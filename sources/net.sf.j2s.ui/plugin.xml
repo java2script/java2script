@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Java2Script"
+            id="net.sf.j2s.ui.views">
+      </category>
+      <view
+            name="J2S View"
+            icon="icons/view.gif"
+            category="net.sf.j2s.ui.views"
+            class="net.sf.j2s.ui.generator.J2SView"
+            id="net.sf.j2s.ui.generator.J2SView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.PDEPerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="net.sf.j2s.ui.property.J2SPropertyPage"
+            id="net.sf.j2s.ui.property.configpage"
+            name="Java2Script Builder"
+            objectClass="org.eclipse.jdt.core.IJavaProject"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="net.sf.j2s.ui.views"
+            name="Java2Script"/>
+      <view
+            category="net.sf.j2s.ui.views"
+            class="net.sf.j2s.ui.console.J2SConsoleView"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.ui.console.J2SConsoleView"
+            name="J2S Console"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="net.sf.j2s.ui.launching.J2SApplicationLaunchShortcut"
+            helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.debug.ui.localJavaShortcut"
+            label="Java2Script Application"
+            modes="run, debug">
+         <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+               <count value="1"/>
+               <iterate>
+                 <or>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                   <test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                   <adapt type="org.eclipse.jdt.core.IJavaElement"/>
+                   <instanceof value="org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput"/>
+                 </or>
+                 <test property="org.eclipse.jdt.debug.ui.hasMainType"/>
+               </iterate>
+             </with>
+           </enablement>
+  		 </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+         <perspective id="org.eclipse.ui.resourcePerspective"/>
+      </shortcut>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <viewShortcut id="net.sf.j2s.ui.console.J2SConsoleView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.pde.ui.PDEPerspective">
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <viewShortcut id="net.sf.j2s.ui.console.J2SConsoleView"/>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="net.sf.j2s.ui.launching.J2SLaunchingTabGroup"
+            id="net.sf.j2s.ui.launching.launchConfigurationTabGroup.j2sApplication"
+            type="net.sf.j2s.ui.launching.j2sApplication"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="net.sf.j2s.ui.launching.J2SLaunchConfigurationDelegate"
+            id="net.sf.j2s.ui.launching.j2sApplication"
+            modes="run, debug"
+            name="Java2Script Application"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="net.sf.j2s.ui.launching.j2sApplication"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sApplication"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="net.sf.j2s.ui.editors.J2SConfigEditor"
+            contributorClass="net.sf.j2s.ui.editors.J2SConfigEditorContributor"
+            extensions="j2s"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.ui.editors.J2SConfigEditor"
+            name="Java2Script Config Editor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="net.sf.j2s.ui.actions.openjs"
+            objectClass="org.eclipse.jdt.core.ICompilationUnit">
+         <action
+               class="net.sf.j2s.ui.actions.OpenJSAction"
+               enablesFor="1"
+               icon="icons/z-logo.gif"
+               id="net.sf.j2s.ui.actions.openJSAction"
+               label="Edit Con&amp;verted *.js"
+               menubarPath="additions"/>
+      </objectContribution>
+      <objectContribution
+            adaptable="false"
+            id="net.sf.j2s.ui.actions.genPropsJS"
+            nameFilter="*.properties"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="net.sf.j2s.ui.actions.GeneratePropertiesJSAction"
+               icon="icons/z-logo.gif"
+               id="net.sf.j2s.ui.actions.genpropjsaction"
+               label="Generate *.js for *.properties"
+               menubarPath="additions"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="net.sf.j2s.ui.actions.openjseditor"
+            targetID="#CompilationUnitEditorContext">
+         <action
+               class="net.sf.j2s.ui.actions.OpenJSEditorAction"
+               icon="icons/z-logo.gif"
+               id="net.sf.j2s.ui.actions.openJSEditorAction"
+               label="Edit Con&amp;verted *.js"
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            class="net.sf.j2s.ui.wizards.ExportJ2SAppWizard"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.ui.packwizard"
+            name="Java2Script Application">
+         <description>Export Java2Script applications as standalone application</description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.javadocCompletionProcessor">
+      <javadocCompletionProcessor
+            class="net.sf.j2s.ui.text.javadoc.JavaDocCompletionEvaluator"
+            id="net.sf.j2s.javadocCompletionProcessor"/>
+   </extension>
+
+</plugin>
