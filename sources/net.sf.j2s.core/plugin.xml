@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         id="net.sf.j2s.core.j2scompiler"
+         name="Java2Script Compiler"
+         point="org.eclipse.jdt.core.extendedCompiler">
+      <extendedCompiler
+            class="net.sf.j2s.core.compiler.Java2ScriptCompiler"
+            id="net.sf.j2s.j2scompiler"/>
+      <extendedCompiler
+            class="net.sf.j2s.core.compiler.J2SDependencyCompiler"
+            id="net.sf.j2s.dependencyCompiler"/>
+   </extension>
+
+</plugin>
