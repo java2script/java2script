@@ -124,7 +124,9 @@ public class J2SConfigEditor extends MultiPageEditorPart implements IResourceCha
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes));
+				IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
+				Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes), 
+						file.getRawLocation().toFile());
 				if (!props.equals(oldProps)) {
 					ByteArrayOutputStream os = new ByteArrayOutputStream();
 					try {
@@ -257,6 +259,7 @@ public class J2SConfigEditor extends MultiPageEditorPart implements IResourceCha
 		super.pageChange(newPageIndex);
 		StyledText textWidget = ((J2STextEditor) editor).getJ2SSourceViewer().getTextWidget();
 		byte[] bytes = textWidget.getText().getBytes();
+		IFile file = (IFile) getEditorInput().getAdapter(IFile.class);
 		if (newPageIndex == 1) {
 			Properties oldProps = new Properties();
 			try {
@@ -264,7 +267,7 @@ public class J2SConfigEditor extends MultiPageEditorPart implements IResourceCha
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes));
+			Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes), file.getRawLocation().toFile());
 			if (!props.equals(oldProps)) {
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 				try {
@@ -281,7 +284,7 @@ public class J2SConfigEditor extends MultiPageEditorPart implements IResourceCha
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes));
+			Properties props = configPage.getUpdatedProperties(new ByteArrayInputStream(bytes), file.getRawLocation().toFile());
 			if (!props.equals(oldProps)) {
 				configPage.initConfigPage(null, new ByteArrayInputStream(bytes));
 			}

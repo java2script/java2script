@@ -75,6 +75,46 @@ public class JavaRuntime {
 		return null;
 	}
 
+	public static IRuntimeClasspathEntry newArchiveRuntimeClasspathEntry(String relativePath) {
+		String path = new File(relativePath).getName();
+		if (path.endsWith(".z.js")) {
+			ContactedClasses cc = new ContactedClasses();
+			cc.setFolder(new File(relativePath).getParentFile());
+			cc.setRelativePath(path);
+			cc.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			return cc;
+		} else if (path.endsWith(".css")){
+			CSSResource css = new CSSResource();
+			css.setFolder(new File(relativePath).getParentFile());
+			css.setRelativePath(path);
+			css.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			return css;
+		} else if (path.endsWith(".j2s")) {
+			CompositeResources comp = new CompositeResources();
+			comp.setFolder(new File(relativePath).getParentFile().getParentFile());
+			comp.setRelativePath("/" + new File(relativePath).getParentFile().getName() + "/" + path);
+			comp.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			return comp;
+//		} else if (path.endsWith(".js")) {
+//			UnitClass unit = new UnitClass();
+//			unit.setFolder(elem.getProject().getLocation().toFile());
+//			unit.setRelativePath(path);
+//			IJavaProject prj = (IJavaProject) elem.getAdapter(IJavaProject.class);
+//			if (prj != null) {
+//				try {
+//					unit.setBinRelativePath(prj.getOutputLocation().toString());
+//				} catch (JavaModelException e) {
+//					unit.setBinRelativePath("");
+//				}
+//			} else {
+//				unit.setBinRelativePath("");
+//			}
+//			unit.parseClassName();
+//			return unit;
+		}
+		return null;
+	}
+
 	public static IRuntimeClasspathEntry newProjectRuntimeClasspathEntry(IJavaProject jp) {
 		ProjectResources prjRes = new ProjectResources();
 		prjRes.setClasspathProperty(IRuntimeClasspathEntry.PROJECT);

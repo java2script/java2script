@@ -146,13 +146,13 @@ public class JDTCoreEnhancer extends JDialog {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String currentPath = null;
+		String currentPath = current.getAbsolutePath();
 		if ("plugins".equals(current.getParentFile().getName())) {
 			currentPath = current.getParentFile().getAbsolutePath();
 		} else if ("workspace".equals(current.getParentFile().getName())) {
 			File plugins = new File(current.getParentFile().getParentFile(), "plugins");
 			currentPath = plugins.getAbsolutePath();
-		}else {
+		} else if (!"plugins".equals(current.getName())){
 			currentPath = current.getParentFile().getAbsolutePath();
 		}
 		String coreJarName = JarUtil.getJDTCoreJarName(currentPath);

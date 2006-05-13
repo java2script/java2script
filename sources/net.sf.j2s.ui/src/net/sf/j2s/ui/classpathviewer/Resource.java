@@ -17,6 +17,7 @@ public class Resource implements IRuntimeClasspathEntry {
 	private Resource parent;
 	private File folder;
 	private String relativePath;
+	private boolean isAbsolute = false;
 	
 	private int resourceCategory;
 
@@ -35,6 +36,14 @@ public class Resource implements IRuntimeClasspathEntry {
 		this.parent = parent;
 		this.folder = folder;
 		this.relativePath = relativePath;
+	}
+
+	public boolean isAbsolute() {
+		return isAbsolute;
+	}
+
+	public void setAbsolute(boolean isAbsolute) {
+		this.isAbsolute = isAbsolute;
 	}
 
 	public Resource getParent() {
@@ -96,6 +105,9 @@ public class Resource implements IRuntimeClasspathEntry {
 	}
 	
 	public String toResourceString() {
+		if (isAbsolute) {
+			return "|" + new File(getFolder(), relativePath).getAbsolutePath();
+		}
 		if (relativePath != null) {
 			return relativePath;
 		}

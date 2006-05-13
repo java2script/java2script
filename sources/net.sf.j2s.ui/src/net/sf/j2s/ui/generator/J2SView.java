@@ -11,6 +11,8 @@
 package net.sf.j2s.ui.generator;
 
 
+import java.util.ResourceBundle;
+
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
@@ -63,7 +65,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.internal.console.ConsoleResourceBundleMessages;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.texteditor.FindReplaceAction;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
@@ -220,6 +224,9 @@ public class J2SView extends ViewPart {
 		fSelectAllAction.setText("Select &All@Ctrl+A"); //$NON-NLS-1$
 		fSelectAllAction.setToolTipText("Select all the script"); //$NON-NLS-1$
 
+//        IActionBars actionBars= getViewSite().getActionBars();
+//        ResourceBundle bundle = ConsoleResourceBundleMessages.getBundle();
+//        actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), new FindReplaceAction(bundle, "find_replace_action_", this)); //$NON-NLS-1$
 	}
 
 	protected void performSetFocus() {

@@ -112,7 +112,24 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		for (int i = 0; i < reses.length; i++) {
 			if (reses[i] != null) {
 				String res = reses[i].trim();
-				if (res.endsWith(".z.js")) {
+				if (res.startsWith("|")) {
+					res = res.substring(1);
+					Resource rr = null;
+					if (res.endsWith(".z.js")) {
+						rr = new ContactedClasses();
+					} else if (res.endsWith(".css")) {
+						rr = new CSSResource();
+					} else if (res.endsWith("/.j2s")) {
+						rr = new ProjectResources();
+					} else if (res.endsWith(".j2s")) {
+						rr = new CompositeResources();
+					}
+					rr.setFolder(new File(res).getParentFile());
+					rr.setRelativePath(new File(res).getName());
+					rr.setParent(this);
+					rr.setAbsolute(true);
+					resourcesList.add(rr);
+				} else if (res.endsWith(".z.js")) {
 					ContactedClasses jz = new ContactedClasses();
 					jz.setFolder(this.getAbsoluteFolder());
 					jz.setRelativePath(res);
