@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 
 public class FileUtil {
 	public static void saveInputStreamAsFile(InputStream is, File file) {
@@ -21,6 +22,44 @@ public class FileUtil {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static String toRelativePath(String absPath, String basePath) {
+		try {
+			File absFile = new File(absPath).getCanonicalFile();
+			File baseFile = new File(basePath).getCanonicalFile();
+			String absURL = absFile.toURL().toString();
+			String baseURL = baseFile.toURL().toString();
+			int index = absURL.indexOf('/');
+			int lastIndex = index;
+			while (index != -1) {
+				String partURL = absURL.substring(0, index);
+				if (!baseURL.startsWith(partURL)) {
+					break;
+				}
+				lastIndex = index;
+				index = absURL.indexOf('/', lastIndex + 1);
+			}
+			absURL = absURL.substring(lastIndex + 1);
+			baseURL = baseURL.substring(lastIndex + 1);
+			String[] parts = baseURL.split("\\/");
+			int length = parts.length;
+			if (baseFile.isFile()) {
+				length--;
+			}
+			StringBuffer buffer = new StringBuffer();
+			for (int i = 0; i < length; i++) {
+				buffer.append("../");
+			}
+			buffer.append(absURL);
+			return buffer.toString();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

@@ -6,22 +6,32 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
 import net.sf.j2s.ui.classpathviewer.Resource;
 import net.sf.j2s.ui.jdtenhancer.EnhancerInfo;
 import net.sf.j2s.ui.jdtenhancer.JarUtil;
+import net.sf.j2s.ui.resources.ExternalResources;
+import net.sf.j2s.ui.resources.FileSystemUtils;
+import net.sf.j2s.ui.resources.IExternalResourceProvider;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.compiler.IExtendedCompiler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferencePage;
@@ -46,6 +56,8 @@ public class J2SPropertyPage extends PropertyPage {
 
 	private boolean isEnabled;
 	private J2SConfigPage configPage;
+
+
 
 	/**
 	 * Constructor for SamplePropertyPage.
@@ -73,7 +85,11 @@ public class J2SPropertyPage extends PropertyPage {
 			StringBuffer buffer = new StringBuffer();
 			for (Iterator iter = ress.iterator(); iter.hasNext();) {
 				Resource res = (Resource) iter.next();
-				String resPath = res.toResourceString();
+				String resPath = null;
+				resPath = res.toResourceString();
+				if (res.isAbsolute()) {
+					resPath = FileUtil.toRelativePath(resPath.substring(1), file.getAbsolutePath());
+				}
 				if (resPath != null) {
 					if (buffer.length() != 0) {
 						buffer.append(',');
@@ -122,26 +138,39 @@ public class J2SPropertyPage extends PropertyPage {
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
-			File folder = new File(prjFolder, "j2slib");
-			if (!folder.exists() || !folder.isDirectory()) {
-				folder.mkdir();
-			}
-            URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
-					.getEntry("/" + File.separator); //$NON-NLS-1$
-			String path = "."; //$NON-NLS-1$
-			try {
-				path = Platform.asLocalURL(starterURL).getFile();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			path = path.replace('/', File.separatorChar);
-
-			FileSystemUtils.copyFolder(new File(path, "j2slib").getAbsolutePath(), folder.getAbsolutePath(), true);
+//			File folder = new File(prjFolder, "j2slib");
+//			if (!folder.exists() || !folder.isDirectory()) {
+//				folder.mkdir();
+//			}
+//            URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
+//					.getEntry("/" + File.separator); //$NON-NLS-1$
+//			String path = "."; //$NON-NLS-1$
+//			try {
+//				path = Platform.asLocalURL(starterURL).getFile();
+//			} catch (IOException e1) {
+//				e1.printStackTrace();
+//			}
+//			path = path.replace('/', File.separatorChar);
+//
+//			FileSystemUtils.copyFolder(new File(path, "j2slib").getAbsolutePath(), folder.getAbsolutePath(), true);
+			
+//			String patternKey = configPage.getPatternKey();
+//			if (patternKey != null) {
+//				IExternalResourceProvider provider = ExternalResources.getProviderByName(patternKey);
+//				if (provider != null) {
+//					provider.copyResources(patternKey, path);
+//				}
+//			}
+			
 			List ress = configPage.classpathModel.resources;
 			StringBuffer buffer = new StringBuffer();
 			for (Iterator iter = ress.iterator(); iter.hasNext();) {
 				Resource res = (Resource) iter.next();
-				String resPath = res.toResourceString();
+				String resPath = null;
+				resPath = res.toResourceString();
+				if (res.isAbsolute()) {
+					resPath = FileUtil.toRelativePath(resPath.substring(1), new File(prjFolder).getAbsolutePath());
+				}
 				if (resPath != null) {
 					if (buffer.length() != 0) {
 						buffer.append(',');
@@ -196,14 +225,14 @@ public class J2SPropertyPage extends PropertyPage {
 
         URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
 				.getEntry("/" + File.separator); //$NON-NLS-1$
-		String path = "."; //$NON-NLS-1$
-		try {
-			path = Platform.asLocalURL(starterURL).getFile();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		path = path.replace('/', File.separatorChar);
-		final String enhancePath = path;
+//		String path = "."; //$NON-NLS-1$
+//		try {
+//			path = Platform.asLocalURL(starterURL).getFile();
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+//		path = path.replace('/', File.separatorChar);
+//		final String enhancePath = path;
 		//String base = new File(path).getParentFile().getAbsolutePath();
 		final String base = new File(Platform.getInstallLocation().getURL().getFile(), "plugins").getAbsolutePath();
 		final String coreJarName = JarUtil.getJDTCoreJarName(base);
@@ -304,7 +333,7 @@ public class J2SPropertyPage extends PropertyPage {
 						public void run() {
 							try {
 								JarUtil.enhanceJDTCoreTo(coreJarName, base, 
-											new File(base).getParentFile().getAbsolutePath(), enhancePath);
+											new File(base).getParentFile().getAbsolutePath(), null); //enhancePath);
 								EnhancerInfo.isJDTCoreAlreadyEnhanced = true;
 								label4.setEnabled(true);
 								btnRestart.setEnabled(true);

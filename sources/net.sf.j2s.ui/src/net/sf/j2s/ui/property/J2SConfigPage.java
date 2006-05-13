@@ -34,6 +34,7 @@ import net.sf.j2s.ui.classpathviewer.ContactedUnitClass;
 import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpathviewer.Resource;
 import net.sf.j2s.ui.classpathviewer.UnitClass;
+import net.sf.j2s.ui.resources.ExternalResources;
 
 import org.eclipse.debug.internal.ui.SWTUtil;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -55,6 +56,7 @@ import org.eclipse.swt.widgets.Shell;
 
 public class J2SConfigPage extends Composite {
 
+	/*
 	private static String[] patterns = new String[] {
 		"SWT", 
 		"Common", 
@@ -88,15 +90,28 @@ public class J2SConfigPage extends Composite {
 		new String[] {
 		}
 	};
+	*/
+//	private static String[] patterns = null;
+//	private static String[] patternTips = null;
+//	private static String[][] patterResouces = null;
+//	
+//	static void initPattern() {
+//		patterns = null;
+//		if (patterns == null) {
+//			patterns = ExternalResources.getAllKeys();
+//			patternTips = ExternalResources.getAllDescriptions();
+//			patterResouces = ExternalResources.getAllResources();
+//		}
+//	}
 
 	private Button buttonEnable;
 	private Button buttonDisable;
 	private boolean compilerEnabled = true;
-	private Combo comboPattern;
+//	private Combo comboPattern;
 	private Composite compilerStatusComp;
-	private Label patternLeadingLabel;
+//	private Label patternLeadingLabel;
 	private Button buttonUp;
-	private Label tipsLabel;
+//	private Label tipsLabel;
 	protected TreeViewer viewer;
 	protected J2SClasspathModel classpathModel;
 	private Button buttonDown;
@@ -104,10 +119,12 @@ public class J2SConfigPage extends Composite {
 	private Button buttonAbandom;
 	private Button buttonRestore;
 	private Button buttonAddRes;
+	private Button buttonAddInnerRes;
 	private Button buttonAddPrj;
 	protected File j2sFile;
 	
 	private transient Set listeners = new HashSet();
+	private J2SAddInnerJarAction addInnerJarAction;
 	
 	public void addConfigModifiedListener(IJ2SConfigModifiedListener listener) {
 		listeners.add(listener);
@@ -120,10 +137,13 @@ public class J2SConfigPage extends Composite {
 			IJ2SConfigModifiedListener listener = (IJ2SConfigModifiedListener) iter.next();
 			listener.configModified();
 		}
-		syncDropList();
+//		syncDropList();
 	}
 	public J2SConfigPage(Composite parent, int style) {
 		super(parent, style);
+		
+//		initPattern();
+		
 		GridLayout gl = new GridLayout();
 		gl.numColumns = 1;
 		setLayout(gl);
@@ -151,32 +171,33 @@ public class J2SConfigPage extends Composite {
 			}
 		});
 		
-		Composite patternComp = new Composite(this, SWT.NONE);
-		GridLayout gl2 = new GridLayout();
-		gl2.numColumns = 4;
-		patternComp.setLayout(gl2);
-		patternComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		patternLeadingLabel = new Label(patternComp, SWT.NONE);
-		patternLeadingLabel.setText("Pattern:");
-		comboPattern = new Combo(patternComp, SWT.READ_ONLY);
-		GridData gd = new GridData();
-		gd.widthHint = 80;
-		comboPattern.setLayoutData(gd);
-		comboPattern.setItems(patterns);
-		tipsLabel = new Label(patternComp, SWT.NONE);
-		GridData gd2 = new GridData(GridData.FILL_HORIZONTAL);
-		gd2.horizontalSpan = 2;
-		gd2.widthHint = 300;
-		tipsLabel.setLayoutData(gd2);
-		comboPattern.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				int idx = comboPattern.getSelectionIndex();
-				updatePattern(idx);
-				fireConfigModified();
-			}
-		});
-		comboPattern.select(1);
-		tipsLabel.setText("(" + patternTips[1] + ")");
+//		Composite patternComp = new Composite(this, SWT.NONE);
+//		GridLayout gl2 = new GridLayout();
+//		gl2.numColumns = 4;
+//		patternComp.setLayout(gl2);
+//		patternComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		patternLeadingLabel = new Label(patternComp, SWT.NONE);
+//		patternLeadingLabel.setText("Pattern:");
+//		comboPattern = new Combo(patternComp, SWT.READ_ONLY);
+//		GridData gd = new GridData();
+//		gd.widthHint = 80;
+//		comboPattern.setLayoutData(gd);
+//		//comboPattern.setItems(patterns);
+//		comboPattern.setItems(ExternalResources.getAllKeys());
+//		tipsLabel = new Label(patternComp, SWT.NONE);
+//		GridData gd2 = new GridData(GridData.FILL_HORIZONTAL);
+//		gd2.horizontalSpan = 2;
+//		gd2.widthHint = 300;
+//		tipsLabel.setLayoutData(gd2);
+//		comboPattern.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent e) {
+//				int idx = comboPattern.getSelectionIndex();
+//				updatePattern(idx);
+//				fireConfigModified();
+//			}
+//		});
+//		comboPattern.select(1);
+//		tipsLabel.setText("(" + patternTips[1] + ")");
 		
 		Composite viewerComp = new Composite(this, SWT.NONE);
 		GridLayout gl3 = new GridLayout();
@@ -199,6 +220,10 @@ public class J2SConfigPage extends Composite {
 		Composite actionComp = new Composite(viewerComp, SWT.NONE);
 		actionComp.setLayout(new GridLayout());
 		actionComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		
+		buttonAddInnerRes = SWTUtil.createPushButton(actionComp, "Add libraries", null);
+		addInnerJarAction = new J2SAddInnerJarAction(this);
+		buttonAddInnerRes.addSelectionListener(addInnerJarAction);
 		
 		buttonAddRes = SWTUtil.createPushButton(actionComp, "Add resources", null);
 //		buttonAddRes.addSelectionListener(new SelectionAdapter() {
@@ -345,10 +370,43 @@ public class J2SConfigPage extends Composite {
 		
 		updateButtonGroup();
 	}
-
+	
+	/*
 	private IRuntimeClasspathEntry newArchiveRuntimeClasspathEntry(String relativePath) {
 		String path = relativePath.toString();
-		if (path.endsWith(".z.js")) {
+		if (path.startsWith("|")) {
+			path = path.substring(1);
+			File file = new File(path);
+			path = file.getName();
+			if (path.endsWith(".z.js")) {
+				ContactedClasses cc = new ContactedClasses();
+				cc.setFolder(file.getParentFile());
+				cc.setRelativePath(path);
+				if (path.indexOf("j2s-") == 0) {
+					cc.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
+				} else {
+					cc.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+				}
+				cc.setAbsolute(true);
+				return cc;
+			} else if (path.endsWith(".css")){
+				CSSResource css = new CSSResource();
+				css.setFolder(file.getParentFile());
+				css.setRelativePath(path);
+				css.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+				css.setAbsolute(true);
+				return css;
+			} else if (path.endsWith(".j2s")) {
+				CompositeResources comp = new CompositeResources();
+				comp.setFolder(file.getParentFile());
+				comp.setRelativePath(path);
+//				comp.setFolder(elem.getProject().getLocation().toFile());
+//				comp.setRelativePath(path);
+				comp.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+				comp.setAbsolute(true);
+				return comp;
+			}
+		} else if (path.endsWith(".z.js")) {
 			ContactedClasses cc = new ContactedClasses();
 			cc.setFolder(j2sFile.getParentFile());
 			cc.setRelativePath(path);
@@ -375,6 +433,7 @@ public class J2SConfigPage extends Composite {
 		}
 		return null;
 	}
+	*/
 	private boolean isLastElementSelected() {
 		Object[] sels = getSelection();
 		if (classpathModel.abandomedClasses.size() > 0) {
@@ -470,6 +529,7 @@ public class J2SConfigPage extends Composite {
 		buttonUp.setEnabled(false);
 		buttonAddPrj.setEnabled(false);
 		buttonAddRes.setEnabled(false);
+		buttonAddInnerRes.setEnabled(false);
 		if (!isNoContactedUnits()) {
 			return ;
 		}
@@ -484,6 +544,7 @@ public class J2SConfigPage extends Composite {
 			if (isResourcesSelected()) {
 				buttonAddPrj.setEnabled(true);
 				buttonAddRes.setEnabled(true);
+				buttonAddInnerRes.setEnabled(true);
 			} else {
 				if (isAbandomsSelected()) {
 					buttonRestore.setEnabled(true);
@@ -497,6 +558,7 @@ public class J2SConfigPage extends Composite {
 		if (getSelection().length == 1) {
 			if (isResourceCategorySelected()) {
 				buttonAddPrj.setEnabled(true);
+				buttonAddInnerRes.setEnabled(true);
 				buttonAddRes.setEnabled(true);
 			} else if (isAbandomedCategorySelected() && classpathModel.abandomedClasses.size() > 0) {
 				buttonRestore.setEnabled(true);
@@ -661,6 +723,9 @@ public class J2SConfigPage extends Composite {
 		//j2sFile = ;
 		comp.setFolder(j2sFile.getParentFile());
 		comp.setRelativePath(j2sFile.getName());
+		if (addInnerJarAction != null) {
+			addInnerJarAction.setJ2SFile(j2sFile);
+		}
 		if (is != null) {
 			comp.load(is);
 		} else {
@@ -702,21 +767,76 @@ public class J2SConfigPage extends Composite {
 			enableCompiler();
 		}
 		
-		syncDropList();
+		//syncDropList();
 	}
+	/*
 	private void syncDropList() {
-		int len = patterResouces[0].length;
-		if (classpathModel.resources.size() == 1) {
+		int len = patterResouces.length;
+		int size = classpathModel.resources.size();
+		for (int k = 0; k < len; k++) {
+			int length = patterResouces[k].length;
+			if (size == length) {
+				boolean[] existed = new boolean[size];
+				for (int i = 0; i < existed.length; i++) {
+					existed[i] = false;
+				}
+				for (int i = 0; i < size; i++) {
+					Resource res = (Resource) classpathModel.resources.get(i);
+					String name = res.getAbsoluteFile().getName();
+					for (int j = 0; j < size; j++) {
+						String path = patterResouces[k][j];
+						if (path.startsWith("|")) {
+							path = path.substring(1);
+						}
+						File file = new File(path);
+						if (file.getName().equals(name)) {
+							existed[j] = true;
+							break;
+						}
+					}
+				}
+				
+				boolean ok = true;
+				for (int i = 0; i < size; i++) {
+					if (!existed[i]) {
+						ok = false;
+						break;
+					}
+				}
+				if (ok) {
+					comboPattern.setText(patterns[k]);
+					updatePattern(k);
+					return ;
+				}
+			}
+		}
+		for (int k = 0; k < len; k++) {
+			int length = patterResouces[k].length;
+			if (0 == length) {
+				comboPattern.setText(patterns[k]);
+				updatePattern(k);
+				return ;
+			}
+		}
+		comboPattern.setText(patterns[0]);
+		updatePattern(0);
+		/*
+		if (size == 1) {
 			for (int i = 1; i <= 3; i++) {
 				Resource res = (Resource) classpathModel.resources.get(0);
 				String name = res.getAbsoluteFile().getName();
-				if (patterResouces[i][0].equals(name)) {
+				String path = patterResouces[i][0];
+				if (path.startsWith("|")) {
+					path = path.substring(1);
+				}
+				File file = new File(path);
+				if (file.getName().equals(name)) {
 					comboPattern.setText(patterns[i]);
 					updatePattern(i);
 					return ;
 				}
 			}
-		} else if (classpathModel.resources.size() == len) {
+		} else if (size == len) {
 			boolean[] existed = new boolean[len];
 			for (int i = 0; i < existed.length; i++) {
 				existed[i] = false;
@@ -725,7 +845,12 @@ public class J2SConfigPage extends Composite {
 				Resource res = (Resource) classpathModel.resources.get(i);
 				String name = res.getAbsoluteFile().getName();
 				for (int j = 0; j < len; j++) {
-					if (patterResouces[0][j].equals(name)) {
+					String path = patterResouces[0][j];
+					if (path.startsWith("|")) {
+						path = path.substring(1);
+					}
+					File file = new File(path);
+					if (file.getName().equals(name)) {
 						existed[j] = true;
 						break;
 					}
@@ -745,6 +870,7 @@ public class J2SConfigPage extends Composite {
 		}
 		comboPattern.setText(patterns[4]);
 		updatePattern(4);
+		*-/
 	}
 
 	public static void main (String [] args) {
@@ -784,6 +910,7 @@ public class J2SConfigPage extends Composite {
 		}
 		display.dispose ();
 	}
+	*/
 
 	private void enableCompiler() {
 		buttonDisable.setSelection(false);
@@ -794,12 +921,12 @@ public class J2SConfigPage extends Composite {
 		compilerEnabled = true;
 		compilerStatusComp.layout(true);
 		
-		if (classpathModel.resources.size() == 0
-				&& classpathModel.unitClasses.size() == 0
-				&& classpathModel.abandomedClasses.size() == 0) {
-			int idx = comboPattern.getSelectionIndex();
-			updatePattern(idx);
-		}
+//		if (classpathModel.resources.size() == 0
+//				&& classpathModel.unitClasses.size() == 0
+//				&& classpathModel.abandomedClasses.size() == 0) {
+//			int idx = comboPattern.getSelectionIndex();
+//			updatePattern(idx);
+//		}
 		setConfigEditable(true);
 	}
 
@@ -816,9 +943,9 @@ public class J2SConfigPage extends Composite {
 	}
 
 	private void setConfigEditable(boolean editable) {
-		patternLeadingLabel.setEnabled(editable);
-		comboPattern.setEnabled(editable);
-		tipsLabel.setEnabled(editable);
+//		patternLeadingLabel.setEnabled(editable);
+//		comboPattern.setEnabled(editable);
+//		tipsLabel.setEnabled(editable);
 		viewer.getTree().setEnabled(editable);
 		//buttonUp.setEnabled(editable);
 		if (editable) {
@@ -831,6 +958,7 @@ public class J2SConfigPage extends Composite {
 			buttonUp.setEnabled(false);
 			buttonAddPrj.setEnabled(false);
 			buttonAddRes.setEnabled(false);
+			buttonAddInnerRes.setEnabled(false);
 		}
 	}
 
@@ -838,7 +966,7 @@ public class J2SConfigPage extends Composite {
 		return compilerEnabled;
 	}
 
-	public Properties getUpdatedProperties(InputStream is) {
+	public Properties getUpdatedProperties(InputStream is, File file) {
 		Properties props = new Properties();
 		try {
 			props.load(is);
@@ -852,7 +980,11 @@ public class J2SConfigPage extends Composite {
 		StringBuffer buffer = new StringBuffer();
 		for (Iterator iter = ress.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
-			String resPath = res.toResourceString();
+			String resPath = null;
+			resPath = res.toResourceString();
+			if (res.isAbsolute() && file != null) {
+				resPath = FileUtil.toRelativePath(resPath.substring(1), file.getAbsolutePath());
+			}
 			if (resPath != null) {
 				if (buffer.length() != 0) {
 					buffer.append(',');
@@ -894,6 +1026,7 @@ public class J2SConfigPage extends Composite {
 		return props;
 	}
 
+	/*
 	private void updatePattern(int idx) {
 		if (idx != -1) {
 			tipsLabel.getParent().layout(true);
@@ -905,7 +1038,8 @@ public class J2SConfigPage extends Composite {
 				classpathModel.resources.clear();
 			}
 			for (int i = 0; i < size; i++) {
-				IRuntimeClasspathEntry entry = newArchiveRuntimeClasspathEntry("j2slib/" + patterResouces[idx][i]);
+				//IRuntimeClasspathEntry entry = newArchiveRuntimeClasspathEntry("j2slib/" + patterResouces[idx][i]);
+				IRuntimeClasspathEntry entry = newArchiveRuntimeClasspathEntry(patterResouces[idx][i]);
 				if (entry != null) {
 					classpathModel.resources.add(entry);
 				}
@@ -925,16 +1059,22 @@ public class J2SConfigPage extends Composite {
 
 		}
 	}
+	*/
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Composite#setFocus()
 	 */
 	public boolean setFocus() {
 		if (compilerEnabled) {
-			comboPattern.setFocus();
+//			comboPattern.setFocus();
+			viewer.getControl().setFocus();
 		} else {
 			buttonEnable.setFocus();
 		}
 		return true;
 	}
+//	
+//	public String getPatternKey() {
+//		return comboPattern.getText();
+//	}
 }

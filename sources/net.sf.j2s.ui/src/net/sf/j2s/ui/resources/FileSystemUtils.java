@@ -10,7 +10,7 @@
  * Contributors:
  *     ognize.com - initial API and implementation
  *******************************************************************************/
-package net.sf.j2s.ui.property;
+package net.sf.j2s.ui.resources;
 
 import java.io.File;
 import java.io.FileFilter;
