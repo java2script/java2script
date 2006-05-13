@@ -1,5 +1,5 @@
 #Java2Script Configuration
-#Fri May 12 15:53:47 CST 2006
+#Sun May 14 03:22:14 CST 2006
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.compiler.abbreviation=true
 j2s.compiler.dependency.status=disable

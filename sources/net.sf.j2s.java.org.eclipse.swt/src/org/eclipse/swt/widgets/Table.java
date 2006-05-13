@@ -984,8 +984,8 @@ void createItem (TableItem item, int index) {
 
 void createWidget () {
 	super.createWidget ();
-	items = new TableItem [4];
-	columns = new TableColumn [4];
+	items = new TableItem [0];
+	columns = new TableColumn [0];
 	/*
 	* Force virtual tables to use custom draw.  This
 	* is necessary to support colors and fonts for table
@@ -2192,7 +2192,8 @@ public void remove (int start, int end) {
 		if (index <= end) error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
 	*/
-	if (!(0 <= start && start <= end && end < itemCount)) {
+	int count = items.length;
+	if (!(0 <= start && start <= end && end < count)) {
 		return;
 	}
 	
@@ -2216,9 +2217,9 @@ public void remove (int start, int end) {
 		}
 		index++;
 	}
-	TableItem[] newItems = new TableItem[itemCount - (index - start)];
+	TableItem[] newItems = new TableItem[count - (index - start)];
 	System.arraycopy(items, 0, newItems, 0, start);
-	System.arraycopy (items, index, newItems, start, itemCount - index);
+	System.arraycopy (items, index, newItems, start, count - index);
 	items = newItems;
 }
 
@@ -2680,11 +2681,13 @@ public void setColumnOrder (int [] order) {
 
 void setCheckboxImageListColor () {
 	if ((style & SWT.CHECK) == 0) return;
+	/*
 	int hOldStateList = OS.SendMessage (handle, OS.LVM_GETIMAGELIST, OS.LVSIL_STATE, 0);
 	if (hOldStateList == 0) return;
 	int [] cx = new int [1], cy = new int [1];
 	OS.ImageList_GetIconSize (hOldStateList, cx, cy);
 	setCheckboxImageList (cx [0], cy [0]);
+	*/
 }
 
 void setCheckboxImageList (int width, int height) {
@@ -2915,8 +2918,8 @@ public void setItemCount (int count) {
 			items [i] = new TableItem (this, SWT.NONE, i, true);
 		}
 	}
-	*/
 	if (!isVirtual) setRedraw (true);
+	*/
 }
 
 void setItemHeight () {

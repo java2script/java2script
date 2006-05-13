@@ -36,6 +36,8 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class TableItem extends Item {
+	Element handle;
+	
 	Table parent;
 	String [] strings;
 	Image [] images;

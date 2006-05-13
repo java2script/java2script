@@ -35,6 +35,8 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  */
 public class TableColumn extends Item {
+	Element handle;
+	
 	Table parent;
 	boolean resizable, moveable;
 
@@ -600,7 +602,6 @@ public void setText (String string) {
 	if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
 	if (result == 0) error (SWT.ERROR_CANNOT_SET_TEXT);
 	*/
-	Element handle = null; // TODO
 	if (handle.childNodes != null) {
 		for (int i = 0; i < handle.childNodes.length; i++) {
 			if (handle.childNodes[i] != null) {

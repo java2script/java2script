@@ -1640,6 +1640,7 @@ public StyledText(Composite parent, int style) {
 	defaultCaret = new Caret(this, SWT.NULL);
 	if (isBidiCaret()) {
 		createCaretBitmaps();
+		/*
 		Runnable runnable = new Runnable() {
 			public void run() {
 				int direction = BidiUtil.getKeyboardLanguage() == BidiUtil.KEYBOARD_BIDI ? SWT.RIGHT : SWT.LEFT;
@@ -1654,6 +1655,7 @@ public StyledText(Composite parent, int style) {
 			}
 		};
 		BidiUtil.addLanguageListener(handle, runnable);
+		*/
 	}
 	setCaret(defaultCaret);	
 	calculateScrollBars();
@@ -5013,9 +5015,11 @@ void handleDispose(Event event) {
 		defaultLineStyler.release();
 		defaultLineStyler = null;
 	}
+	/*
 	if (isBidiCaret()) {
 		BidiUtil.removeLanguageListener(handle);
 	}
+	*/
 	selectionBackground = null;
 	selectionForeground = null;
 	logicalContent = null;
@@ -5686,7 +5690,8 @@ public void invokeAction(int action) {
  * Temporary until SWT provides this
  */
 boolean isBidi() {
-	return IS_GTK || BidiUtil.isBidiPlatform() || isMirrored;
+//	return IS_GTK || BidiUtil.isBidiPlatform() || isMirrored;
+	return false;
 }
 /**
  * Returns whether the given offset is inside a multi byte line delimiter.
@@ -6757,11 +6762,13 @@ void setCaretLocation(int newCaretX, int line, int direction) {
 				}
 			}
 			caret.setSize(caret.getSize().x, lineHeight);
+			/*
 			if (caretDirection == SWT.LEFT) {
 				BidiUtil.setKeyboardLanguage(BidiUtil.KEYBOARD_NON_BIDI);
 			} else if (caretDirection == SWT.RIGHT) {
 				BidiUtil.setKeyboardLanguage(BidiUtil.KEYBOARD_BIDI);
 			}
+			*/
 		}
 	}
 	columnX = newCaretX;
@@ -7182,9 +7189,11 @@ public void setOrientation(int orientation) {
 	if ((orientation & SWT.LEFT_TO_RIGHT) != 0 && isMirrored() == false) {
 		return;
 	}
+	/*
 	if (BidiUtil.setOrientation(handle, orientation) == false) {
 		return;
 	}
+	*/
 	isMirrored = (orientation & SWT.RIGHT_TO_LEFT) != 0;
 	initializeRenderer();
 	caretDirection = SWT.NULL;
@@ -7885,7 +7894,8 @@ public void showSelection() {
 	}	 
 }
 boolean isBidiCaret() {
-	return BidiUtil.isBidiPlatform();
+//	return BidiUtil.isBidiPlatform();
+	return true;
 }
 /**
  * Updates the selection and caret position depending on the text change.

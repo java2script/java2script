@@ -47,11 +47,12 @@ public class TreeItem extends Item {
 	 * platforms and should never be accessed from application code.
 	 * </p>
 	 */	
-	public int handle;
+	Element handle;
+	
 	String [] strings;
 	Image [] images;
-	int background = -1, foreground = -1, font = -1;
-	//int [] cellBackground, cellForeground, cellFont;
+//	int background = -1, foreground = -1, font = -1;
+//	int [] cellBackground, cellForeground, cellFont;
 	Tree parent;
 	TreeItem parentItem;
 	int index;
@@ -282,8 +283,11 @@ public Color getBackground (int index) {
 	checkWidget ();
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count - 1) return getBackground ();
+	/*
 	int pixel = cellBackground != null ? cellBackground [index] : -1;
 	return pixel == -1 ? getBackground () : Color.win32_new (display, pixel);
+	*/
+	return new Color(display, handle.style.backgroundColor);
 }
 
 /**
@@ -299,9 +303,12 @@ public Color getBackground (int index) {
  */
 public Rectangle getBounds () {
 	checkWidget ();
+	/*
 	RECT rect = getBounds (0, true, false, false);
 	int width = rect.right - rect.left, height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
+	*/
+	return new Rectangle(0, 0, 0, 0);
 }
 
 /**
@@ -320,9 +327,12 @@ public Rectangle getBounds () {
  */
 public Rectangle getBounds (int index) {
 	checkWidget();
+	/*
 	RECT rect = getBounds (index, true, true, true);
 	int width = rect.right - rect.left, height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
+	*/
+	return new Rectangle(0, 0, 0, 0);
 }
 
 /*
@@ -432,7 +442,8 @@ public boolean getChecked () {
  */
 public Font getFont () {
 	checkWidget ();
-	return font == -1 ? parent.getFont () : Font.win32_new (display, font);
+//	return font == -1 ? parent.getFont () : Font.win32_new (display, font);
+	return display.getSystemFont();
 }
 
 /**
@@ -453,8 +464,11 @@ public Font getFont (int index) {
 	checkWidget ();
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count -1) return getFont ();
+	/*
 	int hFont = (cellFont != null) ? cellFont [index] : font;
 	return hFont == -1 ? getFont () : Font.win32_new (display, hFont);
+	*/
+	return display.getSystemFont();
 }
 
 /**
@@ -472,8 +486,9 @@ public Font getFont (int index) {
  */
 public Color getForeground () {
 	checkWidget ();
-	int pixel = (foreground == -1) ? parent.getForegroundPixel() : foreground;
-	return Color.win32_new (display, pixel);
+//	int pixel = (foreground == -1) ? parent.getForegroundPixel() : foreground;
+//	return Color.win32_new (display, pixel);
+	return new Color(display, parent.handle.style.color);
 }
 
 /**
@@ -494,8 +509,9 @@ public Color getForeground (int index) {
 	checkWidget ();
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count -1) return getForeground ();
-	int pixel = cellForeground != null ? cellForeground [index] : -1;
-	return pixel == -1 ? getForeground () : Color.win32_new (display, pixel);
+//	int pixel = cellForeground != null ? cellForeground [index] : -1;
+//	return pixel == -1 ? getForeground () : Color.win32_new (display, pixel);
+	return new Color(display, handle.style.color);
 }
 
 /**
@@ -653,9 +669,12 @@ public Image getImage (int index) {
  */
 public Rectangle getImageBounds (int index) {
 	checkWidget();
+	/*
 	RECT rect = getBounds (index, false, true, false);
 	int width = rect.right - rect.left, height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
+	*/
+	return new Rectangle (0, 0, 0, 0);
 }
 
 /**

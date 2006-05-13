@@ -963,9 +963,9 @@ void destroyItem (TreeItem item) {
 	* the item and validate the damage caused by the removing of
 	* the item.
 	*/
+	/*
 	int hItem = item.handle, hParent = 0;
 	boolean fixRedraw = false;
-	/*
 	if (drawCount == 0 && OS.IsWindowVisible (handle)) {
 		RECT rect = new RECT ();
 		rect.left = hItem;
@@ -1577,23 +1577,23 @@ TreeItem [] getItems (int hTreeItem) {
 	return result;
 	*/
 	TreeItem[] children = new TreeItem[0];
-	if (parentIndex < 0) {
-		parentIndex = 0;
+	if (hTreeItem < 0) {
+		hTreeItem = 0;
 	}
-	TreeItem parentItem = items[parentIndex];
-	parentIndex++;
-	while (items[parentIndex] != null) {
-		TreeItem item = items[parentIndex];
+	TreeItem parentItem = items[hTreeItem];
+	hTreeItem++;
+	while (items[hTreeItem] != null) {
+		TreeItem item = items[hTreeItem];
 		if (item.parentItem != parentItem) {
-			if (item.parentItem == items[parentIndex - 1]) {
-				parentIndex = skipItems(parentIndex - 1);
-				if (parentIndex == -1) {
+			if (item.parentItem == items[hTreeItem - 1]) {
+				hTreeItem = skipItems(hTreeItem - 1);
+				if (hTreeItem == -1) {
 					return children;
 				}
-				if (items[parentIndex].parentItem == parentItem.parentItem) {
+				if (items[hTreeItem].parentItem == parentItem.parentItem) {
 					return children;
 				} else {
-					children[children.length] = items[parentIndex];
+					children[children.length] = items[hTreeItem];
 				}
 			} else {
 				return children;
@@ -1601,7 +1601,7 @@ TreeItem [] getItems (int hTreeItem) {
 		} else {
 			children[children.length] = item;
 		}
-		parentIndex++;
+		hTreeItem++;
 	}
 	return children;
 }
@@ -2578,8 +2578,8 @@ public void setTopItem (TreeItem item) {
 	checkWidget ();
 	if (item == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
 	if (item.isDisposed ()) SWT.error (SWT.ERROR_INVALID_ARGUMENT);
-	int hItem = item.handle;
 	/*
+	int hItem = item.handle;
 	boolean fixScroll = checkScroll (hItem);
 	if (fixScroll) {
 		OS.SendMessage (handle, OS.WM_SETREDRAW, 1, 0);
@@ -2594,7 +2594,7 @@ public void setTopItem (TreeItem item) {
 	updateScrollBar ();
 }
 
-void showItem (int hItem) {
+void showItem (Element hItem) {
 	/*
 	* Bug in Windows.  When TVM_ENSUREVISIBLE is used to ensure
 	* that an item is visible and the client area of the tree is
