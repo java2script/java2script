@@ -5,33 +5,21 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
-import net.sf.j2s.ui.Java2ScriptUIPlugin;
 import net.sf.j2s.ui.classpathviewer.Resource;
 import net.sf.j2s.ui.jdtenhancer.EnhancerInfo;
 import net.sf.j2s.ui.jdtenhancer.JarUtil;
-import net.sf.j2s.ui.resources.ExternalResources;
-import net.sf.j2s.ui.resources.FileSystemUtils;
-import net.sf.j2s.ui.resources.IExternalResourceProvider;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.compiler.IExtendedCompiler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferencePage;
@@ -223,8 +211,8 @@ public class J2SPropertyPage extends PropertyPage {
 		data.grabExcessHorizontalSpace = true;
 		composite.setLayoutData(data);
 
-        URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
-				.getEntry("/" + File.separator); //$NON-NLS-1$
+//        URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
+//				.getEntry("/" + File.separator); //$NON-NLS-1$
 //		String path = "."; //$NON-NLS-1$
 //		try {
 //			path = Platform.asLocalURL(starterURL).getFile();
@@ -333,7 +321,7 @@ public class J2SPropertyPage extends PropertyPage {
 						public void run() {
 							try {
 								JarUtil.enhanceJDTCoreTo(coreJarName, base, 
-											new File(base).getParentFile().getAbsolutePath(), null); //enhancePath);
+											new File(base).getParentFile().getAbsolutePath(), base);
 								EnhancerInfo.isJDTCoreAlreadyEnhanced = true;
 								label4.setEnabled(true);
 								btnRestart.setEnabled(true);

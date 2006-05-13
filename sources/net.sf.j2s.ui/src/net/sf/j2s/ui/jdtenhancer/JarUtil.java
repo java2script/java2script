@@ -40,7 +40,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class JarUtil {
 
-	public static final String CURRENT_J2S_VERSION = "0.5.0";
+	public static final String CURRENT_J2S_VERSION = "1.0.0";
 	
 	private static final String J2SENHANCE_TXT = "j2senhance.txt";
 
@@ -306,7 +306,70 @@ public class JarUtil {
 		List classList = new ArrayList();
 		classList.add("plugin.xml");
 		//String base = "jdtenhance/";
-		String base = new File(enhancePath, "jdtenhance/").getAbsolutePath();
+		
+		File enhanceFolder = new File(enhancePath, "jdtenhance/");
+		boolean isTmpFolderCreated = false;
+		if (!enhanceFolder.exists()) {
+			enhanceFolder.mkdirs();
+			isTmpFolderCreated = true;
+			byte[] data = new byte[1024];
+			File[] list = new File(enhancePath).listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					if (name.startsWith("net.sf.j2s.core") && name.endsWith(".jar")) {
+						return true;
+					}
+					return false;
+				}
+			});
+			if (list.length <= 0) {
+				enhanceFolder.delete();
+				boolean renamed = backupJarFile.renameTo(srcJarFile);
+				if (!renamed) {
+					copyFile(backupJarFile, srcJarFile);
+					backupJarFile.delete();
+				}
+				throw new IOException(new File(enhancePath).getAbsolutePath() + " contains no sources net.sf.j2s.core_x.x.x.jar!");
+			}
+			FileInputStream fis = new FileInputStream(list[0]);
+			ZipInputStream zis = new ZipInputStream(fis);
+			ZipEntry nextEntry = zis.getNextEntry();
+			while (nextEntry != null) {
+				String name = nextEntry.getName();
+				if (name.endsWith(".class") && (name.startsWith(COMPILER) || name.startsWith(BUILDER))) {
+					File file = new File(enhanceFolder, name);
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdirs();
+					}
+					FileOutputStream os = new FileOutputStream(file);
+					int length = zis.read(data, 0, 1024);
+					while (length != -1) {
+						os.write(data, 0, length);
+						length = zis.read(data, 0, 1024);
+					}
+					os.close();
+				} else if (name.endsWith("plugin.xml") && name.startsWith("org/eclipse/jdt")) {
+					/*
+					 * Special case for plugin.xml, as there is already a plugin.xml in net.sf.j2s.core, so
+					 * the JDT Core's plugin.xml is placed in org.eclipse.jdt.
+					 */
+					File file = new File(enhanceFolder, "plugin.xml");
+					if (!file.getParentFile().exists()) {
+						file.getParentFile().mkdirs();
+					}
+					FileOutputStream os = new FileOutputStream(file);
+					int length = zis.read(data, 0, 1024);
+					while (length != -1) {
+						os.write(data, 0, length);
+						length = zis.read(data, 0, 1024);
+					}
+					os.close();
+				}
+				nextEntry = zis.getNextEntry();
+			}
+			zis.close();
+			fis.close();
+		}
+		String base = enhanceFolder.getAbsolutePath();
 		File[] files = new File(base, COMPILER).listFiles();
 		for (int i = 0; i < files.length; i++) {
 			classList.add(COMPILER + files[i].getName());
@@ -321,8 +384,24 @@ public class JarUtil {
 		FileOutputStream os = new FileOutputStream(
 				srcJarFile);
 		enhance(is, os, classes, base);
+		if (isTmpFolderCreated) {
+			deleteFolder(enhanceFolder);
+		}
 	}
 
+	public static void deleteFolder(File folder) {
+		if (folder != null && folder.exists()) {
+			File[] listFiles = folder.listFiles();
+			for (int i = 0; i < listFiles.length; i++) {
+				if (listFiles[i].isDirectory()) {
+					deleteFolder(listFiles[i]);
+				} else {
+					listFiles[i].delete();
+				}
+			}
+			folder.delete();
+		}
+	}
 	public static void enhanceJDTCoreTo(String jdtCoreJar, String srcPath, String destPath, String enhancePath) throws FileNotFoundException, IOException {
 		File srcJarFile = new File(srcPath, jdtCoreJar);
 		File destJarFile = new File(destPath, jdtCoreJar);
