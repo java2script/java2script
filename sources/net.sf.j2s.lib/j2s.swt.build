@@ -12,13 +12,14 @@
             Building j2s-swt-*.z.js
     </description>
 	
-	<property name="js.src.dir" value="../net.sf.j2s.java.org.eclipse.swt/bin"/>
+	<property name="js.swt.dir" value="../net.sf.j2s.java.org.eclipse.swt"/>
+	<property name="js.src.dir" value="${js.swt.dir}/bin"/>
 	<property name="jz.dist.dir" value="j2slib"/>
 
     <!-- ================================= 
           target: j2s.swt.basic              
          ================================= -->
-    <target name="j2s.swt.basic" depends="" description="Building j2s-swt-*.z.js">
+    <target name="j2s.swt.basic" depends="j2s.swt.resource" description="Building j2s-swt-*.z.js">
         <concat destfile="${jz.dist.dir}/j2s-swt-basic.z.js">
             <header filtering="no" trimleading="yes">/*=j2s=
             	#Java2Script Configuration
@@ -136,7 +137,7 @@
     <!-- ================================= 
           target: j2s.swt.widget              
          ================================= -->
-    <target name="j2s.swt.widget" depends="" description="Building j2s-swt-*.z.js">
+    <target name="j2s.swt.widget" depends="j2s.swt.resource" description="Building j2s-swt-*.z.js">
         <concat destfile="${jz.dist.dir}/j2s-swt-widget.z.js">
             <header filtering="no" trimleading="yes">/*=j2s=
             	#Java2Script Configuration
@@ -246,5 +247,13 @@
         	</filelist>
         </concat>
     </target>
+    <!-- ================================= 
+          target: j2s.swt.resource              
+         ================================= -->
+    <target name="j2s.swt.resource" depends="" description="Copy css/image resources">
+    	<copy todir="${jz.dist.dir}">
+    		<fileset dir="${js.swt.dir}/j2sswt"/>
+    	</copy>
+	</target>
 </project>
 
