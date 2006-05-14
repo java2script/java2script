@@ -12,8 +12,8 @@
  *******************************************************************************/
 package net.sf.j2s.ui.property;
 
-import net.sf.j2s.ui.classpathviewer.CompositeResources;
-import net.sf.j2s.ui.classpathviewer.ContactedClasses;
+import net.sf.j2s.ui.classpath.CompositeResources;
+import net.sf.j2s.ui.classpath.ContactedClasses;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;

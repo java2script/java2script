@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
+import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IWorkspaceRoot;

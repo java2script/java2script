@@ -1,4 +1,4 @@
-package net.sf.j2s.ui.classpathviewer;
+package net.sf.j2s.ui.classpath;
 
 
 public class CSSResource extends Resource implements IExternalResource {

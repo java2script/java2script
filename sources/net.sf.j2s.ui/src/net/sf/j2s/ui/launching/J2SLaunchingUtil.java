@@ -9,9 +9,9 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.sf.j2s.ui.classpathviewer.CompositeResources;
-import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
-import net.sf.j2s.ui.classpathviewer.Resource;
+import net.sf.j2s.ui.classpath.CompositeResources;
+import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
+import net.sf.j2s.ui.classpath.Resource;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;

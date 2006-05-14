@@ -15,7 +15,7 @@ package net.sf.j2s.ui.property;
 import java.io.File;
 import java.util.ArrayList;
 
-import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
+import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IFile;

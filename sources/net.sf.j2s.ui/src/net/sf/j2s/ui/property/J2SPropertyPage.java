@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import net.sf.j2s.ui.classpathviewer.Resource;
+import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.jdtenhancer.EnhancerInfo;
 import net.sf.j2s.ui.jdtenhancer.JarUtil;
 

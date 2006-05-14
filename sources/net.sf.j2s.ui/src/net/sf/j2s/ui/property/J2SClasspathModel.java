@@ -15,8 +15,8 @@ package net.sf.j2s.ui.property;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.j2s.ui.classpathviewer.Resource;
-import net.sf.j2s.ui.classpathviewer.UnitClass;
+import net.sf.j2s.ui.classpath.Resource;
+import net.sf.j2s.ui.classpath.UnitClass;
 
 /**
  * @author josson smith

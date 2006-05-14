@@ -1,4 +1,4 @@
-package net.sf.j2s.ui.classpathviewer;
+package net.sf.j2s.ui.classpath;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

@@ -12,13 +12,13 @@
  *******************************************************************************/
 package net.sf.j2s.ui.property;
 
-import net.sf.j2s.ui.classpathviewer.CSSResource;
-import net.sf.j2s.ui.classpathviewer.CompositeResources;
-import net.sf.j2s.ui.classpathviewer.ContactedClasses;
-import net.sf.j2s.ui.classpathviewer.ContactedUnitClass;
-import net.sf.j2s.ui.classpathviewer.ProjectResources;
-import net.sf.j2s.ui.classpathviewer.Resource;
-import net.sf.j2s.ui.classpathviewer.UnitClass;
+import net.sf.j2s.ui.classpath.CSSResource;
+import net.sf.j2s.ui.classpath.CompositeResources;
+import net.sf.j2s.ui.classpath.ContactedClasses;
+import net.sf.j2s.ui.classpath.ContactedUnitClass;
+import net.sf.j2s.ui.classpath.ProjectResources;
+import net.sf.j2s.ui.classpath.Resource;
+import net.sf.j2s.ui.classpath.UnitClass;
 
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;

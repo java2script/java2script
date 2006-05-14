@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 
-import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
+import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.property.IJ2SConfigModifiedListener;
 import net.sf.j2s.ui.property.J2SConfigPage;
 

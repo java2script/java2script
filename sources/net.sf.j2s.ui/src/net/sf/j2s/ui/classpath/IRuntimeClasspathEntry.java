@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package net.sf.j2s.ui.classpathviewer;
+package net.sf.j2s.ui.classpath;
 
 
 import org.eclipse.core.resources.IResource;
