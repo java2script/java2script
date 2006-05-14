@@ -1,4 +1,4 @@
-package net.sf.j2s.ui.classpathviewer.viewer;
+package net.sf.j2s.ui.launching;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -345,3 +345,4 @@ public class JavaRuntime {
 	}
 
 }
+

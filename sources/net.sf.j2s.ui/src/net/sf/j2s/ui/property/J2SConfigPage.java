@@ -56,54 +56,6 @@ import org.eclipse.swt.widgets.Shell;
 
 public class J2SConfigPage extends Composite {
 
-	/*
-	private static String[] patterns = new String[] {
-		"SWT", 
-		"Common", 
-		"Utilities", 
-		"Bare Core", 
-		"Custom" 
-	};
-	private static String[] patternTips = new String[] { 
-			"With SWT components supported", 
-			"With common Java classes supported, such as StringBuffer", 
-			"With Java utilities supported, such as java.util.*", 
-			"With only the Java class inheritance supported", 
-			"Custom the pattern needed" 
-	};
-	private static String[][] patterResouces = new String[][] {
-		new String[] {
-				"j2s-core-more.z.js",
-				"j2s-browser-native.z.js",
-				"j2s-swt-basic.z.js",
-				"j2s-swt-widget.z.js"
-		},
-		new String[] {
-				"j2s-core-common.z.js"
-		},
-		new String[] {
-				"j2s-core-util.z.js"
-		},
-		new String[] {
-				"j2s-core-bare.z.js"
-		},
-		new String[] {
-		}
-	};
-	*/
-//	private static String[] patterns = null;
-//	private static String[] patternTips = null;
-//	private static String[][] patterResouces = null;
-//	
-//	static void initPattern() {
-//		patterns = null;
-//		if (patterns == null) {
-//			patterns = ExternalResources.getAllKeys();
-//			patternTips = ExternalResources.getAllDescriptions();
-//			patterResouces = ExternalResources.getAllResources();
-//		}
-//	}
-
 	private Button buttonEnable;
 	private Button buttonDisable;
 	private boolean compilerEnabled = true;
@@ -121,6 +73,9 @@ public class J2SConfigPage extends Composite {
 	private Button buttonAddRes;
 	private Button buttonAddInnerRes;
 	private Button buttonAddPrj;
+	
+	private Button buttonDefault;
+	
 	protected File j2sFile;
 	
 	private transient Set listeners = new HashSet();
@@ -137,12 +92,9 @@ public class J2SConfigPage extends Composite {
 			IJ2SConfigModifiedListener listener = (IJ2SConfigModifiedListener) iter.next();
 			listener.configModified();
 		}
-//		syncDropList();
 	}
 	public J2SConfigPage(Composite parent, int style) {
 		super(parent, style);
-		
-//		initPattern();
 		
 		GridLayout gl = new GridLayout();
 		gl.numColumns = 1;
@@ -153,7 +105,9 @@ public class J2SConfigPage extends Composite {
 		GridLayout gl1 = new GridLayout();
 		gl1.numColumns = 3;
 		compilerStatusComp.setLayout(gl1);
-		compilerStatusComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData gd1 = new GridData(GridData.FILL_HORIZONTAL);
+		//gd1.exclude = true;
+		compilerStatusComp.setLayoutData(gd1);
 		
 		buttonEnable = new Button(compilerStatusComp, SWT.TOGGLE);
 		new Label(compilerStatusComp, SWT.NONE).setText(":");
@@ -171,41 +125,13 @@ public class J2SConfigPage extends Composite {
 			}
 		});
 		
-//		Composite patternComp = new Composite(this, SWT.NONE);
-//		GridLayout gl2 = new GridLayout();
-//		gl2.numColumns = 4;
-//		patternComp.setLayout(gl2);
-//		patternComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//		patternLeadingLabel = new Label(patternComp, SWT.NONE);
-//		patternLeadingLabel.setText("Pattern:");
-//		comboPattern = new Combo(patternComp, SWT.READ_ONLY);
-//		GridData gd = new GridData();
-//		gd.widthHint = 80;
-//		comboPattern.setLayoutData(gd);
-//		//comboPattern.setItems(patterns);
-//		comboPattern.setItems(ExternalResources.getAllKeys());
-//		tipsLabel = new Label(patternComp, SWT.NONE);
-//		GridData gd2 = new GridData(GridData.FILL_HORIZONTAL);
-//		gd2.horizontalSpan = 2;
-//		gd2.widthHint = 300;
-//		tipsLabel.setLayoutData(gd2);
-//		comboPattern.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//				int idx = comboPattern.getSelectionIndex();
-//				updatePattern(idx);
-//				fireConfigModified();
-//			}
-//		});
-//		comboPattern.select(1);
-//		tipsLabel.setText("(" + patternTips[1] + ")");
-		
 		Composite viewerComp = new Composite(this, SWT.NONE);
 		GridLayout gl3 = new GridLayout();
 		gl3.numColumns = 2;
 		viewerComp.setLayout(gl3);
-		GridData gd1 = new GridData(GridData.FILL_BOTH);
-		gd1.heightHint = 250;
-		viewerComp.setLayoutData(gd1);
+		GridData gd2 = new GridData(GridData.FILL_BOTH);
+		gd2.heightHint = 250;
+		viewerComp.setLayoutData(gd2);
 		
 		viewer = new TreeViewer(viewerComp, SWT.BORDER | SWT.MULTI);
 		viewer.setContentProvider(new J2SClasspathContentProvider());
@@ -221,18 +147,18 @@ public class J2SConfigPage extends Composite {
 		actionComp.setLayout(new GridLayout());
 		actionComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		buttonAddInnerRes = SWTUtil.createPushButton(actionComp, "Add libraries", null);
+		buttonAddInnerRes = SWTUtil.createPushButton(actionComp, "Add Libraries", null);
 		addInnerJarAction = new J2SAddInnerJarAction(this);
 		buttonAddInnerRes.addSelectionListener(addInnerJarAction);
 		
-		buttonAddRes = SWTUtil.createPushButton(actionComp, "Add resources", null);
+		buttonAddRes = SWTUtil.createPushButton(actionComp, "Add Resources", null);
 //		buttonAddRes.addSelectionListener(new SelectionAdapter() {
 //			public void widgetSelected(SelectionEvent e) {
 //			}
 //		});
 		buttonAddRes.addSelectionListener(new J2SAddJarAction(this));
 		
-		buttonAddPrj = SWTUtil.createPushButton(actionComp, "Add projects", null);
+		buttonAddPrj = SWTUtil.createPushButton(actionComp, "Add Projects", null);
 //		buttonAddPrj.addSelectionListener(new SelectionAdapter() {
 //			public void widgetSelected(SelectionEvent e) {
 //			}
@@ -315,7 +241,7 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonAbandom = SWTUtil.createPushButton(actionComp, "Abandom classes", null);
+		buttonAbandom = SWTUtil.createPushButton(actionComp, "Abandom Classes", null);
 		buttonAbandom.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -338,7 +264,7 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonRestore = SWTUtil.createPushButton(actionComp, "Restore classes", null);
+		buttonRestore = SWTUtil.createPushButton(actionComp, "Restore Classes", null);
 		buttonRestore.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -367,73 +293,27 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
+		buttonDefault = SWTUtil.createPushButton(actionComp, "Restore Default Classpath", null);
+		GridData gd3 = new GridData();
+		gd3.exclude = true;
+		buttonDefault.setLayoutData(gd3);
 		
 		updateButtonGroup();
 	}
 	
 	/*
-	private IRuntimeClasspathEntry newArchiveRuntimeClasspathEntry(String relativePath) {
-		String path = relativePath.toString();
-		if (path.startsWith("|")) {
-			path = path.substring(1);
-			File file = new File(path);
-			path = file.getName();
-			if (path.endsWith(".z.js")) {
-				ContactedClasses cc = new ContactedClasses();
-				cc.setFolder(file.getParentFile());
-				cc.setRelativePath(path);
-				if (path.indexOf("j2s-") == 0) {
-					cc.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
-				} else {
-					cc.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-				}
-				cc.setAbsolute(true);
-				return cc;
-			} else if (path.endsWith(".css")){
-				CSSResource css = new CSSResource();
-				css.setFolder(file.getParentFile());
-				css.setRelativePath(path);
-				css.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-				css.setAbsolute(true);
-				return css;
-			} else if (path.endsWith(".j2s")) {
-				CompositeResources comp = new CompositeResources();
-				comp.setFolder(file.getParentFile());
-				comp.setRelativePath(path);
-//				comp.setFolder(elem.getProject().getLocation().toFile());
-//				comp.setRelativePath(path);
-				comp.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-				comp.setAbsolute(true);
-				return comp;
-			}
-		} else if (path.endsWith(".z.js")) {
-			ContactedClasses cc = new ContactedClasses();
-			cc.setFolder(j2sFile.getParentFile());
-			cc.setRelativePath(path);
-			if (path.indexOf("j2s-") == 0) {
-				cc.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
-			} else {
-				cc.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			}
-			return cc;
-		} else if (path.endsWith(".css")){
-			CSSResource css = new CSSResource();
-			css.setFolder(j2sFile.getParentFile());
-			css.setRelativePath(path);
-			css.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			return css;
-		} else if (path.endsWith(".j2s")) {
-			CompositeResources comp = new CompositeResources();
-			comp.setFolder(j2sFile.getParentFile());
-			comp.setRelativePath(path);
-//			comp.setFolder(elem.getProject().getLocation().toFile());
-//			comp.setRelativePath(path);
-			comp.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
-			return comp;
-		}
-		return null;
+	 * Nasty thing
+	 */
+	public void forClasspathTab() {
+		GridData gd3 = new GridData();
+		buttonDefault.setLayoutData(gd3);
+		//buttonRestore.getParent().layout(true);
+		GridData gd1 = new GridData(GridData.FILL_HORIZONTAL);
+		gd1.exclude = true;
+		compilerStatusComp.setLayoutData(gd1);
+		//compilerStatusComp.getParent().layout(true);
 	}
-	*/
+	
 	private boolean isLastElementSelected() {
 		Object[] sels = getSelection();
 		if (classpathModel.abandomedClasses.size() > 0) {
@@ -766,113 +646,8 @@ public class J2SConfigPage extends Composite {
 		} else {
 			enableCompiler();
 		}
-		
-		//syncDropList();
 	}
 	/*
-	private void syncDropList() {
-		int len = patterResouces.length;
-		int size = classpathModel.resources.size();
-		for (int k = 0; k < len; k++) {
-			int length = patterResouces[k].length;
-			if (size == length) {
-				boolean[] existed = new boolean[size];
-				for (int i = 0; i < existed.length; i++) {
-					existed[i] = false;
-				}
-				for (int i = 0; i < size; i++) {
-					Resource res = (Resource) classpathModel.resources.get(i);
-					String name = res.getAbsoluteFile().getName();
-					for (int j = 0; j < size; j++) {
-						String path = patterResouces[k][j];
-						if (path.startsWith("|")) {
-							path = path.substring(1);
-						}
-						File file = new File(path);
-						if (file.getName().equals(name)) {
-							existed[j] = true;
-							break;
-						}
-					}
-				}
-				
-				boolean ok = true;
-				for (int i = 0; i < size; i++) {
-					if (!existed[i]) {
-						ok = false;
-						break;
-					}
-				}
-				if (ok) {
-					comboPattern.setText(patterns[k]);
-					updatePattern(k);
-					return ;
-				}
-			}
-		}
-		for (int k = 0; k < len; k++) {
-			int length = patterResouces[k].length;
-			if (0 == length) {
-				comboPattern.setText(patterns[k]);
-				updatePattern(k);
-				return ;
-			}
-		}
-		comboPattern.setText(patterns[0]);
-		updatePattern(0);
-		/*
-		if (size == 1) {
-			for (int i = 1; i <= 3; i++) {
-				Resource res = (Resource) classpathModel.resources.get(0);
-				String name = res.getAbsoluteFile().getName();
-				String path = patterResouces[i][0];
-				if (path.startsWith("|")) {
-					path = path.substring(1);
-				}
-				File file = new File(path);
-				if (file.getName().equals(name)) {
-					comboPattern.setText(patterns[i]);
-					updatePattern(i);
-					return ;
-				}
-			}
-		} else if (size == len) {
-			boolean[] existed = new boolean[len];
-			for (int i = 0; i < existed.length; i++) {
-				existed[i] = false;
-			}
-			for (int i = 0; i < len; i++) {
-				Resource res = (Resource) classpathModel.resources.get(i);
-				String name = res.getAbsoluteFile().getName();
-				for (int j = 0; j < len; j++) {
-					String path = patterResouces[0][j];
-					if (path.startsWith("|")) {
-						path = path.substring(1);
-					}
-					File file = new File(path);
-					if (file.getName().equals(name)) {
-						existed[j] = true;
-						break;
-					}
-				}
-			}
-			
-			for (int i = 0; i < len; i++) {
-				if (!existed[i]) {
-					comboPattern.setText(patterns[4]);
-					updatePattern(4);
-					return ;
-				}
-			}
-			comboPattern.setText(patterns[0]);
-			updatePattern(0);
-			return ;
-		}
-		comboPattern.setText(patterns[4]);
-		updatePattern(4);
-		*-/
-	}
-
 	public static void main (String [] args) {
 		Display display = new Display ();
 		Shell shell = new Shell(display);
@@ -920,13 +695,6 @@ public class J2SConfigPage extends Composite {
 		buttonDisable.setText("Disable Java2Script Compiler");
 		compilerEnabled = true;
 		compilerStatusComp.layout(true);
-		
-//		if (classpathModel.resources.size() == 0
-//				&& classpathModel.unitClasses.size() == 0
-//				&& classpathModel.abandomedClasses.size() == 0) {
-//			int idx = comboPattern.getSelectionIndex();
-//			updatePattern(idx);
-//		}
 		setConfigEditable(true);
 	}
 
@@ -1026,55 +794,20 @@ public class J2SConfigPage extends Composite {
 		return props;
 	}
 
-	/*
-	private void updatePattern(int idx) {
-		if (idx != -1) {
-			tipsLabel.getParent().layout(true);
-			tipsLabel.setText("(" + patternTips[idx] + ")");
-			
-			Object[] expandedElements = viewer.getExpandedElements();
-			int size = patterResouces[idx].length;
-			if (size != 0) {
-				classpathModel.resources.clear();
-			}
-			for (int i = 0; i < size; i++) {
-				//IRuntimeClasspathEntry entry = newArchiveRuntimeClasspathEntry("j2slib/" + patterResouces[idx][i]);
-				IRuntimeClasspathEntry entry = newArchiveRuntimeClasspathEntry(patterResouces[idx][i]);
-				if (entry != null) {
-					classpathModel.resources.add(entry);
-				}
-			}
-			ScrollBar bar = viewer.getTree().getVerticalBar();
-			double selection = 0;
-			if (bar != null) {
-				selection = (0.0 + bar.getSelection()) / bar.getMaximum();
-			}
-			viewer.refresh();
-			//viewer.expandToLevel(2);
-			viewer.setExpandedElements(expandedElements);
-			if (bar != null) {
-				bar.setSelection((int) Math.round(selection * bar.getMaximum()));
-			}
-			updateButtonGroup();
-
-		}
-	}
-	*/
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Composite#setFocus()
 	 */
 	public boolean setFocus() {
 		if (compilerEnabled) {
-//			comboPattern.setFocus();
 			viewer.getControl().setFocus();
 		} else {
 			buttonEnable.setFocus();
 		}
 		return true;
 	}
-//	
-//	public String getPatternKey() {
-//		return comboPattern.getText();
-//	}
+	
+	public Button getRestoreDefaultButton() {
+		return buttonDefault;
+	}
 }

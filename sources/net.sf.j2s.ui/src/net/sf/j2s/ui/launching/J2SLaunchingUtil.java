@@ -12,7 +12,6 @@ import java.util.Set;
 import net.sf.j2s.ui.classpathviewer.CompositeResources;
 import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpathviewer.Resource;
-import net.sf.j2s.ui.classpathviewer.viewer.JavaRuntime;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;

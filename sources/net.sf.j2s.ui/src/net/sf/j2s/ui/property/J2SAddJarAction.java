@@ -16,8 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
-import net.sf.j2s.ui.classpathviewer.actions.ArchiveFilter;
-import net.sf.j2s.ui.classpathviewer.viewer.JavaRuntime;
+import net.sf.j2s.ui.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

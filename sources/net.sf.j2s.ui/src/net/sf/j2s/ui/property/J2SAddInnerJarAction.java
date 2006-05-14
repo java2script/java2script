@@ -23,8 +23,7 @@ import net.sf.j2s.ui.classpathviewer.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpathviewer.ProjectResources;
 import net.sf.j2s.ui.classpathviewer.Resource;
 import net.sf.j2s.ui.classpathviewer.UnitClass;
-import net.sf.j2s.ui.classpathviewer.actions.ArchiveFilter;
-import net.sf.j2s.ui.classpathviewer.viewer.JavaRuntime;
+import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.resources.ExternalResources;
 
 import org.eclipse.core.resources.IFile;

@@ -1,7 +1,5 @@
 package net.sf.j2s.ui.launching;
 
-import net.sf.j2s.ui.classpathviewer.viewer.JavaClasspathTab;
-
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
@@ -20,7 +18,8 @@ public class J2SLaunchingTabGroup extends AbstractLaunchConfigurationTabGroup {
 				new J2SArgumentsTab(),
 				//new J2SPathTab(),
 				//new JavaJRETab(),
-				new JavaClasspathTab(), 
+//				new JavaClasspathTab(), 
+				new J2SClasspathOptionTab(), 
 				//new SourceLookupTab(),
 				//new EnvironmentTab(), 
 				//new CommonTab()

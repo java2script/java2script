@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package net.sf.j2s.ui.classpathviewer.actions;
+package net.sf.j2s.ui.property;
 
 import java.util.HashSet;
 import java.util.List;
