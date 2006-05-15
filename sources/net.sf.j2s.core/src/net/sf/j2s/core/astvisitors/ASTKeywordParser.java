@@ -1458,6 +1458,15 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		super.endVisit(node);
 	}
 
+	protected boolean isSimpleQualified(QualifiedName node) {
+		Name qualifier = node.getQualifier();
+		if (qualifier instanceof SimpleName) {
+			return true;
+		} else if (qualifier instanceof QualifiedName) {
+			return isSimpleQualified((QualifiedName) qualifier);
+		}
+		return false;
+	}
 	public boolean visit(QualifiedName node) {
 //		IBinding nodeBinding = node.resolveBinding();
 //		if (nodeBinding instanceof IVariableBinding) {
@@ -1477,6 +1486,13 @@ public class ASTKeywordParser extends ASTEmptyParser {
 //				}
 //			}
 //		}
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)
+				&& isSimpleQualified(node)) {
+			buffer.append(constValue);
+			return false;
+		}
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();

@@ -103,6 +103,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return super.visit(node);
 	}
 	public boolean visit(QualifiedName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)
+				&& isSimpleQualified(node)) {
+			buffer.append(constValue);
+			return false;
+		}
 //		IBinding nodeBinding = node.resolveBinding();
 //		if (nodeBinding instanceof IVariableBinding) {
 //			IVariableBinding varBinding = (IVariableBinding) nodeBinding;
@@ -191,10 +198,18 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return false;
 	}
 	public boolean visit(ClassInstanceCreation node) {
+		ITypeBinding binding = node.resolveTypeBinding();
+		if (binding != null) {
+			if (isTypeOf(binding, "org.eclipse.swt.internal.RunnableCompatibility")) {
+				buffer.append("Clazz.makeFunction (");
+				boolean result = super.visit(node);
+				buffer.append(")");
+				return result;
+			}
+		}
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		if (anonDeclare != null) {
-			ITypeBinding binding = anonDeclare.resolveBinding();
-			if (binding != null) {
+				/*
 				ITypeBinding[] interfaces = binding.getInterfaces();
 				if (interfaces != null && interfaces.length == 1) {
 					//System.out.println(interfaces[0].getQualifiedName());
@@ -216,7 +231,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 					}
 				}
 				//System.out.println(interfaces);
-			}
+				*/
 		} else {
 			String fqName = null;
 			if (node.getAST().apiLevel() != AST.JLS3) {
@@ -257,14 +272,14 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return super.visit(node);
 	}
 	
-	boolean isTypeOfShell(ITypeBinding binding) {
-		if (binding == null) {
+	boolean isTypeOf(ITypeBinding binding, String clazzName) {
+		if (binding == null || clazzName == null || clazzName.length() == 0) {
 			return false;
 		}
-		if ("org.eclipse.swt.widgets.Shell".equals(binding.getBinaryName())) {
+		if (clazzName.equals(binding.getBinaryName())) {
 			return true;
 		} else {
-			return isTypeOfShell(binding.getSuperclass());
+			return isTypeOf(binding.getSuperclass(), clazzName);
 		}
 	}
 	public boolean visit(WhileStatement node) {
@@ -278,7 +293,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 					Expression shellExp = shellIsDisposed.getExpression();
 					if (shellExp != null) {
 						ITypeBinding typeBinding = shellExp.resolveTypeBinding();
-						if (isTypeOfShell(typeBinding)) {
+						if (isTypeOf(typeBinding, "org.eclipse.swt.widgets.Shell")) {
 							SimpleName methodName = shellIsDisposed.getName();
 							if ("isDisposed".equals(methodName.getIdentifier())) {
 								metSWTBlockWhile = true;
