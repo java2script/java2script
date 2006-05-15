@@ -151,7 +151,7 @@ BrowserNative.getTextSelection = function (handle) {
 				BrowserNative.getTextCaretPosition (), 
 				BrowserNative.getTextCaretPositionEnd ());
 	}
-	return new new org.eclipse.swt.graphics.Point (-1, -1);
+	return new new org.eclipse.swt.graphics.Point (0, 0);
 };
 
 BrowserNative.getTextCaretLineNumber = function (handle) {

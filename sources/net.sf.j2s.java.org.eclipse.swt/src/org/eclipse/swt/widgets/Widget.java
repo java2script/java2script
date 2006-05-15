@@ -14,8 +14,13 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.SWTEventListener;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * This class is the abstract superclass of all user interface objects.  
@@ -45,10 +50,28 @@ import org.eclipse.swt.internal.xhtml.Element;
  */
 
 public abstract class Widget {
+	/**
+	 * the handle to the OS resource 
+	 * (Warning: This field is platform dependent)
+	 * <p>
+	 * <b>IMPORTANT:</b> This field is <em>not</em> part of the SWT
+	 * public API. It is marked public only so that it can be shared
+	 * within the packages provided by SWT. It is not available on all
+	 * platforms and should never be accessed from application code.
+	 * </p>
+	 */
+	public Element handle;
+	
 	int style, state;
 	Display display;
 	EventTable eventTable;
 	Object data;
+	
+	boolean dragStatus;
+	long hoverTime;
+	int hoverTimerID;
+	
+	boolean[] hookedStatus;
 
 	/* Global state flags */
 	static final int DISPOSED		= 1<<0;
@@ -145,6 +168,7 @@ public void addListener (int eventType, Listener listener) {
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (eventTable == null) eventTable = new EventTable ();
 	eventTable.hook (eventType, listener);
+	checkHookType (eventType);
 }
 
 /**
@@ -204,6 +228,169 @@ static int checkBits (int style, int int0, int int1, int int2, int int3, int int
 	if ((style & int4) != 0) style = (style & ~mask) | int4;
 	if ((style & int5) != 0) style = (style & ~mask) | int5;
 	return style;
+}
+
+void checkHookType(final int eventType) {
+	if (hookedStatus == null) {
+		hookedStatus = new boolean[38];
+	}
+	boolean hooked = false;
+	if (eventType >= 0 && eventType <= 37) {
+		hooked = hookedStatus[eventType];
+	}
+	if (hooked) {
+		return;
+	}
+	switch (eventType) {
+	case SWT.KeyDown:
+		hookKeyDown();
+		break;
+	case SWT.KeyUp:
+		hookKeyUp();
+		break;
+	case SWT.MouseDown:
+		hookMouseDown();
+		break;
+	case SWT.MouseUp:
+		hookMouseUp();
+		break;
+	case SWT.MouseMove:
+		hookMouseMove();
+		break;
+	case SWT.MouseEnter:
+		hookMouseEnter();
+		break;
+	case SWT.MouseExit:
+		hookMouseExit();
+		break;
+	case SWT.MouseDoubleClick:
+		hookMouseDoubleClick();
+		break;
+	/*
+	case SWT.Paint:
+		hookPaint();
+		break;
+	case SWT.Move:
+		hookMove();
+		break;
+	case SWT.Resize:
+		hookResize();
+		break;
+	case SWT.Dispose:
+		hookDispose();
+		break;
+	*/
+	case SWT.Selection:
+		hookSelection();
+		break;
+	/*
+	case SWT.DefaultSelection:
+		hookDefaultSelection();
+		break;
+	*/
+	case SWT.FocusIn:
+		hookFocusIn();
+		break;
+	case SWT.FocusOut:
+		hookFocusOut();
+		break;
+	/*
+	case SWT.Expand:
+		hookExpand();
+		break;
+	case SWT.Collapse:
+		hookCollapse();
+		break;
+	case SWT.Iconify:
+		hookIconify();
+		break;
+	case SWT.Deiconify:
+		hookDeiconify();
+		break;
+	case SWT.Close:
+		hookClose();
+		break;
+	case SWT.Show:
+		hookShow();
+		break;
+	case SWT.Hide:
+		hookHide();
+		break;
+	*/
+	case SWT.Modify:
+		hookModify();
+		break;
+	case SWT.Verify:
+		if (!hookedStatus[SWT.KeyDown])
+		hookKeyDown();
+		hookedStatus[SWT.KeyDown] = true;
+		break;
+	/*
+	case SWT.Activate:
+		hookActivate();
+		break;
+	case SWT.Deactivate:
+		hookDeactivate();
+		break;
+	*/
+	case SWT.Help:
+		hookHelp();
+		break;
+	case SWT.DragDetect:
+		if (!hookedStatus[SWT.MouseUp])
+		hookMouseUp();
+		if (!hookedStatus[SWT.MouseDown])
+		hookMouseDown();
+		if (!hookedStatus[SWT.MouseMove])
+		hookMouseMove();
+		hookedStatus[SWT.MouseUp] = true;
+		hookedStatus[SWT.MouseDown] = true;
+		hookedStatus[SWT.MouseMove] = true;
+		break;
+	case SWT.Arm:
+		hookArm();
+		break;
+	case SWT.Traverse:
+		hookTraverse();
+		break;
+	case SWT.MouseHover:
+		if (!hookedStatus[SWT.MouseEnter])
+		hookMouseEnter();
+		if (!hookedStatus[SWT.MouseExit])
+		hookMouseExit();
+		if (!hookedStatus[SWT.MouseUp])
+		hookMouseUp();
+		if (!hookedStatus[SWT.MouseDown])
+		hookMouseDown();
+		if (!hookedStatus[SWT.MouseMove])
+		hookMouseMove();
+		hookedStatus[SWT.MouseEnter] = true;
+		hookedStatus[SWT.MouseExit] = true;
+		hookedStatus[SWT.MouseUp] = true;
+		hookedStatus[SWT.MouseDown] = true;
+		hookedStatus[SWT.MouseMove] = true;
+		break;
+	/*
+	case SWT.HardKeyDown:
+		hookHardKeyDown();
+		break;
+	case SWT.HardKeyUp:
+		hookHardKeyUp();
+		break;
+	*/
+	case SWT.MenuDetect:
+		hookMenuDetect();
+		break;
+	/*
+	case SWT.SetData:
+		hookSetData();
+		break;
+	*/
+	case SWT.MouseWheel:
+		hookMouseWheel();
+		break;
+	}
+	hookedStatus[eventType] = true;
 }
 
 void checkOrientation (Widget parent) {
@@ -567,6 +754,326 @@ public int getStyle () {
 	return style;
 }
 
+void hookKeyDown() {
+	handle.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.KeyDown);
+		}
+	};
+}
+void hookKeyUp() {
+	handle.onkeyup = new RunnableCompatibility() {
+		public void run() {
+			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			if (((HTMLEvent) e.event).keyCode == 27) {
+				dragStatus = false;
+			}
+			sendEvent(SWT.KeyUp);
+		}
+	};
+}
+
+boolean mouseHoverProc() {
+	boolean hoverHooked = false;
+	if (hoverTimerID != 0) {
+		hoverHooked = true;
+		window.clearTimeout(hoverTimerID);
+		hoverTimerID = 0;
+	}
+	if (hoverHooked || hooks(SWT.MouseHover)) {
+		hoverHooked = true;
+		hoverTimerID = window.setTimeout(Clazz.makeFunction(new Runnable() {
+			public void run() {
+				sendEvent(SWT.MouseHover);
+				hoverTimerID = 0;
+			}
+		}), 400);
+	}
+	return hoverHooked;
+}
+
+void hookMouseDown() {
+	handle.onmousedown = new RunnableCompatibility() {
+		public void run() {
+			boolean hoverHooked = mouseHoverProc();
+			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			if (e.leftButtonHold) {
+				dragStatus = true;
+			}
+			if (!hoverHooked || hooks(SWT.MouseDown)) {
+				sendEvent(SWT.MouseDown);
+			}
+		}
+	};
+}
+void hookMouseUp() {
+	handle.onmouseup = new RunnableCompatibility() {
+		public void run() {
+			boolean hoverHooked = mouseHoverProc();
+			dragStatus = false;
+			if (!hoverHooked || hooks(SWT.MouseUp)) {
+				sendEvent(SWT.MouseUp);
+			}
+		}
+	};
+}
+void hookMouseMove() {
+	handle.onmousemove = new RunnableCompatibility() {
+		public void run() {
+			boolean hoverHooked = mouseHoverProc();
+			boolean dragHooked = false;
+			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			if (dragStatus && e.leftButtonHold 
+					&& hooks(SWT.DragDetect)) {
+				dragHooked = true;
+				sendEvent(SWT.DragDetect);
+				dragStatus = false;
+			}
+			if ((!dragHooked && !hoverHooked) || hooks(SWT.MouseMove)) {
+				sendEvent(SWT.MouseMove);
+			}
+		}
+	};
+}
+void hookMouseEnter() {
+	handle.onmouseover = new RunnableCompatibility() {
+		public void run() {
+			boolean hoverHooked = mouseHoverProc();
+			if (!hoverHooked || hooks(SWT.MouseEnter)) {
+				sendEvent(SWT.MouseEnter);
+			}
+		}
+	};
+}
+void hookMouseExit() {
+	handle.onmouseout = new RunnableCompatibility() {
+		public void run() {
+			boolean hoverHooked = false;
+			if (hoverTimerID != 0) {
+				hoverHooked = true;
+				window.clearTimeout(hoverTimerID);
+				hoverTimerID = 0;
+			}
+			if (!hoverHooked || hooks(SWT.MouseExit)) {
+				sendEvent(SWT.MouseExit);
+			}
+		}
+	};
+}
+void hookMouseDoubleClick() {
+	handle.ondblclick = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.MouseDoubleClick);
+		}
+	};
+}
+/*
+void hookPaint() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Paint);
+		}
+	};
+}
+void hookMove() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Move);
+		}
+	};
+}
+void hookResize() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Resize);
+		}
+	};
+}
+void hookDispose() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Dispose);
+		}
+	};
+}
+*/
+void hookSelection() {
+	handle.onclick = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Selection);
+		}
+	};
+}
+/*
+void hookDefaultSelection() {
+	handle.onclick = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.DefaultSelection);
+		}
+	};
+}
+*/
+void hookFocusIn() {
+	handle.onfocus = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.FocusIn);
+		}
+	};
+}
+void hookFocusOut() {
+	handle.onblur = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.FocusOut);
+		}
+	};
+}
+/*
+void hookExpand() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Expand);
+		}
+	};
+}
+void hookCollapse() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Collapse);
+		}
+	};
+}
+void hookIconify() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Iconify);
+		}
+	};
+}
+void hookDeiconify() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Deiconify);
+		}
+	};
+}
+void hookClose() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Close);
+		}
+	};
+}
+void hookShow() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Show);
+		}
+	};
+}
+void hookHide() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Hide);
+		}
+	};
+}
+*/
+void hookModify() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Modify);
+		}
+	};
+}
+/*
+void hookVerify() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Verify);
+		}
+	};
+}
+void hookActivate() {
+	handle.onfocus = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Activate);
+		}
+	};
+}
+void hookDeactivate() {
+	handle.onblur = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Deactivate);
+		}
+	};
+}
+*/
+void hookHelp() {
+	handle.onhelp = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Help);
+		}
+	};
+}
+void hookArm() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Arm);
+		}
+	};
+}
+void hookTraverse() {
+	handle.onkeypress = new RunnableCompatibility() {
+		public void run() {
+			//if (TAB)
+			//sendEvent(SWT.Traverse);
+		}
+	};
+}
+/*
+void hookHardKeyDown() {
+	handle.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.HardKeyDown);
+		}
+	};
+}
+void hookHardKeyUp() {
+	handle.onkeyup = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.HardKeyUp);
+		}
+	};
+}
+*/
+void hookMenuDetect() {
+	handle.oncontextmenu = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.MenuDetect);
+		}
+	};
+}
+/*
+void hookSetData() {
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.SetData);
+		}
+	};
+}
+*/
+void hookMouseWheel() {
+	/*
+	handle.onchange = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.MouseWheel);
+		}
+	};
+	*/
+}
+
+
+
 /*
  * Returns <code>true</code> if the specified eventType is
  * hooked, and <code>false</code> otherwise. Implementations
@@ -878,6 +1385,60 @@ void sendEvent (int eventType, Event event, boolean send) {
 	}
 }
 
+boolean sendKeyEvent (int type, int msg, int wParam, int lParam) {
+	Event event = new Event ();
+//	if (!setKeyState (event, type, wParam, lParam)) return true;
+	return sendKeyEvent (type, msg, wParam, lParam, event);
+}
+
+boolean sendKeyEvent (int type, int msg, int wParam, int lParam, Event event) {
+	sendEvent (type, event);
+	if (isDisposed ()) return false;
+	return event.doit;
+}
+
+boolean sendMouseEvent (int type, int button, Element hwnd, int x, int y) {
+	return sendMouseEvent (type, button, 0, 0, false, hwnd, x, y);
+}
+
+boolean sendMouseEvent (int type, int button, int count, int detail, boolean send, Element hwnd, int x, int y) {
+	if (!hooks (type) && !filters (type)) return true;
+	Event event = new Event ();
+	event.button = button;
+	event.detail = detail;
+	event.count = count;
+	event.x = x;
+	event.y = y;
+//	event.x = (short) (lParam & 0xFFFF);
+//	event.y = (short) (lParam >> 16);
+//	setInputState (event, type);
+//	mapEvent (hwnd, event);
+	switch (type) {
+	case SWT.MouseDown:
+	case SWT.MouseDoubleClick:
+		if (event.button == 1) event.stateMask &= ~SWT.BUTTON1;
+		if (event.button == 2) event.stateMask &= ~SWT.BUTTON2;
+		if (event.button == 3) event.stateMask &= ~SWT.BUTTON3;
+		if (event.button == 4) event.stateMask &= ~SWT.BUTTON4;
+		if (event.button == 5) event.stateMask &= ~SWT.BUTTON5;
+		break;
+	case SWT.MouseUp:
+		if (event.button == 1) event.stateMask |= SWT.BUTTON1;
+		if (event.button == 2) event.stateMask |= SWT.BUTTON2;
+		if (event.button == 3) event.stateMask |= SWT.BUTTON3;
+		if (event.button == 4) event.stateMask |= SWT.BUTTON4;
+		if (event.button == 5) event.stateMask |= SWT.BUTTON5;
+		break;
+	}
+	if (send) {
+		sendEvent (type, event);
+		if (isDisposed ()) return false;
+	} else {
+		postEvent (type, event);
+	}
+	return event.doit;
+}
+
 /*
 boolean sendKeyEvent (int type, int msg, int wParam, int lParam) {
 	Event event = new Event ();
@@ -1161,7 +1722,6 @@ boolean SetWindowPos (int hWnd, int hWndInsertAfter, int X, int Y, int cx, int c
 }
 */
 
-/*
 boolean showMenu (int x, int y) {
 	Event event = new Event ();
 	event.x = x;

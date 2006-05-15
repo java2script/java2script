@@ -12,6 +12,7 @@ package org.eclipse.swt.widgets;
 
 
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -40,17 +41,6 @@ import org.eclipse.swt.accessibility.*;
  */
 
 public abstract class Control extends Widget implements Drawable {
-	/**
-	 * the handle to the OS resource 
-	 * (Warning: This field is platform dependent)
-	 * <p>
-	 * <b>IMPORTANT:</b> This field is <em>not</em> part of the SWT
-	 * public API. It is marked public only so that it can be shared
-	 * within the packages provided by SWT. It is not available on all
-	 * platforms and should never be accessed from application code.
-	 * </p>
-	 */
-	public Element handle;
 	Composite parent;
 	Cursor cursor;
 	Menu menu;
@@ -2386,6 +2376,14 @@ public void setMenu (Menu menu) {
 		}
 	}
 	this.menu = menu;
+	
+	if (handle.oncontextmenu == null) {
+		handle.oncontextmenu = new RunnableCompatibility() {
+			public void run() {
+				showMenu(0, 0);
+			}
+		};
+	}
 }
 
 boolean setRadioFocus () {

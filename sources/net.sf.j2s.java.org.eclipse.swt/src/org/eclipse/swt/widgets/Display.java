@@ -2828,6 +2828,11 @@ public boolean post (Event event) {
 			*/
 		}
 	} 
+	timerExec(1, new Runnable() {
+		public void run() {
+			runDeferredEvents();
+		}
+	});
 	return false;
 }
 
@@ -2851,6 +2856,11 @@ void postEvent (Event event) {
 		eventQueue = newQueue;
 	}
 	eventQueue [index] = event;
+	timerExec(1, new Runnable() {
+		public void run() {
+			runDeferredEvents();
+		}
+	});
 }
 
 /**

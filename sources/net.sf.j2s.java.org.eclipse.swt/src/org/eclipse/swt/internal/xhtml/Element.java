@@ -1,5 +1,7 @@
 package org.eclipse.swt.internal.xhtml;
 
+import org.eclipse.swt.internal.RunnableCompatibility;
+
 
 
 public class Element {
@@ -61,6 +63,21 @@ public class Element {
 
 	public boolean disabled;
 
+	public Object onLoseCapture;
+
+	public Object onfocusout;
+
+	public Object onmousemove;
+
+	public Object onmouseover;
+
+	public Object onmouseout;
+
+	public Object onfocus;
+
+	public Object onblur;
+	
+	public Object onhelp;
 	
 	//private String
 	

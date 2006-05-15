@@ -163,75 +163,95 @@ void createHandle () {
 	if (parent.handle != null) {
 		parent.handle.appendChild(handle);
 	}
+	//setTabStops (tabs = 8);
+	//fixAlignment ();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#hookKeyDown()
+ */
+void hookKeyDown() {
 	handle.onkeydown = new RunnableCompatibility() {
 		public void run() {
-			if (eventTable == null) {
-				toReturn(true);
-				return ;
-			}
-			boolean modified = true;
-			if (!eventTable.hooks(SWT.Verify)) {
-				toReturn(true);
-			} else {
-				Event e = new Event();
-				e.type = SWT.Verify;
-				e.item = Text.this;
+			boolean verifyHooked = false;
+			if (hooks(SWT.Verify)) {
+				verifyHooked = true;
 				HTMLEvent evt = (HTMLEvent) getEvent();
-				//System.out.println(evt.keyCode);
 				if (!isInputCharacter(evt.keyCode, evt.shiftKey, evt.altKey, evt.ctrlKey)) {
 					toReturn(true);
-					modified = false;
 				} else {
-					e.text = getInputCharacter (evt.keyCode, evt.shiftKey, false); //"" + ((char) evt.keyCode);
-					//System.out.println(e.text);
-					e.widget = Text.this;
-					sendEvent(e);
-					toReturn(e.doit);
-					modified = e.doit;
+					Event e = new Event();
+					e.character = getInputCharacter (evt.keyCode, evt.shiftKey, false);
+					String txt = "" + e.character;
+					if (e.character == 8 || e.character == 46) {
+						txt = "";
+					}
+					e.keyCode = evt.keyCode;
+					e.stateMask = (evt.shiftKey ? SWT.SHIFT : SWT.NONE) | (evt.ctrlKey ? SWT.CTRL : SWT.NONE);
+					String s = verifyText(txt, 0, 0, e);
+					if (s == null) {
+						toReturn(false);
+					} else if (hooks(SWT.Modify)) {
+						Event ev = new Event();
+						ev.type = SWT.Modify;
+						ev.widget = Text.this;
+						ev.display = display;
+						ev.time = display.getLastEventTime();
+						sendEvent(ev);
+						toReturn(ev.doit);
+					}
 				}
 			}
-			if (modified && eventTable.hooks(SWT.Modify)) {
-				Event e = new Event();
-				e.type = SWT.Modify;
-				e.item = Text.this;
-				e.widget = Text.this;
-				sendEvent(e);
+			if (!verifyHooked || hooks(SWT.KeyDown)) {
+				Event ev = new Event();
+				ev.type = SWT.Modify;
+				ev.widget = Text.this;
+				ev.display = display;
+				ev.time = display.getLastEventTime();
+				sendEvent(ev);
+				toReturn(ev.doit);
+				sendEvent(SWT.KeyDown);
 			}
 		}
 	};
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#hookModify()
+ */
+void hookModify() {
 	/*
 	 * TODO: Maybe pasting string into Text component should be limited.
 	 */
 	handle.onchange = new RunnableCompatibility() {
 		public void run() {
-			if (eventTable == null) {
+			if ((style & SWT.READ_ONLY) != 0 
+					|| (!hooks (SWT.Verify) && !filters (SWT.Verify))) {
 				toReturn(true);
 				return ;
 			}
-			if (!eventTable.hooks(SWT.Verify)) {
-				toReturn(true);
-			} else {
-				Event e = new Event();
-				e.type = SWT.Verify;
-				e.item = Text.this;
-				e.text = getText();
-				e.widget = Text.this;
-				sendEvent(e);
-				toReturn(e.doit);
-			}
-			if (eventTable.hooks(SWT.Modify)) {
-				Event e = new Event();
-				e.type = SWT.Modify;
-				e.item = Text.this;
-				e.widget = Text.this;
-				sendEvent(e);
+			String newText = handle.value;
+			if (newText != null) {
+				String oldText = newText;
+				newText = verifyText (newText, 0, 0, null);
+				if (newText == null) {
+					toReturn(true);
+					return ;
+				}
+				if (!newText.equals (oldText)) {
+					Event e = new Event();
+					e.type = SWT.Modify;
+					e.item = Text.this;
+					e.widget = Text.this;
+					sendEvent(e);
+					toReturn(e.doit);
+				}
 			}
 		}
 	};
-	//setTabStops (tabs = 8);
-	//fixAlignment ();
 }
-private String getInputCharacter(int keyCode, boolean shiftKey, boolean capsLockStatus) {
+
+private char getInputCharacter(int keyCode, boolean shiftKey, boolean capsLockStatus) {
 	char ch = '\0';
 	if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32) {
 		ch = (char) keyCode;
@@ -281,14 +301,17 @@ private String getInputCharacter(int keyCode, boolean shiftKey, boolean capsLock
 			char chs[] = {'{', '|', '}', '\"'};
 			ch = chs[keyCode - 219];
 		}
+	} else {
+		ch = (char) keyCode;
 	}
-	return "" + ch;
+	return ch;
 }
 private boolean isInputCharacter(int keyCode, boolean shiftKey, boolean altKey, boolean ctrlKey) {
 	if (altKey || ctrlKey) {
 		return false;
 	}
-	if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32 
+	if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32
+			|| keyCode == 8 || keyCode == 46 // Backspace and Delete
 			|| (keyCode >= 48 && keyCode <= 57)
 			|| keyCode == 59 || keyCode == 61
 			|| (keyCode >= 65 && keyCode <= 90)
@@ -1209,6 +1232,11 @@ public int getTopPixel () {
 public void insert (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
+	Point sel = BrowserNative.getTextSelection(handle);
+	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
+		string = verifyText (string, sel.x, sel.y, null);
+		if (string == null) return;
+	}
 	/*
 	string = Display.withCrLf (string);
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {

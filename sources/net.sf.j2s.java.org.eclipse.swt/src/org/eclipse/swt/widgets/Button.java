@@ -76,6 +76,7 @@ public class Button extends Control {
 		ButtonProc = lpWndClass.lpfnWndProc;
 	}
 	*/
+	private Element btnText;
 
 	/**
 	 * Constructs a new instance of this class given its parent
@@ -914,10 +915,14 @@ void createHandle() {
 	if (parent != null && parent.handle != null) {
 		parent.handle.appendChild(handle);
 	}
-	bindHandle();
+	//bindHandle();
+	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+		btnText = document.createElement("SPAN");
+		handle.appendChild(btnText);
+	}
 }
 
-void bindHandle() {
+void hookSelection() {
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
 			if ((style & SWT.TOGGLE) != 0) {
@@ -933,8 +938,6 @@ void bindHandle() {
 		}
 	};
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		Element btnText = document.createElement("SPAN");
-		handle.appendChild(btnText);
 		btnText.onclick = new RunnableCompatibility() {
 			public void run() {
 				if ((style & SWT.CHECK) != 0) {

@@ -27,4 +27,12 @@ public class window {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	/**
+	 * @param hoverTimerID
+	 */
+	public static void clearTimeout(int hoverTimerID) {
+		// TODO Auto-generated method stub
+		
+	}
 }
