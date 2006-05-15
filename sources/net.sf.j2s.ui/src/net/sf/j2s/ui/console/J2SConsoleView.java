@@ -19,6 +19,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -37,6 +39,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class J2SConsoleView extends ViewPart {
 	private static final String SHOW_CONSOLE_ADDRESS_BAR = "show.console.address.bar";
+	private static final String LAST_J2S_APPICATION_URL = "last.j2s.application.url";
 	Browser browser;
 	Action actionReload;
 	Action actionStop;
@@ -45,6 +48,8 @@ public class J2SConsoleView extends ViewPart {
 	
 	Action showAddressBarAction;
 	private boolean showAddressBar;
+	
+	private String lastURL;
 
 	private Text urlText;
 	private IDialogSettings fDialogSettings;
@@ -56,6 +61,7 @@ public class J2SConsoleView extends ViewPart {
 	public J2SConsoleView() {
 		fDialogSettings= Java2ScriptUIPlugin.getDefault().getDialogSettings();
 		showAddressBar= !fDialogSettings.getBoolean(SHOW_CONSOLE_ADDRESS_BAR);
+		lastURL= fDialogSettings.get(LAST_J2S_APPICATION_URL);
 	}
 
 	/**
@@ -82,15 +88,18 @@ public class J2SConsoleView extends ViewPart {
 		gridData.exclude = !showAddressBar;
 		addressBar.setLayoutData(gridData);
 		final Label urlLabel = new Label(addressBar, SWT.NONE);
+		GridData gd = new GridData();
+		gd.exclude = true;
+		urlLabel.setLayoutData(gd);
 		urlLabel.setText("URL:");
-		urlLabel.setEnabled(false);
-		urlText = new Text(addressBar, SWT.BORDER);
-		urlText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		urlText.setEditable(false);
-		urlText.setEnabled(false);
+		if (lastURL == null || lastURL.length() == 0) {
+			urlLabel.setEnabled(false);
+		}
 		final Button copyURLButton = new Button(addressBar, SWT.PUSH);
-		copyURLButton.setEnabled(false);
-		copyURLButton.setText("Copy URL");
+		if (lastURL == null || lastURL.length() == 0) {
+			copyURLButton.setEnabled(false);
+		}
+		copyURLButton.setText("[Copy] URL");
 		copyURLButton.setToolTipText("Copy URL into clipboard");
 		copyURLButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -98,9 +107,37 @@ public class J2SConsoleView extends ViewPart {
 				urlText.copy();
 			}
 		});
+		urlText = new Text(addressBar, SWT.BORDER);
+		urlText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		if (lastURL == null || lastURL.length() == 0) {
+			//urlText.setEditable(false);
+			urlText.setEnabled(false);
+		} else {
+			urlText.setText(lastURL);
+		}
+		urlText.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.character == '\r' || e.character == '\n') {
+					browse(urlText.getText());
+				}
+			}
+		});
+		final Button runButton = new Button(addressBar, SWT.PUSH);
+		if (lastURL == null || lastURL.length() == 0) {
+			runButton.setEnabled(false);
+		}
+		runButton.setText("Run");
+		runButton.setToolTipText("Run J2S application in the below embedded browser");
+		runButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				browse(urlText.getText());
+			}
+		});
 		final Button browserButton = new Button(addressBar, SWT.PUSH);
-		browserButton.setEnabled(false);
-		browserButton.setText("Lauch in Browser");
+		if (lastURL == null || lastURL.length() == 0) {
+			browserButton.setEnabled(false);
+		}
+		browserButton.setText("Run in External Browser");
 		browserButton.setToolTipText("Lauch the URL in standalone browser");
 		browserButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -138,6 +175,7 @@ public class J2SConsoleView extends ViewPart {
 				urlLabel.setEnabled(true);
 				urlText.setEnabled(true);
 				copyURLButton.setEnabled(true);
+				runButton.setEnabled(true);
 				browserButton.setEnabled(true);
 			}
 		});
@@ -208,12 +246,18 @@ public class J2SConsoleView extends ViewPart {
 		
 		actionReload = new Action() {
 			public void run() {
-				browser.refresh();
+				if (lastURL != null && lastURL.length() != 0) {
+					browse(lastURL);
+				} else {
+					browser.refresh();
+				}
 			}
 		};
-		actionReload.setText("Reload");
-		actionReload.setToolTipText("Refresh current J2S application");
-		actionReload.setEnabled(false);
+		actionReload.setText("History");
+		actionReload.setToolTipText("Load Last J2S Application");
+		if (lastURL == null || lastURL.length() == 0) {
+			actionReload.setEnabled(false);
+		}
 //		actionReload.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 //			getImageDescriptor(ISharedImages.IMG_TOOL_REDO));
 		J2SViewImages.setImageDescriptors(actionReload, J2SViewImages.REFRESH);
@@ -223,6 +267,7 @@ public class J2SConsoleView extends ViewPart {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+
 		actionStop = new Action() {
 			public void run() {
 				browser.stop();
@@ -259,7 +304,15 @@ public class J2SConsoleView extends ViewPart {
 	}
 	
 	public void browse(String url) {
-		browser.setUrl(url);
+		if (lastURL != null) {
+			actionReload.setText("Reload");
+			actionReload.setToolTipText("Refresh current J2S application");
+			browser.setUrl(url);
+			lastURL = null;
+		} else {
+			browser.setUrl(url);
+			fDialogSettings.put(LAST_J2S_APPICATION_URL, url);
+		}
 	}
 	
 	public void load(String html) {
