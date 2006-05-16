@@ -725,6 +725,10 @@
 	cursor:default;
 	margin:1px;
 	white-space:nowrap;
+	position:absolute;
+	width:16px;
+	height:16px;
+	border:1px solid red;
 }
 .cool-bar-default {
 	position:absolute;
