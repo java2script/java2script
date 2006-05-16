@@ -116,23 +116,23 @@ public TabItem (TabFolder parent, int style, int index) {
 
 }
 private void configure(int index) {
-	Element handle = parent.itemHandles[index];
+	//Element handle = parent.itemHandles[index];
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
 			//System.out.println("selected");
 			TabItem[] items = parent.items;
-			Element[] handles = parent.itemHandles;
+			//Element[] handles = parent.itemHandles;
 			for (int i = 0; i < items.length; i++) {
 				Object obj = TabItem.this;
 				Control ctrl = items[i].control;
 				String selectedCSS = "tab-item-selected";
-				int index = handles[i].className.indexOf(selectedCSS);
+				int index = items[i].handle.className.indexOf(selectedCSS);
 				if (obj == items[i]) {
 					fixControlBounds(ctrl);
 					//System.out.println(ctrl.getBounds());
 					ctrl.setVisible(true);
 					if (index == -1) {
-						handles[i].className += " " + selectedCSS;
+						items[i].handle.className += " " + selectedCSS;
 					}
 					//System.out.println(TabItem.this);
 					//System.out.println(items[i].handle.className);
@@ -146,7 +146,7 @@ private void configure(int index) {
 //						}
 					ctrl.setVisible(false);
 					if (index != -1) {
-						handles[i].className = handles[i].className.substring(0, index) + handles[i].className.substring(index + selectedCSS.length());
+						items[i].handle.className = items[i].handle.className.substring(0, index) + items[i].handle.className.substring(index + selectedCSS.length());
 					}
 					//System.out.println(i + ".." + items[i].handle.className);
 					//System.out.println(items[i].control.handle.innerHTML);
@@ -326,13 +326,13 @@ public void setImage (Image image) {
 public void setText (String string) {
 	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	int index = parent.indexOf (this);
-	if (index == -1) return;
-	super.setText (string);
-	Element handle = parent.itemHandles[index];
 	if (handle != null) {
 		handle.appendChild(document.createTextNode(string));
 	}
+	int index = parent.indexOf (this);
+	if (index == -1) return;
+	super.setText (string);
+	//Element handle = parent.itemHandles[index];
 	
 	/*
 	/*

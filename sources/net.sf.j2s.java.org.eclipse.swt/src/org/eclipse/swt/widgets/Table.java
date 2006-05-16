@@ -1964,27 +1964,13 @@ void removeItems (int[] indices){
 	}
 }
 
-void releaseHandle() {
-	if (columns != null) {
-		Display.releaseWidgetArray(columns);
-		columns = null;
-	}
-	if (items != null) {
-		Display.releaseWidgetArray(items);
-		items = null;
-	}
-	if (lastSelection != null) {
-		lastSelection = null;
-	}
-	super.releaseHandle();
-}
-
 void releaseWidget () {
-	/*
-	int hwndHeader =  OS.SendMessage (handle, OS.LVM_GETHEADER, 0, 0);
-	int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
+	//int hwndHeader =  OS.SendMessage (handle, OS.LVM_GETHEADER, 0, 0);
+	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
+	int columnCount = columns.length;
 	if (columnCount == 1 && columns [0] == null) columnCount = 0;
-	int itemCount = OS.SendMessage (handle, OS.LVM_GETITEMCOUNT, 0, 0);
+	//int itemCount = OS.SendMessage (handle, OS.LVM_GETITEMCOUNT, 0, 0);
+	int itemCount = items.length;
 	/*
 	* Feature in Windows 98.  When there are a large number
 	* of columns and items in a table (>1000) where each
@@ -2009,12 +1995,13 @@ void releaseWidget () {
 			ignoreSelect = ignoreShrink = false;
 			if (item != null && !item.isDisposed ()) item.releaseResources ();
 		}
-	} else {	
+	} else {
+	*/	
 		for (int i=0; i<itemCount; i++) {
 			TableItem item = items [i];
 			if (item != null && !item.isDisposed ()) item.releaseResources ();
 		}
-	}
+	//}
 	customDraw = false;
 	currentItem = null;
 	items = null;
@@ -2024,10 +2011,11 @@ void releaseWidget () {
 	}
 	columns = null;
 	if (imageList != null) {
-		OS.SendMessage (handle, OS.LVM_SETIMAGELIST, OS.LVSIL_SMALL, 0);
+		//OS.SendMessage (handle, OS.LVM_SETIMAGELIST, OS.LVSIL_SMALL, 0);
 		display.releaseImageList (imageList);
 	}
 	imageList = null;
+	/*
 	int hOldList = OS.SendMessage (handle, OS.LVM_GETIMAGELIST, OS.LVSIL_STATE, 0);
 	OS.SendMessage (handle, OS.LVM_SETIMAGELIST, OS.LVSIL_STATE, 0);
 	if (hOldList != 0) OS.ImageList_Destroy (hOldList);

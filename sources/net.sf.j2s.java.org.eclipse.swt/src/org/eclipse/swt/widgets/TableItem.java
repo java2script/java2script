@@ -36,8 +36,6 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class TableItem extends Item {
-	Element handle;
-	
 	Table parent;
 	String [] strings;
 	Image [] images;
@@ -1221,13 +1219,8 @@ void showSelection(boolean selected) {
 //		System.out.print("selected handle " + this.handle.className );
 //	}
 
-void releaseHandle() {
-	parent = null;
-	super.releaseHandle();
-}
 boolean isSelected(){
 	return this.selected;
 }
-
 
 }

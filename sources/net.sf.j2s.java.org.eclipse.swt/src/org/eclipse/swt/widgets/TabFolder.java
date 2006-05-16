@@ -47,12 +47,11 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TabFolder extends Composite {
 	TabItem [] items;
-	Element [] itemHandles;
 	private Element titles;
 	//private Element outerArea;
 	
-	/*
 	ImageList imageList;
+	/*
 	static final int TabFolderProc;
 	static final TCHAR TabFolderClass = new TCHAR (0, OS.WC_TABCONTROL, true);
 	static final char [] TAB = new char [] {'T', 'A', 'B', 0};
@@ -262,8 +261,8 @@ void createItem (TabItem item, int index) {
 	titles.appendChild(tab);
 	tab.appendChild(document.createTextNode(item.getNameText()));
 	//System.out.println(index + "..." + item);
-	itemHandles[index] = tab;
 	items[index] = item;
+	items[index].handle = tab;
 	/*
 	* Send a selection event when the item that is added becomes
 	* the new selection.  This only happens when the first item
@@ -297,7 +296,6 @@ void createHandle () {
 	int hwndToolTip = OS.SendMessage (handle, OS.TCM_GETTOOLTIPS, 0, 0);
 	OS.SendMessage (hwndToolTip, OS.TTM_SETMAXTIPWIDTH, 0, 0x7FFF);	
 	*/
-	System.err.println("...." + handle);
 	items = new TabItem [0];//new TabItem [4];
 	handle = document.createElement("DIV");
 	if (parent.handle != null) {
@@ -511,9 +509,9 @@ public int getSelectionIndex () {
 	checkWidget ();
 	//return OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	for (int i = 0; i < items.length; i++) {
-		if (items[i] != null && itemHandles[i] != null
-				 && itemHandles[i].className != null 
-				 && itemHandles[i].className.indexOf("selected") != -1) {
+		if (items[i] != null && items[i].handle != null
+				 && items[i].handle.className != null 
+				 && items[i].handle.className.indexOf("selected") != -1) {
 			return i;
 		}
 	}
@@ -566,14 +564,6 @@ public int indexOf (TabItem item) {
 		if (items [i] == item) return i;
 	}
 	return -1;
-}
-
-void releaseHandle() {
-	if (items != null) {
-		Display.releaseWidgetArray(items);
-		items = null;
-	}
-	super.releaseHandle();
 }
 
 Point minimumSize (int wHint, int hHint, boolean flushCache) {
@@ -662,13 +652,11 @@ void releaseWidget () {
 		if (!item.isDisposed ()) item.releaseResources ();
 	}
 	items = null;
-	/*
 	if (imageList != null) {
-		OS.SendMessage (handle, OS.TCM_SETIMAGELIST, 0, 0);
+		//OS.SendMessage (handle, OS.TCM_SETIMAGELIST, 0, 0);
 		display.releaseImageList (imageList);
 	}
 	imageList = null;
-	*/
 	super.releaseWidget ();
 }
 

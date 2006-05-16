@@ -52,4 +52,8 @@ public class BrowserNative {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public static void releaseHandle(Element handle) {
+		
+	}
 }

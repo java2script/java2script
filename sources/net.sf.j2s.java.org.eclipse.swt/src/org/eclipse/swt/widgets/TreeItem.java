@@ -37,18 +37,6 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class TreeItem extends Item {
-	/**
-	 * the handle to the OS resource 
-	 * (Warning: This field is platform dependent)
-	 * <p>
-	 * <b>IMPORTANT:</b> This field is <em>not</em> part of the SWT
-	 * public API. It is marked public only so that it can be shared
-	 * within the packages provided by SWT. It is not available on all
-	 * platforms and should never be accessed from application code.
-	 * </p>
-	 */	
-	Element handle;
-	
 	String [] strings;
 	Image [] images;
 //	int background = -1, foreground = -1, font = -1;
@@ -92,7 +80,8 @@ public class TreeItem extends Item {
 public TreeItem (Tree parent, int style) {
 	super (parent, style);
 	this.parent = parent;
-	parent.createItem (this, null, -1);//OS.TVI_LAST);
+	//parent.createItem (this, 0, OS.TVI_LAST);
+	parent.createItem (this, null, -1);
 }
 
 /**
@@ -425,6 +414,31 @@ public boolean getChecked () {
 	if (checkElement != null) {
 		return checkElement.checked;
 	}
+	return false;
+}
+
+/**
+ * Returns <code>true</code> if the receiver is expanded,
+ * and false otherwise.
+ * <p>
+ *
+ * @return the expanded state
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
+public boolean getExpanded () {
+	checkWidget ();
+	/*
+	int hwnd = parent.handle;
+	TVITEM tvItem = new TVITEM ();
+	tvItem.hItem = handle;
+	tvItem.mask = OS.TVIF_STATE;
+	OS.SendMessage (hwnd, OS.TVM_GETITEM, 0, tvItem);
+	return (tvItem.state & OS.TVIS_EXPANDED) != 0;
+	*/
 	return false;
 }
 

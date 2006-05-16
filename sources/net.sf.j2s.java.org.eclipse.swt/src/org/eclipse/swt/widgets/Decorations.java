@@ -22,6 +22,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -128,6 +129,7 @@ public class Decorations extends Canvas {
 	private Element shellMax;
 	private Element shellIcon;
 	private Element titleBar;
+	private Element shellClose;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -292,6 +294,7 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
 
 void closeWidget () {
 	Event event = new Event ();
+	event.doit = true;
 	sendEvent (SWT.Close, event);
 	if (event.doit && !isDisposed ()) dispose ();
 }
@@ -502,7 +505,7 @@ void createHandle() {
 		frameHandle = document.createElement("DIV");
 		CSSStyle fHandleStyle = frameHandle.style;
 		fHandleStyle.position = "absolute";
-		fHandleStyle.visibility = "hidden";
+		//fHandleStyle.visibility = "hidden";
 		// handle.style.overflow = "hidden";
 		nextWindowLocation();
 		fHandleStyle.left = window.defaultWindowLeft + "px";
@@ -1077,6 +1080,41 @@ Decorations menuShell () {
 	return this;
 }
 
+void releaseHandle() {
+	if (shellMin != null) {
+		BrowserNative.releaseHandle(shellMin);
+		shellMin = null;
+	}
+	if (shellMax != null) {
+		BrowserNative.releaseHandle(shellMax);
+		shellMax = null;
+	}
+	if (shellClose != null) {
+		BrowserNative.releaseHandle(shellClose);
+		shellClose = null;
+	}
+	if (shellIcon != null) {
+		BrowserNative.releaseHandle(shellIcon);
+		shellIcon = null;
+	}
+	if (shellTitle != null) {
+		BrowserNative.releaseHandle(shellTitle);
+		shellTitle = null;
+	}
+	if (titleBar != null) {
+		BrowserNative.releaseHandle(titleBar);
+		titleBar = null;
+	}
+	super.releaseHandle();
+	if (frameHandle != null) {
+		BrowserNative.releaseHandle(frameHandle);
+		frameHandle = null;
+	}
+	if (modalHandle != null) {
+		BrowserNative.releaseHandle(modalHandle);
+		modalHandle = null;
+	}
+}
 void releaseWidget () {
 	if (menuBar != null) menuBar.releaseResources ();
 	menuBar = null;
@@ -1098,6 +1136,7 @@ void releaseWidget () {
 		} while (true);
 	}
 	menus = null;
+	
 	super.releaseWidget ();
 	if (smallImage != null) smallImage.dispose ();
 	if (largeImage != null) largeImage.dispose ();
@@ -1227,24 +1266,6 @@ void setDefaultButton (Button button, boolean save) {
 	}
 	if (save) saveDefault = defaultButton;
 	if (saveDefault != null && saveDefault.isDisposed ()) saveDefault = null;
-}
-
-void releaseHandle() {
-	System.out.println("Decorations#release!");
-	if (menus != null) {
-		Display.releaseWidgetArray(menus);
-		menus = null;
-	}
-	if (menuBar != null) {
-		menuBar.releaseHandle();
-		menuBar = null;
-	}
-	defaultButton = null;
-	saveDefault = null;
-	shellMax = null;
-	shellMin = null;
-	shellTitle = null;
-	super.releaseHandle();
 }
 
 /**
@@ -1814,7 +1835,7 @@ void setSystemMenu () {
 	}
 
 	if ((style & SWT.CLOSE) != 0) {
-		Element shellClose = document.createElement("DIV");
+		shellClose = document.createElement("DIV");
 		shellClose.className = "shellclose";
 		if (!minable() && (style & SWT.MAX) == 0) {
 			shellClose.className += " shell-close-zero";

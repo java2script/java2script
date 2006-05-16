@@ -14,6 +14,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.events.*;
 
 /**
@@ -307,6 +308,11 @@ static int checkStyle (int style) {
 
 void createHandle () {
 	if (handle != null) return;
+	handle = document.createElement("DIV");
+	if (parent.handle != null) {
+		parent.handle.appendChild(handle);
+	}
+	handle.className = "tool-bar-default";
 	if ((style & SWT.BAR) != 0) {
 		/*
 		if (OS.IsPPC) {
@@ -485,10 +491,13 @@ void createItem (MenuItem item, int index) {
 		}
 	}
 	*/
-	if (!success) {
-		display.removeMenuItem (item);
-		error (SWT.ERROR_ITEM_NOT_ADDED);
-	}
+	item.handle = document.createElement("DIV");
+	item.handle.className = "tool-item-default";
+	handle.appendChild(item.handle);
+//	if (!success) {
+//		display.removeMenuItem (item);
+//		error (SWT.ERROR_ITEM_NOT_ADDED);
+//	}
 	redraw ();
 }
 	

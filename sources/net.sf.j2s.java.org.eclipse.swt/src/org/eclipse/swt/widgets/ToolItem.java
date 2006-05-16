@@ -251,7 +251,7 @@ public Rectangle getBounds () {
 	*/
 	int x = 0;//64;
 	int y = 0;//64;
-	Element handle = parent.itemHandles[parent.indexOf(this)];
+//	Element handle = parent.itemHandles[parent.indexOf(this)];
 	String left = handle.style.left;
 	if (left != null && left.length() != 0) {
 		x = Integer.parseInt(left);
@@ -859,9 +859,9 @@ public void setText (String string) {
 	OS.SendMessage (hwnd, OS.WM_SETFONT, hFont, 0);
 	*/
 	
-//	if (handle != null) {
-//		handle.appendChild(document.createTextNode(string));
-//	}
+	if (handle != null) {
+		handle.appendChild(document.createTextNode(string));
+	}
 	parent.layoutItems ();
 }
 

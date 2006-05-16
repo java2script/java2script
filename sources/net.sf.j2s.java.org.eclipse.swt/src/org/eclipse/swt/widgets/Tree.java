@@ -1917,35 +1917,10 @@ void releaseItems (TreeItem [] nodes, TVITEM tvItem) {
 	}
 }
 */
-void releaseHandle () {
-	if (items != null) {
-		Display.releaseWidgetArray(items);
-		items = null;
-	}
-	if (columns != null) {
-		Display.releaseWidgetArray(columns);
-		columns = null;
-	}
-	if (selections != null) {
-		for (int i = 0; i < selections.length; i++) {
-			if (selections[i] != null) {
-				//selections[i].releaseHandle();
-				selections[i] = null;
-			}
-		}
-		selections = null;
-	}
-	if (lastSelection != null) {
-		//lastSelection.releaseHandle();
-		lastSelection = null;
-	}
-	super.releaseHandle ();
-//	hwndParent = hwndHeader = 0;
-}
 
 void releaseWidget () {
-	/*
-	int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
+	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
+	int columnCount = columns.length;
 	for (int i=0; i<items.length; i++) {
 		TreeItem item = items [i];
 		if (item != null && !item.isDisposed ()) {

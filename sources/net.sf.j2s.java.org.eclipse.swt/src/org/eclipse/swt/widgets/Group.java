@@ -358,7 +358,7 @@ public void setBounds(int x, int y, int width, int height) {
 	titleBody.style.width = width + "px";
 	handle.style.top = (y + 20) + "px";
 	//handle.style.height = (height - 20) + "px";
-	System.out.println("setBounds");
+	//System.out.println("setBounds");
 }
 
 /*

@@ -460,7 +460,8 @@ void destroyGdipBrush(int brush) {
  */
 public void dispose() {
 	if (handle == null) return;
-	if (data.device.isDisposed()) return;
+	if (data == null || data.device == null
+			|| data.device.isDisposed()) return;
 	
 	/*
 	if (data.gdipGraphics != 0) Gdip.Graphics_delete(data.gdipGraphics);
@@ -1683,6 +1684,7 @@ public void drawRectangle (int x, int y, int width, int height) {
 	rect.style.top = y + "px";
 	rect.style.width = width + "px";
 	rect.style.height = height + "px";
+	if (fgColor != null)
 	rect.style.borderColor = fgColor.getCSSHandle();
 	rect.style.borderStyle = "solid";
 	rect.style.borderWidth = "1px";

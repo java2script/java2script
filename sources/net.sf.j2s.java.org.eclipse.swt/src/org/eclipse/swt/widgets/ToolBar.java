@@ -44,7 +44,7 @@ import org.eclipse.swt.internal.xhtml.document;
 public class ToolBar extends Composite {
 	int lastFocusId;
 	ToolItem [] items;
-	Element [] itemHandles;
+//	Element [] itemHandles;
 	boolean ignoreResize, ignoreMouse;
 	ImageList imageList, disabledImageList, hotImageList;
 	/*
@@ -378,13 +378,16 @@ void createItem (ToolItem item, int index) {
 	*/
 	
 	items [item.id = id] = item;
+	item.handle = document.createElement("DIV");
+	item.handle.className = "tool-item-default";
+	handle.appendChild(item.handle);
 	if ((style & SWT.VERTICAL) != 0) setRowCount (count + 1);
 	layoutItems ();
 }
 
 void createWidget () {
 	super.createWidget ();
-	items = new ToolItem [4];
+	items = new ToolItem [0];
 	lastFocusId = -1;
 }
 

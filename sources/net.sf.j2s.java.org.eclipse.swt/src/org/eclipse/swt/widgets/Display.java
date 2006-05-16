@@ -3974,103 +3974,17 @@ static String withCrLf (String string) {
 	return result.toString ();
 }
 
-
-void releaseResources() {
-	releaseEventQueue();
-	if (eventTable != null) {
-		eventTable.releaseResource();
-		eventTable = null;
-	}
-	if (filterTable != null) {
-		filterTable.releaseResource();
-		filterTable = null;
-	}
-	if (cursors != null) {
-		for (int i = 0; i < cursors.length; i++) {
-			cursors[i] = null;
-		}
-		cursors = null;
-	}
-	if (controlTable != null) {
-		releaseWidgetArray(controlTable);
-		controlTable = null;
-	}
-	if (items != null) {
-		releaseWidgetArray(items);
-		items = null;
-	}
-	if (popups != null) {
-		releaseWidgetArray(popups);
-		popups = null;
-	}
-	if (bars != null) {
-		releaseWidgetArray(bars);
-		bars = null;
-	}
-}
-static void releaseWidgetArray(Widget[] list) {
-	if (list != null) {
-		for (int i = 0; i < list.length; i++) {
-			if (list[i] != null) {
-				list[i].releaseHandle();
-				list[i] = null;
-			}
-		}
-		list = null;
-	}
-}
-void releaseEventQueue() {
-	if (eventQueue != null) {
-		for (int i = 0; i < eventQueue.length; i++) {
-			if (eventQueue[i] != null) {
-				eventQueue[i].releaseResource();
-				eventQueue[i] = null;
-			}
-		}
-		eventQueue = null;
-	}
-}
-static void releaseAllResources() {
-	String[] tags = new String[] {
-			"DIV", "SPAN", "TABLE", "IMAGE", "INPUT", "SELECT", "TEXTAREA", "BUTTON"
-	};
-	for (int i = 0; i < tags.length; i++) {
-		releaseTaggedElements(tags[i]);
-	}
-	if (Default != null) {
-		Default.releaseResources();
-		Default = null;
-	}
+static void releaseAllDisplays() {
 	if (Displays != null) {
 		for (int i = 0; i < Displays.length; i++) {
 			if (Displays[i] != null) {
-				Displays[i].releaseResources();
+				Displays[i].dispose();
 				Displays[i] = null;
 			}
 		}
 		Displays = null;
 	}
-}
-static void releaseTaggedElements(String tagName) {
-	Element[] elements = document.getElementsByTagName (tagName);
-	for (int i = 0; i < elements.length; i++) {
-		Element el = elements[i];
-		/*
-		 * TODO: update more "on..." here!
-		 */
-		el.onclick = null;
-		el.ondblclick = null;
-		el.onchange = null;
-		el.oncontextmenu = null;
-		el.onkeypress = null;
-		el.onkeydown = null;
-		el.onkeyup = null;
-		el.onmousedown = null;
-		el.onmouseup = null;
-		el.onselectstart = null;
-		el = null;
-	}
-	elements = null;
+	Default = null; // Default will be disposed in the above for loop
 }
 
 }

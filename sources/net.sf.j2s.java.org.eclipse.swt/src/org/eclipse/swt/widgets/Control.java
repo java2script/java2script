@@ -14,6 +14,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.*;
@@ -524,7 +525,7 @@ void destroyWidget () {
 	releaseHandle ();
 	if (hwnd != null) {
 //		OS.DestroyWindow (hwnd);
-		hwnd.parentNode.removeChild(hwnd);
+		BrowserNative.releaseHandle(hwnd);
 	}
 }
 
@@ -1629,7 +1630,10 @@ void releaseChild () {
 
 void releaseHandle () {
 	super.releaseHandle ();
-	handle = null;
+	if (handle != null) {
+		BrowserNative.releaseHandle(handle);
+		handle = null;
+	}
 }
 
 void releaseWidget () {
@@ -1944,6 +1948,7 @@ boolean sendFocusEvent (int type) {
  */
 public void setBackground (Color color) {
 	checkWidget ();
+	if (color != null)
 	handle.style.color = color.getCSSHandle();
 }
 /*
@@ -2228,6 +2233,7 @@ public boolean setFocus () {
  */
 public void setFont (Font font) {
 	checkWidget ();
+	if (font == null || font.data == null) return ;
 	/*
 	int hFont = 0;
 	if (font != null) { 
@@ -2260,6 +2266,7 @@ public void setFont (Font font) {
  */
 public void setForeground (Color color) {
 	checkWidget ();
+	if (color != null)
 	handle.style.color = color.getCSSHandle();
 }
 /*

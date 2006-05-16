@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -501,14 +502,6 @@ void createHandle () {
 }
 
 public void dispose () {
-	frameHandle.removeChild(shellTitle.parentNode);
-	frameHandle.removeChild(handle);
-	document.body.removeChild(frameHandle);
-	
-	if (modalHandle != null) {
-		document.body.removeChild(modalHandle);
-		modalHandle = null;
-	}
 	/*
 	* This code is intentionally commented.  On some
 	* platforms, the owner window is repainted right
@@ -914,6 +907,18 @@ void releaseChild () {
 }
 
 void releaseHandle () {
+//	try {
+//		BrowserNative.releaseHandle(shellTitle);
+//		BrowserNative.releaseHandle(titleBar);
+//		BrowserNative.releaseHandle(frameHandle);
+//		BrowserNative.releaseHandle(modalHandle);
+//		modalHandle = null;
+//		frameHandle = null;
+//		shellTitle = null;
+//		titleBar = null;
+//	} catch (Error e) {
+//		//System.out.println(e);
+//	}
 	super.releaseHandle ();
 	//hwndMDIClient = 0;
 }

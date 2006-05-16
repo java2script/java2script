@@ -35,7 +35,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  */
 public class TableColumn extends Item {
-	Element handle;
+//	Element handle;
 	
 	Table parent;
 	boolean resizable, moveable;
@@ -395,11 +395,6 @@ public void pack () {
 		}
 	}
 	*/
-}
-
-void releaseHandle() {
-	parent = null;
-	super.releaseHandle();
 }
 
 void releaseChild () {
