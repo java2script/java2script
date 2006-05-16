@@ -151,7 +151,7 @@ BrowserNative.getTextSelection = function (handle) {
 				BrowserNative.getTextCaretPosition (), 
 				BrowserNative.getTextCaretPositionEnd ());
 	}
-	return new new org.eclipse.swt.graphics.Point (-1, -1);
+	return new new org.eclipse.swt.graphics.Point (0, 0);
 };
 
 BrowserNative.getTextCaretLineNumber = function (handle) {
@@ -210,6 +210,32 @@ BrowserNative.clearSelection = function (handle) {
 	}
 };
 
+BrowserNative.releaseHandle = function (handle) {
+	if (handle == null) {
+		return ;
+	}
+	handle.onblur = null;
+	handle.onchange = null;
+	handle.onclick = null;
+	handle.oncontextmenu = null;
+	handle.onfocus = null;
+	handle.onkeydown = null;
+	handle.onkeypress = null;
+	handle.onkeyup = null;
+	handle.onmousedown = null;
+	handle.onmousemove = null;
+	handle.onmouseout = null;
+	handle.onmouseover = null;
+	handle.onmouseup = null;
+	handle.onselectchange = null;
+	handle.onselectstart = null;
+	if (handle.parentNode != null) {
+		try {
+			handle.parentNode.removeChild (handle);
+		} catch (e) {
+		}
+	}
+};
 /*
  * Take a second to thought that this utility is time consuming.
  */
@@ -334,7 +360,7 @@ try {
 if (window.attachEvent) {
 	window.attachEvent ("onunload", function () {
 		try {
-			org.eclipse.swt.widgets.Display.releaseAllResources ();
+			org.eclipse.swt.widgets.Display.releaseAllDisplays ();
 		} catch (e) {
 			popupAlert (e.message);
 		}
