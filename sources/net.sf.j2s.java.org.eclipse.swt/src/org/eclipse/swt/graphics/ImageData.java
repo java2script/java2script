@@ -330,6 +330,8 @@ public ImageData(int width, int height, int depth, PaletteData palette, int scan
  * </ul>
  *
  * @see ImageLoader#load(InputStream)
+ * 
+ * @j2sNative if (stream != null) this.url = stream.url;
  */
 public ImageData(InputStream stream) {
 	/*
@@ -1077,7 +1079,7 @@ public ImageData getTransparencyMask() {
 		return colorMaskImage(transparentPixel);
 	}
 	*/
-	return null;
+	return new ImageData(url);
 }
 
 /**

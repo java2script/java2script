@@ -628,7 +628,8 @@ public Image(Device device, ImageData source, ImageData mask) {
 	}
 //	mask = ImageData.convertMask(mask);
 //	init(device, this, source, mask);
-//	if (device.tracking) device.new_Object(this);	
+//	if (device.tracking) device.new_Object(this);
+	url = source.url;
 }
 
 /**
@@ -683,7 +684,10 @@ public Image (Device device, InputStream stream) {
 	if (device == null) device = Device.getDevice();
 	if (device == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 //	init(device, new ImageData(stream));
-//	if (device.tracking) device.new_Object(this);	
+//	if (device.tracking) device.new_Object(this);
+	/**
+	 * @j2sNative if (stream != null) this.url = stream.url;
+	 */ {}
 }
 
 /**
