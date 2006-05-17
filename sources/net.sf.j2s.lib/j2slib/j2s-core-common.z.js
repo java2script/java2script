@@ -1299,6 +1299,43 @@ Clazz.innerFunctions = {
 		return Clazz.getClassName (this);
 	},
 
+	getResourceAsStream : function (name) {
+		var is = null;
+		if (java.io.InputStream != null) {
+			is = new java.io.InputStream ();
+		} else {
+			is = new Object ();
+			is.close = function () {};
+		}
+		is.read = function () { return 0; };
+		name = name.replace (/\\/g, '/');
+		if (name.indexOf ('/') == 0) {
+			is.url = name.substring (1);
+		} else {
+			var baseFolder = window.binaryFolder;
+			if (baseFolder == null || baseFolder.length == 0) {
+				baseFolder = "bin/";
+			}
+			baseFolder = baseFolder.replace (/\\/g, '/');
+			var length = baseFolder.length;
+			var lastChar = baseFolder.charAt (length - 1);
+			if (lastChar != '/') {
+				baseFolder += "/";
+			}
+			if (baseFolder.indexOf ('/') == 0) {
+				baseFolder = baseFolder.substring (1);
+			}
+			var clazzName = this.__CLASS_NAME__;
+			var idx = clazzName.lastIndexOf ('.');
+			if (idx == -1) {
+				is.url = baseFolder + name;
+			} else {
+				is.url = baseFolder + clazzName.substring (0, idx)
+						.replace (/\./g, '/') +  "/" + name;
+			}
+		}
+		return is;
+	},
 	/*
 	 * For JavaScript programmers
 	 */
@@ -1348,6 +1385,7 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	clazzFun.prototype.__CLASS_NAME__ = qName;
 	clazzFun.equals = Clazz.innerFunctions.equals;
 	clazzFun.getName = Clazz.innerFunctions.getName;
+	clazzFun.getResourceAsStream = Clazz.innerFunctions.getResourceAsStream;
 };
 
 /* proected */

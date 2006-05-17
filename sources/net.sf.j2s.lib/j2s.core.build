@@ -133,6 +133,8 @@
         		<file name="java/lang/Float.js"/>
         		<file name="java/lang/Double.js"/>
         		
+        		<file name="java/io/InputStream.js"/>
+        		
         		<file name="java/util/Date.js"/>
         		
         		<file name="java/lang/Throwable.js"/>
@@ -197,6 +199,8 @@
         		<file name="java/lang/Float.js"/>
         		<file name="java/lang/Double.js"/>
         		
+        		<file name="java/io/InputStream.js"/>
+
         		<file name="java/util/Date.js"/>
         		
         		<file name="java/lang/Throwable.js"/>

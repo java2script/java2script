@@ -1299,6 +1299,43 @@ Clazz.innerFunctions = {
 		return Clazz.getClassName (this);
 	},
 
+	getResourceAsStream : function (name) {
+		var is = null;
+		if (java.io.InputStream != null) {
+			is = new java.io.InputStream ();
+		} else {
+			is = new Object ();
+			is.close = function () {};
+		}
+		is.read = function () { return 0; };
+		name = name.replace (/\\/g, '/');
+		if (name.indexOf ('/') == 0) {
+			is.url = name.substring (1);
+		} else {
+			var baseFolder = window.binaryFolder;
+			if (baseFolder == null || baseFolder.length == 0) {
+				baseFolder = "bin/";
+			}
+			baseFolder = baseFolder.replace (/\\/g, '/');
+			var length = baseFolder.length;
+			var lastChar = baseFolder.charAt (length - 1);
+			if (lastChar != '/') {
+				baseFolder += "/";
+			}
+			if (baseFolder.indexOf ('/') == 0) {
+				baseFolder = baseFolder.substring (1);
+			}
+			var clazzName = this.__CLASS_NAME__;
+			var idx = clazzName.lastIndexOf ('.');
+			if (idx == -1) {
+				is.url = baseFolder + name;
+			} else {
+				is.url = baseFolder + clazzName.substring (0, idx)
+						.replace (/\./g, '/') +  "/" + name;
+			}
+		}
+		return is;
+	},
 	/*
 	 * For JavaScript programmers
 	 */
@@ -1348,6 +1385,7 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	clazzFun.prototype.__CLASS_NAME__ = qName;
 	clazzFun.equals = Clazz.innerFunctions.equals;
 	clazzFun.getName = Clazz.innerFunctions.getName;
+	clazzFun.getResourceAsStream = Clazz.innerFunctions.getResourceAsStream;
 };
 
 /* proected */
@@ -3304,6 +3342,80 @@ return parseFloat (s);
 }, "String");
 Double.parseDouble = Double.prototype.parseDouble;
 
+$_J ("java.io");
+cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, java.io, "InputStream");
+$_M (cla$$, "read", 
+function (b) {
+return this.read (b, 0, b.length);
+}, "Array");
+$_M (cla$$, "read", 
+function (b, off, len) {
+if (b == null) {
+throw  new NullPointerException ();
+} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+throw  new IndexOutOfBoundsException ();
+} else if (len == 0) {
+return 0;
+}var c = this.read ();
+if (c == -1) {
+return -1;
+}b[off] = parseInt (c);
+var i = 1;
+try {
+for (; i < len; i++) {
+c = this.read ();
+if (c == -1) {
+break;
+}if (b != null) {
+b[off + i] = parseInt (c);
+}}
+} catch (e) {
+if ($_O (e, java.io.IOException)) {
+} else {
+throw e;
+}
+}
+return i;
+}, "Array,Number,Number");
+$_M (cla$$, "skip", 
+function (n) {
+var remaining = n;
+var nr;
+if (java.io.InputStream.skipBuffer == null) ($t$ = java.io.InputStream.skipBuffer =  $_A (java.io.InputStream.SKIP_BUFFER_SIZE, 0), java.io.InputStream.prototype.skipBuffer = java.io.InputStream.skipBuffer, $t$);
+var localSkipBuffer = java.io.InputStream.skipBuffer;
+if (n <= 0) {
+return 0;
+}while (remaining > 0) {
+nr = this.read (localSkipBuffer, 0, parseInt (Math.min (java.io.InputStream.SKIP_BUFFER_SIZE, remaining)));
+if (nr < 0) {
+break;
+}remaining -= nr;
+}
+return n - remaining;
+}, "Number");
+$_M (cla$$, "available", 
+function () {
+return 0;
+});
+$_M (cla$$, "close", 
+function () {
+});
+$_M (cla$$, "mark", 
+function (readlimit) {
+}, "Number");
+$_M (cla$$, "reset", 
+function () {
+throw  new java.io.IOException ("mark/reset not supported");
+});
+$_M (cla$$, "markSupported", 
+function () {
+return false;
+});
+$_S (cla$$,
+"SKIP_BUFFER_SIZE", 2048,
+"skipBuffer", null);
 Clazz.declarePackage ("java.util");
 java.util.Date = Date;
 Clazz.decorateAsType (java.util.Date, "java.util.Date", null, [java.io.Serializable, Cloneable, Comparable]);
