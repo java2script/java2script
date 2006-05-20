@@ -129,6 +129,19 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		StringBuffer oldLaterBuffer = laterBuffer;
 		laterBuffer = new StringBuffer();
 		List bodyDeclarations = node.bodyDeclarations();
+
+		boolean needPreparation = false;
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				FieldDeclaration field = (FieldDeclaration) element;
+				needPreparation = isFieldNeedPreparation(field);
+				if (needPreparation) {
+					break;
+				}
+			}
+		}
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
@@ -140,6 +153,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				// but there are static final members
 //			} else if (element instanceof Initializer) {
 //				continue;
+			} else if (needPreparation && element instanceof FieldDeclaration) {
+				continue;
 			}
 			element.accept(this);
 //			element.accept(this);
@@ -202,6 +217,29 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		buffer.append(");\r\n");
 		
 		bodyDeclarations = node.bodyDeclarations();
+		
+		if (needPreparation) {
+			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+				ASTNode element = (ASTNode) iter.next();
+				if (element instanceof FieldDeclaration) {
+					FieldDeclaration field = (FieldDeclaration) element;
+					if ((field.getModifiers() & Modifier.STATIC) != 0) {
+						continue;
+					}
+					element.accept(this);
+				}
+			}
+			buffer.append("});\r\n");
+		}
+		
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof MethodDeclaration) {
+				element.accept(this);
+			}
+		}
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
@@ -239,12 +277,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				}
 			}
 		}
-		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof MethodDeclaration) {
-				element.accept(this);
-			}
-		}
+		
 		buffer.append("cla$$ = Clazz.p0p ();\r\n");
 		thisClassName = oldClassName;
 		
@@ -601,6 +634,33 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		}
 
 		List bodyDeclarations = node.bodyDeclarations();
+		
+		boolean needPreparation = false;
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				FieldDeclaration field = (FieldDeclaration) element;
+				needPreparation = isFieldNeedPreparation(field);
+				if (needPreparation) {
+					break;
+				}
+			}
+		}
+		if (needPreparation) {
+			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+				ASTNode element = (ASTNode) iter.next();
+				if (element instanceof FieldDeclaration) {
+					FieldDeclaration field = (FieldDeclaration) element;
+					if ((field.getModifiers() & Modifier.STATIC) != 0) {
+						continue;
+					}
+					element.accept(this);
+				}
+			}
+			buffer.append("};\r\n");
+		}
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof Initializer) {
@@ -679,6 +739,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			*/}
 		}
 		}
+
 		//System.out.println("enum...");
 		List constants = node.enumConstants();
 		for (int i = 0; i < constants.size(); i++) {
@@ -899,6 +960,19 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 //		}
 		List bodyDeclarations = node.bodyDeclarations();
+
+		boolean needPreparation = false;
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				FieldDeclaration field = (FieldDeclaration) element;
+				needPreparation = isFieldNeedPreparation(field);
+				if (needPreparation) {
+					break;
+				}
+			}
+		}
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
@@ -908,7 +982,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				//}
 			} else if (element instanceof Initializer) {
 				continue;
-			} else if (element instanceof FieldDeclaration) {
+			} else if (needPreparation && element instanceof FieldDeclaration) {
+				continue;
 				//if (node.isInterface()) {
 					/*
 					 * As members of interface should be treated
@@ -961,6 +1036,33 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		super.endVisit(node);
 	}
 
+	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+		if ((node.getModifiers() & Modifier.STATIC) != 0) {
+			return false;
+		}
+
+		List fragments = node.fragments();
+		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
+			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
+			Expression initializer = element.getInitializer();
+			if (initializer != null) {
+				Object constValue = initializer.resolveConstantExpressionValue();
+				if (constValue != null && (constValue instanceof Number
+						|| constValue instanceof Boolean
+						|| constValue instanceof String)) {
+					return false;
+				}
+				if (initializer instanceof NullLiteral) {
+					return false;
+				}
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+	
 	public boolean visit(FieldDeclaration node) {
 		if ((node.getModifiers() & Modifier.STATIC) != 0) {
 			return false;
@@ -1315,6 +1417,46 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			} else {
 				node.getBody().accept(this);
 			}
+			/*
+			boolean superSensible = !isSuperCalled && existedSuperClass; 
+			if (superSensible) {
+				buffer.append("{\r\n");
+				buffer.append("Clazz.superConstructor (this, ");
+				buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
+				buffer.append(", []);\r\n");
+			}
+			
+			ASTNode xparent = node.getParent();
+			List bodyDeclarations = null;
+			if (xparent != null) {
+				if (xparent instanceof AbstractTypeDeclaration) {
+					AbstractTypeDeclaration type = (AbstractTypeDeclaration) xparent;
+					bodyDeclarations = type.bodyDeclarations();
+				} else if (xparent instanceof AnonymousClassDeclaration) {
+					AnonymousClassDeclaration type = (AnonymousClassDeclaration) xparent;
+					bodyDeclarations = type.bodyDeclarations();
+				}
+			}
+			if (bodyDeclarations != null) {
+				for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+					ASTNode element = (ASTNode) iter.next();
+					if (element instanceof FieldDeclaration) {
+						FieldDeclaration field = (FieldDeclaration) element;
+						if ((field.getModifiers() & Modifier.STATIC) != 0 && isFieldNeedPreparation(field)) {
+							continue;
+						}
+						element.accept(this);
+					}
+				}
+			}
+			
+			if (superSensible) {
+				visitList(statements, ""); 
+				buffer.append("}");
+			} else {
+				node.getBody().accept(this);
+			}
+			 */
 		} else if (node.getBody() == null) {
 			buffer.append("{\r\n");
 			visitNativeJavadoc(node.getJavadoc(), null, false);
@@ -2182,6 +2324,34 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		laterBuffer = new StringBuffer();
 		// Enum is considered as static member!
 		List bodyDeclarations = node.bodyDeclarations();
+
+		
+		boolean needPreparation = false;
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				FieldDeclaration field = (FieldDeclaration) element;
+				needPreparation = isFieldNeedPreparation(field);
+				if (needPreparation) {
+					break;
+				}
+			}
+		}
+		if (needPreparation) {
+			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+				ASTNode element = (ASTNode) iter.next();
+				if (element instanceof FieldDeclaration) {
+					FieldDeclaration field = (FieldDeclaration) element;
+					if (node.isInterface() || (field.getModifiers() & Modifier.STATIC) != 0) {
+						continue;
+					}
+					element.accept(this);
+				}
+			}
+			buffer.append("});\r\n");
+		}
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof EnumDeclaration) {
@@ -2681,6 +2851,17 @@ public class CB extends CA {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
 		List bodyDeclarations = node.bodyDeclarations();
+		boolean needPreparation = false;
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				FieldDeclaration field = (FieldDeclaration) element;
+				needPreparation = isFieldNeedPreparation(field);
+				if (needPreparation) {
+					break;
+				}
+			}
+		}
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
@@ -2694,7 +2875,7 @@ public class CB extends CA {
 			} else if (element instanceof EnumDeclaration) {
 				continue;
 			} else if (element instanceof FieldDeclaration) {
-				if (node.isInterface()) {
+				if (needPreparation || node.isInterface()) {
 					/*
 					 * As members of interface should be treated
 					 * as final and for javascript interface won't

@@ -310,6 +310,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.defineStatics", "S", //
 				"Clazz.defineEnumConstant", "E", //
 				"Clazz.cloneFinals", "F", //
+				"Clazz.prepareFields", "Y", //
 				"Clazz.newArray", "A", //
 				"Clazz.instanceOf", "O", //
 				"Clazz.inheritArgs", "G", //
