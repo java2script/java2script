@@ -321,6 +321,29 @@ Clazz.defineStatics = function (clazz) {
 	}
 };
 
+/* protected */
+Clazz.prepareFields = function (clazz, fieldsFun) {
+	var stacks = new Array ();
+	if (clazz.con$truct != null) {
+		var ss = clazz.con$truct.stacks;
+		var idx = clazz.con$truct.index;
+		for (var i = idx; i < ss.length; i++) {
+			stacks[i] = ss[i];
+		}
+	}
+	clazz.con$truct = clazz.prototype.con$truct = function () {
+		var stacks = arguments.callee.stacks;
+		if (stacks != null) {
+			for (var i = 0; i < stacks.length; i++) {
+				stacks[i].apply (this, []);
+			}
+		}
+	};
+	stacks[stacks.length] = fieldsFun;
+	clazz.con$truct.stacks = stacks;
+	clazz.con$truct.index = 0;
+};
+
 /*
  * Get the caller method for those methods that are wrapped by 
  * Clazz.searchAndExecuteMethod.
@@ -456,6 +479,5 @@ Clazz.p0pCalling = function () {
 	}
 };
 
-
-$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;
+$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;
 
