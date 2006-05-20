@@ -429,6 +429,7 @@ Clazz.instanceOf = function (obj, clazz) {
 /* public */
 Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 	var fx = null;
+	var i = -1;
 	var clazzFun = objThis[funName];
 	if (clazzFun != null) {
 		if (clazzFun.claxxOwner != null) { 
@@ -440,7 +441,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		} else { // normal wrapped method
 			var stacks = clazzFun.stacks;
 			var length = stacks.length;
-			for (var i = length - 1; i >= 0; i--) {
+			for (i = length - 1; i >= 0; i--) {
 				/*
 				 * Once super call is computed precisely, there are no need 
 				 * to calculate the inherited level but just an equals
@@ -449,7 +450,8 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				//var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
 				if (clazzThis == stacks[i]) { // level == 0
 					if (i > 0) {
-						fx = stacks[i - 1].prototype[funName];
+						i--;
+						fx = stacks[i].prototype[funName];
 					} else {
 						/*
 						 * Will this case be reachable?
@@ -469,6 +471,20 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		} // end of normal wrapped method
 	} // end of clazzFun != null
 	if (fx != null) {
+		/* there are members which are initialized out of the constructor */
+		/*if (i == -1) {
+			// unreachable
+			//var oo = clazzFun.claxxOwner;
+			//if (oo.superClazz == null && oo.con$truct != null) {
+			//	clazzFun.claxxOwner.con$truct.apply (objThis, []);
+			//}
+		} else */if (i == 0 && funName == "construct") {
+			var ss = clazzFun.stacks;
+			if (ss != null && ss[0].superClazz == null
+					&& ss[0].con$truct != null) {
+				ss[0].con$truct.apply (objThis, []);
+			}
+		}
 		if (Clazz.tracingCalling) {
 			var caller = arguments.callee.caller;
 			if (caller == Clazz.superConstructor) {
@@ -481,6 +497,20 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		}
 		return fx.apply (objThis, (funParams == null) ? [] : funParams);
 	} else if (funName == "construct") {
+		/* there are members which are initialized out of the constructor */
+		/*
+		if (i == -1) {
+			// should be ignore as there are codes calling con$truct in 
+			// #superConstructor
+		} else {
+			// unreachable
+			//var ss = clazzFun.stacks;
+			//if (ss != null && ss[0].superClazz == null 
+			//		&& ss[0].con$truct != null) {
+			//	ss[0].con$truct.apply (objThis, []);
+			//}
+		}
+		*/
 		/* No super constructor! */
 		return ;
 	}
@@ -496,6 +526,10 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 /* public */
 Clazz.superConstructor = function (objThis, clazzThis, funParams) {
 	Clazz.superCall (objThis, clazzThis, "construct", funParams);
+	/* If there are members which are initialized out of the constructor */
+	if (clazzThis.con$truct != null) {
+		clazzThis.con$truct.apply (objThis, []);
+	}
 };
 
 /**
@@ -592,7 +626,35 @@ Clazz.getParamsType = function (funParams) {
 /* protected */
 Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	var params = Clazz.getParamsType (funParams);
-	var stacks = objThis[fxName].stacks;
+	var fx = objThis[fxName];
+	/*
+	 * Cache last matched method
+	 */
+	if (fx.lastParams == params.typeString && fx.lastClaxxRef == claxxRef) {
+		var methodParams = null;
+		if (params.hasCastedNull) {
+			methodParams = new Array ();
+			for (var k = 0; k < funParams.length; k++) {
+				if (funParams[k] instanceof Clazz.CastedNull) {
+					/*
+					 * For Clazz.CastedNull instances, the type name is
+					 * already used to indentified the method in Clazz#
+					 * searchMethod.
+					 */
+					methodParams[k] = null;
+				} else {
+					methodParams[k] = funParams[k];
+				}
+			}
+		} else {
+			methodParams = funParams;
+		}
+		return fx.lastMethod.apply (objThis, methodParams);
+	}
+	fx.lastParams = params.typeString;
+	fx.lastClaxxRef = claxxRef;
+
+	var stacks = fx.stacks;
 	var length = stacks.length;
 	/*
 	 * Search the inheritance stacks to get the given class' function
@@ -632,7 +694,7 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 			//}
 			
 			var ret = Clazz.tryToSearchAndExecute (objThis, clazzFun, params, 
-					funParams/*, isSuper, clazzThis*/);
+					funParams/*, isSuper, clazzThis*/, fx);
 			if (!(ret instanceof Clazz.MethodException)) {
 				return ret;
 			}
@@ -670,7 +732,7 @@ Clazz.tracingCalling = false;
 
 /* private */
 Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*, 
-		isSuper, clazzThis*/) {
+		isSuper, clazzThis*/, fx) {
 	var methods = new Array ();
 	//var xfparams = null;
 	var generic = true;
@@ -790,6 +852,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 					}
 					Clazz.pu$hCalling (new Clazz.callingStack (caller, owner));
 				}
+				fx.lastMethod = f;
 				var ret = f.apply (objThis, methodParams);
 				if (noInnerWrapper) {
 					Clazz.p0pCalling ();
@@ -799,6 +862,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 				}
 				return ret;
 			}
+			fx.lastMethod = f;
 			return f.apply (objThis, methodParams);
 		//}
 	}
@@ -1142,6 +1206,10 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
 	var funName = "construct";
 	Clazz.defineMethod (clazzThis, funName, funBody, funParams);
+	if (clazzThis.con$truct != null) {
+		clazzThis.con$truct.index = clazzThis.con$truct.stacks.length;
+	}
+	//clazzThis.con$truct = clazzThis.prototype.con$truct = null;
 };
 
 /* protected */
@@ -1262,8 +1330,44 @@ Clazz.instantialize = function (objThis, args) {
 			&& args[0] instanceof Clazz.args4InheritClass) {
 		return ;
 	}
+	/*
+	if (objThis.con$truct != null) {
+		objThis.con$truct.apply (objThis, args);
+	}
 	if (objThis.construct != null) {
 		objThis.construct.apply (objThis, args);
+	}
+	*/
+	var c = objThis.construct
+	if (c != null) {
+		if (objThis.con$truct == null) { // no need to init fields
+			c.apply (objThis, args);
+		} else if (objThis.getClass ().superClazz == null) { // the base class
+			objThis.con$truct.apply (objThis, []);
+			c.apply (objThis, args);
+		} else if ((c.claxxOwner != null 
+				&& c.claxxOwner == objThis.getClass ())
+				|| (c.stacks != null 
+				&& c.stacks[c.stacks.length - 1] == objThis.getClass ())) {
+			/*
+			 * This #construct is defined by this class itself.
+			 * #construct will call Clazz.superConstructor, which will
+			 * call #con$truct back
+			 */
+			c.apply (objThis, args);
+		} else { // constructor is a super constructor
+			if (c.claxxOwner != null && c.claxxOwner.superClazz == null 
+						&& c.claxxOwner.con$truct != null) {
+				c.claxxOwner.con$truct.apply (objThis, []);
+			} else if (c.stacks != null && c.stacks.length == 1
+					&& c.stacks[0].superClazz == null) {
+				c.stacks[0].con$truct.apply (objThis, []);
+			}
+			c.apply (objThis, args);
+			objThis.con$truct.apply (objThis, []);
+		}
+	} else if (objThis.con$truct != null) {
+		objThis.con$truct.apply (objThis, []);
 	}
 };
 
@@ -1765,6 +1869,29 @@ Clazz.defineStatics = function (clazz) {
 	}
 };
 
+/* protected */
+Clazz.prepareFields = function (clazz, fieldsFun) {
+	var stacks = new Array ();
+	if (clazz.con$truct != null) {
+		var ss = clazz.con$truct.stacks;
+		var idx = clazz.con$truct.index;
+		for (var i = idx; i < ss.length; i++) {
+			stacks[i] = ss[i];
+		}
+	}
+	clazz.con$truct = clazz.prototype.con$truct = function () {
+		var stacks = arguments.callee.stacks;
+		if (stacks != null) {
+			for (var i = 0; i < stacks.length; i++) {
+				stacks[i].apply (this, []);
+			}
+		}
+	};
+	stacks[stacks.length] = fieldsFun;
+	clazz.con$truct.stacks = stacks;
+	clazz.con$truct.index = 0;
+};
+
 /*
  * Get the caller method for those methods that are wrapped by 
  * Clazz.searchAndExecuteMethod.
@@ -1900,8 +2027,7 @@ Clazz.p0pCalling = function () {
 	}
 };
 
-
-$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;
+$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;
 
 $_J ("java.io");
 $_I (java.io, "Serializable");
@@ -2798,7 +2924,7 @@ $_M (cla$$, "expandCapacity",
 ($fz = function (minimumCapacity) {
 var newCapacity = (this.value.length + 1) * 2;
 if (newCapacity < 0) {
-newCapacity = Integer.MAX_VALUE;
+newCapacity = 2147483647;
 } else if (minimumCapacity > newCapacity) {
 newCapacity = minimumCapacity;
 }var newValue =  $_A (newCapacity, '\0');
