@@ -1362,6 +1362,10 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			}
 		}
 		*/
+		this.left = x;
+		this.top = y;
+		this.width = width;
+		this.height = height;
 		SetWindowPos (handle, null, x, y, width, height, flags);
 	} else {
 		super.setBounds (x, y, width, height, flags);

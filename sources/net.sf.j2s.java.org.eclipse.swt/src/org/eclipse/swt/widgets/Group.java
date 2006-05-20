@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -262,7 +263,8 @@ public Rectangle getClientArea () {
 	int height = rect.bottom - y - CLIENT_INSET;
 	return new Rectangle (x, y, width, height);
 	*/
-	return new Rectangle (0, 0, 0, 0);
+	return new Rectangle (left, top, width, height);
+	//return super.getClientArea();
 }
 
 String getNameText () {
@@ -301,6 +303,21 @@ boolean mnemonicMatch (char key) {
 	char mnemonic = findMnemonic (getText ());
 	if (mnemonic == '\0') return false;
 	return Character.toUpperCase (key) == Character.toUpperCase (mnemonic);
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
+ */
+void releaseHandle() {
+	if (title != null) {
+		BrowserNative.releaseHandle(title);
+		title = null;
+	}
+	if (titleBody != null) {
+		BrowserNative.releaseHandle(titleBody);
+		titleBody = null;
+	}
+	super.releaseHandle();
 }
 
 /**

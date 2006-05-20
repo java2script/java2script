@@ -16,6 +16,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
@@ -211,7 +213,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	OS.SetRect (rect, 0, 0, width, size.y);
 	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 1, rect);
 	*/
-	int border = getBorderWidth ();
+//	int border = getBorderWidth ();
 //	rect.left -= border;  rect.right += border;
 //	width = rect.right - rect.left;
 //	size.x = Math.max (width, size.x);
@@ -263,6 +265,11 @@ void createItem (TabItem item, int index) {
 	//System.out.println(index + "..." + item);
 	items[index] = item;
 	items[index].handle = tab;
+	tab.onclick = new RunnableCompatibility() {
+		public void run() {
+			sendEvent(SWT.Selection);
+		}
+	};
 	/*
 	* Send a selection event when the item that is added becomes
 	* the new selection.  This only happens when the first item
@@ -318,8 +325,7 @@ void createHandle () {
 
 void createWidget () {
 	super.createWidget ();
-	items = new TabItem [4];
-	items = new TabItem [0];//new TabItem [4];
+	//items = new TabItem [4];
 }
 
 void destroyItem (TabItem item) {
@@ -442,7 +448,7 @@ public TabItem getItem (int index) {
 public int getItemCount () {
 	checkWidget ();
 //	return OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
-	return 0;
+	return items.length;
 }
 
 /**
@@ -644,6 +650,16 @@ boolean mnemonicMatch (char key) {
 	return false;
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
+ */
+void releaseHandle() {
+	if (titles != null) {
+		BrowserNative.releaseHandle(titles);
+		titles = null;
+	}
+	super.releaseHandle();
+}
 void releaseWidget () {
 	//int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
 	int count = getItemCount();

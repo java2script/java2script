@@ -552,11 +552,14 @@ void createHandle() {
 					}
 				}
 
-				public boolean updateShellBounds(int x, int y, int width,
-						int height) {
+				public boolean updateShellBounds(int x, int y, final int width,
+						final int height) {
 					display.timerExec(25, new Runnable() {
 						public void run() {
-							layout();
+							Point size = getSize();
+							if (width != size.x || height != size.y) {
+								layout();
+							}
 							// Point size = getSize();
 							// size = getLayout().computeSize(Decorations.this,
 							// size.x, size.y, false);

@@ -170,14 +170,16 @@ public Rectangle getClientArea () {
 	 */
 	int w = SWT.DEFAULT;
 	int h = SWT.DEFAULT;
-	String width = handle.style.width;
-	if (width != null && width.length() != 0) {
-		w = Integer.parseInt(width);
-	}
-	String height = handle.style.height;
-	if (height != null && height.length() != 0) {
-		h = Integer.parseInt(height);
-	}
+//	String width = handle.style.width;
+//	if (width != null && width.length() != 0) {
+//		w = Integer.parseInt(width);
+//	}
+//	String height = handle.style.height;
+//	if (height != null && height.length() != 0) {
+//		h = Integer.parseInt(height);
+//	}
+	w = width;
+	h = height;
 	if (w < 0) {
 		w = 64;
 	}

@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
  
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.events.*;
@@ -1092,6 +1093,10 @@ void releaseChild () {
 }
 
 void releaseHandle () {
+	if (handle != null) {
+		BrowserNative.releaseHandle(handle);
+		handle = null;
+	}
 	super.releaseHandle ();
 //	handle = hwndCB = 0;
 }

@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
  
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.events.*;
 
 /**
@@ -485,6 +486,16 @@ void releaseChild () {
 	parent.destroyItem (this);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#releaseHandle()
+ */
+void releaseHandle() {
+	if (handle != null) {
+		BrowserNative.releaseHandle(handle);
+		handle = null;
+	}
+	super.releaseHandle();
+}
 void releaseMenu () {
 //	if (!OS.IsSP) setMenu (null);
 	menu = null;

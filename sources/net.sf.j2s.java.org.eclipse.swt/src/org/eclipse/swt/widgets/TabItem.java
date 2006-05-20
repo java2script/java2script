@@ -15,6 +15,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -384,8 +385,10 @@ public void setToolTipText (String string) {
 	toolTipText = string;
 }
 void releaseHandle() {
-	control = null;
-	parent = null;
+	if (handle != null) {
+		BrowserNative.releaseHandle(handle);
+		handle = null;
+	}
 	super.releaseHandle();
 }
 }

@@ -1622,6 +1622,9 @@ public void redraw (int x, int y, int width, int height, boolean all) {
 
 void register () {
 	display.addControl (handle, this);
+	if (parent != null) {
+		parent.children[parent.children.length] = this;
+	}
 }
 
 void releaseChild () {
@@ -2024,6 +2027,10 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 //				int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //				if ((bits & OS.WS_CLIPSIBLINGS) == 0) flags |= OS.SWP_NOCOPYBITS;
 //			}
+			this.left = x;
+			this.top = y;
+			this.width = width;
+			this.height = height;
 			SetWindowPos (topHandle, null, x, y, width, height, flags);
 		} else {
 			int index = 0;
@@ -2046,6 +2053,10 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 			lpwp [index] = wp;
 		}
 	} else {
+		this.left = x;
+		this.top = y;
+		this.width = width;
+		this.height = height;
 		SetWindowPos (topHandle, null, x, y, width, height, flags);
 	}
 }

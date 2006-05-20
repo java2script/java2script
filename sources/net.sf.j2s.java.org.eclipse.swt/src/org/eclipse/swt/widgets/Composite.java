@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+import java.util.Date;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
@@ -46,6 +47,7 @@ public class Composite extends Scrollable {
 	WINDOWPOS [] lpwp;
 	Control [] tabList;
 	int layoutCount = 0;
+	Control [] children = new Control[0];
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -86,10 +88,12 @@ Composite () {
  */
 public Composite (Composite parent, int style) {
 	super (parent, style);
+//	children = new Control[0];
 }
 
 Control [] _getChildren () {
-	/*
+	if (true) return children;
+	/* 
 	 * TODO: search the DOM and filter out the children
 	 */
 	int count = handle.childNodes.length;
@@ -97,10 +101,7 @@ Control [] _getChildren () {
 	int index = 0;
 	//Control [] newChildren = new Control [0];
 	for (int i = 0; i < count; i++) {
-		//System.out.println("fa:" + handle.childNodes[i].innerHTML);
 		Control control = display.getControl (handle.childNodes[i]);
-		//System.out.println("fdsfs" + control);
-		//System.out.println("da:" + control);
 		if (control != null && control != this) {
 			children [index++] = control;
 		}
@@ -554,6 +555,7 @@ public void layout (boolean changed, boolean all) {
 public void layout (Control [] changed) {
 	checkWidget ();
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
+	Date d = new Date();
 	for (int i=0; i<changed.length; i++) {
 		Control control = changed [i];
 		if (control == null) error (SWT.ERROR_INVALID_ARGUMENT);
@@ -567,6 +569,8 @@ public void layout (Control [] changed) {
 		}
 		if (!ancestor) error (SWT.ERROR_INVALID_PARENT);
 	}
+	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+	d = new Date();
 	int updateCount = 0;
 	Composite [] update = new Composite [16];
 	for (int i=0; i<changed.length; i++) {
@@ -588,9 +592,13 @@ public void layout (Control [] changed) {
 			composite = child.parent;
 		}
 	}
+	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+	d = new Date();
 	for (int i=updateCount-1; i>=0; i--) {
 		update [i].updateLayout (true, false);
 	}
+	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+	d = new Date();
 }
 
 void markLayout (boolean changed, boolean all) {
@@ -908,11 +916,14 @@ boolean updateFont (Font oldFont, Font newFont) {
 
 void updateLayout (boolean resize, boolean all) {
 	if (isLayoutDeferred ()) return;
+	Date d = new Date();
 	if ((state & LAYOUT_NEEDED) != 0) {
 		boolean changed = (state & LAYOUT_CHANGED) != 0;
 		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 		if (resize) setResizeChildren (false);
+		d = new Date();
 		layout.layout (this, changed);
+		System.out.println(":===:" + (new Date().getTime() - d.getTime()));
 		if (resize) setResizeChildren (true);
 	}
 	if (all) {
@@ -920,13 +931,6 @@ void updateLayout (boolean resize, boolean all) {
 		for (int i=0; i<children.length; i++) {
 			children [i].updateLayout (resize, all);
 		}
-	}
-}
-
-public void setSize(int width, int height) {
-	super.setSize(width, height);
-	if (layout != null) {
-		this.layout();
 	}
 }
 

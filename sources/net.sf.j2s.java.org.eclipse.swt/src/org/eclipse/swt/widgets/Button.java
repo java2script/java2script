@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
@@ -559,6 +560,16 @@ boolean mnemonicMatch (char key) {
 	return Character.toUpperCase (key) == Character.toUpperCase (mnemonic);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#releaseHandle()
+ */
+void releaseHandle() {
+	if (btnText != null) {
+		BrowserNative.releaseHandle(btnText);
+		btnText = null;
+	}
+	super.releaseHandle();
+}
 void releaseWidget () {
 	super.releaseWidget ();
 	if (imageList != null) imageList.dispose ();
