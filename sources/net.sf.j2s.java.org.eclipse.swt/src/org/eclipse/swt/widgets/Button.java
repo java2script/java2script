@@ -23,6 +23,7 @@ import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
+
 /**
  * Instances of this class represent a selectable user interface object that
  * issues notification when pressed and released. 
