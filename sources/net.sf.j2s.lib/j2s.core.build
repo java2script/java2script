@@ -401,8 +401,10 @@
 		<copy file="${j2score.dir}/UtilExt.js"
 			tofile="${js.src.dir}/java/util/UtilExt.js"/>
 
+    	<!--
 		<copy file="${j2score.dir}/System.js"
 			tofile="${js.src.dir}/java/lang/System.js"/>
+    	-->
     	
 		<copy file="${j2score.dir}/Encoding.js"
 			tofile="${js.src.dir}/java/lang/Encoding.js"/>
@@ -414,8 +416,10 @@
 		<copy file="${j2score.dir}/NativeConsole.js"
 			tofile="${js.src.dir}/java/lang/NativeConsole.js"/>
 
+    	<!--
 		<copy file="${j2score.dir}/Throwable.js"
 			tofile="${js.src.dir}/java/lang/Throwable.js"/>
+		-->
 
 		<copy file="${j2score.dir}/Error.js"
 			tofile="${js.src.dir}/java/lang/Error.js"/>
