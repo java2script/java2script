@@ -18,7 +18,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.ResizeSystem;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -245,10 +245,12 @@ public int open () {
 	gd.grabExcessVerticalSpace = true;
 	gd.heightHint = 48; //64;
 	GridData labelGD = new GridData(GridData.VERTICAL_ALIGN_CENTER);
-	int wHint = UIStringUtil.calculatePlainStringLineWidth(message);
+//	int wHint = UIStringUtil.calculatePlainStringLineWidth(message);
+	int wHint = OS.getStringPlainWidth(message);
 	if (wHint > 480) {
 		labelGD.widthHint = 480;
-		int hHint = UIStringUtil.calculatePlainStringBlockHeight(message, labelGD.widthHint);
+//		int hHint = UIStringUtil.calculatePlainStringBlockHeight(message, labelGD.widthHint);
+		int hHint = OS.getStringPlainWrappedHeight(message, labelGD.widthHint);
 		if (hHint > 48) {
 			gd.heightHint = hHint;
 		}

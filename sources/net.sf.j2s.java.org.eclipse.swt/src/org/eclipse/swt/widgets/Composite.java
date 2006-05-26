@@ -16,6 +16,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 
@@ -232,19 +233,26 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			changed |= (state & LAYOUT_CHANGED) != 0;
 			state &= ~LAYOUT_CHANGED;
 			size = layout.computeSize (this, wHint, hHint, changed);
+//			System.out.println(wHint + "," + hHint + "," + changed);
+//			System.out.println(size);
 		} else {
 			size = new Point (wHint, hHint);
 		}
 	} else {
 		size = minimumSize (wHint, hHint, changed);
 	}
-	//System.out.println(size);
 	if (size.x == 0) size.x = DEFAULT_WIDTH;
 	if (size.y == 0) size.y = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) size.x = wHint;
 	if (hHint != SWT.DEFAULT) size.y = hHint;
+	System.out.println("before trimming " + size);
 	Rectangle trim = computeTrim (0, 0, size.x, size.y);
-	return new Point (trim.width + 16, trim.height);
+	System.out.println("after trimming " + trim);
+	return new Point (trim.width, trim.height);
+}
+
+protected Element containerHandle() {
+	return handle;
 }
 
 void createHandle () {
@@ -254,8 +262,11 @@ void createHandle () {
 	if ((style & SWT.BORDER) != 0) {
 		handle.className += " composite-border";
 	}
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	state |= CANVAS;
 }
@@ -284,6 +295,17 @@ void fixChildren (Shell newShell, Shell oldShell, Decorations newDecorations, De
 		children [i].fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
 	}
 }
+void fixChildrenList (Control control) {
+	if (children == null || children.length == 0) return;
+	Control[] newChildren = new Control[0];
+	for (int i = 0; i < children.length; i++) {
+		Control child = children[i];
+		if (child != null && child != control) {
+			newChildren[newChildren.length] = child;
+		}
+	}
+	children = newChildren;
+}
 
 void fixTabList (Control control) {
 	if (tabList == null) return;
@@ -306,6 +328,13 @@ void fixTabList (Control control) {
 	tabList = newList;
 }
 
+
+public int getBorderWidth() {
+	if ((style & SWT.BORDER) != 0) {
+		return 2;
+	}
+	return 0;
+}
 
 /**
  * Returns a (possibly empty) array containing the receiver's children.
@@ -660,6 +689,7 @@ void releaseWidget () {
 
 void removeControl (Control control) {
 	fixTabList (control);
+	fixChildrenList (control);
 	resizeChildren ();
 }
 void resizeChildren () {
@@ -727,6 +757,27 @@ void resizeEmbeddedHandle(int embeddedHandle, int width, int height) {
 	}
 }
 */
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBounds(int, int, int, int)
+ */
+public void setBounds(int x, int y, int width, int height) {
+	super.setBounds(x, y, width, height);
+//	if (width != this.width && height != this.height) {
+//		display.timerExec(10, new Runnable() {
+//			public void run() {
+//				layout();
+//			}
+//		});
+//	}
+}
+
+public void setSize(int width, int height) {
+	super.setSize(width, height);
+//	if (layout != null) {
+//		this.layout();
+//	}
+}
 
 boolean setFixedFocus () {
 	checkWidget ();
@@ -913,6 +964,17 @@ boolean updateFont (Font oldFont, Font newFont) {
 	return changed;
 }
 */
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if ((style & SWT.BORDER) != 0) {
+		cx -= 4;
+		cy -= 4;
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
 
 void updateLayout (boolean resize, boolean all) {
 	if (isLayoutDeferred ()) return;

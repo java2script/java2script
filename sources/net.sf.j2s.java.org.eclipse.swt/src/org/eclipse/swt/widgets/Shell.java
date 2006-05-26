@@ -886,11 +886,11 @@ public void open () {
 }
 
 public void setSize(int width, int height) {
-	if (width < 150) {
-		width = 150;
+	if (width < 113) {
+		width = 113;
 	}
-	if (height < 48) {
-		height = 48;
+	if (height < 28) {
+		height = 28;
 	}
 	super.setSize(width, height);
 }

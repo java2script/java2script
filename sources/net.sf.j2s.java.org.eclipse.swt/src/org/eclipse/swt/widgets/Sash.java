@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.SashDND;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -160,8 +161,11 @@ void createHandle() {
 	if ((style & SWT.BORDER) != 0) {
 		handle.className += " sash-border";
 	}
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	DragAndDrop dnd = new DragAndDrop();
 	dnd.addDragListener(new SashDND() {

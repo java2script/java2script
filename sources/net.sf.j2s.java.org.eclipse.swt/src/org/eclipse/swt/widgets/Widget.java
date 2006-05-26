@@ -1685,12 +1685,13 @@ boolean setKeyState (Event event, int type, int wParam, int lParam) {
 	return setInputState (event, type);
 }
 */
-boolean SetWindowPos (Element hWnd, Element hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+boolean SetWindowPos (Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	Element el = (Element) hWnd;
 	// TODO: What about hWndInsertAfter and uFlags
-	hWnd.style.left = X + "px";
-	hWnd.style.top = Y + "px";
-	hWnd.style.width = cx + "px";
-	hWnd.style.height = cy + "px";
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = cx + "px";
+	el.style.height = cy + "px";
 	return true;
 }
 /*

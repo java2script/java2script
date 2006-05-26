@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
-import java.awt.font.TextLayout;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.accessibility.ACC;
@@ -23,11 +21,13 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -49,8 +49,14 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class Link extends Control {
 	String text;
-	//TextLayout layout;
-	Color linkColor, linkDisabledColor;
+	String cachedText;
+	boolean textSizeCached = false;
+	int textWidthCached, textHeightCached;
+	String lastColor;
+	Element[] anchors = new Element[0];
+	
+//	TextLayout layout;
+//	Color linkColor, linkDisabledColor;
 	Point [] offsets;
 	Point selection;
 	String [] ids;
@@ -145,7 +151,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	if (wHint != SWT.DEFAULT && wHint < 0) wHint = 0;
 	if (hHint != SWT.DEFAULT && hHint < 0) hHint = 0;
-	int width, height;
+	int width = 0, height = 0;
 	/*
 	if (OS.COMCTL32_MAJOR >= 6) {
 		int hDC = OS.GetDC (handle);
@@ -180,13 +186,25 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		layout.setWidth (layoutWidth);
 	}
 	*/
+	if (text != null) {
+		if ((style & SWT.WRAP) != 0 && wHint != SWT.DEFAULT && hHint == SWT.DEFAULT) {
+			height = OS.getStringStyledWrappedHeight(cachedText, "label-default", handle.style.cssText, wHint);
+		} else {
+			if (!textSizeCached || changed) {
+				Point cssSize = OS.getStringStyledSize(cachedText, "label-default", handle.style.cssText);
+				textSizeCached = true;
+				textWidthCached = cssSize.x;
+				textHeightCached = cssSize.y;
+			}
+			width = textWidthCached;
+			height = textHeightCached;
+		}
+	}
+	int border = getBorderWidth ();
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
-	int border = getBorderWidth ();
-//	width += border * 2;
-//	height += border * 2;
-//	return new Point (width, height);
-	return new Point (0, 0);
+	width += border * 2; height += border * 2;
+	return new Point (width, height);
 }
 
 void createHandle () {
@@ -204,22 +222,18 @@ void createHandle () {
 	}
 	*/
 	handle = document.createElement("DIV");
-	handle.style.color = "blue";
-	handle.style.cursor = "pointer";
-	//handle.style.cursor = "hand";
-	handle.onclick = new RunnableCompatibility() {
-		public void run() {
-			Event e = new Event();
-			e.type = SWT.Selection;
-			e.item = Link.this;
-			e.text = Link.this.text;
-			e.widget = Link.this;
-			sendEvent(e);
+	handle.className = "link-default";
+	if ((style & SWT.WRAP) != 0) {
+		handle.className += " link-wrap";
+	}
+	if ((style & SWT.BORDER) != 0) {
+		handle.className += " link-border";
+	}
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
 		}
-	};
-	handle.appendChild(document.createTextNode(text));
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
 	}
 }
 
@@ -298,11 +312,37 @@ void enableWidget (boolean enabled) {
 	super.enableWidget (enabled);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#hookSelection()
+ */
+void hookSelection() {
+	RunnableCompatibility linkHandler = new RunnableCompatibility() {
+		public void run() {
+			Event e = new Event();
+			e.type = SWT.Selection;
+			e.item = Link.this;
+			e.text = Link.this.text;
+			e.widget = Link.this;
+			e.display = display;
+			sendEvent(SWT.Selection);
+			if (!e.doit) {
+				toReturn(false);
+			}
+		}
+	};
+	for (int i = 0; i < anchors.length; i++) {
+		anchors[i].href = "#";
+		anchors[i].target = null;
+		anchors[i].onclick = linkHandler;
+		anchors[i].ondblclick = linkHandler;
+	}
+}
+
 void initAccessible () {
 	Accessible accessible = getAccessible ();
 	accessible.addAccessibleListener (new AccessibleAdapter () {
 		public void getName (AccessibleEvent e) {
-			e.result = parse (text);
+			e.result = parse (text, null);
 		}
 	});
 		
@@ -344,6 +384,13 @@ void initAccessible () {
 			if (hasFocus ()) e.childID = ACC.CHILDID_SELF;
 		}
 	});
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getBorderWidth()
+ */
+public int getBorderWidth() {
+	return 2;
 }
 
 String getNameText () {
@@ -398,18 +445,24 @@ public String getText () {
 	return text;
 }
 
-String parse (String string) {
+String parse (String string, Object handle) {
+	Element el = (Element) handle;
 	int length = string.length ();
 	offsets = new Point [length / 4];
 	ids = new String [length / 4];
 	mnemonics = new int [length / 4 + 1];
 	StringBuffer result = new StringBuffer ();
+	StringBuffer result2 = new StringBuffer ();
 	char [] buffer = new char [length];
 	string.getChars (0, string.length (), buffer, 0);
 	int index = 0, state = 0, linkIndex = 0;
 	int start = 0, tagStart = 0, linkStart = 0, endtagStart = 0, refStart = 0;
 	while (index < length) {
-		char c = Character.toLowerCase (buffer [index]);
+		//char c = Character.toLowerCase (buffer [index]);
+		char c = buffer[index];
+		if (c >= 'A' && c <= 'Z') {
+			c += 'a' - 'A';
+		}
 		switch (state) {
 			case 0: 
 				if (c == '<') {
@@ -430,7 +483,8 @@ String parse (String string) {
 						state++;
 						break;
 					default:
-						if (Character.isWhitespace(c)) break;
+						//if (Character.isWhitespace(c)) break;
+						if (c == 32 || c == 160) break;
 						else state = 13;
 				}
 				break;
@@ -448,12 +502,23 @@ String parse (String string) {
 				break;
 			case 6:
 				if (c == '>') {
-					mnemonics [linkIndex] = parseMnemonics (buffer, start, tagStart, result);
+					mnemonics [linkIndex] = parseMnemonics (buffer, start, tagStart, result, result2, handle);
 					int offset = result.length ();
-					parseMnemonics (buffer, linkStart, endtagStart, result);
+					Element anchor = null;
+					if (handle != null) {
+						anchor = document.createElement("A");
+						el.appendChild(anchor);
+						anchors[anchors.length] = anchor;
+					}
+					parseMnemonics (buffer, linkStart, endtagStart, result, result2, anchor);
 					offsets [linkIndex] = new Point (offset, result.length () - 1);
 					if (ids [linkIndex] == null) {
 						ids [linkIndex] = new String (buffer, linkStart, endtagStart - linkStart);
+					}
+					if (anchor != null) {
+						anchor.href = ids[linkIndex];
+						anchor.target = "_blank";
+						anchor.title = ids[linkIndex];
 					}
 					linkIndex++;
 					start = tagStart = linkStart = endtagStart = refStart = index + 1;
@@ -508,8 +573,8 @@ String parse (String string) {
 		index++;
 	}
 	if (start < length) {
-		int tmp = parseMnemonics (buffer, start, tagStart, result);
-		int mnemonic = parseMnemonics (buffer, linkStart, index, result);
+		int tmp = parseMnemonics (buffer, start, tagStart, result, result2, handle);
+		int mnemonic = parseMnemonics (buffer, linkStart, index, result, result2, handle);
 		if (mnemonic == -1) mnemonic = tmp;
 		mnemonics [linkIndex] = mnemonic;
 	} else {
@@ -526,23 +591,72 @@ String parse (String string) {
 		System.arraycopy (mnemonics, 0, newMnemonics, 0, linkIndex + 1);
 		mnemonics = newMnemonics;		
 	}
+	cachedText = result2.toString();
 	return result.toString ();
 }
 
-int parseMnemonics (char[] buffer, int start, int end, StringBuffer result) {
+int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, StringBuffer result2, Object handle) {
+	Element el = (Element) handle;
 	int mnemonic = -1, index = start;
+	int lastIndex = result.length();
 	while (index < end) {
-		if (buffer [index] == '&') {
+		char c = buffer [index];
+		result2.append(c);
+		if (c == '&') {
 			if (index + 1 < end && buffer [index + 1] == '&') {
-				result.append (buffer [index]);
+				result.append (c);
 				index++;
 			} else {
 				mnemonic = result.length();
+				if (el != null) {
+					if ((mnemonic > lastIndex) && (el != null)) {
+						int len = mnemonic - lastIndex;
+						char[] cs = new char[len];
+						result.getChars(lastIndex, mnemonic, cs, 0);
+						String s = new String(cs, 0, len);
+						el.appendChild(document.createTextNode(s));
+					}
+					lastIndex = mnemonic + 1;
+					Element span = document.createElement("SPAN");
+					el.appendChild(span);
+					span.appendChild(document.createTextNode("" + buffer [index + 1]));
+				}
 			}
 		} else {
-			result.append (buffer [index]);
+			result.append (c);
+		}
+		boolean lineBreak = false;
+		if (c == '\r') {
+			if (index + 1 < end && buffer [index + 1] == '\n') {
+				result.append ('\n');
+				index++;
+			}
+			lineBreak = true;
+		}
+		if (c == '\n') {
+			lineBreak = true;
+		}
+		if (lineBreak && el != null) {
+			int idx = result.length();
+			if (idx > lastIndex) {
+				int len = idx - lastIndex;
+				char[] cs = new char[len];
+				result.getChars(lastIndex, idx, cs, 0);
+				String s = new String(cs, 0, len);
+				el.appendChild(document.createTextNode(s));
+			}
+			lastIndex = idx;
+			el.appendChild(document.createElement("BR"));
 		}
 		index++;
+	}
+	int idx = result.length();
+	if (idx > lastIndex && el != null) {
+		int len = idx - lastIndex;
+		char[] cs = new char[len];
+		result.getChars(lastIndex, idx, cs, 0);
+		String s = new String(cs, 0, len);
+		el.appendChild(document.createTextNode(s));
 	}
 	return mnemonic;
 }
@@ -551,9 +665,9 @@ void releaseWidget () {
 	super.releaseWidget ();
 //	if (layout != null) layout.dispose ();
 //	layout = null;
-	if (linkColor != null) linkColor.dispose ();
-	linkColor = null;
-	linkDisabledColor = null;
+//	if (linkColor != null) linkColor.dispose ();
+//	linkColor = null;
+//	linkDisabledColor = null;
 	offsets = null;
 	ids = null;
 	mnemonics = null;
@@ -582,7 +696,54 @@ public void removeSelectionListener (SelectionListener listener) {
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (eventTable == null) return;
 	eventTable.unhook (SWT.Selection, listener);
-	eventTable.unhook (SWT.DefaultSelection, listener);	
+	eventTable.unhook (SWT.DefaultSelection, listener);
+	
+	if (!hooks(SWT.Selection) && !hooks(SWT.DefaultSelection)) {
+		unhookSelection();
+	}
+}
+
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setEnabled(boolean)
+ */
+public void setEnabled(boolean enabled) {
+	super.setEnabled(enabled);
+	String cssName = handle.className;
+	if (cssName == null) cssName = "";
+	String key = "link-disabled";
+	int idx = cssName.indexOf(key);
+	if (!enabled) {
+		lastColor = handle.style.color; 
+		if (idx == -1) {
+			handle.className += " " + key; 
+		}
+		//handle.style.color = "gray";
+	} else {
+		if (idx != -1) {
+			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+		handle.style.color = lastColor;
+		lastColor = null;
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	super.setForeground(color);
+	if (lastColor != null) {
+		lastColor = handle.style.color;
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setFont(org.eclipse.swt.graphics.Font)
+ */
+public void setFont(Font font) {
+	textSizeCached = false;
+	super.setFont(font);
 }
 
 /**
@@ -613,7 +774,22 @@ public void setText (String string) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (string.equals (text)) return;
 	text = string;	
-	handle.innerHTML = text;
+	textSizeCached = false;
+	parse (string, handle);
+	System.out.println(cachedText);
+//	OS.insertText(handle, cachedText);
+	System.out.println("ids==");
+	for (int i = 0; i < ids.length; i++) {
+		System.out.println(i + "/" + ids[i]);
+	}
+	System.out.println("mnemonics==");
+	for (int i = 0; i < mnemonics.length; i++) {
+		System.out.println(i + "/" + mnemonics[i]);
+	}
+	System.out.println("offsets==");
+	for (int i = 0; i < offsets.length; i++) {
+		System.out.println(i + "/" + offsets[i]);
+	}
 	/*
 	if (OS.COMCTL32_MAJOR >= 6) {
 		TCHAR buffer = new TCHAR (getCodePage (), string, true);
@@ -650,19 +826,25 @@ public void setText (String string) {
 	*/
 }
 
+void unhookSelection() {
+	for (int i = 0; i < anchors.length; i++) {
+		anchors[i].onclick = null;
+		anchors[i].ondblclick = null;
+		anchors[i].href = ids[i];
+		anchors[i].target = "_blank";
+	}
+}
+
 /*
 int widgetStyle () {
 	int bits = super.widgetStyle ();
 	return bits | OS.WS_TABSTOP;
 }
-*/
 
 String windowClass () {
-	//return OS.COMCTL32_MAJOR >= 6 ? LinkClass : display.windowClass;
-	return "A";
+	return OS.COMCTL32_MAJOR >= 6 ? LinkClass : display.windowClass;
 }
 
-/*
 int windowProc () {
 	return LinkProc != 0 ? LinkProc : display.windowProc;
 }

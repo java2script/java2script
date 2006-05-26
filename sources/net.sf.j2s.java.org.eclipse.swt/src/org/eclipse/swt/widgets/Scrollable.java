@@ -124,7 +124,8 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	/*
 	 * TODO: implement the computeTrim!
 	 */
-	return new Rectangle (x, y, width, height);
+	int border = getBorderWidth();
+	return new Rectangle (x - border, y - border, width + border * 2, height + border * 2);
 }
 
 ScrollBar createScrollBar (int type) {
@@ -158,8 +159,8 @@ void createWidget () {
  */
 public Rectangle getClientArea () {
 	checkWidget ();
-	/*
 	forceResize ();
+	/*
 	RECT rect = new RECT ();
 	int scrolledHandle = scrolledHandle ();
 	OS.GetClientRect (scrolledHandle, rect);

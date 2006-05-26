@@ -357,8 +357,11 @@ void createHandle () {
 	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 0);
 	*/
 	handle = document.createElement("DIV");
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	handle.className = "tree-default";
 	if ((style & SWT.BORDER) != 0) {

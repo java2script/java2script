@@ -1337,7 +1337,8 @@ int getRightItemEdge (){
 	if (showMax) x -= BUTTON_SIZE;
 	if (showChevron) x -= 3*BUTTON_SIZE/2;
 	if (topRight != null && topRightAlignment != SWT.FILL) {
-		Point rightSize = topRight.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+//		Point rightSize = topRight.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		Point rightSize = topRight.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		x -= rightSize.x + 3;
 	}
 	return Math.max(0, x);

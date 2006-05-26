@@ -11,8 +11,11 @@
 package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -39,8 +42,8 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class Group extends Composite {
-	/*
 	static final int CLIENT_INSET = 3;
+	/*
 	static final int GroupProc;
 	static final TCHAR GroupClass = new TCHAR (0, OS.IsWinCE ? "BUTTON" : "SWT_GROUP", true);
 	static {
@@ -82,8 +85,11 @@ public class Group extends Composite {
 	}
 	*/
 	String groupText;
-	private Element title;
-	private Element titleBody;
+	int textWidth;
+	int textHeight;
+	
+	private Element borderFrame, titleLine, leftCorner, titleText, rightCorner, leftSide, rightSide, 
+		bottomLeft, bottomRight, contentBox, content;
 	
 /**
  * Constructs a new instance of this class given its parent
@@ -157,13 +163,17 @@ protected void checkSubclass () {
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	Point size = super.computeSize (wHint, hHint, changed);
-	/*
-	int length = OS.GetWindowTextLength (handle);
+	int length = 0;
+	if (groupText != null) {
+		length = groupText.length();
+	}
+//	int length = OS.GetWindowTextLength (handle);
 	if (length != 0) {
 		/*
 		* If the group has text, and the text is wider than the
 		* client area, pad the width so the text is not clipped.
-		*-/
+		*/
+		/*
 		TCHAR buffer1 = new TCHAR (getCodePage (), length + 1);
 		OS.GetWindowText (handle, buffer1, length + 1);
 		int newFont, oldFont = 0;
@@ -175,9 +185,10 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		OS.DrawText (hDC, buffer1, length, rect, flags);
 		if (newFont != 0) OS.SelectObject (hDC, oldFont);
 		OS.ReleaseDC (handle, hDC);
-		size.x = Math.max (size.x, rect.right - rect.left + CLIENT_INSET * 6);
+		*/
+		//size.x = Math.max (size.x, rect.right - rect.left + CLIENT_INSET * 6);
+		size.x = Math.max (size.x, textWidth + CLIENT_INSET * 6);
 	}
-	*/
 	return size;
 }
 
@@ -193,55 +204,82 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	OS.GetTextMetrics (hDC, tm);
 	if (newFont != 0) OS.SelectObject (hDC, oldFont);
 	OS.ReleaseDC (handle, hDC);
-	trim.x -= CLIENT_INSET;
-	trim.y -= tm.tmHeight;
-	trim.width += CLIENT_INSET * 2;
-	trim.height += tm.tmHeight + CLIENT_INSET;
 	*/
+	trim.x -= CLIENT_INSET;
+//	trim.y -= tm.tmHeight;
+	if (textHeight <= 0) {
+		textHeight = OS.getStringStyledHeight(".", "group-default", handle.style.cssText);
+	}
+	trim.y -= textHeight;
+	trim.width += CLIENT_INSET * 2;
+//	trim.height += tm.tmHeight + CLIENT_INSET;
+	trim.height += textHeight + CLIENT_INSET;
 	return trim;
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#containerHandle()
+ */
+protected Element containerHandle() {
+	return content;
+}
+
+Object createCSSElement(Object parent, String css) {
+	Element el = document.createElement("DIV");
+	el.className = css;
+	((Element) parent).appendChild(el);
+	return el;
 }
 
 void createHandle () {
 	//super.createHandle ();
 	state &= ~CANVAS;
 	handle = document.createElement("DIV");
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+
+	if ((style & SWT.BORDER) != 0) {
+		handle.className = "group-default group-border-default";
+	} else {
+		handle.className = "group-default";
 	}
-	handle.className = "group-body-default";
-	//SHADOW_ETCHED_IN, SHADOW_ETCHED_OUT, SHADOW_IN, SHADOW_OUT, SHADOW_NONE
+
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
+	}
+	
+	String className = null;
 	if ((style & SWT.SHADOW_ETCHED_IN) != 0) {
-		handle.className += " group-shadow-etched-in";
+		className = "group-shadow-etched-in";
 	} else if ((style & SWT.SHADOW_ETCHED_OUT) != 0) {
-		handle.className += " group-shadow-etched-out";
+		className = "group-shadow-etched-out";
 	} else if ((style & SWT.SHADOW_IN) != 0) {
-		handle.className += " group-shadow-in";
+		className = "group-shadow-in";
 	} else if ((style & SWT.SHADOW_OUT) != 0) {
-		handle.className += " group-shadow-out";
+		className = "group-shadow-out";
 	} else if ((style & SWT.SHADOW_NONE) != 0) {
-		handle.className += " group-shadow-none";
+		className = "group-shadow-none";
 	}
+	if (className == null) {
+		className = "group-border-frame group-no-title-text";
+	} else {
+		className = "group-border-frame group-no-title-text " + className;
+	}
+	borderFrame = (Element) createCSSElement(handle, className);
 	
-	titleBody = document.createElement("DIV");
-	titleBody.className = "group-title-body-default";
-	handle.appendChild(titleBody);
+	titleLine = (Element) createCSSElement(borderFrame, "group-title-line");
+	leftCorner = (Element) createCSSElement(borderFrame, "group-left-corner");
+	rightCorner = (Element) createCSSElement(borderFrame, "group-right-corner");
+	titleText = (Element) createCSSElement(borderFrame, "group-title-text");
+	leftSide = (Element) createCSSElement(borderFrame, "group-side-line-left");
+	rightSide = (Element) createCSSElement(borderFrame, "group-side-line-right");
+	bottomLeft = (Element) createCSSElement(borderFrame, "group-bottom-line-left");
+	bottomRight = (Element) createCSSElement(borderFrame, "group-bottom-line-right");
 	
-	Element titleBlock = document.createElement("DIV"); 
-	titleBlock.className = "group-title-block-default";
-	handle.appendChild(titleBlock);
-
-	Element titleBlockBG = document.createElement("DIV"); 
-	titleBlockBG.className = "group-title-block-ground-default";
-	titleBlock.appendChild(titleBlockBG);
-
-	title = document.createElement("DIV");
-	title.className = "group-title-text-default";
-	title.style.position = "absolute";
-	titleBlock.appendChild(title);
+	contentBox = (Element) createCSSElement(handle, "group-content-box");
+	content = (Element) createCSSElement(contentBox, "group-content");
 	
-	Element titleDuplicate = document.createElement("DIV"); 
-	titleDuplicate.className = "group-title-text-default";
-	titleBlock.appendChild(titleDuplicate);
 }
 
 public Rectangle getClientArea () {
@@ -261,9 +299,22 @@ public Rectangle getClientArea () {
 	int x = CLIENT_INSET, y = tm.tmHeight;
 	int width = rect.right - CLIENT_INSET * 2;
 	int height = rect.bottom - y - CLIENT_INSET;
-	return new Rectangle (x, y, width, height);
 	*/
-	return new Rectangle (left, top, width, height);
+	if (textHeight <= 0) {
+		textHeight = OS.getStringStyledHeight(".", "group-default", handle.style.cssText);
+	}
+	int x = CLIENT_INSET, y = textHeight;
+	int border = getBorderWidth();
+	int width = this.width - border * 2 - CLIENT_INSET * 2;
+	int height = this.height - border * 2 - y - CLIENT_INSET;
+	//System.out.println("-->" + new Rectangle (x, y, width, height));
+//	if (groupText == null || groupText.length() == 0) {
+//		return new Rectangle (x, y / 2, width, height);
+//	} else {
+//		return new Rectangle (x, y, width, height);
+//	}
+	return new Rectangle (x, y, width, height);
+	//return new Rectangle (left, top, width, height);
 	//return super.getClientArea();
 }
 
@@ -309,15 +360,77 @@ boolean mnemonicMatch (char key) {
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
 void releaseHandle() {
-	if (title != null) {
-		BrowserNative.releaseHandle(title);
-		title = null;
+	if (titleLine != null) {
+		BrowserNative.releaseHandle(titleLine);
+		titleLine = null;
 	}
-	if (titleBody != null) {
-		BrowserNative.releaseHandle(titleBody);
-		titleBody = null;
+	if (titleText != null) {
+		BrowserNative.releaseHandle(titleText);
+		titleText = null;
+	}
+	if (leftCorner != null) {
+		BrowserNative.releaseHandle(leftCorner);
+		leftCorner = null;
+	}
+	if (rightCorner != null) {
+		BrowserNative.releaseHandle(rightCorner);
+		rightCorner = null;
+	}
+	if (bottomLeft != null) {
+		BrowserNative.releaseHandle(bottomLeft);
+		bottomLeft = null;
+	}
+	if (bottomRight != null) {
+		BrowserNative.releaseHandle(bottomRight);
+		bottomRight = null;
+	}
+	if (leftSide != null) {
+		BrowserNative.releaseHandle(leftSide);
+		leftSide = null;
+	}
+	if (rightSide != null) {
+		BrowserNative.releaseHandle(rightSide);
+		rightSide = null;
+	}
+	if (borderFrame != null) {
+		BrowserNative.releaseHandle(borderFrame);
+		borderFrame = null;
+	}
+	if (content != null) {
+		BrowserNative.releaseHandle(content);
+		content = null;
+	}
+	if (contentBox != null) {
+		BrowserNative.releaseHandle(contentBox);
+		contentBox = null;
 	}
 	super.releaseHandle();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBounds(int, int, int, int)
+ */
+public void setBounds(int x, int y, int width, int height) {
+	super.setBounds(x, y, width, height);
+	if (textWidth == 0 && groupText != null && groupText.length() != 0) {
+//		textWidth = UIStringUtil.calculateStyledStringLineWidth(groupText, "group-title-text");
+		textWidth = OS.getStringStyledWidth(groupText, "group-default", handle.style.cssText);
+	}
+	if (textWidth != 0) {
+		int w = this.width - textWidth - 12;
+		if (w < 0) {
+			w = 0; 
+		}
+		rightCorner.style.width = w + "px";
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setFont(org.eclipse.swt.graphics.Font)
+ */
+public void setFont(Font font) {
+	// TODO Auto-generated method stub
+	super.setFont(font);
 }
 
 /**
@@ -351,31 +464,37 @@ public void setText (String string) {
 	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 	OS.SetWindowText (handle, buffer);
 	*/
+	String cssName = borderFrame.className;
+	if (cssName == null) cssName = "";
+	String key = "group-no-title-text";
+	int idx = cssName.indexOf(key);
+	if (string.length() == 0) {
+		if (idx == -1) {
+			borderFrame.className += " " + key; 
+		}
+	} else {
+		if (idx != -1) {
+			borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+		if (!string.equals(groupText)) {
+			for (int i = titleText.childNodes.length - 1; i >= 0; i--) {
+				titleText.removeChild(titleText.childNodes[i]);
+			}
+			titleText.appendChild(document.createTextNode(string));
+			textWidth = OS.getContainerWidth(titleText);
+			if (textWidth == 0) {
+//				textWidth = UIStringUtil.calculatePlainStringLineWidth(string);
+				textWidth = OS.getStringStyledWidth(string, "group-default", handle.style.cssText);
+			}
+			if (textWidth != 0) {
+				int w = this.width - textWidth - 24;
+				if (w > 0) {
+					rightCorner.style.width = w + "px";
+				}
+			}
+		}
+	}
 	groupText = string;
-	title.appendChild(document.createTextNode(string));
-	title.nextSibling.appendChild(document.createTextNode(string));
-}
-
-public void setSize(int width, int height) {
-	super.setSize(width, height);
-	titleBody.style.width = width + "px";
-	//handle.style.height = (height - 20) + "px";
-	System.out.println("setSize");
-}
-/* (non-Javadoc)
- * @see org.eclipse.swt.widgets.Control#setLocation(int, int)
- */
-public void setLocation(int x, int y) {
-	super.setLocation(x, y);
-	handle.style.top = (y + 20) + "px";
-	System.out.println("setLocation");
-}
-public void setBounds(int x, int y, int width, int height) {
-	super.setBounds(x, y, width, height);
-	titleBody.style.width = width + "px";
-	handle.style.top = (y + 20) + "px";
-	//handle.style.height = (height - 20) + "px";
-	//System.out.println("setBounds");
 }
 
 /*
@@ -393,12 +512,11 @@ int widgetStyle () {
 	*-/
 	return super.widgetStyle () | OS.BS_GROUPBOX | OS.WS_CLIPCHILDREN | OS.WS_CLIPSIBLINGS;
 }
-*/
 
 String windowClass () {
-	return "DIV"; //GroupClass;
+	return "DIV";
 }
-/*
+
 int windowProc () {
 	return GroupProc;
 }

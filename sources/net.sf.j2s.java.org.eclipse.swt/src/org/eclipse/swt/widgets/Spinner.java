@@ -12,14 +12,16 @@
 package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -379,8 +381,11 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		} else {
 			string = "" + maximum;
 		}
-		width = UIStringUtil.calculatePlainStringLineWidth(string) + 16;
-		height = UIStringUtil.calculatePlainStringLineHeight(string);
+//		width = UIStringUtil.calculatePlainStringLineWidth(string) + 16;
+//		height = UIStringUtil.calculatePlainStringLineHeight(string);
+		Point size = OS.getStringPlainSize(string);
+		width = size.x;
+		height = size.y;
 	}
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;

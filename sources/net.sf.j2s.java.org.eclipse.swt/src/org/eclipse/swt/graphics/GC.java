@@ -11,9 +11,10 @@
 package org.eclipse.swt.graphics;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -4506,12 +4507,14 @@ public Point stringExtent(String string) {
 	}
 	*/
 	if (length == 0) {
-		int height = UIStringUtil.calculatePlainStringLineHeight("M");
-		return new Point(0, height);
+//		int height = UIStringUtil.calculatePlainStringLineHeight("M");
+//		return new Point(0, height);
+		return new Point(0, 16);
 	} else {
-		int height = UIStringUtil.calculatePlainStringLineHeight(string);
-		int width = UIStringUtil.calculatePlainStringLineWidth(string);
-		return new Point(width, height);
+//		int height = UIStringUtil.calculatePlainStringLineHeight(string);
+//		int width = UIStringUtil.calculatePlainStringLineWidth(string);
+//		return new Point(width, height);
+		return OS.getStringPlainSize(string);
 	}
 }
 
@@ -4610,13 +4613,23 @@ public Point textExtent(String string, int flags) {
 	OS.DrawText(handle, buffer, buffer.length(), rect, uFormat);
 	return new Point(rect.right, rect.bottom);
 	*/
+//	if (string.length () == 0) {
+//		int height = UIStringUtil.calculatePlainStringLineHeight("M");
+//		return new Point(0, height);
+//	} else {
+//		int height = UIStringUtil.calculatePlainStringLineHeight(string);
+//		int width = UIStringUtil.calculatePlainStringLineWidth(string);
+//		return new Point(width, height);
+//	}
 	if (string.length () == 0) {
-		int height = UIStringUtil.calculatePlainStringLineHeight("M");
-		return new Point(0, height);
+//		int height = UIStringUtil.calculatePlainStringLineHeight("M");
+//		return new Point(0, height);
+		return new Point(0, 16);
 	} else {
-		int height = UIStringUtil.calculatePlainStringLineHeight(string);
-		int width = UIStringUtil.calculatePlainStringLineWidth(string);
-		return new Point(width, height);
+//		int height = UIStringUtil.calculatePlainStringLineHeight(string);
+//		int width = UIStringUtil.calculatePlainStringLineWidth(string);
+//		return new Point(width, height);
+		return OS.getStringPlainSize(string);
 	}
 }
 

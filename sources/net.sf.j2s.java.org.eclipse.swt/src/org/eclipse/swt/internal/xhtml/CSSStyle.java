@@ -75,4 +75,5 @@ public class CSSStyle {
 	public String backgroundPosition;
 	public String filter;
 	
+	public String cssText;
 }

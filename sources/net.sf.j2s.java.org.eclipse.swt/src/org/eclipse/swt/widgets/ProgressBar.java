@@ -12,9 +12,9 @@
 package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -135,13 +135,21 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if ((style & SWT.HORIZONTAL) != 0) {
 //		width += OS.GetSystemMetrics (OS.SM_CXHSCROLL) * 10;
 //		height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		/*
 		width += UIStringUtil.calculatePlainStringLineWidth("W") * 10;
 		height += UIStringUtil.calculatePlainStringLineHeight("W");
+		*/
+		width += 16 * 10;
+		height += 16;
 	} else {
 //		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
 //		height += OS.GetSystemMetrics (OS.SM_CYVSCROLL) * 10;
+		/*
 		width += UIStringUtil.calculatePlainStringLineWidth("W");
 		height += UIStringUtil.calculatePlainStringLineHeight("W") * 10;
+		*/
+		width += 16;
+		height += 16 * 10;
 	}
 	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);

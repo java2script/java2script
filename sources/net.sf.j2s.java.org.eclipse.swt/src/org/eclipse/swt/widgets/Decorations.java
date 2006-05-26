@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
@@ -336,7 +337,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	if ((style & SWT.NO_TRIM) != 0) {
 		return new Rectangle (x, y, width, height + 4);
 	}
-	return new Rectangle (x, y, width, height + 26);
+	return new Rectangle (x - 4, y - 24, width + 8, height + 20 + 8);
 	/*
 	/* Get the size of the trimmings *-/
 	RECT rect = new RECT ();
@@ -510,8 +511,8 @@ void createHandle() {
 		nextWindowLocation();
 		fHandleStyle.left = window.defaultWindowLeft + "px";
 		fHandleStyle.top = window.defaultWindowTop + "px";
-		fHandleStyle.width = 640 + "px";
-		fHandleStyle.height = 480 + "px";
+		fHandleStyle.width = 768 + "px";
+		fHandleStyle.height = 557 + "px";
 		fHandleStyle.backgroundColor = "menu";
 
 		if ((style & SWT.NO_TRIM) == 0) {
@@ -557,9 +558,10 @@ void createHandle() {
 					display.timerExec(25, new Runnable() {
 						public void run() {
 							Point size = getSize();
-							if (width != size.x || height != size.y) {
+							System.out.println(size);
+							//if (width != size.x || height != size.y) {
 								layout();
-							}
+							//}
 							// Point size = getSize();
 							// size = getLayout().computeSize(Decorations.this,
 							// size.x, size.y, false);
@@ -581,7 +583,7 @@ void createHandle() {
 
 private void nextWindowLocation() {
 	if (window.defaultWindowLeft == null) {
-		window.defaultWindowLeft = "32";
+		window.defaultWindowLeft = "332";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
 		num += 32;
@@ -601,10 +603,10 @@ private void nextWindowLocation() {
 		window.defaultWindowTop = "" + num;
 	}
 	if (window.defaultWindowWidth == null) {
-		window.defaultWindowWidth = "640";
+		window.defaultWindowWidth = "768";
 	}
 	if (window.defaultWindowHeight == null) {
-		window.defaultWindowHeight = "480";
+		window.defaultWindowHeight = "557";
 	}
 	left = Integer.parseInt(window.defaultWindowLeft);
 	top = Integer.parseInt(window.defaultWindowTop);
@@ -770,9 +772,12 @@ public void setBounds(int x, int y, int width, int height) {
 }
 
 public void setSize(int width, int height) {
-	frameHandle.style.width = (width + 8) + "px";
+//	frameHandle.style.width = (width + 8) + "px";
+//	//frameHandle.style.height = (height + 30) + "px";
+//	frameHandle.style.height = (height + 4) + "px";
+	frameHandle.style.width = width + "px";
 	//frameHandle.style.height = (height + 30) + "px";
-	frameHandle.style.height = (height + 4) + "px";
+	frameHandle.style.height = height + "px";
 	this.width = width;
 	this.height = height;
 	ShellFrameDND.fixShellHeight (frameHandle);
@@ -830,7 +835,9 @@ public Rectangle getClientArea () {
 		}
 	}
 	*/
-	return super.getClientArea ();
+	//return super.getClientArea ();
+	//return new Rectangle(0, 0, OS.getContainerWidth(handle), OS.getContainerHeight(handle));
+	return new Rectangle(0, 0, width - 8, height - 20 - 8);
 }
 
 /**

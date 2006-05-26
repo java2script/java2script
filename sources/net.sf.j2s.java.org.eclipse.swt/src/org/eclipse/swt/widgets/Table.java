@@ -16,8 +16,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /** 
@@ -572,7 +572,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if (items.length > 0) {
 		String t = items[0].getNameText();
 		System.out.println(t);
-		height = (UIStringUtil.calculatePlainStringLineHeight(t) + 5) * (items.length + 0);
+//		height = (UIStringUtil.calculatePlainStringLineHeight(t) + 5) * (items.length + 0);
+		height = (OS.getStringPlainHeight(t) + 5) * (items.length + 0);
 	} else {
 		height = 24;
 	}
@@ -690,8 +691,11 @@ void createHandle () {
 	Element table = document.createElement ("TABLE");
 	//table.style.backgroundColor = "white";
 	handle.appendChild(table);
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 }
 
@@ -1308,7 +1312,8 @@ private int getTextWidth(String t) {
 	if (t == null || t.length() == 0) {
 		columnWidth = 0;
 	} else {
-		columnWidth = UIStringUtil.calculatePlainStringLineWidth(t);
+//		columnWidth = UIStringUtil.calculatePlainStringLineWidth(t);
+		columnWidth = OS.getStringPlainWidth(t);
 	}
 	return columnWidth;
 }

@@ -13,11 +13,10 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -286,7 +285,8 @@ public int getWidth () {
 	if (handle.style.width != null && handle.style.width.length() != 0) {
 		return Integer.parseInt(handle.style.width);
 	}
-	return UIStringUtil.getContainerWidth(handle);
+//	return UIStringUtil.getContainerWidth(handle);
+	return OS.getContainerWidth(handle);
 }
 
 /**

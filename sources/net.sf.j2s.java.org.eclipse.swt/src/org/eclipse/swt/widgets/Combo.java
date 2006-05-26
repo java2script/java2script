@@ -16,6 +16,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -497,8 +498,11 @@ void createHandle () {
 	//		handle.size = 1;
 	//	}
 	//handle.appendChild (document.createTextNode(text));
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 
 }

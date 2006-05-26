@@ -12,11 +12,13 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -43,6 +45,10 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class Label extends Control {
 	String text = "";
+	boolean textSizeCached = false;
+	int textWidthCached, textHeightCached;
+	private String lastColor;
+	
 	Image image, image2;
 	/*
 	int font, hCopiedBitmap;
@@ -231,7 +237,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	int border = getBorderWidth ();
 	if ((style & SWT.SEPARATOR) != 0) {
 		//int lineWidth = OS.GetSystemMetrics (OS.SM_CXBORDER);
-		int lineWidth = 4;
+		int lineWidth = 1;
 		if ((style & SWT.HORIZONTAL) != 0) {
 			width = DEFAULT_WIDTH;  height = lineWidth * 2;
 		} else {
@@ -283,15 +289,47 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	}
 	*/
 	if (text != null) {
-		/*
-		 * TODO: use the inner scroll Width to determine the width!
-		 */
-		width += UIStringUtil.calculatePlainStringLineWidth(text);
-		height += UIStringUtil.calculatePlainStringLineHeight(text);
+		if ((style & SWT.WRAP) != 0 && wHint != SWT.DEFAULT && hHint == SWT.DEFAULT) {
+			height = OS.getStringStyledWrappedHeight(text, "label-default", handle.style.cssText, wHint);
+		} else {
+			if (!textSizeCached || changed) {
+				Point cssSize = OS.getStringStyledSize(text, "label-default", handle.style.cssText);
+				textSizeCached = true;
+				textWidthCached = cssSize.x;
+				textHeightCached = cssSize.y;
+			}
+			width = textWidthCached;
+			height = textHeightCached;
+		}
+	}
+	if (image != null) {
+		if (image.width == 0 && image.height == 0) {
+			if (image.url != null && image.url.length() != 0)
+			/**
+			 * @j2sNative
+			 * var img = new Image ();
+			 * img.src = this.image.url;
+			 * this.image.width = img.width;
+			 * this.image.height = img.height;
+			 * width += img.width;
+			 * height = Math.max(img.height, height);
+			 */
+			{
+				// TODO: The above method to find out width & height is unsafe!
+				// TODO: Maybe the image may fail to be loaded!
+			} else {
+				// Default to 16x16 for common
+				width += 16;
+				height = Math.max(16, height);
+			}
+		} else {
+			width += image.width;
+			height = Math.max(image.height, height);
+		}
 	}
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
-//	width += border * 2; height += border * 2;
+	width += border * 2; height += border * 2;
 	/* 
 	* Feature in WinCE PPC.  Text labels have a trim
 	* of one pixel wide on the right and left side.
@@ -300,17 +338,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 //	if (OS.IsWinCE) {
 //		if (!isBitmap && !isIcon) width += 2;
 //	}
-	if ((style & SWT.WRAP) != 0 && hHint == SWT.DEFAULT) {
-		height = UIStringUtil.calculateStyledStringBlockHeight(text, width, "label-default label-wrap");
-	}
-	if (image != null) {
-		width += image.width;
-		height = Math.max(image.height, height);
-	}
-	if ((style & SWT.BORDER) != 0) {
-		width += border * 2;
-		height += border * 2;
-	}
 	return new Point (width, height);
 }
 
@@ -443,12 +470,13 @@ public void setAlignment (int alignment) {
 	style |= alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	if ((style & SWT.LEFT) != 0) {
 		handle.style.textAlign = "left";
+		handle.style.backgroundPosition = "left center";
 	} else if ((style & SWT.CENTER) != 0) {
 		handle.style.textAlign = "center";
-	} else if ((style & SWT.CENTER) != 0) {
+		handle.style.backgroundPosition = "center center";
+	} else if ((style & SWT.RIGHT) != 0) {
 		handle.style.textAlign = "right";
-	} else {
-		handle.style.textAlign = "inherit";
+		handle.style.backgroundPosition = "right center";
 	}
 	/*
 	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
@@ -496,7 +524,7 @@ public void setImage (Image image) {
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 	//_setImage (this.image = image);
 	this.image = image;
-	if (this.image.handle == null) {
+	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle handleStyle = handle.style;
 		if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
@@ -508,7 +536,7 @@ public void setImage (Image image) {
 			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
 			handleStyle.backgroundRepeat = "no-repeat";
-			handleStyle.backgroundPosition = "center center";
+			handleStyle.backgroundPosition = "left center";
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 		}
 	} else if (handle.childNodes.length == 0) {
@@ -560,10 +588,21 @@ public void setText (String string) {
 	* has not changed.  The fix is to check for this case and do
 	* nothing.
 	*/
-	if (string.equals (text)) return;
+	//if (string.equals (text)) return;
+	if (image != null) {
+		handle.style.backgroundImage = "";
+		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
+				&& handle.style.filter != null) {
+			handle.style.filter = "";
+		}
+	}
+	if (string == text) {
+		return ;
+	}
+	textSizeCached = false;
 	text = string;
-	//handle.innerHTML = text;
-	handle.appendChild(document.createTextNode(text));
+	//handle.appendChild(document.createTextNode(text));
+	OS.insertText(handle, text);
 	/*
 	int newBits = OS.GetWindowLong (handle, OS.GWL_STYLE), oldBits = newBits;
 	newBits &= ~(OS.SS_BITMAP | OS.SS_ICON | OS.SS_REALSIZEIMAGE | OS.SS_CENTERIMAGE);
@@ -637,31 +676,37 @@ void createHandle() {
 		}
 		handle.appendChild(seperator);
 		*/
+		if ((style & SWT.SHADOW_IN) != 0) {
+			handle.className += " shadow-in";
+		} else if ((style & SWT.SHADOW_OUT) != 0) {
+			handle.className += " shadow-out";
+		} else {
+			handle.className += " shadow-none";
+		}
 		handle.style.fontSize = "0";
 		Element seperator1 = document.createElement("DIV"); 
-		if ((style & SWT.VERTICAL) != 0) {
-			seperator1.className = "label-seperator-vertical-left";
-		} else {
-			seperator1.className = "label-seperator-horizontal-top";
-		}
-		handle.appendChild(seperator1);
 		Element seperator2 = document.createElement("DIV"); 
 		if ((style & SWT.VERTICAL) != 0) {
+			seperator1.className = "label-seperator-vertical-left";
 			seperator2.className = "label-seperator-vertical-right";
 		} else {
+			seperator1.className = "label-seperator-horizontal-top";
 			seperator2.className = "label-seperator-horizontal-bottom";
 		}
+		handle.appendChild(seperator1);
 		handle.appendChild(seperator2);
 	}
 	if ((style & SWT.WRAP) != 0) {
 		handle.className += " label-wrap";
-		//handle.appendChild (document.createTextNode(text));
 	}
 	if ((style & SWT.BORDER) != 0) {
 		handle.className += " label-border";
 	}
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 }
 
@@ -671,7 +716,11 @@ public void setBounds(int x, int y, int width, int height) {
 	if ((style & SWT.SEPARATOR) != 0) {
 		CSSStyle handleStyle = handle.childNodes[0].style;
 		if ((style & SWT.HORIZONTAL) != 0) {
-			handleStyle.marginTop = ((height / 2) - 1) + "px";
+			int h = (height / 2) - 1;
+			if (OS.isIE) {
+				h--;
+			}
+			handleStyle.marginTop = h + "px";
 			handleStyle.width = width + "px";
 			handle.childNodes[1].style.width = width + "px";
 		} else {
@@ -683,11 +732,43 @@ public void setBounds(int x, int y, int width, int height) {
 	}
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setEnabled(boolean)
+ */
+public void setEnabled(boolean enabled) {
+	super.setEnabled(enabled);
+	if (!enabled) {
+		lastColor = handle.style.color; 
+		handle.style.color = "gray";
+	} else {
+		handle.style.color = lastColor;
+		lastColor = null;
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	super.setForeground(color);
+	if (lastColor != null) {
+		lastColor = handle.style.color;
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setFont(org.eclipse.swt.graphics.Font)
+ */
+public void setFont(Font font) {
+	textSizeCached = false;
+	super.setFont(font);
+}
+
+/*
 String windowClass() {
 	return "DIV";
 }
 
-/*
 int windowProc () {
 	return LabelProc;
 }

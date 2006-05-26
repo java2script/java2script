@@ -19,7 +19,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -42,6 +44,8 @@ import org.eclipse.swt.internal.xhtml.document;
 public class Text extends Scrollable {
 	int tabs, oldStart, oldEnd;
 	boolean doubleClick, ignoreModify, ignoreVerify, ignoreCharacter;
+	
+	int lineHeight;
 	
 	/**
 	* The maximum number of characters that can be entered
@@ -152,16 +156,32 @@ void createHandle () {
 		handle = document.createElement("INPUT");
 		//handle.type = "text";
 	}
-	handle.className = "text-default";
+	handle.className = "text-default" + (OS.isIE ? " text-ie-default" : "");
 	if ((style & SWT.BORDER) != 0) {
 		handle.className += " text-border";
 	}
 	if ((style & SWT.READ_ONLY) != 0) {
 		handle.readOnly = true;
 	}
-	//handle.
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
+//	if ((style & SWT.WRAP) != 0) {
+//		handle.style.whiteSpace = "normal";
+//	}
+	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
+		handle.style.overflow = "scroll";
+	} else {
+		//if (OS.isIE) {
+			if ((style & SWT.V_SCROLL) != 0) {
+				handle.className += " text-v-scroll";
+			} else if ((style & SWT.H_SCROLL) != 0) {
+				handle.className += " text-h-scroll";
+			} 
+		//}
+	}
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
@@ -504,13 +524,35 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int height = 0, width = 0;
 	if (wHint == SWT.DEFAULT || hHint == SWT.DEFAULT) {
+		Point size = null;
+		String text = getText();
+		if (text != null && text.length() != 0) {
+			boolean wrap = (style & SWT.MULTI) != 0 && (style & SWT.WRAP) != 0;
+			if (wrap && wHint != SWT.DEFAULT && wHint > 0) {
+				size = new Point(wHint, 
+						OS.getStringStyledWrappedHeight(text, "text-default", handle.style.cssText, wHint));
+			} else {
+				size = OS.getStringStyledSize(text, "text-default", handle.style.cssText);
+			}
+//			width = size.x - 2; // there are default padding "0 1px" for class "text-default";
+			height = size.y;
+			if (height <= 0) {
+				height = getLineHeight();
+			}
+		} else {
+			width = 0;
+			height = getLineHeight();
+		}
+		/*
 		String[] splits = getText().split("\n");
-		height += getLineHeight() * splits.length + 10;
+		height += getLineHeight() * splits.length;
 		int lineChars = 0;
 		for (int i = 0; i < splits.length; i++) {
 			lineChars = Math.max(lineChars, splits[i].length());
 		}
 		width += lineChars * 6;
+		*/
+		
 		/*
 		int newFont, oldFont = 0;
 		int hDC = OS.GetDC (handle);
@@ -546,11 +588,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
-	
 	Rectangle trim = computeTrim (0, 0, width, height);
-	return new Point (trim.width  - 4, trim.height - 4);
-	//*/
-	//return super.computeSize(wHint, hHint);
+	return new Point (trim.width, trim.height);
+//	return new Point (trim.width  - 4, trim.height - 4);
 }
 
 public Rectangle computeTrim (int x, int y, int width, int height) {
@@ -562,10 +602,23 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	* the single-line text widget in an editable combo
 	* box.
 	*/
-	int margins = 2;//OS.SendMessage(handle, OS.EM_GETMARGINS, 0, 0);
-	rect.x -= margins & 0xFFFF;
-	rect.width += (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
+//	int margins = OS.SendMessage(handle, OS.EM_GETMARGINS, 0, 0);
+//	rect.x -= margins & 0xFFFF;
+//	rect.width += (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
+	System.out.println(rect);
+	System.out.println(width + "," + height);
+	if ((style & SWT.MULTI) != 0) {
+		rect.width += 6;
+	} else {
+		rect.width += 1;
+	}
 	if ((style & SWT.H_SCROLL) != 0) rect.width++;
+	if ((style & SWT.V_SCROLL) != 0) {
+		rect.width += 16;
+	}
+	if ((style & SWT.H_SCROLL) != 0) {
+		rect.height += 16;
+	}
 	if ((style & SWT.BORDER) != 0) {
 		rect.x -= 1;
 		rect.y -= 1;
@@ -688,7 +741,11 @@ public int getBorderWidth () {
 //	if ((style & SWT.BORDER) != 0 && (style & SWT.FLAT) != 0) {
 //		return OS.GetSystemMetrics (OS.SM_CXBORDER);
 //	}
-	return super.getBorderWidth ();
+//	return super.getBorderWidth ();
+	if ((style & SWT.BORDER) != 0) {
+		return 2;
+	}
+	return 0;
 }
 
 /**
@@ -945,7 +1002,10 @@ public int getLineHeight () {
 	OS.ReleaseDC (handle, hDC);
 	return tm.tmHeight;
 	*/
-	return 16;
+	if (lineHeight != -1) {
+		lineHeight = OS.getStringStyledHeight(".", "text-default", handle.style.cssText);
+	}
+	return lineHeight;
 }
 
 /**
@@ -1967,6 +2027,16 @@ public void setTopIndex (int index) {
 	int topIndex = OS.SendMessage (handle, OS.EM_GETFIRSTVISIBLELINE, 0, 0);
 	OS.SendMessage (handle, OS.EM_LINESCROLL, 0, index - topIndex);
 	*/
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if ((style & SWT.BORDER) != 0) {
+		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 /**

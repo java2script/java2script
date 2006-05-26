@@ -13,12 +13,12 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -267,13 +267,15 @@ public Rectangle getBounds () {
 	if (width != null && width.length() != 0) {
 		w = Integer.parseInt(width);
 	} else if (text != null && text.length() != 0) {
-		w = UIStringUtil.calculatePlainStringLineWidth(text);
+//		w = UIStringUtil.calculatePlainStringLineWidth(text);
+		w = OS.getStringPlainWidth(text);
 	}
 	String height = handle.style.height;
 	if (height != null && height.length() != 0) {
 		h = Integer.parseInt(height);
 	} else if (text != null && text.length() != 0) {
-		h = UIStringUtil.calculatePlainStringLineHeight(text);
+//		h = UIStringUtil.calculatePlainStringLineHeight(text);
+		h = OS.getStringPlainHeight(text);
 	}
 
 	return new Rectangle (x, y, w + 6, h + 6);

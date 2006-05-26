@@ -161,6 +161,9 @@ public Browser(Composite parent, int style) {
 		// entering IFRAME
 		handle.style.border = "2px solid menu";
 	}
+	/*
+	 * FIXME:Browser's parent element handle is not safe!!!
+	 */
 	if (getParent().handle != null) {
 		getParent().handle.appendChild(handle);
 	}

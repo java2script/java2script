@@ -20,6 +20,10 @@ public class Element {
 	public String value;
 	public String type;
 
+	public String href;
+	public String target;
+	public String title;
+	
 	public Object onclick;
 	public Object onkeypress;
 	public Object onkeydown;
@@ -57,6 +61,10 @@ public class Element {
 
 	public int height;
 
+	public int offsetWidth, clientWidth, scrollWidth;
+	
+	public int offsetHeight, clientHeight, scrollHeight;
+	
 	public String src;
 
 	public String alt;

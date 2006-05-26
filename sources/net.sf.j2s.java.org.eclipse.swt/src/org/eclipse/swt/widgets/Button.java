@@ -18,9 +18,11 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
 
@@ -50,6 +52,10 @@ import org.eclipse.swt.internal.xhtml.document;
 
 public class Button extends Control {
 	String text = "";
+	boolean textSizeCached = false;
+	int textWidthCached, textHeightCached;
+	private String lastColor;
+	private boolean hasImage;
 	Image image, image2;
 	ImageList imageList;
 	boolean ignoreMouse;
@@ -58,7 +64,7 @@ public class Button extends Control {
 	static final TCHAR ButtonClass = new TCHAR (0,"BUTTON", true);
 	static final char [] SCROLLBAR = new char [] {'S', 'C', 'R', 'O', 'L', 'L', 'B', 'A', 'R', 0};
 	*/
-	static final int CHECK_WIDTH = 12, CHECK_HEIGHT = 12;
+	static final int CHECK_WIDTH = 13, CHECK_HEIGHT = 13;
 	static final int ICON_WIDTH = 128, ICON_HEIGHT = 128;
 	/*
 	static {
@@ -78,7 +84,8 @@ public class Button extends Control {
 		ButtonProc = lpWndClass.lpfnWndProc;
 	}
 	*/
-	private Element btnText;
+	Element btnText;
+	Element btnHandle; 
 
 	/**
 	 * Constructs a new instance of this class given its parent
@@ -307,31 +314,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int border = getBorderWidth ();
 	int width = 0, height = 0;
-	//return super.computeSize(wHint, hHint, changed);
-	//int width = DEFAULT_WIDTH;
-	width = 12;
-	height = 24;//DEFAULT_HEIGHT;
-	if (wHint == SWT.DEFAULT) {
-		/*
-		 * TODO: use the inner scroll Width to determine the width!
-		 */
-		if (text != null) {
-			//width += text.length() * 5;
-			width = 6 + UIStringUtil.calculateStyledStringLineWidth(text, "button-default");
-		}
-		int extra = 6;
-		if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
-			width += CHECK_WIDTH + extra;
-			height = Math.max (height, CHECK_HEIGHT + 3);
-		}
-	
-		if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
-			width += 6;
-			//height += 10;
-		}
-	}
-	/*
 	if ((style & SWT.ARROW) != 0) {
+		/*
 		if ((style & (SWT.UP | SWT.DOWN)) != 0) {
 			width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
 			height += OS.GetSystemMetrics (OS.SM_CYVSCROLL);
@@ -339,13 +323,25 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			width += OS.GetSystemMetrics (OS.SM_CXHSCROLL);
 			height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
 		}
+		*/
+		if ((style & (SWT.UP | SWT.DOWN)) != 0) {
+			width += 16;
+			height += 16;
+		} else {
+			width += 16;
+			height += 16;
+		}
 		if (wHint != SWT.DEFAULT) width = wHint;
 		if (hHint != SWT.DEFAULT) height = hHint;
 		width += border * 2; height += border * 2;
 		return new Point (width, height);
 	}
 	int extra = 0;
-	boolean hasImage;
+//	boolean hasImage;
+//	hasImage = image != null && (text == null || text.length() == 0);
+//	String bg = "" + btnText.style.backgroundImage;
+//	hasImage = bg != null && bg.length() != 0;
+	/*
 	if (OS.COMCTL32_MAJOR >= 6 && OS.IsAppThemed ()) {
 		BUTTON_IMAGELIST buttonImageList = new BUTTON_IMAGELIST();
 		OS.SendMessage (handle, OS.BCM_GETIMAGELIST, 0, buttonImageList);
@@ -354,7 +350,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 		hasImage = (bits & (OS.BS_BITMAP | OS.BS_ICON)) != 0;		
 	}
+	*/
 	if (!hasImage) {
+		/*
 		int oldFont = 0;
 		int hDC = OS.GetDC (handle);
 		int newFont = OS.SendMessage (handle, OS.WM_GETFONT, 0, 0);
@@ -375,13 +373,60 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		}
 		if (newFont != 0) OS.SelectObject (hDC, oldFont);
 		OS.ReleaseDC (handle, hDC);
+		*/
+		if (text == null || text.length() == 0) {
+			height += OS.getStringStyledHeight(".", "button-default", null);
+		} else {
+			if (!textSizeCached || changed) {
+				String string = text.replaceAll("[\r\n]+", "");
+				Point cssSize = OS.getStringStyledSize(string, "button-default", handle.style.cssText);
+				textSizeCached = true;
+				textWidthCached = cssSize.x;
+				textHeightCached = cssSize.y;
+			}
+			
+			width = textWidthCached;
+			height = textHeightCached;
+			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+				width -= 5;
+			}
+			extra = Math.max (8, height);
+		}
 	} else {
+		if (image != null) {
+			if (image.width == 0 && image.height == 0) {
+				if (image.url != null && image.url.length() != 0)
+				/**
+				 * @j2sNative
+				 * var img = new Image ();
+				 * img.src = this.image.url;
+				 * this.image.width = img.width;
+				 * this.image.height = img.height;
+				 * width += img.width;
+				 * height = Math.max(img.height, height);
+				 */
+				{
+					// TODO: The above method to find out width & height is unsafe!
+					// TODO: Maybe the image may fail to be loaded!
+				} else {
+					// Default to 16x16 for common
+					width += 16;
+					height = Math.max(16, height);
+				}
+			} else {
+				width += image.width;
+				height = Math.max(image.height, height);
+			}
+			extra = 8;
+		}
+		/*
 		if (image != null) {
 			Rectangle rect = image.getBounds ();
 			width = rect.width;
 			height = rect.height;
 			extra = 8;
 		}
+		*/
 	}
 	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
 		width += CHECK_WIDTH + extra;
@@ -390,7 +435,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
 		width += 12;  height += 10;
 	}
-	*/
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
 	width += border * 2; height += border * 2;
@@ -411,7 +455,7 @@ int defaultForeground () {
 */
 	
 void enableWidget (boolean enabled) {
-	super.enableWidget (enabled);
+//	super.enableWidget (enabled);
 	/*
 	* Bug in Windows.  When a Button control is right-to-left and
 	* is disabled, the first pixel of the text is clipped.  The fix
@@ -430,6 +474,20 @@ void enableWidget (boolean enabled) {
 		}
 	}
 	*/
+	btnHandle.disabled = !enabled;
+	String cssName = handle.className;
+	if (cssName == null) cssName = "";
+	String key = "button-disabled";
+	int idx = cssName.indexOf(key);
+	if (!enabled) {
+		if (idx == -1) {
+			handle.className += " " + key; 
+		}
+	} else {
+		if (idx != -1) {
+			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+	}
 }
 
 /**
@@ -461,6 +519,13 @@ public int getAlignment () {
 	if ((style & SWT.CENTER) != 0) return SWT.CENTER;
 	if ((style & SWT.RIGHT) != 0) return SWT.RIGHT;
 	return SWT.LEFT;
+}
+
+public int getBorderWidth() {
+	if ((style & SWT.BORDER) != 0) {
+		return 2;
+	}
+	return 0;
 }
 
 boolean getDefault () {
@@ -512,9 +577,10 @@ public boolean getSelection () {
 //	int state = OS.SendMessage (handle, OS.BM_GETCHECK, 0, 0);
 //	return (state & OS.BST_CHECKED) != 0;
 	if ((style & SWT.TOGGLE) != 0) {
-		return (handle.className != null && handle.className.indexOf("selected") != -1);
+		System.out.println(btnHandle.className);
+		return (btnHandle.className != null && btnHandle.className.indexOf("button-selected") != -1);
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		return handle.childNodes[0].checked;
+		return btnHandle.checked;
 	}
 	return false;
 }
@@ -535,6 +601,13 @@ public String getText () {
 	checkWidget ();
 	if ((style & SWT.ARROW) != 0) return "";
 	return text;
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#isEnabled()
+ */
+public boolean isEnabled() {
+	return !btnHandle.disabled;
 }
 
 boolean isTabItem () {
@@ -568,6 +641,10 @@ void releaseHandle() {
 	if (btnText != null) {
 		BrowserNative.releaseHandle(btnText);
 		btnText = null;
+	}
+	if (btnHandle != null) {
+		BrowserNative.releaseHandle(btnHandle);
+		btnHandle = null;
 	}
 	super.releaseHandle();
 }
@@ -653,12 +730,36 @@ public void setAlignment (int alignment) {
 		if ((style & (SWT.UP | SWT.DOWN | SWT.LEFT | SWT.RIGHT)) == 0) return; 
 		style &= ~(SWT.UP | SWT.DOWN | SWT.LEFT | SWT.RIGHT);
 		style |= alignment & (SWT.UP | SWT.DOWN | SWT.LEFT | SWT.RIGHT);
-		//OS.InvalidateRect (handle, null, true);
+		updateArrowStyle();
+		int cx = width, cy = height;
+		if ((style & SWT.BORDER) != 0) {
+			cx -= 4;
+			cy -= 4;
+		}
+		updateArrowSize(cx, cy);
 		return;
 	}
 	if ((alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER)) == 0) return;
 	style &= ~(SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	style |= alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER);
+	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
+		CSSStyle handleStyle = null;
+		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+			handleStyle = btnText.style;
+		} else {
+			handleStyle = btnHandle.style;
+		}
+		if ((style & SWT.LEFT) != 0) {
+			btnText.style.textAlign = "left";
+			handleStyle.backgroundPosition = "left center";
+		} if ((style & SWT.CENTER) != 0) {
+			btnText.style.textAlign = "center";
+			handleStyle.backgroundPosition = "center center";
+		} else if ((style & SWT.RIGHT) != 0) {
+			btnText.style.textAlign = "right";
+			handleStyle.backgroundPosition = "right center";
+		}
+	}
 	/*
 	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 	bits &= ~(OS.BS_LEFT | OS.BS_CENTER | OS.BS_RIGHT);
@@ -729,13 +830,81 @@ boolean setFixedFocus () {
  */
 public void setImage (Image image) {
 	checkWidget ();
+	if ((style & SWT.ARROW) != 0) return ;
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 //	_setImage (this.image = image);
-	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+//	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
+//	this.image = image;
+//	if (image != null && handle != null) {
+//		handle.style.backgroundImage = "url('" + image.url + "')";
+//	}
 	this.image = image;
-	if (image != null && handle != null) {
-		handle.style.backgroundImage = "url('" + image.url + "')";
+	hasImage = true;
+	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
+		OS.clearChildren(btnText);
+		btnText.style.display = "";
+		btnText.style.paddingTop = "";
+		btnHandle.parentNode.style.bottom = ""; 
+		btnHandle.parentNode.style.top = "";
+		btnHandle.style.top = "";
+		btnText.parentNode.style.position = "";
+		btnText.parentNode.style.top = "";
+		
+		CSSStyle handleStyle = null;
+		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+			handleStyle = btnText.style;
+			/**
+			 * @j2sNative 
+			 * var img = new Image ();
+			 * img.src = this.image.url;
+			 * this.image.width = img.width;
+			 * this.image.height = img.height;
+			 */{}
+//			handleStyle.fontSize = this.image.height + "px";
+			handleStyle.display = "block";
+			handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
+			handleStyle.paddingTop = this.image.height + "px"; 
+//			handleStyle.lineHeight = this.image.width + "px"; 
+//			btnText.appendChild(document.createTextNode(" "));
+		} else {
+			handleStyle = btnHandle.style;
+		}
+		if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+//				Element imgBackground = document.createElement("DIV");
+//				imgBackground.style.position = "absolute";
+//				imgBackground.style.width = "100%";
+//				imgBackground.style.height = "100%";
+//				imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+//				handle.appendChild(imgBackground);
+			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+		} else {
+			handleStyle.backgroundRepeat = "no-repeat";
+			String bgXPos = "center";
+			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+				if ((style & SWT.RIGHT) != 0) {
+					bgXPos = "right";
+				} else if ((style & SWT.CENTER) != 0) {
+					bgXPos = "center";
+				} else {
+					bgXPos = "left";
+				}
+			}
+			handleStyle.backgroundPosition = bgXPos + " center";
+			
+			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+		}
+		//btnText.appendChild(document.createTextNode("hello"));
+//	} else if (handle.childNodes.length == 0) {
+//		for (int i = 0; i < image.handle.childNodes.length; i++) {
+//			handle.appendChild(image.handle.childNodes[i]);
+//		}
+//	} else {
+//		Element txt = handle.childNodes[0];
+//		for (int i = 0; i < image.handle.childNodes.length; i++) {
+//			handle.insertBefore(image.handle.childNodes[i], txt);
+//		}
 	}
+	
 }
 
 boolean setRadioFocus () {
@@ -786,10 +955,21 @@ public void setSelection (boolean selected) {
 	checkWidget ();
 	if ((style & (SWT.CHECK | SWT.RADIO | SWT.TOGGLE)) == 0) return;
 	if ((style & SWT.TOGGLE) != 0) {
-		handle.className = selected ? "button-default button-toggle-selected" : "button-default";
+		String cssName = btnHandle.className;
+		if (cssName == null) cssName = "";
+		String key = "button-selected";
+		int idx = cssName.indexOf(key);
+		if (selected) {
+			if (idx == -1) {
+				btnHandle.className += " " + key; 
+			}
+		} else {
+			if (idx != -1) {
+				btnHandle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+			}
+		}
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		//handle.style.borderStyle = selected ? "inset" : "";
-		handle.childNodes[0].checked = selected;
+		btnHandle.checked = selected;
 	} 
 //	int flags = selected ? OS.BST_CHECKED : OS.BST_UNCHECKED;
 	
@@ -850,24 +1030,36 @@ public void setText (String string) {
 		}
 	}
 	*/
+	if (string != text) {
+		textSizeCached = false;
+	}
+	OS.clearChildren(btnText);
+//	boolean hasImage;
+//	hasImage = image != null && (text == null || text.length() == 0);
+//	String bg = "" + btnText.style.backgroundImage;
+//	hasImage = bg != null && bg.length() != 0;
+	if (hasImage) {
+		btnText.style.backgroundImage = "";
+		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
+				&& btnText.style.filter != null) {
+			btnText.style.filter = "";
+		}
+	}
 	text = string;
-	if (handle != null) {
-		Element el = handle;
-		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-			el = handle.childNodes[1];
-		}
-		int idx = string.indexOf('&');
-		if (idx == -1) {
-			el.appendChild(document.createTextNode(string));
-		} else {
-			// Only one &
-			el.appendChild(document.createTextNode(string.substring(0, idx)));
-			Element underline = document.createElement("SPAN");
-			underline.appendChild(document.createTextNode(string.substring(idx + 1, idx + 2)));
-			underline.className = "button-text-mnemonics";
-			el.appendChild(underline);
-			el.appendChild(document.createTextNode(string.substring(idx + 2)));
-		}
+	hasImage = false;
+	//string = string.replaceAll("&&", "&");
+	string = string.replaceAll("(&(&))|([\r\n]+)", "$2");
+	int idx = string.indexOf('&');
+	if (idx == -1) {
+		btnText.appendChild(document.createTextNode(string));
+	} else {
+		// Only one &
+		btnText.appendChild(document.createTextNode(string.substring(0, idx)));
+		Element underline = document.createElement("SPAN");
+		underline.appendChild(document.createTextNode(string.substring(idx + 1, idx + 2)));
+		underline.className = "button-text-mnemonics";
+		btnText.appendChild(underline);
+		btnText.appendChild(document.createTextNode(string.substring(idx + 2)));
 	}
 	/*
 	* Bug in Windows.  When a Button control is right-to-left and
@@ -882,6 +1074,117 @@ public void setText (String string) {
 	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 	OS.SetWindowText (handle, buffer);
 	*/
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#SetWindowPos(org.eclipse.swt.internal.xhtml.Element, org.eclipse.swt.internal.xhtml.Element, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if ((style & SWT.BORDER) != 0) {
+		cx -= 4;
+		cy -= 4;
+	}
+	if ((style & SWT.ARROW) != 0) {
+		updateArrowSize(cx, cy);
+	}
+	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+//		boolean hasImage;
+//		hasImage = image != null && (text == null || text.length() == 0);
+//		String bg = "" + btnText.style.backgroundImage;
+//		hasImage = bg != null && bg.length() != 0;
+
+		int h = 0;
+		if (!hasImage) {
+			if (textSizeCached) {
+				btnText.style.display = "block";
+				if (textHeightCached < CHECK_HEIGHT) {
+					btnText.style.paddingTop = ((CHECK_HEIGHT - textHeightCached) / 2) + "px";
+					btnHandle.parentNode.style.bottom = "0"; 
+					btnHandle.parentNode.style.top = "0";
+					btnHandle.style.top = "0";
+				} else {
+					btnText.style.paddingTop = "0";
+					//btnHandle.parentNode.style.bottom = "auto"; 
+				}
+			}
+			h = textHeightCached;
+		} else {
+//			btnText.style.display = "block";
+//			if (image.height < CHECK_HEIGHT) {
+//				//btnText.style.paddingTop = ((image.height - textHeightCached) / 2) + "px";
+//				btnHandle.parentNode.style.bottom = "auto"; 
+//				btnHandle.parentNode.style.top = "auto";
+//				btnHandle.style.top = "auto";
+//			}
+			h = image.height;
+		}
+		h = Math.max(CHECK_HEIGHT + 3, h);
+		if (h < cy) {
+			btnText.parentNode.style.position = "relative";
+			btnText.parentNode.style.top = ((cy - h) / 2) + "px";
+		}
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
+private void updateArrowSize(int cx, int cy) {
+	int xx = Math.min(cx, cy) / 3;
+	final CSSStyle s = btnText.style;
+	s.borderWidth = xx + "px";
+	if ((style & SWT.LEFT) != 0) {
+		s.borderLeftWidth = "0";
+	} else if ((style & SWT.RIGHT) != 0) {
+		s.borderRightWidth = "0";
+	} else if ((style & SWT.UP) != 0) {
+		s.borderTopWidth = "0";
+	} else if ((style & SWT.DOWN) != 0) {
+		if (xx > 1) {
+			s.borderWidth = (xx - 1) + "px";
+		}
+		s.borderBottomWidth = "0";
+	} else {
+		s.borderTopWidth = "0";
+	} 
+	int x = Math.min(cx, cy) / 6;
+	s.position = "relative";
+	if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
+		s.top = (x - 3) + "px";
+		if ((style & SWT.RIGHT) != 0) {
+			s.left = "1px";
+		}
+	} else {
+		if ((style & SWT.UP) != 0) {
+			s.top = (xx - 3)+ "px";
+		} else if ((style & SWT.DOWN) != 0) {
+			s.top = (xx - 2)+ "px";
+		}
+	}
+	/**
+	 * TODO: Get rid of these nasty position things!
+	 */
+	if (OS.isMozilla && !OS.isFirefox) {
+		if ((style & SWT.UP) != 0) {
+			s.left = "-2px";
+		} else if ((style & SWT.DOWN) != 0) {
+			s.left = "-1px";
+		}
+	}
+	if (OS.isFirefox) {
+		if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
+			s.top = "-2px";
+			if ((style & SWT.RIGHT) != 0) {
+				s.left = "1px";
+			}
+		} else {
+			if ((style & SWT.UP) != 0) {
+				s.left = "-2px";
+				s.top = "-1px";
+			} else if ((style & SWT.DOWN) != 0) {
+				s.left = "-1px";
+				s.top = "-1px";
+			}
+		}
+	}
 }
 
 public void setCursor(Cursor cursor) {
@@ -911,32 +1214,95 @@ int widgetStyle () {
  */
 void createHandle() {
 //	super.createHandle();
-	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
-		handle = document.createElement ("BUTTON");
-		handle.className = "button-default";
-	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		handle = document.createElement("DIV");
-		handle.className = "button-default";
-		
-		Element radioBtn = document.createElement("INPUT");
-		radioBtn.type = ((style & SWT.RADIO) != 0) ? "radio" : "checkbox";
-		radioBtn.className = "button-radio-default";
-		
-		handle.appendChild(radioBtn);
+	handle = document.createElement ("DIV");
+	String cssName = "button-default";
+	if ((style & SWT.BORDER) != 0) {
+		cssName += " button-border";
 	}
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if ((style & SWT.FLAT) != 0) {
+		cssName += " button-flat";
+	}
+	handle.className = cssName;
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
+	}
+	
+	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+		Element btnEl = document.createElement("DIV");
+		handle.appendChild(btnEl);
+		Element btnWrapperEl = document.createElement("DIV");
+		btnWrapperEl.className = "button-input-wrapper";
+		btnEl.appendChild(btnWrapperEl);
+		btnHandle = document.createElement("INPUT");
+		if ((style & SWT.CHECK) != 0) {
+			btnEl.className = "button-check";
+			btnHandle.type = "checkbox";
+		} else {
+			btnEl.className = "button-radio";
+			btnHandle.type = "radio";
+		}
+		btnWrapperEl.appendChild(btnHandle);
+		btnText = document.createElement("DIV");
+		btnText.className = "button-text";
+		btnEl.appendChild(btnText);
+	} else {
+		btnHandle = document.createElement ("BUTTON");
+		handle.appendChild(btnHandle);
+		btnText = document.createElement("DIV");
+		btnHandle.appendChild(btnText);
+		if ((style & SWT.TOGGLE) != 0) {
+			btnHandle.className = "button-toggle";
+		} else if ((style & SWT.ARROW) != 0) {
+			btnHandle.className = "button-arrow";
+			updateArrowStyle(); 
+		} else {
+			btnHandle.className = "button-push";
+		}
 	}
 	//bindHandle();
-	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		btnText = document.createElement("SPAN");
-		handle.appendChild(btnText);
+	hookSelection();
+}
+
+private void updateArrowStyle() {
+	if ((style & SWT.LEFT) != 0) {
+		btnText.className = "button-arrow-left";
+	} else if ((style & SWT.RIGHT) != 0) {
+		btnText.className = "button-arrow-right";
+	} else if ((style & SWT.UP) != 0) {
+		btnText.className = "button-arrow-up";
+	} else if ((style & SWT.DOWN) != 0) {
+		btnText.className = "button-arrow-down";
+	} else {
+		btnText.className = "button-arrow-up";
 	}
 }
 
 void hookSelection() {
-	handle.onclick = new RunnableCompatibility() {
+	RunnableCompatibility eventHandler = new RunnableCompatibility() {
 		public void run() {
+			if (!isEnabled()) {
+				toReturn(false);
+				return ;
+			}
+			if ((style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
+				HTMLEvent e = (HTMLEvent) getEvent();
+				if (e.srcElement != btnHandle) {
+					setSelection (!getSelection ());
+				}
+			} else {
+				if ((style & SWT.RADIO) != 0) {
+					if ((parent.getStyle () & SWT.NO_RADIO_GROUP) != 0) {
+						setSelection (!getSelection ());
+					} else {
+						selectRadio ();
+					}
+				}
+			}
+			postEvent (SWT.Selection);
+			/*
 			if ((style & SWT.TOGGLE) != 0) {
 				setSelection(!getSelection());
 			}
@@ -947,30 +1313,20 @@ void hookSelection() {
 			e.text = getText();
 			e.widget = Button.this;
 			sendEvent(e);
+			*/
 		}
 	};
+	handle.onclick = handle.ondblclick = eventHandler;
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		btnText.onclick = new RunnableCompatibility() {
-			public void run() {
-				if ((style & SWT.CHECK) != 0) {
-					setSelection(!getSelection());
-				}
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.Selection;
-				e.item = Button.this;
-				e.text = getText();
-				e.widget = Button.this;
-				sendEvent(e);
-			}
-		};
+		btnText.onclick = eventHandler;
 	}
 }
 
+/*
 String windowClass() {
 	return "BUTTON";
 }
-/*
+
 int windowProc () {
 	return ButtonProc;
 }

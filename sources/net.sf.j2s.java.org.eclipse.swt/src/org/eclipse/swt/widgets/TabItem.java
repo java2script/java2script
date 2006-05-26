@@ -16,7 +16,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
-import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -125,16 +124,19 @@ private void configure(int index) {
 			//Element[] handles = parent.itemHandles;
 			for (int i = 0; i < items.length; i++) {
 				Object obj = TabItem.this;
-				Control ctrl = items[i].control;
-				String selectedCSS = "tab-item-selected";
-				int index = items[i].handle.className.indexOf(selectedCSS);
+//				String selectedCSS = "tab-item-selected";
+//				int index = items[i].handle.className.indexOf(selectedCSS);
 				if (obj == items[i]) {
+					parent.setSelection(i, false);
+					Control ctrl = items[i].control;
+					if (ctrl == null) continue;
 					fixControlBounds(ctrl);
 					//System.out.println(ctrl.getBounds());
 					ctrl.setVisible(true);
-					if (index == -1) {
-						items[i].handle.className += " " + selectedCSS;
-					}
+					ctrl.getParent().layout(new Control[] { ctrl });
+//					if (index == -1) {
+//						items[i].handle.className += " " + selectedCSS;
+//					}
 					//System.out.println(TabItem.this);
 					//System.out.println(items[i].handle.className);
 					//System.out.println(ctrl);
@@ -145,10 +147,12 @@ private void configure(int index) {
 //							b.y -= 24;
 //							ctrl.setBounds(b);
 //						}
+					Control ctrl = items[i].control;
+					if (ctrl == null) continue;
 					ctrl.setVisible(false);
-					if (index != -1) {
-						items[i].handle.className = items[i].handle.className.substring(0, index) + items[i].handle.className.substring(index + selectedCSS.length());
-					}
+//					if (index != -1) {
+//						items[i].handle.className = items[i].handle.className.substring(0, index) + items[i].handle.className.substring(index + selectedCSS.length());
+//					}
 					//System.out.println(i + ".." + items[i].handle.className);
 					//System.out.println(items[i].control.handle.innerHTML);
 				}
@@ -251,12 +255,17 @@ public void setControl (Control control) {
 		return;
 	}
 	if (newControl != null) {
-		System.err.println(parent.getClientArea ());
-		newControl.setBounds (parent.getClientArea ());
-		fixControlBounds(newControl);
-		//System.out.println(ctrl.getBounds());
-		newControl.setVisible(true);
-		System.out.println("here!");
+		Rectangle clientArea = parent.getClientArea ();
+		if (clientArea.height <= 0 || clientArea.width <= 0) {
+			//
+		} else {
+			newControl.setBounds (clientArea);
+			fixControlBounds(newControl);
+			//System.out.println(ctrl.getBounds());
+			newControl.setVisible(true);
+		}
+//		System.err.println(clientArea);
+//		System.out.println("here!");
 		//newControl.setVisible (true);
 	}
 	if (oldControl != null) oldControl.setVisible (false);
@@ -266,12 +275,13 @@ void fixControlBounds() {
 }
 private void fixControlBounds(Control newControl) {
 	Rectangle b = parent.getBounds();
-	//System.out.println(b);
-	b.height -= 24;
-	b.y = 24;
-//			Rectangle b = ctrl.getBounds();
-//			b.y += 24;
-	System.out.println(b);
+	b.height -= 30;
+	b.width -= 12;
+	b.x -= 1;
+	b.y -= 1;
+	if ((parent.style & SWT.BOTTOM) == 0) {
+		b.y += 18;
+	}
 	newControl.setBounds(b);
 }
 

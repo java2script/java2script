@@ -17,9 +17,10 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -49,8 +50,9 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TabFolder extends Composite {
 	TabItem [] items;
-	private Element titles;
-	//private Element outerArea;
+	private Element borderFrame, borderNW, borderNE, borderSW, borderSE, 
+		itemMore, btnPrevTab, btnNextTab, contentArea;
+	private int offset;
 	
 	ImageList imageList;
 	/*
@@ -199,7 +201,23 @@ protected void checkSubclass () {
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
+	System.out.println(wHint + "," + hHint + "," + changed);
 	Point size = super.computeSize (wHint, hHint, changed);
+	
+	System.out.println("super size of tabfolder:" + size);
+	int width = -124; // this number is an experimental number from WinXP in classical style
+	if (items != null && items.length != 0) {
+//		int height = OS.getContainerHeight(items[0].handle);
+//		size.y += height;
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] != null && !items[i].isDisposed()) {
+				width += OS.getContainerWidth(items[i].handle);
+			}
+		}
+	}
+	if (width < 0) {
+		width += 124 + 12;
+	}
 	/*
 	RECT insetRect = new RECT (), itemRect = new RECT ();
 	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 0, insetRect);
@@ -213,13 +231,15 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	OS.SetRect (rect, 0, 0, width, size.y);
 	OS.SendMessage (handle, OS.TCM_ADJUSTRECT, 1, rect);
 	*/
-//	int border = getBorderWidth ();
+	int border = getBorderWidth ();
 //	rect.left -= border;  rect.right += border;
 //	width = rect.right - rect.left;
-//	size.x = Math.max (width, size.x);
-	size.x += items.length * 32;
-	size.y += 24;
-	System.out.println("in tab folder" + size);
+	width += border * 2;
+	size.x = Math.max (width, size.x);
+	
+//	size.x += items.length * 32;
+//	size.y += 24;
+	System.out.println("in tab folder " + size);
 	return size;
 }
 
@@ -236,10 +256,38 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	int newHeight = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, newWidth, newHeight);
 	*/
+	x -= 4;
+	y -= 4 + 18;
+	width += 8;
+	height += 8 + 18;
+	int border = getBorderWidth ();
+	x -= border;
+	y -= border;
+	width += border * 2;
+	height += border * 2;
+	//System.out.println("after t");
 	return new Rectangle(x, y, width, height);
 }
 
-void createItem (TabItem item, int index) {
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#containerHandle()
+ */
+protected Element containerHandle() {
+	return contentArea;
+}
+
+Object createCSSElement(Object parent, String css) {
+	Element el = document.createElement("DIV");
+	if (css != null) {
+		el.className = css;
+	}
+	if (parent != null) {
+		((Element) parent).appendChild(el);
+	}
+	return el;
+}
+
+void createItem (TabItem item, final int index) {
 	/*
 	int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
@@ -260,29 +308,53 @@ void createItem (TabItem item, int index) {
 //		}
 	Element tab = document.createElement("DIV");
 	tab.className = "tab-item-default";
-	titles.appendChild(tab);
+	//titles.appendChild(tab);
+	borderFrame.insertBefore(tab, itemMore);
+	String cssName = borderFrame.className;
+	if (cssName == null) cssName = "";
+	String key = "tab-folder-no-tab";
+	int idx = cssName.indexOf(key);
+	if (idx != -1) {
+		borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+	}
 	tab.appendChild(document.createTextNode(item.getNameText()));
+	int width = -2;
+	if (items != null && items.length != 0) {
+		for (int i = 0; i < index; i++) {
+			if (items[i] != null && !items[i].isDisposed()) {
+				width += OS.getContainerWidth(items[i].handle);
+			}
+		}
+	}
+	if (width < 2) {
+		width = 2;
+	}
+	tab.style.left = width + "px";
 	//System.out.println(index + "..." + item);
 	items[index] = item;
 	items[index].handle = tab;
-	tab.onclick = new RunnableCompatibility() {
-		public void run() {
-			sendEvent(SWT.Selection);
-		}
-	};
+//	tab.onclick = new RunnableCompatibility() {
+//		public void run() {
+//			setSelection(index);
+//			//sendEvent(SWT.Selection);
+//		}
+//	};
 	/*
 	* Send a selection event when the item that is added becomes
 	* the new selection.  This only happens when the first item
 	* is added.
 	*/
 	if (count == 0) {
-		tab.className += " tab-item-selected";
+//		tab.className += " tab-item-selected";
+//		tab.style.left = (width - 1) + "px";
+		setSelection(0, false);
 		Event event = new Event ();
 		event.item = items [0];
 		sendEvent (SWT.Selection, event);
 		// the widget could be destroyed at this point
 	}
 }
+
 void createHandle () {
 	/*
 	super.createHandle ();
@@ -304,23 +376,84 @@ void createHandle () {
 	OS.SendMessage (hwndToolTip, OS.TTM_SETMAXTIPWIDTH, 0, 0x7FFF);	
 	*/
 	items = new TabItem [0];//new TabItem [4];
-	handle = document.createElement("DIV");
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
-	}
-	handle.className = "tab-folder-default";
+	String cssName = "tab-folder-default";
 	if ((style & SWT.BORDER) != 0) {
-		handle.className += " tab-folder-border";
+		cssName += " tab-folder-border-default";
+	}
+	handle = (Element) createCSSElement(parent.handle, cssName);
+	cssName = "tab-folder-no-tab";
+	if ((style & SWT.BOTTOM) != 0) {
+		cssName += " tab-folder-bottom";
+	}
+	borderFrame = (Element) createCSSElement(handle, cssName);
+	cssName = "tab-folder-border ";
+	itemMore = (Element) createCSSElement(borderFrame, "tab-item-more");
+	if (OS.isMozilla && !OS.isFirefox) {
+		itemMore.style.bottom = "6px";
+	}
+	Element el = (Element) createCSSElement(itemMore, "tab-item-button");
+	btnNextTab = document.createElement("BUTTON");
+	el.appendChild(btnNextTab);
+	Element arrowRight = (Element) createCSSElement(btnNextTab, "button-arrow-right");
+	if (OS.isMozilla && !OS.isFirefox) {
+		arrowRight.style.left = "-5px";
+		arrowRight.style.top = "0";
 	}
 	
-	titles = document.createElement("DIV");
-	titles.className = "tab-folder-title-default";
-	handle.appendChild(titles);
+	el.onclick = btnNextTab.onclick = new RunnableCompatibility() {
+		public void run() {
+			if (offset + 1 >= items.length) return ;
+			int w = 0;
+			int ww = OS.getContainerWidth(items[offset].handle);
+			int width = getSize().x - 36;
+			for (int i = offset + 1; i < items.length; i++) {
+				int x = OS.getContainerWidth(items[i].handle);
+				w += x;
+				ww += x;
+				if (w > width) {
+					if (i < items.length - 1) {
+						offset++;
+						System.out.println("Offset:" + offset);
+						setSelection(getSelectionIndex(), false);
+						return ;
+					}
+				}
+			}
+			if (ww > width) {
+				offset++;
+				System.out.println("Offset:" + offset);
+				setSelection(getSelectionIndex(), false);
+				return ;
+			}
+//			System.err.println("false...");
+		}
+	};
+	el = (Element) createCSSElement(itemMore, "tab-item-button");
+	btnPrevTab = document.createElement("BUTTON");
+	el.appendChild(btnPrevTab);
+	//createCSSElement(btnPrevTab, "button-arrow-left");
+	Element arrowLeft = (Element) createCSSElement(btnPrevTab, "button-arrow-left");
+	if (OS.isMozilla && !OS.isFirefox) {
+		arrowLeft.style.left = "-6px";
+		arrowLeft.style.top = "0";
+	}
+	el.onclick = btnPrevTab.onclick = new RunnableCompatibility() {
+		public void run() {
+			System.out.println("in Offset:" + offset);
+			if (offset <= 0) return ;
+			offset--;
+			System.out.println("Offset:" + offset);
+			setSelection(getSelectionIndex(), false);
+		}
+	};
 	
-	Element outerFrame = document.createElement("DIV");
-	outerFrame.className = "tab-folder-seperator";
-	handle.appendChild(outerFrame);
+	borderNW = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-nw");
+	borderNE = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-ne");
+	borderSW = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-sw");
+	borderSE = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-se");
+	contentArea = (Element) createCSSElement(handle, "tab-folder-content-area");
 	
+	state &= ~CANVAS;
 }
 
 void createWidget () {
@@ -387,16 +520,25 @@ public void setBounds(int x, int y, int width, int height) {
 //		outerArea.style.height = height + "px";
 //	}
 	super.setBounds(x, y, width, height);
-	int idx = getSelectionIndex();
-	items[idx].fixControlBounds();
+//	int idx = getSelectionIndex();
+//	items[idx].fixControlBounds();
 }
 
 public void setSize(int width, int height) {
 //	outerArea.style.width = width + "px";
 //	outerArea.style.height = (height - 24) + "px";
 	super.setSize(width, height);
-	int idx = getSelectionIndex();
-	items[idx].fixControlBounds();
+//	int idx = getSelectionIndex();
+//	items[idx].fixControlBounds();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	// TODO Auto-generated method stub
+	setSelection(getSelectionIndex(), false);
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 public Rectangle getClientArea () {
@@ -410,7 +552,30 @@ public Rectangle getClientArea () {
 	int height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
-	return super.getClientArea();
+//	return super.getClientArea();
+	//System.err.println(super.getClientArea());
+	int x = 2, y = 2;
+	int h = height - 8, w = width - 8;
+	if (items != null && items.length != 0) {
+		int lineHeight = OS.getContainerHeight(items[0].handle);
+		if (OS.isIE) lineHeight++; // ...
+		h -= lineHeight;
+		if (getSelectionIndex() == 0) {
+			h += 2; // ???
+		}
+		if ((style & SWT.BOTTOM) == 0) {
+			y += lineHeight;
+		} else {
+			if (OS.isIE) h--; 
+		}
+	}
+	
+	int border = getBorderWidth ();
+	x += border;
+	y += border;
+	w -= border * 2;
+	h -= border * 2;
+	return new Rectangle(x, y, w, h);
 }
 
 /**
@@ -573,14 +738,13 @@ public int indexOf (TabItem item) {
 }
 
 Point minimumSize (int wHint, int hHint, boolean flushCache) {
-	/*
 	Control [] children = _getChildren ();
 	int width = 0, height = 0;
 	for (int i=0; i<children.length; i++) {
 		Control child = children [i];
 		int index = 0;	
 		//int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
-		int coutn = getItemCount();
+		int count = getItemCount();
 		while (index < count) {
 			if (items [index].control == child) break;
 			index++;
@@ -596,26 +760,6 @@ Point minimumSize (int wHint, int hHint, boolean flushCache) {
 		}
 	}
 	return new Point (width, height);
-	*/
-	Point size = new Point(64, 48);
-	for (int i = 0; i < items.length; i++) {
-		TabItem tabItem = items[i];
-		if (tabItem != null) {
-			String text = tabItem.getNameText();
-			if (text != null && text.length() != 0) {
-				size.x += UIStringUtil.calculatePlainStringLineWidth(text);
-			}
-		}
-	}
-	//size = items.length
-	if (size.x == 0) size.x = DEFAULT_WIDTH;
-	if (size.y == 0) size.y = DEFAULT_HEIGHT;
-	if (wHint != SWT.DEFAULT) size.x = wHint;
-	if (hHint != SWT.DEFAULT) size.y = hHint;
-	// TODO Auto-generated method stub
-	System.out.println("=====" + size);
-	return size;
-
 }
 
 boolean mnemonicHit (char key) {
@@ -654,9 +798,43 @@ boolean mnemonicMatch (char key) {
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
 void releaseHandle() {
-	if (titles != null) {
-		BrowserNative.releaseHandle(titles);
-		titles = null;
+	if (borderNW != null) {
+		BrowserNative.releaseHandle(borderNW);
+		borderNW = null;
+	}
+	if (borderNE != null) {
+		BrowserNative.releaseHandle(borderNE);
+		borderNE = null;
+	}
+	if (borderSW != null) {
+		BrowserNative.releaseHandle(borderSW);
+		borderSW = null;
+	}
+	if (borderSE != null) {
+		BrowserNative.releaseHandle(borderSE);
+		borderSE = null;
+	}
+	if (btnPrevTab != null) {
+		BrowserNative.releaseHandle(btnPrevTab.parentNode);
+		BrowserNative.releaseHandle(btnPrevTab);
+		btnPrevTab = null;
+	}
+	if (btnNextTab != null) {
+		BrowserNative.releaseHandle(btnNextTab.parentNode);
+		BrowserNative.releaseHandle(btnNextTab);
+		btnNextTab = null;
+	}
+	if (itemMore != null) {
+		BrowserNative.releaseHandle(itemMore);
+		itemMore = null;
+	}
+	if (borderFrame != null) {
+		BrowserNative.releaseHandle(borderFrame);
+		borderFrame = null;
+	}
+	if (contentArea != null) {
+		BrowserNative.releaseHandle(contentArea);
+		contentArea = null;
 	}
 	super.releaseHandle();
 }
@@ -760,6 +938,10 @@ public void setSelection (int index) {
 }
 
 void setSelection (int index, boolean notify) {
+	/**
+	 * TODO: When a tab is selected programmly, should move
+	 * the tab into visible tab area.
+	 */
 	/*
 	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	if (oldIndex != -1) {
@@ -785,6 +967,100 @@ void setSelection (int index, boolean notify) {
 		}
 	}
 	*/
+	String key = "tab-item-selected";
+	if (items[index] != null) {
+		boolean before = false;
+		int left = -2;
+		int x = 2;
+		for (int i = offset; i < items.length; i++) {
+			items[i].handle.style.display = "block";
+			items[i].handle.style.zIndex = (i + 1) + "";
+			//if (index == i) continue;
+			String cssName = items[i].handle.className;
+			if (cssName == null) cssName = "";
+			int idx = cssName.indexOf(key);
+			if (idx != -1) {
+				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+				//s.left = (Integer.parseInt(s.left) + 2) + "px";
+				if (i > index) {
+					before = true;
+				}
+			}
+			int w = OS.getContainerWidth(items[i].handle);
+			if (i < index) {
+				left += w;
+			}
+			CSSStyle s = items[i].handle.style;
+			if (i == index) {
+				x -= 2;
+			}
+			s.left = x + "px";
+			x += w;
+		}
+		int ww = Integer.parseInt(handle.style.width);
+		if (ww > 0) {
+			String cssName = borderFrame.className;
+			if (cssName == null) cssName = "";
+			String xkey = "tab-show-more-item";
+			int idx = cssName.indexOf(xkey);
+			if (x > ww || offset != 0) {
+				if (idx == -1) {
+					borderFrame.className += " " + xkey;
+				}
+			} else {
+				if (idx != -1) {
+					borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + xkey.length()); 
+				}
+			}
+		}
+		String cssName = items[index].handle.className;
+		if (cssName == null) cssName = "";
+		int idx = cssName.indexOf(key);
+		if (idx == -1) {
+			items[index].handle.className += " " + key;
+//			CSSStyle s = items[index].handle.style;
+//			s.left = (Integer.parseInt(s.left) - 2) + "px";
+		}
+		items[index].handle.style.zIndex = (items.length + 1) + "";
+		//System.out.println("????");
+		if (this.width != 0) {
+			int w = OS.getContainerWidth(items[index].handle);
+			left += 4;
+//			if (before) {
+//			} else {
+//				left += 2;
+//			}
+			int y = (this.width - left - 4);
+			if (index >= offset) {
+				y -= w;
+			}
+			if (y < 0) {
+				y = 0;
+			}
+			if (left < 2) {
+				left = 2;
+			}
+			if ((style & SWT.BOTTOM) != 0) {
+				borderSW.style.width = (left - 2) + "px";
+				borderSE.style.width = y + "px";
+//				System.out.println("L:" + (left - 2) + ":R:" + y);
+			} else {
+//				System.out.println(this.width + "-" + left + "-" + w);
+//				System.out.println("L:" + (left - 2) + ":R:" + y);
+				borderNW.style.width = (left - 2) + "px";
+				borderNE.style.width = y + "px";
+			}
+		}
+	}
+	for (int i = 0; i < offset; i++) {
+		items[i].handle.style.display = "none";
+		String cssName = items[i].handle.className;
+		if (cssName == null) cssName = "";
+		int idx = cssName.indexOf(key);
+		if (idx != -1) {
+			items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+		}
+	}
 }
 
 /*

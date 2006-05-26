@@ -19,7 +19,6 @@ import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.ScaleDND;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.UIStringUtil;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -178,8 +177,10 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		int scrollY = OS.GetSystemMetrics (OS.SM_CYHSCROLL);
 		height += (rect.top * 2) + scrollY + (scrollY / 3);
 		*/
-		width += UIStringUtil.calculatePlainStringLineWidth("W") * 10;
-		int scrollY = UIStringUtil.calculatePlainStringLineHeight("W");
+//		width += UIStringUtil.calculatePlainStringLineWidth("W") * 10;
+//		int scrollY = UIStringUtil.calculatePlainStringLineHeight("W");
+		width += 16 * 10;
+		int scrollY = 16;
 		height += (thumbHeight * 2) + scrollY + (scrollY / 3);
 	} else {
 		/*
@@ -187,9 +188,11 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		width += (rect.left * 2) + scrollX + (scrollX / 3);
 		height += OS.GetSystemMetrics (OS.SM_CYVSCROLL) * 10;
 		*/
-		int scrollX = UIStringUtil.calculatePlainStringLineWidth("W");
+//		int scrollX = UIStringUtil.calculatePlainStringLineWidth("W");
+		int scrollX = 16;
 		width += (thumbWidth * 2) + scrollX + (scrollX / 3);
-		height += UIStringUtil.calculatePlainStringLineHeight("W") * 10;
+//		height += UIStringUtil.calculatePlainStringLineHeight("W") * 10;
+		height += 16 * 10;
 	}
 	if (wHint != SWT.DEFAULT) width = wHint + (border * 2);
 	if (hHint != SWT.DEFAULT) height = hHint + (border * 2);

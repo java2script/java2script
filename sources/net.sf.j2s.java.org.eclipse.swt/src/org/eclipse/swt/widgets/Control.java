@@ -464,7 +464,8 @@ Control [] computeTabList () {
 
 void createHandle () {
 //	Element hwndParent = widgetParent ();
-	handle = document.createElement(windowClass ());
+//	handle = document.createElement(windowClass ());
+	handle = document.createElement("DIV");
 	/*
 	handle = OS.CreateWindowEx (
 		widgetExtStyle (),
@@ -660,7 +661,6 @@ public boolean forceFocus () {
 
 void forceResize () {
 	if (parent == null) return;
-	/*
 	WINDOWPOS [] lpwp = parent.lpwp;
 	if (lpwp == null) return;
 	for (int i=0; i<lpwp.length; i++) {
@@ -670,18 +670,17 @@ void forceResize () {
 			* This code is intentionally commented.  All widgets that
 			* are created by SWT have WS_CLIPSIBLINGS to ensure that
 			* application code does not draw outside of the control.
-			*-/	
+			*/	
 //			int count = parent.getChildrenCount ();
 //			if (count > 1) {
 //				int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //				if ((bits & OS.WS_CLIPSIBLINGS) == 0) wp.flags |= OS.SWP_NOCOPYBITS;
 //			}
-			SetWindowPos (wp.hwnd, 0, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
+			SetWindowPos (wp.hwnd, null, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
 			lpwp [i] = null;
 			return;
 		}	
 	}
-	*/
 }
 
 /**
@@ -750,6 +749,9 @@ public int getBorderWidth () {
 	int bits2 = OS.GetWindowLong (borderHandle, OS.GWL_STYLE);
 	if ((bits2 & OS.WS_BORDER) != 0) return OS.GetSystemMetrics (OS.SM_CXBORDER);
 	*/
+	if ((style & SWT.BORDER) != 0) {
+		return 1;
+	}
 	return 0;
 }
 
@@ -1426,8 +1428,15 @@ public void moveAbove (Control control) {
 		if (control.isDisposed ()) error(SWT.ERROR_INVALID_ARGUMENT);
 		if (parent != control.parent) return;
 		// TODO
-		parent.handle.removeChild(handle);
-		parent.handle.insertBefore(handle, control.handle);
+		if (parent != null) {
+			Element parentHandle = parent.containerHandle();
+			if (parentHandle!= null) {
+				parentHandle.removeChild(handle);
+				parentHandle.insertBefore(handle, control.handle);
+			}
+		}
+//		parent.handle.removeChild(handle);
+//		parent.handle.insertBefore(handle, control.handle);
 		/*
 		Element hwnd = control.topHandle ();
 		if (hwnd == null || hwnd == topHandle) return;
@@ -1952,7 +1961,7 @@ boolean sendFocusEvent (int type) {
 public void setBackground (Color color) {
 	checkWidget ();
 	if (color != null)
-	handle.style.color = color.getCSSHandle();
+	handle.style.backgroundColor = color.getCSSHandle();
 }
 /*
 public void setBackground (Color color) {
@@ -2256,6 +2265,16 @@ public void setFont (Font font) {
 	*/
 	handle.style.fontFamily = font.data.name;
 	handle.style.fontSize = font.data.height + "pt";
+	if ((font.data.style & SWT.BOLD) != 0) {
+		handle.style.fontWeight = "bold";
+	} else {
+		handle.style.fontWeight = "normal";
+	}
+	if ((font.data.style & SWT.ITALIC) != 0) {
+		handle.style.fontStyle = "italic";
+	} else {
+		handle.style.fontStyle = "normal";
+	}
 	//handle.style.fontVariant = font.data.style;
 	//TODO:
 }
@@ -2522,6 +2541,7 @@ public void setSize (int width, int height) {
 public void setSize (Point size) {
 	checkWidget ();
 	if (size == null) error (SWT.ERROR_NULL_ARGUMENT);
+	System.err.println(size);
 	setSize (size.x, size.y);
 }
 
@@ -3099,6 +3119,9 @@ int widgetExtStyle () {
 */
 
 Element widgetParent () {
+	if (parent == null) {
+		return null;
+	}
 	return parent.handle;
 }
 
@@ -3166,9 +3189,9 @@ public boolean setParent (Composite parent) {
 	return true;
 }
 
+/*
 abstract String windowClass ();
 
-/*
 abstract int windowProc ();
 
 int windowProc (int hwnd, int msg, int wParam, int lParam) {
