@@ -7,6 +7,88 @@ String.getName = Clazz.innerFunctions.getName;
 
 String.serialVersionUID = String.prototype.serialVersionUID = -6849794470754667710;
 
+String.prototype.$replace = function (c1, c2) {
+	var sp = "\\$.*+{}?^()";
+	if (sp.indexOf (c1) != -1) {
+		c1 = "\\" + c1;
+	}
+	var regExp = new RegExp (c1, "gm");
+	return this.replace (regExp, c2);
+};
+String.prototype.replaceAll = function (exp, str) {
+	var regExp = new RegExp (exp, "gm");
+	return this.replace (regExp, str);
+};
+String.prototype.replaceFirst = function (exp, str) {
+	var regExp = new RegExp (exp, "m");
+	return this.replace (regExp, str);
+};
+String.prototype.matches = function (exp) {
+	var regExp = new RegExp (exp, "gm");
+	var m = this.match (regExp);
+	return m != null && m.length != 0;
+};
+String.prototype.regionMatches = function (ignoreCase, toffset,
+		other, ooffset, len) {
+	/*
+	 * Support different method signatures
+	 */
+	if (typeof ignoreCase == "number"
+			|| (ignoreCase != true && ignoreCase != false)) {
+		len = ooffset;
+		ooffset = other;
+		other = toffset;
+		toffset = ignoreCase;
+		ignoreCase = false;
+	}
+	var to = toffset;
+	var po = ooffset;
+	// Note: toffset, ooffset, or len might be near -1>>>1.
+	if ((ooffset < 0) || (toffset < 0) || (toffset > this.length - len) ||
+			(ooffset > other.length - len)) {
+		return false;
+	}
+	var s1 = this.substring (toffset, toffset + len);
+	var s2 = this.substring (ooffset, ooffset + len);
+	if (ignoreCase) {
+		s1 = s1.toLowerCase ();
+		s2 = s2.toLowerCase ();
+	}
+	return s1 == s2;
+};
+String.prototype.$plit = function (regex, limit) {
+	/*
+	 * Support different method signatures
+	 */
+	if (limit != null && limit > 0) {
+		if (limit == 1) {
+			return this;
+		}
+		var regExp = new RegExp ("(" + regex + ")", "gm");
+		var count = 1;
+		var s = this.replace (regExp, function ($0, $1) {
+			count++;
+			if (count == limit) {
+				return "@@_@@";
+			} else if (count > limit) {
+				return $0;
+			} else {
+				return $0;
+			}
+		});
+		regExp = new RegExp (regex, "gm");
+		var arr = this.split (regExp);
+		if (arr.length > limit) {
+			arr[limit - 1] = s.substring (s.indexOf ("@@_@@") + 5);
+			arr.length = limit;
+		}
+		return arr;
+	} else {
+		var regExp = new RegExp (regex, "gm");
+		return this.split (regExp);
+	}
+};
+
 String.prototype.trim = function () {
 	var len = this.length;
 	var st = 0;
@@ -220,9 +302,10 @@ String.instantialize = function () {
 				return Encoding.readUTF8 (arr.join (''));
 			}
 			return x.join ('');
-		} else if (x.__CLASS_NAME__ == "StringBuffer") {
-            x.setShared();
-            var value = x.getValue();
+		} else if (x.__CLASS_NAME__ == "StringBuffer" 
+				|| x.__CLASS_NAME__ == "java.lang.StringBuffer") {
+			x.setShared();
+			var value = x.getValue();
 			var length = x.length ();
 			var valueCopy = new Array (length);
 			for (var i = 0; i < length; i++) {

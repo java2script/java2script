@@ -140,6 +140,8 @@ function consoleOutput (s, color, isBuffered) {
 	}
 
 	var lines = null;
+	var c160 = String.fromCharCode (160);
+	s = s.replace (/\t/g, c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160);
 	if (splitNeedFixed) {
 		try {
 		lines = splitIntoLines (s);
