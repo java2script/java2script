@@ -144,7 +144,7 @@ if (clazzName != null && clazzName.length != 0) {
 str += clazzName + ".";
 }
 str += (m.caller.exName == null) ? "anonymous" : m.caller.exName;
-str += " (" + Clazz.getParamsType (args) + ") ~ ["
+str += " (" + Clazz.getParamsType (args) + ") ~ [";
 for (var i = 0; i <args.length; i++) {
 str += args[i];
 str += (i < args.length - 1) ? "," : "";
@@ -615,11 +615,11 @@ $_Z (this, arguments);
 }, $wt, "SWTError", Error);
 $_K (cla$$, 
 function () {
-this.construct ($WT.ERROR_UNSPECIFIED);
+this.construct (1);
 });
 $_K (cla$$, 
 function (message) {
-this.construct ($WT.ERROR_UNSPECIFIED, message);
+this.construct (1, message);
 }, "String");
 $_K (cla$$, 
 function (code) {
@@ -655,11 +655,11 @@ $_Z (this, arguments);
 }, $wt, "SWTException", RuntimeException);
 $_K (cla$$, 
 function () {
-this.construct ($WT.ERROR_UNSPECIFIED);
+this.construct (1);
 });
 $_K (cla$$, 
 function (message) {
-this.construct ($WT.ERROR_UNSPECIFIED, message);
+this.construct (1, message);
 }, "String");
 $_K (cla$$, 
 function (code) {
@@ -1076,13 +1076,13 @@ return this.eventListener;
 $_V (cla$$, "handleEvent", 
 function (e) {
 switch (e.type) {
-case $WT.Paint:
+case 9:
 {
 var event =  new $wt.events.PaintEvent (e);
 (this.eventListener).paintControl (event);
 e.gc = event.gc;
 break;
-}case $WT.Selection:
+}case 13:
 {
 var event =  new $wt.events.SelectionEvent (e);
 (this.eventListener).widgetSelected (event);
@@ -1090,128 +1090,128 @@ e.x = event.x;
 e.y = event.y;
 e.doit = event.doit;
 break;
-}case $WT.DefaultSelection:
+}case 14:
 {
 (this.eventListener).widgetDefaultSelected ( new $wt.events.SelectionEvent (e));
 break;
-}case $WT.Dispose:
+}case 12:
 {
 (this.eventListener).widgetDisposed ( new $wt.events.DisposeEvent (e));
 break;
-}case $WT.FocusIn:
+}case 15:
 {
 (this.eventListener).focusGained ( new $wt.events.FocusEvent (e));
 break;
-}case $WT.FocusOut:
+}case 16:
 {
 (this.eventListener).focusLost ( new $wt.events.FocusEvent (e));
 break;
-}case $WT.Hide:
+}case 23:
 {
 (this.eventListener).menuHidden ( new $wt.events.MenuEvent (e));
 break;
-}case $WT.Show:
+}case 22:
 {
 (this.eventListener).menuShown ( new $wt.events.MenuEvent (e));
 break;
-}case $WT.KeyDown:
+}case 1:
 {
 var event =  new $wt.events.KeyEvent (e);
 (this.eventListener).keyPressed (event);
 e.doit = event.doit;
 break;
-}case $WT.KeyUp:
+}case 2:
 {
 var event =  new $wt.events.KeyEvent (e);
 (this.eventListener).keyReleased (event);
 e.doit = event.doit;
 break;
-}case $WT.MouseDown:
+}case 3:
 {
 (this.eventListener).mouseDown ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.MouseUp:
+}case 4:
 {
 (this.eventListener).mouseUp ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.MouseDoubleClick:
+}case 8:
 {
 (this.eventListener).mouseDoubleClick ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.MouseMove:
+}case 5:
 {
 (this.eventListener).mouseMove ( new $wt.events.MouseEvent (e));
 return ;
-}case $WT.Resize:
+}case 11:
 {
 (this.eventListener).controlResized ( new $wt.events.ControlEvent (e));
 break;
-}case $WT.Move:
+}case 10:
 {
 (this.eventListener).controlMoved ( new $wt.events.ControlEvent (e));
 break;
-}case $WT.Close:
+}case 21:
 {
 var event =  new $wt.events.ShellEvent (e);
 (this.eventListener).shellClosed (event);
 e.doit = event.doit;
 break;
-}case $WT.Activate:
+}case 26:
 {
 (this.eventListener).shellActivated ( new $wt.events.ShellEvent (e));
 break;
-}case $WT.Deactivate:
+}case 27:
 {
 (this.eventListener).shellDeactivated ( new $wt.events.ShellEvent (e));
 break;
-}case $WT.Iconify:
+}case 19:
 {
 (this.eventListener).shellIconified ( new $wt.events.ShellEvent (e));
 break;
-}case $WT.Deiconify:
+}case 20:
 {
 (this.eventListener).shellDeiconified ( new $wt.events.ShellEvent (e));
 break;
-}case $WT.Expand:
+}case 17:
 {
 (this.eventListener).treeExpanded ( new $wt.events.TreeEvent (e));
 break;
-}case $WT.Collapse:
+}case 18:
 {
 (this.eventListener).treeCollapsed ( new $wt.events.TreeEvent (e));
 break;
-}case $WT.Modify:
+}case 24:
 {
 (this.eventListener).modifyText ( new $wt.events.ModifyEvent (e));
 break;
-}case $WT.Verify:
+}case 25:
 {
 var event =  new $wt.events.VerifyEvent (e);
 (this.eventListener).verifyText (event);
 e.text = event.text;
 e.doit = event.doit;
 break;
-}case $WT.Help:
+}case 28:
 {
 (this.eventListener).helpRequested ( new $wt.events.HelpEvent (e));
 break;
-}case $WT.Arm:
+}case 30:
 {
 (this.eventListener).widgetArmed ( new $wt.events.ArmEvent (e));
 break;
-}case $WT.MouseExit:
+}case 7:
 {
 (this.eventListener).mouseExit ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.MouseEnter:
+}case 6:
 {
 (this.eventListener).mouseEnter ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.MouseHover:
+}case 32:
 {
 (this.eventListener).mouseHover ( new $wt.events.MouseEvent (e));
 break;
-}case $WT.Traverse:
+}case 31:
 {
 var event =  new $wt.events.TraverseEvent (e);
 (this.eventListener).keyTraversed (event);
@@ -1362,7 +1362,7 @@ if (this.types == null) return ;
 this.level += this.level >= 0 ? 1 : -1;
 try {
 for (var i = 0; i < this.types.length; i++) {
-if (event.type == $WT.None) return ;
+if (event.type == 0) return ;
 if (this.types[i] == event.type) {
 var listener = this.listeners[i];
 if (listener != null) listener.handleEvent (event);
@@ -1477,7 +1477,6 @@ this.height = height;
 }, "Number,Number,Number,Number");
 $_M (cla$$, "add", 
 function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 var left = this.x < rect.x ? this.x : rect.x;
 var top = this.y < rect.y ? this.y : rect.y;
 var lhs = this.x + this.width;
@@ -1497,7 +1496,6 @@ return (x >= this.x) && (y >= this.y) && ((x - this.x) < this.width) && ((y - th
 }, "Number,Number");
 $_M (cla$$, "contains", 
 function (pt) {
-if (pt == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return this.contains (pt.x, pt.y);
 }, "$wt.graphics.Point");
 $_V (cla$$, "equals", 
@@ -1513,7 +1511,6 @@ return this.x ^ this.y ^ this.width ^ this.height;
 });
 $_M (cla$$, "intersect", 
 function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (this == rect) return ;
 var left = this.x > rect.x ? this.x : rect.x;
 var top = this.y > rect.y ? this.y : rect.y;
@@ -1530,7 +1527,6 @@ this.height = bottom < top ? 0 : bottom - top;
 }, "$wt.graphics.Rectangle");
 $_M (cla$$, "intersection", 
 function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (this == rect) return  new $wt.graphics.Rectangle (this.x, this.y, this.width, this.height);
 var left = this.x > rect.x ? this.x : rect.x;
 var top = this.y > rect.y ? this.y : rect.y;
@@ -1548,7 +1544,6 @@ return (x < this.x + this.width) && (y < this.y + this.height) && (x + width > t
 }, "Number,Number,Number,Number");
 $_M (cla$$, "intersects", 
 function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return rect == this || this.intersects (rect.x, rect.y, rect.width, rect.height);
 }, "$wt.graphics.Rectangle");
 $_M (cla$$, "isEmpty", 
@@ -1561,7 +1556,6 @@ return "Rectangle {" + this.x + ", " + this.y + ", " + this.width + ", " + this.
 });
 $_M (cla$$, "union", 
 function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 var left = this.x < rect.x ? this.x : rect.x;
 var top = this.y < rect.y ? this.y : rect.y;
 var lhs = this.x + this.width;
@@ -1582,7 +1576,6 @@ $_Z (this, arguments);
 }, $wt.graphics, "RGB", null, $wt.internal.SerializableCompatibility);
 $_K (cla$$, 
 function (red, green, blue) {
-if ((red > 255) || (red < 0) || (green > 255) || (green < 0) || (blue > 255) || (blue < 0)) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 this.red = red;
 this.green = green;
 this.blue = blue;
@@ -1623,7 +1616,7 @@ $_Z (this, arguments);
 $_M (cla$$, "computeSize", 
 function (control, wHint, hHint, flushCache) {
 if (flushCache) this.flushCache ();
-if (wHint == $WT.DEFAULT && hHint == $WT.DEFAULT) {
+if (wHint == -1 && hHint == -1) {
 if (this.defaultWidth == -1 || this.defaultHeight == -1) {
 var size = control.computeSize (wHint, hHint, flushCache);
 this.defaultWidth = size.x;
@@ -1643,8 +1636,8 @@ this.defaultWidth = this.defaultHeight = -1;
 this.currentWidth = this.currentHeight = -1;
 });
 cla$$ = $_C (function () {
-this.width = $WT.DEFAULT;
-this.height = $WT.DEFAULT;
+this.width = -1;
+this.height = -1;
 this.left = null;
 this.right = null;
 this.top = null;
@@ -1733,10 +1726,10 @@ this.isVisited = true;
 var bottomData = bottomControl.getLayoutData ();
 var bottomAttachment = bottomData.getBottomAttachment (bottomControl, spacing, flushCache);
 switch (this.bottom.alignment) {
-case $WT.BOTTOM:
+case 1024:
 this.cacheBottom = bottomAttachment.plus (this.bottom.offset);
 break;
-case $WT.CENTER:
+case 16777216:
 {
 var topAttachment = bottomData.getTopAttachment (bottomControl, spacing, flushCache);
 var bottomHeight = bottomAttachment.minus (topAttachment);
@@ -1770,10 +1763,10 @@ this.isVisited = true;
 var leftData = leftControl.getLayoutData ();
 var leftAttachment = leftData.getLeftAttachment (leftControl, spacing, flushCache);
 switch (this.left.alignment) {
-case $WT.LEFT:
+case 16384:
 this.cacheLeft = leftAttachment.plus (this.left.offset);
 break;
-case $WT.CENTER:
+case 16777216:
 {
 var rightAttachment = leftData.getRightAttachment (leftControl, spacing, flushCache);
 var leftWidth = rightAttachment.minus (leftAttachment);
@@ -1813,10 +1806,10 @@ this.isVisited = true;
 var rightData = rightControl.getLayoutData ();
 var rightAttachment = rightData.getRightAttachment (rightControl, spacing, flushCache);
 switch (this.right.alignment) {
-case $WT.RIGHT:
+case 131072:
 this.cacheRight = rightAttachment.plus (this.right.offset);
 break;
-case $WT.CENTER:
+case 16777216:
 {
 var leftAttachment = rightData.getLeftAttachment (rightControl, spacing, flushCache);
 var rightWidth = rightAttachment.minus (leftAttachment);
@@ -1850,10 +1843,10 @@ this.isVisited = true;
 var topData = topControl.getLayoutData ();
 var topAttachment = topData.getTopAttachment (topControl, spacing, flushCache);
 switch (this.top.alignment) {
-case $WT.TOP:
+case 128:
 this.cacheTop = topAttachment.plus (this.top.offset);
 break;
-case $WT.CENTER:
+case 16777216:
 {
 var bottomAttachment = topData.getBottomAttachment (topControl, spacing, flushCache);
 var topHeight = bottomAttachment.minus (topAttachment);
@@ -1871,8 +1864,8 @@ return this.cacheTop;
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
-if (this.width != $WT.DEFAULT) string += "width=" + this.width + " ";
-if (this.height != $WT.DEFAULT) string += "height=" + this.height + " ";
+if (this.width != -1) string += "width=" + this.width + " ";
+if (this.height != -1) string += "height=" + this.height + " ";
 if (this.left != null) string += "left=" + this.left + " ";
 if (this.right != null) string += "right=" + this.right + " ";
 if (this.top != null) string += "top=" + this.top + " ";
@@ -1884,8 +1877,8 @@ return string;
 cla$$ = $_C (function () {
 this.verticalAlignment = $wt.layout.GridData.CENTER;
 this.horizontalAlignment = $wt.layout.GridData.BEGINNING;
-this.widthHint = $WT.DEFAULT;
-this.heightHint = $WT.DEFAULT;
+this.widthHint = -1;
+this.heightHint = -1;
 this.horizontalIndent = 0;
 this.verticalIndent = 0;
 this.horizontalSpan = 1;
@@ -1980,25 +1973,25 @@ $_V (cla$$, "toString",
 function () {
 var hAlign = "";
 switch (this.horizontalAlignment) {
-case $WT.FILL:
+case 4:
 hAlign = "SWT.FILL";
 break;
-case $WT.BEGINNING:
+case 1:
 hAlign = "SWT.BEGINNING";
 break;
-case $WT.LEFT:
+case 16384:
 hAlign = "SWT.LEFT";
 break;
-case $WT.END:
+case 16777224:
 hAlign = "SWT.END";
 break;
 case $wt.layout.GridData.END:
 hAlign = "GridData.END";
 break;
-case $WT.RIGHT:
+case 131072:
 hAlign = "SWT.RIGHT";
 break;
-case $WT.CENTER:
+case 16777216:
 hAlign = "SWT.CENTER";
 break;
 case $wt.layout.GridData.CENTER:
@@ -2010,25 +2003,25 @@ break;
 }
 var vAlign = "";
 switch (this.verticalAlignment) {
-case $WT.FILL:
+case 4:
 vAlign = "SWT.FILL";
 break;
-case $WT.BEGINNING:
+case 1:
 vAlign = "SWT.BEGINNING";
 break;
-case $WT.TOP:
+case 128:
 vAlign = "SWT.TOP";
 break;
-case $WT.END:
+case 16777224:
 vAlign = "SWT.END";
 break;
 case $wt.layout.GridData.END:
 vAlign = "GridData.END";
 break;
-case $WT.BOTTOM:
+case 1024:
 vAlign = "SWT.BOTTOM";
 break;
-case $WT.CENTER:
+case 16777216:
 vAlign = "SWT.CENTER";
 break;
 case $wt.layout.GridData.CENTER:
@@ -2043,24 +2036,24 @@ string += "horizontalAlignment=" + hAlign + " ";
 if (this.horizontalIndent != 0) string += "horizontalIndent=" + this.horizontalIndent + " ";
 if (this.horizontalSpan != 1) string += "horizontalSpan=" + this.horizontalSpan + " ";
 if (this.grabExcessHorizontalSpace) string += "grabExcessHorizontalSpace=" + this.grabExcessHorizontalSpace + " ";
-if (this.widthHint != $WT.DEFAULT) string += "widthHint=" + this.widthHint + " ";
+if (this.widthHint != -1) string += "widthHint=" + this.widthHint + " ";
 if (this.minimumWidth != 0) string += "minimumWidth=" + this.minimumWidth + " ";
 string += "verticalAlignment=" + vAlign + " ";
 if (this.verticalIndent != 0) string += "verticalIndent=" + this.verticalIndent + " ";
 if (this.verticalSpan != 1) string += "verticalSpan=" + this.verticalSpan + " ";
 if (this.grabExcessVerticalSpace) string += "grabExcessVerticalSpace=" + this.grabExcessVerticalSpace + " ";
-if (this.heightHint != $WT.DEFAULT) string += "heightHint=" + this.heightHint + " ";
+if (this.heightHint != -1) string += "heightHint=" + this.heightHint + " ";
 if (this.minimumHeight != 0) string += "minimumHeight=" + this.minimumHeight + " ";
 if (this.exclude) string += "exclude=" + this.exclude + " ";
 string = string.trim ();
 string += "}";
 return string;
 });
-cla$$.BEGINNING = cla$$.prototype.BEGINNING = $WT.BEGINNING;
+cla$$.BEGINNING = cla$$.prototype.BEGINNING = 1;
 $_S (cla$$,
 "CENTER", 2,
 "END", 3);
-cla$$.FILL = cla$$.prototype.FILL = $WT.FILL;
+cla$$.FILL = cla$$.prototype.FILL = 4;
 $_S (cla$$,
 "VERTICAL_ALIGN_BEGINNING", 1 << 1,
 "VERTICAL_ALIGN_CENTER", 1 << 2,
@@ -2076,8 +2069,8 @@ cla$$.FILL_VERTICAL = cla$$.prototype.FILL_VERTICAL = $wt.layout.GridData.VERTIC
 cla$$.FILL_HORIZONTAL = cla$$.prototype.FILL_HORIZONTAL = $wt.layout.GridData.HORIZONTAL_ALIGN_FILL | $wt.layout.GridData.GRAB_HORIZONTAL;
 cla$$.FILL_BOTH = cla$$.prototype.FILL_BOTH = $wt.layout.GridData.FILL_VERTICAL | $wt.layout.GridData.FILL_HORIZONTAL;
 cla$$ = $_C (function () {
-this.width = $WT.DEFAULT;
-this.height = $WT.DEFAULT;
+this.width = -1;
+this.height = -1;
 this.exclude = false;
 $_Z (this, arguments);
 }, $wt.layout, "RowData");
@@ -2103,8 +2096,8 @@ return string.substring (index + 1, string.length);
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
-if (this.width != $WT.DEFAULT) string += "width=" + this.width + " ";
-if (this.height != $WT.DEFAULT) string += "height=" + this.height + " ";
+if (this.width != -1) string += "width=" + this.width + " ";
+if (this.height != -1) string += "height=" + this.height + " ";
 if (this.exclude) string += "exclude=" + this.exclude + " ";
 string = string.trim ();
 string += "}";
@@ -2131,18 +2124,17 @@ this.construct (numerator, 100, offset);
 }, "Number,Number");
 $_K (cla$$, 
 function (numerator, denominator, offset) {
-if (denominator == 0) $WT.error ($WT.ERROR_CANNOT_BE_ZERO);
 this.numerator = numerator;
 this.denominator = denominator;
 this.offset = offset;
 }, "Number,Number,Number");
 $_K (cla$$, 
 function (control) {
-this.construct (control, 0, $WT.DEFAULT);
+this.construct (control, 0, -1);
 }, "$wt.widgets.Control");
 $_K (cla$$, 
 function (control, offset) {
-this.construct (control, offset, $WT.DEFAULT);
+this.construct (control, offset, -1);
 }, "$wt.widgets.Control,Number");
 $_K (cla$$, 
 function (control, offset, alignment) {
@@ -2202,12 +2194,10 @@ return  new $wt.layout.FormAttachment (this.numerator, this.denominator, this.of
 }, "Number");
 $_M (cla$$, "solveX", 
 function (value) {
-if (this.denominator == 0) $WT.error ($WT.ERROR_CANNOT_BE_ZERO);
 return (Math.floor ((this.numerator * value) / this.denominator)) + this.offset;
 }, "Number");
 $_M (cla$$, "solveY", 
 function (value) {
-if (this.numerator == 0) $WT.error ($WT.ERROR_CANNOT_BE_ZERO);
 return Math.floor ((value - this.offset) * this.denominator / this.numerator);
 }, "Number");
 $_V (cla$$, "toString", 
@@ -2216,7 +2206,7 @@ var string = this.control != null ? this.control.toString () : this.numerator + 
 return "{y = (" + string + (this.offset >= 0 ? ")x + " + this.offset : ")x - " + (-this.offset)) + "}";
 });
 cla$$ = $_C (function () {
-this.type = $WT.HORIZONTAL;
+this.type = 256;
 this.marginWidth = 0;
 this.marginHeight = 0;
 this.spacing = 0;
@@ -2242,9 +2232,9 @@ var child = children[i];
 var w = wHint;
 var h = hHint;
 if (count > 0) {
-if (this.type == $WT.HORIZONTAL && wHint != $WT.DEFAULT) {
+if (this.type == 256 && wHint != -1) {
 w = Math.max (0, Math.floor ((wHint - (count - 1) * this.spacing) / count));
-}if (this.type == $WT.VERTICAL && hHint != $WT.DEFAULT) {
+}if (this.type == 512 && hHint != -1) {
 h = Math.max (0, Math.floor ((hHint - (count - 1) * this.spacing) / count));
 }}var size = this.computeChildSize (child, w, h, flushCache);
 maxWidth = Math.max (maxWidth, size.x);
@@ -2252,7 +2242,7 @@ maxHeight = Math.max (maxHeight, size.y);
 }
 var width = 0;
 var height = 0;
-if (this.type == $WT.HORIZONTAL) {
+if (this.type == 256) {
 width = count * maxWidth;
 if (count != 0) width += (count - 1) * this.spacing;
 height = maxHeight;
@@ -2262,8 +2252,8 @@ height = count * maxHeight;
 if (count != 0) height += (count - 1) * this.spacing;
 }width += this.marginWidth * 2;
 height += this.marginHeight * 2;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_M (cla$$, "computeChildSize", 
@@ -2273,7 +2263,7 @@ if (data == null) {
 data =  new $wt.layout.FillData ();
 control.setLayoutData (data);
 }var size = null;
-if (wHint == $WT.DEFAULT && hHint == $WT.DEFAULT) {
+if (wHint == -1 && hHint == -1) {
 size = data.computeSize (control, wHint, hHint, flushCache);
 } else {
 var trimX;
@@ -2284,8 +2274,8 @@ trimX = rect.width;
 trimY = rect.height;
 } else {
 trimX = trimY = control.getBorderWidth () * 2;
-}var w = wHint == $WT.DEFAULT ? wHint : Math.max (0, wHint - trimX);
-var h = hHint == $WT.DEFAULT ? hHint : Math.max (0, hHint - trimY);
+}var w = wHint == -1 ? wHint : Math.max (0, wHint - trimX);
+var h = hHint == -1 ? hHint : Math.max (0, hHint - trimY);
 size = data.computeSize (control, w, h, flushCache);
 }return size;
 }, "$wt.widgets.Control,Number,Number,Boolean");
@@ -2310,7 +2300,7 @@ var count = children.length;
 if (count == 0) return ;
 var width = rect.width - this.marginWidth * 2;
 var height = rect.height - this.marginHeight * 2;
-if (this.type == $WT.HORIZONTAL) {
+if (this.type == 256) {
 width -= (count - 1) * this.spacing;
 var x = rect.x + this.marginWidth;
 var extra = width % count;
@@ -2346,7 +2336,7 @@ y += childHeight + this.spacing;
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
-string += "type=" + ((this.type == $WT.VERTICAL) ? "SWT.VERTICAL" : "SWT.HORIZONTAL") + " ";
+string += "type=" + ((this.type == 512) ? "SWT.VERTICAL" : "SWT.HORIZONTAL") + " ";
 if (this.marginWidth != 0) string += "marginWidth=" + this.marginWidth + " ";
 if (this.marginHeight != 0) string += "marginHeight=" + this.marginHeight + " ";
 if (this.spacing != 0) string += "spacing=" + this.spacing + " ";
@@ -2385,8 +2375,8 @@ return Math.floor (bottom.denominator * bottom.offset / divider);
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var size = this.layout (composite, false, 0, 0, wHint, hHint, flushCache);
-if (wHint != $WT.DEFAULT) size.x = wHint;
-if (hHint != $WT.DEFAULT) size.y = hHint;
+if (wHint != -1) size.x = wHint;
+if (hHint != -1) size.y = hHint;
 return size;
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_V (cla$$, "flushCache", 
@@ -2442,13 +2432,13 @@ var h = 0;
 for (var i = 0; i < children.length; i++) {
 var child = children[i];
 var data = child.getLayoutData ();
-if (width != $WT.DEFAULT) {
+if (width != -1) {
 data.needed = false;
 var left = data.getLeftAttachment (child, this.spacing, flushCache);
 var right = data.getRightAttachment (child, this.spacing, flushCache);
 var x1 = left.solveX (width);
 var x2 = right.solveX (width);
-if (data.height == $WT.DEFAULT && !data.needed) {
+if (data.height == -1 && !data.needed) {
 var trim = 0;
 if ($_O (child, $wt.widgets.Scrollable)) {
 var rect = (child).computeTrim (0, 0, 0, 0);
@@ -2472,7 +2462,7 @@ w = Math.max (this.computeWidth (child, data, flushCache), w);
 for (var i = 0; i < children.length; i++) {
 var child = children[i];
 var data = child.getLayoutData ();
-if (height != $WT.DEFAULT) {
+if (height != -1) {
 var y1 = data.getTopAttachment (child, this.spacing, flushCache).solveX (height);
 var y2 = data.getBottomAttachment (child, this.spacing, flushCache).solveX (height);
 h = Math.max (y2, h);
@@ -2536,8 +2526,8 @@ this.makeColumnsEqualWidth = makeColumnsEqualWidth;
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var size = this.layout (composite, false, 0, 0, wHint, hHint, flushCache);
-if (wHint != $WT.DEFAULT) size.x = wHint;
-if (hHint != $WT.DEFAULT) size.y = hHint;
+if (wHint != -1) size.x = wHint;
+if (hHint != -1) size.y = hHint;
 return size;
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_V (cla$$, "flushCache", 
@@ -2591,7 +2581,7 @@ var rect = (child).computeTrim (0, 0, 0, 0);
 trim = rect.width;
 } else {
 trim = child.getBorderWidth () * 2;
-}data.cacheWidth = data.cacheHeight = $WT.DEFAULT;
+}data.cacheWidth = data.cacheHeight = -1;
 data.computeSize (child, Math.max (0, data.minimumWidth - trim), data.heightHint, false);
 }}if (data.grabExcessVerticalSpace && data.minimumHeight > 0) {
 data.cacheHeight = Math.max (data.cacheHeight, data.minimumHeight);
@@ -2656,7 +2646,7 @@ if (data.grabExcessHorizontalSpace) {
 if (!expandColumn[j]) expandCount++;
 expandColumn[j] = true;
 }if (!data.grabExcessHorizontalSpace || data.minimumWidth != 0) {
-w = !data.grabExcessHorizontalSpace || data.minimumWidth == $WT.DEFAULT ? data.cacheWidth : data.minimumWidth;
+w = !data.grabExcessHorizontalSpace || data.minimumWidth == -1 ? data.cacheWidth : data.minimumWidth;
 w += data.horizontalIndent;
 minWidths[j] = Math.max (minWidths[j], w);
 }}}}
@@ -2690,7 +2680,7 @@ widths[last = j - k] += delta;
 }}
 if (last > -1) widths[last] += remainder;
 }}if (!data.grabExcessHorizontalSpace || data.minimumWidth != 0) {
-w = !data.grabExcessHorizontalSpace || data.minimumWidth == $WT.DEFAULT ? data.cacheWidth : data.minimumWidth;
+w = !data.grabExcessHorizontalSpace || data.minimumWidth == -1 ? data.cacheWidth : data.minimumWidth;
 w += data.horizontalIndent - spanMinWidth - (hSpan - 1) * this.horizontalSpacing;
 if (w > 0) {
 if (spanExpandCount == 0) {
@@ -2713,13 +2703,13 @@ for (var i = 0; i < columnCount; i++) {
 minColumnWidth = Math.max (minColumnWidth, minWidths[i]);
 columnWidth = Math.max (columnWidth, widths[i]);
 }
-columnWidth = width == $WT.DEFAULT || expandCount == 0 ? columnWidth : Math.max (minColumnWidth, Math.floor (availableWidth / columnCount));
+columnWidth = width == -1 || expandCount == 0 ? columnWidth : Math.max (minColumnWidth, Math.floor (availableWidth / columnCount));
 for (var i = 0; i < columnCount; i++) {
 expandColumn[i] = expandCount > 0;
 widths[i] = columnWidth;
 }
 } else {
-if (width != $WT.DEFAULT && expandCount > 0) {
+if (width != -1 && expandCount > 0) {
 var totalWidth = 0;
 for (var i = 0; i < columnCount; i++) {
 totalWidth += widths[i];
@@ -2752,7 +2742,7 @@ for (var k = 0; k < hSpan; k++) {
 spanWidth += widths[j - k];
 if (expandColumn[j - k]) spanExpandCount++;
 }
-var w = !data.grabExcessHorizontalSpace || data.minimumWidth == $WT.DEFAULT ? data.cacheWidth : data.minimumWidth;
+var w = !data.grabExcessHorizontalSpace || data.minimumWidth == -1 ? data.cacheWidth : data.minimumWidth;
 w += data.horizontalIndent - spanWidth - (hSpan - 1) * this.horizontalSpacing;
 if (w > 0) {
 if (spanExpandCount == 0) {
@@ -2779,12 +2769,12 @@ last = -1;
 }
 }}var flush = null;
 var flushLength = 0;
-if (width != $WT.DEFAULT) {
+if (width != -1) {
 for (var j = 0; j < columnCount; j++) {
 for (var i = 0; i < rowCount; i++) {
 var data = this.getData (grid, i, j, rowCount, columnCount, false);
 if (data != null) {
-if (data.heightHint == $WT.DEFAULT) {
+if (data.heightHint == -1) {
 var child = grid[i][j];
 var hSpan = Math.max (1, Math.min (data.horizontalSpan, columnCount));
 var currentWidth = 0;
@@ -2792,14 +2782,14 @@ for (var k = 0; k < hSpan; k++) {
 currentWidth += widths[j - k];
 }
 currentWidth += (hSpan - 1) * this.horizontalSpacing - data.horizontalIndent;
-if ((currentWidth != data.cacheWidth && data.horizontalAlignment == $WT.FILL) || (data.cacheWidth > currentWidth)) {
+if ((currentWidth != data.cacheWidth && data.horizontalAlignment == 4) || (data.cacheWidth > currentWidth)) {
 var trim = 0;
 if ($_O (child, $wt.widgets.Scrollable)) {
 var rect = (child).computeTrim (0, 0, 0, 0);
 trim = rect.width;
 } else {
 trim = child.getBorderWidth () * 2;
-}data.cacheWidth = data.cacheHeight = $WT.DEFAULT;
+}data.cacheWidth = data.cacheHeight = -1;
 data.computeSize (child, Math.max (0, currentWidth - trim), data.heightHint, false);
 if (data.grabExcessVerticalSpace && data.minimumHeight > 0) {
 data.cacheHeight = Math.max (data.cacheHeight, data.minimumHeight);
@@ -2824,7 +2814,7 @@ if (data.grabExcessVerticalSpace) {
 if (!expandRow[i]) expandCount++;
 expandRow[i] = true;
 }if (!data.grabExcessVerticalSpace || data.minimumHeight != 0) {
-h = !data.grabExcessVerticalSpace || data.minimumHeight == $WT.DEFAULT ? data.cacheHeight : data.minimumHeight;
+h = !data.grabExcessVerticalSpace || data.minimumHeight == -1 ? data.cacheHeight : data.minimumHeight;
 h += data.verticalIndent;
 minHeights[i] = Math.max (minHeights[i], h);
 }}}}
@@ -2858,7 +2848,7 @@ heights[last = i - k] += delta;
 }}
 if (last > -1) heights[last] += remainder;
 }}if (!data.grabExcessVerticalSpace || data.minimumHeight != 0) {
-h = !data.grabExcessVerticalSpace || data.minimumHeight == $WT.DEFAULT ? data.cacheHeight : data.minimumHeight;
+h = !data.grabExcessVerticalSpace || data.minimumHeight == -1 ? data.cacheHeight : data.minimumHeight;
 h += data.verticalIndent - spanMinHeight - (vSpan - 1) * this.verticalSpacing;
 if (h > 0) {
 if (spanExpandCount == 0) {
@@ -2874,7 +2864,7 @@ minHeights[last = i - k] += delta;
 if (last > -1) minHeights[last] += remainder;
 }}}}}}
 }
-if (height != $WT.DEFAULT && expandCount > 0) {
+if (height != -1 && expandCount > 0) {
 var totalHeight = 0;
 for (var i = 0; i < rowCount; i++) {
 totalHeight += heights[i];
@@ -2907,7 +2897,7 @@ for (var k = 0; k < vSpan; k++) {
 spanHeight += heights[i - k];
 if (expandRow[i - k]) spanExpandCount++;
 }
-var h = !data.grabExcessVerticalSpace || data.minimumHeight == $WT.DEFAULT ? data.cacheHeight : data.minimumHeight;
+var h = !data.grabExcessVerticalSpace || data.minimumHeight == -1 ? data.cacheHeight : data.minimumHeight;
 h += data.verticalIndent - spanHeight - (vSpan - 1) * this.verticalSpacing;
 if (h > 0) {
 if (spanExpandCount == 0) {
@@ -2953,16 +2943,16 @@ cellWidth += this.horizontalSpacing * (hSpan - 1);
 var childX = gridX + data.horizontalIndent;
 var childWidth = Math.min (data.cacheWidth, cellWidth);
 switch (data.horizontalAlignment) {
-case $WT.CENTER:
-case $wt.layout.GridData.CENTER:
+case 16777216:
+case 2:
 childX += Math.max (0, Math.floor ((cellWidth - data.horizontalIndent - childWidth) / 2));
 break;
-case $WT.RIGHT:
-case $WT.END:
-case $wt.layout.GridData.END:
+case 131072:
+case 16777224:
+case 3:
 childX += Math.max (0, cellWidth - data.horizontalIndent - childWidth);
 break;
-case $WT.FILL:
+case 4:
 childWidth = cellWidth - data.horizontalIndent;
 break;
 }
@@ -2970,16 +2960,16 @@ cellHeight += this.verticalSpacing * (vSpan - 1);
 var childY = gridY + data.verticalIndent;
 var childHeight = Math.min (data.cacheHeight, cellHeight);
 switch (data.verticalAlignment) {
-case $WT.CENTER:
-case $wt.layout.GridData.CENTER:
+case 16777216:
+case 2:
 childY += Math.max (0, Math.floor ((cellHeight - data.verticalIndent - childHeight) / 2));
 break;
-case $WT.BOTTOM:
-case $WT.END:
-case $wt.layout.GridData.END:
+case 1024:
+case 16777224:
+case 3:
 childY += Math.max (0, cellHeight - data.verticalIndent - childHeight);
 break;
-case $WT.FILL:
+case 4:
 childHeight = cellHeight - data.verticalIndent;
 break;
 }
@@ -3030,7 +3020,7 @@ string += "}";
 return string;
 });
 cla$$ = $_C (function () {
-this.type = $WT.HORIZONTAL;
+this.type = 256;
 this.marginWidth = 0;
 this.marginHeight = 0;
 this.spacing = 3;
@@ -3056,18 +3046,18 @@ this.type = type;
 $_M (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var extent;
-if (this.type == $WT.HORIZONTAL) {
-extent = this.layoutHorizontal (composite, false, (wHint != $WT.DEFAULT) && this.wrap, wHint, flushCache);
+if (this.type == 256) {
+extent = this.layoutHorizontal (composite, false, (wHint != -1) && this.wrap, wHint, flushCache);
 } else {
-extent = this.layoutVertical (composite, false, (hHint != $WT.DEFAULT) && this.wrap, hHint, flushCache);
-}if (wHint != $WT.DEFAULT) extent.x = wHint;
-if (hHint != $WT.DEFAULT) extent.y = hHint;
+extent = this.layoutVertical (composite, false, (hHint != -1) && this.wrap, hHint, flushCache);
+}if (wHint != -1) extent.x = wHint;
+if (hHint != -1) extent.y = hHint;
 return extent;
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_M (cla$$, "computeSize", 
 function (control, flushCache) {
-var wHint = $WT.DEFAULT;
-var hHint = $WT.DEFAULT;
+var wHint = -1;
+var hHint = -1;
 var data = control.getLayoutData ();
 if (data != null) {
 wHint = data.width;
@@ -3088,7 +3078,7 @@ return string.substring (index + 1, string.length);
 $_V (cla$$, "layout", 
 function (composite, flushCache) {
 var clientArea = composite.getClientArea ();
-if (this.type == $WT.HORIZONTAL) {
+if (this.type == 256) {
 this.layoutHorizontal (composite, true, this.wrap, clientArea.width, flushCache);
 } else {
 this.layoutVertical (composite, true, this.wrap, clientArea.height, flushCache);
@@ -3288,7 +3278,7 @@ if (this.fill) bounds[i].width = maxWidth;
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
-string += "type=" + ((this.type != $WT.HORIZONTAL) ? "SWT.VERTICAL" : "SWT.HORIZONTAL") + " ";
+string += "type=" + ((this.type != 256) ? "SWT.VERTICAL" : "SWT.HORIZONTAL") + " ";
 if (this.marginWidth != 0) string += "marginWidth=" + this.marginWidth + " ";
 if (this.marginHeight != 0) string += "marginHeight=" + this.marginHeight + " ";
 if (this.marginLeft != 0) string += "marginLeft=" + this.marginLeft + " ";

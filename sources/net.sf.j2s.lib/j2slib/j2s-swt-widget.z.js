@@ -4,25 +4,24 @@
 j2s.resources.list=swt-default.css,org/eclipse/swt/graphics/GC.js,org/eclipse/swt/graphics/Resource.js,org/eclipse/swt/graphics/Color.js,org/eclipse/swt/graphics/Cursor.js,org/eclipse/swt/accessibility/Accessible.js,org/eclipse/swt/graphics/Drawable.js,org/eclipse/swt/graphics/Device.js,org/eclipse/swt/graphics/Font.js,org/eclipse/swt/graphics/FontData.js,org/eclipse/swt/graphics/FontMetrics.js,org/eclipse/swt/widgets/Widget.js,org/eclipse/swt/widgets/Control.js,org/eclipse/swt/widgets/Scrollable.js,org/eclipse/swt/widgets/Composite.js,org/eclipse/swt/widgets/Canvas.js,org/eclipse/swt/widgets/Decorations.js,org/eclipse/swt/widgets/Shell.js,org/eclipse/swt/widgets/Item.js,org/eclipse/swt/widgets/MenuItem.js,org/eclipse/swt/widgets/Menu.js,org/eclipse/swt/widgets/Monitor.js,org/eclipse/swt/widgets/ScrollBar.js,org/eclipse/swt/widgets/Display.js,org/eclipse/swt/widgets/Button.js,org/eclipse/swt/widgets/Label.js,org/eclipse/swt/widgets/Link.js,org/eclipse/swt/widgets/Text.js,org/eclipse/swt/widgets/List.js,org/eclipse/swt/browser/Browser.js,org/eclipse/swt/widgets/TableItem.js,org/eclipse/swt/widgets/TableColumn.js,org/eclipse/swt/widgets/Table.js,org/eclipse/swt/widgets/TabItem.js,org/eclipse/swt/widgets/TabFolder.js,org/eclipse/swt/widgets/Combo.js,org/eclipse/swt/widgets/Group.js,org/eclipse/swt/widgets/TreeItem.js,org/eclipse/swt/widgets/TreeColumn.js,org/eclipse/swt/widgets/Tree.js,org/eclipse/swt/widgets/ProgressBar.js,org/eclipse/swt/widgets/Sash.js,org/eclipse/swt/custom/SashForm.js,org/eclipse/swt/custom/SashFormData.js,org/eclipse/swt/custom/SashFormLayout.js,org/eclipse/swt/custom/StackLayout.js,org/eclipse/swt/widgets/Scale.js,bin/org/eclipse/swt/widgets/ToolBar.js,bin/org/eclipse/swt/widgets/ToolItem.js,bin/org/eclipse/swt/widgets/CoolBar.js,bin/org/eclipse/swt/widgets/CoolItem.js,bin/org/eclipse/swt/widgets/Caret.js,bin/org/eclipse/swt/widgets/Spinner.js,bin/org/eclipse/swt/widgets/Dialog.js,bin/org/eclipse/swt/widgets/ColorDialog.js,bin/org/eclipse/swt/widgets/DirectoryDialog.js,bin/org/eclipse/swt/widgets/FileDialog.js,bin/org/eclipse/swt/widgets/FontDialog.js,org/eclipse/swt/program/Program.js
 =*/
 cla$$ = $_C (function () {
-this.accessibleListeners =  new java.util.Vector ();
-this.accessibleControlListeners =  new java.util.Vector ();
-this.textListeners =  new java.util.Vector ();
 this.control = null;
 $_Z (this, arguments);
 }, $wt.accessibility, "Accessible");
+$_Y (cla$$, function () {
+this.accessibleListeners =  new java.util.Vector ();
+this.accessibleControlListeners =  new java.util.Vector ();
+this.textListeners =  new java.util.Vector ();
+});
 $_M (cla$$, "addAccessibleListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.accessibleListeners.addElement (listener);
 }, "$wt.accessibility.AccessibleListener");
 $_M (cla$$, "addAccessibleControlListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.accessibleControlListeners.addElement (listener);
 }, "$wt.accessibility.AccessibleControlListener");
 $_M (cla$$, "addAccessibleTextListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.textListeners.addElement (listener);
 }, "$wt.accessibility.AccessibleTextListener");
 $_M (cla$$, "getControl", 
@@ -31,17 +30,14 @@ return this.control;
 });
 $_M (cla$$, "removeAccessibleListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.accessibleListeners.removeElement (listener);
 }, "$wt.accessibility.AccessibleListener");
 $_M (cla$$, "removeAccessibleControlListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.accessibleControlListeners.removeElement (listener);
 }, "$wt.accessibility.AccessibleControlListener");
 $_M (cla$$, "removeAccessibleTextListener", 
 function (listener) {
-if (listener == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.textListeners.removeElement (listener);
 }, "$wt.accessibility.AccessibleTextListener");
 $_M (cla$$, "selectionChanged", 
@@ -64,15 +60,21 @@ this.handle = null;
 this.bgColor = null;
 this.fgColor = null;
 this.font = null;
+this.drawable = null;
+this.data = null;
 $_Z (this, arguments);
-}, $wt.graphics, "GC");
+}, $wt.graphics, "GC", $wt.graphics.Resource);
+$_K (cla$$, 
+function () {
+$_R (this, $wt.graphics.GC, []);
+});
 $_K (cla$$, 
 function (drawable) {
-this.construct (drawable, $WT.NONE);
+this.construct (drawable, 0);
 }, "$wt.graphics.Drawable");
 $_K (cla$$, 
 function (drawable, style) {
-if (drawable == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
+$_R (this, $wt.graphics.GC, []);
 if ($_O (drawable, $wt.widgets.Control)) {
 var ctrl = drawable;
 this.handle = ctrl.handle;
@@ -83,129 +85,101 @@ this.handle = img.handle;
 this.handle = document.createElement ("DIV");
 this.handle.style.position = "absolute";
 }}, "$wt.graphics.Drawable,Number");
-$_M (cla$$, "getBackground", 
-function () {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (this.bgColor == null) {
-this.bgColor =  new $wt.graphics.Color (null, "white");
-}return this.bgColor;
-});
-$_M (cla$$, "setBackground", 
-function (color) {
-this.bgColor = color;
-}, "$wt.graphics.Color");
-$_M (cla$$, "getForeground", 
-function () {
-if (this.fgColor == null) {
-this.fgColor =  new $wt.graphics.Color (null, "black");
-}return this.fgColor;
-});
-$_M (cla$$, "setForeground", 
-function (color) {
-this.fgColor = color;
-}, "$wt.graphics.Color");
-$_M (cla$$, "setFont", 
-function (font) {
-if (font == null) {
-font = $wt.widgets.Display.getDefault ().getSystemFont ();
-} else {
-if (font.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-this.font = font;
-}}, "$wt.graphics.Font");
-$_M (cla$$, "fillRectangle", 
-function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-this.fillRectangle (rect.x, rect.y, rect.width, rect.height);
-}, "$wt.graphics.Rectangle");
-$_M (cla$$, "fillRectangle", 
-function (x, y, width, height) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-var rect = document.createElement ("DIV");
-rect.style.position = "absolute";
-rect.style.left = x + "px";
-rect.style.top = y + "px";
-rect.style.width = width + "px";
-rect.style.height = height + "px";
-rect.style.backgroundColor = this.bgColor.getCSSHandle ();
-this.handle.appendChild (rect);
-}, "Number,Number,Number,Number");
-$_M (cla$$, "fillRoundRectangle", 
-function (x, y, width, height, arcWidth, arcHeight) {
-this.fillRectangle (x, y, width, height);
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+if ((style & 33554432) != 0) style &= ($t$ = ~ $WT.RIGHT_TO_LEFT, $WT.prototype.RIGHT_TO_LEFT = $WT.RIGHT_TO_LEFT, $t$);
+return style & (33554432 | 67108864);
+}, "Number");
+$_M (cla$$, "copyArea", 
+function (image, x, y) {
+}, "$wt.graphics.Image,Number,Number");
+$_M (cla$$, "copyArea", 
+function (srcX, srcY, width, height, destX, destY) {
+this.copyArea (srcX, srcY, width, height, destX, destY, true);
 }, "Number,Number,Number,Number,Number,Number");
-$_M (cla$$, "fillGradientRectangle", 
-function (x, y, width, height, vertical) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (width == 0 || height == 0) return ;
-this.fillRectangle (x, y, width, height);
-}, "Number,Number,Number,Number,Boolean");
+$_M (cla$$, "copyArea", 
+function (srcX, srcY, width, height, destX, destY, paint) {
+}, "Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "createGdipBrush", 
+function () {
+return 0;
+});
+$_M (cla$$, "createGdipFont", 
+function () {
+return 0;
+});
+cla$$.createGdipFont = $_M (cla$$, "createGdipFont", 
+function (hDC, hFont) {
+return 0;
+}, "Number,Number");
+$_M (cla$$, "createGdipPen", 
+function () {
+return 0;
+});
+$_M (cla$$, "destroyGdipBrush", 
+function (brush) {
+}, "Number");
+$_V (cla$$, "dispose", 
+function () {
+if (this.handle == null) return ;
+if (this.data == null || this.data.device == null || this.data.device.isDisposed ()) return ;
+});
+$_M (cla$$, "drawArc", 
+function (x, y, width, height, startAngle, arcAngle) {
+if (width < 0) {
+x = x + width;
+width = -width;
+}if (height < 0) {
+y = y + height;
+height = -height;
+}if (width == 0 || height == 0 || arcAngle == 0) return ;
+var gdipGraphics = this.data.gdipGraphics;
+}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "drawFocus", 
+function (x, y, width, height) {
+}, "Number,Number,Number,Number");
 $_M (cla$$, "drawImage", 
 function (image, x, y) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (image == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (image.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 if (image.handle != null) {
 for (var i = 0; i < image.handle.childNodes.length; i++) {
 this.handle.appendChild (image.handle.childNodes[i]);
 }
 }}, "$wt.graphics.Image,Number,Number");
-$_M (cla$$, "dispose", 
-function () {
-});
-$_M (cla$$, "getFontMetrics", 
-function () {
-return  new $wt.graphics.FontMetrics ();
-});
-$_M (cla$$, "stringExtent", 
-function (string) {
-if (string == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-var length = string.length;
-if (length == 0) {
-var height = UIStringUtil.calculatePlainStringLineHeight ("M");
-return  new $wt.graphics.Point (0, height);
-} else {
-var height = UIStringUtil.calculatePlainStringLineHeight (string);
-var width = UIStringUtil.calculatePlainStringLineWidth (string);
-return  new $wt.graphics.Point (width, height);
-}}, "String");
-$_M (cla$$, "textExtent", 
-function (string) {
-return this.textExtent (string, $WT.DRAW_DELIMITER | $WT.DRAW_TAB);
-}, "String");
-$_M (cla$$, "textExtent", 
-function (string, flags) {
-if (string == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (string.length == 0) {
-var height = UIStringUtil.calculatePlainStringLineHeight ("M");
-return  new $wt.graphics.Point (0, height);
-} else {
-var height = UIStringUtil.calculatePlainStringLineHeight (string);
-var width = UIStringUtil.calculatePlainStringLineWidth (string);
-return  new $wt.graphics.Point (width, height);
-}}, "String,Number");
-$_M (cla$$, "drawRectangle", 
-function (x, y, width, height) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-var rect = document.createElement ("DIV");
+$_M (cla$$, "drawImage", 
+function (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight) {
+if (srcWidth == 0 || srcHeight == 0 || destWidth == 0 || destHeight == 0) return ;
+this.drawImage (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, false);
+}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "drawImage", 
+function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
+var rect = document.createElement ("IMG");
+rect.src = srcImage.url;
 rect.style.position = "absolute";
 rect.style.fontSize = "0px";
-rect.style.left = x + "px";
-rect.style.top = y + "px";
-rect.style.width = width + "px";
-rect.style.height = height + "px";
-rect.style.borderColor = this.fgColor.getCSSHandle ();
-rect.style.borderStyle = "solid";
-rect.style.borderWidth = "1px";
+rect.style.left = destX + "px";
+rect.style.top = destY + "px";
+rect.style.width = destWidth + "px";
+rect.style.height = destHeight + "px";
 this.handle.appendChild (rect);
-}, "Number,Number,Number,Number");
-$_M (cla$$, "drawRectangle", 
-function (rect) {
-if (rect == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-this.drawRectangle (rect.x, rect.y, rect.width, rect.height);
-}, "$wt.graphics.Rectangle");
+}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "drawIcon", 
+function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
+}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "drawBitmap", 
+function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
+}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "drawBitmapTransparentByClipping", 
+function (srcHdc, maskHdc, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple, imgWidth, imgHeight) {
+}, "Number,Number,Number,Number,Number,Number,Number,Number,Number,Number,Boolean,Number,Number");
+$_M (cla$$, "drawBitmapMask", 
+function (srcImage, srcColor, srcMask, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple, imgWidth, imgHeight, offscreen) {
+var srcColorY = srcY;
+if (srcColor == 0) {
+srcColor = srcMask;
+srcColorY += imgHeight;
+}}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Number,Number,Boolean,Number,Number,Boolean");
 $_M (cla$$, "drawLine", 
 function (x1, y1, x2, y2) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 var rect = document.createElement ("DIV");
 rect.style.position = "absolute";
 rect.style.fontSize = "0px";
@@ -229,15 +203,76 @@ rect.style.borderStyle = "solid";
 rect.style.borderWidth = "1px";
 this.handle.appendChild (rect);
 }, "Number,Number,Number,Number");
+$_M (cla$$, "drawOval", 
+function (x, y, width, height) {
+var gdipGraphics = this.data.gdipGraphics;
+}, "Number,Number,Number,Number");
+$_M (cla$$, "drawPath", 
+function (path) {
+}, "$wt.graphics.Path");
+$_M (cla$$, "drawPoint", 
+function (x, y) {
+}, "Number,Number");
+$_M (cla$$, "drawPolygon", 
+function (pointArray) {
+var gdipGraphics = this.data.gdipGraphics;
+}, "Array");
+$_M (cla$$, "drawPolyline", 
+function (pointArray) {
+var gdipGraphics = this.data.gdipGraphics;
+}, "Array");
+$_M (cla$$, "drawRectangle", 
+function (x, y, width, height) {
+var rect = document.createElement ("DIV");
+rect.style.position = "absolute";
+rect.style.fontSize = "0px";
+rect.style.left = x + "px";
+rect.style.top = y + "px";
+rect.style.width = width + "px";
+rect.style.height = height + "px";
+if (this.fgColor != null) rect.style.borderColor = this.fgColor.getCSSHandle ();
+rect.style.borderStyle = "solid";
+rect.style.borderWidth = "1px";
+this.handle.appendChild (rect);
+}, "Number,Number,Number,Number");
+$_M (cla$$, "drawRectangle", 
+function (rect) {
+this.drawRectangle (rect.x, rect.y, rect.width, rect.height);
+}, "$wt.graphics.Rectangle");
+$_M (cla$$, "drawRoundRectangle", 
+function (x, y, width, height, arcWidth, arcHeight) {
+if (this.data.gdipGraphics != 0) {
+this.initGdip (true, false);
+this.drawRoundRectangleGdip (this.data.gdipGraphics, this.data.gdipPen, x, y, width, height, arcWidth, arcHeight);
+return ;
+}}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "drawRoundRectangleGdip", 
+function (gdipGraphics, brush, x, y, width, height, arcWidth, arcHeight) {
+var nx = x;
+var ny = y;
+var nw = width;
+var nh = height;
+var naw = arcWidth;
+var nah = arcHeight;
+if (nw < 0) {
+nw = 0 - nw;
+nx = nx - nw;
+}if (nh < 0) {
+nh = 0 - nh;
+ny = ny - nh;
+}if (naw < 0) naw = 0 - naw;
+if (nah < 0) nah = 0 - nah;
+var naw2 = Math.floor (naw / 2);
+var nah2 = Math.floor (nah / 2);
+}, "Number,Number,Number,Number,Number,Number,Number,Number");
 $_M (cla$$, "drawString", 
 function (string, x, y) {
 this.drawString (string, x, y, false);
 }, "String,Number,Number");
 $_M (cla$$, "drawString", 
 function (string, x, y, isTransparent) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (string == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 var length = string.length;
+if (length == 0) return ;
 if (length == 0) return ;
 var rect = document.createElement ("DIV");
 rect.style.position = "absolute";
@@ -251,58 +286,394 @@ rect.appendChild (document.createTextNode (string));
 }, "String,Number,Number,Boolean");
 $_M (cla$$, "drawText", 
 function (string, x, y) {
-this.drawText (string, x, y, $WT.DRAW_DELIMITER | $WT.DRAW_TAB);
+this.drawText (string, x, y, 2 | 4);
 }, "String,Number,Number");
 $_M (cla$$, "drawText", 
 function (string, x, y, isTransparent) {
-var flags = $WT.DRAW_DELIMITER | $WT.DRAW_TAB;
-if (isTransparent) flags |= $WT.DRAW_TRANSPARENT;
+var flags = 2 | 4;
+if (isTransparent) flags |= 1;
 this.drawText (string, x, y, flags);
 }, "String,Number,Number,Boolean");
 $_M (cla$$, "drawText", 
 function (string, x, y, flags) {
-System.out.println (this.fgColor.getCSSHandle ());
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (string == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (string.length == 0) return ;
 var rect = document.createElement ("DIV");
 rect.style.position = "absolute";
 rect.style.left = x + "px";
 rect.style.top = y + "px";
 rect.style.whiteSpace = "nowrap";
-if ((flags & $WT.DRAW_TRANSPARENT) == 0) {
+if ((flags & 1) == 0) {
 rect.style.backgroundColor = this.bgColor.getCSSHandle ();
 }rect.style.color = this.fgColor.getCSSHandle ();
 this.handle.appendChild (rect);
 rect.appendChild (document.createTextNode (string));
 }, "String,Number,Number,Number");
+$_V (cla$$, "equals", 
+function (object) {
+return (object == this) || (($_O (object, $wt.graphics.GC)) && (this.handle == (object).handle));
+}, "Object");
+$_M (cla$$, "fillArc", 
+function (x, y, width, height, startAngle, arcAngle) {
+if (width < 0) {
+x = x + width;
+width = -width;
+}if (height < 0) {
+y = y + height;
+height = -height;
+}if (width == 0 || height == 0 || arcAngle == 0) return ;
+}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "fillGradientRectangle", 
+function (x, y, width, height, vertical) {
+if (width == 0 || height == 0) return ;
+if (width == 0 || height == 0) return ;
+this.fillRectangle (x, y, width, height);
+}, "Number,Number,Number,Number,Boolean");
+$_M (cla$$, "fillOval", 
+function (x, y, width, height) {
+}, "Number,Number,Number,Number");
+$_M (cla$$, "fillPath", 
+function (path) {
+}, "$wt.graphics.Path");
+$_M (cla$$, "fillPolygon", 
+function (pointArray) {
+}, "Array");
+$_M (cla$$, "fillRectangle", 
+function (x, y, width, height) {
+var rect = document.createElement ("DIV");
+rect.style.position = "absolute";
+rect.style.left = x + "px";
+rect.style.top = y + "px";
+rect.style.width = width + "px";
+rect.style.height = height + "px";
+rect.style.backgroundColor = this.bgColor.getCSSHandle ();
+this.handle.appendChild (rect);
+}, "Number,Number,Number,Number");
+$_M (cla$$, "fillRectangle", 
+function (rect) {
+this.fillRectangle (rect.x, rect.y, rect.width, rect.height);
+}, "$wt.graphics.Rectangle");
+$_M (cla$$, "fillRoundRectangle", 
+function (x, y, width, height, arcWidth, arcHeight) {
+this.fillRectangle (x, y, width, height);
+}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "fillRoundRectangleGdip", 
+function (gdipGraphics, brush, x, y, width, height, arcWidth, arcHeight) {
+var nx = x;
+var ny = y;
+var nw = width;
+var nh = height;
+var naw = arcWidth;
+var nah = arcHeight;
+if (nw < 0) {
+nw = 0 - nw;
+nx = nx - nw;
+}if (nh < 0) {
+nh = 0 - nh;
+ny = ny - nh;
+}if (naw < 0) naw = 0 - naw;
+if (nah < 0) nah = 0 - nah;
+var naw2 = Math.floor (naw / 2);
+var nah2 = Math.floor (nah / 2);
+}, "Number,Number,Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "flush", 
+function () {
+});
+$_M (cla$$, "getAdvanceWidth", 
+function (ch) {
+return 0;
+}, "Number");
+$_M (cla$$, "getAdvanced", 
+function () {
+return this.data.gdipGraphics != 0;
+});
+$_M (cla$$, "getAlpha", 
+function () {
+return this.data.alpha;
+});
+$_M (cla$$, "getAntialias", 
+function () {
+if (this.data.gdipGraphics == 0) return -1;
+return -1;
+});
+$_M (cla$$, "getBackground", 
+function () {
+if (this.bgColor == null) {
+this.bgColor =  new $wt.graphics.Color (null, "white");
+}return this.bgColor;
+});
+$_M (cla$$, "getBackgroundPattern", 
+function () {
+return this.data.backgroundPattern;
+});
+$_M (cla$$, "getCharWidth", 
+function (ch) {
+return 8;
+}, "Number");
+$_M (cla$$, "getClipping", 
+function () {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getClipping", 
+function (region) {
+}, "$wt.graphics.Region");
+$_M (cla$$, "getCodePage", 
+function () {
+return 0;
+});
+$_M (cla$$, "getFillRule", 
+function () {
+return 4;
+});
+$_M (cla$$, "getFont", 
+function () {
+return null;
+});
+$_M (cla$$, "getFontMetrics", 
+function () {
+return  new $wt.graphics.FontMetrics ();
+});
+$_M (cla$$, "getForeground", 
+function () {
+if (this.fgColor == null) {
+this.fgColor =  new $wt.graphics.Color (null, "black");
+}return this.fgColor;
+});
+$_M (cla$$, "getForegroundPattern", 
+function () {
+return this.data.foregroundPattern;
+});
+$_M (cla$$, "getInterpolation", 
+function () {
+if (this.data.gdipGraphics == 0) return -1;
+return -1;
+});
+$_M (cla$$, "getLineCap", 
+function () {
+var style;
+var size;
+return 1;
+});
+$_M (cla$$, "getLineDash", 
+function () {
+if (this.data.dashes == null) return null;
+var dashes =  $_A (this.data.dashes.length, 0);
+System.arraycopy (this.data.dashes, 0, dashes, 0, dashes.length);
+return dashes;
+});
+$_M (cla$$, "getLineJoin", 
+function () {
+var style;
+var size;
+return 3;
+});
+$_M (cla$$, "getLineStyle", 
+function () {
+var style;
+var size;
+return 1;
+});
+$_M (cla$$, "getLineWidth", 
+function () {
+var size;
+return 1;
+});
+$_M (cla$$, "getStyle", 
+function () {
+return this.data.style;
+});
+$_M (cla$$, "getTextAntialias", 
+function () {
+if (this.data.gdipGraphics == 0) return -1;
+return -1;
+});
+$_M (cla$$, "getTransform", 
+function (transform) {
+}, "$wt.graphics.Transform");
+$_M (cla$$, "getXORMode", 
+function () {
+var rop2 = 0;
+return false;
+});
+$_M (cla$$, "initGdip", 
+function (draw, fill) {
+}, "Boolean,Boolean");
+$_M (cla$$, "init", 
+function (drawable, data, hDC) {
+var foreground = data.foreground;
+}, "$wt.graphics.Drawable,$wt.graphics.GCData,Number");
+$_V (cla$$, "hashCode", 
+function () {
+return this.handle.toString ().hashCode ();
+});
+$_M (cla$$, "isClipped", 
+function () {
+return false;
+});
+$_V (cla$$, "isDisposed", 
+function () {
+return this.handle == null;
+});
+$_M (cla$$, "measureSpace", 
+function (font, format) {
+return 1.0;
+}, "Number,Number");
+$_M (cla$$, "setAdvanced", 
+function (advanced) {
+if (advanced && this.data.gdipGraphics != 0) return ;
+if (advanced) {
+try {
+this.initGdip (false, false);
+} catch (e) {
+if ($_O (e, $wt.SWTException)) {
+} else {
+throw e;
+}
+}
+} else {
+}}, "Boolean");
+$_M (cla$$, "setAntialias", 
+function (antialias) {
+if (this.data.gdipGraphics == 0 && antialias == -1) return ;
+}, "Number");
+$_M (cla$$, "setAlpha", 
+function (alpha) {
+if (this.data.gdipGraphics == 0 && (alpha & 0xFF) == 0xFF) return ;
+this.initGdip (false, false);
+this.data.alpha = alpha & 0xFF;
+}, "Number");
+$_M (cla$$, "setBackground", 
+function (color) {
+this.bgColor = color;
+}, "$wt.graphics.Color");
+$_M (cla$$, "setBackgroundPattern", 
+function (pattern) {
+if (this.data.gdipGraphics == 0 && pattern == null) return ;
+this.initGdip (false, false);
+if (this.data.gdipBrush != 0) this.destroyGdipBrush (this.data.gdipBrush);
+this.data.backgroundPattern = pattern;
+}, "$wt.graphics.Pattern");
+$_M (cla$$, "setClipping", 
+function (clipRgn) {
+var hRgn = clipRgn;
+var gdipGraphics = this.data.gdipGraphics;
+}, "Number");
+$_M (cla$$, "setClipping", 
+function (x, y, width, height) {
+}, "Number,Number,Number,Number");
+$_M (cla$$, "setClipping", 
+function (path) {
+this.setClipping (0);
+}, "$wt.graphics.Path");
+$_M (cla$$, "setClipping", 
+function (rect) {
+if (rect == null) {
+this.setClipping (0);
+} else {
+this.setClipping (rect.x, rect.y, rect.width, rect.height);
+}}, "$wt.graphics.Rectangle");
+$_M (cla$$, "setClipping", 
+function (region) {
+this.setClipping (region != null ? region.handle : 0);
+}, "$wt.graphics.Region");
+$_M (cla$$, "setFillRule", 
+function (rule) {
+}, "Number");
+$_M (cla$$, "setFont", 
+function (font) {
+if (font == null) {
+font = $wt.widgets.Display.getDefault ().getSystemFont ();
+} else {
+this.font = font;
+}}, "$wt.graphics.Font");
+$_M (cla$$, "setForeground", 
+function (color) {
+this.fgColor = color;
+}, "$wt.graphics.Color");
+$_M (cla$$, "setForegroundPattern", 
+function (pattern) {
+if (this.data.gdipGraphics == 0 && pattern == null) return ;
+}, "$wt.graphics.Pattern");
+$_M (cla$$, "setInterpolation", 
+function (interpolation) {
+if (this.data.gdipGraphics == 0 && interpolation == -1) return ;
+var mode = 0;
+}, "Number");
+$_M (cla$$, "setLineCap", 
+function (cap) {
+var capStyle = 0;
+this.setPen (-1, -1, -1, capStyle, -1, this.data.dashes);
+}, "Number");
+$_M (cla$$, "setLineDash", 
+function (dashes) {
+if (dashes != null && dashes.length > 0) {
+this.data.dashes =  $_A (dashes.length, 0);
+for (var i = 0; i < dashes.length; i++) {
+var dash = dashes[i];
+this.data.dashes[i] = dash;
+}
+} else {
+this.data.dashes = null;
+}}, "Array");
+$_M (cla$$, "setLineJoin", 
+function (join) {
+var joinStyle = 0;
+this.setPen (-1, -1, -1, -1, joinStyle, this.data.dashes);
+}, "Number");
+$_M (cla$$, "setLineStyle", 
+function (lineStyle) {
+var style = -1;
+this.setPen (-1, -1, style, -1, -1, this.data.dashes);
+}, "Number");
 $_M (cla$$, "setLineWidth", 
 function (lineWidth) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
+this.setPen (-1, lineWidth, -1, -1, -1, this.data.dashes);
 }, "Number");
-$_M (cla$$, "drawImage", 
-function (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-if (srcWidth == 0 || srcHeight == 0 || destWidth == 0 || destHeight == 0) return ;
-if (srcX < 0 || srcY < 0 || srcWidth < 0 || srcHeight < 0 || destWidth < 0 || destHeight < 0) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (image == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (image.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-this.drawImage (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, false);
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number");
-$_M (cla$$, "drawImage", 
-function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
-if (this.handle == null) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-var rect = document.createElement ("IMG");
-rect.src = srcImage.url;
-rect.style.position = "absolute";
-rect.style.fontSize = "0px";
-rect.style.left = destX + "px";
-rect.style.top = destY + "px";
-rect.style.width = destWidth + "px";
-rect.style.height = destHeight + "px";
-this.handle.appendChild (rect);
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "setPen", 
+function (newColor, newWidth, lineStyle, capStyle, joinStyle, dashes) {
+var extPen = false;
+var changed = false;
+}, "Number,Number,Number,Number,Number,Array");
+$_M (cla$$, "setXORMode", 
+function (xor) {
+}, "Boolean");
+$_M (cla$$, "setTextAntialias", 
+function (antialias) {
+if (this.data.gdipGraphics == 0 && antialias == -1) return ;
+var textMode = 0;
+}, "Number");
+$_M (cla$$, "setTransform", 
+function (transform) {
+if (this.data.gdipGraphics == 0 && transform == null) return ;
+}, "$wt.graphics.Transform");
+$_M (cla$$, "stringExtent", 
+function (string) {
+var length = string.length;
+if (length == 0) {
+return  new $wt.graphics.Point (0, 16);
+} else {
+return $wt.internal.browser.OS.getStringPlainSize (string);
+}}, "String");
+$_M (cla$$, "textExtent", 
+function (string) {
+return this.textExtent (string, 2 | 4);
+}, "String");
+$_M (cla$$, "textExtent", 
+function (string, flags) {
+if (string.length == 0) {
+return  new $wt.graphics.Point (0, 16);
+} else {
+return $wt.internal.browser.OS.getStringPlainSize (string);
+}}, "String,Number");
+$_M (cla$$, "toString", 
+function () {
+if (this.isDisposed ()) return "GC {*DISPOSED*}";
+return "GC {" + this.handle + "}";
+});
+$_S (cla$$,
+"LINE_DOT_ZERO", [3, 3],
+"LINE_DASH_ZERO", [18, 6],
+"LINE_DASHDOT_ZERO", [9, 6, 3, 6],
+"LINE_DASHDOTDOT_ZERO", [9, 3, 3, 3, 3, 3]);
 cla$$ = $_C (function () {
 this.device = null;
 $_Z (this, arguments);
@@ -316,15 +687,12 @@ $_K (cla$$,
 function (device, red, green, blue) {
 $_R (this, $wt.graphics.Color, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.init (device, red, green, blue);
 }, "$wt.graphics.Device,Number,Number,Number");
 $_K (cla$$, 
 function (device, rgb) {
 $_R (this, $wt.graphics.Color, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (rgb == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.init (device, rgb.red, rgb.green, rgb.blue);
 }, "$wt.graphics.Device,$wt.graphics.RGB");
 $_V (cla$$, "dispose", 
@@ -352,25 +720,21 @@ return (this.handle & 0xFFFFFF) == (color.handle & 0xFFFFFF);
 }}, "Object");
 $_M (cla$$, "getBlue", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 if (this.handle < 0) this.handle = $wt.graphics.Color.rgbHandleFromCSS (this.cssHandle);
 return (this.handle & 0xFF0000) >> 16;
 });
 $_M (cla$$, "getGreen", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 if (this.handle < 0) this.handle = $wt.graphics.Color.rgbHandleFromCSS (this.cssHandle);
 return (this.handle & 0xFF00) >> 8;
 });
 $_M (cla$$, "getRed", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 if (this.handle < 0) this.handle = $wt.graphics.Color.rgbHandleFromCSS (this.cssHandle);
 return this.handle & 0xFF;
 });
 $_M (cla$$, "getRGB", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 if (this.handle < 0) this.handle = $wt.graphics.Color.rgbHandleFromCSS (this.cssHandle);
 return  new $wt.graphics.RGB (this.handle & 0xFF, (this.handle & 0xFF00) >> 8, (this.handle & 0xFF0000) >> 16);
 });
@@ -380,9 +744,7 @@ return this.handle;
 });
 $_M (cla$$, "init", 
 function (device, red, green, blue) {
-if (red > 255 || red < 0 || green > 255 || green < 0 || blue > 255 || blue < 0) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}this.device = device;
+this.device = device;
 this.handle = 0x02000000 | (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
 this.cssHandle = null;
 }, "$wt.graphics.Device,Number,Number,Number");
@@ -400,7 +762,6 @@ $_K (cla$$,
 function (device, handle) {
 $_R (this, $wt.graphics.Color, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.cssHandle = handle;
 this.handle = -2;
 this.device = device;
@@ -457,86 +818,83 @@ $_K (cla$$,
 function (device, style) {
 $_R (this, $wt.graphics.Cursor, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.device = device;
 switch (style) {
-case $WT.CURSOR_HAND:
+case 21:
 this.handle = "pointer";
 break;
-case $WT.CURSOR_ARROW:
+case 0:
 this.handle = "default";
 break;
-case $WT.CURSOR_WAIT:
+case 1:
 this.handle = "wait";
 break;
-case $WT.CURSOR_CROSS:
+case 2:
 this.handle = "crosshair";
 break;
-case $WT.CURSOR_APPSTARTING:
+case 3:
 this.handle = "progress";
 break;
-case $WT.CURSOR_HELP:
+case 4:
 this.handle = "help";
 break;
-case $WT.CURSOR_SIZEALL:
+case 5:
 this.handle = "move";
 break;
-case $WT.CURSOR_SIZENESW:
+case 6:
 this.handle = "move";
 break;
-case $WT.CURSOR_SIZENS:
+case 7:
 this.handle = "s-resize";
 break;
-case $WT.CURSOR_SIZENWSE:
+case 8:
 this.handle = "move";
 break;
-case $WT.CURSOR_SIZEWE:
+case 9:
 this.handle = "e-resize";
 break;
-case $WT.CURSOR_SIZEN:
+case 10:
 this.handle = "n-resize";
 break;
-case $WT.CURSOR_SIZES:
+case 11:
 this.handle = "s-resize";
 break;
-case $WT.CURSOR_SIZEE:
+case 12:
 this.handle = "e-resize";
 break;
-case $WT.CURSOR_SIZEW:
+case 13:
 this.handle = "w-resize";
 break;
-case $WT.CURSOR_SIZENE:
+case 14:
 this.handle = "ne-resize";
 break;
-case $WT.CURSOR_SIZESE:
+case 15:
 this.handle = "se-resize";
 break;
-case $WT.CURSOR_SIZESW:
+case 16:
 this.handle = "sw-resize";
 break;
-case $WT.CURSOR_SIZENW:
+case 17:
 this.handle = "nw-resize";
 break;
-case $WT.CURSOR_UPARROW:
+case 18:
 this.handle = "default";
 break;
-case $WT.CURSOR_IBEAM:
+case 19:
 this.handle = "text";
 break;
-case $WT.CURSOR_NO:
+case 20:
 this.handle = "auto";
 break;
 default:
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
+$WT.error (5);
 }
 }, "$wt.graphics.Device,Number");
 $_K (cla$$, 
 function (device, source, mask, hotspotX, hotspotY) {
 $_R (this, $wt.graphics.Cursor, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.device = device;
-if (source == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (source.url != null) {
 this.handle = "url(\'" + source.url + "\'),default";
 } else {
@@ -546,9 +904,7 @@ $_K (cla$$,
 function (device, source, hotspotX, hotspotY) {
 $_R (this, $wt.graphics.Cursor, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.device = device;
-if (source == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (source.url != null) {
 this.handle = "url(\'" + source.url + "\'),default";
 } else {
@@ -585,7 +941,6 @@ $_K (cla$$,
 function (device, handle) {
 $_R (this, $wt.graphics.Cursor, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.handle = handle;
 this.device = device;
 }, "$wt.graphics.Device,String");
@@ -613,7 +968,6 @@ this.init ();
 }, "$wt.graphics.DeviceData");
 $_M (cla$$, "checkDevice", 
 function () {
-if (this.disposed) $WT.error ($WT.ERROR_DEVICE_DISPOSED);
 });
 $_M (cla$$, "create", 
 function (data) {
@@ -624,21 +978,18 @@ function () {
 $_M (cla$$, "dispose", 
 function () {
 if (this.isDisposed ()) return ;
-this.checkDevice ();
 this.release ();
 this.destroy ();
 this.disposed = true;
 });
 $_M (cla$$, "getBounds", 
 function () {
-this.checkDevice ();
 var width = window.screen.availWidth;
 var height = window.screen.availHeight;
 return  new $wt.graphics.Rectangle (0, 0, width, height);
 });
 $_M (cla$$, "getDeviceData", 
 function () {
-this.checkDevice ();
 var data =  new $wt.graphics.DeviceData ();
 return data;
 });
@@ -648,70 +999,66 @@ return this.getBounds ();
 });
 $_M (cla$$, "getDepth", 
 function () {
-this.checkDevice ();
 return 32;
 });
 $_M (cla$$, "getDPI", 
 function () {
-this.checkDevice ();
 return  new $wt.graphics.Point (96, 96);
 });
 $_M (cla$$, "getFontList", 
 function (faceName, scalable) {
-this.checkDevice ();
 return  new Array (0);
 }, "String,Boolean");
 $_M (cla$$, "getSystemColor", 
 function (id) {
-this.checkDevice ();
 var pixel = 0x02000000;
 switch (id) {
-case $WT.COLOR_WHITE:
+case 1:
 pixel = 0x02FFFFFF;
 break;
-case $WT.COLOR_BLACK:
+case 2:
 pixel = 0x02000000;
 break;
-case $WT.COLOR_RED:
+case 3:
 pixel = 0x020000FF;
 break;
-case $WT.COLOR_DARK_RED:
+case 4:
 pixel = 0x02000080;
 break;
-case $WT.COLOR_GREEN:
+case 5:
 pixel = 0x0200FF00;
 break;
-case $WT.COLOR_DARK_GREEN:
+case 6:
 pixel = 0x02008000;
 break;
-case $WT.COLOR_YELLOW:
+case 7:
 pixel = 0x0200FFFF;
 break;
-case $WT.COLOR_DARK_YELLOW:
+case 8:
 pixel = 0x02008080;
 break;
-case $WT.COLOR_BLUE:
+case 9:
 pixel = 0x02FF0000;
 break;
-case $WT.COLOR_DARK_BLUE:
+case 10:
 pixel = 0x02800000;
 break;
-case $WT.COLOR_MAGENTA:
+case 11:
 pixel = 0x02FF00FF;
 break;
-case $WT.COLOR_DARK_MAGENTA:
+case 12:
 pixel = 0x02800080;
 break;
-case $WT.COLOR_CYAN:
+case 13:
 pixel = 0x02FFFF00;
 break;
-case $WT.COLOR_DARK_CYAN:
+case 14:
 pixel = 0x02808000;
 break;
-case $WT.COLOR_GRAY:
+case 15:
 pixel = 0x02C0C0C0;
 break;
-case $WT.COLOR_DARK_GRAY:
+case 16:
 pixel = 0x02808080;
 break;
 }
@@ -719,12 +1066,10 @@ return  new $wt.graphics.Color (this, pixel & 0x000000FF, (pixel & 0x0000FF00) >
 }, "Number");
 $_M (cla$$, "getSystemFont", 
 function () {
-this.checkDevice ();
-return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, $WT.NONE);
+return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, 0);
 });
 $_M (cla$$, "getWarnings", 
 function () {
-this.checkDevice ();
 return false;
 });
 $_M (cla$$, "init", 
@@ -739,31 +1084,594 @@ function () {
 });
 $_M (cla$$, "setWarnings", 
 function (warnings) {
-this.checkDevice ();
 }, "Boolean");
 cla$$ = $_C (function () {
 this.width = 0;
 this.height = 0;
-this.disposalMethod = $WT.DM_UNSPECIFIED;
+this.depth = 0;
+this.scanlinePad = 0;
+this.bytesPerLine = 0;
+this.data = null;
+this.palette = null;
+this.transparentPixel = 0;
+this.maskData = null;
+this.maskPad = 0;
+this.alphaData = null;
+this.alpha = 0;
 this.type = 0;
 this.x = 0;
 this.y = 0;
+this.disposalMethod = 0;
 this.url = null;
+this.delayTime = 0;
 $_Z (this, arguments);
 }, $wt.graphics, "ImageData", null, $wt.internal.CloneableCompatibility);
 $_K (cla$$, 
+function (width, height, depth, palette) {
+this.construct (width, height, depth, palette, 4, null, 0, null, null, -1, -1, -1, 0, 0, 0, 0);
+}, "Number,Number,Number,$wt.graphics.PaletteData");
+$_K (cla$$, 
+function (width, height, depth, palette, scanlinePad, data) {
+}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array");
+$_K (cla$$, 
 function (stream) {
+if (stream != null) this.url = stream.url;
 }, "java.io.InputStream");
 $_K (cla$$, 
 function (filename) {
 this.url = filename;
 }, "String");
+$_K (cla$$, 
+function () {
+});
+$_K (cla$$, 
+function (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime) {
+var bytesPerLine = Math.floor (((Math.floor ((width * depth + 7) / 8)) + (scanlinePad - 1)) / scanlinePad) * scanlinePad;
+this.setAllFields (width, height, depth, scanlinePad, bytesPerLine, data != null ? data :  $_A (bytesPerLine * height, 0), palette, transparentPixel, maskData, maskPad, alphaData, alpha, type, x, y, disposalMethod, delayTime);
+}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array,Number,Array,Array,Number,Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "setAllFields", 
+function (width, height, depth, scanlinePad, bytesPerLine, data, palette, transparentPixel, maskData, maskPad, alphaData, alpha, type, x, y, disposalMethod, delayTime) {
+this.width = width;
+this.height = height;
+this.depth = depth;
+this.scanlinePad = scanlinePad;
+this.bytesPerLine = bytesPerLine;
+this.data = data;
+this.palette = palette;
+this.transparentPixel = transparentPixel;
+this.maskData = maskData;
+this.maskPad = maskPad;
+this.alphaData = alphaData;
+this.alpha = alpha;
+this.type = type;
+this.x = x;
+this.y = y;
+this.disposalMethod = disposalMethod;
+this.delayTime = delayTime;
+}, "Number,Number,Number,Number,Number,Array,$wt.graphics.PaletteData,Number,Array,Number,Array,Number,Number,Number,Number,Number,Number");
+cla$$.internal_new = $_M (cla$$, "internal_new", 
+function (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime) {
+return  new $wt.graphics.ImageData (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime);
+}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array,Number,Array,Array,Number,Number,Number,Number,Number,Number,Number");
+$_V (cla$$, "clone", 
+function () {
+var cloneData =  $_A (this.data.length, 0);
+System.arraycopy (this.data, 0, cloneData, 0, this.data.length);
+var cloneMaskData = null;
+if (this.maskData != null) {
+cloneMaskData =  $_A (this.maskData.length, 0);
+System.arraycopy (this.maskData, 0, cloneMaskData, 0, this.maskData.length);
+}var cloneAlphaData = null;
+if (this.alphaData != null) {
+cloneAlphaData =  $_A (this.alphaData.length, 0);
+System.arraycopy (this.alphaData, 0, cloneAlphaData, 0, this.alphaData.length);
+}return  new $wt.graphics.ImageData (this.width, this.height, this.depth, this.palette, this.scanlinePad, cloneData, this.maskPad, cloneMaskData, cloneAlphaData, this.alpha, this.transparentPixel, this.type, this.x, this.y, this.disposalMethod, this.delayTime);
+});
+$_M (cla$$, "getAlpha", 
+function (x, y) {
+if (this.alphaData == null) return 255;
+return this.alphaData[y * this.width + x] & 0xFF;
+}, "Number,Number");
+$_M (cla$$, "getAlphas", 
+function (x, y, getWidth, alphas, startIndex) {
+if (getWidth == 0) return ;
+if (this.alphaData == null) {
+var endIndex = startIndex + getWidth;
+for (var i = startIndex; i < endIndex; i++) {
+alphas[i] = parseInt (255);
+}
+return ;
+}System.arraycopy (this.alphaData, y * this.width + x, alphas, startIndex, getWidth);
+}, "Number,Number,Number,Array,Number");
+$_M (cla$$, "getPixel", 
+function (x, y) {
+var index;
+var theByte;
+var mask;
+if (this.depth == 1) {
+index = (y * this.bytesPerLine) + (x >> 3);
+theByte = this.data[index] & 0xFF;
+mask = 1 << (7 - (x & 0x7));
+if ((theByte & mask) == 0) {
+return 0;
+} else {
+return 1;
+}}if (this.depth == 2) {
+index = (y * this.bytesPerLine) + (x >> 2);
+theByte = this.data[index] & 0xFF;
+var offset = 3 - (x % 4);
+mask = 3 << (offset * 2);
+return (theByte & mask) >> (offset * 2);
+}if (this.depth == 4) {
+index = (y * this.bytesPerLine) + (x >> 1);
+theByte = this.data[index] & 0xFF;
+if ((x & 0x1) == 0) {
+return theByte >> 4;
+} else {
+return theByte & 0x0F;
+}}if (this.depth == 8) {
+index = (y * this.bytesPerLine) + x;
+return this.data[index] & 0xFF;
+}if (this.depth == 16) {
+index = (y * this.bytesPerLine) + (x * 2);
+return ((this.data[index + 1] & 0xFF) << 8) + (this.data[index] & 0xFF);
+}if (this.depth == 24) {
+index = (y * this.bytesPerLine) + (x * 3);
+return ((this.data[index] & 0xFF) << 16) + ((this.data[index + 1] & 0xFF) << 8) + (this.data[index + 2] & 0xFF);
+}if (this.depth == 32) {
+index = (y * this.bytesPerLine) + (x * 4);
+return ((this.data[index] & 0xFF) << 24) + ((this.data[index + 1] & 0xFF) << 16) + ((this.data[index + 2] & 0xFF) << 8) + (this.data[index + 3] & 0xFF);
+}$WT.error (38);
+return 0;
+}, "Number,Number");
+$_M (cla$$, "getPixels", 
+function (x, y, getWidth, pixels, startIndex) {
+if (getWidth == 0) return ;
+var index;
+var theByte;
+var mask = 0;
+var n = getWidth;
+var i = startIndex;
+var srcX = x;
+var srcY = y;
+if (this.depth == 1) {
+index = (y * this.bytesPerLine) + (x >> 3);
+theByte = this.data[index] & 0xFF;
+while (n > 0) {
+mask = 1 << (7 - (srcX & 0x7));
+if ((theByte & mask) == 0) {
+pixels[i] = 0;
+} else {
+pixels[i] = 1;
+}i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+if (n > 0) theByte = this.data[index] & 0xFF;
+srcX = 0;
+} else {
+if (mask == 1) {
+index++;
+if (n > 0) theByte = this.data[index] & 0xFF;
+}}}
+return ;
+}if (this.depth == 2) {
+index = (y * this.bytesPerLine) + (x >> 2);
+theByte = this.data[index] & 0xFF;
+var offset;
+while (n > 0) {
+offset = 3 - (srcX % 4);
+mask = 3 << (offset * 2);
+pixels[i] = parseInt (((theByte & mask) >> (offset * 2)));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+if (n > 0) theByte = this.data[index] & 0xFF;
+srcX = 0;
+} else {
+if (offset == 0) {
+index++;
+theByte = this.data[index] & 0xFF;
+}}}
+return ;
+}if (this.depth == 4) {
+index = (y * this.bytesPerLine) + (x >> 1);
+if ((x & 0x1) == 1) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = parseInt ((theByte & 0x0F));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}while (n > 1) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = parseInt ((theByte >> 4));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+pixels[i] = parseInt ((theByte & 0x0F));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}}
+if (n > 0) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = parseInt ((theByte >> 4));
+}return ;
+}if (this.depth == 8) {
+index = (y * this.bytesPerLine) + x;
+for (var j = 0; j < getWidth; j++) {
+pixels[i] = this.data[index];
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}
+return ;
+}$WT.error (38);
+}, "Number,Number,Number,Array,Number");
+$_M (cla$$, "getPixels", 
+function (x, y, getWidth, pixels, startIndex) {
+if (getWidth == 0) return ;
+var index;
+var theByte;
+var mask;
+var n = getWidth;
+var i = startIndex;
+var srcX = x;
+var srcY = y;
+if (this.depth == 1) {
+index = (y * this.bytesPerLine) + (x >> 3);
+theByte = this.data[index] & 0xFF;
+while (n > 0) {
+mask = 1 << (7 - (srcX & 0x7));
+if ((theByte & mask) == 0) {
+pixels[i] = 0;
+} else {
+pixels[i] = 1;
+}i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+if (n > 0) theByte = this.data[index] & 0xFF;
+srcX = 0;
+} else {
+if (mask == 1) {
+index++;
+if (n > 0) theByte = this.data[index] & 0xFF;
+}}}
+return ;
+}if (this.depth == 2) {
+index = (y * this.bytesPerLine) + (x >> 2);
+theByte = this.data[index] & 0xFF;
+var offset;
+while (n > 0) {
+offset = 3 - (srcX % 4);
+mask = 3 << (offset * 2);
+pixels[i] = parseInt (((theByte & mask) >> (offset * 2)));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+if (n > 0) theByte = this.data[index] & 0xFF;
+srcX = 0;
+} else {
+if (offset == 0) {
+index++;
+theByte = this.data[index] & 0xFF;
+}}}
+return ;
+}if (this.depth == 4) {
+index = (y * this.bytesPerLine) + (x >> 1);
+if ((x & 0x1) == 1) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = theByte & 0x0F;
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}while (n > 1) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = theByte >> 4;
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+pixels[i] = theByte & 0x0F;
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}}
+if (n > 0) {
+theByte = this.data[index] & 0xFF;
+pixels[i] = theByte >> 4;
+}return ;
+}if (this.depth == 8) {
+index = (y * this.bytesPerLine) + x;
+for (var j = 0; j < getWidth; j++) {
+pixels[i] = this.data[index] & 0xFF;
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}
+return ;
+}if (this.depth == 16) {
+index = (y * this.bytesPerLine) + (x * 2);
+for (var j = 0; j < getWidth; j++) {
+pixels[i] = ((this.data[index + 1] & 0xFF) << 8) + (this.data[index] & 0xFF);
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index += 2;
+}}
+return ;
+}if (this.depth == 24) {
+index = (y * this.bytesPerLine) + (x * 3);
+for (var j = 0; j < getWidth; j++) {
+pixels[i] = ((this.data[index] & 0xFF) << 16) | ((this.data[index + 1] & 0xFF) << 8) | (this.data[index + 2] & 0xFF);
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index += 3;
+}}
+return ;
+}if (this.depth == 32) {
+index = (y * this.bytesPerLine) + (x * 4);
+i = startIndex;
+for (var j = 0; j < getWidth; j++) {
+pixels[i] = ((this.data[index] & 0xFF) << 24) | ((this.data[index + 1] & 0xFF) << 16) | ((this.data[index + 2] & 0xFF) << 8) | (this.data[index + 3] & 0xFF);
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index += 4;
+}}
+return ;
+}$WT.error (38);
+}, "Number,Number,Number,Array,Number");
+$_M (cla$$, "getRGBs", 
+function () {
+return this.palette.getRGBs ();
+});
+$_M (cla$$, "getTransparencyMask", 
+function () {
+return  new $wt.graphics.ImageData (this.url);
+});
+$_M (cla$$, "getTransparencyType", 
+function () {
+if (this.maskData != null) return 2;
+if (this.transparentPixel != -1) return 4;
+if (this.alphaData != null) return 1;
+return 0;
+});
+$_M (cla$$, "scaledTo", 
+function (width, height) {
+return null;
+}, "Number,Number");
+$_M (cla$$, "setAlpha", 
+function (x, y, alpha) {
+if (this.alphaData == null) this.alphaData =  $_A (this.width * this.height, 0);
+this.alphaData[y * this.width + x] = parseInt (alpha);
+}, "Number,Number,Number");
+$_M (cla$$, "setAlphas", 
+function (x, y, putWidth, alphas, startIndex) {
+if (putWidth == 0) return ;
+if (this.alphaData == null) this.alphaData =  $_A (this.width * this.height, 0);
+System.arraycopy (alphas, startIndex, this.alphaData, y * this.width + x, putWidth);
+}, "Number,Number,Number,Array,Number");
+$_M (cla$$, "setPixel", 
+function (x, y, pixelValue) {
+var index;
+var theByte;
+var mask;
+if (this.depth == 1) {
+index = (y * this.bytesPerLine) + (x >> 3);
+theByte = this.data[index];
+mask = 1 << (7 - (x & 0x7));
+if ((pixelValue & 0x1) == 1) {
+this.data[index] = parseInt ((theByte | mask));
+} else {
+this.data[index] = parseInt ((theByte & (mask ^ -1)));
+}return ;
+}if (this.depth == 2) {
+index = (y * this.bytesPerLine) + (x >> 2);
+theByte = this.data[index];
+var offset = 3 - (x % 4);
+mask = 0xFF ^ (3 << (offset * 2));
+this.data[index] = parseInt (((this.data[index] & mask) | (pixelValue << (offset * 2))));
+return ;
+}if (this.depth == 4) {
+index = (y * this.bytesPerLine) + (x >> 1);
+if ((x & 0x1) == 0) {
+this.data[index] = parseInt (((this.data[index] & 0x0F) | ((pixelValue & 0x0F) << 4)));
+} else {
+this.data[index] = parseInt (((this.data[index] & 0xF0) | (pixelValue & 0x0F)));
+}return ;
+}if (this.depth == 8) {
+index = (y * this.bytesPerLine) + x;
+this.data[index] = parseInt ((pixelValue & 0xFF));
+return ;
+}if (this.depth == 16) {
+index = (y * this.bytesPerLine) + (x * 2);
+this.data[index + 1] = parseInt (((pixelValue >> 8) & 0xFF));
+this.data[index] = parseInt ((pixelValue & 0xFF));
+return ;
+}if (this.depth == 24) {
+index = (y * this.bytesPerLine) + (x * 3);
+this.data[index] = parseInt (((pixelValue >> 16) & 0xFF));
+this.data[index + 1] = parseInt (((pixelValue >> 8) & 0xFF));
+this.data[index + 2] = parseInt ((pixelValue & 0xFF));
+return ;
+}if (this.depth == 32) {
+index = (y * this.bytesPerLine) + (x * 4);
+this.data[index] = parseInt (((pixelValue >> 24) & 0xFF));
+this.data[index + 1] = parseInt (((pixelValue >> 16) & 0xFF));
+this.data[index + 2] = parseInt (((pixelValue >> 8) & 0xFF));
+this.data[index + 3] = parseInt ((pixelValue & 0xFF));
+return ;
+}$WT.error (38);
+}, "Number,Number,Number");
+$_M (cla$$, "setPixels", 
+function (x, y, putWidth, pixels, startIndex) {
+if (putWidth == 0) return ;
+var index;
+var theByte;
+var mask;
+var n = putWidth;
+var i = startIndex;
+var srcX = x;
+var srcY = y;
+if (this.depth == 1) {
+index = (y * this.bytesPerLine) + (x >> 3);
+while (n > 0) {
+mask = 1 << (7 - (srcX & 0x7));
+if ((pixels[i] & 0x1) == 1) {
+this.data[index] = parseInt (((this.data[index] & 0xFF) | mask));
+} else {
+this.data[index] = parseInt (((this.data[index] & 0xFF) & (mask ^ -1)));
+}i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+if (mask == 1) {
+index++;
+}}}
+return ;
+}if (this.depth == 2) {
+var masks = [parseInt (0xFC), parseInt (0xF3), parseInt (0xCF), parseInt (0x3F)];
+index = (y * this.bytesPerLine) + (x >> 2);
+var offset = 3 - (x % 4);
+while (n > 0) {
+theByte = pixels[i] & 0x3;
+this.data[index] = parseInt (((this.data[index] & masks[offset]) | (theByte << (offset * 2))));
+i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+offset = 0;
+srcX = 0;
+} else {
+if (offset == 0) {
+index++;
+offset = 3;
+} else {
+offset--;
+}}}
+return ;
+}if (this.depth == 4) {
+index = (y * this.bytesPerLine) + (x >> 1);
+var high = (x & 0x1) == 0;
+while (n > 0) {
+theByte = pixels[i] & 0x0F;
+if (high) {
+this.data[index] = parseInt (((this.data[index] & 0x0F) | (theByte << 4)));
+} else {
+this.data[index] = parseInt (((this.data[index] & 0xF0) | theByte));
+}i++;
+n--;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+high = true;
+srcX = 0;
+} else {
+if (!high) index++;
+high = !high;
+}}
+return ;
+}if (this.depth == 8) {
+index = (y * this.bytesPerLine) + x;
+for (var j = 0; j < putWidth; j++) {
+this.data[index] = parseInt ((pixels[i] & 0xFF));
+i++;
+srcX++;
+if (srcX >= this.width) {
+srcY++;
+index = srcY * this.bytesPerLine;
+srcX = 0;
+} else {
+index++;
+}}
+return ;
+}$WT.error (38);
+}, "Number,Number,Number,Array,Number");
+$_M (cla$$, "setPixels", 
+function (x, y, putWidth, pixels, startIndex) {
+}, "Number,Number,Number,Array,Number");
 cla$$ = $_C (function () {
 this.data = null;
 this.logicalScreenWidth = 0;
 this.logicalScreenHeight = 0;
 this.backgroundPixel = 0;
 this.repeatCount = 0;
+this.imageLoaderListeners = null;
 $_Z (this, arguments);
 }, $wt.graphics, "ImageLoader");
 $_K (cla$$, 
@@ -780,73 +1688,75 @@ this.repeatCount = 1;
 });
 $_M (cla$$, "load", 
 function (stream) {
-if (stream == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.reset ();
 this.data = [ new $wt.graphics.ImageData (stream)];
 return this.data;
 }, "java.io.InputStream");
 $_M (cla$$, "load", 
 function (filename) {
-if (filename == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.reset ();
 this.data = [ new $wt.graphics.ImageData (filename)];
 return this.data;
 }, "String");
+$_M (cla$$, "save", 
+function (stream, format) {
+}, "java.io.OutputStream,Number");
+$_M (cla$$, "save", 
+function (filename, format) {
+}, "String,Number");
+$_M (cla$$, "addImageLoaderListener", 
+function (listener) {
+if (this.imageLoaderListeners == null) {
+this.imageLoaderListeners =  new java.util.Vector ();
+}this.imageLoaderListeners.addElement (listener);
+}, "$wt.graphics.ImageLoaderListener");
+$_M (cla$$, "removeImageLoaderListener", 
+function (listener) {
+if (this.imageLoaderListeners == null) return ;
+this.imageLoaderListeners.removeElement (listener);
+}, "$wt.graphics.ImageLoaderListener");
+$_M (cla$$, "hasListeners", 
+function () {
+return this.imageLoaderListeners != null && this.imageLoaderListeners.size () > 0;
+});
+$_M (cla$$, "notifyListeners", 
+function (event) {
+if (!this.hasListeners ()) return ;
+var size = this.imageLoaderListeners.size ();
+for (var i = 0; i < size; i++) {
+var listener = this.imageLoaderListeners.elementAt (i);
+listener.imageDataLoaded (event);
+}
+}, "$wt.graphics.ImageLoaderEvent");
 cla$$ = $_C (function () {
 this.url = null;
 this.width = 0;
 this.height = 0;
-this.handle = null;
-this.type = 0;
 this.imgHandle = null;
+this.type = 0;
+this.handle = null;
+this.transparentPixel = -1;
+this.memGC = null;
+this.alphaData = null;
+this.alpha = -1;
+this.data = null;
 $_Z (this, arguments);
 }, $wt.graphics, "Image", $wt.graphics.Resource, $wt.graphics.Drawable);
 $_K (cla$$, 
+function () {
+$_R (this, $wt.graphics.Image, []);
+});
+$_K (cla$$, 
 function (device, width, height) {
 $_R (this, $wt.graphics.Image, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
+if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device, width, height);
+this.width = width;
+this.height = height;
 }, "$wt.graphics.Device,Number,Number");
-$_K (cla$$, 
-function (device, filename) {
-$_R (this, $wt.graphics.Image, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-this.url = filename;
-}, "$wt.graphics.Device,String");
-$_K (cla$$, 
-function (device, data) {
-$_R (this, $wt.graphics.Image, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-this.url = data.url;
-}, "$wt.graphics.Device,$wt.graphics.ImageData");
-$_K (cla$$, 
-function (device, bounds) {
-$_R (this, $wt.graphics.Image, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (bounds == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-this.init (device, bounds.width, bounds.height);
-}, "$wt.graphics.Device,$wt.graphics.Rectangle");
-$_K (cla$$, 
-function (device, srcImage, flag) {
-$_R (this, $wt.graphics.Image, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (srcImage == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (srcImage.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-switch (flag) {
-case $WT.IMAGE_COPY:
-{
-}case $WT.IMAGE_DISABLE:
-{
-}case $WT.IMAGE_GRAY:
-{
-}}
-this.url = srcImage.url;
-}, "$wt.graphics.Device,$wt.graphics.Image,Number");
 $_M (cla$$, "init", 
 function (device, width, height) {
-if (width <= 0 || height <= 0) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}this.type = $WT.BITMAP;
+this.type = 0;
 this.width = width;
 this.height = height;
 this.handle = document.createElement ("DIV");
@@ -854,27 +1764,85 @@ this.handle.style.width = width + "px";
 this.handle.style.height = height + "px";
 this.imgHandle = this.handle;
 }, "$wt.graphics.Device,Number,Number");
-$_V (cla$$, "isDisposed", 
-function () {
-return false;
-});
+$_K (cla$$, 
+function (device, srcImage, flag) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+this.device = device;
+this.url = srcImage.url;
+}, "$wt.graphics.Device,$wt.graphics.Image,Number");
+$_K (cla$$, 
+function (device, bounds) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+this.width = bounds.width;
+this.height = bounds.height;
+}, "$wt.graphics.Device,$wt.graphics.Rectangle");
+$_K (cla$$, 
+function (device, data) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+this.url = data.url;
+}, "$wt.graphics.Device,$wt.graphics.ImageData");
+$_K (cla$$, 
+function (device, source, mask) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+this.url = source.url;
+}, "$wt.graphics.Device,$wt.graphics.ImageData,$wt.graphics.ImageData");
+$_K (cla$$, 
+function (device, stream) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+{
+if (stream != null) this.url = stream.url;
+}}, "$wt.graphics.Device,java.io.InputStream");
+$_K (cla$$, 
+function (device, filename) {
+$_R (this, $wt.graphics.Image, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
+this.url = filename;
+}, "$wt.graphics.Device,String");
 $_V (cla$$, "dispose", 
 function () {
 });
+$_V (cla$$, "equals", 
+function (object) {
+if (object == this) return true;
+if (!($_O (object, $wt.graphics.Image))) return false;
+var image = object;
+return this.device == image.device && this.handle == image.handle;
+}, "Object");
+$_M (cla$$, "getBackground", 
+function () {
+return  new $wt.graphics.Color (this.device, "white");
+});
 $_M (cla$$, "getBounds", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
-switch (this.type) {
-case $WT.BITMAP:
-return  new $wt.graphics.Rectangle (0, 0, this.width, this.height);
-}
 return  new $wt.graphics.Rectangle (0, 0, this.width, this.height);
 });
 $_M (cla$$, "getImageData", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 return  new $wt.graphics.ImageData (this.url);
 });
+$_V (cla$$, "hashCode", 
+function () {
+return this.handle.toString ().hashCode ();
+});
+$_V (cla$$, "isDisposed", 
+function () {
+return false;
+});
+$_M (cla$$, "setBackground", 
+function (color) {
+}, "$wt.graphics.Color");
+$_M (cla$$, "toString", 
+function () {
+if (this.isDisposed ()) return "Image {*DISPOSED*}";
+return "Image {" + this.handle + "}";
+});
+$_S (cla$$,
+"DEFAULT_SCANLINE_PAD", 4);
 cla$$ = $_C (function () {
 this.data = null;
 $_Z (this, arguments);
@@ -886,28 +1854,27 @@ $_R (this, $wt.graphics.Font, []);
 $_K (cla$$, 
 function (device, fd) {
 $_R (this, $wt.graphics.Font, []);
+if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device, fd);
 }, "$wt.graphics.Device,$wt.graphics.FontData");
 $_K (cla$$, 
 function (device, fds) {
 $_R (this, $wt.graphics.Font, []);
-if (device == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (fds == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-if (fds.length == 0) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
+if (device == null) device = $wt.graphics.Device.getDevice ();
 for (var i = 0; i < fds.length; i++) {
-if (fds[i] == null) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 }
 this.init (device, fds[0]);
 }, "$wt.graphics.Device,Array");
 $_K (cla$$, 
 function (device, name, height, style) {
 $_R (this, $wt.graphics.Font, []);
-if (name == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
+if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device,  new $wt.graphics.FontData (name, height, style));
 }, "$wt.graphics.Device,String,Number,Number");
 $_V (cla$$, "dispose", 
 function () {
 this.data = null;
+this.device = null;
 });
 $_V (cla$$, "equals", 
 function (object) {
@@ -918,7 +1885,6 @@ return font.data.equals (this.data);
 }, "Object");
 $_M (cla$$, "getFontData", 
 function () {
-if (this.isDisposed ()) $WT.error ($WT.ERROR_GRAPHIC_DISPOSED);
 var datum =  new Array (1);
 datum[0] = this.data;
 return datum;
@@ -930,6 +1896,7 @@ return this.data.hashCode ();
 $_M (cla$$, "init", 
 function (device, fd) {
 this.data = fd;
+this.device = device;
 }, "$wt.graphics.Device,$wt.graphics.FontData");
 $_V (cla$$, "isDisposed", 
 function () {
@@ -944,12 +1911,15 @@ cla$$ = $_C (function () {
 this.height = 0;
 this.style = 0;
 this.name = null;
+this.lang = null;
+this.country = null;
+this.variant = null;
 $_Z (this, arguments);
 }, $wt.graphics, "FontData");
 $_K (cla$$, 
 function () {
 this.name = "Arial";
-this.style = $WT.NORMAL;
+this.style = 0;
 this.height = 12;
 });
 $_K (cla$$, 
@@ -957,7 +1927,7 @@ function (string) {
 this.name = string;
 if (this.name == null) {
 this.name = "Arial";
-}this.style = $WT.NORMAL;
+}this.style = 0;
 this.height = 12;
 }, "String");
 $_K (cla$$, 
@@ -977,13 +1947,33 @@ $_M (cla$$, "getHeight",
 function () {
 return this.height;
 });
+$_M (cla$$, "getLocale", 
+function () {
+var buffer =  new StringBuffer ();
+var sep = '_';
+if (this.lang != null) {
+buffer.append (this.lang);
+buffer.append (sep);
+}if (this.country != null) {
+buffer.append (this.country);
+buffer.append (sep);
+}if (this.variant != null) {
+buffer.append (this.variant);
+}var result = buffer.toString ();
+var length = result.length;
+if (length > 0) {
+if ((result.charAt (length - 1)).charCodeAt (0) == (sep).charCodeAt (0)) {
+result = result.substring (0, length - 1);
+}}return result;
+});
 $_M (cla$$, "getName", 
 function () {
 return this.name;
 });
 $_M (cla$$, "getStyle", 
 function () {
-return this.style;
+var style = 0;
+return style;
 });
 $_V (cla$$, "hashCode", 
 function () {
@@ -991,9 +1981,26 @@ return this.height ^ this.style ^ this.getName ().hashCode ();
 });
 $_M (cla$$, "setHeight", 
 function (height) {
-if (height < 0) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 this.height = height;
 }, "Number");
+$_M (cla$$, "setLocale", 
+function (locale) {
+this.lang = this.country = this.variant = null;
+if (locale != null) {
+var sep = '_';
+var length = locale.length;
+var firstSep;
+var secondSep;
+firstSep = locale.indexOf (sep);
+if (firstSep == -1) {
+firstSep = secondSep = length;
+} else {
+secondSep = locale.indexOf (sep, firstSep + 1);
+if (secondSep == -1) secondSep = length;
+}if (firstSep > 0) this.lang = locale.substring (0, firstSep);
+if (secondSep > firstSep + 1) this.country = locale.substring (firstSep + 1, secondSep);
+if (length > secondSep + 1) this.variant = locale.substring (secondSep + 1);
+}}, "String");
 $_M (cla$$, "setName", 
 function (name) {
 this.name = name;
@@ -1012,19 +2019,45 @@ buffer.append (this.getHeight ());
 buffer.append ("|");
 buffer.append (this.getStyle ());
 buffer.append ("|");
+buffer.append ("WINDOWS|1|");
 buffer.append (this.getName ());
 return buffer.toString ();
 });
 cla$$ = $_C (function () {
 $_Z (this, arguments);
 }, $wt.graphics, "FontMetrics");
+$_K (cla$$, 
+function () {
+});
+$_V (cla$$, "equals", 
+function (object) {
+if (object == this) return true;
+if (!($_O (object, $wt.graphics.FontMetrics))) return false;
+return false;
+}, "Object");
+$_M (cla$$, "getAscent", 
+function () {
+return 0;
+});
 $_M (cla$$, "getAverageCharWidth", 
 function () {
 return 9;
 });
+$_M (cla$$, "getDescent", 
+function () {
+return 0;
+});
 $_M (cla$$, "getHeight", 
 function () {
 return 16;
+});
+$_M (cla$$, "getLeading", 
+function () {
+return 0;
+});
+$_M (cla$$, "hashCode", 
+function () {
+return $_U (this, $wt.graphics.FontMetrics, "hashCode", []);
 });
 cla$$ = $_C (function () {
 this.handle = null;
@@ -1033,8 +2066,34 @@ this.state = 0;
 this.display = null;
 this.eventTable = null;
 this.data = null;
+this.dragStatus = false;
+this.hoverTime = 0;
+this.hoverTimerID = 0;
+this.hookedStatus = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Widget");
+$_K (cla$$, 
+function (parent, style) {
+this.checkSubclass ();
+this.checkParent (parent);
+this.style = style;
+this.display = parent.display;
+}, "$wt.widgets.Widget,Number");
+$_M (cla$$, "addListener", 
+function (eventType, listener) {
+if (this.eventTable == null) this.eventTable =  new $wt.widgets.EventTable ();
+this.eventTable.hook (eventType, listener);
+this.checkHookType (eventType);
+}, "Number,$wt.widgets.Listener");
+$_M (cla$$, "addDisposeListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (12, typedListener);
+}, "$wt.events.DisposeListener");
+$_M (cla$$, "callWindowProc", 
+function (hwnd, msg, wParam, lParam) {
+return 0;
+}, "Number,Number,Number,Number");
 cla$$.checkBits = $_M (cla$$, "checkBits", 
 function (style, int0, int1, int2, int3, int4, int5) {
 var mask = int0 | int1 | int2 | int3 | int4 | int5;
@@ -1047,33 +2106,165 @@ if ((style & int4) != 0) style = (style & ~mask) | int4;
 if ((style & int5) != 0) style = (style & ~mask) | int5;
 return style;
 }, "Number,Number,Number,Number,Number,Number,Number");
-$_K (cla$$, 
-function (parent, style) {
-this.style = style;
-this.display = parent.display;
-}, "$wt.widgets.Widget,Number");
-$_M (cla$$, "addListener", 
-function (eventType, listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) this.eventTable =  new $wt.widgets.EventTable ();
-this.eventTable.hook (eventType, listener);
-}, "Number,$wt.widgets.Listener");
-$_M (cla$$, "addDisposeListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Dispose, typedListener);
-}, "$wt.events.DisposeListener");
-$_M (cla$$, "checkXWidget", 
+$_M (cla$$, "checkHookType", 
+function (eventType) {
+if (this.hookedStatus == null) {
+this.hookedStatus =  $_A (38, false);
+}var hooked = false;
+if (eventType >= 0 && eventType <= 37) {
+hooked = this.hookedStatus[eventType];
+}if (hooked) {
+return ;
+}switch (eventType) {
+case 1:
+this.hookKeyDown ();
+break;
+case 2:
+this.hookKeyUp ();
+break;
+case 3:
+this.hookMouseDown ();
+break;
+case 4:
+this.hookMouseUp ();
+break;
+case 5:
+this.hookMouseMove ();
+break;
+case 6:
+this.hookMouseEnter ();
+break;
+case 7:
+this.hookMouseExit ();
+break;
+case 8:
+this.hookMouseDoubleClick ();
+break;
+case 13:
+this.hookSelection ();
+break;
+case 15:
+this.hookFocusIn ();
+break;
+case 16:
+this.hookFocusOut ();
+break;
+case 24:
+this.hookModify ();
+break;
+case 25:
+if (!this.hookedStatus[1]) this.hookKeyDown ();
+this.hookedStatus[1] = true;
+break;
+case 28:
+this.hookHelp ();
+break;
+case 29:
+if (!this.hookedStatus[4]) this.hookMouseUp ();
+if (!this.hookedStatus[3]) this.hookMouseDown ();
+if (!this.hookedStatus[5]) this.hookMouseMove ();
+this.hookedStatus[4] = true;
+this.hookedStatus[3] = true;
+this.hookedStatus[5] = true;
+break;
+case 30:
+this.hookArm ();
+break;
+case 31:
+this.hookTraverse ();
+break;
+case 32:
+if (!this.hookedStatus[6]) this.hookMouseEnter ();
+if (!this.hookedStatus[7]) this.hookMouseExit ();
+if (!this.hookedStatus[4]) this.hookMouseUp ();
+if (!this.hookedStatus[3]) this.hookMouseDown ();
+if (!this.hookedStatus[5]) this.hookMouseMove ();
+this.hookedStatus[6] = true;
+this.hookedStatus[7] = true;
+this.hookedStatus[4] = true;
+this.hookedStatus[3] = true;
+this.hookedStatus[5] = true;
+break;
+case 35:
+this.hookMenuDetect ();
+break;
+case 37:
+this.hookMouseWheel ();
+break;
+}
+this.hookedStatus[eventType] = true;
+}, "Number");
+$_M (cla$$, "checkOrientation", 
+function (parent) {
+this.style &= ($t$ = ~ $WT.MIRRORED, $WT.prototype.MIRRORED = $WT.MIRRORED, $t$);
+if ((this.style & (33554432 | 67108864)) == 0) {
+if (parent != null) {
+if ((parent.style & 33554432) != 0) this.style |= 33554432;
+if ((parent.style & 67108864) != 0) this.style |= 67108864;
+}}this.style = $wt.widgets.Widget.checkBits (this.style, 33554432, 67108864, 0, 0, 0, 0);
+}, "$wt.widgets.Widget");
+$_M (cla$$, "checkOpened", 
 function () {
 });
+$_M (cla$$, "checkParent", 
+function (parent) {
+parent.checkOpened ();
+}, "$wt.widgets.Widget");
+$_M (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "checkWidget", 
+function () {
+var display = this.display;
+});
+$_M (cla$$, "destroyWidget", 
+function () {
+this.releaseHandle ();
+});
+$_M (cla$$, "dispose", 
+function () {
+if (this.isDisposed ()) return ;
+this.releaseChild ();
+this.releaseWidget ();
+this.destroyWidget ();
+});
+$_M (cla$$, "error", 
+function (code) {
+$WT.error (code);
+}, "Number");
+$_M (cla$$, "filters", 
+function (eventType) {
+return this.display.filters (eventType);
+}, "Number");
+$_M (cla$$, "findItem", 
+function (id) {
+return null;
+}, "Number");
+$_M (cla$$, "fixMnemonic", 
+function (string) {
+var buffer =  $_A (string.length, '\0');
+string.getChars (0, string.length, buffer, 0);
+var i = 0;
+var j = 0;
+while (i < buffer.length) {
+if ((buffer[i]).charCodeAt (0) == ('&').charCodeAt (0)) {
+if (i + 1 < buffer.length && (buffer[i + 1]).charCodeAt (0) == ('&').charCodeAt (0)) {
+buffer[j++] = ' ';
+i++;
+}i++;
+} else {
+buffer[j++] = buffer[i++];
+}}
+while (j < buffer.length) buffer[j++] = String.fromCharCode ( 0);
+
+return buffer;
+}, "String");
 $_M (cla$$, "getData", 
 function () {
 return (this.state & $wt.widgets.Widget.KEYED_DATA) != 0 ? (this.data)[0] : this.data;
 });
 $_M (cla$$, "getData", 
 function (key) {
-if (key == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
 var table = this.data;
 for (var i = 1; i < table.length; i += 2) {
@@ -1084,45 +2275,519 @@ if (key.equals (table[i])) return table[i + 1];
 $_M (cla$$, "getDisplay", 
 function () {
 var display = this.display;
-if (display == null) this.error ($WT.ERROR_WIDGET_DISPOSED);
 return display;
+});
+$_M (cla$$, "getMenu", 
+function () {
+return null;
+});
+$_M (cla$$, "getName", 
+function () {
+var string = this.getClass ().getName ();
+var index = string.lastIndexOf ('.');
+if (index == -1) return string;
+return string.substring (index + 1, string.length);
+});
+$_M (cla$$, "getNameText", 
+function () {
+return "";
 });
 $_M (cla$$, "getStyle", 
 function () {
 return this.style;
+});
+$_M (cla$$, "hookKeyDown", 
+function () {
+this.handle.onkeydown = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$1")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$1", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (1);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$1, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookKeyUp", 
+function () {
+this.handle.onkeyup = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$2")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$2", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var e =  new $wt.internal.dnd.HTMLEventWrapper (this.getEvent ());
+if ((e.event).keyCode == 27) {
+this.callbacks["$wt.widgets.Widget"].dragStatus = false;
+}this.callbacks["$wt.widgets.Widget"].sendEvent (2);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$2, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "mouseHoverProc", 
+function () {
+var hoverHooked = false;
+if (this.hoverTimerID != 0) {
+hoverHooked = true;
+window.clearTimeout (this.hoverTimerID);
+this.hoverTimerID = 0;
+}if (hoverHooked || this.hooks (32)) {
+hoverHooked = true;
+this.hoverTimerID = window.setTimeout (Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$3")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$3", null, Runnable);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (32);
+this.callbacks["$wt.widgets.Widget"].hoverTimerID = 0;
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$3, innerThis, finalVars);
+}) (this, null)), 400);
+}return hoverHooked;
+});
+$_M (cla$$, "hookMouseDown", 
+function () {
+this.handle.onmousedown = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$4")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$4", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var hoverHooked = this.callbacks["$wt.widgets.Widget"].mouseHoverProc ();
+var e =  new $wt.internal.dnd.HTMLEventWrapper (this.getEvent ());
+if (e.leftButtonHold) {
+this.callbacks["$wt.widgets.Widget"].dragStatus = true;
+}if (!hoverHooked || this.callbacks["$wt.widgets.Widget"].hooks (3)) {
+this.callbacks["$wt.widgets.Widget"].sendEvent (3);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$4, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseUp", 
+function () {
+this.handle.onmouseup = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$5")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$5", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var hoverHooked = this.callbacks["$wt.widgets.Widget"].mouseHoverProc ();
+this.callbacks["$wt.widgets.Widget"].dragStatus = false;
+if (!hoverHooked || this.callbacks["$wt.widgets.Widget"].hooks (4)) {
+this.callbacks["$wt.widgets.Widget"].sendEvent (4);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$5, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseMove", 
+function () {
+this.handle.onmousemove = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$6")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$6", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var hoverHooked = this.callbacks["$wt.widgets.Widget"].mouseHoverProc ();
+var dragHooked = false;
+var e =  new $wt.internal.dnd.HTMLEventWrapper (this.getEvent ());
+if (this.callbacks["$wt.widgets.Widget"].dragStatus && e.leftButtonHold && this.callbacks["$wt.widgets.Widget"].hooks (29)) {
+dragHooked = true;
+this.callbacks["$wt.widgets.Widget"].sendEvent (29);
+this.callbacks["$wt.widgets.Widget"].dragStatus = false;
+}if ((!dragHooked && !hoverHooked) || this.callbacks["$wt.widgets.Widget"].hooks (5)) {
+this.callbacks["$wt.widgets.Widget"].sendEvent (5);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$6, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseEnter", 
+function () {
+this.handle.onmouseover = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$7")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$7", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var hoverHooked = this.callbacks["$wt.widgets.Widget"].mouseHoverProc ();
+if (!hoverHooked || this.callbacks["$wt.widgets.Widget"].hooks (6)) {
+this.callbacks["$wt.widgets.Widget"].sendEvent (6);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$7, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseExit", 
+function () {
+this.handle.onmouseout = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$8")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$8", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var hoverHooked = false;
+if (this.callbacks["$wt.widgets.Widget"].hoverTimerID != 0) {
+hoverHooked = true;
+window.clearTimeout (this.callbacks["$wt.widgets.Widget"].hoverTimerID);
+this.callbacks["$wt.widgets.Widget"].hoverTimerID = 0;
+}if (!hoverHooked || this.callbacks["$wt.widgets.Widget"].hooks (7)) {
+this.callbacks["$wt.widgets.Widget"].sendEvent (7);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$8, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseDoubleClick", 
+function () {
+this.handle.ondblclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$9")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$9", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (8);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$9, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookSelection", 
+function () {
+this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$10")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$10", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (13);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$10, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookFocusIn", 
+function () {
+this.handle.onfocus = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$11")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$11", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (15);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$11, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookFocusOut", 
+function () {
+this.handle.onblur = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$12")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$12", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (16);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$12, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookModify", 
+function () {
+this.handle.onchange = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$13")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$13", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (24);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$13, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookHelp", 
+function () {
+this.handle.onhelp = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$14")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$14", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (28);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$14, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookArm", 
+function () {
+this.handle.onchange = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$15")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$15", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (30);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$15, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookTraverse", 
+function () {
+this.handle.onkeypress = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$16")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$16", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$16, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMenuDetect", 
+function () {
+this.handle.oncontextmenu = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Widget$17")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Widget$17", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Widget"].sendEvent (35);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Widget$17, innerThis, finalVars);
+}) (this, null));
+});
+$_M (cla$$, "hookMouseWheel", 
+function () {
 });
 $_M (cla$$, "hooks", 
 function (eventType) {
 if (this.eventTable == null) return false;
 return this.eventTable.hooks (eventType);
 }, "Number");
+$_M (cla$$, "isDisposed", 
+function () {
+return (this.state & $wt.widgets.Widget.DISPOSED) != 0;
+});
 $_M (cla$$, "isListening", 
 function (eventType) {
 return this.hooks (eventType);
 }, "Number");
+$_M (cla$$, "isValidSubclass", 
+function () {
+return $wt.widgets.Display.isValidClass (this.getClass ());
+});
+$_M (cla$$, "isValidThread", 
+function () {
+return true;
+});
+$_M (cla$$, "mapEvent", 
+function (hwnd, event) {
+}, "Number,$wt.widgets.Event");
 $_M (cla$$, "notifyListeners", 
 function (eventType, event) {
 if (event == null) event =  new $wt.widgets.Event ();
 this.sendEvent (eventType, event);
 }, "Number,$wt.widgets.Event");
-$_M (cla$$, "removeDisposeListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Dispose, listener);
-}, "$wt.events.DisposeListener");
+$_M (cla$$, "postEvent", 
+function (eventType) {
+this.sendEvent (eventType, null, false);
+}, "Number");
+$_M (cla$$, "postEvent", 
+function (eventType, event) {
+this.sendEvent (eventType, event, false);
+}, "Number,$wt.widgets.Event");
+$_M (cla$$, "releaseChild", 
+function () {
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+this.state |= $wt.widgets.Widget.DISPOSED;
+this.display = null;
+});
+$_M (cla$$, "releaseResources", 
+function () {
+this.releaseWidget ();
+this.releaseHandle ();
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+this.sendEvent (12);
+this.eventTable = null;
+this.data = null;
+});
 $_M (cla$$, "removeListener", 
 function (eventType, listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
 }, "Number,$wt.widgets.Listener");
 $_M (cla$$, "removeListener", 
 function (eventType, listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
 }, "Number,$wt.internal.SWTEventListener");
+$_M (cla$$, "removeDisposeListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (12, listener);
+}, "$wt.events.DisposeListener");
+$_M (cla$$, "sendEvent", 
+function (event) {
+var display = event.display;
+if (!display.filterEvent (event)) {
+if (this.eventTable != null) this.eventTable.sendEvent (event);
+}}, "$wt.widgets.Event");
+$_M (cla$$, "sendEvent", 
+function (eventType) {
+this.sendEvent (eventType, null, true);
+}, "Number");
+$_M (cla$$, "sendEvent", 
+function (eventType, event) {
+this.sendEvent (eventType, event, true);
+}, "Number,$wt.widgets.Event");
+$_M (cla$$, "sendEvent", 
+function (eventType, event, send) {
+if (this.eventTable == null && !this.display.filters (eventType)) {
+return ;
+}if (event == null) event =  new $wt.widgets.Event ();
+event.type = eventType;
+event.display = this.display;
+event.widget = this;
+if (event.time == 0) {
+event.time = this.display.getLastEventTime ();
+}if (send) {
+this.sendEvent (event);
+} else {
+this.display.postEvent (event);
+}}, "Number,$wt.widgets.Event,Boolean");
+$_M (cla$$, "sendKeyEvent", 
+function (type, msg, wParam, lParam) {
+var event =  new $wt.widgets.Event ();
+return this.sendKeyEvent (type, msg, wParam, lParam, event);
+}, "Number,Number,Number,Number");
+$_M (cla$$, "sendKeyEvent", 
+function (type, msg, wParam, lParam, event) {
+this.sendEvent (type, event);
+if (this.isDisposed ()) return false;
+return event.doit;
+}, "Number,Number,Number,Number,$wt.widgets.Event");
+$_M (cla$$, "sendMouseEvent", 
+function (type, button, hwnd, x, y) {
+return this.sendMouseEvent (type, button, 0, 0, false, hwnd, x, y);
+}, "Number,Number,$wt.internal.xhtml.Element,Number,Number");
+$_M (cla$$, "sendMouseEvent", 
+function (type, button, count, detail, send, hwnd, x, y) {
+if (!this.hooks (type) && !this.filters (type)) return true;
+var event =  new $wt.widgets.Event ();
+event.button = button;
+event.detail = detail;
+event.count = count;
+event.x = x;
+event.y = y;
+switch (type) {
+case 3:
+case 8:
+if (event.button == 1) event.stateMask &= ($t$ = ~ $WT.BUTTON1, $WT.prototype.BUTTON1 = $WT.BUTTON1, $t$);
+if (event.button == 2) event.stateMask &= ($t$ = ~ $WT.BUTTON2, $WT.prototype.BUTTON2 = $WT.BUTTON2, $t$);
+if (event.button == 3) event.stateMask &= ($t$ = ~ $WT.BUTTON3, $WT.prototype.BUTTON3 = $WT.BUTTON3, $t$);
+if (event.button == 4) event.stateMask &= ($t$ = ~ $WT.BUTTON4, $WT.prototype.BUTTON4 = $WT.BUTTON4, $t$);
+if (event.button == 5) event.stateMask &= ($t$ = ~ $WT.BUTTON5, $WT.prototype.BUTTON5 = $WT.BUTTON5, $t$);
+break;
+case 4:
+if (event.button == 1) event.stateMask |= 524288;
+if (event.button == 2) event.stateMask |= 1048576;
+if (event.button == 3) event.stateMask |= 2097152;
+if (event.button == 4) event.stateMask |= 8388608;
+if (event.button == 5) event.stateMask |= 33554432;
+break;
+}
+if (send) {
+this.sendEvent (type, event);
+if (this.isDisposed ()) return false;
+} else {
+this.postEvent (type, event);
+}return event.doit;
+}, "Number,Number,Number,Number,Boolean,$wt.internal.xhtml.Element,Number,Number");
 $_M (cla$$, "setData", 
 function (data) {
 if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
@@ -1132,7 +2797,6 @@ this.data = data;
 }}, "Object");
 $_M (cla$$, "setData", 
 function (key, value) {
-if (key == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var index = 1;
 var table = null;
 if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
@@ -1167,17 +2831,35 @@ System.arraycopy (table, 0, newTable, 0, index);
 System.arraycopy (table, index + 2, newTable, index, length - index);
 this.data = newTable;
 }}}}}, "String,Object");
-$_M (cla$$, "getName", 
-function () {
-var string = this.getClass ().getName ();
-var index = string.lastIndexOf ('.');
-if (index == -1) return string;
-return string.substring (index + 1, string.length);
-});
-$_M (cla$$, "getNameText", 
-function () {
-return "";
-});
+$_M (cla$$, "sendFocusEvent", 
+function (type) {
+this.sendEvent (type);
+return true;
+}, "Number");
+$_M (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+var el = hWnd;
+el.style.left = X + "px";
+el.style.top = Y + "px";
+el.style.width = cx + "px";
+el.style.height = cy + "px";
+return true;
+}, "Object,Object,Number,Number,Number,Number,Number");
+$_M (cla$$, "showMenu", 
+function (x, y) {
+var event =  new $wt.widgets.Event ();
+event.x = x;
+event.y = y;
+this.sendEvent (35, event);
+if (!event.doit) return true;
+var menu = this.getMenu ();
+if (menu != null && !menu.isDisposed ()) {
+if (x != event.x || y != event.y) {
+menu.setLocation (event.x, event.y);
+}menu.setVisible (true);
+return true;
+}return false;
+}, "Number,Number");
 $_V (cla$$, "toString", 
 function () {
 var string = "*Disposed*";
@@ -1185,97 +2867,6 @@ if (!this.isDisposed ()) {
 string = "*Wrong Thread*";
 if (this.isValidThread ()) string = this.getNameText ();
 }return this.getName () + " {" + string + "}";
-});
-$_M (cla$$, "dispose", 
-function () {
-if (this.isDisposed ()) return ;
-if (!this.isValidThread ()) this.error ($WT.ERROR_THREAD_INVALID_ACCESS);
-this.releaseChild ();
-this.releaseWidget ();
-this.destroyWidget ();
-});
-$_M (cla$$, "isDisposed", 
-function () {
-return (this.state & $wt.widgets.Widget.DISPOSED) != 0;
-});
-$_M (cla$$, "isValidThread", 
-function () {
-return true;
-});
-$_M (cla$$, "error", 
-function (code) {
-$WT.error (code);
-}, "Number");
-$_M (cla$$, "releaseWidget", 
-function () {
-this.sendEvent ($WT.Dispose);
-this.eventTable = null;
-this.data = null;
-});
-$_M (cla$$, "releaseHandle", 
-function () {
-if (this.eventTable != null) {
-this.eventTable.releaseResource ();
-this.eventTable = null;
-}this.handle = null;
-});
-$_M (cla$$, "releaseChild", 
-function () {
-});
-$_M (cla$$, "destroyWidget", 
-function () {
-this.state |= $wt.widgets.Widget.DISPOSED;
-});
-$_M (cla$$, "sendEvent", 
-function (event) {
-var display = event.display;
-if (display == null || !display.filterEvent (event)) {
-if (this.eventTable != null) this.eventTable.sendEvent (event);
-}}, "$wt.widgets.Event");
-$_M (cla$$, "sendEvent", 
-function (eventType) {
-this.sendEvent (eventType, null, true);
-}, "Number");
-$_M (cla$$, "sendEvent", 
-function (eventType, event) {
-this.sendEvent (eventType, event, true);
-}, "Number,$wt.widgets.Event");
-$_M (cla$$, "sendEvent", 
-function (eventType, event, send) {
-if (this.eventTable == null && !this.display.filters (eventType)) {
-return ;
-}if (event == null) event =  new $wt.widgets.Event ();
-event.type = eventType;
-event.display = this.display;
-event.widget = this;
-if (event.time == 0) {
-if (this.display != null) {
-event.time = this.display.getLastEventTime ();
-} else {
-System.out.println ("display is null");
-event.time = parseInt ( new java.util.Date ().getTime ());
-}}if (send) {
-this.sendEvent (event);
-} else {
-if (this.display != null) {
-this.display.postEvent (event);
-} else {
-System.out.println ("display is null");
-}}}, "Number,$wt.widgets.Event,Boolean");
-$_M (cla$$, "filters", 
-function (eventType) {
-return this.display.filters (eventType);
-}, "Number");
-$_M (cla$$, "postEvent", 
-function (eventType) {
-this.sendEvent (eventType, null, false);
-}, "Number");
-$_M (cla$$, "postEvent", 
-function (eventType, event) {
-this.sendEvent (eventType, event, false);
-}, "Number,$wt.widgets.Event");
-$_M (cla$$, "checkSubclass", 
-function () {
 });
 $_S (cla$$,
 "DISPOSED", 1 << 0,
@@ -1288,11 +2879,19 @@ $_S (cla$$,
 "DEFAULT_WIDTH", 64,
 "DEFAULT_HEIGHT", 64);
 cla$$ = $_C (function () {
-this.menu = null;
 this.parent = null;
-this.layoutData = null;
 this.cursor = null;
+this.menu = null;
 this.toolTipText = null;
+this.layoutData = null;
+this.accessible = null;
+this.drawCount = 0;
+this.foreground = 0;
+this.background = 0;
+this.left = 0;
+this.top = 0;
+this.width = 0;
+this.height = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Control", $wt.widgets.Widget, $wt.graphics.Drawable);
 $_K (cla$$, 
@@ -1303,179 +2902,76 @@ this.createWidget ();
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "addControlListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Resize, typedListener);
-this.addListener ($WT.Move, typedListener);
+this.addListener (11, typedListener);
+this.addListener (10, typedListener);
 }, "$wt.events.ControlListener");
 $_M (cla$$, "addFocusListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.FocusIn, typedListener);
-this.addListener ($WT.FocusOut, typedListener);
+this.addListener (15, typedListener);
+this.addListener (16, typedListener);
 }, "$wt.events.FocusListener");
 $_M (cla$$, "addHelpListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Help, typedListener);
+this.addListener (28, typedListener);
 }, "$wt.events.HelpListener");
 $_M (cla$$, "addKeyListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.KeyUp, typedListener);
-this.addListener ($WT.KeyDown, typedListener);
+this.addListener (2, typedListener);
+this.addListener (1, typedListener);
 }, "$wt.events.KeyListener");
 $_M (cla$$, "addMouseListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.MouseDown, typedListener);
-this.addListener ($WT.MouseUp, typedListener);
-this.addListener ($WT.MouseDoubleClick, typedListener);
+this.addListener (3, typedListener);
+this.addListener (4, typedListener);
+this.addListener (8, typedListener);
 }, "$wt.events.MouseListener");
 $_M (cla$$, "addMouseTrackListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.MouseEnter, typedListener);
-this.addListener ($WT.MouseExit, typedListener);
-this.addListener ($WT.MouseHover, typedListener);
+this.addListener (6, typedListener);
+this.addListener (7, typedListener);
+this.addListener (32, typedListener);
 }, "$wt.events.MouseTrackListener");
 $_M (cla$$, "addMouseMoveListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.MouseMove, typedListener);
+this.addListener (5, typedListener);
 }, "$wt.events.MouseMoveListener");
 $_M (cla$$, "addPaintListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Paint, typedListener);
+this.addListener (9, typedListener);
 }, "$wt.events.PaintListener");
 $_M (cla$$, "addTraverseListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Traverse, typedListener);
+this.addListener (31, typedListener);
 }, "$wt.events.TraverseListener");
-$_M (cla$$, "removeControlListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Move, listener);
-this.eventTable.unhook ($WT.Resize, listener);
-}, "$wt.events.ControlListener");
-$_M (cla$$, "removeFocusListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.FocusIn, listener);
-this.eventTable.unhook ($WT.FocusOut, listener);
-}, "$wt.events.FocusListener");
-$_M (cla$$, "removeHelpListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Help, listener);
-}, "$wt.events.HelpListener");
-$_M (cla$$, "removeKeyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.KeyUp, listener);
-this.eventTable.unhook ($WT.KeyDown, listener);
-}, "$wt.events.KeyListener");
-$_M (cla$$, "removeMouseTrackListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.MouseEnter, listener);
-this.eventTable.unhook ($WT.MouseExit, listener);
-this.eventTable.unhook ($WT.MouseHover, listener);
-}, "$wt.events.MouseTrackListener");
-$_M (cla$$, "removeMouseListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.MouseDown, listener);
-this.eventTable.unhook ($WT.MouseUp, listener);
-this.eventTable.unhook ($WT.MouseDoubleClick, listener);
-}, "$wt.events.MouseListener");
-$_M (cla$$, "removeMouseMoveListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.MouseMove, listener);
-}, "$wt.events.MouseMoveListener");
-$_M (cla$$, "removePaintListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Paint, listener);
-}, "$wt.events.PaintListener");
-$_M (cla$$, "removeTraverseListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Traverse, listener);
-}, "$wt.events.TraverseListener");
-$_M (cla$$, "isActive", 
+$_M (cla$$, "borderHandle", 
 function () {
-return true;
+return this.handle;
 });
-$_M (cla$$, "forceFocus", 
+$_M (cla$$, "checkBorder", 
 function () {
-if (!this.isEnabled () || !this.isVisible () || !this.isActive ()) return false;
-if (this.isFocusControl ()) return true;
-if (this.isDisposed ()) return false;
-return this.isFocusControl ();
+if (this.getBorderWidth () == 0) this.style &= ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$);
 });
-$_M (cla$$, "isEnabled", 
+$_M (cla$$, "checkBuffered", 
 function () {
-return this.getEnabled () && this.parent.isEnabled ();
+this.style &= ($t$ = ~ $WT.DOUBLE_BUFFERED, $WT.prototype.DOUBLE_BUFFERED = $WT.DOUBLE_BUFFERED, $t$);
 });
-$_M (cla$$, "getEnabled", 
+$_M (cla$$, "checkHandle", 
+function (hwnd) {
+return hwnd == this.handle;
+}, "$wt.internal.xhtml.Element");
+$_M (cla$$, "checkMirrored", 
 function () {
-if (this.handle != null) {
-if (this.handle.nodeName == "BUTTON" || this.handle.nodeName == "INPUT" || this.handle.nodeName == "SELECT") {
-return !this.handle.disabled;
-}}return true;
-});
-$_M (cla$$, "getAccessible", 
-function () {
-return null;
-});
-$_M (cla$$, "getBackground", 
-function () {
-if (this.handle != null) {
-var bgColor = this.handle.style.backgroundColor;
-if (bgColor != null && bgColor.length != 0) {
-return  new $wt.graphics.Color (this.display, bgColor);
-}}return  new $wt.graphics.Color (this.display, "transparent");
-});
-$_M (cla$$, "isFocusControl", 
-function () {
-return false;
-});
-$_M (cla$$, "setFocus", 
-function () {
-if ((this.style & $WT.NO_FOCUS) != 0) return false;
-return this.forceFocus ();
-});
-$_M (cla$$, "getFont", 
-function () {
-return  new $wt.graphics.Font (this.display,  new $wt.graphics.FontData ("Arial", 10, $WT.NONE));
-});
-$_M (cla$$, "getForeground", 
-function () {
-var fgColor = this.handle.style.color;
-System.out.println (fgColor);
-return  new $wt.graphics.Color (null, fgColor);
-});
+if ((this.style & 67108864) != 0) {
+}});
 $_M (cla$$, "computeSize", 
 function (wHint, hHint) {
 return this.computeSize (wHint, hHint, true);
@@ -1484,289 +2980,343 @@ $_M (cla$$, "computeSize",
 function (wHint, hHint, changed) {
 var width = $wt.widgets.Widget.DEFAULT_WIDTH;
 var height = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 var border = this.getBorderWidth ();
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
+$_M (cla$$, "computeTabGroup", 
+function () {
+if (this.isTabGroup ()) return this;
+return this.parent.computeTabGroup ();
+});
+$_M (cla$$, "computeTabRoot", 
+function () {
+var tabList = this.parent._getTabList ();
+if (tabList != null) {
+var index = 0;
+while (index < tabList.length) {
+if (tabList[index] == this) break;
+index++;
+}
+if (index == tabList.length) {
+if (this.isTabGroup ()) return this;
+}}return this.parent.computeTabRoot ();
+});
+$_M (cla$$, "computeTabList", 
+function () {
+if (this.isTabGroup ()) {
+if (this.getVisible () && this.getEnabled ()) {
+return [this];
+}}return  new Array (0);
+});
+$_M (cla$$, "createHandle", 
+function () {
+this.handle = document.createElement ("DIV");
+});
+$_M (cla$$, "createWidget", 
+function () {
+this.foreground = this.background = -1;
+this.checkOrientation (this.parent);
+this.createHandle ();
+this.checkBuffered ();
+this.register ();
+this.setDefaultFont ();
+this.checkMirrored ();
+this.checkBorder ();
+});
+$_M (cla$$, "deregister", 
+function () {
+this.display.removeControl (this.handle);
+});
+$_V (cla$$, "destroyWidget", 
+function () {
+var hwnd = this.topHandle ();
+this.releaseHandle ();
+if (hwnd != null) {
+BrowserNative.releaseHandle (hwnd);
+}});
+$_M (cla$$, "enableWidget", 
+function (enabled) {
+this.handle.disabled = !enabled;
+}, "Boolean");
+$_M (cla$$, "findBrush", 
+function (pixel) {
+return this.parent.findBrush (pixel);
+}, "Number");
+$_M (cla$$, "findCursor", 
+function () {
+if (this.cursor != null) return this.cursor;
+return this.parent.findCursor ();
+});
+$_M (cla$$, "findThemeControl", 
+function () {
+return this.background == -1 ? this.parent.findThemeControl () : null;
+});
+$_M (cla$$, "findMenus", 
+function (control) {
+if (this.menu != null && this != control) return [this.menu];
+return  new Array (0);
+}, "$wt.widgets.Control");
+$_M (cla$$, "findMnemonic", 
+function (string) {
+var index = 0;
+var length = string.length;
+do {
+while (index < length && (string.charAt (index)).charCodeAt (0) != ('&').charCodeAt (0)) index++;
+
+if (++index >= length) return '\0';
+if ((string.charAt (index)).charCodeAt (0) != ('&').charCodeAt (0)) return string.charAt (index);
+index++;
+} while (index < length);
+return '\0';
+}, "String");
+$_M (cla$$, "fixChildren", 
+function (newShell, oldShell, newDecorations, oldDecorations, menus) {
+oldShell.fixShell (newShell, this);
+oldDecorations.fixDecorations (newDecorations, this, menus);
+}, "$wt.widgets.Shell,$wt.widgets.Shell,$wt.widgets.Decorations,$wt.widgets.Decorations,Array");
+$_M (cla$$, "fixFocus", 
+function (focusControl) {
+var shell = this.getShell ();
+var control = this;
+while (control != shell && (control = control.parent) != null) {
+if (control.setFixedFocus ()) return ;
+}
+shell.setSavedFocus (focusControl);
+}, "$wt.widgets.Control");
+$_M (cla$$, "forceFocus", 
+function () {
+if (this.display.focusEvent == 16) return false;
+var shell = this.menuShell ();
+shell.setSavedFocus (this);
+if (!this.isEnabled () || !this.isVisible () || !this.isActive ()) return false;
+if (this.isFocusControl ()) return true;
+shell.setSavedFocus (null);
+if (this.isDisposed ()) return false;
+shell.setSavedFocus (this);
+return this.isFocusControl ();
+});
+$_M (cla$$, "forceResize", 
+function () {
+if (this.parent == null) return ;
+var lpwp = this.parent.lpwp;
+if (lpwp == null) return ;
+for (var i = 0; i < lpwp.length; i++) {
+var wp = lpwp[i];
+if (wp != null && wp.hwnd == this.handle) {
+this.SetWindowPos (wp.hwnd, null, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
+lpwp[i] = null;
+return ;
+}}
+});
+$_M (cla$$, "getAccessible", 
+function () {
+return this.accessible;
+});
+$_M (cla$$, "getBackground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
+});
 $_M (cla$$, "getBorderWidth", 
 function () {
-return 0;
+if ((this.style & 2048) != 0) {
+return 1;
+}return 0;
+});
+$_M (cla$$, "getBounds", 
+function () {
+this.forceResize ();
+return  new $wt.graphics.Rectangle (this.left, this.top, this.width, this.height);
+});
+$_M (cla$$, "getEnabled", 
+function () {
+return !this.handle.disabled;
+});
+$_M (cla$$, "getFont", 
+function () {
+return  new $wt.graphics.Font (this.display, this.handle.style.fontFamily, Integer.parseInt (this.handle.style.fontSize), 0);
+});
+$_M (cla$$, "getForeground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.handle.style.color);
 });
 $_M (cla$$, "getLayoutData", 
 function () {
 return this.layoutData;
 });
-$_M (cla$$, "setLayoutData", 
-function (layoutData) {
-this.layoutData = layoutData;
-}, "Object");
 $_M (cla$$, "getLocation", 
 function () {
-var x = 0;
-var y = 0;
-var left = this.handle.style.left;
-if (left != null && left.length != 0) {
-x = Integer.parseInt (left);
-}var top = this.handle.style.top;
-if (top != null && top.length != 0) {
-y = Integer.parseInt (top);
-}return  new $wt.graphics.Point (x, y);
+this.forceResize ();
+return  new $wt.graphics.Point (this.left, this.top);
 });
-$_M (cla$$, "getMenu", 
+$_V (cla$$, "getMenu", 
 function () {
-return null;
-});
-$_M (cla$$, "setMenu", 
-function (menu) {
-if (menu != null) {
-if (menu.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-if ((menu.style & $WT.POP_UP) == 0) {
-this.error ($WT.ERROR_MENU_NOT_POP_UP);
-}if (menu.parent != this.menuShell ()) {
-this.error ($WT.ERROR_INVALID_PARENT);
-}}this.menu = menu;
-this.handle.oncontextmenu = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Control$1")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Control$1", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-this.callbacks["$wt.widgets.Control"].menu.handle.style.display = "";
-this.toReturn (false);
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Control$1, innerThis, finalVars);
-}) (this, null));
-}, "$wt.widgets.Menu");
-$_M (cla$$, "menuShell", 
-function () {
-return this.parent.menuShell ();
+return this.menu;
 });
 $_M (cla$$, "getMonitor", 
 function () {
-var monitor =  new $wt.widgets.Monitor ();
-monitor.handle = 220284;
-monitor.clientWidth = monitor.width = document.body.clientWidth;
-monitor.clientHeight = monitor.height = document.body.clientHeight;
-monitor.clientX = monitor.x = 0;
-monitor.clientY = monitor.y = 0;
-return monitor;
+return this.display.getPrimaryMonitor ();
 });
 $_M (cla$$, "getParent", 
 function () {
 return this.parent;
 });
-$_M (cla$$, "getBounds", 
+$_M (cla$$, "getPath", 
 function () {
-var position = this.getLocation ();
-var size = this.getSize ();
-return  new $wt.graphics.Rectangle (position.x, position.y, size.x, size.y);
-});
-$_M (cla$$, "setBounds", 
-function (x, y, width, height) {
-this.handle.style.left = x + "px";
-this.handle.style.top = y + "px";
-if (width != 0) {
-if ((this.style & $WT.BORDER) != 0) {
-width = Math.max (0, width - 6);
-}this.handle.style.width = width + "px";
-}if (height != 0) {
-if ((this.style & $WT.BORDER) != 0) {
-height = Math.max (0, height - 6);
-}this.handle.style.height = height + "px";
-}}, "Number,Number,Number,Number");
-$_M (cla$$, "setBounds", 
-function (rect) {
-if (rect == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.setBounds (rect.x, rect.y, rect.width, rect.height);
-}, "$wt.graphics.Rectangle");
-$_M (cla$$, "setFont", 
-function (font) {
-var hFont = 0;
-if (font != null) {
-if (font.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var fontData = font.getFontData ()[0];
-this.handle.style.fontFamily = fontData.getName ();
-this.handle.style.fontSize = fontData.getHeight () + "pt";
-if ((fontData.style & $WT.BOLD) != 0) {
-try {
-this.handle.style.fontStyle = "bold";
-} catch (e) {
-if ($_O (e, Error)) {
-} else {
-throw e;
-}
-}
-this.handle.style.fontWeight = "bold";
-} else if ((fontData.style & $WT.ITALIC) != 0) {
-try {
-this.handle.style.fontStyle = "italic";
-} catch (e) {
-if ($_O (e, Error)) {
-} else {
-throw e;
-}
-}
-}}, "$wt.graphics.Font");
-$_M (cla$$, "register", 
-function () {
-this.display.addControl (this.handle, this);
-});
-$_M (cla$$, "setSize", 
-function (width, height) {
-this.handle.style.width = width + "px";
-this.handle.style.height = height + "px";
-}, "Number,Number");
-$_M (cla$$, "isVisible", 
-function () {
-return this.getVisible () && this.parent.isVisible ();
-});
-$_M (cla$$, "getVisible", 
-function () {
-if (this.handle != null && this.handle.style.display != "none") {
-return true;
-} else {
-return false;
-}});
-$_M (cla$$, "setVisible", 
-function (visible) {
-if (visible) {
-this.handle.style.display = "";
-} else {
-this.handle.style.display = "none";
-}if (visible) {
-this.sendEvent ($WT.Show);
-var gc =  new $wt.graphics.GC (this);
-var event =  new $wt.widgets.Event ();
-event.type = $WT.Paint;
-event.gc = gc;
-event.x = Integer.parseInt (this.handle.style.left);
-event.y = Integer.parseInt (this.handle.style.right);
-event.width = Integer.parseInt (this.handle.style.width);
-event.height = Integer.parseInt (this.handle.style.height);
-this.display.postEvent (event);
-if (this.isDisposed ()) return ;
-}}, "Boolean");
-$_M (cla$$, "pack", 
-function () {
-this.pack (true);
-});
-$_M (cla$$, "pack", 
-function (changed) {
-this.setSize (this.computeSize ($WT.DEFAULT, $WT.DEFAULT, changed));
-}, "Boolean");
-$_M (cla$$, "setSize", 
-function (size) {
-if (size == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.setSize (size.x, size.y);
-}, "$wt.graphics.Point");
-$_M (cla$$, "setLocation", 
-function (x, y) {
-this.setBounds (x, y, 0, 0);
-}, "Number,Number");
-$_M (cla$$, "setLocation", 
-function (location) {
-if (location == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.setLocation (location.x, location.y);
-}, "$wt.graphics.Point");
-$_M (cla$$, "markLayout", 
-function (changed, all) {
-}, "Boolean,Boolean");
-$_M (cla$$, "updateLayout", 
-function (resize, all) {
-}, "Boolean,Boolean");
-$_M (cla$$, "update", 
-function () {
-this.update (false);
-});
-$_M (cla$$, "update", 
-function (all) {
-}, "Boolean");
-$_M (cla$$, "redraw", 
-function () {
-var event =  new $wt.widgets.Event ();
-event.type = $WT.Paint;
-event.display = this.display;
-event.widget = this;
-event.gc =  new $wt.graphics.GC (this);
-this.sendEvent (event);
-});
-$_M (cla$$, "redraw", 
-function (x, y, width, height, all) {
-if (width <= 0 || height <= 0) return ;
-System.out.println ("partial update");
-var event =  new $wt.widgets.Event ();
-event.type = $WT.Paint;
-event.display = this.display;
-event.widget = this;
-event.gc =  new $wt.graphics.GC (this);
-this.sendEvent (event);
-}, "Number,Number,Number,Number,Boolean");
-$_M (cla$$, "setBackground", 
-function (color) {
-if (color != null) {
-this.handle.style.backgroundColor = color.getCSSHandle ();
-}}, "$wt.graphics.Color");
-$_M (cla$$, "setForeground", 
-function (color) {
-var pixel = -1;
-if (color != null) {
-this.handle.style.color = color.getCSSHandle ();
-}this.redraw ();
-}, "$wt.graphics.Color");
-$_M (cla$$, "setToolTipText", 
-function (string) {
+var count = 0;
 var shell = this.getShell ();
-shell.setToolTipText (this.handle, this.toolTipText = string);
-}, "String");
+var control = this;
+while (control != shell) {
+count++;
+control = control.parent;
+}
+control = this;
+var result =  new Array (count);
+while (control != shell) {
+result[--count] = control;
+control = control.parent;
+}
+return result;
+});
+$_M (cla$$, "getShell", 
+function () {
+return this.parent.getShell ();
+});
+$_M (cla$$, "getSize", 
+function () {
+this.forceResize ();
+return  new $wt.graphics.Point (this.width, this.height);
+});
 $_M (cla$$, "getToolTipText", 
 function () {
 return this.toolTipText;
 });
-$_M (cla$$, "getShell", 
+$_M (cla$$, "getVisible", 
 function () {
-if ($_O (this, $wt.widgets.Shell)) {
-return this;
-}return this.parent.getShell ();
+if (this.drawCount != 0) return (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+return this.handle.style.visibility != "hidden";
 });
-$_M (cla$$, "getSize", 
+$_M (cla$$, "hasCursor", 
 function () {
-var w = 64;
-var h = 64;
-var width = this.handle.style.width;
-if (width != null && width.length != 0) {
-w = Integer.parseInt (width);
-}var height = this.handle.style.height;
-if (height != null && height.length != 0) {
-h = Integer.parseInt (height);
-}return  new $wt.graphics.Point (w, h);
+return false;
 });
-$_M (cla$$, "setEnabled", 
-function (enabled) {
-if (this.handle != null) {
-if (this.handle.nodeName == "BUTTON" || this.handle.nodeName == "INPUT" || this.handle.nodeName == "SELECT") {
-this.handle.disabled = !enabled;
-}}}, "Boolean");
-$_M (cla$$, "setCursor", 
-function (cursor) {
-if (cursor != null && cursor.isDisposed ()) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
-this.cursor = cursor;
-this.handle.style.cursor = cursor.getCSSHandle ();
-}, "$wt.graphics.Cursor");
+$_M (cla$$, "hasFocus", 
+function () {
+return false;
+});
+$_M (cla$$, "isActive", 
+function () {
+var dialogShell = this.display.getModalDialogShell ();
+if (dialogShell != null && dialogShell != this.getShell ()) {
+return false;
+}var shell = null;
+var modalShells = this.display.modalShells;
+if (modalShells != null) {
+var bits = 65536 | 131072;
+var index = modalShells.length;
+while (--index >= 0) {
+var modal = modalShells[index];
+if (modal != null) {
+if ((modal.style & bits) != 0) {
+var control = this;
+while (control != null) {
+if (control == modal) break;
+control = control.parent;
+}
+if (control != modal) return false;
+break;
+}if ((modal.style & 32768) != 0) {
+if (shell == null) shell = this.getShell ();
+if (modal.parent == shell) return false;
+}}}
+}if (shell == null) shell = this.getShell ();
+return shell.getEnabled ();
+});
+$_M (cla$$, "isEnabled", 
+function () {
+return this.getEnabled () && this.parent.isEnabled ();
+});
+$_M (cla$$, "isFocusControl", 
+function () {
+return this.hasFocus ();
+});
+$_M (cla$$, "isFocusAncestor", 
+function (control) {
+while (control != null && control != this) {
+control = control.parent;
+}
+return control == this;
+}, "$wt.widgets.Control");
+$_M (cla$$, "isReparentable", 
+function () {
+return true;
+});
+$_M (cla$$, "isShowing", 
+function () {
+if (!this.isVisible ()) return false;
+var control = this;
+while (control != null) {
+var size = control.getSize ();
+if (size.x == 0 || size.y == 0) {
+return false;
+}control = control.parent;
+}
+return true;
+});
+$_M (cla$$, "isTabGroup", 
+function () {
+var tabList = this.parent._getTabList ();
+if (tabList != null) {
+for (var i = 0; i < tabList.length; i++) {
+if (tabList[i] == this) return true;
+}
+}return true;
+});
+$_M (cla$$, "isTabItem", 
+function () {
+var tabList = this.parent._getTabList ();
+if (tabList != null) {
+for (var i = 0; i < tabList.length; i++) {
+if (tabList[i] == this) return false;
+}
+}return false;
+});
+$_M (cla$$, "isVisible", 
+function () {
+return this.getVisible () && this.parent.isVisible ();
+});
+$_M (cla$$, "mapEvent", 
+function (hwnd, event) {
+if (hwnd != this.handle) {
+}}, "$wt.internal.xhtml.Element,$wt.widgets.Event");
+$_M (cla$$, "markLayout", 
+function (changed, all) {
+}, "Boolean,Boolean");
+$_M (cla$$, "menuShell", 
+function () {
+return this.parent.menuShell ();
+});
+$_M (cla$$, "mnemonicHit", 
+function (key) {
+return false;
+}, "Number");
+$_M (cla$$, "mnemonicMatch", 
+function (key) {
+return false;
+}, "Number");
 $_M (cla$$, "moveAbove", 
 function (control) {
 if (control != null) {
 if (this.parent != control.parent) return ;
-this.parent.handle.removeChild (this.handle);
-this.parent.handle.insertBefore (this.handle, control.handle);
-}}, "$wt.widgets.Control");
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.removeChild (this.handle);
+parentHandle.insertBefore (this.handle, control.handle);
+}}}}, "$wt.widgets.Control");
 $_M (cla$$, "moveBelow", 
 function (control) {
 if (control != null) {
@@ -1777,16 +3327,500 @@ this.parent.handle.insertBefore (this.handle, control.handle.nextSibling);
 } else {
 this.parent.handle.appendChild (this.handle);
 }}}, "$wt.widgets.Control");
+$_M (cla$$, "pack", 
+function () {
+this.pack (true);
+});
+$_M (cla$$, "pack", 
+function (changed) {
+this.setSize (this.computeSize (-1, -1, changed));
+}, "Boolean");
+$_M (cla$$, "redraw", 
+function () {
+});
+$_M (cla$$, "redraw", 
+function (x, y, width, height, all) {
+if (width <= 0 || height <= 0) return ;
+}, "Number,Number,Number,Number,Boolean");
+$_M (cla$$, "register", 
+function () {
+this.display.addControl (this.handle, this);
+if (this.parent != null) {
+this.parent.children[this.parent.children.length] = this;
+}});
+$_V (cla$$, "releaseChild", 
+function () {
+this.parent.removeControl (this);
+});
 $_M (cla$$, "releaseHandle", 
 function () {
-this.parent = null;
-if (this.menu != null) {
-this.menu.releaseHandle ();
-this.menu = null;
-}this.cursor = null;
-this.layoutData = null;
 $_U (this, $wt.widgets.Control, "releaseHandle", []);
+if (this.handle != null) {
+BrowserNative.releaseHandle (this.handle);
+this.handle = null;
+}});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.Control, "releaseWidget", []);
+if (this.toolTipText != null) {
+var shell = this.getShell ();
+shell.setToolTipText (this.handle, null);
+}this.toolTipText = null;
+if (this.menu != null && !this.menu.isDisposed ()) {
+this.menu.dispose ();
+}this.menu = null;
+this.cursor = null;
+this.deregister ();
+this.parent = null;
+this.layoutData = null;
+this.accessible = null;
 });
+$_M (cla$$, "removeControlListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (10, listener);
+this.eventTable.unhook (11, listener);
+}, "$wt.events.ControlListener");
+$_M (cla$$, "removeFocusListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (15, listener);
+this.eventTable.unhook (16, listener);
+}, "$wt.events.FocusListener");
+$_M (cla$$, "removeHelpListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (28, listener);
+}, "$wt.events.HelpListener");
+$_M (cla$$, "removeKeyListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (2, listener);
+this.eventTable.unhook (1, listener);
+}, "$wt.events.KeyListener");
+$_M (cla$$, "removeMouseTrackListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (6, listener);
+this.eventTable.unhook (7, listener);
+this.eventTable.unhook (32, listener);
+}, "$wt.events.MouseTrackListener");
+$_M (cla$$, "removeMouseListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (3, listener);
+this.eventTable.unhook (4, listener);
+this.eventTable.unhook (8, listener);
+}, "$wt.events.MouseListener");
+$_M (cla$$, "removeMouseMoveListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (5, listener);
+}, "$wt.events.MouseMoveListener");
+$_M (cla$$, "removePaintListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (9, listener);
+}, "$wt.events.PaintListener");
+$_M (cla$$, "removeTraverseListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (31, listener);
+}, "$wt.events.TraverseListener");
+$_M (cla$$, "showWidget", 
+function (visible) {
+this.handle.style.visibility = visible ? "visible" : "hidden";
+}, "Boolean");
+$_V (cla$$, "sendFocusEvent", 
+function (type) {
+var shell = this.getShell ();
+var display = this.display;
+display.focusEvent = type;
+display.focusControl = this;
+this.sendEvent (type);
+display.focusEvent = 0;
+display.focusControl = null;
+if (!shell.isDisposed ()) {
+switch (type) {
+case 15:
+shell.setActiveControl (this);
+break;
+case 16:
+if (shell != display.getActiveShell ()) {
+shell.setActiveControl (null);
+}break;
+}
+}return true;
+}, "Number");
+$_M (cla$$, "setBackground", 
+function (color) {
+if (color != null) this.handle.style.backgroundColor = color.getCSSHandle ();
+}, "$wt.graphics.Color");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height) {
+var flags = 0;
+this.setBounds (x, y, Math.max (0, width), Math.max (0, height), flags);
+}, "Number,Number,Number,Number");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+this.setBounds (x, y, width, height, flags, true);
+}, "Number,Number,Number,Number,Number");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags, defer) {
+var topHandle = this.topHandle ();
+if (defer && this.parent != null) {
+this.forceResize ();
+var lpwp = this.parent.lpwp;
+if (lpwp == null) {
+this.left = x;
+this.top = y;
+this.width = width;
+this.height = height;
+this.SetWindowPos (topHandle, null, x, y, width, height, flags);
+} else {
+var index = 0;
+while (index < lpwp.length) {
+if (lpwp[index] == null) break;
+index++;
+}
+if (index == lpwp.length) {
+var newLpwp =  new Array (lpwp.length + 4);
+System.arraycopy (lpwp, 0, newLpwp, 0, lpwp.length);
+this.parent.lpwp = lpwp = newLpwp;
+}var wp =  new $wt.internal.struct.WINDOWPOS ();
+wp.hwnd = topHandle;
+wp.x = x;
+wp.y = y;
+wp.cx = width;
+wp.cy = height;
+wp.flags = flags;
+lpwp[index] = wp;
+}} else {
+this.left = x;
+this.top = y;
+this.width = width;
+this.height = height;
+this.SetWindowPos (topHandle, null, x, y, width, height, flags);
+}}, "Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "setBounds", 
+function (rect) {
+this.setBounds (rect.x, rect.y, rect.width, rect.height);
+}, "$wt.graphics.Rectangle");
+$_M (cla$$, "setCapture", 
+function (capture) {
+}, "Boolean");
+$_M (cla$$, "setCursor", 
+function () {
+});
+$_M (cla$$, "setCursor", 
+function (cursor) {
+this.cursor = cursor;
+this.handle.style.cursor = cursor.getCSSHandle ();
+}, "$wt.graphics.Cursor");
+$_M (cla$$, "setDefaultFont", 
+function () {
+});
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+var control = null;
+var fixFocus = false;
+if (!enabled) {
+if (this.display.focusEvent != 16) {
+control = this.display.getFocusControl ();
+fixFocus = this.isFocusAncestor (control);
+}}this.enableWidget (enabled);
+if (fixFocus) this.fixFocus (control);
+}, "Boolean");
+$_M (cla$$, "setFixedFocus", 
+function () {
+if ((this.style & 524288) != 0) return false;
+return this.forceFocus ();
+});
+$_M (cla$$, "setFocus", 
+function () {
+if ((this.style & 524288) != 0) return false;
+return this.forceFocus ();
+});
+$_M (cla$$, "setFont", 
+function (font) {
+if (font == null || font.data == null) return ;
+this.handle.style.fontFamily = font.data.name;
+this.handle.style.fontSize = font.data.height + "pt";
+if ((font.data.style & 1) != 0) {
+this.handle.style.fontWeight = "bold";
+} else {
+this.handle.style.fontWeight = "normal";
+}if ((font.data.style & 2) != 0) {
+this.handle.style.fontStyle = "italic";
+} else {
+this.handle.style.fontStyle = "normal";
+}}, "$wt.graphics.Font");
+$_M (cla$$, "setForeground", 
+function (color) {
+if (color != null) this.handle.style.color = color.getCSSHandle ();
+}, "$wt.graphics.Color");
+$_M (cla$$, "setLayoutData", 
+function (layoutData) {
+this.layoutData = layoutData;
+}, "Object");
+$_M (cla$$, "setLocation", 
+function (x, y) {
+var flags = 0;
+this.setBounds (x, y, 0, 0, flags);
+}, "Number,Number");
+$_M (cla$$, "setLocation", 
+function (location) {
+this.setLocation (location.x, location.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setMenu", 
+function (menu) {
+if (menu != null) {
+}this.menu = menu;
+if (this.handle.oncontextmenu == null) {
+this.handle.oncontextmenu = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Control$1")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Control$1", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Control"].showMenu (0, 0);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Control$1, innerThis, finalVars);
+}) (this, null));
+}}, "$wt.widgets.Menu");
+$_M (cla$$, "setRadioFocus", 
+function () {
+return false;
+});
+$_M (cla$$, "setRadioSelection", 
+function (value) {
+return false;
+}, "Boolean");
+$_M (cla$$, "setRedraw", 
+function (redraw) {
+}, "Boolean");
+$_M (cla$$, "setSavedFocus", 
+function () {
+return this.forceFocus ();
+});
+$_M (cla$$, "setSize", 
+function (width, height) {
+var flags = 0;
+this.setBounds (0, 0, Math.max (0, width), Math.max (0, height), flags);
+}, "Number,Number");
+$_M (cla$$, "setSize", 
+function (size) {
+System.err.println (size);
+this.setSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setTabGroupFocus", 
+function () {
+return this.setTabItemFocus ();
+});
+$_M (cla$$, "setTabItemFocus", 
+function () {
+if (!this.isShowing ()) return false;
+return this.forceFocus ();
+});
+$_M (cla$$, "setToolTipText", 
+function (string) {
+var shell = this.getShell ();
+shell.setToolTipText (this.handle, this.toolTipText = string);
+}, "String");
+$_M (cla$$, "setVisible", 
+function (visible) {
+if (this.drawCount != 0) {
+if (((this.state & $wt.widgets.Widget.HIDDEN) == 0) == visible) return ;
+} else {
+if ((this.handle.style.visibility != "hidden") == visible) return ;
+}if (visible) {
+this.sendEvent (22);
+if (this.isDisposed ()) return ;
+}var control = null;
+var fixFocus = false;
+if (!visible) {
+if (this.display.focusEvent != 16) {
+control = this.display.getFocusControl ();
+fixFocus = this.isFocusAncestor (control);
+}}if (this.drawCount != 0) {
+this.state = visible ? this.state & ($t$ = ~ $wt.widgets.Widget.HIDDEN, $wt.widgets.Widget.prototype.HIDDEN = $wt.widgets.Widget.HIDDEN, $t$) : this.state | $wt.widgets.Widget.HIDDEN;
+} else {
+this.showWidget (visible);
+if (this.isDisposed ()) return ;
+}if (!visible) {
+this.sendEvent (23);
+if (this.isDisposed ()) return ;
+}if (fixFocus) this.fixFocus (control);
+}, "Boolean");
+$_M (cla$$, "sort", 
+function (items) {
+var length = items.length;
+for (var gap = Math.floor (length / 2); gap > 0; gap /= 2) {
+for (var i = gap; i < length; i++) {
+for (var j = i - gap; j >= 0; j -= gap) {
+if (items[j] <= items[j + gap]) {
+var swap = items[j];
+items[j] = items[j + gap];
+items[j + gap] = swap;
+}}
+}
+}
+}, "Array");
+$_M (cla$$, "toControl", 
+function (x, y) {
+return  new $wt.graphics.Point (x, y);
+}, "Number,Number");
+$_M (cla$$, "toControl", 
+function (point) {
+return this.toControl (point.x, point.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "toDisplay", 
+function (x, y) {
+return  new $wt.graphics.Point (x, y);
+}, "Number,Number");
+$_M (cla$$, "toDisplay", 
+function (point) {
+return this.toDisplay (point.x, point.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "topHandle", 
+function () {
+return this.handle;
+});
+$_M (cla$$, "traverse", 
+function (event) {
+this.sendEvent (31, event);
+if (this.isDisposed ()) return true;
+if (!event.doit) return false;
+switch (event.detail) {
+case 0:
+return true;
+case 2:
+return this.traverseEscape ();
+case 4:
+return this.traverseReturn ();
+case 16:
+return this.traverseGroup (true);
+case 8:
+return this.traverseGroup (false);
+case 64:
+return this.traverseItem (true);
+case 32:
+return this.traverseItem (false);
+case 128:
+return this.traverseMnemonic (event.character);
+case 512:
+return this.traversePage (true);
+case 256:
+return this.traversePage (false);
+}
+return false;
+}, "$wt.widgets.Event");
+$_M (cla$$, "traverse", 
+function (traversal) {
+var event =  new $wt.widgets.Event ();
+event.doit = true;
+event.detail = traversal;
+return this.traverse (event);
+}, "Number");
+$_M (cla$$, "traverseEscape", 
+function () {
+return false;
+});
+$_M (cla$$, "traverseGroup", 
+function (next) {
+var root = this.computeTabRoot ();
+var group = this.computeTabGroup ();
+var list = root.computeTabList ();
+var length = list.length;
+var index = 0;
+while (index < length) {
+if (list[index] == group) break;
+index++;
+}
+if (index == length) return false;
+var start = index;
+var offset = (next) ? 1 : -1;
+while ((index = ((index + offset + length) % length)) != start) {
+var control = list[index];
+if (!control.isDisposed () && control.setTabGroupFocus ()) {
+return true;
+}}
+if (group.isDisposed ()) return false;
+return group.setTabGroupFocus ();
+}, "Boolean");
+$_M (cla$$, "traverseItem", 
+function (next) {
+var children = this.parent._getChildren ();
+var length = children.length;
+var index = 0;
+while (index < length) {
+if (children[index] == this) break;
+index++;
+}
+if (index == length) return false;
+var start = index;
+var offset = (next) ? 1 : -1;
+while ((index = (index + offset + length) % length) != start) {
+var child = children[index];
+if (!child.isDisposed () && child.isTabItem ()) {
+if (child.setTabItemFocus ()) return true;
+}}
+return false;
+}, "Boolean");
+$_M (cla$$, "traverseMnemonic", 
+function (key) {
+return this.mnemonicHit (key);
+}, "Number");
+$_M (cla$$, "traversePage", 
+function (next) {
+return false;
+}, "Boolean");
+$_M (cla$$, "traverseReturn", 
+function () {
+return false;
+});
+$_M (cla$$, "update", 
+function () {
+this.update (false);
+});
+$_M (cla$$, "update", 
+function (all) {
+}, "Boolean");
+$_M (cla$$, "updateFont", 
+function (oldFont, newFont) {
+var sameFont = this.getFont ().equals (oldFont);
+if (sameFont) this.setFont (newFont);
+return sameFont;
+}, "$wt.graphics.Font,$wt.graphics.Font");
+$_M (cla$$, "updateLayout", 
+function (resize, all) {
+}, "Boolean,Boolean");
+$_M (cla$$, "widgetParent", 
+function () {
+if (this.parent == null) {
+return null;
+}return this.parent.handle;
+});
+$_M (cla$$, "setParent", 
+function (parent) {
+if (this.parent == parent) return true;
+if (!this.isReparentable ()) return false;
+this.releaseChild ();
+var newShell = parent.getShell ();
+var oldShell = this.getShell ();
+var newDecorations = parent.menuShell ();
+var oldDecorations = this.menuShell ();
+if (oldShell != newShell || oldDecorations != newDecorations) {
+var menus = oldShell.findMenus (this);
+this.fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
+}this.parent = parent;
+return true;
+}, "$wt.widgets.Composite");
 cla$$ = $_C (function () {
 this.horizontalBar = null;
 this.verticalBar = null;
@@ -1796,35 +3830,11 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.Scrollable, [parent, style]);
 }, "$wt.widgets.Composite,Number");
-$_M (cla$$, "getClientArea", 
-function () {
-var w = $WT.DEFAULT;
-var h = $WT.DEFAULT;
-var width = this.handle.style.width;
-if (width != null && width.length != 0) {
-w = Integer.parseInt (width);
-}var height = this.handle.style.height;
-if (height != null && height.length != 0) {
-h = Integer.parseInt (height);
-}if (w < 0) {
-w = 64;
-}if (h < 0) {
-h = 64;
-}return  new $wt.graphics.Rectangle (0, 0, w, h);
-});
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
-return  new $wt.graphics.Rectangle (x, y, width, height);
+var border = this.getBorderWidth ();
+return  new $wt.graphics.Rectangle (x - border, y - border, width + border * 2, height + border * 2);
 }, "Number,Number,Number,Number");
-$_V (cla$$, "createWidget", 
-function () {
-this.register ();
-this.handle = document.createElement ("DIV");
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}if ((this.style & $WT.H_SCROLL) != 0) this.horizontalBar = this.createScrollBar ($WT.H_SCROLL);
-if ((this.style & $WT.V_SCROLL) != 0) this.verticalBar = this.createScrollBar ($WT.V_SCROLL);
-});
 $_M (cla$$, "createScrollBar", 
 function (type) {
 var bar =  new $wt.widgets.ScrollBar (this, type);
@@ -1833,6 +3843,25 @@ bar.setMaximum (100);
 bar.setThumb (10);
 }return bar;
 }, "Number");
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.Scrollable, "createWidget", []);
+if ((this.style & 256) != 0) this.horizontalBar = this.createScrollBar (256);
+if ((this.style & 512) != 0) this.verticalBar = this.createScrollBar (512);
+});
+$_M (cla$$, "getClientArea", 
+function () {
+this.forceResize ();
+var w = -1;
+var h = -1;
+w = this.width;
+h = this.height;
+if (w < 0) {
+w = 64;
+}if (h < 0) {
+h = 64;
+}return  new $wt.graphics.Rectangle (0, 0, w, h);
+});
 $_M (cla$$, "releaseHandle", 
 function () {
 if (this.horizontalBar != null) {
@@ -1843,17 +3872,46 @@ this.verticalBar.releaseHandle ();
 this.verticalBar = null;
 }$_U (this, $wt.widgets.Scrollable, "releaseHandle", []);
 });
+$_M (cla$$, "getHorizontalBar", 
+function () {
+return this.horizontalBar;
+});
+$_M (cla$$, "getVerticalBar", 
+function () {
+return this.verticalBar;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+if (this.horizontalBar != null) this.horizontalBar.releaseResources ();
+if (this.verticalBar != null) this.verticalBar.releaseResources ();
+this.horizontalBar = this.verticalBar = null;
+$_U (this, $wt.widgets.Scrollable, "releaseWidget", []);
+});
+$_M (cla$$, "scrolledHandle", 
+function () {
+return this.handle;
+});
+$_M (cla$$, "windowClass", 
+function () {
+return "DIV";
+});
 cla$$ = $_C (function () {
 this.$layout = null;
+this.lpwp = null;
+this.tabList = null;
 this.layoutCount = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Composite", $wt.widgets.Scrollable);
+$_Y (cla$$, function () {
+this.children =  new Array (0);
+});
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Composite, [parent, style]);
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "_getChildren", 
 function () {
+if (true) return this.children;
 var count = this.handle.childNodes.length;
 var children =  new Array (0);
 var index = 0;
@@ -1864,6 +3922,165 @@ children[index++] = control;
 }}
 return children;
 });
+$_M (cla$$, "_getTabList", 
+function () {
+if (this.tabList == null) return this.tabList;
+var count = 0;
+for (var i = 0; i < this.tabList.length; i++) {
+if (!this.tabList[i].isDisposed ()) count++;
+}
+if (count == this.tabList.length) return this.tabList;
+var newList =  new Array (count);
+var index = 0;
+for (var i = 0; i < this.tabList.length; i++) {
+if (!this.tabList[i].isDisposed ()) {
+newList[index++] = this.tabList[i];
+}}
+this.tabList = newList;
+return this.tabList;
+});
+$_M (cla$$, "changed", 
+function (changed) {
+for (var i = 0; i < changed.length; i++) {
+var control = changed[i];
+var ancestor = false;
+var composite = control.parent;
+while (composite != null) {
+ancestor = composite == this;
+if (ancestor) break;
+composite = composite.parent;
+}
+}
+for (var i = 0; i < changed.length; i++) {
+var child = changed[i];
+var composite = child.parent;
+while (child != this) {
+if (composite.$layout == null || !composite.$layout.flushCache (child)) {
+composite.state |= $wt.widgets.Widget.LAYOUT_CHANGED;
+}child = composite;
+composite = child.parent;
+}
+}
+}, "Array");
+$_V (cla$$, "checkBuffered", 
+function () {
+});
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "computeTabList", 
+function () {
+var result = $_U (this, $wt.widgets.Composite, "computeTabList", []);
+if (result.length == 0) return result;
+var list = this.tabList != null ? this._getTabList () : this._getChildren ();
+for (var i = 0; i < list.length; i++) {
+var child = list[i];
+var childList = child.computeTabList ();
+if (childList.length != 0) {
+var newResult =  new Array (result.length + childList.length);
+System.arraycopy (result, 0, newResult, 0, result.length);
+System.arraycopy (childList, 0, newResult, result.length, childList.length);
+result = newResult;
+}}
+return result;
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var size;
+if (this.$layout != null) {
+if (wHint == -1 || hHint == -1) {
+changed = new Boolean (changed | ((this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0));
+this.state &= ($t$ = ~ $wt.widgets.Widget.LAYOUT_CHANGED, $wt.widgets.Widget.prototype.LAYOUT_CHANGED = $wt.widgets.Widget.LAYOUT_CHANGED, $t$);
+size = this.$layout.computeSize (this, wHint, hHint, changed);
+} else {
+size =  new $wt.graphics.Point (wHint, hHint);
+}} else {
+size = this.minimumSize (wHint, hHint, changed);
+}if (size.x == 0) size.x = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (size.y == 0) size.y = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) size.x = wHint;
+if (hHint != -1) size.y = hHint;
+System.out.println ("before trimming " + size);
+var trim = this.computeTrim (0, 0, size.x, size.y);
+System.out.println ("after trimming " + trim);
+return  new $wt.graphics.Point (trim.width, trim.height);
+}, "Number,Number,Boolean");
+$_M (cla$$, "containerHandle", 
+function () {
+return this.handle;
+});
+$_V (cla$$, "createHandle", 
+function () {
+this.handle = document.createElement ("DIV");
+this.handle.className = "composite-default";
+if ((this.style & 2048) != 0) {
+this.handle.className += " composite-border";
+}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}this.state |= $wt.widgets.Widget.CANVAS;
+});
+$_M (cla$$, "findMenus", 
+function (control) {
+if (control == this) return  new Array (0);
+var result = $_U (this, $wt.widgets.Composite, "findMenus", [control]);
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+var menuList = child.findMenus (control);
+if (menuList.length != 0) {
+var newResult =  new Array (result.length + menuList.length);
+System.arraycopy (result, 0, newResult, 0, result.length);
+System.arraycopy (menuList, 0, newResult, result.length, menuList.length);
+result = newResult;
+}}
+return result;
+}, "$wt.widgets.Control");
+$_M (cla$$, "fixChildren", 
+function (newShell, oldShell, newDecorations, oldDecorations, menus) {
+$_U (this, $wt.widgets.Composite, "fixChildren", [newShell, oldShell, newDecorations, oldDecorations, menus]);
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+children[i].fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
+}
+}, "$wt.widgets.Shell,$wt.widgets.Shell,$wt.widgets.Decorations,$wt.widgets.Decorations,Array");
+$_M (cla$$, "fixChildrenList", 
+function (control) {
+if (this.children == null || this.children.length == 0) return ;
+var newChildren =  new Array (0);
+for (var i = 0; i < this.children.length; i++) {
+var child = this.children[i];
+if (child != null && child != control) {
+newChildren[newChildren.length] = child;
+}}
+this.children = newChildren;
+}, "$wt.widgets.Control");
+$_M (cla$$, "fixTabList", 
+function (control) {
+if (this.tabList == null) return ;
+var count = 0;
+for (var i = 0; i < this.tabList.length; i++) {
+if (this.tabList[i] == control) count++;
+}
+if (count == 0) return ;
+var newList = null;
+var length = this.tabList.length - count;
+if (length != 0) {
+newList =  new Array (length);
+var index = 0;
+for (var i = 0; i < this.tabList.length; i++) {
+if (this.tabList[i] != control) {
+newList[index++] = this.tabList[i];
+}}
+}this.tabList = newList;
+}, "$wt.widgets.Control");
+$_V (cla$$, "getBorderWidth", 
+function () {
+if ((this.style & 2048) != 0) {
+return 2;
+}return 0;
+});
 $_M (cla$$, "getChildren", 
 function () {
 return this._getChildren ();
@@ -1873,13 +4090,38 @@ function () {
 var count = 0;
 return count;
 });
-$_M (cla$$, "setLayout", 
-function (layout) {
-this.$layout = layout;
-}, "$wt.widgets.Layout");
 $_M (cla$$, "getLayout", 
 function () {
 return this.$layout;
+});
+$_M (cla$$, "getTabList", 
+function () {
+var tabList = this._getTabList ();
+if (tabList == null) {
+var count = 0;
+var list = this._getChildren ();
+for (var i = 0; i < list.length; i++) {
+if (list[i].isTabGroup ()) count++;
+}
+tabList =  new Array (count);
+var index = 0;
+for (var i = 0; i < list.length; i++) {
+if (list[i].isTabGroup ()) {
+tabList[index++] = list[i];
+}}
+}return tabList;
+});
+$_M (cla$$, "hooksKeys", 
+function () {
+return this.hooks (1) || this.hooks (2);
+});
+$_M (cla$$, "getLayoutDeferred", 
+function () {
+return this.layoutCount > 0;
+});
+$_M (cla$$, "isLayoutDeferred", 
+function () {
+return this.layoutCount > 0 || this.parent.isLayoutDeferred ();
 });
 $_M (cla$$, "layout", 
 function () {
@@ -1898,11 +4140,9 @@ this.updateLayout (true, all);
 }, "Boolean,Boolean");
 $_M (cla$$, "layout", 
 function (changed) {
-if (changed == null) this.error ($WT.ERROR_INVALID_ARGUMENT);
+var d =  new java.util.Date ();
 for (var i = 0; i < changed.length; i++) {
 var control = changed[i];
-if (control == null) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (control.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
 var ancestor = false;
 var composite = control.parent;
 while (composite != null) {
@@ -1910,8 +4150,9 @@ ancestor = composite == this;
 if (ancestor) break;
 composite = composite.parent;
 }
-if (!ancestor) this.error ($WT.ERROR_INVALID_PARENT);
 }
+System.out.println (":::" + ( new java.util.Date ().getTime () - d.getTime ()));
+d =  new java.util.Date ();
 var updateCount = 0;
 var update =  new Array (16);
 for (var i = 0; i < changed.length; i++) {
@@ -1930,9 +4171,13 @@ update = newUpdate;
 composite = child.parent;
 }
 }
+System.out.println (":::" + ( new java.util.Date ().getTime () - d.getTime ()));
+d =  new java.util.Date ();
 for (var i = updateCount - 1; i >= 0; i--) {
 update[i].updateLayout (true, false);
 }
+System.out.println (":::" + ( new java.util.Date ().getTime () - d.getTime ()));
+d =  new java.util.Date ();
 }, "Array");
 $_M (cla$$, "markLayout", 
 function (changed, all) {
@@ -1945,69 +4190,6 @@ for (var i = 0; i < children.length; i++) {
 children[i].markLayout (changed, all);
 }
 }}, "Boolean,Boolean");
-$_M (cla$$, "updateLayout", 
-function (resize, all) {
-if (this.isLayoutDeferred ()) return ;
-if ((this.state & $wt.widgets.Widget.LAYOUT_NEEDED) != 0) {
-var changed = (this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0;
-this.state &= ~($wt.widgets.Widget.LAYOUT_NEEDED | $wt.widgets.Widget.LAYOUT_CHANGED);
-if (resize) this.setResizeChildren (false);
-this.$layout.layout (this, changed);
-if (resize) this.setResizeChildren (true);
-}if (all) {
-var children = this._getChildren ();
-for (var i = 0; i < children.length; i++) {
-children[i].updateLayout (resize, all);
-}
-}}, "Boolean,Boolean");
-$_M (cla$$, "isLayoutDeferred", 
-function () {
-return this.layoutCount > 0 || this.parent.isLayoutDeferred ();
-});
-$_M (cla$$, "setLayoutDeferred", 
-function (defer) {
-if (!defer) {
-if (--this.layoutCount == 0) {
-if (!this.isLayoutDeferred ()) this.updateLayout (true, true);
-}} else {
-this.layoutCount++;
-}}, "Boolean");
-$_M (cla$$, "getLayoutDeferred", 
-function () {
-return this.layoutCount > 0;
-});
-$_M (cla$$, "setResizeChildren", 
-function (resize) {
-}, "Boolean");
-$_V (cla$$, "createWidget", 
-function () {
-this.register ();
-this.handle = document.createElement ("DIV");
-this.handle.className = "composite-default";
-if ((this.style & $WT.BORDER) != 0) {
-this.handle.className += " composite-border";
-}if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
-$_M (cla$$, "computeSize", 
-function (wHint, hHint, changed) {
-var size;
-if (this.$layout != null) {
-if (wHint == $WT.DEFAULT || hHint == $WT.DEFAULT) {
-changed = new Boolean (changed | ((this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0));
-this.state &= ($t$ = ~ $wt.widgets.Widget.LAYOUT_CHANGED, $wt.widgets.Widget.prototype.LAYOUT_CHANGED = $wt.widgets.Widget.LAYOUT_CHANGED, $t$);
-size = this.$layout.computeSize (this, wHint, hHint, changed);
-} else {
-size =  new $wt.graphics.Point (wHint, hHint);
-}} else {
-size = this.minimumSize (wHint, hHint, changed);
-}if (size.x == 0) size.x = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (size.y == 0) size.y = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) size.x = wHint;
-if (hHint != $WT.DEFAULT) size.y = hHint;
-var trim = this.computeTrim (0, 0, size.x, size.y);
-return  new $wt.graphics.Point (trim.width + 16, trim.height);
-}, "Number,Number,Boolean");
 $_M (cla$$, "minimumSize", 
 function (wHint, hHint, changed) {
 var children = this._getChildren ();
@@ -2020,33 +4202,213 @@ height = Math.max (height, rect.y + rect.height);
 }
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_M (cla$$, "setSize", 
-function (width, height) {
-$_U (this, $wt.widgets.Composite, "setSize", [width, height]);
-if (this.$layout != null) {
-this.layout ();
-}}, "Number,Number");
+$_M (cla$$, "releaseChildren", 
+function () {
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (!child.isDisposed ()) child.releaseResources ();
+}
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+this.releaseChildren ();
+$_U (this, $wt.widgets.Composite, "releaseWidget", []);
+if ((this.state & $wt.widgets.Widget.CANVAS) != 0 && (this.style & 16777216) != 0) {
+}this.$layout = null;
+this.tabList = null;
+this.lpwp = null;
+});
+$_M (cla$$, "removeControl", 
+function (control) {
+this.fixTabList (control);
+this.fixChildrenList (control);
+this.resizeChildren ();
+}, "$wt.widgets.Control");
+$_M (cla$$, "resizeChildren", 
+function () {
+if (this.lpwp == null) return ;
+do {
+var currentLpwp = this.lpwp;
+this.lpwp = null;
+if (!this.resizeChildren (true, currentLpwp)) {
+this.resizeChildren (false, currentLpwp);
+}} while (this.lpwp != null);
+});
+$_M (cla$$, "resizeChildren", 
+function (defer, pwp) {
+if (pwp == null) return true;
+var hdwp = 0;
+if (defer) {
+if (hdwp == 0) return false;
+}for (var i = 0; i < pwp.length; i++) {
+var wp = pwp[i];
+if (wp != null) {
+if (defer) {
+if (hdwp == 0) return false;
+} else {
+this.SetWindowPos (wp.hwnd, null, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
+}}}
+return true;
+}, "Boolean,Array");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.Composite, "setBounds", [x, y, width, height]);
-this.layout ();
 }, "Number,Number,Number,Number");
+$_M (cla$$, "setSize", 
+function (width, height) {
+$_U (this, $wt.widgets.Composite, "setSize", [width, height]);
+}, "Number,Number");
+$_M (cla$$, "setFixedFocus", 
+function () {
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.setRadioFocus ()) return true;
+}
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.setFixedFocus ()) return true;
+}
+return $_U (this, $wt.widgets.Composite, "setFixedFocus", []);
+});
+$_M (cla$$, "setFocus", 
+function () {
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.setRadioFocus ()) return true;
+}
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.setFocus ()) return true;
+}
+return $_U (this, $wt.widgets.Composite, "setFocus", []);
+});
+$_M (cla$$, "setLayout", 
+function (layout) {
+this.$layout = layout;
+}, "$wt.widgets.Layout");
+$_M (cla$$, "setLayoutDeferred", 
+function (defer) {
+if (!defer) {
+if (--this.layoutCount == 0) {
+if (!this.isLayoutDeferred ()) this.updateLayout (true, true);
+}} else {
+this.layoutCount++;
+}}, "Boolean");
+$_M (cla$$, "setTabList", 
+function (tabList) {
+if (tabList != null) {
+for (var i = 0; i < tabList.length; i++) {
+var control = tabList[i];
+}
+var newList =  new Array (tabList.length);
+System.arraycopy (tabList, 0, newList, 0, tabList.length);
+tabList = newList;
+}this.tabList = tabList;
+}, "Array");
+$_M (cla$$, "setResizeChildren", 
+function (resize) {
+if (resize) {
+this.resizeChildren ();
+} else {
+var count = this.getChildrenCount ();
+if (count > 1 && this.lpwp == null) {
+this.lpwp =  new Array (count);
+}}}, "Boolean");
+$_V (cla$$, "setTabGroupFocus", 
+function () {
+if (this.isTabItem ()) return this.setTabItemFocus ();
+var takeFocus = (this.style & 524288) == 0;
+if ((this.state & $wt.widgets.Widget.CANVAS) != 0) {
+takeFocus = this.hooksKeys ();
+if ((this.style & 16777216) != 0) takeFocus = true;
+}if (takeFocus && this.setTabItemFocus ()) return true;
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.isTabItem () && child.setRadioFocus ()) return true;
+}
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (child.isTabItem () && child.setTabItemFocus ()) return true;
+}
+return false;
+});
+$_M (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+if ((this.style & 2048) != 0) {
+cx -= 4;
+cy -= 4;
+}return $_U (this, $wt.widgets.Composite, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,Number,Number,Number,Number,Number");
+$_M (cla$$, "updateLayout", 
+function (resize, all) {
+if (this.isLayoutDeferred ()) return ;
+var d =  new java.util.Date ();
+if ((this.state & $wt.widgets.Widget.LAYOUT_NEEDED) != 0) {
+var changed = (this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0;
+this.state &= ~($wt.widgets.Widget.LAYOUT_NEEDED | $wt.widgets.Widget.LAYOUT_CHANGED);
+if (resize) this.setResizeChildren (false);
+d =  new java.util.Date ();
+this.$layout.layout (this, changed);
+System.out.println (":===:" + ( new java.util.Date ().getTime () - d.getTime ()));
+if (resize) this.setResizeChildren (true);
+}if (all) {
+var children = this._getChildren ();
+for (var i = 0; i < children.length; i++) {
+children[i].updateLayout (resize, all);
+}
+}}, "Boolean,Boolean");
 cla$$ = $_C (function () {
+this.caret = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Canvas", $wt.widgets.Composite);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Canvas, [parent, style]);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "clearArea", 
+function (x, y, width, height) {
+}, "Number,Number,Number,Number");
+$_M (cla$$, "getCaret", 
+function () {
+return this.caret;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+if (this.caret != null) this.caret.releaseResources ();
+this.caret = null;
+$_U (this, $wt.widgets.Canvas, "releaseWidget", []);
+});
+$_M (cla$$, "scroll", 
+function (destX, destY, x, y, width, height, all) {
+this.forceResize ();
+}, "Number,Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "setCaret", 
+function (caret) {
+var newCaret = caret;
+this.caret = newCaret;
+}, "$wt.widgets.Caret");
+$_M (cla$$, "setFont", 
+function (font) {
+if (this.caret != null) this.caret.setFont (font);
+$_U (this, $wt.widgets.Canvas, "setFont", [font]);
+}, "$wt.graphics.Font");
 cla$$ = $_C (function () {
 this.image = null;
 this.smallImage = null;
 this.largeImage = null;
 this.images = null;
-this.defaultButton = null;
-this.saveDefault = null;
 this.menuBar = null;
 this.menus = null;
+this.savedFocus = null;
+this.defaultButton = null;
+this.saveDefault = null;
+this.moved = false;
+this.resized = false;
+this.opened = false;
 this.shellTitle = null;
 this.frameHandle = null;
 this.modalHandle = null;
@@ -2054,22 +4416,83 @@ this.oldBounds = null;
 this.shellMin = null;
 this.shellMax = null;
 this.shellIcon = null;
+this.titleBar = null;
+this.shellClose = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Decorations", $wt.widgets.Canvas);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Decorations, [parent, $wt.widgets.Decorations.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "addMenu", 
+function (menu) {
+if (this.menus == null) this.menus =  new Array (4);
+for (var i = 0; i < this.menus.length; i++) {
+if (this.menus[i] == null) {
+this.menus[i] = menu;
+return ;
+}}
+var newMenus =  new Array (this.menus.length + 4);
+newMenus[this.menus.length] = menu;
+System.arraycopy (this.menus, 0, newMenus, 0, this.menus.length);
+this.menus = newMenus;
+}, "$wt.widgets.Menu");
+$_M (cla$$, "bringToTop", 
+function () {
+this.frameHandle.style.visibility = "visible";
+if (window.currentTopZIndex == null) {
+this.frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+} else {
+this.frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+}});
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-if ((style & $WT.NO_TRIM) != 0) {
-style &= ~($WT.CLOSE | $WT.TITLE | $WT.MIN | $WT.MAX | $WT.RESIZE | $WT.BORDER);
-}if ((style & ($WT.MENU | $WT.MIN | $WT.MAX | $WT.CLOSE)) != 0) {
-style |= $WT.TITLE;
-}if ((style & ($WT.MIN | $WT.MAX)) != 0) style |= $WT.CLOSE;
-if ((style & $WT.CLOSE) != 0) style |= $WT.TITLE;
+if ((style & 8) != 0) {
+style &= ~(64 | 32 | 128 | 1024 | 16 | 2048);
+}if ((style & (64 | 128 | 1024 | 64)) != 0) {
+style |= 32;
+}if ((style & (128 | 1024)) != 0) style |= 64;
+if ((style & 64) != 0) style |= 32;
 return style;
 }, "Number");
+$_V (cla$$, "checkBorder", 
+function () {
+});
+$_V (cla$$, "checkOpened", 
+function () {
+if (!this.opened) this.resized = false;
+});
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "closeWidget", 
+function () {
+var event =  new $wt.widgets.Event ();
+event.doit = true;
+this.sendEvent (21, event);
+if (event.doit && !this.isDisposed ()) this.dispose ();
+});
+$_V (cla$$, "computeTabGroup", 
+function () {
+return this;
+});
+$_V (cla$$, "computeTabRoot", 
+function () {
+return this;
+});
+$_V (cla$$, "computeTrim", 
+function (x, y, width, height) {
+if ((this.style & 8) != 0) {
+return  new $wt.graphics.Rectangle (x, y, width, height + 4);
+}return  new $wt.graphics.Rectangle (x - 4, y - 24, width + 8, height + 20 + 8);
+}, "Number,Number,Number,Number");
+$_M (cla$$, "createAccelerators", 
+function () {
+});
+$_M (cla$$, "createIcon", 
+function (image) {
+return null;
+}, "$wt.graphics.Image");
 $_M (cla$$, "createCSSDiv", 
 ($fz = function (css) {
 var el = document.createElement ("DIV");
@@ -2084,10 +4507,9 @@ for (var i = 0; i < handles.length; i++) {
 this.createCSSDiv (handles[i]);
 }
 }, $fz.isPrivate = true, $fz));
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
-if ((this.style & $WT.APPLICATION_MODAL) != 0 || (this.style & $WT.PRIMARY_MODAL) != 0) {
+if ((this.style & 65536) != 0 || (this.style & 32768) != 0) {
 this.display.timerExec (25, (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$1")) {
 Clazz.pu$h ();
@@ -2106,9 +4528,78 @@ return $_N ($wt.widgets.Decorations$1, innerThis, finalVars);
 }this.frameHandle = document.createElement ("DIV");
 var fHandleStyle = this.frameHandle.style;
 fHandleStyle.position = "absolute";
-fHandleStyle.visibility = "hidden";
+this.nextWindowLocation ();
+fHandleStyle.left = window.defaultWindowLeft + "px";
+fHandleStyle.top = window.defaultWindowTop + "px";
+fHandleStyle.width = 768 + "px";
+fHandleStyle.height = 557 + "px";
+fHandleStyle.backgroundColor = "menu";
+if ((this.style & 8) == 0) {
+fHandleStyle.borderColor = "black";
+fHandleStyle.borderWidth = "1px";
+fHandleStyle.borderStyle = "solid";
+} else {
+fHandleStyle.borderStyle = "none";
+}document.body.appendChild (this.frameHandle);
+if ((this.style & 8) == 0 && (this.style & 16) != 0) {
+this.createResizeHandles ();
+}if ((this.style & 8) == 0) {
+this.setSystemMenu ();
+}this.handle = this.createCSSDiv ("shell-content");
+if ((this.style & 8) != 0) {
+this.handle.style.top = "0px";
+} else {
+$wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
+$wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
+var dnd =  new $wt.internal.dnd.DragAndDrop ();
+dnd.addDragListener ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$2")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$2", $wt.internal.dnd.ShellFrameDND);
+$_M (cla$$, "isDraggable", 
+function (e) {
+if ($_U (this, $wt.widgets.Decorations$2, "isDraggable", [e])) {
+var cssName = e.target.className;
+if (cssName.indexOf ("shelltitle") != -1 && this.callbacks["$wt.widgets.Decorations"].oldBounds != null) {
+return false;
+}return true;
+} else {
+return false;
+}}, "$wt.internal.dnd.HTMLEventWrapper");
+$_V (cla$$, "updateShellBounds", 
+function (x, y, width, height) {
+this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$2$3")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$2$3", null, Runnable);
+$_V (cla$$, "run", 
+function () {
+var size = this.callbacks["$wt.widgets.Decorations"].getSize ();
+System.out.println (size);
+this.callbacks["$wt.widgets.Decorations"].layout ();
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$2$3, innerThis, finalVars);
+}) (this, null));
+return true;
+}, "Number,Number,Number,Number");
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$2, innerThis, finalVars);
+}) (this, null));
+dnd.bind (this.frameHandle);
+}});
+$_M (cla$$, "nextWindowLocation", 
+($fz = function () {
 if (window.defaultWindowLeft == null) {
-window.defaultWindowLeft = "32";
+window.defaultWindowLeft = "332";
 } else {
 var num = Integer.parseInt ("" + window.defaultWindowLeft);
 num += 32;
@@ -2124,241 +4615,14 @@ if (num > document.body.clientHeight) {
 num = 32;
 }window.defaultWindowTop = "" + num;
 }if (window.defaultWindowWidth == null) {
-window.defaultWindowWidth = "640";
+window.defaultWindowWidth = "768";
 }if (window.defaultWindowHeight == null) {
-window.defaultWindowHeight = "480";
-}fHandleStyle.left = window.defaultWindowLeft + "px";
-fHandleStyle.top = window.defaultWindowTop + "px";
-fHandleStyle.width = 640 + "px";
-fHandleStyle.height = 480 + "px";
-fHandleStyle.backgroundColor = "menu";
-if ((this.style & $WT.NO_TRIM) == 0) {
-fHandleStyle.borderColor = "black";
-fHandleStyle.borderWidth = "1px";
-fHandleStyle.borderStyle = "solid";
-} else {
-fHandleStyle.borderStyle = "none";
-}document.body.appendChild (this.frameHandle);
-if ((this.style & $WT.NO_TRIM) == 0 && (this.style & $WT.RESIZE) != 0) {
-this.createResizeHandles ();
-}if ((this.style & $WT.NO_TRIM) == 0) {
-var titleBar = document.createElement ("DIV");
-titleBar.className = "shell-title-bar";
-if ((this.style & $WT.BORDER) == 0 || (this.style & $WT.RESIZE) != 0) {
-this.shellIcon = document.createElement ("DIV");
-this.shellIcon.className = "shellicon";
-titleBar.appendChild (this.shellIcon);
-this.shellIcon.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$2")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$2", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-var shell =  new $wt.widgets.Shell (this.callbacks["$wt.widgets.Decorations"].display, $WT.SHELL_TRIM | $WT.APPLICATION_MODAL);
-shell.setLayout ( new $wt.layout.FillLayout ());
-shell.setText ("Export HTML Source");
-shell.setSize (480, 280);
-var composite =  new $wt.widgets.Composite (shell, $WT.NONE);
-composite.setLayout ( new $wt.layout.GridLayout ());
-var text =  new $wt.widgets.Text (composite, $WT.BORDER | $WT.MULTI | $WT.READ_ONLY);
-text.setLayoutData ( new $wt.layout.GridData ($wt.layout.GridData.FILL_BOTH));
-var size = shell.getSize ();
-var html = "<div class=\"shell-content\" style=\"" + "width:" + size.x + "px;height:" + size.y + "px;\">" + this.callbacks["$wt.widgets.Decorations"].handle.innerHTML + "</div>";
-text.setText (html);
- new $wt.widgets.Label (composite, $WT.HORIZONTAL | $WT.SEPARATOR).setLayoutData ( new $wt.layout.GridData ($wt.layout.GridData.FILL_HORIZONTAL));
-var button =  new $wt.widgets.Button (composite, $WT.PUSH);
-button.setText ("OK");
-var gridData =  new $wt.layout.GridData ($wt.layout.GridData.HORIZONTAL_ALIGN_END);
-gridData.widthHint = 80;
-button.setLayoutData (gridData);
-button.addSelectionListener ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$2$3")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$2$3", $wt.events.SelectionAdapter);
-$_V (cla$$, "widgetSelected", 
-function (e) {
-this.$finals.shell.close ();
-}, "$wt.events.SelectionEvent");
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$2$3, innerThis, finalVars);
-}) (this, $_F ("shell", shell)));
-shell.open ();
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$2, innerThis, finalVars);
-}) (this, null));
-}var shellButtons = document.createElement ("DIV");
-shellButtons.className = "shellbuttons";
-titleBar.appendChild (shellButtons);
-if (this.minable ()) {
-this.shellMin = document.createElement ("DIV");
-this.shellMin.className = "shellmin";
-if ((this.style & $WT.MAX) == 0) {
-this.shellMin.className += " shell-min-zero";
-}shellButtons.appendChild (this.shellMin);
-this.shellMin.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$4")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$4", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-$wt.internal.ResizeSystem.unregister (this.callbacks["$wt.widgets.Decorations"]);
-this.callbacks["$wt.widgets.Decorations"].setMinimized (true);
-this.callbacks["$wt.widgets.Decorations"].shellMax.className = "shellnormal";
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$4, innerThis, finalVars);
-}) (this, null));
-}if ((this.style & $WT.MAX) != 0) {
-this.shellMax = document.createElement ("DIV");
-this.shellMax.className = "shellmax";
-if (!this.minable ()) {
-this.shellMax.className += " shell-max-zero";
-}shellButtons.appendChild (this.shellMax);
-this.shellMax.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$5")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$5", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-this.callbacks["$wt.widgets.Decorations"].toggleMaximize ();
-this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$5$6")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$5$6", null, Runnable);
-$_V (cla$$, "run", 
-function () {
-this.callbacks["$wt.widgets.Decorations"].layout ();
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$5$6, innerThis, finalVars);
-}) (this, null));
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$5, innerThis, finalVars);
-}) (this, null));
-}if ((this.style & $WT.CLOSE) != 0) {
-var shellClose = document.createElement ("DIV");
-shellClose.className = "shellclose";
-if (!this.minable () && (this.style & $WT.MAX) == 0) {
-shellClose.className += " shell-close-zero";
-} else if (!this.minable () || (this.style & $WT.MAX) == 0) {
-shellClose.className += " shell-close-one";
-}shellButtons.appendChild (shellClose);
-shellClose.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$7")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$7", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-if ($_O (this.callbacks["$wt.widgets.Decorations"], $wt.widgets.Shell)) {
-var shell = this.callbacks["$wt.widgets.Decorations"];
-shell.close ();
-}});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$7, innerThis, finalVars);
-}) (this, null));
-}this.shellTitle = document.createElement ("DIV");
-this.shellTitle.className = "shelltitle";
-titleBar.appendChild (this.shellTitle);
-if ((this.style & $WT.MAX) != 0) {
-titleBar.ondblclick = this.shellMax.onclick;
-}this.shellTitle.appendChild (document.createTextNode ("-"));
-this.frameHandle.appendChild (titleBar);
-titleBar.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$8")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$8", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-var fHandleStyle = this.callbacks["$wt.widgets.Decorations"].frameHandle.style;
-if (fHandleStyle.zIndex != window.currentTopZIndex) {
-fHandleStyle.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
-}});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$8, innerThis, finalVars);
-}) (this, null));
-if (window.currentTopZIndex == null) {
-fHandleStyle.zIndex = window.currentTopZIndex = "1000";
-} else {
-fHandleStyle.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
-}}this.handle = this.createCSSDiv ("shell-content");
-if ((this.style & $WT.NO_TRIM) != 0) {
-this.handle.style.top = "0px";
-} else {
-$wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
-$wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
-var dnd =  new $wt.internal.dnd.DragAndDrop ();
-dnd.addDragListener ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$9")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$9", $wt.internal.dnd.ShellFrameDND);
-$_M (cla$$, "isDraggable", 
-function (e) {
-if ($_U (this, $wt.widgets.Decorations$9, "isDraggable", [e])) {
-var cssName = e.target.className;
-if (cssName.indexOf ("shelltitle") != -1 && this.callbacks["$wt.widgets.Decorations"].oldBounds != null) {
-return false;
-}return true;
-} else {
-return false;
-}}, "$wt.internal.dnd.HTMLEventWrapper");
-$_V (cla$$, "updateShellBounds", 
-function (x, y, width, height) {
-this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Decorations$9$10")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Decorations$9$10", null, Runnable);
-$_V (cla$$, "run", 
-function () {
-this.callbacks["$wt.widgets.Decorations"].layout ();
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$9$10, innerThis, finalVars);
-}) (this, null));
-return true;
-}, "Number,Number,Number,Number");
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Decorations$9, innerThis, finalVars);
-}) (this, null));
-dnd.bind (this.frameHandle);
-}});
+window.defaultWindowHeight = "557";
+}this.left = Integer.parseInt (window.defaultWindowLeft);
+this.top = Integer.parseInt (window.defaultWindowTop);
+this.width = Integer.parseInt (window.defaultWindowWidth);
+this.height = Integer.parseInt (window.defaultWindowHeight);
+}, $fz.isPrivate = true, $fz));
 $_M (cla$$, "addModalLayer", 
 function () {
 this.modalHandle = document.createElement ("DIV");
@@ -2366,12 +4630,109 @@ this.modalHandle.className = "shell-modal-block";
 this.modalHandle.style.zIndex = "" + (Integer.parseInt ("" + this.frameHandle.style.zIndex) - 1);
 document.body.insertBefore (this.modalHandle, this.frameHandle);
 });
+$_M (cla$$, "exportHTMLSource", 
+function () {
+var shell =  new $wt.widgets.Shell (this.display, 1264 | 65536);
+shell.setLayout ( new $wt.layout.FillLayout ());
+shell.setText ("Export HTML Source");
+var innerHTML = this.handle.innerHTML;
+var length = innerHTML.length;
+if (length < 200) {
+length = 200;
+} else if (length > 1800) {
+length = 1800;
+}length = Math.floor ((length - 200) / 400);
+shell.setSize (480 + 80 * length, 280 + 50 * length);
+var composite =  new $wt.widgets.Composite (shell, 0);
+composite.setLayout ( new $wt.layout.GridLayout ());
+var text =  new $wt.widgets.Text (composite, 2048 | 2 | 8);
+text.setLayoutData ( new $wt.layout.GridData (1808));
+var size = shell.getSize ();
+var html = "<div class=\"shell-content\" style=\"" + "width:" + size.x + "px;height:" + size.y + "px;\">" + innerHTML + "</div>";
+text.setText (html);
+ new $wt.widgets.Label (composite, 256 | 2).setLayoutData ( new $wt.layout.GridData (768));
+var button =  new $wt.widgets.Button (composite, 8);
+button.setText ("OK");
+var gridData =  new $wt.layout.GridData (128);
+gridData.widthHint = 80;
+button.setLayoutData (gridData);
+button.addSelectionListener ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$4")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$4", $wt.events.SelectionAdapter);
+$_V (cla$$, "widgetSelected", 
+function (e) {
+this.$finals.shell.close ();
+}, "$wt.events.SelectionEvent");
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$4, innerThis, finalVars);
+}) (this, $_F ("shell", shell)));
+shell.open ();
+});
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.Decorations, "createWidget", []);
+});
+$_M (cla$$, "destroyAccelerators", 
+function () {
+});
+$_M (cla$$, "dispose", 
+function () {
+if (this.isDisposed ()) return ;
+if (!($_O (this, $wt.widgets.Shell))) {
+this.setVisible (false);
+if (!this.traverseDecorations (false)) {
+var shell = this.getShell ();
+shell.setFocus ();
+}}$_U (this, $wt.widgets.Decorations, "dispose", []);
+});
+$_M (cla$$, "findMenu", 
+function (hMenu) {
+if (this.menus == null) return null;
+for (var i = 0; i < this.menus.length; i++) {
+var menu = this.menus[i];
+if (menu != null && hMenu == menu.handle) return menu;
+}
+return null;
+}, "$wt.internal.xhtml.Element");
+$_M (cla$$, "fixDecorations", 
+function (newDecorations, control, menus) {
+if (this == newDecorations) return ;
+if (control == this.savedFocus) this.savedFocus = null;
+if (control == this.defaultButton) this.defaultButton = null;
+if (control == this.saveDefault) this.saveDefault = null;
+if (menus == null) return ;
+var menu = control.menu;
+if (menu != null) {
+var index = 0;
+while (index < menus.length) {
+if (menus[index] == menu) {
+control.setMenu (null);
+return ;
+}index++;
+}
+menu.fixMenus (newDecorations);
+this.destroyAccelerators ();
+newDecorations.destroyAccelerators ();
+}}, "$wt.widgets.Decorations,$wt.widgets.Control,Array");
+$_M (cla$$, "getBounds", 
+function () {
+return $_U (this, $wt.widgets.Decorations, "getBounds", []);
+});
 $_M (cla$$, "minable", 
 ($fz = function () {
-return (this.style & $WT.MIN) != 0 && ((this.style & $WT.BORDER) == 0 || (this.style & $WT.RESIZE) != 0);
+return (this.style & 128) != 0 && ((this.style & 2048) == 0 || (this.style & 16) != 0);
 }, $fz.isPrivate = true, $fz));
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
+this.left = x;
+this.top = y;
+this.width = width;
+this.height = height;
 var fHandleStyle = this.frameHandle.style;
 fHandleStyle.left = x + "px";
 fHandleStyle.top = y + "px";
@@ -2384,24 +4745,33 @@ $wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
 }, "Number,Number,Number,Number");
 $_M (cla$$, "setSize", 
 function (width, height) {
-this.frameHandle.style.width = (width + 8) + "px";
-this.frameHandle.style.height = (height + 4) + "px";
+this.frameHandle.style.width = width + "px";
+this.frameHandle.style.height = height + "px";
+this.width = width;
+this.height = height;
 $wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
 $wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
 if (this.$layout != null) {
 this.layout ();
 }}, "Number,Number");
-$_V (cla$$, "computeTrim", 
-function (x, y, width, height) {
-if ((this.style & $WT.NO_TRIM) != 0) {
-return  new $wt.graphics.Rectangle (x, y, width, height + 4);
-}return  new $wt.graphics.Rectangle (x, y, width, height + 26);
-}, "Number,Number,Number,Number");
-$_M (cla$$, "getSize", 
+$_V (cla$$, "getClientArea", 
 function () {
-var size = $_U (this, $wt.widgets.Decorations, "getSize", []);
-size.y += 26;
-return size;
+return  new $wt.graphics.Rectangle (0, 0, this.width - 8, this.height - 20 - 8);
+});
+$_M (cla$$, "getDefaultButton", 
+function () {
+return this.defaultButton;
+});
+$_M (cla$$, "getImage", 
+function () {
+return this.image;
+});
+$_M (cla$$, "getImages", 
+function () {
+if (this.images == null) return  new Array (0);
+var result =  new Array (this.images.length);
+System.arraycopy (this.images, 0, result, 0, this.images.length);
+return result;
 });
 $_V (cla$$, "getLocation", 
 function () {
@@ -2415,39 +4785,172 @@ if (top != null && top.length != 0) {
 y = Integer.parseInt (top);
 }return  new $wt.graphics.Point (x, y);
 });
-$_M (cla$$, "setText", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.shellTitle != null && this.shellTitle.childNodes != null) {
-for (var i = this.shellTitle.childNodes.length - 1; i >= 0; i--) {
-if (this.shellTitle.childNodes[i] != null) {
-this.shellTitle.removeChild (this.shellTitle.childNodes[i]);
-}}
-this.shellTitle.appendChild (document.createTextNode (string));
-}}, "String");
-$_M (cla$$, "bringToTop", 
+$_M (cla$$, "getMaximized", 
 function () {
-this.frameHandle.style.visibility = "visible";
-if (window.currentTopZIndex == null) {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "1000";
-} else {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+return false;
+});
+$_M (cla$$, "getMenuBar", 
+function () {
+return this.menuBar;
+});
+$_M (cla$$, "getMinimized", 
+function () {
+return false;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
+$_M (cla$$, "getSize", 
+function () {
+var size = $_U (this, $wt.widgets.Decorations, "getSize", []);
+size.y += 26;
+return size;
+});
+$_M (cla$$, "getText", 
+function () {
+return null;
+});
+$_V (cla$$, "isReparentable", 
+function () {
+return false;
+});
+$_V (cla$$, "isTabGroup", 
+function () {
+return true;
+});
+$_V (cla$$, "isTabItem", 
+function () {
+return false;
+});
+$_V (cla$$, "menuShell", 
+function () {
+return this;
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+if (this.shellMin != null) {
+BrowserNative.releaseHandle (this.shellMin);
+this.shellMin = null;
+}if (this.shellMax != null) {
+BrowserNative.releaseHandle (this.shellMax);
+this.shellMax = null;
+}if (this.shellClose != null) {
+BrowserNative.releaseHandle (this.shellClose);
+this.shellClose = null;
+}if (this.shellIcon != null) {
+BrowserNative.releaseHandle (this.shellIcon);
+this.shellIcon = null;
+}if (this.shellTitle != null) {
+BrowserNative.releaseHandle (this.shellTitle);
+this.shellTitle = null;
+}if (this.titleBar != null) {
+BrowserNative.releaseHandle (this.titleBar);
+this.titleBar = null;
+}$_U (this, $wt.widgets.Decorations, "releaseHandle", []);
+if (this.frameHandle != null) {
+BrowserNative.releaseHandle (this.frameHandle);
+this.frameHandle = null;
+}if (this.modalHandle != null) {
+BrowserNative.releaseHandle (this.modalHandle);
+this.modalHandle = null;
 }});
-$_M (cla$$, "setMinimized", 
-function (minimized) {
-if (minimized && this.handle != null) {
-if (this.oldBounds == null) {
-this.oldBounds = this.getBounds ();
-this.oldBounds.width -= 2;
-}var width = this.oldBounds.width;
-if (width < 200) {
-width = 200;
-}this.setBounds (-1, document.body.clientHeight - 26, width, 0);
-}if (minimized) {
-$wt.internal.ResizeSystem.register (this, $WT.MIN);
+$_M (cla$$, "releaseWidget", 
+function () {
+if (this.menuBar != null) this.menuBar.releaseResources ();
+this.menuBar = null;
+if (this.menus != null) {
+do {
+var index = 0;
+while (index < this.menus.length) {
+var menu = this.menus[index];
+if (menu != null && !menu.isDisposed ()) {
+while (menu.getParentMenu () != null) {
+menu = menu.getParentMenu ();
+}
+menu.dispose ();
+break;
+}index++;
+}
+if (index == this.menus.length) break;
+} while (true);
+}this.menus = null;
+$_U (this, $wt.widgets.Decorations, "releaseWidget", []);
+if (this.smallImage != null) this.smallImage.dispose ();
+if (this.largeImage != null) this.largeImage.dispose ();
+this.smallImage = this.largeImage = this.image = null;
+this.images = null;
+this.savedFocus = null;
+this.defaultButton = this.saveDefault = null;
+});
+$_M (cla$$, "removeMenu", 
+function (menu) {
+if (this.menus == null) return ;
+for (var i = 0; i < this.menus.length; i++) {
+if (this.menus[i] == menu) {
+this.menus[i] = null;
+return ;
+}}
+}, "$wt.widgets.Menu");
+$_M (cla$$, "restoreFocus", 
+function () {
+if (this.display.ignoreRestoreFocus) return true;
+if (this.savedFocus != null && this.savedFocus.isDisposed ()) this.savedFocus = null;
+if (this.savedFocus != null && this.savedFocus.setSavedFocus ()) return true;
+return false;
+});
+$_M (cla$$, "saveFocus", 
+function () {
+});
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags, defer) {
+$_U (this, $wt.widgets.Decorations, "setBounds", [x, y, width, height, flags, defer]);
+}, "Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "setDefaultButton", 
+function (button) {
+this.setDefaultButton (button, true);
+}, "$wt.widgets.Button");
+$_M (cla$$, "setDefaultButton", 
+function (button, save) {
+if (button == null) {
+if (this.defaultButton == this.saveDefault) {
+if (save) this.saveDefault = null;
+return ;
+}} else {
+if ((button.style & 8) == 0) return ;
+if (button == this.defaultButton) return ;
+}if (this.defaultButton != null) {
+if (!this.defaultButton.isDisposed ()) this.defaultButton.setDefault (false);
+}if ((this.defaultButton = button) == null) this.defaultButton = this.saveDefault;
+if (this.defaultButton != null) {
+if (!this.defaultButton.isDisposed ()) this.defaultButton.setDefault (true);
+}if (save) this.saveDefault = this.defaultButton;
+if (this.saveDefault != null && this.saveDefault.isDisposed ()) this.saveDefault = null;
+}, "$wt.widgets.Button,Boolean");
+$_M (cla$$, "setImage", 
+function (image) {
+this.image = image;
+this.setImages (image, null);
+this.image = image;
+if (this.shellIcon != null && this.image.handle == null) {
+var iconStyle = this.shellIcon.style;
+if (image.url.toLowerCase ().endsWith (".png") && this.handle.style.filter != null) {
+iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 } else {
-$wt.internal.ResizeSystem.unregister (this);
-}}, "Boolean");
+iconStyle.backgroundRepeat = "no-repeat";
+iconStyle.backgroundPosition = "center center";
+iconStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+}}}, "$wt.graphics.Image");
+$_M (cla$$, "setImages", 
+function (image, images) {
+}, "$wt.graphics.Image,Array");
+$_M (cla$$, "setImages", 
+function (images) {
+for (var i = 0; i < images.length; i++) {
+}
+this.images = images;
+this.setImage (images[0]);
+}, "Array");
 $_M (cla$$, "setMaximized", 
 function (maximized) {
 if (maximized && this.handle != null) {
@@ -2463,109 +4966,10 @@ width = window.screen.availWidth;
 }this.setBounds (0 - 4, 0 - 4, width - 2, height + 4);
 document.body.scrollTop = 0;
 }if (maximized) {
-$wt.internal.ResizeSystem.register (this, $WT.MAX);
+$wt.internal.ResizeSystem.register (this, 1024);
 } else {
 $wt.internal.ResizeSystem.unregister (this);
 }}, "Boolean");
-$_M (cla$$, "addMenu", 
-function (menu) {
-if (this.menus == null) this.menus =  new Array (4);
-for (var i = 0; i < this.menus.length; i++) {
-if (this.menus[i] == null) {
-this.menus[i] = menu;
-return ;
-}}
-var newMenus =  new Array (this.menus.length + 4);
-newMenus[this.menus.length] = menu;
-System.arraycopy (this.menus, 0, newMenus, 0, this.menus.length);
-this.menus = newMenus;
-}, "$wt.widgets.Menu");
-$_V (cla$$, "menuShell", 
-function () {
-return this;
-});
-$_M (cla$$, "setDefaultButton", 
-function (button) {
-this.setDefaultButton (button, true);
-}, "$wt.widgets.Button");
-$_M (cla$$, "setDefaultButton", 
-function (button, save) {
-if (button == null) {
-if (this.defaultButton == this.saveDefault) {
-if (save) this.saveDefault = null;
-return ;
-}} else {
-if (button.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if ((button.style & $WT.PUSH) == 0) return ;
-if (button == this.defaultButton) return ;
-}if (this.defaultButton != null) {
-if (!this.defaultButton.isDisposed ()) this.defaultButton.setDefault (false);
-}if ((this.defaultButton = button) == null) this.defaultButton = this.saveDefault;
-if (this.defaultButton != null) {
-if (!this.defaultButton.isDisposed ()) this.defaultButton.setDefault (true);
-}if (save) this.saveDefault = this.defaultButton;
-if (this.saveDefault != null && this.saveDefault.isDisposed ()) this.saveDefault = null;
-}, "$wt.widgets.Button,Boolean");
-$_M (cla$$, "getDefaultButton", 
-function () {
-return this.defaultButton;
-});
-$_M (cla$$, "setMenuBar", 
-function (mb) {
-if (this.menuBar == this.menu) return ;
-if (this.menu != null) {
-if (this.menu.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if ((this.menu.style & $WT.BAR) == 0) this.error ($WT.ERROR_MENU_NOT_BAR);
-if (this.menu.parent != this) this.error ($WT.ERROR_INVALID_PARENT);
-}if (this.menu != null) this.display.removeBar (this.menu);
-this.menuBar = this.menu;
-}, "$wt.widgets.Menu");
-$_M (cla$$, "getMenuBar", 
-function () {
-return this.menuBar;
-});
-$_M (cla$$, "releaseHandle", 
-function () {
-System.out.println ("Decorations#release!");
-if (this.menus != null) {
-$wt.widgets.Display.releaseWidgetArray (this.menus);
-this.menus = null;
-}if (this.menuBar != null) {
-this.menuBar.releaseHandle ();
-this.menuBar = null;
-}this.defaultButton = null;
-this.saveDefault = null;
-this.shellMax = null;
-this.shellMin = null;
-this.shellTitle = null;
-$_U (this, $wt.widgets.Decorations, "releaseHandle", []);
-});
-$_M (cla$$, "getImage", 
-function () {
-return this.image;
-});
-$_M (cla$$, "setImage", 
-function (image) {
-if (image != null && image.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-this.image = image;
-if (this.shellIcon != null && this.image.handle == null) {
-var iconStyle = this.shellIcon.style;
-if (image.url.toLowerCase ().endsWith (".png") && this.handle.style.filter != null) {
-iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
-} else {
-iconStyle.backgroundRepeat = "no-repeat";
-iconStyle.backgroundPosition = "center center";
-iconStyle.backgroundImage = "url(\"" + this.image.url + "\")";
-}}}, "$wt.graphics.Image");
-$_M (cla$$, "setImages", 
-function (images) {
-if (images == null) this.error ($WT.ERROR_INVALID_ARGUMENT);
-for (var i = 0; i < images.length; i++) {
-if (images[i] == null || images[i].isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-}
-this.images = images;
-this.setImage (images[0]);
-}, "Array");
 $_M (cla$$, "toggleMaximize", 
 function () {
 if (this.oldBounds != null) {
@@ -2576,24 +4980,228 @@ $wt.internal.ResizeSystem.unregister (this);
 } else {
 this.setMaximized (true);
 this.shellMax.className = "shellnormal";
-}if ((this.style & $WT.MIN) == 0) {
+}if ((this.style & 128) == 0) {
 this.shellMax.className += " shell-max-zero";
 }});
+$_M (cla$$, "setMenuBar", 
+function (menu) {
+if (this.menuBar == menu) return ;
+if (menu != null) {
+}if (this.menuBar == menu) return ;
+if (menu != null) {
+}if (menu != null) this.display.removeBar (menu);
+this.menuBar = menu;
+}, "$wt.widgets.Menu");
+$_M (cla$$, "setMinimized", 
+function (minimized) {
+if (minimized && this.handle != null) {
+if (this.oldBounds == null) {
+this.oldBounds = this.getBounds ();
+this.oldBounds.width -= 2;
+}var width = this.oldBounds.width;
+if (width < 200) {
+width = 200;
+}this.setBounds (-1, document.body.clientHeight - 26, 120, 0);
+}if (minimized) {
+$wt.internal.ResizeSystem.register (this, 128);
+} else {
+$wt.internal.ResizeSystem.unregister (this);
+}}, "Boolean");
+$_M (cla$$, "setParent", 
+function () {
+});
+$_M (cla$$, "setSavedFocus", 
+function (control) {
+this.savedFocus = control;
+}, "$wt.widgets.Control");
+$_M (cla$$, "setSystemMenu", 
+function () {
+this.titleBar = document.createElement ("DIV");
+this.titleBar.className = "shell-title-bar";
+if ((this.style & 2048) == 0 || (this.style & 16) != 0) {
+this.shellIcon = document.createElement ("DIV");
+this.shellIcon.className = "shellicon";
+this.titleBar.appendChild (this.shellIcon);
+this.shellIcon.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$5")) {
+Clazz.pu$h ();
 cla$$ = $_C (function () {
-this.minWidth = $WT.DEFAULT;
-this.minHeight = $WT.DEFAULT;
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$5", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Decorations"].exportHTMLSource ();
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$5, innerThis, finalVars);
+}) (this, null));
+}var shellButtons = document.createElement ("DIV");
+shellButtons.className = "shellbuttons";
+this.titleBar.appendChild (shellButtons);
+if (this.minable ()) {
+this.shellMin = document.createElement ("DIV");
+this.shellMin.className = "shellmin";
+if ((this.style & 1024) == 0) {
+this.shellMin.className += " shell-min-zero";
+}shellButtons.appendChild (this.shellMin);
+this.shellMin.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$6")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$6", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+$wt.internal.ResizeSystem.unregister (this.callbacks["$wt.widgets.Decorations"]);
+this.callbacks["$wt.widgets.Decorations"].setMinimized (true);
+this.callbacks["$wt.widgets.Decorations"].shellMax.className = "shellnormal";
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$6, innerThis, finalVars);
+}) (this, null));
+}if ((this.style & 1024) != 0) {
+this.shellMax = document.createElement ("DIV");
+this.shellMax.className = "shellmax";
+if (!this.minable ()) {
+this.shellMax.className += " shell-max-zero";
+}shellButtons.appendChild (this.shellMax);
+this.shellMax.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$7")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$7", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Decorations"].toggleMaximize ();
+this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$7$8")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$7$8", null, Runnable);
+$_V (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Decorations"].layout ();
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$7$8, innerThis, finalVars);
+}) (this, null));
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$7, innerThis, finalVars);
+}) (this, null));
+}if ((this.style & 64) != 0) {
+this.shellClose = document.createElement ("DIV");
+this.shellClose.className = "shellclose";
+if (!this.minable () && (this.style & 1024) == 0) {
+this.shellClose.className += " shell-close-zero";
+} else if (!this.minable () || (this.style & 1024) == 0) {
+this.shellClose.className += " shell-close-one";
+}shellButtons.appendChild (this.shellClose);
+this.shellClose.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$9")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$9", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+if ($_O (this.callbacks["$wt.widgets.Decorations"], $wt.widgets.Shell)) {
+var shell = this.callbacks["$wt.widgets.Decorations"];
+shell.close ();
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$9, innerThis, finalVars);
+}) (this, null));
+}this.shellTitle = document.createElement ("DIV");
+this.shellTitle.className = "shelltitle";
+this.titleBar.appendChild (this.shellTitle);
+if ((this.style & 1024) != 0) {
+this.titleBar.ondblclick = this.shellMax.onclick;
+}this.shellTitle.appendChild (document.createTextNode ("-"));
+this.frameHandle.appendChild (this.titleBar);
+this.titleBar.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Decorations$10")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Decorations$10", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+var fHandleStyle = this.callbacks["$wt.widgets.Decorations"].frameHandle.style;
+if (fHandleStyle.zIndex != window.currentTopZIndex) {
+fHandleStyle.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Decorations$10, innerThis, finalVars);
+}) (this, null));
+if (window.currentTopZIndex == null) {
+this.frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+} else {
+this.frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+}});
+$_M (cla$$, "setText", 
+function (string) {
+if (this.shellTitle != null && this.shellTitle.childNodes != null) {
+for (var i = this.shellTitle.childNodes.length - 1; i >= 0; i--) {
+if (this.shellTitle.childNodes[i] != null) {
+this.shellTitle.removeChild (this.shellTitle.childNodes[i]);
+}}
+this.shellTitle.appendChild (document.createTextNode (string));
+}}, "String");
+$_V (cla$$, "setVisible", 
+function (visible) {
+if (this.drawCount != 0) {
+if (((this.state & $wt.widgets.Widget.HIDDEN) == 0) == visible) return ;
+} else {
+if (visible == (this.handle.style.visibility != "hidden")) return ;
+}if (visible) {
+this.sendEvent (22);
+if (this.isDisposed ()) return ;
+} else {
+if (this.isDisposed ()) return ;
+this.sendEvent (23);
+}}, "Boolean");
+$_M (cla$$, "traverseDecorations", 
+function (next) {
+var children = this.parent._getChildren ();
+var length = children.length;
+var index = 0;
+while (index < length) {
+if (children[index] == this) break;
+index++;
+}
+var start = index;
+var offset = (next) ? 1 : -1;
+while ((index = (index + offset + length) % length) != start) {
+var child = children[index];
+if (!child.isDisposed () && $_O (child, $wt.widgets.Decorations)) {
+if (child.setFocus ()) return true;
+}}
+return false;
+}, "Boolean");
+cla$$ = $_C (function () {
+this.activeMenu = null;
+this.minWidth = -1;
+this.minHeight = -1;
+this.showWithParent = false;
+this.lastActive = null;
+this.region = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Shell", $wt.widgets.Decorations);
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-style = $wt.widgets.Decorations.checkStyle (style);
-var mask = $WT.SYSTEM_MODAL | $WT.APPLICATION_MODAL | $WT.PRIMARY_MODAL;
-var bits = style & ~mask;
-if ((style & $WT.SYSTEM_MODAL) != 0) return bits | $WT.SYSTEM_MODAL;
-if ((style & $WT.APPLICATION_MODAL) != 0) return bits | $WT.APPLICATION_MODAL;
-if ((style & $WT.PRIMARY_MODAL) != 0) return bits | $WT.PRIMARY_MODAL;
-return bits;
-}, "Number");
 $_K (cla$$, 
 function () {
 this.construct (null);
@@ -2604,7 +5212,7 @@ this.construct (null, style);
 }, "Number");
 $_K (cla$$, 
 function (display) {
-this.construct (display, $WT.SHELL_TRIM);
+this.construct (display, 1264);
 }, "$wt.widgets.Display");
 $_K (cla$$, 
 function (display, style) {
@@ -2612,83 +5220,129 @@ this.construct (display, null, style, 0);
 }, "$wt.widgets.Display,Number");
 $_K (cla$$, 
 function (display, parent, style, handle) {
+$_R (this, $wt.widgets.Shell);
+this.checkSubclass ();
 if (display == null) display = $wt.widgets.Display.getCurrent ();
 if (display == null) display = $wt.widgets.Display.getDefault ();
-if (parent != null && parent.isDisposed ()) {
-this.error ($WT.ERROR_INVALID_ARGUMENT);
-}this.style = $wt.widgets.Shell.checkStyle (style);
+this.style = $wt.widgets.Shell.checkStyle (style);
 this.parent = parent;
 this.display = display;
 this.createWidget ();
 }, "$wt.widgets.Display,$wt.widgets.Shell,Number,Number");
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.DIALOG_TRIM);
+this.construct (parent, 2144);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 this.construct (parent != null ? parent.display : null, parent, style, 0);
 }, "$wt.widgets.Shell,Number");
+cla$$.win32_new = $_M (cla$$, "win32_new", 
+function (display, handle) {
+return  new $wt.widgets.Shell (display, null, 8, handle);
+}, "$wt.widgets.Display,Number");
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+style = $wt.widgets.Decorations.checkStyle (style);
+var mask = 131072 | 65536 | 32768;
+var bits = style & ~mask;
+if ((style & 131072) != 0) return bits | 131072;
+if ((style & 65536) != 0) return bits | 65536;
+if ((style & 32768) != 0) return bits | 32768;
+return bits;
+}, "Number");
 $_M (cla$$, "addShellListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Close, typedListener);
-this.addListener ($WT.Iconify, typedListener);
-this.addListener ($WT.Deiconify, typedListener);
-this.addListener ($WT.Activate, typedListener);
-this.addListener ($WT.Deactivate, typedListener);
+this.addListener (21, typedListener);
+this.addListener (19, typedListener);
+this.addListener (20, typedListener);
+this.addListener (26, typedListener);
+this.addListener (27, typedListener);
 }, "$wt.events.ShellListener");
-$_M (cla$$, "removeShellListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Close, listener);
-this.eventTable.unhook ($WT.Iconify, listener);
-this.eventTable.unhook ($WT.Deiconify, listener);
-this.eventTable.unhook ($WT.Activate, listener);
-this.eventTable.unhook ($WT.Deactivate, listener);
-}, "$wt.events.ShellListener");
-$_M (cla$$, "open", 
-function () {
-this.bringToTop ();
-if (this.isDisposed ()) return ;
-this.setVisible (true);
-if (this.isDisposed ()) return ;
-this.layout ();
-});
-$_V (cla$$, "isVisible", 
-function () {
-return this.getVisible ();
-});
 $_M (cla$$, "close", 
 function () {
 this.closeWidget ();
 });
-$_M (cla$$, "closeWidget", 
+$_M (cla$$, "createHandle", 
 function () {
-var event =  new $wt.widgets.Event ();
-this.sendEvent ($WT.Close, event);
-if (event.doit && !this.isDisposed ()) this.dispose ();
+$_U (this, $wt.widgets.Shell, "createHandle", []);
 });
 $_M (cla$$, "dispose", 
 function () {
-this.frameHandle.removeChild (this.shellTitle.parentNode);
-this.frameHandle.removeChild (this.handle);
-document.body.removeChild (this.frameHandle);
-if (this.modalHandle != null) {
-document.body.removeChild (this.modalHandle);
-this.modalHandle = null;
-}$_U (this, $wt.widgets.Shell, "dispose", []);
+$_U (this, $wt.widgets.Shell, "dispose", []);
 });
-$_V (cla$$, "isLayoutDeferred", 
+$_V (cla$$, "enableWidget", 
+function (enabled) {
+if (enabled) {
+this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
+} else {
+this.state |= $wt.widgets.Widget.DISABLED;
+}}, "Boolean");
+$_V (cla$$, "findCursor", 
 function () {
-return this.layoutCount > 0;
+return this.cursor;
+});
+$_V (cla$$, "findThemeControl", 
+function () {
+return null;
+});
+$_M (cla$$, "fixShell", 
+function (newShell, control) {
+if (this == newShell) return ;
+if (control == this.lastActive) this.setActiveControl (null);
+newShell.setToolTipText (control.handle, control.toolTipText);
+}, "$wt.widgets.Shell,$wt.widgets.Control");
+$_M (cla$$, "forceActive", 
+function () {
+if (!this.isVisible ()) return ;
+});
+$_V (cla$$, "forceResize", 
+function () {
+});
+$_M (cla$$, "getBounds", 
+function () {
+return $_U (this, $wt.widgets.Shell, "getBounds", []);
+});
+$_V (cla$$, "getEnabled", 
+function () {
+return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+});
+$_M (cla$$, "getImeInputMode", 
+function () {
+return 0;
+});
+$_M (cla$$, "getLocation", 
+function () {
+return $_U (this, $wt.widgets.Shell, "getLocation", []);
+});
+$_M (cla$$, "getMinimumSize", 
+function () {
+var width = Math.max (0, this.minWidth);
+var trim = 32 | 64 | 128 | 1024;
+if ((this.style & 8) == 0 && (this.style & trim) != 0) {
+width = Math.max (width, 80);
+}var height = Math.max (0, this.minHeight);
+if ((this.style & 8) == 0 && (this.style & trim) != 0) {
+if ((this.style & 16) != 0) {
+height = Math.max (height, 24);
+} else {
+height = Math.max (height, 24);
+}}if ((this.style & 8) != 0) {
+return  new $wt.graphics.Point (this.minWidth, Math.max (this.minHeight - 24, 0));
+}return  new $wt.graphics.Point (width, height);
+});
+$_M (cla$$, "getRegion", 
+function () {
+return this.region;
+});
+$_V (cla$$, "getShell", 
+function () {
+return this;
 });
 $_M (cla$$, "getSize", 
 function () {
-var size = $_U (this, $wt.widgets.Shell, "getSize", []);
-return  new $wt.graphics.Point (size.x, size.y);
+return $_U (this, $wt.widgets.Shell, "getSize", []);
 });
 $_M (cla$$, "getShells", 
 function () {
@@ -2713,37 +5367,155 @@ result[index++] = shells[i];
 }}
 return result;
 });
+$_V (cla$$, "isLayoutDeferred", 
+function () {
+return this.layoutCount > 0;
+});
 $_V (cla$$, "isEnabled", 
 function () {
 return this.getEnabled ();
 });
-$_M (cla$$, "getMinimumSize", 
+$_V (cla$$, "isVisible", 
 function () {
-var width = Math.max (0, this.minWidth);
-var trim = $WT.TITLE | $WT.CLOSE | $WT.MIN | $WT.MAX;
-if ((this.style & $WT.NO_TRIM) == 0 && (this.style & trim) != 0) {
-width = Math.max (width, 80);
-}var height = Math.max (0, this.minHeight);
-if ((this.style & $WT.NO_TRIM) == 0 && (this.style & trim) != 0) {
-if ((this.style & $WT.RESIZE) != 0) {
-height = Math.max (height, 24);
-} else {
-height = Math.max (height, 24);
-}}if ((this.style & $WT.NO_TRIM) != 0) {
-return  new $wt.graphics.Point (this.minWidth, Math.max (this.minHeight - 24, 0));
-}return  new $wt.graphics.Point (width, height);
+return this.getVisible ();
 });
-$_M (cla$$, "setToolTipText", 
-function (hwnd, text) {
-}, "Object,String");
+$_M (cla$$, "open", 
+function () {
+this.bringToTop ();
+if (this.isDisposed ()) return ;
+this.setVisible (true);
+if (this.isDisposed ()) return ;
+this.layout ();
+});
 $_M (cla$$, "setSize", 
 function (width, height) {
-if (width < 150) {
-width = 150;
-}if (height < 48) {
-height = 48;
+if (width < 113) {
+width = 113;
+}if (height < 28) {
+height = 28;
 }$_U (this, $wt.widgets.Shell, "setSize", [width, height]);
 }, "Number,Number");
+$_V (cla$$, "releaseChild", 
+function () {
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+$_U (this, $wt.widgets.Shell, "releaseHandle", []);
+});
+$_M (cla$$, "releaseShells", 
+function () {
+var shells = this.getShells ();
+for (var i = 0; i < shells.length; i++) {
+var shell = shells[i];
+if (!shell.isDisposed ()) shell.releaseResources ();
+}
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+this.releaseShells ();
+$_U (this, $wt.widgets.Shell, "releaseWidget", []);
+this.activeMenu = null;
+this.display.clearModal (this);
+this.lastActive = null;
+this.region = null;
+});
+$_M (cla$$, "removeMenu", 
+function (menu) {
+$_U (this, $wt.widgets.Shell, "removeMenu", [menu]);
+if (menu == this.activeMenu) this.activeMenu = null;
+}, "$wt.widgets.Menu");
+$_M (cla$$, "removeShellListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (21, listener);
+this.eventTable.unhook (19, listener);
+this.eventTable.unhook (20, listener);
+this.eventTable.unhook (26, listener);
+this.eventTable.unhook (27, listener);
+}, "$wt.events.ShellListener");
+$_M (cla$$, "setActive", 
+function () {
+if (!this.isVisible ()) return ;
+this.bringToTop ();
+});
+$_M (cla$$, "setActiveControl", 
+function (control) {
+if (control != null && control.isDisposed ()) control = null;
+if (this.lastActive != null && this.lastActive.isDisposed ()) this.lastActive = null;
+if (this.lastActive == control) return ;
+var activate = (control == null) ?  new Array (0) : control.getPath ();
+var deactivate = (this.lastActive == null) ?  new Array (0) : this.lastActive.getPath ();
+this.lastActive = control;
+var index = 0;
+var length = Math.min (activate.length, deactivate.length);
+while (index < length) {
+if (activate[index] != deactivate[index]) break;
+index++;
+}
+for (var i = deactivate.length - 1; i >= index; --i) {
+if (!deactivate[i].isDisposed ()) {
+deactivate[i].sendEvent (27);
+}}
+for (var i = activate.length - 1; i >= index; --i) {
+if (!activate[i].isDisposed ()) {
+activate[i].sendEvent (26);
+}}
+}, "$wt.widgets.Control");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags, defer) {
+$_U (this, $wt.widgets.Shell, "setBounds", [x, y, width, height, flags, false]);
+}, "Number,Number,Number,Number,Number,Boolean");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+if (((this.state & $wt.widgets.Widget.DISABLED) == 0) == enabled) return ;
+$_U (this, $wt.widgets.Shell, "setEnabled", [enabled]);
+}, "Boolean");
+$_M (cla$$, "setImeInputMode", 
+function (mode) {
+}, "Number");
+$_M (cla$$, "setMinimumSize", 
+function (width, height) {
+var widthLimit = 0;
+var heightLimit = 0;
+var trim = 32 | 64 | 128 | 1024;
+if ((this.style & 8) == 0 && (this.style & trim) != 0) {
+}this.minWidth = Math.max (widthLimit, width);
+this.minHeight = Math.max (heightLimit, height);
+var size = this.getSize ();
+var newWidth = Math.max (size.x, this.minWidth);
+var newHeight = Math.max (size.y, this.minHeight);
+if (this.minWidth <= widthLimit) this.minWidth = -1;
+if (this.minHeight <= heightLimit) this.minHeight = -1;
+if (newWidth != size.x || newHeight != size.y) this.setSize (newWidth, newHeight);
+}, "Number,Number");
+$_M (cla$$, "setMinimumSize", 
+function (size) {
+this.setMinimumSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setItemEnabled", 
+function (cmd, enabled) {
+}, "Number,Boolean");
+$_M (cla$$, "setParent", 
+function () {
+});
+$_M (cla$$, "setRegion", 
+function (region) {
+if ((this.style & 8) == 0) return ;
+}, "$wt.graphics.Region");
+$_M (cla$$, "setToolTipText", 
+function (hwnd, text) {
+}, "$wt.internal.xhtml.Element,String");
+$_M (cla$$, "setVisible", 
+function (visible) {
+$_U (this, $wt.widgets.Shell, "setVisible", [visible]);
+}, "Boolean");
+$_V (cla$$, "traverseEscape", 
+function () {
+if (this.parent == null) return false;
+if (!this.isVisible () || !this.isEnabled ()) return false;
+this.close ();
+return true;
+});
 $_M (cla$$, "updateModal", 
 function () {
 });
@@ -2784,20 +5556,12 @@ this.image = null;
 });
 $_M (cla$$, "setImage", 
 function (image) {
-if (image != null && image.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
 this.image = image;
 }, "$wt.graphics.Image");
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 this.text = string;
 }, "String");
-$_M (cla$$, "releaseHandle", 
-function () {
-if (this.image != null) {
-this.image = null;
-}$_U (this, $wt.widgets.Item, "releaseHandle", []);
-});
 cla$$ = $_C (function () {
 this.parent = null;
 this.menu = null;
@@ -2805,22 +5569,16 @@ this.id = 0;
 this.accelerator = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "MenuItem", $wt.widgets.Item);
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.PUSH, $WT.CHECK, $WT.RADIO, $WT.SEPARATOR, $WT.CASCADE, 0);
-}, "Number");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style)]);
 this.parent = parent;
-this.createWidget ();
 parent.createItem (this, parent.getItemCount ());
 }, "$wt.widgets.Menu,Number");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style)]);
 this.parent = parent;
-this.createWidget ();
 parent.createItem (this, index);
 }, "$wt.widgets.Menu,Number,Number");
 $_K (cla$$, 
@@ -2829,71 +5587,198 @@ $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style
 this.parent = parent;
 this.menu = menu;
 if (menu != null) menu.cascade = this;
-this.createWidget ();
 this.display.addMenuItem (this);
 }, "$wt.widgets.Menu,$wt.widgets.Menu,Number,Number");
-$_M (cla$$, "createWidget", 
+$_M (cla$$, "addArmListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (30, typedListener);
+}, "$wt.events.ArmListener");
+$_M (cla$$, "addHelpListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (28, typedListener);
+}, "$wt.events.HelpListener");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+$_V (cla$$, "checkSubclass", 
 function () {
-this.handle = document.createElement ("DIV");
-this.handle.style.width = "150px";
-this.handle.style.borderStyle = "solid";
-this.handle.style.borderColor = "black";
-this.handle.style.borderWidth = "1px";
-this.handle.appendChild (document.createTextNode (this.text));
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-System.out.println ("parent!");
-}});
-$_M (cla$$, "setText", 
-function (string) {
-$_U (this, $wt.widgets.MenuItem, "setText", [string]);
+});
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+return $wt.widgets.Widget.checkBits (style, 8, 32, 16, 2, 64, 0);
+}, "Number");
+$_M (cla$$, "fixMenus", 
+function (newParent) {
+if (this.menu != null) this.menu.fixMenus (newParent);
+}, "$wt.widgets.Decorations");
+$_M (cla$$, "getAccelerator", 
+function () {
+return this.accelerator;
+});
+$_M (cla$$, "getBounds", 
+function () {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getEnabled", 
+function () {
+return true;
+});
+$_V (cla$$, "getMenu", 
+function () {
+return this.menu;
+});
+$_M (cla$$, "getNameText", 
+function () {
+if ((this.style & 2) != 0) return "|";
+return $_U (this, $wt.widgets.MenuItem, "getNameText", []);
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getSelection", 
+function () {
+if ((this.style & (32 | 16)) == 0) return false;
+return false;
+});
+$_M (cla$$, "isEnabled", 
+function () {
+return this.getEnabled () && this.parent.isEnabled ();
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.MenuItem, "releaseChild", []);
+if (this.menu != null) this.menu.dispose ();
+this.menu = null;
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseHandle", 
+function () {
 if (this.handle != null) {
-this.handle.appendChild (document.createTextNode (this.text));
-}}, "String");
-$_M (cla$$, "setMenu", 
-function (menu) {
-if ((this.style & $WT.CASCADE) == 0) {
-this.error ($WT.ERROR_MENUITEM_NOT_CASCADE);
-}if (menu != null) {
-if (menu.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if ((menu.style & $WT.DROP_DOWN) == 0) {
-this.error ($WT.ERROR_MENU_NOT_DROP_DOWN);
-}if (menu.parent != this.parent.parent) {
-this.error ($WT.ERROR_INVALID_PARENT);
-}}var oldMenu = this.menu;
-if (oldMenu == menu) return ;
-if (oldMenu != null) oldMenu.cascade = null;
-this.menu = menu;
-if (menu != null) {
-menu.cascade = this;
-}}, "$wt.widgets.Menu");
+BrowserNative.releaseHandle (this.handle);
+this.handle = null;
+}$_U (this, $wt.widgets.MenuItem, "releaseHandle", []);
+});
+$_M (cla$$, "releaseMenu", 
+function () {
+this.menu = null;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+if (this.menu != null) this.menu.releaseResources ();
+this.menu = null;
+$_U (this, $wt.widgets.MenuItem, "releaseWidget", []);
+if (this.accelerator != 0) {
+this.parent.destroyAccelerators ();
+}this.accelerator = 0;
+this.display.removeMenuItem (this);
+this.parent = null;
+});
+$_M (cla$$, "removeArmListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (30, listener);
+}, "$wt.events.ArmListener");
+$_M (cla$$, "removeHelpListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (28, listener);
+}, "$wt.events.HelpListener");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "selectRadio", 
+function () {
+var index = 0;
+var items = this.parent.getItems ();
+while (index < items.length && items[index] != this) index++;
+
+var i = index - 1;
+while (i >= 0 && items[i].setRadioSelection (false)) --i;
+
+var j = index + 1;
+while (j < items.length && items[j].setRadioSelection (false)) j++;
+
+this.setSelection (true);
+});
 $_M (cla$$, "setAccelerator", 
 function (accelerator) {
 if (this.accelerator == accelerator) return ;
 this.accelerator = accelerator;
+this.parent.destroyAccelerators ();
 }, "Number");
-$_M (cla$$, "releaseHandle", 
-function () {
-this.menu = null;
-this.parent = null;
-$_U (this, $wt.widgets.MenuItem, "releaseHandle", []);
-});
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+this.parent.destroyAccelerators ();
+this.parent.redraw ();
+}, "Boolean");
+$_M (cla$$, "setImage", 
+function (image) {
+if ((this.style & 2) != 0) return ;
+$_U (this, $wt.widgets.MenuItem, "setImage", [image]);
+this.parent.redraw ();
+}, "$wt.graphics.Image");
+$_M (cla$$, "setMenu", 
+function (menu) {
+if (menu != null) {
+}var oldMenu = this.menu;
+if (oldMenu == menu) return ;
+if (oldMenu != null) oldMenu.cascade = null;
+this.menu = menu;
+this.parent.destroyAccelerators ();
+}, "$wt.widgets.Menu");
+$_M (cla$$, "setRadioSelection", 
+function (value) {
+if ((this.style & 16) == 0) return false;
+if (this.getSelection () != value) {
+this.setSelection (value);
+this.postEvent (13);
+}return true;
+}, "Boolean");
+$_M (cla$$, "setSelection", 
+function (selected) {
+if ((this.style & (32 | 16)) == 0) return ;
+this.parent.redraw ();
+}, "Boolean");
+$_M (cla$$, "setText", 
+function (string) {
+if ((this.style & 2) != 0) return ;
+if (this.text.equals (string)) return ;
+$_U (this, $wt.widgets.MenuItem, "setText", [string]);
+this.parent.redraw ();
+}, "String");
 cla$$ = $_C (function () {
+this.$handle = null;
+this.x = 0;
+this.y = 0;
+this.hwndCB = 0;
+this.id0 = 0;
+this.id1 = 0;
+this.hasLocation = false;
 this.cascade = null;
 this.parent = null;
+this.imageList = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Menu", $wt.widgets.Widget);
 $_K (cla$$, 
 function (parent) {
-this.construct ($wt.widgets.Menu.checkNull (parent).menuShell (), $WT.POP_UP);
+this.construct ($wt.widgets.Menu.checkNull (parent).menuShell (), 8);
 }, "$wt.widgets.Control");
 $_K (cla$$, 
 function (parent, style) {
-this.construct (parent, $wt.widgets.Menu.checkStyle (style), 0);
+this.construct (parent, $wt.widgets.Menu.checkStyle (style), null);
 }, "$wt.widgets.Decorations,Number");
 $_K (cla$$, 
 function (parentMenu) {
-this.construct ($wt.widgets.Menu.checkNull (parentMenu).parent, $WT.DROP_DOWN);
+this.construct ($wt.widgets.Menu.checkNull (parentMenu).parent, 4);
 }, "$wt.widgets.Menu");
 $_K (cla$$, 
 function (parentItem) {
@@ -2903,72 +5788,282 @@ $_K (cla$$,
 function (parent, style, handle) {
 $_R (this, $wt.widgets.Menu, [parent, $wt.widgets.Menu.checkStyle (style)]);
 this.parent = parent;
+this.$handle = handle;
+this.checkOrientation (parent);
 this.createWidget ();
-}, "$wt.widgets.Decorations,Number,Number");
-$_M (cla$$, "createWidget", 
-function () {
-this.handle = document.createElement ("DIV");
-this.handle.style.position = "absolute";
-this.handle.style.left = "0px";
-this.handle.style.top = "0px";
-this.handle.style.width = "150px";
-this.handle.style.borderStyle = "solid";
-this.handle.style.borderColor = "black";
-this.handle.style.borderWidth = "1px";
-this.handle.style.display = "none";
-this.handle.style.backgroundColor = "menu";
-this.parent.addMenu (this);
-document.body.appendChild (this.handle);
-});
-$_M (cla$$, "getItemCount", 
-function () {
-if (this.handle != null) {
-return this.handle.childNodes.length;
-}return 0;
-});
-$_M (cla$$, "createItem", 
-function (item, index) {
-var count = this.getItemCount ();
-if (!(0 <= index && index <= count)) this.error ($WT.ERROR_INVALID_RANGE);
-this.display.addMenuItem (item);
-var success = false;
-item.createWidget ();
-this.handle.appendChild (item.handle);
-success = true;
-if (!success) {
-this.display.removeMenuItem (item);
-this.error ($WT.ERROR_ITEM_NOT_ADDED);
-}}, "$wt.widgets.MenuItem,Number");
+}, "$wt.widgets.Decorations,Number,$wt.internal.xhtml.Element");
+$_M (cla$$, "_setVisible", 
+function (visible) {
+if ((this.style & (2 | 4)) != 0) return ;
+}, "Boolean");
+$_M (cla$$, "addHelpListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (28, typedListener);
+}, "$wt.events.HelpListener");
+$_M (cla$$, "addMenuListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (23, typedListener);
+this.addListener (22, typedListener);
+}, "$wt.events.MenuListener");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (control) {
-if (control == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return control;
 }, "$wt.widgets.Control");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (menu) {
-if (menu == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return menu;
 }, "$wt.widgets.Menu");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (item) {
-if (item == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return item;
 }, "$wt.widgets.MenuItem");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.POP_UP, $WT.BAR, $WT.DROP_DOWN, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 8, 2, 4, 0, 0, 0);
 }, "Number");
-$_M (cla$$, "getItems", 
+$_M (cla$$, "createHandle", 
+function () {
+if (this.$handle != null) return ;
+this.$handle = document.createElement ("DIV");
+if (this.parent.handle != null) {
+this.parent.handle.appendChild (this.$handle);
+}this.$handle.className = "tool-bar-default";
+if ((this.style & 2) != 0) {
+} else {
+}});
+$_M (cla$$, "createItem", 
+function (item, index) {
+var count = this.GetMenuItemCount (this.$handle);
+this.display.addMenuItem (item);
+var success = false;
+item.handle = document.createElement ("DIV");
+item.handle.className = "tool-item-default";
+this.$handle.appendChild (item.handle);
+this.redraw ();
+}, "$wt.widgets.MenuItem,Number");
+$_M (cla$$, "createWidget", 
+function () {
+this.createHandle ();
+this.parent.addMenu (this);
+});
+$_M (cla$$, "destroyAccelerators", 
+function () {
+this.parent.destroyAccelerators ();
+});
+$_M (cla$$, "destroyItem", 
+function (item) {
+this.redraw ();
+}, "$wt.widgets.MenuItem");
+$_V (cla$$, "destroyWidget", 
+function () {
+this.releaseHandle ();
+});
+$_M (cla$$, "fixMenus", 
+function (newParent) {
+var items = this.getItems ();
+for (var i = 0; i < items.length; i++) {
+items[i].fixMenus (newParent);
+}
+this.parent.removeMenu (this);
+newParent.addMenu (this);
+this.parent = newParent;
+}, "$wt.widgets.Decorations");
+$_M (cla$$, "getBounds", 
+function () {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getDefaultItem", 
 function () {
 return null;
 });
+$_M (cla$$, "getEnabled", 
+function () {
+return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+});
+$_M (cla$$, "getItem", 
+function (index) {
+var id = 0;
+return this.display.getMenuItem (id);
+}, "Number");
+$_M (cla$$, "getItemCount", 
+function () {
+return this.GetMenuItemCount (this.$handle);
+});
+$_M (cla$$, "getItems", 
+function () {
+return  new Array (0);
+});
+$_M (cla$$, "GetMenuItemCount", 
+function (handle) {
+return 0;
+}, "$wt.internal.xhtml.Element");
+$_V (cla$$, "getNameText", 
+function () {
+var result = "";
+var items = this.getItems ();
+var length = items.length;
+if (length > 0) {
+for (var i = 0; i < length - 1; i++) {
+result = result + items[i].getNameText () + ", ";
+}
+result = result + items[length - 1].getNameText ();
+}return result;
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getParentItem", 
+function () {
+return this.cascade;
+});
+$_M (cla$$, "getParentMenu", 
+function () {
+if (this.cascade != null) return this.cascade.parent;
+return null;
+});
+$_M (cla$$, "getShell", 
+function () {
+return this.parent.getShell ();
+});
+$_M (cla$$, "getVisible", 
+function () {
+if ((this.style & 2) != 0) {
+return this == this.parent.menuShell ().menuBar;
+}if ((this.style & 8) != 0) {
+var popups = this.display.popups;
+if (popups == null) return false;
+for (var i = 0; i < popups.length; i++) {
+if (popups[i] == this) return true;
+}
+}var shell = this.getShell ();
+var menu = shell.activeMenu;
+while (menu != null && menu != this) {
+menu = menu.getParentMenu ();
+}
+return this == menu;
+});
+$_M (cla$$, "imageIndex", 
+function (image) {
+var index = this.imageList.indexOf (image);
+if (index == -1) {
+index = this.imageList.add (image);
+} else {
+this.imageList.put (index, image);
+}return index;
+}, "$wt.graphics.Image");
+$_M (cla$$, "indexOf", 
+function (item) {
+if (item.parent != this) return -1;
+return -1;
+}, "$wt.widgets.MenuItem");
+$_M (cla$$, "isEnabled", 
+function () {
+var parentMenu = this.getParentMenu ();
+if (parentMenu == null) return this.getEnabled ();
+return this.getEnabled () && parentMenu.isEnabled ();
+});
+$_M (cla$$, "isVisible", 
+function () {
+return this.getVisible ();
+});
+$_M (cla$$, "redraw", 
+function () {
+if (!this.isVisible ()) return ;
+if ((this.style & 2) != 0) {
+this.display.addBar (this);
+} else {
+this.update ();
+}});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.Menu, "releaseChild", []);
+if (this.cascade != null) this.cascade.releaseMenu ();
+if ((this.style & 2) != 0) {
+this.display.removeBar (this);
+if (this == this.parent.menuBar) {
+this.parent.setMenuBar (null);
+}} else {
+if ((this.style & 8) != 0) {
+this.display.removePopup (this);
+}}});
+$_M (cla$$, "releaseHandle", 
+function () {
+if (this.$handle != null) {
+BrowserNative.releaseHandle (this.$handle);
+this.$handle = null;
+}$_U (this, $wt.widgets.Menu, "releaseHandle", []);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+var items = this.getItems ();
+for (var i = 0; i < items.length; i++) {
+var item = items[i];
+if (!item.isDisposed ()) {
+item.dispose ();
+}}
+$_U (this, $wt.widgets.Menu, "releaseWidget", []);
+if (this.parent != null) this.parent.removeMenu (this);
+this.parent = null;
+this.cascade = null;
+});
+$_M (cla$$, "removeHelpListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (28, listener);
+}, "$wt.events.HelpListener");
+$_M (cla$$, "removeMenuListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (23, listener);
+this.eventTable.unhook (22, listener);
+}, "$wt.events.MenuListener");
+$_M (cla$$, "setDefaultItem", 
+function (item) {
+var newID = -1;
+if (item != null) {
+if (item.parent != this) return ;
+newID = item.id;
+}this.redraw ();
+}, "$wt.widgets.MenuItem");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
+if (!enabled) this.state |= $wt.widgets.Widget.DISABLED;
+}, "Boolean");
+$_M (cla$$, "setLocation", 
+function (x, y) {
+if ((this.style & (2 | 4)) != 0) return ;
+this.x = x;
+this.y = y;
+this.hasLocation = true;
+}, "Number,Number");
+$_M (cla$$, "setLocation", 
+function (location) {
+this.setLocation (location.x, location.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setVisible", 
+function (visible) {
+if ((this.style & (2 | 4)) != 0) return ;
+if (visible) {
+this.display.addPopup (this);
+} else {
+this.display.removePopup (this);
+this._setVisible (false);
+}}, "Boolean");
 $_M (cla$$, "update", 
 function () {
 });
-$_M (cla$$, "_setVisible", 
-function (visible) {
-if ((this.style & ($WT.BAR | $WT.DROP_DOWN)) != 0) return ;
-}, "Boolean");
+$_S (cla$$,
+"ID_PPC", 100,
+"ID_SPMM", 102,
+"ID_SPBM", 103,
+"ID_SPMB", 104,
+"ID_SPBB", 105,
+"ID_SPSOFTKEY0", 106,
+"ID_SPSOFTKEY1", 107);
 cla$$ = $_C (function () {
 this.handle = 0;
 this.x = 0;
@@ -3015,27 +6110,144 @@ $_R (this, $wt.widgets.ScrollBar, [parent, $wt.widgets.ScrollBar.checkStyle (sty
 this.parent = parent;
 this.createWidget ();
 }, "$wt.widgets.Scrollable,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.HORIZONTAL, $WT.VERTICAL, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
 }, "Number");
 $_M (cla$$, "createWidget", 
 function () {
 this.increment = 1;
 this.pageIncrement = 10;
 });
+$_M (cla$$, "dispose", 
+function () {
+if (this.isDisposed ()) return ;
+$_U (this, $wt.widgets.ScrollBar, "dispose", []);
+});
+$_M (cla$$, "getBounds", 
+function () {
+this.parent.forceResize ();
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getEnabled", 
+function () {
+return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+});
+$_M (cla$$, "getIncrement", 
+function () {
+return this.increment;
+});
+$_M (cla$$, "getMaximum", 
+function () {
+return 100;
+});
+$_M (cla$$, "getMinimum", 
+function () {
+return 0;
+});
+$_M (cla$$, "getPageIncrement", 
+function () {
+return this.pageIncrement;
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getSelection", 
+function () {
+return 0;
+});
+$_M (cla$$, "getSize", 
+function () {
+this.parent.forceResize ();
+return  new $wt.graphics.Point (0, 0);
+});
+$_M (cla$$, "getThumb", 
+function () {
+return 10;
+});
+$_M (cla$$, "getVisible", 
+function () {
+return (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+});
+$_M (cla$$, "hwndScrollBar", 
+function () {
+return this.parent.scrolledHandle ();
+});
+$_M (cla$$, "isEnabled", 
+function () {
+return this.getEnabled () && this.parent.isEnabled ();
+});
+$_M (cla$$, "isVisible", 
+function () {
+return this.getVisible () && this.parent.isVisible ();
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.ScrollBar, "releaseChild", []);
+if (this.parent.horizontalBar == this) this.parent.horizontalBar = null;
+if (this.parent.verticalBar == this) this.parent.verticalBar = null;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.ScrollBar, "releaseWidget", []);
+this.parent = null;
+});
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+}, "Boolean");
+$_M (cla$$, "setIncrement", 
+function (value) {
+if (value < 1) return ;
+this.increment = value;
+}, "Number");
 $_M (cla$$, "setMaximum", 
 function (value) {
 if (value < 0) return ;
 }, "Number");
+$_M (cla$$, "setMinimum", 
+function (value) {
+if (value < 0) return ;
+}, "Number");
+$_M (cla$$, "setPageIncrement", 
+function (value) {
+if (value < 1) return ;
+this.pageIncrement = value;
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (selection) {
+}, "Number");
 $_M (cla$$, "setThumb", 
 function (value) {
+if (value < 1) return ;
 }, "Number");
-$_M (cla$$, "releaseHandle", 
-function () {
-this.parent = null;
-$_U (this, $wt.widgets.ScrollBar, "releaseHandle", []);
-});
+$_M (cla$$, "setValues", 
+function (selection, minimum, maximum, thumb, increment, pageIncrement) {
+if (minimum < 0) return ;
+if (maximum < 0) return ;
+if (thumb < 1) return ;
+if (increment < 1) return ;
+if (pageIncrement < 1) return ;
+this.increment = increment;
+this.pageIncrement = pageIncrement;
+}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "setVisible", 
+function (visible) {
+var isVisible = (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+if (isVisible == visible) return ;
+}, "Boolean");
 cla$$ = $_C (function () {
 this.eventQueue = null;
 this.eventTable = null;
@@ -3061,7 +6273,6 @@ this.lastMouse = 0;
 this.lastVirtual = false;
 this.lastNull = false;
 this.lastDead = false;
-this.keyboard =  $_A (256, 0);
 this.accelKeyHit = false;
 this.mnemonicKeyHit = false;
 this.lockActiveWindow = false;
@@ -3069,7 +6280,6 @@ this.captureChanged = false;
 this.ignoreRestoreFocus = false;
 this.lastHittestControl = null;
 this.lastHittest = 0;
-this.cursors =  new Array ($WT.CURSOR_HAND + 1);
 this.imageList = null;
 this.toolImageList = null;
 this.toolHotImageList = null;
@@ -3083,6 +6293,10 @@ this.modalDialogShell = null;
 this.hitCount = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Display", $wt.graphics.Device);
+$_Y (cla$$, function () {
+this.keyboard =  $_A (256, 0);
+this.cursors =  new Array (21 + 1);
+});
 $_K (cla$$, 
 function () {
 this.construct (null);
@@ -3116,15 +6330,11 @@ this.controlTable[this.controlTable.length] = control;
 }, "Object,$wt.widgets.Control");
 $_M (cla$$, "addFilter", 
 function (eventType, listener) {
-this.checkDevice ();
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.filterTable == null) this.filterTable =  new $wt.widgets.EventTable ();
 this.filterTable.hook (eventType, listener);
 }, "Number,$wt.widgets.Listener");
 $_M (cla$$, "addListener", 
 function (eventType, listener) {
-this.checkDevice ();
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) this.eventTable =  new $wt.widgets.EventTable ();
 this.eventTable.hook (eventType, listener);
 }, "Number,$wt.widgets.Listener");
@@ -3167,29 +6377,21 @@ return 0;
 }, "Number");
 $_M (cla$$, "asyncExec", 
 function (runnable) {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 window.setTimeout (Clazz.makeFunction (runnable), 10);
 }, "Runnable");
 $_M (cla$$, "beep", 
 function () {
-this.checkDevice ();
 });
 $_M (cla$$, "checkSubclass", 
 function () {
-if (!$wt.widgets.Display.isValidClass (this.getClass ())) this.error ($WT.ERROR_INVALID_SUBCLASS);
 });
 $_V (cla$$, "checkDevice", 
 function () {
-if (this.thread == null) this.error ($WT.ERROR_WIDGET_DISPOSED);
-if (this.thread != Thread.currentThread ()) this.error ($WT.ERROR_THREAD_INVALID_ACCESS);
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 });
 cla$$.checkDisplay = $_M (cla$$, "checkDisplay", 
 function (thread, multiple) {
 for (var i = 0; i < $wt.widgets.Display.Displays.length; i++) {
 if ($wt.widgets.Display.Displays[i] != null) {
-if (!multiple) $WT.error ($WT.ERROR_NOT_IMPLEMENTED, null, " [multiple displays]");
-if ($wt.widgets.Display.Displays[i].thread == thread) $WT.error ($WT.ERROR_THREAD_INVALID_ACCESS);
 }}
 }, "Thread,Boolean");
 $_M (cla$$, "clearModal", 
@@ -3212,9 +6414,8 @@ for (var i = 0; i < shells.length; i++) shells[i].updateModal ();
 }, "$wt.widgets.Shell");
 $_M (cla$$, "close", 
 function () {
-this.checkDevice ();
 var event =  new $wt.widgets.Event ();
-this.sendEvent ($WT.Close, event);
+this.sendEvent (21, event);
 if (event.doit) this.dispose ();
 });
 $_V (cla$$, "create", 
@@ -3245,7 +6446,6 @@ function () {
 });
 $_M (cla$$, "disposeExec", 
 function (runnable) {
-this.checkDevice ();
 if (this.disposeList == null) this.disposeList =  new Array (4);
 for (var i = 0; i < this.disposeList.length; i++) {
 if (this.disposeList[i] == null) {
@@ -3287,7 +6487,6 @@ return null;
 }, "Number");
 $_M (cla$$, "findWidget", 
 function (handle) {
-this.checkDevice ();
 return null;
 }, "Number");
 $_M (cla$$, "findWidget", 
@@ -3305,7 +6504,6 @@ return null;
 }, "Thread");
 $_M (cla$$, "getActiveShell", 
 function () {
-this.checkDevice ();
 return null;
 });
 $_M (cla$$, "getBounds", 
@@ -3331,17 +6529,14 @@ return null;
 }, "Object");
 $_M (cla$$, "getCursorControl", 
 function () {
-this.checkDevice ();
 return null;
 });
 $_M (cla$$, "getCursorLocation", 
 function () {
-this.checkDevice ();
 return  new $wt.graphics.Point (0, 0);
 });
 $_M (cla$$, "getCursorSizes", 
 function () {
-this.checkDevice ();
 return [ new $wt.graphics.Point (16, 16)];
 });
 cla$$.getDefault = $_M (cla$$, "getDefault", 
@@ -3357,8 +6552,6 @@ return name.substring (0, index + 1).equals ($wt.widgets.Display.PACKAGE_PREFIX)
 }, "Class");
 $_M (cla$$, "getData", 
 function (key) {
-this.checkDevice ();
-if (key == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.keys == null) return null;
 for (var i = 0; i < this.keys.length; i++) {
 if (this.keys[i].equals (key)) return this.values[i];
@@ -3367,39 +6560,32 @@ return null;
 }, "String");
 $_M (cla$$, "getData", 
 function () {
-this.checkDevice ();
 return this.data;
 });
 $_M (cla$$, "getDismissalAlignment", 
 function () {
-this.checkDevice ();
-return $WT.LEFT;
+return 16384;
 });
 $_M (cla$$, "getDoubleClickTime", 
 function () {
-this.checkDevice ();
 return 20;
 });
 $_M (cla$$, "getFocusControl", 
 function () {
-this.checkDevice ();
 if (this.focusControl != null && !this.focusControl.isDisposed ()) {
 return this.focusControl;
 }return null;
 });
 $_M (cla$$, "getHighContrast", 
 function () {
-this.checkDevice ();
 return false;
 });
 $_M (cla$$, "getIconDepth", 
 function () {
-this.checkDevice ();
 return 32;
 });
 $_M (cla$$, "getIconSizes", 
 function () {
-this.checkDevice ();
 return [ new $wt.graphics.Point (16, 16),  new $wt.graphics.Point (32, 32)];
 });
 $_M (cla$$, "getImageList", 
@@ -3526,7 +6712,6 @@ return this.modalDialogShell;
 });
 $_M (cla$$, "getMonitors", 
 function () {
-this.checkDevice ();
 var monitor =  new $wt.widgets.Monitor ();
 monitor.handle = 220284;
 monitor.clientWidth = monitor.width = document.body.clientWidth;
@@ -3537,7 +6722,6 @@ return [monitor];
 });
 $_M (cla$$, "getPrimaryMonitor", 
 function () {
-this.checkDevice ();
 var monitor =  new $wt.widgets.Monitor ();
 monitor.handle = 220284;
 monitor.clientWidth = monitor.width = document.body.clientWidth;
@@ -3548,7 +6732,6 @@ return monitor;
 });
 $_M (cla$$, "getShells", 
 function () {
-this.checkDevice ();
 var count = 0;
 for (var i = 0; i < this.controlTable.length; i++) {
 var control = this.controlTable[i];
@@ -3565,67 +6748,65 @@ return result;
 });
 $_M (cla$$, "getSyncThread", 
 function () {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 return null;
 });
 $_M (cla$$, "getSystemColor", 
 function (id) {
-this.checkDevice ();
 var pixel = "#000000";
 switch (id) {
-case $WT.COLOR_WIDGET_DARK_SHADOW:
+case 17:
 pixel = "ThreeDDarkShadow";
 break;
-case $WT.COLOR_WIDGET_NORMAL_SHADOW:
+case 18:
 pixel = "ThreeDShadow";
 break;
-case $WT.COLOR_WIDGET_LIGHT_SHADOW:
+case 19:
 pixel = "ThreeDLightShadow";
 break;
-case $WT.COLOR_WIDGET_HIGHLIGHT_SHADOW:
+case 20:
 pixel = "ThreeDHighlight";
 break;
-case $WT.COLOR_WIDGET_BACKGROUND:
+case 22:
 pixel = "ThreeDFace";
 break;
-case $WT.COLOR_WIDGET_BORDER:
+case 23:
 pixel = "WindowFrame";
 break;
-case $WT.COLOR_WIDGET_FOREGROUND:
-case $WT.COLOR_LIST_FOREGROUND:
+case 21:
+case 24:
 pixel = "WindowText";
 break;
-case $WT.COLOR_LIST_BACKGROUND:
+case 25:
 pixel = "Window";
 break;
-case $WT.COLOR_LIST_SELECTION:
+case 26:
 pixel = "Highlight";
 break;
-case $WT.COLOR_LIST_SELECTION_TEXT:
+case 27:
 pixel = "HighlightText";
 break;
-case $WT.COLOR_INFO_FOREGROUND:
+case 28:
 pixel = "InfoText";
 break;
-case $WT.COLOR_INFO_BACKGROUND:
+case 29:
 pixel = "InfoBackground";
 break;
-case $WT.COLOR_TITLE_FOREGROUND:
+case 30:
 pixel = "CaptionText";
 break;
-case $WT.COLOR_TITLE_BACKGROUND:
+case 31:
 pixel = "ActiveCaption";
 break;
-case $WT.COLOR_TITLE_BACKGROUND_GRADIENT:
+case 32:
 pixel = "ActiveCaption";
 break;
-case $WT.COLOR_TITLE_INACTIVE_FOREGROUND:
+case 33:
 pixel = "InactiveCaptionText";
 break;
-case $WT.COLOR_TITLE_INACTIVE_BACKGROUND:
+case 34:
 pixel = "InactiveCaption";
 break;
-case $WT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT:
+case 35:
 pixel = "InactiveCaption";
 break;
 default:
@@ -3635,7 +6816,6 @@ return  new $wt.graphics.Color (null, pixel);
 }, "Number");
 $_M (cla$$, "getSystemCursor", 
 function (id) {
-this.checkDevice ();
 if (!(0 <= id && id < this.cursors.length)) return null;
 if (this.cursors[id] == null) {
 this.cursors[id] =  new $wt.graphics.Cursor (this, id);
@@ -3643,25 +6823,23 @@ this.cursors[id] =  new $wt.graphics.Cursor (this, id);
 }, "Number");
 $_V (cla$$, "getSystemFont", 
 function () {
-this.checkDevice ();
-return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, $WT.NONE);
+return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, 0);
 });
 $_M (cla$$, "getSystemImage", 
 function (id) {
-this.checkDevice ();
 var iconName = null;
 switch (id) {
-case $WT.ICON_ERROR:
+case 1:
 iconName = "error";
 break;
-case $WT.ICON_WORKING:
-case $WT.ICON_INFORMATION:
+case 16:
+case 2:
 iconName = "information";
 break;
-case $WT.ICON_QUESTION:
+case 4:
 iconName = "question";
 break;
-case $WT.ICON_WARNING:
+case 8:
 iconName = "warning";
 break;
 }
@@ -3670,13 +6848,11 @@ return  new $wt.graphics.Image (this, "j2slib/images/" + iconName + ".png");
 }, "Number");
 $_M (cla$$, "getSystemTray", 
 function () {
-this.checkDevice ();
 if (this.tray != null) return this.tray;
-return this.tray =  new $wt.widgets.Tray (this, $WT.NONE);
+return this.tray =  new $wt.widgets.Tray (this, 0);
 });
 $_M (cla$$, "getThread", 
 function () {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 return this.thread;
 });
 $_M (cla$$, "init", 
@@ -3694,48 +6870,51 @@ return this.thread == Thread.currentThread ();
 });
 $_M (cla$$, "map", 
 function (from, to, point) {
-this.checkDevice ();
-if (point == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 return this.map (from, to, point.x, point.y);
 }, "$wt.widgets.Control,$wt.widgets.Control,$wt.graphics.Point");
 $_M (cla$$, "map", 
 function (from, to, x, y) {
-this.checkDevice ();
-if (from != null && from.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (to != null && to.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
 var hwndFrom = from != null ? from.handle : null;
 var hwndTo = to != null ? to.handle : null;
 return  new $wt.graphics.Point (0, 0);
 }, "$wt.widgets.Control,$wt.widgets.Control,Number,Number");
 $_M (cla$$, "map", 
 function (from, to, rectangle) {
-this.checkDevice ();
-if (rectangle == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 return this.map (from, to, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 }, "$wt.widgets.Control,$wt.widgets.Control,$wt.graphics.Rectangle");
 $_M (cla$$, "map", 
 function (from, to, x, y, width, height) {
-this.checkDevice ();
-if (from != null && from.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (to != null && to.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
 var hwndFrom = from != null ? from.handle : null;
 var hwndTo = to != null ? to.handle : null;
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 }, "$wt.widgets.Control,$wt.widgets.Control,Number,Number,Number,Number");
 $_M (cla$$, "post", 
 function (event) {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
-if (event == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var type = event.type;
 switch (type) {
-case $WT.KeyDown:
-case $WT.KeyUp:
+case 1:
+case 2:
 {
-}case $WT.MouseDown:
-case $WT.MouseMove:
-case $WT.MouseUp:
+}case 3:
+case 5:
+case 4:
 {
 }}
+this.timerExec (1, (function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Display$1")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Display$1", null, Runnable);
+$_M (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Display"].runDeferredEvents ();
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Display$1, innerThis, finalVars);
+}) (this, null));
 return false;
 }, "$wt.widgets.Event");
 $_M (cla$$, "postEvent", 
@@ -3752,10 +6931,24 @@ var newQueue =  new Array (length + 4);
 System.arraycopy (this.eventQueue, 0, newQueue, 0, length);
 this.eventQueue = newQueue;
 }this.eventQueue[index] = event;
+this.timerExec (1, (function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Display$2")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Display$2", null, Runnable);
+$_M (cla$$, "run", 
+function () {
+this.callbacks["$wt.widgets.Display"].runDeferredEvents ();
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Display$2, innerThis, finalVars);
+}) (this, null));
 }, "$wt.widgets.Event");
 $_M (cla$$, "readAndDispatch", 
 function () {
-this.checkDevice ();
 this.drawMenuBars ();
 this.runPopups ();
 return true;
@@ -3774,7 +6967,7 @@ newDisplays[$wt.widgets.Display.Displays.length] = display;
 }, "$wt.widgets.Display");
 $_M (cla$$, "release", 
 function () {
-this.sendEvent ($WT.Dispose,  new $wt.widgets.Event ());
+this.sendEvent (12,  new $wt.widgets.Event ());
 var shells = this.getShells ();
 for (var i = 0; i < shells.length; i++) {
 var shell = shells[i];
@@ -3880,16 +7073,12 @@ return ;
 }, "$wt.widgets.ImageList");
 $_M (cla$$, "removeFilter", 
 function (eventType, listener) {
-this.checkDevice ();
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.filterTable == null) return ;
 this.filterTable.unhook (eventType, listener);
 if (this.filterTable.size () == 0) this.filterTable = null;
 }, "Number,$wt.widgets.Listener");
 $_M (cla$$, "removeListener", 
 function (eventType, listener) {
-this.checkDevice ();
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
 }, "Number,$wt.widgets.Listener");
@@ -3992,18 +7181,13 @@ if (this.eventTable != null) this.eventTable.sendEvent (event);
 }}, "Number,$wt.widgets.Event");
 $_M (cla$$, "setCursorLocation", 
 function (x, y) {
-this.checkDevice ();
 }, "Number,Number");
 $_M (cla$$, "setCursorLocation", 
 function (point) {
-this.checkDevice ();
-if (point == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 this.setCursorLocation (point.x, point.y);
 }, "$wt.graphics.Point");
 $_M (cla$$, "setData", 
 function (key, value) {
-this.checkDevice ();
-if (key == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (value == null) {
 if (this.keys == null) return ;
 var index = 0;
@@ -4043,7 +7227,6 @@ this.values = newValues;
 }, "String,Object");
 $_M (cla$$, "setData", 
 function (data) {
-this.checkDevice ();
 this.data = data;
 }, "Object");
 cla$$.setAppName = $_M (cla$$, "setAppName", 
@@ -4078,23 +7261,17 @@ for (var i = 0; i < shells.length; i++) shells[i].updateModal ();
 }, "$wt.widgets.Shell");
 $_M (cla$$, "setSynchronizer", 
 function (synchronizer) {
-this.checkDevice ();
-if (synchronizer == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 }, "$wt.widgets.Synchronizer");
 $_M (cla$$, "sleep", 
 function () {
-this.checkDevice ();
 return false;
 });
 $_M (cla$$, "syncExec", 
 function (runnable) {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 runnable.run ();
 }, "Runnable");
 $_M (cla$$, "timerExec", 
 function (milliseconds, runnable) {
-this.checkDevice ();
-if (runnable == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.timerList == null) this.timerList =  new Array (4);
 if (this.timerIds == null) this.timerIds =  $_A (4, 0);
 var index = 0;
@@ -4133,7 +7310,6 @@ this.timerIds[index] = newTimerID;
 }}, "Number,Runnable");
 $_M (cla$$, "update", 
 function () {
-this.checkDevice ();
 var shells = this.getShells ();
 for (var i = 0; i < shells.length; i++) {
 var shell = shells[i];
@@ -4142,7 +7318,6 @@ if (!shell.isDisposed ()) shell.update (true);
 });
 $_M (cla$$, "wake", 
 function () {
-if (this.isDisposed ()) this.error ($WT.ERROR_DEVICE_DISPOSED);
 });
 cla$$.withCrLf = $_M (cla$$, "withCrLf", 
 function (string) {
@@ -4172,89 +7347,17 @@ i++;
 }}
 return result.toString ();
 }, "String");
-$_M (cla$$, "releaseResources", 
+cla$$.releaseAllDisplays = $_M (cla$$, "releaseAllDisplays", 
 function () {
-this.releaseEventQueue ();
-if (this.eventTable != null) {
-this.eventTable.releaseResource ();
-this.eventTable = null;
-}if (this.filterTable != null) {
-this.filterTable.releaseResource ();
-this.filterTable = null;
-}if (this.cursors != null) {
-for (var i = 0; i < this.cursors.length; i++) {
-this.cursors[i] = null;
-}
-this.cursors = null;
-}if (this.controlTable != null) {
-$wt.widgets.Display.releaseWidgetArray (this.controlTable);
-this.controlTable = null;
-}if (this.items != null) {
-$wt.widgets.Display.releaseWidgetArray (this.items);
-this.items = null;
-}if (this.popups != null) {
-$wt.widgets.Display.releaseWidgetArray (this.popups);
-this.popups = null;
-}if (this.bars != null) {
-$wt.widgets.Display.releaseWidgetArray (this.bars);
-this.bars = null;
-}});
-cla$$.releaseWidgetArray = $_M (cla$$, "releaseWidgetArray", 
-function (list) {
-if (list != null) {
-for (var i = 0; i < list.length; i++) {
-if (list[i] != null) {
-list[i].releaseHandle ();
-list[i] = null;
-}}
-list = null;
-}}, "Array");
-$_M (cla$$, "releaseEventQueue", 
-function () {
-if (this.eventQueue != null) {
-for (var i = 0; i < this.eventQueue.length; i++) {
-if (this.eventQueue[i] != null) {
-this.eventQueue[i].releaseResource ();
-this.eventQueue[i] = null;
-}}
-this.eventQueue = null;
-}});
-cla$$.releaseAllResources = $_M (cla$$, "releaseAllResources", 
-function () {
-var tags = ["DIV", "SPAN", "TABLE", "IMAGE", "INPUT", "SELECT", "TEXTAREA", "BUTTON"];
-for (var i = 0; i < tags.length; i++) {
-$wt.widgets.Display.releaseTaggedElements (tags[i]);
-}
-if ($wt.widgets.Display.Default != null) {
-$wt.widgets.Display.Default.releaseResources ();
-($t$ = $wt.widgets.Display.Default = null, $wt.widgets.Display.prototype.Default = $wt.widgets.Display.Default, $t$);
-}if ($wt.widgets.Display.Displays != null) {
+if ($wt.widgets.Display.Displays != null) {
 for (var i = 0; i < $wt.widgets.Display.Displays.length; i++) {
 if ($wt.widgets.Display.Displays[i] != null) {
-$wt.widgets.Display.Displays[i].releaseResources ();
+$wt.widgets.Display.Displays[i].dispose ();
 $wt.widgets.Display.Displays[i] = null;
 }}
 ($t$ = $wt.widgets.Display.Displays = null, $wt.widgets.Display.prototype.Displays = $wt.widgets.Display.Displays, $t$);
-}});
-cla$$.releaseTaggedElements = $_M (cla$$, "releaseTaggedElements", 
-function (tagName) {
-var elements = document.getElementsByTagName (tagName);
-for (var i = 0; i < elements.length; i++) {
-var el = elements[i];
-el.onclick = null;
-el.ondblclick = null;
-el.onchange = null;
-el.oncontextmenu = null;
-el.onkeypress = null;
-el.onkeydown = null;
-el.onkeyup = null;
-el.onmousedown = null;
-el.onmouseup = null;
-el.onselectstart = null;
-el = null;
-}
-elements = null;
-}, "String");
+}($t$ = $wt.widgets.Display.Default = null, $wt.widgets.Display.prototype.Default = $wt.widgets.Display.Default, $t$);
+});
 $_S (cla$$,
 "GROW_SIZE", 1024,
 "ID_START", 108,
@@ -4267,95 +7370,524 @@ $_S (cla$$,
 "PACKAGE_PREFIX", "org.eclipse.swt.widgets.");
 cla$$ = $_C (function () {
 this.text = "";
+this.textSizeCached = false;
+this.textWidthCached = 0;
+this.textHeightCached = 0;
+this.lastColor = null;
+this.hasImage = false;
 this.image = null;
 this.image2 = null;
+this.imageList = null;
+this.ignoreMouse = false;
+this.btnText = null;
+this.btnHandle = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Button", $wt.widgets.Control);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Button, [parent, $wt.widgets.Button.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-style = $wt.widgets.Widget.checkBits (style, $WT.PUSH, $WT.ARROW, $WT.CHECK, $WT.RADIO, $WT.TOGGLE, 0);
-if ((style & ($WT.PUSH | $WT.TOGGLE)) != 0) {
-return $wt.widgets.Widget.checkBits (style, $WT.CENTER, $WT.LEFT, $WT.RIGHT, 0, 0, 0);
-}if ((style & ($WT.CHECK | $WT.RADIO)) != 0) {
-return $wt.widgets.Widget.checkBits (style, $WT.LEFT, $WT.RIGHT, $WT.CENTER, 0, 0, 0);
-}if ((style & $WT.ARROW) != 0) {
-style |= $WT.NO_FOCUS;
-return $wt.widgets.Widget.checkBits (style, $WT.UP, $WT.DOWN, $WT.LEFT, $WT.RIGHT, 0, 0);
-}return style;
-}, "Number");
+$_M (cla$$, "_setImage", 
+function (image) {
+}, "$wt.graphics.Image");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
-$_M (cla$$, "removeSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "getText", 
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+style = $wt.widgets.Widget.checkBits (style, 8, 4, 32, 16, 2, 0);
+if ((style & (8 | 2)) != 0) {
+return $wt.widgets.Widget.checkBits (style, 16777216, 16384, 131072, 0, 0, 0);
+}if ((style & (32 | 16)) != 0) {
+return $wt.widgets.Widget.checkBits (style, 16384, 131072, 16777216, 0, 0, 0);
+}if ((style & 4) != 0) {
+style |= 524288;
+return $wt.widgets.Widget.checkBits (style, 128, 1024, 16384, 131072, 0, 0);
+}return style;
+}, "Number");
+$_M (cla$$, "click", 
 function () {
-if ((this.style & $WT.ARROW) != 0) return "";
-return this.text;
+this.ignoreMouse = true;
+this.ignoreMouse = false;
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var border = this.getBorderWidth ();
+var width = 0;
+var height = 0;
+if ((this.style & 4) != 0) {
+if ((this.style & (128 | 1024)) != 0) {
+width += 16;
+height += 16;
+} else {
+width += 16;
+height += 16;
+}if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+width += border * 2;
+height += border * 2;
+return  new $wt.graphics.Point (width, height);
+}var extra = 0;
+if (!this.hasImage) {
+if (this.text == null || this.text.length == 0) {
+height += $wt.internal.browser.OS.getStringStyledHeight (".", "button-default", null);
+} else {
+if (!this.textSizeCached || changed) {
+var string = this.text.replaceAll ("[\r\n]+", "");
+var cssSize = $wt.internal.browser.OS.getStringStyledSize (string, "button-default", this.handle.style.cssText);
+this.textSizeCached = true;
+this.textWidthCached = cssSize.x;
+this.textHeightCached = cssSize.y;
+}width = this.textWidthCached;
+height = this.textHeightCached;
+if ((this.style & (16 | 32)) != 0) {
+width -= 5;
+}extra = Math.max (8, height);
+}} else {
+if (this.image != null) {
+if (this.image.width == 0 && this.image.height == 0) {
+if (this.image.url != null && this.image.url.length != 0) {
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
+} else {
+width += 16;
+height = Math.max (16, height);
+}} else {
+width += this.image.width;
+height = Math.max (this.image.height, height);
+}extra = 8;
+}}if ((this.style & (32 | 16)) != 0) {
+width += $wt.widgets.Button.CHECK_WIDTH + extra;
+height = Math.max (height, $wt.widgets.Button.CHECK_HEIGHT + 3);
+}if ((this.style & (8 | 2)) != 0) {
+width += 12;
+height += 10;
+}if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+width += border * 2;
+height += border * 2;
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_V (cla$$, "enableWidget", 
+function (enabled) {
+this.btnHandle.disabled = !enabled;
+var cssName = this.handle.className;
+if (cssName == null) cssName = "";
+var key = "button-disabled";
+var idx = cssName.indexOf (key);
+if (!enabled) {
+if (idx == -1) {
+this.handle.className += " " + key;
+}} else {
+if (idx != -1) {
+this.handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}}}, "Boolean");
+$_M (cla$$, "getAlignment", 
+function () {
+if ((this.style & 4) != 0) {
+if ((this.style & 128) != 0) return 128;
+if ((this.style & 1024) != 0) return 1024;
+if ((this.style & 16384) != 0) return 16384;
+if ((this.style & 131072) != 0) return 131072;
+return 128;
+}if ((this.style & 16384) != 0) return 16384;
+if ((this.style & 16777216) != 0) return 16777216;
+if ((this.style & 131072) != 0) return 131072;
+return 16384;
+});
+$_V (cla$$, "getBorderWidth", 
+function () {
+if ((this.style & 2048) != 0) {
+return 2;
+}return 0;
+});
+$_M (cla$$, "getDefault", 
+function () {
+if ((this.style & 8) == 0) return false;
+return false;
+});
+$_M (cla$$, "getImage", 
+function () {
+return this.image;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
 });
 $_M (cla$$, "getSelection", 
 function () {
-if ((this.style & ($WT.CHECK | $WT.RADIO | $WT.TOGGLE)) == 0) return false;
-if ((this.style & $WT.TOGGLE) != 0) {
-return (this.handle.className != null && this.handle.className.indexOf ("selected") != -1);
-} else if ((this.style & ($WT.RADIO | $WT.CHECK)) != 0) {
-return this.handle.childNodes[0].checked;
+if ((this.style & (32 | 16 | 2)) == 0) return false;
+if ((this.style & 2) != 0) {
+System.out.println (this.btnHandle.className);
+return (this.btnHandle.className != null && this.btnHandle.className.indexOf ("button-selected") != -1);
+} else if ((this.style & (16 | 32)) != 0) {
+return this.btnHandle.checked;
 }return false;
+});
+$_M (cla$$, "getText", 
+function () {
+if ((this.style & 4) != 0) return "";
+return this.text;
+});
+$_V (cla$$, "isEnabled", 
+function () {
+return !this.btnHandle.disabled;
+});
+$_M (cla$$, "isTabItem", 
+function () {
+return $_U (this, $wt.widgets.Button, "isTabItem", []);
+});
+$_V (cla$$, "mnemonicHit", 
+function (ch) {
+if (!this.setFocus ()) return false;
+if ((this.style & 16) == 0) this.click ();
+return true;
+}, "Number");
+$_V (cla$$, "mnemonicMatch", 
+function (key) {
+var mnemonic = this.findMnemonic (this.getText ());
+if ((mnemonic).charCodeAt (0) == ('\0').charCodeAt (0)) return false;
+return (Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (mnemonic)).charCodeAt (0);
+}, "Number");
+$_M (cla$$, "releaseHandle", 
+function () {
+if (this.btnText != null) {
+BrowserNative.releaseHandle (this.btnText);
+this.btnText = null;
+}if (this.btnHandle != null) {
+BrowserNative.releaseHandle (this.btnHandle);
+this.btnHandle = null;
+}$_U (this, $wt.widgets.Button, "releaseHandle", []);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.Button, "releaseWidget", []);
+if (this.imageList != null) this.imageList.dispose ();
+this.imageList = null;
+if (this.image2 != null) this.image2.dispose ();
+this.image2 = null;
+this.text = null;
+this.image = null;
+});
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "selectRadio", 
+function () {
+var children = this.parent._getChildren ();
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+if (this != child) child.setRadioSelection (false);
+}
+this.setSelection (true);
+});
+$_M (cla$$, "setAlignment", 
+function (alignment) {
+if ((this.style & 4) != 0) {
+if ((this.style & (128 | 1024 | 16384 | 131072)) == 0) return ;
+this.style &= ~(128 | 1024 | 16384 | 131072);
+this.style |= alignment & (128 | 1024 | 16384 | 131072);
+this.updateArrowStyle ();
+var cx = this.width;
+var cy = this.height;
+if ((this.style & 2048) != 0) {
+cx -= 4;
+cy -= 4;
+}this.updateArrowSize (cx, cy);
+return ;
+}if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+this.style &= ~(16384 | 131072 | 16777216);
+this.style |= alignment & (16384 | 131072 | 16777216);
+if ((this.style & (8 | 2)) != 0) {
+var handleStyle = null;
+if ((this.style & (16 | 32)) != 0) {
+handleStyle = this.btnText.style;
+} else {
+handleStyle = this.btnHandle.style;
+}if ((this.style & 16384) != 0) {
+this.btnText.style.textAlign = "left";
+handleStyle.backgroundPosition = "left center";
+}if ((this.style & 16777216) != 0) {
+this.btnText.style.textAlign = "center";
+handleStyle.backgroundPosition = "center center";
+} else if ((this.style & 131072) != 0) {
+this.btnText.style.textAlign = "right";
+handleStyle.backgroundPosition = "right center";
+}}}, "Number");
+$_M (cla$$, "setDefault", 
+function (value) {
+if ((this.style & 8) == 0) return ;
+if (value) {
+try {
+this.handle.focus ();
+} catch (e) {
+if ($_O (e, Error)) {
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
+} else {
+throw e;
+}
+}
+}}, "Boolean");
+$_M (cla$$, "setFixedFocus", 
+function () {
+if ((this.style & 16) != 0 && !this.getSelection ()) return false;
+return $_U (this, $wt.widgets.Button, "setFixedFocus", []);
+});
+$_M (cla$$, "setImage", 
+function (image) {
+if ((this.style & 4) != 0) return ;
+this.image = image;
+this.hasImage = true;
+if (this.image.handle == null && this.image.url != null && this.image.url.length != 0) {
+$wt.internal.browser.OS.clearChildren (this.btnText);
+this.btnText.style.display = "";
+this.btnText.style.paddingTop = "";
+this.btnHandle.parentNode.style.bottom = "";
+this.btnHandle.parentNode.style.top = "";
+this.btnHandle.style.top = "";
+this.btnText.parentNode.style.position = "";
+this.btnText.parentNode.style.top = "";
+var handleStyle = null;
+if ((this.style & (16 | 32)) != 0) {
+handleStyle = this.btnText.style;
+{
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+}handleStyle.display = "block";
+handleStyle.marginLeft = ($wt.widgets.Button.CHECK_WIDTH + 3) + "px";
+handleStyle.paddingTop = this.image.height + "px";
+} else {
+handleStyle = this.btnHandle.style;
+}if (image.url.toLowerCase ().endsWith (".png") && handleStyle.filter != null) {
+handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+} else {
+handleStyle.backgroundRepeat = "no-repeat";
+var bgXPos = "center";
+if ((this.style & (16 | 32)) != 0) {
+if ((this.style & 131072) != 0) {
+bgXPos = "right";
+} else if ((this.style & 16777216) != 0) {
+bgXPos = "center";
+} else {
+bgXPos = "left";
+}}handleStyle.backgroundPosition = bgXPos + " center";
+handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+}}}, "$wt.graphics.Image");
+$_V (cla$$, "setRadioFocus", 
+function () {
+if ((this.style & 16) == 0 || !this.getSelection ()) return false;
+return this.setFocus ();
+});
+$_M (cla$$, "setRadioSelection", 
+function (value) {
+if ((this.style & 16) == 0) return false;
+if (this.getSelection () != value) {
+this.setSelection (value);
+this.postEvent (13);
+}return true;
+}, "Boolean");
+$_M (cla$$, "setSavedFocus", 
+function () {
+if ((this.style & 16) != 0 && !this.getSelection ()) return false;
+return $_U (this, $wt.widgets.Button, "setSavedFocus", []);
 });
 $_M (cla$$, "setSelection", 
 function (selected) {
-if ((this.style & ($WT.CHECK | $WT.RADIO | $WT.TOGGLE)) == 0) return ;
-if ((this.style & $WT.TOGGLE) != 0) {
-this.handle.className = selected ? "button-default button-toggle-selected" : "button-default";
-} else if ((this.style & ($WT.RADIO | $WT.CHECK)) != 0) {
-this.handle.childNodes[0].checked = selected;
+if ((this.style & (32 | 16 | 2)) == 0) return ;
+if ((this.style & 2) != 0) {
+var cssName = this.btnHandle.className;
+if (cssName == null) cssName = "";
+var key = "button-selected";
+var idx = cssName.indexOf (key);
+if (selected) {
+if (idx == -1) {
+this.btnHandle.className += " " + key;
+}} else {
+if (idx != -1) {
+this.btnHandle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}}} else if ((this.style & (16 | 32)) != 0) {
+this.btnHandle.checked = selected;
 }}, "Boolean");
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.text = string;
-if (this.handle != null) {
-var el = this.handle;
-if ((this.style & ($WT.RADIO | $WT.CHECK)) != 0) {
-el = this.handle.childNodes[1];
-}var idx = string.indexOf ('&');
+if ((this.style & 4) != 0) return ;
+if (string != this.text) {
+this.textSizeCached = false;
+}$wt.internal.browser.OS.clearChildren (this.btnText);
+if (this.hasImage) {
+this.btnText.style.backgroundImage = "";
+if ($wt.internal.browser.OS.isIE && this.image.url != null && this.image.url.toLowerCase ().endsWith (".png") && this.btnText.style.filter != null) {
+this.btnText.style.filter = "";
+}}this.text = string;
+this.hasImage = false;
+string = string.replaceAll ("(&(&))|([\r\n]+)", "$2");
+var idx = string.indexOf ('&');
 if (idx == -1) {
-el.appendChild (document.createTextNode (string));
+this.btnText.appendChild (document.createTextNode (string));
 } else {
-el.appendChild (document.createTextNode (string.substring (0, idx)));
+this.btnText.appendChild (document.createTextNode (string.substring (0, idx)));
 var underline = document.createElement ("SPAN");
 underline.appendChild (document.createTextNode (string.substring (idx + 1, idx + 2)));
 underline.className = "button-text-mnemonics";
-el.appendChild (underline);
-el.appendChild (document.createTextNode (string.substring (idx + 2)));
-}}}, "String");
-$_V (cla$$, "createWidget", 
+this.btnText.appendChild (underline);
+this.btnText.appendChild (document.createTextNode (string.substring (idx + 2)));
+}}, "String");
+$_M (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+if ((this.style & 2048) != 0) {
+cx -= 4;
+cy -= 4;
+}if ((this.style & 4) != 0) {
+this.updateArrowSize (cx, cy);
+}if ((this.style & (16 | 32)) != 0) {
+var h = 0;
+if (!this.hasImage) {
+if (this.textSizeCached) {
+this.btnText.style.display = "block";
+if (this.textHeightCached < $wt.widgets.Button.CHECK_HEIGHT) {
+this.btnText.style.paddingTop = (Math.floor (($wt.widgets.Button.CHECK_HEIGHT - this.textHeightCached) / 2)) + "px";
+this.btnHandle.parentNode.style.bottom = "0";
+this.btnHandle.parentNode.style.top = "0";
+this.btnHandle.style.top = "0";
+} else {
+this.btnText.style.paddingTop = "0";
+}}h = this.textHeightCached;
+} else {
+h = this.image.height;
+}h = Math.max ($wt.widgets.Button.CHECK_HEIGHT + 3, h);
+if (h < cy) {
+this.btnText.parentNode.style.position = "relative";
+this.btnText.parentNode.style.top = (Math.floor ((cy - h) / 2)) + "px";
+}}return $_U (this, $wt.widgets.Button, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,Number,Number,Number,Number,Number");
+$_M (cla$$, "updateArrowSize", 
+($fz = function (cx, cy) {
+var xx = Math.floor (Math.min (cx, cy) / 3);
+var s = this.btnText.style;
+s.borderWidth = xx + "px";
+if ((this.style & 16384) != 0) {
+s.borderLeftWidth = "0";
+} else if ((this.style & 131072) != 0) {
+s.borderRightWidth = "0";
+} else if ((this.style & 128) != 0) {
+s.borderTopWidth = "0";
+} else if ((this.style & 1024) != 0) {
+if (xx > 1) {
+s.borderWidth = (xx - 1) + "px";
+}s.borderBottomWidth = "0";
+} else {
+s.borderTopWidth = "0";
+}var x = Math.floor (Math.min (cx, cy) / 6);
+s.position = "relative";
+if ((this.style & (131072 | 16384)) != 0) {
+s.top = (x - 3) + "px";
+if ((this.style & 131072) != 0) {
+s.left = "1px";
+}} else {
+if ((this.style & 128) != 0) {
+s.top = (xx - 3) + "px";
+} else if ((this.style & 1024) != 0) {
+s.top = (xx - 2) + "px";
+}}if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+if ((this.style & 128) != 0) {
+s.left = "-2px";
+} else if ((this.style & 1024) != 0) {
+s.left = "-1px";
+}}if ($wt.internal.browser.OS.isFirefox) {
+if ((this.style & (131072 | 16384)) != 0) {
+s.top = "-2px";
+if ((this.style & 131072) != 0) {
+s.left = "1px";
+}} else {
+if ((this.style & 128) != 0) {
+s.left = "-2px";
+s.top = "-1px";
+} else if ((this.style & 1024) != 0) {
+s.left = "-1px";
+s.top = "-1px";
+}}}}, $fz.isPrivate = true, $fz), "Number,Number");
+$_M (cla$$, "setCursor", 
+function (cursor) {
+if (this.handle != null) {
+this.handle.style.cursor = cursor.handle;
+}}, "$wt.graphics.Cursor");
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
-if ((this.style & ($WT.PUSH | $WT.TOGGLE)) != 0) {
-this.handle = document.createElement ("BUTTON");
-this.handle.className = "button-default";
-} else if ((this.style & ($WT.RADIO | $WT.CHECK)) != 0) {
 this.handle = document.createElement ("DIV");
-this.handle.className = "button-default";
-var radioBtn = document.createElement ("INPUT");
-radioBtn.type = ((this.style & $WT.RADIO) != 0) ? "radio" : "checkbox";
-radioBtn.className = "button-radio-default";
-this.handle.appendChild (radioBtn);
-}this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+var cssName = "button-default";
+if ((this.style & 2048) != 0) {
+cssName += " button-border";
+}if ((this.style & 8388608) != 0) {
+cssName += " button-flat";
+}this.handle.className = cssName;
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}if ((this.style & (16 | 32)) != 0) {
+var btnEl = document.createElement ("DIV");
+this.handle.appendChild (btnEl);
+var btnWrapperEl = document.createElement ("DIV");
+btnWrapperEl.className = "button-input-wrapper";
+btnEl.appendChild (btnWrapperEl);
+this.btnHandle = document.createElement ("INPUT");
+if ((this.style & 32) != 0) {
+btnEl.className = "button-check";
+this.btnHandle.type = "checkbox";
+} else {
+btnEl.className = "button-radio";
+this.btnHandle.type = "radio";
+}btnWrapperEl.appendChild (this.btnHandle);
+this.btnText = document.createElement ("DIV");
+this.btnText.className = "button-text";
+btnEl.appendChild (this.btnText);
+} else {
+this.btnHandle = document.createElement ("BUTTON");
+this.handle.appendChild (this.btnHandle);
+this.btnText = document.createElement ("DIV");
+this.btnHandle.appendChild (this.btnText);
+if ((this.style & 2) != 0) {
+this.btnHandle.className = "button-toggle";
+} else if ((this.style & 4) != 0) {
+this.btnHandle.className = "button-arrow";
+this.updateArrowStyle ();
+} else {
+this.btnHandle.className = "button-push";
+}}this.hookSelection ();
+});
+$_M (cla$$, "updateArrowStyle", 
+($fz = function () {
+if ((this.style & 16384) != 0) {
+this.btnText.className = "button-arrow-left";
+} else if ((this.style & 131072) != 0) {
+this.btnText.className = "button-arrow-right";
+} else if ((this.style & 128) != 0) {
+this.btnText.className = "button-arrow-up";
+} else if ((this.style & 1024) != 0) {
+this.btnText.className = "button-arrow-down";
+} else {
+this.btnText.className = "button-arrow-up";
+}}, $fz.isPrivate = true, $fz));
+$_V (cla$$, "hookSelection", 
+function () {
+var eventHandler = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Button$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -4364,98 +7896,40 @@ $_Z (this, arguments);
 }, $wt.widgets, "Button$1", $wt.internal.RunnableCompatibility);
 $_V (cla$$, "run", 
 function () {
-if ((this.callbacks["$wt.widgets.Button"].style & $WT.TOGGLE) != 0) {
+if (!this.callbacks["$wt.widgets.Button"].isEnabled ()) {
+this.toReturn (false);
+return ;
+}if ((this.callbacks["$wt.widgets.Button"].style & (32 | 2)) != 0) {
+var e = this.getEvent ();
+if (e.srcElement != this.callbacks["$wt.widgets.Button"].btnHandle) {
 this.callbacks["$wt.widgets.Button"].setSelection (!this.callbacks["$wt.widgets.Button"].getSelection ());
-}var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.item = this.callbacks["$wt.widgets.Button"];
-e.text = this.callbacks["$wt.widgets.Button"].getText ();
-e.widget = this.callbacks["$wt.widgets.Button"];
-this.callbacks["$wt.widgets.Button"].sendEvent (e);
+}} else {
+if ((this.callbacks["$wt.widgets.Button"].style & 16) != 0) {
+if ((this.callbacks["$wt.widgets.Button"].parent.getStyle () & 4194304) != 0) {
+this.callbacks["$wt.widgets.Button"].setSelection (!this.callbacks["$wt.widgets.Button"].getSelection ());
+} else {
+this.callbacks["$wt.widgets.Button"].selectRadio ();
+}}}this.callbacks["$wt.widgets.Button"].postEvent (13);
 });
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Button$1, innerThis, finalVars);
 }) (this, null));
-if ((this.style & ($WT.RADIO | $WT.CHECK)) != 0) {
-var btnText = document.createElement ("SPAN");
-this.handle.appendChild (btnText);
-btnText.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
-if (!$_D ("org.eclipse.swt.widgets.Button$2")) {
-Clazz.pu$h ();
-cla$$ = $_C (function () {
-$_B (this, arguments);
-$_Z (this, arguments);
-}, $wt.widgets, "Button$2", $wt.internal.RunnableCompatibility);
-$_V (cla$$, "run", 
-function () {
-if ((this.callbacks["$wt.widgets.Button"].style & $WT.CHECK) != 0) {
-this.callbacks["$wt.widgets.Button"].setSelection (!this.callbacks["$wt.widgets.Button"].getSelection ());
-}var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.item = this.callbacks["$wt.widgets.Button"];
-e.text = this.callbacks["$wt.widgets.Button"].getText ();
-e.widget = this.callbacks["$wt.widgets.Button"];
-this.callbacks["$wt.widgets.Button"].sendEvent (e);
-});
-cla$$ = $_P ();
-}
-return $_N ($wt.widgets.Button$2, innerThis, finalVars);
-}) (this, null));
-}if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
+this.handle.onclick = this.handle.ondblclick = eventHandler;
+if ((this.style & (16 | 32)) != 0) {
+this.btnText.onclick = eventHandler;
 }});
-$_V (cla$$, "setCursor", 
-function (cursor) {
-if (this.handle != null) {
-this.handle.style.cursor = cursor.handle;
-}}, "$wt.graphics.Cursor");
-$_M (cla$$, "setImage", 
-function (image) {
-if (image != null && image.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-this.image = image;
-if (image != null && this.handle != null) {
-this.handle.style.backgroundImage = "url('" + image.url + "')";
-}}, "$wt.graphics.Image");
-$_M (cla$$, "setDefault", 
-function (value) {
-if ((this.style & $WT.PUSH) == 0) return ;
-if (value) {
-try {
-this.handle.focus ();
-} catch (e) {
-if ($_O (e, Error)) {
-} else {
-throw e;
-}
-}
-}}, "Boolean");
-$_M (cla$$, "computeSize", 
-function (wHint, hHint, changed) {
-var width = $wt.widgets.Widget.DEFAULT_WIDTH;
-width = 12;
-var height = 24;
-if (wHint == $WT.DEFAULT) {
-if (this.text != null) {
-width = 6 + UIStringUtil.calculateStyledStringLineWidth (this.text, "button-default");
-}var extra = 6;
-if ((this.style & ($WT.CHECK | $WT.RADIO)) != 0) {
-width += $wt.widgets.Button.CHECK_WIDTH + extra;
-height = Math.max (height, $wt.widgets.Button.CHECK_HEIGHT + 3);
-}if ((this.style & ($WT.PUSH | $WT.TOGGLE)) != 0) {
-width += 6;
-}}if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
-var border = this.getBorderWidth ();
-width += border * 2;
-height += border * 2;
-return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
 $_S (cla$$,
-"CHECK_WIDTH", 12,
-"CHECK_HEIGHT", 12);
+"CHECK_WIDTH", 13,
+"CHECK_HEIGHT", 13,
+"ICON_WIDTH", 128,
+"ICON_HEIGHT", 128);
 cla$$ = $_C (function () {
 this.text = "";
+this.textSizeCached = false;
+this.textWidthCached = 0;
+this.textHeightCached = 0;
+this.lastColor = null;
 this.image = null;
 this.image2 = null;
 $_Z (this, arguments);
@@ -4466,135 +7940,119 @@ $_R (this, $wt.widgets.Label, [parent, $wt.widgets.Label.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= $WT.NO_FOCUS;
-if ((style & $WT.SEPARATOR) != 0) {
-style = $wt.widgets.Widget.checkBits (style, $WT.VERTICAL, $WT.HORIZONTAL, 0, 0, 0, 0);
-return $wt.widgets.Widget.checkBits (style, $WT.SHADOW_OUT, $WT.SHADOW_IN, $WT.SHADOW_NONE, 0, 0, 0);
-}return $wt.widgets.Widget.checkBits (style, $WT.LEFT, $WT.CENTER, $WT.RIGHT, 0, 0, 0);
+style |= 524288;
+if ((style & 2) != 0) {
+style = $wt.widgets.Widget.checkBits (style, 512, 256, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 8, 4, 32, 0, 0, 0);
+}return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
 }, "Number");
-$_M (cla$$, "getAlignment", 
-function () {
-if ((this.style & $WT.SEPARATOR) != 0) return 0;
-if ((this.style & $WT.LEFT) != 0) return $WT.LEFT;
-if ((this.style & $WT.CENTER) != 0) return $WT.CENTER;
-if ((this.style & $WT.RIGHT) != 0) return $WT.RIGHT;
-return $WT.LEFT;
-});
-$_M (cla$$, "getText", 
-function () {
-if ((this.style & $WT.SEPARATOR) != 0) return "";
-return this.text;
-});
-$_M (cla$$, "setText", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if ((this.style & $WT.SEPARATOR) != 0) return ;
-if (string.equals (this.text)) return ;
-this.text = string;
-this.handle.appendChild (document.createTextNode (this.text));
-}, "String");
-$_M (cla$$, "setAlignment", 
-function (alignment) {
-if ((this.style & $WT.SEPARATOR) != 0) return ;
-if ((alignment & ($WT.LEFT | $WT.RIGHT | $WT.CENTER)) == 0) return ;
-this.style &= ~($WT.LEFT | $WT.RIGHT | $WT.CENTER);
-this.style |= alignment & ($WT.LEFT | $WT.RIGHT | $WT.CENTER);
-if ((this.style & $WT.LEFT) != 0) {
-this.handle.style.textAlign = "left";
-} else if ((this.style & $WT.CENTER) != 0) {
-this.handle.style.textAlign = "center";
-} else if ((this.style & $WT.CENTER) != 0) {
-this.handle.style.textAlign = "right";
-} else {
-this.handle.style.textAlign = "inherit";
-}}, "Number");
-$_V (cla$$, "createWidget", 
-function () {
-this.register ();
-this.handle = document.createElement ("DIV");
-this.handle.className = "label-default";
-if ((this.style & $WT.SEPARATOR) != 0) {
-this.handle.style.fontSize = "0";
-var seperator1 = document.createElement ("DIV");
-if ((this.style & $WT.VERTICAL) != 0) {
-seperator1.className = "label-seperator-vertical-left";
-} else {
-seperator1.className = "label-seperator-horizontal-top";
-}this.handle.appendChild (seperator1);
-var seperator2 = document.createElement ("DIV");
-if ((this.style & $WT.VERTICAL) != 0) {
-seperator2.className = "label-seperator-vertical-right";
-} else {
-seperator2.className = "label-seperator-horizontal-bottom";
-}this.handle.appendChild (seperator2);
-}if ((this.style & $WT.WRAP) != 0) {
-this.handle.className += " label-wrap";
-}if ((this.style & $WT.BORDER) != 0) {
-this.handle.className += " label-border";
-}if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var width = 0;
 var height = 0;
 var border = this.getBorderWidth ();
-if ((this.style & $WT.SEPARATOR) != 0) {
-var lineWidth = 4;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 2) != 0) {
+var lineWidth = 1;
+if ((this.style & 256) != 0) {
 width = $wt.widgets.Widget.DEFAULT_WIDTH;
 height = lineWidth * 2;
 } else {
 width = lineWidth * 2;
 height = $wt.widgets.Widget.DEFAULT_HEIGHT;
-}if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+}if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
 }if (this.text != null) {
-width += UIStringUtil.calculatePlainStringLineWidth (this.text);
-height += UIStringUtil.calculatePlainStringLineHeight (this.text);
-}if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
-if ((this.style & $WT.WRAP) != 0 && hHint == $WT.DEFAULT) {
-height = UIStringUtil.calculateStyledStringBlockHeight (this.text, width, "label-default label-wrap");
-}if (this.image != null) {
+if ((this.style & 64) != 0 && wHint != -1 && hHint == -1) {
+height = $wt.internal.browser.OS.getStringStyledWrappedHeight (this.text, "label-default", this.handle.style.cssText, wHint);
+} else {
+if (!this.textSizeCached || changed) {
+var cssSize = $wt.internal.browser.OS.getStringStyledSize (this.text, "label-default", this.handle.style.cssText);
+this.textSizeCached = true;
+this.textWidthCached = cssSize.x;
+this.textHeightCached = cssSize.y;
+}width = this.textWidthCached;
+height = this.textHeightCached;
+}}if (this.image != null) {
+if (this.image.width == 0 && this.image.height == 0) {
+if (this.image.url != null && this.image.url.length != 0) {
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
+} else {
+width += 16;
+height = Math.max (16, height);
+}} else {
 width += this.image.width;
 height = Math.max (this.image.height, height);
-}if ((this.style & $WT.BORDER) != 0) {
+}}if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 width += border * 2;
 height += border * 2;
-}return  new $wt.graphics.Point (width, height);
+return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_M (cla$$, "setBounds", 
-function (x, y, width, height) {
-$_U (this, $wt.widgets.Label, "setBounds", [x, y, width, height]);
-if ((this.style & $WT.SEPARATOR) != 0) {
-var handleStyle = this.handle.childNodes[0].style;
-if ((this.style & $WT.HORIZONTAL) != 0) {
-handleStyle.marginTop = ((Math.floor (height / 2)) - 1) + "px";
-handleStyle.width = width + "px";
-this.handle.childNodes[1].style.width = width + "px";
-} else {
-handleStyle.marginLeft = ((Math.floor (width / 2)) - 1) + "px";
-handleStyle.height = height + "px";
-this.handle.childNodes[1].style.marginLeft = (Math.floor (width / 2)) + "px";
-this.handle.childNodes[1].style.height = height + "px";
-}}}, "Number,Number,Number,Number");
+$_M (cla$$, "getAlignment", 
+function () {
+if ((this.style & 2) != 0) return 0;
+if ((this.style & 16384) != 0) return 16384;
+if ((this.style & 16777216) != 0) return 16777216;
+if ((this.style & 131072) != 0) return 131072;
+return 16384;
+});
+$_M (cla$$, "getImage", 
+function () {
+return this.image;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
+$_M (cla$$, "getText", 
+function () {
+if ((this.style & 2) != 0) return "";
+return this.text;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.Label, "releaseWidget", []);
+if (this.image2 != null) this.image2.dispose ();
+this.image2 = null;
+this.text = null;
+this.image = null;
+});
+$_M (cla$$, "setAlignment", 
+function (alignment) {
+if ((this.style & 2) != 0) return ;
+if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+this.style &= ~(16384 | 131072 | 16777216);
+this.style |= alignment & (16384 | 131072 | 16777216);
+if ((this.style & 16384) != 0) {
+this.handle.style.textAlign = "left";
+this.handle.style.backgroundPosition = "left center";
+} else if ((this.style & 16777216) != 0) {
+this.handle.style.textAlign = "center";
+this.handle.style.backgroundPosition = "center center";
+} else if ((this.style & 131072) != 0) {
+this.handle.style.textAlign = "right";
+this.handle.style.backgroundPosition = "right center";
+}}, "Number");
 $_M (cla$$, "setImage", 
 function (image) {
 if (image == null) return ;
-if ((this.style & $WT.SEPARATOR) != 0) return ;
-if (image != null && image.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
+if ((this.style & 2) != 0) return ;
 this.image = image;
-if (this.image.handle == null) {
+if (this.image.handle == null && this.image.url != null && this.image.url.length != 0) {
 var handleStyle = this.handle.style;
 if (image.url.toLowerCase ().endsWith (".png") && handleStyle.filter != null) {
 handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 } else {
 handleStyle.backgroundRepeat = "no-repeat";
-handleStyle.backgroundPosition = "center center";
+handleStyle.backgroundPosition = "left center";
 handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 }} else if (this.handle.childNodes.length == 0) {
 for (var i = 0; i < image.handle.childNodes.length; i++) {
@@ -4606,14 +8064,96 @@ for (var i = 0; i < image.handle.childNodes.length; i++) {
 this.handle.insertBefore (image.handle.childNodes[i], txt);
 }
 }}, "$wt.graphics.Image");
-$_M (cla$$, "getImage", 
+$_M (cla$$, "setText", 
+function (string) {
+if ((this.style & 2) != 0) return ;
+if (this.image != null) {
+this.handle.style.backgroundImage = "";
+if ($wt.internal.browser.OS.isIE && this.image.url != null && this.image.url.toLowerCase ().endsWith (".png") && this.handle.style.filter != null) {
+this.handle.style.filter = "";
+}}if (string == this.text) {
+return ;
+}this.textSizeCached = false;
+this.text = string;
+$wt.internal.browser.OS.insertText (this.handle, this.text);
+}, "String");
+$_V (cla$$, "createHandle", 
 function () {
-return this.image;
-});
+this.handle = document.createElement ("DIV");
+this.handle.className = "label-default";
+if ((this.style & 2) != 0) {
+if ((this.style & 4) != 0) {
+this.handle.className += " shadow-in";
+} else if ((this.style & 8) != 0) {
+this.handle.className += " shadow-out";
+} else {
+this.handle.className += " shadow-none";
+}this.handle.style.fontSize = "0";
+var seperator1 = document.createElement ("DIV");
+var seperator2 = document.createElement ("DIV");
+if ((this.style & 512) != 0) {
+seperator1.className = "label-seperator-vertical-left";
+seperator2.className = "label-seperator-vertical-right";
+} else {
+seperator1.className = "label-seperator-horizontal-top";
+seperator2.className = "label-seperator-horizontal-bottom";
+}this.handle.appendChild (seperator1);
+this.handle.appendChild (seperator2);
+}if ((this.style & 64) != 0) {
+this.handle.className += " label-wrap";
+}if ((this.style & 2048) != 0) {
+this.handle.className += " label-border";
+}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}});
+$_M (cla$$, "setBounds", 
+function (x, y, width, height) {
+$_U (this, $wt.widgets.Label, "setBounds", [x, y, width, height]);
+if ((this.style & 2) != 0) {
+var handleStyle = this.handle.childNodes[0].style;
+if ((this.style & 256) != 0) {
+var h = (Math.floor (height / 2)) - 1;
+if ($wt.internal.browser.OS.isIE) {
+h--;
+}handleStyle.marginTop = h + "px";
+handleStyle.width = width + "px";
+this.handle.childNodes[1].style.width = width + "px";
+} else {
+handleStyle.marginLeft = ((Math.floor (width / 2)) - 1) + "px";
+handleStyle.height = height + "px";
+this.handle.childNodes[1].style.marginLeft = (Math.floor (width / 2)) + "px";
+this.handle.childNodes[1].style.height = height + "px";
+}}}, "Number,Number,Number,Number");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+$_U (this, $wt.widgets.Label, "setEnabled", [enabled]);
+if (!enabled) {
+this.lastColor = this.handle.style.color;
+this.handle.style.color = "gray";
+} else {
+this.handle.style.color = this.lastColor;
+this.lastColor = null;
+}}, "Boolean");
+$_M (cla$$, "setForeground", 
+function (color) {
+$_U (this, $wt.widgets.Label, "setForeground", [color]);
+if (this.lastColor != null) {
+this.lastColor = this.handle.style.color;
+}}, "$wt.graphics.Color");
+$_M (cla$$, "setFont", 
+function (font) {
+this.textSizeCached = false;
+$_U (this, $wt.widgets.Label, "setFont", [font]);
+}, "$wt.graphics.Font");
 cla$$ = $_C (function () {
 this.text = null;
-this.linkColor = null;
-this.linkDisabledColor = null;
+this.cachedText = null;
+this.textSizeCached = false;
+this.textWidthCached = 0;
+this.textHeightCached = 0;
+this.lastColor = null;
 this.offsets = null;
 this.selection = null;
 this.ids = null;
@@ -4622,24 +8162,68 @@ this.focusIndex = 0;
 this.font = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Link", $wt.widgets.Control);
+$_Y (cla$$, function () {
+this.anchors =  new Array (0);
+});
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Link, [parent, style]);
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+if (wHint != -1 && wHint < 0) wHint = 0;
+if (hHint != -1 && hHint < 0) hHint = 0;
+var width = 0;
+var height = 0;
+if (this.text != null) {
+if ((this.style & 64) != 0 && wHint != -1 && hHint == -1) {
+height = $wt.internal.browser.OS.getStringStyledWrappedHeight (this.cachedText, "label-default", this.handle.style.cssText, wHint);
+} else {
+if (!this.textSizeCached || changed) {
+var cssSize = $wt.internal.browser.OS.getStringStyledSize (this.cachedText, "label-default", this.handle.style.cssText);
+this.textSizeCached = true;
+this.textWidthCached = cssSize.x;
+this.textHeightCached = cssSize.y;
+}width = this.textWidthCached;
+height = this.textHeightCached;
+}}var border = this.getBorderWidth ();
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+width += border * 2;
+height += border * 2;
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_V (cla$$, "createHandle", 
 function () {
-this.text = "";
 this.handle = document.createElement ("DIV");
-this.handle.style.color = "blue";
-this.handle.style.cursor = "pointer";
-this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+this.handle.className = "link-default";
+if ((this.style & 64) != 0) {
+this.handle.className += " link-wrap";
+}if ((this.style & 2048) != 0) {
+this.handle.className += " link-border";
+}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}});
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.Link, "createWidget", []);
+this.text = "";
+});
+$_M (cla$$, "enableWidget", 
+function (enabled) {
+$_U (this, $wt.widgets.Link, "enableWidget", [enabled]);
+}, "Boolean");
+$_V (cla$$, "hookSelection", 
+function () {
+var linkHandler = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Link$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -4649,38 +8233,377 @@ $_Z (this, arguments);
 $_V (cla$$, "run", 
 function () {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
+e.type = 13;
 e.item = this.callbacks["$wt.widgets.Link"];
 e.text = this.callbacks["$wt.widgets.Link"].text;
 e.widget = this.callbacks["$wt.widgets.Link"];
-this.callbacks["$wt.widgets.Link"].sendEvent (e);
-});
+e.display = this.callbacks["$wt.widgets.Link"].display;
+this.callbacks["$wt.widgets.Link"].sendEvent (13);
+if (!e.doit) {
+this.toReturn (false);
+}});
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Link$1, innerThis, finalVars);
 }) (this, null));
-this.handle.appendChild (document.createTextNode (this.text));
-if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
+for (var i = 0; i < this.anchors.length; i++) {
+this.anchors[i].href = "#";
+this.anchors[i].target = null;
+this.anchors[i].onclick = linkHandler;
+this.anchors[i].ondblclick = linkHandler;
+}
+});
+$_M (cla$$, "initAccessible", 
+function () {
+var accessible = this.getAccessible ();
+accessible.addAccessibleListener ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Link$2")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Link$2", $wt.accessibility.AccessibleAdapter);
+$_V (cla$$, "getName", 
+function (e) {
+e.result = this.callbacks["$wt.widgets.Link"].parse (this.callbacks["$wt.widgets.Link"].text, null);
+}, "$wt.accessibility.AccessibleEvent");
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Link$2, innerThis, finalVars);
+}) (this, null));
+accessible.addAccessibleControlListener ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.Link$3")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "Link$3", $wt.accessibility.AccessibleControlAdapter);
+$_V (cla$$, "getChildAtPoint", 
+function (e) {
+e.childID = -1;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getLocation", 
+function (e) {
+var rect = this.callbacks["$wt.widgets.Link"].display.map (this.callbacks["$wt.widgets.Link"].getParent (), null, this.callbacks["$wt.widgets.Link"].getBounds ());
+e.x = rect.x;
+e.y = rect.y;
+e.width = rect.width;
+e.height = rect.height;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getChildCount", 
+function (e) {
+e.detail = 0;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getRole", 
+function (e) {
+e.detail = 30;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getState", 
+function (e) {
+e.detail = 1048576;
+if (this.callbacks["$wt.widgets.Link"].hasFocus ()) e.detail |= 4;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getDefaultAction", 
+function (e) {
+e.result = $WT.getMessage ("SWT_Press");
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getSelection", 
+function (e) {
+if (this.callbacks["$wt.widgets.Link"].hasFocus ()) e.childID = -1;
+}, "$wt.accessibility.AccessibleControlEvent");
+$_V (cla$$, "getFocus", 
+function (e) {
+if (this.callbacks["$wt.widgets.Link"].hasFocus ()) e.childID = -1;
+}, "$wt.accessibility.AccessibleControlEvent");
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.Link$3, innerThis, finalVars);
+}) (this, null));
+});
+$_V (cla$$, "getBorderWidth", 
+function () {
+return 2;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
 $_M (cla$$, "getText", 
 function () {
 return this.text;
 });
+$_M (cla$$, "parse", 
+function (string, handle) {
+var el = handle;
+var length = string.length;
+this.offsets =  new Array (Math.floor (length / 4));
+this.ids =  new Array (Math.floor (length / 4));
+this.mnemonics =  $_A (Math.floor (length / 4) + 1, 0);
+var result =  new StringBuffer ();
+var result2 =  new StringBuffer ();
+var buffer =  $_A (length, '\0');
+string.getChars (0, string.length, buffer, 0);
+var index = 0;
+var state = 0;
+var linkIndex = 0;
+var start = 0;
+var tagStart = 0;
+var linkStart = 0;
+var endtagStart = 0;
+var refStart = 0;
+while (index < length) {
+var c = buffer[index];
+if ((c).charCodeAt (0) >= ('A').charCodeAt (0) && (c).charCodeAt (0) <= ('Z').charCodeAt (0)) {
+c = String.fromCharCode ((c).charCodeAt (0) + (('a').charCodeAt (0) - ('A').charCodeAt (0)));
+}switch (state) {
+case 0:
+if ((c).charCodeAt (0) == ('<').charCodeAt (0)) {
+tagStart = index;
+state++;
+}break;
+case 1:
+if ((c).charCodeAt (0) == ('a').charCodeAt (0)) state++;
+break;
+case 2:
+switch (c) {
+case 'h':
+state = 7;
+break;
+case '>':
+linkStart = index + 1;
+state++;
+break;
+default:
+if ((c).charCodeAt (0) == 32 || (c).charCodeAt (0) == 160) break;
+ else state = 13;
+}
+break;
+case 3:
+if ((c).charCodeAt (0) == ('<').charCodeAt (0)) {
+endtagStart = index;
+state++;
+}break;
+case 4:
+state = (c).charCodeAt (0) == ('/').charCodeAt (0) ? state + 1 : 3;
+break;
+case 5:
+state = (c).charCodeAt (0) == ('a').charCodeAt (0) ? state + 1 : 3;
+break;
+case 6:
+if ((c).charCodeAt (0) == ('>').charCodeAt (0)) {
+this.mnemonics[linkIndex] = this.parseMnemonics (buffer, start, tagStart, result, result2, handle);
+var offset = result.length ();
+var anchor = null;
+if (handle != null) {
+anchor = document.createElement ("A");
+el.appendChild (anchor);
+this.anchors[this.anchors.length] = anchor;
+}this.parseMnemonics (buffer, linkStart, endtagStart, result, result2, anchor);
+this.offsets[linkIndex] =  new $wt.graphics.Point (offset, result.length () - 1);
+if (this.ids[linkIndex] == null) {
+this.ids[linkIndex] =  String.instantialize (buffer, linkStart, endtagStart - linkStart);
+}if (anchor != null) {
+anchor.href = this.ids[linkIndex];
+anchor.target = "_blank";
+anchor.title = this.ids[linkIndex];
+}linkIndex++;
+start = tagStart = linkStart = endtagStart = refStart = index + 1;
+state = 0;
+} else {
+state = 3;
+}break;
+case 7:
+state = (c).charCodeAt (0) == ('r').charCodeAt (0) ? state + 1 : 0;
+break;
+case 8:
+state = (c).charCodeAt (0) == ('e').charCodeAt (0) ? state + 1 : 0;
+break;
+case 9:
+state = (c).charCodeAt (0) == ('f').charCodeAt (0) ? state + 1 : 0;
+break;
+case 10:
+state = (c).charCodeAt (0) == ('=').charCodeAt (0) ? state + 1 : 0;
+break;
+case 11:
+if ((c).charCodeAt (0) == ('"').charCodeAt (0)) {
+state++;
+refStart = index + 1;
+} else {
+state = 0;
+}break;
+case 12:
+if ((c).charCodeAt (0) == ('"').charCodeAt (0)) {
+this.ids[linkIndex] =  String.instantialize (buffer, refStart, index - refStart);
+state = 2;
+}break;
+case 13:
+if (Character.isWhitespace (c)) {
+state = 0;
+} else if ((c).charCodeAt (0) == ('=').charCodeAt (0)) {
+state++;
+}break;
+case 14:
+state = (c).charCodeAt (0) == ('"').charCodeAt (0) ? state + 1 : 0;
+break;
+case 15:
+if ((c).charCodeAt (0) == ('"').charCodeAt (0)) state = 2;
+break;
+default:
+state = 0;
+break;
+}
+index++;
+}
+if (start < length) {
+var tmp = this.parseMnemonics (buffer, start, tagStart, result, result2, handle);
+var mnemonic = this.parseMnemonics (buffer, linkStart, index, result, result2, handle);
+if (mnemonic == -1) mnemonic = tmp;
+this.mnemonics[linkIndex] = mnemonic;
+} else {
+this.mnemonics[linkIndex] = -1;
+}if (this.offsets.length != linkIndex) {
+var newOffsets =  new Array (linkIndex);
+System.arraycopy (this.offsets, 0, newOffsets, 0, linkIndex);
+this.offsets = newOffsets;
+var newIDs =  new Array (linkIndex);
+System.arraycopy (this.ids, 0, newIDs, 0, linkIndex);
+this.ids = newIDs;
+var newMnemonics =  $_A (linkIndex + 1, 0);
+System.arraycopy (this.mnemonics, 0, newMnemonics, 0, linkIndex + 1);
+this.mnemonics = newMnemonics;
+}this.cachedText = result2.toString ();
+return result.toString ();
+}, "String,Object");
+$_M (cla$$, "parseMnemonics", 
+function (buffer, start, end, result, result2, handle) {
+var el = handle;
+var mnemonic = -1;
+var index = start;
+var lastIndex = result.length ();
+while (index < end) {
+var c = buffer[index];
+result2.append (c);
+if ((c).charCodeAt (0) == ('&').charCodeAt (0)) {
+if (index + 1 < end && (buffer[index + 1]).charCodeAt (0) == ('&').charCodeAt (0)) {
+result.append (c);
+index++;
+} else {
+mnemonic = result.length ();
+if (el != null) {
+if ((mnemonic > lastIndex) && (el != null)) {
+var len = mnemonic - lastIndex;
+var cs =  $_A (len, '\0');
+result.getChars (lastIndex, mnemonic, cs, 0);
+var s =  String.instantialize (cs, 0, len);
+el.appendChild (document.createTextNode (s));
+}lastIndex = mnemonic + 1;
+var span = document.createElement ("SPAN");
+el.appendChild (span);
+span.appendChild (document.createTextNode ("" + buffer[index + 1]));
+}}} else {
+result.append (c);
+}var lineBreak = false;
+if ((c).charCodeAt (0) == ('\r').charCodeAt (0)) {
+if (index + 1 < end && (buffer[index + 1]).charCodeAt (0) == ('\n').charCodeAt (0)) {
+result.append ('\n');
+index++;
+}lineBreak = true;
+}if ((c).charCodeAt (0) == ('\n').charCodeAt (0)) {
+lineBreak = true;
+}if (lineBreak && el != null) {
+var idx = result.length ();
+if (idx > lastIndex) {
+var len = idx - lastIndex;
+var cs =  $_A (len, '\0');
+result.getChars (lastIndex, idx, cs, 0);
+var s =  String.instantialize (cs, 0, len);
+el.appendChild (document.createTextNode (s));
+}lastIndex = idx;
+el.appendChild (document.createElement ("BR"));
+}index++;
+}
+var idx = result.length ();
+if (idx > lastIndex && el != null) {
+var len = idx - lastIndex;
+var cs =  $_A (len, '\0');
+result.getChars (lastIndex, idx, cs, 0);
+var s =  String.instantialize (cs, 0, len);
+el.appendChild (document.createTextNode (s));
+}return mnemonic;
+}, "Array,Number,Number,StringBuffer,StringBuffer,Object");
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.Link, "releaseWidget", []);
+this.offsets = null;
+this.ids = null;
+this.mnemonics = null;
+this.text = null;
+});
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
-}, "$wt.events.SelectionListener");
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+if (!this.hooks (13) && !this.hooks (14)) {
+this.unhookSelection ();
+}}, "$wt.events.SelectionListener");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+$_U (this, $wt.widgets.Link, "setEnabled", [enabled]);
+var cssName = this.handle.className;
+if (cssName == null) cssName = "";
+var key = "link-disabled";
+var idx = cssName.indexOf (key);
+if (!enabled) {
+this.lastColor = this.handle.style.color;
+if (idx == -1) {
+this.handle.className += " " + key;
+}} else {
+if (idx != -1) {
+this.handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}this.handle.style.color = this.lastColor;
+this.lastColor = null;
+}}, "Boolean");
+$_M (cla$$, "setForeground", 
+function (color) {
+$_U (this, $wt.widgets.Link, "setForeground", [color]);
+if (this.lastColor != null) {
+this.lastColor = this.handle.style.color;
+}}, "$wt.graphics.Color");
+$_M (cla$$, "setFont", 
+function (font) {
+this.textSizeCached = false;
+$_U (this, $wt.widgets.Link, "setFont", [font]);
+}, "$wt.graphics.Font");
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (string.equals (this.text)) return ;
 this.text = string;
-this.handle.innerHTML = this.text;
+this.textSizeCached = false;
+this.parse (string, this.handle);
+System.out.println (this.cachedText);
+System.out.println ("ids==");
+for (var i = 0; i < this.ids.length; i++) {
+System.out.println (i + "/" + this.ids[i]);
+}
+System.out.println ("mnemonics==");
+for (var i = 0; i < this.mnemonics.length; i++) {
+System.out.println (i + "/" + this.mnemonics[i]);
+}
+System.out.println ("offsets==");
+for (var i = 0; i < this.offsets.length; i++) {
+System.out.println (i + "/" + this.offsets[i]);
+}
 }, "String");
+$_M (cla$$, "unhookSelection", 
+function () {
+for (var i = 0; i < this.anchors.length; i++) {
+this.anchors[i].onclick = null;
+this.anchors[i].ondblclick = null;
+this.anchors[i].href = this.ids[i];
+this.anchors[i].target = "_blank";
+}
+});
 cla$$.LINK_FOREGROUND = cla$$.prototype.LINK_FOREGROUND =  new $wt.graphics.RGB (0, 51, 153);
 cla$$ = $_C (function () {
 this.tabs = 0;
@@ -4690,80 +8613,40 @@ this.doubleClick = false;
 this.ignoreModify = false;
 this.ignoreVerify = false;
 this.ignoreCharacter = false;
+this.lineHeight = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Text", $wt.widgets.Scrollable);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Text, [parent, $wt.widgets.Text.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-if ((style & $WT.SINGLE) != 0 && (style & $WT.MULTI) != 0) {
-style &= ($t$ = ~ $WT.MULTI, $WT.prototype.MULTI = $WT.MULTI, $t$);
-}style = $wt.widgets.Widget.checkBits (style, $WT.LEFT, $WT.CENTER, $WT.RIGHT, 0, 0, 0);
-if ((style & $WT.SINGLE) != 0) style &= ~($WT.H_SCROLL | $WT.V_SCROLL | $WT.WRAP);
-if ((style & $WT.WRAP) != 0) {
-style |= $WT.MULTI;
-style &= ($t$ = ~ $WT.H_SCROLL, $WT.prototype.H_SCROLL = $WT.H_SCROLL, $t$);
-}if ((style & $WT.MULTI) != 0) style &= ($t$ = ~ $WT.PASSWORD, $WT.prototype.PASSWORD = $WT.PASSWORD, $t$);
-if ((style & ($WT.SINGLE | $WT.MULTI)) != 0) return style;
-if ((style & ($WT.H_SCROLL | $WT.V_SCROLL)) != 0) return style | $WT.MULTI;
-return style | $WT.SINGLE;
-}, "Number");
-$_M (cla$$, "addModifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Modify, typedListener);
-}, "$wt.events.ModifyListener");
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "addVerifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Verify, typedListener);
-}, "$wt.events.VerifyListener");
-$_M (cla$$, "removeModifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Modify, listener);
-}, "$wt.events.ModifyListener");
-$_M (cla$$, "removeSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "removeVerifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Verify, listener);
-}, "$wt.events.VerifyListener");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
 this.doubleClick = true;
-if ((this.style & $WT.MULTI) != 0) {
+if ((this.style & 2) != 0) {
 this.handle = document.createElement ("TEXTAREA");
 } else {
 this.handle = document.createElement ("INPUT");
-}this.handle.className = "text-default";
-if ((this.style & $WT.BORDER) != 0) {
+}this.handle.className = "text-default" + ($wt.internal.browser.OS.isIE ? " text-ie-default" : "");
+if ((this.style & 2048) != 0) {
 this.handle.className += " text-border";
-}if ((this.style & $WT.READ_ONLY) != 0) {
+}if ((this.style & 8) != 0) {
 this.handle.readOnly = true;
-}if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.onkeydown = Clazz.makeFunction ((function (innerThis, finalVars) {
+}if ((this.style & 512) != 0 && (this.style & 256) != 0) {
+this.handle.style.overflow = "scroll";
+} else {
+if ((this.style & 512) != 0) {
+this.handle.className += " text-v-scroll";
+} else if ((this.style & 256) != 0) {
+this.handle.className += " text-h-scroll";
+}}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}});
+$_V (cla$$, "hookKeyDown", 
+function () {
+this.handle.onkeydown = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Text$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -4772,37 +8655,48 @@ $_Z (this, arguments);
 }, $wt.widgets, "Text$1", $wt.internal.RunnableCompatibility);
 $_V (cla$$, "run", 
 function () {
-if (this.callbacks["$wt.widgets.Text"].eventTable == null) {
-this.toReturn (true);
-return ;
-}var modified = true;
-if (!this.callbacks["$wt.widgets.Text"].eventTable.hooks ($WT.Verify)) {
-this.toReturn (true);
-} else {
-var e =  new $wt.widgets.Event ();
-e.type = $WT.Verify;
-e.item = this.callbacks["$wt.widgets.Text"];
+var verifyHooked = false;
+if (this.callbacks["$wt.widgets.Text"].hooks (25)) {
+verifyHooked = true;
 var evt = this.getEvent ();
 if (!this.callbacks["$wt.widgets.Text"].isInputCharacter (evt.keyCode, evt.shiftKey, evt.altKey, evt.ctrlKey)) {
 this.toReturn (true);
-modified = false;
 } else {
-e.text = this.callbacks["$wt.widgets.Text"].getInputCharacter (evt.keyCode, evt.shiftKey, false);
-e.widget = this.callbacks["$wt.widgets.Text"];
-this.callbacks["$wt.widgets.Text"].sendEvent (e);
-this.toReturn (e.doit);
-modified = e.doit;
-}}if (modified && this.callbacks["$wt.widgets.Text"].eventTable.hooks ($WT.Modify)) {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Modify;
-e.item = this.callbacks["$wt.widgets.Text"];
-e.widget = this.callbacks["$wt.widgets.Text"];
-this.callbacks["$wt.widgets.Text"].sendEvent (e);
+e.character = this.callbacks["$wt.widgets.Text"].getInputCharacter (evt.keyCode, evt.shiftKey, false);
+var txt = "" + e.character;
+if ((e.character).charCodeAt (0) == 8 || (e.character).charCodeAt (0) == 46) {
+txt = "";
+}e.keyCode = evt.keyCode;
+e.stateMask = (evt.shiftKey ? 131072 : 0) | (evt.ctrlKey ? 262144 : 0);
+var s = this.callbacks["$wt.widgets.Text"].verifyText (txt, 0, 0, e);
+if (s == null) {
+this.toReturn (false);
+} else if (this.callbacks["$wt.widgets.Text"].hooks (24)) {
+var ev =  new $wt.widgets.Event ();
+ev.type = 24;
+ev.widget = this.callbacks["$wt.widgets.Text"];
+ev.display = this.callbacks["$wt.widgets.Text"].display;
+ev.time = this.callbacks["$wt.widgets.Text"].display.getLastEventTime ();
+this.callbacks["$wt.widgets.Text"].sendEvent (ev);
+this.toReturn (ev.doit);
+}}}if (!verifyHooked || this.callbacks["$wt.widgets.Text"].hooks (1)) {
+var ev =  new $wt.widgets.Event ();
+ev.type = 24;
+ev.widget = this.callbacks["$wt.widgets.Text"];
+ev.display = this.callbacks["$wt.widgets.Text"].display;
+ev.time = this.callbacks["$wt.widgets.Text"].display.getLastEventTime ();
+this.callbacks["$wt.widgets.Text"].sendEvent (ev);
+this.toReturn (ev.doit);
+this.callbacks["$wt.widgets.Text"].sendEvent (1);
 }});
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Text$1, innerThis, finalVars);
 }) (this, null));
+});
+$_V (cla$$, "hookModify", 
+function () {
 this.handle.onchange = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Text$2")) {
 Clazz.pu$h ();
@@ -4812,26 +8706,24 @@ $_Z (this, arguments);
 }, $wt.widgets, "Text$2", $wt.internal.RunnableCompatibility);
 $_V (cla$$, "run", 
 function () {
-if (this.callbacks["$wt.widgets.Text"].eventTable == null) {
+if ((this.callbacks["$wt.widgets.Text"].style & 8) != 0 || (!this.callbacks["$wt.widgets.Text"].hooks (25) && !this.callbacks["$wt.widgets.Text"].filters (25))) {
 this.toReturn (true);
 return ;
-}if (!this.callbacks["$wt.widgets.Text"].eventTable.hooks ($WT.Verify)) {
+}var newText = this.callbacks["$wt.widgets.Text"].handle.value;
+if (newText != null) {
+var oldText = newText;
+newText = this.callbacks["$wt.widgets.Text"].verifyText (newText, 0, 0, null);
+if (newText == null) {
 this.toReturn (true);
-} else {
+return ;
+}if (!newText.equals (oldText)) {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Verify;
+e.type = 24;
 e.item = this.callbacks["$wt.widgets.Text"];
-e.text = this.callbacks["$wt.widgets.Text"].getText ();
 e.widget = this.callbacks["$wt.widgets.Text"];
 this.callbacks["$wt.widgets.Text"].sendEvent (e);
 this.toReturn (e.doit);
-}if (this.callbacks["$wt.widgets.Text"].eventTable.hooks ($WT.Modify)) {
-var e =  new $wt.widgets.Event ();
-e.type = $WT.Modify;
-e.item = this.callbacks["$wt.widgets.Text"];
-e.widget = this.callbacks["$wt.widgets.Text"];
-this.callbacks["$wt.widgets.Text"].sendEvent (e);
-}});
+}}});
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Text$2, innerThis, finalVars);
@@ -4882,96 +8774,125 @@ ch = chs[keyCode - 219];
 } else {
 var chs = ['{', '|', '}', '\"'];
 ch = chs[keyCode - 219];
-}}return "" + ch;
+}} else {
+ch = String.fromCharCode (keyCode);
+}return ch;
 }, $fz.isPrivate = true, $fz), "Number,Boolean,Boolean");
 $_M (cla$$, "isInputCharacter", 
 ($fz = function (keyCode, shiftKey, altKey, ctrlKey) {
 if (altKey || ctrlKey) {
 return false;
-}if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32 || (keyCode >= 48 && keyCode <= 57) || keyCode == 59 || keyCode == 61 || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 96 && keyCode <= 111 && keyCode != 108) || (keyCode >= 186 && keyCode <= 192) || (keyCode >= 218 && keyCode <= 222)) {
+}if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32 || keyCode == 8 || keyCode == 46 || (keyCode >= 48 && keyCode <= 57) || keyCode == 59 || keyCode == 61 || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 96 && keyCode <= 111 && keyCode != 108) || (keyCode >= 186 && keyCode <= 192) || (keyCode >= 218 && keyCode <= 222)) {
 return true;
 }return false;
 }, $fz.isPrivate = true, $fz), "Number,Boolean,Boolean,Boolean");
+$_M (cla$$, "addModifyListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (24, typedListener);
+}, "$wt.events.ModifyListener");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "addVerifyListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (25, typedListener);
+}, "$wt.events.VerifyListener");
+$_M (cla$$, "append", 
+function (string) {
+this.handle.value += string;
+}, "String");
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+if ((style & 4) != 0 && (style & 2) != 0) {
+style &= ($t$ = ~ $WT.MULTI, $WT.prototype.MULTI = $WT.MULTI, $t$);
+}style = $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
+if ((style & 4) != 0) style &= ~(256 | 512 | 64);
+if ((style & 64) != 0) {
+style |= 2;
+style &= ($t$ = ~ $WT.H_SCROLL, $WT.prototype.H_SCROLL = $WT.H_SCROLL, $t$);
+}if ((style & 2) != 0) style &= ($t$ = ~ $WT.PASSWORD, $WT.prototype.PASSWORD = $WT.PASSWORD, $t$);
+if ((style & (4 | 2)) != 0) return style;
+if ((style & (256 | 512)) != 0) return style | 2;
+return style | 4;
+}, "Number");
+$_M (cla$$, "clearSelection", 
+function () {
+BrowserNative.clearSelection (this.handle);
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var height = 0;
+var width = 0;
+if (wHint == -1 || hHint == -1) {
+var size = null;
+var text = this.getText ();
+if (text != null && text.length != 0) {
+var wrap = (this.style & 2) != 0 && (this.style & 64) != 0;
+if (wrap && wHint != -1 && wHint > 0) {
+size =  new $wt.graphics.Point (wHint, $wt.internal.browser.OS.getStringStyledWrappedHeight (text, "text-default", this.handle.style.cssText, wHint));
+} else {
+size = $wt.internal.browser.OS.getStringStyledSize (text, "text-default", this.handle.style.cssText);
+}height = size.y;
+if (height <= 0) {
+height = this.getLineHeight ();
+}} else {
+width = 0;
+height = this.getLineHeight ();
+}}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+var trim = this.computeTrim (0, 0, width, height);
+return  new $wt.graphics.Point (trim.width, trim.height);
+}, "Number,Number,Boolean");
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var rect = $_U (this, $wt.widgets.Text, "computeTrim", [x, y, width, height]);
-var margins = 2;
-rect.x -= margins & 0xFFFF;
-rect.width += (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
-if ((this.style & $WT.H_SCROLL) != 0) rect.width++;
-if ((this.style & $WT.BORDER) != 0) {
+System.out.println (rect);
+System.out.println (width + "," + height);
+if ((this.style & 2) != 0) {
+rect.width += 6;
+} else {
+rect.width += 1;
+}if ((this.style & 256) != 0) rect.width++;
+if ((this.style & 512) != 0) {
+rect.width += 16;
+}if ((this.style & 256) != 0) {
+rect.height += 16;
+}if ((this.style & 2048) != 0) {
 rect.x -= 1;
 rect.y -= 1;
 rect.width += 2;
 rect.height += 2;
 }return rect;
 }, "Number,Number,Number,Number");
-$_M (cla$$, "computeSize", 
-function (wHint, hHint, changed) {
-var height = 0;
-var width = 0;
-if (wHint == $WT.DEFAULT || hHint == $WT.DEFAULT) {
-var splits = this.getText ().split ("\n");
-height += this.getLineHeight () * splits.length + 10;
-var lineChars = 0;
-for (var i = 0; i < splits.length; i++) {
-lineChars = Math.max (lineChars, splits[i].length);
-}
-width += lineChars * 6;
-}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
-var trim = this.computeTrim (0, 0, width, height);
-return  new $wt.graphics.Point (trim.width - 4, trim.height - 4);
-}, "Number,Number,Boolean");
-$_M (cla$$, "setText", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.handle.value = string;
-if ((this.style & $WT.MULTI) != 0) {
-this.sendEvent ($WT.Modify);
-}}, "String");
-$_M (cla$$, "getLineHeight", 
+$_M (cla$$, "copy", 
 function () {
-return 16;
 });
-$_M (cla$$, "getText", 
+$_M (cla$$, "createWidget", 
 function () {
-return this.handle.value;
+$_U (this, $wt.widgets.Text, "createWidget", []);
+this.doubleClick = true;
+this.setTabStops (this.tabs = 8);
+this.fixAlignment ();
 });
-$_M (cla$$, "getText", 
-function (start, end) {
-var length = this.handle.value.length;
-start = Math.max (0, start);
-end = Math.min (end, length - 1);
-return this.getText ().substring (start, end + 1);
-}, "Number,Number");
-$_M (cla$$, "selectAll", 
+$_M (cla$$, "cut", 
 function () {
-this.handle.select ();
+if ((this.style & 8) != 0) return ;
 });
-$_M (cla$$, "append", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.handle.value += string;
-}, "String");
-$_M (cla$$, "getSelectionCount", 
+$_M (cla$$, "fixAlignment", 
 function () {
-var selection = this.getSelection ();
-return selection.y - selection.x;
 });
-$_M (cla$$, "getCharCount", 
+$_V (cla$$, "getBorderWidth", 
 function () {
-return this.getSelectionCount ();
-});
-$_M (cla$$, "getSelectionText", 
-function () {
-return BrowserNative.getSelectionText (this.handle);
-});
-$_M (cla$$, "getSelection", 
-function () {
-return BrowserNative.getTextSelection (this.handle);
+if ((this.style & 2048) != 0) {
+return 2;
+}return 0;
 });
 $_M (cla$$, "getCaretLineNumber", 
 function () {
@@ -4985,6 +8906,18 @@ $_M (cla$$, "getCaretPosition",
 function () {
 return BrowserNative.getTextCaretPosition (this.handle);
 });
+$_M (cla$$, "getCharCount", 
+function () {
+return this.getSelectionCount ();
+});
+$_M (cla$$, "getDoubleClickEnabled", 
+function () {
+return this.doubleClick;
+});
+$_M (cla$$, "getEchoChar", 
+function () {
+return '*';
+});
 $_M (cla$$, "getEditable", 
 function () {
 var disableClass = "text-disable";
@@ -4994,26 +8927,131 @@ if (idx != -1) {
 return false;
 }}return true;
 });
-$_M (cla$$, "getDoubleClickEnabled", 
+$_M (cla$$, "getLineCount", 
 function () {
-return this.doubleClick;
+return 0;
 });
 $_M (cla$$, "getLineDelimiter", 
 function () {
 return $wt.widgets.Text.DELIMITER;
 });
-$_M (cla$$, "getLineCount", 
+$_M (cla$$, "getLineHeight", 
 function () {
-return -1;
+if (this.lineHeight != -1) {
+this.lineHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "text-default", this.handle.style.cssText);
+}return this.lineHeight;
 });
+$_M (cla$$, "getOrientation", 
+function () {
+return this.style & (33554432 | 67108864);
+});
+$_M (cla$$, "getSelection", 
+function () {
+return BrowserNative.getTextSelection (this.handle);
+});
+$_M (cla$$, "getSelectionCount", 
+function () {
+var selection = this.getSelection ();
+return selection.y - selection.x;
+});
+$_M (cla$$, "getSelectionText", 
+function () {
+return BrowserNative.getSelectionText (this.handle);
+});
+$_M (cla$$, "getTabs", 
+function () {
+return this.tabs;
+});
+$_M (cla$$, "getTabWidth", 
+function (tabs) {
+return 64;
+}, "Number");
+$_M (cla$$, "getText", 
+function () {
+return this.handle.value;
+});
+$_M (cla$$, "getText", 
+function (start, end) {
+var length = this.handle.value.length;
+start = Math.max (0, start);
+end = Math.min (end, length - 1);
+return this.getText ().substring (start, end + 1);
+}, "Number,Number");
+$_M (cla$$, "getTextLimit", 
+function () {
+return 0;
+});
+$_M (cla$$, "getTopIndex", 
+function () {
+if ((this.style & 4) != 0) return 0;
+return 0;
+});
+$_M (cla$$, "getTopPixel", 
+function () {
+return this.getTopIndex () * this.getLineHeight ();
+});
+$_M (cla$$, "insert", 
+function (string) {
+var sel = BrowserNative.getTextSelection (this.handle);
+if (this.hooks (25) || this.filters (25)) {
+string = this.verifyText (string, sel.x, sel.y, null);
+if (string == null) return ;
+}BrowserNative.insertTextString (this.handle, string);
+if ((this.style & 2) != 0) {
+this.sendEvent (24);
+}}, "String");
+$_M (cla$$, "paste", 
+function () {
+if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "removeModifyListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (24, listener);
+}, "$wt.events.ModifyListener");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "removeVerifyListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (25, listener);
+}, "$wt.events.VerifyListener");
+$_M (cla$$, "selectAll", 
+function () {
+this.handle.select ();
+});
+$_M (cla$$, "sendKeyEvent", 
+function (type, msg, wParam, lParam, event) {
+return false;
+}, "Number,Number,Number,Number,$wt.widgets.Event");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+$_U (this, $wt.widgets.Text, "setBounds", [x, y, width, height, flags]);
+}, "Number,Number,Number,Number,Number");
 $_M (cla$$, "setDoubleClickEnabled", 
 function (doubleClick) {
 this.doubleClick = doubleClick;
 }, "Boolean");
+$_M (cla$$, "setEchoChar", 
+function (echo) {
+if ((this.style & 2) != 0) return ;
+try {
+this.handle.type = "password";
+} catch (e) {
+if ($_O (e, Exception)) {
+} else {
+throw e;
+}
+}
+}, "Number");
 $_M (cla$$, "setEditable", 
 function (editable) {
 this.style &= ($t$ = ~ $WT.READ_ONLY, $WT.prototype.READ_ONLY = $WT.READ_ONLY, $t$);
-if (!editable) this.style |= $WT.READ_ONLY;
+if (!editable) this.style |= 8;
 this.handle.readOnly = !editable;
 var disableClass = "text-disable";
 if (editable) {
@@ -5034,6 +9072,7 @@ $_U (this, $wt.widgets.Text, "setFont", [font]);
 }, "$wt.graphics.Font");
 $_M (cla$$, "setOrientation", 
 function (orientation) {
+this.fixAlignment ();
 }, "Number");
 $_M (cla$$, "setSelection", 
 function (start) {
@@ -5043,72 +9082,64 @@ $_M (cla$$, "setSelection",
 function (start, end) {
 BrowserNative.setTextSelection (this.handle, start, end);
 }, "Number,Number");
+$_M (cla$$, "setRedraw", 
+function (redraw) {
+$_U (this, $wt.widgets.Text, "setRedraw", [redraw]);
+if (this.drawCount != 0) return ;
+}, "Boolean");
 $_M (cla$$, "setSelection", 
 function (selection) {
-if (selection == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 this.setSelection (selection.x, selection.y);
 }, "$wt.graphics.Point");
-$_M (cla$$, "setEchoChar", 
-function (c) {
-try {
-this.handle.type = "password";
-} catch (e) {
-if ($_O (e, Exception)) {
-} else {
-throw e;
-}
-}
-}, "Number");
-$_M (cla$$, "insert", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-BrowserNative.insertTextString (this.handle, string);
-if ((this.style & $WT.MULTI) != 0) {
-this.sendEvent ($WT.Modify);
-}}, "String");
-$_M (cla$$, "paste", 
-function () {
-if ((this.style & $WT.READ_ONLY) != 0) return ;
-});
-$_M (cla$$, "cut", 
-function () {
-if ((this.style & $WT.READ_ONLY) != 0) return ;
-});
-$_M (cla$$, "copy", 
-function () {
-});
-$_M (cla$$, "clearSelection", 
-function () {
-BrowserNative.clearSelection (this.handle);
-});
 $_M (cla$$, "setTabs", 
 function (tabs) {
 if (tabs < 0) return ;
 this.tabs = tabs;
 }, "Number");
+$_M (cla$$, "setTabStops", 
+function (tabs) {
+}, "Number");
+$_M (cla$$, "setText", 
+function (string) {
+this.handle.value = string;
+if ((this.style & 2) != 0) {
+this.sendEvent (24);
+}}, "String");
 $_M (cla$$, "setTextLimit", 
 function (limit) {
-if (limit == 0) this.error ($WT.ERROR_CANNOT_BE_ZERO);
 if (limit > $wt.widgets.Text.LIMIT) {
 }}, "Number");
 $_M (cla$$, "setTopIndex", 
 function (index) {
-if ((this.style & $WT.SINGLE) != 0) return ;
+if ((this.style & 4) != 0) return ;
 }, "Number");
+$_M (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+if ((this.style & 2048) != 0) {
+return $_U (this, $wt.widgets.Text, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags]);
+}return $_U (this, $wt.widgets.Text, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,Number,Number,Number,Number,Number");
 $_M (cla$$, "showSelection", 
 function () {
 });
-$_V (cla$$, "forceFocus", 
+$_M (cla$$, "verifyText", 
+function (string, start, end, keyEvent) {
+if (this.ignoreVerify) return string;
+var event =  new $wt.widgets.Event ();
+event.text = string;
+event.start = start;
+event.end = end;
+if (keyEvent != null) {
+event.character = keyEvent.character;
+event.keyCode = keyEvent.keyCode;
+event.stateMask = keyEvent.stateMask;
+}this.sendEvent (25, event);
+if (!event.doit || this.isDisposed ()) return null;
+return event.text;
+}, "String,Number,Number,$wt.widgets.Event");
+$_V (cla$$, "windowClass", 
 function () {
-try {
-this.handle.focus ();
-} catch (e) {
-if ($_O (e, Error)) {
-} else {
-throw e;
-}
-}
-return true;
+return "TEXTAREA";
 });
 $_S (cla$$,
 "LIMIT", 0x7FFF,
@@ -5120,19 +9151,51 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.List, [parent, $wt.widgets.List.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "add", 
+function (string) {
+if (this.handle != null) {
+this.handle.options[this.handle.options.length] =  new Option (string, string);
+}}, "String");
+$_M (cla$$, "add", 
+function (string, index) {
+if (this.handle != null) {
+this.handle.options[index] =  new Option (string, string);
+}}, "String,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.SINGLE, $WT.MULTI, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
 }, "Number");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var width = 0;
+var height = 0;
+if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+var border = this.getBorderWidth ();
+width += border * 2 + 3;
+height += border * 2;
+if ((this.style & 512) != 0) {
+}if ((this.style & 256) != 0) {
+}return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
 this.handle = document.createElement ("SELECT");
 this.handle.size = 2;
 this.handle.className = "list-default";
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.List$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -5142,7 +9205,7 @@ $_Z (this, arguments);
 $_V (cla$$, "run", 
 function () {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
+e.type = 13;
 e.item = this.callbacks["$wt.widgets.List"];
 e.widget = this.callbacks["$wt.widgets.List"];
 this.callbacks["$wt.widgets.List"].sendEvent (e);
@@ -5152,54 +9215,27 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.List$1, innerThis, finalVars);
 }) (this, null));
 });
-$_M (cla$$, "add", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.handle != null) {
-this.handle.options[this.handle.options.length] =  new Option (string, string);
-}}, "String");
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "add", 
-function (string, index) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (index == -1) this.error ($WT.ERROR_INVALID_RANGE);
-if (this.handle != null) {
-this.handle.options[index] =  new Option (string, string);
-}}, "String,Number");
+$_M (cla$$, "deselect", 
+function (indices) {
+if (indices.length == 0) return ;
+}, "Array");
 $_M (cla$$, "deselect", 
 function (index) {
 if (index == -1) return ;
-if ((this.style & $WT.SINGLE) != 0) {
+if ((this.style & 4) != 0) {
 return ;
 }}, "Number");
 $_M (cla$$, "deselect", 
 function (start, end) {
 if (start > end) return ;
-if ((this.style & $WT.SINGLE) != 0) {
+if ((this.style & 4) != 0) {
 return ;
 }}, "Number,Number");
 $_M (cla$$, "deselectAll", 
 function () {
-if ((this.style & $WT.SINGLE) != 0) {
+if ((this.style & 4) != 0) {
 } else {
 }});
-$_M (cla$$, "deselect", 
-function (indices) {
-if (indices == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (indices.length == 0) return ;
-if ((this.style & $WT.SINGLE) != 0) {
-return ;
-}for (var i = 0; i < indices.length; i++) {
-var index = indices[i];
-if (index != -1) {
-}}
-}, "Array");
 $_M (cla$$, "getFocusIndex", 
 function () {
 return -1;
@@ -5255,7 +9291,6 @@ return this.indexOf (string, 0);
 }, "String");
 $_M (cla$$, "indexOf", 
 function (string, start) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (string.length == 0) {
 var count = this.getItemCount ();
 for (var i = start; i < count; i++) {
@@ -5272,6 +9307,12 @@ return false;
 }, "Number");
 $_M (cla$$, "remove", 
 function (indices) {
+if (indices.length == 0) return ;
+var newIndices =  $_A (indices.length, 0);
+System.arraycopy (indices, 0, newIndices, 0, indices.length);
+this.sort (newIndices);
+var start = newIndices[newIndices.length - 1];
+var end = newIndices[0];
 }, "Array");
 $_M (cla$$, "remove", 
 function (index) {
@@ -5282,9 +9323,7 @@ if (start > end) return ;
 }, "Number,Number");
 $_M (cla$$, "remove", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var index = this.indexOf (string, 0);
-if (index == -1) this.error ($WT.ERROR_INVALID_ARGUMENT);
 this.remove (index);
 }, "String");
 $_M (cla$$, "removeAll", 
@@ -5292,16 +9331,14 @@ function () {
 });
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "select", 
 function (indices) {
-if (indices == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var length = indices.length;
-if (length == 0 || ((this.style & $WT.SINGLE) != 0 && length > 1)) return ;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
 this.select (indices, false);
 }, "Array");
 $_M (cla$$, "select", 
@@ -5325,8 +9362,8 @@ if (index < 0) return ;
 }, "Number,Boolean");
 $_M (cla$$, "select", 
 function (start, end) {
-if (end < 0 || start > end || ((this.style & $WT.SINGLE) != 0 && start != end)) return ;
-if ((this.style & $WT.SINGLE) != 0) {
+if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
+if ((this.style & 4) != 0) {
 this.select (start, false);
 } else {
 this.select (start, end, false);
@@ -5340,14 +9377,20 @@ return ;
 }, "Number,Number,Boolean");
 $_M (cla$$, "selectAll", 
 function () {
-if ((this.style & $WT.SINGLE) != 0) return ;
+if ((this.style & 4) != 0) return ;
 });
-$_V (cla$$, "setFont", 
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+}, "Number,Number,Number,Number,Number");
+$_M (cla$$, "setFocusIndex", 
+function (index) {
+}, "Number");
+$_M (cla$$, "setFont", 
 function (font) {
+$_U (this, $wt.widgets.List, "setFont", [font]);
 }, "$wt.graphics.Font");
 $_M (cla$$, "setItem", 
 function (index, string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var topIndex = this.getTopIndex ();
 var isSelected = this.isSelected (index);
 this.remove (index);
@@ -5357,12 +9400,10 @@ this.setTopIndex (topIndex);
 }, "Number,String");
 $_M (cla$$, "setItems", 
 function (items) {
-if (items == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 for (var j = this.handle.childNodes.length - 1; j >= 0; j++) {
 this.handle.removeChild (this.handle.childNodes[j]);
 }
 for (var i = 0; i < items.length; i++) {
-if (items[i] == null) this.error ($WT.ERROR_INVALID_ARGUMENT);
 var it = document.createElement ("OPTION");
 it.appendChild (document.createTextNode (items[i]));
 it.value = items[i];
@@ -5371,20 +9412,18 @@ this.handle.appendChild (it);
 }, "Array");
 $_M (cla$$, "setSelection", 
 function (indices) {
-if (indices == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 this.deselectAll ();
 var length = indices.length;
-if (length == 0 || ((this.style & $WT.SINGLE) != 0 && length > 1)) return ;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
 this.select (indices, true);
-if ((this.style & $WT.MULTI) != 0) {
+if ((this.style & 2) != 0) {
 var focusIndex = indices[0];
 }}, "Array");
 $_M (cla$$, "setSelection", 
 function (items) {
-if (items == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 this.deselectAll ();
 var length = items.length;
-if (length == 0 || ((this.style & $WT.SINGLE) != 0 && length > 1)) return ;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
 var focusIndex = -1;
 for (var i = length - 1; i >= 0; --i) {
 var string = items[i];
@@ -5394,26 +9433,26 @@ var localFocus = -1;
 while ((index = this.indexOf (string, index)) != -1) {
 if (localFocus == -1) localFocus = index;
 this.select (index, false);
-if ((this.style & $WT.SINGLE) != 0 && this.isSelected (index)) {
+if ((this.style & 4) != 0 && this.isSelected (index)) {
 this.showSelection ();
 return ;
 }index++;
 }
 if (localFocus != -1) focusIndex = localFocus;
 }}
-if ((this.style & $WT.MULTI) != 0) {
+if ((this.style & 2) != 0) {
 }}, "Array");
 $_M (cla$$, "setSelection", 
 function (index) {
 this.deselectAll ();
 this.select (index, true);
-if ((this.style & $WT.MULTI) != 0) {
+if ((this.style & 2) != 0) {
 }}, "Number");
 $_M (cla$$, "setSelection", 
 function (start, end) {
 this.deselectAll ();
-if (end < 0 || start > end || ((this.style & $WT.SINGLE) != 0 && start != end)) return ;
-if ((this.style & $WT.SINGLE) != 0) {
+if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
+if ((this.style & 4) != 0) {
 this.select (start, true);
 } else {
 this.select (start, end, true);
@@ -5424,53 +9463,94 @@ function (index) {
 $_M (cla$$, "showSelection", 
 function () {
 });
+$_V (cla$$, "windowClass", 
+function () {
+return "SELECT";
+});
 cla$$ = $_C (function () {
 this.$back = false;
 this.$forward = false;
 this.navigate = false;
 this.delaySetText = false;
+this.addressBar = true;
+this.menuBar = true;
+this.statusBar = true;
+this.toolBar = true;
+this.info = 0;
+this.globalDispatch = 0;
 this.html = null;
 this.url = null;
 $_Z (this, arguments);
 }, $wt.browser, "Browser", $wt.widgets.Composite);
+$_Y (cla$$, function () {
+this.closeWindowListeners =  new Array (0);
+this.locationListeners =  new Array (0);
+this.openWindowListeners =  new Array (0);
+this.progressListeners =  new Array (0);
+this.statusTextListeners =  new Array (0);
+this.titleListeners =  new Array (0);
+this.visibilityWindowListeners =  new Array (0);
+});
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.browser.Browser, [parent, style & ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$)]);
-}, "$wt.widgets.Composite,Number");
-$_M (cla$$, "createWidget", 
-function () {
-$_U (this, $wt.browser.Browser, "createWidget", []);
 this.handle = document.createElement ("IFRAME");
 this.handle.style.position = "absolute";
 this.handle.style.backgroundColor = "white";
 if (this.handle.style.filter != null) {
 this.handle.style.border = "2px solid menu";
-}if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
-$_M (cla$$, "setText", 
-function (html) {
-if (html == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
-var blankLoading = this.html != null;
-this.html = html;
-if (blankLoading) return true;
-if (this.handle != null) {
-BrowserNative.iframeDocumentWrite (this.handle, html);
-}this.html = null;
-return true;
-}, "String");
-$_M (cla$$, "getUrl", 
-function () {
-return this.url;
-});
-$_M (cla$$, "refresh", 
-function () {
-if (this.handle != null) {
-if (this.handle.contentWindow != null) {
-this.handle.contentWindow.reload ();
-} else {
-this.handle.src = this.url;
-}}});
+}if (this.getParent ().handle != null) {
+this.getParent ().handle.appendChild (this.handle);
+}}, "$wt.widgets.Composite,Number");
+$_M (cla$$, "addCloseWindowListener", 
+function (listener) {
+var newCloseWindowListeners =  new Array (this.closeWindowListeners.length + 1);
+System.arraycopy (this.closeWindowListeners, 0, newCloseWindowListeners, 0, this.closeWindowListeners.length);
+this.closeWindowListeners = newCloseWindowListeners;
+this.closeWindowListeners[this.closeWindowListeners.length - 1] = listener;
+}, "$wt.browser.CloseWindowListener");
+$_M (cla$$, "addLocationListener", 
+function (listener) {
+var newLocationListeners =  new Array (this.locationListeners.length + 1);
+System.arraycopy (this.locationListeners, 0, newLocationListeners, 0, this.locationListeners.length);
+this.locationListeners = newLocationListeners;
+this.locationListeners[this.locationListeners.length - 1] = listener;
+}, "$wt.browser.LocationListener");
+$_M (cla$$, "addOpenWindowListener", 
+function (listener) {
+var newOpenWindowListeners =  new Array (this.openWindowListeners.length + 1);
+System.arraycopy (this.openWindowListeners, 0, newOpenWindowListeners, 0, this.openWindowListeners.length);
+this.openWindowListeners = newOpenWindowListeners;
+this.openWindowListeners[this.openWindowListeners.length - 1] = listener;
+}, "$wt.browser.OpenWindowListener");
+$_M (cla$$, "addProgressListener", 
+function (listener) {
+var newProgressListeners =  new Array (this.progressListeners.length + 1);
+System.arraycopy (this.progressListeners, 0, newProgressListeners, 0, this.progressListeners.length);
+this.progressListeners = newProgressListeners;
+this.progressListeners[this.progressListeners.length - 1] = listener;
+}, "$wt.browser.ProgressListener");
+$_M (cla$$, "addStatusTextListener", 
+function (listener) {
+var newStatusTextListeners =  new Array (this.statusTextListeners.length + 1);
+System.arraycopy (this.statusTextListeners, 0, newStatusTextListeners, 0, this.statusTextListeners.length);
+this.statusTextListeners = newStatusTextListeners;
+this.statusTextListeners[this.statusTextListeners.length - 1] = listener;
+}, "$wt.browser.StatusTextListener");
+$_M (cla$$, "addTitleListener", 
+function (listener) {
+var newTitleListeners =  new Array (this.titleListeners.length + 1);
+System.arraycopy (this.titleListeners, 0, newTitleListeners, 0, this.titleListeners.length);
+this.titleListeners = newTitleListeners;
+this.titleListeners[this.titleListeners.length - 1] = listener;
+}, "$wt.browser.TitleListener");
+$_M (cla$$, "addVisibilityWindowListener", 
+function (listener) {
+var newVisibilityWindowListeners =  new Array (this.visibilityWindowListeners.length + 1);
+System.arraycopy (this.visibilityWindowListeners, 0, newVisibilityWindowListeners, 0, this.visibilityWindowListeners.length);
+this.visibilityWindowListeners = newVisibilityWindowListeners;
+this.visibilityWindowListeners[this.visibilityWindowListeners.length - 1] = listener;
+}, "$wt.browser.VisibilityWindowListener");
 $_M (cla$$, "back", 
 function () {
 if (!this.$back) return false;
@@ -5488,6 +9568,15 @@ throw e;
 }
 }return false;
 });
+$_V (cla$$, "checkSubclass", 
+function () {
+var name = this.getClass ().getName ();
+var index = name.lastIndexOf ('.');
+});
+$_M (cla$$, "execute", 
+function (script) {
+return true;
+}, "String");
 $_M (cla$$, "forward", 
 function () {
 if (!this.$forward) return false;
@@ -5512,9 +9601,156 @@ $_M (cla$$, "isForwardEnabled",
 function () {
 return this.$forward;
 });
+$_M (cla$$, "getUrl", 
+function () {
+return this.url;
+});
+$_M (cla$$, "refresh", 
+function () {
+if (this.handle != null) {
+if (this.handle.contentWindow != null) {
+this.handle.contentWindow.reload ();
+} else {
+this.handle.src = this.url;
+}}});
+$_M (cla$$, "removeCloseWindowListener", 
+function (listener) {
+if (this.closeWindowListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.closeWindowListeners.length; i++) {
+if (listener == this.closeWindowListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.closeWindowListeners.length == 1) {
+this.closeWindowListeners =  new Array (0);
+return ;
+}var newCloseWindowListeners =  new Array (this.closeWindowListeners.length - 1);
+System.arraycopy (this.closeWindowListeners, 0, newCloseWindowListeners, 0, index);
+System.arraycopy (this.closeWindowListeners, index + 1, newCloseWindowListeners, index, this.closeWindowListeners.length - index - 1);
+this.closeWindowListeners = newCloseWindowListeners;
+}, "$wt.browser.CloseWindowListener");
+$_M (cla$$, "removeLocationListener", 
+function (listener) {
+if (this.locationListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.locationListeners.length; i++) {
+if (listener == this.locationListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.locationListeners.length == 1) {
+this.locationListeners =  new Array (0);
+return ;
+}var newLocationListeners =  new Array (this.locationListeners.length - 1);
+System.arraycopy (this.locationListeners, 0, newLocationListeners, 0, index);
+System.arraycopy (this.locationListeners, index + 1, newLocationListeners, index, this.locationListeners.length - index - 1);
+this.locationListeners = newLocationListeners;
+}, "$wt.browser.LocationListener");
+$_M (cla$$, "removeOpenWindowListener", 
+function (listener) {
+if (this.openWindowListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.openWindowListeners.length; i++) {
+if (listener == this.openWindowListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.openWindowListeners.length == 1) {
+this.openWindowListeners =  new Array (0);
+return ;
+}var newOpenWindowListeners =  new Array (this.openWindowListeners.length - 1);
+System.arraycopy (this.openWindowListeners, 0, newOpenWindowListeners, 0, index);
+System.arraycopy (this.openWindowListeners, index + 1, newOpenWindowListeners, index, this.openWindowListeners.length - index - 1);
+this.openWindowListeners = newOpenWindowListeners;
+}, "$wt.browser.OpenWindowListener");
+$_M (cla$$, "removeProgressListener", 
+function (listener) {
+if (this.progressListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.progressListeners.length; i++) {
+if (listener == this.progressListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.progressListeners.length == 1) {
+this.progressListeners =  new Array (0);
+return ;
+}var newProgressListeners =  new Array (this.progressListeners.length - 1);
+System.arraycopy (this.progressListeners, 0, newProgressListeners, 0, index);
+System.arraycopy (this.progressListeners, index + 1, newProgressListeners, index, this.progressListeners.length - index - 1);
+this.progressListeners = newProgressListeners;
+}, "$wt.browser.ProgressListener");
+$_M (cla$$, "removeStatusTextListener", 
+function (listener) {
+if (this.statusTextListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.statusTextListeners.length; i++) {
+if (listener == this.statusTextListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.statusTextListeners.length == 1) {
+this.statusTextListeners =  new Array (0);
+return ;
+}var newStatusTextListeners =  new Array (this.statusTextListeners.length - 1);
+System.arraycopy (this.statusTextListeners, 0, newStatusTextListeners, 0, index);
+System.arraycopy (this.statusTextListeners, index + 1, newStatusTextListeners, index, this.statusTextListeners.length - index - 1);
+this.statusTextListeners = newStatusTextListeners;
+}, "$wt.browser.StatusTextListener");
+$_M (cla$$, "removeTitleListener", 
+function (listener) {
+if (this.titleListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.titleListeners.length; i++) {
+if (listener == this.titleListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.titleListeners.length == 1) {
+this.titleListeners =  new Array (0);
+return ;
+}var newTitleListeners =  new Array (this.titleListeners.length - 1);
+System.arraycopy (this.titleListeners, 0, newTitleListeners, 0, index);
+System.arraycopy (this.titleListeners, index + 1, newTitleListeners, index, this.titleListeners.length - index - 1);
+this.titleListeners = newTitleListeners;
+}, "$wt.browser.TitleListener");
+$_M (cla$$, "removeVisibilityWindowListener", 
+function (listener) {
+if (this.visibilityWindowListeners.length == 0) return ;
+var index = -1;
+for (var i = 0; i < this.visibilityWindowListeners.length; i++) {
+if (listener == this.visibilityWindowListeners[i]) {
+index = i;
+break;
+}}
+if (index == -1) return ;
+if (this.visibilityWindowListeners.length == 1) {
+this.visibilityWindowListeners =  new Array (0);
+return ;
+}var newVisibilityWindowListeners =  new Array (this.visibilityWindowListeners.length - 1);
+System.arraycopy (this.visibilityWindowListeners, 0, newVisibilityWindowListeners, 0, index);
+System.arraycopy (this.visibilityWindowListeners, index + 1, newVisibilityWindowListeners, index, this.visibilityWindowListeners.length - index - 1);
+this.visibilityWindowListeners = newVisibilityWindowListeners;
+}, "$wt.browser.VisibilityWindowListener");
+$_M (cla$$, "setText", 
+function (html) {
+var blankLoading = this.html != null;
+this.html = html;
+if (blankLoading) return true;
+if (this.handle != null) {
+BrowserNative.iframeDocumentWrite (this.handle, html);
+}this.html = null;
+return true;
+}, "String");
 $_M (cla$$, "setUrl", 
 function (url) {
-if (url == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 this.html = null;
 this.url = url;
 if (this.handle != null) {
@@ -5540,15 +9776,43 @@ $_U (this, $wt.browser.Browser, "setBounds", [x, y, width - 2, height - 2]);
 $_U (this, $wt.browser.Browser, "setBounds", [x, y, width - 4, height - 4]);
 }}, "Number,Number,Number,Number");
 $_S (cla$$,
-"ABOUT_BLANK", "about:blank");
+"BeforeNavigate2", 0xfa,
+"CommandStateChange", 0x69,
+"DocumentComplete", 0x103,
+"NavigateComplete2", 0xfc,
+"NewWindow2", 0xfb,
+"OnMenuBar", 0x100,
+"OnStatusBar", 0x101,
+"OnToolBar", 0xff,
+"OnVisible", 0xfe,
+"ProgressChange", 0x6c,
+"RegisterAsBrowser", 0x228,
+"StatusTextChange", 0x66,
+"TitleChange", 0x71,
+"WindowClosing", 0x107,
+"WindowSetHeight", 0x10b,
+"WindowSetLeft", 0x108,
+"WindowSetResizable", 0x106,
+"WindowSetTop", 0x109,
+"WindowSetWidth", 0x10a,
+"ABOUT_BLANK", "about:blank",
+"URL_DIRECTOR", "http://download.macromedia.com/pub/shockwave/cabs/director/sw.cab",
+"PACKAGE_PREFIX", "org.eclipse.swt.browser.");
 cla$$ = $_C (function () {
 this.parent = null;
 this.strings = null;
 this.images = null;
-this.index = 0;
 this.checked = false;
 this.grayed = false;
 this.cached = false;
+this.imageIndent = 0;
+this.background = -1;
+this.foreground = -1;
+this.font = -1;
+this.cellBackground = null;
+this.cellForeground = null;
+this.cellFont = null;
+this.index = 0;
 this.selected = false;
 $_Z (this, arguments);
 }, $wt.widgets, "TableItem", $wt.widgets.Item);
@@ -5568,16 +9832,258 @@ if (create) parent.createItem (this, index);
 }, "$wt.widgets.Table,Number,Number,Boolean");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (control) {
-if (control == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 return control;
 }, "$wt.widgets.Table");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "clear", 
+function () {
+this.text = "";
+this.image = null;
+this.strings = null;
+this.images = null;
+this.imageIndent = 0;
+this.checked = this.grayed = false;
+if ((this.parent.style & 268435456) != 0) this.cached = false;
+});
+$_M (cla$$, "getBackground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
+});
+$_M (cla$$, "getBackground", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getBackground ();
+return  new $wt.graphics.Color (this.display, this.handle.childNodes[index].style.backgroundColor);
+}, "Number");
+$_M (cla$$, "getBounds", 
+function () {
+var itemIndex = this.parent.indexOf (this);
+if (itemIndex == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getBounds", 
+function (index) {
+var itemIndex = this.parent.indexOf (this);
+if (itemIndex == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+}, "Number");
+$_M (cla$$, "getChecked", 
+function () {
+if ((this.parent.style & 32) == 0) return false;
+return this.checked;
+});
+$_M (cla$$, "getFont", 
+function () {
+return this.display.getSystemFont ();
+});
+$_M (cla$$, "getFont", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getFont ();
+return this.display.getSystemFont ();
+}, "Number");
+$_M (cla$$, "getForeground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.handle.style.color);
+});
+$_M (cla$$, "getForeground", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getForeground ();
+return  new $wt.graphics.Color (null, this.handle.childNodes[index].style.backgroundColor);
+}, "Number");
+$_M (cla$$, "getGrayed", 
+function () {
+if ((this.parent.style & 32) == 0) return false;
+return this.grayed;
+});
+$_M (cla$$, "getImage", 
+function () {
+return $_U (this, $wt.widgets.TableItem, "getImage", []);
+});
+$_M (cla$$, "getImage", 
+function (index) {
+if (index == 0) return this.getImage ();
+if (this.images != null) {
+if (0 <= index && index < this.images.length) return this.images[index];
+}return null;
+}, "Number");
+$_M (cla$$, "getImageBounds", 
+function (index) {
+var itemIndex = this.parent.indexOf (this);
+if (itemIndex == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+}, "Number");
+$_M (cla$$, "getImageIndent", 
+function () {
+return this.imageIndent;
+});
+$_M (cla$$, "getNameText", 
+function () {
+if ((this.parent.style & 268435456) != 0) {
+if (!this.cached) return "*virtual*";
+}return $_U (this, $wt.widgets.TableItem, "getNameText", []);
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getText", 
+function () {
+return $_U (this, $wt.widgets.TableItem, "getText", []);
+});
+$_M (cla$$, "getText", 
+function (index) {
+if (index == 0) return this.getText ();
+if (this.strings != null) {
+if (0 <= index && index < this.strings.length) {
+var string = this.strings[index];
+return string != null ? string : "";
+}}return "";
+}, "Number");
+$_M (cla$$, "redraw", 
+function () {
+if ((this.parent.style & 268435456) != 0) this.cached = true;
+if (this.parent.currentItem == this || this.parent.drawCount != 0) return ;
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+});
+$_M (cla$$, "redraw", 
+function (column, drawText, drawImage) {
+if ((this.parent.style & 268435456) != 0) this.cached = true;
+if (this.parent.currentItem == this || this.parent.drawCount != 0) return ;
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+}, "Number,Boolean,Boolean");
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.TableItem, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.TableItem, "releaseWidget", []);
+this.parent = null;
+this.strings = null;
+this.images = null;
+});
+$_M (cla$$, "setBackground", 
+function (color) {
+var pixel = -1;
+if (color != null) {
+this.handle.style.backgroundColor = color.getCSSHandle ();
+}}, "$wt.graphics.Color");
+$_M (cla$$, "setBackground", 
+function (index, color) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+if (color != null) {
+this.handle.childNodes[index].style.backgroundColor = color.getCSSHandle ();
+}}, "Number,$wt.graphics.Color");
+$_M (cla$$, "setChecked", 
+function (checked) {
+if ((this.parent.style & 32) == 0) return ;
+if (this.checked == checked) return ;
+this.setChecked (checked, false);
+}, "Boolean");
+$_M (cla$$, "setChecked", 
+function (checked, notify) {
+this.checked = checked;
+if (notify) {
+var event =  new $wt.widgets.Event ();
+event.item = this;
+event.detail = 32;
+this.parent.postEvent (13, event);
+}this.redraw ();
+}, "Boolean,Boolean");
+$_M (cla$$, "setFont", 
+function (font) {
+var hFont = -1;
+if (font != null) {
+this.parent.customDraw = true;
+}if (this.font == hFont) return ;
+this.font = hFont;
+this.parent.setScrollWidth (this, false);
+this.redraw ();
+}, "$wt.graphics.Font");
+$_M (cla$$, "setFont", 
+function (index, font) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+if (font != null) {
+this.parent.customDraw = true;
+}if (this.cellFont == null) {
+this.cellFont =  $_A (count, 0);
+for (var i = 0; i < count; i++) {
+this.cellFont[i] = -1;
+}
+}this.redraw (index, true, false);
+}, "Number,$wt.graphics.Font");
+$_M (cla$$, "setForeground", 
+function (color) {
+var pixel = -1;
+if (color != null) {
+this.handle.style.color = color.getCSSHandle ();
+}}, "$wt.graphics.Color");
+$_M (cla$$, "setForeground", 
+function (index, color) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+var pixel = -1;
+if (color != null) {
+this.handle.childNodes[index].style.color = color.getCSSHandle ();
+}}, "Number,$wt.graphics.Color");
+$_M (cla$$, "setGrayed", 
+function (grayed) {
+if ((this.parent.style & 32) == 0) return ;
+if (this.grayed == grayed) return ;
+this.grayed = grayed;
+this.redraw ();
+}, "Boolean");
+$_M (cla$$, "setImage", 
+function (images) {
+for (var i = 0; i < images.length; i++) {
+this.setImage (i, images[i]);
+}
+}, "Array");
 $_M (cla$$, "setText", 
 function (string) {
 this.setText (0, string);
 }, "String");
+$_M (cla$$, "setImage", 
+function (index, image) {
+if (index == 0) {
+if (image != null && image.type == 1) {
+if (image.equals (this.image)) return ;
+}$_U (this, $wt.widgets.TableItem, "setImage", [image]);
+}var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+if (this.images == null && index != 0) this.images =  new Array (count);
+if (this.images != null) {
+if (image != null && image.type == 1) {
+if (image.equals (this.images[index])) return ;
+}this.images[index] = image;
+}this.redraw (index, false, true);
+}, "Number,$wt.graphics.Image");
+$_M (cla$$, "setImage", 
+function (image) {
+this.setImage (0, image);
+}, "$wt.graphics.Image");
+$_M (cla$$, "setImageIndent", 
+function (indent) {
+if (indent < 0) return ;
+if (this.imageIndent == indent) return ;
+this.imageIndent = indent;
+if ((this.parent.style & 268435456) == 0) {
+var index = this.parent.indexOf (this);
+if (index != -1) {
+}}this.parent.setScrollWidth (this, false);
+this.redraw ();
+}, "Number");
 $_M (cla$$, "setText", 
 function (strings) {
-if (strings == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 for (var i = 0; i < strings.length; i++) {
 var string = strings[i];
 if (string != null) this.setText (i, string);
@@ -5585,7 +10091,6 @@ if (string != null) this.setText (i, string);
 }, "Array");
 $_M (cla$$, "setText", 
 function (index, string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (index == 0) {
 if (string.equals (this.text)) return ;
 $_U (this, $wt.widgets.TableItem, "setText", [string]);
@@ -5610,7 +10115,7 @@ tbodyTD.removeChild (tbodyTD.childNodes[i]);
 }var el = document.createElement ("DIV");
 tbodyTD.appendChild (el);
 el.className = "table-item-cell-default";
-if (index == 0 && (this.parent.style & $WT.CHECK) != 0) {
+if (index == 0 && (this.parent.style & 32) != 0) {
 var check = document.createElement ("INPUT");
 check.type = "checkbox";
 el.appendChild (check);
@@ -5624,8 +10129,8 @@ $_Z (this, arguments);
 $_V (cla$$, "run", 
 function () {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.detail = $WT.CHECK;
+e.type = 13;
+e.detail = 32;
 e.item = this.callbacks["$wt.widgets.TableItem"];
 e.widget = this.callbacks["$wt.widgets.TableItem"];
 this.callbacks["$wt.widgets.TableItem"].parent.sendEvent (e);
@@ -5638,7 +10143,7 @@ return $_N ($wt.widgets.TableItem$1, innerThis, finalVars);
 el.appendChild (text);
 text.className = "table-item-cell-text-default";
 text.appendChild (document.createTextNode (string));
-if ((this.parent.style & $WT.FULL_SELECTION) != 0 || index == 0) {
+if ((this.parent.style & 65536) != 0 || index == 0) {
 text.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.TableItem$2")) {
 Clazz.pu$h ();
@@ -5651,8 +10156,8 @@ function () {
 var evt = this.getEvent ();
 this.callbacks["$wt.widgets.TableItem"].parent.toggleSelection (this.callbacks["$wt.widgets.TableItem"], evt.ctrlKey, evt.shiftKey);
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.detail = $WT.NONE;
+e.type = 13;
+e.detail = 0;
 e.item = this.callbacks["$wt.widgets.TableItem"];
 e.widget = this.callbacks["$wt.widgets.TableItem"];
 this.callbacks["$wt.widgets.TableItem"].parent.sendEvent (e);
@@ -5675,8 +10180,8 @@ var evt = this.getEvent ();
 this.callbacks["$wt.widgets.TableItem"].parent.toggleSelection (this.callbacks["$wt.widgets.TableItem"], evt.ctrlKey, evt.shiftKey);
 System.out.println ("An event is runned " + evt);
 var e =  new $wt.widgets.Event ();
-e.type = $WT.DefaultSelection;
-e.detail = $WT.NONE;
+e.type = 14;
+e.detail = 0;
 e.item = this.callbacks["$wt.widgets.TableItem"];
 e.widget = this.callbacks["$wt.widgets.TableItem"];
 this.callbacks["$wt.widgets.TableItem"].parent.sendEvent (e);
@@ -5691,92 +10196,11 @@ $_M (cla$$, "showSelection",
 function (selected) {
 this.selected = selected;
 var index = 0;
-if ((this.parent.style & $WT.CHECK) != 0) {
+if ((this.parent.style & 32) != 0) {
 index++;
 }var element = this.handle.childNodes[0].childNodes[0].childNodes[index];
 element.className = selected ? "table-item-cell-text-selected" : "table-item-cell-text-default";
 }, "Boolean");
-$_M (cla$$, "getText", 
-function () {
-return $_U (this, $wt.widgets.TableItem, "getText", []);
-});
-$_M (cla$$, "getText", 
-function (index) {
-if (index == 0) return this.getText ();
-if (this.strings != null) {
-if (0 <= index && index < this.strings.length) {
-var string = this.strings[index];
-return string != null ? string : "";
-}}return "";
-}, "Number");
-$_M (cla$$, "setBackground", 
-function (color) {
-if (color != null && color.isDisposed ()) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var pixel = -1;
-if (color != null) {
-this.handle.style.backgroundColor = color.getCSSHandle ();
-}}, "$wt.graphics.Color");
-$_M (cla$$, "setBackground", 
-function (index, color) {
-if (color != null && color.isDisposed ()) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var count = Math.max (1, this.parent.getColumnCount ());
-if (0 > index || index > count - 1) return ;
-if (color != null) {
-this.handle.childNodes[index].style.backgroundColor = color.getCSSHandle ();
-}}, "Number,$wt.graphics.Color");
-$_M (cla$$, "setForeground", 
-function (color) {
-if (color != null && color.isDisposed ()) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var pixel = -1;
-if (color != null) {
-this.handle.style.color = color.getCSSHandle ();
-}}, "$wt.graphics.Color");
-$_M (cla$$, "setForeground", 
-function (index, color) {
-if (color != null && color.isDisposed ()) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var count = Math.max (1, this.parent.getColumnCount ());
-if (0 > index || index > count - 1) return ;
-var pixel = -1;
-if (color != null) {
-this.handle.childNodes[index].style.color = color.getCSSHandle ();
-}}, "Number,$wt.graphics.Color");
-$_M (cla$$, "getBackground", 
-function () {
-return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
-});
-$_M (cla$$, "getBackground", 
-function (index) {
-var count = Math.max (1, this.parent.getColumnCount ());
-if (0 > index || index > count - 1) return this.getBackground ();
-return  new $wt.graphics.Color (this.display, this.handle.childNodes[index].style.backgroundColor);
-}, "Number");
-$_M (cla$$, "getForeground", 
-function () {
-return  new $wt.graphics.Color (this.display, this.handle.style.color);
-});
-$_M (cla$$, "getForeground", 
-function (index) {
-return  new $wt.graphics.Color (null, this.handle.childNodes[index].style.backgroundColor);
-}, "Number");
-$_M (cla$$, "redraw", 
-function () {
-if ((this.parent.style & $WT.VIRTUAL) != 0) this.cached = true;
-var index = this.parent.indexOf (this);
-if (index == -1) return ;
-});
-$_M (cla$$, "redraw", 
-function (column, drawText, drawImage) {
-if ((this.parent.style & $WT.VIRTUAL) != 0) this.cached = true;
-}, "Number,Boolean,Boolean");
-$_M (cla$$, "releaseHandle", 
-function () {
-this.parent = null;
-$_U (this, $wt.widgets.TableItem, "releaseHandle", []);
-});
 $_M (cla$$, "isSelected", 
 function () {
 return this.selected;
@@ -5801,15 +10225,110 @@ this.resizable = true;
 this.parent = parent;
 parent.createItem (this, index);
 }, "$wt.widgets.Table,Number,Number");
+$_M (cla$$, "addControlListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (11, typedListener);
+this.addListener (10, typedListener);
+}, "$wt.events.ControlListener");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.LEFT, $WT.CENTER, $WT.RIGHT, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
 }, "Number");
-$_M (cla$$, "pack", 
+$_V (cla$$, "checkSubclass", 
 function () {
 });
+$_M (cla$$, "getAlignment", 
+function () {
+if ((this.style & 16384) != 0) return 16384;
+if ((this.style & 16777216) != 0) return 16777216;
+if ((this.style & 131072) != 0) return 131072;
+return 16384;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getMoveable", 
+function () {
+return this.moveable;
+});
+$_M (cla$$, "getResizable", 
+function () {
+return this.resizable;
+});
+$_M (cla$$, "getWidth", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return 0;
+if (this.handle.style.width != null && this.handle.style.width.length != 0) {
+return Integer.parseInt (this.handle.style.width);
+}return $wt.internal.browser.OS.getContainerWidth (this.handle);
+});
+$_M (cla$$, "pack", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.TableColumn, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.TableColumn, "releaseWidget", []);
+this.parent = null;
+});
+$_M (cla$$, "removeControlListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (10, listener);
+this.eventTable.unhook (11, listener);
+}, "$wt.events.ControlListener");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "setAlignment", 
+function (alignment) {
+if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+var index = this.parent.indexOf (this);
+if (index == -1 || index == 0) return ;
+this.style &= ~(16384 | 131072 | 16777216);
+this.style |= alignment & (16384 | 131072 | 16777216);
+}, "Number");
+$_M (cla$$, "setImage", 
+function (image) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+$_U (this, $wt.widgets.TableColumn, "setImage", [image]);
+}, "$wt.graphics.Image");
+$_M (cla$$, "setMoveable", 
+function (moveable) {
+this.moveable = moveable;
+this.parent.updateMoveable ();
+}, "Boolean");
+$_M (cla$$, "setResizable", 
+function (resizable) {
+this.resizable = resizable;
+}, "Boolean");
 $_M (cla$$, "setText", 
 function (string) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
 $_U (this, $wt.widgets.TableColumn, "setText", [string]);
 if (this.handle.childNodes != null) {
 for (var i = 0; i < this.handle.childNodes.length; i++) {
@@ -5824,26 +10343,25 @@ var index = this.parent.indexOf (this);
 if (index == -1) return ;
 this.handle.style.width = width + "px";
 }, "Number");
-$_M (cla$$, "getWidth", 
-function () {
-var index = this.parent.indexOf (this);
-if (index == -1) return 0;
-if (this.handle.style.width != null && this.handle.style.width.length != 0) {
-return Integer.parseInt (this.handle.style.width);
-}return UIStringUtil.getContainerWidth (this.handle);
-});
-$_M (cla$$, "releaseHandle", 
-function () {
-this.parent = null;
-$_U (this, $wt.widgets.TableColumn, "releaseHandle", []);
-});
 cla$$ = $_C (function () {
 this.items = null;
 this.columns = null;
+this.imageList = null;
+this.currentItem = null;
 this.lastSelection = null;
 this.selection = null;
 this.lastIndexOf = 0;
 this.lastWidth = 0;
+this.customDraw = false;
+this.cancelMove = false;
+this.dragStarted = false;
+this.fixScrollWidth = false;
+this.tipRequested = false;
+this.wasSelected = false;
+this.ignoreActivate = false;
+this.ignoreSelect = false;
+this.ignoreShrink = false;
+this.ignoreResize = false;
 $_Z (this, arguments);
 }, $wt.widgets, "Table", $wt.widgets.Composite);
 $_K (cla$$, 
@@ -5853,11 +10371,100 @@ this.selection =  new Array (0);
 this.items =  new Array (0);
 this.columns =  new Array (0);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "_getItem", 
+function (index) {
+if (this.items[index] != null) return this.items[index];
+return this.items[index] =  new $wt.widgets.TableItem (this, 0, -1, false);
+}, "Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= $WT.H_SCROLL | $WT.V_SCROLL;
-return $wt.widgets.Widget.checkBits (style, $WT.SINGLE, $WT.MULTI, 0, 0, 0, 0);
+style |= 256 | 512;
+return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
 }, "Number");
+$_M (cla$$, "checkData", 
+function (item, redraw) {
+if (item.cached) return true;
+if ((this.style & 268435456) != 0) {
+item.cached = true;
+var event =  new $wt.widgets.Event ();
+event.item = item;
+this.currentItem = item;
+this.sendEvent (36, event);
+this.currentItem = null;
+if (this.isDisposed () || item.isDisposed ()) return false;
+if (redraw) {
+if (!this.setScrollWidth (item, false)) {
+item.redraw ();
+}}}return true;
+}, "$wt.widgets.TableItem,Boolean");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "clear", 
+function (index) {
+var count = this.items.length;
+}, "Number");
+$_M (cla$$, "clear", 
+function (start, end) {
+if (start > end) return ;
+}, "Number,Number");
+$_M (cla$$, "clear", 
+function (indices) {
+if (indices.length == 0) return ;
+}, "Array");
+$_M (cla$$, "clearAll", 
+function () {
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var width = 0;
+var height = 0;
+var lineWidth = 0;
+for (var i = 0; i < this.columns.length; i++) {
+var maxWidth = 0;
+var t = this.columns[i].getNameText ();
+var columnWidth = this.getTextWidth (t);
+maxWidth = Math.max (maxWidth, columnWidth);
+for (var j = 0; j < this.items.length; j++) {
+maxWidth = Math.max (maxWidth, this.getTextWidth (this.items[j].getText (i)));
+}
+lineWidth += maxWidth + 10;
+}
+width = lineWidth;
+if (this.items.length > 0) {
+var t = this.items[0].getNameText ();
+System.out.println (t);
+height = ($wt.internal.browser.OS.getStringPlainHeight (t) + 5) * (this.items.length + 0);
+} else {
+height = 24;
+}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+var border = this.getBorderWidth ();
+width += border * 2;
+height += border * 2;
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_M (cla$$, "createHandle", 
+function () {
+$_U (this, $wt.widgets.Table, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.handle = document.createElement ("DIV");
+this.handle.className = "table-default";
+var table = document.createElement ("TABLE");
+this.handle.appendChild (table);
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}});
 $_M (cla$$, "createItem", 
 function (column, index) {
 if (this.columns == null) {
@@ -5913,32 +10520,6 @@ theadTD.style.margin = "0";
 theadTD.style.padding = "0";
 column.handle = theadTD;
 }, "$wt.widgets.TableColumn,Number");
-$_M (cla$$, "removeItems", 
-function (indices) {
-if (indices == null && indices.length > this.items.length) return ;
-var table = this.handle.childNodes[0];
-var tbody = null;
-for (var i = 0; i < table.childNodes.length; i++) {
-if ("TBODY".equals (table.childNodes[i].nodeName)) {
-tbody = table.childNodes[i];
-break;
-}}
-var count = this.items.length;
-if (tbody == null) return ;
-var last = -1;
-var newItems =  new Array (this.items.length - indices.length);
-for (var i = 0; i < indices.length; i++) {
-var index = i;
-if (index < 0 || index >= this.items.length) return ;
-var item = this.items[index];
-if (item == null) return ;
-if (item != null) {
-System.arraycopy (this.items, index + 1, this.items, index, --count - index);
-this.items[count] = null;
-last = index;
-}tbody.removeChild (item.handle);
-}
-}, "Array");
 $_M (cla$$, "createItem", 
 function (item, index) {
 if (this.items == null) {
@@ -5972,78 +10553,82 @@ this.items[i].index = i;
 this.items[index] = item;
 }item.handle = tbodyTR;
 }, "$wt.widgets.TableItem,Number");
-$_M (cla$$, "getItemCount", 
+$_M (cla$$, "createWidget", 
 function () {
-if (this.items == null) {
-return 0;
-}return this.items.length;
+$_U (this, $wt.widgets.Table, "createWidget", []);
+this.items =  new Array (0);
+this.columns =  new Array (0);
+if ((this.style & 268435456) != 0) this.customDraw = true;
 });
-$_M (cla$$, "getColumnCount", 
-function () {
-if (this.columns == null) {
-return 0;
-}return this.columns.length;
-});
-$_V (cla$$, "createWidget", 
-function () {
-this.register ();
-this.handle = document.createElement ("DIV");
-this.handle.className = "table-default";
-var table = document.createElement ("TABLE");
-this.handle.appendChild (table);
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
-$_M (cla$$, "computeSize", 
-function (wHint, hHint, changed) {
-var width = 0;
-var height = 0;
-var lineWidth = 0;
-for (var i = 0; i < this.columns.length; i++) {
-var maxWidth = 0;
-var t = this.columns[i].getNameText ();
-var columnWidth = this.getTextWidth (t);
-maxWidth = Math.max (maxWidth, columnWidth);
-for (var j = 0; j < this.items.length; j++) {
-maxWidth = Math.max (maxWidth, this.getTextWidth (this.items[j].getText (i)));
-}
-lineWidth += maxWidth + 10;
-}
-width = lineWidth;
-if (this.items.length > 0) {
-var t = this.items[0].getNameText ();
-System.out.println (t);
-height = (UIStringUtil.calculatePlainStringLineHeight (t) + 5) * (this.items.length + 0);
+$_M (cla$$, "deselect", 
+function (indices) {
+if (indices.length == 0) return ;
+for (var i = 0; i < indices.length; i++) {
+if (indices[i] >= 0) {
+this.items[indices[i]].showSelection (false);
+}}
+this.removeFromSelection (indices);
+}, "Array");
+$_M (cla$$, "deselect", 
+function (index) {
+if (index < 0) return ;
+this.items[index].showSelection (false);
+this.removeFromSelection ([index]);
+}, "Number");
+$_M (cla$$, "deselect", 
+function (start, end) {
+var count = this.items.length;
+if (start == 0 && end == count - 1) {
+this.deselectAll ();
 } else {
-height = 24;
-}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
-var border = this.getBorderWidth ();
-width += border * 2;
-height += border * 2;
-return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+start = Math.max (0, start);
+var indices =  $_A (end - start + 1, 0);
+for (var i = start; i <= end; i++) {
+this.items[i].showSelection (false);
+indices[i - start] = i;
+}
+this.removeFromSelection (indices);
+}}, "Number,Number");
+$_M (cla$$, "deselectAll", 
+function () {
+for (var i = 0; i < this.items.length; i++) {
+this.items[i].showSelection (false);
+}
+this.selection =  new Array (0);
+});
+$_M (cla$$, "destroyItem", 
+function (column) {
+}, "$wt.widgets.TableColumn");
+$_M (cla$$, "destroyItem", 
+function (item) {
+}, "$wt.widgets.TableItem");
+$_M (cla$$, "fixCheckboxImageList", 
+function () {
+if ((this.style & 32) == 0) return ;
+});
 $_M (cla$$, "getTextWidth", 
 ($fz = function (t) {
 var columnWidth = 0;
 if (t == null || t.length == 0) {
 columnWidth = 0;
 } else {
-columnWidth = UIStringUtil.calculatePlainStringLineWidth (t);
+columnWidth = $wt.internal.browser.OS.getStringPlainWidth (t);
 }return columnWidth;
 }, $fz.isPrivate = true, $fz), "String");
-$_M (cla$$, "setHeaderVisible", 
-function (b) {
-}, "Boolean");
-$_M (cla$$, "setLinesVisible", 
-function (b) {
-}, "Boolean");
 $_M (cla$$, "getColumn", 
 function (index) {
 return this.columns[index];
 }, "Number");
+$_M (cla$$, "getColumnCount", 
+function () {
+if (this.columns == null) {
+return 0;
+}return this.columns.length;
+});
+$_M (cla$$, "getColumnOrder", 
+function () {
+return  $_A (0, 0);
+});
 $_M (cla$$, "getColumns", 
 function () {
 var count = this.columns.length;
@@ -6052,16 +10637,42 @@ var result =  new Array (count);
 System.arraycopy (this.columns, 0, result, 0, count);
 return result;
 });
-$_M (cla$$, "_getItem", 
+$_M (cla$$, "getGridLineWidth", 
+function () {
+return $wt.widgets.Table.GRID_WIDTH;
+});
+$_M (cla$$, "getHeaderHeight", 
+function () {
+return 16;
+});
+$_M (cla$$, "getHeaderVisible", 
+function () {
+return false;
+});
+$_M (cla$$, "getItem", 
 function (index) {
-if (this.items[index] != null) return this.items[index];
-return this.items[index] =  new $wt.widgets.TableItem (this, $WT.NONE, -1, false);
+var count = this.items.length;
+return this._getItem (index);
 }, "Number");
+$_M (cla$$, "getItem", 
+function (point) {
+return null;
+}, "$wt.graphics.Point");
+$_M (cla$$, "getItemCount", 
+function () {
+if (this.items == null) {
+return 0;
+}return this.items.length;
+});
+$_M (cla$$, "getItemHeight", 
+function () {
+return 16;
+});
 $_M (cla$$, "getItems", 
 function () {
 var count = this.items.length;
 var result =  new Array (count);
-if ((this.style & $WT.VIRTUAL) != 0) {
+if ((this.style & 268435456) != 0) {
 for (var i = 0; i < count; i++) {
 result[i] = this._getItem (i);
 }
@@ -6069,22 +10680,36 @@ result[i] = this._getItem (i);
 System.arraycopy (this.items, 0, result, 0, count);
 }return result;
 });
-$_M (cla$$, "getItem", 
-function (index) {
-var count = this.items.length;
-if (!(0 <= index && index < count)) this.error ($WT.ERROR_INVALID_RANGE);
-return this._getItem (index);
-}, "Number");
-$_M (cla$$, "getItem", 
-function (point) {
-return null;
-}, "$wt.graphics.Point");
-$_M (cla$$, "setTopIndex", 
-function (index) {
-}, "Number");
+$_M (cla$$, "getLinesVisible", 
+function () {
+return true;
+});
+$_M (cla$$, "getSelection", 
+function () {
+return this.selection;
+});
+$_M (cla$$, "getSelectionCount", 
+function () {
+return 0;
+});
+$_M (cla$$, "getSelectionIndex", 
+function () {
+return 0;
+});
+$_M (cla$$, "getSelectionIndices", 
+function () {
+var result =  $_A (this.selection.length, 0);
+for (var i = 0; i < this.selection.length; i++) {
+result[i] = 0;
+}
+return result;
+});
+$_M (cla$$, "getTopIndex", 
+function () {
+return 0;
+});
 $_M (cla$$, "indexOf", 
 function (column) {
-if (column == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var count = this.columns.length;
 for (var i = 0; i < count; i++) {
 if (this.columns[i] == column) return i;
@@ -6093,7 +10718,6 @@ return -1;
 }, "$wt.widgets.TableColumn");
 $_M (cla$$, "indexOf", 
 function (item) {
-if (item == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var count = this.items.length;
 if (1 <= this.lastIndexOf && this.lastIndexOf < count - 1) {
 if (this.items[this.lastIndexOf] == item) return this.lastIndexOf;
@@ -6109,113 +10733,61 @@ if (this.items[i] == item) return this.lastIndexOf = i;
 }
 }return -1;
 }, "$wt.widgets.TableItem");
-$_M (cla$$, "select", 
+$_M (cla$$, "isSelected", 
 function (index) {
-if (index < 0) return ;
-this.deselectAll ();
-this.items[index].showSelection (true);
-this.selection =  new Array (1);
-this.selection[0] = this.items[index];
+return false;
 }, "Number");
-$_M (cla$$, "setSelection", 
-function (index) {
-this.deselectAll ();
-this.select (index);
-this.setFocusIndex (index);
-}, "Number");
-$_M (cla$$, "setSelection", 
-function (start, end) {
-this.deselectAll ();
-if (end < 0 || start > end || ((this.style & $WT.SINGLE) != 0 && start != end)) return ;
-var count = this.items.length;
-if (count == 0 || start >= count) return ;
-start = Math.max (0, start);
-end = Math.min (end, count - 1);
-this.select (start, end);
-this.selection =  new Array (end - start + 1);
-for (var i = start; i <= end; i++) {
-this.selection[i - start] = this.items[i];
-}
-this.setFocusIndex (start);
-this.showSelection ();
-}, "Number,Number");
-$_M (cla$$, "setFocusIndex", 
-function (index) {
-if (index < 0) return ;
-}, "Number");
-$_M (cla$$, "setSelection", 
-function (items) {
-if (items == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.deselectAll ();
-var length = items.length;
-if (length == 0 || ((this.style & $WT.SINGLE) != 0 && length > 1)) return ;
-var focusIndex = -1;
-this.selection = items;
-for (var i = length - 1; i >= 0; --i) {
-var index = this.indexOf (items[i]);
-items[i].showSelection (true);
-if (index != -1) {
-focusIndex = index;
-}}
-if (focusIndex != -1) this.setFocusIndex (focusIndex);
-this.showSelection ();
-}, "Array");
-$_M (cla$$, "select", 
-function (start, end) {
-if (end < 0 || start > end || ((this.style & $WT.SINGLE) != 0 && start != end)) return ;
-var count = this.items.length;
-if (count == 0 || start >= count) return ;
-this.deselectAll ();
-start = Math.max (0, start);
-end = Math.min (end, count - 1);
-if (start == 0 && end == count - 1) {
-this.selectAll ();
-} else {
-this.selection =  new Array (end - start + 1);
-for (var i = start; i <= end; i++) {
-this.items[i].showSelection (true);
-this.selection[i - start] = this.items[i];
-}
-}}, "Number,Number");
-$_M (cla$$, "removeAll", 
-function () {
-this.remove (0, this.items.length - 1);
-});
-$_M (cla$$, "remove", 
-function (start, end) {
-var itemCount = this.items.length;
-if (start > end) return ;
-if (!(0 <= start && start <= end && end < itemCount)) {
-return ;
-}var table = this.handle.childNodes[0];
+$_M (cla$$, "removeItems", 
+function (indices) {
+if (indices == null && indices.length > this.items.length) return ;
+var table = this.handle.childNodes[0];
 var tbody = null;
 for (var i = 0; i < table.childNodes.length; i++) {
 if ("TBODY".equals (table.childNodes[i].nodeName)) {
 tbody = table.childNodes[i];
 break;
 }}
+var count = this.items.length;
 if (tbody == null) return ;
-this.deselect (start, end);
-var index = start;
-while (index <= end) {
+var last = -1;
+var newItems =  new Array (this.items.length - indices.length);
+for (var i = 0; i < indices.length; i++) {
+var index = i;
+if (index < 0 || index >= this.items.length) return ;
 var item = this.items[index];
-if (item != null && !item.isDisposed ()) {
-tbody.removeChild (item.handle);
-item.releaseHandle ();
-}index++;
+if (item == null) return ;
+if (item != null) {
+System.arraycopy (this.items, index + 1, this.items, index, --count - index);
+this.items[count] = null;
+last = index;
+}tbody.removeChild (item.handle);
 }
-var newItems =  new Array (itemCount - (index - start));
-System.arraycopy (this.items, 0, newItems, 0, start);
-System.arraycopy (this.items, index, newItems, start, itemCount - index);
-this.items = newItems;
-}, "Number,Number");
-$_M (cla$$, "remove", 
-function (index) {
-this.remove ([index]);
-}, "Number");
+}, "Array");
+$_M (cla$$, "releaseWidget", 
+function () {
+var columnCount = this.columns.length;
+if (columnCount == 1 && this.columns[0] == null) columnCount = 0;
+var itemCount = this.items.length;
+for (var i = 0; i < itemCount; i++) {
+var item = this.items[i];
+if (item != null && !item.isDisposed ()) item.releaseResources ();
+}
+this.customDraw = false;
+this.currentItem = null;
+this.items = null;
+for (var i = 0; i < columnCount; i++) {
+var column = this.columns[i];
+if (!column.isDisposed ()) column.releaseResources ();
+}
+this.columns = null;
+if (this.imageList != null) {
+this.display.releaseImageList (this.imageList);
+}this.imageList = null;
+$_U (this, $wt.widgets.Table, "releaseWidget", []);
+});
 $_M (cla$$, "remove", 
 function (indices) {
-if (indices == null || indices.length == 0) return ;
+if (indices.length == 0) return ;
 var newIndices =  $_A (indices.length, 0);
 System.arraycopy (indices, 0, newIndices, 0, indices.length);
 var table = this.handle.childNodes[0];
@@ -6249,25 +10821,197 @@ var newItems =  new Array (indices.length);
 System.arraycopy (this.items, 0, newItems, 0, indices.length);
 this.items = newItems;
 }, "Array");
+$_M (cla$$, "remove", 
+function (index) {
+this.remove ([index]);
+}, "Number");
+$_M (cla$$, "remove", 
+function (start, end) {
+if (start > end) return ;
+var count = this.items.length;
+if (!(0 <= start && start <= end && end < count)) {
+return ;
+}var table = this.handle.childNodes[0];
+var tbody = null;
+for (var i = 0; i < table.childNodes.length; i++) {
+if ("TBODY".equals (table.childNodes[i].nodeName)) {
+tbody = table.childNodes[i];
+break;
+}}
+if (tbody == null) return ;
+this.deselect (start, end);
+var index = start;
+while (index <= end) {
+var item = this.items[index];
+if (item != null && !item.isDisposed ()) {
+tbody.removeChild (item.handle);
+item.releaseHandle ();
+}index++;
+}
+var newItems =  new Array (count - (index - start));
+System.arraycopy (this.items, 0, newItems, 0, start);
+System.arraycopy (this.items, index, newItems, start, count - index);
+this.items = newItems;
+}, "Number,Number");
+$_M (cla$$, "removeAll", 
+function () {
+this.remove (0, this.items.length - 1);
+});
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "select", 
+function (indices) {
+var length = indices.length;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
+}, "Array");
+$_M (cla$$, "select", 
+function (index) {
+if (index < 0) return ;
+this.deselectAll ();
+this.items[index].showSelection (true);
+this.selection =  new Array (1);
+this.selection[0] = this.items[index];
+this.items[index].handle.className = "table-item-selected";
+}, "Number");
+$_M (cla$$, "select", 
+function (start, end) {
+if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
+var count = this.items.length;
+if (count == 0 || start >= count) return ;
+this.deselectAll ();
+start = Math.max (0, start);
+end = Math.min (end, count - 1);
+if (start == 0 && end == count - 1) {
+this.selectAll ();
+} else {
+this.selection =  new Array (end - start + 1);
+for (var i = start; i <= end; i++) {
+this.items[i].showSelection (true);
+this.selection[i - start] = this.items[i];
+}
+}}, "Number,Number");
 $_M (cla$$, "selectAll", 
 function () {
-if ((this.style & $WT.SINGLE) != 0) return ;
+if ((this.style & 4) != 0) return ;
 this.selection =  new Array (this.items.length);
 for (var i = 0; i < this.items.length; i++) {
 this.items[i].showSelection (true);
 this.selection[i] = this.items[i];
 }
 });
-$_M (cla$$, "deselect", 
-function (indices) {
-if (indices == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (indices.length == 0) return ;
-for (var i = 0; i < indices.length; i++) {
-if (indices[i] >= 0) {
-this.items[indices[i]].showSelection (false);
-}}
-this.removeFromSelection (indices);
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+var fixResize = false;
+if (fixResize) this.setRedraw (false);
+$_U (this, $wt.widgets.Table, "setBounds", [x, y, width, height, flags]);
+if (fixResize) this.setRedraw (true);
+}, "Number,Number,Number,Number,Number");
+$_M (cla$$, "setColumnOrder", 
+function (order) {
 }, "Array");
+$_M (cla$$, "setCheckboxImageListColor", 
+function () {
+if ((this.style & 32) == 0) return ;
+});
+$_M (cla$$, "setCheckboxImageList", 
+function (width, height) {
+if ((this.style & 32) == 0) return ;
+var count = 4;
+}, "Number,Number");
+$_M (cla$$, "setFocusIndex", 
+function (index) {
+if (index < 0) return ;
+}, "Number");
+$_M (cla$$, "setFont", 
+function (font) {
+var topIndex = this.getTopIndex ();
+this.setRedraw (false);
+this.setTopIndex (0);
+$_U (this, $wt.widgets.Table, "setFont", [font]);
+this.setTopIndex (topIndex);
+this.setScrollWidth (null, true);
+this.setRedraw (true);
+this.setItemHeight ();
+}, "$wt.graphics.Font");
+$_M (cla$$, "setHeaderVisible", 
+function (show) {
+}, "Boolean");
+$_M (cla$$, "setItemCount", 
+function (count) {
+count = Math.max (0, count);
+}, "Number");
+$_M (cla$$, "setItemHeight", 
+function () {
+});
+$_M (cla$$, "setLinesVisible", 
+function (show) {
+var newBits = 0;
+}, "Boolean");
+$_V (cla$$, "setRedraw", 
+function (redraw) {
+}, "Boolean");
+$_M (cla$$, "setScrollWidth", 
+function (item, force) {
+if (this.currentItem != null) {
+if (this.currentItem != item) this.fixScrollWidth = true;
+return false;
+}return false;
+}, "$wt.widgets.TableItem,Boolean");
+$_M (cla$$, "setSelection", 
+function (indices) {
+this.deselectAll ();
+var length = indices.length;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
+this.select (indices);
+var focusIndex = indices[0];
+if (focusIndex != -1) this.setFocusIndex (focusIndex);
+this.showSelection ();
+}, "Array");
+$_M (cla$$, "setSelection", 
+function (items) {
+this.deselectAll ();
+var length = items.length;
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) return ;
+var focusIndex = -1;
+this.selection = items;
+for (var i = length - 1; i >= 0; --i) {
+var index = this.indexOf (items[i]);
+items[i].showSelection (true);
+if (index != -1) {
+focusIndex = index;
+}}
+if (focusIndex != -1) this.setFocusIndex (focusIndex);
+this.showSelection ();
+}, "Array");
+$_M (cla$$, "setSelection", 
+function (index) {
+this.deselectAll ();
+this.select (index);
+this.setFocusIndex (index);
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (start, end) {
+this.deselectAll ();
+if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
+var count = this.items.length;
+if (count == 0 || start >= count) return ;
+start = Math.max (0, start);
+end = Math.min (end, count - 1);
+this.select (start, end);
+this.selection =  new Array (end - start + 1);
+for (var i = start; i <= end; i++) {
+this.selection[i - start] = this.items[i];
+}
+this.setFocusIndex (start);
+this.showSelection ();
+}, "Number,Number");
+$_M (cla$$, "setTableEmpty", 
+function () {
+});
 $_M (cla$$, "removeFromSelection", 
 ($fz = function (indices) {
 if (this.selection.length < indices.length) {
@@ -6280,61 +11024,11 @@ newSelection[j++] = this.selection[i];
 }}
 this.selection = newSelection;
 }, $fz.isPrivate = true, $fz), "Array");
-$_M (cla$$, "deselect", 
-function (index) {
-if (index < 0) return ;
-this.items[index].showSelection (false);
-this.removeFromSelection ([index]);
-}, "Number");
-$_M (cla$$, "deselect", 
-function (start, end) {
-var count = this.items.length;
-if (start == 0 && end == count - 1) {
-this.deselectAll ();
-} else {
-start = Math.max (0, start);
-var indices =  $_A (end - start + 1, 0);
-for (var i = start; i <= end; i++) {
-this.items[i].showSelection (false);
-indices[i - start] = i;
-}
-this.removeFromSelection (indices);
-}}, "Number,Number");
-$_M (cla$$, "deselectAll", 
-function () {
-for (var i = 0; i < this.items.length; i++) {
-this.items[i].showSelection (false);
-}
-this.selection =  new Array (0);
-});
-$_M (cla$$, "clear", 
-function (index) {
-var count = this.items.length;
-if (!(0 <= index && index < count)) this.error ($WT.ERROR_INVALID_RANGE);
-var item = this.items[index];
-}, "Number");
-$_M (cla$$, "clear", 
-function (start, end) {
-}, "Number,Number");
-$_M (cla$$, "clear", 
-function (indices) {
-}, "Array");
-$_M (cla$$, "clearAll", 
-function () {
-});
-$_M (cla$$, "getSelectionIndices", 
-function () {
-var result =  $_A (this.selection.length, 0);
-for (var i = 0; i < this.selection.length; i++) {
-result[i] = 0;
-}
-return result;
-});
 $_M (cla$$, "toggleSelection", 
 function (item, isCtrlKeyHold, isShiftKeyHold) {
 if (item == null) {
 return false;
-}if ((this.style & $WT.MULTI) != 0 && (isCtrlKeyHold || isShiftKeyHold)) {
+}if ((this.style & 2) != 0 && (isCtrlKeyHold || isShiftKeyHold)) {
 if (isCtrlKeyHold) {
 for (var i = 0; i < this.selection.length; i++) {
 if (item == this.selection[i]) {
@@ -6385,46 +11079,33 @@ this.selection =  new Array (1);
 }this.lastSelection = item;
 return true;
 }, "$wt.widgets.TableItem,Boolean,Boolean");
-$_M (cla$$, "getSelection", 
-function () {
-return this.selection;
-});
+$_M (cla$$, "setTopIndex", 
+function (index) {
+}, "Number");
+$_M (cla$$, "showColumn", 
+function (column) {
+if (column.parent != this) return ;
+var index = this.indexOf (column);
+if (index == -1) return ;
+}, "$wt.widgets.TableColumn");
+$_M (cla$$, "showItem", 
+function (index) {
+}, "Number");
+$_M (cla$$, "showItem", 
+function (item) {
+var index = this.indexOf (item);
+if (index != -1) this.showItem (index);
+}, "$wt.widgets.TableItem");
 $_M (cla$$, "showSelection", 
 function () {
 });
-$_M (cla$$, "checkData", 
-function (item, redraw) {
-if (item.cached) return true;
-if ((this.style & $WT.VIRTUAL) != 0) {
-item.cached = true;
-var event =  new $wt.widgets.Event ();
-event.item = item;
-this.lastSelection = item;
-this.sendEvent ($WT.SetData, event);
-this.lastSelection = null;
-if (this.isDisposed () || item.isDisposed ()) return false;
-if (redraw) {
-}}return true;
-}, "$wt.widgets.TableItem,Boolean");
-$_M (cla$$, "releaseHandle", 
+$_M (cla$$, "updateMoveable", 
 function () {
-if (this.columns != null) {
-$wt.widgets.Display.releaseWidgetArray (this.columns);
-this.columns = null;
-}if (this.items != null) {
-$wt.widgets.Display.releaseWidgetArray (this.items);
-this.items = null;
-}if (this.lastSelection != null) {
-this.lastSelection = null;
-}$_U (this, $wt.widgets.Table, "releaseHandle", []);
 });
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
+$_S (cla$$,
+"INSET", 4,
+"GRID_WIDTH", 1,
+"HEADER_MARGIN", 10);
 cla$$ = $_C (function () {
 this.parent = null;
 this.control = null;
@@ -6435,18 +11116,19 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.TabItem, [parent, style]);
 this.parent = parent;
-parent.createItem (this, parent.getItemCount ());
-this.configure ();
+var index = parent.getItemCount ();
+parent.createItem (this, index);
+this.configure (index);
 }, "$wt.widgets.TabFolder,Number");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TabItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, index);
-this.configure ();
+this.configure (index);
 }, "$wt.widgets.TabFolder,Number,Number");
 $_M (cla$$, "configure", 
-($fz = function () {
+($fz = function (index) {
 this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.TabItem$1")) {
 Clazz.pu$h ();
@@ -6459,25 +11141,22 @@ function () {
 var items = this.callbacks["$wt.widgets.TabItem"].parent.items;
 for (var i = 0; i < items.length; i++) {
 var obj = this.callbacks["$wt.widgets.TabItem"];
-var ctrl = items[i].control;
-var selectedCSS = "tab-item-selected";
-var index = items[i].handle.className.indexOf (selectedCSS);
 if (obj == items[i]) {
-this.callbacks["$wt.widgets.TabItem"].fixControlBounds (ctrl);
+this.callbacks["$wt.widgets.TabItem"].parent.setSelection (i, false);
+var ctrl = items[i].control;
+if (ctrl == null) continue ;this.callbacks["$wt.widgets.TabItem"].fixControlBounds (ctrl);
 ctrl.setVisible (true);
-if (index == -1) {
-items[i].handle.className += " " + selectedCSS;
-}} else {
-ctrl.setVisible (false);
-if (index != -1) {
-items[i].handle.className = items[i].handle.className.substring (0, index) + items[i].handle.className.substring (index + selectedCSS.length);
-}}}
+ctrl.getParent ().layout ([ctrl]);
+} else {
+var ctrl = items[i].control;
+if (ctrl == null) continue ;ctrl.setVisible (false);
+}}
 });
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.TabItem$1, innerThis, finalVars);
 }) (this, null));
-}, $fz.isPrivate = true, $fz));
+}, $fz.isPrivate = true, $fz), "Number");
 $_M (cla$$, "getControl", 
 function () {
 return this.control;
@@ -6507,8 +11186,6 @@ this.parent = null;
 $_M (cla$$, "setControl", 
 function (control) {
 if (control != null) {
-if (control.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (control.parent != this.parent) this.error ($WT.ERROR_INVALID_PARENT);
 }if (this.control != null && this.control.isDisposed ()) {
 this.control = null;
 }var oldControl = this.control;
@@ -6519,12 +11196,13 @@ if (index != this.parent.getSelectionIndex ()) {
 if (newControl != null) newControl.setVisible (false);
 return ;
 }if (newControl != null) {
-System.err.println (this.parent.getClientArea ());
-newControl.setBounds (this.parent.getClientArea ());
+var clientArea = this.parent.getClientArea ();
+if (clientArea.height <= 0 || clientArea.width <= 0) {
+} else {
+newControl.setBounds (clientArea);
 this.fixControlBounds (newControl);
 newControl.setVisible (true);
-System.out.println ("here!");
-}if (oldControl != null) oldControl.setVisible (false);
+}}if (oldControl != null) oldControl.setVisible (false);
 }, "$wt.widgets.Control");
 $_M (cla$$, "fixControlBounds", 
 function () {
@@ -6533,121 +11211,284 @@ this.fixControlBounds (this.control);
 $_M (cla$$, "fixControlBounds", 
 ($fz = function (newControl) {
 var b = this.parent.getBounds ();
-b.height -= 24;
-b.y = 24;
-System.out.println (b);
-newControl.setBounds (b);
+b.height -= 30;
+b.width -= 12;
+b.x -= 1;
+b.y -= 1;
+if ((this.parent.style & 1024) == 0) {
+b.y += 18;
+}newControl.setBounds (b);
 }, $fz.isPrivate = true, $fz), "$wt.widgets.Control");
-$_V (cla$$, "setImage", 
+$_M (cla$$, "setImage", 
 function (image) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+$_U (this, $wt.widgets.TabItem, "setImage", [image]);
 }, "$wt.graphics.Image");
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var index = this.parent.indexOf (this);
-if (index == -1) return ;
-$_U (this, $wt.widgets.TabItem, "setText", [string]);
 if (this.handle != null) {
 this.handle.appendChild (document.createTextNode (string));
-}}, "String");
+}var index = this.parent.indexOf (this);
+if (index == -1) return ;
+$_U (this, $wt.widgets.TabItem, "setText", [string]);
+}, "String");
 $_M (cla$$, "setToolTipText", 
 function (string) {
 this.toolTipText = string;
 }, "String");
 $_M (cla$$, "releaseHandle", 
 function () {
-this.control = null;
-this.parent = null;
-$_U (this, $wt.widgets.TabItem, "releaseHandle", []);
+if (this.handle != null) {
+BrowserNative.releaseHandle (this.handle);
+this.handle = null;
+}$_U (this, $wt.widgets.TabItem, "releaseHandle", []);
 });
 cla$$ = $_C (function () {
 this.items = null;
-this.titles = null;
+this.borderFrame = null;
+this.borderNW = null;
+this.borderNE = null;
+this.borderSW = null;
+this.borderSE = null;
+this.itemMore = null;
+this.btnPrevTab = null;
+this.btnNextTab = null;
+this.contentArea = null;
+this.offset = 0;
+this.imageList = null;
 $_Z (this, arguments);
 }, $wt.widgets, "TabFolder", $wt.widgets.Composite);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.TabFolder, [parent, $wt.widgets.TabFolder.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style = $wt.widgets.Widget.checkBits (style, $WT.TOP, $WT.BOTTOM, 0, 0, 0, 0);
-return style & ~($WT.H_SCROLL | $WT.V_SCROLL);
+style = $wt.widgets.Widget.checkBits (style, 128, 1024, 0, 0, 0, 0);
+return style & ~(256 | 512);
 }, "Number");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
+System.out.println (wHint + "," + hHint + "," + changed);
 var size = $_U (this, $wt.widgets.TabFolder, "computeSize", [wHint, hHint, changed]);
-var border = this.getBorderWidth ();
-size.x += this.items.length * 32;
-size.y += 24;
-System.out.println ("in tab folder" + size);
+System.out.println ("super size of tabfolder:" + size);
+var width = -124;
+if (this.items != null && this.items.length != 0) {
+for (var i = 0; i < this.items.length; i++) {
+if (this.items[i] != null && !this.items[i].isDisposed ()) {
+width += $wt.internal.browser.OS.getContainerWidth (this.items[i].handle);
+}}
+}if (width < 0) {
+width += 124 + 12;
+}var border = this.getBorderWidth ();
+width += border * 2;
+size.x = Math.max (width, size.x);
+System.out.println ("in tab folder " + size);
 return size;
 }, "Number,Number,Boolean");
+$_V (cla$$, "computeTrim", 
+function (x, y, width, height) {
+x -= 4;
+y -= 4 + 18;
+width += 8;
+height += 8 + 18;
+var border = this.getBorderWidth ();
+x -= border;
+y -= border;
+width += border * 2;
+height += border * 2;
+return  new $wt.graphics.Rectangle (x, y, width, height);
+}, "Number,Number,Number,Number");
+$_V (cla$$, "containerHandle", 
+function () {
+return this.contentArea;
+});
+$_M (cla$$, "createCSSElement", 
+function (parent, css) {
+var el = document.createElement ("DIV");
+if (css != null) {
+el.className = css;
+}if (parent != null) {
+(parent).appendChild (el);
+}return el;
+}, "Object,String");
 $_M (cla$$, "createItem", 
 function (item, index) {
 var count = this.items.length;
 var tab = document.createElement ("DIV");
 tab.className = "tab-item-default";
-this.titles.appendChild (tab);
-tab.appendChild (document.createTextNode (item.getNameText ()));
-item.handle = tab;
+this.borderFrame.insertBefore (tab, this.itemMore);
+var cssName = this.borderFrame.className;
+if (cssName == null) cssName = "";
+var key = "tab-folder-no-tab";
+var idx = cssName.indexOf (key);
+if (idx != -1) {
+this.borderFrame.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}tab.appendChild (document.createTextNode (item.getNameText ()));
+var width = -2;
+if (this.items != null && this.items.length != 0) {
+for (var i = 0; i < index; i++) {
+if (this.items[i] != null && !this.items[i].isDisposed ()) {
+width += $wt.internal.browser.OS.getContainerWidth (this.items[i].handle);
+}}
+}if (width < 2) {
+width = 2;
+}tab.style.left = width + "px";
 this.items[index] = item;
+this.items[index].handle = tab;
 if (count == 0) {
-tab.className += " tab-item-selected";
+this.setSelection (0, false);
 var event =  new $wt.widgets.Event ();
 event.item = this.items[0];
-this.sendEvent ($WT.Selection, event);
+this.sendEvent (13, event);
 }}, "$wt.widgets.TabItem,Number");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
-System.err.println ("...." + this.handle);
 this.items =  new Array (0);
-this.handle = document.createElement ("DIV");
-if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.className = "tab-folder-default";
-if ((this.style & $WT.BORDER) != 0) {
-this.handle.className += " tab-folder-border";
-}this.titles = document.createElement ("DIV");
-this.titles.className = "tab-folder-title-default";
-this.handle.appendChild (this.titles);
-var outerFrame = document.createElement ("DIV");
-outerFrame.className = "tab-folder-seperator";
-this.handle.appendChild (outerFrame);
+var cssName = "tab-folder-default";
+if ((this.style & 2048) != 0) {
+cssName += " tab-folder-border-default";
+}this.handle = this.createCSSElement (this.parent.handle, cssName);
+cssName = "tab-folder-no-tab";
+if ((this.style & 1024) != 0) {
+cssName += " tab-folder-bottom";
+}this.borderFrame = this.createCSSElement (this.handle, cssName);
+cssName = "tab-folder-border ";
+this.itemMore = this.createCSSElement (this.borderFrame, "tab-item-more");
+if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+this.itemMore.style.bottom = "6px";
+}var el = this.createCSSElement (this.itemMore, "tab-item-button");
+this.btnNextTab = document.createElement ("BUTTON");
+el.appendChild (this.btnNextTab);
+var arrowRight = this.createCSSElement (this.btnNextTab, "button-arrow-right");
+if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+arrowRight.style.left = "-5px";
+arrowRight.style.top = "0";
+}el.onclick = this.btnNextTab.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.TabFolder$1")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "TabFolder$1", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+if (this.callbacks["$wt.widgets.TabFolder"].offset + 1 >= this.callbacks["$wt.widgets.TabFolder"].items.length) return ;
+var w = 0;
+var ww = $wt.internal.browser.OS.getContainerWidth (this.callbacks["$wt.widgets.TabFolder"].items[this.callbacks["$wt.widgets.TabFolder"].offset].handle);
+var width = this.callbacks["$wt.widgets.TabFolder"].getSize ().x - 36;
+for (var i = this.callbacks["$wt.widgets.TabFolder"].offset + 1; i < this.callbacks["$wt.widgets.TabFolder"].items.length; i++) {
+var x = $wt.internal.browser.OS.getContainerWidth (this.callbacks["$wt.widgets.TabFolder"].items[i].handle);
+w += x;
+ww += x;
+if (w > width) {
+if (i < this.callbacks["$wt.widgets.TabFolder"].items.length - 1) {
+this.callbacks["$wt.widgets.TabFolder"].offset++;
+System.out.println ("Offset:" + this.callbacks["$wt.widgets.TabFolder"].offset);
+this.callbacks["$wt.widgets.TabFolder"].setSelection (this.callbacks["$wt.widgets.TabFolder"].getSelectionIndex (), false);
+return ;
+}}}
+if (ww > width) {
+this.callbacks["$wt.widgets.TabFolder"].offset++;
+System.out.println ("Offset:" + this.callbacks["$wt.widgets.TabFolder"].offset);
+this.callbacks["$wt.widgets.TabFolder"].setSelection (this.callbacks["$wt.widgets.TabFolder"].getSelectionIndex (), false);
+return ;
+}});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.TabFolder$1, innerThis, finalVars);
+}) (this, null));
+el = this.createCSSElement (this.itemMore, "tab-item-button");
+this.btnPrevTab = document.createElement ("BUTTON");
+el.appendChild (this.btnPrevTab);
+var arrowLeft = this.createCSSElement (this.btnPrevTab, "button-arrow-left");
+if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+arrowLeft.style.left = "-6px";
+arrowLeft.style.top = "0";
+}el.onclick = this.btnPrevTab.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
+if (!$_D ("org.eclipse.swt.widgets.TabFolder$2")) {
+Clazz.pu$h ();
+cla$$ = $_C (function () {
+$_B (this, arguments);
+$_Z (this, arguments);
+}, $wt.widgets, "TabFolder$2", $wt.internal.RunnableCompatibility);
+$_V (cla$$, "run", 
+function () {
+System.out.println ("in Offset:" + this.callbacks["$wt.widgets.TabFolder"].offset);
+if (this.callbacks["$wt.widgets.TabFolder"].offset <= 0) return ;
+this.callbacks["$wt.widgets.TabFolder"].offset--;
+System.out.println ("Offset:" + this.callbacks["$wt.widgets.TabFolder"].offset);
+this.callbacks["$wt.widgets.TabFolder"].setSelection (this.callbacks["$wt.widgets.TabFolder"].getSelectionIndex (), false);
+});
+cla$$ = $_P ();
+}
+return $_N ($wt.widgets.TabFolder$2, innerThis, finalVars);
+}) (this, null));
+this.borderNW = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-nw");
+this.borderNE = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-ne");
+this.borderSW = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-sw");
+this.borderSE = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-se");
+this.contentArea = this.createCSSElement (this.handle, "tab-folder-content-area");
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+});
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.TabFolder, "createWidget", []);
+});
+$_M (cla$$, "destroyItem", 
+function (item) {
+}, "$wt.widgets.TabItem");
+$_V (cla$$, "findThemeControl", 
+function () {
+return null;
 });
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.TabFolder, "setBounds", [x, y, width, height]);
-var idx = this.getSelectionIndex ();
-this.items[idx].fixControlBounds ();
 }, "Number,Number,Number,Number");
-$_V (cla$$, "minimumSize", 
-function (wHint, hHint, changed) {
-var size =  new $wt.graphics.Point (64, 48);
-for (var i = 0; i < this.items.length; i++) {
-var tabItem = this.items[i];
-if (tabItem != null) {
-var text = tabItem.getNameText ();
-if (text != null && text.length != 0) {
-size.x += UIStringUtil.calculatePlainStringLineWidth (text);
-}}}
-if (size.x == 0) size.x = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (size.y == 0) size.y = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) size.x = wHint;
-if (hHint != $WT.DEFAULT) size.y = hHint;
-System.out.println ("=====" + size);
-return size;
-}, "Number,Number,Boolean");
 $_M (cla$$, "setSize", 
 function (width, height) {
 $_U (this, $wt.widgets.TabFolder, "setSize", [width, height]);
-var idx = this.getSelectionIndex ();
-this.items[idx].fixControlBounds ();
 }, "Number,Number");
-$_M (cla$$, "destroyItem", 
-function (item) {
-}, "$wt.widgets.TabItem");
+$_M (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+this.setSelection (this.getSelectionIndex (), false);
+return $_U (this, $wt.widgets.TabFolder, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,Number,Number,Number,Number,Number");
+$_V (cla$$, "getClientArea", 
+function () {
+this.forceResize ();
+var x = 2;
+var y = 2;
+var h = this.height - 8;
+var w = this.width - 8;
+if (this.items != null && this.items.length != 0) {
+var lineHeight = $wt.internal.browser.OS.getContainerHeight (this.items[0].handle);
+if ($wt.internal.browser.OS.isIE) lineHeight++;
+h -= lineHeight;
+if (this.getSelectionIndex () == 0) {
+h += 2;
+}if ((this.style & 1024) == 0) {
+y += lineHeight;
+} else {
+if ($wt.internal.browser.OS.isIE) h--;
+}}var border = this.getBorderWidth ();
+x += border;
+y += border;
+w -= border * 2;
+h -= border * 2;
+return  new $wt.graphics.Rectangle (x, y, w, h);
+});
 $_M (cla$$, "getItem", 
 function (index) {
 return this.items[index];
@@ -6663,16 +11504,6 @@ var result =  new Array (count);
 System.arraycopy (this.items, 0, result, 0, count);
 return result;
 });
-$_M (cla$$, "indexOf", 
-function (item) {
-if (item == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var count = this.getItemCount ();
-for (var i = 0; i < count; i++) {
-if (this.items[i] == item) return i;
-}
-System.out.println ("-1 returned");
-return -1;
-}, "$wt.widgets.TabItem");
 $_M (cla$$, "getSelection", 
 function () {
 var index = this.getSelectionIndex ();
@@ -6687,188 +11518,726 @@ return i;
 }}
 return 0;
 });
+$_M (cla$$, "indexOf", 
+function (item) {
+var count = this.getItemCount ();
+for (var i = 0; i < count; i++) {
+if (this.items[i] == item) return i;
+}
+return -1;
+}, "$wt.widgets.TabItem");
+$_V (cla$$, "minimumSize", 
+function (wHint, hHint, flushCache) {
+var children = this._getChildren ();
+var width = 0;
+var height = 0;
+for (var i = 0; i < children.length; i++) {
+var child = children[i];
+var index = 0;
+var count = this.getItemCount ();
+while (index < count) {
+if (this.items[index].control == child) break;
+index++;
+}
+if (index == count) {
+var rect = child.getBounds ();
+width = Math.max (width, rect.x + rect.width);
+height = Math.max (height, rect.y + rect.height);
+} else {
+var size = child.computeSize (wHint, hHint, flushCache);
+width = Math.max (width, size.x);
+height = Math.max (height, size.y);
+}}
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_V (cla$$, "mnemonicHit", 
+function (key) {
+var selection = this.getSelectionIndex ();
+for (var i = 0; i < this.items.length; i++) {
+if (i != selection) {
+var item = this.items[i];
+if (item != null) {
+var ch = this.findMnemonic (item.getText ());
+if ((Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (ch)).charCodeAt (0)) {
+if (this.setFocus ()) {
+this.setSelection (i, true);
+return true;
+}}}}}
+return false;
+}, "Number");
+$_V (cla$$, "mnemonicMatch", 
+function (key) {
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null) {
+var ch = this.findMnemonic (item.getText ());
+if ((Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (ch)).charCodeAt (0)) {
+return true;
+}}}
+return false;
+}, "Number");
 $_M (cla$$, "releaseHandle", 
 function () {
-if (this.items != null) {
-$wt.widgets.Display.releaseWidgetArray (this.items);
-this.items = null;
+if (this.borderNW != null) {
+BrowserNative.releaseHandle (this.borderNW);
+this.borderNW = null;
+}if (this.borderNE != null) {
+BrowserNative.releaseHandle (this.borderNE);
+this.borderNE = null;
+}if (this.borderSW != null) {
+BrowserNative.releaseHandle (this.borderSW);
+this.borderSW = null;
+}if (this.borderSE != null) {
+BrowserNative.releaseHandle (this.borderSE);
+this.borderSE = null;
+}if (this.btnPrevTab != null) {
+BrowserNative.releaseHandle (this.btnPrevTab.parentNode);
+BrowserNative.releaseHandle (this.btnPrevTab);
+this.btnPrevTab = null;
+}if (this.btnNextTab != null) {
+BrowserNative.releaseHandle (this.btnNextTab.parentNode);
+BrowserNative.releaseHandle (this.btnNextTab);
+this.btnNextTab = null;
+}if (this.itemMore != null) {
+BrowserNative.releaseHandle (this.itemMore);
+this.itemMore = null;
+}if (this.borderFrame != null) {
+BrowserNative.releaseHandle (this.borderFrame);
+this.borderFrame = null;
+}if (this.contentArea != null) {
+BrowserNative.releaseHandle (this.contentArea);
+this.contentArea = null;
 }$_U (this, $wt.widgets.TabFolder, "releaseHandle", []);
 });
+$_M (cla$$, "releaseWidget", 
+function () {
+var count = this.getItemCount ();
+for (var i = 0; i < count; i++) {
+var item = this.items[i];
+if (!item.isDisposed ()) item.releaseResources ();
+}
+this.items = null;
+if (this.imageList != null) {
+this.display.releaseImageList (this.imageList);
+}this.imageList = null;
+$_U (this, $wt.widgets.TabFolder, "releaseWidget", []);
+});
+$_M (cla$$, "removeControl", 
+function (control) {
+$_U (this, $wt.widgets.TabFolder, "removeControl", [control]);
+var count = this.getItemCount ();
+for (var i = 0; i < count; i++) {
+var item = this.items[i];
+if (item.control == control) item.setControl (null);
+}
+}, "$wt.widgets.Control");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "setSelection", 
+function (items) {
+if (items.length == 0) {
+this.setSelection (-1, false);
+} else {
+for (var i = items.length - 1; i >= 0; --i) {
+var index = this.indexOf (items[i]);
+if (index != -1) this.setSelection (index, false);
+}
+}}, "Array");
+$_M (cla$$, "setSelection", 
+function (index) {
+var count = this.getItemCount ();
+if (!(0 <= index && index < count)) return ;
+this.setSelection (index, false);
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (index, notify) {
+var key = "tab-item-selected";
+if (this.items[index] != null) {
+var before = false;
+var left = -2;
+var x = 2;
+for (var i = this.offset; i < this.items.length; i++) {
+this.items[i].handle.style.display = "block";
+this.items[i].handle.style.zIndex = (i + 1) + "";
+var cssName = this.items[i].handle.className;
+if (cssName == null) cssName = "";
+var idx = cssName.indexOf (key);
+if (idx != -1) {
+this.items[i].handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+if (i > index) {
+before = true;
+}}var w = $wt.internal.browser.OS.getContainerWidth (this.items[i].handle);
+if (i < index) {
+left += w;
+}var s = this.items[i].handle.style;
+if (i == index) {
+x -= 2;
+}s.left = x + "px";
+x += w;
+}
+var ww = Integer.parseInt (this.handle.style.width);
+if (ww > 0) {
+var cssName = this.borderFrame.className;
+if (cssName == null) cssName = "";
+var xkey = "tab-show-more-item";
+var idx = cssName.indexOf (xkey);
+if (x > ww || this.offset != 0) {
+if (idx == -1) {
+this.borderFrame.className += " " + xkey;
+}} else {
+if (idx != -1) {
+this.borderFrame.className = cssName.substring (0, idx) + cssName.substring (idx + xkey.length);
+}}}var cssName = this.items[index].handle.className;
+if (cssName == null) cssName = "";
+var idx = cssName.indexOf (key);
+if (idx == -1) {
+this.items[index].handle.className += " " + key;
+}this.items[index].handle.style.zIndex = (this.items.length + 1) + "";
+if (this.width != 0) {
+var w = $wt.internal.browser.OS.getContainerWidth (this.items[index].handle);
+left += 4;
+var y = (this.width - left - 4);
+if (index >= this.offset) {
+y -= w;
+}if (y < 0) {
+y = 0;
+}if (left < 2) {
+left = 2;
+}if ((this.style & 1024) != 0) {
+this.borderSW.style.width = (left - 2) + "px";
+this.borderSE.style.width = y + "px";
+} else {
+this.borderNW.style.width = (left - 2) + "px";
+this.borderNE.style.width = y + "px";
+}}}for (var i = 0; i < this.offset; i++) {
+this.items[i].handle.style.display = "none";
+var cssName = this.items[i].handle.className;
+if (cssName == null) cssName = "";
+var idx = cssName.indexOf (key);
+if (idx != -1) {
+this.items[i].handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}}
+}, "Number,Boolean");
+$_V (cla$$, "traversePage", 
+function (next) {
+var count = this.getItemCount ();
+if (count <= 1) return false;
+var index = this.getSelectionIndex ();
+if (index == -1) {
+index = 0;
+} else {
+var offset = (next) ? 1 : -1;
+index = (index + offset + count) % count;
+}this.setSelection (index, true);
+return index == this.getSelectionIndex ();
+}, "Boolean");
 cla$$ = $_C (function () {
+this.noSelection = false;
+this.ignoreModify = false;
+this.ignoreCharacter = false;
+this.visibleCount = 5;
 $_Z (this, arguments);
 }, $wt.widgets, "Combo", $wt.widgets.Composite);
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-style &= ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$);
-style &= ~($WT.H_SCROLL | $WT.V_SCROLL);
-style = $wt.widgets.Widget.checkBits (style, $WT.DROP_DOWN, $WT.SIMPLE, 0, 0, 0, 0);
-if ((style & $WT.SIMPLE) != 0) return style & ($t$ = ~ $WT.READ_ONLY, $WT.prototype.READ_ONLY = $WT.READ_ONLY, $t$);
-return style;
-}, "Number");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Combo, [parent, $wt.widgets.Combo.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "add", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.handle != null) {
 this.handle.options[this.handle.options.length] =  new Option (string, string);
 }}, "String");
 $_M (cla$$, "add", 
 function (string, index) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.handle != null) {
 this.handle.options[index] =  new Option (string, string);
 }}, "String,Number");
 $_M (cla$$, "addModifyListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Modify, typedListener);
+this.addListener (24, typedListener);
 }, "$wt.events.ModifyListener");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "addVerifyListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Verify, typedListener);
+this.addListener (25, typedListener);
 }, "$wt.events.VerifyListener");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+style &= ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$);
+style &= ~(256 | 512);
+style = $wt.widgets.Widget.checkBits (style, 4, 64, 0, 0, 0, 0);
+if ((style & 64) != 0) return style & ($t$ = ~ $WT.READ_ONLY, $WT.prototype.READ_ONLY = $WT.READ_ONLY, $t$);
+return style;
+}, "Number");
+$_M (cla$$, "clearSelection", 
+function () {
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var width = 0;
+var height = 0;
+if (wHint == -1) {
+}if (hHint == -1) {
+if ((this.style & 64) != 0) {
+}}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+if ((this.style & 8) != 0) {
+width += 8;
+} else {
+}return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_M (cla$$, "copy", 
+function () {
+});
+$_M (cla$$, "createHandle", 
+function () {
+$_U (this, $wt.widgets.Combo, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.handle = document.createElement ("SELECT");
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}});
+$_M (cla$$, "cut", 
+function () {
+if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "deregister", 
+function () {
+$_U (this, $wt.widgets.Combo, "deregister", []);
+});
+$_M (cla$$, "deselect", 
+function (index) {
+this.sendEvent (24);
+}, "Number");
+$_M (cla$$, "deselectAll", 
+function () {
+this.sendEvent (24);
+});
+$_M (cla$$, "getItem", 
+function (index) {
+return "";
+}, "Number");
+$_M (cla$$, "getItemCount", 
+function () {
+return 0;
+});
+$_M (cla$$, "getItemHeight", 
+function () {
+return 0;
+});
+$_M (cla$$, "getItems", 
+function () {
+var count = this.getItemCount ();
+var result =  new Array (count);
+for (var i = 0; i < count; i++) result[i] = this.getItem (i);
+
+return result;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
+$_M (cla$$, "getOrientation", 
+function () {
+return this.style & (33554432 | 67108864);
+});
+$_M (cla$$, "getSelection", 
+function () {
+return  new $wt.graphics.Point (0, 0);
+});
+$_M (cla$$, "getSelectionIndex", 
+function () {
+if (this.noSelection) return -1;
+return 0;
+});
+$_M (cla$$, "getText", 
+function () {
+return "";
+});
+$_M (cla$$, "getTextHeight", 
+function () {
+return 0;
+});
+$_M (cla$$, "getTextLimit", 
+function () {
+return 0;
+});
+$_M (cla$$, "getVisibleItemCount", 
+function () {
+return this.visibleCount;
+});
+$_V (cla$$, "hasFocus", 
+function () {
+return false;
+});
+$_M (cla$$, "indexOf", 
+function (string) {
+return this.indexOf (string, 0);
+}, "String");
+$_M (cla$$, "indexOf", 
+function (string, start) {
+if (string.length == 0) {
+var count = this.getItemCount ();
+for (var i = start; i < count; i++) {
+if (string.equals (this.getItem (i))) return i;
+}
+return -1;
+}return -1;
+}, "String,Number");
+$_M (cla$$, "paste", 
+function () {
+if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "register", 
+function () {
+$_U (this, $wt.widgets.Combo, "register", []);
+});
+$_M (cla$$, "remove", 
+function (index) {
+}, "Number");
+$_M (cla$$, "remove", 
+function (start, end) {
+if (start > end) return ;
+}, "Number,Number");
+$_M (cla$$, "remove", 
+function (string) {
+var index = this.indexOf (string, 0);
+this.remove (index);
+}, "String");
+$_M (cla$$, "removeAll", 
+function () {
+this.sendEvent (24);
+});
 $_M (cla$$, "removeModifyListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Modify, listener);
+this.eventTable.unhook (24, listener);
 }, "$wt.events.ModifyListener");
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "removeVerifyListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Verify, listener);
+this.eventTable.unhook (25, listener);
 }, "$wt.events.VerifyListener");
+$_M (cla$$, "select", 
+function (index) {
+}, "Number");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+if ((this.style & 4) != 0) {
+height = this.getTextHeight () + (this.getItemHeight () * this.visibleCount) + 2;
+this.left = x;
+this.top = y;
+this.width = width;
+this.height = height;
+this.SetWindowPos (this.handle, null, x, y, width, height, flags);
+} else {
+$_U (this, $wt.widgets.Combo, "setBounds", [x, y, width, height, flags]);
+}}, "Number,Number,Number,Number,Number");
 $_M (cla$$, "setItem", 
 function (index, string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.isDisposed ()) return ;
 this.add (string, index);
 }, "Number,String");
 $_M (cla$$, "setItems", 
 function (items) {
-if (items == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 for (var i = 0; i < items.length; i++) {
-if (items[i] == null) this.error ($WT.ERROR_INVALID_ARGUMENT);
 }
 for (var i = 0; i < items.length; i++) {
 var string = items[i];
 this.add (string);
 }
-this.sendEvent ($WT.Modify);
+this.sendEvent (24);
 }, "Array");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "setOrientation", 
+function (orientation) {
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (selection) {
+}, "$wt.graphics.Point");
+$_M (cla$$, "setText", 
+function (string) {
+if ((this.style & 8) != 0) {
+var index = this.indexOf (string);
+if (index != -1) this.select (index);
+return ;
+}this.sendEvent (24);
+}, "String");
+$_M (cla$$, "setTextLimit", 
+function (limit) {
+}, "Number");
+$_M (cla$$, "setVisibleItemCount", 
+function (count) {
+if (count < 0) return ;
+this.visibleCount = count;
+if ((this.style & 4) != 0) {
+this.forceResize ();
+}}, "Number");
+$_M (cla$$, "traverseEscape", 
 function () {
-this.handle = document.createElement ("SELECT");
-if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}});
+if ((this.style & 4) != 0) {
+}return $_U (this, $wt.widgets.Combo, "traverseEscape", []);
+});
+$_M (cla$$, "verifyText", 
+function (string, start, end, keyEvent) {
+var event =  new $wt.widgets.Event ();
+event.text = string;
+event.start = start;
+event.end = end;
+if (keyEvent != null) {
+event.character = keyEvent.character;
+event.keyCode = keyEvent.keyCode;
+event.stateMask = keyEvent.stateMask;
+}this.sendEvent (25, event);
+if (!event.doit || this.isDisposed ()) return null;
+return event.text;
+}, "String,Number,Number,$wt.widgets.Event");
+$_V (cla$$, "windowClass", 
+function () {
+return "DIV";
+});
+$_S (cla$$,
+"LIMIT", 0x7FFF);
 cla$$ = $_C (function () {
 this.groupText = null;
-this.title = null;
-this.titleBody = null;
+this.textWidth = 0;
+this.textHeight = 0;
+this.borderFrame = null;
+this.titleLine = null;
+this.leftCorner = null;
+this.titleText = null;
+this.rightCorner = null;
+this.leftSide = null;
+this.rightSide = null;
+this.bottomLeft = null;
+this.bottomRight = null;
+this.contentBox = null;
+this.content = null;
 $_Z (this, arguments);
 }, $wt.widgets, "Group", $wt.widgets.Composite);
-cla$$.checkStyle = $_M (cla$$, "checkStyle", 
-function (style) {
-style |= $WT.NO_FOCUS;
-return style & ~($WT.H_SCROLL | $WT.V_SCROLL);
-}, "Number");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Group, [parent, $wt.widgets.Group.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+style |= 524288;
+return style & ~(256 | 512);
+}, "Number");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var size = $_U (this, $wt.widgets.Group, "computeSize", [wHint, hHint, changed]);
+var length = 0;
+if (this.groupText != null) {
+length = this.groupText.length;
+}if (length != 0) {
+size.x = Math.max (size.x, this.textWidth + $wt.widgets.Group.CLIENT_INSET * 6);
+}return size;
+}, "Number,Number,Boolean");
+$_M (cla$$, "computeTrim", 
+function (x, y, width, height) {
+var trim = $_U (this, $wt.widgets.Group, "computeTrim", [x, y, width, height]);
+trim.x -= $wt.widgets.Group.CLIENT_INSET;
+if (this.textHeight <= 0) {
+this.textHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "group-default", this.handle.style.cssText);
+}trim.y -= this.textHeight;
+trim.width += $wt.widgets.Group.CLIENT_INSET * 2;
+trim.height += this.textHeight + $wt.widgets.Group.CLIENT_INSET;
+return trim;
+}, "Number,Number,Number,Number");
+$_M (cla$$, "containerHandle", 
+function () {
+return this.content;
+});
+$_M (cla$$, "createCSSElement", 
+function (parent, css) {
+var el = document.createElement ("DIV");
+el.className = css;
+(parent).appendChild (el);
+return el;
+}, "Object,String");
+$_V (cla$$, "createHandle", 
+function () {
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.handle = document.createElement ("DIV");
+if ((this.style & 2048) != 0) {
+this.handle.className = "group-default group-border-default";
+} else {
+this.handle.className = "group-default";
+}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}var className = null;
+if ((this.style & 16) != 0) {
+className = "group-shadow-etched-in";
+} else if ((this.style & 64) != 0) {
+className = "group-shadow-etched-out";
+} else if ((this.style & 4) != 0) {
+className = "group-shadow-in";
+} else if ((this.style & 8) != 0) {
+className = "group-shadow-out";
+} else if ((this.style & 32) != 0) {
+className = "group-shadow-none";
+}if (className == null) {
+className = "group-border-frame group-no-title-text";
+} else {
+className = "group-border-frame group-no-title-text " + className;
+}this.borderFrame = this.createCSSElement (this.handle, className);
+this.titleLine = this.createCSSElement (this.borderFrame, "group-title-line");
+this.leftCorner = this.createCSSElement (this.borderFrame, "group-left-corner");
+this.rightCorner = this.createCSSElement (this.borderFrame, "group-right-corner");
+this.titleText = this.createCSSElement (this.borderFrame, "group-title-text");
+this.leftSide = this.createCSSElement (this.borderFrame, "group-side-line-left");
+this.rightSide = this.createCSSElement (this.borderFrame, "group-side-line-right");
+this.bottomLeft = this.createCSSElement (this.borderFrame, "group-bottom-line-left");
+this.bottomRight = this.createCSSElement (this.borderFrame, "group-bottom-line-right");
+this.contentBox = this.createCSSElement (this.handle, "group-content-box");
+this.content = this.createCSSElement (this.contentBox, "group-content");
+});
+$_V (cla$$, "getClientArea", 
+function () {
+this.forceResize ();
+if (this.textHeight <= 0) {
+this.textHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "group-default", this.handle.style.cssText);
+}var x = $wt.widgets.Group.CLIENT_INSET;
+var y = this.textHeight;
+var border = this.getBorderWidth ();
+var width = this.width - border * 2 - $wt.widgets.Group.CLIENT_INSET * 2;
+var height = this.height - border * 2 - y - $wt.widgets.Group.CLIENT_INSET;
+return  new $wt.graphics.Rectangle (x, y, width, height);
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
 $_M (cla$$, "getText", 
 function () {
 return this.groupText;
 });
-$_M (cla$$, "setText", 
-function (string) {
-this.groupText = string;
-this.title.appendChild (document.createTextNode (string));
-this.title.nextSibling.appendChild (document.createTextNode (string));
-}, "String");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "mnemonicHit", 
+function (key) {
+return this.setFocus ();
+}, "Number");
+$_V (cla$$, "mnemonicMatch", 
+function (key) {
+var mnemonic = this.findMnemonic (this.getText ());
+if ((mnemonic).charCodeAt (0) == ('\0').charCodeAt (0)) return false;
+return (Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (mnemonic)).charCodeAt (0);
+}, "Number");
+$_M (cla$$, "releaseHandle", 
 function () {
-this.register ();
-this.handle = document.createElement ("DIV");
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.className = "group-body-default";
-if ((this.style & $WT.SHADOW_ETCHED_IN) != 0) {
-this.handle.className += " group-shadow-etched-in";
-} else if ((this.style & $WT.SHADOW_ETCHED_OUT) != 0) {
-this.handle.className += " group-shadow-etched-out";
-} else if ((this.style & $WT.SHADOW_IN) != 0) {
-this.handle.className += " group-shadow-in";
-} else if ((this.style & $WT.SHADOW_OUT) != 0) {
-this.handle.className += " group-shadow-out";
-} else if ((this.style & $WT.SHADOW_NONE) != 0) {
-this.handle.className += " group-shadow-none";
-}this.titleBody = document.createElement ("DIV");
-this.titleBody.className = "group-title-body-default";
-this.handle.appendChild (this.titleBody);
-var titleBlock = document.createElement ("DIV");
-titleBlock.className = "group-title-block-default";
-this.handle.appendChild (titleBlock);
-var titleBlockBG = document.createElement ("DIV");
-titleBlockBG.className = "group-title-block-ground-default";
-titleBlock.appendChild (titleBlockBG);
-this.title = document.createElement ("DIV");
-this.title.className = "group-title-text-default";
-this.title.style.position = "absolute";
-titleBlock.appendChild (this.title);
-var titleDuplicate = document.createElement ("DIV");
-titleDuplicate.className = "group-title-text-default";
-titleBlock.appendChild (titleDuplicate);
+if (this.titleLine != null) {
+BrowserNative.releaseHandle (this.titleLine);
+this.titleLine = null;
+}if (this.titleText != null) {
+BrowserNative.releaseHandle (this.titleText);
+this.titleText = null;
+}if (this.leftCorner != null) {
+BrowserNative.releaseHandle (this.leftCorner);
+this.leftCorner = null;
+}if (this.rightCorner != null) {
+BrowserNative.releaseHandle (this.rightCorner);
+this.rightCorner = null;
+}if (this.bottomLeft != null) {
+BrowserNative.releaseHandle (this.bottomLeft);
+this.bottomLeft = null;
+}if (this.bottomRight != null) {
+BrowserNative.releaseHandle (this.bottomRight);
+this.bottomRight = null;
+}if (this.leftSide != null) {
+BrowserNative.releaseHandle (this.leftSide);
+this.leftSide = null;
+}if (this.rightSide != null) {
+BrowserNative.releaseHandle (this.rightSide);
+this.rightSide = null;
+}if (this.borderFrame != null) {
+BrowserNative.releaseHandle (this.borderFrame);
+this.borderFrame = null;
+}if (this.content != null) {
+BrowserNative.releaseHandle (this.content);
+this.content = null;
+}if (this.contentBox != null) {
+BrowserNative.releaseHandle (this.contentBox);
+this.contentBox = null;
+}$_U (this, $wt.widgets.Group, "releaseHandle", []);
 });
-$_M (cla$$, "setSize", 
-function (width, height) {
-$_U (this, $wt.widgets.Group, "setSize", [width, height]);
-this.titleBody.style.width = width + "px";
-System.out.println ("setSize");
-}, "Number,Number");
-$_M (cla$$, "setLocation", 
-function (x, y) {
-$_U (this, $wt.widgets.Group, "setLocation", [x, y]);
-this.handle.style.top = (y + 20) + "px";
-System.out.println ("setLocation");
-}, "Number,Number");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.Group, "setBounds", [x, y, width, height]);
-this.titleBody.style.width = width + "px";
-this.handle.style.top = (y + 20) + "px";
-System.out.println ("setBounds");
-}, "Number,Number,Number,Number");
+if (this.textWidth == 0 && this.groupText != null && this.groupText.length != 0) {
+this.textWidth = $wt.internal.browser.OS.getStringStyledWidth (this.groupText, "group-default", this.handle.style.cssText);
+}if (this.textWidth != 0) {
+var w = this.width - this.textWidth - 12;
+if (w < 0) {
+w = 0;
+}this.rightCorner.style.width = w + "px";
+}}, "Number,Number,Number,Number");
+$_M (cla$$, "setFont", 
+function (font) {
+$_U (this, $wt.widgets.Group, "setFont", [font]);
+}, "$wt.graphics.Font");
+$_M (cla$$, "setText", 
+function (string) {
+var cssName = this.borderFrame.className;
+if (cssName == null) cssName = "";
+var key = "group-no-title-text";
+var idx = cssName.indexOf (key);
+if (string.length == 0) {
+if (idx == -1) {
+this.borderFrame.className += " " + key;
+}} else {
+if (idx != -1) {
+this.borderFrame.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}if (!string.equals (this.groupText)) {
+for (var i = this.titleText.childNodes.length - 1; i >= 0; i--) {
+this.titleText.removeChild (this.titleText.childNodes[i]);
+}
+this.titleText.appendChild (document.createTextNode (string));
+this.textWidth = $wt.internal.browser.OS.getContainerWidth (this.titleText);
+if (this.textWidth == 0) {
+this.textWidth = $wt.internal.browser.OS.getStringStyledWidth (string, "group-default", this.handle.style.cssText);
+}if (this.textWidth != 0) {
+var w = this.width - this.textWidth - 24;
+if (w > 0) {
+this.rightCorner.style.width = w + "px";
+}}}}this.groupText = string;
+}, "String");
+$_S (cla$$,
+"CLIENT_INSET", 3);
 cla$$ = $_C (function () {
+this.strings = null;
+this.images = null;
 this.parent = null;
 this.parentItem = null;
 this.index = 0;
 this.expandStatus = false;
-this.strings = null;
 this.checkElement = null;
 $_Z (this, arguments);
 }, $wt.widgets, "TreeItem", $wt.widgets.Item);
@@ -6881,7 +12250,6 @@ parent.createItem (this, null, -1);
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TreeItem, [parent, style]);
-if (index < 0) this.error ($WT.ERROR_INVALID_RANGE);
 this.parent = parent;
 parent.createItem (this, null, index);
 }, "$wt.widgets.Tree,Number,Number");
@@ -6895,14 +12263,237 @@ this.parent.createItem (this, parentItem.handle, -1);
 $_K (cla$$, 
 function (parentItem, style, index) {
 $_R (this, $wt.widgets.TreeItem, [parentItem.parent, style]);
-if (index < 0) this.error ($WT.ERROR_INVALID_RANGE);
 this.parent = parentItem.parent;
 this.parentItem = parentItem;
 this.parent.createItem (this, parentItem.handle, index);
 }, "$wt.widgets.TreeItem,Number,Number");
+cla$$.checkNull = $_M (cla$$, "checkNull", 
+function (item) {
+return item;
+}, "$wt.widgets.TreeItem");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "getBackground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
+});
+$_M (cla$$, "getBackground", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getBackground ();
+return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
+}, "Number");
+$_M (cla$$, "getBounds", 
+function () {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getBounds", 
+function (index) {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+}, "Number");
+$_M (cla$$, "getChecked", 
+function () {
+if ((this.parent.style & 32) == 0) return false;
+if (this.checkElement != null) {
+return this.checkElement.checked;
+}return false;
+});
+$_M (cla$$, "getExpanded", 
+function () {
+return false;
+});
+$_M (cla$$, "getFont", 
+function () {
+return this.display.getSystemFont ();
+});
+$_M (cla$$, "getFont", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getFont ();
+return this.display.getSystemFont ();
+}, "Number");
+$_M (cla$$, "getForeground", 
+function () {
+return  new $wt.graphics.Color (this.display, this.parent.handle.style.color);
+});
+$_M (cla$$, "getForeground", 
+function (index) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return this.getForeground ();
+return  new $wt.graphics.Color (this.display, this.handle.style.color);
+}, "Number");
+$_M (cla$$, "getGrayed", 
+function () {
+if ((this.parent.style & 32) == 0) return false;
+if (this.checkElement != null) {
+return this.checkElement.checked;
+}return true;
+});
+$_M (cla$$, "getItem", 
+function (index) {
+return this.parent.items[index];
+}, "Number");
+$_M (cla$$, "getItemCount", 
+function () {
+return this.parent.items.length;
+});
+$_M (cla$$, "getItems", 
+function () {
+System.out.println ("index: " + this.index);
+return this.parent.getItems (this.index);
+});
+$_M (cla$$, "getImage", 
+function (index) {
+if (index == 0) return this.getImage ();
+if (this.images != null) {
+if (0 <= index && index < this.images.length) return this.images[index];
+}return null;
+}, "Number");
+$_M (cla$$, "getImageBounds", 
+function (index) {
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+}, "Number");
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getParentItem", 
+function () {
+return this.parentItem;
+});
+$_M (cla$$, "getText", 
+function (index) {
+if (index == 0) return this.getText ();
+if (this.strings != null) {
+if (0 <= index && index < this.strings.length) {
+var string = this.strings[index];
+return string != null ? string : "";
+}}return "";
+}, "Number");
+$_M (cla$$, "indexOf", 
+function (item) {
+return this.parent.indexOf (this.index, item);
+}, "$wt.widgets.TreeItem");
+$_M (cla$$, "redraw", 
+function () {
+if (this.parent.drawCount > 0) return ;
+});
+$_M (cla$$, "redraw", 
+function (column, drawText, drawImage) {
+if (this.parent.drawCount > 0) return ;
+}, "Number,Boolean,Boolean");
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.TreeItem, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+$_U (this, $wt.widgets.TreeItem, "releaseHandle", []);
+this.parent = null;
+this.parentItem = null;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.TreeItem, "releaseWidget", []);
+this.parent = null;
+this.strings = null;
+this.images = null;
+});
+$_M (cla$$, "removeAll", 
+function () {
+});
+$_M (cla$$, "setBackground", 
+function (color) {
+this.redraw ();
+}, "$wt.graphics.Color");
+$_M (cla$$, "setBackground", 
+function (index, color) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+this.redraw (index, true, true);
+}, "Number,$wt.graphics.Color");
+$_M (cla$$, "setChecked", 
+function (checked) {
+if ((this.parent.style & 32) == 0) return ;
+if (this.checkElement != null) {
+this.checkElement.checked = checked;
+}}, "Boolean");
+$_M (cla$$, "setExpanded", 
+function (expanded) {
+this.expandStatus = expanded;
+var items = this.parent.getDescendantItems (this.index);
+for (var i = 0; i < items.length; i++) {
+if (items[i].parentItem == this) {
+items[i].expandStatus = this.expandStatus;
+}if (items[i].expandStatus) {
+items[i].handle.style.display = expanded ? "" : "none";
+} else {
+items[i].handle.style.display = "none";
+}}
+if (items.length == 0) {
+this.updateModifier (0);
+} else {
+this.updateModifier (expanded ? 1 : -1);
+}}, "Boolean");
+$_M (cla$$, "setFont", 
+function (font) {
+}, "$wt.graphics.Font");
+$_M (cla$$, "setFont", 
+function (index, font) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+}, "Number,$wt.graphics.Font");
+$_M (cla$$, "setForeground", 
+function (color) {
+this.redraw ();
+}, "$wt.graphics.Color");
+$_M (cla$$, "setForeground", 
+function (index, color) {
+var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+this.redraw (index, true, false);
+}, "Number,$wt.graphics.Color");
+$_M (cla$$, "setGrayed", 
+function (grayed) {
+if ((this.parent.style & 32) == 0) return ;
+if (this.checkElement != null) {
+this.checkElement.checked = grayed;
+}}, "Boolean");
+$_M (cla$$, "setImage", 
+function (images) {
+for (var i = 0; i < images.length; i++) {
+this.setImage (i, images[i]);
+}
+}, "Array");
+$_M (cla$$, "setImage", 
+function (index, image) {
+if (index == 0) {
+if (image != null && image.type == 1) {
+if (image.equals (this.image)) return ;
+}$_U (this, $wt.widgets.TreeItem, "setImage", [image]);
+}var count = Math.max (1, this.parent.getColumnCount ());
+if (0 > index || index > count - 1) return ;
+if (this.images == null && index != 0) this.images =  new Array (count);
+if (this.images != null) {
+if (image != null && image.type == 1) {
+if (image.equals (this.images[index])) return ;
+}this.images[index] = image;
+}}, "Number,$wt.graphics.Image");
+$_M (cla$$, "setImage", 
+function (image) {
+this.setImage (0, image);
+}, "$wt.graphics.Image");
+$_M (cla$$, "setText", 
+function (strings) {
+for (var i = 0; i < strings.length; i++) {
+var string = strings[i];
+if (string != null) this.setText (i, string);
+}
+}, "Array");
 $_M (cla$$, "setText", 
 function (index, string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (index == 0) {
 if (string.equals (this.text)) return ;
 $_U (this, $wt.widgets.TreeItem, "setText", [string]);
@@ -6946,7 +12537,7 @@ return $_N ($wt.widgets.TreeItem$1, innerThis, finalVars);
 }) (this, null));
 hAnchor.appendChild (document.createTextNode ("" + String.fromCharCode (160)));
 hItem.appendChild (hAnchor);
-if ((this.parent.style & $WT.CHECK) != 0) {
+if ((this.parent.style & 32) != 0) {
 this.checkElement = document.createElement ("INPUT");
 this.checkElement.type = "checkbox";
 hItem.appendChild (this.checkElement);
@@ -6960,8 +12551,8 @@ $_Z (this, arguments);
 $_V (cla$$, "run", 
 function () {
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.detail = $WT.CHECK;
+e.type = 13;
+e.detail = 32;
 e.item = this.callbacks["$wt.widgets.TreeItem"];
 e.widget = this.callbacks["$wt.widgets.TreeItem"];
 this.callbacks["$wt.widgets.TreeItem"].parent.sendEvent (e);
@@ -6986,8 +12577,8 @@ function () {
 var evt = this.getEvent ();
 this.callbacks["$wt.widgets.TreeItem"].parent.toggleSelection (this.callbacks["$wt.widgets.TreeItem"], evt.ctrlKey, evt.shiftKey);
 var e =  new $wt.widgets.Event ();
-e.type = $WT.Selection;
-e.detail = $WT.NONE;
+e.type = 13;
+e.detail = 0;
 e.item = this.callbacks["$wt.widgets.TreeItem"];
 e.widget = this.callbacks["$wt.widgets.TreeItem"];
 this.callbacks["$wt.widgets.TreeItem"].parent.sendEvent (e);
@@ -7038,31 +12629,18 @@ padding += 20;
 hItem.style.marginLeft = padding + "px";
 tbodyTD.appendChild (hItem);
 }, "Number,String");
-$_M (cla$$, "showSelection", 
-function (selected) {
-var index = 1;
-if ((this.parent.style & $WT.CHECK) != 0) {
-index++;
-}var element = this.handle.childNodes[0].childNodes[0].childNodes[index];
-element.className = selected ? "tree-item-text-selected" : "tree-item-text-default";
-}, "Boolean");
 $_M (cla$$, "setText", 
 function (string) {
 this.setText (0, string);
 }, "String");
-$_M (cla$$, "setText", 
-function (strings) {
-if (strings == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-for (var i = 0; i < strings.length; i++) {
-var string = strings[i];
-if (string != null) this.setText (i, string);
-}
-}, "Array");
-$_M (cla$$, "getItems", 
-function () {
-System.out.println ("index: " + this.index);
-return this.parent.getItems (this.index);
-});
+$_M (cla$$, "showSelection", 
+function (selected) {
+var index = 1;
+if ((this.parent.style & 32) != 0) {
+index++;
+}var element = this.handle.childNodes[0].childNodes[0].childNodes[index];
+element.className = selected ? "tree-item-text-selected" : "tree-item-text-default";
+}, "Boolean");
 $_M (cla$$, "toggleExpandStatus", 
 function () {
 var clazzName = this.handle.childNodes[0].childNodes[0].childNodes[0].className;
@@ -7078,7 +12656,7 @@ return ;
 }var toExpand = type >= 0;
 this.setExpanded (toExpand);
 var e =  new $wt.widgets.Event ();
-e.type = toExpand ? $WT.Expand : $WT.Collapse;
+e.type = toExpand ? 17 : 18;
 e.item = this;
 e.widget = this;
 this.parent.sendEvent (e);
@@ -7096,79 +12674,145 @@ return true;
 element.className = "tree-item-anchor-default";
 return true;
 }}, "Number");
-$_M (cla$$, "setExpanded", 
-function (expanded) {
-this.expandStatus = expanded;
-var items = this.parent.getDescendantItems (this.index);
-for (var i = 0; i < items.length; i++) {
-if (items[i].parentItem == this) {
-items[i].expandStatus = this.expandStatus;
-}if (items[i].expandStatus) {
-items[i].handle.style.display = expanded ? "" : "none";
-} else {
-items[i].handle.style.display = "none";
-}}
-if (items.length == 0) {
-this.updateModifier (0);
-} else {
-this.updateModifier (expanded ? 1 : -1);
-}}, "Boolean");
-$_M (cla$$, "getParentItem", 
-function () {
-return this.parentItem;
-});
-$_M (cla$$, "getGrayed", 
-function () {
-if ((this.parent.style & $WT.CHECK) == 0) return false;
-if (this.checkElement != null) {
-return this.checkElement.checked;
-}return true;
-});
-$_M (cla$$, "setGrayed", 
-function (grayed) {
-if ((this.parent.style & $WT.CHECK) == 0) return ;
-if (this.checkElement != null) {
-this.checkElement.checked = grayed;
-}}, "Boolean");
-$_M (cla$$, "getChecked", 
-function () {
-if ((this.parent.style & $WT.CHECK) == 0) return false;
-if (this.checkElement != null) {
-return this.checkElement.checked;
-}return false;
-});
-$_M (cla$$, "setChecked", 
-function (checked) {
-if ((this.parent.style & $WT.CHECK) == 0) return ;
-if (this.checkElement != null) {
-this.checkElement.checked = checked;
-}}, "Boolean");
-$_M (cla$$, "indexOf", 
-function (item) {
-if (item == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (item.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-return this.parent.indexOf (this.index, item);
-}, "$wt.widgets.TreeItem");
-$_M (cla$$, "releaseHandle", 
-function () {
-this.parent = null;
-this.parentItem = null;
-$_U (this, $wt.widgets.TreeItem, "releaseHandle", []);
-});
 cla$$ = $_C (function () {
+this.parent = null;
+this.resizable = false;
 $_Z (this, arguments);
 }, $wt.widgets, "TreeColumn", $wt.widgets.Item);
 $_K (cla$$, 
 function (parent, style) {
-$_R (this, $wt.widgets.TreeColumn, [parent, style]);
-}, "$wt.widgets.Widget,Number");
+$_R (this, $wt.widgets.TreeColumn, [parent, $wt.widgets.TreeColumn.checkStyle (style)]);
+this.resizable = true;
+this.parent = parent;
+parent.createItem (this, parent.getColumnCount ());
+}, "$wt.widgets.Tree,Number");
 $_K (cla$$, 
 function (parent, style, index) {
-$_R (this, $wt.widgets.TreeColumn, [parent, style, index]);
-}, "$wt.widgets.Widget,Number,Number");
+$_R (this, $wt.widgets.TreeColumn, [parent, $wt.widgets.TreeColumn.checkStyle (style)]);
+this.resizable = true;
+this.parent = parent;
+parent.createItem (this, index);
+}, "$wt.widgets.Tree,Number,Number");
+$_M (cla$$, "addControlListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (11, typedListener);
+this.addListener (10, typedListener);
+}, "$wt.events.ControlListener");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+cla$$.checkStyle = $_M (cla$$, "checkStyle", 
+function (style) {
+return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
+}, "Number");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "getAlignment", 
+function () {
+if ((this.style & 16384) != 0) return 16384;
+if ((this.style & 16777216) != 0) return 16777216;
+if ((this.style & 131072) != 0) return 131072;
+return 16384;
+});
+$_V (cla$$, "getNameText", 
+function () {
+return this.getText ();
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getResizable", 
+function () {
+return this.resizable;
+});
+$_M (cla$$, "getWidth", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return 0;
+return 0;
+});
+$_M (cla$$, "pack", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+var columnWidth = 0;
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.TreeColumn, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.TreeColumn, "releaseWidget", []);
+this.parent = null;
+});
+$_M (cla$$, "removeControlListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (10, listener);
+this.eventTable.unhook (11, listener);
+}, "$wt.events.ControlListener");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "setAlignment", 
+function (alignment) {
+if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+var index = this.parent.indexOf (this);
+if (index == -1 || index == 0) return ;
+this.style &= ~(16384 | 131072 | 16777216);
+this.style |= alignment & (16384 | 131072 | 16777216);
+}, "Number");
+$_M (cla$$, "setImage", 
+function (image) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+$_U (this, $wt.widgets.TreeColumn, "setImage", [image]);
+}, "$wt.graphics.Image");
+$_M (cla$$, "setResizable", 
+function (resizable) {
+this.resizable = resizable;
+}, "Boolean");
+$_M (cla$$, "setText", 
+function (string) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+$_U (this, $wt.widgets.TreeColumn, "setText", [string]);
+}, "String");
+$_M (cla$$, "setWidth", 
+function (width) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+}, "Number");
 cla$$ = $_C (function () {
 this.items = null;
 this.columns = null;
+this.itemHandles = null;
+this.columnHandles = null;
+this.imageList = null;
+this.dragStarted = false;
+this.gestureCompleted = false;
+this.insertAfter = false;
+this.ignoreSelect = false;
+this.ignoreExpand = false;
+this.ignoreDeselect = false;
+this.ignoreResize = false;
+this.lockSelection = false;
+this.oldSelected = false;
+this.newSelected = false;
+this.linesVisible = false;
+this.customDraw = false;
+this.printClient = false;
 this.selections = null;
 this.lastSelection = null;
 this.hwndParent = null;
@@ -7185,17 +12829,50 @@ this.items =  new Array (0);
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= $WT.H_SCROLL | $WT.V_SCROLL;
-return $wt.widgets.Widget.checkBits (style, $WT.SINGLE, $WT.MULTI, 0, 0, 0, 0);
+style |= 256 | 512;
+return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
 }, "Number");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "addTreeListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (17, typedListener);
+this.addListener (18, typedListener);
+}, "$wt.events.TreeListener");
+$_V (cla$$, "checkSubclass", 
 function () {
-this.register ();
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var width = 0;
+var height = 0;
+if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+var border = this.getBorderWidth ();
+width += border * 2;
+height += border * 2;
+if ((this.style & 512) != 0) {
+}if ((this.style & 256) != 0) {
+}return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_M (cla$$, "createHandle", 
+function () {
+$_U (this, $wt.widgets.Tree, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
 this.handle = document.createElement ("DIV");
-if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.className = "tree-default";
-if ((this.style & $WT.BORDER) != 0) {
+if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}this.handle.className = "tree-default";
+if ((this.style & 2048) != 0) {
 this.handle.className += " tree-border";
 }var table = document.createElement ("TABLE");
 table.style.backgroundColor = "white";
@@ -7203,13 +12880,69 @@ this.handle.appendChild (table);
 });
 $_M (cla$$, "createItem", 
 function (column, index) {
-if (this.hwndHeader == null) this.createParent ();
 }, "$wt.widgets.TreeColumn,Number");
+$_M (cla$$, "createItem", 
+function (item, hParent, index) {
+if (this.items == null) {
+this.items =  new Array (0);
+}var table = this.handle.childNodes[0];
+var tbody = null;
+for (var i = 0; i < table.childNodes.length; i++) {
+if ("TBODY".equals (table.childNodes[i].nodeName)) {
+tbody = table.childNodes[i];
+break;
+}}
+if (tbody == null) {
+tbody = document.createElement ("TBODY");
+table.appendChild (tbody);
+}var idx = -1;
+if (hParent != null) {
+for (var i = 0; i < tbody.childNodes.length; i++) {
+if (tbody.childNodes[i] == hParent) {
+idx = i;
+break;
+}}
+}var newTR = document.createElement ("TR");
+item.handle = newTR;
+var existedIndex = -1;
+if (index >= 0) {
+existedIndex = this.findItem (idx, index);
+if (existedIndex != -1) {
+tbody.insertBefore (newTR, tbody.childNodes[existedIndex]);
+for (var i = this.items.length; i > existedIndex; i--) {
+this.items[i] = this.items[i - 1];
+this.items[i].index = i;
+}
+item.index = existedIndex;
+this.items[existedIndex] = item;
+}}if (existedIndex == -1) {
+if (idx < 0) {
+tbody.appendChild (newTR);
+item.index = this.items.length;
+this.items[this.items.length] = item;
+} else {
+var siblingIndex = this.findNextSiblingItem (idx);
+if (siblingIndex == -1) {
+tbody.appendChild (newTR);
+item.index = this.items.length;
+this.items[this.items.length] = item;
+} else {
+tbody.insertBefore (newTR, tbody.childNodes[siblingIndex]);
+for (var i = this.items.length; i > siblingIndex; i--) {
+this.items[i] = this.items[i - 1];
+this.items[i].index = i;
+}
+item.index = siblingIndex;
+this.items[siblingIndex] = item;
+}}}if (item.parentItem != null) {
+item.handle.style.display = "none";
+item.parentItem.updateModifier (-1);
+}}, "$wt.widgets.TreeItem,Object,Number");
 $_M (cla$$, "toggleSelection", 
 function (item, isCtrlKeyHold, isShiftKeyHold) {
 if (item == null) {
 return false;
-}if ((this.style & $WT.MULTI) != 0 && (isCtrlKeyHold || isShiftKeyHold)) {
+}if ((this.style & 2) != 0 && (isCtrlKeyHold || isShiftKeyHold)) {
 if (isCtrlKeyHold) {
 for (var i = 0; i < this.selections.length; i++) {
 if (item == this.selections[i]) {
@@ -7287,6 +13020,67 @@ return index;
 }
 return -1;
 }, "Number");
+$_M (cla$$, "createParent", 
+function () {
+this.forceResize ();
+this.register ();
+});
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.Tree, "createWidget", []);
+this.items =  new Array (4);
+this.columns =  new Array (4);
+});
+$_M (cla$$, "deselectAll", 
+function () {
+for (var i = 0; i < this.selections.length; i++) {
+this.selections[i].showSelection (false);
+}
+});
+$_M (cla$$, "destroyItem", 
+function (column) {
+}, "$wt.widgets.TreeColumn");
+$_M (cla$$, "destroyItem", 
+function (item) {
+this.updateScrollBar ();
+}, "$wt.widgets.TreeItem");
+$_M (cla$$, "enableWidget", 
+function (enabled) {
+$_U (this, $wt.widgets.Tree, "enableWidget", [enabled]);
+}, "Boolean");
+$_M (cla$$, "findItem", 
+function (id) {
+return null;
+}, "Number");
+$_M (cla$$, "getGridLineWidth", 
+function () {
+return $wt.widgets.Tree.GRID_WIDTH;
+});
+$_M (cla$$, "getHeaderHeight", 
+function () {
+return 16;
+});
+$_M (cla$$, "getHeaderVisible", 
+function () {
+return false;
+});
+$_M (cla$$, "getImageSize", 
+function () {
+if (this.imageList != null) return this.imageList.getImageSize ();
+return  new $wt.graphics.Point (0, this.getItemHeight ());
+});
+$_M (cla$$, "getColumn", 
+function (index) {
+return this.columns[index];
+}, "Number");
+$_M (cla$$, "getColumnCount", 
+function () {
+return 0;
+});
+$_M (cla$$, "getColumns", 
+function () {
+return this.columns;
+});
 $_M (cla$$, "getDescendantItems", 
 function (index) {
 var nextSiblingIdx = this.findNextSiblingItem (index);
@@ -7295,79 +13089,6 @@ nextSiblingIdx = this.items.length;
 }var children =  new Array (nextSiblingIdx - index - 1);
 for (var i = index + 1; i < nextSiblingIdx; i++) {
 children[i - index - 1] = this.items[i];
-}
-return children;
-}, "Number");
-$_M (cla$$, "getItems", 
-function () {
-var copiedItems =  new Array (0);
-for (var i = 0; i < this.items.length; i++) {
-if (this.items[i] != null && this.items[i].parentItem == null) {
-copiedItems[copiedItems.length] = this.items[i];
-}}
-return copiedItems;
-});
-$_M (cla$$, "indexOf", 
-function (parentIndex, ti) {
-var index = 0;
-if (parentIndex < 0) {
-if (ti.parentItem != null) {
-return -1;
-}for (var i = 0; i < this.items.length; i++) {
-if (this.items[i] == ti) {
-return index;
-} else if (this.items[i].parentItem == null) {
-index++;
-}}
-return -1;
-}var parentItem = this.items[parentIndex];
-parentIndex++;
-while (this.items[parentIndex] != null) {
-var item = this.items[parentIndex];
-if (item.parentItem != parentItem) {
-if (item.parentItem == this.items[parentIndex - 1]) {
-parentIndex = this.skipItems (parentIndex - 1);
-if (parentIndex == -1) {
-return -1;
-}if (this.items[parentIndex].parentItem == parentItem.parentItem) {
-return -1;
-} else {
-if (this.items[parentIndex] == ti) {
-return index;
-}index++;
-}} else {
-return -1;
-}} else {
-if (item == ti) {
-return index;
-}index++;
-}parentIndex++;
-}
-return -1;
-}, "Number,$wt.widgets.TreeItem");
-$_M (cla$$, "getItems", 
-function (parentIndex) {
-var children =  new Array (0);
-if (parentIndex < 0) {
-parentIndex = 0;
-}var parentItem = this.items[parentIndex];
-parentIndex++;
-while (this.items[parentIndex] != null) {
-var item = this.items[parentIndex];
-if (item.parentItem != parentItem) {
-if (item.parentItem == this.items[parentIndex - 1]) {
-parentIndex = this.skipItems (parentIndex - 1);
-if (parentIndex == -1) {
-return children;
-}if (this.items[parentIndex].parentItem == parentItem.parentItem) {
-return children;
-} else {
-children[children.length] = this.items[parentIndex];
-}} else {
-return children;
-}} else {
-children[children.length] = item;
-}parentIndex++;
 }
 return children;
 }, "Number");
@@ -7429,80 +13150,204 @@ return parentIndex;
 return parentIndex;
 }}return -1;
 }, "Number");
-$_M (cla$$, "createItem", 
-function (item, hParent, index) {
-if (this.items == null) {
-this.items =  new Array (0);
-}var table = this.handle.childNodes[0];
-var tbody = null;
-for (var i = 0; i < table.childNodes.length; i++) {
-if ("TBODY".equals (table.childNodes[i].nodeName)) {
-tbody = table.childNodes[i];
-break;
+$_M (cla$$, "indexOf", 
+function (parentIndex, ti) {
+var index = 0;
+if (parentIndex < 0) {
+if (ti.parentItem != null) {
+return -1;
+}for (var i = 0; i < this.items.length; i++) {
+if (this.items[i] == ti) {
+return index;
+} else if (this.items[i].parentItem == null) {
+index++;
 }}
-if (tbody == null) {
-tbody = document.createElement ("TBODY");
-table.appendChild (tbody);
-}var idx = -1;
-if (hParent != null) {
-for (var i = 0; i < tbody.childNodes.length; i++) {
-if (tbody.childNodes[i] == hParent) {
-idx = i;
-break;
-}}
-}var newTR = document.createElement ("TR");
-item.handle = newTR;
-var existedIndex = -1;
-if (index >= 0) {
-existedIndex = this.findItem (idx, index);
-if (existedIndex != -1) {
-tbody.insertBefore (newTR, tbody.childNodes[existedIndex]);
-for (var i = this.items.length; i > existedIndex; i--) {
-this.items[i] = this.items[i - 1];
-this.items[i].index = i;
-}
-item.index = existedIndex;
-this.items[existedIndex] = item;
-}}if (existedIndex == -1) {
-if (idx < 0) {
-tbody.appendChild (newTR);
-item.index = this.items.length;
-this.items[this.items.length] = item;
+return -1;
+}var parentItem = this.items[parentIndex];
+parentIndex++;
+while (this.items[parentIndex] != null) {
+var item = this.items[parentIndex];
+if (item.parentItem != parentItem) {
+if (item.parentItem == this.items[parentIndex - 1]) {
+parentIndex = this.skipItems (parentIndex - 1);
+if (parentIndex == -1) {
+return -1;
+}if (this.items[parentIndex].parentItem == parentItem.parentItem) {
+return -1;
 } else {
-var siblingIndex = this.findNextSiblingItem (idx);
-if (siblingIndex == -1) {
-tbody.appendChild (newTR);
-item.index = this.items.length;
-this.items[this.items.length] = item;
-} else {
-tbody.insertBefore (newTR, tbody.childNodes[siblingIndex]);
-for (var i = this.items.length; i > siblingIndex; i--) {
-this.items[i] = this.items[i - 1];
-this.items[i].index = i;
+if (this.items[parentIndex] == ti) {
+return index;
+}index++;
+}} else {
+return -1;
+}} else {
+if (item == ti) {
+return index;
+}index++;
+}parentIndex++;
 }
-item.index = siblingIndex;
-this.items[siblingIndex] = item;
-}}}if (item.parentItem != null) {
-item.handle.style.display = "none";
-item.parentItem.updateModifier (-1);
-}}, "$wt.widgets.TreeItem,Object,Number");
-$_M (cla$$, "createParent", 
+return -1;
+}, "Number,$wt.widgets.TreeItem");
+$_M (cla$$, "getItem", 
+function (index) {
+return this.items[index];
+}, "Number");
+$_M (cla$$, "getItem", 
+function (point) {
+return null;
+}, "$wt.graphics.Point");
+$_M (cla$$, "getItemCount", 
 function () {
+return this.items.length;
 });
-$_M (cla$$, "getColumnCount", 
+$_M (cla$$, "getItemCount", 
+function (hItem) {
+var count = 0;
+return this.items.length;
+}, "Number");
+$_M (cla$$, "getItemHeight", 
 function () {
-if (this.hwndHeader == null) return 0;
-return 0;
+return 16;
+});
+$_M (cla$$, "getItems", 
+function () {
+var copiedItems =  new Array (0);
+for (var i = 0; i < this.items.length; i++) {
+if (this.items[i] != null && this.items[i].parentItem == null) {
+copiedItems[copiedItems.length] = this.items[i];
+}}
+return copiedItems;
+});
+$_M (cla$$, "getItems", 
+function (hTreeItem) {
+var children =  new Array (0);
+if (hTreeItem < 0) {
+hTreeItem = 0;
+}var parentItem = this.items[hTreeItem];
+hTreeItem++;
+while (this.items[hTreeItem] != null) {
+var item = this.items[hTreeItem];
+if (item.parentItem != parentItem) {
+if (item.parentItem == this.items[hTreeItem - 1]) {
+hTreeItem = this.skipItems (hTreeItem - 1);
+if (hTreeItem == -1) {
+return children;
+}if (this.items[hTreeItem].parentItem == parentItem.parentItem) {
+return children;
+} else {
+children[children.length] = this.items[hTreeItem];
+}} else {
+return children;
+}} else {
+children[children.length] = item;
+}hTreeItem++;
+}
+return children;
+}, "Number");
+$_M (cla$$, "getLinesVisible", 
+function () {
+return this.linesVisible;
+});
+$_M (cla$$, "getParentItem", 
+function () {
+return null;
 });
 $_M (cla$$, "getSelection", 
 function () {
 return this.selections;
 });
+$_M (cla$$, "getSelectionCount", 
+function () {
+return 0;
+});
+$_M (cla$$, "getTopItem", 
+function () {
+return this.items[0];
+});
+$_M (cla$$, "indexOf", 
+function (column) {
+var count = this.columns.length;
+for (var i = 0; i < count; i++) {
+if (this.columns[i] == column) return i;
+}
+return -1;
+}, "$wt.widgets.TreeColumn");
+$_M (cla$$, "indexOf", 
+function (item) {
+for (var i = 0; i < this.items.length; i++) {
+if (this.items[i] == item) {
+return i;
+}}
+return -1;
+}, "$wt.widgets.TreeItem");
+$_M (cla$$, "releaseWidget", 
+function () {
+var columnCount = this.columns.length;
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null && !item.isDisposed ()) {
+item.releaseResources ();
+}}
+this.items = null;
+for (var i = 0; i < columnCount; i++) {
+var column = this.columns[i];
+if (!column.isDisposed ()) column.releaseResources ();
+}
+this.columns = null;
+$_U (this, $wt.widgets.Tree, "releaseWidget", []);
+});
+$_M (cla$$, "removeAll", 
+function () {
+this.ignoreDeselect = this.ignoreSelect = true;
+this.updateScrollBar ();
+});
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "removeTreeListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (17, listener);
+this.eventTable.unhook (18, listener);
+}, "$wt.events.TreeListener");
+$_M (cla$$, "setInsertMark", 
+function (item, before) {
+}, "$wt.widgets.TreeItem,Boolean");
+$_M (cla$$, "setLinesVisible", 
+function (show) {
+if (this.linesVisible == show) return ;
+this.linesVisible = show;
+}, "Boolean");
+$_M (cla$$, "selectAll", 
+function () {
+if ((this.style & 4) != 0) return ;
+});
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+$_U (this, $wt.widgets.Tree, "setBounds", [x, y, width, height, flags]);
+}, "Number,Number,Number,Number,Number");
+$_M (cla$$, "setCheckboxImageList", 
+function () {
+if ((this.style & 32) == 0) return ;
+var count = 5;
+});
+$_M (cla$$, "setHeaderVisible", 
+function (show) {
+this.setScrollWidth ();
+this.updateScrollBar ();
+}, "Boolean");
+$_V (cla$$, "setRedraw", 
+function (redraw) {
+}, "Boolean");
+$_M (cla$$, "setScrollWidth", 
+function () {
+});
 $_M (cla$$, "setSelection", 
 function (items) {
-if (items == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var length = items.length;
-if (length == 0 || ((this.style & $WT.SINGLE) != 0 && length > 1)) {
+if (length == 0 || ((this.style & 4) != 0 && length > 1)) {
 this.deselectAll ();
 return ;
 }this.selections = items;
@@ -7510,71 +13355,42 @@ for (var i = 0; i < items.length; i++) {
 items[i].showSelection (true);
 }
 }, "Array");
-$_M (cla$$, "deselectAll", 
-function () {
-for (var i = 0; i < this.selections.length; i++) {
-this.selections[i].showSelection (false);
-}
-});
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "addTreeListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Expand, typedListener);
-this.addListener ($WT.Collapse, typedListener);
-}, "$wt.events.TreeListener");
-$_M (cla$$, "removeSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "removeTreeListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Expand, listener);
-this.eventTable.unhook ($WT.Collapse, listener);
-}, "$wt.events.TreeListener");
-$_M (cla$$, "getItem", 
-function (point) {
-return null;
-}, "$wt.graphics.Point");
-$_M (cla$$, "indexOf", 
+$_M (cla$$, "setTopItem", 
 function (item) {
-if (item == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (item.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-for (var i = 0; i < this.items.length; i++) {
-if (this.items[i] == item) {
-return i;
-}}
-return -1;
+this.updateScrollBar ();
 }, "$wt.widgets.TreeItem");
-$_M (cla$$, "releaseHandle", 
+$_M (cla$$, "showItem", 
+function (hItem) {
+this.updateScrollBar ();
+}, "$wt.internal.xhtml.Element");
+$_M (cla$$, "showColumn", 
+function (column) {
+if (column.parent != this) return ;
+var index = this.indexOf (column);
+if (index == -1) return ;
+}, "$wt.widgets.TreeColumn");
+$_M (cla$$, "showItem", 
+function (item) {
+this.showItem (item.handle);
+}, "$wt.widgets.TreeItem");
+$_M (cla$$, "showSelection", 
 function () {
-if (this.items != null) {
-$wt.widgets.Display.releaseWidgetArray (this.items);
-this.items = null;
-}if (this.columns != null) {
-$wt.widgets.Display.releaseWidgetArray (this.columns);
-this.columns = null;
-}if (this.selections != null) {
-for (var i = 0; i < this.selections.length; i++) {
-if (this.selections[i] != null) {
-this.selections[i] = null;
-}}
-this.selections = null;
-}if (this.lastSelection != null) {
-this.lastSelection = null;
-}$_U (this, $wt.widgets.Tree, "releaseHandle", []);
 });
+$_M (cla$$, "showWidget", 
+function (visible) {
+$_U (this, $wt.widgets.Tree, "showWidget", [visible]);
+}, "Boolean");
+$_V (cla$$, "topHandle", 
+function () {
+return this.hwndParent != null ? this.hwndParent : this.handle;
+});
+$_M (cla$$, "updateScrollBar", 
+function () {
+});
+$_S (cla$$,
+"INSET", 3,
+"GRID_WIDTH", 1,
+"HEADER_MARGIN", 10);
 cla$$ = $_C (function () {
 this.minimum = 0;
 this.maximum = 0;
@@ -7590,37 +13406,62 @@ this.maximum = 100;
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= $WT.NO_FOCUS;
-return $wt.widgets.Widget.checkBits (style, $WT.HORIZONTAL, $WT.VERTICAL, 0, 0, 0, 0);
+style |= 524288;
+return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
 }, "Number");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
 var width = border * 2;
 var height = border * 2;
-if ((this.style & $WT.HORIZONTAL) != 0) {
-width += UIStringUtil.calculatePlainStringLineWidth ("W") * 10;
-height += UIStringUtil.calculatePlainStringLineHeight ("W");
+if ((this.style & 256) != 0) {
+width += 16 * 10;
+height += 16;
 } else {
-width += UIStringUtil.calculatePlainStringLineWidth ("W");
-height += UIStringUtil.calculatePlainStringLineHeight ("W") * 10;
-}if (wHint != $WT.DEFAULT) width = wHint + (border * 2);
-if (hHint != $WT.DEFAULT) height = hHint + (border * 2);
+width += 16;
+height += 16 * 10;
+}if (wHint != -1) width = wHint + (border * 2);
+if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
 this.handle = document.createElement ("DIV");
 this.handle.className = "progress-bar-default";
 if (this.parent != null && this.parent.handle != null) {
 this.parent.handle.appendChild (this.handle);
 }this.innerHandle = document.createElement ("DIV");
 this.handle.appendChild (this.innerHandle);
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.innerHandle.className = "progress-bar-horizontal";
 } else {
 this.innerHandle.className = "progress-bar-vertical";
+}this.startTimer ();
+});
+$_M (cla$$, "getMaximum", 
+function () {
+return this.maximum;
+});
+$_M (cla$$, "getMinimum", 
+function () {
+return this.minimum;
+});
+$_M (cla$$, "getSelection", 
+function () {
+return this.selection;
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.ProgressBar, "releaseWidget", []);
+this.stopTimer ();
+});
+$_M (cla$$, "startTimer", 
+function () {
+if ((this.style & 2) != 0) {
+}});
+$_M (cla$$, "stopTimer", 
+function () {
+if ((this.style & 2) != 0) {
 }});
 $_M (cla$$, "setMaximum", 
 function (value) {
@@ -7635,22 +13476,14 @@ this.minimum = value;
 $_M (cla$$, "setSelection", 
 function (value) {
 this.selection = value;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.innerHandle.style.width = Math.round (Math.floor (this.getSize ().x * this.selection / this.maximum)) + "px";
 } else {
 this.innerHandle.style.height = Math.round (Math.floor (this.getSize ().y * this.selection / this.maximum)) + "px";
 }}, "Number");
-$_M (cla$$, "getSelection", 
+$_M (cla$$, "windowClass", 
 function () {
-return this.selection;
-});
-$_M (cla$$, "getMinimum", 
-function () {
-return this.minimum;
-});
-$_M (cla$$, "getMaximum", 
-function () {
-return this.maximum;
+return "DIV";
 });
 $_S (cla$$,
 "DELAY", 100,
@@ -7677,14 +13510,13 @@ this.pageIncrement = 10;
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.HORIZONTAL, $WT.VERTICAL, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
 }, "Number");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
@@ -7693,36 +13525,36 @@ var width = border * 2;
 var height = border * 2;
 var thumbWidth = 16;
 var thumbHeight = 24;
-if ((this.style & $WT.HORIZONTAL) != 0) {
-width += UIStringUtil.calculatePlainStringLineWidth ("W") * 10;
-var scrollY = UIStringUtil.calculatePlainStringLineHeight ("W");
+if ((this.style & 256) != 0) {
+width += 16 * 10;
+var scrollY = 16;
 height += (thumbHeight * 2) + scrollY + (Math.floor (scrollY / 3));
 } else {
-var scrollX = UIStringUtil.calculatePlainStringLineWidth ("W");
+var scrollX = 16;
 width += (thumbWidth * 2) + scrollX + (Math.floor (scrollX / 3));
-height += UIStringUtil.calculatePlainStringLineHeight ("W") * 10;
-}if (wHint != $WT.DEFAULT) width = wHint + (border * 2);
-if (hHint != $WT.DEFAULT) height = hHint + (border * 2);
+height += 16 * 10;
+}if (wHint != -1) width = wHint + (border * 2);
+if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "createHandle", 
 function () {
-this.register ();
+$_U (this, $wt.widgets.Scale, "createHandle", []);
 this.handle = document.createElement ("DIV");
 this.handle.className = "scale-default";
 if (this.parent != null && this.parent.handle != null) {
 this.parent.handle.appendChild (this.handle);
-}if ((this.style & $WT.BORDER) != 0) {
+}if ((this.style & 2048) != 0) {
 this.handle.className += " scale-border";
 }this.thumbHandle = document.createElement ("DIV");
 this.handle.appendChild (this.thumbHandle);
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.thumbHandle.className = "scale-thumb-horizontal";
 this.thumbHandle.style.left = "0px";
 } else {
 this.thumbHandle.className = "scale-thumb-vertical";
 this.thumbHandle.style.top = "0px";
-}var isHorizontal = (this.style & $WT.HORIZONTAL) != 0;
+}var isHorizontal = (this.style & 256) != 0;
 this.decorateScale ();
 this.trackHandle = document.createElement ("DIV");
 if (isHorizontal) {
@@ -7758,7 +13590,7 @@ event.x = this.callbacks["$wt.widgets.Scale"].lastX;
 event.y = this.callbacks["$wt.widgets.Scale"].lastY;
 var size = this.callbacks["$wt.widgets.Scale"].getSize ();
 var delta = 0;
-if ((this.callbacks["$wt.widgets.Scale"].style & $WT.BORDER) != 0) {
+if ((this.callbacks["$wt.widgets.Scale"].style & 2048) != 0) {
 delta = 6;
 }var width = size.x + delta;
 if (width < 2) {
@@ -7770,7 +13602,7 @@ height = 2;
 }event.height = height;
 event.widget = this.callbacks["$wt.widgets.Scale"];
 event.item = this.callbacks["$wt.widgets.Scale"];
-this.callbacks["$wt.widgets.Scale"].sendEvent ($WT.Selection, event);
+this.callbacks["$wt.widgets.Scale"].sendEvent (13, event);
 return true;
 }, "$wt.internal.dnd.DragEvent");
 $_M (cla$$, "dragEnded", 
@@ -7786,7 +13618,7 @@ event.x = Integer.parseInt (this.callbacks["$wt.widgets.Scale"].handle.style.lef
 event.y = p.y;
 }var size = this.callbacks["$wt.widgets.Scale"].getSize ();
 var delta = 0;
-if ((this.callbacks["$wt.widgets.Scale"].style & $WT.BORDER) != 0) {
+if ((this.callbacks["$wt.widgets.Scale"].style & 2048) != 0) {
 delta = 6;
 }var width = size.x + delta;
 if (width < 2) {
@@ -7798,9 +13630,9 @@ height = 2;
 }event.height = height;
 event.widget = this.callbacks["$wt.widgets.Scale"];
 event.item = this.callbacks["$wt.widgets.Scale"];
-if ((this.callbacks["$wt.widgets.Scale"].style & $WT.SMOOTH) == 0) {
-event.detail = $WT.DRAG;
-}this.callbacks["$wt.widgets.Scale"].sendEvent ($WT.Selection, event);
+if ((this.callbacks["$wt.widgets.Scale"].style & 65536) == 0) {
+event.detail = 1;
+}this.callbacks["$wt.widgets.Scale"].sendEvent (13, event);
 if (event.doit) {
 this.callbacks["$wt.widgets.Scale"].lastX = event.x;
 this.callbacks["$wt.widgets.Scale"].lastY = event.y;
@@ -7824,7 +13656,7 @@ this.handle.removeChild (this.handle.childNodes[i]);
 $_M (cla$$, "decorateScale", 
 ($fz = function () {
 var outerSize;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 outerSize = this.getSize ().x;
 } else {
 outerSize = this.getSize ().y;
@@ -7832,7 +13664,7 @@ outerSize = this.getSize ().y;
 var thumbSize = 16;
 for (var j = 0; j <= pages; j++) {
 var line = document.createElement ("DIV");
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 line.className = "scale-line-decoration-horizontal";
 line.style.left = Math.floor (Math.floor ((outerSize - thumbSize) * j / pages) + Math.floor (thumbSize / 2)) + "px";
 } else {
@@ -7859,7 +13691,7 @@ return this.pageIncrement;
 });
 $_M (cla$$, "getSelection", 
 function () {
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 var left = Integer.parseInt (this.thumbHandle.style.left);
 this.selection = Math.floor (left * this.maximum / (this.getSize ().x - 12));
 } else {
@@ -7869,10 +13701,9 @@ this.selection = Math.floor (top * this.maximum / (this.getSize ().y - 12));
 });
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "setIncrement", 
 function (increment) {
@@ -7911,11 +13742,15 @@ function (value) {
 if (this.selection == value) return ;
 if (this.minimum <= value && value < this.maximum) {
 this.selection = value;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.thumbHandle.style.left = Math.round (Math.floor (this.selection * (this.getSize ().x - 12) / this.maximum)) + "px";
 } else {
 this.thumbHandle.style.top = Math.round (Math.floor (this.selection * (this.getSize ().y - 12) / this.maximum)) + "px";
 }}}, "Number");
+$_M (cla$$, "windowClass", 
+function () {
+return "DIV";
+});
 cla$$ = $_C (function () {
 this.minimum = 0;
 this.maximum = 0;
@@ -7936,28 +13771,27 @@ $_R (this, $wt.widgets.Slider, [parent, $wt.widgets.Slider.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.HORIZONTAL, $WT.VERTICAL, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
 }, "Number");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
 var width = border * 2;
 var height = border * 2;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 width += Math.floor (16 * (this.maximum - this.minimum) / this.pageIncrement);
 height += 24;
 } else {
 width += 24;
 height += Math.floor (16 * (this.maximum - this.minimum) / this.pageIncrement);
-}if (wHint != $WT.DEFAULT) width = wHint + (border * 2);
-if (hHint != $WT.DEFAULT) height = hHint + (border * 2);
+}if (wHint != -1) width = wHint + (border * 2);
+if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
 $_V (cla$$, "createWidget", 
@@ -7967,11 +13801,11 @@ this.handle = document.createElement ("DIV");
 this.handle.className = "slider-default";
 if (this.parent != null && this.parent.handle != null) {
 this.parent.handle.appendChild (this.handle);
-}if ((this.style & $WT.BORDER) != 0) {
+}if ((this.style & 2048) != 0) {
 this.handle.className += " slider-border";
 }this.decBtnHandle = document.createElement ("BUTTON");
 this.handle.appendChild (this.decBtnHandle);
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.decBtnHandle.className = "slider-left-button-default";
 } else {
 this.decBtnHandle.className = "slider-top-button-default";
@@ -7988,11 +13822,11 @@ this.callbacks["$wt.widgets.Slider"].setSelection (this.callbacks["$wt.widgets.S
 var event =  new $wt.widgets.Event ();
 event.widget = this.callbacks["$wt.widgets.Slider"];
 event.item = this.callbacks["$wt.widgets.Slider"];
-if ((this.callbacks["$wt.widgets.Slider"].style & $WT.HORIZONTAL) != 0) {
-event.detail = $WT.ARROW_LEFT;
+if ((this.callbacks["$wt.widgets.Slider"].style & 256) != 0) {
+event.detail = 16777219;
 } else {
-event.detail = $WT.ARROW_UP;
-}this.callbacks["$wt.widgets.Slider"].sendEvent ($WT.Selection, event);
+event.detail = 16777217;
+}this.callbacks["$wt.widgets.Slider"].sendEvent (13, event);
 });
 cla$$ = $_P ();
 }
@@ -8000,7 +13834,7 @@ return $_N ($wt.widgets.Slider$1, innerThis, finalVars);
 }) (this, null));
 this.incBtnHandle = document.createElement ("BUTTON");
 this.handle.appendChild (this.incBtnHandle);
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.incBtnHandle.className = "slider-right-button-default";
 } else {
 this.incBtnHandle.className = "slider-bottom-button-default";
@@ -8017,11 +13851,11 @@ this.callbacks["$wt.widgets.Slider"].setSelection (this.callbacks["$wt.widgets.S
 var event =  new $wt.widgets.Event ();
 event.widget = this.callbacks["$wt.widgets.Slider"];
 event.item = this.callbacks["$wt.widgets.Slider"];
-if ((this.callbacks["$wt.widgets.Slider"].style & $WT.HORIZONTAL) != 0) {
-event.detail = $WT.ARROW_RIGHT;
+if ((this.callbacks["$wt.widgets.Slider"].style & 256) != 0) {
+event.detail = 16777220;
 } else {
-event.detail = $WT.ARROW_DOWN;
-}this.callbacks["$wt.widgets.Slider"].sendEvent ($WT.Selection, event);
+event.detail = 16777218;
+}this.callbacks["$wt.widgets.Slider"].sendEvent (13, event);
 });
 cla$$ = $_P ();
 }
@@ -8029,7 +13863,7 @@ return $_N ($wt.widgets.Slider$2, innerThis, finalVars);
 }) (this, null));
 this.thumbHandle = document.createElement ("BUTTON");
 this.handle.appendChild (this.thumbHandle);
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.thumbHandle.className = "slider-thumb-horizontal";
 this.thumbHandle.style.left = "0px";
 } else {
@@ -8062,8 +13896,8 @@ event.x = Integer.parseInt (this.callbacks["$wt.widgets.Slider"].handle.style.le
 event.y = p.y;
 }event.widget = this.callbacks["$wt.widgets.Slider"];
 event.item = this.callbacks["$wt.widgets.Slider"];
-event.detail = $WT.DRAG;
-this.callbacks["$wt.widgets.Slider"].sendEvent ($WT.Selection, event);
+event.detail = 1;
+this.callbacks["$wt.widgets.Slider"].sendEvent (13, event);
 if (event.doit) {
 this.callbacks["$wt.widgets.Slider"].lastX = event.x;
 this.callbacks["$wt.widgets.Slider"].lastY = event.y;
@@ -8120,8 +13954,8 @@ event.x = this.callbacks["$wt.widgets.Slider"].lastX;
 event.y = this.callbacks["$wt.widgets.Slider"].lastY;
 event.widget = this.callbacks["$wt.widgets.Slider"];
 event.item = this.callbacks["$wt.widgets.Slider"];
-event.detail = $WT.DRAG;
-this.callbacks["$wt.widgets.Slider"].sendEvent ($WT.Selection, event);
+event.detail = 1;
+this.callbacks["$wt.widgets.Slider"].sendEvent (13, event);
 return true;
 }, "$wt.internal.dnd.DragEvent");
 cla$$ = $_P ();
@@ -8131,7 +13965,7 @@ return $_N ($wt.widgets.Slider$3, innerThis, finalVars);
 dnd.bind (this.thumbHandle);
 this.updateSlider ();
 });
-$_M (cla$$, "enableWidget", 
+$_V (cla$$, "enableWidget", 
 function (enabled) {
 if (enabled) {
 this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
@@ -8168,7 +14002,7 @@ function () {
 var size = this.getSize ();
 var borderWidth = 20;
 var trackWidth = 0;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 if (size.x <= 64) {
 borderWidth = Math.floor (size.x * 20 / 64);
 }trackWidth = size.x - borderWidth * 2;
@@ -8204,11 +14038,14 @@ return this.thumb;
 });
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+$_U (this, $wt.widgets.Slider, "setBounds", [x, y, width, height, flags]);
+}, "Number,Number,Number,Number,Number");
 $_M (cla$$, "setIncrement", 
 function (value) {
 if (value < 1) return ;
@@ -8248,36 +14085,27 @@ this.selection = this.maximum - this.thumb;
 this.selection = value;
 }this.updateSlider ();
 }, "Number");
+$_M (cla$$, "setSize", 
+function (width, height) {
+$_U (this, $wt.widgets.Slider, "setSize", [width, height]);
+this.updateSlider ();
+}, "Number,Number");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height) {
+$_U (this, $wt.widgets.Slider, "setBounds", [x, y, width, height]);
+this.updateSlider ();
+}, "Number,Number,Number,Number");
 $_M (cla$$, "setThumb", 
 function (value) {
 if (value < 1) return ;
 this.thumb = value;
 this.updateSlider ();
 }, "Number");
-$_M (cla$$, "setValues", 
-function (selection, minimum, maximum, thumb, increment, pageIncrement) {
-if (minimum < 0) return ;
-if (maximum < 0) return ;
-if (minimum >= maximum) return ;
-if (thumb < 1) return ;
-if (increment < 1) return ;
-if (pageIncrement < 1) return ;
-this.increment = increment;
-this.pageIncrement = pageIncrement;
-this.minimum = minimum;
-this.maximum = maximum;
-this.thumb = thumb;
-if (this.selection < this.minimum) {
-this.selection = this.minimum;
-} else if (this.selection > this.maximum) {
-this.selection = this.maximum;
-}this.updateSlider ();
-}, "Number,Number,Number,Number,Number,Number");
 $_M (cla$$, "getIncrementButtonWidth", 
 function () {
 var size = this.getSize ();
 var borderWidth = 20;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 if (size.x <= 64) {
 borderWidth = Math.floor (size.x * 20 / 64);
 }} else {
@@ -8290,7 +14118,7 @@ function () {
 var size = this.getSize ();
 var borderWidth = 20;
 var trackWidth = 0;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 if (size.x <= 64) {
 borderWidth = Math.floor (size.x * 20 / 64);
 }trackWidth = size.x - borderWidth * 2;
@@ -8319,16 +14147,30 @@ thumbWidth--;
 thumbWidth = 8;
 }this.thumbHandle.style.height = thumbWidth + "px";
 }});
-$_M (cla$$, "setSize", 
-function (width, height) {
-$_U (this, $wt.widgets.Slider, "setSize", [width, height]);
-this.updateSlider ();
-}, "Number,Number");
-$_M (cla$$, "setBounds", 
-function (x, y, width, height) {
-$_U (this, $wt.widgets.Slider, "setBounds", [x, y, width, height]);
-this.updateSlider ();
-}, "Number,Number,Number,Number");
+$_M (cla$$, "setValues", 
+function (selection, minimum, maximum, thumb, increment, pageIncrement) {
+if (minimum < 0) return ;
+if (maximum < 0) return ;
+if (thumb < 1) return ;
+if (increment < 1) return ;
+if (pageIncrement < 1) return ;
+this.increment = increment;
+this.pageIncrement = pageIncrement;
+this.increment = increment;
+this.pageIncrement = pageIncrement;
+this.minimum = minimum;
+this.maximum = maximum;
+this.thumb = thumb;
+if (this.selection < this.minimum) {
+this.selection = this.minimum;
+} else if (this.selection > this.maximum) {
+this.selection = this.maximum;
+}this.updateSlider ();
+}, "Number,Number,Number,Number,Number,Number");
+$_M (cla$$, "windowClass", 
+function () {
+return "DIV";
+});
 cla$$ = $_C (function () {
 this.dragging = false;
 this.lastX = 0;
@@ -8339,38 +14181,45 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.Sash, [parent, $wt.widgets.Sash.checkStyle (style)]);
 }, "$wt.widgets.Composite,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.HORIZONTAL, $WT.VERTICAL, 0, 0, 0, 0);
+return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
 }, "Number");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
 var width = border * 2;
 var height = border * 2;
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 width += $wt.widgets.Widget.DEFAULT_WIDTH;
 height += 3;
 } else {
 width += 3;
 height += $wt.widgets.Widget.DEFAULT_HEIGHT;
-}if (wHint != $WT.DEFAULT) width = wHint + (border * 2);
-if (hHint != $WT.DEFAULT) height = hHint + (border * 2);
+}if (wHint != -1) width = wHint + (border * 2);
+if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "createHandle", 
 function () {
-this.register ();
 this.handle = document.createElement ("DIV");
-if ((this.style & $WT.HORIZONTAL) != 0) {
+if ((this.style & 256) != 0) {
 this.handle.className = "sash-vertical-default";
 } else {
 this.handle.className = "sash-horizontal-default";
-}if ((this.style & $WT.BORDER) != 0) {
+}if ((this.style & 2048) != 0) {
 this.handle.className += " sash-border";
-}if (this.parent != null && this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}var dnd =  new $wt.internal.dnd.DragAndDrop ();
+}if (this.parent != null) {
+var parentHandle = this.parent.containerHandle ();
+if (parentHandle != null) {
+parentHandle.appendChild (this.handle);
+}}var dnd =  new $wt.internal.dnd.DragAndDrop ();
 dnd.addDragListener ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Sash$1")) {
 Clazz.pu$h ();
@@ -8386,7 +14235,7 @@ event.x = this.callbacks["$wt.widgets.Sash"].lastX;
 event.y = this.callbacks["$wt.widgets.Sash"].lastY;
 var size = this.callbacks["$wt.widgets.Sash"].getSize ();
 var delta = 0;
-if ((this.callbacks["$wt.widgets.Sash"].style & $WT.BORDER) != 0) {
+if ((this.callbacks["$wt.widgets.Sash"].style & 2048) != 0) {
 delta = 6;
 }var width = size.x + delta;
 if (width < 2) {
@@ -8398,10 +14247,10 @@ height = 2;
 }event.height = height;
 event.widget = this.callbacks["$wt.widgets.Sash"];
 event.item = this.callbacks["$wt.widgets.Sash"];
-this.callbacks["$wt.widgets.Sash"].sendEvent ($WT.Selection, event);
+this.callbacks["$wt.widgets.Sash"].sendEvent (13, event);
 System.out.println (event);
 if (event.doit) {
-if ((this.callbacks["$wt.widgets.Sash"].style & $WT.SMOOTH) != 0) {
+if ((this.callbacks["$wt.widgets.Sash"].style & 65536) != 0) {
 if (this.isHorizontal) {
 this.callbacks["$wt.widgets.Sash"].handle.style.left = this.callbacks["$wt.widgets.Sash"].lastX + "px";
 } else {
@@ -8421,7 +14270,7 @@ event.x = Integer.parseInt (this.callbacks["$wt.widgets.Sash"].handle.style.left
 event.y = p.y;
 }var size = this.callbacks["$wt.widgets.Sash"].getSize ();
 var delta = 0;
-if ((this.callbacks["$wt.widgets.Sash"].style & $WT.BORDER) != 0) {
+if ((this.callbacks["$wt.widgets.Sash"].style & 2048) != 0) {
 delta = 6;
 }var width = size.x + delta;
 if (width < 2) {
@@ -8433,13 +14282,13 @@ height = 2;
 }event.height = height;
 event.widget = this.callbacks["$wt.widgets.Sash"];
 event.item = this.callbacks["$wt.widgets.Sash"];
-if ((this.callbacks["$wt.widgets.Sash"].style & $WT.SMOOTH) == 0) {
-event.detail = $WT.DRAG;
-}this.callbacks["$wt.widgets.Sash"].sendEvent ($WT.Selection, event);
+if ((this.callbacks["$wt.widgets.Sash"].style & 65536) == 0) {
+event.detail = 1;
+}this.callbacks["$wt.widgets.Sash"].sendEvent (13, event);
 if (event.doit) {
 this.callbacks["$wt.widgets.Sash"].lastX = event.x;
 this.callbacks["$wt.widgets.Sash"].lastY = event.y;
-}if ((this.callbacks["$wt.widgets.Sash"].style & $WT.SMOOTH) != 0) {
+}if ((this.callbacks["$wt.widgets.Sash"].style & 65536) != 0) {
 if (this.isHorizontal) {
 this.callbacks["$wt.widgets.Sash"].handle.style.left = this.callbacks["$wt.widgets.Sash"].lastX + "px";
 } else {
@@ -8452,41 +14301,39 @@ return $_N ($wt.widgets.Sash$1, innerThis, finalVars);
 }) (this, null));
 dnd.bind (this.handle);
 });
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
+$_M (cla$$, "windowClass", 
+function () {
+return "DIV";
+});
 $_S (cla$$,
 "INCREMENT", 1,
 "PAGE_INCREMENT", 9);
 cla$$ = $_C (function () {
 this.SASH_WIDTH = 3;
 this.sashStyle = 0;
-this.sashes =  new Array (0);
-this.background = null;
-this.foreground = null;
-this.controls =  new Array (0);
+this.$background = null;
+this.$foreground = null;
 this.maxControl = null;
 this.sashListener = null;
 $_Z (this, arguments);
 }, $wt.custom, "SashForm", $wt.widgets.Composite);
+$_Y (cla$$, function () {
+this.sashes =  new Array (0);
+this.controls =  new Array (0);
+});
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.custom.SashForm, [parent, $wt.custom.SashForm.checkStyle (style)]);
 $_U (this, $wt.custom.SashForm, "setLayout", [ new $wt.custom.SashFormLayout ()]);
-this.sashStyle = ((style & $WT.VERTICAL) != 0) ? $WT.HORIZONTAL : $WT.VERTICAL;
-if ((style & $WT.BORDER) != 0) this.sashStyle |= $WT.BORDER;
-if ((style & $WT.SMOOTH) != 0) this.sashStyle |= $WT.SMOOTH;
+this.sashStyle = ((style & 512) != 0) ? 256 : 512;
+if ((style & 2048) != 0) this.sashStyle |= 2048;
+if ((style & 65536) != 0) this.sashStyle |= 65536;
 this.sashListener = (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.custom.SashForm$1")) {
 Clazz.pu$h ();
@@ -8505,18 +14352,18 @@ return $_N ($wt.custom.SashForm$1, innerThis, finalVars);
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-var mask = $WT.BORDER | $WT.LEFT_TO_RIGHT | $WT.RIGHT_TO_LEFT;
+var mask = 2048 | 33554432 | 67108864;
 return style & mask;
 }, "Number");
 $_M (cla$$, "getOrientation", 
 function () {
-return (this.sashStyle & $WT.VERTICAL) != 0 ? $WT.HORIZONTAL : $WT.VERTICAL;
+return (this.sashStyle & 512) != 0 ? 256 : 512;
 });
 $_M (cla$$, "getStyle", 
 function () {
 var style = $_U (this, $wt.custom.SashForm, "getStyle", []);
-style |= this.getOrientation () == $WT.VERTICAL ? $WT.VERTICAL : $WT.HORIZONTAL;
-if ((this.sashStyle & $WT.SMOOTH) != 0) style |= $WT.SMOOTH;
+style |= this.getOrientation () == 512 ? 512 : 256;
+if ((this.sashStyle & 65536) != 0) style |= 65536;
 return style;
 });
 $_M (cla$$, "getMaximizedControl", 
@@ -8565,7 +14412,7 @@ var b2 = c2.getBounds ();
 var sashBounds = sash.getBounds ();
 var area = this.getClientArea ();
 var correction = false;
-if (this.getOrientation () == $WT.HORIZONTAL) {
+if (this.getOrientation () == 256) {
 correction = b1.width < $wt.custom.SashForm.DRAG_MINIMUM || b2.width < $wt.custom.SashForm.DRAG_MINIMUM;
 var totalWidth = b2.x + b2.width - b1.x;
 var shift = event.x - sashBounds.x;
@@ -8623,7 +14470,7 @@ data2 =  new $wt.custom.SashFormData ();
 c2.setLayoutData (data2);
 }(data1).weight = Math.floor (((parseInt (b1.height) << 16) + area.height - 1) / area.height);
 (data2).weight = Math.floor (((parseInt (b2.height) << 16) + area.height - 1) / area.height);
-}if (correction || (event.doit && event.detail != $WT.DRAG)) {
+}if (correction || (event.doit && event.detail != 1)) {
 c1.setBounds (b1);
 sash.setBounds (event.x, event.y, event.width, event.height);
 c2.setBounds (b2);
@@ -8631,33 +14478,31 @@ c2.setBounds (b2);
 $_M (cla$$, "setOrientation", 
 function (orientation) {
 if (this.getOrientation () == orientation) return ;
-if (orientation != $WT.HORIZONTAL && orientation != $WT.VERTICAL) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}this.sashStyle &= ~($WT.HORIZONTAL | $WT.VERTICAL);
-this.sashStyle |= orientation == $WT.VERTICAL ? $WT.HORIZONTAL : $WT.VERTICAL;
+this.sashStyle &= ~(256 | 512);
+this.sashStyle |= orientation == 512 ? 256 : 512;
 for (var i = 0; i < this.sashes.length; i++) {
 this.sashes[i].dispose ();
 this.sashes[i] =  new $wt.widgets.Sash (this, this.sashStyle);
-this.sashes[i].setBackground (this.background);
-this.sashes[i].setForeground (this.foreground);
-this.sashes[i].addListener ($WT.Selection, this.sashListener);
+this.sashes[i].setBackground (this.$background);
+this.sashes[i].setForeground (this.$foreground);
+this.sashes[i].addListener (13, this.sashListener);
 }
 this.layout (false);
 }, "Number");
 $_M (cla$$, "setBackground", 
 function (color) {
 $_U (this, $wt.custom.SashForm, "setBackground", [color]);
-this.background = color;
+this.$background = color;
 for (var i = 0; i < this.sashes.length; i++) {
-this.sashes[i].setBackground (this.background);
+this.sashes[i].setBackground (this.$background);
 }
 }, "$wt.graphics.Color");
 $_M (cla$$, "setForeground", 
 function (color) {
 $_U (this, $wt.custom.SashForm, "setForeground", [color]);
-this.foreground = color;
+this.$foreground = color;
 for (var i = 0; i < this.sashes.length; i++) {
-this.sashes[i].setForeground (this.foreground);
+this.sashes[i].setForeground (this.$foreground);
 }
 }, "$wt.graphics.Color");
 $_M (cla$$, "setLayout", 
@@ -8683,17 +14528,11 @@ this.layout (false);
 $_M (cla$$, "setWeights", 
 function (weights) {
 var cArray = this.getControls (false);
-if (weights == null || weights.length != cArray.length) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}var total = 0;
+var total = 0;
 for (var i = 0; i < weights.length; i++) {
-if (weights[i] < 0) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}total += weights[i];
+total += weights[i];
 }
-if (total == 0) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}for (var i = 0; i < cArray.length; i++) {
+for (var i = 0; i < cArray.length; i++) {
 var data = cArray[i].getLayoutData ();
 if (data == null || !($_O (data, $wt.custom.SashFormData))) {
 data =  new $wt.custom.SashFormData ();
@@ -8729,21 +14568,21 @@ var cArray = sashForm.getControls (true);
 var width = 0;
 var height = 0;
 if (cArray.length == 0) {
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
-}var vertical = sashForm.getOrientation () == $WT.VERTICAL;
+}var vertical = sashForm.getOrientation () == 512;
 var maxIndex = 0;
 var maxValue = 0;
 for (var i = 0; i < cArray.length; i++) {
 if (vertical) {
-var size = cArray[i].computeSize (wHint, $WT.DEFAULT, flushCache);
+var size = cArray[i].computeSize (wHint, -1, flushCache);
 if (size.y > maxValue) {
 maxIndex = i;
 maxValue = size.y;
 }width = Math.max (width, size.x);
 } else {
-var size = cArray[i].computeSize ($WT.DEFAULT, hHint, flushCache);
+var size = cArray[i].computeSize (-1, hHint, flushCache);
 if (size.x > maxValue) {
 maxIndex = i;
 maxValue = size.x;
@@ -8769,8 +14608,8 @@ height += parseInt ((Math.floor (total * maxValue / ratios[maxIndex]))) + (cArra
 width += parseInt ((Math.floor (total * maxValue / ratios[maxIndex]))) + (cArray.length - 1) * sashwidth;
 }}width += sashForm.getBorderWidth () * 2;
 height += sashForm.getBorderWidth () * 2;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_V (cla$$, "flushCache", 
@@ -8801,7 +14640,7 @@ for (var i = sashForm.sashes.length; i < newSashes.length; i++) {
 newSashes[i] =  new $wt.widgets.Sash (sashForm, sashForm.sashStyle);
 newSashes[i].setBackground (sashForm.background);
 newSashes[i].setForeground (sashForm.foreground);
-newSashes[i].addListener ($WT.Selection, sashForm.sashListener);
+newSashes[i].addListener (13, sashForm.sashListener);
 }
 sashForm.sashes = newSashes;
 }if (sashForm.sashes.length > controls.length - 1) {
@@ -8832,7 +14671,7 @@ controls[i].setLayoutData (data);
 }total += ratios[i];
 }
 var sashwidth = sashes.length > 0 ? sashForm.SASH_WIDTH + sashes[0].getBorderWidth () * 2 : sashForm.SASH_WIDTH;
-if (sashForm.getOrientation () == $WT.HORIZONTAL) {
+if (sashForm.getOrientation () == 256) {
 var width = parseInt ((Math.floor (ratios[0] * (area.width - sashes.length * sashwidth) / total)));
 var x = area.x;
 controls[0].setBounds (x, area.y, width, area.height);
@@ -8885,8 +14724,8 @@ maxHeight = Math.max (size.y, maxHeight);
 }
 var width = maxWidth + 2 * this.marginWidth;
 var height = maxHeight + 2 * this.marginHeight;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_V (cla$$, "flushCache", 
@@ -8948,7 +14787,7 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.custom.ViewForm, [parent, $wt.custom.ViewForm.checkStyle (style)]);
 $_U (this, $wt.custom.ViewForm, "setLayout", [ new $wt.custom.ViewFormLayout ()]);
-this.setBorderVisible ((style & $WT.BORDER) != 0);
+this.setBorderVisible ((style & 2048) != 0);
 var listener = (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.custom.ViewForm$1")) {
 Clazz.pu$h ();
@@ -8959,13 +14798,13 @@ $_Z (this, arguments);
 $_V (cla$$, "handleEvent", 
 function (e) {
 switch (e.type) {
-case $WT.Dispose:
+case 12:
 this.callbacks["$wt.custom.ViewForm"].onDispose ();
 break;
-case $WT.Paint:
+case 9:
 this.callbacks["$wt.custom.ViewForm"].onPaint (e.gc);
 break;
-case $WT.Resize:
+case 11:
 this.callbacks["$wt.custom.ViewForm"].onResize ();
 break;
 }
@@ -8974,15 +14813,15 @@ cla$$ = $_P ();
 }
 return $_N ($wt.custom.ViewForm$1, innerThis, finalVars);
 }) (this, null);
-var events = [$WT.Dispose, $WT.Paint, $WT.Resize];
+var events = [12, 9, 11];
 for (var i = 0; i < events.length; i++) {
 this.addListener (events[i], listener);
 }
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-var mask = $WT.FLAT | $WT.LEFT_TO_RIGHT | $WT.RIGHT_TO_LEFT;
-return style & mask | $WT.NO_REDRAW_RESIZE;
+var mask = 8388608 | 33554432 | 67108864;
+return style & mask | 1048576;
 }, "Number");
 $_V (cla$$, "computeTrim", 
 function (x, y, width, height) {
@@ -9040,7 +14879,7 @@ var y1 = 1;
 var x2 = size.x - 1;
 var y2 = size.y - 1;
 var shape = [x1, y1, x2, y1, x2, y2, x1, y2, x1, y1 + this.highlight, x1 + this.highlight, y1 + this.highlight, x1 + this.highlight, y2 - this.highlight, x2 - this.highlight, y2 - this.highlight, x2 - this.highlight, y1 + this.highlight, x1, y1 + this.highlight];
-var highlightColor = this.getDisplay ().getSystemColor ($WT.COLOR_LIST_SELECTION);
+var highlightColor = this.getDisplay ().getSystemColor (26);
 gc.setBackground (highlightColor);
 }}if (this.separator > -1) {
 gc.setForeground (border);
@@ -9069,9 +14908,7 @@ height = this.borderBottom + this.highlight;
 });
 $_M (cla$$, "setContent", 
 function (content) {
-if (content != null && content.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.content != null && !this.content.isDisposed ()) {
+if (this.content != null && !this.content.isDisposed ()) {
 this.content.setBounds ($wt.custom.ViewForm.OFFSCREEN, $wt.custom.ViewForm.OFFSCREEN, 0, 0);
 }this.content = content;
 this.layout (false);
@@ -9089,9 +14926,7 @@ this.redraw ();
 }, "$wt.graphics.Color");
 $_M (cla$$, "setTopCenter", 
 function (topCenter) {
-if (topCenter != null && topCenter.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.topCenter != null && !this.topCenter.isDisposed ()) {
+if (this.topCenter != null && !this.topCenter.isDisposed ()) {
 var size = this.topCenter.getSize ();
 this.topCenter.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
 }this.topCenter = topCenter;
@@ -9099,9 +14934,7 @@ this.layout (false);
 }, "$wt.widgets.Control");
 $_M (cla$$, "setTopLeft", 
 function (c) {
-if (c != null && c.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.topLeft != null && !this.topLeft.isDisposed ()) {
+if (this.topLeft != null && !this.topLeft.isDisposed ()) {
 var size = this.topLeft.getSize ();
 this.topLeft.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
 }this.topLeft = c;
@@ -9109,9 +14942,7 @@ this.layout (false);
 }, "$wt.widgets.Control");
 $_M (cla$$, "setTopRight", 
 function (c) {
-if (c != null && c.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.topRight != null && !this.topRight.isDisposed ()) {
+if (this.topRight != null && !this.topRight.isDisposed ()) {
 var size = this.topRight.getSize ();
 this.topRight.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
 }this.topRight = c;
@@ -9123,7 +14954,7 @@ if (this.showBorder == show) return ;
 this.showBorder = show;
 if (this.showBorder) {
 this.borderLeft = this.borderTop = this.borderRight = this.borderBottom = 1;
-if ((this.getStyle () & $WT.FLAT) == 0) this.highlight = 2;
+if ((this.getStyle () & 8388608) == 0) this.highlight = 2;
 } else {
 this.borderBottom = this.borderTop = this.borderLeft = this.borderRight = 0;
 this.highlight = 0;
@@ -9140,8 +14971,8 @@ cla$$.borderMiddleRGB = cla$$.prototype.borderMiddleRGB =  new $wt.graphics.RGB 
 cla$$.borderOutsideRGB = cla$$.prototype.borderOutsideRGB =  new $wt.graphics.RGB (171, 168, 165);
 $_S (cla$$,
 "OFFSCREEN", -200);
-cla$$.BORDER1_COLOR = cla$$.prototype.BORDER1_COLOR = $WT.COLOR_WIDGET_NORMAL_SHADOW;
-cla$$.SELECTION_BACKGROUND = cla$$.prototype.SELECTION_BACKGROUND = $WT.COLOR_LIST_BACKGROUND;
+cla$$.BORDER1_COLOR = cla$$.prototype.BORDER1_COLOR = 18;
+cla$$.SELECTION_BACKGROUND = cla$$.prototype.SELECTION_BACKGROUND = 25;
 cla$$ = $_C (function () {
 $_Z (this, arguments);
 }, $wt.custom, "ViewFormLayout", $wt.widgets.Layout);
@@ -9154,15 +14985,15 @@ var right = form.topRight;
 var content = form.content;
 var leftSize =  new $wt.graphics.Point (0, 0);
 if (left != null) {
-leftSize = this.computeChildSize (left, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+leftSize = this.computeChildSize (left, -1, -1, flushCache);
 }var centerSize =  new $wt.graphics.Point (0, 0);
 if (center != null) {
-centerSize = this.computeChildSize (center, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+centerSize = this.computeChildSize (center, -1, -1, flushCache);
 }var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null) {
-rightSize = this.computeChildSize (right, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+rightSize = this.computeChildSize (right, -1, -1, flushCache);
 }var size =  new $wt.graphics.Point (0, 0);
-if (form.separateTopCenter || (wHint != $WT.DEFAULT && leftSize.x + centerSize.x + rightSize.x > wHint)) {
+if (form.separateTopCenter || (wHint != -1 && leftSize.x + centerSize.x + rightSize.x > wHint)) {
 size.x = leftSize.x + rightSize.x;
 if (leftSize.x > 0 && rightSize.x > 0) size.x += form.horizontalSpacing;
 size.x = Math.max (centerSize.x, size.x);
@@ -9181,14 +15012,14 @@ size.y = Math.max (leftSize.y, Math.max (centerSize.y, rightSize.y));
 }if (content != null) {
 if (left != null || right != null || center != null) size.y += 1;
 var contentSize =  new $wt.graphics.Point (0, 0);
-contentSize = this.computeChildSize (content, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+contentSize = this.computeChildSize (content, -1, -1, flushCache);
 size.x = Math.max (size.x, contentSize.x);
 size.y += contentSize.y;
 if (size.y > contentSize.y) size.y += form.verticalSpacing;
 }size.x += 2 * form.marginWidth;
 size.y += 2 * form.marginHeight;
-if (wHint != $WT.DEFAULT) size.x = wHint;
-if (hHint != $WT.DEFAULT) size.y = hHint;
+if (wHint != -1) size.x = wHint;
+if (hHint != -1) size.y = hHint;
 return size;
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_M (cla$$, "computeChildSize", 
@@ -9222,13 +15053,13 @@ var content = form.content;
 var rect = composite.getClientArea ();
 var leftSize =  new $wt.graphics.Point (0, 0);
 if (left != null && !left.isDisposed ()) {
-leftSize = this.computeChildSize (left, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+leftSize = this.computeChildSize (left, -1, -1, flushCache);
 }var centerSize =  new $wt.graphics.Point (0, 0);
 if (center != null && !center.isDisposed ()) {
-centerSize = this.computeChildSize (center, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+centerSize = this.computeChildSize (center, -1, -1, flushCache);
 }var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null && !right.isDisposed ()) {
-rightSize = this.computeChildSize (right, $WT.DEFAULT, $WT.DEFAULT, flushCache);
+rightSize = this.computeChildSize (right, -1, -1, flushCache);
 }var minTopWidth = leftSize.x + centerSize.x + rightSize.x + 2 * form.marginWidth + 2 * form.highlight;
 var count = -1;
 if (leftSize.x > 0) count++;
@@ -9249,14 +15080,14 @@ x -= form.horizontalSpacing;
 top = true;
 var trim = this.computeTrim (left);
 var leftW = x - rect.x - form.marginWidth - form.highlight - trim;
-leftSize = this.computeChildSize (left, leftW, $WT.DEFAULT, false);
+leftSize = this.computeChildSize (left, leftW, -1, false);
 left.setBounds (rect.x + form.marginWidth + form.highlight, y, leftSize.x, topHeight);
 }if (top) y += topHeight + form.verticalSpacing;
 if (center != null && !center.isDisposed ()) {
 top = true;
 var trim = this.computeTrim (center);
 var w = rect.width - 2 * form.marginWidth - 2 * form.highlight - trim;
-centerSize = this.computeChildSize (center, w, $WT.DEFAULT, false);
+centerSize = this.computeChildSize (center, w, -1, false);
 center.setBounds (rect.x + rect.width - form.marginWidth - form.highlight - centerSize.x, y, centerSize.x, centerSize.y);
 y += centerSize.y + form.verticalSpacing;
 }} else {
@@ -9292,7 +15123,7 @@ var b = Math.max (form.separator, oldSeperator);
 form.redraw (form.borderLeft, t, form.getSize ().x - form.borderLeft - form.borderRight, b - t, false);
 }}, "$wt.widgets.Composite,Boolean");
 cla$$ = $_C (function () {
-this.align = $WT.LEFT;
+this.align = 16384;
 this.hIndent = $wt.custom.CLabel.INDENT;
 this.vIndent = $wt.custom.CLabel.INDENT;
 this.text = null;
@@ -9307,10 +15138,10 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.custom.CLabel, [parent, $wt.custom.CLabel.checkStyle (style)]);
-if ((style & ($WT.CENTER | $WT.RIGHT)) == 0) style |= $WT.LEFT;
-if ((style & $WT.CENTER) != 0) this.align = $WT.CENTER;
-if ((style & $WT.RIGHT) != 0) this.align = $WT.RIGHT;
-if ((style & $WT.LEFT) != 0) this.align = $WT.LEFT;
+if ((style & (16777216 | 131072)) == 0) style |= 16384;
+if ((style & 16777216) != 0) this.align = 16777216;
+if ((style & 131072) != 0) this.align = 131072;
+if ((style & 16384) != 0) this.align = 16384;
 this.addPaintListener ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.custom.CLabel$1")) {
 Clazz.pu$h ();
@@ -9350,7 +15181,7 @@ $_Z (this, arguments);
 }, $wt.custom, "CLabel$3", null, $wt.events.TraverseListener);
 $_V (cla$$, "keyTraversed", 
 function (event) {
-if (event.detail == $WT.TRAVERSE_MNEMONIC) {
+if (event.detail == 128) {
 this.callbacks["$wt.custom.CLabel"].onMnemonic (event);
 }}, "$wt.events.TraverseEvent");
 cla$$ = $_P ();
@@ -9360,22 +15191,22 @@ return $_N ($wt.custom.CLabel$3, innerThis, finalVars);
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 ($fz = function (style) {
-if ((style & $WT.BORDER) != 0) style |= $WT.SHADOW_IN;
-var mask = $WT.SHADOW_IN | $WT.SHADOW_OUT | $WT.SHADOW_NONE | $WT.LEFT_TO_RIGHT | $WT.RIGHT_TO_LEFT;
+if ((style & 2048) != 0) style |= 4;
+var mask = 4 | 8 | 32 | 33554432 | 67108864;
 style = style & mask;
-style |= $WT.NO_FOCUS;
+style |= 524288;
 var platform = $WT.getPlatform ();
 if ("carbon".equals (platform) || "gtk".equals (platform)) return style;
-return style | $WT.NO_BACKGROUND;
+return style | 262144;
 }, $fz.isPrivate = true, $fz), "Number");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var e = this.getTotalSize (this.image, this.text);
-if (wHint == $WT.DEFAULT) {
+if (wHint == -1) {
 e.x += 2 * this.hIndent;
 } else {
 e.x = wHint;
-}if (hHint == $WT.DEFAULT) {
+}if (hHint == -1) {
 e.y += 2 * this.vIndent;
 } else {
 e.y = hHint;
@@ -9434,14 +15265,14 @@ $_M (cla$$, "getStyle",
 function () {
 var style = $_U (this, $wt.custom.CLabel, "getStyle", []);
 switch (this.align) {
-case $WT.RIGHT:
-style |= $WT.RIGHT;
+case 131072:
+style |= 131072;
 break;
-case $WT.CENTER:
-style |= $WT.CENTER;
+case 16777216:
+style |= 16777216;
 break;
-case $WT.LEFT:
-style |= $WT.LEFT;
+case 16384:
+style |= 16384;
 break;
 }
 return style;
@@ -9480,7 +15311,7 @@ index++;
 if (index < children.length) {
 if (children[index].setFocus ()) {
 event.doit = true;
-event.detail = $WT.TRAVERSE_NONE;
+event.detail = 0;
 }}control = control.getParent ();
 }
 }, "$wt.events.TraverseEvent");
@@ -9518,9 +15349,9 @@ $_U (this, $wt.custom.CLabel, "setToolTipText", [this.text]);
 }} else {
 $_U (this, $wt.custom.CLabel, "setToolTipText", [this.appToolTipText]);
 }var x = rect.x + this.hIndent;
-if (this.align == $WT.CENTER) {
+if (this.align == 16777216) {
 x = Math.floor ((rect.width - extent.x) / 2);
-}if (this.align == $WT.RIGHT) {
+}if (this.align == 131072) {
 x = rect.width - this.hIndent - extent.x;
 }try {
 if (this.backgroundImage != null) {
@@ -9571,13 +15402,13 @@ gc.fillRectangle (pos, 0, rect.width - pos, rect.height);
 }gc.setForeground (oldForeground);
 }gc.setBackground (oldBackground);
 } else {
-if ((this.getStyle () & $WT.NO_BACKGROUND) != 0) {
+if ((this.getStyle () & 262144) != 0) {
 gc.setBackground (this.getBackground ());
 System.out.println ("============" + rect);
 gc.fillRectangle (rect);
 }}} catch (e) {
 if ($_O (e, $wt.SWTException)) {
-if ((this.getStyle () & $WT.NO_BACKGROUND) != 0) {
+if ((this.getStyle () & 262144) != 0) {
 gc.setBackground (this.getBackground ());
 System.out.println ("--------");
 gc.fillRectangle (rect);
@@ -9586,7 +15417,7 @@ throw e;
 }
 }
 var style = this.getStyle ();
-if ((style & $WT.SHADOW_IN) != 0 || (style & $WT.SHADOW_OUT) != 0) {
+if ((style & 4) != 0 || (style & 8) != 0) {
 this.paintBorder (gc, rect);
 }if (img != null) {
 var imageRect = img.getBounds ();
@@ -9601,10 +15432,10 @@ gc.setForeground (this.getForeground ());
 for (var i = 0; i < lines.length; i++) {
 var lineX = x;
 if (lines.length > 1) {
-if (this.align == $WT.CENTER) {
+if (this.align == 16777216) {
 var lineWidth = gc.textExtent (lines[i], $wt.custom.CLabel.DRAW_FLAGS).x;
 lineX = x + Math.max (0, Math.floor ((extent.x - lineWidth) / 2));
-}if (this.align == $WT.RIGHT) {
+}if (this.align == 131072) {
 var lineWidth = gc.textExtent (lines[i], $wt.custom.CLabel.DRAW_FLAGS).x;
 lineX = Math.max (x, rect.x + rect.width - this.hIndent - lineWidth);
 }}gc.drawText (lines[i], lineX, lineY, $wt.custom.CLabel.DRAW_FLAGS);
@@ -9619,21 +15450,19 @@ var disp = this.getDisplay ();
 var c1 = null;
 var c2 = null;
 var style = this.getStyle ();
-if ((style & $WT.SHADOW_IN) != 0) {
-c1 = disp.getSystemColor ($WT.COLOR_WIDGET_NORMAL_SHADOW);
-c2 = disp.getSystemColor ($WT.COLOR_WIDGET_HIGHLIGHT_SHADOW);
-}if ((style & $WT.SHADOW_OUT) != 0) {
-c1 = disp.getSystemColor ($WT.COLOR_WIDGET_LIGHT_SHADOW);
-c2 = disp.getSystemColor ($WT.COLOR_WIDGET_NORMAL_SHADOW);
+if ((style & 4) != 0) {
+c1 = disp.getSystemColor (18);
+c2 = disp.getSystemColor (20);
+}if ((style & 8) != 0) {
+c1 = disp.getSystemColor (19);
+c2 = disp.getSystemColor (18);
 }if (c1 != null && c2 != null) {
 gc.setLineWidth (1);
 this.drawBevelRect (gc, r.x, r.y, r.width - 1, r.height - 1, c1, c2);
 }}, $fz.isPrivate = true, $fz), "$wt.graphics.GC,$wt.graphics.Rectangle");
 $_M (cla$$, "setAlignment", 
 function (align) {
-if (align != $WT.LEFT && align != $WT.RIGHT && align != $WT.CENTER) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.align != align) {
+if (this.align != align) {
 this.align = align;
 this.redraw ();
 }}, "Number");
@@ -9656,17 +15485,11 @@ this.setBackground (colors, percents, false);
 $_M (cla$$, "setBackground", 
 function (colors, percents, vertical) {
 if (colors != null) {
-if (percents == null || percents.length != colors.length - 1) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.getDisplay ().getDepth () < 15) {
+if (this.getDisplay ().getDepth () < 15) {
 colors = [colors[colors.length - 1]];
 percents = [];
 }for (var i = 0; i < percents.length; i++) {
-if (percents[i] < 0 || percents[i] > 100) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (i > 0 && percents[i] < percents[i - 1]) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}}
+}
 }var background = this.getBackground ();
 if (this.backgroundImage == null) {
 if ((this.gradientColors != null) && (colors != null) && (this.gradientColors.length == colors.length)) {
@@ -9773,7 +15596,7 @@ $_S (cla$$,
 "GAP", 5,
 "INDENT", 3,
 "ELLIPSIS", "...");
-cla$$.DRAW_FLAGS = cla$$.prototype.DRAW_FLAGS = $WT.DRAW_MNEMONIC | $WT.DRAW_TAB | $WT.DRAW_TRANSPARENT | $WT.DRAW_DELIMITER;
+cla$$.DRAW_FLAGS = cla$$.prototype.DRAW_FLAGS = 8 | 4 | 1 | 2;
 cla$$ = $_C (function () {
 this.defaultWidth = -1;
 this.defaultHeight = -1;
@@ -9786,7 +15609,7 @@ $_Z (this, arguments);
 $_M (cla$$, "computeSize", 
 function (control, wHint, hHint, flushCache) {
 if (flushCache) this.flushCache ();
-if (wHint == $WT.DEFAULT && hHint == $WT.DEFAULT) {
+if (wHint == -1 && hHint == -1) {
 if (this.defaultWidth == -1 || this.defaultHeight == -1) {
 var size = control.computeSize (wHint, hHint, flushCache);
 this.defaultWidth = size.x;
@@ -9806,29 +15629,31 @@ this.defaultWidth = this.defaultHeight = -1;
 this.currentWidth = this.currentHeight = -1;
 });
 cla$$ = $_C (function () {
-this.left = null;
+this.$left = null;
 this.right = null;
 this.bottom = null;
 this.simple = true;
 this.curve = null;
 this.curveStart = 0;
-this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
 this.curve_width = 5;
 this.curve_indent = -2;
-this.rightWidth = $WT.DEFAULT;
-this.rightMinWidth = $WT.DEFAULT;
-this.rightMinHeight = $WT.DEFAULT;
+this.rightWidth = -1;
+this.rightMinWidth = -1;
+this.rightMinHeight = -1;
 this.resizeCursor = null;
 this.dragging = false;
 this.rightDragDisplacement = 0;
 $_Z (this, arguments);
 }, $wt.custom, "CBanner", $wt.widgets.Composite);
+$_Y (cla$$, function () {
+this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.custom.CBanner, [parent, $wt.custom.CBanner.checkStyle (style)]);
 $_U (this, $wt.custom.CBanner, "setLayout", [ new $wt.custom.CBannerLayout ()]);
 this.updateCurve (25);
-this.resizeCursor =  new $wt.graphics.Cursor (this.getDisplay (), $WT.CURSOR_SIZEWE);
+this.resizeCursor =  new $wt.graphics.Cursor (this.getDisplay (), 9);
 var listener = (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.custom.CBanner$1")) {
 Clazz.pu$h ();
@@ -9839,25 +15664,25 @@ $_Z (this, arguments);
 $_V (cla$$, "handleEvent", 
 function (e) {
 switch (e.type) {
-case $WT.Dispose:
+case 12:
 this.callbacks["$wt.custom.CBanner"].onDispose ();
 break;
-case $WT.MouseDown:
+case 3:
 this.callbacks["$wt.custom.CBanner"].onMouseDown (e.x, e.y);
 break;
-case $WT.MouseExit:
+case 7:
 this.callbacks["$wt.custom.CBanner"].onMouseExit ();
 break;
-case $WT.MouseMove:
+case 5:
 this.callbacks["$wt.custom.CBanner"].onMouseMove (e.x, e.y);
 break;
-case $WT.MouseUp:
+case 4:
 this.callbacks["$wt.custom.CBanner"].onMouseUp ();
 break;
-case $WT.Paint:
+case 9:
 this.callbacks["$wt.custom.CBanner"].onPaint (e.gc);
 break;
-case $WT.Resize:
+case 11:
 this.callbacks["$wt.custom.CBanner"].onResize ();
 break;
 }
@@ -9866,7 +15691,7 @@ cla$$ = $_P ();
 }
 return $_N ($wt.custom.CBanner$1, innerThis, finalVars);
 }) (this, null);
-var events = [$WT.Dispose, $WT.MouseDown, $WT.MouseExit, $WT.MouseMove, $WT.MouseUp, $WT.Paint, $WT.Resize];
+var events = [12, 3, 7, 5, 4, 9, 11];
 for (var i = 0; i < events.length; i++) {
 this.addListener (events[i], listener);
 }
@@ -9891,7 +15716,7 @@ return polygon;
 }, "Number,Number,Number,Number,Number,Number,Number,Number,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $WT.NONE;
+return 0;
 }, "Number");
 $_M (cla$$, "getBottom", 
 function () {
@@ -9903,7 +15728,7 @@ return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 });
 $_M (cla$$, "getLeft", 
 function () {
-return this.left;
+return this.$left;
 });
 $_M (cla$$, "getRight", 
 function () {
@@ -9916,8 +15741,8 @@ return  new $wt.graphics.Point (this.rightMinWidth, this.rightMinHeight);
 $_M (cla$$, "getRightWidth", 
 function () {
 if (this.right == null) return 0;
-if (this.rightWidth == $WT.DEFAULT) {
-var size = this.right.computeSize ($WT.DEFAULT, this.getSize ().y, false);
+if (this.rightWidth == -1) {
+var size = this.right.computeSize (-1, this.getSize ().y, false);
 return size.x;
 }return this.rightWidth;
 });
@@ -9929,7 +15754,7 @@ $_M (cla$$, "onDispose",
 function () {
 if (this.resizeCursor != null) this.resizeCursor.dispose ();
 this.resizeCursor = null;
-this.left = null;
+this.$left = null;
 this.right = null;
 });
 $_M (cla$$, "onMouseDown", 
@@ -9948,7 +15773,7 @@ if (this.dragging) {
 var size = this.getSize ();
 if (!(0 < x && x < size.x)) return ;
 this.rightWidth = Math.max (0, size.x - x - this.rightDragDisplacement);
-if (this.rightMinWidth != $WT.DEFAULT) {
+if (this.rightMinWidth != -1) {
 this.rightWidth = Math.max (this.rightMinWidth, this.rightWidth);
 }this.layout (false);
 return ;
@@ -9965,11 +15790,11 @@ $_M (cla$$, "onPaint",
 function (gc) {
 var size = this.getSize ();
 var border1 = this.getDisplay ().getSystemColor ($wt.custom.CBanner.BORDER1);
-if (this.bottom != null && (this.left != null || this.right != null)) {
+if (this.bottom != null && (this.$left != null || this.right != null)) {
 gc.setForeground (border1);
 var y = this.bottom.getBounds ().y - $wt.custom.CBanner.BORDER_STRIPE - 1;
 gc.drawLine (0, y, size.x, y);
-}if (this.left == null || this.right == null) return ;
+}if (this.$left == null || this.right == null) return ;
 var line1 =  $_A (this.curve.length + 6, 0);
 var index = 0;
 var x = this.curveStart;
@@ -10022,9 +15847,7 @@ this.updateCurve (this.getSize ().y);
 });
 $_M (cla$$, "setBottom", 
 function (control) {
-if (control != null && control.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.bottom != null && !this.bottom.isDisposed ()) {
+if (this.bottom != null && !this.bottom.isDisposed ()) {
 var size = this.bottom.getSize ();
 this.bottom.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
 }this.bottom = control;
@@ -10036,19 +15859,15 @@ return ;
 }, "$wt.widgets.Layout");
 $_M (cla$$, "setLeft", 
 function (control) {
-if (control != null && control.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.left != null && !this.left.isDisposed ()) {
-var size = this.left.getSize ();
-this.left.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
-}this.left = control;
+if (this.$left != null && !this.$left.isDisposed ()) {
+var size = this.$left.getSize ();
+this.$left.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
+}this.$left = control;
 this.layout (false);
 }, "$wt.widgets.Control");
 $_M (cla$$, "setRight", 
 function (control) {
-if (control != null && control.getParent () != this) {
-$WT.error ($WT.ERROR_INVALID_ARGUMENT);
-}if (this.right != null && !this.right.isDisposed ()) {
+if (this.right != null && !this.right.isDisposed ()) {
 var size = this.right.getSize ();
 this.right.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
 }this.right = control;
@@ -10056,13 +15875,11 @@ this.layout (false);
 }, "$wt.widgets.Control");
 $_M (cla$$, "setRightMinimumSize", 
 function (size) {
-if (size == null || size.x < $WT.DEFAULT || size.y < $WT.DEFAULT) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 this.rightMinWidth = size.x;
 this.rightMinHeight = size.y;
 }, "$wt.graphics.Point");
 $_M (cla$$, "setRightWidth", 
 function (width) {
-if (width < $WT.DEFAULT) $WT.error ($WT.ERROR_INVALID_ARGUMENT);
 this.rightWidth = width;
 this.layout (false);
 }, "Number");
@@ -10097,7 +15914,7 @@ $_S (cla$$,
 "BEZIER_RIGHT", 30,
 "BEZIER_LEFT", 30,
 "MIN_LEFT", 10);
-cla$$.BORDER1 = cla$$.prototype.BORDER1 = $WT.COLOR_WIDGET_HIGHLIGHT_SHADOW;
+cla$$.BORDER1 = cla$$.prototype.BORDER1 = 20;
 cla$$ = $_C (function () {
 $_Z (this, arguments);
 }, $wt.custom, "CBannerLayout", $wt.widgets.Layout);
@@ -10113,41 +15930,41 @@ var width = wHint;
 var bottomSize =  new $wt.graphics.Point (0, 0);
 if (bottom != null) {
 var trim = this.computeTrim (bottom);
-var w = wHint == $WT.DEFAULT ? $WT.DEFAULT : width - trim;
-bottomSize = this.computeChildSize (bottom, w, $WT.DEFAULT, flushCache);
-if (hHint != $WT.DEFAULT) {
+var w = wHint == -1 ? -1 : width - trim;
+bottomSize = this.computeChildSize (bottom, w, -1, flushCache);
+if (hHint != -1) {
 bottomSize.y = Math.min (bottomSize.y, height);
-height -= bottomSize.y + $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_STRIPE + $wt.custom.CBanner.BORDER_BOTTOM;
-}}if (showCurve && hHint != $WT.DEFAULT) {
-height -= $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_BOTTOM + 2 * $wt.custom.CBanner.BORDER_STRIPE;
+height -= bottomSize.y + 3 + 1 + 2;
+}}if (showCurve && hHint != -1) {
+height -= 3 + 2 + 2 * 1;
 }var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null) {
 var trim = this.computeTrim (right);
-var w = banner.rightWidth == $WT.DEFAULT ? $WT.DEFAULT : banner.rightWidth - trim;
-var h = banner.rightWidth == $WT.DEFAULT ? $WT.DEFAULT : height;
+var w = banner.rightWidth == -1 ? -1 : banner.rightWidth - trim;
+var h = banner.rightWidth == -1 ? -1 : height;
 rightSize = this.computeChildSize (right, w, h, flushCache);
-if (wHint != $WT.DEFAULT) {
+if (wHint != -1) {
 rightSize.x = Math.min (rightSize.x, width);
 width -= rightSize.x + banner.curve_width - 2 * banner.curve_indent;
-width = Math.max (width, $wt.custom.CBanner.MIN_LEFT);
+width = Math.max (width, 10);
 }}var leftSize =  new $wt.graphics.Point (0, 0);
 if (left != null) {
 var trim = this.computeTrim (left);
-var w = wHint == $WT.DEFAULT ? $WT.DEFAULT : width - trim;
-leftSize = this.computeChildSize (left, w, $WT.DEFAULT, flushCache);
+var w = wHint == -1 ? -1 : width - trim;
+leftSize = this.computeChildSize (left, w, -1, flushCache);
 }width = leftSize.x + rightSize.x;
 height = bottomSize.y;
 if (bottom != null) {
-height += $wt.custom.CBanner.BORDER_STRIPE + 2;
+height += 1 + 2;
 }if (left != null) {
 height += right == null ? leftSize.y : Math.max (leftSize.y, banner.rightMinHeight);
 } else {
 height += rightSize.y;
 }if (showCurve) {
 width += banner.curve_width - 2 * banner.curve_indent;
-height += $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_BOTTOM + 2 * $wt.custom.CBanner.BORDER_STRIPE;
-}if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+height += 3 + 2 + 2 * 1;
+}if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
 }, "$wt.widgets.Composite,Number,Number,Boolean");
 $_M (cla$$, "computeChildSize", 
@@ -10185,10 +16002,10 @@ var bottomSize =  new $wt.graphics.Point (0, 0);
 if (bottom != null) {
 var trim = this.computeTrim (bottom);
 var w = width - trim;
-bottomSize = this.computeChildSize (bottom, w, $WT.DEFAULT, flushCache);
+bottomSize = this.computeChildSize (bottom, w, -1, flushCache);
 bottomSize.y = Math.min (bottomSize.y, height);
-height -= bottomSize.y + $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_BOTTOM + $wt.custom.CBanner.BORDER_STRIPE;
-}if (showCurve) height -= $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_BOTTOM + 2 * $wt.custom.CBanner.BORDER_STRIPE;
+height -= bottomSize.y + 3 + 2 + 1;
+}if (showCurve) height -= 3 + 2 + 2 * 1;
 height = Math.max (0, height);
 var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null) {
@@ -10200,16 +16017,16 @@ trimX = rect.width;
 trimY = rect.height;
 } else {
 trimX = trimY = right.getBorderWidth () * 2;
-}var rightW = banner.rightWidth == $WT.DEFAULT ? $WT.DEFAULT : banner.rightWidth - trimX;
-var rightH = banner.rightWidth == $WT.DEFAULT ? $WT.DEFAULT : height - trimY;
+}var rightW = banner.rightWidth == -1 ? -1 : banner.rightWidth - trimX;
+var rightH = banner.rightWidth == -1 ? -1 : height - trimY;
 rightSize = this.computeChildSize (right, rightW, rightH, flushCache);
 rightSize.x = Math.min (rightSize.x, width);
 width -= rightSize.x + banner.curve_width - 2 * banner.curve_indent;
-width = Math.max (width, $wt.custom.CBanner.MIN_LEFT);
+width = Math.max (width, 10);
 }var leftSize =  new $wt.graphics.Point (0, 0);
 if (left != null) {
 var trim = this.computeTrim (left);
-leftSize = this.computeChildSize (left, width - trim, $WT.DEFAULT, flushCache);
+leftSize = this.computeChildSize (left, width - trim, -1, flushCache);
 }var x = 0;
 var y = 0;
 var oldStart = banner.curveStart;
@@ -10218,7 +16035,7 @@ var rightRect = null;
 var bottomRect = null;
 if (bottom != null) {
 bottomRect =  new $wt.graphics.Rectangle (x, y + size.y - bottomSize.y, bottomSize.x, bottomSize.y);
-}if (showCurve) y += $wt.custom.CBanner.BORDER_TOP + $wt.custom.CBanner.BORDER_STRIPE;
+}if (showCurve) y += 3 + 1;
 if (left != null) {
 leftRect =  new $wt.graphics.Rectangle (x, y, leftSize.x, leftSize.y);
 banner.curveStart = x + leftSize.x - banner.curve_indent;
@@ -10226,9 +16043,9 @@ x += leftSize.x + banner.curve_width - 2 * banner.curve_indent;
 }if (right != null) {
 rightRect =  new $wt.graphics.Rectangle (x, y, rightSize.x, rightSize.y);
 }if (banner.curveStart < oldStart) {
-banner.redraw (banner.curveStart - $wt.custom.CBanner.CURVE_TAIL, 0, oldStart + banner.curve_width - banner.curveStart + $wt.custom.CBanner.CURVE_TAIL + 5, size.y, false);
+banner.redraw (banner.curveStart - 200, 0, oldStart + banner.curve_width - banner.curveStart + 200 + 5, size.y, false);
 }if (banner.curveStart > oldStart) {
-banner.redraw (oldStart - $wt.custom.CBanner.CURVE_TAIL, 0, banner.curveStart + banner.curve_width - oldStart + $wt.custom.CBanner.CURVE_TAIL + 5, size.y, false);
+banner.redraw (oldStart - 200, 0, banner.curveStart + banner.curve_width - oldStart + 200 + 5, size.y, false);
 }banner.update ();
 banner.curveRect =  new $wt.graphics.Rectangle (banner.curveStart, 0, banner.curve_width, size.y);
 if (bottomRect != null) bottom.setBounds (bottomRect);
@@ -10240,69 +16057,34 @@ this.lastFocusId = 0;
 this.items = null;
 this.ignoreResize = false;
 this.ignoreMouse = false;
+this.imageList = null;
+this.disabledImageList = null;
+this.hotImageList = null;
 $_Z (this, arguments);
 }, $wt.widgets, "ToolBar", $wt.widgets.Composite);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.ToolBar, [parent, $wt.widgets.ToolBar.checkStyle (style)]);
-if ((style & $WT.VERTICAL) != 0) {
-this.style |= $WT.VERTICAL;
-} else {
-this.style |= $WT.HORIZONTAL;
-}}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-if ((style & $WT.FLAT) == 0) style |= $WT.NO_FOCUS;
-if ((style & $WT.VERTICAL) != 0) style &= ($t$ = ~ $WT.WRAP, $WT.prototype.WRAP = $WT.WRAP, $t$);
-return style & ~($WT.H_SCROLL | $WT.V_SCROLL);
+if ((style & 8388608) == 0) style |= 524288;
+if ((style & 512) != 0) style &= ($t$ = ~ $WT.WRAP, $WT.prototype.WRAP = $WT.WRAP, $t$);
+return style & ~(256 | 512);
 }, "Number");
-$_V (cla$$, "createWidget", 
+$_V (cla$$, "checkSubclass", 
 function () {
-this.items =  new Array (0);
-this.lastFocusId = -1;
-this.register ();
-this.handle = document.createElement ("DIV");
-if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.className = "tool-bar-default";
-if ((this.style & $WT.BORDER) != 0) {
-this.handle.className += " tool-bar-border";
-}});
-$_M (cla$$, "createItem", 
-function (item, index) {
-var count = this.items.length;
-if (!(0 <= index && index <= count)) this.error ($WT.ERROR_INVALID_RANGE);
-var id = this.items.length;
-this.items[item.id = id] = item;
-item.handle = document.createElement ("DIV");
-item.handle.className = "tool-item-default";
-if (index == count) {
-this.handle.appendChild (item.handle);
-} else {
-this.handle.insertBefore (item.handle, this.items[index].handle);
-}if ((this.style & $WT.VERTICAL) != 0) this.setRowCount (count + 1);
-this.layoutItems ();
-}, "$wt.widgets.ToolItem,Number");
-$_M (cla$$, "setRowCount", 
-function (count) {
-if ((this.style & $WT.VERTICAL) != 0) {
-}}, "Number");
-$_M (cla$$, "computeTrim", 
-function (x, y, width, height) {
-var trim = $_U (this, $wt.widgets.ToolBar, "computeTrim", [x, y, width, height]);
-trim.height += 2;
-return trim;
-}, "Number,Number,Number,Number");
+});
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var width = 0;
 var height = 0;
-if ((this.style & $WT.VERTICAL) != 0) {
+if ((this.style & 512) != 0) {
 var count = this.items.length;
 for (var i = 0; i < count; i++) {
 var rect = this.items[i].getBounds ();
 height += rect.height;
-if ((this.items[i].style & $WT.SEPARATOR) != 0) {
+if ((this.items[i].style & 2) != 0) {
 width = Math.max (width, $wt.widgets.ToolBar.DEFAULT_WIDTH);
 } else {
 width = Math.max (width, rect.width);
@@ -10317,26 +16099,108 @@ width += rect.width;
 }
 }if (width == 0) width = $wt.widgets.ToolBar.DEFAULT_WIDTH;
 if (height == 0) height = $wt.widgets.ToolBar.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 var trim = this.computeTrim (0, 0, width, height);
 width = trim.width;
 height = trim.height;
 return  new $wt.graphics.Point (width, height);
 }, "Number,Number,Boolean");
-$_M (cla$$, "getItemCount", 
+$_M (cla$$, "computeTrim", 
+function (x, y, width, height) {
+var trim = $_U (this, $wt.widgets.ToolBar, "computeTrim", [x, y, width, height]);
+trim.height += 2;
+return trim;
+}, "Number,Number,Number,Number");
+$_M (cla$$, "createHandle", 
 function () {
-return this.items.length;
+$_U (this, $wt.widgets.ToolBar, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.items =  new Array (0);
+this.lastFocusId = -1;
+this.handle = document.createElement ("DIV");
+if (this.parent.handle != null) {
+this.parent.handle.appendChild (this.handle);
+}this.handle.className = "tool-bar-default";
+if ((this.style & 2048) != 0) {
+this.handle.className += " tool-bar-border";
+}});
+$_M (cla$$, "createItem", 
+function (item, index) {
+var count = this.items.length;
+var id = this.items.length;
+this.items[item.id = id] = item;
+item.handle = document.createElement ("DIV");
+item.handle.className = "tool-item-default";
+this.handle.appendChild (item.handle);
+if ((this.style & 512) != 0) this.setRowCount (count + 1);
+this.layoutItems ();
+}, "$wt.widgets.ToolItem,Number");
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.ToolBar, "createWidget", []);
+this.items =  new Array (0);
+this.lastFocusId = -1;
+});
+$_M (cla$$, "destroyItem", 
+function (item) {
+this.layoutItems ();
+}, "$wt.widgets.ToolItem");
+$_M (cla$$, "enableWidget", 
+function (enabled) {
+$_U (this, $wt.widgets.ToolBar, "enableWidget", [enabled]);
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null) {
+if ((item.style & (32 | 16)) != 0) {
+item.updateImages (enabled && item.getEnabled ());
+}}}
+}, "Boolean");
+$_M (cla$$, "getDisabledImageList", 
+function () {
+return this.disabledImageList;
+});
+$_M (cla$$, "getHotImageList", 
+function () {
+return this.hotImageList;
+});
+$_M (cla$$, "getImageList", 
+function () {
+return this.imageList;
 });
 $_M (cla$$, "getItem", 
 function (index) {
 var count = this.items.length;
-if (!(0 <= index && index < count)) this.error ($WT.ERROR_INVALID_RANGE);
 return this.items[index];
 }, "Number");
+$_M (cla$$, "getItem", 
+function (point) {
+var items = this.getItems ();
+for (var i = 0; i < items.length; i++) {
+var rect = items[i].getBounds ();
+if (rect.contains (point)) return items[i];
+}
+return null;
+}, "$wt.graphics.Point");
+$_M (cla$$, "getItemCount", 
+function () {
+return this.items.length;
+});
+$_M (cla$$, "getItems", 
+function () {
+return this.items;
+});
+$_M (cla$$, "getRowCount", 
+function () {
+return 1;
+});
+$_M (cla$$, "indexOf", 
+function (item) {
+return 0;
+}, "$wt.widgets.ToolItem");
 $_M (cla$$, "layoutItems", 
 function () {
-if ((this.style & $WT.WRAP) != 0) {
+if ((this.style & 64) != 0) {
 try {
 this.handle.style.whiteSpace = "wrap";
 } catch (e) {
@@ -10345,11 +16209,103 @@ if ($_O (e, Exception)) {
 throw e;
 }
 }
-}if ((this.style & $WT.VERTICAL) != 0) {
+}if ((this.style & 512) != 0) {
 }for (var i = 0; i < this.items.length; i++) {
 var item = this.items[i];
 if (item != null) item.resizeControl ();
 }
+});
+$_V (cla$$, "mnemonicHit", 
+function (ch) {
+return true;
+}, "Number");
+$_V (cla$$, "mnemonicMatch", 
+function (ch) {
+return false;
+}, "Number");
+$_M (cla$$, "releaseWidget", 
+function () {
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null && !item.isDisposed ()) {
+item.releaseImages ();
+item.releaseResources ();
+}}
+this.items = null;
+this.imageList = this.hotImageList = this.disabledImageList = null;
+$_U (this, $wt.widgets.ToolBar, "releaseWidget", []);
+});
+$_M (cla$$, "removeControl", 
+function (control) {
+$_U (this, $wt.widgets.ToolBar, "removeControl", [control]);
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null && item.control == control) {
+item.setControl (null);
+}}
+}, "$wt.widgets.Control");
+$_M (cla$$, "setBounds", 
+function (x, y, width, height, flags) {
+if (this.parent.lpwp != null) {
+}$_U (this, $wt.widgets.ToolBar, "setBounds", [x, y, width, height, flags]);
+}, "Number,Number,Number,Number,Number");
+$_M (cla$$, "setDefaultFont", 
+function () {
+$_U (this, $wt.widgets.ToolBar, "setDefaultFont", []);
+});
+$_M (cla$$, "setDisabledImageList", 
+function (imageList) {
+if (this.disabledImageList == imageList) return ;
+var hImageList = 0;
+if ((this.disabledImageList = imageList) != null) {
+hImageList = this.disabledImageList.getHandle ();
+}}, "$wt.widgets.ImageList");
+$_M (cla$$, "setFont", 
+function (font) {
+$_U (this, $wt.widgets.ToolBar, "setFont", [font]);
+var index = 0;
+var mask = 8 | 32 | 16 | 4;
+while (index < this.items.length) {
+var item = this.items[index];
+if (item != null && (item.style & mask) != 0) break;
+index++;
+}
+if (index == this.items.length) {
+}this.layoutItems ();
+}, "$wt.graphics.Font");
+$_M (cla$$, "setHotImageList", 
+function (imageList) {
+if (this.hotImageList == imageList) return ;
+var hImageList = 0;
+if ((this.hotImageList = imageList) != null) {
+hImageList = this.hotImageList.getHandle ();
+}}, "$wt.widgets.ImageList");
+$_M (cla$$, "setImageList", 
+function (imageList) {
+if (this.imageList == imageList) return ;
+var hImageList = 0;
+if ((this.imageList = imageList) != null) {
+hImageList = imageList.getHandle ();
+}}, "$wt.widgets.ImageList");
+$_M (cla$$, "setParent", 
+function (parent) {
+if (!$_U (this, $wt.widgets.ToolBar, "setParent", [parent])) return false;
+return true;
+}, "$wt.widgets.Composite");
+$_M (cla$$, "setRowCount", 
+function (count) {
+}, "Number");
+$_M (cla$$, "setTabItemFocus", 
+function () {
+var index = 0;
+while (index < this.items.length) {
+var item = this.items[index];
+if (item != null && (item.style & 2) == 0) {
+if (item.getEnabled ()) break;
+}index++;
+}
+if (index == this.items.length) return false;
+return $_U (this, $wt.widgets.ToolBar, "setTabItemFocus", []);
 });
 $_S (cla$$,
 "DEFAULT_WIDTH", 24,
@@ -10365,21 +16321,37 @@ this.id = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "ToolItem", $wt.widgets.Item);
 $_K (cla$$, 
-function (parent, style, index) {
-$_R (this, $wt.widgets.ToolItem, [parent, $wt.widgets.ToolItem.checkStyle (style)]);
-this.parent = parent;
-parent.createItem (this, index);
-}, "$wt.widgets.ToolBar,Number,Number");
-$_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.ToolItem, [parent, $wt.widgets.ToolItem.checkStyle (style)]);
 this.parent = parent;
 parent.createItem (this, parent.getItemCount ());
 }, "$wt.widgets.ToolBar,Number");
+$_K (cla$$, 
+function (parent, style, index) {
+$_R (this, $wt.widgets.ToolItem, [parent, $wt.widgets.ToolItem.checkStyle (style)]);
+this.parent = parent;
+parent.createItem (this, index);
+}, "$wt.widgets.ToolBar,Number,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return $wt.widgets.Widget.checkBits (style, $WT.PUSH, $WT.CHECK, $WT.RADIO, $WT.SEPARATOR, $WT.DROP_DOWN, 0);
+return $wt.widgets.Widget.checkBits (style, 8, 32, 16, 2, 4, 0);
 }, "Number");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "click", 
+function (dropDown) {
+}, "Boolean");
+$_M (cla$$, "createDisabledImage", 
+function (image, color) {
+return  new $wt.graphics.Image (this.display, image, 1);
+}, "$wt.graphics.Image,$wt.graphics.Color");
 $_M (cla$$, "getBounds", 
 function () {
 var x = 0;
@@ -10396,28 +16368,77 @@ var width = this.handle.style.width;
 if (width != null && width.length != 0) {
 w = Integer.parseInt (width);
 } else if (this.text != null && this.text.length != 0) {
-w = UIStringUtil.calculatePlainStringLineWidth (this.text);
+w = $wt.internal.browser.OS.getStringPlainWidth (this.text);
 }var height = this.handle.style.height;
 if (height != null && height.length != 0) {
 h = Integer.parseInt (height);
 } else if (this.text != null && this.text.length != 0) {
-h = UIStringUtil.calculatePlainStringLineHeight (this.text);
+h = $wt.internal.browser.OS.getStringPlainHeight (this.text);
 }return  new $wt.graphics.Rectangle (x, y, w + 6, h + 6);
+});
+$_M (cla$$, "getControl", 
+function () {
+return this.control;
+});
+$_M (cla$$, "getDisabledImage", 
+function () {
+return this.disabledImage;
+});
+$_M (cla$$, "getEnabled", 
+function () {
+if ((this.style & 2) != 0) {
+return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+}return true;
+});
+$_M (cla$$, "getHotImage", 
+function () {
+return this.hotImage;
 });
 $_M (cla$$, "getParent", 
 function () {
 return this.parent;
 });
-$_M (cla$$, "setControl", 
-function (control) {
-if (control != null) {
-if (control.isDisposed ()) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (control.parent != this.parent) this.error ($WT.ERROR_INVALID_PARENT);
-}if ((this.style & $WT.SEPARATOR) == 0) return ;
-this.control = control;
-if ((this.parent.style & ($WT.WRAP | $WT.VERTICAL)) != 0) {
-}this.resizeControl ();
-}, "$wt.widgets.Control");
+$_M (cla$$, "getSelection", 
+function () {
+if ((this.style & (32 | 16)) == 0) return false;
+return true;
+});
+$_M (cla$$, "getToolTipText", 
+function () {
+return this.toolTipText;
+});
+$_M (cla$$, "getWidth", 
+function () {
+return 24;
+});
+$_M (cla$$, "isEnabled", 
+function () {
+return this.getEnabled () && this.parent.isEnabled ();
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.ToolItem, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.ToolItem, "releaseWidget", []);
+this.parent = null;
+this.control = null;
+this.toolTipText = null;
+this.disabledImage = this.hotImage = null;
+if (this.disabledImage2 != null) this.disabledImage2.dispose ();
+this.disabledImage2 = null;
+});
+$_M (cla$$, "releaseImages", 
+function () {
+});
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
 $_M (cla$$, "resizeControl", 
 function () {
 if (this.control != null && !this.control.isDisposed ()) {
@@ -10428,10 +16449,68 @@ rect.x = itemRect.x + Math.floor ((itemRect.width - rect.width) / 2);
 rect.y = itemRect.y + Math.floor ((itemRect.height - rect.height) / 2);
 this.control.setLocation (rect.x, rect.y);
 }});
+$_M (cla$$, "selectRadio", 
+function () {
+var index = 0;
+var items = this.parent.getItems ();
+while (index < items.length && items[index] != this) index++;
+
+var i = index - 1;
+while (i >= 0 && items[i].setRadioSelection (false)) --i;
+
+var j = index + 1;
+while (j < items.length && items[j].setRadioSelection (false)) j++;
+
+this.setSelection (true);
+});
+$_M (cla$$, "setControl", 
+function (control) {
+if (control != null) {
+}if ((this.style & 2) == 0) return ;
+this.control = control;
+if ((this.parent.style & (64 | 512)) != 0) {
+}this.resizeControl ();
+}, "$wt.widgets.Control");
+$_M (cla$$, "setEnabled", 
+function (enabled) {
+if (this.image != null) this.updateImages (enabled && this.parent.getEnabled ());
+}, "Boolean");
+$_M (cla$$, "setDisabledImage", 
+function (image) {
+if ((this.style & 2) != 0) return ;
+this.disabledImage = image;
+this.updateImages (this.getEnabled () && this.parent.getEnabled ());
+}, "$wt.graphics.Image");
+$_M (cla$$, "setHotImage", 
+function (image) {
+if ((this.style & 2) != 0) return ;
+this.hotImage = image;
+this.updateImages (this.getEnabled () && this.parent.getEnabled ());
+}, "$wt.graphics.Image");
+$_M (cla$$, "setImage", 
+function (image) {
+if ((this.style & 2) != 0) return ;
+$_U (this, $wt.widgets.ToolItem, "setImage", [image]);
+this.updateImages (this.getEnabled () && this.parent.getEnabled ());
+}, "$wt.graphics.Image");
+$_M (cla$$, "setRadioSelection", 
+function (value) {
+if ((this.style & 16) == 0) return false;
+if (this.getSelection () != value) {
+this.setSelection (value);
+this.postEvent (13);
+}return true;
+}, "Boolean");
+$_M (cla$$, "setSelection", 
+function (selected) {
+if ((this.style & (32 | 16)) == 0) return ;
+if ((this.style & (32 | 16)) != 0) {
+if (!this.getEnabled () || !this.parent.getEnabled ()) {
+this.updateImages (false);
+}}}, "Boolean");
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if ((this.style & $WT.SEPARATOR) != 0) return ;
+if ((this.style & 2) != 0) return ;
 $_U (this, $wt.widgets.ToolItem, "setText", [string]);
 if (this.handle != null) {
 this.handle.appendChild (document.createTextNode (string));
@@ -10441,12 +16520,19 @@ $_M (cla$$, "setToolTipText",
 function (string) {
 this.toolTipText = string;
 }, "String");
-$_M (cla$$, "getToolTipText", 
-function () {
-return this.toolTipText;
-});
+$_M (cla$$, "setWidth", 
+function (width) {
+if ((this.style & 2) == 0) return ;
+if (width < 0) return ;
+this.parent.layoutItems ();
+}, "Number");
+$_M (cla$$, "updateImages", 
+function (enabled) {
+this.parent.layoutItems ();
+}, "Boolean");
 cla$$ = $_C (function () {
 this.items = null;
+this.itemHandles = null;
 this.originalItems = null;
 this.locked = false;
 this.ignoreResize = false;
@@ -10458,61 +16544,207 @@ $_R (this, $wt.widgets.CoolBar, [parent, $wt.widgets.CoolBar.checkStyle (style)]
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= $WT.NO_FOCUS;
-return style & ~($WT.H_SCROLL | $WT.V_SCROLL);
+style |= 524288;
+return style & ~(256 | 512);
+}, "Number");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint, changed) {
+var width = 0;
+var height = 0;
+var border = this.getBorderWidth ();
+var newWidth = wHint == -1 ? 0x3FFF : wHint + (border * 2);
+var newHeight = hHint == -1 ? 0x3FFF : hHint + (border * 2);
+if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
+if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
+height += border * 2;
+width += border * 2;
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number,Boolean");
+$_M (cla$$, "createHandle", 
+function () {
+$_U (this, $wt.widgets.CoolBar, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.handle = document.createElement ("DIV");
+if (this.parent.handle != null) {
+this.parent.handle.appendChild (this.handle);
+}this.handle.className = "cool-bar-default";
+if ((this.style & 2048) != 0) {
+this.handle.className += " cool-bar-border";
+}});
+$_M (cla$$, "createItem", 
+function (item, index) {
+var count = this.items.length;
+var id = this.items.length;
+this.items[item.id = id] = item;
+this.itemHandles[id] = document.createElement ("DIV");
+var handle = this.itemHandles[id];
+handle.className = "cool-item-default";
+if (index == count) {
+handle.appendChild (handle);
+} else {
+handle.insertBefore (handle, this.itemHandles[index]);
+}}, "$wt.widgets.CoolItem,Number");
+$_M (cla$$, "createWidget", 
+function () {
+$_U (this, $wt.widgets.CoolBar, "createWidget", []);
+this.items =  new Array (4);
+this.originalItems =  new Array (0);
+this.items =  new Array (0);
+});
+$_M (cla$$, "destroyItem", 
+function (item) {
+}, "$wt.widgets.CoolItem");
+$_M (cla$$, "getMargin", 
+function (index) {
+var margin = 0;
+if ((this.style & 8388608) != 0) {
+margin += 8 + 4;
+} else {
+margin += 8 + 8;
+}return margin;
+}, "Number");
+$_V (cla$$, "findThemeControl", 
+function () {
+return null;
+});
+$_M (cla$$, "getItem", 
+function (index) {
+var count = this.items.length;
+return this.items[index];
 }, "Number");
 $_M (cla$$, "getItemCount", 
 function () {
 return this.items.length;
 });
+$_M (cla$$, "getItemOrder", 
+function () {
+return  $_A (0, 0);
+});
+$_M (cla$$, "getItems", 
+function () {
+return this.items;
+});
+$_M (cla$$, "getItemSizes", 
+function () {
+return null;
+});
+$_M (cla$$, "getLastIndexOfRow", 
+function (index) {
+return 0;
+}, "Number");
+$_M (cla$$, "isLastItemOfRow", 
+function (index) {
+return false;
+}, "Number");
+$_M (cla$$, "getLocked", 
+function () {
+return this.locked;
+});
+$_M (cla$$, "getWrapIndices", 
+function () {
+var items = this.getItems ();
+var indices =  $_A (items.length, 0);
+var count = 0;
+for (var i = 0; i < items.length; i++) {
+if (items[i].getWrap ()) indices[count++] = i;
+}
+var result =  $_A (count, 0);
+System.arraycopy (indices, 0, result, 0, count);
+return result;
+});
 $_M (cla$$, "indexOf", 
 function (item) {
-if (item == null) this.error ($WT.ERROR_NULL_ARGUMENT);
 for (var i = 0; i < this.items.length; i++) {
 if (item == this.items[i]) {
 return i;
 }}
 return -1;
 }, "$wt.widgets.CoolItem");
-$_M (cla$$, "getItem", 
+$_M (cla$$, "resizeToPreferredWidth", 
 function (index) {
-var count = this.items.length;
-if (!(0 <= index && index < count)) this.error ($WT.ERROR_INVALID_RANGE);
-return this.items[index];
 }, "Number");
-$_M (cla$$, "createItem", 
-function (item, index) {
-var count = this.items.length;
-if (!(0 <= index && index <= count)) this.error ($WT.ERROR_INVALID_RANGE);
-var id = this.items.length;
-this.items[item.id = id] = item;
-item.handle = document.createElement ("DIV");
-item.handle.className = "cool-item-default";
-if (index == count) {
-this.handle.appendChild (item.handle);
-} else {
-this.handle.insertBefore (item.handle, this.items[index].handle);
-}}, "$wt.widgets.CoolItem,Number");
-$_V (cla$$, "createWidget", 
+$_M (cla$$, "resizeToMaximumWidth", 
+function (index) {
+}, "Number");
+$_M (cla$$, "releaseWidget", 
 function () {
-this.items =  new Array (0);
-this.register ();
-this.handle = document.createElement ("DIV");
-if (this.parent.handle != null) {
-this.parent.handle.appendChild (this.handle);
-}this.handle.className = "cool-bar-default";
-if ((this.style & $WT.BORDER) != 0) {
-this.handle.className += " cool-bar-border";
-}});
-$_M (cla$$, "getMargin", 
-function (index) {
-var margin = 0;
-if ((this.style & $WT.FLAT) != 0) {
-margin += 8 + 4;
-} else {
-margin += 8 + 8;
-}return margin;
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null && !item.isDisposed ()) {
+item.releaseResources ();
+}}
+this.items = null;
+$_U (this, $wt.widgets.CoolBar, "releaseWidget", []);
+});
+$_M (cla$$, "removeControl", 
+function (control) {
+$_U (this, $wt.widgets.CoolBar, "removeControl", [control]);
+for (var i = 0; i < this.items.length; i++) {
+var item = this.items[i];
+if (item != null && item.control == control) {
+item.setControl (null);
+}}
+}, "$wt.widgets.Control");
+$_M (cla$$, "setBackgroundPixel", 
+function (pixel) {
+if (this.background == pixel) return ;
+this.background = pixel;
 }, "Number");
+$_M (cla$$, "setForegroundPixel", 
+function (pixel) {
+if (this.foreground == pixel) return ;
+this.foreground = pixel;
+}, "Number");
+$_M (cla$$, "setItemColors", 
+function (foreColor, backColor) {
+}, "Number,Number");
+$_M (cla$$, "setItemLayout", 
+function (itemOrder, wrapIndices, sizes) {
+this.setRedraw (false);
+this.setItemOrder (itemOrder);
+this.setWrapIndices (wrapIndices);
+this.setItemSizes (sizes);
+this.setRedraw (true);
+}, "Array,Array,Array");
+$_M (cla$$, "setItemOrder", 
+function (itemOrder) {
+}, "Array");
+$_M (cla$$, "setItemSizes", 
+function (sizes) {
+}, "Array");
+$_M (cla$$, "setLocked", 
+function (locked) {
+this.locked = locked;
+}, "Boolean");
+$_M (cla$$, "setWrapIndices", 
+function (indices) {
+if (indices == null) indices =  $_A (0, 0);
+var count = this.getItemCount ();
+for (var i = 0; i < indices.length; i++) {
+}
+this.setRedraw (false);
+var items = this.getItems ();
+for (var i = 0; i < items.length; i++) {
+var item = items[i];
+if (item.getWrap ()) {
+this.resizeToPreferredWidth (i - 1);
+item.setWrap (false);
+}}
+this.resizeToMaximumWidth (count - 1);
+for (var i = 0; i < indices.length; i++) {
+var index = indices[i];
+if (0 <= index && index < items.length) {
+var item = items[index];
+item.setWrap (true);
+this.resizeToMaximumWidth (index - 1);
+}}
+this.setRedraw (true);
+}, "Array");
 $_S (cla$$,
 "SEPARATOR_WIDTH", 2,
 "MAX_WIDTH", 0x7FFF);
@@ -10525,29 +16757,71 @@ this.minimum = false;
 $_Z (this, arguments);
 }, $wt.widgets, "CoolItem", $wt.widgets.Item);
 $_K (cla$$, 
-function (parent, style, index) {
-$_R (this, $wt.widgets.CoolItem, [parent, style]);
-this.parent = parent;
-parent.createItem (this, index);
-}, "$wt.widgets.CoolBar,Number,Number");
-$_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.CoolItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, parent.getItemCount ());
 }, "$wt.widgets.CoolBar,Number");
-$_M (cla$$, "setText", 
-function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if ((this.style & $WT.SEPARATOR) != 0) return ;
-$_U (this, $wt.widgets.CoolItem, "setText", [string]);
-if (this.handle != null) {
-this.handle.appendChild (document.createTextNode (string));
-}}, "String");
+$_K (cla$$, 
+function (parent, style, index) {
+$_R (this, $wt.widgets.CoolItem, [parent, style]);
+this.parent = parent;
+parent.createItem (this, index);
+}, "$wt.widgets.CoolBar,Number,Number");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
+$_M (cla$$, "computeSize", 
+function (wHint, hHint) {
+var index = this.parent.indexOf (this);
+if (index == -1) return  new $wt.graphics.Point (0, 0);
+var width = wHint;
+var height = hHint;
+if (wHint == -1) width = 32;
+if (hHint == -1) height = 32;
+width += this.parent.getMargin (index);
+return  new $wt.graphics.Point (width, height);
+}, "Number,Number");
+$_M (cla$$, "getBounds", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getClientArea", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+return  new $wt.graphics.Rectangle (0, 0, 0, 0);
+});
+$_M (cla$$, "getControl", 
+function () {
+return this.control;
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.CoolItem, "releaseChild", []);
+this.parent.destroyItem (this);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.CoolItem, "releaseWidget", []);
+this.control = null;
+this.parent = null;
+});
 $_M (cla$$, "setControl", 
 function (control) {
 if (control != null) {
-if (control.parent != this.parent) this.error ($WT.ERROR_INVALID_PARENT);
 }var index = this.parent.indexOf (this);
 if (index == -1) return ;
 if (this.control != null && this.control.isDisposed ()) {
@@ -10556,11 +16830,12 @@ this.control = null;
 var newControl = control;
 this.control = newControl;
 }, "$wt.widgets.Control");
-$_M (cla$$, "setPreferredSize", 
-function (size) {
-if (size == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-this.setPreferredSize (size.x, size.y);
-}, "$wt.graphics.Point");
+$_M (cla$$, "getPreferredSize", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1) return  new $wt.graphics.Point (0, 0);
+return  new $wt.graphics.Point (0, 0);
+});
 $_M (cla$$, "setPreferredSize", 
 function (width, height) {
 var index = this.parent.indexOf (this);
@@ -10568,28 +16843,232 @@ if (index == -1) return ;
 width = Math.max (0, width);
 height = Math.max (0, height);
 this.ideal = true;
-this.handle.style.width = width + "px";
-this.handle.style.height = height + "px";
+var handle = this.parent.itemHandles[this.parent.indexOf (this)];
+handle.style.width = width + "px";
+handle.style.height = height + "px";
 }, "Number,Number");
-$_M (cla$$, "computeSize", 
-function (wHint, hHint) {
+$_M (cla$$, "setPreferredSize", 
+function (size) {
+this.setPreferredSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setText", 
+function (string) {
+if ((this.style & 2) != 0) return ;
+$_U (this, $wt.widgets.CoolItem, "setText", [string]);
+var handle = this.parent.itemHandles[this.parent.indexOf (this)];
+if (handle != null) {
+handle.appendChild (document.createTextNode (string));
+}}, "String");
+$_M (cla$$, "getSize", 
+function () {
+var index = this.parent.indexOf (this);
+if (index == -1)  new $wt.graphics.Point (0, 0);
+return  new $wt.graphics.Point (0, 0);
+});
+$_M (cla$$, "setSize", 
+function (width, height) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+width = Math.max (0, width);
+height = Math.max (0, height);
+}, "Number,Number");
+$_M (cla$$, "setSize", 
+function (size) {
+this.setSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "getMinimumSize", 
+function () {
 var index = this.parent.indexOf (this);
 if (index == -1) return  new $wt.graphics.Point (0, 0);
-var width = wHint;
-var height = hHint;
-if (wHint == $WT.DEFAULT) width = 32;
-if (hHint == $WT.DEFAULT) height = 32;
-width += this.parent.getMargin (index);
-return  new $wt.graphics.Point (width, height);
+return  new $wt.graphics.Point (32, 16);
+});
+$_M (cla$$, "setMinimumSize", 
+function (width, height) {
+var index = this.parent.indexOf (this);
+if (index == -1) return ;
+width = Math.max (0, width);
+height = Math.max (0, height);
+this.minimum = true;
 }, "Number,Number");
+$_M (cla$$, "setMinimumSize", 
+function (size) {
+this.setMinimumSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "getWrap", 
+function () {
+var index = this.parent.indexOf (this);
+return false;
+});
+$_M (cla$$, "setWrap", 
+function (wrap) {
+var index = this.parent.indexOf (this);
+}, "Boolean");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
 cla$$ = $_C (function () {
+this.parent = null;
+this.x = 0;
+this.y = 0;
+this.width = 0;
+this.height = 0;
+this.moved = false;
+this.resized = false;
+this.$isVisible = false;
+this.image = null;
+this.font = null;
 $_Z (this, arguments);
-}, $wt.widgets, "Caret", $wt.widgets.Control);
+}, $wt.widgets, "Caret", $wt.widgets.Widget);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Caret, [parent, style]);
-}, "$wt.widgets.Composite,Number");
+this.parent = parent;
+this.createWidget ();
+}, "$wt.widgets.Canvas,Number");
+$_M (cla$$, "createWidget", 
+function () {
+this.$isVisible = true;
+if (this.parent.getCaret () == null) {
+this.parent.setCaret (this);
+}});
+$_M (cla$$, "getBounds", 
+function () {
+if (this.image != null) {
+var rect = this.image.getBounds ();
+return  new $wt.graphics.Rectangle (this.x, this.y, rect.width, rect.height);
+}return  new $wt.graphics.Rectangle (this.x, this.y, this.width, this.height);
+});
+$_M (cla$$, "getFont", 
+function () {
+if (this.font == null) {
+}return this.font;
+});
+$_M (cla$$, "getImage", 
+function () {
+return this.image;
+});
+$_M (cla$$, "getLocation", 
+function () {
+return  new $wt.graphics.Point (this.x, this.y);
+});
+$_M (cla$$, "getParent", 
+function () {
+return this.parent;
+});
+$_M (cla$$, "getSize", 
+function () {
+if (this.image != null) {
+var rect = this.image.getBounds ();
+return  new $wt.graphics.Point (rect.width, rect.height);
+}return  new $wt.graphics.Point (this.width, this.height);
+});
+$_M (cla$$, "getVisible", 
+function () {
+return this.$isVisible;
+});
+$_M (cla$$, "hasFocus", 
+function () {
+return false;
+});
+$_M (cla$$, "isFocusCaret", 
+function () {
+return this.parent.caret == this && this.hasFocus ();
+});
+$_M (cla$$, "isVisible", 
+function () {
+return this.$isVisible && this.parent.isVisible () && this.hasFocus ();
+});
+$_M (cla$$, "killFocus", 
+function () {
+});
+$_M (cla$$, "move", 
+function () {
+this.moved = false;
+});
+$_M (cla$$, "releaseChild", 
+function () {
+$_U (this, $wt.widgets.Caret, "releaseChild", []);
+if (this == this.parent.getCaret ()) this.parent.setCaret (null);
+});
+$_M (cla$$, "releaseWidget", 
+function () {
+$_U (this, $wt.widgets.Caret, "releaseWidget", []);
+this.parent = null;
+this.image = null;
+this.font = null;
+});
+$_M (cla$$, "resize", 
+function () {
+this.resized = false;
+this.move ();
+});
+$_M (cla$$, "setBounds", 
+function (x, y, width, height) {
+var samePosition = this.x == x && this.y == y;
+var sameExtent = this.width == width && this.height == height;
+if (samePosition && sameExtent) return ;
+this.x = x;
+this.y = y;
+this.width = width;
+this.height = height;
+if (sameExtent) {
+this.moved = true;
+if (this.$isVisible && this.hasFocus ()) this.move ();
+} else {
+this.resized = true;
+if (this.$isVisible && this.hasFocus ()) this.resize ();
+}}, "Number,Number,Number,Number");
+$_M (cla$$, "setBounds", 
+function (rect) {
+this.setBounds (rect.x, rect.y, rect.width, rect.height);
+}, "$wt.graphics.Rectangle");
+$_M (cla$$, "setFocus", 
+function () {
+});
+$_M (cla$$, "setFont", 
+function (font) {
+this.font = font;
+}, "$wt.graphics.Font");
+$_M (cla$$, "setImage", 
+function (image) {
+this.image = image;
+if (this.$isVisible && this.hasFocus ()) this.resize ();
+}, "$wt.graphics.Image");
+$_M (cla$$, "setLocation", 
+function (x, y) {
+if (this.x == x && this.y == y) return ;
+this.x = x;
+this.y = y;
+this.moved = true;
+if (this.$isVisible && this.hasFocus ()) this.move ();
+}, "Number,Number");
+$_M (cla$$, "setLocation", 
+function (location) {
+this.setLocation (location.x, location.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setSize", 
+function (width, height) {
+if (this.width == width && this.height == height) return ;
+this.width = width;
+this.height = height;
+this.resized = true;
+if (this.$isVisible && this.hasFocus ()) this.resize ();
+}, "Number,Number");
+$_M (cla$$, "setSize", 
+function (size) {
+this.setSize (size.x, size.y);
+}, "$wt.graphics.Point");
+$_M (cla$$, "setVisible", 
+function (visible) {
+if (visible == this.$isVisible) return ;
+this.$isVisible = visible;
+}, "Boolean");
 cla$$ = $_C (function () {
+this.hwndText = null;
+this.hwndUpDown = null;
 this.ignoreModify = false;
 this.pageIncrement = 0;
 this.digits = 0;
@@ -10609,162 +17088,20 @@ $_R (this, $wt.widgets.Spinner, [parent, $wt.widgets.Spinner.checkStyle (style)]
 }, "$wt.widgets.Composite,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return style & ~($WT.H_SCROLL | $WT.V_SCROLL);
+return style & ~(256 | 512);
 }, "Number");
-$_M (cla$$, "addModifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Modify, typedListener);
-}, "$wt.events.ModifyListener");
-$_M (cla$$, "addSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Selection, typedListener);
-this.addListener ($WT.DefaultSelection, typedListener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "addVerifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-var typedListener =  new $wt.widgets.TypedListener (listener);
-this.addListener ($WT.Verify, typedListener);
-}, "$wt.events.VerifyListener");
-$_M (cla$$, "removeModifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Modify, listener);
-}, "$wt.events.ModifyListener");
-$_M (cla$$, "removeSelectionListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Selection, listener);
-this.eventTable.unhook ($WT.DefaultSelection, listener);
-}, "$wt.events.SelectionListener");
-$_M (cla$$, "removeVerifyListener", 
-function (listener) {
-if (listener == null) this.error ($WT.ERROR_NULL_ARGUMENT);
-if (this.eventTable == null) return ;
-this.eventTable.unhook ($WT.Verify, listener);
-}, "$wt.events.VerifyListener");
-$_M (cla$$, "verifyText", 
-function (string, start, end, keyEvent) {
-var event =  new $wt.widgets.Event ();
-event.text = string;
-event.start = start;
-event.end = end;
-if (keyEvent != null) {
-event.character = keyEvent.character;
-event.keyCode = keyEvent.keyCode;
-event.stateMask = keyEvent.stateMask;
-}var index = 0;
-if (this.digits > 0) {
-var decimalSeparator = this.getDecimalSeparator ();
-index = string.indexOf (decimalSeparator);
-if (index != -1) {
-string = string.substring (0, index) + string.substring (index + 1);
-}index = 0;
-}while (index < string.length) {
-if (!Character.isDigit (string.charAt (index))) break;
-index++;
-}
-event.doit = index == string.length;
-this.sendEvent ($WT.Verify, event);
-if (!event.doit || this.isDisposed ()) return null;
-return event.text;
-}, "String,Number,Number,$wt.widgets.Event");
-$_M (cla$$, "getDecimalSeparator", 
+$_V (cla$$, "checkSubclass", 
 function () {
-return ".";
 });
-$_M (cla$$, "setPageIncrement", 
-function (value) {
-if (value < 1) return ;
-this.pageIncrement = value;
-}, "Number");
-$_M (cla$$, "getPageIncrement", 
+$_M (cla$$, "createHandle", 
 function () {
-return this.pageIncrement;
-});
-$_M (cla$$, "getMaximum", 
-function () {
-return this.maximum;
-});
-$_M (cla$$, "setMaximum", 
-function (maximum) {
-this.maximum = maximum;
-}, "Number");
-$_M (cla$$, "getMinimum", 
-function () {
-return this.minimum;
-});
-$_M (cla$$, "setMinimum", 
-function (minimum) {
-this.minimum = minimum;
-}, "Number");
-$_M (cla$$, "getDigits", 
-function () {
-return this.digits;
-});
-$_M (cla$$, "setDigits", 
-function (value) {
-if (value < 0) this.error ($WT.ERROR_INVALID_ARGUMENT);
-if (value == this.digits) return ;
-this.digits = value;
-}, "Number");
-$_M (cla$$, "getIncrement", 
-function () {
-return this.increment;
-});
-$_M (cla$$, "setIncrement", 
-function (value) {
-if (value < 1) return ;
-this.increment = value;
-}, "Number");
-$_M (cla$$, "getSelection", 
-function () {
-return Integer.parseInt (this.textInputHandle.value);
-});
-$_M (cla$$, "setSelection", 
-function (selection) {
-this.setSelection (selection, false);
-}, "Number");
-$_M (cla$$, "setSelection", 
-function (value, notify) {
-var string = String.valueOf (value);
-if (this.digits > 0) {
-var decimalSeparator = this.getDecimalSeparator ();
-var index = string.length - this.digits;
-var buffer =  new StringBuffer ();
-if (index > 0) {
-buffer.append (string.substring (0, index));
-buffer.append (decimalSeparator);
-buffer.append (string.substring (index));
-} else {
-buffer.append ("0");
-buffer.append (decimalSeparator);
-while (index++ < 0) buffer.append ("0");
-
-buffer.append (string);
-}string = buffer.toString ();
-}if (this.hooks ($WT.Verify) || this.filters ($WT.Verify)) {
-var length = this.textInputHandle.value.length;
-string = this.verifyText (string, 0, length, null);
-if (string == null) return ;
-}if (this.textInputHandle != null) {
-this.textInputHandle.value = "" + value;
-}if (notify) this.sendEvent ($WT.Selection);
-}, "Number,Boolean");
-$_V (cla$$, "createWidget", 
-function () {
-this.register ();
+$_U (this, $wt.widgets.Spinner, "createHandle", []);
+this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
 this.handle = document.createElement ("DIV");
 this.handle.className = "spinner-default";
 if (this.parent != null && this.parent.handle != null) {
 this.parent.handle.appendChild (this.handle);
-}if ((this.style & $WT.BORDER) != 0) {
+}if ((this.style & 2048) != 0) {
 this.handle.className += " spinner-border";
 }this.updownHandle = document.createElement ("DIV");
 this.handle.appendChild (this.updownHandle);
@@ -10826,17 +17163,27 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.Spinner$3, innerThis, finalVars);
 }) (this, null));
 });
-$_M (cla$$, "setSize", 
-function (width, height) {
-$_U (this, $wt.widgets.Spinner, "setSize", [width, height]);
-this.textInputHandle.style.width = (width - 28) + "px";
-this.textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
-}, "Number,Number");
+$_M (cla$$, "addModifyListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (24, typedListener);
+}, "$wt.events.ModifyListener");
+$_M (cla$$, "addSelectionListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (13, typedListener);
+this.addListener (14, typedListener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "addVerifyListener", 
+function (listener) {
+var typedListener =  new $wt.widgets.TypedListener (listener);
+this.addListener (25, typedListener);
+}, "$wt.events.VerifyListener");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var width = 0;
 var height = 0;
-if (wHint == $WT.DEFAULT || hHint == $WT.DEFAULT) {
+if (wHint == -1 || hHint == -1) {
 var string = null;
 if (this.digits > 0) {
 var leading = Math.floor (this.maximum / parseInt (Math.pow (10, this.digits)));
@@ -10851,12 +17198,13 @@ string = buffer;
 System.out.println (buffer);
 } else {
 string = "" + this.maximum;
-}width = UIStringUtil.calculatePlainStringLineWidth (string) + 16;
-height = UIStringUtil.calculatePlainStringLineHeight (string);
+}var size = $wt.internal.browser.OS.getStringPlainSize (string);
+width = size.x;
+height = size.y;
 }if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
 if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
-if (wHint != $WT.DEFAULT) width = wHint;
-if (hHint != $WT.DEFAULT) height = hHint;
+if (wHint != -1) width = wHint;
+if (hHint != -1) height = hHint;
 var trim = this.computeTrim (0, 0, width, height);
 System.err.println (trim);
 return  new $wt.graphics.Point (trim.width, trim.height);
@@ -10866,7 +17214,7 @@ function (x, y, width, height) {
 var margins = 4;
 x -= margins & 0xFFFF;
 width += (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
-if ((this.style & $WT.BORDER) != 0) {
+if ((this.style & 2048) != 0) {
 x -= 1;
 y -= 1;
 width += 2;
@@ -10874,6 +17222,180 @@ height += 2;
 }width += 2;
 return  new $wt.graphics.Rectangle (x, y, width, height);
 }, "Number,Number,Number,Number");
+$_M (cla$$, "copy", 
+function () {
+});
+$_M (cla$$, "cut", 
+function () {
+if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "enableWidget", 
+function (enabled) {
+$_U (this, $wt.widgets.Spinner, "enableWidget", [enabled]);
+}, "Boolean");
+$_M (cla$$, "deregister", 
+function () {
+$_U (this, $wt.widgets.Spinner, "deregister", []);
+this.display.removeControl (this.hwndText);
+this.display.removeControl (this.hwndUpDown);
+});
+$_V (cla$$, "hasFocus", 
+function () {
+return false;
+});
+$_M (cla$$, "getDigits", 
+function () {
+return this.digits;
+});
+$_M (cla$$, "getDecimalSeparator", 
+function () {
+return ".";
+});
+$_M (cla$$, "getIncrement", 
+function () {
+return this.increment;
+});
+$_M (cla$$, "getMaximum", 
+function () {
+return this.maximum;
+});
+$_M (cla$$, "getMinimum", 
+function () {
+return this.minimum;
+});
+$_M (cla$$, "getPageIncrement", 
+function () {
+return this.pageIncrement;
+});
+$_M (cla$$, "getSelection", 
+function () {
+return Integer.parseInt (this.textInputHandle.value);
+});
+$_M (cla$$, "getSelectionText", 
+function () {
+return 0;
+});
+$_M (cla$$, "paste", 
+function () {
+if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "register", 
+function () {
+$_U (this, $wt.widgets.Spinner, "register", []);
+this.display.addControl (this.hwndText, this);
+this.display.addControl (this.hwndUpDown, this);
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+$_U (this, $wt.widgets.Spinner, "releaseHandle", []);
+this.hwndText = this.hwndUpDown = null;
+});
+$_M (cla$$, "removeModifyListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (24, listener);
+}, "$wt.events.ModifyListener");
+$_M (cla$$, "removeSelectionListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (13, listener);
+this.eventTable.unhook (14, listener);
+}, "$wt.events.SelectionListener");
+$_M (cla$$, "removeVerifyListener", 
+function (listener) {
+if (this.eventTable == null) return ;
+this.eventTable.unhook (25, listener);
+}, "$wt.events.VerifyListener");
+$_M (cla$$, "setDigits", 
+function (value) {
+if (value == this.digits) return ;
+this.digits = value;
+}, "Number");
+$_M (cla$$, "setIncrement", 
+function (value) {
+if (value < 1) return ;
+this.increment = value;
+}, "Number");
+$_M (cla$$, "setMaximum", 
+function (value) {
+if (value < 0) return ;
+this.maximum = value;
+}, "Number");
+$_M (cla$$, "setMinimum", 
+function (value) {
+if (value < 0) return ;
+this.minimum = value;
+}, "Number");
+$_M (cla$$, "setPageIncrement", 
+function (value) {
+if (value < 1) return ;
+this.pageIncrement = value;
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (value) {
+var max =  $_A (1, 0);
+var min =  $_A (1, 0);
+value = Math.min (Math.max (min[0], value), max[0]);
+this.setSelection (value, false);
+}, "Number");
+$_M (cla$$, "setSelection", 
+function (value, notify) {
+var string = String.valueOf (value);
+if (this.digits > 0) {
+var decimalSeparator = this.getDecimalSeparator ();
+var index = string.length - this.digits;
+var buffer =  new StringBuffer ();
+if (index > 0) {
+buffer.append (string.substring (0, index));
+buffer.append (decimalSeparator);
+buffer.append (string.substring (index));
+} else {
+buffer.append ("0");
+buffer.append (decimalSeparator);
+while (index++ < 0) buffer.append ("0");
+
+buffer.append (string);
+}string = buffer.toString ();
+}if (this.hooks (25) || this.filters (25)) {
+var length = this.textInputHandle.value.length;
+string = this.verifyText (string, 0, length, null);
+if (string == null) return ;
+}if (this.textInputHandle != null) {
+this.textInputHandle.value = "" + value;
+}if (notify) this.sendEvent (13);
+}, "Number,Boolean");
+$_M (cla$$, "verifyText", 
+function (string, start, end, keyEvent) {
+var event =  new $wt.widgets.Event ();
+event.text = string;
+event.start = start;
+event.end = end;
+if (keyEvent != null) {
+event.character = keyEvent.character;
+event.keyCode = keyEvent.keyCode;
+event.stateMask = keyEvent.stateMask;
+}var index = 0;
+if (this.digits > 0) {
+var decimalSeparator = this.getDecimalSeparator ();
+index = string.indexOf (decimalSeparator);
+if (index != -1) {
+string = string.substring (0, index) + string.substring (index + 1);
+}index = 0;
+}while (index < string.length) {
+if (!Character.isDigit (string.charAt (index))) break;
+index++;
+}
+event.doit = index == string.length;
+this.sendEvent (25, event);
+if (!event.doit || this.isDisposed ()) return null;
+return event.text;
+}, "String,Number,Number,$wt.widgets.Event");
+$_M (cla$$, "setSize", 
+function (width, height) {
+$_U (this, $wt.widgets.Spinner, "setSize", [width, height]);
+this.textInputHandle.style.width = (width - 28) + "px";
+this.textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
+}, "Number,Number");
 cla$$ = $_C (function () {
 this.style = 0;
 this.parent = null;
@@ -10882,14 +17404,24 @@ $_Z (this, arguments);
 }, $wt.widgets, "Dialog");
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.PRIMARY_MODAL);
+this.construct (parent, 32768);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
+this.checkParent (parent);
 this.parent = parent;
 this.style = style;
 this.title = "";
 }, "$wt.widgets.Shell,Number");
+$_M (cla$$, "checkSubclass", 
+function () {
+if (!$wt.widgets.Display.isValidClass (this.getClass ())) {
+this.error (43);
+}});
+$_M (cla$$, "checkParent", 
+function (parent) {
+if (parent == null) this.error (4);
+}, "$wt.widgets.Shell");
 $_M (cla$$, "error", 
 function (code) {
 $WT.error (code);
@@ -10908,13 +17440,13 @@ return this.title;
 });
 $_M (cla$$, "setText", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
+if (string == null) this.error (4);
 this.title = string;
 }, "String");
 $_M (cla$$, "dialogUnimplemented", 
 function () {
-var dialogShell =  new $wt.widgets.Shell (this.parent.display, this.style | $WT.CLOSE | $WT.BORDER);
-dialogShell.addListener ($WT.Close, (function (innerThis, finalVars) {
+var dialogShell =  new $wt.widgets.Shell (this.parent.display, this.style | 64 | 2048);
+dialogShell.addListener (21, (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Dialog$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -10930,18 +17462,18 @@ return $_N ($wt.widgets.Dialog$1, innerThis, finalVars);
 }) (this, null));
 dialogShell.setText (this.title);
 dialogShell.setLayout ( new $wt.layout.GridLayout (2, false));
-var icon =  new $wt.widgets.Label (dialogShell, $WT.NONE);
+var icon =  new $wt.widgets.Label (dialogShell, 0);
 icon.setImage ( new $wt.graphics.Image (dialogShell.display, "j2slib/images/warning.png"));
 var gridData =  new $wt.layout.GridData (32, 32);
 icon.setLayoutData (gridData);
-var label =  new $wt.widgets.Label (dialogShell, $WT.NONE);
+var label =  new $wt.widgets.Label (dialogShell, 0);
 label.setText ("Not implemented yet.");
-var buttonPanel =  new $wt.widgets.Composite (dialogShell, $WT.NONE);
-var gd =  new $wt.layout.GridData ($wt.layout.GridData.END, $wt.layout.GridData.CENTER, false, false);
+var buttonPanel =  new $wt.widgets.Composite (dialogShell, 0);
+var gd =  new $wt.layout.GridData (3, 2, false, false);
 gd.horizontalSpan = 2;
 buttonPanel.setLayoutData (gd);
 buttonPanel.setLayout ( new $wt.layout.GridLayout ());
-var btn =  new $wt.widgets.Button (buttonPanel, $WT.PUSH);
+var btn =  new $wt.widgets.Button (buttonPanel, 8);
 btn.setText ("&OK");
 btn.setLayoutData ( new $wt.layout.GridData (75, 24));
 btn.addSelectionListener ((function (innerThis, finalVars) {
@@ -10966,7 +17498,7 @@ var y = Math.floor ((document.body.clientHeight - size.y) / 2) - 20;
 if (y < 0) {
 y = 0;
 }dialogShell.setLocation (Math.floor ((document.body.clientWidth - size.x) / 2), y);
-$wt.internal.ResizeSystem.register (dialogShell, $WT.CENTER);
+$wt.internal.ResizeSystem.register (dialogShell, 16777216);
 });
 cla$$ = $_C (function () {
 this.message = "";
@@ -10978,21 +17510,22 @@ $_Z (this, arguments);
 }, $wt.widgets, "MessageBox", $wt.widgets.Dialog);
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.OK | $WT.ICON_INFORMATION | $WT.APPLICATION_MODAL);
+this.construct (parent, 32 | 2 | 65536);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.MessageBox, [parent, $wt.widgets.MessageBox.checkStyle (style)]);
+this.checkSubclass ();
 }, "$wt.widgets.Shell,Number");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-if ((style & ($WT.PRIMARY_MODAL | $WT.APPLICATION_MODAL | $WT.SYSTEM_MODAL)) == 0) style |= $WT.APPLICATION_MODAL;
-var mask = ($WT.YES | $WT.NO | $WT.OK | $WT.CANCEL | $WT.ABORT | $WT.RETRY | $WT.IGNORE);
+if ((style & (32768 | 65536 | 131072)) == 0) style |= 65536;
+var mask = (64 | 128 | 32 | 256 | 512 | 1024 | 2048);
 var bits = style & mask;
-if (bits == $WT.OK || bits == $WT.CANCEL || bits == ($WT.OK | $WT.CANCEL)) return style;
-if (bits == $WT.YES || bits == $WT.NO || bits == ($WT.YES | $WT.NO) || bits == ($WT.YES | $WT.NO | $WT.CANCEL)) return style;
-if (bits == ($WT.RETRY | $WT.CANCEL) || bits == ($WT.ABORT | $WT.RETRY | $WT.IGNORE)) return style;
-style = (style & ~mask) | $WT.OK;
+if (bits == 32 || bits == 256 || bits == (32 | 256)) return style;
+if (bits == 64 || bits == 128 || bits == (64 | 128) || bits == (64 | 128 | 256)) return style;
+if (bits == (1024 | 256) || bits == (512 | 1024 | 2048)) return style;
+style = (style & ~mask) | 32;
 return style;
 }, "Number");
 $_M (cla$$, "getMessage", 
@@ -11002,8 +17535,8 @@ return this.message;
 $_M (cla$$, "open", 
 function () {
 this.returnCode = -1;
-this.dialogShell =  new $wt.widgets.Shell (this.parent.display, this.style | $WT.CLOSE | $WT.BORDER);
-this.dialogShell.addListener ($WT.Close, (function (innerThis, finalVars) {
+this.dialogShell =  new $wt.widgets.Shell (this.parent.display, this.style | 64 | 2048);
+this.dialogShell.addListener (21, (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.MessageBox$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -11021,37 +17554,37 @@ return $_N ($wt.widgets.MessageBox$1, innerThis, finalVars);
 this.dialogShell.setText (this.title);
 this.dialogShell.setLayout ( new $wt.layout.GridLayout (2, false));
 var iconName = null;
-if ((this.style & $WT.ICON_ERROR) != 0) {
+if ((this.style & 1) != 0) {
 iconName = "error";
-} else if ((this.style & $WT.ICON_INFORMATION) != 0) {
+} else if ((this.style & 2) != 0) {
 iconName = "information";
-} else if ((this.style & $WT.ICON_QUESTION) != 0) {
+} else if ((this.style & 4) != 0) {
 iconName = "question";
-} else if ((this.style & $WT.ICON_WARNING) != 0) {
+} else if ((this.style & 8) != 0) {
 iconName = "warning";
-} else if ((this.style & $WT.ICON_WORKING) != 0) {
+} else if ((this.style & 16) != 0) {
 iconName = "information";
 }if (iconName != null) {
-var composite =  new $wt.widgets.Composite (this.dialogShell, $WT.NONE);
+var composite =  new $wt.widgets.Composite (this.dialogShell, 0);
 composite.setLayout ( new $wt.layout.GridLayout ());
 var gd =  new $wt.layout.GridData (48, 48);
 composite.setLayoutData (gd);
-var icon =  new $wt.widgets.Label (composite, $WT.NONE);
+var icon =  new $wt.widgets.Label (composite, 0);
 icon.setImage ( new $wt.graphics.Image (this.dialogShell.display, "j2slib/images/" + iconName + ".png"));
 var gridData =  new $wt.layout.GridData (32, 32);
 icon.setLayoutData (gridData);
-}var composite =  new $wt.widgets.Composite (this.dialogShell, $WT.NONE);
+}var composite =  new $wt.widgets.Composite (this.dialogShell, 0);
 composite.setLayout ( new $wt.layout.GridLayout (2, false));
-var gd =  new $wt.layout.GridData ($wt.layout.GridData.FILL_BOTH | $wt.layout.GridData.VERTICAL_ALIGN_CENTER);
+var gd =  new $wt.layout.GridData (1808 | 4);
 if (iconName == null) {
 gd.horizontalSpan = 2;
 }gd.grabExcessVerticalSpace = true;
 gd.heightHint = 48;
-var labelGD =  new $wt.layout.GridData ($wt.layout.GridData.VERTICAL_ALIGN_CENTER);
-var wHint = UIStringUtil.calculatePlainStringLineWidth (this.message);
+var labelGD =  new $wt.layout.GridData (4);
+var wHint = $wt.internal.browser.OS.getStringPlainWidth (this.message);
 if (wHint > 480) {
 labelGD.widthHint = 480;
-var hHint = UIStringUtil.calculatePlainStringBlockHeight (this.message, labelGD.widthHint);
+var hHint = $wt.internal.browser.OS.getStringPlainWrappedHeight (this.message, labelGD.widthHint);
 if (hHint > 48) {
 gd.heightHint = hHint;
 }} else if (wHint < 64) {
@@ -11059,25 +17592,25 @@ labelGD.widthHint = 64;
 } else {
 labelGD.widthHint = wHint;
 }composite.setLayoutData (gd);
-var messageLabel =  new $wt.widgets.Label (composite, $WT.WRAP);
+var messageLabel =  new $wt.widgets.Label (composite, 64);
 messageLabel.setText (this.message);
 messageLabel.setLayoutData (labelGD);
 var gd2 =  new $wt.layout.GridData ();
 gd2.grabExcessVerticalSpace = true;
- new $wt.widgets.Label (composite, $WT.NONE).setLayoutData (gd2);
-this.buttonPanel =  new $wt.widgets.Composite (this.dialogShell, $WT.NONE);
+ new $wt.widgets.Label (composite, 0).setLayoutData (gd2);
+this.buttonPanel =  new $wt.widgets.Composite (this.dialogShell, 0);
 var count = 0;
-count += this.createButton ($WT.YES, "&Yes") == null ? 0 : 1;
-count += this.createButton ($WT.NO, "&No") == null ? 0 : 1;
-count += this.createButton ($WT.RETRY, "&Retry") == null ? 0 : 1;
-count += this.createButton ($WT.ABORT, "&Abort") == null ? 0 : 1;
-count += this.createButton ($WT.IGNORE, "&Ignore") == null ? 0 : 1;
-count += this.createButton ($WT.OK, "&OK") == null ? 0 : 1;
-count += this.createButton ($WT.CANCEL, "&Cancel") == null ? 0 : 1;
+count += this.createButton (64, "&Yes") == null ? 0 : 1;
+count += this.createButton (128, "&No") == null ? 0 : 1;
+count += this.createButton (1024, "&Retry") == null ? 0 : 1;
+count += this.createButton (512, "&Abort") == null ? 0 : 1;
+count += this.createButton (2048, "&Ignore") == null ? 0 : 1;
+count += this.createButton (32, "&OK") == null ? 0 : 1;
+count += this.createButton (256, "&Cancel") == null ? 0 : 1;
 if (count == 0) {
-this.createButton ($WT.OK, "&OK", true);
+this.createButton (32, "&OK", true);
 count = 1;
-}var gridData =  new $wt.layout.GridData ($wt.layout.GridData.CENTER, $wt.layout.GridData.CENTER, false, false);
+}var gridData =  new $wt.layout.GridData (2, 2, false, false);
 gridData.horizontalSpan = 2;
 this.buttonPanel.setLayoutData (gridData);
 this.buttonPanel.setLayout ( new $wt.layout.GridLayout (count, true));
@@ -11088,8 +17621,8 @@ var y = Math.floor ((document.body.clientHeight - size.y) / 2) - 20;
 if (y < 0) {
 y = 0;
 }this.dialogShell.setLocation (Math.floor ((document.body.clientWidth - size.x) / 2), y);
-$wt.internal.ResizeSystem.register (this.dialogShell, $WT.CENTER);
-return $WT.CANCEL;
+$wt.internal.ResizeSystem.register (this.dialogShell, 16777216);
+return 256;
 });
 $_M (cla$$, "createButton", 
 function (btnStyle, btnLabel) {
@@ -11098,7 +17631,7 @@ return this.createButton (btnStyle, btnLabel, false);
 $_M (cla$$, "createButton", 
 function (btnStyle, btnLabel, forced) {
 if ((this.style & btnStyle) != 0 || forced) {
-this.btn =  new $wt.widgets.Button (this.buttonPanel, $WT.PUSH);
+this.btn =  new $wt.widgets.Button (this.buttonPanel, 8);
 this.btn.setText (btnLabel);
 var gridData =  new $wt.layout.GridData (75, 24);
 this.btn.setLayoutData (gridData);
@@ -11124,19 +17657,19 @@ return null;
 }}, "Number,String,Boolean");
 $_M (cla$$, "setMessage", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
+if (string == null) this.error (4);
 this.message = string;
 }, "String");
 $_M (cla$$, "updateReturnCode", 
 ($fz = function () {
 if (this.returnCode == -1) {
-this.returnCode = $WT.CANCEL;
-if ((this.style & $WT.OK) == $WT.OK) this.returnCode = $WT.OK;
-if ((this.style & ($WT.OK | $WT.CANCEL)) == ($WT.OK | $WT.CANCEL)) this.returnCode = $WT.CANCEL;
-if ((this.style & ($WT.YES | $WT.NO)) == ($WT.YES | $WT.NO)) this.returnCode = $WT.NO;
-if ((this.style & ($WT.YES | $WT.NO | $WT.CANCEL)) == ($WT.YES | $WT.NO | $WT.CANCEL)) this.returnCode = $WT.CANCEL;
-if ((this.style & ($WT.RETRY | $WT.CANCEL)) == ($WT.RETRY | $WT.CANCEL)) this.returnCode = $WT.CANCEL;
-if ((this.style & ($WT.ABORT | $WT.RETRY | $WT.IGNORE)) == ($WT.ABORT | $WT.RETRY | $WT.IGNORE)) this.returnCode = $WT.IGNORE;
+this.returnCode = 256;
+if ((this.style & 32) == 32) this.returnCode = 32;
+if ((this.style & (32 | 256)) == (32 | 256)) this.returnCode = 256;
+if ((this.style & (64 | 128)) == (64 | 128)) this.returnCode = 128;
+if ((this.style & (64 | 128 | 256)) == (64 | 128 | 256)) this.returnCode = 256;
+if ((this.style & (1024 | 256)) == (1024 | 256)) this.returnCode = 256;
+if ((this.style & (512 | 1024 | 2048)) == (512 | 1024 | 2048)) this.returnCode = 2048;
 }}, $fz.isPrivate = true, $fz));
 cla$$ = $_C (function () {
 this.rgb = null;
@@ -11144,11 +17677,12 @@ $_Z (this, arguments);
 }, $wt.widgets, "ColorDialog", $wt.widgets.Dialog);
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.PRIMARY_MODAL);
+this.construct (parent, 32768);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.ColorDialog, [parent, style]);
+this.checkSubclass ();
 }, "$wt.widgets.Shell,Number");
 $_M (cla$$, "getRGB", 
 function () {
@@ -11171,11 +17705,12 @@ $_Z (this, arguments);
 }, $wt.widgets, "DirectoryDialog", $wt.widgets.Dialog);
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.PRIMARY_MODAL);
+this.construct (parent, 32768);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.DirectoryDialog, [parent, style]);
+this.checkSubclass ();
 }, "$wt.widgets.Shell,Number");
 $_M (cla$$, "getFilterPath", 
 function () {
@@ -11196,24 +17731,27 @@ this.filterPath = string;
 }, "String");
 $_M (cla$$, "setMessage", 
 function (string) {
-if (string == null) this.error ($WT.ERROR_NULL_ARGUMENT);
+if (string == null) this.error (4);
 this.message = string;
 }, "String");
 cla$$ = $_C (function () {
-this.filterNames =  new Array (0);
-this.filterExtensions =  new Array (0);
-this.fileNames =  new Array (0);
 this.filterPath = "";
 this.fileName = "";
 $_Z (this, arguments);
 }, $wt.widgets, "FileDialog", $wt.widgets.Dialog);
+$_Y (cla$$, function () {
+this.filterNames =  new Array (0);
+this.filterExtensions =  new Array (0);
+this.fileNames =  new Array (0);
+});
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.PRIMARY_MODAL);
+this.construct (parent, 32768);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.FileDialog, [parent, style]);
+this.checkSubclass ();
 }, "$wt.widgets.Shell,Number");
 $_M (cla$$, "getFileName", 
 function () {
@@ -11266,11 +17804,12 @@ $_Z (this, arguments);
 }, $wt.widgets, "FontDialog", $wt.widgets.Dialog);
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, $WT.PRIMARY_MODAL);
+this.construct (parent, 32768);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.FontDialog, [parent, style]);
+this.checkSubclass ();
 }, "$wt.widgets.Shell,Number");
 $_M (cla$$, "getFontData", 
 function () {
@@ -11319,7 +17858,6 @@ function () {
 });
 cla$$.findProgram = $_M (cla$$, "findProgram", 
 function (extension) {
-if (extension == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (extension.length == 0) return null;
 if ((extension.charAt (0)).charCodeAt (0) != ('.').charCodeAt (0)) extension = "." + extension;
 extension = extension.toLowerCase ();
@@ -11358,7 +17896,6 @@ document.body.appendChild (script);
 }, "String");
 cla$$.launch = $_M (cla$$, "launch", 
 function (fileName) {
-if (fileName == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 if (fileName.endsWith (".js")) {
 $wt.program.Program.findProgram (".js").execute (fileName);
 } else {
@@ -11367,7 +17904,6 @@ $wt.program.Program.findProgram (fileName).execute (fileName);
 }, "String");
 $_M (cla$$, "execute", 
 function (fileName) {
-if (fileName == null) $WT.error ($WT.ERROR_NULL_ARGUMENT);
 var quote = true;
 var prefix = this.command;
 var suffix = "";
@@ -11589,9 +18125,11 @@ this.status = 0;
 this.element = null;
 this.startX = 0;
 this.startY = 0;
-this.listeners =  new Array (0);
 $_Z (this, arguments);
 }, $wt.internal.dnd, "DragAndDrop");
+$_Y (cla$$, function () {
+this.listeners =  new Array (0);
+});
 $_M (cla$$, "reset", 
 function () {
 this.status = 0;
@@ -12045,7 +18583,7 @@ e.startY = e.currentY;
 return true;
 }, "$wt.internal.dnd.DragEvent");
 var methods = ["onmousedown", "onmouseup", "onmousemove",
-		"onkeyup", "onselectstart"]
+		"onkeyup", "onselectstart"];
 for (var i = 0; i < methods.length; i++) {
 	org.eclipse.swt.internal.dnd.DNDUtils["$" + methods[i]] =
 			org.eclipse.swt.internal.dnd.DNDUtils[methods[i]];
@@ -12183,11 +18721,11 @@ for (var i = 0; i < $wt.internal.ResizeSystem.handlers.length; i++) {
 var hdl = $wt.internal.ResizeSystem.handlers[i];
 if (hdl != null) {
 var status = hdl.getStatus ();
-if (status == $WT.MAX) {
+if (status == 1024) {
 hdl.updateMaximized ();
-} else if (status == $WT.MIN) {
+} else if (status == 128) {
 hdl.updateMinimized ();
-} else if (status == $WT.CENTER) {
+} else if (status == 16777216) {
 hdl.updateCentered ();
 }}}
 });

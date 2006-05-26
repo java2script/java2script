@@ -2262,6 +2262,8 @@ function consoleOutput (s, color, isBuffered) {
 	}
 
 	var lines = null;
+	var c160 = String.fromCharCode (160);
+	s = s.replace (/\t/g, c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160);
 	if (splitNeedFixed) {
 		try {
 		lines = splitIntoLines (s);
@@ -2600,6 +2602,88 @@ String.getName = Clazz.innerFunctions.getName;
 
 String.serialVersionUID = String.prototype.serialVersionUID = -6849794470754667710;
 
+String.prototype.$replace = function (c1, c2) {
+	var sp = "\\$.*+{}?^()";
+	if (sp.indexOf (c1) != -1) {
+		c1 = "\\" + c1;
+	}
+	var regExp = new RegExp (c1, "gm");
+	return this.replace (regExp, c2);
+};
+String.prototype.replaceAll = function (exp, str) {
+	var regExp = new RegExp (exp, "gm");
+	return this.replace (regExp, str);
+};
+String.prototype.replaceFirst = function (exp, str) {
+	var regExp = new RegExp (exp, "m");
+	return this.replace (regExp, str);
+};
+String.prototype.matches = function (exp) {
+	var regExp = new RegExp (exp, "gm");
+	var m = this.match (regExp);
+	return m != null && m.length != 0;
+};
+String.prototype.regionMatches = function (ignoreCase, toffset,
+		other, ooffset, len) {
+	/*
+	 * Support different method signatures
+	 */
+	if (typeof ignoreCase == "number"
+			|| (ignoreCase != true && ignoreCase != false)) {
+		len = ooffset;
+		ooffset = other;
+		other = toffset;
+		toffset = ignoreCase;
+		ignoreCase = false;
+	}
+	var to = toffset;
+	var po = ooffset;
+	// Note: toffset, ooffset, or len might be near -1>>>1.
+	if ((ooffset < 0) || (toffset < 0) || (toffset > this.length - len) ||
+			(ooffset > other.length - len)) {
+		return false;
+	}
+	var s1 = this.substring (toffset, toffset + len);
+	var s2 = this.substring (ooffset, ooffset + len);
+	if (ignoreCase) {
+		s1 = s1.toLowerCase ();
+		s2 = s2.toLowerCase ();
+	}
+	return s1 == s2;
+};
+String.prototype.$plit = function (regex, limit) {
+	/*
+	 * Support different method signatures
+	 */
+	if (limit != null && limit > 0) {
+		if (limit == 1) {
+			return this;
+		}
+		var regExp = new RegExp ("(" + regex + ")", "gm");
+		var count = 1;
+		var s = this.replace (regExp, function ($0, $1) {
+			count++;
+			if (count == limit) {
+				return "@@_@@";
+			} else if (count > limit) {
+				return $0;
+			} else {
+				return $0;
+			}
+		});
+		regExp = new RegExp (regex, "gm");
+		var arr = this.split (regExp);
+		if (arr.length > limit) {
+			arr[limit - 1] = s.substring (s.indexOf ("@@_@@") + 5);
+			arr.length = limit;
+		}
+		return arr;
+	} else {
+		var regExp = new RegExp (regex, "gm");
+		return this.split (regExp);
+	}
+};
+
 String.prototype.trim = function () {
 	var len = this.length;
 	var st = 0;
@@ -2813,9 +2897,10 @@ String.instantialize = function () {
 				return Encoding.readUTF8 (arr.join (''));
 			}
 			return x.join ('');
-		} else if (x.__CLASS_NAME__ == "StringBuffer") {
-            x.setShared();
-            var value = x.getValue();
+		} else if (x.__CLASS_NAME__ == "StringBuffer" 
+				|| x.__CLASS_NAME__ == "java.lang.StringBuffer") {
+			x.setShared();
+			var value = x.getValue();
 			var length = x.length ();
 			var valueCopy = new Array (length);
 			for (var i = 0; i < length; i++) {
@@ -3581,10 +3666,12 @@ return parseInt (ht) ^ parseInt ((ht >> 32));
 
 cla$$ = $_C (function () {
 this.detailMessage = null;
-this.cause = this;
 this.stackTrace = null;
 $_Z (this, arguments);
 }, java.lang, "Throwable", null, java.io.Serializable);
+$_Y (cla$$, function () {
+this.cause = this;
+});
 $_K (cla$$, 
 function () {
 this.fillInStackTrace ();
@@ -4373,9 +4460,11 @@ if (!$_D ("java.util.AbstractMap$1$2")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.i = this.callbacks["java.util.AbstractMap"].entrySet ().iterator ();
 $_Z (this, arguments);
 }, java.util, "AbstractMap$1$2", null, java.util.Iterator);
+$_Y (cla$$, function () {
+this.i = this.callbacks["java.util.AbstractMap"].entrySet ().iterator ();
+});
 $_M (cla$$, "hasNext", 
 function () {
 return this.i.hasNext ();
@@ -4424,9 +4513,11 @@ if (!$_D ("java.util.AbstractMap$3$4")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.i = this.callbacks["java.util.AbstractMap"].entrySet ().iterator ();
 $_Z (this, arguments);
 }, java.util, "AbstractMap$3$4", null, java.util.Iterator);
+$_Y (cla$$, function () {
+this.i = this.callbacks["java.util.AbstractMap"].entrySet ().iterator ();
+});
 $_M (cla$$, "hasNext", 
 function () {
 return this.i.hasNext ();
@@ -4526,9 +4617,11 @@ cla$$ = $_C (function () {
 $_B (this, arguments);
 this.cursor = 0;
 this.lastRet = -1;
-this.expectedModCount = this.callbacks["java.util.AbstractList"].modCount;
 $_Z (this, arguments);
 }, java.util.AbstractList, "Itr", null, java.util.Iterator);
+$_Y (cla$$, function () {
+this.expectedModCount = this.callbacks["java.util.AbstractList"].modCount;
+});
 $_V (cla$$, "hasNext", 
 function () {
 return this.cursor != this.callbacks["java.util.AbstractList"].size ();
@@ -4843,9 +4936,11 @@ if (!$_D ("java.util.SubList$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.i = this.callbacks["java.util.SubList"].l.listIterator (index + this.callbacks["java.util.SubList"].offset);
 $_Z (this, arguments);
 }, java.util, "SubList$1", null, java.util.ListIterator);
+$_Y (cla$$, function () {
+this.i = this.callbacks["java.util.SubList"].l.listIterator (index + this.callbacks["java.util.SubList"].offset);
+});
 $_V (cla$$, "hasNext", 
 function () {
 return this.nextIndex () < this.callbacks["java.util.SubList"].$size;
@@ -5862,15 +5957,17 @@ if (!$_D ("java.util.Hashtable.Enumerator")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.table = this.callbacks["java.util.Hashtable"].table;
-this.index = this.table.length;
 this.entry = null;
 this.lastReturned = null;
 this.type = 0;
 this.iterator = false;
-this.expectedModCount = this.callbacks["java.util.Hashtable"].modCount;
 $_Z (this, arguments);
 }, java.util.Hashtable, "Enumerator", null, [java.util.Enumeration, java.util.Iterator]);
+$_Y (cla$$, function () {
+this.table = this.callbacks["java.util.Hashtable"].table;
+this.index = this.table.length;
+this.expectedModCount = this.callbacks["java.util.Hashtable"].modCount;
+});
 $_K (cla$$, 
 function (type, iterator) {
 this.type = type;
@@ -6948,12 +7045,14 @@ $_Z (this, arguments);
 }, java.util, "ResourceBundle");
 Clazz.pu$h ();
 cla$$ = $_C (function () {
-this.map =  new Array (0);
-this.keys =  new Array (0);
 this.content = null;
 this.initialized = false;
 $_Z (this, arguments);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
+$_Y (cla$$, function () {
+this.map =  new Array (0);
+this.keys =  new Array (0);
+});
 $_K (cla$$, 
 function (bundleName) {
 $_R (this, java.util.ResourceBundle.TextResourceBundle, []);
