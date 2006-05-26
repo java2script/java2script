@@ -41,6 +41,8 @@ public class PropertyMethodMap {
 		pmMap = new HashMap();
 		methodSet = new HashSet();
 		register("java.lang.String", "length", "length");
+		register("java.lang.String", "replace", "~replace");
+		register("java.lang.String", "split", "~plit");
 		W3CDOM2Map.registerAllMaps();
 	}
 	

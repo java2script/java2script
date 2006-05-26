@@ -707,7 +707,13 @@ public class ASTKeywordParser extends ASTEmptyParser {
 						if (element == node) {
 							break;
 						}
-						previousStart = element.getStartPosition();
+						previousStart = element.getStartPosition() + element.getLength();
+					}
+				} else if (sttmt instanceof IfStatement) {
+					IfStatement ifSttmt = (IfStatement) sttmt;
+					if (ifSttmt.getElseStatement() == node) {
+						Statement thenSttmt = ifSttmt.getThenStatement();
+						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
 					}
 				}
 			} else if (blockParent instanceof MethodDeclaration) {

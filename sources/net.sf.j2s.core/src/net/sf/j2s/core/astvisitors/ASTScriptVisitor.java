@@ -153,7 +153,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				// but there are static final members
 //			} else if (element instanceof Initializer) {
 //				continue;
-			} else if (needPreparation && element instanceof FieldDeclaration) {
+			} else if (element instanceof FieldDeclaration
+					&& isFieldNeedPreparation((FieldDeclaration) element)) {
 				continue;
 			}
 			element.accept(this);
@@ -224,7 +225,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
-					if ((field.getModifiers() & Modifier.STATIC) != 0) {
+					if (!isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
@@ -652,7 +653,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
-					if ((field.getModifiers() & Modifier.STATIC) != 0) {
+					if (!isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
@@ -982,8 +983,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				//}
 			} else if (element instanceof Initializer) {
 				continue;
-			} else if (needPreparation && element instanceof FieldDeclaration) {
-				continue;
+			} else if (element instanceof FieldDeclaration 
+					&& isFieldNeedPreparation((FieldDeclaration) element)) {
 				//if (node.isInterface()) {
 					/*
 					 * As members of interface should be treated
@@ -1576,16 +1577,23 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		String methodName = node.getName().getIdentifier();
 		List args = node.arguments();
 		int size = args.size();
+		boolean isSpecialMethod = false;
 		if (PropertyMethodMap.isMethodRegistered(methodName) 
-				&& size == 0) {
+				&& (size == 0 || methodName.equals("split") || methodName.equals("replace"))) {
 			IBinding binding = node.getName().resolveBinding();
 			if (binding != null && binding instanceof IMethodBinding) {
 				IMethodBinding mthBinding = (IMethodBinding) binding;
 				String className = mthBinding.getDeclaringClass().getQualifiedName();
 				String propertyName = PropertyMethodMap.translate(className, methodName);
 				if (propertyName != null) {
-					buffer.append(propertyName);
-					return false;
+					if (propertyName.startsWith("~")) {
+						buffer.append('$');
+						buffer.append(propertyName.substring(1));
+						isSpecialMethod = true;
+					} else {
+						buffer.append(propertyName);
+						return false;
+					}
 				}
 			}
 		}
@@ -1602,7 +1610,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 		}
 		*/
-		node.getName().accept(this);
+		if (!isSpecialMethod) {
+			node.getName().accept(this);
+		}
 		buffer.append(" (");
 
 		IMethodBinding methodBinding = node.resolveMethodBinding();
@@ -2343,7 +2353,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
-					if (node.isInterface() || (field.getModifiers() & Modifier.STATIC) != 0) {
+					if (node.isInterface() || !isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
@@ -2875,7 +2885,7 @@ public class CB extends CA {
 			} else if (element instanceof EnumDeclaration) {
 				continue;
 			} else if (element instanceof FieldDeclaration) {
-				if (needPreparation || node.isInterface()) {
+				if (isFieldNeedPreparation((FieldDeclaration) element) || node.isInterface()) {
 					/*
 					 * As members of interface should be treated
 					 * as final and for javascript interface won't
