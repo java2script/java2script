@@ -64,6 +64,7 @@
         		<file name="org/eclipse/swt/internal/CloneableCompatibility.js"/>
         		<file name="org/eclipse/swt/internal/RunnableCompatibility.js"/>
 
+        		<file name="org/eclipse/swt/internal/browser/OS.js"/>
 
         		<file name="org/eclipse/swt/widgets/Event.js"/>
         		<file name="org/eclipse/swt/events/TypedEvent.js"/>
