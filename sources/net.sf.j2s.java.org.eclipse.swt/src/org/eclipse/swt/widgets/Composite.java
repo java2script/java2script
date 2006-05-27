@@ -583,6 +583,7 @@ public void layout (boolean changed, boolean all) {
  */
 public void layout (Control [] changed) {
 	checkWidget ();
+	System.out.print("control");
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
 	Date d = new Date();
 	for (int i=0; i<changed.length; i++) {

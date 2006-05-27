@@ -86,14 +86,15 @@ protected boolean flushCache(Control control) {
 }
 
 protected void layout(Composite composite, boolean flushCache) {
+
 	SashForm sashForm = (SashForm)composite;
 	Rectangle area = sashForm.getClientArea();
 	if (area.width <= 1 || area.height <= 1) return;
-	
+
 	Control[] newControls = sashForm.getControls(true);
 	if (sashForm.controls.length == 0 && newControls.length == 0) return;
 	sashForm.controls = newControls;
-	
+
 	Control[] controls = sashForm.controls;
 	
 	if (sashForm.maxControl != null && !sashForm.maxControl.isDisposed()) {
@@ -106,15 +107,14 @@ protected void layout(Composite composite, boolean flushCache) {
 		}
 		return;
 	}
-	
 	// keep just the right number of sashes
 	if (sashForm.sashes.length < controls.length - 1) {
 		Sash[] newSashes = new Sash[controls.length - 1];
 		System.arraycopy(sashForm.sashes, 0, newSashes, 0, sashForm.sashes.length);
 		for (int i = sashForm.sashes.length; i < newSashes.length; i++) {
 			newSashes[i] = new Sash(sashForm, sashForm.sashStyle);
-			newSashes[i].setBackground(sashForm.background);
-			newSashes[i].setForeground(sashForm.foreground);
+			newSashes[i].setBackground(sashForm.backgroundColor);
+			newSashes[i].setForeground(sashForm.foregroundColor);
 			newSashes[i].addListener(SWT.Selection, sashForm.sashListener);
 		}
 		sashForm.sashes = newSashes;
