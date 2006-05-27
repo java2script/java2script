@@ -133,7 +133,7 @@ public class Display extends Device {
 	/* Widget Table */
 	int freeSlot;
 	int [] indexTable;
-	Control [] controlTable;
+	Control [] controlTable = new Control[1];
 	static final int GROW_SIZE = 1024;
 //	static final int SWT_OBJECT_INDEX;
 //	static final boolean USE_PROPERTY = !OS.IsWinCE;

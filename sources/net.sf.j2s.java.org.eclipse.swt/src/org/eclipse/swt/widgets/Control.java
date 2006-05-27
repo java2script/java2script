@@ -2358,7 +2358,8 @@ public void setLocation (int x, int y) {
 	* not running on WinCE.
 	*/
 //	if (!OS.IsWinCE) flags |= OS.SWP_DRAWFRAME;
-	setBounds (x, y, 0, 0, flags);
+	setBounds (x, y, this.width, this.height, flags);
+//	computeSize(SWT.DEFAULT, SWT.DEFAULT);
 }
 
 /**
