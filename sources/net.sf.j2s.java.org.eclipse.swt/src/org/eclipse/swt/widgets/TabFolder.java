@@ -256,10 +256,20 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	int newHeight = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, newWidth, newHeight);
 	*/
+	int lineHeight = OS.getContainerHeight(items[0].handle);
+	if (OS.isIE) {
+		lineHeight++; // ...
+	} else {
+		// Mozilla
+		if ((style & SWT.BOTTOM) != 0) {
+			lineHeight--;
+		}
+	}
+	System.err.println("]" + lineHeight);
 	x -= 4;
-	y -= 4 + 18;
+	y -= 4 + lineHeight;
 	width += 8;
-	height += 8 + 18;
+	height += 8 + lineHeight;
 	int border = getBorderWidth ();
 	x -= border;
 	y -= border;
@@ -317,7 +327,9 @@ void createItem (TabItem item, final int index) {
 	if (idx != -1) {
 		borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
 	}
-	tab.appendChild(document.createTextNode(item.getNameText()));
+	item.textEl = document.createElement("SPAN");
+	tab.appendChild(item.textEl);
+	item.textEl.appendChild(document.createTextNode(item.getNameText()));
 	int width = -2;
 	if (items != null && items.length != 0) {
 		for (int i = 0; i < index; i++) {
@@ -942,8 +954,8 @@ void setSelection (int index, boolean notify) {
 	 * TODO: When a tab is selected programmly, should move
 	 * the tab into visible tab area.
 	 */
-	/*
-	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
+//	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
+	int oldIndex = getSelectionIndex();
 	if (oldIndex != -1) {
 		TabItem item = items [oldIndex];
 		Control control = item.control;
@@ -951,8 +963,13 @@ void setSelection (int index, boolean notify) {
 			control.setVisible (false);
 		}
 	}
-	OS.SendMessage (handle, OS.TCM_SETCURSEL, index, 0);
-	int newIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
+//	OS.SendMessage (handle, OS.TCM_SETCURSEL, index, 0);
+	updateSelection(index);
+//	int newIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
+	int newIndex = index;
+	if (oldIndex == index) {
+		newIndex = -1;
+	}
 	if (newIndex != -1) {
 		TabItem item = items [newIndex];
 		Control control = item.control;
@@ -966,10 +983,12 @@ void setSelection (int index, boolean notify) {
 			sendEvent (SWT.Selection, event);
 		}
 	}
-	*/
+}
+
+void updateSelection(int index) {
 	String key = "tab-item-selected";
 	if (items[index] != null) {
-		boolean before = false;
+//		boolean before = false;
 		int left = -2;
 		int x = 2;
 		for (int i = offset; i < items.length; i++) {
@@ -983,7 +1002,7 @@ void setSelection (int index, boolean notify) {
 				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
 				//s.left = (Integer.parseInt(s.left) + 2) + "px";
 				if (i > index) {
-					before = true;
+//					before = true;
 				}
 			}
 			int w = OS.getContainerWidth(items[i].handle);
@@ -1062,7 +1081,6 @@ void setSelection (int index, boolean notify) {
 		}
 	}
 }
-
 /*
 String toolTipText (NMTTDISPINFO hdr) {
 	if ((hdr.uFlags & OS.TTF_IDISHWND) != 0) {

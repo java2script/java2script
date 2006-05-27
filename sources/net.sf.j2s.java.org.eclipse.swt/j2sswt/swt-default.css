@@ -611,11 +611,15 @@ textarea.text-h-scroll {
 	z-index:100;
 }
 .tab-folder-border-nw {
-	top:8px;
+	top:7px;
 	border-style:outset none none outset;
 	border-left:1px solid white;
 	border-top:1px solid white;
-	margin-top:1em;
+	margin-top:1.2em;
+}
+* html .tab-folder-border-nw {
+	top:6px;
+	margin-top:1.3em;
 }
 .tab-folder-border-sw {
 	bottom:0;
@@ -624,10 +628,14 @@ textarea.text-h-scroll {
 }
 .tab-folder-border-ne {
 	right:0;
-	top:8px;
+	top:7px;
 	border-style:outset outset none none;
 	border-top:1px solid white;
-	margin-top:1em;
+	margin-top:1.2em;
+}
+* html .tab-folder-border-ne {
+	top:6px;
+	margin-top:1.3em;
 }
 .tab-folder-border-se {
 	right:0;
@@ -645,9 +653,13 @@ textarea.text-h-scroll {
 	margin-top:0;
 }
 .tab-folder-bottom .tab-folder-border-sw {
-	bottom:8px;
-	margin-bottom:1em;
+	bottom:7px;
+	margin-bottom:1.2em;
 	border-bottom:1px outset #777;
+}
+* html .tab-folder-bottom .tab-folder-border-sw {
+	bottom:6px;
+	margin-bottom:1.3em;
 }
 .tab-folder-bottom .tab-folder-border-ne {
 	right:0;
@@ -655,9 +667,13 @@ textarea.text-h-scroll {
 	margin-top:0;
 }
 .tab-folder-bottom .tab-folder-border-se {
-	bottom:8px;
-	margin-bottom:1em;
+	bottom:7px;
+	margin-bottom:1.2em;
 	border-bottom:1px outset #777;
+}
+* html .tab-folder-bottom .tab-folder-border-se {
+	bottom:6px;
+	margin-bottom:1.3em;
 }
 .tab-folder-no-tab .tab-folder-border-nw {
 	top:2px;
@@ -703,10 +719,13 @@ textarea.text-h-scroll {
 	border-bottom-style:none;
 	background-color:menu;
 }
-
 * html .tab-item-default {
 	padding-top:1px;
-	width:28px;
+	/*width:28px;*/
+}
+* html .tab-item-image {
+	/*width:52px;*/
+	/*width:68px;*/
 }
 .tab-item-selected {
 	margin-top:0;
@@ -714,20 +733,38 @@ textarea.text-h-scroll {
 	padding-right:7px;
 	padding-bottom:4px;
 }
+.tab-item-default span {
+	white-space:nowrap;
+	padding-bottom:4px;
+	background-position:left center;
+	background-repeat:no-repeat;
+}
+.tab-folder-bottom .tab-item-default span {
+	padding-top:1px;
+	padding-bottom:3px;
+}
+* html .tab-folder-bottom .tab-item-default span {
+	padding-top:3px;
+	padding-bottom:1px;
+}
+.tab-item-image span {
+	margin-left:2px;
+	padding-left:22px;
+}
 .tab-folder-bottom .tab-item-default {
 	bottom:2px;
 	margin-top:0;
-	padding-top:1px;
+	padding-top:2px;
 	border-top-width:0;
 	border-bottom:2px outset white;
 }
 * html .tab-folder-bottom .tab-item-default {
-	padding-top:1px;
+	padding-top:2px;
 	padding-bottom:0;
 }
 .tab-folder-bottom .tab-item-selected {
 	margin-top:0;
-	padding-top:2px;
+	padding-top:4px;
 	padding-bottom:2px;
 	margin-bottom:0;
 	bottom:0;
@@ -742,6 +779,12 @@ textarea.text-h-scroll {
 	left:-36px;
 	/*margin-top:2px;*/
 	top:-4px;
+	/*
+	left:-3em;
+	top:-0.4em;
+	height:0.8em;
+	padding:4px;
+	*/
 	margin-left:100%;
 	display:none;
 	z-index:111;
@@ -769,14 +812,27 @@ textarea.text-h-scroll {
 .tab-item-button {
 	width:16px;
 	height:16px;
+	/*
+	width:0.8em;
+	height:0.8em;
+	padding:4px;
+	*/
 	float:right;
 }
 .tab-item-button button {
 	position:relative;
 	width:16px;
 	height:16px;
+	/*
+	width:100%;
+	height:100%;
+	top:-1em;
+	left:0;
+	*/
 }
 .tab-item-button .button-arrow-left {
+	border-width:0.4em;
+	border-left-width:0;
 	border-width:4px 4px 4px 0;
 	position:relative;
 	/*left:-6px; mozilla 1.8*/
@@ -784,7 +840,9 @@ textarea.text-h-scroll {
 	top:-2px;
 }
 .tab-item-button .button-arrow-right {
-	border-width:4px 0px 4px 4px;
+	border-width:0.4em;
+	border-right-width:0;
+	border-width:4px 0 4px 4px;
 	position:relative;
 	/*left:-5px; mozilla 1.8*/
 	left:0;

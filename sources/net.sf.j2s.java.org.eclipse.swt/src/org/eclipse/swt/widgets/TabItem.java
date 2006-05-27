@@ -15,7 +15,10 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -36,6 +39,8 @@ public class TabItem extends Item {
 	TabFolder parent;
 	Control control;
 	String toolTipText;
+	boolean hasImage;
+	Element textEl;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -116,47 +121,9 @@ public TabItem (TabFolder parent, int style, int index) {
 
 }
 private void configure(int index) {
-	//Element handle = parent.itemHandles[index];
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
-			//System.out.println("selected");
-			TabItem[] items = parent.items;
-			//Element[] handles = parent.itemHandles;
-			for (int i = 0; i < items.length; i++) {
-				Object obj = TabItem.this;
-//				String selectedCSS = "tab-item-selected";
-//				int index = items[i].handle.className.indexOf(selectedCSS);
-				if (obj == items[i]) {
-					parent.setSelection(i, false);
-					Control ctrl = items[i].control;
-					if (ctrl == null) continue;
-					fixControlBounds(ctrl);
-					//System.out.println(ctrl.getBounds());
-					ctrl.setVisible(true);
-					ctrl.getParent().layout(new Control[] { ctrl });
-//					if (index == -1) {
-//						items[i].handle.className += " " + selectedCSS;
-//					}
-					//System.out.println(TabItem.this);
-					//System.out.println(items[i].handle.className);
-					//System.out.println(ctrl);
-					//ctrl.setSize(120, 24);
-				} else {
-//						if (ctrl.getVisible()) {
-//							Rectangle b = ctrl.getBounds();
-//							b.y -= 24;
-//							ctrl.setBounds(b);
-//						}
-					Control ctrl = items[i].control;
-					if (ctrl == null) continue;
-					ctrl.setVisible(false);
-//					if (index != -1) {
-//						items[i].handle.className = items[i].handle.className.substring(0, index) + items[i].handle.className.substring(index + selectedCSS.length());
-//					}
-					//System.out.println(i + ".." + items[i].handle.className);
-					//System.out.println(items[i].control.handle.innerHTML);
-				}
-			}
+			parent.setSelection(new TabItem[] { TabItem.this });
 		}
 	};
 }
@@ -260,8 +227,6 @@ public void setControl (Control control) {
 			//
 		} else {
 			newControl.setBounds (clientArea);
-			fixControlBounds(newControl);
-			//System.out.println(ctrl.getBounds());
 			newControl.setVisible(true);
 		}
 //		System.err.println(clientArea);
@@ -269,20 +234,6 @@ public void setControl (Control control) {
 		//newControl.setVisible (true);
 	}
 	if (oldControl != null) oldControl.setVisible (false);
-}
-void fixControlBounds() {
-	fixControlBounds(this.control);
-}
-private void fixControlBounds(Control newControl) {
-	Rectangle b = parent.getBounds();
-	b.height -= 30;
-	b.width -= 12;
-	b.x -= 1;
-	b.y -= 1;
-	if ((parent.style & SWT.BOTTOM) == 0) {
-		b.y += 18;
-	}
-	newControl.setBounds(b);
 }
 
 public void setImage (Image image) {
@@ -307,6 +258,43 @@ public void setImage (Image image) {
 	tcItem.iImage = parent.imageIndex (image);
 	OS.SendMessage (hwnd, OS.TCM_SETITEM, index, tcItem);
 	*/
+	if (image != null && image.handle == null 
+			&& image.url != null && image.url.length() != 0) {
+		CSSStyle handleStyle = textEl.style;
+		if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+//				Element imgBackground = document.createElement("DIV");
+//				imgBackground.style.position = "absolute";
+//				imgBackground.style.width = "100%";
+//				imgBackground.style.height = "100%";
+//				imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+//				handle.appendChild(imgBackground);
+			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+		} else {
+//			handleStyle.backgroundRepeat = "no-repeat";
+//			handleStyle.backgroundPosition = "left center";
+			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+		}
+	} else {
+		textEl.style.backgroundImage = "";
+		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
+				&& textEl.style.filter != null) {
+			textEl.style.filter = "";
+		}
+	}
+	String cssName = handle.className;
+	if (cssName == null) cssName = "";
+	String key = "tab-item-image";
+	int idx = cssName.indexOf(key);
+	hasImage = image != null; 
+	if (hasImage) {
+		if (idx == -1) {
+			handle.className += " " + key; 
+		}
+	} else {
+		if (idx != -1) {
+			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+	}
 }
 /**
  * Sets the receiver's text.  The string may include
@@ -338,11 +326,16 @@ public void setText (String string) {
 	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (handle != null) {
-		handle.appendChild(document.createTextNode(string));
+		OS.clearChildren(handle);
+		textEl = document.createElement("SPAN");
+		handle.appendChild(textEl);
+		textEl.appendChild(document.createTextNode(string));
+		//handle.appendChild(document.createTextNode(string));
 	}
-	int index = parent.indexOf (this);
-	if (index == -1) return;
-	super.setText (string);
+//	int index = parent.indexOf (this);
+//	if (index == -1) return;
+//	super.setText (string);
+	this.text = string;
 	//Element handle = parent.itemHandles[index];
 	
 	/*
@@ -395,6 +388,10 @@ public void setToolTipText (String string) {
 	toolTipText = string;
 }
 void releaseHandle() {
+	if (textEl != null) {
+		BrowserNative.releaseHandle(textEl);
+		textEl = null;
+	}
 	if (handle != null) {
 		BrowserNative.releaseHandle(handle);
 		handle = null;
