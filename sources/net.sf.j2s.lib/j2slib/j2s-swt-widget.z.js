@@ -4,13 +4,13 @@
 j2s.resources.list=swt-default.css,org/eclipse/swt/graphics/GC.js,org/eclipse/swt/graphics/Resource.js,org/eclipse/swt/graphics/Color.js,org/eclipse/swt/graphics/Cursor.js,org/eclipse/swt/accessibility/Accessible.js,org/eclipse/swt/graphics/Drawable.js,org/eclipse/swt/graphics/Device.js,org/eclipse/swt/graphics/Font.js,org/eclipse/swt/graphics/FontData.js,org/eclipse/swt/graphics/FontMetrics.js,org/eclipse/swt/widgets/Widget.js,org/eclipse/swt/widgets/Control.js,org/eclipse/swt/widgets/Scrollable.js,org/eclipse/swt/widgets/Composite.js,org/eclipse/swt/widgets/Canvas.js,org/eclipse/swt/widgets/Decorations.js,org/eclipse/swt/widgets/Shell.js,org/eclipse/swt/widgets/Item.js,org/eclipse/swt/widgets/MenuItem.js,org/eclipse/swt/widgets/Menu.js,org/eclipse/swt/widgets/Monitor.js,org/eclipse/swt/widgets/ScrollBar.js,org/eclipse/swt/widgets/Display.js,org/eclipse/swt/widgets/Button.js,org/eclipse/swt/widgets/Label.js,org/eclipse/swt/widgets/Link.js,org/eclipse/swt/widgets/Text.js,org/eclipse/swt/widgets/List.js,org/eclipse/swt/browser/Browser.js,org/eclipse/swt/widgets/TableItem.js,org/eclipse/swt/widgets/TableColumn.js,org/eclipse/swt/widgets/Table.js,org/eclipse/swt/widgets/TabItem.js,org/eclipse/swt/widgets/TabFolder.js,org/eclipse/swt/widgets/Combo.js,org/eclipse/swt/widgets/Group.js,org/eclipse/swt/widgets/TreeItem.js,org/eclipse/swt/widgets/TreeColumn.js,org/eclipse/swt/widgets/Tree.js,org/eclipse/swt/widgets/ProgressBar.js,org/eclipse/swt/widgets/Sash.js,org/eclipse/swt/custom/SashForm.js,org/eclipse/swt/custom/SashFormData.js,org/eclipse/swt/custom/SashFormLayout.js,org/eclipse/swt/custom/StackLayout.js,org/eclipse/swt/widgets/Scale.js,bin/org/eclipse/swt/widgets/ToolBar.js,bin/org/eclipse/swt/widgets/ToolItem.js,bin/org/eclipse/swt/widgets/CoolBar.js,bin/org/eclipse/swt/widgets/CoolItem.js,bin/org/eclipse/swt/widgets/Caret.js,bin/org/eclipse/swt/widgets/Spinner.js,bin/org/eclipse/swt/widgets/Dialog.js,bin/org/eclipse/swt/widgets/ColorDialog.js,bin/org/eclipse/swt/widgets/DirectoryDialog.js,bin/org/eclipse/swt/widgets/FileDialog.js,bin/org/eclipse/swt/widgets/FontDialog.js,org/eclipse/swt/program/Program.js
 =*/
 cla$$ = $_C (function () {
-this.control = null;
 $_Z (this, arguments);
 }, $wt.accessibility, "Accessible");
 $_Y (cla$$, function () {
 this.accessibleListeners =  new java.util.Vector ();
 this.accessibleControlListeners =  new java.util.Vector ();
 this.textListeners =  new java.util.Vector ();
+this.control = null;
 });
 $_M (cla$$, "addAccessibleListener", 
 function (listener) {
@@ -3566,7 +3566,7 @@ this.layoutData = layoutData;
 $_M (cla$$, "setLocation", 
 function (x, y) {
 var flags = 0;
-this.setBounds (x, y, 0, 0, flags);
+this.setBounds (x, y, this.width, this.height, flags);
 }, "Number,Number");
 $_M (cla$$, "setLocation", 
 function (location) {
@@ -3896,13 +3896,13 @@ function () {
 return "DIV";
 });
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.widgets, "Composite", $wt.widgets.Scrollable);
+$_Y (cla$$, function () {
 this.$layout = null;
 this.lpwp = null;
 this.tabList = null;
 this.layoutCount = 0;
-$_Z (this, arguments);
-}, $wt.widgets, "Composite", $wt.widgets.Scrollable);
-$_Y (cla$$, function () {
 this.children =  new Array (0);
 });
 $_K (cla$$, 
@@ -6249,12 +6249,15 @@ var isVisible = (this.state & $wt.widgets.Widget.HIDDEN) == 0;
 if (isVisible == visible) return ;
 }, "Boolean");
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.widgets, "Display", $wt.graphics.Device);
+$_Y (cla$$, function () {
 this.eventQueue = null;
 this.eventTable = null;
 this.filterTable = null;
 this.freeSlot = 0;
 this.indexTable = null;
-this.controlTable = null;
+this.controlTable =  new Array (1);
 this.focusEvent = 0;
 this.focusControl = null;
 this.bars = null;
@@ -6273,6 +6276,7 @@ this.lastMouse = 0;
 this.lastVirtual = false;
 this.lastNull = false;
 this.lastDead = false;
+this.keyboard =  $_A (256, 0);
 this.accelKeyHit = false;
 this.mnemonicKeyHit = false;
 this.lockActiveWindow = false;
@@ -6280,6 +6284,7 @@ this.captureChanged = false;
 this.ignoreRestoreFocus = false;
 this.lastHittestControl = null;
 this.lastHittest = 0;
+this.cursors =  new Array (21 + 1);
 this.imageList = null;
 this.toolImageList = null;
 this.toolHotImageList = null;
@@ -6291,11 +6296,6 @@ this.values = null;
 this.modalShells = null;
 this.modalDialogShell = null;
 this.hitCount = 0;
-$_Z (this, arguments);
-}, $wt.widgets, "Display", $wt.graphics.Device);
-$_Y (cla$$, function () {
-this.keyboard =  $_A (256, 0);
-this.cursors =  new Array (21 + 1);
 });
 $_K (cla$$, 
 function () {
@@ -7457,11 +7457,19 @@ this.image.height = img.height;
 width += img.width;
 height = Math.max(img.height, height);
 } else {
-width += 16;
-height = Math.max (16, height);
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
 }} else {
-width += this.image.width;
-height = Math.max (this.image.height, height);
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
 }extra = 8;
 }}if ((this.style & (32 | 16)) != 0) {
 width += $wt.widgets.Button.CHECK_WIDTH + extra;
@@ -7674,7 +7682,10 @@ this.image.height = img.height;
 handleStyle.marginLeft = ($wt.widgets.Button.CHECK_WIDTH + 3) + "px";
 handleStyle.paddingTop = this.image.height + "px";
 } else {
-handleStyle = this.btnHandle.style;
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
 }if (image.url.toLowerCase ().endsWith (".png") && handleStyle.filter != null) {
 handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 } else {
@@ -7985,11 +7996,19 @@ this.image.height = img.height;
 width += img.width;
 height = Math.max(img.height, height);
 } else {
-width += 16;
-height = Math.max (16, height);
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
 }} else {
-width += this.image.width;
-height = Math.max (this.image.height, height);
+var img = new Image ();
+img.src = this.image.url;
+this.image.width = img.width;
+this.image.height = img.height;
+width += img.width;
+height = Math.max(img.height, height);
 }}if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 width += border * 2;
@@ -8148,22 +8167,22 @@ this.textSizeCached = false;
 $_U (this, $wt.widgets.Label, "setFont", [font]);
 }, "$wt.graphics.Font");
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.widgets, "Link", $wt.widgets.Control);
+$_Y (cla$$, function () {
 this.text = null;
 this.cachedText = null;
 this.textSizeCached = false;
 this.textWidthCached = 0;
 this.textHeightCached = 0;
 this.lastColor = null;
+this.anchors =  new Array (0);
 this.offsets = null;
 this.selection = null;
 this.ids = null;
 this.mnemonics = null;
 this.focusIndex = 0;
 this.font = 0;
-$_Z (this, arguments);
-}, $wt.widgets, "Link", $wt.widgets.Control);
-$_Y (cla$$, function () {
-this.anchors =  new Array (0);
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -9468,6 +9487,9 @@ function () {
 return "SELECT";
 });
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.browser, "Browser", $wt.widgets.Composite);
+$_Y (cla$$, function () {
 this.$back = false;
 this.$forward = false;
 this.navigate = false;
@@ -9479,10 +9501,6 @@ this.toolBar = true;
 this.info = 0;
 this.globalDispatch = 0;
 this.html = null;
-this.url = null;
-$_Z (this, arguments);
-}, $wt.browser, "Browser", $wt.widgets.Composite);
-$_Y (cla$$, function () {
 this.closeWindowListeners =  new Array (0);
 this.locationListeners =  new Array (0);
 this.openWindowListeners =  new Array (0);
@@ -9490,6 +9508,7 @@ this.progressListeners =  new Array (0);
 this.statusTextListeners =  new Array (0);
 this.titleListeners =  new Array (0);
 this.visibilityWindowListeners =  new Array (0);
+this.url = null;
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -14315,17 +14334,17 @@ $_S (cla$$,
 "INCREMENT", 1,
 "PAGE_INCREMENT", 9);
 cla$$ = $_C (function () {
-this.SASH_WIDTH = 3;
-this.sashStyle = 0;
-this.$background = null;
-this.$foreground = null;
-this.maxControl = null;
-this.sashListener = null;
 $_Z (this, arguments);
 }, $wt.custom, "SashForm", $wt.widgets.Composite);
 $_Y (cla$$, function () {
+this.SASH_WIDTH = 3;
+this.sashStyle = 0;
 this.sashes =  new Array (0);
+this.$background = null;
+this.$foreground = null;
 this.controls =  new Array (0);
+this.maxControl = null;
+this.sashListener = null;
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -15629,12 +15648,16 @@ this.defaultWidth = this.defaultHeight = -1;
 this.currentWidth = this.currentHeight = -1;
 });
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.custom, "CBanner", $wt.widgets.Composite);
+$_Y (cla$$, function () {
 this.$left = null;
 this.right = null;
 this.bottom = null;
 this.simple = true;
 this.curve = null;
 this.curveStart = 0;
+this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
 this.curve_width = 5;
 this.curve_indent = -2;
 this.rightWidth = -1;
@@ -15643,10 +15666,6 @@ this.rightMinHeight = -1;
 this.resizeCursor = null;
 this.dragging = false;
 this.rightDragDisplacement = 0;
-$_Z (this, arguments);
-}, $wt.custom, "CBanner", $wt.widgets.Composite);
-$_Y (cla$$, function () {
-this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -17735,14 +17754,14 @@ if (string == null) this.error (4);
 this.message = string;
 }, "String");
 cla$$ = $_C (function () {
-this.filterPath = "";
-this.fileName = "";
 $_Z (this, arguments);
 }, $wt.widgets, "FileDialog", $wt.widgets.Dialog);
 $_Y (cla$$, function () {
 this.filterNames =  new Array (0);
 this.filterExtensions =  new Array (0);
 this.fileNames =  new Array (0);
+this.filterPath = "";
+this.fileName = "";
 });
 $_K (cla$$, 
 function (parent) {
@@ -18121,13 +18140,13 @@ $_S (cla$$,
 "$onmouseup", null,
 "$onkeyup", null);
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.internal.dnd, "DragAndDrop");
+$_Y (cla$$, function () {
 this.status = 0;
 this.element = null;
 this.startX = 0;
 this.startY = 0;
-$_Z (this, arguments);
-}, $wt.internal.dnd, "DragAndDrop");
-$_Y (cla$$, function () {
 this.listeners =  new Array (0);
 });
 $_M (cla$$, "reset", 

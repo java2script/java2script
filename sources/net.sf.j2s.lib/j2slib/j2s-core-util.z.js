@@ -3665,12 +3665,12 @@ return parseInt (ht) ^ parseInt ((ht >> 32));
 });
 
 cla$$ = $_C (function () {
-this.detailMessage = null;
-this.stackTrace = null;
 $_Z (this, arguments);
 }, java.lang, "Throwable", null, java.io.Serializable);
 $_Y (cla$$, function () {
+this.detailMessage = null;
 this.cause = this;
+this.stackTrace = null;
 });
 $_K (cla$$, 
 function () {
@@ -4615,11 +4615,11 @@ if (!$_D ("java.util.AbstractList.Itr")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.cursor = 0;
-this.lastRet = -1;
 $_Z (this, arguments);
 }, java.util.AbstractList, "Itr", null, java.util.Iterator);
 $_Y (cla$$, function () {
+this.cursor = 0;
+this.lastRet = -1;
 this.expectedModCount = this.callbacks["java.util.AbstractList"].modCount;
 });
 $_V (cla$$, "hasNext", 
@@ -5957,15 +5957,15 @@ if (!$_D ("java.util.Hashtable.Enumerator")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
-this.entry = null;
-this.lastReturned = null;
-this.type = 0;
-this.iterator = false;
 $_Z (this, arguments);
 }, java.util.Hashtable, "Enumerator", null, [java.util.Enumeration, java.util.Iterator]);
 $_Y (cla$$, function () {
 this.table = this.callbacks["java.util.Hashtable"].table;
 this.index = this.table.length;
+this.entry = null;
+this.lastReturned = null;
+this.type = 0;
+this.iterator = false;
 this.expectedModCount = this.callbacks["java.util.Hashtable"].modCount;
 });
 $_K (cla$$, 
@@ -7045,13 +7045,13 @@ $_Z (this, arguments);
 }, java.util, "ResourceBundle");
 Clazz.pu$h ();
 cla$$ = $_C (function () {
-this.content = null;
-this.initialized = false;
 $_Z (this, arguments);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
 $_Y (cla$$, function () {
 this.map =  new Array (0);
 this.keys =  new Array (0);
+this.content = null;
+this.initialized = false;
 });
 $_K (cla$$, 
 function (bundleName) {

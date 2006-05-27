@@ -3665,12 +3665,12 @@ return parseInt (ht) ^ parseInt ((ht >> 32));
 });
 
 cla$$ = $_C (function () {
-this.detailMessage = null;
-this.stackTrace = null;
 $_Z (this, arguments);
 }, java.lang, "Throwable", null, java.io.Serializable);
 $_Y (cla$$, function () {
+this.detailMessage = null;
 this.cause = this;
+this.stackTrace = null;
 });
 $_K (cla$$, 
 function () {

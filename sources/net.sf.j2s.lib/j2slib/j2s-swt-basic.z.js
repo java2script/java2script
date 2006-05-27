@@ -740,6 +740,320 @@ $_M (cla$$, "isReturned",
 function () {
 return this.returnSet != 0;
 });
+$_J ("org.eclipse.swt.internal.browser");
+cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.internal.browser, "OS");
+cla$$.destoryHandle = $_M (cla$$, "destoryHandle", 
+function (handle) {
+if (handle == null) {
+return ;
+}var el = handle;
+el.onblur = null;
+el.onchange = null;
+el.onclick = null;
+el.oncontextmenu = null;
+el.onfocus = null;
+el.onkeydown = null;
+el.onkeypress = null;
+el.onkeyup = null;
+el.onmousedown = null;
+el.onmousemove = null;
+el.onmouseout = null;
+el.onmouseover = null;
+el.onmouseup = null;
+el.onselectchange = null;
+el.onselectstart = null;
+if (el.parentNode != null) {
+try {
+el.parentNode.removeChild (el);
+} catch (e) {
+if ($_O (e, Error)) {
+var os = $wt.internal.browser.OS;
+var dua = navigator.userAgent;
+var dav = navigator.appVersion;
+os.isOpera = dua.indexOf("Opera") >= 0;
+var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
+os.isSafari = dav.indexOf("Safari") >= 0;
+var geckoPos = dua.indexOf("Gecko");
+os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
+os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
+os.isIE = (document.all)&&(!os.isOpera);
+os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
+os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
+os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
+} else {
+throw e;
+}
+}
+}}, "Object");
+cla$$.clearChildren = $_M (cla$$, "clearChildren", 
+function (handle) {
+if (handle == null) {
+return ;
+}var el = handle;
+for (var i = el.childNodes.length - 1; i >= 0; i--) {
+el.removeChild (el.childNodes[i]);
+}
+}, "Object");
+cla$$.SetWindowPos = $_M (cla$$, "SetWindowPos", 
+function (handle, x, y, w, h, flags) {
+if (handle == null) {
+return ;
+}var el = handle;
+}, "Object,Number,Number,Number,Number,Number");
+cla$$.init = $_M (cla$$, "init", 
+($fz = function () {
+if ($wt.internal.browser.OS.invisibleContainer == null) {
+var el = document.createElement ("DIV");
+document.body.appendChild (el);
+var s = el.style;
+s.position = "absolute";
+s.top = "-300px";
+s.width = "3000px";
+s.height = "100px";
+s.overflow = "scroll";
+($t$ = $wt.internal.browser.OS.invisibleContainer = el, $wt.internal.browser.OS.prototype.invisibleContainer = $wt.internal.browser.OS.invisibleContainer, $t$);
+el = document.createElement ("DIV");
+$wt.internal.browser.OS.invisibleContainer.appendChild (el);
+el.className = "system-default";
+s = el.style;
+s.whiteSpace = "nowrap";
+s.overflow = "visible";
+($t$ = $wt.internal.browser.OS.lineContainer = el, $wt.internal.browser.OS.prototype.lineContainer = $wt.internal.browser.OS.lineContainer, $t$);
+el = document.createElement ("DIV");
+$wt.internal.browser.OS.invisibleContainer.appendChild (el);
+($t$ = $wt.internal.browser.OS.blockContainer = el, $wt.internal.browser.OS.prototype.blockContainer = $wt.internal.browser.OS.blockContainer, $t$);
+}}, $fz.isPrivate = true, $fz));
+cla$$.resetLineContainer = $_M (cla$$, "resetLineContainer", 
+($fz = function () {
+var container = $wt.internal.browser.OS.lineContainer;
+$wt.internal.browser.OS.clearChildren (container);
+container.className = "";
+var s = container.style;
+s.cssText = "";
+s.whiteSpace = "nowrap";
+s.overflow = "visible";
+}, $fz.isPrivate = true, $fz));
+cla$$.resetBlockContainer = $_M (cla$$, "resetBlockContainer", 
+($fz = function () {
+var container = $wt.internal.browser.OS.blockContainer;
+$wt.internal.browser.OS.clearChildren (container);
+container.className = "";
+container.style.cssText = "";
+}, $fz.isPrivate = true, $fz));
+cla$$.getContainerWidth = $_M (cla$$, "getContainerWidth", 
+function (container) {
+var el = container;
+return Math.max (el.offsetWidth, Math.max (el.clientWidth, el.scrollWidth));
+}, "Object");
+cla$$.getContainerHeight = $_M (cla$$, "getContainerHeight", 
+function (container) {
+var el = container;
+var max = Math.max (el.offsetHeight, Math.max (el.clientHeight, el.scrollHeight));
+if ($wt.internal.browser.OS.isIE) {
+max--;
+}return max;
+}, "Object");
+cla$$.insertText = $_M (cla$$, "insertText", 
+function (handle, text) {
+if (!((/[\r\n\t&]/g).test (text))) {
+handle.style.display = "inline";
+handle.appendChild(document.createTextNode(text));
+return ;
+}
+var lines = null;
+var c160 = String.fromCharCode (160);
+var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
+var s = text.replace (/\t/g, c160x8);
+if (splitNeedFixed) {
+try {
+lines = splitIntoLines (s);
+} catch (e) {
+//popupAlert (e.message);
+}
+} else {
+lines = s.split (/\r\n|\r|\n/g);
+}
+for (var i = 0; i < lines.length; i++) {
+if (i > 0) {
+handle.appendChild (document.createElement ("BR"));
+}
+var lineEl = document.createElement ("SPAN");
+handle.appendChild (lineEl);
+//lineEl.style.whiteSpace = "nowrap";
+if (lines[i].length == 0) {
+lines[i] = String.fromCharCode (160);
+}
+var idx = lines[i].indexOf ('&');
+var lastIndex = 0;
+while (idx != -1) {
+if (idx < lines[i].length - 1) {
+var c = lines[i].charAt (idx + 1);
+if (c == '&') {
+idx = lines[i].indexOf ('&', idx + 2);
+continue;
+} else {
+var chs = lines[i].substring (lastIndex, idx);
+if (chs.length != 0) {
+lineEl.appendChild (document.createTextNode (chs));
+}
+var el = document.createElement ("SPAN");
+lineEl.appendChild (el);
+//el.style.whiteSpace = "nowrap";
+el.appendChild (document.createTextNode (c));
+lastIndex = idx + 2;
+idx = lines[i].indexOf ('&', lastIndex);
+}
+} else {
+break;
+}
+}
+if (lastIndex == 0) {
+lineEl.appendChild (document.createTextNode (lines[i].replace (/&&/g, '&')));
+} else {
+lineEl.appendChild (document.createTextNode (lines[i]
+.substring (lastIndex, lines[i].length).replace (/&&/g, '&')));
+}
+}
+}, "Object,String");
+cla$$.setupAsPlain = $_M (cla$$, "setupAsPlain", 
+($fz = function (str) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+c.className = "system-default";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "String");
+cla$$.setupAsStyled = $_M (cla$$, "setupAsStyled", 
+($fz = function (str, className, cssText) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+if (className != null && className.length != 0) {
+c.className = className;
+}if (cssText != null && cssText.length != 0) {
+cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+c.style.cssText = cssText;
+}$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "String,String,String");
+cla$$.setupAsPlainWrapped = $_M (cla$$, "setupAsPlainWrapped", 
+($fz = function (str, wrappedWidth) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetBlockContainer ();
+var c = $wt.internal.browser.OS.blockContainer;
+c.className = "system-default";
+c.style.width = wrappedWidth + "px";
+c.style.overflow = "visible";
+c.style.whiteSpace = "normal";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "String,Number");
+cla$$.setupAsStyledWrapped = $_M (cla$$, "setupAsStyledWrapped", 
+($fz = function (str, className, cssText, wrappedWidth) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+if (className != null && className.length != 0) {
+c.className = className;
+}if (cssText != null && cssText.length != 0) {
+cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+c.style.cssText = cssText;
+}c.style.width = wrappedWidth + "px";
+c.style.overflow = "visible";
+c.style.whiteSpace = "normal";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "String,String,String,Number");
+cla$$.getStringPlainWidth = $_M (cla$$, "getStringPlainWidth", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return $wt.internal.browser.OS.getContainerWidth (c);
+}, "String");
+cla$$.getStringStyledWidth = $_M (cla$$, "getStringStyledWidth", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return $wt.internal.browser.OS.getContainerWidth (c);
+}, "String,String,String");
+cla$$.getStringPlainHeight = $_M (cla$$, "getStringPlainHeight", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "String");
+cla$$.getStringPlainWrappedHeight = $_M (cla$$, "getStringPlainWrappedHeight", 
+function (str, wrappedWidth) {
+var c = $wt.internal.browser.OS.setupAsPlainWrapped (str, wrappedWidth);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "String,Number");
+cla$$.getStringStyledHeight = $_M (cla$$, "getStringStyledHeight", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "String,String,String");
+cla$$.getStringStyledWrappedHeight = $_M (cla$$, "getStringStyledWrappedHeight", 
+function (str, className, cssText, wrappedWidth) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyledWrapped (str, className, cssText, wrappedWidth);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "String,String,String,Number");
+cla$$.getStringPlainSize = $_M (cla$$, "getStringPlainSize", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
+}, "String");
+cla$$.getStringStyledSize = $_M (cla$$, "getStringStyledSize", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return new org.eclipse.swt.graphics.Point(0, 0);
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
+}, "String,String,String");
+$_S (cla$$,
+"isIE", false,
+"isIE60", false,
+"isIE55", false,
+"isIE50", false,
+"isMozilla", false,
+"isFirefox", false,
+"isSafari", false,
+"isOpera", false);
+{
+var os = $wt.internal.browser.OS;
+var dua = navigator.userAgent;
+var dav = navigator.appVersion;
+os.isOpera = dua.indexOf("Opera") >= 0;
+var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
+os.isSafari = dav.indexOf("Safari") >= 0;
+var geckoPos = dua.indexOf("Gecko");
+os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
+os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
+os.isIE = (document.all)&&(!os.isOpera);
+os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
+os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
+os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
+}$_S (cla$$,
+"invisibleContainer", null,
+"lineContainer", null,
+"blockContainer", null);
 cla$$ = $_C (function () {
 this.display = null;
 this.widget = null;
