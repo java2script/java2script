@@ -19,6 +19,8 @@ package net.sf.j2s.test.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,6 +40,7 @@ public static void main (String [] args) {
 	final Shell shell = new Shell (display);
 	//shell.setLayout (new FillLayout ());
 	shell.setLayout (new GridLayout ());
+	Image imageOpen = new Image(display, TestTabFolder.class.getResourceAsStream("openFolder.gif"));
 //	final TabFolder tf = new TabFolder(shell, SWT.BORDER | SWT.SHADOW_NONE);
 //	group.setText("Colors and Font and Long and Long");
 //	tf.setLayout(new GridLayout(2, true));
@@ -48,20 +51,28 @@ public static void main (String [] args) {
 //	
 //	final Button btn2 = new Button(tf, SWT.PUSH);
 //	btn2.setText("Thing");
+	final Group group = new Group(shell, SWT.BORDER);
+	group.setText("Colors and Font and Long and Long");
+	group.setLayout(new GridLayout(1, true));
 
-	final TabFolder tf2 = new TabFolder(shell, SWT.BORDER | SWT.BOTTOM);
+	final TabFolder tf2 = new TabFolder(group, SWT.BORDER | SWT.TOP);
 	final TabItem ti1 = new TabItem(tf2, SWT.NONE);
+	Font font = new Font(display, "Tahoma", 18, SWT.NONE);
+//	tf2.setFont(font);
 	ti1.setText("World");
-	final TabItem ti2 = new TabItem(tf2, SWT.NONE);
+	final TabItem ti2 = new TabItem(tf2, SWT.NONE | SWT.RIGHT_TO_LEFT);
 	ti2.setText("World");
 //	final TabItem ti3 = new TabItem(tf2, SWT.NONE);
 //	ti3.setText("World");
 	final Button btnCool = new Button(tf2, SWT.PUSH);
 	btnCool.setText("Cool");
 	ti1.setControl(btnCool);
+	
 	final Text txtCool = new Text(tf2, SWT.SINGLE);
 	txtCool.setText("Cool");
 	ti2.setControl(txtCool);
+	ti2.setImage(imageOpen);
+	
 //	final Button btnThing = new Button(tf2, SWT.PUSH);
 //	btnThing.setText("Thing");
 //	ti2.setControl(btnThing);
@@ -70,18 +81,18 @@ public static void main (String [] args) {
 //	ti3.setControl(btnThink);
 //	new TabItem(tf2, SWT.NONE).setText("World");
 //	new TabItem(tf2, SWT.NONE).setText("World");
-	new TabItem(tf2, SWT.NONE).setText("Hello long long and long");
+//	new TabItem(tf2, SWT.NONE | SWT.RIGHT_TO_LEFT).setText("Hello long long and long");
 	new TabItem(tf2, SWT.NONE).setText("World");
 	TabItem ti5 = new TabItem(tf2, SWT.NONE);
 	ti5.setText("World");
 	final Text txt2Cool = new Text(tf2, SWT.SINGLE);
 	txt2Cool.setText("Cool");
 	ti5.setControl(txt2Cool);
-	new TabItem(tf2, SWT.NONE).setText("World");
-	new TabItem(tf2, SWT.NONE).setText("Wor");
-	new TabItem(tf2, SWT.NONE).setText("World");
-	new TabItem(tf2, SWT.NONE).setText("Wor");
-	new TabItem(tf2, SWT.NONE).setText("World");
+//	new TabItem(tf2, SWT.NONE).setText("World");
+//	new TabItem(tf2, SWT.NONE).setText("Wor");
+//	new TabItem(tf2, SWT.NONE).setText("World");
+//	new TabItem(tf2, SWT.NONE).setText("Wor");
+//	new TabItem(tf2, SWT.NONE).setText("World");
 //	new TabItem(tf2, SWT.NONE).setText("Wor");
 	tf2.setSelection(1);
 	tf2.setLayoutData(new GridData(230, 80));
@@ -126,6 +137,8 @@ public static void main (String [] args) {
 	while (!shell.isDisposed()) {
 		if (!display.readAndDispatch ()) display.sleep ();
 	}
+	imageOpen.dispose();
+	font.dispose();
 	display.dispose ();
 }
 public static void print(Composite c) {
