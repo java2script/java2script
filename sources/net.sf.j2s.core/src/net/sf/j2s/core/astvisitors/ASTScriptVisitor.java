@@ -154,8 +154,13 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //			} else if (element instanceof Initializer) {
 //				continue;
 			} else if (element instanceof FieldDeclaration
-					&& isFieldNeedPreparation((FieldDeclaration) element)) {
-				continue;
+					/*&& isFieldNeedPreparation((FieldDeclaration) element)*/) {
+//				continue;
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (isFieldNeedPreparation(fieldDeclaration)) {
+					visitWith(fieldDeclaration, true);
+					continue;
+				}
 			}
 			element.accept(this);
 //			element.accept(this);
@@ -962,17 +967,17 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		}
 		List bodyDeclarations = node.bodyDeclarations();
 
-		boolean needPreparation = false;
-		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				FieldDeclaration field = (FieldDeclaration) element;
-				needPreparation = isFieldNeedPreparation(field);
-				if (needPreparation) {
-					break;
-				}
-			}
-		}
+//		boolean needPreparation = false;
+//		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			if (element instanceof FieldDeclaration) {
+//				FieldDeclaration field = (FieldDeclaration) element;
+//				needPreparation = isFieldNeedPreparation(field);
+//				if (needPreparation) {
+//					break;
+//				}
+//			}
+//		}
 		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -984,7 +989,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			} else if (element instanceof Initializer) {
 				continue;
 			} else if (element instanceof FieldDeclaration 
-					&& isFieldNeedPreparation((FieldDeclaration) element)) {
+					/*&& isFieldNeedPreparation((FieldDeclaration) element)*/) {
 				//if (node.isInterface()) {
 					/*
 					 * As members of interface should be treated
@@ -994,6 +999,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					 */
 					//continue;
 				//}
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (isFieldNeedPreparation(fieldDeclaration)) {
+					visitWith(fieldDeclaration, true);
+					continue;
+				}
 			}
 			element.accept(this);
 		}
@@ -1065,6 +1075,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 	
 	public boolean visit(FieldDeclaration node) {
+		return visitWith(node, false);
+	}
+	public boolean visitWith(FieldDeclaration node, boolean ignoreInitializer) {
 		if ((node.getModifiers() & Modifier.STATIC) != 0) {
 			return false;
 		}
@@ -1109,19 +1122,21 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 			//buffer.append(element.getName());
 			buffer.append(" = ");
+			/*
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				//ASTNode parent = node.getParent();
 				//if (parent instanceof AbstractTypeDeclaration) {
 					/*
 					 * Should ALWAYS get in here!
-					 */
+					 *-/
 					buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
 					buffer.append('.');
 					buffer.append(ext + fieldName);
 					//buffer.append(element.getName());
 				//}
 			} else {
-				if (element.getInitializer() != null) {
+			*/
+				if (!ignoreInitializer && element.getInitializer() != null) {
 					element.getInitializer().accept(this);
 				} else {
 					boolean isArray = false;
@@ -1149,7 +1164,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						}
 					}
 				}
-			}
+			//}
 			buffer.append(";\r\n");
 		}
 		return false;
@@ -1728,6 +1743,10 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
 								buffer.append('$');
 							}
+							if (declaringClass != null
+									&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
+								fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
+							}
 							buffer.append(fieldName);
 							return false;
 						//}
@@ -1788,6 +1807,10 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					}
 					if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
 						buffer.append('$');
+					}
+					if (declaringClass != null
+							&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
+						fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
 					}
 					buffer.append(fieldName);				
 				} else {
@@ -2861,17 +2884,17 @@ public class CB extends CA {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
 		List bodyDeclarations = node.bodyDeclarations();
-		boolean needPreparation = false;
-		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				FieldDeclaration field = (FieldDeclaration) element;
-				needPreparation = isFieldNeedPreparation(field);
-				if (needPreparation) {
-					break;
-				}
-			}
-		}
+//		boolean needPreparation = false;
+//		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			if (element instanceof FieldDeclaration) {
+//				FieldDeclaration field = (FieldDeclaration) element;
+//				needPreparation = isFieldNeedPreparation(field);
+//				if (needPreparation) {
+//					break;
+//				}
+//			}
+//		}
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
@@ -2885,13 +2908,18 @@ public class CB extends CA {
 			} else if (element instanceof EnumDeclaration) {
 				continue;
 			} else if (element instanceof FieldDeclaration) {
-				if (isFieldNeedPreparation((FieldDeclaration) element) || node.isInterface()) {
+				if (node.isInterface()) {
 					/*
 					 * As members of interface should be treated
 					 * as final and for javascript interface won't
 					 * get instantiated, so the member will be
 					 * treated specially. 
 					 */
+					continue;
+				}
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (isFieldNeedPreparation(fieldDeclaration)) {
+					visitWith(fieldDeclaration, true);
 					continue;
 				}
 			} else if (element instanceof TypeDeclaration) {
