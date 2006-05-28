@@ -8,10 +8,15 @@ String.getName = Clazz.innerFunctions.getName;
 String.serialVersionUID = String.prototype.serialVersionUID = -6849794470754667710;
 
 String.prototype.$replace = function (c1, c2) {
-	var sp = "\\$.*+{}?^()";
+	/*
+	var sp = "\\$.*+{}?^()[]";
 	if (sp.indexOf (c1) != -1) {
 		c1 = "\\" + c1;
 	}
+	*/
+	c1 = c1.replace (/([\\\/\$\.\*\+\{\}\?\^\(\)\[\]])/g, function ($0, $1) {
+		return "\\" + $1;
+	});
 	var regExp = new RegExp (c1, "gm");
 	return this.replace (regExp, c2);
 };
