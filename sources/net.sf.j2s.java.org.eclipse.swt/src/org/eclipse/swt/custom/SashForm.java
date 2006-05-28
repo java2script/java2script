@@ -36,8 +36,8 @@ public class SashForm extends Composite {
 	// colors to determine whether to set
 	// sashes to the default color (null) or
 	// a specific color
-	Color backgroundColor = null;
-	Color foregroundColor = null;
+	Color background = null;
+	Color foreground = null;
 	Control[] controls = new Control[0];
 	Control maxControl = null;
 	Listener sashListener;
@@ -262,7 +262,6 @@ void onDragSash(Event event) {
  */
 public void setOrientation(int orientation) {
 	checkWidget();
-	System.out.print("orient");
 	if (getOrientation() == orientation) return;
 	if (orientation != SWT.HORIZONTAL && orientation != SWT.VERTICAL) {
 		SWT.error(SWT.ERROR_INVALID_ARGUMENT);
@@ -272,25 +271,24 @@ public void setOrientation(int orientation) {
 	for (int i = 0; i < sashes.length; i++) {
 		sashes[i].dispose();
 		sashes[i] = new Sash(this, sashStyle);
-		sashes[i].setBackground(backgroundColor);
-		sashes[i].setForeground(foregroundColor);
+		sashes[i].setBackground(background);
+		sashes[i].setForeground(foreground);
 		sashes[i].addListener(SWT.Selection, sashListener);
 	}
 	layout(false);
 }
 public void setBackground (Color color) {
-	System.out.print("back");
 	super.setBackground(color);
-	backgroundColor = color;
+	background = color;
 	for (int i = 0; i < sashes.length; i++) {
-		sashes[i].setBackground(backgroundColor);
+		sashes[i].setBackground(background);
 	}
 }
 public void setForeground (Color color) {
 	super.setForeground(color);
-	foregroundColor = color;
+	foreground = color;
 	for (int i = 0; i < sashes.length; i++) {
-		sashes[i].setForeground(foregroundColor);
+		sashes[i].setForeground(foreground);
 	}
 }
 /**
@@ -310,7 +308,6 @@ public void setForeground (Color color) {
  */
 public void setLayout (Layout layout) {
 	checkWidget();
-	System.out.print("layout");
 	return;
 }
 /**
@@ -329,7 +326,6 @@ public void setLayout (Layout layout) {
  */
 public void setMaximizedControl(Control control){
 	checkWidget();
-	System.out.print("maximized");
 	if (control == null) {
 		if (maxControl != null) {
 			this.maxControl = null;
@@ -365,7 +361,6 @@ public void setMaximizedControl(Control control){
  */
 public void setWeights(int[] weights) {
 	checkWidget();
-	System.out.print("weight");
 	Control[] cArray = getControls(false);
 	if (weights == null || weights.length != cArray.length) {
 		SWT.error(SWT.ERROR_INVALID_ARGUMENT);
@@ -392,6 +387,4 @@ public void setWeights(int[] weights) {
 
 	layout(false);
 }
-
-
 }
