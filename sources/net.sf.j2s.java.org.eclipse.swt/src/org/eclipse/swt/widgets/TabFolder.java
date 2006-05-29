@@ -549,8 +549,13 @@ public void setSize(int width, int height) {
  * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
-	// TODO Auto-generated method stub
-	setSelection(getSelectionIndex(), false);
+	int selectionIndex = getSelectionIndex();
+	if (selectionIndex != -1) {
+		Control ctrl = items[selectionIndex].control;
+		if (ctrl != null)
+			ctrl.setBounds(getClientArea());
+		setSelection(selectionIndex, false);
+	}
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
@@ -971,15 +976,8 @@ void setSelection (int index, boolean notify) {
 	System.out.println("set selection is called!");
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
-	/*
-	 * Whenever the old index is equals to the requested index
-	 * do nothing. 
-	 */
-	if(oldIndex == index){
-		return;
-	}
 	
-	if (oldIndex != -1) {
+	if (oldIndex != -1 && oldIndex != index) {
 		TabItem item = items [oldIndex];
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
@@ -990,9 +988,9 @@ void setSelection (int index, boolean notify) {
 	updateSelection(index);
 //	int newIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int newIndex = index;
-//	if (oldIndex == index) {
-//		newIndex = -1;
-//	}
+	if (oldIndex == index) {
+		newIndex = -1;
+	}
 	if (newIndex != -1) {
 		TabItem item = items [newIndex];
 		Control control = item.control;
