@@ -490,7 +490,7 @@ public boolean isVisible () {
 	return getVisible () && parent.isVisible ();
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	if (parent.horizontalBar == this) parent.horizontalBar = null;
 	if (parent.verticalBar == this) parent.verticalBar = null;

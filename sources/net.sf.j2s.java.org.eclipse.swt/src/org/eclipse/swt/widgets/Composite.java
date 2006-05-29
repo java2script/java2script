@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -245,9 +246,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if (size.y == 0) size.y = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) size.x = wHint;
 	if (hHint != SWT.DEFAULT) size.y = hHint;
-	System.out.println("before trimming " + size);
+//	System.out.println("before trimming " + size);
 	Rectangle trim = computeTrim (0, 0, size.x, size.y);
-	System.out.println("after trimming " + trim);
+//	System.out.println("after trimming " + trim);
 	return new Point (trim.width, trim.height);
 }
 
@@ -974,6 +975,13 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 		cx -= 4;
 		cy -= 4;
 	}
+//	display.timerExec(10, new Runnable() {
+//		public void run() {
+//			System.out.println("layout of " + Composite.this);
+//			layout();
+//			System.out.println("end layout of " + Composite.this);
+//		}
+//	});
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 

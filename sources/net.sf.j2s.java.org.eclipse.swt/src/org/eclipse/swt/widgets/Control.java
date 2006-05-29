@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -1636,7 +1637,7 @@ void register () {
 	}
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	parent.removeControl (this);
 }
 

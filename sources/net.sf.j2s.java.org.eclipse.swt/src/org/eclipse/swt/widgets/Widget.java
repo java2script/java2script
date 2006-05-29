@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -1690,8 +1691,8 @@ boolean SetWindowPos (Object hWnd, Object hWndInsertAfter, int X, int Y, int cx,
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";
 	el.style.top = Y + "px";
-	el.style.width = cx + "px";
-	el.style.height = cy + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
 	return true;
 }
 /*

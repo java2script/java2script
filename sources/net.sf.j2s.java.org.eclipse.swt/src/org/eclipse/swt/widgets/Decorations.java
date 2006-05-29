@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -334,10 +335,26 @@ Control computeTabRoot () {
 
 public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
-	if ((style & SWT.NO_TRIM) != 0) {
-		return new Rectangle (x, y, width, height + 4);
+	if ((style & SWT.NO_TRIM) == 0) {
+		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
+			height += 20;
+			if (width < 105) {
+				width = 105;
+			}
+		}
+		if ((style & SWT.BORDER) != 0) {
+			width += 8;
+			height += 8;
+			x -= 4;
+			y -= 4;
+		} else {
+			width += 4;
+			height += 4;
+			x -= 2;
+			y -= 2;
+		}
 	}
-	return new Rectangle (x - 4, y - 24, width + 8, height + 20 + 8);
+	return new Rectangle (x, y, width, height);
 	/*
 	/* Get the size of the trimmings *-/
 	RECT rect = new RECT ();
@@ -772,6 +789,18 @@ public void setBounds(int x, int y, int width, int height) {
 }
 
 public void setSize(int width, int height) {
+	int w = 0;
+	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
+		w = 113;
+	} else {
+		w = 28;
+	}
+	if (width < w) {
+		width = w;
+	}
+	if (height < 28) {
+		height = 28;
+	}
 //	frameHandle.style.width = (width + 8) + "px";
 //	//frameHandle.style.height = (height + 30) + "px";
 //	frameHandle.style.height = (height + 4) + "px";
@@ -782,9 +811,16 @@ public void setSize(int width, int height) {
 	this.height = height;
 	ShellFrameDND.fixShellHeight (frameHandle);
 	ShellFrameDND.fixShellWidth (frameHandle);
-	if (layout != null) {
-		this.layout();
-	}
+//	if (layout != null) {
+//		this.layout();
+//	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#getBorderWidth()
+ */
+public int getBorderWidth() {
+	return (style & SWT.NO_TRIM) != 0 ? 1 : 0;
 }
 public Rectangle getClientArea () {
 	checkWidget ();
@@ -837,7 +873,18 @@ public Rectangle getClientArea () {
 	*/
 	//return super.getClientArea ();
 	//return new Rectangle(0, 0, OS.getContainerWidth(handle), OS.getContainerHeight(handle));
-	return new Rectangle(0, 0, width - 8, height - 20 - 8);
+	int w = width;
+	int h = height;
+	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
+		h -= 20;
+		w -= 8;
+		h -= 8;
+		if ((style & SWT.BORDER) != 0) {
+			w -= 4;
+			h -= 4;
+		}
+	}
+	return new Rectangle(0, 0, w, h);
 }
 
 /**

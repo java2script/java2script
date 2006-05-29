@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -17,9 +18,7 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.document;
 
 
 /**
@@ -885,17 +884,7 @@ public void open () {
 	layout();
 }
 
-public void setSize(int width, int height) {
-	if (width < 113) {
-		width = 113;
-	}
-	if (height < 28) {
-		height = 28;
-	}
-	super.setSize(width, height);
-}
-
-void releaseChild () {
+protected void releaseChild () {
 	/* Do nothing */
 }
 
