@@ -468,7 +468,7 @@ void createHandle () {
 	state &= ~CANVAS;
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 	//items = new TabItem [4];
 }
@@ -698,7 +698,11 @@ public int getSelectionIndex () {
 			return i;
 		}
 	}
-	return 0;
+	System.out.println("The selection is not happend yet!");
+	/*
+	 * should return -1 instead of 0
+	 */
+	return -1;
 	//return handle.selectedIndex;
 }
 
@@ -954,8 +958,17 @@ void setSelection (int index, boolean notify) {
 	 * TODO: When a tab is selected programmly, should move
 	 * the tab into visible tab area.
 	 */
+	System.out.println("set selection is called!");
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
+	/*
+	 * Whenever the old index is equals to the requested index
+	 * do nothing. 
+	 */
+	if(oldIndex == index){
+		return;
+	}
+	
 	if (oldIndex != -1) {
 		TabItem item = items [oldIndex];
 		Control control = item.control;
@@ -967,9 +980,9 @@ void setSelection (int index, boolean notify) {
 	updateSelection(index);
 //	int newIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int newIndex = index;
-	if (oldIndex == index) {
-		newIndex = -1;
-	}
+//	if (oldIndex == index) {
+//		newIndex = -1;
+//	}
 	if (newIndex != -1) {
 		TabItem item = items [newIndex];
 		Control control = item.control;
