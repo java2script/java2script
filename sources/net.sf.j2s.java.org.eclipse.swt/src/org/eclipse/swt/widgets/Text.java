@@ -15,6 +15,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -44,6 +45,8 @@ import org.eclipse.swt.internal.xhtml.document;
 public class Text extends Scrollable {
 	int tabs, oldStart, oldEnd;
 	boolean doubleClick, ignoreModify, ignoreVerify, ignoreCharacter;
+	
+	Element textHandle;
 	
 	int lineHeight;
 	
@@ -149,40 +152,73 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
 void createHandle () {
 	//super.createHandle ();
 	//OS.SendMessage (handle, OS.EM_LIMITTEXT, 0, 0);
-	doubleClick = true;
-	if ((style & SWT.MULTI) != 0) {
-		handle = document.createElement("TEXTAREA");
-	} else {
-		handle = document.createElement("INPUT");
-		//handle.type = "text";
-	}
-	handle.className = "text-default" + (OS.isIE ? " text-ie-default" : "");
-	if ((style & SWT.BORDER) != 0) {
-		handle.className += " text-border";
-	}
-	if ((style & SWT.READ_ONLY) != 0) {
-		handle.readOnly = true;
-	}
-//	if ((style & SWT.WRAP) != 0) {
-//		handle.style.whiteSpace = "normal";
+	handle = document.createElement ("DIV");
+	String cssName = "text-default";
+//	if ((style & SWT.BORDER) != 0) {
+//		cssName += " text-border";
 //	}
-	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
-		handle.style.overflow = "scroll";
-	} else {
-		//if (OS.isIE) {
-			if ((style & SWT.V_SCROLL) != 0) {
-				handle.className += " text-v-scroll";
-			} else if ((style & SWT.H_SCROLL) != 0) {
-				handle.className += " text-h-scroll";
-			} 
-		//}
-	}
+//	if ((style & SWT.FLAT) != 0) {
+//		cssName += " text-flat";
+//	}
+	handle.className = cssName;
 	if (parent != null) {
 		Element parentHandle = parent.containerHandle();
 		if (parentHandle!= null) {
 			parentHandle.appendChild(handle);
 		}
 	}
+	doubleClick = true;
+	
+	if ((style & SWT.MULTI) != 0) {
+		textHandle = document.createElement("TEXTAREA");
+	} else {
+		textHandle = document.createElement("INPUT");
+		//handle.type = "text";
+	}
+	if (OS.isMozilla) {
+		textHandle.style.position = "fixed";
+	}
+	String textCSSName = null;
+	if (OS.isIE) {
+		textCSSName = "text-ie-default";
+	}
+	if ((style & SWT.BORDER) != 0) {
+		if (textCSSName != null) {
+			textCSSName += " text-border";
+		} else {
+			textCSSName = "text-border";
+		}
+	}
+	if ((style & SWT.READ_ONLY) != 0) {
+		textHandle.readOnly = true;
+	}
+//	if ((style & SWT.WRAP) != 0) {
+//		handle.style.whiteSpace = "normal";
+//	}
+	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
+		textHandle.style.overflow = "scroll";
+	} else {
+		//if (OS.isIE) {
+			if ((style & SWT.V_SCROLL) != 0) {
+				if (textCSSName != null) {
+					textCSSName += " text-v-scroll";
+				} else {
+					textCSSName = "text-v-scroll";
+				}
+			} else if ((style & SWT.H_SCROLL) != 0) {
+				if (textCSSName != null) {
+					textCSSName += " text-h-scroll";
+				} else {
+					textCSSName = "text-h-scroll";
+				}
+			} 
+		//}
+	}
+	if (textCSSName != null) {
+		System.out.println("border:" + textCSSName);
+		textHandle.className = textCSSName;
+	}
+	handle.appendChild(textHandle);
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
 }
@@ -191,7 +227,7 @@ void createHandle () {
  * @see org.eclipse.swt.widgets.Widget#hookKeyDown()
  */
 void hookKeyDown() {
-	handle.onkeydown = new RunnableCompatibility() {
+	textHandle.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			boolean verifyHooked = false;
 			if (hooks(SWT.Verify)) {
@@ -243,14 +279,14 @@ void hookModify() {
 	/*
 	 * TODO: Maybe pasting string into Text component should be limited.
 	 */
-	handle.onchange = new RunnableCompatibility() {
+	textHandle.onchange = new RunnableCompatibility() {
 		public void run() {
 			if ((style & SWT.READ_ONLY) != 0 
 					|| (!hooks (SWT.Verify) && !filters (SWT.Verify))) {
 				toReturn(true);
 				return ;
 			}
-			String newText = handle.value;
+			String newText = textHandle.value;
 			if (newText != null) {
 				String oldText = newText;
 				newText = verifyText (newText, 0, 0, null);
@@ -472,7 +508,7 @@ public void append (String string) {
 	ignoreCharacter = false;
 	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 	*/
-	handle.value += string;
+	textHandle.value += string;
 }
 
 static int checkStyle (int style) {
@@ -517,7 +553,7 @@ public void clearSelection () {
 		OS.SendMessage (handle, OS.EM_SETSEL, -1, 0);
 	}
 	*/
-	BrowserNative.clearSelection(handle);
+	BrowserNative.clearSelection(textHandle);
 }
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
@@ -535,6 +571,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 				size = OS.getStringStyledSize(text, "text-default", handle.style.cssText);
 			}
 //			width = size.x - 2; // there are default padding "0 1px" for class "text-default";
+			width = size.x;
 			height = size.y;
 			if (height <= 0) {
 				height = getLineHeight();
@@ -764,7 +801,7 @@ public int getBorderWidth () {
 public int getCaretLineNumber () {
 	checkWidget ();
 	//return OS.SendMessage (handle, OS.EM_LINEFROMCHAR, -1, 0);
-	return BrowserNative.getTextCaretLineNumber (handle);
+	return BrowserNative.getTextCaretLineNumber (textHandle);
 }
 
 /**
@@ -852,7 +889,7 @@ public int getCaretPosition () {
 	if (!OS.IsUnicode && OS.IsDBLocale) caret = mbcsToWcsPos (caret);
 	return caret;
 	*/
-	return BrowserNative.getTextCaretPosition (handle);
+	return BrowserNative.getTextCaretPosition (textHandle);
 }
 
 /**
@@ -937,8 +974,8 @@ public boolean getEditable () {
 //	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //	return (bits & OS.ES_READONLY) == 0;
 	String disableClass = "text-disable";
-	if (handle.className != null) {
-		int idx = handle.className.indexOf(disableClass);
+	if (textHandle.className != null) {
+		int idx = textHandle.className.indexOf(disableClass);
 		if (idx != -1) {
 			return false;
 		}
@@ -1055,7 +1092,7 @@ public Point getSelection () {
 	}
 	return new Point (start [0], end [0]);
 	*/
-	return BrowserNative.getTextSelection(handle);
+	return BrowserNative.getTextSelection(textHandle);
 }
 
 /**
@@ -1096,7 +1133,7 @@ public String getSelectionText () {
 	OS.GetWindowText (handle, buffer, length + 1);
 	return buffer.toString (start [0], end [0] - start [0]);
 	*/
-	return BrowserNative.getSelectionText(handle);
+	return BrowserNative.getSelectionText(textHandle);
 }
 
 /**
@@ -1159,7 +1196,7 @@ public String getText () {
 	OS.GetWindowText (handle, buffer, length + 1);
 	return buffer.toString (0, length);
 	*/
-	return handle.value;
+	return textHandle.value;
 }
 
 /**
@@ -1185,7 +1222,7 @@ public String getText (int start, int end) {
 //	if (!(start <= end && 0 <= end)) return "";
 //	int length = OS.GetWindowTextLength (handle);
 //	if (!OS.IsUnicode && OS.IsDBLocale) length = mbcsToWcsPos (length);
-	int length = handle.value.length();
+	int length = textHandle.value.length();
 	start = Math.max (0, start);
 	end = Math.min (end, length - 1);
 	/*
@@ -1292,7 +1329,7 @@ public int getTopPixel () {
 public void insert (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	Point sel = BrowserNative.getTextSelection(handle);
+	Point sel = BrowserNative.getTextSelection(textHandle);
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
 		string = verifyText (string, sel.x, sel.y, null);
 		if (string == null) return;
@@ -1321,7 +1358,7 @@ public void insert (String string) {
 	OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
 	ignoreCharacter = false;
 	*/
-	BrowserNative.insertTextString(handle, string);
+	BrowserNative.insertTextString(textHandle, string);
 	if ((style & SWT.MULTI) != 0) {
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
@@ -1388,6 +1425,16 @@ public void paste () {
 	//OS.SendMessage (handle, OS.WM_PASTE, 0, 0);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
+ */
+void releaseHandle() {
+	if (textHandle != null) {
+		BrowserNative.releaseHandle(textHandle);
+		textHandle = null;
+	}
+	super.releaseHandle();
+}
 /**
  * Removes the listener from the collection of listeners who will
  * be notified when the receiver's text is modified.
@@ -1472,7 +1519,7 @@ public void removeVerifyListener (VerifyListener listener) {
 public void selectAll() {
 	checkWidget ();
 	//OS.SendMessage (handle, OS.EM_SETSEL, 0, -1);
-	handle.select();
+	textHandle.select();
 }
 
 boolean sendKeyEvent (int type, int msg, int wParam, int lParam, Event event) {
@@ -1622,7 +1669,14 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	*/
 	super.setBounds (x, y, width, height, flags);
 }
-
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBackground(org.eclipse.swt.graphics.Color)
+ */
+public void setBackground(Color color) {
+	if (color != null)
+		textHandle.style.backgroundColor = color.getCSSHandle();
+	super.setBackground(color);
+}
 /**
  * Sets the double click enabled flag.
  * <p>
@@ -1682,7 +1736,7 @@ public void setEchoChar (char echo) {
 	OS.InvalidateRect (handle, null, true);
 	*/
 	try {
-		handle.type = "password";
+		textHandle.type = "password";
 	} catch (Exception e) {
 		
 	}
@@ -1702,21 +1756,21 @@ public void setEditable (boolean editable) {
 	checkWidget ();
 	style &= ~SWT.READ_ONLY;
 	if (!editable) style |= SWT.READ_ONLY;
-	handle.readOnly = !editable;
+	textHandle.readOnly = !editable;
 	String disableClass = "text-disable";
 	if (editable) {
-		if (handle.className != null) {
-			int idx = handle.className.indexOf(disableClass);
+		if (textHandle.className != null) {
+			int idx = textHandle.className.indexOf(disableClass);
 			if (idx != -1) {
-				String zzName = handle.className.substring(0, idx) + handle.className.substring(idx + disableClass.length());
-				handle.className = zzName;
+				String zzName = textHandle.className.substring(0, idx) + textHandle.className.substring(idx + disableClass.length());
+				textHandle.className = zzName;
 			}
 		}
 	} else {
-		if (handle.className != null) {
-			int idx = handle.className.indexOf(disableClass);
+		if (textHandle.className != null) {
+			int idx = textHandle.className.indexOf(disableClass);
 			if (idx == -1) {
-				handle.className += " text-disable";
+				textHandle.className += " text-disable";
 			}
 		}
 	}
@@ -1725,9 +1779,20 @@ public void setEditable (boolean editable) {
 public void setFont (Font font) {
 	checkWidget ();
 	super.setFont (font);
+	Element tmp = handle;
+	handle = textHandle;
+	super.setFont (font);
+	handle = tmp;
 //	setTabStops (tabs);
 }
-
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	if (color != null)
+		textHandle.style.color = color.getCSSHandle();
+	super.setForeground(color);
+}
 /**
  * Sets the orientation of the receiver, which must be one
  * of the constants <code>SWT.LEFT_TO_RIGHT</code> or <code>SWT.RIGHT_TO_LEFT</code>.
@@ -1795,7 +1860,7 @@ public void setSelection (int start) {
 	OS.SendMessage (handle, OS.EM_SETSEL, start, start);
 	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 	*/
-	setSelection(start, handle.value.length ());
+	setSelection(start, textHandle.value.length ());
 }
 
 /**
@@ -1833,7 +1898,7 @@ public void setSelection (int start, int end) {
 	OS.SendMessage (handle, OS.EM_SETSEL, start, end);
 	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 	*/
-    BrowserNative.setTextSelection (handle, start, end);
+    BrowserNative.setTextSelection (textHandle, start, end);
 }
 
 public void setRedraw (boolean redraw) {
@@ -1946,7 +2011,7 @@ void setTabStops (int tabs) {
 public void setText (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	handle.value = string;
+	textHandle.value = string;
 	/*
 	string = Display.withCrLf (string);
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
@@ -2034,8 +2099,12 @@ public void setTopIndex (int index) {
  */
 boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	if ((style & SWT.BORDER) != 0) {
+		textHandle.style.width = ((cx - 4) > 0 ? (cx - 4) : 0) + "px";
+		textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
 		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
 	}
+	textHandle.style.width = cx + "px";
+	textHandle.style.height = cy + "px";
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
@@ -2056,6 +2125,14 @@ public void showSelection () {
 	checkWidget ();
 //	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 }
+//
+///* (non-Javadoc)
+// * @see org.eclipse.swt.widgets.Control#showWidget(boolean)
+// */
+//void showWidget(boolean visible) {
+//	textHandle.style.visibility = visible ? "visible" : "hidden";
+//	super.showWidget(visible);
+//}
 
 String verifyText (String string, int start, int end, Event keyEvent) {
 	if (ignoreVerify) return string;
