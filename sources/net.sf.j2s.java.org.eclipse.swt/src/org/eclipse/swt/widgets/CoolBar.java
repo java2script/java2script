@@ -298,7 +298,7 @@ void createItem (CoolItem item, int index) {
 //		layoutItems ();
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 	items = new CoolItem [4];
 	originalItems = new CoolItem [0];

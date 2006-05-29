@@ -42,7 +42,7 @@ import org.eclipse.swt.accessibility.*;
  */
 
 public abstract class Control extends Widget implements Drawable {
-	Composite parent;
+	protected Composite parent;
 	Cursor cursor;
 	Menu menu;
 	String toolTipText;

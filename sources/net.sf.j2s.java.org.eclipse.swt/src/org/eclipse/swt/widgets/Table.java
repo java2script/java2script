@@ -986,7 +986,7 @@ void createItem (TableItem item, int index) {
 	item.handle = tbodyTR;
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 	items = new TableItem [0];
 	columns = new TableColumn [0];

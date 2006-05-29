@@ -644,7 +644,7 @@ public void copy () {
 	//OS.SendMessage (handle, OS.WM_COPY, 0, 0);
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 	doubleClick = true;
 	setTabStops (tabs = 8);

@@ -663,7 +663,7 @@ void exportHTMLSource() {
 	shell.open();
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 //	swFlags = OS.IsWinCE ? OS.SW_SHOWMAXIMIZED : OS.SW_SHOWNOACTIVATE;
 //	hAccel = -1;

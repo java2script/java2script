@@ -385,7 +385,7 @@ void createItem (ToolItem item, int index) {
 	layoutItems ();
 }
 
-void createWidget () {
+protected void createWidget () {
 	super.createWidget ();
 	items = new ToolItem [0];
 	lastFocusId = -1;

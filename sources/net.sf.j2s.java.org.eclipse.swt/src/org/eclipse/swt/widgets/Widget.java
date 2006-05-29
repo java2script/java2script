@@ -62,7 +62,7 @@ public abstract class Widget {
 	 */
 	public Element handle;
 	
-	int style, state;
+	protected int style, state;
 	Display display;
 	EventTable eventTable;
 	Object data;
@@ -74,13 +74,13 @@ public abstract class Widget {
 	boolean[] hookedStatus;
 
 	/* Global state flags */
-	static final int DISPOSED		= 1<<0;
-	static final int CANVAS			= 1<<1;
-	static final int KEYED_DATA		= 1<<2;
-	static final int DISABLED		= 1<<3;
-	static final int HIDDEN			= 1<<4;
-	static final int LAYOUT_NEEDED	= 1<<5;
-	static final int LAYOUT_CHANGED = 1<<6;
+	static protected final int DISPOSED		= 1<<0;
+	static protected final int CANVAS			= 1<<1;
+	static protected final int KEYED_DATA		= 1<<2;
+	static protected final int DISABLED		= 1<<3;
+	static protected final int HIDDEN			= 1<<4;
+	static protected final int LAYOUT_NEEDED	= 1<<5;
+	static protected final int LAYOUT_CHANGED = 1<<6;
 	
 	/* Default widths for widgets */
 	static final int DEFAULT_WIDTH	= 64;

@@ -441,6 +441,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		}
 	}
 	*/
+	System.out.println("Combo : " + width + " " + height);
 	return new Point (width, height);
 }
 
@@ -1374,6 +1375,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	} else {
 		super.setBounds (x, y, width, height, flags);
 	}
+	System.out.println("left " + this.left + " " + this.top + " width "+ width + " height " + height);
 }
 
 /*
