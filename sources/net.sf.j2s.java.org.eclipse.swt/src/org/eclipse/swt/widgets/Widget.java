@@ -1205,7 +1205,7 @@ void postEvent (int eventType, Event event) {
  * @see #releaseWidget
  * @see #releaseHandle
  */
-void releaseChild () {
+protected void releaseChild () {
 }
 
 /*
