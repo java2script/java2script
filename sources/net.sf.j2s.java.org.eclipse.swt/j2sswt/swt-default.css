@@ -455,13 +455,31 @@
 .text-default {
 	position:absolute;
 	border-style:none;
-	background-color:white;
+	/*background-color:white;*/
 	margin:0;
 	/*padding:0 1px;*/
 	padding:0;
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 	/*white-space:nowrap;*/
+}
+.text-default textarea {
+	border-style:none;
+	background-color:white;
+	margin:0;
+	/*padding:0 1px;*/
+	padding:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+}
+.text-default input {
+	border-style:none;
+	background-color:white;
+	margin:0;
+	/*padding:0 1px;*/
+	padding:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
 }
 textarea.text-ie-default {
 	overflow-y:hidden;
@@ -475,6 +493,12 @@ textarea.text-h-scroll {
 	overflow-y:hidden;
 }
 .text-border {
+	border-style:inset;
+}
+textarea.text-border {
+	border-style:inset;
+}
+input.text-border {
 	border-style:inset;
 }
 .text-disable {
@@ -901,6 +925,7 @@ textarea.text-h-scroll {
 .group-title-text {
 	position:absolute;
 	margin:0 2px 0 8px;
+	cursor:default;
 }
 .group-right-corner {
 	position:absolute;
