@@ -1092,7 +1092,7 @@ protected void releaseChild () {
 	}
 }
 
-void releaseHandle () {
+protected void releaseHandle () {
 	if (handle != null) {
 		BrowserNative.releaseHandle(handle);
 		handle = null;

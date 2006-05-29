@@ -27,7 +27,7 @@ import org.eclipse.swt.graphics.*;
  */
 
 public abstract class Item extends Widget {
-	String text;
+	protected String text;
 	Image image;
 
 /**
@@ -135,7 +135,7 @@ public String getText () {
 	return text;
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	text = null;
 	image = null;

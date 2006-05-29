@@ -3068,7 +3068,7 @@ void releaseDisplay () {
 	imageList = toolImageList = toolHotImageList = toolDisabledImageList = null;
 }
 
-void releaseImageList (ImageList list) {
+public void releaseImageList (ImageList list) {
 	int i = 0;
 	int length = imageList.length; 
 	while (i < length) {

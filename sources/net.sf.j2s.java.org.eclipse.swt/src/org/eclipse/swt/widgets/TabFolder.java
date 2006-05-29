@@ -368,7 +368,7 @@ void createItem (TabItem item, final int index) {
 	}
 }
 
-void createHandle () {
+protected void createHandle () {
 	/*
 	super.createHandle ();
 	
@@ -548,7 +548,7 @@ public void setSize(int width, int height) {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
-boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	// TODO Auto-generated method stub
 	setSelection(getSelectionIndex(), false);
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
@@ -823,7 +823,7 @@ boolean mnemonicMatch (char key) {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
-void releaseHandle() {
+protected void releaseHandle() {
 	if (borderNW != null) {
 		BrowserNative.releaseHandle(borderNW);
 		borderNW = null;
@@ -864,7 +864,7 @@ void releaseHandle() {
 	}
 	super.releaseHandle();
 }
-void releaseWidget () {
+protected void releaseWidget () {
 	//int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
 	int count = getItemCount();
 	for (int i=0; i<count; i++) {
@@ -880,7 +880,7 @@ void releaseWidget () {
 	super.releaseWidget ();
 }
 
-void removeControl (Control control) {
+protected void removeControl (Control control) {
 	super.removeControl (control);
 	//int count = OS.SendMessage (handle, OS.TCM_GETITEMCOUNT, 0, 0);
 	int count = getItemCount();

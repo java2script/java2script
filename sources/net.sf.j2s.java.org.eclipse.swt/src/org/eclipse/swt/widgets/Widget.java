@@ -64,7 +64,7 @@ public abstract class Widget {
 	public Element handle;
 	
 	protected int style, state;
-	Display display;
+	protected Display display;
 	EventTable eventTable;
 	Object data;
 	
@@ -219,7 +219,7 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
  *
  * @return the new style bits
  */
-static int checkBits (int style, int int0, int int1, int int2, int int3, int int4, int int5) {
+protected static int checkBits (int style, int int0, int int1, int int2, int int3, int int4, int int5) {
 	int mask = int0 | int1 | int2 | int3 | int4 | int5;
 	if ((style & mask) == 0) style |= int0;
 	if ((style & int0) != 0) style = (style & ~mask) | int0;
@@ -584,7 +584,7 @@ public void dispose () {
  *
  * @see SWT#error(int)
  */
-void error (int code) {
+protected void error (int code) {
 	SWT.error(code);
 }
 
@@ -1132,7 +1132,7 @@ public boolean isListening (int eventType) {
  *
  * @return <code>true</code> when subclassing is allowed and <code>false</code> otherwise
  */
-boolean isValidSubclass () {
+protected boolean isValidSubclass () {
 	return Display.isValidClass (getClass ());
 }
 
@@ -1227,12 +1227,12 @@ protected void releaseChild () {
  * @see #releaseWidget
  * @see #releaseHandle
  */
-void releaseHandle () {
+protected void releaseHandle () {
 	state |= DISPOSED;
 	display = null;
 }
 
-void releaseResources () {
+public void releaseResources () {
 	releaseWidget ();
 	releaseHandle ();
 }
@@ -1364,7 +1364,7 @@ void sendEvent (int eventType) {
 	sendEvent (eventType, null, true);
 }
 
-void sendEvent (int eventType, Event event) {
+protected void sendEvent (int eventType, Event event) {
 	sendEvent (eventType, event, true);
 }
 

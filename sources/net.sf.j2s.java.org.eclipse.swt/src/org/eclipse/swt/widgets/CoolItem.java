@@ -296,7 +296,7 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	control = null;
 	parent = null;

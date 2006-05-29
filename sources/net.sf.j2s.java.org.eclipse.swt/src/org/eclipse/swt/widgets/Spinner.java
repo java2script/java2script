@@ -130,7 +130,7 @@ protected void checkSubclass () {
 	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
 }
 
-void createHandle () {
+protected void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 	/*
@@ -702,7 +702,7 @@ void register () {
 	display.addControl (hwndUpDown, this);
 }
 
-void releaseHandle () {
+protected void releaseHandle () {
 	super.releaseHandle ();
 	hwndText = hwndUpDown = null;
 }

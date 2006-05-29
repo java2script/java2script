@@ -818,14 +818,14 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-void releaseHandle () {
+protected void releaseHandle () {
 	super.releaseHandle ();
 //	handle = 0;
 	parent = null;
 	parentItem = null;
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	parent = null;
 	strings = null;

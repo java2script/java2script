@@ -93,7 +93,7 @@ public Composite (Composite parent, int style) {
 //	children = new Control[0];
 }
 
-Control [] _getChildren () {
+protected Control [] _getChildren () {
 	if (true) return children;
 	/* 
 	 * TODO: search the DOM and filter out the children
@@ -256,7 +256,7 @@ protected Element containerHandle() {
 	return handle;
 }
 
-void createHandle () {
+protected void createHandle () {
 	//super.createHandle ();
 	handle = document.createElement("DIV");
 	handle.className = "composite-default";
@@ -669,7 +669,7 @@ void releaseChildren () {
 	}
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	releaseChildren ();
 	super.releaseWidget ();
 	if ((state & CANVAS) != 0 && (style & SWT.EMBEDDED) != 0) {
@@ -689,7 +689,7 @@ void releaseWidget () {
 }
 
 
-void removeControl (Control control) {
+protected void removeControl (Control control) {
 	fixTabList (control);
 	fixChildrenList (control);
 	resizeChildren ();
@@ -970,7 +970,7 @@ boolean updateFont (Font oldFont, Font newFont) {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
-boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 4;
 		cy -= 4;

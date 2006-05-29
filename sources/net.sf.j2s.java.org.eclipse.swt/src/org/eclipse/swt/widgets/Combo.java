@@ -463,7 +463,7 @@ public void copy () {
 	//OS.SendMessage (handle, OS.WM_COPY, 0, 0);
 }
 
-void createHandle () {
+protected void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 

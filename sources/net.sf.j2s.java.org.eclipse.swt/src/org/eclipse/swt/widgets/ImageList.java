@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-class ImageList {
+public class ImageList {
 	int handle, style, refCount;
 	Image [] images;
 	/*

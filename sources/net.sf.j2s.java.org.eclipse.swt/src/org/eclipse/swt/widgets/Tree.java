@@ -317,7 +317,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	return new Point (width, height);
 }
 
-void createHandle () {
+protected void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 	
@@ -1921,7 +1921,7 @@ void releaseItems (TreeItem [] nodes, TVITEM tvItem) {
 }
 */
 
-void releaseWidget () {
+protected void releaseWidget () {
 	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
 	int columnCount = columns.length;
 	for (int i=0; i<items.length; i++) {

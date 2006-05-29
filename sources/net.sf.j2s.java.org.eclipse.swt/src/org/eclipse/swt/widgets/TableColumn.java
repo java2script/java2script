@@ -402,7 +402,7 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	parent = null;
 }

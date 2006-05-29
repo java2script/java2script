@@ -1428,7 +1428,7 @@ public void paste () {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
-void releaseHandle() {
+protected void releaseHandle() {
 	if (textHandle != null) {
 		BrowserNative.releaseHandle(textHandle);
 		textHandle = null;

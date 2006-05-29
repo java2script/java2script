@@ -440,7 +440,7 @@ public void close () {
 	closeWidget ();
 }
 
-void createHandle () {
+protected void createHandle () {
 //	boolean embedded = handle != null;
 	
 	/*
@@ -596,7 +596,7 @@ public void forceActive () {
 //	OS.SetForegroundWindow (handle);
 }
 
-void forceResize () {
+protected void forceResize () {
 	/* Do nothing */
 }
 
@@ -888,7 +888,7 @@ protected void releaseChild () {
 	/* Do nothing */
 }
 
-void releaseHandle () {
+protected void releaseHandle () {
 //	try {
 //		BrowserNative.releaseHandle(shellTitle);
 //		BrowserNative.releaseHandle(titleBar);
@@ -913,7 +913,7 @@ void releaseShells () {
 	}
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	releaseShells ();
 	super.releaseWidget ();
 	activeMenu = null;

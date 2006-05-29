@@ -489,7 +489,7 @@ protected void releaseChild () {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Widget#releaseHandle()
  */
-void releaseHandle() {
+protected void releaseHandle() {
 	if (handle != null) {
 		BrowserNative.releaseHandle(handle);
 		handle = null;
@@ -501,7 +501,7 @@ void releaseMenu () {
 	menu = null;
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	if (menu != null) menu.releaseResources ();
 	menu = null;
 	super.releaseWidget ();

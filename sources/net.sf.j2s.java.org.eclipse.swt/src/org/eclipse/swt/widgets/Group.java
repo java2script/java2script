@@ -232,7 +232,7 @@ Object createCSSElement(Object parent, String css) {
 	return el;
 }
 
-void createHandle () {
+protected void createHandle () {
 	//super.createHandle ();
 	state &= ~CANVAS;
 	handle = document.createElement("DIV");
@@ -360,7 +360,7 @@ boolean mnemonicMatch (char key) {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
-void releaseHandle() {
+protected void releaseHandle() {
 	if (titleLine != null) {
 		BrowserNative.releaseHandle(titleLine);
 		titleLine = null;

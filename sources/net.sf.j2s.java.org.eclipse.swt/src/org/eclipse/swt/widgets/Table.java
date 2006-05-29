@@ -596,7 +596,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	return new Point (width, height);
 }
 
-void createHandle () {
+protected void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
 	
@@ -1969,7 +1969,7 @@ void removeItems (int[] indices){
 	}
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	//int hwndHeader =  OS.SendMessage (handle, OS.LVM_GETHEADER, 0, 0);
 	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
 	int columnCount = columns.length;

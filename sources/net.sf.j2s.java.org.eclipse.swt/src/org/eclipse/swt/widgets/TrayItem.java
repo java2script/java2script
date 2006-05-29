@@ -258,7 +258,7 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	if (image2 != null) image2.dispose ();
 	image2 = null;

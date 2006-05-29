@@ -114,7 +114,7 @@ public Caret getCaret () {
 	return caret;
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	if (caret != null) caret.releaseResources ();
 	caret = null;
 	super.releaseWidget ();

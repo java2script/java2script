@@ -189,7 +189,7 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-void releaseHandle() {
+protected void releaseHandle() {
 	if (textEl != null) {
 		BrowserNative.releaseHandle(textEl);
 		textEl = null;
@@ -201,7 +201,7 @@ void releaseHandle() {
 	super.releaseHandle();
 }
 
-void releaseWidget () {
+protected void releaseWidget () {
 	super.releaseWidget ();
 	control = null;
 	parent = null;

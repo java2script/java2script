@@ -43,14 +43,16 @@ import org.eclipse.swt.accessibility.*;
  */
 
 public abstract class Control extends Widget implements Drawable {
-	protected Composite parent;
+	public Composite parent;
 	Cursor cursor;
 	Menu menu;
 	String toolTipText;
 	Object layoutData;
 	Accessible accessible;
 	int drawCount, foreground, background;
-	int left, top, width, height;
+	int left, top;
+	protected int height;
+	protected int width;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -591,7 +593,7 @@ Menu [] findMenus (Control control) {
 	return new Menu [0];
 }
 
-char findMnemonic (String string) {
+protected char findMnemonic (String string) {
 	int index = 0;
 	int length = string.length ();
 	do {
@@ -660,7 +662,7 @@ public boolean forceFocus () {
 	return isFocusControl ();
 }
 
-void forceResize () {
+protected void forceResize () {
 	if (parent == null) return;
 	WINDOWPOS [] lpwp = parent.lpwp;
 	if (lpwp == null) return;
@@ -1641,7 +1643,7 @@ protected void releaseChild () {
 	parent.removeControl (this);
 }
 
-void releaseHandle () {
+protected void releaseHandle () {
 	super.releaseHandle ();
 	if (handle != null) {
 		BrowserNative.releaseHandle(handle);

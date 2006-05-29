@@ -638,7 +638,7 @@ boolean mnemonicMatch (char key) {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Control#releaseHandle()
  */
-void releaseHandle() {
+protected void releaseHandle() {
 	if (btnText != null) {
 		BrowserNative.releaseHandle(btnText);
 		btnText = null;

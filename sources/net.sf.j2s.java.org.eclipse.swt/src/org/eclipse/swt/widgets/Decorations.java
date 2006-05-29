@@ -503,7 +503,7 @@ private void createResizeHandles() {
 	}
 }
 
-void createHandle() {
+protected void createHandle() {
 	/*
 	super.createHandle ();
 	if (parent != null || ((style & SWT.TOOL) != 0)) {
@@ -1137,7 +1137,7 @@ Decorations menuShell () {
 	return this;
 }
 
-void releaseHandle() {
+protected void releaseHandle() {
 	if (shellMin != null) {
 		BrowserNative.releaseHandle(shellMin);
 		shellMin = null;
@@ -1172,7 +1172,7 @@ void releaseHandle() {
 		modalHandle = null;
 	}
 }
-void releaseWidget () {
+protected void releaseWidget () {
 	if (menuBar != null) menuBar.releaseResources ();
 	menuBar = null;
 	if (menus != null) {

@@ -191,7 +191,7 @@ public Rectangle getClientArea () {
 	return new Rectangle (0, 0, w, h);
 }
 
-void releaseHandle() {
+protected void releaseHandle() {
 	if (horizontalBar != null) {
 		horizontalBar.releaseHandle();
 		horizontalBar = null;
