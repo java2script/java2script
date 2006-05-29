@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
@@ -553,6 +554,14 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
+///* (non-Javadoc)
+// * @see org.eclipse.swt.widgets.Control#showWidget(boolean)
+// */
+//void showWidget(boolean visible) {
+//	items[getSelectionIndex()].handle.style.visibility = visible ? "visible" : "hidden";
+//	super.showWidget(visible);
+//}
+
 public Rectangle getClientArea () {
 	checkWidget ();
 	forceResize ();
@@ -566,15 +575,16 @@ public Rectangle getClientArea () {
 	*/
 //	return super.getClientArea();
 	//System.err.println(super.getClientArea());
-	int x = 2, y = 2;
+	int x = 4, y = 4;
 	int h = height - 8, w = width - 8;
 	if (items != null && items.length != 0) {
 		int lineHeight = OS.getContainerHeight(items[0].handle);
 		if (OS.isIE) lineHeight++; // ...
-		h -= lineHeight;
 		if (getSelectionIndex() == 0) {
-			h += 2; // ???
+			lineHeight -= 2; // padding-top:2px
 		}
+		h -= lineHeight;
+//		System.out.println("hi..." + height + "," + lineHeight + ":" + );
 		if ((style & SWT.BOTTOM) == 0) {
 			y += lineHeight;
 		} else {
@@ -987,6 +997,11 @@ void setSelection (int index, boolean notify) {
 		TabItem item = items [newIndex];
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
+			/*
+			 * When the TabFolder has not yet layouted, getClientArea 
+			 * will not get the right client area!
+			 * later layout should relayout the control.
+			 */
 			control.setBounds (getClientArea ());
 			control.setVisible (true);
 		}
@@ -1062,7 +1077,7 @@ void updateSelection(int index) {
 //			} else {
 //				left += 2;
 //			}
-			int y = (this.width - left - 4);
+			int y = (this.width - left - ((style & SWT.BORDER) != 0 ? 4 : 0));
 			if (index >= offset) {
 				y -= w;
 			}

@@ -7,13 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
@@ -39,6 +39,7 @@ public class TabItem extends Item {
 	TabFolder parent;
 	Control control;
 	String toolTipText;
+
 	boolean hasImage;
 	Element textEl;
 
@@ -116,10 +117,13 @@ public TabItem (TabFolder parent, int style, int index) {
 	super (parent, style);
 	this.parent = parent;
 	parent.createItem (this, index);
-	
 	configure(index);
-
 }
+
+protected void checkSubclass () {
+	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
+}
+
 private void configure(int index) {
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
@@ -127,6 +131,7 @@ private void configure(int index) {
 		}
 	};
 }
+
 /**
  * Returns the control that is used to fill the client area of
  * the tab folder when the user selects the tab item.  If no
@@ -175,13 +180,25 @@ public String getToolTipText () {
 	return toolTipText;
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	int index = parent.indexOf (this);
 	if (index == parent.getSelectionIndex ()) {
 		if (control != null) control.setVisible (false);
 	}
 	parent.destroyItem (this);
+}
+
+void releaseHandle() {
+	if (textEl != null) {
+		BrowserNative.releaseHandle(textEl);
+		textEl = null;
+	}
+	if (handle != null) {
+		BrowserNative.releaseHandle(handle);
+		handle = null;
+	}
+	super.releaseHandle();
 }
 
 void releaseWidget () {
@@ -222,16 +239,8 @@ public void setControl (Control control) {
 		return;
 	}
 	if (newControl != null) {
-		Rectangle clientArea = parent.getClientArea ();
-		if (clientArea.height <= 0 || clientArea.width <= 0) {
-			//
-		} else {
-			newControl.setBounds (clientArea);
-			newControl.setVisible(true);
-		}
-//		System.err.println(clientArea);
-//		System.out.println("here!");
-		//newControl.setVisible (true);
+		newControl.setBounds (parent.getClientArea ());
+		newControl.setVisible (true);
 	}
 	if (oldControl != null) oldControl.setVisible (false);
 }
@@ -241,7 +250,6 @@ public void setImage (Image image) {
 	int index = parent.indexOf (this);
 	if (index == -1) return;
 	super.setImage (image);
-	/*
 	/*
 	* Bug in Windows.  In version 6.00 of COMCTL32.DLL, tab
 	* items with an image and a label that includes '&' cause
@@ -325,6 +333,9 @@ public void setImage (Image image) {
 public void setText (String string) {
 	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
+	int index = parent.indexOf (this);
+	if (index == -1) return;
+	super.setText (string);
 	if (handle != null) {
 		OS.clearChildren(handle);
 		textEl = document.createElement("SPAN");
@@ -336,7 +347,6 @@ public void setText (String string) {
 //	if (index == -1) return;
 //	super.setText (string);
 	this.text = string;
-	//Element handle = parent.itemHandles[index];
 	
 	/*
 	/*
@@ -387,15 +397,5 @@ public void setToolTipText (String string) {
 	checkWidget();
 	toolTipText = string;
 }
-void releaseHandle() {
-	if (textEl != null) {
-		BrowserNative.releaseHandle(textEl);
-		textEl = null;
-	}
-	if (handle != null) {
-		BrowserNative.releaseHandle(handle);
-		handle = null;
-	}
-	super.releaseHandle();
-}
+
 }
