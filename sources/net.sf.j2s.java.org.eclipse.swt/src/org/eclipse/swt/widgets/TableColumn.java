@@ -397,7 +397,7 @@ public void pack () {
 	*/
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }

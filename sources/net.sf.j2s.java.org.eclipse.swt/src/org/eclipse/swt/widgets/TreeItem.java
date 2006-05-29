@@ -813,7 +813,7 @@ void redraw (int column, boolean drawText, boolean drawImage) {
 	*/
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }

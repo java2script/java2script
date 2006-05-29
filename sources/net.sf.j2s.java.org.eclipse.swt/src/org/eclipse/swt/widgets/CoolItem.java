@@ -291,7 +291,7 @@ public CoolBar getParent () {
 	return parent;
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }

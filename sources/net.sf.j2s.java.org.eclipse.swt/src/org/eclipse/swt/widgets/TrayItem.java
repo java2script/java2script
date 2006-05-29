@@ -253,7 +253,7 @@ void recreate () {
 	if (toolTipText != null) setToolTipText (toolTipText);
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }

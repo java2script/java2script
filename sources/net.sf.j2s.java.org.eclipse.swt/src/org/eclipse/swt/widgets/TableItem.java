@@ -579,7 +579,7 @@ void redraw (int column, boolean drawText, boolean drawImage) {
 //	OS.InvalidateRect (hwnd, rect, true);
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }

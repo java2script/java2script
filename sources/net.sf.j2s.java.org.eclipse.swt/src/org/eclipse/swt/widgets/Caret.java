@@ -282,7 +282,7 @@ void resizeIME () {
 }
 */
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	if (this == parent.getCaret ()) parent.setCaret (null);
 }

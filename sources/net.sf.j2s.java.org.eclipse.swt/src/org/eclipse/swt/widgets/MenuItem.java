@@ -479,7 +479,7 @@ public boolean isEnabled () {
 	return getEnabled () && parent.isEnabled ();
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	if (menu != null) menu.dispose ();
 	menu = null;

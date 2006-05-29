@@ -1077,7 +1077,7 @@ void redraw () {
 	}
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	if (cascade != null) cascade.releaseMenu ();
 	if ((style & SWT.BAR) != 0) {

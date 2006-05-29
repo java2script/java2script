@@ -125,7 +125,7 @@ public TrayItem [] getItems () {
 	return result;
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	if (display.tray == this) display.tray = null;
 }

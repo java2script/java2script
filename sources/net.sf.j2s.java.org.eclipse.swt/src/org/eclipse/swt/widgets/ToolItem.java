@@ -459,7 +459,7 @@ public boolean isEnabled () {
 	return getEnabled () && parent.isEnabled ();
 }
 
-void releaseChild () {
+protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }
