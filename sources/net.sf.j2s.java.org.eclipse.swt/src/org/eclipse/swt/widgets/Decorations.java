@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -29,7 +30,6 @@ import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 
@@ -123,8 +123,8 @@ public class Decorations extends Canvas {
 	boolean moved, resized, opened;
 	//int oldX = OS.CW_USEDEFAULT, oldY = OS.CW_USEDEFAULT;
 	//int oldWidth = OS.CW_USEDEFAULT, oldHeight = OS.CW_USEDEFAULT;
+	Element contentHandle;
 	Element shellTitle;
-	Element frameHandle;
 	Element modalHandle;
 	private Rectangle oldBounds;
 	private Element shellMin;
@@ -210,14 +210,14 @@ void bringToTop () {
 //		OS.SetWindowPos (handle, OS.HWND_TOP, 0, 0, 0, 0, flags);
 //	} else {
 		//OS.BringWindowToTop (handle);
-		frameHandle.style.visibility = "visible";
+		handle.style.visibility = "visible";
 		/*
 		 * TODO: Set the z-index of the style
 		 */
 		if (window.currentTopZIndex == null) {
-			frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+			handle.style.zIndex = window.currentTopZIndex = "1000";
 		} else {
-			frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
+			handle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
 		}
 		// widget could be disposed at this point
 //	}
@@ -333,6 +333,13 @@ Control computeTabRoot () {
 	return this;
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#containerHandle()
+ */
+protected Element containerHandle() {
+	return contentHandle;
+}
+
 public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
 	if ((style & SWT.NO_TRIM) == 0) {
@@ -354,6 +361,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 			y -= 2;
 		}
 	}
+	System.err.println( new Rectangle (x, y, width, height));
 	return new Rectangle (x, y, width, height);
 	/*
 	/* Get the size of the trimmings *-/
@@ -483,7 +491,7 @@ Image createIcon (Image image) {
 private Element createCSSDiv(String css) {
 	Element el = document.createElement("DIV");
 	el.className = css;
-	frameHandle.appendChild(el);
+	handle.appendChild(el);
 	return el;
 }
 private void createResizeHandles() {
@@ -513,89 +521,58 @@ protected void createHandle() {
 	*/
 	
 	if ((style & SWT.APPLICATION_MODAL) != 0
-				|| (style & SWT.PRIMARY_MODAL) != 0) {
-			display.timerExec(25, new Runnable() {
-				public void run() {
-					addModalLayer();
+			|| (style & SWT.PRIMARY_MODAL) != 0) {
+		display.timerExec(25, new Runnable() {
+			public void run() {
+				addModalLayer();
+			}
+		});
+	}
+	handle = document.createElement("DIV");
+	handle.className = "shell-default";
+	nextWindowLocation();
+	this.width = 768;
+	this.height = 557;
+	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
+		handle.className += " shell-trim";
+	}
+	document.body.appendChild(handle);
+	if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
+		createResizeHandles();
+	}
+	if ((style & SWT.NO_TRIM) == 0
+			&& (style & (SWT.TITLE | SWT.MIN | SWT.MAX | SWT.CLOSE)) != 0) {
+		setSystemMenu();
+	}
+	contentHandle = createCSSDiv("shell-content");
+	DragAndDrop dnd = new DragAndDrop();
+	dnd.addDragListener(new ShellFrameDND() {
+		public boolean isDraggable(HTMLEventWrapper e) {
+			if (super.isDraggable(e)) {
+				String cssName = e.target.className;
+				if (cssName.indexOf("shell-title-text") != -1
+						&& oldBounds != null) {
+					return false;
 				}
-			});
+				return true;
+			} else {
+				return false;
+			}
 		}
-		frameHandle = document.createElement("DIV");
-		CSSStyle fHandleStyle = frameHandle.style;
-		fHandleStyle.position = "absolute";
-		//fHandleStyle.visibility = "hidden";
-		// handle.style.overflow = "hidden";
-		nextWindowLocation();
-		fHandleStyle.left = window.defaultWindowLeft + "px";
-		fHandleStyle.top = window.defaultWindowTop + "px";
-		fHandleStyle.width = 768 + "px";
-		fHandleStyle.height = 557 + "px";
-		fHandleStyle.backgroundColor = "menu";
-
-		if ((style & SWT.NO_TRIM) == 0) {
-			fHandleStyle.borderColor = "black";
-			fHandleStyle.borderWidth = "1px";
-			fHandleStyle.borderStyle = "solid";
-		} else {
-			fHandleStyle.borderStyle = "none";
-		}
-		document.body.appendChild(frameHandle);
-
-		if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
-			createResizeHandles();
-		}
-		if ((style & SWT.NO_TRIM) == 0) {
-			setSystemMenu();
-		}
-
-		handle = createCSSDiv("shell-content");
-		if ((style & SWT.NO_TRIM) != 0) {
-			handle.style.top = "0px";
-		} else {
-			ShellFrameDND.fixShellHeight(frameHandle);
-			ShellFrameDND.fixShellWidth(frameHandle);
-			DragAndDrop dnd = new DragAndDrop();
-			// ShellFrameDND shellDND = new ShellFrameDND ();
-			dnd.addDragListener(new ShellFrameDND() {
-				public boolean isDraggable(HTMLEventWrapper e) {
-					if (super.isDraggable(e)) {
-						String cssName = e.target.className;
-						if (cssName.indexOf("shelltitle") != -1
-								&& oldBounds != null) {
-							return false;
-						}
-						return true;
-					} else {
-						return false;
+		public boolean updateShellBounds(int x, int y, final int width,
+				final int height) {
+			setBounds(x, y, width + 4, height + 4);
+			if (false)
+				display.timerExec(25, new Runnable() {
+					public void run() {
+						//Point size = getSize();
+						layout();
 					}
-				}
-
-				public boolean updateShellBounds(int x, int y, final int width,
-						final int height) {
-					display.timerExec(25, new Runnable() {
-						public void run() {
-							Point size = getSize();
-							System.out.println(size);
-							//if (width != size.x || height != size.y) {
-								layout();
-							//}
-							// Point size = getSize();
-							// size = getLayout().computeSize(Decorations.this,
-							// size.x, size.y, false);
-							// frameHandle.style.width = size.x + "px";
-							//						frameHandle.style.height = size.y + "px";
-							//						ShellFrameDND.fixShellHeight (frameHandle);
-							//						ShellFrameDND.fixShellWidth (frameHandle);
-						}
-					});
-					return true;
-				}
-			});
-			dnd.bind(frameHandle);
+				});
+			return true;
 		}
-		/*
-		 * TODO: show activate
-		 */
+	});
+	dnd.bind(handle);
 }
 
 private void nextWindowLocation() {
@@ -635,40 +612,82 @@ void addModalLayer() {
 	modalHandle = document.createElement ("DIV");
 	modalHandle.className = "shell-modal-block";
 	//document.body.appendChild(modalHandle);
-	modalHandle.style.zIndex = "" + (Integer.parseInt("" + frameHandle.style.zIndex) - 1);
-	document.body.insertBefore(modalHandle, frameHandle);
+	modalHandle.style.zIndex = "" + (Integer.parseInt("" + handle.style.zIndex) - 1);
+	document.body.insertBefore(modalHandle, handle);
 }
 
 void exportHTMLSource() {
 	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-	shell.setLayout(new FillLayout());
+//	shell.setLayout(new FillLayout());
 	shell.setText("Export HTML Source");
-	String innerHTML = handle.innerHTML;
-	int length = innerHTML.length();
-	if (length < 200) {
-		length = 200;
-	} else if (length > 1800) {
-		length = 1800;
+	String innerHTML = contentHandle.innerHTML;
+	//innerHTML.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
+	if (OS.isIE)
+	/**
+	 * @j2sNative
+innerHTML = innerHTML.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+	return $1 + $2.toLowerCase () + $3;
+}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+	if (!((/;$/).test ($2))) {
+		$2 += ";";
 	}
-	length = (length - 200) / 400;
-	shell.setSize(480 + 80 * length, 280 + 50 * length);
-	Composite composite = new Composite(shell, SWT.NONE);
-	composite.setLayout(new GridLayout());
-	Text text = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY);
-	text.setLayoutData(new GridData(GridData.FILL_BOTH));
-	Point size = shell.getSize();
+	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
+}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
+	return " " + $2 + "=\"" + $3 + "\"" + $4;
+}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
+	return " " + $1 + "=\"" + $1 + "\"" + $2;
+});
+	 */ {} else
+	/**
+	 * @j2sNative
+innerHTML = innerHTML.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
+});
+	 */ {}
+	/**
+	 * @j2sNative
+innerHTML = innerHTML.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
+	if ($2.length == 0) {
+		if ($3 != ">") {
+			return $3;
+		} else {
+			return ">";
+		}
+	} else {
+		return " class=\"" + $2 + "\"" + $3;
+	}
+});
+	 */ {}
+//	int length = innerHTML.length();
+//	if (length < 200) {
+//		length = 200;
+//	} else if (length > 1800) {
+//		length = 1800;
+//	}
+//	length = (length - 200) / 400;
+//	shell.setSize(480 + 80 * length, 280 + 50 * length);
+//	Composite composite = new Composite(shell, SWT.NONE);
+//	composite.setLayout(new GridLayout());
+	shell.setLayout(new GridLayout());
+	Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+	GridData gd = new GridData(GridData.FILL_BOTH);
+	gd.widthHint = 400;
+	gd.heightHint = 275;
+	text.setLayoutData(gd);
+	Rectangle rect = getClientArea();
 	String html = "<div class=\"shell-content\" style=\""
 				+ "width:"
-				+ size.x
+				+ rect.width
 				+ "px;height:"
-				+ size.y
+				+ rect.height
 				+ "px;\">"
 				+ innerHTML + "</div>";
 	text.setText(html);
-	new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR)
+	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
 			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	Button button = new Button(composite, SWT.PUSH);
-	button.setText("OK");
+	Button button = new Button(shell, SWT.PUSH);
+	button.setText("&OK");
 	GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
 	gridData.widthHint = 80;
 	button.setLayoutData(gridData);
@@ -677,6 +696,7 @@ void exportHTMLSource() {
 			shell.close();
 		}
 	});
+	shell.pack();
 	shell.open();
 }
 
@@ -755,65 +775,6 @@ public Rectangle getBounds () {
 private boolean minable() {
 	return (style & SWT.MIN) != 0 
 			&& ((style & SWT.BORDER) == 0 || (style & SWT.RESIZE) != 0);
-}
-
-public void setBounds(int x, int y, int width, int height) {
-	left = x;
-	top = y;
-	this.width = width;
-	this.height = height;
-	CSSStyle fHandleStyle = frameHandle.style;
-	fHandleStyle.left = x + "px";
-	fHandleStyle.top = y + "px";
-	if (width != 0) {
-		// FIXME: What does SWT.BORDER mean?
-//			if ((style & SWT.BORDER) != 0) {//handle.className != null && handle.className.indexOf("border") != -1) {
-//				width = Math.max(0, width - 6);
-//			}
-		fHandleStyle.width = (width + 8) + "px";
-	}
-	if (height != 0) {
-		// FIXME: What does SWT.BORDER mean?
-//			if ((style & SWT.BORDER) != 0) {//handle.className != null && handle.className.indexOf("border") != -1) {
-//				height = Math.max(0, height - 6);
-//			}
-		fHandleStyle.height = (height + 4) + "px";
-	}
-	ShellFrameDND.fixShellHeight (frameHandle);
-	ShellFrameDND.fixShellWidth (frameHandle);
-	/*
-	 * May cause the shell to layout twice!
-	 * TODO: make it deferredLayout!
-	 */
-	//this.layout();
-}
-
-public void setSize(int width, int height) {
-	int w = 0;
-	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
-		w = 113;
-	} else {
-		w = 28;
-	}
-	if (width < w) {
-		width = w;
-	}
-	if (height < 28) {
-		height = 28;
-	}
-//	frameHandle.style.width = (width + 8) + "px";
-//	//frameHandle.style.height = (height + 30) + "px";
-//	frameHandle.style.height = (height + 4) + "px";
-	frameHandle.style.width = width + "px";
-	//frameHandle.style.height = (height + 30) + "px";
-	frameHandle.style.height = height + "px";
-	this.width = width;
-	this.height = height;
-	ShellFrameDND.fixShellHeight (frameHandle);
-	ShellFrameDND.fixShellWidth (frameHandle);
-//	if (layout != null) {
-//		this.layout();
-//	}
 }
 
 /* (non-Javadoc)
@@ -980,17 +941,20 @@ public Point getLocation () {
 	}
 	return super.getLocation ();
 	*/
+/*	
 	int x = 0;//64;
 	int y = 0;//64;
-	String left = frameHandle.style.left;
+	String left = handle.style.left;
 	if (left != null && left.length() != 0) {
 		x = Integer.parseInt(left);
 	}
-	String top = frameHandle.style.top;
+	String top = handle.style.top;
 	if (top != null && top.length() != 0) {
 		y = Integer.parseInt(top);
 	}
 	return new Point (x, y);
+*/
+	return new Point (left, top);
 }
 
 /**
@@ -1162,15 +1126,15 @@ protected void releaseHandle() {
 		BrowserNative.releaseHandle(titleBar);
 		titleBar = null;
 	}
-	super.releaseHandle();
-	if (frameHandle != null) {
-		BrowserNative.releaseHandle(frameHandle);
-		frameHandle = null;
+	if (contentHandle != null) {
+		BrowserNative.releaseHandle(contentHandle);
+		contentHandle = null;
 	}
 	if (modalHandle != null) {
 		BrowserNative.releaseHandle(modalHandle);
 		modalHandle = null;
 	}
+	super.releaseHandle();
 }
 protected void releaseWidget () {
 	if (menuBar != null) menuBar.releaseResources ();
@@ -1238,7 +1202,14 @@ void saveFocus () {
 	}
 	*/
 }
-
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBackground(org.eclipse.swt.graphics.Color)
+ */
+public void setBackground(Color color) {
+	checkWidget ();
+	if (color != null)
+	contentHandle.style.backgroundColor = color.getCSSHandle();
+}
 void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	/*
 	if (OS.IsWinCE) {
@@ -1325,6 +1296,14 @@ void setDefaultButton (Button button, boolean save) {
 	if (saveDefault != null && saveDefault.isDisposed ()) saveDefault = null;
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	checkWidget ();
+	if (color != null)
+	contentHandle.style.color = color.getCSSHandle();
+}
 /**
  * Sets the receiver's image to the argument, which may
  * be null. The image is typically displayed by the window
@@ -1355,7 +1334,7 @@ public void setImage (Image image) {
 //		}
 	if (shellIcon != null && this.image.handle == null) {
 		CSSStyle iconStyle = shellIcon.style;
-		if (image.url.toLowerCase().endsWith(".png") && handle.style.filter != null) {
+		if (image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
 //				imgBackground.style.width = "100%";
@@ -1541,7 +1520,7 @@ public void setMaximized (boolean maximized) {
 		OS.UpdateWindow (handle);
 	}
 	*/
-	if (maximized && handle != null) {
+	if (maximized && contentHandle != null) {
 		if (oldBounds == null) {
 			oldBounds = getBounds();
 			oldBounds.width -= 2; // FIXME
@@ -1554,7 +1533,8 @@ public void setMaximized (boolean maximized) {
 		if (width > window.screen.availWidth) {
 			width = window.screen.availWidth;
 		}
-		setBounds(0 - 4, 0 - 4, width - 2, height + 4);
+		setBounds(computeTrim(0, 0, width + 2, height - 18));
+		//setBounds(0 - 4, 0 - 4, width - 2, height + 4);
 		document.body.scrollTop = 0;
 	}
 	if (maximized) {
@@ -1565,17 +1545,25 @@ public void setMaximized (boolean maximized) {
 }
 
 void toggleMaximize() {
+	String key = "shell-maximized";
 	if (oldBounds != null) {
 		setBounds(oldBounds);
-		shellMax.className = "shellmax";
+		String cssName = titleBar.className;
+		if (cssName == null) cssName = "";
+		int idx = cssName.indexOf(key);
+		if (idx != -1) {
+			titleBar.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+		}
 		oldBounds = null;
 		ResizeSystem.unregister(this);
 	} else {
 		setMaximized(true);
-		shellMax.className = "shellnormal";
-	}
-	if ((style & SWT.MIN) == 0) {
-		shellMax.className += " shell-max-zero";
+		String cssName = titleBar.className;
+		if (cssName == null) cssName = "";
+		int idx = cssName.indexOf(key);
+		if (idx != -1) {
+			titleBar.className += " " + key;
+		}
 	}
 }
 
@@ -1696,7 +1684,7 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
-	if (minimized && handle != null) {
+	if (minimized && contentHandle != null) {
 		//handle.style.display = "none";
 		if (oldBounds == null) {
 			oldBounds = getBounds();
@@ -1843,7 +1831,7 @@ void setSystemMenu () {
 
 	if ((style & SWT.BORDER) == 0 || (style & SWT.RESIZE) != 0) {
 		shellIcon = document.createElement("DIV");
-		shellIcon.className = "shellicon";
+		shellIcon.className = "shell-title-icon";
 		titleBar.appendChild(shellIcon);
 		shellIcon.onclick = new RunnableCompatibility() {
 			public void run() {
@@ -1852,17 +1840,10 @@ void setSystemMenu () {
 		};
 	}
 
-	Element shellButtons = document.createElement("DIV");
-	shellButtons.className = "shellbuttons";
-	titleBar.appendChild(shellButtons);
-
 	if (minable()) {
 		shellMin = document.createElement("DIV");
-		shellMin.className = "shellmin";
-		if ((style & SWT.MAX) == 0) {
-			shellMin.className += " shell-min-zero";
-		}
-		shellButtons.appendChild(shellMin);
+		shellMin.className = "shell-title-min";
+		titleBar.appendChild(shellMin);
 		shellMin.onclick = new RunnableCompatibility() {
 			public void run() {
 				ResizeSystem.unregister(Decorations.this);
@@ -1874,11 +1855,8 @@ void setSystemMenu () {
 
 	if ((style & SWT.MAX) != 0) {
 		shellMax = document.createElement("DIV");
-		shellMax.className = "shellmax";
-		if (!minable()) {
-			shellMax.className += " shell-max-zero";
-		}
-		shellButtons.appendChild(shellMax);
+		shellMax.className = "shell-title-normal-max";
+		titleBar.appendChild(shellMax);
 		shellMax.onclick = new RunnableCompatibility() {
 			public void run() {
 				toggleMaximize();
@@ -1893,13 +1871,8 @@ void setSystemMenu () {
 
 	if ((style & SWT.CLOSE) != 0) {
 		shellClose = document.createElement("DIV");
-		shellClose.className = "shellclose";
-		if (!minable() && (style & SWT.MAX) == 0) {
-			shellClose.className += " shell-close-zero";
-		} else if (!minable() || (style & SWT.MAX) == 0) {
-			shellClose.className += " shell-close-one";
-		}
-		shellButtons.appendChild(shellClose);
+		shellClose.className = "shell-title-close";
+		titleBar.appendChild(shellClose);
 		shellClose.onclick = new RunnableCompatibility() {
 			public void run() {
 				if (Decorations.this instanceof Shell) {
@@ -1910,18 +1883,18 @@ void setSystemMenu () {
 		};
 	}
 	shellTitle = document.createElement("DIV");
-	shellTitle.className = "shelltitle";
+	shellTitle.className = "shell-title-text";
 	titleBar.appendChild(shellTitle);
 	if ((style & SWT.MAX) != 0) {
 		titleBar.ondblclick = shellMax.onclick;
 	}
 
-	shellTitle.appendChild(document.createTextNode("-"));
+	//shellTitle.appendChild(document.createTextNode("-"));
 
-	frameHandle.appendChild(titleBar);
+	handle.appendChild(titleBar);
 	titleBar.onclick = new RunnableCompatibility() {
 		public void run() {
-			CSSStyle fHandleStyle = frameHandle.style;
+			CSSStyle fHandleStyle = handle.style;
 			if (fHandleStyle.zIndex != window.currentTopZIndex) {
 				fHandleStyle.zIndex = window.currentTopZIndex = ""
 						+ (Integer.parseInt(window.currentTopZIndex) + 2);
@@ -1929,9 +1902,9 @@ void setSystemMenu () {
 		}
 	};
 	if (window.currentTopZIndex == null) {
-		frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+		handle.style.zIndex = window.currentTopZIndex = "1000";
 	} else {
-		frameHandle.style.zIndex = window.currentTopZIndex = ""
+		handle.style.zIndex = window.currentTopZIndex = ""
 				+ (Integer.parseInt(window.currentTopZIndex) + 2);
 	}
 }
@@ -1973,7 +1946,7 @@ public void setVisible (boolean visible) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {
 		//if (visible == OS.IsWindowVisible (handle)) return;
-		if (visible == (handle.style.visibility != "hidden")) return;
+		if (visible == (contentHandle.style.visibility != "hidden")) return;
 	}
 	if (visible) {
 		/*
@@ -2045,6 +2018,95 @@ public void setVisible (boolean visible) {
 		if (isDisposed ()) return;
 		sendEvent (SWT.Hide);
 	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if ((style & SWT.NO_TRIM) == 0) {
+		int w = 0;
+		int h = 0;
+		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
+			w = 113;
+			h = 28;
+		}
+		if ((style & SWT.BORDER) != 0) {
+			w += 2;
+			h += 2;
+		}
+		if (width < w) {
+			width = w;
+			cx = w;
+		}
+		if (height < h) {
+			height = h;
+			cy = h;
+		}
+	}
+	if ((style & SWT.NO_TRIM) != 0) {
+		contentHandle.style.height = height + "px";
+		contentHandle.style.width = width + "px";
+	} else if (titleBar != null) {
+		int dw = 8;
+		int dh = 28;
+		if ((style & SWT.BORDER) != 0) {
+			dw += 2;
+			dh += 3;
+		}
+		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
+		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
+		titleBar.style.width = (width - 8 - 2) + "px";
+		int ww = 18;
+		int w = ww;
+		if (shellClose != null) {
+			shellClose.style.left = (width - 8 - 2 - w) + "px"; 
+			w += ww;
+		}
+		if (shellMax != null) {
+			shellMax.style.left = (width - 8 - 2 - w) + "px"; 
+			w += ww;
+		}
+		if (shellMin != null) {
+			shellMin.style.left = (width - 8 - 2 - w) + "px";
+			w += ww;
+		}
+		w -= ww;
+		if (shellIcon != null) {
+			shellIcon.style.left = 2 + "px"; 
+			shellTitle.style.left = (4 + ww) + "px";
+			w += ww;
+		} else {
+			shellTitle.style.left = 4 + "px";
+		}
+		shellTitle.style.width = (width - 8 - 8 - w) + "px";
+	} else {
+		width -= 4;
+		height -= 4;
+		cx -= 4;
+		cy -= 4;
+		int dw = 7;
+		int dh = 7;
+//		if ((style & SWT.BORDER) != 0) {
+//			dw -= 2;
+//			dh -= 2;
+//		}
+		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
+		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
+		contentHandle.style.top = 2 + "px";
+		contentHandle.style.marginRight = 1 + "px";
+	}
+	if ((style & SWT.BORDER) != 0) {
+		cx -= 4;
+		cy -= 4;
+	}
+	Element el = (Element) hWnd;
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+//	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 /*

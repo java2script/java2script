@@ -40,7 +40,7 @@ public class ShellFrameDND extends DragAdapter {
 					|| cssName.indexOf ("bottom") != -1)) {
 				this.resize = cssName.substring (6);
 				return true;
-			} else if (cssName.indexOf ("shelltitle") != -1) {
+			} else if (cssName.indexOf ("shell-title-text") != -1) {
 				return true;
 			}
 		}
@@ -56,10 +56,20 @@ public class ShellFrameDND extends DragAdapter {
 			this.frame.style.top = this.sourceY + "px";
 			this.frame.style.zIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 100);
 			document.body.appendChild (this.frame);
-			Element titleBar = document.createElement ("DIV");
-			titleBar.className = "shell-title-bar opacity";
-			titleBar.style.paddingTop = "4px";
-			this.frame.appendChild (titleBar);
+			boolean existedTitleBar = false;
+			Element[] els = e.sourceElement.getElementsByTagName("DIV");
+			for (int i = 0; i < els.length; i++) {
+				if (els[i].className.indexOf("shell-title-bar") != -1) {
+					existedTitleBar = true;
+					break;
+				}
+			}
+			if (existedTitleBar) {
+				Element titleBar = document.createElement ("DIV");
+				titleBar.className = "shell-title-bar opacity";
+				titleBar.style.paddingTop = "4px";
+				this.frame.appendChild (titleBar);
+			}
 			firstTime = true;
 		} else {
 			this.frame.style.left = this.sourceX + "px";
@@ -211,8 +221,8 @@ public class ShellFrameDND extends DragAdapter {
 		shell.style.height = height + "px";
 		shell.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
 		
-		ShellFrameDND.fixShellHeight (e.sourceElement);
-		ShellFrameDND.fixShellWidth (e.sourceElement);
+//		ShellFrameDND.fixShellHeight (e.sourceElement);
+//		ShellFrameDND.fixShellWidth (e.sourceElement);
 		
 		this.updateShellBounds (x, y, width, height);
 		clean();

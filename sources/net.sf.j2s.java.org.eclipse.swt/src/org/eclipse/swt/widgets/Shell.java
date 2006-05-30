@@ -1374,6 +1374,9 @@ public void setVisible (boolean visible) {
 		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, true);
 	}
 	*/
+	if (visible) {
+		SetWindowPos(handle, null, left, top, width, height, 0);
+	}
 }
 
 /*

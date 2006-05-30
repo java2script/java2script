@@ -47,7 +47,8 @@ public class ResizeHandler {
 		if (width > window.screen.availWidth) {
 			width = window.screen.availWidth;
 		}
-		shell.setBounds(0 - 4, 0 - 4, width - 2, height + 4);
+//		shell.setBounds(0 - 4, 0 - 4, width - 2, height + 4);
+		shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
 		document.body.scrollTop = 0;
 	}
 	public void updateCentered() {
