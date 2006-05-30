@@ -393,7 +393,7 @@ protected void createHandle () {
 	if ((style & SWT.BORDER) != 0) {
 		cssName += " tab-folder-border-default";
 	}
-	handle = (Element) createCSSElement(parent.handle, cssName);
+	handle = (Element) createCSSElement(parent.containerHandle(), cssName);
 	cssName = "tab-folder-no-tab";
 	if ((style & SWT.BOTTOM) != 0) {
 		cssName += " tab-folder-bottom";

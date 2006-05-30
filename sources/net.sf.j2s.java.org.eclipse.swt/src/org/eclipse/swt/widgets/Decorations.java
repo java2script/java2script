@@ -2050,13 +2050,15 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	} else if (titleBar != null) {
 		int dw = 8;
 		int dh = 28;
+		int dww = 8; 
 		if ((style & SWT.BORDER) != 0) {
 			dw += 2;
 			dh += 3;
+			dww += 2;
 		}
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
-		titleBar.style.width = (width - 8 - 2) + "px";
+		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
 		int ww = 18;
 		int w = ww;
 		if (shellClose != null) {
