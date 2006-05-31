@@ -257,18 +257,23 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	int newHeight = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, newWidth, newHeight);
 	*/
-	int lineHeight = OS.getContainerHeight(items[0].handle);
-	if (OS.isIE) {
-		lineHeight++; // ...
-	} else {
-		// Mozilla
-		if ((style & SWT.BOTTOM) != 0) {
-			lineHeight--;
+	int lineHeight = 0;
+	if (items != null && items.length > 0) {
+		lineHeight = OS.getContainerHeight(items[offset].handle);
+		if (getSelectionIndex() == offset) {
+			lineHeight -= 2; // padding-top:2px
 		}
+		if (OS.isIE) {
+			lineHeight++; // ...
+		} else {
+			// Mozilla
+			if ((style & SWT.BOTTOM) != 0) {
+				lineHeight--;
+			}
+		}
+		x -= 4;
+		y -= 4 + lineHeight;
 	}
-	System.err.println("]" + lineHeight);
-	x -= 4;
-	y -= 4 + lineHeight;
 	width += 8;
 	height += 8 + lineHeight;
 	int border = getBorderWidth ();
@@ -583,9 +588,9 @@ public Rectangle getClientArea () {
 	int x = 4, y = 4;
 	int h = height - 8, w = width - 8;
 	if (items != null && items.length != 0) {
-		int lineHeight = OS.getContainerHeight(items[0].handle);
+		int lineHeight = OS.getContainerHeight(items[offset].handle);
 		if (OS.isIE) lineHeight++; // ...
-		if (getSelectionIndex() == 0) {
+		if (getSelectionIndex() == offset) {
 			lineHeight -= 2; // padding-top:2px
 		}
 		h -= lineHeight;
@@ -1099,12 +1104,12 @@ void updateSelection(int index) {
 	}
 	for (int i = 0; i < offset; i++) {
 		items[i].handle.style.display = "none";
-		String cssName = items[i].handle.className;
-		if (cssName == null) cssName = "";
-		int idx = cssName.indexOf(key);
-		if (idx != -1) {
-			items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-		}
+//		String cssName = items[i].handle.className;
+//		if (cssName == null) cssName = "";
+//		int idx = cssName.indexOf(key);
+//		if (idx != -1) {
+//			items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+//		}
 	}
 }
 /*

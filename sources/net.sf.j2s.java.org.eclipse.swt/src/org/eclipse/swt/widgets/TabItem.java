@@ -124,10 +124,10 @@ protected void checkSubclass () {
 	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
 }
 
-private void configure(int index) {
+private void configure(final int index) {
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
-			parent.setSelection(new TabItem[] { TabItem.this });
+			parent.setSelection(index, true);
 		}
 	};
 }

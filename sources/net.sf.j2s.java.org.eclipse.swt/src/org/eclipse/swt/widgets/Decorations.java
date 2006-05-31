@@ -634,8 +634,9 @@ innerHTML = innerHTML.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) 
 	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
 }).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
 	return " " + $2 + "=\"" + $3 + "\"" + $4;
-}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
-	return " " + $1 + "=\"" + $1 + "\"" + $2;
+//}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
+//	$1 = $1.toLowerCase ();
+//	return " " + $1 + "=\"" + $1 + "\"" + $2;
 });
 	 */ {} else
 	/**

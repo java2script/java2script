@@ -722,7 +722,11 @@ public Accessible getAccessible () {
 public Color getBackground () {
 	checkWidget ();
 //	return Color.win32_new (display, getBackgroundPixel ());
-	return new Color(display, handle.style.backgroundColor);
+	String bg = handle.style.backgroundColor;
+	if (bg == null || bg.toString().length() == 0) {
+		return new Color(display, "menu");
+	}
+	return new Color(display, bg);
 }
 
 /*
@@ -860,7 +864,15 @@ public Font getFont () {
 	if (hFont == 0) hFont = defaultFont ();
 	return Font.win32_new (display, hFont);
 	*/
-	return new Font(display, handle.style.fontFamily, Integer.parseInt(handle.style.fontSize), SWT.NONE);
+	String ff = handle.style.fontFamily;
+	if (ff == null || ff.toString().length() == 0) {
+		ff = "Tahoma, Arial, sans-serif";
+	}
+	String fs = handle.style.fontSize;
+	if (fs == null || fs.toString().length() == 0) {
+		fs = "8";
+	}
+	return new Font(display, ff, Integer.parseInt(fs) , SWT.NONE);
 }
 
 /**
@@ -876,6 +888,10 @@ public Font getFont () {
 public Color getForeground () {
 	checkWidget ();
 //	return Color.win32_new (display, getForegroundPixel ());
+	String fg = handle.style.color;
+	if (fg == null || fg.toString().length() == 0) {
+		return new Color(display, "black");
+	}
 	return new Color(display, handle.style.color);
 }
 
