@@ -141,7 +141,6 @@
          <action
                class="net.sf.j2s.ui.actions.OpenJSAction"
                enablesFor="1"
-               icon="icons/z-logo.gif"
                id="net.sf.j2s.ui.actions.openJSAction"
                label="Edit Con&amp;verted *.js"
                menubarPath="additions"/>
@@ -153,7 +152,6 @@
             objectClass="org.eclipse.core.resources.IFile">
          <action
                class="net.sf.j2s.ui.actions.GeneratePropertiesJSAction"
-               icon="icons/z-logo.gif"
                id="net.sf.j2s.ui.actions.genpropjsaction"
                label="Generate *.js for *.properties"
                menubarPath="additions"/>
@@ -166,7 +164,6 @@
             targetID="#CompilationUnitEditorContext">
          <action
                class="net.sf.j2s.ui.actions.OpenJSEditorAction"
-               icon="icons/z-logo.gif"
                id="net.sf.j2s.ui.actions.openJSEditorAction"
                label="Edit Con&amp;verted *.js"
                menubarPath="additions">
