@@ -1841,7 +1841,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
+//										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
+										if (Bindings.isSuperType(declaringClass, typeBinding)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -1854,7 +1855,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (Bindings.isSuperType(typeBinding, declaringClass)) {
+										if (Bindings.isSuperType(declaringClass, typeBinding)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -1994,7 +1995,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
+										if (Bindings.isSuperType(declaringClass, typeBinding)) {
+//										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -2007,7 +2009,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (Bindings.isSuperType(typeBinding, declaringClass)) {
+										if (Bindings.isSuperType(declaringClass, typeBinding)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
