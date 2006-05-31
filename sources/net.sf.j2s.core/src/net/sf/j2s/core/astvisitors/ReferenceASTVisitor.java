@@ -34,6 +34,11 @@ public class ReferenceASTVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			return false;
+		}
 		isReferenced = true;
 		return false;
 	}

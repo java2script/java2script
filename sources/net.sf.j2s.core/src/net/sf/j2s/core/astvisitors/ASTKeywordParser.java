@@ -722,6 +722,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else if (blockParent instanceof Initializer) {
 				Initializer initializer = (Initializer) blockParent;
 				previousStart = initializer.getStartPosition();
+			} else if (blockParent instanceof CatchClause) {
+				CatchClause catchClause = (CatchClause) blockParent;
+				previousStart = catchClause.getStartPosition();
 			}
 		}
 		return previousStart;
@@ -983,6 +986,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	}
 	
 	public boolean visit(InfixExpression node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			buffer.append(constValue);
+			return false;
+		}
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
 		boolean beCare = false;
 		if (expTypeBinding != null 
@@ -1335,6 +1344,17 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	}
 
 	public boolean visit(PrefixExpression node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			buffer.append(constValue);
+			return false;
+		}
+		String op = node.getOperator().toString();
+		if ("~".equals(op) || "!".equals(op)) {
+			buffer.append(op);
+			return super.visit(node);
+		}
 		Expression left = node.getOperand();
 		IVariableBinding varBinding = null;
 		if (left instanceof Name) {
@@ -1377,7 +1397,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			String op = node.getOperator().toString();
+			//String op = node.getOperator().toString();
 			buffer.append(op);
 			buffer.append(' ');
 			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
@@ -1434,7 +1454,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				node.getOperand().accept(this);
 				buffer.append(" = String.fromCharCode ((");
 				node.getOperand().accept(this);
-				String op = node.getOperator().toString();
+				//String op = node.getOperator().toString();
 				if ("++".equals(op)) {
 					buffer.append(").charCodeAt (0) + 1)");
 				} else {

@@ -88,6 +88,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 //	}
 	
 	public boolean visit(SimpleName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			buffer.append(constValue);
+			return false;
+		}
 		IBinding binding = node.resolveBinding();
 		if (binding != null
 				&& binding instanceof ITypeBinding) {

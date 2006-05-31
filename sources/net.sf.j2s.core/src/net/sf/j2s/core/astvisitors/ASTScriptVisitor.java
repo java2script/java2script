@@ -1503,7 +1503,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					if (type.isPrimitiveType()){
 						PrimitiveType pType = (PrimitiveType) type;
 						if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-							buffer.append("Boolean");
+							//buffer.append("Boolean");
+							buffer.append("~B");
 //						} else if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
 //							buffer.append("0");
 //						} else if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
@@ -1511,16 +1512,22 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //						} else if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
 //							buffer.append("0");
 						} else {
-							buffer.append("Number");
+//							buffer.append("Number");
+							buffer.append("~N");
 						}
 					} else if (type.isArrayType()) {
-						buffer.append("Array");
+//						buffer.append("Array");
+						buffer.append("~A");
 					} else {
 						ITypeBinding binding = type.resolveBinding();
 						if (binding != null) {
 							String name = binding.getQualifiedName();
 							name = JavaLangUtil.ripJavaLang(name);
-							buffer.append(name);
+							if ("String".equals(name)) {
+								buffer.append("~S");
+							} else {
+								buffer.append(name);
+							}
 						} else {
 							buffer.append(type);
 						}
@@ -1721,6 +1728,12 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 
 	public boolean visit(SimpleName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			buffer.append(constValue);
+			return false;
+		}
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
 			buffer.append(node);
@@ -1841,7 +1854,39 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (SearchSuperClass.isInheritedClassName(typeBinding/*.getSuperclass()*/, name)) {
+										if (Bindings.isSuperType(typeBinding, declaringClass)) {
+											if (superLevel == 1) {
+												buffer.append("this.");
+												isThis = true;
+											} else {
+												name = typeBinding.getQualifiedName();
+												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+													name = typeBinding.getBinaryName();
+													int idx1 = name.indexOf('$');
+													if (idx1 != -1) {
+														int idx2 = name.indexOf('$', idx1 + 1);
+														String parentAnon = "";
+														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
+															parent = parent.getParent();
+															while (parent != null) {
+																if (parent instanceof AbstractTypeDeclaration) {
+																	break;
+																} else if (parent instanceof AnonymousClassDeclaration) {
+																	AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+																	ITypeBinding aTypeBinding = atype.resolveBinding();
+																	String aName = aTypeBinding.getBinaryName();
+																	parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
+																}
+																parent = parent.getParent();
+															}
+															name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+														}
+													}
+												}
+											}
+											break;
+										}
+/*										if (SearchSuperClass.isInheritedClassName(typeBinding.getSuperclass(), name)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -1850,7 +1895,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 											}
 											break;
 										}
-									}
+*/									}
 									parent = parent.getParent();
 								}
 								if (!isThis) {
@@ -1962,7 +2007,40 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
-										if (SearchSuperClass.isInheritedClassName(typeBinding/*.getSuperclass()*/, name)) {
+										if (Bindings.isSuperType(typeBinding, declaringClass)) {
+											if (superLevel == 1) {
+												buffer.append("this.");
+												isThis = true;
+											} else {
+												name = typeBinding.getQualifiedName();
+												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+													name = typeBinding.getBinaryName();
+													int idx1 = name.indexOf('$');
+													if (idx1 != -1) {
+														int idx2 = name.indexOf('$', idx1 + 1);
+														String parentAnon = "";
+														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
+															parent = parent.getParent();
+															while (parent != null) {
+																if (parent instanceof AbstractTypeDeclaration) {
+																	break;
+																} else if (parent instanceof AnonymousClassDeclaration) {
+																	AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+																	ITypeBinding aTypeBinding = atype.resolveBinding();
+																	String aName = aTypeBinding.getBinaryName();
+																	parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
+																}
+																parent = parent.getParent();
+															}
+															name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+														}
+													}
+												}
+											}
+											break;
+										}
+										/*
+										if (SearchSuperClass.isInheritedClassName(typeBinding/*.getSuperclass()*-/, name)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -1971,6 +2049,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 											}
 											break;
 										}
+										*/
 									}
 									parent = parent.getParent();
 								}
