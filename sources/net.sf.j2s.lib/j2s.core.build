@@ -239,6 +239,7 @@
         		<file name="java/util/Vector.js"/>
         		<file name="java/util/Stack.js"/>
         		<file name="java/util/ResourceBundle.js"/>
+        		<file name="java/util/MissingResourceException.js"/>
 
         		<file name="java/util/UtilExt.js"/>
 

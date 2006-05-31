@@ -24,8 +24,23 @@ Clazz.formatParameters = function (funParams) {
 if (funParams == null || funParams.length == 0) {
 return "\\void";
 } else {
-return "\\" + funParams.toString ().replace (/\s+/g, "")
-.replace (/,/g, "\\").replace (/\$wt\./g, "org.eclipse.swt.");
+var s = funParams.toString ();
+s = s.replace (/~([NABSO])/g, function ($0, $1) {
+if ($1 == 'N') {
+return "Number";
+} else if ($1 == 'B') {
+return "Boolean"
+} else if ($1 == 'S') {
+return "String";
+} else if ($1 == 'O') {
+return "Object";
+} else if ($1 == 'A') {
+return "Array"
+}
+return "Unknown";
+});
+return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\")
+.replace (/\$wt\./g, "org.eclipse.swt.");
 }
 };
 $WT = 
@@ -35,91 +50,91 @@ $_Z (this, arguments);
 cla$$.findErrorText = $_M (cla$$, "findErrorText", 
 function (code) {
 switch (code) {
-case $WT.ERROR_UNSPECIFIED:
+case 1:
 return "Unspecified error";
-case $WT.ERROR_NO_HANDLES:
+case 2:
 return "No more handles";
-case $WT.ERROR_NO_MORE_CALLBACKS:
+case 3:
 return "No more callbacks";
-case $WT.ERROR_NULL_ARGUMENT:
+case 4:
 return "Argument cannot be null";
-case $WT.ERROR_INVALID_ARGUMENT:
+case 5:
 return "Argument not valid";
-case $WT.ERROR_INVALID_RANGE:
+case 6:
 return "Index out of bounds";
-case $WT.ERROR_CANNOT_BE_ZERO:
+case 7:
 return "Argument cannot be zero";
-case $WT.ERROR_CANNOT_GET_ITEM:
+case 8:
 return "Cannot get item";
-case $WT.ERROR_CANNOT_GET_SELECTION:
+case 9:
 return "Cannot get selection";
-case $WT.ERROR_CANNOT_GET_ITEM_HEIGHT:
+case 11:
 return "Cannot get item height";
-case $WT.ERROR_CANNOT_GET_TEXT:
+case 12:
 return "Cannot get text";
-case $WT.ERROR_CANNOT_SET_TEXT:
+case 13:
 return "Cannot set text";
-case $WT.ERROR_ITEM_NOT_ADDED:
+case 14:
 return "Item not added";
-case $WT.ERROR_ITEM_NOT_REMOVED:
+case 15:
 return "Item not removed";
-case $WT.ERROR_NOT_IMPLEMENTED:
+case 20:
 return "Not implemented";
-case $WT.ERROR_MENU_NOT_DROP_DOWN:
+case 21:
 return "Menu must be a drop down";
-case $WT.ERROR_THREAD_INVALID_ACCESS:
+case 22:
 return "Invalid thread access";
-case $WT.ERROR_WIDGET_DISPOSED:
+case 24:
 return "Widget is disposed";
-case $WT.ERROR_MENUITEM_NOT_CASCADE:
+case 27:
 return "Menu item is not a CASCADE";
-case $WT.ERROR_CANNOT_SET_SELECTION:
+case 28:
 return "Cannot set selection";
-case $WT.ERROR_CANNOT_SET_MENU:
+case 29:
 return "Cannot set menu";
-case $WT.ERROR_CANNOT_SET_ENABLED:
+case 30:
 return "Cannot set the enabled state";
-case $WT.ERROR_CANNOT_GET_ENABLED:
+case 31:
 return "Cannot get the enabled state";
-case $WT.ERROR_INVALID_PARENT:
+case 32:
 return "Widget has the wrong parent";
-case $WT.ERROR_MENU_NOT_BAR:
+case 33:
 return "Menu is not a BAR";
-case $WT.ERROR_CANNOT_GET_COUNT:
+case 36:
 return "Cannot get count";
-case $WT.ERROR_MENU_NOT_POP_UP:
+case 37:
 return "Menu is not a POP_UP";
-case $WT.ERROR_UNSUPPORTED_DEPTH:
+case 38:
 return "Unsupported color depth";
-case $WT.ERROR_IO:
+case 39:
 return "i/o error";
-case $WT.ERROR_INVALID_IMAGE:
+case 40:
 return "Invalid image";
-case $WT.ERROR_UNSUPPORTED_FORMAT:
+case 42:
 return "Unsupported or unrecognized format";
-case $WT.ERROR_INVALID_SUBCLASS:
+case 43:
 return "Subclassing not allowed";
-case $WT.ERROR_GRAPHIC_DISPOSED:
+case 44:
 return "Graphic is disposed";
-case $WT.ERROR_DEVICE_DISPOSED:
+case 45:
 return "Device is disposed";
-case $WT.ERROR_FAILED_EXEC:
+case 46:
 return "Failed to execute runnable";
-case $WT.ERROR_FAILED_LOAD_LIBRARY:
+case 47:
 return "Unable to load library";
-case $WT.ERROR_CANNOT_INVERT_MATRIX:
+case 10:
 return "Cannot invert matrix";
-case $WT.ERROR_NO_GRAPHICS_LIBRARY:
+case 16:
 return "Unable to load graphics library";
-case $WT.ERROR_INVALID_FONT:
+case 48:
 return "Font not valid";
 }
 return "Unknown error";
-}, "Number");
+}, "~N");
 cla$$.getMessage = $_M (cla$$, "getMessage", 
 function (key) {
 return "!" + key + "!";
-}, "String");
+}, "~S");
 cla$$.getPlatform = $_M (cla$$, "getPlatform", 
 function () {
 return "win32";
@@ -154,11 +169,11 @@ window.error (str);
 window.log (("" + m.caller).trim ());
 }
 $WT.error (code, null);
-}, "Number");
+}, "~N");
 cla$$.error = $_M (cla$$, "error", 
 function (code, throwable) {
 $WT.error (code, throwable, null);
-}, "Number,Throwable");
+}, "~N,Throwable");
 cla$$.error = $_M (cla$$, "error", 
 function (code, throwable, detail) {
 if ($_O (throwable, $wt.SWTError)) throw throwable;
@@ -166,50 +181,50 @@ if ($_O (throwable, $wt.SWTException)) throw throwable;
 var message = $WT.findErrorText (code);
 if (detail != null) message += detail;
 switch (code) {
-case $WT.ERROR_NULL_ARGUMENT:
-case $WT.ERROR_CANNOT_BE_ZERO:
-case $WT.ERROR_INVALID_ARGUMENT:
-case $WT.ERROR_MENU_NOT_BAR:
-case $WT.ERROR_MENU_NOT_DROP_DOWN:
-case $WT.ERROR_MENU_NOT_POP_UP:
-case $WT.ERROR_MENUITEM_NOT_CASCADE:
-case $WT.ERROR_INVALID_PARENT:
-case $WT.ERROR_INVALID_RANGE:
+case 4:
+case 7:
+case 5:
+case 33:
+case 21:
+case 37:
+case 27:
+case 32:
+case 6:
 {
 throw  new IllegalArgumentException (message);
-}case $WT.ERROR_INVALID_SUBCLASS:
-case $WT.ERROR_THREAD_INVALID_ACCESS:
-case $WT.ERROR_WIDGET_DISPOSED:
-case $WT.ERROR_GRAPHIC_DISPOSED:
-case $WT.ERROR_DEVICE_DISPOSED:
-case $WT.ERROR_INVALID_IMAGE:
-case $WT.ERROR_UNSUPPORTED_DEPTH:
-case $WT.ERROR_UNSUPPORTED_FORMAT:
-case $WT.ERROR_FAILED_EXEC:
-case $WT.ERROR_CANNOT_INVERT_MATRIX:
-case $WT.ERROR_NO_GRAPHICS_LIBRARY:
-case $WT.ERROR_IO:
+}case 43:
+case 22:
+case 24:
+case 44:
+case 45:
+case 40:
+case 38:
+case 42:
+case 46:
+case 10:
+case 16:
+case 39:
 {
 var exception =  new $wt.SWTException (code, message);
 exception.throwable = throwable;
 throw exception;
-}case $WT.ERROR_CANNOT_GET_COUNT:
-case $WT.ERROR_CANNOT_GET_ENABLED:
-case $WT.ERROR_CANNOT_GET_ITEM:
-case $WT.ERROR_CANNOT_GET_ITEM_HEIGHT:
-case $WT.ERROR_CANNOT_GET_SELECTION:
-case $WT.ERROR_CANNOT_GET_TEXT:
-case $WT.ERROR_CANNOT_SET_ENABLED:
-case $WT.ERROR_CANNOT_SET_MENU:
-case $WT.ERROR_CANNOT_SET_SELECTION:
-case $WT.ERROR_CANNOT_SET_TEXT:
-case $WT.ERROR_ITEM_NOT_ADDED:
-case $WT.ERROR_ITEM_NOT_REMOVED:
-case $WT.ERROR_NO_HANDLES:
-case $WT.ERROR_FAILED_LOAD_LIBRARY:
-case $WT.ERROR_NO_MORE_CALLBACKS:
-case $WT.ERROR_NOT_IMPLEMENTED:
-case $WT.ERROR_UNSPECIFIED:
+}case 36:
+case 31:
+case 8:
+case 11:
+case 9:
+case 12:
+case 30:
+case 29:
+case 28:
+case 13:
+case 14:
+case 15:
+case 2:
+case 47:
+case 3:
+case 20:
+case 1:
 {
 var error =  new $wt.SWTError (code, message);
 error.throwable = throwable;
@@ -218,7 +233,7 @@ throw error;
 var error =  new $wt.SWTError (code, message);
 error.throwable = throwable;
 throw error;
-}, "Number,Throwable,String");
+}, "~N,Throwable,~S");
 $_S (cla$$,
 "None", 0,
 "KeyDown", 1,
@@ -266,105 +281,98 @@ $_S (cla$$,
 "ON", 1,
 "LOW", 1,
 "HIGH", 2,
-"BAR", 1 << 1,
-"DROP_DOWN", 1 << 2,
-"POP_UP", 1 << 3,
-"SEPARATOR", 1 << 1,
-"TOGGLE", 1 << 1,
-"ARROW", 1 << 2,
-"PUSH", 1 << 3,
-"RADIO", 1 << 4,
-"CHECK", 1 << 5,
-"CASCADE", 1 << 6,
-"MULTI", 1 << 1,
-"SINGLE", 1 << 2,
-"READ_ONLY", 1 << 3,
-"WRAP", 1 << 6,
-"SIMPLE", 1 << 6,
-"PASSWORD", 1 << 22,
-"SHADOW_IN", 1 << 2,
-"SHADOW_OUT", 1 << 3,
-"SHADOW_ETCHED_IN", 1 << 4,
-"SHADOW_ETCHED_OUT", 1 << 6,
-"SHADOW_NONE", 1 << 5,
-"INDETERMINATE", 1 << 1,
-"TOOL", 1 << 2,
-"NO_TRIM", 1 << 3,
-"RESIZE", 1 << 4,
-"TITLE", 1 << 5,
-"CLOSE", 1 << 6);
-cla$$.MENU = cla$$.prototype.MENU = $WT.CLOSE;
-$_S (cla$$,
-"MIN", 1 << 7,
-"MAX", 1 << 10,
-"H_SCROLL", 1 << 8,
-"V_SCROLL", 1 << 9,
-"BORDER", 1 << 11,
-"CLIP_CHILDREN", 1 << 12,
-"CLIP_SIBLINGS", 1 << 13,
-"ON_TOP", 1 << 14);
-cla$$.SHELL_TRIM = cla$$.prototype.SHELL_TRIM = $WT.CLOSE | $WT.TITLE | $WT.MIN | $WT.MAX | $WT.RESIZE;
-cla$$.DIALOG_TRIM = cla$$.prototype.DIALOG_TRIM = $WT.TITLE | $WT.CLOSE | $WT.BORDER;
-$_S (cla$$,
+"BAR", 2,
+"DROP_DOWN", 4,
+"POP_UP", 8,
+"SEPARATOR", 2,
+"TOGGLE", 2,
+"ARROW", 4,
+"PUSH", 8,
+"RADIO", 16,
+"CHECK", 32,
+"CASCADE", 64,
+"MULTI", 2,
+"SINGLE", 4,
+"READ_ONLY", 8,
+"WRAP", 64,
+"SIMPLE", 64,
+"PASSWORD", 4194304,
+"SHADOW_IN", 4,
+"SHADOW_OUT", 8,
+"SHADOW_ETCHED_IN", 16,
+"SHADOW_ETCHED_OUT", 64,
+"SHADOW_NONE", 32,
+"INDETERMINATE", 2,
+"TOOL", 4,
+"NO_TRIM", 8,
+"RESIZE", 16,
+"TITLE", 32,
+"CLOSE", 64,
+"MENU", 64,
+"MIN", 128,
+"MAX", 1024,
+"H_SCROLL", 256,
+"V_SCROLL", 512,
+"BORDER", 2048,
+"CLIP_CHILDREN", 4096,
+"CLIP_SIBLINGS", 8192,
+"ON_TOP", 16384,
+"SHELL_TRIM", 1264,
+"DIALOG_TRIM", 2144,
 "MODELESS", 0,
-"PRIMARY_MODAL", 1 << 15,
-"APPLICATION_MODAL", 1 << 16,
-"SYSTEM_MODAL", 1 << 17,
-"HIDE_SELECTION", 1 << 15,
-"FULL_SELECTION", 1 << 16,
-"FLAT", 1 << 23,
-"SMOOTH", 1 << 16,
-"NO_BACKGROUND", 1 << 18,
-"NO_FOCUS", 1 << 19,
-"NO_REDRAW_RESIZE", 1 << 20,
-"NO_MERGE_PAINTS", 1 << 21,
-"NO_RADIO_GROUP", 1 << 22,
-"LEFT_TO_RIGHT", 1 << 25,
-"RIGHT_TO_LEFT", 1 << 26,
-"MIRRORED", 1 << 27,
-"EMBEDDED", 1 << 24,
-"VIRTUAL", 1 << 28,
-"DOUBLE_BUFFERED", 1 << 29,
-"UP", 1 << 7);
-cla$$.TOP = cla$$.prototype.TOP = $WT.UP;
-$_S (cla$$,
-"DOWN", 1 << 10);
-cla$$.BOTTOM = cla$$.prototype.BOTTOM = $WT.DOWN;
-$_S (cla$$,
-"LEAD", 1 << 14);
-cla$$.LEFT = cla$$.prototype.LEFT = $WT.LEAD;
-$_S (cla$$,
-"TRAIL", 1 << 17);
-cla$$.RIGHT = cla$$.prototype.RIGHT = $WT.TRAIL;
-$_S (cla$$,
-"CENTER", 1 << 24,
-"HORIZONTAL", 1 << 8,
-"VERTICAL", 1 << 9,
+"PRIMARY_MODAL", 32768,
+"APPLICATION_MODAL", 65536,
+"SYSTEM_MODAL", 131072,
+"HIDE_SELECTION", 32768,
+"FULL_SELECTION", 65536,
+"FLAT", 8388608,
+"SMOOTH", 65536,
+"NO_BACKGROUND", 262144,
+"NO_FOCUS", 524288,
+"NO_REDRAW_RESIZE", 1048576,
+"NO_MERGE_PAINTS", 2097152,
+"NO_RADIO_GROUP", 4194304,
+"LEFT_TO_RIGHT", 33554432,
+"RIGHT_TO_LEFT", 67108864,
+"MIRRORED", 134217728,
+"EMBEDDED", 16777216,
+"VIRTUAL", 268435456,
+"DOUBLE_BUFFERED", 536870912,
+"UP", 128,
+"TOP", 128,
+"DOWN", 1024,
+"BOTTOM", 1024,
+"LEAD", 16384,
+"LEFT", 16384,
+"TRAIL", 131072,
+"RIGHT", 131072,
+"CENTER", 16777216,
+"HORIZONTAL", 256,
+"VERTICAL", 512,
 "BEGINNING", 1,
 "FILL", 4,
-"DBCS", 1 << 1,
-"ALPHA", 1 << 2,
-"NATIVE", 1 << 3,
-"PHONETIC", 1 << 4,
-"ROMAN", 1 << 5,
+"DBCS", 2,
+"ALPHA", 4,
+"NATIVE", 8,
+"PHONETIC", 16,
+"ROMAN", 32,
 "BS", '\b',
 "CR", '\r',
 "DEL", 0x7F,
 "ESC", 0x1B,
 "LF", '\n',
 "TAB", '\t',
-"ALT", 1 << 16,
-"SHIFT", 1 << 17,
-"CTRL", 1 << 18);
-cla$$.CONTROL = cla$$.prototype.CONTROL = $WT.CTRL;
-$_S (cla$$,
-"COMMAND", 1 << 22,
+"ALT", 65536,
+"SHIFT", 131072,
+"CTRL", 262144,
+"CONTROL", 262144,
+"COMMAND", 4194304,
 "MODIFIER_MASK", 0,
-"BUTTON1", 1 << 19,
-"BUTTON2", 1 << 20,
-"BUTTON3", 1 << 21,
-"BUTTON4", 1 << 23,
-"BUTTON5", 1 << 25,
+"BUTTON1", 524288,
+"BUTTON2", 1048576,
+"BUTTON3", 2097152,
+"BUTTON4", 8388608,
+"BUTTON5", 33554432,
 "BUTTON_MASK", 0,
 "MOD1", 0,
 "MOD2", 0,
@@ -372,71 +380,70 @@ $_S (cla$$,
 "MOD4", 0,
 "SCROLL_LINE", 1,
 "SCROLL_PAGE", 2,
-"KEYCODE_BIT", (1 << 24));
-cla$$.KEY_MASK = cla$$.prototype.KEY_MASK = $WT.KEYCODE_BIT + 0xFFFF;
-cla$$.ARROW_UP = cla$$.prototype.ARROW_UP = $WT.KEYCODE_BIT + 1;
-cla$$.ARROW_DOWN = cla$$.prototype.ARROW_DOWN = $WT.KEYCODE_BIT + 2;
-cla$$.ARROW_LEFT = cla$$.prototype.ARROW_LEFT = $WT.KEYCODE_BIT + 3;
-cla$$.ARROW_RIGHT = cla$$.prototype.ARROW_RIGHT = $WT.KEYCODE_BIT + 4;
-cla$$.PAGE_UP = cla$$.prototype.PAGE_UP = $WT.KEYCODE_BIT + 5;
-cla$$.PAGE_DOWN = cla$$.prototype.PAGE_DOWN = $WT.KEYCODE_BIT + 6;
-cla$$.HOME = cla$$.prototype.HOME = $WT.KEYCODE_BIT + 7;
-cla$$.END = cla$$.prototype.END = $WT.KEYCODE_BIT + 8;
-cla$$.INSERT = cla$$.prototype.INSERT = $WT.KEYCODE_BIT + 9;
-cla$$.F1 = cla$$.prototype.F1 = $WT.KEYCODE_BIT + 10;
-cla$$.F2 = cla$$.prototype.F2 = $WT.KEYCODE_BIT + 11;
-cla$$.F3 = cla$$.prototype.F3 = $WT.KEYCODE_BIT + 12;
-cla$$.F4 = cla$$.prototype.F4 = $WT.KEYCODE_BIT + 13;
-cla$$.F5 = cla$$.prototype.F5 = $WT.KEYCODE_BIT + 14;
-cla$$.F6 = cla$$.prototype.F6 = $WT.KEYCODE_BIT + 15;
-cla$$.F7 = cla$$.prototype.F7 = $WT.KEYCODE_BIT + 16;
-cla$$.F8 = cla$$.prototype.F8 = $WT.KEYCODE_BIT + 17;
-cla$$.F9 = cla$$.prototype.F9 = $WT.KEYCODE_BIT + 18;
-cla$$.F10 = cla$$.prototype.F10 = $WT.KEYCODE_BIT + 19;
-cla$$.F11 = cla$$.prototype.F11 = $WT.KEYCODE_BIT + 20;
-cla$$.F12 = cla$$.prototype.F12 = $WT.KEYCODE_BIT + 21;
-cla$$.F13 = cla$$.prototype.F13 = $WT.KEYCODE_BIT + 22;
-cla$$.F14 = cla$$.prototype.F14 = $WT.KEYCODE_BIT + 23;
-cla$$.F15 = cla$$.prototype.F15 = $WT.KEYCODE_BIT + 24;
-cla$$.KEYPAD_MULTIPLY = cla$$.prototype.KEYPAD_MULTIPLY = $WT.KEYCODE_BIT + 42;
-cla$$.KEYPAD_ADD = cla$$.prototype.KEYPAD_ADD = $WT.KEYCODE_BIT + 43;
-cla$$.KEYPAD_SUBTRACT = cla$$.prototype.KEYPAD_SUBTRACT = $WT.KEYCODE_BIT + 45;
-cla$$.KEYPAD_DECIMAL = cla$$.prototype.KEYPAD_DECIMAL = $WT.KEYCODE_BIT + 46;
-cla$$.KEYPAD_DIVIDE = cla$$.prototype.KEYPAD_DIVIDE = $WT.KEYCODE_BIT + 47;
-cla$$.KEYPAD_0 = cla$$.prototype.KEYPAD_0 = $WT.KEYCODE_BIT + 48;
-cla$$.KEYPAD_1 = cla$$.prototype.KEYPAD_1 = $WT.KEYCODE_BIT + 49;
-cla$$.KEYPAD_2 = cla$$.prototype.KEYPAD_2 = $WT.KEYCODE_BIT + 50;
-cla$$.KEYPAD_3 = cla$$.prototype.KEYPAD_3 = $WT.KEYCODE_BIT + 51;
-cla$$.KEYPAD_4 = cla$$.prototype.KEYPAD_4 = $WT.KEYCODE_BIT + 52;
-cla$$.KEYPAD_5 = cla$$.prototype.KEYPAD_5 = $WT.KEYCODE_BIT + 53;
-cla$$.KEYPAD_6 = cla$$.prototype.KEYPAD_6 = $WT.KEYCODE_BIT + 54;
-cla$$.KEYPAD_7 = cla$$.prototype.KEYPAD_7 = $WT.KEYCODE_BIT + 55;
-cla$$.KEYPAD_8 = cla$$.prototype.KEYPAD_8 = $WT.KEYCODE_BIT + 56;
-cla$$.KEYPAD_9 = cla$$.prototype.KEYPAD_9 = $WT.KEYCODE_BIT + 57;
-cla$$.KEYPAD_EQUAL = cla$$.prototype.KEYPAD_EQUAL = $WT.KEYCODE_BIT + 61;
-cla$$.KEYPAD_CR = cla$$.prototype.KEYPAD_CR = $WT.KEYCODE_BIT + 80;
-cla$$.HELP = cla$$.prototype.HELP = $WT.KEYCODE_BIT + 81;
-cla$$.CAPS_LOCK = cla$$.prototype.CAPS_LOCK = $WT.KEYCODE_BIT + 82;
-cla$$.NUM_LOCK = cla$$.prototype.NUM_LOCK = $WT.KEYCODE_BIT + 83;
-cla$$.SCROLL_LOCK = cla$$.prototype.SCROLL_LOCK = $WT.KEYCODE_BIT + 84;
-cla$$.PAUSE = cla$$.prototype.PAUSE = $WT.KEYCODE_BIT + 85;
-cla$$.BREAK = cla$$.prototype.BREAK = $WT.KEYCODE_BIT + 86;
-cla$$.PRINT_SCREEN = cla$$.prototype.PRINT_SCREEN = $WT.KEYCODE_BIT + 87;
-$_S (cla$$,
+"KEYCODE_BIT", (16777216),
+"KEY_MASK", 16842751,
+"ARROW_UP", 16777217,
+"ARROW_DOWN", 16777218,
+"ARROW_LEFT", 16777219,
+"ARROW_RIGHT", 16777220,
+"PAGE_UP", 16777221,
+"PAGE_DOWN", 16777222,
+"HOME", 16777223,
+"END", 16777224,
+"INSERT", 16777225,
+"F1", 16777226,
+"F2", 16777227,
+"F3", 16777228,
+"F4", 16777229,
+"F5", 16777230,
+"F6", 16777231,
+"F7", 16777232,
+"F8", 16777233,
+"F9", 16777234,
+"F10", 16777235,
+"F11", 16777236,
+"F12", 16777237,
+"F13", 16777238,
+"F14", 16777239,
+"F15", 16777240,
+"KEYPAD_MULTIPLY", 16777258,
+"KEYPAD_ADD", 16777259,
+"KEYPAD_SUBTRACT", 16777261,
+"KEYPAD_DECIMAL", 16777262,
+"KEYPAD_DIVIDE", 16777263,
+"KEYPAD_0", 16777264,
+"KEYPAD_1", 16777265,
+"KEYPAD_2", 16777266,
+"KEYPAD_3", 16777267,
+"KEYPAD_4", 16777268,
+"KEYPAD_5", 16777269,
+"KEYPAD_6", 16777270,
+"KEYPAD_7", 16777271,
+"KEYPAD_8", 16777272,
+"KEYPAD_9", 16777273,
+"KEYPAD_EQUAL", 16777277,
+"KEYPAD_CR", 16777296,
+"HELP", 16777297,
+"CAPS_LOCK", 16777298,
+"NUM_LOCK", 16777299,
+"SCROLL_LOCK", 16777300,
+"PAUSE", 16777301,
+"BREAK", 16777302,
+"PRINT_SCREEN", 16777303,
 "ICON_ERROR", 1,
-"ICON_INFORMATION", 1 << 1,
-"ICON_QUESTION", 1 << 2,
-"ICON_WARNING", 1 << 3,
-"ICON_WORKING", 1 << 4,
-"OK", 1 << 5,
-"YES", 1 << 6,
-"NO", 1 << 7,
-"CANCEL", 1 << 8,
-"ABORT", 1 << 9,
-"RETRY", 1 << 10,
-"IGNORE", 1 << 11,
-"OPEN", 1 << 12,
-"SAVE", 1 << 13,
+"ICON_INFORMATION", 2,
+"ICON_QUESTION", 4,
+"ICON_WARNING", 8,
+"ICON_WORKING", 16,
+"OK", 32,
+"YES", 64,
+"NO", 128,
+"CANCEL", 256,
+"ABORT", 512,
+"RETRY", 1024,
+"IGNORE", 2048,
+"OPEN", 4096,
+"SAVE", 8192,
 "COLOR_WHITE", 1,
 "COLOR_BLACK", 2,
 "COLOR_RED", 3,
@@ -472,10 +479,10 @@ $_S (cla$$,
 "COLOR_TITLE_INACTIVE_FOREGROUND", 33,
 "COLOR_TITLE_INACTIVE_BACKGROUND", 34,
 "COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT", 35,
-"DRAW_TRANSPARENT", 1 << 0,
-"DRAW_DELIMITER", 1 << 1,
-"DRAW_TAB", 1 << 2,
-"DRAW_MNEMONIC", 1 << 3,
+"DRAW_TRANSPARENT", 1,
+"DRAW_DELIMITER", 2,
+"DRAW_TAB", 4,
+"DRAW_MNEMONIC", 8,
 "ERROR_UNSPECIFIED", 1,
 "ERROR_NO_HANDLES", 2,
 "ERROR_NO_MORE_CALLBACKS", 3,
@@ -516,23 +523,23 @@ $_S (cla$$,
 "ERROR_FAILED_LOAD_LIBRARY", 47,
 "ERROR_INVALID_FONT", 48,
 "TRAVERSE_NONE", 0,
-"TRAVERSE_ESCAPE", 1 << 1,
-"TRAVERSE_RETURN", 1 << 2,
-"TRAVERSE_TAB_PREVIOUS", 1 << 3,
-"TRAVERSE_TAB_NEXT", 1 << 4,
-"TRAVERSE_ARROW_PREVIOUS", 1 << 5,
-"TRAVERSE_ARROW_NEXT", 1 << 6,
-"TRAVERSE_MNEMONIC", 1 << 7,
-"TRAVERSE_PAGE_PREVIOUS", 1 << 8,
-"TRAVERSE_PAGE_NEXT", 1 << 9,
+"TRAVERSE_ESCAPE", 2,
+"TRAVERSE_RETURN", 4,
+"TRAVERSE_TAB_PREVIOUS", 8,
+"TRAVERSE_TAB_NEXT", 16,
+"TRAVERSE_ARROW_PREVIOUS", 32,
+"TRAVERSE_ARROW_NEXT", 64,
+"TRAVERSE_MNEMONIC", 128,
+"TRAVERSE_PAGE_PREVIOUS", 256,
+"TRAVERSE_PAGE_NEXT", 512,
 "BITMAP", 0,
 "ICON", 1,
 "IMAGE_COPY", 0,
 "IMAGE_DISABLE", 1,
 "IMAGE_GRAY", 2,
 "NORMAL", 0,
-"BOLD", 1 << 0,
-"ITALIC", 1 << 1,
+"BOLD", 1,
+"ITALIC", 2,
 "CURSOR_ARROW", 0,
 "CURSOR_WAIT", 1,
 "CURSOR_CROSS", 2,
@@ -588,25 +595,25 @@ $_S (cla$$,
 "DM_FILL_BACKGROUND", 0x2,
 "DM_FILL_PREVIOUS", 0x3,
 "TRANSPARENCY_NONE", 0x0,
-"TRANSPARENCY_ALPHA", 1 << 0,
-"TRANSPARENCY_MASK", 1 << 1,
-"TRANSPARENCY_PIXEL", 1 << 2,
-"MOVEMENT_CHAR", 1 << 0,
-"MOVEMENT_CLUSTER", 1 << 1,
-"MOVEMENT_WORD", 1 << 2);
+"TRANSPARENCY_ALPHA", 1,
+"TRANSPARENCY_MASK", 2,
+"TRANSPARENCY_PIXEL", 4,
+"MOVEMENT_CHAR", 1,
+"MOVEMENT_CLUSTER", 2,
+"MOVEMENT_WORD", 4);
 {
-($t$ = $WT.BUTTON_MASK = $WT.BUTTON1 | $WT.BUTTON2 | $WT.BUTTON3 | $WT.BUTTON4 | $WT.BUTTON5, $WT.prototype.BUTTON_MASK = $WT.BUTTON_MASK, $t$);
-($t$ = $WT.MODIFIER_MASK = $WT.ALT | $WT.SHIFT | $WT.CTRL | $WT.COMMAND, $WT.prototype.MODIFIER_MASK = $WT.MODIFIER_MASK, $t$);
+($t$ = $WT.BUTTON_MASK = 45613056, $WT.prototype.BUTTON_MASK = $WT.BUTTON_MASK, $t$);
+($t$ = $WT.MODIFIER_MASK = 4653056, $WT.prototype.MODIFIER_MASK = $WT.MODIFIER_MASK, $t$);
 var platform = $WT.getPlatform ();
 if ("carbon".equals (platform)) {
-($t$ = $WT.MOD1 = $WT.COMMAND, $WT.prototype.MOD1 = $WT.MOD1, $t$);
-($t$ = $WT.MOD2 = $WT.SHIFT, $WT.prototype.MOD2 = $WT.MOD2, $t$);
-($t$ = $WT.MOD3 = $WT.ALT, $WT.prototype.MOD3 = $WT.MOD3, $t$);
-($t$ = $WT.MOD4 = $WT.CONTROL, $WT.prototype.MOD4 = $WT.MOD4, $t$);
+($t$ = $WT.MOD1 = 4194304, $WT.prototype.MOD1 = $WT.MOD1, $t$);
+($t$ = $WT.MOD2 = 131072, $WT.prototype.MOD2 = $WT.MOD2, $t$);
+($t$ = $WT.MOD3 = 65536, $WT.prototype.MOD3 = $WT.MOD3, $t$);
+($t$ = $WT.MOD4 = 262144, $WT.prototype.MOD4 = $WT.MOD4, $t$);
 } else {
-($t$ = $WT.MOD1 = $WT.CONTROL, $WT.prototype.MOD1 = $WT.MOD1, $t$);
-($t$ = $WT.MOD2 = $WT.SHIFT, $WT.prototype.MOD2 = $WT.MOD2, $t$);
-($t$ = $WT.MOD3 = $WT.ALT, $WT.prototype.MOD3 = $WT.MOD3, $t$);
+($t$ = $WT.MOD1 = 262144, $WT.prototype.MOD1 = $WT.MOD1, $t$);
+($t$ = $WT.MOD2 = 131072, $WT.prototype.MOD2 = $WT.MOD2, $t$);
+($t$ = $WT.MOD3 = 65536, $WT.prototype.MOD3 = $WT.MOD3, $t$);
 ($t$ = $WT.MOD4 = 0, $WT.prototype.MOD4 = $WT.MOD4, $t$);
 }}cla$$ = $_C (function () {
 this.code = 0;
@@ -620,16 +627,16 @@ this.construct (1);
 $_K (cla$$, 
 function (message) {
 this.construct (1, message);
-}, "String");
+}, "~S");
 $_K (cla$$, 
 function (code) {
 this.construct (code, $WT.findErrorText (code));
-}, "Number");
+}, "~N");
 $_K (cla$$, 
 function (code, message) {
 $_R (this, $wt.SWTError, [message]);
 this.code = code;
-}, "Number,String");
+}, "~N,~S");
 $_V (cla$$, "getCause", 
 function () {
 return this.throwable;
@@ -660,16 +667,16 @@ this.construct (1);
 $_K (cla$$, 
 function (message) {
 this.construct (1, message);
-}, "String");
+}, "~S");
 $_K (cla$$, 
 function (code) {
 this.construct (code, $WT.findErrorText (code));
-}, "Number");
+}, "~N");
 $_K (cla$$, 
 function (code, message) {
 $_R (this, $wt.SWTException, [message]);
 this.code = code;
-}, "Number,String");
+}, "~N,~S");
 $_V (cla$$, "getCause", 
 function () {
 return this.throwable;
@@ -721,14 +728,14 @@ function (val) {
 this.returnSet = 1;
 this.returnNumber = val;
 this.returnObject = null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "toReturn", 
 function (val) {
 this.returnSet = 2;
 this.returnBoolean = val;
 this.returnNumber = 0;
 this.returnObject = null;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "toReturn", 
 function (val) {
 this.returnSet = 3;
@@ -740,320 +747,6 @@ $_M (cla$$, "isReturned",
 function () {
 return this.returnSet != 0;
 });
-$_J ("org.eclipse.swt.internal.browser");
-cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.internal.browser, "OS");
-cla$$.destoryHandle = $_M (cla$$, "destoryHandle", 
-function (handle) {
-if (handle == null) {
-return ;
-}var el = handle;
-el.onblur = null;
-el.onchange = null;
-el.onclick = null;
-el.oncontextmenu = null;
-el.onfocus = null;
-el.onkeydown = null;
-el.onkeypress = null;
-el.onkeyup = null;
-el.onmousedown = null;
-el.onmousemove = null;
-el.onmouseout = null;
-el.onmouseover = null;
-el.onmouseup = null;
-el.onselectchange = null;
-el.onselectstart = null;
-if (el.parentNode != null) {
-try {
-el.parentNode.removeChild (el);
-} catch (e) {
-if ($_O (e, Error)) {
-var os = $wt.internal.browser.OS;
-var dua = navigator.userAgent;
-var dav = navigator.appVersion;
-os.isOpera = dua.indexOf("Opera") >= 0;
-var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
-os.isSafari = dav.indexOf("Safari") >= 0;
-var geckoPos = dua.indexOf("Gecko");
-os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
-os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
-os.isIE = (document.all)&&(!os.isOpera);
-os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
-os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
-os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
-} else {
-throw e;
-}
-}
-}}, "Object");
-cla$$.clearChildren = $_M (cla$$, "clearChildren", 
-function (handle) {
-if (handle == null) {
-return ;
-}var el = handle;
-for (var i = el.childNodes.length - 1; i >= 0; i--) {
-el.removeChild (el.childNodes[i]);
-}
-}, "Object");
-cla$$.SetWindowPos = $_M (cla$$, "SetWindowPos", 
-function (handle, x, y, w, h, flags) {
-if (handle == null) {
-return ;
-}var el = handle;
-}, "Object,Number,Number,Number,Number,Number");
-cla$$.init = $_M (cla$$, "init", 
-($fz = function () {
-if ($wt.internal.browser.OS.invisibleContainer == null) {
-var el = document.createElement ("DIV");
-document.body.appendChild (el);
-var s = el.style;
-s.position = "absolute";
-s.top = "-300px";
-s.width = "3000px";
-s.height = "100px";
-s.overflow = "scroll";
-($t$ = $wt.internal.browser.OS.invisibleContainer = el, $wt.internal.browser.OS.prototype.invisibleContainer = $wt.internal.browser.OS.invisibleContainer, $t$);
-el = document.createElement ("DIV");
-$wt.internal.browser.OS.invisibleContainer.appendChild (el);
-el.className = "system-default";
-s = el.style;
-s.whiteSpace = "nowrap";
-s.overflow = "visible";
-($t$ = $wt.internal.browser.OS.lineContainer = el, $wt.internal.browser.OS.prototype.lineContainer = $wt.internal.browser.OS.lineContainer, $t$);
-el = document.createElement ("DIV");
-$wt.internal.browser.OS.invisibleContainer.appendChild (el);
-($t$ = $wt.internal.browser.OS.blockContainer = el, $wt.internal.browser.OS.prototype.blockContainer = $wt.internal.browser.OS.blockContainer, $t$);
-}}, $fz.isPrivate = true, $fz));
-cla$$.resetLineContainer = $_M (cla$$, "resetLineContainer", 
-($fz = function () {
-var container = $wt.internal.browser.OS.lineContainer;
-$wt.internal.browser.OS.clearChildren (container);
-container.className = "";
-var s = container.style;
-s.cssText = "";
-s.whiteSpace = "nowrap";
-s.overflow = "visible";
-}, $fz.isPrivate = true, $fz));
-cla$$.resetBlockContainer = $_M (cla$$, "resetBlockContainer", 
-($fz = function () {
-var container = $wt.internal.browser.OS.blockContainer;
-$wt.internal.browser.OS.clearChildren (container);
-container.className = "";
-container.style.cssText = "";
-}, $fz.isPrivate = true, $fz));
-cla$$.getContainerWidth = $_M (cla$$, "getContainerWidth", 
-function (container) {
-var el = container;
-return Math.max (el.offsetWidth, Math.max (el.clientWidth, el.scrollWidth));
-}, "Object");
-cla$$.getContainerHeight = $_M (cla$$, "getContainerHeight", 
-function (container) {
-var el = container;
-var max = Math.max (el.offsetHeight, Math.max (el.clientHeight, el.scrollHeight));
-if ($wt.internal.browser.OS.isIE) {
-max--;
-}return max;
-}, "Object");
-cla$$.insertText = $_M (cla$$, "insertText", 
-function (handle, text) {
-if (!((/[\r\n\t&]/g).test (text))) {
-handle.style.display = "inline";
-handle.appendChild(document.createTextNode(text));
-return ;
-}
-var lines = null;
-var c160 = String.fromCharCode (160);
-var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
-var s = text.replace (/\t/g, c160x8);
-if (splitNeedFixed) {
-try {
-lines = splitIntoLines (s);
-} catch (e) {
-//popupAlert (e.message);
-}
-} else {
-lines = s.split (/\r\n|\r|\n/g);
-}
-for (var i = 0; i < lines.length; i++) {
-if (i > 0) {
-handle.appendChild (document.createElement ("BR"));
-}
-var lineEl = document.createElement ("SPAN");
-handle.appendChild (lineEl);
-//lineEl.style.whiteSpace = "nowrap";
-if (lines[i].length == 0) {
-lines[i] = String.fromCharCode (160);
-}
-var idx = lines[i].indexOf ('&');
-var lastIndex = 0;
-while (idx != -1) {
-if (idx < lines[i].length - 1) {
-var c = lines[i].charAt (idx + 1);
-if (c == '&') {
-idx = lines[i].indexOf ('&', idx + 2);
-continue;
-} else {
-var chs = lines[i].substring (lastIndex, idx);
-if (chs.length != 0) {
-lineEl.appendChild (document.createTextNode (chs));
-}
-var el = document.createElement ("SPAN");
-lineEl.appendChild (el);
-//el.style.whiteSpace = "nowrap";
-el.appendChild (document.createTextNode (c));
-lastIndex = idx + 2;
-idx = lines[i].indexOf ('&', lastIndex);
-}
-} else {
-break;
-}
-}
-if (lastIndex == 0) {
-lineEl.appendChild (document.createTextNode (lines[i].replace (/&&/g, '&')));
-} else {
-lineEl.appendChild (document.createTextNode (lines[i]
-.substring (lastIndex, lines[i].length).replace (/&&/g, '&')));
-}
-}
-}, "Object,String");
-cla$$.setupAsPlain = $_M (cla$$, "setupAsPlain", 
-($fz = function (str) {
-$wt.internal.browser.OS.init ();
-$wt.internal.browser.OS.resetLineContainer ();
-var c = $wt.internal.browser.OS.lineContainer;
-c.className = "system-default";
-$wt.internal.browser.OS.insertText (c, str);
-return c;
-}, $fz.isPrivate = true, $fz), "String");
-cla$$.setupAsStyled = $_M (cla$$, "setupAsStyled", 
-($fz = function (str, className, cssText) {
-$wt.internal.browser.OS.init ();
-$wt.internal.browser.OS.resetLineContainer ();
-var c = $wt.internal.browser.OS.lineContainer;
-if (className != null && className.length != 0) {
-c.className = className;
-}if (cssText != null && cssText.length != 0) {
-cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-c.style.cssText = cssText;
-}$wt.internal.browser.OS.insertText (c, str);
-return c;
-}, $fz.isPrivate = true, $fz), "String,String,String");
-cla$$.setupAsPlainWrapped = $_M (cla$$, "setupAsPlainWrapped", 
-($fz = function (str, wrappedWidth) {
-$wt.internal.browser.OS.init ();
-$wt.internal.browser.OS.resetBlockContainer ();
-var c = $wt.internal.browser.OS.blockContainer;
-c.className = "system-default";
-c.style.width = wrappedWidth + "px";
-c.style.overflow = "visible";
-c.style.whiteSpace = "normal";
-$wt.internal.browser.OS.insertText (c, str);
-return c;
-}, $fz.isPrivate = true, $fz), "String,Number");
-cla$$.setupAsStyledWrapped = $_M (cla$$, "setupAsStyledWrapped", 
-($fz = function (str, className, cssText, wrappedWidth) {
-$wt.internal.browser.OS.init ();
-$wt.internal.browser.OS.resetLineContainer ();
-var c = $wt.internal.browser.OS.lineContainer;
-if (className != null && className.length != 0) {
-c.className = className;
-}if (cssText != null && cssText.length != 0) {
-cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-c.style.cssText = cssText;
-}c.style.width = wrappedWidth + "px";
-c.style.overflow = "visible";
-c.style.whiteSpace = "normal";
-$wt.internal.browser.OS.insertText (c, str);
-return c;
-}, $fz.isPrivate = true, $fz), "String,String,String,Number");
-cla$$.getStringPlainWidth = $_M (cla$$, "getStringPlainWidth", 
-function (str) {
-var c = $wt.internal.browser.OS.setupAsPlain (str);
-return $wt.internal.browser.OS.getContainerWidth (c);
-}, "String");
-cla$$.getStringStyledWidth = $_M (cla$$, "getStringStyledWidth", 
-function (str, className, cssText) {
-{
-var r = /display\s*:\s*none/ig;
-if (r.test (cssText)) {
-return 0;
-}
-}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
-return $wt.internal.browser.OS.getContainerWidth (c);
-}, "String,String,String");
-cla$$.getStringPlainHeight = $_M (cla$$, "getStringPlainHeight", 
-function (str) {
-var c = $wt.internal.browser.OS.setupAsPlain (str);
-return $wt.internal.browser.OS.getContainerHeight (c);
-}, "String");
-cla$$.getStringPlainWrappedHeight = $_M (cla$$, "getStringPlainWrappedHeight", 
-function (str, wrappedWidth) {
-var c = $wt.internal.browser.OS.setupAsPlainWrapped (str, wrappedWidth);
-return $wt.internal.browser.OS.getContainerHeight (c);
-}, "String,Number");
-cla$$.getStringStyledHeight = $_M (cla$$, "getStringStyledHeight", 
-function (str, className, cssText) {
-{
-var r = /display\s*:\s*none/ig;
-if (r.test (cssText)) {
-return 0;
-}
-}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
-return $wt.internal.browser.OS.getContainerHeight (c);
-}, "String,String,String");
-cla$$.getStringStyledWrappedHeight = $_M (cla$$, "getStringStyledWrappedHeight", 
-function (str, className, cssText, wrappedWidth) {
-{
-var r = /display\s*:\s*none/ig;
-if (r.test (cssText)) {
-return 0;
-}
-}var c = $wt.internal.browser.OS.setupAsStyledWrapped (str, className, cssText, wrappedWidth);
-return $wt.internal.browser.OS.getContainerHeight (c);
-}, "String,String,String,Number");
-cla$$.getStringPlainSize = $_M (cla$$, "getStringPlainSize", 
-function (str) {
-var c = $wt.internal.browser.OS.setupAsPlain (str);
-return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
-}, "String");
-cla$$.getStringStyledSize = $_M (cla$$, "getStringStyledSize", 
-function (str, className, cssText) {
-{
-var r = /display\s*:\s*none/ig;
-if (r.test (cssText)) {
-return new org.eclipse.swt.graphics.Point(0, 0);
-}
-}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
-return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
-}, "String,String,String");
-$_S (cla$$,
-"isIE", false,
-"isIE60", false,
-"isIE55", false,
-"isIE50", false,
-"isMozilla", false,
-"isFirefox", false,
-"isSafari", false,
-"isOpera", false);
-{
-var os = $wt.internal.browser.OS;
-var dua = navigator.userAgent;
-var dav = navigator.appVersion;
-os.isOpera = dua.indexOf("Opera") >= 0;
-var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
-os.isSafari = dav.indexOf("Safari") >= 0;
-var geckoPos = dua.indexOf("Gecko");
-os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
-os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
-os.isIE = (document.all)&&(!os.isOpera);
-os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
-os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
-os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
-}$_S (cla$$,
-"invisibleContainer", null,
-"lineContainer", null,
-"blockContainer", null);
 cla$$ = $_C (function () {
 this.display = null;
 this.widget = null;
@@ -1661,7 +1354,7 @@ System.arraycopy (this.listeners, 0, newListeners, 0, length);
 this.listeners = newListeners;
 }this.types[index] = eventType;
 this.listeners[index] = listener;
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "hooks", 
 function (eventType) {
 if (this.types == null) return false;
@@ -1669,7 +1362,7 @@ for (var i = 0; i < this.types.length; i++) {
 if (this.types[i] == eventType) return true;
 }
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "sendEvent", 
 function (event) {
 if (this.types == null) return ;
@@ -1718,7 +1411,7 @@ index = end;
 if (this.level > 0) this.level = -this.level;
 }this.types[index] = 0;
 this.listeners[index] = null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "unhook", 
 function (eventType, listener) {
 if (this.types == null) return ;
@@ -1727,7 +1420,7 @@ if (this.types[i] == eventType && this.listeners[i] == listener) {
 this.remove (i);
 return ;
 }}
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "unhook", 
 function (eventType, listener) {
 if (this.types == null) return ;
@@ -1739,7 +1432,7 @@ if (typedListener.getEventListener () == listener) {
 this.remove (i);
 return ;
 }}}}
-}, "Number,$wt.internal.SWTEventListener");
+}, "~N,$wt.internal.SWTEventListener");
 $_M (cla$$, "releaseResource", 
 function () {
 if (this.listeners != null) {
@@ -1757,7 +1450,7 @@ $_K (cla$$,
 function (x, y) {
 this.x = x;
 this.y = y;
-}, "Number,Number");
+}, "~N,~N");
 $_V (cla$$, "equals", 
 function (object) {
 if (object == this) return true;
@@ -1788,7 +1481,7 @@ this.x = x;
 this.y = y;
 this.width = width;
 this.height = height;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "add", 
 function (rect) {
 var left = this.x < rect.x ? this.x : rect.x;
@@ -1807,7 +1500,7 @@ this.height = bottom - top;
 $_M (cla$$, "contains", 
 function (x, y) {
 return (x >= this.x) && (y >= this.y) && ((x - this.x) < this.width) && ((y - this.y) < this.height);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "contains", 
 function (pt) {
 return this.contains (pt.x, pt.y);
@@ -1855,7 +1548,7 @@ return  new $wt.graphics.Rectangle (right < left ? 0 : left, bottom < top ? 0 : 
 $_M (cla$$, "intersects", 
 function (x, y, width, height) {
 return (x < this.x + this.width) && (y < this.y + this.height) && (x + width > this.x) && (y + height > this.y);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "intersects", 
 function (rect) {
 return rect == this || this.intersects (rect.x, rect.y, rect.width, rect.height);
@@ -1893,7 +1586,7 @@ function (red, green, blue) {
 this.red = red;
 this.green = green;
 this.blue = blue;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_V (cla$$, "equals", 
 function (object) {
 if (object == this) return true;
@@ -1943,7 +1636,7 @@ this.currentHhint = hHint;
 this.currentWidth = size.x;
 this.currentHeight = size.y;
 }return  new $wt.graphics.Point (this.currentWidth, this.currentHeight);
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "flushCache", 
 function () {
 this.defaultWidth = this.defaultHeight = -1;
@@ -1981,7 +1674,7 @@ $_K (cla$$,
 function (width, height) {
 this.width = width;
 this.height = height;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "computeSize", 
 function (control, wHint, hHint, flushCache) {
 if (this.cacheWidth != -1 && this.cacheHeight != -1) return ;
@@ -2003,7 +1696,7 @@ this.currentWidth = size.x;
 this.currentHeight = size.y;
 }this.cacheWidth = this.currentWidth;
 this.cacheHeight = this.currentHeight;
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "flushCache", 
 function () {
 this.cacheWidth = this.cacheHeight = -1;
@@ -2015,12 +1708,12 @@ function (control, flushCache) {
 this.needed = true;
 this.computeSize (control, this.width, this.height, flushCache);
 return this.cacheWidth;
-}, "$wt.widgets.Control,Boolean");
+}, "$wt.widgets.Control,~B");
 $_M (cla$$, "getHeight", 
 function (control, flushCache) {
 this.computeSize (control, this.width, this.height, flushCache);
 return this.cacheHeight;
-}, "$wt.widgets.Control,Boolean");
+}, "$wt.widgets.Control,~B");
 $_M (cla$$, "getBottomAttachment", 
 function (control, spacing, flushCache) {
 if (this.cacheBottom != null) return this.cacheBottom;
@@ -2057,7 +1750,7 @@ break;
 }}
 this.isVisited = false;
 return this.cacheBottom;
-}, "$wt.widgets.Control,Number,Boolean");
+}, "$wt.widgets.Control,~N,~B");
 $_M (cla$$, "getLeftAttachment", 
 function (control, spacing, flushCache) {
 if (this.cacheLeft != null) return this.cacheLeft;
@@ -2093,7 +1786,7 @@ this.cacheLeft = rightAttachment.plus (this.left.offset + spacing);
 }}
 this.isVisited = false;
 return this.cacheLeft;
-}, "$wt.widgets.Control,Number,Boolean");
+}, "$wt.widgets.Control,~N,~B");
 $_M (cla$$, "getName", 
 function () {
 var string = this.getClass ().getName ();
@@ -2137,7 +1830,7 @@ break;
 }}
 this.isVisited = false;
 return this.cacheRight;
-}, "$wt.widgets.Control,Number,Boolean");
+}, "$wt.widgets.Control,~N,~B");
 $_M (cla$$, "getTopAttachment", 
 function (control, spacing, flushCache) {
 if (this.cacheTop != null) return this.cacheTop;
@@ -2174,7 +1867,7 @@ break;
 }}
 this.isVisited = false;
 return this.cacheTop;
-}, "$wt.widgets.Control,Number,Boolean");
+}, "$wt.widgets.Control,~N,~B");
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
@@ -2189,8 +1882,8 @@ string += "}";
 return string;
 });
 cla$$ = $_C (function () {
-this.verticalAlignment = $wt.layout.GridData.CENTER;
-this.horizontalAlignment = $wt.layout.GridData.BEGINNING;
+this.verticalAlignment = 2;
+this.horizontalAlignment = 1;
 this.widthHint = -1;
 this.heightHint = -1;
 this.horizontalIndent = 0;
@@ -2219,21 +1912,21 @@ function () {
 });
 $_K (cla$$, 
 function (style) {
-if ((style & $wt.layout.GridData.VERTICAL_ALIGN_BEGINNING) != 0) this.verticalAlignment = $wt.layout.GridData.BEGINNING;
-if ((style & $wt.layout.GridData.VERTICAL_ALIGN_CENTER) != 0) this.verticalAlignment = $wt.layout.GridData.CENTER;
-if ((style & $wt.layout.GridData.VERTICAL_ALIGN_FILL) != 0) this.verticalAlignment = $wt.layout.GridData.FILL;
-if ((style & $wt.layout.GridData.VERTICAL_ALIGN_END) != 0) this.verticalAlignment = $wt.layout.GridData.END;
-if ((style & $wt.layout.GridData.HORIZONTAL_ALIGN_BEGINNING) != 0) this.horizontalAlignment = $wt.layout.GridData.BEGINNING;
-if ((style & $wt.layout.GridData.HORIZONTAL_ALIGN_CENTER) != 0) this.horizontalAlignment = $wt.layout.GridData.CENTER;
-if ((style & $wt.layout.GridData.HORIZONTAL_ALIGN_FILL) != 0) this.horizontalAlignment = $wt.layout.GridData.FILL;
-if ((style & $wt.layout.GridData.HORIZONTAL_ALIGN_END) != 0) this.horizontalAlignment = $wt.layout.GridData.END;
-this.grabExcessHorizontalSpace = (style & $wt.layout.GridData.GRAB_HORIZONTAL) != 0;
-this.grabExcessVerticalSpace = (style & $wt.layout.GridData.GRAB_VERTICAL) != 0;
-}, "Number");
+if ((style & 2) != 0) this.verticalAlignment = 1;
+if ((style & 4) != 0) this.verticalAlignment = 2;
+if ((style & 16) != 0) this.verticalAlignment = 4;
+if ((style & 8) != 0) this.verticalAlignment = 3;
+if ((style & 32) != 0) this.horizontalAlignment = 1;
+if ((style & 64) != 0) this.horizontalAlignment = 2;
+if ((style & 256) != 0) this.horizontalAlignment = 4;
+if ((style & 128) != 0) this.horizontalAlignment = 3;
+this.grabExcessHorizontalSpace = (style & 512) != 0;
+this.grabExcessVerticalSpace = (style & 1024) != 0;
+}, "~N");
 $_K (cla$$, 
 function (horizontalAlignment, verticalAlignment, grabExcessHorizontalSpace, grabExcessVerticalSpace) {
 this.construct (horizontalAlignment, verticalAlignment, grabExcessHorizontalSpace, grabExcessVerticalSpace, 1, 1);
-}, "Number,Number,Boolean,Boolean");
+}, "~N,~N,~B,~B");
 $_K (cla$$, 
 function (horizontalAlignment, verticalAlignment, grabExcessHorizontalSpace, grabExcessVerticalSpace, horizontalSpan, verticalSpan) {
 this.horizontalAlignment = horizontalAlignment;
@@ -2242,12 +1935,12 @@ this.grabExcessHorizontalSpace = grabExcessHorizontalSpace;
 this.grabExcessVerticalSpace = grabExcessVerticalSpace;
 this.horizontalSpan = horizontalSpan;
 this.verticalSpan = verticalSpan;
-}, "Number,Number,Boolean,Boolean,Number,Number");
+}, "~N,~N,~B,~B,~N,~N");
 $_K (cla$$, 
 function (width, height) {
 this.widthHint = width;
 this.heightHint = height;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "computeSize", 
 function (control, wHint, hHint, flushCache) {
 if (this.cacheWidth != -1 && this.cacheHeight != -1) return ;
@@ -2269,7 +1962,7 @@ this.currentWidth = size.x;
 this.currentHeight = size.y;
 }this.cacheWidth = this.currentWidth;
 this.cacheHeight = this.currentHeight;
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "flushCache", 
 function () {
 this.cacheWidth = this.cacheHeight = -1;
@@ -2299,7 +1992,7 @@ break;
 case 16777224:
 hAlign = "SWT.END";
 break;
-case $wt.layout.GridData.END:
+case 3:
 hAlign = "GridData.END";
 break;
 case 131072:
@@ -2308,7 +2001,7 @@ break;
 case 16777216:
 hAlign = "SWT.CENTER";
 break;
-case $wt.layout.GridData.CENTER:
+case 2:
 hAlign = "GridData.CENTER";
 break;
 default:
@@ -2329,7 +2022,7 @@ break;
 case 16777224:
 vAlign = "SWT.END";
 break;
-case $wt.layout.GridData.END:
+case 3:
 vAlign = "GridData.END";
 break;
 case 1024:
@@ -2338,7 +2031,7 @@ break;
 case 16777216:
 vAlign = "SWT.CENTER";
 break;
-case $wt.layout.GridData.CENTER:
+case 2:
 vAlign = "GridData.CENTER";
 break;
 default:
@@ -2363,25 +2056,24 @@ string = string.trim ();
 string += "}";
 return string;
 });
-cla$$.BEGINNING = cla$$.prototype.BEGINNING = 1;
 $_S (cla$$,
+"BEGINNING", 1,
 "CENTER", 2,
-"END", 3);
-cla$$.FILL = cla$$.prototype.FILL = 4;
-$_S (cla$$,
-"VERTICAL_ALIGN_BEGINNING", 1 << 1,
-"VERTICAL_ALIGN_CENTER", 1 << 2,
-"VERTICAL_ALIGN_END", 1 << 3,
-"VERTICAL_ALIGN_FILL", 1 << 4,
-"HORIZONTAL_ALIGN_BEGINNING", 1 << 5,
-"HORIZONTAL_ALIGN_CENTER", 1 << 6,
-"HORIZONTAL_ALIGN_END", 1 << 7,
-"HORIZONTAL_ALIGN_FILL", 1 << 8,
-"GRAB_HORIZONTAL", 1 << 9,
-"GRAB_VERTICAL", 1 << 10);
-cla$$.FILL_VERTICAL = cla$$.prototype.FILL_VERTICAL = $wt.layout.GridData.VERTICAL_ALIGN_FILL | $wt.layout.GridData.GRAB_VERTICAL;
-cla$$.FILL_HORIZONTAL = cla$$.prototype.FILL_HORIZONTAL = $wt.layout.GridData.HORIZONTAL_ALIGN_FILL | $wt.layout.GridData.GRAB_HORIZONTAL;
-cla$$.FILL_BOTH = cla$$.prototype.FILL_BOTH = $wt.layout.GridData.FILL_VERTICAL | $wt.layout.GridData.FILL_HORIZONTAL;
+"END", 3,
+"FILL", 4,
+"VERTICAL_ALIGN_BEGINNING", 2,
+"VERTICAL_ALIGN_CENTER", 4,
+"VERTICAL_ALIGN_END", 8,
+"VERTICAL_ALIGN_FILL", 16,
+"HORIZONTAL_ALIGN_BEGINNING", 32,
+"HORIZONTAL_ALIGN_CENTER", 64,
+"HORIZONTAL_ALIGN_END", 128,
+"HORIZONTAL_ALIGN_FILL", 256,
+"GRAB_HORIZONTAL", 512,
+"GRAB_VERTICAL", 1024,
+"FILL_VERTICAL", 1040,
+"FILL_HORIZONTAL", 768,
+"FILL_BOTH", 1808);
 cla$$ = $_C (function () {
 this.width = -1;
 this.height = -1;
@@ -2395,7 +2087,7 @@ $_K (cla$$,
 function (width, height) {
 this.width = width;
 this.height = height;
-}, "Number,Number");
+}, "~N,~N");
 $_K (cla$$, 
 function (point) {
 this.construct (point.x, point.y);
@@ -2431,17 +2123,17 @@ function () {
 $_K (cla$$, 
 function (numerator) {
 this.construct (numerator, 100, 0);
-}, "Number");
+}, "~N");
 $_K (cla$$, 
 function (numerator, offset) {
 this.construct (numerator, 100, offset);
-}, "Number,Number");
+}, "~N,~N");
 $_K (cla$$, 
 function (numerator, denominator, offset) {
 this.numerator = numerator;
 this.denominator = denominator;
 this.offset = offset;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_K (cla$$, 
 function (control) {
 this.construct (control, 0, -1);
@@ -2449,17 +2141,17 @@ this.construct (control, 0, -1);
 $_K (cla$$, 
 function (control, offset) {
 this.construct (control, offset, -1);
-}, "$wt.widgets.Control,Number");
+}, "$wt.widgets.Control,~N");
 $_K (cla$$, 
 function (control, offset, alignment) {
 this.control = control;
 this.offset = offset;
 this.alignment = alignment;
-}, "$wt.widgets.Control,Number,Number");
+}, "$wt.widgets.Control,~N,~N");
 $_M (cla$$, "divide", 
 function (value) {
 return  new $wt.layout.FormAttachment (this.numerator, this.denominator * value, Math.floor (this.offset / value));
-}, "Number");
+}, "~N");
 $_M (cla$$, "gcd", 
 function (m, n) {
 var temp;
@@ -2475,7 +2167,7 @@ m = n;
 n = temp % n;
 }
 return m;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "minus", 
 function (attachment) {
 var solution =  new $wt.layout.FormAttachment ();
@@ -2490,7 +2182,7 @@ return solution;
 $_M (cla$$, "minus", 
 function (value) {
 return  new $wt.layout.FormAttachment (this.numerator, this.denominator, this.offset - value);
-}, "Number");
+}, "~N");
 $_M (cla$$, "plus", 
 function (attachment) {
 var solution =  new $wt.layout.FormAttachment ();
@@ -2505,15 +2197,15 @@ return solution;
 $_M (cla$$, "plus", 
 function (value) {
 return  new $wt.layout.FormAttachment (this.numerator, this.denominator, this.offset + value);
-}, "Number");
+}, "~N");
 $_M (cla$$, "solveX", 
 function (value) {
 return (Math.floor ((this.numerator * value) / this.denominator)) + this.offset;
-}, "Number");
+}, "~N");
 $_M (cla$$, "solveY", 
 function (value) {
 return Math.floor ((value - this.offset) * this.denominator / this.numerator);
-}, "Number");
+}, "~N");
 $_V (cla$$, "toString", 
 function () {
 var string = this.control != null ? this.control.toString () : this.numerator + "/" + this.denominator;
@@ -2534,7 +2226,7 @@ $_K (cla$$,
 function (type) {
 $_R (this, $wt.layout.FillLayout, []);
 this.type = type;
-}, "Number");
+}, "~N");
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var children = composite.getChildren ();
@@ -2569,7 +2261,7 @@ height += this.marginHeight * 2;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_M (cla$$, "computeChildSize", 
 function (control, wHint, hHint, flushCache) {
 var data = control.getLayoutData ();
@@ -2592,7 +2284,7 @@ trimX = trimY = control.getBorderWidth () * 2;
 var h = hHint == -1 ? hHint : Math.max (0, hHint - trimY);
 size = data.computeSize (control, w, h, flushCache);
 }return size;
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 var data = control.getLayoutData ();
@@ -2646,7 +2338,7 @@ if (i == count - 1) childHeight += Math.floor ((extra + 1) / 2);
 }child.setBounds (x, y, width, childHeight);
 y += childHeight + this.spacing;
 }
-}}, "$wt.widgets.Composite,Boolean");
+}}, "$wt.widgets.Composite,~B");
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
@@ -2685,14 +2377,14 @@ return Math.floor (-top.offset * top.denominator / bottom.numerator);
 }var divider = bottom.denominator - bottom.numerator;
 return Math.floor (bottom.denominator * bottom.offset / divider);
 }return height.solveY (data.getHeight (control, flushCache));
-}, "$wt.widgets.Control,$wt.layout.FormData,Boolean");
+}, "$wt.widgets.Control,$wt.layout.FormData,~B");
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var size = this.layout (composite, false, 0, 0, wHint, hHint, flushCache);
 if (wHint != -1) size.x = wHint;
 if (hHint != -1) size.y = hHint;
 return size;
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 var data = control.getLayoutData ();
@@ -2719,7 +2411,7 @@ return Math.floor (-left.offset * left.denominator / left.numerator);
 }var divider = right.denominator - right.numerator;
 return Math.floor (right.denominator * right.offset / divider);
 }return width.solveY (data.getWidth (control, flushCache));
-}, "$wt.widgets.Control,$wt.layout.FormData,Boolean");
+}, "$wt.widgets.Control,$wt.layout.FormData,~B");
 $_M (cla$$, "layout", 
 function (composite, flushCache) {
 var rect = composite.getClientArea ();
@@ -2728,7 +2420,7 @@ var y = rect.y + this.marginTop + this.marginHeight;
 var width = Math.max (0, rect.width - this.marginLeft - 2 * this.marginWidth - this.marginRight);
 var height = Math.max (0, rect.height - this.marginLeft - 2 * this.marginHeight - this.marginBottom);
 this.layout (composite, true, x, y, width, height, flushCache);
-}, "$wt.widgets.Composite,Boolean");
+}, "$wt.widgets.Composite,~B");
 $_M (cla$$, "layout", 
 function (composite, move, x, y, width, height, flushCache) {
 var children = composite.getChildren ();
@@ -2799,7 +2491,7 @@ children[i].setBounds (bounds[i]);
 }w += this.marginLeft + this.marginWidth * 2 + this.marginRight;
 h += this.marginTop + this.marginHeight * 2 + this.marginBottom;
 return  new $wt.graphics.Point (w, h);
-}, "$wt.widgets.Composite,Boolean,Number,Number,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~B,~N,~N,~N,~N,~B");
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";
@@ -2836,14 +2528,14 @@ function (numColumns, makeColumnsEqualWidth) {
 $_R (this, $wt.layout.GridLayout, []);
 this.numColumns = numColumns;
 this.makeColumnsEqualWidth = makeColumnsEqualWidth;
-}, "Number,Boolean");
+}, "~N,~B");
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var size = this.layout (composite, false, 0, 0, wHint, hHint, flushCache);
 if (wHint != -1) size.x = wHint;
 if (hHint != -1) size.y = hHint;
 return size;
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 var data = control.getLayoutData ();
@@ -2863,12 +2555,12 @@ if (0 <= i && i < rowCount) {
 if (0 <= j && j < columnCount) {
 if (control == grid[i][j]) return data;
 }}}return null;
-}, "Array,Number,Number,Number,Number,Boolean");
+}, "Array,~N,~N,~N,~N,~B");
 $_M (cla$$, "layout", 
 function (composite, flushCache) {
 var rect = composite.getClientArea ();
 this.layout (composite, true, rect.x, rect.y, rect.width, rect.height, flushCache);
-}, "$wt.widgets.Composite,Boolean");
+}, "$wt.widgets.Composite,~B");
 $_M (cla$$, "layout", 
 function (composite, move, x, y, width, height, flushCache) {
 if (this.numColumns < 1) {
@@ -3308,7 +3000,7 @@ totalDefaultHeight += heights[i];
 totalDefaultWidth += this.horizontalSpacing * (columnCount - 1) + this.marginLeft + this.marginWidth * 2 + this.marginRight;
 totalDefaultHeight += this.verticalSpacing * (rowCount - 1) + this.marginTop + this.marginHeight * 2 + this.marginBottom;
 return  new $wt.graphics.Point (totalDefaultWidth, totalDefaultHeight);
-}, "$wt.widgets.Composite,Boolean,Number,Number,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~B,~N,~N,~N,~N,~B");
 $_M (cla$$, "getName", 
 function () {
 var string = this.getClass ().getName ();
@@ -3356,7 +3048,7 @@ $_K (cla$$,
 function (type) {
 $_R (this, $wt.layout.RowLayout, []);
 this.type = type;
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var extent;
@@ -3367,7 +3059,7 @@ extent = this.layoutVertical (composite, false, (hHint != -1) && this.wrap, hHin
 }if (wHint != -1) extent.x = wHint;
 if (hHint != -1) extent.y = hHint;
 return extent;
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_M (cla$$, "computeSize", 
 function (control, flushCache) {
 var wHint = -1;
@@ -3377,7 +3069,7 @@ if (data != null) {
 wHint = data.width;
 hHint = data.height;
 }return control.computeSize (wHint, hHint, flushCache);
-}, "$wt.widgets.Control,Boolean");
+}, "$wt.widgets.Control,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 return true;
@@ -3396,7 +3088,7 @@ if (this.type == 256) {
 this.layoutHorizontal (composite, true, this.wrap, clientArea.width, flushCache);
 } else {
 this.layoutVertical (composite, true, this.wrap, clientArea.height, flushCache);
-}}, "$wt.widgets.Composite,Boolean");
+}}, "$wt.widgets.Composite,~B");
 $_M (cla$$, "layoutHorizontal", 
 function (composite, move, wrap, width, flushCache) {
 var count = 0;
@@ -3492,7 +3184,7 @@ if (this.fill) bounds[i].height = maxHeight;
 }children[i].setBounds (bounds[i]);
 }
 }return  new $wt.graphics.Point (maxX, y + maxHeight + this.marginBottom + this.marginHeight);
-}, "$wt.widgets.Composite,Boolean,Boolean,Number,Boolean");
+}, "$wt.widgets.Composite,~B,~B,~N,~B");
 $_M (cla$$, "layoutVertical", 
 function (composite, move, wrap, height, flushCache) {
 var count = 0;
@@ -3588,7 +3280,7 @@ if (this.fill) bounds[i].width = maxWidth;
 }children[i].setBounds (bounds[i]);
 }
 }return  new $wt.graphics.Point (x + maxWidth + this.marginRight + this.marginWidth, maxY);
-}, "$wt.widgets.Composite,Boolean,Boolean,Number,Boolean");
+}, "$wt.widgets.Composite,~B,~B,~N,~B");
 $_V (cla$$, "toString", 
 function () {
 var string = this.getName () + " {";

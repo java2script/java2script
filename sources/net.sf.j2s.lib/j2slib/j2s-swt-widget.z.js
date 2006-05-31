@@ -3,14 +3,331 @@
 #Sun Jan 22 00:50:30 CST 2006
 j2s.resources.list=swt-default.css,org/eclipse/swt/graphics/GC.js,org/eclipse/swt/graphics/Resource.js,org/eclipse/swt/graphics/Color.js,org/eclipse/swt/graphics/Cursor.js,org/eclipse/swt/accessibility/Accessible.js,org/eclipse/swt/graphics/Drawable.js,org/eclipse/swt/graphics/Device.js,org/eclipse/swt/graphics/Font.js,org/eclipse/swt/graphics/FontData.js,org/eclipse/swt/graphics/FontMetrics.js,org/eclipse/swt/widgets/Widget.js,org/eclipse/swt/widgets/Control.js,org/eclipse/swt/widgets/Scrollable.js,org/eclipse/swt/widgets/Composite.js,org/eclipse/swt/widgets/Canvas.js,org/eclipse/swt/widgets/Decorations.js,org/eclipse/swt/widgets/Shell.js,org/eclipse/swt/widgets/Item.js,org/eclipse/swt/widgets/MenuItem.js,org/eclipse/swt/widgets/Menu.js,org/eclipse/swt/widgets/Monitor.js,org/eclipse/swt/widgets/ScrollBar.js,org/eclipse/swt/widgets/Display.js,org/eclipse/swt/widgets/Button.js,org/eclipse/swt/widgets/Label.js,org/eclipse/swt/widgets/Link.js,org/eclipse/swt/widgets/Text.js,org/eclipse/swt/widgets/List.js,org/eclipse/swt/browser/Browser.js,org/eclipse/swt/widgets/TableItem.js,org/eclipse/swt/widgets/TableColumn.js,org/eclipse/swt/widgets/Table.js,org/eclipse/swt/widgets/TabItem.js,org/eclipse/swt/widgets/TabFolder.js,org/eclipse/swt/widgets/Combo.js,org/eclipse/swt/widgets/Group.js,org/eclipse/swt/widgets/TreeItem.js,org/eclipse/swt/widgets/TreeColumn.js,org/eclipse/swt/widgets/Tree.js,org/eclipse/swt/widgets/ProgressBar.js,org/eclipse/swt/widgets/Sash.js,org/eclipse/swt/custom/SashForm.js,org/eclipse/swt/custom/SashFormData.js,org/eclipse/swt/custom/SashFormLayout.js,org/eclipse/swt/custom/StackLayout.js,org/eclipse/swt/widgets/Scale.js,bin/org/eclipse/swt/widgets/ToolBar.js,bin/org/eclipse/swt/widgets/ToolItem.js,bin/org/eclipse/swt/widgets/CoolBar.js,bin/org/eclipse/swt/widgets/CoolItem.js,bin/org/eclipse/swt/widgets/Caret.js,bin/org/eclipse/swt/widgets/Spinner.js,bin/org/eclipse/swt/widgets/Dialog.js,bin/org/eclipse/swt/widgets/ColorDialog.js,bin/org/eclipse/swt/widgets/DirectoryDialog.js,bin/org/eclipse/swt/widgets/FileDialog.js,bin/org/eclipse/swt/widgets/FontDialog.js,org/eclipse/swt/program/Program.js
 =*/
+$_J ("org.eclipse.swt.internal.browser");
 cla$$ = $_C (function () {
+$_Z (this, arguments);
+}, $wt.internal.browser, "OS");
+cla$$.destoryHandle = $_M (cla$$, "destoryHandle", 
+function (handle) {
+if (handle == null) {
+return ;
+}var el = handle;
+el.onblur = null;
+el.onchange = null;
+el.onclick = null;
+el.oncontextmenu = null;
+el.onfocus = null;
+el.onkeydown = null;
+el.onkeypress = null;
+el.onkeyup = null;
+el.onmousedown = null;
+el.onmousemove = null;
+el.onmouseout = null;
+el.onmouseover = null;
+el.onmouseup = null;
+el.onselectchange = null;
+el.onselectstart = null;
+if (el.parentNode != null) {
+try {
+el.parentNode.removeChild (el);
+} catch (e) {
+if ($_O (e, Error)) {
+var os = $wt.internal.browser.OS;
+var dua = navigator.userAgent;
+var dav = navigator.appVersion;
+os.isOpera = dua.indexOf("Opera") >= 0;
+var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
+os.isSafari = dav.indexOf("Safari") >= 0;
+var geckoPos = dua.indexOf("Gecko");
+os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
+os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
+os.isIE = (document.all)&&(!os.isOpera);
+os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
+os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
+os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
+} else {
+throw e;
+}
+}
+}}, "Object");
+cla$$.clearChildren = $_M (cla$$, "clearChildren", 
+function (handle) {
+if (handle == null) {
+return ;
+}var el = handle;
+for (var i = el.childNodes.length - 1; i >= 0; i--) {
+el.removeChild (el.childNodes[i]);
+}
+}, "Object");
+cla$$.SetWindowPos = $_M (cla$$, "SetWindowPos", 
+function (handle, x, y, w, h, flags) {
+if (handle == null) {
+return ;
+}var el = handle;
+}, "Object,~N,~N,~N,~N,~N");
+cla$$.init = $_M (cla$$, "init", 
+($fz = function () {
+if ($wt.internal.browser.OS.invisibleContainer == null) {
+var el = document.createElement ("DIV");
+document.body.appendChild (el);
+var s = el.style;
+s.position = "absolute";
+s.top = "-300px";
+s.width = "3000px";
+s.height = "100px";
+s.overflow = "scroll";
+($t$ = $wt.internal.browser.OS.invisibleContainer = el, $wt.internal.browser.OS.prototype.invisibleContainer = $wt.internal.browser.OS.invisibleContainer, $t$);
+el = document.createElement ("DIV");
+$wt.internal.browser.OS.invisibleContainer.appendChild (el);
+el.className = "system-default";
+s = el.style;
+s.whiteSpace = "nowrap";
+s.overflow = "visible";
+($t$ = $wt.internal.browser.OS.lineContainer = el, $wt.internal.browser.OS.prototype.lineContainer = $wt.internal.browser.OS.lineContainer, $t$);
+el = document.createElement ("DIV");
+$wt.internal.browser.OS.invisibleContainer.appendChild (el);
+($t$ = $wt.internal.browser.OS.blockContainer = el, $wt.internal.browser.OS.prototype.blockContainer = $wt.internal.browser.OS.blockContainer, $t$);
+}}, $fz.isPrivate = true, $fz));
+cla$$.resetLineContainer = $_M (cla$$, "resetLineContainer", 
+($fz = function () {
+var container = $wt.internal.browser.OS.lineContainer;
+$wt.internal.browser.OS.clearChildren (container);
+container.className = "";
+var s = container.style;
+s.cssText = "";
+s.whiteSpace = "nowrap";
+s.overflow = "visible";
+}, $fz.isPrivate = true, $fz));
+cla$$.resetBlockContainer = $_M (cla$$, "resetBlockContainer", 
+($fz = function () {
+var container = $wt.internal.browser.OS.blockContainer;
+$wt.internal.browser.OS.clearChildren (container);
+container.className = "";
+container.style.cssText = "";
+}, $fz.isPrivate = true, $fz));
+cla$$.getContainerWidth = $_M (cla$$, "getContainerWidth", 
+function (container) {
+var el = container;
+return Math.max (el.offsetWidth, Math.max (el.clientWidth, el.scrollWidth));
+}, "Object");
+cla$$.getContainerHeight = $_M (cla$$, "getContainerHeight", 
+function (container) {
+var el = container;
+var max = Math.max (el.offsetHeight, Math.max (el.clientHeight, el.scrollHeight));
+if ($wt.internal.browser.OS.isIE) {
+max--;
+}return max;
+}, "Object");
+cla$$.insertText = $_M (cla$$, "insertText", 
+function (handle, text) {
+if (!((/[\r\n\t&]/g).test (text))) {
+handle.style.display = "inline";
+handle.appendChild(document.createTextNode(text));
+return ;
+}
+var lines = null;
+var c160 = String.fromCharCode (160);
+var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
+var s = text.replace (/\t/g, c160x8);
+if (splitNeedFixed) {
+try {
+lines = splitIntoLines (s);
+} catch (e) {
+//popupAlert (e.message);
+}
+} else {
+lines = s.split (/\r\n|\r|\n/g);
+}
+for (var i = 0; i < lines.length; i++) {
+if (i > 0) {
+handle.appendChild (document.createElement ("BR"));
+}
+var lineEl = document.createElement ("SPAN");
+handle.appendChild (lineEl);
+//lineEl.style.whiteSpace = "nowrap";
+if (lines[i].length == 0) {
+lines[i] = String.fromCharCode (160);
+}
+var idx = lines[i].indexOf ('&');
+var lastIndex = 0;
+while (idx != -1) {
+if (idx < lines[i].length - 1) {
+var c = lines[i].charAt (idx + 1);
+if (c == '&') {
+idx = lines[i].indexOf ('&', idx + 2);
+continue;
+} else {
+var chs = lines[i].substring (lastIndex, idx);
+if (chs.length != 0) {
+lineEl.appendChild (document.createTextNode (chs));
+}
+var el = document.createElement ("SPAN");
+lineEl.appendChild (el);
+//el.style.whiteSpace = "nowrap";
+el.appendChild (document.createTextNode (c));
+lastIndex = idx + 2;
+idx = lines[i].indexOf ('&', lastIndex);
+}
+} else {
+break;
+}
+}
+if (lastIndex == 0) {
+lineEl.appendChild (document.createTextNode (lines[i].replace (/&&/g, '&')));
+} else {
+lineEl.appendChild (document.createTextNode (lines[i]
+.substring (lastIndex, lines[i].length).replace (/&&/g, '&')));
+}
+}
+}, "Object,~S");
+cla$$.setupAsPlain = $_M (cla$$, "setupAsPlain", 
+($fz = function (str) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+c.className = "system-default";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "~S");
+cla$$.setupAsStyled = $_M (cla$$, "setupAsStyled", 
+($fz = function (str, className, cssText) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+if (className != null && className.length != 0) {
+c.className = className;
+}if (cssText != null && cssText.length != 0) {
+cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+c.style.cssText = cssText;
+}$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "~S,~S,~S");
+cla$$.setupAsPlainWrapped = $_M (cla$$, "setupAsPlainWrapped", 
+($fz = function (str, wrappedWidth) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetBlockContainer ();
+var c = $wt.internal.browser.OS.blockContainer;
+c.className = "system-default";
+c.style.width = wrappedWidth + "px";
+c.style.overflow = "visible";
+c.style.whiteSpace = "normal";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "~S,~N");
+cla$$.setupAsStyledWrapped = $_M (cla$$, "setupAsStyledWrapped", 
+($fz = function (str, className, cssText, wrappedWidth) {
+$wt.internal.browser.OS.init ();
+$wt.internal.browser.OS.resetLineContainer ();
+var c = $wt.internal.browser.OS.lineContainer;
+if (className != null && className.length != 0) {
+c.className = className;
+}if (cssText != null && cssText.length != 0) {
+cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+c.style.cssText = cssText;
+}c.style.width = wrappedWidth + "px";
+c.style.overflow = "visible";
+c.style.whiteSpace = "normal";
+$wt.internal.browser.OS.insertText (c, str);
+return c;
+}, $fz.isPrivate = true, $fz), "~S,~S,~S,~N");
+cla$$.getStringPlainWidth = $_M (cla$$, "getStringPlainWidth", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return $wt.internal.browser.OS.getContainerWidth (c);
+}, "~S");
+cla$$.getStringStyledWidth = $_M (cla$$, "getStringStyledWidth", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return $wt.internal.browser.OS.getContainerWidth (c);
+}, "~S,~S,~S");
+cla$$.getStringPlainHeight = $_M (cla$$, "getStringPlainHeight", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "~S");
+cla$$.getStringPlainWrappedHeight = $_M (cla$$, "getStringPlainWrappedHeight", 
+function (str, wrappedWidth) {
+var c = $wt.internal.browser.OS.setupAsPlainWrapped (str, wrappedWidth);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "~S,~N");
+cla$$.getStringStyledHeight = $_M (cla$$, "getStringStyledHeight", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "~S,~S,~S");
+cla$$.getStringStyledWrappedHeight = $_M (cla$$, "getStringStyledWrappedHeight", 
+function (str, className, cssText, wrappedWidth) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return 0;
+}
+}var c = $wt.internal.browser.OS.setupAsStyledWrapped (str, className, cssText, wrappedWidth);
+return $wt.internal.browser.OS.getContainerHeight (c);
+}, "~S,~S,~S,~N");
+cla$$.getStringPlainSize = $_M (cla$$, "getStringPlainSize", 
+function (str) {
+var c = $wt.internal.browser.OS.setupAsPlain (str);
+return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
+}, "~S");
+cla$$.getStringStyledSize = $_M (cla$$, "getStringStyledSize", 
+function (str, className, cssText) {
+{
+var r = /display\s*:\s*none/ig;
+if (r.test (cssText)) {
+return new org.eclipse.swt.graphics.Point(0, 0);
+}
+}var c = $wt.internal.browser.OS.setupAsStyled (str, className, cssText);
+return  new $wt.graphics.Point ($wt.internal.browser.OS.getContainerWidth (c), $wt.internal.browser.OS.getContainerHeight (c));
+}, "~S,~S,~S");
+$_S (cla$$,
+"isIE", false,
+"isIE60", false,
+"isIE55", false,
+"isIE50", false,
+"isMozilla", false,
+"isFirefox", false,
+"isSafari", false,
+"isOpera", false);
+{
+var os = $wt.internal.browser.OS;
+var dua = navigator.userAgent;
+var dav = navigator.appVersion;
+os.isOpera = dua.indexOf("Opera") >= 0;
+var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
+os.isSafari = dav.indexOf("Safari") >= 0;
+var geckoPos = dua.indexOf("Gecko");
+os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
+os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
+os.isIE = (document.all)&&(!os.isOpera);
+os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
+os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
+os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
+}$_S (cla$$,
+"invisibleContainer", null,
+"lineContainer", null,
+"blockContainer", null);
+cla$$ = $_C (function () {
+this.accessibleListeners = null;
+this.accessibleControlListeners = null;
+this.textListeners = null;
+this.control = null;
 $_Z (this, arguments);
 }, $wt.accessibility, "Accessible");
 $_Y (cla$$, function () {
 this.accessibleListeners =  new java.util.Vector ();
 this.accessibleControlListeners =  new java.util.Vector ();
 this.textListeners =  new java.util.Vector ();
-this.control = null;
 });
 $_M (cla$$, "addAccessibleListener", 
 function (listener) {
@@ -45,13 +362,13 @@ function () {
 });
 $_M (cla$$, "setFocus", 
 function (childID) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "textCaretMoved", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "textChanged", 
 function (type, startIndex, length) {
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "textSelectionChanged", 
 function () {
 });
@@ -84,22 +401,22 @@ this.handle = img.handle;
 } else {
 this.handle = document.createElement ("DIV");
 this.handle.style.position = "absolute";
-}}, "$wt.graphics.Drawable,Number");
+}}, "$wt.graphics.Drawable,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-if ((style & 33554432) != 0) style &= ($t$ = ~ $WT.RIGHT_TO_LEFT, $WT.prototype.RIGHT_TO_LEFT = $WT.RIGHT_TO_LEFT, $t$);
-return style & (33554432 | 67108864);
-}, "Number");
+if ((style & 33554432) != 0) style &= -67108865;
+return style & (100663296);
+}, "~N");
 $_M (cla$$, "copyArea", 
 function (image, x, y) {
-}, "$wt.graphics.Image,Number,Number");
+}, "$wt.graphics.Image,~N,~N");
 $_M (cla$$, "copyArea", 
 function (srcX, srcY, width, height, destX, destY) {
 this.copyArea (srcX, srcY, width, height, destX, destY, true);
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "copyArea", 
 function (srcX, srcY, width, height, destX, destY, paint) {
-}, "Number,Number,Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "createGdipBrush", 
 function () {
 return 0;
@@ -111,14 +428,14 @@ return 0;
 cla$$.createGdipFont = $_M (cla$$, "createGdipFont", 
 function (hDC, hFont) {
 return 0;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "createGdipPen", 
 function () {
 return 0;
 });
 $_M (cla$$, "destroyGdipBrush", 
 function (brush) {
-}, "Number");
+}, "~N");
 $_V (cla$$, "dispose", 
 function () {
 if (this.handle == null) return ;
@@ -134,22 +451,22 @@ y = y + height;
 height = -height;
 }if (width == 0 || height == 0 || arcAngle == 0) return ;
 var gdipGraphics = this.data.gdipGraphics;
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "drawFocus", 
 function (x, y, width, height) {
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "drawImage", 
 function (image, x, y) {
 if (image.handle != null) {
 for (var i = 0; i < image.handle.childNodes.length; i++) {
 this.handle.appendChild (image.handle.childNodes[i]);
 }
-}}, "$wt.graphics.Image,Number,Number");
+}}, "$wt.graphics.Image,~N,~N");
 $_M (cla$$, "drawImage", 
 function (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight) {
 if (srcWidth == 0 || srcHeight == 0 || destWidth == 0 || destHeight == 0) return ;
 this.drawImage (image, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, false);
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number");
+}, "$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "drawImage", 
 function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
 var rect = document.createElement ("IMG");
@@ -161,23 +478,23 @@ rect.style.top = destY + "px";
 rect.style.width = destWidth + "px";
 rect.style.height = destHeight + "px";
 this.handle.appendChild (rect);
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+}, "$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "drawIcon", 
 function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+}, "$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "drawBitmap", 
 function (srcImage, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple) {
-}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Boolean");
+}, "$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "drawBitmapTransparentByClipping", 
 function (srcHdc, maskHdc, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple, imgWidth, imgHeight) {
-}, "Number,Number,Number,Number,Number,Number,Number,Number,Number,Number,Boolean,Number,Number");
+}, "~N,~N,~N,~N,~N,~N,~N,~N,~N,~N,~B,~N,~N");
 $_M (cla$$, "drawBitmapMask", 
 function (srcImage, srcColor, srcMask, srcX, srcY, srcWidth, srcHeight, destX, destY, destWidth, destHeight, simple, imgWidth, imgHeight, offscreen) {
 var srcColorY = srcY;
 if (srcColor == 0) {
 srcColor = srcMask;
 srcColorY += imgHeight;
-}}, "$wt.graphics.Image,Number,Number,Number,Number,Number,Number,Number,Number,Number,Number,Boolean,Number,Number,Boolean");
+}}, "$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~N,~N,~B,~N,~N,~B");
 $_M (cla$$, "drawLine", 
 function (x1, y1, x2, y2) {
 var rect = document.createElement ("DIV");
@@ -202,17 +519,17 @@ rect.style.borderStyle = "solid";
 }rect.style.borderColor = this.fgColor.getCSSHandle ();
 rect.style.borderWidth = "1px";
 this.handle.appendChild (rect);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "drawOval", 
 function (x, y, width, height) {
 var gdipGraphics = this.data.gdipGraphics;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "drawPath", 
 function (path) {
 }, "$wt.graphics.Path");
 $_M (cla$$, "drawPoint", 
 function (x, y) {
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "drawPolygon", 
 function (pointArray) {
 var gdipGraphics = this.data.gdipGraphics;
@@ -234,7 +551,7 @@ if (this.fgColor != null) rect.style.borderColor = this.fgColor.getCSSHandle ();
 rect.style.borderStyle = "solid";
 rect.style.borderWidth = "1px";
 this.handle.appendChild (rect);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "drawRectangle", 
 function (rect) {
 this.drawRectangle (rect.x, rect.y, rect.width, rect.height);
@@ -245,7 +562,7 @@ if (this.data.gdipGraphics != 0) {
 this.initGdip (true, false);
 this.drawRoundRectangleGdip (this.data.gdipGraphics, this.data.gdipPen, x, y, width, height, arcWidth, arcHeight);
 return ;
-}}, "Number,Number,Number,Number,Number,Number");
+}}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "drawRoundRectangleGdip", 
 function (gdipGraphics, brush, x, y, width, height, arcWidth, arcHeight) {
 var nx = x;
@@ -264,11 +581,11 @@ ny = ny - nh;
 if (nah < 0) nah = 0 - nah;
 var naw2 = Math.floor (naw / 2);
 var nah2 = Math.floor (nah / 2);
-}, "Number,Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "drawString", 
 function (string, x, y) {
 this.drawString (string, x, y, false);
-}, "String,Number,Number");
+}, "~S,~N,~N");
 $_M (cla$$, "drawString", 
 function (string, x, y, isTransparent) {
 var length = string.length;
@@ -283,17 +600,17 @@ if (!isTransparent) {
 rect.style.backgroundColor = this.bgColor.getCSSHandle ();
 }this.handle.appendChild (rect);
 rect.appendChild (document.createTextNode (string));
-}, "String,Number,Number,Boolean");
+}, "~S,~N,~N,~B");
 $_M (cla$$, "drawText", 
 function (string, x, y) {
-this.drawText (string, x, y, 2 | 4);
-}, "String,Number,Number");
+this.drawText (string, x, y, 6);
+}, "~S,~N,~N");
 $_M (cla$$, "drawText", 
 function (string, x, y, isTransparent) {
-var flags = 2 | 4;
+var flags = 6;
 if (isTransparent) flags |= 1;
 this.drawText (string, x, y, flags);
-}, "String,Number,Number,Boolean");
+}, "~S,~N,~N,~B");
 $_M (cla$$, "drawText", 
 function (string, x, y, flags) {
 if (string.length == 0) return ;
@@ -307,7 +624,7 @@ rect.style.backgroundColor = this.bgColor.getCSSHandle ();
 }rect.style.color = this.fgColor.getCSSHandle ();
 this.handle.appendChild (rect);
 rect.appendChild (document.createTextNode (string));
-}, "String,Number,Number,Number");
+}, "~S,~N,~N,~N");
 $_V (cla$$, "equals", 
 function (object) {
 return (object == this) || (($_O (object, $wt.graphics.GC)) && (this.handle == (object).handle));
@@ -321,16 +638,16 @@ width = -width;
 y = y + height;
 height = -height;
 }if (width == 0 || height == 0 || arcAngle == 0) return ;
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "fillGradientRectangle", 
 function (x, y, width, height, vertical) {
 if (width == 0 || height == 0) return ;
 if (width == 0 || height == 0) return ;
 this.fillRectangle (x, y, width, height);
-}, "Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~B");
 $_M (cla$$, "fillOval", 
 function (x, y, width, height) {
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "fillPath", 
 function (path) {
 }, "$wt.graphics.Path");
@@ -347,7 +664,7 @@ rect.style.width = width + "px";
 rect.style.height = height + "px";
 rect.style.backgroundColor = this.bgColor.getCSSHandle ();
 this.handle.appendChild (rect);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "fillRectangle", 
 function (rect) {
 this.fillRectangle (rect.x, rect.y, rect.width, rect.height);
@@ -355,7 +672,7 @@ this.fillRectangle (rect.x, rect.y, rect.width, rect.height);
 $_M (cla$$, "fillRoundRectangle", 
 function (x, y, width, height, arcWidth, arcHeight) {
 this.fillRectangle (x, y, width, height);
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "fillRoundRectangleGdip", 
 function (gdipGraphics, brush, x, y, width, height, arcWidth, arcHeight) {
 var nx = x;
@@ -374,14 +691,14 @@ ny = ny - nh;
 if (nah < 0) nah = 0 - nah;
 var naw2 = Math.floor (naw / 2);
 var nah2 = Math.floor (nah / 2);
-}, "Number,Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "flush", 
 function () {
 });
 $_M (cla$$, "getAdvanceWidth", 
 function (ch) {
 return 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getAdvanced", 
 function () {
 return this.data.gdipGraphics != 0;
@@ -408,7 +725,7 @@ return this.data.backgroundPattern;
 $_M (cla$$, "getCharWidth", 
 function (ch) {
 return 8;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getClipping", 
 function () {
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
@@ -496,11 +813,11 @@ return false;
 });
 $_M (cla$$, "initGdip", 
 function (draw, fill) {
-}, "Boolean,Boolean");
+}, "~B,~B");
 $_M (cla$$, "init", 
 function (drawable, data, hDC) {
 var foreground = data.foreground;
-}, "$wt.graphics.Drawable,$wt.graphics.GCData,Number");
+}, "$wt.graphics.Drawable,$wt.graphics.GCData,~N");
 $_V (cla$$, "hashCode", 
 function () {
 return this.handle.toString ().hashCode ();
@@ -516,7 +833,7 @@ return this.handle == null;
 $_M (cla$$, "measureSpace", 
 function (font, format) {
 return 1.0;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setAdvanced", 
 function (advanced) {
 if (advanced && this.data.gdipGraphics != 0) return ;
@@ -530,17 +847,17 @@ throw e;
 }
 }
 } else {
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setAntialias", 
 function (antialias) {
 if (this.data.gdipGraphics == 0 && antialias == -1) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setAlpha", 
 function (alpha) {
 if (this.data.gdipGraphics == 0 && (alpha & 0xFF) == 0xFF) return ;
 this.initGdip (false, false);
 this.data.alpha = alpha & 0xFF;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setBackground", 
 function (color) {
 this.bgColor = color;
@@ -556,10 +873,10 @@ $_M (cla$$, "setClipping",
 function (clipRgn) {
 var hRgn = clipRgn;
 var gdipGraphics = this.data.gdipGraphics;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setClipping", 
 function (x, y, width, height) {
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "setClipping", 
 function (path) {
 this.setClipping (0);
@@ -577,7 +894,7 @@ this.setClipping (region != null ? region.handle : 0);
 }, "$wt.graphics.Region");
 $_M (cla$$, "setFillRule", 
 function (rule) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setFont", 
 function (font) {
 if (font == null) {
@@ -597,12 +914,12 @@ $_M (cla$$, "setInterpolation",
 function (interpolation) {
 if (this.data.gdipGraphics == 0 && interpolation == -1) return ;
 var mode = 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setLineCap", 
 function (cap) {
 var capStyle = 0;
 this.setPen (-1, -1, -1, capStyle, -1, this.data.dashes);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setLineDash", 
 function (dashes) {
 if (dashes != null && dashes.length > 0) {
@@ -618,29 +935,29 @@ $_M (cla$$, "setLineJoin",
 function (join) {
 var joinStyle = 0;
 this.setPen (-1, -1, -1, -1, joinStyle, this.data.dashes);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setLineStyle", 
 function (lineStyle) {
 var style = -1;
 this.setPen (-1, -1, style, -1, -1, this.data.dashes);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setLineWidth", 
 function (lineWidth) {
 this.setPen (-1, lineWidth, -1, -1, -1, this.data.dashes);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setPen", 
 function (newColor, newWidth, lineStyle, capStyle, joinStyle, dashes) {
 var extPen = false;
 var changed = false;
-}, "Number,Number,Number,Number,Number,Array");
+}, "~N,~N,~N,~N,~N,Array");
 $_M (cla$$, "setXORMode", 
 function (xor) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setTextAntialias", 
 function (antialias) {
 if (this.data.gdipGraphics == 0 && antialias == -1) return ;
 var textMode = 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setTransform", 
 function (transform) {
 if (this.data.gdipGraphics == 0 && transform == null) return ;
@@ -652,18 +969,18 @@ if (length == 0) {
 return  new $wt.graphics.Point (0, 16);
 } else {
 return $wt.internal.browser.OS.getStringPlainSize (string);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "textExtent", 
 function (string) {
-return this.textExtent (string, 2 | 4);
-}, "String");
+return this.textExtent (string, 6);
+}, "~S");
 $_M (cla$$, "textExtent", 
 function (string, flags) {
 if (string.length == 0) {
 return  new $wt.graphics.Point (0, 16);
 } else {
 return $wt.internal.browser.OS.getStringPlainSize (string);
-}}, "String,Number");
+}}, "~S,~N");
 $_M (cla$$, "toString", 
 function () {
 if (this.isDisposed ()) return "GC {*DISPOSED*}";
@@ -688,7 +1005,7 @@ function (device, red, green, blue) {
 $_R (this, $wt.graphics.Color, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device, red, green, blue);
-}, "$wt.graphics.Device,Number,Number,Number");
+}, "$wt.graphics.Device,~N,~N,~N");
 $_K (cla$$, 
 function (device, rgb) {
 $_R (this, $wt.graphics.Color, []);
@@ -747,7 +1064,7 @@ function (device, red, green, blue) {
 this.device = device;
 this.handle = 0x02000000 | (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
 this.cssHandle = null;
-}, "$wt.graphics.Device,Number,Number,Number");
+}, "$wt.graphics.Device,~N,~N,~N");
 $_V (cla$$, "isDisposed", 
 function () {
 return this.handle == -1;
@@ -765,7 +1082,7 @@ if (device == null) device = $wt.graphics.Device.getDevice ();
 this.cssHandle = handle;
 this.handle = -2;
 this.device = device;
-}, "$wt.graphics.Device,String");
+}, "$wt.graphics.Device,~S");
 cla$$.rgbHandleFromCSS = $_M (cla$$, "rgbHandleFromCSS", 
 ($fz = function (cssHandle) {
 if (cssHandle == null) return 0x02000000;
@@ -798,7 +1115,7 @@ return 0x02000000 | intHandle;
 return 0x0F000000; // unknown yet, may be "menu" or others
 }
 }
-}, $fz.isPrivate = true, $fz), "String");
+}, $fz.isPrivate = true, $fz), "~S");
 $_M (cla$$, "getCSSHandle", 
 function () {
 if (this.cssHandle != null) return this.cssHandle;
@@ -889,7 +1206,7 @@ break;
 default:
 $WT.error (5);
 }
-}, "$wt.graphics.Device,Number");
+}, "$wt.graphics.Device,~N");
 $_K (cla$$, 
 function (device, source, mask, hotspotX, hotspotY) {
 $_R (this, $wt.graphics.Cursor, []);
@@ -899,7 +1216,7 @@ if (source.url != null) {
 this.handle = "url(\'" + source.url + "\'),default";
 } else {
 this.handle = "default";
-}}, "$wt.graphics.Device,$wt.graphics.ImageData,$wt.graphics.ImageData,Number,Number");
+}}, "$wt.graphics.Device,$wt.graphics.ImageData,$wt.graphics.ImageData,~N,~N");
 $_K (cla$$, 
 function (device, source, hotspotX, hotspotY) {
 $_R (this, $wt.graphics.Cursor, []);
@@ -909,7 +1226,7 @@ if (source.url != null) {
 this.handle = "url(\'" + source.url + "\'),default";
 } else {
 this.handle = "default";
-}}, "$wt.graphics.Device,$wt.graphics.ImageData,Number,Number");
+}}, "$wt.graphics.Device,$wt.graphics.ImageData,~N,~N");
 $_V (cla$$, "dispose", 
 function () {
 if (this.handle == null) return ;
@@ -943,7 +1260,7 @@ $_R (this, $wt.graphics.Cursor, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
 this.handle = handle;
 this.device = device;
-}, "$wt.graphics.Device,String");
+}, "$wt.graphics.Device,~S");
 $_M (cla$$, "getCSSHandle", 
 function () {
 return this.handle;
@@ -1008,7 +1325,7 @@ return  new $wt.graphics.Point (96, 96);
 $_M (cla$$, "getFontList", 
 function (faceName, scalable) {
 return  new Array (0);
-}, "String,Boolean");
+}, "~S,~B");
 $_M (cla$$, "getSystemColor", 
 function (id) {
 var pixel = 0x02000000;
@@ -1063,7 +1380,7 @@ pixel = 0x02808080;
 break;
 }
 return  new $wt.graphics.Color (this, pixel & 0x000000FF, (pixel & 0x0000FF00) >> 8, (pixel & 0x00FF00) >> 16);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getSystemFont", 
 function () {
 return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, 0);
@@ -1084,7 +1401,7 @@ function () {
 });
 $_M (cla$$, "setWarnings", 
 function (warnings) {
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
 this.width = 0;
 this.height = 0;
@@ -1109,10 +1426,10 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (width, height, depth, palette) {
 this.construct (width, height, depth, palette, 4, null, 0, null, null, -1, -1, -1, 0, 0, 0, 0);
-}, "Number,Number,Number,$wt.graphics.PaletteData");
+}, "~N,~N,~N,$wt.graphics.PaletteData");
 $_K (cla$$, 
 function (width, height, depth, palette, scanlinePad, data) {
-}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array");
+}, "~N,~N,~N,$wt.graphics.PaletteData,~N,Array");
 $_K (cla$$, 
 function (stream) {
 if (stream != null) this.url = stream.url;
@@ -1120,7 +1437,7 @@ if (stream != null) this.url = stream.url;
 $_K (cla$$, 
 function (filename) {
 this.url = filename;
-}, "String");
+}, "~S");
 $_K (cla$$, 
 function () {
 });
@@ -1128,7 +1445,7 @@ $_K (cla$$,
 function (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime) {
 var bytesPerLine = Math.floor (((Math.floor ((width * depth + 7) / 8)) + (scanlinePad - 1)) / scanlinePad) * scanlinePad;
 this.setAllFields (width, height, depth, scanlinePad, bytesPerLine, data != null ? data :  $_A (bytesPerLine * height, 0), palette, transparentPixel, maskData, maskPad, alphaData, alpha, type, x, y, disposalMethod, delayTime);
-}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array,Number,Array,Array,Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,$wt.graphics.PaletteData,~N,Array,~N,Array,Array,~N,~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "setAllFields", 
 function (width, height, depth, scanlinePad, bytesPerLine, data, palette, transparentPixel, maskData, maskPad, alphaData, alpha, type, x, y, disposalMethod, delayTime) {
 this.width = width;
@@ -1148,11 +1465,11 @@ this.x = x;
 this.y = y;
 this.disposalMethod = disposalMethod;
 this.delayTime = delayTime;
-}, "Number,Number,Number,Number,Number,Array,$wt.graphics.PaletteData,Number,Array,Number,Array,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,Array,$wt.graphics.PaletteData,~N,Array,~N,Array,~N,~N,~N,~N,~N,~N");
 cla$$.internal_new = $_M (cla$$, "internal_new", 
 function (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime) {
 return  new $wt.graphics.ImageData (width, height, depth, palette, scanlinePad, data, maskPad, maskData, alphaData, alpha, transparentPixel, type, x, y, disposalMethod, delayTime);
-}, "Number,Number,Number,$wt.graphics.PaletteData,Number,Array,Number,Array,Array,Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,$wt.graphics.PaletteData,~N,Array,~N,Array,Array,~N,~N,~N,~N,~N,~N,~N");
 $_V (cla$$, "clone", 
 function () {
 var cloneData =  $_A (this.data.length, 0);
@@ -1171,7 +1488,7 @@ $_M (cla$$, "getAlpha",
 function (x, y) {
 if (this.alphaData == null) return 255;
 return this.alphaData[y * this.width + x] & 0xFF;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "getAlphas", 
 function (x, y, getWidth, alphas, startIndex) {
 if (getWidth == 0) return ;
@@ -1182,7 +1499,7 @@ alphas[i] = parseInt (255);
 }
 return ;
 }System.arraycopy (this.alphaData, y * this.width + x, alphas, startIndex, getWidth);
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 $_M (cla$$, "getPixel", 
 function (x, y) {
 var index;
@@ -1223,7 +1540,7 @@ index = (y * this.bytesPerLine) + (x * 4);
 return ((this.data[index] & 0xFF) << 24) + ((this.data[index + 1] & 0xFF) << 16) + ((this.data[index + 2] & 0xFF) << 8) + (this.data[index + 3] & 0xFF);
 }$WT.error (38);
 return 0;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "getPixels", 
 function (x, y, getWidth, pixels, startIndex) {
 if (getWidth == 0) return ;
@@ -1334,7 +1651,7 @@ index++;
 }}
 return ;
 }$WT.error (38);
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 $_M (cla$$, "getPixels", 
 function (x, y, getWidth, pixels, startIndex) {
 if (getWidth == 0) return ;
@@ -1488,7 +1805,7 @@ index += 4;
 }}
 return ;
 }$WT.error (38);
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 $_M (cla$$, "getRGBs", 
 function () {
 return this.palette.getRGBs ();
@@ -1507,18 +1824,18 @@ return 0;
 $_M (cla$$, "scaledTo", 
 function (width, height) {
 return null;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setAlpha", 
 function (x, y, alpha) {
 if (this.alphaData == null) this.alphaData =  $_A (this.width * this.height, 0);
 this.alphaData[y * this.width + x] = parseInt (alpha);
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "setAlphas", 
 function (x, y, putWidth, alphas, startIndex) {
 if (putWidth == 0) return ;
 if (this.alphaData == null) this.alphaData =  $_A (this.width * this.height, 0);
 System.arraycopy (alphas, startIndex, this.alphaData, y * this.width + x, putWidth);
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 $_M (cla$$, "setPixel", 
 function (x, y, pixelValue) {
 var index;
@@ -1570,7 +1887,7 @@ this.data[index + 2] = parseInt (((pixelValue >> 8) & 0xFF));
 this.data[index + 3] = parseInt ((pixelValue & 0xFF));
 return ;
 }$WT.error (38);
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "setPixels", 
 function (x, y, putWidth, pixels, startIndex) {
 if (putWidth == 0) return ;
@@ -1661,10 +1978,10 @@ index++;
 }}
 return ;
 }$WT.error (38);
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 $_M (cla$$, "setPixels", 
 function (x, y, putWidth, pixels, startIndex) {
-}, "Number,Number,Number,Array,Number");
+}, "~N,~N,~N,Array,~N");
 cla$$ = $_C (function () {
 this.data = null;
 this.logicalScreenWidth = 0;
@@ -1697,13 +2014,13 @@ function (filename) {
 this.reset ();
 this.data = [ new $wt.graphics.ImageData (filename)];
 return this.data;
-}, "String");
+}, "~S");
 $_M (cla$$, "save", 
 function (stream, format) {
-}, "java.io.OutputStream,Number");
+}, "java.io.OutputStream,~N");
 $_M (cla$$, "save", 
 function (filename, format) {
-}, "String,Number");
+}, "~S,~N");
 $_M (cla$$, "addImageLoaderListener", 
 function (listener) {
 if (this.imageLoaderListeners == null) {
@@ -1753,7 +2070,7 @@ if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device, width, height);
 this.width = width;
 this.height = height;
-}, "$wt.graphics.Device,Number,Number");
+}, "$wt.graphics.Device,~N,~N");
 $_M (cla$$, "init", 
 function (device, width, height) {
 this.type = 0;
@@ -1763,14 +2080,14 @@ this.handle = document.createElement ("DIV");
 this.handle.style.width = width + "px";
 this.handle.style.height = height + "px";
 this.imgHandle = this.handle;
-}, "$wt.graphics.Device,Number,Number");
+}, "$wt.graphics.Device,~N,~N");
 $_K (cla$$, 
 function (device, srcImage, flag) {
 $_R (this, $wt.graphics.Image, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
 this.device = device;
 this.url = srcImage.url;
-}, "$wt.graphics.Device,$wt.graphics.Image,Number");
+}, "$wt.graphics.Device,$wt.graphics.Image,~N");
 $_K (cla$$, 
 function (device, bounds) {
 $_R (this, $wt.graphics.Image, []);
@@ -1802,7 +2119,7 @@ function (device, filename) {
 $_R (this, $wt.graphics.Image, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
 this.url = filename;
-}, "$wt.graphics.Device,String");
+}, "$wt.graphics.Device,~S");
 $_V (cla$$, "dispose", 
 function () {
 });
@@ -1870,7 +2187,7 @@ function (device, name, height, style) {
 $_R (this, $wt.graphics.Font, []);
 if (device == null) device = $wt.graphics.Device.getDevice ();
 this.init (device,  new $wt.graphics.FontData (name, height, style));
-}, "$wt.graphics.Device,String,Number,Number");
+}, "$wt.graphics.Device,~S,~N,~N");
 $_V (cla$$, "dispose", 
 function () {
 this.data = null;
@@ -1929,13 +2246,13 @@ if (this.name == null) {
 this.name = "Arial";
 }this.style = 0;
 this.height = 12;
-}, "String");
+}, "~S");
 $_K (cla$$, 
 function (name, height, style) {
 this.setName (name);
 this.setHeight (height);
 this.setStyle (style);
-}, "String,Number,Number");
+}, "~S,~N,~N");
 $_V (cla$$, "equals", 
 function (object) {
 if (object == this) return true;
@@ -1982,7 +2299,7 @@ return this.height ^ this.style ^ this.getName ().hashCode ();
 $_M (cla$$, "setHeight", 
 function (height) {
 this.height = height;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setLocale", 
 function (locale) {
 this.lang = this.country = this.variant = null;
@@ -2000,15 +2317,15 @@ if (secondSep == -1) secondSep = length;
 }if (firstSep > 0) this.lang = locale.substring (0, firstSep);
 if (secondSep > firstSep + 1) this.country = locale.substring (firstSep + 1, secondSep);
 if (length > secondSep + 1) this.variant = locale.substring (secondSep + 1);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "setName", 
 function (name) {
 this.name = name;
-}, "String");
+}, "~S");
 $_M (cla$$, "setStyle", 
 function (style) {
 this.style = style;
-}, "Number");
+}, "~N");
 $_V (cla$$, "toString", 
 function () {
 var buffer =  new StringBuffer ();
@@ -2078,13 +2395,13 @@ this.checkSubclass ();
 this.checkParent (parent);
 this.style = style;
 this.display = parent.display;
-}, "$wt.widgets.Widget,Number");
+}, "$wt.widgets.Widget,~N");
 $_M (cla$$, "addListener", 
 function (eventType, listener) {
 if (this.eventTable == null) this.eventTable =  new $wt.widgets.EventTable ();
 this.eventTable.hook (eventType, listener);
 this.checkHookType (eventType);
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "addDisposeListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -2093,7 +2410,7 @@ this.addListener (12, typedListener);
 $_M (cla$$, "callWindowProc", 
 function (hwnd, msg, wParam, lParam) {
 return 0;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 cla$$.checkBits = $_M (cla$$, "checkBits", 
 function (style, int0, int1, int2, int3, int4, int5) {
 var mask = int0 | int1 | int2 | int3 | int4 | int5;
@@ -2105,7 +2422,7 @@ if ((style & int3) != 0) style = (style & ~mask) | int3;
 if ((style & int4) != 0) style = (style & ~mask) | int4;
 if ((style & int5) != 0) style = (style & ~mask) | int5;
 return style;
-}, "Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "checkHookType", 
 function (eventType) {
 if (this.hookedStatus == null) {
@@ -2193,11 +2510,11 @@ this.hookMouseWheel ();
 break;
 }
 this.hookedStatus[eventType] = true;
-}, "Number");
+}, "~N");
 $_M (cla$$, "checkOrientation", 
 function (parent) {
-this.style &= ($t$ = ~ $WT.MIRRORED, $WT.prototype.MIRRORED = $WT.MIRRORED, $t$);
-if ((this.style & (33554432 | 67108864)) == 0) {
+this.style &= -134217729;
+if ((this.style & (100663296)) == 0) {
 if (parent != null) {
 if ((parent.style & 33554432) != 0) this.style |= 33554432;
 if ((parent.style & 67108864) != 0) this.style |= 67108864;
@@ -2231,15 +2548,15 @@ this.destroyWidget ();
 $_M (cla$$, "error", 
 function (code) {
 $WT.error (code);
-}, "Number");
+}, "~N");
 $_M (cla$$, "filters", 
 function (eventType) {
 return this.display.filters (eventType);
-}, "Number");
+}, "~N");
 $_M (cla$$, "findItem", 
 function (id) {
 return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "fixMnemonic", 
 function (string) {
 var buffer =  $_A (string.length, '\0');
@@ -2258,20 +2575,20 @@ buffer[j++] = buffer[i++];
 while (j < buffer.length) buffer[j++] = String.fromCharCode ( 0);
 
 return buffer;
-}, "String");
+}, "~S");
 $_M (cla$$, "getData", 
 function () {
-return (this.state & $wt.widgets.Widget.KEYED_DATA) != 0 ? (this.data)[0] : this.data;
+return (this.state & 4) != 0 ? (this.data)[0] : this.data;
 });
 $_M (cla$$, "getData", 
 function (key) {
-if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
+if ((this.state & 4) != 0) {
 var table = this.data;
 for (var i = 1; i < table.length; i += 2) {
 if (key.equals (table[i])) return table[i + 1];
 }
 }return null;
-}, "String");
+}, "~S");
 $_M (cla$$, "getDisplay", 
 function () {
 var display = this.display;
@@ -2644,15 +2961,15 @@ $_M (cla$$, "hooks",
 function (eventType) {
 if (this.eventTable == null) return false;
 return this.eventTable.hooks (eventType);
-}, "Number");
+}, "~N");
 $_M (cla$$, "isDisposed", 
 function () {
-return (this.state & $wt.widgets.Widget.DISPOSED) != 0;
+return (this.state & 1) != 0;
 });
 $_M (cla$$, "isListening", 
 function (eventType) {
 return this.hooks (eventType);
-}, "Number");
+}, "~N");
 $_M (cla$$, "isValidSubclass", 
 function () {
 return $wt.widgets.Display.isValidClass (this.getClass ());
@@ -2663,26 +2980,26 @@ return true;
 });
 $_M (cla$$, "mapEvent", 
 function (hwnd, event) {
-}, "Number,$wt.widgets.Event");
+}, "~N,$wt.widgets.Event");
 $_M (cla$$, "notifyListeners", 
 function (eventType, event) {
 if (event == null) event =  new $wt.widgets.Event ();
 this.sendEvent (eventType, event);
-}, "Number,$wt.widgets.Event");
+}, "~N,$wt.widgets.Event");
 $_M (cla$$, "postEvent", 
 function (eventType) {
 this.sendEvent (eventType, null, false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "postEvent", 
 function (eventType, event) {
 this.sendEvent (eventType, event, false);
-}, "Number,$wt.widgets.Event");
+}, "~N,$wt.widgets.Event");
 $_M (cla$$, "releaseChild", 
 function () {
 });
 $_M (cla$$, "releaseHandle", 
 function () {
-this.state |= $wt.widgets.Widget.DISPOSED;
+this.state |= 1;
 this.display = null;
 });
 $_M (cla$$, "releaseResources", 
@@ -2700,12 +3017,12 @@ $_M (cla$$, "removeListener",
 function (eventType, listener) {
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "removeListener", 
 function (eventType, listener) {
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
-}, "Number,$wt.internal.SWTEventListener");
+}, "~N,$wt.internal.SWTEventListener");
 $_M (cla$$, "removeDisposeListener", 
 function (listener) {
 if (this.eventTable == null) return ;
@@ -2720,11 +3037,11 @@ if (this.eventTable != null) this.eventTable.sendEvent (event);
 $_M (cla$$, "sendEvent", 
 function (eventType) {
 this.sendEvent (eventType, null, true);
-}, "Number");
+}, "~N");
 $_M (cla$$, "sendEvent", 
 function (eventType, event) {
 this.sendEvent (eventType, event, true);
-}, "Number,$wt.widgets.Event");
+}, "~N,$wt.widgets.Event");
 $_M (cla$$, "sendEvent", 
 function (eventType, event, send) {
 if (this.eventTable == null && !this.display.filters (eventType)) {
@@ -2739,22 +3056,22 @@ event.time = this.display.getLastEventTime ();
 this.sendEvent (event);
 } else {
 this.display.postEvent (event);
-}}, "Number,$wt.widgets.Event,Boolean");
+}}, "~N,$wt.widgets.Event,~B");
 $_M (cla$$, "sendKeyEvent", 
 function (type, msg, wParam, lParam) {
 var event =  new $wt.widgets.Event ();
 return this.sendKeyEvent (type, msg, wParam, lParam, event);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "sendKeyEvent", 
 function (type, msg, wParam, lParam, event) {
 this.sendEvent (type, event);
 if (this.isDisposed ()) return false;
 return event.doit;
-}, "Number,Number,Number,Number,$wt.widgets.Event");
+}, "~N,~N,~N,~N,$wt.widgets.Event");
 $_M (cla$$, "sendMouseEvent", 
 function (type, button, hwnd, x, y) {
 return this.sendMouseEvent (type, button, 0, 0, false, hwnd, x, y);
-}, "Number,Number,$wt.internal.xhtml.Element,Number,Number");
+}, "~N,~N,$wt.internal.xhtml.Element,~N,~N");
 $_M (cla$$, "sendMouseEvent", 
 function (type, button, count, detail, send, hwnd, x, y) {
 if (!this.hooks (type) && !this.filters (type)) return true;
@@ -2767,11 +3084,11 @@ event.y = y;
 switch (type) {
 case 3:
 case 8:
-if (event.button == 1) event.stateMask &= ($t$ = ~ $WT.BUTTON1, $WT.prototype.BUTTON1 = $WT.BUTTON1, $t$);
-if (event.button == 2) event.stateMask &= ($t$ = ~ $WT.BUTTON2, $WT.prototype.BUTTON2 = $WT.BUTTON2, $t$);
-if (event.button == 3) event.stateMask &= ($t$ = ~ $WT.BUTTON3, $WT.prototype.BUTTON3 = $WT.BUTTON3, $t$);
-if (event.button == 4) event.stateMask &= ($t$ = ~ $WT.BUTTON4, $WT.prototype.BUTTON4 = $WT.BUTTON4, $t$);
-if (event.button == 5) event.stateMask &= ($t$ = ~ $WT.BUTTON5, $WT.prototype.BUTTON5 = $WT.BUTTON5, $t$);
+if (event.button == 1) event.stateMask &= -524289;
+if (event.button == 2) event.stateMask &= -1048577;
+if (event.button == 3) event.stateMask &= -2097153;
+if (event.button == 4) event.stateMask &= -8388609;
+if (event.button == 5) event.stateMask &= -33554433;
 break;
 case 4:
 if (event.button == 1) event.stateMask |= 524288;
@@ -2787,10 +3104,10 @@ if (this.isDisposed ()) return false;
 } else {
 this.postEvent (type, event);
 }return event.doit;
-}, "Number,Number,Number,Number,Boolean,$wt.internal.xhtml.Element,Number,Number");
+}, "~N,~N,~N,~N,~B,$wt.internal.xhtml.Element,~N,~N");
 $_M (cla$$, "setData", 
 function (data) {
-if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
+if ((this.state & 4) != 0) {
 (this.data)[0] = data;
 } else {
 this.data = data;
@@ -2799,14 +3116,14 @@ $_M (cla$$, "setData",
 function (key, value) {
 var index = 1;
 var table = null;
-if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
+if ((this.state & 4) != 0) {
 table = this.data;
 while (index < table.length) {
 if (key.equals (table[index])) break;
 index += 2;
 }
 }if (value != null) {
-if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
+if ((this.state & 4) != 0) {
 if (index == table.length) {
 var newTable =  new Array (table.length + 2);
 System.arraycopy (table, 0, newTable, 0, table.length);
@@ -2815,36 +3132,36 @@ this.data = table = newTable;
 table =  new Array (3);
 table[0] = this.data;
 this.data = table;
-this.state |= $wt.widgets.Widget.KEYED_DATA;
+this.state |= 4;
 }table[index] = key;
 table[index + 1] = value;
 } else {
-if ((this.state & $wt.widgets.Widget.KEYED_DATA) != 0) {
+if ((this.state & 4) != 0) {
 if (index != table.length) {
 var length = table.length - 2;
 if (length == 1) {
 this.data = table[0];
-this.state &= ($t$ = ~ $wt.widgets.Widget.KEYED_DATA, $wt.widgets.Widget.prototype.KEYED_DATA = $wt.widgets.Widget.KEYED_DATA, $t$);
+this.state &= -5;
 } else {
 var newTable =  new Array (length);
 System.arraycopy (table, 0, newTable, 0, index);
 System.arraycopy (table, index + 2, newTable, index, length - index);
 this.data = newTable;
-}}}}}, "String,Object");
+}}}}}, "~S,Object");
 $_M (cla$$, "sendFocusEvent", 
 function (type) {
 this.sendEvent (type);
 return true;
-}, "Number");
+}, "~N");
 $_M (cla$$, "SetWindowPos", 
 function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
 var el = hWnd;
 el.style.left = X + "px";
 el.style.top = Y + "px";
-el.style.width = cx + "px";
-el.style.height = cy + "px";
+el.style.width = (cx > 0 ? cx : 0) + "px";
+el.style.height = (cy > 0 ? cy : 0) + "px";
 return true;
-}, "Object,Object,Number,Number,Number,Number,Number");
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_M (cla$$, "showMenu", 
 function (x, y) {
 var event =  new $wt.widgets.Event ();
@@ -2859,7 +3176,7 @@ menu.setLocation (event.x, event.y);
 }menu.setVisible (true);
 return true;
 }return false;
-}, "Number,Number");
+}, "~N,~N");
 $_V (cla$$, "toString", 
 function () {
 var string = "*Disposed*";
@@ -2869,13 +3186,13 @@ if (this.isValidThread ()) string = this.getNameText ();
 }return this.getName () + " {" + string + "}";
 });
 $_S (cla$$,
-"DISPOSED", 1 << 0,
-"CANVAS", 1 << 1,
-"KEYED_DATA", 1 << 2,
-"DISABLED", 1 << 3,
-"HIDDEN", 1 << 4,
-"LAYOUT_NEEDED", 1 << 5,
-"LAYOUT_CHANGED", 1 << 6,
+"DISPOSED", 1,
+"CANVAS", 2,
+"KEYED_DATA", 4,
+"DISABLED", 8,
+"HIDDEN", 16,
+"LAYOUT_NEEDED", 32,
+"LAYOUT_CHANGED", 64,
 "DEFAULT_WIDTH", 64,
 "DEFAULT_HEIGHT", 64);
 cla$$ = $_C (function () {
@@ -2890,8 +3207,8 @@ this.foreground = 0;
 this.background = 0;
 this.left = 0;
 this.top = 0;
-this.width = 0;
 this.height = 0;
+this.width = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Control", $wt.widgets.Widget, $wt.graphics.Drawable);
 $_K (cla$$, 
@@ -2899,7 +3216,7 @@ function (parent, style) {
 $_R (this, $wt.widgets.Control, [parent, style]);
 this.parent = parent;
 this.createWidget ();
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addControlListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -2958,11 +3275,11 @@ return this.handle;
 });
 $_M (cla$$, "checkBorder", 
 function () {
-if (this.getBorderWidth () == 0) this.style &= ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$);
+if (this.getBorderWidth () == 0) this.style &= -2049;
 });
 $_M (cla$$, "checkBuffered", 
 function () {
-this.style &= ($t$ = ~ $WT.DOUBLE_BUFFERED, $WT.prototype.DOUBLE_BUFFERED = $WT.DOUBLE_BUFFERED, $t$);
+this.style &= -536870913;
 });
 $_M (cla$$, "checkHandle", 
 function (hwnd) {
@@ -2975,18 +3292,18 @@ if ((this.style & 67108864) != 0) {
 $_M (cla$$, "computeSize", 
 function (wHint, hHint) {
 return this.computeSize (wHint, hHint, true);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
-var width = $wt.widgets.Widget.DEFAULT_WIDTH;
-var height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+var width = 64;
+var height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var border = this.getBorderWidth ();
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "computeTabGroup", 
 function () {
 if (this.isTabGroup ()) return this;
@@ -3041,11 +3358,11 @@ BrowserNative.releaseHandle (hwnd);
 $_M (cla$$, "enableWidget", 
 function (enabled) {
 this.handle.disabled = !enabled;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "findBrush", 
 function (pixel) {
 return this.parent.findBrush (pixel);
-}, "Number");
+}, "~N");
 $_M (cla$$, "findCursor", 
 function () {
 if (this.cursor != null) return this.cursor;
@@ -3072,7 +3389,7 @@ if ((string.charAt (index)).charCodeAt (0) != ('&').charCodeAt (0)) return strin
 index++;
 } while (index < length);
 return '\0';
-}, "String");
+}, "~S");
 $_M (cla$$, "fixChildren", 
 function (newShell, oldShell, newDecorations, oldDecorations, menus) {
 oldShell.fixShell (newShell, this);
@@ -3118,7 +3435,10 @@ return this.accessible;
 });
 $_M (cla$$, "getBackground", 
 function () {
-return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
+var bg = this.handle.style.backgroundColor;
+if (bg == null || bg.toString ().length == 0) {
+return  new $wt.graphics.Color (this.display, "menu");
+}return  new $wt.graphics.Color (this.display, bg);
 });
 $_M (cla$$, "getBorderWidth", 
 function () {
@@ -3137,11 +3457,20 @@ return !this.handle.disabled;
 });
 $_M (cla$$, "getFont", 
 function () {
-return  new $wt.graphics.Font (this.display, this.handle.style.fontFamily, Integer.parseInt (this.handle.style.fontSize), 0);
+var ff = this.handle.style.fontFamily;
+if (ff == null || ff.toString ().length == 0) {
+ff = "Tahoma, Arial, sans-serif";
+}var fs = this.handle.style.fontSize;
+if (fs == null || fs.toString ().length == 0) {
+fs = "8";
+}return  new $wt.graphics.Font (this.display, ff, Integer.parseInt (fs), 0);
 });
 $_M (cla$$, "getForeground", 
 function () {
-return  new $wt.graphics.Color (this.display, this.handle.style.color);
+var fg = this.handle.style.color;
+if (fg == null || fg.toString ().length == 0) {
+return  new $wt.graphics.Color (this.display, "black");
+}return  new $wt.graphics.Color (this.display, this.handle.style.color);
 });
 $_M (cla$$, "getLayoutData", 
 function () {
@@ -3196,7 +3525,7 @@ return this.toolTipText;
 });
 $_M (cla$$, "getVisible", 
 function () {
-if (this.drawCount != 0) return (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+if (this.drawCount != 0) return (this.state & 16) == 0;
 return this.handle.style.visibility != "hidden";
 });
 $_M (cla$$, "hasCursor", 
@@ -3215,7 +3544,7 @@ return false;
 }var shell = null;
 var modalShells = this.display.modalShells;
 if (modalShells != null) {
-var bits = 65536 | 131072;
+var bits = 196608;
 var index = modalShells.length;
 while (--index >= 0) {
 var modal = modalShells[index];
@@ -3294,7 +3623,7 @@ if (hwnd != this.handle) {
 }}, "$wt.internal.xhtml.Element,$wt.widgets.Event");
 $_M (cla$$, "markLayout", 
 function (changed, all) {
-}, "Boolean,Boolean");
+}, "~B,~B");
 $_M (cla$$, "menuShell", 
 function () {
 return this.parent.menuShell ();
@@ -3302,11 +3631,11 @@ return this.parent.menuShell ();
 $_M (cla$$, "mnemonicHit", 
 function (key) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "mnemonicMatch", 
 function (key) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "moveAbove", 
 function (control) {
 if (control != null) {
@@ -3334,14 +3663,14 @@ this.pack (true);
 $_M (cla$$, "pack", 
 function (changed) {
 this.setSize (this.computeSize (-1, -1, changed));
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "redraw", 
 function () {
 });
 $_M (cla$$, "redraw", 
 function (x, y, width, height, all) {
 if (width <= 0 || height <= 0) return ;
-}, "Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~B");
 $_M (cla$$, "register", 
 function () {
 this.display.addControl (this.handle, this);
@@ -3430,7 +3759,7 @@ this.eventTable.unhook (31, listener);
 $_M (cla$$, "showWidget", 
 function (visible) {
 this.handle.style.visibility = visible ? "visible" : "hidden";
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "sendFocusEvent", 
 function (type) {
 var shell = this.getShell ();
@@ -3451,7 +3780,7 @@ shell.setActiveControl (null);
 }break;
 }
 }return true;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setBackground", 
 function (color) {
 if (color != null) this.handle.style.backgroundColor = color.getCSSHandle ();
@@ -3460,11 +3789,11 @@ $_M (cla$$, "setBounds",
 function (x, y, width, height) {
 var flags = 0;
 this.setBounds (x, y, Math.max (0, width), Math.max (0, height), flags);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
 this.setBounds (x, y, width, height, flags, true);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags, defer) {
 var topHandle = this.topHandle ();
@@ -3501,14 +3830,14 @@ this.top = y;
 this.width = width;
 this.height = height;
 this.SetWindowPos (topHandle, null, x, y, width, height, flags);
-}}, "Number,Number,Number,Number,Number,Boolean");
+}}, "~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "setBounds", 
 function (rect) {
 this.setBounds (rect.x, rect.y, rect.width, rect.height);
 }, "$wt.graphics.Rectangle");
 $_M (cla$$, "setCapture", 
 function (capture) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setCursor", 
 function () {
 });
@@ -3530,7 +3859,7 @@ control = this.display.getFocusControl ();
 fixFocus = this.isFocusAncestor (control);
 }}this.enableWidget (enabled);
 if (fixFocus) this.fixFocus (control);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setFixedFocus", 
 function () {
 if ((this.style & 524288) != 0) return false;
@@ -3567,7 +3896,7 @@ $_M (cla$$, "setLocation",
 function (x, y) {
 var flags = 0;
 this.setBounds (x, y, this.width, this.height, flags);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setLocation", 
 function (location) {
 this.setLocation (location.x, location.y);
@@ -3600,10 +3929,10 @@ return false;
 $_M (cla$$, "setRadioSelection", 
 function (value) {
 return false;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setRedraw", 
 function (redraw) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setSavedFocus", 
 function () {
 return this.forceFocus ();
@@ -3612,7 +3941,7 @@ $_M (cla$$, "setSize",
 function (width, height) {
 var flags = 0;
 this.setBounds (0, 0, Math.max (0, width), Math.max (0, height), flags);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setSize", 
 function (size) {
 System.err.println (size);
@@ -3631,11 +3960,11 @@ $_M (cla$$, "setToolTipText",
 function (string) {
 var shell = this.getShell ();
 shell.setToolTipText (this.handle, this.toolTipText = string);
-}, "String");
+}, "~S");
 $_M (cla$$, "setVisible", 
 function (visible) {
 if (this.drawCount != 0) {
-if (((this.state & $wt.widgets.Widget.HIDDEN) == 0) == visible) return ;
+if (((this.state & 16) == 0) == visible) return ;
 } else {
 if ((this.handle.style.visibility != "hidden") == visible) return ;
 }if (visible) {
@@ -3648,7 +3977,7 @@ if (this.display.focusEvent != 16) {
 control = this.display.getFocusControl ();
 fixFocus = this.isFocusAncestor (control);
 }}if (this.drawCount != 0) {
-this.state = visible ? this.state & ($t$ = ~ $wt.widgets.Widget.HIDDEN, $wt.widgets.Widget.prototype.HIDDEN = $wt.widgets.Widget.HIDDEN, $t$) : this.state | $wt.widgets.Widget.HIDDEN;
+this.state = visible ? this.state & -17 : this.state | 16;
 } else {
 this.showWidget (visible);
 if (this.isDisposed ()) return ;
@@ -3656,7 +3985,7 @@ if (this.isDisposed ()) return ;
 this.sendEvent (23);
 if (this.isDisposed ()) return ;
 }if (fixFocus) this.fixFocus (control);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "sort", 
 function (items) {
 var length = items.length;
@@ -3674,7 +4003,7 @@ items[j + gap] = swap;
 $_M (cla$$, "toControl", 
 function (x, y) {
 return  new $wt.graphics.Point (x, y);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "toControl", 
 function (point) {
 return this.toControl (point.x, point.y);
@@ -3682,7 +4011,7 @@ return this.toControl (point.x, point.y);
 $_M (cla$$, "toDisplay", 
 function (x, y) {
 return  new $wt.graphics.Point (x, y);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "toDisplay", 
 function (point) {
 return this.toDisplay (point.x, point.y);
@@ -3726,7 +4055,7 @@ var event =  new $wt.widgets.Event ();
 event.doit = true;
 event.detail = traversal;
 return this.traverse (event);
-}, "Number");
+}, "~N");
 $_M (cla$$, "traverseEscape", 
 function () {
 return false;
@@ -3752,7 +4081,7 @@ return true;
 }}
 if (group.isDisposed ()) return false;
 return group.setTabGroupFocus ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "traverseItem", 
 function (next) {
 var children = this.parent._getChildren ();
@@ -3771,15 +4100,15 @@ if (!child.isDisposed () && child.isTabItem ()) {
 if (child.setTabItemFocus ()) return true;
 }}
 return false;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "traverseMnemonic", 
 function (key) {
 return this.mnemonicHit (key);
-}, "Number");
+}, "~N");
 $_M (cla$$, "traversePage", 
 function (next) {
 return false;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "traverseReturn", 
 function () {
 return false;
@@ -3790,7 +4119,7 @@ this.update (false);
 });
 $_M (cla$$, "update", 
 function (all) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "updateFont", 
 function (oldFont, newFont) {
 var sameFont = this.getFont ().equals (oldFont);
@@ -3799,7 +4128,7 @@ return sameFont;
 }, "$wt.graphics.Font,$wt.graphics.Font");
 $_M (cla$$, "updateLayout", 
 function (resize, all) {
-}, "Boolean,Boolean");
+}, "~B,~B");
 $_M (cla$$, "widgetParent", 
 function () {
 if (this.parent == null) {
@@ -3829,20 +4158,20 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Scrollable, [parent, style]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var border = this.getBorderWidth ();
 return  new $wt.graphics.Rectangle (x - border, y - border, width + border * 2, height + border * 2);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "createScrollBar", 
 function (type) {
 var bar =  new $wt.widgets.ScrollBar (this, type);
-if ((this.state & $wt.widgets.Widget.CANVAS) != 0) {
+if ((this.state & 2) != 0) {
 bar.setMaximum (100);
 bar.setThumb (10);
 }return bar;
-}, "Number");
+}, "~N");
 $_M (cla$$, "createWidget", 
 function () {
 $_U (this, $wt.widgets.Scrollable, "createWidget", []);
@@ -3896,19 +4225,20 @@ function () {
 return "DIV";
 });
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.widgets, "Composite", $wt.widgets.Scrollable);
-$_Y (cla$$, function () {
 this.$layout = null;
 this.lpwp = null;
 this.tabList = null;
 this.layoutCount = 0;
+this.children = null;
+$_Z (this, arguments);
+}, $wt.widgets, "Composite", $wt.widgets.Scrollable);
+$_Y (cla$$, function () {
 this.children =  new Array (0);
 });
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Composite, [parent, style]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "_getChildren", 
 function () {
 if (true) return this.children;
@@ -3956,7 +4286,7 @@ var child = changed[i];
 var composite = child.parent;
 while (child != this) {
 if (composite.$layout == null || !composite.$layout.flushCache (child)) {
-composite.state |= $wt.widgets.Widget.LAYOUT_CHANGED;
+composite.state |= 64;
 }child = composite;
 composite = child.parent;
 }
@@ -3989,22 +4319,20 @@ function (wHint, hHint, changed) {
 var size;
 if (this.$layout != null) {
 if (wHint == -1 || hHint == -1) {
-changed = new Boolean (changed | ((this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0));
-this.state &= ($t$ = ~ $wt.widgets.Widget.LAYOUT_CHANGED, $wt.widgets.Widget.prototype.LAYOUT_CHANGED = $wt.widgets.Widget.LAYOUT_CHANGED, $t$);
+changed = new Boolean (changed | ((this.state & 64) != 0));
+this.state &= -65;
 size = this.$layout.computeSize (this, wHint, hHint, changed);
 } else {
 size =  new $wt.graphics.Point (wHint, hHint);
 }} else {
 size = this.minimumSize (wHint, hHint, changed);
-}if (size.x == 0) size.x = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (size.y == 0) size.y = $wt.widgets.Widget.DEFAULT_HEIGHT;
+}if (size.x == 0) size.x = 64;
+if (size.y == 0) size.y = 64;
 if (wHint != -1) size.x = wHint;
 if (hHint != -1) size.y = hHint;
-System.out.println ("before trimming " + size);
 var trim = this.computeTrim (0, 0, size.x, size.y);
-System.out.println ("after trimming " + trim);
 return  new $wt.graphics.Point (trim.width, trim.height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "containerHandle", 
 function () {
 return this.handle;
@@ -4019,7 +4347,7 @@ this.handle.className += " composite-border";
 var parentHandle = this.parent.containerHandle ();
 if (parentHandle != null) {
 parentHandle.appendChild (this.handle);
-}}this.state |= $wt.widgets.Widget.CANVAS;
+}}this.state |= 2;
 });
 $_M (cla$$, "findMenus", 
 function (control) {
@@ -4131,15 +4459,16 @@ $_M (cla$$, "layout",
 function (changed) {
 if (this.$layout == null) return ;
 this.layout (changed, true);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "layout", 
 function (changed, all) {
 if (this.$layout == null && !all) return ;
 this.markLayout (changed, all);
 this.updateLayout (true, all);
-}, "Boolean,Boolean");
+}, "~B,~B");
 $_M (cla$$, "layout", 
 function (changed) {
+System.out.print ("control");
 var d =  new java.util.Date ();
 for (var i = 0; i < changed.length; i++) {
 var control = changed[i];
@@ -4160,9 +4489,9 @@ var child = changed[i];
 var composite = child.parent;
 while (child != this) {
 if (composite.$layout != null) {
-composite.state |= $wt.widgets.Widget.LAYOUT_NEEDED;
+composite.state |= 32;
 if (!composite.$layout.flushCache (child)) {
-composite.state |= $wt.widgets.Widget.LAYOUT_CHANGED;
+composite.state |= 64;
 }}if (updateCount == update.length) {
 var newUpdate =  new Array (update.length + 16);
 System.arraycopy (update, 0, newUpdate, 0, update.length);
@@ -4182,14 +4511,14 @@ d =  new java.util.Date ();
 $_M (cla$$, "markLayout", 
 function (changed, all) {
 if (this.$layout != null) {
-this.state |= $wt.widgets.Widget.LAYOUT_NEEDED;
-if (changed) this.state |= $wt.widgets.Widget.LAYOUT_CHANGED;
+this.state |= 32;
+if (changed) this.state |= 64;
 }if (all) {
 var children = this._getChildren ();
 for (var i = 0; i < children.length; i++) {
 children[i].markLayout (changed, all);
 }
-}}, "Boolean,Boolean");
+}}, "~B,~B");
 $_M (cla$$, "minimumSize", 
 function (wHint, hHint, changed) {
 var children = this._getChildren ();
@@ -4201,7 +4530,7 @@ width = Math.max (width, rect.x + rect.width);
 height = Math.max (height, rect.y + rect.height);
 }
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "releaseChildren", 
 function () {
 var children = this._getChildren ();
@@ -4214,7 +4543,7 @@ $_M (cla$$, "releaseWidget",
 function () {
 this.releaseChildren ();
 $_U (this, $wt.widgets.Composite, "releaseWidget", []);
-if ((this.state & $wt.widgets.Widget.CANVAS) != 0 && (this.style & 16777216) != 0) {
+if ((this.state & 2) != 0 && (this.style & 16777216) != 0) {
 }this.$layout = null;
 this.tabList = null;
 this.lpwp = null;
@@ -4250,15 +4579,15 @@ if (hdwp == 0) return false;
 this.SetWindowPos (wp.hwnd, null, wp.x, wp.y, wp.cx, wp.cy, wp.flags);
 }}}
 return true;
-}, "Boolean,Array");
+}, "~B,Array");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.Composite, "setBounds", [x, y, width, height]);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "setSize", 
 function (width, height) {
 $_U (this, $wt.widgets.Composite, "setSize", [width, height]);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setFixedFocus", 
 function () {
 var children = this._getChildren ();
@@ -4296,7 +4625,7 @@ if (--this.layoutCount == 0) {
 if (!this.isLayoutDeferred ()) this.updateLayout (true, true);
 }} else {
 this.layoutCount++;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setTabList", 
 function (tabList) {
 if (tabList != null) {
@@ -4316,12 +4645,12 @@ this.resizeChildren ();
 var count = this.getChildrenCount ();
 if (count > 1 && this.lpwp == null) {
 this.lpwp =  new Array (count);
-}}}, "Boolean");
+}}}, "~B");
 $_V (cla$$, "setTabGroupFocus", 
 function () {
 if (this.isTabItem ()) return this.setTabItemFocus ();
 var takeFocus = (this.style & 524288) == 0;
-if ((this.state & $wt.widgets.Widget.CANVAS) != 0) {
+if ((this.state & 2) != 0) {
 takeFocus = this.hooksKeys ();
 if ((this.style & 16777216) != 0) takeFocus = true;
 }if (takeFocus && this.setTabItemFocus ()) return true;
@@ -4342,14 +4671,14 @@ if ((this.style & 2048) != 0) {
 cx -= 4;
 cy -= 4;
 }return $_U (this, $wt.widgets.Composite, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
-}, "Object,Object,Number,Number,Number,Number,Number");
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_M (cla$$, "updateLayout", 
 function (resize, all) {
 if (this.isLayoutDeferred ()) return ;
 var d =  new java.util.Date ();
-if ((this.state & $wt.widgets.Widget.LAYOUT_NEEDED) != 0) {
-var changed = (this.state & $wt.widgets.Widget.LAYOUT_CHANGED) != 0;
-this.state &= ~($wt.widgets.Widget.LAYOUT_NEEDED | $wt.widgets.Widget.LAYOUT_CHANGED);
+if ((this.state & 32) != 0) {
+var changed = (this.state & 64) != 0;
+this.state &= -97;
 if (resize) this.setResizeChildren (false);
 d =  new java.util.Date ();
 this.$layout.layout (this, changed);
@@ -4360,7 +4689,7 @@ var children = this._getChildren ();
 for (var i = 0; i < children.length; i++) {
 children[i].updateLayout (resize, all);
 }
-}}, "Boolean,Boolean");
+}}, "~B,~B");
 cla$$ = $_C (function () {
 this.caret = null;
 $_Z (this, arguments);
@@ -4368,10 +4697,10 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Canvas, [parent, style]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "clearArea", 
 function (x, y, width, height) {
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "getCaret", 
 function () {
 return this.caret;
@@ -4385,7 +4714,7 @@ $_U (this, $wt.widgets.Canvas, "releaseWidget", []);
 $_M (cla$$, "scroll", 
 function (destX, destY, x, y, width, height, all) {
 this.forceResize ();
-}, "Number,Number,Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "setCaret", 
 function (caret) {
 var newCaret = caret;
@@ -4409,8 +4738,8 @@ this.saveDefault = null;
 this.moved = false;
 this.resized = false;
 this.opened = false;
+this.contentHandle = null;
 this.shellTitle = null;
-this.frameHandle = null;
 this.modalHandle = null;
 this.oldBounds = null;
 this.shellMin = null;
@@ -4423,7 +4752,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Decorations, [parent, $wt.widgets.Decorations.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addMenu", 
 function (menu) {
 if (this.menus == null) this.menus =  new Array (4);
@@ -4439,22 +4768,22 @@ this.menus = newMenus;
 }, "$wt.widgets.Menu");
 $_M (cla$$, "bringToTop", 
 function () {
-this.frameHandle.style.visibility = "visible";
+this.handle.style.visibility = "visible";
 if (window.currentTopZIndex == null) {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+this.handle.style.zIndex = window.currentTopZIndex = "1000";
 } else {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+this.handle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
 }});
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 if ((style & 8) != 0) {
-style &= ~(64 | 32 | 128 | 1024 | 16 | 2048);
-}if ((style & (64 | 128 | 1024 | 64)) != 0) {
+style &= -3313;
+}if ((style & (1216)) != 0) {
 style |= 32;
-}if ((style & (128 | 1024)) != 0) style |= 64;
+}if ((style & (1152)) != 0) style |= 64;
 if ((style & 64) != 0) style |= 32;
 return style;
-}, "Number");
+}, "~N");
 $_V (cla$$, "checkBorder", 
 function () {
 });
@@ -4480,12 +4809,30 @@ $_V (cla$$, "computeTabRoot",
 function () {
 return this;
 });
+$_V (cla$$, "containerHandle", 
+function () {
+return this.contentHandle;
+});
 $_V (cla$$, "computeTrim", 
 function (x, y, width, height) {
-if ((this.style & 8) != 0) {
-return  new $wt.graphics.Rectangle (x, y, width, height + 4);
-}return  new $wt.graphics.Rectangle (x - 4, y - 24, width + 8, height + 20 + 8);
-}, "Number,Number,Number,Number");
+if ((this.style & 8) == 0) {
+if ((this.style & (1248)) != 0) {
+height += 20;
+if (width < 105) {
+width = 105;
+}}if ((this.style & 2048) != 0) {
+width += 8;
+height += 8;
+x -= 4;
+y -= 4;
+} else {
+width += 4;
+height += 4;
+x -= 2;
+y -= 2;
+}}System.err.println ( new $wt.graphics.Rectangle (x, y, width, height));
+return  new $wt.graphics.Rectangle (x, y, width, height);
+}, "~N,~N,~N,~N");
 $_M (cla$$, "createAccelerators", 
 function () {
 });
@@ -4497,9 +4844,9 @@ $_M (cla$$, "createCSSDiv",
 ($fz = function (css) {
 var el = document.createElement ("DIV");
 el.className = css;
-this.frameHandle.appendChild (el);
+this.handle.appendChild (el);
 return el;
-}, $fz.isPrivate = true, $fz), "String");
+}, $fz.isPrivate = true, $fz), "~S");
 $_M (cla$$, "createResizeHandles", 
 ($fz = function () {
 var handles = ["shell-left-top", "shell-right-top", "shell-center-top", "shell-left-middle", "shell-right-middle", "shell-center-middle", "shell-left-bottom", "shell-right-bottom", "shell-center-bottom"];
@@ -4525,32 +4872,19 @@ cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Decorations$1, innerThis, finalVars);
 }) (this, null));
-}this.frameHandle = document.createElement ("DIV");
-var fHandleStyle = this.frameHandle.style;
-fHandleStyle.position = "absolute";
+}this.handle = document.createElement ("DIV");
+this.handle.className = "shell-default";
 this.nextWindowLocation ();
-fHandleStyle.left = window.defaultWindowLeft + "px";
-fHandleStyle.top = window.defaultWindowTop + "px";
-fHandleStyle.width = 768 + "px";
-fHandleStyle.height = 557 + "px";
-fHandleStyle.backgroundColor = "menu";
-if ((this.style & 8) == 0) {
-fHandleStyle.borderColor = "black";
-fHandleStyle.borderWidth = "1px";
-fHandleStyle.borderStyle = "solid";
-} else {
-fHandleStyle.borderStyle = "none";
-}document.body.appendChild (this.frameHandle);
+this.width = 768;
+this.height = 557;
+if ( new Boolean ((this.style & 8) == 0 & (this.style & 16) != 0)) {
+this.handle.className += " shell-trim";
+}document.body.appendChild (this.handle);
 if ((this.style & 8) == 0 && (this.style & 16) != 0) {
 this.createResizeHandles ();
-}if ((this.style & 8) == 0) {
+}if ((this.style & 8) == 0 && (this.style & (1248)) != 0) {
 this.setSystemMenu ();
-}this.handle = this.createCSSDiv ("shell-content");
-if ((this.style & 8) != 0) {
-this.handle.style.top = "0px";
-} else {
-$wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
-$wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
+}this.contentHandle = this.createCSSDiv ("shell-content");
 var dnd =  new $wt.internal.dnd.DragAndDrop ();
 dnd.addDragListener ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$2")) {
@@ -4563,7 +4897,7 @@ $_M (cla$$, "isDraggable",
 function (e) {
 if ($_U (this, $wt.widgets.Decorations$2, "isDraggable", [e])) {
 var cssName = e.target.className;
-if (cssName.indexOf ("shelltitle") != -1 && this.callbacks["$wt.widgets.Decorations"].oldBounds != null) {
+if (cssName.indexOf ("shell-title-text") != -1 && this.callbacks["$wt.widgets.Decorations"].oldBounds != null) {
 return false;
 }return true;
 } else {
@@ -4571,7 +4905,8 @@ return false;
 }}, "$wt.internal.dnd.HTMLEventWrapper");
 $_V (cla$$, "updateShellBounds", 
 function (x, y, width, height) {
-this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
+this.callbacks["$wt.widgets.Decorations"].setBounds (x, y, width + 4, height + 4);
+if (false) this.callbacks["$wt.widgets.Decorations"].display.timerExec (25, (function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$2$3")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -4580,8 +4915,6 @@ $_Z (this, arguments);
 }, $wt.widgets, "Decorations$2$3", null, Runnable);
 $_V (cla$$, "run", 
 function () {
-var size = this.callbacks["$wt.widgets.Decorations"].getSize ();
-System.out.println (size);
 this.callbacks["$wt.widgets.Decorations"].layout ();
 });
 cla$$ = $_P ();
@@ -4589,13 +4922,13 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.Decorations$2$3, innerThis, finalVars);
 }) (this, null));
 return true;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Decorations$2, innerThis, finalVars);
 }) (this, null));
-dnd.bind (this.frameHandle);
-}});
+dnd.bind (this.handle);
+});
 $_M (cla$$, "nextWindowLocation", 
 ($fz = function () {
 if (window.defaultWindowLeft == null) {
@@ -4627,32 +4960,57 @@ $_M (cla$$, "addModalLayer",
 function () {
 this.modalHandle = document.createElement ("DIV");
 this.modalHandle.className = "shell-modal-block";
-this.modalHandle.style.zIndex = "" + (Integer.parseInt ("" + this.frameHandle.style.zIndex) - 1);
-document.body.insertBefore (this.modalHandle, this.frameHandle);
+this.modalHandle.style.zIndex = "" + (Integer.parseInt ("" + this.handle.style.zIndex) - 1);
+document.body.insertBefore (this.modalHandle, this.handle);
 });
 $_M (cla$$, "exportHTMLSource", 
 function () {
-var shell =  new $wt.widgets.Shell (this.display, 1264 | 65536);
-shell.setLayout ( new $wt.layout.FillLayout ());
+var shell =  new $wt.widgets.Shell (this.display, 66800);
 shell.setText ("Export HTML Source");
-var innerHTML = this.handle.innerHTML;
-var length = innerHTML.length;
-if (length < 200) {
-length = 200;
-} else if (length > 1800) {
-length = 1800;
-}length = Math.floor ((length - 200) / 400);
-shell.setSize (480 + 80 * length, 280 + 50 * length);
-var composite =  new $wt.widgets.Composite (shell, 0);
-composite.setLayout ( new $wt.layout.GridLayout ());
-var text =  new $wt.widgets.Text (composite, 2048 | 2 | 8);
-text.setLayoutData ( new $wt.layout.GridData (1808));
-var size = shell.getSize ();
-var html = "<div class=\"shell-content\" style=\"" + "width:" + size.x + "px;height:" + size.y + "px;\">" + innerHTML + "</div>";
+var innerHTML = this.contentHandle.innerHTML;
+if ($wt.internal.browser.OS.isIE) {
+innerHTML = innerHTML.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+return $1 + $2.toLowerCase () + $3;
+}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+if (!((/;$/).test ($2))) {
+$2 += ";";
+}
+return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
+}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
+return " " + $2 + "=\"" + $3 + "\"" + $4;
+//}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
+//	$1 = $1.toLowerCase ();
+//	return " " + $1 + "=\"" + $1 + "\"" + $2;
+});
+} else {
+innerHTML = innerHTML.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
+});
+}{
+innerHTML = innerHTML.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
+if ($2.length == 0) {
+if ($3 != ">") {
+return $3;
+} else {
+return ">";
+}
+} else {
+return " class=\"" + $2 + "\"" + $3;
+}
+});
+}shell.setLayout ( new $wt.layout.GridLayout ());
+var text =  new $wt.widgets.Text (shell, 2570);
+var gd =  new $wt.layout.GridData (1808);
+gd.widthHint = 400;
+gd.heightHint = 275;
+text.setLayoutData (gd);
+var rect = this.getClientArea ();
+var html = "<div class=\"shell-content\" style=\"" + "width:" + rect.width + "px;height:" + rect.height + "px;\">" + innerHTML + "</div>";
 text.setText (html);
- new $wt.widgets.Label (composite, 256 | 2).setLayoutData ( new $wt.layout.GridData (768));
-var button =  new $wt.widgets.Button (composite, 8);
-button.setText ("OK");
+ new $wt.widgets.Label (shell, 258).setLayoutData ( new $wt.layout.GridData (768));
+var button =  new $wt.widgets.Button (shell, 8);
+button.setText ("&OK");
 var gridData =  new $wt.layout.GridData (128);
 gridData.widthHint = 80;
 button.setLayoutData (gridData);
@@ -4671,6 +5029,7 @@ cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Decorations$4, innerThis, finalVars);
 }) (this, $_F ("shell", shell)));
+shell.pack ();
 shell.open ();
 });
 $_M (cla$$, "createWidget", 
@@ -4695,7 +5054,7 @@ function (hMenu) {
 if (this.menus == null) return null;
 for (var i = 0; i < this.menus.length; i++) {
 var menu = this.menus[i];
-if (menu != null && hMenu == menu.handle) return menu;
+if (menu != null && hMenu == menu.$handle) return menu;
 }
 return null;
 }, "$wt.internal.xhtml.Element");
@@ -4727,36 +5086,22 @@ $_M (cla$$, "minable",
 ($fz = function () {
 return (this.style & 128) != 0 && ((this.style & 2048) == 0 || (this.style & 16) != 0);
 }, $fz.isPrivate = true, $fz));
-$_M (cla$$, "setBounds", 
-function (x, y, width, height) {
-this.left = x;
-this.top = y;
-this.width = width;
-this.height = height;
-var fHandleStyle = this.frameHandle.style;
-fHandleStyle.left = x + "px";
-fHandleStyle.top = y + "px";
-if (width != 0) {
-fHandleStyle.width = (width + 8) + "px";
-}if (height != 0) {
-fHandleStyle.height = (height + 4) + "px";
-}$wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
-$wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
-}, "Number,Number,Number,Number");
-$_M (cla$$, "setSize", 
-function (width, height) {
-this.frameHandle.style.width = width + "px";
-this.frameHandle.style.height = height + "px";
-this.width = width;
-this.height = height;
-$wt.internal.dnd.ShellFrameDND.fixShellHeight (this.frameHandle);
-$wt.internal.dnd.ShellFrameDND.fixShellWidth (this.frameHandle);
-if (this.$layout != null) {
-this.layout ();
-}}, "Number,Number");
+$_V (cla$$, "getBorderWidth", 
+function () {
+return (this.style & 8) != 0 ? 1 : 0;
+});
 $_V (cla$$, "getClientArea", 
 function () {
-return  new $wt.graphics.Rectangle (0, 0, this.width - 8, this.height - 20 - 8);
+var w = this.width;
+var h = this.height;
+if ((this.style & (1248)) != 0) {
+h -= 20;
+w -= 8;
+h -= 8;
+if ((this.style & 2048) != 0) {
+w -= 4;
+h -= 4;
+}}return  new $wt.graphics.Rectangle (0, 0, w, h);
 });
 $_M (cla$$, "getDefaultButton", 
 function () {
@@ -4775,15 +5120,7 @@ return result;
 });
 $_V (cla$$, "getLocation", 
 function () {
-var x = 0;
-var y = 0;
-var left = this.frameHandle.style.left;
-if (left != null && left.length != 0) {
-x = Integer.parseInt (left);
-}var top = this.frameHandle.style.top;
-if (top != null && top.length != 0) {
-y = Integer.parseInt (top);
-}return  new $wt.graphics.Point (x, y);
+return  new $wt.graphics.Point (this.left, this.top);
 });
 $_M (cla$$, "getMaximized", 
 function () {
@@ -4847,14 +5184,14 @@ this.shellTitle = null;
 }if (this.titleBar != null) {
 BrowserNative.releaseHandle (this.titleBar);
 this.titleBar = null;
-}$_U (this, $wt.widgets.Decorations, "releaseHandle", []);
-if (this.frameHandle != null) {
-BrowserNative.releaseHandle (this.frameHandle);
-this.frameHandle = null;
+}if (this.contentHandle != null) {
+BrowserNative.releaseHandle (this.contentHandle);
+this.contentHandle = null;
 }if (this.modalHandle != null) {
 BrowserNative.releaseHandle (this.modalHandle);
 this.modalHandle = null;
-}});
+}$_U (this, $wt.widgets.Decorations, "releaseHandle", []);
+});
 $_M (cla$$, "releaseWidget", 
 function () {
 if (this.menuBar != null) this.menuBar.releaseResources ();
@@ -4902,10 +5239,14 @@ return false;
 $_M (cla$$, "saveFocus", 
 function () {
 });
+$_V (cla$$, "setBackground", 
+function (color) {
+if (color != null) this.contentHandle.style.backgroundColor = color.getCSSHandle ();
+}, "$wt.graphics.Color");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags, defer) {
 $_U (this, $wt.widgets.Decorations, "setBounds", [x, y, width, height, flags, defer]);
-}, "Number,Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "setDefaultButton", 
 function (button) {
 this.setDefaultButton (button, true);
@@ -4926,7 +5267,11 @@ if (this.defaultButton != null) {
 if (!this.defaultButton.isDisposed ()) this.defaultButton.setDefault (true);
 }if (save) this.saveDefault = this.defaultButton;
 if (this.saveDefault != null && this.saveDefault.isDisposed ()) this.saveDefault = null;
-}, "$wt.widgets.Button,Boolean");
+}, "$wt.widgets.Button,~B");
+$_V (cla$$, "setForeground", 
+function (color) {
+if (color != null) this.contentHandle.style.color = color.getCSSHandle ();
+}, "$wt.graphics.Color");
 $_M (cla$$, "setImage", 
 function (image) {
 this.image = image;
@@ -4934,7 +5279,7 @@ this.setImages (image, null);
 this.image = image;
 if (this.shellIcon != null && this.image.handle == null) {
 var iconStyle = this.shellIcon.style;
-if (image.url.toLowerCase ().endsWith (".png") && this.handle.style.filter != null) {
+if (image.url.toLowerCase ().endsWith (".png") && this.contentHandle.style.filter != null) {
 iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 } else {
 iconStyle.backgroundRepeat = "no-repeat";
@@ -4953,7 +5298,7 @@ this.setImage (images[0]);
 }, "Array");
 $_M (cla$$, "setMaximized", 
 function (maximized) {
-if (maximized && this.handle != null) {
+if (maximized && this.contentHandle != null) {
 if (this.oldBounds == null) {
 this.oldBounds = this.getBounds ();
 this.oldBounds.width -= 2;
@@ -4963,26 +5308,33 @@ height = window.screen.availHeight - 10;
 }var width = document.body.clientWidth;
 if (width > window.screen.availWidth) {
 width = window.screen.availWidth;
-}this.setBounds (0 - 4, 0 - 4, width - 2, height + 4);
+}this.setBounds (this.computeTrim (0, 0, width + 2, height - 18));
 document.body.scrollTop = 0;
 }if (maximized) {
 $wt.internal.ResizeSystem.register (this, 1024);
 } else {
 $wt.internal.ResizeSystem.unregister (this);
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "toggleMaximize", 
 function () {
+var key = "shell-maximized";
 if (this.oldBounds != null) {
 this.setBounds (this.oldBounds);
-this.shellMax.className = "shellmax";
-this.oldBounds = null;
+var cssName = this.titleBar.className;
+if (cssName == null) cssName = "";
+var idx = cssName.indexOf (key);
+if (idx != -1) {
+this.titleBar.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}this.oldBounds = null;
 $wt.internal.ResizeSystem.unregister (this);
 } else {
 this.setMaximized (true);
-this.shellMax.className = "shellnormal";
-}if ((this.style & 128) == 0) {
-this.shellMax.className += " shell-max-zero";
-}});
+var cssName = this.titleBar.className;
+if (cssName == null) cssName = "";
+var idx = cssName.indexOf (key);
+if (idx != -1) {
+this.titleBar.className += " " + key;
+}}});
 $_M (cla$$, "setMenuBar", 
 function (menu) {
 if (this.menuBar == menu) return ;
@@ -4994,7 +5346,7 @@ this.menuBar = menu;
 }, "$wt.widgets.Menu");
 $_M (cla$$, "setMinimized", 
 function (minimized) {
-if (minimized && this.handle != null) {
+if (minimized && this.contentHandle != null) {
 if (this.oldBounds == null) {
 this.oldBounds = this.getBounds ();
 this.oldBounds.width -= 2;
@@ -5006,7 +5358,7 @@ width = 200;
 $wt.internal.ResizeSystem.register (this, 128);
 } else {
 $wt.internal.ResizeSystem.unregister (this);
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setParent", 
 function () {
 });
@@ -5020,7 +5372,7 @@ this.titleBar = document.createElement ("DIV");
 this.titleBar.className = "shell-title-bar";
 if ((this.style & 2048) == 0 || (this.style & 16) != 0) {
 this.shellIcon = document.createElement ("DIV");
-this.shellIcon.className = "shellicon";
+this.shellIcon.className = "shell-title-icon";
 this.titleBar.appendChild (this.shellIcon);
 this.shellIcon.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$5")) {
@@ -5037,15 +5389,10 @@ cla$$ = $_P ();
 }
 return $_N ($wt.widgets.Decorations$5, innerThis, finalVars);
 }) (this, null));
-}var shellButtons = document.createElement ("DIV");
-shellButtons.className = "shellbuttons";
-this.titleBar.appendChild (shellButtons);
-if (this.minable ()) {
+}if (this.minable ()) {
 this.shellMin = document.createElement ("DIV");
-this.shellMin.className = "shellmin";
-if ((this.style & 1024) == 0) {
-this.shellMin.className += " shell-min-zero";
-}shellButtons.appendChild (this.shellMin);
+this.shellMin.className = "shell-title-min";
+this.titleBar.appendChild (this.shellMin);
 this.shellMin.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$6")) {
 Clazz.pu$h ();
@@ -5065,10 +5412,8 @@ return $_N ($wt.widgets.Decorations$6, innerThis, finalVars);
 }) (this, null));
 }if ((this.style & 1024) != 0) {
 this.shellMax = document.createElement ("DIV");
-this.shellMax.className = "shellmax";
-if (!this.minable ()) {
-this.shellMax.className += " shell-max-zero";
-}shellButtons.appendChild (this.shellMax);
+this.shellMax.className = "shell-title-normal-max";
+this.titleBar.appendChild (this.shellMax);
 this.shellMax.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$7")) {
 Clazz.pu$h ();
@@ -5101,12 +5446,8 @@ return $_N ($wt.widgets.Decorations$7, innerThis, finalVars);
 }) (this, null));
 }if ((this.style & 64) != 0) {
 this.shellClose = document.createElement ("DIV");
-this.shellClose.className = "shellclose";
-if (!this.minable () && (this.style & 1024) == 0) {
-this.shellClose.className += " shell-close-zero";
-} else if (!this.minable () || (this.style & 1024) == 0) {
-this.shellClose.className += " shell-close-one";
-}shellButtons.appendChild (this.shellClose);
+this.shellClose.className = "shell-title-close";
+this.titleBar.appendChild (this.shellClose);
 this.shellClose.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$9")) {
 Clazz.pu$h ();
@@ -5125,12 +5466,11 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.Decorations$9, innerThis, finalVars);
 }) (this, null));
 }this.shellTitle = document.createElement ("DIV");
-this.shellTitle.className = "shelltitle";
+this.shellTitle.className = "shell-title-text";
 this.titleBar.appendChild (this.shellTitle);
 if ((this.style & 1024) != 0) {
 this.titleBar.ondblclick = this.shellMax.onclick;
-}this.shellTitle.appendChild (document.createTextNode ("-"));
-this.frameHandle.appendChild (this.titleBar);
+}this.handle.appendChild (this.titleBar);
 this.titleBar.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Decorations$10")) {
 Clazz.pu$h ();
@@ -5140,7 +5480,7 @@ $_Z (this, arguments);
 }, $wt.widgets, "Decorations$10", $wt.internal.RunnableCompatibility);
 $_V (cla$$, "run", 
 function () {
-var fHandleStyle = this.callbacks["$wt.widgets.Decorations"].frameHandle.style;
+var fHandleStyle = this.callbacks["$wt.widgets.Decorations"].handle.style;
 if (fHandleStyle.zIndex != window.currentTopZIndex) {
 fHandleStyle.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
 }});
@@ -5149,9 +5489,9 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.Decorations$10, innerThis, finalVars);
 }) (this, null));
 if (window.currentTopZIndex == null) {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "1000";
+this.handle.style.zIndex = window.currentTopZIndex = "1000";
 } else {
-this.frameHandle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
+this.handle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
 }});
 $_M (cla$$, "setText", 
 function (string) {
@@ -5161,20 +5501,91 @@ if (this.shellTitle.childNodes[i] != null) {
 this.shellTitle.removeChild (this.shellTitle.childNodes[i]);
 }}
 this.shellTitle.appendChild (document.createTextNode (string));
-}}, "String");
+}}, "~S");
 $_V (cla$$, "setVisible", 
 function (visible) {
 if (this.drawCount != 0) {
-if (((this.state & $wt.widgets.Widget.HIDDEN) == 0) == visible) return ;
+if (((this.state & 16) == 0) == visible) return ;
 } else {
-if (visible == (this.handle.style.visibility != "hidden")) return ;
+if (visible == (this.contentHandle.style.visibility != "hidden")) return ;
 }if (visible) {
 this.sendEvent (22);
 if (this.isDisposed ()) return ;
 } else {
 if (this.isDisposed ()) return ;
 this.sendEvent (23);
-}}, "Boolean");
+}}, "~B");
+$_V (cla$$, "SetWindowPos", 
+function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
+if ((this.style & 8) == 0) {
+var w = 0;
+var h = 0;
+if ((this.style & (1248)) != 0) {
+w = 113;
+h = 28;
+}if ((this.style & 2048) != 0) {
+w += 2;
+h += 2;
+}if (this.width < w) {
+this.width = w;
+cx = w;
+}if (this.height < h) {
+this.height = h;
+cy = h;
+}}if ((this.style & 8) != 0) {
+this.contentHandle.style.height = this.height + "px";
+this.contentHandle.style.width = this.width + "px";
+} else if (this.titleBar != null) {
+var dw = 8;
+var dh = 28;
+var dww = 8;
+if ((this.style & 2048) != 0) {
+dw += 2;
+dh += 3;
+dww += 2;
+}this.contentHandle.style.height = ((this.height - dh >= 0) ? this.height - dh : 0) + "px";
+this.contentHandle.style.width = ((this.width - dw) > 0 ? this.width - dw : 0) + "px";
+this.titleBar.style.width = ((this.width - dww) > 0 ? this.width - dww : 0) + "px";
+var ww = 18;
+var w = ww;
+if (this.shellClose != null) {
+this.shellClose.style.left = (this.width - 8 - 2 - w) + "px";
+w += ww;
+}if (this.shellMax != null) {
+this.shellMax.style.left = (this.width - 8 - 2 - w) + "px";
+w += ww;
+}if (this.shellMin != null) {
+this.shellMin.style.left = (this.width - 8 - 2 - w) + "px";
+w += ww;
+}w -= ww;
+if (this.shellIcon != null) {
+this.shellIcon.style.left = 2 + "px";
+this.shellTitle.style.left = (4 + ww) + "px";
+w += ww;
+} else {
+this.shellTitle.style.left = 4 + "px";
+}this.shellTitle.style.width = (this.width - 8 - 8 - w) + "px";
+} else {
+this.width -= 4;
+this.height -= 4;
+cx -= 4;
+cy -= 4;
+var dw = 7;
+var dh = 7;
+this.contentHandle.style.height = ((this.height - dh >= 0) ? this.height - dh : 0) + "px";
+this.contentHandle.style.width = (this.width - dw > 0 ? this.width - dw : 0) + "px";
+this.contentHandle.style.top = 2 + "px";
+this.contentHandle.style.marginRight = 1 + "px";
+}if ((this.style & 2048) != 0) {
+cx -= 4;
+cy -= 4;
+}var el = hWnd;
+el.style.left = X + "px";
+el.style.top = Y + "px";
+el.style.width = (cx > 0 ? cx : 0) + "px";
+el.style.height = (cy > 0 ? cy : 0) + "px";
+return true;
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_M (cla$$, "traverseDecorations", 
 function (next) {
 var children = this.parent._getChildren ();
@@ -5192,7 +5603,7 @@ if (!child.isDisposed () && $_O (child, $wt.widgets.Decorations)) {
 if (child.setFocus ()) return true;
 }}
 return false;
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
 this.activeMenu = null;
 this.minWidth = -1;
@@ -5209,7 +5620,7 @@ this.construct (null);
 $_K (cla$$, 
 function (style) {
 this.construct (null, style);
-}, "Number");
+}, "~N");
 $_K (cla$$, 
 function (display) {
 this.construct (display, 1264);
@@ -5217,7 +5628,7 @@ this.construct (display, 1264);
 $_K (cla$$, 
 function (display, style) {
 this.construct (display, null, style, 0);
-}, "$wt.widgets.Display,Number");
+}, "$wt.widgets.Display,~N");
 $_K (cla$$, 
 function (display, parent, style, handle) {
 $_R (this, $wt.widgets.Shell);
@@ -5228,7 +5639,7 @@ this.style = $wt.widgets.Shell.checkStyle (style);
 this.parent = parent;
 this.display = display;
 this.createWidget ();
-}, "$wt.widgets.Display,$wt.widgets.Shell,Number,Number");
+}, "$wt.widgets.Display,$wt.widgets.Shell,~N,~N");
 $_K (cla$$, 
 function (parent) {
 this.construct (parent, 2144);
@@ -5236,21 +5647,21 @@ this.construct (parent, 2144);
 $_K (cla$$, 
 function (parent, style) {
 this.construct (parent != null ? parent.display : null, parent, style, 0);
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 cla$$.win32_new = $_M (cla$$, "win32_new", 
 function (display, handle) {
 return  new $wt.widgets.Shell (display, null, 8, handle);
-}, "$wt.widgets.Display,Number");
+}, "$wt.widgets.Display,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style = $wt.widgets.Decorations.checkStyle (style);
-var mask = 131072 | 65536 | 32768;
+var mask = 229376;
 var bits = style & ~mask;
 if ((style & 131072) != 0) return bits | 131072;
 if ((style & 65536) != 0) return bits | 65536;
 if ((style & 32768) != 0) return bits | 32768;
 return bits;
-}, "Number");
+}, "~N");
 $_M (cla$$, "addShellListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -5275,10 +5686,10 @@ $_U (this, $wt.widgets.Shell, "dispose", []);
 $_V (cla$$, "enableWidget", 
 function (enabled) {
 if (enabled) {
-this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
+this.state &= -9;
 } else {
-this.state |= $wt.widgets.Widget.DISABLED;
-}}, "Boolean");
+this.state |= 8;
+}}, "~B");
 $_V (cla$$, "findCursor", 
 function () {
 return this.cursor;
@@ -5306,7 +5717,7 @@ return $_U (this, $wt.widgets.Shell, "getBounds", []);
 });
 $_V (cla$$, "getEnabled", 
 function () {
-return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+return (this.state & 8) == 0;
 });
 $_M (cla$$, "getImeInputMode", 
 function () {
@@ -5319,7 +5730,7 @@ return $_U (this, $wt.widgets.Shell, "getLocation", []);
 $_M (cla$$, "getMinimumSize", 
 function () {
 var width = Math.max (0, this.minWidth);
-var trim = 32 | 64 | 128 | 1024;
+var trim = 1248;
 if ((this.style & 8) == 0 && (this.style & trim) != 0) {
 width = Math.max (width, 80);
 }var height = Math.max (0, this.minHeight);
@@ -5387,14 +5798,6 @@ this.setVisible (true);
 if (this.isDisposed ()) return ;
 this.layout ();
 });
-$_M (cla$$, "setSize", 
-function (width, height) {
-if (width < 113) {
-width = 113;
-}if (height < 28) {
-height = 28;
-}$_U (this, $wt.widgets.Shell, "setSize", [width, height]);
-}, "Number,Number");
 $_V (cla$$, "releaseChild", 
 function () {
 });
@@ -5464,20 +5867,20 @@ activate[i].sendEvent (26);
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags, defer) {
 $_U (this, $wt.widgets.Shell, "setBounds", [x, y, width, height, flags, false]);
-}, "Number,Number,Number,Number,Number,Boolean");
+}, "~N,~N,~N,~N,~N,~B");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
-if (((this.state & $wt.widgets.Widget.DISABLED) == 0) == enabled) return ;
+if (((this.state & 8) == 0) == enabled) return ;
 $_U (this, $wt.widgets.Shell, "setEnabled", [enabled]);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setImeInputMode", 
 function (mode) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMinimumSize", 
 function (width, height) {
 var widthLimit = 0;
 var heightLimit = 0;
-var trim = 32 | 64 | 128 | 1024;
+var trim = 1248;
 if ((this.style & 8) == 0 && (this.style & trim) != 0) {
 }this.minWidth = Math.max (widthLimit, width);
 this.minHeight = Math.max (heightLimit, height);
@@ -5487,14 +5890,14 @@ var newHeight = Math.max (size.y, this.minHeight);
 if (this.minWidth <= widthLimit) this.minWidth = -1;
 if (this.minHeight <= heightLimit) this.minHeight = -1;
 if (newWidth != size.x || newHeight != size.y) this.setSize (newWidth, newHeight);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setMinimumSize", 
 function (size) {
 this.setMinimumSize (size.x, size.y);
 }, "$wt.graphics.Point");
 $_M (cla$$, "setItemEnabled", 
 function (cmd, enabled) {
-}, "Number,Boolean");
+}, "~N,~B");
 $_M (cla$$, "setParent", 
 function () {
 });
@@ -5504,11 +5907,13 @@ if ((this.style & 8) == 0) return ;
 }, "$wt.graphics.Region");
 $_M (cla$$, "setToolTipText", 
 function (hwnd, text) {
-}, "$wt.internal.xhtml.Element,String");
+}, "$wt.internal.xhtml.Element,~S");
 $_M (cla$$, "setVisible", 
 function (visible) {
 $_U (this, $wt.widgets.Shell, "setVisible", [visible]);
-}, "Boolean");
+if (visible) {
+this.SetWindowPos (this.handle, null, this.left, this.top, this.width, this.height, 0);
+}}, "~B");
 $_V (cla$$, "traverseEscape", 
 function () {
 if (this.parent == null) return false;
@@ -5528,11 +5933,11 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.Item, [parent, style]);
 this.text = "";
-}, "$wt.widgets.Widget,Number");
+}, "$wt.widgets.Widget,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 this.construct (parent, style);
-}, "$wt.widgets.Widget,Number,Number");
+}, "$wt.widgets.Widget,~N,~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -5561,7 +5966,7 @@ this.image = image;
 $_M (cla$$, "setText", 
 function (string) {
 this.text = string;
-}, "String");
+}, "~S");
 cla$$ = $_C (function () {
 this.parent = null;
 this.menu = null;
@@ -5574,13 +5979,13 @@ function (parent, style) {
 $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style)]);
 this.parent = parent;
 parent.createItem (this, parent.getItemCount ());
-}, "$wt.widgets.Menu,Number");
+}, "$wt.widgets.Menu,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style)]);
 this.parent = parent;
 parent.createItem (this, index);
-}, "$wt.widgets.Menu,Number,Number");
+}, "$wt.widgets.Menu,~N,~N");
 $_K (cla$$, 
 function (parent, menu, style, index) {
 $_R (this, $wt.widgets.MenuItem, [parent, $wt.widgets.MenuItem.checkStyle (style)]);
@@ -5588,7 +5993,7 @@ this.parent = parent;
 this.menu = menu;
 if (menu != null) menu.cascade = this;
 this.display.addMenuItem (this);
-}, "$wt.widgets.Menu,$wt.widgets.Menu,Number,Number");
+}, "$wt.widgets.Menu,$wt.widgets.Menu,~N,~N");
 $_M (cla$$, "addArmListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -5611,7 +6016,7 @@ function () {
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 8, 32, 16, 2, 64, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "fixMenus", 
 function (newParent) {
 if (this.menu != null) this.menu.fixMenus (newParent);
@@ -5643,7 +6048,7 @@ return this.parent;
 });
 $_M (cla$$, "getSelection", 
 function () {
-if ((this.style & (32 | 16)) == 0) return false;
+if ((this.style & (48)) == 0) return false;
 return false;
 });
 $_M (cla$$, "isEnabled", 
@@ -5714,12 +6119,12 @@ function (accelerator) {
 if (this.accelerator == accelerator) return ;
 this.accelerator = accelerator;
 this.parent.destroyAccelerators ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
 this.parent.destroyAccelerators ();
 this.parent.redraw ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setImage", 
 function (image) {
 if ((this.style & 2) != 0) return ;
@@ -5742,19 +6147,19 @@ if (this.getSelection () != value) {
 this.setSelection (value);
 this.postEvent (13);
 }return true;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setSelection", 
 function (selected) {
-if ((this.style & (32 | 16)) == 0) return ;
+if ((this.style & (48)) == 0) return ;
 this.parent.redraw ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setText", 
 function (string) {
 if ((this.style & 2) != 0) return ;
 if (this.text.equals (string)) return ;
 $_U (this, $wt.widgets.MenuItem, "setText", [string]);
 this.parent.redraw ();
-}, "String");
+}, "~S");
 cla$$ = $_C (function () {
 this.$handle = null;
 this.x = 0;
@@ -5775,7 +6180,7 @@ this.construct ($wt.widgets.Menu.checkNull (parent).menuShell (), 8);
 $_K (cla$$, 
 function (parent, style) {
 this.construct (parent, $wt.widgets.Menu.checkStyle (style), null);
-}, "$wt.widgets.Decorations,Number");
+}, "$wt.widgets.Decorations,~N");
 $_K (cla$$, 
 function (parentMenu) {
 this.construct ($wt.widgets.Menu.checkNull (parentMenu).parent, 4);
@@ -5791,11 +6196,11 @@ this.parent = parent;
 this.$handle = handle;
 this.checkOrientation (parent);
 this.createWidget ();
-}, "$wt.widgets.Decorations,Number,$wt.internal.xhtml.Element");
+}, "$wt.widgets.Decorations,~N,$wt.internal.xhtml.Element");
 $_M (cla$$, "_setVisible", 
 function (visible) {
-if ((this.style & (2 | 4)) != 0) return ;
-}, "Boolean");
+if ((this.style & (6)) != 0) return ;
+}, "~B");
 $_M (cla$$, "addHelpListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -5822,7 +6227,7 @@ return item;
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 8, 2, 4, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "createHandle", 
 function () {
 if (this.$handle != null) return ;
@@ -5842,7 +6247,7 @@ item.handle = document.createElement ("DIV");
 item.handle.className = "tool-item-default";
 this.$handle.appendChild (item.handle);
 this.redraw ();
-}, "$wt.widgets.MenuItem,Number");
+}, "$wt.widgets.MenuItem,~N");
 $_M (cla$$, "createWidget", 
 function () {
 this.createHandle ();
@@ -5880,13 +6285,13 @@ return null;
 });
 $_M (cla$$, "getEnabled", 
 function () {
-return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+return (this.state & 8) == 0;
 });
 $_M (cla$$, "getItem", 
 function (index) {
 var id = 0;
 return this.display.getMenuItem (id);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return this.GetMenuItemCount (this.$handle);
@@ -6030,29 +6435,29 @@ newID = item.id;
 }, "$wt.widgets.MenuItem");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
-this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
-if (!enabled) this.state |= $wt.widgets.Widget.DISABLED;
-}, "Boolean");
+this.state &= -9;
+if (!enabled) this.state |= 8;
+}, "~B");
 $_M (cla$$, "setLocation", 
 function (x, y) {
-if ((this.style & (2 | 4)) != 0) return ;
+if ((this.style & (6)) != 0) return ;
 this.x = x;
 this.y = y;
 this.hasLocation = true;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setLocation", 
 function (location) {
 this.setLocation (location.x, location.y);
 }, "$wt.graphics.Point");
 $_M (cla$$, "setVisible", 
 function (visible) {
-if ((this.style & (2 | 4)) != 0) return ;
+if ((this.style & (6)) != 0) return ;
 if (visible) {
 this.display.addPopup (this);
 } else {
 this.display.removePopup (this);
 this._setVisible (false);
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "update", 
 function () {
 });
@@ -6109,7 +6514,7 @@ function (parent, style) {
 $_R (this, $wt.widgets.ScrollBar, [parent, $wt.widgets.ScrollBar.checkStyle (style)]);
 this.parent = parent;
 this.createWidget ();
-}, "$wt.widgets.Scrollable,Number");
+}, "$wt.widgets.Scrollable,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -6119,7 +6524,7 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "createWidget", 
 function () {
 this.increment = 1;
@@ -6137,7 +6542,7 @@ return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 });
 $_M (cla$$, "getEnabled", 
 function () {
-return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+return (this.state & 8) == 0;
 });
 $_M (cla$$, "getIncrement", 
 function () {
@@ -6174,7 +6579,7 @@ return 10;
 });
 $_M (cla$$, "getVisible", 
 function () {
-return (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+return (this.state & 16) == 0;
 });
 $_M (cla$$, "hwndScrollBar", 
 function () {
@@ -6207,32 +6612,32 @@ this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setIncrement", 
 function (value) {
 if (value < 1) return ;
 this.increment = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMaximum", 
 function (value) {
 if (value < 0) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMinimum", 
 function (value) {
 if (value < 0) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setPageIncrement", 
 function (value) {
 if (value < 1) return ;
 this.pageIncrement = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (selection) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setThumb", 
 function (value) {
 if (value < 1) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setValues", 
 function (selection, minimum, maximum, thumb, increment, pageIncrement) {
 if (minimum < 0) return ;
@@ -6242,22 +6647,19 @@ if (increment < 1) return ;
 if (pageIncrement < 1) return ;
 this.increment = increment;
 this.pageIncrement = pageIncrement;
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "setVisible", 
 function (visible) {
-var isVisible = (this.state & $wt.widgets.Widget.HIDDEN) == 0;
+var isVisible = (this.state & 16) == 0;
 if (isVisible == visible) return ;
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.widgets, "Display", $wt.graphics.Device);
-$_Y (cla$$, function () {
 this.eventQueue = null;
 this.eventTable = null;
 this.filterTable = null;
 this.freeSlot = 0;
 this.indexTable = null;
-this.controlTable =  new Array (1);
+this.controlTable = null;
 this.focusEvent = 0;
 this.focusControl = null;
 this.bars = null;
@@ -6276,7 +6678,7 @@ this.lastMouse = 0;
 this.lastVirtual = false;
 this.lastNull = false;
 this.lastDead = false;
-this.keyboard =  $_A (256, 0);
+this.keyboard = null;
 this.accelKeyHit = false;
 this.mnemonicKeyHit = false;
 this.lockActiveWindow = false;
@@ -6284,7 +6686,7 @@ this.captureChanged = false;
 this.ignoreRestoreFocus = false;
 this.lastHittestControl = null;
 this.lastHittest = 0;
-this.cursors =  new Array (21 + 1);
+this.cursors = null;
 this.imageList = null;
 this.toolImageList = null;
 this.toolHotImageList = null;
@@ -6296,6 +6698,11 @@ this.values = null;
 this.modalShells = null;
 this.modalDialogShell = null;
 this.hitCount = 0;
+$_Z (this, arguments);
+}, $wt.widgets, "Display", $wt.graphics.Device);
+$_Y (cla$$, function () {
+this.keyboard =  $_A (256, 0);
+this.cursors =  new Array (22);
 });
 $_K (cla$$, 
 function () {
@@ -6332,22 +6739,22 @@ $_M (cla$$, "addFilter",
 function (eventType, listener) {
 if (this.filterTable == null) this.filterTable =  new $wt.widgets.EventTable ();
 this.filterTable.hook (eventType, listener);
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "addListener", 
 function (eventType, listener) {
 if (this.eventTable == null) this.eventTable =  new $wt.widgets.EventTable ();
 this.eventTable.hook (eventType, listener);
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "addMenuItem", 
 function (item) {
 if (this.items == null) this.items =  new Array (64);
 for (var i = 0; i < this.items.length; i++) {
 if (this.items[i] == null) {
-item.id = i + $wt.widgets.Display.ID_START;
+item.id = i + 108;
 this.items[i] = item;
 return ;
 }}
-item.id = this.items.length + $wt.widgets.Display.ID_START;
+item.id = this.items.length + 108;
 var newItems =  new Array (this.items.length + 64);
 newItems[this.items.length] = item;
 System.arraycopy (this.items, 0, newItems, 0, this.items.length);
@@ -6374,7 +6781,7 @@ this.popups = newPopups;
 $_M (cla$$, "asciiKey", 
 function (key) {
 return 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "asyncExec", 
 function (runnable) {
 window.setTimeout (Clazz.makeFunction (runnable), 10);
@@ -6393,7 +6800,7 @@ function (thread, multiple) {
 for (var i = 0; i < $wt.widgets.Display.Displays.length; i++) {
 if ($wt.widgets.Display.Displays[i] != null) {
 }}
-}, "Thread,Boolean");
+}, "Thread,~B");
 $_M (cla$$, "clearModal", 
 function (shell) {
 if (this.modalShells == null) return ;
@@ -6469,7 +6876,7 @@ this.bars = null;
 $_M (cla$$, "error", 
 function (code) {
 $WT.error (code);
-}, "Number");
+}, "~N");
 $_M (cla$$, "filterEvent", 
 function (event) {
 if (this.filterTable != null) this.filterTable.sendEvent (event);
@@ -6479,20 +6886,20 @@ $_M (cla$$, "filters",
 function (eventType) {
 if (this.filterTable == null) return false;
 return this.filterTable.hooks (eventType);
-}, "Number");
+}, "~N");
 $_M (cla$$, "findControl", 
 function (handle) {
 if (handle == 0) return null;
 return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "findWidget", 
 function (handle) {
 return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "findWidget", 
 function (handle, id) {
 return null;
-}, "Number,Number");
+}, "~N,~N");
 cla$$.findDisplay = $_M (cla$$, "findDisplay", 
 function (thread) {
 for (var i = 0; i < $wt.widgets.Display.Displays.length; i++) {
@@ -6557,7 +6964,7 @@ for (var i = 0; i < this.keys.length; i++) {
 if (this.keys[i].equals (key)) return this.values[i];
 }
 return null;
-}, "String");
+}, "~S");
 $_M (cla$$, "getData", 
 function () {
 return this.data;
@@ -6611,7 +7018,7 @@ this.imageList = newList;
 this.imageList[i] = list;
 list.addRef ();
 return list;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "getImageListToolBar", 
 function (style, width, height) {
 if (this.toolImageList == null) this.toolImageList =  new Array (4);
@@ -6635,7 +7042,7 @@ this.toolImageList = newList;
 this.toolImageList[i] = list;
 list.addRef ();
 return list;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "getImageListToolBarDisabled", 
 function (style, width, height) {
 if (this.toolDisabledImageList == null) this.toolDisabledImageList =  new Array (4);
@@ -6659,7 +7066,7 @@ this.toolDisabledImageList = newList;
 this.toolDisabledImageList[i] = list;
 list.addRef ();
 return list;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "getImageListToolBarHot", 
 function (style, width, height) {
 if (this.toolHotImageList == null) this.toolHotImageList =  new Array (4);
@@ -6683,7 +7090,7 @@ this.toolHotImageList = newList;
 this.toolHotImageList[i] = list;
 list.addRef ();
 return list;
-}, "Number,Number,Number");
+}, "~N,~N,~N");
 $_M (cla$$, "getLastEventTime", 
 function () {
 return parseInt ( new java.util.Date ().getTime ());
@@ -6691,10 +7098,10 @@ return parseInt ( new java.util.Date ().getTime ());
 $_M (cla$$, "getMenuItem", 
 function (id) {
 if (this.items == null) return null;
-id = id - $wt.widgets.Display.ID_START;
+id = id - 108;
 if (0 <= id && id < this.items.length) return this.items[id];
 return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getModalShell", 
 function () {
 if (this.modalShells == null) return null;
@@ -6813,14 +7220,14 @@ default:
 return $_U (this, $wt.widgets.Display, "getSystemColor", [id]);
 }
 return  new $wt.graphics.Color (null, pixel);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getSystemCursor", 
 function (id) {
 if (!(0 <= id && id < this.cursors.length)) return null;
 if (this.cursors[id] == null) {
 this.cursors[id] =  new $wt.graphics.Cursor (this, id);
 }return this.cursors[id];
-}, "Number");
+}, "~N");
 $_V (cla$$, "getSystemFont", 
 function () {
 return  new $wt.graphics.Font (this, "Tahoma,Arial", 10, 0);
@@ -6845,7 +7252,7 @@ break;
 }
 if (iconName == null) return null;
 return  new $wt.graphics.Image (this, "j2slib/images/" + iconName + ".png");
-}, "Number");
+}, "~N");
 $_M (cla$$, "getSystemTray", 
 function () {
 if (this.tray != null) return this.tray;
@@ -6858,11 +7265,11 @@ return this.thread;
 $_M (cla$$, "init", 
 function () {
 $_U (this, $wt.widgets.Display, "init", []);
-this.indexTable =  $_A ($wt.widgets.Display.GROW_SIZE, 0);
-this.controlTable =  new Array ($wt.widgets.Display.GROW_SIZE);
-for (var i = 0; i < $wt.widgets.Display.GROW_SIZE - 1; i++) this.indexTable[i] = i + 1;
+this.indexTable =  $_A (1024, 0);
+this.controlTable =  new Array (1024);
+for (var i = 0; i < 1023; i++) this.indexTable[i] = i + 1;
 
-this.indexTable[$wt.widgets.Display.GROW_SIZE - 1] = -1;
+this.indexTable[1023] = -1;
 });
 $_M (cla$$, "isValidThread", 
 function () {
@@ -6877,7 +7284,7 @@ function (from, to, x, y) {
 var hwndFrom = from != null ? from.handle : null;
 var hwndTo = to != null ? to.handle : null;
 return  new $wt.graphics.Point (0, 0);
-}, "$wt.widgets.Control,$wt.widgets.Control,Number,Number");
+}, "$wt.widgets.Control,$wt.widgets.Control,~N,~N");
 $_M (cla$$, "map", 
 function (from, to, rectangle) {
 return this.map (from, to, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
@@ -6887,7 +7294,7 @@ function (from, to, x, y, width, height) {
 var hwndFrom = from != null ? from.handle : null;
 var hwndTo = to != null ? to.handle : null;
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
-}, "$wt.widgets.Control,$wt.widgets.Control,Number,Number,Number,Number");
+}, "$wt.widgets.Control,$wt.widgets.Control,~N,~N,~N,~N");
 $_M (cla$$, "post", 
 function (event) {
 var type = event.type;
@@ -7076,12 +7483,12 @@ function (eventType, listener) {
 if (this.filterTable == null) return ;
 this.filterTable.unhook (eventType, listener);
 if (this.filterTable.size () == 0) this.filterTable = null;
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "removeListener", 
 function (eventType, listener) {
 if (this.eventTable == null) return ;
 this.eventTable.unhook (eventType, listener);
-}, "Number,$wt.widgets.Listener");
+}, "~N,$wt.widgets.Listener");
 $_M (cla$$, "removeBar", 
 function (menu) {
 if (this.bars == null) return ;
@@ -7106,7 +7513,7 @@ this.freeSlot = index;
 $_M (cla$$, "removeMenuItem", 
 function (item) {
 if (this.items == null) return ;
-this.items[item.id - $wt.widgets.Display.ID_START] = null;
+this.items[item.id - 108] = null;
 item.id = -1;
 }, "$wt.widgets.MenuItem");
 $_M (cla$$, "removePopup", 
@@ -7167,7 +7574,7 @@ return true;
 }index++;
 }
 }return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "sendEvent", 
 function (eventType, event) {
 if (this.eventTable == null && this.filterTable == null) {
@@ -7178,10 +7585,10 @@ event.type = eventType;
 if (event.time == 0) event.time = this.getLastEventTime ();
 if (!this.filterEvent (event)) {
 if (this.eventTable != null) this.eventTable.sendEvent (event);
-}}, "Number,$wt.widgets.Event");
+}}, "~N,$wt.widgets.Event");
 $_M (cla$$, "setCursorLocation", 
 function (x, y) {
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setCursorLocation", 
 function (point) {
 this.setCursorLocation (point.x, point.y);
@@ -7224,14 +7631,14 @@ newKeys[this.keys.length] = key;
 newValues[this.values.length] = value;
 this.keys = newKeys;
 this.values = newValues;
-}, "String,Object");
+}, "~S,Object");
 $_M (cla$$, "setData", 
 function (data) {
 this.data = data;
 }, "Object");
 cla$$.setAppName = $_M (cla$$, "setAppName", 
 function (name) {
-}, "String");
+}, "~S");
 $_M (cla$$, "setModalDialogShell", 
 function (modalDailog) {
 if (this.modalDialogShell != null && this.modalDialogShell.isDisposed ()) this.modalDialogShell = null;
@@ -7307,7 +7714,7 @@ this.timerIds = newTimerIds;
 if (newTimerID != 0) {
 this.timerList[index] = runnable;
 this.timerIds[index] = newTimerID;
-}}, "Number,Runnable");
+}}, "~N,Runnable");
 $_M (cla$$, "update", 
 function () {
 var shells = this.getShells ();
@@ -7346,7 +7753,7 @@ result.append ("\r\n");
 i++;
 }}
 return result.toString ();
-}, "String");
+}, "~S");
 cla$$.releaseAllDisplays = $_M (cla$$, "releaseAllDisplays", 
 function () {
 if ($wt.widgets.Display.Displays != null) {
@@ -7386,7 +7793,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Button, [parent, $wt.widgets.Button.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "_setImage", 
 function (image) {
 }, "$wt.graphics.Image");
@@ -7399,15 +7806,15 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style = $wt.widgets.Widget.checkBits (style, 8, 4, 32, 16, 2, 0);
-if ((style & (8 | 2)) != 0) {
+if ((style & (10)) != 0) {
 return $wt.widgets.Widget.checkBits (style, 16777216, 16384, 131072, 0, 0, 0);
-}if ((style & (32 | 16)) != 0) {
+}if ((style & (48)) != 0) {
 return $wt.widgets.Widget.checkBits (style, 16384, 131072, 16777216, 0, 0, 0);
 }if ((style & 4) != 0) {
 style |= 524288;
 return $wt.widgets.Widget.checkBits (style, 128, 1024, 16384, 131072, 0, 0);
 }return style;
-}, "Number");
+}, "~N");
 $_M (cla$$, "click", 
 function () {
 this.ignoreMouse = true;
@@ -7419,7 +7826,7 @@ var border = this.getBorderWidth ();
 var width = 0;
 var height = 0;
 if ((this.style & 4) != 0) {
-if ((this.style & (128 | 1024)) != 0) {
+if ((this.style & (1152)) != 0) {
 width += 16;
 height += 16;
 } else {
@@ -7443,7 +7850,7 @@ this.textWidthCached = cssSize.x;
 this.textHeightCached = cssSize.y;
 }width = this.textWidthCached;
 height = this.textHeightCached;
-if ((this.style & (16 | 32)) != 0) {
+if ((this.style & (48)) != 0) {
 width -= 5;
 }extra = Math.max (8, height);
 }} else {
@@ -7457,24 +7864,16 @@ this.image.height = img.height;
 width += img.width;
 height = Math.max(img.height, height);
 } else {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
-width += img.width;
-height = Math.max(img.height, height);
+width += 16;
+height = Math.max (16, height);
 }} else {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
-width += img.width;
-height = Math.max(img.height, height);
+width += this.image.width;
+height = Math.max (this.image.height, height);
 }extra = 8;
-}}if ((this.style & (32 | 16)) != 0) {
-width += $wt.widgets.Button.CHECK_WIDTH + extra;
-height = Math.max (height, $wt.widgets.Button.CHECK_HEIGHT + 3);
-}if ((this.style & (8 | 2)) != 0) {
+}}if ((this.style & (48)) != 0) {
+width += 13 + extra;
+height = Math.max (height, 16);
+}if ((this.style & (10)) != 0) {
 width += 12;
 height += 10;
 }if (wHint != -1) width = wHint;
@@ -7482,7 +7881,7 @@ if (hHint != -1) height = hHint;
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "enableWidget", 
 function (enabled) {
 this.btnHandle.disabled = !enabled;
@@ -7496,7 +7895,7 @@ this.handle.className += " " + key;
 }} else {
 if (idx != -1) {
 this.handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
-}}}, "Boolean");
+}}}, "~B");
 $_M (cla$$, "getAlignment", 
 function () {
 if ((this.style & 4) != 0) {
@@ -7531,11 +7930,11 @@ return this.getText ();
 });
 $_M (cla$$, "getSelection", 
 function () {
-if ((this.style & (32 | 16 | 2)) == 0) return false;
+if ((this.style & (50)) == 0) return false;
 if ((this.style & 2) != 0) {
 System.out.println (this.btnHandle.className);
 return (this.btnHandle.className != null && this.btnHandle.className.indexOf ("button-selected") != -1);
-} else if ((this.style & (16 | 32)) != 0) {
+} else if ((this.style & (48)) != 0) {
 return this.btnHandle.checked;
 }return false;
 });
@@ -7557,13 +7956,13 @@ function (ch) {
 if (!this.setFocus ()) return false;
 if ((this.style & 16) == 0) this.click ();
 return true;
-}, "Number");
+}, "~N");
 $_V (cla$$, "mnemonicMatch", 
 function (key) {
 var mnemonic = this.findMnemonic (this.getText ());
 if ((mnemonic).charCodeAt (0) == ('\0').charCodeAt (0)) return false;
 return (Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (mnemonic)).charCodeAt (0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "releaseHandle", 
 function () {
 if (this.btnText != null) {
@@ -7602,9 +8001,9 @@ this.setSelection (true);
 $_M (cla$$, "setAlignment", 
 function (alignment) {
 if ((this.style & 4) != 0) {
-if ((this.style & (128 | 1024 | 16384 | 131072)) == 0) return ;
-this.style &= ~(128 | 1024 | 16384 | 131072);
-this.style |= alignment & (128 | 1024 | 16384 | 131072);
+if ((this.style & (148608)) == 0) return ;
+this.style &= -148609;
+this.style |= alignment & (148608);
 this.updateArrowStyle ();
 var cx = this.width;
 var cy = this.height;
@@ -7613,12 +8012,12 @@ cx -= 4;
 cy -= 4;
 }this.updateArrowSize (cx, cy);
 return ;
-}if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
-this.style &= ~(16384 | 131072 | 16777216);
-this.style |= alignment & (16384 | 131072 | 16777216);
-if ((this.style & (8 | 2)) != 0) {
+}if ((alignment & (16924672)) == 0) return ;
+this.style &= -16924673;
+this.style |= alignment & (16924672);
+if ((this.style & (10)) != 0) {
 var handleStyle = null;
-if ((this.style & (16 | 32)) != 0) {
+if ((this.style & (48)) != 0) {
 handleStyle = this.btnText.style;
 } else {
 handleStyle = this.btnHandle.style;
@@ -7631,7 +8030,7 @@ handleStyle.backgroundPosition = "center center";
 } else if ((this.style & 131072) != 0) {
 this.btnText.style.textAlign = "right";
 handleStyle.backgroundPosition = "right center";
-}}}, "Number");
+}}}, "~N");
 $_M (cla$$, "setDefault", 
 function (value) {
 if ((this.style & 8) == 0) return ;
@@ -7640,17 +8039,11 @@ try {
 this.handle.focus ();
 } catch (e) {
 if ($_O (e, Error)) {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
-width += img.width;
-height = Math.max(img.height, height);
 } else {
 throw e;
 }
 }
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setFixedFocus", 
 function () {
 if ((this.style & 16) != 0 && !this.getSelection ()) return false;
@@ -7671,7 +8064,7 @@ this.btnHandle.style.top = "";
 this.btnText.parentNode.style.position = "";
 this.btnText.parentNode.style.top = "";
 var handleStyle = null;
-if ((this.style & (16 | 32)) != 0) {
+if ((this.style & (48)) != 0) {
 handleStyle = this.btnText.style;
 {
 var img = new Image ();
@@ -7679,19 +8072,16 @@ img.src = this.image.url;
 this.image.width = img.width;
 this.image.height = img.height;
 }handleStyle.display = "block";
-handleStyle.marginLeft = ($wt.widgets.Button.CHECK_WIDTH + 3) + "px";
+handleStyle.marginLeft = (16) + "px";
 handleStyle.paddingTop = this.image.height + "px";
 } else {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
+handleStyle = this.btnHandle.style;
 }if (image.url.toLowerCase ().endsWith (".png") && handleStyle.filter != null) {
 handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 } else {
 handleStyle.backgroundRepeat = "no-repeat";
 var bgXPos = "center";
-if ((this.style & (16 | 32)) != 0) {
+if ((this.style & (48)) != 0) {
 if ((this.style & 131072) != 0) {
 bgXPos = "right";
 } else if ((this.style & 16777216) != 0) {
@@ -7713,7 +8103,7 @@ if (this.getSelection () != value) {
 this.setSelection (value);
 this.postEvent (13);
 }return true;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setSavedFocus", 
 function () {
 if ((this.style & 16) != 0 && !this.getSelection ()) return false;
@@ -7721,7 +8111,7 @@ return $_U (this, $wt.widgets.Button, "setSavedFocus", []);
 });
 $_M (cla$$, "setSelection", 
 function (selected) {
-if ((this.style & (32 | 16 | 2)) == 0) return ;
+if ((this.style & (50)) == 0) return ;
 if ((this.style & 2) != 0) {
 var cssName = this.btnHandle.className;
 if (cssName == null) cssName = "";
@@ -7733,9 +8123,9 @@ this.btnHandle.className += " " + key;
 }} else {
 if (idx != -1) {
 this.btnHandle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
-}}} else if ((this.style & (16 | 32)) != 0) {
+}}} else if ((this.style & (48)) != 0) {
 this.btnHandle.checked = selected;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setText", 
 function (string) {
 if ((this.style & 4) != 0) return ;
@@ -7759,7 +8149,7 @@ underline.appendChild (document.createTextNode (string.substring (idx + 1, idx +
 underline.className = "button-text-mnemonics";
 this.btnText.appendChild (underline);
 this.btnText.appendChild (document.createTextNode (string.substring (idx + 2)));
-}}, "String");
+}}, "~S");
 $_M (cla$$, "SetWindowPos", 
 function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
 if ((this.style & 2048) != 0) {
@@ -7767,13 +8157,13 @@ cx -= 4;
 cy -= 4;
 }if ((this.style & 4) != 0) {
 this.updateArrowSize (cx, cy);
-}if ((this.style & (16 | 32)) != 0) {
+}if ((this.style & (48)) != 0) {
 var h = 0;
 if (!this.hasImage) {
 if (this.textSizeCached) {
 this.btnText.style.display = "block";
-if (this.textHeightCached < $wt.widgets.Button.CHECK_HEIGHT) {
-this.btnText.style.paddingTop = (Math.floor (($wt.widgets.Button.CHECK_HEIGHT - this.textHeightCached) / 2)) + "px";
+if (this.textHeightCached < 13) {
+this.btnText.style.paddingTop = (Math.floor ((13 - this.textHeightCached) / 2)) + "px";
 this.btnHandle.parentNode.style.bottom = "0";
 this.btnHandle.parentNode.style.top = "0";
 this.btnHandle.style.top = "0";
@@ -7782,17 +8172,17 @@ this.btnText.style.paddingTop = "0";
 }}h = this.textHeightCached;
 } else {
 h = this.image.height;
-}h = Math.max ($wt.widgets.Button.CHECK_HEIGHT + 3, h);
+}h = Math.max (16, h);
 if (h < cy) {
 this.btnText.parentNode.style.position = "relative";
 this.btnText.parentNode.style.top = (Math.floor ((cy - h) / 2)) + "px";
 }}return $_U (this, $wt.widgets.Button, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
-}, "Object,Object,Number,Number,Number,Number,Number");
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_M (cla$$, "updateArrowSize", 
 ($fz = function (cx, cy) {
 var xx = Math.floor (Math.min (cx, cy) / 3);
 var s = this.btnText.style;
-s.borderWidth = xx + "px";
+s.borderWidth = (xx > 0 ? xx : 0) + "px";
 if ((this.style & 16384) != 0) {
 s.borderLeftWidth = "0";
 } else if ((this.style & 131072) != 0) {
@@ -7805,9 +8195,10 @@ s.borderWidth = (xx - 1) + "px";
 }s.borderBottomWidth = "0";
 } else {
 s.borderTopWidth = "0";
-}var x = Math.floor (Math.min (cx, cy) / 6);
+}var x = Math.floor (cy / 6);
+xx = Math.floor (cy / 3);
 s.position = "relative";
-if ((this.style & (131072 | 16384)) != 0) {
+if ((this.style & (147456)) != 0) {
 s.top = (x - 3) + "px";
 if ((this.style & 131072) != 0) {
 s.left = "1px";
@@ -7816,13 +8207,13 @@ if ((this.style & 128) != 0) {
 s.top = (xx - 3) + "px";
 } else if ((this.style & 1024) != 0) {
 s.top = (xx - 2) + "px";
-}}if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+}}if ($wt.internal.browser.OS.isMozilla && !$wt.internal.browser.OS.isFirefox) {
 if ((this.style & 128) != 0) {
 s.left = "-2px";
 } else if ((this.style & 1024) != 0) {
 s.left = "-1px";
 }}if ($wt.internal.browser.OS.isFirefox) {
-if ((this.style & (131072 | 16384)) != 0) {
+if ((this.style & (147456)) != 0) {
 s.top = "-2px";
 if ((this.style & 131072) != 0) {
 s.left = "1px";
@@ -7833,7 +8224,7 @@ s.top = "-1px";
 } else if ((this.style & 1024) != 0) {
 s.left = "-1px";
 s.top = "-1px";
-}}}}, $fz.isPrivate = true, $fz), "Number,Number");
+}}}}, $fz.isPrivate = true, $fz), "~N,~N");
 $_M (cla$$, "setCursor", 
 function (cursor) {
 if (this.handle != null) {
@@ -7852,7 +8243,7 @@ if (this.parent != null) {
 var parentHandle = this.parent.containerHandle ();
 if (parentHandle != null) {
 parentHandle.appendChild (this.handle);
-}}if ((this.style & (16 | 32)) != 0) {
+}}if ((this.style & (48)) != 0) {
 var btnEl = document.createElement ("DIV");
 this.handle.appendChild (btnEl);
 var btnWrapperEl = document.createElement ("DIV");
@@ -7910,7 +8301,7 @@ function () {
 if (!this.callbacks["$wt.widgets.Button"].isEnabled ()) {
 this.toReturn (false);
 return ;
-}if ((this.callbacks["$wt.widgets.Button"].style & (32 | 2)) != 0) {
+}if ((this.callbacks["$wt.widgets.Button"].style & (34)) != 0) {
 var e = this.getEvent ();
 if (e.srcElement != this.callbacks["$wt.widgets.Button"].btnHandle) {
 this.callbacks["$wt.widgets.Button"].setSelection (!this.callbacks["$wt.widgets.Button"].getSelection ());
@@ -7927,7 +8318,7 @@ cla$$ = $_P ();
 return $_N ($wt.widgets.Button$1, innerThis, finalVars);
 }) (this, null));
 this.handle.onclick = this.handle.ondblclick = eventHandler;
-if ((this.style & (16 | 32)) != 0) {
+if ((this.style & (48)) != 0) {
 this.btnText.onclick = eventHandler;
 }});
 $_S (cla$$,
@@ -7948,7 +8339,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Label, [parent, $wt.widgets.Label.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style |= 524288;
@@ -7956,7 +8347,7 @@ if ((style & 2) != 0) {
 style = $wt.widgets.Widget.checkBits (style, 512, 256, 0, 0, 0, 0);
 return $wt.widgets.Widget.checkBits (style, 8, 4, 32, 0, 0, 0);
 }return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var width = 0;
@@ -7965,11 +8356,11 @@ var border = this.getBorderWidth ();
 if ((this.style & 2) != 0) {
 var lineWidth = 1;
 if ((this.style & 256) != 0) {
-width = $wt.widgets.Widget.DEFAULT_WIDTH;
+width = 64;
 height = lineWidth * 2;
 } else {
 width = lineWidth * 2;
-height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+height = 64;
 }if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 width += border * 2;
@@ -7996,25 +8387,17 @@ this.image.height = img.height;
 width += img.width;
 height = Math.max(img.height, height);
 } else {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
-width += img.width;
-height = Math.max(img.height, height);
+width += 16;
+height = Math.max (16, height);
 }} else {
-var img = new Image ();
-img.src = this.image.url;
-this.image.width = img.width;
-this.image.height = img.height;
-width += img.width;
-height = Math.max(img.height, height);
+width += this.image.width;
+height = Math.max (this.image.height, height);
 }}if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "getAlignment", 
 function () {
 if ((this.style & 2) != 0) return 0;
@@ -8047,9 +8430,9 @@ this.image = null;
 $_M (cla$$, "setAlignment", 
 function (alignment) {
 if ((this.style & 2) != 0) return ;
-if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
-this.style &= ~(16384 | 131072 | 16777216);
-this.style |= alignment & (16384 | 131072 | 16777216);
+if ((alignment & (16924672)) == 0) return ;
+this.style &= -16924673;
+this.style |= alignment & (16924672);
 if ((this.style & 16384) != 0) {
 this.handle.style.textAlign = "left";
 this.handle.style.backgroundPosition = "left center";
@@ -8059,7 +8442,7 @@ this.handle.style.backgroundPosition = "center center";
 } else if ((this.style & 131072) != 0) {
 this.handle.style.textAlign = "right";
 this.handle.style.backgroundPosition = "right center";
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setImage", 
 function (image) {
 if (image == null) return ;
@@ -8095,7 +8478,7 @@ return ;
 }this.textSizeCached = false;
 this.text = string;
 $wt.internal.browser.OS.insertText (this.handle, this.text);
-}, "String");
+}, "~S");
 $_V (cla$$, "createHandle", 
 function () {
 this.handle = document.createElement ("DIV");
@@ -8144,7 +8527,7 @@ handleStyle.marginLeft = ((Math.floor (width / 2)) - 1) + "px";
 handleStyle.height = height + "px";
 this.handle.childNodes[1].style.marginLeft = (Math.floor (width / 2)) + "px";
 this.handle.childNodes[1].style.height = height + "px";
-}}}, "Number,Number,Number,Number");
+}}}, "~N,~N,~N,~N");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
 $_U (this, $wt.widgets.Label, "setEnabled", [enabled]);
@@ -8154,7 +8537,7 @@ this.handle.style.color = "gray";
 } else {
 this.handle.style.color = this.lastColor;
 this.lastColor = null;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setForeground", 
 function (color) {
 $_U (this, $wt.widgets.Label, "setForeground", [color]);
@@ -8167,27 +8550,28 @@ this.textSizeCached = false;
 $_U (this, $wt.widgets.Label, "setFont", [font]);
 }, "$wt.graphics.Font");
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.widgets, "Link", $wt.widgets.Control);
-$_Y (cla$$, function () {
 this.text = null;
 this.cachedText = null;
 this.textSizeCached = false;
 this.textWidthCached = 0;
 this.textHeightCached = 0;
 this.lastColor = null;
-this.anchors =  new Array (0);
+this.anchors = null;
 this.offsets = null;
 this.selection = null;
 this.ids = null;
 this.mnemonics = null;
 this.focusIndex = 0;
 this.font = 0;
+$_Z (this, arguments);
+}, $wt.widgets, "Link", $wt.widgets.Control);
+$_Y (cla$$, function () {
+this.anchors =  new Array (0);
 });
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Link, [parent, style]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -8217,7 +8601,7 @@ if (hHint != -1) height = hHint;
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "createHandle", 
 function () {
 this.handle = document.createElement ("DIV");
@@ -8239,7 +8623,7 @@ this.text = "";
 $_M (cla$$, "enableWidget", 
 function (enabled) {
 $_U (this, $wt.widgets.Link, "enableWidget", [enabled]);
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "hookSelection", 
 function () {
 var linkHandler = Clazz.makeFunction ((function (innerThis, finalVars) {
@@ -8373,7 +8757,7 @@ var refStart = 0;
 while (index < length) {
 var c = buffer[index];
 if ((c).charCodeAt (0) >= ('A').charCodeAt (0) && (c).charCodeAt (0) <= ('Z').charCodeAt (0)) {
-c = String.fromCharCode ((c).charCodeAt (0) + (('a').charCodeAt (0) - ('A').charCodeAt (0)));
+c = String.fromCharCode ((c).charCodeAt (0) + (32));
 }switch (state) {
 case 0:
 if ((c).charCodeAt (0) == ('<').charCodeAt (0)) {
@@ -8492,7 +8876,7 @@ System.arraycopy (this.mnemonics, 0, newMnemonics, 0, linkIndex + 1);
 this.mnemonics = newMnemonics;
 }this.cachedText = result2.toString ();
 return result.toString ();
-}, "String,Object");
+}, "~S,Object");
 $_M (cla$$, "parseMnemonics", 
 function (buffer, start, end, result, result2, handle) {
 var el = handle;
@@ -8549,7 +8933,7 @@ result.getChars (lastIndex, idx, cs, 0);
 var s =  String.instantialize (cs, 0, len);
 el.appendChild (document.createTextNode (s));
 }return mnemonic;
-}, "Array,Number,Number,StringBuffer,StringBuffer,Object");
+}, "Array,~N,~N,StringBuffer,StringBuffer,Object");
 $_M (cla$$, "releaseWidget", 
 function () {
 $_U (this, $wt.widgets.Link, "releaseWidget", []);
@@ -8582,7 +8966,7 @@ if (idx != -1) {
 this.handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
 }this.handle.style.color = this.lastColor;
 this.lastColor = null;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setForeground", 
 function (color) {
 $_U (this, $wt.widgets.Link, "setForeground", [color]);
@@ -8613,7 +8997,7 @@ System.out.println ("offsets==");
 for (var i = 0; i < this.offsets.length; i++) {
 System.out.println (i + "/" + this.offsets[i]);
 }
-}, "String");
+}, "~S");
 $_M (cla$$, "unhookSelection", 
 function () {
 for (var i = 0; i < this.anchors.length; i++) {
@@ -8632,40 +9016,60 @@ this.doubleClick = false;
 this.ignoreModify = false;
 this.ignoreVerify = false;
 this.ignoreCharacter = false;
+this.textHandle = null;
 this.lineHeight = 0;
 $_Z (this, arguments);
 }, $wt.widgets, "Text", $wt.widgets.Scrollable);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Text, [parent, $wt.widgets.Text.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_V (cla$$, "createHandle", 
 function () {
-this.doubleClick = true;
-if ((this.style & 2) != 0) {
-this.handle = document.createElement ("TEXTAREA");
-} else {
-this.handle = document.createElement ("INPUT");
-}this.handle.className = "text-default" + ($wt.internal.browser.OS.isIE ? " text-ie-default" : "");
-if ((this.style & 2048) != 0) {
-this.handle.className += " text-border";
-}if ((this.style & 8) != 0) {
-this.handle.readOnly = true;
-}if ((this.style & 512) != 0 && (this.style & 256) != 0) {
-this.handle.style.overflow = "scroll";
-} else {
-if ((this.style & 512) != 0) {
-this.handle.className += " text-v-scroll";
-} else if ((this.style & 256) != 0) {
-this.handle.className += " text-h-scroll";
-}}if (this.parent != null) {
+this.handle = document.createElement ("DIV");
+var cssName = "text-default";
+this.handle.className = cssName;
+if (this.parent != null) {
 var parentHandle = this.parent.containerHandle ();
 if (parentHandle != null) {
 parentHandle.appendChild (this.handle);
-}}});
+}}this.doubleClick = true;
+if ((this.style & 2) != 0) {
+this.textHandle = document.createElement ("TEXTAREA");
+} else {
+this.textHandle = document.createElement ("INPUT");
+}if ($wt.internal.browser.OS.isMozilla) {
+}var textCSSName = null;
+if ($wt.internal.browser.OS.isIE) {
+textCSSName = "text-ie-default";
+}if ((this.style & 2048) != 0) {
+if (textCSSName != null) {
+textCSSName += " text-border";
+} else {
+textCSSName = "text-border";
+}}if ((this.style & 8) != 0) {
+this.textHandle.readOnly = true;
+}if ((this.style & 512) != 0 && (this.style & 256) != 0) {
+this.textHandle.style.overflow = "scroll";
+} else {
+if ((this.style & 512) != 0) {
+if (textCSSName != null) {
+textCSSName += " text-v-scroll";
+} else {
+textCSSName = "text-v-scroll";
+}} else if ((this.style & 256) != 0) {
+if (textCSSName != null) {
+textCSSName += " text-h-scroll";
+} else {
+textCSSName = "text-h-scroll";
+}}}if (textCSSName != null) {
+System.out.println ("border:" + textCSSName);
+this.textHandle.className = textCSSName;
+}this.handle.appendChild (this.textHandle);
+});
 $_V (cla$$, "hookKeyDown", 
 function () {
-this.handle.onkeydown = Clazz.makeFunction ((function (innerThis, finalVars) {
+this.textHandle.onkeydown = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Text$1")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -8716,7 +9120,7 @@ return $_N ($wt.widgets.Text$1, innerThis, finalVars);
 });
 $_V (cla$$, "hookModify", 
 function () {
-this.handle.onchange = Clazz.makeFunction ((function (innerThis, finalVars) {
+this.textHandle.onchange = Clazz.makeFunction ((function (innerThis, finalVars) {
 if (!$_D ("org.eclipse.swt.widgets.Text$2")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
@@ -8728,7 +9132,7 @@ function () {
 if ((this.callbacks["$wt.widgets.Text"].style & 8) != 0 || (!this.callbacks["$wt.widgets.Text"].hooks (25) && !this.callbacks["$wt.widgets.Text"].filters (25))) {
 this.toReturn (true);
 return ;
-}var newText = this.callbacks["$wt.widgets.Text"].handle.value;
+}var newText = this.callbacks["$wt.widgets.Text"].textHandle.value;
 if (newText != null) {
 var oldText = newText;
 newText = this.callbacks["$wt.widgets.Text"].verifyText (newText, 0, 0, null);
@@ -8796,7 +9200,7 @@ ch = chs[keyCode - 219];
 }} else {
 ch = String.fromCharCode (keyCode);
 }return ch;
-}, $fz.isPrivate = true, $fz), "Number,Boolean,Boolean");
+}, $fz.isPrivate = true, $fz), "~N,~B,~B");
 $_M (cla$$, "isInputCharacter", 
 ($fz = function (keyCode, shiftKey, altKey, ctrlKey) {
 if (altKey || ctrlKey) {
@@ -8804,7 +9208,7 @@ return false;
 }if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32 || keyCode == 8 || keyCode == 46 || (keyCode >= 48 && keyCode <= 57) || keyCode == 59 || keyCode == 61 || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 96 && keyCode <= 111 && keyCode != 108) || (keyCode >= 186 && keyCode <= 192) || (keyCode >= 218 && keyCode <= 222)) {
 return true;
 }return false;
-}, $fz.isPrivate = true, $fz), "Number,Boolean,Boolean,Boolean");
+}, $fz.isPrivate = true, $fz), "~N,~B,~B,~B");
 $_M (cla$$, "addModifyListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -8823,25 +9227,25 @@ this.addListener (25, typedListener);
 }, "$wt.events.VerifyListener");
 $_M (cla$$, "append", 
 function (string) {
-this.handle.value += string;
-}, "String");
+this.textHandle.value += string;
+}, "~S");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 if ((style & 4) != 0 && (style & 2) != 0) {
-style &= ($t$ = ~ $WT.MULTI, $WT.prototype.MULTI = $WT.MULTI, $t$);
+style &= -3;
 }style = $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
-if ((style & 4) != 0) style &= ~(256 | 512 | 64);
+if ((style & 4) != 0) style &= -833;
 if ((style & 64) != 0) {
 style |= 2;
-style &= ($t$ = ~ $WT.H_SCROLL, $WT.prototype.H_SCROLL = $WT.H_SCROLL, $t$);
-}if ((style & 2) != 0) style &= ($t$ = ~ $WT.PASSWORD, $WT.prototype.PASSWORD = $WT.PASSWORD, $t$);
-if ((style & (4 | 2)) != 0) return style;
-if ((style & (256 | 512)) != 0) return style | 2;
+style &= -257;
+}if ((style & 2) != 0) style &= -4194305;
+if ((style & (6)) != 0) return style;
+if ((style & (768)) != 0) return style | 2;
 return style | 4;
-}, "Number");
+}, "~N");
 $_M (cla$$, "clearSelection", 
 function () {
-BrowserNative.clearSelection (this.handle);
+BrowserNative.clearSelection (this.textHandle);
 });
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
@@ -8856,19 +9260,20 @@ if (wrap && wHint != -1 && wHint > 0) {
 size =  new $wt.graphics.Point (wHint, $wt.internal.browser.OS.getStringStyledWrappedHeight (text, "text-default", this.handle.style.cssText, wHint));
 } else {
 size = $wt.internal.browser.OS.getStringStyledSize (text, "text-default", this.handle.style.cssText);
-}height = size.y;
+}width = size.x;
+height = size.y;
 if (height <= 0) {
 height = this.getLineHeight ();
 }} else {
 width = 0;
 height = this.getLineHeight ();
-}}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+}}if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var trim = this.computeTrim (0, 0, width, height);
 return  new $wt.graphics.Point (trim.width, trim.height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var rect = $_U (this, $wt.widgets.Text, "computeTrim", [x, y, width, height]);
@@ -8889,7 +9294,7 @@ rect.y -= 1;
 rect.width += 2;
 rect.height += 2;
 }return rect;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "copy", 
 function () {
 });
@@ -8915,7 +9320,7 @@ return 2;
 });
 $_M (cla$$, "getCaretLineNumber", 
 function () {
-return BrowserNative.getTextCaretLineNumber (this.handle);
+return BrowserNative.getTextCaretLineNumber (this.textHandle);
 });
 $_M (cla$$, "getCaretLocation", 
 function () {
@@ -8923,7 +9328,7 @@ return  new $wt.graphics.Point (0, 0);
 });
 $_M (cla$$, "getCaretPosition", 
 function () {
-return BrowserNative.getTextCaretPosition (this.handle);
+return BrowserNative.getTextCaretPosition (this.textHandle);
 });
 $_M (cla$$, "getCharCount", 
 function () {
@@ -8940,8 +9345,8 @@ return '*';
 $_M (cla$$, "getEditable", 
 function () {
 var disableClass = "text-disable";
-if (this.handle.className != null) {
-var idx = this.handle.className.indexOf (disableClass);
+if (this.textHandle.className != null) {
+var idx = this.textHandle.className.indexOf (disableClass);
 if (idx != -1) {
 return false;
 }}return true;
@@ -8962,11 +9367,11 @@ this.lineHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "text-defa
 });
 $_M (cla$$, "getOrientation", 
 function () {
-return this.style & (33554432 | 67108864);
+return this.style & (100663296);
 });
 $_M (cla$$, "getSelection", 
 function () {
-return BrowserNative.getTextSelection (this.handle);
+return BrowserNative.getTextSelection (this.textHandle);
 });
 $_M (cla$$, "getSelectionCount", 
 function () {
@@ -8975,7 +9380,7 @@ return selection.y - selection.x;
 });
 $_M (cla$$, "getSelectionText", 
 function () {
-return BrowserNative.getSelectionText (this.handle);
+return BrowserNative.getSelectionText (this.textHandle);
 });
 $_M (cla$$, "getTabs", 
 function () {
@@ -8984,18 +9389,18 @@ return this.tabs;
 $_M (cla$$, "getTabWidth", 
 function (tabs) {
 return 64;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getText", 
 function () {
-return this.handle.value;
+return this.textHandle.value;
 });
 $_M (cla$$, "getText", 
 function (start, end) {
-var length = this.handle.value.length;
+var length = this.textHandle.value.length;
 start = Math.max (0, start);
 end = Math.min (end, length - 1);
 return this.getText ().substring (start, end + 1);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "getTextLimit", 
 function () {
 return 0;
@@ -9011,17 +9416,24 @@ return this.getTopIndex () * this.getLineHeight ();
 });
 $_M (cla$$, "insert", 
 function (string) {
-var sel = BrowserNative.getTextSelection (this.handle);
+var sel = BrowserNative.getTextSelection (this.textHandle);
 if (this.hooks (25) || this.filters (25)) {
 string = this.verifyText (string, sel.x, sel.y, null);
 if (string == null) return ;
-}BrowserNative.insertTextString (this.handle, string);
+}BrowserNative.insertTextString (this.textHandle, string);
 if ((this.style & 2) != 0) {
 this.sendEvent (24);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "paste", 
 function () {
 if ((this.style & 8) != 0) return ;
+});
+$_M (cla$$, "releaseHandle", 
+function () {
+if (this.textHandle != null) {
+BrowserNative.releaseHandle (this.textHandle);
+this.textHandle = null;
+}$_U (this, $wt.widgets.Text, "releaseHandle", []);
 });
 $_M (cla$$, "removeModifyListener", 
 function (listener) {
@@ -9041,71 +9453,85 @@ this.eventTable.unhook (25, listener);
 }, "$wt.events.VerifyListener");
 $_M (cla$$, "selectAll", 
 function () {
-this.handle.select ();
+this.textHandle.select ();
 });
 $_M (cla$$, "sendKeyEvent", 
 function (type, msg, wParam, lParam, event) {
 return false;
-}, "Number,Number,Number,Number,$wt.widgets.Event");
+}, "~N,~N,~N,~N,$wt.widgets.Event");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
 $_U (this, $wt.widgets.Text, "setBounds", [x, y, width, height, flags]);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
+$_M (cla$$, "setBackground", 
+function (color) {
+if (color != null) this.textHandle.style.backgroundColor = color.getCSSHandle ();
+$_U (this, $wt.widgets.Text, "setBackground", [color]);
+}, "$wt.graphics.Color");
 $_M (cla$$, "setDoubleClickEnabled", 
 function (doubleClick) {
 this.doubleClick = doubleClick;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setEchoChar", 
 function (echo) {
 if ((this.style & 2) != 0) return ;
 try {
-this.handle.type = "password";
+this.textHandle.type = "password";
 } catch (e) {
 if ($_O (e, Exception)) {
 } else {
 throw e;
 }
 }
-}, "Number");
+}, "~N");
 $_M (cla$$, "setEditable", 
 function (editable) {
-this.style &= ($t$ = ~ $WT.READ_ONLY, $WT.prototype.READ_ONLY = $WT.READ_ONLY, $t$);
+this.style &= -9;
 if (!editable) this.style |= 8;
-this.handle.readOnly = !editable;
+this.textHandle.readOnly = !editable;
 var disableClass = "text-disable";
 if (editable) {
-if (this.handle.className != null) {
-var idx = this.handle.className.indexOf (disableClass);
+if (this.textHandle.className != null) {
+var idx = this.textHandle.className.indexOf (disableClass);
 if (idx != -1) {
-var zzName = this.handle.className.substring (0, idx) + this.handle.className.substring (idx + disableClass.length);
-this.handle.className = zzName;
+var zzName = this.textHandle.className.substring (0, idx) + this.textHandle.className.substring (idx + disableClass.length);
+this.textHandle.className = zzName;
 }}} else {
-if (this.handle.className != null) {
-var idx = this.handle.className.indexOf (disableClass);
+if (this.textHandle.className != null) {
+var idx = this.textHandle.className.indexOf (disableClass);
 if (idx == -1) {
-this.handle.className += " text-disable";
-}}}}, "Boolean");
+this.textHandle.className += " text-disable";
+}}}}, "~B");
 $_M (cla$$, "setFont", 
 function (font) {
 $_U (this, $wt.widgets.Text, "setFont", [font]);
+var tmp = this.handle;
+this.handle = this.textHandle;
+$_U (this, $wt.widgets.Text, "setFont", [font]);
+this.handle = tmp;
 }, "$wt.graphics.Font");
+$_M (cla$$, "setForeground", 
+function (color) {
+if (color != null) this.textHandle.style.color = color.getCSSHandle ();
+$_U (this, $wt.widgets.Text, "setForeground", [color]);
+}, "$wt.graphics.Color");
 $_M (cla$$, "setOrientation", 
 function (orientation) {
 this.fixAlignment ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (start) {
-this.setSelection (start, this.handle.value.length);
-}, "Number");
+this.setSelection (start, this.textHandle.value.length);
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (start, end) {
-BrowserNative.setTextSelection (this.handle, start, end);
-}, "Number,Number");
+BrowserNative.setTextSelection (this.textHandle, start, end);
+}, "~N,~N");
 $_M (cla$$, "setRedraw", 
 function (redraw) {
 $_U (this, $wt.widgets.Text, "setRedraw", [redraw]);
 if (this.drawCount != 0) return ;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setSelection", 
 function (selection) {
 this.setSelection (selection.x, selection.y);
@@ -9114,30 +9540,34 @@ $_M (cla$$, "setTabs",
 function (tabs) {
 if (tabs < 0) return ;
 this.tabs = tabs;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setTabStops", 
 function (tabs) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setText", 
 function (string) {
-this.handle.value = string;
+this.textHandle.value = string;
 if ((this.style & 2) != 0) {
 this.sendEvent (24);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "setTextLimit", 
 function (limit) {
-if (limit > $wt.widgets.Text.LIMIT) {
-}}, "Number");
+if (limit > 32767) {
+}}, "~N");
 $_M (cla$$, "setTopIndex", 
 function (index) {
 if ((this.style & 4) != 0) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "SetWindowPos", 
 function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
 if ((this.style & 2048) != 0) {
+this.textHandle.style.width = ((cx - 4) > 0 ? (cx - 4) : 0) + "px";
+this.textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
 return $_U (this, $wt.widgets.Text, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags]);
-}return $_U (this, $wt.widgets.Text, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
-}, "Object,Object,Number,Number,Number,Number,Number");
+}this.textHandle.style.width = cx + "px";
+this.textHandle.style.height = cy + "px";
+return $_U (this, $wt.widgets.Text, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_M (cla$$, "showSelection", 
 function () {
 });
@@ -9155,7 +9585,7 @@ event.stateMask = keyEvent.stateMask;
 }this.sendEvent (25, event);
 if (!event.doit || this.isDisposed ()) return null;
 return event.text;
-}, "String,Number,Number,$wt.widgets.Event");
+}, "~S,~N,~N,$wt.widgets.Event");
 $_V (cla$$, "windowClass", 
 function () {
 return "TEXTAREA";
@@ -9169,17 +9599,17 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.List, [parent, $wt.widgets.List.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "add", 
 function (string) {
 if (this.handle != null) {
 this.handle.options[this.handle.options.length] =  new Option (string, string);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "add", 
 function (string, index) {
 if (this.handle != null) {
 this.handle.options[index] =  new Option (string, string);
-}}, "String,Number");
+}}, "~S,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -9189,13 +9619,13 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var width = 0;
 var height = 0;
-if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var border = this.getBorderWidth ();
@@ -9204,7 +9634,7 @@ height += border * 2;
 if ((this.style & 512) != 0) {
 }if ((this.style & 256) != 0) {
 }return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "createHandle", 
 function () {
 this.handle = document.createElement ("SELECT");
@@ -9243,13 +9673,13 @@ function (index) {
 if (index == -1) return ;
 if ((this.style & 4) != 0) {
 return ;
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "deselect", 
 function (start, end) {
 if (start > end) return ;
 if ((this.style & 4) != 0) {
 return ;
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "deselectAll", 
 function () {
 if ((this.style & 4) != 0) {
@@ -9262,7 +9692,7 @@ return -1;
 $_M (cla$$, "getItem", 
 function (index) {
 return "";
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return 0;
@@ -9307,7 +9737,7 @@ return 0;
 $_M (cla$$, "indexOf", 
 function (string) {
 return this.indexOf (string, 0);
-}, "String");
+}, "~S");
 $_M (cla$$, "indexOf", 
 function (string, start) {
 if (string.length == 0) {
@@ -9319,11 +9749,11 @@ return -1;
 }var index = start - 1;
 var last;
 return index;
-}, "String,Number");
+}, "~S,~N");
 $_M (cla$$, "isSelected", 
 function (index) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "remove", 
 function (indices) {
 if (indices.length == 0) return ;
@@ -9335,16 +9765,16 @@ var end = newIndices[0];
 }, "Array");
 $_M (cla$$, "remove", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "remove", 
 function (start, end) {
 if (start > end) return ;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "remove", 
 function (string) {
 var index = this.indexOf (string, 0);
 this.remove (index);
-}, "String");
+}, "~S");
 $_M (cla$$, "removeAll", 
 function () {
 });
@@ -9370,15 +9800,15 @@ this.select (index, false);
 }i++;
 }
 if (scroll) this.showSelection ();
-}, "Array,Boolean");
+}, "Array,~B");
 $_M (cla$$, "select", 
 function (index) {
 this.select (index, false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "select", 
 function (index, scroll) {
 if (index < 0) return ;
-}, "Number,Boolean");
+}, "~N,~B");
 $_M (cla$$, "select", 
 function (start, end) {
 if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
@@ -9386,24 +9816,24 @@ if ((this.style & 4) != 0) {
 this.select (start, false);
 } else {
 this.select (start, end, false);
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "select", 
 function (start, end, scroll) {
 if (start == end) {
 this.select (start, scroll);
 return ;
 }if (scroll) this.showSelection ();
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "selectAll", 
 function () {
 if ((this.style & 4) != 0) return ;
 });
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setFocusIndex", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setFont", 
 function (font) {
 $_U (this, $wt.widgets.List, "setFont", [font]);
@@ -9416,7 +9846,7 @@ this.remove (index);
 this.add (string, index);
 if (isSelected) this.select (index, false);
 this.setTopIndex (topIndex);
-}, "Number,String");
+}, "~N,~S");
 $_M (cla$$, "setItems", 
 function (items) {
 for (var j = this.handle.childNodes.length - 1; j >= 0; j++) {
@@ -9466,7 +9896,7 @@ function (index) {
 this.deselectAll ();
 this.select (index, true);
 if ((this.style & 2) != 0) {
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setSelection", 
 function (start, end) {
 this.deselectAll ();
@@ -9475,10 +9905,10 @@ if ((this.style & 4) != 0) {
 this.select (start, true);
 } else {
 this.select (start, end, true);
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "setTopIndex", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "showSelection", 
 function () {
 });
@@ -9487,9 +9917,6 @@ function () {
 return "SELECT";
 });
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.browser, "Browser", $wt.widgets.Composite);
-$_Y (cla$$, function () {
 this.$back = false;
 this.$forward = false;
 this.navigate = false;
@@ -9501,6 +9928,17 @@ this.toolBar = true;
 this.info = 0;
 this.globalDispatch = 0;
 this.html = null;
+this.closeWindowListeners = null;
+this.locationListeners = null;
+this.openWindowListeners = null;
+this.progressListeners = null;
+this.statusTextListeners = null;
+this.titleListeners = null;
+this.visibilityWindowListeners = null;
+this.url = null;
+$_Z (this, arguments);
+}, $wt.browser, "Browser", $wt.widgets.Composite);
+$_Y (cla$$, function () {
 this.closeWindowListeners =  new Array (0);
 this.locationListeners =  new Array (0);
 this.openWindowListeners =  new Array (0);
@@ -9508,11 +9946,10 @@ this.progressListeners =  new Array (0);
 this.statusTextListeners =  new Array (0);
 this.titleListeners =  new Array (0);
 this.visibilityWindowListeners =  new Array (0);
-this.url = null;
 });
 $_K (cla$$, 
 function (parent, style) {
-$_R (this, $wt.browser.Browser, [parent, style & ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$)]);
+$_R (this, $wt.browser.Browser, [parent, style & -2049]);
 this.handle = document.createElement ("IFRAME");
 this.handle.style.position = "absolute";
 this.handle.style.backgroundColor = "white";
@@ -9520,7 +9957,7 @@ if (this.handle.style.filter != null) {
 this.handle.style.border = "2px solid menu";
 }if (this.getParent ().handle != null) {
 this.getParent ().handle.appendChild (this.handle);
-}}, "$wt.widgets.Composite,Number");
+}}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addCloseWindowListener", 
 function (listener) {
 var newCloseWindowListeners =  new Array (this.closeWindowListeners.length + 1);
@@ -9595,7 +10032,7 @@ var index = name.lastIndexOf ('.');
 $_M (cla$$, "execute", 
 function (script) {
 return true;
-}, "String");
+}, "~S");
 $_M (cla$$, "forward", 
 function () {
 if (!this.$forward) return false;
@@ -9767,7 +10204,7 @@ if (this.handle != null) {
 BrowserNative.iframeDocumentWrite (this.handle, html);
 }this.html = null;
 return true;
-}, "String");
+}, "~S");
 $_M (cla$$, "setUrl", 
 function (url) {
 this.html = null;
@@ -9779,7 +10216,7 @@ this.handle.contentWindow.location = url;
 this.handle.src = url;
 }}this.$back = true;
 return true;
-}, "String");
+}, "~S");
 $_M (cla$$, "stop", 
 function () {
 if (this.handle != null) {
@@ -9793,7 +10230,7 @@ if (this.handle.style.filter != null) {
 $_U (this, $wt.browser.Browser, "setBounds", [x, y, width - 2, height - 2]);
 } else {
 $_U (this, $wt.browser.Browser, "setBounds", [x, y, width - 4, height - 4]);
-}}, "Number,Number,Number,Number");
+}}, "~N,~N,~N,~N");
 $_S (cla$$,
 "BeforeNavigate2", 0xfa,
 "CommandStateChange", 0x69,
@@ -9838,17 +10275,17 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 this.construct (parent, style, $wt.widgets.TableItem.checkNull (parent).getItemCount (), true);
-}, "$wt.widgets.Table,Number");
+}, "$wt.widgets.Table,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 this.construct (parent, style, index, true);
-}, "$wt.widgets.Table,Number,Number");
+}, "$wt.widgets.Table,~N,~N");
 $_K (cla$$, 
 function (parent, style, index, create) {
 $_R (this, $wt.widgets.TableItem, [parent, style]);
 this.parent = parent;
 if (create) parent.createItem (this, index);
-}, "$wt.widgets.Table,Number,Number,Boolean");
+}, "$wt.widgets.Table,~N,~N,~B");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (control) {
 return control;
@@ -9875,7 +10312,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getBackground ();
 return  new $wt.graphics.Color (this.display, this.handle.childNodes[index].style.backgroundColor);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getBounds", 
 function () {
 var itemIndex = this.parent.indexOf (this);
@@ -9887,7 +10324,7 @@ function (index) {
 var itemIndex = this.parent.indexOf (this);
 if (itemIndex == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getChecked", 
 function () {
 if ((this.parent.style & 32) == 0) return false;
@@ -9902,7 +10339,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getFont ();
 return this.display.getSystemFont ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "getForeground", 
 function () {
 return  new $wt.graphics.Color (this.display, this.handle.style.color);
@@ -9912,7 +10349,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getForeground ();
 return  new $wt.graphics.Color (null, this.handle.childNodes[index].style.backgroundColor);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getGrayed", 
 function () {
 if ((this.parent.style & 32) == 0) return false;
@@ -9928,13 +10365,13 @@ if (index == 0) return this.getImage ();
 if (this.images != null) {
 if (0 <= index && index < this.images.length) return this.images[index];
 }return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getImageBounds", 
 function (index) {
 var itemIndex = this.parent.indexOf (this);
 if (itemIndex == -1) return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getImageIndent", 
 function () {
 return this.imageIndent;
@@ -9961,7 +10398,7 @@ if (0 <= index && index < this.strings.length) {
 var string = this.strings[index];
 return string != null ? string : "";
 }}return "";
-}, "Number");
+}, "~N");
 $_M (cla$$, "redraw", 
 function () {
 if ((this.parent.style & 268435456) != 0) this.cached = true;
@@ -9975,7 +10412,7 @@ if ((this.parent.style & 268435456) != 0) this.cached = true;
 if (this.parent.currentItem == this || this.parent.drawCount != 0) return ;
 var index = this.parent.indexOf (this);
 if (index == -1) return ;
-}, "Number,Boolean,Boolean");
+}, "~N,~B,~B");
 $_M (cla$$, "releaseChild", 
 function () {
 $_U (this, $wt.widgets.TableItem, "releaseChild", []);
@@ -10000,13 +10437,13 @@ var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return ;
 if (color != null) {
 this.handle.childNodes[index].style.backgroundColor = color.getCSSHandle ();
-}}, "Number,$wt.graphics.Color");
+}}, "~N,$wt.graphics.Color");
 $_M (cla$$, "setChecked", 
 function (checked) {
 if ((this.parent.style & 32) == 0) return ;
 if (this.checked == checked) return ;
 this.setChecked (checked, false);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setChecked", 
 function (checked, notify) {
 this.checked = checked;
@@ -10016,7 +10453,7 @@ event.item = this;
 event.detail = 32;
 this.parent.postEvent (13, event);
 }this.redraw ();
-}, "Boolean,Boolean");
+}, "~B,~B");
 $_M (cla$$, "setFont", 
 function (font) {
 var hFont = -1;
@@ -10039,7 +10476,7 @@ for (var i = 0; i < count; i++) {
 this.cellFont[i] = -1;
 }
 }this.redraw (index, true, false);
-}, "Number,$wt.graphics.Font");
+}, "~N,$wt.graphics.Font");
 $_M (cla$$, "setForeground", 
 function (color) {
 var pixel = -1;
@@ -10053,14 +10490,14 @@ if (0 > index || index > count - 1) return ;
 var pixel = -1;
 if (color != null) {
 this.handle.childNodes[index].style.color = color.getCSSHandle ();
-}}, "Number,$wt.graphics.Color");
+}}, "~N,$wt.graphics.Color");
 $_M (cla$$, "setGrayed", 
 function (grayed) {
 if ((this.parent.style & 32) == 0) return ;
 if (this.grayed == grayed) return ;
 this.grayed = grayed;
 this.redraw ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setImage", 
 function (images) {
 for (var i = 0; i < images.length; i++) {
@@ -10070,7 +10507,7 @@ this.setImage (i, images[i]);
 $_M (cla$$, "setText", 
 function (string) {
 this.setText (0, string);
-}, "String");
+}, "~S");
 $_M (cla$$, "setImage", 
 function (index, image) {
 if (index == 0) {
@@ -10085,7 +10522,7 @@ if (image != null && image.type == 1) {
 if (image.equals (this.images[index])) return ;
 }this.images[index] = image;
 }this.redraw (index, false, true);
-}, "Number,$wt.graphics.Image");
+}, "~N,$wt.graphics.Image");
 $_M (cla$$, "setImage", 
 function (image) {
 this.setImage (0, image);
@@ -10100,7 +10537,7 @@ var index = this.parent.indexOf (this);
 if (index != -1) {
 }}this.parent.setScrollWidth (this, false);
 this.redraw ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setText", 
 function (strings) {
 for (var i = 0; i < strings.length; i++) {
@@ -10210,7 +10647,7 @@ cla$$ = $_P ();
 }
 return $_N ($wt.widgets.TableItem$3, innerThis, finalVars);
 }) (this, null));
-}}, "Number,String");
+}}, "~N,~S");
 $_M (cla$$, "showSelection", 
 function (selected) {
 this.selected = selected;
@@ -10219,7 +10656,7 @@ if ((this.parent.style & 32) != 0) {
 index++;
 }var element = this.handle.childNodes[0].childNodes[0].childNodes[index];
 element.className = selected ? "table-item-cell-text-selected" : "table-item-cell-text-default";
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "isSelected", 
 function () {
 return this.selected;
@@ -10236,14 +10673,14 @@ $_R (this, $wt.widgets.TableColumn, [parent, $wt.widgets.TableColumn.checkStyle 
 this.resizable = true;
 this.parent = parent;
 parent.createItem (this, parent.getColumnCount ());
-}, "$wt.widgets.Table,Number");
+}, "$wt.widgets.Table,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TableColumn, [parent, $wt.widgets.TableColumn.checkStyle (style)]);
 this.resizable = true;
 this.parent = parent;
 parent.createItem (this, index);
-}, "$wt.widgets.Table,Number,Number");
+}, "$wt.widgets.Table,~N,~N");
 $_M (cla$$, "addControlListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -10259,7 +10696,7 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -10323,12 +10760,12 @@ this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "setAlignment", 
 function (alignment) {
-if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+if ((alignment & (16924672)) == 0) return ;
 var index = this.parent.indexOf (this);
 if (index == -1 || index == 0) return ;
-this.style &= ~(16384 | 131072 | 16777216);
-this.style |= alignment & (16384 | 131072 | 16777216);
-}, "Number");
+this.style &= -16924673;
+this.style |= alignment & (16924672);
+}, "~N");
 $_M (cla$$, "setImage", 
 function (image) {
 var index = this.parent.indexOf (this);
@@ -10339,11 +10776,11 @@ $_M (cla$$, "setMoveable",
 function (moveable) {
 this.moveable = moveable;
 this.parent.updateMoveable ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setResizable", 
 function (resizable) {
 this.resizable = resizable;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setText", 
 function (string) {
 var index = this.parent.indexOf (this);
@@ -10355,13 +10792,13 @@ if (this.handle.childNodes[i] != null) {
 this.handle.removeChild (this.handle.childNodes[i]);
 }}
 }this.handle.appendChild (document.createTextNode (string));
-}, "String");
+}, "~S");
 $_M (cla$$, "setWidth", 
 function (width) {
 var index = this.parent.indexOf (this);
 if (index == -1) return ;
 this.handle.style.width = width + "px";
-}, "Number");
+}, "~N");
 cla$$ = $_C (function () {
 this.items = null;
 this.columns = null;
@@ -10389,12 +10826,12 @@ $_R (this, $wt.widgets.Table, [parent, $wt.widgets.Table.checkStyle (style)]);
 this.selection =  new Array (0);
 this.items =  new Array (0);
 this.columns =  new Array (0);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "_getItem", 
 function (index) {
 if (this.items[index] != null) return this.items[index];
 return this.items[index] =  new $wt.widgets.TableItem (this, 0, -1, false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -10403,9 +10840,9 @@ this.addListener (14, typedListener);
 }, "$wt.events.SelectionListener");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= 256 | 512;
+style |= 768;
 return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "checkData", 
 function (item, redraw) {
 if (item.cached) return true;
@@ -10421,18 +10858,18 @@ if (redraw) {
 if (!this.setScrollWidth (item, false)) {
 item.redraw ();
 }}}return true;
-}, "$wt.widgets.TableItem,Boolean");
+}, "$wt.widgets.TableItem,~B");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
 $_M (cla$$, "clear", 
 function (index) {
 var count = this.items.length;
-}, "Number");
+}, "~N");
 $_M (cla$$, "clear", 
 function (start, end) {
 if (start > end) return ;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "clear", 
 function (indices) {
 if (indices.length == 0) return ;
@@ -10462,19 +10899,19 @@ System.out.println (t);
 height = ($wt.internal.browser.OS.getStringPlainHeight (t) + 5) * (this.items.length + 0);
 } else {
 height = 24;
-}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+}if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var border = this.getBorderWidth ();
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.Table, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("DIV");
 this.handle.className = "table-default";
 var table = document.createElement ("TABLE");
@@ -10538,7 +10975,7 @@ theadTD.removeChild (theadTD.childNodes[i]);
 theadTD.style.margin = "0";
 theadTD.style.padding = "0";
 column.handle = theadTD;
-}, "$wt.widgets.TableColumn,Number");
+}, "$wt.widgets.TableColumn,~N");
 $_M (cla$$, "createItem", 
 function (item, index) {
 if (this.items == null) {
@@ -10571,7 +11008,7 @@ this.items[i].index = i;
 }
 this.items[index] = item;
 }item.handle = tbodyTR;
-}, "$wt.widgets.TableItem,Number");
+}, "$wt.widgets.TableItem,~N");
 $_M (cla$$, "createWidget", 
 function () {
 $_U (this, $wt.widgets.Table, "createWidget", []);
@@ -10593,7 +11030,7 @@ function (index) {
 if (index < 0) return ;
 this.items[index].showSelection (false);
 this.removeFromSelection ([index]);
-}, "Number");
+}, "~N");
 $_M (cla$$, "deselect", 
 function (start, end) {
 var count = this.items.length;
@@ -10607,7 +11044,7 @@ this.items[i].showSelection (false);
 indices[i - start] = i;
 }
 this.removeFromSelection (indices);
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "deselectAll", 
 function () {
 for (var i = 0; i < this.items.length; i++) {
@@ -10633,11 +11070,11 @@ columnWidth = 0;
 } else {
 columnWidth = $wt.internal.browser.OS.getStringPlainWidth (t);
 }return columnWidth;
-}, $fz.isPrivate = true, $fz), "String");
+}, $fz.isPrivate = true, $fz), "~S");
 $_M (cla$$, "getColumn", 
 function (index) {
 return this.columns[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getColumnCount", 
 function () {
 if (this.columns == null) {
@@ -10658,7 +11095,7 @@ return result;
 });
 $_M (cla$$, "getGridLineWidth", 
 function () {
-return $wt.widgets.Table.GRID_WIDTH;
+return 1;
 });
 $_M (cla$$, "getHeaderHeight", 
 function () {
@@ -10672,7 +11109,7 @@ $_M (cla$$, "getItem",
 function (index) {
 var count = this.items.length;
 return this._getItem (index);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItem", 
 function (point) {
 return null;
@@ -10755,7 +11192,7 @@ if (this.items[i] == item) return this.lastIndexOf = i;
 $_M (cla$$, "isSelected", 
 function (index) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "removeItems", 
 function (indices) {
 if (indices == null && indices.length > this.items.length) return ;
@@ -10843,7 +11280,7 @@ this.items = newItems;
 $_M (cla$$, "remove", 
 function (index) {
 this.remove ([index]);
-}, "Number");
+}, "~N");
 $_M (cla$$, "remove", 
 function (start, end) {
 if (start > end) return ;
@@ -10871,7 +11308,7 @@ var newItems =  new Array (count - (index - start));
 System.arraycopy (this.items, 0, newItems, 0, start);
 System.arraycopy (this.items, index, newItems, start, count - index);
 this.items = newItems;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "removeAll", 
 function () {
 this.remove (0, this.items.length - 1);
@@ -10895,7 +11332,7 @@ this.items[index].showSelection (true);
 this.selection =  new Array (1);
 this.selection[0] = this.items[index];
 this.items[index].handle.className = "table-item-selected";
-}, "Number");
+}, "~N");
 $_M (cla$$, "select", 
 function (start, end) {
 if (end < 0 || start > end || ((this.style & 4) != 0 && start != end)) return ;
@@ -10912,7 +11349,7 @@ for (var i = start; i <= end; i++) {
 this.items[i].showSelection (true);
 this.selection[i - start] = this.items[i];
 }
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "selectAll", 
 function () {
 if ((this.style & 4) != 0) return ;
@@ -10928,7 +11365,7 @@ var fixResize = false;
 if (fixResize) this.setRedraw (false);
 $_U (this, $wt.widgets.Table, "setBounds", [x, y, width, height, flags]);
 if (fixResize) this.setRedraw (true);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setColumnOrder", 
 function (order) {
 }, "Array");
@@ -10940,11 +11377,11 @@ $_M (cla$$, "setCheckboxImageList",
 function (width, height) {
 if ((this.style & 32) == 0) return ;
 var count = 4;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setFocusIndex", 
 function (index) {
 if (index < 0) return ;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setFont", 
 function (font) {
 var topIndex = this.getTopIndex ();
@@ -10958,28 +11395,28 @@ this.setItemHeight ();
 }, "$wt.graphics.Font");
 $_M (cla$$, "setHeaderVisible", 
 function (show) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setItemCount", 
 function (count) {
 count = Math.max (0, count);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setItemHeight", 
 function () {
 });
 $_M (cla$$, "setLinesVisible", 
 function (show) {
 var newBits = 0;
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "setRedraw", 
 function (redraw) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setScrollWidth", 
 function (item, force) {
 if (this.currentItem != null) {
 if (this.currentItem != item) this.fixScrollWidth = true;
 return false;
 }return false;
-}, "$wt.widgets.TableItem,Boolean");
+}, "$wt.widgets.TableItem,~B");
 $_M (cla$$, "setSelection", 
 function (indices) {
 this.deselectAll ();
@@ -11011,7 +11448,7 @@ function (index) {
 this.deselectAll ();
 this.select (index);
 this.setFocusIndex (index);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (start, end) {
 this.deselectAll ();
@@ -11027,7 +11464,7 @@ this.selection[i - start] = this.items[i];
 }
 this.setFocusIndex (start);
 this.showSelection ();
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setTableEmpty", 
 function () {
 });
@@ -11097,10 +11534,10 @@ this.selection =  new Array (1);
 }this.selection[0] = item;
 }this.lastSelection = item;
 return true;
-}, "$wt.widgets.TableItem,Boolean,Boolean");
+}, "$wt.widgets.TableItem,~B,~B");
 $_M (cla$$, "setTopIndex", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "showColumn", 
 function (column) {
 if (column.parent != this) return ;
@@ -11109,7 +11546,7 @@ if (index == -1) return ;
 }, "$wt.widgets.TableColumn");
 $_M (cla$$, "showItem", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "showItem", 
 function (item) {
 var index = this.indexOf (item);
@@ -11129,6 +11566,8 @@ cla$$ = $_C (function () {
 this.parent = null;
 this.control = null;
 this.toolTipText = null;
+this.hasImage = false;
+this.textEl = null;
 $_Z (this, arguments);
 }, $wt.widgets, "TabItem", $wt.widgets.Item);
 $_K (cla$$, 
@@ -11138,14 +11577,17 @@ this.parent = parent;
 var index = parent.getItemCount ();
 parent.createItem (this, index);
 this.configure (index);
-}, "$wt.widgets.TabFolder,Number");
+}, "$wt.widgets.TabFolder,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TabItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, index);
 this.configure (index);
-}, "$wt.widgets.TabFolder,Number,Number");
+}, "$wt.widgets.TabFolder,~N,~N");
+$_V (cla$$, "checkSubclass", 
+function () {
+});
 $_M (cla$$, "configure", 
 ($fz = function (index) {
 this.handle.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
@@ -11157,25 +11599,13 @@ $_Z (this, arguments);
 }, $wt.widgets, "TabItem$1", $wt.internal.RunnableCompatibility);
 $_V (cla$$, "run", 
 function () {
-var items = this.callbacks["$wt.widgets.TabItem"].parent.items;
-for (var i = 0; i < items.length; i++) {
-var obj = this.callbacks["$wt.widgets.TabItem"];
-if (obj == items[i]) {
-this.callbacks["$wt.widgets.TabItem"].parent.setSelection (i, false);
-var ctrl = items[i].control;
-if (ctrl == null) continue ;this.callbacks["$wt.widgets.TabItem"].fixControlBounds (ctrl);
-ctrl.setVisible (true);
-ctrl.getParent ().layout ([ctrl]);
-} else {
-var ctrl = items[i].control;
-if (ctrl == null) continue ;ctrl.setVisible (false);
-}}
+this.callbacks["$wt.widgets.TabItem"].parent.setSelection (this.$finals.index, true);
 });
 cla$$ = $_P ();
 }
 return $_N ($wt.widgets.TabItem$1, innerThis, finalVars);
-}) (this, null));
-}, $fz.isPrivate = true, $fz), "Number");
+}) (this, $_F ("index", index)));
+}, $fz.isPrivate = true, $fz), "~N");
 $_M (cla$$, "getControl", 
 function () {
 return this.control;
@@ -11196,6 +11626,16 @@ if (index == this.parent.getSelectionIndex ()) {
 if (this.control != null) this.control.setVisible (false);
 }this.parent.destroyItem (this);
 });
+$_M (cla$$, "releaseHandle", 
+function () {
+if (this.textEl != null) {
+BrowserNative.releaseHandle (this.textEl);
+this.textEl = null;
+}if (this.handle != null) {
+BrowserNative.releaseHandle (this.handle);
+this.handle = null;
+}$_U (this, $wt.widgets.TabItem, "releaseHandle", []);
+});
 $_M (cla$$, "releaseWidget", 
 function () {
 $_U (this, $wt.widgets.TabItem, "releaseWidget", []);
@@ -11215,54 +11655,53 @@ if (index != this.parent.getSelectionIndex ()) {
 if (newControl != null) newControl.setVisible (false);
 return ;
 }if (newControl != null) {
-var clientArea = this.parent.getClientArea ();
-if (clientArea.height <= 0 || clientArea.width <= 0) {
-} else {
-newControl.setBounds (clientArea);
-this.fixControlBounds (newControl);
+newControl.setBounds (this.parent.getClientArea ());
 newControl.setVisible (true);
-}}if (oldControl != null) oldControl.setVisible (false);
+}if (oldControl != null) oldControl.setVisible (false);
 }, "$wt.widgets.Control");
-$_M (cla$$, "fixControlBounds", 
-function () {
-this.fixControlBounds (this.control);
-});
-$_M (cla$$, "fixControlBounds", 
-($fz = function (newControl) {
-var b = this.parent.getBounds ();
-b.height -= 30;
-b.width -= 12;
-b.x -= 1;
-b.y -= 1;
-if ((this.parent.style & 1024) == 0) {
-b.y += 18;
-}newControl.setBounds (b);
-}, $fz.isPrivate = true, $fz), "$wt.widgets.Control");
 $_M (cla$$, "setImage", 
 function (image) {
 var index = this.parent.indexOf (this);
 if (index == -1) return ;
 $_U (this, $wt.widgets.TabItem, "setImage", [image]);
-}, "$wt.graphics.Image");
+if (image != null && image.handle == null && image.url != null && image.url.length != 0) {
+var handleStyle = this.textEl.style;
+if (image.url.toLowerCase ().endsWith (".png") && handleStyle.filter != null) {
+handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+} else {
+handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+}} else {
+this.textEl.style.backgroundImage = "";
+if ($wt.internal.browser.OS.isIE && image.url != null && image.url.toLowerCase ().endsWith (".png") && this.textEl.style.filter != null) {
+this.textEl.style.filter = "";
+}}var cssName = this.handle.className;
+if (cssName == null) cssName = "";
+var key = "tab-item-image";
+var idx = cssName.indexOf (key);
+this.hasImage = image != null;
+if (this.hasImage) {
+if (idx == -1) {
+this.handle.className += " " + key;
+}} else {
+if (idx != -1) {
+this.handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
+}}}, "$wt.graphics.Image");
 $_M (cla$$, "setText", 
 function (string) {
-if (this.handle != null) {
-this.handle.appendChild (document.createTextNode (string));
-}var index = this.parent.indexOf (this);
+var index = this.parent.indexOf (this);
 if (index == -1) return ;
 $_U (this, $wt.widgets.TabItem, "setText", [string]);
-}, "String");
+if (this.handle != null) {
+$wt.internal.browser.OS.clearChildren (this.handle);
+this.textEl = document.createElement ("SPAN");
+this.handle.appendChild (this.textEl);
+this.textEl.appendChild (document.createTextNode (string));
+}this.text = string;
+}, "~S");
 $_M (cla$$, "setToolTipText", 
 function (string) {
 this.toolTipText = string;
-}, "String");
-$_M (cla$$, "releaseHandle", 
-function () {
-if (this.handle != null) {
-BrowserNative.releaseHandle (this.handle);
-this.handle = null;
-}$_U (this, $wt.widgets.TabItem, "releaseHandle", []);
-});
+}, "~S");
 cla$$ = $_C (function () {
 this.items = null;
 this.borderFrame = null;
@@ -11281,7 +11720,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.TabFolder, [parent, $wt.widgets.TabFolder.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -11291,8 +11730,8 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style = $wt.widgets.Widget.checkBits (style, 128, 1024, 0, 0, 0, 0);
-return style & ~(256 | 512);
-}, "Number");
+return style & -769;
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -11308,27 +11747,37 @@ if (this.items[i] != null && !this.items[i].isDisposed ()) {
 width += $wt.internal.browser.OS.getContainerWidth (this.items[i].handle);
 }}
 }if (width < 0) {
-width += 124 + 12;
+width += 136;
 }var border = this.getBorderWidth ();
 width += border * 2;
 size.x = Math.max (width, size.x);
 System.out.println ("in tab folder " + size);
 return size;
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "computeTrim", 
 function (x, y, width, height) {
-x -= 4;
-y -= 4 + 18;
-width += 8;
-height += 8 + 18;
+var lineHeight = 0;
+if (this.items != null && this.items.length > 0) {
+lineHeight = $wt.internal.browser.OS.getContainerHeight (this.items[this.offset].handle);
+if (this.getSelectionIndex () == this.offset) {
+lineHeight -= 2;
+}if ($wt.internal.browser.OS.isIE) {
+lineHeight++;
+} else {
+if ((this.style & 1024) != 0) {
+lineHeight--;
+}}x -= 4;
+y -= 4 + lineHeight;
+}width += 8;
+height += 8 + lineHeight;
 var border = this.getBorderWidth ();
 x -= border;
 y -= border;
 width += border * 2;
 height += border * 2;
 return  new $wt.graphics.Rectangle (x, y, width, height);
-}, "Number,Number,Number,Number");
-$_V (cla$$, "containerHandle", 
+}, "~N,~N,~N,~N");
+$_M (cla$$, "containerHandle", 
 function () {
 return this.contentArea;
 });
@@ -11340,7 +11789,7 @@ el.className = css;
 }if (parent != null) {
 (parent).appendChild (el);
 }return el;
-}, "Object,String");
+}, "Object,~S");
 $_M (cla$$, "createItem", 
 function (item, index) {
 var count = this.items.length;
@@ -11353,7 +11802,9 @@ var key = "tab-folder-no-tab";
 var idx = cssName.indexOf (key);
 if (idx != -1) {
 this.borderFrame.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
-}tab.appendChild (document.createTextNode (item.getNameText ()));
+}item.textEl = document.createElement ("SPAN");
+tab.appendChild (item.textEl);
+item.textEl.appendChild (document.createTextNode (item.getNameText ()));
 var width = -2;
 if (this.items != null && this.items.length != 0) {
 for (var i = 0; i < index; i++) {
@@ -11370,27 +11821,27 @@ this.setSelection (0, false);
 var event =  new $wt.widgets.Event ();
 event.item = this.items[0];
 this.sendEvent (13, event);
-}}, "$wt.widgets.TabItem,Number");
+}}, "$wt.widgets.TabItem,~N");
 $_V (cla$$, "createHandle", 
 function () {
 this.items =  new Array (0);
 var cssName = "tab-folder-default";
 if ((this.style & 2048) != 0) {
 cssName += " tab-folder-border-default";
-}this.handle = this.createCSSElement (this.parent.handle, cssName);
+}this.handle = this.createCSSElement (this.parent.containerHandle (), cssName);
 cssName = "tab-folder-no-tab";
 if ((this.style & 1024) != 0) {
 cssName += " tab-folder-bottom";
 }this.borderFrame = this.createCSSElement (this.handle, cssName);
 cssName = "tab-folder-border ";
 this.itemMore = this.createCSSElement (this.borderFrame, "tab-item-more");
-if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+if ($wt.internal.browser.OS.isMozilla && !$wt.internal.browser.OS.isFirefox) {
 this.itemMore.style.bottom = "6px";
 }var el = this.createCSSElement (this.itemMore, "tab-item-button");
 this.btnNextTab = document.createElement ("BUTTON");
 el.appendChild (this.btnNextTab);
 var arrowRight = this.createCSSElement (this.btnNextTab, "button-arrow-right");
-if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+if ($wt.internal.browser.OS.isMozilla && !$wt.internal.browser.OS.isFirefox) {
 arrowRight.style.left = "-5px";
 arrowRight.style.top = "0";
 }el.onclick = this.btnNextTab.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
@@ -11431,7 +11882,7 @@ el = this.createCSSElement (this.itemMore, "tab-item-button");
 this.btnPrevTab = document.createElement ("BUTTON");
 el.appendChild (this.btnPrevTab);
 var arrowLeft = this.createCSSElement (this.btnPrevTab, "button-arrow-left");
-if ($wt.internal.browser.OS.isMozilla && ($t$ = ! $wt.internal.browser.OS.isFirefox, $wt.internal.browser.OS.prototype.isFirefox = $wt.internal.browser.OS.isFirefox, $t$)) {
+if ($wt.internal.browser.OS.isMozilla && !$wt.internal.browser.OS.isFirefox) {
 arrowLeft.style.left = "-6px";
 arrowLeft.style.top = "0";
 }el.onclick = this.btnPrevTab.onclick = Clazz.makeFunction ((function (innerThis, finalVars) {
@@ -11458,7 +11909,7 @@ this.borderNE = this.createCSSElement (this.borderFrame, cssName + "tab-folder-b
 this.borderSW = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-sw");
 this.borderSE = this.createCSSElement (this.borderFrame, cssName + "tab-folder-border-se");
 this.contentArea = this.createCSSElement (this.handle, "tab-folder-content-area");
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 });
 $_M (cla$$, "createWidget", 
 function () {
@@ -11474,30 +11925,34 @@ return null;
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.TabFolder, "setBounds", [x, y, width, height]);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "setSize", 
 function (width, height) {
 $_U (this, $wt.widgets.TabFolder, "setSize", [width, height]);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "SetWindowPos", 
 function (hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags) {
-this.setSelection (this.getSelectionIndex (), false);
-return $_U (this, $wt.widgets.TabFolder, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
-}, "Object,Object,Number,Number,Number,Number,Number");
+var selectionIndex = this.getSelectionIndex ();
+if (selectionIndex != -1) {
+var ctrl = this.items[selectionIndex].control;
+if (ctrl != null) ctrl.setBounds (this.getClientArea ());
+this.setSelection (selectionIndex, false);
+}return $_U (this, $wt.widgets.TabFolder, "SetWindowPos", [hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags]);
+}, "Object,Object,~N,~N,~N,~N,~N");
 $_V (cla$$, "getClientArea", 
 function () {
 this.forceResize ();
-var x = 2;
-var y = 2;
+var x = 4;
+var y = 4;
 var h = this.height - 8;
 var w = this.width - 8;
 if (this.items != null && this.items.length != 0) {
-var lineHeight = $wt.internal.browser.OS.getContainerHeight (this.items[0].handle);
+var lineHeight = $wt.internal.browser.OS.getContainerHeight (this.items[this.offset].handle);
 if ($wt.internal.browser.OS.isIE) lineHeight++;
-h -= lineHeight;
-if (this.getSelectionIndex () == 0) {
-h += 2;
-}if ((this.style & 1024) == 0) {
+if (this.getSelectionIndex () == this.offset) {
+lineHeight -= 2;
+}h -= lineHeight;
+if ((this.style & 1024) == 0) {
 y += lineHeight;
 } else {
 if ($wt.internal.browser.OS.isIE) h--;
@@ -11511,7 +11966,7 @@ return  new $wt.graphics.Rectangle (x, y, w, h);
 $_M (cla$$, "getItem", 
 function (index) {
 return this.items[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return this.items.length;
@@ -11535,7 +11990,8 @@ for (var i = 0; i < this.items.length; i++) {
 if (this.items[i] != null && this.items[i].handle != null && this.items[i].handle.className != null && this.items[i].handle.className.indexOf ("selected") != -1) {
 return i;
 }}
-return 0;
+System.out.println ("The selection is not happend yet!");
+return -1;
 });
 $_M (cla$$, "indexOf", 
 function (item) {
@@ -11568,7 +12024,7 @@ width = Math.max (width, size.x);
 height = Math.max (height, size.y);
 }}
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "mnemonicHit", 
 function (key) {
 var selection = this.getSelectionIndex ();
@@ -11583,7 +12039,7 @@ this.setSelection (i, true);
 return true;
 }}}}}
 return false;
-}, "Number");
+}, "~N");
 $_V (cla$$, "mnemonicMatch", 
 function (key) {
 for (var i = 0; i < this.items.length; i++) {
@@ -11594,7 +12050,7 @@ if ((Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (ch))
 return true;
 }}}
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "releaseHandle", 
 function () {
 if (this.borderNW != null) {
@@ -11671,12 +12127,35 @@ function (index) {
 var count = this.getItemCount ();
 if (!(0 <= index && index < count)) return ;
 this.setSelection (index, false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (index, notify) {
+System.out.println ("set selection is called!");
+var oldIndex = this.getSelectionIndex ();
+if (oldIndex != -1 && oldIndex != index) {
+var item = this.items[oldIndex];
+var control = item.control;
+if (control != null && !control.isDisposed ()) {
+control.setVisible (false);
+}}this.updateSelection (index);
+var newIndex = index;
+if (oldIndex == index) {
+newIndex = -1;
+}if (newIndex != -1) {
+var item = this.items[newIndex];
+var control = item.control;
+if (control != null && !control.isDisposed ()) {
+control.setBounds (this.getClientArea ());
+control.setVisible (true);
+}if (notify) {
+var event =  new $wt.widgets.Event ();
+event.item = item;
+this.sendEvent (13, event);
+}}}, "~N,~B");
+$_M (cla$$, "updateSelection", 
+function (index) {
 var key = "tab-item-selected";
 if (this.items[index] != null) {
-var before = false;
 var left = -2;
 var x = 2;
 for (var i = this.offset; i < this.items.length; i++) {
@@ -11688,7 +12167,6 @@ var idx = cssName.indexOf (key);
 if (idx != -1) {
 this.items[i].handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
 if (i > index) {
-before = true;
 }}var w = $wt.internal.browser.OS.getContainerWidth (this.items[i].handle);
 if (i < index) {
 left += w;
@@ -11719,7 +12197,7 @@ this.items[index].handle.className += " " + key;
 if (this.width != 0) {
 var w = $wt.internal.browser.OS.getContainerWidth (this.items[index].handle);
 left += 4;
-var y = (this.width - left - 4);
+var y = (this.width - left - ((this.style & 2048) != 0 ? 4 : 0));
 if (index >= this.offset) {
 y -= w;
 }if (y < 0) {
@@ -11734,13 +12212,8 @@ this.borderNW.style.width = (left - 2) + "px";
 this.borderNE.style.width = y + "px";
 }}}for (var i = 0; i < this.offset; i++) {
 this.items[i].handle.style.display = "none";
-var cssName = this.items[i].handle.className;
-if (cssName == null) cssName = "";
-var idx = cssName.indexOf (key);
-if (idx != -1) {
-this.items[i].handle.className = cssName.substring (0, idx) + cssName.substring (idx + key.length);
-}}
-}, "Number,Boolean");
+}
+}, "~N");
 $_V (cla$$, "traversePage", 
 function (next) {
 var count = this.getItemCount ();
@@ -11753,7 +12226,7 @@ var offset = (next) ? 1 : -1;
 index = (index + offset + count) % count;
 }this.setSelection (index, true);
 return index == this.getSelectionIndex ();
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
 this.noSelection = false;
 this.ignoreModify = false;
@@ -11764,17 +12237,17 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Combo, [parent, $wt.widgets.Combo.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "add", 
 function (string) {
 if (this.handle != null) {
 this.handle.options[this.handle.options.length] =  new Option (string, string);
-}}, "String");
+}}, "~S");
 $_M (cla$$, "add", 
 function (string, index) {
 if (this.handle != null) {
 this.handle.options[index] =  new Option (string, string);
-}}, "String,Number");
+}}, "~S,~N");
 $_M (cla$$, "addModifyListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -11796,12 +12269,12 @@ function () {
 });
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style &= ($t$ = ~ $WT.BORDER, $WT.prototype.BORDER = $WT.BORDER, $t$);
-style &= ~(256 | 512);
+style &= -2049;
+style &= -769;
 style = $wt.widgets.Widget.checkBits (style, 4, 64, 0, 0, 0, 0);
-if ((style & 64) != 0) return style & ($t$ = ~ $WT.READ_ONLY, $WT.prototype.READ_ONLY = $WT.READ_ONLY, $t$);
+if ((style & 64) != 0) return style & -9;
 return style;
-}, "Number");
+}, "~N");
 $_M (cla$$, "clearSelection", 
 function () {
 });
@@ -11812,22 +12285,23 @@ var height = 0;
 if (wHint == -1) {
 }if (hHint == -1) {
 if ((this.style & 64) != 0) {
-}}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+}}if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 if ((this.style & 8) != 0) {
 width += 8;
 } else {
-}return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}System.out.println ("Combo : " + width + " " + height);
+return  new $wt.graphics.Point (width, height);
+}, "~N,~N,~B");
 $_M (cla$$, "copy", 
 function () {
 });
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.Combo, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("SELECT");
 if (this.parent != null) {
 var parentHandle = this.parent.containerHandle ();
@@ -11845,7 +12319,7 @@ $_U (this, $wt.widgets.Combo, "deregister", []);
 $_M (cla$$, "deselect", 
 function (index) {
 this.sendEvent (24);
-}, "Number");
+}, "~N");
 $_M (cla$$, "deselectAll", 
 function () {
 this.sendEvent (24);
@@ -11853,7 +12327,7 @@ this.sendEvent (24);
 $_M (cla$$, "getItem", 
 function (index) {
 return "";
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return 0;
@@ -11876,7 +12350,7 @@ return this.getText ();
 });
 $_M (cla$$, "getOrientation", 
 function () {
-return this.style & (33554432 | 67108864);
+return this.style & (100663296);
 });
 $_M (cla$$, "getSelection", 
 function () {
@@ -11910,7 +12384,7 @@ return false;
 $_M (cla$$, "indexOf", 
 function (string) {
 return this.indexOf (string, 0);
-}, "String");
+}, "~S");
 $_M (cla$$, "indexOf", 
 function (string, start) {
 if (string.length == 0) {
@@ -11920,7 +12394,7 @@ if (string.equals (this.getItem (i))) return i;
 }
 return -1;
 }return -1;
-}, "String,Number");
+}, "~S,~N");
 $_M (cla$$, "paste", 
 function () {
 if ((this.style & 8) != 0) return ;
@@ -11931,16 +12405,16 @@ $_U (this, $wt.widgets.Combo, "register", []);
 });
 $_M (cla$$, "remove", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "remove", 
 function (start, end) {
 if (start > end) return ;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "remove", 
 function (string) {
 var index = this.indexOf (string, 0);
 this.remove (index);
-}, "String");
+}, "~S");
 $_M (cla$$, "removeAll", 
 function () {
 this.sendEvent (24);
@@ -11963,7 +12437,7 @@ this.eventTable.unhook (25, listener);
 }, "$wt.events.VerifyListener");
 $_M (cla$$, "select", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
 if ((this.style & 4) != 0) {
@@ -11975,12 +12449,13 @@ this.height = height;
 this.SetWindowPos (this.handle, null, x, y, width, height, flags);
 } else {
 $_U (this, $wt.widgets.Combo, "setBounds", [x, y, width, height, flags]);
-}}, "Number,Number,Number,Number,Number");
+}System.out.println ("left " + this.left + " " + this.top + " width " + width + " height " + height);
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setItem", 
 function (index, string) {
 if (this.isDisposed ()) return ;
 this.add (string, index);
-}, "Number,String");
+}, "~N,~S");
 $_M (cla$$, "setItems", 
 function (items) {
 for (var i = 0; i < items.length; i++) {
@@ -11993,7 +12468,7 @@ this.sendEvent (24);
 }, "Array");
 $_M (cla$$, "setOrientation", 
 function (orientation) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (selection) {
 }, "$wt.graphics.Point");
@@ -12004,17 +12479,17 @@ var index = this.indexOf (string);
 if (index != -1) this.select (index);
 return ;
 }this.sendEvent (24);
-}, "String");
+}, "~S");
 $_M (cla$$, "setTextLimit", 
 function (limit) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setVisibleItemCount", 
 function (count) {
 if (count < 0) return ;
 this.visibleCount = count;
 if ((this.style & 4) != 0) {
 this.forceResize ();
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "traverseEscape", 
 function () {
 if ((this.style & 4) != 0) {
@@ -12033,7 +12508,7 @@ event.stateMask = keyEvent.stateMask;
 }this.sendEvent (25, event);
 if (!event.doit || this.isDisposed ()) return null;
 return event.text;
-}, "String,Number,Number,$wt.widgets.Event");
+}, "~S,~N,~N,$wt.widgets.Event");
 $_V (cla$$, "windowClass", 
 function () {
 return "DIV";
@@ -12060,12 +12535,12 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Group, [parent, $wt.widgets.Group.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style |= 524288;
-return style & ~(256 | 512);
-}, "Number");
+return style & -769;
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -12076,20 +12551,20 @@ var length = 0;
 if (this.groupText != null) {
 length = this.groupText.length;
 }if (length != 0) {
-size.x = Math.max (size.x, this.textWidth + $wt.widgets.Group.CLIENT_INSET * 6);
+size.x = Math.max (size.x, this.textWidth + 18);
 }return size;
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var trim = $_U (this, $wt.widgets.Group, "computeTrim", [x, y, width, height]);
-trim.x -= $wt.widgets.Group.CLIENT_INSET;
+trim.x -= 3;
 if (this.textHeight <= 0) {
 this.textHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "group-default", this.handle.style.cssText);
 }trim.y -= this.textHeight;
-trim.width += $wt.widgets.Group.CLIENT_INSET * 2;
-trim.height += this.textHeight + $wt.widgets.Group.CLIENT_INSET;
+trim.width += 6;
+trim.height += this.textHeight + 3;
 return trim;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "containerHandle", 
 function () {
 return this.content;
@@ -12100,10 +12575,10 @@ var el = document.createElement ("DIV");
 el.className = css;
 (parent).appendChild (el);
 return el;
-}, "Object,String");
+}, "Object,~S");
 $_V (cla$$, "createHandle", 
 function () {
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("DIV");
 if ((this.style & 2048) != 0) {
 this.handle.className = "group-default group-border-default";
@@ -12145,11 +12620,11 @@ function () {
 this.forceResize ();
 if (this.textHeight <= 0) {
 this.textHeight = $wt.internal.browser.OS.getStringStyledHeight (".", "group-default", this.handle.style.cssText);
-}var x = $wt.widgets.Group.CLIENT_INSET;
+}var x = 3;
 var y = this.textHeight;
 var border = this.getBorderWidth ();
-var width = this.width - border * 2 - $wt.widgets.Group.CLIENT_INSET * 2;
-var height = this.height - border * 2 - y - $wt.widgets.Group.CLIENT_INSET;
+var width = this.width - border * 2 - 6;
+var height = this.height - border * 2 - y - 3;
 return  new $wt.graphics.Rectangle (x, y, width, height);
 });
 $_V (cla$$, "getNameText", 
@@ -12163,13 +12638,13 @@ return this.groupText;
 $_V (cla$$, "mnemonicHit", 
 function (key) {
 return this.setFocus ();
-}, "Number");
+}, "~N");
 $_V (cla$$, "mnemonicMatch", 
 function (key) {
 var mnemonic = this.findMnemonic (this.getText ());
 if ((mnemonic).charCodeAt (0) == ('\0').charCodeAt (0)) return false;
 return (Character.toUpperCase (key)).charCodeAt (0) == (Character.toUpperCase (mnemonic)).charCodeAt (0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "releaseHandle", 
 function () {
 if (this.titleLine != null) {
@@ -12217,7 +12692,7 @@ var w = this.width - this.textWidth - 12;
 if (w < 0) {
 w = 0;
 }this.rightCorner.style.width = w + "px";
-}}, "Number,Number,Number,Number");
+}}, "~N,~N,~N,~N");
 $_M (cla$$, "setFont", 
 function (font) {
 $_U (this, $wt.widgets.Group, "setFont", [font]);
@@ -12247,7 +12722,7 @@ var w = this.width - this.textWidth - 24;
 if (w > 0) {
 this.rightCorner.style.width = w + "px";
 }}}}this.groupText = string;
-}, "String");
+}, "~S");
 $_S (cla$$,
 "CLIENT_INSET", 3);
 cla$$ = $_C (function () {
@@ -12265,27 +12740,27 @@ function (parent, style) {
 $_R (this, $wt.widgets.TreeItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, null, -1);
-}, "$wt.widgets.Tree,Number");
+}, "$wt.widgets.Tree,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TreeItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, null, index);
-}, "$wt.widgets.Tree,Number,Number");
+}, "$wt.widgets.Tree,~N,~N");
 $_K (cla$$, 
 function (parentItem, style) {
 $_R (this, $wt.widgets.TreeItem, [parentItem.parent, style]);
 this.parent = parentItem.parent;
 this.parentItem = parentItem;
 this.parent.createItem (this, parentItem.handle, -1);
-}, "$wt.widgets.TreeItem,Number");
+}, "$wt.widgets.TreeItem,~N");
 $_K (cla$$, 
 function (parentItem, style, index) {
 $_R (this, $wt.widgets.TreeItem, [parentItem.parent, style]);
 this.parent = parentItem.parent;
 this.parentItem = parentItem;
 this.parent.createItem (this, parentItem.handle, index);
-}, "$wt.widgets.TreeItem,Number,Number");
+}, "$wt.widgets.TreeItem,~N,~N");
 cla$$.checkNull = $_M (cla$$, "checkNull", 
 function (item) {
 return item;
@@ -12302,7 +12777,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getBackground ();
 return  new $wt.graphics.Color (this.display, this.handle.style.backgroundColor);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getBounds", 
 function () {
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
@@ -12310,7 +12785,7 @@ return  new $wt.graphics.Rectangle (0, 0, 0, 0);
 $_M (cla$$, "getBounds", 
 function (index) {
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getChecked", 
 function () {
 if ((this.parent.style & 32) == 0) return false;
@@ -12331,7 +12806,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getFont ();
 return this.display.getSystemFont ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "getForeground", 
 function () {
 return  new $wt.graphics.Color (this.display, this.parent.handle.style.color);
@@ -12341,7 +12816,7 @@ function (index) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return this.getForeground ();
 return  new $wt.graphics.Color (this.display, this.handle.style.color);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getGrayed", 
 function () {
 if ((this.parent.style & 32) == 0) return false;
@@ -12352,7 +12827,7 @@ return this.checkElement.checked;
 $_M (cla$$, "getItem", 
 function (index) {
 return this.parent.items[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return this.parent.items.length;
@@ -12368,11 +12843,11 @@ if (index == 0) return this.getImage ();
 if (this.images != null) {
 if (0 <= index && index < this.images.length) return this.images[index];
 }return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getImageBounds", 
 function (index) {
 return  new $wt.graphics.Rectangle (0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getParent", 
 function () {
 return this.parent;
@@ -12389,7 +12864,7 @@ if (0 <= index && index < this.strings.length) {
 var string = this.strings[index];
 return string != null ? string : "";
 }}return "";
-}, "Number");
+}, "~N");
 $_M (cla$$, "indexOf", 
 function (item) {
 return this.parent.indexOf (this.index, item);
@@ -12401,7 +12876,7 @@ if (this.parent.drawCount > 0) return ;
 $_M (cla$$, "redraw", 
 function (column, drawText, drawImage) {
 if (this.parent.drawCount > 0) return ;
-}, "Number,Boolean,Boolean");
+}, "~N,~B,~B");
 $_M (cla$$, "releaseChild", 
 function () {
 $_U (this, $wt.widgets.TreeItem, "releaseChild", []);
@@ -12432,13 +12907,13 @@ function (index, color) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return ;
 this.redraw (index, true, true);
-}, "Number,$wt.graphics.Color");
+}, "~N,$wt.graphics.Color");
 $_M (cla$$, "setChecked", 
 function (checked) {
 if ((this.parent.style & 32) == 0) return ;
 if (this.checkElement != null) {
 this.checkElement.checked = checked;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setExpanded", 
 function (expanded) {
 this.expandStatus = expanded;
@@ -12455,7 +12930,7 @@ if (items.length == 0) {
 this.updateModifier (0);
 } else {
 this.updateModifier (expanded ? 1 : -1);
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setFont", 
 function (font) {
 }, "$wt.graphics.Font");
@@ -12463,7 +12938,7 @@ $_M (cla$$, "setFont",
 function (index, font) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return ;
-}, "Number,$wt.graphics.Font");
+}, "~N,$wt.graphics.Font");
 $_M (cla$$, "setForeground", 
 function (color) {
 this.redraw ();
@@ -12473,13 +12948,13 @@ function (index, color) {
 var count = Math.max (1, this.parent.getColumnCount ());
 if (0 > index || index > count - 1) return ;
 this.redraw (index, true, false);
-}, "Number,$wt.graphics.Color");
+}, "~N,$wt.graphics.Color");
 $_M (cla$$, "setGrayed", 
 function (grayed) {
 if ((this.parent.style & 32) == 0) return ;
 if (this.checkElement != null) {
 this.checkElement.checked = grayed;
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "setImage", 
 function (images) {
 for (var i = 0; i < images.length; i++) {
@@ -12499,7 +12974,7 @@ if (this.images != null) {
 if (image != null && image.type == 1) {
 if (image.equals (this.images[index])) return ;
 }this.images[index] = image;
-}}, "Number,$wt.graphics.Image");
+}}, "~N,$wt.graphics.Image");
 $_M (cla$$, "setImage", 
 function (image) {
 this.setImage (0, image);
@@ -12647,11 +13122,11 @@ padding += 20;
 }
 hItem.style.marginLeft = padding + "px";
 tbodyTD.appendChild (hItem);
-}, "Number,String");
+}, "~N,~S");
 $_M (cla$$, "setText", 
 function (string) {
 this.setText (0, string);
-}, "String");
+}, "~S");
 $_M (cla$$, "showSelection", 
 function (selected) {
 var index = 1;
@@ -12659,7 +13134,7 @@ if ((this.parent.style & 32) != 0) {
 index++;
 }var element = this.handle.childNodes[0].childNodes[0].childNodes[index];
 element.className = selected ? "tree-item-text-selected" : "tree-item-text-default";
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "toggleExpandStatus", 
 function () {
 var clazzName = this.handle.childNodes[0].childNodes[0].childNodes[0].className;
@@ -12692,7 +13167,7 @@ return true;
 } else {
 element.className = "tree-item-anchor-default";
 return true;
-}}, "Number");
+}}, "~N");
 cla$$ = $_C (function () {
 this.parent = null;
 this.resizable = false;
@@ -12704,14 +13179,14 @@ $_R (this, $wt.widgets.TreeColumn, [parent, $wt.widgets.TreeColumn.checkStyle (s
 this.resizable = true;
 this.parent = parent;
 parent.createItem (this, parent.getColumnCount ());
-}, "$wt.widgets.Tree,Number");
+}, "$wt.widgets.Tree,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.TreeColumn, [parent, $wt.widgets.TreeColumn.checkStyle (style)]);
 this.resizable = true;
 this.parent = parent;
 parent.createItem (this, index);
-}, "$wt.widgets.Tree,Number,Number");
+}, "$wt.widgets.Tree,~N,~N");
 $_M (cla$$, "addControlListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -12727,7 +13202,7 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 16384, 16777216, 131072, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -12786,12 +13261,12 @@ this.eventTable.unhook (14, listener);
 }, "$wt.events.SelectionListener");
 $_M (cla$$, "setAlignment", 
 function (alignment) {
-if ((alignment & (16384 | 131072 | 16777216)) == 0) return ;
+if ((alignment & (16924672)) == 0) return ;
 var index = this.parent.indexOf (this);
 if (index == -1 || index == 0) return ;
-this.style &= ~(16384 | 131072 | 16777216);
-this.style |= alignment & (16384 | 131072 | 16777216);
-}, "Number");
+this.style &= -16924673;
+this.style |= alignment & (16924672);
+}, "~N");
 $_M (cla$$, "setImage", 
 function (image) {
 var index = this.parent.indexOf (this);
@@ -12801,18 +13276,18 @@ $_U (this, $wt.widgets.TreeColumn, "setImage", [image]);
 $_M (cla$$, "setResizable", 
 function (resizable) {
 this.resizable = resizable;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setText", 
 function (string) {
 var index = this.parent.indexOf (this);
 if (index == -1) return ;
 $_U (this, $wt.widgets.TreeColumn, "setText", [string]);
-}, "String");
+}, "~S");
 $_M (cla$$, "setWidth", 
 function (width) {
 var index = this.parent.indexOf (this);
 if (index == -1) return ;
-}, "Number");
+}, "~N");
 cla$$ = $_C (function () {
 this.items = null;
 this.columns = null;
@@ -12845,12 +13320,12 @@ function (parent, style) {
 $_R (this, $wt.widgets.Tree, [parent, $wt.widgets.Tree.checkStyle (style)]);
 this.selections =  new Array (0);
 this.items =  new Array (0);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-style |= 256 | 512;
+style |= 768;
 return $wt.widgets.Widget.checkBits (style, 4, 2, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -12870,8 +13345,8 @@ $_M (cla$$, "computeSize",
 function (wHint, hHint, changed) {
 var width = 0;
 var height = 0;
-if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var border = this.getBorderWidth ();
@@ -12880,11 +13355,11 @@ height += border * 2;
 if ((this.style & 512) != 0) {
 }if ((this.style & 256) != 0) {
 }return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.Tree, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("DIV");
 if (this.parent != null) {
 var parentHandle = this.parent.containerHandle ();
@@ -12899,7 +13374,7 @@ this.handle.appendChild (table);
 });
 $_M (cla$$, "createItem", 
 function (column, index) {
-}, "$wt.widgets.TreeColumn,Number");
+}, "$wt.widgets.TreeColumn,~N");
 $_M (cla$$, "createItem", 
 function (item, hParent, index) {
 if (this.items == null) {
@@ -12956,7 +13431,7 @@ this.items[siblingIndex] = item;
 }}}if (item.parentItem != null) {
 item.handle.style.display = "none";
 item.parentItem.updateModifier (-1);
-}}, "$wt.widgets.TreeItem,Object,Number");
+}}, "$wt.widgets.TreeItem,Object,~N");
 $_M (cla$$, "toggleSelection", 
 function (item, isCtrlKeyHold, isShiftKeyHold) {
 if (item == null) {
@@ -13011,7 +13486,7 @@ this.selections =  new Array (1);
 }this.selections[0] = item;
 }this.lastSelection = item;
 return true;
-}, "$wt.widgets.TreeItem,Boolean,Boolean");
+}, "$wt.widgets.TreeItem,~B,~B");
 $_M (cla$$, "skipItems", 
 function (index) {
 var parentItem = this.items[index];
@@ -13038,7 +13513,7 @@ return index;
 }}index++;
 }
 return -1;
-}, "Number");
+}, "~N");
 $_M (cla$$, "createParent", 
 function () {
 this.forceResize ();
@@ -13066,14 +13541,14 @@ this.updateScrollBar ();
 $_M (cla$$, "enableWidget", 
 function (enabled) {
 $_U (this, $wt.widgets.Tree, "enableWidget", [enabled]);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "findItem", 
 function (id) {
 return null;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getGridLineWidth", 
 function () {
-return $wt.widgets.Tree.GRID_WIDTH;
+return 1;
 });
 $_M (cla$$, "getHeaderHeight", 
 function () {
@@ -13091,7 +13566,7 @@ return  new $wt.graphics.Point (0, this.getItemHeight ());
 $_M (cla$$, "getColumn", 
 function (index) {
 return this.columns[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getColumnCount", 
 function () {
 return 0;
@@ -13110,7 +13585,7 @@ for (var i = index + 1; i < nextSiblingIdx; i++) {
 children[i - index - 1] = this.items[i];
 }
 return children;
-}, "Number");
+}, "~N");
 $_M (cla$$, "findItem", 
 function (parentIndex, index) {
 if (parentIndex < 0) {
@@ -13139,7 +13614,7 @@ return parentIndex;
 }parentIndex++;
 }
 return -1;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "findNextSiblingItem", 
 function (parentIndex) {
 if (parentIndex < 0) {
@@ -13168,7 +13643,7 @@ return parentIndex;
 }} else {
 return parentIndex;
 }}return -1;
-}, "Number");
+}, "~N");
 $_M (cla$$, "indexOf", 
 function (parentIndex, ti) {
 var index = 0;
@@ -13206,11 +13681,11 @@ return index;
 }parentIndex++;
 }
 return -1;
-}, "Number,$wt.widgets.TreeItem");
+}, "~N,$wt.widgets.TreeItem");
 $_M (cla$$, "getItem", 
 function (index) {
 return this.items[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItem", 
 function (point) {
 return null;
@@ -13223,7 +13698,7 @@ $_M (cla$$, "getItemCount",
 function (hItem) {
 var count = 0;
 return this.items.length;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemHeight", 
 function () {
 return 16;
@@ -13262,7 +13737,7 @@ children[children.length] = item;
 }hTreeItem++;
 }
 return children;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getLinesVisible", 
 function () {
 return this.linesVisible;
@@ -13333,12 +13808,12 @@ this.eventTable.unhook (18, listener);
 }, "$wt.events.TreeListener");
 $_M (cla$$, "setInsertMark", 
 function (item, before) {
-}, "$wt.widgets.TreeItem,Boolean");
+}, "$wt.widgets.TreeItem,~B");
 $_M (cla$$, "setLinesVisible", 
 function (show) {
 if (this.linesVisible == show) return ;
 this.linesVisible = show;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "selectAll", 
 function () {
 if ((this.style & 4) != 0) return ;
@@ -13346,7 +13821,7 @@ if ((this.style & 4) != 0) return ;
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
 $_U (this, $wt.widgets.Tree, "setBounds", [x, y, width, height, flags]);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setCheckboxImageList", 
 function () {
 if ((this.style & 32) == 0) return ;
@@ -13356,10 +13831,10 @@ $_M (cla$$, "setHeaderVisible",
 function (show) {
 this.setScrollWidth ();
 this.updateScrollBar ();
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "setRedraw", 
 function (redraw) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setScrollWidth", 
 function () {
 });
@@ -13398,7 +13873,7 @@ function () {
 $_M (cla$$, "showWidget", 
 function (visible) {
 $_U (this, $wt.widgets.Tree, "showWidget", [visible]);
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "topHandle", 
 function () {
 return this.hwndParent != null ? this.hwndParent : this.handle;
@@ -13422,27 +13897,27 @@ function (parent, style) {
 $_R (this, $wt.widgets.ProgressBar, [parent, $wt.widgets.ProgressBar.checkStyle (style)]);
 this.minimum = 0;
 this.maximum = 100;
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style |= 524288;
 return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
 var width = border * 2;
 var height = border * 2;
 if ((this.style & 256) != 0) {
-width += 16 * 10;
+width += 160;
 height += 16;
 } else {
 width += 16;
-height += 16 * 10;
+height += 160;
 }if (wHint != -1) width = wHint + (border * 2);
 if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "createHandle", 
 function () {
 this.handle = document.createElement ("DIV");
@@ -13486,12 +13961,12 @@ $_M (cla$$, "setMaximum",
 function (value) {
 if (0 <= this.minimum && this.minimum < value) {
 this.maximum = value;
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setMinimum", 
 function (value) {
 if (0 <= value && value < this.maximum) {
 this.minimum = value;
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setSelection", 
 function (value) {
 this.selection = value;
@@ -13499,7 +13974,7 @@ if ((this.style & 256) != 0) {
 this.innerHandle.style.width = Math.round (Math.floor (this.getSize ().x * this.selection / this.maximum)) + "px";
 } else {
 this.innerHandle.style.height = Math.round (Math.floor (this.getSize ().y * this.selection / this.maximum)) + "px";
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "windowClass", 
 function () {
 return "DIV";
@@ -13526,7 +14001,7 @@ $_R (this, $wt.widgets.Scale, [parent, $wt.widgets.Scale.checkStyle (style)]);
 this.minimum = 0;
 this.maximum = 100;
 this.pageIncrement = 10;
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -13536,7 +14011,7 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
@@ -13545,17 +14020,17 @@ var height = border * 2;
 var thumbWidth = 16;
 var thumbHeight = 24;
 if ((this.style & 256) != 0) {
-width += 16 * 10;
+width += 160;
 var scrollY = 16;
 height += (thumbHeight * 2) + scrollY + (Math.floor (scrollY / 3));
 } else {
 var scrollX = 16;
 width += (thumbWidth * 2) + scrollX + (Math.floor (scrollX / 3));
-height += 16 * 10;
+height += 160;
 }if (wHint != -1) width = wHint + (border * 2);
 if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.Scale, "createHandle", []);
@@ -13730,7 +14205,7 @@ if (increment < 1) return ;
 if (increment > this.maximum - this.minimum) return ;
 if (this.increment == increment) return ;
 this.increment = increment;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMaximum", 
 function (value) {
 if (0 <= this.minimum && this.minimum < value) {
@@ -13738,7 +14213,7 @@ if (this.maximum == value) return ;
 this.maximum = value;
 this.clearScaleDecoration ();
 this.decorateScale ();
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setMinimum", 
 function (value) {
 if (0 <= value && value < this.maximum) {
@@ -13746,7 +14221,7 @@ if (this.minimum == value) return ;
 this.minimum = value;
 this.clearScaleDecoration ();
 this.decorateScale ();
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setPageIncrement", 
 function (pageIncrement) {
 if (pageIncrement < 1) return ;
@@ -13755,7 +14230,7 @@ if (this.pageIncrement == pageIncrement) return ;
 this.pageIncrement = pageIncrement;
 this.clearScaleDecoration ();
 this.decorateScale ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (value) {
 if (this.selection == value) return ;
@@ -13765,7 +14240,7 @@ if ((this.style & 256) != 0) {
 this.thumbHandle.style.left = Math.round (Math.floor (this.selection * (this.getSize ().x - 12) / this.maximum)) + "px";
 } else {
 this.thumbHandle.style.top = Math.round (Math.floor (this.selection * (this.getSize ().y - 12) / this.maximum)) + "px";
-}}}, "Number");
+}}}, "~N");
 $_M (cla$$, "windowClass", 
 function () {
 return "DIV";
@@ -13787,7 +14262,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Slider, [parent, $wt.widgets.Slider.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -13797,7 +14272,7 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
@@ -13812,7 +14287,7 @@ height += Math.floor (16 * (this.maximum - this.minimum) / this.pageIncrement);
 }if (wHint != -1) width = wHint + (border * 2);
 if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "createWidget", 
 function () {
 this.register ();
@@ -13987,14 +14462,14 @@ this.updateSlider ();
 $_V (cla$$, "enableWidget", 
 function (enabled) {
 if (enabled) {
-this.state &= ($t$ = ~ $wt.widgets.Widget.DISABLED, $wt.widgets.Widget.prototype.DISABLED = $wt.widgets.Widget.DISABLED, $t$);
+this.state &= -9;
 } else {
-this.state |= $wt.widgets.Widget.DISABLED;
+this.state |= 8;
 }this.handle.disabled = enabled;
-}, "Boolean");
+}, "~B");
 $_V (cla$$, "getEnabled", 
 function () {
-return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+return (this.state & 8) == 0;
 });
 $_M (cla$$, "getIncrement", 
 function () {
@@ -14064,12 +14539,12 @@ this.eventTable.unhook (14, listener);
 $_M (cla$$, "setBounds", 
 function (x, y, width, height, flags) {
 $_U (this, $wt.widgets.Slider, "setBounds", [x, y, width, height, flags]);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setIncrement", 
 function (value) {
 if (value < 1) return ;
 this.increment = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMaximum", 
 function (value) {
 if (value < 0) return ;
@@ -14078,7 +14553,7 @@ this.maximum = value;
 if (this.selection > this.maximum) {
 this.selection = this.maximum;
 }this.updateSlider ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMinimum", 
 function (value) {
 if (value < 0) return ;
@@ -14087,12 +14562,12 @@ this.minimum = value;
 if (this.selection < this.minimum) {
 this.selection = this.minimum;
 }this.updateSlider ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setPageIncrement", 
 function (value) {
 if (value < 1) return ;
 this.pageIncrement = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (value) {
 if (value < 0) return ;
@@ -14103,23 +14578,23 @@ this.selection = this.maximum - this.thumb;
 } else {
 this.selection = value;
 }this.updateSlider ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSize", 
 function (width, height) {
 $_U (this, $wt.widgets.Slider, "setSize", [width, height]);
 this.updateSlider ();
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setBounds", 
 function (x, y, width, height) {
 $_U (this, $wt.widgets.Slider, "setBounds", [x, y, width, height]);
 this.updateSlider ();
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "setThumb", 
 function (value) {
 if (value < 1) return ;
 this.thumb = value;
 this.updateSlider ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "getIncrementButtonWidth", 
 function () {
 var size = this.getSize ();
@@ -14185,7 +14660,7 @@ this.selection = this.minimum;
 } else if (this.selection > this.maximum) {
 this.selection = this.maximum;
 }this.updateSlider ();
-}, "Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N");
 $_M (cla$$, "windowClass", 
 function () {
 return "DIV";
@@ -14199,7 +14674,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Sash, [parent, $wt.widgets.Sash.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -14209,22 +14684,22 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 256, 512, 0, 0, 0, 0);
-}, "Number");
+}, "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var border = this.getBorderWidth ();
 var width = border * 2;
 var height = border * 2;
 if ((this.style & 256) != 0) {
-width += $wt.widgets.Widget.DEFAULT_WIDTH;
+width += 64;
 height += 3;
 } else {
 width += 3;
-height += $wt.widgets.Widget.DEFAULT_HEIGHT;
+height += 64;
 }if (wHint != -1) width = wHint + (border * 2);
 if (hHint != -1) height = hHint + (border * 2);
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "createHandle", 
 function () {
 this.handle = document.createElement ("DIV");
@@ -14266,8 +14741,8 @@ height = 2;
 }event.height = height;
 event.widget = this.callbacks["$wt.widgets.Sash"];
 event.item = this.callbacks["$wt.widgets.Sash"];
+System.out.println ("drop");
 this.callbacks["$wt.widgets.Sash"].sendEvent (13, event);
-System.out.println (event);
 if (event.doit) {
 if ((this.callbacks["$wt.widgets.Sash"].style & 65536) != 0) {
 if (this.isHorizontal) {
@@ -14334,17 +14809,19 @@ $_S (cla$$,
 "INCREMENT", 1,
 "PAGE_INCREMENT", 9);
 cla$$ = $_C (function () {
+this.SASH_WIDTH = 3;
+this.sashStyle = 0;
+this.sashes = null;
+this.$background = null;
+this.$foreground = null;
+this.controls = null;
+this.maxControl = null;
+this.sashListener = null;
 $_Z (this, arguments);
 }, $wt.custom, "SashForm", $wt.widgets.Composite);
 $_Y (cla$$, function () {
-this.SASH_WIDTH = 3;
-this.sashStyle = 0;
 this.sashes =  new Array (0);
-this.$background = null;
-this.$foreground = null;
 this.controls =  new Array (0);
-this.maxControl = null;
-this.sashListener = null;
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -14368,12 +14845,12 @@ cla$$ = $_P ();
 }
 return $_N ($wt.custom.SashForm$1, innerThis, finalVars);
 }) (this, null);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-var mask = 2048 | 33554432 | 67108864;
+var mask = 100665344;
 return style & mask;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getOrientation", 
 function () {
 return (this.sashStyle & 512) != 0 ? 256 : 512;
@@ -14413,7 +14890,7 @@ newResult[result.length] = children[i];
 result = newResult;
 }
 return result;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "onDragSash", 
 function (event) {
 var sash = event.widget;
@@ -14432,22 +14909,22 @@ var sashBounds = sash.getBounds ();
 var area = this.getClientArea ();
 var correction = false;
 if (this.getOrientation () == 256) {
-correction = b1.width < $wt.custom.SashForm.DRAG_MINIMUM || b2.width < $wt.custom.SashForm.DRAG_MINIMUM;
+correction = b1.width < 20 || b2.width < 20;
 var totalWidth = b2.x + b2.width - b1.x;
 var shift = event.x - sashBounds.x;
 b1.width += shift;
 b2.x += shift;
 b2.width -= shift;
-if (b1.width < $wt.custom.SashForm.DRAG_MINIMUM) {
-b1.width = $wt.custom.SashForm.DRAG_MINIMUM;
+if (b1.width < 20) {
+b1.width = 20;
 b2.x = b1.x + b1.width + sashBounds.width;
 b2.width = totalWidth - b2.x;
 event.x = b1.x + b1.width;
 event.doit = false;
-}if (b2.width < $wt.custom.SashForm.DRAG_MINIMUM) {
-b1.width = totalWidth - $wt.custom.SashForm.DRAG_MINIMUM - sashBounds.width;
+}if (b2.width < 20) {
+b1.width = totalWidth - 20 - sashBounds.width;
 b2.x = b1.x + b1.width + sashBounds.width;
-b2.width = $wt.custom.SashForm.DRAG_MINIMUM;
+b2.width = 20;
 event.x = b1.x + b1.width;
 event.doit = false;
 }var data1 = c1.getLayoutData ();
@@ -14461,22 +14938,22 @@ c2.setLayoutData (data2);
 }(data1).weight = Math.floor (((parseInt (b1.width) << 16) + area.width - 1) / area.width);
 (data2).weight = Math.floor (((parseInt (b2.width) << 16) + area.width - 1) / area.width);
 } else {
-correction = b1.height < $wt.custom.SashForm.DRAG_MINIMUM || b2.height < $wt.custom.SashForm.DRAG_MINIMUM;
+correction = b1.height < 20 || b2.height < 20;
 var totalHeight = b2.y + b2.height - b1.y;
 var shift = event.y - sashBounds.y;
 b1.height += shift;
 b2.y += shift;
 b2.height -= shift;
-if (b1.height < $wt.custom.SashForm.DRAG_MINIMUM) {
-b1.height = $wt.custom.SashForm.DRAG_MINIMUM;
+if (b1.height < 20) {
+b1.height = 20;
 b2.y = b1.y + b1.height + sashBounds.height;
 b2.height = totalHeight - b2.y;
 event.y = b1.y + b1.height;
 event.doit = false;
-}if (b2.height < $wt.custom.SashForm.DRAG_MINIMUM) {
-b1.height = totalHeight - $wt.custom.SashForm.DRAG_MINIMUM - sashBounds.height;
+}if (b2.height < 20) {
+b1.height = totalHeight - 20 - sashBounds.height;
 b2.y = b1.y + b1.height + sashBounds.height;
-b2.height = $wt.custom.SashForm.DRAG_MINIMUM;
+b2.height = 20;
 event.y = b1.y + b1.height;
 event.doit = false;
 }var data1 = c1.getLayoutData ();
@@ -14497,7 +14974,7 @@ c2.setBounds (b2);
 $_M (cla$$, "setOrientation", 
 function (orientation) {
 if (this.getOrientation () == orientation) return ;
-this.sashStyle &= ~(256 | 512);
+this.sashStyle &= -769;
 this.sashStyle |= orientation == 512 ? 256 : 512;
 for (var i = 0; i < this.sashes.length; i++) {
 this.sashes[i].dispose ();
@@ -14507,7 +14984,7 @@ this.sashes[i].setForeground (this.$foreground);
 this.sashes[i].addListener (13, this.sashListener);
 }
 this.layout (false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setBackground", 
 function (color) {
 $_U (this, $wt.custom.SashForm, "setBackground", [color]);
@@ -14616,7 +15093,7 @@ ratios[i] = (data).weight;
 } else {
 data =  new $wt.custom.SashFormData ();
 cArray[i].setLayoutData (data);
-(data).weight = ratios[i] = Math.floor (((200 << 16) + 999) / 1000);
+(data).weight = ratios[i] = 13108;
 }total += ratios[i];
 }
 if (ratios[maxIndex] > 0) {
@@ -14630,7 +15107,7 @@ height += sashForm.getBorderWidth () * 2;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 return true;
@@ -14657,8 +15134,8 @@ var newSashes =  new Array (controls.length - 1);
 System.arraycopy (sashForm.sashes, 0, newSashes, 0, sashForm.sashes.length);
 for (var i = sashForm.sashes.length; i < newSashes.length; i++) {
 newSashes[i] =  new $wt.widgets.Sash (sashForm, sashForm.sashStyle);
-newSashes[i].setBackground (sashForm.background);
-newSashes[i].setForeground (sashForm.foreground);
+newSashes[i].setBackground (sashForm.$background);
+newSashes[i].setForeground (sashForm.$foreground);
 newSashes[i].addListener (13, sashForm.sashListener);
 }
 sashForm.sashes = newSashes;
@@ -14686,7 +15163,7 @@ ratios[i] = (data).weight;
 } else {
 data =  new $wt.custom.SashFormData ();
 controls[i].setLayoutData (data);
-(data).weight = ratios[i] = Math.floor (((200 << 16) + 999) / 1000);
+(data).weight = ratios[i] = 13108;
 }total += ratios[i];
 }
 var sashwidth = sashes.length > 0 ? sashForm.SASH_WIDTH + sashes[0].getBorderWidth () * 2 : sashForm.SASH_WIDTH;
@@ -14724,7 +15201,7 @@ sashes[sashes.length - 1].setBounds (area.x, y, area.width, sashwidth);
 y += sashwidth;
 height = area.height - y;
 controls[controls.length - 1].setBounds (area.x, y, area.width, height);
-}}}, "$wt.widgets.Composite,Boolean");
+}}}, "$wt.widgets.Composite,~B");
 cla$$ = $_C (function () {
 this.marginWidth = 0;
 this.marginHeight = 0;
@@ -14746,7 +15223,7 @@ var height = maxHeight + 2 * this.marginHeight;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_V (cla$$, "flushCache", 
 function (control) {
 return true;
@@ -14763,7 +15240,7 @@ for (var i = 0; i < children.length; i++) {
 children[i].setBounds (rect);
 children[i].setVisible (children[i] == this.topControl);
 }
-}, "$wt.widgets.Composite,Boolean");
+}, "$wt.widgets.Composite,~B");
 $_M (cla$$, "getName", 
 function () {
 var string = this.getClass ().getName ();
@@ -14836,12 +15313,12 @@ var events = [12, 9, 11];
 for (var i = 0; i < events.length; i++) {
 this.addListener (events[i], listener);
 }
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-var mask = 8388608 | 33554432 | 67108864;
+var mask = 109051904;
 return style & mask | 1048576;
-}, "Number");
+}, "~N");
 $_V (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var trimX = x - this.borderLeft - this.highlight;
@@ -14849,7 +15326,7 @@ var trimY = y - this.borderTop - this.highlight;
 var trimWidth = width + this.borderLeft + this.borderRight + 2 * this.highlight;
 var trimHeight = height + this.borderTop + this.borderBottom + 2 * this.highlight;
 return  new $wt.graphics.Rectangle (trimX, trimY, trimWidth, trimHeight);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "getClientArea", 
 function () {
 var clientArea = $_U (this, $wt.custom.ViewForm, "getClientArea", []);
@@ -14888,7 +15365,7 @@ $_M (cla$$, "onPaint",
 function (gc) {
 var gcForeground = gc.getForeground ();
 var size = this.getSize ();
-var border = this.getDisplay ().getSystemColor ($wt.custom.ViewForm.BORDER1_COLOR);
+var border = this.getDisplay ().getSystemColor (18);
 if (this.showBorder) {
 gc.setForeground (border);
 gc.drawRectangle (0, 0, size.x - 1, size.y - 1);
@@ -14928,7 +15405,7 @@ height = this.borderBottom + this.highlight;
 $_M (cla$$, "setContent", 
 function (content) {
 if (this.content != null && !this.content.isDisposed ()) {
-this.content.setBounds ($wt.custom.ViewForm.OFFSCREEN, $wt.custom.ViewForm.OFFSCREEN, 0, 0);
+this.content.setBounds (-200, -200, 0, 0);
 }this.content = content;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -14939,7 +15416,7 @@ return ;
 $_M (cla$$, "setSelectionBackground", 
 function (color) {
 if (this.selectionBackground == color) return ;
-if (color == null) color = this.getDisplay ().getSystemColor ($wt.custom.ViewForm.SELECTION_BACKGROUND);
+if (color == null) color = this.getDisplay ().getSystemColor (25);
 this.selectionBackground = color;
 this.redraw ();
 }, "$wt.graphics.Color");
@@ -14947,7 +15424,7 @@ $_M (cla$$, "setTopCenter",
 function (topCenter) {
 if (this.topCenter != null && !this.topCenter.isDisposed ()) {
 var size = this.topCenter.getSize ();
-this.topCenter.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
+this.topCenter.setLocation (-200 - size.x, -200 - size.y);
 }this.topCenter = topCenter;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -14955,7 +15432,7 @@ $_M (cla$$, "setTopLeft",
 function (c) {
 if (this.topLeft != null && !this.topLeft.isDisposed ()) {
 var size = this.topLeft.getSize ();
-this.topLeft.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
+this.topLeft.setLocation (-200 - size.x, -200 - size.y);
 }this.topLeft = c;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -14963,7 +15440,7 @@ $_M (cla$$, "setTopRight",
 function (c) {
 if (this.topRight != null && !this.topRight.isDisposed ()) {
 var size = this.topRight.getSize ();
-this.topRight.setLocation ($wt.custom.ViewForm.OFFSCREEN - size.x, $wt.custom.ViewForm.OFFSCREEN - size.y);
+this.topRight.setLocation (-200 - size.x, -200 - size.y);
 }this.topRight = c;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -14979,19 +15456,19 @@ this.borderBottom = this.borderTop = this.borderLeft = this.borderRight = 0;
 this.highlight = 0;
 }this.layout (false);
 this.redraw ();
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setTopCenterSeparate", 
 function (show) {
 this.separateTopCenter = show;
 this.layout (false);
-}, "Boolean");
+}, "~B");
 cla$$.borderInsideRGB = cla$$.prototype.borderInsideRGB =  new $wt.graphics.RGB (132, 130, 132);
 cla$$.borderMiddleRGB = cla$$.prototype.borderMiddleRGB =  new $wt.graphics.RGB (143, 141, 138);
 cla$$.borderOutsideRGB = cla$$.prototype.borderOutsideRGB =  new $wt.graphics.RGB (171, 168, 165);
 $_S (cla$$,
-"OFFSCREEN", -200);
-cla$$.BORDER1_COLOR = cla$$.prototype.BORDER1_COLOR = 18;
-cla$$.SELECTION_BACKGROUND = cla$$.prototype.SELECTION_BACKGROUND = 25;
+"OFFSCREEN", -200,
+"BORDER1_COLOR", 18,
+"SELECTION_BACKGROUND", 25);
 cla$$ = $_C (function () {
 $_Z (this, arguments);
 }, $wt.custom, "ViewFormLayout", $wt.widgets.Layout);
@@ -15040,7 +15517,7 @@ size.y += 2 * form.marginHeight;
 if (wHint != -1) size.x = wHint;
 if (hHint != -1) size.y = hHint;
 return size;
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_M (cla$$, "computeChildSize", 
 function (control, wHint, hHint, flushCache) {
 var data = control.getLayoutData ();
@@ -15048,7 +15525,7 @@ if (data == null || !($_O (data, $wt.custom.CLayoutData))) {
 data =  new $wt.custom.CLayoutData ();
 control.setLayoutData (data);
 }return (data).computeSize (control, wHint, hHint, flushCache);
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "computeTrim", 
 function (c) {
 if ($_O (c, $wt.widgets.Scrollable)) {
@@ -15140,11 +15617,11 @@ y++;
 var t = Math.min (form.separator, oldSeperator);
 var b = Math.max (form.separator, oldSeperator);
 form.redraw (form.borderLeft, t, form.getSize ().x - form.borderLeft - form.borderRight, b - t, false);
-}}, "$wt.widgets.Composite,Boolean");
+}}, "$wt.widgets.Composite,~B");
 cla$$ = $_C (function () {
 this.align = 16384;
-this.hIndent = $wt.custom.CLabel.INDENT;
-this.vIndent = $wt.custom.CLabel.INDENT;
+this.hIndent = 3;
+this.vIndent = 3;
 this.text = null;
 this.image = null;
 this.appToolTipText = null;
@@ -15157,7 +15634,7 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.custom.CLabel, [parent, $wt.custom.CLabel.checkStyle (style)]);
-if ((style & (16777216 | 131072)) == 0) style |= 16384;
+if ((style & (16908288)) == 0) style |= 16384;
 if ((style & 16777216) != 0) this.align = 16777216;
 if ((style & 131072) != 0) this.align = 131072;
 if ((style & 16384) != 0) this.align = 16384;
@@ -15207,17 +15684,17 @@ cla$$ = $_P ();
 }
 return $_N ($wt.custom.CLabel$3, innerThis, finalVars);
 }) (this, null));
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 ($fz = function (style) {
 if ((style & 2048) != 0) style |= 4;
-var mask = 4 | 8 | 32 | 33554432 | 67108864;
+var mask = 100663340;
 style = style & mask;
 style |= 524288;
 var platform = $WT.getPlatform ();
 if ("carbon".equals (platform) || "gtk".equals (platform)) return style;
 return style | 262144;
-}, $fz.isPrivate = true, $fz), "Number");
+}, $fz.isPrivate = true, $fz), "~N");
 $_M (cla$$, "computeSize", 
 function (wHint, hHint, changed) {
 var e = this.getTotalSize (this.image, this.text);
@@ -15230,7 +15707,7 @@ e.y += 2 * this.vIndent;
 } else {
 e.y = hHint;
 }return e;
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "drawBevelRect", 
 ($fz = function (gc, x, y, w, h, topleft, bottomright) {
 gc.setForeground (bottomright);
@@ -15239,7 +15716,7 @@ gc.drawLine (x, y + h, x + w, y + h);
 gc.setForeground (topleft);
 gc.drawLine (x, y, x + w - 1, y);
 gc.drawLine (x, y, x, y + h - 1);
-}, $fz.isPrivate = true, $fz), "$wt.graphics.GC,Number,Number,Number,Number,$wt.graphics.Color,$wt.graphics.Color");
+}, $fz.isPrivate = true, $fz), "$wt.graphics.GC,~N,~N,~N,~N,$wt.graphics.Color,$wt.graphics.Color");
 $_M (cla$$, "_findMnemonic", 
 function (string) {
 if (string == null) return '\0';
@@ -15253,7 +15730,7 @@ if ((string.charAt (index)).charCodeAt (0) != ('&').charCodeAt (0)) return strin
 index++;
 } while (index < length);
 return '\0';
-}, "String");
+}, "~S");
 $_M (cla$$, "getAlignment", 
 function () {
 return this.align;
@@ -15274,12 +15751,12 @@ if (text != null && text.length > 0) {
 var e = gc.textExtent (text, $wt.custom.CLabel.DRAW_FLAGS);
 size.x += e.x;
 size.y = Math.max (size.y, e.y);
-if (image != null) size.x += $wt.custom.CLabel.GAP;
+if (image != null) size.x += 5;
 } else {
 size.y = Math.max (size.y, gc.getFontMetrics ().getHeight ());
 }gc.dispose ();
 return size;
-}, $fz.isPrivate = true, $fz), "$wt.graphics.Image,String");
+}, $fz.isPrivate = true, $fz), "$wt.graphics.Image,~S");
 $_M (cla$$, "getStyle", 
 function () {
 var style = $_U (this, $wt.custom.CLabel, "getStyle", []);
@@ -15441,8 +15918,8 @@ this.paintBorder (gc, rect);
 }if (img != null) {
 var imageRect = img.getBounds ();
 gc.drawImage (img, 0, 0, imageRect.width, imageRect.height, x, Math.floor ((rect.height - imageRect.height) / 2), imageRect.width, imageRect.height);
-x += imageRect.width + $wt.custom.CLabel.GAP;
-extent.x -= imageRect.width + $wt.custom.CLabel.GAP;
+x += imageRect.width + 5;
+extent.x -= imageRect.width + 5;
 }if (lines != null) {
 var lineHeight = gc.getFontMetrics ().getHeight ();
 var textHeight = lines.length * lineHeight;
@@ -15484,7 +15961,7 @@ function (align) {
 if (this.align != align) {
 this.align = align;
 this.redraw ();
-}}, "Number");
+}}, "~N");
 $_M (cla$$, "setBackground", 
 function (color) {
 $_U (this, $wt.custom.CLabel, "setBackground", [color]);
@@ -15538,7 +16015,7 @@ for (var i = 0; i < percents.length; ++i) this.gradientPercents[i] = percents[i]
 
 this.gradientVertical = vertical;
 }this.redraw ();
-}, "Array,Array,Boolean");
+}, "Array,Array,~B");
 $_M (cla$$, "setBackground", 
 function (image) {
 if (image == this.backgroundImage) return ;
@@ -15565,12 +16042,12 @@ if (text == null) text = "";
 if (!text.equals (this.text)) {
 this.text = text;
 this.redraw ();
-}}, "String");
+}}, "~S");
 $_M (cla$$, "setToolTipText", 
 function (string) {
 $_U (this, $wt.custom.CLabel, "setToolTipText", [string]);
 this.appToolTipText = $_U (this, $wt.custom.CLabel, "getToolTipText", []);
-}, "String");
+}, "~S");
 $_M (cla$$, "shortenText", 
 function (gc, t, width) {
 if (t == null) return null;
@@ -15591,7 +16068,7 @@ break;
 e++;
 }
 return t;
-}, "$wt.graphics.GC,String,Number");
+}, "$wt.graphics.GC,~S,~N");
 $_M (cla$$, "splitString", 
 ($fz = function (text) {
 var lines =  new Array (1);
@@ -15610,12 +16087,12 @@ System.arraycopy (lines, 0, newLines, 0, lines.length);
 lines = newLines;
 }} while (pos != -1);
 return lines;
-}, $fz.isPrivate = true, $fz), "String");
+}, $fz.isPrivate = true, $fz), "~S");
 $_S (cla$$,
 "GAP", 5,
 "INDENT", 3,
-"ELLIPSIS", "...");
-cla$$.DRAW_FLAGS = cla$$.prototype.DRAW_FLAGS = 8 | 4 | 1 | 2;
+"ELLIPSIS", "...",
+"DRAW_FLAGS", 15);
 cla$$ = $_C (function () {
 this.defaultWidth = -1;
 this.defaultHeight = -1;
@@ -15641,23 +16118,20 @@ this.currentHhint = hHint;
 this.currentWidth = size.x;
 this.currentHeight = size.y;
 }return  new $wt.graphics.Point (this.currentWidth, this.currentHeight);
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "flushCache", 
 function () {
 this.defaultWidth = this.defaultHeight = -1;
 this.currentWidth = this.currentHeight = -1;
 });
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.custom, "CBanner", $wt.widgets.Composite);
-$_Y (cla$$, function () {
 this.$left = null;
 this.right = null;
 this.bottom = null;
 this.simple = true;
 this.curve = null;
 this.curveStart = 0;
-this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
+this.curveRect = null;
 this.curve_width = 5;
 this.curve_indent = -2;
 this.rightWidth = -1;
@@ -15666,6 +16140,10 @@ this.rightMinHeight = -1;
 this.resizeCursor = null;
 this.dragging = false;
 this.rightDragDisplacement = 0;
+$_Z (this, arguments);
+}, $wt.custom, "CBanner", $wt.widgets.Composite);
+$_Y (cla$$, function () {
+this.curveRect =  new $wt.graphics.Rectangle (0, 0, 0, 0);
 });
 $_K (cla$$, 
 function (parent, style) {
@@ -15714,7 +16192,7 @@ var events = [12, 3, 7, 5, 4, 9, 11];
 for (var i = 0; i < events.length; i++) {
 this.addListener (events[i], listener);
 }
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.bezier = $_M (cla$$, "bezier", 
 function (x0, y0, x1, y1, x2, y2, x3, y3, count) {
 var a0 = x0;
@@ -15732,11 +16210,11 @@ polygon[2 * i] = parseInt ((a0 + a1 * t + a2 * t * t + a3 * t * t * t));
 polygon[2 * i + 1] = parseInt ((b0 + b1 * t + b2 * t * t + b3 * t * t * t));
 }
 return polygon;
-}, "Number,Number,Number,Number,Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N,~N,~N,~N,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getBottom", 
 function () {
 return this.bottom;
@@ -15781,7 +16259,7 @@ function (x, y) {
 if (this.curveRect.contains (x, y)) {
 this.dragging = true;
 this.rightDragDisplacement = this.curveStart - x + this.curve_width - this.curve_indent;
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "onMouseExit", 
 function () {
 if (!this.dragging) this.setCursor (null);
@@ -15800,7 +16278,7 @@ return ;
 this.setCursor (this.resizeCursor);
 } else {
 this.setCursor (null);
-}}, "Number,Number");
+}}, "~N,~N");
 $_M (cla$$, "onMouseUp", 
 function () {
 this.dragging = false;
@@ -15811,7 +16289,7 @@ var size = this.getSize ();
 var border1 = this.getDisplay ().getSystemColor ($wt.custom.CBanner.BORDER1);
 if (this.bottom != null && (this.$left != null || this.right != null)) {
 gc.setForeground (border1);
-var y = this.bottom.getBounds ().y - $wt.custom.CBanner.BORDER_STRIPE - 1;
+var y = this.bottom.getBounds ().y - 1 - 1;
 gc.drawLine (0, y, size.x, y);
 }if (this.$left == null || this.right == null) return ;
 var line1 =  $_A (this.curve.length + 6, 0);
@@ -15819,7 +16297,7 @@ var index = 0;
 var x = this.curveStart;
 var y = 0;
 line1[index++] = x + 1;
-line1[index++] = size.y - $wt.custom.CBanner.BORDER_STRIPE;
+line1[index++] = size.y - 1;
 for (var i = 0; i < Math.floor (this.curve.length / 2); i++) {
 line1[index++] = x + this.curve[2 * i];
 line1[index++] = y + this.curve[2 * i + 1];
@@ -15850,14 +16328,14 @@ var blue = from.blue + Math.floor (3 * (to.blue - from.blue) / 4);
 var color =  new $wt.graphics.Color (this.getDisplay (), red, green, blue);
 gc.setForeground (color);
 color.dispose ();
-var x1 = Math.max (0, this.curveStart - $wt.custom.CBanner.CURVE_TAIL);
+var x1 = Math.max (0, this.curveStart - 200);
 gc.setForeground (background);
 gc.setBackground (border1);
-gc.fillGradientRectangle (x1, size.y - $wt.custom.CBanner.BORDER_STRIPE, this.curveStart - x1 + 1, 1, false);
+gc.fillGradientRectangle (x1, size.y - 1, this.curveStart - x1 + 1, 1, false);
 } else {
-var x1 = Math.max (0, this.curveStart - $wt.custom.CBanner.CURVE_TAIL);
+var x1 = Math.max (0, this.curveStart - 200);
 gc.setForeground (border1);
-gc.drawLine (x1, size.y - $wt.custom.CBanner.BORDER_STRIPE, this.curveStart + 1, size.y - $wt.custom.CBanner.BORDER_STRIPE);
+gc.drawLine (x1, size.y - 1, this.curveStart + 1, size.y - 1);
 }gc.setForeground (border1);
 }, "$wt.graphics.GC");
 $_M (cla$$, "onResize", 
@@ -15868,7 +16346,7 @@ $_M (cla$$, "setBottom",
 function (control) {
 if (this.bottom != null && !this.bottom.isDisposed ()) {
 var size = this.bottom.getSize ();
-this.bottom.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
+this.bottom.setLocation (-200 - size.x, -200 - size.y);
 }this.bottom = control;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -15880,7 +16358,7 @@ $_M (cla$$, "setLeft",
 function (control) {
 if (this.$left != null && !this.$left.isDisposed ()) {
 var size = this.$left.getSize ();
-this.$left.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
+this.$left.setLocation (-200 - size.x, -200 - size.y);
 }this.$left = control;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -15888,7 +16366,7 @@ $_M (cla$$, "setRight",
 function (control) {
 if (this.right != null && !this.right.isDisposed ()) {
 var size = this.right.getSize ();
-this.right.setLocation ($wt.custom.CBanner.OFFSCREEN - size.x, $wt.custom.CBanner.OFFSCREEN - size.y);
+this.right.setLocation (-200 - size.x, -200 - size.y);
 }this.right = control;
 this.layout (false);
 }, "$wt.widgets.Control");
@@ -15901,7 +16379,7 @@ $_M (cla$$, "setRightWidth",
 function (width) {
 this.rightWidth = width;
 this.layout (false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSimple", 
 function (simple) {
 if (this.simple != simple) {
@@ -15915,15 +16393,15 @@ this.curve_indent = 5;
 }this.updateCurve (this.getSize ().y);
 this.layout (false);
 this.redraw ();
-}}, "Boolean");
+}}, "~B");
 $_M (cla$$, "updateCurve", 
 function (height) {
-var h = height - $wt.custom.CBanner.BORDER_STRIPE;
+var h = height - 1;
 if (this.simple) {
 this.curve = [0, h, 1, h, 2, h - 1, 3, h - 2, 3, 2, 4, 1, 5, 0];
 } else {
-this.curve = $wt.custom.CBanner.bezier (0, h + 1, $wt.custom.CBanner.BEZIER_LEFT, h + 1, this.curve_width - $wt.custom.CBanner.BEZIER_RIGHT, 0, this.curve_width, 0, this.curve_width);
-}}, "Number");
+this.curve = $wt.custom.CBanner.bezier (0, h + 1, 30, h + 1, this.curve_width - 30, 0, this.curve_width, 0, this.curve_width);
+}}, "~N");
 $_S (cla$$,
 "OFFSCREEN", -200,
 "BORDER_BOTTOM", 2,
@@ -15932,15 +16410,15 @@ $_S (cla$$,
 "CURVE_TAIL", 200,
 "BEZIER_RIGHT", 30,
 "BEZIER_LEFT", 30,
-"MIN_LEFT", 10);
-cla$$.BORDER1 = cla$$.prototype.BORDER1 = 20;
+"MIN_LEFT", 10,
+"BORDER1", 20);
 cla$$ = $_C (function () {
 $_Z (this, arguments);
 }, $wt.custom, "CBannerLayout", $wt.widgets.Layout);
 $_V (cla$$, "computeSize", 
 function (composite, wHint, hHint, flushCache) {
 var banner = composite;
-var left = banner.left;
+var left = banner.$left;
 var right = banner.right;
 var bottom = banner.bottom;
 var showCurve = left != null && right != null;
@@ -15955,7 +16433,7 @@ if (hHint != -1) {
 bottomSize.y = Math.min (bottomSize.y, height);
 height -= bottomSize.y + 3 + 1 + 2;
 }}if (showCurve && hHint != -1) {
-height -= 3 + 2 + 2 * 1;
+height -= 7;
 }var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null) {
 var trim = this.computeTrim (right);
@@ -15974,18 +16452,18 @@ leftSize = this.computeChildSize (left, w, -1, flushCache);
 }width = leftSize.x + rightSize.x;
 height = bottomSize.y;
 if (bottom != null) {
-height += 1 + 2;
+height += 3;
 }if (left != null) {
 height += right == null ? leftSize.y : Math.max (leftSize.y, banner.rightMinHeight);
 } else {
 height += rightSize.y;
 }if (showCurve) {
 width += banner.curve_width - 2 * banner.curve_indent;
-height += 3 + 2 + 2 * 1;
+height += 7;
 }if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 return  new $wt.graphics.Point (width, height);
-}, "$wt.widgets.Composite,Number,Number,Boolean");
+}, "$wt.widgets.Composite,~N,~N,~B");
 $_M (cla$$, "computeChildSize", 
 function (control, wHint, hHint, flushCache) {
 var data = control.getLayoutData ();
@@ -15993,7 +16471,7 @@ if (data == null || !($_O (data, $wt.custom.CLayoutData))) {
 data =  new $wt.custom.CLayoutData ();
 control.setLayoutData (data);
 }return (data).computeSize (control, wHint, hHint, flushCache);
-}, "$wt.widgets.Control,Number,Number,Boolean");
+}, "$wt.widgets.Control,~N,~N,~B");
 $_M (cla$$, "computeTrim", 
 function (c) {
 if ($_O (c, $wt.widgets.Scrollable)) {
@@ -16010,7 +16488,7 @@ return true;
 $_V (cla$$, "layout", 
 function (composite, flushCache) {
 var banner = composite;
-var left = banner.left;
+var left = banner.$left;
 var right = banner.right;
 var bottom = banner.bottom;
 var size = banner.getSize ();
@@ -16024,7 +16502,7 @@ var w = width - trim;
 bottomSize = this.computeChildSize (bottom, w, -1, flushCache);
 bottomSize.y = Math.min (bottomSize.y, height);
 height -= bottomSize.y + 3 + 2 + 1;
-}if (showCurve) height -= 3 + 2 + 2 * 1;
+}if (showCurve) height -= 7;
 height = Math.max (0, height);
 var rightSize =  new $wt.graphics.Point (0, 0);
 if (right != null) {
@@ -16054,7 +16532,7 @@ var rightRect = null;
 var bottomRect = null;
 if (bottom != null) {
 bottomRect =  new $wt.graphics.Rectangle (x, y + size.y - bottomSize.y, bottomSize.x, bottomSize.y);
-}if (showCurve) y += 3 + 1;
+}if (showCurve) y += 4;
 if (left != null) {
 leftRect =  new $wt.graphics.Rectangle (x, y, leftSize.x, leftSize.y);
 banner.curveStart = x + leftSize.x - banner.curve_indent;
@@ -16070,7 +16548,7 @@ banner.curveRect =  new $wt.graphics.Rectangle (banner.curveStart, 0, banner.cur
 if (bottomRect != null) bottom.setBounds (bottomRect);
 if (rightRect != null) right.setBounds (rightRect);
 if (leftRect != null) left.setBounds (leftRect);
-}, "$wt.widgets.Composite,Boolean");
+}, "$wt.widgets.Composite,~B");
 cla$$ = $_C (function () {
 this.lastFocusId = 0;
 this.items = null;
@@ -16084,13 +16562,13 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.ToolBar, [parent, $wt.widgets.ToolBar.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 if ((style & 8388608) == 0) style |= 524288;
-if ((style & 512) != 0) style &= ($t$ = ~ $WT.WRAP, $WT.prototype.WRAP = $WT.WRAP, $t$);
-return style & ~(256 | 512);
-}, "Number");
+if ((style & 512) != 0) style &= -65;
+return style & -769;
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -16104,7 +16582,7 @@ for (var i = 0; i < count; i++) {
 var rect = this.items[i].getBounds ();
 height += rect.height;
 if ((this.items[i].style & 2) != 0) {
-width = Math.max (width, $wt.widgets.ToolBar.DEFAULT_WIDTH);
+width = Math.max (width, 24);
 } else {
 width = Math.max (width, rect.width);
 }}
@@ -16116,25 +16594,25 @@ System.out.println (rect);
 height = Math.max (height, rect.height);
 width += rect.width;
 }
-}if (width == 0) width = $wt.widgets.ToolBar.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.ToolBar.DEFAULT_HEIGHT;
+}if (width == 0) width = 24;
+if (height == 0) height = 22;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var trim = this.computeTrim (0, 0, width, height);
 width = trim.width;
 height = trim.height;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var trim = $_U (this, $wt.widgets.ToolBar, "computeTrim", [x, y, width, height]);
 trim.height += 2;
 return trim;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.ToolBar, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.items =  new Array (0);
 this.lastFocusId = -1;
 this.handle = document.createElement ("DIV");
@@ -16154,7 +16632,7 @@ item.handle.className = "tool-item-default";
 this.handle.appendChild (item.handle);
 if ((this.style & 512) != 0) this.setRowCount (count + 1);
 this.layoutItems ();
-}, "$wt.widgets.ToolItem,Number");
+}, "$wt.widgets.ToolItem,~N");
 $_M (cla$$, "createWidget", 
 function () {
 $_U (this, $wt.widgets.ToolBar, "createWidget", []);
@@ -16171,10 +16649,10 @@ $_U (this, $wt.widgets.ToolBar, "enableWidget", [enabled]);
 for (var i = 0; i < this.items.length; i++) {
 var item = this.items[i];
 if (item != null) {
-if ((item.style & (32 | 16)) != 0) {
+if ((item.style & (48)) != 0) {
 item.updateImages (enabled && item.getEnabled ());
 }}}
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "getDisabledImageList", 
 function () {
 return this.disabledImageList;
@@ -16191,7 +16669,7 @@ $_M (cla$$, "getItem",
 function (index) {
 var count = this.items.length;
 return this.items[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItem", 
 function (point) {
 var items = this.getItems ();
@@ -16237,11 +16715,11 @@ if (item != null) item.resizeControl ();
 $_V (cla$$, "mnemonicHit", 
 function (ch) {
 return true;
-}, "Number");
+}, "~N");
 $_V (cla$$, "mnemonicMatch", 
 function (ch) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "releaseWidget", 
 function () {
 for (var i = 0; i < this.items.length; i++) {
@@ -16267,7 +16745,7 @@ $_M (cla$$, "setBounds",
 function (x, y, width, height, flags) {
 if (this.parent.lpwp != null) {
 }$_U (this, $wt.widgets.ToolBar, "setBounds", [x, y, width, height, flags]);
-}, "Number,Number,Number,Number,Number");
+}, "~N,~N,~N,~N,~N");
 $_M (cla$$, "setDefaultFont", 
 function () {
 $_U (this, $wt.widgets.ToolBar, "setDefaultFont", []);
@@ -16283,7 +16761,7 @@ $_M (cla$$, "setFont",
 function (font) {
 $_U (this, $wt.widgets.ToolBar, "setFont", [font]);
 var index = 0;
-var mask = 8 | 32 | 16 | 4;
+var mask = 60;
 while (index < this.items.length) {
 var item = this.items[index];
 if (item != null && (item.style & mask) != 0) break;
@@ -16313,7 +16791,7 @@ return true;
 }, "$wt.widgets.Composite");
 $_M (cla$$, "setRowCount", 
 function (count) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "setTabItemFocus", 
 function () {
 var index = 0;
@@ -16327,8 +16805,8 @@ if (index == this.items.length) return false;
 return $_U (this, $wt.widgets.ToolBar, "setTabItemFocus", []);
 });
 $_S (cla$$,
-"DEFAULT_WIDTH", 24,
-"DEFAULT_HEIGHT", 22);
+"$DEFAULT_WIDTH", 24,
+"$DEFAULT_HEIGHT", 22);
 cla$$ = $_C (function () {
 this.parent = null;
 this.control = null;
@@ -16344,13 +16822,13 @@ function (parent, style) {
 $_R (this, $wt.widgets.ToolItem, [parent, $wt.widgets.ToolItem.checkStyle (style)]);
 this.parent = parent;
 parent.createItem (this, parent.getItemCount ());
-}, "$wt.widgets.ToolBar,Number");
+}, "$wt.widgets.ToolBar,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.ToolItem, [parent, $wt.widgets.ToolItem.checkStyle (style)]);
 this.parent = parent;
 parent.createItem (this, index);
-}, "$wt.widgets.ToolBar,Number,Number");
+}, "$wt.widgets.ToolBar,~N,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -16360,13 +16838,13 @@ this.addListener (14, typedListener);
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 return $wt.widgets.Widget.checkBits (style, 8, 32, 16, 2, 4, 0);
-}, "Number");
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
 $_M (cla$$, "click", 
 function (dropDown) {
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "createDisabledImage", 
 function (image, color) {
 return  new $wt.graphics.Image (this.display, image, 1);
@@ -16406,7 +16884,7 @@ return this.disabledImage;
 $_M (cla$$, "getEnabled", 
 function () {
 if ((this.style & 2) != 0) {
-return (this.state & $wt.widgets.Widget.DISABLED) == 0;
+return (this.state & 8) == 0;
 }return true;
 });
 $_M (cla$$, "getHotImage", 
@@ -16419,7 +16897,7 @@ return this.parent;
 });
 $_M (cla$$, "getSelection", 
 function () {
-if ((this.style & (32 | 16)) == 0) return false;
+if ((this.style & (48)) == 0) return false;
 return true;
 });
 $_M (cla$$, "getToolTipText", 
@@ -16487,13 +16965,13 @@ function (control) {
 if (control != null) {
 }if ((this.style & 2) == 0) return ;
 this.control = control;
-if ((this.parent.style & (64 | 512)) != 0) {
+if ((this.parent.style & (576)) != 0) {
 }this.resizeControl ();
 }, "$wt.widgets.Control");
 $_M (cla$$, "setEnabled", 
 function (enabled) {
 if (this.image != null) this.updateImages (enabled && this.parent.getEnabled ());
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setDisabledImage", 
 function (image) {
 if ((this.style & 2) != 0) return ;
@@ -16519,14 +16997,14 @@ if (this.getSelection () != value) {
 this.setSelection (value);
 this.postEvent (13);
 }return true;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setSelection", 
 function (selected) {
-if ((this.style & (32 | 16)) == 0) return ;
-if ((this.style & (32 | 16)) != 0) {
+if ((this.style & (48)) == 0) return ;
+if ((this.style & (48)) != 0) {
 if (!this.getEnabled () || !this.parent.getEnabled ()) {
 this.updateImages (false);
-}}}, "Boolean");
+}}}, "~B");
 $_M (cla$$, "setText", 
 function (string) {
 if ((this.style & 2) != 0) return ;
@@ -16534,21 +17012,21 @@ $_U (this, $wt.widgets.ToolItem, "setText", [string]);
 if (this.handle != null) {
 this.handle.appendChild (document.createTextNode (string));
 }this.parent.layoutItems ();
-}, "String");
+}, "~S");
 $_M (cla$$, "setToolTipText", 
 function (string) {
 this.toolTipText = string;
-}, "String");
+}, "~S");
 $_M (cla$$, "setWidth", 
 function (width) {
 if ((this.style & 2) == 0) return ;
 if (width < 0) return ;
 this.parent.layoutItems ();
-}, "Number");
+}, "~N");
 $_M (cla$$, "updateImages", 
 function (enabled) {
 this.parent.layoutItems ();
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
 this.items = null;
 this.itemHandles = null;
@@ -16560,12 +17038,12 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.CoolBar, [parent, $wt.widgets.CoolBar.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
 style |= 524288;
-return style & ~(256 | 512);
-}, "Number");
+return style & -769;
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
@@ -16576,18 +17054,18 @@ var height = 0;
 var border = this.getBorderWidth ();
 var newWidth = wHint == -1 ? 0x3FFF : wHint + (border * 2);
 var newHeight = hHint == -1 ? 0x3FFF : hHint + (border * 2);
-if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 height += border * 2;
 width += border * 2;
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.CoolBar, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("DIV");
 if (this.parent.handle != null) {
 this.parent.handle.appendChild (this.handle);
@@ -16607,7 +17085,7 @@ if (index == count) {
 handle.appendChild (handle);
 } else {
 handle.insertBefore (handle, this.itemHandles[index]);
-}}, "$wt.widgets.CoolItem,Number");
+}}, "$wt.widgets.CoolItem,~N");
 $_M (cla$$, "createWidget", 
 function () {
 $_U (this, $wt.widgets.CoolBar, "createWidget", []);
@@ -16622,11 +17100,11 @@ $_M (cla$$, "getMargin",
 function (index) {
 var margin = 0;
 if ((this.style & 8388608) != 0) {
-margin += 8 + 4;
+margin += 12;
 } else {
-margin += 8 + 8;
+margin += 16;
 }return margin;
-}, "Number");
+}, "~N");
 $_V (cla$$, "findThemeControl", 
 function () {
 return null;
@@ -16635,7 +17113,7 @@ $_M (cla$$, "getItem",
 function (index) {
 var count = this.items.length;
 return this.items[index];
-}, "Number");
+}, "~N");
 $_M (cla$$, "getItemCount", 
 function () {
 return this.items.length;
@@ -16655,11 +17133,11 @@ return null;
 $_M (cla$$, "getLastIndexOfRow", 
 function (index) {
 return 0;
-}, "Number");
+}, "~N");
 $_M (cla$$, "isLastItemOfRow", 
 function (index) {
 return false;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getLocked", 
 function () {
 return this.locked;
@@ -16686,10 +17164,10 @@ return -1;
 }, "$wt.widgets.CoolItem");
 $_M (cla$$, "resizeToPreferredWidth", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "resizeToMaximumWidth", 
 function (index) {
-}, "Number");
+}, "~N");
 $_M (cla$$, "releaseWidget", 
 function () {
 for (var i = 0; i < this.items.length; i++) {
@@ -16713,15 +17191,15 @@ $_M (cla$$, "setBackgroundPixel",
 function (pixel) {
 if (this.background == pixel) return ;
 this.background = pixel;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setForegroundPixel", 
 function (pixel) {
 if (this.foreground == pixel) return ;
 this.foreground = pixel;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setItemColors", 
 function (foreColor, backColor) {
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setItemLayout", 
 function (itemOrder, wrapIndices, sizes) {
 this.setRedraw (false);
@@ -16739,7 +17217,7 @@ function (sizes) {
 $_M (cla$$, "setLocked", 
 function (locked) {
 this.locked = locked;
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "setWrapIndices", 
 function (indices) {
 if (indices == null) indices =  $_A (0, 0);
@@ -16780,13 +17258,13 @@ function (parent, style) {
 $_R (this, $wt.widgets.CoolItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, parent.getItemCount ());
-}, "$wt.widgets.CoolBar,Number");
+}, "$wt.widgets.CoolBar,~N");
 $_K (cla$$, 
 function (parent, style, index) {
 $_R (this, $wt.widgets.CoolItem, [parent, style]);
 this.parent = parent;
 parent.createItem (this, index);
-}, "$wt.widgets.CoolBar,Number,Number");
+}, "$wt.widgets.CoolBar,~N,~N");
 $_M (cla$$, "addSelectionListener", 
 function (listener) {
 var typedListener =  new $wt.widgets.TypedListener (listener);
@@ -16806,7 +17284,7 @@ if (wHint == -1) width = 32;
 if (hHint == -1) height = 32;
 width += this.parent.getMargin (index);
 return  new $wt.graphics.Point (width, height);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "getBounds", 
 function () {
 var index = this.parent.indexOf (this);
@@ -16865,7 +17343,7 @@ this.ideal = true;
 var handle = this.parent.itemHandles[this.parent.indexOf (this)];
 handle.style.width = width + "px";
 handle.style.height = height + "px";
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setPreferredSize", 
 function (size) {
 this.setPreferredSize (size.x, size.y);
@@ -16877,7 +17355,7 @@ $_U (this, $wt.widgets.CoolItem, "setText", [string]);
 var handle = this.parent.itemHandles[this.parent.indexOf (this)];
 if (handle != null) {
 handle.appendChild (document.createTextNode (string));
-}}, "String");
+}}, "~S");
 $_M (cla$$, "getSize", 
 function () {
 var index = this.parent.indexOf (this);
@@ -16890,7 +17368,7 @@ var index = this.parent.indexOf (this);
 if (index == -1) return ;
 width = Math.max (0, width);
 height = Math.max (0, height);
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setSize", 
 function (size) {
 this.setSize (size.x, size.y);
@@ -16908,7 +17386,7 @@ if (index == -1) return ;
 width = Math.max (0, width);
 height = Math.max (0, height);
 this.minimum = true;
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setMinimumSize", 
 function (size) {
 this.setMinimumSize (size.x, size.y);
@@ -16921,7 +17399,7 @@ return false;
 $_M (cla$$, "setWrap", 
 function (wrap) {
 var index = this.parent.indexOf (this);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "removeSelectionListener", 
 function (listener) {
 if (this.eventTable == null) return ;
@@ -16946,7 +17424,7 @@ function (parent, style) {
 $_R (this, $wt.widgets.Caret, [parent, style]);
 this.parent = parent;
 this.createWidget ();
-}, "$wt.widgets.Canvas,Number");
+}, "$wt.widgets.Canvas,~N");
 $_M (cla$$, "createWidget", 
 function () {
 this.$isVisible = true;
@@ -17039,7 +17517,7 @@ if (this.$isVisible && this.hasFocus ()) this.move ();
 } else {
 this.resized = true;
 if (this.$isVisible && this.hasFocus ()) this.resize ();
-}}, "Number,Number,Number,Number");
+}}, "~N,~N,~N,~N");
 $_M (cla$$, "setBounds", 
 function (rect) {
 this.setBounds (rect.x, rect.y, rect.width, rect.height);
@@ -17063,7 +17541,7 @@ this.x = x;
 this.y = y;
 this.moved = true;
 if (this.$isVisible && this.hasFocus ()) this.move ();
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setLocation", 
 function (location) {
 this.setLocation (location.x, location.y);
@@ -17075,7 +17553,7 @@ this.width = width;
 this.height = height;
 this.resized = true;
 if (this.$isVisible && this.hasFocus ()) this.resize ();
-}, "Number,Number");
+}, "~N,~N");
 $_M (cla$$, "setSize", 
 function (size) {
 this.setSize (size.x, size.y);
@@ -17084,7 +17562,7 @@ $_M (cla$$, "setVisible",
 function (visible) {
 if (visible == this.$isVisible) return ;
 this.$isVisible = visible;
-}, "Boolean");
+}, "~B");
 cla$$ = $_C (function () {
 this.hwndText = null;
 this.hwndUpDown = null;
@@ -17104,18 +17582,18 @@ $_Z (this, arguments);
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.Spinner, [parent, $wt.widgets.Spinner.checkStyle (style)]);
-}, "$wt.widgets.Composite,Number");
+}, "$wt.widgets.Composite,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-return style & ~(256 | 512);
-}, "Number");
+return style & -769;
+}, "~N");
 $_V (cla$$, "checkSubclass", 
 function () {
 });
 $_M (cla$$, "createHandle", 
 function () {
 $_U (this, $wt.widgets.Spinner, "createHandle", []);
-this.state &= ($t$ = ~ $wt.widgets.Widget.CANVAS, $wt.widgets.Widget.prototype.CANVAS = $wt.widgets.Widget.CANVAS, $t$);
+this.state &= -3;
 this.handle = document.createElement ("DIV");
 this.handle.className = "spinner-default";
 if (this.parent != null && this.parent.handle != null) {
@@ -17220,14 +17698,14 @@ string = "" + this.maximum;
 }var size = $wt.internal.browser.OS.getStringPlainSize (string);
 width = size.x;
 height = size.y;
-}if (width == 0) width = $wt.widgets.Widget.DEFAULT_WIDTH;
-if (height == 0) height = $wt.widgets.Widget.DEFAULT_HEIGHT;
+}if (width == 0) width = 64;
+if (height == 0) height = 64;
 if (wHint != -1) width = wHint;
 if (hHint != -1) height = hHint;
 var trim = this.computeTrim (0, 0, width, height);
 System.err.println (trim);
 return  new $wt.graphics.Point (trim.width, trim.height);
-}, "Number,Number,Boolean");
+}, "~N,~N,~B");
 $_V (cla$$, "computeTrim", 
 function (x, y, width, height) {
 var margins = 4;
@@ -17240,7 +17718,7 @@ width += 2;
 height += 2;
 }width += 2;
 return  new $wt.graphics.Rectangle (x, y, width, height);
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_M (cla$$, "copy", 
 function () {
 });
@@ -17251,7 +17729,7 @@ if ((this.style & 8) != 0) return ;
 $_M (cla$$, "enableWidget", 
 function (enabled) {
 $_U (this, $wt.widgets.Spinner, "enableWidget", [enabled]);
-}, "Boolean");
+}, "~B");
 $_M (cla$$, "deregister", 
 function () {
 $_U (this, $wt.widgets.Spinner, "deregister", []);
@@ -17329,34 +17807,34 @@ $_M (cla$$, "setDigits",
 function (value) {
 if (value == this.digits) return ;
 this.digits = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setIncrement", 
 function (value) {
 if (value < 1) return ;
 this.increment = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMaximum", 
 function (value) {
 if (value < 0) return ;
 this.maximum = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setMinimum", 
 function (value) {
 if (value < 0) return ;
 this.minimum = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setPageIncrement", 
 function (value) {
 if (value < 1) return ;
 this.pageIncrement = value;
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (value) {
 var max =  $_A (1, 0);
 var min =  $_A (1, 0);
 value = Math.min (Math.max (min[0], value), max[0]);
 this.setSelection (value, false);
-}, "Number");
+}, "~N");
 $_M (cla$$, "setSelection", 
 function (value, notify) {
 var string = String.valueOf (value);
@@ -17382,7 +17860,7 @@ if (string == null) return ;
 }if (this.textInputHandle != null) {
 this.textInputHandle.value = "" + value;
 }if (notify) this.sendEvent (13);
-}, "Number,Boolean");
+}, "~N,~B");
 $_M (cla$$, "verifyText", 
 function (string, start, end, keyEvent) {
 var event =  new $wt.widgets.Event ();
@@ -17408,13 +17886,13 @@ event.doit = index == string.length;
 this.sendEvent (25, event);
 if (!event.doit || this.isDisposed ()) return null;
 return event.text;
-}, "String,Number,Number,$wt.widgets.Event");
+}, "~S,~N,~N,$wt.widgets.Event");
 $_M (cla$$, "setSize", 
 function (width, height) {
 $_U (this, $wt.widgets.Spinner, "setSize", [width, height]);
 this.textInputHandle.style.width = (width - 28) + "px";
 this.textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
-}, "Number,Number");
+}, "~N,~N");
 cla$$ = $_C (function () {
 this.style = 0;
 this.parent = null;
@@ -17431,7 +17909,7 @@ this.checkParent (parent);
 this.parent = parent;
 this.style = style;
 this.title = "";
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 $_M (cla$$, "checkSubclass", 
 function () {
 if (!$wt.widgets.Display.isValidClass (this.getClass ())) {
@@ -17444,7 +17922,7 @@ if (parent == null) this.error (4);
 $_M (cla$$, "error", 
 function (code) {
 $WT.error (code);
-}, "Number");
+}, "~N");
 $_M (cla$$, "getParent", 
 function () {
 return this.parent;
@@ -17461,7 +17939,7 @@ $_M (cla$$, "setText",
 function (string) {
 if (string == null) this.error (4);
 this.title = string;
-}, "String");
+}, "~S");
 $_M (cla$$, "dialogUnimplemented", 
 function () {
 var dialogShell =  new $wt.widgets.Shell (this.parent.display, this.style | 64 | 2048);
@@ -17529,24 +18007,24 @@ $_Z (this, arguments);
 }, $wt.widgets, "MessageBox", $wt.widgets.Dialog);
 $_K (cla$$, 
 function (parent) {
-this.construct (parent, 32 | 2 | 65536);
+this.construct (parent, 65570);
 }, "$wt.widgets.Shell");
 $_K (cla$$, 
 function (parent, style) {
 $_R (this, $wt.widgets.MessageBox, [parent, $wt.widgets.MessageBox.checkStyle (style)]);
 this.checkSubclass ();
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 cla$$.checkStyle = $_M (cla$$, "checkStyle", 
 function (style) {
-if ((style & (32768 | 65536 | 131072)) == 0) style |= 65536;
-var mask = (64 | 128 | 32 | 256 | 512 | 1024 | 2048);
+if ((style & (229376)) == 0) style |= 65536;
+var mask = (4064);
 var bits = style & mask;
-if (bits == 32 || bits == 256 || bits == (32 | 256)) return style;
-if (bits == 64 || bits == 128 || bits == (64 | 128) || bits == (64 | 128 | 256)) return style;
-if (bits == (1024 | 256) || bits == (512 | 1024 | 2048)) return style;
+if (bits == 32 || bits == 256 || bits == (288)) return style;
+if (bits == 64 || bits == 128 || bits == (192) || bits == (448)) return style;
+if (bits == (1280) || bits == (3584)) return style;
 style = (style & ~mask) | 32;
 return style;
-}, "Number");
+}, "~N");
 $_M (cla$$, "getMessage", 
 function () {
 return this.message;
@@ -17594,7 +18072,7 @@ var gridData =  new $wt.layout.GridData (32, 32);
 icon.setLayoutData (gridData);
 }var composite =  new $wt.widgets.Composite (this.dialogShell, 0);
 composite.setLayout ( new $wt.layout.GridLayout (2, false));
-var gd =  new $wt.layout.GridData (1808 | 4);
+var gd =  new $wt.layout.GridData (1812);
 if (iconName == null) {
 gd.horizontalSpan = 2;
 }gd.grabExcessVerticalSpace = true;
@@ -17646,7 +18124,7 @@ return 256;
 $_M (cla$$, "createButton", 
 function (btnStyle, btnLabel) {
 return this.createButton (btnStyle, btnLabel, false);
-}, "Number,String");
+}, "~N,~S");
 $_M (cla$$, "createButton", 
 function (btnStyle, btnLabel, forced) {
 if ((this.style & btnStyle) != 0 || forced) {
@@ -17673,22 +18151,22 @@ return $_N ($wt.widgets.MessageBox$2, innerThis, finalVars);
 return this.btn;
 } else {
 return null;
-}}, "Number,String,Boolean");
+}}, "~N,~S,~B");
 $_M (cla$$, "setMessage", 
 function (string) {
 if (string == null) this.error (4);
 this.message = string;
-}, "String");
+}, "~S");
 $_M (cla$$, "updateReturnCode", 
 ($fz = function () {
 if (this.returnCode == -1) {
 this.returnCode = 256;
 if ((this.style & 32) == 32) this.returnCode = 32;
-if ((this.style & (32 | 256)) == (32 | 256)) this.returnCode = 256;
-if ((this.style & (64 | 128)) == (64 | 128)) this.returnCode = 128;
-if ((this.style & (64 | 128 | 256)) == (64 | 128 | 256)) this.returnCode = 256;
-if ((this.style & (1024 | 256)) == (1024 | 256)) this.returnCode = 256;
-if ((this.style & (512 | 1024 | 2048)) == (512 | 1024 | 2048)) this.returnCode = 2048;
+if ((this.style & (288)) == (288)) this.returnCode = 256;
+if ((this.style & (192)) == (192)) this.returnCode = 128;
+if ((this.style & (448)) == (448)) this.returnCode = 256;
+if ((this.style & (1280)) == (1280)) this.returnCode = 256;
+if ((this.style & (3584)) == (3584)) this.returnCode = 2048;
 }}, $fz.isPrivate = true, $fz));
 cla$$ = $_C (function () {
 this.rgb = null;
@@ -17702,7 +18180,7 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.ColorDialog, [parent, style]);
 this.checkSubclass ();
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 $_M (cla$$, "getRGB", 
 function () {
 return this.rgb;
@@ -17730,7 +18208,7 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.DirectoryDialog, [parent, style]);
 this.checkSubclass ();
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 $_M (cla$$, "getFilterPath", 
 function () {
 return this.filterPath;
@@ -17747,21 +18225,24 @@ return this.directoryPath;
 $_M (cla$$, "setFilterPath", 
 function (string) {
 this.filterPath = string;
-}, "String");
+}, "~S");
 $_M (cla$$, "setMessage", 
 function (string) {
 if (string == null) this.error (4);
 this.message = string;
-}, "String");
+}, "~S");
 cla$$ = $_C (function () {
+this.filterNames = null;
+this.filterExtensions = null;
+this.fileNames = null;
+this.filterPath = "";
+this.fileName = "";
 $_Z (this, arguments);
 }, $wt.widgets, "FileDialog", $wt.widgets.Dialog);
 $_Y (cla$$, function () {
 this.filterNames =  new Array (0);
 this.filterExtensions =  new Array (0);
 this.fileNames =  new Array (0);
-this.filterPath = "";
-this.fileName = "";
 });
 $_K (cla$$, 
 function (parent) {
@@ -17771,7 +18252,7 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.FileDialog, [parent, style]);
 this.checkSubclass ();
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 $_M (cla$$, "getFileName", 
 function () {
 return this.fileName;
@@ -17800,7 +18281,7 @@ return null;
 $_M (cla$$, "setFileName", 
 function (string) {
 this.fileName = string;
-}, "String");
+}, "~S");
 $_M (cla$$, "setFilterExtensions", 
 function (extensions) {
 this.filterExtensions = extensions;
@@ -17812,10 +18293,10 @@ this.filterNames = names;
 $_M (cla$$, "setFilterPath", 
 function (string) {
 this.filterPath = string;
-}, "String");
+}, "~S");
 $_S (cla$$,
 "FILTER", "*.*",
-"BUFFER_SIZE", 1024 * 32);
+"BUFFER_SIZE", 32768);
 cla$$ = $_C (function () {
 this.fontData = null;
 this.rgb = null;
@@ -17829,7 +18310,7 @@ $_K (cla$$,
 function (parent, style) {
 $_R (this, $wt.widgets.FontDialog, [parent, style]);
 this.checkSubclass ();
-}, "$wt.widgets.Shell,Number");
+}, "$wt.widgets.Shell,~N");
 $_M (cla$$, "getFontData", 
 function () {
 return this.fontData;
@@ -17890,7 +18371,7 @@ program.name = "Embeded Browser";
 program.command = "window.open(\"%1\")";
 program.iconName = "images/browser.gif";
 }return program;
-}, "String");
+}, "~S");
 cla$$.getExtensions = $_M (cla$$, "getExtensions", 
 function () {
 return [".js", ".html", ".htm", ".xhtml", "xml", ".png", ".gif", ".jpg", ".jpeg"];
@@ -17912,7 +18393,7 @@ function (url) {
 var script = document.createElement ("SCRIPT");
 script.src = url;
 document.body.appendChild (script);
-}, "String");
+}, "~S");
 cla$$.launch = $_M (cla$$, "launch", 
 function (fileName) {
 if (fileName.endsWith (".js")) {
@@ -17920,7 +18401,7 @@ $wt.program.Program.findProgram (".js").execute (fileName);
 } else {
 $wt.program.Program.findProgram (fileName).execute (fileName);
 }return true;
-}, "String");
+}, "~S");
 $_M (cla$$, "execute", 
 function (fileName) {
 var quote = true;
@@ -17951,7 +18432,7 @@ throw e;
 }
 }
 return true;
-}, "String");
+}, "~S");
 $_M (cla$$, "getImageData", 
 function () {
 return  new $wt.graphics.ImageData (this.iconName);
@@ -18038,7 +18519,7 @@ this.event = evt;
 this.sourceElement = src;
 this.startX = x;
 this.startY = y;
-}, "$wt.internal.dnd.HTMLEventWrapper,$wt.internal.xhtml.Element,Number,Number");
+}, "$wt.internal.dnd.HTMLEventWrapper,$wt.internal.xhtml.Element,~N,~N");
 $_M (cla$$, "deltaX", 
 function () {
 return this.currentX - this.startX;
@@ -18051,7 +18532,7 @@ $_M (cla$$, "mouseMoveTo",
 function (currentX, currentY) {
 this.currentX = currentX;
 this.currentY = currentY;
-}, "Number,Number");
+}, "~N,~N");
 $_V (cla$$, "toString", 
 function () {
 return "DragEvent {" + this.sourceElement + "#" + "(" + this.startX + "," + this.startY + ")->" + "(" + this.currentX + "," + this.currentY + ")}";
@@ -18140,13 +18621,14 @@ $_S (cla$$,
 "$onmouseup", null,
 "$onkeyup", null);
 cla$$ = $_C (function () {
-$_Z (this, arguments);
-}, $wt.internal.dnd, "DragAndDrop");
-$_Y (cla$$, function () {
 this.status = 0;
 this.element = null;
 this.startX = 0;
 this.startY = 0;
+this.listeners = null;
+$_Z (this, arguments);
+}, $wt.internal.dnd, "DragAndDrop");
+$_Y (cla$$, function () {
 this.listeners =  new Array (0);
 });
 $_M (cla$$, "reset", 
@@ -18242,7 +18724,7 @@ if (cssName != null) {
 if (cssName.indexOf ("shell") == 0 && (cssName.indexOf ("top") != -1 || cssName.indexOf ("middle") != -1 || cssName.indexOf ("bottom") != -1)) {
 this.resize = cssName.substring (6);
 return true;
-} else if (cssName.indexOf ("shelltitle") != -1) {
+} else if (cssName.indexOf ("shell-title-text") != -1) {
 return true;
 }}return false;
 }, "$wt.internal.dnd.HTMLEventWrapper");
@@ -18257,11 +18739,19 @@ this.frame.style.left = this.sourceX + "px";
 this.frame.style.top = this.sourceY + "px";
 this.frame.style.zIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 100);
 document.body.appendChild (this.frame);
+var existedTitleBar = false;
+var els = e.sourceElement.getElementsByTagName ("DIV");
+for (var i = 0; i < els.length; i++) {
+if (els[i].className.indexOf ("shell-title-bar") != -1) {
+existedTitleBar = true;
+break;
+}}
+if (existedTitleBar) {
 var titleBar = document.createElement ("DIV");
 titleBar.className = "shell-title-bar opacity";
 titleBar.style.paddingTop = "4px";
 this.frame.appendChild (titleBar);
-firstTime = true;
+}firstTime = true;
 } else {
 this.frame.style.left = this.sourceX + "px";
 this.frame.style.top = this.sourceY + "px";
@@ -18372,8 +18862,6 @@ shell.style.top = y + "px";
 shell.style.width = width + "px";
 shell.style.height = height + "px";
 shell.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt (window.currentTopZIndex) + 2);
-$wt.internal.dnd.ShellFrameDND.fixShellHeight (e.sourceElement);
-$wt.internal.dnd.ShellFrameDND.fixShellWidth (e.sourceElement);
 this.updateShellBounds (x, y, width, height);
 this.clean ();
 return true;
@@ -18390,7 +18878,7 @@ this.overFrameHandle = null;
 $_M (cla$$, "updateShellBounds", 
 function (x, y, width, height) {
 return true;
-}, "Number,Number,Number,Number");
+}, "~N,~N,~N,~N");
 $_V (cla$$, "dragCanceled", 
 function (e) {
 this.clean ();
@@ -18681,7 +19169,7 @@ $_K (cla$$,
 function (shell, status) {
 this.shell = shell;
 this.status = status;
-}, "$wt.widgets.Decorations,Number");
+}, "$wt.widgets.Decorations,~N");
 $_M (cla$$, "updateMinimized", 
 function () {
 this.shell.setLocation (-1, document.body.clientHeight - 26);
@@ -18694,7 +19182,7 @@ height = window.screen.availHeight - 10;
 }var width = document.body.clientWidth;
 if (width > window.screen.availWidth) {
 width = window.screen.availWidth;
-}this.shell.setBounds (0 - 4, 0 - 4, width - 2, height + 4);
+}this.shell.setBounds (this.shell.computeTrim (0, 0, width + 2, height - 18));
 document.body.scrollTop = 0;
 });
 $_M (cla$$, "updateCentered", 
@@ -18725,7 +19213,7 @@ return ;
 }}
 $wt.internal.ResizeSystem.handlers[$wt.internal.ResizeSystem.handlers.length] =  new $wt.internal.ResizeHandler (shell, status);
 return ;
-}, "$wt.widgets.Decorations,Number");
+}, "$wt.widgets.Decorations,~N");
 cla$$.unregister = $_M (cla$$, "unregister", 
 function (shell) {
 for (var i = 0; i < $wt.internal.ResizeSystem.handlers.length; i++) {

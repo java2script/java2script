@@ -1009,7 +1009,22 @@ Clazz.formatParameters = function (funParams) {
 			fpName = "\\" + funParams.join ("\\");
 		}
 		*/
-		return "\\" + funParams.toString ().replace (/\s+/g, "").replace (/,/g, "\\");
+		var s = funParams.toString ();
+		s = s.replace (/~([NABSO])/g, function ($0, $1) {
+			if ($1 == 'N') {
+				return "Number";
+			} else if ($1 == 'B') {
+				return "Boolean"
+			} else if ($1 == 'S') {
+				return "String";
+			} else if ($1 == 'O') {
+				return "Object";
+			} else if ($1 == 'A') {
+				return "Array"
+			}
+			return "Unknown";
+		});
+		return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\");
 	} else {
 		return "\\void";
 	}
@@ -1338,7 +1353,7 @@ Clazz.instantialize = function (objThis, args) {
 		objThis.construct.apply (objThis, args);
 	}
 	*/
-	var c = objThis.construct
+	var c = objThis.construct;
 	if (c != null) {
 		if (objThis.con$truct == null) { // no need to init fields
 			c.apply (objThis, args);
@@ -2603,10 +2618,15 @@ String.getName = Clazz.innerFunctions.getName;
 String.serialVersionUID = String.prototype.serialVersionUID = -6849794470754667710;
 
 String.prototype.$replace = function (c1, c2) {
-	var sp = "\\$.*+{}?^()";
+	/*
+	var sp = "\\$.*+{}?^()[]";
 	if (sp.indexOf (c1) != -1) {
 		c1 = "\\" + c1;
 	}
+	*/
+	c1 = c1.replace (/([\\\/\$\.\*\+\{\}\?\^\(\)\[\]])/g, function ($0, $1) {
+		return "\\" + $1;
+	});
 	var regExp = new RegExp (c1, "gm");
 	return this.replace (regExp, c2);
 };
@@ -3665,12 +3685,12 @@ return parseInt (ht) ^ parseInt ((ht >> 32));
 });
 
 cla$$ = $_C (function () {
+this.detailMessage = null;
+this.stackTrace = null;
 $_Z (this, arguments);
 }, java.lang, "Throwable", null, java.io.Serializable);
 $_Y (cla$$, function () {
-this.detailMessage = null;
 this.cause = this;
-this.stackTrace = null;
 });
 $_K (cla$$, 
 function () {
@@ -4615,11 +4635,11 @@ if (!$_D ("java.util.AbstractList.Itr")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
+this.cursor = 0;
+this.lastRet = -1;
 $_Z (this, arguments);
 }, java.util.AbstractList, "Itr", null, java.util.Iterator);
 $_Y (cla$$, function () {
-this.cursor = 0;
-this.lastRet = -1;
 this.expectedModCount = this.callbacks["java.util.AbstractList"].modCount;
 });
 $_V (cla$$, "hasNext", 
@@ -5957,15 +5977,15 @@ if (!$_D ("java.util.Hashtable.Enumerator")) {
 Clazz.pu$h ();
 cla$$ = $_C (function () {
 $_B (this, arguments);
+this.entry = null;
+this.lastReturned = null;
+this.type = 0;
+this.iterator = false;
 $_Z (this, arguments);
 }, java.util.Hashtable, "Enumerator", null, [java.util.Enumeration, java.util.Iterator]);
 $_Y (cla$$, function () {
 this.table = this.callbacks["java.util.Hashtable"].table;
 this.index = this.table.length;
-this.entry = null;
-this.lastReturned = null;
-this.type = 0;
-this.iterator = false;
 this.expectedModCount = this.callbacks["java.util.Hashtable"].modCount;
 });
 $_K (cla$$, 
@@ -7045,25 +7065,27 @@ $_Z (this, arguments);
 }, java.util, "ResourceBundle");
 Clazz.pu$h ();
 cla$$ = $_C (function () {
+this.map = null;
+this.keys = null;
+this.content = null;
+this.initialized = false;
 $_Z (this, arguments);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
 $_Y (cla$$, function () {
 this.map =  new Array (0);
 this.keys =  new Array (0);
-this.content = null;
-this.initialized = false;
 });
 $_K (cla$$, 
 function (bundleName) {
 $_R (this, java.util.ResourceBundle.TextResourceBundle, []);
 this.bundleName = bundleName;
-}, "String");
+}, "~S");
 $_K (cla$$, 
 function (bundleName, content) {
 $_R (this, java.util.ResourceBundle.TextResourceBundle, []);
 this.bundleName = bundleName;
 this.content = content;
-}, "String,String");
+}, "~S,~S");
 $_M (cla$$, "evalString", 
 function (s) {
 var arr = new Array ();
@@ -7096,7 +7118,7 @@ if (!inScope) {
 arr[arr.length] = s.substring (lastIndex, s.length);
 }
 return arr.join ('');
-}, "String");
+}, "~S");
 $_M (cla$$, "initBundle", 
 ($fz = function () {
 if (this.initialized) {
@@ -7119,7 +7141,7 @@ index++;
 }
 }if (this.content == null) {
 return ;
-}var bundleLines = this.content.split ("\n");
+}var bundleLines = this.content.$plit ("\n");
 for (var i = 0; i < bundleLines.length; i++) {
 var trimedLine = bundleLines[i].trim ();
 if (!trimedLine.startsWith ("#")) {
@@ -7167,7 +7189,7 @@ if (!this.initialized) {
 this.initBundle();
 }
 return this.map[key];
-}, "String");
+}, "~S");
 cla$$ = $_P ();
 $_K (cla$$, 
 function () {
@@ -7175,11 +7197,11 @@ function () {
 $_M (cla$$, "getString", 
 function (key) {
 return this.getObject (key);
-}, "String");
+}, "~S");
 $_M (cla$$, "getStringArray", 
 function (key) {
 return this.getObject (key);
-}, "String");
+}, "~S");
 $_M (cla$$, "getObject", 
 function (key) {
 var obj = this.handleGetObject (key);
@@ -7188,7 +7210,7 @@ if (this.parent != null) {
 obj = this.parent.getObject (key);
 }if (obj == null) throw  new java.util.MissingResourceException ("Can't find resource for bundle " + this.getClass ().getName () + ", key " + key, this.getClass ().getName (), key);
 }return obj;
-}, "String");
+}, "~S");
 $_M (cla$$, "getLocale", 
 function () {
 return this.locale;
@@ -7200,17 +7222,17 @@ this.parent = parent;
 cla$$.getBundle = $_M (cla$$, "getBundle", 
 function (baseName) {
 return java.util.ResourceBundle.getBundleImpl (baseName, null, null);
-}, "String");
+}, "~S");
 cla$$.getBundle = $_M (cla$$, "getBundle", 
 function (baseName, locale) {
 return java.util.ResourceBundle.getBundleImpl (baseName, locale, null);
-}, "String,java.util.Locale");
+}, "~S,java.util.Locale");
 cla$$.getBundle = $_M (cla$$, "getBundle", 
 function (baseName, locale, loader) {
 if (loader == null) {
 throw  new NullPointerException ();
 }return java.util.ResourceBundle.getBundleImpl (baseName, locale, loader);
-}, "String,java.util.Locale,ClassLoader");
+}, "~S,java.util.Locale,ClassLoader");
 cla$$.getBundleImpl = $_M (cla$$, "getBundleImpl", 
 ($fz = function (baseName, locale, loader) {
 if (baseName == null) {
@@ -7222,7 +7244,7 @@ return java.util.ResourceBundle.caches[i];
 var bundle =  new java.util.ResourceBundle.TextResourceBundle (baseName);
 java.util.ResourceBundle.caches[java.util.ResourceBundle.caches.length] = bundle;
 return bundle;
-}, $fz.isPrivate = true, $fz), "String,java.util.Locale,ClassLoader");
+}, $fz.isPrivate = true, $fz), "~S,java.util.Locale,ClassLoader");
 cla$$.registerBundle = $_M (cla$$, "registerBundle", 
 function (baseName, content) {
 for (var i = 0; i < java.util.ResourceBundle.caches.length; i++) {
@@ -7230,8 +7252,28 @@ if (java.util.ResourceBundle.caches[i].bundleName == baseName) {
 return ;
 }}
 java.util.ResourceBundle.caches[java.util.ResourceBundle.caches.length] =  new java.util.ResourceBundle.TextResourceBundle (baseName, content);
-}, "String,String");
+}, "~S,~S");
 cla$$.caches = cla$$.prototype.caches =  new Array (0);
+$_J ("java.util");
+cla$$ = $_C (function () {
+this.className = null;
+this.key = null;
+$_Z (this, arguments);
+}, java.util, "MissingResourceException", RuntimeException);
+$_K (cla$$, 
+function (s, className, key) {
+$_R (this, java.util.MissingResourceException, [s]);
+this.className = className;
+this.key = key;
+}, "~S,~S,~S");
+$_M (cla$$, "getClassName", 
+function () {
+return this.className;
+});
+$_M (cla$$, "getKey", 
+function () {
+return this.key;
+});
 Clazz.declarePackage ("java.lang.reflect");
 java.lang.reflect.Array = {
 	newInstance : function (type, size) {

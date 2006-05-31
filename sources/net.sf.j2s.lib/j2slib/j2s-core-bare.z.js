@@ -1009,7 +1009,22 @@ Clazz.formatParameters = function (funParams) {
 			fpName = "\\" + funParams.join ("\\");
 		}
 		*/
-		return "\\" + funParams.toString ().replace (/\s+/g, "").replace (/,/g, "\\");
+		var s = funParams.toString ();
+		s = s.replace (/~([NABSO])/g, function ($0, $1) {
+			if ($1 == 'N') {
+				return "Number";
+			} else if ($1 == 'B') {
+				return "Boolean"
+			} else if ($1 == 'S') {
+				return "String";
+			} else if ($1 == 'O') {
+				return "Object";
+			} else if ($1 == 'A') {
+				return "Array"
+			}
+			return "Unknown";
+		});
+		return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\");
 	} else {
 		return "\\void";
 	}
@@ -1338,7 +1353,7 @@ Clazz.instantialize = function (objThis, args) {
 		objThis.construct.apply (objThis, args);
 	}
 	*/
-	var c = objThis.construct
+	var c = objThis.construct;
 	if (c != null) {
 		if (objThis.con$truct == null) { // no need to init fields
 			c.apply (objThis, args);
@@ -2252,10 +2267,15 @@ String.getName = Clazz.innerFunctions.getName;
 String.serialVersionUID = String.prototype.serialVersionUID = -6849794470754667710;
 
 String.prototype.$replace = function (c1, c2) {
-	var sp = "\\$.*+{}?^()";
+	/*
+	var sp = "\\$.*+{}?^()[]";
 	if (sp.indexOf (c1) != -1) {
 		c1 = "\\" + c1;
 	}
+	*/
+	c1 = c1.replace (/([\\\/\$\.\*\+\{\}\?\^\(\)\[\]])/g, function ($0, $1) {
+		return "\\" + $1;
+	});
 	var regExp = new RegExp (c1, "gm");
 	return this.replace (regExp, c2);
 };
