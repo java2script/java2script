@@ -1,8 +1,8 @@
 Clazz.declarePackage ("java.lang");
-cla$$ = java.lang.Error = Error/* = function () {
+c$ = java.lang.Error = Error/* = function () {
 Clazz.instantialize (this, arguments);
 }*/;
-Clazz.decorateAsType (cla$$, "Error", Throwable);
+Clazz.decorateAsType (c$, "Error", Throwable);
 
 Clazz.defineMethod (Error, "getMessage", 
 function () {
@@ -39,20 +39,20 @@ System.err.println (this.toString ());
 });
 Clazz.defineMethod (Error, "fillInStackTrace", function () {});
 
-Clazz.makeConstructor (cla$$, 
+Clazz.makeConstructor (c$, 
 function () {
 Clazz.superConstructor (this, Error);
 });
-Clazz.makeConstructor (cla$$, 
+Clazz.makeConstructor (c$, 
 function (message) {
 Clazz.superConstructor (this, Error, [message]);
 }, "String");
-Clazz.makeConstructor (cla$$, 
+Clazz.makeConstructor (c$, 
 function (message, cause) {
 Clazz.superConstructor (this, Error, [message, cause]);
 }, "String, Throwable");
-Clazz.makeConstructor (cla$$, 
+Clazz.makeConstructor (c$, 
 function (cause) {
 Clazz.superConstructor (this, Error, [cause]);
 }, "Throwable");
-cla$$.serialVersionUID = cla$$.prototype.serialVersionUID = 4980196508277280342;
+c$.serialVersionUID = c$.prototype.serialVersionUID = 4980196508277280342;

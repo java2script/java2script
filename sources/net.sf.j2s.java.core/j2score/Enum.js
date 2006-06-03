@@ -1,47 +1,47 @@
 Clazz.declarePackage ("java.lang");
-cla$$ = java.lang.Enum = Enum = function () {
+c$ = java.lang.Enum = Enum = function () {
 this.$name = null;
 this.$ordinal = 0;
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (cla$$, "Enum", null, [Comparable, java.io.Serializable]);
-Clazz.defineMethod (cla$$, "name", 
+Clazz.decorateAsType (c$, "Enum", null, [Comparable, java.io.Serializable]);
+Clazz.defineMethod (c$, "name", 
 function () {
 return this.$name;
 });
-Clazz.defineMethod (cla$$, "ordinal", 
+Clazz.defineMethod (c$, "ordinal", 
 function () {
 return this.$ordinal;
 });
-Clazz.makeConstructor (cla$$, 
+Clazz.makeConstructor (c$, 
 function (name, ordinal) {
 this.$name = name;
 this.$ordinal = ordinal;
 }, "String, Number");
-Clazz.defineMethod (cla$$, "toString", 
+Clazz.defineMethod (c$, "toString", 
 function () {
 return this.$name;
 });
-Clazz.defineMethod (cla$$, "equals", 
+Clazz.defineMethod (c$, "equals", 
 function (other) {
 return this == other;
 }, "Object");
-Clazz.defineMethod (cla$$, "hashCode", 
+Clazz.defineMethod (c$, "hashCode", 
 function () {
 return System.identityHashCode (this);
 });
-Clazz.defineMethod (cla$$, "clone", 
+Clazz.defineMethod (c$, "clone", 
 function () {
 throw  new CloneNotSupportedException ();
 });
-Clazz.defineMethod (cla$$, "compareTo", 
+Clazz.defineMethod (c$, "compareTo", 
 function (o) {
 var other = o;
 var self = this;
 if (self.getClass () != other.getClass () && self.getDeclaringClass () != other.getDeclaringClass ()) throw  new ClassCastException ();
 return self.ordinal - other.ordinal;
 }, "E");
-Clazz.defineMethod (cla$$, "getDeclaringClass", 
+Clazz.defineMethod (c$, "getDeclaringClass", 
 function () {
 var clazz = this.getClass ();
 var zuper = clazz.getSuperclass ();

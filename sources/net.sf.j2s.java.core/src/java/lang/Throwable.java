@@ -446,70 +446,27 @@ public class Throwable implements Serializable {
      * class LowLevelException extends Exception {
      * }
      * </pre>
-     * @j2sXNative
-System.err.println (this);
-var caller = arguments.callee.caller;
-var superCaller = null;
-var callerList = new Array ();
-var index = Clazz.callingStackTraces.length - 1;
-var noLooping = true;
-while (index > -1 || caller != null) {
-	var clazzName = null;
-	if (!noLooping || caller == Clazz.tryToSearchAndExecute || caller == Clazz.superCall || caller == null) {
-		if (index < 0) {
-			break;
-		}
-		noLooping = true;
-		superCaller = Clazz.callingStackTraces[index].caller;
-		clazzName = Clazz.callingStackTraces[index].owner.__CLASS_NAME__;
-		index--;
-	} else {
-		superCaller = caller;
-		if (superCaller.claxxOwner != null) {
-			clazzName = superCaller.claxxOwner.__CLASS_NAME__;
-		} else if (superCaller.exClazz != null) {
-			clazzName = superCaller.exClazz.__CLASS_NAME__;
-		}
-	}
-
-	var str = "";
-	if (clazzName != null && clazzName.length != 0) {
-		str += clazzName + ".";
-	}
-	str += (superCaller.exName == null) ? "anonymous" : superCaller.exName;
-	str += " (" + Clazz.getParamsType (superCaller.arguments) + ")";
-	//str += "~ [";
-	//for (var i = 0; i <superCaller.arguments.length; i++) {
-	//	str += args[i];
-	//	str += (i < args.length - 1) ? "," : "";
-	//}
-	//str += "]";
-	System.err.println (str);
-	for (var i = 0; i < callerList.length; i++) {
-		if (callerList[i] == superCaller) {
-			System.err.println ("... stack information lost as recursive invocation existed ...");
-			noLooping = false;
-			//break;
-		}
-	}
-	if (superCaller != null) {
-		callerList[callerList.length] = superCaller;
-	}
-	caller = superCaller.arguments.callee.caller;
-}
      */
     public void printStackTrace() { 
         //printStackTrace(System.err);
     	System.err.println(this);
     	for (int i = 0; i < stackTrace.length; i++)
     	/**
+    	 * @j2sNativeSrc
+var t = this.stackTrace[i];
+var x = t.methodName.indexOf ("(");
+var n = t.methodName.substring (0, x).replace (/\s+/g, "");
+if (n != "construct" || t.nativeClazz == null
+		|| Clazz.getInheritedLevel (t.nativeClazz, Throwable) < 0) {
+	System.err.println (t);
+}
     	 * @j2sNative
-var st = this.stackTrace[i];
-var idx = st.methodName.indexOf ("(");
-var mName = st.methodName.substring (0, idx).replace (/\s+/g, "");
-if (mName != "construct" || st.nativeClazz == null
-		|| Clazz.getInheritedLevel (st.nativeClazz, Throwable) < 0) {
-	System.err.println (this.stackTrace[i]);
+var t = this.c[i];
+var x = t.e.indexOf ("(");
+var n = t.e.substring (0, x).replace (/\s+/g, "");
+if (n != "construct" || t.z == null
+		|| Clazz.getInheritedLevel (t.z, Throwable) < 0) {
+	System.err.println (t);
 }
     	 */
     	{
@@ -624,7 +581,7 @@ if (mName != "construct" || st.nativeClazz == null
      *
      * @return  a reference to this <code>Throwable</code> instance.
      * @see     java.lang.Throwable#printStackTrace()
-     * @j2sNative
+     * @j2sNativeSrc
 this.stackTrace = new Array ();
 var caller = arguments.callee.caller;
 var superCaller = null;
@@ -680,6 +637,66 @@ while (index > -1 || caller != null) {
 		callerList[callerList.length] = superCaller;
 	}
 	caller = superCaller.arguments.callee.caller;
+}
+Clazz.initializingException = false;
+return this;
+     * @j2sNative
+this.c = new Array ();
+var r = arguments.callee.caller;
+var s = null;
+var l = new Array ();
+var q = Clazz.callingStackTraces;
+var x = q.length - 1;
+var p = true;
+while (x > -1 || r != null) {
+	var clazzName = null;
+	var z = null;
+	if (!p || r == Clazz.tryToSearchAndExecute || r == Clazz.superCall || r == null) {
+		if (x < 0) {
+			break;
+		}
+		p = true;
+		s = q[x].caller;
+		z = q[x].owner;
+		x--;
+	} else {
+		s = r;
+		if (s.claxxOwner != null) {
+			z = s.claxxOwner;
+		} else if (s.exClazz != null) {
+			z = s.exClazz;
+		}
+	}
+
+	var st = new StackTraceElement ();
+	st.z = z;
+	st.b = (z != null 
+			&& z.__CLASS_NAME__.length != 0) ? 
+			z.__CLASS_NAME__ : "anonymous";
+	st.e = ((s.exName == null) ? "anonymous" : s.exName) 
+			+ " (" + Clazz.getParamsType (s.arguments) + ")";
+	st.c = null;
+	st.d = -1;
+	this.c[this.c.length] = st;
+	for (var i = 0; i < l.length; i++) {
+		if (l[i] == s) {
+			// ... stack information lost as recursive invocation existed ...
+			var st = new StackTraceElement ();
+			st.z = null;
+			st.b = "lost";
+			st.e = "missing";
+			st.c = null;
+			st.d = -3;
+			this.c[this.c.length] = st;
+ 
+			p = false;
+			//break;
+		}
+	}
+	if (s != null) {
+		l[l.length] = s;
+	}
+	r = s.arguments.callee.caller;
 }
 Clazz.initializingException = false;
 return this;

@@ -27,6 +27,11 @@ function NullObject () {
 };
 
 /**
+ * Try to fix bug on Safari
+ */
+InternalFunction = Object;
+
+/**
  * Return the class name of the given class or object.
  *
  * @param clazzHost given class or object
@@ -83,6 +88,8 @@ Clazz.getClassName = function (clazzHost) {
 				if (obj.__CLASS_NAME__ != null) {
 					/* user defined class name */
 					return obj.__CLASS_NAME__;
+				} else if (obj.constructor == null) {
+					return "Object"; // For HTML Element in IE
 				} else {
 					return Clazz.getClassName (obj.constructor);
 				}
@@ -125,6 +132,8 @@ Clazz.getClass = function (clazzHost) {
 				/* user defined class name */
 				if (obj.__CLASS_NAME__ != null) {
 					clazzName = obj.__CLASS_NAME__;
+				} else if (obj.constructor == null) {
+					return Object; // Is it safe?
 				} else {
 					return obj.constructor;
 				}

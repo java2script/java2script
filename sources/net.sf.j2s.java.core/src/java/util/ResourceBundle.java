@@ -531,71 +531,72 @@ abstract public class ResourceBundle {
 			this.content = content;
 		}
 		/**
-		 * @param s
+		 * @param a
 		 * @return
 		 * @j2sNative
-var arr = new Array ();
-var lastIndex = 0;
-var inScope = false;
-for (var i = 0; i < s.length; i++) {
-	var ch = s.charAt (i);
-	if (inScope) {
-		if (ch == 'f') arr[arr.length] = '\f';
-		else if (ch == 't') arr[arr.length] = '\t';
-		else if (ch == 'r') arr[arr.length] = '\r';
-		else if (ch == 'n') arr[arr.length] = '\n';
-		else if (ch == '\'') arr[arr.length] = '\'';
-		else if (ch == '\"') arr[arr.length] = '\"';
-		else if (ch == '\\') arr[arr.length] = '\\';
-		else if (ch == 'u') {
-			arr[arr.length] =  eval ("\"\\u" + s.substring (i + 1, i + 5) + "\"");
+var r = new Array ();
+var b = false;
+var x = 0;
+for (var i = 0; i < a.length; i++) {
+	var c = a.charAt (i);
+	if (b) {
+		if (c == 'f') r[r.length] = '\f';
+		else if (c == 't') r[r.length] = '\t';
+		else if (c == 'r') r[r.length] = '\r';
+		else if (c == 'n') r[r.length] = '\n';
+		else if (c == '\'') r[r.length] = '\'';
+		else if (c == '\"') r[r.length] = '\"';
+		else if (c == '\\') r[r.length] = '\\';
+		else if (c == 'u') {
+			r[r.length] =  eval ("\"\\u" + a.substring (i + 1, i + 5) + "\"");
 			i += 4;
 		}
-		lastIndex = i + 1;
-		inScope = false;
-	} else if (ch == '\\') {
- 		if (lastIndex != i) {
- 			arr[arr.length] = s.substring (lastIndex, i);
+		x = i + 1;
+		b = false;
+	} else if (c == '\\') {
+ 		if (x != i) {
+ 			r[r.length] = a.substring (x, i);
 	 	}
- 		inScope = true;
+ 		b = true;
 	 }
 }
-if (!inScope) {
-	arr[arr.length] = s.substring (lastIndex, s.length);
+if (!b) {
+	r[r.length] = a.substring (x, a.length);
 }
-return arr.join (''); 
+return r.join (''); 
 		 */
-		native String evalString(String s);
+		native String evalString(String a);
 		
 		private void initBundle() {
 			if (initialized) {
 				return ;
 			}
 			initialized = true;
-			
+			String a = null;
+			String b = this.bundleName;
 			if (content == null) 
 			/**
 			 * Load the content from URL specified by given bundle name
 			 * @j2sNative
-			var bundlePath = this.bundleName.replace (/\./g, '/') + ".properties";
-			var paths = ["bin/", "", "j2slib/"];
-			var request =  new ajax.HttpRequest ();
-			var index = 0;
-			while (this.content == null && index < paths.length) {
-				request.open ("GET", paths[index] + bundlePath, false);
+			var n = b.replace (/\./g, '/') + ".properties";
+			var p = ["bin/", "", "j2slib/"];
+			var r =  new ajax.HttpRequest ();
+			var x = 0;
+			while (a == null && x < p.length) {
+				r.open ("GET", p[x] + n, false);
 				try {
-					request.send ();
-					this.content = request.getResponseText ();
+					r.send ();
+					a = r.getResponseText ();
 				} catch (e) {
-					request =  new ajax.HttpRequest ();
+					r =  new ajax.HttpRequest ();
 				}
-				index++;
+				x++;
 			}
 			 */
 			{
-				// content = ...
+				content = b; // nonsense codes
 			}
-			
+			content = a;
 			if (content == null) {
 				return ;
 			}
@@ -607,21 +608,30 @@ return arr.join ('');
 					if (index != -1) {
 						String key = trimedLine.substring(0, index).trim();
 						String value = trimedLine.substring(index + 1).trim();
+						if (value.indexOf ('\\') != -1) {
+							value = this.evalString (value);
+						}
+						String[] m = this.map;
+						String[] k = this.keys;
 						/**
+						 * @j2sNativeSrc
+						 * if (m[key] == null) {
+						 * k[k.length] = key;
+						 * }
+						 * m[key] = value;
 						 * @j2sNative
-						 * if (this.map[key] == null) {
-						 * this.keys[this.keys.length] = key;
+						 * if (i[g] == null) {
+						 * j[j.length] = g;
 						 * }
-						 * if (value.indexOf ('\\') != -1) {
-						 * value = this.evalString (value);
-						 * }
-						 * this.map[key] = value;
+						 * i[g] = h;
 						 */
 						{
 							//keys[keys.length] = key;
 							//map.put(key, value);
 							map[0] = key;
 							map[1] = value;
+							k[0] = key; // nonsense code to prevent IDE's warning
+							m[0] = value;
 						}
 					}
 				}
@@ -643,19 +653,19 @@ return arr.join ('');
 			//return new Vector(map.keySet()).elements();
 		}
 
-		/**
-		 * @j2sNative
-		if (!this.initialized) {
-			this.initBundle();
-		}
-		return this.map[key];
-		 */
 		protected Object handleGetObject(String key) {
 			if (!this.initialized) {
 				this.initBundle();
 			}
+			String[] m = this.map; 
+			/**
+			 * @j2sNativeSrc
+			return m[key];
+			 * @j2sNative
+			return b[a];
+			 */ {}
 			//return map.get(key);
-			return null;
+			return m; // Should never reach here in JS
 		}
     	
     }

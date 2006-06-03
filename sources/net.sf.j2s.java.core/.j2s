@@ -1,11 +1,12 @@
 #Java2Script Configuration
-#Tue May 30 09:42:02 CST 2006
+#Sun Jun 04 06:50:33 CST 2006
+j2s.compiler.visitor=SWTScriptVisitor
 j2s.compiler.abbreviation=true
 j2s.compiler.dependency.status=disable
 j2s.compiler.status=enable
 j2s.abandomed.resources.list=bin/net/sf/j2s/java/core/CorePlugin.js,bin/net/sf/j2s/java/core/RegExCompress.js,bin/net/sf/j2s/java/core/Bundle2StringUtil.js
 j2s.compiler.abbreviation.prefix=$_
 j2s.resources.list=bin/java/lang/Runnable.js,bin/java/lang/Cloneable.js,bin/java/io/Serializable.js,bin/java/lang/Comparable.js,bin/java/lang/CharSequence.js,bin/java/lang/StringBuffer.js,bin/java/util/Comparator.js,bin/java/util/Iterator.js,bin/java/util/ListIterator.js,bin/java/util/Enumeration.js,bin/java/util/Collection.js,bin/java/util/Set.js,bin/java/util/Map.js,bin/java/util/List.js,bin/java/util/RandomAccess.js,bin/java/util/AbstractCollection.js,bin/java/util/AbstractSet.js,bin/java/util/AbstractMap.js,bin/java/util/AbstractList.js,bin/java/util/ArrayList.js,bin/java/util/HashMap.js,bin/java/util/HashSet.js,bin/java/util/Dictionary.js,bin/java/util/Hashtable.js,bin/java/util/Properties.js,bin/java/util/Vector.js,bin/java/util/Stack.js,bin/java/lang/Throwable.js,bin/java/lang/Error.js,bin/java/lang/Exception.js,bin/java/lang/RuntimeException.js,bin/java/lang/NullPointerException.js,bin/java/lang/IllegalArgumentException.js,bin/java/lang/NoSuchMethodException.js,bin/java/util/EventObject.js,bin/java/util/EventListener.js,bin/java/util/EventListenerProxy.js,bin/java/util/ResourceBundle.js,bin/java/lang/ThreadGroup.js,bin/java/lang/Thread.js,bin/java/lang/StackTraceElement.js,bin/java/io/InputStream.js,bin/java/util/MissingResourceException.js
-j2s.compiler.whitespace=true
+j2s.compiler.whitespace=false
 j2s.output.path=bin
 j2s.compiler.linebreak=\r\n

@@ -62,11 +62,12 @@ Clazz.MethodNotFoundException = function (obj, clazz, method, params) {
 /* protected */
 Clazz.prepareCallback = function (objThis, args) {
 	var classThisObj = args[0];
+	var cbName = "b$"; // "callbacks";
 	if (objThis != null && classThisObj != null && classThisObj != window) {
-		var obs = objThis["callbacks"];
+		var obs = objThis[cbName];
 		if (obs == null) {
 			obs = new Array ();
-			objThis["callbacks"] = obs;
+			objThis[cbName] = obs;
 		}
 		var className = Clazz.getClassName (classThisObj);
 		//if (obs[className] == null) { /* == null make no sense! */
@@ -80,7 +81,7 @@ Clazz.prepareCallback = function (objThis, args) {
 						.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
 			}
 		//}
-		var cbs = classThisObj["callbacks"];
+		var cbs = classThisObj[cbName];
 		if (cbs != null && cbs instanceof Array) {
 			for (var s in cbs) {
 				if (s != "length") {
@@ -149,6 +150,22 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
 		}
 		obj.construct.apply (obj, args);
 	}
+	// f$ is short for the once choosen "$finals"
+	if (finalVars != null && objThis.f$ == null) {
+		obj.f$ = finalVars;
+	} else if (finalVars == null && objThis.f$ != null) {
+		obj.f$ = objThis.f$;
+	} else if (finalVars != null && objThis.f$ != null) {
+		var o = new Object ();
+		for (var attr in objThis.f$) {
+			o[attr] = objThis.f$[attr];
+		}
+		for (var attr in finalVars) {
+			o[attr] = finalVars[attr];
+		}
+		obj.f$ = o;
+	}
+	/*
 	if (finalVars != null && objThis.$finals == null) {
 		obj.$finals = finalVars;
 	} else if (finalVars == null && objThis.$finals != null) {
@@ -163,6 +180,7 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
 		}
 		obj.$finals = o;
 	}
+	*/
 	//Clazz.prepareCallback (obj, objThis);
 	return obj;
 };
@@ -430,11 +448,12 @@ Clazz.checkPrivateMethod = function (args) {
 	return null;
 };
 var $fz = null; // for private method declaration
-var cla$$ = null;
+//var cla$$ = null;
+var c$ = null;
 Clazz.cla$$$tack = new Array ();
 Clazz.pu$h = function () {
-	if (cla$$ != null) {
-		Clazz.cla$$$tack[Clazz.cla$$$tack.length] = cla$$;
+	if (c$ != null) { // if (cla$$ != null) {
+		Clazz.cla$$$tack[Clazz.cla$$$tack.length] = c$; // cla$$;
 	}
 };
 Clazz.p0p = function () {
@@ -479,5 +498,8 @@ Clazz.p0pCalling = function () {
 	}
 };
 
-$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;
+w$ = window; // Short for browser's window object
+d$ = document; // Short for browser's document object
+
+$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;
 
