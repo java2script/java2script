@@ -26,7 +26,7 @@ package net.sf.j2s.ui.text.javadoc;
 public interface IJavaDocTagConstants {
 
 	/** Javadoc general tags */
-	public static final String[] JAVADOC_GENERAL_TAGS= new String[] { "@j2sIgnore", "@j2sDebug", "@j2sKeep", "@j2sNative", "@j2sOverride", "@j2sIgnoreSuperConstructor" };//"@author", "@deprecated", "@docRoot", "@exception", "@inheritDoc", "@link", "@linkplain", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@value", "@version" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$
+	public static final String[] JAVADOC_GENERAL_TAGS= new String[] { "@j2sIgnore", "@j2sDebug", "@j2sKeep", "@j2sNative", "@j2sNativeSrc", "@j2sOverride", "@j2sIgnoreSuperConstructor" };//"@author", "@deprecated", "@docRoot", "@exception", "@inheritDoc", "@link", "@linkplain", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@value", "@version" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$
 
 	/** Javadoc link tags */
 	public static final String[] JAVADOC_LINK_TAGS= new String[] { }; //"@docRoot", "@inheritDoc", "@link", "@linkplain" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

@@ -10,11 +10,12 @@
             id="net.sf.j2s.ui.views">
       </category>
       <view
-            name="J2S View"
-            icon="icons/view.gif"
+            allowMultiple="true"
             category="net.sf.j2s.ui.views"
             class="net.sf.j2s.ui.generator.J2SView"
-            id="net.sf.j2s.ui.generator.J2SView">
+            icon="icons/view.gif"
+            id="net.sf.j2s.ui.generator.J2SView"
+            name="J2S View">
       </view>
    </extension>
    <extension
@@ -44,6 +45,7 @@
             id="net.sf.j2s.ui.views"
             name="Java2Script"/>
       <view
+            allowMultiple="true"
             category="net.sf.j2s.ui.views"
             class="net.sf.j2s.ui.console.J2SConsoleView"
             icon="icons/z-logo.gif"

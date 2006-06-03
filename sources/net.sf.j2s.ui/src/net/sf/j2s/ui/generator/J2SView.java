@@ -11,12 +11,11 @@
 package net.sf.j2s.ui.generator;
 
 
-import java.util.ResourceBundle;
-
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
+import net.sf.j2s.core.compiler.Java2ScriptCompiler;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
@@ -27,12 +26,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -65,9 +67,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.internal.console.ConsoleResourceBundleMessages;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.FindReplaceAction;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
@@ -75,12 +75,14 @@ public class J2SView extends ViewPart {
 	
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_SCRIPT_WRITTEN= "script_written"; //$NON-NLS-1$
+	private final static String SETTINGS_COMPRESS_VAR_NAME= "compress_name"; //$NON-NLS-1$
 
 	private Action fFocusAction;
 	private Action fClearAction;
 	private Action fSelectAllAction;
 	private Action fCopyAction;
-	//private Action fScriptWrittenAction;
+	private Action fScriptWrittenAction;
+	private Action fCompressVarNameAction;
 
 	private Text scriptText;
 	
@@ -95,14 +97,16 @@ public class J2SView extends ViewPart {
 	
 	private boolean fDoLinkWithEditor;
 	private IDialogSettings fDialogSettings;
-	// boolean fScriptWritten;
+	boolean fScriptWritten;
+	boolean fCompressVarName;
 
 	private ListenerMix fSuperListener;
 
 	public J2SView() {
 		fDialogSettings= Java2ScriptUIPlugin.getDefault().getDialogSettings();
 		fDoLinkWithEditor= fDialogSettings.getBoolean(SETTINGS_LINK_WITH_EDITOR);
-		//fScriptWritten= !fDialogSettings.getBoolean(SETTINGS_NO_SCRIPT_WRITTEN);
+		fScriptWritten= !fDialogSettings.getBoolean(SETTINGS_NO_SCRIPT_WRITTEN);
+		fCompressVarName = !fDialogSettings.getBoolean(SETTINGS_COMPRESS_VAR_NAME);
 		fCurrentASTLevel = AST.JLS3;
 	}
 
@@ -144,8 +148,9 @@ public class J2SView extends ViewPart {
 	private void fillLocalPullDown(IMenuManager manager) {
 //		manager.add(fFocusAction);
 //		manager.add(fLinkWithEditor);
-		//manager.add(fScriptWrittenAction);
-		//manager.add(new Separator());
+//		manager.add(fScriptWrittenAction);
+		manager.add(fCompressVarNameAction);
+		manager.add(new Separator());
 		//manager.add(fClearAction);
 		manager.add(fSelectAllAction);
 	}
@@ -187,16 +192,26 @@ public class J2SView extends ViewPart {
 		fClearAction.setText("Clear Script");
 		fClearAction.setToolTipText("Clear the script output console");
 		J2SViewImages.setImageDescriptors(fClearAction, J2SViewImages.CLEAR);
-		
-//		fScriptWrittenAction = new Action("Save Script Automatically", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
-//			public void run() {
-//				performScriptWritten();
-//			}
-//		};
-//		fScriptWrittenAction.setChecked(fScriptWritten);
-//		fScriptWrittenAction.setToolTipText("Save the generated scripts to file automatically "); //$NON-NLS-1$
-//		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
-//		fScriptWrittenAction.setEnabled(fScriptWritten);
+		/*
+		fScriptWrittenAction = new Action("Enable J2SMap", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performScriptWritten();
+			}
+		};
+		fScriptWrittenAction.setChecked(fScriptWritten);
+		fScriptWrittenAction.setToolTipText("Converting Java to JavaScript using given J2SMap"); //$NON-NLS-1$
+		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
+		//fScriptWrittenAction.setEnabled(fScriptWritten);
+		*/
+		fCompressVarNameAction = new Action("Enable Name Compressing", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performCompressName();
+			}
+		};
+		fCompressVarNameAction.setChecked(fCompressVarName);
+		fCompressVarNameAction.setToolTipText("Compress the variable name when converting"); //$NON-NLS-1$
+		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
+		//fCompressVarNameAction.setEnabled(fCompressVarName);
 
 		fLinkWithEditor = new Action() {
 			public void run() {
@@ -245,12 +260,24 @@ public class J2SView extends ViewPart {
 	}
 	
 	protected void performScriptWritten() {
-//		fScriptWritten= fScriptWrittenAction.isChecked();
-//		fDialogSettings.put(SETTINGS_NO_SCRIPT_WRITTEN, !fScriptWritten);
+		/*
+		fScriptWritten= fScriptWrittenAction.isChecked();
+		fDialogSettings.put(SETTINGS_NO_SCRIPT_WRITTEN, !fScriptWritten);
 //		if (fScriptWritten) {
 //			ExtendedCompilers.register("java2script", new Java2ScriptCompiler());
 //		} else {
 //			ExtendedCompilers.deregister("java2script");
+//		}
+		*/
+	}
+	
+	protected void performCompressName() {
+		fCompressVarName = fCompressVarNameAction.isChecked();
+		fDialogSettings.put(SETTINGS_COMPRESS_VAR_NAME, !fScriptWritten);
+//		if (fScriptWritten) {
+//		ExtendedCompilers.register("java2script", new Java2ScriptCompiler());
+//		} else {
+//		ExtendedCompilers.deregister("java2script");
 //		}
 	}
 
@@ -278,7 +305,24 @@ public class J2SView extends ViewPart {
 			//installModificationListener();
 
 			//ASTScriptVisitor visitor = new ASTScriptVisitor();
+//			SWTScriptVisitor visitor = new CompressedSWTScriptVisitor();
 			SWTScriptVisitor visitor = new SWTScriptVisitor();
+			
+			visitor.setToCompileVariableName(fCompressVarName);
+			NameConverterUtil.setJ2SMap(null);
+			if (fCompressVarName) {
+				String prjFolder = null;
+				if (fOpenable instanceof IJavaElement) {
+					IJavaElement unit = (IJavaElement) fOpenable;
+					IJavaProject javaProject = unit.getJavaProject();
+					if (javaProject != null) {
+						prjFolder = javaProject.getProject().getLocation().toOSString();
+					}
+				}
+				if (prjFolder != null) {
+					Java2ScriptCompiler.updateJ2SMap(prjFolder);
+				}
+			}
 			fRoot.accept(visitor);
 			outputJavaScript(visitor);
 			
@@ -317,6 +361,11 @@ public class J2SView extends ViewPart {
 
 	private void outputJavaScript(ASTScriptVisitor visitor) {
 		String js = visitor.getBuffer().toString();
+		js = js.replaceAll("cla\\$\\$", "c\\$")
+				.replaceAll("innerThis", "i\\$")
+				.replaceAll("finalVars", "v\\$")
+				.replaceAll("\\.callbacks", "\\.b\\$")
+				.replaceAll("\\.\\$finals", "\\.f\\$");
 		scriptText.setText(js);
 		/*
 		if (!fScriptWritten) {

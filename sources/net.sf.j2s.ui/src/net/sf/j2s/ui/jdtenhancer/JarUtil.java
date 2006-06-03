@@ -161,7 +161,7 @@ public class JarUtil {
 		String[] list = new File(path).list(new FilenameFilter() {
 		
 			public boolean accept(File dir, String name) {
-				if (name.startsWith("org.eclipse.jdt.core") && name.endsWith(".jar")) {
+				if (name.startsWith("org.eclipse.jdt.core_") && name.endsWith(".jar")) {
 					return true;
 				}
 				return false;
