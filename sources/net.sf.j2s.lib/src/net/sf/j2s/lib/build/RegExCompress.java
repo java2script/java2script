@@ -56,13 +56,19 @@ public class RegExCompress {
 	 * @throws FileNotFoundException 
 	 */
 	public static void main(String[] args) throws FileNotFoundException {
-		for (int i = 0; i < (args.length - 1) / 2; i++) {
-			File src = new File(args[0], args[i + i + 1]);
-			File dest = new File(args[0], args[i + i + 2]);
-			pack(src, dest);
+		boolean completelyCompressing = true;
+		int indexDelta = 0;
+		if (args.length % 2 == 0 && args.length > 0) {
+			completelyCompressing = "true".equals(args[0]);
+			indexDelta = 1;
+		}
+		for (int i = 0; i < (args.length - 1 - indexDelta) / 2; i++) {
+			File src = new File(args[indexDelta], args[i + i + 1 + indexDelta]);
+			File dest = new File(args[indexDelta], args[i + i + 2 + indexDelta]);
+			pack(src, dest, completelyCompressing);
 		}
 	}
-	private static void pack(File src, File dest) throws FileNotFoundException {
+	private static void pack(File src, File dest, boolean completelyCompress) throws FileNotFoundException {
 		if (src.exists() && dest.exists() && src.lastModified() <= dest.lastModified()) {
 			return ;
 		}
@@ -71,7 +77,11 @@ public class RegExCompress {
 			return ;
 		}
 		String s = readFileAll(new FileInputStream(src));
-		s = regexCompress(s);
+		if (completelyCompress) {
+			s = regexCompress(s);
+		} else {
+			s = regexCompress2(s);
+		}
 		try {
 			FileOutputStream fos = new FileOutputStream(dest);
 			String compressedStr = "/* http://j2s.sf.net/ */" + s;
@@ -93,6 +103,22 @@ public class RegExCompress {
 				"|((\\b|\\x24)\\s+(\\b|\\x24))|" + // 3:9,10,11
 				"(([+\\-])\\s+([+\\-]))|" + // 3:12,13,14
 				"(\\s+)",
+				"$1$2$7$8");
+		return str;
+	}
+	public static String regexCompress2(String str) {
+		String whiteSpace = "[ \\f\\t\\v]";
+		String regEx = "('[^'\\n\\r]*')|" + // 1:1
+				"(\"[^\"\\n\\r]*\")|" + // 1:2
+				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:3 // line comments
+				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:4,5 // block comments
+				"(" + whiteSpace + "+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:6,7 // regular expression
+				"([^\\w\\x24\\/'\"*)\\?:]\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*)"; // 1:8 // regular expression 
+		//str = str.replaceAll(regEx,	"$1$2$7$8");
+		str = mk(str, regEx +
+				"|((\\b|\\x24)" + whiteSpace + "+(\\b|\\x24))|" + // 3:9,10,11
+				"(([+\\-])" + whiteSpace + "+([+\\-]))|" + // 3:12,13,14
+				"(" + whiteSpace + "+)",
 				"$1$2$7$8");
 		return str;
 	}

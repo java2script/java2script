@@ -306,8 +306,8 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.core.compile">
     	
-    	<!--
         <java classname="net.sf.j2s.lib.build.RegExCompress">
+        	<arg value="false"/>
         	<arg value="${current.project.dir}"/>
         	
     		<arg value="${j2score.dir}/Class.js"/>
@@ -343,17 +343,11 @@
     		<arg value="${j2score.dir}/UtilExt.js"/>
     		<arg value="${js.src.dir}/java/util/UtilExt.js"/>
 
-    		<arg value="${j2score.dir}/System.js"/>
-    		<arg value="${js.src.dir}/java/lang/System.js"/>
-        	
     		<arg value="${j2score.dir}/Encoding.js"/>
     		<arg value="${js.src.dir}/java/lang/Encoding.js"/>
         	
     		<arg value="${j2score.dir}/String.js"/>
     		<arg value="${js.src.dir}/java/lang/String.js"/>
-        	
-    		<arg value="${j2score.dir}/console.css"/>
-    		<arg value="${jz.dist.dir}/console.css"/>
         	
     		<arg value="${j2score.dir}/NativeConsole.js"/>
     		<arg value="${js.src.dir}/java/lang/NativeConsole.js"/>
@@ -369,12 +363,8 @@
         	</classpath>
         </java>
     	
-		-->
+    	<!---->
     	<!--
-		<copy file="${j2score.dir}/NoSuchMethodException.js"
-			tofile="${js.src.dir}/java/lang/NoSuchMethodException.js"/>
-		-->
-    	
 		<copy file="${j2score.dir}/Class.js"
 			tofile="${js.src.dir}/java/lang/Class.js"/>
 		<copy file="${j2score.dir}/ClassExt.js"
@@ -401,11 +391,6 @@
 			tofile="${js.src.dir}/java/util/Date.js"/>
 		<copy file="${j2score.dir}/UtilExt.js"
 			tofile="${js.src.dir}/java/util/UtilExt.js"/>
-
-    	<!--
-		<copy file="${j2score.dir}/System.js"
-			tofile="${js.src.dir}/java/lang/System.js"/>
-    	-->
     	
 		<copy file="${j2score.dir}/Encoding.js"
 			tofile="${js.src.dir}/java/lang/Encoding.js"/>
@@ -417,18 +402,11 @@
 		<copy file="${j2score.dir}/NativeConsole.js"
 			tofile="${js.src.dir}/java/lang/NativeConsole.js"/>
 
-    	<!--
 		<copy file="${j2score.dir}/Throwable.js"
 			tofile="${js.src.dir}/java/lang/Throwable.js"/>
-		-->
 
 		<copy file="${j2score.dir}/Error.js"
 			tofile="${js.src.dir}/java/lang/Error.js"/>
-    	<!--
-    	-->
-    	<!--
-		<copy file="${j2score.dir}/Class.js"
-			tofile="${js.src.dir}/java/lang/Class.js"/>
 		-->
     </target>
 

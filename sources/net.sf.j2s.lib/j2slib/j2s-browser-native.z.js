@@ -217,6 +217,7 @@ BrowserNative.releaseHandle = function (handle) {
 	handle.onblur = null;
 	handle.onchange = null;
 	handle.onclick = null;
+	handle.ondblclick = null;
 	handle.oncontextmenu = null;
 	handle.onfocus = null;
 	handle.onkeydown = null;
@@ -233,6 +234,7 @@ BrowserNative.releaseHandle = function (handle) {
 		try {
 			handle.parentNode.removeChild (handle);
 		} catch (e) {
+			alert ("error:" + e);
 		}
 	}
 };
@@ -258,11 +260,13 @@ try {
  */
 if (window.attachEvent) {
 	window.attachEvent ("onunload", function () {
-		try {
+		//try {
 			org.eclipse.swt.widgets.Display.releaseAllDisplays ();
-		} catch (e) {
-			popupAlert (e.message);
-		}
+			//popupAlert ("OK");
+		//} catch (e) {
+		//	popupAlert (e.message);
+		//	throw e;
+		//}
 		return true;
 	});
 }

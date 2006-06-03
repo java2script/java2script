@@ -161,6 +161,7 @@
             </header>
         	<filelist dir="${js.src.dir}">
 
+        		<file name="org/eclipse/swt/internal/struct/WINDOWPOS.js"/>
         		<file name="org/eclipse/swt/internal/browser/OS.js"/>
         		
         		<file name="org/eclipse/swt/accessibility/Accessible.js"/>

@@ -57,6 +57,8 @@ ajax.HttpRequest = function () {
 	};
 	this.open = function (method, url, async) {
 		this.transport.open (method, url, async);
+		this.transport.setRequestHeader ("User-Agent",
+				"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
 		if (method != null && method.toLowerCase () == "post") {
 			this.transport.setRequestHeader ("Content-type", 
 					"application/x-www-form-urlencoded");
@@ -81,21 +83,21 @@ ajax.HttpRequest.__CLASS_NAME__ = ajax.HttpRequest.prototype.__CLASS_NAME__ = "a
 Clazz.declarePackage ("ajax");
 Clazz.declareInterface (ajax, "IHttpRequestCallBack");
 Clazz.declarePackage ("ajax");
-cla$$ = Clazz.decorateAsClass (function () {
+c$ = Clazz.decorateAsClass (function () {
 Clazz.instantialize (this, arguments);
 }, ajax, "HttpRequestCallBackAdapter", null, ajax.IHttpRequestCallBack);
-Clazz.defineMethod (cla$$, "onComplete", 
+Clazz.overrideMethod (c$, "onComplete", 
 function () {
 });
-Clazz.defineMethod (cla$$, "onInteractive", 
+Clazz.overrideMethod (c$, "onInteractive", 
 function () {
 });
-Clazz.defineMethod (cla$$, "onLoaded", 
+Clazz.overrideMethod (c$, "onLoaded", 
 function () {
 });
-Clazz.defineMethod (cla$$, "onLoading", 
+Clazz.overrideMethod (c$, "onLoading", 
 function () {
 });
-Clazz.defineMethod (cla$$, "onUninitialized", 
+Clazz.overrideMethod (c$, "onUninitialized", 
 function () {
 });
