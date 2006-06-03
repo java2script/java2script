@@ -14,6 +14,7 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -53,6 +54,7 @@ public abstract class Control extends Widget implements Drawable {
 	int left, top;
 	protected int height;
 	protected int width;
+	//private int lastLeft, lastTop, lastHeight, lastWidth; 
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -494,6 +496,10 @@ void createHandle () {
 }
 
 void createWidget () {
+//	lastLeft = -1;
+//	lastTop = -1;
+//	lastWidth = 0;
+//	lastHeight = 0;
 	foreground = background = -1;
 	checkOrientation (parent);
 	createHandle ();
@@ -1568,7 +1574,9 @@ public void pack () {
  */
 public void pack (boolean changed) {
 	checkWidget ();
-	setSize (computeSize (SWT.DEFAULT, SWT.DEFAULT, changed));
+	Point computeSize = computeSize (SWT.DEFAULT, SWT.DEFAULT, changed);
+	System.out.println(computeSize);
+	setSize (computeSize);
 }
 
 /**
@@ -2055,6 +2063,10 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 //				int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //				if ((bits & OS.WS_CLIPSIBLINGS) == 0) flags |= OS.SWP_NOCOPYBITS;
 //			}
+			if ((width != this.width || height != this.height)
+					&& this instanceof Composite) {
+				display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
+			}
 			this.left = x;
 			this.top = y;
 			this.width = width;
@@ -2081,6 +2093,10 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 			lpwp [index] = wp;
 		}
 	} else {
+		if ((width != this.width || height != this.height)
+				&& this instanceof Composite) {
+			display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
+		}
 		this.left = x;
 		this.top = y;
 		this.width = width;

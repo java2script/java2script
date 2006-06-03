@@ -153,7 +153,7 @@ void createHandle () {
 	//super.createHandle ();
 	//OS.SendMessage (handle, OS.EM_LIMITTEXT, 0, 0);
 	handle = document.createElement ("DIV");
-	String cssName = "text-default";
+	String cssName = "text-default text-editable";
 //	if ((style & SWT.BORDER) != 0) {
 //		cssName += " text-border";
 //	}
@@ -176,7 +176,7 @@ void createHandle () {
 		//handle.type = "text";
 	}
 	if (OS.isMozilla) {
-		textHandle.style.position = "fixed";
+//		textHandle.style.position = "fixed";
 	}
 	String textCSSName = null;
 	if (OS.isIE) {
@@ -215,7 +215,6 @@ void createHandle () {
 		//}
 	}
 	if (textCSSName != null) {
-		System.out.println("border:" + textCSSName);
 		textHandle.className = textCSSName;
 	}
 	handle.appendChild(textHandle);
@@ -973,14 +972,14 @@ public boolean getEditable () {
 	checkWidget ();
 //	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //	return (bits & OS.ES_READONLY) == 0;
-	String disableClass = "text-disable";
-	if (textHandle.className != null) {
-		int idx = textHandle.className.indexOf(disableClass);
+	String editableClass = "text-editable";
+	if (handle.className != null) {
+		int idx = handle.className.indexOf(editableClass);
 		if (idx != -1) {
-			return false;
+			return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 /**
@@ -1757,20 +1756,20 @@ public void setEditable (boolean editable) {
 	style &= ~SWT.READ_ONLY;
 	if (!editable) style |= SWT.READ_ONLY;
 	textHandle.readOnly = !editable;
-	String disableClass = "text-disable";
-	if (editable) {
-		if (textHandle.className != null) {
-			int idx = textHandle.className.indexOf(disableClass);
+	String editableClass = "text-editable";
+	if (!editable) {
+		if (handle.className != null) {
+			int idx = handle.className.indexOf(editableClass);
 			if (idx != -1) {
-				String zzName = textHandle.className.substring(0, idx) + textHandle.className.substring(idx + disableClass.length());
-				textHandle.className = zzName;
+				String zzName = handle.className.substring(0, idx) + textHandle.className.substring(idx + editableClass.length());
+				handle.className = zzName;
 			}
 		}
 	} else {
-		if (textHandle.className != null) {
-			int idx = textHandle.className.indexOf(disableClass);
+		if (handle.className != null) {
+			int idx = handle.className.indexOf(editableClass);
 			if (idx == -1) {
-				textHandle.className += " text-disable";
+				handle.className += " " + editableClass;
 			}
 		}
 	}
@@ -2099,13 +2098,22 @@ public void setTopIndex (int index) {
  */
 boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	if ((style & SWT.BORDER) != 0) {
-		textHandle.style.width = ((cx - 4) > 0 ? (cx - 4) : 0) + "px";
-		textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
-		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
+		cx -= 4;
+		cy -= 4;
+//		textHandle.style.width = ((cx - 4) > 0 ? (cx - 4) : 0) + "px";
+//		textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
+//		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
 	}
-	textHandle.style.width = cx + "px";
-	textHandle.style.height = cy + "px";
-	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	textHandle.style.width = (cx > 0 ? cx : 0) + "px";
+	textHandle.style.height = (cy > 0 ? cy : 0) + "px";
+	Element el = (Element) hWnd;
+	// TODO: What about hWndInsertAfter and uFlags
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+	//return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 /**

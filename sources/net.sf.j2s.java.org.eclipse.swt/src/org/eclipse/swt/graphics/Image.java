@@ -685,9 +685,17 @@ public Image (Device device, InputStream stream) {
 	if (device == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 //	init(device, new ImageData(stream));
 //	if (device.tracking) device.new_Object(this);
+	String url = null;
+	
+	if (stream != null) 
 	/**
-	 * @j2sNative if (stream != null) this.url = stream.url;
+	 * @j2sNativeSrc
+	 * url = stream.url;
+	 * @j2sNative
+	 * c = b.url;
 	 */ {}
+	
+	 this.url = url;
 }
 
 /**

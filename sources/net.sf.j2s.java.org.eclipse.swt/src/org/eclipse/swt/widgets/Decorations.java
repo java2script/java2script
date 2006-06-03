@@ -25,6 +25,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
+import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -349,7 +350,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 				width = 105;
 			}
 		}
-		if ((style & SWT.BORDER) != 0) {
+		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX | SWT.BORDER)) != 0) {
 			width += 8;
 			height += 8;
 			x -= 4;
@@ -561,14 +562,7 @@ protected void createHandle() {
 		}
 		public boolean updateShellBounds(int x, int y, final int width,
 				final int height) {
-			setBounds(x, y, width + 4, height + 4);
-			if (false)
-				display.timerExec(25, new Runnable() {
-					public void run() {
-						//Point size = getSize();
-						layout();
-					}
-				});
+			setBounds(x, y, width, height);
 			return true;
 		}
 	});
@@ -620,12 +614,12 @@ void exportHTMLSource() {
 	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 //	shell.setLayout(new FillLayout());
 	shell.setText("Export HTML Source");
-	String innerHTML = contentHandle.innerHTML;
-	//innerHTML.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
+	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
+	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
 	if (OS.isIE)
 	/**
 	 * @j2sNative
-innerHTML = innerHTML.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
 	return $1 + $2.toLowerCase () + $3;
 }).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
 	if (!((/;$/).test ($2))) {
@@ -641,13 +635,13 @@ innerHTML = innerHTML.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) 
 	 */ {} else
 	/**
 	 * @j2sNative
-innerHTML = innerHTML.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
 	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
 });
 	 */ {}
 	/**
 	 * @j2sNative
-innerHTML = innerHTML.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
 	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
 	if ($2.length == 0) {
 		if ($3 != ">") {
@@ -677,13 +671,9 @@ innerHTML = innerHTML.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0
 	gd.heightHint = 275;
 	text.setLayoutData(gd);
 	Rectangle rect = getClientArea();
-	String html = "<div class=\"shell-content\" style=\""
-				+ "width:"
-				+ rect.width
-				+ "px;height:"
-				+ rect.height
-				+ "px;\">"
-				+ innerHTML + "</div>";
+	String html = "<div class=\"shell-content\" style=\"" + "width:"
+				+ rect.width + "px;height:" + rect.height + "px;\">" + b
+				+ "</div>";
 	text.setText(html);
 	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
 			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -1562,7 +1552,7 @@ void toggleMaximize() {
 		String cssName = titleBar.className;
 		if (cssName == null) cssName = "";
 		int idx = cssName.indexOf(key);
-		if (idx != -1) {
+		if (idx == -1) {
 			titleBar.className += " " + key;
 		}
 	}
@@ -1849,7 +1839,6 @@ void setSystemMenu () {
 			public void run() {
 				ResizeSystem.unregister(Decorations.this);
 				setMinimized(true);
-				shellMax.className = "shellnormal";
 			}
 		};
 	}

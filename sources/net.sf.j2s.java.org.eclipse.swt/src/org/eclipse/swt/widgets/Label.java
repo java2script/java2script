@@ -305,17 +305,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	}
 	if (image != null) {
 		if (image.width == 0 && image.height == 0) {
-			if (image.url != null && image.url.length() != 0)
-			/**
-			 * @j2sNative
-			 * var img = new Image ();
-			 * img.src = this.image.url;
-			 * this.image.width = img.width;
-			 * this.image.height = img.height;
-			 * width += img.width;
-			 * height = Math.max(img.height, height);
-			 */
-			{
+			if (image.url != null && image.url.length() != 0) {
+				org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
+				img.src = this.image.url;
+				this.image.width = img.width;
+				this.image.height = img.height;
+				width += img.width;
+				height = Math.max(img.height, height);
 				// TODO: The above method to find out width & height is unsafe!
 				// TODO: Maybe the image may fail to be loaded!
 			} else {

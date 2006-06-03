@@ -367,43 +367,65 @@ public Color(Device device, String handle) {
 	this.device = device;
 }
 
-/**
- * @param cssHandle
- * @return
- * 
- * @j2sNative
- * if (cssHandle == null) return 0x02000000;
- * var red = -1, green = -1, blue = -1;
- * cssHandle.replace (/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/, function ($0, $1, $2, $3) {
- * 	red = parseInt ($1);
- * 	green = parseInt ($2);
- * 	blue = parseInt ($3);
- * 	return $0;
- * });
- * if (red != -1 && green != -1 && blue != -1) {
- * return 0x02000000 | (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
- * } else {
- * var intHandle = -2;
- * cssHandle.replace (/#([0-9a-fA-F]{3,6})/, function ($0, $1) {
- * 	if ($1.length == 3) {
- * 		var r = $1.charAt (0);
- * 		var g = $1.charAt (1);
- * 		var b = $1.charAt (2);
- * 		intHandle = eval ("0x" + b + b + g + g + r + r);
- * 	} else if ($1.length == 6) {
- * 		intHandle = eval ("0x" + $1.substring(4, 6) + $1.substring(2, 4) + $1.substring(0, 2));
- *  } else {
- *  $WT.error($WT.ERROR_INVALID_ARGUMENT);
- *  }
- * });
- * if (intHandle != -2) {
- * 	return 0x02000000 | intHandle;
- * } else {
- * 	return 0x0F000000; // unknown yet, may be "menu" or others
- * }
- * }
- */
-private static int rgbHandleFromCSS(String cssHandle) {
+private int rgbHandleFromCSS(String cssHandle) {
+	if (cssHandle == null) return 0x02000000;
+		int red = -1, green = -1, blue = -1;
+		/**
+		 * @j2sNativeSrc
+		cssHandle.replace (/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/, function ($0, $1, $2, $3) {
+			red = parseInt ($1);
+			green = parseInt ($2);
+			blue = parseInt ($3);
+			return $0;
+		});
+		 * @j2sNative
+		a.replace (/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/, function ($0, $1, $2, $3) {
+			b = parseInt ($1);
+			c = parseInt ($2);
+			d = parseInt ($3);
+			return $0;
+		});
+		*/ {}
+		if (red != -1 && green != -1 && blue != -1) {
+		return 0x02000000 | (red & 0xFF) | ((green & 0xFF) << 8) | ((blue & 0xFF) << 16);
+	} else {
+		int intHandle = -2;
+		/**
+		 * @j2sNativeSrc
+		cssHandle.replace (/#([0-9a-fA-F]{3,6})/, function ($0, $1) {
+			if ($1.length == 3) {
+				var r = $1.charAt (0);
+				var g = $1.charAt (1);
+				var b = $1.charAt (2);
+				intHandle = eval ("0x" + b + b + g + g + r + r);
+			} else if ($1.length == 6) {
+				intHandle = eval ("0x" + $1.substring(4, 6) + $1.substring(2, 4) + $1.substring(0, 2));
+			} else {
+				//$WT.error($WT.ERROR_INVALID_ARGUMENT);
+				$WT.error(4);
+			}
+		});
+		 * @j2sNative
+		a.replace (/#([0-9a-fA-F]{3,6})/, function ($0, $1) {
+			if ($1.length == 3) {
+				var r = $1.charAt (0);
+				var g = $1.charAt (1);
+				var b = $1.charAt (2);
+				e = eval ("0x" + b + b + g + g + r + r);
+			} else if ($1.length == 6) {
+				e = eval ("0x" + $1.substring(4, 6) + $1.substring(2, 4) + $1.substring(0, 2));
+			} else {
+				$WT.error(4);
+			}
+		});
+		*/ {}
+		if (intHandle != -2) {
+			return 0x02000000 | intHandle;
+		} else {
+			return 0x0F000000; // unknown yet, may be "menu" or others
+		}
+	}
+	/*
 	if (cssHandle != null) {
 		cssHandle = cssHandle.trim().toLowerCase();
 		if (cssHandle.length() != 0 && cssHandle.startsWith("rgb")) {
@@ -435,6 +457,7 @@ private static int rgbHandleFromCSS(String cssHandle) {
 		}
 	}
 	return 0x02000000;
+	*/
 }
 
 public String getCSSHandle() {

@@ -194,8 +194,8 @@ void createHandle() {
 			event.height = height;
 			event.widget = Sash.this;
 			event.item = Sash.this;
+			System.out.println("drop");
 			sendEvent (SWT.Selection, event);
-			System.out.println(event);
 			if (event.doit) {
 				if ((style & SWT.SMOOTH) != 0) {
 					//setBounds (event.x, event.y, width, height);

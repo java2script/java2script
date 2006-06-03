@@ -1398,11 +1398,11 @@ boolean sendKeyEvent (int type, int msg, int wParam, int lParam, Event event) {
 	return event.doit;
 }
 
-boolean sendMouseEvent (int type, int button, Element hwnd, int x, int y) {
+boolean sendMouseEvent (int type, int button, Object hwnd, int x, int y) {
 	return sendMouseEvent (type, button, 0, 0, false, hwnd, x, y);
 }
 
-boolean sendMouseEvent (int type, int button, int count, int detail, boolean send, Element hwnd, int x, int y) {
+boolean sendMouseEvent (int type, int button, int count, int detail, boolean send, Object hwnd, int x, int y) {
 	if (!hooks (type) && !filters (type)) return true;
 	Event event = new Event ();
 	event.button = button;
@@ -1687,6 +1687,7 @@ boolean setKeyState (Event event, int type, int wParam, int lParam) {
 }
 */
 boolean SetWindowPos (Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if (hWnd == null) return true;
 	Element el = (Element) hWnd;
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";

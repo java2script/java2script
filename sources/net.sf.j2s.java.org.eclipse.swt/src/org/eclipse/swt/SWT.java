@@ -2839,8 +2839,10 @@ public static int getVersion () {
  * Throws an appropriate exception based on the passed in error code.
  *
  * @param code the SWT error code
- * 
- * @j2sNative
+ */
+public static void error (int code) {
+	/**
+	 * @j2sNative
 var m = Clazz.getMixedCallerMethod (arguments);
 if (m != null) {
 	var args = m.caller.arguments;
@@ -2864,9 +2866,7 @@ if (m != null) {
 	window.error (str);
 	window.log (("" + m.caller).trim ());
 }
-$WT.error (code, null);
- */
-public static void error (int code) {
+	 */ {}
 	error (code, null);
 }
 

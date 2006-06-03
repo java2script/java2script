@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -49,7 +50,8 @@ public class Composite extends Scrollable {
 	WINDOWPOS [] lpwp;
 	Control [] tabList;
 	int layoutCount = 0;
-	Control [] children = new Control[0];
+//	Control [] children = new Control[0];
+	Control [] children;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -90,25 +92,26 @@ Composite () {
  */
 public Composite (Composite parent, int style) {
 	super (parent, style);
-//	children = new Control[0];
+	children = new Control[0];
 }
 
 protected Control [] _getChildren () {
-	if (true) return children;
+	//return children;
+	//if (true) return children;
 	/* 
 	 * TODO: search the DOM and filter out the children
 	 */
-	int count = handle.childNodes.length;
-	Control [] children = new Control [0];
+	int count = children.length; //handle.childNodes.length;
+	//Control [] children = new Control [0];
 	int index = 0;
-	//Control [] newChildren = new Control [0];
+	Control [] newChildren = new Control [0];
 	for (int i = 0; i < count; i++) {
-		Control control = display.getControl (handle.childNodes[i]);
+		Control control = children[i]; //display.getControl (handle.childNodes[i]);
 		if (control != null && control != this) {
-			children [index++] = control;
+			newChildren [index++] = control;
 		}
 	}
-	return children;
+	return newChildren;
 	/*
 	int hwndChild = OS.GetWindow (handle, OS.GW_CHILD);
 	if (hwndChild == 0) return new Control [0];
@@ -362,11 +365,12 @@ public Control [] getChildren () {
 }
 
 int getChildrenCount () {
+	if (true) return 0;
 	/*
 	* NOTE: The current implementation will count
 	* non-registered children.
 	*/
-	int count = 0;
+//	int count = 0;
 	/*
 	int hwndChild = OS.GetWindow (handle, OS.GW_CHILD);
 	while (hwndChild != 0) {
@@ -375,7 +379,8 @@ int getChildrenCount () {
 	}
 	*/
 	// TODO: search the children and filter out the essential children
-	return count;
+//	return count;
+	return children.length;
 }
 
 /**
@@ -683,8 +688,15 @@ protected void releaseWidget () {
 		}
 		*/
 	}
+	children = null;
 	layout = null;
 	tabList = null;
+	if (lpwp != null) {
+		for (int i = 0; i < lpwp.length; i++) {
+			lpwp[i].hwnd = null;
+			lpwp[i].hwndInsertAfter = null;
+		}
+	}
 	lpwp = null;
 }
 
@@ -759,27 +771,6 @@ void resizeEmbeddedHandle(int embeddedHandle, int width, int height) {
 	}
 }
 */
-
-/* (non-Javadoc)
- * @see org.eclipse.swt.widgets.Control#setBounds(int, int, int, int)
- */
-public void setBounds(int x, int y, int width, int height) {
-	super.setBounds(x, y, width, height);
-//	if (width != this.width && height != this.height) {
-//		display.timerExec(10, new Runnable() {
-//			public void run() {
-//				layout();
-//			}
-//		});
-//	}
-}
-
-public void setSize(int width, int height) {
-	super.setSize(width, height);
-//	if (layout != null) {
-//		this.layout();
-//	}
-}
 
 boolean setFixedFocus () {
 	checkWidget ();
@@ -975,6 +966,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		cx -= 4;
 		cy -= 4;
 	}
+//	if (!isLayoutDeferred()) {
+//		setLayoutDeferred(true);
+//	}
 //	display.timerExec(10, new Runnable() {
 //		public void run() {
 //			System.out.println("layout of " + Composite.this);
@@ -982,25 +976,33 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 //			System.out.println("end layout of " + Composite.this);
 //		}
 //	});
-	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	Element el = (Element) hWnd;
+	// TODO: What about hWndInsertAfter and uFlags
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+//	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 void updateLayout (boolean resize, boolean all) {
 	if (isLayoutDeferred ()) return;
-	Date d = new Date();
 	if ((state & LAYOUT_NEEDED) != 0) {
 		boolean changed = (state & LAYOUT_CHANGED) != 0;
 		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 		if (resize) setResizeChildren (false);
-		d = new Date();
 		layout.layout (this, changed);
-		System.out.println(":===:" + (new Date().getTime() - d.getTime()));
 		if (resize) setResizeChildren (true);
 	}
 	if (all) {
 		Control [] children = _getChildren ();
 		for (int i=0; i<children.length; i++) {
-			children [i].updateLayout (resize, all);
+//			children [i].updateLayout (resize, all);
+			if (children[i] instanceof Composite) {
+//				System.out.println("update Layout " + children[i]);
+				display.sendMessage(new MESSAGE(children[i], MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
+			}
 		}
 	}
 }

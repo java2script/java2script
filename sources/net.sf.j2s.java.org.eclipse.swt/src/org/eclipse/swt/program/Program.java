@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     ognize.com - initial Java2Script implementation
  *******************************************************************************/
 package org.eclipse.swt.program;
 
@@ -231,10 +232,14 @@ public static Program [] getPrograms () {
 /**
  * @param url
  * 
- * @j2sNative
+ * @j2sNativeSrc
  * var script = document.createElement ("SCRIPT");
  * script.src = url;
  * document.body.appendChild (script);
+ * @j2sNative
+ * var b = document.createElement ("SCRIPT");
+ * b.src = a;
+ * document.body.appendChild (b);
  */
 protected static void loadJavaScript(String url) {
 }
@@ -315,8 +320,10 @@ public boolean execute (String fileName) {
 	if (quote) fileName = "\"" + fileName + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 	try 
 	/**
-	 * @j2sNative
+	 * @j2sNativeSrc
 	 * eval ((prefix + fileName + suffix).replace (/\\/g, "\\\\"));
+	 * @j2sNative
+	 * eval ((c + a + d).replace (/\\/g, "\\\\"));
 	 */
 	{
 		(prefix + fileName + suffix).length();

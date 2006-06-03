@@ -71,6 +71,7 @@ public class OS {
 		el.onchange = null;
 		el.onclick = null;
 		el.oncontextmenu = null;
+		el.ondblclick = null;
 		el.onfocus = null;
 		el.onkeydown = null;
 		el.onkeypress = null;
@@ -170,73 +171,107 @@ public class OS {
 		return max;
 	}
 
-	/**
-	 * @param handle
-	 * @param text
-	 * @j2sNative
-	if (!((/[\r\n\t&]/g).test (text))) {
-		handle.style.display = "inline";
-		handle.appendChild(document.createTextNode(text));
-		return ;
-	}
-	var lines = null;
-	var c160 = String.fromCharCode (160);
-	var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
-	var s = text.replace (/\t/g, c160x8);
-	if (splitNeedFixed) {
-		try {
-			lines = splitIntoLines (s);
-		} catch (e) {
-			//popupAlert (e.message);
+	public static void insertText(Object el, String text) {
+		String[] lines = null;
+		Element handle = (Element) el;
+//		el.appendChild (document.createTextNode (text));
+		/**
+		 * @j2sNativeSrc
+		if (!((/[\r\n\t&]/g).test (text))) {
+			handle.style.display = "inline";
+			handle.appendChild(document.createTextNode(text));
+			return ;
 		}
-	} else {
-		lines = s.split (/\r\n|\r|\n/g);
-	}
-	for (var i = 0; i < lines.length; i++) {
-		if (i > 0) {
-			handle.appendChild (document.createElement ("BR"));
-		}
-		var lineEl = document.createElement ("SPAN");
-		handle.appendChild (lineEl);
-		//lineEl.style.whiteSpace = "nowrap";
-		if (lines[i].length == 0) {
-			lines[i] = String.fromCharCode (160);
-		}
-		var idx = lines[i].indexOf ('&');
-		var lastIndex = 0;
-		while (idx != -1) {
-			if (idx < lines[i].length - 1) {
-				var c = lines[i].charAt (idx + 1);
-				if (c == '&') {
-					idx = lines[i].indexOf ('&', idx + 2);
-					continue;
-				} else {
-					var chs = lines[i].substring (lastIndex, idx);
-					if (chs.length != 0) {
-						lineEl.appendChild (document.createTextNode (chs));
-					}
-					var el = document.createElement ("SPAN");
-					lineEl.appendChild (el);
-					//el.style.whiteSpace = "nowrap";
-					el.appendChild (document.createTextNode (c));
-					lastIndex = idx + 2;
-					idx = lines[i].indexOf ('&', lastIndex);
-				}
-			} else {
-				break;
+		var c160 = String.fromCharCode (160);
+		var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
+		var s = text.replace (/\t/g, c160x8);
+		if (splitNeedFixed) {
+			try {
+				lines = splitIntoLines (s);
+			} catch (e) {
+				//popupAlert (e.message);
 			}
-		}
-		if (lastIndex == 0) {
-			lineEl.appendChild (document.createTextNode (lines[i].replace (/&&/g, '&')));
 		} else {
-			lineEl.appendChild (document.createTextNode (lines[i]
-					.substring (lastIndex, lines[i].length).replace (/&&/g, '&')));
+			lines = s.split (/\r\n|\r|\n/g);
 		}
-	}
-	 */
-	public static void insertText(Object handle, String text) {
-		Element el = (Element) handle;
-		el.appendChild (document.createTextNode (text));
+		 * @j2sNative
+		if (!((/[\r\n\t&]/g).test (b))) {
+			d.style.display = "inline";
+			d.appendChild(document.createTextNode(b));
+			return ;
+		}
+		var z = String.fromCharCode (160);
+		var w = z + z + z + z + z + z + z + z;
+		var s = b.replace (/\t/g, w);
+		if (splitNeedFixed) {
+			try {
+				c = splitIntoLines (s);
+			} catch (e) {
+				//popupAlert (e.message);
+			}
+		} else {
+			c = s.split (/\r\n|\r|\n/g);
+		}
+		 */ {}
+		for (int i = 0; i < lines.length; i++) {
+			if (i > 0) {
+				handle.appendChild (document.createElement ("BR"));
+			}
+			String line = lines[i];
+			if (line.length() == 0)
+			/**
+			 * @j2sNativeSrc
+			 * line = c160;
+			 * @j2sNative
+			 * f = z;
+			 */
+			{
+				//line = String.fromCharCode (160);
+			}
+			int lastIndex = 0;
+			int idx = line.indexOf ('&');
+			Element lineEl = document.createElement ("SPAN");
+			//lineEl.style.whiteSpace = "nowrap";
+			handle.appendChild (lineEl);
+			while (idx != -1) {
+				if (idx < line.length() - 1) {
+					char c = line.charAt (idx + 1);
+					if (c == '&') {
+						idx = line.indexOf ('&', idx + 2);
+						continue;
+					} else {
+						String chs = line.substring (lastIndex, idx);
+						if (chs.length() != 0) {
+							lineEl.appendChild (document.createTextNode (chs));
+						}
+						Element span = document.createElement ("SPAN");
+						lineEl.appendChild (span);
+						//span.style.whiteSpace = "nowrap";
+						span.appendChild (document.createTextNode ("" + c));
+						lastIndex = idx + 2;
+						idx = line.indexOf ('&', lastIndex);
+					}
+				} else {
+					break;
+				}
+			}
+			String s = null;
+			/**
+			 * @j2sNativeSrc
+			if (lastIndex == 0) {
+				s = lines[i].replace (/&&/g, '&');
+			} else {
+				s = lines[i].substring (lastIndex, lines[i].length).replace (/&&/g, '&');
+			}
+			 * @j2sNative
+			if (g == 0) {
+				j = c[e].replace (/&&/g, '&');
+			} else {
+				j = c[e].substring (g, c[e].length).replace (/&&/g, '&');
+			}
+			*/ {}
+			lineEl.appendChild (document.createTextNode (s));
+		}
 	}
 	
 	private static Element setupAsPlain(String str) {
@@ -258,9 +293,12 @@ public class OS {
 		}
 		if (cssText != null && cssText.length() != 0) 
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
 		 * c.style.cssText = cssText;
+		 * @j2sNative
+		 * c = c.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+		 * d.style.cssText = c;
 		 */
 		{
 			c.style.cssText = cssText;
@@ -292,9 +330,12 @@ public class OS {
 		}
 		if (cssText != null && cssText.length() != 0)
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
 		 * c.style.cssText = cssText;
+		 * @j2sNative
+		 * c = c.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
+		 * d.style.cssText = c;
 		 */
 		{
 			c.style.cssText = cssText;
@@ -314,9 +355,14 @@ public class OS {
 
 	public static int getStringStyledWidth(String str, String className, String cssText) {
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * var r = /display\s*:\s*none/ig;
 		 * if (r.test (cssText)) {
+		 * 	return 0;
+		 * }
+		 * @j2sNative
+		 * var r = /display\s*:\s*none/ig;
+		 * if (r.test (c)) {
 		 * 	return 0;
 		 * }
 		 */ {}
@@ -336,9 +382,14 @@ public class OS {
 
 	public static int getStringStyledHeight(String str, String className, String cssText) {
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * var r = /display\s*:\s*none/ig;
 		 * if (r.test (cssText)) {
+		 * 	return 0;
+		 * }
+		 * @j2sNative
+		 * var r = /display\s*:\s*none/ig;
+		 * if (r.test (c)) {
 		 * 	return 0;
 		 * }
 		 */ {}
@@ -348,9 +399,14 @@ public class OS {
 	
 	public static int getStringStyledWrappedHeight(String str, String className, String cssText, int wrappedWidth) {
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * var r = /display\s*:\s*none/ig;
 		 * if (r.test (cssText)) {
+		 * 	return 0;
+		 * }
+		 * @j2sNative
+		 * var r = /display\s*:\s*none/ig;
+		 * if (r.test (c)) {
 		 * 	return 0;
 		 * }
 		 */ {}
@@ -365,9 +421,14 @@ public class OS {
 
 	public static Point getStringStyledSize(String str, String className, String cssText) {
 		/**
-		 * @j2sNative
+		 * @j2sNativeSrc
 		 * var r = /display\s*:\s*none/ig;
 		 * if (r.test (cssText)) {
+		 * 	return new org.eclipse.swt.graphics.Point(0, 0);
+		 * }
+		 * @j2sNative
+		 * var r = /display\s*:\s*none/ig;
+		 * if (r.test (c)) {
 		 * 	return new org.eclipse.swt.graphics.Point(0, 0);
 		 * }
 		 */ {}

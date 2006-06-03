@@ -1018,6 +1018,17 @@ void setSelection (int index, boolean notify) {
 
 void updateSelection(int index) {
 	String key = "tab-item-selected";
+	for (int i = 0; i < offset; i++) {
+		items[i].handle.style.display = "none";
+		if (index >= offset) {
+			String cssName = items[i].handle.className;
+			if (cssName == null) cssName = "";
+			int idx = cssName.indexOf(key);
+			if (idx != -1) {
+				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+			}
+		}
+	}
 	if (items[index] != null) {
 //		boolean before = false;
 		int left = -2;
@@ -1101,15 +1112,6 @@ void updateSelection(int index) {
 				borderNE.style.width = y + "px";
 			}
 		}
-	}
-	for (int i = 0; i < offset; i++) {
-		items[i].handle.style.display = "none";
-//		String cssName = items[i].handle.className;
-//		if (cssName == null) cssName = "";
-//		int idx = cssName.indexOf(key);
-//		if (idx != -1) {
-//			items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-//		}
 	}
 }
 /*

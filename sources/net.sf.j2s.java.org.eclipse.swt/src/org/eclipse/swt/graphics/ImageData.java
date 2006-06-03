@@ -330,10 +330,17 @@ public ImageData(int width, int height, int depth, PaletteData palette, int scan
  * </ul>
  *
  * @see ImageLoader#load(InputStream)
- * 
- * @j2sNative if (stream != null) this.url = stream.url;
  */
 public ImageData(InputStream stream) {
+	String url = null;
+	if (stream != null)
+	/**
+	 * @j2sNativeSrc
+	 * url = stream.url;
+	 * @j2sNative
+	 * b = a.url;
+	 */ {}
+	this.url = url;
 	/*
 	ImageData[] data = ImageDataLoader.load(stream);
 	if (data.length < 1) SWT.error(SWT.ERROR_INVALID_IMAGE);

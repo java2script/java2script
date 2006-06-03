@@ -396,17 +396,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	} else {
 		if (image != null) {
 			if (image.width == 0 && image.height == 0) {
-				if (image.url != null && image.url.length() != 0)
-				/**
-				 * @j2sNative
-				 * var img = new Image ();
-				 * img.src = this.image.url;
-				 * this.image.width = img.width;
-				 * this.image.height = img.height;
-				 * width += img.width;
-				 * height = Math.max(img.height, height);
-				 */
-				{
+				if (image.url != null && image.url.length() != 0) {
+					org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
+					img.src = this.image.url;
+					this.image.width = img.width;
+					this.image.height = img.height;
+					width += img.width;
+					height = Math.max(img.height, height);
 					// TODO: The above method to find out width & height is unsafe!
 					// TODO: Maybe the image may fail to be loaded!
 				} else {
@@ -854,13 +850,10 @@ public void setImage (Image image) {
 		CSSStyle handleStyle = null;
 		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 			handleStyle = btnText.style;
-			/**
-			 * @j2sNative 
-			 * var img = new Image ();
-			 * img.src = this.image.url;
-			 * this.image.width = img.width;
-			 * this.image.height = img.height;
-			 */{}
+			org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
+			img.src = this.image.url;
+			this.image.width = img.width;
+			this.image.height = img.height;
 //			handleStyle.fontSize = this.image.height + "px";
 			handleStyle.display = "block";
 			handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
@@ -1125,13 +1118,20 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 			btnText.parentNode.style.top = ((cy - h) / 2) + "px";
 		}
 	}
-	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	Element el = (Element) hWnd;
+	// TODO: What about hWndInsertAfter and uFlags
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+//	return super.SetWindowPos(null, null, X, Y, cx, cy, uFlags);
 }
 
 private void updateArrowSize(int cx, int cy) {
 	int xx = Math.min(cx, cy) / 3;
 	final CSSStyle s = btnText.style;
-	s.borderWidth = xx + "px";
+	s.borderWidth = (xx > 0 ? xx : 0) + "px";
 	if ((style & SWT.LEFT) != 0) {
 		s.borderLeftWidth = "0";
 	} else if ((style & SWT.RIGHT) != 0) {
@@ -1146,7 +1146,8 @@ private void updateArrowSize(int cx, int cy) {
 	} else {
 		s.borderTopWidth = "0";
 	} 
-	int x = Math.min(cx, cy) / 6;
+	int x = cy / 6;
+	xx = cy / 3;
 	s.position = "relative";
 	if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
 		s.top = (x - 3) + "px";
@@ -1290,7 +1291,11 @@ void hookSelection() {
 			}
 			if ((style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
 				HTMLEvent e = (HTMLEvent) getEvent();
-				if (e.srcElement != btnHandle) {
+				if ((style & SWT.CHECK) != 0) {
+					if (e.srcElement != btnHandle) {
+						setSelection (!getSelection ());
+					}
+				} else {
 					setSelection (!getSelection ());
 				}
 			} else {

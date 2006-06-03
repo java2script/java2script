@@ -16,6 +16,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
@@ -1367,6 +1368,10 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			}
 		}
 		*/
+		if ((width != this.width || height != this.height)
+				&& this instanceof Composite) {
+			display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
+		}
 		this.left = x;
 		this.top = y;
 		this.width = width;

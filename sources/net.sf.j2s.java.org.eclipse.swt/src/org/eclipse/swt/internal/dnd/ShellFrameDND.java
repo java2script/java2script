@@ -153,8 +153,10 @@ public class ShellFrameDND extends DragAdapter {
 			}
 			this.frame.style.left = xx + "px";
 			this.frame.style.top = yy + "px";
-			this.frame.style.width = ((ww > 104) ? ww : 110)  + "px";
-			this.frame.style.height = ((hh > 26) ? hh : 26) + "px";
+//			this.frame.style.width = ((ww > 104) ? ww : 110)  + "px";
+//			this.frame.style.height = ((hh > 26) ? hh : 26) + "px";
+			this.frame.style.width = ((ww > 16) ? ww : 16)  + "px"; // For shell, 16x16 for mininum size.
+			this.frame.style.height = ((hh > 16) ? hh : 16) + "px";
 			return true;
 		}
 		int xx = this.sourceX + e.deltaX ();
@@ -215,10 +217,10 @@ public class ShellFrameDND extends DragAdapter {
 		int width = Integer.parseInt (this.frame.style.width);
 		int height = Integer.parseInt (this.frame.style.height);
 		Element shell = e.sourceElement;
-		shell.style.left = x + "px";
-		shell.style.top = y + "px";
-		shell.style.width = width + "px";
-		shell.style.height = height + "px";
+//		shell.style.left = x + "px";
+//		shell.style.top = y + "px";
+//		shell.style.width = width + "px";
+//		shell.style.height = height + "px";
 		shell.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
 		
 //		ShellFrameDND.fixShellHeight (e.sourceElement);

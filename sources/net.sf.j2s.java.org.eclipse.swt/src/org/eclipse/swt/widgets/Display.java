@@ -24,6 +24,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -227,6 +229,9 @@ public class Display extends Device {
 	Object data;
 	String [] keys;
 	Object [] values;
+	
+	MESSAGE [] msgs;
+	int messageProc;
 	
 //	/* Key Mappings */
 //	static final int [] [] KeyTable = {
@@ -2243,6 +2248,9 @@ protected void init () {
 	controlTable = new Control [GROW_SIZE];
 	for (int i=0; i<GROW_SIZE-1; i++) indexTable [i] = i + 1;
 	indexTable [GROW_SIZE - 1] = -1;
+	
+	msgs = new MESSAGE[0];
+	messageProc = 0;
 }
 
 /**	 
@@ -2903,6 +2911,70 @@ public boolean readAndDispatch () {
 	}
 	return runAsyncMessages (false);
 	*/
+	messageProc = window.setInterval(new RunnableCompatibility() {
+		public void run() {
+			MESSAGE[] msgs = Display.this.msgs;
+			if (msgs.length != 0) {
+//				System.out.println("msgs.legnth" + msgs.length);
+				for (int i = msgs.length - 1; i >= 0; i--) {
+					MESSAGE m1 = msgs[i];
+					if (m1 == null) {
+						continue;
+					}
+					for (int j = i - 1; j >= 0; j--) {
+						MESSAGE m2 = msgs[j];
+						if (m2 != null && m2.control == m1.control
+								&& m2.type == m1.type) {
+							msgs[j] = null;
+							break;
+						}
+					}
+				}
+				long time = 0;
+				for (int i = 0; i < msgs.length; i++) {
+//				for (int i = msgs.length - 1; i >= 0; i--) {
+					MESSAGE m = msgs[i];
+					msgs[i] = null;
+					if (m != null && m.type == MESSAGE.CONTROL_LAYOUT) {
+						if (!m.control.isVisible()) { continue; }
+						Date d = new Date();
+						Composite c = (Composite) m.control;
+						if (m.data != null) {
+							boolean[] bs = (boolean[]) m.data;
+							c.updateLayout(bs[0], bs[1]);
+						} else {
+							c.layout();
+						}
+						time += new Date().getTime() - d.getTime();
+//						System.err.println(m.control + " cost " + (time));
+						if (time > 100) {
+//							System.out.println("before deferring:" + msgs.length);
+							for (int j = i + 1; j < msgs.length; j++) {
+								msgs[j - i - 1] = msgs[j];
+							}
+							for (int j = 0; j < i; j++) {
+								msgs[msgs.length - 1 - j] = null;
+							}
+							/**
+							 * @j2sNativeSrc
+							 * msgs.length -= i + 1;
+							 * @j2sNative
+							 * a.length -= d + 1;
+							 */ {}
+//							System.out.println("after deferring:" + msgs.length);
+							return ;
+						}
+					}
+				}
+				/**
+				 * @j2sNativeSrc
+				 * msgs.length = 0;
+				 * @j2sNative
+				 * a.length = 0;
+				 */ {}
+			}
+		}
+	}, 20);
 	return true;
 }
 
@@ -3066,6 +3138,13 @@ void releaseDisplay () {
 	controlTable = null;
 	lastHittestControl = null;
 	imageList = toolImageList = toolHotImageList = toolDisabledImageList = null;
+	eventQueue = null;
+	eventTable = null;
+	filterTable = null;
+	if (messageProc != 0) {
+		window.clearInterval(messageProc);
+	}
+	msgs = null;
 }
 
 public void releaseImageList (ImageList list) {
@@ -3340,6 +3419,10 @@ void sendEvent (int eventType, Event event) {
 	}
 }
 
+void sendMessage(MESSAGE msg) {
+//	System.out.println("message:" + msg.control);
+	msgs[msgs.length] = msg;
+}
 /**
  * Sets the location of the on-screen pointer relative to the top left corner
  * of the screen.  <b>Note: It is typically considered bad practice for a

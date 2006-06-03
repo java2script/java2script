@@ -246,9 +246,19 @@ public Shell (Display display, int style) {
 	this (display, null, style, 0);
 }
 
+/**
+ * @param display
+ * @param parent
+ * @param style
+ * @param handle
+ * @j2sIgnoreSuperConstructor
+ */
 Shell (Display display, Shell parent, int style, int handle) {
 	super ();
 	checkSubclass ();
+	// call something in Composite's constructor
+	children = new Control[0];
+	
 	if (display == null) display = Display.getCurrent ();
 	if (display == null) display = Display.getDefault ();
 	if (!display.isValidThread ()) {
