@@ -20,7 +20,9 @@ public class CheckFieldMethodName {
 			//System.out.println("check in..");
 			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
-				if (name.equals(declaredMethods[i].getName())) {
+//				String methodName = declaredMethods[i].getName();
+				String methodName = NameConverterUtil.getJ2SName(declaredMethods[i]);
+				if (name.equals(methodName)) {
 					return true;
 				}
 			}

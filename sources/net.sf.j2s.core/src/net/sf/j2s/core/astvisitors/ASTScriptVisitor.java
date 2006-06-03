@@ -436,8 +436,10 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			
 			int lastCurrentBlock = currentBlockForVisit;
 			List lastVisitedVars = visitedVars;
+			List lastNormalVars = normalVars;
 			currentBlockForVisit = blockLevel;
 			visitedVars = new ArrayList();
+			normalVars = new ArrayList();
 			anonDeclare.accept(this);
 
 			buffer.append("return Clazz.innerTypeInstance (");
@@ -471,7 +473,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 			//buffer.append(listToString(finalVars, ", ", scope));
 			//System.out.println(visitedVars.size());
-			buffer.append(listToString(visitedVars, ", ", scope));
+			normalVars = lastNormalVars;
+			buffer.append(listFinalVariables(visitedVars, ", ", scope));
+			
 			if (lastCurrentBlock != -1) {
 				/* add the visited variables into last visited variables */
 				for (int j = 0; j < visitedVars.size(); j++) {
@@ -1102,7 +1106,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		List fragments = node.fragments();
 		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
-			String fieldName = element.getName().getIdentifier();
+			String fieldName = NameConverterUtil.getJ2SName(element.getName());
+//			String fieldName = element.getName().getIdentifier();
 			String ext = "";
 			if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
 				ext += "$";
@@ -1373,7 +1378,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append(", ");
 		} else {
 			buffer.append(", \"");
-			String identifier = node.getName().getIdentifier();
+//			String identifier = node.getName().getIdentifier();
+			String identifier = NameConverterUtil.getJ2SName(node.getName());
 			if (JavaScriptKeywords.checkKeyworkViolation(identifier)) {
 				buffer.append('$');
 			}
@@ -1424,12 +1430,14 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						&& !"java.lang.Enum".equals(qualifiedName);
 			}
 			if (!isSuperCalled && existedSuperClass) {
+				blockLevel++;
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
 				buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
 				buffer.append(", []);\r\n");
 				visitList(statements, ""); 
-				buffer.append("}");
+				//buffer.append("}");
+				endVisit(node.getBody());
 			} else {
 				node.getBody().accept(this);
 			}
@@ -1474,8 +1482,16 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 			 */
 		} else if (node.getBody() == null) {
+			blockLevel++;
 			buffer.append("{\r\n");
 			visitNativeJavadoc(node.getJavadoc(), null, false);
+			for (int i = normalVars.size() - 1; i >= 0; i--) {
+				FinalVariable var = (FinalVariable) normalVars.get(i);
+				if (var.getBlockLevel() >= blockLevel) {
+					normalVars.remove(i);
+				}
+			}
+			blockLevel--;
 			buffer.append("}");
 		} else {
 			node.getBody().accept(this);
@@ -1494,7 +1510,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					if (varBinding != null) {
 						isArray = varBinding.getType().isArray();
 						if (isArray) {
-							buffer.append("Array");
+							//buffer.append("Array");
+							buffer.append("~A");
 						}
 					}
 				}
@@ -1734,6 +1751,19 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append(constValue);
 			return false;
 		}
+		IBinding binding = node.resolveBinding();
+		if (binding != null
+				&& binding instanceof ITypeBinding) {
+			ITypeBinding typeBinding = (ITypeBinding) binding;
+			if (typeBinding != null) {
+				String name = typeBinding.getQualifiedName();
+				if (name.startsWith("org.eclipse.swt.internal.xhtml")) {
+					buffer.append(node.getIdentifier());
+					return false;
+				}
+			}
+		}
+		String thisClassName = getClassName();
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
 			buffer.append(node);
@@ -1742,14 +1772,15 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		char ch = buffer.charAt(buffer.length() - 1);
 		if (xparent instanceof QualifiedName) {
 			if (ch == '.') {
-				IBinding binding = node.resolveBinding();
+				//IBinding binding = node.resolveBinding();
 				if (binding != null) {
 					if (binding instanceof IVariableBinding) {
 						IVariableBinding varBinding = (IVariableBinding) binding;
 						//if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
 							IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 							ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-							String fieldName = variableDeclaration.getName();
+//							String fieldName = variableDeclaration.getName();
+							String fieldName = NameConverterUtil.getJ2SName(node);
 							if (CheckFieldMethodName.checkSameName(declaringClass, fieldName)) {
 								buffer.append('$');
 							}
@@ -1770,10 +1801,10 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 		}
 		if (xparent instanceof ClassInstanceCreation) {
-			if (!(node.resolveBinding() instanceof IVariableBinding)) {
-				ITypeBinding binding = node.resolveTypeBinding();
+			if (!(binding instanceof IVariableBinding)) {
+				ITypeBinding binding2 = node.resolveTypeBinding();
 				if (binding != null) {
-					String name = binding.getQualifiedName();
+					String name = binding2.getQualifiedName();
 					name = JavaLangUtil.ripJavaLang(name);
 //					if (name.length() != 0) {
 //						buffer.append(name);
@@ -1781,12 +1812,14 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //					}
 					buffer.append(name);
 				} else {
-					buffer.append(JavaLangUtil.ripJavaLang(node.getIdentifier()));
+					String nodeId = NameConverterUtil.getJ2SName(node);
+					buffer.append(JavaLangUtil.ripJavaLang(nodeId));
+//					buffer.append(JavaLangUtil.ripJavaLang(node.getIdentifier()));
 				}
 				return false;
 			}
 		}
-		IBinding binding = node.resolveBinding();
+		//IBinding binding = node.resolveBinding();
 		if (binding != null) {
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding varBinding = (IVariableBinding) binding;
@@ -1802,7 +1835,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							// and the binary name of the anonymous class will conflict
 							// with my anonymous class name!
 							name = declaringClass.getBinaryName();
-							//System.out.println(name);
 						}
 						name = JavaLangUtil.ripJavaLang(name);
 						if (name.length() != 0) {
@@ -1810,11 +1842,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							buffer.append(".");
 						}
 					}
-					String fieldName = variableDeclaration.getName();
-//					System.out.println(fieldName);
-//					if ("onmousemove".equals(fieldName)) {
-//						System.out.println("...");
-//					}
+//					String fieldName = variableDeclaration.getName();
+					String fieldName = NameConverterUtil.getJ2SName(node);
 					if (CheckFieldMethodName.checkSameName(declaringClass, fieldName)) {
 						buffer.append('$');
 					}
@@ -1887,16 +1916,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 											}
 											break;
 										}
-/*										if (SearchSuperClass.isInheritedClassName(typeBinding.getSuperclass(), name)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-											}
-											break;
-										}
-*/									}
+									}
 									parent = parent.getParent();
 								}
 								if (!isThis) {
@@ -1908,6 +1928,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						}
 					}
 					
+					String fieldVar = null;
 					if (this.isFinalSensible 
 							&& (varBinding.getModifiers() & Modifier.FINAL) != 0 
 							&& varBinding.getDeclaringMethod() != null) {
@@ -1921,6 +1942,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 									if (vv.getVariableName().equals(varBinding.getName())
 											&& vv.getBlockLevel() <= currentBlockForVisit
 											&& !visitedVars.contains(vv)) {
+										fieldVar = vv.getToVariableName();
 										visitedVars.add(vv);
 									}
 								}
@@ -1928,10 +1950,20 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						}
 					}
 
-					String fieldName = node.getFullyQualifiedName();
-					//System.err.println(fieldName);
 					IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 					ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+//					String fieldName = node.getFullyQualifiedName();
+					String fieldName = null;
+					if (declaringClass != null) {
+						fieldName = NameConverterUtil.getJ2SName(node);
+					} else {
+						if (fieldVar == null) {
+							fieldName = getVariableName(node.getIdentifier());
+						} else {
+							fieldName = fieldVar;
+						}
+					}
+					//System.err.println(fieldName);
 					if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
 						buffer.append('$');
 					}
@@ -1943,12 +1975,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
 						fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
 					}
-					//if (declaringClass == null) {
-					//	buffer.append(JavaLangUtil.ripJavaLang(fieldName));				
-					//} else {
-						buffer.append(fieldName);
-					//}
-					//buffer.append(node.getFullyQualifiedName());
+					buffer.append(fieldName);
 				}
 			} else if (binding instanceof IMethodBinding) {
 				IMethodBinding mthBinding = (IMethodBinding) binding;
@@ -1971,13 +1998,13 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							}
 						}
 					}
-					String name = variableDeclaration.getName();
+//					String name = variableDeclaration.getName();
+					String name = NameConverterUtil.getJ2SName(node);
 					name = JavaLangUtil.ripJavaLang(name);
 					if (!(isClassString && "valueOf".equals(name)) && JavaScriptKeywords.checkKeyworkViolation(name)) {
 						buffer.append('$');
 					}
 					buffer.append(name);
-					//buffer.append(variableDeclaration.getName());				
 				} else {
 					ASTNode parent = node.getParent();
 					boolean isClassString = false;
@@ -1996,7 +2023,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 										ITypeBinding typeBinding = type.resolveBinding();
 										superLevel++;
 										if (Bindings.isSuperType(declaringClass, typeBinding)) {
-//										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
 											if (superLevel == 1) {
 												buffer.append("this.");
 												isThis = true;
@@ -2041,17 +2067,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 											}
 											break;
 										}
-										/*
-										if (SearchSuperClass.isInheritedClassName(typeBinding/*.getSuperclass()*-/, name)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-											}
-											break;
-										}
-										*/
 									}
 									parent = parent.getParent();
 								}
@@ -2063,7 +2078,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							}
 						}
 					}
-					String name = node.getFullyQualifiedName();
+//					String name = node.getFullyQualifiedName();
+					String name = NameConverterUtil.getJ2SName(node);
 					name = JavaLangUtil.ripJavaLang(name);
 					if (!(isClassString && "valueOf".equals(name)) && JavaScriptKeywords.checkKeyworkViolation(name)) {
 						buffer.append('$');
@@ -2072,6 +2088,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				}
 			} else {
 				ITypeBinding typeBinding = node.resolveTypeBinding();
+//				String name = NameConverterUtil.getJ2SName(node);
 				if (typeBinding != null) {
 					String name = typeBinding.getQualifiedName();
 					name = JavaLangUtil.ripJavaLang(name);
@@ -2081,7 +2098,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					buffer.append(name);
 				} else {
 					String name = node.getFullyQualifiedName();
-					name = JavaLangUtil.ripJavaLang(name);
+//					name = JavaLangUtil.ripJavaLang(name);
 					if (JavaScriptKeywords.checkKeyworkViolation(name)) {
 						buffer.append('$');
 					}
@@ -2089,7 +2106,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				}
 			}
 		} else {
-			String name = node.getFullyQualifiedName();
+//			String name = node.getFullyQualifiedName();
+			String name = NameConverterUtil.getJ2SName(node);
 			name = JavaLangUtil.ripJavaLang(name);
 			if (JavaScriptKeywords.checkKeyworkViolation(name)) {
 				buffer.append('$');
@@ -2097,6 +2115,16 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append(name);
 		}
 		return false;
+	}
+
+	protected String getVariableName(String name) {
+		for (int i = normalVars.size() - 1; i >= 0; i--) {
+			FinalVariable var = (FinalVariable) normalVars.get(i);
+			if (name.equals(var.getVariableName())) {
+				return getIndexedVarName(name, i);
+			}
+		}
+		return name;
 	}
 
 	public void endVisit(SimpleType node) {
@@ -2121,13 +2149,25 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
+			String identifier = name.getIdentifier();
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				FinalVariable f = null;
 				if (methodDeclareStack.size() == 0) {
-					finalVars.add(new FinalVariable(blockLevel + 1, name.getIdentifier(), null));
+					f = new FinalVariable(blockLevel + 1, identifier, null);
+					finalVars.add(f);
 				} else {
 					String methodSig = (String) methodDeclareStack.peek();
-					finalVars.add(new FinalVariable(blockLevel + 1, name.getIdentifier(), methodSig));
+					f = new FinalVariable(blockLevel + 1, identifier, methodSig);
+					finalVars.add(f);
 				}
+				f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+//			} else {
+			}
+			if (methodDeclareStack.size() == 0) {
+				normalVars.add(new FinalVariable(blockLevel + 1, identifier, null));
+			} else {
+				String methodSig = (String) methodDeclareStack.peek();
+				normalVars.add(new FinalVariable(blockLevel + 1, identifier, methodSig));
 			}
 		}
 		name.accept(this);
@@ -2200,12 +2240,15 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				typeBinding = type.resolveBinding().getSuperclass();
 			}
 		}
-		String fieldName = node.getName().getIdentifier();
+//		String fieldName = node.getName().getIdentifier();
+		String fieldName = NameConverterUtil.getJ2SName(node.getName());
 		if (SearchSuperField.isInheritedFieldName(typeBinding, fieldName)) {
 			if (typeBinding != null) {
 				IVariableBinding[] declaredFields = typeBinding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					if (fieldName.equals(declaredFields[i].getName())) {
+//					String superFieldName = declaredFields[i].getName();
+					String superFieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
+					if (fieldName.equals(superFieldName)) {
 						buffer.append("this.");
 //						buffer.append("this.superFields[\"");
 //						buffer.append(getFullClassName());
@@ -2240,7 +2283,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		buffer.append("Clazz.superCall (this, ");
 		buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
 		buffer.append(", \"");
-		buffer.append(node.getName());
+		String name = NameConverterUtil.getJ2SName(node.getName());
+//		String name = node.getName().toString();
+		buffer.append(name);
 		buffer.append("\", [");
 		visitList(node.arguments(), ", ");
 		buffer.append("])");

@@ -104,6 +104,10 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	
 	protected boolean isFinalSensible = true;
 
+	protected List normalVars = new ArrayList();
+	
+	protected boolean toCompileVariableName = true;
+	
 	protected int currentBlockForVisit = -1;
 	
 	protected List visitedVars = new ArrayList();
@@ -122,7 +126,14 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		super(visitDocTags);
 	}
 
-	
+	public boolean isToCompileVariableName() {
+		return toCompileVariableName;
+	}
+
+	public void setToCompileVariableName(boolean toCompileVariableName) {
+		this.toCompileVariableName = toCompileVariableName;
+	}
+
 	public boolean isDebugging() {
 		return isDebugging;
 	}
@@ -153,7 +164,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		}
 	}
 	
-	protected static String listToString(List list, String seperator, String scope) {
+	protected String listFinalVariables(List list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
 		}
@@ -163,6 +174,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
 			FinalVariable fv = (FinalVariable) iter.next();
 			String name = fv.getVariableName();
+			if (fv.getToVariableName() != null) {
+				name = fv.getToVariableName();
+			}
 			//if (!set.contains(name)) {
 //				if (buf.length() >= 2) {
 //					buf.append(seperator);
@@ -324,7 +338,13 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		/*
 		 * TODO: should be implemented
 		 */
-		return super.visit(node);
+		//return super.visit(node);
+		/*
+		 * The assert statement should be passed when debugging in
+		 * native Java application mode. No need for JavaScript to
+		 * throws errors.
+		 */
+		return false;
 	}
 
 	public void endVisit(Assignment node) {
@@ -525,6 +545,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				finalVars.remove(i);
 			}
 		}
+		for (int i = normalVars.size() - 1; i >= 0; i--) {
+			FinalVariable var = (FinalVariable) normalVars.get(i);
+			if (var.getBlockLevel() >= blockLevel) {
+				normalVars.remove(i);
+			}
+		}
 		blockLevel--;
 		super.endVisit(node);
 	}
@@ -613,6 +639,29 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					for (Iterator iter = tags.iterator(); iter.hasNext();) {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sDebug".equals(tagEl.getTagName())) {
+							if (superVisit) super.visit(node);
+							List fragments = tagEl.fragments();
+							boolean isFirstLine = true;
+							for (Iterator iterator = fragments.iterator(); iterator
+									.hasNext();) {
+								TextElement commentEl = (TextElement) iterator.next();
+								String text = commentEl.getText().trim();
+								if (isFirstLine) {
+									if (text.length() == 0) {
+										continue;
+									}
+								}
+								buffer.append(text);
+								buffer.append("\r\n");
+							}
+							return false;
+						}
+					}
+				}
+				if (!toCompileVariableName) {
+					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+						TagElement tagEl = (TagElement) iter.next();
+						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
 							List fragments = tagEl.fragments();
 							boolean isFirstLine = true;
@@ -1698,17 +1747,43 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		super.endVisit(node);
 	}
 
+	public String getIndexedVarName(String name, int i) {
+		if (!toCompileVariableName) {
+			return name;
+		}
+		if (i < 26) {
+			return String.valueOf((char) ('a' + i));
+		} else if (i < 52) {
+			return String.valueOf((char) ('A' + (i - 26)));
+		} else {
+			int h = i / 26;
+			int l = i % 26;
+			return String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
+		}
+	}
 	public boolean visit(VariableDeclarationFragment node) {
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
+			String identifier = name.getIdentifier();
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				FinalVariable f = null;
 				if (methodDeclareStack.size() == 0) {
-					finalVars.add(new FinalVariable(blockLevel, name.getIdentifier(), null));
+					f = new FinalVariable(blockLevel, identifier, null);
+					finalVars.add(f);
 				} else {
 					String methodSig = (String) methodDeclareStack.peek();
-					finalVars.add(new FinalVariable(blockLevel, name.getIdentifier(), methodSig));
+					f = new FinalVariable(blockLevel, identifier, methodSig);
+					finalVars.add(f);
 				}
+				f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+//			} else {
+			}
+			if (methodDeclareStack.size() == 0) {
+				normalVars.add(new FinalVariable(blockLevel, identifier, null));
+			} else {
+				String methodSig = (String) methodDeclareStack.peek();
+				normalVars.add(new FinalVariable(blockLevel, identifier, methodSig));
 			}
 		}
 		name.accept(this);

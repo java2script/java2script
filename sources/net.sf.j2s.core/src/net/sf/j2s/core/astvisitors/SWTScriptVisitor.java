@@ -101,7 +101,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			if (typeBinding != null) {
 				String name = typeBinding.getQualifiedName();
 				if (name.startsWith("org.eclipse.swt.internal.xhtml")) {
-					buffer.append(node.getIdentifier());
+					String identifier = node.getIdentifier();
+					if ("window".equals(identifier)) {
+						identifier = "w$";
+					} else if ("document".equals(identifier)) {
+						identifier = "d$";
+					}
+					buffer.append(identifier);
 					return false;
 				}
 			}
@@ -172,18 +178,25 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 //							}
 						}
 						name = JavaLangUtil.ripJavaLang(name);
+//						System.out.println("---" + name);
 						//*
 						if (name.indexOf("java.lang") != -1) {
 							name = name.substring(9);
 						}
 						//*/
 						String xhtml = "org.eclipse.swt.internal.xhtml";
-						if (name.indexOf(xhtml) != -1) {
+						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
 						}
 						xhtml = "$wt.internal.xhtml";
-						if (name.indexOf(xhtml) != -1) {
+						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
+						}
+//						System.out.println("xvs - " + name);
+						if ("window".equals(name)) {
+							name = "w$";
+						} else if ("document".equals(name)) {
+							name = "d$";
 						}
 						if (name.length() != 0) {
 							buffer.append(name);

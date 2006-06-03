@@ -22,6 +22,7 @@ public class FinalVariable {
 	private int blockLevel;
 	private String variableName;
 	private String methodScope;
+	private String toVariableName;
 	
 	private FinalVariable() {
 	}
@@ -45,6 +46,14 @@ public class FinalVariable {
 		this.variableName = variableName;
 	}
 	
+	public String getToVariableName() {
+		return toVariableName;
+	}
+
+	public void setToVariableName(String toVariableName) {
+		this.toVariableName = toVariableName;
+	}
+
 	public String getMethodScope() {
 		return methodScope;
 	}

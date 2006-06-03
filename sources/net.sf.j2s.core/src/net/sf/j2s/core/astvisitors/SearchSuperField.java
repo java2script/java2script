@@ -26,7 +26,9 @@ public class SearchSuperField {
 			if (superclass != null) {
 				IVariableBinding[] declaredFields = superclass.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					if (name.equals(declaredFields[i].getName())) {
+//					String fieldName = declaredFields[i].getName();
+					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
+					if (name.equals(fieldName)) {
 						return true;
 					}
 				}
@@ -34,7 +36,9 @@ public class SearchSuperField {
 				// Interface
 				IVariableBinding[] declaredFields = binding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					if (name.equals(declaredFields[i].getName())) {
+//					String fieldName = declaredFields[i].getName();
+					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
+					if (name.equals(fieldName)) {
 						return true;
 					}
 				}
@@ -61,7 +65,9 @@ public class SearchSuperField {
 				StringBuffer buffer = new StringBuffer();
 				IVariableBinding[] declaredFields = superclass.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					if (name.equals(declaredFields[i].getName())) {
+//					String fieldName = declaredFields[i].getName();
+					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
+					if (name.equals(fieldName)) {
 						buffer.append("$");
 					}
 				}

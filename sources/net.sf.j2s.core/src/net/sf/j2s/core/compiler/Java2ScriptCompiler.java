@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.NameConvertItem;
+import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -132,10 +132,17 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				ASTScriptVisitor visitor = null;
 				if ("ASTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
 					visitor = new ASTScriptVisitor();
+				} else if ("SWTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+					visitor = new SWTScriptVisitor();
 				} else {
 					visitor = new SWTScriptVisitor();
 				}
 				visitor.setDebugging("debug".equals(props.getProperty("j2s.compiler.mode")));
+				boolean toCompress = !"disable".equals(props.getProperty("j2s.compiler.compress.variable.name"));
+				visitor.setToCompileVariableName(toCompress);
+				if (toCompress) {
+					updateJ2SMap(prjFolder);
+				}
 				boolean errorOccurs = false;
 				try {
 					root.accept(visitor);
@@ -165,6 +172,58 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		}
 	}
 
+	public static void updateJ2SMap(String prjFolder) {
+		File j2sMap = new File(prjFolder, ".j2smap");
+		if (j2sMap.exists()) {
+			String mapStr = FileUtil.readSource(j2sMap);
+			if (mapStr != null) {
+				String lastClassName = null;
+				List varList = new ArrayList();
+				String[] lines = mapStr.split("\r\n|\r|\n");
+				for (int j = 0; j < lines.length; j++) {
+					String line = lines[j].trim();
+					if (line.length() > 0) {
+						if (!line.startsWith("#")) {
+							int index = line.indexOf("=");
+							if (index != -1) {
+								String key = line.substring(0, index).trim();
+								String toVarName = line.substring(index + 1).trim();
+								boolean isMethod = true;
+								int idx = key.lastIndexOf('#');
+								if (idx == -1) {
+									isMethod = false;
+									idx = key.lastIndexOf('.');
+									if (idx == -1) {
+										continue;
+									}
+								}
+								String className = key.substring(0, idx);
+								if (className.startsWith("$")) {
+									if (lastClassName != null) {
+										className = className.replaceAll("\\$", lastClassName);
+//													System.out.println(className + "..." + lastClassName);
+									} else {
+										className = className.replaceAll("\\$", "");
+										lastClassName = className;
+									}
+								} else {
+									lastClassName = className;
+								}
+								String varName = key.substring(idx + 1);
+//											System.out.println(className + "." + varName + "->" + toVarName);
+								varList.add(new NameConvertItem(className, varName, toVarName, isMethod));
+							}
+						}
+					}
+				}
+				NameConvertItem[] items = (NameConvertItem[]) varList.toArray((NameConvertItem[]) new NameConvertItem[0]);
+				NameConverterUtil.setJ2SMap(items);
+				return ;
+			}
+		}
+		NameConverterUtil.setJ2SMap(null);
+	}
+
 	public static void outputJavaScript(ASTScriptVisitor visitor, CompilationUnit fRoot, String folderPath, Properties props) {
 		String js = visitor.getBuffer().toString();
 		
@@ -191,18 +250,30 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 			}
 		}
+		/**
+		 * FIXME: The following variable name replacement should be done in *Visitor
+		 */
+		js = js.replaceAll("cla\\$\\$", "c\\$")
+				.replaceAll("innerThis", "i\\$")
+				.replaceAll("finalVars", "v\\$")
+				.replaceAll("\\.callbacks", "\\.b\\$")
+				.replaceAll("\\.\\$finals", "\\.f\\$");
 		String abbr = props.getProperty("j2s.compiler.abbreviation");
 		if (abbr != null) {
 			if (abbr.equals("true")) {
 				String abbrPrefix = props.getProperty("j2s.compiler.abbreviation.prefix");
 				if (abbrPrefix == null) {
-					abbrPrefix = "$";
+					abbrPrefix = "$_";
 				}
 				abbrPrefix = abbrPrefix.replaceAll("\\$", "\\\\\\$");
 				String[] clazzAll = getClazzAbbrMap();
 				StringBuffer buf = new StringBuffer();
 				for (int i = 0; i < clazzAll.length / 2; i++) {
-					buf.append("(Clazz\\." + clazzAll[i + i].substring(6) + ")");
+					String method = clazzAll[i + i].substring(6);
+					if ("pu$h".equals(method)) {
+						method = "pu\\$h";
+					}
+					buf.append("(Clazz\\." + method + ")");
 					if (i < clazzAll.length / 2 - 1) {
 						buf.append("|");
 					}
@@ -315,6 +386,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.instanceOf", "O", //
 				"Clazz.inheritArgs", "G", //
 				"Clazz.checkPrivateMethod", "X", //
+				"Clazz.makeFunction", "Q", //
 		};
 		return clazzAll;
 	}
