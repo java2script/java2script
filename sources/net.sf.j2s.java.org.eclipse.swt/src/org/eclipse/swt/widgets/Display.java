@@ -1615,7 +1615,7 @@ ImageList getImageListToolBarHot (int style, int width, int height) {
 	return list;
 }
 
-int getLastEventTime () {
+public int getLastEventTime () {
 //	return OS.IsWinCE ? OS.GetTickCount () : OS.GetMessageTime ();
 	/*
 	 * TODO: fixed the last event time!
