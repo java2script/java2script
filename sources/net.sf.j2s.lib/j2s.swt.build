@@ -162,6 +162,7 @@
         	<filelist dir="${js.src.dir}">
 
         		<file name="org/eclipse/swt/internal/struct/WINDOWPOS.js"/>
+	       		<file name="org/eclipse/swt/internal/struct/MESSAGE.js"/>
         		<file name="org/eclipse/swt/internal/browser/OS.js"/>
         		
         		<file name="org/eclipse/swt/accessibility/Accessible.js"/>
@@ -230,6 +231,15 @@
         		<file name="org/eclipse/swt/custom/CLayoutData.js"/>
         		<file name="org/eclipse/swt/custom/CBanner.js"/>
         		<file name="org/eclipse/swt/custom/CBannerLayout.js"/>
+        		
+        		<file name="org/eclipse/swt/custom/CTabItem.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolderListener.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolderLayout.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolderEvent.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolderAdapter.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolder2Listener.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolder2Adapter.js"/>
+        		<file name="org/eclipse/swt/custom/CTabFolder.js"/>
         		
         		<file name="org/eclipse/swt/widgets/ToolBar.js"/>
         		<file name="org/eclipse/swt/widgets/ToolItem.js"/>
