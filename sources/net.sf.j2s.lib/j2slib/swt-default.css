@@ -385,6 +385,32 @@ input.text-border {
 }
 /* End of Text */
 
+/* Combo */
+.combo-default{
+	overflow:visible;
+}
+.combo-button{
+	width:11px;
+	min-height:11px;
+	background-image:url('images/combo-button.gif');
+	background-repeat:no-repeat;
+	background-position:center center;
+}
+
+.combo-input-box{
+}
+
+.combo-select-box-invisible{
+	display:none;
+
+}
+
+.combo-select-box-visible{
+	display:block;
+}
+/* End of Combo */
+
+
 .tree-item-default {
 	/*background-color:#cccccc;*/
 	height:20px;
@@ -497,9 +523,9 @@ input.text-border {
 
 /* Begin of TabFolder */
 .tab-folder-default {
-	position:absolute;
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
+	position:absolute;
 	overflow:hidden;
 }
 .tab-folder-border-default {
