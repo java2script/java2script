@@ -8,9 +8,11 @@
       <extendedCompiler
             class="net.sf.j2s.core.compiler.Java2ScriptCompiler"
             id="net.sf.j2s.j2scompiler"/>
+      <!--
       <extendedCompiler
             class="net.sf.j2s.core.compiler.J2SDependencyCompiler"
             id="net.sf.j2s.dependencyCompiler"/>
+      -->
    </extension>
 
 </plugin>

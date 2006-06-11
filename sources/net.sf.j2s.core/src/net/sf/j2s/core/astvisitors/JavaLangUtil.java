@@ -33,6 +33,15 @@ public class JavaLangUtil {
 			if (after.length() == 0 || after.startsWith(".")) {
 				name = "$WT" + after;
 			}
+		} else {
+			String os = "org.eclipse.swt.internal.browser.OS";
+			index = name.indexOf(os);
+			if (index != -1) {
+				String after = name.substring(os.length());
+				if (after.length() == 0 || after.startsWith(".")) {
+					name = "O$" + after;
+				}
+			}
 		}
 		
 		swt = "org.eclipse.swt";

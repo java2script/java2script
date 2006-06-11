@@ -1751,39 +1751,57 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		if (!toCompileVariableName) {
 			return name;
 		}
-		if (i < 26) {
-			return String.valueOf((char) ('a' + i));
-		} else if (i < 52) {
-			return String.valueOf((char) ('A' + (i - 26)));
-		} else {
-			int h = i / 26;
-			int l = i % 26;
-			return String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
+		String newName = null;
+		while (true) {
+			if (i < 26) {
+				newName = String.valueOf((char) ('a' + i));
+			} else if (i < 52) {
+				newName = String.valueOf((char) ('A' + (i - 26)));
+			} else {
+				int h = i / 26;
+				int l = i % 26;
+				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
+			}
+			for (Iterator iter = finalVars.iterator(); iter.hasNext();) {
+				FinalVariable f = (FinalVariable) iter.next();
+				if (newName.equals(f.getToVariableName())) {
+					newName = null;
+					i++;
+					break;
+				}
+			}
+			if (newName != null) {
+				for (Iterator iter = normalVars.iterator(); iter.hasNext();) {
+					FinalVariable f = (FinalVariable) iter.next();
+					if (newName.equals(f.getToVariableName())) {
+						newName = null;
+						i++;
+						break;
+					}
+				}
+			}
+			if (newName != null) {
+				break;
+			}
 		}
+		return newName;
 	}
 	public boolean visit(VariableDeclarationFragment node) {
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
-				FinalVariable f = null;
-				if (methodDeclareStack.size() == 0) {
-					f = new FinalVariable(blockLevel, identifier, null);
-					finalVars.add(f);
-				} else {
-					String methodSig = (String) methodDeclareStack.peek();
-					f = new FinalVariable(blockLevel, identifier, methodSig);
-					finalVars.add(f);
-				}
-				f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
-//			} else {
-			}
+			FinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				normalVars.add(new FinalVariable(blockLevel, identifier, null));
+				f = new FinalVariable(blockLevel, identifier, null);
 			} else {
 				String methodSig = (String) methodDeclareStack.peek();
-				normalVars.add(new FinalVariable(blockLevel, identifier, methodSig));
+				f = new FinalVariable(blockLevel, identifier, methodSig);
+			}
+			f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+			normalVars.add(f);
+			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				finalVars.add(f);
 			}
 		}
 		name.accept(this);

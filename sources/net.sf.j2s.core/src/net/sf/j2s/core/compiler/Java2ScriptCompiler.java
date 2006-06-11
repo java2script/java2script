@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,7 +140,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					visitor = new SWTScriptVisitor();
 				}
 				visitor.setDebugging("debug".equals(props.getProperty("j2s.compiler.mode")));
-				boolean toCompress = !"disable".equals(props.getProperty("j2s.compiler.compress.variable.name"));
+				boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
 				visitor.setToCompileVariableName(toCompress);
 				if (toCompress) {
 					updateJ2SMap(prjFolder);
@@ -178,7 +180,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			String mapStr = FileUtil.readSource(j2sMap);
 			if (mapStr != null) {
 				String lastClassName = null;
-				List varList = new ArrayList();
+				Map varList = new HashMap();
 				String[] lines = mapStr.split("\r\n|\r|\n");
 				for (int j = 0; j < lines.length; j++) {
 					String line = lines[j].trim();
@@ -210,14 +212,18 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 									lastClassName = className;
 								}
 								String varName = key.substring(idx + 1);
-//											System.out.println(className + "." + varName + "->" + toVarName);
-								varList.add(new NameConvertItem(className, varName, toVarName, isMethod));
+//								System.out.println(className + "." + varName + "->" + toVarName);
+								if (isMethod) {
+									key = className + "#" + varName;
+								} else {
+									key = className + "." + varName;
+								}
+								varList.put(key, new NameConvertItem(className, varName, toVarName, isMethod));
 							}
 						}
 					}
 				}
-				NameConvertItem[] items = (NameConvertItem[]) varList.toArray((NameConvertItem[]) new NameConvertItem[0]);
-				NameConverterUtil.setJ2SMap(items);
+				NameConverterUtil.setJ2SMap(varList);
 				return ;
 			}
 		}

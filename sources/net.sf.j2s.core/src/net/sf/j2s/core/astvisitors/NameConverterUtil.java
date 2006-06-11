@@ -13,6 +13,7 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.Map;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -25,7 +26,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * 2006-6-3
  */
 public class NameConverterUtil {
-	private static NameConvertItem[] maps;
+	private static Map maps;
 
 	public static String getJ2SName(SimpleName node) {
 //		initConvertionMaps();
@@ -65,7 +66,7 @@ public class NameConverterUtil {
 	public static String getJ2SName(IVariableBinding binding) {
 //		initConvertionMaps();
 		String nameID = binding.getName();
-		if (maps == null || maps.length == 0) {
+		if (maps == null || maps.size() == 0) {
 			return nameID; 
 		}
 		String className = null;
@@ -76,11 +77,11 @@ public class NameConverterUtil {
 		}
 //		System.out.println("checking " + className + "." + nameID);
 		
-		for (int i = 0; i < maps.length; i++) {
-			NameConvertItem item = maps[i];
-			if (item.className.equals(className) && item.varName.equals(nameID) && !item.isMethod) {
-				return item.toVarName;
-			}
+		String key = className + "." + nameID;
+		Object value = maps.get(key);
+		if (value != null && value instanceof NameConvertItem) {
+			NameConvertItem item = (NameConvertItem) value;
+			return item.toVarName;
 		}
 		return nameID;
 	}
@@ -89,14 +90,14 @@ public class NameConverterUtil {
 	public static String getJ2SName(IMethodBinding binding) {
 //		initConvertionMaps();
 		String nameID = binding.getName();
-		if (maps == null || maps.length == 0) {
+		if (maps == null || maps.size() == 0) {
 			return nameID; 
 		}
 		String className = null;
 		IMethodBinding methodBinding = (IMethodBinding) binding;
 		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 		ITypeBinding superclass = declaringClass.getSuperclass();
-		if (superclass != null) {
+		while (superclass != null) {
 			IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
 				String methodName = declaredMethods[i].getName();
@@ -104,17 +105,16 @@ public class NameConverterUtil {
 					return getJ2SName(declaredMethods[i]);
 				}
 			}
+			superclass = superclass.getSuperclass();
 		}
 		if (declaringClass != null) {
 			className = declaringClass.getQualifiedName();
 		}
-//		System.out.println("checking " + className + "." + nameID);
-		
-		for (int i = 0; i < maps.length; i++) {
-			NameConvertItem item = maps[i];
-			if (item.className.equals(className) && item.varName.equals(nameID) && item.isMethod) {
-				return item.toVarName;
-			}
+		String key = className + "#" + nameID;
+		Object value = maps.get(key);
+		if (value != null && value instanceof NameConvertItem) {
+			NameConvertItem item = (NameConvertItem) value;
+			return item.toVarName;
 		}
 		return nameID;
 	}
@@ -134,7 +134,7 @@ public class NameConverterUtil {
 //				};
 	}
 	
-	public static void setJ2SMap(NameConvertItem[] m) {
+	public static void setJ2SMap(Map m) {
 		maps = m;
 	}
 }

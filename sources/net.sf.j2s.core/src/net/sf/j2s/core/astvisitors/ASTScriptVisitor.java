@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -1542,6 +1543,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							name = JavaLangUtil.ripJavaLang(name);
 							if ("String".equals(name)) {
 								buffer.append("~S");
+							} else if ("Object".equals(name)) {
+								buffer.append("~O");
 							} else {
 								buffer.append(name);
 							}
@@ -1940,10 +1943,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 								for (int i = 0; i < size; i++) {
 									FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
 									if (vv.getVariableName().equals(varBinding.getName())
-											&& vv.getBlockLevel() <= currentBlockForVisit
-											&& !visitedVars.contains(vv)) {
+											&& vv.getBlockLevel() <= currentBlockForVisit) {
+										if (!visitedVars.contains(vv)) {
+											visitedVars.add(vv);
+										}
 										fieldVar = vv.getToVariableName();
-										visitedVars.add(vv);
 									}
 								}
 							}
@@ -2121,7 +2125,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
 			FinalVariable var = (FinalVariable) normalVars.get(i);
 			if (name.equals(var.getVariableName())) {
-				return getIndexedVarName(name, i);
+				//return getIndexedVarName(name, i);
+				return var.getToVariableName();
 			}
 		}
 		return name;
@@ -2150,24 +2155,17 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
-				FinalVariable f = null;
-				if (methodDeclareStack.size() == 0) {
-					f = new FinalVariable(blockLevel + 1, identifier, null);
-					finalVars.add(f);
-				} else {
-					String methodSig = (String) methodDeclareStack.peek();
-					f = new FinalVariable(blockLevel + 1, identifier, methodSig);
-					finalVars.add(f);
-				}
-				f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
-//			} else {
-			}
+			FinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				normalVars.add(new FinalVariable(blockLevel + 1, identifier, null));
+				f = new FinalVariable(blockLevel + 1, identifier, null);
 			} else {
 				String methodSig = (String) methodDeclareStack.peek();
-				normalVars.add(new FinalVariable(blockLevel + 1, identifier, methodSig));
+				f = new FinalVariable(blockLevel + 1, identifier, methodSig);
+			}
+			f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+			normalVars.add(f);
+			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				finalVars.add(f);
 			}
 		}
 		name.accept(this);
@@ -2879,6 +2877,33 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		}
 		// Interface's inner interfaces or classes
 		buffer.append(laterBuffer);
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sSuffix".equals(tagEl.getTagName())) {
+						List fragments = tagEl.fragments();
+						StringBuffer buf = new StringBuffer();
+						boolean isFirstLine = true;
+						for (Iterator iterator = fragments.iterator(); iterator
+								.hasNext();) {
+							TextElement commentEl = (TextElement) iterator.next();
+							String text = commentEl.getText().trim();
+							if (isFirstLine) {
+								if (text.length() == 0) {
+									continue;
+								}
+							}
+							buf.append(text);
+							buf.append("\r\n");
+						}
+						buffer.append("\r\n" + buf.toString().trim() + "\r\n");
+					}
+				}
+			}
+		}
 		laterBuffer = new StringBuffer();
 		super.endVisit(node);
 	}
@@ -2991,7 +3016,33 @@ public class CB extends CA {
 		if (node.isInterface()) {
 			return false;
 		}
-		
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sPrefix".equals(tagEl.getTagName())) {
+						List fragments = tagEl.fragments();
+						StringBuffer buf = new StringBuffer();
+						boolean isFirstLine = true;
+						for (Iterator iterator = fragments.iterator(); iterator
+								.hasNext();) {
+							TextElement commentEl = (TextElement) iterator.next();
+							String text = commentEl.getText().trim();
+							if (isFirstLine) {
+								if (text.length() == 0) {
+									continue;
+								}
+							}
+							buf.append(text);
+							buf.append("\r\n");
+						}
+						buffer.append(buf.toString().trim() + " ");
+					}
+				}
+			}
+		}
 		buffer.append("cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");

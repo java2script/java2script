@@ -110,6 +110,10 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 					buffer.append(identifier);
 					return false;
 				}
+				if ("org.eclipse.swt.internal.browser.OS".equals(name)) {
+					buffer.append("O$");
+					return false;
+				}
 			}
 		}
 		return super.visit(node);
