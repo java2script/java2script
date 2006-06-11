@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Platform;
  */
 public class JavaSWTJSProvider implements IExternalResourceProvider {
 
+	/*
 	private static String[] SWT_KEY_LIST = new String[] {
 		"SWT", 
 		"SWT Custom" 
@@ -42,7 +43,6 @@ public class JavaSWTJSProvider implements IExternalResourceProvider {
 
 	private static String[][] SWT_RESOURCE_LIST = new String[][] {
 		new String[] {
-				"j2s-browser-native.z.js",
 				"j2s-swt-basic.z.js",
 				"j2s-swt-widget.z.js"
 		},
@@ -51,7 +51,27 @@ public class JavaSWTJSProvider implements IExternalResourceProvider {
 				"j2s-swt-other.z.js"
 		}
 	};
+	*/
+	private static String[] SWT_KEY_LIST = new String[] {
+		"J2S SWT" 
+	};
 	
+	private static String[] SWT_DESC_LIST = new String[] {
+		"J2S SWT library" 
+	};
+
+	private static String[][] SWT_RESOURCE_LIST = new String[][] {
+		new String[] {
+				"j2s-swt-basic.z.js",
+				"j2s-swt-event.z.js",
+				"j2s-swt-layout.z.js",
+				"j2s-swt-widget.z.js",
+				"j2s-swt-more.z.js",
+				"j2s-swt-custom.z.js",
+				"j2s-swt-other.z.js"
+		}
+	};
+
 	public String[] getKeys() {
 		return SWT_KEY_LIST;
 	}

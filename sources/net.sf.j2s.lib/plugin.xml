@@ -11,9 +11,6 @@
       <externalResourceProvider
             class="net.sf.j2s.lib.providers.JavaSWTJSProvider"
             id="net.sf.j2s.lib.providers.javaSWTJS"/>
-      <externalResourceProvider
-            class="net.sf.j2s.lib.providers.JavaAjaxJSProvider"
-            id="net.sf.j2s.lib.providers.javaAjaxJS"/>
    </extension>
 
 </plugin>

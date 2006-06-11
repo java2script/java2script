@@ -82,6 +82,9 @@ public class RegExCompress {
 		} else {
 			s = regexCompress2(s);
 		}
+		if (!dest.getParentFile().exists()) {
+			dest.getParentFile().mkdirs();
+		}
 		try {
 			FileOutputStream fos = new FileOutputStream(dest);
 			String compressedStr = "/* http://j2s.sf.net/ */" + s;

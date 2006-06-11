@@ -1,50 +1,50 @@
 /*=j2s=
 #Java2Script Configuration
 #Sun Jan 22 00:50:30 CST 2006
-j2s.resources.list=org/eclipse/swt/internal/SWTEventListener.js,org/eclipse/swt/internal/SWTEventObject.js,org/eclipse/swt/internal/SerializableCompatibility.js,org/eclipse/swt/internal/CloneableCompatibility.js,org/eclipse/swt/internal/RunnableCompatibility.js,org/eclipse/swt/SWT.js,org/eclipse/swt/widgets/Event.js,org/eclipse/swt/events/TypedEvent.js,org/eclipse/swt/events/ArmEvent.js,org/eclipse/swt/events/ControlEvent.js,org/eclipse/swt/events/DisposeEvent.js,org/eclipse/swt/events/FocusEvent.js,org/eclipse/swt/events/HelpEvent.js,org/eclipse/swt/events/KeyEvent.js,org/eclipse/swt/events/MenuEvent.js,org/eclipse/swt/events/ModifyEvent.js,org/eclipse/swt/events/MouseAdapter.js,org/eclipse/swt/events/MouseEvent.js,org/eclipse/swt/events/PaintEvent.js,org/eclipse/swt/events/SelectionEvent.js,org/eclipse/swt/events/ShellEvent.js,org/eclipse/swt/events/TraverseEvent.js,org/eclipse/swt/events/TreeEvent.js,org/eclipse/swt/events/VerifyEvent.js,org/eclipse/swt/widgets/Listener.js,org/eclipse/swt/widgets/TypedListener.js,org/eclipse/swt/events/ArmListener.js,org/eclipse/swt/events/ControlListener.js,org/eclipse/swt/events/ControlAdapter.js,org/eclipse/swt/events/DisposeListener.js,org/eclipse/swt/events/FocusListener.js,org/eclipse/swt/events/FocusAdapter.js,org/eclipse/swt/events/HelpListener.js,org/eclipse/swt/events/KeyListener.js,org/eclipse/swt/events/KeyAdapter.js,org/eclipse/swt/events/MenuListener.js,org/eclipse/swt/events/MenuAdapter.js,org/eclipse/swt/events/ModifyListener.js,org/eclipse/swt/events/MouseListener.js,org/eclipse/swt/events/MouseMoveListener.js,org/eclipse/swt/events/MouseTrackListener.js,org/eclipse/swt/events/MouseTrackAdapter.js,org/eclipse/swt/events/PaintListener.js,org/eclipse/swt/events/SelectionListener.js,org/eclipse/swt/events/SelectionAdapter.js,org/eclipse/swt/events/ShellListener.js,org/eclipse/swt/events/ShellAdapter.js,org/eclipse/swt/events/TraverseListener.js,org/eclipse/swt/events/TreeListener.js,org/eclipse/swt/events/TreeAdapter.js,org/eclipse/swt/events/VerifyListener.js,org/eclipse/swt/widgets/EventTable.js,org/eclipse/swt/graphics/Point.js,org/eclipse/swt/graphics/Rectangle.js,org/eclipse/swt/graphics/RGB.js,org/eclipse/swt/widgets/Layout.js,org/eclipse/swt/layout/FillData.js,org/eclipse/swt/layout/FormData.js,org/eclipse/swt/layout/GridData.js,org/eclipse/swt/layout/RowData.js,org/eclipse/swt/layout/FormAttachment.js,org/eclipse/swt/layout/FillLayout.js,org/eclipse/swt/layout/FormLayout.js,org/eclipse/swt/layout/GridLayout.js,org/eclipse/swt/layout/RowLayout.js
+j2s.resources.list=org/eclipse/swt/SWT.js,org/eclipse/swt/SWTError.js,org/eclipse/swt/SWTException.js,org/eclipse/swt/internal/SWTEventListener.js,org/eclipse/swt/internal/SWTEventObject.js,org/eclipse/swt/internal/SerializableCompatibility.js,org/eclipse/swt/internal/CloneableCompatibility.js,org/eclipse/swt/internal/RunnableCompatibility.js,org/eclipse/swt/accessibility/Accessible.js,org/eclipse/swt/graphics/Point.js,org/eclipse/swt/graphics/Rectangle.js,org/eclipse/swt/graphics/RGB.js,org/eclipse/swt/graphics/GC.js,org/eclipse/swt/graphics/Resource.js,org/eclipse/swt/graphics/Color.js,org/eclipse/swt/graphics/Cursor.js,org/eclipse/swt/graphics/Drawable.js,org/eclipse/swt/graphics/Device.js,org/eclipse/swt/graphics/ImageData.js,org/eclipse/swt/graphics/ImageLoader.js,org/eclipse/swt/graphics/Image.js,org/eclipse/swt/graphics/Font.js,org/eclipse/swt/graphics/FontData.js,org/eclipse/swt/graphics/FontMetrics.js,org/eclipse/swt/internal/struct/WINDOWPOS.js,org/eclipse/swt/internal/struct/MESSAGE.js
 =*/
-Clazz.declarePackage ("org.eclipse.swt");
-$wt = org.eclipse.swt;
-var swtSubPackages = [
-"accessibility", 
-"browser", 
-"custom", 
+$_J("org.eclipse.swt");
+$wt=org.eclipse.swt;
+var swtSubPackages=[
+"accessibility",
+"browser",
+"custom",
 "dnd",
-"events", 
-"graphics", 
-"internal", 
-"internal.dnd", 
-"layout", 
+"events",
+"graphics",
+"internal",
+"internal.dnd",
+"layout",
 "widgets"
 ];
-for (var i = 0; i < swtSubPackages.length; i++) {
-Clazz.declarePackage ("org.eclipse.swt." + swtSubPackages[i]);
+for(var i=0;i<swtSubPackages.length;i++){
+$_J("org.eclipse.swt."+swtSubPackages[i]);
 }
-Clazz.formatParameters = function (funParams) {
-if (funParams == null || funParams.length == 0) {
-return "\\void";
-} else {
-var s = funParams.toString ();
-s = s.replace (/~([NABSO])/g, function ($0, $1) {
-if ($1 == 'N') {
-return "Number";
-} else if ($1 == 'B') {
-return "Boolean"
-} else if ($1 == 'S') {
-return "String";
-} else if ($1 == 'O') {
-return "Object";
-} else if ($1 == 'A') {
-return "Array"
+Clazz.formatParameters=function(funParams){
+if(funParams==null||funParams.length==0){
+return"\\void";
+}else{
+var s=funParams.toString();
+s=s.replace(/~([NABSO])/g,function($0,$1){
+if($1=='N'){
+return"Number";
+}else if($1=='B'){
+return"Boolean"
+}else if($1=='S'){
+return"String";
+}else if($1=='O'){
+return"Object";
+}else if($1=='A'){
+return"Array"
 }
-return "Unknown";
+return"Unknown";
 });
-return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\")
-.replace (/\$wt\./g, "org.eclipse.swt.");
+return s.replace(/^|,/g,"\\").replace(/\$/g,"org.eclipse.s");
+
+
 }
 };
-$WT = 
-c$=$_C(function(){
+$WT=c$=$_C(function(){
 $_Z(this,arguments);
 },$wt,"SWT");
 c$.findErrorText=$_M(c$,"findErrorText",
@@ -656,7 +656,7 @@ this.throwable.printStackTrace();
 }});
 $_S(c$,
 "serialVersionUID",3833467327105808433);
-c$=$_C(function(){
+if(typeof window["RuntimeException"]!="undefined"){c$=$_C(function(){
 this.code=0;
 this.throwable=null;
 $_Z(this,arguments);
@@ -696,6 +696,8 @@ this.throwable.printStackTrace();
 }});
 $_S(c$,
 "serialVersionUID",3257282552304842547);
+
+}
 $_I($wt.internal,"SWTEventListener",java.util.EventListener);
 c$=$_C(function(){
 $_Z(this,arguments);
@@ -703,7 +705,7 @@ $_Z(this,arguments);
 $_K(c$,
 function(source){
 $_R(this,$wt.internal.SWTEventObject,[source]);
-},"Object");
+},"~O");
 $_S(c$,
 "serialVersionUID",3258125873411470903);
 $_I($wt.internal,"SerializableCompatibility",java.io.Serializable);
@@ -723,7 +725,7 @@ return this.event;
 $_M(c$,"setEvent",
 function(event){
 this.event=event;
-},"Object");
+},"~O");
 $_M(c$,"toReturn",
 function(val){
 this.returnSet=1;
@@ -743,705 +745,66 @@ this.returnSet=3;
 this.returnObject=val;
 this.returnNumber=0;
 this.returnBoolean=false;
-},"Object");
+},"~O");
 $_M(c$,"isReturned",
 function(){
 return this.returnSet!=0;
 });
 c$=$_C(function(){
-this.display=null;
-this.widget=null;
-this.type=0;
-this.detail=0;
-this.item=null;
-this.gc=null;
-this.x=0;
-this.y=0;
-this.width=0;
-this.height=0;
-this.count=0;
-this.time=0;
-this.button=0;
-this.character=0;
-this.keyCode=0;
-this.stateMask=0;
-this.start=0;
-this.end=0;
-this.text=null;
-this.doit=true;
-this.data=null;
+this.accessibleListeners=null;
+this.accessibleControlListeners=null;
+this.textListeners=null;
+this.control=null;
 $_Z(this,arguments);
-},$wt.widgets,"Event");
-$_M(c$,"getBounds",
-function(){
-return new $wt.graphics.Rectangle(this.x,this.y,this.width,this.height);
+},$wt.accessibility,"Accessible");
+$_Y(c$,function(){
+this.accessibleListeners=new java.util.Vector();
+this.accessibleControlListeners=new java.util.Vector();
+this.textListeners=new java.util.Vector();
 });
-$_M(c$,"setBounds",
-function(rect){
-this.x=rect.x;
-this.y=rect.y;
-this.width=rect.width;
-this.height=rect.height;
-},"$wt.graphics.Rectangle");
-$_V(c$,"toString",
-function(){
-return"Event {type="+this.type+",widget="+this.widget+",x="+this.x+",y="+this.y+",width="+this.width+",height="+this.height+"}";
-});
-$_M(c$,"releaseResource",
-function(){
-this.gc=null;
-this.data=null;
-this.item=null;
-this.widget=null;
-this.display=null;
-});
-c$=$_C(function(){
-this.display=null;
-this.widget=null;
-this.time=0;
-this.data=null;
-$_Z(this,arguments);
-},$wt.events,"TypedEvent",$wt.internal.SWTEventObject);
-$_K(c$,
-function(object){
-$_R(this,$wt.events.TypedEvent,[object]);
-},"Object");
-$_K(c$,
-function(e){
-$_R(this,$wt.events.TypedEvent,[e.widget]);
-this.display=e.display;
-this.widget=e.widget;
-this.time=e.time;
-this.data=e.data;
-},"$wt.widgets.Event");
-$_M(c$,"getName",
-function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
-});
-$_V(c$,"toString",
-function(){
-return this.getName()+"{"+this.widget+" time="+this.time+" data="+this.data+"}";
-});
-$_S(c$,
-"serialVersionUID",3257285846578377524);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ArmEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.ArmEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258126964249212217);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ControlEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.ControlEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258132436155119161);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"DisposeEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.DisposeEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3257566187633521206);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"FocusEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.FocusEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258134643684227381);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"HelpEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.HelpEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3257001038606251315);
-c$=$_C(function(){
-this.character=0;
-this.keyCode=0;
-this.stateMask=0;
-this.doit=false;
-$_Z(this,arguments);
-},$wt.events,"KeyEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.KeyEvent,[e]);
-this.character=e.character;
-this.keyCode=e.keyCode;
-this.stateMask=e.stateMask;
-this.doit=e.doit;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.KeyEvent,"toString",[]);
-return string.substring(0,string.length-1)+" character='"+(((this.character).charCodeAt(0)==0)?"\\0":""+this.character)+"'"+" keyCode="+this.keyCode+" stateMask="+this.stateMask+" doit="+this.doit+"}";
-});
-$_S(c$,
-"serialVersionUID",3256442491011412789);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MenuEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.MenuEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258132440332383025);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ModifyEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.ModifyEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258129146227011891);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MouseAdapter",null,$wt.events.MouseListener);
-$_V(c$,"mouseDoubleClick",
-function(e){
-},"$wt.events.MouseEvent");
-$_V(c$,"mouseDown",
-function(e){
-},"$wt.events.MouseEvent");
-$_V(c$,"mouseUp",
-function(e){
-},"$wt.events.MouseEvent");
-c$=$_C(function(){
-this.button=0;
-this.stateMask=0;
-this.x=0;
-this.y=0;
-$_Z(this,arguments);
-},$wt.events,"MouseEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.MouseEvent,[e]);
-this.x=e.x;
-this.y=e.y;
-this.button=e.button;
-this.stateMask=e.stateMask;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.MouseEvent,"toString",[]);
-return string.substring(0,string.length-1)+" button="+this.button+" stateMask="+this.stateMask+" x="+this.x+" y="+this.y+"}";
-});
-$_S(c$,
-"serialVersionUID",3257288037011566898);
-c$=$_C(function(){
-this.gc=null;
-this.x=0;
-this.y=0;
-this.width=0;
-this.height=0;
-this.count=0;
-$_Z(this,arguments);
-},$wt.events,"PaintEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.PaintEvent,[e]);
-this.gc=e.gc;
-this.x=e.x;
-this.y=e.y;
-this.width=e.width;
-this.height=e.height;
-this.count=e.count;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.PaintEvent,"toString",[]);
-return string.substring(0,string.length-1)+" gc="+this.gc+" x="+this.x+" y="+this.y+" width="+this.width+" height="+this.height+" count="+this.count+"}";
-});
-$_S(c$,
-"serialVersionUID",3256446919205992497);
-c$=$_C(function(){
-this.item=null;
-this.detail=0;
-this.x=0;
-this.y=0;
-this.width=0;
-this.height=0;
-this.stateMask=0;
-this.text=null;
-this.doit=false;
-$_Z(this,arguments);
-},$wt.events,"SelectionEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.SelectionEvent,[e]);
-this.item=e.item;
-this.x=e.x;
-this.y=e.y;
-this.width=e.width;
-this.height=e.height;
-this.detail=e.detail;
-this.stateMask=e.stateMask;
-this.text=e.text;
-this.doit=e.doit;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.SelectionEvent,"toString",[]);
-return string.substring(0,string.length-1)+" item="+this.item+" detail="+this.detail+" x="+this.x+" y="+this.y+" width="+this.width+" height="+this.height+" stateMask="+this.stateMask+" text="+this.text+" doit="+this.doit+"}";
-});
-$_S(c$,
-"serialVersionUID",3976735856884987953);
-c$=$_C(function(){
-this.doit=false;
-$_Z(this,arguments);
-},$wt.events,"ShellEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.ShellEvent,[e]);
-this.doit=e.doit;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.ShellEvent,"toString",[]);
-return string.substring(0,string.length-1)+" doit="+this.doit+"}";
-});
-$_S(c$,
-"serialVersionUID",3257569490479888441);
-c$=$_C(function(){
-this.detail=0;
-$_Z(this,arguments);
-},$wt.events,"TraverseEvent",$wt.events.KeyEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.TraverseEvent,[e]);
-this.detail=e.detail;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.TraverseEvent,"toString",[]);
-return string.substring(0,string.length-1)+" detail="+this.detail+"}";
-});
-$_S(c$,
-"serialVersionUID",3257565105301239349);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"TreeEvent",$wt.events.SelectionEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.TreeEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3257282548009677109);
-c$=$_C(function(){
-this.start=0;
-this.end=0;
-this.text=null;
-$_Z(this,arguments);
-},$wt.events,"VerifyEvent",$wt.events.KeyEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.VerifyEvent,[e]);
-this.character=e.character;
-this.keyCode=e.keyCode;
-this.stateMask=e.stateMask;
-this.start=e.start;
-this.end=e.end;
-this.text=e.text;
-},"$wt.widgets.Event");
-$_M(c$,"toString",
-function(){
-var string=$_U(this,$wt.events.VerifyEvent,"toString",[]);
-return string.substring(0,string.length-1)+" start="+this.start+" end="+this.end+" text="+this.text+"}";
-});
-$_S(c$,
-"serialVersionUID",3257003246269577014);
-$_I($wt.widgets,"Listener");
-c$=$_C(function(){
-this.eventListener=null;
-$_Z(this,arguments);
-},$wt.widgets,"TypedListener",null,$wt.widgets.Listener);
-$_K(c$,
+$_M(c$,"addAccessibleListener",
 function(listener){
-this.eventListener=listener;
-},"$wt.internal.SWTEventListener");
-$_M(c$,"getEventListener",
+this.accessibleListeners.addElement(listener);
+},"$wt.accessibility.AccessibleListener");
+$_M(c$,"addAccessibleControlListener",
+function(listener){
+this.accessibleControlListeners.addElement(listener);
+},"$wt.accessibility.AccessibleControlListener");
+$_M(c$,"addAccessibleTextListener",
+function(listener){
+this.textListeners.addElement(listener);
+},"$wt.accessibility.AccessibleTextListener");
+$_M(c$,"getControl",
 function(){
-return this.eventListener;
+return this.control;
 });
-$_V(c$,"handleEvent",
-function(e){
-switch(e.type){
-case 9:
-{
-var event=new $wt.events.PaintEvent(e);
-(this.eventListener).paintControl(event);
-e.gc=event.gc;
-break;
-}case 13:
-{
-var event=new $wt.events.SelectionEvent(e);
-(this.eventListener).widgetSelected(event);
-e.x=event.x;
-e.y=event.y;
-e.doit=event.doit;
-break;
-}case 14:
-{
-(this.eventListener).widgetDefaultSelected(new $wt.events.SelectionEvent(e));
-break;
-}case 12:
-{
-(this.eventListener).widgetDisposed(new $wt.events.DisposeEvent(e));
-break;
-}case 15:
-{
-(this.eventListener).focusGained(new $wt.events.FocusEvent(e));
-break;
-}case 16:
-{
-(this.eventListener).focusLost(new $wt.events.FocusEvent(e));
-break;
-}case 23:
-{
-(this.eventListener).menuHidden(new $wt.events.MenuEvent(e));
-break;
-}case 22:
-{
-(this.eventListener).menuShown(new $wt.events.MenuEvent(e));
-break;
-}case 1:
-{
-var event=new $wt.events.KeyEvent(e);
-(this.eventListener).keyPressed(event);
-e.doit=event.doit;
-break;
-}case 2:
-{
-var event=new $wt.events.KeyEvent(e);
-(this.eventListener).keyReleased(event);
-e.doit=event.doit;
-break;
-}case 3:
-{
-(this.eventListener).mouseDown(new $wt.events.MouseEvent(e));
-break;
-}case 4:
-{
-(this.eventListener).mouseUp(new $wt.events.MouseEvent(e));
-break;
-}case 8:
-{
-(this.eventListener).mouseDoubleClick(new $wt.events.MouseEvent(e));
-break;
-}case 5:
-{
-(this.eventListener).mouseMove(new $wt.events.MouseEvent(e));
-return;
-}case 11:
-{
-(this.eventListener).controlResized(new $wt.events.ControlEvent(e));
-break;
-}case 10:
-{
-(this.eventListener).controlMoved(new $wt.events.ControlEvent(e));
-break;
-}case 21:
-{
-var event=new $wt.events.ShellEvent(e);
-(this.eventListener).shellClosed(event);
-e.doit=event.doit;
-break;
-}case 26:
-{
-(this.eventListener).shellActivated(new $wt.events.ShellEvent(e));
-break;
-}case 27:
-{
-(this.eventListener).shellDeactivated(new $wt.events.ShellEvent(e));
-break;
-}case 19:
-{
-(this.eventListener).shellIconified(new $wt.events.ShellEvent(e));
-break;
-}case 20:
-{
-(this.eventListener).shellDeiconified(new $wt.events.ShellEvent(e));
-break;
-}case 17:
-{
-(this.eventListener).treeExpanded(new $wt.events.TreeEvent(e));
-break;
-}case 18:
-{
-(this.eventListener).treeCollapsed(new $wt.events.TreeEvent(e));
-break;
-}case 24:
-{
-(this.eventListener).modifyText(new $wt.events.ModifyEvent(e));
-break;
-}case 25:
-{
-var event=new $wt.events.VerifyEvent(e);
-(this.eventListener).verifyText(event);
-e.text=event.text;
-e.doit=event.doit;
-break;
-}case 28:
-{
-(this.eventListener).helpRequested(new $wt.events.HelpEvent(e));
-break;
-}case 30:
-{
-(this.eventListener).widgetArmed(new $wt.events.ArmEvent(e));
-break;
-}case 7:
-{
-(this.eventListener).mouseExit(new $wt.events.MouseEvent(e));
-break;
-}case 6:
-{
-(this.eventListener).mouseEnter(new $wt.events.MouseEvent(e));
-break;
-}case 32:
-{
-(this.eventListener).mouseHover(new $wt.events.MouseEvent(e));
-break;
-}case 31:
-{
-var event=new $wt.events.TraverseEvent(e);
-(this.eventListener).keyTraversed(event);
-e.detail=event.detail;
-e.doit=event.doit;
-break;
-}}
-},"$wt.widgets.Event");
-$_I($wt.events,"ArmListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"ControlListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ControlAdapter",null,$wt.events.ControlListener);
-$_V(c$,"controlMoved",
-function(e){
-},"$wt.events.ControlEvent");
-$_V(c$,"controlResized",
-function(e){
-},"$wt.events.ControlEvent");
-$_I($wt.events,"DisposeListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"FocusListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"FocusAdapter",null,$wt.events.FocusListener);
-$_V(c$,"focusGained",
-function(e){
-},"$wt.events.FocusEvent");
-$_V(c$,"focusLost",
-function(e){
-},"$wt.events.FocusEvent");
-$_I($wt.events,"HelpListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"KeyListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"KeyAdapter",null,$wt.events.KeyListener);
-$_V(c$,"keyPressed",
-function(e){
-},"$wt.events.KeyEvent");
-$_V(c$,"keyReleased",
-function(e){
-},"$wt.events.KeyEvent");
-$_I($wt.events,"MenuListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MenuAdapter",null,$wt.events.MenuListener);
-$_V(c$,"menuHidden",
-function(e){
-},"$wt.events.MenuEvent");
-$_V(c$,"menuShown",
-function(e){
-},"$wt.events.MenuEvent");
-$_I($wt.events,"ModifyListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"MouseListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"MouseMoveListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"MouseTrackListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MouseTrackAdapter",null,$wt.events.MouseTrackListener);
-$_V(c$,"mouseEnter",
-function(e){
-},"$wt.events.MouseEvent");
-$_V(c$,"mouseExit",
-function(e){
-},"$wt.events.MouseEvent");
-$_V(c$,"mouseHover",
-function(e){
-},"$wt.events.MouseEvent");
-$_I($wt.events,"PaintListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"SelectionListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"SelectionAdapter",null,$wt.events.SelectionListener);
-$_V(c$,"widgetSelected",
-function(e){
-},"$wt.events.SelectionEvent");
-$_V(c$,"widgetDefaultSelected",
-function(e){
-},"$wt.events.SelectionEvent");
-$_I($wt.events,"ShellListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ShellAdapter",null,$wt.events.ShellListener);
-$_V(c$,"shellActivated",
-function(e){
-},"$wt.events.ShellEvent");
-$_V(c$,"shellClosed",
-function(e){
-},"$wt.events.ShellEvent");
-$_V(c$,"shellDeactivated",
-function(e){
-},"$wt.events.ShellEvent");
-$_V(c$,"shellDeiconified",
-function(e){
-},"$wt.events.ShellEvent");
-$_V(c$,"shellIconified",
-function(e){
-},"$wt.events.ShellEvent");
-$_I($wt.events,"TraverseListener",$wt.internal.SWTEventListener);
-$_I($wt.events,"TreeListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"TreeAdapter",null,$wt.events.TreeListener);
-$_V(c$,"treeCollapsed",
-function(e){
-},"$wt.events.TreeEvent");
-$_V(c$,"treeExpanded",
-function(e){
-},"$wt.events.TreeEvent");
-$_I($wt.events,"VerifyListener",$wt.internal.SWTEventListener);
-c$=$_C(function(){
-this.types=null;
-this.listeners=null;
-this.level=0;
-$_Z(this,arguments);
-},$wt.widgets,"EventTable");
-$_M(c$,"hook",
-function(eventType,listener){
-if(this.types==null)this.types=$_A(4,0);
-if(this.listeners==null)this.listeners=new Array(4);
-var length=this.types.length;
-var index=length-1;
-while(index>=0){
-if(this.types[index]!=0)break;
---index;
-}
-index++;
-if(index==length){
-var newTypes=$_A(length+4,0);
-System.arraycopy(this.types,0,newTypes,0,length);
-this.types=newTypes;
-var newListeners=new Array(length+4);
-System.arraycopy(this.listeners,0,newListeners,0,length);
-this.listeners=newListeners;
-}this.types[index]=eventType;
-this.listeners[index]=listener;
-},"~N,$wt.widgets.Listener");
-$_M(c$,"hooks",
-function(eventType){
-if(this.types==null)return false;
-for(var i=0;i<this.types.length;i++){
-if(this.types[i]==eventType)return true;
-}
-return false;
+$_M(c$,"removeAccessibleListener",
+function(listener){
+this.accessibleListeners.removeElement(listener);
+},"$wt.accessibility.AccessibleListener");
+$_M(c$,"removeAccessibleControlListener",
+function(listener){
+this.accessibleControlListeners.removeElement(listener);
+},"$wt.accessibility.AccessibleControlListener");
+$_M(c$,"removeAccessibleTextListener",
+function(listener){
+this.textListeners.removeElement(listener);
+},"$wt.accessibility.AccessibleTextListener");
+$_M(c$,"selectionChanged",
+function(){
+});
+$_M(c$,"setFocus",
+function(childID){
 },"~N");
-$_M(c$,"sendEvent",
-function(event){
-if(this.types==null)return;
-this.level+=this.level>=0?1:-1;
-try{
-for(var i=0;i<this.types.length;i++){
-if(event.type==0)return;
-if(this.types[i]==event.type){
-var listener=this.listeners[i];
-if(listener!=null)listener.handleEvent(event);
-}}
-}finally{
-var compact=this.level<0;
-this.level-=this.level>=0?1:-1;
-if(compact&&this.level==0){
-var index=0;
-for(var i=0;i<this.types.length;i++){
-if(this.types[i]!=0){
-this.types[index]=this.types[i];
-this.listeners[index]=this.listeners[i];
-index++;
-}}
-for(var i=index;i<this.types.length;i++){
-this.types[i]=0;
-this.listeners[i]=null;
-}
-}}
-},"$wt.widgets.Event");
-$_M(c$,"size",
-function(){
-if(this.types==null)return 0;
-var count=0;
-for(var i=0;i<this.types.length;i++){
-if(this.types[i]!=0)count++;
-}
-return count;
-});
-$_M(c$,"remove",
+$_M(c$,"textCaretMoved",
 function(index){
-if(this.level==0){
-var end=this.types.length-1;
-System.arraycopy(this.types,index+1,this.types,index,end-index);
-System.arraycopy(this.listeners,index+1,this.listeners,index,end-index);
-index=end;
-}else{
-if(this.level>0)this.level=-this.level;
-}this.types[index]=0;
-this.listeners[index]=null;
 },"~N");
-$_M(c$,"unhook",
-function(eventType,listener){
-if(this.types==null)return;
-for(var i=0;i<this.types.length;i++){
-if(this.types[i]==eventType&&this.listeners[i]==listener){
-this.remove(i);
-return;
-}}
-},"~N,$wt.widgets.Listener");
-$_M(c$,"unhook",
-function(eventType,listener){
-if(this.types==null)return;
-for(var i=0;i<this.types.length;i++){
-if(this.types[i]==eventType){
-if($_O(this.listeners[i],$wt.widgets.TypedListener)){
-var typedListener=this.listeners[i];
-if(typedListener.getEventListener()==listener){
-this.remove(i);
-return;
-}}}}
-},"~N,$wt.internal.SWTEventListener");
-$_M(c$,"releaseResource",
+$_M(c$,"textChanged",
+function(type,startIndex,length){
+},"~N,~N,~N");
+$_M(c$,"textSelectionChanged",
 function(){
-if(this.listeners!=null){
-for(var i=0;i<this.listeners.length;i++){
-this.listeners[i]=null;
-}
-this.listeners=null;
-}});
+});
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -1458,7 +821,7 @@ if(object==this)return true;
 if(!($_O(object,$wt.graphics.Point)))return false;
 var p=object;
 return(p.x==this.x)&&(p.y==this.y);
-},"Object");
+},"~O");
 $_V(c$,"hashCode",
 function(){
 return this.x^this.y;
@@ -1512,7 +875,7 @@ if(object==this)return true;
 if(!($_O(object,$wt.graphics.Rectangle)))return false;
 var r=object;
 return(r.x==this.x)&&(r.y==this.y)&&(r.width==this.width)&&(r.height==this.height);
-},"Object");
+},"~O");
 $_V(c$,"hashCode",
 function(){
 return this.x^this.y^this.width^this.height;
@@ -1594,7 +957,7 @@ if(object==this)return true;
 if(!($_O(object,$wt.graphics.RGB)))return false;
 var rgb=object;
 return(rgb.red==this.red)&&(rgb.green==this.green)&&(rgb.blue==this.blue);
-},"Object");
+},"~O");
 $_V(c$,"hashCode",
 function(){
 return(this.blue<<16)|(this.green<<8)|this.red;
@@ -1606,1698 +969,2043 @@ return"RGB {"+this.red+", "+this.green+", "+this.blue+"}";
 $_S(c$,
 "serialVersionUID",3258415023461249074);
 c$=$_C(function(){
+this.handle=null;
+this.bgColor=null;
+this.fgColor=null;
+this.font=null;
+this.drawable=null;
+this.data=null;
 $_Z(this,arguments);
-},$wt.widgets,"Layout");
-$_M(c$,"flushCache",
-function(control){
-return false;
-},"$wt.widgets.Control");
-c$=$_C(function(){
-this.defaultWidth=-1;
-this.defaultHeight=-1;
-this.currentWhint=0;
-this.currentHhint=0;
-this.currentWidth=-1;
-this.currentHeight=-1;
-$_Z(this,arguments);
-},$wt.layout,"FillData");
-$_M(c$,"computeSize",
-function(control,wHint,hHint,flushCache){
-if(flushCache)this.flushCache();
-if(wHint==-1&&hHint==-1){
-if(this.defaultWidth==-1||this.defaultHeight==-1){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.defaultWidth=size.x;
-this.defaultHeight=size.y;
-}return new $wt.graphics.Point(this.defaultWidth,this.defaultHeight);
-}if(this.currentWidth==-1||this.currentHeight==-1||wHint!=this.currentWhint||hHint!=this.currentHhint){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.currentWhint=wHint;
-this.currentHhint=hHint;
-this.currentWidth=size.x;
-this.currentHeight=size.y;
-}return new $wt.graphics.Point(this.currentWidth,this.currentHeight);
-},"$wt.widgets.Control,~N,~N,~B");
-$_M(c$,"flushCache",
-function(){
-this.defaultWidth=this.defaultHeight=-1;
-this.currentWidth=this.currentHeight=-1;
-});
-c$=$_C(function(){
-this.width=-1;
-this.height=-1;
-this.left=null;
-this.right=null;
-this.top=null;
-this.bottom=null;
-this.cacheWidth=-1;
-this.cacheHeight=-1;
-this.defaultWhint=0;
-this.defaultHhint=0;
-this.defaultWidth=-1;
-this.defaultHeight=-1;
-this.currentWhint=0;
-this.currentHhint=0;
-this.currentWidth=-1;
-this.currentHeight=-1;
-this.cacheLeft=null;
-this.cacheRight=null;
-this.cacheTop=null;
-this.cacheBottom=null;
-this.isVisited=false;
-this.needed=false;
-$_Z(this,arguments);
-},$wt.layout,"FormData");
+},$wt.graphics,"GC",$wt.graphics.Resource);
 $_K(c$,
 function(){
+$_R(this,$wt.graphics.GC,[]);
 });
 $_K(c$,
-function(width,height){
-this.width=width;
-this.height=height;
-},"~N,~N");
-$_M(c$,"computeSize",
-function(control,wHint,hHint,flushCache){
-if(this.cacheWidth!=-1&&this.cacheHeight!=-1)return;
-if(wHint==this.width&&hHint==this.height){
-if(this.defaultWidth==-1||this.defaultHeight==-1||wHint!=this.defaultWhint||hHint!=this.defaultHhint){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.defaultWhint=wHint;
-this.defaultHhint=hHint;
-this.defaultWidth=size.x;
-this.defaultHeight=size.y;
-}this.cacheWidth=this.defaultWidth;
-this.cacheHeight=this.defaultHeight;
-return;
-}if(this.currentWidth==-1||this.currentHeight==-1||wHint!=this.currentWhint||hHint!=this.currentHhint){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.currentWhint=wHint;
-this.currentHhint=hHint;
-this.currentWidth=size.x;
-this.currentHeight=size.y;
-}this.cacheWidth=this.currentWidth;
-this.cacheHeight=this.currentHeight;
-},"$wt.widgets.Control,~N,~N,~B");
-$_M(c$,"flushCache",
-function(){
-this.cacheWidth=this.cacheHeight=-1;
-this.defaultHeight=this.defaultWidth=-1;
-this.currentHeight=this.currentWidth=-1;
-});
-$_M(c$,"getWidth",
-function(control,flushCache){
-this.needed=true;
-this.computeSize(control,this.width,this.height,flushCache);
-return this.cacheWidth;
-},"$wt.widgets.Control,~B");
-$_M(c$,"getHeight",
-function(control,flushCache){
-this.computeSize(control,this.width,this.height,flushCache);
-return this.cacheHeight;
-},"$wt.widgets.Control,~B");
-$_M(c$,"getBottomAttachment",
-function(control,spacing,flushCache){
-if(this.cacheBottom!=null)return this.cacheBottom;
-if(this.isVisited)return this.cacheBottom=new $wt.layout.FormAttachment(0,this.getHeight(control,flushCache));
-if(this.bottom==null){
-if(this.top==null)return this.cacheBottom=new $wt.layout.FormAttachment(0,this.getHeight(control,flushCache));
-return this.cacheBottom=this.getTopAttachment(control,spacing,flushCache).plus(this.getHeight(control,flushCache));
-}var bottomControl=this.bottom.control;
-if(bottomControl!=null){
-if(bottomControl.isDisposed()){
-this.bottom.control=bottomControl=null;
-}else{
-if(bottomControl.getParent()!=control.getParent()){
-bottomControl=null;
-}}}if(bottomControl==null)return this.cacheBottom=this.bottom;
-this.isVisited=true;
-var bottomData=bottomControl.getLayoutData();
-var bottomAttachment=bottomData.getBottomAttachment(bottomControl,spacing,flushCache);
-switch(this.bottom.alignment){
-case 1024:
-this.cacheBottom=bottomAttachment.plus(this.bottom.offset);
-break;
-case 16777216:
-{
-var topAttachment=bottomData.getTopAttachment(bottomControl,spacing,flushCache);
-var bottomHeight=bottomAttachment.minus(topAttachment);
-this.cacheBottom=bottomAttachment.minus(bottomHeight.minus(this.getHeight(control,flushCache)).divide(2));
-break;
-}default:
-{
-var topAttachment=bottomData.getTopAttachment(bottomControl,spacing,flushCache);
-this.cacheBottom=topAttachment.plus(this.bottom.offset-spacing);
-break;
-}}
-this.isVisited=false;
-return this.cacheBottom;
-},"$wt.widgets.Control,~N,~B");
-$_M(c$,"getLeftAttachment",
-function(control,spacing,flushCache){
-if(this.cacheLeft!=null)return this.cacheLeft;
-if(this.isVisited)return this.cacheLeft=new $wt.layout.FormAttachment(0,0);
-if(this.left==null){
-if(this.right==null)return this.cacheLeft=new $wt.layout.FormAttachment(0,0);
-return this.cacheLeft=this.getRightAttachment(control,spacing,flushCache).minus(this.getWidth(control,flushCache));
-}var leftControl=this.left.control;
-if(leftControl!=null){
-if(leftControl.isDisposed()){
-this.left.control=leftControl=null;
-}else{
-if(leftControl.getParent()!=control.getParent()){
-leftControl=null;
-}}}if(leftControl==null)return this.cacheLeft=this.left;
-this.isVisited=true;
-var leftData=leftControl.getLayoutData();
-var leftAttachment=leftData.getLeftAttachment(leftControl,spacing,flushCache);
-switch(this.left.alignment){
-case 16384:
-this.cacheLeft=leftAttachment.plus(this.left.offset);
-break;
-case 16777216:
-{
-var rightAttachment=leftData.getRightAttachment(leftControl,spacing,flushCache);
-var leftWidth=rightAttachment.minus(leftAttachment);
-this.cacheLeft=leftAttachment.plus(leftWidth.minus(this.getWidth(control,flushCache)).divide(2));
-break;
-}default:
-{
-var rightAttachment=leftData.getRightAttachment(leftControl,spacing,flushCache);
-this.cacheLeft=rightAttachment.plus(this.left.offset+spacing);
-}}
-this.isVisited=false;
-return this.cacheLeft;
-},"$wt.widgets.Control,~N,~B");
-$_M(c$,"getName",
-function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
-});
-$_M(c$,"getRightAttachment",
-function(control,spacing,flushCache){
-if(this.cacheRight!=null)return this.cacheRight;
-if(this.isVisited)return this.cacheRight=new $wt.layout.FormAttachment(0,this.getWidth(control,flushCache));
-if(this.right==null){
-if(this.left==null)return this.cacheRight=new $wt.layout.FormAttachment(0,this.getWidth(control,flushCache));
-return this.cacheRight=this.getLeftAttachment(control,spacing,flushCache).plus(this.getWidth(control,flushCache));
-}var rightControl=this.right.control;
-if(rightControl!=null){
-if(rightControl.isDisposed()){
-this.right.control=rightControl=null;
-}else{
-if(rightControl.getParent()!=control.getParent()){
-rightControl=null;
-}}}if(rightControl==null)return this.cacheRight=this.right;
-this.isVisited=true;
-var rightData=rightControl.getLayoutData();
-var rightAttachment=rightData.getRightAttachment(rightControl,spacing,flushCache);
-switch(this.right.alignment){
-case 131072:
-this.cacheRight=rightAttachment.plus(this.right.offset);
-break;
-case 16777216:
-{
-var leftAttachment=rightData.getLeftAttachment(rightControl,spacing,flushCache);
-var rightWidth=rightAttachment.minus(leftAttachment);
-this.cacheRight=rightAttachment.minus(rightWidth.minus(this.getWidth(control,flushCache)).divide(2));
-break;
-}default:
-{
-var leftAttachment=rightData.getLeftAttachment(rightControl,spacing,flushCache);
-this.cacheRight=leftAttachment.plus(this.right.offset-spacing);
-break;
-}}
-this.isVisited=false;
-return this.cacheRight;
-},"$wt.widgets.Control,~N,~B");
-$_M(c$,"getTopAttachment",
-function(control,spacing,flushCache){
-if(this.cacheTop!=null)return this.cacheTop;
-if(this.isVisited)return this.cacheTop=new $wt.layout.FormAttachment(0,0);
-if(this.top==null){
-if(this.bottom==null)return this.cacheTop=new $wt.layout.FormAttachment(0,0);
-return this.cacheTop=this.getBottomAttachment(control,spacing,flushCache).minus(this.getHeight(control,flushCache));
-}var topControl=this.top.control;
-if(topControl!=null){
-if(topControl.isDisposed()){
-this.top.control=topControl=null;
-}else{
-if(topControl.getParent()!=control.getParent()){
-topControl=null;
-}}}if(topControl==null)return this.cacheTop=this.top;
-this.isVisited=true;
-var topData=topControl.getLayoutData();
-var topAttachment=topData.getTopAttachment(topControl,spacing,flushCache);
-switch(this.top.alignment){
-case 128:
-this.cacheTop=topAttachment.plus(this.top.offset);
-break;
-case 16777216:
-{
-var bottomAttachment=topData.getBottomAttachment(topControl,spacing,flushCache);
-var topHeight=bottomAttachment.minus(topAttachment);
-this.cacheTop=topAttachment.plus(topHeight.minus(this.getHeight(control,flushCache)).divide(2));
-break;
-}default:
-{
-var bottomAttachment=topData.getBottomAttachment(topControl,spacing,flushCache);
-this.cacheTop=bottomAttachment.plus(this.top.offset+spacing);
-break;
-}}
-this.isVisited=false;
-return this.cacheTop;
-},"$wt.widgets.Control,~N,~B");
-$_V(c$,"toString",
-function(){
-var string=this.getName()+" {";
-if(this.width!=-1)string+="width="+this.width+" ";
-if(this.height!=-1)string+="height="+this.height+" ";
-if(this.left!=null)string+="left="+this.left+" ";
-if(this.right!=null)string+="right="+this.right+" ";
-if(this.top!=null)string+="top="+this.top+" ";
-if(this.bottom!=null)string+="bottom="+this.bottom+" ";
-string=string.trim();
-string+="}";
-return string;
-});
-c$=$_C(function(){
-this.verticalAlignment=2;
-this.horizontalAlignment=1;
-this.widthHint=-1;
-this.heightHint=-1;
-this.horizontalIndent=0;
-this.verticalIndent=0;
-this.horizontalSpan=1;
-this.verticalSpan=1;
-this.grabExcessHorizontalSpace=false;
-this.grabExcessVerticalSpace=false;
-this.minimumWidth=0;
-this.minimumHeight=0;
-this.exclude=false;
-this.cacheWidth=-1;
-this.cacheHeight=-1;
-this.defaultWhint=0;
-this.defaultHhint=0;
-this.defaultWidth=-1;
-this.defaultHeight=-1;
-this.currentWhint=0;
-this.currentHhint=0;
-this.currentWidth=-1;
-this.currentHeight=-1;
-$_Z(this,arguments);
-},$wt.layout,"GridData");
+function(drawable){
+this.construct(drawable,0);
+},"$wt.graphics.Drawable");
 $_K(c$,
-function(){
-});
-$_K(c$,
+function(drawable,style){
+$_R(this,$wt.graphics.GC,[]);
+if($_O(drawable,$wt.widgets.Control)){
+var ctrl=drawable;
+this.handle=ctrl.handle;
+}else if($_O(drawable,$wt.graphics.Image)){
+var img=drawable;
+this.handle=img.handle;
+}else{
+this.handle=d$.createElement("DIV");
+this.handle.style.position="absolute";
+}},"$wt.graphics.Drawable,~N");
+c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
-if((style&2)!=0)this.verticalAlignment=1;
-if((style&4)!=0)this.verticalAlignment=2;
-if((style&16)!=0)this.verticalAlignment=4;
-if((style&8)!=0)this.verticalAlignment=3;
-if((style&32)!=0)this.horizontalAlignment=1;
-if((style&64)!=0)this.horizontalAlignment=2;
-if((style&256)!=0)this.horizontalAlignment=4;
-if((style&128)!=0)this.horizontalAlignment=3;
-this.grabExcessHorizontalSpace=(style&512)!=0;
-this.grabExcessVerticalSpace=(style&1024)!=0;
+if((style&33554432)!=0)style&=-67108865;
+return style&(100663296);
 },"~N");
-$_K(c$,
-function(horizontalAlignment,verticalAlignment,grabExcessHorizontalSpace,grabExcessVerticalSpace){
-this.construct(horizontalAlignment,verticalAlignment,grabExcessHorizontalSpace,grabExcessVerticalSpace,1,1);
-},"~N,~N,~B,~B");
-$_K(c$,
-function(horizontalAlignment,verticalAlignment,grabExcessHorizontalSpace,grabExcessVerticalSpace,horizontalSpan,verticalSpan){
-this.horizontalAlignment=horizontalAlignment;
-this.verticalAlignment=verticalAlignment;
-this.grabExcessHorizontalSpace=grabExcessHorizontalSpace;
-this.grabExcessVerticalSpace=grabExcessVerticalSpace;
-this.horizontalSpan=horizontalSpan;
-this.verticalSpan=verticalSpan;
-},"~N,~N,~B,~B,~N,~N");
-$_K(c$,
-function(width,height){
-this.widthHint=width;
-this.heightHint=height;
+$_M(c$,"copyArea",
+function(image,x,y){
+},"$wt.graphics.Image,~N,~N");
+$_M(c$,"copyArea",
+function(srcX,srcY,width,height,destX,destY){
+this.copyArea(srcX,srcY,width,height,destX,destY,true);
+},"~N,~N,~N,~N,~N,~N");
+$_M(c$,"copyArea",
+function(srcX,srcY,width,height,destX,destY,paint){
+},"~N,~N,~N,~N,~N,~N,~B");
+$_M(c$,"createGdipBrush",
+function(){
+return 0;
+});
+$_M(c$,"createGdipFont",
+function(){
+return 0;
+});
+c$.createGdipFont=$_M(c$,"createGdipFont",
+function(hDC,hFont){
+return 0;
 },"~N,~N");
-$_M(c$,"computeSize",
-function(control,wHint,hHint,flushCache){
-if(this.cacheWidth!=-1&&this.cacheHeight!=-1)return;
-if(wHint==this.widthHint&&hHint==this.heightHint){
-if(this.defaultWidth==-1||this.defaultHeight==-1||wHint!=this.defaultWhint||hHint!=this.defaultHhint){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.defaultWhint=wHint;
-this.defaultHhint=hHint;
-this.defaultWidth=size.x;
-this.defaultHeight=size.y;
-}this.cacheWidth=this.defaultWidth;
-this.cacheHeight=this.defaultHeight;
+$_M(c$,"createGdipPen",
+function(){
+return 0;
+});
+$_M(c$,"destroyGdipBrush",
+function(brush){
+},"~N");
+$_V(c$,"dispose",
+function(){
+if(this.handle==null)return;
+if(this.data==null||this.data.device==null||this.data.device.isDisposed())return;
+});
+$_M(c$,"drawArc",
+function(x,y,width,height,startAngle,arcAngle){
+if(width<0){
+x=x+width;
+width=-width;
+}if(height<0){
+y=y+height;
+height=-height;
+}if(width==0||height==0||arcAngle==0)return;
+var gdipGraphics=this.data.gdipGraphics;
+},"~N,~N,~N,~N,~N,~N");
+$_M(c$,"drawFocus",
+function(x,y,width,height){
+},"~N,~N,~N,~N");
+$_M(c$,"drawImage",
+function(image,x,y){
+if(image.handle!=null){
+for(var i=0;i<image.handle.childNodes.length;i++){
+this.handle.appendChild(image.handle.childNodes[i]);
+}
+}},"$wt.graphics.Image,~N,~N");
+$_M(c$,"drawImage",
+function(image,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight){
+if(srcWidth==0||srcHeight==0||destWidth==0||destHeight==0)return;
+this.drawImage(image,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,false);
+},"$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N");
+$_M(c$,"drawImage",
+function(srcImage,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,simple){
+var rect=d$.createElement("IMG");
+rect.src=srcImage.url;
+rect.style.position="absolute";
+rect.style.fontSize="0px";
+rect.style.left=destX+"px";
+rect.style.top=destY+"px";
+rect.style.width=destWidth+"px";
+rect.style.height=destHeight+"px";
+this.handle.appendChild(rect);
+},"$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
+$_M(c$,"drawIcon",
+function(srcImage,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,simple){
+},"$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
+$_M(c$,"drawBitmap",
+function(srcImage,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,simple){
+},"$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~B");
+$_M(c$,"drawBitmapTransparentByClipping",
+function(srcHdc,maskHdc,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,simple,imgWidth,imgHeight){
+},"~N,~N,~N,~N,~N,~N,~N,~N,~N,~N,~B,~N,~N");
+$_M(c$,"drawBitmapMask",
+function(srcImage,srcColor,srcMask,srcX,srcY,srcWidth,srcHeight,destX,destY,destWidth,destHeight,simple,imgWidth,imgHeight,offscreen){
+var srcColorY=srcY;
+if(srcColor==0){
+srcColor=srcMask;
+srcColorY+=imgHeight;
+}},"$wt.graphics.Image,~N,~N,~N,~N,~N,~N,~N,~N,~N,~N,~B,~N,~N,~B");
+$_M(c$,"drawLine",
+function(x1,y1,x2,y2){
+var rect=d$.createElement("DIV");
+rect.style.position="absolute";
+rect.style.fontSize="0px";
+if(x1==x2){
+rect.style.left=x1+"px";
+rect.style.borderLeftStyle="solid";
+rect.style.top=Math.min(y1,y2)+"px";
+rect.style.height=Math.abs(y1-y2)+"px";
+}else if(y1==y2){
+rect.style.top=x1+"px";
+rect.style.borderTopStyle="solid";
+rect.style.left=Math.min(x1,x2)+"px";
+rect.style.width=Math.abs(x1-x2)+"px";
+}else{
+rect.style.left=Math.min(x1,x2)+"px";
+rect.style.top=Math.min(y1,y2)+"px";
+rect.style.width=Math.abs(x1-x2)+"px";
+rect.style.height=Math.abs(y1-y2)+"px";
+rect.style.borderStyle="solid";
+}rect.style.borderColor=this.fgColor.getCSSHandle();
+rect.style.borderWidth="1px";
+this.handle.appendChild(rect);
+},"~N,~N,~N,~N");
+$_M(c$,"drawOval",
+function(x,y,width,height){
+var gdipGraphics=this.data.gdipGraphics;
+},"~N,~N,~N,~N");
+$_M(c$,"drawPath",
+function(path){
+},"$wt.graphics.Path");
+$_M(c$,"drawPoint",
+function(x,y){
+},"~N,~N");
+$_M(c$,"drawPolygon",
+function(pointArray){
+var gdipGraphics=this.data.gdipGraphics;
+},"~A");
+$_M(c$,"drawPolyline",
+function(pointArray){
+var gdipGraphics=this.data.gdipGraphics;
+},"~A");
+$_M(c$,"drawRectangle",
+function(x,y,width,height){
+var rect=d$.createElement("DIV");
+rect.style.position="absolute";
+rect.style.fontSize="0px";
+rect.style.left=x+"px";
+rect.style.top=y+"px";
+rect.style.width=width+"px";
+rect.style.height=height+"px";
+if(this.fgColor!=null)rect.style.borderColor=this.fgColor.getCSSHandle();
+rect.style.borderStyle="solid";
+rect.style.borderWidth="1px";
+this.handle.appendChild(rect);
+},"~N,~N,~N,~N");
+$_M(c$,"drawRectangle",
+function(rect){
+this.drawRectangle(rect.x,rect.y,rect.width,rect.height);
+},"$wt.graphics.Rectangle");
+$_M(c$,"drawRoundRectangle",
+function(x,y,width,height,arcWidth,arcHeight){
+if(this.data.gdipGraphics!=0){
+this.initGdip(true,false);
+this.drawRoundRectangleGdip(this.data.gdipGraphics,this.data.gdipPen,x,y,width,height,arcWidth,arcHeight);
 return;
-}if(this.currentWidth==-1||this.currentHeight==-1||wHint!=this.currentWhint||hHint!=this.currentHhint){
-var size=control.computeSize(wHint,hHint,flushCache);
-this.currentWhint=wHint;
-this.currentHhint=hHint;
-this.currentWidth=size.x;
-this.currentHeight=size.y;
-}this.cacheWidth=this.currentWidth;
-this.cacheHeight=this.currentHeight;
-},"$wt.widgets.Control,~N,~N,~B");
-$_M(c$,"flushCache",
+}},"~N,~N,~N,~N,~N,~N");
+$_M(c$,"drawRoundRectangleGdip",
+function(gdipGraphics,brush,x,y,width,height,arcWidth,arcHeight){
+var nx=x;
+var ny=y;
+var nw=width;
+var nh=height;
+var naw=arcWidth;
+var nah=arcHeight;
+if(nw<0){
+nw=0-nw;
+nx=nx-nw;
+}if(nh<0){
+nh=0-nh;
+ny=ny-nh;
+}if(naw<0)naw=0-naw;
+if(nah<0)nah=0-nah;
+var naw2=Math.floor(naw/2);
+var nah2=Math.floor(nah/2);
+},"~N,~N,~N,~N,~N,~N,~N,~N");
+$_M(c$,"drawString",
+function(string,x,y){
+this.drawString(string,x,y,false);
+},"~S,~N,~N");
+$_M(c$,"drawString",
+function(string,x,y,isTransparent){
+var length=string.length;
+if(length==0)return;
+if(length==0)return;
+var rect=d$.createElement("DIV");
+rect.style.position="absolute";
+rect.style.left=x+"px";
+rect.style.top=y+"px";
+rect.style.whiteSpace="nowrap";
+if(!isTransparent){
+rect.style.backgroundColor=this.bgColor.getCSSHandle();
+}this.handle.appendChild(rect);
+rect.appendChild(d$.createTextNode(string));
+},"~S,~N,~N,~B");
+$_M(c$,"drawText",
+function(string,x,y){
+this.drawText(string,x,y,6);
+},"~S,~N,~N");
+$_M(c$,"drawText",
+function(string,x,y,isTransparent){
+var flags=6;
+if(isTransparent)flags|=1;
+this.drawText(string,x,y,flags);
+},"~S,~N,~N,~B");
+$_M(c$,"drawText",
+function(string,x,y,flags){
+if(string.length==0)return;
+var rect=d$.createElement("DIV");
+rect.style.position="absolute";
+rect.style.left=x+"px";
+rect.style.top=y+"px";
+rect.style.whiteSpace="nowrap";
+if((flags&1)==0){
+rect.style.backgroundColor=this.bgColor.getCSSHandle();
+}rect.style.color=this.fgColor.getCSSHandle();
+this.handle.appendChild(rect);
+rect.appendChild(d$.createTextNode(string));
+},"~S,~N,~N,~N");
+$_V(c$,"equals",
+function(object){
+return(object==this)||(($_O(object,$wt.graphics.GC))&&(this.handle==(object).handle));
+},"~O");
+$_M(c$,"fillArc",
+function(x,y,width,height,startAngle,arcAngle){
+if(width<0){
+x=x+width;
+width=-width;
+}if(height<0){
+y=y+height;
+height=-height;
+}if(width==0||height==0||arcAngle==0)return;
+},"~N,~N,~N,~N,~N,~N");
+$_M(c$,"fillGradientRectangle",
+function(x,y,width,height,vertical){
+if(width==0||height==0)return;
+if(width==0||height==0)return;
+this.fillRectangle(x,y,width,height);
+},"~N,~N,~N,~N,~B");
+$_M(c$,"fillOval",
+function(x,y,width,height){
+},"~N,~N,~N,~N");
+$_M(c$,"fillPath",
+function(path){
+},"$wt.graphics.Path");
+$_M(c$,"fillPolygon",
+function(pointArray){
+},"~A");
+$_M(c$,"fillRectangle",
+function(x,y,width,height){
+var rect=d$.createElement("DIV");
+rect.style.position="absolute";
+rect.style.left=x+"px";
+rect.style.top=y+"px";
+rect.style.width=width+"px";
+rect.style.height=height+"px";
+rect.style.backgroundColor=this.bgColor.getCSSHandle();
+this.handle.appendChild(rect);
+},"~N,~N,~N,~N");
+$_M(c$,"fillRectangle",
+function(rect){
+this.fillRectangle(rect.x,rect.y,rect.width,rect.height);
+},"$wt.graphics.Rectangle");
+$_M(c$,"fillRoundRectangle",
+function(x,y,width,height,arcWidth,arcHeight){
+this.fillRectangle(x,y,width,height);
+},"~N,~N,~N,~N,~N,~N");
+$_M(c$,"fillRoundRectangleGdip",
+function(gdipGraphics,brush,x,y,width,height,arcWidth,arcHeight){
+var nx=x;
+var ny=y;
+var nw=width;
+var nh=height;
+var naw=arcWidth;
+var nah=arcHeight;
+if(nw<0){
+nw=0-nw;
+nx=nx-nw;
+}if(nh<0){
+nh=0-nh;
+ny=ny-nh;
+}if(naw<0)naw=0-naw;
+if(nah<0)nah=0-nah;
+var naw2=Math.floor(naw/2);
+var nah2=Math.floor(nah/2);
+},"~N,~N,~N,~N,~N,~N,~N,~N");
+$_M(c$,"flush",
 function(){
-this.cacheWidth=this.cacheHeight=-1;
-this.defaultWidth=this.defaultHeight=-1;
-this.currentWidth=this.currentHeight=-1;
 });
-$_M(c$,"getName",
+$_M(c$,"getAdvanceWidth",
+function(ch){
+return 0;
+},"~N");
+$_M(c$,"getAdvanced",
 function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
+return this.data.gdipGraphics!=0;
 });
-$_V(c$,"toString",
+$_M(c$,"getAlpha",
 function(){
-var hAlign="";
-switch(this.horizontalAlignment){
-case 4:
-hAlign="SWT.FILL";
-break;
-case 1:
-hAlign="SWT.BEGINNING";
-break;
-case 16384:
-hAlign="SWT.LEFT";
-break;
-case 16777224:
-hAlign="SWT.END";
-break;
-case 3:
-hAlign="GridData.END";
-break;
-case 131072:
-hAlign="SWT.RIGHT";
-break;
-case 16777216:
-hAlign="SWT.CENTER";
-break;
-case 2:
-hAlign="GridData.CENTER";
-break;
-default:
-hAlign="Undefined "+this.horizontalAlignment;
-break;
+return this.data.alpha;
+});
+$_M(c$,"getAntialias",
+function(){
+if(this.data.gdipGraphics==0)return-1;
+return-1;
+});
+$_M(c$,"getBackground",
+function(){
+if(this.bgColor==null){
+this.bgColor=new $wt.graphics.Color(null,"white");
+}return this.bgColor;
+});
+$_M(c$,"getBackgroundPattern",
+function(){
+return this.data.backgroundPattern;
+});
+$_M(c$,"getCharWidth",
+function(ch){
+return 8;
+},"~N");
+$_M(c$,"getClipping",
+function(){
+return new $wt.graphics.Rectangle(0,0,0,0);
+});
+$_M(c$,"getClipping",
+function(region){
+},"$wt.graphics.Region");
+$_M(c$,"getCodePage",
+function(){
+return 0;
+});
+$_M(c$,"getFillRule",
+function(){
+return 4;
+});
+$_M(c$,"getFont",
+function(){
+return null;
+});
+$_M(c$,"getFontMetrics",
+function(){
+return new $wt.graphics.FontMetrics();
+});
+$_M(c$,"getForeground",
+function(){
+if(this.fgColor==null){
+this.fgColor=new $wt.graphics.Color(null,"black");
+}return this.fgColor;
+});
+$_M(c$,"getForegroundPattern",
+function(){
+return this.data.foregroundPattern;
+});
+$_M(c$,"getInterpolation",
+function(){
+if(this.data.gdipGraphics==0)return-1;
+return-1;
+});
+$_M(c$,"getLineCap",
+function(){
+var style;
+var size;
+return 1;
+});
+$_M(c$,"getLineDash",
+function(){
+if(this.data.dashes==null)return null;
+var dashes=$_A(this.data.dashes.length,0);
+System.arraycopy(this.data.dashes,0,dashes,0,dashes.length);
+return dashes;
+});
+$_M(c$,"getLineJoin",
+function(){
+var style;
+var size;
+return 3;
+});
+$_M(c$,"getLineStyle",
+function(){
+var style;
+var size;
+return 1;
+});
+$_M(c$,"getLineWidth",
+function(){
+var size;
+return 1;
+});
+$_M(c$,"getStyle",
+function(){
+return this.data.style;
+});
+$_M(c$,"getTextAntialias",
+function(){
+if(this.data.gdipGraphics==0)return-1;
+return-1;
+});
+$_M(c$,"getTransform",
+function(transform){
+},"$wt.graphics.Transform");
+$_M(c$,"getXORMode",
+function(){
+var rop2=0;
+return false;
+});
+$_M(c$,"initGdip",
+function(draw,fill){
+},"~B,~B");
+$_M(c$,"init",
+function(drawable,data,hDC){
+var foreground=data.foreground;
+},"$wt.graphics.Drawable,$wt.graphics.GCData,~N");
+$_V(c$,"hashCode",
+function(){
+return this.handle.toString().hashCode();
+});
+$_M(c$,"isClipped",
+function(){
+return false;
+});
+$_V(c$,"isDisposed",
+function(){
+return this.handle==null;
+});
+$_M(c$,"measureSpace",
+function(font,format){
+return 1.0;
+},"~N,~N");
+$_M(c$,"setAdvanced",
+function(advanced){
+if(advanced&&this.data.gdipGraphics!=0)return;
+if(advanced){
+try{
+this.initGdip(false,false);
+}catch(e){
+if($_O(e,$wt.SWTException)){
+}else{
+throw e;
 }
-var vAlign="";
-switch(this.verticalAlignment){
-case 4:
-vAlign="SWT.FILL";
-break;
-case 1:
-vAlign="SWT.BEGINNING";
-break;
-case 128:
-vAlign="SWT.TOP";
-break;
-case 16777224:
-vAlign="SWT.END";
-break;
-case 3:
-vAlign="GridData.END";
-break;
-case 1024:
-vAlign="SWT.BOTTOM";
-break;
-case 16777216:
-vAlign="SWT.CENTER";
-break;
-case 2:
-vAlign="GridData.CENTER";
-break;
-default:
-vAlign="Undefined "+this.verticalAlignment;
-break;
 }
-var string=this.getName()+" {";
-string+="horizontalAlignment="+hAlign+" ";
-if(this.horizontalIndent!=0)string+="horizontalIndent="+this.horizontalIndent+" ";
-if(this.horizontalSpan!=1)string+="horizontalSpan="+this.horizontalSpan+" ";
-if(this.grabExcessHorizontalSpace)string+="grabExcessHorizontalSpace="+this.grabExcessHorizontalSpace+" ";
-if(this.widthHint!=-1)string+="widthHint="+this.widthHint+" ";
-if(this.minimumWidth!=0)string+="minimumWidth="+this.minimumWidth+" ";
-string+="verticalAlignment="+vAlign+" ";
-if(this.verticalIndent!=0)string+="verticalIndent="+this.verticalIndent+" ";
-if(this.verticalSpan!=1)string+="verticalSpan="+this.verticalSpan+" ";
-if(this.grabExcessVerticalSpace)string+="grabExcessVerticalSpace="+this.grabExcessVerticalSpace+" ";
-if(this.heightHint!=-1)string+="heightHint="+this.heightHint+" ";
-if(this.minimumHeight!=0)string+="minimumHeight="+this.minimumHeight+" ";
-if(this.exclude)string+="exclude="+this.exclude+" ";
-string=string.trim();
-string+="}";
-return string;
+}else{
+}},"~B");
+$_M(c$,"setAntialias",
+function(antialias){
+if(this.data.gdipGraphics==0&&antialias==-1)return;
+},"~N");
+$_M(c$,"setAlpha",
+function(alpha){
+if(this.data.gdipGraphics==0&&(alpha&0xFF)==0xFF)return;
+this.initGdip(false,false);
+this.data.alpha=alpha&0xFF;
+},"~N");
+$_M(c$,"setBackground",
+function(color){
+this.bgColor=color;
+},"$wt.graphics.Color");
+$_M(c$,"setBackgroundPattern",
+function(pattern){
+if(this.data.gdipGraphics==0&&pattern==null)return;
+this.initGdip(false,false);
+if(this.data.gdipBrush!=0)this.destroyGdipBrush(this.data.gdipBrush);
+this.data.backgroundPattern=pattern;
+},"$wt.graphics.Pattern");
+$_M(c$,"setClipping",
+function(clipRgn){
+var hRgn=clipRgn;
+var gdipGraphics=this.data.gdipGraphics;
+},"~N");
+$_M(c$,"setClipping",
+function(x,y,width,height){
+},"~N,~N,~N,~N");
+$_M(c$,"setClipping",
+function(path){
+this.setClipping(0);
+},"$wt.graphics.Path");
+$_M(c$,"setClipping",
+function(rect){
+if(rect==null){
+this.setClipping(0);
+}else{
+this.setClipping(rect.x,rect.y,rect.width,rect.height);
+}},"$wt.graphics.Rectangle");
+$_M(c$,"setClipping",
+function(region){
+this.setClipping(region!=null?region.handle:0);
+},"$wt.graphics.Region");
+$_M(c$,"setFillRule",
+function(rule){
+},"~N");
+$_M(c$,"setFont",
+function(font){
+if(font==null){
+font=$wt.widgets.Display.getDefault().getSystemFont();
+}else{
+this.font=font;
+}},"$wt.graphics.Font");
+$_M(c$,"setForeground",
+function(color){
+this.fgColor=color;
+},"$wt.graphics.Color");
+$_M(c$,"setForegroundPattern",
+function(pattern){
+if(this.data.gdipGraphics==0&&pattern==null)return;
+},"$wt.graphics.Pattern");
+$_M(c$,"setInterpolation",
+function(interpolation){
+if(this.data.gdipGraphics==0&&interpolation==-1)return;
+var mode=0;
+},"~N");
+$_M(c$,"setLineCap",
+function(cap){
+var capStyle=0;
+this.setPen(-1,-1,-1,capStyle,-1,this.data.dashes);
+},"~N");
+$_M(c$,"setLineDash",
+function(dashes){
+if(dashes!=null&&dashes.length>0){
+this.data.dashes=$_A(dashes.length,0);
+for(var i=0;i<dashes.length;i++){
+var dash=dashes[i];
+this.data.dashes[i]=dash;
+}
+}else{
+this.data.dashes=null;
+}},"~A");
+$_M(c$,"setLineJoin",
+function(join){
+var joinStyle=0;
+this.setPen(-1,-1,-1,-1,joinStyle,this.data.dashes);
+},"~N");
+$_M(c$,"setLineStyle",
+function(lineStyle){
+var style=-1;
+this.setPen(-1,-1,style,-1,-1,this.data.dashes);
+},"~N");
+$_M(c$,"setLineWidth",
+function(lineWidth){
+this.setPen(-1,lineWidth,-1,-1,-1,this.data.dashes);
+},"~N");
+$_M(c$,"setPen",
+function(newColor,newWidth,lineStyle,capStyle,joinStyle,dashes){
+var extPen=false;
+var changed=false;
+},"~N,~N,~N,~N,~N,~A");
+$_M(c$,"setXORMode",
+function(xor){
+},"~B");
+$_M(c$,"setTextAntialias",
+function(antialias){
+if(this.data.gdipGraphics==0&&antialias==-1)return;
+var textMode=0;
+},"~N");
+$_M(c$,"setTransform",
+function(transform){
+if(this.data.gdipGraphics==0&&transform==null)return;
+},"$wt.graphics.Transform");
+$_M(c$,"stringExtent",
+function(string){
+var length=string.length;
+if(length==0){
+return new $wt.graphics.Point(0,16);
+}else{
+return O$.getStringPlainSize(string);
+}},"~S");
+$_M(c$,"textExtent",
+function(string){
+return this.textExtent(string,6);
+},"~S");
+$_M(c$,"textExtent",
+function(string,flags){
+if(string.length==0){
+return new $wt.graphics.Point(0,16);
+}else{
+return O$.getStringPlainSize(string);
+}},"~S,~N");
+$_M(c$,"toString",
+function(){
+if(this.isDisposed())return"GC {*DISPOSED*}";
+return"GC {"+this.handle+"}";
 });
 $_S(c$,
-"BEGINNING",1,
-"CENTER",2,
-"END",3,
-"FILL",4,
-"VERTICAL_ALIGN_BEGINNING",2,
-"VERTICAL_ALIGN_CENTER",4,
-"VERTICAL_ALIGN_END",8,
-"VERTICAL_ALIGN_FILL",16,
-"HORIZONTAL_ALIGN_BEGINNING",32,
-"HORIZONTAL_ALIGN_CENTER",64,
-"HORIZONTAL_ALIGN_END",128,
-"HORIZONTAL_ALIGN_FILL",256,
-"GRAB_HORIZONTAL",512,
-"GRAB_VERTICAL",1024,
-"FILL_VERTICAL",1040,
-"FILL_HORIZONTAL",768,
-"FILL_BOTH",1808);
+"LINE_DOT_ZERO",[3,3],
+"LINE_DASH_ZERO",[18,6],
+"LINE_DASHDOT_ZERO",[9,6,3,6],
+"LINE_DASHDOTDOT_ZERO",[9,3,3,3,3,3]);
 c$=$_C(function(){
-this.width=-1;
-this.height=-1;
-this.exclude=false;
+this.device=null;
 $_Z(this,arguments);
-},$wt.layout,"RowData");
+},$wt.graphics,"Resource");
+c$=$_C(function(){
+this.handle=0;
+this.cssHandle=null;
+$_Z(this,arguments);
+},$wt.graphics,"Color",$wt.graphics.Resource);
+$_K(c$,
+function(device,red,green,blue){
+$_R(this,$wt.graphics.Color,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.init(device,red,green,blue);
+},"$wt.graphics.Device,~N,~N,~N");
+$_K(c$,
+function(device,rgb){
+$_R(this,$wt.graphics.Color,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.init(device,rgb.red,rgb.green,rgb.blue);
+},"$wt.graphics.Device,$wt.graphics.RGB");
+$_V(c$,"dispose",
+function(){
+if(this.handle==-1)return;
+if(this.device.isDisposed())return;
+this.handle=-1;
+this.cssHandle=null;
+this.device=null;
+});
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.Color)))return false;
+var color=object;
+if(this.device!=color.device)return false;
+if(this.cssHandle!=null&&color.cssHandle!=null){
+return this.cssHandle==color.cssHandle;
+}else if(this.cssHandle!=null){
+return(this.rgbHandleFromCSS(this.cssHandle)&0xFFFFFF)==(color.handle&0xFFFFFF);
+}else if(color.cssHandle!=null){
+return(this.rgbHandleFromCSS(color.cssHandle)&0xFFFFFF)==(this.handle&0xFFFFFF);
+}else{
+return(this.handle&0xFFFFFF)==(color.handle&0xFFFFFF);
+}},"~O");
+$_M(c$,"getBlue",
+function(){
+if(this.handle<0)this.handle=this.rgbHandleFromCSS(this.cssHandle);
+return(this.handle&0xFF0000)>>16;
+});
+$_M(c$,"getGreen",
+function(){
+if(this.handle<0)this.handle=this.rgbHandleFromCSS(this.cssHandle);
+return(this.handle&0xFF00)>>8;
+});
+$_M(c$,"getRed",
+function(){
+if(this.handle<0)this.handle=this.rgbHandleFromCSS(this.cssHandle);
+return this.handle&0xFF;
+});
+$_M(c$,"getRGB",
+function(){
+if(this.handle<0)this.handle=this.rgbHandleFromCSS(this.cssHandle);
+return new $wt.graphics.RGB(this.handle&0xFF,(this.handle&0xFF00)>>8,(this.handle&0xFF0000)>>16);
+});
+$_V(c$,"hashCode",
+function(){
+return this.handle;
+});
+$_M(c$,"init",
+function(device,red,green,blue){
+this.device=device;
+this.handle=0x02000000|(red&0xFF)|((green&0xFF)<<8)|((blue&0xFF)<<16);
+this.cssHandle=null;
+},"$wt.graphics.Device,~N,~N,~N");
+$_V(c$,"isDisposed",
+function(){
+return this.handle==-1;
+});
+$_V(c$,"toString",
+function(){
+if(this.isDisposed())return"Color {*DISPOSED*}";
+if(this.cssHandle!=null)return"Color {\"" + this.cssHandle + "\"}";
+return"Color {"+this.getRed()+", "+this.getGreen()+", "+this.getBlue()+"}";
+});
+$_K(c$,
+function(device,handle){
+$_R(this,$wt.graphics.Color,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.cssHandle=handle;
+this.handle=-2;
+this.device=device;
+},"$wt.graphics.Device,~S");
+$_M(c$,"rgbHandleFromCSS",
+($fz=function(cssHandle){
+if(cssHandle==null)return 0x02000000;
+var red=-1;
+var green=-1;
+var blue=-1;
+{
+cssHandle.replace(/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/,function($0,$1,$2,$3){
+red=parseInt($1);
+green=parseInt($2);
+blue=parseInt($3);
+return $0;
+});
+}if(red!=-1&&green!=-1&&blue!=-1){
+return 0x02000000|(red&0xFF)|((green&0xFF)<<8)|((blue&0xFF)<<16);
+}else{
+var intHandle=-2;
+{
+cssHandle.replace(/#([0-9a-fA-F]{3,6})/,function($0,$1){
+if($1.length==3){
+var r=$1.charAt(0);
+var g=$1.charAt(1);
+var b=$1.charAt(2);
+intHandle=eval("0x"+b+b+g+g+r+r);
+}else if($1.length==6){
+intHandle=eval("0x"+$1.substring(4,6)+$1.substring(2,4)+$1.substring(0,2));
+}else{
+
+$WT.error(4);
+}
+});
+}if(intHandle!=-2){
+return 0x02000000|intHandle;
+}else{
+return 0x0F000000;
+}}},$fz.isPrivate=true,$fz),"~S");
+$_M(c$,"getCSSHandle",
+function(){
+if(this.cssHandle!=null)return this.cssHandle;
+return"rgb("+this.getRed()+", "+this.getGreen()+", "+this.getBlue()+")";
+});
+$_M(c$,"isPlatformSpecific",
+function(){
+if((this.handle<0||this.handle==0x0F000000)&&this.cssHandle!=null){
+return this.rgbHandleFromCSS(this.cssHandle)==0x0F000000;
+}return false;
+});
+c$=$_C(function(){
+this.handle=null;
+$_Z(this,arguments);
+},$wt.graphics,"Cursor",$wt.graphics.Resource);
+$_K(c$,
+function(device,style){
+$_R(this,$wt.graphics.Cursor,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.device=device;
+switch(style){
+case 21:
+this.handle="pointer";
+break;
+case 0:
+this.handle="default";
+break;
+case 1:
+this.handle="wait";
+break;
+case 2:
+this.handle="crosshair";
+break;
+case 3:
+this.handle="progress";
+break;
+case 4:
+this.handle="help";
+break;
+case 5:
+this.handle="move";
+break;
+case 6:
+this.handle="move";
+break;
+case 7:
+this.handle="s-resize";
+break;
+case 8:
+this.handle="move";
+break;
+case 9:
+this.handle="e-resize";
+break;
+case 10:
+this.handle="n-resize";
+break;
+case 11:
+this.handle="s-resize";
+break;
+case 12:
+this.handle="e-resize";
+break;
+case 13:
+this.handle="w-resize";
+break;
+case 14:
+this.handle="ne-resize";
+break;
+case 15:
+this.handle="se-resize";
+break;
+case 16:
+this.handle="sw-resize";
+break;
+case 17:
+this.handle="nw-resize";
+break;
+case 18:
+this.handle="default";
+break;
+case 19:
+this.handle="text";
+break;
+case 20:
+this.handle="auto";
+break;
+default:
+$WT.error(5);
+}
+},"$wt.graphics.Device,~N");
+$_K(c$,
+function(device,source,mask,hotspotX,hotspotY){
+$_R(this,$wt.graphics.Cursor,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.device=device;
+if(source.url!=null){
+this.handle="url(\'"+source.url+"\'),default";
+}else{
+this.handle="default";
+}},"$wt.graphics.Device,$wt.graphics.ImageData,$wt.graphics.ImageData,~N,~N");
+$_K(c$,
+function(device,source,hotspotX,hotspotY){
+$_R(this,$wt.graphics.Cursor,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.device=device;
+if(source.url!=null){
+this.handle="url(\'"+source.url+"\'),default";
+}else{
+this.handle="default";
+}},"$wt.graphics.Device,$wt.graphics.ImageData,~N,~N");
+$_V(c$,"dispose",
+function(){
+if(this.handle==null)return;
+if(this.device.isDisposed())return;
+this.handle=null;
+this.device=null;
+});
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.Cursor)))return false;
+var cursor=object;
+return this.device==cursor.device&&this.handle==cursor.handle;
+},"~O");
+$_V(c$,"hashCode",
+function(){
+return this.handle.hashCode();
+});
+$_V(c$,"isDisposed",
+function(){
+return this.handle==null;
+});
+$_V(c$,"toString",
+function(){
+if(this.isDisposed())return"Cursor {*DISPOSED*}";
+return"Cursor {"+this.handle+"}";
+});
+$_K(c$,
+function(device,handle){
+$_R(this,$wt.graphics.Cursor,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.handle=handle;
+this.device=device;
+},"$wt.graphics.Device,~S");
+$_M(c$,"getCSSHandle",
+function(){
+return this.handle;
+});
+$_I($wt.graphics,"Drawable");
+c$=$_C(function(){
+this.disposed=false;
+$_Z(this,arguments);
+},$wt.graphics,"Device",null,$wt.graphics.Drawable);
+c$.getDevice=$_M(c$,"getDevice",
+function(){
+return $wt.widgets.Display.getDefault();
+});
+$_K(c$,
+function(){
+this.construct(null);
+});
+$_K(c$,
+function(data){
+this.create(data);
+this.init();
+},"$wt.graphics.DeviceData");
+$_M(c$,"checkDevice",
+function(){
+});
+$_M(c$,"create",
+function(data){
+},"$wt.graphics.DeviceData");
+$_M(c$,"destroy",
+function(){
+});
+$_M(c$,"dispose",
+function(){
+if(this.isDisposed())return;
+this.release();
+this.destroy();
+this.disposed=true;
+});
+$_M(c$,"getBounds",
+function(){
+var width=w$.screen.availWidth;
+var height=w$.screen.availHeight;
+return new $wt.graphics.Rectangle(0,0,width,height);
+});
+$_M(c$,"getDeviceData",
+function(){
+var data=new $wt.graphics.DeviceData();
+return data;
+});
+$_M(c$,"getClientArea",
+function(){
+return this.getBounds();
+});
+$_M(c$,"getDepth",
+function(){
+return 32;
+});
+$_M(c$,"getDPI",
+function(){
+return new $wt.graphics.Point(96,96);
+});
+$_M(c$,"getFontList",
+function(faceName,scalable){
+return new Array(0);
+},"~S,~B");
+$_M(c$,"getSystemColor",
+function(id){
+var pixel=0x02000000;
+switch(id){
+case 1:
+pixel=0x02FFFFFF;
+break;
+case 2:
+pixel=0x02000000;
+break;
+case 3:
+pixel=0x020000FF;
+break;
+case 4:
+pixel=0x02000080;
+break;
+case 5:
+pixel=0x0200FF00;
+break;
+case 6:
+pixel=0x02008000;
+break;
+case 7:
+pixel=0x0200FFFF;
+break;
+case 8:
+pixel=0x02008080;
+break;
+case 9:
+pixel=0x02FF0000;
+break;
+case 10:
+pixel=0x02800000;
+break;
+case 11:
+pixel=0x02FF00FF;
+break;
+case 12:
+pixel=0x02800080;
+break;
+case 13:
+pixel=0x02FFFF00;
+break;
+case 14:
+pixel=0x02808000;
+break;
+case 15:
+pixel=0x02C0C0C0;
+break;
+case 16:
+pixel=0x02808080;
+break;
+}
+return new $wt.graphics.Color(this,pixel&0x000000FF,(pixel&0x0000FF00)>>8,(pixel&0x00FF00)>>16);
+},"~N");
+$_M(c$,"getSystemFont",
+function(){
+return new $wt.graphics.Font(this,"Tahoma,Arial",10,0);
+});
+$_M(c$,"getWarnings",
+function(){
+return false;
+});
+$_M(c$,"init",
+function(){
+});
+$_M(c$,"isDisposed",
+function(){
+return this.disposed;
+});
+$_M(c$,"release",
+function(){
+});
+$_M(c$,"setWarnings",
+function(warnings){
+},"~B");
+c$=$_C(function(){
+this.width=0;
+this.height=0;
+this.depth=0;
+this.scanlinePad=0;
+this.bytesPerLine=0;
+this.data=null;
+this.palette=null;
+this.transparentPixel=0;
+this.maskData=null;
+this.maskPad=0;
+this.alphaData=null;
+this.alpha=0;
+this.type=0;
+this.x=0;
+this.y=0;
+this.disposalMethod=0;
+this.url=null;
+this.delayTime=0;
+$_Z(this,arguments);
+},$wt.graphics,"ImageData",null,$wt.internal.CloneableCompatibility);
+$_K(c$,
+function(width,height,depth,palette){
+this.construct(width,height,depth,palette,4,null,0,null,null,-1,-1,-1,0,0,0,0);
+},"~N,~N,~N,$wt.graphics.PaletteData");
+$_K(c$,
+function(width,height,depth,palette,scanlinePad,data){
+},"~N,~N,~N,$wt.graphics.PaletteData,~N,~A");
+$_K(c$,
+function(stream){
+var url=null;
+if(stream!=null){
+url=stream.url;
+}this.url=url;
+},"java.io.InputStream");
+$_K(c$,
+function(filename){
+this.url=filename;
+},"~S");
 $_K(c$,
 function(){
 });
 $_K(c$,
-function(width,height){
+function(width,height,depth,palette,scanlinePad,data,maskPad,maskData,alphaData,alpha,transparentPixel,type,x,y,disposalMethod,delayTime){
+var bytesPerLine=Math.floor(((Math.floor((width*depth+7)/ 8)) + (scanlinePad - 1)) /scanlinePad)*scanlinePad;
+this.setAllFields(width,height,depth,scanlinePad,bytesPerLine,data!=null?data:$_A(bytesPerLine*height,0),palette,transparentPixel,maskData,maskPad,alphaData,alpha,type,x,y,disposalMethod,delayTime);
+},"~N,~N,~N,$wt.graphics.PaletteData,~N,~A,~N,~A,~A,~N,~N,~N,~N,~N,~N,~N");
+$_M(c$,"setAllFields",
+function(width,height,depth,scanlinePad,bytesPerLine,data,palette,transparentPixel,maskData,maskPad,alphaData,alpha,type,x,y,disposalMethod,delayTime){
 this.width=width;
 this.height=height;
-},"~N,~N");
-$_K(c$,
-function(point){
-this.construct(point.x,point.y);
-},"$wt.graphics.Point");
-$_M(c$,"getName",
-function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
-});
-$_V(c$,"toString",
-function(){
-var string=this.getName()+" {";
-if(this.width!=-1)string+="width="+this.width+" ";
-if(this.height!=-1)string+="height="+this.height+" ";
-if(this.exclude)string+="exclude="+this.exclude+" ";
-string=string.trim();
-string+="}";
-return string;
-});
-c$=$_C(function(){
-this.numerator=0;
-this.denominator=100;
-this.offset=0;
-this.control=null;
-this.alignment=0;
-$_Z(this,arguments);
-},$wt.layout,"FormAttachment");
-$_K(c$,
-function(){
-});
-$_K(c$,
-function(numerator){
-this.construct(numerator,100,0);
-},"~N");
-$_K(c$,
-function(numerator,offset){
-this.construct(numerator,100,offset);
-},"~N,~N");
-$_K(c$,
-function(numerator,denominator,offset){
-this.numerator=numerator;
-this.denominator=denominator;
-this.offset=offset;
-},"~N,~N,~N");
-$_K(c$,
-function(control){
-this.construct(control,0,-1);
-},"$wt.widgets.Control");
-$_K(c$,
-function(control,offset){
-this.construct(control,offset,-1);
-},"$wt.widgets.Control,~N");
-$_K(c$,
-function(control,offset,alignment){
-this.control=control;
-this.offset=offset;
-this.alignment=alignment;
-},"$wt.widgets.Control,~N,~N");
-$_M(c$,"divide",
-function(value){
-return new $wt.layout.FormAttachment(this.numerator,this.denominator*value,Math.floor(this.offset/value));
-},"~N");
-$_M(c$,"gcd",
-function(m,n){
-var temp;
-m=Math.abs(m);
-n=Math.abs(n);
-if(m<n){
-temp=m;
-m=n;
-n=temp;
-}while(n!=0){
-temp=m;
-m=n;
-n=temp%n;
-}
-return m;
-},"~N,~N");
-$_M(c$,"minus",
-function(attachment){
-var solution=new $wt.layout.FormAttachment();
-solution.numerator=this.numerator*attachment.denominator-this.denominator*attachment.numerator;
-solution.denominator=this.denominator*attachment.denominator;
-var gcd=this.gcd(solution.denominator,solution.numerator);
-solution.numerator=Math.floor(solution.numerator/gcd);
-solution.denominator=Math.floor(solution.denominator/gcd);
-solution.offset=this.offset-attachment.offset;
-return solution;
-},"$wt.layout.FormAttachment");
-$_M(c$,"minus",
-function(value){
-return new $wt.layout.FormAttachment(this.numerator,this.denominator,this.offset-value);
-},"~N");
-$_M(c$,"plus",
-function(attachment){
-var solution=new $wt.layout.FormAttachment();
-solution.numerator=this.numerator*attachment.denominator+this.denominator*attachment.numerator;
-solution.denominator=this.denominator*attachment.denominator;
-var gcd=this.gcd(solution.denominator,solution.numerator);
-solution.numerator=Math.floor(solution.numerator/gcd);
-solution.denominator=Math.floor(solution.denominator/gcd);
-solution.offset=this.offset+attachment.offset;
-return solution;
-},"$wt.layout.FormAttachment");
-$_M(c$,"plus",
-function(value){
-return new $wt.layout.FormAttachment(this.numerator,this.denominator,this.offset+value);
-},"~N");
-$_M(c$,"solveX",
-function(value){
-return(Math.floor((this.numerator*value)/this.denominator))+this.offset;
-},"~N");
-$_M(c$,"solveY",
-function(value){
-return Math.floor((value-this.offset)*this.denominator/this.numerator);
-},"~N");
-$_V(c$,"toString",
-function(){
-var string=this.control!=null?this.control.toString():this.numerator+"/"+this.denominator;
-return"{y = ("+string+(this.offset>=0?")x + "+this.offset:")x - "+(-this.offset))+"}";
-});
-c$=$_C(function(){
-this.type=256;
-this.marginWidth=0;
-this.marginHeight=0;
-this.spacing=0;
-$_Z(this,arguments);
-},$wt.layout,"FillLayout",$wt.widgets.Layout);
-$_K(c$,
-function(){
-$_R(this,$wt.layout.FillLayout,[]);
-});
-$_K(c$,
-function(type){
-$_R(this,$wt.layout.FillLayout,[]);
+this.depth=depth;
+this.scanlinePad=scanlinePad;
+this.bytesPerLine=bytesPerLine;
+this.data=data;
+this.palette=palette;
+this.transparentPixel=transparentPixel;
+this.maskData=maskData;
+this.maskPad=maskPad;
+this.alphaData=alphaData;
+this.alpha=alpha;
 this.type=type;
-},"~N");
-$_V(c$,"computeSize",
-function(composite,wHint,hHint,flushCache){
-var children=composite.getChildren();
-var count=children.length;
-var maxWidth=0;
-var maxHeight=0;
-for(var i=0;i<count;i++){
-var child=children[i];
-var w=wHint;
-var h=hHint;
-if(count>0){
-if(this.type==256&&wHint!=-1){
-w=Math.max(0,Math.floor((wHint-(count-1)*this.spacing)/count));
-}if(this.type==512&&hHint!=-1){
-h=Math.max(0,Math.floor((hHint-(count-1)*this.spacing)/count));
-}}var size=this.computeChildSize(child,w,h,flushCache);
-maxWidth=Math.max(maxWidth,size.x);
-maxHeight=Math.max(maxHeight,size.y);
-}
-var width=0;
-var height=0;
-if(this.type==256){
-width=count*maxWidth;
-if(count!=0)width+=(count-1)*this.spacing;
-height=maxHeight;
-}else{
-width=maxWidth;
-height=count*maxHeight;
-if(count!=0)height+=(count-1)*this.spacing;
-}width+=this.marginWidth*2;
-height+=this.marginHeight*2;
-if(wHint!=-1)width=wHint;
-if(hHint!=-1)height=hHint;
-return new $wt.graphics.Point(width,height);
-},"$wt.widgets.Composite,~N,~N,~B");
-$_M(c$,"computeChildSize",
-function(control,wHint,hHint,flushCache){
-var data=control.getLayoutData();
-if(data==null){
-data=new $wt.layout.FillData();
-control.setLayoutData(data);
-}var size=null;
-if(wHint==-1&&hHint==-1){
-size=data.computeSize(control,wHint,hHint,flushCache);
-}else{
-var trimX;
-var trimY;
-if($_O(control,$wt.widgets.Scrollable)){
-var rect=(control).computeTrim(0,0,0,0);
-trimX=rect.width;
-trimY=rect.height;
-}else{
-trimX=trimY=control.getBorderWidth()*2;
-}var w=wHint==-1?wHint:Math.max(0,wHint-trimX);
-var h=hHint==-1?hHint:Math.max(0,hHint-trimY);
-size=data.computeSize(control,w,h,flushCache);
-}return size;
-},"$wt.widgets.Control,~N,~N,~B");
-$_V(c$,"flushCache",
-function(control){
-var data=control.getLayoutData();
-if(data!=null)(data).flushCache();
-return true;
-},"$wt.widgets.Control");
-$_M(c$,"getName",
+this.x=x;
+this.y=y;
+this.disposalMethod=disposalMethod;
+this.delayTime=delayTime;
+},"~N,~N,~N,~N,~N,~A,$wt.graphics.PaletteData,~N,~A,~N,~A,~N,~N,~N,~N,~N,~N");
+c$.internal_new=$_M(c$,"internal_new",
+function(width,height,depth,palette,scanlinePad,data,maskPad,maskData,alphaData,alpha,transparentPixel,type,x,y,disposalMethod,delayTime){
+return new $wt.graphics.ImageData(width,height,depth,palette,scanlinePad,data,maskPad,maskData,alphaData,alpha,transparentPixel,type,x,y,disposalMethod,delayTime);
+},"~N,~N,~N,$wt.graphics.PaletteData,~N,~A,~N,~A,~A,~N,~N,~N,~N,~N,~N,~N");
+$_V(c$,"clone",
 function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
+var cloneData=$_A(this.data.length,0);
+System.arraycopy(this.data,0,cloneData,0,this.data.length);
+var cloneMaskData=null;
+if(this.maskData!=null){
+cloneMaskData=$_A(this.maskData.length,0);
+System.arraycopy(this.maskData,0,cloneMaskData,0,this.maskData.length);
+}var cloneAlphaData=null;
+if(this.alphaData!=null){
+cloneAlphaData=$_A(this.alphaData.length,0);
+System.arraycopy(this.alphaData,0,cloneAlphaData,0,this.alphaData.length);
+}return new $wt.graphics.ImageData(this.width,this.height,this.depth,this.palette,this.scanlinePad,cloneData,this.maskPad,cloneMaskData,cloneAlphaData,this.alpha,this.transparentPixel,this.type,this.x,this.y,this.disposalMethod,this.delayTime);
 });
-$_V(c$,"layout",
-function(composite,flushCache){
-var rect=composite.getClientArea();
-var children=composite.getChildren();
-var count=children.length;
-if(count==0)return;
-var width=rect.width-this.marginWidth*2;
-var height=rect.height-this.marginHeight*2;
-if(this.type==256){
-width-=(count-1)*this.spacing;
-var x=rect.x+this.marginWidth;
-var extra=width%count;
-var y=rect.y+this.marginHeight;
-var cellWidth=Math.floor(width/count);
-for(var i=0;i<count;i++){
-var child=children[i];
-var childWidth=cellWidth;
-if(i==0){
-childWidth+=Math.floor(extra/2);
+$_M(c$,"getAlpha",
+function(x,y){
+if(this.alphaData==null)return 255;
+return this.alphaData[y*this.width+x]&0xFF;
+},"~N,~N");
+$_M(c$,"getAlphas",
+function(x,y,getWidth,alphas,startIndex){
+if(getWidth==0)return;
+if(this.alphaData==null){
+var endIndex=startIndex+getWidth;
+for(var i=startIndex;i<endIndex;i++){
+alphas[i]=parseInt(255);
+}
+return;
+}System.arraycopy(this.alphaData,y*this.width+x,alphas,startIndex,getWidth);
+},"~N,~N,~N,~A,~N");
+$_M(c$,"getPixel",
+function(x,y){
+var index;
+var theByte;
+var mask;
+if(this.depth==1){
+index=(y*this.bytesPerLine)+(x>>3);
+theByte=this.data[index]&0xFF;
+mask=1<<(7-(x&0x7));
+if((theByte&mask)==0){
+return 0;
 }else{
-if(i==count-1)childWidth+=Math.floor((extra+1)/2);
-}child.setBounds(x,y,childWidth,height);
-x+=childWidth+this.spacing;
-}
+return 1;
+}}if(this.depth==2){
+index=(y*this.bytesPerLine)+(x>>2);
+theByte=this.data[index]&0xFF;
+var offset=3-(x%4);
+mask=3<<(offset*2);
+return(theByte&mask)>>(offset*2);
+}if(this.depth==4){
+index=(y*this.bytesPerLine)+(x>>1);
+theByte=this.data[index]&0xFF;
+if((x&0x1)==0){
+return theByte>>4;
 }else{
-height-=(count-1)*this.spacing;
-var x=rect.x+this.marginWidth;
-var cellHeight=Math.floor(height/count);
-var y=rect.y+this.marginHeight;
-var extra=height%count;
-for(var i=0;i<count;i++){
-var child=children[i];
-var childHeight=cellHeight;
-if(i==0){
-childHeight+=Math.floor(extra/2);
+return theByte&0x0F;
+}}if(this.depth==8){
+index=(y*this.bytesPerLine)+x;
+return this.data[index]&0xFF;
+}if(this.depth==16){
+index=(y*this.bytesPerLine)+(x*2);
+return((this.data[index+1]&0xFF)<<8)+(this.data[index]&0xFF);
+}if(this.depth==24){
+index=(y*this.bytesPerLine)+(x*3);
+return((this.data[index]&0xFF)<<16)+((this.data[index+1]&0xFF)<<8)+(this.data[index+2]&0xFF);
+}if(this.depth==32){
+index=(y*this.bytesPerLine)+(x*4);
+return((this.data[index]&0xFF)<<24)+((this.data[index+1]&0xFF)<<16)+((this.data[index+2]&0xFF)<<8)+(this.data[index+3]&0xFF);
+}$WT.error(38);
+return 0;
+},"~N,~N");
+$_M(c$,"getPixels",
+function(x,y,getWidth,pixels,startIndex){
+if(getWidth==0)return;
+var index;
+var theByte;
+var mask=0;
+var n=getWidth;
+var i=startIndex;
+var srcX=x;
+var srcY=y;
+if(this.depth==1){
+index=(y*this.bytesPerLine)+(x>>3);
+theByte=this.data[index]&0xFF;
+while(n>0){
+mask=1<<(7-(srcX&0x7));
+if((theByte&mask)==0){
+pixels[i]=0;
 }else{
-if(i==count-1)childHeight+=Math.floor((extra+1)/2);
-}child.setBounds(x,y,width,childHeight);
-y+=childHeight+this.spacing;
-}
-}},"$wt.widgets.Composite,~B");
-$_V(c$,"toString",
-function(){
-var string=this.getName()+" {";
-string+="type="+((this.type==512)?"SWT.VERTICAL":"SWT.HORIZONTAL")+" ";
-if(this.marginWidth!=0)string+="marginWidth="+this.marginWidth+" ";
-if(this.marginHeight!=0)string+="marginHeight="+this.marginHeight+" ";
-if(this.spacing!=0)string+="spacing="+this.spacing+" ";
-string=string.trim();
-string+="}";
-return string;
-});
-c$=$_C(function(){
-this.marginWidth=0;
-this.marginHeight=0;
-this.marginLeft=0;
-this.marginTop=0;
-this.marginRight=0;
-this.marginBottom=0;
-this.spacing=0;
-$_Z(this,arguments);
-},$wt.layout,"FormLayout",$wt.widgets.Layout);
-$_K(c$,
-function(){
-$_R(this,$wt.layout.FormLayout,[]);
-});
-$_M(c$,"computeHeight",
-function(control,data,flushCache){
-var top=data.getTopAttachment(control,this.spacing,flushCache);
-var bottom=data.getBottomAttachment(control,this.spacing,flushCache);
-var height=bottom.minus(top);
-if(height.numerator==0){
-if(bottom.numerator==0)return bottom.offset;
-if(bottom.numerator==bottom.denominator)return-top.offset;
-if(bottom.offset<=0){
-return Math.floor(-top.offset*top.denominator/bottom.numerator);
-}var divider=bottom.denominator-bottom.numerator;
-return Math.floor(bottom.denominator*bottom.offset/divider);
-}return height.solveY(data.getHeight(control,flushCache));
-},"$wt.widgets.Control,$wt.layout.FormData,~B");
-$_V(c$,"computeSize",
-function(composite,wHint,hHint,flushCache){
-var size=this.layout(composite,false,0,0,wHint,hHint,flushCache);
-if(wHint!=-1)size.x=wHint;
-if(hHint!=-1)size.y=hHint;
-return size;
-},"$wt.widgets.Composite,~N,~N,~B");
-$_V(c$,"flushCache",
-function(control){
-var data=control.getLayoutData();
-if(data!=null)(data).flushCache();
-return true;
-},"$wt.widgets.Control");
-$_M(c$,"getName",
-function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
-});
-$_M(c$,"computeWidth",
-function(control,data,flushCache){
-var left=data.getLeftAttachment(control,this.spacing,flushCache);
-var right=data.getRightAttachment(control,this.spacing,flushCache);
-var width=right.minus(left);
-if(width.numerator==0){
-if(right.numerator==0)return right.offset;
-if(right.numerator==right.denominator)return-left.offset;
-if(right.offset<=0){
-return Math.floor(-left.offset*left.denominator/left.numerator);
-}var divider=right.denominator-right.numerator;
-return Math.floor(right.denominator*right.offset/divider);
-}return width.solveY(data.getWidth(control,flushCache));
-},"$wt.widgets.Control,$wt.layout.FormData,~B");
-$_M(c$,"layout",
-function(composite,flushCache){
-var rect=composite.getClientArea();
-var x=rect.x+this.marginLeft+this.marginWidth;
-var y=rect.y+this.marginTop+this.marginHeight;
-var width=Math.max(0,rect.width-this.marginLeft-2*this.marginWidth-this.marginRight);
-var height=Math.max(0,rect.height-this.marginLeft-2*this.marginHeight-this.marginBottom);
-this.layout(composite,true,x,y,width,height,flushCache);
-},"$wt.widgets.Composite,~B");
-$_M(c$,"layout",
-function(composite,move,x,y,width,height,flushCache){
-var children=composite.getChildren();
-for(var i=0;i<children.length;i++){
-var child=children[i];
-var data=child.getLayoutData();
-if(data==null)child.setLayoutData(data=new $wt.layout.FormData());
-if(flushCache)data.flushCache();
-data.cacheLeft=data.cacheRight=data.cacheTop=data.cacheBottom=null;
-}
-var flush=null;
-var bounds=null;
-var w=0;
-var h=0;
-for(var i=0;i<children.length;i++){
-var child=children[i];
-var data=child.getLayoutData();
-if(width!=-1){
-data.needed=false;
-var left=data.getLeftAttachment(child,this.spacing,flushCache);
-var right=data.getRightAttachment(child,this.spacing,flushCache);
-var x1=left.solveX(width);
-var x2=right.solveX(width);
-if(data.height==-1&&!data.needed){
-var trim=0;
-if($_O(child,$wt.widgets.Scrollable)){
-var rect=(child).computeTrim(0,0,0,0);
-trim=rect.width;
+pixels[i]=1;
+}i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+if(n>0)theByte=this.data[index]&0xFF;
+srcX=0;
 }else{
-trim=child.getBorderWidth()*2;
-}data.cacheWidth=data.cacheHeight=-1;
-var currentWidth=Math.max(0,x2-x1-trim);
-data.computeSize(child,currentWidth,data.height,flushCache);
-if(flush==null)flush=$_A(children.length,false);
-flush[i]=true;
-}w=Math.max(x2,w);
-if(move){
-if(bounds==null)bounds=new Array(children.length);
-bounds[i]=new $wt.graphics.Rectangle(0,0,0,0);
-bounds[i].x=x+x1;
-bounds[i].width=x2-x1;
-}}else{
-w=Math.max(this.computeWidth(child,data,flushCache),w);
-}}
-for(var i=0;i<children.length;i++){
-var child=children[i];
-var data=child.getLayoutData();
-if(height!=-1){
-var y1=data.getTopAttachment(child,this.spacing,flushCache).solveX(height);
-var y2=data.getBottomAttachment(child,this.spacing,flushCache).solveX(height);
-h=Math.max(y2,h);
-if(move){
-bounds[i].y=y+y1;
-bounds[i].height=y2-y1;
-}}else{
-h=Math.max(this.computeHeight(child,data,flushCache),h);
-}}
-for(var i=0;i<children.length;i++){
-var child=children[i];
-var data=child.getLayoutData();
-if(flush!=null&&flush[i])data.cacheWidth=data.cacheHeight=-1;
-data.cacheLeft=data.cacheRight=data.cacheTop=data.cacheBottom=null;
-}
-if(move){
-for(var i=0;i<children.length;i++){
-children[i].setBounds(bounds[i]);
-}
-}w+=this.marginLeft+this.marginWidth*2+this.marginRight;
-h+=this.marginTop+this.marginHeight*2+this.marginBottom;
-return new $wt.graphics.Point(w,h);
-},"$wt.widgets.Composite,~B,~N,~N,~N,~N,~B");
-$_V(c$,"toString",
-function(){
-var string=this.getName()+" {";
-if(this.marginWidth!=0)string+="marginWidth="+this.marginWidth+" ";
-if(this.marginHeight!=0)string+="marginHeight="+this.marginHeight+" ";
-if(this.marginLeft!=0)string+="marginLeft="+this.marginLeft+" ";
-if(this.marginRight!=0)string+="marginRight="+this.marginRight+" ";
-if(this.marginTop!=0)string+="marginTop="+this.marginTop+" ";
-if(this.marginBottom!=0)string+="marginBottom="+this.marginBottom+" ";
-if(this.spacing!=0)string+="spacing="+this.spacing+" ";
-string=string.trim();
-string+="}";
-return string;
-});
-c$=$_C(function(){
-this.numColumns=1;
-this.makeColumnsEqualWidth=false;
-this.marginWidth=5;
-this.marginHeight=5;
-this.marginLeft=0;
-this.marginTop=0;
-this.marginRight=0;
-this.marginBottom=0;
-this.horizontalSpacing=5;
-this.verticalSpacing=5;
-$_Z(this,arguments);
-},$wt.layout,"GridLayout",$wt.widgets.Layout);
-$_K(c$,
-function(){
-$_R(this,$wt.layout.GridLayout,[]);
-});
-$_K(c$,
-function(numColumns,makeColumnsEqualWidth){
-$_R(this,$wt.layout.GridLayout,[]);
-this.numColumns=numColumns;
-this.makeColumnsEqualWidth=makeColumnsEqualWidth;
-},"~N,~B");
-$_V(c$,"computeSize",
-function(composite,wHint,hHint,flushCache){
-var size=this.layout(composite,false,0,0,wHint,hHint,flushCache);
-if(wHint!=-1)size.x=wHint;
-if(hHint!=-1)size.y=hHint;
-return size;
-},"$wt.widgets.Composite,~N,~N,~B");
-$_V(c$,"flushCache",
-function(control){
-var data=control.getLayoutData();
-if(data!=null)(data).flushCache();
-return true;
-},"$wt.widgets.Control");
-$_M(c$,"getData",
-function(grid,row,column,rowCount,columnCount,first){
-var control=grid[row][column];
-if(control!=null){
-var data=control.getLayoutData();
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-var vSpan=Math.max(1,data.verticalSpan);
-var i=first?row+vSpan-1:row-vSpan+1;
-var j=first?column+hSpan-1:column-hSpan+1;
-if(0<=i&&i<rowCount){
-if(0<=j&&j<columnCount){
-if(control==grid[i][j])return data;
-}}}return null;
-},"~A,~N,~N,~N,~N,~B");
-$_M(c$,"layout",
-function(composite,flushCache){
-var rect=composite.getClientArea();
-this.layout(composite,true,rect.x,rect.y,rect.width,rect.height,flushCache);
-},"$wt.widgets.Composite,~B");
-$_M(c$,"layout",
-function(composite,move,x,y,width,height,flushCache){
-if(this.numColumns<1){
-return new $wt.graphics.Point(this.marginLeft+this.marginWidth*2+this.marginRight,this.marginTop+this.marginHeight*2+this.marginBottom);
-}var count=0;
-var children=composite.getChildren();
-for(var i=0;i<children.length;i++){
-var control=children[i];
-var data=control.getLayoutData();
-if(data==null||!data.exclude){
-children[count++]=children[i];
-}}
-for(var i=0;i<count;i++){
-var child=children[i];
-var data=child.getLayoutData();
-if(data==null)child.setLayoutData(data=new $wt.layout.GridData());
-if(flushCache)data.flushCache();
-data.computeSize(child,data.widthHint,data.heightHint,flushCache);
-if(data.grabExcessHorizontalSpace&&data.minimumWidth>0){
-if(data.cacheWidth<data.minimumWidth){
-var trim=0;
-if($_O(child,$wt.widgets.Scrollable)){
-var rect=(child).computeTrim(0,0,0,0);
-trim=rect.width;
-}else{
-trim=child.getBorderWidth()*2;
-}data.cacheWidth=data.cacheHeight=-1;
-data.computeSize(child,Math.max(0,data.minimumWidth-trim),data.heightHint,false);
-}}if(data.grabExcessVerticalSpace&&data.minimumHeight>0){
-data.cacheHeight=Math.max(data.cacheHeight,data.minimumHeight);
-}}
-var row=0;
-var column=0;
-var rowCount=0;
-var columnCount=this.numColumns;
-var grid=$_A(4,columnCount,null);
-for(var i=0;i<count;i++){
-var child=children[i];
-var data=child.getLayoutData();
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-var vSpan=Math.max(1,data.verticalSpan);
-while(true){
-var lastRow=row+vSpan;
-if(lastRow>=grid.length){
-var newGrid=$_A(lastRow+4,columnCount,null);
-System.arraycopy(grid,0,newGrid,0,grid.length);
-grid=newGrid;
-}if(grid[row]==null){
-grid[row]=new Array(columnCount);
-}while(column<columnCount&&grid[row][column]!=null){
-column++;
-}
-var endCount=column+hSpan;
-if(endCount<=columnCount){
-var index=column;
-while(index<endCount&&grid[row][index]==null){
+if(mask==1){
 index++;
-}
-if(index==endCount)break;
-column=index;
-}if(column+hSpan>=columnCount){
-column=0;
-row++;
-}}
-for(var j=0;j<vSpan;j++){
-if(grid[row+j]==null){
-grid[row+j]=new Array(columnCount);
-}for(var k=0;k<hSpan;k++){
-grid[row+j][column+k]=child;
-}
-}
-rowCount=Math.max(rowCount,row+vSpan);
-column+=hSpan;
-}
-var availableWidth=width-this.horizontalSpacing*(columnCount-1)-(this.marginLeft+this.marginWidth*2+this.marginRight);
-var expandCount=0;
-var widths=$_A(columnCount,0);
-var minWidths=$_A(columnCount,0);
-var expandColumn=$_A(columnCount,false);
-for(var j=0;j<columnCount;j++){
-for(var i=0;i<rowCount;i++){
-var data=this.getData(grid,i,j,rowCount,columnCount,true);
-if(data!=null){
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-if(hSpan==1){
-var w=data.cacheWidth+data.horizontalIndent;
-widths[j]=Math.max(widths[j],w);
-if(data.grabExcessHorizontalSpace){
-if(!expandColumn[j])expandCount++;
-expandColumn[j]=true;
-}if(!data.grabExcessHorizontalSpace||data.minimumWidth!=0){
-w=!data.grabExcessHorizontalSpace||data.minimumWidth==-1?data.cacheWidth:data.minimumWidth;
-w+=data.horizontalIndent;
-minWidths[j]=Math.max(minWidths[j],w);
-}}}}
-for(var i=0;i<rowCount;i++){
-var data=this.getData(grid,i,j,rowCount,columnCount,false);
-if(data!=null){
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-if(hSpan>1){
-var spanWidth=0;
-var spanMinWidth=0;
-var spanExpandCount=0;
-for(var k=0;k<hSpan;k++){
-spanWidth+=widths[j-k];
-spanMinWidth+=minWidths[j-k];
-if(expandColumn[j-k])spanExpandCount++;
-}
-if(data.grabExcessHorizontalSpace&&spanExpandCount==0){
-expandCount++;
-expandColumn[j]=true;
-}var w=data.cacheWidth+data.horizontalIndent-spanWidth-(hSpan-1)*this.horizontalSpacing;
-if(w>0){
-if(spanExpandCount==0){
-widths[j]+=w;
-}else{
-var delta=Math.floor(w/spanExpandCount);
-var remainder=w%spanExpandCount;
-var last=-1;
-for(var k=0;k<hSpan;k++){
-if(expandColumn[j-k]){
-widths[last=j-k]+=delta;
-}}
-if(last>-1)widths[last]+=remainder;
-}}if(!data.grabExcessHorizontalSpace||data.minimumWidth!=0){
-w=!data.grabExcessHorizontalSpace||data.minimumWidth==-1?data.cacheWidth:data.minimumWidth;
-w+=data.horizontalIndent-spanMinWidth-(hSpan-1)*this.horizontalSpacing;
-if(w>0){
-if(spanExpandCount==0){
-minWidths[j]+=w;
-}else{
-var delta=Math.floor(w/spanExpandCount);
-var remainder=w%spanExpandCount;
-var last=-1;
-for(var k=0;k<hSpan;k++){
-if(expandColumn[j-k]){
-minWidths[last=j-k]+=delta;
-}}
-if(last>-1)minWidths[last]+=remainder;
-}}}}}}
-}
-if(this.makeColumnsEqualWidth){
-var minColumnWidth=0;
-var columnWidth=0;
-for(var i=0;i<columnCount;i++){
-minColumnWidth=Math.max(minColumnWidth,minWidths[i]);
-columnWidth=Math.max(columnWidth,widths[i]);
-}
-columnWidth=width==-1||expandCount==0?columnWidth:Math.max(minColumnWidth,Math.floor(availableWidth/columnCount));
-for(var i=0;i<columnCount;i++){
-expandColumn[i]=expandCount>0;
-widths[i]=columnWidth;
-}
-}else{
-if(width!=-1&&expandCount>0){
-var totalWidth=0;
-for(var i=0;i<columnCount;i++){
-totalWidth+=widths[i];
-}
-var c=expandCount;
-var delta=Math.floor((availableWidth-totalWidth)/c);
-var remainder=(availableWidth-totalWidth)%c;
-var last=-1;
-while(totalWidth!=availableWidth){
-for(var j=0;j<columnCount;j++){
-if(expandColumn[j]){
-if(widths[j]+delta>minWidths[j]){
-widths[last=j]=widths[j]+delta;
-}else{
-widths[j]=minWidths[j];
-expandColumn[j]=false;
-c--;
+if(n>0)theByte=this.data[index]&0xFF;
 }}}
-if(last>-1)widths[last]+=remainder;
-for(var j=0;j<columnCount;j++){
-for(var i=0;i<rowCount;i++){
-var data=this.getData(grid,i,j,rowCount,columnCount,false);
-if(data!=null){
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-if(hSpan>1){
-if(!data.grabExcessHorizontalSpace||data.minimumWidth!=0){
-var spanWidth=0;
-var spanExpandCount=0;
-for(var k=0;k<hSpan;k++){
-spanWidth+=widths[j-k];
-if(expandColumn[j-k])spanExpandCount++;
-}
-var w=!data.grabExcessHorizontalSpace||data.minimumWidth==-1?data.cacheWidth:data.minimumWidth;
-w+=data.horizontalIndent-spanWidth-(hSpan-1)*this.horizontalSpacing;
-if(w>0){
-if(spanExpandCount==0){
-widths[j]+=w;
+return;
+}if(this.depth==2){
+index=(y*this.bytesPerLine)+(x>>2);
+theByte=this.data[index]&0xFF;
+var offset;
+while(n>0){
+offset=3-(srcX%4);
+mask=3<<(offset*2);
+pixels[i]=parseInt(((theByte&mask)>>(offset*2)));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+if(n>0)theByte=this.data[index]&0xFF;
+srcX=0;
 }else{
-var delta2=Math.floor(w/spanExpandCount);
-var remainder2=w%spanExpandCount;
-var last2=-1;
-for(var k=0;k<hSpan;k++){
-if(expandColumn[j-k]){
-widths[last2=j-k]+=delta2;
-}}
-if(last2>-1)widths[last2]+=remainder2;
-}}}}}}
-}
-if(c==0)break;
-totalWidth=0;
-for(var i=0;i<columnCount;i++){
-totalWidth+=widths[i];
-}
-delta=Math.floor((availableWidth-totalWidth)/c);
-remainder=(availableWidth-totalWidth)%c;
-last=-1;
-}
-}}var flush=null;
-var flushLength=0;
-if(width!=-1){
-for(var j=0;j<columnCount;j++){
-for(var i=0;i<rowCount;i++){
-var data=this.getData(grid,i,j,rowCount,columnCount,false);
-if(data!=null){
-if(data.heightHint==-1){
-var child=grid[i][j];
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-var currentWidth=0;
-for(var k=0;k<hSpan;k++){
-currentWidth+=widths[j-k];
-}
-currentWidth+=(hSpan-1)*this.horizontalSpacing-data.horizontalIndent;
-if((currentWidth!=data.cacheWidth&&data.horizontalAlignment==4)||(data.cacheWidth>currentWidth)){
-var trim=0;
-if($_O(child,$wt.widgets.Scrollable)){
-var rect=(child).computeTrim(0,0,0,0);
-trim=rect.width;
-}else{
-trim=child.getBorderWidth()*2;
-}data.cacheWidth=data.cacheHeight=-1;
-data.computeSize(child,Math.max(0,currentWidth-trim),data.heightHint,false);
-if(data.grabExcessVerticalSpace&&data.minimumHeight>0){
-data.cacheHeight=Math.max(data.cacheHeight,data.minimumHeight);
-}if(flush==null)flush=new Array(count);
-flush[flushLength++]=data;
-}}}}
-}
-}var availableHeight=height-this.verticalSpacing*(rowCount-1)-(this.marginTop+this.marginHeight*2+this.marginBottom);
-expandCount=0;
-var heights=$_A(rowCount,0);
-var minHeights=$_A(rowCount,0);
-var expandRow=$_A(rowCount,false);
-for(var i=0;i<rowCount;i++){
-for(var j=0;j<columnCount;j++){
-var data=this.getData(grid,i,j,rowCount,columnCount,true);
-if(data!=null){
-var vSpan=Math.max(1,Math.min(data.verticalSpan,rowCount));
-if(vSpan==1){
-var h=data.cacheHeight+data.verticalIndent;
-heights[i]=Math.max(heights[i],h);
-if(data.grabExcessVerticalSpace){
-if(!expandRow[i])expandCount++;
-expandRow[i]=true;
-}if(!data.grabExcessVerticalSpace||data.minimumHeight!=0){
-h=!data.grabExcessVerticalSpace||data.minimumHeight==-1?data.cacheHeight:data.minimumHeight;
-h+=data.verticalIndent;
-minHeights[i]=Math.max(minHeights[i],h);
-}}}}
-for(var j=0;j<columnCount;j++){
-var data=this.getData(grid,i,j,rowCount,columnCount,false);
-if(data!=null){
-var vSpan=Math.max(1,Math.min(data.verticalSpan,rowCount));
-if(vSpan>1){
-var spanHeight=0;
-var spanMinHeight=0;
-var spanExpandCount=0;
-for(var k=0;k<vSpan;k++){
-spanHeight+=heights[i-k];
-spanMinHeight+=minHeights[i-k];
-if(expandRow[i-k])spanExpandCount++;
-}
-if(data.grabExcessVerticalSpace&&spanExpandCount==0){
-expandCount++;
-expandRow[i]=true;
-}var h=data.cacheHeight+data.verticalIndent-spanHeight-(vSpan-1)*this.verticalSpacing;
-if(h>0){
-if(spanExpandCount==0){
-heights[i]+=h;
-}else{
-var delta=Math.floor(h/spanExpandCount);
-var remainder=h%spanExpandCount;
-var last=-1;
-for(var k=0;k<vSpan;k++){
-if(expandRow[i-k]){
-heights[last=i-k]+=delta;
-}}
-if(last>-1)heights[last]+=remainder;
-}}if(!data.grabExcessVerticalSpace||data.minimumHeight!=0){
-h=!data.grabExcessVerticalSpace||data.minimumHeight==-1?data.cacheHeight:data.minimumHeight;
-h+=data.verticalIndent-spanMinHeight-(vSpan-1)*this.verticalSpacing;
-if(h>0){
-if(spanExpandCount==0){
-minHeights[i]+=h;
-}else{
-var delta=Math.floor(h/spanExpandCount);
-var remainder=h%spanExpandCount;
-var last=-1;
-for(var k=0;k<vSpan;k++){
-if(expandRow[i-k]){
-minHeights[last=i-k]+=delta;
-}}
-if(last>-1)minHeights[last]+=remainder;
-}}}}}}
-}
-if(height!=-1&&expandCount>0){
-var totalHeight=0;
-for(var i=0;i<rowCount;i++){
-totalHeight+=heights[i];
-}
-var c=expandCount;
-var delta=Math.floor((availableHeight-totalHeight)/c);
-var remainder=(availableHeight-totalHeight)%c;
-var last=-1;
-while(totalHeight!=availableHeight){
-for(var i=0;i<rowCount;i++){
-if(expandRow[i]){
-if(heights[i]+delta>minHeights[i]){
-heights[last=i]=heights[i]+delta;
-}else{
-heights[i]=minHeights[i];
-expandRow[i]=false;
-c--;
+if(offset==0){
+index++;
+theByte=this.data[index]&0xFF;
 }}}
-if(last>-1)heights[last]+=remainder;
-for(var i=0;i<rowCount;i++){
-for(var j=0;j<columnCount;j++){
-var data=this.getData(grid,i,j,rowCount,columnCount,false);
-if(data!=null){
-var vSpan=Math.max(1,Math.min(data.verticalSpan,rowCount));
-if(vSpan>1){
-if(!data.grabExcessVerticalSpace||data.minimumHeight!=0){
-var spanHeight=0;
-var spanExpandCount=0;
-for(var k=0;k<vSpan;k++){
-spanHeight+=heights[i-k];
-if(expandRow[i-k])spanExpandCount++;
-}
-var h=!data.grabExcessVerticalSpace||data.minimumHeight==-1?data.cacheHeight:data.minimumHeight;
-h+=data.verticalIndent-spanHeight-(vSpan-1)*this.verticalSpacing;
-if(h>0){
-if(spanExpandCount==0){
-heights[i]+=h;
+return;
+}if(this.depth==4){
+index=(y*this.bytesPerLine)+(x>>1);
+if((x&0x1)==1){
+theByte=this.data[index]&0xFF;
+pixels[i]=parseInt((theByte&0x0F));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
 }else{
-var delta2=Math.floor(h/spanExpandCount);
-var remainder2=h%spanExpandCount;
-var last2=-1;
-for(var k=0;k<vSpan;k++){
-if(expandRow[i-k]){
-heights[last2=i-k]+=delta2;
+index++;
+}}while(n>1){
+theByte=this.data[index]&0xFF;
+pixels[i]=parseInt((theByte>>4));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+pixels[i]=parseInt((theByte&0x0F));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
+}}}
+if(n>0){
+theByte=this.data[index]&0xFF;
+pixels[i]=parseInt((theByte>>4));
+}return;
+}if(this.depth==8){
+index=(y*this.bytesPerLine)+x;
+for(var j=0;j<getWidth;j++){
+pixels[i]=this.data[index];
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
 }}
-if(last2>-1)heights[last2]+=remainder2;
-}}}}}}
-}
-if(c==0)break;
-totalHeight=0;
-for(var i=0;i<rowCount;i++){
-totalHeight+=heights[i];
-}
-delta=Math.floor((availableHeight-totalHeight)/c);
-remainder=(availableHeight-totalHeight)%c;
-last=-1;
-}
-}if(move){
-var gridY=y+this.marginTop+this.marginHeight;
-for(var i=0;i<rowCount;i++){
-var gridX=x+this.marginLeft+this.marginWidth;
-for(var j=0;j<columnCount;j++){
-var data=this.getData(grid,i,j,rowCount,columnCount,true);
-if(data!=null){
-var hSpan=Math.max(1,Math.min(data.horizontalSpan,columnCount));
-var vSpan=Math.max(1,data.verticalSpan);
-var cellWidth=0;
-var cellHeight=0;
-for(var k=0;k<hSpan;k++){
-cellWidth+=widths[j+k];
-}
-for(var k=0;k<vSpan;k++){
-cellHeight+=heights[i+k];
-}
-cellWidth+=this.horizontalSpacing*(hSpan-1);
-var childX=gridX+data.horizontalIndent;
-var childWidth=Math.min(data.cacheWidth,cellWidth);
-switch(data.horizontalAlignment){
-case 16777216:
-case 2:
-childX+=Math.max(0,Math.floor((cellWidth-data.horizontalIndent-childWidth)/2));
-break;
-case 131072:
-case 16777224:
-case 3:
-childX+=Math.max(0,cellWidth-data.horizontalIndent-childWidth);
-break;
-case 4:
-childWidth=cellWidth-data.horizontalIndent;
-break;
-}
-cellHeight+=this.verticalSpacing*(vSpan-1);
-var childY=gridY+data.verticalIndent;
-var childHeight=Math.min(data.cacheHeight,cellHeight);
-switch(data.verticalAlignment){
-case 16777216:
-case 2:
-childY+=Math.max(0,Math.floor((cellHeight-data.verticalIndent-childHeight)/2));
-break;
-case 1024:
-case 16777224:
-case 3:
-childY+=Math.max(0,cellHeight-data.verticalIndent-childHeight);
-break;
-case 4:
-childHeight=cellHeight-data.verticalIndent;
-break;
-}
-var child=grid[i][j];
-if(child!=null){
-child.setBounds(childX,childY,childWidth,childHeight);
-}}gridX+=widths[j]+this.horizontalSpacing;
-}
-gridY+=heights[i]+this.verticalSpacing;
-}
-}for(var i=0;i<flushLength;i++){
-flush[i].cacheWidth=flush[i].cacheHeight=-1;
-}
-var totalDefaultWidth=0;
-var totalDefaultHeight=0;
-for(var i=0;i<columnCount;i++){
-totalDefaultWidth+=widths[i];
-}
-for(var i=0;i<rowCount;i++){
-totalDefaultHeight+=heights[i];
-}
-totalDefaultWidth+=this.horizontalSpacing*(columnCount-1)+this.marginLeft+this.marginWidth*2+this.marginRight;
-totalDefaultHeight+=this.verticalSpacing*(rowCount-1)+this.marginTop+this.marginHeight*2+this.marginBottom;
-return new $wt.graphics.Point(totalDefaultWidth,totalDefaultHeight);
-},"$wt.widgets.Composite,~B,~N,~N,~N,~N,~B");
-$_M(c$,"getName",
+return;
+}$WT.error(38);
+},"~N,~N,~N,~A,~N");
+$_M(c$,"getPixels",
+function(x,y,getWidth,pixels,startIndex){
+if(getWidth==0)return;
+var index;
+var theByte;
+var mask;
+var n=getWidth;
+var i=startIndex;
+var srcX=x;
+var srcY=y;
+if(this.depth==1){
+index=(y*this.bytesPerLine)+(x>>3);
+theByte=this.data[index]&0xFF;
+while(n>0){
+mask=1<<(7-(srcX&0x7));
+if((theByte&mask)==0){
+pixels[i]=0;
+}else{
+pixels[i]=1;
+}i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+if(n>0)theByte=this.data[index]&0xFF;
+srcX=0;
+}else{
+if(mask==1){
+index++;
+if(n>0)theByte=this.data[index]&0xFF;
+}}}
+return;
+}if(this.depth==2){
+index=(y*this.bytesPerLine)+(x>>2);
+theByte=this.data[index]&0xFF;
+var offset;
+while(n>0){
+offset=3-(srcX%4);
+mask=3<<(offset*2);
+pixels[i]=parseInt(((theByte&mask)>>(offset*2)));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+if(n>0)theByte=this.data[index]&0xFF;
+srcX=0;
+}else{
+if(offset==0){
+index++;
+theByte=this.data[index]&0xFF;
+}}}
+return;
+}if(this.depth==4){
+index=(y*this.bytesPerLine)+(x>>1);
+if((x&0x1)==1){
+theByte=this.data[index]&0xFF;
+pixels[i]=theByte&0x0F;
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
+}}while(n>1){
+theByte=this.data[index]&0xFF;
+pixels[i]=theByte>>4;
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+pixels[i]=theByte&0x0F;
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
+}}}
+if(n>0){
+theByte=this.data[index]&0xFF;
+pixels[i]=theByte>>4;
+}return;
+}if(this.depth==8){
+index=(y*this.bytesPerLine)+x;
+for(var j=0;j<getWidth;j++){
+pixels[i]=this.data[index]&0xFF;
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
+}}
+return;
+}if(this.depth==16){
+index=(y*this.bytesPerLine)+(x*2);
+for(var j=0;j<getWidth;j++){
+pixels[i]=((this.data[index+1]&0xFF)<<8)+(this.data[index]&0xFF);
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index+=2;
+}}
+return;
+}if(this.depth==24){
+index=(y*this.bytesPerLine)+(x*3);
+for(var j=0;j<getWidth;j++){
+pixels[i]=((this.data[index]&0xFF)<<16)|((this.data[index+1]&0xFF)<<8)|(this.data[index+2]&0xFF);
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index+=3;
+}}
+return;
+}if(this.depth==32){
+index=(y*this.bytesPerLine)+(x*4);
+i=startIndex;
+for(var j=0;j<getWidth;j++){
+pixels[i]=((this.data[index]&0xFF)<<24)|((this.data[index+1]&0xFF)<<16)|((this.data[index+2]&0xFF)<<8)|(this.data[index+3]&0xFF);
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index+=4;
+}}
+return;
+}$WT.error(38);
+},"~N,~N,~N,~A,~N");
+$_M(c$,"getRGBs",
 function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
+return this.palette.getRGBs();
+});
+$_M(c$,"getTransparencyMask",
+function(){
+return new $wt.graphics.ImageData(this.url);
+});
+$_M(c$,"getTransparencyType",
+function(){
+if(this.maskData!=null)return 2;
+if(this.transparentPixel!=-1)return 4;
+if(this.alphaData!=null)return 1;
+return 0;
+});
+$_M(c$,"scaledTo",
+function(width,height){
+return null;
+},"~N,~N");
+$_M(c$,"setAlpha",
+function(x,y,alpha){
+if(this.alphaData==null)this.alphaData=$_A(this.width*this.height,0);
+this.alphaData[y*this.width+x]=parseInt(alpha);
+},"~N,~N,~N");
+$_M(c$,"setAlphas",
+function(x,y,putWidth,alphas,startIndex){
+if(putWidth==0)return;
+if(this.alphaData==null)this.alphaData=$_A(this.width*this.height,0);
+System.arraycopy(alphas,startIndex,this.alphaData,y*this.width+x,putWidth);
+},"~N,~N,~N,~A,~N");
+$_M(c$,"setPixel",
+function(x,y,pixelValue){
+var index;
+var theByte;
+var mask;
+if(this.depth==1){
+index=(y*this.bytesPerLine)+(x>>3);
+theByte=this.data[index];
+mask=1<<(7-(x&0x7));
+if((pixelValue&0x1)==1){
+this.data[index]=parseInt((theByte|mask));
+}else{
+this.data[index]=parseInt((theByte&(mask^-1)));
+}return;
+}if(this.depth==2){
+index=(y*this.bytesPerLine)+(x>>2);
+theByte=this.data[index];
+var offset=3-(x%4);
+mask=0xFF^(3<<(offset*2));
+this.data[index]=parseInt(((this.data[index]&mask)|(pixelValue<<(offset*2))));
+return;
+}if(this.depth==4){
+index=(y*this.bytesPerLine)+(x>>1);
+if((x&0x1)==0){
+this.data[index]=parseInt(((this.data[index]&0x0F)|((pixelValue&0x0F)<<4)));
+}else{
+this.data[index]=parseInt(((this.data[index]&0xF0)|(pixelValue&0x0F)));
+}return;
+}if(this.depth==8){
+index=(y*this.bytesPerLine)+x;
+this.data[index]=parseInt((pixelValue&0xFF));
+return;
+}if(this.depth==16){
+index=(y*this.bytesPerLine)+(x*2);
+this.data[index+1]=parseInt(((pixelValue>>8)&0xFF));
+this.data[index]=parseInt((pixelValue&0xFF));
+return;
+}if(this.depth==24){
+index=(y*this.bytesPerLine)+(x*3);
+this.data[index]=parseInt(((pixelValue>>16)&0xFF));
+this.data[index+1]=parseInt(((pixelValue>>8)&0xFF));
+this.data[index+2]=parseInt((pixelValue&0xFF));
+return;
+}if(this.depth==32){
+index=(y*this.bytesPerLine)+(x*4);
+this.data[index]=parseInt(((pixelValue>>24)&0xFF));
+this.data[index+1]=parseInt(((pixelValue>>16)&0xFF));
+this.data[index+2]=parseInt(((pixelValue>>8)&0xFF));
+this.data[index+3]=parseInt((pixelValue&0xFF));
+return;
+}$WT.error(38);
+},"~N,~N,~N");
+$_M(c$,"setPixels",
+function(x,y,putWidth,pixels,startIndex){
+if(putWidth==0)return;
+var index;
+var theByte;
+var mask;
+var n=putWidth;
+var i=startIndex;
+var srcX=x;
+var srcY=y;
+if(this.depth==1){
+index=(y*this.bytesPerLine)+(x>>3);
+while(n>0){
+mask=1<<(7-(srcX&0x7));
+if((pixels[i]&0x1)==1){
+this.data[index]=parseInt(((this.data[index]&0xFF)|mask));
+}else{
+this.data[index]=parseInt(((this.data[index]&0xFF)&(mask^-1)));
+}i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+if(mask==1){
+index++;
+}}}
+return;
+}if(this.depth==2){
+var masks=[parseInt(0xFC),parseInt(0xF3),parseInt(0xCF),parseInt(0x3F)];
+index=(y*this.bytesPerLine)+(x>>2);
+var offset=3-(x%4);
+while(n>0){
+theByte=pixels[i]&0x3;
+this.data[index]=parseInt(((this.data[index]&masks[offset])|(theByte<<(offset*2))));
+i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+offset=0;
+srcX=0;
+}else{
+if(offset==0){
+index++;
+offset=3;
+}else{
+offset--;
+}}}
+return;
+}if(this.depth==4){
+index=(y*this.bytesPerLine)+(x>>1);
+var high=(x&0x1)==0;
+while(n>0){
+theByte=pixels[i]&0x0F;
+if(high){
+this.data[index]=parseInt(((this.data[index]&0x0F)|(theByte<<4)));
+}else{
+this.data[index]=parseInt(((this.data[index]&0xF0)|theByte));
+}i++;
+n--;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+high=true;
+srcX=0;
+}else{
+if(!high)index++;
+high=!high;
+}}
+return;
+}if(this.depth==8){
+index=(y*this.bytesPerLine)+x;
+for(var j=0;j<putWidth;j++){
+this.data[index]=parseInt((pixels[i]&0xFF));
+i++;
+srcX++;
+if(srcX>=this.width){
+srcY++;
+index=srcY*this.bytesPerLine;
+srcX=0;
+}else{
+index++;
+}}
+return;
+}$WT.error(38);
+},"~N,~N,~N,~A,~N");
+$_M(c$,"setPixels",
+function(x,y,putWidth,pixels,startIndex){
+},"~N,~N,~N,~A,~N");
+c$=$_C(function(){
+this.data=null;
+this.logicalScreenWidth=0;
+this.logicalScreenHeight=0;
+this.backgroundPixel=0;
+this.repeatCount=0;
+this.imageLoaderListeners=null;
+$_Z(this,arguments);
+},$wt.graphics,"ImageLoader");
+$_K(c$,
+function(){
+this.reset();
+});
+$_M(c$,"reset",
+function(){
+this.data=null;
+this.logicalScreenWidth=0;
+this.logicalScreenHeight=0;
+this.backgroundPixel=-1;
+this.repeatCount=1;
+});
+$_M(c$,"load",
+function(stream){
+this.reset();
+this.data=[new $wt.graphics.ImageData(stream)];
+return this.data;
+},"java.io.InputStream");
+$_M(c$,"load",
+function(filename){
+this.reset();
+this.data=[new $wt.graphics.ImageData(filename)];
+return this.data;
+},"~S");
+$_M(c$,"save",
+function(stream,format){
+},"java.io.OutputStream,~N");
+$_M(c$,"save",
+function(filename,format){
+},"~S,~N");
+$_M(c$,"addImageLoaderListener",
+function(listener){
+if(this.imageLoaderListeners==null){
+this.imageLoaderListeners=new java.util.Vector();
+}this.imageLoaderListeners.addElement(listener);
+},"$wt.graphics.ImageLoaderListener");
+$_M(c$,"removeImageLoaderListener",
+function(listener){
+if(this.imageLoaderListeners==null)return;
+this.imageLoaderListeners.removeElement(listener);
+},"$wt.graphics.ImageLoaderListener");
+$_M(c$,"hasListeners",
+function(){
+return this.imageLoaderListeners!=null&&this.imageLoaderListeners.size()>0;
+});
+$_M(c$,"notifyListeners",
+function(event){
+if(!this.hasListeners())return;
+var size=this.imageLoaderListeners.size();
+for(var i=0;i<size;i++){
+var listener=this.imageLoaderListeners.elementAt(i);
+listener.imageDataLoaded(event);
+}
+},"$wt.graphics.ImageLoaderEvent");
+c$=$_C(function(){
+this.url=null;
+this.width=0;
+this.height=0;
+this.imgHandle=null;
+this.type=0;
+this.handle=null;
+this.transparentPixel=-1;
+this.memGC=null;
+this.alphaData=null;
+this.alpha=-1;
+this.data=null;
+$_Z(this,arguments);
+},$wt.graphics,"Image",$wt.graphics.Resource,$wt.graphics.Drawable);
+$_K(c$,
+function(){
+$_R(this,$wt.graphics.Image,[]);
+});
+$_K(c$,
+function(device,width,height){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.init(device,width,height);
+this.width=width;
+this.height=height;
+},"$wt.graphics.Device,~N,~N");
+$_M(c$,"init",
+function(device,width,height){
+this.type=0;
+this.width=width;
+this.height=height;
+this.handle=d$.createElement("DIV");
+this.handle.style.width=width+"px";
+this.handle.style.height=height+"px";
+this.imgHandle=this.handle;
+},"$wt.graphics.Device,~N,~N");
+$_K(c$,
+function(device,srcImage,flag){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.device=device;
+this.url=srcImage.url;
+},"$wt.graphics.Device,$wt.graphics.Image,~N");
+$_K(c$,
+function(device,bounds){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.width=bounds.width;
+this.height=bounds.height;
+},"$wt.graphics.Device,$wt.graphics.Rectangle");
+$_K(c$,
+function(device,data){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.url=data.url;
+},"$wt.graphics.Device,$wt.graphics.ImageData");
+$_K(c$,
+function(device,source,mask){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.url=source.url;
+},"$wt.graphics.Device,$wt.graphics.ImageData,$wt.graphics.ImageData");
+$_K(c$,
+function(device,stream){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+var url=null;
+if(stream!=null){
+url=stream.url;
+}this.url=url;
+},"$wt.graphics.Device,java.io.InputStream");
+$_K(c$,
+function(device,filename){
+$_R(this,$wt.graphics.Image,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.url=filename;
+},"$wt.graphics.Device,~S");
+$_V(c$,"dispose",
+function(){
+});
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.Image)))return false;
+var image=object;
+return this.device==image.device&&this.handle==image.handle;
+},"~O");
+$_M(c$,"getBackground",
+function(){
+return new $wt.graphics.Color(this.device,"white");
+});
+$_M(c$,"getBounds",
+function(){
+return new $wt.graphics.Rectangle(0,0,this.width,this.height);
+});
+$_M(c$,"getImageData",
+function(){
+return new $wt.graphics.ImageData(this.url);
+});
+$_V(c$,"hashCode",
+function(){
+return this.handle.toString().hashCode();
+});
+$_V(c$,"isDisposed",
+function(){
+return false;
+});
+$_M(c$,"setBackground",
+function(color){
+},"$wt.graphics.Color");
+$_M(c$,"toString",
+function(){
+if(this.isDisposed())return"Image {*DISPOSED*}";
+return"Image {"+this.handle+"}";
+});
+$_S(c$,
+"DEFAULT_SCANLINE_PAD",4);
+c$=$_C(function(){
+this.data=null;
+$_Z(this,arguments);
+},$wt.graphics,"Font",$wt.graphics.Resource);
+$_K(c$,
+function(){
+$_R(this,$wt.graphics.Font,[]);
+});
+$_K(c$,
+function(device,fd){
+$_R(this,$wt.graphics.Font,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.init(device,fd);
+},"$wt.graphics.Device,$wt.graphics.FontData");
+$_K(c$,
+function(device,fds){
+$_R(this,$wt.graphics.Font,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+for(var i=0;i<fds.length;i++){
+}
+this.init(device,fds[0]);
+},"$wt.graphics.Device,~A");
+$_K(c$,
+function(device,name,height,style){
+$_R(this,$wt.graphics.Font,[]);
+if(device==null)device=$wt.graphics.Device.getDevice();
+this.init(device,new $wt.graphics.FontData(name,height,style));
+},"$wt.graphics.Device,~S,~N,~N");
+$_V(c$,"dispose",
+function(){
+this.data=null;
+this.device=null;
+});
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.Font)))return false;
+var font=object;
+return font.data.equals(this.data);
+},"~O");
+$_M(c$,"getFontData",
+function(){
+var datum=new Array(1);
+datum[0]=this.data;
+return datum;
+});
+$_V(c$,"hashCode",
+function(){
+return this.data.hashCode();
+});
+$_M(c$,"init",
+function(device,fd){
+this.data=fd;
+this.device=device;
+},"$wt.graphics.Device,$wt.graphics.FontData");
+$_V(c$,"isDisposed",
+function(){
+return this.data==null;
 });
 $_V(c$,"toString",
 function(){
-var string=this.getName()+" {";
-if(this.numColumns!=1)string+="numColumns="+this.numColumns+" ";
-if(this.makeColumnsEqualWidth)string+="makeColumnsEqualWidth="+this.makeColumnsEqualWidth+" ";
-if(this.marginWidth!=0)string+="marginWidth="+this.marginWidth+" ";
-if(this.marginHeight!=0)string+="marginHeight="+this.marginHeight+" ";
-if(this.marginLeft!=0)string+="marginLeft="+this.marginLeft+" ";
-if(this.marginRight!=0)string+="marginRight="+this.marginRight+" ";
-if(this.marginTop!=0)string+="marginTop="+this.marginTop+" ";
-if(this.marginBottom!=0)string+="marginBottom="+this.marginBottom+" ";
-if(this.horizontalSpacing!=0)string+="horizontalSpacing="+this.horizontalSpacing+" ";
-if(this.verticalSpacing!=0)string+="verticalSpacing="+this.verticalSpacing+" ";
-string=string.trim();
-string+="}";
-return string;
+if(this.isDisposed())return"Font {*DISPOSED*}";
+return"Font {"+this.data+"}";
 });
 c$=$_C(function(){
-this.type=256;
-this.marginWidth=0;
-this.marginHeight=0;
-this.spacing=3;
-this.wrap=true;
-this.pack=true;
-this.fill=false;
-this.justify=false;
-this.marginLeft=3;
-this.marginTop=3;
-this.marginRight=3;
-this.marginBottom=3;
+this.height=0;
+this.style=0;
+this.name=null;
+this.lang=null;
+this.country=null;
+this.variant=null;
 $_Z(this,arguments);
-},$wt.layout,"RowLayout",$wt.widgets.Layout);
+},$wt.graphics,"FontData");
 $_K(c$,
 function(){
-$_R(this,$wt.layout.RowLayout,[]);
+this.name="Arial";
+this.style=0;
+this.height=12;
 });
 $_K(c$,
-function(type){
-$_R(this,$wt.layout.RowLayout,[]);
-this.type=type;
-},"~N");
-$_M(c$,"computeSize",
-function(composite,wHint,hHint,flushCache){
-var extent;
-if(this.type==256){
-extent=this.layoutHorizontal(composite,false,(wHint!=-1)&&this.wrap,wHint,flushCache);
-}else{
-extent=this.layoutVertical(composite,false,(hHint!=-1)&&this.wrap,hHint,flushCache);
-}if(wHint!=-1)extent.x=wHint;
-if(hHint!=-1)extent.y=hHint;
-return extent;
-},"$wt.widgets.Composite,~N,~N,~B");
-$_M(c$,"computeSize",
-function(control,flushCache){
-var wHint=-1;
-var hHint=-1;
-var data=control.getLayoutData();
-if(data!=null){
-wHint=data.width;
-hHint=data.height;
-}return control.computeSize(wHint,hHint,flushCache);
-},"$wt.widgets.Control,~B");
-$_V(c$,"flushCache",
-function(control){
-return true;
-},"$wt.widgets.Control");
+function(string){
+this.name=string;
+if(this.name==null){
+this.name="Arial";
+}this.style=0;
+this.height=12;
+},"~S");
+$_K(c$,
+function(name,height,style){
+this.setName(name);
+this.setHeight(height);
+this.setStyle(style);
+},"~S,~N,~N");
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.FontData)))return false;
+var fd=object;
+return this.height==fd.height&&this.style==fd.style&&this.getName().equals(fd.getName());
+},"~O");
+$_M(c$,"getHeight",
+function(){
+return this.height;
+});
+$_M(c$,"getLocale",
+function(){
+var buffer=new StringBuffer();
+var sep='_';
+if(this.lang!=null){
+buffer.append(this.lang);
+buffer.append(sep);
+}if(this.country!=null){
+buffer.append(this.country);
+buffer.append(sep);
+}if(this.variant!=null){
+buffer.append(this.variant);
+}var result=buffer.toString();
+var length=result.length;
+if(length>0){
+if((result.charAt(length-1)).charCodeAt(0)==(sep).charCodeAt(0)){
+result=result.substring(0,length-1);
+}}return result;
+});
 $_M(c$,"getName",
 function(){
-var string=this.getClass().getName();
-var index=string.lastIndexOf('.');
-if(index==-1)return string;
-return string.substring(index+1,string.length);
+return this.name;
 });
-$_V(c$,"layout",
-function(composite,flushCache){
-var clientArea=composite.getClientArea();
-if(this.type==256){
-this.layoutHorizontal(composite,true,this.wrap,clientArea.width,flushCache);
+$_M(c$,"getStyle",
+function(){
+var style=0;
+return style;
+});
+$_V(c$,"hashCode",
+function(){
+return this.height^this.style^this.getName().hashCode();
+});
+$_M(c$,"setHeight",
+function(height){
+this.height=height;
+},"~N");
+$_M(c$,"setLocale",
+function(locale){
+this.lang=this.country=this.variant=null;
+if(locale!=null){
+var sep='_';
+var length=locale.length;
+var firstSep;
+var secondSep;
+firstSep=locale.indexOf(sep);
+if(firstSep==-1){
+firstSep=secondSep=length;
 }else{
-this.layoutVertical(composite,true,this.wrap,clientArea.height,flushCache);
-}},"$wt.widgets.Composite,~B");
-$_M(c$,"layoutHorizontal",
-function(composite,move,wrap,width,flushCache){
-var count=0;
-var children=composite.getChildren();
-for(var i=0;i<children.length;i++){
-var control=children[i];
-var data=control.getLayoutData();
-if(data==null||!data.exclude){
-children[count++]=children[i];
-}}
-var childWidth=0;
-var childHeight=0;
-var maxHeight=0;
-if(!this.pack){
-for(var i=0;i<count;i++){
-var child=children[i];
-var size=this.computeSize(child,flushCache);
-childWidth=Math.max(childWidth,size.x);
-childHeight=Math.max(childHeight,size.y);
-}
-maxHeight=childHeight;
-}var clientX=0;
-var clientY=0;
-if(move){
-var rect=composite.getClientArea();
-clientX=rect.x;
-clientY=rect.y;
-}var wraps=null;
-var wrapped=false;
-var bounds=null;
-if(move&&(this.justify||this.fill)){
-bounds=new Array(count);
-wraps=$_A(count,0);
-}var maxX=0;
-var x=this.marginLeft+this.marginWidth;
-var y=this.marginTop+this.marginHeight;
-for(var i=0;i<count;i++){
-var child=children[i];
-if(this.pack){
-var size=this.computeSize(child,flushCache);
-childWidth=size.x;
-childHeight=size.y;
-}if(wrap&&(i!=0)&&(x+childWidth>width)){
-wrapped=true;
-if(move&&(this.justify||this.fill))wraps[i-1]=maxHeight;
-x=this.marginLeft+this.marginWidth;
-y+=this.spacing+maxHeight;
-if(this.pack)maxHeight=0;
-}if(this.pack||this.fill){
-maxHeight=Math.max(maxHeight,childHeight);
-}if(move){
-var childX=x+clientX;
-var childY=y+clientY;
-if(this.justify||this.fill){
-bounds[i]=new $wt.graphics.Rectangle(childX,childY,childWidth,childHeight);
-}else{
-child.setBounds(childX,childY,childWidth,childHeight);
-}}x+=this.spacing+childWidth;
-maxX=Math.max(maxX,x);
-}
-maxX=Math.max(clientX+this.marginLeft+this.marginWidth,maxX-this.spacing);
-if(!wrapped)maxX+=this.marginRight+this.marginWidth;
-if(move&&(this.justify||this.fill)){
-var space=0;
-var margin=0;
-if(!wrapped){
-space=Math.max(0,Math.floor((width-maxX)/(count+1)));
-margin=Math.max(0,Math.floor(((width-maxX)%(count+1))/2));
-}else{
-if(this.fill||this.justify){
-var last=0;
-if(count>0)wraps[count-1]=maxHeight;
-for(var i=0;i<count;i++){
-if(wraps[i]!=0){
-var wrapCount=i-last+1;
-if(this.justify){
-var wrapX=0;
-for(var j=last;j<=i;j++){
-wrapX+=bounds[j].width+this.spacing;
-}
-space=Math.max(0,Math.floor((width-wrapX)/(wrapCount+1)));
-margin=Math.max(0,Math.floor(((width-wrapX)%(wrapCount+1))/2));
-}for(var j=last;j<=i;j++){
-if(this.justify)bounds[j].x+=(space*(j-last+1))+margin;
-if(this.fill)bounds[j].height=wraps[i];
-}
-last=i+1;
-}}
-}}for(var i=0;i<count;i++){
-if(!wrapped){
-if(this.justify)bounds[i].x+=(space*(i+1))+margin;
-if(this.fill)bounds[i].height=maxHeight;
-}children[i].setBounds(bounds[i]);
-}
-}return new $wt.graphics.Point(maxX,y+maxHeight+this.marginBottom+this.marginHeight);
-},"$wt.widgets.Composite,~B,~B,~N,~B");
-$_M(c$,"layoutVertical",
-function(composite,move,wrap,height,flushCache){
-var count=0;
-var children=composite.getChildren();
-for(var i=0;i<children.length;i++){
-var control=children[i];
-var data=control.getLayoutData();
-if(data==null||!data.exclude){
-children[count++]=children[i];
-}}
-var childWidth=0;
-var childHeight=0;
-var maxWidth=0;
-if(!this.pack){
-for(var i=0;i<count;i++){
-var child=children[i];
-var size=this.computeSize(child,flushCache);
-childWidth=Math.max(childWidth,size.x);
-childHeight=Math.max(childHeight,size.y);
-}
-maxWidth=childWidth;
-}var clientX=0;
-var clientY=0;
-if(move){
-var rect=composite.getClientArea();
-clientX=rect.x;
-clientY=rect.y;
-}var wraps=null;
-var wrapped=false;
-var bounds=null;
-if(move&&(this.justify||this.fill)){
-bounds=new Array(count);
-wraps=$_A(count,0);
-}var maxY=0;
-var x=this.marginLeft+this.marginWidth;
-var y=this.marginTop+this.marginHeight;
-for(var i=0;i<count;i++){
-var child=children[i];
-if(this.pack){
-var size=this.computeSize(child,flushCache);
-childWidth=size.x;
-childHeight=size.y;
-}if(wrap&&(i!=0)&&(y+childHeight>height)){
-wrapped=true;
-if(move&&(this.justify||this.fill))wraps[i-1]=maxWidth;
-x+=this.spacing+maxWidth;
-y=this.marginTop+this.marginHeight;
-if(this.pack)maxWidth=0;
-}if(this.pack||this.fill){
-maxWidth=Math.max(maxWidth,childWidth);
-}if(move){
-var childX=x+clientX;
-var childY=y+clientY;
-if(this.justify||this.fill){
-bounds[i]=new $wt.graphics.Rectangle(childX,childY,childWidth,childHeight);
-}else{
-child.setBounds(childX,childY,childWidth,childHeight);
-}}y+=this.spacing+childHeight;
-maxY=Math.max(maxY,y);
-}
-maxY=Math.max(clientY+this.marginTop+this.marginHeight,maxY-this.spacing);
-if(!wrapped)maxY+=this.marginBottom+this.marginHeight;
-if(move&&(this.justify||this.fill)){
-var space=0;
-var margin=0;
-if(!wrapped){
-space=Math.max(0,Math.floor((height-maxY)/(count+1)));
-margin=Math.max(0,Math.floor(((height-maxY)%(count+1))/2));
-}else{
-if(this.fill||this.justify){
-var last=0;
-if(count>0)wraps[count-1]=maxWidth;
-for(var i=0;i<count;i++){
-if(wraps[i]!=0){
-var wrapCount=i-last+1;
-if(this.justify){
-var wrapY=0;
-for(var j=last;j<=i;j++){
-wrapY+=bounds[j].height+this.spacing;
-}
-space=Math.max(0,Math.floor((height-wrapY)/(wrapCount+1)));
-margin=Math.max(0,Math.floor(((height-wrapY)%(wrapCount+1))/2));
-}for(var j=last;j<=i;j++){
-if(this.justify)bounds[j].y+=(space*(j-last+1))+margin;
-if(this.fill)bounds[j].width=wraps[i];
-}
-last=i+1;
-}}
-}}for(var i=0;i<count;i++){
-if(!wrapped){
-if(this.justify)bounds[i].y+=(space*(i+1))+margin;
-if(this.fill)bounds[i].width=maxWidth;
-}children[i].setBounds(bounds[i]);
-}
-}return new $wt.graphics.Point(x+maxWidth+this.marginRight+this.marginWidth,maxY);
-},"$wt.widgets.Composite,~B,~B,~N,~B");
+secondSep=locale.indexOf(sep,firstSep+1);
+if(secondSep==-1)secondSep=length;
+}if(firstSep>0)this.lang=locale.substring(0,firstSep);
+if(secondSep>firstSep+1)this.country=locale.substring(firstSep+1,secondSep);
+if(length>secondSep+1)this.variant=locale.substring(secondSep+1);
+}},"~S");
+$_M(c$,"setName",
+function(name){
+this.name=name;
+},"~S");
+$_M(c$,"setStyle",
+function(style){
+this.style=style;
+},"~N");
 $_V(c$,"toString",
 function(){
-var string=this.getName()+" {";
-string+="type="+((this.type!=256)?"SWT.VERTICAL":"SWT.HORIZONTAL")+" ";
-if(this.marginWidth!=0)string+="marginWidth="+this.marginWidth+" ";
-if(this.marginHeight!=0)string+="marginHeight="+this.marginHeight+" ";
-if(this.marginLeft!=0)string+="marginLeft="+this.marginLeft+" ";
-if(this.marginTop!=0)string+="marginTop="+this.marginTop+" ";
-if(this.marginRight!=0)string+="marginRight="+this.marginRight+" ";
-if(this.marginBottom!=0)string+="marginBottom="+this.marginBottom+" ";
-if(this.spacing!=0)string+="spacing="+this.spacing+" ";
-string+="wrap="+this.wrap+" ";
-string+="pack="+this.pack+" ";
-string+="fill="+this.fill+" ";
-string+="justify="+this.justify+" ";
-string=string.trim();
-string+="}";
-return string;
+var buffer=new StringBuffer();
+buffer.append("1|");
+buffer.append(this.getName());
+buffer.append("|");
+buffer.append(this.getHeight());
+buffer.append("|");
+buffer.append(this.getStyle());
+buffer.append("|");
+buffer.append("WINDOWS|1|");
+buffer.append(this.getName());
+return buffer.toString();
 });
+c$=$_C(function(){
+$_Z(this,arguments);
+},$wt.graphics,"FontMetrics");
+$_K(c$,
+function(){
+});
+$_V(c$,"equals",
+function(object){
+if(object==this)return true;
+if(!($_O(object,$wt.graphics.FontMetrics)))return false;
+return false;
+},"~O");
+$_M(c$,"getAscent",
+function(){
+return 0;
+});
+$_M(c$,"getAverageCharWidth",
+function(){
+return 9;
+});
+$_M(c$,"getDescent",
+function(){
+return 0;
+});
+$_M(c$,"getHeight",
+function(){
+return 16;
+});
+$_M(c$,"getLeading",
+function(){
+return 0;
+});
+$_M(c$,"hashCode",
+function(){
+return $_U(this,$wt.graphics.FontMetrics,"hashCode",[]);
+});
+$_J("org.eclipse.swt.internal.struct");
+c$=$_C(function(){
+this.hwnd=null;
+this.hwndInsertAfter=null;
+this.x=0;
+this.y=0;
+this.cx=0;
+this.cy=0;
+this.flags=0;
+$_Z(this,arguments);
+},$wt.internal.struct,"WINDOWPOS");
+$_S(c$,
+"sizeof",28);
+$_J("org.eclipse.swt.internal.struct");
+c$=$_C(function(){
+this.control=null;
+this.type=0;
+this.data=null;
+$_Z(this,arguments);
+},$wt.internal.struct,"MESSAGE");
+$_K(c$,
+function(control,type,data){
+this.control=control;
+this.type=type;
+this.data=data;
+},"$wt.widgets.Control,~N,~O");
+$_S(c$,
+"CONTROL_RESIZE",1,
+"CONTROL_LAYOUT",2);

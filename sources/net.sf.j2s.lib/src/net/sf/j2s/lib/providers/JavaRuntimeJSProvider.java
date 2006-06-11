@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Platform;
  */
 public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 
+	/*
 	private static String[] CORE_KEY_LIST = new String[] {
 		"Common", "Utilities", "Bare Core" 
 	};
@@ -49,6 +50,25 @@ public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 		},
 		new String[] {
 				"j2s-core-bare.z.js"
+		}
+	};
+	*/
+	private static String[] CORE_KEY_LIST = new String[] {
+		"J2S Core" 
+	};
+	
+	private static String[] CORE_DESC_LIST = new String[] {
+		"Java2Script core library" 
+	};
+
+	private static String[][] CORE_RESOURCE_LIST = new String[][] {
+		new String[] {
+				"j2s-core-bare.z.js",
+				"j2s-core-basic.z.js",
+				"j2s-core-error.z.js",
+				"j2s-core-common.z.js",
+				"j2s-core-util.z.js",
+				"j2s-core-more.z.js"
 		}
 	};
 	
