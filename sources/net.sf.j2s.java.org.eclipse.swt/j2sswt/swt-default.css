@@ -183,6 +183,16 @@
 	text-decoration:underline;
 }
 
+.browser-default {
+	width:100%;
+	height:100%;
+	background-color:white;
+}
+
+* html .browser-default {
+	border:2px solid menu;
+}
+
 .composite-default {
 	position:absolute;
 	white-space:nowrap;
@@ -413,7 +423,7 @@ input.text-border {
 
 .tree-item-default {
 	/*background-color:#cccccc;*/
-	height:20px;
+	/*height:20px;*/
 	white-space:nowrap;
 }
 .tree-default {
@@ -1874,7 +1884,7 @@ table, tr, td {
 	position:absolute;
 	width:20px;
 	height:20px;
-	background-color:#aaaaff;
+	/*background-color:#aaaaff;*/
 	z-index:1;
 }
 .shell-left-top {
@@ -1900,7 +1910,7 @@ table, tr, td {
 
 .shell-center-top, .shell-left-middle, .shell-right-middle, .shell-center-bottom {
 	position:absolute;
-	background-color:#7777ff;
+	/*background-color:#7777ff;*/
 	z-index:0;
 }
 .shell-center-top {

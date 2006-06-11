@@ -22,6 +22,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * @author josson smith
  *
  * 2006-5-21
+ * @j2sPrefix O$ = 
  */
 public class OS {
 	
@@ -62,7 +63,7 @@ public class OS {
 	static {
 		
 	}
-	public static void destoryHandle(Object handle) {
+	public static void destroyHandle(Object handle) {
 		if (handle == null) {
 			return ;
 		}
@@ -109,6 +110,7 @@ public class OS {
 	}
 	
 	private static Element invisibleContainer;
+	private static Object containers;
 	private static Element lineContainer;
 	private static Element blockContainer;
 	
@@ -123,40 +125,23 @@ public class OS {
 			s.height = "100px";
 			s.overflow = "scroll";
 			invisibleContainer = el;
+			containers = new Object();
 			
 			el = document.createElement ("DIV");
 			invisibleContainer.appendChild (el);
 			el.className = "system-default";
-			s = el.style;
-			//s.display = "inline";
-			s.whiteSpace = "nowrap";
-			s.overflow = "visible";
+			el.style.whiteSpace = "nowrap";
+			el.style.overflow = "visible";
 			lineContainer = el;
 			
 			el = document.createElement ("DIV");
 			invisibleContainer.appendChild (el);
+			el.style.overflow = "visible";
+			el.style.whiteSpace = "normal";
 			blockContainer = el;
 		}
 	}
-	
-	private static void resetLineContainer() {
-		Element container = lineContainer;
-		clearChildren(container);
-		container.className = "";
-		CSSStyle s = container.style;
-		s.cssText = "";
-		//s.display = "inline";
-		s.whiteSpace = "nowrap";
-		s.overflow = "visible";
-	};
 
-	private static void resetBlockContainer() {
-		Element container = blockContainer;
-		clearChildren(container);
-		container.className = "";
-		container.style.cssText = "";
-	};
-	
 	public static int getContainerWidth(Object container) {
 		Element el = (Element) container;
 		return Math.max(el.offsetWidth, Math.max(el.clientWidth, el.scrollWidth));
@@ -273,83 +258,86 @@ public class OS {
 			lineEl.appendChild (document.createTextNode (s));
 		}
 	}
-	
-	private static Element setupAsPlain(String str) {
-		init ();
-		resetLineContainer ();
-		Element c = lineContainer;
-		c.className = "system-default";
-		//c.appendChild (document.createTextNode (str));
-		insertText(c, str);
-		return c;
-	}
 
-	private static Element setupAsStyled(String str, String className, String cssText) {
-		init ();
-		resetLineContainer ();
-		Element c = lineContainer;
-		if (className != null && className.length() != 0) {
-			c.className = className;
-		}
-		if (cssText != null && cssText.length() != 0) 
+	private static String wrapCSS(String a) {
+		if (a == null) {
+			return null;
+		} else
 		/**
-		 * @j2sNativeSrc
-		 * cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-		 * c.style.cssText = cssText;
 		 * @j2sNative
-		 * c = c.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-		 * d.style.cssText = c;
+			a = a.replace (/(^|[^-])(left|top|right|bottom|height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig,'$1');
+			a = a.replace (/background(-[^:]+)?\s*:\s*[^;]+(\s*;|$)/ig, '');
+			a = a.replace (/visibility(-[^:]+)?\s*:\s*[^;]+(\s*;|$)/ig, '');
+			a = a.trim ();
+			return a;
 		 */
 		{
-			c.style.cssText = cssText;
+			a = a.trim ();
+			return a;
 		}
-		//c.appendChild (document.createTextNode (str));
+	}
+	private static Element setupAsPlain(String str, int wrappedWidth) {
+		init ();
+		Element c = null;
+		if (wrappedWidth > 0) {
+			c = blockContainer;
+			c.style.width = wrappedWidth + "px";
+		} else {
+			c = lineContainer;
+		}
+		clearChildren(c);
 		insertText(c, str);
 		return c;
 	}
 
-	private static Element setupAsPlainWrapped(String str, int wrappedWidth) {
+	private static Element setupAsStyled(String str, String className, String cssText, int wrappedWidth) {
 		init ();
-		resetBlockContainer();
-		Element c = blockContainer;
-		c.className = "system-default";
-		c.style.width = wrappedWidth + "px";
-		c.style.overflow = "visible";
-		c.style.whiteSpace = "normal";
-		//c.appendChild (document.createTextNode (str));
-		insertText(c, str);
-		return c;
-	}
-
-	private static Element setupAsStyledWrapped(String str, String className, String cssText, int wrappedWidth) {
-		init ();
-		resetLineContainer ();
-		Element c = lineContainer;
-		if (className != null && className.length() != 0) {
-			c.className = className;
+		cssText = wrapCSS(cssText);
+		Object e = containers;
+		Element f = null;
+		String g = null;
+		if (wrappedWidth > 0) {
+			g = "+" + className + "|" + cssText;
+		} else {
+			g = "~" + className + "|" + cssText;
 		}
-		if (cssText != null && cssText.length() != 0)
 		/**
-		 * @j2sNativeSrc
-		 * cssText = cssText.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-		 * c.style.cssText = cssText;
 		 * @j2sNative
-		 * c = c.replace (/(height|width)\s*:\s*[\+\-]?\d+(cm|mm|em|px|pt)?(\s*;|$)/ig, '');
-		 * d.style.cssText = c;
-		 */
-		{
-			c.style.cssText = cssText;
+		 * f = e[g];
+		 */ {
+			 e = g; // non-sense code
+		 }
+		if (f != null) {
+			clearChildren (f);
+		} else {
+			f = document.createElement("DIV");
+			invisibleContainer.appendChild(f);
+			CSSStyle x = f.style;
+			f.className=className;
+			x.cssText=cssText;
+			if (wrappedWidth > 0) {
+				x.whiteSpace="normal";
+			} else {
+				x.whiteSpace="nowrap";
+			}
+			x.overflow="visible";
+
+			/**
+			 * @j2sNative
+			 * e[g]=f;
+			 */ {
+				 g = e.toString(); // non-sense code
+			 }
 		}
-		c.style.width = wrappedWidth + "px";
-		c.style.overflow = "visible";
-		c.style.whiteSpace = "normal";
-		//c.appendChild (document.createTextNode (str));
-		insertText(c, str);
-		return c;
+		if (wrappedWidth > 0) {
+			f.style.width = wrappedWidth + "px";
+		}
+		insertText (f, str);
+		return f;
 	}
 	
 	public static int getStringPlainWidth(String str) {
-		Element c = setupAsPlain(str);
+		Element c = setupAsPlain(str, -1);
 		return getContainerWidth (c);
 	}
 
@@ -366,17 +354,17 @@ public class OS {
 		 * 	return 0;
 		 * }
 		 */ {}
-		Element c = setupAsStyled(str, className, cssText);
+		Element c = setupAsStyled(str, className, cssText, -1);
 		return getContainerWidth (c);
 	}
 	
 	public static int getStringPlainHeight(String str) {
-		Element c = setupAsPlain(str);
+		Element c = setupAsPlain(str, -1);
 		return getContainerHeight(c);
 	}
 	
 	public static int getStringPlainWrappedHeight(String str, int wrappedWidth) {
-		Element c = setupAsPlainWrapped(str, wrappedWidth);
+		Element c = setupAsPlain(str, wrappedWidth);
 		return getContainerHeight(c);
 	}
 
@@ -393,7 +381,7 @@ public class OS {
 		 * 	return 0;
 		 * }
 		 */ {}
-		Element c = setupAsStyled(str, className, cssText);
+		Element c = setupAsStyled(str, className, cssText, -1);
 		return getContainerHeight(c);
 	}
 	
@@ -410,12 +398,12 @@ public class OS {
 		 * 	return 0;
 		 * }
 		 */ {}
-		Element c = setupAsStyledWrapped(str, className, cssText, wrappedWidth);
+		Element c = setupAsStyled(str, className, cssText, wrappedWidth);
 		return getContainerHeight(c);
 	}
 	
 	public static Point getStringPlainSize(String str) {
-		Element c = setupAsPlain(str);
+		Element c = setupAsPlain(str, -1);
 		return new Point(getContainerWidth(c), getContainerHeight(c));
 	}
 
@@ -432,7 +420,7 @@ public class OS {
 		 * 	return new org.eclipse.swt.graphics.Point(0, 0);
 		 * }
 		 */ {}
-		Element c = setupAsStyled(str, className, cssText);
+		Element c = setupAsStyled(str, className, cssText, -1);
 		return new Point(getContainerWidth(c), getContainerHeight(c));
 	}
 }

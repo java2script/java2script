@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -821,6 +822,10 @@ protected void releaseChild () {
 protected void releaseHandle () {
 	super.releaseHandle ();
 //	handle = 0;
+	if (handle != null) {
+		OS.destroyHandle(handle);
+		handle = null;
+	}
 	parent = null;
 	parentItem = null;
 }
@@ -1435,11 +1440,7 @@ public void setText (int index, String string) {
 		handle.appendChild(tbodyTD);
 	}
 	if (tbodyTD.childNodes != null) {
-		for (int i = 0; i < tbodyTD.childNodes.length; i++) {
-			if (tbodyTD.childNodes[i] != null) {
-				tbodyTD.removeChild(tbodyTD.childNodes[i]);
-			}
-		}
+		OS.clearChildren(tbodyTD);
 	}
 	Element hItem = document.createElement("DIV");
 	hItem.className = "tree-item-default";
@@ -1459,6 +1460,7 @@ public void setText (int index, String string) {
 		checkElement.onclick = new RunnableCompatibility() {
 			public void run() {
 				Event e = new Event();
+				e.display = display;
 				e.type = SWT.Selection;
 				e.detail = SWT.CHECK;
 				e.item = TreeItem.this;
@@ -1478,6 +1480,7 @@ public void setText (int index, String string) {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			parent.toggleSelection(TreeItem.this, evt.ctrlKey, evt.shiftKey);
 			Event e = new Event();
+			e.display = display;
 			e.type = SWT.Selection;
 			e.detail = SWT.NONE;
 			e.item = TreeItem.this;
@@ -1559,6 +1562,7 @@ void toggleExpandStatus() {
 	Event e = new Event();
 	e.type = toExpand ? SWT.Expand : SWT.Collapse;
 	//e.detail = SWT.NONE;
+	e.display = display;
 	e.item = this;
 	e.widget = this;
 	parent.sendEvent(e);

@@ -105,6 +105,21 @@ import org.eclipse.swt.internal.xhtml.window;
  * @see #readAndDispatch
  * @see #sleep
  * @see Device#dispose
+ * 
+ * @j2sSuffix
+// Only IE need to release the resources so that no memory is leaked
+if (window.attachEvent) {
+	window.attachEvent ("onunload", function () {
+		try {
+			org.eclipse.swt.widgets.Display.releaseAllDisplays ();
+			//popupAlert ("OK");
+		} catch (e) {
+		//	popupAlert (e.message);
+		//	throw e;
+		}
+		return true;
+	});
+}
  */
 
 public class Display extends Device {

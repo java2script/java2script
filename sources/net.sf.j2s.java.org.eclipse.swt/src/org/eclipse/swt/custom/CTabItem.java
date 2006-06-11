@@ -11,15 +11,21 @@
 package org.eclipse.swt.custom;
 
 
-import org.eclipse.swt.*;
-import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
-import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
 
 /**
  * Instances of this class represent a selectable user interface object
@@ -653,15 +659,15 @@ protected void releaseWidget () {
 }
 protected void releaseHandle() {
 	if (textEl != null) {
-		BrowserNative.releaseHandle(textEl);
+		OS.destroyHandle(textEl);
 		textEl = null;
 	}
 	if (rightEl != null){
-		BrowserNative.releaseHandle(rightEl);
+		OS.destroyHandle(rightEl);
 		rightEl = null;
 	}
 	if (handle != null) {
-		BrowserNative.releaseHandle(handle);
+		OS.destroyHandle(handle);
 		handle = null;
 	}
 	super.releaseHandle();

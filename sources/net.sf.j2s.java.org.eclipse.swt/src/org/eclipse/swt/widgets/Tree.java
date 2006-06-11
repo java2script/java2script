@@ -356,14 +356,14 @@ protected void createHandle () {
 	int hFont = OS.GetStockObject (OS.SYSTEM_FONT);
 	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 0);
 	*/
-	handle = document.createElement("DIV");
-	if (parent != null) {
-		Element parentHandle = parent.containerHandle();
-		if (parentHandle!= null) {
-			parentHandle.appendChild(handle);
-		}
-	}
-	handle.className = "tree-default";
+//	handle = document.createElement("DIV");
+//	if (parent != null) {
+//		Element parentHandle = parent.containerHandle();
+//		if (parentHandle!= null) {
+//			parentHandle.appendChild(handle);
+//		}
+//	}
+	handle.className += " tree-default";
 	if ((style & SWT.BORDER) != 0) {
 		handle.className += " tree-border";
 	}
@@ -531,6 +531,16 @@ void createItem (TreeItem item, Object hParent, int index) {
 	updateScrollBar ();
 	*/
 	if (items == null) {
+		items = new TreeItem[0];
+	}
+	int count = 0;
+	for (int i = 0; i < items.length; i++) {
+		if (items[i].handle == null) {
+			items[i] = null;
+			count++;
+		}
+	}
+	if (count == items.length) {
 		items = new TreeItem[0];
 	}
 //		int id = 0;
@@ -797,8 +807,8 @@ void createParent () {
 
 protected void createWidget () {
 	super.createWidget ();
-	items = new TreeItem [4];
-	columns = new TreeColumn [4];
+	items = new TreeItem [0];
+	columns = new TreeColumn [0];
 }
 
 /*

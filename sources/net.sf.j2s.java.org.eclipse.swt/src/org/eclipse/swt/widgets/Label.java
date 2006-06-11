@@ -537,10 +537,12 @@ public void setImage (Image image) {
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 		}
 	} else if (handle.childNodes.length == 0) {
+		if (image.handle == null) return ;
 		for (int i = 0; i < image.handle.childNodes.length; i++) {
 			handle.appendChild(image.handle.childNodes[i]);
 		}
 	} else {
+		if (image.handle == null) return ;
 		Element txt = handle.childNodes[0];
 		for (int i = 0; i < image.handle.childNodes.length; i++) {
 			handle.insertBefore(image.handle.childNodes[i], txt);

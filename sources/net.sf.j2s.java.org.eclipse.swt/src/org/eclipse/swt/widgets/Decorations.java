@@ -25,8 +25,6 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
-import org.eclipse.swt.internal.struct.MESSAGE;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -1094,35 +1092,35 @@ Decorations menuShell () {
 
 protected void releaseHandle() {
 	if (shellMin != null) {
-		BrowserNative.releaseHandle(shellMin);
+		OS.destroyHandle(shellMin);
 		shellMin = null;
 	}
 	if (shellMax != null) {
-		BrowserNative.releaseHandle(shellMax);
+		OS.destroyHandle(shellMax);
 		shellMax = null;
 	}
 	if (shellClose != null) {
-		BrowserNative.releaseHandle(shellClose);
+		OS.destroyHandle(shellClose);
 		shellClose = null;
 	}
 	if (shellIcon != null) {
-		BrowserNative.releaseHandle(shellIcon);
+		OS.destroyHandle(shellIcon);
 		shellIcon = null;
 	}
 	if (shellTitle != null) {
-		BrowserNative.releaseHandle(shellTitle);
+		OS.destroyHandle(shellTitle);
 		shellTitle = null;
 	}
 	if (titleBar != null) {
-		BrowserNative.releaseHandle(titleBar);
+		OS.destroyHandle(titleBar);
 		titleBar = null;
 	}
 	if (contentHandle != null) {
-		BrowserNative.releaseHandle(contentHandle);
+		OS.destroyHandle(contentHandle);
 		contentHandle = null;
 	}
 	if (modalHandle != null) {
-		BrowserNative.releaseHandle(modalHandle);
+		OS.destroyHandle(modalHandle);
 		modalHandle = null;
 	}
 	super.releaseHandle();
@@ -1323,7 +1321,7 @@ public void setImage (Image image) {
 //		if (image != null) {
 //			shellIcon.style.backgroundImage = "url('" + image.url + "')";
 //		}
-	if (shellIcon != null && this.image.handle == null) {
+	if (shellIcon != null && this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle iconStyle = shellIcon.style;
 		if (image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {
 //				Element imgBackground = document.createElement("DIV");

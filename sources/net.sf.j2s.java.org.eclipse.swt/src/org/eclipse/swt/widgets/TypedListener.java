@@ -76,6 +76,7 @@ public SWTEventListener getEventListener () {
  * @param e the event to handle
  */
 public void handleEvent (Event e) {
+	SWTEventListener eventListener = this.eventListener;
 	switch (e.type) {
 		case SWT.Paint: {
 			/* Field set by Control */

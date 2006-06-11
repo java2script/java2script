@@ -24,7 +24,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -4220,7 +4219,7 @@ protected void releaseHandle() {
 //		btnNextTab = null;
 //	}
 	if (itemMore != null) {
-		BrowserNative.releaseHandle(itemMore);
+		OS.destroyHandle(itemMore);
 		itemMore = null;
 	}
 //	if (borderFrame != null) {
@@ -4228,7 +4227,7 @@ protected void releaseHandle() {
 //		borderFrame = null;
 //	}
 	if (contentArea != null) {
-		BrowserNative.releaseHandle(contentArea);
+		OS.destroyHandle(contentArea);
 		contentArea = null;
 	}
 	super.releaseHandle();
@@ -4290,7 +4289,7 @@ protected void checkSubclass () {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Composite#containerHandle()
  */
-protected Element containerHandle() {
+public Element containerHandle() {
 	return contentArea;
 }
 
@@ -4306,8 +4305,9 @@ Object createCSSElement(Object parent, String css) {
 }
 
 protected void createHandle () {
-	/*
 	super.createHandle ();
+	state &= ~CANVAS;
+	/*
 	
 	/* Enable the flat look for tab folders on PPC *-/
 	if (OS.IsPPC) {
@@ -4332,7 +4332,8 @@ protected void createHandle () {
 		cssName += " ctab-folder-border-default";
 		roundTheCorners = true;
 	}
-	handle = (Element) createCSSElement(parent.handle, cssName);
+	//handle = (Element) createCSSElement(parent.containerHandle(), cssName);
+	handle.className += " " + cssName;
 	
 	cssName = "tab-folder-no-tab";
 //	if ((style & SWT.BOTTOM) != 0) {

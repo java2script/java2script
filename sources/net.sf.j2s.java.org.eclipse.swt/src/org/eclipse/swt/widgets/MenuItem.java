@@ -11,10 +11,15 @@
 package org.eclipse.swt.widgets;
 
  
-import org.eclipse.swt.*;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.ArmListener;
+import org.eclipse.swt.events.HelpListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 
 /**
  * Instances of this class represent a selectable user interface object
@@ -491,7 +496,7 @@ protected void releaseChild () {
  */
 protected void releaseHandle() {
 	if (handle != null) {
-		BrowserNative.releaseHandle(handle);
+		OS.destroyHandle(handle);
 		handle = null;
 	}
 	super.releaseHandle();

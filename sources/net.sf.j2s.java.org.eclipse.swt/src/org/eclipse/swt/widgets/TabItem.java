@@ -16,7 +16,6 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -191,11 +190,11 @@ protected void releaseChild () {
 
 protected void releaseHandle() {
 	if (textEl != null) {
-		BrowserNative.releaseHandle(textEl);
+		OS.destroyHandle(textEl);
 		textEl = null;
 	}
 	if (handle != null) {
-		BrowserNative.releaseHandle(handle);
+		OS.destroyHandle(handle);
 		handle = null;
 	}
 	super.releaseHandle();

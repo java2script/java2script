@@ -19,7 +19,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -835,41 +834,41 @@ boolean mnemonicMatch (char key) {
  */
 protected void releaseHandle() {
 	if (borderNW != null) {
-		BrowserNative.releaseHandle(borderNW);
+		OS.destroyHandle(borderNW);
 		borderNW = null;
 	}
 	if (borderNE != null) {
-		BrowserNative.releaseHandle(borderNE);
+		OS.destroyHandle(borderNE);
 		borderNE = null;
 	}
 	if (borderSW != null) {
-		BrowserNative.releaseHandle(borderSW);
+		OS.destroyHandle(borderSW);
 		borderSW = null;
 	}
 	if (borderSE != null) {
-		BrowserNative.releaseHandle(borderSE);
+		OS.destroyHandle(borderSE);
 		borderSE = null;
 	}
 	if (btnPrevTab != null) {
-		BrowserNative.releaseHandle(btnPrevTab.parentNode);
-		BrowserNative.releaseHandle(btnPrevTab);
+		OS.destroyHandle(btnPrevTab.parentNode);
+		OS.destroyHandle(btnPrevTab);
 		btnPrevTab = null;
 	}
 	if (btnNextTab != null) {
-		BrowserNative.releaseHandle(btnNextTab.parentNode);
-		BrowserNative.releaseHandle(btnNextTab);
+		OS.destroyHandle(btnNextTab.parentNode);
+		OS.destroyHandle(btnNextTab);
 		btnNextTab = null;
 	}
 	if (itemMore != null) {
-		BrowserNative.releaseHandle(itemMore);
+		OS.destroyHandle(itemMore);
 		itemMore = null;
 	}
 	if (borderFrame != null) {
-		BrowserNative.releaseHandle(borderFrame);
+		OS.destroyHandle(borderFrame);
 		borderFrame = null;
 	}
 	if (contentArea != null) {
-		BrowserNative.releaseHandle(contentArea);
+		OS.destroyHandle(contentArea);
 		contentArea = null;
 	}
 	super.releaseHandle();

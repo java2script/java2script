@@ -267,13 +267,7 @@ int widgetStyle () {
 	if ((style & SWT.V_SCROLL) != 0) bits |= OS.WS_VSCROLL;
 	return bits;
 }
-*/
 
-String windowClass () {
-	return "DIV";
-}
-
-/*
 int windowProc () {
 	return display.windowProc;
 }

@@ -1115,6 +1115,7 @@ public void setText (int index, String string) {
 		check.onclick = new RunnableCompatibility() {
 			public void run() {
 				Event e = new Event();
+				e.display = display;
 				e.type = SWT.Selection;
 				e.detail = SWT.CHECK;
 				e.item = TableItem.this;
@@ -1136,6 +1137,7 @@ public void setText (int index, String string) {
 				HTMLEvent evt = (HTMLEvent) getEvent();
 				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
 				Event e = new Event();
+				e.display = display;
 				e.type = SWT.Selection;
 				e.detail = SWT.NONE;
 				e.item = TableItem.this;
@@ -1150,6 +1152,7 @@ public void setText (int index, String string) {
 				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
 				System.out.println("An event is runned " + evt);
 				Event e = new Event();
+				e.display = display;
 				e.type = SWT.DefaultSelection;
 				e.detail = SWT.NONE;
 				e.item = TableItem.this;

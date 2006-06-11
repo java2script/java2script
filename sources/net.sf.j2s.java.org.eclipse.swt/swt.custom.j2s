@@ -1,0 +1,7 @@
+#Java2Script Configuration
+#Tue May 02 22:59:43 CST 2006
+j2s.resources.list=bin/org/eclipse/swt/custom/SashForm.js,bin/org/eclipse/swt/custom/SashFormData.js,bin/org/eclipse/swt/custom/SashFormLayout.js,bin/org/eclipse/swt/custom/StackLayout.js,bin/org/eclipse/swt/custom/ViewForm.js,bin/org/eclipse/swt/custom/ViewFormLayout.js,bin/org/eclipse/swt/custom/CLabel.js,bin/org/eclipse/swt/custom/CLayoutData.js,bin/org/eclipse/swt/custom/CBanner.js,bin/org/eclipse/swt/custom/CBannerLayout.js,bin/org/eclipse/swt/custom/CTabFolderEvent.js,bin/org/eclipse/swt/custom/CTabFolderListener.js,bin/org/eclipse/swt/custom/CTabFolderLayout.js,bin/org/eclipse/swt/custom/CTabFolderAdapter.js,bin/org/eclipse/swt/custom/CTabFolder2Listener.js,bin/org/eclipse/swt/custom/CTabFolder2Adapter.js,org/eclipse/swt/custom/CTabItem.js,bin/org/eclipse/swt/custom/CTabFolder.js
+j2s.abandomed.resources.list=
+j2s.compiler.visitor=SWTScriptVisitor
+j2s.output.path=bin
+j2s.compiler.status=enable

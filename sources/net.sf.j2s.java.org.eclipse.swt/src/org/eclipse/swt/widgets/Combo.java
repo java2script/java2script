@@ -12,7 +12,6 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -20,8 +19,6 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.struct.MESSAGE;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
@@ -2382,17 +2379,17 @@ LRESULT wmIMEChar (int hwnd, int wParam, int lParam) {
 protected void releaseHandle() {
 
 	if (selectInput != null) {
-		BrowserNative.releaseHandle(selectInput);
+		OS.destroyHandle(selectInput);
 		selectInput  = null;
 	}
 
 	if (dropDownButton != null) {
-		BrowserNative.releaseHandle(dropDownButton);
+		OS.destroyHandle(dropDownButton);
 		dropDownButton = null;
 	}
 
 	if (textInput != null) {
-		BrowserNative.releaseHandle(textInput);
+		OS.destroyHandle(textInput);
 		textInput = null;
 	}
 

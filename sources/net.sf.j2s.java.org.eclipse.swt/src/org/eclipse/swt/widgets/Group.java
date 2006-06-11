@@ -17,7 +17,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -362,47 +361,47 @@ boolean mnemonicMatch (char key) {
  */
 protected void releaseHandle() {
 	if (titleLine != null) {
-		BrowserNative.releaseHandle(titleLine);
+		OS.destroyHandle(titleLine);
 		titleLine = null;
 	}
 	if (titleText != null) {
-		BrowserNative.releaseHandle(titleText);
+		OS.destroyHandle(titleText);
 		titleText = null;
 	}
 	if (leftCorner != null) {
-		BrowserNative.releaseHandle(leftCorner);
+		OS.destroyHandle(leftCorner);
 		leftCorner = null;
 	}
 	if (rightCorner != null) {
-		BrowserNative.releaseHandle(rightCorner);
+		OS.destroyHandle(rightCorner);
 		rightCorner = null;
 	}
 	if (bottomLeft != null) {
-		BrowserNative.releaseHandle(bottomLeft);
+		OS.destroyHandle(bottomLeft);
 		bottomLeft = null;
 	}
 	if (bottomRight != null) {
-		BrowserNative.releaseHandle(bottomRight);
+		OS.destroyHandle(bottomRight);
 		bottomRight = null;
 	}
 	if (leftSide != null) {
-		BrowserNative.releaseHandle(leftSide);
+		OS.destroyHandle(leftSide);
 		leftSide = null;
 	}
 	if (rightSide != null) {
-		BrowserNative.releaseHandle(rightSide);
+		OS.destroyHandle(rightSide);
 		rightSide = null;
 	}
 	if (borderFrame != null) {
-		BrowserNative.releaseHandle(borderFrame);
+		OS.destroyHandle(borderFrame);
 		borderFrame = null;
 	}
 	if (content != null) {
-		BrowserNative.releaseHandle(content);
+		OS.destroyHandle(content);
 		content = null;
 	}
 	if (contentBox != null) {
-		BrowserNative.releaseHandle(contentBox);
+		OS.destroyHandle(contentBox);
 		contentBox = null;
 	}
 	super.releaseHandle();

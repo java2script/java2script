@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
@@ -21,7 +22,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -552,8 +552,24 @@ public void clearSelection () {
 		OS.SendMessage (handle, OS.EM_SETSEL, -1, 0);
 	}
 	*/
-	BrowserNative.clearSelection(textHandle);
+	clearSelection(textHandle);
 }
+
+/**
+ * @param handle
+ * @j2sNative
+var handle = arguments[0];
+handle.focus ();
+if (typeof handle.selectionStart != "undefined") {
+	var start = handle.selectionStart;
+	handle.setSelectionRange (start, start);
+} else if (document.selection) {
+	var workRange=document.selection.createRange();
+	workRange.text = workRange.text;
+	workRange.select ();
+}
+ */
+private native void clearSelection(Object handle);
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
@@ -800,8 +816,61 @@ public int getBorderWidth () {
 public int getCaretLineNumber () {
 	checkWidget ();
 	//return OS.SendMessage (handle, OS.EM_LINEFROMCHAR, -1, 0);
-	return BrowserNative.getTextCaretLineNumber (textHandle);
+	return getTextCaretLineNumber (textHandle);
 }
+
+/**
+ * @param textHandle
+ * @return
+ * @j2sNative
+var handle = arguments[0];
+var txt = "";
+if (typeof handle.selectionStart != "undefined") {
+	txt = handle.value.substring (0, handle.selectionStart);
+} else if (document.selection) {
+	handle.focus ();
+	var workRange=document.selection.createRange();
+	workRange.moveStart("character", -65535);
+	if (workRange.htmlText != null) {
+		var s = workRange.htmlText;
+		var key = handle.nodeName;
+		txt = this.parseInnerText (s, key);
+	} else {
+		txt = workRange.text;
+	}
+}
+return txt.split (/\r\n|\r|\n/g).length;
+ */
+private native int getTextCaretLineNumber (Object textHandle);
+
+/**
+ * @param str
+ * @param key
+ * @return
+ * @j2sNative
+var s = arguments[0];
+var key = arguments[1];
+var idx1 = s.lastIndexOf ("</" + key + ">");
+if (idx1 != -1) {
+	var idx2 = s.lastIndexOf ("<" + key, idx1);
+	if (idx2 != -1) {
+		var idx3 = s.indexOf (">", idx2);
+		if (idx3 != -1) {
+			s = s.substring (idx3 + 1, idx1);
+			s = s.replace (/&gt;/g, ">")
+					.replace (/&lt;/g, "<")
+					.replace (/&quot;/g, "\"")
+					.replace (/&apos;/g, "\'")
+					.replace (/&nbsp;/g, " ")
+					.replace (/&amp;/g, "&");
+			// FIXME: still buggy here!
+			return s;
+		}
+	}
+}
+return null;
+ */
+private native String parseInnerText(String s, String key);
 
 /**
  * Returns a point describing the receiver's location relative
@@ -888,8 +957,58 @@ public int getCaretPosition () {
 	if (!OS.IsUnicode && OS.IsDBLocale) caret = mbcsToWcsPos (caret);
 	return caret;
 	*/
-	return BrowserNative.getTextCaretPosition (textHandle);
+	return getTextCaretPosition (textHandle);
 }
+
+/**
+ * @param handle
+ * @return
+ * @j2sNative
+var handle = arguments[0];
+if (typeof handle.selectionStart != "undefined") {
+	return handle.selectionStart;
+} else if (document.selection) {
+	handle.focus ();
+	var workRange = document.selection.createRange();
+	workRange.moveStart ("character", -32767);
+	if (workRange.htmlText != null) {
+		var s = workRange.htmlText;
+		var key = handle.nodeName;
+		var txt = this.parseInnerText (s, key);
+		if (txt != null) {
+			return txt.length;
+		}
+	}
+	return workRange.text.length;
+}
+return -1;
+ */
+private native int getTextCaretPosition(Object handle);
+
+/**
+ * 
+ * @param handle
+ * @return
+ * @j2sNative
+var handle = arguments[0]; 
+if (typeof handle.selectionEnd != "undefined") {
+	return handle.selectionEnd;
+} else if (document.selection) {
+	handle.focus ();
+	var workRange = document.selection.createRange();
+	if (workRange.htmlText != null) {
+		var s = workRange.htmlText;
+		var key = handle.nodeName;
+		var txt = parseInnerText (s, key);
+		if (txt != null) {
+			return txt.length;
+		}
+	}
+	return workRange.text.length;
+}
+return -1;
+ */
+private native int getTextCaretPositionEnd(Object handle);
 
 /**
  * Returns the number of characters.
@@ -1091,8 +1210,25 @@ public Point getSelection () {
 	}
 	return new Point (start [0], end [0]);
 	*/
-	return BrowserNative.getTextSelection(textHandle);
+	return getTextSelection(textHandle);
 }
+
+/**
+ * @param textHandle
+ * @return
+ * @j2sNative
+var handle = arguments[0];
+if (typeof handle.selectionStart != "undefined") {
+	return new org.eclipse.swt.graphics.Point (handle.selectionStart, 
+			handle.selectionEnd);
+} else if (document.selection) {
+	return new org.eclipse.swt.graphics.Point (
+			this.getTextCaretPosition (handle), 
+			this.getTextCaretPositionEnd (handle));
+}
+return new new org.eclipse.swt.graphics.Point (0, 0);
+ */
+private native Point getTextSelection(Object textHandle);
 
 /**
  * Returns the number of selected characters.
@@ -1132,9 +1268,26 @@ public String getSelectionText () {
 	OS.GetWindowText (handle, buffer, length + 1);
 	return buffer.toString (start [0], end [0] - start [0]);
 	*/
-	return BrowserNative.getSelectionText(textHandle);
+	return getSelectionText(textHandle);
 }
 
+/**
+ * 
+ * @param textHandle
+ * @return
+ * @j2sNative
+var handle = arguments[0];
+handle.focus ();
+if (typeof handle.selectionStart != "undefined") {
+	var start = handle.selectionStart;
+	return handle.value.substring (start, handle.selectionEnd);
+} else if (document.selection) {
+	var workRange=document.selection.createRange();
+	return workRange.text;
+}
+return "";
+ */
+private native String getSelectionText(Object textHandle);
 /**
  * Returns the number of tabs.
  * <p>
@@ -1328,7 +1481,7 @@ public int getTopPixel () {
 public void insert (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	Point sel = BrowserNative.getTextSelection(textHandle);
+	Point sel = getTextSelection(textHandle);
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
 		string = verifyText (string, sel.x, sel.y, null);
 		if (string == null) return;
@@ -1357,12 +1510,32 @@ public void insert (String string) {
 	OS.SendMessage (handle, OS.EM_REPLACESEL, 0, buffer);
 	ignoreCharacter = false;
 	*/
-	BrowserNative.insertTextString(textHandle, string);
+	insertTextString(textHandle, string);
 	if ((style & SWT.MULTI) != 0) {
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
 	}
 }
+
+/**
+ * 
+ * @param textHandle
+ * @param string
+ * @j2sNative
+var handle = arguments[0];
+var str = arguments[1];
+handle.focus ();
+if (typeof handle.selectionStart != "undefined") {
+	var start = handle.selectionStart;
+	handle.value = handle.value.substring (0, start) + str + handle.value.substring (handle.selectionEnd);
+	handle.setSelectionRange (start + str.length, start + str.length);
+} else if (document.selection) {
+	var workRange=document.selection.createRange();
+	workRange.text = str;
+	workRange.select ();
+}
+ */
+private native void insertTextString(Object textHandle, String string);
 
 /*
 int mbcsToWcsPos (int mbcsPos) {
@@ -1429,7 +1602,7 @@ public void paste () {
  */
 protected void releaseHandle() {
 	if (textHandle != null) {
-		BrowserNative.releaseHandle(textHandle);
+		OS.destroyHandle(textHandle);
 		textHandle = null;
 	}
 	super.releaseHandle();
@@ -1897,8 +2070,39 @@ public void setSelection (int start, int end) {
 	OS.SendMessage (handle, OS.EM_SETSEL, start, end);
 	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 	*/
-    BrowserNative.setTextSelection (textHandle, start, end);
+    setTextSelection (textHandle, start, end);
 }
+
+/**
+ * 
+ * @param handle
+ * @param start
+ * @param end
+ * @j2sNative
+var handle = arguments[0];
+var start = arguments[1];
+var end = arguments[2];
+handle.focus ();
+if (!(handle.setSelectionRange && handle.createTextRange)) {
+	var s = handle.value.substring (0, start);
+	var count = s.split (/\r\n|\r|\n/g).length;
+	start -= count;
+	end -= count;
+	s = handle.value.substring (start, end);
+	end -= s.split (/\r\n|\r|\n/g).length;
+}
+if (handle.setSelectionRange) {
+	handle.setSelectionRange (start, end);
+} else if (handle.createTextRange) {
+	var range = handle.createTextRange ();
+	range.collapse (true);
+	range.moveStart ("character", start);
+	range.moveEnd ("character", end - start + 1);
+	range.select ();
+}
+handle.focus ();
+ */
+private native void setTextSelection(Object handle, int start, int end);
 
 public void setRedraw (boolean redraw) {
 	checkWidget ();

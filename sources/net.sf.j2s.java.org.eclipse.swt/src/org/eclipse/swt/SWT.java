@@ -30,6 +30,50 @@ package org.eclipse.swt;
  * <em>HINT</em> may change from release to release, although we typically
  * will not withdraw support for a <em>HINT</em> once it is made available.
  * </p>
+ * 
+ * @j2sPrefix 
+Clazz.declarePackage ("org.eclipse.swt");
+$wt = org.eclipse.swt;
+var swtSubPackages = [
+		"accessibility", 
+		"browser", 
+    	"custom", 
+		"dnd",
+    	"events", 
+		"graphics", 
+    	"internal", 
+    	"internal.dnd", 
+		"layout", 
+    	"widgets"
+];
+for (var i = 0; i < swtSubPackages.length; i++) {
+	Clazz.declarePackage ("org.eclipse.swt." + swtSubPackages[i]);
+}
+Clazz.formatParameters = function (funParams) {
+	if (funParams == null || funParams.length == 0) {
+		return "\\void";
+	} else {
+		var s = funParams.toString ();
+		s = s.replace (/~([NABSO])/g, function ($0, $1) {
+			if ($1 == 'N') {
+				return "Number";
+			} else if ($1 == 'B') {
+				return "Boolean"
+			} else if ($1 == 'S') {
+				return "String";
+			} else if ($1 == 'O') {
+				return "Object";
+			} else if ($1 == 'A') {
+				return "Array"
+			}
+			return "Unknown";
+		});
+		return s.replace (/^|,/g, "\\").replace (/\$/g, "org.eclipse.s");
+		//return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\")
+		//		.replace (/\$wt\./g, "org.eclipse.swt.");
+	}
+};
+$WT = 
  */
  
 /* NOTE:

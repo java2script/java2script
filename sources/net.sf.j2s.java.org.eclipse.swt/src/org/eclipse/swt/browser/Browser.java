@@ -11,10 +11,13 @@
 package org.eclipse.swt.browser;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Widget;
 
 /**
  * Instances of this class implement the browser user interface
@@ -116,6 +119,8 @@ public class Browser extends Composite {
 
 	/* Package Name */
 	static final String PACKAGE_PREFIX = "org.eclipse.swt.browser."; //$NON-NLS-1$
+	
+	private Element browserHandle;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -149,25 +154,7 @@ public class Browser extends Composite {
  */
 public Browser(Composite parent, int style) {
 	super(parent, style &~ SWT.BORDER);
-	
-	handle = document.createElement ("IFRAME");
-	//handle.appendChild (document.createTextNode(text));
-	//System.out.println(handle.innerHTML);
-	//System.out.println(parent.handle);
-	handle.style.position = "absolute";
-	handle.style.backgroundColor = "white";
-	if (handle.style.filter != null) {
-		// two more pixel so onmousemove can be triggered before
-		// entering IFRAME
-		handle.style.border = "2px solid menu";
-	}
-	/*
-	 * FIXME:Browser's parent element handle is not safe!!!
-	 */
-	if (getParent().handle != null) {
-		getParent().handle.appendChild(handle);
-	}
-	
+		
 	/*
 	info = Browser.DOCHOSTUIFLAG_THEME;
 	if ((style & SWT.BORDER) == 0) info |= Browser.DOCHOSTUIFLAG_NO3DOUTERBORDER;
@@ -788,9 +775,9 @@ public boolean back() {
 	Variant pVarResult = auto.invoke(rgdispid[0]);
 	return pVarResult != null && pVarResult.getType() == OLE.VT_EMPTY;
 	*/
-	if (handle != null && handle.contentWindow != null) {
+	if (browserHandle != null && browserHandle.contentWindow != null) {
 		try {
-			handle.contentWindow.history.back();
+			browserHandle.contentWindow.history.back();
 			forward = true;
 			return true;
 		} catch (Error e) {
@@ -806,6 +793,17 @@ protected void checkSubclass() {
 	if (!name.substring(0, index + 1).equals(PACKAGE_PREFIX)) {
 		SWT.error(SWT.ERROR_INVALID_SUBCLASS);
 	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#createHandle()
+ */
+protected void createHandle() {
+	super.createHandle();
+	
+	browserHandle = document.createElement ("IFRAME");
+	browserHandle.className = "browser-default";
+	handle.appendChild(browserHandle);
 }
 
 /**
@@ -885,9 +883,9 @@ public boolean forward() {
 	Variant pVarResult = auto.invoke(rgdispid[0]);
 	return pVarResult != null && pVarResult.getType() == OLE.VT_EMPTY;
 	*/
-	if (handle != null && handle.contentWindow != null) {
+	if (browserHandle != null && browserHandle.contentWindow != null) {
 		try {
-			handle.contentWindow.history.forward();
+			browserHandle.contentWindow.history.forward();
 			return true;
 		} catch (Error e) {
 			return false;
@@ -973,13 +971,24 @@ public void refresh() {
 	checkWidget();
 //	int[] rgdispid = auto.getIDsOfNames(new String[] { "Refresh" }); //$NON-NLS-1$
 //	auto.invoke(rgdispid[0]);
-	if (handle != null) {
-		if (handle.contentWindow != null) {
-			handle.contentWindow.reload();
+	if (browserHandle != null) {
+		if (browserHandle.contentWindow != null) {
+			browserHandle.contentWindow.reload();
 		} else { // Opera
-			handle.src = url; //?
+			browserHandle.src = url; //?
 		}
 	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (browserHandle != null) {
+		OS.destroyHandle(browserHandle);
+		browserHandle = null;
+	}
+	super.releaseHandle();
 }
 
 /**	 
@@ -1351,12 +1360,37 @@ public boolean setText(String html) {
 	boolean blankLoading = this.html != null;
 	this.html = html;
 	if (blankLoading) return true;
-	if (handle != null) {
-		BrowserNative.iframeDocumentWrite(handle, html);
+	if (browserHandle != null) {
+		iframeDocumentWrite(browserHandle, html);
 	}
 	this.html = null;
 	return true;
 }
+
+/**
+ * @param handle
+ * @param html
+ * @j2sNative
+var handle = arguments[0];
+var html = arguments[1];
+if (handle.contentWindow != null) {
+	handle.contentWindow.location = "about:blank";
+} else { // Opera
+	handle.src = "about:blank";
+}
+try {
+	handle.contentWindow.document.write (html);
+	handle.contentWindow.document.close ();
+} catch (e) {
+	window.setTimeout ((function () {
+		return function () {
+			handle.contentWindow.document.write (html);
+			handle.contentWindow.document.close ();
+		};
+	}) (), 25);
+}
+ */
+private native void iframeDocumentWrite(Object handle, String html);
 
 /**
  * Loads a URL.
@@ -1425,11 +1459,11 @@ public boolean setUrl(String url) {
 	*/
 	this.url = url;
 	
-	if (handle != null) {
-		if (handle.contentWindow != null) {
-			handle.contentWindow.location = url;
+	if (browserHandle != null) {
+		if (browserHandle.contentWindow != null) {
+			browserHandle.contentWindow.location = url;
 		} else { // Opera
-			handle.src = url;
+			browserHandle.src = url;
 		}
 	}
 	back = true;
@@ -1449,9 +1483,9 @@ public void stop() {
 	checkWidget();
 	//int[] rgdispid = auto.getIDsOfNames(new String[] { "Stop" }); //$NON-NLS-1$
 	//auto.invoke(rgdispid[0]);
-	if (handle != null) {
-		if (handle.contentWindow != null) {
-			handle.contentWindow.stop();
+	if (browserHandle != null) {
+		if (browserHandle.contentWindow != null) {
+			browserHandle.contentWindow.stop();
 		} else { // Opera
 			//handle.src = url; //?
 		}
@@ -1459,12 +1493,15 @@ public void stop() {
 }
 
 public void setBounds(int x, int y, int width, int height) {
+	super.setBounds(x, y, width, height);
 	if (handle.style.filter != null) {
 		// one more pixel so onmousemove can be triggered before
 		// entering IFRAME
-		super.setBounds(x, y, width - 2, height - 2);
+		browserHandle.style.width = (width - 2 > 0 ? width - 2 : 0) + "px";
+		browserHandle.style.height = (height - 2 > 0 ? height - 2 : 0) + "px";
 	} else {
-		super.setBounds(x, y, width - 4, height - 4);
+		browserHandle.style.width = (width - 4 > 0 ? width - 4 : 0) + "px";
+		browserHandle.style.height = (height - 4 > 0 ? height - 4 : 0) + "px";
 	}
 }
 	

@@ -20,6 +20,22 @@ import org.eclipse.swt.widgets.Decorations;
  * @author josson smith
  *
  * 2006-4-24
+ * @j2sSuffix
+var $browserResizingHandle = null;
+$browserLayoutResize = function () {
+	if ($browserResizingHandle != null) {
+		window.clearTimeout ($browserResizingHandle);
+	}
+	$browserResizingHandle = window.setTimeout (function () {
+		org.eclipse.swt.internal.ResizeSystem.updateResize ();
+	}, 50);
+};
+
+try {
+	window.addEventListener('resize', $browserLayoutResize, true);
+} catch (e) {
+	window.onresize = $browserLayoutResize;
+}
  */
 public class ResizeSystem {
 	static ResizeHandler[] handlers = new ResizeHandler[5];

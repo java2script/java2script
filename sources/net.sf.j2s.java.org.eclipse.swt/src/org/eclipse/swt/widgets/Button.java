@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
@@ -636,11 +635,11 @@ boolean mnemonicMatch (char key) {
  */
 protected void releaseHandle() {
 	if (btnText != null) {
-		BrowserNative.releaseHandle(btnText);
+		OS.destroyHandle(btnText);
 		btnText = null;
 	}
 	if (btnHandle != null) {
-		BrowserNative.releaseHandle(btnHandle);
+		OS.destroyHandle(btnHandle);
 		btnHandle = null;
 	}
 	super.releaseHandle();

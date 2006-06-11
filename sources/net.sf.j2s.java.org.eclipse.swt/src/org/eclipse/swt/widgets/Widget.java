@@ -510,6 +510,9 @@ protected void checkWidget () {
  */
 void destroyWidget () {
 	releaseHandle ();
+	if (hoverTimerID != 0) {
+		window.clearTimeout(hoverTimerID);
+	}
 }
 
 /*
@@ -785,7 +788,9 @@ boolean mouseHoverProc() {
 		hoverHooked = true;
 		hoverTimerID = window.setTimeout(Clazz.makeFunction(new Runnable() {
 			public void run() {
-				sendEvent(SWT.MouseHover);
+				if (!isDisposed()) {
+					sendEvent(SWT.MouseHover);
+				}
 				hoverTimerID = 0;
 			}
 		}), 400);
@@ -1355,6 +1360,9 @@ public void removeDisposeListener (DisposeListener listener) {
 
 void sendEvent (Event event) {
 	Display display = event.display;
+	if (display == null) {
+		event.display = display = this.display;
+	}
 	if (!display.filterEvent (event)) {
 		if (eventTable != null) eventTable.sendEvent (event);
 	}

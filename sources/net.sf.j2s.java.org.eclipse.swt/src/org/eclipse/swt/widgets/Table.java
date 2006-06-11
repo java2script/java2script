@@ -240,6 +240,7 @@ boolean checkData (TableItem item, boolean redraw) {
 	if ((style & SWT.VIRTUAL) != 0) {
 		item.cached = true;
 		Event event = new Event ();
+		event.display = display;
 		event.item = item;
 		currentItem = item;
 		sendEvent (SWT.SetData, event);
@@ -686,8 +687,8 @@ protected void createHandle () {
 		OS.SetWindowLong (hwndHeader, OS.GWL_EXSTYLE, bits2 | OS.WS_EX_LAYOUTRTL);
 	}
 	*/
-	handle = document.createElement("DIV");
-	handle.className = "table-default";
+//	handle = document.createElement("DIV");
+	handle.className += " table-default";
 	Element table = document.createElement ("TABLE");
 	//table.style.backgroundColor = "white";
 	handle.appendChild(table);

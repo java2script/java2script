@@ -11,12 +11,16 @@
 package org.eclipse.swt.widgets;
 
  
-import org.eclipse.swt.*;
-import org.eclipse.swt.graphics.*;
-import org.eclipse.swt.internal.xhtml.BrowserNative;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.HelpListener;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.events.*;
 
 /**
  * Instances of this class are user interface objects that contain
@@ -1094,7 +1098,7 @@ protected void releaseChild () {
 
 protected void releaseHandle () {
 	if (handle != null) {
-		BrowserNative.releaseHandle(handle);
+		OS.destroyHandle(handle);
 		handle = null;
 	}
 	super.releaseHandle ();

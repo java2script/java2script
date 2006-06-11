@@ -26,6 +26,10 @@ package org.eclipse.swt;
  * </p>
  *
  * @see SWTError
+ * @j2sPrefix
+ * if (typeof window["RuntimeException"] != "undefined") {
+ * @j2sSuffix
+ * }
  */
 
 public class SWTException extends RuntimeException {
