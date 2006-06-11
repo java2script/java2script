@@ -38,6 +38,17 @@ package java.util;
  * @version 1.24, 01/18/03
  * @see Collection
  * @since 1.2
+ * 
+ * @j2sPrefix
+Clazz.declarePackage ("java.lang.reflect");
+java.lang.reflect.Array = {
+	newInstance : function (type, size) {
+		return new Array (size);
+	}
+};
+Array.getComponentType = function () {
+	return Object;
+};
  */
 
 public abstract class AbstractCollection implements Collection {

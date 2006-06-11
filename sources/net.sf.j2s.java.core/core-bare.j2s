@@ -1,0 +1,6 @@
+#Java2Script Configuration
+#Wed May 03 04:39:51 CST 2006
+j2s.resources.list=j2score/Class.js,j2score/ClassExt.js
+j2s.abandomed.resources.list=
+j2s.output.path=bin
+j2s.compiler.status=enable

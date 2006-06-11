@@ -500,6 +500,31 @@ Clazz.p0pCalling = function () {
 
 w$ = window; // Short for browser's window object
 d$ = document; // Short for browser's document object
+System = {
+	out : {
+		print : function () {},
+		printf : function () {},
+		println : function () {}
+	},
+	err : {
+		print : function () {},
+		printf : function () {},
+		println : function () {}
+	},
+	arraycopy : function (src, srcPos, dest, destPos, length) {
+		for (var i = 0; i < length; i++) {
+			dest[destPos + i] = src[srcPos + i];
+		}
+	}
+};
+log = error = window.alert;
+
+Thread = function () {};
+Thread.J2S_THREAD = Thread.prototype.J2S_THREAD = new Thread ();
+Thread.currentThread = Thread.prototype.currentThread = function () {
+	return this.J2S_THREAD;
+};
+
 
 $_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;
 

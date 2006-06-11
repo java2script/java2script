@@ -580,7 +580,7 @@ return r.join ('');
 			 * @j2sNative
 			var n = b.replace (/\./g, '/') + ".properties";
 			var p = ["bin/", "", "j2slib/"];
-			var r =  new ajax.HttpRequest ();
+			var r =  new net.sf.j2s.ajax.HttpRequest ();
 			var x = 0;
 			while (a == null && x < p.length) {
 				r.open ("GET", p[x] + n, false);
@@ -588,7 +588,7 @@ return r.join ('');
 					r.send ();
 					a = r.getResponseText ();
 				} catch (e) {
-					r =  new ajax.HttpRequest ();
+					r =  new net.sf.j2s.ajax.HttpRequest ();
 				}
 				x++;
 			}
