@@ -23,7 +23,7 @@ c$ = Clazz.decorateAsClass (function () {
 		return this.transport.status;
 	};
 	this.registerOnReadyStateChange = function (handler) {
-		this.transport.onreadystatechange = (function (transport) {
+		this.transport.onreadystatechange = (function (transport, handler) {
 			return function () {
 				var state = transport.readyState;
 				if (handler != null) {
@@ -39,7 +39,7 @@ c$ = Clazz.decorateAsClass (function () {
 					}
 				}
 			};
-		}) (this.transport);
+		}) (this.transport, handler);
 	};
 	this.setRequestHeader = function (key, value) {
 		this.transport.setRequestHeader(key, value);
