@@ -124,6 +124,15 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 	}
 
 	public String toHTMLString() {
+		Resource p = this.getParent();
+		if (p != null) {
+			if (p instanceof ContactedClasses) {
+				Resource pp = p.getParent();
+				if (pp != null && pp instanceof ContactedClasses) {
+					return "";
+				}
+			}
+		}
 		StringBuffer buf = new StringBuffer();
 		if (externalList == null) {
 			this.load();
@@ -143,15 +152,23 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 				}
 			}
 		}
-		if (this.getParent() != null 
-				&& (this.getParent() instanceof CompositeResources)) {
-			CompositeResources cc = (CompositeResources) this.getParent();
-			String binRelative = cc.getBinRelativePath();
-			if (binRelative != null) {
-				if (binRelative.length() != 0 && getRelativePath().endsWith(".z.js")) {
-					return "";
+		if (p != null) {
+			if (p instanceof ContactedClasses) {
+				ContactedClasses cc = (ContactedClasses) p;
+				String path = cc.getRelativePath();
+				int idx = path.lastIndexOf('/');
+				if (idx != -1) {
+					buf.append(path.substring(0, idx + 1));
 				}
-				buf.append(binRelative);
+			} else if (p instanceof CompositeResources) {
+				CompositeResources cc = (CompositeResources) p;
+				String binRelative = cc.getBinRelativePath();
+				if (binRelative != null) {
+					if (binRelative.length() != 0 && getRelativePath().endsWith(".z.js")) {
+						return "";
+					}
+					buf.append(binRelative);
+				}
 			}
 		}
 		buf.append(getRelativePath());

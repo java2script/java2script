@@ -7,9 +7,17 @@ public class CSSResource extends Resource implements IExternalResource {
 //		return getAbsoluteFile().getName();
 //	}
 	public String toHTMLString() {
+		Resource p = this.getParent();
+		if (p != null) {
+			if (p instanceof ContactedClasses) {
+				Resource pp = p.getParent();
+				if (pp != null && pp instanceof ContactedClasses) {
+					return "";
+				}
+			}
+		}
 		StringBuffer buf = new StringBuffer();
 		buf.append("<link rel=\"stylesheet\" href=\"");
-		Resource p = getParent();
 		if (p != null) {
 			if (p instanceof ContactedClasses) {
 				ContactedClasses cc = (ContactedClasses) p;

@@ -308,6 +308,28 @@ public class JarUtil {
 		//String base = "jdtenhance/";
 		
 		File enhanceFolder = new File(enhancePath, "jdtenhance/");
+		boolean isTmpFolderCreated = unzipEnhancedClasses(enhancePath, srcJarFile, backupJarFile, enhanceFolder);
+		String base = enhanceFolder.getAbsolutePath();
+		File[] files = new File(base, COMPILER).listFiles();
+		for (int i = 0; i < files.length; i++) {
+			classList.add(COMPILER + files[i].getName());
+		}
+		files = new File(base, BUILDER).listFiles();
+		for (int i = 0; i < files.length; i++) {
+			classList.add(BUILDER + files[i].getName());
+		}
+		String[] classes = (String[]) classList.toArray(new String[0]);
+		FileInputStream is = new FileInputStream(
+				backupJarFile);
+		FileOutputStream os = new FileOutputStream(
+				srcJarFile);
+		enhance(is, os, classes, base);
+		if (isTmpFolderCreated) {
+			deleteFolder(enhanceFolder);
+		}
+	}
+
+	static boolean unzipEnhancedClasses(String enhancePath, File srcJarFile, File backupJarFile, File enhanceFolder) throws IOException, FileNotFoundException {
 		boolean isTmpFolderCreated = false;
 		if (!enhanceFolder.exists()) {
 			enhanceFolder.mkdirs();
@@ -323,10 +345,12 @@ public class JarUtil {
 			});
 			if (list.length <= 0) {
 				enhanceFolder.delete();
-				boolean renamed = backupJarFile.renameTo(srcJarFile);
-				if (!renamed) {
-					copyFile(backupJarFile, srcJarFile);
-					backupJarFile.delete();
+				if (backupJarFile != null) {
+					boolean renamed = backupJarFile.renameTo(srcJarFile);
+					if (!renamed) {
+						copyFile(backupJarFile, srcJarFile);
+						backupJarFile.delete();
+					}
 				}
 				throw new IOException(new File(enhancePath).getAbsolutePath() + " contains no sources net.sf.j2s.core_x.x.x.jar!");
 			}
@@ -369,24 +393,7 @@ public class JarUtil {
 			zis.close();
 			fis.close();
 		}
-		String base = enhanceFolder.getAbsolutePath();
-		File[] files = new File(base, COMPILER).listFiles();
-		for (int i = 0; i < files.length; i++) {
-			classList.add(COMPILER + files[i].getName());
-		}
-		files = new File(base, BUILDER).listFiles();
-		for (int i = 0; i < files.length; i++) {
-			classList.add(BUILDER + files[i].getName());
-		}
-		String[] classes = (String[]) classList.toArray(new String[0]);
-		FileInputStream is = new FileInputStream(
-				backupJarFile);
-		FileOutputStream os = new FileOutputStream(
-				srcJarFile);
-		enhance(is, os, classes, base);
-		if (isTmpFolderCreated) {
-			deleteFolder(enhanceFolder);
-		}
+		return isTmpFolderCreated;
 	}
 
 	public static void deleteFolder(File folder) {
@@ -413,7 +420,9 @@ public class JarUtil {
 		}
 		List classList = new ArrayList();
 		classList.add("plugin.xml");
-		String base = new File(enhancePath, "jdtenhance/").getAbsolutePath();
+		File enhanceFolder = new File(enhancePath, "jdtenhance/");
+		String base = enhanceFolder.getAbsolutePath();
+		boolean isTmpFolderCreated = unzipEnhancedClasses(enhancePath, srcJarFile, null, enhanceFolder);
 		File[] files = new File(base, COMPILER).listFiles();
 		for (int i = 0; i < files.length; i++) {
 			classList.add(COMPILER + files[i].getName());
@@ -428,6 +437,9 @@ public class JarUtil {
 		FileOutputStream os = new FileOutputStream(
 				destJarFile);
 		enhance(is, os, classes, base);
+		if (isTmpFolderCreated) {
+			deleteFolder(enhanceFolder);
+		}
 	}
 
 }

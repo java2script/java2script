@@ -106,7 +106,7 @@ public class J2SView extends ViewPart {
 		fDialogSettings= Java2ScriptUIPlugin.getDefault().getDialogSettings();
 		fDoLinkWithEditor= fDialogSettings.getBoolean(SETTINGS_LINK_WITH_EDITOR);
 		fScriptWritten= !fDialogSettings.getBoolean(SETTINGS_NO_SCRIPT_WRITTEN);
-		fCompressVarName = !fDialogSettings.getBoolean(SETTINGS_COMPRESS_VAR_NAME);
+		fCompressVarName = fDialogSettings.getBoolean(SETTINGS_COMPRESS_VAR_NAME);
 		fCurrentASTLevel = AST.JLS3;
 	}
 
@@ -203,13 +203,13 @@ public class J2SView extends ViewPart {
 		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
 		//fScriptWrittenAction.setEnabled(fScriptWritten);
 		*/
-		fCompressVarNameAction = new Action("Enable Name Compressing", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+		fCompressVarNameAction = new Action("Enable Identifier Minimization", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
 				performCompressName();
 			}
 		};
 		fCompressVarNameAction.setChecked(fCompressVarName);
-		fCompressVarNameAction.setToolTipText("Compress the variable name when converting"); //$NON-NLS-1$
+		fCompressVarNameAction.setToolTipText("Minimization of identifiers for small script size"); //$NON-NLS-1$
 		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
 		//fCompressVarNameAction.setEnabled(fCompressVarName);
 

@@ -172,6 +172,7 @@
          </action>
       </viewerContribution>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.exportWizards">
       <wizard
@@ -182,6 +183,7 @@
          <description>Export Java2Script applications as standalone application</description>
       </wizard>
    </extension>
+   -->
    <extension
          point="org.eclipse.jdt.ui.javadocCompletionProcessor">
       <javadocCompletionProcessor

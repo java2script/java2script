@@ -120,27 +120,6 @@ public class J2SLaunchingUtil {
 					}
 				}
 			}
-			
-//			String binPath = "j2score";
-//			boolean useInnerConsole = configuration.getAttribute(
-//					IJ2SLauchingConfiguration.INNER_CONSOLE, true);
-//			if (useInnerConsole) {
-//				buf.append("<link rel=\"stylesheet\" href=\"");
-//				buf.append(binPath);
-//				buf.append("/console.css\"/>\r\n");
-//				buf.append(wrapTypeJS("java.lang.NativeConsole", binPath));
-//			}
-//			String[] classes = new String[] {
-//					"java.lang.Class", 
-//					"java.lang.Object", 
-//					"java.lang.NoSuchMethodException", 
-//					"java.lang.Runnable", 
-//					"java.lang.Encoding", 
-//					"java.lang.String"
-//			};
-//			for (int i = 0; i < classes.length; i++) {
-//				buf.append(wrapTypeJS(classes[i], binPath));
-//			}
 		} else {
 			CompositeResources fModel= new CompositeResources();
 			fModel.setFolder(workingDir);
@@ -164,6 +143,24 @@ public class J2SLaunchingUtil {
 		
 		if (buf.indexOf(relativePath + "/" + mainType.replace('.', '/') + ".js") == -1) {
 			buf.append(wrapTypeJS(mainType, relativePath));
+		}
+		String str = buf.toString();
+		buf = new StringBuffer();
+		String[] split = str.split("\r\n|\r|\n");
+		Set set = new HashSet();
+		for (int i = 0; i < split.length; i++) {
+			if (set.contains(split[i])) {
+				String line = split[i].toLowerCase();
+				if (line.startsWith("<script ") && line.indexOf("src=") != -1) {
+					continue;
+				}
+				if (line.startsWith("<link ") && line.indexOf("href=") != -1) {
+					continue;
+				}
+			}
+			set.add(split[i]);
+			buf.append(split[i]);
+			buf.append("\r\n");
 		}
 		return buf.toString();
 	}
