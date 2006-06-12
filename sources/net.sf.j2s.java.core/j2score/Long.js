@@ -48,3 +48,11 @@ function (s) {
 return Long.parseLong (s, 10);
 }, "String");
 Long.parseLong = Long.prototype.parseLong;
+
+Clazz.defineMethod (Long, "equals", 
+function (s) {
+if(s == null || ! Clazz.instanceOf(s, Long) ){
+	return false;
+}
+return s.valueOf()  == this.valueOf();
+}, "Object");

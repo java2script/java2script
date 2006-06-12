@@ -4,7 +4,7 @@ Clazz.instantialize (this, arguments);
 };
 Clazz.decorateAsType (Double, "Double", Number, Comparable);
 Double.prototype.valueOf = function () { return 0; };
-Integer.prototype.toString = function () {
+Double.prototype.toString = function () {
 	return "" + this.valueOf ();
 };
 Clazz.makeConstructor (Double, 
@@ -43,3 +43,10 @@ return parseFloat (s);
 }, "String");
 Double.parseDouble = Double.prototype.parseDouble;
 
+Clazz.defineMethod (Double, "equals", 
+function (s) {
+if(s == null || ! Clazz.instanceOf(s, Double) ){
+	return false;
+}
+return s.valueOf()  == this.valueOf();
+}, "Object");

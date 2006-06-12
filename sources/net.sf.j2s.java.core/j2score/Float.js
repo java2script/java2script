@@ -4,7 +4,7 @@ Clazz.instantialize (this, arguments);
 };
 Clazz.decorateAsType (Float, "Float", Number, Comparable);
 Float.prototype.valueOf = function () { return 0; };
-Integer.prototype.toString = function () {
+Float.prototype.toString = function () {
 	return "" + this.valueOf ();
 };
 Clazz.makeConstructor (Float, 
@@ -46,4 +46,12 @@ function (num) {
 return isNaN (num);
 }, "Number");
 Float.isNaN = Float.prototype.isNaN;
+
+Clazz.defineMethod (Float, "equals", 
+function (s) {
+if(s == null || ! Clazz.instanceOf(s, Float) ){
+	return false;
+}
+return s.valueOf()  == this.valueOf();
+}, "Object");
 

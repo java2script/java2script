@@ -48,3 +48,11 @@ function (s) {
 return Integer.parseInt (s, 10);
 }, "String");
 Integer.parseInt = Integer.prototype.parseInt;
+
+Clazz.defineMethod (Integer, "equals", 
+function (s) {
+if(s == null || ! Clazz.instanceOf(s, Integer) ){
+	return false;
+}
+return s.valueOf()  == this.valueOf();
+}, "Object");
