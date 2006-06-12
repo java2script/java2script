@@ -623,6 +623,7 @@ void createItem (CTabItem item, final int index) {
 		Event event = new Event ();
 		event.item = items [0];
 		sendEvent (SWT.Selection, event);
+
 	}
 }
 void destroyItem (CTabItem item) {
@@ -3325,6 +3326,7 @@ void setSelection (int index, boolean notify) {
 	 */
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
+	System.out.println("setselection called! at " + oldIndex + " at " + index);
 	/*
 	 * Whenever the old index is equals to the requested index
 	 * do nothing. 
@@ -3432,19 +3434,20 @@ void updateSelection(int index) {
 		if (cssName == null) cssName = "";
 		int idx = cssName.indexOf(key);
 		if (idx == -1) {
-			int w = OS.getContainerWidth(items[index].rightEl) + OS.getContainerWidth(items[index].textEl);
 			items[index].handle.className += " " + key;
 			items[index].rightEl.className = items[index].cssClassForRight();
 			items[index].handle.style.height = (OS.getContainerHeight(buttonArea) + 3) + "px";
 			items[index].rightEl.style.height = items[index].handle.style.height;
 			items[index].isSelected = true;
+			int w = OS.getContainerWidth(items[index].rightEl) + OS.getContainerWidth(items[index].textEl);
 			if(!simple){
-				w += 24;
+				//w += 24;
 //				w += showClose ? 24 : 15;
 			}
 			//items[index].rightEl.style.backgroundColor = "white";
 			CSSStyle s = items[index].handle.style;
 			s.width = w + "px";
+			System.out.println("xxx S WIDTH : " + s.width + " " + OS.getContainerWidth(items[index].rightEl) + " " + OS.getContainerWidth(items[index].textEl));
 		}
 		items[index].handle.style.zIndex = (items.length + 1) + "";
 		//System.out.println("????");

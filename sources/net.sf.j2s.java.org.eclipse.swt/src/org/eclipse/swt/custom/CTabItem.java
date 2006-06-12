@@ -582,6 +582,7 @@ public void setText (String string) {
 		handle.appendChild(rightEl);
 		configureRightEl();
 		//handle.appendChild(document.createTextNode(string));
+		parent.updateSelection(parent.getSelectionIndex());
 	}
 //	int index = parent.indexOf (this);
 //	if (index == -1) return;
