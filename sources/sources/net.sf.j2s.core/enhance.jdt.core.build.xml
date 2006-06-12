@@ -1,0 +1,18 @@
+<project name="enhance.jdt.core" default="enhance" basedir=".">
+    <target name="enhance" description="Enhance">
+    	<delete file="dist/org.eclipse.jdt.core_3.1.1.jar" quiet="yes"/>
+    	<copy file="bakup/org.eclipse.jdt.core_3.1.1.jar" tofile="dist/org.eclipse.jdt.core_3.1.1.jar" overwrite="yes"/>
+    	<jar destfile="dist/org.eclipse.jdt.core_3.1.1.jar" update="yes">
+    		<fileset dir="bin" includes="org/eclipse/jdt/**"/>
+    		<fileset dir="bakup" includes="plugin.xml"/>
+    	</jar>
+    </target>
+    <target name="enhance-3.1.2" description="Enhance">
+    	<delete file="dist/org.eclipse.jdt.core_3.1.2.jar" quiet="yes"/>
+    	<copy file="bakup/org.eclipse.jdt.core_3.1.2.jar" tofile="dist/org.eclipse.jdt.core_3.1.2.jar" overwrite="yes"/>
+    	<jar destfile="dist/org.eclipse.jdt.core_3.1.2.jar" update="yes">
+    		<fileset dir="bin" includes="org/eclipse/jdt/**"/>
+    		<fileset dir="bakup" includes="plugin.xml"/>
+    	</jar>
+    </target>
+</project>
