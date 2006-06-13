@@ -1492,6 +1492,14 @@ public void setText (int index, String string) {
 	text.ondblclick = new RunnableCompatibility() {
 		public void run() {
 			toggleExpandStatus();
+			// Adding default selection event for double click
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.DefaultSelection;
+			e.detail = SWT.NONE;
+			e.item = TreeItem.this;
+			e.widget = TreeItem.this;
+			parent.sendEvent(e);
 			toReturn(false);
 		}
 	};
