@@ -18,15 +18,14 @@ import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.NameConvertItem;
 import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
+import net.sf.j2s.core.builder.SourceFile;
+import net.sf.j2s.core.builder.SourceFileProxy;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.compiler.IExtendedCompiler;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
-import org.eclipse.jdt.internal.core.builder.SourceFile;
-import org.eclipse.jdt.internal.core.builder.SourceFileProxy;
 
 public class Java2ScriptCompiler implements IExtendedCompiler {
 

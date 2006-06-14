@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.compiler;
+package net.sf.j2s.core.compiler;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,7 +26,7 @@ public class ExtendedCompilers {
 		isExtensionPointsChecked = true;
 		IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
 		IExtensionPoint extensionPoint = extensionRegistry
-				.getExtensionPoint("org.eclipse.jdt.core.extendedCompiler"); //$NON-NLS-1$
+				.getExtensionPoint("net.sf.j2s.core.extendedCompiler"); //$NON-NLS-1$
 		if (extensionPoint == null) {
 			return;
 		}

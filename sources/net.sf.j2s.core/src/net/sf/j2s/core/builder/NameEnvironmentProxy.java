@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.builder;
+package net.sf.j2s.core.builder;
 
 public class NameEnvironmentProxy {
 
