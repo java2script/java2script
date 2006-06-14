@@ -1,8 +1,8 @@
 #Java2Script Configuration
-#Wed Jun 14 17:19:08 CST 2006
+#Thu Jun 15 00:01:04 CST 2006
+j2s.abandoned.resources.list=
 j2s.compiler.abbreviation=true
 j2s.compiler.status=enable
-j2s.abandomed.resources.list=
 j2s.compiler.abbreviation.prefix=$_
 j2s.compiler.mode=debug
 j2s.resources.list=bin/net/sf/j2s/ajax/internal/AJAXContainerInitializer.js,bin/net/sf/j2s/ajax/internal/AJAXContainer.js,bin/net/sf/j2s/ajax/XHRCallbackSWTAdapter.js,bin/net/sf/j2s/ajax/XHRCallbackAdapter.js,bin/net/sf/j2s/ajax/IXHRCallback.js,bin/net/sf/j2s/ajax/HttpRequest.js,bin/net/sf/j2s/ajax/AjaxPlugin.js,bin/net/sf/j2s/ajax/internal/AJAXVariableInitializer.js,bin/net/sf/j2s/ajax/AJAXVariableInitializer.js
