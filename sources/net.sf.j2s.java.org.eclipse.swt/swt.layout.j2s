@@ -1,7 +1,7 @@
 #Java2Script Configuration
 #Tue May 02 22:59:43 CST 2006
 j2s.resources.list=bin/org/eclipse/swt/widgets/Layout.js,bin/org/eclipse/swt/layout/FillData.js,bin/org/eclipse/swt/layout/FormData.js,bin/org/eclipse/swt/layout/GridData.js,bin/org/eclipse/swt/layout/RowData.js,bin/org/eclipse/swt/layout/FormAttachment.js,bin/org/eclipse/swt/layout/FillLayout.js,bin/org/eclipse/swt/layout/FormLayout.js,bin/org/eclipse/swt/layout/GridLayout.js,bin/org/eclipse/swt/layout/RowLayout.js
-j2s.abandomed.resources.list=
+j2s.abandoned.resources.list=
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.output.path=bin
 j2s.compiler.status=enable

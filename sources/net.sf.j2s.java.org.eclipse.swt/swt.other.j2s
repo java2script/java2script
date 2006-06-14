@@ -1,7 +1,7 @@
 #Java2Script Configuration
 #Tue May 02 22:59:43 CST 2006
 j2s.resources.list=bin/org/eclipse/swt/browser/Browser.js,bin/org/eclipse/swt/program/Program.js,bin/org/eclipse/swt/printing/Printer.js,bin/org/eclipse/swt/printing/PrinterData.js,bin/org/eclipse/swt/printing/PrintDialog.js
-j2s.abandomed.resources.list=
+j2s.abandoned.resources.list=
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.output.path=bin
 j2s.compiler.status=enable

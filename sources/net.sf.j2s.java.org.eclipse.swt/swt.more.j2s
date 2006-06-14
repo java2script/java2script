@@ -1,7 +1,7 @@
 #Java2Script Configuration
 #Tue May 02 22:59:43 CST 2006
 j2s.resources.list=bin/org/eclipse/swt/widgets/ScrollBar.js,bin/org/eclipse/swt/widgets/Monitor.js,bin/org/eclipse/swt/widgets/Caret.js,bin/org/eclipse/swt/widgets/Spinner.js,bin/org/eclipse/swt/widgets/ProgressBar.js,bin/org/eclipse/swt/widgets/Scale.js,bin/org/eclipse/swt/internal/dnd/ScaleDND.js,bin/org/eclipse/swt/widgets/Slider.js,bin/org/eclipse/swt/internal/dnd/SliderDND.js,bin/org/eclipse/swt/widgets/MenuItem.js,bin/org/eclipse/swt/widgets/Menu.js,bin/org/eclipse/swt/widgets/Monitor.js,bin/org/eclipse/swt/widgets/TableItem.js,bin/org/eclipse/swt/widgets/TableColumn.js,bin/org/eclipse/swt/widgets/Table.js,bin/org/eclipse/swt/widgets/TreeItem.js,bin/org/eclipse/swt/widgets/TreeColumn.js,bin/org/eclipse/swt/widgets/Tree.js,bin/org/eclipse/swt/widgets/ToolBar.js,bin/org/eclipse/swt/widgets/ToolItem.js,bin/org/eclipse/swt/widgets/CoolBar.js,bin/org/eclipse/swt/widgets/CoolItem.js,bin/org/eclipse/swt/widgets/ColorDialog.js,bin/org/eclipse/swt/widgets/DirectoryDialog.js,bin/org/eclipse/swt/widgets/FileDialog.js,bin/org/eclipse/swt/widgets/FontDialog.js
-j2s.abandomed.resources.list=
+j2s.abandoned.resources.list=
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.output.path=bin
 j2s.compiler.status=enable
