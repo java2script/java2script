@@ -13,7 +13,7 @@ import java.util.Properties;
 
 public class PathUtil {
 	public static final String J2S_RESOURCES_LIST = "j2s.resources.list";
-	public static final String J2S_ABANDOMED_RESOURCES_LIST = "j2s.abandomed.resources.list";
+	public static final String J2S_ABANDOMED_RESOURCES_LIST = "j2s.abandoned.resources.list";
 	public static final String J2S_OUTPUT_PATH = "j2s.output.path";
 
 	public static void hello() {
@@ -60,7 +60,7 @@ public class PathUtil {
 		}
 		return new String[0];
 	}
-	public static String[] getAbandomedResources(Properties props) {
+	public static String[] getAbandonedResources(Properties props) {
 		String listStr = props.getProperty(J2S_ABANDOMED_RESOURCES_LIST);
 		if (listStr != null) {
 			String[] splits = listStr.split(",");

@@ -87,13 +87,13 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 				ILaunchConfigurationWorkingCopy configCopy = ((ILaunchConfigurationWorkingCopy)fLaunchConfiguration);
 				try {
 					String classpath = configCopy.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
-					String abandomClasspath = configCopy.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDOM_CLASS_PATH, (String) null);
+					String abandonClasspath = configCopy.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
 					if ((classpath == null || classpath.trim().length() == 0) &&
-							(abandomClasspath == null || abandomClasspath.trim().length() == 0)){
+							(abandonClasspath == null || abandonClasspath.trim().length() == 0)){
 						return ;
 					}
 					configCopy.setAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
-					configCopy.setAttribute(IJ2SLauchingConfiguration.J2S_ABANDOM_CLASS_PATH, (String) null);
+					configCopy.setAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
 					IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 					String projectName = fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
 					if ((projectName == null) || (projectName.trim().length() < 1)) {
@@ -161,9 +161,9 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 			}
 			File j2sFile = new File(workingDir, ".j2s");
 			String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
-			String abandomClasspath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDOM_CLASS_PATH, (String) null);
+			String abandonClasspath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
 			if ((classpath == null || classpath.trim().length() == 0) &&
-					(abandomClasspath == null || abandomClasspath.trim().length() == 0)){
+					(abandonClasspath == null || abandonClasspath.trim().length() == 0)){
 				configPage.initConfigPage(j2sFile);
 			} else {
 				if (relativePath == null) {
@@ -171,7 +171,7 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 				}
 				String propStr = "j2s.compiler.status=enable\r\nj2s.output.path=" + relativePath 
 						+ "\r\nj2s.resources.list=" + classpath
-						+ "\r\nj2s.abandomed.resources.list=" + abandomClasspath;
+						+ "\r\nj2s.abandoned.resources.list=" + abandonClasspath;
 				configPage.initConfigPage(j2sFile, new ByteArrayInputStream(propStr.getBytes()));
 			}
 		} catch (CoreException e) {
@@ -211,21 +211,21 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 			}
 			File j2sFile = new File(workingDir, ".j2s");
 			String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
-			String abandomClasspath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDOM_CLASS_PATH, (String) null);
+			String abandonClasspath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
 			if (relativePath == null) {
 				relativePath = "";
 			}
 			String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.resources.list=" + classpath
-			 		+ "\r\nj2s.abandomed.resources.list==" + abandomClasspath;
+			 		+ "\r\nj2s.abandoned.resources.list==" + abandonClasspath;
 			InputStream is = new ByteArrayInputStream(propStr.getBytes());
 			Properties prop = configPage.getUpdatedProperties(is, j2sFile);
 			String resList = prop.getProperty("j2s.resources.list");
 			if (!resList.equals(classpath)) {
 				configuration.setAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, resList);
 			}
-			resList = prop.getProperty("j2s.abandomed.resources.list");
+			resList = prop.getProperty("j2s.abandoned.resources.list");
 			if (!resList.equals(classpath)) {
-				configuration.setAttribute(IJ2SLauchingConfiguration.J2S_ABANDOM_CLASS_PATH, resList);
+				configuration.setAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, resList);
 			}
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block

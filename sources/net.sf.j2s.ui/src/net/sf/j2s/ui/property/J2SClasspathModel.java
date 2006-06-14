@@ -26,7 +26,7 @@ import net.sf.j2s.ui.classpath.UnitClass;
 public class J2SClasspathModel {
 	protected List resources = new ArrayList();
 	protected List unitClasses = new ArrayList();
-	protected List abandomedClasses = new ArrayList();
+	protected List abandonedClasses = new ArrayList();
 	
 	public void addResource(Resource res) {
 		resources.add(res);
@@ -42,20 +42,20 @@ public class J2SClasspathModel {
 		unitClasses.remove(cl);
 	}
 	
-	public void addAbandomedClass(UnitClass cl) {
-		abandomedClasses.add(cl);
+	public void addAbandonedClass(UnitClass cl) {
+		abandonedClasses.add(cl);
 	}
-	public void removeAbandomedClass(UnitClass cl) {
-		abandomedClasses.remove(cl);
+	public void removeAbandonedClass(UnitClass cl) {
+		abandonedClasses.remove(cl);
 	}
 
-	public void abandomUnitClass(UnitClass cl) {
+	public void abandonUnitClass(UnitClass cl) {
 		unitClasses.remove(cl);
-		abandomedClasses.add(cl);
+		abandonedClasses.add(cl);
 	}
 	
 	public void restoreUnitClass(UnitClass cl) {
-		abandomedClasses.remove(cl);
+		abandonedClasses.remove(cl);
 		unitClasses.add(cl);
 	}
 	
@@ -67,14 +67,14 @@ public class J2SClasspathModel {
 		return (UnitClass[]) unitClasses.toArray(new UnitClass[0]);
 	}
 	
-	public UnitClass[] getAbandomedClasses() {
-		return (UnitClass[]) abandomedClasses.toArray(new UnitClass[0]);
+	public UnitClass[] getAbandonedClasses() {
+		return (UnitClass[]) abandonedClasses.toArray(new UnitClass[0]);
 	}
 	
 	static String[] categories = new String[] {
 		"Resources",
 		"Classes",
-		"Abandomed Classes"
+		"Abandoned Classes"
 	};
 	public J2SCategory[] getCategories() {
 		J2SCategory[] ctgs = new J2SCategory[3];
@@ -92,14 +92,14 @@ public class J2SClasspathModel {
 		return unitClasses.contains(res);
 	}
 	
-	public boolean isResourceInAbandoms(Object res) {
-		return abandomedClasses.contains(res);
+	public boolean isResourceInAbandons(Object res) {
+		return abandonedClasses.contains(res);
 	}
 	
 	public void removeTheResource(Resource res) {
 		if (!resources.remove(res)) {
 			if (!unitClasses.remove(res)) {
-				abandomedClasses.remove(res);
+				abandonedClasses.remove(res);
 			}
 		}
 	}

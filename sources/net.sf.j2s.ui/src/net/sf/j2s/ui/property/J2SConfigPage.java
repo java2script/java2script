@@ -68,7 +68,7 @@ public class J2SConfigPage extends Composite {
 	protected J2SClasspathModel classpathModel;
 	private Button buttonDown;
 	private Button buttonRemove;
-	private Button buttonAbandom;
+	private Button buttonAbandon;
 	private Button buttonRestore;
 	private Button buttonAddRes;
 	private Button buttonAddInnerRes;
@@ -174,7 +174,7 @@ public class J2SConfigPage extends Composite {
 				} else if (isClassesSelected()) {
 					up(getSelection(), classpathModel.unitClasses);
 				} else {
-					up(getSelection(), classpathModel.abandomedClasses);
+					up(getSelection(), classpathModel.abandonedClasses);
 				}
 				ScrollBar bar = viewer.getTree().getVerticalBar();
 				double selection = 0;
@@ -201,7 +201,7 @@ public class J2SConfigPage extends Composite {
 				} else if (isClassesSelected()) {
 					down(getSelection(), classpathModel.unitClasses);
 				} else {
-					down(getSelection(), classpathModel.abandomedClasses);
+					down(getSelection(), classpathModel.abandonedClasses);
 				}
 				ScrollBar bar = viewer.getTree().getVerticalBar();
 				double selection = 0;
@@ -241,13 +241,13 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonAbandom = SWTUtil.createPushButton(actionComp, "Abandom Classes", null);
-		buttonAbandom.addSelectionListener(new SelectionAdapter() {
+		buttonAbandon = SWTUtil.createPushButton(actionComp, "Abandon Classes", null);
+		buttonAbandon.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
 				Object[] sels = getSelection();
 				for (int i = 0; i < sels.length; i++) {
-					classpathModel.abandomUnitClass((UnitClass) sels[i]);
+					classpathModel.abandonUnitClass((UnitClass) sels[i]);
 				}
 				ScrollBar bar = viewer.getTree().getVerticalBar();
 				double selection = 0;
@@ -271,8 +271,8 @@ public class J2SConfigPage extends Composite {
 				Object[] sels = getSelection();
 				for (int i = 0; i < sels.length; i++) {
 					if (sels[i] instanceof J2SCategory) {
-						for (int j = classpathModel.abandomedClasses.size() - 1; j >= 0; j--) {
-							classpathModel.restoreUnitClass((UnitClass) classpathModel.abandomedClasses.get(j));
+						for (int j = classpathModel.abandonedClasses.size() - 1; j >= 0; j--) {
+							classpathModel.restoreUnitClass((UnitClass) classpathModel.abandonedClasses.get(j));
 						}
 						break;
 					}
@@ -316,8 +316,8 @@ public class J2SConfigPage extends Composite {
 	
 	private boolean isLastElementSelected() {
 		Object[] sels = getSelection();
-		if (classpathModel.abandomedClasses.size() > 0) {
-			Object res = classpathModel.abandomedClasses.get(classpathModel.abandomedClasses.size() - 1);
+		if (classpathModel.abandonedClasses.size() > 0) {
+			Object res = classpathModel.abandonedClasses.get(classpathModel.abandonedClasses.size() - 1);
 			for (int i = 0; i < sels.length; i++) {
 				if (res == sels[i]) {
 					return true;
@@ -344,8 +344,8 @@ public class J2SConfigPage extends Composite {
 	}
 	private boolean isFirstElementSelected() {
 		Object[] sels = getSelection();
-		if (classpathModel.abandomedClasses.size() > 0) {
-			Object res = classpathModel.abandomedClasses.get(0);
+		if (classpathModel.abandonedClasses.size() > 0) {
+			Object res = classpathModel.abandonedClasses.get(0);
 			for (int i = 0; i < sels.length; i++) {
 				if (res == sels[i]) {
 					return true;
@@ -402,7 +402,7 @@ public class J2SConfigPage extends Composite {
 	}
 	
 	protected void updateButtonGroup() {
-		buttonAbandom.setEnabled(false);
+		buttonAbandon.setEnabled(false);
 		buttonRestore.setEnabled(false);
 		buttonRemove.setEnabled(false);
 		buttonDown.setEnabled(false);
@@ -426,10 +426,10 @@ public class J2SConfigPage extends Composite {
 				buttonAddRes.setEnabled(true);
 				buttonAddInnerRes.setEnabled(true);
 			} else {
-				if (isAbandomsSelected()) {
+				if (isAbandonsSelected()) {
 					buttonRestore.setEnabled(true);
 				} else {
-					buttonAbandom.setEnabled(true);
+					buttonAbandon.setEnabled(true);
 				}
 			}
 		} else if (!isSelectionContainsCategory() && getSelection().length > 0) {
@@ -440,7 +440,7 @@ public class J2SConfigPage extends Composite {
 				buttonAddPrj.setEnabled(true);
 				buttonAddInnerRes.setEnabled(true);
 				buttonAddRes.setEnabled(true);
-			} else if (isAbandomedCategorySelected() && classpathModel.abandomedClasses.size() > 0) {
+			} else if (isAbandonedCategorySelected() && classpathModel.abandonedClasses.size() > 0) {
 				buttonRestore.setEnabled(true);
 			}
 		}
@@ -497,7 +497,7 @@ public class J2SConfigPage extends Composite {
 		}
 		boolean b3 = false;
 		for (int i = 0; i < sels.length; i++) {
-			if (classpathModel.isResourceInAbandoms(sels[i])) {
+			if (classpathModel.isResourceInAbandons(sels[i])) {
 				b3 = true;
 				break;
 			}
@@ -540,7 +540,7 @@ public class J2SConfigPage extends Composite {
 		}
 		return b;
 	}
-	private boolean isAbandomedCategorySelected() {
+	private boolean isAbandonedCategorySelected() {
 		Object[] sels = getSelection();
 		boolean b = false;
 		for (int i = 0; i < sels.length; i++) {
@@ -565,11 +565,11 @@ public class J2SConfigPage extends Composite {
 		}
 		return b;
 	}
-	private boolean isAbandomsSelected() {
+	private boolean isAbandonsSelected() {
 		Object[] sels = getSelection();
 		boolean b = false;
 		for (int i = 0; i < sels.length; i++) {
-			if (classpathModel.isResourceInAbandoms(sels[i])) {
+			if (classpathModel.isResourceInAbandons(sels[i])) {
 				b = true;
 				break;
 			}
@@ -624,11 +624,11 @@ public class J2SConfigPage extends Composite {
 				classpathModel.addResource(res);
 			}
 		}
-		children = comp.getAbandomedResources();
+		children = comp.getAbandonedResources();
 		for (int i = 0; i < children.length; i++) {
 			Resource res = children[i];
 			if (res instanceof UnitClass) {
-				classpathModel.addAbandomedClass((UnitClass) res);
+				classpathModel.addAbandonedClass((UnitClass) res);
 			} else {
 				//classpathModel.addResource(res);
 			}
@@ -671,7 +671,7 @@ public class J2SConfigPage extends Composite {
 					System.out.println(res.toHTMLString());
 				}
 				System.out.println("========");
-				for (Iterator iter = model.abandomedClasses.iterator(); iter.hasNext();) {
+				for (Iterator iter = model.abandonedClasses.iterator(); iter.hasNext();) {
 					Resource res = (Resource) iter.next();
 					System.out.println(res.toHTMLString());
 				}
@@ -719,7 +719,7 @@ public class J2SConfigPage extends Composite {
 		if (editable) {
 			updateButtonGroup();
 		} else {
-			buttonAbandom.setEnabled(false);
+			buttonAbandon.setEnabled(false);
 			buttonRestore.setEnabled(false);
 			buttonRemove.setEnabled(false);
 			buttonDown.setEnabled(false);
@@ -773,7 +773,7 @@ public class J2SConfigPage extends Composite {
 		}
 		props.setProperty("j2s.resources.list", buffer.toString());
 
-		ress = classpathModel.abandomedClasses;
+		ress = classpathModel.abandonedClasses;
 		buffer = new StringBuffer();
 		for (Iterator iter = ress.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
@@ -785,7 +785,7 @@ public class J2SConfigPage extends Composite {
 				buffer.append(resPath);
 			}
 		}
-		props.setProperty("j2s.abandomed.resources.list", buffer.toString());
+		props.setProperty("j2s.abandoned.resources.list", buffer.toString());
 		if (isCompilerEnabled()) {
 			props.setProperty("j2s.compiler.status", "enable");
 		} else {

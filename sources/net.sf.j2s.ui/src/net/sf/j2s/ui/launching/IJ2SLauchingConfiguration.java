@@ -14,5 +14,5 @@ public interface IJ2SLauchingConfiguration {
 	public static final String HEAD_HEADER_HTML = "head.header.html";
 	
 	public static final String J2S_CLASS_PATH = "j2s.class.path";
-	public static final String J2S_ABANDOM_CLASS_PATH = "j2s.abandom.class.path";
+	public static final String J2S_ABANDON_CLASS_PATH = "j2s.abandon.class.path";
 }

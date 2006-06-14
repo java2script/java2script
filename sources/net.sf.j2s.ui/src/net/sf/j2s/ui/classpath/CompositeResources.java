@@ -13,7 +13,7 @@ import java.util.Properties;
 
 public class CompositeResources extends Resource implements IClasspathContainer {
 	protected List resources;
-	protected List abandomedResources;
+	protected List abandonedResources;
 	//private Resource[] children;
 	private String binRelativePath;
 
@@ -52,7 +52,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 	public void load() {
 		File file = getAbsoluteFile();
 		resources = new ArrayList();
-		abandomedResources = new ArrayList();
+		abandonedResources = new ArrayList();
 		if (file != null && file.exists()) {
 			InputStream fis = null;
 			try {
@@ -69,7 +69,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 	}
 	public void load(InputStream fis) {
 		resources = new ArrayList();
-		abandomedResources = new ArrayList();
+		abandonedResources = new ArrayList();
 		if (fis != null) {
 			Properties props = new Properties();
 			try {
@@ -88,8 +88,8 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 			String[] reses = PathUtil.getResources(props);
 			addResourceByString(resources, reses);
 			
-			reses = PathUtil.getAbandomedResources(props);
-			addResourceByString(abandomedResources, reses);
+			reses = PathUtil.getAbandonedResources(props);
+			addResourceByString(abandonedResources, reses);
 
 			/*
 			this.children = new Resource[resources.size()];
@@ -102,11 +102,11 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 	}
 	
-	public Resource[] getAbandomedResources() {
-		if (abandomedResources == null) {
+	public Resource[] getAbandonedResources() {
+		if (abandonedResources == null) {
 			return new Resource[0];
 		}
-		return (Resource []) abandomedResources.toArray(new Resource[0]);
+		return (Resource []) abandonedResources.toArray(new Resource[0]);
 	}
 	private void addResourceByString(List resourcesList, String[] reses) {
 		for (int i = 0; i < reses.length; i++) {

@@ -36,7 +36,7 @@ public class J2SClasspathContentProvider implements ITreeContentProvider {
 			} else if (J2SClasspathModel.categories[1].equals(ctg.getKey())) {
 				return ctg.getParent().getUnitClasses();
 			} else {
-				return ctg.getParent().getAbandomedClasses();
+				return ctg.getParent().getAbandonedClasses();
 			}
 		} else if (parentElement instanceof CompositeResources) {
 			CompositeResources comp = (CompositeResources) parentElement;

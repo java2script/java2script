@@ -84,7 +84,7 @@ public class J2SPropertyPage extends PropertyPage {
 			}
 			props.setProperty("j2s.resources.list", buffer.toString());
 
-			ress = configPage.classpathModel.abandomedClasses;
+			ress = configPage.classpathModel.abandonedClasses;
 			buffer = new StringBuffer();
 			for (Iterator iter = ress.iterator(); iter.hasNext();) {
 				Resource res = (Resource) iter.next();
@@ -96,7 +96,7 @@ public class J2SPropertyPage extends PropertyPage {
 					buffer.append(resPath);
 				}
 			}
-			props.setProperty("j2s.abandomed.resources.list", buffer.toString());
+			props.setProperty("j2s.abandoned.resources.list", buffer.toString());
 
 		} else if (configPage.isCompilerEnabled()) {
 			try {
@@ -153,7 +153,7 @@ public class J2SPropertyPage extends PropertyPage {
 				}
 			}
 			props.setProperty("j2s.resources.list", buffer.toString());
-			props.setProperty("j2s.abandomed.resources.list", "");
+			props.setProperty("j2s.abandoned.resources.list", "");
 		}
 		if (configPage.isCompilerEnabled()) {
 			props.setProperty("j2s.compiler.status", "enable");
