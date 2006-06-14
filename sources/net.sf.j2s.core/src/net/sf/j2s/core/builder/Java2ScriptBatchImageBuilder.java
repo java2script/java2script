@@ -16,6 +16,7 @@ package net.sf.j2s.core.builder;
 import java.util.Locale;
 import java.util.Map;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
@@ -75,4 +76,10 @@ public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 
 		return newCompiler;
 	}
+
+
+	protected void cleanOutputFolders(boolean copyBack) throws CoreException {
+		//super.cleanOutputFolders(copyBack);
+	}
+	
 }

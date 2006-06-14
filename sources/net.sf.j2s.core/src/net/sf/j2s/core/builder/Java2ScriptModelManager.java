@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import net.sf.j2s.core.Java2ScriptProjectNature;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.runtime.CoreException;
@@ -115,7 +116,7 @@ public class Java2ScriptModelManager {
 	 * For use by image builder and evaluation support only
 	 */
 	public static Object getLastBuiltState(IProject project, IProgressMonitor monitor) {
-		if (!JavaProject.hasJavaNature(project)) {
+		if (!Java2ScriptProjectNature.hasJava2ScriptNature(project)) {
 			if (JavaBuilder.DEBUG)
 				System.out.println(project + " is not a Java project"); //$NON-NLS-1$
 			return null; // should never be requested on non-Java projects
@@ -174,6 +175,15 @@ public class Java2ScriptModelManager {
 					file.delete();
 			} catch(SecurityException se) {
 				// could not delete file: cannot do much more
+			}
+		} else {
+			PerProjectInfo info = new PerProjectInfo(project);
+			info.savedState = state;
+			try {
+				saveBuiltState(info);
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

@@ -68,16 +68,16 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				list.add(splits[i]);
 			}
 		}
-		List abandomedList = null;
-		String abandomedPaths = props.getProperty("j2s.abandomed.resources.list");
-		if (abandomedPaths == null || abandomedPaths.trim().length() == 0) {
-			abandomedList = new ArrayList();
+		List abandonedList = null;
+		String abandonedPaths = props.getProperty("j2s.abandoned.resources.list");
+		if (abandonedPaths == null || abandonedPaths.trim().length() == 0) {
+			abandonedList = new ArrayList();
 		} else {
-			String[] splits = abandomedPaths.split(",");
+			String[] splits = abandonedPaths.split(",");
 			//list = Arrays.asList(splits);
-			abandomedList = new ArrayList();
+			abandonedList = new ArrayList();
 			for (int i = 0; i < splits.length; i++) {
-				abandomedList.add(splits[i]);
+				abandonedList.add(splits[i]);
 			}
 		}
 		for (int i = 0; i < sourceUnits.length; i++) {
@@ -95,7 +95,7 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				path.append(className);
 				path.append(".js");
 				String jsPath = binaryFolder.getProjectRelativePath().toPortableString() + "/" + path.toString();
-				if (!list.contains(jsPath) && !abandomedList.contains(jsPath)) {
+				if (!list.contains(jsPath) && !abandonedList.contains(jsPath)) {
 					list.add(jsPath);
 				}
 				//System.out.println(jsPath);

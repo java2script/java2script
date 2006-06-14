@@ -51,6 +51,24 @@ public class Java2ScriptProjectNature implements IProjectNature {
 	public void setProject(IProject project) {
 		this.project = project;
 	}
+	
+	public boolean hasNature() {
+		try {
+			IProjectDescription description = this.project.getDescription();
+			int javaCommandIndex = getJavaCommandIndex(description.getBuildSpec());
+			return (javaCommandIndex != -1);
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public static boolean hasJava2ScriptNature(IProject project) {
+		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
+		pn.setProject(project);
+		return pn.hasNature();
+	}
+	
 	/**
 	 * Adds a builder to the build spec for the given project.
 	 */
@@ -85,8 +103,8 @@ public class Java2ScriptProjectNature implements IProjectNature {
 		if (oldJavaCommandIndex == -1) {
 			// Add a Java build spec before other builders (1FWJK7I)
 			newCommands = new ICommand[oldBuildSpec.length + 1];
-			System.arraycopy(oldBuildSpec, 0, newCommands, 1, oldBuildSpec.length);
-			newCommands[0] = newCommand;
+			System.arraycopy(oldBuildSpec, 0, newCommands, 0, oldBuildSpec.length);
+			newCommands[oldBuildSpec.length] = newCommand;
 		} else {
 		    oldBuildSpec[oldJavaCommandIndex] = newCommand;
 			newCommands = oldBuildSpec;
