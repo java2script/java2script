@@ -83,6 +83,6 @@ public class Java2ScriptImageCompiler extends Compiler {
 		if (binaryFolder != null) {
 			ExtendedCompilers.compile(sourceUnits, binaryFolder);
 		}
-//		super.compile(sourceUnits);
+		super.compile(sourceUnits);
 	}
 }

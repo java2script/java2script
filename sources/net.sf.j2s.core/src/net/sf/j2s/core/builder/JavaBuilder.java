@@ -10,6 +10,9 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
+import net.sf.j2s.core.JavaModelManager;
+import net.sf.j2s.core.JavaModelManager.PerProjectInfo;
+
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
@@ -17,7 +20,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.core.*;
-import org.eclipse.jdt.internal.core.JavaModelManager.PerProjectInfo;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -270,7 +272,7 @@ private void cleanup() {
 }
 
 private void clearLastState() {
-	Java2ScriptModelManager.setLastBuiltState(currentProject, null);
+	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, null);
 }
 
 boolean filterExtraResource(IResource resource) {
@@ -352,7 +354,7 @@ private SimpleLookupTable findDeltas() {
 }
 
 public State getLastState(IProject project) {
-	return (State) Java2ScriptModelManager.getLastBuiltState(project, notifier.monitor);
+	return (State) JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
 }
 
 /* Return the list of projects for which it requires a resource delta. This builder's project
@@ -626,7 +628,7 @@ private void recordNewState(State state) {
 	if (DEBUG)
 		System.out.println("Recording new state : " + state); //$NON-NLS-1$
 	// state.dump();
-	Java2ScriptModelManager.setLastBuiltState(currentProject, state);
+	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, state);
 }
 
 /**

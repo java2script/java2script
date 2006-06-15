@@ -63,12 +63,6 @@ public class Java2ScriptProjectNature implements IProjectNature {
 		}
 	}
 	
-	public static boolean hasJava2ScriptNature(IProject project) {
-		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
-		pn.setProject(project);
-		return pn.hasNature();
-	}
-	
 	/**
 	 * Adds a builder to the build spec for the given project.
 	 */
