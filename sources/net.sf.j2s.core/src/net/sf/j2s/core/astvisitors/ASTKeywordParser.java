@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
  * This class will traverse most of the common keyword and
@@ -157,13 +158,104 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	protected void visitList(List list, String seperator) {
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
-			element.accept(this);
+			boxingNode(element);
 			if (iter.hasNext()) {
 				buffer.append(seperator);
 			}
 		}
+//		for (Iterator iter = list.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			element.accept(this);
+//			if (iter.hasNext()) {
+//				buffer.append(seperator);
+//			}
+//		}
 	}
-	
+
+	protected void boxingNode(ASTNode element) {
+		if (element instanceof Expression) {
+			Expression exp = (Expression) element;
+			if (exp.resolveBoxing()) {
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (typeBinding.isPrimitive()) {
+					String name = typeBinding.getName();
+					Code type = PrimitiveType.toCode(name);
+					String bigName = null;
+					if (type == PrimitiveType.INT) {
+						bigName = "Integer";
+					} else if (type == PrimitiveType.LONG) {
+						bigName = "Long";
+					} else if (type == PrimitiveType.FLOAT) {
+						bigName = "Float";
+					} else if (type == PrimitiveType.DOUBLE) {
+						bigName = "Double";
+					} else if (type == PrimitiveType.BOOLEAN) {
+						bigName = "Boolean";
+					} else if (type == PrimitiveType.BYTE) {
+						bigName = "Byte";
+					} else if (type == PrimitiveType.SHORT) {
+						bigName = "Short";
+					} else if (type == PrimitiveType.CHAR) {
+						bigName = "Character";
+					} 
+					if (bigName != null) {
+						buffer.append("new " + bigName + " (");
+						element.accept(this);
+						buffer.append(")");
+						return ;
+					}
+				}
+			} else if (exp.resolveUnboxing()) {
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (!typeBinding.isPrimitive()) {
+					String name = typeBinding.getQualifiedName();
+					String bigName = null;
+					if ("java.lang.Integer".equals(name)) {
+						bigName = "int";
+					} else if ("java.lang.Long".equals(name)) {
+						bigName = "long";
+					} else if ("java.lang.Float".equals(name)) {
+						bigName = "float";
+					} else if ("java.lang.Double".equals(name)) {
+						bigName = "double";
+					} else if ("java.lang.Boolean".equals(name)) {
+						bigName = "boolean";
+					} else if ("java.lang.Byte".equals(name)) {
+						bigName = "byte";
+					} else if ("java.lang.Short".equals(name)) {
+						bigName = "short";
+					} else if ("java.lang.Character".equals(name)) {
+						bigName = "char";
+					}
+					 
+					if (bigName != null) {
+						buffer.append("(");
+						element.accept(this);
+						buffer.append(")." + bigName + "Value ()");
+						return ;
+					}
+				}
+			}
+		}
+		element.accept(this);
+	}
+	protected void visitList(List list, String seperator, int begin, int end) {
+		for (int i = begin; i < end; i++) {
+			ASTNode element = (ASTNode) list.get(i);
+			boxingNode(element);
+			if (i < end - 1) {
+				buffer.append(seperator);
+			}
+		}
+//		for (Iterator iter = list.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			element.accept(this);
+//			if (iter.hasNext()) {
+//				buffer.append(seperator);
+//			}
+//		}
+	}
+
 	protected String listFinalVariables(List list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
@@ -411,7 +503,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(op);
 			Expression right = node.getRightHandSide();
 			buffer.append(' ');
-			right.accept(this);
+//			right.accept(this);
+			boxingNode(right);
 			
 			buffer.append(", ");
 			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
@@ -1021,16 +1114,19 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	
 	private void charVisit(ASTNode node, boolean beCare) {
 		if (!beCare || !(node instanceof Expression)) {
-			node.accept(this);
+//			node.accept(this);
+			boxingNode(node);
 			return ;
 		}
 		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
 		if (binding.isPrimitive() && "char".equals(binding.getName())) {
 			buffer.append("(");
-			node.accept(this);
+//			node.accept(this);
+			boxingNode(node);
 			buffer.append(").charCodeAt (0)");
 		} else {
-			node.accept(this);
+//			node.accept(this);
+			boxingNode(node);
 		}
 	}
 	
@@ -1385,7 +1481,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				return false;
 			}
 		}
-		return super.visit(node);
+		boxingNode(node.getOperand());
+		return false;
+		//return super.visit(node);
 	}
 
 	public void endVisit(PrefixExpression node) {
@@ -1514,7 +1612,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			}
 		}
 		buffer.append(node.getOperator());
-		return super.visit(node);
+		boxingNode(node.getOperand());
+		return false;
+		//return super.visit(node);
 	}
 
 	public void endVisit(PrimitiveType node) {
@@ -1833,7 +1933,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					}
 				}
 			}
-			initializer.accept(this);
+//			initializer.accept(this);
+			boxingNode(initializer);
 		}
 		return false;
 	}

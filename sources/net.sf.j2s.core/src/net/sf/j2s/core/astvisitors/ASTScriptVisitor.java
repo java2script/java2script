@@ -1660,12 +1660,20 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		if (methodBinding != null && methodBinding.isVarargs()) {
 			ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
+			/*
 			for (int i = 0; i < paramTypes.length - 1; i++) {
 				ASTNode element = (ASTNode) args.get(i);
 				element.accept(this);
 				buffer.append(", ");
 			}
+			*/
+			visitList(args, ", ", 0, paramTypes.length - 1);
+			if (paramTypes.length - 1 > 0) {
+				buffer.append(", ");
+			}
 			buffer.append("[");
+			visitList(args, ", ", paramTypes.length - 1, size);
+			/*
 			for (int i = paramTypes.length - 1; i < size; i++) {
 				ASTNode element = (ASTNode) args.get(i);
 				if (element instanceof Expression) {
@@ -1710,6 +1718,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					buffer.append(", ");
 				}
 			}
+			*/
 			buffer.append("]");
 		} else {
 			visitList(args, ", ");
