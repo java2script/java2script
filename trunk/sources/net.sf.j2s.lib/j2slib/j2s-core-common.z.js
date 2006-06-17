@@ -766,24 +766,24 @@ this.send=function(str){
 this.transport.send(str);
 };
 },net.sf.j2s.ajax,"HttpRequest",null,Runnable);
-Clazz.declarePackage ("net.sf.j2s.ajax");
-Clazz.declareInterface (net.sf.j2s.ajax, "IXHRCallback");
-Clazz.declarePackage ("net.sf.j2s.ajax");
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackAdapter", null, net.sf.j2s.ajax.IXHRCallback);
-Clazz.overrideMethod (c$, "onComplete", 
-function () {
+$_J("net.sf.j2s.ajax");
+$_I(net.sf.j2s.ajax,"IXHRCallback");
+$_J("net.sf.j2s.ajax");
+c$=$_C(function(){
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackAdapter",null,net.sf.j2s.ajax.IXHRCallback);
+$_V(c$,"onComplete",
+function(){
 });
-Clazz.overrideMethod (c$, "onInteractive", 
-function () {
+$_V(c$,"onInteractive",
+function(){
 });
-Clazz.overrideMethod (c$, "onLoaded", 
-function () {
+$_V(c$,"onLoaded",
+function(){
 });
-Clazz.overrideMethod (c$, "onLoading", 
-function () {
+$_V(c$,"onLoading",
+function(){
 });
-Clazz.overrideMethod (c$, "onUninitialized", 
-function () {
+$_V(c$,"onUninitialized",
+function(){
 });
