@@ -65,6 +65,9 @@ Clazz.getClassName = function (clazzHost) {
 		}
 		var idx1 = idx0 + 8;
 		var idx2 = clazzStr.indexOf ("(", idx1);
+		if (idx2 == -1) {
+			return "Object";
+		}
 		var clazzName = clazzStr.substring (idx1, idx2)
 				.replace (/^\s+/, "").replace (/\s+$/, ""); // .trim ()
 		if (clazzName == "anonymous") {
@@ -91,6 +94,15 @@ Clazz.getClassName = function (clazzHost) {
 				} else if (obj.constructor == null) {
 					return "Object"; // For HTML Element in IE
 				} else {
+					if (obj.constructor.__CLASS_NAME__ == null) {
+						if (obj instanceof Number) {
+							return "Number";
+						} else if (obj instanceof Boolean) {
+							return "Boolean";
+						} else if (obj instanceof Array) {
+							return "Array";
+						}
+					}
 					return Clazz.getClassName (obj.constructor);
 				}
 			} else if (objType == "number") {
