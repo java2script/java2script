@@ -1024,13 +1024,21 @@ function(s){
 return Integer.parseInt(s,10);
 },"String");
 Integer.parseInt=Integer.prototype.parseInt;
+
+Clazz.defineMethod(Integer,"equals",
+function(s){
+if(s==null||!Clazz.instanceOf(s,Integer)){
+return false;
+}
+return s.valueOf()==this.valueOf();
+},"Object");
 /* http://j2s.sf.net/ */Clazz.declarePackage("java.lang");
 java.lang.Long=Long=function(){
 Clazz.instantialize(this,arguments);
 };
 Clazz.decorateAsType(Long,"Long",Number,Comparable);
 Long.prototype.valueOf=function(){return 0;};
-Integer.prototype.toString=function(){
+Long.prototype.toString=function(){
 return""+this.valueOf();
 };
 Clazz.makeConstructor(Long,
@@ -1074,13 +1082,21 @@ function(s){
 return Long.parseLong(s,10);
 },"String");
 Long.parseLong=Long.prototype.parseLong;
+
+Clazz.defineMethod(Long,"equals",
+function(s){
+if(s==null||!Clazz.instanceOf(s,Long)){
+return false;
+}
+return s.valueOf()==this.valueOf();
+},"Object");
 /* http://j2s.sf.net/ */Clazz.declarePackage("java.lang");
 java.lang.Float=Float=function(){
 Clazz.instantialize(this,arguments);
 };
 Clazz.decorateAsType(Float,"Float",Number,Comparable);
 Float.prototype.valueOf=function(){return 0;};
-Integer.prototype.toString=function(){
+Float.prototype.toString=function(){
 return""+this.valueOf();
 };
 Clazz.makeConstructor(Float,
@@ -1123,13 +1139,21 @@ return isNaN(num);
 },"Number");
 Float.isNaN=Float.prototype.isNaN;
 
+Clazz.defineMethod(Float,"equals",
+function(s){
+if(s==null||!Clazz.instanceOf(s,Float)){
+return false;
+}
+return s.valueOf()==this.valueOf();
+},"Object");
+
 /* http://j2s.sf.net/ */Clazz.declarePackage("java.lang");
 java.lang.Double=Double=function(){
 Clazz.instantialize(this,arguments);
 };
 Clazz.decorateAsType(Double,"Double",Number,Comparable);
 Double.prototype.valueOf=function(){return 0;};
-Integer.prototype.toString=function(){
+Double.prototype.toString=function(){
 return""+this.valueOf();
 };
 Clazz.makeConstructor(Double,
@@ -1168,7 +1192,13 @@ return parseFloat(s);
 },"String");
 Double.parseDouble=Double.prototype.parseDouble;
 
-/* http://j2s.sf.net/ */Clazz.declarePackage("java.util");
+Clazz.defineMethod(Double,"equals",
+function(s){
+if(s==null||!Clazz.instanceOf(s,Double)){
+return false;
+}
+return s.valueOf()==this.valueOf();
+},"Object");/* http://j2s.sf.net/ */Clazz.declarePackage("java.util");
 java.util.Date=Date;
 Clazz.decorateAsType(java.util.Date,"java.util.Date",null,[java.io.Serializable,Cloneable,Comparable]);
 
