@@ -2,7 +2,7 @@
 <feature
       id="net.sf.j2s"
       label="net.sf.j2s"
-      version="1.0.0.v201"
+      version="1.0.0"
       provider-name="j2s.sourceforge.net">
 
    <description url="http://j2s.sourceforge.net/features">
@@ -24,28 +24,28 @@
 
    <plugin
          id="net.sf.j2s.ajax"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
+         download-size="14"
+         install-size="26"
+         version="1.0.0"/>
 
    <plugin
          id="net.sf.j2s.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
+         download-size="183"
+         install-size="183"
+         version="1.0.0"
          unpack="false"/>
 
    <plugin
          id="net.sf.j2s.lib"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
+         download-size="200"
+         install-size="921"
+         version="1.0.0"/>
 
    <plugin
          id="net.sf.j2s.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
+         download-size="178"
+         install-size="178"
+         version="1.0.0"
          unpack="false"/>
 
 </feature>
