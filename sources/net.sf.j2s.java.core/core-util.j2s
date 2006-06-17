@@ -1,0 +1,6 @@
+#Java2Script Configuration
+#Wed May 03 04:39:51 CST 2006
+j2s.resources.list=bin/java/lang/Runnable.js,bin/java/lang/Cloneable.js,bin/java/io/Serializable.js,bin/java/lang/Comparable.js,bin/java/lang/CharSequence.js,bin/java/lang/StringBuffer.js,bin/java/util/Comparator.js,bin/java/util/Iterator.js,bin/java/util/ListIterator.js,bin/java/util/Enumeration.js,bin/java/util/Collection.js,bin/java/util/Set.js,bin/java/util/Map.js,bin/java/util/List.js,bin/java/util/RandomAccess.js,bin/java/util/AbstractCollection.js,bin/java/util/AbstractSet.js,bin/java/util/AbstractMap.js,bin/java/util/AbstractList.js,bin/java/util/ArrayList.js,bin/java/util/HashMap.js,bin/java/util/HashSet.js,bin/java/util/Dictionary.js,bin/java/util/Hashtable.js,bin/java/util/Properties.js,bin/java/util/Vector.js,bin/java/util/Stack.js,bin/java/util/ResourceBundle.js,bin/java/lang/ThreadGroup.js,bin/java/lang/Thread.js
+j2s.abandoned.resources.list=
+j2s.output.path=bin
+j2s.compiler.status=enable
