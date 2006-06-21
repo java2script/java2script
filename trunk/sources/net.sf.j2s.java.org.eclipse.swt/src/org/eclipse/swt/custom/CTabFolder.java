@@ -3340,8 +3340,11 @@ void setSelection (int index, boolean notify) {
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
 			control.setVisible (false);
+			control.handle.style.display = "none";
 		}
 	}
+	
+	
 //	OS.SendMessage (handle, OS.TCM_SETCURSEL, index, 0);
 	updateSelection(index);
 //	int newIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
@@ -3356,6 +3359,7 @@ void setSelection (int index, boolean notify) {
 		if (control != null && !control.isDisposed ()) {
 			control.setBounds (getClientArea ());
 			control.setVisible (true);
+			control.handle.style.display = "block";
 		}
 		if (notify) {
 			Event event = new Event ();
@@ -3434,6 +3438,7 @@ void updateSelection(int index) {
 		if (cssName == null) cssName = "";
 		int idx = cssName.indexOf(key);
 		if (idx == -1) {
+			
 			items[index].handle.className += " " + key;
 			items[index].rightEl.className = items[index].cssClassForRight();
 			items[index].handle.style.height = (OS.getContainerHeight(buttonArea) + 3) + "px";
