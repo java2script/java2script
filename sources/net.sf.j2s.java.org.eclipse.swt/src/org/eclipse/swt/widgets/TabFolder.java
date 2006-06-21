@@ -986,6 +986,7 @@ void setSelection (int index, boolean notify) {
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
 			control.setVisible (false);
+			control.handle.style.display = "none";
 		}
 	}
 //	OS.SendMessage (handle, OS.TCM_SETCURSEL, index, 0);
@@ -1006,6 +1007,7 @@ void setSelection (int index, boolean notify) {
 			 */
 			control.setBounds (getClientArea ());
 			control.setVisible (true);
+			control.handle.style.display = "block";
 		}
 		if (notify) {
 			Event event = new Event ();
