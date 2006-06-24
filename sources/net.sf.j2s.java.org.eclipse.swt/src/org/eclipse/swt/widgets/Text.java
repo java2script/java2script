@@ -226,6 +226,7 @@ void createHandle () {
  * @see org.eclipse.swt.widgets.Widget#hookKeyDown()
  */
 void hookKeyDown() {
+
 	textHandle.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			boolean verifyHooked = false;
@@ -278,10 +279,19 @@ void hookModify() {
 	/*
 	 * TODO: Maybe pasting string into Text component should be limited.
 	 */
-	textHandle.onchange = new RunnableCompatibility() {
+	/*
+	 * I have changed, the change event to onkeyup. I think change is 
+	 * just fired after the blur.
+	 */
+	textHandle.onkeyup = new RunnableCompatibility() {
 		public void run() {
-			if ((style & SWT.READ_ONLY) != 0 
-					|| (!hooks (SWT.Verify) && !filters (SWT.Verify))) {
+			if ((style & SWT.READ_ONLY) != 0
+					/*
+					 * I have changed !hooks (SWT.Verify) && !filters (SWT.Verify)) to
+					 * hooks (SWT.Verify) && !filters (SWT.Verify))
+					 * I do not know what is the rational behind the first. 
+					 */
+					|| (hooks (SWT.Verify) && !filters (SWT.Verify))) {
 				toReturn(true);
 				return ;
 			}
@@ -293,14 +303,14 @@ void hookModify() {
 					toReturn(true);
 					return ;
 				}
-				if (!newText.equals (oldText)) {
+				//if (!newText.equals (oldText)) {
 					Event e = new Event();
 					e.type = SWT.Modify;
 					e.item = Text.this;
 					e.widget = Text.this;
 					sendEvent(e);
 					toReturn(e.doit);
-				}
+				//}
 			}
 		}
 	};
