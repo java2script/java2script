@@ -1205,9 +1205,13 @@ void showSelection(boolean selected) {
 	if ((parent.style & SWT.CHECK) != 0) {
 		index++;
 	}
-	Element element = handle.childNodes[0].childNodes[0].childNodes[index];
-	//System.out.println(handle.childNodes[0].childNodes[0].innerHTML);
-	element.className = selected ? "table-item-cell-text-selected" : "table-item-cell-text-default";
+	if((parent.style & SWT.FULL_SELECTION) != 0){
+		handle.className = selected ? "table-item-selected" : "table-item-default";
+	}else{
+//	System.out.println(handle.className);
+		Element element = handle.childNodes[0].childNodes[0].childNodes[index];
+		element.className = selected ? "table-item-cell-text-selected" : "table-item-cell-text-default";
+	}
 }
 
 //	void setSelected(boolean selected){
