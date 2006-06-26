@@ -579,6 +579,8 @@ public void setText (String string) {
 
 		rightEl = document.createElement("DIV");
 		rightEl.className = cssClassForRight();
+//		rightEl.onmousemove = new 
+//		rightEl.onmouseout
 		handle.appendChild(rightEl);
 		configureRightEl();
 		//handle.appendChild(document.createTextNode(string));
@@ -602,7 +604,7 @@ public void setText (String string) {
 void configureRightEl() {
 	// TODO Auto-generated method stub
 	System.out.println("Show close : " + showClose);
-	if(showClose)
+	if(showClose){
 		rightEl.onclick = new RunnableCompatibility() {
 			public void run() {
 				CTabFolderEvent e = new CTabFolderEvent(parent);
@@ -627,6 +629,28 @@ void configureRightEl() {
 				
 			}
 		};
+		/*
+		 * IE does not support HOVER on DIVs so this is a workaround !
+		 */
+		rightEl.onmouseover = new RunnableCompatibility() {
+			public void run() {
+				prepareCloseBtn(true);
+				rightEl.className = rightEl.className.trim() + "-hover";
+			
+			}
+		};
+		rightEl.onmouseout = new RunnableCompatibility() {
+			public void run() {
+				prepareCloseBtn(false);
+				int idx = rightEl.className.indexOf("-hover");
+				if(idx >= 0){
+					rightEl.className = rightEl.className.substring(0, idx); 
+				}
+				//rightEl.className = rightEl.className;
+			}
+		}; 
+
+	}
 }
 /**
  * Sets the receiver's tool tip text to the argument, which
@@ -675,7 +699,7 @@ protected void releaseHandle() {
 }
 protected void prepareCloseBtn(boolean in){
 	//rightEl.style.backgroundImage = in ? "url(images/ctab-simple-right-close.png)" : "url(images/ctab-simple-right.gif)";
-	String key = "ctab-item-attach-close-right";
+	String key = " ctab-item-attach-close-right";
 	if(this.isSelected || !parent.showClose){
 		return;
 	}
@@ -685,7 +709,7 @@ protected void prepareCloseBtn(boolean in){
 			rightEl.className.substring(0,idx) + rightEl.className.substring(idx+key.length());
 	}
 	if(in){
-		rightEl.className += " ctab-item-attach-close-right ";
+		rightEl.className += " ctab-item-attach-close-right";
 	}
 	/*
 	 * Workaround for firefox;)

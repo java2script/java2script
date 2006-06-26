@@ -3376,16 +3376,22 @@ void updateSelection(int index) {
 //		boolean before = false;
 		int left = -2;
 		int x = 2;
+		
 		for (int i = offset; i < items.length; i++) {
 			items[i].handle.style.display = "block";
 			items[i].handle.style.zIndex = (i + 1) + "";
+		
 			//if (index == i) continue;
 			String cssName = items[i].handle.className;
 			if (cssName == null) cssName = "";
 			int idx = cssName.indexOf(key);
+		
 			if (idx != -1) {
 				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
+	
 				items[i].rightEl.className = items[i].cssClassForRight();
+				Element el = (Element) buttonArea;
+	
 				items[i].handle.style.height = (OS.getContainerHeight(buttonArea)  -3) + "px";
 				items[i].isSelected = false;
 				//items[i].rightEl.style.backgroundColor = "red";
@@ -3395,6 +3401,8 @@ void updateSelection(int index) {
 //					before = true;
 				}
 			}
+		
+			
 //			int w = OS.getContainerWidth(items[i].handle);
 //			Element el = items[i].handle;
 //			System.out.println(" ITEMS I " + el.offsetWidth + " " + el.clientWidth + " " + el.scrollWidth);
@@ -3452,7 +3460,6 @@ void updateSelection(int index) {
 			//items[index].rightEl.style.backgroundColor = "white";
 			CSSStyle s = items[index].handle.style;
 			s.width = w + "px";
-			System.out.println("xxx S WIDTH : " + s.width + " " + OS.getContainerWidth(items[index].rightEl) + " " + OS.getContainerWidth(items[index].textEl));
 		}
 		items[index].handle.style.zIndex = (items.length + 1) + "";
 		//System.out.println("????");
@@ -4349,6 +4356,12 @@ protected void createHandle () {
 //	}
 	//borderFrame = (Element) createCSSElement(handle, cssName);
 	buttonArea = (Element) createCSSElement(handle, "ctab-folder-button-area");
+	
+//	buttonArea = document.createElement("A");
+//	buttonArea.className = "ctab-folder-button-area";
+//
+//	handle.appendChild(buttonArea);
+
 	contentArea = (Element) createCSSElement(handle, "ctab-folder-content-area");
 
 //	nwCorner = (Element) createCSSElement(handle, roundTheCorners ? "ctab-border-nw" : "no-border");
