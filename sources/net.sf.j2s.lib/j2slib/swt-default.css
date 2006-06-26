@@ -826,13 +826,14 @@ input.text-border {
 }
 /* Button Container of CTAB */
 .ctab-folder-button-area {
+	min-height:16px;
 	border-bottom:1px solid gray;
 	border-left:1px solid gray;
 	border-right:1px solid gray;
 	border-top:1px solid gray;
 	background-color: menu;
 	padding:1px 1px 1px 1px;
-	min-height:16px;
+	_height: 16px;
 }
 
 .ctab-item-more{
@@ -938,7 +939,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-attach-noextrapos-left {
@@ -955,7 +956,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-attach-close-left{
@@ -964,7 +965,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	width:15px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -972,12 +973,12 @@ input.text-border {
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
-
+.ctab-item-attach-close-left-hover,
 .ctab-item-attach-close-left:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -990,14 +991,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
-
+.ctab-item-attach-close-right-hover,
 .ctab-item-attach-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1015,7 +1016,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-attach-rounded-noextrapos-left {
@@ -1032,7 +1033,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-attach-rounded-close-left{
@@ -1041,7 +1042,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	width:15px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -1049,12 +1050,12 @@ input.text-border {
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
-
+.ctab-item-attach-rounded-close-left-hover,
 .ctab-item-attach-rounded-close-left:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1067,14 +1068,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
-
+.ctab-item-attach-rounded-close-right-hover,
 .ctab-item-attach-rounded-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1089,7 +1090,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-left-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-selected .ctab-item-attach-noextrapos-right {
@@ -1100,7 +1101,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
 .ctab-item-selected .ctab-item-attach-default-right{
 	float:right;
@@ -1110,9 +1111,9 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-close-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
-
+.ctab-item-selected .ctab-item-attach-default-right-hover, 
 .ctab-item-selected .ctab-item-attach-default-right:hover{
 	float:right;
 	width:15px;
@@ -1121,7 +1122,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-close-selected-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
 /*
 .ctab-item-selected .ctab-item-attach-close-rounded-right{
@@ -1210,8 +1211,10 @@ input.text-border {
 	background-image:url('images/ctab-rounded-close-right.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
+
+.ctab-item-rounded-selected .ctab-item-attach-rounded-default-right-hover,
 .ctab-item-rounded-selected .ctab-item-attach-rounded-default-right:hover{
 	float:right;
 	width:37px;
@@ -1220,7 +1223,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-close-right-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-noextrapos-left {
@@ -1232,7 +1235,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-left.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;	
+	background-color:menu;	
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-noextrapos-right {
@@ -1244,7 +1247,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-right.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-left{
@@ -1253,7 +1256,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	width:37px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -1261,12 +1264,12 @@ input.text-border {
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
-
+.ctab-item-rounded-selected .ctab-item-attach-rounded-close-left-hover,
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-left:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1279,14 +1282,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 }
-
+.ctab-item-rounded-selected .ctab-item-attach-rounded-close-right-hover,
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:inherit;
+	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }

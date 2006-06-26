@@ -87,7 +87,7 @@ c$.getContainerHeight=$_M(c$,"getContainerHeight",
 function(container){
 var el=container;
 var max=Math.max(el.offsetHeight,Math.max(el.clientHeight,el.scrollHeight));
-if(O$.isIE){
+if(O$.isIE&&max>=1){
 max--;
 }return max;
 },"~O");
@@ -5876,7 +5876,12 @@ this.handle.style.filter="";
 return;
 }this.textSizeCached=false;
 this.text=string;
-O$.insertText(this.handle,this.text);
+var children=this.handle.childNodes;
+if(children!=null){
+for(var i=0;i<children.length;i++){
+this.handle.removeChild(children[i]);
+}
+}O$.insertText(this.handle,this.text);
 },"~S");
 $_V(c$,"createHandle",
 function(){
@@ -7286,7 +7291,7 @@ return $_N($wt.widgets.Text$1,i$,v$);
 });
 $_V(c$,"hookModify",
 function(){
-this.textHandle.onchange=$_Q((function(i$,v$){
+this.textHandle.onkeyup=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Text$2")){
 $_H();
 c$=$_C(function(){
@@ -7295,7 +7300,7 @@ $_Z(this,arguments);
 },$wt.widgets,"Text$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-if((this.b$["$wt.widgets.Text"].style&8)!=0||(!this.b$["$wt.widgets.Text"].hooks(25)&&!this.b$["$wt.widgets.Text"].filters(25))){
+if((this.b$["$wt.widgets.Text"].style&8)!=0||(this.b$["$wt.widgets.Text"].hooks(25)&&!this.b$["$wt.widgets.Text"].filters(25))){
 this.toReturn(true);
 return;
 }var newText=this.b$["$wt.widgets.Text"].textHandle.value;
@@ -7305,14 +7310,13 @@ newText=this.b$["$wt.widgets.Text"].verifyText(newText,0,0,null);
 if(newText==null){
 this.toReturn(true);
 return;
-}if(!newText.equals(oldText)){
-var e=new $wt.widgets.Event();
+}var e=new $wt.widgets.Event();
 e.type=24;
 e.item=this.b$["$wt.widgets.Text"];
 e.widget=this.b$["$wt.widgets.Text"];
 this.b$["$wt.widgets.Text"].sendEvent(e);
 this.toReturn(e.doit);
-}}});
+}});
 c$=$_P();
 }
 return $_N($wt.widgets.Text$2,i$,v$);
@@ -8458,6 +8462,7 @@ var item=this.items[oldIndex];
 var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setVisible(false);
+control.handle.style.display="none";
 }}this.updateSelection(index);
 var newIndex=index;
 if(oldIndex==index){
@@ -8468,6 +8473,7 @@ var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setBounds(this.getClientArea());
 control.setVisible(true);
+control.handle.style.display="block";
 }if(notify){
 var event=new $wt.widgets.Event();
 event.item=item;
@@ -9825,112 +9831,112 @@ if((this.style&(448))==(448))this.returnCode=256;
 if((this.style&(1280))==(1280))this.returnCode=256;
 if((this.style&(3584))==(3584))this.returnCode=2048;
 }},$fz.isPrivate=true,$fz));
-Clazz.declarePackage ("net.sf.j2s.ajax");
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter", null, net.sf.j2s.ajax.IXHRCallback);
-Clazz.defineMethod (c$, "swtOnComplete", 
-function () {
+$_J("net.sf.j2s.ajax");
+c$=$_C(function(){
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter",null,net.sf.j2s.ajax.IXHRCallback);
+$_M(c$,"swtOnComplete",
+function(){
 });
-Clazz.defineMethod (c$, "swtOnInteractive", 
-function () {
+$_M(c$,"swtOnInteractive",
+function(){
 });
-Clazz.defineMethod (c$, "swtOnLoaded", 
-function () {
+$_M(c$,"swtOnLoaded",
+function(){
 });
-Clazz.defineMethod (c$, "swtOnLoading", 
-function () {
+$_M(c$,"swtOnLoading",
+function(){
 });
-Clazz.defineMethod (c$, "swtOnUninitialized", 
-function () {
+$_M(c$,"swtOnUninitialized",
+function(){
 });
-Clazz.overrideMethod (c$, "onComplete", 
-function () {
-$wt.widgets.Display.getDefault ().syncExec ((function (i$, v$) {
-if (!Clazz.isClassDefined ("net.sf.j2s.ajax.XHRCallbackSWTAdapter$1")) {
-Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter$1", null, Runnable);
-Clazz.overrideMethod (c$, "run", 
-function () {
-this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnComplete ();
+$_V(c$,"onComplete",
+function(){
+$wt.widgets.Display.getDefault().syncExec((function(i$,v$){
+if(!$_D("net.sf.j2s.ajax.XHRCallbackSWTAdapter$1")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter$1",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnComplete();
 });
-c$ = Clazz.p0p ();
+c$=$_P();
 }
-return Clazz.innerTypeInstance (net.sf.j2s.ajax.XHRCallbackSWTAdapter$1, i$, v$);
-}) (this, null));
+return $_N(net.sf.j2s.ajax.XHRCallbackSWTAdapter$1,i$,v$);
+})(this,null));
 });
-Clazz.overrideMethod (c$, "onInteractive", 
-function () {
-$wt.widgets.Display.getDefault ().syncExec ((function (i$, v$) {
-if (!Clazz.isClassDefined ("net.sf.j2s.ajax.XHRCallbackSWTAdapter$2")) {
-Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter$2", null, Runnable);
-Clazz.overrideMethod (c$, "run", 
-function () {
-this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnInteractive ();
+$_V(c$,"onInteractive",
+function(){
+$wt.widgets.Display.getDefault().syncExec((function(i$,v$){
+if(!$_D("net.sf.j2s.ajax.XHRCallbackSWTAdapter$2")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter$2",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnInteractive();
 });
-c$ = Clazz.p0p ();
+c$=$_P();
 }
-return Clazz.innerTypeInstance (net.sf.j2s.ajax.XHRCallbackSWTAdapter$2, i$, v$);
-}) (this, null));
+return $_N(net.sf.j2s.ajax.XHRCallbackSWTAdapter$2,i$,v$);
+})(this,null));
 });
-Clazz.overrideMethod (c$, "onLoaded", 
-function () {
-$wt.widgets.Display.getDefault ().syncExec ((function (i$, v$) {
-if (!Clazz.isClassDefined ("net.sf.j2s.ajax.XHRCallbackSWTAdapter$3")) {
-Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter$3", null, Runnable);
-Clazz.overrideMethod (c$, "run", 
-function () {
-this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnLoaded ();
+$_V(c$,"onLoaded",
+function(){
+$wt.widgets.Display.getDefault().syncExec((function(i$,v$){
+if(!$_D("net.sf.j2s.ajax.XHRCallbackSWTAdapter$3")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter$3",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnLoaded();
 });
-c$ = Clazz.p0p ();
+c$=$_P();
 }
-return Clazz.innerTypeInstance (net.sf.j2s.ajax.XHRCallbackSWTAdapter$3, i$, v$);
-}) (this, null));
+return $_N(net.sf.j2s.ajax.XHRCallbackSWTAdapter$3,i$,v$);
+})(this,null));
 });
-Clazz.overrideMethod (c$, "onLoading", 
-function () {
-$wt.widgets.Display.getDefault ().syncExec ((function (i$, v$) {
-if (!Clazz.isClassDefined ("net.sf.j2s.ajax.XHRCallbackSWTAdapter$4")) {
-Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter$4", null, Runnable);
-Clazz.overrideMethod (c$, "run", 
-function () {
-this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnLoading ();
+$_V(c$,"onLoading",
+function(){
+$wt.widgets.Display.getDefault().syncExec((function(i$,v$){
+if(!$_D("net.sf.j2s.ajax.XHRCallbackSWTAdapter$4")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter$4",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnLoading();
 });
-c$ = Clazz.p0p ();
+c$=$_P();
 }
-return Clazz.innerTypeInstance (net.sf.j2s.ajax.XHRCallbackSWTAdapter$4, i$, v$);
-}) (this, null));
+return $_N(net.sf.j2s.ajax.XHRCallbackSWTAdapter$4,i$,v$);
+})(this,null));
 });
-Clazz.overrideMethod (c$, "onUninitialized", 
-function () {
-$wt.widgets.Display.getDefault ().syncExec ((function (i$, v$) {
-if (!Clazz.isClassDefined ("net.sf.j2s.ajax.XHRCallbackSWTAdapter$5")) {
-Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, net.sf.j2s.ajax, "XHRCallbackSWTAdapter$5", null, Runnable);
-Clazz.overrideMethod (c$, "run", 
-function () {
-this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnUninitialized ();
+$_V(c$,"onUninitialized",
+function(){
+$wt.widgets.Display.getDefault().syncExec((function(i$,v$){
+if(!$_D("net.sf.j2s.ajax.XHRCallbackSWTAdapter$5")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter$5",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["net.sf.j2s.ajax.XHRCallbackSWTAdapter"].swtOnUninitialized();
 });
-c$ = Clazz.p0p ();
+c$=$_P();
 }
-return Clazz.innerTypeInstance (net.sf.j2s.ajax.XHRCallbackSWTAdapter$5, i$, v$);
-}) (this, null));
+return $_N(net.sf.j2s.ajax.XHRCallbackSWTAdapter$5,i$,v$);
+})(this,null));
 });
