@@ -2473,9 +2473,12 @@ this.selected=selected;
 var index=0;
 if((this.parent.style&32)!=0){
 index++;
-}var element=this.handle.childNodes[0].childNodes[0].childNodes[index];
+}if((this.parent.style&65536)!=0){
+this.handle.className=selected?"table-item-selected":"table-item-default";
+}else{
+var element=this.handle.childNodes[0].childNodes[0].childNodes[index];
 element.className=selected?"table-item-cell-text-selected":"table-item-cell-text-default";
-},"~B");
+}},"~B");
 $_M(c$,"isSelected",
 function(){
 return this.selected;
@@ -3750,6 +3753,13 @@ $_Z(this,arguments);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.TreeItem"].toggleExpandStatus();
+var e=new $wt.widgets.Event();
+e.display=this.b$["$wt.widgets.TreeItem"].display;
+e.type=14;
+e.detail=0;
+e.item=this.b$["$wt.widgets.TreeItem"];
+e.widget=this.b$["$wt.widgets.TreeItem"];
+this.b$["$wt.widgets.TreeItem"].parent.sendEvent(e);
 this.toReturn(false);
 });
 c$=$_P();

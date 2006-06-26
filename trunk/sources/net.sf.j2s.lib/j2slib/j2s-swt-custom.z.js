@@ -432,9 +432,12 @@ rect.y+=this.marginHeight;
 rect.width-=2*this.marginWidth;
 rect.height-=2*this.marginHeight;
 for(var i=0;i<children.length;i++){
+if(children[i]!=this.topControl){
+children[i].handle.style.display="none";
+}else{
 children[i].setBounds(rect);
-children[i].setVisible(children[i]==this.topControl);
-}
+children[i].handle.style.display="block";
+}}
 },"$wt.widgets.Composite,~B");
 $_M(c$,"getName",
 function(){
@@ -2158,12 +2161,14 @@ this.rightEl=d$.createElement("DIV");
 this.rightEl.className=this.cssClassForRight();
 this.handle.appendChild(this.rightEl);
 this.configureRightEl();
+this.parent.updateSelection(this.parent.getSelectionIndex());
 }this.text=string;
 },"~S");
 $_M(c$,"configureRightEl",
 function(){
 System.out.println("Show close : "+this.showClose);
-if(this.showClose)this.rightEl.onclick=$_Q((function(i$,v$){
+if(this.showClose){
+this.rightEl.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$4")){
 $_H();
 c$=$_C(function(){
@@ -2193,7 +2198,41 @@ c$=$_P();
 }
 return $_N($wt.custom.CTabItem$4,i$,v$);
 })(this,null));
+this.rightEl.onmouseover=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.custom.CTabItem$5")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.custom,"CTabItem$5",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+this.b$["$wt.custom.CTabItem"].prepareCloseBtn(true);
+this.b$["$wt.custom.CTabItem"].rightEl.className=this.b$["$wt.custom.CTabItem"].rightEl.className.trim()+"-hover";
 });
+c$=$_P();
+}
+return $_N($wt.custom.CTabItem$5,i$,v$);
+})(this,null));
+this.rightEl.onmouseout=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.custom.CTabItem$6")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.custom,"CTabItem$6",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+this.b$["$wt.custom.CTabItem"].prepareCloseBtn(false);
+var idx=this.b$["$wt.custom.CTabItem"].rightEl.className.indexOf("-hover");
+if(idx>=0){
+this.b$["$wt.custom.CTabItem"].rightEl.className=this.b$["$wt.custom.CTabItem"].rightEl.className.substring(0,idx);
+}});
+c$=$_P();
+}
+return $_N($wt.custom.CTabItem$6,i$,v$);
+})(this,null));
+}});
 $_M(c$,"setToolTipText",
 function(string){
 this.toolTipText=string;
@@ -2227,14 +2266,14 @@ this.handle=null;
 });
 $_M(c$,"prepareCloseBtn",
 function($in){
-var key="ctab-item-attach-close-right";
+var key=" ctab-item-attach-close-right";
 if(this.isSelected||!this.parent.showClose){
 return;
 }var idx=this.rightEl.className.indexOf(key);
 if(idx!=-1){
 this.rightEl.className=this.rightEl.className.substring(0,idx)+this.rightEl.className.substring(idx+key.length);
 }if($in){
-this.rightEl.className+=" ctab-item-attach-close-right ";
+this.rightEl.className+=" ctab-item-attach-close-right";
 }this.handle.style.height=(O$.getContainerHeight(this.textEl)+1)+"px";
 this.rightEl.style.height=(O$.getContainerHeight(this.textEl)+1)+"px";
 },"~B");
@@ -3213,6 +3252,7 @@ this.setSelection(index,false);
 $_M(c$,"setSelection",
 function(index,notify){
 var oldIndex=this.getSelectionIndex();
+System.out.println("setselection called! at "+oldIndex+" at "+index);
 if(oldIndex==index){
 return;
 }if(oldIndex!=-1){
@@ -3220,6 +3260,7 @@ var item=this.items[oldIndex];
 var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setVisible(false);
+control.handle.style.display="none";
 }}this.updateSelection(index);
 var newIndex=index;
 if(newIndex!=-1){
@@ -3229,6 +3270,7 @@ var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setBounds(this.getClientArea());
 control.setVisible(true);
+control.handle.style.display="block";
 }if(notify){
 var event=new $wt.widgets.Event();
 event.item=item;
@@ -3250,6 +3292,7 @@ var idx=cssName.indexOf(key);
 if(idx!=-1){
 this.items[i].handle.className=cssName.substring(0,idx)+cssName.substring(idx+key.length);
 this.items[i].rightEl.className=this.items[i].cssClassForRight();
+var el=this.buttonArea;
 this.items[i].handle.style.height=(O$.getContainerHeight(this.buttonArea)-3)+"px";
 this.items[i].isSelected=false;
 if(i>index){
@@ -3271,14 +3314,13 @@ if(ww>0){
 if(cssName==null)cssName="";
 var idx=cssName.indexOf(key);
 if(idx==-1){
-var w=O$.getContainerWidth(this.items[index].rightEl)+O$.getContainerWidth(this.items[index].textEl);
 this.items[index].handle.className+=" "+key;
 this.items[index].rightEl.className=this.items[index].cssClassForRight();
 this.items[index].handle.style.height=(O$.getContainerHeight(this.buttonArea)+3)+"px";
 this.items[index].rightEl.style.height=this.items[index].handle.style.height;
 this.items[index].isSelected=true;
+var w=O$.getContainerWidth(this.items[index].rightEl)+O$.getContainerWidth(this.items[index].textEl);
 if(!this.simple){
-w+=24;
 }var s=this.items[index].handle.style;
 s.width=w+"px";
 }this.items[index].handle.style.zIndex=(this.items.length+1)+"";
