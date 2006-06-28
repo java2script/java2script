@@ -135,9 +135,7 @@ public CTabItem (CTabFolder parent, int style, int index) {
 	super (parent, checkStyle(style));
 	this.parent = parent;
 	showClose = parent.showClose;
-	System.out.println("after sw" + showClose + " " + (style & SWT.CLOSE) + " " + style);
 	parent.createItem (this, index);
-	System.out.println("handle " + handle);
 	configure(index);
 }
 String getNameText () {
@@ -148,7 +146,6 @@ private void configure(int index) {
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
 			parent.setSelection(CTabItem.this);
-			System.out.println("An item is selected " + CTabItem.this);
 		}
 	};
 	if(parent.showClose){
@@ -466,8 +463,11 @@ public void setControl (Control control) {
 		} else {
 			newControl.setBounds (clientArea);
 			newControl.setVisible(true);
-			System.out.println("bounds " + clientArea);
 		}
+//		if (newControl != null) {
+//			newControl.setBounds (parent.getClientArea ());
+//			newControl.setVisible (true);
+//		}
 //		System.err.println(clientArea);
 //		System.out.println("here!");
 		//newControl.setVisible (true);
@@ -603,7 +603,6 @@ public void setText (String string) {
 }
 void configureRightEl() {
 	// TODO Auto-generated method stub
-	System.out.println("Show close : " + showClose);
 	if(showClose){
 		rightEl.onclick = new RunnableCompatibility() {
 			public void run() {
@@ -625,7 +624,6 @@ void configureRightEl() {
 					parent.destroyItem(CTabItem.this);
 				}
 				
-				System.out.println("An item is closed " + CTabItem.this);
 				
 			}
 		};
