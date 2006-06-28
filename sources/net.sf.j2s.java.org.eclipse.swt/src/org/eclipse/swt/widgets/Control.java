@@ -2650,7 +2650,8 @@ public void setVisible (boolean visible) {
 		sendEvent (SWT.Show);
 		if (isDisposed ()) return;
 	}
-	
+	handle.style.visibility = visible ? "visible" : "hidden";
+	handle.style.display = visible ? "block" : "none";
 	/*
 	* Feature in Windows.  If the receiver has focus, hiding
 	* the receiver causes no window to have focus.  The fix is

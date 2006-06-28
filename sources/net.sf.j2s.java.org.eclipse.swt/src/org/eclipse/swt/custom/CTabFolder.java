@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TypedListener;
 
 /**
@@ -3140,6 +3141,12 @@ public void setBounds(int x, int y, int width, int height) {
 	contentArea.style.width = (width - 6) + "px";
 	buttonArea.style.width = (width - 4) + "px";
 	super.setBounds(x, y, width, height);
+	if(selectedIndex != -1 ){
+		Control control = items[selectedIndex].control;
+		if(control != null && control.isDisposed()){
+			control.setBounds(getClientArea());
+		}
+	}
 //	int idx = getSelectionIndex();
 //	items[idx].fixControlBounds();
 }
@@ -3326,21 +3333,13 @@ void setSelection (int index, boolean notify) {
 	 */
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
-	System.out.println("setselection called! at " + oldIndex + " at " + index);
-	/*
-	 * Whenever the old index is equals to the requested index
-	 * do nothing. 
-	 */
-	if(oldIndex == index){
-		return;
-	}
 	
-	if (oldIndex != -1) {
+	if (oldIndex != -1 && oldIndex != index) {
 		CTabItem item = items [oldIndex];
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
 			control.setVisible (false);
-			control.handle.style.display = "none";
+//			control.handle.style.display = "none";
 		}
 	}
 	
@@ -3352,6 +3351,11 @@ void setSelection (int index, boolean notify) {
 //	if (oldIndex == index) {
 //		newIndex = -1;
 //	}
+
+	if (oldIndex == index) {
+		newIndex = -1;
+	}
+
 	if (newIndex != -1) {
 		CTabItem item = items [newIndex];
 		selectedIndex = newIndex;
@@ -3359,7 +3363,7 @@ void setSelection (int index, boolean notify) {
 		if (control != null && !control.isDisposed ()) {
 			control.setBounds (getClientArea ());
 			control.setVisible (true);
-			control.handle.style.display = "block";
+//			control.handle.style.display = "block";
 		}
 		if (notify) {
 			Event event = new Event ();
@@ -3367,7 +3371,7 @@ void setSelection (int index, boolean notify) {
 			sendEvent (SWT.Selection, event);
 		}
 	}
-	layout();
+	//layout();
 }
 
 void updateSelection(int index) {
@@ -3378,7 +3382,12 @@ void updateSelection(int index) {
 		int x = 2;
 		
 		for (int i = offset; i < items.length; i++) {
-			items[i].handle.style.display = "block";
+//			items[i].handle.style.display = "block";
+			Control control = items[i].control;
+			
+			if(control != null && !control.isDisposed()){
+				control.setVisible(false);
+			}
 			items[i].handle.style.zIndex = (i + 1) + "";
 		
 			//if (index == i) continue;
@@ -3446,7 +3455,12 @@ void updateSelection(int index) {
 		if (cssName == null) cssName = "";
 		int idx = cssName.indexOf(key);
 		if (idx == -1) {
+			Control control = items[index].control;
 			
+			if(control != null && !control.isDisposed()){
+				control.setVisible(true);
+			}
+
 			items[index].handle.className += " " + key;
 			items[index].rightEl.className = items[index].cssClassForRight();
 			items[index].handle.style.height = (OS.getContainerHeight(buttonArea) + 3) + "px";
@@ -3495,7 +3509,10 @@ void updateSelection(int index) {
 	}
 	boolean after = false;
 	for (int i = 0; i < offset; i++) {
-		items[i].handle.style.display = "none";
+//		items[i].handle.style.display = "none";
+		if(items[i].control != null){
+			items[i].control.setVisible(false);
+		}
 		String cssName = items[i].handle.className;
 		if (cssName == null) cssName = "";
 		int idx = cssName.indexOf(key);

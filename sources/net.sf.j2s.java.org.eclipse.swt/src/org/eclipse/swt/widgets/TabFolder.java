@@ -203,8 +203,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	System.out.println(wHint + "," + hHint + "," + changed);
 	Point size = super.computeSize (wHint, hHint, changed);
-	
-	System.out.println("super size of tabfolder:" + size);
 	int width = -124; // this number is an experimental number from WinXP in classical style
 	if (items != null && items.length != 0) {
 //		int height = OS.getContainerHeight(items[0].handle);
@@ -239,7 +237,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	
 //	size.x += items.length * 32;
 //	size.y += 24;
-	System.out.println("in tab folder " + size);
 	return size;
 }
 
@@ -430,7 +427,7 @@ protected void createHandle () {
 				if (w > width) {
 					if (i < items.length - 1) {
 						offset++;
-						System.out.println("Offset:" + offset);
+//						System.out.println("Offset:" + offset);
 						setSelection(getSelectionIndex(), false);
 						return ;
 					}
@@ -438,7 +435,7 @@ protected void createHandle () {
 			}
 			if (ww > width) {
 				offset++;
-				System.out.println("Offset:" + offset);
+//				System.out.println("Offset:" + offset);
 				setSelection(getSelectionIndex(), false);
 				return ;
 			}
@@ -456,10 +453,10 @@ protected void createHandle () {
 	}
 	el.onclick = btnPrevTab.onclick = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("in Offset:" + offset);
+//			System.out.println("in Offset:" + offset);
 			if (offset <= 0) return ;
 			offset--;
-			System.out.println("Offset:" + offset);
+//			System.out.println("Offset:" + offset);
 			setSelection(getSelectionIndex(), false);
 		}
 	};
@@ -536,7 +533,19 @@ public void setBounds(int x, int y, int width, int height) {
 //		}
 //		outerArea.style.height = height + "px";
 //	}
+	
 	super.setBounds(x, y, width, height);
+//	int selectedIndex = getSelectionIndex();
+//	if(selectedIndex != -1 ){
+//		
+//		Control control = items[selectedIndex].control;
+//		if(control != null)
+//		System.out.println(" tab folder conrol for bounds 1 " + control + " " + getClientArea() + " " + control.isDisposed());
+//		if(control != null && control.isDisposed()){
+//			System.out.println("tab folder set bounds for " + control + " " + getClientArea());
+//			control.setBounds(getClientArea());
+//		}
+//	}
 //	int idx = getSelectionIndex();
 //	items[idx].fixControlBounds();
 }
@@ -717,7 +726,7 @@ public int getSelectionIndex () {
 			return i;
 		}
 	}
-	System.out.println("The selection is not happend yet!");
+//	System.out.println("The selection is not happend yet!");
 	/*
 	 * should return -1 instead of 0
 	 */
@@ -977,7 +986,7 @@ void setSelection (int index, boolean notify) {
 	 * TODO: When a tab is selected programmly, should move
 	 * the tab into visible tab area.
 	 */
-	System.out.println("set selection is called!");
+//	System.out.println("set selection is called!");
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
 	
@@ -986,7 +995,7 @@ void setSelection (int index, boolean notify) {
 		Control control = item.control;
 		if (control != null && !control.isDisposed ()) {
 			control.setVisible (false);
-			control.handle.style.display = "none";
+			//control.handle.style.display = "none";
 		}
 	}
 //	OS.SendMessage (handle, OS.TCM_SETCURSEL, index, 0);
@@ -1006,8 +1015,9 @@ void setSelection (int index, boolean notify) {
 			 * later layout should relayout the control.
 			 */
 			control.setBounds (getClientArea ());
+//			System.out.println("set selection bounds " + getClientArea());
 			control.setVisible (true);
-			control.handle.style.display = "block";
+			//control.handle.style.display = "block";
 		}
 		if (notify) {
 			Event event = new Event ();
@@ -1020,7 +1030,10 @@ void setSelection (int index, boolean notify) {
 void updateSelection(int index) {
 	String key = "tab-item-selected";
 	for (int i = 0; i < offset; i++) {
-		items[i].handle.style.display = "none";
+		if(items[i].control != null){
+			items[i].control.setVisible(false);
+		}
+		//items[i].handle.style.display = "none";
 		if (index >= offset) {
 			String cssName = items[i].handle.className;
 			if (cssName == null) cssName = "";
@@ -1035,7 +1048,7 @@ void updateSelection(int index) {
 		int left = -2;
 		int x = 2;
 		for (int i = offset; i < items.length; i++) {
-			items[i].handle.style.display = "block";
+			//items[i].handle.style.display = "block";
 			items[i].handle.style.zIndex = (i + 1) + "";
 			//if (index == i) continue;
 			String cssName = items[i].handle.className;

@@ -115,7 +115,6 @@ protected void layout(Composite composite, boolean flushCache) {
 	for (int i = 0; i < children.length; i++) {
 		children[i].setBounds(rect);
 		children[i].setVisible(children[i] == topControl);
-			
 	}
 }
 
