@@ -3137,9 +3137,10 @@ public void setBounds(int x, int y, int width, int height) {
 //		}
 //		outerArea.style.height = height + "px";
 //	}
-	contentArea.style.height = (height - OS.getContainerHeight(buttonArea) - 6)+"px";
-	contentArea.style.width = (width - 6) + "px";
-	buttonArea.style.width = (width - 4) + "px";
+	int h = (height - OS.getContainerHeight(buttonArea) - 6);
+	contentArea.style.height = Math.max(h, 0) +"px";
+	contentArea.style.width = Math.max(0, width - 6) + "px";
+	buttonArea.style.width = Math.max(0, width - 4) + "px";
 	super.setBounds(x, y, width, height);
 	if(selectedIndex != -1 ){
 		Control control = items[selectedIndex].control;
