@@ -303,6 +303,8 @@
         		<file name="org/eclipse/swt/custom/CTabFolder2Adapter.js"/>
         		<file name="org/eclipse/swt/custom/CTabItem.js"/>
         		<file name="org/eclipse/swt/custom/CTabFolder.js"/>
+        		<file name="org/eclipse/swt/custom/ScrolledComposite.js"/>
+        		<file name="org/eclipse/swt/custom/ScrolledCompositeLayout.js"/>
         	</filelist>
         </concat>
     </target>

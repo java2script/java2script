@@ -87,7 +87,7 @@ c$.getContainerHeight=$_M(c$,"getContainerHeight",
 function(container){
 var el=container;
 var max=Math.max(el.offsetHeight,Math.max(el.clientHeight,el.scrollHeight));
-if(O$.isIE&&max>=1){
+if(O$.isIE){
 max--;
 }return max;
 },"~O");
@@ -1901,7 +1901,9 @@ if((this.handle.style.visibility!="hidden")==visible)return;
 }if(visible){
 this.sendEvent(22);
 if(this.isDisposed())return;
-}var control=null;
+}this.handle.style.visibility=visible?"visible":"hidden";
+this.handle.style.display=visible?"block":"none";
+var control=null;
 var fixFocus=false;
 if(!visible){
 if(this.display.focusEvent!=16){
@@ -8064,7 +8066,6 @@ $_M(c$,"computeSize",
 function(wHint,hHint,changed){
 System.out.println(wHint+","+hHint+","+changed);
 var size=$_U(this,$wt.widgets.TabFolder,"computeSize",[wHint,hHint,changed]);
-System.out.println("super size of tabfolder:"+size);
 var width=-124;
 if(this.items!=null&&this.items.length!=0){
 for(var i=0;i<this.items.length;i++){
@@ -8076,7 +8077,6 @@ width+=136;
 }var border=this.getBorderWidth();
 width+=border*2;
 size.x=Math.max(width,size.x);
-System.out.println("in tab folder "+size);
 return size;
 },"~N,~N,~B");
 $_V(c$,"computeTrim",
@@ -8189,13 +8189,11 @@ ww+=x;
 if(w>width){
 if(i<this.b$["$wt.widgets.TabFolder"].items.length-1){
 this.b$["$wt.widgets.TabFolder"].offset++;
-System.out.println("Offset:"+this.b$["$wt.widgets.TabFolder"].offset);
 this.b$["$wt.widgets.TabFolder"].setSelection(this.b$["$wt.widgets.TabFolder"].getSelectionIndex(),false);
 return;
 }}}
 if(ww>width){
 this.b$["$wt.widgets.TabFolder"].offset++;
-System.out.println("Offset:"+this.b$["$wt.widgets.TabFolder"].offset);
 this.b$["$wt.widgets.TabFolder"].setSelection(this.b$["$wt.widgets.TabFolder"].getSelectionIndex(),false);
 return;
 }});
@@ -8219,10 +8217,8 @@ $_Z(this,arguments);
 },$wt.widgets,"TabFolder$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-System.out.println("in Offset:"+this.b$["$wt.widgets.TabFolder"].offset);
 if(this.b$["$wt.widgets.TabFolder"].offset<=0)return;
 this.b$["$wt.widgets.TabFolder"].offset--;
-System.out.println("Offset:"+this.b$["$wt.widgets.TabFolder"].offset);
 this.b$["$wt.widgets.TabFolder"].setSelection(this.b$["$wt.widgets.TabFolder"].getSelectionIndex(),false);
 });
 c$=$_P();
@@ -8315,7 +8311,6 @@ for(var i=0;i<this.items.length;i++){
 if(this.items[i]!=null&&this.items[i].handle!=null&&this.items[i].handle.className!=null&&this.items[i].handle.className.indexOf("selected")!=-1){
 return i;
 }}
-System.out.println("The selection is not happend yet!");
 return-1;
 });
 $_M(c$,"indexOf",
@@ -8455,14 +8450,12 @@ this.setSelection(index,false);
 },"~N");
 $_M(c$,"setSelection",
 function(index,notify){
-System.out.println("set selection is called!");
 var oldIndex=this.getSelectionIndex();
 if(oldIndex!=-1&&oldIndex!=index){
 var item=this.items[oldIndex];
 var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setVisible(false);
-control.handle.style.display="none";
 }}this.updateSelection(index);
 var newIndex=index;
 if(oldIndex==index){
@@ -8473,7 +8466,6 @@ var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setBounds(this.getClientArea());
 control.setVisible(true);
-control.handle.style.display="block";
 }if(notify){
 var event=new $wt.widgets.Event();
 event.item=item;
@@ -8483,8 +8475,9 @@ $_M(c$,"updateSelection",
 function(index){
 var key="tab-item-selected";
 for(var i=0;i<this.offset;i++){
-this.items[i].handle.style.display="none";
-if(index>=this.offset){
+if(this.items[i].control!=null){
+this.items[i].control.setVisible(false);
+}if(index>=this.offset){
 var cssName=this.items[i].handle.className;
 if(cssName==null)cssName="";
 var idx=cssName.indexOf(key);
@@ -8495,7 +8488,6 @@ if(this.items[index]!=null){
 var left=-2;
 var x=2;
 for(var i=this.offset;i<this.items.length;i++){
-this.items[i].handle.style.display="block";
 this.items[i].handle.style.zIndex=(i+1)+"";
 var cssName=this.items[i].handle.className;
 if(cssName==null)cssName="";

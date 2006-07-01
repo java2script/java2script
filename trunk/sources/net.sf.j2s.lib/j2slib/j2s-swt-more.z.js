@@ -29,6 +29,7 @@ $_M(c$,"createWidget",
 function(){
 this.increment=1;
 this.pageIncrement=10;
+this.state=this.state|16;
 });
 $_M(c$,"dispose",
 function(){
@@ -150,8 +151,27 @@ this.pageIncrement=pageIncrement;
 },"~N,~N,~N,~N,~N,~N");
 $_M(c$,"setVisible",
 function(visible){
+System.out.println("setvisible of scrollbar called : "+visible+" parent : "+this.parent);
 var isVisible=(this.state&16)==0;
 if(isVisible==visible)return;
+if(visible){
+this.state=this.state&-17;
+}else{
+this.state=this.state|16;
+}if(this.parent==null||this.parent.handle==null){
+return;
+}var scrollClass="hscroll-default";
+if((this.style&512)!=0){
+scrollClass="vscroll-default";
+}var className=this.parent.handle.className;
+var idx=this.parent.handle.className.indexOf(scrollClass);
+System.out.println("parent scroll class name is "+className+" "+idx+" "+visible);
+if(!visible&&idx!=-1){
+className=className.substring(0,idx)+className.substring(idx+scrollClass.length);
+}else if(visible&&idx==-1){
+className+=" "+scrollClass;
+}System.out.println("setting parent scrollable to "+className);
+this.parent.handle.className=className;
 },"~B");
 c$=$_C(function(){
 this.handle=0;
@@ -2626,6 +2646,7 @@ this.items=null;
 this.columns=null;
 this.imageList=null;
 this.currentItem=null;
+this.tbody=null;
 this.lastSelection=null;
 this.selection=null;
 this.lastIndexOf=0;
@@ -2648,6 +2669,7 @@ $_R(this,$wt.widgets.Table,[parent,$wt.widgets.Table.checkStyle(style)]);
 this.selection=new Array(0);
 this.items=new Array(0);
 this.columns=new Array(0);
+this.tbody=null;
 },"$wt.widgets.Composite,~N");
 $_M(c$,"_getItem",
 function(index){
@@ -2807,23 +2829,22 @@ this.items[index]=item;
 if(this.handle==null){
 return;
 }var table=this.handle.childNodes[0];
-var tbody=null;
-for(var i=0;i<table.childNodes.length;i++){
+if(this.tbody==null)for(var i=0;i<table.childNodes.length;i++){
 if("TBODY".equals(table.childNodes[i].nodeName)){
-tbody=table.childNodes[i];
+this.tbody=table.childNodes[i];
 break;
 }}
-if(tbody==null){
-tbody=d$.createElement("TBODY");
-table.appendChild(tbody);
+if(this.tbody==null){
+this.tbody=d$.createElement("TBODY");
+table.appendChild(this.tbody);
 }var tbodyTR=d$.createElement("TR");
 tbodyTR.className="table-item-default";
-if(index<0||index>=tbody.childNodes.length){
-tbody.appendChild(tbodyTR);
+if(index<0||index>=this.tbody.childNodes.length){
+this.tbody.appendChild(tbodyTR);
 this.items[index]=item;
 }else{
 System.out.println("existed");
-tbody.insertBefore(tbodyTR,tbody.childNodes[index]);
+this.tbody.insertBefore(tbodyTR,this.tbody.childNodes[index]);
 for(var i=this.items.length;i>index;i--){
 this.items[i]=this.items[i-1];
 this.items[i].index=i;
