@@ -423,4 +423,21 @@ public class OS {
 		Element c = setupAsStyled(str, className, cssText, -1);
 		return new Point(getContainerWidth(c), getContainerHeight(c));
 	}
+	
+	static public Point getElementPositionInShell(Element elem, Element shellElem){
+		Element currentElem = elem;
+		int left = 0;
+		int top = 0;
+		while (currentElem != shellElem) {
+			left += currentElem.offsetLeft;
+			top += currentElem.offsetTop;
+			currentElem = currentElem.offsetParent;
+		}
+//		System.out.println(getShell().she)
+		if(isFirefox){
+			left += 6;
+			top += 2;
+		}
+		return new Point(left, top + OS.getContainerHeight(elem));
+	}
 }

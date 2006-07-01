@@ -22,6 +22,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class are controls that allow the user
@@ -558,12 +559,25 @@ protected void createHandle () {
 		selectInput.style.top = height + "px" ;
 		selectInput.style.left = textInput.style.left;
 		System.out.println("is Simple " + isSimple);
-		selectInput.className = "combo-select-box-invisible";
+		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
 		selectInput.size = visibleCount;
+		System.out.println("ho combo1 "  + textInput.scrollHeight);
+		System.out.println("ho combo2 "  + textInput.offsetHeight);
+		System.out.println("ho combo3 "  + textInput.clientHeight);
 		//TODO: add the select to shell to be shown every where
-//		getShell().handle.appendChild(selectInput);
-		handle.appendChild(selectInput);
+	
+		getShell().handle.appendChild(selectInput);
+//		handle.appendChild(selectInput);
 	}
+	
+	textInput.ondblclick = new RunnableCompatibility() {
+		public void run() {
+			System.out.println("button clicked!");
+			if(!isSimple) 
+				show();
+		}
+	};
+	
 	
 	dropDownButton.onclick = new RunnableCompatibility() {
 		public void run() {
@@ -608,7 +622,7 @@ void hide(){
 //	}
 	
 	this.selectShown = false;
-	selectInput.className = "combo-select-box-invisible";
+	selectInput.className = "combo-select-box-invisible" + (isSimple ? "" : " combo-select-box-notsimple");
 }
 
 void show(){
@@ -616,12 +630,17 @@ void show(){
 //	if(this.selectShown){
 //		return;
 //	}
+
+	Point coordinate = OS.getElementPositionInShell(textInput, getShell().handle);
 	this.selectShown = true;
 	selectInput.style.zIndex = "120";
-	selectInput.className = "combo-select-box-visible";
+	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
+	selectInput.style.top = coordinate.y + "px";
+	selectInput.style.left = coordinate.x + "px";
 	System.out.println("Z " + selectInput.style.zIndex);
 	selectInput.focus();	
 }
+
 void updateSelection(){
 	textInput.value = selectInput.options[getSelectionIndex()].value;
 }

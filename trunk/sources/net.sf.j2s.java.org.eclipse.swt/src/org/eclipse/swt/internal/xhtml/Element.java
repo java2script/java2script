@@ -11,6 +11,9 @@ public class Element {
 	public Element parentNode;
 	public Element[] childNodes;
 	public Element nextSibling;
+	public int offsetLeft;
+	public int offsetTop;
+	public Element offsetParent;
 	
 	public CSSStyle style;
 	public String id;

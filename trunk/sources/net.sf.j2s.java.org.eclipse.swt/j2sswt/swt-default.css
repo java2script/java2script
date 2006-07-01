@@ -398,17 +398,20 @@ input.text-border {
 
 /* Combo */
 .combo-default{
+	padding: 0;
+	border-style:none;
 	overflow:visible;
 }
 .combo-button{
-	width:11px;
-	min-height:11px;
+//	width:11px;
+	height: 100%;
 	background-image:url('images/combo-button.gif');
 	background-repeat:no-repeat;
 	background-position:center center;
 }
 
 .combo-input-box{
+	border-style:none;
 }
 
 .combo-select-box-invisible{
@@ -418,6 +421,10 @@ input.text-border {
 
 .combo-select-box-visible{
 	display:block;
+}
+
+.combo-select-box-notsimple{
+	position:absolute;
 }
 /* End of Combo */
 
