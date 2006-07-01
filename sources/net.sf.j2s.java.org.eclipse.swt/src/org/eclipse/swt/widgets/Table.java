@@ -51,8 +51,19 @@ public class Table extends Composite {
 	ImageList imageList;
 	TableItem currentItem;
 	
+	Element tbody;
+	
 	TableItem lastSelection;
 	TableItem[] selection;
+	
+//	String[] itemsStr;
+//	String[] columnsStr;
+//	String tableHeaderStr = "<TABLE>";
+//	String tableFooterStr = "</TABLE>";
+//	String theadHeaderStr = "<THEAD>";
+//	String theadFooterStr = "</THEAD>";
+//	String tbodyHeaderStr = "<TBODY>";
+//	String tbodyFooterStr = "</TBODY>";
 	
 	int lastIndexOf, lastWidth;
 	boolean customDraw, cancelMove, dragStarted, fixScrollWidth, tipRequested;
@@ -109,6 +120,8 @@ public Table (Composite parent, int style) {
 	selection = new TableItem[0];
 	items = new TableItem[0];
 	columns = new TableColumn[0];
+//	itemsStr = new String[0];
+	tbody = null;
 }
 
 TableItem _getItem (int index) {
@@ -841,6 +854,7 @@ void createItem (TableColumn column, int index) {
 	if (handle == null) {
 		return ;
 	}
+
 	Element table = handle.childNodes[0];
 	Element thead = null;
 	for (int i = 0; i < table.childNodes.length; i++) {
@@ -951,14 +965,19 @@ void createItem (TableItem item, int index) {
 	*/
 	if (items == null) {
 		items = new TableItem[0];
+//		itemsStr = new String[0];		
 	}
+//	if(itemsStr == null){
+//		System.out.println("init itemStr");
+//	}
 	item.index = index;
 	items[index] = item;
 	if (handle == null) {
 		return ;
 	}
 	Element table = handle.childNodes[0];
-	Element tbody = null;
+	//tbody = null;
+	if(tbody == null)
 	for (int i = 0; i < table.childNodes.length; i++) {
 		if ("TBODY".equals(table.childNodes[i].nodeName)) {
 			tbody = table.childNodes[i];
@@ -971,19 +990,26 @@ void createItem (TableItem item, int index) {
 	}
 	
 	Element tbodyTR = document.createElement("TR");
+//	String trStr = "<TR class=\"table-item-default\"></TR>";
 	tbodyTR.className = "table-item-default";
 	if (index < 0 || index >= tbody.childNodes.length) { //theadTD == null){
 		tbody.appendChild(tbodyTR);
 		items[index] = item;
+//		itemsStr[index] = trStr;
 	} else {
 		System.out.println("existed");
 		tbody.insertBefore(tbodyTR, tbody.childNodes[index]);
 		for (int i = items.length; i > index; i--) {
 			items[i] = items[i - 1];
 			items[i].index = i;
+//			itemsStr[i] = itemsStr[i - 1];
 		}
 		items[index] = item;
+//		itemsStr[index] = trStr;
 	}
+//	fillTbody();
+//	System.out.println(tbody.innerHTML);
+//	item.handle = tbody.childNodes[index];
 	item.handle = tbodyTR;
 }
 
@@ -3633,6 +3659,14 @@ void updateMoveable () {
 	OS.SendMessage (handle, OS.LVM_SETEXTENDEDLISTVIEWSTYLE, OS.LVS_EX_HEADERDRAGDROP, newBits);
 	*/
 }
+
+///**
+// * @j2sNative
+// * this.tbody.innerHTML = this.itemsStr.join('');
+// */
+//void fillTbody() {
+//	
+//}
 
 /*
 int widgetStyle () {
