@@ -119,6 +119,7 @@ ScrollBar (Scrollable parent, int style) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
 	createWidget ();
+	//setVisible(false);
 }
 
 /**
@@ -168,6 +169,7 @@ static int checkStyle (int style) {
 void createWidget () {
 	increment = 1;
 	pageIncrement = 10;
+	state = state | HIDDEN;
 	/*
 	* Do not set the intial values of the maximum
 	* or the thumb.  These values normally default
@@ -848,9 +850,33 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
  */
 public void setVisible (boolean visible) {
 	checkWidget();
+	System.out.println("setvisible of scrollbar called : " + visible + " parent : " + parent);
 	boolean isVisible = (state & HIDDEN) == 0;
 	if (isVisible == visible) return;
+	if(visible) {
+		state = state & ~HIDDEN;
+	}else{
+		state = state | HIDDEN;
+	}
+	if(parent == null || parent.handle == null){
+		return;
+	}
 	
+	String scrollClass = "hscroll-default";
+	if((style & SWT.VERTICAL)!=0){
+		scrollClass = "vscroll-default";
+	}
+	String className = this.parent.handle.className;
+	int idx = this.parent.handle.className.indexOf(scrollClass);
+	System.out.println("parent scroll class name is " + className + " " + idx + " " + visible);
+	if(!visible && idx != -1){
+		className = className.substring(0, idx) + className.substring(idx + scrollClass.length());
+	}
+	else if(visible && idx == -1){ 
+		className += " " + scrollClass;
+	}
+	System.out.println("setting parent scrollable to " + className);
+	this.parent.handle.className = className;
 	/*
 	/*
 	* On Windows CE, use SIF_DISABLENOSCROLL to show and

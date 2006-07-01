@@ -138,30 +138,6 @@ public class ScrolledComposite extends Composite {
 public ScrolledComposite(Composite parent, int style) {
 	super(parent, checkStyle(style));
 	super.setLayout(new ScrolledCompositeLayout());
-	ScrollBar hBar = getHorizontalBar ();
-	if (hBar != null) {
-		hBar.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				hScroll();
-			}
-		});
-	}
-	
-	ScrollBar vBar = getVerticalBar ();
-	if (vBar != null) {
-		vBar.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				vScroll();
-			}
-		});
-	}
-	
-	contentListener = new Listener() {
-		public void handleEvent(Event e) {
-			if (e.type != SWT.Resize) return;
-			layout(false);
-		}
-	};
 }
 
 static int checkStyle (int style) {
@@ -508,5 +484,33 @@ void vScroll() {
 	ScrollBar vBar = getVerticalBar ();
 	int vSelection = vBar.getSelection ();
 	content.setLocation (location.x, -vSelection);
+}
+protected void createHandle () {
+	super.createHandle();
+//	ScrollBar hBar = getHorizontalBar ();
+//	if (hBar != null) {
+//		hBar.addListener (SWT.Selection, new Listener () {
+//			public void handleEvent (Event e) {
+//				hScroll();
+//			}
+//		});
+//	}
+	
+//	ScrollBar vBar = getVerticalBar ();
+//	if (vBar != null) {
+//		vBar.addListener (SWT.Selection, new Listener () {
+//			public void handleEvent (Event e) {
+//				vScroll();
+//			}
+//		});
+//	}
+	
+//	contentListener = new Listener() {
+//		public void handleEvent(Event e) {
+//			if (e.type != SWT.Resize) return;
+//			layout(false);
+//		}
+//	};
+
 }
 }

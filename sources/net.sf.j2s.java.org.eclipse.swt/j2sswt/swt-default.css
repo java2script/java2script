@@ -211,6 +211,7 @@
 	border-width:2px;
 	border-color:black white white black;
 }
+
 .system-default {
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
@@ -1845,6 +1846,14 @@ table, tr, td {
 	font-size:8pt;
 	margin:0;
 	padding:0;
+}
+/* scrolled composite */
+.vscroll-default{
+	overflow-y:scroll;
+}
+
+.hscroll-default{
+	overflow-x:scroll;
 }
 
 /* shell */
