@@ -432,12 +432,9 @@ rect.y+=this.marginHeight;
 rect.width-=2*this.marginWidth;
 rect.height-=2*this.marginHeight;
 for(var i=0;i<children.length;i++){
-if(children[i]!=this.topControl){
-children[i].handle.style.display="none";
-}else{
 children[i].setBounds(rect);
-children[i].handle.style.display="block";
-}}
+children[i].setVisible(children[i]==this.topControl);
+}
 },"$wt.widgets.Composite,~B");
 $_M(c$,"getName",
 function(){
@@ -1880,9 +1877,7 @@ function(parent,style,index){
 $_R(this,$wt.custom.CTabItem,[parent,$wt.custom.CTabItem.checkStyle(style)]);
 this.parent=parent;
 this.showClose=parent.showClose;
-System.out.println("after sw"+this.showClose+" "+(style&64)+" "+style);
 parent.createItem(this,index);
-System.out.println("handle "+this.handle);
 this.configure(index);
 },"$wt.custom.CTabFolder,~N,~N");
 $_V(c$,"getNameText",
@@ -1901,7 +1896,6 @@ $_Z(this,arguments);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].parent.setSelection(this.b$["$wt.custom.CTabItem"]);
-System.out.println("An item is selected "+this.b$["$wt.custom.CTabItem"]);
 });
 c$=$_P();
 }
@@ -2119,7 +2113,6 @@ System.out.println("client area has trouble");
 }else{
 newControl.setBounds(clientArea);
 newControl.setVisible(true);
-System.out.println("bounds "+clientArea);
 }}if(oldControl!=null)oldControl.setVisible(false);
 },"$wt.widgets.Control");
 $_M(c$,"setDisabledImage",
@@ -2166,7 +2159,6 @@ this.parent.updateSelection(this.parent.getSelectionIndex());
 },"~S");
 $_M(c$,"configureRightEl",
 function(){
-System.out.println("Show close : "+this.showClose);
 if(this.showClose){
 this.rightEl.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$4")){
@@ -2192,8 +2184,7 @@ listener.itemClosed(e);
 }
 if(e.doit){
 this.b$["$wt.custom.CTabItem"].parent.destroyItem(this.b$["$wt.custom.CTabItem"]);
-}System.out.println("An item is closed "+this.b$["$wt.custom.CTabItem"]);
-});
+}});
 c$=$_P();
 }
 return $_N($wt.custom.CTabItem$4,i$,v$);
@@ -3200,11 +3191,16 @@ return $_U(this,$wt.custom.CTabFolder,"SetWindowPos",[hWnd,hWndInsertAfter,X,Y,c
 },"~O,~O,~N,~N,~N,~N,~N");
 $_M(c$,"setBounds",
 function(x,y,width,height){
-this.contentArea.style.height=(height-O$.getContainerHeight(this.buttonArea)-6)+"px";
-this.contentArea.style.width=(width-6)+"px";
-this.buttonArea.style.width=(width-4)+"px";
+var h=(height-O$.getContainerHeight(this.buttonArea)-6);
+this.contentArea.style.height=Math.max(h,0)+"px";
+this.contentArea.style.width=Math.max(0,width-6)+"px";
+this.buttonArea.style.width=Math.max(0,width-4)+"px";
 $_U(this,$wt.custom.CTabFolder,"setBounds",[x,y,width,height]);
-},"~N,~N,~N,~N");
+if(this.selectedIndex!=-1){
+var control=this.items[this.selectedIndex].control;
+if(control!=null&&control.isDisposed()){
+control.setBounds(this.getClientArea());
+}}},"~N,~N,~N,~N");
 $_M(c$,"setMinimizeVisible",
 function(visible){
 if(this.showMin==visible)return;
@@ -3252,31 +3248,27 @@ this.setSelection(index,false);
 $_M(c$,"setSelection",
 function(index,notify){
 var oldIndex=this.getSelectionIndex();
-System.out.println("setselection called! at "+oldIndex+" at "+index);
-if(oldIndex==index){
-return;
-}if(oldIndex!=-1){
+if(oldIndex!=-1&&oldIndex!=index){
 var item=this.items[oldIndex];
 var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setVisible(false);
-control.handle.style.display="none";
 }}this.updateSelection(index);
 var newIndex=index;
-if(newIndex!=-1){
+if(oldIndex==index){
+newIndex=-1;
+}if(newIndex!=-1){
 var item=this.items[newIndex];
 this.selectedIndex=newIndex;
 var control=item.control;
 if(control!=null&&!control.isDisposed()){
 control.setBounds(this.getClientArea());
 control.setVisible(true);
-control.handle.style.display="block";
 }if(notify){
 var event=new $wt.widgets.Event();
 event.item=item;
 this.sendEvent(13,event);
-}}this.layout();
-},"~N,~B");
+}}},"~N,~B");
 $_M(c$,"updateSelection",
 function(index){
 var key=this.simple?"ctab-item-selected":"ctab-item-rounded-selected";
@@ -3284,8 +3276,10 @@ if(this.items[index]!=null){
 var left=-2;
 var x=2;
 for(var i=this.offset;i<this.items.length;i++){
-this.items[i].handle.style.display="block";
-this.items[i].handle.style.zIndex=(i+1)+"";
+var control=this.items[i].control;
+if(control!=null&&!control.isDisposed()){
+control.setVisible(false);
+}this.items[i].handle.style.zIndex=(i+1)+"";
 var cssName=this.items[i].handle.className;
 if(cssName==null)cssName="";
 var idx=cssName.indexOf(key);
@@ -3314,7 +3308,10 @@ if(ww>0){
 if(cssName==null)cssName="";
 var idx=cssName.indexOf(key);
 if(idx==-1){
-this.items[index].handle.className+=" "+key;
+var control=this.items[index].control;
+if(control!=null&&!control.isDisposed()){
+control.setVisible(true);
+}this.items[index].handle.className+=" "+key;
 this.items[index].rightEl.className=this.items[index].cssClassForRight();
 this.items[index].handle.style.height=(O$.getContainerHeight(this.buttonArea)+3)+"px";
 this.items[index].rightEl.style.height=this.items[index].handle.style.height;
@@ -3336,8 +3333,9 @@ y=0;
 left=2;
 }}}var after=false;
 for(var i=0;i<this.offset;i++){
-this.items[i].handle.style.display="none";
-var cssName=this.items[i].handle.className;
+if(this.items[i].control!=null){
+this.items[i].control.setVisible(false);
+}var cssName=this.items[i].handle.className;
 if(cssName==null)cssName="";
 var idx=cssName.indexOf(key);
 if(idx!=-1){
@@ -3836,3 +3834,246 @@ $_S(c$,
 "HOT",2,
 "SELECTED",3);
 c$.CLOSE_FILL=c$.prototype.CLOSE_FILL=new $wt.graphics.RGB(252,160,160);
+c$=$_C(function(){
+this.content=null;
+this.contentListener=null;
+this.minHeight=0;
+this.minWidth=0;
+this.expandHorizontal=false;
+this.expandVertical=false;
+this.alwaysShowScroll=false;
+$_Z(this,arguments);
+},$wt.custom,"ScrolledComposite",$wt.widgets.Composite);
+$_K(c$,
+function(parent,style){
+$_R(this,$wt.custom.ScrolledComposite,[parent,$wt.custom.ScrolledComposite.checkStyle(style)]);
+$_U(this,$wt.custom.ScrolledComposite,"setLayout",[new $wt.custom.ScrolledCompositeLayout()]);
+},"$wt.widgets.Composite,~N");
+c$.checkStyle=$_M(c$,"checkStyle",
+function(style){
+var mask=100666112;
+return style&mask;
+},"~N");
+$_M(c$,"getAlwaysShowScrollBars",
+function(){
+return this.alwaysShowScroll;
+});
+$_M(c$,"getContent",
+function(){
+return this.content;
+});
+$_M(c$,"hScroll",
+function(){
+if(this.content==null)return;
+var location=this.content.getLocation();
+var hBar=this.getHorizontalBar();
+var hSelection=hBar.getSelection();
+this.content.setLocation(-hSelection,location.y);
+});
+$_M(c$,"needHScroll",
+function(contentRect,vVisible){
+var hBar=this.getHorizontalBar();
+if(hBar==null)return false;
+var hostRect=this.getBounds();
+var border=this.getBorderWidth();
+hostRect.width-=2*border;
+var vBar=this.getVerticalBar();
+if(vVisible&&vBar!=null)hostRect.width-=vBar.getSize().x;
+if(!this.expandHorizontal&&contentRect.width>hostRect.width)return true;
+if(this.expandHorizontal&&this.minWidth>hostRect.width)return true;
+return false;
+},"$wt.graphics.Rectangle,~B");
+$_M(c$,"needVScroll",
+function(contentRect,hVisible){
+var vBar=this.getVerticalBar();
+if(vBar==null)return false;
+var hostRect=this.getBounds();
+var border=this.getBorderWidth();
+hostRect.height-=2*border;
+var hBar=this.getHorizontalBar();
+if(hVisible&&hBar!=null)hostRect.height-=hBar.getSize().y;
+if(!this.expandVertical&&contentRect.height>hostRect.height)return true;
+if(this.expandVertical&&this.minHeight>hostRect.height)return true;
+return false;
+},"$wt.graphics.Rectangle,~B");
+$_M(c$,"getOrigin",
+function(){
+if(this.content==null)return new $wt.graphics.Point(0,0);
+var location=this.content.getLocation();
+return new $wt.graphics.Point(-location.x,-location.y);
+});
+$_M(c$,"setOrigin",
+function(origin){
+this.setOrigin(origin.x,origin.y);
+},"$wt.graphics.Point");
+$_M(c$,"setOrigin",
+function(x,y){
+if(this.content==null)return;
+var hBar=this.getHorizontalBar();
+if(hBar!=null){
+hBar.setSelection(x);
+x=-hBar.getSelection();
+}else{
+x=0;
+}var vBar=this.getVerticalBar();
+if(vBar!=null){
+vBar.setSelection(y);
+y=-vBar.getSelection();
+}else{
+y=0;
+}this.content.setLocation(x,y);
+},"~N,~N");
+$_M(c$,"setAlwaysShowScrollBars",
+function(show){
+if(show==this.alwaysShowScroll)return;
+this.alwaysShowScroll=show;
+var hBar=this.getHorizontalBar();
+if(hBar!=null&&this.alwaysShowScroll)hBar.setVisible(true);
+var vBar=this.getVerticalBar();
+if(vBar!=null&&this.alwaysShowScroll)vBar.setVisible(true);
+this.layout(false);
+},"~B");
+$_M(c$,"setContent",
+function(content){
+if(this.content!=null&&!this.content.isDisposed()){
+this.content.removeListener(11,this.contentListener);
+this.content.setBounds(new $wt.graphics.Rectangle(-200,-200,0,0));
+}this.content=content;
+var vBar=this.getVerticalBar();
+var hBar=this.getHorizontalBar();
+if(this.content!=null){
+if(vBar!=null){
+vBar.setMaximum(0);
+vBar.setThumb(0);
+vBar.setSelection(0);
+}if(hBar!=null){
+hBar.setMaximum(0);
+hBar.setThumb(0);
+hBar.setSelection(0);
+}content.setLocation(0,0);
+this.layout(false);
+this.content.addListener(11,this.contentListener);
+}else{
+if(hBar!=null)hBar.setVisible(this.alwaysShowScroll);
+if(vBar!=null)vBar.setVisible(this.alwaysShowScroll);
+}},"$wt.widgets.Control");
+$_M(c$,"setExpandHorizontal",
+function(expand){
+if(expand==this.expandHorizontal)return;
+this.expandHorizontal=expand;
+this.layout(false);
+},"~B");
+$_M(c$,"setExpandVertical",
+function(expand){
+if(expand==this.expandVertical)return;
+this.expandVertical=expand;
+this.layout(false);
+},"~B");
+$_M(c$,"setLayout",
+function(layout){
+return;
+},"$wt.widgets.Layout");
+$_M(c$,"setMinHeight",
+function(height){
+this.setMinSize(this.minWidth,height);
+},"~N");
+$_M(c$,"setMinSize",
+function(size){
+if(size==null){
+this.setMinSize(0,0);
+}else{
+this.setMinSize(size.x,size.y);
+}},"$wt.graphics.Point");
+$_M(c$,"setMinSize",
+function(width,height){
+if(width==this.minWidth&&height==this.minHeight)return;
+this.minWidth=Math.max(0,width);
+this.minHeight=Math.max(0,height);
+this.layout(false);
+},"~N,~N");
+$_M(c$,"setMinWidth",
+function(width){
+this.setMinSize(width,this.minHeight);
+},"~N");
+$_M(c$,"vScroll",
+function(){
+if(this.content==null)return;
+var location=this.content.getLocation();
+var vBar=this.getVerticalBar();
+var vSelection=vBar.getSelection();
+this.content.setLocation(location.x,-vSelection);
+});
+$_M(c$,"createHandle",
+function(){
+$_U(this,$wt.custom.ScrolledComposite,"createHandle",[]);
+});
+c$=$_C(function(){
+this.inLayout=false;
+$_Z(this,arguments);
+},$wt.custom,"ScrolledCompositeLayout",$wt.widgets.Layout);
+$_V(c$,"computeSize",
+function(composite,wHint,hHint,flushCache){
+var sc=composite;
+if(sc.content==null){
+var w=(wHint!=-1)?wHint:64;
+var h=(hHint!=-1)?hHint:64;
+return new $wt.graphics.Point(w,h);
+}var size=sc.content.computeSize(wHint,hHint,flushCache);
+if(sc.alwaysShowScroll){
+var hBar=sc.getHorizontalBar();
+var vBar=sc.getVerticalBar();
+if(hBar!=null)size.y+=hBar.getSize().y;
+if(vBar!=null)size.x+=vBar.getSize().x;
+}return size;
+},"$wt.widgets.Composite,~N,~N,~B");
+$_V(c$,"flushCache",
+function(control){
+return true;
+},"$wt.widgets.Control");
+$_V(c$,"layout",
+function(composite,flushCache){
+if(this.inLayout)return;
+var sc=composite;
+if(sc.content==null)return;
+this.inLayout=true;
+var contentRect=sc.content.getBounds();
+var hBar=sc.getHorizontalBar();
+var vBar=sc.getVerticalBar();
+System.out.println("calling scrolledcompoisite layout "+hBar+" "+vBar);
+if(!sc.alwaysShowScroll){
+var hVisible=sc.needHScroll(contentRect,false);
+var vVisible=sc.needVScroll(contentRect,hVisible);
+if(!hVisible&&vVisible)hVisible=sc.needHScroll(contentRect,vVisible);
+if(hBar!=null)hBar.setVisible(hVisible);
+if(vBar!=null)vBar.setVisible(vVisible);
+}var hostRect=sc.getClientArea();
+if(sc.expandHorizontal){
+contentRect.width=Math.max(sc.minWidth,hostRect.width);
+}if(sc.expandVertical){
+contentRect.height=Math.max(sc.minHeight,hostRect.height);
+}if(hBar!=null){
+hBar.setMaximum(contentRect.width);
+hBar.setThumb(Math.min(contentRect.width,hostRect.width));
+var hPage=contentRect.width-hostRect.width;
+var hSelection=hBar.getSelection();
+if(hSelection>=hPage){
+if(hPage<=0){
+hSelection=0;
+hBar.setSelection(0);
+}contentRect.x=-hSelection;
+}}if(vBar!=null){
+vBar.setMaximum(contentRect.height);
+vBar.setThumb(Math.min(contentRect.height,hostRect.height));
+var vPage=contentRect.height-hostRect.height;
+var vSelection=vBar.getSelection();
+if(vSelection>=vPage){
+if(vPage<=0){
+vSelection=0;
+vBar.setSelection(0);
+}contentRect.y=-vSelection;
+}}sc.content.setBounds(contentRect);
+this.inLayout=false;
+},"$wt.widgets.Composite,~B");
+$_S(c$,
+"DEFAULT_WIDTH",64,
+"DEFAULT_HEIGHT",64);
