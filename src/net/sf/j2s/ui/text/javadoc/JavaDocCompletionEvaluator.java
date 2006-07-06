@@ -494,6 +494,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 	}
 
 	private JavaCompletionProposal createSeeTypeCompletion(int flags, int start, int end, char[] completion, String fullTypeName, int severity) {
+		return null;
+		/*
 		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), fullTypeName);
 		StringBuffer nameBuffer= new StringBuffer();
 		String simpleName= Signature.getSimpleName(fullTypeName);
@@ -514,6 +516,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
+		*/
 	}
 
 
