@@ -21,6 +21,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+
+import net.sf.j2s.core.builder.JavaBuilder;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -37,7 +40,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.DeltaProcessingState;
 import org.eclipse.jdt.internal.core.DeltaProcessor;
 import org.eclipse.jdt.internal.core.JavaModel;
-import org.eclipse.jdt.internal.core.builder.JavaBuilder;
 import org.eclipse.jdt.internal.core.util.Messages;
 
 /**

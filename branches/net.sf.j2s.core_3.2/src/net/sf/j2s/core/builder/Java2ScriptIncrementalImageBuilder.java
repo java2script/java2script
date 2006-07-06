@@ -16,6 +16,8 @@ package net.sf.j2s.core.builder;
 import java.util.Locale;
 import java.util.Map;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
+import net.sf.j2s.core.compiler.Java2ScriptImageCompiler;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
@@ -54,24 +56,18 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 		}
 		
 		// called once when the builder is initialized... can override if needed
-		Compiler newCompiler = new net.sf.j2s.core.compiler.Java2ScriptImageCompiler(
+		CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
+		compilerOptions.performStatementsRecovery = true;
+		Compiler newCompiler = new Java2ScriptImageCompiler(
 			nameEnvironment,
 			DefaultErrorHandlingPolicies.proceedWithAllProblems(),
-			projectOptions,
+			compilerOptions,
 			this,
 			ProblemFactory.getProblemFactory(Locale.getDefault()));
 		CompilerOptions options = newCompiler.options;
 
 		// enable the compiler reference info support
 		options.produceReferenceInfo = true;
-		
-		org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment env = newCompiler.lookupEnvironment;
-		synchronized (env) {
-			// enable shared byte[]'s used by ClassFile to avoid allocating MBs during a build
-			env.sharedArraysUsed = false;
-			env.sharedClassFileHeader = new byte[30000];
-			env.sharedClassFileContents = new byte[30000];
-		}
 
 		return newCompiler;
 	}
