@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,11 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import net.sf.j2s.core.JavaModelManager;
-import net.sf.j2s.core.JavaModelManager.PerProjectInfo;
-
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.core.*;
 import org.eclipse.jdt.internal.core.util.Messages;
@@ -31,6 +28,7 @@ public class JavaBuilder extends IncrementalProjectBuilder {
 IProject currentProject;
 JavaProject javaProject;
 IWorkspaceRoot workspaceRoot;
+CompilationParticipant[] participants;
 NameEnvironment nameEnvironment;
 SimpleLookupTable binaryLocationsPerProject; // maps a project to its binary resources (output folders, class folders, zip/jar files)
 State lastState;
@@ -49,8 +47,25 @@ static ArrayList builtProjects = null;
 
 public static IMarker[] getProblemsFor(IResource resource) {
 	try {
-		if (resource != null && resource.exists())
-			return resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+		if (resource != null && resource.exists()) {
+			IMarker[] markers = resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			Set markerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
+			if (markerTypes.isEmpty()) return markers;
+			ArrayList markerList = new ArrayList(5);
+			for (int i = 0, length = markers.length; i < length; i++) {
+				markerList.add(markers[i]);
+			}
+			Iterator iterator = markerTypes.iterator();
+			while (iterator.hasNext()) {
+				markers = resource.findMarkers((String) iterator.next(), false, IResource.DEPTH_INFINITE);
+				for (int i = 0, length = markers.length; i < length; i++) {
+					markerList.add(markers[i]);
+				}
+			}
+			IMarker[] result;
+			markerList.toArray(result = new IMarker[markerList.size()]);
+			return result;
+		}
 	} catch (CoreException e) {
 		// assume there are no problems
 	}
@@ -85,8 +100,16 @@ public static void buildFinished() {
 
 public static void removeProblemsFor(IResource resource) {
 	try {
-		if (resource != null && resource.exists())
+		if (resource != null && resource.exists()) {
 			resource.deleteMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			
+			// delete managed markers
+			Set markerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
+			if (markerTypes.size() == 0) return;
+			Iterator iterator = markerTypes.iterator();
+			while (iterator.hasNext())
+				resource.deleteMarkers((String) iterator.next(), false, IResource.DEPTH_INFINITE);
+		}
 	} catch (CoreException e) {
 		// assume there were no problems
 	}
@@ -106,6 +129,13 @@ public static void removeProblemsAndTasksFor(IResource resource) {
 		if (resource != null && resource.exists()) {
 			resource.deleteMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 			resource.deleteMarkers(IJavaModelMarker.TASK_MARKER, false, IResource.DEPTH_INFINITE);
+			
+			// delete managed markers
+			Set markerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
+			if (markerTypes.size() == 0) return;
+			Iterator iterator = markerTypes.iterator();
+			while (iterator.hasNext())
+				resource.deleteMarkers((String) iterator.next(), false, IResource.DEPTH_INFINITE);
 		}
 	} catch (CoreException e) {
 		// assume there were no problems
@@ -132,7 +162,7 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 	boolean ok = false;
 	try {
 		notifier.checkCancel();
-		initializeBuilder();
+		kind = initializeBuilder(kind, true);
 
 		if (isWorthBuilding()) {
 			if (kind == FULL_BUILD) {
@@ -172,11 +202,13 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 		marker.setAttribute(IMarker.MESSAGE, Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage())); 
 		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		marker.setAttribute(IJavaModelMarker.CATEGORY_ID, CategorizedProblem.CAT_BUILDPATH);
 	} catch (ImageBuilderInternalException e) {
 		Util.log(e.getThrowable(), "JavaBuilder handling ImageBuilderInternalException while building: " + currentProject.getName()); //$NON-NLS-1$
 		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 		marker.setAttribute(IMarker.MESSAGE, Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage())); 
 		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		marker.setAttribute(IJavaModelMarker.CATEGORY_ID, CategorizedProblem.CAT_BUILDPATH);
 	} catch (MissingClassFileException e) {
 		// do not log this exception since its thrown to handle aborted compiles because of missing class files
 		if (DEBUG)
@@ -184,6 +216,7 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 		marker.setAttribute(IMarker.MESSAGE, Messages.bind(Messages.build_incompleteClassPath, e.missingClassFile)); 
 		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		marker.setAttribute(IJavaModelMarker.CATEGORY_ID, CategorizedProblem.CAT_BUILDPATH);
 	} catch (MissingSourceFileException e) {
 		// do not log this exception since its thrown to handle aborted compiles because of missing source files
 		if (DEBUG)
@@ -208,18 +241,18 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 
 private void buildAll() {
 	notifier.checkCancel();
-	notifier.subTask(Messages.build_preparingBuild); 
+	notifier.subTask(Messages.bind(Messages.build_preparingBuild, this.currentProject.getName())); 
 	if (DEBUG && lastState != null)
 		System.out.println("Clearing last state : " + lastState); //$NON-NLS-1$
 	clearLastState();
-	BatchImageBuilder imageBuilder = new Java2ScriptBatchImageBuilder(this);
+	BatchImageBuilder imageBuilder = new Java2ScriptBatchImageBuilder(this, true);
 	imageBuilder.build();
 	recordNewState(imageBuilder.newState);
 }
 
 private void buildDeltas(SimpleLookupTable deltas) {
 	notifier.checkCancel();
-	notifier.subTask(Messages.build_preparingBuild); 
+	notifier.subTask(Messages.bind(Messages.build_preparingBuild, this.currentProject.getName())); 
 	if (DEBUG && lastState != null)
 		System.out.println("Clearing last state : " + lastState); //$NON-NLS-1$
 	clearLastState(); // clear the previously built state so if the build fails, a full build will occur next time
@@ -242,12 +275,12 @@ protected void clean(IProgressMonitor monitor) throws CoreException {
 	try {
 		notifier.checkCancel();
 
-		initializeBuilder();
+		initializeBuilder(CLEAN_BUILD, true);
 		if (DEBUG)
 			System.out.println("Clearing last state as part of clean : " + lastState); //$NON-NLS-1$
 		clearLastState();
 		removeProblemsAndTasksFor(currentProject);
-		new BatchImageBuilder(this).cleanOutputFolders(false);
+		new BatchImageBuilder(this, false).cleanOutputFolders(false);
 	} catch (CoreException e) {
 		Util.log(e, "JavaBuilder handling CoreException while cleaning: " + currentProject.getName()); //$NON-NLS-1$
 		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
@@ -263,6 +296,7 @@ protected void clean(IProgressMonitor monitor) throws CoreException {
 }
 
 private void cleanup() {
+	this.participants = null;
 	this.nameEnvironment = null;
 	this.binaryLocationsPerProject = null;
 	this.lastState = null;
@@ -272,7 +306,7 @@ private void cleanup() {
 }
 
 private void clearLastState() {
-	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, null);
+	net.sf.j2s.core.JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, null);
 }
 
 boolean filterExtraResource(IResource resource) {
@@ -354,7 +388,7 @@ private SimpleLookupTable findDeltas() {
 }
 
 public State getLastState(IProject project) {
-	return (State) JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
+	return (State) net.sf.j2s.core.JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
 }
 
 /* Return the list of projects for which it requires a resource delta. This builder's project
@@ -376,6 +410,8 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 			switch (entry.getEntryKind()) {
 				case IClasspathEntry.CPE_PROJECT :
 					p = workspaceRoot.getProject(path.lastSegment()); // missing projects are considered too
+					if (((ClasspathEntry) entry).isOptional() && !JavaProject.hasJavaNature(p)) // except if entry is optional
+						p = null;
 					break;
 				case IClasspathEntry.CPE_LIBRARY :
 					if (includeBinaryPrerequisites && path.segmentCount() > 1) {
@@ -461,6 +497,14 @@ private boolean hasClasspathChanged() {
 	return false;
 }
 
+private boolean hasJavaBuilder(IProject project) throws CoreException {
+	ICommand[] buildCommands = project.getDescription().getBuildSpec();
+	for (int i = 0, l = buildCommands.length; i < l; i++)
+		if (buildCommands[i].getBuilderName().equals(JavaCore.BUILDER_ID))
+			return true;
+	return false;
+}
+
 private boolean hasStructuralDelta() {
 	// handle case when currentProject has only .class file folders and/or jar files... no source/output folders
 	IResourceDelta delta = getDelta(currentProject);
@@ -483,46 +527,59 @@ private boolean hasStructuralDelta() {
 	return false;
 }
 
-private void initializeBuilder() throws CoreException {
+private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
+	// some calls just need the nameEnvironment initialized so skip the rest
 	this.javaProject = (JavaProject) JavaCore.create(currentProject);
 	this.workspaceRoot = currentProject.getWorkspace().getRoot();
 
-	// Flush the existing external files cache if this is the beginning of a build cycle
-	String projectName = currentProject.getName();
-	if (builtProjects == null || builtProjects.contains(projectName)) {
-		JavaModel.flushExternalFileCache();
-		builtProjects = new ArrayList();
+	if (forBuild) {
+		// cache the known participants for this project
+		this.participants = JavaModelManager.getJavaModelManager().compilationParticipants.getCompilationParticipants(this.javaProject);
+		if (this.participants != null)
+			for (int i = 0, l = this.participants.length; i < l; i++)
+				if (this.participants[i].aboutToBuild(this.javaProject) == CompilationParticipant.NEEDS_FULL_BUILD)
+					kind = FULL_BUILD;
+	
+		// Flush the existing external files cache if this is the beginning of a build cycle
+		String projectName = currentProject.getName();
+		if (builtProjects == null || builtProjects.contains(projectName)) {
+			JavaModel.flushExternalFileCache();
+			builtProjects = new ArrayList();
+		}
+		builtProjects.add(projectName);
 	}
-	builtProjects.add(projectName);
 
 	this.binaryLocationsPerProject = new SimpleLookupTable(3);
 	this.nameEnvironment = new NameEnvironment(workspaceRoot, javaProject, binaryLocationsPerProject);
 
-	String filterSequence = javaProject.getOption(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, true);
-	char[][] filters = filterSequence != null && filterSequence.length() > 0
-		? CharOperation.splitAndTrimOn(',', filterSequence.toCharArray())
-		: null;
-	if (filters == null) {
-		this.extraResourceFileFilters = null;
-		this.extraResourceFolderFilters = null;
-	} else {
-		int fileCount = 0, folderCount = 0;
-		for (int i = 0, l = filters.length; i < l; i++) {
-			char[] f = filters[i];
-			if (f.length == 0) continue;
-			if (f[f.length - 1] == '/') folderCount++; else fileCount++;
-		}
-		this.extraResourceFileFilters = new char[fileCount][];
-		this.extraResourceFolderFilters = new String[folderCount];
-		for (int i = 0, l = filters.length; i < l; i++) {
-			char[] f = filters[i];
-			if (f.length == 0) continue;
-			if (f[f.length - 1] == '/')
-				extraResourceFolderFilters[--folderCount] = new String(f, 0, f.length - 1);
-			else
-				extraResourceFileFilters[--fileCount] = f;
+	if (forBuild) {
+		String filterSequence = javaProject.getOption(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, true);
+		char[][] filters = filterSequence != null && filterSequence.length() > 0
+			? CharOperation.splitAndTrimOn(',', filterSequence.toCharArray())
+			: null;
+		if (filters == null) {
+			this.extraResourceFileFilters = null;
+			this.extraResourceFolderFilters = null;
+		} else {
+			int fileCount = 0, folderCount = 0;
+			for (int i = 0, l = filters.length; i < l; i++) {
+				char[] f = filters[i];
+				if (f.length == 0) continue;
+				if (f[f.length - 1] == '/') folderCount++; else fileCount++;
+			}
+			this.extraResourceFileFilters = new char[fileCount][];
+			this.extraResourceFolderFilters = new String[folderCount];
+			for (int i = 0, l = filters.length; i < l; i++) {
+				char[] f = filters[i];
+				if (f.length == 0) continue;
+				if (f[f.length - 1] == '/')
+					extraResourceFolderFilters[--folderCount] = new String(f, 0, f.length - 1);
+				else
+					extraResourceFileFilters[--fileCount] = f;
+			}
 		}
 	}
+	return kind;
 }
 
 private boolean isClasspathBroken(IClasspathEntry[] classpath, IProject p) throws CoreException {
@@ -551,6 +608,7 @@ private boolean isWorthBuilding() throws CoreException {
 		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 		marker.setAttribute(IMarker.MESSAGE, Messages.build_abortDueToClasspathProblems); 
 		marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		marker.setAttribute(IJavaModelMarker.CATEGORY_ID, CategorizedProblem.CAT_BUILDPATH);
 		return false;
 	}
 
@@ -560,13 +618,23 @@ private boolean isWorthBuilding() throws CoreException {
 	// make sure all prereq projects have valid build states... only when aborting builds since projects in cycles do not have build states
 	// except for projects involved in a 'warning' cycle (see below)
 	IProject[] requiredProjects = getRequiredProjects(false);
-	next : for (int i = 0, l = requiredProjects.length; i < l; i++) {
+	for (int i = 0, l = requiredProjects.length; i < l; i++) {
 		IProject p = requiredProjects[i];
 		if (getLastState(p) == null)  {
 			// The prereq project has no build state: if this prereq project has a 'warning' cycle marker then allow build (see bug id 23357)
 			JavaProject prereq = (JavaProject) JavaCore.create(p);
-			if (prereq.hasCycleMarker() && JavaCore.WARNING.equals(javaProject.getOption(JavaCore.CORE_CIRCULAR_CLASSPATH, true)))
+			if (prereq.hasCycleMarker() && JavaCore.WARNING.equals(javaProject.getOption(JavaCore.CORE_CIRCULAR_CLASSPATH, true))) {
+				if (DEBUG)
+					System.out.println("Continued to build even though prereq project " + p.getName() //$NON-NLS-1$
+						+ " was not built since its part of a cycle"); //$NON-NLS-1$
 				continue;
+			}
+			if (!hasJavaBuilder(p)) {
+				if (DEBUG)
+					System.out.println("Continued to build even though prereq project " + p.getName() //$NON-NLS-1$
+						+ " is not built by JavaBuilder"); //$NON-NLS-1$
+				continue;
+			}
 			if (DEBUG)
 				System.out.println("Aborted build because prereq project " + p.getName() //$NON-NLS-1$
 					+ " was not built"); //$NON-NLS-1$
@@ -578,6 +646,7 @@ private boolean isWorthBuilding() throws CoreException {
 					? Messages.bind(Messages.build_prereqProjectHasClasspathProblems, p.getName()) 
 					: Messages.bind(Messages.build_prereqProjectMustBeRebuilt, p.getName())); 
 			marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+			marker.setAttribute(IJavaModelMarker.CATEGORY_ID, CategorizedProblem.CAT_BUILDPATH);
 			return false;
 		}
 	}
@@ -628,7 +697,7 @@ private void recordNewState(State state) {
 	if (DEBUG)
 		System.out.println("Recording new state : " + state); //$NON-NLS-1$
 	// state.dump();
-	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, state);
+	net.sf.j2s.core.JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, state);
 }
 
 /**

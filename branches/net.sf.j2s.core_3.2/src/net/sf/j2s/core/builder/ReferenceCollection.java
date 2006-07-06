@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tim Hanson <thanson@bea.com> - fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=137634
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
@@ -21,6 +22,36 @@ char[][] simpleNameReferences;
 protected ReferenceCollection(char[][][] qualifiedNameReferences, char[][] simpleNameReferences) {
 	this.qualifiedNameReferences = internQualifiedNames(qualifiedNameReferences);
 	this.simpleNameReferences = internSimpleNames(simpleNameReferences, true);
+}
+
+void addDependencies(String[] typeNameDependencies) {
+	// if each qualified type name is already known then all of its subNames can be skipped
+	// and its expected that very few qualified names in typeNameDependencies need to be added
+	// but could always take 'p1.p2.p3.X' and make all qualified names 'p1' 'p1.p2' 'p1.p2.p3' 'p1.p2.p3.X', then intern
+	char[][][] qNames = new char[typeNameDependencies.length][][];
+	for (int i = typeNameDependencies.length; --i >= 0;)
+		qNames[i] = CharOperation.splitOn('.', typeNameDependencies[i].toCharArray());
+	qNames = internQualifiedNames(qNames);
+
+	next : for (int i = qNames.length; --i >= 0;) {
+		char[][] qualifiedTypeName = qNames[i];
+		while (!includes(qualifiedTypeName)) {
+			if (!includes(qualifiedTypeName[qualifiedTypeName.length - 1])) {
+				int length = this.simpleNameReferences.length;
+				System.arraycopy(this.simpleNameReferences, 0, this.simpleNameReferences = new char[length + 1][], 0, length);
+				this.simpleNameReferences[length] = qualifiedTypeName[qualifiedTypeName.length - 1];				
+			}
+			int length = this.qualifiedNameReferences.length;
+			System.arraycopy(this.qualifiedNameReferences, 0, this.qualifiedNameReferences = new char[length + 1][][], 0, length);
+			this.qualifiedNameReferences[length] = qualifiedTypeName;
+
+			qualifiedTypeName = CharOperation.subarray(qualifiedTypeName, 0, qualifiedTypeName.length - 1);
+			char[][][] temp = internQualifiedNames(new char[][][] {qualifiedTypeName});
+			if (temp == EmptyQualifiedNames)
+				continue next; // qualifiedTypeName is a well known name
+			qualifiedTypeName = temp[0];
+		}
+	}
 }
 
 boolean includes(char[] simpleName) {
@@ -157,7 +188,7 @@ static char[][][] internQualifiedNames(char[][][] qualifiedNames) {
 		keepers[index++] = internedNames.add(qualifiedName);
 	}
 	if (length > index) {
-		if (length == 0) return EmptyQualifiedNames;
+		if (index == 0) return EmptyQualifiedNames;
 		System.arraycopy(keepers, 0, keepers = new char[index][][], 0, index);
 	}
 	return keepers;
