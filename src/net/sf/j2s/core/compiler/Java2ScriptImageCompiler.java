@@ -13,6 +13,7 @@
 
 package net.sf.j2s.core.compiler;
 
+import java.io.PrintWriter;
 import java.util.Map;
 import net.sf.j2s.core.builder.ClasspathDirectory;
 import net.sf.j2s.core.builder.ClasspathDirectoryProxy;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 /**
  * @author josson smith
@@ -33,35 +35,17 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
  * 2006-6-14
  */
 public class Java2ScriptImageCompiler extends Compiler {
-	/**
-	 * @param environment
-	 * @param policy
-	 * @param settings
-	 * @param requestor
-	 * @param problemFactory
-	 */
-	public Java2ScriptImageCompiler(INameEnvironment environment,
-			IErrorHandlingPolicy policy, Map settings,
-			ICompilerRequestor requestor, IProblemFactory problemFactory) {
-		super(environment, policy, settings, requestor, problemFactory);
+	
+	public Java2ScriptImageCompiler(INameEnvironment environment, IErrorHandlingPolicy policy, CompilerOptions options, ICompilerRequestor requestor, IProblemFactory problemFactory, PrintWriter out) {
+		super(environment, policy, options, requestor, problemFactory, out);
 		// TODO Auto-generated constructor stub
 	}
-	/**
-	 * @param environment
-	 * @param policy
-	 * @param settings
-	 * @param requestor
-	 * @param problemFactory
-	 * @param parseLiteralExpressionsAsConstants
-	 */
-	public Java2ScriptImageCompiler(INameEnvironment environment,
-			IErrorHandlingPolicy policy, Map settings,
-			ICompilerRequestor requestor, IProblemFactory problemFactory,
-			boolean parseLiteralExpressionsAsConstants) {
-		super(environment, policy, settings, requestor, problemFactory,
-				parseLiteralExpressionsAsConstants);
+
+	public Java2ScriptImageCompiler(INameEnvironment environment, IErrorHandlingPolicy policy, CompilerOptions options, ICompilerRequestor requestor, IProblemFactory problemFactory) {
+		super(environment, policy, options, requestor, problemFactory);
 		// TODO Auto-generated constructor stub
 	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.compiler.Compiler#compile(org.eclipse.jdt.internal.compiler.env.ICompilationUnit[])
 	 */
