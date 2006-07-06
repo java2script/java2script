@@ -71,7 +71,9 @@ public class UnitJavaScriptUtil {
 		if (files != null && files.length != 0) {
 			editorInput = new FileEditorInput(files[0]);
 		} else {
-			editorInput = new JavaFileEditorInput(file);
+			//editorInput = new JavaFileEditorInput(file);
+			// FIXME open editor for *.js
+			return false;
 		}
 		try {
 			Java2ScriptUIPlugin.getDefault().getWorkbench()
