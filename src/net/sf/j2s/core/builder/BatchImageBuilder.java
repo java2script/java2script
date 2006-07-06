@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -21,9 +22,14 @@ import java.util.*;
 
 public class BatchImageBuilder extends AbstractImageBuilder {
 
-protected BatchImageBuilder(JavaBuilder javaBuilder) {
-	super(javaBuilder);
+	IncrementalImageBuilder incrementalBuilder; // if annotations or secondary types have to be processed after the compile loop
+	ArrayList missingSecondaryTypes; // qualified names for any secondary types found after the first compile loop
+
+protected BatchImageBuilder(JavaBuilder javaBuilder, boolean buildStarting) {
+	super(javaBuilder, buildStarting, null);
 	this.nameEnvironment.isIncrementalBuild = false;
+	this.incrementalBuilder = null;
+	this.missingSecondaryTypes = null;
 }
 
 public void build() {
@@ -31,15 +37,15 @@ public void build() {
 		System.out.println("FULL build"); //$NON-NLS-1$
 
 	try {
-		notifier.subTask(Messages.build_cleaningOutput); 
+		notifier.subTask(Messages.bind(Messages.build_cleaningOutput, this.javaBuilder.currentProject.getName()));
 		JavaBuilder.removeProblemsAndTasksFor(javaBuilder.currentProject);
 		cleanOutputFolders(true);
-		notifier.updateProgressDelta(0.1f);
+		notifier.updateProgressDelta(0.05f);
 
 		notifier.subTask(Messages.build_analyzingSources); 
 		ArrayList sourceFiles = new ArrayList(33);
 		addAllSourceFiles(sourceFiles);
-		notifier.updateProgressDelta(0.15f);
+		notifier.updateProgressDelta(0.10f);
 
 		if (sourceFiles.size() > 0) {
 			SourceFile[] allSourceFiles = new SourceFile[sourceFiles.size()];
@@ -48,6 +54,11 @@ public void build() {
 			notifier.setProgressPerCompilationUnit(0.75f / allSourceFiles.length);
 			workQueue.addAll(allSourceFiles);
 			compile(allSourceFiles);
+
+			if (this.missingSecondaryTypes != null && !this.missingSecondaryTypes.isEmpty())
+				rebuildTypesAffectedByMissingSecondaryTypes();
+			if (this.incrementalBuilder != null)
+				this.incrementalBuilder.buildAfterBatchBuild();
 		}
 
 		if (javaBuilder.javaProject.hasCycleMarker())
@@ -57,6 +68,11 @@ public void build() {
 	} finally {
 		cleanUp();
 	}
+}
+
+protected void acceptSecondaryType(ClassFile classFile) {
+	if (this.missingSecondaryTypes != null)
+		this.missingSecondaryTypes.add(classFile.fileName());
 }
 
 protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreException {
@@ -102,9 +118,13 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 	boolean deleteAll = JavaCore.CLEAN.equals(
 		javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER, true));
 	if (deleteAll) {
+		if (this.javaBuilder.participants != null)
+			for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
+				this.javaBuilder.participants[i].cleanStarting(this.javaBuilder.javaProject);
+
 		ArrayList visited = new ArrayList(sourceLocations.length);
 		for (int i = 0, l = sourceLocations.length; i < l; i++) {
-			notifier.subTask(Messages.build_cleaningOutput); 
+			notifier.subTask(Messages.bind(Messages.build_cleaningOutput, this.javaBuilder.currentProject.getName())); 
 			ClasspathMultiDirectory sourceLocation = sourceLocations[i];
 			if (sourceLocation.hasIndependentOutputFolder) {
 				IContainer outputFolder = sourceLocation.binaryFolder;
@@ -185,6 +205,18 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 	}
 }
 
+protected void cleanUp() {
+	this.incrementalBuilder = null;
+	this.missingSecondaryTypes = null;
+	super.cleanUp();
+}
+
+protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean compilingFirstGroup) {
+	if (!compilingFirstGroup && this.missingSecondaryTypes == null)
+		this.missingSecondaryTypes = new ArrayList(7);
+	super.compile(units, additionalUnits, compilingFirstGroup);
+}
+
 protected void copyExtraResourcesBack(ClasspathMultiDirectory sourceLocation, final boolean deletedAll) throws CoreException {
 	// When, if ever, does a builder need to copy resources files (not .java or .class) into the output folder?
 	// If we wipe the output folder at the beginning of the build then all 'extra' resources must be copied to the output folder.
@@ -225,8 +257,7 @@ protected void copyExtraResourcesBack(ClasspathMultiDirectory sourceLocation, fi
 							}
 							copiedResource.delete(IResource.FORCE, null); // last one wins
 						}
-						resource.copy(copiedResource.getFullPath(), IResource.FORCE, null);
-						copiedResource.setDerived(true);
+						resource.copy(copiedResource.getFullPath(), IResource.FORCE | IResource.DERIVED, null);
 						Util.setReadOnly(copiedResource, false); // just in case the original was read only
 						return false;
 					case IResource.FOLDER :
@@ -282,6 +313,24 @@ protected IResource findOriginalResource(IPath partialPath) {
 		}
 	}
 	return null;
+}
+
+protected void processAnnotationResults(CompilationParticipantResult[] results) {
+	// to compile the compilation participant results, we need to incrementally recompile all affected types
+	// whenever the generated types are initially added or structurally changed
+	if (this.incrementalBuilder == null)
+		this.incrementalBuilder = new IncrementalImageBuilder(this);
+	this.incrementalBuilder.processAnnotationResults(results);
+}
+
+protected void rebuildTypesAffectedByMissingSecondaryTypes() {
+	// to compile types that could not find 'missing' secondary types because of multiple
+	// compile groups, we need to incrementally recompile all affected types as if the missing
+	// secondary types have just been added
+	if (this.incrementalBuilder == null)
+		this.incrementalBuilder = new IncrementalImageBuilder(this);
+	for (int i = this.missingSecondaryTypes.size(); --i >=0; )
+		this.incrementalBuilder.addAffectedSourceFiles((char[]) this.missingSecondaryTypes.get(i));
 }
 
 public String toString() {

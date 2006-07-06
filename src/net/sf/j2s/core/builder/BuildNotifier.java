@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package net.sf.j2s.core.builder;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.util.Messages;
@@ -203,7 +204,7 @@ public void subTask(String message) {
 	this.previousSubtask = msg;
 }
 
-protected void updateProblemCounts(IProblem[] newProblems) {
+protected void updateProblemCounts(CategorizedProblem[] newProblems) {
 	for (int i = 0, l = newProblems.length; i < l; i++)
 		if (newProblems[i].isError()) newErrorCount++; else newWarningCount++;
 }
@@ -212,10 +213,10 @@ protected void updateProblemCounts(IProblem[] newProblems) {
  * Update the problem counts from one compilation result given the old and new problems,
  * either of which may be null.
  */
-protected void updateProblemCounts(IMarker[] oldProblems, IProblem[] newProblems) {
+protected void updateProblemCounts(IMarker[] oldProblems, CategorizedProblem[] newProblems) {
 	if (newProblems != null) {
 		next : for (int i = 0, l = newProblems.length; i < l; i++) {
-			IProblem newProblem = newProblems[i];
+			CategorizedProblem newProblem = newProblems[i];
 			if (newProblem.getID() == IProblem.Task) continue; // skip task
 			boolean isError = newProblem.isError();
 			String message = newProblem.getMessage();
@@ -245,7 +246,7 @@ protected void updateProblemCounts(IMarker[] oldProblems, IProblem[] newProblems
 
 			if (newProblems != null) {
 				for (int j = 0, m = newProblems.length; j < m; j++) {
-					IProblem pb = newProblems[j];
+					CategorizedProblem pb = newProblems[j];
 					if (pb.getID() == IProblem.Task) continue; // skip task
 					if (wasError == pb.isError() && message.equals(pb.getMessage()))
 						continue next;

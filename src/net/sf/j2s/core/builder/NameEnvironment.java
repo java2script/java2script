@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import net.sf.j2s.core.Java2ScriptProject;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
@@ -19,9 +18,9 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.env.*;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
+import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.*;
-import org.eclipse.jdt.internal.core.util.Util;
 
 import java.io.*;
 import java.util.*;
@@ -32,8 +31,8 @@ boolean isIncrementalBuild;
 ClasspathMultiDirectory[] sourceLocations;
 ClasspathLocation[] binaryLocations;
 	
-String[] initialTypeNames; // assumed that each name is of the form "a/b/ClassName"
-SourceFile[] additionalUnits;
+SimpleSet initialTypeNames; // assumed that each name is of the form "a/b/ClassName"
+SimpleLookupTable additionalUnits;
 
 NameEnvironment(IWorkspaceRoot root, JavaProject javaProject, SimpleLookupTable binaryLocationsPerProject) throws CoreException {
 	this.isIncrementalBuild = false;
@@ -119,7 +118,7 @@ private void computeClasspathLocations(
 			case IClasspathEntry.CPE_PROJECT :
 				if (!(target instanceof IProject)) continue nextEntry;
 				IProject prereqProject = (IProject) target;
-				if (!Java2ScriptProject.hasJava2ScriptNature(prereqProject)) continue nextEntry; // if project doesn't have java nature or is not accessible
+				if (!JavaProject.hasJavaNature(prereqProject)) continue nextEntry; // if project doesn't have java nature or is not accessible
 
 				JavaProject prereqJavaProject = (JavaProject) JavaCore.create(prereqProject);
 				IClasspathEntry[] prereqClasspathEntries = prereqJavaProject.getRawClasspath();
@@ -137,11 +136,7 @@ private void computeClasspathLocations(
 							: (IContainer) root.getFolder(prereqOutputPath);
 						if (binaryFolder.exists() && !seen.contains(binaryFolder)) {
 							seen.add(binaryFolder);
-							ClasspathLocation bLocation = 
-								ClasspathLocation.forBinaryFolder(
-										binaryFolder, 
-										true, 
-										entry.getAccessRuleSet());
+							ClasspathLocation bLocation = ClasspathLocation.forBinaryFolder(binaryFolder, true, entry.getAccessRuleSet());
 							bLocations.add(bLocation);
 							if (binaryLocationsPerProject != null) { // normal builder mode
 								ClasspathLocation[] existingLocations = (ClasspathLocation[]) binaryLocationsPerProject.get(prereqProject);
@@ -259,37 +254,20 @@ private void createFolder(IContainer folder) throws CoreException {
 }
 
 private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeName) {
-	if (initialTypeNames != null) {
-		// TODO (kent) should use a hash set to avoid linear search once massive source set is being processed
-		for (int i = 0, l = initialTypeNames.length; i < l; i++) {
-			if (qualifiedTypeName.equals(initialTypeNames[i])) {
-				if (isIncrementalBuild)
-					// catch the case that a type inside a source file has been renamed but other class files are looking for it
-					throw new AbortCompilation(true, new AbortIncrementalBuildException(qualifiedTypeName));
-				return null; // looking for a file which we know was provided at the beginning of the compilation
-			}
-		}
+	if (this.initialTypeNames != null && this.initialTypeNames.includes(qualifiedTypeName)) {
+		if (isIncrementalBuild)
+			// catch the case that a type inside a source file has been renamed but other class files are looking for it
+			throw new AbortCompilation(true, new AbortIncrementalBuildException(qualifiedTypeName));
+		return null; // looking for a file which we know was provided at the beginning of the compilation
 	}
 
-	if (additionalUnits != null && sourceLocations.length > 0) {
+	if (this.additionalUnits != null && this.sourceLocations.length > 0) {
 		// if an additional source file is waiting to be compiled, answer it BUT not if this is a secondary type search
 		// if we answer X.java & it no longer defines Y then the binary type looking for Y will think the class path is wrong
 		// let the recompile loop fix up dependents when the secondary type Y has been deleted from X.java
-		IPath qSourceFilePath = new Path(qualifiedTypeName); // doesn't have file extension
-		int qSegmentCount = qSourceFilePath.segmentCount();
-		next : for (int i = 0, l = additionalUnits.length; i < l; i++) {
-			SourceFile additionalUnit = additionalUnits[i];
-			IPath fullPath = additionalUnit.resource.getFullPath();
-			int prefixCount = additionalUnit.sourceLocation.sourceFolder.getFullPath().segmentCount();
-			if (qSegmentCount == fullPath.segmentCount() - prefixCount) {
-				for (int j = 0; j < qSegmentCount - 1; j++)
-					if (!qSourceFilePath.segment(j).equals(fullPath.segment(j + prefixCount)))
-						continue next;
-				if (!Util.equalsIgnoreJavaLikeExtension(fullPath.segment(qSegmentCount-1 + prefixCount), qSourceFilePath.segment(qSegmentCount-1)))
-					continue next;
-				return new NameEnvironmentAnswer(additionalUnit, null /*no access restriction*/);
-			}
-		}
+		SourceFile unit = (SourceFile) this.additionalUnits.get(qualifiedTypeName); // doesn't have file extension
+		if (unit != null)
+			return new NameEnvironmentAnswer(unit, null /*no access restriction*/);
 	}
 
 	String qBinaryFileName = qualifiedTypeName + SUFFIX_STRING_class;
@@ -302,10 +280,21 @@ private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeNam
 	}
 
 	// NOTE: the output folders are added at the beginning of the binaryLocations
+	NameEnvironmentAnswer suggestedAnswer = null;
 	for (int i = 0, l = binaryLocations.length; i < l; i++) {
 		NameEnvironmentAnswer answer = binaryLocations[i].findClass(binaryFileName, qPackageName, qBinaryFileName);
-		if (answer != null) return answer;
+		if (answer != null) {
+			if (!answer.ignoreIfBetter()) {
+				if (answer.isBetter(suggestedAnswer))
+					return answer;
+			} else if (answer.isBetter(suggestedAnswer))
+				// remember suggestion and keep looking
+				suggestedAnswer = answer;
+		}
 	}
+	if (suggestedAnswer != null)
+		// no better answer was found
+		return suggestedAnswer;
 	return null;
 }
 
@@ -337,9 +326,27 @@ public boolean isPackage(String qualifiedPackageName) {
 	return false;
 }
 
-void setNames(String[] initialTypeNames, SourceFile[] additionalUnits) {
-	this.initialTypeNames = initialTypeNames;
-	this.additionalUnits = additionalUnits;
+void setNames(String[] typeNames, SourceFile[] additionalFiles) {
+	// convert the initial typeNames to a set
+	if (typeNames == null) {
+		this.initialTypeNames = null;
+	} else {
+		this.initialTypeNames = new SimpleSet(typeNames.length);
+		for (int i = 0, l = typeNames.length; i < l; i++)
+			this.initialTypeNames.add(typeNames[i]);
+	}
+	// map the additional source files by qualified type name
+	if (additionalFiles == null) {
+		this.additionalUnits = null;
+	} else {
+		this.additionalUnits = new SimpleLookupTable(additionalFiles.length);
+		for (int i = 0, l = additionalFiles.length; i < l; i++) {
+			SourceFile additionalUnit = additionalFiles[i];
+			if (additionalUnit != null)
+				this.additionalUnits.put(additionalUnit.initialTypeName, additionalFiles[i]);
+		}
+	}
+
 	for (int i = 0, l = sourceLocations.length; i < l; i++)
 		sourceLocations[i].reset();
 	for (int i = 0, l = binaryLocations.length; i < l; i++)
