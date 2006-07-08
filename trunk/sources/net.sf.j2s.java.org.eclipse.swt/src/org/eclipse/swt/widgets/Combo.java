@@ -1280,7 +1280,10 @@ public void remove (String string) {
 public void removeAll () {
 	checkWidget ();
 	//OS.SendMessage (handle, OS.CB_RESETCONTENT, 0, 0);
-	selectInput.options = new Option[0];
+	/**
+	 * @j2sNative
+	 * this.selectInput.options.length = 0;
+	 */{}
 	sendEvent (SWT.Modify);
 	// widget could be disposed at this point
 }
