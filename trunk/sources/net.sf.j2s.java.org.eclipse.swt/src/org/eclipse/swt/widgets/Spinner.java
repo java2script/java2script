@@ -99,6 +99,8 @@ public class Spinner extends Composite {
 public Spinner (Composite parent, int style) {
 	super (parent, checkStyle (style));
 	increment = 1;
+	minimum = 0;
+	maximum = Integer.MAX_VALUE;
 }
 /*
 int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
@@ -1049,7 +1051,6 @@ public void setPageIncrement (int value) {
 public void setSelection (int value) {
 	checkWidget ();
 	//OS.SendMessage (hwndUpDown , OS.UDM_GETRANGE32, min, max);
-	System.out.println();
 	value = Math.min (Math.max (minimum, value), maximum);
 	
 	setSelection (value, false);
