@@ -98,6 +98,7 @@ public class Spinner extends Composite {
  */
 public Spinner (Composite parent, int style) {
 	super (parent, checkStyle (style));
+	increment = 1;
 }
 /*
 int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
@@ -182,8 +183,12 @@ protected void createHandle () {
 	*/
 	handle = document.createElement ("DIV");
 	handle.className = "spinner-default";
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	
 	if ((style & SWT.BORDER) != 0) {
@@ -199,7 +204,7 @@ protected void createHandle () {
 	upBtnHandle.onclick = new RunnableCompatibility() {
 	
 		public void run() {
-			setSelection(getSelection() + increment, true);
+			setSelection(getSelection() + increment);
 		}
 	
 	};
@@ -210,7 +215,7 @@ protected void createHandle () {
 	downBtnHandle.onclick = new RunnableCompatibility() {
 	
 		public void run() {
-			setSelection(getSelection() - increment, true);
+			setSelection(getSelection() - increment);
 		}
 	
 	};
@@ -221,12 +226,11 @@ protected void createHandle () {
 	textInputHandle = document.createElement("INPUT");
 	textInputHandle.className = "spinner-text-field-default";
 	textHandle.appendChild(textInputHandle);
-	
+	setSelection(0, false);
 	textInputHandle.onchange = new RunnableCompatibility() {
 	
 		public void run() {
-			// TODO Auto-generated method stub
-	
+			setSelection(getSelection());
 		}
 	
 	};
@@ -1044,15 +1048,17 @@ public void setPageIncrement (int value) {
  */
 public void setSelection (int value) {
 	checkWidget ();
-	int [] max = new int [1], min = new int [1];
 	//OS.SendMessage (hwndUpDown , OS.UDM_GETRANGE32, min, max);
-	value = Math.min (Math.max (min [0], value), max [0]);
+	System.out.println();
+	value = Math.min (Math.max (minimum, value), maximum);
+	
 	setSelection (value, false);
 }
 
 void setSelection (int value, boolean notify) {
 	//OS.SendMessage (hwndUpDown , OS.IsWinCE ? OS.UDM_SETPOS : OS.UDM_SETPOS32, 0, value);
 	String string = String.valueOf (value);
+	System.out.println("Spinner value " + value + " " + digits);
 	if (digits > 0) {
 		String decimalSeparator = getDecimalSeparator ();
 		int index = string.length () - digits;
@@ -1069,10 +1075,13 @@ void setSelection (int value, boolean notify) {
 		}
 		string = buffer.toString ();
 	}
+	
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
 		//int length = OS.GetWindowTextLength (hwndText);
 		int length = textInputHandle.value.length();
+		System.out.println("Spinner set text of " + length);	
 		string = verifyText (string, 0, length, null);
+		System.out.println("Spinner set text of 2" + string);
 		if (string == null) return;
 	}
 	if (textInputHandle != null) {
@@ -1139,8 +1148,19 @@ public void setSize(int width, int height) {
 	super.setSize(width, height);
 	textInputHandle.style.width = (width - 28) + "px";
 	textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
+	System.out.println("width " + width + " px " + textInputHandle.style.width
+			+ " heigth " + height + " " + textInputHandle.style.height);
 }
+void setBounds (int x, int y, int width, int height, int flags) {
+	super.setBounds(x, y, width, height, flags);
+	System.out.println("Spinner set bounds called on " + x + " " + y + " " + width + " " + height);
+	System.out.println("width " + width + " px " + textInputHandle.style.width
+			+ " heigth " + height + " " + textInputHandle.style.height);
 
+	textInputHandle.style.width = (width - 28) + "px";
+	textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
+
+}
 /*
 int widgetExtStyle () {
 	return super.widgetExtStyle () & ~OS.WS_EX_CLIENTEDGE;
