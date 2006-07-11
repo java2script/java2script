@@ -1440,6 +1440,7 @@ Clazz.innerFunctions = {
 			is = new java.io.InputStream ();
 		} else {
 			is = new Object ();
+			is.__CLASS_NAME__ = "java.io.InputStream";
 			is.close = function () {};
 		}
 		is.read = function () { return 0; };
@@ -1447,7 +1448,11 @@ Clazz.innerFunctions = {
 		if (name.indexOf ('/') == 0) {
 			is.url = name.substring (1);
 		} else {
-			var baseFolder = window.binaryFolder;
+			var baseFolder = null;
+			var bins = Clazz.binaryFolders;
+			if (bins != null && bins.length != 0) {
+				baseFolder = bins[0];
+			}
 			if (baseFolder == null || baseFolder.length == 0) {
 				baseFolder = "bin/";
 			}
@@ -1577,3 +1582,8 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 };
 
 Clazz.declarePackage ("java.lang");
+Clazz.declarePackage ("java.lang.ref");
+Clazz.declarePackage ("java.lang.ref.reflect");
+Clazz.declarePackage ("java.lang.reflect");
+Clazz.declarePackage ("java.io");
+Clazz.declarePackage ("java.util");
