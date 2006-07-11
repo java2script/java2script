@@ -563,6 +563,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 						right.accept(this);
 						buffer.append(')');
 					}
+					buffer.append(".valueOf ()");
 					return false;
 				}
 			} else if ("char".equals(typeBinding.getName())) {
@@ -1226,7 +1227,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			}
 		}
 		if (simple) {
-			buffer.append(')');
+			buffer.append(").valueOf ()");
 		}
 		return false;
 	}
@@ -1328,7 +1329,13 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	}
 
 	protected String[] skipDeclarePackages() {
-		return new String[] {"java.lang"};
+		return new String[] {
+				"java.lang", 
+				"java.lang.ref", 
+				"java.lang.ref.reflect", 
+				"java.lang.reflect", 
+				"java.io", 
+				"java.util"};
 	}
 
 	public void endVisit(ParenthesizedExpression node) {
