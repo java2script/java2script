@@ -446,6 +446,7 @@ public void setControl (Control control) {
 		if (control.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 		if (control.parent != parent) error (SWT.ERROR_INVALID_PARENT);
 	}
+	System.out.println("Ctab setControl " + control +  " " + control.parent + " " + parent);
 	if (this.control != null && this.control.isDisposed ()) {
 		this.control = null;
 	}
@@ -461,7 +462,9 @@ public void setControl (Control control) {
 		if (clientArea.height <= 0 || clientArea.width <= 0) {
 			System.out.println("client area has trouble");
 		} else {
-			newControl.setBounds (clientArea);
+			if(this.isSelected){
+				newControl.setBounds (clientArea);
+			}
 			newControl.setVisible(true);
 		}
 //		if (newControl != null) {
@@ -612,6 +615,7 @@ void configureRightEl() {
 				e.time = display.getLastEventTime ();
 				e.item = CTabItem.this;
 				e.doit = true;
+				CTabFolder parent = CTabItem.this.parent; 
 				for (int j = 0; j < parent.folderListeners.length; j++) {
 					CTabFolder2Listener listener = parent.folderListeners[j];
 					listener.close(e);
