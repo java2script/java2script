@@ -12,6 +12,8 @@ import java.util.Set;
 import net.sf.j2s.ui.classpath.CompositeResources;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
+import net.sf.j2s.ui.property.FileUtil;
+import net.sf.j2s.ui.resources.ExternalResources;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -206,14 +208,26 @@ public class J2SLaunchingUtil {
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.HEAD_HEADER_HTML, ""));
 
-		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
+//		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
+		String[][] allResources = ExternalResources.getAllResources();
+		String j2sLibPath = null;
+		if (allResources != null && allResources.length != 0 && allResources[0].length != 0) {
+			if ((allResources[0][0]).startsWith("|")) {
+				allResources[0][0] = FileUtil.toRelativePath(allResources[0][0].substring(1), 
+						workingDir.getAbsolutePath());;
+			}
+			j2sLibPath = allResources[0][0].substring(0, allResources[0][0].lastIndexOf("/") + 1);
+		} else {
+			j2sLibPath = "../net.sf.j2s.lib/j2slib/";
+		}
+		buf.append("<script type=\"text/javascript\" src=\"" + j2sLibPath + "j2slib.z.js\"></script>\r\n");
 
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.TAIL_HEADER_HTML, ""));
 		buf.append("</head>\r\n");
 		buf.append("<body>\r\n");
 		if (useInnerConsole) {
-			buf.append("<div id=\"_console_\" class=\"consolewindow\"></div>\r\n");
+			//buf.append("<div id=\"_console_\" class=\"consolewindow\"></div>\r\n");
 		}
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.HEAD_BODY_HTML, ""));
@@ -229,7 +243,7 @@ public class J2SLaunchingUtil {
 		}
 		String path = javaProject.getOutputLocation().toString();
 		int idx = path.indexOf('/', 2);
-		String relativePath = null;
+		String relativePath = "";
 		if (idx != -1) {
 			relativePath = path.substring(idx + 1); 
 		}
@@ -237,9 +251,19 @@ public class J2SLaunchingUtil {
 		 * MainType Class may already included in the header section
 		 */
 		//buf.append(wrapTypeJS(mainType, relativePath));
+		
 		buf.append("<script type=\"text/javascript\">\r\n");
+		buf.append("ClazzLoader.j2slibClasspath (\"");
+		buf.append(j2sLibPath);
+		buf.append("\");\r\n");
+		buf.append("ClazzLoader.setPrimaryFolder (\"");
+		buf.append(relativePath);
+		buf.append("\");\r\n");
+		
 		String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
+		buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
 		buf.append("" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args) + ");\r\n");
+		buf.append("});\r\n");
 		buf.append("</script>\r\n");
 
 		buf.append(configuration.getAttribute(
