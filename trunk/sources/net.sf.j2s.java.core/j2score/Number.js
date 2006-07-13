@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.lang");
+Clazz.load (["java.io.Serializable"], "java.lang.Number", null, function () {
 java.lang.Number = Number;
 //Clazz.decorateAsType (Number, "Number", null, java.io.Serializable);
 Number.__CLASS_NAME__ = "Number";
@@ -41,4 +41,5 @@ return this;
 Clazz.defineMethod (Number, "hashCode", 
 function () {
 return this.valueOf ();
+});
 });

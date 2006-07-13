@@ -15,7 +15,24 @@
  * @author josson smith
  * @create Nov 5, 2005
  *******/
- 
+
+/*-#
+ # _x_CLASS_NAME__ -> C$N
+ # _x_PKG_NAME__ -> P$N
+ #
+ # clazzThis -> Tz
+ # objThis -> To
+ # clazzHost -> Hz
+ # hostThis -> Th
+ # hostSuper -> Sh
+ # clazzFun -> Fc
+ # clazzName -> Nc
+ # funName -> Nf
+ # funBody -> Bf
+ # objType -> oT
+ #  
+ # qClazzName ->Nq
+ #-*/
 /**
  * Class Clazz. All the methods are static in this class.
  */
@@ -52,6 +69,7 @@ Clazz.getClassName = function (clazzHost) {
 			/* user defined class name */
 			return clazz.__CLASS_NAME__;
 		}
+		/*-# clazzStr -> Sc #-*/
 		var clazzStr = clazz.toString ();
 		var idx0 = clazzStr.indexOf ("function");
 		if (idx0 == -1) {
@@ -166,6 +184,7 @@ Clazz.getClass = function (clazzHost) {
  * Be used to copy members of class
  */
 /* protected */
+/*-# extendsProperties -> eP #-*/
 Clazz.extendsProperties = function (hostThis, hostSuper) {
 	for (var o in hostSuper) {
 		if (o != "prototype" && o != "superClazz"
@@ -177,6 +196,7 @@ Clazz.extendsProperties = function (hostThis, hostSuper) {
 };
 
 /* private */
+/*-# checkInnerFunction -> cIF #-*/
 Clazz.checkInnerFunction = function (hostSuper, funName) {
 	for (var k = 0; k < Clazz.innerFunctionNames.length; k++) {
 		if (funName == Clazz.innerFunctionNames[k] && 
@@ -191,6 +211,7 @@ Clazz.checkInnerFunction = function (hostSuper, funName) {
  * Be used to copy members of interface
  */
 /* protected */
+/*-# implementsProperties -> ip #-*/
 Clazz.implementsProperties = function (hostThis, hostSuper) {
 	for (var o in hostSuper) {
 		if (o != "prototype" && o != "superClazz"
@@ -222,6 +243,7 @@ Clazz.implementsProperties = function (hostThis, hostSuper) {
 	*/
 };
 
+/*-# args4InheritClass -> aIC #-*/
 Clazz.args4InheritClass = function () {
 };
 Clazz.inheritArgs = new Clazz.args4InheritClass ();
@@ -235,7 +257,12 @@ Clazz.inheritArgs = new Clazz.args4InheritClass ();
  * @param clazzSuper super class which is inherited from
  * @param objSuper super class instance
  */
-/* public */
+/* protected */
+/*-#
+ # inheritClass -> xic 
+ #
+ # objSuper -> oSp
+ #-*/
 Clazz.inheritClass = function (clazzThis, clazzSuper, objSuper) {
 	//var thisClassName = Clazz.getClassName (clazzThis);
 	Clazz.extendsProperties (clazzThis, clazzSuper);
@@ -302,6 +329,11 @@ Clazz.implementOf = function (clazzThis, interfacez) {
 Clazz.extendInterface = Clazz.implementOf;
 
 /* protected */
+/*-#
+ # equalsOrExtendsLevel -> eOE 
+ #
+ # clazzAncestor -> anc
+ #-*/
 Clazz.equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
 	if (clazzThis == clazzAncestor) {
 		return 0;
@@ -336,6 +368,12 @@ Clazz.getClassNameEvalStr = function (clazzVarName, clazzName) {
 */
 
 /* protected */
+/*-#
+ # getInheritedLevel -> gIL 
+ #
+ # clazzBase -> bs
+ # clazzTarget -> tg
+ #-*/
 Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 	if (clazzTarget == clazzBase) {
 		return 0;
@@ -501,6 +539,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				ss[0].con$truct.apply (objThis, []);
 			}
 		}
+		/*# {$no.debug.support} >>x #*/
 		if (Clazz.tracingCalling) {
 			var caller = arguments.callee.caller;
 			if (caller == Clazz.superConstructor) {
@@ -511,6 +550,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 			Clazz.p0pCalling ();
 			return ret;
 		}
+		/*# x<< #*/
 		return fx.apply (objThis, (funParams == null) ? [] : funParams);
 	} else if (funName == "construct") {
 		/* there are members which are initialized out of the constructor */
@@ -608,6 +648,7 @@ Clazz.MethodNotFoundException = function () {
 };
 
 /* private */
+/*-# getParamsType -> gPT #-*/
 Clazz.getParamsType = function (funParams) {
 	var params = new Array ();
 	params.hasCastedNull = false;
@@ -640,6 +681,7 @@ Clazz.getParamsType = function (funParams) {
  * @throws Clazz.MethodNotFoundException if no matched method is found
  */
 /* protected */
+/*-# searchAndExecuteMethod -> saem #-*/
 Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	var params = Clazz.getParamsType (funParams);
 	var fx = objThis[fxName];
@@ -733,8 +775,6 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 			fxName, params.typeString);
 };
 
-var fNullCount = 0;
-
 /*
  * Internet Explorer will result the following expression as 1, while the
  * other browser will have result of 2.
@@ -744,9 +784,12 @@ var fNullCount = 0;
 /* private */
 Clazz.ie$plit = "\\2".split (/\\/).length == 1;
 
+/*# {$no.debug.support} >>x #*/
 Clazz.tracingCalling = false;
+/*# x<< #*/
 
 /* private */
+/*-# tryToSearchAndExecute -> tsae #-*/
 Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*, 
 		isSuper, clazzThis*/, fx) {
 	var methods = new Array ();
@@ -829,6 +872,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 			} else {
 				methodParams = funParams;
 			}
+			/*# {$no.debug.support} >>x #*/
 			if (Clazz.tracingCalling) {
 				var caller = arguments.callee.caller; // SAEM
 				caller = caller.arguments.callee.caller; // Delegating
@@ -878,6 +922,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 				}
 				return ret;
 			}
+			/*# x<< #*/
 			fx.lastMethod = f;
 			return f.apply (objThis, methodParams);
 		//}
@@ -886,7 +931,9 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 	return new Clazz.MethodException ();
 };
 
+/*# {$no.debug.support} >>x #*/
 Clazz.initializingException = false;
+/*# x<< #*/
 
 /**
  * Search the existed polynomial methods to get the matched method with
@@ -897,6 +944,12 @@ Clazz.initializingException = false;
  * @return string of method parameters seperated by "\\"
  */
 /* private */
+/*-# 
+ # searchMethod -> sM 
+ #
+ # roundOne -> rO
+ # paramTypes -> pts
+ #-*/
 Clazz.searchMethod = function (roundOne, paramTypes) {
 	/*
 	var roundOne = new Array ();
@@ -915,8 +968,10 @@ Clazz.searchMethod = function (roundOne, paramTypes) {
 	/*
 	 * Filter out all the fitted methods for the given parameters
 	 */
+	/*-# roundTwo -> rT #-*/
 	var roundTwo = new Array ();
 	for (var i = 0; i < roundOne.length; i++) {
+		/*-# fittedLevel -> fL #-*/
 		var fittedLevel = new Array ();
 		var isFitted = true;
 		for (var j = 0; j < roundOne[i].length; j++) {
@@ -938,9 +993,11 @@ Clazz.searchMethod = function (roundOne, paramTypes) {
 	/*
 	 * Find out the best method according to the inheritance.
 	 */
+	/*-# resultTwo -> rtT #-*/
 	var resultTwo = roundTwo;
 	var min = resultTwo[0];
 	for (var i = 1; i < resultTwo.length; i++) {
+		/*-# isVectorLesser -> vl #-*/
 		var isVectorLesser = true;
 		for (var j = 0; j < paramTypes.length; j++) {
 			if (min[j] < resultTwo[i][j]) {
@@ -980,6 +1037,7 @@ Clazz.searchMethod = function (roundOne, paramTypes) {
  * from the given class by the parameters
  */
 /* private */
+/*-# generateDelegatingMethod -> gDM #-*/
 Clazz.generateDelegatingMethod = function (claxxRef, funName) {
 	/*
 	 * Delegating method.
@@ -1003,28 +1061,13 @@ SAEM = Clazz.searchAndExecuteMethod;
  */
 /* protected */
 Clazz.formatParameters = function (funParams) {
-	if (funParams != null && funParams.length != 0) {
+	if (funParams == null || funParams.length == 0) {
+		return "\\void";
+	} else {
 		/* 
 		 * If funParams is Array, funParams.toString() will
 		 * also return "*,*,..." string.
 		 */
-		/*
-		var paramStr = funParams.toString ().replace (/\s/g, "");
-		if (paramStr.length != 0) {
-			//var params = paramStr.split (/,/);
-			//fpName += "\\" + params.join ('\\');
-			fpName = "\\" + paramStr.replace (/,/g, "\\");
-		} else {
-			fpName += "\\void";
-		}
-		*/
-		/*
-		if (typeof funParams == "string") {
-			fpName = "\\" + funParams.replace (/\s*,\s+/g, "\\");
-		} else {
-			fpName = "\\" + funParams.join ("\\");
-		}
-		*/
 		var s = funParams.toString ();
 		s = s.replace (/~([NABSO])/g, function ($0, $1) {
 			if ($1 == 'N') {
@@ -1040,11 +1083,11 @@ Clazz.formatParameters = function (funParams) {
 			}
 			return "Unknown";
 		});
-		return "\\" + s.replace (/\s+/g, "").replace (/,/g, "\\");
-	} else {
-		return "\\void";
+		return s.replace (/\s+/g, "").replace (/^|,/g, "\\")
+				.replace (/\$/g, "org.eclipse.s");
 	}
 };
+
 /*
  * Override the existed methods which are in the same name.
  * Overriding methods is provided for the purpose that the JavaScript
@@ -1278,6 +1321,7 @@ Clazz.declarePackage = function (pkgName) {
 };
 
 /* protected */
+/*-# evalType -> eT  #-*/
 Clazz.evalType = function (typeStr, isQualified) {
 	//*
 	var idx = typeStr.lastIndexOf (".");
@@ -1348,10 +1392,12 @@ Clazz.defineType = function (qClazzName, clazzFun, clazzParent, interfacez) {
 		window[qClazzName] = clazzFun;
 	}
 	Clazz.decorateAsType (clazzFun, qClazzName, clazzParent, interfacez);
+	/*# {$no.javascript.support} >>x #*/
 	var iFun = Clazz.innerFunctions;
 	clazzFun.defineMethod = iFun.defineMethod;
 	clazzFun.defineStaticMethod = iFun.defineStaticMethod;
 	clazzFun.makeConstructor = iFun.makeConstructor;
+	/*# x<< #*/
 	return clazzFun;
 };
 
@@ -1411,14 +1457,16 @@ Clazz.instantialize = function (objThis, args) {
  * be function.
  */
 /* protected */
+/*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "getName", "defineMethod", "defineStaticMethod",
-	"makeConstructor"
+	"equals", "getName" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"makeConstructor" /*# x<< #*/
 ];
 
 /*
  * Static methods
  */
+/*x-# innerFunctions -> inF #-x*/
 Clazz.innerFunctions = {
 	/*
 	 * Similar to Object#equals
@@ -1475,7 +1523,8 @@ Clazz.innerFunctions = {
 			}
 		}
 		return is;
-	},
+	}/*# {$no.javascript.support} >>x #*/,
+	
 	/*
 	 * For JavaScript programmers
 	 */
@@ -1497,9 +1546,11 @@ Clazz.innerFunctions = {
 	makeConstructor : function (funBody, paramTypes) {
 		Clazz.makeConstructor (this, funBody, paramTypes);
 	}
+	/*# x<< #*/
 };
 
 /* private */
+/*-# decorateFunction -> dF #-*/
 Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	var qName = null;
 	if (prefix == null) {
@@ -1539,12 +1590,16 @@ Clazz.declareInterface = function (prefix, name, interfacez) {
 };
 
 /* protected */
+/*-# 
+ # parentClazzInstance -> pi
+ # clazzParent -> pc
+ #-*/
 Clazz.decorateAsClass = function (clazzFun, prefix, name, clazzParent, 
-		interfacez, clazzParentInstance) {
+		interfacez, parentClazzInstance) {
 	var qName = null;
 	Clazz.decorateFunction (clazzFun, prefix, name);
-	if (clazzParentInstance != null) {
-		Clazz.inheritClass (clazzFun, clazzParent, clazzParentInstance);
+	if (parentClazzInstance != null) {
+		Clazz.inheritClass (clazzFun, clazzParent, parentClazzInstance);
 	} else if (clazzParent != null) {
 		Clazz.inheritClass (clazzFun, clazzParent);
 	}
@@ -1556,7 +1611,7 @@ Clazz.decorateAsClass = function (clazzFun, prefix, name, clazzParent,
 
 /* protected */
 Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent, 
-		interfacez, clazzParentInstance) {
+		interfacez, parentClazzInstance) {
 	clazzFun.__CLASS_NAME__ = qClazzName;
 	//if (qClazzName != "String" && qClazzName != "Object"
 	//		&& qClazzName != "Number" && qClazzName != "Date") {
@@ -1570,8 +1625,8 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 		clazzFun[methodName] = Clazz.innerFunctions[methodName];
 	}
 	*/
-	if (clazzParentInstance != null) {
-		Clazz.inheritClass (clazzFun, clazzParent, clazzParentInstance);
+	if (parentClazzInstance != null) {
+		Clazz.inheritClass (clazzFun, clazzParent, parentClazzInstance);
 	} else if (clazzParent != null) {
 		Clazz.inheritClass (clazzFun, clazzParent);
 	}
@@ -1582,8 +1637,4 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 };
 
 Clazz.declarePackage ("java.lang");
-Clazz.declarePackage ("java.lang.ref");
-Clazz.declarePackage ("java.lang.ref.reflect");
-Clazz.declarePackage ("java.lang.reflect");
-Clazz.declarePackage ("java.io");
-Clazz.declarePackage ("java.util");
+

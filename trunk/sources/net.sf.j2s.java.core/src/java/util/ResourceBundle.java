@@ -183,6 +183,8 @@ package java.util;
  * @author josson smith
  *
  * 2006-5-3
+ * 
+ * @j2sOptionalImport net.sf.j2s.ajax.HttpRequest
  */
 abstract public class ResourceBundle {
 
@@ -579,11 +581,18 @@ return r.join ('');
 			 * Load the content from URL specified by given bundle name
 			 * @j2sNative
 			var n = b.replace (/\./g, '/') + ".properties";
-			var p = ["bin/", "", "j2slib/"];
+			var p = Clazz.binaryFolders;
+			if (p == null) {
+				p = ["bin", "", "j2slib"];
+			}
 			var r =  new net.sf.j2s.ajax.HttpRequest ();
 			var x = 0;
 			while (a == null && x < p.length) {
-				r.open ("GET", p[x] + n, false);
+				var q = p[x];
+				if (q.length > 0 && q.lastIndexOf ("/") != q.length - 1) {
+					q += "/";
+				}
+				r.open ("GET", q + n, false);
 				try {
 					r.send ();
 					a = r.getResponseText ();
@@ -596,7 +605,9 @@ return r.join ('');
 			{
 				content = b; // nonsense codes
 			}
-			content = a;
+			if (content == null) {
+				content = a;
+			}
 			if (content == null) {
 				return ;
 			}
