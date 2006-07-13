@@ -8,9 +8,11 @@
       <externalResourceProvider
             class="net.sf.j2s.lib.providers.JavaRuntimeJSProvider"
             id="net.sf.j2s.lib.providers.javaRuntimeJS"/>
+      <!--
       <externalResourceProvider
             class="net.sf.j2s.lib.providers.JavaSWTJSProvider"
             id="net.sf.j2s.lib.providers.javaSWTJS"/>
+       -->
    </extension>
 
 </plugin>

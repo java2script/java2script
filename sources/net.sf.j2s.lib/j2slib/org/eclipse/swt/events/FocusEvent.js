@@ -1,0 +1,11 @@
+Clazz.load(["$wt.events.TypedEvent"],"$wt.events.FocusEvent",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},$wt.events,"FocusEvent",$wt.events.TypedEvent);
+$_K(c$,
+function(e){
+$_R(this,$wt.events.FocusEvent,[e]);
+},"$wt.widgets.Event");
+$_S(c$,
+"serialVersionUID",3258134643684227381);
+});

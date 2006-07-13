@@ -1,0 +1,11 @@
+Clazz.load(["$wt.browser.LocationListener"],"$wt.browser.LocationAdapter",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},$wt.browser,"LocationAdapter",null,$wt.browser.LocationListener);
+$_V(c$,"changing",
+function(event){
+},"$wt.browser.LocationEvent");
+$_V(c$,"changed",
+function(event){
+},"$wt.browser.LocationEvent");
+});

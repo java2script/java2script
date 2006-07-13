@@ -14,6 +14,8 @@
 	
 	<property name="j2score.dir" value="../net.sf.j2s.java.core/j2score"/>
 	<property name="js.src.dir" value="../net.sf.j2s.java.core/bin"/>
+	<property name="js.swt.dir" value="../net.sf.j2s.java.org.eclipse.swt"/>
+	<property name="jswt.src.dir" value="${js.swt.dir}/bin"/>
 	<property name="ajaxcore.dir" value="../net.sf.j2s.ajax/j2sajax"/>
 	<property name="ajax.src.dir" value="../net.sf.j2s.ajax/bin"/>
 	<property name="jz.dist.dir" value="j2slib"/>
@@ -57,7 +59,9 @@
         		<file name="java/util/Comparator.js"/>
         		<file name="java/lang/Enum.js"/>
         		
+        		<!--
         		<file name="java/lang/Object.js"/>
+        		-->
         		<file name="java/lang/Encoding.js"/>
         		<file name="java/lang/String.js"/>
         		<file name="java/lang/StringBuffer.js"/>
@@ -125,7 +129,7 @@
             </header>
         	<filelist dir="${js.src.dir}">
 				<!-- Inner Console : java.lang.System -->
-        		<file name="java/lang/NativeConsole.js"/>
+        		<file name="java/lang/Console.js"/>
 
         		<file name="java/lang/ThreadGroup.js"/>
         		<file name="java/lang/Thread.js"/>
@@ -185,23 +189,163 @@
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.core                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.core">
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${current.project.dir}/${j2score.dir}/Class.js"/>
+        	<arg value="${current.project.dir}/${js.src.dir}/java/lang/Class.js"/>
+        	
+    		<arg value="no.debug.support=true"/>
+    		<arg value="no.javascript.support=true"/>
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+       	</java>
+
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${current.project.dir}/${j2score.dir}/ClassLoader.js"/>
+   			<arg value="${current.project.dir}/${js.src.dir}/java/lang/ClassLoader.js"/>
+        	
+    		<arg value="clazz.existed=true"/>
+    		<arg value="no.clazzloader.mode=true"/>
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+       	</java>
+    	
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${current.project.dir}/${j2score.dir}/Console.js"/>
+    		<arg value="${current.project.dir}/${js.src.dir}/java/lang/Console.js"/>
+        	
+    		<arg value="no.window.support=false"/>
+    		<arg value="no.system.support=false"/>
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+       	</java>
+        <concat destfile="${jz.dist.dir}/j2slib.z.js">
+            <header filtering="no" trimleading="yes">/******************************************************************************
+            	 * Copyright (c) 2005-2006 ognize.com and others.
+            	 * All rights reserved. This program and the accompanying materials
+            	 * are made available under the terms of the Eclipse Public License v1.0
+            	 * which accompanies this distribution, and is available at
+            	 * http://www.eclipse.org/legal/epl-v10.html
+            	 *
+            	 * Web:
+            	 *     http://j2s.sourceforge.net/
+            	 *     http://sourceforge.net/projects/j2s/
+            	 * Contributors:
+            	 *     ognize.com - initial API and implementation
+            	 *****************************************************************************/
+            	/*******
+            	 * @author zhou renjian
+            	 * @create July 12, 2006
+            	 *******/
+            </header>
+        	<filelist dir="${js.src.dir}">
+        		<file name="java/lang/Class.js"/>
+        		<file name="java/lang/ClassLoader.js"/>
+        		<file name="java/lang/Console.js"/>
+        	</filelist>
+        </concat>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.common                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.common">
+        <concat destfile="${jz.dist.dir}/java/j2slib.common.z.js">
+        	<filelist dir="${js.src.dir}">
+        		<file name="java/io/Serializable.js"/>
+        		<file name="java/lang/CharSequence.js"/>
+        		<file name="java/lang/Cloneable.js"/>
+        		<file name="java/lang/Comparable.js"/>
+        		<file name="java/lang/Runnable.js"/>
+        		<file name="java/util/Comparator.js"/>
+        	</filelist>
+        </concat>
+        <concat destfile="${jz.dist.dir}/java/j2slib.basic.z.js">
+        	<filelist dir="${js.src.dir}">
+        		<file name="java/lang/Number.js"/>
+        		<file name="java/lang/Integer.js"/>
+        		<file name="java/lang/Long.js"/>
+        		<file name="java/lang/Float.js"/>
+        		<file name="java/lang/Double.js"/>
+        		
+        		<file name="java/util/Date.js"/>
+        		
+        		<file name="java/util/EventObject.js"/>
+        		<file name="java/util/EventListener.js"/>
+        		<file name="java/util/EventListenerProxy.js"/>
+        		
+        		<file name="java/util/Iterator.js"/>
+        		<file name="java/util/ListIterator.js"/>
+        		<file name="java/util/Enumeration.js"/>
+        		<file name="java/util/Collection.js"/>
+        		<file name="java/util/Set.js"/>
+        		<file name="java/util/Map.js"/>
+        		<file name="java/util/List.js"/>
+        		<file name="java/util/RandomAccess.js"/>
+        	</filelist>
+        </concat>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.common                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.lib" depends="j2s.core.compile, j2s.pack.core, j2s.pack.common">
+    	<copy todir="${jz.dist.dir}">
+    		<fileset dir="${ajax.src.dir}">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${js.src.dir}">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${jswt.src.dir}">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    	</copy>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.core.compile                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.core.compile">
+    <target name="j2s.core.compile" depends="j2s.pack.core">
     	<delete file="${ajax.src.dir}/net/sf/j2s/ajax/HttpRequest.js" quiet="true"/>
-    	
+        	
         <java classname="net.sf.j2s.lib.build.RegExCompress">
         	<arg value="false"/>
         	<arg value="${current.project.dir}"/>
         	
+        	<!--
     		<arg value="${j2score.dir}/Class.js"/>
         	<arg value="${js.src.dir}/java/lang/Class.js"/>
 	
     		<arg value="${j2score.dir}/ClassExt.js"/>
    			<arg value="${js.src.dir}/java/lang/ClassExt.js"/>
 
+    		<arg value="${j2score.dir}/ClassLoader.js"/>
+   			<arg value="${js.src.dir}/java/lang/ClassLoader.js"/>
+
     		<arg value="${j2score.dir}/Object.js"/>
     		<arg value="${js.src.dir}/java/lang/Object.js"/>
+    		-->
 
     		<arg value="${j2score.dir}/Enum.js"/>
     		<arg value="${js.src.dir}/java/lang/Enum.js"/>
@@ -224,8 +368,10 @@
     		<arg value="${j2score.dir}/Date.js"/>
     		<arg value="${js.src.dir}/java/util/Date.js"/>
         	
+        	<!--
     		<arg value="${j2score.dir}/UtilExt.js"/>
     		<arg value="${js.src.dir}/java/util/UtilExt.js"/>
+    		-->
 
     		<arg value="${j2score.dir}/Encoding.js"/>
     		<arg value="${js.src.dir}/java/lang/Encoding.js"/>
@@ -233,12 +379,14 @@
     		<arg value="${j2score.dir}/String.js"/>
     		<arg value="${js.src.dir}/java/lang/String.js"/>
         	
-    		<arg value="${j2score.dir}/NativeConsole.js"/>
-    		<arg value="${js.src.dir}/java/lang/NativeConsole.js"/>
+        	<!--
+    		<arg value="${j2score.dir}/Console.js"/>
+    		<arg value="${js.src.dir}/java/lang/Console.js"/>
 
     		<arg value="${j2score.dir}/Throwable.js"/>
     		<arg value="${js.src.dir}/java/lang/Throwable.js"/>
-
+			-->
+        	
     		<arg value="${j2score.dir}/Error.js"/>
     		<arg value="${js.src.dir}/java/lang/Error.js"/>
 

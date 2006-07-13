@@ -1,0 +1,17 @@
+$_J("org.eclipse.swt.internal.xhtml");
+c$=$_C(function(){
+this.srcElement=null;
+this.type=0;
+this.returnValue=0;
+this.cancelBubble=false;
+this.clientX=0;
+this.clientY=0;
+this.offsetX=0;
+this.offsetY=0;
+this.button=0;
+this.altKey=false;
+this.ctrlKey=false;
+this.shiftKey=false;
+this.keyCode=0;
+$_Z(this,arguments);
+},$wt.internal.xhtml,"HTMLEvent");

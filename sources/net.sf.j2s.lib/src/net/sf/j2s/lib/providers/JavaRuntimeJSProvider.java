@@ -63,12 +63,15 @@ public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 
 	private static String[][] CORE_RESOURCE_LIST = new String[][] {
 		new String[] {
+				/*
 				"j2s-core-bare.z.js",
 				"j2s-core-basic.z.js",
 				"j2s-core-error.z.js",
 				"j2s-core-common.z.js",
 				"j2s-core-util.z.js",
 				"j2s-core-more.z.js"
+				*/
+				"j2slib.z.js"
 		}
 	};
 	

@@ -1,0 +1,11 @@
+Clazz.load(["$wt.events.ControlListener"],"$wt.events.ControlAdapter",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},$wt.events,"ControlAdapter",null,$wt.events.ControlListener);
+$_V(c$,"controlMoved",
+function(e){
+},"$wt.events.ControlEvent");
+$_V(c$,"controlResized",
+function(e){
+},"$wt.events.ControlEvent");
+});
