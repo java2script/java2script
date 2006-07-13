@@ -1,0 +1,12 @@
+Clazz.load(["$wt.events.TypedEvent"],"$wt.browser.StatusTextEvent",null,function(){
+c$=$_C(function(){
+this.text=null;
+$_Z(this,arguments);
+},$wt.browser,"StatusTextEvent",$wt.events.TypedEvent);
+$_K(c$,
+function(w){
+$_R(this,$wt.browser.StatusTextEvent,[w]);
+},"$wt.widgets.Widget");
+$_S(c$,
+"serialVersionUID",3258407348371600439);
+});

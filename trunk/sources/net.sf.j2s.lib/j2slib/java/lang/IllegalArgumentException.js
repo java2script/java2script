@@ -1,0 +1,13 @@
+Clazz.load(["java.lang.RuntimeException"],"java.lang.IllegalArgumentException",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},java.lang,"IllegalArgumentException",RuntimeException);
+$_K(c$,
+function(){
+$_R(this,IllegalArgumentException);
+});
+$_K(c$,
+function(s){
+$_R(this,IllegalArgumentException,[s]);
+},"~S");
+});

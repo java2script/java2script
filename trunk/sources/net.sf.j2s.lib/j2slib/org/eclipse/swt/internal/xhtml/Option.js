@@ -1,0 +1,11 @@
+$_J("org.eclipse.swt.internal.xhtml");
+c$=$_C(function(){
+this.label=null;
+this.value=null;
+$_Z(this,arguments);
+},$wt.internal.xhtml,"Option");
+$_K(c$,
+function(label,value){
+this.label=label;
+this.value=value;
+},"~S,~S");

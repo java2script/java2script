@@ -1,0 +1,11 @@
+Clazz.load(["java.util.EventObject"],"$wt.internal.SWTEventObject",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},$wt.internal,"SWTEventObject",java.util.EventObject);
+$_K(c$,
+function(source){
+$_R(this,$wt.internal.SWTEventObject,[source]);
+},"~O");
+$_S(c$,
+"serialVersionUID",3258125873411470903);
+});

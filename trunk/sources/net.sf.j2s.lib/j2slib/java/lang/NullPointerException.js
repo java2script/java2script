@@ -1,0 +1,13 @@
+Clazz.load(["java.lang.RuntimeException"],"java.lang.NullPointerException",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},java.lang,"NullPointerException",RuntimeException);
+$_K(c$,
+function(){
+$_R(this,NullPointerException);
+});
+$_K(c$,
+function(s){
+$_R(this,NullPointerException,[s]);
+},"~S");
+});
