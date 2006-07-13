@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.lang");
+Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Long", null, function () {
 java.lang.Long = Long = function () {
 Clazz.instantialize (this, arguments);
 };
@@ -56,3 +56,4 @@ if(s == null || ! Clazz.instanceOf(s, Long) ){
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
+});

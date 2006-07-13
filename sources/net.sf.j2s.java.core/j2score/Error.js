@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.lang");
+Clazz.load (["java.lang.Throwable"], "java.lang.Error", null, function () {
 c$ = java.lang.Error = Error/* = function () {
 Clazz.instantialize (this, arguments);
 }*/;
@@ -56,3 +56,4 @@ function (cause) {
 Clazz.superConstructor (this, Error, [cause]);
 }, "Throwable");
 c$.serialVersionUID = c$.prototype.serialVersionUID = 4980196508277280342;
+});

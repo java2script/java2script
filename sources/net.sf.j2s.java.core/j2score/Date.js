@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.util");
+Clazz.load (["java.io.Serializable", "java.lang.Cloneable", "$.Comparable"], "java.util.Date", ["java.lang.IllegalArgumentException", "java.lang.ref.SoftReference", "java.text.DateFormat", "$.SimpleDateFormat", "java.util.GregorianCalendar", "$.TimeZone"], function () {
 java.util.Date = Date;
 Clazz.decorateAsType (java.util.Date, "java.util.Date", null, [java.io.Serializable, Cloneable, Comparable]);
 
@@ -34,4 +34,4 @@ function () {
 var ht = this.getTime ();
 return parseInt (ht) ^ parseInt ((ht >> 32));
 });
-
+});

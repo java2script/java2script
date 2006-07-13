@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.lang");
+Clazz.load (["java.io.Serializable", "java.lang.Comparable"], "java.lang.Enum", ["java.lang.ClassCastException", "$.CloneNotSupportedException", "$.IllegalArgumentException", "$.NullPointerException"], function () {
 c$ = java.lang.Enum = Enum = function () {
 this.$name = null;
 this.$ordinal = 0;
@@ -80,4 +80,4 @@ function () {
 	return this.$ALL$ENUMS;
 });
 Enum.values = Enum.prototype.values;
-
+});

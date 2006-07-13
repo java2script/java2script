@@ -1,4 +1,4 @@
-Clazz.declarePackage ("java.lang");
+Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Double", null, function () {
 java.lang.Double = Double = function () {
 Clazz.instantialize (this, arguments);
 };
@@ -50,3 +50,4 @@ if(s == null || ! Clazz.instanceOf(s, Double) ){
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
+});

@@ -371,6 +371,7 @@ Clazz.prepareFields = function (clazz, fieldsFun) {
  * Clazz.searchAndExecuteMethod or is called directly.
  */
 /* protected */
+/*-# getMixedCallerMethod -> gMCM  #-*/
 Clazz.getMixedCallerMethod = function (args) {
 	var o = new Object ();
 	var argc = args.callee.caller; // Clazz.tryToSearchAndExecute
@@ -411,7 +412,7 @@ Clazz.getMixedCallerMethod = function (args) {
  * @return private method if there are private method fitted for the current 
  * calling environment
  */
-/* protected */
+/* public */
 Clazz.checkPrivateMethod = function (args) {
 	var m = Clazz.getMixedCallerMethod (args);
 	if (m == null) return null;
@@ -450,6 +451,7 @@ Clazz.checkPrivateMethod = function (args) {
 var $fz = null; // for private method declaration
 //var cla$$ = null;
 var c$ = null;
+/*-# cla$$$tack -> cst  #-*/
 Clazz.cla$$$tack = new Array ();
 Clazz.pu$h = function () {
 	if (c$ != null) { // if (cla$$ != null) {
@@ -466,6 +468,7 @@ Clazz.p0p = function () {
 	}
 };
 
+/*# {$no.debug.support} >>x #*/
 /*
  * Option to switch on/off of stack traces.
  */
@@ -497,6 +500,112 @@ Clazz.p0pCalling = function () {
 		return null;
 	}
 };
+/*# x<< #*/
+
+/**
+ * The first folder is considered as the primary folder.
+ * And try to be compatiable with ClazzLoader system.
+ */
+/* private */
+if (window["ClazzLoader"] != null && ClazzLoader.binaryFolders != null) {
+	Clazz.binaryFolders = ClazzLoader.binaryFolders;
+} else {
+	Clazz.binaryFolders = ["bin/", "", "j2slib/"];
+}
+
+Clazz.addBinaryFolder = function (bin) {
+	if (bin != null) {
+		var bins = Clazz.binaryFolders;
+		for (var i = 0; i < bins.length; i++) {
+			if (bins[i] == bin) {
+				return ;
+			}
+		}
+		bins[bins.length] = bin;
+	}
+};
+Clazz.removeBinaryFolder = function (bin) {
+	if (bin != null) {
+		var bins = Clazz.binaryFolders;
+		for (var i = 0; i < bins.length; i++) {
+			if (bins[i] == bin) {
+				for (var j = i; j < bins.length - 1; j++) {
+					bins[j] = bins[j + 1];
+				}
+				bins.length--;
+				return bin;
+			}
+		}
+	}
+	return null;
+};
+Clazz.setPrimaryFolder = function (bin) {
+	if (bin != null) {
+		Clazz.removeBinaryFolder (bin);
+		var bins = Clazz.binaryFolders;
+		for (var i = bins.length - 1; i >= 0; i--) {
+			bins[i + 1] = bins[i];
+		}
+		bins[0] = bin;
+	}
+};
+
+/**
+ * This is a simple implementation for Clazz#load. It just ignore dependencies
+ * of the class. This will be fine for jar *.z.js file.
+ * It will be overriden in ClazzLoader#loader.
+ * For more details, see ClazzLoader.js
+ */
+/* protected */
+Clazz.load = function (musts, clazz, optionals, declaration) {
+	if (declaration != null) {
+		declaration ();
+	}
+};
+
+/*
+ * Invade the Object prototype!
+ * TODO: make sure that invading Object prototype does not affect other
+ * existed library, such as Dojo, YUI, Prototype, ...
+ */
+java.lang.Object = Object;
+
+//Clazz.decorateAsType (java.lang.Object, "Object");
+//Object.__CLASS_NAME__ = "Object";
+
+Object.getName = Clazz.innerFunctions.getName;
+
+Object.prototype.equals = function (obj) {
+	return this == obj;
+};
+
+Object.prototype.hashCode = function () {
+	return this.toString ().hashCode ();
+};
+
+Object.prototype.getClass = function () {
+	return Clazz.getClass (this);
+};
+
+Object.prototype.clone = function () {
+	return this;
+};
+
+/*
+ * Methods for thread in Object
+ */
+Object.prototype.finalize = function () {};
+Object.prototype.notify = function () {};
+Object.prototype.notifyAll = function () {};
+Object.prototype.wait = function () {};
+
+Object.prototype.toString = function () {
+	if (this.__CLASS_NAME__ != null) {
+		return "[" + this.__CLASS_NAME__ + " object]";
+	} else {
+		return "[object]";
+	}
+};
 
 w$ = window; // Short for browser's window object
 d$ = document; // Short for browser's document object
@@ -517,7 +626,7 @@ System = {
 		}
 	}
 };
-log = error = window.alert;
+popup = assert = log = error = window.alert;
 
 Thread = function () {};
 Thread.J2S_THREAD = Thread.prototype.J2S_THREAD = new Thread ();

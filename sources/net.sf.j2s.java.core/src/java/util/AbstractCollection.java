@@ -40,7 +40,6 @@ package java.util;
  * @since 1.2
  * 
  * @j2sPrefix
-Clazz.declarePackage ("java.lang.reflect");
 java.lang.reflect.Array = {
 	newInstance : function (type, size) {
 		return new Array (size);
