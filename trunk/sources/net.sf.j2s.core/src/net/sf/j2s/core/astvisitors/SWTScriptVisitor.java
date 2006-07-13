@@ -61,6 +61,8 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				swt + ".graphics", 
 				swt + ".internal", 
 				swt + ".internal.dnd", 
+				swt + ".internal.browser", 
+				swt + ".internal.struct", 
 				swt + ".layout", 
 				swt + ".widgets"
 		};
