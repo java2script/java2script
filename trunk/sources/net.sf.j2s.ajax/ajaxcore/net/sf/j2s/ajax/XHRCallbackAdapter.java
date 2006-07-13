@@ -36,8 +36,8 @@ public class XHRCallbackAdapter implements IXHRCallback {
 		
 	}
 
-	public void onUninitialized() {
-		
-	}
+//	public void onUninitialized() {
+//		
+//	}
 
 }

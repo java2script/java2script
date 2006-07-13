@@ -73,4 +73,4 @@ c$ = Clazz.decorateAsClass (function () {
 	this.send = function (str) {
 		this.transport.send (str);
 	};
-}, net.sf.j2s.ajax, "HttpRequest", null, Runnable);
+}, net.sf.j2s.ajax, "HttpRequest");

@@ -19,7 +19,7 @@ package net.sf.j2s.ajax;
  * 2006-2-11
  */
 public interface IXHRCallback {
-	public void onUninitialized();
+	//public void onUninitialized();
 	public void onLoading();
 	public void onLoaded();
 	public void onInteractive();

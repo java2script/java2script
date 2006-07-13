@@ -34,7 +34,7 @@ import org.w3c.dom.Document;
  *
  * 2006-2-11
  */
-public final class HttpRequest implements Runnable {
+public final class HttpRequest {
 	private int status;
 	private int readyState;
 	
@@ -96,6 +96,10 @@ public final class HttpRequest implements Runnable {
 		this.url = url;
 		responseText = null;
 		responseXML = null;
+		readyState = 1;
+		if (onreadystatechange != null) {
+			onreadystatechange.onLoading();
+		}
 	}
 	public void send() {
 		send(null);
@@ -103,12 +107,16 @@ public final class HttpRequest implements Runnable {
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
-			new Thread(this).start();
+			new Thread(new Runnable() {
+				public void run() {
+					request();
+				}
+			}).start();
 		} else {
-			run();
+			request();
 		}
 	}
-	public void run() {
+	private void request() {
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
 			connection.setDoInput(true);
@@ -125,9 +133,6 @@ public final class HttpRequest implements Runnable {
 				connection.setRequestProperty(key, (String) headers.get(key));
 			}
 			connection.setUseCaches(false);
-			if (onreadystatechange != null) {
-				onreadystatechange.onLoading();
-			}
 			if ("post".equalsIgnoreCase(method)) {
 				DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
 				if (content != null) {
@@ -137,39 +142,51 @@ public final class HttpRequest implements Runnable {
 				dos.close();
 			}
 			InputStream is = connection.getInputStream();
-			if (onreadystatechange != null) {
-				onreadystatechange.onLoading();
-			}
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
 			int read;
 			while ((read = is.read(buffer)) != -1) {
+				if (readyState < 2) {
+					readyState = 2;
+					if (onreadystatechange != null) {
+						onreadystatechange.onLoaded();
+					}
+				}
 				baos.write(buffer, 0, read);
-				if (onreadystatechange != null) {
-					onreadystatechange.onInteractive();
+				if (readyState != 3) {
+					readyState = 3;
+					if (onreadystatechange != null) {
+						onreadystatechange.onInteractive();
+					}
 				}
 			}
 			is.close();
-			if (onreadystatechange != null) {
-				onreadystatechange.onLoaded();
-			}
 			responseText = baos.toString();
 			status = connection.getResponseCode();
+			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onComplete();
 			}
 			connection.disconnect();
+			readyState = 0;
+			/*
 			if (onreadystatechange != null) {
 				onreadystatechange.onUninitialized();
 			}
+			*/
 		} catch (IOException e) {
 			e.printStackTrace();
+			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onComplete();
 			}
+			connection = null;
+			readyState = 0;
+			/*
 			if (onreadystatechange != null) {
 				onreadystatechange.onUninitialized();
 			}
+			*/
 		}
 	}
 	
