@@ -21,6 +21,9 @@ import org.eclipse.swt.widgets.Display;
  * @author josson smith
  *
  * 2006-2-11
+ * 
+ * @j2sIgnoreImport java.lang.Runnable, org.eclipse.swt.widgets.Display
+ * 
  */
 public class XHRCallbackSWTAdapter implements IXHRCallback {
 	
@@ -36,9 +39,12 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	public void swtOnLoading() {
 	}
 
-	public void swtOnUninitialized() {
-	}
+//	public void swtOnUninitialized() {
+//	}
 
+	/**
+	 * @j2sNative this.swtOnComplete();
+	 */
 	public void onComplete() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
@@ -47,6 +53,9 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 		});
 	}
 
+	/**
+	 * @j2sNative this.swtOnInteractive();
+	 */
 	public void onInteractive() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
@@ -55,6 +64,9 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 		});
 	}
 
+	/**
+	 * @j2sNative this.swtOnLoaded();
+	 */
 	public void onLoaded() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
@@ -63,6 +75,9 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 		});
 	}
 
+	/**
+	 * @j2sNative this.swtOnLoading();
+	 */
 	public void onLoading() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
@@ -71,12 +86,15 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 		});
 	}
 
-	public void onUninitialized() {
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				swtOnUninitialized();
-			}
-		});
-	}
+//	/**
+//	 * @j2sNative this.swtOnUninitialized();
+//	 */
+//	public void onUninitialized() {
+//		Display.getDefault().syncExec(new Runnable() {
+//			public void run() {
+//				swtOnUninitialized();
+//			}
+//		});
+//	}
 
 }
