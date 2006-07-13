@@ -106,7 +106,7 @@ public class OS {
 		if (handle == null) {
 			return ;
 		}
-		Element el = (Element) handle;
+		//Element el = (Element) handle;
 	}
 	
 	private static Element invisibleContainer;
@@ -170,11 +170,11 @@ public class OS {
 		var c160 = String.fromCharCode (160);
 		var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
 		var s = text.replace (/\t/g, c160x8);
-		if (splitNeedFixed) {
+		if (window["Console"] != null && Console.splitNeedFixed) {
 			try {
-				lines = splitIntoLines (s);
+				lines = Console.splitIntoLines (s);
 			} catch (e) {
-				//popupAlert (e.message);
+				lines = s.split (/\r\n|\r|\n/g);
 			}
 		} else {
 			lines = s.split (/\r\n|\r|\n/g);
@@ -188,11 +188,11 @@ public class OS {
 		var z = String.fromCharCode (160);
 		var w = z + z + z + z + z + z + z + z;
 		var s = b.replace (/\t/g, w);
-		if (splitNeedFixed) {
+		if (window["Console"] != null && Console.splitNeedFixed) {
 			try {
-				c = splitIntoLines (s);
+				c = Console.splitIntoLines (s);
 			} catch (e) {
-				//popupAlert (e.message);
+				c = s.split (/\r\n|\r|\n/g);
 			}
 		} else {
 			c = s.split (/\r\n|\r|\n/g);
