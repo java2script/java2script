@@ -57,6 +57,9 @@ public class JavaLangUtil {
 		return name;
 	}
 	public static String ripGeneric(String name) {
+		if (name == null) {
+			return null;
+		}
 		int index = name.indexOf('<');
 		if (index != -1) {
 			name = name.substring(0, index).trim();

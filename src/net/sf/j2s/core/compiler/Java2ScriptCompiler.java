@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConvertItem;
 import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
@@ -130,6 +131,34 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				astParser.setSource(createdUnit);
 				root = (CompilationUnit) astParser.createAST(null);
 				
+				DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+				boolean errorOccurs = false;
+				try {
+					root.accept(dvisitor);
+				} catch (Throwable e) {
+					e.printStackTrace();
+					errorOccurs = true;
+				}
+				if (!errorOccurs) {
+					//J2SDependencyCompiler.outputJavaScript(dvisitor, root, binFolder);
+				} else {
+					String folderPath = binFolder;
+					String elementName = root.getJavaElement().getElementName();
+					//if (elementName.endsWith(".class") || elementName.endsWith(".java")) {  //$NON-NLS-1$//$NON-NLS-2$
+						elementName = elementName.substring(0, elementName.lastIndexOf('.'));
+					//} /* maybe ended with other customized extension
+					String packageName = dvisitor.getPackageName();
+					if (packageName != null) {
+						File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
+						folderPath = folder.getAbsolutePath();
+						File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
+						if (jsFile.exists()) {
+							jsFile.delete();
+						}
+					}
+					continue ;
+				}
+
 				ASTScriptVisitor visitor = null;
 				if ("ASTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
 					visitor = new ASTScriptVisitor();
@@ -144,7 +173,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				if (toCompress) {
 					updateJ2SMap(prjFolder);
 				}
-				boolean errorOccurs = false;
+				//boolean errorOccurs = false;
+				errorOccurs = false;
 				try {
 					root.accept(visitor);
 				} catch (Throwable e) {
@@ -152,7 +182,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					errorOccurs = true;
 				}
 				if (!errorOccurs) {
-					Java2ScriptCompiler.outputJavaScript(visitor, root, binFolder, props);
+					Java2ScriptCompiler.outputJavaScript(visitor, dvisitor, root, binFolder, props);
 				} else {
 					String folderPath = binFolder;
 					String elementName = root.getJavaElement().getElementName();
@@ -229,9 +259,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		NameConverterUtil.setJ2SMap(null);
 	}
 
-	public static void outputJavaScript(ASTScriptVisitor visitor, CompilationUnit fRoot, String folderPath, Properties props) {
-		String js = visitor.getBuffer().toString();
-		
+	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot, String folderPath, Properties props) {
+		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		String lineBreak = props.getProperty("j2s.compiler.linebreak");
 		String whiteSpace = props.getProperty("j2s.compiler.whitespace");
 		if (lineBreak != null && whiteSpace != null
@@ -343,6 +372,68 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 			}
 		}
+		
+		String[] classNameSet = dvisitor.getClassName();
+		if (classNameSet.length > 1) {
+			StringBuffer buffer = new StringBuffer();
+			String key = "ClazzLoader.jarClasspath (path + \"" + /*packageName.replace('.', '/') + "/" + */elementName + ".js\", [";
+			buffer.append(key + "\r\n");
+			/*
+			for (int i = 0; i < classNameSet.length; i++) {
+				buffer.append("\"");
+				buffer.append(classNameSet[i]);
+				buffer.append("\"");
+				if (i != classNameSet.length - 1) {
+					buffer.append(",\r\n");
+				} else {
+					buffer.append(",\r\n");
+				}
+			}
+			*/
+			DependencyASTVisitor.joinArrayClasses(buffer, classNameSet, null, ",\r\n");
+			
+			buffer.append("]);\r\n");
+			String s = props.getProperty("package.js");
+			if (s == null || s.length() == 0) {
+				s = "package.js";
+			}
+			File f = new File(folderPath, s);
+			String source = null;
+			if (f.exists()) {
+				source = FileUtil.readSource(f);
+				int index = source.indexOf(key);
+				boolean updated = false;
+				if (index != -1) {
+					int index2 = source.indexOf("]);", index + key.length());
+					if (index2 != -1) {
+						source = source.substring(0, index) + buffer.toString() + source.substring(index2 + 5);
+						updated = true;
+					}
+				}
+				if (!updated) {
+					source += buffer.toString();
+				}
+			}
+			if (source == null) {
+				String pkgName = null;
+				if (packageName == null || packageName.length() == 0) {
+					pkgName = "package";
+				} else {
+					pkgName = packageName + ".package";
+				}
+				source = "var path = ClazzLoader.getClasspathFor (\"" + pkgName + "\");\r\n" +
+					"path = path.substring (0, path.lastIndexOf (\"package.js\"));\r\n";
+				source += buffer.toString();
+			}
+			try {
+				FileOutputStream fos = new FileOutputStream(f);
+				fos.write(source.getBytes());
+				fos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 //		if (visitor instanceof SWTScriptVisitor) {
 //			SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
 //			String removedJS = swtVisitor.getBufferRemoved().toString();
