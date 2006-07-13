@@ -12,6 +12,7 @@ package net.sf.j2s.ui.generator;
 
 
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
@@ -324,7 +325,15 @@ public class J2SView extends ViewPart {
 				}
 			}
 			fRoot.accept(visitor);
-			outputJavaScript(visitor);
+			DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+			boolean errorOccurs = false;
+			try {
+				fRoot.accept(dvisitor);
+			} catch (Throwable e) {
+				e.printStackTrace();
+				errorOccurs = true;
+			}
+			outputJavaScript(visitor, dvisitor);
 			
 //			DependencyASTVisitor dependencyASTVisitor = new DependencyASTVisitor();
 //			fRoot.accept(dependencyASTVisitor);
@@ -359,8 +368,8 @@ public class J2SView extends ViewPart {
 		return new Status(IStatus.ERROR, "net.sf.j2s.j2sview", IStatus.ERROR, message, th);
 	}
 
-	private void outputJavaScript(ASTScriptVisitor visitor) {
-		String js = visitor.getBuffer().toString();
+	private void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor) {
+		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		js = js.replaceAll("cla\\$\\$", "c\\$")
 				.replaceAll("innerThis", "i\\$")
 				.replaceAll("finalVars", "v\\$")
