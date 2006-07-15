@@ -403,11 +403,17 @@ input.text-border {
 	overflow:visible;
 }
 .combo-button{
-//	width:11px;
+	margin:auto;
+	line-height:0;
+	
+	border-style:none none none none;
+	border-color:black;
+	
 	height: 100%;
 	background-image:url('images/combo-button.gif');
 	background-repeat:no-repeat;
 	background-position:center center;
+	
 }
 
 .combo-input-box{
@@ -453,12 +459,12 @@ input.text-border {
 }
 */
 .table-default {
-	overflow:auto;
+	overflow:scroll;
 	position:absolute;
 	background-color:white;
 }
 .table-default table {
-	width:100%;
+
 }
 .table-item-default {
 	cursor:default;
@@ -537,6 +543,21 @@ input.text-border {
 	background-color:#00008e;
 	color:white;
 	cursor:default;
+}
+
+.table-column-default {
+	overflow: invisible;
+}
+
+.table-column-resize {
+	top:1px;
+	position:absolute;
+	cursor:e-resize;
+	width:3px;
+  	font-size:0;
+	z-index:100;
+	background-color:red;
+	float:right;
 }
 
 /* Begin of TabFolder */
@@ -1821,6 +1842,7 @@ input.text-border {
 .spinner-text-field-default {
 	font-family:Arial,sans-serif;
 	font-size:10pt;
+	border-style:none;
 }
 .spinner-up-down-default {
 	float:right;
