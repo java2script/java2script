@@ -12,10 +12,13 @@
 package org.eclipse.swt.widgets;
 
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Device;
@@ -2928,24 +2931,38 @@ public boolean readAndDispatch () {
 	*/
 	messageProc = window.setInterval(new RunnableCompatibility() {
 		public void run() {
+//			System.out.println("I'm entering the run");
+//			System.out.println("msg " + Display.this.msgs);
+			List layoutQueue = new ArrayList();
 			MESSAGE[] msgs = Display.this.msgs;
 			if (msgs.length != 0) {
-//				System.out.println("msgs.legnth" + msgs.length);
+				System.out.println("msgs.legnth" + msgs.length);
 				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m1 = msgs[i];
 					if (m1 == null) {
 						continue;
 					}
+
 					for (int j = i - 1; j >= 0; j--) {
 						MESSAGE m2 = msgs[j];
 						if (m2 != null && m2.control == m1.control
 								&& m2.type == m1.type) {
 							msgs[j] = null;
-							break;
+							
+//							break;
 						}
 					}
+					
+					if(m1.type == MESSAGE.CONTROL_LAYOUT){
+						if(layoutQueue.contains(m1.control.parent)){
+							msgs[i] = null;
+						}
+						layoutQueue.add(m1);
+					}
+					
 				}
 				long time = 0;
+
 				for (int i = 0; i < msgs.length; i++) {
 //				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m = msgs[i];
@@ -2954,6 +2971,9 @@ public boolean readAndDispatch () {
 						if (!m.control.isVisible()) { continue; }
 						Date d = new Date();
 						Composite c = (Composite) m.control;
+						if(c.layout != null){
+							c.layout.layout (c, (c.state & Composite.LAYOUT_CHANGED) != 0);
+						}
 						if (m.data != null) {
 							boolean[] bs = (boolean[]) m.data;
 							c.updateLayout(bs[0], bs[1]);
@@ -2961,9 +2981,9 @@ public boolean readAndDispatch () {
 							c.layout();
 						}
 						time += new Date().getTime() - d.getTime();
-//						System.err.println(m.control + " cost " + (time));
-						if (time > 100) {
-//							System.out.println("before deferring:" + msgs.length);
+						System.err.println(c.getName() + " cost " + (time));
+						if (time > 200) {
+							System.out.println("before deferring:" + msgs.length);
 							for (int j = i + 1; j < msgs.length; j++) {
 								msgs[j - i - 1] = msgs[j];
 							}
@@ -2976,7 +2996,7 @@ public boolean readAndDispatch () {
 							 * @j2sNative
 							 * a.length -= d + 1;
 							 */ {}
-//							System.out.println("after deferring:" + msgs.length);
+							System.out.println("after deferring:" + msgs.length);
 							return ;
 						}
 					}
@@ -2989,7 +3009,7 @@ public boolean readAndDispatch () {
 				 */ {}
 			}
 		}
-	}, 20);
+	}, 100);
 	return true;
 }
 

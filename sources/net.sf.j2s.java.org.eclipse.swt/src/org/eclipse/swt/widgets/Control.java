@@ -686,7 +686,8 @@ protected void forceResize () {
 	if (parent == null) return;
 	WINDOWPOS [] lpwp = parent.lpwp;
 	if (lpwp == null) return;
-	for (int i=0; i<lpwp.length; i++) {
+	int length = lpwp.length;
+	for (int i=0; i<length; i++) {
 		WINDOWPOS wp = lpwp [i];
 		if (wp != null && wp.hwnd == handle) {
 			/*

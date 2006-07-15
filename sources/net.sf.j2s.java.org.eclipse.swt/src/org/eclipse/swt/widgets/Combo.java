@@ -68,6 +68,7 @@ public class Combo extends Composite {
 			selectInput;
 	private boolean selectShown;
 	private boolean isSimple;
+	private int itemCount;
 	
 	/**
 	 * the operating system limit for the number of characters
@@ -138,7 +139,7 @@ public class Combo extends Composite {
  */
 public Combo (Composite parent, int style) {
 	super (parent, checkStyle (style));
-	
+	itemCount = 0;
 }
 
 /**
@@ -167,8 +168,9 @@ public void add (String string) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	*/
 	if (selectInput != null) {
-		selectInput.options[selectInput.options.length] = new Option(string, string);
+		selectInput.options[itemCount] = new Option(string, string);
 	}
+	itemCount++;
 }
 
 /**
@@ -198,7 +200,7 @@ public void add (String string, int index) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	
-	int count = selectInput.options.length;
+	int count = itemCount;
 	if (!(0 <= index && index <= count)) {
 		error (SWT.ERROR_INVALID_RANGE);
 	}
@@ -383,7 +385,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		
 		if(selectInput != null){
 			Option[] options = selectInput.options;
-			for(int i = 0; i < options.length; i++){
+			int length = itemCount;
+			for(int i = 0; i < length; i++){
 				width = Math.max(width, OS.getStringPlainWidth(options[i].value));	
 			}
 		} else{
@@ -723,6 +726,7 @@ public void deselectAll () {
 	checkWidget ();
 	//OS.SendMessage (handle, OS.CB_SETCURSEL, -1, 0);
 	selectInput.selectedIndex = -1;
+	setText("", false);
 	sendEvent (SWT.Modify);
 	// widget could be disposed at this point
 }
@@ -756,8 +760,7 @@ public String getItem (int index) {
 	if (0 <= index && index < count) error (SWT.ERROR_CANNOT_GET_ITEM);
 	error (SWT.ERROR_INVALID_RANGE);
 	*/
-	Option[] options = selectInput.options;
-	if(index < 0 || index > (options.length - 1))
+	if(index < 0 || index > (itemCount - 1))
 		error(SWT.ERROR_INVALID_RANGE);
 	return selectInput.options[index].value;
 }
@@ -779,7 +782,7 @@ public int getItemCount () {
 	if (count == OS.CB_ERR) error (SWT.ERROR_CANNOT_GET_COUNT);
 	return count;
 	*/
-	return selectInput.options.length;
+	return this.itemCount;
 }
 
 /**
@@ -1183,6 +1186,7 @@ public void remove (int index) {
 	System.arraycopy(oldOptions,0, newOptions, 0, index);
 	System.arraycopy(oldOptions, index + 1, newOptions, index, oldOptions.length - index - 1);
 	selectInput.options = newOptions;
+	itemCount--;
 }
 
 /**
@@ -1242,6 +1246,7 @@ public void remove (int start, int end) {
 	System.arraycopy(oldOptions,0, newOptions, 0, start);
 	System.arraycopy(oldOptions, end + 1, newOptions, start, oldOptions.length - end - 1);
 	selectInput.options = newOptions;
+	itemCount -= (end - start + 1);
 }
 
 /**
@@ -1284,6 +1289,8 @@ public void removeAll () {
 	 * @j2sNative
 	 * this.selectInput.options.length = 0;
 	 */{}
+	itemCount = 0;
+	textInput.value = "";
 	sendEvent (SWT.Modify);
 	// widget could be disposed at this point
 }
@@ -1475,9 +1482,10 @@ public void select (int index) {
 		}
 	}
 	*/
-	if(index >= 0  && index < selectInput.options.length){
+	if(index >= 0  && index < itemCount){
 		selectInput.selectedIndex = index;
 	}
+	setText(getItem(index));
 }
 /*
 void setBackgroundPixel (int pixel) {
@@ -1782,6 +1790,10 @@ public void setSelection (Point selection) {
  * </ul>
  */
 public void setText (String string) {
+	setText(string, true);
+}
+
+public void setText (String string, boolean modify) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if ((style & SWT.READ_ONLY) != 0) {
@@ -1794,7 +1806,9 @@ public void setText (String string) {
 	textInput.readOnly = (style & SWT.READ_ONLY) != 0;
 //	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 //	if (OS.SetWindowText (handle, buffer)) {
+	if(modify){
 		sendEvent (SWT.Modify);
+	}
 		// widget could be disposed at this point
 //	}
 }

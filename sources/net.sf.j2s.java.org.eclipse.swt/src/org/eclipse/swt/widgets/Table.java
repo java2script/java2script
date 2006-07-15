@@ -16,7 +16,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.DragAndDrop;
+import org.eclipse.swt.internal.dnd.DragEvent;
+import org.eclipse.swt.internal.dnd.SliderDND;
+import org.eclipse.swt.internal.dnd.TableColumnDND;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -68,6 +73,10 @@ public class Table extends Composite {
 	int lastIndexOf, lastWidth;
 	boolean customDraw, cancelMove, dragStarted, fixScrollWidth, tipRequested;
 	boolean wasSelected, ignoreActivate, ignoreSelect, ignoreShrink, ignoreResize;
+	private Element tbodyTRTemplate;
+	int lineWidth;
+	int columnMaxWidth[];
+	//private String tbodyTRTemplateInnerHTML;
 	static final int INSET = 4;
 	static final int GRID_WIDTH = 1;
 	static final int HEADER_MARGIN = 10;
@@ -120,6 +129,8 @@ public Table (Composite parent, int style) {
 	selection = new TableItem[0];
 	items = new TableItem[0];
 	columns = new TableColumn[0];
+	columnMaxWidth = new int[0];
+	lineWidth = 0;
 //	itemsStr = new String[0];
 	tbody = null;
 }
@@ -569,20 +580,21 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	height -= (oneItem >> 16) - (empty >> 16);
 	*/
 	
-	int width = 0;
+	int width = lineWidth;
 	int height = 0;
-	int lineWidth = 0;
-	for (int i = 0; i < columns.length; i++) {
-		int maxWidth = 0;
-		String t = columns[i].getNameText();
-		int columnWidth = getTextWidth(t);
-		maxWidth = Math.max(maxWidth, columnWidth);
-		for (int j = 0; j < items.length; j++) {
-			maxWidth = Math.max(maxWidth, getTextWidth(items[j].getText(i)));
-		}
-		lineWidth += maxWidth + 10;
-	}
-	width = lineWidth;
+//	lineWidth = 0;
+//	columnMaxWidth = new int[0];
+//	for (int i = 0; i < columns.length; i++) {
+//		int maxWidth = 0;
+//		String t = columns[i].getNameText();
+//		int columnWidth = getTextWidth(t);
+//		maxWidth = Math.max(maxWidth, columnWidth);
+//		for (int j = 0; j < items.length; j++) {
+//			maxWidth = Math.max(maxWidth, getTextWidth(items[j].getText(i)));
+//		}
+//		lineWidth += maxWidth + 10;
+//	}
+//	width = lineWidth;
 	if (items.length > 0) {
 		String t = items[0].getNameText();
 		System.out.println(t);
@@ -889,7 +901,9 @@ void createItem (TableColumn column, int index) {
 //			}
 //		}
 	Element theadTD = document.createElement("TD");
+	theadTD.className = "table-column-default";
 	theadTD.style.whiteSpace = "nowrap";
+//	int childIndex = column.resizable ? index * 2 : index;
 	if (index < 0 || index >= theadTR.childNodes.length) { //theadTD == null){
 		theadTR.appendChild(theadTD);
 		columns[index] = column;
@@ -920,6 +934,8 @@ void createItem (TableColumn column, int index) {
 	theadTD.style.margin = "0";
 	theadTD.style.padding = "0";
 	column.handle = theadTD;
+	
+
 }
 
 void createItem (TableItem item, int index) {
@@ -989,9 +1005,36 @@ void createItem (TableItem item, int index) {
 		table.appendChild(tbody);
 	}
 	
-	Element tbodyTR = document.createElement("TR");
+	if(tbodyTRTemplate == null){
+		tbodyTRTemplate = document.createElement("TR");
 //	String trStr = "<TR class=\"table-item-default\"></TR>";
-	tbodyTR.className = "table-item-default";
+		tbodyTRTemplate.className = "table-item-default";
+		int length = this.columns.length;
+		for(int i = 0; i < length; i++){
+			Element td = document.createElement("TD");
+			tbodyTRTemplate.appendChild(td);
+			Element el = document.createElement("DIV");
+			td.appendChild(el);
+			el.className = "table-item-cell-default";
+			if (index == 0 && (style & SWT.CHECK) != 0) {
+				Element check = document.createElement("INPUT");
+				check.type = "checkbox";
+				el.appendChild(check);
+				item.check = check;
+			}			
+			Element text = document.createElement("DIV");
+			el.appendChild(text);
+			text.className = "table-item-cell-text-default";
+		}
+//		tbodyTRTemplateInnerHTML = "<TR class=\"table-item-default\" >" + tbodyTRTemplate.innerHTML + "</TR>";
+//		/**
+//		 * @j2sNative
+//		 *alert(this.tbodyTRTemplateInnerHTML);
+//		 */{}
+	}
+	Element tbodyTR = tbodyTRTemplate.cloneNode(true); 
+//	tbodyTR.className = "table-item-default";
+//	tbodyTR.innerHTML = tbodyTRTemplateInnerHTML;
 	if (index < 0 || index >= tbody.childNodes.length) { //theadTD == null){
 		tbody.appendChild(tbodyTR);
 		items[index] = item;
@@ -1163,7 +1206,9 @@ public void deselectAll () {
 	OS.SendMessage (handle, OS.LVM_SETITEMSTATE, -1, lvItem);
 	ignoreSelect = false;
 	*/
+	System.out.println("deselect " + items + " " + items.length);
 	for (int i = 0; i < items.length; i++) {
+		System.out.println("deselecting " + i + items[i] + " " + items.length);
 		items[i].showSelection(false);
 	}
 	selection = new TableItem[0];
@@ -1334,7 +1379,7 @@ int getBackgroundPixel () {
 }
 */
 
-private int getTextWidth(String t) {
+int getTextWidth(String t) {
 	int columnWidth = 0;
 	if (t == null || t.length() == 0) {
 		columnWidth = 0;
@@ -2119,6 +2164,7 @@ public void remove (int [] indices) {
 	}
 	deselect(indices);
 	TableItem[] itemsToBeRemoved = new TableItem[indices.length];
+	TableItem[] newItems = new TableItem[count-1];
 	int last = -1;
 	for (int i=0; i<newIndices.length; i++) {
 		int index = newIndices [i];
@@ -2127,15 +2173,17 @@ public void remove (int [] indices) {
 			if (item != null) {
 				tbody.removeChild(item.handle);					
 				item.releaseHandle();
-				System.arraycopy (items, index + 1, items, index, --count - index);
-				items [count] = null;
+				System.arraycopy (items, 0, newItems, 0, index);
+				System.arraycopy (items, index + 1, newItems, index, --count - index);
+				items = newItems;
+				newItems = new TableItem[count-1];
+				System.out.println("after remove " + items + " " + count + " " + index);
+				//items [count] = null; 
 				last = index;
 			}
 		}
 	}
-	TableItem[] newItems = new TableItem[indices.length];
-	System.arraycopy(items, 0, newItems, 0, indices.length);
-	items = newItems;
+//	items = newItems;
 }
 
 /**
@@ -3658,6 +3706,10 @@ void updateMoveable () {
 	int newBits = index < count ? OS.LVS_EX_HEADERDRAGDROP : 0;
 	OS.SendMessage (handle, OS.LVM_SETEXTENDEDLISTVIEWSTYLE, OS.LVS_EX_HEADERDRAGDROP, newBits);
 	*/
+}
+
+protected Control[] _getChildren() {
+	return new Control[0];
 }
 
 ///**
