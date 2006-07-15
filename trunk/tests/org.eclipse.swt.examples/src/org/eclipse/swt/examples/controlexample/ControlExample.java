@@ -218,18 +218,18 @@ public class ControlExample {
 		Display display = new Display();
 		int style = SWT.SHELL_TRIM;
 		int styleNone = SWT.NONE;
-		/**
-		 * @j2sNative 
-		 * window.extraDisplay (display);
-		 * style = styleNone;
-		 */ {}
+//		/**
+//		 * @j2sNative 
+//		 * window.extraDisplay (display);
+//		 * style = styleNone;
+//		 */ {}
 		
 		Shell shell = new Shell(display, style);
 		shell.setLayout(new FillLayout());
 		ControlExample instance = new ControlExample(shell);
 		shell.setText(getResourceString("window.title"));
 		setShellSize(display, shell);
-		shell.setMaximized(true);
+//		shell.setMaximized(true);
 		shell.open();
 		while (! shell.isDisposed()) {
 			if (! display.readAndDispatch()) display.sleep();
