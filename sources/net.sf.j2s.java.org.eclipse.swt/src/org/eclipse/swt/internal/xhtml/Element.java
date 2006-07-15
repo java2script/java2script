@@ -1,6 +1,5 @@
 package org.eclipse.swt.internal.xhtml;
 
-import org.eclipse.swt.internal.RunnableCompatibility;
 
 
 
@@ -123,6 +122,10 @@ public class Element {
 	
 	public Element[] getElementsByTagName(String tag) {
 		return new Element[0];
+	}
+	
+	public Element cloneNode(boolean flag){
+		return new Element();
 	}
 
 //	public void write(String html) {
