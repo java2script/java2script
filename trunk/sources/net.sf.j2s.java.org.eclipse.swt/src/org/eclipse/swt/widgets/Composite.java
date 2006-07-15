@@ -137,13 +137,14 @@ protected Control [] _getChildren () {
 Control [] _getTabList () {
 	if (tabList == null) return tabList;
 	int count = 0;
-	for (int i=0; i<tabList.length; i++) {
+	int length = tabList.length;
+	for (int i=0; i<length; i++) {
 		if (!tabList [i].isDisposed ()) count++;
 	}
-	if (count == tabList.length) return tabList;
+	if (count == length) return tabList;
 	Control [] newList = new Control [count];
 	int index = 0;
-	for (int i=0; i<tabList.length; i++) {
+	for (int i=0; i<length; i++) {
 		if (!tabList [i].isDisposed ()) {
 			newList [index++] = tabList [i];
 		}
@@ -174,7 +175,8 @@ Control [] _getTabList () {
 public void changed (Control[] changed) {
 	checkWidget ();
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
-	for (int i=0; i<changed.length; i++) {
+	int length = changed.length;
+	for (int i=0; i< length; i++) {
 		Control control = changed [i];
 		if (control == null) error (SWT.ERROR_INVALID_ARGUMENT);
 		if (control.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
@@ -187,7 +189,7 @@ public void changed (Control[] changed) {
 		}
 		if (!ancestor) error (SWT.ERROR_INVALID_PARENT);
 	}
-	for (int i=0; i<changed.length; i++) {
+	for (int i=0; i< length; i++) {
 		Control child = changed [i];
 		Composite composite = child.parent;
 		while (child != this) {
@@ -279,6 +281,7 @@ Menu [] findMenus (Control control) {
 	if (control == this) return new Menu [0];
 	Menu result [] = super.findMenus (control);
 	Control [] children = _getChildren ();
+	
 	for (int i=0; i<children.length; i++) {
 		Control child = children [i];
 		Menu [] menuList = child.findMenus (control);
@@ -295,14 +298,16 @@ Menu [] findMenus (Control control) {
 void fixChildren (Shell newShell, Shell oldShell, Decorations newDecorations, Decorations oldDecorations, Menu [] menus) {
 	super.fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
 	Control [] children = _getChildren ();
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i< length; i++) {
 		children [i].fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
 	}
 }
 void fixChildrenList (Control control) {
-	if (children == null || children.length == 0) return;
+	int length = children.length;
+	if (children == null || length == 0) return;
 	Control[] newChildren = new Control[0];
-	for (int i = 0; i < children.length; i++) {
+	for (int i = 0; i < length; i++) {
 		Control child = children[i];
 		if (child != null && child != control) {
 			newChildren[newChildren.length] = child;
@@ -380,7 +385,7 @@ int getChildrenCount () {
 	*/
 	// TODO: search the children and filter out the essential children
 //	return count;
-	return children.length;
+	return _getChildren().length;
 }
 
 /**
@@ -417,12 +422,13 @@ public Control [] getTabList () {
 	if (tabList == null) {
 		int count = 0;
 		Control [] list =_getChildren ();
-		for (int i=0; i<list.length; i++) {
+		int length = list.length;
+		for (int i=0; i< length; i++) {
 			if (list [i].isTabGroup ()) count++;
 		}
 		tabList = new Control [count];
 		int index = 0;
-		for (int i=0; i<list.length; i++) {
+		for (int i=0; i< length; i++) {
 			if (list [i].isTabGroup ()) {
 				tabList [index++] = list [i];
 			}
@@ -592,7 +598,8 @@ public void layout (Control [] changed) {
 	System.out.print("control");
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
 	Date d = new Date();
-	for (int i=0; i<changed.length; i++) {
+	int length = changed.length;
+	for (int i=0; i< length; i++) {
 		Control control = changed [i];
 		if (control == null) error (SWT.ERROR_INVALID_ARGUMENT);
 		if (control.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
@@ -609,7 +616,7 @@ public void layout (Control [] changed) {
 	d = new Date();
 	int updateCount = 0;
 	Composite [] update = new Composite [16];
-	for (int i=0; i<changed.length; i++) {
+	for (int i=0; i< length; i++) {
 		Control child = changed [i];
 		Composite composite = child.parent;
 		while (child != this) {
@@ -644,7 +651,8 @@ void markLayout (boolean changed, boolean all) {
 	}
 	if (all) {
 		Control [] children = _getChildren ();
-		for (int i=0; i<children.length; i++) {
+		int length = children.length;
+		for (int i=0; i< length; i++) {
 			children [i].markLayout (changed, all);
 		}
 	}
@@ -654,7 +662,8 @@ Point minimumSize (int wHint, int hHint, boolean changed) {
 	Control [] children = _getChildren ();
 	//System.out.println("minimumSize@Composite");
 	int width = 0, height = 0;
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i< length; i++) {
 		//System.out.println(i + "..." + children [i]);
 		Rectangle rect = children [i].getBounds ();
 		width = Math.max (width, rect.x + rect.width);
@@ -668,7 +677,8 @@ Point minimumSize (int wHint, int hHint, boolean changed) {
 
 void releaseChildren () {
 	Control [] children = _getChildren ();
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (!child.isDisposed ()) child.releaseResources ();
 	}
@@ -692,7 +702,8 @@ protected void releaseWidget () {
 	layout = null;
 	tabList = null;
 	if (lpwp != null) {
-		for (int i = 0; i < lpwp.length; i++) {
+		int length = lpwp.length;
+		for (int i = 0; i < length; i++) {
 			lpwp[i].hwnd = null;
 			lpwp[i].hwndInsertAfter = null;
 		}
@@ -724,7 +735,8 @@ boolean resizeChildren (boolean defer, WINDOWPOS [] pwp) {
 		//hdwp = OS.BeginDeferWindowPos (pwp.length);
 		if (hdwp == 0) return false;
 	}
-	for (int i=0; i<pwp.length; i++) {
+	int length = pwp.length;
+	for (int i=0; i<length; i++) {
 		WINDOWPOS wp = pwp [i];
 		if (wp != null) {
 			/*
@@ -775,11 +787,12 @@ void resizeEmbeddedHandle(int embeddedHandle, int width, int height) {
 boolean setFixedFocus () {
 	checkWidget ();
 	Control [] children = _getChildren ();
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.setRadioFocus ()) return true;
 	}
-	for (int i=0; i<children.length; i++) {
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.setFixedFocus ()) return true;
 	}
@@ -789,11 +802,12 @@ boolean setFixedFocus () {
 public boolean setFocus () {
 	checkWidget ();
 	Control [] children = _getChildren ();
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.setRadioFocus ()) return true;
 	}
-	for (int i=0; i<children.length; i++) {
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.setFocus ()) return true;
 	}
@@ -865,14 +879,15 @@ public void setLayoutDeferred (boolean defer) {
 public void setTabList (Control [] tabList) {
 	checkWidget ();
 	if (tabList != null) {
-		for (int i=0; i<tabList.length; i++) {
+		int length = tabList.length;
+		for (int i=0; i<length; i++) {
 			Control control = tabList [i];
 			if (control == null) error (SWT.ERROR_INVALID_ARGUMENT);
 			if (control.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
 			if (control.parent != this) error (SWT.ERROR_INVALID_PARENT);
 		}
-		Control [] newList = new Control [tabList.length];
-		System.arraycopy (tabList, 0, newList, 0, tabList.length);
+		Control [] newList = new Control [length];
+		System.arraycopy (tabList, 0, newList, 0, length);
 		tabList = newList;
 	} 
 	this.tabList = tabList;
@@ -898,11 +913,12 @@ boolean setTabGroupFocus () {
 	}
 	if (takeFocus && setTabItemFocus ()) return true;
 	Control [] children = _getChildren ();
-	for (int i=0; i<children.length; i++) {
+	int length = children.length;
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.isTabItem () && child.setRadioFocus ()) return true;
 	}
-	for (int i=0; i<children.length; i++) {
+	for (int i=0; i<length; i++) {
 		Control child = children [i];
 		if (child.isTabItem () && child.setTabItemFocus ()) return true;
 	}
@@ -992,12 +1008,16 @@ void updateLayout (boolean resize, boolean all) {
 		boolean changed = (state & LAYOUT_CHANGED) != 0;
 		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 		if (resize) setResizeChildren (false);
-		layout.layout (this, changed);
+//		layout.layout (this, changed);
+		display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
 		if (resize) setResizeChildren (true);
 	}
+	
+	
 	if (all) {
 		Control [] children = _getChildren ();
-		for (int i=0; i<children.length; i++) {
+		int length = children.length;
+		for (int i=0; i<length; i++) {
 //			children [i].updateLayout (resize, all);
 			if (children[i] instanceof Composite) {
 //				System.out.println("update Layout " + children[i]);

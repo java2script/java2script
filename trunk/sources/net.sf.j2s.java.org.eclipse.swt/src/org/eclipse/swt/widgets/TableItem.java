@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -44,6 +45,7 @@ public class TableItem extends Item {
 	int [] cellBackground, cellForeground, cellFont;
 	int index;
 	private boolean selected;
+	Element check;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -118,6 +120,56 @@ TableItem (Table parent, int style, int index, boolean create) {
 	super (parent, style);
 	this.parent = parent;
 	if (create) parent.createItem (this, index);
+	configureItem();
+}
+
+private void configureItem() {
+	if((parent.style & SWT.CHECK) != 0){
+		check.onclick = new RunnableCompatibility() {
+			public void run() {
+				Event e = new Event();
+				e.display = display;
+				e.type = SWT.Selection;
+				e.detail = SWT.CHECK;
+				e.item = TableItem.this;
+				e.widget = TableItem.this;
+				parent.sendEvent(e);
+			}
+		};
+	}
+	if ((parent.style & SWT.FULL_SELECTION) != 0 || index == 0) {
+		this.handle.onclick = new RunnableCompatibility() {
+			public void run() {
+//				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
+//				element.className = "tree-item-text-selected";
+				HTMLEvent evt = (HTMLEvent) getEvent();
+				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+				Event e = new Event();
+				e.display = display;
+				e.type = SWT.Selection;
+				e.detail = SWT.NONE;
+				e.item = TableItem.this;
+				e.widget = TableItem.this;
+				parent.sendEvent(e);
+				toReturn(false);
+			}
+		};
+		this.handle.ondblclick = new RunnableCompatibility(){
+			public void run(){
+				HTMLEvent evt = (HTMLEvent) getEvent();
+				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+				System.out.println("An event is runned " + evt);
+				Event e = new Event();
+				e.display = display;
+				e.type = SWT.DefaultSelection;
+				e.detail = SWT.NONE;
+				e.item = TableItem.this;
+				e.widget = TableItem.this;
+				parent.sendEvent(e);
+				toReturn(false);					
+			}
+		};
+	}
 }
 
 static Table checkNull (Table control) {
@@ -1081,87 +1133,106 @@ public void setText (int index, String string) {
 		if (string.equals (strings [index])) return;
 		strings [index] = string;
 	}
+	Element text = handle.childNodes[index].childNodes[0];
+//	Element[] children = text.childNodes;
+	text.innerHTML = "<div class=\"table-item-cell-default\"><div class=\"table-item-cell-text-default\">" + string + "</div></div>";
 	
-	Element tbodyTD = null;
-	if (index < handle.childNodes.length) {
-		if (handle.childNodes[index] != null
-				&& "TD".equals(handle.childNodes[index].nodeName)) {
-			tbodyTD = handle.childNodes[index];
+	int[] columnMaxWidth = parent.columnMaxWidth;
+	int width = OS.getContainerWidth(text);
+	if(columnMaxWidth.length > index){
+		if(columnMaxWidth[index] < width){
+			parent.lineWidth = parent.lineWidth + width - columnMaxWidth[index];
+			columnMaxWidth[index] = width;
 		}
+	}else{
+		parent.lineWidth = parent.lineWidth + width;
+		columnMaxWidth[index] = width;
 	}
-	if (tbodyTD == null){
-		tbodyTD = document.createElement("TD");
-		handle.appendChild(tbodyTD);
-//			System.out.println("extisted already." + index);
-//		} else {
-//			System.out.println("No existed yet?" + index);
-	}
-	if (tbodyTD.childNodes != null) {
-		for (int i = 0; i < tbodyTD.childNodes.length; i++) {
-			if (tbodyTD.childNodes[i] != null) {
-				tbodyTD.removeChild(tbodyTD.childNodes[i]);
-			}
-		}
-	}
-	Element el = document.createElement("DIV");
-	tbodyTD.appendChild(el);
-	el.className = "table-item-cell-default";
-	//el.appendChild(document.createTextNode(string));
-	
-	if (index == 0 && (parent.style & SWT.CHECK) != 0) {
-		Element check = document.createElement("INPUT");
-		check.type = "checkbox";
-		el.appendChild(check);
-		check.onclick = new RunnableCompatibility() {
-			public void run() {
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.Selection;
-				e.detail = SWT.CHECK;
-				e.item = TableItem.this;
-				e.widget = TableItem.this;
-				parent.sendEvent(e);
-			}
-		};
-	}
-	
-	Element text = document.createElement("DIV");
-	el.appendChild(text);
-	text.className = "table-item-cell-text-default";
-	text.appendChild(document.createTextNode(string));
-	if ((parent.style & SWT.FULL_SELECTION) != 0 || index == 0) {
-		text.onclick = new RunnableCompatibility() {
-			public void run() {
-//				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
-//				element.className = "tree-item-text-selected";
-				HTMLEvent evt = (HTMLEvent) getEvent();
-				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.Selection;
-				e.detail = SWT.NONE;
-				e.item = TableItem.this;
-				e.widget = TableItem.this;
-				parent.sendEvent(e);
-				toReturn(false);
-			}
-		};
-		text.ondblclick = new RunnableCompatibility(){
-			public void run(){
-				HTMLEvent evt = (HTMLEvent) getEvent();
-				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-				System.out.println("An event is runned " + evt);
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.DefaultSelection;
-				e.detail = SWT.NONE;
-				e.item = TableItem.this;
-				e.widget = TableItem.this;
-				parent.sendEvent(e);
-				toReturn(false);					
-			}
-		};
-	}
+//	if(children.length > 0){
+//		text.removeChild(children[0]);
+//	}
+//	text.appendChild(document.createTextNode(string));
+//	
+//	Element tbodyTD = null;
+//	if (index < handle.childNodes.length) {
+//		if (handle.childNodes[index] != null
+//				&& "TD".equals(handle.childNodes[index].nodeName)) {
+//			tbodyTD = handle.childNodes[index];
+//		}
+//	}
+//	if (tbodyTD == null){
+//		tbodyTD = document.createElement("TD");
+//		handle.appendChild(tbodyTD);
+////			System.out.println("extisted already." + index);
+////		} else {
+////			System.out.println("No existed yet?" + index);
+//	}
+//	if (tbodyTD.childNodes != null) {
+//		for (int i = 0; i < tbodyTD.childNodes.length; i++) {
+//			if (tbodyTD.childNodes[i] != null) {
+//				tbodyTD.removeChild(tbodyTD.childNodes[i]);
+//			}
+//		}
+//	}
+//	Element el = document.createElement("DIV");
+//	tbodyTD.appendChild(el);
+//	el.className = "table-item-cell-default";
+//	//el.appendChild(document.createTextNode(string));
+//	
+//	if (index == 0 && (parent.style & SWT.CHECK) != 0) {
+//		Element check = document.createElement("INPUT");
+//		check.type = "checkbox";
+//		el.appendChild(check);
+//		check.onclick = new RunnableCompatibility() {
+//			public void run() {
+//				Event e = new Event();
+//				e.display = display;
+//				e.type = SWT.Selection;
+//				e.detail = SWT.CHECK;
+//				e.item = TableItem.this;
+//				e.widget = TableItem.this;
+//				parent.sendEvent(e);
+//			}
+//		};
+//	}
+//	
+//	Element text = document.createElement("DIV");
+//	el.appendChild(text);
+//	text.className = "table-item-cell-text-default";
+//	text.appendChild(document.createTextNode(string));
+//	if ((parent.style & SWT.FULL_SELECTION) != 0 || index == 0) {
+//		text.onclick = new RunnableCompatibility() {
+//			public void run() {
+////				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
+////				element.className = "tree-item-text-selected";
+//				HTMLEvent evt = (HTMLEvent) getEvent();
+//				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+//				Event e = new Event();
+//				e.display = display;
+//				e.type = SWT.Selection;
+//				e.detail = SWT.NONE;
+//				e.item = TableItem.this;
+//				e.widget = TableItem.this;
+//				parent.sendEvent(e);
+//				toReturn(false);
+//			}
+//		};
+//		text.ondblclick = new RunnableCompatibility(){
+//			public void run(){
+//				HTMLEvent evt = (HTMLEvent) getEvent();
+//				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+//				System.out.println("An event is runned " + evt);
+//				Event e = new Event();
+//				e.display = display;
+//				e.type = SWT.DefaultSelection;
+//				e.detail = SWT.NONE;
+//				e.item = TableItem.this;
+//				e.widget = TableItem.this;
+//				parent.sendEvent(e);
+//				toReturn(false);					
+//			}
+//		};
+//	}
 
 //		tbodyTD.style.overflow = "hidden";
 //		tbodyTD.style.whiteSpace = "nowrap";

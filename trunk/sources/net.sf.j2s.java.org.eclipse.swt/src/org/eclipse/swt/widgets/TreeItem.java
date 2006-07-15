@@ -1026,6 +1026,9 @@ public void setExpanded(boolean expanded) {
 	}
 	*/
 	expandStatus = expanded;
+	if(getItemCount() == 0){
+		return;
+	}
 	TreeItem[] items = parent.getDescendantItems(index);
 //				TreeItem[] items = getItems();
 //		System.out.println(expanded);

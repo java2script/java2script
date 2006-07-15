@@ -16,7 +16,12 @@ import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.DragAndDrop;
+import org.eclipse.swt.internal.dnd.DragEvent;
+import org.eclipse.swt.internal.dnd.TableColumnDND;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -35,9 +40,10 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TableColumn extends Item {
 //	Element handle;
-	
+	private int lastX, lastY;
 	Table parent;
 	boolean resizable, moveable;
+	Element resizeHandle;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -76,6 +82,76 @@ public TableColumn (Table parent, int style) {
 	resizable = true;
 	this.parent = parent;
 	parent.createItem (this, parent.getColumnCount ());
+	//configureColumn();
+}
+
+private void configureColumn() {
+	// TODO Auto-generated method stub
+	this.handle.style.height = (OS.getStringPlainHeight("A")+ 2) + "px";
+	System.out.println("configuring table column " + this.handle.style.height);
+	if(resizeHandle != null){
+		OS.destroyHandle(resizeHandle);
+	}
+	if(resizable){
+		resizeHandle = document.createElement("DIV"); 
+		resizeHandle.className = "table-column-resize";
+		handle.appendChild(resizeHandle);
+	}
+	if(resizable){		
+		resizeHandle.style.display = "block";
+		resizeHandle.style.height = Math.max(0, OS.getContainerHeight(this.handle)) + "px";
+		System.out.println(" height is " + resizeHandle.style.height);
+		int left = 0;
+		for(int i = 0; i <= parent.indexOf(this); i++){
+			left += Math.max(0, parent.columns[i].getWidth() + 2);
+			System.out.println(" at " + i + " left is "+ left);
+		}
+		resizeHandle.style.left = (left  - 3)+ "px"; 
+		System.out.println("resize handle for " + this.text + " " + resizeHandle.style.left);
+		/*
+		 * Resizing the columns
+		 */
+		DragAndDrop dnd = new DragAndDrop();
+		dnd.addDragListener(new TableColumnDND() {
+			public boolean dragEnded(DragEvent e) {
+				super.dragEnded(e);
+				Event event = new Event ();
+				//Point location = getLocation();
+//				event.x = ScaleDND.x;//location.x;
+//				event.y = ScaleDND.y;//location.y;
+				Point p = currentLocation(e);
+				event.x = Integer.parseInt(thumb.style.left);//p.x; //SashDND.x;//location.x;
+				if (event.doit) {
+					lastX = event.x;
+				}
+				int tempWidth = lastX - Integer.parseInt(resizeHandle.style.left) + getWidth();
+				System.out.println("drag ends" + lastX + " " + getWidth() + " " + tempWidth);
+				setWidth(Math.max(0, tempWidth));
+				return true;
+			}
+			
+			public boolean dragging(DragEvent e) {
+				super.dragging(e);
+				System.out.println("draggin");
+				//e.sourceElement.style.top = currentLocation(e).y + "px";
+				//caculateSelection();
+				Event event = new Event ();
+				event.x = lastX;
+				event.y = lastY;
+				//event.widget = Slider.this;
+				//event.item = Slider.this;
+				event.detail = SWT.DRAG;
+				sendEvent (SWT.Selection, event);
+				return true;
+			}
+		
+		});
+		dnd.bind(resizeHandle);
+
+	} else if(resizeHandle != null){
+		resizeHandle.style.display = "none";
+	}
+
 }
 
 /**
@@ -283,7 +359,8 @@ public int getWidth () {
 	//int hwnd = parent.handle;
 	//return OS.SendMessage (hwnd, OS.LVM_GETCOLUMNWIDTH, index, 0);
 	if (handle.style.width != null && handle.style.width.length() != 0) {
-		return Integer.parseInt(handle.style.width);
+		int styleWidth = Integer.parseInt(handle.style.width);
+		return this.text != null ? Math.max(OS.getStringPlainWidth(this.text), styleWidth) : styleWidth;
 	}
 //	return UIStringUtil.getContainerWidth(handle);
 	return OS.getContainerWidth(handle);
@@ -402,9 +479,13 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-protected void releaseWidget () {
-	super.releaseWidget ();
-	parent = null;
+protected void releaseHandle() {
+	// TODO Auto-generated method stub
+	if(resizeHandle != null){
+		OS.destroyHandle(resizeHandle);
+		resizeHandle = null;
+	}
+	super.releaseHandle();
 }
 
 /**
@@ -557,6 +638,7 @@ public void setMoveable (boolean moveable) {
 public void setResizable (boolean resizable) {
 	checkWidget ();
 	this.resizable = resizable;
+//	configureColumn();
 }
 
 public void setText (String string) {
@@ -605,6 +687,19 @@ public void setText (String string) {
 		}
 	}
 	handle.appendChild(document.createTextNode(string));
+	int[] columnMaxWidth = parent.columnMaxWidth;
+	int width = OS.getContainerWidth(handle);
+	if(columnMaxWidth.length > index){
+		if(columnMaxWidth[index] < width){
+			parent.lineWidth += width - columnMaxWidth[index];
+			columnMaxWidth[index] = width;
+		}
+	}else{
+		parent.lineWidth += width;
+		columnMaxWidth[index] = width;
+	}
+	//resizeHandle = null;
+//	configureColumn();
 }
 
 /**
@@ -623,7 +718,13 @@ public void setWidth (int width) {
 	if (index == -1) return;
 //	int hwnd = parent.handle;
 //	OS.SendMessage (hwnd, OS.LVM_SETCOLUMNWIDTH, index, width);
-	handle.style.width = width + "px";
+	int tempWidth = width;
+	if(this.text != null){
+		tempWidth = Math.max(OS.getStringPlainWidth(this.text), width);
+	}
+	handle.style.width = tempWidth + "px";
+	System.out.println("setting width to " + handle.style.width);
+//	configureColumn();
 }
 
 }
