@@ -1009,6 +1009,7 @@ void updateLayout (boolean resize, boolean all) {
 		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 		if (resize) setResizeChildren (false);
 //		layout.layout (this, changed);
+		this.waintingForLayout = true;
 		display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
 		if (resize) setResizeChildren (true);
 	}

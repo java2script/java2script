@@ -12,13 +12,10 @@
 package org.eclipse.swt.widgets;
 
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Device;
@@ -2933,7 +2930,7 @@ public boolean readAndDispatch () {
 		public void run() {
 //			System.out.println("I'm entering the run");
 //			System.out.println("msg " + Display.this.msgs);
-			List layoutQueue = new ArrayList();
+//			List layoutQueue = new ArrayList();
 			MESSAGE[] msgs = Display.this.msgs;
 			if (msgs.length != 0) {
 				System.out.println("msgs.legnth" + msgs.length);
@@ -2954,10 +2951,9 @@ public boolean readAndDispatch () {
 					}
 					
 					if(m1.type == MESSAGE.CONTROL_LAYOUT){
-						if(layoutQueue.contains(m1.control.parent)){
+						if(m1.control.parent != null && m1.control.parent.waintingForLayout){
 							msgs[i] = null;
 						}
-						layoutQueue.add(m1);
 					}
 					
 				}
@@ -2968,6 +2964,7 @@ public boolean readAndDispatch () {
 					MESSAGE m = msgs[i];
 					msgs[i] = null;
 					if (m != null && m.type == MESSAGE.CONTROL_LAYOUT) {
+						m.control.waintingForLayout = false;
 						if (!m.control.isVisible()) { continue; }
 						Date d = new Date();
 						Composite c = (Composite) m.control;

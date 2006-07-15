@@ -71,7 +71,7 @@ public abstract class Widget {
 	boolean dragStatus;
 	long hoverTime;
 	int hoverTimerID;
-	
+	boolean waintingForLayout;
 	boolean[] hookedStatus;
 
 	/* Global state flags */
@@ -142,6 +142,7 @@ public Widget (Widget parent, int style) {
 	checkParent (parent);
 	this.style = style;
 	display = parent.display;
+	waintingForLayout = false;
 }
 
 /**
