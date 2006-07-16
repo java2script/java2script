@@ -640,7 +640,7 @@ public TreeItem [] getItems () {
 //	int hwnd = parent.handle;
 //	int hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, handle);
 //	if (hItem == 0) return new TreeItem [0];
-	System.out.println("index: " + this.index);
+//	System.out.println("index: " + this.index);
 	return parent.getItems (this.index);
 }
 

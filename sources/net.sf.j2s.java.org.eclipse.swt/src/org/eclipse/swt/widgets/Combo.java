@@ -470,7 +470,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		}
 	}
 	*/
-	System.out.println("Combo : " + width + " " + height + " hints " + wHint + " " + hHint);
+//	System.out.println("Combo : " + width + " " + height + " hints " + wHint + " " + hHint);
 	return new Point (width, height);
 }
 
@@ -554,19 +554,19 @@ protected void createHandle () {
 	if(isSimple){		
 		selectInput.style.top = height + "px";
 		selectInput.style.left = textInput.style.left;
-		System.out.println("is Simple " + isSimple);
+//		System.out.println("is Simple " + isSimple);
 		selectInput.className = "combo-select-box-visible";
 		selectInput.size = visibleCount;
 		handle.appendChild(selectInput);
 	}else{		
 		selectInput.style.top = height + "px" ;
 		selectInput.style.left = textInput.style.left;
-		System.out.println("is Simple " + isSimple);
+//		System.out.println("is Simple " + isSimple);
 		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
 		selectInput.size = visibleCount;
-		System.out.println("ho combo1 "  + textInput.scrollHeight);
-		System.out.println("ho combo2 "  + textInput.offsetHeight);
-		System.out.println("ho combo3 "  + textInput.clientHeight);
+//		System.out.println("ho combo1 "  + textInput.scrollHeight);
+//		System.out.println("ho combo2 "  + textInput.offsetHeight);
+//		System.out.println("ho combo3 "  + textInput.clientHeight);
 		//TODO: add the select to shell to be shown every where
 	
 		getShell().handle.appendChild(selectInput);
@@ -575,7 +575,7 @@ protected void createHandle () {
 	
 	textInput.ondblclick = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("button clicked!");
+//			System.out.println("button clicked!");
 			if(!isSimple) 
 				show();
 		}
@@ -584,7 +584,7 @@ protected void createHandle () {
 	
 	dropDownButton.onclick = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("button clicked!");
+//			System.out.println("button clicked!");
 			if(!isSimple) 
 				show();
 		}
@@ -592,7 +592,7 @@ protected void createHandle () {
 	
 	selectInput.onchange = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("select changed!" + selectInput.selectedIndex);
+//			System.out.println("select changed!" + selectInput.selectedIndex);
 			noSelection = false;
 			updateSelection();
 			if(!isSimple)
@@ -602,7 +602,7 @@ protected void createHandle () {
 
 	selectInput.onblur = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("handle blurred!");
+//			System.out.println("handle blurred!");
 //			updateSelection();
 			if(!isSimple)
 				hide();
@@ -640,7 +640,7 @@ void show(){
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
 	selectInput.style.top = coordinate.y + "px";
 	selectInput.style.left = coordinate.x + "px";
-	System.out.println("Z " + selectInput.style.zIndex);
+//	System.out.println("Z " + selectInput.style.zIndex);
 	selectInput.focus();	
 }
 
@@ -903,7 +903,7 @@ public int getSelectionIndex () {
 	checkWidget ();
 	if (noSelection) return -1;
 	//return OS.SendMessage (handle, OS.CB_GETCURSEL, 0, 0);
-	System.out.println("combo selected Index " + selectInput.selectedIndex);
+//	System.out.println("combo selected Index " + selectInput.selectedIndex);
 	return selectInput.selectedIndex;
 }
 
@@ -1570,7 +1570,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	}
 	selectInput.style.width = width + "px";
 	
-	System.out.println("combo left " + this.left + " " + this.top + " textInput " +dropDownButton.style.width + " " + dropDownButton.style.height);
+//	System.out.println("combo left " + this.left + " " + this.top + " textInput " +dropDownButton.style.width + " " + dropDownButton.style.height);
 }
 
 /*

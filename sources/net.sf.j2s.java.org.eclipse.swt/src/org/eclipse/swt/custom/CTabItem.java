@@ -446,7 +446,7 @@ public void setControl (Control control) {
 		if (control.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 		if (control.parent != parent) error (SWT.ERROR_INVALID_PARENT);
 	}
-	System.out.println("Ctab setControl " + control +  " " + control.parent + " " + parent);
+//	System.out.println("Ctab setControl " + control +  " " + control.parent + " " + parent);
 	if (this.control != null && this.control.isDisposed ()) {
 		this.control = null;
 	}
@@ -460,7 +460,7 @@ public void setControl (Control control) {
 	if (newControl != null) {
 		Rectangle clientArea = parent.getClientArea ();
 		if (clientArea.height <= 0 || clientArea.width <= 0) {
-			System.out.println("client area has trouble");
+//			System.out.println("client area has trouble");
 		} else {
 			if(this.isSelected){
 				newControl.setBounds (clientArea);

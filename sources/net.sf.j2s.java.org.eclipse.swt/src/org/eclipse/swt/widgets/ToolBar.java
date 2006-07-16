@@ -230,7 +230,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		int count = items.length;
 		for (int i=0; i<count; i++) {
 			Rectangle rect = items[i].getBounds();
-			System.out.println(rect);
+//			System.out.println(rect);
 			height = Math.max (height, rect.height);
 			width += rect.width;
 //			if ((items[i].style & SWT.SEPARATOR) != 0) {

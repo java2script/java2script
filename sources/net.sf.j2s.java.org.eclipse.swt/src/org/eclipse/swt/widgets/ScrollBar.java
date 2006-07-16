@@ -850,7 +850,7 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
  */
 public void setVisible (boolean visible) {
 	checkWidget();
-	System.out.println("setvisible of scrollbar called : " + visible + " parent : " + parent);
+//	System.out.println("setvisible of scrollbar called : " + visible + " parent : " + parent);
 	boolean isVisible = (state & HIDDEN) == 0;
 	if (isVisible == visible) return;
 	if(visible) {
@@ -868,14 +868,14 @@ public void setVisible (boolean visible) {
 	}
 	String className = this.parent.handle.className;
 	int idx = this.parent.handle.className.indexOf(scrollClass);
-	System.out.println("parent scroll class name is " + className + " " + idx + " " + visible);
+//	System.out.println("parent scroll class name is " + className + " " + idx + " " + visible);
 	if(!visible && idx != -1){
 		className = className.substring(0, idx) + className.substring(idx + scrollClass.length());
 	}
 	else if(visible && idx == -1){ 
 		className += " " + scrollClass;
 	}
-	System.out.println("setting parent scrollable to " + className);
+//	System.out.println("setting parent scrollable to " + className);
 	this.parent.handle.className = className;
 	/*
 	/*

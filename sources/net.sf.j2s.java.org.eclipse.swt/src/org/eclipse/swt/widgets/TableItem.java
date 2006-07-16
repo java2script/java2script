@@ -158,7 +158,7 @@ private void configureItem() {
 			public void run(){
 				HTMLEvent evt = (HTMLEvent) getEvent();
 				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-				System.out.println("An event is runned " + evt);
+//				System.out.println("An event is runned " + evt);
 				Event e = new Event();
 				e.display = display;
 				e.type = SWT.DefaultSelection;
