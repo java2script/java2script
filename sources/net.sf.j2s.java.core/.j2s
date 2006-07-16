@@ -1,5 +1,5 @@
 #Java2Script Configuration
-#Thu Jul 13 21:43:16 CST 2006
+#Sun Jul 16 14:25:43 CST 2006
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.abandoned.resources.list=bin/net/sf/j2s/java/core/CorePlugin.js,bin/net/sf/j2s/java/core/RegExCompress.js,bin/net/sf/j2s/java/core/Bundle2StringUtil.js
 j2s.compiler.abbreviation=true

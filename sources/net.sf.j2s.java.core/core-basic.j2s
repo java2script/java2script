@@ -1,6 +1,0 @@
-#Java2Script Configuration
-#Wed May 03 04:39:51 CST 2006
-j2s.resources.list=java/io/Serializable.js,java/lang/CharSequence.js,java/lang/Cloneable.js,java/lang/Comparable.js,java/lang/Runnable.js,java/util/Comparator.js,java/lang/Enum.js,java/lang/Object.js,java/lang/Encoding.js,java/lang/String.js,java/lang/StringBuffer.js,java/lang/Number.js,java/lang/Integer.js,java/lang/Long.js,java/lang/Float.js,java/lang/Double.js,java/util/Date.js,java/util/EventObject.js,java/util/EventListener.js,java/util/EventListenerProxy.js,java/util/Iterator.js,java/util/ListIterator.js,java/util/Enumeration.js,java/util/Collection.js,java/util/Set.js,java/util/Map.js,java/util/List.js,java/util/RandomAccess.js
-j2s.abandoned.resources.list=
-j2s.output.path=bin
-j2s.compiler.status=enable

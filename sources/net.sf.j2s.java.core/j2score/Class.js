@@ -1321,7 +1321,7 @@ Clazz.declarePackage = function (pkgName) {
 };
 
 /* protected */
-/*-# evalType -> eT  #-*/
+/*x-# evalType -> eT  #-x*/
 Clazz.evalType = function (typeStr, isQualified) {
 	//*
 	var idx = typeStr.lastIndexOf (".");
@@ -1496,10 +1496,22 @@ Clazz.innerFunctions = {
 		if (name.indexOf ('/') == 0) {
 			is.url = name.substring (1);
 		} else {
+			var clazzName = this.__CLASS_NAME__;
+			/*-# baseFolder -> bFr #-*/
 			var baseFolder = null;
-			var bins = Clazz.binaryFolders;
-			if (bins != null && bins.length != 0) {
-				baseFolder = bins[0];
+			if (window["ClazzLoader"] != null) {
+				baseFolder = ClazzLoader.getClasspathFor (clazzName);
+				var x = baseFolder.lastIndexOf (clazzName.replace (/\./g, "/"));
+				if (x != -1) {
+					baseFolder = baseFolder.substring (0, x);
+				} else {
+					baseFolder = null;
+				}
+			} else {
+				var bins = Clazz.binaryFolders;
+				if (bins != null && bins.length != 0) {
+					baseFolder = bins[0];
+				}
 			}
 			if (baseFolder == null || baseFolder.length == 0) {
 				baseFolder = "bin/";
@@ -1510,10 +1522,12 @@ Clazz.innerFunctions = {
 			if (lastChar != '/') {
 				baseFolder += "/";
 			}
-			if (baseFolder.indexOf ('/') == 0) {
-				baseFolder = baseFolder.substring (1);
-			}
-			var clazzName = this.__CLASS_NAME__;
+			/*
+			 * FIXME: bug here for "/"
+			 */
+			//if (baseFolder.indexOf ('/') == 0) {
+			//	baseFolder = baseFolder.substring (1);
+			//}
 			var idx = clazzName.lastIndexOf ('.');
 			if (idx == -1) {
 				is.url = baseFolder + name;
