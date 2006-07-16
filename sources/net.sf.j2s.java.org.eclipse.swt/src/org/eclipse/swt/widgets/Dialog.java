@@ -287,11 +287,11 @@ protected void dialogUnimplemented() {
 	dialogShell.pack();
 	dialogShell.open();
 	Point size = dialogShell.getSize();
-	int y = (document.body.clientHeight - size.y) / 2 - 20;
+	int y = (dialogShell.getMonitor().clientHeight - size.y) / 2 - 20;
 	if (y < 0) {
 		y = 0;
 	}
-	dialogShell.setLocation((document.body.clientWidth - size.x) / 2, y);
+	dialogShell.setLocation((dialogShell.getMonitor().clientWidth - size.x) / 2, y);
 	ResizeSystem.register(dialogShell, SWT.CENTER);
 }
 

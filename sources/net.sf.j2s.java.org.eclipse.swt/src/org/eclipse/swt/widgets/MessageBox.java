@@ -215,32 +215,35 @@ public int open () {
 	});
 	dialogShell.setText(title);
 	dialogShell.setLayout(new GridLayout(2, false));
-	String iconName = null;
-	if ((style & SWT.ICON_ERROR) != 0) {
-		iconName = "error";
-	} else if ((style & SWT.ICON_INFORMATION) != 0) {
-		iconName = "information";
-	} else if ((style & SWT.ICON_QUESTION) != 0) {
-		iconName = "question";
-	} else if ((style & SWT.ICON_WARNING) != 0) {
-		iconName = "warning";
-	} else if ((style & SWT.ICON_WORKING) != 0) {
-		iconName = "information";
+	int iconID = 0;
+	int[] iconStyles = new int[] {
+			SWT.ICON_ERROR,
+			SWT.ICON_INFORMATION,
+			SWT.ICON_QUESTION,
+			SWT.ICON_WARNING,
+			SWT.ICON_WORKING
+	};
+	for (int i = 0; i < iconStyles.length; i++) {
+		if ((style & iconStyles[i]) != 0) {
+			iconID = iconStyles[i];
+			break;
+		}
 	}
-	if (iconName != null) {
+	if (iconID != 0) {
 		Composite composite = new Composite(dialogShell, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		GridData gd = new GridData(48, 48);
 		composite.setLayoutData(gd);
 		Label icon = new Label(composite, SWT.NONE);
-		icon.setImage(new Image(dialogShell.display, "j2slib/images/" + iconName + ".png"));
+		//icon.setImage(new Image(dialogShell.display, "j2slib/images/" + iconName + ".png"));
+		icon.setImage(parent.display.getSystemImage(iconID));
 		GridData gridData = new GridData(32, 32);
 		icon.setLayoutData(gridData);
 	}
 	Composite composite = new Composite(dialogShell, SWT.NONE);
 	composite.setLayout(new GridLayout(2, false));
 	GridData gd = new GridData(GridData.FILL_BOTH | GridData.VERTICAL_ALIGN_CENTER);
-	if (iconName == null) {
+	if (iconID == 0) {
 		gd.horizontalSpan = 2;
 	}
 	gd.grabExcessVerticalSpace = true;
@@ -291,11 +294,11 @@ public int open () {
 	dialogShell.pack();
 	dialogShell.open();
 	Point size = dialogShell.getSize();
-	int y = (document.body.clientHeight - size.y) / 2 - 20;
+	int y = (dialogShell.getMonitor().clientHeight - size.y) / 2 - 20;
 	if (y < 0) {
 		y = 0;
 	}
-	dialogShell.setLocation((document.body.clientWidth - size.x) / 2, y);
+	dialogShell.setLocation((dialogShell.getMonitor().clientWidth - size.x) / 2, y);
 	ResizeSystem.register(dialogShell, SWT.CENTER);
 	/*
 	* This code is intentionally commented.  On some

@@ -23,7 +23,7 @@ import org.eclipse.swt.internal.xhtml.window;
  *
  * 2006-3-15
  */
-public class SashDND extends DragAdapter {
+public class SashDND implements DragListener {
 	protected int sourceX = 0;
 	protected int sourceY = 0;
 	protected Element thumb;
@@ -126,6 +126,10 @@ public class SashDND extends DragAdapter {
 		} else {
 			thumb.style.top = currentLocation(e).y + "px";
 		}
+		return true;
+	}
+
+	public boolean isDraggable(HTMLEventWrapper e) {
 		return true;
 	}
 

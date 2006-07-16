@@ -21,7 +21,7 @@ import org.eclipse.swt.internal.xhtml.document;
  *
  * 2006-3-15
  */
-public class ScaleDND extends DragAdapter {
+public class ScaleDND implements DragListener {
 	protected int sourceX = 0;
 	protected int sourceY = 0;
 	protected boolean isHorizontal;
@@ -92,6 +92,10 @@ public class ScaleDND extends DragAdapter {
 		} else {
 			e.sourceElement.style.top = currentLocation(e).y + "px";
 		}
+		return true;
+	}
+
+	public boolean isDraggable(HTMLEventWrapper e) {
 		return true;
 	}
 

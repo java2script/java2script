@@ -23,7 +23,7 @@ import org.eclipse.swt.internal.xhtml.window;
  *
  * 2006-3-15
  */
-public class ShellFrameDND extends DragAdapter {
+public class ShellFrameDND implements DragListener {
 	int sourceX = 0;
 	int sourceY = 0;
 	int sourceWidth = 0;

@@ -14,9 +14,11 @@
 package org.eclipse.swt.internal;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 import org.eclipse.swt.widgets.Decorations;
+import org.eclipse.swt.widgets.Monitor;
 
 /**
  * @author josson smith
@@ -36,29 +38,32 @@ public class ResizeHandler {
 	}
 	
 	public void updateMinimized() {
-		shell.setLocation(-1, document.body.clientHeight - 26);
+		shell.setLocation(-1, shell.getMonitor().getClientArea().height - 26);
 	}
 	public void updateMaximized() {
-		int height = document.body.clientHeight - 0;
-		if (height > window.screen.availHeight - 10) {
-			height = window.screen.availHeight - 10;
+		Monitor monitor = shell.getMonitor();
+		Rectangle clientArea = monitor.getClientArea();
+		Rectangle bounds = monitor.getBounds();
+		int height = clientArea.height - 0;
+		if (height > bounds.height - 10) {
+			height = bounds.height - 10;
 		}
-		int width = document.body.clientWidth;
-		if (width > window.screen.availWidth) {
-			width = window.screen.availWidth;
+		int width = clientArea.width;
+		if (width > bounds.width) {
+			width = bounds.width;
 		}
 //		shell.setBounds(0 - 4, 0 - 4, width - 2, height + 4);
 		shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
-		document.body.scrollTop = 0;
 	}
 	public void updateCentered() {
 		// Not used now
+		Monitor monitor = shell.getMonitor();
 		Point size = shell.getSize();
-		int y = (document.body.clientHeight - size.y) / 2 - 20;
+		int y = (monitor.getClientArea().height - size.y) / 2 - 20;
 		if (y < 0) {
 			y = 0;
 		}
-		shell.setLocation((document.body.clientWidth - size.x) / 2, y);
+		shell.setLocation((monitor.getClientArea().width - size.x) / 2, y);
 	}
 	public int getStatus() {
 		return status;

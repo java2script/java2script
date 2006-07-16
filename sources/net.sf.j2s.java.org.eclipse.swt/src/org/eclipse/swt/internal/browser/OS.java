@@ -120,6 +120,7 @@ public class OS {
 			document.body.appendChild (el);
 			CSSStyle s = el.style;
 			s.position = "absolute";
+			s.left = "-4000px";
 			s.top = "-300px";
 			s.width = "3000px";
 			s.height = "100px";
@@ -428,7 +429,7 @@ public class OS {
 		Element currentElem = elem;
 		int left = 0;
 		int top = 0;
-		while (currentElem != shellElem) {
+		while (currentElem != null && currentElem != shellElem) {
 			left += currentElem.offsetLeft;
 			top += currentElem.offsetTop;
 			currentElem = currentElem.offsetParent;

@@ -521,7 +521,7 @@ protected void createHandle() {
 	
 	if ((style & SWT.APPLICATION_MODAL) != 0
 			|| (style & SWT.PRIMARY_MODAL) != 0) {
-		display.timerExec(25, new Runnable() {
+		display.timerExec(10, new Runnable() {
 			public void run() {
 				addModalLayer();
 			}
@@ -535,7 +535,7 @@ protected void createHandle() {
 	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
 		handle.className += " shell-trim";
 	}
-	document.body.appendChild(handle);
+	getMonitor().handle.appendChild(handle);
 	if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
 		createResizeHandles();
 	}
@@ -544,27 +544,29 @@ protected void createHandle() {
 		setSystemMenu();
 	}
 	contentHandle = createCSSDiv("shell-content");
-	DragAndDrop dnd = new DragAndDrop();
-	dnd.addDragListener(new ShellFrameDND() {
-		public boolean isDraggable(HTMLEventWrapper e) {
-			if (super.isDraggable(e)) {
-				String cssName = e.target.className;
-				if (cssName.indexOf("shell-title-text") != -1
-						&& oldBounds != null) {
+	if (DragAndDrop.class != null) {
+		DragAndDrop dnd = new DragAndDrop();
+		dnd.addDragListener(new ShellFrameDND() {
+			public boolean isDraggable(HTMLEventWrapper e) {
+				if (super.isDraggable(e)) {
+					String cssName = e.target.className;
+					if (cssName.indexOf("shell-title-text") != -1
+							&& oldBounds != null) {
+						return false;
+					}
+					return true;
+				} else {
 					return false;
 				}
-				return true;
-			} else {
-				return false;
 			}
-		}
-		public boolean updateShellBounds(int x, int y, final int width,
-				final int height) {
-			setBounds(x, y, width, height);
-			return true;
-		}
-	});
-	dnd.bind(handle);
+			public boolean updateShellBounds(int x, int y, final int width,
+					final int height) {
+				setBounds(x, y, width, height);
+				return true;
+			}
+		});
+		dnd.bind(handle);
+	}
 }
 
 private void nextWindowLocation() {
@@ -573,7 +575,7 @@ private void nextWindowLocation() {
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
 		num += 32;
-		if (num > document.body.clientWidth) {
+		if (num > getMonitor().clientWidth) {
 			num = 32;
 		}
 		window.defaultWindowLeft = "" + num;
@@ -583,7 +585,7 @@ private void nextWindowLocation() {
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowTop);
 		num += 32;
-		if (num > document.body.clientHeight) {
+		if (num > getMonitor().clientHeight) {
 			num = 32;
 		}
 		window.defaultWindowTop = "" + num;
@@ -603,91 +605,94 @@ private void nextWindowLocation() {
 void addModalLayer() {
 	modalHandle = document.createElement ("DIV");
 	modalHandle.className = "shell-modal-block";
-	//document.body.appendChild(modalHandle);
 	modalHandle.style.zIndex = "" + (Integer.parseInt("" + handle.style.zIndex) - 1);
-	document.body.insertBefore(modalHandle, handle);
+	getMonitor().handle.insertBefore(modalHandle, handle);
 }
 
-void exportHTMLSource() {
-	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-//	shell.setLayout(new FillLayout());
-	shell.setText("Export HTML Source");
-	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
-	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
-	if (OS.isIE)
-	/**
-	 * @j2sNative
-b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
-	return $1 + $2.toLowerCase () + $3;
-}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
-	if (!((/;$/).test ($2))) {
-		$2 += ";";
-	}
-	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
-}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
-	return " " + $2 + "=\"" + $3 + "\"" + $4;
-//}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
-//	$1 = $1.toLowerCase ();
-//	return " " + $1 + "=\"" + $1 + "\"" + $2;
-});
-	 */ {} else
-	/**
-	 * @j2sNative
-b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
-	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
-});
-	 */ {}
-	/**
-	 * @j2sNative
-b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
-	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
-	if ($2.length == 0) {
-		if ($3 != ">") {
-			return $3;
-		} else {
-			return ">";
-		}
-	} else {
-		return " class=\"" + $2 + "\"" + $3;
-	}
-});
-	 */ {}
-//	int length = innerHTML.length();
-//	if (length < 200) {
-//		length = 200;
-//	} else if (length > 1800) {
-//		length = 1800;
+///**
+// * TODO: Move this function into external *.js
+// * @j2sIgnore
+// */
+//void exportHTMLSource() {
+//	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+////	shell.setLayout(new FillLayout());
+//	shell.setText("Export HTML Source");
+//	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
+//	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
+//	if (OS.isIE)
+//	/**
+//	 * @j2sNative
+//b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+//	return $1 + $2.toLowerCase () + $3;
+//}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+//	if (!((/;$/).test ($2))) {
+//		$2 += ";";
 //	}
-//	length = (length - 200) / 400;
-//	shell.setSize(480 + 80 * length, 280 + 50 * length);
-//	Composite composite = new Composite(shell, SWT.NONE);
-//	composite.setLayout(new GridLayout());
-	shell.setLayout(new GridLayout());
-	Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
-	GridData gd = new GridData(GridData.FILL_BOTH);
-	gd.widthHint = 400;
-	gd.heightHint = 275;
-	text.setLayoutData(gd);
-	Rectangle rect = getClientArea();
-	String html = "<div class=\"shell-content\" style=\"" + "width:"
-				+ rect.width + "px;height:" + rect.height + "px;\">" + b
-				+ "</div>";
-	text.setText(html);
-	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
-			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	Button button = new Button(shell, SWT.PUSH);
-	button.setText("&OK");
-	GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
-	gridData.widthHint = 80;
-	button.setLayoutData(gridData);
-	button.addSelectionListener(new SelectionAdapter() {
-		public void widgetSelected(SelectionEvent e) {
-			shell.close();
-		}
-	});
-	shell.pack();
-	shell.open();
-}
+//	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
+//}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
+//	return " " + $2 + "=\"" + $3 + "\"" + $4;
+////}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
+////	$1 = $1.toLowerCase ();
+////	return " " + $1 + "=\"" + $1 + "\"" + $2;
+//});
+//	 */ {} else
+//	/**
+//	 * @j2sNative
+//b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+//	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
+//});
+//	 */ {}
+//	/**
+//	 * @j2sNative
+//b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+//	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
+//	if ($2.length == 0) {
+//		if ($3 != ">") {
+//			return $3;
+//		} else {
+//			return ">";
+//		}
+//	} else {
+//		return " class=\"" + $2 + "\"" + $3;
+//	}
+//});
+//	 */ {}
+////	int length = innerHTML.length();
+////	if (length < 200) {
+////		length = 200;
+////	} else if (length > 1800) {
+////		length = 1800;
+////	}
+////	length = (length - 200) / 400;
+////	shell.setSize(480 + 80 * length, 280 + 50 * length);
+////	Composite composite = new Composite(shell, SWT.NONE);
+////	composite.setLayout(new GridLayout());
+//	shell.setLayout(new GridLayout());
+//	Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+//	GridData gd = new GridData(GridData.FILL_BOTH);
+//	gd.widthHint = 400;
+//	gd.heightHint = 275;
+//	text.setLayoutData(gd);
+//	Rectangle rect = getClientArea();
+//	String html = "<div class=\"shell-content\" style=\"" + "width:"
+//				+ rect.width + "px;height:" + rect.height + "px;\">" + b
+//				+ "</div>";
+//	text.setText(html);
+//	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
+//			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//	Button button = new Button(shell, SWT.PUSH);
+//	button.setText("&OK");
+//	GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+//	gridData.widthHint = 80;
+//	button.setLayoutData(gridData);
+//	button.addSelectionListener(new SelectionAdapter() {
+//		public void widgetSelected(SelectionEvent e) {
+//			shell.close();
+//		}
+//	});
+//	shell.pack();
+//	shell.open();
+//}
 
 protected void createWidget () {
 	super.createWidget ();
@@ -1512,19 +1517,20 @@ public void setMaximized (boolean maximized) {
 	if (maximized && contentHandle != null) {
 		if (oldBounds == null) {
 			oldBounds = getBounds();
-			oldBounds.width -= 2; // FIXME
+			oldBounds.width -= 4; // FIXME
 		}
-		int height = document.body.clientHeight - 0;
-		if (height > window.screen.availHeight - 10) {
-			height = window.screen.availHeight - 10;
+		int height = getMonitor().clientHeight - 0;
+//		if (height > getMonitor().height - 10) {
+//			height = getMonitor().height - 10;
+//		}
+		int width = getMonitor().clientWidth;
+		if (width > getMonitor().width) {
+			width = getMonitor().width;
 		}
-		int width = document.body.clientWidth;
-		if (width > window.screen.availWidth) {
-			width = window.screen.availWidth;
-		}
-		setBounds(computeTrim(0, 0, width + 2, height - 18));
+		int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
+		// FIXME: maximized size is not accurate
+		setBounds(computeTrim(0, 0, width + 4, height - titleHeight + 6));
 		//setBounds(0 - 4, 0 - 4, width - 2, height + 4);
-		document.body.scrollTop = 0;
 	}
 	if (maximized) {
 		ResizeSystem.register(this, SWT.MAX);
@@ -1683,8 +1689,7 @@ public void setMinimized (boolean minimized) {
 		if (width < 200) {
 			width = 200;
 		}
-		//setBounds(-1, document.body.clientHeight - 26, width, 0);
-		setBounds(-1, document.body.clientHeight - 26, 120, 0);
+		setBounds(-1, getMonitor().clientHeight - 26, 120, 0);
 	}
 	if (minimized) {
 		ResizeSystem.register(this, SWT.MIN);
@@ -1822,11 +1827,15 @@ void setSystemMenu () {
 		shellIcon = document.createElement("DIV");
 		shellIcon.className = "shell-title-icon";
 		titleBar.appendChild(shellIcon);
-		shellIcon.onclick = new RunnableCompatibility() {
-			public void run() {
-				exportHTMLSource();
-			}
-		};
+//		/**
+//		 * @j2sIgnore
+//		 */ {
+//		shellIcon.onclick = new RunnableCompatibility() {
+//			public void run() {
+//				exportHTMLSource();
+//			}
+//		};
+//		 }
 	}
 
 	if (minable()) {
@@ -2012,6 +2021,7 @@ public void setVisible (boolean visible) {
  * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	// TODO: comment the following codes. 
 	if ((style & SWT.NO_TRIM) == 0) {
 		int w = 0;
 		int h = 0;
