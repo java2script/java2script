@@ -51,16 +51,14 @@
 		"$.SubList"
 	]);
 	
-	ClazzLoader.jarClasspath (path + "j2slib.common.z.js", [
+	ClazzLoader.jarClasspath (path + "core.z.js", [
 		"java.io.Serializable",
 		"java.lang.CharSequence",
 		"$.Cloneable",
 		"$.Comparable",
 		"$.Runnable",
-		"java.util.Comparator"
-	]);
-	
-	ClazzLoader.jarClasspath (path + "j2slib.basic.z.js", [
+		"java.util.Comparator",
+		
        	"java.lang.Number",
        	"$.Integer",
        	"$.Long",
@@ -80,7 +78,12 @@
        	"$.Set",
        	"$.Map",
        	"$.List",
-       	"$.RandomAccess"
+       	"$.RandomAccess",
+       	
+       	"net.sf.j2s.ajax.HttpRequest",
+       	"$.IXHRCallback",
+       	"$.XHRCallbackAdapter",
+       	"$.XHRCallbackSWTAdapter"
 	]);
 
 	ClazzLoader.loadClass ("java.lang.Encoding");

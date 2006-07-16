@@ -20,6 +20,8 @@
  * TODO:
  * Make optimization over class dependency tree.
  * Give more ways for the feedback of loading.
+ * Use multiple SCRIPT tags so *.js can be downloaded asynchronously.
+ * Use Class.for.... to load tabs.
  */
  
 /*-#
@@ -31,7 +33,7 @@
 /*-#
  # parents -> sp
  # musts -> sm
- # optionals -> so
+ # xxxoptionals -> so
  # declaration -> dcl
  # optionalsLoaded -> oled
  #-*/
@@ -513,6 +515,9 @@ ClazzLoader.scriptCompleted = function (file) {};
 /* protected */
 ClazzLoader.globalLoaded = function () {};
 
+/* protected */
+ClazzLoader.keepOnLoading = true;
+
 /* private */
 /*-# mapPath2ClassNode -> p2node #-*/
 ClazzLoader.mapPath2ClassNode = new Object ();
@@ -525,6 +530,16 @@ ClazzLoader.xhrOnload = function (transport, file) {
 		ClazzLoader.tryToLoadNext (file);
 	} else {
 		try {
+			/*
+			if (transport.responseText.length >= 2048) {
+				//fileCount++;
+			}
+				if (file.indexOf ("examples") != -1) {
+				} else {
+				log (transport.responseText.length + "::" + file);
+				}				
+			*/
+				fileCount += transport.responseText.length;
 			eval (transport.responseText);
 		} catch (e) {
 			alert ("[Java2Script] Script error: " + e.message);
@@ -611,9 +626,19 @@ ClazzLoader.loadScript = function (file) {
 					}
 				}
 			};
-			transport.send (null);
+			try {
+				transport.send (null);
+			} catch (e) {
+				alert ("[Java2Script] Loading file error: " + e.message);
+				throw e;
+			}
 		} else {
-			transport.send (null);
+			try {
+				transport.send (null);
+			} catch (e) {
+				alert ("[Java2Script] Loading file error: " + e.message);
+				throw e;
+			}
 			ClazzLoader.xhrOnload (transport, file);
 		}
 		return ;
@@ -694,6 +719,31 @@ ClazzLoader.loadScript = function (file) {
 	ClazzLoader.scriptLoading (file);
 };
 
+/* public */
+ClazzLoader.loadCSS = function (cssName) {
+	var cssKey = "";
+	var idx = cssName.lastIndexOf (".");
+	if (idx == -1) {
+		cssKey = cssName + ".css";
+	} else {
+		cssKey = cssName.substring (idx + 1) + ".css";
+	}
+	var resLinks = document.getElementsByTagName ("LINK");
+	for (var i = 0; i < resLinks.length; i++) {
+		var cssPath = resLinks[i].href;
+		if (cssPath.lastIndexOf (cssKey) == cssPath.length - cssKey.length) {
+			return ;
+		}
+	}
+
+	/*-# cssLink -> rel #-*/
+	var cssLink = document.createElement ("LINK");
+	cssLink.rel = "stylesheet";
+	var path = ClazzLoader.getClasspathFor (cssName);
+	cssLink.href = path.substring (0, path.lastIndexOf (".js")) + ".css";
+	document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
+};
+
 /**
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
@@ -755,6 +805,9 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (node);
 		}
 	}
+	if (!ClazzLoader.keepOnLoading) {
+		return ;
+	}
 	var n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, 
 			ClazzNode.STATUS_KNOWN);
 	//alert ("next..." + n) ;
@@ -779,6 +832,8 @@ ClazzLoader.tryToLoadNext = function (file) {
 				//log ("in optionals..." + n.name);
 				ClazzLoader.loadClassNode (n);
 			} else {
+				//error ("no more optionals?");
+				ClazzLoader.updateNode (node);
 				ClazzLoader.globalLoaded ();
 				//error ("no optionals?");
 			}
@@ -827,9 +882,11 @@ ClazzLoader.updateNode = function (node) {
 							if (nn.status != ClazzNode.STATUS_OPTIONALS_LOADED
 									&& nn != n) {
 								nn.status = n.status;
+								nn.declaration = null;
 								ClazzLoader.updateNode (nn);
 							}
 						}
+						n.declaration = null;
 					}
 				} else {
 					isMustsOK = false;
@@ -887,15 +944,24 @@ ClazzLoader.updateNode = function (node) {
 		}
 		var level = ClazzNode.STATUS_DECLARED;
 		var isOptionsOK = false;
-		if (node.optionals == null || node.optionals.length == 0
+		if (((node.optionals == null || node.optionals.length == 0) 
+				&& (node.musts == null || node.musts.length == 0))
 				|| node.declaration == null) {
 			isOptionsOK = true;
 		} else {
 			isOptionsOK = true;
-			for (var i = 0; i < node.optionals.length; i++) {
-				var n = node.optionals[i];
+			for (var i = 0; i < node.musts.length; i++) {
+				var n = node.musts[i];
 				if (n.status < ClazzNode.STATUS_OPTIONALS_LOADED) {
 					isOptionsOK = false;
+				}
+			}
+			if (isOptionsOK) {
+				for (var i = 0; i < node.optionals.length; i++) {
+					var n = node.optionals[i];
+					if (n.status < ClazzNode.STATUS_OPTIONALS_LOADED) {
+						isOptionsOK = false;
+					}
 				}
 			}
 		}
@@ -905,6 +971,9 @@ ClazzLoader.updateNode = function (node) {
 			ClazzLoader.scriptCompleted (node.path);
 			if (node.optionalsLoaded != null) {
 				node.optionalsLoaded ();
+				if (!ClazzLoader.keepOnLoading) {
+					return false;
+				}
 			}
 					/*
 					 * For those classes within one *.js file, update
@@ -915,10 +984,15 @@ ClazzLoader.updateNode = function (node) {
 						var list = node.declaration.clazzList;
 						for (var j = 0; j < list.length; j++) {
 							var nn = list[j];
-							if (nn.status != ClazzNode.level && nn != node) {
+							if (nn.status != level && nn != node) {
+			nn.status = level;
+			nn.declaration = null;
 			ClazzLoader.scriptCompleted (nn.path);
 			if (nn.optionalsLoaded != null) {
 				nn.optionalsLoaded ();
+				if (!ClazzLoader.keepOnLoading) {
+					return false;
+				}
 			}
 							}
 						}
@@ -1250,6 +1324,7 @@ ClazzLoader.queueBeforeString = new Array ();
  */
 /* public */
 ClazzLoader.loadClass = function (name, optionalsLoaded) {
+	ClazzLoader.keepOnLoading = true;
 	if (!ClazzLoader.isClassDefined ("java.lang.String") 
 			&& name.indexOf ("java.") != 0) {
 		var qbs = ClazzLoader.queueBeforeString;
@@ -1282,7 +1357,10 @@ ClazzLoader.loadClass = function (name, optionalsLoaded) {
 				ClazzLoader.loadScript (n.path);
 			}
 		}
+	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
+		optionalsLoaded ();
 	}
+	
 };
 
 /**
