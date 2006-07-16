@@ -9,15 +9,16 @@ this.data=null;
 this.dragStatus=false;
 this.hoverTime=0;
 this.hoverTimerID=0;
+this.waitingForLayout=false;
 this.hookedStatus=null;
 $_Z(this,arguments);
 },$wt.widgets,"Widget");
 $_K(c$,
 function(parent,style){
-this.checkSubclass();
 this.checkParent(parent);
 this.style=style;
 this.display=parent.display;
+this.waitingForLayout=true;
 },"$wt.widgets.Widget,~N");
 $_M(c$,"addListener",
 function(eventType,listener){
@@ -150,13 +151,6 @@ $_M(c$,"checkParent",
 function(parent){
 parent.checkOpened();
 },"$wt.widgets.Widget");
-$_M(c$,"checkSubclass",
-function(){
-});
-$_M(c$,"checkWidget",
-function(){
-var display=this.display;
-});
 $_M(c$,"destroyWidget",
 function(){
 this.releaseHandle();

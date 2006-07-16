@@ -19,9 +19,6 @@ if((style&8388608)==0)style|=524288;
 if((style&512)!=0)style&=-65;
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
 var width=0;
@@ -40,7 +37,6 @@ width=Math.max(width,rect.width);
 var count=this.items.length;
 for(var i=0;i<count;i++){
 var rect=this.items[i].getBounds();
-System.out.println(rect);
 height=Math.max(height,rect.height);
 width+=rect.width;
 }

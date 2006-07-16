@@ -279,8 +279,6 @@ return new $wt.graphics.Point(trim.width,trim.height);
 $_M(c$,"computeTrim",
 function(x,y,width,height){
 var rect=$_U(this,$wt.widgets.Text,"computeTrim",[x,y,width,height]);
-System.out.println(rect);
-System.out.println(width+","+height);
 if((this.style&2)!=0){
 rect.width+=6;
 }else{

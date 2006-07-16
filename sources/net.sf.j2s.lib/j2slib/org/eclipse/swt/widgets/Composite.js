@@ -5,6 +5,7 @@ this.lpwp=null;
 this.tabList=null;
 this.layoutCount=0;
 this.children=null;
+this.waitingForLayoutWithResize=false;
 $_Z(this,arguments);
 },$wt.widgets,"Composite",$wt.widgets.Scrollable);
 $_K(c$,
@@ -28,13 +29,14 @@ $_M(c$,"_getTabList",
 function(){
 if(this.tabList==null)return this.tabList;
 var count=0;
-for(var i=0;i<this.tabList.length;i++){
+var length=this.tabList.length;
+for(var i=0;i<length;i++){
 if(!this.tabList[i].isDisposed())count++;
 }
-if(count==this.tabList.length)return this.tabList;
+if(count==length)return this.tabList;
 var newList=new Array(count);
 var index=0;
-for(var i=0;i<this.tabList.length;i++){
+for(var i=0;i<length;i++){
 if(!this.tabList[i].isDisposed()){
 newList[index++]=this.tabList[i];
 }}
@@ -43,7 +45,8 @@ return this.tabList;
 });
 $_M(c$,"changed",
 function(changed){
-for(var i=0;i<changed.length;i++){
+var length=changed.length;
+for(var i=0;i<length;i++){
 var control=changed[i];
 var ancestor=false;
 var composite=control.parent;
@@ -53,7 +56,7 @@ if(ancestor)break;
 composite=composite.parent;
 }
 }
-for(var i=0;i<changed.length;i++){
+for(var i=0;i<length;i++){
 var child=changed[i];
 var composite=child.parent;
 while(child!=this){
@@ -65,9 +68,6 @@ composite=child.parent;
 }
 },"~A");
 $_V(c$,"checkBuffered",
-function(){
-});
-$_V(c$,"checkSubclass",
 function(){
 });
 $_M(c$,"computeTabList",
@@ -91,7 +91,7 @@ function(wHint,hHint,changed){
 var size;
 if(this.$layout!=null){
 if(wHint==-1||hHint==-1){
-changed=new Boolean(changed|((this.state&64)!=0));
+changed=new Boolean(changed|((this.state&64)!=0)).valueOf();
 this.state&=-65;
 size=this.$layout.computeSize(this,wHint,hHint,changed);
 }else{
@@ -141,15 +141,17 @@ $_M(c$,"fixChildren",
 function(newShell,oldShell,newDecorations,oldDecorations,menus){
 $_U(this,$wt.widgets.Composite,"fixChildren",[newShell,oldShell,newDecorations,oldDecorations,menus]);
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 children[i].fixChildren(newShell,oldShell,newDecorations,oldDecorations,menus);
 }
 },"$wt.widgets.Shell,$wt.widgets.Shell,$wt.widgets.Decorations,$wt.widgets.Decorations,~A");
 $_M(c$,"fixChildrenList",
 function(control){
-if(this.children==null||this.children.length==0)return;
+var length=this.children.length;
+if(this.children==null||length==0)return;
 var newChildren=new Array(0);
-for(var i=0;i<this.children.length;i++){
+for(var i=0;i<length;i++){
 var child=this.children[i];
 if(child!=null&&child!=control){
 newChildren[newChildren.length]=child;
@@ -188,7 +190,7 @@ return this._getChildren();
 $_M(c$,"getChildrenCount",
 function(){
 if(true)return 0;
-return this.children.length;
+return this._getChildren().length;
 });
 $_M(c$,"getLayout",
 function(){
@@ -200,12 +202,13 @@ var tabList=this._getTabList();
 if(tabList==null){
 var count=0;
 var list=this._getChildren();
-for(var i=0;i<list.length;i++){
+var length=list.length;
+for(var i=0;i<length;i++){
 if(list[i].isTabGroup())count++;
 }
 tabList=new Array(count);
 var index=0;
-for(var i=0;i<list.length;i++){
+for(var i=0;i<length;i++){
 if(list[i].isTabGroup()){
 tabList[index++]=list[i];
 }}
@@ -240,9 +243,9 @@ this.updateLayout(true,all);
 },"~B,~B");
 $_M(c$,"layout",
 function(changed){
-System.out.print("control");
 var d=new java.util.Date();
-for(var i=0;i<changed.length;i++){
+var length=changed.length;
+for(var i=0;i<length;i++){
 var control=changed[i];
 var ancestor=false;
 var composite=control.parent;
@@ -252,11 +255,10 @@ if(ancestor)break;
 composite=composite.parent;
 }
 }
-System.out.println(":::"+(new java.util.Date().getTime()-d.getTime()));
 d=new java.util.Date();
 var updateCount=0;
 var update=new Array(16);
-for(var i=0;i<changed.length;i++){
+for(var i=0;i<length;i++){
 var child=changed[i];
 var composite=child.parent;
 while(child!=this){
@@ -272,12 +274,10 @@ update=newUpdate;
 composite=child.parent;
 }
 }
-System.out.println(":::"+(new java.util.Date().getTime()-d.getTime()));
 d=new java.util.Date();
 for(var i=updateCount-1;i>=0;i--){
 update[i].updateLayout(true,false);
 }
-System.out.println(":::"+(new java.util.Date().getTime()-d.getTime()));
 d=new java.util.Date();
 },"~A");
 $_M(c$,"markLayout",
@@ -287,7 +287,8 @@ this.state|=32;
 if(changed)this.state|=64;
 }if(all){
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 children[i].markLayout(changed,all);
 }
 }},"~B,~B");
@@ -296,7 +297,8 @@ function(wHint,hHint,changed){
 var children=this._getChildren();
 var width=0;
 var height=0;
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 var rect=children[i].getBounds();
 width=Math.max(width,rect.x+rect.width);
 height=Math.max(height,rect.y+rect.height);
@@ -306,7 +308,8 @@ return new $wt.graphics.Point(width,height);
 $_M(c$,"releaseChildren",
 function(){
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 var child=children[i];
 if(!child.isDisposed())child.releaseResources();
 }
@@ -320,7 +323,8 @@ if((this.state&2)!=0&&(this.style&16777216)!=0){
 this.$layout=null;
 this.tabList=null;
 if(this.lpwp!=null){
-for(var i=0;i<this.lpwp.length;i++){
+var length=this.lpwp.length;
+for(var i=0;i<length;i++){
 this.lpwp[i].hwnd=null;
 this.lpwp[i].hwndInsertAfter=null;
 }
@@ -348,7 +352,8 @@ if(pwp==null)return true;
 var hdwp=0;
 if(defer){
 if(hdwp==0)return false;
-}for(var i=0;i<pwp.length;i++){
+}var length=pwp.length;
+for(var i=0;i<length;i++){
 var wp=pwp[i];
 if(wp!=null){
 if(defer){
@@ -361,11 +366,12 @@ return true;
 $_M(c$,"setFixedFocus",
 function(){
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.setRadioFocus())return true;
 }
-for(var i=0;i<children.length;i++){
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.setFixedFocus())return true;
 }
@@ -374,11 +380,12 @@ return $_U(this,$wt.widgets.Composite,"setFixedFocus",[]);
 $_M(c$,"setFocus",
 function(){
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.setRadioFocus())return true;
 }
-for(var i=0;i<children.length;i++){
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.setFocus())return true;
 }
@@ -399,11 +406,12 @@ this.layoutCount++;
 $_M(c$,"setTabList",
 function(tabList){
 if(tabList!=null){
-for(var i=0;i<tabList.length;i++){
+var length=tabList.length;
+for(var i=0;i<length;i++){
 var control=tabList[i];
 }
-var newList=new Array(tabList.length);
-System.arraycopy(tabList,0,newList,0,tabList.length);
+var newList=new Array(length);
+System.arraycopy(tabList,0,newList,0,length);
 tabList=newList;
 }this.tabList=tabList;
 },"~A");
@@ -425,11 +433,12 @@ takeFocus=this.hooksKeys();
 if((this.style&16777216)!=0)takeFocus=true;
 }if(takeFocus&&this.setTabItemFocus())return true;
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.isTabItem()&&child.setRadioFocus())return true;
 }
-for(var i=0;i<children.length;i++){
+for(var i=0;i<length;i++){
 var child=children[i];
 if(child.isTabItem()&&child.setTabItemFocus())return true;
 }
@@ -453,12 +462,13 @@ if(this.isLayoutDeferred())return;
 if((this.state&32)!=0){
 var changed=(this.state&64)!=0;
 this.state&=-97;
-if(resize)this.setResizeChildren(false);
-this.$layout.layout(this,changed);
-if(resize)this.setResizeChildren(true);
+this.waitingForLayout=true;
+this.waitingForLayoutWithResize=resize;
+this.display.sendMessage(new $wt.internal.struct.MESSAGE(this,2,[resize,all]));
 }if(all){
 var children=this._getChildren();
-for(var i=0;i<children.length;i++){
+var length=children.length;
+for(var i=0;i<length;i++){
 if($_O(children[i],$wt.widgets.Composite)){
 this.display.sendMessage(new $wt.internal.struct.MESSAGE(children[i],2,[resize,all]));
 }}

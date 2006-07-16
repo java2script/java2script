@@ -147,7 +147,6 @@ this.pageIncrement=pageIncrement;
 },"~N,~N,~N,~N,~N,~N");
 $_M(c$,"setVisible",
 function(visible){
-System.out.println("setvisible of scrollbar called : "+visible+" parent : "+this.parent);
 var isVisible=(this.state&16)==0;
 if(isVisible==visible)return;
 if(visible){
@@ -161,12 +160,10 @@ if((this.style&512)!=0){
 scrollClass="vscroll-default";
 }var className=this.parent.handle.className;
 var idx=this.parent.handle.className.indexOf(scrollClass);
-System.out.println("parent scroll class name is "+className+" "+idx+" "+visible);
 if(!visible&&idx!=-1){
 className=className.substring(0,idx)+className.substring(idx+scrollClass.length);
 }else if(visible&&idx==-1){
 className+=" "+scrollClass;
-}System.out.println("setting parent scrollable to "+className);
-this.parent.handle.className=className;
+}this.parent.handle.className=className;
 },"~B");
 });

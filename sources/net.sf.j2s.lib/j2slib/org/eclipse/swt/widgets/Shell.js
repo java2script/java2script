@@ -26,7 +26,6 @@ this.construct(display,null,style,0);
 },"$wt.widgets.Display,~N");
 $_K(c$,
 function(display,parent,style,handle){
-this.checkSubclass();
 this.children=new Array(0);
 if(display==null)display=$wt.widgets.Display.getCurrent();
 if(display==null)display=$wt.widgets.Display.getDefault();

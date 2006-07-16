@@ -31,9 +31,6 @@ c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return $wt.widgets.Widget.checkBits(style,8,32,16,2,4,0);
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"click",
 function(dropDown){
 },"~B");

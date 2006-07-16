@@ -25,9 +25,6 @@ function(style){
 style|=524288;
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
 var size=$_U(this,$wt.widgets.Group,"computeSize",[wHint,hHint,changed]);

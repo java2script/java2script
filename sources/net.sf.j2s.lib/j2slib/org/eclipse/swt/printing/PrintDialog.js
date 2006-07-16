@@ -14,7 +14,6 @@ this.construct(parent,32768);
 $_K(c$,
 function(parent,style){
 $_R(this,$wt.printing.PrintDialog,[parent,style]);
-this.checkSubclass();
 },"$wt.widgets.Shell,~N");
 $_M(c$,"getScope",
 function(){
@@ -48,11 +47,6 @@ $_M(c$,"setPrintToFile",
 function(printToFile){
 this.printToFile=printToFile;
 },"~B");
-$_V(c$,"checkSubclass",
-function(){
-var name=this.getClass().getName();
-var validName=$wt.printing.PrintDialog.getName();
-});
 $_M(c$,"open",
 function(){
 this.dialogUnimplemented();

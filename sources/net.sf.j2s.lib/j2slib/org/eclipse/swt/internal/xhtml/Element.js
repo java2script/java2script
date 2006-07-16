@@ -77,3 +77,7 @@ $_M(c$,"getElementsByTagName",
 function(tag){
 return new Array(0);
 },"~S");
+$_M(c$,"cloneNode",
+function(flag){
+return new Element();
+},"~B");

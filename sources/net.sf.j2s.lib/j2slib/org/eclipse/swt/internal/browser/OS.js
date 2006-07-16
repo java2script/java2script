@@ -54,6 +54,7 @@ var el=d$.createElement("DIV");
 d$.body.appendChild(el);
 var s=el.style;
 s.position="absolute";
+s.left="-4000px";
 s.top="-300px";
 s.width="3000px";
 s.height="100px";
@@ -266,7 +267,7 @@ function(elem,shellElem){
 var currentElem=elem;
 var left=0;
 var top=0;
-while(currentElem!=shellElem){
+while(currentElem!=null&&currentElem!=shellElem){
 left+=currentElem.offsetLeft;
 top+=currentElem.offsetTop;
 currentElem=currentElem.offsetParent;

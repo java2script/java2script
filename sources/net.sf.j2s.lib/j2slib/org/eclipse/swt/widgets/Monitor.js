@@ -1,6 +1,6 @@
 Clazz.load(null,"$wt.widgets.Monitor",["$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
-this.handle=0;
+this.handle=null;
 this.x=0;
 this.y=0;
 this.width=0;
@@ -31,6 +31,16 @@ return new $wt.graphics.Rectangle(this.clientX,this.clientY,this.clientWidth,thi
 });
 $_V(c$,"hashCode",
 function(){
-return this.handle;
-});
+if(this.handle.id==null||this.handle.id.length==0){
+var random=Math.random();
+var code=parseInt(random)*1000000;
+this.handle.id=""+code;
+return code;
+}else{
+var code=Integer.parseInt(this.handle.id);
+if(this.handle.id==""+code){
+return code;
+}else{
+return this.handle.id.hashCode();
+}}});
 });

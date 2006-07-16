@@ -252,7 +252,9 @@
         	<filelist dir="${js.src.dir}">
         		<file name="java/lang/Class.js"/>
         		<file name="java/lang/ClassLoader.js"/>
+        		<!--
         		<file name="java/lang/Console.js"/>
+        		-->
         	</filelist>
         </concat>
 	</target>
@@ -261,7 +263,7 @@
           target: j2s.pack.common                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.common">
-        <concat destfile="${jz.dist.dir}/java/j2slib.common.z.js">
+        <concat destfile="${js.src.dir}/java/core.z.js">
         	<filelist dir="${js.src.dir}">
         		<file name="java/io/Serializable.js"/>
         		<file name="java/lang/CharSequence.js"/>
@@ -269,10 +271,7 @@
         		<file name="java/lang/Comparable.js"/>
         		<file name="java/lang/Runnable.js"/>
         		<file name="java/util/Comparator.js"/>
-        	</filelist>
-        </concat>
-        <concat destfile="${jz.dist.dir}/java/j2slib.basic.z.js">
-        	<filelist dir="${js.src.dir}">
+        		
         		<file name="java/lang/Number.js"/>
         		<file name="java/lang/Integer.js"/>
         		<file name="java/lang/Long.js"/>
@@ -294,6 +293,12 @@
         		<file name="java/util/List.js"/>
         		<file name="java/util/RandomAccess.js"/>
         	</filelist>
+        	<filelist dir="${ajax.src.dir}">
+        		<file name="net/sf/j2s/ajax/HttpRequest.js"/>
+        		<file name="net/sf/j2s/ajax/IXHRCallback.js"/>
+        		<file name="net/sf/j2s/ajax/XHRCallbackAdapter.js"/>
+        		<file name="net/sf/j2s/ajax/XHRCallbackSWTAdapter.js"/>
+			</filelist>
         </concat>
 	</target>
 
@@ -305,6 +310,8 @@
     		<fileset dir="${ajax.src.dir}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
+    			<exclude name="**/AjaxPlugin.js"/>
+    			<exclude name="**/AJAXVariableInitializer.js"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>

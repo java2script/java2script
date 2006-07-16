@@ -22,9 +22,6 @@ this.parent=parent;
 parent.createItem(this,index);
 this.configure(index);
 },"$wt.widgets.TabFolder,~N,~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"configure",
 ($fz=function(index){
 this.handle.onclick=$_Q((function(i$,v$){

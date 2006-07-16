@@ -16,9 +16,6 @@ function(style){
 style|=524288;
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
 var width=0;

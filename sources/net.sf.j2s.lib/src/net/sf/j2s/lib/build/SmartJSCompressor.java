@@ -42,7 +42,7 @@ public class SmartJSCompressor {
 		String dest = args[1];
 		File srcFile = new File(src);
 		if (!srcFile.exists()) {
-			System.err.println("Error: source file " + src + " does not exist!");
+			System.err.println("Error: source file " + srcFile.getAbsolutePath() + " does not exist!");
 			return ;
 		}
 		File destFile = new File(dest);
@@ -152,7 +152,7 @@ public class SmartJSCompressor {
 			String command = lines[i];
 			if (command.indexOf("->") != -1) {
 				String[] split = command.split("\\s*->\\s*");
-				String from = split[0].trim().replaceAll("\\$", "\\\\\\$");
+				String from = split[0].trim().replaceAll("(\\$|\\.|\\[|\\(|\\)|\\])", "\\\\$0");
 				String to = split[1].trim().replaceAll("\\$", "\\\\\\$");
 				if (isVerbose) {
 					System.out.println(from + "->" + to);

@@ -42,9 +42,6 @@ var typedListener=new $wt.widgets.TypedListener(listener);
 this.addListener(13,typedListener);
 this.addListener(14,typedListener);
 },"$wt.events.SelectionListener");
-$_V(c$,"checkSubclass",
-function(){
-});
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return $wt.widgets.Widget.checkBits(style,8,32,16,2,64,0);

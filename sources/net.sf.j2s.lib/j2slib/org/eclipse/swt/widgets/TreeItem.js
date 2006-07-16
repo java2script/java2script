@@ -39,9 +39,6 @@ c$.checkNull=$_M(c$,"checkNull",
 function(item){
 return item;
 },"$wt.widgets.TreeItem");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"getBackground",
 function(){
 return new $wt.graphics.Color(this.display,this.handle.style.backgroundColor);
@@ -108,7 +105,6 @@ return this.parent.items.length;
 });
 $_M(c$,"getItems",
 function(){
-System.out.println("index: "+this.index);
 return this.parent.getItems(this.index);
 });
 $_M(c$,"getImage",
@@ -194,7 +190,9 @@ this.checkElement.checked=checked;
 $_M(c$,"setExpanded",
 function(expanded){
 this.expandStatus=expanded;
-var items=this.parent.getDescendantItems(this.index);
+if(this.getItemCount()==0){
+return;
+}var items=this.parent.getDescendantItems(this.index);
 for(var i=0;i<items.length;i++){
 if(items[i].parentItem==this){
 items[i].expandStatus=this.expandStatus;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Device","$.Cursor"],"$wt.widgets.Display",["java.lang.Runnable","$.StringBuffer","$.Thread","java.util.Date","$wt.SWT","$wt.graphics.Color","$.Font","$.Image","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.struct.MESSAGE","$wt.widgets.Control","$.Event","$.EventTable","$.ImageList","$.Menu","$.MenuItem","$.Monitor","$.Shell","$.Tray"],function(){
+Clazz.load(["$wt.graphics.Device","$.Cursor"],"$wt.widgets.Display",["java.lang.Runnable","$.StringBuffer","$.Thread","java.util.Date","$wt.SWT","$wt.graphics.Color","$.Font","$.Image","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.struct.MESSAGE","$wt.widgets.Control","$.Event","$.EventTable","$.ImageList","$.Menu","$.MenuItem","$.Monitor","$.Shell","$.Tray"],function(){
 c$=$_C(function(){
 this.eventQueue=null;
 this.eventTable=null;
@@ -138,9 +138,6 @@ $_M(c$,"beep",
 function(){
 });
 $_M(c$,"checkSubclass",
-function(){
-});
-$_V(c$,"checkDevice",
 function(){
 });
 c$.checkDisplay=$_M(c$,"checkDisplay",
@@ -343,102 +340,6 @@ $_M(c$,"getIconSizes",
 function(){
 return[new $wt.graphics.Point(16,16),new $wt.graphics.Point(32,32)];
 });
-$_M(c$,"getImageList",
-function(style,width,height){
-if(this.imageList==null)this.imageList=new Array(4);
-var i=0;
-var length=this.imageList.length;
-while(i<length){
-var list=this.imageList[i];
-if(list==null)break;
-var size=list.getImageSize();
-if(size.x==width&&size.y==height){
-if(list.getStyle()==style){
-list.addRef();
-return list;
-}}i++;
-}
-if(i==length){
-var newList=new Array(length+4);
-System.arraycopy(this.imageList,0,newList,0,length);
-this.imageList=newList;
-}var list=new $wt.widgets.ImageList(style);
-this.imageList[i]=list;
-list.addRef();
-return list;
-},"~N,~N,~N");
-$_M(c$,"getImageListToolBar",
-function(style,width,height){
-if(this.toolImageList==null)this.toolImageList=new Array(4);
-var i=0;
-var length=this.toolImageList.length;
-while(i<length){
-var list=this.toolImageList[i];
-if(list==null)break;
-var size=list.getImageSize();
-if(size.x==width&&size.y==height){
-if(list.getStyle()==style){
-list.addRef();
-return list;
-}}i++;
-}
-if(i==length){
-var newList=new Array(length+4);
-System.arraycopy(this.toolImageList,0,newList,0,length);
-this.toolImageList=newList;
-}var list=new $wt.widgets.ImageList(style);
-this.toolImageList[i]=list;
-list.addRef();
-return list;
-},"~N,~N,~N");
-$_M(c$,"getImageListToolBarDisabled",
-function(style,width,height){
-if(this.toolDisabledImageList==null)this.toolDisabledImageList=new Array(4);
-var i=0;
-var length=this.toolDisabledImageList.length;
-while(i<length){
-var list=this.toolDisabledImageList[i];
-if(list==null)break;
-var size=list.getImageSize();
-if(size.x==width&&size.y==height){
-if(list.getStyle()==style){
-list.addRef();
-return list;
-}}i++;
-}
-if(i==length){
-var newList=new Array(length+4);
-System.arraycopy(this.toolDisabledImageList,0,newList,0,length);
-this.toolDisabledImageList=newList;
-}var list=new $wt.widgets.ImageList(style);
-this.toolDisabledImageList[i]=list;
-list.addRef();
-return list;
-},"~N,~N,~N");
-$_M(c$,"getImageListToolBarHot",
-function(style,width,height){
-if(this.toolHotImageList==null)this.toolHotImageList=new Array(4);
-var i=0;
-var length=this.toolHotImageList.length;
-while(i<length){
-var list=this.toolHotImageList[i];
-if(list==null)break;
-var size=list.getImageSize();
-if(size.x==width&&size.y==height){
-if(list.getStyle()==style){
-list.addRef();
-return list;
-}}i++;
-}
-if(i==length){
-var newList=new Array(length+4);
-System.arraycopy(this.toolHotImageList,0,newList,0,length);
-this.toolHotImageList=newList;
-}var list=new $wt.widgets.ImageList(style);
-this.toolHotImageList[i]=list;
-list.addRef();
-return list;
-},"~N,~N,~N");
 $_M(c$,"getLastEventTime",
 function(){
 return parseInt(new java.util.Date().getTime());
@@ -467,23 +368,84 @@ return this.modalDialogShell;
 });
 $_M(c$,"getMonitors",
 function(){
+if($wt.widgets.Display.monitors==null){
 var monitor=new $wt.widgets.Monitor();
-monitor.handle=220284;
-monitor.clientWidth=monitor.width=d$.body.clientWidth;
-monitor.clientHeight=monitor.height=d$.body.clientHeight;
+monitor.handle=d$.body;
+monitor.clientWidth=d$.body.clientWidth;
+monitor.width=w$.screen.availWidth;
+monitor.clientHeight=d$.body.clientHeight;
+monitor.height=w$.screen.availHeight;
 monitor.clientX=monitor.x=0;
 monitor.clientY=monitor.y=0;
-return[monitor];
+($t$=$wt.widgets.Display.monitors=[monitor],$wt.widgets.Display.prototype.monitors=$wt.widgets.Display.monitors,$t$);
+($t$=$wt.widgets.Display.monitorCount=1,$wt.widgets.Display.prototype.monitorCount=$wt.widgets.Display.monitorCount,$t$);
+}return $wt.widgets.Display.monitors;
 });
+c$.registerElementAsMonitor=$_M(c$,"registerElementAsMonitor",
+function(el){
+if(el==null){
+return;
+}if($wt.widgets.Display.monitors!=null){
+for(var i=0;i<$wt.widgets.Display.monitors.length;i++){
+if($wt.widgets.Display.monitors[i].handle==el){
+return;
+}}
+}else{
+var monitor=new $wt.widgets.Monitor();
+monitor.handle=d$.body;
+monitor.clientWidth=d$.body.clientWidth;
+monitor.width=w$.screen.availWidth;
+monitor.clientHeight=d$.body.clientHeight;
+monitor.height=w$.screen.availHeight;
+monitor.clientX=monitor.x=0;
+monitor.clientY=monitor.y=0;
+($t$=$wt.widgets.Display.monitors=[monitor],$wt.widgets.Display.prototype.monitors=$wt.widgets.Display.monitors,$t$);
+($t$=$wt.widgets.Display.monitorCount=1,$wt.widgets.Display.prototype.monitorCount=$wt.widgets.Display.monitorCount,$t$);
+}var monitor=new $wt.widgets.Monitor();
+monitor.handle=el;
+monitor.clientX=0;
+monitor.clientY=0;
+if(el==d$.body){
+monitor.clientWidth=d$.body.clientWidth;
+monitor.clientHeight=d$.body.clientHeight;
+monitor.x=0;
+monitor.y=0;
+monitor.width=w$.screen.availWidth;
+monitor.height=w$.screen.availHeight;
+}else{
+var pt=O$.getElementPositionInShell(el,d$.body);
+el.style.position="absolute";
+monitor.x=pt.x;
+monitor.y=pt.y;
+monitor.width=monitor.clientWidth=O$.getContainerWidth(el);
+monitor.height=monitor.clientHeight=O$.getContainerHeight(el);
+}$wt.widgets.Display.monitors[$wt.widgets.Display.monitors.length]=monitor;
+($t$=$wt.widgets.Display.monitorCount=$wt.widgets.Display.monitors.length,$wt.widgets.Display.prototype.monitorCount=$wt.widgets.Display.monitorCount,$t$);
+},"$wt.internal.xhtml.Element");
 $_M(c$,"getPrimaryMonitor",
 function(){
-var monitor=new $wt.widgets.Monitor();
-monitor.handle=220284;
-monitor.clientWidth=monitor.width=d$.body.clientWidth;
-monitor.clientHeight=monitor.height=d$.body.clientHeight;
-monitor.clientX=monitor.x=0;
-monitor.clientY=monitor.y=0;
-return monitor;
+{
+var ms=this.getMonitors();
+var key="current.monitor.id";
+if(window[key]!=null){
+var x=parseInt(window[key]);
+if(""+x==window[key]){
+if(x<0||x>=ms.length){
+x=0;
+}
+return ms[x];
+}else{
+var el=document.getElementById(window[key]);
+if(el!=null){
+for(var i=0;i<ms.length;i++){
+if(ms[i].handle==el){
+return ms[i];
+}
+}
+}
+}
+}
+}return this.getMonitors()[0];
 });
 $_M(c$,"getShells",
 function(){
@@ -599,7 +561,7 @@ iconName="warning";
 break;
 }
 if(iconName==null)return null;
-return new $wt.graphics.Image(this,"j2slib/images/"+iconName+".png");
+return new $wt.graphics.Image(this,$wt.widgets.Display.getResourceAsStream("../images/"+iconName+".png"));
 },"~N");
 $_M(c$,"getSystemTray",
 function(){
@@ -631,8 +593,6 @@ return this.map(from,to,point.x,point.y);
 },"$wt.widgets.Control,$wt.widgets.Control,$wt.graphics.Point");
 $_M(c$,"map",
 function(from,to,x,y){
-var hwndFrom=from!=null?from.handle:null;
-var hwndTo=to!=null?to.handle:null;
 return new $wt.graphics.Point(0,0);
 },"$wt.widgets.Control,$wt.widgets.Control,~N,~N");
 $_M(c$,"map",
@@ -641,8 +601,6 @@ return this.map(from,to,rectangle.x,rectangle.y,rectangle.width,rectangle.height
 },"$wt.widgets.Control,$wt.widgets.Control,$wt.graphics.Rectangle");
 $_M(c$,"map",
 function(from,to,x,y,width,height){
-var hwndFrom=from!=null?from.handle:null;
-var hwndTo=to!=null?to.handle:null;
 return new $wt.graphics.Rectangle(0,0,0,0);
 },"$wt.widgets.Control,$wt.widgets.Control,~N,~N,~N,~N");
 $_M(c$,"post",
@@ -719,36 +677,52 @@ $_M(c$,"run",
 function(){
 var msgs=this.b$["$wt.widgets.Display"].msgs;
 if(msgs.length!=0){
+var defered=new Array(0);
+var defsize=0;
 for(var i=msgs.length-1;i>=0;i--){
 var m1=msgs[i];
 if(m1==null){
-continue;}for(var j=i-1;j>=0;j--){
+continue;}m1.defer=false;
+for(var j=i-1;j>=0;j--){
 var m2=msgs[j];
 if(m2!=null&&m2.control==m1.control&&m2.type==m1.type){
 msgs[j]=null;
-break;
 }}
-}
+if(m1.type==2){
+if(m1.control.parent!=null&&m1.control.parent.waitingForLayout){
+m1.defer=true;
+defered[defsize++]=m1;
+}}}
 var time=0;
 for(var i=0;i<msgs.length;i++){
 var m=msgs[i];
-msgs[i]=null;
+if(m!=null&&m.defer){
+continue;}msgs[i]=null;
 if(m!=null&&m.type==2){
+m.control.waitingForLayout=false;
 if(!m.control.isVisible()){
 continue;}var d=new java.util.Date();
 var c=m.control;
-if(m.data!=null){
+if(c.waitingForLayoutWithResize){
+c.setResizeChildren(false);
+}if(c.$layout!=null){
+c.$layout.layout(c,(c.state&64)!=0);
+}if(c.waitingForLayoutWithResize){
+c.setResizeChildren(true);
+c.waitingForLayoutWithResize=false;
+}if(m.data!=null){
 var bs=m.data;
 c.updateLayout(bs[0],bs[1]);
 }else{
 c.layout();
 }time+=new java.util.Date().getTime()-d.getTime();
-if(time>100){
+if(time>200){
 for(var j=i+1;j<msgs.length;j++){
 msgs[j-i-1]=msgs[j];
 }
-for(var j=0;j<i;j++){
-msgs[msgs.length-1-j]=null;
+var length=msgs.length-i-1;
+for(var j=0;j<defsize;j++){
+msgs[length+j]=defered[j];
 }
 {
 msgs.length-=i+1;
@@ -756,11 +730,12 @@ msgs.length-=i+1;
 }}}
 {
 msgs.length=0;
-}}});
+}this.b$["$wt.widgets.Display"].msgs=defered;
+}});
 c$=$_P();
 }
 return $_N($wt.widgets.Display$3,i$,v$);
-})(this,null)),20);
+})(this,null)),100);
 return true;
 });
 c$.register=$_M(c$,"register",
@@ -817,75 +792,7 @@ w$.clearInterval(this.messageProc);
 });
 $_M(c$,"releaseImageList",
 function(list){
-var i=0;
-var length=this.imageList.length;
-while(i<length){
-if(this.imageList[i]==list){
-if(list.removeRef()>0)return;
-list.dispose();
-System.arraycopy(this.imageList,i+1,this.imageList,i,--length-i);
-this.imageList[length]=null;
-for(var j=0;j<length;j++){
-if(this.imageList[j]!=null)return;
-}
-this.imageList=null;
-return;
-}i++;
-}
-},"$wt.widgets.ImageList");
-$_M(c$,"releaseToolImageList",
-function(list){
-var i=0;
-var length=this.toolImageList.length;
-while(i<length){
-if(this.toolImageList[i]==list){
-if(list.removeRef()>0)return;
-list.dispose();
-System.arraycopy(this.toolImageList,i+1,this.toolImageList,i,--length-i);
-this.toolImageList[length]=null;
-for(var j=0;j<length;j++){
-if(this.toolImageList[j]!=null)return;
-}
-this.toolImageList=null;
-return;
-}i++;
-}
-},"$wt.widgets.ImageList");
-$_M(c$,"releaseToolHotImageList",
-function(list){
-var i=0;
-var length=this.toolHotImageList.length;
-while(i<length){
-if(this.toolHotImageList[i]==list){
-if(list.removeRef()>0)return;
-list.dispose();
-System.arraycopy(this.toolHotImageList,i+1,this.toolHotImageList,i,--length-i);
-this.toolHotImageList[length]=null;
-for(var j=0;j<length;j++){
-if(this.toolHotImageList[j]!=null)return;
-}
-this.toolHotImageList=null;
-return;
-}i++;
-}
-},"$wt.widgets.ImageList");
-$_M(c$,"releaseToolDisabledImageList",
-function(list){
-var i=0;
-var length=this.toolDisabledImageList.length;
-while(i<length){
-if(this.toolDisabledImageList[i]==list){
-if(list.removeRef()>0)return;
-list.dispose();
-System.arraycopy(this.toolDisabledImageList,i+1,this.toolDisabledImageList,i,--length-i);
-this.toolDisabledImageList[length]=null;
-for(var j=0;j<length;j++){
-if(this.toolDisabledImageList[j]!=null)return;
-}
-this.toolDisabledImageList=null;
-return;
-}i++;
-}
+{}
 },"$wt.widgets.ImageList");
 $_M(c$,"removeFilter",
 function(eventType,listener){
@@ -1139,34 +1046,6 @@ if(!shell.isDisposed())shell.update(true);
 $_M(c$,"wake",
 function(){
 });
-c$.withCrLf=$_M(c$,"withCrLf",
-function(string){
-var length=string.length;
-if(length==0)return string;
-var i=string.indexOf('\n',0);
-if(i==-1)return string;
-if(i>0&&(string.charAt(i-1)).charCodeAt(0)==('\r').charCodeAt(0)){
-return string;
-}i++;
-var count=1;
-while(i<length){
-if((i=string.indexOf('\n',i))==-1)break;
-count++;
-i++;
-}
-count+=length;
-i=0;
-var result=new StringBuffer(count);
-while(i<length){
-var j=string.indexOf('\n',i);
-if(j==-1)j=length;
-result.append(string.substring(i,j));
-if((i=j)<length){
-result.append("\r\n");
-i++;
-}}
-return result.toString();
-},"~S");
 c$.releaseAllDisplays=$_M(c$,"releaseAllDisplays",
 function(){
 if($wt.widgets.Display.Displays!=null){

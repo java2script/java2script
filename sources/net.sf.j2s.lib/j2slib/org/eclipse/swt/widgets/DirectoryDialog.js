@@ -12,7 +12,6 @@ this.construct(parent,32768);
 $_K(c$,
 function(parent,style){
 $_R(this,$wt.widgets.DirectoryDialog,[parent,style]);
-this.checkSubclass();
 },"$wt.widgets.Shell,~N");
 $_M(c$,"getFilterPath",
 function(){

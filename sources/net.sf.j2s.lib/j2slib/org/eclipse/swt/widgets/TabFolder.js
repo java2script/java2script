@@ -29,12 +29,8 @@ function(style){
 style=$wt.widgets.Widget.checkBits(style,128,1024,0,0,0,0);
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
-System.out.println(wHint+","+hHint+","+changed);
 var size=$_U(this,$wt.widgets.TabFolder,"computeSize",[wHint,hHint,changed]);
 var width=-124;
 if(this.items!=null&&this.items.length!=0){

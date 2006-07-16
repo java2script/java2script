@@ -35,52 +35,40 @@ function(deviceData){
 },"$wt.graphics.DeviceData");
 $_M(c$,"startJob",
 function(jobName){
-this.checkDevice();
 return false;
 },"~S");
 $_M(c$,"endJob",
 function(){
-this.checkDevice();
 });
 $_M(c$,"cancelJob",
 function(){
-this.checkDevice();
 });
 $_M(c$,"startPage",
 function(){
-this.checkDevice();
 return false;
 });
 $_M(c$,"endPage",
 function(){
-this.checkDevice();
 });
 $_V(c$,"getDPI",
 function(){
-this.checkDevice();
 return null;
 });
 $_V(c$,"getBounds",
 function(){
-this.checkDevice();
 return null;
 });
 $_V(c$,"getClientArea",
 function(){
-this.checkDevice();
 return null;
 });
 $_M(c$,"computeTrim",
 function(x,y,width,height){
-this.checkDevice();
 return new $wt.graphics.Rectangle(0,0,0,0);
 },"~N,~N,~N,~N");
 $_M(c$,"getPrinterData",
 function(){
 return this.data;
-});
-$_V(c$,"checkDevice",
-function(){
 });
 $_M(c$,"release",
 function(){

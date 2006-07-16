@@ -34,9 +34,6 @@ c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return $wt.widgets.Widget.checkBits(style,16384,16777216,131072,0,0,0);
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"getAlignment",
 function(){
 if((this.style&16384)!=0)return 16384;

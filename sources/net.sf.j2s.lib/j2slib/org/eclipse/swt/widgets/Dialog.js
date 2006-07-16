@@ -16,11 +16,6 @@ this.parent=parent;
 this.style=style;
 this.title="";
 },"$wt.widgets.Shell,~N");
-$_M(c$,"checkSubclass",
-function(){
-if(!$wt.widgets.Display.isValidClass(this.getClass())){
-this.error(43);
-}});
 $_M(c$,"checkParent",
 function(parent){
 if(parent==null)this.error(4);
@@ -97,10 +92,10 @@ return $_N($wt.widgets.Dialog$2,i$,v$);
 dialogShell.pack();
 dialogShell.open();
 var size=dialogShell.getSize();
-var y=Math.floor((d$.body.clientHeight-size.y)/2)-20;
+var y=Math.floor((dialogShell.getMonitor().clientHeight-size.y)/2)-20;
 if(y<0){
 y=0;
-}dialogShell.setLocation(Math.floor((d$.body.clientWidth-size.x)/2),y);
+}dialogShell.setLocation(Math.floor((dialogShell.getMonitor().clientWidth-size.x)/2),y);
 $wt.internal.ResizeSystem.register(dialogShell,16777216);
 });
 });

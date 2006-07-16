@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Table",["$wt.graphics.Point","$wt.internal.browser.OS","$wt.widgets.Event","$.TableColumn","$.TableItem","$.TypedListener"],function(){
+Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Table",["$wt.graphics.Point","$wt.internal.browser.OS","$wt.widgets.Control","$.Event","$.TableColumn","$.TableItem","$.TypedListener"],function(){
 c$=$_C(function(){
 this.items=null;
 this.columns=null;
@@ -19,6 +19,9 @@ this.ignoreActivate=false;
 this.ignoreSelect=false;
 this.ignoreShrink=false;
 this.ignoreResize=false;
+this.tbodyTRTemplate=null;
+this.lineWidth=0;
+this.columnMaxWidth=null;
 $_Z(this,arguments);
 },$wt.widgets,"Table",$wt.widgets.Composite);
 $_K(c$,
@@ -27,6 +30,8 @@ $_R(this,$wt.widgets.Table,[parent,$wt.widgets.Table.checkStyle(style)]);
 this.selection=new Array(0);
 this.items=new Array(0);
 this.columns=new Array(0);
+this.columnMaxWidth=$_A(0,0);
+this.lineWidth=0;
 this.tbody=null;
 },"$wt.widgets.Composite,~N");
 $_M(c$,"_getItem",
@@ -62,9 +67,6 @@ if(!this.setScrollWidth(item,false)){
 item.redraw();
 }}}return true;
 },"$wt.widgets.TableItem,~B");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"clear",
 function(index){
 var count=this.items.length;
@@ -82,23 +84,10 @@ function(){
 });
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
-var width=0;
+var width=this.lineWidth;
 var height=0;
-var lineWidth=0;
-for(var i=0;i<this.columns.length;i++){
-var maxWidth=0;
-var t=this.columns[i].getNameText();
-var columnWidth=this.getTextWidth(t);
-maxWidth=Math.max(maxWidth,columnWidth);
-for(var j=0;j<this.items.length;j++){
-maxWidth=Math.max(maxWidth,this.getTextWidth(this.items[j].getText(i)));
-}
-lineWidth+=maxWidth+10;
-}
-width=lineWidth;
 if(this.items.length>0){
 var t=this.items[0].getNameText();
-System.out.println(t);
 height=(O$.getStringPlainHeight(t)+5)*(this.items.length+0);
 }else{
 height=24;
@@ -150,6 +139,7 @@ theadTR=thead.childNodes[i];
 theadTR=d$.createElement("TR");
 thead.appendChild(theadTR);
 }var theadTD=d$.createElement("TD");
+theadTD.className="table-column-default";
 theadTD.style.whiteSpace="nowrap";
 if(index<0||index>=theadTR.childNodes.length){
 theadTR.appendChild(theadTD);
@@ -195,13 +185,30 @@ break;
 if(this.tbody==null){
 this.tbody=d$.createElement("TBODY");
 table.appendChild(this.tbody);
-}var tbodyTR=d$.createElement("TR");
-tbodyTR.className="table-item-default";
+}if(this.tbodyTRTemplate==null){
+this.tbodyTRTemplate=d$.createElement("TR");
+this.tbodyTRTemplate.className="table-item-default";
+var length=this.columns.length;
+for(var i=0;i<length;i++){
+var td=d$.createElement("TD");
+this.tbodyTRTemplate.appendChild(td);
+var el=d$.createElement("DIV");
+td.appendChild(el);
+el.className="table-item-cell-default";
+if(index==0&&(this.style&32)!=0){
+var check=d$.createElement("INPUT");
+check.type="checkbox";
+el.appendChild(check);
+item.check=check;
+}var text=d$.createElement("DIV");
+el.appendChild(text);
+text.className="table-item-cell-text-default";
+}
+}var tbodyTR=this.tbodyTRTemplate.cloneNode(true);
 if(index<0||index>=this.tbody.childNodes.length){
 this.tbody.appendChild(tbodyTR);
 this.items[index]=item;
 }else{
-System.out.println("existed");
 this.tbody.insertBefore(tbodyTR,this.tbody.childNodes[index]);
 for(var i=this.items.length;i>index;i--){
 this.items[i]=this.items[i-1];
@@ -248,8 +255,9 @@ this.removeFromSelection(indices);
 }},"~N,~N");
 $_M(c$,"deselectAll",
 function(){
-for(var i=0;i<this.items.length;i++){
-this.items[i].showSelection(false);
+var items=this.getSelection();
+for(var i=0;i<items.length;i++){
+items[i].showSelection(false);
 }
 this.selection=new Array(0);
 });
@@ -264,14 +272,14 @@ function(){
 if((this.style&32)==0)return;
 });
 $_M(c$,"getTextWidth",
-($fz=function(t){
+function(t){
 var columnWidth=0;
 if(t==null||t.length==0){
 columnWidth=0;
 }else{
 columnWidth=O$.getStringPlainWidth(t);
 }return columnWidth;
-},$fz.isPrivate=true,$fz),"~S");
+},"~S");
 $_M(c$,"getColumn",
 function(index){
 return this.columns[index];
@@ -462,6 +470,7 @@ if(!(0<=start&&start<=end&&end<count)){
 return;
 }this.deselect(indices);
 var itemsToBeRemoved=new Array(indices.length);
+var newItems=new Array(count-1);
 var last=-1;
 for(var i=0;i<newIndices.length;i++){
 var index=newIndices[i];
@@ -470,13 +479,12 @@ var item=this.items[index];
 if(item!=null){
 tbody.removeChild(item.handle);
 item.releaseHandle();
-System.arraycopy(this.items,index+1,this.items,index,--count-index);
-this.items[count]=null;
+System.arraycopy(this.items,0,newItems,0,index);
+System.arraycopy(this.items,index+1,newItems,index,--count-index);
+this.items=newItems;
+newItems=new Array(count-1);
 last=index;
 }}}
-var newItems=new Array(indices.length);
-System.arraycopy(this.items,0,newItems,0,indices.length);
-this.items=newItems;
 },"~A");
 $_M(c$,"remove",
 function(index){
@@ -712,7 +720,6 @@ this.selection[i].showSelection(false);
 if(this.lastSelection!=null){
 var idx1=Math.min(this.lastSelection.index,item.index);
 var idx2=Math.max(this.lastSelection.index,item.index);
-System.out.println("here!"+idx1+":"+idx2);
 this.selection=new Array(0);
 for(var i=idx1;i<=idx2;i++){
 var ti=this.items[i];
@@ -758,6 +765,10 @@ function(){
 });
 $_M(c$,"updateMoveable",
 function(){
+});
+$_V(c$,"_getChildren",
+function(){
+return new Array(0);
 });
 $_S(c$,
 "INSET",4,
