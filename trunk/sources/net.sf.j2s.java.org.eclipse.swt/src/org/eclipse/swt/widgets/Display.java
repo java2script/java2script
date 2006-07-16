@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -1510,6 +1511,10 @@ public Point [] getIconSizes () {
 	};	
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 ImageList getImageList (int style, int width, int height) {
 	if (imageList == null) imageList = new ImageList [4];
 	
@@ -1540,6 +1545,10 @@ ImageList getImageList (int style, int width, int height) {
 	return list;
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 ImageList getImageListToolBar (int style, int width, int height) {
 	if (toolImageList == null) toolImageList = new ImageList [4];
 	
@@ -1570,6 +1579,10 @@ ImageList getImageListToolBar (int style, int width, int height) {
 	return list;
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 ImageList getImageListToolBarDisabled (int style, int width, int height) {
 	if (toolDisabledImageList == null) toolDisabledImageList = new ImageList [4];
 	
@@ -1600,6 +1613,10 @@ ImageList getImageListToolBarDisabled (int style, int width, int height) {
 	return list;
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 ImageList getImageListToolBarHot (int style, int width, int height) {
 	if (toolHotImageList == null) toolHotImageList = new ImageList [4];
 	
@@ -1691,15 +1708,68 @@ public Monitor [] getMonitors () {
 	monitorCount = 0;
 	return result;
 	*/
+	if (monitors == null) {
+		Monitor monitor = new Monitor();
+		monitor.handle = document.body;
+		monitor.clientWidth = document.body.clientWidth; 
+		monitor.width = window.screen.availWidth;
+		monitor.clientHeight = document.body.clientHeight;
+		monitor.height = window.screen.availHeight;
+		monitor.clientX = monitor.x = 0;
+		monitor.clientY = monitor.y = 0;
+		monitors = new Monitor[] {
+			monitor
+		};
+		monitorCount = 1;
+	}
+	return monitors;
+}
+
+protected static void registerElementAsMonitor(Element el) {
+	if (el == null) {
+		return ;
+	}
+	if (monitors != null) {
+		for (int i = 0; i < monitors.length; i++) {
+			if (monitors[i].handle == el) {
+				return ;
+			}
+		}
+	} else {
+		Monitor monitor = new Monitor();
+		monitor.handle = document.body;
+		monitor.clientWidth = document.body.clientWidth; 
+		monitor.width = window.screen.availWidth;
+		monitor.clientHeight = document.body.clientHeight;
+		monitor.height = window.screen.availHeight;
+		monitor.clientX = monitor.x = 0;
+		monitor.clientY = monitor.y = 0;
+		monitors = new Monitor[] {
+			monitor
+		};
+		monitorCount = 1;
+	}
 	Monitor monitor = new Monitor();
-	monitor.handle = 220284;
-	monitor.clientWidth = monitor.width = document.body.clientWidth;
-	monitor.clientHeight = monitor.height = document.body.clientHeight;
-	monitor.clientX = monitor.x = 0;
-	monitor.clientY = monitor.y = 0;
-	return new Monitor[] {
-		monitor
-	};
+	monitor.handle = el;
+	monitor.clientX = 0;
+	monitor.clientY = 0;
+	if (el == document.body) {
+		monitor.clientWidth = document.body.clientWidth; 
+		monitor.clientHeight = document.body.clientHeight;
+		monitor.x = 0;
+		monitor.y = 0;
+		monitor.width = window.screen.availWidth;
+		monitor.height = window.screen.availHeight;
+	} else {
+		Point pt = OS.getElementPositionInShell(el, document.body);
+		el.style.position = "absolute";
+		monitor.x = pt.x;
+		monitor.y = pt.y;
+		monitor.width = monitor.clientWidth = OS.getContainerWidth(el);
+		monitor.height = monitor.clientHeight = OS.getContainerHeight(el);
+	}
+	monitors[monitors.length] = monitor;
+	monitorCount = monitors.length;
 }
 /*
 int getMsgProc (int code, int wParam, int lParam) {
@@ -1785,13 +1855,30 @@ public Monitor getPrimaryMonitor () {
 	monitorCount = 0;
 	return result;
 	*/
-	Monitor monitor = new Monitor();
-	monitor.handle = 220284;
-	monitor.clientWidth = monitor.width = document.body.clientWidth;
-	monitor.clientHeight = monitor.height = document.body.clientHeight;
-	monitor.clientX = monitor.x = 0;
-	monitor.clientY = monitor.y = 0;
-	return monitor;
+	/**
+	 * @j2sNative
+var ms = this.getMonitors();
+var key = "current.monitor.id";
+if (window[key] != null) {
+	var x = parseInt (window[key]);
+	if ("" + x == window[key]) {
+		if (x < 0 || x >= ms.length) {
+			x = 0;
+		}
+		return ms[x];
+	} else {
+		var el = document.getElementById (window[key]);
+		if (el != null) {
+			for (var i = 0; i < ms.length; i++) {
+				if (ms[i].handle == el) {
+					return ms[i];
+				}
+			} 
+		}
+	}
+}
+	 */ {}
+	return getMonitors()[0];
 }
 
 /**
@@ -2085,7 +2172,8 @@ public Image getSystemImage (int id) {
 			break;
 	}
 	if (iconName == null) return null;
-	return new Image(this, "j2slib/images/" + iconName + ".png");
+	return new Image(this, Display.class.getResourceAsStream("../images/" + iconName + ".png"));
+	//return new Image(this, "j2slib/images/" + iconName + ".png");
 }
 
 /**
@@ -2393,8 +2481,9 @@ public Point map (Control from, Control to, int x, int y) {
 	checkDevice ();
 	if (from != null && from.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 	if (to != null && to.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
-	Element hwndFrom = from != null ? from.handle : null;
-	Element hwndTo = to != null ? to.handle : null;
+//	Element hwndFrom = from != null ? from.handle : null;
+//	Element hwndTo = to != null ? to.handle : null;
+	
 //	POINT point = new POINT ();
 //	point.x = x;
 //	point.y = y;
@@ -2487,8 +2576,9 @@ public Rectangle map (Control from, Control to, int x, int y, int width, int hei
 	checkDevice ();
 	if (from != null && from.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 	if (to != null && to.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
-	Element hwndFrom = from != null ? from.handle : null;
-	Element hwndTo = to != null ? to.handle : null;
+//	Element hwndFrom = from != null ? from.handle : null;
+//	Element hwndTo = to != null ? to.handle : null;
+	
 //	RECT rect = new RECT ();
 //	rect.left = x;
 //	rect.top  = y;
@@ -3205,6 +3295,10 @@ void releaseDisplay () {
 	msgs = null;
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sNative {}
+ */
 public void releaseImageList (ImageList list) {
 	int i = 0;
 	int length = imageList.length; 
@@ -3224,6 +3318,10 @@ public void releaseImageList (ImageList list) {
 	}
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 void releaseToolImageList (ImageList list) {
 	int i = 0;
 	int length = toolImageList.length; 
@@ -3243,6 +3341,10 @@ void releaseToolImageList (ImageList list) {
 	}
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 void releaseToolHotImageList (ImageList list) {
 	int i = 0;
 	int length = toolHotImageList.length; 
@@ -3262,6 +3364,10 @@ void releaseToolHotImageList (ImageList list) {
 	}
 }
 
+/**
+ * TODO: Later should implement ImageList
+ * @j2sIgnore
+ */
 void releaseToolDisabledImageList (ImageList list) {
 	int i = 0;
 	int length = toolDisabledImageList.length; 
@@ -4071,6 +4177,9 @@ static int wcsToMbcs (char ch) {
 }
 */
 
+/**
+ * @j2sIgnore
+ */
 static String withCrLf (String string) {
 
 	/* If the string is empty, return the string. */

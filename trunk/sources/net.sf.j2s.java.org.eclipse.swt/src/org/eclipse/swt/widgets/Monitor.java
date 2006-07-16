@@ -11,6 +11,7 @@
 package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.xhtml.Element;
 
 /**
  * Instances of this class are descriptions of monitors.
@@ -20,7 +21,7 @@ import org.eclipse.swt.graphics.*;
  * @since 3.0
  */
 public final class Monitor {
-	int handle;
+	Element handle;
 	int x, y, width, height;
 	int clientX, clientY, clientWidth, clientHeight;
 	
@@ -78,7 +79,20 @@ public Rectangle getClientArea () {
  * @see #equals(Object)
  */
 public int hashCode () {
-	return handle;
+	//return handle;
+	if (handle.id == null || handle.id.length() == 0) {
+		double random = Math.random();
+		int code = (int) random * 1000000;
+		handle.id = "" + code;
+		return code;
+	} else {
+		int code = Integer.parseInt(handle.id);
+		if (handle.id == "" + code) {
+			return code;
+		} else {
+			return handle.id.hashCode();
+		}
+	}
 }
 
 }

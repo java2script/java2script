@@ -1,7 +1,0 @@
-#Java2Script Configuration
-#Tue May 02 22:59:43 CST 2006
-j2s.resources.list=bin/org/eclipse/swt/SWT.js,bin/org/eclipse/swt/SWTError.js,bin/org/eclipse/swt/SWTException.js,bin/org/eclipse/swt/internal/SWTEventListener.js,bin/org/eclipse/swt/internal/SWTEventObject.js,bin/org/eclipse/swt/internal/SerializableCompatibility.js,bin/org/eclipse/swt/internal/CloneableCompatibility.js,bin/org/eclipse/swt/internal/RunnableCompatibility.js,bin/org/eclipse/swt/accessibility/Accessible.js,bin/org/eclipse/swt/graphics/Point.js,bin/org/eclipse/swt/graphics/Rectangle.js,bin/org/eclipse/swt/graphics/RGB.js,bin/org/eclipse/swt/graphics/GC.js,bin/org/eclipse/swt/graphics/Resource.js,bin/org/eclipse/swt/graphics/Color.js,bin/org/eclipse/swt/graphics/Cursor.js,bin/org/eclipse/swt/graphics/Drawable.js,bin/org/eclipse/swt/graphics/Device.js,bin/org/eclipse/swt/graphics/ImageData.js,bin/org/eclipse/swt/graphics/ImageLoader.js,bin/org/eclipse/swt/graphics/Image.js,bin/org/eclipse/swt/graphics/Font.js,bin/org/eclipse/swt/graphics/FontData.js,bin/org/eclipse/swt/graphics/FontMetrics.js,bin/org/eclipse/swt/internal/struct/WINDOWPOS.js,bin/org/eclipse/swt/internal/struct/MESSAGE.js
-j2s.abandoned.resources.list=
-j2s.compiler.visitor=SWTScriptVisitor
-j2s.output.path=bin
-j2s.compiler.status=enable
