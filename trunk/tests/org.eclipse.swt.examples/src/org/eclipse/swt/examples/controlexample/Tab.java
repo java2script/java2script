@@ -114,7 +114,7 @@ abstract class Tab {
 		 * "Style" group, the "Other" group and the "Size" group.
 		 */	
 		controlGroup = new Group (tabFolderPage, SWT.NONE);
-		controlGroup.setLayout (new GridLayout (2, true));
+		controlGroup.setLayout (new GridLayout (2, false));
 		controlGroup.setLayoutData (new GridData(SWT.FILL, SWT.FILL, false, false));
 		controlGroup.setText (ControlExample.getResourceString("Parameters"));
 	
