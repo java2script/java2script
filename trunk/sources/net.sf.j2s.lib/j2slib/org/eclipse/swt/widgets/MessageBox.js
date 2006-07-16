@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.MessageBox",["$wt.events.SelectionAdapter","$wt.graphics.Image","$wt.internal.ResizeSystem","$wt.internal.browser.OS","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Label","$.Listener","$.Shell"],function(){
+Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.MessageBox",["$wt.events.SelectionAdapter","$wt.internal.ResizeSystem","$wt.internal.browser.OS","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Label","$.Listener","$.Shell"],function(){
 c$=$_C(function(){
 this.message="";
 this.buttonPanel=null;
@@ -14,7 +14,6 @@ this.construct(parent,65570);
 $_K(c$,
 function(parent,style){
 $_R(this,$wt.widgets.MessageBox,[parent,$wt.widgets.MessageBox.checkStyle(style)]);
-this.checkSubclass();
 },"$wt.widgets.Shell,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
@@ -52,30 +51,26 @@ return $_N($wt.widgets.MessageBox$1,i$,v$);
 })(this,null));
 this.dialogShell.setText(this.title);
 this.dialogShell.setLayout(new $wt.layout.GridLayout(2,false));
-var iconName=null;
-if((this.style&1)!=0){
-iconName="error";
-}else if((this.style&2)!=0){
-iconName="information";
-}else if((this.style&4)!=0){
-iconName="question";
-}else if((this.style&8)!=0){
-iconName="warning";
-}else if((this.style&16)!=0){
-iconName="information";
-}if(iconName!=null){
+var iconID=0;
+var iconStyles=[1,2,4,8,16];
+for(var i=0;i<iconStyles.length;i++){
+if((this.style&iconStyles[i])!=0){
+iconID=iconStyles[i];
+break;
+}}
+if(iconID!=0){
 var composite=new $wt.widgets.Composite(this.dialogShell,0);
 composite.setLayout(new $wt.layout.GridLayout());
 var gd=new $wt.layout.GridData(48,48);
 composite.setLayoutData(gd);
 var icon=new $wt.widgets.Label(composite,0);
-icon.setImage(new $wt.graphics.Image(this.dialogShell.display,"j2slib/images/"+iconName+".png"));
+icon.setImage(this.parent.display.getSystemImage(iconID));
 var gridData=new $wt.layout.GridData(32,32);
 icon.setLayoutData(gridData);
 }var composite=new $wt.widgets.Composite(this.dialogShell,0);
 composite.setLayout(new $wt.layout.GridLayout(2,false));
 var gd=new $wt.layout.GridData(1812);
-if(iconName==null){
+if(iconID==0){
 gd.horizontalSpan=2;
 }gd.grabExcessVerticalSpace=true;
 gd.heightHint=48;
@@ -116,10 +111,10 @@ this.buttonPanel.setLayout(new $wt.layout.GridLayout(count,true));
 this.dialogShell.pack();
 this.dialogShell.open();
 var size=this.dialogShell.getSize();
-var y=Math.floor((d$.body.clientHeight-size.y)/2)-20;
+var y=Math.floor((this.dialogShell.getMonitor().clientHeight-size.y)/2)-20;
 if(y<0){
 y=0;
-}this.dialogShell.setLocation(Math.floor((d$.body.clientWidth-size.x)/2),y);
+}this.dialogShell.setLocation(Math.floor((this.dialogShell.getMonitor().clientWidth-size.x)/2),y);
 $wt.internal.ResizeSystem.register(this.dialogShell,16777216);
 return 256;
 });

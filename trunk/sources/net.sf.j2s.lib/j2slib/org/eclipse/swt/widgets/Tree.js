@@ -49,9 +49,6 @@ var typedListener=new $wt.widgets.TypedListener(listener);
 this.addListener(17,typedListener);
 this.addListener(18,typedListener);
 },"$wt.events.TreeListener");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint,changed){
 var width=0;

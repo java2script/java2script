@@ -9,20 +9,23 @@ this.textInput=null;
 this.selectInput=null;
 this.selectShown=false;
 this.isSimple=false;
+this.itemCount=0;
 $_Z(this,arguments);
 },$wt.widgets,"Combo",$wt.widgets.Composite);
 $_K(c$,
 function(parent,style){
 $_R(this,$wt.widgets.Combo,[parent,$wt.widgets.Combo.checkStyle(style)]);
+this.itemCount=0;
 },"$wt.widgets.Composite,~N");
 $_M(c$,"add",
 function(string){
 if(this.selectInput!=null){
-this.selectInput.options[this.selectInput.options.length]=new Option(string,string);
-}},"~S");
+this.selectInput.options[this.itemCount]=new Option(string,string);
+}this.itemCount++;
+},"~S");
 $_M(c$,"add",
 function(string,index){
-var count=this.selectInput.options.length;
+var count=this.itemCount;
 if(this.selectInput!=null){
 this.selectInput.options[index]=new Option(string,string);
 }},"~S,~N");
@@ -42,9 +45,6 @@ function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
 this.addListener(25,typedListener);
 },"$wt.events.VerifyListener");
-$_V(c$,"checkSubclass",
-function(){
-});
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style&=-2049;
@@ -63,7 +63,8 @@ var height=0;
 if(wHint==-1){
 if(this.selectInput!=null){
 var options=this.selectInput.options;
-for(var i=0;i<options.length;i++){
+var length=this.itemCount;
+for(var i=0;i<length;i++){
 width=Math.max(width,O$.getStringPlainWidth(options[i].value));
 }
 }else{
@@ -77,7 +78,6 @@ height=this.computeSelectHeight();
 if(height==0)height=64;
 if(wHint!=-1)width=wHint;
 if(hHint!=-1)height=hHint;
-System.out.println("Combo : "+width+" "+height+" hints "+wHint+" "+hHint);
 return new $wt.graphics.Point(width,height);
 },"~N,~N,~B");
 $_M(c$,"computeSelectHeight",
@@ -107,19 +107,14 @@ this.selectInput=d$.createElement("SELECT");
 if(this.isSimple){
 this.selectInput.style.top=height+"px";
 this.selectInput.style.left=this.textInput.style.left;
-System.out.println("is Simple "+this.isSimple);
 this.selectInput.className="combo-select-box-visible";
 this.selectInput.size=this.visibleCount;
 this.handle.appendChild(this.selectInput);
 }else{
 this.selectInput.style.top=height+"px";
 this.selectInput.style.left=this.textInput.style.left;
-System.out.println("is Simple "+this.isSimple);
 this.selectInput.className="combo-select-box-invisible combo-select-box-notsimple";
 this.selectInput.size=this.visibleCount;
-System.out.println("ho combo1 "+this.textInput.scrollHeight);
-System.out.println("ho combo2 "+this.textInput.offsetHeight);
-System.out.println("ho combo3 "+this.textInput.clientHeight);
 this.getShell().handle.appendChild(this.selectInput);
 }this.textInput.ondblclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Combo$1")){
@@ -130,7 +125,6 @@ $_Z(this,arguments);
 },$wt.widgets,"Combo$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-System.out.println("button clicked!");
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].show();
 });
 c$=$_P();
@@ -146,7 +140,6 @@ $_Z(this,arguments);
 },$wt.widgets,"Combo$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-System.out.println("button clicked!");
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].show();
 });
 c$=$_P();
@@ -162,7 +155,6 @@ $_Z(this,arguments);
 },$wt.widgets,"Combo$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-System.out.println("select changed!"+this.b$["$wt.widgets.Combo"].selectInput.selectedIndex);
 this.b$["$wt.widgets.Combo"].noSelection=false;
 this.b$["$wt.widgets.Combo"].updateSelection();
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].hide();
@@ -180,7 +172,6 @@ $_Z(this,arguments);
 },$wt.widgets,"Combo$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-System.out.println("handle blurred!");
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].hide();
 });
 c$=$_P();
@@ -201,7 +192,6 @@ this.selectInput.style.zIndex="120";
 this.selectInput.className="combo-select-box-visible"+(this.isSimple?"":" combo-select-box-notsimple");
 this.selectInput.style.top=coordinate.y+"px";
 this.selectInput.style.left=coordinate.x+"px";
-System.out.println("Z "+this.selectInput.style.zIndex);
 this.selectInput.focus();
 });
 $_M(c$,"updateSelection",
@@ -224,16 +214,16 @@ this.sendEvent(24);
 $_M(c$,"deselectAll",
 function(){
 this.selectInput.selectedIndex=-1;
+this.setText("",false);
 this.sendEvent(24);
 });
 $_M(c$,"getItem",
 function(index){
-var options=this.selectInput.options;
 return this.selectInput.options[index].value;
 },"~N");
 $_M(c$,"getItemCount",
 function(){
-return this.selectInput.options.length;
+return this.itemCount;
 });
 $_M(c$,"getItemHeight",
 function(){
@@ -262,7 +252,6 @@ return new $wt.graphics.Point(0,0);
 $_M(c$,"getSelectionIndex",
 function(){
 if(this.noSelection)return-1;
-System.out.println("combo selected Index "+this.selectInput.selectedIndex);
 return this.selectInput.selectedIndex;
 });
 $_M(c$,"getText",
@@ -314,6 +303,7 @@ var newOptions=new Array(oldOptions.length-1);
 System.arraycopy(oldOptions,0,newOptions,0,index);
 System.arraycopy(oldOptions,index+1,newOptions,index,oldOptions.length-index-1);
 this.selectInput.options=newOptions;
+this.itemCount--;
 },"~N");
 $_M(c$,"remove",
 function(start,end){
@@ -323,6 +313,7 @@ var newOptions=new Array(oldOptions.length-(end-start+1));
 System.arraycopy(oldOptions,0,newOptions,0,start);
 System.arraycopy(oldOptions,end+1,newOptions,start,oldOptions.length-end-1);
 this.selectInput.options=newOptions;
+this.itemCount-=(end-start+1);
 },"~N,~N");
 $_M(c$,"remove",
 function(string){
@@ -333,7 +324,9 @@ $_M(c$,"removeAll",
 function(){
 {
 this.selectInput.options.length=0;
-}this.sendEvent(24);
+}this.itemCount=0;
+this.textInput.value="";
+this.sendEvent(24);
 });
 $_M(c$,"removeModifyListener",
 function(listener){
@@ -353,9 +346,10 @@ this.eventTable.unhook(25,listener);
 },"$wt.events.VerifyListener");
 $_M(c$,"select",
 function(index){
-if(index>=0&&index<this.selectInput.options.length){
+if(index>=0&&index<this.itemCount){
 this.selectInput.selectedIndex=index;
-}},"~N");
+}this.setText(this.getItem(index));
+},"~N");
 $_M(c$,"setBounds",
 function(x,y,width,height,flags){
 var buttonHeight=this.getTextHeight();
@@ -376,7 +370,6 @@ this.textInput.style.height=this.dropDownButton.style.height=(buttonHeight)+"px"
 this.dropDownButton.style.display="none";
 this.textInput.style.width=width+"px";
 }this.selectInput.style.width=width+"px";
-System.out.println("combo left "+this.left+" "+this.top+" textInput "+this.dropDownButton.style.width+" "+this.dropDownButton.style.height);
 },"~N,~N,~N,~N,~N");
 $_M(c$,"setItem",
 function(index,string){
@@ -402,6 +395,10 @@ function(selection){
 },"$wt.graphics.Point");
 $_M(c$,"setText",
 function(string){
+this.setText(string,true);
+},"~S");
+$_M(c$,"setText",
+function(string,modify){
 if((this.style&8)!=0){
 var index=this.indexOf(string);
 if(index!=-1)this.select(index);
@@ -409,8 +406,9 @@ return;
 }this.textInput.readOnly=false;
 this.textInput.value=string;
 this.textInput.readOnly=(this.style&8)!=0;
+if(modify){
 this.sendEvent(24);
-},"~S");
+}},"~S,~B");
 $_M(c$,"setTextLimit",
 function(limit){
 this.textInput.size=limit;

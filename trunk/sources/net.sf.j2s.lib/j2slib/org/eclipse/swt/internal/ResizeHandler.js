@@ -10,26 +10,29 @@ this.status=status;
 },"$wt.widgets.Decorations,~N");
 $_M(c$,"updateMinimized",
 function(){
-this.shell.setLocation(-1,d$.body.clientHeight-26);
+this.shell.setLocation(-1,this.shell.getMonitor().getClientArea().height-26);
 });
 $_M(c$,"updateMaximized",
 function(){
-var height=d$.body.clientHeight-0;
-if(height>w$.screen.availHeight-10){
-height=w$.screen.availHeight-10;
-}var width=d$.body.clientWidth;
-if(width>w$.screen.availWidth){
-width=w$.screen.availWidth;
+var monitor=this.shell.getMonitor();
+var clientArea=monitor.getClientArea();
+var bounds=monitor.getBounds();
+var height=clientArea.height-0;
+if(height>bounds.height-10){
+height=bounds.height-10;
+}var width=clientArea.width;
+if(width>bounds.width){
+width=bounds.width;
 }this.shell.setBounds(this.shell.computeTrim(0,0,width+2,height-18));
-d$.body.scrollTop=0;
 });
 $_M(c$,"updateCentered",
 function(){
+var monitor=this.shell.getMonitor();
 var size=this.shell.getSize();
-var y=Math.floor((d$.body.clientHeight-size.y)/2)-20;
+var y=Math.floor((monitor.getClientArea().height-size.y)/2)-20;
 if(y<0){
 y=0;
-}this.shell.setLocation(Math.floor((d$.body.clientWidth-size.x)/2),y);
+}this.shell.setLocation(Math.floor((monitor.getClientArea().width-size.x)/2),y);
 });
 $_M(c$,"getStatus",
 function(){

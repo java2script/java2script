@@ -19,7 +19,6 @@ this.construct(parent,32768);
 $_K(c$,
 function(parent,style){
 $_R(this,$wt.widgets.FileDialog,[parent,style]);
-this.checkSubclass();
 },"$wt.widgets.Shell,~N");
 $_M(c$,"getFileName",
 function(){

@@ -25,9 +25,6 @@ var typedListener=new $wt.widgets.TypedListener(listener);
 this.addListener(13,typedListener);
 this.addListener(14,typedListener);
 },"$wt.events.SelectionListener");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"computeSize",
 function(wHint,hHint){
 var index=this.parent.indexOf(this);

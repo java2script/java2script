@@ -13,9 +13,6 @@ $_K(c$,
 function(parent,style,index){
 this.construct(parent,style);
 },"$wt.widgets.Widget,~N,~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"getImage",
 function(){
 return this.image;

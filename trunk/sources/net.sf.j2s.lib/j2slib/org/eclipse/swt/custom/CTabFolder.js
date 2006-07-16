@@ -177,8 +177,7 @@ lineHeight++;
 }else{
 if((this.style&1024)!=0){
 lineHeight--;
-}}System.err.println("]"+lineHeight);
-x-=4;
+}}x-=4;
 y-=4+lineHeight;
 width+=8;
 height+=8+lineHeight;
@@ -1412,9 +1411,6 @@ function(style){
 style=$wt.widgets.Widget.checkBits(style,128,1024,0,0,0,0);
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_V(c$,"containerHandle",
 function(){
 return this.contentArea;

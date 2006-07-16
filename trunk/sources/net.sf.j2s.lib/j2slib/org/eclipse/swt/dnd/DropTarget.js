@@ -75,13 +75,6 @@ $_M(c$,"AddRef",
 this.refCount++;
 return this.refCount;
 },$fz.isPrivate=true,$fz));
-$_V(c$,"checkSubclass",
-function(){
-var name=this.getClass().getName();
-var validName=$wt.dnd.DropTarget.getName();
-if(!validName.equals(name)){
-$wt.dnd.DND.error(43);
-}});
 $_M(c$,"getControl",
 function(){
 return this.control;

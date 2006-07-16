@@ -74,13 +74,6 @@ $_M(c$,"AddRef",
 this.refCount++;
 return this.refCount;
 },$fz.isPrivate=true,$fz));
-$_V(c$,"checkSubclass",
-function(){
-var name=this.getClass().getName();
-var validName=$wt.dnd.DragSource.getName();
-if(!validName.equals(name)){
-$wt.dnd.DND.error(43);
-}});
 $_M(c$,"drag",
 ($fz=function(){
 },$fz.isPrivate=true,$fz));

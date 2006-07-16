@@ -1,4 +1,5 @@
 c$=$_C(function(){
+this.defer=false;
 this.control=null;
 this.type=0;
 this.data=null;

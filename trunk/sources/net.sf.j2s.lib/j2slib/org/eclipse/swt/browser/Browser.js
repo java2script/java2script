@@ -101,11 +101,6 @@ throw e;
 }
 }return false;
 });
-$_V(c$,"checkSubclass",
-function(){
-var name=this.getClass().getName();
-var index=name.lastIndexOf('.');
-});
 $_M(c$,"createHandle",
 function(){
 $_U(this,$wt.browser.Browser,"createHandle",[]);

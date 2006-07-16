@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Drawable"],"$wt.graphics.Device",["$wt.SWT","$wt.graphics.Color","$.DeviceData","$.Font","$.FontData","$.Point","$.Rectangle","$wt.widgets.Display"],function(){
+Clazz.load(["$wt.graphics.Drawable"],"$wt.graphics.Device",["$wt.SWT","$wt.graphics.Color","$.DeviceData","$.Font","$.FontData","$.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.disposed=false;
 $_Z(this,arguments);
@@ -16,9 +16,6 @@ function(data){
 this.create(data);
 this.init();
 },"$wt.graphics.DeviceData");
-$_M(c$,"checkDevice",
-function(){
-});
 $_M(c$,"create",
 function(data){
 },"$wt.graphics.DeviceData");

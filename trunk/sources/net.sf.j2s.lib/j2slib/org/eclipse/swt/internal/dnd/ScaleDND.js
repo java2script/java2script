@@ -1,10 +1,10 @@
-Clazz.load(["$wt.internal.dnd.DragAdapter"],"$wt.internal.dnd.ScaleDND",["$wt.graphics.Point"],function(){
+Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ScaleDND",["$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;
 this.isHorizontal=false;
 $_Z(this,arguments);
-},$wt.internal.dnd,"ScaleDND",$wt.internal.dnd.DragAdapter);
+},$wt.internal.dnd,"ScaleDND",null,$wt.internal.dnd.DragListener);
 $_V(c$,"dragBegan",
 function(e){
 var cssName=e.sourceElement.className;
@@ -60,4 +60,8 @@ e.sourceElement.style.left=this.currentLocation(e).x+"px";
 e.sourceElement.style.top=this.currentLocation(e).y+"px";
 }return true;
 },"$wt.internal.dnd.DragEvent");
+$_V(c$,"isDraggable",
+function(e){
+return true;
+},"$wt.internal.dnd.HTMLEventWrapper");
 });

@@ -253,8 +253,7 @@ w+=18;
 $_M(c$,"setControl",
 function(control){
 if(control!=null){
-}System.out.println("Ctab setControl "+control+" "+control.parent+" "+this.parent);
-if(this.control!=null&&this.control.isDisposed()){
+}if(this.control!=null&&this.control.isDisposed()){
 this.control=null;
 }var oldControl=this.control;
 var newControl=control;
@@ -266,7 +265,6 @@ return;
 }if(newControl!=null){
 var clientArea=this.parent.getClientArea();
 if(clientArea.height<=0||clientArea.width<=0){
-System.out.println("client area has trouble");
 }else{
 if(this.isSelected){
 newControl.setBounds(clientArea);

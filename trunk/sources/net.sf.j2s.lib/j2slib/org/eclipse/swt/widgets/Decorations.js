@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Canvas"],"$wt.widgets.Decorations",["java.lang.Runnable","$wt.events.SelectionAdapter","$wt.graphics.Image","$.Point","$.Rectangle","$wt.internal.ResizeSystem","$.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.ShellFrameDND","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Event","$.Label","$.Menu","$.Shell","$.Text"],function(){
+Clazz.load(["$wt.widgets.Canvas"],"$wt.widgets.Decorations",["java.lang.Runnable","$wt.graphics.Image","$.Point","$.Rectangle","$wt.internal.ResizeSystem","$.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.ShellFrameDND","$wt.widgets.Event","$.Menu"],function(){
 c$=$_C(function(){
 this.image=null;
 this.smallImage=null;
@@ -65,9 +65,6 @@ $_V(c$,"checkOpened",
 function(){
 if(!this.opened)this.resized=false;
 });
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"closeWidget",
 function(){
 var event=new $wt.widgets.Event();
@@ -104,8 +101,7 @@ width+=4;
 height+=4;
 x-=2;
 y-=2;
-}}System.err.println(new $wt.graphics.Rectangle(x,y,width,height));
-return new $wt.graphics.Rectangle(x,y,width,height);
+}}return new $wt.graphics.Rectangle(x,y,width,height);
 },"~N,~N,~N,~N");
 $_M(c$,"createAccelerators",
 function(){
@@ -131,7 +127,7 @@ this.createCSSDiv(handles[i]);
 $_V(c$,"createHandle",
 function(){
 if((this.style&65536)!=0||(this.style&32768)!=0){
-this.display.timerExec(25,(function(i$,v$){
+this.display.timerExec(10,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$1")){
 $_H();
 c$=$_C(function(){
@@ -151,14 +147,15 @@ this.handle.className="shell-default";
 this.nextWindowLocation();
 this.width=768;
 this.height=557;
-if(new Boolean((this.style&8)==0&(this.style&16)!=0)){
+if(new Boolean((this.style&8)==0&(this.style&16)!=0).valueOf()){
 this.handle.className+=" shell-trim";
-}d$.body.appendChild(this.handle);
+}this.getMonitor().handle.appendChild(this.handle);
 if((this.style&8)==0&&(this.style&16)!=0){
 this.createResizeHandles();
 }if((this.style&8)==0&&(this.style&(1248))!=0){
 this.setSystemMenu();
 }this.contentHandle=this.createCSSDiv("shell-content");
+if($wt.internal.dnd.DragAndDrop!=null){
 var dnd=new $wt.internal.dnd.DragAndDrop();
 dnd.addDragListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$2")){
@@ -187,7 +184,7 @@ c$=$_P();
 return $_N($wt.widgets.Decorations$2,i$,v$);
 })(this,null));
 dnd.bind(this.handle);
-});
+}});
 $_M(c$,"nextWindowLocation",
 ($fz=function(){
 if(w$.defaultWindowLeft==null){
@@ -195,7 +192,7 @@ w$.defaultWindowLeft="332";
 }else{
 var num=Integer.parseInt(""+w$.defaultWindowLeft);
 num+=32;
-if(num>d$.body.clientWidth){
+if(num>this.getMonitor().clientWidth){
 num=32;
 }w$.defaultWindowLeft=""+num;
 }if(w$.defaultWindowTop==null){
@@ -203,7 +200,7 @@ w$.defaultWindowTop="32";
 }else{
 var num=Integer.parseInt(""+w$.defaultWindowTop);
 num+=32;
-if(num>d$.body.clientHeight){
+if(num>this.getMonitor().clientHeight){
 num=32;
 }w$.defaultWindowTop=""+num;
 }if(w$.defaultWindowWidth==null){
@@ -220,76 +217,7 @@ function(){
 this.modalHandle=d$.createElement("DIV");
 this.modalHandle.className="shell-modal-block";
 this.modalHandle.style.zIndex=""+(Integer.parseInt(""+this.handle.style.zIndex)-1);
-d$.body.insertBefore(this.modalHandle,this.handle);
-});
-$_M(c$,"exportHTMLSource",
-function(){
-var shell=new $wt.widgets.Shell(this.display,66800);
-shell.setText("Export HTML Source");
-var b=this.contentHandle.innerHTML;
-if(O$.isIE){
-b=b.replace(/(<\/?)(\w+)(\s|>)/ig,function($0,$1,$2,$3){
-return $1+$2.toLowerCase()+$3;
-}).replace(/(style\s*=\s*")([^"]+)(")/ig,function($0,$1,$2,$3){
-if(!((/;$/).test($2))){
-$2+=";";
-}
-return"style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
-}).replace(/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig,function($0,$1,$2,$3,$4){
-return" "+$2+"=\"" + $3 + "\""+$4;
-
-
-
-});
-}else{
-b=b.replace(/(style\s*=\s*")([^"]+)(")/ig,function($0,$1,$2,$3){
-return"style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
-});
-}{
-b=b.replace(/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig,function($0,$1,$2,$3){
-$2=$2.replace(/\s\s+/g,' ').replace(/^\s+/,'').replace(/\s+$/g,'');
-if($2.length==0){
-if($3!=">"){
-return $3;
-}else{
-return">";
-}
-}else{
-return" class=\"" + $2 + "\""+$3;
-}
-});
-}shell.setLayout(new $wt.layout.GridLayout());
-var text=new $wt.widgets.Text(shell,2570);
-var gd=new $wt.layout.GridData(1808);
-gd.widthHint=400;
-gd.heightHint=275;
-text.setLayoutData(gd);
-var rect=this.getClientArea();
-var html="<div class=\"shell-content\" style=\"" + "width:" + rect.width + "px;height:" + rect.height + "px;\">"+b+"</div>";
-text.setText(html);
-new $wt.widgets.Label(shell,258).setLayoutData(new $wt.layout.GridData(768));
-var button=new $wt.widgets.Button(shell,8);
-button.setText("&OK");
-var gridData=new $wt.layout.GridData(128);
-gridData.widthHint=80;
-button.setLayoutData(gridData);
-button.addSelectionListener((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Decorations$3")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$3",$wt.events.SelectionAdapter);
-$_V(c$,"widgetSelected",
-function(e){
-this.f$.shell.close();
-},"$wt.events.SelectionEvent");
-c$=$_P();
-}
-return $_N($wt.widgets.Decorations$3,i$,v$);
-})(this,$_F("shell",shell)));
-shell.pack();
-shell.open();
+this.getMonitor().handle.insertBefore(this.modalHandle,this.handle);
 });
 $_M(c$,"createWidget",
 function(){
@@ -560,15 +488,13 @@ function(maximized){
 if(maximized&&this.contentHandle!=null){
 if(this.oldBounds==null){
 this.oldBounds=this.getBounds();
-this.oldBounds.width-=2;
-}var height=d$.body.clientHeight-0;
-if(height>w$.screen.availHeight-10){
-height=w$.screen.availHeight-10;
-}var width=d$.body.clientWidth;
-if(width>w$.screen.availWidth){
-width=w$.screen.availWidth;
-}this.setBounds(this.computeTrim(0,0,width+2,height-18));
-d$.body.scrollTop=0;
+this.oldBounds.width-=4;
+}var height=this.getMonitor().clientHeight-0;
+var width=this.getMonitor().clientWidth;
+if(width>this.getMonitor().width){
+width=this.getMonitor().width;
+}var titleHeight=((this.style&32)!=0)?20:0;
+this.setBounds(this.computeTrim(0,0,width+4,height-titleHeight+6));
 }if(maximized){
 $wt.internal.ResizeSystem.register(this,1024);
 }else{
@@ -612,7 +538,7 @@ this.oldBounds.width-=2;
 }var width=this.oldBounds.width;
 if(width<200){
 width=200;
-}this.setBounds(-1,d$.body.clientHeight-26,120,0);
+}this.setBounds(-1,this.getMonitor().clientHeight-26,120,0);
 }if(minimized){
 $wt.internal.ResizeSystem.register(this,128);
 }else{
@@ -633,7 +559,31 @@ if((this.style&2048)==0||(this.style&16)!=0){
 this.shellIcon=d$.createElement("DIV");
 this.shellIcon.className="shell-title-icon";
 this.titleBar.appendChild(this.shellIcon);
-this.shellIcon.onclick=$_Q((function(i$,v$){
+}if(this.minable()){
+this.shellMin=d$.createElement("DIV");
+this.shellMin.className="shell-title-min";
+this.titleBar.appendChild(this.shellMin);
+this.shellMin.onclick=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.Decorations$3")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"Decorations$3",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+$wt.internal.ResizeSystem.unregister(this.b$["$wt.widgets.Decorations"]);
+this.b$["$wt.widgets.Decorations"].setMinimized(true);
+});
+c$=$_P();
+}
+return $_N($wt.widgets.Decorations$3,i$,v$);
+})(this,null));
+}if((this.style&1024)!=0){
+this.shellMax=d$.createElement("DIV");
+this.shellMax.className="shell-title-normal-max";
+this.titleBar.appendChild(this.shellMax);
+this.shellMax.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$4")){
 $_H();
 c$=$_C(function(){
@@ -642,37 +592,32 @@ $_Z(this,arguments);
 },$wt.widgets,"Decorations$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-this.b$["$wt.widgets.Decorations"].exportHTMLSource();
+this.b$["$wt.widgets.Decorations"].toggleMaximize();
+this.b$["$wt.widgets.Decorations"].display.timerExec(25,(function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.Decorations$4$5")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"Decorations$4$5",null,Runnable);
+$_V(c$,"run",
+function(){
+this.b$["$wt.widgets.Decorations"].layout();
+});
+c$=$_P();
+}
+return $_N($wt.widgets.Decorations$4$5,i$,v$);
+})(this,null));
 });
 c$=$_P();
 }
 return $_N($wt.widgets.Decorations$4,i$,v$);
 })(this,null));
-}if(this.minable()){
-this.shellMin=d$.createElement("DIV");
-this.shellMin.className="shell-title-min";
-this.titleBar.appendChild(this.shellMin);
-this.shellMin.onclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Decorations$5")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$5",$wt.internal.RunnableCompatibility);
-$_V(c$,"run",
-function(){
-$wt.internal.ResizeSystem.unregister(this.b$["$wt.widgets.Decorations"]);
-this.b$["$wt.widgets.Decorations"].setMinimized(true);
-});
-c$=$_P();
-}
-return $_N($wt.widgets.Decorations$5,i$,v$);
-})(this,null));
-}if((this.style&1024)!=0){
-this.shellMax=d$.createElement("DIV");
-this.shellMax.className="shell-title-normal-max";
-this.titleBar.appendChild(this.shellMax);
-this.shellMax.onclick=$_Q((function(i$,v$){
+}if((this.style&64)!=0){
+this.shellClose=d$.createElement("DIV");
+this.shellClose.className="shell-title-close";
+this.titleBar.appendChild(this.shellClose);
+this.shellClose.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$6")){
 $_H();
 c$=$_C(function(){
@@ -681,47 +626,13 @@ $_Z(this,arguments);
 },$wt.widgets,"Decorations$6",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
-this.b$["$wt.widgets.Decorations"].toggleMaximize();
-this.b$["$wt.widgets.Decorations"].display.timerExec(25,(function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Decorations$6$7")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$6$7",null,Runnable);
-$_V(c$,"run",
-function(){
-this.b$["$wt.widgets.Decorations"].layout();
-});
-c$=$_P();
-}
-return $_N($wt.widgets.Decorations$6$7,i$,v$);
-})(this,null));
-});
-c$=$_P();
-}
-return $_N($wt.widgets.Decorations$6,i$,v$);
-})(this,null));
-}if((this.style&64)!=0){
-this.shellClose=d$.createElement("DIV");
-this.shellClose.className="shell-title-close";
-this.titleBar.appendChild(this.shellClose);
-this.shellClose.onclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Decorations$8")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$8",$wt.internal.RunnableCompatibility);
-$_V(c$,"run",
-function(){
 if($_O(this.b$["$wt.widgets.Decorations"],$wt.widgets.Shell)){
 var shell=this.b$["$wt.widgets.Decorations"];
 shell.close();
 }});
 c$=$_P();
 }
-return $_N($wt.widgets.Decorations$8,i$,v$);
+return $_N($wt.widgets.Decorations$6,i$,v$);
 })(this,null));
 }this.shellTitle=d$.createElement("DIV");
 this.shellTitle.className="shell-title-text";
@@ -730,12 +641,12 @@ if((this.style&1024)!=0){
 this.titleBar.ondblclick=this.shellMax.onclick;
 }this.handle.appendChild(this.titleBar);
 this.titleBar.onclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Decorations$9")){
+if(!$_D("org.eclipse.swt.widgets.Decorations$7")){
 $_H();
 c$=$_C(function(){
 $_B(this,arguments);
 $_Z(this,arguments);
-},$wt.widgets,"Decorations$9",$wt.internal.RunnableCompatibility);
+},$wt.widgets,"Decorations$7",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var fHandleStyle=this.b$["$wt.widgets.Decorations"].handle.style;
@@ -744,7 +655,7 @@ fHandleStyle.zIndex=w$.currentTopZIndex=""+(Integer.parseInt(w$.currentTopZIndex
 }});
 c$=$_P();
 }
-return $_N($wt.widgets.Decorations$9,i$,v$);
+return $_N($wt.widgets.Decorations$7,i$,v$);
 })(this,null));
 if(w$.currentTopZIndex==null){
 this.handle.style.zIndex=w$.currentTopZIndex="1000";

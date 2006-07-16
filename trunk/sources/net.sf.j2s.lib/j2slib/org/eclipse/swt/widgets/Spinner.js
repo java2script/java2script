@@ -26,9 +26,6 @@ c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return style&-769;
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"createHandle",
 function(){
 $_U(this,$wt.widgets.Spinner,"createHandle",[]);
@@ -135,18 +132,17 @@ buffer+="0";
 count--;
 }
 string=buffer;
-System.out.println(buffer);
 }else{
 string=""+this.maximum;
 }var size=O$.getStringPlainSize(string);
 width=size.x;
-height=size.y;
+height=O$.getContainerHeight(this.updownHandle);
+height=O$.getContainerHeight(this.upBtnHandle)+O$.getContainerHeight(this.downBtnHandle);
 }if(width==0)width=64;
 if(height==0)height=64;
 if(wHint!=-1)width=wHint;
 if(hHint!=-1)height=hHint;
 var trim=this.computeTrim(0,0,width,height);
-System.err.println(trim);
 return new $wt.graphics.Point(trim.width,trim.height);
 },"~N,~N,~B");
 $_V(c$,"computeTrim",
@@ -211,10 +207,6 @@ $_M(c$,"getSelection",
 function(){
 return Integer.parseInt(this.textInputHandle.value);
 });
-$_M(c$,"getSelectionText",
-function(){
-return 0;
-});
 $_M(c$,"paste",
 function(){
 if((this.style&8)!=0)return;
@@ -224,11 +216,6 @@ function(){
 $_U(this,$wt.widgets.Spinner,"register",[]);
 this.display.addControl(this.hwndText,this);
 this.display.addControl(this.hwndUpDown,this);
-});
-$_M(c$,"releaseHandle",
-function(){
-$_U(this,$wt.widgets.Spinner,"releaseHandle",[]);
-this.hwndText=this.hwndUpDown=null;
 });
 $_M(c$,"removeModifyListener",
 function(listener){
@@ -279,7 +266,6 @@ this.setSelection(value,false);
 $_M(c$,"setSelection",
 function(value,notify){
 var string=String.valueOf(value);
-System.out.println("Spinner value "+value+" "+this.digits);
 if(this.digits>0){
 var decimalSeparator=this.getDecimalSeparator();
 var index=string.length-this.digits;
@@ -297,9 +283,7 @@ buffer.append(string);
 }string=buffer.toString();
 }if(this.hooks(25)||this.filters(25)){
 var length=this.textInputHandle.value.length;
-System.out.println("Spinner set text of "+length);
 string=this.verifyText(string,0,length,null);
-System.out.println("Spinner set text of 2"+string);
 if(string==null)return;
 }if(this.textInputHandle!=null){
 this.textInputHandle.value=""+value;
@@ -334,16 +318,33 @@ return event.text;
 $_M(c$,"setSize",
 function(width,height){
 $_U(this,$wt.widgets.Spinner,"setSize",[width,height]);
-this.textInputHandle.style.width=(width-28)+"px";
+this.textInputHandle.style.width=(width-16)+"px";
 this.textInputHandle.style.height=((height-2)>24?20:height-2)+"px";
-System.out.println("width "+width+" px "+this.textInputHandle.style.width+" heigth "+height+" "+this.textInputHandle.style.height);
 },"~N,~N");
 $_M(c$,"setBounds",
 function(x,y,width,height,flags){
 $_U(this,$wt.widgets.Spinner,"setBounds",[x,y,width,height,flags]);
-System.out.println("Spinner set bounds called on "+x+" "+y+" "+width+" "+height);
-System.out.println("width "+width+" px "+this.textInputHandle.style.width+" heigth "+height+" "+this.textInputHandle.style.height);
-this.textInputHandle.style.width=(width-28)+"px";
+this.textInputHandle.style.width=(width-16)+"px";
 this.textInputHandle.style.height=((height-2)>24?20:height-2)+"px";
 },"~N,~N,~N,~N,~N");
+$_M(c$,"releaseHandle",
+function(){
+if(this.textHandle!=null){
+O$.destroyHandle(this.textHandle);
+this.textHandle=null;
+}if(this.upBtnHandle!=null){
+O$.destroyHandle(this.upBtnHandle);
+this.upBtnHandle=null;
+}if(this.downBtnHandle!=null){
+O$.destroyHandle(this.downBtnHandle);
+this.downBtnHandle=null;
+}if(this.updownHandle!=null){
+O$.destroyHandle(this.updownHandle);
+this.updownHandle=null;
+}$_U(this,$wt.widgets.Spinner,"releaseHandle",[]);
+});
+$_M(c$,"getSelectionText",
+function(){
+return 0;
+});
 });

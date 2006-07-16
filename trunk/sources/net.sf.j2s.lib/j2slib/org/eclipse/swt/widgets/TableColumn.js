@@ -1,8 +1,11 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableColumn",["$wt.internal.browser.OS","$wt.widgets.TypedListener"],function(){
+Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableColumn",["$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.TableColumnDND","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
+this.lastX=0;
+this.lastY=0;
 this.parent=null;
 this.resizable=false;
 this.moveable=false;
+this.resizeHandle=null;
 $_Z(this,arguments);
 },$wt.widgets,"TableColumn",$wt.widgets.Item);
 $_K(c$,
@@ -35,9 +38,6 @@ c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return $wt.widgets.Widget.checkBits(style,16384,16777216,131072,0,0,0);
 },"~N");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"getAlignment",
 function(){
 if((this.style&16384)!=0)return 16384;
@@ -66,7 +66,8 @@ function(){
 var index=this.parent.indexOf(this);
 if(index==-1)return 0;
 if(this.handle.style.width!=null&&this.handle.style.width.length!=0){
-return Integer.parseInt(this.handle.style.width);
+var styleWidth=Integer.parseInt(this.handle.style.width);
+return this.text!=null?Math.max(O$.getStringPlainWidth(this.text),styleWidth):styleWidth;
 }return O$.getContainerWidth(this.handle);
 });
 $_M(c$,"pack",
@@ -79,10 +80,12 @@ function(){
 $_U(this,$wt.widgets.TableColumn,"releaseChild",[]);
 this.parent.destroyItem(this);
 });
-$_M(c$,"releaseWidget",
+$_M(c$,"releaseHandle",
 function(){
-$_U(this,$wt.widgets.TableColumn,"releaseWidget",[]);
-this.parent=null;
+if(this.resizeHandle!=null){
+O$.destroyHandle(this.resizeHandle);
+this.resizeHandle=null;
+}$_U(this,$wt.widgets.TableColumn,"releaseHandle",[]);
 });
 $_M(c$,"removeControlListener",
 function(listener){
@@ -130,11 +133,23 @@ if(this.handle.childNodes[i]!=null){
 this.handle.removeChild(this.handle.childNodes[i]);
 }}
 }this.handle.appendChild(d$.createTextNode(string));
-},"~S");
+var columnMaxWidth=this.parent.columnMaxWidth;
+var width=O$.getContainerWidth(this.handle);
+if(columnMaxWidth.length>index){
+if(columnMaxWidth[index]<width){
+this.parent.lineWidth+=width-columnMaxWidth[index];
+columnMaxWidth[index]=width;
+}}else{
+this.parent.lineWidth+=width;
+columnMaxWidth[index]=width;
+}},"~S");
 $_M(c$,"setWidth",
 function(width){
 var index=this.parent.indexOf(this);
 if(index==-1)return;
-this.handle.style.width=width+"px";
+var tempWidth=width;
+if(this.text!=null){
+tempWidth=Math.max(O$.getStringPlainWidth(this.text),width);
+}this.handle.style.width=tempWidth+"px";
 },"~N");
 });

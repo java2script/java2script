@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.dnd.DragAdapter"],"$wt.internal.dnd.ShellFrameDND",null,function(){
+Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ShellFrameDND",null,function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;
@@ -8,7 +8,7 @@ this.resize=null;
 this.frame=null;
 this.overFrameHandle=null;
 $_Z(this,arguments);
-},$wt.internal.dnd,"ShellFrameDND",$wt.internal.dnd.DragAdapter);
+},$wt.internal.dnd,"ShellFrameDND",null,$wt.internal.dnd.DragListener);
 $_V(c$,"isDraggable",
 function(e){
 var cssName=e.target.className;

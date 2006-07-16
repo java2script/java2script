@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable"],"java.lang.Throwable",["java.lang.IllegalArgumentException","$.IllegalStateException","$.NullPointerException","$.StackTraceElement"],function(){
+Clazz.load(["java.io.Serializable"],"java.lang.Throwable",["java.lang.StackTraceElement"],function(){
 c$=$_C(function(){
 this.detailMessage=null;
 this.cause=null;

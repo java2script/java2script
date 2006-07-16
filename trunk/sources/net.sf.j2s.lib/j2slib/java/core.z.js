@@ -1,3 +1,9 @@
+$_I(java.io,"Serializable");
+$_I(java.lang,"CharSequence");
+$_I(java.lang,"Cloneable");
+$_I(java.lang,"Comparable");
+$_I(java.lang,"Runnable");
+$_I(java.util,"Comparator");
 /* http://j2s.sf.net/ */Clazz.load(["java.io.Serializable"],"java.lang.Number",null,function(){
 java.lang.Number=Number;
 
@@ -351,3 +357,130 @@ Clazz.load(["java.util.Collection"],"java.util.List",null,function(){
 $_I(java.util,"List",java.util.Collection);
 });
 $_I(java.util,"RandomAccess");
+/* http://j2s.sf.net/ */Clazz.declarePackage("net.sf.j2s.ajax");
+c$=Clazz.decorateAsClass(function(){
+this.transport=null;
+if(window.XMLHttpRequest){
+this.transport=new XMLHttpRequest();
+}else{
+try{
+this.transport=new ActiveXObject("Msxml2.XMLHTTP");
+}catch(e){
+this.transport=new ActiveXObject("Microsoft.XMLHTTP");
+}
+}
+this.getReadyState=function(){
+return this.transport.readyState;
+};
+this.getResponseText=function(){
+return this.transport.responseText;
+};
+this.getResponseXML=function(){
+return this.transport.responseXML;
+};
+this.getResponseCode=function(){
+return this.transport.status;
+};
+this.registerOnReadyStateChange=function(handler){
+this.transport.onreadystatechange=(function(transport,handler){
+return function(){
+var state=transport.readyState;
+if(handler!=null){
+if(state==1){
+handler.onLoading();
+}else if(state==2){
+handler.onLoaded();
+}else if(state==3){
+handler.onLoaded();
+}else if(state==4){
+handler.onComplete();
+transport.onreadystatechange=function(){};
+}
+}
+};
+})(this.transport,handler);
+};
+this.setRequestHeader=function(key,value){
+this.transport.setRequestHeader(key,value);
+};
+this.getResponseHeader=function(key){
+return this.transport.getResponseHeader(key);
+};
+this.open=function(method,url){
+this.open(method,url,false);
+};
+this.open=function(method,url,async){
+this.transport.open(method,url,async);
+this.transport.setRequestHeader("User-Agent",
+"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
+if(method!=null&&method.toLowerCase()=="post"){
+this.transport.setRequestHeader("Content-type",
+"application/x-www-form-urlencoded");
+
+
+if(this.transport.overrideMimeType){
+this.transport.setRequestHeader("Connection","close");
+}
+}
+};
+this.send=function(){
+this.send(null);
+};
+this.send=function(str){
+this.transport.send(str);
+};
+},net.sf.j2s.ajax,"HttpRequest");
+$_J("net.sf.j2s.ajax");
+$_I(net.sf.j2s.ajax,"IXHRCallback");
+$_J("net.sf.j2s.ajax");
+Clazz.load(["net.sf.j2s.ajax.IXHRCallback"],"net.sf.j2s.ajax.XHRCallbackAdapter",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackAdapter",null,net.sf.j2s.ajax.IXHRCallback);
+$_V(c$,"onComplete",
+function(){
+});
+$_V(c$,"onInteractive",
+function(){
+});
+$_V(c$,"onLoaded",
+function(){
+});
+$_V(c$,"onLoading",
+function(){
+});
+});
+$_J("net.sf.j2s.ajax");
+Clazz.load(["net.sf.j2s.ajax.IXHRCallback"],"net.sf.j2s.ajax.XHRCallbackSWTAdapter",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},net.sf.j2s.ajax,"XHRCallbackSWTAdapter",null,net.sf.j2s.ajax.IXHRCallback);
+$_M(c$,"swtOnComplete",
+function(){
+});
+$_M(c$,"swtOnInteractive",
+function(){
+});
+$_M(c$,"swtOnLoaded",
+function(){
+});
+$_M(c$,"swtOnLoading",
+function(){
+});
+$_V(c$,"onComplete",
+function(){
+this.swtOnComplete();
+});
+$_V(c$,"onInteractive",
+function(){
+this.swtOnInteractive();
+});
+$_V(c$,"onLoaded",
+function(){
+this.swtOnLoaded();
+});
+$_V(c$,"onLoading",
+function(){
+this.swtOnLoading();
+});
+});

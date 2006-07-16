@@ -225,7 +225,8 @@ function(){
 if(this.parent==null)return;
 var lpwp=this.parent.lpwp;
 if(lpwp==null)return;
-for(var i=0;i<lpwp.length;i++){
+var length=lpwp.length;
+for(var i=0;i<length;i++){
 var wp=lpwp[i];
 if(wp!=null&&wp.hwnd==this.handle){
 this.SetWindowPos(wp.hwnd,null,wp.x,wp.y,wp.cx,wp.cy,wp.flags);
@@ -467,7 +468,6 @@ this.pack(true);
 $_M(c$,"pack",
 function(changed){
 var computeSize=this.computeSize(-1,-1,changed);
-System.out.println(computeSize);
 this.setSize(computeSize);
 },"~B");
 $_M(c$,"redraw",
@@ -754,7 +754,6 @@ this.setBounds(0,0,Math.max(0,width),Math.max(0,height),flags);
 },"~N,~N");
 $_M(c$,"setSize",
 function(size){
-System.err.println(size);
 this.setSize(size.x,size.y);
 },"$wt.graphics.Point");
 $_M(c$,"setTabGroupFocus",

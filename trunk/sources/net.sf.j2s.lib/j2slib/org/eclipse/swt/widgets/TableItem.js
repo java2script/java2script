@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.widgets.Event"],function(){
+Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.strings=null;
@@ -15,6 +15,7 @@ this.cellForeground=null;
 this.cellFont=null;
 this.index=0;
 this.selected=false;
+this.check=null;
 $_Z(this,arguments);
 },$wt.widgets,"TableItem",$wt.widgets.Item);
 $_K(c$,
@@ -30,14 +31,86 @@ function(parent,style,index,create){
 $_R(this,$wt.widgets.TableItem,[parent,style]);
 this.parent=parent;
 if(create)parent.createItem(this,index);
+this.configureItem();
 },"$wt.widgets.Table,~N,~N,~B");
+$_M(c$,"configureItem",
+($fz=function(){
+if((this.parent.style&32)!=0){
+this.check.onclick=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.TableItem$1")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"TableItem$1",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+var e=new $wt.widgets.Event();
+e.display=this.b$["$wt.widgets.TableItem"].display;
+e.type=13;
+e.detail=32;
+e.item=this.b$["$wt.widgets.TableItem"];
+e.widget=this.b$["$wt.widgets.TableItem"];
+this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
+});
+c$=$_P();
+}
+return $_N($wt.widgets.TableItem$1,i$,v$);
+})(this,null));
+}if((this.parent.style&65536)!=0||this.index==0){
+this.handle.onclick=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.TableItem$2")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"TableItem$2",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+var evt=this.getEvent();
+this.b$["$wt.widgets.TableItem"].parent.toggleSelection(this.b$["$wt.widgets.TableItem"],evt.ctrlKey,evt.shiftKey);
+var e=new $wt.widgets.Event();
+e.display=this.b$["$wt.widgets.TableItem"].display;
+e.type=13;
+e.detail=0;
+e.item=this.b$["$wt.widgets.TableItem"];
+e.widget=this.b$["$wt.widgets.TableItem"];
+this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
+this.toReturn(false);
+});
+c$=$_P();
+}
+return $_N($wt.widgets.TableItem$2,i$,v$);
+})(this,null));
+this.handle.ondblclick=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.TableItem$3")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"TableItem$3",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+var evt=this.getEvent();
+this.b$["$wt.widgets.TableItem"].parent.toggleSelection(this.b$["$wt.widgets.TableItem"],evt.ctrlKey,evt.shiftKey);
+var e=new $wt.widgets.Event();
+e.display=this.b$["$wt.widgets.TableItem"].display;
+e.type=14;
+e.detail=0;
+e.item=this.b$["$wt.widgets.TableItem"];
+e.widget=this.b$["$wt.widgets.TableItem"];
+this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
+this.toReturn(false);
+});
+c$=$_P();
+}
+return $_N($wt.widgets.TableItem$3,i$,v$);
+})(this,null));
+}},$fz.isPrivate=true,$fz));
 c$.checkNull=$_M(c$,"checkNull",
 function(control){
 return control;
 },"$wt.widgets.Table");
-$_V(c$,"checkSubclass",
-function(){
-});
 $_M(c$,"clear",
 function(){
 this.text="";
@@ -301,100 +374,17 @@ if(this.strings==null&&index!=0)this.strings=new Array(count);
 if(this.strings!=null){
 if(string.equals(this.strings[index]))return;
 this.strings[index]=string;
-}var tbodyTD=null;
-if(index<this.handle.childNodes.length){
-if(this.handle.childNodes[index]!=null&&"TD".equals(this.handle.childNodes[index].nodeName)){
-tbodyTD=this.handle.childNodes[index];
-}}if(tbodyTD==null){
-tbodyTD=d$.createElement("TD");
-this.handle.appendChild(tbodyTD);
-}if(tbodyTD.childNodes!=null){
-for(var i=0;i<tbodyTD.childNodes.length;i++){
-if(tbodyTD.childNodes[i]!=null){
-tbodyTD.removeChild(tbodyTD.childNodes[i]);
-}}
-}var el=d$.createElement("DIV");
-tbodyTD.appendChild(el);
-el.className="table-item-cell-default";
-if(index==0&&(this.parent.style&32)!=0){
-var check=d$.createElement("INPUT");
-check.type="checkbox";
-el.appendChild(check);
-check.onclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.TableItem$1")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$1",$wt.internal.RunnableCompatibility);
-$_V(c$,"run",
-function(){
-var e=new $wt.widgets.Event();
-e.display=this.b$["$wt.widgets.TableItem"].display;
-e.type=13;
-e.detail=32;
-e.item=this.b$["$wt.widgets.TableItem"];
-e.widget=this.b$["$wt.widgets.TableItem"];
-this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
-});
-c$=$_P();
-}
-return $_N($wt.widgets.TableItem$1,i$,v$);
-})(this,null));
-}var text=d$.createElement("DIV");
-el.appendChild(text);
-text.className="table-item-cell-text-default";
-text.appendChild(d$.createTextNode(string));
-if((this.parent.style&65536)!=0||index==0){
-text.onclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.TableItem$2")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$2",$wt.internal.RunnableCompatibility);
-$_V(c$,"run",
-function(){
-var evt=this.getEvent();
-this.b$["$wt.widgets.TableItem"].parent.toggleSelection(this.b$["$wt.widgets.TableItem"],evt.ctrlKey,evt.shiftKey);
-var e=new $wt.widgets.Event();
-e.display=this.b$["$wt.widgets.TableItem"].display;
-e.type=13;
-e.detail=0;
-e.item=this.b$["$wt.widgets.TableItem"];
-e.widget=this.b$["$wt.widgets.TableItem"];
-this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
-this.toReturn(false);
-});
-c$=$_P();
-}
-return $_N($wt.widgets.TableItem$2,i$,v$);
-})(this,null));
-text.ondblclick=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.TableItem$3")){
-$_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$3",$wt.internal.RunnableCompatibility);
-$_V(c$,"run",
-function(){
-var evt=this.getEvent();
-this.b$["$wt.widgets.TableItem"].parent.toggleSelection(this.b$["$wt.widgets.TableItem"],evt.ctrlKey,evt.shiftKey);
-System.out.println("An event is runned "+evt);
-var e=new $wt.widgets.Event();
-e.display=this.b$["$wt.widgets.TableItem"].display;
-e.type=14;
-e.detail=0;
-e.item=this.b$["$wt.widgets.TableItem"];
-e.widget=this.b$["$wt.widgets.TableItem"];
-this.b$["$wt.widgets.TableItem"].parent.sendEvent(e);
-this.toReturn(false);
-});
-c$=$_P();
-}
-return $_N($wt.widgets.TableItem$3,i$,v$);
-})(this,null));
+}var text=this.handle.childNodes[index].childNodes[0];
+text.innerHTML="<div class=\"table-item-cell-default\"><div class=\"table-item-cell-text-default\">"+string+"</div></div>";
+var columnMaxWidth=this.parent.columnMaxWidth;
+var width=O$.getContainerWidth(text);
+if(columnMaxWidth.length>index){
+if(columnMaxWidth[index]<width){
+this.parent.lineWidth=this.parent.lineWidth+width-columnMaxWidth[index];
+columnMaxWidth[index]=width;
+}}else{
+this.parent.lineWidth=this.parent.lineWidth+width;
+columnMaxWidth[index]=width;
 }},"~N,~S");
 $_M(c$,"showSelection",
 function(selected){
