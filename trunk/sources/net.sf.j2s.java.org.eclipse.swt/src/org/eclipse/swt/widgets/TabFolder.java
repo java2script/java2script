@@ -201,7 +201,7 @@ protected void checkSubclass () {
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
-	System.out.println(wHint + "," + hHint + "," + changed);
+//	System.out.println(wHint + "," + hHint + "," + changed);
 	Point size = super.computeSize (wHint, hHint, changed);
 	int width = -124; // this number is an experimental number from WinXP in classical style
 	if (items != null && items.length != 0) {

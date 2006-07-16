@@ -107,7 +107,7 @@ private void configureColumn() {
 			System.out.println(" at " + i + " left is "+ left);
 		}
 		resizeHandle.style.left = (left  - 3)+ "px"; 
-		System.out.println("resize handle for " + this.text + " " + resizeHandle.style.left);
+//		System.out.println("resize handle for " + this.text + " " + resizeHandle.style.left);
 		/*
 		 * Resizing the columns
 		 */
@@ -125,14 +125,14 @@ private void configureColumn() {
 					lastX = event.x;
 				}
 				int tempWidth = lastX - Integer.parseInt(resizeHandle.style.left) + getWidth();
-				System.out.println("drag ends" + lastX + " " + getWidth() + " " + tempWidth);
+//				System.out.println("drag ends" + lastX + " " + getWidth() + " " + tempWidth);
 				setWidth(Math.max(0, tempWidth));
 				return true;
 			}
 			
 			public boolean dragging(DragEvent e) {
 				super.dragging(e);
-				System.out.println("draggin");
+//				System.out.println("draggin");
 				//e.sourceElement.style.top = currentLocation(e).y + "px";
 				//caculateSelection();
 				Event event = new Event ();
@@ -723,7 +723,7 @@ public void setWidth (int width) {
 		tempWidth = Math.max(OS.getStringPlainWidth(this.text), width);
 	}
 	handle.style.width = tempWidth + "px";
-	System.out.println("setting width to " + handle.style.width);
+//	System.out.println("setting width to " + handle.style.width);
 //	configureColumn();
 }
 

@@ -360,7 +360,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 			y -= 2;
 		}
 	}
-	System.err.println( new Rectangle (x, y, width, height));
+//	System.err.println( new Rectangle (x, y, width, height));
 	return new Rectangle (x, y, width, height);
 	/*
 	/* Get the size of the trimmings *-/

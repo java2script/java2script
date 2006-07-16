@@ -568,7 +568,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 			lineHeight--;
 		}
 	}
-	System.err.println("]" + lineHeight);
+//	System.err.println("]" + lineHeight);
 	x -= 4;
 	y -= 4 + lineHeight;
 	width += 8;

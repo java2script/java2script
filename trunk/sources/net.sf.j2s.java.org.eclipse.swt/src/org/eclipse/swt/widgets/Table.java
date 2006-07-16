@@ -597,7 +597,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 //	width = lineWidth;
 	if (items.length > 0) {
 		String t = items[0].getNameText();
-		System.out.println(t);
+//		System.out.println(t);
 //		height = (UIStringUtil.calculatePlainStringLineHeight(t) + 5) * (items.length + 0);
 		height = (OS.getStringPlainHeight(t) + 5) * (items.length + 0);
 	} else {
@@ -1040,7 +1040,7 @@ void createItem (TableItem item, int index) {
 		items[index] = item;
 //		itemsStr[index] = trStr;
 	} else {
-		System.out.println("existed");
+//		System.out.println("existed");
 		tbody.insertBefore(tbodyTR, tbody.childNodes[index]);
 		for (int i = items.length; i > index; i--) {
 			items[i] = items[i - 1];
@@ -1206,9 +1206,10 @@ public void deselectAll () {
 	OS.SendMessage (handle, OS.LVM_SETITEMSTATE, -1, lvItem);
 	ignoreSelect = false;
 	*/
-	System.out.println("deselect " + items + " " + items.length);
+//	System.out.println("deselect " + items + " " + items.length);
+	TableItem[] items = getSelection();
 	for (int i = 0; i < items.length; i++) {
-		System.out.println("deselecting " + i + items[i] + " " + items.length);
+//		System.out.println("deselecting " + i + items[i] + " " + items.length);
 		items[i].showSelection(false);
 	}
 	selection = new TableItem[0];
@@ -2177,7 +2178,7 @@ public void remove (int [] indices) {
 				System.arraycopy (items, index + 1, newItems, index, --count - index);
 				items = newItems;
 				newItems = new TableItem[count-1];
-				System.out.println("after remove " + items + " " + count + " " + index);
+//				System.out.println("after remove " + items + " " + count + " " + index);
 				//items [count] = null; 
 				last = index;
 			}
@@ -3443,7 +3444,7 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 			if (lastSelection != null) {
 				int idx1 = Math.min(lastSelection.index, item.index);
 				int idx2 = Math.max(lastSelection.index, item.index);
-				System.out.println("here!" + idx1 + ":" + idx2);
+//				System.out.println("here!" + idx1 + ":" + idx2);
 				selection = new TableItem[0];
 				for (int i = idx1; i <= idx2; i++) {
 					TableItem ti = items[i];

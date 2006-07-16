@@ -383,7 +383,7 @@ public class Spinner extends Composite {
 					count--;
 				}
 				string = buffer;
-				System.out.println(buffer);
+//				System.out.println(buffer);
 			} else {
 				string = "" + maximum;
 			}
@@ -393,14 +393,14 @@ public class Spinner extends Composite {
 			width = size.x;
 			height = OS.getContainerHeight(this.updownHandle);
 			height = OS.getContainerHeight(this.upBtnHandle) + OS.getContainerHeight(this.downBtnHandle);
-			System.out.println("Spinner ho hoy " + height);
+//			System.out.println("Spinner ho hoy " + height);
 		}
 		if (width == 0) width = DEFAULT_WIDTH;
 		if (height == 0) height = DEFAULT_HEIGHT;
 		if (wHint != SWT.DEFAULT) width = wHint;
 		if (hHint != SWT.DEFAULT) height = hHint;
 		Rectangle trim = computeTrim (0, 0, width, height);
-		System.err.println("Spinner " + trim + " " + height);
+//		System.err.println("Spinner " + trim + " " + height);
 //		if (hHint == SWT.DEFAULT) {
 //		trim.height = Math.max (trim.height, OS.GetSystemMetrics (OS.SM_CYVSCROLL));
 //		}
@@ -997,7 +997,7 @@ public class Spinner extends Composite {
 	void setSelection (int value, boolean notify) {
 		//OS.SendMessage (hwndUpDown , OS.IsWinCE ? OS.UDM_SETPOS : OS.UDM_SETPOS32, 0, value);
 		String string = String.valueOf (value);
-		System.out.println("Spinner value " + value + " " + digits);
+//		System.out.println("Spinner value " + value + " " + digits);
 		if (digits > 0) {
 			String decimalSeparator = getDecimalSeparator ();
 			int index = string.length () - digits;
@@ -1018,9 +1018,9 @@ public class Spinner extends Composite {
 		if (hooks (SWT.Verify) || filters (SWT.Verify)) {
 			//int length = OS.GetWindowTextLength (hwndText);
 			int length = textInputHandle.value.length();
-			System.out.println("Spinner set text of " + length);	
+//			System.out.println("Spinner set text of " + length);	
 			string = verifyText (string, 0, length, null);
-			System.out.println("Spinner set text of 2" + string);
+//			System.out.println("Spinner set text of 2" + string);
 			if (string == null) return;
 		}
 		if (textInputHandle != null) {
@@ -1087,14 +1087,14 @@ public class Spinner extends Composite {
 		super.setSize(width, height);
 		textInputHandle.style.width = (width - 16) + "px";
 		textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";
-		System.out.println("width " + width + " px " + textInputHandle.style.width
-				+ " heigth " + height + " " + textInputHandle.style.height);
+//		System.out.println("width " + width + " px " + textInputHandle.style.width
+//				+ " heigth " + height + " " + textInputHandle.style.height);
 	}
 	void setBounds (int x, int y, int width, int height, int flags) {
 		super.setBounds(x, y, width, height, flags);
-		System.out.println("Spinner set bounds called on " + x + " " + y + " " + width + " " + height);
-		System.out.println("width " + width + " px " + textInputHandle.style.width
-				+ " heigth " + height + " " + textInputHandle.style.height);
+//		System.out.println("Spinner set bounds called on " + x + " " + y + " " + width + " " + height);
+//		System.out.println("width " + width + " px " + textInputHandle.style.width
+//				+ " heigth " + height + " " + textInputHandle.style.height);
 		
 		textInputHandle.style.width = (width - 16) + "px";
 		textInputHandle.style.height = ((height - 2) > 24 ? 20 : height - 2) + "px";

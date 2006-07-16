@@ -24,7 +24,7 @@ public class MESSAGE {
 	public static final int CONTROL_RESIZE = 1;
 	public static final int CONTROL_LAYOUT = 2;
 	
-	
+	public boolean defer;
 	public Control control;
 	public int type;
 	public Object data;

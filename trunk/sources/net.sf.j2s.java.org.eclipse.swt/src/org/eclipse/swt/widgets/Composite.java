@@ -52,6 +52,7 @@ public class Composite extends Scrollable {
 	int layoutCount = 0;
 //	Control [] children = new Control[0];
 	Control [] children;
+	boolean waitingForLayoutWithResize;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -595,7 +596,7 @@ public void layout (boolean changed, boolean all) {
  */
 public void layout (Control [] changed) {
 	checkWidget ();
-	System.out.print("control");
+//	System.out.print("control");
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
 	Date d = new Date();
 	int length = changed.length;
@@ -612,7 +613,7 @@ public void layout (Control [] changed) {
 		}
 		if (!ancestor) error (SWT.ERROR_INVALID_PARENT);
 	}
-	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+//	System.out.println(":::" + (new Date().getTime() - d.getTime()));
 	d = new Date();
 	int updateCount = 0;
 	Composite [] update = new Composite [16];
@@ -635,12 +636,12 @@ public void layout (Control [] changed) {
 			composite = child.parent;
 		}
 	}
-	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+//	System.out.println(":::" + (new Date().getTime() - d.getTime()));
 	d = new Date();
 	for (int i=updateCount-1; i>=0; i--) {
 		update [i].updateLayout (true, false);
 	}
-	System.out.println(":::" + (new Date().getTime() - d.getTime()));
+//	System.out.println(":::" + (new Date().getTime() - d.getTime()));
 	d = new Date();
 }
 
@@ -1007,11 +1008,12 @@ void updateLayout (boolean resize, boolean all) {
 	if ((state & LAYOUT_NEEDED) != 0) {
 		boolean changed = (state & LAYOUT_CHANGED) != 0;
 		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
-		if (resize) setResizeChildren (false);
+//		if (resize) setResizeChildren (false);
 //		layout.layout (this, changed);
-		this.waintingForLayout = true;
+		this.waitingForLayout = true;
+		this.waitingForLayoutWithResize = resize;
 		display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
-		if (resize) setResizeChildren (true);
+//		if (resize) setResizeChildren (true);
 	}
 	
 	

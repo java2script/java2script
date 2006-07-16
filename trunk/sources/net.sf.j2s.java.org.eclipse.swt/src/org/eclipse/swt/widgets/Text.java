@@ -667,8 +667,8 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 //	int margins = OS.SendMessage(handle, OS.EM_GETMARGINS, 0, 0);
 //	rect.x -= margins & 0xFFFF;
 //	rect.width += (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
-	System.out.println(rect);
-	System.out.println(width + "," + height);
+//	System.out.println(rect);
+//	System.out.println(width + "," + height);
 	if ((style & SWT.MULTI) != 0) {
 		rect.width += 6;
 	} else {

@@ -2933,44 +2933,62 @@ public boolean readAndDispatch () {
 //			List layoutQueue = new ArrayList();
 			MESSAGE[] msgs = Display.this.msgs;
 			if (msgs.length != 0) {
-				System.out.println("msgs.legnth" + msgs.length);
+//				System.out.println("msgs.legnth" + msgs.length);
+				MESSAGE[] defered = new MESSAGE[0];
+				
+				int defsize = 0;
 				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m1 = msgs[i];
 					if (m1 == null) {
 						continue;
 					}
-
+					m1.defer = false;
 					for (int j = i - 1; j >= 0; j--) {
 						MESSAGE m2 = msgs[j];
 						if (m2 != null && m2.control == m1.control
 								&& m2.type == m1.type) {
 							msgs[j] = null;
-							
-//							break;
 						}
 					}
 					
 					if(m1.type == MESSAGE.CONTROL_LAYOUT){
-						if(m1.control.parent != null && m1.control.parent.waintingForLayout){
-							msgs[i] = null;
+						if(m1.control.parent != null && m1.control.parent.waitingForLayout){
+//							System.out.println(m1.control.getName()+ " is waiting for parent " +
+//									m1.control.parent.getName());
+							m1.defer = true;
+							defered[defsize++] = m1;
 						}
 					}
 					
 				}
 				long time = 0;
 
+
 				for (int i = 0; i < msgs.length; i++) {
 //				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m = msgs[i];
+					
+					if(m != null && m.defer){
+//						System.out.println("deffer " + m.control.getName());
+						continue;
+					}
 					msgs[i] = null;
 					if (m != null && m.type == MESSAGE.CONTROL_LAYOUT) {
-						m.control.waintingForLayout = false;
+						m.control.waitingForLayout = false;
 						if (!m.control.isVisible()) { continue; }
 						Date d = new Date();
 						Composite c = (Composite) m.control;
+						if(c.waitingForLayoutWithResize){
+							c.setResizeChildren (false);
+						}
 						if(c.layout != null){
 							c.layout.layout (c, (c.state & Composite.LAYOUT_CHANGED) != 0);
 						}
+						if(c.waitingForLayoutWithResize){
+							c.setResizeChildren (true);
+							c.waitingForLayoutWithResize = false;
+						}
+						
 						if (m.data != null) {
 							boolean[] bs = (boolean[]) m.data;
 							c.updateLayout(bs[0], bs[1]);
@@ -2978,14 +2996,18 @@ public boolean readAndDispatch () {
 							c.layout();
 						}
 						time += new Date().getTime() - d.getTime();
-						System.err.println(c.getName() + " cost " + (time));
+//						System.err.println(c.getName() + " cost " + (time));
 						if (time > 200) {
-							System.out.println("before deferring:" + msgs.length);
+//							System.out.println("before deferring:" + msgs.length);
 							for (int j = i + 1; j < msgs.length; j++) {
 								msgs[j - i - 1] = msgs[j];
 							}
-							for (int j = 0; j < i; j++) {
-								msgs[msgs.length - 1 - j] = null;
+//							for (int j = 0; j < i; j++) {
+//								msgs[msgs.length - 1 - j] = null;
+//							}
+							int length = msgs.length - i - 1;
+							for(int j = 0; j < defsize; j++){
+								msgs[length + j] = defered[j];
 							}
 							/**
 							 * @j2sNativeSrc
@@ -2993,7 +3015,7 @@ public boolean readAndDispatch () {
 							 * @j2sNative
 							 * a.length -= d + 1;
 							 */ {}
-							System.out.println("after deferring:" + msgs.length);
+//							System.out.println("after deferring:" + msgs.length);
 							return ;
 						}
 					}
@@ -3004,6 +3026,10 @@ public boolean readAndDispatch () {
 				 * @j2sNative
 				 * a.length = 0;
 				 */ {}
+				 Display.this.msgs = defered;
+//				for(int j = 0; j < defsize; j++){
+//					msgs[j] = defered[j];
+//				}
 			}
 		}
 	}, 100);
