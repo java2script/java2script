@@ -187,17 +187,14 @@ public class ControlExample {
 					
 					for (int i = 0; i < imageLocations.length; ++i) {
 						InputStream sourceStream = clazz.getResourceAsStream(imageLocations[i]);
-						images[i] = new Image(null, sourceStream);
-//						ImageData source = new ImageData(sourceStream);
-//						ImageData mask = source.getTransparencyMask();
-//						images[i] = new Image(null, source, mask);
-//						try {
-//							sourceStream.close();
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-						
-						//images[i] = new Image(null, "bin/org/eclipse/swt/examples/controlexample/" + imageLocations[i]);
+						ImageData source = new ImageData(sourceStream);
+						ImageData mask = source.getTransparencyMask();
+						images[i] = new Image(null, source, mask);
+						try {
+							sourceStream.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 				return;
@@ -216,20 +213,20 @@ public class ControlExample {
 	 */
 	public static void main(String[] args) {
 		Display display = new Display();
-		int style = SWT.SHELL_TRIM;
 		int styleNone = SWT.NONE;
-//		/**
-//		 * @j2sNative 
-//		 * window.extraDisplay (display);
-//		 * style = styleNone;
-//		 */ {}
+		int style = styleNone;
+		style = SWT.SHELL_TRIM;
+		/**
+		 * @j2sNative 
+		 * style = styleNone;
+		 */ {}
 		
 		Shell shell = new Shell(display, style);
 		shell.setLayout(new FillLayout());
 		ControlExample instance = new ControlExample(shell);
 		shell.setText(getResourceString("window.title"));
-		setShellSize(display, shell);
-//		shell.setMaximized(true);
+//		setShellSize(display, shell);
+		shell.setMaximized(true);
 		shell.open();
 		while (! shell.isDisposed()) {
 			if (! display.readAndDispatch()) display.sleep();
