@@ -14,13 +14,23 @@
 package net.sf.j2s.ui.actions;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -32,8 +42,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.internal.editors.text.JavaFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -58,33 +72,129 @@ public class UnitJavaScriptUtil {
 		}
 		return editorID;
 	}
-	public static boolean openEditor(ICompilationUnit unit) {
+	public static boolean openEditor( ICompilationUnit unit) {
 		String relativePath = getRelativeJSPath(unit);
 		IJavaModel javaModel = unit.getJavaModel();
 		File file = new File(javaModel.getResource()
 				.getLocation().toOSString(), relativePath);
-		
+
 		IFile[] files = javaModel.getWorkspace().getRoot()
 				.findFilesForLocation(
 						Path.fromPortableString(relativePath));
 		IEditorInput editorInput = null;
 		if (files != null && files.length != 0) {
 			editorInput = new FileEditorInput(files[0]);
+			try {
+				Java2ScriptUIPlugin.getDefault().getWorkbench()
+						.getActiveWorkbenchWindow().getActivePage()
+						.openEditor(editorInput, getEditorID());
+				return true;
+			} catch (PartInitException e) {
+				e.printStackTrace();
+			}
 		} else {
-			//editorInput = new JavaFileEditorInput(file);
-			// FIXME open editor for *.js
-			return false;
-		}
-		try {
-			Java2ScriptUIPlugin.getDefault().getWorkbench()
-					.getActiveWorkbenchWindow().getActivePage()
-					.openEditor(editorInput, getEditorID());
-			return true;
-		} catch (PartInitException e) {
-			e.printStackTrace();
+			IFileStore fileStore= EFS.getLocalFileSystem().getStore(new Path(file.getParent()));
+			fileStore= fileStore.getChild(file.getName());
+			if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
+				IEditorInput input= createEditorInput(fileStore);
+				if (input == null) {
+					return false;
+				}
+				IWorkbenchWindow fWindow = Java2ScriptUIPlugin.getDefault().getWorkbench()
+						.getActiveWorkbenchWindow();
+				String editorId= getEditorId(fWindow, fileStore);
+				IWorkbenchPage page= fWindow.getActivePage();
+				try {
+					page.openEditor(input, editorId);
+					return true;
+				} catch (PartInitException e) {
+					EditorsPlugin.log(e.getStatus());
+				}
+			}
 		}
 		return false;
 	}
+	/*
+	 * XXX: Requested a helper to get the correct editor descriptor
+	 *		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=110203
+	 */
+	private static String getEditorId(IWorkbenchWindow fWindow, IFileStore file) {
+		IWorkbench workbench= fWindow.getWorkbench();
+		IEditorRegistry editorRegistry= workbench.getEditorRegistry();
+		IEditorDescriptor descriptor= editorRegistry.getDefaultEditor(file.getName(), getContentType(file));
+
+		// check the OS for in-place editor (OLE on Win32)
+		if (descriptor == null && editorRegistry.isSystemInPlaceEditorAvailable(file.getName()))
+			descriptor= editorRegistry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
+		
+//		// check the OS for external editor
+//		if (descriptor == null && editorRegistry.isSystemExternalEditorAvailable(file.getName()))
+//			descriptor= editorRegistry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
+		
+		if (descriptor != null)
+			return descriptor.getId();
+		
+		return EditorsUI.DEFAULT_TEXT_EDITOR_ID;
+	}
+
+	private static IContentType getContentType (IFileStore fileStore) {
+		if (fileStore == null)
+			return null;
+
+		InputStream stream= null;
+		try {
+			stream= fileStore.openInputStream(EFS.NONE, null);
+			return Platform.getContentTypeManager().findContentTypeFor(stream, fileStore.getName());
+		} catch (IOException x) {
+			EditorsPlugin.log(x);
+			return null;
+		} catch (CoreException x) {
+			// Do not log FileNotFoundException (no access)
+			if (!(x.getStatus().getException() instanceof FileNotFoundException))
+				EditorsPlugin.log(x);
+			
+			return null;
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException x) {
+				EditorsPlugin.log(x);
+			}
+		}
+	}
+
+	private static IEditorInput createEditorInput(IFileStore fileStore) {
+		IFile workspaceFile= getWorkspaceFile(fileStore);
+		if (workspaceFile != null)
+			return new FileEditorInput(workspaceFile);
+		return new JavaFileEditorInput(fileStore);
+	}
+
+	private static IFile getWorkspaceFile(IFileStore fileStore) {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IFile[] files= workspace.getRoot().findFilesForLocation(new Path(fileStore.toURI().getPath()));
+		files= filterNonExistentFiles(files);
+		if (files == null || files.length == 0)
+			return null;
+		if (files.length == 1)
+			return files[0];
+		return null;
+	}
+
+	private static IFile[] filterNonExistentFiles(IFile[] files){
+		if (files == null)
+			return null;
+
+		int length= files.length;
+		ArrayList existentFiles= new ArrayList(length);
+		for (int i= 0; i < length; i++) {
+			if (files[i].exists())
+				existentFiles.add(files[i]);
+		}
+		return (IFile[])existentFiles.toArray(new IFile[existentFiles.size()]);
+	}
+
 	protected static String getRelativeJSPath(ICompilationUnit unit) {
 		if (unit == null) {
 			return null;

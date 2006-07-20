@@ -137,7 +137,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
-      <!--
       <objectContribution
             id="net.sf.j2s.ui.actions.openjs"
             objectClass="org.eclipse.jdt.core.ICompilationUnit">
@@ -148,7 +147,6 @@
                label="Edit Con&amp;verted *.js"
                menubarPath="additions"/>
       </objectContribution>
-      -->
       <objectContribution
             adaptable="false"
             id="net.sf.j2s.ui.actions.genPropsJS"
@@ -161,7 +159,6 @@
                menubarPath="additions"/>
       </objectContribution>
    </extension>
-   <!--
    <extension
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
@@ -175,7 +172,6 @@
          </action>
       </viewerContribution>
    </extension>
-   -->
    <!--
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -187,12 +183,15 @@
          <description>Export Java2Script applications as standalone application</description>
       </wizard>
    </extension>
-   <extension
-         point="org.eclipse.jdt.ui.javadocCompletionProcessor">
-      <javadocCompletionProcessor
-            class="net.sf.j2s.ui.text.javadoc.JavaDocCompletionEvaluator"
-            id="net.sf.j2s.javadocCompletionProcessor"/>
-   </extension>
    -->
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="J2SCompletionProposalComputer">
+		<javaCompletionProposalComputer
+			class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
 
 </plugin>
