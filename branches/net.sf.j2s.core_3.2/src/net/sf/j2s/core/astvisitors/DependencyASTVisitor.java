@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -58,6 +57,8 @@ public class DependencyASTVisitor extends ASTVisitor {
 	
 	protected Set classNameSet = new HashSet();
 
+	protected Set classBindingSet = new HashSet();
+
 	protected Set musts = new HashSet();
 	
 	protected Set requires = new HashSet();
@@ -94,6 +95,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 		return (String[]) classNameSet.toArray(new String[0]);
 	}
 	
+	/*
 	public String getMusts() {
 		StringBuffer buf = new StringBuffer();
 		buf.append("musts=");
@@ -132,11 +134,49 @@ public class DependencyASTVisitor extends ASTVisitor {
 		}
 		return buf.toString();
 	}
+	*/
 	
+	protected void checkSuperType(Set set) {
+		Set removed = new HashSet();
+		Set reseted = new HashSet();
+		for (Iterator iter = set.iterator(); iter.hasNext();) {
+			Object n = iter.next();
+			if (n instanceof QNTypeBinding) {
+				QNTypeBinding qn = (QNTypeBinding) n;
+				boolean isRemoved = false;
+				for (Iterator iterator = classBindingSet.iterator(); iterator
+						.hasNext();) {
+					ITypeBinding binding = (ITypeBinding) iterator.next();
+					if (Bindings.isSuperType(binding, qn.binding)) {
+						removed.add(qn);
+						//set.remove(qn);
+						isRemoved = true;
+						break;
+					}
+				}
+				if (!isRemoved) {
+					reseted.add(qn);
+					//set.remove(qn);
+					//set.add(qn.qualifiedName);
+				}
+			}
+		}
+		set.removeAll(removed);
+		set.removeAll(reseted);
+		for (Iterator i = reseted.iterator(); i.hasNext();) {
+			QNTypeBinding qn = (QNTypeBinding) i.next();
+			set.add(qn.qualifiedName);
+		}
+	}
 	public String getDependencyScript(StringBuffer mainJS) {
+		checkSuperType(musts);
+		checkSuperType(requires);
+		checkSuperType(optionals);
+		
 		musts.remove("");
 		requires.remove("");
 		optionals.remove("");
+
 		for (Iterator iter = ignores.iterator(); iter.hasNext();) {
 			String s = (String) iter.next();
 			if (musts.contains(s)) {
@@ -164,6 +204,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				optionals.remove(s);
 			}
 		}
+		
 		String js = mainJS.toString();
 		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
 			return js;
@@ -383,6 +424,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (resolveBinding.isTopLevel()) {
 			String thisClassName = resolveBinding.getQualifiedName();
 			classNameSet.add(thisClassName);
+			classBindingSet.add(resolveBinding);
 		}
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
@@ -416,6 +458,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (resolveBinding.isTopLevel()) {
 			String thisClassName = resolveBinding.getQualifiedName();
 			classNameSet.add(thisClassName);
+			classBindingSet.add(resolveBinding);
 		}
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
@@ -478,16 +521,20 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (superclassType != null) {
 			ITypeBinding superBinding = superclassType.resolveBinding();
 			if (superBinding != null) {
+				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName;
 				ITypeBinding declaringClass = superBinding.getDeclaringClass();
 				if (declaringClass != null) {
 					qualifiedName = declaringClass.getQualifiedName();
+					qn.binding = declaringClass;
 				} else {
 					qualifiedName = superBinding.getQualifiedName();
+					qn.binding = superBinding;
 				}
 				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node)) {
-					musts.add(qualifiedName);
+					musts.add(qn);
 				}
 				//musts.add(superBinding.getQualifiedName());
 			}
@@ -503,20 +550,26 @@ public class DependencyASTVisitor extends ASTVisitor {
 			for (Iterator iter = superInterfaces.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				ITypeBinding binding = ((Type) element).resolveBinding();
+				QNTypeBinding qn = new QNTypeBinding();
 				if (binding != null) {
 					String qualifiedName;
 					ITypeBinding declaringClass = binding.getDeclaringClass();
 					if (declaringClass != null) {
 						qualifiedName = declaringClass.getQualifiedName();
+						qn.binding = declaringClass;
 					} else {
 						qualifiedName = binding.getQualifiedName();
+						qn.binding = binding;
 					}
 					qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+					qn.qualifiedName = qualifiedName;
 					if (isQualifiedNameOK(qualifiedName, node)) {
-						musts.add(qualifiedName);
+						musts.add(qn);
 					}
 				} else {
-					musts.add(element.toString());
+					qn.qualifiedName = element.toString();
+					qn.binding = binding;
+					musts.add(qn);
 				}
 			}
 		}
@@ -640,22 +693,27 @@ public class DependencyASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		ITypeBinding resolveTypeBinding = node.resolveTypeBinding();
+		QNTypeBinding qn = new QNTypeBinding();
 		String qualifiedName = null;
 		if (resolveTypeBinding.isAnonymous()) {
 			qualifiedName = node.getType().resolveBinding().getQualifiedName();
+			qn.binding = node.getType().resolveBinding();
 		} else {
 			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
 			if (declaringClass != null) {
 				qualifiedName = declaringClass.getQualifiedName();
+				qn.binding = declaringClass;
 			} else {
 				qualifiedName = resolveTypeBinding.getQualifiedName();
+				qn.binding = resolveTypeBinding;
 			}
 		}
 		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 
-				&& !musts.contains(qualifiedName)
-				&& !requires.contains(qualifiedName)) {
-			optionals.add(qualifiedName);
+				&& !musts.contains(qn)
+				&& !requires.contains(qn)) {
+			optionals.add(qn);
 		}
 		return super.visit(node);
 	}
@@ -669,17 +727,21 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (!elementType.isPrimitiveType()) {
 			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
 			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+			QNTypeBinding qn = new QNTypeBinding();
 			String qualifiedName = null;
 			if (declaringClass != null) {
 				qualifiedName = declaringClass.getQualifiedName();
+				qn.binding = declaringClass;
 			} else {
 				qualifiedName = resolveTypeBinding.getQualifiedName();
+				qn.binding = resolveTypeBinding;
 			}
 			qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+			qn.qualifiedName = qualifiedName;
 			if (isQualifiedNameOK(qualifiedName, node) 
-					&& !musts.contains(qualifiedName)
-					&& !requires.contains(qualifiedName)) {
-				optionals.add(qualifiedName);
+					&& !musts.contains(qn)
+					&& !requires.contains(qn)) {
+				optionals.add(qn);
 			}
 		}
 		return super.visit(node);
@@ -696,17 +758,21 @@ public class DependencyASTVisitor extends ASTVisitor {
 				Name name = (Name) expression;
 				ITypeBinding resolveTypeBinding = name.resolveTypeBinding();
 				ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName = null;
 				if (declaringClass != null) {
 					qualifiedName = declaringClass.getQualifiedName();
+					qn.binding = declaringClass;
 				} else {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
+					qn.binding = resolveTypeBinding;
 				}
 				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
-						&& !musts.contains(qualifiedName)
-						&& !requires.contains(qualifiedName)) {
-					optionals.add(qualifiedName);
+						&& !musts.contains(qn)
+						&& !requires.contains(qn)) {
+					optionals.add(qn);
 				}
 			}
 		}
@@ -725,20 +791,48 @@ public class DependencyASTVisitor extends ASTVisitor {
 				Name name = (Name) expression;
 				ITypeBinding resolveTypeBinding = name.resolveTypeBinding();
 				ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName = null;
 				if (declaringClass != null) {
 					qualifiedName = declaringClass.getQualifiedName();
+					qn.binding = declaringClass;
 				} else {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
+					qn.binding = resolveTypeBinding;
 				}
 				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
-						&& !musts.contains(qualifiedName)
-						&& !requires.contains(qualifiedName)) {
-					optionals.add(qualifiedName);
+						&& !musts.contains(qn)
+						&& !requires.contains(qn)) {
+					optionals.add(qn);
 				}
 			}
 		}
 		return super.visit(node);
 	}
+}
+
+class QNTypeBinding {
+	String qualifiedName;
+	ITypeBinding binding;
+	
+	public boolean equals(Object obj) {
+		if (obj == null/* || !(obj instanceof QNTypeBinding)*/) {
+			return false;
+		}
+		if (obj instanceof String) {
+			return qualifiedName.equals(obj);
+		} else if (obj instanceof QNTypeBinding) {
+			QNTypeBinding b = (QNTypeBinding) obj;
+			return /*binding == b.binding &&*/ qualifiedName.equals(b.qualifiedName);
+		} else {
+			return false;
+		}
+	}
+	
+	public int hashCode() {
+		return qualifiedName.hashCode();
+	}
+	
 }

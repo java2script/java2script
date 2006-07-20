@@ -161,7 +161,7 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 
 	public static void outputJavaScript(DependencyASTVisitor visitor, CompilationUnit fRoot, String folderPath) {
 		String js = visitor.getBuffer().toString();
-		js = visitor.getMusts() + "\r\n" + visitor.getRequires() + "\r\n" + visitor.getOptionals();
+//		js = visitor.getMusts() + "\r\n" + visitor.getRequires() + "\r\n" + visitor.getOptionals();
 		String elementName = fRoot.getJavaElement().getElementName();
 		//if (elementName.endsWith(".class") || elementName.endsWith(".java")) {  //$NON-NLS-1$//$NON-NLS-2$
 			elementName = elementName.substring(0, elementName.lastIndexOf('.'));
