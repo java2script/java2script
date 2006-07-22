@@ -1182,11 +1182,15 @@ public void remove (int index) {
 	Option[] oldOptions = selectInput.options;
 	if (0 > index && index > oldOptions.length - 1)
 		error (SWT.ERROR_INVALID_RANGE);
+	if(selectInput.selectedIndex == index){
+		noSelection =true;
+	}
 	Option[] newOptions = new Option[oldOptions.length - 1];
 	System.arraycopy(oldOptions,0, newOptions, 0, index);
 	System.arraycopy(oldOptions, index + 1, newOptions, index, oldOptions.length - index - 1);
 	selectInput.options = newOptions;
 	itemCount--;
+	
 }
 
 /**
@@ -1242,6 +1246,9 @@ public void remove (int start, int end) {
 	Option[] oldOptions = selectInput.options;
 	if ((0 > start && start > oldOptions.length - 1) || (0 > end && end > oldOptions.length - 1))
 		error (SWT.ERROR_INVALID_RANGE);
+	if(start <= selectInput.selectedIndex  && selectInput.selectedIndex <= end){
+		noSelection = true;
+	}
 	Option[] newOptions = new Option[oldOptions.length - (end - start + 1)];
 	System.arraycopy(oldOptions,0, newOptions, 0, start);
 	System.arraycopy(oldOptions, end + 1, newOptions, start, oldOptions.length - end - 1);
@@ -1270,6 +1277,9 @@ public void remove (String string) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	int index = indexOf (string, 0);
 	if (index == -1) error (SWT.ERROR_INVALID_ARGUMENT);
+	if(selectInput.selectedIndex == index){
+		noSelection = true;
+	}
 	remove (index);
 }
 
@@ -1289,6 +1299,7 @@ public void removeAll () {
 	 * @j2sNative
 	 * this.selectInput.options.length = 0;
 	 */{}
+	noSelection = true;
 	itemCount = 0;
 	textInput.value = "";
 	sendEvent (SWT.Modify);
@@ -1483,9 +1494,10 @@ public void select (int index) {
 	}
 	*/
 	if(index >= 0  && index < itemCount){
+		noSelection = false;
 		selectInput.selectedIndex = index;
+		setText(getItem(index));
 	}
-	setText(getItem(index));
 }
 /*
 void setBackgroundPixel (int pixel) {
