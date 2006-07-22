@@ -1263,6 +1263,24 @@ void createHandle() {
 			btnHandle.className = "button-push";
 		}
 	}
+	btnHandle.onmouseover = new RunnableCompatibility() {
+		public void run() {
+			String cssName = " button-hover";
+			int idx = btnHandle.className.indexOf(cssName);
+			if(idx == -1){
+				btnHandle.className = btnHandle.className + cssName;
+			}
+		}
+	};
+	btnHandle.onmouseout = new RunnableCompatibility() {
+		public void run() {
+			String cssName = " button-hover";
+			int idx = btnHandle.className.indexOf(cssName);
+			if(idx != -1){
+				btnHandle.className = btnHandle.className.substring(0, idx) + btnHandle.className.substring(cssName.length() + idx);
+			}
+		}
+	};
 	//bindHandle();
 	hookSelection();
 }
