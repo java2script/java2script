@@ -24,7 +24,12 @@ public class JavaLangUtil {
 						|| ((ch = name.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
 //				((idx2 = name.indexOf('.', index + 10)) == -1 
 //						|| !name.substring(index + 10, idx2).startsWith ("ref"))) {
-			name = name.substring(10);
+			if (name.indexOf ("Error") != -1 || name.indexOf("Exception") != -1
+					|| name.indexOf("ThreadDeath") != -1) {
+				
+			} else {
+				name = name.substring(10);
+			}
 		}
 		String swt = "org.eclipse.swt.SWT";
 		index = name.indexOf(swt);
