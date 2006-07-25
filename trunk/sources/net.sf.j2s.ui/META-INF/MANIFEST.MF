@@ -27,6 +27,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui.console,
- net.sf.j2s.core
+ net.sf.j2s.core,
+ org.junit,
+ org.eclipse.jdt.junit
 Eclipse-AutoStart: true
 Main-Class: net.sf.j2s.ui.jdtenhancer.JDTCoreEnhancer
