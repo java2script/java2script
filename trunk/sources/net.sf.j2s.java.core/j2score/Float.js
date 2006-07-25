@@ -21,7 +21,12 @@ this.valueOf = function () {
 }, "Number");
 Clazz.makeConstructor (Float, 
 function (s) {
-var value = Float.parseFloat (s, 10);
+var value = null;
+if (s != null) {
+	value = Float.parseFloat (s, 10);
+} else {
+	value = 0;
+}
 this.valueOf = function () {
 	return value;
 };
@@ -46,6 +51,11 @@ function (num) {
 return isNaN (num);
 }, "Number");
 Float.isNaN = Float.prototype.isNaN;
+Clazz.defineMethod (Float, "isInfinite", 
+function (num) {
+return !isFinite (num);
+}, "Number");
+Float.isInfinite = Float.prototype.isInfinite;
 
 Clazz.defineMethod (Float, "equals", 
 function (s) {
