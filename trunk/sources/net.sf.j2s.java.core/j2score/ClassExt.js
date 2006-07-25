@@ -41,7 +41,7 @@ Clazz.MethodNotFoundException = function (obj, clazz, method, params) {
 	} else {
 		leadingStr = "Constructor";
 	}
-	this.message = leadingStr + " " + Clazz.getClassName (clazz) + "." 
+	this.message = leadingStr + " " + Clazz.getClassName (clazz, true) + "." 
 					+ method + "(" + paramStr + ") is not found!";
 	this.toString = function () {
 		return "MethodNotFoundException:" + this.message;
@@ -69,7 +69,7 @@ Clazz.prepareCallback = function (objThis, args) {
 			obs = new Array ();
 			objThis[cbName] = obs;
 		}
-		var className = Clazz.getClassName (classThisObj);
+		var className = Clazz.getClassName (classThisObj, true);
 		//if (obs[className] == null) { /* == null make no sense! */
 			//obs[className] = classThisObj;
 			obs[className.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
@@ -77,7 +77,7 @@ Clazz.prepareCallback = function (objThis, args) {
 			while (clazz.superClazz != null) {
 				clazz = clazz.superClazz;
 				//obs[Clazz.getClassName (clazz)] = classThisObj;
-				obs[Clazz.getClassName (clazz)
+				obs[Clazz.getClassName (clazz, true)
 						.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
 			}
 		//}
@@ -588,7 +588,12 @@ Object.prototype.getClass = function () {
 };
 
 Object.prototype.clone = function () {
-	return this;
+	var o = new Object ();
+	for (var i in this) {
+		o[i] = this[i];
+	}
+	return o;
+	//return this;
 };
 
 /*
@@ -611,14 +616,26 @@ w$ = window; // Short for browser's window object
 d$ = document; // Short for browser's document object
 System = {
 	out : {
+		__CLASS_NAME__ : "java.io.PrintStream",
 		print : function () {},
 		printf : function () {},
 		println : function () {}
 	},
 	err : {
+		__CLASS_NAME__ : "java.io.PrintStream",
 		print : function () {},
 		printf : function () {},
 		println : function () {}
+	},
+	currentTimeMillis : function () {
+		return new Date ().getTime ();
+	},
+	props : null, //new java.util.Properties (),
+	getProperties : function () {
+		return System.props;
+	},
+	setProperties : function (props) {
+		System.props = props;
 	},
 	arraycopy : function (src, srcPos, dest, destPos, length) {
 		for (var i = 0; i < length; i++) {
@@ -637,3 +654,89 @@ Thread.currentThread = Thread.prototype.currentThread = function () {
 
 $_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;
 
+var reflect = Clazz.declarePackage ("java.lang.reflect");
+Clazz.declarePackage ("java.security");
+
+Clazz.innerFunctionNames = Clazz.innerFunctionNames.concat (["getSuperclass",
+		"isAssignableFrom", "getMethods", "getMethod", "getDeclaredMethods", 
+		"getDeclaredMethod", "getConstructor", "getModifiers", "isArray", "newInstance"]);
+
+Clazz.innerFunctions.getSuperclass = function () {
+	return this.superClazz;	
+};
+Clazz.innerFunctions.isAssignableFrom = function (clazz) {
+	return Clazz.getInheritedLevel (clazz, this) >= 0;	
+};
+Clazz.innerFunctions.getConstructor = function () {
+	return new java.lang.reflect.Constructor (this, [], [], 
+			java.lang.reflect.Modifier.PUBLIC, 0);
+};
+Clazz.innerFunctions.getDeclaredMethods = Clazz.innerFunctions.getMethods = function () {
+	var ms = new Array ();
+	var p = this.prototype;
+	for (var attr in p) {
+		if (typeof p[attr] == "function" && p[attr].__CLASS_NAME__ == null) {
+			/* there are polynormical methods. */
+			ms[ms.length] = new java.lang.reflect.Method (this, attr,
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC, 0);
+		}
+	}
+	p = this;
+	for (var attr in p) {
+		if (typeof p[attr] == "function" && p[attr].__CLASS_NAME__ == null) {
+			ms[ms.length] = new java.lang.reflect.Method (this, attr,
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
+					| java.lang.reflect.Modifier.STATIC, 0);
+		}
+	}
+	return ms;
+};
+Clazz.innerFunctions.getDeclaredMethod = Clazz.innerFunctions.getMethod = function (name, clazzes) {
+	var p = this.prototype;
+	for (var attr in p) {
+		if (name == attr && typeof p[attr] == "function" 
+				&& p[attr].__CLASS_NAME__ == null) {
+			/* there are polynormical methods. */
+			return new java.lang.reflect.Method (this, attr,
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC, 0);
+		}
+	}
+	p = this;
+	for (var attr in p) {
+		if (name == attr && typeof p[attr] == "function" 
+				&& p[attr].__CLASS_NAME__ == null) {
+			return new java.lang.reflect.Method (this, attr,
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
+					| java.lang.reflect.Modifier.STATIC, 0);
+		}
+	}
+	return null;
+};
+Clazz.innerFunctions.getModifiers = function () {
+	return java.lang.reflect.Modifier.PUBLIC;
+};
+Clazz.innerFunctions.isArray = function () {
+	return false;
+};
+Clazz.innerFunctions.newInstance = function () {
+	var clz = this;
+	return new clz ();
+};
+
+//Object.newInstance = Clazz.innerFunctions.newInstance;
+{
+	var inF = Clazz.innerFunctionNames;
+	for (var i = 0; i < inF.length; i++) {
+		Object[inF[i]] = Clazz.innerFunctions[inF[i]];
+	}
+}
+
+Clazz.forName = function (clazzName) {
+	if (window["ClazzLoader"] != null) {
+		ClazzLoader.setLoadingMode ("xhr.sync");
+		ClazzLoader.loadClass (clazzName);
+		return Clazz.evalType (clazzName);
+	} else {
+		alert ("[Java2Script] Error: No ClassLoader!");
+	}
+};

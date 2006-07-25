@@ -40,6 +40,8 @@
 function Clazz () {
 };
 
+Class = Clazz;
+
 function NullObject () {
 };
 
@@ -66,6 +68,9 @@ Clazz.getClassName = function (clazzHost) {
 	if (typeof clazzHost == "function") {
 		var clazz = clazzHost;
 		if (clazz.__CLASS_NAME__ != null) {
+			if (arguments[1] != true) {
+				return "Class";
+			}
 			/* user defined class name */
 			return clazz.__CLASS_NAME__;
 		}
@@ -121,14 +126,14 @@ Clazz.getClassName = function (clazzHost) {
 							return "Array";
 						}
 					}
-					return Clazz.getClassName (obj.constructor);
+					return Clazz.getClassName (obj.constructor, true);
 				}
 			} else if (objType == "number") {
 				return "Number";
 			} else if (objType == "boolean") {
 				return "Boolean";
 			}
-			return Clazz.getClassName (obj.constructor);
+			return Clazz.getClassName (obj.constructor, true);
 		}
 	}
 };
@@ -600,7 +605,7 @@ Clazz.CastedNull = function (asClazz) {
 		if (asClazz instanceof String) {
 			this.clazzName = asClazz;
 		} else if (asClazz instanceof Function) {
-			this.clazzName = Clazz.getClassName (asClazz);
+			this.clazzName = Clazz.getClassName (asClazz, true);
 		} else {
 			this.clazzName = "" + asClazz;
 		}
@@ -648,7 +653,7 @@ Clazz.MethodNotFoundException = function () {
 };
 
 /* private */
-/*-# getParamsType -> gPT #-*/
+/*x-# getParamsType -> gPT #-x*/
 Clazz.getParamsType = function (funParams) {
 	var params = new Array ();
 	params.hasCastedNull = false;
@@ -1459,7 +1464,7 @@ Clazz.instantialize = function (objThis, args) {
 /* protected */
 /*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "getName" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"equals", "getName", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
 	"makeConstructor" /*# x<< #*/
 ];
 
@@ -1479,7 +1484,7 @@ Clazz.innerFunctions = {
 	 * Similar to Class#getName
 	 */
 	getName : function () {
-		return Clazz.getClassName (this);
+		return Clazz.getClassName (this, true);
 	},
 
 	getResourceAsStream : function (name) {
@@ -1588,9 +1593,16 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	}
 	clazzFun.__CLASS_NAME__ = qName;
 	clazzFun.prototype.__CLASS_NAME__ = qName;
+	/*
 	clazzFun.equals = Clazz.innerFunctions.equals;
 	clazzFun.getName = Clazz.innerFunctions.getName;
 	clazzFun.getResourceAsStream = Clazz.innerFunctions.getResourceAsStream;
+	*/
+	var inF = Clazz.innerFunctionNames;
+	for (var i = 0; i < inF.length; i++) {
+		clazzFun[inF[i]] = Clazz.innerFunctions[inF[i]];
+	}
+
 };
 
 /* proected */
@@ -1651,4 +1663,7 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 };
 
 Clazz.declarePackage ("java.lang");
+java.lang.ClassLoader = {
+	__CLASS_NAME__ : "ClassLoader"
+};
 
