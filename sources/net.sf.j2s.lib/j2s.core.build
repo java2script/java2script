@@ -15,7 +15,9 @@
 	<property name="j2score.dir" value="../net.sf.j2s.java.core/j2score"/>
 	<property name="js.src.dir" value="../net.sf.j2s.java.core/bin"/>
 	<property name="js.swt.dir" value="../net.sf.j2s.java.org.eclipse.swt"/>
+	<property name="js.unit.dir" value="../net.sf.j2s.java.junit"/>
 	<property name="jswt.src.dir" value="${js.swt.dir}/bin"/>
+	<property name="junit.src.dir" value="${js.unit.dir}/bin"/>
 	<property name="ajaxcore.dir" value="../net.sf.j2s.ajax/j2sajax"/>
 	<property name="ajax.src.dir" value="../net.sf.j2s.ajax/bin"/>
 	<property name="jz.dist.dir" value="j2slib"/>
@@ -196,7 +198,7 @@
     		<arg value="${current.project.dir}/${j2score.dir}/Class.js"/>
         	<arg value="${current.project.dir}/${js.src.dir}/java/lang/Class.js"/>
         	
-    		<arg value="no.debug.support=true"/>
+    		<arg value="no.debug.support=false"/>
     		<arg value="no.javascript.support=true"/>
     		<arg value="link.compress=true"/>
 
@@ -252,8 +254,8 @@
         	<filelist dir="${js.src.dir}">
         		<file name="java/lang/Class.js"/>
         		<file name="java/lang/ClassLoader.js"/>
-        		<!--
         		<file name="java/lang/Console.js"/>
+        		<!--
         		-->
         	</filelist>
         </concat>
@@ -322,6 +324,13 @@
     			<exclude name="**/*.swo"/>
     		</fileset>
     		<fileset dir="${jswt.src.dir}">
+    			<exclude name="org/eclipse/swt/internal/xhtml/**"/>
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${junit.src.dir}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>

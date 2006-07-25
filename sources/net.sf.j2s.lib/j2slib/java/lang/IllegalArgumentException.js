@@ -1,7 +1,7 @@
 Clazz.load(["java.lang.RuntimeException"],"java.lang.IllegalArgumentException",null,function(){
 c$=$_C(function(){
 $_Z(this,arguments);
-},java.lang,"IllegalArgumentException",RuntimeException);
+},java.lang,"IllegalArgumentException",java.lang.RuntimeException);
 $_K(c$,
 function(){
 $_R(this,IllegalArgumentException);

@@ -147,7 +147,7 @@ case 27:
 case 32:
 case 6:
 {
-throw new IllegalArgumentException(message);
+throw new java.lang.IllegalArgumentException(message);
 }case 43:
 case 22:
 case 24:

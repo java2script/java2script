@@ -5,7 +5,7 @@ $_Z(this,arguments);
 },java.util,"EventObject",null,java.io.Serializable);
 $_K(c$,
 function(source){
-if(source==null)throw new IllegalArgumentException("null source");
+if(source==null)throw new java.lang.IllegalArgumentException("null source");
 this.source=source;
 },"~O");
 $_M(c$,"getSource",

@@ -186,13 +186,13 @@ return java.util.ResourceBundle.getBundleImpl(baseName,locale,null);
 c$.getBundle=$_M(c$,"getBundle",
 function(baseName,locale,loader){
 if(loader==null){
-throw new NullPointerException();
+throw new java.lang.NullPointerException();
 }return java.util.ResourceBundle.getBundleImpl(baseName,locale,loader);
 },"~S,java.util.Locale,ClassLoader");
 c$.getBundleImpl=$_M(c$,"getBundleImpl",
 ($fz=function(baseName,locale,loader){
 if(baseName==null){
-throw new NullPointerException();
+throw new java.lang.NullPointerException();
 }for(var i=0;i<java.util.ResourceBundle.caches.length;i++){
 if(java.util.ResourceBundle.caches[i].bundleName==baseName){
 return java.util.ResourceBundle.caches[i];

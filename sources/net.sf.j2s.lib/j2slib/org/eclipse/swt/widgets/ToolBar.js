@@ -147,7 +147,7 @@ if((this.style&64)!=0){
 try{
 this.handle.style.whiteSpace="wrap";
 }catch(e){
-if($_O(e,Exception)){
+if($_O(e,java.lang.Exception)){
 }else{
 throw e;
 }

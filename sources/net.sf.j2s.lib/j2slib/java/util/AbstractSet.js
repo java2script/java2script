@@ -15,9 +15,9 @@ if(c.size()!=this.size())return false;
 try{
 return this.containsAll(c);
 }catch(e){
-if($_O(e,ClassCastException)){
+if($_O(e,java.lang.ClassCastException)){
 return false;
-}else if($_O(e,NullPointerException)){
+}else if($_O(e,java.lang.NullPointerException)){
 return false;
 }else{
 throw e;

@@ -78,7 +78,7 @@ fileName="file:///"+fileName;
 try{
 eval((prefix+fileName+suffix).replace(/\\/g,"\\\\"));
 }catch(e){
-if($_O(e,Error)){
+if($_O(e,java.lang.Error)){
 return false;
 }else{
 throw e;

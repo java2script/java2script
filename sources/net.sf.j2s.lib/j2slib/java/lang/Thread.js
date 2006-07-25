@@ -72,7 +72,7 @@ this.target.run();
 $_M(c$,"setPriority",
 function(newPriority){
 if(newPriority>10||newPriority<1){
-throw new IllegalArgumentException();
+throw new java.lang.IllegalArgumentException();
 }this.priority=newPriority;
 },"~N");
 $_M(c$,"getPriority",

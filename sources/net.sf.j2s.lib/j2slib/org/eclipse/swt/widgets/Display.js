@@ -43,6 +43,7 @@ this.keys=null;
 this.values=null;
 this.msgs=null;
 this.messageProc=0;
+this.currentMonitor=null;
 this.modalShells=null;
 this.modalDialogShell=null;
 this.hitCount=0;
@@ -342,7 +343,7 @@ return[new $wt.graphics.Point(16,16),new $wt.graphics.Point(32,32)];
 });
 $_M(c$,"getLastEventTime",
 function(){
-return parseInt(new java.util.Date().getTime());
+return new java.util.Date().getTime();
 });
 $_M(c$,"getMenuItem",
 function(id){
@@ -424,7 +425,9 @@ monitor.height=monitor.clientHeight=O$.getContainerHeight(el);
 },"$wt.internal.xhtml.Element");
 $_M(c$,"getPrimaryMonitor",
 function(){
-{
+if(this.currentMonitor!=null){
+return this.currentMonitor;
+}{
 var ms=this.getMonitors();
 var key="current.monitor.id";
 if(window[key]!=null){
@@ -433,20 +436,27 @@ if(""+x==window[key]){
 if(x<0||x>=ms.length){
 x=0;
 }
+this.bindMonitor(ms[x]);
 return ms[x];
 }else{
 var el=document.getElementById(window[key]);
 if(el!=null){
 for(var i=0;i<ms.length;i++){
 if(ms[i].handle==el){
+this.bindMonitor(ms[i]);
 return ms[i];
 }
 }
 }
 }
 }
-}return this.getMonitors()[0];
+}this.bindMonitor(this.getMonitors()[0]);
+return this.getMonitors()[0];
 });
+$_M(c$,"bindMonitor",
+function(m){
+this.currentMonitor=m;
+},"$wt.widgets.Monitor");
 $_M(c$,"getShells",
 function(){
 var count=0;

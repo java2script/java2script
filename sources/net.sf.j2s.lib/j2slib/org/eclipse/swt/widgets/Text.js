@@ -560,7 +560,7 @@ if((this.style&2)!=0)return;
 try{
 this.textHandle.type="password";
 }catch(e){
-if($_O(e,Exception)){
+if($_O(e,java.lang.Exception)){
 }else{
 throw e;
 }

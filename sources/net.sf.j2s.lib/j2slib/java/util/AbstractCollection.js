@@ -47,7 +47,7 @@ return a;
 },"~A");
 $_V(c$,"add",
 function(o){
-throw new UnsupportedOperationException();
+throw new java.lang.UnsupportedOperationException();
 },"~O");
 $_V(c$,"remove",
 function(o){

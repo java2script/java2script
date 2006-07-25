@@ -3,7 +3,7 @@ if(typeof window["RuntimeException"]!="undefined"){c$=$_C(function(){
 this.code=0;
 this.throwable=null;
 $_Z(this,arguments);
-},$wt,"SWTException",RuntimeException);
+},$wt,"SWTException",java.lang.RuntimeException);
 $_K(c$,
 function(){
 this.construct(1);

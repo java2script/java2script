@@ -7,7 +7,7 @@ $_Z(this,arguments);
 $_K(c$,
 function(initialCapacity){
 $_R(this,java.util.ArrayList);
-if(initialCapacity<0)throw new IllegalArgumentException("Illegal Capacity: "+initialCapacity);
+if(initialCapacity<0)throw new java.lang.IllegalArgumentException("Illegal Capacity: "+initialCapacity);
 this.elementData=new Array(initialCapacity);
 },"~N");
 $_K(c$,
@@ -18,7 +18,7 @@ $_K(c$,
 function(c){
 $_R(this,java.util.ArrayList,[]);
 this.$size=c.size();
-this.elementData=new Array(parseInt(Math.min(Math.floor((this.$size*110)/100),2147483647)));
+this.elementData=new Array(Math.min(Math.floor((this.$size*110)/100),2147483647));
 c.toArray(this.elementData);
 },"java.util.Collection");
 $_M(c$,"trimToSize",
@@ -82,8 +82,8 @@ System.arraycopy(this.elementData,0,v.elementData,0,this.$size);
 v.modCount=0;
 return v;
 }catch(e){
-if($_O(e,CloneNotSupportedException)){
-throw new InternalError();
+if($_O(e,java.lang.CloneNotSupportedException)){
+throw new java.lang.InternalError();
 }else{
 throw e;
 }
@@ -122,7 +122,7 @@ return true;
 },"~O");
 $_M(c$,"add",
 function(index,element){
-if(index>this.$size||index<0)throw new IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
+if(index>this.$size||index<0)throw new java.lang.IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
 this.ensureCapacity(this.$size+1);
 System.arraycopy(this.elementData,index,this.elementData,index+1,this.$size-index);
 this.elementData[index]=element;
@@ -156,7 +156,7 @@ return numNew!=0;
 },"java.util.Collection");
 $_M(c$,"addAll",
 function(index,c){
-if(index>this.$size||index<0)throw new IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
+if(index>this.$size||index<0)throw new java.lang.IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
 var a=c.toArray();
 var numNew=a.length;
 this.ensureCapacity(this.$size+numNew);
@@ -177,7 +177,7 @@ while(this.$size!=newSize)this.elementData[--this.$size]=null;
 },"~N,~N");
 $_M(c$,"RangeCheck",
 ($fz=function(index){
-if(index>=this.$size)throw new IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
+if(index>=this.$size)throw new java.lang.IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
 },$fz.isPrivate=true,$fz),"~N");
 $_S(c$,
 "serialVersionUID",8683452581122892189);

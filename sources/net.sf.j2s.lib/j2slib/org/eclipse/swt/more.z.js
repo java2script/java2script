@@ -23,7 +23,8 @@ height=bounds.height-10;
 }var width=clientArea.width;
 if(width>bounds.width){
 width=bounds.width;
-}this.shell.setBounds(this.shell.computeTrim(0,0,width+2,height-18));
+}var titleHeight=((this.shell.getStyle()&32)!=0)?20:0;
+this.shell.setBounds(this.shell.computeTrim(0,0,width+4,height-titleHeight+6));
 });
 $_M(c$,"updateCentered",
 function(){

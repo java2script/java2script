@@ -33,7 +33,7 @@ $_V(c$,"hashCode",
 function(){
 if(this.handle.id==null||this.handle.id.length==0){
 var random=Math.random();
-var code=parseInt(random)*1000000;
+var code=Math.round(random)random*1000000;
 this.handle.id=""+code;
 return code;
 }else{

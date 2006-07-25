@@ -1,0 +1,13 @@
+Clazz.load(["java.security.BasicPermission"],"java.lang.reflect.ReflectPermission",null,function(){
+c$=$_C(function(){
+$_Z(this,arguments);
+},reflect,"ReflectPermission",java.security.BasicPermission);
+$_K(c$,
+function(name){
+$_R(this,java.lang.reflect.ReflectPermission,[name]);
+},"~S");
+$_K(c$,
+function(name,actions){
+$_R(this,java.lang.reflect.ReflectPermission,[name,actions]);
+},"~S,~S");
+});

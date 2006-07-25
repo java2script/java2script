@@ -27,7 +27,7 @@ if(el.parentNode!=null){
 try{
 el.parentNode.removeChild(el);
 }catch(e){
-if($_O(e,Error)){
+if($_O(e,java.lang.Error)){
 }else{
 throw e;
 }

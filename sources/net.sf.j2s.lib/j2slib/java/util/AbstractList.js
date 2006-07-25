@@ -24,7 +24,7 @@ var a=this.b$["java.util.AbstractList"].get(this.cursor);
 this.lastRet=this.cursor++;
 return a;
 }catch(e){
-if($_O(e,IndexOutOfBoundsException)){
+if($_O(e,java.lang.IndexOutOfBoundsException)){
 this.checkForComodification();
 throw new java.util.NoSuchElementException();
 }else{
@@ -34,7 +34,7 @@ throw e;
 });
 $_V(c$,"remove",
 function(){
-if(this.lastRet==-1)throw new IllegalStateException();
+if(this.lastRet==-1)throw new java.lang.IllegalStateException();
 this.checkForComodification();
 try{
 this.b$["java.util.AbstractList"].remove(this.lastRet);
@@ -42,7 +42,7 @@ if(this.lastRet<this.cursor)this.cursor--;
 this.lastRet=-1;
 this.expectedModCount=this.b$["java.util.AbstractList"].modCount;
 }catch(e){
-if($_O(e,IndexOutOfBoundsException)){
+if($_O(e,java.lang.IndexOutOfBoundsException)){
 throw new java.util.ConcurrentModificationException();
 }else{
 throw e;
@@ -79,7 +79,7 @@ var b=this.b$["java.util.AbstractList"].get(a);
 this.lastRet=this.cursor=a;
 return b;
 }catch(e){
-if($_O(e,IndexOutOfBoundsException)){
+if($_O(e,java.lang.IndexOutOfBoundsException)){
 this.checkForComodification();
 throw new java.util.NoSuchElementException();
 }else{
@@ -97,13 +97,13 @@ return this.cursor-1;
 });
 $_V(c$,"set",
 function(a){
-if(this.lastRet==-1)throw new IllegalStateException();
+if(this.lastRet==-1)throw new java.lang.IllegalStateException();
 this.checkForComodification();
 try{
 this.b$["java.util.AbstractList"].set(this.lastRet,a);
 this.expectedModCount=this.b$["java.util.AbstractList"].modCount;
 }catch(e){
-if($_O(e,IndexOutOfBoundsException)){
+if($_O(e,java.lang.IndexOutOfBoundsException)){
 throw new java.util.ConcurrentModificationException();
 }else{
 throw e;
@@ -118,7 +118,7 @@ this.b$["java.util.AbstractList"].add(this.cursor++,a);
 this.lastRet=-1;
 this.expectedModCount=this.b$["java.util.AbstractList"].modCount;
 }catch(e){
-if($_O(e,IndexOutOfBoundsException)){
+if($_O(e,java.lang.IndexOutOfBoundsException)){
 throw new java.util.ConcurrentModificationException();
 }else{
 throw e;
@@ -141,15 +141,15 @@ return true;
 },"~O");
 $_V(c$,"set",
 function(index,element){
-throw new UnsupportedOperationException();
+throw new java.lang.UnsupportedOperationException();
 },"~N,~O");
 $_M(c$,"add",
 function(index,element){
-throw new UnsupportedOperationException();
+throw new java.lang.UnsupportedOperationException();
 },"~N,~O");
 $_M(c$,"remove",
 function(index){
-throw new UnsupportedOperationException();
+throw new java.lang.UnsupportedOperationException();
 },"~N");
 $_V(c$,"indexOf",
 function(o){
@@ -197,7 +197,7 @@ return this.listIterator(0);
 });
 $_M(c$,"listIterator",
 function(index){
-if(index<0||index>this.size())throw new IndexOutOfBoundsException("Index: "+index);
+if(index<0||index>this.size())throw new java.lang.IndexOutOfBoundsException("Index: "+index);
 return $_N(java.util.AbstractList.ListItr,this,null,index);
 },"~N");
 $_V(c$,"subList",
@@ -245,9 +245,9 @@ $_Z(this,arguments);
 $_K(c$,
 function(list,fromIndex,toIndex){
 $_R(this,java.util.SubList,[]);
-if(fromIndex<0)throw new IndexOutOfBoundsException("fromIndex = "+fromIndex);
-if(toIndex>list.size())throw new IndexOutOfBoundsException("toIndex = "+toIndex);
-if(fromIndex>toIndex)throw new IllegalArgumentException("fromIndex("+fromIndex+") > toIndex("+toIndex+")");
+if(fromIndex<0)throw new java.lang.IndexOutOfBoundsException("fromIndex = "+fromIndex);
+if(toIndex>list.size())throw new java.lang.IndexOutOfBoundsException("toIndex = "+toIndex);
+if(fromIndex>toIndex)throw new java.lang.IllegalArgumentException("fromIndex("+fromIndex+") > toIndex("+toIndex+")");
 this.l=list;
 this.offset=fromIndex;
 this.$size=toIndex-fromIndex;
@@ -272,7 +272,7 @@ return this.$size;
 });
 $_M(c$,"add",
 function(index,element){
-if(index<0||index>this.$size)throw new IndexOutOfBoundsException();
+if(index<0||index>this.$size)throw new java.lang.IndexOutOfBoundsException();
 this.checkForComodification();
 this.l.add(index+this.offset,element);
 this.expectedModCount=this.l.modCount;
@@ -303,7 +303,7 @@ return this.addAll(this.$size,c);
 },"java.util.Collection");
 $_M(c$,"addAll",
 function(index,c){
-if(index<0||index>this.$size)throw new IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
+if(index<0||index>this.$size)throw new java.lang.IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
 var cSize=c.size();
 if(cSize==0)return false;
 this.checkForComodification();
@@ -320,7 +320,7 @@ return this.listIterator();
 $_M(c$,"listIterator",
 function(index){
 this.checkForComodification();
-if(index<0||index>this.$size)throw new IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
+if(index<0||index>this.$size)throw new java.lang.IndexOutOfBoundsException("Index: "+index+", Size: "+this.$size);
 return(function(i$,v$){
 if(!$_D("java.util.SubList$1")){
 $_H();
@@ -387,7 +387,7 @@ return new java.util.SubList(this,fromIndex,toIndex);
 },"~N,~N");
 $_M(c$,"rangeCheck",
 ($fz=function(index){
-if(index<0||index>=this.$size)throw new IndexOutOfBoundsException("Index: "+index+",Size: "+this.$size);
+if(index<0||index>=this.$size)throw new java.lang.IndexOutOfBoundsException("Index: "+index+",Size: "+this.$size);
 },$fz.isPrivate=true,$fz),"~N");
 $_M(c$,"checkForComodification",
 ($fz=function(){

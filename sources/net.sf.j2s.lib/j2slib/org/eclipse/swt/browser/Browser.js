@@ -93,7 +93,7 @@ this.browserHandle.contentWindow.history.back();
 this.$forward=true;
 return true;
 }catch(e){
-if($_O(e,Error)){
+if($_O(e,java.lang.Error)){
 return false;
 }else{
 throw e;
@@ -120,7 +120,7 @@ try{
 this.browserHandle.contentWindow.history.forward();
 return true;
 }catch(e){
-if($_O(e,Error)){
+if($_O(e,java.lang.Error)){
 return false;
 }else{
 throw e;

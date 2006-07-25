@@ -34,7 +34,7 @@ Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 Clazz.defineMethod(Integer,"parseInt",
 function(s,radix){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("int null");
 }if(radix<2){
 throw new NumberFormatException("radix "+radix+" less than Character.MIN_RADIX");
 }if(radix>36){
@@ -56,4 +56,13 @@ return false;
 }
 return s.valueOf()==this.valueOf();
 },"Object");
+Integer.toHexString=Integer.prototype.toHexString=function(i){
+return i.toString(16);
+};
+Integer.toOctalString=Integer.prototype.toOctalString=function(i){
+return i.toString(8);
+};
+Integer.toBinaryString=Integer.prototype.toBinaryString=function(i){
+return i.toString(2);
+};
 });
