@@ -112,7 +112,7 @@ if(key.equals(e.getKey()))return e.getValue();
 },"~O");
 $_V(c$,"put",
 function(key,value){
-throw new UnsupportedOperationException();
+throw new java.lang.UnsupportedOperationException();
 },"~O,~O");
 $_V(c$,"remove",
 function(key){
@@ -272,9 +272,9 @@ if(!(t.get(key)==null&&t.containsKey(key)))return false;
 if(!value.equals(t.get(key)))return false;
 }}
 }catch(e){
-if($_O(e,ClassCastException)){
+if($_O(e,java.lang.ClassCastException)){
 return false;
-}else if($_O(e,NullPointerException)){
+}else if($_O(e,java.lang.NullPointerException)){
 return false;
 }else{
 throw e;

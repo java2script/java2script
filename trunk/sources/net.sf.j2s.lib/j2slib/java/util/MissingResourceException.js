@@ -3,7 +3,7 @@ c$=$_C(function(){
 this.className=null;
 this.key=null;
 $_Z(this,arguments);
-},java.util,"MissingResourceException",RuntimeException);
+},java.util,"MissingResourceException",java.lang.RuntimeException);
 $_K(c$,
 function(s,className,key){
 $_R(this,java.util.MissingResourceException,[s]);

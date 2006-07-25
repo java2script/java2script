@@ -4,19 +4,19 @@ $_Z(this,arguments);
 },$wt.internal,"Compatibility");
 c$.cos=$_M(c$,"cos",
 function(angle,length){
-return parseInt((Math.cos(angle*$wt.internal.Compatibility.toRadians)*length));
+return Math.round((Math.cos(angle*$wt.internal.Compatibility.toRadians)*length))(Math.cos(angle*$wt.internal.Compatibility.toRadians)*length);
 },"~N,~N");
 c$.sin=$_M(c$,"sin",
 function(angle,length){
-return parseInt((Math.sin(angle*$wt.internal.Compatibility.toRadians)*length));
+return Math.round((Math.sin(angle*$wt.internal.Compatibility.toRadians)*length))(Math.sin(angle*$wt.internal.Compatibility.toRadians)*length);
 },"~N,~N");
 c$.ceil=$_M(c$,"ceil",
 function(p,q){
-return parseInt(Math.ceil(p/q));
+return Math.round(Math.ceil(p/ q))Math.ceil (p /q);
 },"~N,~N");
 c$.floor=$_M(c$,"floor",
 function(p,q){
-return parseInt(Math.floor(p/q));
+return Math.round(Math.floor(p/ q))Math.floor (p /q);
 },"~N,~N");
 c$.round=$_M(c$,"round",
 function(p,q){

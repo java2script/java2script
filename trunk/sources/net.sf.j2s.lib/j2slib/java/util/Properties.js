@@ -112,7 +112,7 @@ case'F':
 value=(value<<4)+10+(aChar).charCodeAt(0)-('A').charCodeAt(0);
 break;
 default:
-throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
+throw new java.lang.IllegalArgumentException("Malformed \\uxxxx encoding.");
 }
 }
 outBuffer.append(String.fromCharCode(value));

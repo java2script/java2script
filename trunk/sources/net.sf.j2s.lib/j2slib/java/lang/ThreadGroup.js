@@ -17,7 +17,7 @@ this.construct(Thread.currentThread().getThreadGroup(),name);
 $_K(c$,
 function(parent,name){
 if(parent==null){
-throw new NullPointerException();
+throw new java.lang.NullPointerException();
 }this.name=name;
 this.parent=parent;
 this.maxPriority=10;

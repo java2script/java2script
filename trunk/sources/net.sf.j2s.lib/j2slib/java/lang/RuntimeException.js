@@ -1,7 +1,7 @@
 Clazz.load(["java.lang.Exception"],"java.lang.RuntimeException",null,function(){
 c$=$_C(function(){
 $_Z(this,arguments);
-},java.lang,"RuntimeException",Exception);
+},java.lang,"RuntimeException",java.lang.Exception);
 $_K(c$,
 function(){
 $_R(this,RuntimeException);

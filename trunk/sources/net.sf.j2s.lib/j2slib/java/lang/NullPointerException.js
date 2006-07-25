@@ -1,7 +1,7 @@
 Clazz.load(["java.lang.RuntimeException"],"java.lang.NullPointerException",null,function(){
 c$=$_C(function(){
 $_Z(this,arguments);
-},java.lang,"NullPointerException",RuntimeException);
+},java.lang,"NullPointerException",java.lang.RuntimeException);
 $_K(c$,
 function(){
 $_R(this,NullPointerException);

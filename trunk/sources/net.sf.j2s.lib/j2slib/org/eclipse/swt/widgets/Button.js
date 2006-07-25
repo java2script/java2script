@@ -262,7 +262,7 @@ if(value){
 try{
 this.handle.focus();
 }catch(e){
-if($_O(e,Error)){
+if($_O(e,java.lang.Error)){
 }else{
 throw e;
 }
@@ -500,7 +500,43 @@ this.btnHandle.className="button-arrow";
 this.updateArrowStyle();
 }else{
 this.btnHandle.className="button-push";
-}}this.hookSelection();
+}}this.btnHandle.onmouseover=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.Button$1")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"Button$1",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+var cssName=" button-hover";
+var idx=this.b$["$wt.widgets.Button"].btnHandle.className.indexOf(cssName);
+if(idx==-1){
+this.b$["$wt.widgets.Button"].btnHandle.className=this.b$["$wt.widgets.Button"].btnHandle.className+cssName;
+}});
+c$=$_P();
+}
+return $_N($wt.widgets.Button$1,i$,v$);
+})(this,null));
+this.btnHandle.onmouseout=$_Q((function(i$,v$){
+if(!$_D("org.eclipse.swt.widgets.Button$2")){
+$_H();
+c$=$_C(function(){
+$_B(this,arguments);
+$_Z(this,arguments);
+},$wt.widgets,"Button$2",$wt.internal.RunnableCompatibility);
+$_V(c$,"run",
+function(){
+var cssName=" button-hover";
+var idx=this.b$["$wt.widgets.Button"].btnHandle.className.indexOf(cssName);
+if(idx!=-1){
+this.b$["$wt.widgets.Button"].btnHandle.className=this.b$["$wt.widgets.Button"].btnHandle.className.substring(0,idx)+this.b$["$wt.widgets.Button"].btnHandle.className.substring(cssName.length+idx);
+}});
+c$=$_P();
+}
+return $_N($wt.widgets.Button$2,i$,v$);
+})(this,null));
+this.hookSelection();
 });
 $_M(c$,"updateArrowStyle",
 ($fz=function(){
@@ -518,12 +554,12 @@ this.btnText.className="button-arrow-up";
 $_V(c$,"hookSelection",
 function(){
 var eventHandler=$_Q((function(i$,v$){
-if(!$_D("org.eclipse.swt.widgets.Button$1")){
+if(!$_D("org.eclipse.swt.widgets.Button$3")){
 $_H();
 c$=$_C(function(){
 $_B(this,arguments);
 $_Z(this,arguments);
-},$wt.widgets,"Button$1",$wt.internal.RunnableCompatibility);
+},$wt.widgets,"Button$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Button"].isEnabled()){
@@ -546,7 +582,7 @@ this.b$["$wt.widgets.Button"].selectRadio();
 });
 c$=$_P();
 }
-return $_N($wt.widgets.Button$1,i$,v$);
+return $_N($wt.widgets.Button$3,i$,v$);
 })(this,null));
 this.handle.onclick=this.handle.ondblclick=eventHandler;
 if((this.style&(48))!=0){

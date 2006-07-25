@@ -11,7 +11,7 @@ this.map=new java.util.HashMap();
 $_K(c$,
 function(c){
 $_R(this,java.util.HashSet,[]);
-this.map=new java.util.HashMap(Math.max(parseInt((c.size()/.75))+1,16));
+this.map=new java.util.HashMap(Math.max(Math.round((c.size()/ .75))(c.size () /.75)+1,16));
 this.addAll(c);
 },"java.util.Collection");
 $_K(c$,
@@ -64,8 +64,8 @@ var newSet=$_U(this,java.util.HashSet,"clone",[]);
 newSet.map=this.map.clone();
 return newSet;
 }catch(e){
-if($_O(e,CloneNotSupportedException)){
-throw new InternalError();
+if($_O(e,java.lang.CloneNotSupportedException)){
+throw new java.lang.InternalError();
 }else{
 throw e;
 }

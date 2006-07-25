@@ -21,7 +21,14 @@ return value;
 },"Number");
 Clazz.makeConstructor(Float,
 function(s){
-var value=Float.parseFloat(s,10);
+alert(arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller);
+alert("-----"+s+"=====")
+var value=null;
+if(s!=null){
+value=Float.parseFloat(s,10);
+}else{
+value=0;
+}
 this.valueOf=function(){
 return value;
 };
@@ -36,7 +43,7 @@ Float.NaN=Number.NaN;
 Clazz.defineMethod(Float,"parseFloat",
 function(s){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("float null");
 }
 return parseFloat(s);
 },"String");
@@ -46,6 +53,11 @@ function(num){
 return isNaN(num);
 },"Number");
 Float.isNaN=Float.prototype.isNaN;
+Clazz.defineMethod(Float,"isInfinite",
+function(num){
+return!isFinite(num);
+},"Number");
+Float.isInfinite=Float.prototype.isInfinite;
 
 Clazz.defineMethod(Float,"equals",
 function(s){

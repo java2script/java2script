@@ -44,9 +44,9 @@ cArray[i].setLayoutData(data);
 if(ratios[maxIndex]>0){
 var sashwidth=sashForm.sashes.length>0?sashForm.SASH_WIDTH+sashForm.sashes[0].getBorderWidth()*2:sashForm.SASH_WIDTH;
 if(vertical){
-height+=parseInt((Math.floor(total*maxValue/ratios[maxIndex])))+(cArray.length-1)*sashwidth;
+height+=(Math.floor(total*maxValue/ratios[maxIndex]))+(cArray.length-1)*sashwidth;
 }else{
-width+=parseInt((Math.floor(total*maxValue/ratios[maxIndex])))+(cArray.length-1)*sashwidth;
+width+=(Math.floor(total*maxValue/ratios[maxIndex]))+(cArray.length-1)*sashwidth;
 }}width+=sashForm.getBorderWidth()*2;
 height+=sashForm.getBorderWidth()*2;
 if(wHint!=-1)width=wHint;
@@ -113,14 +113,14 @@ controls[i].setLayoutData(data);
 }
 var sashwidth=sashes.length>0?sashForm.SASH_WIDTH+sashes[0].getBorderWidth()*2:sashForm.SASH_WIDTH;
 if(sashForm.getOrientation()==256){
-var width=parseInt((Math.floor(ratios[0]*(area.width-sashes.length*sashwidth)/total)));
+var width=(Math.floor(ratios[0]*(area.width-sashes.length*sashwidth)/total));
 var x=area.x;
 controls[0].setBounds(x,area.y,width,area.height);
 x+=width;
 for(var i=1;i<controls.length-1;i++){
 sashes[i-1].setBounds(x,area.y,sashwidth,area.height);
 x+=sashwidth;
-width=parseInt((Math.floor(ratios[i]*(area.width-sashes.length*sashwidth)/total)));
+width=(Math.floor(ratios[i]*(area.width-sashes.length*sashwidth)/total));
 controls[i].setBounds(x,area.y,width,area.height);
 x+=width;
 }
@@ -130,14 +130,14 @@ x+=sashwidth;
 width=area.width-x;
 controls[controls.length-1].setBounds(x,area.y,width,area.height);
 }}else{
-var height=parseInt((Math.floor(ratios[0]*(area.height-sashes.length*sashwidth)/total)));
+var height=(Math.floor(ratios[0]*(area.height-sashes.length*sashwidth)/total));
 var y=area.y;
 controls[0].setBounds(area.x,y,area.width,height);
 y+=height;
 for(var i=1;i<controls.length-1;i++){
 sashes[i-1].setBounds(area.x,y,area.width,sashwidth);
 y+=sashwidth;
-height=parseInt((Math.floor(ratios[i]*(area.height-sashes.length*sashwidth)/total)));
+height=(Math.floor(ratios[i]*(area.height-sashes.length*sashwidth)/total));
 controls[i].setBounds(area.x,y,area.width,height);
 y+=height;
 }

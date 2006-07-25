@@ -9,15 +9,15 @@ return this.read(b,0,b.length);
 $_M(c$,"read",
 function(b,off,len){
 if(b==null){
-throw new NullPointerException();
+throw new java.lang.NullPointerException();
 }else if((off<0)||(off>b.length)||(len<0)||((off+len)>b.length)||((off+len)<0)){
-throw new IndexOutOfBoundsException();
+throw new java.lang.IndexOutOfBoundsException();
 }else if(len==0){
 return 0;
 }var c=this.read();
 if(c==-1){
 return-1;
-}b[off]=parseInt(c);
+}b[off]=c;
 var i=1;
 try{
 for(;i<len;i++){
@@ -25,7 +25,7 @@ c=this.read();
 if(c==-1){
 break;
 }if(b!=null){
-b[off+i]=parseInt(c);
+b[off+i]=c;
 }}
 }catch(e){
 if($_O(e,java.io.IOException)){
@@ -44,7 +44,7 @@ var localSkipBuffer=java.io.InputStream.skipBuffer;
 if(n<=0){
 return 0;
 }while(remaining>0){
-nr=this.read(localSkipBuffer,0,parseInt(Math.min(2048,remaining)));
+nr=this.read(localSkipBuffer,0,Math.min(2048,remaining));
 if(nr<0){
 break;
 }remaining-=nr;

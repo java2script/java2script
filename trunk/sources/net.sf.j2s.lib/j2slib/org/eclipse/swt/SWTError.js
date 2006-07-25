@@ -3,7 +3,7 @@ c$=$_C(function(){
 this.code=0;
 this.throwable=null;
 $_Z(this,arguments);
-},$wt,"SWTError",Error);
+},$wt,"SWTError",java.lang.Error);
 $_K(c$,
 function(){
 this.construct(1);

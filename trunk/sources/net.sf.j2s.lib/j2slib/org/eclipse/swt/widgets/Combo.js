@@ -299,7 +299,9 @@ $_U(this,$wt.widgets.Combo,"register",[]);
 $_M(c$,"remove",
 function(index){
 var oldOptions=this.selectInput.options;
-var newOptions=new Array(oldOptions.length-1);
+if(this.selectInput.selectedIndex==index){
+this.noSelection=true;
+}var newOptions=new Array(oldOptions.length-1);
 System.arraycopy(oldOptions,0,newOptions,0,index);
 System.arraycopy(oldOptions,index+1,newOptions,index,oldOptions.length-index-1);
 this.selectInput.options=newOptions;
@@ -309,7 +311,9 @@ $_M(c$,"remove",
 function(start,end){
 if(start>end)return;
 var oldOptions=this.selectInput.options;
-var newOptions=new Array(oldOptions.length-(end-start+1));
+if(start<=this.selectInput.selectedIndex&&this.selectInput.selectedIndex<=end){
+this.noSelection=true;
+}var newOptions=new Array(oldOptions.length-(end-start+1));
 System.arraycopy(oldOptions,0,newOptions,0,start);
 System.arraycopy(oldOptions,end+1,newOptions,start,oldOptions.length-end-1);
 this.selectInput.options=newOptions;
@@ -318,13 +322,16 @@ this.itemCount-=(end-start+1);
 $_M(c$,"remove",
 function(string){
 var index=this.indexOf(string,0);
-this.remove(index);
+if(this.selectInput.selectedIndex==index){
+this.noSelection=true;
+}this.remove(index);
 },"~S");
 $_M(c$,"removeAll",
 function(){
 {
 this.selectInput.options.length=0;
-}this.itemCount=0;
+}this.noSelection=true;
+this.itemCount=0;
 this.textInput.value="";
 this.sendEvent(24);
 });
@@ -347,9 +354,10 @@ this.eventTable.unhook(25,listener);
 $_M(c$,"select",
 function(index){
 if(index>=0&&index<this.itemCount){
+this.noSelection=false;
 this.selectInput.selectedIndex=index;
-}this.setText(this.getItem(index));
-},"~N");
+this.setText(this.getItem(index));
+}},"~N");
 $_M(c$,"setBounds",
 function(x,y,width,height,flags){
 var buttonHeight=this.getTextHeight();

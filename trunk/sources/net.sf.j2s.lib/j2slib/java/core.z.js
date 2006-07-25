@@ -84,7 +84,7 @@ Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 Clazz.defineMethod(Integer,"parseInt",
 function(s,radix){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("int null");
 }if(radix<2){
 throw new NumberFormatException("radix "+radix+" less than Character.MIN_RADIX");
 }if(radix>36){
@@ -106,6 +106,15 @@ return false;
 }
 return s.valueOf()==this.valueOf();
 },"Object");
+Integer.toHexString=Integer.prototype.toHexString=function(i){
+return i.toString(16);
+};
+Integer.toOctalString=Integer.prototype.toOctalString=function(i){
+return i.toString(8);
+};
+Integer.toBinaryString=Integer.prototype.toBinaryString=function(i){
+return i.toString(2);
+};
 });/* http://j2s.sf.net/ */Clazz.load(["java.lang.Comparable","$.Number"],"java.lang.Long",null,function(){
 java.lang.Long=Long=function(){
 Clazz.instantialize(this,arguments);
@@ -142,7 +151,7 @@ Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 Clazz.defineMethod(Long,"parseLong",
 function(s,radix){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("long null");
 }if(radix<2){
 throw new NumberFormatException("radix "+radix+" less than Character.MIN_RADIX");
 }if(radix>36){
@@ -187,7 +196,14 @@ return value;
 },"Number");
 Clazz.makeConstructor(Float,
 function(s){
-var value=Float.parseFloat(s,10);
+alert(arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller);
+alert("-----"+s+"=====")
+var value=null;
+if(s!=null){
+value=Float.parseFloat(s,10);
+}else{
+value=0;
+}
 this.valueOf=function(){
 return value;
 };
@@ -202,7 +218,7 @@ Float.NaN=Number.NaN;
 Clazz.defineMethod(Float,"parseFloat",
 function(s){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("float null");
 }
 return parseFloat(s);
 },"String");
@@ -212,6 +228,11 @@ function(num){
 return isNaN(num);
 },"Number");
 Float.isNaN=Float.prototype.isNaN;
+Clazz.defineMethod(Float,"isInfinite",
+function(num){
+return!isFinite(num);
+},"Number");
+Float.isInfinite=Float.prototype.isInfinite;
 
 Clazz.defineMethod(Float,"equals",
 function(s){
@@ -250,16 +271,26 @@ return value;
 },"String");
 
 Double.serialVersionUID=Double.prototype.serialVersionUID=-9172774392245257468;
-Double.MIN_VALUE=Double.prototype.MIN_VALUE=3.4028235e+38;
-Double.MAX_VALUE=Double.prototype.MAX_VALUE=1.4e-45;
+Double.MIN_VALUE=Double.prototype.MIN_VALUE=4.9e-324;
+Double.MAX_VALUE=Double.prototype.MAX_VALUE=1.7976931348623157e+308;
 Double.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Double.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Double.NaN=Number.NaN;
+Clazz.defineMethod(Double,"isNaN",
+function(num){
+return isNaN(num);
+},"Number");
+Double.isNaN=Double.prototype.isNaN;
+Clazz.defineMethod(Double,"isInfinite",
+function(num){
+return!isFinite(num);
+},"Number");
+Double.isInfinite=Double.prototype.isInfinite;
 
 Clazz.defineMethod(Double,"parseDouble",
 function(s){
 if(s==null){
-throw new NumberFormatException("null");
+throw new NumberFormatException("double null");
 }
 return parseFloat(s);
 },"String");
@@ -315,7 +346,7 @@ $_Z(this,arguments);
 },java.util,"EventObject",null,java.io.Serializable);
 $_K(c$,
 function(source){
-if(source==null)throw new IllegalArgumentException("null source");
+if(source==null)throw new java.lang.IllegalArgumentException("null source");
 this.source=source;
 },"~O");
 $_M(c$,"getSource",

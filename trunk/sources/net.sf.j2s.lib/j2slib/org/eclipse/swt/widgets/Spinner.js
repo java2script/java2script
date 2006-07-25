@@ -123,7 +123,7 @@ var height=0;
 if(wHint==-1||hHint==-1){
 var string=null;
 if(this.digits>0){
-var leading=Math.floor(this.maximum/parseInt(Math.pow(10,this.digits)));
+var leading=Math.floor(this.maximum/Math.round(Math.pow(10,this.digits))Math.pow(10,this.digits));
 var buffer=""+leading;
 buffer+=this.getDecimalSeparator();
 var count=this.digits-buffer.length+1;

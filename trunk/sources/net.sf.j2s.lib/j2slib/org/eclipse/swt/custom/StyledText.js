@@ -110,7 +110,7 @@ f=f.substring(0,h);
 try{
 g=Integer.parseInt(f);
 }catch(e){
-if($_O(e,NumberFormatException)){
+if($_O(e,java.lang.NumberFormatException)){
 }else{
 throw e;
 }
@@ -128,7 +128,7 @@ if((e).charCodeAt(0)>0xFF&&this.WriteUnicode){
 if(d>b){
 this.write(a.substring(b,d));
 }this.write("\\u");
-this.write(Integer.toString(parseInt(e)));
+this.write(Integer.toString((e).charCodeAt(0)));
 this.write(' ');
 b=d+1;
 }else if((e).charCodeAt(0)==('}').charCodeAt(0)||(e).charCodeAt(0)==('{').charCodeAt(0)||(e).charCodeAt(0)==('\\').charCodeAt(0)){

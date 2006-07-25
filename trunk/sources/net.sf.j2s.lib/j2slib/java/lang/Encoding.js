@@ -27,13 +27,13 @@ for(var i=startIdx;i<str.length;i++){
 var charCode=str.charCodeAt(i);
 if(charCode<0x80){
 arrs[arrs.length]=str.charAt(i);
-}else if(charCode>0xc0&&charCode<=0xe0){
+}else if(charCode>0xc0&&charCode<0xe0){
 var c1=charCode&0x1f;
 i++;
 var c2=str.charCodeAt(i)&0x3f;
 var c=(c1<<6)+c2;
 arrs[arrs.length]=String.fromCharCode(c);
-}else if(charCode>0xe0){
+}else if(charCode>=0xe0){
 var c1=charCode&0x0f;
 i++;
 var c2=str.charCodeAt(i)&0x3f;
@@ -62,7 +62,7 @@ for(var i=startIdx;i<str.length;i++){
 var charCode=str.charCodeAt(i);
 if(charCode<0x80){
 arrs[offset+i-startIdx]=str.charAt(i);
-}else if(charCode<0x07ff){
+}else if(charCode<=0x07ff){
 var c1=0xc0+((charCode&0x07c0)>>6);
 var c2=0x80+(charCode&0x003f);
 arrs[offset+i-startIdx]=String.fromCharCode(c1)+String.fromCharCode(c2);

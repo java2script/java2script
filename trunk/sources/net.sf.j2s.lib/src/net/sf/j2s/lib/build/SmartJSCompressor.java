@@ -48,7 +48,14 @@ public class SmartJSCompressor {
 		File destFile = new File(dest);
 		
 		if (srcFile.exists() && destFile.exists() && srcFile.lastModified() <= destFile.lastModified()) {
-			return ;
+			if ("Class.js".equals(srcFile.getName())) {
+				File src2File = new File(srcFile.getParentFile(), "ClassExt.js");
+				if (src2File.exists() && destFile.exists() && src2File.lastModified() <= destFile.lastModified()) {
+					return ;
+				}
+			} else {
+				return ;
+			}
 		}
 		
 		Map vals = new HashMap();

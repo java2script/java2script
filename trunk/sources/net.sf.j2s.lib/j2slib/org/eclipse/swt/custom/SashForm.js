@@ -64,7 +64,7 @@ var ratios=$_A(cArray.length,0);
 for(var i=0;i<cArray.length;i++){
 var data=cArray[i].getLayoutData();
 if(data!=null&&$_O(data,$wt.custom.SashFormData)){
-ratios[i]=parseInt(((data).weight*1000>>16));
+ratios[i]=((data).weight*1000>>16);
 }else{
 ratios[i]=200;
 }}
@@ -126,8 +126,8 @@ c1.setLayoutData(data1);
 if(data2==null||!($_O(data2,$wt.custom.SashFormData))){
 data2=new $wt.custom.SashFormData();
 c2.setLayoutData(data2);
-}(data1).weight=Math.floor(((parseInt(b1.width)<<16)+area.width-1)/area.width);
-(data2).weight=Math.floor(((parseInt(b2.width)<<16)+area.width-1)/area.width);
+}(data1).weight=Math.floor(((b1.width<<16)+area.width-1)/area.width);
+(data2).weight=Math.floor(((b2.width<<16)+area.width-1)/area.width);
 }else{
 correction=b1.height<20||b2.height<20;
 var totalHeight=b2.y+b2.height-b1.y;
@@ -155,8 +155,8 @@ c1.setLayoutData(data1);
 if(data2==null||!($_O(data2,$wt.custom.SashFormData))){
 data2=new $wt.custom.SashFormData();
 c2.setLayoutData(data2);
-}(data1).weight=Math.floor(((parseInt(b1.height)<<16)+area.height-1)/area.height);
-(data2).weight=Math.floor(((parseInt(b2.height)<<16)+area.height-1)/area.height);
+}(data1).weight=Math.floor(((b1.height<<16)+area.height-1)/area.height);
+(data2).weight=Math.floor(((b2.height<<16)+area.height-1)/area.height);
 }if(correction||(event.doit&&event.detail!=1)){
 c1.setBounds(b1);
 sash.setBounds(event.x,event.y,event.width,event.height);
@@ -224,7 +224,7 @@ var data=cArray[i].getLayoutData();
 if(data==null||!($_O(data,$wt.custom.SashFormData))){
 data=new $wt.custom.SashFormData();
 cArray[i].setLayoutData(data);
-}(data).weight=Math.floor(((parseInt(weights[i])<<16)+total-1)/total);
+}(data).weight=Math.floor(((weights[i]<<16)+total-1)/total);
 }
 this.layout(false);
 },"~A");

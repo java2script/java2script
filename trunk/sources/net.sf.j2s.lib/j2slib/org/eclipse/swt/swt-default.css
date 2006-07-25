@@ -39,6 +39,11 @@
 	padding:0;
 	width:100%;
 	height:100%;
+	background-image:url('images/button.png');
+	background-repeat:repeat-x;
+	background-position:0 0;
+	background-color:white;
+	
 }
 * html .button-push {
 	font-family:Tahoma, Arial, sans-serif;
@@ -53,11 +58,19 @@
 .button-push, .button-toggle, .button-arrow {
 	border-width:2px;
 	border-style:solid;
-	background-color:menu;
 	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
+	background-image:url('images/table-column.png');
+	background-repeat:repeat-x;
+	background-position:0 0;
+	background-color:white;
+	
 }
 }
-
+.button-hover{
+	background-image:url('images/button-hover.png');
+	background-repeat:repeat-x;
+	background-color:#B0E8FE;	
+}
 .button-check, .button-radio {
 }
 
@@ -123,7 +136,7 @@
 	line-height:0;
 	
 	border-style:solid solid solid none;
-	border-color:menu;
+	border-color:#DDD;
 	border-right-color:black;
 	border-left-width:0;
 }
@@ -135,7 +148,7 @@
 	line-height:0;
 	
 	border-style:solid none solid solid;
-	border-color:menu;
+	border-color:#DDD;
 	border-left-color:black;
 	border-right-width:0;
 }
@@ -147,7 +160,7 @@
 	line-height:0;
 	
 	border-style:none solid solid solid;
-	border-color:menu;
+	border-color:#DDD;
 	border-bottom-color:black;
 	border-top-width:0;
 }
@@ -159,7 +172,7 @@
 	line-height:0;
 	
 	border-style:solid solid none solid;
-	border-color:menu;
+	border-color:#DDD;
 	border-top-color:black;
 	border-bottom-width:0;
 }
@@ -190,7 +203,7 @@
 }
 
 * html .browser-default {
-	border:2px solid menu;
+	border:2px solid #DDD;
 }
 
 .composite-default {
@@ -204,6 +217,8 @@
 	margin:0;
 	padding:0;
 	overflow:hidden;
+/*	background-image:url('images/brushed.png');
+	background-repeat:repeat-x repeat-y;*/
 }
 .composite-border {
 	white-space:nowrap;
@@ -236,7 +251,7 @@
 	border-style:solid;
 	border-width:1px;
 	border-color:black white white black;
-}
+}WINEPREFIX="/home/antonio/.ies4linux/ie6" /usr/bin/wine "c:\\windows\\hh.exe" ...
 .label-seperator-horizontal-top {
 	height:0;
 	font-size:0;
@@ -346,6 +361,8 @@
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 	/*white-space:nowrap;*/
+	background-image:url('images/text.png');
+	background-repeat:no-repeat;
 }
 .text-default textarea {
 	border-style:none;
@@ -392,32 +409,35 @@ input.text-border {
 	border-style:inset;
 }
 .text-disable {
-	background-color:menu;
+	background-color:#DDD;
 }
 /* End of Text */
 
 /* Combo */
 .combo-default{
+	background-color:#DDD;
 	padding: 0;
 	border-style:none;
 	overflow:visible;
 }
 .combo-button{
-	margin:auto;
-	line-height:0;
-	
 	border-style:none none none none;
 	border-color:black;
-	
+	background-color:#DDD;
 	height: 100%;
-	background-image:url('images/combo-button.gif');
+	background-image:url('images/combo.png');
 	background-repeat:no-repeat;
 	background-position:center center;
-	
+	min-width: 24px;
+	min-height:24px;
+	_width: 24px;
+	_height: 24px;	
 }
 
 .combo-input-box{
 	border-style:none;
+	background-image:url('images/text.png');
+	background-repeat:no-repeat;
 }
 
 .combo-select-box-invisible{
@@ -436,7 +456,7 @@ input.text-border {
 
 
 .tree-item-default {
-	/*background-color:#cccccc;*/
+	/*background-color:#DDDccc;*/
 	/*height:20px;*/
 	white-space:nowrap;
 }
@@ -471,7 +491,7 @@ input.text-border {
 	white-space:nowrap;
 }
 .table-item-selected {
-	background-color:#00008e;
+	background-color:#58D;
 	color:white;
 	cursor:default;
 	white-space:nowrap;
@@ -496,7 +516,7 @@ input.text-border {
 	white-space:nowrap;
 	margin:0;
 	padding:0;
-	background-color:#00008e;
+	background-color:#58D;
 	color:white;
 }
 .tree-item-anchor-default {
@@ -505,9 +525,9 @@ input.text-border {
 	height:1em;
 	padding-left:20px;
 	height:20px;
-	background-image:url('images/T.png');
+/*	background-image:url('images/T.png');
 	background-repeat:no-repeat;
-	background-position:center center;
+	background-position:center center;*/
 	cursor:default;
 }
 .tree-item-anchor-expanded {
@@ -516,7 +536,7 @@ input.text-border {
 	overflow:hidden;
 	padding-left:20px;
 	height:20px;
-	background-image:url('images/Lminus.png');
+	background-image:url('images/arrow-down.png');
 	background-repeat:no-repeat;
 	background-position:center center;
 	cursor:default;
@@ -528,7 +548,7 @@ input.text-border {
 	overflow:hidden;
 	padding-left:20px;
 	height:20px;
-	background-image:url('images/Lplus.png');
+	background-image:url('images/arrow-right.png');
 	background-repeat:no-repeat;
 	background-position:center center;
 	cursor:default;
@@ -540,13 +560,15 @@ input.text-border {
 }
 .tree-item-text-selected {
 	display:inline;
-	background-color:#00008e;
+	background-color:#58D;
 	color:white;
 	cursor:default;
 }
 
 .table-column-default {
 	overflow: invisible;
+	background-image:url('images/table-column.png');
+	background-repeat:repeat-x;
 }
 
 .table-column-resize {
@@ -568,21 +590,21 @@ input.text-border {
 	overflow:hidden;
 }
 .tab-folder-border-default {
-	border:2px inset #ccc;
+	border:2px inset #DDD;
 }
 .tab-folder-border {
 	position:absolute;
 	width:50%;
 	height:50%;
-	border-width:2px;
-	border-color:white;
+	border-width:1px;
+	border-color:#37b;
 	z-index:100;
 }
 .tab-folder-border-nw {
 	top:7px;
 	border-style:outset none none outset;
-	border-left:1px solid white;
-	border-top:1px solid white;
+	border-left:1px solid #37b;
+	border-top:1px solid #37b;
 	margin-top:1.2em;
 }
 * html .tab-folder-border-nw {
@@ -592,13 +614,13 @@ input.text-border {
 .tab-folder-border-sw {
 	bottom:0;
 	border-style:none none outset outset;
-	border-left:1px solid white;
+	border-left:1px solid #37b;
 }
 .tab-folder-border-ne {
 	right:0;
 	top:7px;
 	border-style:outset outset none none;
-	border-top:1px solid white;
+	border-top:1px solid #37b;
 	margin-top:1.2em;
 }
 * html .tab-folder-border-ne {
@@ -679,13 +701,16 @@ input.text-border {
 	padding:2px 5px 2px 5px;
 	min-width:28px;
 	cursor:default;
-	overflow:visible;
+	overflow:hidden;
 	white-space:nowrap;
-	border-top:1px solid white;
-	border-left:1px solid white;
-	border-right:2px outset #777;
+	border-top:1px solid #777;
+	border-left:1px solid #777;
+	border-right:1px outset #777;
 	border-bottom-style:none;
-	background-color:menu;
+	background-color:#DDD;
+	background-image:url('images/table-column.png');
+	background-repeat:repeat-x;
+	
 }
 * html .tab-item-default {
 	padding-top:1px;
@@ -700,6 +725,11 @@ input.text-border {
 	padding-left:7px;
 	padding-right:7px;
 	padding-bottom:4px;
+	border-top:1px solid #37b;
+	border-left:1px solid #37b;
+	border-right:1px solid #37b;
+	background-image:url('images/button-hover.png');
+	background-repeat:repeat-x;
 }
 .tab-item-default span {
 	white-space:nowrap;
@@ -828,6 +858,7 @@ input.text-border {
 	position:absolute;
 	width:100%;
 	z-index:120;
+	background-color:#DDD;
 }
 
 /* End of TabFolder */
@@ -843,7 +874,7 @@ input.text-border {
 }
 
 .ctab-folder-border-default {
-	border:2px inset #ccc;
+	border:2px inset #DDD;
 }
 .ctab-folder-border {
 	position:absolute;
@@ -860,7 +891,7 @@ input.text-border {
 	border-left:1px solid gray;
 	border-right:1px solid gray;
 	border-top:1px solid gray;
-	background-color: menu;
+	background-color: #DDD;
 	padding:1px 1px 1px 1px;
 	_height: 16px;
 }
@@ -887,7 +918,7 @@ input.text-border {
 	border-style:solid solid solid solid;
 	border-width:12px;
 	border-color:red;*/
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-folder-content-area-border-blue {
@@ -968,7 +999,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-attach-noextrapos-left {
@@ -985,7 +1016,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-attach-close-left{
@@ -994,7 +1025,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	width:15px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -1007,7 +1038,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1020,14 +1051,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 .ctab-item-attach-close-right-hover,
 .ctab-item-attach-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1045,7 +1076,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-attach-rounded-noextrapos-left {
@@ -1062,7 +1093,7 @@ input.text-border {
 	overflow:hidden;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-attach-rounded-close-left{
@@ -1071,7 +1102,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	width:15px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -1084,7 +1115,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1097,14 +1128,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 .ctab-item-attach-rounded-close-right-hover,
 .ctab-item-attach-rounded-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1119,7 +1150,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-left-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-selected .ctab-item-attach-noextrapos-right {
@@ -1130,7 +1161,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 .ctab-item-selected .ctab-item-attach-default-right{
 	float:right;
@@ -1140,7 +1171,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-close-selected.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 .ctab-item-selected .ctab-item-attach-default-right-hover, 
 .ctab-item-selected .ctab-item-attach-default-right:hover{
@@ -1151,7 +1182,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-right-close-selected-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 /*
 .ctab-item-selected .ctab-item-attach-close-rounded-right{
@@ -1240,7 +1271,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-close-right.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-default-right-hover,
@@ -1252,7 +1283,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-close-right-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-noextrapos-left {
@@ -1264,7 +1295,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-left.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;	
+	background-color:#DDD;	
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-noextrapos-right {
@@ -1276,7 +1307,7 @@ input.text-border {
 	background-image:url('images/ctab-rounded-right.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-left{
@@ -1285,7 +1316,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	width:37px;
 	overflow:hidden;
 	font-family:Arial, sans-serif;
@@ -1298,7 +1329,7 @@ input.text-border {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top left;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1311,14 +1342,14 @@ input.text-border {
 	background-image:url('images/ctab-simple-close.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 }
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-right-hover,
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-right:hover{
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
-	background-color:menu;
+	background-color:#DDD;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
 }
@@ -1617,7 +1648,7 @@ input.text-border {
 	border:2px outset white;
 	height:100%;
 	width:20px;
-	background-color:menu;
+	background-color:#DDD;
 	padding:0;
 	margin:0;
 }
@@ -1627,7 +1658,7 @@ input.text-border {
 	width:100%;
 	height:20px;
 	border:2px outset white;
-	background-color:menu;
+	background-color:#DDD;
 	padding:0;
 	margin:0;
 }
@@ -1695,7 +1726,7 @@ input.text-border {
 	cursor:default;
 	font-size:0;
 	z-index:4;
-	background-color:menu;
+	background-color:#DDD;
 	border:1px outset white;
 }
 .scale-line-decoration-horizontal {
@@ -1716,7 +1747,7 @@ input.text-border {
 	margin:0;
 	padding:0;
 	height:24px;
-	background-color:menu;
+	background-color:#DDD;
 	width:100%;
 	z-index:2;
 }
@@ -1756,7 +1787,7 @@ input.text-border {
 	cursor:default;
 	font-size:0;
 	z-index:4;
-	background-color:menu;
+	background-color:#DDD;
 	border:1px outset white;
 }
 .scale-line-decoration-vertical {
@@ -1777,7 +1808,7 @@ input.text-border {
 	margin:0;
 	padding:0;
 	width:24px;
-	background-color:menu;
+	background-color:#DDD;
 	height:100%;
 	z-index:2;
 }
@@ -1889,7 +1920,7 @@ table, tr, td {
 .shell-handle {
 	position:absolute;
 	border:1px outset white;
-	background-color:menu;
+	background-color:#DDD;
 	z-index:10;
 }
 .opacity {
@@ -1902,7 +1933,7 @@ table, tr, td {
 	position:absolute;
 	top:0;
 	left:0;
-	background-color:menu;
+	background-color:#DDD;
 	overflow:hidden;
 	font-size:0;
 }
@@ -1917,7 +1948,7 @@ table, tr, td {
 	margin-top:1px;
 	margin-right:2px;
 	overflow:hidden;
-	background-color:menu;
+	background-color:#DDD;
 	/*background-color:navy;*/
 	z-index:3;
 }
@@ -2030,7 +2061,7 @@ table, tr, td {
 	height:14px;
 	overflow:hidden;
 	z-index:1;
-	background-color:menu;
+	background-color:#DDD;
 	border:1px outset white;
 }
 

@@ -81,8 +81,8 @@ var b3=y3-y0+3*y1-3*y2;
 var polygon=$_A(2*count+2,0);
 for(var i=0;i<=count;i++){
 var t=i/count;
-polygon[2*i]=parseInt((a0+a1*t+a2*t*t+a3*t*t*t));
-polygon[2*i+1]=parseInt((b0+b1*t+b2*t*t+b3*t*t*t));
+polygon[2*i]=Math.round((a0+a1*t+a2*t*t+a3*t*t*t))(a0+a1*t+a2*t*t+a3*t*t*t);
+polygon[2*i+1]=Math.round((b0+b1*t+b2*t*t+b3*t*t*t))(b0+b1*t+b2*t*t+b3*t*t*t);
 }
 return polygon;
 },"~N,~N,~N,~N,~N,~N,~N,~N,~N");

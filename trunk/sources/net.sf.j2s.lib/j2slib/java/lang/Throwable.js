@@ -43,8 +43,8 @@ return(this.cause==this?null:this.cause);
 });
 $_M(c$,"initCause",
 function(cause){
-if(this.cause!=this)throw new IllegalStateException("Can't overwrite cause");
-if(cause==this)throw new IllegalArgumentException("Self-causation not permitted");
+if(this.cause!=this)throw new java.lang.IllegalStateException("Can't overwrite cause");
+if(cause==this)throw new java.lang.IllegalArgumentException("Self-causation not permitted");
 this.cause=cause;
 return this;
 },"Throwable");
@@ -137,7 +137,7 @@ return this;
 $_M(c$,"setStackTrace",
 function(stackTrace){
 var defensiveCopy=stackTrace.clone();
-for(var i=0;i<defensiveCopy.length;i++)if(defensiveCopy[i]==null)throw new NullPointerException("stackTrace["+i+"]");
+for(var i=0;i<defensiveCopy.length;i++)if(defensiveCopy[i]==null)throw new java.lang.NullPointerException("stackTrace["+i+"]");
 
 this.stackTrace=defensiveCopy;
 },"~A");

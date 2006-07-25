@@ -95,7 +95,7 @@ if(getWidth==0)return;
 if(this.alphaData==null){
 var endIndex=startIndex+getWidth;
 for(var i=startIndex;i<endIndex;i++){
-alphas[i]=parseInt(255);
+alphas[i]=255;
 }
 return;
 }System.arraycopy(this.alphaData,y*this.width+x,alphas,startIndex,getWidth);
@@ -181,7 +181,7 @@ var offset;
 while(n>0){
 offset=3-(srcX%4);
 mask=3<<(offset*2);
-pixels[i]=parseInt(((theByte&mask)>>(offset*2)));
+pixels[i]=((theByte&mask)>>(offset*2));
 i++;
 n--;
 srcX++;
@@ -200,7 +200,7 @@ return;
 index=(y*this.bytesPerLine)+(x>>1);
 if((x&0x1)==1){
 theByte=this.data[index]&0xFF;
-pixels[i]=parseInt((theByte&0x0F));
+pixels[i]=(theByte&0x0F);
 i++;
 n--;
 srcX++;
@@ -212,7 +212,7 @@ srcX=0;
 index++;
 }}while(n>1){
 theByte=this.data[index]&0xFF;
-pixels[i]=parseInt((theByte>>4));
+pixels[i]=(theByte>>4);
 i++;
 n--;
 srcX++;
@@ -221,7 +221,7 @@ srcY++;
 index=srcY*this.bytesPerLine;
 srcX=0;
 }else{
-pixels[i]=parseInt((theByte&0x0F));
+pixels[i]=(theByte&0x0F);
 i++;
 n--;
 srcX++;
@@ -234,7 +234,7 @@ index++;
 }}}
 if(n>0){
 theByte=this.data[index]&0xFF;
-pixels[i]=parseInt((theByte>>4));
+pixels[i]=(theByte>>4);
 }return;
 }if(this.depth==8){
 index=(y*this.bytesPerLine)+x;
@@ -292,7 +292,7 @@ var offset;
 while(n>0){
 offset=3-(srcX%4);
 mask=3<<(offset*2);
-pixels[i]=parseInt(((theByte&mask)>>(offset*2)));
+pixels[i]=((theByte&mask)>>(offset*2));
 i++;
 n--;
 srcX++;
@@ -428,7 +428,7 @@ return null;
 $_M(c$,"setAlpha",
 function(x,y,alpha){
 if(this.alphaData==null)this.alphaData=$_A(this.width*this.height,0);
-this.alphaData[y*this.width+x]=parseInt(alpha);
+this.alphaData[y*this.width+x]=alpha;
 },"~N,~N,~N");
 $_M(c$,"setAlphas",
 function(x,y,putWidth,alphas,startIndex){
@@ -446,45 +446,45 @@ index=(y*this.bytesPerLine)+(x>>3);
 theByte=this.data[index];
 mask=1<<(7-(x&0x7));
 if((pixelValue&0x1)==1){
-this.data[index]=parseInt((theByte|mask));
+this.data[index]=(theByte|mask);
 }else{
-this.data[index]=parseInt((theByte&(mask^-1)));
+this.data[index]=(theByte&(mask^-1));
 }return;
 }if(this.depth==2){
 index=(y*this.bytesPerLine)+(x>>2);
 theByte=this.data[index];
 var offset=3-(x%4);
 mask=0xFF^(3<<(offset*2));
-this.data[index]=parseInt(((this.data[index]&mask)|(pixelValue<<(offset*2))));
+this.data[index]=((this.data[index]&mask)|(pixelValue<<(offset*2)));
 return;
 }if(this.depth==4){
 index=(y*this.bytesPerLine)+(x>>1);
 if((x&0x1)==0){
-this.data[index]=parseInt(((this.data[index]&0x0F)|((pixelValue&0x0F)<<4)));
+this.data[index]=((this.data[index]&0x0F)|((pixelValue&0x0F)<<4));
 }else{
-this.data[index]=parseInt(((this.data[index]&0xF0)|(pixelValue&0x0F)));
+this.data[index]=((this.data[index]&0xF0)|(pixelValue&0x0F));
 }return;
 }if(this.depth==8){
 index=(y*this.bytesPerLine)+x;
-this.data[index]=parseInt((pixelValue&0xFF));
+this.data[index]=(pixelValue&0xFF);
 return;
 }if(this.depth==16){
 index=(y*this.bytesPerLine)+(x*2);
-this.data[index+1]=parseInt(((pixelValue>>8)&0xFF));
-this.data[index]=parseInt((pixelValue&0xFF));
+this.data[index+1]=((pixelValue>>8)&0xFF);
+this.data[index]=(pixelValue&0xFF);
 return;
 }if(this.depth==24){
 index=(y*this.bytesPerLine)+(x*3);
-this.data[index]=parseInt(((pixelValue>>16)&0xFF));
-this.data[index+1]=parseInt(((pixelValue>>8)&0xFF));
-this.data[index+2]=parseInt((pixelValue&0xFF));
+this.data[index]=((pixelValue>>16)&0xFF);
+this.data[index+1]=((pixelValue>>8)&0xFF);
+this.data[index+2]=(pixelValue&0xFF);
 return;
 }if(this.depth==32){
 index=(y*this.bytesPerLine)+(x*4);
-this.data[index]=parseInt(((pixelValue>>24)&0xFF));
-this.data[index+1]=parseInt(((pixelValue>>16)&0xFF));
-this.data[index+2]=parseInt(((pixelValue>>8)&0xFF));
-this.data[index+3]=parseInt((pixelValue&0xFF));
+this.data[index]=((pixelValue>>24)&0xFF);
+this.data[index+1]=((pixelValue>>16)&0xFF);
+this.data[index+2]=((pixelValue>>8)&0xFF);
+this.data[index+3]=(pixelValue&0xFF);
 return;
 }$WT.error(38);
 },"~N,~N,~N");
@@ -503,9 +503,9 @@ index=(y*this.bytesPerLine)+(x>>3);
 while(n>0){
 mask=1<<(7-(srcX&0x7));
 if((pixels[i]&0x1)==1){
-this.data[index]=parseInt(((this.data[index]&0xFF)|mask));
+this.data[index]=((this.data[index]&0xFF)|mask);
 }else{
-this.data[index]=parseInt(((this.data[index]&0xFF)&(mask^-1)));
+this.data[index]=((this.data[index]&0xFF)&(mask^-1));
 }i++;
 n--;
 srcX++;
@@ -519,12 +519,12 @@ index++;
 }}}
 return;
 }if(this.depth==2){
-var masks=[parseInt(0xFC),parseInt(0xF3),parseInt(0xCF),parseInt(0x3F)];
+var masks=[0xFC,0xF3,0xCF,0x3F];
 index=(y*this.bytesPerLine)+(x>>2);
 var offset=3-(x%4);
 while(n>0){
 theByte=pixels[i]&0x3;
-this.data[index]=parseInt(((this.data[index]&masks[offset])|(theByte<<(offset*2))));
+this.data[index]=((this.data[index]&masks[offset])|(theByte<<(offset*2)));
 i++;
 n--;
 srcX++;
@@ -547,9 +547,9 @@ var high=(x&0x1)==0;
 while(n>0){
 theByte=pixels[i]&0x0F;
 if(high){
-this.data[index]=parseInt(((this.data[index]&0x0F)|(theByte<<4)));
+this.data[index]=((this.data[index]&0x0F)|(theByte<<4));
 }else{
-this.data[index]=parseInt(((this.data[index]&0xF0)|theByte));
+this.data[index]=((this.data[index]&0xF0)|theByte);
 }i++;
 n--;
 srcX++;
@@ -566,7 +566,7 @@ return;
 }if(this.depth==8){
 index=(y*this.bytesPerLine)+x;
 for(var j=0;j<putWidth;j++){
-this.data[index]=parseInt((pixels[i]&0xFF));
+this.data[index]=(pixels[i]&0xFF);
 i++;
 srcX++;
 if(srcX>=this.width){
