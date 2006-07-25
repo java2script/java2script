@@ -56,4 +56,13 @@ if(s == null || ! Clazz.instanceOf(s, Integer) ){
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
+Integer.toHexString = Integer.prototype.toHexString = function (i) {
+	return i.toString (16);
+};
+Integer.toOctalString = Integer.prototype.toOctalString = function (i) {
+	return i.toString (8);
+};
+Integer.toBinaryString = Integer.prototype.toBinaryString = function (i) {
+	return i.toString (2);
+};
 });
