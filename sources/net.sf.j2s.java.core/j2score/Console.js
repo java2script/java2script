@@ -449,6 +449,10 @@ window.assert = function () {
 	/* public */
 	System = new Object ();
 	
+	System.currentTimeMillis = function () {
+		return new Date ().getTime ();
+	};
+
 	/* public */
 	System.arraycopy = function (src, srcPos, dest, destPos, length) {
 		for (var i = 0; i < length; i++) {
@@ -456,8 +460,18 @@ window.assert = function () {
 		}
 	};
 	
+	System.props = null; //new java.util.Properties ();
+	System.getProperties = function () {
+		return System.props;
+	};
+	System.setProperties = function (props) {
+		System.props = props;
+	};
+
 	/* public */
-	System.out = new Object ();
+	System.out = {
+		__CLASS_NAME__ : "java.io.PrintStream"
+	}; //new Object ();
 	
 	/* public */
 	System.out.print = function (s) { 
@@ -477,7 +491,9 @@ window.assert = function () {
 	};
 	
 	/* public */
-	System.err = new Object ();
+	System.err = {
+		__CLASS_NAME__ : "java.io.PrintStream"
+	}; //new Object ();
 	
 	/* public */
 	System.err.print = function (s) { 

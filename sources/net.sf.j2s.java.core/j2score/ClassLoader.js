@@ -22,6 +22,9 @@
  * Give more ways for the feedback of loading.
  * Use multiple SCRIPT tags so *.js can be downloaded asynchronously.
  * Use Class.for.... to load tabs.
+ *
+ * Fix the bug that *.random are used to identify visited status.
+ * Determine whether *.js is sucessfully loaded or failed.
  */
  
 /*-#
@@ -83,7 +86,7 @@ ClazzNode.STATUS_OPTIONALS_LOADED = 5;
 /**
  * Static class loader class
  */
-ClazzLoader = {};
+ClazzLoader = function () {};
 
 /**
  * Class dependency tree
@@ -307,7 +310,7 @@ ClazzLoader.classQueue = new Array ();
 ClazzLoader.classpathMap = new Object ();
 
 /* public */
-ClazzLoader.packageClassPath = function (pkg, base) {
+ClazzLoader.packageClasspath = function (pkg, base) {
 	if (pkg.lastIndexOf (".*") == pkg.length - 2) {
 		pkg = pkg.substring (0, pkg.length - 2);
 	}
@@ -341,7 +344,7 @@ ClazzLoader.libraryClasspath = function (prefix, pkgs, base, index) {
 	}
 	ClazzLoader[isRegistered] = true;
 	for (var i = 0; i < pkgs.length; i++) {
-		ClazzLoader.packageClassPath (prefix + pkgs[i], base);
+		ClazzLoader.packageClasspath (prefix + pkgs[i], base);
 	}
 	if (index == true && window[prefix + "package"] != true) {
 		ClazzLoader.loadClass (prefix + "package");
@@ -383,6 +386,21 @@ ClazzLoader.swtClasspath = function (base) {
 	], base, true);
 };
 
+
+/* public */
+ClazzLoader.junitClasspath = function (base) {
+	ClazzLoader.libraryClasspath ("junit.", [
+			"*",
+			"awtui.*",
+			"extensions.*",
+			"framework.*",
+			"runner.*",
+			"swingui.*",
+			"textui.*"
+	], base, false);
+};
+
+
 /* public */
 ClazzLoader.ajaxClasspath = function (base) {
 	ClazzLoader.libraryClasspath ("net.sf.j2s.ajax.", ["*"], base, false);
@@ -397,6 +415,7 @@ ClazzLoader.j2slibClasspath = function (base) {
 	ClazzLoader.runtimeClasspath (base);
 	ClazzLoader.swtClasspath (base);
 	ClazzLoader.ajaxClasspath (base);
+	ClazzLoader.junitClasspath (base);
 };
 
 /**
@@ -1324,6 +1343,9 @@ ClazzLoader.queueBeforeString = new Array ();
  */
 /* public */
 ClazzLoader.loadClass = function (name, optionalsLoaded) {
+	if (typeof optionalsLoaded == "boolean") {
+		return Clazz.evalType (name);
+	}
 	ClazzLoader.keepOnLoading = true;
 	if (!ClazzLoader.isClassDefined ("java.lang.String") 
 			&& name.indexOf ("java.") != 0) {
@@ -1343,7 +1365,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded) {
 			n.status = ClazzNode.STATUS_KNOWN;
 			/*-# needBeingQueued -> nQ #-*/
 			var needBeingQueued = false;
-			for (var i = ClazzLoader.classQueue.length - 1; i >= 0; i++) {
+			for (var i = ClazzLoader.classQueue.length - 1; i >= 0; i--) {
 				var cq = ClazzLoader.classQueue[i];
 				if (cq.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
 					needBeingQueued = true;
@@ -1396,4 +1418,6 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 		child.parents[child.parents.length] = parent;
 	}
 };
+
+ClassLoader = ClazzLoader;
 

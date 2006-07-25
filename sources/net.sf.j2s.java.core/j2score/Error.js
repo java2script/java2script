@@ -1,13 +1,16 @@
 Clazz.load (["java.lang.Throwable"], "java.lang.Error", null, function () {
-c$ = java.lang.Error = Error/* = function () {
+c$ = java.lang.Error = Error = function () {
 Clazz.instantialize (this, arguments);
-}*/;
+};
 Clazz.decorateAsType (c$, "Error", Throwable);
 
 Clazz.defineMethod (Error, "getMessage", 
 function () {
-return this.message;
-//return this.detailMessage;
+if (typeof this.message != "undefined") {
+	return this.message;
+} else {
+	return this.detailMessage;
+}
 });
 Clazz.defineMethod (Error, "getLocalizedMessage", 
 function () {
@@ -25,7 +28,7 @@ this.cause = cause;
 return this;
 }, "Throwable");
 //*
-Clazz.defineMethod (Error, "toString", 
+Clazz.overrideMethod (Error, "toString", 
 function () {
 var s = this.getClass ().getName ();
 var message = this.getLocalizedMessage ();

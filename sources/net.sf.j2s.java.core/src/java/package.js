@@ -12,7 +12,7 @@
 
 	ClazzLoader.ignore (
 		"java.io.FileInputStream",
-		"$.IOException",
+//		"$.IOException",
 		"$.ObjectInputStream",
 		"$.ObjectOutputStream",
 		"$.PrintWriter",
@@ -23,11 +23,11 @@
 		"$.CloneNotSupportedException",
 		"$.IllegalArgumentException",
 		"$.IllegalStateException",
-		"$.IndexOutOfBoundsException",
+//		"$.IndexOutOfBoundsException",
 		"$.InternalError",
 		"$.InterruptedException",
-		"$.NullPointerException",
-		"$.StringIndexOutOfBoundsException",
+//		"$.NullPointerException",
+//		"$.StringIndexOutOfBoundsException",
 		"$.UnsupportedOperationException",
 		"java.lang.ref.SoftReference",
 		"java.lang.reflect.Array",
@@ -37,7 +37,7 @@
 		"$.Collections",
 		"$.ConcurrentModificationException",
 		"$.GregorianCalendar",
-		"$.Locale",
+//		"$.Locale",
 		"$.NoSuchElementException",
 		"$.TimeZone"
 	);
