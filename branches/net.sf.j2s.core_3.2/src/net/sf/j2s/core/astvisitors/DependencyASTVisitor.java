@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
@@ -413,6 +414,30 @@ public class DependencyASTVisitor extends ASTVisitor {
 				set.add(s);
 			}
 		}
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeLiteral)
+	 */
+	public boolean visit(TypeLiteral node) {
+		ITypeBinding resolveTypeBinding = node.getType().resolveBinding();
+		ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+		QNTypeBinding qn = new QNTypeBinding();
+		String qualifiedName = null;
+		if (declaringClass != null) {
+			qualifiedName = declaringClass.getQualifiedName();
+			qn.binding = declaringClass;
+		} else {
+			qualifiedName = resolveTypeBinding.getQualifiedName();
+			qn.binding = resolveTypeBinding;
+		}
+		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qn.qualifiedName = qualifiedName;
+		if (isQualifiedNameOK(qualifiedName, node) 
+				&& !musts.contains(qn)
+				&& !requires.contains(qn)) {
+			optionals.add(qn);
+		}
+		return false;
 	}
 	/*
 	 * (non-Javadoc)

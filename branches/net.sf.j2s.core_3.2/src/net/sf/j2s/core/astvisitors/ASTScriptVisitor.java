@@ -308,21 +308,55 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		 * TODO: some casting should have its meaning!
 		 */
 		if (type.isPrimitiveType()) {
+			ITypeBinding resolveTypeBinding = node.getExpression().resolveTypeBinding();
+			String name = resolveTypeBinding.getName();
 			PrimitiveType pType = (PrimitiveType) type;
 			if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
 					|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
 					|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
 					|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
-				buffer.append("parseInt (");
-				node.getExpression().accept(this);
-				buffer.append (")");
-				return false;
+				if ("char".equals(name)) {
+					buffer.append("(");
+					node.getExpression().accept(this);
+					buffer.append (").charCodeAt (0)");
+					return false;
+				} else if ("float".equals(name) || "double".equals(name)) {
+					// TODO:
+					buffer.append("Math.round (");
+					node.getExpression().accept(this);
+					buffer.append (")");
+//				} else if ("int".equals(name) || "byte".equals(name)
+//						|| "double".equals(name) || "float".equals(name)
+//						|| "short".equals(name) || "long".equals(name)) {
+					
+				}
+//				buffer.append("parseInt (");
+//				node.getExpression().accept(this);
+//				buffer.append (")");
+//				return false;
 			}
 			if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-				buffer.append("String.fromCharCode (");
-				node.getExpression().accept(this);
-				buffer.append (")");
-				return false;
+				if ("char".equals(name)) {
+//					buffer.append("(");
+//					node.getExpression().accept(this);
+//					buffer.append (").charCodeAt (0)");
+//					return false;
+				} else if ("float".equals(name) || "double".equals(name)) {
+					// TODO:
+					buffer.append("String.fromCharCode (");
+					buffer.append("Math.round (");
+					node.getExpression().accept(this);
+					buffer.append (")");
+					buffer.append (")");
+					return false;
+				} else if ("int".equals(name) || "byte".equals(name)
+						|| "double".equals(name) || "float".equals(name)
+						|| "short".equals(name) || "long".equals(name)) {
+					buffer.append("String.fromCharCode (");
+					node.getExpression().accept(this);
+					buffer.append (")");
+					return false;
+				}
 			}
 		}
 		node.getExpression().accept(this);
