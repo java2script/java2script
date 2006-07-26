@@ -58,7 +58,7 @@
             class="net.sf.j2s.ui.launching.J2SApplicationLaunchShortcut"
             helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
             icon="icons/z-logo.gif"
-            id="net.sf.j2s.debug.ui.localJavaShortcut"
+            id="net.sf.j2s.debug.ui.localJava2ScriptShortcut"
             label="Java2Script Application"
             modes="run, debug">
          <contextualLaunch>
@@ -89,7 +89,51 @@
          <perspective
                id="org.eclipse.debug.ui.DebugPerspective">
          </perspective>
+         <perspective
+               id="org.eclipse.pde.PDEPerspective">
+         </perspective>
          <perspective id="org.eclipse.ui.resourcePerspective"/>
+      </shortcut>
+      <shortcut
+            label="Java2Script Unit Test"
+            icon="icons/z-logo.gif"
+            modes="run, debug"
+            class="net.sf.j2s.ui.launching.J2SUnitLaunchShortcut"
+            id="net.sf.j2s.debug.ui.localJ2SJUnitShortcut">
+         <contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+               		<iterate>
+                 		<or>
+                   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
+                   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
+                   			<adapt type="org.eclipse.jdt.core.IJavaElement"/>
+                 		</or>
+                 		<!--test property="org.eclipse.pde.core.PluginNature"/-->
+                 		<test property="org.eclipse.jdt.junit.isTest"/>
+               		</iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.pde.PDEPerspective">
+         </perspective>
       </shortcut>
    </extension>
    <extension
@@ -109,6 +153,22 @@
             class="net.sf.j2s.ui.launching.J2SLaunchingTabGroup"
             id="net.sf.j2s.ui.launching.launchConfigurationTabGroup.j2sApplication"
             type="net.sf.j2s.ui.launching.j2sApplication"/>
+      <launchConfigurationTabGroup
+            type="net.sf.j2s.ui.launching.j2sUnit"
+            class="net.sf.j2s.ui.launching.J2SUnitTabGroup"
+            id="net.sf.j2s.ui.launching.launchConfigurationTabGroup.j2sUnit">
+         <!--
+         <launchMode
+               description="%jUnitTabGroup.description.debug"
+               perspective="org.eclipse.debug.ui.DebugPerspective"
+               mode="debug">
+         </launchMode>
+         <launchMode
+               description="%jUnitTabGroup.description.run"
+               mode="run">
+         </launchMode>
+         -->
+      </launchConfigurationTabGroup>
    </extension>
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
@@ -117,6 +177,22 @@
             id="net.sf.j2s.ui.launching.j2sApplication"
             modes="run, debug"
             name="Java2Script Application"/>
+      <launchConfigurationType
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            name="Java2Script Unit Test"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+            delegate="net.sf.j2s.ui.launching.J2SUnitConfigurationDelegate"
+            modes="run, debug"
+            id="net.sf.j2s.ui.launching.j2sUnit">
+         <fileExtension
+               default="false"
+               extension="java">
+         </fileExtension>
+         <fileExtension
+               default="false"
+               extension="class">
+         </fileExtension>
+      </launchConfigurationType>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
@@ -124,6 +200,10 @@
             configTypeID="net.sf.j2s.ui.launching.j2sApplication"
             icon="icons/z-logo.gif"
             id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sApplication"/>
+      <launchConfigurationTypeImage
+            icon="icons/z-logo.gif"
+            configTypeID="net.sf.j2s.ui.launching.j2sUnit"
+            id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sUnit"/>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
