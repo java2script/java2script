@@ -45,6 +45,7 @@ public class SmartJSCompressor {
 			System.err.println("Error: source file " + srcFile.getAbsolutePath() + " does not exist!");
 			return ;
 		}
+		/*
 		File destFile = new File(dest);
 		
 		if (srcFile.exists() && destFile.exists() && srcFile.lastModified() <= destFile.lastModified()) {
@@ -57,6 +58,7 @@ public class SmartJSCompressor {
 				return ;
 			}
 		}
+		*/
 		
 		Map vals = new HashMap();
 		if (args.length > 2) {
