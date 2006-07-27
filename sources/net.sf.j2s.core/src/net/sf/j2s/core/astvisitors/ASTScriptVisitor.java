@@ -325,6 +325,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					buffer.append("Math.round (");
 					node.getExpression().accept(this);
 					buffer.append (")");
+					return false;
 //				} else if ("int".equals(name) || "byte".equals(name)
 //						|| "double".equals(name) || "float".equals(name)
 //						|| "short".equals(name) || "long".equals(name)) {
