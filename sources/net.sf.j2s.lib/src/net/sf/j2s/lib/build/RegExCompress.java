@@ -69,7 +69,8 @@ public class RegExCompress {
 		}
 	}
 	private static void pack(File src, File dest, boolean completelyCompress) throws FileNotFoundException {
-		if (src.exists() && dest.exists() && src.lastModified() <= dest.lastModified()) {
+		if (src.exists() && dest.exists() && (src.lastModified() <= dest.lastModified() 
+				&& !src.getAbsolutePath().equals(dest.getAbsolutePath()))) {
 			return ;
 		}
 		if (!src.exists()) {
@@ -77,6 +78,10 @@ public class RegExCompress {
 			return ;
 		}
 		String s = readFileAll(new FileInputStream(src));
+		String j2sKeySig = "/* http://j2s.sf.net/ */";
+		if (s.startsWith(j2sKeySig)) {
+			return ;
+		}
 		if (completelyCompress) {
 			s = regexCompress(s);
 		} else {
@@ -87,7 +92,7 @@ public class RegExCompress {
 		}
 		try {
 			FileOutputStream fos = new FileOutputStream(dest);
-			String compressedStr = "/* http://j2s.sf.net/ */" + s;
+			String compressedStr = j2sKeySig + s;
 			fos.write(compressedStr.getBytes());
 			fos.close();
 		} catch (IOException e) {
