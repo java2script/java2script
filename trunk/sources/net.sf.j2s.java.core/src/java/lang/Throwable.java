@@ -249,6 +249,12 @@ public class Throwable implements Serializable {
      *          (which may be <tt>null</tt>).
      */
     public String getMessage() {
+    	/**
+    	 * @j2sNative
+    	 * if (typeof this.message != "undefined") {
+    	 * 	return this.message;
+    	 * }
+    	 */{}
         return detailMessage;
     }
 
