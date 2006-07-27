@@ -81,7 +81,11 @@ Clazz.getClassName = function (clazzHost) {
 			// For Firefox 1.5.0.1+, those HTML element are no longer
 			// bound with function () { [native] } constructors
 			if (clazzStr.charAt (0) == '[') {
-				return clazzStr.substring (1, clazzStr.length - 1);
+				var clazzName = clazzStr.substring (1, clazzStr.length - 1);
+				if (clazzName.indexOf ("object ") != -1) { // IE
+					return clazzName.substring (7);
+				}
+				return clazzName;
 			} else {
 				return clazzStr.replace(/[^a-zA-Z0-9]/g, '');
 			}

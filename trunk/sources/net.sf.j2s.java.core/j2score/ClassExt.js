@@ -651,7 +651,7 @@ Thread.currentThread = Thread.prototype.currentThread = function () {
 	return this.J2S_THREAD;
 };
 
-
+// Compress the common public API method in shorter name
 $_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;
 
 var reflect = Clazz.declarePackage ("java.lang.reflect");
@@ -671,6 +671,9 @@ Clazz.innerFunctions.getConstructor = function () {
 	return new java.lang.reflect.Constructor (this, [], [], 
 			java.lang.reflect.Modifier.PUBLIC, 0);
 };
+/**
+ * TODO: fix bug for polynormical methods!
+ */
 Clazz.innerFunctions.getDeclaredMethods = Clazz.innerFunctions.getMethods = function () {
 	var ms = new Array ();
 	var p = this.prototype;
