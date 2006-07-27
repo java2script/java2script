@@ -20,7 +20,7 @@
 	<property name="ajaxcore.dir" value="../net.sf.j2s.ajax/j2sajax"/>
 	<property name="ajax.src.dir" value="../net.sf.j2s.ajax/bin"/>
 	<property name="jz.dist.dir" value="j2slib"/>
-	<property name="current.project.dir" value="workspace/net.sf.j2s.java.lib"/>
+	<property name="current.project.dir" value="."/>
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.core                      
@@ -139,7 +139,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.lib" depends="j2s.pack.common">
+    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.swt">
     	<copy todir="${jz.dist.dir}">
     		<fileset dir="${ajax.src.dir}">
     			<exclude name="**/*.clazz"/>
@@ -218,6 +218,191 @@
         		<pathelement path="bin"/>
         	</classpath>
         </java>
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.swt                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.more,pack.swt.event">
+	</target>
+	
+    <!-- ================================= 
+          target: pack.swt.basic              
+         ================================= -->
+    <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
+        <concat destfile="${jswt.src.dir}/org/eclipse/swt/basic.z.js">
+        	<filelist dir="${jswt.src.dir}">
+        		<!--
+        		<file name="org/eclipse/swt/SWT.js"/>
+        		<file name="org/eclipse/swt/SWTError.js"/>
+           		<file name="org/eclipse/swt/SWTException.js"/>
+        		
+        		<file name="org/eclipse/swt/internal/SWTEventListener.js"/>
+        		<file name="org/eclipse/swt/internal/SWTEventObject.js"/>
+        		-->
+        		<file name="org/eclipse/swt/internal/SerializableCompatibility.js"/>
+        		<file name="org/eclipse/swt/internal/CloneableCompatibility.js"/>
+        		<file name="org/eclipse/swt/internal/RunnableCompatibility.js"/>
+        		
+        		<file name="org/eclipse/swt/internal/dnd/HTMLEventWrapper.js"/>
+        		<file name="org/eclipse/swt/internal/dnd/DragListener.js"/>
+        		<file name="org/eclipse/swt/internal/dnd/DragAdapter.js"/>
+        		<file name="org/eclipse/swt/internal/dnd/DragEvent.js"/>
+        		
+        		<file name="org/eclipse/swt/internal/struct/WINDOWPOS.js"/>
+        		<file name="org/eclipse/swt/internal/struct/MESSAGE.js"/>
+        		
+        		<file name="org/eclipse/swt/accessibility/Accessible.js"/>
+
+        		<file name="org/eclipse/swt/graphics/Point.js"/>
+        		<file name="org/eclipse/swt/graphics/Rectangle.js"/>
+        		<file name="org/eclipse/swt/graphics/RGB.js"/>
+        		
+        		<!--
+        		<file name="org/eclipse/swt/graphics/GC.js"/>
+        		-->
+
+        		<file name="org/eclipse/swt/graphics/Resource.js"/>
+        		<file name="org/eclipse/swt/graphics/Color.js"/>
+        		<file name="org/eclipse/swt/graphics/Cursor.js"/>
+
+        		<file name="org/eclipse/swt/graphics/Drawable.js"/>
+        		<file name="org/eclipse/swt/graphics/Device.js"/>
+        		<file name="org/eclipse/swt/graphics/DeviceData.js"/>
+
+        		<file name="org/eclipse/swt/widgets/Monitor.js"/>
+
+        		<!--
+        		<file name="org/eclipse/swt/graphics/ImageData.js"/>
+        		<file name="org/eclipse/swt/graphics/ImageLoader.js"/>
+        		<file name="org/eclipse/swt/graphics/Image.js"/>
+
+        		<file name="org/eclipse/swt/graphics/Font.js"/>
+        		<file name="org/eclipse/swt/graphics/FontData.js"/>
+        		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
+        		-->
+
+        	</filelist>
+        </concat>
+    </target>
+
+    <!-- ================================= 
+          target: pack.swt.more              
+         ================================= -->
+    <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
+        <concat destfile="${jswt.src.dir}/org/eclipse/swt/more.z.js">
+        	<filelist dir="${jswt.src.dir}">
+    			<file name="org/eclipse/swt/internal/ResizeHandler.js"/>
+        		<file name="org/eclipse/swt/internal/ResizeSystem.js"/>
+
+        		<file name="org/eclipse/swt/internal/dnd/DragAndDrop.js"/>
+        		<file name="org/eclipse/swt/internal/dnd/DNDUtils.js"/>
+        		<file name="org/eclipse/swt/internal/dnd/ShellFrameDND.js"/>
+        		<!--
+        		-->
+        		<file name="org/eclipse/swt/internal/browser/OS.js"/>
+        		
+        		<file name="org/eclipse/swt/graphics/Image.js"/>
+
+        		<file name="org/eclipse/swt/widgets/Item.js"/>
+        		<file name="org/eclipse/swt/widgets/Layout.js"/>
+        		<!--
+        		<file name="org/eclipse/swt/graphics/ImageData.js"/>
+        		<file name="org/eclipse/swt/graphics/ImageLoader.js"/>
+
+        		<file name="org/eclipse/swt/graphics/Font.js"/>
+        		<file name="org/eclipse/swt/graphics/FontData.js"/>
+        		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
+        		-->
+
+        	</filelist>
+        </concat>
+    </target>
+
+    <!-- ================================= 
+          target: pack.swt.event              
+         ================================= -->
+    <target name="pack.swt.event" description="Building j2s-swt-*.z.js">
+        <concat destfile="${jswt.src.dir}/org/eclipse/swt/events.z.js">
+            <header filtering="no" trimleading="yes">/*-# 
+            	# ["$wt.events.TypedEvent"] -> t$e
+            	# ["$wt.internal.SWTEventListener"] -> e$l
+            	#-*/
+            </header>
+        	<filelist dir="${jswt.src.dir}">
+        		<file name="org/eclipse/swt/internal/SWTEventListener.js"/>
+        		<file name="org/eclipse/swt/internal/SWTEventObject.js"/>
+        		
+        		<file name="org/eclipse/swt/widgets/Event.js"/>
+        		<file name="org/eclipse/swt/events/TypedEvent.js"/>
+        	
+        		<file name="org/eclipse/swt/events/ArmEvent.js"/>
+        		<file name="org/eclipse/swt/events/ControlEvent.js"/>
+        		<file name="org/eclipse/swt/events/DisposeEvent.js"/>
+        		<file name="org/eclipse/swt/events/FocusEvent.js"/>
+        		<file name="org/eclipse/swt/events/HelpEvent.js"/>
+        		<file name="org/eclipse/swt/events/KeyEvent.js"/>
+        		<file name="org/eclipse/swt/events/MenuEvent.js"/>
+        		<file name="org/eclipse/swt/events/ModifyEvent.js"/>
+        		<file name="org/eclipse/swt/events/MouseAdapter.js"/>
+        		<file name="org/eclipse/swt/events/MouseEvent.js"/>
+        		<file name="org/eclipse/swt/events/PaintEvent.js"/>
+        		<file name="org/eclipse/swt/events/SelectionEvent.js"/>
+        		<file name="org/eclipse/swt/events/ShellEvent.js"/>
+        		<file name="org/eclipse/swt/events/TraverseEvent.js"/>
+        		<file name="org/eclipse/swt/events/TreeEvent.js"/>
+        		<file name="org/eclipse/swt/events/VerifyEvent.js"/>
+        		
+        		<file name="org/eclipse/swt/widgets/Listener.js"/>
+        		<file name="org/eclipse/swt/widgets/TypedListener.js"/>
+
+        		<file name="org/eclipse/swt/events/ArmListener.js"/>
+        		<file name="org/eclipse/swt/events/ControlListener.js"/>
+        		<file name="org/eclipse/swt/events/ControlAdapter.js"/>
+        		<file name="org/eclipse/swt/events/DisposeListener.js"/>
+        		<file name="org/eclipse/swt/events/FocusListener.js"/>
+        		<file name="org/eclipse/swt/events/FocusAdapter.js"/>
+        		<file name="org/eclipse/swt/events/HelpListener.js"/>
+        		<file name="org/eclipse/swt/events/KeyListener.js"/>
+        		<file name="org/eclipse/swt/events/KeyAdapter.js"/>
+        		<file name="org/eclipse/swt/events/MenuListener.js"/>
+        		<file name="org/eclipse/swt/events/MenuAdapter.js"/>
+        		<file name="org/eclipse/swt/events/ModifyListener.js"/>
+        		<file name="org/eclipse/swt/events/MouseListener.js"/>
+        		<file name="org/eclipse/swt/events/MouseMoveListener.js"/>
+        		<file name="org/eclipse/swt/events/MouseTrackListener.js"/>
+        		<file name="org/eclipse/swt/events/MouseTrackAdapter.js"/>
+        		<file name="org/eclipse/swt/events/PaintListener.js"/>
+        		<file name="org/eclipse/swt/events/SelectionListener.js"/>
+        		<file name="org/eclipse/swt/events/SelectionAdapter.js"/>
+        		<file name="org/eclipse/swt/events/ShellListener.js"/>
+        		<file name="org/eclipse/swt/events/ShellAdapter.js"/>
+        		<file name="org/eclipse/swt/events/TraverseListener.js"/>
+        		<file name="org/eclipse/swt/events/TreeListener.js"/>
+        		<file name="org/eclipse/swt/events/TreeAdapter.js"/>
+        		<file name="org/eclipse/swt/events/VerifyListener.js"/>
+
+        		<file name="org/eclipse/swt/widgets/EventTable.js"/>
+        	</filelist>
+        </concat>
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${current.project.dir}/${jswt.src.dir}/org/eclipse/swt/events.z.js"/>
+    		<arg value="${current.project.dir}/${jswt.src.dir}/org/eclipse/swt/events.js"/>
+        	
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+       	</java>
+        <concat destfile="${jswt.src.dir}/org/eclipse/swt/events.z.js">
+            <header filtering="no" trimleading="yes">
+            	var t$e = ["$wt.events.TypedEvent"];
+            	var e$l = ["$wt.internal.SWTEventListener"];
+            </header>
+        	<filelist dir="${jswt.src.dir}">
+        		<file name="org/eclipse/swt/events.js"/>
+        	</filelist>
+        </concat>
+    	<delete file="${jswt.src.dir}/org/eclipse/swt/events.js"></delete>
     </target>
 
 </project>
