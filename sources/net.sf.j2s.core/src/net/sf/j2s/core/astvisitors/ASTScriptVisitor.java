@@ -386,7 +386,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				if (!binding.isTopLevel()) {
 					if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 						buffer.append("Clazz.innerTypeInstance (");
-						buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+						if (binding.isAnonymous() || binding.isLocal()) {
+							buffer.append(JavaLangUtil.ripJavaLang(binding.getBinaryName()));
+						} else {
+							buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+						}
 						buffer.append(", this, ");
 						/*
 						String scope = null;
@@ -1939,8 +1943,14 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 												name = typeBinding.getQualifiedName();
 												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
 													name = typeBinding.getBinaryName();
-													int idx1 = name.indexOf('$');
+													int idx0 = name.lastIndexOf(".");
+													if (idx0 == -1) {
+														idx0 = 0;
+													}
+													int idx1 = name.indexOf('$', idx0);
 													if (idx1 != -1) {
+														// TODO: Comment the following codes!
+														// I can't understand why now -- Josson
 														int idx2 = name.indexOf('$', idx1 + 1);
 														String parentAnon = "";
 														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
@@ -2091,7 +2101,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 												name = typeBinding.getQualifiedName();
 												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
 													name = typeBinding.getBinaryName();
-													int idx1 = name.indexOf('$');
+													int idx0 = name.lastIndexOf(".");
+													if (idx0 == -1) {
+														idx0 = 0;
+													}
+													int idx1 = name.indexOf('$', idx0);
 													if (idx1 != -1) {
 														int idx2 = name.indexOf('$', idx1 + 1);
 														String parentAnon = "";
@@ -2351,8 +2365,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 
 	public void endVisit(TypeDeclaration node) {
-		if (node != rootTypeNode && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
-			
+		if (node != rootTypeNode && node.getParent() != null 
+				&& (node.getParent() instanceof AbstractTypeDeclaration
+						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			return ;
 		}
 		if (!node.isInterface()) {
@@ -2968,7 +2983,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		if (thisClassName == null || thisClassName.trim().length() == 0) {
 //			thisClassName = node.getName().toString();
 //		}
-		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
+		System.out.println();
+		
+		if ((node != rootTypeNode) && node.getParent() != null 
+				&& (node.getParent() instanceof AbstractTypeDeclaration
+				|| node.getParent() instanceof TypeDeclarationStatement)) {
 			/* inner static class */
 			ASTScriptVisitor visitor = null;
 			try {
@@ -2977,7 +2996,12 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				visitor = new ASTScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
-			visitor.thisClassName = thisClassName + "." + node.getName();
+			if (node.getParent() instanceof TypeDeclarationStatement) {
+				anonymousCount++;
+				visitor.thisClassName = thisClassName + "$" + anonymousCount + "$" + node.getName();
+			} else {
+				visitor.thisClassName = thisClassName + "." + node.getName();
+			}
 			visitor.thisPackageName = thisPackageName;
 //			System.out.println(visitor.thisClassName);
 //			System.out.println(visitor.thisPackageName);
@@ -3101,7 +3125,9 @@ public class CB extends CA {
 		
 		buffer.append("function () {\r\n");
 		if (node == rootTypeNode && (node.getModifiers() & Modifier.STATIC) == 0 
-				&& !((TypeDeclaration) node.getParent()).isInterface()) {
+				&& ((node.getParent() instanceof TypeDeclaration 
+						&& !((TypeDeclaration) node.getParent()).isInterface()) 
+						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
 		List bodyDeclarations = node.bodyDeclarations();
