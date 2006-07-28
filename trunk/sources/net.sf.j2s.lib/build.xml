@@ -7,11 +7,12 @@
                    
      josson smith
      ====================================================================== -->
-<project name="j2s.core.build" default="j2s.pack.lib">
+<project name="j2s.core.build" default="j2s.pack.lib" basedir=".">
     <description>
             Building j2s-core-*.z.js
     </description>
 	
+	<property name="jcore.src.dir" value="../net.sf.j2s.java.core/src"/>
 	<property name="js.src.dir" value="../net.sf.j2s.java.core/bin"/>
 	<property name="js.swt.dir" value="../net.sf.j2s.java.org.eclipse.swt"/>
 	<property name="js.unit.dir" value="../net.sf.j2s.java.junit"/>
@@ -27,7 +28,7 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.core">
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${current.project.dir}/${js.src.dir}/java/lang/Class.js"/>
+    		<arg value="${current.project.dir}/${jcore.src.dir}/java/lang/Class.js"/>
         	<arg value="${current.project.dir}/${js.src.dir}/java/lang/Class.js"/>
         	
     		<arg value="no.debug.support=false"/>
@@ -40,7 +41,7 @@
        	</java>
 
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${current.project.dir}/${js.src.dir}/java/lang/ClassLoader.js"/>
+    		<arg value="${current.project.dir}/${jcore.src.dir}/java/lang/ClassLoader.js"/>
    			<arg value="${current.project.dir}/${js.src.dir}/java/lang/ClassLoader.js"/>
         	
     		<arg value="clazz.existed=true"/>
