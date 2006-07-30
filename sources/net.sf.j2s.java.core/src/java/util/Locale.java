@@ -159,7 +159,7 @@ import sun.text.resources.LocaleData;
  * @author      Mark Davis
  * @since       1.1
  * 
- * @j2sIgnoreImport java.security.AccessController,java.text.MessageFormat,sun.security.action.GetPropertyAction,sun.text.resources.LocaleData
+ * @j2sIgnoreImport java.security.AccessController,java.text.MessageFormat,sun.security.action.GetPropertyAction,sun.text.resources.LocaleData,java.util.PropertyPermission,java.lang.Character,java.util.StringTokenizer
  */
 
 public final class Locale implements Cloneable, Serializable {

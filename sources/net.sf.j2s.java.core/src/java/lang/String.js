@@ -235,8 +235,11 @@ String.prototype.toCharArray = function () {
 	}
 	return result;
 };
-
+String.value0f = String.valueOf;
 String.valueOf = function (o) {
+	if (o == "undefined") {
+		return String.value0f ();
+	}
 	if (o instanceof Array) {
 		if (arguments.length == 1) {
 			return o.join ('');
@@ -318,6 +321,7 @@ String.prototype.concat = function (s) {
 	}
 	return this.$concat (s);
 };
+
 String.prototype.$lastIndexOf = String.prototype.lastIndexOf;
 String.prototype.lastIndexOf = function (s, last) {
 	if (last + this.length <= 0) {	
@@ -325,6 +329,7 @@ String.prototype.lastIndexOf = function (s, last) {
 	}
 	return this.$lastIndexOf (s, last);
 };
+
 String.prototype.intern = function () {
 	return this.valueOf ();
 };
