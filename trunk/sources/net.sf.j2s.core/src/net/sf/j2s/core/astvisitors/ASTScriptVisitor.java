@@ -2727,6 +2727,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //					//buffer.append(fullClassName);
 //					buffer.append(".");
 					VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
+					if ("serialVersionUID".equals(vdf.getName().getIdentifier())) {
+						continue;
+					}
 					Expression initializer = vdf.getInitializer();
 					refVisitor.setReferenced(false);
 					if (initializer != null) {
@@ -2794,6 +2797,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				List fragments = field.fragments();
 				for (int j = 0; j < fragments.size(); j++) {
 					VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
+					if ("serialVersionUID".equals(vdf.getName().getIdentifier())) {
+						continue;
+					}
 					Expression initializer = vdf.getInitializer();
 					refVisitor.setReferenced(false);
 					if (initializer != null) {
