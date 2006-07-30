@@ -3095,7 +3095,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			visitor.rootTypeNode = node;
 			if (node.getParent() instanceof TypeDeclarationStatement) {
 				anonymousCount++;
-				visitor.thisClassName = thisClassName + "$" + anonymousCount + "$" + node.getName();
+				if (node.resolveBinding().getBinaryName().matches(".*\\$[0-9]+\\$.*")) {
+					visitor.thisClassName = thisClassName + "$" + anonymousCount + "$" + node.getName();
+				} else {
+					visitor.thisClassName = thisClassName + "$" + anonymousCount + node.getName();
+				}
 			} else {
 				visitor.thisClassName = thisClassName + "." + node.getName();
 			}
