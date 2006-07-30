@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -176,7 +177,26 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		buffer.append("Clazz.instantialize (this, arguments);\r\n");
 		
 		buffer.append("}, ");
+
 		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
+		} else {
+			emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+					"Clazz.prepareCallback (this, arguments);\r\n" +
+					"Clazz.instantialize (this, arguments);\r\n" +
+					"}, ";
+			idx = buffer.lastIndexOf(emptyFun);
+			
+			if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+				buffer.replace(idx, buffer.length(), "Clazz.declareAnonymous (");
+			}
+		}
 //		buffer.append("Clazz.decorateAsType (");
 //		buffer.append("cla$$");
 //		buffer.append(fullClassName);
@@ -325,6 +345,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					buffer.append("Math.round (");
 					node.getExpression().accept(this);
 					buffer.append (")");
+					return false;
 //				} else if ("int".equals(name) || "byte".equals(name)
 //						|| "double".equals(name) || "float".equals(name)
 //						|| "short".equals(name) || "long".equals(name)) {
@@ -385,7 +406,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				if (!binding.isTopLevel()) {
 					if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 						buffer.append("Clazz.innerTypeInstance (");
-						buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+						if (binding.isAnonymous() || binding.isLocal()) {
+							buffer.append(JavaLangUtil.ripJavaLang(binding.getBinaryName()));
+						} else {
+							buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+						}
 						buffer.append(", this, ");
 						/*
 						String scope = null;
@@ -567,6 +592,17 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		}
 
 		buffer.append("}, ");
+		
+		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
+		}
+
 		String fullClassName = null;//getFullClassName();
 		if (thisPackageName != null && thisPackageName.length() != 0) {
 			fullClassName = thisPackageName + '.' + thisClassName;
@@ -1314,6 +1350,57 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				return false;
 			}
 		}
+		/*
+		 * To skip those methods or constructors which are just overriding with
+		 * default super methods or constructors. 
+		 */
+		Block body = node.getBody();
+		boolean needToCheckArgs = false;
+		List argsList = null;
+		if (body != null && body.statements().size() == 1) {
+			Object statement = body.statements().get(0);
+			if (statement instanceof ReturnStatement) {
+				ReturnStatement ret = (ReturnStatement) statement;
+				Expression exp = ret.getExpression();
+				if (exp instanceof SuperMethodInvocation) {
+					SuperMethodInvocation superRet = (SuperMethodInvocation) exp;
+					if (superRet.getName().toString().equals(node.getName().toString())) {
+						// same method name
+						needToCheckArgs = true;
+						argsList = superRet.arguments();
+					}
+				}
+			} else if (statement instanceof SuperConstructorInvocation) {
+				SuperConstructorInvocation superConstructor = (SuperConstructorInvocation) statement;
+				needToCheckArgs = true;
+				argsList = superConstructor.arguments();
+			}
+		}
+		if (needToCheckArgs) {
+			List params = node.parameters();
+			if (params.size() == argsList.size()) {
+				// same parameters count
+				boolean isOnlySuper = true;
+				for (Iterator iter = params.iterator(), itr = argsList.iterator(); iter.hasNext();) {
+					ASTNode astNode = (ASTNode) iter.next();
+					ASTNode argNode = (ASTNode) itr.next();
+					if (astNode instanceof SingleVariableDeclaration
+							&& argNode instanceof SimpleName) {
+						SingleVariableDeclaration varDecl = (SingleVariableDeclaration) astNode;
+						String paramID = varDecl.getName().getIdentifier();
+						String argID = ((SimpleName) argNode).getIdentifier();
+						if (!paramID.equals(argID)) {
+							// not with the same order, break out
+							isOnlySuper = false;
+							break;
+						}
+					}
+				}
+				if (isOnlySuper) {
+					return false;
+				}
+			}
+		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
 			MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor();
 			methodRefVisitor.setMethodSignature(node.resolveBinding().getKey());
@@ -1938,8 +2025,14 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 												name = typeBinding.getQualifiedName();
 												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
 													name = typeBinding.getBinaryName();
-													int idx1 = name.indexOf('$');
+													int idx0 = name.lastIndexOf(".");
+													if (idx0 == -1) {
+														idx0 = 0;
+													}
+													int idx1 = name.indexOf('$', idx0);
 													if (idx1 != -1) {
+														// TODO: Comment the following codes!
+														// I can't understand why now -- Josson
 														int idx2 = name.indexOf('$', idx1 + 1);
 														String parentAnon = "";
 														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
@@ -2090,7 +2183,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 												name = typeBinding.getQualifiedName();
 												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
 													name = typeBinding.getBinaryName();
-													int idx1 = name.indexOf('$');
+													int idx0 = name.lastIndexOf(".");
+													if (idx0 == -1) {
+														idx0 = 0;
+													}
+													int idx1 = name.indexOf('$', idx0);
 													if (idx1 != -1) {
 														int idx2 = name.indexOf('$', idx1 + 1);
 														String parentAnon = "";
@@ -2350,14 +2447,24 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 
 	public void endVisit(TypeDeclaration node) {
-		if (node != rootTypeNode && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
-			
+		if (node != rootTypeNode && node.getParent() != null 
+				&& (node.getParent() instanceof AbstractTypeDeclaration
+						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			return ;
 		}
 		if (!node.isInterface()) {
 			buffer.append("Clazz.instantialize (this, arguments);\r\n");
 			//buffer.append("};\r\n");
 			buffer.append("}, ");
+		}
+		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		}
 
 		
@@ -2620,6 +2727,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //					//buffer.append(fullClassName);
 //					buffer.append(".");
 					VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
+					if ("serialVersionUID".equals(vdf.getName().getIdentifier())) {
+						continue;
+					}
 					Expression initializer = vdf.getInitializer();
 					refVisitor.setReferenced(false);
 					if (initializer != null) {
@@ -2687,6 +2797,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				List fragments = field.fragments();
 				for (int j = 0; j < fragments.size(); j++) {
 					VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
+					if ("serialVersionUID".equals(vdf.getName().getIdentifier())) {
+						continue;
+					}
 					Expression initializer = vdf.getInitializer();
 					refVisitor.setReferenced(false);
 					if (initializer != null) {
@@ -2967,7 +3080,11 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		if (thisClassName == null || thisClassName.trim().length() == 0) {
 //			thisClassName = node.getName().toString();
 //		}
-		if ((node != rootTypeNode) && node.getParent() != null && node.getParent() instanceof AbstractTypeDeclaration) {
+		System.out.println();
+		
+		if ((node != rootTypeNode) && node.getParent() != null 
+				&& (node.getParent() instanceof AbstractTypeDeclaration
+				|| node.getParent() instanceof TypeDeclarationStatement)) {
 			/* inner static class */
 			ASTScriptVisitor visitor = null;
 			try {
@@ -2976,7 +3093,16 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				visitor = new ASTScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
-			visitor.thisClassName = thisClassName + "." + node.getName();
+			if (node.getParent() instanceof TypeDeclarationStatement) {
+				anonymousCount++;
+				if (node.resolveBinding().getBinaryName().matches(".*\\$[0-9]+\\$.*")) {
+					visitor.thisClassName = thisClassName + "$" + anonymousCount + "$" + node.getName();
+				} else {
+					visitor.thisClassName = thisClassName + "$" + anonymousCount + node.getName();
+				}
+			} else {
+				visitor.thisClassName = thisClassName + "." + node.getName();
+			}
 			visitor.thisPackageName = thisPackageName;
 //			System.out.println(visitor.thisClassName);
 //			System.out.println(visitor.thisPackageName);
@@ -3100,7 +3226,9 @@ public class CB extends CA {
 		
 		buffer.append("function () {\r\n");
 		if (node == rootTypeNode && (node.getModifiers() & Modifier.STATIC) == 0 
-				&& !((TypeDeclaration) node.getParent()).isInterface()) {
+				&& ((node.getParent() instanceof TypeDeclaration 
+						&& !((TypeDeclaration) node.getParent()).isInterface()) 
+						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
 		List bodyDeclarations = node.bodyDeclarations();
