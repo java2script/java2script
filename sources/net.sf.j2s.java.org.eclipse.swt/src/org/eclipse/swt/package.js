@@ -2,7 +2,7 @@ Clazz.declarePackage ("org.eclipse.swt");
 $wt = org.eclipse.swt;
 
 (function () {
-	var subPkgs = [
+	ClazzLoader.registerPackages ("org.eclipse.swt", [
 			"accessibility", 
 			"browser", 
 	    	"custom", 
@@ -14,11 +14,7 @@ $wt = org.eclipse.swt;
 	    	"internal.browser", 
 	    	"internal.struct", 
 			"layout", 
-	    	"widgets"
-	];
-	for (var i = 0; i < subPkgs.length; i++) {
-		Clazz.declarePackage ("org.eclipse.swt." + subPkgs[i]);
-	}
+	    	"widgets"]);
 
 	var swtCSSKey = "swt-default.css";
 	var existed = false;
@@ -33,13 +29,12 @@ $wt = org.eclipse.swt;
 	if (!existed) {
 		var stylesheet = document.createElement ("LINK");
 		stylesheet.rel = "stylesheet";
-		var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.SWT");
-		stylesheet.href = path.substring (0, path.lastIndexOf ("SWT.js")) + swtCSSKey;
+		var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
+		stylesheet.href = path + swtCSSKey;
 		document.getElementsByTagName ("HEAD")[0].appendChild (stylesheet);
 	}
 
-	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.package");
-	path = path.substring (0, path.lastIndexOf ("package.js"));
+	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
 //	if (false)
 	ClazzLoader.jarClasspath (path + "events.z.js", [
 		"$swt.internal.SWTEventListener",
