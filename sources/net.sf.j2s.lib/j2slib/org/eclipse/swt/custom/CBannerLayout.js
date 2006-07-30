@@ -1,7 +1,5 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.custom.CBannerLayout",["$wt.custom.CLayoutData","$wt.graphics.Point","$.Rectangle"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"CBannerLayout",$wt.widgets.Layout);
+$_L(["$wt.widgets.Layout"],"$wt.custom.CBannerLayout",["$wt.custom.CLayoutData","$wt.graphics.Point","$.Rectangle"],function(){
+c$=$_T($wt.custom,"CBannerLayout",$wt.widgets.Layout);
 $_V(c$,"computeSize",
 function(composite,wHint,hHint,flushCache){
 var banner=composite;

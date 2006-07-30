@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Combo",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Combo",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.noSelection=true;
 this.ignoreModify=false;
@@ -12,11 +12,6 @@ this.isSimple=false;
 this.itemCount=0;
 $_Z(this,arguments);
 },$wt.widgets,"Combo",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Combo,[parent,$wt.widgets.Combo.checkStyle(style)]);
-this.itemCount=0;
-},"$wt.widgets.Composite,~N");
 $_M(c$,"add",
 function(string){
 if(this.selectInput!=null){
@@ -119,10 +114,7 @@ this.getShell().handle.appendChild(this.selectInput);
 }this.textInput.ondblclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Combo$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Combo$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Combo$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].show();
@@ -134,10 +126,7 @@ return $_N($wt.widgets.Combo$1,i$,v$);
 this.dropDownButton.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Combo$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Combo$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Combo$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].show();
@@ -149,10 +138,7 @@ return $_N($wt.widgets.Combo$2,i$,v$);
 this.selectInput.onchange=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Combo$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Combo$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Combo$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Combo"].noSelection=false;
@@ -166,10 +152,7 @@ return $_N($wt.widgets.Combo$3,i$,v$);
 this.selectInput.onblur=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Combo$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Combo$4",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Combo$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Combo"].isSimple)this.b$["$wt.widgets.Combo"].hide();

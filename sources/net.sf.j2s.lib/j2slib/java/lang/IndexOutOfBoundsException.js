@@ -1,13 +1,3 @@
-Clazz.load(["java.lang.RuntimeException"],"java.lang.IndexOutOfBoundsException",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.lang,"IndexOutOfBoundsException",java.lang.RuntimeException);
-$_K(c$,
-function(){
-$_R(this,IndexOutOfBoundsException);
-});
-$_K(c$,
-function(s){
-$_R(this,IndexOutOfBoundsException,[s]);
-},"~S");
+$_L(["java.lang.RuntimeException"],"java.lang.IndexOutOfBoundsException",null,function(){
+c$=$_T(java.lang,"IndexOutOfBoundsException",RuntimeException);
 });

@@ -14,7 +14,7 @@ function () {
 try {
 Clazz.superCall (this, junit.extensions.ExceptionTestCase, "runTest", []);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 if (this.fExpected.isAssignableFrom (e.getClass ())) return ;
  else throw e;
 } else {

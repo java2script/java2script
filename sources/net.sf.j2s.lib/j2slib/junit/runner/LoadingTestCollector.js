@@ -16,8 +16,8 @@ if (classFileName.endsWith (".class")) {
 var testClass = this.classFromFile (classFileName);
 return (testClass != null) && this.isTestClass (testClass);
 }} catch (e) {
-if (Clazz.instanceOf (e, java.lang.ClassNotFoundException)) {
-} else if (Clazz.instanceOf (e, java.lang.NoClassDefFoundError)) {
+if (Clazz.instanceOf (e, ClassNotFoundException)) {
+} else if (Clazz.instanceOf (e, NoClassDefFoundError)) {
 } else {
 throw e;
 }
@@ -41,7 +41,7 @@ function (testClass) {
 try {
 testClass.getMethod (junit.runner.BaseTestRunner.SUITE_METHODNAME,  new Array (0));
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 return false;
 } else {
 throw e;
@@ -54,7 +54,7 @@ function (testClass) {
 try {
 junit.framework.TestSuite.getTestConstructor (testClass);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NoSuchMethodException)) {
+if (Clazz.instanceOf (e, NoSuchMethodException)) {
 return false;
 } else {
 throw e;

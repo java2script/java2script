@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.MouseTrackListener"],"$wt.events.MouseTrackAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MouseTrackAdapter",null,$wt.events.MouseTrackListener);
+$_L(["$wt.events.MouseTrackListener"],"$wt.events.MouseTrackAdapter",null,function(){
+c$=$_T($wt.events,"MouseTrackAdapter",null,$wt.events.MouseTrackListener);
 $_V(c$,"mouseEnter",
 function(e){
 },"$wt.events.MouseEvent");

@@ -1,7 +1,5 @@
-Clazz.load(["java.util.AbstractCollection","$.Set"],"java.util.AbstractSet",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.util,"AbstractSet",java.util.AbstractCollection,java.util.Set);
+$_L(["java.util.AbstractCollection","$.Set"],"java.util.AbstractSet",null,function(){
+c$=$_T(java.util,"AbstractSet",java.util.AbstractCollection,java.util.Set);
 $_K(c$,
 function(){
 $_R(this,java.util.AbstractSet,[]);
@@ -15,9 +13,9 @@ if(c.size()!=this.size())return false;
 try{
 return this.containsAll(c);
 }catch(e){
-if($_O(e,java.lang.ClassCastException)){
+if($_O(e,ClassCastException)){
 return false;
-}else if($_O(e,java.lang.NullPointerException)){
+}else if($_O(e,NullPointerException)){
 return false;
 }else{
 throw e;

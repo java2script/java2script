@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget","$.TrayItem"],"$wt.widgets.Tray",["$wt.widgets.Display"],function(){
+$_L(["$wt.widgets.Widget","$.TrayItem"],"$wt.widgets.Tray",["$wt.widgets.Display"],function(){
 c$=$_C(function(){
 this.itemCount=0;
 this.items=null;

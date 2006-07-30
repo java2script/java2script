@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.events.MouseEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.events.MouseEvent",null,function(){
 c$=$_C(function(){
 this.button=0;
 this.stateMask=0;
@@ -19,6 +19,4 @@ function(){
 var string=$_U(this,$wt.events.MouseEvent,"toString",[]);
 return string.substring(0,string.length-1)+" button="+this.button+" stateMask="+this.stateMask+" x="+this.x+" y="+this.y+"}";
 });
-$_S(c$,
-"serialVersionUID",3257288037011566898);
 });

@@ -1,13 +1,3 @@
-Clazz.load(["java.io.IOException"],"java.io.UnsupportedEncodingException",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.io,"UnsupportedEncodingException",java.io.IOException);
-$_K(c$,
-function(){
-$_R(this,java.io.UnsupportedEncodingException);
-});
-$_K(c$,
-function(s){
-$_R(this,java.io.UnsupportedEncodingException,[s]);
-},"~S");
+$_L(["java.io.IOException"],"java.io.UnsupportedEncodingException",null,function(){
+c$=$_T(java.io,"UnsupportedEncodingException",java.io.IOException);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["java.util.Map"],"java.util.AbstractMap",["java.lang.StringBuffer","$.UnsupportedOperationException","java.util.AbstractCollection","$.AbstractSet","$.Iterator"],function(){
+$_L(["java.util.Map"],"java.util.AbstractMap",["java.lang.StringBuffer","$.UnsupportedOperationException","java.util.AbstractCollection","$.AbstractSet","$.Iterator"],function(){
 c$=$_C(function(){
 this.$keySet=null;
 this.$values=null;
@@ -112,7 +112,7 @@ if(key.equals(e.getKey()))return e.getValue();
 },"~O");
 $_V(c$,"put",
 function(key,value){
-throw new java.lang.UnsupportedOperationException();
+throw new UnsupportedOperationException();
 },"~O,~O");
 $_V(c$,"remove",
 function(key){
@@ -152,10 +152,7 @@ if(this.$keySet==null){
 this.$keySet=(function(i$,v$){
 if(!$_D("java.util.AbstractMap$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},java.util,"AbstractMap$1",java.util.AbstractSet);
+c$=$_W(java.util,"AbstractMap$1",java.util.AbstractSet);
 $_M(c$,"iterator",
 function(){
 return(function(i$,v$){
@@ -206,10 +203,7 @@ if(this.$values==null){
 this.$values=(function(i$,v$){
 if(!$_D("java.util.AbstractMap$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},java.util,"AbstractMap$3",java.util.AbstractCollection);
+c$=$_W(java.util,"AbstractMap$3",java.util.AbstractCollection);
 $_V(c$,"iterator",
 function(){
 return(function(i$,v$){
@@ -272,9 +266,9 @@ if(!(t.get(key)==null&&t.containsKey(key)))return false;
 if(!value.equals(t.get(key)))return false;
 }}
 }catch(e){
-if($_O(e,java.lang.ClassCastException)){
+if($_O(e,ClassCastException)){
 return false;
-}else if($_O(e,java.lang.NullPointerException)){
+}else if($_O(e,NullPointerException)){
 return false;
 }else{
 throw e;

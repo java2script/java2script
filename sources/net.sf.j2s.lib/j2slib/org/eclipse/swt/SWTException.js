@@ -1,9 +1,9 @@
-Clazz.load(["java.lang.RuntimeException"],"$wt.SWTException",["$wt.SWT"],function(){
+$_L(["java.lang.RuntimeException"],"$wt.SWTException",["$wt.SWT"],function(){
 if(typeof window["RuntimeException"]!="undefined"){c$=$_C(function(){
 this.code=0;
 this.throwable=null;
 $_Z(this,arguments);
-},$wt,"SWTException",java.lang.RuntimeException);
+},$wt,"SWTException",RuntimeException);
 $_K(c$,
 function(){
 this.construct(1);
@@ -37,8 +37,6 @@ if(this.throwable!=null){
 System.err.println("*** Stack trace of contained exception ***");
 this.throwable.printStackTrace();
 }});
-$_S(c$,
-"serialVersionUID",3257282552304842547);
 
 }
 });

@@ -1,11 +1,5 @@
-Clazz.load(["$wt.widgets.Scrollable"],"$wt.widgets.List",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.widgets.Event","$.TypedListener"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.widgets,"List",$wt.widgets.Scrollable);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.List,[parent,$wt.widgets.List.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
+$_L(["$wt.widgets.Scrollable"],"$wt.widgets.List",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.widgets.Event","$.TypedListener"],function(){
+c$=$_T($wt.widgets,"List",$wt.widgets.Scrollable);
 $_M(c$,"add",
 function(string){
 if(this.handle!=null){
@@ -53,10 +47,7 @@ parentHandle.appendChild(this.handle);
 }}this.handle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.List$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"List$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"List$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.widgets.Event();

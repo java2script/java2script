@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.DirectoryDialog",null,function(){
+$_L(["$wt.widgets.Dialog"],"$wt.widgets.DirectoryDialog",null,function(){
 c$=$_C(function(){
 this.message="";
 this.filterPath="";

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SWTEventObject"],"$wt.events.TypedEvent",null,function(){
+$_L(["$wt.internal.SWTEventObject"],"$wt.events.TypedEvent",null,function(){
 c$=$_C(function(){
 this.display=null;
 this.widget=null;
@@ -6,10 +6,6 @@ this.time=0;
 this.data=null;
 $_Z(this,arguments);
 },$wt.events,"TypedEvent",$wt.internal.SWTEventObject);
-$_K(c$,
-function(object){
-$_R(this,$wt.events.TypedEvent,[object]);
-},"~O");
 $_K(c$,
 function(e){
 $_R(this,$wt.events.TypedEvent,[e.widget]);
@@ -29,6 +25,4 @@ $_V(c$,"toString",
 function(){
 return this.getName()+"{"+this.widget+" time="+this.time+" data="+this.data+"}";
 });
-$_S(c$,
-"serialVersionUID",3257285846578377524);
 });

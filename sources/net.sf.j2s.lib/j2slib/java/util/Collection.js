@@ -1,1 +1,3 @@
-$_I(java.util,"Collection");
+$_L(["java.lang.Iterable"],"java.util.Collection",null,function(){
+$_I(java.util,"Collection",Iterable);
+});

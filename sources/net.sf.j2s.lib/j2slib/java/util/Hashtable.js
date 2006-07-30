@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractCollection","$.AbstractSet","$.Dictionary","$.Enumeration","$.Iterator","$.Map"],"java.util.Hashtable",["java.lang.Float","$.IllegalArgumentException","$.IllegalStateException","$.InternalError","$.NullPointerException","$.StringBuffer","$.UnsupportedOperationException","java.util.Collections","$.ConcurrentModificationException","$.NoSuchElementException"],function(){
+$_L(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractCollection","$.AbstractSet","$.Dictionary","$.Enumeration","$.Iterator","$.Map"],"java.util.Hashtable",["java.lang.Float","$.IllegalArgumentException","$.IllegalStateException","$.InternalError","$.NullPointerException","$.StringBuffer","$.UnsupportedOperationException","java.util.Collections","$.ConcurrentModificationException","$.NoSuchElementException"],function(){
 c$=$_C(function(){
 this.table=null;
 this.count=0;
@@ -173,8 +173,8 @@ return this.nextElement();
 });
 $_V(c$,"remove",
 function(){
-if(!this.iterator)throw new java.lang.UnsupportedOperationException();
-if(this.lastReturned==null)throw new java.lang.IllegalStateException("Hashtable Enumerator");
+if(!this.iterator)throw new UnsupportedOperationException();
+if(this.lastReturned==null)throw new IllegalStateException("Hashtable Enumerator");
 if(this.b$["java.util.Hashtable"].modCount!=this.expectedModCount)throw new java.util.ConcurrentModificationException();
 {
 var a=this.b$["java.util.Hashtable"].table;
@@ -224,7 +224,7 @@ return this.value;
 });
 $_V(c$,"setValue",
 function(a){
-if(a==null)throw new java.lang.NullPointerException();
+if(a==null)throw new NullPointerException();
 var b=this.value;
 this.value=a;
 return b;
@@ -245,9 +245,7 @@ return this.key.toString()+"="+this.value.toString();
 });
 c$=$_P();
 $_H();
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.util.Hashtable,"EmptyEnumerator",null,java.util.Enumeration);
+c$=$_T(java.util.Hashtable,"EmptyEnumerator",null,java.util.Enumeration);
 $_K(c$,
 function(){
 });
@@ -261,9 +259,7 @@ throw new java.util.NoSuchElementException("Hashtable Enumerator");
 });
 c$=$_P();
 $_H();
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.util.Hashtable,"EmptyIterator",null,java.util.Iterator);
+c$=$_T(java.util.Hashtable,"EmptyIterator",null,java.util.Iterator);
 $_K(c$,
 function(){
 });
@@ -277,18 +273,18 @@ throw new java.util.NoSuchElementException("Hashtable Iterator");
 });
 $_V(c$,"remove",
 function(){
-throw new java.lang.IllegalStateException("Hashtable Iterator");
+throw new IllegalStateException("Hashtable Iterator");
 });
 c$=$_P();
 $_K(c$,
 function(initialCapacity,loadFactor){
 $_R(this,java.util.Hashtable,[]);
-if(initialCapacity<0)throw new java.lang.IllegalArgumentException("Illegal Capacity: "+initialCapacity);
-if(loadFactor<=0||Float.isNaN(loadFactor))throw new java.lang.IllegalArgumentException("Illegal Load: "+loadFactor);
+if(initialCapacity<0)throw new IllegalArgumentException("Illegal Capacity: "+initialCapacity);
+if(loadFactor<=0||Float.isNaN(loadFactor))throw new IllegalArgumentException("Illegal Load: "+loadFactor);
 if(initialCapacity==0)initialCapacity=1;
 this.loadFactor=loadFactor;
 this.table=new Array(initialCapacity);
-this.threshold=Math.round((initialCapacity*loadFactor))(initialCapacity*loadFactor);
+this.threshold=Math.round((initialCapacity*loadFactor));
 },"~N,~N");
 $_K(c$,
 function(initialCapacity){
@@ -322,7 +318,7 @@ return this.getEnumeration(1);
 $_M(c$,"contains",
 function(value){
 if(value==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }var tab=this.table;
 for(var i=tab.length;i-->0;){
 for(var e=tab[i];e!=null;e=e.next){
@@ -365,7 +361,7 @@ var oldMap=this.table;
 var newCapacity=oldCapacity*2+1;
 var newMap=new Array(newCapacity);
 this.modCount++;
-this.threshold=Math.round((newCapacity*this.loadFactor))(newCapacity*this.loadFactor);
+this.threshold=Math.round((newCapacity*this.loadFactor));
 this.table=newMap;
 for(var i=oldCapacity;i-->0;){
 for(var old=oldMap[i];old!=null;){
@@ -380,7 +376,7 @@ newMap[index]=e;
 $_V(c$,"put",
 function(key,value){
 if(value==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }var tab=this.table;
 var hash=key.hashCode();
 var index=(hash&0x7FFFFFFF)%tab.length;
@@ -449,8 +445,8 @@ t.$values=null;
 t.modCount=0;
 return t;
 }catch(e){
-if($_O(e,java.lang.CloneNotSupportedException)){
-throw new java.lang.InternalError();
+if($_O(e,CloneNotSupportedException)){
+throw new InternalError();
 }else{
 throw e;
 }
@@ -519,9 +515,9 @@ if(!(t.get(key)==null&&t.containsKey(key)))return false;
 if(!value.equals(t.get(key)))return false;
 }}
 }catch(e){
-if($_O(e,java.lang.ClassCastException)){
+if($_O(e,ClassCastException)){
 return false;
-}else if($_O(e,java.lang.NullPointerException)){
+}else if($_O(e,NullPointerException)){
 return false;
 }else{
 throw e;
@@ -542,7 +538,6 @@ this.loadFactor=-this.loadFactor;
 return h;
 });
 $_S(c$,
-"serialVersionUID",1421746759512286392,
 "KEYS",0,
 "VALUES",1,
 "ENTRIES",2);

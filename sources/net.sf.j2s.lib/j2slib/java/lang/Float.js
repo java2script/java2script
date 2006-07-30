@@ -21,8 +21,6 @@ return value;
 },"Number");
 Clazz.makeConstructor(Float,
 function(s){
-alert(arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller.arguments.callee.caller);
-alert("-----"+s+"=====")
 var value=null;
 if(s!=null){
 value=Float.parseFloat(s,10);
@@ -43,7 +41,7 @@ Float.NaN=Number.NaN;
 Clazz.defineMethod(Float,"parseFloat",
 function(s){
 if(s==null){
-throw new NumberFormatException("float null");
+throw new NumberFormatException("null");
 }
 return parseFloat(s);
 },"String");

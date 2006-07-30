@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.TabFolder",["java.lang.Character","$wt.graphics.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TabItem","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.TabFolder",["java.lang.Character","$wt.graphics.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Control","$.Event","$.TabItem","$.TypedListener"],function(){
 c$=$_C(function(){
 this.items=null;
 this.borderFrame=null;
@@ -14,10 +14,6 @@ this.offset=0;
 this.imageList=null;
 $_Z(this,arguments);
 },$wt.widgets,"TabFolder",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.TabFolder,[parent,$wt.widgets.TabFolder.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addSelectionListener",
 function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
@@ -115,6 +111,7 @@ this.sendEvent(13,event);
 }},"$wt.widgets.TabItem,~N");
 $_V(c$,"createHandle",
 function(){
+this.children=new Array(0);
 this.items=new Array(0);
 var cssName="tab-folder-default";
 if((this.style&2048)!=0){
@@ -138,10 +135,7 @@ arrowRight.style.top="0";
 }el.onclick=this.btnNextTab.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TabFolder$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TabFolder$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TabFolder$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(this.b$["$wt.widgets.TabFolder"].offset+1>=this.b$["$wt.widgets.TabFolder"].items.length)return;
@@ -177,10 +171,7 @@ arrowLeft.style.top="0";
 }el.onclick=this.btnPrevTab.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TabFolder$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TabFolder$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TabFolder$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(this.b$["$wt.widgets.TabFolder"].offset<=0)return;

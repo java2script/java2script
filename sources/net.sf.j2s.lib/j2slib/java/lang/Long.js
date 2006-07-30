@@ -34,7 +34,7 @@ Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
 Clazz.defineMethod(Long,"parseLong",
 function(s,radix){
 if(s==null){
-throw new NumberFormatException("long null");
+throw new NumberFormatException("null");
 }if(radix<2){
 throw new NumberFormatException("radix "+radix+" less than Character.MIN_RADIX");
 }if(radix>36){

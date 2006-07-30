@@ -1,7 +1,5 @@
-Clazz.load(["$wt.accessibility.AccessibleControlListener"],"$wt.accessibility.AccessibleControlAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.accessibility,"AccessibleControlAdapter",null,$wt.accessibility.AccessibleControlListener);
+$_L(["$wt.accessibility.AccessibleControlListener"],"$wt.accessibility.AccessibleControlAdapter",null,function(){
+c$=$_T($wt.accessibility,"AccessibleControlAdapter",null,$wt.accessibility.AccessibleControlListener);
 $_V(c$,"getChildAtPoint",
 function(e){
 },"$wt.accessibility.AccessibleControlEvent");

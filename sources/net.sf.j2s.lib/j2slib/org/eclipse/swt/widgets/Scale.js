@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Scale",["$wt.graphics.Point","$wt.internal.dnd.DragAndDrop","$.ScaleDND","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Scale",["$wt.graphics.Point","$wt.internal.dnd.DragAndDrop","$.ScaleDND","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.minimum=0;
 this.maximum=0;
@@ -11,13 +11,6 @@ this.thumbHandle=null;
 this.trackHandle=null;
 $_Z(this,arguments);
 },$wt.widgets,"Scale",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Scale,[parent,$wt.widgets.Scale.checkStyle(style)]);
-this.minimum=0;
-this.maximum=100;
-this.pageIncrement=10;
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addSelectionListener",
 function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
@@ -47,9 +40,11 @@ height+=160;
 if(hHint!=-1)height=hHint+(border*2);
 return new $wt.graphics.Point(width,height);
 },"~N,~N,~B");
-$_M(c$,"createHandle",
+$_V(c$,"createHandle",
 function(){
-$_U(this,$wt.widgets.Scale,"createHandle",[]);
+this.minimum=0;
+this.maximum=100;
+this.pageIncrement=10;
 this.handle=d$.createElement("DIV");
 this.handle.className="scale-default";
 if(this.parent!=null&&this.parent.handle!=null){
@@ -88,10 +83,7 @@ var dnd=new $wt.internal.dnd.DragAndDrop();
 dnd.addDragListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Scale$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Scale$1",$wt.internal.dnd.ScaleDND);
+c$=$_W($wt.widgets,"Scale$1",$wt.internal.dnd.ScaleDND);
 $_M(c$,"dragging",
 function(e){
 $_U(this,$wt.widgets.Scale$1,"dragging",[e]);

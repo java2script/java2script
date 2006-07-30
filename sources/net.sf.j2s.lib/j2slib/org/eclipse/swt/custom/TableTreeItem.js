@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.custom.TableTreeItem",["$wt.SWT","$wt.graphics.GC","$.Image","$.Rectangle","$wt.widgets.Event","$.TableItem"],function(){
+$_L(["$wt.widgets.Item"],"$wt.custom.TableTreeItem",["$wt.SWT","$wt.graphics.GC","$.Image","$.Rectangle","$wt.widgets.Event","$.TableItem"],function(){
 c$=$_C(function(){
 this.tableItem=null;
 this.parent=null;

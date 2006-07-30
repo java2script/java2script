@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.ShellListener"],"$wt.events.ShellAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ShellAdapter",null,$wt.events.ShellListener);
+$_L(["$wt.events.ShellListener"],"$wt.events.ShellAdapter",null,function(){
+c$=$_T($wt.events,"ShellAdapter",null,$wt.events.ShellListener);
 $_V(c$,"shellActivated",
 function(e){
 },"$wt.events.ShellEvent");

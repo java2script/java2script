@@ -53,14 +53,14 @@ try {
 c = this.findSystemClass (name);
 return c;
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.ClassNotFoundException)) {
+if (Clazz.instanceOf (e, ClassNotFoundException)) {
 } else {
 throw e;
 }
 }
 }if (c == null) {
 var data = this.lookupClassData (name);
-if (data == null) throw  new java.lang.ClassNotFoundException ();
+if (data == null) throw  new ClassNotFoundException ();
 c = this.defineClass (name, data, 0, data.length);
 }if (resolve) this.resolveClass (c);
 return c;
@@ -77,7 +77,7 @@ data = this.loadJarData (path, fileName);
 data = this.loadFileData (path, fileName);
 }if (data != null) return data;
 }
-throw  new java.lang.ClassNotFoundException (className);
+throw  new ClassNotFoundException (className);
 }, $fz.isPrivate = true, $fz), "~S");
 Clazz.defineMethod (c$, "isJar", 
 function (pathEntry) {

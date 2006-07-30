@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Drawable","$wt.widgets.Widget"],"$wt.widgets.Control",["$wt.SWT","$wt.graphics.Color","$.Font","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.struct.MESSAGE","$.WINDOWPOS","$wt.widgets.Event","$.Menu","$.TypedListener"],function(){
+$_L(["$wt.graphics.Drawable","$wt.widgets.Widget"],"$wt.widgets.Control",["$wt.SWT","$wt.graphics.Color","$.Font","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.struct.MESSAGE","$.WINDOWPOS","$wt.widgets.Event","$.Menu","$.TypedListener"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.cursor=null;
@@ -719,10 +719,7 @@ if(this.handle.oncontextmenu==null){
 this.handle.oncontextmenu=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Control$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Control$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Control$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Control"].showMenu(0,0);

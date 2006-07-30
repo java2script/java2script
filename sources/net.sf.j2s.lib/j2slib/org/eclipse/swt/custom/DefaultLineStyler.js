@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.LineBackgroundListener","$.LineStyleListener","$.StyleRange"],"$wt.custom.DefaultLineStyler",["java.util.Vector","$wt.graphics.Color","$.Point","$wt.internal.Compatibility"],function(){
+$_L(["$wt.custom.LineBackgroundListener","$.LineStyleListener","$.StyleRange"],"$wt.custom.DefaultLineStyler",["java.util.Vector","$wt.graphics.Color","$.Point","$wt.internal.Compatibility"],function(){
 c$=$_C(function(){
 this.content=null;
 this.styles=null;

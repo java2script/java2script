@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.layout.GridLayout",["$wt.graphics.Point","$wt.layout.GridData","$wt.widgets.Control"],function(){
+$_L(["$wt.widgets.Layout"],"$wt.layout.GridLayout",["$wt.graphics.Point","$wt.layout.GridData","$wt.widgets.Control"],function(){
 c$=$_C(function(){
 this.numColumns=1;
 this.makeColumnsEqualWidth=false;

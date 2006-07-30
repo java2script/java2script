@@ -1,14 +1,10 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Sash",["$wt.graphics.Point","$wt.internal.dnd.DragAndDrop","$.SashDND","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Sash",["$wt.graphics.Point","$wt.internal.dnd.DragAndDrop","$.SashDND","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.dragging=false;
 this.lastX=0;
 this.lastY=0;
 $_Z(this,arguments);
 },$wt.widgets,"Sash",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Sash,[parent,$wt.widgets.Sash.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addSelectionListener",
 function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
@@ -51,10 +47,7 @@ parentHandle.appendChild(this.handle);
 dnd.addDragListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Sash$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Sash$1",$wt.internal.dnd.SashDND);
+c$=$_W($wt.widgets,"Sash$1",$wt.internal.dnd.SashDND);
 $_M(c$,"dragEnded",
 function(e){
 $_U(this,$wt.widgets.Sash$1,"dragEnded",[e]);

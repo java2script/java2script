@@ -1,8 +1,6 @@
 Clazz.declarePackage ("junit.runner");
 Clazz.load (["junit.runner.ClassPathTestCollector"], "junit.runner.SimpleTestCollector", null, function () {
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, junit.runner, "SimpleTestCollector", junit.runner.ClassPathTestCollector);
+c$ = Clazz.declareType (junit.runner, "SimpleTestCollector", junit.runner.ClassPathTestCollector);
 Clazz.makeConstructor (c$, 
 function () {
 Clazz.superConstructor (this, junit.runner.SimpleTestCollector, []);

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.FontDialog",["$wt.graphics.FontData"],function(){
+$_L(["$wt.widgets.Dialog"],"$wt.widgets.FontDialog",["$wt.graphics.FontData"],function(){
 c$=$_C(function(){
 this.fontData=null;
 this.rgb=null;

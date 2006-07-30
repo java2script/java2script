@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractList","$.List","$.RandomAccess"],"java.util.Vector",["java.lang.ArrayIndexOutOfBoundsException","$.IllegalArgumentException","$.IndexOutOfBoundsException","$.InternalError","java.lang.reflect.Array","java.util.Collections","$.Enumeration","$.NoSuchElementException"],function(){
+$_L(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractList","$.List","$.RandomAccess"],"java.util.Vector",["java.lang.ArrayIndexOutOfBoundsException","$.IllegalArgumentException","$.IndexOutOfBoundsException","$.InternalError","java.lang.reflect.Array","java.util.Collections","$.Enumeration","$.NoSuchElementException"],function(){
 c$=$_C(function(){
 this.elementData=null;
 this.elementCount=0;
@@ -8,7 +8,7 @@ $_Z(this,arguments);
 $_K(c$,
 function(initialCapacity,capacityIncrement){
 $_R(this,java.util.Vector);
-if(initialCapacity<0)throw new java.lang.IllegalArgumentException("Illegal Capacity: "+initialCapacity);
+if(initialCapacity<0)throw new IllegalArgumentException("Illegal Capacity: "+initialCapacity);
 this.elementData=new Array(initialCapacity);
 this.capacityIncrement=capacityIncrement;
 },"~N,~N");
@@ -129,7 +129,7 @@ return this.lastIndexOf(elem,this.elementCount-1);
 },"~O");
 $_M(c$,"lastIndexOf",
 function(elem,index){
-if(index>=this.elementCount)throw new java.lang.IndexOutOfBoundsException(index+" >= "+this.elementCount);
+if(index>=this.elementCount)throw new IndexOutOfBoundsException(index+" >= "+this.elementCount);
 if(elem==null){
 for(var i=index;i>=0;i--)if(this.elementData[i]==null)return i;
 
@@ -141,7 +141,7 @@ for(var i=index;i>=0;i--)if(elem.equals(this.elementData[i]))return i;
 $_M(c$,"elementAt",
 function(index){
 if(index>=this.elementCount){
-throw new java.lang.ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
+throw new ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
 }return this.elementData[index];
 },"~N");
 $_M(c$,"firstElement",
@@ -159,16 +159,16 @@ throw new java.util.NoSuchElementException();
 $_M(c$,"setElementAt",
 function(obj,index){
 if(index>=this.elementCount){
-throw new java.lang.ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
+throw new ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
 }this.elementData[index]=obj;
 },"~O,~N");
 $_M(c$,"removeElementAt",
 function(index){
 this.modCount++;
 if(index>=this.elementCount){
-throw new java.lang.ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
+throw new ArrayIndexOutOfBoundsException(index+" >= "+this.elementCount);
 }else if(index<0){
-throw new java.lang.ArrayIndexOutOfBoundsException(index);
+throw new ArrayIndexOutOfBoundsException(index);
 }var j=this.elementCount-index-1;
 if(j>0){
 System.arraycopy(this.elementData,index+1,this.elementData,index,j);
@@ -179,7 +179,7 @@ $_M(c$,"insertElementAt",
 function(obj,index){
 this.modCount++;
 if(index>this.elementCount){
-throw new java.lang.ArrayIndexOutOfBoundsException(index+" > "+this.elementCount);
+throw new ArrayIndexOutOfBoundsException(index+" > "+this.elementCount);
 }this.ensureCapacityHelper(this.elementCount+1);
 System.arraycopy(this.elementData,index,this.elementData,index+1,this.elementCount-index);
 this.elementData[index]=obj;
@@ -216,8 +216,8 @@ System.arraycopy(this.elementData,0,v.elementData,0,this.elementCount);
 v.modCount=0;
 return v;
 }catch(e){
-if($_O(e,java.lang.CloneNotSupportedException)){
-throw new java.lang.InternalError();
+if($_O(e,CloneNotSupportedException)){
+throw new InternalError();
 }else{
 throw e;
 }
@@ -238,12 +238,12 @@ return a;
 },"~A");
 $_V(c$,"get",
 function(index){
-if(index>=this.elementCount)throw new java.lang.ArrayIndexOutOfBoundsException(index);
+if(index>=this.elementCount)throw new ArrayIndexOutOfBoundsException(index);
 return this.elementData[index];
 },"~N");
 $_V(c$,"set",
 function(index,element){
-if(index>=this.elementCount)throw new java.lang.ArrayIndexOutOfBoundsException(index);
+if(index>=this.elementCount)throw new ArrayIndexOutOfBoundsException(index);
 var oldValue=this.elementData[index];
 this.elementData[index]=element;
 return oldValue;
@@ -266,7 +266,7 @@ this.insertElementAt(element,index);
 $_M(c$,"remove",
 function(index){
 this.modCount++;
-if(index>=this.elementCount)throw new java.lang.ArrayIndexOutOfBoundsException(index);
+if(index>=this.elementCount)throw new ArrayIndexOutOfBoundsException(index);
 var oldValue=this.elementData[index];
 var numMoved=this.elementCount-index-1;
 if(numMoved>0)System.arraycopy(this.elementData,index+1,this.elementData,index,numMoved);
@@ -277,10 +277,6 @@ $_V(c$,"clear",
 function(){
 this.removeAllElements();
 });
-$_V(c$,"containsAll",
-function(c){
-return $_U(this,java.util.Vector,"containsAll",[c]);
-},"java.util.Collection");
 $_M(c$,"addAll",
 function(c){
 this.modCount++;
@@ -291,18 +287,10 @@ System.arraycopy(a,0,this.elementData,this.elementCount,numNew);
 this.elementCount+=numNew;
 return numNew!=0;
 },"java.util.Collection");
-$_V(c$,"removeAll",
-function(c){
-return $_U(this,java.util.Vector,"removeAll",[c]);
-},"java.util.Collection");
-$_V(c$,"retainAll",
-function(c){
-return $_U(this,java.util.Vector,"retainAll",[c]);
-},"java.util.Collection");
 $_M(c$,"addAll",
 function(index,c){
 this.modCount++;
-if(index<0||index>this.elementCount)throw new java.lang.ArrayIndexOutOfBoundsException(index);
+if(index<0||index>this.elementCount)throw new ArrayIndexOutOfBoundsException(index);
 var a=c.toArray();
 var numNew=a.length;
 this.ensureCapacityHelper(this.elementCount+numNew);
@@ -312,18 +300,6 @@ System.arraycopy(a,0,this.elementData,index,numNew);
 this.elementCount+=numNew;
 return numNew!=0;
 },"~N,java.util.Collection");
-$_V(c$,"equals",
-function(o){
-return $_U(this,java.util.Vector,"equals",[o]);
-},"~O");
-$_V(c$,"hashCode",
-function(){
-return $_U(this,java.util.Vector,"hashCode",[]);
-});
-$_M(c$,"toString",
-function(){
-return $_U(this,java.util.Vector,"toString",[]);
-});
 $_V(c$,"subList",
 function(fromIndex,toIndex){
 return java.util.Collections.synchronizedList($_U(this,java.util.Vector,"subList",[fromIndex,toIndex]),this);
@@ -337,6 +313,4 @@ var newElementCount=this.elementCount-(toIndex-fromIndex);
 while(this.elementCount!=newElementCount)this.elementData[--this.elementCount]=null;
 
 },"~N,~N");
-$_S(c$,
-"serialVersionUID",-2767605614048989439);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TreeColumn",["$wt.widgets.TypedListener"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.TreeColumn",["$wt.widgets.TypedListener"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.resizable=false;

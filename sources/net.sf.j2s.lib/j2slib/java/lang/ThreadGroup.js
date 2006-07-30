@@ -1,4 +1,4 @@
-Clazz.load(null,"java.lang.ThreadGroup",["java.lang.NullPointerException","$.Thread"],function(){
+$_L(null,"java.lang.ThreadGroup",["java.lang.NullPointerException","$.Thread"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.name=null;
@@ -17,7 +17,7 @@ this.construct(Thread.currentThread().getThreadGroup(),name);
 $_K(c$,
 function(parent,name){
 if(parent==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }this.name=name;
 this.parent=parent;
 this.maxPriority=10;

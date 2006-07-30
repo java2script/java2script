@@ -1,4 +1,4 @@
-Clazz.load(null,"java.lang.reflect.AccessibleObject",["java.lang.SecurityException"],function(){
+$_L(null,"java.lang.reflect.AccessibleObject",["java.lang.SecurityException"],function(){
 c$=$_C(function(){
 this.securityCheckCache=null;
 this.override=false;
@@ -21,7 +21,7 @@ c$.setAccessible0=$_M(c$,"setAccessible0",
 if($_O(obj,java.lang.reflect.Constructor)&&flag==true){
 var c=obj;
 if(c.getDeclaringClass()==Class){
-throw new java.lang.SecurityException("Can not make a java.lang.Class"+" constructor accessible");
+throw new SecurityException("Can not make a java.lang.Class"+" constructor accessible");
 }}obj.override=flag;
 },$fz.isPrivate=true,$fz),"java.lang.reflect.AccessibleObject,~B");
 $_M(c$,"isAccessible",

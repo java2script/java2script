@@ -1,8 +1,6 @@
 Clazz.declarePackage ("junit.runner");
 Clazz.load (["junit.runner.TestSuiteLoader"], "junit.runner.ReloadingTestSuiteLoader", ["junit.runner.TestCaseClassLoader"], function () {
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, junit.runner, "ReloadingTestSuiteLoader", null, junit.runner.TestSuiteLoader);
+c$ = Clazz.declareType (junit.runner, "ReloadingTestSuiteLoader", null, junit.runner.TestSuiteLoader);
 Clazz.overrideMethod (c$, "load", 
 function (suiteClassName) {
 return this.createLoader ().loadClass (suiteClassName, true);

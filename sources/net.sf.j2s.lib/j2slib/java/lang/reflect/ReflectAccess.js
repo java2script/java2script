@@ -1,7 +1,5 @@
-Clazz.load(["sun.reflect.LangReflectAccess"],"java.lang.reflect.ReflectAccess",["java.lang.reflect.Constructor","$.Field","$.Method"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},reflect,"ReflectAccess",null,sun.reflect.LangReflectAccess);
+$_L(["sun.reflect.LangReflectAccess"],"java.lang.reflect.ReflectAccess",["java.lang.reflect.Constructor","$.Field","$.Method"],function(){
+c$=$_T(reflect,"ReflectAccess",null,sun.reflect.LangReflectAccess);
 $_V(c$,"newField",
 function(declaringClass,name,type,modifiers,slot){
 return new java.lang.reflect.Field(declaringClass,name,type,modifiers,slot);

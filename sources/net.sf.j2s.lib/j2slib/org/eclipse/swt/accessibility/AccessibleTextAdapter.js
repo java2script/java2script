@@ -1,7 +1,5 @@
-Clazz.load(["$wt.accessibility.AccessibleTextListener"],"$wt.accessibility.AccessibleTextAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.accessibility,"AccessibleTextAdapter",null,$wt.accessibility.AccessibleTextListener);
+$_L(["$wt.accessibility.AccessibleTextListener"],"$wt.accessibility.AccessibleTextAdapter",null,function(){
+c$=$_T($wt.accessibility,"AccessibleTextAdapter",null,$wt.accessibility.AccessibleTextListener);
 $_V(c$,"getCaretOffset",
 function(e){
 },"$wt.accessibility.AccessibleTextEvent");

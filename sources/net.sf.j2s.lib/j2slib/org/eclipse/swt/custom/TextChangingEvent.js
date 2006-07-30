@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.custom.TextChangingEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.custom.TextChangingEvent",null,function(){
 c$=$_C(function(){
 this.start=0;
 this.newText=null;
@@ -9,10 +9,6 @@ this.newLineCount=0;
 $_Z(this,arguments);
 },$wt.custom,"TextChangingEvent",$wt.events.TypedEvent);
 $_K(c$,
-function(source){
-$_R(this,$wt.custom.TextChangingEvent,[source]);
-},"$wt.custom.StyledTextContent");
-$_K(c$,
 function(source,e){
 $_R(this,$wt.custom.TextChangingEvent,[source]);
 this.start=e.start;
@@ -22,6 +18,4 @@ this.replaceLineCount=e.replaceLineCount;
 this.newLineCount=e.newLineCount;
 this.newText=e.text;
 },"$wt.custom.StyledTextContent,$wt.custom.StyledTextEvent");
-$_S(c$,
-"serialVersionUID",3257290210114352439);
 });

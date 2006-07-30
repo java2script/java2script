@@ -55,12 +55,12 @@ return null;
 try {
 testClass = this.loadSuiteClass (suiteClassName);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.ClassNotFoundException)) {
+if (Clazz.instanceOf (e, ClassNotFoundException)) {
 var clazz = e.getMessage ();
 if (clazz == null) clazz = suiteClassName;
 this.runFailed ("Class not found \"" + clazz + "\"");
 return null;
-} else if (Clazz.instanceOf (e, java.lang.Exception)) {
+} else if (Clazz.instanceOf (e, Exception)) {
 this.runFailed ("Error: " + e.toString ());
 return null;
 } else {
@@ -71,7 +71,7 @@ var suiteMethod = null;
 try {
 suiteMethod = testClass.getMethod (junit.runner.BaseTestRunner.SUITE_METHODNAME,  new Array (0));
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 this.clearStatus ();
 return  new junit.framework.TestSuite (testClass);
 } else {
@@ -89,7 +89,7 @@ if (test == null) return test;
 if (Clazz.instanceOf (e, java.lang.reflect.InvocationTargetException)) {
 this.runFailed ("Failed to invoke suite():" + e.getTargetException ().toString ());
 return null;
-} else if (Clazz.instanceOf (e, java.lang.IllegalAccessException)) {
+} else if (Clazz.instanceOf (e, IllegalAccessException)) {
 this.runFailed ("Failed to invoke suite():" + e.toString ());
 return null;
 } else {
@@ -189,7 +189,7 @@ if (value == null) return intValue;
 try {
 intValue = Integer.parseInt (value);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NumberFormatException)) {
+if (Clazz.instanceOf (e, NumberFormatException)) {
 } else {
 throw e;
 }
@@ -201,7 +201,7 @@ function () {
 try {
 Class.forName ("com.ibm.uvm.tools.DebugSupport");
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 return false;
 } else {
 throw e;
@@ -231,7 +231,7 @@ while ((line = br.readLine ()) != null) {
 if (!junit.runner.BaseTestRunner.filterLine (line)) pw.println (line);
 }
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 return stack;
 } else {
 throw e;

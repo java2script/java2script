@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Group",["java.lang.Character","$wt.graphics.Rectangle","$wt.internal.browser.OS"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Group",["java.lang.Character","$wt.graphics.Rectangle","$wt.internal.browser.OS","$wt.widgets.Control"],function(){
 c$=$_C(function(){
 this.groupText=null;
 this.textWidth=0;
@@ -16,10 +16,6 @@ this.contentBox=null;
 this.content=null;
 $_Z(this,arguments);
 },$wt.widgets,"Group",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Group,[parent,$wt.widgets.Group.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style|=524288;
@@ -59,6 +55,7 @@ return el;
 },"~O,~S");
 $_V(c$,"createHandle",
 function(){
+this.children=new Array(0);
 this.state&=-3;
 this.handle=d$.createElement("DIV");
 if((this.style&2048)!=0){

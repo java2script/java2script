@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractCollection","$.AbstractMap","$.AbstractSet","$.Iterator","$.Map"],"java.util.HashMap",["java.lang.Float","$.IllegalArgumentException","$.IllegalStateException","java.util.ConcurrentModificationException","$.NoSuchElementException"],function(){
+$_L(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractCollection","$.AbstractMap","$.AbstractSet","$.Iterator","$.Map"],"java.util.HashMap",["java.lang.Float","$.IllegalArgumentException","$.IllegalStateException","java.util.ConcurrentModificationException","$.NoSuchElementException"],function(){
 c$=$_C(function(){
 this.table=null;
 this.$size=0;
@@ -46,7 +46,7 @@ return this.current=a;
 });
 $_V(c$,"remove",
 function(){
-if(this.current==null)throw new java.lang.IllegalStateException();
+if(this.current==null)throw new IllegalStateException();
 if(this.b$["java.util.HashMap"].modCount!=this.expectedModCount)throw new java.util.ConcurrentModificationException();
 var a=this.current.key;
 this.current=null;
@@ -236,14 +236,14 @@ c$=$_P();
 $_K(c$,
 function(initialCapacity,loadFactor){
 $_R(this,java.util.HashMap,[]);
-if(initialCapacity<0)throw new java.lang.IllegalArgumentException("Illegal initial capacity: "+initialCapacity);
+if(initialCapacity<0)throw new IllegalArgumentException("Illegal initial capacity: "+initialCapacity);
 if(initialCapacity>1073741824)initialCapacity=1073741824;
-if(loadFactor<=0||Float.isNaN(loadFactor))throw new java.lang.IllegalArgumentException("Illegal load factor: "+loadFactor);
+if(loadFactor<=0||Float.isNaN(loadFactor))throw new IllegalArgumentException("Illegal load factor: "+loadFactor);
 var capacity=1;
 while(capacity<initialCapacity)capacity<<=1;
 
 this.$loadFactor=loadFactor;
-this.threshold=Math.round((capacity*loadFactor))(capacity*loadFactor);
+this.threshold=Math.round((capacity*loadFactor));
 this.table=new Array(capacity);
 this.init();
 },"~N,~N");
@@ -255,13 +255,13 @@ $_K(c$,
 function(){
 $_R(this,java.util.HashMap,[]);
 this.$loadFactor=0.75;
-this.threshold=Math.round((12.0))(12.0);
+this.threshold=Math.round((12.0));
 this.table=new Array(16);
 this.init();
 });
 $_K(c$,
 function(m){
-this.construct(Math.max(Math.round((m.size()/ 0.75))(m.size () /0.75)+1,16),0.75);
+this.construct(Math.max(Math.round((m.size()/0.75))+1,16),0.75);
 this.putAllForCreate(m);
 },"java.util.Map");
 $_M(c$,"init",
@@ -379,7 +379,7 @@ return;
 }var newTable=new Array(newCapacity);
 this.transfer(newTable);
 this.table=newTable;
-this.threshold=Math.round((newCapacity*this.$loadFactor))(newCapacity*this.$loadFactor);
+this.threshold=Math.round((newCapacity*this.$loadFactor));
 },"~N");
 $_M(c$,"transfer",
 function(newTable){
@@ -403,7 +403,7 @@ function(m){
 var numKeysToBeAdded=m.size();
 if(numKeysToBeAdded==0)return;
 if(numKeysToBeAdded>this.threshold){
-var targetCapacity=Math.round((numKeysToBeAdded/ this.$loadFactor + 1))(numKeysToBeAdded /this.$loadFactor+1);
+var targetCapacity=Math.round((numKeysToBeAdded/this.$loadFactor+1));
 if(targetCapacity>1073741824)targetCapacity=1073741824;
 var newCapacity=this.table.length;
 while(newCapacity<targetCapacity)newCapacity<<=1;
@@ -494,7 +494,7 @@ var result=null;
 try{
 result=$_U(this,java.util.HashMap,"clone",[]);
 }catch(e){
-if($_O(e,java.lang.CloneNotSupportedException)){
+if($_O(e,CloneNotSupportedException)){
 }else{
 throw e;
 }
@@ -557,6 +557,4 @@ $_S(c$,
 "MAXIMUM_CAPACITY",1073741824,
 "DEFAULT_LOAD_FACTOR",0.75);
 c$.NULL_KEY=c$.prototype.NULL_KEY=new Object();
-$_S(c$,
-"serialVersionUID",362498820763181265);
 });

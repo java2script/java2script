@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Canvas"],"$wt.custom.CLabel",["java.lang.Character","$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$wt.events.DisposeListener","$.PaintListener","$.TraverseListener","$wt.graphics.Color","$.GC","$.Point"],function(){
+$_L(["$wt.widgets.Canvas"],"$wt.custom.CLabel",["java.lang.Character","$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$wt.events.DisposeListener","$.PaintListener","$.TraverseListener","$wt.graphics.Color","$.GC","$.Point"],function(){
 c$=$_C(function(){
 this.align=16384;
 this.hIndent=3;
@@ -22,10 +22,7 @@ if((style&16384)!=0)this.align=16384;
 this.addPaintListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CLabel$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CLabel$1",null,$wt.events.PaintListener);
+c$=$_W($wt.custom,"CLabel$1",null,$wt.events.PaintListener);
 $_V(c$,"paintControl",
 function(event){
 this.b$["$wt.custom.CLabel"].onPaint(event);
@@ -37,10 +34,7 @@ return $_N($wt.custom.CLabel$1,i$,v$);
 this.addDisposeListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CLabel$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CLabel$2",null,$wt.events.DisposeListener);
+c$=$_W($wt.custom,"CLabel$2",null,$wt.events.DisposeListener);
 $_V(c$,"widgetDisposed",
 function(event){
 this.b$["$wt.custom.CLabel"].onDispose(event);
@@ -52,10 +46,7 @@ return $_N($wt.custom.CLabel$2,i$,v$);
 this.addTraverseListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CLabel$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CLabel$3",null,$wt.events.TraverseListener);
+c$=$_W($wt.custom,"CLabel$3",null,$wt.events.TraverseListener);
 $_V(c$,"keyTraversed",
 function(event){
 if(event.detail==128){

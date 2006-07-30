@@ -1,11 +1,3 @@
-Clazz.load(["$wt.events.SelectionEvent"],"$wt.events.TreeEvent",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"TreeEvent",$wt.events.SelectionEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.TreeEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3257282548009677109);
+$_L(["$wt.events.SelectionEvent"],"$wt.events.TreeEvent",null,function(){
+c$=$_T($wt.events,"TreeEvent",$wt.events.SelectionEvent);
 });

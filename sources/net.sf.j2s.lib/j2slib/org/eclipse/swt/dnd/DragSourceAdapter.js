@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.DragSourceListener"],"$wt.dnd.DragSourceAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"DragSourceAdapter",null,$wt.dnd.DragSourceListener);
+$_L(["$wt.dnd.DragSourceListener"],"$wt.dnd.DragSourceAdapter",null,function(){
+c$=$_T($wt.dnd,"DragSourceAdapter",null,$wt.dnd.DragSourceListener);
 $_V(c$,"dragStart",
 function(event){
 },"$wt.dnd.DragSourceEvent");

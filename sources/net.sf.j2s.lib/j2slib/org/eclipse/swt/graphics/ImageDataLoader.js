@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.graphics.ImageDataLoader",["$wt.graphics.ImageLoader"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.graphics,"ImageDataLoader");
+$_L(null,"$wt.graphics.ImageDataLoader",["$wt.graphics.ImageLoader"],function(){
+c$=$_T($wt.graphics,"ImageDataLoader");
 c$.load=$_M(c$,"load",
 function(stream){
 return new $wt.graphics.ImageLoader().load(stream);

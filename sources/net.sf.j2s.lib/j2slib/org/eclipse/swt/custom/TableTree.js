@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$wt.custom.TableTreeItem","$wt.graphics.Image"],"$wt.custom.TableTree",["$wt.SWT","$wt.graphics.GC","$.ImageData","$.PaletteData","$.RGB","$wt.widgets.Event","$.Listener","$.Table","$.TableItem","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite","$wt.custom.TableTreeItem","$wt.graphics.Image"],"$wt.custom.TableTree",["$wt.SWT","$wt.graphics.GC","$.ImageData","$.PaletteData","$.RGB","$wt.widgets.Event","$.Listener","$.Table","$.TableItem","$.TypedListener"],function(){
 c$=$_C(function(){
 this.table=null;
 this.items=null;
@@ -18,10 +18,7 @@ this.table=new $wt.widgets.Table(this,style);
 var tableListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableTree$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableTree$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableTree$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 switch(e.type){
@@ -50,10 +47,7 @@ this.table.addListener(tableEvents[i],tableListener);
 var listener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableTree$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableTree$2",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableTree$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 switch(e.type){

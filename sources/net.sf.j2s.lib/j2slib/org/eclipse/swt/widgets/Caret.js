@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget"],"$wt.widgets.Caret",["$wt.graphics.Point","$.Rectangle"],function(){
+$_L(["$wt.widgets.Widget"],"$wt.widgets.Caret",["$wt.graphics.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.x=0;

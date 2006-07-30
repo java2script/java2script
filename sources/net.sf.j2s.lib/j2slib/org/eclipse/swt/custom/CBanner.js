@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$wt.graphics.Rectangle"],"$wt.custom.CBanner",["$wt.SWT","$wt.custom.CBannerLayout","$wt.graphics.Color","$.Cursor","$.Point","$wt.widgets.Listener"],function(){
+$_L(["$wt.widgets.Composite","$wt.graphics.Rectangle"],"$wt.custom.CBanner",["$wt.SWT","$wt.custom.CBannerLayout","$wt.graphics.Color","$.Cursor","$.Point","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.$left=null;
 this.right=null;
@@ -29,10 +29,7 @@ this.resizeCursor=new $wt.graphics.Cursor(this.getDisplay(),9);
 var listener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CBanner$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CBanner$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"CBanner$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 switch(e.type){
@@ -81,8 +78,8 @@ var b3=y3-y0+3*y1-3*y2;
 var polygon=$_A(2*count+2,0);
 for(var i=0;i<=count;i++){
 var t=i/count;
-polygon[2*i]=Math.round((a0+a1*t+a2*t*t+a3*t*t*t))(a0+a1*t+a2*t*t+a3*t*t*t);
-polygon[2*i+1]=Math.round((b0+b1*t+b2*t*t+b3*t*t*t))(b0+b1*t+b2*t*t+b3*t*t*t);
+polygon[2*i]=Math.round((a0+a1*t+a2*t*t+a3*t*t*t));
+polygon[2*i+1]=Math.round((b0+b1*t+b2*t*t+b3*t*t*t));
 }
 return polygon;
 },"~N,~N,~N,~N,~N,~N,~N,~N,~N");

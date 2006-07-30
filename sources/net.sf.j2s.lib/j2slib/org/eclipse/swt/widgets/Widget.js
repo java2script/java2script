@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.widgets.Widget",["java.lang.Runnable","$.Thread","$wt.SWT","$wt.internal.RunnableCompatibility","$wt.internal.dnd.HTMLEventWrapper","$wt.widgets.Display","$.Event","$.EventTable","$.TypedListener"],function(){
+$_L(null,"$wt.widgets.Widget",["java.lang.Runnable","$.Thread","$wt.SWT","$wt.internal.RunnableCompatibility","$wt.internal.dnd.HTMLEventWrapper","$wt.widgets.Display","$.Event","$.EventTable","$.TypedListener"],function(){
 c$=$_C(function(){
 this.handle=null;
 this.style=0;
@@ -11,13 +11,19 @@ this.hoverTime=0;
 this.hoverTimerID=0;
 this.waitingForLayout=false;
 this.hookedStatus=null;
+this.styleChecked=false;
 $_Z(this,arguments);
 },$wt.widgets,"Widget");
 $_K(c$,
 function(parent,style){
 this.checkParent(parent);
 this.style=style;
-this.display=parent.display;
+{
+if(!this.styleChecked&&this.checkStyle!=null){
+this.style=this.checkStyle(this.style);
+this.styleChecked=true;
+}
+}this.display=parent.display;
 this.waitingForLayout=true;
 },"$wt.widgets.Widget,~N");
 $_M(c$,"addListener",
@@ -237,10 +243,7 @@ function(){
 this.handle.onkeydown=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(1);
@@ -255,10 +258,7 @@ function(){
 this.handle.onkeyup=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.internal.dnd.HTMLEventWrapper(this.getEvent());
@@ -283,10 +283,7 @@ hoverHooked=true;
 this.hoverTimerID=w$.setTimeout($_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$3",null,Runnable);
+c$=$_W($wt.widgets,"Widget$3",null,Runnable);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Widget"].isDisposed()){
@@ -304,10 +301,7 @@ function(){
 this.handle.onmousedown=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$4",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var hoverHooked=this.b$["$wt.widgets.Widget"].mouseHoverProc();
@@ -327,10 +321,7 @@ function(){
 this.handle.onmouseup=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$5",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$5",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var hoverHooked=this.b$["$wt.widgets.Widget"].mouseHoverProc();
@@ -348,10 +339,7 @@ function(){
 this.handle.onmousemove=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$6")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$6",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$6",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var hoverHooked=this.b$["$wt.widgets.Widget"].mouseHoverProc();
@@ -374,10 +362,7 @@ function(){
 this.handle.onmouseover=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$7")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$7",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$7",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var hoverHooked=this.b$["$wt.widgets.Widget"].mouseHoverProc();
@@ -394,10 +379,7 @@ function(){
 this.handle.onmouseout=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$8")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$8",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$8",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var hoverHooked=false;
@@ -418,10 +400,7 @@ function(){
 this.handle.ondblclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$9")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$9",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$9",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(8);
@@ -436,10 +415,7 @@ function(){
 this.handle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$10")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$10",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$10",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(13);
@@ -454,10 +430,7 @@ function(){
 this.handle.onfocus=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$11")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$11",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$11",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(15);
@@ -472,10 +445,7 @@ function(){
 this.handle.onblur=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$12")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$12",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$12",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(16);
@@ -490,10 +460,7 @@ function(){
 this.handle.onchange=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$13")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$13",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$13",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(24);
@@ -508,10 +475,7 @@ function(){
 this.handle.onhelp=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$14")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$14",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$14",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(28);
@@ -526,10 +490,7 @@ function(){
 this.handle.onchange=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$15")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$15",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$15",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(30);
@@ -544,10 +505,7 @@ function(){
 this.handle.onkeypress=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$16")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$16",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$16",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 });
@@ -561,10 +519,7 @@ function(){
 this.handle.oncontextmenu=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Widget$17")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Widget$17",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Widget$17",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Widget"].sendEvent(35);

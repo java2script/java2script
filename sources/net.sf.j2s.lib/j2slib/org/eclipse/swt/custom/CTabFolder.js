@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$wt.custom.CTabFolder2Listener","$.CTabFolderListener","$wt.graphics.RGB","$.Rectangle"],"$wt.custom.CTabFolder",["java.lang.Character","$wt.SWT","$wt.custom.CTabFolderLayout","$.CTabItem","$wt.events.SelectionAdapter","$wt.graphics.Color","$.GC","$.Point","$.Region","$wt.internal.browser.OS","$wt.widgets.Event","$.Label","$.Menu","$.MenuItem","$.Shell","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite","$wt.custom.CTabFolder2Listener","$.CTabFolderListener","$wt.graphics.RGB","$.Rectangle"],"$wt.custom.CTabFolder",["java.lang.Character","$wt.SWT","$wt.custom.CTabFolderLayout","$.CTabItem","$wt.events.SelectionAdapter","$wt.graphics.Color","$.GC","$.Point","$.Region","$wt.internal.browser.OS","$wt.widgets.Event","$.Label","$.Menu","$.MenuItem","$.Shell","$.TypedListener"],function(){
 c$=$_C(function(){
 this.itemMore=null;
 this.contentArea=null;
@@ -1247,10 +1247,7 @@ item.setData(id,tab);
 item.addSelectionListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabFolder$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabFolder$1",$wt.events.SelectionAdapter);
+c$=$_W($wt.custom,"CTabFolder$1",$wt.events.SelectionAdapter);
 $_V(c$,"widgetSelected",
 function(e){
 var menuItem=e.widget;

@@ -70,10 +70,7 @@ this.startTest (test);
 var p = (function (i$, v$) {
 if (!Clazz.isClassDefined ("junit.framework.TestResult$1")) {
 Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, junit.framework, "TestResult$1", null, junit.framework.Protectable);
+c$ = Clazz.declareAnonymous (junit.framework, "TestResult$1", null, junit.framework.Protectable);
 Clazz.defineMethod (c$, "protect", 
 function () {
 this.f$.test.runBare ();
@@ -96,7 +93,7 @@ p.protect ();
 } catch (e) {
 if (Clazz.instanceOf (e, junit.framework.AssertionFailedError)) {
 this.addFailure (test, e);
-} else if (Clazz.instanceOf (e, java.lang.ThreadDeath)) {
+} else if (Clazz.instanceOf (e, ThreadDeath)) {
 throw e;
 } else if (Clazz.instanceOf (e, Throwable)) {
 this.addError (test, e);

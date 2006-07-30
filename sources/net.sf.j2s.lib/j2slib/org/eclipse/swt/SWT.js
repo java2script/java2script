@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.SWT",["java.lang.IllegalArgumentException","$wt.SWTError","$.SWTException"],function(){
-$WT=c$=$_C(function(){
-$_Z(this,arguments);
-},$wt,"SWT");
+$_L(null,"$wt.SWT",["java.lang.IllegalArgumentException","$wt.SWTError","$.SWTException"],function(){
+$WT=c$=$_T($wt,"SWT");
 c$.findErrorText=$_M(c$,"findErrorText",
 function(code){
 switch(code){
@@ -147,7 +145,7 @@ case 27:
 case 32:
 case 6:
 {
-throw new java.lang.IllegalArgumentException(message);
+throw new IllegalArgumentException(message);
 }case 43:
 case 22:
 case 24:

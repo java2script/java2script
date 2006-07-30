@@ -1,5 +1,5 @@
 $_J("org.eclipse.swt.printing");
-Clazz.load(["$wt.graphics.Device"],"$wt.printing.Printer",["$wt.SWT","$wt.graphics.Rectangle","$wt.printing.PrinterData"],function(){
+$_L(["$wt.graphics.Device"],"$wt.printing.Printer",["$wt.SWT","$wt.graphics.Rectangle","$wt.printing.PrinterData"],function(){
 c$=$_C(function(){
 this.handle=0;
 this.data=null;
@@ -26,10 +26,6 @@ $_K(c$,
 function(){
 this.construct(null);
 });
-$_K(c$,
-function(data){
-$_R(this,$wt.printing.Printer,[$wt.printing.Printer.checkNull(data)]);
-},"$wt.printing.PrinterData");
 $_V(c$,"create",
 function(deviceData){
 },"$wt.graphics.DeviceData");

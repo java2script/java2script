@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.custom.ScrolledCompositeLayout",["$wt.graphics.Point"],function(){
+$_L(["$wt.widgets.Layout"],"$wt.custom.ScrolledCompositeLayout",["$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.inLayout=false;
 $_Z(this,arguments);

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Table",["$wt.graphics.Point","$wt.internal.browser.OS","$wt.widgets.Control","$.Event","$.TableColumn","$.TableItem","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Table",["$wt.graphics.Point","$wt.internal.browser.OS","$wt.widgets.Control","$.Event","$.TableColumn","$.TableItem","$.TypedListener"],function(){
 c$=$_C(function(){
 this.items=null;
 this.columns=null;
@@ -24,16 +24,6 @@ this.lineWidth=0;
 this.columnMaxWidth=null;
 $_Z(this,arguments);
 },$wt.widgets,"Table",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Table,[parent,$wt.widgets.Table.checkStyle(style)]);
-this.selection=new Array(0);
-this.items=new Array(0);
-this.columns=new Array(0);
-this.columnMaxWidth=$_A(0,0);
-this.lineWidth=0;
-this.tbody=null;
-},"$wt.widgets.Composite,~N");
 $_M(c$,"_getItem",
 function(index){
 if(this.items[index]!=null)return this.items[index];
@@ -102,6 +92,12 @@ return new $wt.graphics.Point(width,height);
 },"~N,~N,~B");
 $_M(c$,"createHandle",
 function(){
+this.selection=new Array(0);
+this.items=new Array(0);
+this.columns=new Array(0);
+this.columnMaxWidth=$_A(0,0);
+this.lineWidth=0;
+this.tbody=null;
 $_U(this,$wt.widgets.Table,"createHandle",[]);
 this.state&=-3;
 this.handle.className+=" table-default";

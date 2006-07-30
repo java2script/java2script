@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.StyledTextContent"],"$wt.custom.WrappedContent",["$wt.SWT"],function(){
+$_L(["$wt.custom.StyledTextContent"],"$wt.custom.WrappedContent",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.renderer=null;
 this.logicalContent=null;

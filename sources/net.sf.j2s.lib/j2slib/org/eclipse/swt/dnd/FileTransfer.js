@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.ByteArrayTransfer"],"$wt.dnd.FileTransfer",["java.lang.StringBuffer","$wt.dnd.DND"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"FileTransfer",$wt.dnd.ByteArrayTransfer);
+$_L(["$wt.dnd.ByteArrayTransfer"],"$wt.dnd.FileTransfer",["java.lang.StringBuffer","$wt.dnd.DND"],function(){
+c$=$_T($wt.dnd,"FileTransfer",$wt.dnd.ByteArrayTransfer);
 $_K(c$,
 ($fz=function(){
 $_R(this,$wt.dnd.FileTransfer,[]);

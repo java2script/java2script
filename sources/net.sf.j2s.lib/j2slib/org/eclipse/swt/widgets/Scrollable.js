@@ -1,13 +1,9 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Scrollable",["$wt.graphics.Rectangle","$wt.widgets.ScrollBar"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Scrollable",["$wt.graphics.Rectangle","$wt.widgets.ScrollBar"],function(){
 c$=$_C(function(){
 this.horizontalBar=null;
 this.verticalBar=null;
 $_Z(this,arguments);
 },$wt.widgets,"Scrollable",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Scrollable,[parent,style]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"computeTrim",
 function(x,y,width,height){
 var border=this.getBorderWidth();

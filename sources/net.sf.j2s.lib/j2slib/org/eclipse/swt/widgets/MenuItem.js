@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.MenuItem",["$wt.graphics.Rectangle","$wt.internal.browser.OS","$wt.widgets.TypedListener"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.MenuItem",["$wt.graphics.Rectangle","$wt.internal.browser.OS","$wt.widgets.TypedListener"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.menu=null;

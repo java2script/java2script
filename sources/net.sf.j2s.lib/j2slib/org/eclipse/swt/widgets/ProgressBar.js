@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.ProgressBar",["$wt.graphics.Point"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.ProgressBar",["$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.minimum=0;
 this.maximum=0;
@@ -6,12 +6,6 @@ this.selection=0;
 this.innerHandle=null;
 $_Z(this,arguments);
 },$wt.widgets,"ProgressBar",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.ProgressBar,[parent,$wt.widgets.ProgressBar.checkStyle(style)]);
-this.minimum=0;
-this.maximum=100;
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style|=524288;
@@ -34,6 +28,8 @@ return new $wt.graphics.Point(width,height);
 },"~N,~N,~B");
 $_V(c$,"createHandle",
 function(){
+this.minimum=0;
+this.maximum=100;
 this.handle=d$.createElement("DIV");
 this.handle.className="progress-bar-default";
 if(this.parent!=null&&this.parent.handle!=null){

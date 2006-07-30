@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.widgets.Dialog",["$wt.SWT","$wt.events.SelectionAdapter","$wt.graphics.Image","$wt.internal.ResizeSystem","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Display","$.Label","$.Listener","$.Shell"],function(){
+$_L(null,"$wt.widgets.Dialog",["$wt.SWT","$wt.events.SelectionAdapter","$wt.graphics.Image","$wt.internal.ResizeSystem","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Display","$.Label","$.Listener","$.Shell"],function(){
 c$=$_C(function(){
 this.style=0;
 this.parent=null;
@@ -47,10 +47,7 @@ var dialogShell=new $wt.widgets.Shell(this.parent.display,this.style|64|2048);
 dialogShell.addListener(21,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Dialog$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Dialog$1",null,$wt.widgets.Listener);
+c$=$_W($wt.widgets,"Dialog$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 },"$wt.widgets.Event");
@@ -77,10 +74,7 @@ btn.setLayoutData(new $wt.layout.GridData(75,24));
 btn.addSelectionListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Dialog$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Dialog$2",$wt.events.SelectionAdapter);
+c$=$_W($wt.widgets,"Dialog$2",$wt.events.SelectionAdapter);
 $_V(c$,"widgetSelected",
 function(e){
 this.f$.dialogShell.close();

@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.widgets.ImageList",["$wt.graphics.Image","$.Point"],function(){
+$_L(null,"$wt.widgets.ImageList",["$wt.graphics.Image","$.Point"],function(){
 c$=$_C(function(){
 this.handle=0;
 this.style=0;

@@ -39,10 +39,8 @@ $_M(c$,"getStatus",
 function(){
 return this.status;
 });
-Clazz.load(["$wt.internal.ResizeHandler"],"$wt.internal.ResizeSystem",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal,"ResizeSystem");
+$_L(["$wt.internal.ResizeHandler"],"$wt.internal.ResizeSystem",null,function(){
+c$=$_T($wt.internal,"ResizeSystem");
 c$.register=$_M(c$,"register",
 function(shell,status){
 for(var i=0;i<$wt.internal.ResizeSystem.handlers.length;i++){
@@ -96,7 +94,7 @@ window.addEventListener('resize',$browserLayoutResize,true);
 window.onresize=$browserLayoutResize;
 }
 });
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAndDrop",["$wt.internal.dnd.DNDUtils"],function(){
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAndDrop",["$wt.internal.dnd.DNDUtils"],function(){
 c$=$_C(function(){
 this.status=0;
 this.element=null;
@@ -185,10 +183,8 @@ return listener;
 return null;
 },"$wt.internal.dnd.DragListener");
 });
-Clazz.load(null,"$wt.internal.dnd.DNDUtils",["$wt.internal.dnd.DragEvent","$.HTMLEventWrapper"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal.dnd,"DNDUtils");
+$_L(null,"$wt.internal.dnd.DNDUtils",["$wt.internal.dnd.DragEvent","$.HTMLEventWrapper"],function(){
+c$=$_T($wt.internal.dnd,"DNDUtils");
 c$.bindFunctionWith=$_M(c$,"bindFunctionWith",
 function(aFun,obj){
 var xFun=null;
@@ -283,7 +279,7 @@ org.eclipse.swt.internal.dnd.DNDUtils["$"+methods[i]]=
 org.eclipse.swt.internal.dnd.DNDUtils[methods[i]];
 }
 });
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ShellFrameDND",null,function(){
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ShellFrameDND",null,function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;
@@ -492,10 +488,8 @@ div.style.width=width+"px";
 }}}
 },"~O");
 });
-Clazz.load(null,"$wt.internal.browser.OS",["$wt.graphics.Point"],function(){
-O$=c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal.browser,"OS");
+$_L(null,"$wt.internal.browser.OS",["$wt.graphics.Point"],function(){
+O$=c$=$_T($wt.internal.browser,"OS");
 c$.destroyHandle=$_M(c$,"destroyHandle",
 function(handle){
 if(handle==null){
@@ -800,7 +794,7 @@ os.isIE60=os.isIE&&dav.indexOf("MSIE 6.0")>=0;
 "lineContainer",null,
 "blockContainer",null);
 });
-Clazz.load(["$wt.graphics.Drawable","$.Resource"],"$wt.graphics.Image",["$wt.SWT","$wt.graphics.Color","$.Device","$.ImageData","$.Rectangle"],function(){
+$_L(["$wt.graphics.Drawable","$.Resource"],"$wt.graphics.Image",["$wt.SWT","$wt.graphics.Color","$.Device","$.ImageData","$.Rectangle"],function(){
 c$=$_C(function(){
 this.url=null;
 this.width=0;
@@ -919,7 +913,7 @@ return"Image {"+this.handle+"}";
 $_S(c$,
 "DEFAULT_SCANLINE_PAD",4);
 });
-Clazz.load(["$wt.widgets.Widget"],"$wt.widgets.Item",null,function(){
+$_L(["$wt.widgets.Widget"],"$wt.widgets.Item",null,function(){
 c$=$_C(function(){
 this.text=null;
 this.image=null;
@@ -961,9 +955,7 @@ function(string){
 this.text=string;
 },"~S");
 });
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.widgets,"Layout");
+c$=$_T($wt.widgets,"Layout");
 $_M(c$,"flushCache",
 function(control){
 return false;

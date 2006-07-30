@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.ControlEditor"],"$wt.custom.TreeEditor",["java.lang.Runnable","$wt.events.ControlListener","$.TreeListener","$wt.graphics.Rectangle"],function(){
+$_L(["$wt.custom.ControlEditor"],"$wt.custom.TreeEditor",["java.lang.Runnable","$wt.events.ControlListener","$.TreeListener","$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
 this.tree=null;
 this.item=null;
@@ -14,10 +14,7 @@ this.tree=tree;
 this.columnListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TreeEditor$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TreeEditor$1",null,$wt.events.ControlListener);
+c$=$_W($wt.custom,"TreeEditor$1",null,$wt.events.ControlListener);
 $_V(c$,"controlMoved",
 function(e){
 this.b$["$wt.custom.TreeEditor"].resize();
@@ -42,10 +39,7 @@ $_Y(c$,function(){
 this.runnable=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TreeEditor$2$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TreeEditor$2$3",null,Runnable);
+c$=$_W($wt.custom,"TreeEditor$2$3",null,Runnable);
 $_V(c$,"run",
 function(){
 if(this.b$["$wt.custom.TreeEditor"].editor==null||this.b$["$wt.custom.TreeEditor"].editor.isDisposed())return;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Scrollable"],"$wt.widgets.Composite",["java.util.Date","$wt.graphics.Point","$wt.internal.struct.MESSAGE","$.WINDOWPOS","$wt.widgets.Control","$.Menu"],function(){
+$_L(["$wt.widgets.Scrollable"],"$wt.widgets.Composite",["java.util.Date","$wt.graphics.Point","$wt.internal.struct.MESSAGE","$.WINDOWPOS","$wt.widgets.Control","$.Menu"],function(){
 c$=$_C(function(){
 this.$layout=null;
 this.lpwp=null;
@@ -8,11 +8,6 @@ this.children=null;
 this.waitingForLayoutWithResize=false;
 $_Z(this,arguments);
 },$wt.widgets,"Composite",$wt.widgets.Scrollable);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Composite,[parent,style]);
-this.children=new Array(0);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"_getChildren",
 function(){
 var count=this.children.length;
@@ -111,6 +106,7 @@ return this.handle;
 });
 $_V(c$,"createHandle",
 function(){
+this.children=new Array(0);
 this.handle=d$.createElement("DIV");
 this.handle.className="composite-default";
 if((this.style&2048)!=0){

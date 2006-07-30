@@ -34,7 +34,7 @@ Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
 Clazz.defineMethod(Integer,"parseInt",
 function(s,radix){
 if(s==null){
-throw new NumberFormatException("int null");
+throw new NumberFormatException("null");
 }if(radix<2){
 throw new NumberFormatException("radix "+radix+" less than Character.MIN_RADIX");
 }if(radix>36){

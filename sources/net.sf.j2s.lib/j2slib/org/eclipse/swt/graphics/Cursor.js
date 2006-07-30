@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.Cursor",["$wt.SWT","$wt.graphics.Device"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.Cursor",["$wt.SWT","$wt.graphics.Device"],function(){
 c$=$_C(function(){
 this.handle=null;
 $_Z(this,arguments);

@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.MenuListener"],"$wt.events.MenuAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"MenuAdapter",null,$wt.events.MenuListener);
+$_L(["$wt.events.MenuListener"],"$wt.events.MenuAdapter",null,function(){
+c$=$_T($wt.events,"MenuAdapter",null,$wt.events.MenuListener);
 $_V(c$,"menuHidden",
 function(e){
 },"$wt.events.MenuEvent");

@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable"],"java.lang.Throwable",["java.lang.StackTraceElement"],function(){
+$_L(["java.io.Serializable"],"java.lang.Throwable",["java.lang.StackTraceElement"],function(){
 c$=$_C(function(){
 this.detailMessage=null;
 this.cause=null;
@@ -31,7 +31,11 @@ this.cause=cause;
 },"Throwable");
 $_M(c$,"getMessage",
 function(){
-return this.detailMessage;
+{
+if(typeof this.message!="undefined"){
+return this.message;
+}
+}return this.detailMessage;
 });
 $_M(c$,"getLocalizedMessage",
 function(){
@@ -43,8 +47,8 @@ return(this.cause==this?null:this.cause);
 });
 $_M(c$,"initCause",
 function(cause){
-if(this.cause!=this)throw new java.lang.IllegalStateException("Can't overwrite cause");
-if(cause==this)throw new java.lang.IllegalArgumentException("Self-causation not permitted");
+if(this.cause!=this)throw new IllegalStateException("Can't overwrite cause");
+if(cause==this)throw new IllegalArgumentException("Self-causation not permitted");
 this.cause=cause;
 return this;
 },"Throwable");
@@ -137,10 +141,8 @@ return this;
 $_M(c$,"setStackTrace",
 function(stackTrace){
 var defensiveCopy=stackTrace.clone();
-for(var i=0;i<defensiveCopy.length;i++)if(defensiveCopy[i]==null)throw new java.lang.NullPointerException("stackTrace["+i+"]");
+for(var i=0;i<defensiveCopy.length;i++)if(defensiveCopy[i]==null)throw new NullPointerException("stackTrace["+i+"]");
 
 this.stackTrace=defensiveCopy;
 },"~A");
-$_S(c$,
-"serialVersionUID",-3042686055658047285);
 });

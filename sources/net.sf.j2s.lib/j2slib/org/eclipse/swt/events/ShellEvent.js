@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.events.ShellEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.events.ShellEvent",null,function(){
 c$=$_C(function(){
 this.doit=false;
 $_Z(this,arguments);
@@ -13,6 +13,4 @@ function(){
 var string=$_U(this,$wt.events.ShellEvent,"toString",[]);
 return string.substring(0,string.length-1)+" doit="+this.doit+"}";
 });
-$_S(c$,
-"serialVersionUID",3257569490479888441);
 });

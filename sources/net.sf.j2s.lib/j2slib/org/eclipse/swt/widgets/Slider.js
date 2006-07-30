@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Slider",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.dnd.DragAndDrop","$.SliderDND","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Slider",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.dnd.DragAndDrop","$.SliderDND","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.minimum=0;
 this.maximum=0;
@@ -13,10 +13,6 @@ this.lastX=0;
 this.lastY=0;
 $_Z(this,arguments);
 },$wt.widgets,"Slider",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Slider,[parent,$wt.widgets.Slider.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addSelectionListener",
 function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
@@ -60,10 +56,7 @@ this.decBtnHandle.className="slider-top-button-default";
 }this.decBtnHandle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Slider$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Slider$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Slider$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Slider"].setSelection(this.b$["$wt.widgets.Slider"].getSelection()-this.b$["$wt.widgets.Slider"].increment);
@@ -89,10 +82,7 @@ this.incBtnHandle.className="slider-bottom-button-default";
 }this.incBtnHandle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Slider$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Slider$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Slider$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Slider"].setSelection(this.b$["$wt.widgets.Slider"].getSelection()+this.b$["$wt.widgets.Slider"].increment);
@@ -127,10 +117,7 @@ var dnd=new $wt.internal.dnd.DragAndDrop();
 dnd.addDragListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Slider$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Slider$3",$wt.internal.dnd.SliderDND);
+c$=$_W($wt.widgets,"Slider$3",$wt.internal.dnd.SliderDND);
 $_V(c$,"dragEnded",
 function(e){
 this.b$["$wt.widgets.Slider"].caculateSelection();

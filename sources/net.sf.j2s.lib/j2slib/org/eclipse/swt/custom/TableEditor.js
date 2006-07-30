@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.ControlEditor"],"$wt.custom.TableEditor",["$wt.events.ControlListener","$wt.graphics.Rectangle"],function(){
+$_L(["$wt.custom.ControlEditor"],"$wt.custom.TableEditor",["$wt.events.ControlListener","$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
 this.table=null;
 this.item=null;
@@ -13,10 +13,7 @@ this.table=table;
 this.columnListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableEditor$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableEditor$1",null,$wt.events.ControlListener);
+c$=$_W($wt.custom,"TableEditor$1",null,$wt.events.ControlListener);
 $_V(c$,"controlMoved",
 function(e){
 this.b$["$wt.custom.TableEditor"].resize();

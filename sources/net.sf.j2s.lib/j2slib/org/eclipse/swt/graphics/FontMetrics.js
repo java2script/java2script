@@ -1,6 +1,4 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.graphics,"FontMetrics");
+c$=$_T($wt.graphics,"FontMetrics");
 $_K(c$,
 function(){
 });
@@ -29,8 +27,4 @@ return 16;
 $_M(c$,"getLeading",
 function(){
 return 0;
-});
-$_M(c$,"hashCode",
-function(){
-return $_U(this,$wt.graphics.FontMetrics,"hashCode",[]);
 });

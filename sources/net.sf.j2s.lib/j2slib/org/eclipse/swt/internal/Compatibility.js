@@ -1,22 +1,20 @@
-Clazz.load(null,"$wt.internal.Compatibility",["java.io.FileInputStream","$.FileOutputStream","java.lang.Character","$.Runtime","$.Thread","java.text.MessageFormat","java.util.ResourceBundle","$wt.SWT"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal,"Compatibility");
+$_L(null,"$wt.internal.Compatibility",["java.io.FileInputStream","$.FileOutputStream","java.lang.Character","$.Runtime","$.Thread","java.text.MessageFormat","java.util.ResourceBundle","$wt.SWT"],function(){
+c$=$_T($wt.internal,"Compatibility");
 c$.cos=$_M(c$,"cos",
 function(angle,length){
-return Math.round((Math.cos(angle*$wt.internal.Compatibility.toRadians)*length))(Math.cos(angle*$wt.internal.Compatibility.toRadians)*length);
+return Math.round((Math.cos(angle*$wt.internal.Compatibility.toRadians)*length));
 },"~N,~N");
 c$.sin=$_M(c$,"sin",
 function(angle,length){
-return Math.round((Math.sin(angle*$wt.internal.Compatibility.toRadians)*length))(Math.sin(angle*$wt.internal.Compatibility.toRadians)*length);
+return Math.round((Math.sin(angle*$wt.internal.Compatibility.toRadians)*length));
 },"~N,~N");
 c$.ceil=$_M(c$,"ceil",
 function(p,q){
-return Math.round(Math.ceil(p/ q))Math.ceil (p /q);
+return Math.round(Math.ceil(p/q));
 },"~N,~N");
 c$.floor=$_M(c$,"floor",
 function(p,q){
-return Math.round(Math.floor(p/ q))Math.floor (p /q);
+return Math.round(Math.floor(p/q));
 },"~N,~N");
 c$.round=$_M(c$,"round",
 function(p,q){

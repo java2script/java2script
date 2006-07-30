@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Tree",["$wt.SWT","$wt.graphics.Point","$wt.widgets.TreeColumn","$.TreeItem","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Tree",["$wt.SWT","$wt.graphics.Point","$wt.widgets.TreeColumn","$.TreeItem","$.TypedListener"],function(){
 c$=$_C(function(){
 this.items=null;
 this.columns=null;
@@ -26,12 +26,6 @@ this.hAnchor=null;
 this.hInsert=null;
 $_Z(this,arguments);
 },$wt.widgets,"Tree",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Tree,[parent,$wt.widgets.Tree.checkStyle(style)]);
-this.selections=new Array(0);
-this.items=new Array(0);
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style|=768;
@@ -66,6 +60,8 @@ if((this.style&512)!=0){
 },"~N,~N,~B");
 $_M(c$,"createHandle",
 function(){
+this.selections=new Array(0);
+this.items=new Array(0);
 $_U(this,$wt.widgets.Tree,"createHandle",[]);
 this.state&=-3;
 this.handle.className+=" tree-default";

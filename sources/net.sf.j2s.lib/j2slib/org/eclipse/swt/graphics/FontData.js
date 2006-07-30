@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.graphics.FontData",["java.lang.StringBuffer","$wt.SWT"],function(){
+$_L(null,"$wt.graphics.FontData",["java.lang.StringBuffer","$wt.SWT"],function(){
 c$=$_C(function(){
 this.height=0;
 this.style=0;

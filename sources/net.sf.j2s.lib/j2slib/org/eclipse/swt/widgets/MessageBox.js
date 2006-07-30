@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.MessageBox",["$wt.events.SelectionAdapter","$wt.internal.ResizeSystem","$wt.internal.browser.OS","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Label","$.Listener","$.Shell"],function(){
+$_L(["$wt.widgets.Dialog"],"$wt.widgets.MessageBox",["$wt.events.SelectionAdapter","$wt.internal.ResizeSystem","$wt.internal.browser.OS","$wt.layout.GridData","$.GridLayout","$wt.widgets.Button","$.Composite","$.Label","$.Listener","$.Shell"],function(){
 c$=$_C(function(){
 this.message="";
 this.buttonPanel=null;
@@ -37,10 +37,7 @@ this.dialogShell=new $wt.widgets.Shell(this.parent.display,this.style|64|2048);
 this.dialogShell.addListener(21,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.MessageBox$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"MessageBox$1",null,$wt.widgets.Listener);
+c$=$_W($wt.widgets,"MessageBox$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 this.b$["$wt.widgets.MessageBox"].updateReturnCode();
@@ -132,10 +129,7 @@ this.btn.setLayoutData(gridData);
 this.btn.addSelectionListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.MessageBox$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"MessageBox$2",$wt.events.SelectionAdapter);
+c$=$_W($wt.widgets,"MessageBox$2",$wt.events.SelectionAdapter);
 $_V(c$,"widgetSelected",
 function(e){
 this.b$["$wt.widgets.MessageBox"].returnCode=this.f$.btnStyle;

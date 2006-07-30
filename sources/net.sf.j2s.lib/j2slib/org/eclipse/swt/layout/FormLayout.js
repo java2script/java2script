@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.layout.FormLayout",["$wt.graphics.Point","$.Rectangle","$wt.layout.FormData"],function(){
+$_L(["$wt.widgets.Layout"],"$wt.layout.FormLayout",["$wt.graphics.Point","$.Rectangle","$wt.layout.FormData"],function(){
 c$=$_C(function(){
 this.marginWidth=0;
 this.marginHeight=0;

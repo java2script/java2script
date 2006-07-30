@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Device","$.Cursor"],"$wt.widgets.Display",["java.lang.Runnable","$.StringBuffer","$.Thread","java.util.Date","$wt.SWT","$wt.graphics.Color","$.Font","$.Image","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.struct.MESSAGE","$wt.widgets.Control","$.Event","$.EventTable","$.ImageList","$.Menu","$.MenuItem","$.Monitor","$.Shell","$.Tray"],function(){
+$_L(["$wt.graphics.Device","$.Cursor"],"$wt.widgets.Display",["java.lang.Runnable","$.StringBuffer","$.Thread","java.util.Date","$wt.SWT","$wt.graphics.Color","$.Font","$.Image","$.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.struct.MESSAGE","$wt.widgets.Control","$.Event","$.EventTable","$.ImageList","$.Menu","$.MenuItem","$.Monitor","$.Shell","$.Tray"],function(){
 c$=$_C(function(){
 this.eventQueue=null;
 this.eventTable=null;
@@ -57,10 +57,6 @@ $_K(c$,
 function(){
 this.construct(null);
 });
-$_K(c$,
-function(data){
-$_R(this,$wt.widgets.Display,[data]);
-},"$wt.graphics.DeviceData");
 $_M(c$,"addBar",
 function(menu){
 if(this.bars==null)this.bars=new Array(4);
@@ -259,17 +255,9 @@ $_M(c$,"getActiveShell",
 function(){
 return null;
 });
-$_M(c$,"getBounds",
-function(){
-return $_U(this,$wt.widgets.Display,"getBounds",[]);
-});
 c$.getCurrent=$_M(c$,"getCurrent",
 function(){
 return $wt.widgets.Display.findDisplay(Thread.currentThread());
-});
-$_M(c$,"getClientArea",
-function(){
-return $_U(this,$wt.widgets.Display,"getClientArea",[]);
 });
 $_M(c$,"getControl",
 function(handle){
@@ -628,10 +616,7 @@ case 4:
 this.timerExec(1,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Display$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Display$1",null,Runnable);
+c$=$_W($wt.widgets,"Display$1",null,Runnable);
 $_M(c$,"run",
 function(){
 this.b$["$wt.widgets.Display"].runDeferredEvents();
@@ -659,10 +644,7 @@ this.eventQueue=newQueue;
 this.timerExec(1,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Display$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Display$2",null,Runnable);
+c$=$_W($wt.widgets,"Display$2",null,Runnable);
 $_M(c$,"run",
 function(){
 this.b$["$wt.widgets.Display"].runDeferredEvents();
@@ -679,10 +661,7 @@ this.runPopups();
 this.messageProc=w$.setInterval($_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Display$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Display$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Display$3",$wt.internal.RunnableCompatibility);
 $_M(c$,"run",
 function(){
 var msgs=this.b$["$wt.widgets.Display"].msgs;

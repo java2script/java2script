@@ -1,4 +1,4 @@
-Clazz.load(["java.lang.reflect.AccessibleObject","$.Member","java.lang.Void"],"java.lang.reflect.Constructor",["java.lang.StringBuffer","java.lang.reflect.Field","$.Method","$.Modifier","sun.reflect.Reflection"],function(){
+$_L(["java.lang.reflect.AccessibleObject","$.Member","java.lang.Void"],"java.lang.reflect.Constructor",["java.lang.StringBuffer","java.lang.reflect.Field","$.Method","$.Modifier","sun.reflect.Reflection"],function(){
 c$=$_C(function(){
 this.clazz=null;
 this.slot=0;
@@ -87,7 +87,7 @@ if(k<(exceptions.length-1))sb.append(",");
 }
 }return sb.toString();
 }catch(e){
-if($_O(e,java.lang.Exception)){
+if($_O(e,Exception)){
 return"<"+e+">";
 }else{
 throw e;

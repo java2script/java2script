@@ -1,8 +1,6 @@
 $_J("org.eclipse.swt.awt");
-Clazz.load(null,"$wt.awt.SWT_AWT",["$wt.SWT"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.awt,"SWT_AWT");
+$_L(null,"$wt.awt.SWT_AWT",["$wt.SWT"],function(){
+c$=$_T($wt.awt,"SWT_AWT");
 c$.loadLibrary=$_M(c$,"loadLibrary",
 function(){
 if($wt.awt.SWT_AWT.loaded)return;

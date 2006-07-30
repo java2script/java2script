@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget"],"$wt.widgets.Tracker",["$wt.graphics.Point","$.Rectangle","$wt.widgets.Display","$.TypedListener"],function(){
+$_L(["$wt.widgets.Widget"],"$wt.widgets.Tracker",["$wt.graphics.Point","$.Rectangle","$wt.widgets.Display","$.TypedListener"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.tracking=false;

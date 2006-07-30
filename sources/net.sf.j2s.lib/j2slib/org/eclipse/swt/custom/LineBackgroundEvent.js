@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.custom.LineBackgroundEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.custom.LineBackgroundEvent",null,function(){
 c$=$_C(function(){
 this.lineOffset=0;
 this.lineText=null;
@@ -11,6 +11,4 @@ $_R(this,$wt.custom.LineBackgroundEvent,[e]);
 this.lineOffset=e.detail;
 this.lineText=e.text;
 },"$wt.custom.StyledTextEvent");
-$_S(c$,
-"serialVersionUID",3978711687853324342);
 });

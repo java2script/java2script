@@ -47,7 +47,7 @@ Double.isInfinite=Double.prototype.isInfinite;
 Clazz.defineMethod(Double,"parseDouble",
 function(s){
 if(s==null){
-throw new NumberFormatException("double null");
+throw new NumberFormatException("null");
 }
 return parseFloat(s);
 },"String");

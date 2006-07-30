@@ -1,7 +1,5 @@
 Clazz.declarePackage ("junit.runner");
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, junit.runner, "Sorter");
+c$ = Clazz.declareType (junit.runner, "Sorter");
 Clazz.declareInterface (junit.runner.Sorter, "Swapper");
 c$.sortStrings = Clazz.defineMethod (c$, "sortStrings", 
 function (values, left, right, swapper) {

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.Font",["$wt.SWT","$wt.graphics.Device","$.FontData"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.Font",["$wt.SWT","$wt.graphics.Device","$.FontData"],function(){
 c$=$_C(function(){
 this.data=null;
 $_Z(this,arguments);

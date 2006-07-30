@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.Color",["$wt.SWT","$wt.graphics.Device","$.RGB"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.Color",["$wt.SWT","$wt.graphics.Device","$.RGB"],function(){
 c$=$_C(function(){
 this.handle=0;
 this.cssHandle=null;

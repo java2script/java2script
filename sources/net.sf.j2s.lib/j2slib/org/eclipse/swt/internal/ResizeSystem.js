@@ -1,7 +1,5 @@
-Clazz.load(["$wt.internal.ResizeHandler"],"$wt.internal.ResizeSystem",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal,"ResizeSystem");
+$_L(["$wt.internal.ResizeHandler"],"$wt.internal.ResizeSystem",null,function(){
+c$=$_T($wt.internal,"ResizeSystem");
 c$.register=$_M(c$,"register",
 function(shell,status){
 for(var i=0;i<$wt.internal.ResizeSystem.handlers.length;i++){

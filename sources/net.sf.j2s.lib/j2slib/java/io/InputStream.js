@@ -1,7 +1,5 @@
-Clazz.load(null,"java.io.InputStream",["java.io.IOException","java.lang.IndexOutOfBoundsException","$.NullPointerException"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.io,"InputStream");
+$_L(null,"java.io.InputStream",["java.io.IOException","java.lang.IndexOutOfBoundsException","$.NullPointerException"],function(){
+c$=$_T(java.io,"InputStream");
 $_M(c$,"read",
 function(b){
 return this.read(b,0,b.length);
@@ -9,9 +7,9 @@ return this.read(b,0,b.length);
 $_M(c$,"read",
 function(b,off,len){
 if(b==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }else if((off<0)||(off>b.length)||(len<0)||((off+len)>b.length)||((off+len)<0)){
-throw new java.lang.IndexOutOfBoundsException();
+throw new IndexOutOfBoundsException();
 }else if(len==0){
 return 0;
 }var c=this.read();

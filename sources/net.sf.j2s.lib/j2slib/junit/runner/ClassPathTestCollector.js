@@ -1,8 +1,6 @@
 Clazz.declarePackage ("junit.runner");
 Clazz.load (["junit.runner.TestCollector"], "junit.runner.ClassPathTestCollector", ["java.io.File", "java.util.Hashtable", "$.StringTokenizer", "$.Vector"], function () {
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, junit.runner, "ClassPathTestCollector", null, junit.runner.TestCollector);
+c$ = Clazz.declareType (junit.runner, "ClassPathTestCollector", null, junit.runner.TestCollector);
 Clazz.makeConstructor (c$, 
 function () {
 });

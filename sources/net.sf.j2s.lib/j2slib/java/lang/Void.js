@@ -1,6 +1,4 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.lang,"Void");
+c$=$_T(java.lang,"Void");
 $_S(c$,
 "TYPE",null);
 {

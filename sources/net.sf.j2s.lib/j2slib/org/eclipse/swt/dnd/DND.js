@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.dnd.DND",["$wt.SWT","$.SWTError","$.SWTException"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"DND");
+$_L(null,"$wt.dnd.DND",["$wt.SWT","$.SWTError","$.SWTException"],function(){
+c$=$_T($wt.dnd,"DND");
 c$.error=$_M(c$,"error",
 function(code){
 $wt.dnd.DND.error(code,0);

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Button",["java.lang.Character","$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.TypedListener"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Button",["java.lang.Character","$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.TypedListener"],function(){
 c$=$_C(function(){
 this.text="";
 this.textSizeCached=false;
@@ -14,10 +14,6 @@ this.btnText=null;
 this.btnHandle=null;
 $_Z(this,arguments);
 },$wt.widgets,"Button",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Button,[parent,$wt.widgets.Button.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"_setImage",
 function(image){
 },"$wt.graphics.Image");
@@ -156,7 +152,6 @@ $_M(c$,"getSelection",
 function(){
 if((this.style&(50))==0)return false;
 if((this.style&2)!=0){
-System.out.println(this.btnHandle.className);
 return(this.btnHandle.className!=null&&this.btnHandle.className.indexOf("button-selected")!=-1);
 }else if((this.style&(48))!=0){
 return this.btnHandle.checked;
@@ -170,10 +165,6 @@ return this.text;
 $_V(c$,"isEnabled",
 function(){
 return!this.btnHandle.disabled;
-});
-$_M(c$,"isTabItem",
-function(){
-return $_U(this,$wt.widgets.Button,"isTabItem",[]);
 });
 $_V(c$,"mnemonicHit",
 function(ch){
@@ -262,7 +253,7 @@ if(value){
 try{
 this.handle.focus();
 }catch(e){
-if($_O(e,java.lang.Error)){
+if($_O(e,Error)){
 }else{
 throw e;
 }
@@ -503,10 +494,7 @@ this.btnHandle.className="button-push";
 }}this.btnHandle.onmouseover=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Button$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Button$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Button$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var cssName=" button-hover";
@@ -521,10 +509,7 @@ return $_N($wt.widgets.Button$1,i$,v$);
 this.btnHandle.onmouseout=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Button$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Button$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Button$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var cssName=" button-hover";
@@ -556,10 +541,7 @@ function(){
 var eventHandler=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Button$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Button$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Button$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.widgets.Button"].isEnabled()){

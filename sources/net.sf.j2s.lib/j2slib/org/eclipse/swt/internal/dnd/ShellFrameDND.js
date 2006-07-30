@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ShellFrameDND",null,function(){
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.ShellFrameDND",null,function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;

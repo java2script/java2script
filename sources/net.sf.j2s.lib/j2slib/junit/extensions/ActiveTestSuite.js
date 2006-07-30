@@ -8,18 +8,6 @@ Clazz.makeConstructor (c$,
 function () {
 Clazz.superConstructor (this, junit.extensions.ActiveTestSuite, []);
 });
-Clazz.makeConstructor (c$, 
-function (theClass) {
-Clazz.superConstructor (this, junit.extensions.ActiveTestSuite, [theClass]);
-}, "Class");
-Clazz.makeConstructor (c$, 
-function (name) {
-Clazz.superConstructor (this, junit.extensions.ActiveTestSuite, [name]);
-}, "~S");
-Clazz.makeConstructor (c$, 
-function (theClass, name) {
-Clazz.superConstructor (this, junit.extensions.ActiveTestSuite, [theClass, name]);
-}, "Class,~S");
 Clazz.defineMethod (c$, "run", 
 function (result) {
 this.fActiveTestDeathCount = 0;
@@ -31,10 +19,7 @@ function (test, result) {
 var t = (function (i$, v$) {
 if (!Clazz.isClassDefined ("junit.extensions.ActiveTestSuite$1")) {
 Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, junit.extensions, "ActiveTestSuite$1", Thread);
+c$ = Clazz.declareAnonymous (junit.extensions, "ActiveTestSuite$1", Thread);
 Clazz.overrideMethod (c$, "run", 
 function () {
 try {
@@ -55,7 +40,7 @@ while (this.fActiveTestDeathCount < this.testCount ()) {
 try {
 this.wait ();
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.InterruptedException)) {
+if (Clazz.instanceOf (e, InterruptedException)) {
 return ;
 } else {
 throw e;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Event"],"$wt.dnd.DNDEvent",null,function(){
+$_L(["$wt.widgets.Event"],"$wt.dnd.DNDEvent",null,function(){
 c$=$_C(function(){
 this.dataType=null;
 this.dataTypes=null;

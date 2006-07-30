@@ -1,11 +1,5 @@
-Clazz.load(["$wt.widgets.TypedListener"],"$wt.custom.StyledTextListener",["$wt.custom.BidiSegmentEvent","$.ExtendedModifyEvent","$.LineBackgroundEvent","$.LineStyleEvent","$.TextChangedEvent","$.TextChangingEvent","$wt.events.VerifyEvent"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"StyledTextListener",$wt.widgets.TypedListener);
-$_K(c$,
-function(listener){
-$_R(this,$wt.custom.StyledTextListener,[listener]);
-},"$wt.internal.SWTEventListener");
+$_L(["$wt.widgets.TypedListener"],"$wt.custom.StyledTextListener",["$wt.custom.BidiSegmentEvent","$.ExtendedModifyEvent","$.LineBackgroundEvent","$.LineStyleEvent","$.TextChangedEvent","$.TextChangingEvent","$wt.events.VerifyEvent"],function(){
+c$=$_T($wt.custom,"StyledTextListener",$wt.widgets.TypedListener);
 $_V(c$,"handleEvent",
 function(e){
 var textChangedEvent;

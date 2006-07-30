@@ -1,4 +1,4 @@
-Clazz.load(["java.lang.Runnable"],"$wt.internal.RunnableCompatibility",null,function(){
+$_L(["java.lang.Runnable"],"$wt.internal.RunnableCompatibility",null,function(){
 c$=$_C(function(){
 this.returnSet=0;
 this.returnBoolean=false;

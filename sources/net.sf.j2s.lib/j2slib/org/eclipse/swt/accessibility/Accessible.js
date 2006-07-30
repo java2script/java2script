@@ -1,4 +1,4 @@
-Clazz.load(["java.util.Vector"],"$wt.accessibility.Accessible",["$wt.SWT"],function(){
+$_L(["java.util.Vector"],"$wt.accessibility.Accessible",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.accessibleListeners=null;
 this.accessibleControlListeners=null;

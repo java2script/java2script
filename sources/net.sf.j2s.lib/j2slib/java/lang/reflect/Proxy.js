@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.reflect.InvocationHandler","java.util.Collections","$.WeakHashMap"],"java.lang.reflect.Proxy",["java.lang.IllegalArgumentException","$.InternalError","$.NullPointerException","$.StringBuffer","java.lang.ref.WeakReference","java.lang.reflect.Modifier","java.util.HashMap","sun.misc.ProxyGenerator"],function(){
+$_L(["java.io.Serializable","java.lang.reflect.InvocationHandler","java.util.Collections","$.WeakHashMap"],"java.lang.reflect.Proxy",["java.lang.IllegalArgumentException","$.InternalError","$.NullPointerException","$.StringBuffer","java.lang.ref.WeakReference","java.lang.reflect.Modifier","java.util.HashMap","sun.misc.ProxyGenerator"],function(){
 c$=$_C(function(){
 this.h=null;
 $_Z(this,arguments);
@@ -16,15 +16,15 @@ var interfaceClass=null;
 try{
 interfaceClass=Class.forName(interfaces[i].getName(),false,loader);
 }catch(e){
-if($_O(e,java.lang.ClassNotFoundException)){
+if($_O(e,ClassNotFoundException)){
 }else{
 throw e;
 }
 }
 if(interfaceClass!=interfaces[i]){
-throw new java.lang.IllegalArgumentException(interfaces[i]+" is not visible from class loader");
+throw new IllegalArgumentException(interfaces[i]+" is not visible from class loader");
 }if(!interfaceClass.isInterface()){
-throw new java.lang.IllegalArgumentException(interfaceClass.getName()+" is not an interface");
+throw new IllegalArgumentException(interfaceClass.getName()+" is not an interface");
 }keyBuffer.append(interfaces[i].getName()).append(';');
 }
 var key=keyBuffer.toString();
@@ -45,7 +45,7 @@ return proxyClass;
 try{
 cache.wait();
 }catch(e){
-if($_O(e,java.lang.InterruptedException)){
+if($_O(e,InterruptedException)){
 }else{
 throw e;
 }
@@ -65,7 +65,7 @@ var pkg=((n==-1)?"":name.substring(0,n+1));
 if(proxyPkg==null){
 proxyPkg=pkg;
 }else if(!pkg.equals(proxyPkg)){
-throw new java.lang.IllegalArgumentException("non-public interfaces from different packages");
+throw new IllegalArgumentException("non-public interfaces from different packages");
 }}}
 if(proxyPkg==null){
 proxyPkg="";
@@ -78,8 +78,8 @@ var proxyClassFile=sun.misc.ProxyGenerator.generateProxyClass(proxyName,interfac
 try{
 proxyClass=java.lang.reflect.Proxy.defineClass0(loader,proxyName,proxyClassFile,0,proxyClassFile.length);
 }catch(e){
-if($_O(e,java.lang.ClassFormatError)){
-throw new java.lang.IllegalArgumentException(e.toString());
+if($_O(e,ClassFormatError)){
+throw new IllegalArgumentException(e.toString());
 }else{
 throw e;
 }
@@ -98,20 +98,20 @@ return proxyClass;
 c$.newProxyInstance=$_M(c$,"newProxyInstance",
 function(loader,interfaces,h){
 if(h==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }var cl=java.lang.reflect.Proxy.getProxyClass(loader,interfaces);
 try{
 var cons=cl.getConstructor(java.lang.reflect.Proxy.constructorParams);
 return cons.newInstance([h]);
 }catch(e){
-if($_O(e,java.lang.NoSuchMethodException)){
-throw new java.lang.InternalError(e.toString());
-}else if($_O(e,java.lang.IllegalAccessException)){
-throw new java.lang.InternalError(e.toString());
-}else if($_O(e,java.lang.InstantiationException)){
-throw new java.lang.InternalError(e.toString());
+if($_O(e,NoSuchMethodException)){
+throw new InternalError(e.toString());
+}else if($_O(e,IllegalAccessException)){
+throw new InternalError(e.toString());
+}else if($_O(e,InstantiationException)){
+throw new InternalError(e.toString());
 }else if($_O(e,java.lang.reflect.InvocationTargetException)){
-throw new java.lang.InternalError(e.toString());
+throw new InternalError(e.toString());
 }else{
 throw e;
 }
@@ -120,13 +120,13 @@ throw e;
 c$.isProxyClass=$_M(c$,"isProxyClass",
 function(cl){
 if(cl==null){
-throw new java.lang.NullPointerException();
+throw new NullPointerException();
 }return java.lang.reflect.Proxy.proxyClasses.containsKey(cl);
 },"Class");
 c$.getInvocationHandler=$_M(c$,"getInvocationHandler",
 function(proxy){
 if(!java.lang.reflect.Proxy.isProxyClass(proxy.getClass())){
-throw new java.lang.IllegalArgumentException("not a proxy instance");
+throw new IllegalArgumentException("not a proxy instance");
 }var p=proxy;
 return p.h;
 },"~O");

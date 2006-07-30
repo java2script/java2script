@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.widgets.Event",["$wt.graphics.Rectangle"],function(){
+$_L(null,"$wt.widgets.Event",["$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
 this.display=null;
 this.widget=null;

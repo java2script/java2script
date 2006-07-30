@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.graphics.ImageLoader",["java.util.Vector","$wt.SWT","$wt.graphics.ImageData"],function(){
+$_L(null,"$wt.graphics.ImageLoader",["java.util.Vector","$wt.SWT","$wt.graphics.ImageData"],function(){
 c$=$_C(function(){
 this.data=null;
 this.logicalScreenWidth=0;

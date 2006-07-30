@@ -95,9 +95,145 @@
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.error                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.error">
+        <java classname="net.sf.j2s.lib.build.J2SConcat">
+        	<arg value="false"/>
+        	<arg value="${js.src.dir}/java/error.z.js"/>
+        	
+        	<arg value="${current.project.dir}/${js.src.dir}"/>
+
+    		<arg value="java/lang/Throwable.js"/>
+    		<arg value="java/lang/StackTraceElement.js"/>
+        	
+    		<arg value="java/lang/Error.js"/>
+        	<arg value="java/lang/LinkageError.js"/>
+        	<arg value="java/lang/IncompatibleClassChangeError.js"/>
+        	<arg value="java/lang/AbstractMethodError.js"/>
+        	<arg value="java/lang/AssertionError.js"/>
+        	<arg value="java/lang/ClassCircularityError.js"/>
+        	<arg value="java/lang/ClassFormatError.js"/>
+        	<arg value="java/lang/ExceptionInInitializerError.js"/>
+        	<arg value="java/lang/IllegalAccessError.js"/>
+        	<arg value="java/lang/InstantiationError.js"/>
+        	<arg value="java/lang/VirtualMachineError.js"/>
+        	<arg value="java/lang/InternalError.js"/>
+        	<arg value="java/lang/NoClassDefFoundError.js"/>
+        	<arg value="java/lang/NoSuchFieldError.js"/>
+        	<arg value="java/lang/NoSuchMethodError.js"/>
+        	<arg value="java/lang/OutOfMemoryError.js"/>
+        	<arg value="java/lang/StackOverflowError.js"/>
+        	<arg value="java/lang/UnknownError.js"/>
+        	<arg value="java/lang/UnsatisfiedLinkError.js"/>
+        	<arg value="java/lang/UnsupportedClassVersionError.js"/>
+        	<arg value="java/lang/VerifyError.js"/>
+        	<arg value="java/lang/ThreadDeath.js"/>
+
+    		<arg value="java/lang/Exception.js"/>
+        	<arg value="java/lang/RuntimeException.js"/>
+        	<arg value="java/lang/ArithmeticException.js"/>
+        	<arg value="java/lang/IndexOutOfBoundsException.js"/>
+        	<arg value="java/lang/ArrayIndexOutOfBoundsException.js"/>
+        	<arg value="java/lang/ArrayStoreException.js"/>
+        	<arg value="java/lang/ClassCastException.js"/>
+        	<arg value="java/lang/ClassNotFoundException.js"/>
+        	<arg value="java/lang/CloneNotSupportedException.js"/>
+        	<arg value="java/lang/IllegalAccessException.js"/>
+        	<arg value="java/lang/IllegalArgumentException.js"/>
+        	<arg value="java/lang/IllegalMonitorStateException.js"/>
+        	<arg value="java/lang/IllegalStateException.js"/>
+        	<arg value="java/lang/IllegalThreadStateException.js"/>
+        	<arg value="java/lang/InstantiationException.js"/>
+        	<arg value="java/lang/InterruptedException.js"/>
+        	<arg value="java/lang/NegativeArraySizeException.js"/>
+        	<arg value="java/lang/NoSuchFieldException.js"/>
+        	<arg value="java/lang/NoSuchMethodException.js"/>
+        	<arg value="java/lang/NullPointerException.js"/>
+        	<arg value="java/lang/NumberFormatException.js"/>
+        	<arg value="java/lang/SecurityException.js"/>
+        	<arg value="java/lang/StringIndexOutOfBoundsException.js"/>
+        	<arg value="java/lang/UnsupportedOperationException.js"/>
+
+        	<arg value="java/lang/reflect/InvocationTargetException.js"/>
+        	<arg value="java/lang/reflect/UndeclaredThrowableException.js"/>
+
+        	<arg value="java/io/IOException.js"/>
+        	<arg value="java/io/CharConversionException.js"/>
+        	<arg value="java/io/EOFException.js"/>
+        	<arg value="java/io/FileNotFoundException.js"/>
+        	<arg value="java/io/InterruptedIOException.js"/>
+        	<arg value="java/io/ObjectStreamException.js"/>
+        	<arg value="java/io/InvalidClassException.js"/>
+        	<arg value="java/io/InvalidObjectException.js"/>
+        	<arg value="java/io/NotActiveException.js"/>
+        	<arg value="java/io/NotSerializableException.js"/>
+        	<arg value="java/io/OptionalDataException.js"/>
+        	<arg value="java/io/StreamCorruptedException.js"/>
+        	<arg value="java/io/SyncFailedException.js"/>
+        	<arg value="java/io/UnsupportedEncodingException.js"/>
+        	<arg value="java/io/UTFDataFormatException.js"/>
+        	<arg value="java/io/WriteAbortedException.js"/>
+
+        	<arg value="java/util/ConcurrentModificationException.js"/>
+        	<arg value="java/util/EmptyStackException.js"/>
+        	<arg value="java/util/MissingResourceException.js"/>
+        	<arg value="java/util/NoSuchElementException.js"/>
+        	<arg value="java/util/TooManyListenersException.js"/>
+
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+        </java>
+    </target>
+	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.common                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.common" depends="j2s.pack.zip">
+        <java classname="net.sf.j2s.lib.build.J2SConcat">
+        	<arg value="false"/>
+        	<arg value="${js.src.dir}/java/core.z.js"/>
+        	
+        	<arg value="${current.project.dir}/${js.src.dir}"/>
+
+        	<!-- Already defined in Class.js
+    		<arg value="java/io/Serializable.js"/>
+    		<arg value="java/lang/CharSequence.js"/>
+    		<arg value="java/lang/Cloneable.js"/>
+    		<arg value="java/lang/Comparable.js"/>
+    		<arg value="java/lang/Runnable.js"/>
+    		<arg value="java/util/Comparator.js"/>
+    		-->
+    		
+    		<arg value="java/lang/Number.js"/>
+    		<arg value="java/lang/Integer.js"/>
+    		<arg value="java/lang/Long.js"/>
+    		<arg value="java/lang/Float.js"/>
+    		<arg value="java/lang/Double.js"/>
+    		
+    		<arg value="java/lang/Encoding.js"/>
+    		<arg value="java/lang/String.js"/>
+    			
+    		<arg value="java/util/Date.js"/>
+    		
+    		<arg value="java/util/EventObject.js"/>
+    		<arg value="java/util/EventListener.js"/>
+    		<arg value="java/util/EventListenerProxy.js"/>
+    		
+    		<arg value="java/util/Iterator.js"/>
+    		<arg value="java/util/ListIterator.js"/>
+    		<arg value="java/util/Enumeration.js"/>
+    		<arg value="java/util/Collection.js"/>
+    		<arg value="java/util/Set.js"/>
+    		<arg value="java/util/Map.js"/>
+    		<arg value="java/util/List.js"/>
+    		<arg value="java/util/RandomAccess.js"/>
+
+        	<classpath>
+        		<pathelement path="bin"/>
+        	</classpath>
+        </java>
+    	<!--
         <concat destfile="${js.src.dir}/java/core.z.js">
         	<filelist dir="${js.src.dir}">
         		<file name="java/io/Serializable.js"/>
@@ -113,6 +249,9 @@
         		<file name="java/lang/Float.js"/>
         		<file name="java/lang/Double.js"/>
         		
+        		<file name="java/lang/Encoding.js"/>
+        		<file name="java/lang/String.js"/>
+        			
         		<file name="java/util/Date.js"/>
         		
         		<file name="java/util/EventObject.js"/>
@@ -135,12 +274,13 @@
         		<file name="net/sf/j2s/ajax/XHRCallbackSWTAdapter.js"/>
 			</filelist>
         </concat>
+        -->
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.swt">
+    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,j2s.pack.swt">
     	<copy todir="${jz.dist.dir}">
     		<fileset dir="${ajax.src.dir}">
     			<exclude name="**/*.clazz"/>

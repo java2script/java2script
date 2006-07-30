@@ -1,9 +1,9 @@
-Clazz.load(["java.lang.Error"],"$wt.SWTError",["$wt.SWT"],function(){
+$_L(["java.lang.Error"],"$wt.SWTError",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.code=0;
 this.throwable=null;
 $_Z(this,arguments);
-},$wt,"SWTError",java.lang.Error);
+},$wt,"SWTError",Error);
 $_K(c$,
 function(){
 this.construct(1);
@@ -37,6 +37,4 @@ if(this.throwable!=null){
 System.err.println("*** Stack trace of contained error ***");
 this.throwable.printStackTrace();
 }});
-$_S(c$,
-"serialVersionUID",3833467327105808433);
 });

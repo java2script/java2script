@@ -1,4 +1,4 @@
-Clazz.load(["$wt.dnd.DragUnderEffect"],"$wt.dnd.TableDragUnderEffect",null,function(){
+$_L(["$wt.dnd.DragUnderEffect"],"$wt.dnd.TableDragUnderEffect",null,function(){
 c$=$_C(function(){
 this.table=null;
 this.scrollIndex=0;

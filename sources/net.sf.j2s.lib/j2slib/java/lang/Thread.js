@@ -1,4 +1,4 @@
-Clazz.load(["java.lang.Runnable"],"java.lang.Thread",["java.lang.IllegalArgumentException","$.ThreadGroup","java.util.Date"],function(){
+$_L(["java.lang.Runnable"],"java.lang.Thread",["java.lang.IllegalArgumentException","$.ThreadGroup","java.util.Date"],function(){
 c$=$_C(function(){
 this.target=null;
 this.group=null;
@@ -72,7 +72,7 @@ this.target.run();
 $_M(c$,"setPriority",
 function(newPriority){
 if(newPriority>10||newPriority<1){
-throw new java.lang.IllegalArgumentException();
+throw new IllegalArgumentException();
 }this.priority=newPriority;
 },"~N");
 $_M(c$,"getPriority",

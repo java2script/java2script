@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.SelectionListener"],"$wt.events.SelectionAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"SelectionAdapter",null,$wt.events.SelectionListener);
+$_L(["$wt.events.SelectionListener"],"$wt.events.SelectionAdapter",null,function(){
+c$=$_T($wt.events,"SelectionAdapter",null,$wt.events.SelectionListener);
 $_V(c$,"widgetSelected",
 function(e){
 },"$wt.events.SelectionEvent");

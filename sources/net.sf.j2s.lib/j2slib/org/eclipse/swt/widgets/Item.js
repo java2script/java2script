@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget"],"$wt.widgets.Item",null,function(){
+$_L(["$wt.widgets.Widget"],"$wt.widgets.Item",null,function(){
 c$=$_C(function(){
 this.text=null;
 this.image=null;

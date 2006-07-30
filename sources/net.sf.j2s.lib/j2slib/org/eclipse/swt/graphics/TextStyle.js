@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.graphics.TextStyle",["$wt.SWT"],function(){
+$_L(null,"$wt.graphics.TextStyle",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.font=null;
 this.foreground=null;

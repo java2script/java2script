@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.browser.WindowEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.browser.WindowEvent",null,function(){
 c$=$_C(function(){
 this.required=false;
 this.browser=null;
@@ -10,10 +10,4 @@ this.statusBar=false;
 this.toolBar=false;
 $_Z(this,arguments);
 },$wt.browser,"WindowEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(w){
-$_R(this,$wt.browser.WindowEvent,[w]);
-},"$wt.widgets.Widget");
-$_S(c$,
-"serialVersionUID",3617851997387174969);
 });

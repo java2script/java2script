@@ -1,8 +1,6 @@
 $_J("net.sf.j2s.ajax");
-Clazz.load(["net.sf.j2s.ajax.IXHRCallback"],"net.sf.j2s.ajax.XHRCallbackAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},net.sf.j2s.ajax,"XHRCallbackAdapter",null,net.sf.j2s.ajax.IXHRCallback);
+$_L(["net.sf.j2s.ajax.IXHRCallback"],"net.sf.j2s.ajax.XHRCallbackAdapter",null,function(){
+c$=$_T(net.sf.j2s.ajax,"XHRCallbackAdapter",null,net.sf.j2s.ajax.IXHRCallback);
 $_V(c$,"onComplete",
 function(){
 });

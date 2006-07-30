@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.CloneableCompatibility"],"$wt.custom.StyleRange",["java.lang.StringBuffer"],function(){
+$_L(["$wt.internal.CloneableCompatibility"],"$wt.custom.StyleRange",["java.lang.StringBuffer"],function(){
 c$=$_C(function(){
 this.start=0;
 this.length=0;
