@@ -337,6 +337,8 @@ public class Display extends Device {
 	static Monitor[] monitors = null;
 	static int monitorCount = 0;
 	
+	Monitor currentMonitor;
+	
 	/* Modality */
 	Shell [] modalShells;
 	Shell modalDialogShell;
@@ -1855,6 +1857,9 @@ public Monitor getPrimaryMonitor () {
 	monitorCount = 0;
 	return result;
 	*/
+	if (currentMonitor != null) {
+		return currentMonitor;
+	}
 	/**
 	 * @j2sNative
 var ms = this.getMonitors();
@@ -1865,12 +1870,14 @@ if (window[key] != null) {
 		if (x < 0 || x >= ms.length) {
 			x = 0;
 		}
+		this.bindMonitor (ms[x]);
 		return ms[x];
 	} else {
 		var el = document.getElementById (window[key]);
 		if (el != null) {
 			for (var i = 0; i < ms.length; i++) {
 				if (ms[i].handle == el) {
+					this.bindMonitor (ms[i]);
 					return ms[i];
 				}
 			} 
@@ -1878,9 +1885,16 @@ if (window[key] != null) {
 	}
 }
 	 */ {}
+	this.bindMonitor(getMonitors()[0]);
 	return getMonitors()[0];
 }
 
+/*
+ * Bind the monitor with the current display.
+ */
+protected void bindMonitor(Monitor m) {
+	currentMonitor = m;
+}
 /**
  * Returns a (possibly empty) array containing all shells which have
  * not been disposed and have the receiver as their display.
