@@ -41,6 +41,15 @@ public class TestFailure extends Object {
 	    buffer.append(fFailedTest+": "+fThrownException.getMessage());
 	    return buffer.toString();
 	}
+	/**
+	 * @j2sNative
+	 * var k = this.thrownException ();
+	 * if (k instanceof TypeError) {
+	 * 	return "TypeError:" + k.message;
+	 * } else {
+	 * 	return k.toString();
+	 * }
+	 */
 	public String trace() {
 		if (true) return thrownException().toString();
 		StringWriter stringWriter= new StringWriter();
