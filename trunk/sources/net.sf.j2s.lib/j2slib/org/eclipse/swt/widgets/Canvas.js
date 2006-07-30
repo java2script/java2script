@@ -1,12 +1,8 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Canvas",null,function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Canvas",null,function(){
 c$=$_C(function(){
 this.caret=null;
 $_Z(this,arguments);
 },$wt.widgets,"Canvas",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Canvas,[parent,style]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"clearArea",
 function(x,y,width,height){
 },"~N,~N,~N,~N");

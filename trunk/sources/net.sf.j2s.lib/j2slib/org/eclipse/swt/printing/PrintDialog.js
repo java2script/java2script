@@ -1,5 +1,5 @@
 $_J("org.eclipse.swt.printing");
-Clazz.load(["$wt.widgets.Dialog"],"$wt.printing.PrintDialog",["$wt.SWT"],function(){
+$_L(["$wt.widgets.Dialog"],"$wt.printing.PrintDialog",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.scope=0;
 this.startPage=1;

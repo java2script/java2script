@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.TreeListener"],"$wt.events.TreeAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"TreeAdapter",null,$wt.events.TreeListener);
+$_L(["$wt.events.TreeListener"],"$wt.events.TreeAdapter",null,function(){
+c$=$_T($wt.events,"TreeAdapter",null,$wt.events.TreeListener);
 $_V(c$,"treeCollapsed",
 function(e){
 },"$wt.events.TreeEvent");

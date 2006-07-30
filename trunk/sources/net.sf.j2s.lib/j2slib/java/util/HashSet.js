@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractSet","$.Set"],"java.util.HashSet",["java.lang.InternalError","java.util.HashMap","$.LinkedHashMap"],function(){
+$_L(["java.io.Serializable","java.lang.Cloneable","java.util.AbstractSet","$.Set"],"java.util.HashSet",["java.lang.InternalError","java.util.HashMap","$.LinkedHashMap"],function(){
 c$=$_C(function(){
 this.map=null;
 $_Z(this,arguments);
@@ -11,7 +11,7 @@ this.map=new java.util.HashMap();
 $_K(c$,
 function(c){
 $_R(this,java.util.HashSet,[]);
-this.map=new java.util.HashMap(Math.max(Math.round((c.size()/ .75))(c.size () /.75)+1,16));
+this.map=new java.util.HashMap(Math.max(Math.round((c.size()/.75))+1,16));
 this.addAll(c);
 },"java.util.Collection");
 $_K(c$,
@@ -64,14 +64,12 @@ var newSet=$_U(this,java.util.HashSet,"clone",[]);
 newSet.map=this.map.clone();
 return newSet;
 }catch(e){
-if($_O(e,java.lang.CloneNotSupportedException)){
-throw new java.lang.InternalError();
+if($_O(e,CloneNotSupportedException)){
+throw new InternalError();
 }else{
 throw e;
 }
 }
 });
-$_S(c$,
-"serialVersionUID",-5024744406713321676);
 c$.PRESENT=c$.prototype.PRESENT=new Object();
 });

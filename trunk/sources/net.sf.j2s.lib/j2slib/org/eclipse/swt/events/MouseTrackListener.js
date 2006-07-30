@@ -1,3 +1,3 @@
-Clazz.load(["$wt.internal.SWTEventListener"],"$wt.events.MouseTrackListener",null,function(){
+$_L(["$wt.internal.SWTEventListener"],"$wt.events.MouseTrackListener",null,function(){
 $_I($wt.events,"MouseTrackListener",$wt.internal.SWTEventListener);
 });

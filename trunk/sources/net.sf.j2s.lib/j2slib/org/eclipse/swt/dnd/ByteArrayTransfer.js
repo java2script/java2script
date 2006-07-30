@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.Transfer"],"$wt.dnd.ByteArrayTransfer",["$wt.dnd.DND","$.TransferData"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"ByteArrayTransfer",$wt.dnd.Transfer);
+$_L(["$wt.dnd.Transfer"],"$wt.dnd.ByteArrayTransfer",["$wt.dnd.DND","$.TransferData"],function(){
+c$=$_T($wt.dnd,"ByteArrayTransfer",$wt.dnd.Transfer);
 $_V(c$,"getSupportedTypes",
 function(){
 var types=this.getTypeIds();

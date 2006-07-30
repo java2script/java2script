@@ -22,7 +22,7 @@ this.fName = theClass.getName ();
 try {
 junit.framework.TestSuite.getTestConstructor (theClass);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NoSuchMethodException)) {
+if (Clazz.instanceOf (e, NoSuchMethodException)) {
 this.addTest (junit.framework.TestSuite.warning ("Class " + theClass.getName () + " has no public constructor TestCase(String name) or TestCase()"));
 return ;
 } else {
@@ -71,7 +71,7 @@ var constructor;
 try {
 constructor = junit.framework.TestSuite.getTestConstructor (theClass);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NoSuchMethodException)) {
+if (Clazz.instanceOf (e, NoSuchMethodException)) {
 return junit.framework.TestSuite.warning ("Class " + theClass.getName () + " has no public constructor TestCase(String name) or TestCase()");
 } else {
 throw e;
@@ -85,11 +85,11 @@ if (Clazz.instanceOf (test, junit.framework.TestCase)) (test).setName (name);
 } else {
 test = constructor.newInstance ([name]);
 }} catch (e) {
-if (Clazz.instanceOf (e, java.lang.InstantiationException)) {
+if (Clazz.instanceOf (e, InstantiationException)) {
 return (junit.framework.TestSuite.warning ("Cannot instantiate test case: " + name + " (" + junit.framework.TestSuite.exceptionToString (e) + ")"));
 } else if (Clazz.instanceOf (e, java.lang.reflect.InvocationTargetException)) {
 return (junit.framework.TestSuite.warning ("Exception in constructor: " + name + " (" + junit.framework.TestSuite.exceptionToString (e.getTargetException ()) + ")"));
-} else if (Clazz.instanceOf (e, java.lang.IllegalAccessException)) {
+} else if (Clazz.instanceOf (e, IllegalAccessException)) {
 return (junit.framework.TestSuite.warning ("Cannot access test case: " + name + " (" + junit.framework.TestSuite.exceptionToString (e) + ")"));
 } else {
 throw e;
@@ -119,7 +119,7 @@ var args = [String];
 try {
 return theClass.getConstructor (args);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NoSuchMethodException)) {
+if (Clazz.instanceOf (e, NoSuchMethodException)) {
 } else {
 throw e;
 }
@@ -179,10 +179,7 @@ c$.warning = Clazz.defineMethod (c$, "warning",
 return (function (i$, arg0, v$) {
 if (!Clazz.isClassDefined ("junit.framework.TestSuite$1")) {
 Clazz.pu$h ();
-c$ = Clazz.decorateAsClass (function () {
-Clazz.prepareCallback (this, arguments);
-Clazz.instantialize (this, arguments);
-}, junit.framework, "TestSuite$1", junit.framework.TestCase);
+c$ = Clazz.declareAnonymous (junit.framework, "TestSuite$1", junit.framework.TestCase);
 Clazz.overrideMethod (c$, "runTest", 
 function () {
 junit.framework.Assert.fail (this.f$.message);

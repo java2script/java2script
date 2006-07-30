@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.custom.ExtendedModifyEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.custom.ExtendedModifyEvent",null,function(){
 c$=$_C(function(){
 this.start=0;
 this.length=0;
@@ -12,6 +12,4 @@ this.start=e.start;
 this.length=e.end-e.start;
 this.replacedText=e.text;
 },"$wt.custom.StyledTextEvent");
-$_S(c$,
-"serialVersionUID",3258696507027830832);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["java.util.EventListener"],"java.util.EventListenerProxy",null,function(){
+$_L(["java.util.EventListener"],"java.util.EventListenerProxy",null,function(){
 c$=$_C(function(){
 this.listener=null;
 $_Z(this,arguments);

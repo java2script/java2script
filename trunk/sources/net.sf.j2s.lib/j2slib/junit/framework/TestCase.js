@@ -48,7 +48,7 @@ var runMethod = null;
 try {
 runMethod = this.getClass ().getMethod (this.fName, null);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.NoSuchMethodException)) {
+if (Clazz.instanceOf (e, NoSuchMethodException)) {
 junit.framework.Assert.fail ("Method \"" + this.fName + "\" not found");
 } else {
 throw e;
@@ -62,7 +62,7 @@ runMethod.invoke (this,  new Array (0));
 if (Clazz.instanceOf (e, java.lang.reflect.InvocationTargetException)) {
 e.fillInStackTrace ();
 throw e.getTargetException ();
-} else if (Clazz.instanceOf (e, java.lang.IllegalAccessException)) {
+} else if (Clazz.instanceOf (e, IllegalAccessException)) {
 e.fillInStackTrace ();
 throw e;
 } else {

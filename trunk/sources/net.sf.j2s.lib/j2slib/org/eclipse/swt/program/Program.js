@@ -1,5 +1,5 @@
 $_J("org.eclipse.swt.program");
-Clazz.load(null,"$wt.program.Program",["$wt.SWT","$wt.graphics.ImageData"],function(){
+$_L(null,"$wt.program.Program",["$wt.SWT","$wt.graphics.ImageData"],function(){
 c$=$_C(function(){
 this.name=null;
 this.command=null;
@@ -78,7 +78,7 @@ fileName="file:///"+fileName;
 try{
 eval((prefix+fileName+suffix).replace(/\\/g,"\\\\"));
 }catch(e){
-if($_O(e,java.lang.Error)){
+if($_O(e,Error)){
 return false;
 }else{
 throw e;

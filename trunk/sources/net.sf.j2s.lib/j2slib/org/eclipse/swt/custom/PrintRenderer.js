@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.StyledTextRenderer"],"$wt.custom.PrintRenderer",["$wt.custom.StyledTextEvent","$.WrappedContent","$wt.graphics.Point"],function(){
+$_L(["$wt.custom.StyledTextRenderer"],"$wt.custom.PrintRenderer",["$wt.custom.StyledTextEvent","$.WrappedContent","$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.logicalContent=null;
 this.content=null;

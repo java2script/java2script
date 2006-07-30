@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.widgets.EventTable",["$wt.widgets.Listener"],function(){
+$_L(null,"$wt.widgets.EventTable",["$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.types=null;
 this.listeners=null;

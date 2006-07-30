@@ -1,6 +1,4 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.accessibility,"ACC");
+c$=$_T($wt.accessibility,"ACC");
 $_S(c$,
 "STATE_NORMAL",0x00000000,
 "STATE_SELECTED",0x00000002,

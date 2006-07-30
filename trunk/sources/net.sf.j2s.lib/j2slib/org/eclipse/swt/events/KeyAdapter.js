@@ -1,7 +1,5 @@
-Clazz.load(["$wt.events.KeyListener"],"$wt.events.KeyAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"KeyAdapter",null,$wt.events.KeyListener);
+$_L(["$wt.events.KeyListener"],"$wt.events.KeyAdapter",null,function(){
+c$=$_T($wt.events,"KeyAdapter",null,$wt.events.KeyListener);
 $_V(c$,"keyPressed",
 function(e){
 },"$wt.events.KeyEvent");

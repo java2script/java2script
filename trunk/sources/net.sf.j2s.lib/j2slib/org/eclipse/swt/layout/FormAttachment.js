@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.layout.FormAttachment",["$wt.SWT"],function(){
+$_L(null,"$wt.layout.FormAttachment",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.numerator=0;
 this.denominator=100;

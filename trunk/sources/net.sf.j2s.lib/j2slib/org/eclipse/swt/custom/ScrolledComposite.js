@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.custom.ScrolledComposite",["$wt.custom.ScrolledCompositeLayout","$wt.graphics.Point","$.Rectangle"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.custom.ScrolledComposite",["$wt.custom.ScrolledCompositeLayout","$wt.graphics.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.content=null;
 this.contentListener=null;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.dnd.DragAdapter"],"$wt.internal.dnd.SliderDND",null,function(){
+$_L(["$wt.internal.dnd.DragAdapter"],"$wt.internal.dnd.SliderDND",null,function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;

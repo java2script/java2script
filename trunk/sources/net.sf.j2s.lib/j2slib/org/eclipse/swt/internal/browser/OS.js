@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.internal.browser.OS",["$wt.graphics.Point"],function(){
-O$=c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal.browser,"OS");
+$_L(null,"$wt.internal.browser.OS",["$wt.graphics.Point"],function(){
+O$=c$=$_T($wt.internal.browser,"OS");
 c$.destroyHandle=$_M(c$,"destroyHandle",
 function(handle){
 if(handle==null){
@@ -27,7 +25,7 @@ if(el.parentNode!=null){
 try{
 el.parentNode.removeChild(el);
 }catch(e){
-if($_O(e,java.lang.Error)){
+if($_O(e,Error)){
 }else{
 throw e;
 }

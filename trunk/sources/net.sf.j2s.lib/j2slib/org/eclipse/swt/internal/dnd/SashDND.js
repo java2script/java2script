@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.SashDND",["$wt.graphics.Point"],function(){
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.SashDND",["$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.sourceX=0;
 this.sourceY=0;

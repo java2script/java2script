@@ -1,8 +1,6 @@
 Clazz.declarePackage ("junit.framework");
 Clazz.load (null, "junit.framework.Assert", ["java.lang.Boolean", "$.Byte", "$.Character", "$.Double", "$.Float", "$.Long", "$.Short", "junit.framework.AssertionFailedError", "$.ComparisonFailure"], function () {
-c$ = Clazz.decorateAsClass (function () {
-Clazz.instantialize (this, arguments);
-}, junit.framework, "Assert");
+c$ = Clazz.declareType (junit.framework, "Assert");
 Clazz.makeConstructor (c$, 
 function () {
 });
@@ -24,9 +22,10 @@ junit.framework.Assert.assertFalse (null, condition);
 }, "~B");
 c$.fail = Clazz.defineMethod (c$, "fail", 
 function (message) {
-var ee = new junit.framework.AssertionFailedError (message);
-ee.detailMessage = message;
-throw ee;
+var err =  new junit.framework.AssertionFailedError (message);
+{
+err.detailMessage = message;
+}throw err;
 }, "~S");
 c$.fail = Clazz.defineMethod (c$, "fail", 
 function () {

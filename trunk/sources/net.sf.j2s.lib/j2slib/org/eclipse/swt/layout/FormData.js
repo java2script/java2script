@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.layout.FormData",["$wt.layout.FormAttachment"],function(){
+$_L(null,"$wt.layout.FormData",["$wt.layout.FormAttachment"],function(){
 c$=$_C(function(){
 this.width=-1;
 this.height=-1;

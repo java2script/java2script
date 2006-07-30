@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.events.SelectionEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.events.SelectionEvent",null,function(){
 c$=$_C(function(){
 this.item=null;
 this.detail=0;
@@ -29,6 +29,4 @@ function(){
 var string=$_U(this,$wt.events.SelectionEvent,"toString",[]);
 return string.substring(0,string.length-1)+" item="+this.item+" detail="+this.detail+" x="+this.x+" y="+this.y+" width="+this.width+" height="+this.height+" stateMask="+this.stateMask+" text="+this.text+" doit="+this.doit+"}";
 });
-$_S(c$,
-"serialVersionUID",3976735856884987953);
 });

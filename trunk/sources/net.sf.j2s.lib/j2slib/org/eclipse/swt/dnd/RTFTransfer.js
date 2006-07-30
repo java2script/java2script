@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.ByteArrayTransfer"],"$wt.dnd.RTFTransfer",["$wt.dnd.DND"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"RTFTransfer",$wt.dnd.ByteArrayTransfer);
+$_L(["$wt.dnd.ByteArrayTransfer"],"$wt.dnd.RTFTransfer",["$wt.dnd.DND"],function(){
+c$=$_T($wt.dnd,"RTFTransfer",$wt.dnd.ByteArrayTransfer);
 $_K(c$,
 ($fz=function(){
 $_R(this,$wt.dnd.RTFTransfer,[]);

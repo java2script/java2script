@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.custom.StyledTextRenderer",["java.lang.StringBuffer","$wt.custom.StyleRange","$wt.graphics.Font","$.TextLayout","$.TextStyle"],function(){
+$_L(null,"$wt.custom.StyledTextRenderer",["java.lang.StringBuffer","$wt.custom.StyleRange","$wt.graphics.Font","$.TextLayout","$.TextStyle"],function(){
 c$=$_C(function(){
 this.device=null;
 this.regularFont=null;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget","$wt.dnd.Transfer"],"$wt.dnd.DropTarget",["java.util.Date","$wt.dnd.DND","$.DNDEvent","$.DNDListener","$.TransferData","$wt.graphics.Point","$wt.widgets.Listener"],function(){
+$_L(["$wt.widgets.Widget","$wt.dnd.Transfer"],"$wt.dnd.DropTarget",["java.util.Date","$wt.dnd.DND","$.DNDEvent","$.DNDListener","$.TransferData","$wt.graphics.Point","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.control=null;
 this.controlListener=null;
@@ -24,10 +24,7 @@ this.AddRef();
 this.controlListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.dnd.DropTarget$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.dnd,"DropTarget$1",null,$wt.widgets.Listener);
+c$=$_W($wt.dnd,"DropTarget$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 if(!this.b$["$wt.dnd.DropTarget"].isDisposed()){
@@ -41,10 +38,7 @@ control.addListener(12,this.controlListener);
 this.addListener(12,(function(i$,v$){
 if(!$_D("org.eclipse.swt.dnd.DropTarget$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.dnd,"DropTarget$2",null,$wt.widgets.Listener);
+c$=$_W($wt.dnd,"DropTarget$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 this.b$["$wt.dnd.DropTarget"].onDispose();

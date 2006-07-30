@@ -26,12 +26,12 @@ return buffer.toString ();
 });
 Clazz.defineMethod (c$, "trace", 
 function () {
-if (true) return this.thrownException ().toString ();
-var stringWriter =  new java.io.StringWriter ();
-var writer =  new java.io.PrintWriter (stringWriter);
-this.thrownException ().printStackTrace (writer);
-var buffer = stringWriter.getBuffer ();
-return buffer.toString ();
+var k = this.thrownException ();
+if (k instanceof TypeError) {
+return "TypeError:" + k.message;
+} else {
+return k.toString();
+}
 });
 Clazz.defineMethod (c$, "exceptionMessage", 
 function () {

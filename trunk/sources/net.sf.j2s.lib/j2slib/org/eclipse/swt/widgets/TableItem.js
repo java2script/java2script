@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.TableItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.strings=null;
@@ -39,10 +39,7 @@ if((this.parent.style&32)!=0){
 this.check.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TableItem$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TableItem$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.widgets.Event();
@@ -61,10 +58,7 @@ return $_N($wt.widgets.TableItem$1,i$,v$);
 this.handle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TableItem$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TableItem$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var evt=this.getEvent();
@@ -85,10 +79,7 @@ return $_N($wt.widgets.TableItem$2,i$,v$);
 this.handle.ondblclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TableItem$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TableItem$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TableItem$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var evt=this.getEvent();

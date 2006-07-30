@@ -25,9 +25,6 @@ this.currentHeight=-1;
 $_Z(this,arguments);
 },$wt.layout,"GridData");
 $_K(c$,
-function(){
-});
-$_K(c$,
 function(style){
 if((style&2)!=0)this.verticalAlignment=1;
 if((style&4)!=0)this.verticalAlignment=2;

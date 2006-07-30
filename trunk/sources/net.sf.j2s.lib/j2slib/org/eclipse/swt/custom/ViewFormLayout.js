@@ -1,7 +1,5 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.custom.ViewFormLayout",["$wt.custom.CLayoutData","$wt.graphics.Point","$.Rectangle"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"ViewFormLayout",$wt.widgets.Layout);
+$_L(["$wt.widgets.Layout"],"$wt.custom.ViewFormLayout",["$wt.custom.CLayoutData","$wt.graphics.Point","$.Rectangle"],function(){
+c$=$_T($wt.custom,"ViewFormLayout",$wt.widgets.Layout);
 $_V(c$,"computeSize",
 function(composite,wHint,hHint,flushCache){
 var form=composite;

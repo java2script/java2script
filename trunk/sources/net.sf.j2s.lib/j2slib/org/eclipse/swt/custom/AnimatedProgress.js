@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Canvas"],"$wt.custom.AnimatedProgress",["java.lang.Runnable","$wt.events.ControlAdapter","$.DisposeListener","$.PaintListener","$wt.graphics.GC","$.Point","$.Rectangle"],function(){
+$_L(["$wt.widgets.Canvas"],"$wt.custom.AnimatedProgress",["java.lang.Runnable","$wt.events.ControlAdapter","$.DisposeListener","$.PaintListener","$wt.graphics.GC","$.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.active=false;
 this.showStripes=false;
@@ -16,10 +16,7 @@ this.orientation=512;
 this.addControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.AnimatedProgress$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"AnimatedProgress$1",$wt.events.ControlAdapter);
+c$=$_W($wt.custom,"AnimatedProgress$1",$wt.events.ControlAdapter);
 $_V(c$,"controlResized",
 function(e){
 this.b$["$wt.custom.AnimatedProgress"].redraw();
@@ -31,10 +28,7 @@ return $_N($wt.custom.AnimatedProgress$1,i$,v$);
 this.addPaintListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.AnimatedProgress$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"AnimatedProgress$2",null,$wt.events.PaintListener);
+c$=$_W($wt.custom,"AnimatedProgress$2",null,$wt.events.PaintListener);
 $_V(c$,"paintControl",
 function(e){
 this.b$["$wt.custom.AnimatedProgress"].paint(e);
@@ -46,10 +40,7 @@ return $_N($wt.custom.AnimatedProgress$2,i$,v$);
 this.addDisposeListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.AnimatedProgress$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"AnimatedProgress$3",null,$wt.events.DisposeListener);
+c$=$_W($wt.custom,"AnimatedProgress$3",null,$wt.events.DisposeListener);
 $_V(c$,"widgetDisposed",
 function(e){
 this.b$["$wt.custom.AnimatedProgress"].stop();
@@ -142,10 +133,7 @@ var timer=new Array(1);
 timer[0]=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.AnimatedProgress$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"AnimatedProgress$4",null,Runnable);
+c$=$_W($wt.custom,"AnimatedProgress$4",null,Runnable);
 $_V(c$,"run",
 function(){
 if(!this.b$["$wt.custom.AnimatedProgress"].active)return;

@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.DragUnderEffect"],"$wt.dnd.NoDragUnderEffect",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"NoDragUnderEffect",$wt.dnd.DragUnderEffect);
+$_L(["$wt.dnd.DragUnderEffect"],"$wt.dnd.NoDragUnderEffect",null,function(){
+c$=$_T($wt.dnd,"NoDragUnderEffect",$wt.dnd.DragUnderEffect);
 $_K(c$,
 function(control){
 $_R(this,$wt.dnd.NoDragUnderEffect,[]);

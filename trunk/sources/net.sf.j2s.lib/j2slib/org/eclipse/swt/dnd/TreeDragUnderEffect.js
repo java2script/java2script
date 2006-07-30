@@ -1,4 +1,4 @@
-Clazz.load(["$wt.dnd.DragUnderEffect"],"$wt.dnd.TreeDragUnderEffect",null,function(){
+$_L(["$wt.dnd.DragUnderEffect"],"$wt.dnd.TreeDragUnderEffect",null,function(){
 c$=$_C(function(){
 this.tree=null;
 this.dropIndex=0;

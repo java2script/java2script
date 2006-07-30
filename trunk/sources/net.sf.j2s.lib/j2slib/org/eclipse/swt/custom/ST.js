@@ -1,6 +1,4 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"ST");
+c$=$_T($wt.custom,"ST");
 $_S(c$,
 "LINE_UP",16777217,
 "LINE_DOWN",16777218,

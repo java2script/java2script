@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.ColorDialog",null,function(){
+$_L(["$wt.widgets.Dialog"],"$wt.widgets.ColorDialog",null,function(){
 c$=$_C(function(){
 this.rgb=null;
 $_Z(this,arguments);

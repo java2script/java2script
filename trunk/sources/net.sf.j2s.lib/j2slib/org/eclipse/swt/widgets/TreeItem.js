@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TreeItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.TreeItem",["$wt.SWT","$wt.graphics.Color","$.Image","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event"],function(){
 c$=$_C(function(){
 this.strings=null;
 this.images=null;
@@ -289,10 +289,7 @@ hAnchor.className="tree-item-anchor-default";
 hAnchor.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TreeItem$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TreeItem$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TreeItem$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.TreeItem"].toggleExpandStatus();
@@ -310,10 +307,7 @@ hItem.appendChild(this.checkElement);
 this.checkElement.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TreeItem$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TreeItem$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TreeItem$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.widgets.Event();
@@ -335,10 +329,7 @@ text.appendChild(d$.createTextNode(s));
 text.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TreeItem$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TreeItem$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TreeItem$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var evt=this.getEvent();
@@ -359,10 +350,7 @@ return $_N($wt.widgets.TreeItem$3,i$,v$);
 text.ondblclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TreeItem$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TreeItem$4",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TreeItem$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.TreeItem"].toggleExpandStatus();
@@ -382,10 +370,7 @@ return $_N($wt.widgets.TreeItem$4,i$,v$);
 text.onselectstart=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TreeItem$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TreeItem$5",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TreeItem$5",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.toReturn(false);

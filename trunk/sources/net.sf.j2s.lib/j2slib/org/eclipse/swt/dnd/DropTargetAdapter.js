@@ -1,7 +1,5 @@
-Clazz.load(["$wt.dnd.DropTargetListener"],"$wt.dnd.DropTargetAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"DropTargetAdapter",null,$wt.dnd.DropTargetListener);
+$_L(["$wt.dnd.DropTargetListener"],"$wt.dnd.DropTargetAdapter",null,function(){
+c$=$_T($wt.dnd,"DropTargetAdapter",null,$wt.dnd.DropTargetListener);
 $_V(c$,"dragEnter",
 function(event){
 },"$wt.dnd.DropTargetEvent");

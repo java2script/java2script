@@ -1,11 +1,5 @@
-Clazz.load(["$wt.widgets.TypedListener"],"$wt.dnd.DNDListener",["$wt.dnd.DragSourceEvent","$.DropTargetEvent"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"DNDListener",$wt.widgets.TypedListener);
-$_K(c$,
-function(listener){
-$_R(this,$wt.dnd.DNDListener,[listener]);
-},"$wt.internal.SWTEventListener");
+$_L(["$wt.widgets.TypedListener"],"$wt.dnd.DNDListener",["$wt.dnd.DragSourceEvent","$.DropTargetEvent"],function(){
+c$=$_T($wt.dnd,"DNDListener",$wt.widgets.TypedListener);
 $_V(c$,"handleEvent",
 function(e){
 switch(e.type){

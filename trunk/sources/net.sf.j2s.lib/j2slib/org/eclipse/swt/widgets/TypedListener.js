@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Listener"],"$wt.widgets.TypedListener",["$wt.events.ArmEvent","$.ControlEvent","$.DisposeEvent","$.FocusEvent","$.HelpEvent","$.KeyEvent","$.MenuEvent","$.ModifyEvent","$.MouseEvent","$.PaintEvent","$.SelectionEvent","$.ShellEvent","$.TraverseEvent","$.TreeEvent","$.VerifyEvent"],function(){
+$_L(["$wt.widgets.Listener"],"$wt.widgets.TypedListener",["$wt.events.ArmEvent","$.ControlEvent","$.DisposeEvent","$.FocusEvent","$.HelpEvent","$.KeyEvent","$.MenuEvent","$.ModifyEvent","$.MouseEvent","$.PaintEvent","$.SelectionEvent","$.ShellEvent","$.TraverseEvent","$.TreeEvent","$.VerifyEvent"],function(){
 c$=$_C(function(){
 this.eventListener=null;
 $_Z(this,arguments);

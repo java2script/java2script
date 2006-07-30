@@ -1,11 +1,3 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.events.ModifyEvent",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.events,"ModifyEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(e){
-$_R(this,$wt.events.ModifyEvent,[e]);
-},"$wt.widgets.Event");
-$_S(c$,
-"serialVersionUID",3258129146227011891);
+$_L(["$wt.events.TypedEvent"],"$wt.events.ModifyEvent",null,function(){
+c$=$_T($wt.events,"ModifyEvent",$wt.events.TypedEvent);
 });

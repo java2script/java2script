@@ -1,3 +1,1 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.dnd,"DragUnderEffect");
+c$=$_T($wt.dnd,"DragUnderEffect");

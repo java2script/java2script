@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control"],"$wt.widgets.Label",["$wt.graphics.Point","$wt.internal.browser.OS"],function(){
+$_L(["$wt.widgets.Control"],"$wt.widgets.Label",["$wt.graphics.Point","$wt.internal.browser.OS"],function(){
 c$=$_C(function(){
 this.text="";
 this.textSizeCached=false;
@@ -9,10 +9,6 @@ this.image=null;
 this.image2=null;
 $_Z(this,arguments);
 },$wt.widgets,"Label",$wt.widgets.Control);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Label,[parent,$wt.widgets.Label.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style|=524288;

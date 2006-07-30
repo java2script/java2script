@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.custom.CLayoutData",["$wt.graphics.Point"],function(){
+$_L(null,"$wt.custom.CLayoutData",["$wt.graphics.Point"],function(){
 c$=$_C(function(){
 this.defaultWidth=-1;
 this.defaultHeight=-1;

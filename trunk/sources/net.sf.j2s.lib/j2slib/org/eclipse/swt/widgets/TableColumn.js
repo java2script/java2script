@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TableColumn",["$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.TableColumnDND","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.TableColumn",["$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.TableColumnDND","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.lastX=0;
 this.lastY=0;

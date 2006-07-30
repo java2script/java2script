@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Decorations"],"$wt.widgets.Shell",["$wt.graphics.Point","$wt.widgets.Control","$.Display","$.TypedListener"],function(){
+$_L(["$wt.widgets.Decorations"],"$wt.widgets.Shell",["$wt.graphics.Point","$wt.widgets.Control","$.Display","$.TypedListener"],function(){
 c$=$_C(function(){
 this.activeMenu=null;
 this.minWidth=-1;

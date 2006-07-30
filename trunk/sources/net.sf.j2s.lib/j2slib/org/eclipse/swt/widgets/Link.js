@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Control","$wt.graphics.RGB"],"$wt.widgets.Link",["java.lang.Character","$.StringBuffer","$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Control","$wt.graphics.RGB"],"$wt.widgets.Link",["java.lang.Character","$.StringBuffer","$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.text=null;
 this.cachedText=null;
@@ -18,10 +18,6 @@ $_Z(this,arguments);
 $_Y(c$,function(){
 this.anchors=new Array(0);
 });
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Link,[parent,style]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addSelectionListener",
 function(listener){
 var typedListener=new $wt.widgets.TypedListener(listener);
@@ -79,10 +75,7 @@ function(){
 var linkHandler=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Link$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Link$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Link$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.widgets.Event();
@@ -112,10 +105,7 @@ var accessible=this.getAccessible();
 accessible.addAccessibleListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Link$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Link$2",$wt.accessibility.AccessibleAdapter);
+c$=$_W($wt.widgets,"Link$2",$wt.accessibility.AccessibleAdapter);
 $_V(c$,"getName",
 function(e){
 e.result=this.b$["$wt.widgets.Link"].parse(this.b$["$wt.widgets.Link"].text,null);
@@ -127,10 +117,7 @@ return $_N($wt.widgets.Link$2,i$,v$);
 accessible.addAccessibleControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Link$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Link$3",$wt.accessibility.AccessibleControlAdapter);
+c$=$_W($wt.widgets,"Link$3",$wt.accessibility.AccessibleControlAdapter);
 $_V(c$,"getChildAtPoint",
 function(e){
 e.childID=-1;

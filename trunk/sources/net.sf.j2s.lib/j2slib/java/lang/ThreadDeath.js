@@ -1,5 +1,7 @@
-Clazz.load(["java.lang.Error"],"java.lang.ThreadDeath",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.lang,"ThreadDeath",java.lang.Error);
+$_L(["java.lang.Error"],"java.lang.ThreadDeath",null,function(){
+c$=$_T(java.lang,"ThreadDeath",Error);
+$_K(c$,
+function(){
+$_R(this,ThreadDeath,[]);
+});
 });

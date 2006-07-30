@@ -1,7 +1,5 @@
-Clazz.load(["java.util.Vector"],"java.util.Stack",["java.util.EmptyStackException"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},java.util,"Stack",java.util.Vector);
+$_L(["java.util.Vector"],"java.util.Stack",["java.util.EmptyStackException"],function(){
+c$=$_T(java.util,"Stack",java.util.Vector);
 $_K(c$,
 function(){
 $_R(this,java.util.Stack,[]);
@@ -36,6 +34,4 @@ if(i>=0){
 return this.size()-i;
 }return-1;
 },"~O");
-$_S(c$,
-"serialVersionUID",1224463164541339165);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Rectangle",["$wt.SWT"],function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Rectangle",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -104,6 +104,4 @@ rhs=rect.y+rect.height;
 var bottom=lhs>rhs?lhs:rhs;
 return new $wt.graphics.Rectangle(left,top,right-left,bottom-top);
 },"$wt.graphics.Rectangle");
-$_S(c$,
-"serialVersionUID",3256439218279428914);
 });

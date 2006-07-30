@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.KeyEvent"],"$wt.events.VerifyEvent",null,function(){
+$_L(["$wt.events.KeyEvent"],"$wt.events.VerifyEvent",null,function(){
 c$=$_C(function(){
 this.start=0;
 this.end=0;
@@ -20,6 +20,4 @@ function(){
 var string=$_U(this,$wt.events.VerifyEvent,"toString",[]);
 return string.substring(0,string.length-1)+" start="+this.start+" end="+this.end+" text="+this.text+"}";
 });
-$_S(c$,
-"serialVersionUID",3257003246269577014);
 });

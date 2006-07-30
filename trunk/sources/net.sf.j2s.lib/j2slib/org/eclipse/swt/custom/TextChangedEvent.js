@@ -1,11 +1,3 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.custom.TextChangedEvent",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"TextChangedEvent",$wt.events.TypedEvent);
-$_K(c$,
-function(source){
-$_R(this,$wt.custom.TextChangedEvent,[source]);
-},"$wt.custom.StyledTextContent");
-$_S(c$,
-"serialVersionUID",3258696524257835065);
+$_L(["$wt.events.TypedEvent"],"$wt.custom.TextChangedEvent",null,function(){
+c$=$_T($wt.custom,"TextChangedEvent",$wt.events.TypedEvent);
 });

@@ -1,10 +1,10 @@
-Clazz.load(["java.io.Serializable"],"$wt.internal.SerializableCompatibility",null,function(){
+$_L(["java.io.Serializable"],"$wt.internal.SerializableCompatibility",null,function(){
 $_I($wt.internal,"SerializableCompatibility",java.io.Serializable);
 });
-Clazz.load(["java.lang.Cloneable"],"$wt.internal.CloneableCompatibility",null,function(){
+$_L(["java.lang.Cloneable"],"$wt.internal.CloneableCompatibility",null,function(){
 $_I($wt.internal,"CloneableCompatibility",Cloneable);
 });
-Clazz.load(["java.lang.Runnable"],"$wt.internal.RunnableCompatibility",null,function(){
+$_L(["java.lang.Runnable"],"$wt.internal.RunnableCompatibility",null,function(){
 c$=$_C(function(){
 this.returnSet=0;
 this.returnBoolean=false;
@@ -121,10 +121,8 @@ function(){
 
 org.eclipse.swt.internal.dnd.HTMLEventWrapper.mozLastButton=0;
 $_I($wt.internal.dnd,"DragListener");
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal.dnd,"DragAdapter",null,$wt.internal.dnd.DragListener);
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAdapter",null,function(){
+c$=$_T($wt.internal.dnd,"DragAdapter",null,$wt.internal.dnd.DragListener);
 $_V(c$,"dragBegan",
 function(e){
 return true;
@@ -207,7 +205,7 @@ this.data=data;
 $_S(c$,
 "CONTROL_RESIZE",1,
 "CONTROL_LAYOUT",2);
-Clazz.load(["java.util.Vector"],"$wt.accessibility.Accessible",["$wt.SWT"],function(){
+$_L(["java.util.Vector"],"$wt.accessibility.Accessible",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.accessibleListeners=null;
 this.accessibleControlListeners=null;
@@ -264,7 +262,7 @@ $_M(c$,"textSelectionChanged",
 function(){
 });
 });
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Point",null,function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Point",null,function(){
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -290,10 +288,8 @@ $_V(c$,"toString",
 function(){
 return"Point {"+this.x+", "+this.y+"}";
 });
-$_S(c$,
-"serialVersionUID",3257002163938146354);
 });
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Rectangle",["$wt.SWT"],function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Rectangle",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -399,10 +395,8 @@ rhs=rect.y+rect.height;
 var bottom=lhs>rhs?lhs:rhs;
 return new $wt.graphics.Rectangle(left,top,right-left,bottom-top);
 },"$wt.graphics.Rectangle");
-$_S(c$,
-"serialVersionUID",3256439218279428914);
 });
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.RGB",["$wt.SWT"],function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.RGB",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.red=0;
 this.green=0;
@@ -430,14 +424,12 @@ $_V(c$,"toString",
 function(){
 return"RGB {"+this.red+", "+this.green+", "+this.blue+"}";
 });
-$_S(c$,
-"serialVersionUID",3258415023461249074);
 });
 c$=$_C(function(){
 this.device=null;
 $_Z(this,arguments);
 },$wt.graphics,"Resource");
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.Color",["$wt.SWT","$wt.graphics.Device","$.RGB"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.Color",["$wt.SWT","$wt.graphics.Device","$.RGB"],function(){
 c$=$_C(function(){
 this.handle=0;
 this.cssHandle=null;
@@ -574,7 +566,7 @@ return this.rgbHandleFromCSS(this.cssHandle)==0x0F000000;
 }return false;
 });
 });
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.Cursor",["$wt.SWT","$wt.graphics.Device"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.Cursor",["$wt.SWT","$wt.graphics.Device"],function(){
 c$=$_C(function(){
 this.handle=null;
 $_Z(this,arguments);
@@ -715,7 +707,7 @@ return this.handle;
 });
 });
 $_I($wt.graphics,"Drawable");
-Clazz.load(["$wt.graphics.Drawable"],"$wt.graphics.Device",["$wt.SWT","$wt.graphics.Color","$.DeviceData","$.Font","$.FontData","$.Point","$.Rectangle"],function(){
+$_L(["$wt.graphics.Drawable"],"$wt.graphics.Device",["$wt.SWT","$wt.graphics.Color","$.DeviceData","$.Font","$.FontData","$.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.disposed=false;
 $_Z(this,arguments);
@@ -857,7 +849,7 @@ this.errors=null;
 this.objects=null;
 $_Z(this,arguments);
 },$wt.graphics,"DeviceData");
-Clazz.load(null,"$wt.widgets.Monitor",["$wt.graphics.Rectangle"],function(){
+$_L(null,"$wt.widgets.Monitor",["$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
 this.handle=null;
 this.x=0;
@@ -892,7 +884,7 @@ $_V(c$,"hashCode",
 function(){
 if(this.handle.id==null||this.handle.id.length==0){
 var random=Math.random();
-var code=parseInt(random)*1000000;
+var code=Math.round(random)*1000000;
 this.handle.id=""+code;
 return code;
 }else{

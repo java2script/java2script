@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Drawable","$.Resource"],"$wt.graphics.Image",["$wt.SWT","$wt.graphics.Color","$.Device","$.ImageData","$.Rectangle"],function(){
+$_L(["$wt.graphics.Drawable","$.Resource"],"$wt.graphics.Image",["$wt.SWT","$wt.graphics.Color","$.Device","$.ImageData","$.Rectangle"],function(){
 c$=$_C(function(){
 this.url=null;
 this.width=0;

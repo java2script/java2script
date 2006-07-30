@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.CloneableCompatibility"],"$wt.graphics.ImageData",["$wt.SWT"],function(){
+$_L(["$wt.internal.CloneableCompatibility"],"$wt.graphics.ImageData",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.width=0;
 this.height=0;

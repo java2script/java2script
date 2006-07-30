@@ -1,4 +1,4 @@
-Clazz.load(["java.util.Hashtable"],"java.util.Properties",["java.io.BufferedReader","$.BufferedWriter","$.InputStreamReader","$.OutputStreamWriter","java.lang.IllegalArgumentException","$.StringBuffer","java.util.Date"],function(){
+$_L(["java.util.Hashtable"],"java.util.Properties",["java.io.BufferedReader","$.BufferedWriter","$.InputStreamReader","$.OutputStreamWriter","java.lang.IllegalArgumentException","$.StringBuffer","java.util.Date"],function(){
 c$=$_C(function(){
 this.defaults=null;
 $_Z(this,arguments);
@@ -112,7 +112,7 @@ case'F':
 value=(value<<4)+10+(aChar).charCodeAt(0)-('A').charCodeAt(0);
 break;
 default:
-throw new java.lang.IllegalArgumentException("Malformed \\uxxxx encoding.");
+throw new IllegalArgumentException("Malformed \\uxxxx encoding.");
 }
 }
 outBuffer.append(String.fromCharCode(value));
@@ -260,7 +260,6 @@ c$.toHex=$_M(c$,"toHex",
 return java.util.Properties.hexDigit[(nibble&0xF)];
 },$fz.isPrivate=true,$fz),"~N");
 $_S(c$,
-"serialVersionUID",4112578634029874840,
 "keyValueSeparators","=: \t\r\n\f",
 "strictKeyValueSeparators","=:",
 "specialSaveChars","=: \t\r\n\f#!",

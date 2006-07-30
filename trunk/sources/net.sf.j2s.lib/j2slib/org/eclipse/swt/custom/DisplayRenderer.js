@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.StyledTextRenderer"],"$wt.custom.DisplayRenderer",["$wt.graphics.GC","$.TextLayout"],function(){
+$_L(["$wt.custom.StyledTextRenderer"],"$wt.custom.DisplayRenderer",["$wt.graphics.GC","$.TextLayout"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.topIndex=-1;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.GC",["$wt.SWT","$wt.graphics.Color","$.FontMetrics","$.Point","$.Rectangle","$wt.internal.browser.OS","$wt.widgets.Display"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.GC",["$wt.SWT","$wt.graphics.Color","$.FontMetrics","$.Point","$.Rectangle","$wt.internal.browser.OS","$wt.widgets.Display"],function(){
 c$=$_C(function(){
 this.handle=null;
 this.bgColor=null;

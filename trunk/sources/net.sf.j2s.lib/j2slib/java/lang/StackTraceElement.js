@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable"],"java.lang.StackTraceElement",null,function(){
+$_L(["java.io.Serializable"],"java.lang.StackTraceElement",null,function(){
 c$=$_C(function(){
 this.declaringClass=null;
 this.methodName=null;
@@ -50,6 +50,4 @@ result=31*result+(this.fileName==null?0:this.fileName.hashCode());
 result=31*result+this.lineNumber;
 return result;
 });
-$_S(c$,
-"serialVersionUID",6992337162326171013);
 });

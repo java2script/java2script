@@ -71,7 +71,7 @@ this.fPrinter.printWaitPrompt ();
 try {
 System.$in.read ();
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 } else {
 throw e;
 }
@@ -85,7 +85,7 @@ var r = aTestRunner.start (args);
 if (!r.wasSuccessful ()) System.exit (1);
 System.exit (0);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
+if (Clazz.instanceOf (e, Exception)) {
 System.err.println (e.getMessage ());
 System.exit (2);
 } else {
@@ -103,13 +103,13 @@ if (args[i].equals ("-wait")) wait = true;
  else if (args[i].equals ("-v")) System.err.println ("JUnit " + junit.runner.Version.id () + " by Kent Beck and Erich Gamma");
  else testCase = args[i];
 }
-if (testCase.equals ("")) throw  new java.lang.Exception ("Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class");
+if (testCase.equals ("")) throw  new Exception ("Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class");
 try {
 var suite = this.getTest (testCase);
 return this.doRun (suite, wait);
 } catch (e) {
-if (Clazz.instanceOf (e, java.lang.Exception)) {
-throw  new java.lang.Exception ("Could not create and run test suite: " + e);
+if (Clazz.instanceOf (e, Exception)) {
+throw  new Exception ("Could not create and run test suite: " + e);
 } else {
 throw e;
 }

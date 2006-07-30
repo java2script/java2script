@@ -1,4 +1,4 @@
-Clazz.load(["java.util.Collection"],"java.util.AbstractCollection",["java.lang.StringBuffer","$.UnsupportedOperationException","java.lang.reflect.Array"],function(){
+$_L(["java.util.Collection"],"java.util.AbstractCollection",["java.lang.StringBuffer","$.UnsupportedOperationException","java.lang.reflect.Array"],function(){
 java.lang.reflect.Array={
 newInstance:function(type,size){
 return new Array(size);
@@ -6,9 +6,7 @@ return new Array(size);
 };
 Array.getComponentType=function(){
 return Object;
-};c$=$_C(function(){
-$_Z(this,arguments);
-},java.util,"AbstractCollection",null,java.util.Collection);
+};c$=$_T(java.util,"AbstractCollection",null,java.util.Collection);
 $_K(c$,
 function(){
 });
@@ -47,7 +45,7 @@ return a;
 },"~A");
 $_V(c$,"add",
 function(o){
-throw new java.lang.UnsupportedOperationException();
+throw new UnsupportedOperationException();
 },"~O");
 $_V(c$,"remove",
 function(o){

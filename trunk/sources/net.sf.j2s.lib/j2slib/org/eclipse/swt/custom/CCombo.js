@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.custom.CCombo",["$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$.AccessibleTextAdapter","$wt.graphics.GC","$.Point","$wt.widgets.Button","$.Control","$.Event","$.List","$.Listener","$.Shell","$.Text","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.custom.CCombo",["$wt.SWT","$wt.accessibility.AccessibleAdapter","$.AccessibleControlAdapter","$.AccessibleTextAdapter","$wt.graphics.GC","$.Point","$wt.widgets.Button","$.Control","$.Event","$.List","$.Listener","$.Shell","$.Text","$.TypedListener"],function(){
 c$=$_C(function(){
 this.text=null;
 this.list=null;
@@ -26,10 +26,7 @@ this.arrow=new $wt.widgets.Button(this,arrowStyle);
 this.listener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"CCombo$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 if(this.b$["$wt.custom.CCombo"].popup==event.widget){
@@ -57,10 +54,7 @@ return $_N($wt.custom.CCombo$1,i$,v$);
 this.filter=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$2",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"CCombo$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 var shell=(event.widget).getShell();
@@ -360,10 +354,7 @@ function(){
 var accessibleAdapter=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$3",$wt.accessibility.AccessibleAdapter);
+c$=$_W($wt.custom,"CCombo$3",$wt.accessibility.AccessibleAdapter);
 $_V(c$,"getName",
 function(e){
 var name=null;
@@ -398,10 +389,7 @@ this.list.getAccessible().addAccessibleListener(accessibleAdapter);
 this.arrow.getAccessible().addAccessibleListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$4",$wt.accessibility.AccessibleAdapter);
+c$=$_W($wt.custom,"CCombo$4",$wt.accessibility.AccessibleAdapter);
 $_V(c$,"getName",
 function(e){
 e.result=this.b$["$wt.custom.CCombo"].isDropped()?$WT.getMessage("SWT_Close"):$WT.getMessage("SWT_Open");
@@ -421,10 +409,7 @@ return $_N($wt.custom.CCombo$4,i$,v$);
 this.getAccessible().addAccessibleTextListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$5",$wt.accessibility.AccessibleTextAdapter);
+c$=$_W($wt.custom,"CCombo$5",$wt.accessibility.AccessibleTextAdapter);
 $_V(c$,"getCaretOffset",
 function(e){
 e.offset=this.b$["$wt.custom.CCombo"].text.getCaretPosition();
@@ -436,10 +421,7 @@ return $_N($wt.custom.CCombo$5,i$,v$);
 this.getAccessible().addAccessibleControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$6")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$6",$wt.accessibility.AccessibleControlAdapter);
+c$=$_W($wt.custom,"CCombo$6",$wt.accessibility.AccessibleControlAdapter);
 $_V(c$,"getChildAtPoint",
 function(e){
 var testPoint=this.b$["$wt.custom.CCombo"].toControl(e.x,e.y);
@@ -478,10 +460,7 @@ return $_N($wt.custom.CCombo$6,i$,v$);
 this.text.getAccessible().addAccessibleControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$7")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$7",$wt.accessibility.AccessibleControlAdapter);
+c$=$_W($wt.custom,"CCombo$7",$wt.accessibility.AccessibleControlAdapter);
 $_V(c$,"getRole",
 function(e){
 e.detail=this.b$["$wt.custom.CCombo"].text.getEditable()?42:41;
@@ -493,10 +472,7 @@ return $_N($wt.custom.CCombo$7,i$,v$);
 this.arrow.getAccessible().addAccessibleControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CCombo$8")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CCombo$8",$wt.accessibility.AccessibleControlAdapter);
+c$=$_W($wt.custom,"CCombo$8",$wt.accessibility.AccessibleControlAdapter);
 $_V(c$,"getDefaultAction",
 function(e){
 e.result=this.b$["$wt.custom.CCombo"].isDropped()?$WT.getMessage("SWT_Close"):$WT.getMessage("SWT_Open");

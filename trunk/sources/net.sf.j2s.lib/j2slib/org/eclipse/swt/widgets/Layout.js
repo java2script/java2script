@@ -1,6 +1,4 @@
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.widgets,"Layout");
+c$=$_T($wt.widgets,"Layout");
 $_M(c$,"flushCache",
 function(control){
 return false;

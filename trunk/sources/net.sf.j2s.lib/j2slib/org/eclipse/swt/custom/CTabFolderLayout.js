@@ -1,7 +1,5 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.custom.CTabFolderLayout",["$wt.graphics.GC","$.Point"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"CTabFolderLayout",$wt.widgets.Layout);
+$_L(["$wt.widgets.Layout"],"$wt.custom.CTabFolderLayout",["$wt.graphics.GC","$.Point"],function(){
+c$=$_T($wt.custom,"CTabFolderLayout",$wt.widgets.Layout);
 $_V(c$,"computeSize",
 function(composite,wHint,hHint,flushCache){
 var folder=composite;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.dnd.DragSourceEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.dnd.DragSourceEvent",null,function(){
 c$=$_C(function(){
 this.detail=0;
 this.doit=false;
@@ -22,6 +22,4 @@ e.detail=this.detail;
 e.doit=this.doit;
 e.dataType=this.dataType;
 },"$wt.dnd.DNDEvent");
-$_S(c$,
-"serialVersionUID",3257002142513770808);
 });

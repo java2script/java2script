@@ -1,7 +1,5 @@
-Clazz.load(null,"java.lang.reflect.Modifier",["java.lang.StringBuffer","java.lang.reflect.Method"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},reflect,"Modifier");
+$_L(null,"java.lang.reflect.Modifier",["java.lang.StringBuffer","java.lang.reflect.Method"],function(){
+c$=$_T(reflect,"Modifier");
 c$.isPublic=$_M(c$,"isPublic",
 function(mod){
 return(mod&1)!=0;

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.graphics.Resource"],"$wt.graphics.TextLayout",["$wt.SWT","$wt.graphics.Device","$.Point","$.Rectangle"],function(){
+$_L(["$wt.graphics.Resource"],"$wt.graphics.TextLayout",["$wt.SWT","$wt.graphics.Device","$.Point","$.Rectangle"],function(){
 c$=$_C(function(){
 this.font=null;
 this.text=null;

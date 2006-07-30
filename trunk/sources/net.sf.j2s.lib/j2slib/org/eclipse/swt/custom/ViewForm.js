@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$wt.graphics.RGB"],"$wt.custom.ViewForm",["$wt.SWT","$wt.custom.ViewFormLayout","$wt.graphics.Rectangle","$wt.widgets.Listener"],function(){
+$_L(["$wt.widgets.Composite","$wt.graphics.RGB"],"$wt.custom.ViewForm",["$wt.SWT","$wt.custom.ViewFormLayout","$wt.graphics.Rectangle","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.marginWidth=0;
 this.marginHeight=0;
@@ -28,10 +28,7 @@ this.setBorderVisible((style&2048)!=0);
 var listener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.ViewForm$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"ViewForm$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"ViewForm$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 switch(e.type){

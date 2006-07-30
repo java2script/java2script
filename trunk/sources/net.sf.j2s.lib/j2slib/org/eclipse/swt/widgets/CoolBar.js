@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.CoolBar",["$wt.graphics.Point","$wt.widgets.CoolItem"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.CoolBar",["$wt.graphics.Point","$wt.widgets.CoolItem"],function(){
 c$=$_C(function(){
 this.items=null;
 this.itemHandles=null;
@@ -7,10 +7,6 @@ this.locked=false;
 this.ignoreResize=false;
 $_Z(this,arguments);
 },$wt.widgets,"CoolBar",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.CoolBar,[parent,$wt.widgets.CoolBar.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 style|=524288;

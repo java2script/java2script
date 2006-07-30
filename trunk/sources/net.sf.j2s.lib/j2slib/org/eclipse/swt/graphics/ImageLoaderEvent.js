@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SWTEventObject"],"$wt.graphics.ImageLoaderEvent",null,function(){
+$_L(["$wt.internal.SWTEventObject"],"$wt.graphics.ImageLoaderEvent",null,function(){
 c$=$_C(function(){
 this.imageData=null;
 this.incrementCount=0;
@@ -16,6 +16,4 @@ $_V(c$,"toString",
 function(){
 return"ImageLoaderEvent {source="+this.source+" imageData="+this.imageData+" incrementCount="+this.incrementCount+" endOfImage="+this.endOfImage+"}";
 });
-$_S(c$,
-"serialVersionUID",3257284738325558065);
 });

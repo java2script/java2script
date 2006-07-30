@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.custom.ControlEditor",["$wt.graphics.Rectangle","$wt.widgets.Listener"],function(){
+$_L(null,"$wt.custom.ControlEditor",["$wt.graphics.Rectangle","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.horizontalAlignment=16777216;
 this.grabHorizontal=false;
@@ -19,10 +19,7 @@ this.parent=parent;
 this.tableListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.ControlEditor$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"ControlEditor$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"ControlEditor$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 this.b$["$wt.custom.ControlEditor"].resize();
@@ -35,10 +32,7 @@ parent.addListener(11,this.tableListener);
 this.scrollbarListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.ControlEditor$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"ControlEditor$2",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"ControlEditor$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 this.b$["$wt.custom.ControlEditor"].scroll(e);

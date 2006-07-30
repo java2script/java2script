@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Canvas"],"$wt.widgets.Decorations",["java.lang.Runnable","$wt.graphics.Image","$.Point","$.Rectangle","$wt.internal.ResizeSystem","$.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.ShellFrameDND","$wt.widgets.Event","$.Menu"],function(){
+$_L(["$wt.widgets.Canvas"],"$wt.widgets.Decorations",["java.lang.Runnable","$wt.graphics.Image","$.Point","$.Rectangle","$wt.internal.ResizeSystem","$.RunnableCompatibility","$wt.internal.browser.OS","$wt.internal.dnd.DragAndDrop","$.ShellFrameDND","$wt.widgets.Event","$.Menu"],function(){
 c$=$_C(function(){
 this.image=null;
 this.smallImage=null;
@@ -23,10 +23,6 @@ this.titleBar=null;
 this.shellClose=null;
 $_Z(this,arguments);
 },$wt.widgets,"Decorations",$wt.widgets.Canvas);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Decorations,[parent,$wt.widgets.Decorations.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addMenu",
 function(menu){
 if(this.menus==null)this.menus=new Array(4);
@@ -130,10 +126,7 @@ if((this.style&65536)!=0||(this.style&32768)!=0){
 this.display.timerExec(10,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$1",null,Runnable);
+c$=$_W($wt.widgets,"Decorations$1",null,Runnable);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Decorations"].addModalLayer();
@@ -160,10 +153,7 @@ var dnd=new $wt.internal.dnd.DragAndDrop();
 dnd.addDragListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$2",$wt.internal.dnd.ShellFrameDND);
+c$=$_W($wt.widgets,"Decorations$2",$wt.internal.dnd.ShellFrameDND);
 $_M(c$,"isDraggable",
 function(e){
 if($_U(this,$wt.widgets.Decorations$2,"isDraggable",[e])){
@@ -566,10 +556,7 @@ this.titleBar.appendChild(this.shellMin);
 this.shellMin.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Decorations$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 $wt.internal.ResizeSystem.unregister(this.b$["$wt.widgets.Decorations"]);
@@ -586,20 +573,14 @@ this.titleBar.appendChild(this.shellMax);
 this.shellMax.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$4",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Decorations$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Decorations"].toggleMaximize();
 this.b$["$wt.widgets.Decorations"].display.timerExec(25,(function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$4$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$4$5",null,Runnable);
+c$=$_W($wt.widgets,"Decorations$4$5",null,Runnable);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Decorations"].layout();
@@ -620,10 +601,7 @@ this.titleBar.appendChild(this.shellClose);
 this.shellClose.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$6")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$6",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Decorations$6",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if($_O(this.b$["$wt.widgets.Decorations"],$wt.widgets.Shell)){
@@ -643,10 +621,7 @@ this.titleBar.ondblclick=this.shellMax.onclick;
 this.titleBar.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Decorations$7")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Decorations$7",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Decorations$7",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var fHandleStyle=this.b$["$wt.widgets.Decorations"].handle.style;

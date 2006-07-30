@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Point",null,function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.Point",null,function(){
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -24,6 +24,4 @@ $_V(c$,"toString",
 function(){
 return"Point {"+this.x+", "+this.y+"}";
 });
-$_S(c$,
-"serialVersionUID",3257002163938146354);
 });

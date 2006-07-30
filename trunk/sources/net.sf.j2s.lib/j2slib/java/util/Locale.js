@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.Cloneable"],"java.util.Locale",["java.lang.Character","$.InternalError","$.NullPointerException","$.StringBuffer","java.util.MissingResourceException","$.PropertyPermission","$.StringTokenizer"],function(){
+$_L(["java.io.Serializable","java.lang.Cloneable"],"java.util.Locale",["java.lang.InternalError","$.NullPointerException","$.StringBuffer","java.util.MissingResourceException"],function(){
 c$=$_C(function(){
 this.language="";
 this.country="";
@@ -35,7 +35,7 @@ java.util.Locale.defaultLocale=new java.util.Locale(language,country,variant);
 });
 c$.setDefault=$_M(c$,"setDefault",
 function(newLocale){
-if(newLocale==null)throw new java.lang.NullPointerException("Can't set default locale to NULL");
+if(newLocale==null)throw new NullPointerException("Can't set default locale to NULL");
 {
 java.util.Locale.defaultLocale=newLocale;
 }},"java.util.Locale");
@@ -175,8 +175,8 @@ try{
 var that=$_U(this,java.util.Locale,"clone",[]);
 return that;
 }catch(e){
-if($_O(e,java.lang.CloneNotSupportedException)){
-throw new java.lang.InternalError();
+if($_O(e,CloneNotSupportedException)){
+throw new InternalError();
 }else{
 throw e;
 }
@@ -233,7 +233,6 @@ c$.US=c$.prototype.US=new java.util.Locale("en","US","");
 c$.CANADA=c$.prototype.CANADA=new java.util.Locale("en","CA","");
 c$.CANADA_FRENCH=c$.prototype.CANADA_FRENCH=new java.util.Locale("fr","CA","");
 $_S(c$,
-"serialVersionUID",9149081749638150636,
 "defaultLocale",null,
 "isoLanguages",null,
 "compressedIsoLanguages",",aaaar,ababk,afafr,amamh,arara,asasm,ayaym,azaze,babak,bebel,bgbul,bhbih,bibis,bnben,"+"bobod,brbre,cacat,cocos,csces,cycym,dadan,dedeu,dzdzo,elell,eneng,eoepo,esspa,"+"etest,eueus,fafas,fifin,fjfij,fofao,frfra,fyfry,gagai,gdgdh,glglg,gngrn,guguj,"+"hahau,heheb,hihin,hrhrv,huhun,hyhye,iaina,idind,ieile,ikipk,inind,isisl,itita,"+"iuiku,iwheb,jajpn,jiyid,jwjaw,kakat,kkkaz,klkal,kmkhm,knkan,kokor,kskas,kukur,"+"kykir,lalat,lnlin,lolao,ltlit,lvlav,mgmlg,mimri,mkmkd,mlmal,mnmon,momol,mrmar,"+"msmsa,mtmlt,mymya,nanau,nenep,nlnld,nonor,ococi,omorm,orori,papan,plpol,pspus,"+"ptpor,quque,rmroh,rnrun,roron,rurus,rwkin,sasan,sdsnd,sgsag,shsrp,sisin,skslk,"+"slslv,smsmo,snsna,sosom,sqsqi,srsrp,ssssw,stsot,susun,svswe,swswa,tatam,tetel,"+"tgtgk,ththa,titir,tktuk,tltgl,tntsn,toton,trtur,tstso,tttat,twtwi,uguig,ukukr,"+"ururd,uzuzb,vivie,vovol,wowol,xhxho,yiyid,yoyor,zazha,zhzho,zuzul",

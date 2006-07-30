@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.custom.PopupList",["$wt.SWT","$wt.events.ControlListener","$.KeyListener","$.MouseListener","$wt.widgets.List","$.Listener","$.Shell"],function(){
+$_L(null,"$wt.custom.PopupList",["$wt.SWT","$wt.events.ControlListener","$.KeyListener","$.MouseListener","$wt.widgets.List","$.Listener","$.Shell"],function(){
 c$=$_C(function(){
 this.shell=null;
 this.list=null;
@@ -16,10 +16,7 @@ this.list=new $wt.widgets.List(this.shell,516);
 this.shell.addListener(27,(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.PopupList$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"PopupList$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"PopupList$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 this.b$["$wt.custom.PopupList"].shell.setVisible(false);
@@ -31,10 +28,7 @@ return $_N($wt.custom.PopupList$1,i$,v$);
 this.shell.addControlListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.PopupList$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"PopupList$2",null,$wt.events.ControlListener);
+c$=$_W($wt.custom,"PopupList$2",null,$wt.events.ControlListener);
 $_V(c$,"controlMoved",
 function(e){
 },"$wt.events.ControlEvent");
@@ -50,10 +44,7 @@ return $_N($wt.custom.PopupList$2,i$,v$);
 this.list.addMouseListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.PopupList$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"PopupList$3",null,$wt.events.MouseListener);
+c$=$_W($wt.custom,"PopupList$3",null,$wt.events.MouseListener);
 $_V(c$,"mouseDoubleClick",
 function(e){
 },"$wt.events.MouseEvent");
@@ -71,10 +62,7 @@ return $_N($wt.custom.PopupList$3,i$,v$);
 this.list.addKeyListener((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.PopupList$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"PopupList$4",null,$wt.events.KeyListener);
+c$=$_W($wt.custom,"PopupList$4",null,$wt.events.KeyListener);
 $_V(c$,"keyReleased",
 function(e){
 },"$wt.events.KeyEvent");

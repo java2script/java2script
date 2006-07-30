@@ -1,4 +1,4 @@
-Clazz.load(null,"$wt.graphics.PaletteData",["$wt.SWT","$wt.graphics.RGB"],function(){
+$_L(null,"$wt.graphics.PaletteData",["$wt.SWT","$wt.graphics.RGB"],function(){
 c$=$_C(function(){
 this.isDirect=false;
 this.colors=null;

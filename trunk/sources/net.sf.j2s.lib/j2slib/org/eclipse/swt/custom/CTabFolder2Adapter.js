@@ -1,7 +1,5 @@
-Clazz.load(["$wt.custom.CTabFolder2Listener"],"$wt.custom.CTabFolder2Adapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"CTabFolder2Adapter",null,$wt.custom.CTabFolder2Listener);
+$_L(["$wt.custom.CTabFolder2Listener"],"$wt.custom.CTabFolder2Adapter",null,function(){
+c$=$_T($wt.custom,"CTabFolder2Adapter",null,$wt.custom.CTabFolder2Listener);
 $_V(c$,"close",
 function(event){
 },"$wt.custom.CTabFolderEvent");

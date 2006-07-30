@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAndDrop",["$wt.internal.dnd.DNDUtils"],function(){
+$_L(["$wt.internal.dnd.DragListener"],"$wt.internal.dnd.DragAndDrop",["$wt.internal.dnd.DNDUtils"],function(){
 c$=$_C(function(){
 this.status=0;
 this.element=null;

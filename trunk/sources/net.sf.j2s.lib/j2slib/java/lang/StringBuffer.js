@@ -1,4 +1,4 @@
-Clazz.load(["java.io.Serializable","java.lang.CharSequence"],"java.lang.StringBuffer",["java.lang.StringIndexOutOfBoundsException"],function(){
+$_L(["java.io.Serializable","java.lang.CharSequence"],"java.lang.StringBuffer",["java.lang.StringIndexOutOfBoundsException"],function(){
 c$=$_C(function(){
 this.value=null;
 this.count=0;
@@ -54,7 +54,7 @@ this.shared=false;
 $_M(c$,"setLength",
 function(newLength){
 if(newLength<0){
-throw new java.lang.StringIndexOutOfBoundsException(newLength);
+throw new StringIndexOutOfBoundsException(newLength);
 }if(newLength>this.value.length){
 this.expandCapacity(newLength);
 }if(this.count<newLength){
@@ -74,23 +74,23 @@ this.shared=false;
 $_V(c$,"charAt",
 function(index){
 if((index<0)||(index>=this.count)){
-throw new java.lang.StringIndexOutOfBoundsException(index);
+throw new StringIndexOutOfBoundsException(index);
 }return this.value[index];
 },"~N");
 $_M(c$,"getChars",
 function(srcBegin,srcEnd,dst,dstBegin){
 if(srcBegin<0){
-throw new java.lang.StringIndexOutOfBoundsException(srcBegin);
+throw new StringIndexOutOfBoundsException(srcBegin);
 }if((srcEnd<0)||(srcEnd>this.count)){
-throw new java.lang.StringIndexOutOfBoundsException(srcEnd);
+throw new StringIndexOutOfBoundsException(srcEnd);
 }if(srcBegin>srcEnd){
-throw new java.lang.StringIndexOutOfBoundsException("srcBegin > srcEnd");
+throw new StringIndexOutOfBoundsException("srcBegin > srcEnd");
 }System.arraycopy(this.value,srcBegin,dst,dstBegin,srcEnd-srcBegin);
 },"~N,~N,~A,~N");
 $_M(c$,"setCharAt",
 function(index,ch){
 if((index<0)||(index>=this.count)){
-throw new java.lang.StringIndexOutOfBoundsException(index);
+throw new StringIndexOutOfBoundsException(index);
 }if(this.shared)this.copy();
 this.value[index]=ch;
 },"~N,~N");
@@ -185,9 +185,9 @@ return this;
 },"~N");
 $_M(c$,"$delete",
 function(start,end){
-if(start<0)throw new java.lang.StringIndexOutOfBoundsException(start);
+if(start<0)throw new StringIndexOutOfBoundsException(start);
 if(end>this.count)end=this.count;
-if(start>end)throw new java.lang.StringIndexOutOfBoundsException();
+if(start>end)throw new StringIndexOutOfBoundsException();
 var len=end-start;
 if(len>0){
 if(this.shared)this.copy();
@@ -197,7 +197,7 @@ this.count-=len;
 },"~N,~N");
 $_M(c$,"deleteCharAt",
 function(index){
-if((index<0)||(index>=this.count))throw new java.lang.StringIndexOutOfBoundsException();
+if((index<0)||(index>=this.count))throw new StringIndexOutOfBoundsException();
 if(this.shared)this.copy();
 System.arraycopy(this.value,index+1,this.value,index,this.count-index-1);
 this.count--;
@@ -205,9 +205,9 @@ return this;
 },"~N");
 $_M(c$,"replace",
 function(start,end,str){
-if(start<0)throw new java.lang.StringIndexOutOfBoundsException(start);
+if(start<0)throw new StringIndexOutOfBoundsException(start);
 if(end>this.count)end=this.count;
-if(start>end)throw new java.lang.StringIndexOutOfBoundsException();
+if(start>end)throw new StringIndexOutOfBoundsException();
 var len=str.length;
 var newCount=this.count+len-(end-start);
 if(newCount>this.value.length)this.expandCapacity(newCount);
@@ -227,16 +227,16 @@ return this.substring(start,end);
 },"~N,~N");
 $_M(c$,"substring",
 function(start,end){
-if(start<0)throw new java.lang.StringIndexOutOfBoundsException(start);
-if(end>this.count)throw new java.lang.StringIndexOutOfBoundsException(end);
-if(start>end)throw new java.lang.StringIndexOutOfBoundsException(end-start);
+if(start<0)throw new StringIndexOutOfBoundsException(start);
+if(end>this.count)throw new StringIndexOutOfBoundsException(end);
+if(start>end)throw new StringIndexOutOfBoundsException(end-start);
 return String.instantialize(this.value,start,end-start);
 },"~N,~N");
 $_M(c$,"insert",
 function(index,str,offset,len){
-if((index<0)||(index>this.count))throw new java.lang.StringIndexOutOfBoundsException();
-if((offset<0)||(offset+len<0)||(offset+len>str.length))throw new java.lang.StringIndexOutOfBoundsException(offset);
-if(len<0)throw new java.lang.StringIndexOutOfBoundsException(len);
+if((index<0)||(index>this.count))throw new StringIndexOutOfBoundsException();
+if((offset<0)||(offset+len<0)||(offset+len>str.length))throw new StringIndexOutOfBoundsException(offset);
+if(len<0)throw new StringIndexOutOfBoundsException(len);
 var newCount=this.count+len;
 if(newCount>this.value.length)this.expandCapacity(newCount);
 else if(this.shared)this.copy();
@@ -252,7 +252,7 @@ return this.insert(offset,String.valueOf(obj));
 $_M(c$,"insert",
 function(offset,str){
 if((offset<0)||(offset>this.count)){
-throw new java.lang.StringIndexOutOfBoundsException();
+throw new StringIndexOutOfBoundsException();
 }if(str==null){
 str=String.valueOf(str);
 }var len=str.length;
@@ -267,7 +267,7 @@ return this;
 $_M(c$,"insert",
 function(offset,str){
 if((offset<0)||(offset>this.count)){
-throw new java.lang.StringIndexOutOfBoundsException();
+throw new StringIndexOutOfBoundsException();
 }var len=str.length;
 var newcount=this.count+len;
 if(newcount>this.value.length)this.expandCapacity(newcount);
@@ -346,7 +346,5 @@ $_M(c$,"getValue",
 function(){
 return this.value;
 });
-$_S(c$,
-"serialVersionUID",3388685877147921107);
 c$.NULL=c$.prototype.NULL=new StringBuffer("null");
 });

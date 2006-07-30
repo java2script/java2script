@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.ToolBar",["$wt.graphics.Point","$wt.widgets.ToolItem"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.ToolBar",["$wt.graphics.Point","$wt.widgets.ToolItem"],function(){
 c$=$_C(function(){
 this.lastFocusId=0;
 this.items=null;
@@ -9,10 +9,6 @@ this.disabledImageList=null;
 this.hotImageList=null;
 $_Z(this,arguments);
 },$wt.widgets,"ToolBar",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.ToolBar,[parent,$wt.widgets.ToolBar.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 if((style&8388608)==0)style|=524288;
@@ -147,7 +143,7 @@ if((this.style&64)!=0){
 try{
 this.handle.style.whiteSpace="wrap";
 }catch(e){
-if($_O(e,java.lang.Exception)){
+if($_O(e,Exception)){
 }else{
 throw e;
 }

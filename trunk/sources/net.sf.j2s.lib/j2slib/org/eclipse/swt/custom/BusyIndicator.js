@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.custom.BusyIndicator",["$wt.SWT","$wt.widgets.Display"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"BusyIndicator");
+$_L(null,"$wt.custom.BusyIndicator",["$wt.SWT","$wt.widgets.Display"],function(){
+c$=$_T($wt.custom,"BusyIndicator");
 c$.showWhile=$_M(c$,"showWhile",
 function(display,runnable){
 if(display==null){

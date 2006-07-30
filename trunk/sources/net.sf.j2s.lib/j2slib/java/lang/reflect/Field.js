@@ -1,4 +1,4 @@
-Clazz.load(["java.lang.reflect.AccessibleObject","$.Member"],"java.lang.reflect.Field",["java.lang.StringBuffer","java.lang.reflect.Modifier","sun.reflect.Reflection"],function(){
+$_L(["java.lang.reflect.AccessibleObject","$.Member"],"java.lang.reflect.Field",["java.lang.StringBuffer","java.lang.reflect.Modifier","sun.reflect.Reflection"],function(){
 c$=$_C(function(){
 this.clazz=null;
 this.slot=0;

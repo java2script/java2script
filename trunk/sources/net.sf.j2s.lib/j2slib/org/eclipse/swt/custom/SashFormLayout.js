@@ -1,7 +1,5 @@
-Clazz.load(["$wt.widgets.Layout"],"$wt.custom.SashFormLayout",["$wt.custom.SashFormData","$wt.graphics.Point","$wt.widgets.Sash"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.custom,"SashFormLayout",$wt.widgets.Layout);
+$_L(["$wt.widgets.Layout"],"$wt.custom.SashFormLayout",["$wt.custom.SashFormData","$wt.graphics.Point","$wt.widgets.Sash"],function(){
+c$=$_T($wt.custom,"SashFormLayout",$wt.widgets.Layout);
 $_V(c$,"computeSize",
 function(composite,wHint,hHint,flushCache){
 var sashForm=composite;

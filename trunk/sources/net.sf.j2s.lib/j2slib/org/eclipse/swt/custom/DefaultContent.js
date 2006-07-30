@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.StyledTextContent","java.util.Vector"],"$wt.custom.DefaultContent",["java.lang.StringBuffer","$wt.SWT","$wt.custom.StyledTextEvent","$.StyledTextListener","$wt.internal.Compatibility"],function(){
+$_L(["$wt.custom.StyledTextContent","java.util.Vector"],"$wt.custom.DefaultContent",["java.lang.StringBuffer","$wt.SWT","$wt.custom.StyledTextEvent","$.StyledTextListener","$wt.internal.Compatibility"],function(){
 c$=$_C(function(){
 this.textListeners=null;
 this.textStore=null;

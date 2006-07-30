@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.dnd.DropTargetEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.dnd.DropTargetEvent",null,function(){
 c$=$_C(function(){
 this.x=0;
 this.y=0;
@@ -37,6 +37,4 @@ e.operations=this.operations;
 e.feedback=this.feedback;
 e.item=this.item;
 },"$wt.dnd.DNDEvent");
-$_S(c$,
-"serialVersionUID",3256727264573338678);
 });

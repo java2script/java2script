@@ -1,17 +1,19 @@
-Clazz.load(["java.lang.RuntimeException"],"java.lang.reflect.UndeclaredThrowableException",null,function(){
+$_L(["java.lang.RuntimeException"],"java.lang.reflect.UndeclaredThrowableException",null,function(){
 c$=$_C(function(){
 this.undeclaredThrowable=null;
 $_Z(this,arguments);
-},reflect,"UndeclaredThrowableException",java.lang.RuntimeException);
+},reflect,"UndeclaredThrowableException",RuntimeException);
 $_K(c$,
-function(undeclaredThrowable){
-$_R(this,java.lang.reflect.UndeclaredThrowableException,[null]);
-this.undeclaredThrowable=undeclaredThrowable;
+function(exception){
+$_R(this,java.lang.reflect.UndeclaredThrowableException);
+this.undeclaredThrowable=exception;
+this.initCause(exception);
 },"Throwable");
 $_K(c$,
-function(undeclaredThrowable,s){
-$_R(this,java.lang.reflect.UndeclaredThrowableException,[s,null]);
-this.undeclaredThrowable=undeclaredThrowable;
+function(exception,detailMessage){
+$_R(this,java.lang.reflect.UndeclaredThrowableException,[detailMessage]);
+this.undeclaredThrowable=exception;
+this.initCause(exception);
 },"Throwable,~S");
 $_M(c$,"getUndeclaredThrowable",
 function(){
@@ -21,6 +23,4 @@ $_V(c$,"getCause",
 function(){
 return this.undeclaredThrowable;
 });
-$_S(c$,
-"serialVersionUID",330127114055056639);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.custom.ControlEditor"],"$wt.custom.TableTreeEditor",["java.lang.Runnable","$wt.events.ControlListener","$.TreeListener","$wt.graphics.Rectangle"],function(){
+$_L(["$wt.custom.ControlEditor"],"$wt.custom.TableTreeEditor",["java.lang.Runnable","$wt.events.ControlListener","$.TreeListener","$wt.graphics.Rectangle"],function(){
 c$=$_C(function(){
 this.tableTree=null;
 this.item=null;
@@ -23,10 +23,7 @@ $_Y(c$,function(){
 this.runnable=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableTreeEditor$1$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableTreeEditor$1$2",null,Runnable);
+c$=$_W($wt.custom,"TableTreeEditor$1$2",null,Runnable);
 $_V(c$,"run",
 function(){
 if(this.b$["$wt.custom.TableTreeEditor"].editor==null||this.b$["$wt.custom.TableTreeEditor"].editor.isDisposed())return;
@@ -59,10 +56,7 @@ tableTree.addTreeListener(this.treeListener);
 this.columnListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableTreeEditor$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableTreeEditor$3",null,$wt.events.ControlListener);
+c$=$_W($wt.custom,"TableTreeEditor$3",null,$wt.events.ControlListener);
 $_V(c$,"controlMoved",
 function(e){
 this.b$["$wt.custom.TableTreeEditor"].resize();

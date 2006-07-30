@@ -1,7 +1,5 @@
-Clazz.load(["$wt.accessibility.AccessibleListener"],"$wt.accessibility.AccessibleAdapter",null,function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.accessibility,"AccessibleAdapter",null,$wt.accessibility.AccessibleListener);
+$_L(["$wt.accessibility.AccessibleListener"],"$wt.accessibility.AccessibleAdapter",null,function(){
+c$=$_T($wt.accessibility,"AccessibleAdapter",null,$wt.accessibility.AccessibleListener);
 $_V(c$,"getName",
 function(e){
 },"$wt.accessibility.AccessibleEvent");

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Event"],"$wt.custom.StyledTextEvent",null,function(){
+$_L(["$wt.widgets.Event"],"$wt.custom.StyledTextEvent",null,function(){
 c$=$_C(function(){
 this.styles=null;
 this.lineBackground=null;

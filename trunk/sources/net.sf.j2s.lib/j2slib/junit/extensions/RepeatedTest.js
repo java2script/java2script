@@ -7,7 +7,7 @@ Clazz.instantialize (this, arguments);
 Clazz.makeConstructor (c$, 
 function (test, repeat) {
 Clazz.superConstructor (this, junit.extensions.RepeatedTest, [test]);
-if (repeat < 0) throw  new java.lang.IllegalArgumentException ("Repetition count must be > 0");
+if (repeat < 0) throw  new IllegalArgumentException ("Repetition count must be > 0");
 this.fTimesRepeat = repeat;
 }, "junit.framework.Test,~N");
 Clazz.defineMethod (c$, "countTestCases", 

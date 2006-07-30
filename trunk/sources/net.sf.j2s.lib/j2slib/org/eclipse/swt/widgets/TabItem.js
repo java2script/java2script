@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item"],"$wt.widgets.TabItem",["$wt.internal.RunnableCompatibility","$wt.internal.browser.OS"],function(){
+$_L(["$wt.widgets.Item"],"$wt.widgets.TabItem",["$wt.internal.RunnableCompatibility","$wt.internal.browser.OS"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.control=null;
@@ -27,10 +27,7 @@ $_M(c$,"configure",
 this.handle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.TabItem$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"TabItem$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"TabItem$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.TabItem"].parent.setSelection(this.f$.index,true);

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.dnd.Transfer"],"$wt.dnd.Clipboard",["java.lang.Thread","$wt.dnd.DND","$.TransferData","$wt.widgets.Display"],function(){
+$_L(["$wt.dnd.Transfer"],"$wt.dnd.Clipboard",["java.lang.Thread","$wt.dnd.DND","$.TransferData","$wt.widgets.Display"],function(){
 c$=$_C(function(){
 this.display=null;
 this.refCount=0;

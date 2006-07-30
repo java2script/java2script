@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$.Control","$.Sash"],"$wt.custom.SashForm",["$wt.SWT","$wt.custom.SashFormData","$.SashFormLayout","$wt.widgets.Listener"],function(){
+$_L(["$wt.widgets.Composite","$.Control","$.Sash"],"$wt.custom.SashForm",["$wt.SWT","$wt.custom.SashFormData","$.SashFormLayout","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.SASH_WIDTH=3;
 this.sashStyle=0;
@@ -24,10 +24,7 @@ if((style&65536)!=0)this.sashStyle|=65536;
 this.sashListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.SashForm$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"SashForm$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"SashForm$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 this.b$["$wt.custom.SashForm"].onDragSash(e);

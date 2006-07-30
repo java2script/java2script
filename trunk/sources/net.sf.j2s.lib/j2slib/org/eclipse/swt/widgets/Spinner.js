@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite"],"$wt.widgets.Spinner",["java.lang.Character","$.StringBuffer","$wt.graphics.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Composite"],"$wt.widgets.Spinner",["java.lang.Character","$.StringBuffer","$wt.graphics.Point","$.Rectangle","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.hwndText=null;
 this.hwndUpDown=null;
@@ -15,19 +15,15 @@ this.downBtnHandle=null;
 this.upBtnHandle=null;
 $_Z(this,arguments);
 },$wt.widgets,"Spinner",$wt.widgets.Composite);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Spinner,[parent,$wt.widgets.Spinner.checkStyle(style)]);
-this.increment=1;
-this.minimum=0;
-this.maximum=2147483647;
-},"$wt.widgets.Composite,~N");
 c$.checkStyle=$_M(c$,"checkStyle",
 function(style){
 return style&-769;
 },"~N");
 $_M(c$,"createHandle",
 function(){
+this.increment=1;
+this.minimum=0;
+this.maximum=2147483647;
 $_U(this,$wt.widgets.Spinner,"createHandle",[]);
 this.state&=-3;
 this.handle=d$.createElement("DIV");
@@ -47,10 +43,7 @@ this.upBtnHandle.className="spinner-up-button-default";
 this.upBtnHandle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Spinner$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Spinner$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Spinner$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Spinner"].setSelection(this.b$["$wt.widgets.Spinner"].getSelection()+this.b$["$wt.widgets.Spinner"].increment);
@@ -65,10 +58,7 @@ this.downBtnHandle.className="spinner-down-button-default";
 this.downBtnHandle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Spinner$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Spinner$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Spinner$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Spinner"].setSelection(this.b$["$wt.widgets.Spinner"].getSelection()-this.b$["$wt.widgets.Spinner"].increment);
@@ -87,10 +77,7 @@ this.setSelection(0,false);
 this.textInputHandle.onchange=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Spinner$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Spinner$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Spinner$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.widgets.Spinner"].setSelection(this.b$["$wt.widgets.Spinner"].getSelection());
@@ -123,7 +110,7 @@ var height=0;
 if(wHint==-1||hHint==-1){
 var string=null;
 if(this.digits>0){
-var leading=Math.floor(this.maximum/Math.round(Math.pow(10,this.digits))Math.pow(10,this.digits));
+var leading=Math.floor(this.maximum/Math.round(Math.pow(10,this.digits)));
 var buffer=""+leading;
 buffer+=this.getDecimalSeparator();
 var count=this.digits-buffer.length+1;

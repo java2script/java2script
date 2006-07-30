@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Composite","$wt.browser.CloseWindowListener","$.LocationListener","$.OpenWindowListener","$.ProgressListener","$.StatusTextListener","$.TitleListener","$.VisibilityWindowListener"],"$wt.browser.Browser",["$wt.SWT","$wt.internal.browser.OS"],function(){
+$_L(["$wt.widgets.Composite","$wt.browser.CloseWindowListener","$.LocationListener","$.OpenWindowListener","$.ProgressListener","$.StatusTextListener","$.TitleListener","$.VisibilityWindowListener"],"$wt.browser.Browser",["$wt.SWT","$wt.internal.browser.OS"],function(){
 c$=$_C(function(){
 this.$back=false;
 this.$forward=false;
@@ -31,10 +31,6 @@ this.statusTextListeners=new Array(0);
 this.titleListeners=new Array(0);
 this.visibilityWindowListeners=new Array(0);
 });
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.browser.Browser,[parent,style&-2049]);
-},"$wt.widgets.Composite,~N");
 $_M(c$,"addCloseWindowListener",
 function(listener){
 var newCloseWindowListeners=new Array(this.closeWindowListeners.length+1);
@@ -93,7 +89,7 @@ this.browserHandle.contentWindow.history.back();
 this.$forward=true;
 return true;
 }catch(e){
-if($_O(e,java.lang.Error)){
+if($_O(e,Error)){
 return false;
 }else{
 throw e;
@@ -120,7 +116,7 @@ try{
 this.browserHandle.contentWindow.history.forward();
 return true;
 }catch(e){
-if($_O(e,java.lang.Error)){
+if($_O(e,Error)){
 return false;
 }else{
 throw e;

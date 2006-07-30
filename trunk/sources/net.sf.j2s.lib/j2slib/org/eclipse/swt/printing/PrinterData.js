@@ -1,5 +1,5 @@
 $_J("org.eclipse.swt.printing");
-Clazz.load(["$wt.graphics.DeviceData"],"$wt.printing.PrinterData",null,function(){
+$_L(["$wt.graphics.DeviceData"],"$wt.printing.PrinterData",null,function(){
 c$=$_C(function(){
 this.driver=null;
 this.name=null;

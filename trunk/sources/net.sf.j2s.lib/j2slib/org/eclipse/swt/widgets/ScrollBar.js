@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget"],"$wt.widgets.ScrollBar",["$wt.graphics.Point","$.Rectangle","$wt.widgets.TypedListener"],function(){
+$_L(["$wt.widgets.Widget"],"$wt.widgets.ScrollBar",["$wt.graphics.Point","$.Rectangle","$wt.widgets.TypedListener"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.increment=0;

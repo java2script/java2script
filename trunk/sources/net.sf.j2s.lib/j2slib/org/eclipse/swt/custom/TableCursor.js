@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Canvas"],"$wt.custom.TableCursor",["$wt.SWT","$wt.graphics.Point","$wt.widgets.Event","$.Listener","$.TypedListener"],function(){
+$_L(["$wt.widgets.Canvas"],"$wt.custom.TableCursor",["$wt.SWT","$wt.graphics.Point","$wt.widgets.Event","$.Listener","$.TypedListener"],function(){
 c$=$_C(function(){
 this.table=null;
 this.row=null;
@@ -18,10 +18,7 @@ this.setForeground(null);
 var listener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableCursor$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableCursor$1",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableCursor$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 switch(event.type){
@@ -54,10 +51,7 @@ this.addListener(events[i],listener);
 this.tableListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableCursor$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableCursor$2",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableCursor$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 switch(event.type){
@@ -78,10 +72,7 @@ this.table.addListener(3,this.tableListener);
 this.disposeItemListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableCursor$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableCursor$3",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableCursor$3",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 this.b$["$wt.custom.TableCursor"].row=null;
@@ -95,10 +86,7 @@ return $_N($wt.custom.TableCursor$3,i$,v$);
 this.disposeColumnListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableCursor$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableCursor$4",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableCursor$4",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 this.b$["$wt.custom.TableCursor"].row=null;
@@ -112,10 +100,7 @@ return $_N($wt.custom.TableCursor$4,i$,v$);
 this.resizeListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.TableCursor$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"TableCursor$5",null,$wt.widgets.Listener);
+c$=$_W($wt.custom,"TableCursor$5",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 this.b$["$wt.custom.TableCursor"].resize();

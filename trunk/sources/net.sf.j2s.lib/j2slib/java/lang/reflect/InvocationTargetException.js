@@ -1,21 +1,21 @@
-Clazz.load(["java.lang.Exception"],"java.lang.reflect.InvocationTargetException",null,function(){
+$_L(["java.lang.Exception"],"java.lang.reflect.InvocationTargetException",null,function(){
 c$=$_C(function(){
 this.target=null;
 $_Z(this,arguments);
-},reflect,"InvocationTargetException",java.lang.Exception);
+},reflect,"InvocationTargetException",Exception);
 $_K(c$,
 function(){
 $_R(this,java.lang.reflect.InvocationTargetException,[null]);
 });
 $_K(c$,
-function(target){
-$_R(this,java.lang.reflect.InvocationTargetException,[null]);
-this.target=target;
+function(exception){
+$_R(this,java.lang.reflect.InvocationTargetException,[null,exception]);
+this.target=exception;
 },"Throwable");
 $_K(c$,
-function(target,s){
-$_R(this,java.lang.reflect.InvocationTargetException,[s,null]);
-this.target=target;
+function(exception,detailMessage){
+$_R(this,java.lang.reflect.InvocationTargetException,[detailMessage,exception]);
+this.target=exception;
 },"Throwable,~S");
 $_M(c$,"getTargetException",
 function(){
@@ -25,6 +25,4 @@ $_V(c$,"getCause",
 function(){
 return this.target;
 });
-$_S(c$,
-"serialVersionUID",4085088731926701167);
 });

@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.KeyEvent"],"$wt.events.TraverseEvent",null,function(){
+$_L(["$wt.events.KeyEvent"],"$wt.events.TraverseEvent",null,function(){
 c$=$_C(function(){
 this.detail=0;
 $_Z(this,arguments);
@@ -13,6 +13,4 @@ function(){
 var string=$_U(this,$wt.events.TraverseEvent,"toString",[]);
 return string.substring(0,string.length-1)+" detail="+this.detail+"}";
 });
-$_S(c$,
-"serialVersionUID",3257565105301239349);
 });

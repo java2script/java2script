@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Dialog"],"$wt.widgets.FileDialog",null,function(){
+$_L(["$wt.widgets.Dialog"],"$wt.widgets.FileDialog",null,function(){
 c$=$_C(function(){
 this.filterNames=null;
 this.filterExtensions=null;

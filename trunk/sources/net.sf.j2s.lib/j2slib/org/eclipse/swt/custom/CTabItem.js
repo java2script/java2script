@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Item","$wt.graphics.Rectangle"],"$wt.custom.CTabItem",["$wt.SWT","$wt.custom.CTabFolderEvent","$wt.graphics.Color","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS"],function(){
+$_L(["$wt.widgets.Item","$wt.graphics.Rectangle"],"$wt.custom.CTabItem",["$wt.SWT","$wt.custom.CTabFolderEvent","$wt.graphics.Color","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS"],function(){
 c$=$_C(function(){
 this.parent=null;
 this.x=0;
@@ -45,10 +45,7 @@ $_M(c$,"configure",
 this.handle.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].parent.setSelection(this.b$["$wt.custom.CTabItem"]);
@@ -61,10 +58,7 @@ if(this.parent.showClose){
 this.handle.onmouseover=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].prepareCloseBtn(true);
@@ -76,10 +70,7 @@ return $_N($wt.custom.CTabItem$2,i$,v$);
 this.handle.onmouseout=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$3")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$3",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$3",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].prepareCloseBtn(false);
@@ -319,10 +310,7 @@ if(this.showClose){
 this.rightEl.onclick=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$4")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$4",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$4",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var e=new $wt.custom.CTabFolderEvent(this.b$["$wt.custom.CTabItem"].parent);
@@ -349,10 +337,7 @@ return $_N($wt.custom.CTabItem$4,i$,v$);
 this.rightEl.onmouseover=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$5")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$5",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$5",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].prepareCloseBtn(true);
@@ -365,10 +350,7 @@ return $_N($wt.custom.CTabItem$5,i$,v$);
 this.rightEl.onmouseout=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.custom.CTabItem$6")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.custom,"CTabItem$6",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.custom,"CTabItem$6",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 this.b$["$wt.custom.CTabItem"].prepareCloseBtn(false);

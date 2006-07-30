@@ -1,4 +1,4 @@
-Clazz.load(["$wt.events.TypedEvent"],"$wt.events.KeyEvent",null,function(){
+$_L(["$wt.events.TypedEvent"],"$wt.events.KeyEvent",null,function(){
 c$=$_C(function(){
 this.character=0;
 this.keyCode=0;
@@ -19,6 +19,4 @@ function(){
 var string=$_U(this,$wt.events.KeyEvent,"toString",[]);
 return string.substring(0,string.length-1)+" character='"+(((this.character).charCodeAt(0)==0)?"\\0":""+this.character)+"'"+" keyCode="+this.keyCode+" stateMask="+this.stateMask+" doit="+this.doit+"}";
 });
-$_S(c$,
-"serialVersionUID",3256442491011412789);
 });

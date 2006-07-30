@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SWTEventObject"],"$wt.accessibility.AccessibleControlEvent",null,function(){
+$_L(["$wt.internal.SWTEventObject"],"$wt.accessibility.AccessibleControlEvent",null,function(){
 c$=$_C(function(){
 this.childID=0;
 this.accessible=null;
@@ -11,14 +11,8 @@ this.result=null;
 this.children=null;
 $_Z(this,arguments);
 },$wt.accessibility,"AccessibleControlEvent",$wt.internal.SWTEventObject);
-$_K(c$,
-function(source){
-$_R(this,$wt.accessibility.AccessibleControlEvent,[source]);
-},"~O");
 $_V(c$,"toString",
 function(){
 return"AccessibleControlEvent {childID="+this.childID+" accessible="+this.accessible+" x="+this.x+" y="+this.y+" width="+this.width+" height="+this.height+" detail="+this.detail+" result="+this.result+"}";
 });
-$_S(c$,
-"serialVersionUID",3257281444169529141);
 });

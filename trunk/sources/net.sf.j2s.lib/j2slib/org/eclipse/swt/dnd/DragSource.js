@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Widget","$wt.dnd.Transfer"],"$wt.dnd.DragSource",["$wt.dnd.DND","$.DNDListener","$wt.widgets.Listener"],function(){
+$_L(["$wt.widgets.Widget","$wt.dnd.Transfer"],"$wt.dnd.DragSource",["$wt.dnd.DND","$.DNDListener","$wt.widgets.Listener"],function(){
 c$=$_C(function(){
 this.control=null;
 this.controlListener=null;
@@ -21,10 +21,7 @@ this.AddRef();
 this.controlListener=(function(i$,v$){
 if(!$_D("org.eclipse.swt.dnd.DragSource$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.dnd,"DragSource$1",null,$wt.widgets.Listener);
+c$=$_W($wt.dnd,"DragSource$1",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(event){
 if(event.type==12){
@@ -43,10 +40,7 @@ control.addListener(29,this.controlListener);
 this.addListener(12,(function(i$,v$){
 if(!$_D("org.eclipse.swt.dnd.DragSource$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.dnd,"DragSource$2",null,$wt.widgets.Listener);
+c$=$_W($wt.dnd,"DragSource$2",null,$wt.widgets.Listener);
 $_V(c$,"handleEvent",
 function(e){
 this.b$["$wt.dnd.DragSource"].onDispose();

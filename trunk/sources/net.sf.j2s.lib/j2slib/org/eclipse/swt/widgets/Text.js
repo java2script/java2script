@@ -1,4 +1,4 @@
-Clazz.load(["$wt.widgets.Scrollable"],"$wt.widgets.Text",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
+$_L(["$wt.widgets.Scrollable"],"$wt.widgets.Text",["$wt.graphics.Point","$wt.internal.RunnableCompatibility","$wt.internal.browser.OS","$wt.widgets.Event","$.TypedListener"],function(){
 c$=$_C(function(){
 this.tabs=0;
 this.oldStart=0;
@@ -11,10 +11,6 @@ this.textHandle=null;
 this.lineHeight=0;
 $_Z(this,arguments);
 },$wt.widgets,"Text",$wt.widgets.Scrollable);
-$_K(c$,
-function(parent,style){
-$_R(this,$wt.widgets.Text,[parent,$wt.widgets.Text.checkStyle(style)]);
-},"$wt.widgets.Composite,~N");
 $_V(c$,"createHandle",
 function(){
 this.handle=d$.createElement("DIV");
@@ -62,10 +58,7 @@ function(){
 this.textHandle.onkeydown=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Text$1")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Text$1",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Text$1",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 var verifyHooked=false;
@@ -113,10 +106,7 @@ function(){
 this.textHandle.onkeyup=$_Q((function(i$,v$){
 if(!$_D("org.eclipse.swt.widgets.Text$2")){
 $_H();
-c$=$_C(function(){
-$_B(this,arguments);
-$_Z(this,arguments);
-},$wt.widgets,"Text$2",$wt.internal.RunnableCompatibility);
+c$=$_W($wt.widgets,"Text$2",$wt.internal.RunnableCompatibility);
 $_V(c$,"run",
 function(){
 if((this.b$["$wt.widgets.Text"].style&8)!=0||(this.b$["$wt.widgets.Text"].hooks(25)&&!this.b$["$wt.widgets.Text"].filters(25))){
@@ -560,7 +550,7 @@ if((this.style&2)!=0)return;
 try{
 this.textHandle.type="password";
 }catch(e){
-if($_O(e,java.lang.Exception)){
+if($_O(e,Exception)){
 }else{
 throw e;
 }

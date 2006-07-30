@@ -1,4 +1,4 @@
-Clazz.load(["$wt.internal.SerializableCompatibility"],"$wt.graphics.RGB",["$wt.SWT"],function(){
+$_L(["$wt.internal.SerializableCompatibility"],"$wt.graphics.RGB",["$wt.SWT"],function(){
 c$=$_C(function(){
 this.red=0;
 this.green=0;
@@ -26,6 +26,4 @@ $_V(c$,"toString",
 function(){
 return"RGB {"+this.red+", "+this.green+", "+this.blue+"}";
 });
-$_S(c$,
-"serialVersionUID",3258415023461249074);
 });

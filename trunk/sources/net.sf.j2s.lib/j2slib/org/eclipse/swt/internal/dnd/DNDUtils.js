@@ -1,7 +1,5 @@
-Clazz.load(null,"$wt.internal.dnd.DNDUtils",["$wt.internal.dnd.DragEvent","$.HTMLEventWrapper"],function(){
-c$=$_C(function(){
-$_Z(this,arguments);
-},$wt.internal.dnd,"DNDUtils");
+$_L(null,"$wt.internal.dnd.DNDUtils",["$wt.internal.dnd.DragEvent","$.HTMLEventWrapper"],function(){
+c$=$_T($wt.internal.dnd,"DNDUtils");
 c$.bindFunctionWith=$_M(c$,"bindFunctionWith",
 function(aFun,obj){
 var xFun=null;
