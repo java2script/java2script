@@ -122,6 +122,8 @@ public class Button extends Control {
 	 * @see SWT#CENTER
 	 * @see Widget#checkSubclass
 	 * @see Widget#getStyle
+	 * 
+	 * @j2sIgnore
 	 */
 	public Button (Composite parent, int style) {
 		super (parent, checkStyle (style));
@@ -573,7 +575,7 @@ public boolean getSelection () {
 //	int state = OS.SendMessage (handle, OS.BM_GETCHECK, 0, 0);
 //	return (state & OS.BST_CHECKED) != 0;
 	if ((style & SWT.TOGGLE) != 0) {
-		System.out.println(btnHandle.className);
+		//System.out.println(btnHandle.className);
 		return (btnHandle.className != null && btnHandle.className.indexOf("button-selected") != -1);
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		return btnHandle.checked;

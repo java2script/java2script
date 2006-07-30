@@ -137,6 +137,8 @@ public class Text extends Scrollable {
  * @see SWT#WRAP
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Text (Composite parent, int style) {
 	super (parent, checkStyle (style));

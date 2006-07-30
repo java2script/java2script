@@ -136,10 +136,12 @@ public class Combo extends Composite {
  * @see SWT#SIMPLE
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Combo (Composite parent, int style) {
 	super (parent, checkStyle (style));
-	itemCount = 0;
+	//itemCount = 0;
 }
 
 /**

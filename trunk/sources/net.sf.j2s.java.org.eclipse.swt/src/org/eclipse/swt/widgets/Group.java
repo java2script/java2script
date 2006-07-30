@@ -122,6 +122,8 @@ public class Group extends Composite {
  * @see SWT#SHADOW_NONE
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Group (Composite parent, int style) {
 	super (parent, checkStyle (style));
@@ -232,6 +234,7 @@ Object createCSSElement(Object parent, String css) {
 }
 
 protected void createHandle () {
+	children = new Control[0];
 	//super.createHandle ();
 	state &= ~CANVAS;
 	handle = document.createElement("DIV");

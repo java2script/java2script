@@ -99,6 +99,8 @@ public class ToolBar extends Composite {
  * @see SWT#VERTICAL
  * @see Widget#checkSubclass()
  * @see Widget#getStyle()
+ * 
+ * @j2sIgnore
  */
 public ToolBar (Composite parent, int style) {
 	super (parent, checkStyle (style));

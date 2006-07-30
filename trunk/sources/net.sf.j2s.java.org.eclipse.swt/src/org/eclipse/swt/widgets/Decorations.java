@@ -176,6 +176,8 @@ Decorations () {
  * @see SWT#TOOL
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Decorations (Composite parent, int style) {
 	super (parent, checkStyle (style));
