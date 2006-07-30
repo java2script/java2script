@@ -446,7 +446,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding resolveBinding = node.resolveBinding();
-		if (resolveBinding.isTopLevel()) {
+		if (resolveBinding != null && resolveBinding.isTopLevel()) {
 			String thisClassName = resolveBinding.getQualifiedName();
 			classNameSet.add(thisClassName);
 			classBindingSet.add(resolveBinding);
@@ -502,6 +502,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				}
 			}
 		}
+		musts.add("java.lang.Enum");
 		visitForMusts(node);
 		visitForRequires(node);
 		visitForOptionals(node);

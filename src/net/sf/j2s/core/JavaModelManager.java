@@ -308,9 +308,11 @@ public class JavaModelManager {
 	 * Sets the last built state for the given project, or null to reset it.
 	 */
 	public void setLastBuiltState(IProject project, Object state) {
+		PerProjectInfo info = null;
 		if (Java2ScriptProject.hasJava2ScriptNature(project)) {
 			// should never be requested on non-Java projects
-			PerProjectInfo info = getPerProjectInfo(project, true /*create if missing*/);
+			//PerProjectInfo info = getPerProjectInfo(project, true /*create if missing*/);
+			info = getPerProjectInfo(project, true /*create if missing*/);
 			info.triedRead = true; // no point trying to re-read once using setter
 			info.savedState = state;
 		}
@@ -321,6 +323,15 @@ public class JavaModelManager {
 					file.delete();
 			} catch(SecurityException se) {
 				// could not delete file: cannot do much more
+			}
+		} else {
+			if (info != null) {
+				try {
+					saveBuiltState(info);
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
