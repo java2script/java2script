@@ -77,6 +77,8 @@ public class List extends Scrollable {
  * @see SWT#MULTI
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public List (Composite parent, int style) {
 	super (parent, checkStyle (style));

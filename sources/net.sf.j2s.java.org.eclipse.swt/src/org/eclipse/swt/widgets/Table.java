@@ -123,9 +123,12 @@ public class Table extends Composite {
  * @see SWT#VIRTUAL
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Table (Composite parent, int style) {
 	super (parent, checkStyle (style));
+	/*
 	selection = new TableItem[0];
 	items = new TableItem[0];
 	columns = new TableColumn[0];
@@ -133,6 +136,7 @@ public Table (Composite parent, int style) {
 	lineWidth = 0;
 //	itemsStr = new String[0];
 	tbody = null;
+	*/
 }
 
 TableItem _getItem (int index) {
@@ -623,6 +627,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 }
 
 protected void createHandle () {
+	selection = new TableItem[0];
+	items = new TableItem[0];
+	columns = new TableColumn[0];
+	columnMaxWidth = new int[0];
+	lineWidth = 0;
+//	itemsStr = new String[0];
+	tbody = null;
 	super.createHandle ();
 	state &= ~CANVAS;
 	

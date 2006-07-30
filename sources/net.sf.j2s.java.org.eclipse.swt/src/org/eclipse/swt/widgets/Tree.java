@@ -101,11 +101,15 @@ public class Tree extends Composite {
  * @see SWT#CHECK
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Tree (Composite parent, int style) {
 	super (parent, checkStyle (style));
+	/*
 	selections = new TreeItem[0];
 	items = new TreeItem[0];
+	*/
 }
 
 static int checkStyle (int style) {
@@ -318,6 +322,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 }
 
 protected void createHandle () {
+	selections = new TreeItem[0];
+	items = new TreeItem[0];
 	super.createHandle ();
 	state &= ~CANVAS;
 	

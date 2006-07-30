@@ -130,6 +130,8 @@ public class TabFolder extends Composite {
  * @see SWT
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public TabFolder (Composite parent, int style) {
 	super (parent, checkStyle (style));
@@ -370,6 +372,7 @@ void createItem (TabItem item, final int index) {
 }
 
 protected void createHandle () {
+	children = new Control[0];
 	/*
 	super.createHandle ();
 	

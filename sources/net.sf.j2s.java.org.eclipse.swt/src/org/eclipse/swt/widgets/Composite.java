@@ -90,10 +90,14 @@ Composite () {
  * @see SWT#NO_REDRAW_RESIZE
  * @see SWT#NO_RADIO_GROUP
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Composite (Composite parent, int style) {
 	super (parent, style);
+	/*
 	children = new Control[0];
+	*/
 }
 
 protected Control [] _getChildren () {
@@ -263,6 +267,7 @@ protected Element containerHandle() {
 }
 
 protected void createHandle () {
+	children = new Control[0];
 	//super.createHandle ();
 	handle = document.createElement("DIV");
 	handle.className = "composite-default";

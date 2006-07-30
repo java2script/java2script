@@ -72,6 +72,8 @@ public class Sash extends Control {
  * @see SWT#VERTICAL
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Sash (Composite parent, int style) {
 	super (parent, checkStyle (style));

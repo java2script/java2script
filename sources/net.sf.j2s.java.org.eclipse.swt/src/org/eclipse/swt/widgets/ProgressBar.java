@@ -109,11 +109,15 @@ public class ProgressBar extends Control {
  * @see SWT#VERTICAL
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */	
 public ProgressBar (Composite parent, int style) {
 	super (parent, checkStyle (style));
+	/*
 	minimum = 0;
 	maximum = 100;
+	*/
 }
 
 /*
@@ -158,6 +162,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 
 void createHandle () {
 	//super.createHandle ();
+	minimum = 0;
+	maximum = 100;
 	handle = document.createElement ("DIV");
 	handle.className = "progress-bar-default";
 	if (parent != null && parent.handle != null) {

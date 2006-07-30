@@ -95,12 +95,16 @@ public class Spinner extends Composite {
 	 * @see SWT#WRAP
 	 * @see Widget#checkSubclass
 	 * @see Widget#getStyle
+	 * 
+	 * @j2sIgnore
 	 */
 	public Spinner (Composite parent, int style) {
 		super (parent, checkStyle (style));
+		/*
 		increment = 1;
 		minimum = 0;
 		maximum = Integer.MAX_VALUE;
+		*/
 	}
 	/*
 	 int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
@@ -134,6 +138,9 @@ public class Spinner extends Composite {
 	}
 	
 	protected void createHandle () {
+		increment = 1;
+		minimum = 0;
+		maximum = Integer.MAX_VALUE;
 		super.createHandle ();
 		state &= ~CANVAS;
 		/*

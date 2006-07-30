@@ -74,6 +74,8 @@ public abstract class Widget {
 	boolean waitingForLayout;
 	boolean[] hookedStatus;
 
+	boolean styleChecked;
+	
 	/* Global state flags */
 	static protected final int DISPOSED		= 1<<0;
 	static protected final int CANVAS			= 1<<1;
@@ -141,6 +143,13 @@ public Widget (Widget parent, int style) {
 	checkSubclass ();
 	checkParent (parent);
 	this.style = style;
+	/**
+	 * @j2sNative
+	 * if (!this.styleChecked && this.checkStyle != null) {
+	 * 	this.style = this.checkStyle (this.style);
+	 * 	this.styleChecked = true;
+	 * }
+	 */{}
 	display = parent.display;
 	waitingForLayout = true;
 }

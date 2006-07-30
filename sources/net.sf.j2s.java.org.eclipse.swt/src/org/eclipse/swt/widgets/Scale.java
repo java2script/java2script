@@ -120,12 +120,16 @@ public class Scale extends Control {
  * @see SWT#VERTICAL
  * @see Widget#checkSubclass
  * @see Widget#getStyle
+ * 
+ * @j2sIgnore
  */
 public Scale (Composite parent, int style) {
 	super (parent, checkStyle (style));
+	/*
 	minimum = 0;
 	maximum = 100;
 	pageIncrement = 10;
+	*/
 }
 
 /**
@@ -202,7 +206,10 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 
 
 void createHandle () {
-	super.createHandle ();
+	//super.createHandle ();
+	minimum = 0;
+	maximum = 100;
+	pageIncrement = 10;
 	/*
 	OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 0, 100);
 	OS.SendMessage (handle, OS.TBM_SETPAGESIZE, 0, 10);
