@@ -1639,6 +1639,27 @@ Clazz.decorateAsClass = function (clazzFun, prefix, name, clazzParent,
 	return clazzFun;
 };
 
+/* public */
+Clazz.declareType = function (prefix, name, clazzParent, interfacez, 
+		parentClazzInstance) {
+	var f = function () {
+		Clazz.instantialize (this, arguments);
+	};
+	return Clazz.decorateAsClass (f, prefix, name, clazzParent, interfacez, 
+			parentClazzInstance);
+};
+
+/* public */
+Clazz.declareAnonymous = function (prefix, name, clazzParent, interfacez, 
+		parentClazzInstance) {
+	var f = function () {
+		Clazz.prepareCallback (this, arguments);
+		Clazz.instantialize (this, arguments);
+	};
+	return Clazz.decorateAsClass (f, prefix, name, clazzParent, interfacez, 
+			parentClazzInstance);
+};
+
 /* protected */
 Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent, 
 		interfacez, parentClazzInstance) {
@@ -1666,7 +1687,22 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 	return clazzFun;
 };
 
-Clazz.declarePackage ("java.lang");
+Clazz.declarePackage ("java.io");
+//Clazz.declarePackage ("java.lang");
+Clazz.declarePackage ("java.lang.reflect"); // java.lang
+Clazz.declarePackage ("java.lang.ref.reflect");  // java.lang.ref
+Clazz.declarePackage ("java.util");
+
+/*
+ * Consider these interfaces are basic!
+ */
+Clazz.declareInterface (java.io,"Serializable");
+Clazz.declareInterface (java.lang,"CharSequence");
+Clazz.declareInterface (java.lang,"Cloneable");
+Clazz.declareInterface (java.lang,"Comparable");
+Clazz.declareInterface (java.lang,"Runnable");
+Clazz.declareInterface (java.util,"Comparator");
+
 java.lang.ClassLoader = {
 	__CLASS_NAME__ : "ClassLoader"
 };

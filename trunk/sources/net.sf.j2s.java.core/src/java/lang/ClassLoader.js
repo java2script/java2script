@@ -310,12 +310,41 @@ ClazzLoader.classQueue = new Array ();
 ClazzLoader.classpathMap = new Object ();
 
 /* public */
-ClazzLoader.packageClasspath = function (pkg, base) {
+ClazzLoader.packageClasspath = function (pkg, base, index) {
+	if (pkg instanceof Array) {
+		for (var i = 0; i < pkg.length; i++) {
+			ClazzLoader.packageClasspath (pkg[i], base, index);
+		}
+		return ;
+	}
+	var map = ClazzLoader.classpathMap;
+	if (pkg == "java" || pkg == "java.*") {
+		// support ajax for default
+		var key = "@net.sf.j2s.ajax";
+		if (map[key] == null) {
+			map[key] = base;
+		}
+	} else if (pkg == "swt") { //abbrev
+		pkg = "org.eclipse.swt";
+	} else if (pkg == "ajax") { //abbrev
+		pkg = "net.sf.j2s.ajax";
+	}
 	if (pkg.lastIndexOf (".*") == pkg.length - 2) {
 		pkg = pkg.substring (0, pkg.length - 2);
 	}
-	ClazzLoader.classpathMap["@" + pkg] = base;
+	map["@" + pkg] = base;
+	if (index == true && window[pkg + ".package"] != true) {
+		ClazzLoader.pkgRefCount++;
+		ClazzLoader.loadClass (pkg + ".package", function () {
+					ClazzLoader.pkgRefCount--;
+					if (ClazzLoader.pkgRefCount == 0) {
+						ClazzLoader.runtimeLoaded ();
+					}
+				}, true);
+	}
 };
+
+ClazzLoader.pkgRefCount = 0;
 
 /* public */
 /*-# clazzes -> zs #-*/
@@ -333,102 +362,37 @@ ClazzLoader.jarClasspath = function (jar, clazzes) {
 };
 
 /* public */
-/*-#
- # prefix -> px 
- # isRegistered -> iX
- #-*/
-ClazzLoader.libraryClasspath = function (prefix, pkgs, base, index) {
-	var isRegistered = prefix + "registered";
-	if (ClazzLoader[isRegistered] == true) {
-		return ;
-	}
-	ClazzLoader[isRegistered] = true;
+ClazzLoader.registerPackages = function (prefix, pkgs) {
+	var base = ClazzLoader.getClasspathFor (prefix + ".*", true);
 	for (var i = 0; i < pkgs.length; i++) {
-		ClazzLoader.packageClasspath (prefix + pkgs[i], base);
+		if (window["Clazz"] != null) {
+			Clazz.declarePackage (prefix + "." + pkgs[i]);
+		}
+		ClazzLoader.packageClasspath (prefix + "." + pkgs[i], base);
 	}
-	if (index == true && window[prefix + "package"] != true) {
-		ClazzLoader.loadClass (prefix + "package");
-	}
-};
-
-/* public */
-ClazzLoader.runtimeClasspath = function (base) {
-	ClazzLoader.libraryClasspath ("java.",  [
-			"*",
-			"lang.*",
-			"lang.ref.*",
-			"lang.ref.reflect.*",
-			"lang.reflect.*",
-			"io.*",
-			"util.*"
-	], base, true);
-};
-
-/* public */
-ClazzLoader.swtClasspath = function (base) {
-	ClazzLoader.libraryClasspath ("org.eclipse.swt.", [
-			"*",
-			"accessibility.*",
-			"awt.*",
-			"browser.*",
-			"custom.*",
-			"dnd.*",
-			"events.*",
-			"graphics.*",
-			"internal.*",
-			"internal.browser.*",
-			"internal.dnd.*",
-			"internal.struct.*",
-			"layout.*",
-			"printing.*",
-			"program.*",
-			"widgets.*"
-	], base, true);
-};
-
-
-/* public */
-ClazzLoader.junitClasspath = function (base) {
-	ClazzLoader.libraryClasspath ("junit.", [
-			"*",
-			"awtui.*",
-			"extensions.*",
-			"framework.*",
-			"runner.*",
-			"swingui.*",
-			"textui.*"
-	], base, false);
-};
-
-
-/* public */
-ClazzLoader.ajaxClasspath = function (base) {
-	ClazzLoader.libraryClasspath ("net.sf.j2s.ajax.", ["*"], base, false);
-};
-
-/**
- * All the Java runtime library, Eclipse SWT library and AJAX library are put
- * in the same folder.
- */
-/* public */
-ClazzLoader.j2slibClasspath = function (base) {
-	ClazzLoader.runtimeClasspath (base);
-	ClazzLoader.swtClasspath (base);
-	ClazzLoader.ajaxClasspath (base);
-	ClazzLoader.junitClasspath (base);
 };
 
 /**
  * Return the *.js path of the given class. Maybe the class is contained
  * in a *.z.js jar file.
+ * @param clazz Given class that the path is to be calculated for. May
+ * be java.package, or java.lang.String
+ * @param forRoot Optional argument, if true, the return path will be root
+ * of the given classs' package root path.
  */
 /* public */
-ClazzLoader.getClasspathFor = function (clazz/*, fullpath*/) {
+ClazzLoader.getClasspathFor = function (clazz, forRoot) {
 	//error ("check js path : " + clazz);
 	var path = ClazzLoader.classpathMap["#" + clazz];
 	if (path != null) {
 		return path;
 	}
+	/*
+	path = ClazzLoader.classpathMap["@" + clazz]; // package
+	if (path != null) {
+		return ClazzLoader.assureBase (path) + clazz.replace (/\./g, "/") + "/";
+	}
+	*/
 	var base = null;
 	var idx = clazz.lastIndexOf (".");
 	/*
@@ -447,11 +411,12 @@ ClazzLoader.getClasspathFor = function (clazz/*, fullpath*/) {
 	}
 	
 	base = ClazzLoader.assureBase (base);
-	/*
-	if (!fullpath) {
+	if (forRoot) {
 		return base;
 	}
-	*/
+	if (clazz.lastIndexOf (".*") == clazz.length - 2) {
+		return base + clazz.substring (0, idx + 1).replace (/\./g, "/");
+	}
 	var jsPath = base + clazz.replace (/\./g, "/") + ".js";
 	return jsPath;
 };
@@ -558,7 +523,7 @@ ClazzLoader.xhrOnload = function (transport, file) {
 				log (transport.responseText.length + "::" + file);
 				}				
 			*/
-				fileCount += transport.responseText.length;
+			//	fileCount += transport.responseText.length;
 			eval (transport.responseText);
 		} catch (e) {
 			alert ("[Java2Script] Script error: " + e.message);
@@ -897,7 +862,7 @@ ClazzLoader.updateNode = function (node) {
 							&& n.declaration.clazzList != null) {
 						var list = n.declaration.clazzList;
 						for (var j = 0; j < list.length; j++) {
-							var nn = list[j];
+							var nn = ClazzLoader.findClass (list[j]);
 							if (nn.status != ClazzNode.STATUS_OPTIONALS_LOADED
 									&& nn != n) {
 								nn.status = n.status;
@@ -949,7 +914,7 @@ ClazzLoader.updateNode = function (node) {
 							&& node.declaration.clazzList != null) {
 						var list = node.declaration.clazzList;
 						for (var j = 0; j < list.length; j++) {
-							var nn = list[j];
+							var nn = ClazzLoader.findClass (list[j]);
 							if (nn.status != ClazzNode.STATUS_DECLARED
 									&& nn != node) {
 			nn.status = ClazzNode.STATUS_DECLARED;
@@ -1002,7 +967,7 @@ ClazzLoader.updateNode = function (node) {
 							&& node.declaration.clazzList != null) {
 						var list = node.declaration.clazzList;
 						for (var j = 0; j < list.length; j++) {
-							var nn = list[j];
+							var nn = ClazzLoader.findClass (list[j]);
 							if (nn.status != level && nn != node) {
 			nn.status = level;
 			nn.declaration = null;
@@ -1228,6 +1193,9 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
  */
 if (window["Clazz"] != null) {
 	Clazz.load = ClazzLoader.load;
+	if (window["$_L"] != null) {
+		$_L = Clazz.load;
+	}
 }
 
 /**
@@ -1336,20 +1304,30 @@ ClazzLoader.loadClassNode = function (node) {
 	}
 };
 
-ClazzLoader.queueBeforeString = new Array ();
+
+/* protected */
+ClazzLoader.runtimeKeyClass = "java.lang.String";
+
+/**
+ * Queue used to store classes before key class is loaded.
+ */
+/* private */
+ClazzLoader.queueBe4KeyClazz = new Array ();
 
 /**
  * Load the given class ant its related classes.
  */
 /* public */
-ClazzLoader.loadClass = function (name, optionalsLoaded) {
+ClazzLoader.loadClass = function (name, optionalsLoaded, forced) {
 	if (typeof optionalsLoaded == "boolean") {
 		return Clazz.evalType (name);
 	}
 	ClazzLoader.keepOnLoading = true;
-	if (!ClazzLoader.isClassDefined ("java.lang.String") 
-			&& name.indexOf ("java.") != 0) {
-		var qbs = ClazzLoader.queueBeforeString;
+	if (!forced && ((ClazzLoader.pkgRefCount != 0 
+			&& name.lastIndexOf (".package") != name.length - 8)
+			|| (!ClazzLoader.isClassDefined (ClazzLoader.runtimeKeyClass) 
+			&& name.indexOf ("java.") != 0))) {
+		var qbs = ClazzLoader.queueBe4KeyClazz;
 		qbs[qbs.length] = [name, optionalsLoaded];
 		return ;
 	}
@@ -1365,15 +1343,24 @@ ClazzLoader.loadClass = function (name, optionalsLoaded) {
 			n.status = ClazzNode.STATUS_KNOWN;
 			/*-# needBeingQueued -> nQ #-*/
 			var needBeingQueued = false;
-			for (var i = ClazzLoader.classQueue.length - 1; i >= 0; i--) {
-				var cq = ClazzLoader.classQueue[i];
-				if (cq.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+			var qq = ClazzLoader.classQueue;
+			for (var i = qq.length - 1; i >= 0; i--) {
+				if (qq[i].status != ClazzNode.STATUS_OPTIONALS_LOADED) {
 					needBeingQueued = true;
 					break;
 				}
 			}
-			// push class to queue
-			ClazzLoader.classQueue[ClazzLoader.classQueue.length] = n;
+			/*
+			if (forced) {
+				// push class to queue
+				for (var i = qq.length - 1; i >= 0; i--) {
+					qq[i + 1] = qq[i];
+				}
+				qq[0] = n;
+			} else {
+			//*/
+				qq[qq.length] = n;
+			//}
 			if (!needBeingQueued) { // can be loaded directly
 				ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
 				ClazzLoader.loadScript (n.path);
@@ -1383,6 +1370,29 @@ ClazzLoader.loadClass = function (name, optionalsLoaded) {
 		optionalsLoaded ();
 	}
 	
+};
+
+/* private */
+ClazzLoader.runtimeLoaded = function () {
+	if (ClazzLoader.pkgRefCount != 0 
+			|| !ClazzLoader.isClassDefined (ClazzLoader.runtimeKeyClass)) {
+		return ;
+	}
+	var qbs = ClazzLoader.queueBe4KeyClazz;
+	for (var i = 0; i < qbs.length; i++) {
+		ClazzLoader.loadClass (qbs[i][0], qbs[i][1]);
+	}
+	ClazzLoader.runtimeLoaded = function () {};
+};
+
+/* public */
+ClazzLoader.loadZJar = function (zjarPath, keyClazz) {
+	ClazzLoader.jarClasspath (zjarPath, [keyClazz]);
+	if (keyClazz == ClazzLoader.runtimeKeyClass) {
+		ClazzLoader.loadClass (keyClazz, ClazzLoader.runtimeLoaded, true);
+	} else {
+		ClazzLoader.loadClass (keyClazz, null, true);
+	}
 };
 
 /**
