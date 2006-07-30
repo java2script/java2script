@@ -31,23 +31,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
 public class J2SLaunchingUtil {
-//	public static String readTemplate() {
-//		try {
-//			InputStream res = J2SLaunchingUtil.class
-//					.getResourceAsStream("j2s.template.html");
-//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//			byte[] buf = new byte[1024];
-//			int read = 0;
-//			while ((read = res.read(buf)) != -1) {
-//				baos.write(buf, 0, read);
-//			}
-//			res.close();
-//			return baos.toString();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
 
 	public static void writeMainHTML(File file, String html) {
 		try {
@@ -253,9 +236,16 @@ public class J2SLaunchingUtil {
 		//buf.append(wrapTypeJS(mainType, relativePath));
 		
 		buf.append("<script type=\"text/javascript\">\r\n");
+		/*
 		buf.append("ClazzLoader.j2slibClasspath (\"");
 		buf.append(j2sLibPath);
 		buf.append("\");\r\n");
+		*/
+
+		buf.append("ClazzLoader.packageClasspath ([\"java\", \"swt\"], \"");
+		buf.append(j2sLibPath);
+		buf.append("\", true);\r\n");
+
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
