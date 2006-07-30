@@ -138,17 +138,6 @@ public class J2SUnitLaunchShortcut implements ILaunchShortcut {
 		ILaunchConfiguration config= findOrCreateLaunchConfiguration(mode, this, description);
 
 		if (config != null) {
-			try {
-				DebugPlugin.getDefault().getLaunchManager().addLaunch(new Launch(config, mode, new ISourceLocator() {
-					public Object getSourceElement(IStackFrame stackFrame) {
-						// TODO Auto-generated method stub
-						return null;
-					}
-				}));
-				J2SUnitLaunchingUtil.launchingJ2SUnit(config);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
 			DebugUITools.launch(config, mode);
 		}
 	}

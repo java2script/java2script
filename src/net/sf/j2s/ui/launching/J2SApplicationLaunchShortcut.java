@@ -135,24 +135,7 @@ public class J2SApplicationLaunchShortcut extends JavaLaunchShortcut {
 	protected void launch(IType type, String mode) {
 		ILaunchConfiguration config = findLaunchConfiguration(type, getConfigurationType());
 		if (config != null) {
-			try {
-				StringBuffer buffer= new StringBuffer(config.getName());
-				buffer.append(DebugUIMessages.DebugUIPlugin_0); //$NON-NLS-1$
-				ILaunchConfigurationWorkingCopy workingCopy= config.copy(buffer.toString());
-				//workingCopy.setAttribute(ATTR_LAUNCHING_CONFIG_HANDLE, config.getMemento());
-				//final ILaunch pendingLaunch= new PendingLaunch(workingCopy, mode, this);
-                
-				DebugPlugin.getDefault().getLaunchManager().addLaunch(new Launch(config, mode, new ISourceLocator() {
-					public Object getSourceElement(IStackFrame stackFrame) {
-						// TODO Auto-generated method stub
-						return null;
-					}
-				}));
-				J2SLaunchingUtil.launchingJ2SApp(config);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-			//DebugUITools.launch(config, mode);
+			DebugUITools.launch(config, mode);
 		}			
 	}
 	
