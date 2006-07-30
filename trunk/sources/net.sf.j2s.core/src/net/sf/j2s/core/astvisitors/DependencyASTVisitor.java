@@ -502,6 +502,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				}
 			}
 		}
+		musts.add("java.lang.Enum");
 		visitForMusts(node);
 		visitForRequires(node);
 		visitForOptionals(node);

@@ -460,6 +460,9 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	public static String[] getClazzAbbrMap() {
 		String[] clazzAll = new String[] {
+				"Clazz.load", "L", //
+				"Clazz.declareAnonymous", "W", //
+				"Clazz.declareType", "T", //
 				"Clazz.declarePackage", "J", //
 				"Clazz.decorateAsClass", "C", //
 				"Clazz.instantialize", "Z", //

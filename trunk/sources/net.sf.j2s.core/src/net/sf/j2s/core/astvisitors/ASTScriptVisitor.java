@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -176,7 +177,26 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		buffer.append("Clazz.instantialize (this, arguments);\r\n");
 		
 		buffer.append("}, ");
+
 		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
+		} else {
+			emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+					"Clazz.prepareCallback (this, arguments);\r\n" +
+					"Clazz.instantialize (this, arguments);\r\n" +
+					"}, ";
+			idx = buffer.lastIndexOf(emptyFun);
+			
+			if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+				buffer.replace(idx, buffer.length(), "Clazz.declareAnonymous (");
+			}
+		}
 //		buffer.append("Clazz.decorateAsType (");
 //		buffer.append("cla$$");
 //		buffer.append(fullClassName);
@@ -572,6 +592,17 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		}
 
 		buffer.append("}, ");
+		
+		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
+		}
+
 		String fullClassName = null;//getFullClassName();
 		if (thisPackageName != null && thisPackageName.length() != 0) {
 			fullClassName = thisPackageName + '.' + thisClassName;
@@ -1317,6 +1348,57 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 			if (!isJ2S) {
 				return false;
+			}
+		}
+		/*
+		 * To skip those methods or constructors which are just overriding with
+		 * default super methods or constructors. 
+		 */
+		Block body = node.getBody();
+		boolean needToCheckArgs = false;
+		List argsList = null;
+		if (body != null && body.statements().size() == 1) {
+			Object statement = body.statements().get(0);
+			if (statement instanceof ReturnStatement) {
+				ReturnStatement ret = (ReturnStatement) statement;
+				Expression exp = ret.getExpression();
+				if (exp instanceof SuperMethodInvocation) {
+					SuperMethodInvocation superRet = (SuperMethodInvocation) exp;
+					if (superRet.getName().toString().equals(node.getName().toString())) {
+						// same method name
+						needToCheckArgs = true;
+						argsList = superRet.arguments();
+					}
+				}
+			} else if (statement instanceof SuperConstructorInvocation) {
+				SuperConstructorInvocation superConstructor = (SuperConstructorInvocation) statement;
+				needToCheckArgs = true;
+				argsList = superConstructor.arguments();
+			}
+		}
+		if (needToCheckArgs) {
+			List params = node.parameters();
+			if (params.size() == argsList.size()) {
+				// same parameters count
+				boolean isOnlySuper = true;
+				for (Iterator iter = params.iterator(), itr = argsList.iterator(); iter.hasNext();) {
+					ASTNode astNode = (ASTNode) iter.next();
+					ASTNode argNode = (ASTNode) itr.next();
+					if (astNode instanceof SingleVariableDeclaration
+							&& argNode instanceof SimpleName) {
+						SingleVariableDeclaration varDecl = (SingleVariableDeclaration) astNode;
+						String paramID = varDecl.getName().getIdentifier();
+						String argID = ((SimpleName) argNode).getIdentifier();
+						if (!paramID.equals(argID)) {
+							// not with the same order, break out
+							isOnlySuper = false;
+							break;
+						}
+					}
+				}
+				if (isOnlySuper) {
+					return false;
+				}
 			}
 		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
@@ -2374,6 +2456,15 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append("Clazz.instantialize (this, arguments);\r\n");
 			//buffer.append("};\r\n");
 			buffer.append("}, ");
+		}
+		
+		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
+				"Clazz.instantialize (this, arguments);\r\n" +
+				"}, ";
+		int idx = buffer.lastIndexOf(emptyFun);
+		
+		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		}
 
 		
