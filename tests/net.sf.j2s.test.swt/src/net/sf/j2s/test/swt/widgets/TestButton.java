@@ -37,7 +37,7 @@ public class TestButton {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void mainArrow(String[] args) {
 		Display display = new Display ();
 		final Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout());
@@ -202,13 +202,13 @@ public class TestButton {
 		imageOpen.dispose();
 		display.dispose ();
 	}
-	public static void mainPush(String[] args) {
+	public static void main(String[] args) {
 		Display display = new Display ();
 		final Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout());
 		Image imageOpen = new Image(display, TestButton.class.getResourceAsStream("openFolder.gif"));
 		
-		final Button btnImg = new Button(shell, SWT.PUSH);
+		final Button btnImg = new Button(shell, SWT.TOGGLE);
 		btnImg.setImage(imageOpen);
 		
 //		System.out.println(new StringBuffer().getClass().getName());
