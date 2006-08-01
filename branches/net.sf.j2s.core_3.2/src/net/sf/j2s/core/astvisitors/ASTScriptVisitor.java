@@ -1397,7 +1397,22 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					}
 				}
 				if (isOnlySuper) {
-					return false;
+					boolean isForced2Keep = false;
+					if (javadoc != null) {
+						List tags = javadoc.tags();
+						if (tags.size() != 0) {
+							for (Iterator iter = tags.iterator(); iter.hasNext();) {
+								TagElement tagEl = (TagElement) iter.next();
+								if ("@j2sKeep".equals(tagEl.getTagName())) {
+									isForced2Keep = true;
+									break;
+								}
+							}
+						}
+					}
+					if (!isForced2Keep) {
+						return false;
+					}
 				}
 			}
 		}
