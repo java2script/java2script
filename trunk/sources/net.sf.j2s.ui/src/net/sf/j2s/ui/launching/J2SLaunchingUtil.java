@@ -242,7 +242,7 @@ public class J2SLaunchingUtil {
 		buf.append("\");\r\n");
 		*/
 
-		buf.append("ClazzLoader.packageClasspath ([\"java\", \"swt\"], \"");
+		buf.append("ClazzLoader.packageClasspath ([\"java\", \"swt\", \"junit\"], \"");
 		buf.append(j2sLibPath);
 		buf.append("\", true);\r\n");
 
