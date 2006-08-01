@@ -354,6 +354,19 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if ("net.sf.j2s.ajax.junit.AsyncSWT".equals(methodBinding.getDeclaringClass().getQualifiedName())
+				&& "waitLayout".equals(methodBinding.getName())) {
+			metSWTBlockWhile = true;
+			node.getExpression().accept(this);
+			buffer.append(".waitLayout (");
+			Expression shellExp = (Expression) node.arguments().get(0);
+			shellExp.accept(this);
+			buffer.append(", ");
+			Expression runnableExp = (Expression) node.arguments().get(1);
+			runnableExp.accept(this);
+			buffer.append(", this, function () {\r\n//");
+			return false;
+		}
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
 			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
