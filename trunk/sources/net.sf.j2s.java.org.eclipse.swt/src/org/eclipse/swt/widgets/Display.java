@@ -425,6 +425,11 @@ public Display () {
  * Constructs a new instance of this class using the parameter.
  * 
  * @param data the device data
+ * 
+ * @j2sKeep As there are some members intializing 
+ * which require this constructor! The members is 
+ * cursors and displays. 
+ * TODO: May require bug fix!
  */
 public Display (DeviceData data) {
 	super (data);
@@ -3031,12 +3036,23 @@ public boolean readAndDispatch () {
 	return runAsyncMessages (false);
 	*/
 	messageProc = window.setInterval(new RunnableCompatibility() {
+		private boolean messageLoop = false;
 		public void run() {
 //			System.out.println("I'm entering the run");
 //			System.out.println("msg " + Display.this.msgs);
 //			List layoutQueue = new ArrayList();
 			MESSAGE[] msgs = Display.this.msgs;
+			if (msgs.length == 0 && messageLoop)
+			/**
+			 * @j2sNative
+			 * var layoutFinished = window["j2s.swt.shell.finish.layout"];
+			 * if (layoutFinished != null) {
+			 * 	layoutFinished ();
+			 * }
+			 * this.messageLoop = false;
+			 */	{ }
 			if (msgs.length != 0) {
+				messageLoop = true; 
 //				System.out.println("msgs.legnth" + msgs.length);
 				MESSAGE[] defered = new MESSAGE[0];
 				
@@ -3117,7 +3133,7 @@ public boolean readAndDispatch () {
 							 * @j2sNativeSrc
 							 * msgs.length -= i + 1;
 							 * @j2sNative
-							 * a.length -= d + 1;
+							 * a.length -= f + 1;
 							 */ {}
 //							System.out.println("after deferring:" + msgs.length);
 							return ;
