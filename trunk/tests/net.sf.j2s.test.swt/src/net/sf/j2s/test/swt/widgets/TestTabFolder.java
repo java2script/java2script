@@ -51,11 +51,11 @@ public static void main (String [] args) {
 //	
 //	final Button btn2 = new Button(tf, SWT.PUSH);
 //	btn2.setText("Thing");
-	final Group group = new Group(shell, SWT.BORDER);
-	group.setText("Colors and Font and Long and Long");
-	group.setLayout(new GridLayout(1, true));
+//	final Group group = new Group(shell, SWT.BORDER);
+//	group.setText("Colors and Font and Long and Long");
+//	group.setLayout(new GridLayout(1, true));
 
-	final TabFolder tf2 = new TabFolder(group, SWT.BORDER | SWT.TOP);
+	final TabFolder tf2 = new TabFolder(shell, SWT.NONE | SWT.TOP);
 	final TabItem ti1 = new TabItem(tf2, SWT.NONE);
 	Font font = new Font(display, "Tahoma", 18, SWT.NONE);
 //	tf2.setFont(font);
@@ -66,12 +66,12 @@ public static void main (String [] args) {
 //	ti3.setText("World");
 	final Button btnCool = new Button(tf2, SWT.PUSH);
 	btnCool.setText("Cool");
-	ti1.setControl(btnCool);
+//	ti1.setControl(btnCool);
 	
 	final Text txtCool = new Text(tf2, SWT.SINGLE);
 	txtCool.setText("Cool");
-	ti2.setControl(txtCool);
-	ti2.setImage(imageOpen);
+	ti1.setControl(txtCool);
+//	ti2.setImage(imageOpen);
 	
 //	final Button btnThing = new Button(tf2, SWT.PUSH);
 //	btnThing.setText("Thing");
@@ -94,7 +94,7 @@ public static void main (String [] args) {
 //	new TabItem(tf2, SWT.NONE).setText("Wor");
 //	new TabItem(tf2, SWT.NONE).setText("World");
 //	new TabItem(tf2, SWT.NONE).setText("Wor");
-	tf2.setSelection(1);
+//	tf2.setSelection(1);
 	tf2.setLayoutData(new GridData(230, 80));
 	
 	Button button = new Button(shell, SWT.PUSH);
@@ -108,10 +108,12 @@ public static void main (String [] args) {
 //			print(btn);
 //			print(btn2);
 			print(btnCool);
+			print(txtCool);
+			print(txt2Cool);
 //			print(btnThink);
 			print(tf2);
 //			print(groupLeft);
-			shell.layout();
+//			shell.layout();
 		}
 	});
 	Button disp = new Button(shell, SWT.PUSH);
@@ -149,6 +151,12 @@ public static void print(Composite c) {
 	System.out.println("..======..");
 }
 public static void print(Button btn) {
+//	System.out.println(btn.getSize());
+	System.out.println(btn.getBounds());
+	System.out.println(btn.getBorderWidth());
+	System.out.println("..======..");
+}
+public static void print(Text btn) {
 //	System.out.println(btn.getSize());
 	System.out.println(btn.getBounds());
 	System.out.println(btn.getBorderWidth());

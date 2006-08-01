@@ -41,6 +41,7 @@ public class TestText {
 		shell.setLayout(new GridLayout());
 		final Text text = new Text(shell, SWT.NONE);
 		text.setText("hello");
+		text.setEnabled(false);
 		final Text text2 = new Text(shell, SWT.BORDER);
 		text2.setText("Hi, I am here programming");
 		final Text text3 = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL);
