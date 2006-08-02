@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Junit
+Bundle-SymbolicName: net.sf.j2s.test.junit
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Require-Bundle: org.junit
