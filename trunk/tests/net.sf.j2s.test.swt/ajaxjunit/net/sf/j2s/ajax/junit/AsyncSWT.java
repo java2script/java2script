@@ -14,6 +14,9 @@
 package net.sf.j2s.ajax.junit;
 
 import junit.framework.AssertionFailedError;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -22,6 +25,16 @@ import org.eclipse.swt.widgets.Shell;
  * 2006-7-31
  */
 public class AsyncSWT {
+	
+	private static boolean shellAutoClose = true;
+	
+	public static void setShellAutoClose(boolean close) {
+		shellAutoClose = close;
+	}
+	
+	public static boolean isShellAutoClose() {
+		return shellAutoClose;
+	}
 	
 	/**
 	 * @param shell
@@ -48,22 +61,17 @@ if (Clazz.instanceOf (e, junit.framework.AssertionFailedError)) {
 }
 			}
 		} finally {
-			shell.close ();
-			//if (f.next != null) {
-			//	f.next ();
-			//}
+			if (net.sf.j2s.ajax.junit.AsyncSWT.isShellAutoClose ()) {
+				shell.close ();
+			}
 		}
 	} else {
-		shell.close ();
-		//if (f.next != null) {
-		//	f.next ();
-		//}
+		if (net.sf.j2s.ajax.junit.AsyncSWT.isShellAutoClose ()) {
+			shell.close ();
+		}
 	}
 };
 var key = "j2s.swt.shell.finish.layout";
-//if (window[key] != null) {
-//	f.next = window[key];
-//} 
 window[key] = f;
 var closeFun = closeCleanUp;
 if (Clazz.instanceOf (runnable, net.sf.j2s.ajax.junit.AsyncTestRunnable)) {
@@ -95,15 +103,19 @@ Sync2Async.block (shell, oThis, closeFun);
 					}
 				}
 			} finally {
-				shell.close();
+				if (isShellAutoClose()) {
+					shell.close();
+				}
 			}
 		} else {
-			shell.close();
+			if (isShellAutoClose()) {
+				shell.close();
+			}
 		}
 		if (runnable instanceof AsyncTestRunnable) {
 			final AsyncTestRunnable aTest = (AsyncTestRunnable) runnable;
 			//aTest.callback();
-			new Thread(new Runnable() {
+			final Runnable callback = new Runnable() {
 				public void run() {
 					try {
 						Thread.sleep(100);
@@ -112,7 +124,20 @@ Sync2Async.block (shell, oThis, closeFun);
 					}
 					aTest.callback();
 				}
-			}).start();
+			};
+			if (isShellAutoClose()) {
+				new Thread(callback).start();
+			} else {
+				shell.addDisposeListener(new DisposeListener() {
+					public void widgetDisposed(DisposeEvent e) {
+						new Thread(callback).start();
+					}
+				});
+				Display display = shell.getDisplay();
+				while (!shell.isDisposed ()) {
+					if (!display.readAndDispatch ()) display.sleep ();
+				}
+			}
 		}
 	}
 }
