@@ -132,6 +132,16 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getBorderWidth()
+ */
+public int getBorderWidth() {
+	/*if ((style & SWT.BORDER) != 0) {
+		return 2;
+	}*/
+	return 1;
+}
+
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int border = getBorderWidth ();
@@ -166,8 +176,11 @@ void createHandle () {
 	maximum = 100;
 	handle = document.createElement ("DIV");
 	handle.className = "progress-bar-default";
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	
 	innerHandle = document.createElement("DIV");
@@ -300,8 +313,9 @@ public void setMaximum (int value) {
 		OS.SendMessage (handle, OS.PBM_SETRANGE32, minimum, value);
 	}
 	*/
-	if (0 <= minimum && minimum < value) {
+	if (0 <= minimum && minimum < value && maximum != value) {
 		maximum = value;
+		setSelection(selection);
 	}
 }
 
@@ -326,8 +340,9 @@ public void setMinimum (int value) {
 		OS.SendMessage (handle, OS.PBM_SETRANGE32, value, maximum);
 	}
 	*/
-	if (0 <= value && value < maximum) {
+	if (0 <= value && value < maximum && minimum != value) {
 		minimum = value;
+		setSelection(selection);
 	}
 }
 
@@ -346,7 +361,13 @@ public void setMinimum (int value) {
 public void setSelection (int value) {
 	checkWidget ();
 //	OS.SendMessage (handle, OS.PBM_SETPOS, value, 0);
-	selection = value;
+	if (value < minimum) {
+		selection = minimum;
+	} else if (value > maximum) {
+		selection = maximum;
+	} else {
+		selection = value;
+	}
 	if ((style & SWT.HORIZONTAL) != 0) {
 		innerHandle.style.width = Math.round(getSize().x * selection / maximum) + "px";
 	} else {
