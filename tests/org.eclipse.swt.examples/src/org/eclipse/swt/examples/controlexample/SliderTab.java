@@ -28,7 +28,7 @@ class SliderTab extends RangeTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	SliderTab(ControlExample instance) {
+	public SliderTab(ControlExample instance) {
 		super(instance);
 	}
 

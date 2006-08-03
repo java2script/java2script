@@ -11,6 +11,7 @@
 package org.eclipse.swt.examples.controlexample;
 
 
+import net.sf.j2s.ajax.ASWTClass;
 import org.eclipse.swt.*;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,6 +20,7 @@ import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.text.*;
 import java.util.*;
 
@@ -28,6 +30,7 @@ import java.util.*;
  *
  * 2006-7-9
  * 
+ * @j2sRequireImport java.lang.reflect.Constructor
  * @j2sIgnoreImport java.text.MessageFormat
  */
 public class ControlExample {
@@ -54,6 +57,86 @@ public class ControlExample {
 	public ControlExample(Composite parent) {
 		initResources();
 		tabFolder = new TabFolder (parent, SWT.NONE);
+		String[] tabs = new String[] {
+				"Button", 
+				"Label", 
+//				"Canvas",
+				"Combo",
+//				"CoolBar",
+//				"Dialog",
+				"Group",
+				"Label",
+				"Link",
+//				"List",
+//				"Menu",
+				"ProgressBar",
+				"Sash",
+				// shellTab = new ShellTab(this),
+				"Shell",
+				"Slider",
+				"Spinner",
+				"TabFolder",
+//				"Table",
+				"Text"
+//				"ToolBar",
+//				"Tree"
+		};
+		for (int i=0; i<tabs.length; i++) {
+			TabItem item = new TabItem (tabFolder, SWT.NONE);
+		    item.setText (tabs [i]);
+		    //item.setControl (tabs [i].createTabFolderPage (tabFolder));
+		    item.setData ("org.eclipse.swt.examples.controlexample." + tabs [i] + "Tab");
+		}
+		if (tabs.length > 0) {
+			final TabItem item = tabFolder.getItem(0);
+			ASWTClass.shellLoad(parent.getShell(), (String) item.getData(), new Runnable() {
+				public void run() {
+					try {
+						Constructor constructor = Class.forName((String) item.getData()).getConstructor(new Class[] {ControlExample.class});
+						Object inst = constructor.newInstance(new Object[] {ControlExample.this});
+						Tab tab = (Tab) inst;
+						item.setControl(tab.createTabFolderPage(tabFolder));
+						//item.getParent().getShell().pack();
+					} catch (Throwable e) {
+						//e.printStackTrace();
+						throw (Error) e;
+					}
+				}
+			});
+		}
+		if (tabs.length > 1) {
+			tabFolder.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					int idx = tabFolder.getSelectionIndex();
+					if (idx != -1) {
+						final TabItem item = tabFolder.getItem(idx);
+						if (item.getControl() == null) {
+							Object data = item.getData();
+							if (data != null) {
+								ASWTClass.shellLoad(tabFolder.getShell(), (String) data, new Runnable() {
+									public void run() {
+										try {
+											Constructor constructor = Class.forName((String) item.getData()).getConstructor(new Class[] {ControlExample.class});
+											Object inst = constructor.newInstance(new Object[] {ControlExample.this});
+											Tab tab = (Tab) inst;
+											if (((String) item.getData()).indexOf("Shell") != -1) {
+												shellTab = (ShellTab) tab;
+											}
+											item.setControl(tab.createTabFolderPage(tabFolder));
+										} catch (Throwable e) {
+											//e.printStackTrace();
+											throw (Error) e;
+										}
+									}
+								});
+							}
+						}
+					}
+				}
+			});
+		}
+		
+		/*
 		Tab [] tabs = createTabs();
 		for (int i=0; i<tabs.length; i++) {
 			TabItem item = new TabItem (tabFolder, SWT.NONE);
@@ -82,36 +165,37 @@ public class ControlExample {
 				}
 			});
 		}
+		*/
 		startup = false;
 	}
 
 	/**
 	 * Answers the set of example Tabs
 	 */
-	Tab[] createTabs() {
-		return new Tab [] {
-			new ButtonTab (this),
-//			new CanvasTab (this),
+//	Tab[] createTabs() {
+//		return new Tab [] {
+//			new ButtonTab (this),
+////			new CanvasTab (this),
 //			new ComboTab (this),
-//			new CoolBarTab (this),
-//			new DialogTab (this),
-			new GroupTab (this),
-			new LabelTab (this),
-			new LinkTab (this),
-//			new ListTab (this),
-//			new MenuTab (this),
+////			new CoolBarTab (this),
+////			new DialogTab (this),
+//			new GroupTab (this),
+//			new LabelTab (this),
+//			new LinkTab (this),
+////			new ListTab (this),
+////			new MenuTab (this),
 //			new ProgressBarTab (this),
-//			new SashTab (this),
-			shellTab = new ShellTab(this),
-//			new SliderTab (this),
+////			new SashTab (this),
+//			shellTab = new ShellTab(this),
+////			new SliderTab (this),
 //			new SpinnerTab (this),
-			new TabFolderTab (this),
-//			new TableTab (this),
-			new TextTab (this),
-//			new ToolBarTab (this),
-//			new TreeTab (this),
-		};
-	}
+//			new TabFolderTab (this),
+////			new TableTab (this),
+//			new TextTab (this),
+////			new ToolBarTab (this),
+////			new TreeTab (this),
+//		};
+//	}
 
 	/**
 	 * Disposes of all resources associated with a particular
@@ -216,17 +300,21 @@ public class ControlExample {
 		int styleNone = SWT.NONE;
 		int style = styleNone;
 		style = SWT.SHELL_TRIM;
-		/**
-		 * @j2sNative 
-		 * style = styleNone;
-		 */ {}
+//		/**
+//		 * @j2sNative 
+//		 * style = styleNone;
+//		 */ {}
 		
 		Shell shell = new Shell(display, style);
 		shell.setLayout(new FillLayout());
 		ControlExample instance = new ControlExample(shell);
 		shell.setText(getResourceString("window.title"));
 //		setShellSize(display, shell);
-		shell.setMaximized(true);
+		/**
+		 * @j2sNative
+		 * shell.setMaximized(true);
+		 */ {}
+		
 		shell.open();
 		while (! shell.isDisposed()) {
 			if (! display.readAndDispatch()) display.sleep();

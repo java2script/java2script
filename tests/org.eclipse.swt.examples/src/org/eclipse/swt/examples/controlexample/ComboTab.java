@@ -38,7 +38,7 @@ class ComboTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ComboTab(ControlExample instance) {
+	public ComboTab(ControlExample instance) {
 		super(instance);
 	}
 	

@@ -31,7 +31,7 @@ class SpinnerTab extends RangeTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	SpinnerTab(ControlExample instance) {
+	public SpinnerTab(ControlExample instance) {
 		super(instance);
 	}
 	

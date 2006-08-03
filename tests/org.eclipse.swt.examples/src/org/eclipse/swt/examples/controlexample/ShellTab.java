@@ -32,7 +32,7 @@ class ShellTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ShellTab(ControlExample instance) {
+	public ShellTab(ControlExample instance) {
 		super(instance);
 	}
 
