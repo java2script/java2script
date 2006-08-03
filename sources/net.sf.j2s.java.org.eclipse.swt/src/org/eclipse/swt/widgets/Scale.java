@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.ScaleDND;
@@ -91,6 +92,7 @@ public class Scale extends Control {
 	private Element thumbHandle;
 	//private Object draggingEvent;
 	private Element trackHandle;
+	private Element[] lines;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -168,14 +170,24 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.HORIZONTAL, SWT.VERTICAL, 0, 0, 0, 0);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getBorderWidth()
+ */
+public int getBorderWidth() {
+	if ((style & SWT.BORDER) != 0) {
+		return 2;
+	}
+	return 0;
+}
+
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int border = getBorderWidth ();
 	int width = border * 2, height = border * 2;
 	//RECT rect = new RECT ();
 	//OS.SendMessage (handle, OS.TBM_GETTHUMBRECT, 0, rect);
-	int thumbWidth = 16;
-	int thumbHeight = 24;
+	int thumbWidth = 10;
+	int thumbHeight = 10;
 	if ((style & SWT.HORIZONTAL) != 0) {
 		/*
 		width += OS.GetSystemMetrics (OS.SM_CXHSCROLL) * 10;
@@ -217,8 +229,11 @@ void createHandle () {
 	*/
 	handle = document.createElement ("DIV");
 	handle.className = "scale-default";
-	if (parent != null && parent.handle != null) {
-		parent.handle.appendChild(handle);
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
 	}
 	
 	if ((style & SWT.BORDER) != 0) {
@@ -234,6 +249,9 @@ void createHandle () {
 		thumbHandle.className = "scale-thumb-vertical";
 		thumbHandle.style.top = "0px";
 	}
+	
+	lines = new Element[0];
+
 	boolean isHorizontal = (style & SWT.HORIZONTAL) != 0;
 	decorateScale();
 	trackHandle = document.createElement ("DIV");
@@ -333,6 +351,28 @@ void createHandle () {
 	dnd.bind(thumbHandle);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (lines != null) {
+		for (int i = 0; i < lines.length; i++) {
+			OS.destroyHandle(lines[i]);
+			lines[i] = null;
+		}
+		//lines = new Element[0];
+	}
+	if (thumbHandle != null) {
+		OS.destroyHandle(thumbHandle);
+		thumbHandle = null;
+	}
+	if (trackHandle != null) {
+		OS.destroyHandle(trackHandle);
+		trackHandle = null;
+	}
+	super.releaseHandle();
+}
+
 /*
 int defaultForeground () {
 	return OS.GetSysColor (OS.COLOR_BTNFACE);
@@ -341,9 +381,9 @@ int defaultForeground () {
 
 private void clearScaleDecoration() {
 	for (int i = 0; i < handle.childNodes.length; i++) {
-		System.out.println(i + ":" + handle.childNodes[i].className);
+		//System.out.println(i + ":" + handle.childNodes[i].className);
 		if (handle.childNodes[i].className.indexOf("scale-line-decoration") != -1) {
-			System.out.println(i);
+			//System.out.println(i);
 			handle.removeChild(handle.childNodes[i]);
 		}
 	}
@@ -355,18 +395,36 @@ private void decorateScale() {
 	} else {
 		outerSize = getSize().y;
 	}
+	
+	//System.err.println(outerSize);
 	int pages = (maximum - minimum) / pageIncrement;
-	int thumbSize = 16;
-	for (int j = 0; j <= pages; j++) {
-		Element line = document.createElement ("DIV");
-		if ((style & SWT.HORIZONTAL) != 0) {
-			line.className = "scale-line-decoration-horizontal";
-			line.style.left = Math.floor ((outerSize - thumbSize) * j / pages + thumbSize / 2) + "px";
-		} else {
-			line.className = "scale-line-decoration-vertical";
-			line.style.top = Math.floor ((outerSize - thumbSize) * j / pages + thumbSize / 2) + "px";
+	
+	for (int i = pages; i < lines.length; i++) {
+		if (lines[i] != null) {
+			lines[i].style.display = "none";
 		}
-		handle.appendChild (line);
+	}
+	int thumbSize = 16;
+	int range = outerSize - thumbSize + pages;
+	for (int i = 0; i < pages; i++) {
+		Element line = lines[i];
+		if (line == null) {
+			line = document.createElement("DIV");
+			handle.appendChild(line);
+			if ((style & SWT.HORIZONTAL) != 0) {
+				line.className = "scale-line-decoration-horizontal";
+			} else {
+				line.className = "scale-line-decoration-vertical";
+			}
+			lines[i] = line;
+		} else {
+			line.style.display = "block";
+		}
+		if ((style & SWT.HORIZONTAL) != 0) {
+			line.style.left = Math.floor (range * i / pages + thumbSize / 2) + "px";
+		} else {
+			line.style.top = Math.floor (range * i / pages + thumbSize / 2) + "px";
+		}
 	}
 }
 
@@ -632,19 +690,31 @@ public void setSelection (int value) {
 	}
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	decorateScale();
+	Element el = (Element) hWnd;
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+//	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
 /*
 int widgetStyle () {
 	int bits = super.widgetStyle () | OS.WS_TABSTOP | OS.TBS_BOTH | OS.TBS_AUTOTICKS;
 	if ((style & SWT.HORIZONTAL) != 0) return bits | OS.TBS_HORZ | OS.TBS_DOWNISLEFT;
 	return bits | OS.TBS_VERT;
 }
-*/
 
 String windowClass () {
-	return "DIV"; //TrackBarClass;
+	return TrackBarClass;
 }
 
-/*
 int windowProc () {
 	return TrackBarProc;
 }

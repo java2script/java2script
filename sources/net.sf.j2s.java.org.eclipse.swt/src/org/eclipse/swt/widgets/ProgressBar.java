@@ -269,9 +269,14 @@ void releaseWidget () {
 void startTimer () {
 	if ((style & SWT.INDETERMINATE) != 0) {
 		timer = new Runnable() {
-					int timerSelection = selection;
+					int timerSelection = -1;
+					int lastSelection = selection;
 					public void run() {
 						int range = maximum - minimum;
+						if (timerSelection == -1 || lastSelection != selection) {
+							timerSelection = selection;
+							lastSelection = selection;
+						}
 						timerSelection += Math.round(range / 10);
 						if (timerSelection > maximum) {
 							timerSelection = minimum;
@@ -431,7 +436,7 @@ protected void updateSelection(int selection) {
 				}
 				innerHandles[i] = el;
 			} else {
-				innerHandles[i].style.display = "block";
+				el.style.display = "block";
 			}
 			if ((style & SWT.HORIZONTAL) != 0) {
 				el.style.height = (height - 2) + "px";

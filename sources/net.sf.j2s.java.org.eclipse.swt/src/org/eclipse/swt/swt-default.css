@@ -1687,7 +1687,8 @@ input.text-border {
 	position:absolute;
 }
 .scale-border {
-	border: 1px inset white;
+	border-width:2px;
+	border-style:inset;
 }
 .scale-thumb-pressed {
 	background-color:#e0e0e0;
@@ -1701,7 +1702,8 @@ input.text-border {
 	font-size:0;
 	z-index:4;
 	background-color:menu;
-	border:1px outset white;
+	border-width:1px;
+	border-style:outset;
 }
 .scale-line-decoration-horizontal {
 	position:absolute;
@@ -1762,7 +1764,8 @@ input.text-border {
 	font-size:0;
 	z-index:4;
 	background-color:menu;
-	border:1px outset white;
+	border-width:1px;
+	border-style:outset;
 }
 .scale-line-decoration-vertical {
 	position:absolute;
