@@ -232,6 +232,46 @@ public class ProgressBarTest extends AsyncTestCase {
 		display.dispose ();
 	}
 
+
+	public void testMinimumValue() {
+		Display display = new Display ();
+		Shell shell = new Shell(display);
+		shell.setLayout(new GridLayout());
+		final ProgressBar progressD = new ProgressBar(shell, SWT.NONE);
+		final ProgressBar progressB = new ProgressBar(shell, SWT.BORDER);
+		final ProgressBar progressV = new ProgressBar(shell, SWT.VERTICAL);
+		final ProgressBar progressS = new ProgressBar(shell, SWT.SMOOTH);
+		final ProgressBar progressX = new ProgressBar(shell, SWT.INDETERMINATE);
+		//new ProgressBar(shell, SWT.SMOOTH | SWT.INDETERMINATE);
+		//new ProgressBar(shell, SWT.VERTICAL | SWT.INDETERMINATE);
+		shell.pack();
+		shell.open ();
+		AsyncSWT.setShellAutoClose(false);
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+				progressD.setSelection(20);
+				progressB.setSelection(-20);
+				progressV.setSelection(120);
+				progressS.setSelection(100);
+				progressX.setSelection(45);
+				
+				progressD.setMinimum(40);
+				progressB.setMinimum(-80);
+				progressV.setMinimum(250);
+				progressS.setMinimum(50);
+				progressX.setMinimum(70);
+				
+				assertEquals("Default", progressD.getSelection(), 40);
+				assertEquals("Border", progressB.getSelection(), 0);
+				assertEquals("Vertical", progressV.getSelection(), 100);
+				assertEquals("Smooth", progressS.getSelection(), 100);
+				assertEquals("Indeterminate", progressX.getSelection(), 70);
+				
+			}
+		});
+		display.dispose ();
+	}
+
 	/**
 	 * ATTENTION: Always run me as SWT Application or Java2Script Application.
 	 * Running me as JUnit Test or Java2Script Unit Test won't work for these
