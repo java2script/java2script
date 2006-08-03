@@ -716,7 +716,11 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 		} else {
 			methodParams = funParams;
 		}
-		return fx.lastMethod.apply (objThis, methodParams);
+		if (fx.lastMethod != null) {
+			return fx.lastMethod.apply (objThis, methodParams);
+		} else { // missed default constructor ?
+			return ;
+		}
 	}
 	fx.lastParams = params.typeString;
 	fx.lastClaxxRef = claxxRef;
