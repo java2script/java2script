@@ -777,6 +777,7 @@ public void setText (String string) {
 	text = string;	
 	textSizeCached = false;
 	parse (string, handle);
+	/*
 	System.out.println(cachedText);
 //	OS.insertText(handle, cachedText);
 	System.out.println("ids==");
@@ -791,6 +792,7 @@ public void setText (String string) {
 	for (int i = 0; i < offsets.length; i++) {
 		System.out.println(i + "/" + offsets[i]);
 	}
+	*/
 	/*
 	if (OS.COMCTL32_MAJOR >= 6) {
 		TCHAR buffer = new TCHAR (getCodePage (), string, true);
