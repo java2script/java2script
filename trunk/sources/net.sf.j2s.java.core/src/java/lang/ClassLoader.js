@@ -1318,7 +1318,7 @@ ClazzLoader.queueBe4KeyClazz = new Array ();
  * Load the given class ant its related classes.
  */
 /* public */
-ClazzLoader.loadClass = function (name, optionalsLoaded, forced) {
+ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (typeof optionalsLoaded == "boolean") {
 		return Clazz.evalType (name);
 	}
@@ -1367,7 +1367,11 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced) {
 			}
 		}
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
-		optionalsLoaded ();
+		if (async) {
+			window.setTimeout (optionalsLoaded, 25);
+		} else {
+			optionalsLoaded ();
+		}
 	}
 	
 };

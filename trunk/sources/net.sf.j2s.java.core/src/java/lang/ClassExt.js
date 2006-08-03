@@ -736,6 +736,9 @@ Clazz.innerFunctions.newInstance = function () {
 }
 
 Clazz.forName = function (clazzName) {
+	if (Clazz.isClassDefined (clazzName)) {
+		return Clazz.evalType (clazzName);
+	}
 	if (window["ClazzLoader"] != null) {
 		ClazzLoader.setLoadingMode ("xhr.sync");
 		ClazzLoader.loadClass (clazzName);
