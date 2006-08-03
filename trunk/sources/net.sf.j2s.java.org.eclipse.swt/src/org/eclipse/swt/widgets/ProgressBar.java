@@ -14,6 +14,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -78,7 +79,8 @@ public class ProgressBar extends Control {
 	private int minimum;
 	private int maximum;
 	private int selection;
-	private Element innerHandle;
+	private Element[] innerHandles;
+	private Runnable timer;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -182,15 +184,29 @@ void createHandle () {
 			parentHandle.appendChild(handle);
 		}
 	}
-	
-	innerHandle = document.createElement("DIV");
-	handle.appendChild(innerHandle);
+	innerHandles = new Element[1];
+	innerHandles[0] = document.createElement("DIV");
+	handle.appendChild(innerHandles[0]);
 	if ((style & SWT.HORIZONTAL) != 0) {
-		innerHandle.className = "progress-bar-horizontal";
+		innerHandles[0].className = "progress-bar-horizontal";
 	} else {
-		innerHandle.className = "progress-bar-vertical";
+		innerHandles[0].className = "progress-bar-vertical";
 	}
 	startTimer ();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (innerHandles != null) {
+		for (int i = 0; i < innerHandles.length; i++) {
+			OS.destroyHandle(innerHandles[i]);
+			innerHandles[i] = null;
+		}
+		//innerHandles = new Element[0];
+	}
+	super.releaseHandle();
 }
 
 //int defaultForeground () {
@@ -252,14 +268,19 @@ void releaseWidget () {
 
 void startTimer () {
 	if ((style & SWT.INDETERMINATE) != 0) {
-		/*
-		int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-		if (OS.COMCTL32_MAJOR < 6 || (bits & OS.PBS_MARQUEE) == 0) {
-			OS.SetTimer (handle, TIMER_ID, DELAY, 0);
-		} else {
-			OS.SendMessage (handle, OS.PBM_SETMARQUEE, 1, DELAY);
-		}
-		*/
+		timer = new Runnable() {
+					int timerSelection = selection;
+					public void run() {
+						int range = maximum - minimum;
+						timerSelection += Math.round(range / 10);
+						if (timerSelection > maximum) {
+							timerSelection = minimum;
+						}
+						updateSelection(timerSelection);
+						display.timerExec(100, this);
+					}
+				};
+		display.timerExec(100, timer);
 	}
 }
 
@@ -273,6 +294,9 @@ void stopTimer () {
 			OS.SendMessage (handle, OS.PBM_SETMARQUEE, 0, 0);
 		}
 		*/
+		if (timer != null) {
+			display.timerExec(-1, timer);
+		}
 	}
 }
 
@@ -368,11 +392,80 @@ public void setSelection (int value) {
 	} else {
 		selection = value;
 	}
-	if ((style & SWT.HORIZONTAL) != 0) {
-		innerHandle.style.width = Math.round(getSize().x * selection / maximum) + "px";
+	updateSelection(selection);
+}
+
+protected void updateSelection(int selection) {
+	int blockSize = 9;
+	int w = ((style & SWT.HORIZONTAL) != 0) ?  width : height;
+	w = Math.round((w - 2) * selection / maximum);
+	if ((style & SWT.SMOOTH) != 0) {
+		if ((style & SWT.HORIZONTAL) != 0) {
+			innerHandles[0].style.width = w + "px";
+			innerHandles[0].style.height = (height - 2) + "px";
+		} else {
+			innerHandles[0].style.width = (width - 2) + "px";
+			innerHandles[0].style.height = w + "px";
+		}
 	} else {
-		innerHandle.style.height = Math.round(getSize().y * selection / maximum) + "px";
+		int blocks = (int) Math.round(w / (blockSize + 2) + 0.5);
+		if (w == 0) {
+			blocks = 0;
+		}
+		for (int i = blocks; i < innerHandles.length; i++) {
+			if (innerHandles[i] != null) {
+				innerHandles[i].style.display = "none";
+			}
+		}
+		for (int i = 0; i < blocks; i++) {
+			Element el = innerHandles[i];
+			if (el == null) {
+				el = document.createElement("DIV");
+				handle.appendChild(el);
+				if ((style & SWT.HORIZONTAL) != 0) {
+					el.className = "progress-bar-horizontal";
+					el.style.left = (i * (blockSize + 2) + 1) + "px";
+				} else {
+					el.className = "progress-bar-vertical";
+					el.style.bottom = (i * (blockSize + 2) + 1) + "px";
+				}
+				innerHandles[i] = el;
+			} else {
+				innerHandles[i].style.display = "block";
+			}
+			if ((style & SWT.HORIZONTAL) != 0) {
+				el.style.height = (height - 2) + "px";
+				if ((i + 1) * (blockSize + 2) <= width - 2) {
+					el.style.width = blockSize + "px";
+				} else {
+					el.style.width = (w - i * (blockSize + 2)) + "px";
+				}
+			} else {
+				el.style.width = (width - 2) + "px";
+				if ((i + 1) * (blockSize + 2) <= height - 2) {
+					el.style.height = blockSize + "px";
+				} else {
+					el.style.height = (w - i * (blockSize + 2)) + "px";
+				}
+			}
+		}
 	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	cx -= 2;
+	cy -= 2;
+	
+	Element el = (Element) hWnd;
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
+	return true;
+//	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 /*
@@ -383,14 +476,11 @@ int widgetStyle () {
 	if ((style & SWT.INDETERMINATE) != 0) bits |= OS.PBS_MARQUEE;
 	return bits;
 }
-*/
 
 String windowClass () {
-//	return ProgressBarClass;
-	return "DIV";
+	return ProgressBarClass;
 }
 
-/*
 int windowProc () {
 	return ProgressBarProc;
 }
