@@ -31,7 +31,7 @@ class TabFolderTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	TabFolderTab(ControlExample instance) {
+	public TabFolderTab(ControlExample instance) {
 		super(instance);
 	}
 	

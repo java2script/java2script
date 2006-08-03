@@ -35,7 +35,7 @@ class ButtonTab extends AlignableTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ButtonTab(ControlExample instance) {
+	public ButtonTab(ControlExample instance) {
 		super(instance);
 	}
 	

@@ -27,7 +27,7 @@ class ProgressBarTab extends RangeTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ProgressBarTab(ControlExample instance) {
+	public ProgressBarTab(ControlExample instance) {
 		super(instance);
 	}
 

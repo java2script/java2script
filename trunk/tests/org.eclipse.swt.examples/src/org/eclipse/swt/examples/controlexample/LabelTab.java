@@ -27,7 +27,7 @@ class LabelTab extends AlignableTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	LabelTab(ControlExample instance) {
+	public LabelTab(ControlExample instance) {
 		super(instance);
 	}
 	

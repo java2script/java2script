@@ -29,7 +29,7 @@ class GroupTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	GroupTab(ControlExample instance) {
+	public GroupTab(ControlExample instance) {
 		super(instance);
 	}
 	

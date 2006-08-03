@@ -23,7 +23,7 @@ class LinkTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	LinkTab(ControlExample instance) {
+	public LinkTab(ControlExample instance) {
 		super(instance);
 	}
 	
