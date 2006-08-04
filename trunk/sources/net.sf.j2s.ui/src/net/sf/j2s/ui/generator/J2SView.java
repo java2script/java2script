@@ -326,6 +326,7 @@ public class J2SView extends ViewPart {
 			}
 			fRoot.accept(visitor);
 			DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+			dvisitor.setToCompileVariableName(fCompressVarName);
 			boolean errorOccurs = false;
 			try {
 				fRoot.accept(dvisitor);
