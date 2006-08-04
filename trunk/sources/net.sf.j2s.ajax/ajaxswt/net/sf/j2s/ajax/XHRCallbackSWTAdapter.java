@@ -21,9 +21,6 @@ import org.eclipse.swt.widgets.Display;
  * @author josson smith
  *
  * 2006-2-11
- * 
- * @j2sIgnoreImport java.lang.Runnable, org.eclipse.swt.widgets.Display
- * 
  */
 public class XHRCallbackSWTAdapter implements IXHRCallback {
 	
