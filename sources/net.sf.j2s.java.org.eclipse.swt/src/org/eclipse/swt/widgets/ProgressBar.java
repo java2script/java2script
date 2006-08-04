@@ -404,12 +404,15 @@ protected void updateSelection(int selection) {
 	int blockSize = 9;
 	int w = ((style & SWT.HORIZONTAL) != 0) ?  width : height;
 	w = Math.round((w - 2) * selection / maximum);
+	if (w < 0) {
+		w = 0;
+	}
 	if ((style & SWT.SMOOTH) != 0) {
 		if ((style & SWT.HORIZONTAL) != 0) {
 			innerHandles[0].style.width = w + "px";
-			innerHandles[0].style.height = (height - 2) + "px";
+			innerHandles[0].style.height = ((height - 2) < 0 ? 0 : height - 2) + "px";
 		} else {
-			innerHandles[0].style.width = (width - 2) + "px";
+			innerHandles[0].style.width = ((width - 2) < 0 ? 0 : (width - 2)) + "px";
 			innerHandles[0].style.height = w + "px";
 		}
 	} else {
@@ -439,14 +442,14 @@ protected void updateSelection(int selection) {
 				el.style.display = "block";
 			}
 			if ((style & SWT.HORIZONTAL) != 0) {
-				el.style.height = (height - 2) + "px";
+				el.style.height = ((height - 2) < 0 ? 0 : height - 2) + "px";
 				if ((i + 1) * (blockSize + 2) <= width - 2) {
 					el.style.width = blockSize + "px";
 				} else {
 					el.style.width = (w - i * (blockSize + 2)) + "px";
 				}
 			} else {
-				el.style.width = (width - 2) + "px";
+				el.style.width = ((width - 2) < 0 ? 0 : (width - 2)) + "px";
 				if ((i + 1) * (blockSize + 2) <= height - 2) {
 					el.style.height = blockSize + "px";
 				} else {
