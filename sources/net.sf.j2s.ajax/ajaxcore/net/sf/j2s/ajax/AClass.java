@@ -33,10 +33,18 @@ public class AClass {
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {
+	 * 	if (Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
+	 * 		var clz = Clazz.evalType (clazzName);
+	 * 		afterLoaded.setClazz (clz);
+	 * 	}
 	 * 	afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
 	 * ClazzLoader.loadClass (a, function () {
+	 * 	if (Clazz.instanceOf (b, net.sf.j2s.ajax.ARunnable)) {
+	 * 		var clz = Clazz.evalType (a);
+	 * 		b.setClazz (clz);
+	 * 	}
 	 * 	b.run ();
 	 * }, false, true);
 	 */
@@ -44,7 +52,11 @@ public class AClass {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Class.forName(clazzName);
+					Class clz = Class.forName(clazzName);
+					if (afterLoaded instanceof ARunnable) {
+						ARunnable runnable = (ARunnable) afterLoaded;
+						runnable.setClazz(clz);
+					}
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 					return ;

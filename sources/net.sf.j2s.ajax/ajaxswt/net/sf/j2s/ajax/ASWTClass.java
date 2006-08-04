@@ -30,20 +30,7 @@ public class ASWTClass extends AClass {
 		// prevent from instantialization
 	}
 
-	/**
-	 * @param clazzName
-	 * @param afterLoaded
-	 * 
-	 * @j2sNativeSrc
-	 * ClazzLoader.loadClass (clazzName, function () {
-	 * 	afterLoaded.run ();
-	 * }, false, true);
-	 * @j2sNative
-	 * ClazzLoader.loadClass (a, function () {
-	 * 	b.run ();
-	 * }, false, true);
-	 */
-	public static void swtLoad(final String clazzName, final Runnable afterLoaded) {
+	public static void swtLoad(String clazzName, Runnable afterLoaded) {
 		Display display = Display.getCurrent();
 		if (display == null) {
 			display = Display.getDefault();
@@ -59,10 +46,18 @@ public class ASWTClass extends AClass {
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {
+	 * 	if (Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
+	 * 		var clz = Clazz.evalType (clazzName);
+	 * 		afterLoaded.setClazz (clz);
+	 * 	}
 	 * 	afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
 	 * ClazzLoader.loadClass (b, function () {
+	 * 	if (Clazz.instanceOf (c, net.sf.j2s.ajax.ARunnable)) {
+	 * 		var clz = Clazz.evalType (b);
+	 * 		c.setClazz (clz);
+	 * 	}
 	 * 	c.run ();
 	 * }, false, true);
 	 */
@@ -70,7 +65,11 @@ public class ASWTClass extends AClass {
 		display.asyncExec(new Runnable() {
 			public void run() {
 				try {
-					Class.forName(clazzName);
+					Class clz = Class.forName(clazzName);
+					if (afterLoaded instanceof ARunnable) {
+						ARunnable runnable = (ARunnable) afterLoaded;
+						runnable.setClazz(clz);
+					}
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 					return ;
@@ -81,21 +80,7 @@ public class ASWTClass extends AClass {
 		});
 	}
 
-	/**
-	 * @param shell
-	 * @param clazzName
-	 * @param afterLoaded
-	 * 
-	 * @j2sNativeSrc
-	 * ClazzLoader.loadClass (clazzName, function () {
-	 * 	afterLoaded.run ();
-	 * }, false, true);
-	 * @j2sNative
-	 * ClazzLoader.loadClass (b, function () {
-	 * 	c.run ();
-	 * }, false, true);
-	 */
-	public static void shellLoad(Shell shell, final String clazzName, final Runnable afterLoaded) {
+	public static void shellLoad(Shell shell, String clazzName, Runnable afterLoaded) {
 		displayLoad(shell.getDisplay(), clazzName, afterLoaded);
 	}
 }
