@@ -13,6 +13,7 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,7 +24,10 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -32,13 +36,16 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
@@ -67,7 +74,14 @@ public class DependencyASTVisitor extends ASTVisitor {
 	protected Set optionals = new HashSet();
 	
 	protected Set ignores = new HashSet();
+
+	private boolean isDebugging = false;
 	
+	private Javadoc[] nativeJavadoc = null;
+	
+	private ASTNode javadocRoot = null;
+
+	protected boolean toCompileVariableName = true;
 	
 	public DependencyASTVisitor() {
 		super();
@@ -509,15 +523,34 @@ public class DependencyASTVisitor extends ASTVisitor {
 		return super.visit(node);
 	}
 
+	public boolean isClassKnown(String qualifiedName) {
+		String[] knownClasses = new String[] {
+				"java.lang.Object",
+				"java.lang.Class",
+				"java.lang.String",
+				"java.io.Serializable",
+				"java.lang.Iterable",
+				"java.lang.CharSequence",
+				"java.lang.Cloneable",
+				"java.lang.Comparable",
+				"java.lang.Runnable",
+				"java.util.Comparator",
+				"java.lang.System",
+				"java.io.PrintStream",
+				"java.lang.Math",
+				"java.lang.Integer"
+		};
+		
+		for (int i = 0; i < knownClasses.length; i++) {
+			if (knownClasses[i].equals(qualifiedName)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
 		if (qualifiedName != null 
-				&& !"java.lang.Object".equals(qualifiedName)
-				&& !"java.lang.Class".equals(qualifiedName)
-				&& !"java.lang.String".equals(qualifiedName)
-				&& !"java.lang.System".equals(qualifiedName)
-				&& !"java.io.PrintStream".equals(qualifiedName)
-				&& !"java.lang.Math".equals(qualifiedName)
-				&& !"java.lang.Integer".equals(qualifiedName)
+				&& !isClassKnown(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
 				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")) {
 			ASTNode root = node.getRoot();
@@ -804,7 +837,79 @@ public class DependencyASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
+
+	public boolean isDebugging() {
+		return isDebugging;
+	}
+
+	public void setDebugging(boolean isDebugging) {
+		this.isDebugging = isDebugging;
+	}
+
+	public boolean isToCompileVariableName() {
+		return toCompileVariableName;
+	}
+
+	public void setToCompileVariableName(boolean toCompileVariableName) {
+		this.toCompileVariableName = toCompileVariableName;
+	}
 	
+	public boolean visit(MethodDeclaration node) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sIgnore".equals(tagEl.getTagName())) {
+						return false;
+					}
+				}
+			}
+		}
+		
+		if (node.getBody() == null) {
+			/*
+			 * Abstract or native method
+			 */
+			boolean isJ2S = false;
+			if ((node.getModifiers() & Modifier.NATIVE) != 0) {
+				if (javadoc != null) {
+					List tags = javadoc.tags();
+					if (tags.size() != 0) {
+						for (Iterator iter = tags.iterator(); iter.hasNext();) {
+							TagElement tagEl = (TagElement) iter.next();
+							if ("@j2sIgnore".equals(tagEl.getTagName())) {
+								return false;
+							}
+						}
+						if (isDebugging()) {
+							for (Iterator iter = tags.iterator(); iter.hasNext();) {
+								TagElement tagEl = (TagElement) iter.next();
+								if ("@j2sDebug".equals(tagEl.getTagName())) {
+									isJ2S = true;
+									break;
+								}
+							}
+						}
+						if (!isJ2S) {
+							for (Iterator iter = tags.iterator(); iter.hasNext();) {
+								TagElement tagEl = (TagElement) iter.next();
+								if ("@j2sNative".equals(tagEl.getTagName())) {
+									isJ2S = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			if (!isJ2S) {
+				return false;
+			}
+		}
+		return super.visit(node);
+	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.FieldAccess)
 	 */
@@ -837,6 +942,206 @@ public class DependencyASTVisitor extends ASTVisitor {
 		}
 		return super.visit(node);
 	}
+	
+	public boolean visit(Block node) {
+		ASTNode parent = node.getParent();
+		if (parent instanceof MethodDeclaration) {
+			MethodDeclaration method = (MethodDeclaration) parent;
+			Javadoc javadoc = method.getJavadoc();
+			/*
+			 * if comment contains "@j2sNative", then output the given native 
+			 * JavaScript codes directly. 
+			 */
+			if (visitNativeJavadoc(javadoc, node, true) == false) {
+				return false;
+			}
+		} else if (parent instanceof Initializer) {
+			Initializer initializer = (Initializer) parent;
+			Javadoc javadoc = initializer.getJavadoc();
+			/*
+			 * if comment contains "@j2sNative", then output the given native 
+			 * JavaScript codes directly. 
+			 */
+			if (visitNativeJavadoc(javadoc, node, true) == false) {
+				return false;
+			}
+		}
+		int blockStart = node.getStartPosition();
+		int previousStart = getPreviousStartPosition(node);
+		ASTNode root = node.getRoot();
+		checkJavadocs(root);
+		//for (int i = 0; i < nativeJavadoc.length; i++) {
+		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
+			Javadoc javadoc = nativeJavadoc[i];
+			int commentStart = javadoc.getStartPosition();
+			if (commentStart > previousStart && commentStart < blockStart) {
+				/*
+				 * if the block's leading comment contains "@j2sNative", 
+				 * then output the given native JavaScript codes directly. 
+				 */
+				if (visitNativeJavadoc(javadoc, node, true) == false) {
+					return false;
+				}
+			}
+		}
+		return super.visit(node);
+	}
+	
+	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sIgnore".equals(tagEl.getTagName())) {
+						if (superVisit) super.visit(node);
+						return false;
+					}
+				}
+				if (isDebugging) {
+					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+						TagElement tagEl = (TagElement) iter.next();
+						if ("@j2sDebug".equals(tagEl.getTagName())) {
+							if (superVisit) super.visit(node);
+							List fragments = tagEl.fragments();
+							boolean isFirstLine = true;
+							for (Iterator iterator = fragments.iterator(); iterator
+									.hasNext();) {
+								TextElement commentEl = (TextElement) iterator.next();
+								String text = commentEl.getText().trim();
+								if (isFirstLine) {
+									if (text.length() == 0) {
+										continue;
+									}
+								}
+								buffer.append(text);
+								buffer.append("\r\n");
+							}
+							return false;
+						}
+					}
+				}
+				if (!toCompileVariableName) {
+					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+						TagElement tagEl = (TagElement) iter.next();
+						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
+							if (superVisit) super.visit(node);
+							List fragments = tagEl.fragments();
+							boolean isFirstLine = true;
+							for (Iterator iterator = fragments.iterator(); iterator
+									.hasNext();) {
+								TextElement commentEl = (TextElement) iterator.next();
+								String text = commentEl.getText().trim();
+								if (isFirstLine) {
+									if (text.length() == 0) {
+										continue;
+									}
+								}
+								buffer.append(text);
+								buffer.append("\r\n");
+							}
+							return false;
+						}
+					}
+				}
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sNative".equals(tagEl.getTagName())) {
+						if (superVisit) super.visit(node);
+						List fragments = tagEl.fragments();
+						boolean isFirstLine = true;
+						for (Iterator iterator = fragments.iterator(); iterator
+								.hasNext();) {
+							TextElement commentEl = (TextElement) iterator.next();
+							String text = commentEl.getText().trim();
+							if (isFirstLine) {
+								if (text.length() == 0) {
+									continue;
+								}
+							}
+							buffer.append(text);
+							buffer.append("\r\n");
+						}
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private void checkJavadocs(ASTNode root) {
+		if (root != javadocRoot) {
+			nativeJavadoc = null;
+			javadocRoot = root;
+		}
+		if (nativeJavadoc == null) {
+			nativeJavadoc = new Javadoc[0];
+			if (root instanceof CompilationUnit) {
+				CompilationUnit unit = (CompilationUnit) root;
+				List commentList = unit.getCommentList();
+				ArrayList list = new ArrayList();
+				for (Iterator iter = commentList.iterator(); iter.hasNext();) {
+					Comment comment = (Comment) iter.next();
+					if (comment instanceof Javadoc) {
+						Javadoc javadoc = (Javadoc) comment;
+						List tags = javadoc.tags();
+						if (tags.size() != 0) {
+							for (Iterator itr = tags.iterator(); itr.hasNext();) {
+								TagElement tagEl = (TagElement) itr.next();
+								String tagName = tagEl.getTagName();
+								if ("@j2sIgnore".equals(tagName)
+										|| "@j2sDebug".equals(tagName)
+										|| "@j2sNative".equals(tagName)) {
+									list.add(comment);
+								}
+							}
+						}
+					}
+				}
+				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
+			}
+		}
+	}
+
+	private int getPreviousStartPosition(Block node) {
+		int previousStart = 0;
+		ASTNode blockParent = node.getParent();
+		if (blockParent != null) {
+			if (blockParent instanceof Statement) {
+				Statement sttmt = (Statement) blockParent;
+				previousStart = sttmt.getStartPosition();
+				if (sttmt instanceof Block) {
+					Block parentBlock = (Block) sttmt;
+					for (Iterator iter = parentBlock.statements().iterator(); iter.hasNext();) {
+						Statement element = (Statement) iter.next();
+						if (element == node) {
+							break;
+						}
+						previousStart = element.getStartPosition() + element.getLength();
+					}
+				} else if (sttmt instanceof IfStatement) {
+					IfStatement ifSttmt = (IfStatement) sttmt;
+					if (ifSttmt.getElseStatement() == node) {
+						Statement thenSttmt = ifSttmt.getThenStatement();
+						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
+					}
+				}
+			} else if (blockParent instanceof MethodDeclaration) {
+				MethodDeclaration method = (MethodDeclaration) blockParent;
+				previousStart = method.getStartPosition();
+			} else if (blockParent instanceof Initializer) {
+				Initializer initializer = (Initializer) blockParent;
+				previousStart = initializer.getStartPosition();
+			} else if (blockParent instanceof CatchClause) {
+				CatchClause catchClause = (CatchClause) blockParent;
+				previousStart = catchClause.getStartPosition();
+			}
+		}
+		return previousStart;
+	}
+	
+
 }
 
 class QNTypeBinding {
