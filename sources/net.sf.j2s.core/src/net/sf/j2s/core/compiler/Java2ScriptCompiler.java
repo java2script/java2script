@@ -46,7 +46,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			String status = props.getProperty("j2s.compiler.status");
 			if (!"enable".equals(status)) {
 				/*
-				 * No enabled!
+				 * Not enabled!
 				 */
 				return ;
 			}
@@ -167,9 +167,12 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				} else {
 					visitor = new SWTScriptVisitor();
 				}
-				visitor.setDebugging("debug".equals(props.getProperty("j2s.compiler.mode")));
+				boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
+				visitor.setDebugging(isDebugging);
+				dvisitor.setDebugging(isDebugging);
 				boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
 				visitor.setToCompileVariableName(toCompress);
+				dvisitor.setToCompileVariableName(toCompress);
 				if (toCompress) {
 					updateJ2SMap(prjFolder);
 				}
