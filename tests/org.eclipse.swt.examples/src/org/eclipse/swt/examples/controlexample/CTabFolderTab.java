@@ -44,7 +44,7 @@ class CTabFolderTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	CTabFolderTab(ControlExample instance) {
+	public CTabFolderTab(ControlExample instance) {
 		super(instance);
 	}
 	

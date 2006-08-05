@@ -53,7 +53,7 @@ class SashTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	SashTab(ControlExample instance) {
+	public SashTab(ControlExample instance) {
 		super(instance);
 	}
 	
