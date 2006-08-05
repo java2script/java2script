@@ -48,7 +48,7 @@ public class J2SConcat {
 					System.err.println("Source file " + src.getAbsolutePath() + " does not exist!");
 					return ;
 				}
-				System.out.println("Checking " + args[i + 1 + indexDelta] + " ...");
+//				System.out.println("Checking " + args[i + 1 + indexDelta] + " ...");
 				if (src.lastModified() > dest.lastModified()) {
 					isAllFileEarlier = false;
 					break;
