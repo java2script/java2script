@@ -746,7 +746,8 @@ void initAccessible() {
 	
 	arrow.getAccessible ().addAccessibleListener (new AccessibleAdapter() {
 		public void getName (AccessibleEvent e) {
-			e.result = isDropped () ? SWT.getMessage ("SWT_Close") : SWT.getMessage ("SWT_Open"); //$NON-NLS-1$ //$NON-NLS-2$
+			//e.result = isDropped () ? SWT.getMessage ("SWT_Close") : SWT.getMessage ("SWT_Open"); //$NON-NLS-1$ //$NON-NLS-2$
+			e.result = isDropped () ? "Close" : "Open";
 		}
 		public void getKeyboardShortcut (AccessibleEvent e) {
 			e.result = "Alt+Down Arrow"; //$NON-NLS-1$

@@ -739,7 +739,7 @@ public void close () {
  */
 protected void create (DeviceData data) {
 	checkSubclass ();
-	checkDisplay (thread = Thread.currentThread (), true);
+	//checkDisplay (thread = Thread.currentThread (), true);
 	createDisplay (data);
 	register (this);
 	if (Default == null) Default = this;
@@ -966,6 +966,11 @@ int embeddedProc (int hwnd, int msg, int wParam, int lParam) {
  * @param code the descriptive error code
  *
  * @see SWT#error(int)
+ *
+ * @j2sNativeSrc
+ * throw "SWT.error (" + code + ")";
+ * @j2sNative
+ * throw "SWT.error (" + a + ")";
  */
 void error (int code) {
 	SWT.error (code);
@@ -1145,8 +1150,8 @@ public Rectangle getBounds () {
  * @return the current display
  */
 public static synchronized Display getCurrent () {
-	return findDisplay (Thread.currentThread ());
-	//return getDefault();
+	//return findDisplay (Thread.currentThread ());
+	return getDefault();
 }
 
 /**
@@ -2415,7 +2420,8 @@ boolean isXMouseActive () {
 */
 
 boolean isValidThread () {
-	return thread == Thread.currentThread ();
+	//return thread == Thread.currentThread ();
+	return true;
 }
 
 /**

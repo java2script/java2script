@@ -433,7 +433,7 @@ ImageData(
 	byte[] alphaData, int alpha, int transparentPixel, int type,
 	int x, int y, int disposalMethod, int delayTime)
 {
-
+	/*
 	if (palette == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (!(depth == 1 || depth == 2 || depth == 4 || depth == 8
 		|| depth == 16 || depth == 24 || depth == 32)) {
@@ -464,6 +464,7 @@ ImageData(
 		y,
 		disposalMethod,
 		delayTime);
+	*/
 }
 
 /**
@@ -479,7 +480,7 @@ void setAllFields(int width, int height, int depth, int scanlinePad,
 	int bytesPerLine, byte[] data, PaletteData palette, int transparentPixel,
 	byte[] maskData, int maskPad, byte[] alphaData, int alpha,
 	int type, int x, int y, int disposalMethod, int delayTime) {
-
+	/*
 	this.width = width;
 	this.height = height;
 	this.depth = depth;
@@ -497,6 +498,7 @@ void setAllFields(int width, int height, int depth, int scanlinePad,
 	this.y = y;
 	this.disposalMethod = disposalMethod;
 	this.delayTime = delayTime;
+	*/
 }
 
 /**	 
@@ -512,6 +514,8 @@ void setAllFields(int width, int height, int depth, int scanlinePad,
  * <p>
  * This method is for internal use, and is not described further.
  * </p>
+ * 
+ * @j2sIgnore
  */
 public static ImageData internal_new(
 	int width, int height, int depth, PaletteData palette,
@@ -557,6 +561,7 @@ static byte[] checkData(byte [] data) {
  * @return a copy of the receiver.
  */
 public Object clone() {
+	/*
 	byte[] cloneData = new byte[data.length];
 	System.arraycopy(data, 0, cloneData, 0, data.length);
 	byte[] cloneMaskData = null;
@@ -586,6 +591,8 @@ public Object clone() {
 		y,
 		disposalMethod,
 		delayTime);
+	*/
+	return this.clone();
 }
 
 /**
@@ -601,10 +608,13 @@ public Object clone() {
  * </ul>
  */
 public int getAlpha(int x, int y) {
+	/*
 	if (x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 
 	if (alphaData == null) return 255;
 	return alphaData[y * width + x] & 0xFF;
+	*/
+	return 0;
 }
 
 /**
@@ -626,6 +636,7 @@ public int getAlpha(int x, int y) {
  * </ul>
  */
 public void getAlphas(int x, int y, int getWidth, byte[] alphas, int startIndex) {
+	/*
 	if (alphas == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (getWidth < 0 || x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	if (getWidth == 0) return;
@@ -639,6 +650,7 @@ public void getAlphas(int x, int y, int getWidth, byte[] alphas, int startIndex)
 	}
 	// may throw an IndexOutOfBoundsException
 	System.arraycopy(alphaData, y * width + x, alphas, startIndex, getWidth);
+	*/
 }
 
 /**
@@ -657,6 +669,7 @@ public void getAlphas(int x, int y, int getWidth, byte[] alphas, int startIndex)
  * </ul>
  */
 public int getPixel(int x, int y) {
+	/*
 	if (x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	int index;
 	int theByte;
@@ -706,6 +719,7 @@ public int getPixel(int x, int y) {
 				((data[index+2] & 0xFF) << 8) + (data[index+3] & 0xFF);
 	}
 	SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+	*/
 	return 0;
 }
 
@@ -732,6 +746,7 @@ public int getPixel(int x, int y) {
  * </ul>
  */
 public void getPixels(int x, int y, int getWidth, byte[] pixels, int startIndex) {
+	/*
 	if (pixels == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (getWidth < 0 || x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	if (getWidth == 0) return;
@@ -856,6 +871,7 @@ public void getPixels(int x, int y, int getWidth, byte[] pixels, int startIndex)
 		return;
 	}
 	SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+	*/
 }
 
 /**
@@ -880,6 +896,7 @@ public void getPixels(int x, int y, int getWidth, byte[] pixels, int startIndex)
  * </ul>
  */
 public void getPixels(int x, int y, int getWidth, int[] pixels, int startIndex) {
+	/*
 	if (pixels == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (getWidth < 0 || x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	if (getWidth == 0) return;
@@ -1055,6 +1072,7 @@ public void getPixels(int x, int y, int getWidth, int[] pixels, int startIndex) 
 		return;
 	}
 	SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+	*/
 }
 
 /**
@@ -1189,11 +1207,13 @@ public ImageData scaledTo(int width, int height) {
  *  </ul>
  */
 public void setAlpha(int x, int y, int alpha) {
+	/*
 	if (x >= width || y >= height || x < 0 || y < 0 || alpha < 0 || alpha > 255)
 		SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	
 	if (alphaData == null) alphaData = new byte[width * height];
-	alphaData[y * width + x] = (byte)alpha;	
+	alphaData[y * width + x] = (byte)alpha;
+	*/	
 }
 
 /**
@@ -1216,6 +1236,7 @@ public void setAlpha(int x, int y, int alpha) {
  * </ul>
  */
 public void setAlphas(int x, int y, int putWidth, byte[] alphas, int startIndex) {
+	/*
 	if (alphas == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (putWidth < 0 || x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	if (putWidth == 0) return;
@@ -1223,6 +1244,7 @@ public void setAlphas(int x, int y, int putWidth, byte[] alphas, int startIndex)
 	if (alphaData == null) alphaData = new byte[width * height];
 	// may throw an IndexOutOfBoundsException
 	System.arraycopy(alphas, startIndex, alphaData, y * width + x, putWidth);
+	*/
 }
 
 /**
@@ -1241,6 +1263,7 @@ public void setAlphas(int x, int y, int putWidth, byte[] alphas, int startIndex)
  * </ul>
  */
 public void setPixel(int x, int y, int pixelValue) {
+	/*
 	if (x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	int index;
 	byte theByte;
@@ -1300,6 +1323,7 @@ public void setPixel(int x, int y, int pixelValue) {
 		return;
 	}
 	SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+	*/
 }
 
 /**
@@ -1326,6 +1350,7 @@ public void setPixel(int x, int y, int pixelValue) {
  * </ul>
  */
 public void setPixels(int x, int y, int putWidth, byte[] pixels, int startIndex) {
+	/*
 	if (pixels == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	if (putWidth < 0 || x >= width || y >= height || x < 0 || y < 0) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	if (putWidth == 0) return;
@@ -1427,6 +1452,7 @@ public void setPixels(int x, int y, int putWidth, byte[] pixels, int startIndex)
 		return;
 	}
 	SWT.error(SWT.ERROR_UNSUPPORTED_DEPTH);
+	*/
 }
 
 /**
