@@ -12,7 +12,18 @@
 		"$.RandomAccessSubList",
 		"$.SubList"
 	]);
-	
+
+	ClazzLoader.jarClasspath (base + "lang/reflect.z.js", [
+        "java.lang.Void",
+		"$.reflect.AccessibleObject",
+		"$.InvocationHandler",
+		"$.Member",
+        "$.Modifier",
+		"$.Constructor",
+        "$.Field",
+        "$.Method"
+	]);
+	if (false)
 	ClazzLoader.ignore (
 		"java.io.FileInputStream",
 		"$.ObjectInputStream",
