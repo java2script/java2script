@@ -18,6 +18,7 @@ import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConvertItem;
 import net.sf.j2s.core.astvisitors.NameConverterUtil;
+import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
@@ -131,7 +132,14 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				astParser.setSource(createdUnit);
 				root = (CompilationUnit) astParser.createAST(null);
 				
-				DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+				DependencyASTVisitor dvisitor = null;
+				if ("ASTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+					dvisitor = new DependencyASTVisitor();
+				} else if ("SWTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+					dvisitor = new SWTDependencyASTVisitor();
+				} else {
+					dvisitor = new SWTDependencyASTVisitor();
+				}
 				boolean errorOccurs = false;
 				try {
 					root.accept(dvisitor);
