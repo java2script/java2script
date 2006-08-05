@@ -37,14 +37,14 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 			String status = props.getProperty("j2s.compiler.status");
 			if (!"enable".equals(status)) {
 				/*
-				 * No enabled!
+				 * Not enabled!
 				 */
 				return ;
 			}
 			String dependencyStatus = props.getProperty("j2s.compiler.dependency.status");
 			if (dependencyStatus != null && !"enable".equals(status)) {
 				/*
-				 * No enabled!
+				 * Not enabled!
 				 */
 				return ;
 			}
