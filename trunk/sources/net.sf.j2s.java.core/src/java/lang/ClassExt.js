@@ -204,6 +204,9 @@ Clazz.cloneFinals = function () {
 /* public */
 Clazz.isClassDefined = Clazz.isDefinedClass = function (clazzName) {
 	if (clazzName != null && clazzName.length != 0) {
+		if (Clazz.allClasses[clazzName]) {
+			return true;
+		}
 		var pkgFrags = clazzName.split (/\./);
 		var pkg = null;
 		for (var i = 0; i < pkgFrags.length; i++) {
@@ -222,7 +225,13 @@ Clazz.isClassDefined = Clazz.isDefinedClass = function (clazzName) {
 			}
 		}
 		//error (clazzName + " / " + (pkg != null));
-		return pkg != null;
+		//return pkg != null;
+		if (pkg != null) {
+			Clazz.allClasses[clazzName] = true;
+			return true;
+		} else {
+			return false;
+		}
 	} else {
 		/* consider null or empty name as non-defined class */
 		return false;
@@ -735,6 +744,7 @@ Clazz.innerFunctions.newInstance = function () {
 	}
 }
 
+/* public */
 Clazz.forName = function (clazzName) {
 	if (Clazz.isClassDefined (clazzName)) {
 		return Clazz.evalType (clazzName);
@@ -745,5 +755,100 @@ Clazz.forName = function (clazzName) {
 		return Clazz.evalType (clazzName);
 	} else {
 		alert ("[Java2Script] Error: No ClassLoader!");
+	}
+};
+
+/* protected */
+Clazz.cssAlreadyAggregated = false;
+Clazz.cssForcedUsingFile = true;
+
+countxx = 0;
+/* private */
+Clazz.cssForIE = function (key) {
+	var value = window[key];
+	window[key] = true; // loaded and release css text 
+	return value;
+};
+
+/**
+ * Register css for the given class. If the given css text is null, it will
+ * try to find relative *.css file instead loading css text directly.
+ * @param clazzName Qualified name of a class
+ * @param cssText Optional, if given, it will loaded into the page directly.
+ */
+/* public */
+Clazz.registerCSS = function (clazzName, cssText) {
+	if (Clazz.cssAlreadyAggregated || window["ClazzLoader"] == null) {
+		return ;
+	}
+	clazzName = ClazzLoader.unwrapArray ([clazzName])[0];
+	var cssPath = ClazzLoader.getClasspathFor (clazzName, false, ".css");
+	var basePath = ClazzLoader.getClasspathFor (clazzName, true);
+	/*
+	 * Check whether the css resources is loaded or not
+	 */
+	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath)) {
+		if (cssText == null || Clazz.cssForcedUsingFile) {
+			var cssLink = document.createElement ("LINK");
+			cssLink.rel = "stylesheet";
+			cssLink.id = clazzName;
+			cssLink.href = cssPath;
+			document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
+		} else {
+			var prefix = "";
+			var idx = cssPath.lastIndexOf ("/");
+			if (idx != -1) {
+				prefix = cssPath.substring (0, idx + 1);
+			}
+			if (document.createStyleSheet != null) {
+				// prepare for createStyleSheet with "javascript:...";
+				/*
+				 * TODO: Make more tests on the correctness of prefix!
+				 */
+				//var protocol = window.location.protocol;
+				//var host = window.location.host;
+				var location = window.location.href.toString ();
+				//if (protocol == "file:" || host == "") {
+					var idx = location.lastIndexOf ("/");
+					if (idx != -1) {
+						prefix = location.substring (0, idx + 1) + prefix;
+					}
+				//}
+			}
+			/*
+			 * Fix the css images location
+			 */
+			cssText = cssText.replace (/(url\s*\(\s*['"])(.*)(['"])/ig, 
+					//"
+					function ($0, $1, $2, $3) {
+						if ($2.indexOf ("/") == 0
+								|| $2.indexOf ("http://") == 0 
+								|| $2.indexOf ("https://") == 0
+								|| $2.indexOf ("file:/") == 0
+								|| $2.indexOf ("ftp://") == 0
+								|| $2.indexOf ("javascript:") == 0) {
+							return $0;
+						}
+						return $1 + prefix + $2 + $3;
+					});
+			if (document.createStyleSheet != null) {
+				/*
+				 * Internet Explorer does not support loading dynamic css styles
+				 * by <STYLE>!
+				 */
+				var cssID = "css." + clazzName;
+				window[cssID] = cssText;
+				/*
+				 * TODO: Keep eyes open on IE. Maybe IE won't initialize this 
+				 * javascript-kind of CSS!
+				 */
+				document.createStyleSheet ("javascript:Clazz.cssForIE (\"" + cssID + "\");");
+			} else {
+				var cssStyle = document.createElement ("STYLE");
+				cssStyle.id = clazzName;
+				cssStyle.appendChild (document.createTextNode (cssText));
+				document.getElementsByTagName ("HEAD")[0].appendChild (cssStyle);
+			}
+		}
 	}
 };

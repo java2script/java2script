@@ -1302,6 +1302,12 @@ Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
 /* protected */
 Clazz.allPackage = new Object ();
 
+/**
+ * Will be used to keep value of whether the class is defined or not.
+ */
+/* protected */
+Clazz.allClasses = new Object ();
+
 Clazz.lastPackageName = null;
 Clazz.lastPackage = null;
 
