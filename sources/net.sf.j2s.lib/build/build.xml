@@ -247,7 +247,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,j2s.pack.swt">
+    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt">
     	<copy todir="${jz.dist.dir}">
     		<fileset dir="${ajax.src.dir}">
     			<exclude name="**/*.clazz"/>
