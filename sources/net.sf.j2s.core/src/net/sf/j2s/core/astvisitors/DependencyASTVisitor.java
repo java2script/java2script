@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
@@ -695,11 +696,39 @@ public class DependencyASTVisitor extends ASTVisitor {
 	protected void visitForOptionals(AbstractTypeDeclaration node) {
 
 	}
+
+	protected boolean isSimpleQualified(QualifiedName node) {
+		Name qualifier = node.getQualifier();
+		if (qualifier instanceof SimpleName) {
+			return true;
+		} else if (qualifier instanceof QualifiedName) {
+			return isSimpleQualified((QualifiedName) qualifier);
+		}
+		return false;
+	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedName)
+	 */
+	public boolean visit(QualifiedName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)
+				&& isSimpleQualified(node)) {
+			//buffer.append(constValue);
+			return false;
+		}
+		return super.visit(node);
+	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
+		Object constValue = node.resolveConstantExpressionValue();
+		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			return false;
+		}
 		/*
 		ITypeBinding typeBinding = node.resolveTypeBinding();
 		if (typeBinding != null) {
@@ -916,8 +945,9 @@ public class DependencyASTVisitor extends ASTVisitor {
 	public boolean visit(FieldAccess node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		IVariableBinding resolveFieldBinding = node.resolveFieldBinding();
+		Expression exp = node.getExpression();
 		if (constValue == null && Modifier.isStatic(resolveFieldBinding.getModifiers())) {
-			Expression expression = node.getExpression();
+			Expression expression = exp;
 			if (expression instanceof Name) {
 				Name name = (Name) expression;
 				ITypeBinding resolveTypeBinding = name.resolveTypeBinding();
@@ -939,7 +969,14 @@ public class DependencyASTVisitor extends ASTVisitor {
 					optionals.add(qn);
 				}
 			}
+		} else if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Boolean)) {
+			if ((exp instanceof QualifiedName) 
+					|| (exp instanceof QualifiedName && isSimpleQualified((QualifiedName) exp))) {
+				return false;
+			}
 		}
+
 		return super.visit(node);
 	}
 	
