@@ -58,6 +58,9 @@ import org.eclipse.swt.internal.xhtml.window;
  * </p>
  *
  * @see List
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Combo");
  */
 
 public class Combo extends Composite {

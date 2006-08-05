@@ -43,6 +43,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * IMPORTANT: This class is intended to be subclassed <em>only</em>
  * within the SWT implementation.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Label");
  */
 public class Label extends Control {
 	String text = "";

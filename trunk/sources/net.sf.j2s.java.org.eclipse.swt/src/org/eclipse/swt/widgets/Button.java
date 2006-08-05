@@ -48,6 +48,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * IMPORTANT: This class is intended to be subclassed <em>only</em>
  * within the SWT implementation.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Button");
  */
 
 public class Button extends Control {

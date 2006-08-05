@@ -41,6 +41,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p><p>
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Text");
  */
 public class Text extends Scrollable {
 	int tabs, oldStart, oldEnd;

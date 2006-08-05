@@ -102,6 +102,9 @@ import org.eclipse.swt.internal.xhtml.Element;
  *
  * @see Decorations
  * @see SWT
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Shell");
  * @j2sSuffix
 Sync2Async = {};
 Sync2Async.block = function (shell, oThis, runnable) {

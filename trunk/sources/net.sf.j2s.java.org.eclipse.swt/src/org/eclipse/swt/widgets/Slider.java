@@ -70,6 +70,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  *
  * @see ScrollBar
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Slider");
  */
 public class Slider extends Control {
 	int minimum;
