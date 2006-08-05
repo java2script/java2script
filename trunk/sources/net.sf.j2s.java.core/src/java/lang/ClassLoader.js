@@ -838,6 +838,8 @@ ClazzLoader.tryToLoadNext = function (file) {
 	if (!ClazzLoader.keepOnLoading) {
 		return ;
 	}
+
+	var loadFurther = false;
 	var n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, 
 			ClazzNode.STATUS_KNOWN);
 	//alert ("next..." + n) ;
@@ -859,16 +861,78 @@ ClazzLoader.tryToLoadNext = function (file) {
 		} else { // Optionals
 			n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
 			if (n != null) {
-				//log ("in optionals..." + n.name);
+				//log ("in optionals unknown..." + n.name);
 				ClazzLoader.loadClassNode (n);
 			} else {
-				//error ("no more optionals?");
-				ClazzLoader.updateNode (node);
-				ClazzLoader.globalLoaded ();
-				//error ("no optionals?");
+				loadFurther = true;
 			}
 		}
 	}
+	if (loadFurther) {
+		//error ("no optionals?");
+		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
+			ClazzLoader.updateNode (n);
+		}
+		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_CONTENT_LOADED)) != null) {
+			ClazzLoader.updateNode (n);
+		}
+		while (ClazzLoader.checkOptionalCycle (ClazzLoader.clazzTreeRoot)) {
+		}
+		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
+			ClazzLoader.updateNode (n);
+		}
+		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_DECLARED)) != null) {
+			ClazzLoader.updateNode (n);
+		}
+
+		ClazzLoader.globalLoaded ();
+		//error ("end ?");
+	}
+};
+
+ClazzLoader.tracks = new Array ();
+
+/* protected */
+ClazzLoader.checkOptionalCycle = function (node) {
+	var ts = ClazzLoader.tracks;
+	var length = ts.length;
+	var cycleFound = -1;
+	for (var i = 0; i < ts.length; i++) {
+		if (ts[i] == node && ts[i].status >= ClazzNode.STATUS_DECLARED) { 
+			// Cycle is found;
+			cycleFound = i;
+			break;
+		}
+	}
+	ts[ts.length] = node;
+	if (cycleFound != -1) {
+		for (var i = cycleFound; i < ts.length; i++) {
+			ts[i].status = ClazzNode.STATUS_OPTIONALS_LOADED;
+			ClazzLoader.updateNode (ts[i]);
+			for (var k = 0; k < ts[i].parents.length; k++) {
+				//log ("updating parent ::" + ts[i].parents[k].name);
+				ClazzLoader.updateNode (ts[i].parents[k]);
+			}
+		}
+		ts.length = 0;
+		return true;
+	}
+	for (var i = 0; i < node.musts.length; i++) {
+		if (node.musts[i].status == ClazzNode.STATUS_DECLARED) {
+			if (ClazzLoader.checkOptionalCycle (node.musts[i])) {
+				return true;
+			}
+		}
+	}
+	for (var i = 0; i < node.optionals.length; i++) {
+		if (node.optionals[i].status == ClazzNode.STATUS_DECLARED) {
+			if (ClazzLoader.checkOptionalCycle (node.optionals[i])) {
+				return true;
+			}
+		}
+	}
+	ts.length = length;
+	return false;
 };
 
 /**
@@ -1151,8 +1215,14 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 	}
 	var node = ClazzLoader.mapPath2ClassNode["#" + clazz];
 	if (node == null) { // ClazzLoader.load called inside *.z.js?
+		var n = ClazzLoader.findClass (clazz);
+		if (n != null) {
+			node = n;
+		} else {
+			node = new ClazzNode ();
+		}
 		//*
-		node = new ClazzNode ();
+		//node = new ClazzNode ();
 		node.name = clazz;
 		node.path = ClazzLoader.lastScriptPath;
 		//error ("..." + node.path + "//" + node.name);
@@ -1212,6 +1282,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 	}
 	node.declaration = declaration;
 	
+	var isOptionalsOK = true;
 	if (optionals != null && optionals.length != 0) {
 		ClazzLoader.unwrapArray (optionals);
 		for (var i = 0; i < optionals.length; i++) {
@@ -1223,6 +1294,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 					|| ClazzLoader.isClassExcluded (name)) {
 				continue;
 			}
+			isOptionalsOK = false;
 			var n = ClazzLoader.findClass (name);
 			if (n == null) {
 				n = new ClazzNode ();
@@ -1465,7 +1537,20 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 		}
 	}
 	if (!existed) {
-		arr[arr.length] = child;
+		/*
+		if (type != 1) { // test cyclic optionals
+			existed = false;
+			for (var j = 0; j < child.optionals.length; j++) {
+				if (child.optionals[j].name == parent.name) {
+					existed = true;
+					break;
+				}
+			}
+		}
+		*/
+		if (!existed) {
+			arr[arr.length] = child;
+		}
 	}
 	existed = false;
 	for (var i = 0; i < child.parents.length; i++) {
