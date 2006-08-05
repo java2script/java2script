@@ -338,6 +338,17 @@
         </java>
 	</target>
 
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: pack.swt.widgets.css                     
+         - - - - - - - - - - - - - - - - - -->
+    <target name="pack.swt.widgets.css">
+        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/package.css">
+        	<fileset dir="${jswt.src.dir}/org/eclipse/swt/widgets/">
+        	    <include name="*.css"/>
+        	</fileset>
+        </concat>
+	</target>
+
     <!-- ================================= 
           target: pack.swt.basic              
          ================================= -->
