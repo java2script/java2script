@@ -14,6 +14,7 @@ package net.sf.j2s.ui.generator;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConverterUtil;
+import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
@@ -325,7 +326,8 @@ public class J2SView extends ViewPart {
 				}
 			}
 			fRoot.accept(visitor);
-			DependencyASTVisitor dvisitor = new DependencyASTVisitor();
+			DependencyASTVisitor dvisitor = new SWTDependencyASTVisitor();
+			dvisitor.setToCompileVariableName(fCompressVarName);
 			boolean errorOccurs = false;
 			try {
 				fRoot.accept(dvisitor);
