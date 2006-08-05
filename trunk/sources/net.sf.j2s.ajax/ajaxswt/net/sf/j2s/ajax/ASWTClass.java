@@ -31,11 +31,17 @@ public class ASWTClass extends AClass {
 	}
 
 	public static void swtLoad(String clazzName, Runnable afterLoaded) {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
+		Display display = null;
+		/**
+		 * @j2sIgnore
+		 */
+		{
+			Display.getCurrent();
+			if (display == null) {
+				display = Display.getDefault();
+			}
 		}
-		displayLoad(display, clazzName, afterLoaded);
+		objectLoad(display, clazzName, afterLoaded);
 	}
 
 
@@ -61,8 +67,8 @@ public class ASWTClass extends AClass {
 	 * 	c.run ();
 	 * }, false, true);
 	 */
-	public static void displayLoad(Display display, final String clazzName, final Runnable afterLoaded) {
-		display.asyncExec(new Runnable() {
+	static void objectLoad(Object display, final String clazzName, final Runnable afterLoaded) {
+		((Display) display).asyncExec(new Runnable() {
 			public void run() {
 				try {
 					Class clz = Class.forName(clazzName);
@@ -80,7 +86,10 @@ public class ASWTClass extends AClass {
 		});
 	}
 
+	public static void displayLoad(Display display, final String clazzName, final Runnable afterLoaded) {
+		objectLoad(display, clazzName, afterLoaded);
+	}
 	public static void shellLoad(Shell shell, String clazzName, Runnable afterLoaded) {
-		displayLoad(shell.getDisplay(), clazzName, afterLoaded);
+		objectLoad(shell.getDisplay(), clazzName, afterLoaded);
 	}
 }
