@@ -270,7 +270,7 @@ ClazzLoader.MODE_XHR_ASYNC = 1;
  * the ignored classes list.
  */
 /* private */
-/*-# unwrapArray -> uA #-*/
+/*x-# unwrapArray -> uA #-x*/
 ClazzLoader.unwrapArray = function (arr) {
 	if (arr == null || arr.length == 0) {
 		return arr;
