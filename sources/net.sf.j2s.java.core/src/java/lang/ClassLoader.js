@@ -296,6 +296,7 @@ ClazzLoader.unwrapArray = function (arr) {
 		}
 		last = arr[i];
 	}
+	return arr;
 };
 
 /**
@@ -379,9 +380,11 @@ ClazzLoader.registerPackages = function (prefix, pkgs) {
  * be java.package, or java.lang.String
  * @param forRoot Optional argument, if true, the return path will be root
  * of the given classs' package root path.
+ * @param ext Optional argument, if given, it will replace the default ".js"
+ * extension.
  */
 /* public */
-ClazzLoader.getClasspathFor = function (clazz, forRoot) {
+ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 	//error ("check js path : " + clazz);
 	var path = ClazzLoader.classpathMap["#" + clazz];
 	if (path != null) {
@@ -417,7 +420,12 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot) {
 	if (clazz.lastIndexOf (".*") == clazz.length - 2) {
 		return base + clazz.substring (0, idx + 1).replace (/\./g, "/");
 	}
-	var jsPath = base + clazz.replace (/\./g, "/") + ".js";
+	if (ext == null) {
+		ext = ".js";
+	} else if (ext.charAt (0) != '.') {
+		ext = "." + ext;
+	}
+	var jsPath = base + clazz.replace (/\./g, "/") + ext;
 	return jsPath;
 };
 
@@ -701,6 +709,44 @@ ClazzLoader.loadScript = function (file) {
 	// Add script DOM element to document tree
 	document.getElementsByTagName ("HEAD")[0].appendChild (script);
 	ClazzLoader.scriptLoading (file);
+};
+
+/* protected */
+ClazzLoader.isResourceExisted = function (id, path, base) {
+	if (id != null && document.getElementById (id) != null) {
+		return true;
+	}
+	if (path != null) {
+		var key = path;
+		if (base != null) {
+			if (path.indexOf (base) == 0) {
+				key = path.substring (base.length);
+			}
+		}
+		if (path.lastIndexOf (".css") == path.length - 4) {
+			var resLinks = document.getElementsByTagName ("LINK");
+			for (var i = 0; i < resLinks.length; i++) {
+				var cssPath = resLinks[i].href;
+				var idx = cssPath.lastIndexOf (key);
+				if (idx != -1 && idx == cssPath.length - key.length) {
+					return true;
+				}
+			}
+			if (window["css." + id] == true) {
+				return true;
+			}
+		} else if (path.lastIndexOf (".js") == path.length - 4) {
+			var resScripts = document.getElementsByTagName ("SCRIPT");
+			for (var i = 0; i < resScripts.length; i++) {
+				var jsPath = resScripts[i].src;
+				var idx = jsPath.lastIndexOf (key);
+				if (idx != -1 && idx == jsPath.length - key.length) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 };
 
 /* public */
