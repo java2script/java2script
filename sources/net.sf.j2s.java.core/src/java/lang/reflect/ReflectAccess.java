@@ -14,6 +14,9 @@ import sun.reflect.ConstructorAccessor;
     sun.reflect.LangReflectAccess interface, allowing the java.lang
     package to instantiate objects in this package. */
 
+/**
+ * @j2sIgnoreImport sun.reflect.LangReflectAccess
+ */
 class ReflectAccess implements sun.reflect.LangReflectAccess {
     public Field newField(Class declaringClass,
                           String name,

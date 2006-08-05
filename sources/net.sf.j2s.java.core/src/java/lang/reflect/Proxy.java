@@ -314,7 +314,8 @@ public class Proxy implements java.io.Serializable {
 	Class proxyClass = null;
 
 	/* buffer to generate string key for proxy class cache */
-	StringBuffer keyBuffer = new StringBuffer();
+	//StringBuffer keyBuffer = new StringBuffer();
+	String[] keyBuffer = new String[0];
 
 	for (int i = 0; i < interfaces.length; i++) {
 	    /*
@@ -342,7 +343,9 @@ public class Proxy implements java.io.Serializable {
 	    }
 
 	    // continue building string key for proxy class cache
-	    keyBuffer.append(interfaces[i].getName()).append(';');
+	    //keyBuffer.append(interfaces[i].getName()).append(';');
+	    keyBuffer[keyBuffer.length] = interfaces[i].getName();
+	    keyBuffer[keyBuffer.length] = ";";
 	}
 
 	/*
@@ -355,7 +358,17 @@ public class Proxy implements java.io.Serializable {
 	 * objects, and using a string representation of a class makes
 	 * for an implicit weak reference to the class.
 	 */
-	String key = keyBuffer.toString();
+	//String key = keyBuffer.toString();
+	String key = null;
+	/**
+	 * @j2sNativeSrc
+	 * key = keyBuffer.join ('');
+	 * @j2sNative
+	 * f = d.join ('');
+	 */
+	{
+		key = keyBuffer.toString();
+	}
 
 	/*
 	 * Find or create the proxy class cache for the class loader.

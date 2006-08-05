@@ -7,9 +7,11 @@
 
 package java.lang.reflect;
 
+/*
 import java.security.AccessController;
 import sun.reflect.LangReflectAccess;
 import sun.reflect.ReflectionFactory;
+*/
 
 /**
  * The Modifier class provides <code>static</code> methods and
@@ -40,9 +42,7 @@ class Modifier {
      * Bootstrapping protocol between java.lang and java.lang.reflect
      *  packages 
      */
-	/**
-	 * @j2sIgnore
-	 */
+	// @j2sIgnore
 	/*
     static {
         sun.reflect.ReflectionFactory factory =
@@ -230,6 +230,7 @@ class Modifier {
      * represented by <code>mod</code>
      */
     public static String toString(int mod) {
+    /*
 	StringBuffer sb = new StringBuffer();
 	int len;
 
@@ -237,7 +238,7 @@ class Modifier {
 	if ((mod & PROTECTED) != 0)	sb.append("protected ");
 	if ((mod & PRIVATE) != 0)	sb.append("private ");
 
-	/* Canonical order */
+	/-* Canonical order *-/
 	if ((mod & ABSTRACT) != 0)	sb.append("abstract ");
 	if ((mod & STATIC) != 0)	sb.append("static ");
 	if ((mod & FINAL) != 0)		sb.append("final ");
@@ -248,8 +249,35 @@ class Modifier {
 	if ((mod & STRICT) != 0)	sb.append("strictfp ");
 	if ((mod & INTERFACE) != 0)	sb.append("interface ");
 
-	if ((len = sb.length()) > 0)	/* trim trailing space */
+	if ((len = sb.length()) > 0)	/-* trim trailing space *-/
 	    return sb.toString().substring(0, len-1);
+	*/
+    String[] sb = new String[0];
+	if ((mod & PUBLIC) != 0)	sb[sb.length] = "public";
+	if ((mod & PROTECTED) != 0)	sb[sb.length] = "protected";
+	if ((mod & PRIVATE) != 0)	sb[sb.length] = "private";
+
+	/* Canonical order */
+	if ((mod & ABSTRACT) != 0)	sb[sb.length] = "abstract";
+	if ((mod & STATIC) != 0)	sb[sb.length] = "static";
+	if ((mod & FINAL) != 0)		sb[sb.length] = "final";
+	if ((mod & TRANSIENT) != 0)	sb[sb.length] = "transient";
+	if ((mod & VOLATILE) != 0)	sb[sb.length] = "volatile";
+	if ((mod & SYNCHRONIZED) != 0)	sb[sb.length] = "synchronized";
+	if ((mod & NATIVE) != 0)	sb[sb.length] = "native";
+	if ((mod & STRICT) != 0)	sb[sb.length] = "strictfp";
+	if ((mod & INTERFACE) != 0)	sb[sb.length] = "interface";
+
+	if (sb.length > 0)	/* join the array */
+	/**
+	 * @j2sNativeSrc
+	 * return sb.join (" ");
+	 * @j2sNative
+	 * return a.join (" ");
+	 */
+	{
+	    return sb.toString();
+	}
 	return "";
     }
 
