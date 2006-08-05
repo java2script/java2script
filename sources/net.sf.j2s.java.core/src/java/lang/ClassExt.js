@@ -760,7 +760,7 @@ Clazz.forName = function (clazzName) {
 
 /* protected */
 Clazz.cssAlreadyAggregated = false;
-Clazz.cssForcedUsingFile = true;
+Clazz.cssForcedUsingFile = false;
 
 countxx = 0;
 /* private */
