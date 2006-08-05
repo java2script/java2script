@@ -11,6 +11,7 @@
 package org.eclipse.swt.examples.controlexample;
 
 
+import net.sf.j2s.ajax.ARunnable;
 import net.sf.j2s.ajax.ASWTClass;
 import org.eclipse.swt.*;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -62,6 +63,9 @@ public class ControlExample {
 				"Label", 
 //				"Canvas",
 				"Combo",
+				"CLabel",
+				"CTabFolder",
+				"SashForm",
 //				"CoolBar",
 //				"Dialog",
 				"Group",
@@ -89,10 +93,10 @@ public class ControlExample {
 		}
 		if (tabs.length > 0) {
 			final TabItem item = tabFolder.getItem(0);
-			ASWTClass.shellLoad(parent.getShell(), (String) item.getData(), new Runnable() {
+			ASWTClass.shellLoad(parent.getShell(), (String) item.getData(), new ARunnable() {
 				public void run() {
 					try {
-						Constructor constructor = Class.forName((String) item.getData()).getConstructor(new Class[] {ControlExample.class});
+						Constructor constructor = getClazz().getConstructor(new Class[] {ControlExample.class});
 						Object inst = constructor.newInstance(new Object[] {ControlExample.this});
 						Tab tab = (Tab) inst;
 						item.setControl(tab.createTabFolderPage(tabFolder));
@@ -113,10 +117,10 @@ public class ControlExample {
 						if (item.getControl() == null) {
 							Object data = item.getData();
 							if (data != null) {
-								ASWTClass.shellLoad(tabFolder.getShell(), (String) data, new Runnable() {
+								ASWTClass.shellLoad(tabFolder.getShell(), (String) data, new ARunnable() {
 									public void run() {
 										try {
-											Constructor constructor = Class.forName((String) item.getData()).getConstructor(new Class[] {ControlExample.class});
+											Constructor constructor = getClazz().getConstructor(new Class[] {ControlExample.class});
 											Object inst = constructor.newInstance(new Object[] {ControlExample.this});
 											Tab tab = (Tab) inst;
 											if (((String) item.getData()).indexOf("Shell") != -1) {

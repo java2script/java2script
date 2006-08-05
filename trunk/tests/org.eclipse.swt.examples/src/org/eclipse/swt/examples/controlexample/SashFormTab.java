@@ -48,7 +48,7 @@ class SashFormTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	SashFormTab(ControlExample instance) {
+	public SashFormTab(ControlExample instance) {
 		super(instance);
 	}
 	void createExampleGroup () {
