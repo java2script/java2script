@@ -7,8 +7,10 @@
 
 package java.lang.reflect;
 
+/*
 import java.security.AccessController;
 import sun.reflect.ReflectionFactory;
+*/
 
 /**
  * The AccessibleObject class is the base class for Field, Method and
@@ -70,7 +72,7 @@ class AccessibleObject {
      */
     public static void setAccessible(AccessibleObject[] array, boolean flag)
 	throws SecurityException {
-	SecurityManager sm = System.getSecurityManager();
+//	SecurityManager sm = System.getSecurityManager();
 //	if (sm != null) sm.checkPermission(ACCESS_PERMISSION);
 	for (int i = 0; i < array.length; i++) {
 	    setAccessible0(array[i], flag);
@@ -103,7 +105,7 @@ class AccessibleObject {
      * @see java.lang.RuntimePermission
      */
     public void setAccessible(boolean flag) throws SecurityException {
-	SecurityManager sm = System.getSecurityManager();
+//	SecurityManager sm = System.getSecurityManager();
 //	if (sm != null) sm.checkPermission(ACCESS_PERMISSION);
 	setAccessible0(this, flag);
     }

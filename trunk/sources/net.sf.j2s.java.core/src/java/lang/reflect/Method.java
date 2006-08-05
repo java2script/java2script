@@ -219,6 +219,7 @@ class Method extends AccessibleObject implements Member {
      */
     public String toString() {
 	try {
+		/*
 	    StringBuffer sb = new StringBuffer();
 	    int mod = getModifiers();
 	    if (mod != 0) {
@@ -243,6 +244,38 @@ class Method extends AccessibleObject implements Member {
 			sb.append(",");
 		}
 	    }
+	    return sb.toString();
+	    */
+	    String[] sb = new String[0];
+	    int mod = getModifiers();
+	    if (mod != 0) {
+	    	sb[sb.length] = Modifier.toString(mod) + " ";
+	    }
+	    sb[sb.length] = Field.getTypeName(getReturnType()) + " ";
+	    sb[sb.length] = Field.getTypeName(getDeclaringClass()) + ".";
+	    sb[sb.length] = getName() + "(";
+	    Class[] params = parameterTypes; // avoid clone
+	    for (int j = 0; j < params.length; j++) {
+	    	sb[sb.length] = Field.getTypeName(params[j]);
+	    	if (j < (params.length - 1))
+	    		sb[sb.length] = ",";
+	    }
+	    sb[sb.length] = ")";
+	    Class[] exceptions = exceptionTypes; // avoid clone
+	    if (exceptions.length > 0) {
+	    	sb[sb.length] = " throws ";
+	    	for (int k = 0; k < exceptions.length; k++) {
+	    		sb[sb.length] = exceptions[k].getName();
+	    		if (k < (exceptions.length - 1))
+	    			sb[sb.length] = ",";
+	    	}
+	    }
+	    /**
+	     * @j2sNativeSrc
+	     * return sb.join ('');
+	     * @j2sNative
+	     * return a.join ('');
+	     */ {}
 	    return sb.toString();
 	} catch (Exception e) {
 	    return "<" + e + ">";

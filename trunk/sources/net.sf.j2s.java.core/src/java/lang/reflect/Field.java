@@ -840,11 +840,25 @@ class Field extends AccessibleObject implements Member {
 		    dimensions++;
 		    cl = cl.getComponentType();
 		}
+		/*
 		StringBuffer sb = new StringBuffer();
 		sb.append(cl.getName());
 		for (int i = 0; i < dimensions; i++) {
 		    sb.append("[]");
 		}
+		return sb.toString();
+		*/
+		String[] sb = new String[0];
+		sb[sb.length] = cl.getName();
+		for (int i = 0; i < dimensions; i++) {
+			sb[sb.length] = "[]";
+		}
+	    /**
+	     * @j2sNativeSrc
+	     * return sb.join ('');
+	     * @j2sNative
+	     * return d.join ('');
+	     */ {}
 		return sb.toString();
 	    } catch (Throwable e) { /*FALLTHRU*/ }
 	}

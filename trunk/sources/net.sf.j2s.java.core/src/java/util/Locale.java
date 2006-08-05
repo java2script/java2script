@@ -158,8 +158,6 @@ import sun.text.resources.LocaleData;
  * @version     1.69, 01/23/03
  * @author      Mark Davis
  * @since       1.1
- * 
- * @j2sIgnoreImport java.security.AccessController,java.text.MessageFormat,sun.security.action.GetPropertyAction,sun.text.resources.LocaleData,java.util.PropertyPermission,java.lang.Character,java.util.StringTokenizer
  */
 
 public final class Locale implements Cloneable, Serializable {
@@ -510,6 +508,7 @@ return [
         boolean l = language.length() != 0;
         boolean c = country.length() != 0;
         boolean v = variant.length() != 0;
+        /*
         StringBuffer result = new StringBuffer(language);
         if (c||(l&&v)) {
             result.append('_').append(country); // This may just append '_'
@@ -518,6 +517,15 @@ return [
             result.append('_').append(variant);
         }
         return result.toString();
+        */
+        String result = language;
+        if (c||(l&&v)) {
+            result += '_' + country; // This may just append '_'
+        }
+        if (v&&(l||c)) {
+            result += '_' + variant;
+        }
+        return result;
     }
 
     /**
