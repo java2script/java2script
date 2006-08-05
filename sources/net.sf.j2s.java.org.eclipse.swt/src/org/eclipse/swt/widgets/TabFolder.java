@@ -47,6 +47,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p><p>
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.TabFolder");
  */
 public class TabFolder extends Composite {
 	TabItem [] items;

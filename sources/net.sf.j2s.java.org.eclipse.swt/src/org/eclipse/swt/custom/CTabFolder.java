@@ -68,6 +68,9 @@ import org.eclipse.swt.widgets.TypedListener;
  * </p><p>
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.custom.CTabFolder");
  */
  
 public class CTabFolder extends Composite {
@@ -381,8 +384,10 @@ static int checkStyle (Composite parent, int style) {
 	 * NO_BACKGROUND style.  The NO_BACKGROUND style is not required on platforms
 	 * that use double buffering which is true in both of these cases.
 	 */
+	/* Ignore platform problem here in Java2Script SWT
 	String platform = SWT.getPlatform();
 	if ("carbon".equals(platform) || "gtk".equals(platform)) return style; //$NON-NLS-1$ //$NON-NLS-2$
+	*/
 	
 	//TEMPORARY CODE
 	/*

@@ -16,24 +16,6 @@ $wt = org.eclipse.swt;
 			"layout", 
 	    	"widgets"]);
 
-	var swtCSSKey = "swt-default.css";
-	var existed = false;
-	var resLinks = document.getElementsByTagName ("LINK");
-	for (var i = 0; i < resLinks.length; i++) {
-		var cssPath = resLinks[i].href;
-		if (cssPath.lastIndexOf (swtCSSKey) == cssPath.length - swtCSSKey.length) {
-			existed = true;
-			break;
-		}
-	}
-	if (!existed) {
-		var stylesheet = document.createElement ("LINK");
-		stylesheet.rel = "stylesheet";
-		var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
-		stylesheet.href = path + swtCSSKey;
-		document.getElementsByTagName ("HEAD")[0].appendChild (stylesheet);
-	}
-
 	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
 //	if (false)
 	ClazzLoader.jarClasspath (path + "events.z.js", [

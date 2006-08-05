@@ -47,6 +47,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @since 3.1
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Link");
  */
 public class Link extends Control {
 	String text;
