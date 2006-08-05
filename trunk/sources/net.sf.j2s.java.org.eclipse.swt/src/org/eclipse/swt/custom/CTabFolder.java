@@ -4176,6 +4176,14 @@ boolean updateTabHeight(boolean force){
 	notifyListeners(SWT.Resize, new Event());
 	return true;
 }
+/**
+ * @param x
+ * @param y
+ * @return
+ * 
+ * @j2sNative
+ * return null;
+ */
 String _getToolTip(int x, int y) {
 	if (showMin && minRect.contains(x, y)) return minimized ? SWT.getMessage("SWT_Restore") : SWT.getMessage("SWT_Minimize"); //$NON-NLS-1$ //$NON-NLS-2$
 	if (showMax && maxRect.contains(x, y)) return maximized ? SWT.getMessage("SWT_Restore") : SWT.getMessage("SWT_Maximize"); //$NON-NLS-1$ //$NON-NLS-2$

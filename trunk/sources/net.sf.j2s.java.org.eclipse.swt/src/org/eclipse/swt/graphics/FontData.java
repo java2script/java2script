@@ -368,6 +368,7 @@ public int getHeight() {
  * @since 3.0
  */
 public String getLocale () {
+	/*
 	StringBuffer buffer = new StringBuffer ();
 	char sep = '_';
 	if (lang != null) {
@@ -383,6 +384,22 @@ public String getLocale () {
 	}
 	
 	String result = buffer.toString ();
+	*/
+	
+	String result = "";
+	char sep = '_';
+	if (lang != null) {
+		result += lang;
+		result += sep;
+	}
+	if (country != null) {
+		result += country;
+		result += sep;
+	}
+	if (variant != null) {
+		result += variant;
+	}
+	
 	int length = result.length ();
 	if (length > 0) {
 		if (result.charAt (length - 1) == sep) {
@@ -602,15 +619,15 @@ public void setStyle(int style) {
  * @see FontData
  */
 public String toString() {
-	StringBuffer buffer = new StringBuffer();
-	buffer.append("1|"); //$NON-NLS-1$
-	buffer.append(getName());
-	buffer.append("|"); //$NON-NLS-1$
-	buffer.append(getHeight());
-	buffer.append("|"); //$NON-NLS-1$
-	buffer.append(getStyle());
-	buffer.append("|"); //$NON-NLS-1$
-	buffer.append("WINDOWS|1|"); //$NON-NLS-1$
+//	StringBuffer buffer = new StringBuffer();
+//	buffer.append("1|"); //$NON-NLS-1$
+//	buffer.append(getName());
+//	buffer.append("|"); //$NON-NLS-1$
+//	buffer.append(getHeight());
+//	buffer.append("|"); //$NON-NLS-1$
+//	buffer.append(getStyle());
+//	buffer.append("|"); //$NON-NLS-1$
+//	buffer.append("WINDOWS|1|"); //$NON-NLS-1$
 	/*
 	buffer.append(data.lfHeight);
 	buffer.append("|"); //$NON-NLS-1$
@@ -639,8 +656,18 @@ public String toString() {
 	buffer.append(data.lfPitchAndFamily);
 	buffer.append("|"); //$NON-NLS-1$
 	*/
-	buffer.append(getName());
-	return buffer.toString();
+//	buffer.append(getName());
+//	return buffer.toString();
+	String str = "1|"; //$NON-NLS-1$
+	str += getName();
+	str += "|"; //$NON-NLS-1$
+	str += getHeight();
+	str += "|"; //$NON-NLS-1$
+	str += getStyle();
+	str += "|"; //$NON-NLS-1$
+	str += "WINDOWS|1|"; //$NON-NLS-1$
+	str += getName();
+	return str;
 }
 
 /*

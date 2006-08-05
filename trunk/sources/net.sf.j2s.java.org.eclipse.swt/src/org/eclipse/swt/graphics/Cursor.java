@@ -210,7 +210,9 @@ public Cursor(Device device, int style) {
 		case SWT.CURSOR_IBEAM: 		handle = "text"; break;
 		case SWT.CURSOR_NO: 		handle = "auto"; break; /* TODO */
 		default:
-			SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+			//SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+			if (true) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+			;
 	}
 	/*
 	int lpCursorName = 0;

@@ -152,7 +152,10 @@ public int getPixel(RGB rgb) {
 			if (colors[i].equals(rgb)) return i;
 		}
 		/* The RGB did not exist in the palette */
-		SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+		//SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+		/**
+		 * throw "SWT.error (4)"; 
+		 */ {}
 		return 0;
 	}
 }

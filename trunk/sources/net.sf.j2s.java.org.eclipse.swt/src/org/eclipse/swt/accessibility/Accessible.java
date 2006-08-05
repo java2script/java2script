@@ -1,17 +1,46 @@
 package org.eclipse.swt.accessibility;
 
-import java.util.Vector;
+//import java.util.Vector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Control;
 
 public class Accessible {
+	/*
 	Vector accessibleListeners = new Vector();
 	Vector accessibleControlListeners = new Vector();
 	Vector textListeners = new Vector ();
+	*/
+	Object[] accessibleListeners = new Object[0];
+	Object[] accessibleControlListeners = new Object[0];
+	Object[] textListeners = new Object[0];
 	//Object[] variants;
 	Control control;
+	
+	private void addElement(Object[] arr, Object element) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == element) {
+				return ;
+			}
+		}
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == null) {
+				arr[i] = element;
+				return ;
+			}
+		}
+		arr[arr.length] = element;
+	}
+	
+	private void removeElement(Object[] arr, Object element) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == element) {
+				arr[i] = null;
+				return ;
+			}
+		}
+	}
 	/**
 	 * Adds the listener to the collection of listeners who will
 	 * be notified when an accessible client asks for certain strings,
@@ -36,7 +65,8 @@ public class Accessible {
 	public void addAccessibleListener(AccessibleListener listener) {
 		//checkWidget();
 		if (listener == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
-		accessibleListeners.addElement(listener);
+		//accessibleListeners.addElement(listener);
+		addElement(accessibleListeners, listener);
 	}
 	
 	
@@ -64,7 +94,8 @@ public class Accessible {
 	public void addAccessibleControlListener(AccessibleControlListener listener) {
 		//checkWidget();
 		if (listener == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
-		accessibleControlListeners.addElement(listener);
+		//accessibleControlListeners.addElement(listener);
+		addElement(accessibleControlListeners, listener);
 	}
 
 	/**
@@ -93,7 +124,8 @@ public class Accessible {
 	public void addAccessibleTextListener (AccessibleTextListener listener) {
 		//checkWidget ();
 		if (listener == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
-		textListeners.addElement (listener);		
+		//textListeners.addElement (listener);		
+		addElement(textListeners, listener);		
 	}
 	
 	/**
@@ -127,7 +159,8 @@ public class Accessible {
 	public void removeAccessibleListener(AccessibleListener listener) {
 		//checkWidget();
 		if (listener == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
-		accessibleListeners.removeElement(listener);
+		//accessibleListeners.removeElement(listener);
+		removeElement(accessibleListeners, listener);
 	}
 
 	/**
@@ -152,7 +185,8 @@ public class Accessible {
 	public void removeAccessibleControlListener(AccessibleControlListener listener) {
 		//checkWidget();
 		if (listener == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
-		accessibleControlListeners.removeElement(listener);
+		//accessibleControlListeners.removeElement(listener);
+		removeElement(accessibleControlListeners, listener);
 	}
 
 	/**
@@ -179,7 +213,8 @@ public class Accessible {
 	public void removeAccessibleTextListener (AccessibleTextListener listener) {
 		//checkWidget ();
 		if (listener == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
-		textListeners.removeElement (listener);
+		//textListeners.removeElement (listener);
+		removeElement(textListeners, listener);
 	}
 
 	/**

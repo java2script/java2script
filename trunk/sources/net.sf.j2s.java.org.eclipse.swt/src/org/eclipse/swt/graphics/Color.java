@@ -402,7 +402,8 @@ private int rgbHandleFromCSS(String cssHandle) {
 				intHandle = eval ("0x" + $1.substring(4, 6) + $1.substring(2, 4) + $1.substring(0, 2));
 			} else {
 				//$WT.error($WT.ERROR_INVALID_ARGUMENT);
-				$WT.error(4);
+				//$WT.error(4);
+				throw "SWT.error (4)";
 			}
 		});
 		 * @j2sNative
@@ -415,7 +416,8 @@ private int rgbHandleFromCSS(String cssHandle) {
 			} else if ($1.length == 6) {
 				e = eval ("0x" + $1.substring(4, 6) + $1.substring(2, 4) + $1.substring(0, 2));
 			} else {
-				$WT.error(4);
+				//$WT.error(4);
+				throw "SWT.error (4)";
 			}
 		});
 		*/ {}

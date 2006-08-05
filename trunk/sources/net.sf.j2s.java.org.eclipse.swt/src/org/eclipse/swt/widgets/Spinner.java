@@ -1011,6 +1011,7 @@ public class Spinner extends Composite {
 		if (digits > 0) {
 			String decimalSeparator = getDecimalSeparator ();
 			int index = string.length () - digits;
+			/*
 			StringBuffer buffer = new StringBuffer ();
 			if (index > 0) {
 				buffer.append (string.substring (0, index));
@@ -1023,6 +1024,20 @@ public class Spinner extends Composite {
 				buffer.append (string);
 			}
 			string = buffer.toString ();
+			*/
+			String str = "";
+			if (index > 0) {
+				str += string.substring (0, index);
+				str += decimalSeparator;
+				str += string.substring (index);
+			} else {
+				str += "0";
+				str += decimalSeparator;
+				while (index++ < 0) str += "0";
+				str += string;
+			}
+			string = str;
+
 		}
 		
 		if (hooks (SWT.Verify) || filters (SWT.Verify)) {

@@ -174,6 +174,11 @@ void checkParent (Shell parent) {
  * @param code the descriptive error code
  *
  * @see SWT#error(int)
+ *
+ * @j2sNativeSrc
+ * throw "SWT.error (" + code + ")";
+ * @j2sNative
+ * throw "SWT.error (" + a + ")";
  */
 void error (int code) {
 	SWT.error(code);

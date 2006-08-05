@@ -257,9 +257,15 @@ public static void error (int code, int hresult) {
 			throw new SWTException (code, msg);
 		}
 	}
-			
+	/**
+	 * @j2sNativeSrc
+	 * throw "SWT.error (" + code + ")";
+	 * @j2sNative
+	 * throw "SWT.error (" + a + ")";
+	 */ {
 	/* Unknown/Undefined Error */
 	SWT.error(code);
+	}
 }
 
 }
