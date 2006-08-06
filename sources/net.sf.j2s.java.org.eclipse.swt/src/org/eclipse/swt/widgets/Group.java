@@ -502,7 +502,9 @@ public void setText (String string) {
 	}
 	groupText = string;
 }
-
+protected void _updateOrientation(){
+	this.handle.style.direction = "ltr";
+}
 /*
 int widgetStyle () {
 	/*

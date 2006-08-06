@@ -178,7 +178,9 @@ void createHandle() {
 	
 		public boolean dragEnded(DragEvent e) {
 			super.dragEnded(e);
-			
+			/*
+			 * TODO: Sash form on right to left should be fixed.
+			 */
 			Event event = new Event ();
 			event.x = lastX; //e.currentX; //Integer.parseInt(thumb.style.left); //lastX;
 			event.y = lastY; //e.currentY; //Integer.parseInt(thumb.style.top); //lastY;
@@ -199,7 +201,7 @@ void createHandle() {
 			event.height = height;
 			event.widget = Sash.this;
 			event.item = Sash.this;
-			System.out.println("drop");
+//			System.out.println("drop");
 			sendEvent (SWT.Selection, event);
 			if (event.doit) {
 				if ((style & SWT.SMOOTH) != 0) {

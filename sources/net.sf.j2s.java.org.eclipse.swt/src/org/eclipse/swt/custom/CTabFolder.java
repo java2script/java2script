@@ -4339,6 +4339,10 @@ public Element containerHandle() {
 	return contentArea;
 }
 
+protected void _updateOrientation(){
+	handle.style.direction = "ltr";
+}
+
 Object createCSSElement(Object parent, String css) {
 	Element el = document.createElement("DIV");
 	if (css != null) {
