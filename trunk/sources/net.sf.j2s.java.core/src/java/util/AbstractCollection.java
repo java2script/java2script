@@ -48,6 +48,8 @@ java.lang.reflect.Array = {
 Array.getComponentType = function () {
 	return Object;
 };
+
+@j2sIgnoreImport java.lang.reflect.Array
  */
 
 public abstract class AbstractCollection implements Collection {
