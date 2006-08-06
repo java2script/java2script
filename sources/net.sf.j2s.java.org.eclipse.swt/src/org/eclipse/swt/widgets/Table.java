@@ -16,15 +16,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.dnd.DragAndDrop;
-import org.eclipse.swt.internal.dnd.DragEvent;
-import org.eclipse.swt.internal.dnd.SliderDND;
-import org.eclipse.swt.internal.dnd.TableColumnDND;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
-import org.w3c.dom.NodeList;
 
 /** 
  * Instances of this class implement a selectable user interface
