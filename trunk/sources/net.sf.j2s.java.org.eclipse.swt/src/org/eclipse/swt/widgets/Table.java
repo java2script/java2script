@@ -24,6 +24,7 @@ import org.eclipse.swt.internal.dnd.SliderDND;
 import org.eclipse.swt.internal.dnd.TableColumnDND;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
+import org.w3c.dom.NodeList;
 
 /** 
  * Instances of this class implement a selectable user interface
@@ -145,6 +146,14 @@ public Table (Composite parent, int style) {
 TableItem _getItem (int index) {
 	if (items [index] != null) return items [index];
 	return items [index] = new TableItem (this, SWT.NONE, -1, false);
+}
+
+void enableWidget(boolean enabled) {
+	// TODO Auto-generated method stub
+	super.enableWidget(enabled);
+	for(int i = 0; i < this.items.length; i++){
+		this.items[i].enableWidget(enabled);
+	}
 }
 
 /**
@@ -1023,14 +1032,14 @@ void createItem (TableItem item, int index) {
 		tbodyTRTemplate = document.createElement("TR");
 //	String trStr = "<TR class=\"table-item-default\"></TR>";
 		tbodyTRTemplate.className = "table-item-default";
-		int length = this.columns.length;
+		int length = Math.max(1,this.columns.length);
 		for(int i = 0; i < length; i++){
 			Element td = document.createElement("TD");
 			tbodyTRTemplate.appendChild(td);
 			Element el = document.createElement("DIV");
 			td.appendChild(el);
 			el.className = "table-item-cell-default";
-			if (index == 0 && (style & SWT.CHECK) != 0) {
+			if (i == 0 && (style & SWT.CHECK) != 0) {
 				Element check = document.createElement("INPUT");
 				check.type = "checkbox";
 				el.appendChild(check);
@@ -1046,9 +1055,15 @@ void createItem (TableItem item, int index) {
 //		 *alert(this.tbodyTRTemplateInnerHTML);
 //		 */{}
 	}
-	Element tbodyTR = tbodyTRTemplate.cloneNode(true); 
+	
+	Element tbodyTR = tbodyTRTemplate.cloneNode(true);
+//	System.out.println("the table is now " + tbodyTR.innerHTML);
 //	tbodyTR.className = "table-item-default";
 //	tbodyTR.innerHTML = tbodyTRTemplateInnerHTML;
+	if ((style & SWT.CHECK) != 0) {
+		Element[] nl = tbodyTR.getElementsByTagName("INPUT");
+		item.check = (Element) nl[0];
+	}
 	if (index < 0 || index >= tbody.childNodes.length) { //theadTD == null){
 		tbody.appendChild(tbodyTR);
 		items[index] = item;
@@ -1815,7 +1830,7 @@ public TableItem [] getSelection () {
 public int getSelectionCount () {
 	checkWidget ();
 	//return OS.SendMessage (handle, OS.LVM_GETSELECTEDCOUNT, 0, 0);
-	return 0;
+	return selection.length;
 }
 
 /**
@@ -1841,7 +1856,10 @@ public int getSelectionIndex () {
 	}
 	return selectedIndex;
 	*/
-	return 0;
+	if(selection.length == 0){
+		return -1;
+	}
+	return selection[0].index;
 }
 
 /**
@@ -1872,7 +1890,7 @@ public int [] getSelectionIndices () {
 	*/
 	int [] result = new int [selection.length];
 	for (int i = 0; i < selection.length; i++) {
-		result[i] = 0;//selection[i].index;
+		result[i] = selection[i].index;
 	}
 	return result;
 }

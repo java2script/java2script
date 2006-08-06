@@ -651,6 +651,8 @@ void show(){
 
 void updateSelection(){
 	textInput.value = selectInput.options[getSelectionIndex()].value;
+	setText(getItem(getSelectionIndex()));
+	sendEvent(SWT.Selection);
 }
 
 /**
@@ -1565,11 +1567,8 @@ void setBounds (int x, int y, int width, int height, int flags) {
 //				&& this instanceof Composite) {
 //			display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
 //		}
-		this.left = x;
-		this.top = y;
-		this.width = width;
-		this.height = height;
-		SetWindowPos (handle, null, x, y, width, height, flags);
+		super.setBounds (x, y, width, height, flags);
+//		SetWindowPos (handle, null, x, y, width, height, flags);
 		textInput.style.height = dropDownButton.style.height = Math.min(height, buttonHeight) + "px";
 		dropDownButton.style.width = buttonWidth + "px";
 		textInput.style.width = Math.max(0, width - buttonWidth) + "px";
@@ -1813,17 +1812,19 @@ public void setText (String string) {
 public void setText (String string, boolean modify) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	if ((style & SWT.READ_ONLY) != 0) {
-		int index = indexOf (string);
-		if (index != -1) select (index);
-		return;
-	}
+//	if ((style & SWT.READ_ONLY) != 0) {
+//		int index = indexOf (string);
+//		if(selectInput.selectedIndex != index && index != -1)
+//			select (index);
+//		return;
+//	}
 	textInput.readOnly = false;
 	textInput.value = string;
 	textInput.readOnly = (style & SWT.READ_ONLY) != 0;
 //	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 //	if (OS.SetWindowText (handle, buffer)) {
 	if(modify){
+//		System.out.println("send event modify");
 		sendEvent (SWT.Modify);
 	}
 		// widget could be disposed at this point
@@ -2447,6 +2448,27 @@ protected void releaseHandle() {
 	}
 
 	super.releaseHandle();
+}
+
+void enableWidget(boolean enabled) {
+	// TODO Auto-generated method stub
+	super.enableWidget(enabled);
+	this.textInput.disabled = !enabled;
+	this.dropDownButton.disabled = !enabled;
+	
+	String cssName = handle.className;
+	if (cssName == null) cssName = "";
+	String key = "text-disabled";
+	int idx = cssName.indexOf(key);
+	if (!enabled) {
+		if (idx == -1) {
+			handle.className += " " + key; 
+		}
+	} else {
+		if (idx != -1) {
+			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+	}
 }
 
 }

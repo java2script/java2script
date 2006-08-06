@@ -53,7 +53,7 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TabFolder extends Composite {
 	TabItem [] items;
-	private Element borderFrame, borderNW, borderNE, borderSW, borderSE, 
+	Element borderFrame, borderNW, borderNE, borderSW, borderSE, 
 		itemMore, btnPrevTab, btnNextTab, contentArea;
 	private int offset;
 	
@@ -1031,6 +1031,9 @@ void setSelection (int index, boolean notify) {
 			sendEvent (SWT.Selection, event);
 		}
 	}
+}
+protected void _updateOrientation(){
+	handle.style.direction = "ltr";
 }
 
 void updateSelection(int index) {

@@ -22,6 +22,8 @@ import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
+import com.sun.corba.se.spi.legacy.connection.GetEndPointInfoAgainException;
+
 /**
  * Instances of this class represent a selectable user interface object
  * that represents an item in a table.
@@ -134,42 +136,48 @@ private void configureItem() {
 				e.item = TableItem.this;
 				e.widget = TableItem.this;
 				parent.sendEvent(e);
+				setChecked(!checked);
 			}
 		};
 	}
-	if ((parent.style & SWT.FULL_SELECTION) != 0 || index == 0) {
-		this.handle.onclick = new RunnableCompatibility() {
-			public void run() {
-//				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
-//				element.className = "tree-item-text-selected";
-				HTMLEvent evt = (HTMLEvent) getEvent();
-				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.Selection;
-				e.detail = SWT.NONE;
-				e.item = TableItem.this;
-				e.widget = TableItem.this;
-				parent.sendEvent(e);
-				toReturn(false);
+	this.handle.onclick = new RunnableCompatibility() {
+		public void run() {
+			if(handle.disabled){
+				return;
 			}
-		};
-		this.handle.ondblclick = new RunnableCompatibility(){
-			public void run(){
-				HTMLEvent evt = (HTMLEvent) getEvent();
-				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-//				System.out.println("An event is runned " + evt);
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.DefaultSelection;
-				e.detail = SWT.NONE;
-				e.item = TableItem.this;
-				e.widget = TableItem.this;
-				parent.sendEvent(e);
-				toReturn(false);					
+//			Element element = handle.childNodes[0].childNodes[0].childNodes[1];
+//			element.className = "tree-item-text-selected";
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.Selection;
+			e.detail = SWT.NONE;
+			e.item = TableItem.this;
+			e.widget = TableItem.this;
+			parent.sendEvent(e);
+			toReturn(false);
+		}
+	};
+	this.handle.ondblclick = new RunnableCompatibility(){
+		public void run(){
+			if(handle.disabled){
+				return;
 			}
-		};
-	}
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
+//			System.out.println("An event is runned " + evt);
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.DefaultSelection;
+			e.detail = SWT.NONE;
+			e.item = TableItem.this;
+			e.widget = TableItem.this;
+			parent.sendEvent(e);
+			toReturn(false);					
+		}
+	};
+	
 }
 
 static Table checkNull (Table control) {
@@ -704,6 +712,8 @@ public void setBackground (int index, Color color) {
 	if (0 > index || index > count - 1) return;
 //	int pixel = -1;
 	if (color != null) {
+//		this.backgroundColors[index] = color.getCSSHandle();
+		
 		handle.childNodes[index].style.backgroundColor = color.getCSSHandle();
 //		parent.customDraw = true;
 //		pixel = color.handle;
@@ -741,6 +751,7 @@ public void setChecked (boolean checked) {
 
 void setChecked (boolean checked, boolean notify) {
 	this.checked = checked;
+	this.check.checked = this.checked;
 	if (notify) {
 		Event event = new Event();
 		event.item = this;
@@ -1133,12 +1144,13 @@ public void setText (int index, String string) {
 		if (string.equals (strings [index])) return;
 		strings [index] = string;
 	}
-	Element text = handle.childNodes[index].childNodes[0];
+	int elementIndex = ((parent.style & SWT.CHECK) != 0 && index == 0)? 1 : 0;
+	Element text = handle.childNodes[index].childNodes[0].childNodes[elementIndex];
 //	Element[] children = text.childNodes;
-	text.innerHTML = "<div class=\"table-item-cell-default\"><div class=\"table-item-cell-text-default\">" + string + "</div></div>";
+	text.innerHTML = "<div class=\"table-item-cell-text-default\">" + string + "</div>";
 	
 	int[] columnMaxWidth = parent.columnMaxWidth;
-	int width = OS.getContainerWidth(text);
+	int width = OS.getContainerWidth(text.parentNode);
 	if(columnMaxWidth.length > index){
 		if(columnMaxWidth[index] < width){
 			parent.lineWidth = parent.lineWidth + width - columnMaxWidth[index];
@@ -1299,6 +1311,11 @@ void showSelection(boolean selected) {
 
 boolean isSelected(){
 	return this.selected;
+}
+
+public void enableWidget(boolean enabled) {
+	this.handle.disabled = !enabled;
+	this.check.disabled = !enabled;
 }
 
 }

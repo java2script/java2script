@@ -544,7 +544,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 	}
 	int count = 0;
 	for (int i = 0; i < items.length; i++) {
-		if (items[i].handle == null) {
+		if (items[i] != null && items[i].handle == null) {
 			items[i] = null;
 			count++;
 		}
@@ -623,10 +623,15 @@ void createItem (TreeItem item, Object hParent, int index) {
 		}
 	}
 	if (item.parentItem != null) {
-		item.handle.style.display = "none";
-		item.parentItem.updateModifier(-1);
+		item.parentItem.addItem(item, index);
+		item.parentItem.setExpanded(false);
+//		item.parentItem.setExpanded(item.parentItem.getExpanded());
+//		item.handle.style.display = "none";
+//		item.parentItem.updateModifier(-1);
+//		System.out.println("adding " + item.parentItem + " " + item);
 	}
-
+	item.checkOrientation(this);
+	item._updateOrientation();
 	//items [id] = item;
 }	
 
@@ -1038,6 +1043,35 @@ void destroyItem (TreeItem item) {
 		items = new TreeItem [4];
 	}
 	*/
+	int length = selections.length;
+	int index = -1;
+	for(int i = 0; i < length; i++){
+		if(selections[i].equals(item)){
+			index = i;
+			break;
+		}
+	}
+	
+	if(index != -1){
+		TreeItem[] oldSelection = selections;
+		selections = new TreeItem[length - 1];
+		System.arraycopy(oldSelection, 0, selections, 0, index);
+		System.arraycopy(oldSelection, index + 1, selections, index, length - index - 1);
+	}
+	boolean found = false;
+	length = items.length;
+	for(int i = 0; i < length; i++){
+		if(found){
+			items[i-1] = items[i];
+		}
+		if(items[i].equals(item)){
+			found = true;
+		}
+	}
+	/**
+	 * @j2sNative
+	 * this.items.length = length - 1;
+	 */{}
 	updateScrollBar ();
 }
 
@@ -1224,7 +1258,7 @@ public int getColumnCount () {
 	checkWidget ();
 	//if (hwndHeader == 0) return 0;
 	//return OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
-	return 0;
+	return columns.length;
 }
 
 /**
@@ -1441,7 +1475,7 @@ public TreeItem getItem (int index) {
 	OS.SendMessage (handle, OS.TVM_GETITEM, 0, tvItem);
 	return items [tvItem.lParam];
 	*/
-	return items[index];
+	return getItems()[index];
 }
 
 /**
@@ -1501,7 +1535,7 @@ public int getItemCount () {
 	if (hItem == 0) return 0;
 	return getItemCount (hItem);
 	*/
-	return items.length;
+	return getItems().length;
 }
 
 int getItemCount (int hItem) {
@@ -1780,7 +1814,7 @@ public int getSelectionCount () {
 	OS.SetWindowLong (handle, OS.GWL_WNDPROC, oldProc);
 	return count;
 	*/
-	return 0;
+	return selections.length;
 }
 
 /**
@@ -2032,6 +2066,12 @@ public void removeAll () {
 	items = new TreeItem [4];
 	hAnchor = hInsert = 0;
 	*/
+	TreeItem[] items = getItems();
+	int length = items.length;
+	for(int i = 0 ;i < length; i++){
+		items[i].dispose();
+	}
+	this.items = new TreeItem[0];
 	updateScrollBar ();
 }
 

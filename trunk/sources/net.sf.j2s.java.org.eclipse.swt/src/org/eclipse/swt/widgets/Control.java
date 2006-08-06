@@ -523,6 +523,7 @@ void createWidget () {
 	setDefaultFont ();
 	checkMirrored ();
 	checkBorder ();
+	_updateOrientation();
 }
 
 /*
@@ -1133,6 +1134,9 @@ public boolean getVisible () {
 	if (drawCount != 0) return (state & HIDDEN) == 0;
 //	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //	return (bits & OS.WS_VISIBLE) != 0;
+	if(handle == null){
+		return false;
+	}
 	return handle.style.visibility != "hidden";
 }
 
@@ -2063,6 +2067,14 @@ void setBounds (int x, int y, int width, int height, int flags) {
 }
 
 void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
+	/**
+	 * A patch to send bounds to support mirroring features like what Windows have.
+	 */
+	if(parent != null){
+		if((parent.style & SWT.RIGHT_TO_LEFT) != 0){
+			x = Math.max(0, parent.getClientArea().width - x - width);
+		}
+	}
 	Element topHandle = topHandle ();
 	if (defer && parent != null) {
 		forceResize ();
@@ -2650,6 +2662,9 @@ public void setVisible (boolean visible) {
 	if (visible) {
 		sendEvent (SWT.Show);
 		if (isDisposed ()) return;
+		if(this instanceof Composite) {
+			display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
+		}
 	}
 	handle.style.visibility = visible ? "visible" : "hidden";
 	handle.style.display = visible ? "block" : "none";
@@ -3235,7 +3250,13 @@ public boolean setParent (Composite parent) {
 	//TODO
 //	Element topHandle = topHandle ();
 //	if (OS.SetParent (topHandle, parent.handle) == 0) return false;
+//	Element newHandle = this.handle.cloneNode(true);
+//	parent.handle.appendChild(this.handle.cloneNode(true));
+//	this.parent.handle.removeChild(this.handle);
+//	display.sendMessage(new MESSAGE(parent, MESSAGE.CONTROL_LAYOUT, null));
 	this.parent = parent;
+//	this.handle = newHandle;
+//	display.sendMessage(new MESSAGE(parent, MESSAGE.CONTROL_LAYOUT, null));
 //	int flags = OS.SWP_NOSIZE | OS.SWP_NOMOVE | OS.SWP_NOACTIVATE; 
 //	SetWindowPos (topHandle, OS.HWND_BOTTOM, 0, 0, 0, 0, flags);
 	return true;

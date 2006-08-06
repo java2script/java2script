@@ -66,3 +66,56 @@
 	color:white;
 	cursor:default;
 }
+
+/* Just for right to left images I used the arrow pngs this should be changed.*/
+.tree-item-anchor-expanded {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/arrow-down.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}
+.tree-item-anchor-collapsed {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/arrow-right.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}
+
+.tree-item-anchor-expanded-rtl {
+	display:inline;
+	width:20px;
+	overflow:visible;
+	padding-right:20px;
+	height:20px;
+	background-image:url('images/arrow-down.png');
+	background-repeat:no-repeat;
+	background-position:right center;
+	cursor:default;
+	/*float:right;*/
+	/*border:1px solid red;*/
+}
+.tree-item-anchor-collapsed-rtl {
+	display:inline;
+	width:20px;
+	overflow:visible;
+	padding-right:20px;
+	height:20px;
+	background-image:url('images/arrow-left.png');
+	background-repeat:no-repeat;
+	background-position:right center;
+	cursor:default;
+	/*float:right;*/
+	/*border:1px solid red;*/
+}

@@ -88,7 +88,7 @@ public TableColumn (Table parent, int style) {
 private void configureColumn() {
 	// TODO Auto-generated method stub
 	this.handle.style.height = (OS.getStringPlainHeight("A")+ 2) + "px";
-	System.out.println("configuring table column " + this.handle.style.height);
+//	System.out.println("configuring table column " + this.handle.style.height);
 	if(resizeHandle != null){
 		OS.destroyHandle(resizeHandle);
 	}
@@ -100,11 +100,11 @@ private void configureColumn() {
 	if(resizable){		
 		resizeHandle.style.display = "block";
 		resizeHandle.style.height = Math.max(0, OS.getContainerHeight(this.handle)) + "px";
-		System.out.println(" height is " + resizeHandle.style.height);
+//		System.out.println(" height is " + resizeHandle.style.height);
 		int left = 0;
 		for(int i = 0; i <= parent.indexOf(this); i++){
 			left += Math.max(0, parent.columns[i].getWidth() + 2);
-			System.out.println(" at " + i + " left is "+ left);
+//			System.out.println(" at " + i + " left is "+ left);
 		}
 		resizeHandle.style.left = (left  - 3)+ "px"; 
 //		System.out.println("resize handle for " + this.text + " " + resizeHandle.style.left);

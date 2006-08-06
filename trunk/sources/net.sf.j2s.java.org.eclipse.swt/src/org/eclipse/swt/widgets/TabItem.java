@@ -340,6 +340,7 @@ public void setText (String string) {
 		textEl = document.createElement("SPAN");
 		handle.appendChild(textEl);
 		textEl.appendChild(document.createTextNode(string));
+		this.handle.style.height = "14px";
 		//handle.appendChild(document.createTextNode(string));
 	}
 //	int index = parent.indexOf (this);

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+import java.util.Vector;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Color;
@@ -44,6 +46,7 @@ public class TreeItem extends Item {
 //	int [] cellBackground, cellForeground, cellFont;
 	Tree parent;
 	TreeItem parentItem;
+	TreeItem[] items;
 	int index;
 	boolean expandStatus = false;
 	private Element checkElement;
@@ -81,6 +84,7 @@ public class TreeItem extends Item {
 public TreeItem (Tree parent, int style) {
 	super (parent, style);
 	this.parent = parent;
+	this.items = new TreeItem[0];
 	//parent.createItem (this, 0, OS.TVI_LAST);
 	parent.createItem (this, null, -1);
 }
@@ -120,6 +124,7 @@ public TreeItem (Tree parent, int style, int index) {
 	super (parent, style);
 	if (index < 0) error (SWT.ERROR_INVALID_RANGE);
 	this.parent = parent;
+	this.items = new TreeItem[0];
 	/*
 	int hItem = OS.TVI_FIRST;
 	if (index != 0) {
@@ -170,6 +175,7 @@ public TreeItem (TreeItem parentItem, int style) {
 	super (parentItem.parent, style);
 	parent = parentItem.parent;
 	this.parentItem = parentItem;
+	this.items = new TreeItem[0];
 //	Element hItem = parentItem.handle;
 	parent.createItem (this, parentItem.handle, -1);//OS.TVI_LAST);
 }
@@ -209,6 +215,7 @@ public TreeItem (TreeItem parentItem, int style, int index) {
 	super (parentItem.parent, style);
 	if (index < 0) error (SWT.ERROR_INVALID_RANGE);
 	parent = parentItem.parent;
+	this.items = new TreeItem[0];
 	this.parentItem = parentItem;
 	/*
 	int hItem = OS.TVI_FIRST;
@@ -594,7 +601,15 @@ public TreeItem getItem (int index) {
 	OS.SendMessage (hwnd, OS.TVM_GETITEM, 0, tvItem);
 	return parent.items [tvItem.lParam];
 	*/
-	return parent.items[index];
+//	TreeItem[] copiedItems = new TreeItem[0];
+//	TreeItem[] items = parent.items;
+//	for (int i = 0; i < items.length; i++) {
+//		if (items[i] != null && items[i].parentItem == null) {
+//			copiedItems[copiedItems.length] = items[i];
+//		}
+//	}
+//	return copiedItems[index];
+	return items[index];
 }
 
 /**
@@ -616,7 +631,15 @@ public int getItemCount () {
 	if (hItem == 0) return 0;
 	return parent.getItemCount (hItem);
 	*/
-	return parent.items.length;
+	return items.length;
+//	TreeItem[] copiedItems = new TreeItem[0];
+//	TreeItem[] items = parent.items;
+//	for (int i = 0; i < items.length; i++) {
+//		if (items[i] != null && items[i].parentItem == null) {
+//			copiedItems[copiedItems.length] = items[i];
+//		}
+//	}
+//	return copiedItems.length;
 }
 
 /**
@@ -641,7 +664,7 @@ public TreeItem [] getItems () {
 //	int hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, handle);
 //	if (hItem == 0) return new TreeItem [0];
 //	System.out.println("index: " + this.index);
-	return parent.getItems (this.index);
+	return items;
 }
 
 /**
@@ -816,7 +839,32 @@ void redraw (int column, boolean drawText, boolean drawImage) {
 
 protected void releaseChild () {
 	super.releaseChild ();
+//	System.out.println("disposing " + this);
+	TreeItem[] children = this.getItems();
+	for (int i = 0; i < children.length; i++){
+		children[i].dispose();
+	}
 	parent.destroyItem (this);
+	if(parentItem!=null){
+		parentItem.destroyItem(this);
+	}
+}
+
+private void destroyItem(TreeItem item) {
+	int length = items.length;
+	int index = -1;
+	for(int i = 0; i < length; i++){
+		if(items[i].equals(item)){
+			index = i;
+		}
+	}
+	if(index > -1){
+		TreeItem[] newItems = new TreeItem[0];
+		System.arraycopy(items, 0, newItems, 0, index);
+		System.arraycopy(items, index + 1, newItems, index, items.length - index - 1);
+		items = newItems;
+	}
+	
 }
 
 protected void releaseHandle () {
@@ -826,16 +874,15 @@ protected void releaseHandle () {
 		OS.destroyHandle(handle);
 		handle = null;
 	}
-	parent = null;
-	parentItem = null;
 }
 
 protected void releaseWidget () {
 	super.releaseWidget ();
-	parent = null;
-	strings = null;
-	images = null;
 	//cellBackground = cellForeground = cellFont = null;
+	if (handle != null) {
+		OS.destroyHandle(handle);
+		handle = null;
+	}
 }
 
 /**
@@ -864,6 +911,12 @@ public void removeAll () {
 		tvItem.hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, handle);
 	}
 	*/
+	TreeItem[] items = getItems();
+	int length = items.length;
+	for(int i = 0 ;i < length; i++){
+		items[i].dispose();
+	}
+	this.items = new TreeItem[0];
 }
 
 /**
@@ -1029,6 +1082,7 @@ public void setExpanded(boolean expanded) {
 	if(getItemCount() == 0){
 		return;
 	}
+
 	TreeItem[] items = parent.getDescendantItems(index);
 //				TreeItem[] items = getItems();
 //		System.out.println(expanded);
@@ -1041,6 +1095,8 @@ public void setExpanded(boolean expanded) {
 //					System.out.println("...");
 //					System.out.println(items[i]);
 //					System.out.println(items[i].expandStatus);
+		if(items[i] == null)
+			continue;
 		if (items[i].parentItem == this) {
 			items[i].expandStatus = expandStatus;
 		}
@@ -1454,7 +1510,8 @@ public void setText (int index, String string) {
 			toggleExpandStatus();
 		}
 	};
-	hAnchor.appendChild(document.createTextNode("" + (char) 160));
+	
+	hAnchor.appendChild(document.createTextNode("" + (char) 160 + (char) 160 + (char) 160));
 	hItem.appendChild(hAnchor);
 	if ((parent.style & SWT.CHECK) != 0) {
 		checkElement = document.createElement("INPUT");
@@ -1518,9 +1575,13 @@ public void setText (int index, String string) {
 		pItem = pItem.parentItem;
 		padding += 20;
 	}
-	hItem.style.marginLeft = padding + "px";
+	if((parent.style & SWT.RIGHT_TO_LEFT) != 0){
+		hItem.style.marginRight = padding + "px";
+		hAnchor.style.width = "20px";
+	}else{
+		hItem.style.marginLeft = padding + "px";
+	}
 	tbodyTD.appendChild(hItem);
-
 	/*
 	if (index == 0) {
 		int hwnd = parent.handle;
@@ -1583,16 +1644,31 @@ void toggleExpandStatus() {
  * Return expanded status of the item
  */
 boolean updateModifier(int type) {
+	boolean isRTL = (parent.style & SWT.RIGHT_TO_LEFT) != 0;
 	Element element = handle.childNodes[0].childNodes[0].childNodes[0];
 	if (type == -1) {
-		element.className = "tree-item-anchor-collapsed";
+		element.className = "tree-item-anchor-collapsed"  + (isRTL ? "-rtl" : "");
 		return false;
 	} else if (type == 1) {
-		element.className = "tree-item-anchor-expanded";
+		element.className = "tree-item-anchor-expanded" + (isRTL ? "-rtl" : "");
 		return true;
 	} else {
 		element.className = "tree-item-anchor-default";
 		return true;
 	}
+}
+
+public void addItem(TreeItem item, int index) {
+//	System.out.println("adding item to list " + item);
+	if(index == -1 || index == items.length){
+		items[items.length] = item;
+	}else{
+		TreeItem[] newItem = new TreeItem[0];
+		System.arraycopy(items, 0, newItem, 0, index);
+		System.arraycopy(items, index , newItem, index+1, items.length - index);
+		newItem[index] = item;
+		items = newItem;
+	}
+//	System.out.println("adding item to list " + item);
 }
 }

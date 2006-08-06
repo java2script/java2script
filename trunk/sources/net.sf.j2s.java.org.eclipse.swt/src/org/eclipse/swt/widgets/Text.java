@@ -178,7 +178,11 @@ void createHandle () {
 		textHandle = document.createElement("TEXTAREA");
 	} else {
 		textHandle = document.createElement("INPUT");
-		//handle.type = "text";
+		if((style & SWT.PASSWORD) != 0){
+			textHandle.type = "password";
+		}else{
+			textHandle.type = "text";
+		}
 	}
 	if (OS.isMozilla) {
 //		textHandle.style.position = "fixed";
@@ -223,6 +227,7 @@ void createHandle () {
 		textHandle.className = textCSSName;
 	}
 	handle.appendChild(textHandle);
+
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
 }
@@ -317,6 +322,16 @@ void hookModify() {
 					toReturn(e.doit);
 				//}
 			}
+		}
+	};
+	textHandle.onblur = new RunnableCompatibility() {
+		public void run() {
+			Event e = new Event();
+			e.type = SWT.FocusOut;
+			e.item = Text.this;
+			e.widget = Text.this;
+			sendEvent(e);
+			toReturn(e.doit);			
 		}
 	};
 }
@@ -2768,4 +2783,40 @@ LRESULT wmCommandChild (int wParam, int lParam) {
 	return super.wmCommandChild (wParam, lParam);
 }
 */
+void enableWidget (boolean enabled) {
+//	super.enableWidget (enabled);
+	/*
+	* Bug in Windows.  When a Button control is right-to-left and
+	* is disabled, the first pixel of the text is clipped.  The fix
+	* is to append a space to the text.
+	*/
+	/*
+	if ((style & SWT.RIGHT_TO_LEFT) != 0) {
+		if (OS.COMCTL32_MAJOR < 6 || !OS.IsAppThemed ()) {
+			int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
+			boolean hasImage = (bits & (OS.BS_BITMAP | OS.BS_ICON)) != 0;
+			if (!hasImage) {
+					String string = enabled ? text : text + " ";
+					TCHAR buffer = new TCHAR (getCodePage (), string, true);
+					OS.SetWindowText (handle, buffer);
+			}
+		}
+	}
+	*/
+	this.textHandle.disabled = !enabled;
+	String cssName = handle.className;
+	if (cssName == null) cssName = "";
+	String key = "text-disabled";
+	int idx = cssName.indexOf(key);
+	if (!enabled) {
+		if (idx == -1) {
+			handle.className += " " + key; 
+		}
+	} else {
+		if (idx != -1) {
+			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
+		}
+	}
+}
+
 }

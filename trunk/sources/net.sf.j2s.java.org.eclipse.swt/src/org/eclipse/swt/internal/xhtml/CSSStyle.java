@@ -74,6 +74,7 @@ public class CSSStyle {
 	public String backgroundRepeat;
 	public String backgroundPosition;
 	public String filter;
-	
+
+	public String direction;
 	public String cssText;
 }
