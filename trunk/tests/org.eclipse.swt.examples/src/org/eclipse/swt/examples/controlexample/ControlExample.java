@@ -300,6 +300,7 @@ public class ControlExample {
 	 * Invokes as a standalone program.
 	 */
 	public static void main(String[] args) {
+		System.out.println("To begin control examples ..."); // bring the correct width and height of XHTML
 		Display display = new Display();
 		int styleNone = SWT.NONE;
 		int style = styleNone;
@@ -314,10 +315,10 @@ public class ControlExample {
 		ControlExample instance = new ControlExample(shell);
 		shell.setText(getResourceString("window.title"));
 //		setShellSize(display, shell);
-		/**
-		 * @j2sNative
-		 * shell.setMaximized(true);
-		 */ {}
+//		/**
+//		 * @j2sNative
+//		 * shell.setMaximized(true);
+//		 */ {}
 		
 		shell.open();
 		while (! shell.isDisposed()) {
