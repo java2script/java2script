@@ -336,7 +336,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.swt                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.more,pack.swt.event,pack.swt.css,pack.swt.shell">
+    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.css,pack.swt.more,pack.swt.event,pack.swt.shell">
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
