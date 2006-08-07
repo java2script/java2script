@@ -324,10 +324,14 @@ String.prototype.concat = function (s) {
 
 String.prototype.$lastIndexOf = String.prototype.lastIndexOf;
 String.prototype.lastIndexOf = function (s, last) {
-	if (last + this.length <= 0) {	
+	if (last != null && last + this.length <= 0) {	
 		return -1;
 	}
-	return this.$lastIndexOf (s, last);
+	if (last != null) {
+		return this.$lastIndexOf (s, last);
+	} else {
+		return this.$lastIndexOf (s);
+	}
 };
 
 String.prototype.intern = function () {
