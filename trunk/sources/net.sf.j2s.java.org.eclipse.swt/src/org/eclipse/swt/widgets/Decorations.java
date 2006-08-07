@@ -2199,6 +2199,19 @@ boolean traverseDecorations (boolean next) {
 	}
 	return false;
 }
+/**
+ * Updates the monitor size whenever the window is resized
+ *
+ */
+public void _updateMonitorSize() {
+	Monitor monitor = getMonitor();
+	monitor.clientWidth = document.body.clientWidth; 
+	monitor.width = window.screen.availWidth;
+	monitor.clientHeight = document.body.clientHeight;
+	monitor.height = window.screen.availHeight;
+	monitor.clientX = monitor.x = 0;
+	monitor.clientY = monitor.y = 0;
+}
 
 /*
 boolean traverseItem (boolean next) {
