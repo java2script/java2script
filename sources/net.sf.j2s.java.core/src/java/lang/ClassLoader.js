@@ -387,30 +387,38 @@ ClazzLoader.registerPackages = function (prefix, pkgs) {
 ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 	//error ("check js path : " + clazz);
 	var path = ClazzLoader.classpathMap["#" + clazz];
-	if (path != null) {
-		return path;
-	}
-	/*
-	path = ClazzLoader.classpathMap["@" + clazz]; // package
-	if (path != null) {
-		return ClazzLoader.assureBase (path) + clazz.replace (/\./g, "/") + "/";
-	}
-	*/
 	var base = null;
-	var idx = clazz.lastIndexOf (".");
-	/*
-	while (idx != -1) {
-		var pkg = clazz.substring (0, idx);
-		base = ClazzLoader.classpathMap["@" + pkg];
-		if (base != null) {
-			break;
+	if (path != null) {
+		if (!forRoot && ext == null) { // return directly
+			return path;
+		} else {
+			var idx = path.lastIndexOf (clazz.replace (/\./g, "/"));
+			if (idx != -1) {
+				base = path.substring (0, idx);
+			}
 		}
-		idx = clazz.lastIndexOf (".", idx - 2);
-	}
-	*/
-	if (idx != -1) {
-		var pkg = clazz.substring (0, idx);
-		base = ClazzLoader.classpathMap["@" + pkg];
+	} else {
+		/*
+		path = ClazzLoader.classpathMap["@" + clazz]; // package
+		if (path != null) {
+			return ClazzLoader.assureBase (path) + clazz.replace (/\./g, "/") + "/";
+		}
+		*/
+		var idx = clazz.lastIndexOf (".");
+		/*
+		while (idx != -1) {
+			var pkg = clazz.substring (0, idx);
+			base = ClazzLoader.classpathMap["@" + pkg];
+			if (base != null) {
+				break;
+			}
+			idx = clazz.lastIndexOf (".", idx - 2);
+		}
+		*/
+		if (idx != -1) {
+			var pkg = clazz.substring (0, idx);
+			base = ClazzLoader.classpathMap["@" + pkg];
+		}
 	}
 	
 	base = ClazzLoader.assureBase (base);

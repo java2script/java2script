@@ -841,6 +841,8 @@ Clazz.registerCSS = function (clazzName, cssText) {
 				/*
 				 * TODO: Keep eyes open on IE. Maybe IE won't initialize this 
 				 * javascript-kind of CSS!
+				 * FIXME: IE7 (or IE6 sp2) does not support this kind of 
+				 * CSS loading!
 				 */
 				document.createStyleSheet ("javascript:Clazz.cssForIE (\"" + cssID + "\");");
 			} else {
