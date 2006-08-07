@@ -28,6 +28,7 @@ $browserLayoutResize = function () {
 	}
 	$browserResizingHandle = window.setTimeout (function () {
 		org.eclipse.swt.internal.ResizeSystem.updateResize ();
+		alert('resize called');
 	}, 50);
 };
 
@@ -65,6 +66,7 @@ public class ResizeSystem {
 	public static void updateResize() {
 		for (int i = 0; i < handlers.length; i++) {
 			ResizeHandler hdl = handlers[i];
+			hdl.shell._updateMonitorSize();
 			if (hdl != null) {
 				int status = hdl.getStatus();
 				if (status == SWT.MAX) {
