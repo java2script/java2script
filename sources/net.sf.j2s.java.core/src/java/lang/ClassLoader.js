@@ -395,6 +395,19 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 			var idx = path.lastIndexOf (clazz.replace (/\./g, "/"));
 			if (idx != -1) {
 				base = path.substring (0, idx);
+			} else {
+				/*
+				 * Check more: Maybe the same class' *.css is located
+				 * in the same folder.
+				 */
+				idx = clazz.lastIndexOf (".");
+				if (idx != -1) {
+					idx = path.lastIndexOf (clazz.substring (0, idx)
+							.replace (/\./g, "/"));
+					if (idx != -1) {
+						base = path.substring (0, idx);
+					}
+				}
 			}
 		}
 	} else {

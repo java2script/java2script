@@ -762,14 +762,6 @@ Clazz.forName = function (clazzName) {
 Clazz.cssAlreadyAggregated = false;
 Clazz.cssForcedUsingFile = false;
 
-countxx = 0;
-/* private */
-Clazz.cssForIE = function (key) {
-	var value = window[key];
-	window[key] = true; // loaded and release css text 
-	return value;
-};
-
 /**
  * Register css for the given class. If the given css text is null, it will
  * try to find relative *.css file instead loading css text directly.
@@ -783,7 +775,9 @@ Clazz.registerCSS = function (clazzName, cssText) {
 	}
 	clazzName = ClazzLoader.unwrapArray ([clazzName])[0];
 	var cssPath = ClazzLoader.getClasspathFor (clazzName, false, ".css");
+	
 	var basePath = ClazzLoader.getClasspathFor (clazzName, true);
+	var cssID = "c$$." + clazzName;
 	/*
 	 * Check whether the css resources is loaded or not
 	 */
@@ -791,7 +785,7 @@ Clazz.registerCSS = function (clazzName, cssText) {
 		if (cssText == null || Clazz.cssForcedUsingFile) {
 			var cssLink = document.createElement ("LINK");
 			cssLink.rel = "stylesheet";
-			cssLink.id = clazzName;
+			cssLink.id = cssID;
 			cssLink.href = cssPath;
 			document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
 		} else {
@@ -834,20 +828,15 @@ Clazz.registerCSS = function (clazzName, cssText) {
 			if (document.createStyleSheet != null) {
 				/*
 				 * Internet Explorer does not support loading dynamic css styles
-				 * by <STYLE>!
+				 * by creating <STYLE> element!
 				 */
-				var cssID = "css." + clazzName;
-				window[cssID] = cssText;
-				/*
-				 * TODO: Keep eyes open on IE. Maybe IE won't initialize this 
-				 * javascript-kind of CSS!
-				 * FIXME: IE7 (or IE6 sp2) does not support this kind of 
-				 * CSS loading!
-				 */
-				document.createStyleSheet ("javascript:Clazz.cssForIE (\"" + cssID + "\");");
+				var sheet = document.createStyleSheet ();
+				sheet.cssText = cssText;
+				//sheet.id = cssID; // No ID support the this element for IE
+				window[cssID] = true;
 			} else {
 				var cssStyle = document.createElement ("STYLE");
-				cssStyle.id = clazzName;
+				cssStyle.id = cssID;
 				cssStyle.appendChild (document.createTextNode (cssText));
 				document.getElementsByTagName ("HEAD")[0].appendChild (cssStyle);
 			}
