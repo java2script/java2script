@@ -21,7 +21,8 @@ $wt = org.eclipse.swt;
 	// The core.z.js should already intialized
 	ClazzLoader.loadZJar (path + "events.z.js", "org.eclipse.swt.widgets.EventTable");
 
-	//if (false)
+var isDebugging = (window["swt.debugging"] == true);
+if (!isDebugging) {
 	ClazzLoader.jarClasspath (path + "basic.z.js", [
 		"$wt.internal.SerializableCompatibility",
 		"$.CloneableCompatibility",
@@ -186,6 +187,7 @@ $wt = org.eclipse.swt;
 		"$.SubList"
 	]);
 	*/
+} // end of !isDebugging
 
 }) ();
 
