@@ -382,15 +382,6 @@ int defaultForeground () {
 }
 */
 
-private void clearScaleDecoration() {
-	for (int i = 0; i < handle.childNodes.length; i++) {
-		//System.out.println(i + ":" + handle.childNodes[i].className);
-		if (handle.childNodes[i].className.indexOf("scale-line-decoration") != -1) {
-			//System.out.println(i);
-			handle.removeChild(handle.childNodes[i]);
-		}
-	}
-}
 private void decorateScale() {
 	int outerSize;
 	if ((style & SWT.HORIZONTAL) != 0) {
@@ -517,7 +508,7 @@ public int getSelection () {
 		selection = left * maximum / (getSize().x - 12);
 	} else {
 		int top = Integer.parseInt(thumbHandle.style.top);
-		selection = top * maximum / (getSize().y - 12);
+		selection = maximum - top * maximum / (getSize().y - 12);
 	}
 	return selection;
 }
@@ -611,8 +602,9 @@ public void setMaximum (int value) {
 		//OS.SendMessage (handle, OS.TBM_SETRANGEMAX, 1, value);
 		if (maximum == value) return;
 		maximum = value;
-		clearScaleDecoration();
+//		clearScaleDecoration();
 		decorateScale();
+		setSelection(selection);
 	}
 }
 
@@ -636,8 +628,9 @@ public void setMinimum (int value) {
 		//OS.SendMessage (handle, OS.TBM_SETRANGEMIN, 1, value);
 		if (minimum == value) return;
 		minimum = value;
-		clearScaleDecoration();
+//		clearScaleDecoration();
 		decorateScale();
+		setSelection(selection);
 	}
 }
 
@@ -664,7 +657,7 @@ public void setPageIncrement (int pageIncrement) {
 //	OS.SendMessage (handle, OS.TBM_SETTICFREQ, pageIncrement, 0);
 	if (this.pageIncrement == pageIncrement) return;
 	this.pageIncrement = pageIncrement;
-	clearScaleDecoration();
+//	clearScaleDecoration();
 	decorateScale();
 }
 
@@ -682,14 +675,22 @@ public void setPageIncrement (int pageIncrement) {
 public void setSelection (int value) {
 	checkWidget ();
 	//OS.SendMessage (handle, OS.TBM_SETPOS, 1, value);
-	if (selection == value) return;
-	if (minimum <= value && value < maximum) {
+	if (value < minimum) {
+		selection = minimum;
+	} else if (value > maximum) {
+		selection = maximum;
+	} else {
 		selection = value;
-		if ((style & SWT.HORIZONTAL) != 0) {
-			thumbHandle.style.left = Math.round(selection * (getSize().x - 12) / maximum) + "px";
-		} else {
-			thumbHandle.style.top = Math.round(selection * (getSize().y - 12) / maximum) + "px";
-		}
+	}
+
+//	if (selection == value) return;
+//	if (minimum <= value && value < maximum) {
+//		selection = value;
+//	}
+	if ((style & SWT.HORIZONTAL) != 0) {
+		thumbHandle.style.left = Math.round(selection * (getSize().x - 12) / maximum) + "px";
+	} else {
+		thumbHandle.style.top = Math.round((maximum - selection) * (getSize().y - 12) / maximum) + "px";
 	}
 }
 
@@ -703,6 +704,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 	el.style.top = Y + "px";
 	el.style.width = (cx > 0 ? cx : 0) + "px";
 	el.style.height = (cy > 0 ? cy : 0) + "px";
+	setSelection(selection);
 	return true;
 //	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
