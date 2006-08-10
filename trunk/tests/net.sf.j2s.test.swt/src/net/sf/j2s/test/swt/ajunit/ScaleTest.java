@@ -167,7 +167,7 @@ public class ScaleTest extends AsyncTestCase {
 	}
 
 
-	public void xtestSelectionValue() {
+	public void testSelectionValue() {
 		Display display = new Display ();
 		Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout());
@@ -177,6 +177,7 @@ public class ScaleTest extends AsyncTestCase {
 		final Scale scaleS = new Scale(shell, SWT.SMOOTH);
 		shell.pack();
 		shell.open ();
+		AsyncSWT.setShellAutoClose(false);
 		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
 			public void run() {
 				scaleD.setSelection(20);
@@ -184,10 +185,10 @@ public class ScaleTest extends AsyncTestCase {
 				scaleV.setSelection(-20);
 				scaleS.setSelection(100);
 				
-				assertEquals(scaleD.getSelection(), 20);
-				assertEquals(scaleB.getSelection(), 100);
-				assertEquals(scaleV.getSelection(), 0);
-				assertEquals(scaleS.getSelection(), 100);
+				assertEquals("Default", scaleD.getSelection(), 20);
+				assertEquals("Border", scaleB.getSelection(), 100);
+				assertEquals("Vertical", scaleV.getSelection(), 0);
+				assertEquals("Smooth", scaleS.getSelection(), 100);
 			}
 		});
 		display.dispose ();
@@ -280,7 +281,7 @@ public class ScaleTest extends AsyncTestCase {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		AsyncSWT.setShellAutoClose(false);
+		//AsyncSWT.setShellAutoClose(false);
 		AsyncTestRunner.asyncRun (ScaleTest.class);
 	}
 }
