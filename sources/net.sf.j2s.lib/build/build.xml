@@ -214,6 +214,8 @@
     		<arg value="java/lang/String.js"/>
         	
     		<arg value="java/lang/Character.js"/>
+        	
+    		<arg value="java/lang/reflect/Array.js"/>
     			
     		<arg value="java/util/Date.js"/>
     		
