@@ -28,13 +28,14 @@ import java.lang.reflect.Constructor;
  */
 public class TestSuite implements Test {
 
-	private Vector fTests= new Vector(10);
+	private Vector fTests;//= new Vector(10);
 	private String fName;
 
     /**
 	 * Constructs an empty TestSuite.
 	 */
 	public TestSuite() {
+		fTests = new Vector(10);
 	}
 	
 	/**
@@ -53,6 +54,7 @@ public class TestSuite implements Test {
 	 * Kanton Uri
 	 */
 	 public TestSuite(final Class theClass) {
+		fTests = new Vector(10);
 		fName= theClass.getName();
 		try {
 			getTestConstructor(theClass); // Avoid generating multiple error messages
