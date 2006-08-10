@@ -1,6 +1,8 @@
 (function () {
 	ClazzLoader.registerPackages ("java", [
 			"io", "lang", "lang.reflect", "util"]);
+			
+	window["reflect"] = java.lang.reflect;
 
 	var base = ClazzLoader.getClasspathFor ("java.*");
 	

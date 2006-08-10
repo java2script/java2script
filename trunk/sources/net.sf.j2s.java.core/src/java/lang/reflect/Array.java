@@ -16,6 +16,11 @@ package java.lang.reflect;
  * conversion would occur.
  *
  * @author Nakul Saraiya
+ * 
+ * @j2sPrefix
+ * Array.getComponentType = function () {
+ * 	return Object;
+ * };
  */
 public final
 class Array {
@@ -46,6 +51,13 @@ class Array {
      * @exception IllegalArgumentException if componentType is Void.TYPE
      * @exception NegativeArraySizeException if the specified <code>length</code> 
      * is negative
+     * 
+     * @j2sNativeSrc
+     * return Clazz.newArray (length); 
+     * // return new Array (length);
+     * @j2sNative
+     * return Clazz.newArray (b); 
+     * // return new Array (b);
      */
     public static Object newInstance(Class componentType, int length)
 	throws NegativeArraySizeException {
@@ -84,6 +96,8 @@ class Array {
      * is Void.TYPE.
      * @exception NegativeArraySizeException if any of the components in
      * the specified <code>dimensions</code> argument is negative.
+     * 
+     * @j2sIgnore
      */
     public static Object newInstance(Class componentType, int[] dimensions)
 	throws IllegalArgumentException, NegativeArraySizeException {
