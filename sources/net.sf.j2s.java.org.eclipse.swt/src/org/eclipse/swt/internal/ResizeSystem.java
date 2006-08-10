@@ -28,7 +28,6 @@ $browserLayoutResize = function () {
 	}
 	$browserResizingHandle = window.setTimeout (function () {
 		org.eclipse.swt.internal.ResizeSystem.updateResize ();
-		alert('resize called');
 	}, 50);
 };
 
@@ -39,7 +38,7 @@ try {
 }
  */
 public class ResizeSystem {
-	static ResizeHandler[] handlers = new ResizeHandler[5];
+	static ResizeHandler[] handlers = new ResizeHandler[0];
 	public static void register(Decorations shell, int status) {
 		for (int i = 0; i < handlers.length; i++) {
 			if (handlers[i] != null && handlers[i].shell == shell) {
