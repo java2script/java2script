@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -1262,7 +1263,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		buffer.append("Clazz.instanceOf (");
 		node.getLeftOperand().accept(this);
 		buffer.append(", ");
-		node.getRightOperand().accept(this);
+		Type right = node.getRightOperand();
+		if (right instanceof ArrayType) {
+			buffer.append("Array");
+		} else {
+			right.accept(this);
+		}
 		buffer.append(")");
 		return false;
 	}
