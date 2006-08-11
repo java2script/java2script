@@ -60,7 +60,6 @@ public class J2SLaunchingUtil {
 
 		if (workingDir != null) {
 			String url = generateHTML(configuration, mainType, workingDir);
-	
 			Display.getDefault().asyncExec(
 					new J2SApplicationRunnable(configuration, url));
 		} else {
@@ -615,10 +614,6 @@ public class J2SLaunchingUtil {
 		J2SCyclicProjectUtils.emptyTracks();
 		buf.append(generateClasspathJ2X(configuration, mainType, workingDir));
 		
-//		buf.append("ClazzLoader.packageClasspath ([\"java\", \"swt\", \"junit\"], \"");
-//		buf.append(j2sLibPath);
-//		buf.append("\", true);\r\n");
-
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
