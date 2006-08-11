@@ -12,6 +12,7 @@
  *******************************************************************************/
 package net.sf.j2s.ui.property;
 
+import java.io.File;
 import net.sf.j2s.ui.classpath.CSSResource;
 import net.sf.j2s.ui.classpath.CompositeResources;
 import net.sf.j2s.ui.classpath.ContactedClasses;
@@ -54,7 +55,12 @@ public class J2SClasspathLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof Resource) {
 			Resource res = (Resource) element;
-			return res.getName();
+//			return res.getName();
+			String name = res.getName();
+			if (name.endsWith(".j2x")) {
+				return name.substring(0, name.length() - 4);
+			}
+			return name;
 		} else if (element instanceof J2SCategory) {
 			J2SCategory ctg = (J2SCategory) element;
 			return ctg.getKey();

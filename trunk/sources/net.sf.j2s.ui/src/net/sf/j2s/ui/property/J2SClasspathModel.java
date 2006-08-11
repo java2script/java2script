@@ -12,9 +12,10 @@
  *******************************************************************************/
 package net.sf.j2s.ui.property;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
 import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.classpath.UnitClass;
 
@@ -29,7 +30,25 @@ public class J2SClasspathModel {
 	protected List abandonedClasses = new ArrayList();
 	
 	public void addResource(Resource res) {
-		resources.add(res);
+		if (!resources.contains(res)) {
+			if (res.getName().endsWith(".j2x")) {
+				for (Iterator iter = resources.iterator(); iter.hasNext();) {
+					Resource r = (Resource) iter.next();
+					if (r.getName().endsWith(".j2x")) {
+						boolean equals = false;
+						try {
+							equals = r.getAbsoluteFile().getCanonicalPath().equals(res.getAbsoluteFile().getCanonicalPath());
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						if (equals) {
+							return;
+						}
+					}
+				}
+			}
+			resources.add(res);
+		}
 	}
 	public void removeResource(Resource res) {
 		resources.remove(res);
@@ -73,11 +92,16 @@ public class J2SClasspathModel {
 	
 	static String[] categories = new String[] {
 		"Resources",
-		"Classes",
+//		"Classes",
 		"Abandoned Classes"
 	};
+	
+	J2SCategory[] ctgs = null;
 	public J2SCategory[] getCategories() {
-		J2SCategory[] ctgs = new J2SCategory[3];
+		if (ctgs != null) {
+			return ctgs;
+		}
+		ctgs = new J2SCategory[categories.length];
 		for (int i = 0; i < ctgs.length; i++) {
 			ctgs[i] = new J2SCategory(this, categories[i]);
 		}
