@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import net.sf.j2s.ui.launching.J2SCyclicProjectUtils;
 
 
 public class CompositeResources extends Resource implements IClasspathContainer {
@@ -21,7 +22,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 	
 	public File getAbsoluteFile() {
 		if (getRelativePath().startsWith("/")) {
-			return new File(getFolder(), ".." + getRelativePath());
+			return new File(getFolder(),  getRelativePath());
 		} else {
 			return super.getAbsoluteFile();
 		}
@@ -34,14 +35,14 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 
 	public boolean exists() {
 		if (getRelativePath().startsWith("/")) {
-			return new File(getFolder(), ".." + getRelativePath()).exists();
+			return new File(getFolder(), getRelativePath()).exists();
 		} else {
 			return super.exists();
 		}
 	}
 	public String getBinRelativePath() {
 		if (getRelativePath().startsWith("/")) {
-			return ".." + getRelativePath().substring(0, getRelativePath().lastIndexOf('/') + 1);
+			return getRelativePath().substring(0, getRelativePath().lastIndexOf('/') + 1);
 		} else {
 			return "";
 			//return binRelativePath;
@@ -115,7 +116,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 				if (res.startsWith("|")) {
 					res = res.substring(1);
 					Resource rr = null;
-					if (res.endsWith(".z.js")) {
+					if (res.endsWith(".z.js") || res.endsWith(".j2x")) {
 						rr = new ContactedClasses();
 					} else if (res.endsWith(".css")) {
 						rr = new CSSResource();
@@ -129,7 +130,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 					rr.setParent(this);
 					rr.setAbsolute(true);
 					resourcesList.add(rr);
-				} else if (res.endsWith(".z.js")) {
+				} else if (res.endsWith(".z.js") || res.endsWith(".j2x")) {
 					ContactedClasses jz = new ContactedClasses();
 					jz.setFolder(this.getAbsoluteFolder());
 					jz.setRelativePath(res);
@@ -151,7 +152,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 					resourcesList.add(css);
 				} else if (res.endsWith("/.j2s")) {
 					ProjectResources prj = new ProjectResources();
-					prj.setFolder(this.getAbsoluteFolder());
+					prj.setFolder(this.getAbsoluteFolder().getParentFile());
 					prj.setRelativePath(res);
 					prj.setParent(this);
 					resourcesList.add(prj);
@@ -240,10 +241,119 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		for (Iterator iter = resources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
 			buf.append(res.toHTMLString());
 		}
 		return buf.toString();
 	}
+	
+	public String toJ2XString() {
+		StringBuffer buf = new StringBuffer();
+		if (!J2SCyclicProjectUtils.visit(this)) {
+			return buf.toString();
+		}
+		if (resources == null) {
+			this.load();
+		}
+		for (Iterator iter = resources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
+			if (res instanceof CompositeResources) {
+				CompositeResources c = (CompositeResources) res;
+				buf.append(c.toJ2XString());
+				buf.append(',');
+			}
+		}
+		for (Iterator iter = resources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
+			if (res instanceof ContactedClasses) {
+				ContactedClasses unit = (ContactedClasses) res;
+				buf.append(unit.getAbsoluteFile().getAbsolutePath());
+				buf.append(',');
+			}
+		}
+		return buf.toString();
+	}
+	
+	public String existedClassesString() {
+		StringBuffer buf = new StringBuffer();
+		if (!J2SCyclicProjectUtils.visit(this)) {
+			return buf.toString();
+		}
+		if (resources == null) {
+			this.load();
+		}
+		buf.append('[');
+		try {
+			buf.append(new File(getAbsoluteFolder(), binRelativePath).getCanonicalPath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		buf.append(']');
+		buf.append(',');
+		for (Iterator iter = resources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (res instanceof UnitClass) {
+				if (!J2SCyclicProjectUtils.visit(res)) {
+					continue;
+				}
+				UnitClass unit = (UnitClass) res;
+				buf.append(unit.getClassName());
+				buf.append(',');
+			}
+		}
+		for (Iterator iter = resources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (res instanceof CompositeResources) {
+				CompositeResources c = (CompositeResources) res;
+				buf.append(c.existedClassesString());
+				buf.append(',');
+			}
+		}
+		return buf.toString();
+	}
+	
+	public String ignoredClassesString() {
+		StringBuffer buf = new StringBuffer();
+		if (!J2SCyclicProjectUtils.visit(this)) {
+			return buf.toString();
+		}
+		if (resources == null) {
+			this.load();
+		}
+		for (Iterator iter = resources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
+			if (res instanceof CompositeResources) {
+				CompositeResources c = (CompositeResources) res;
+				buf.append(c.ignoredClassesString());
+				buf.append(',');
+			}
+		}
+		for (Iterator iter = abandonedResources.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
+			if (res instanceof UnitClass) {
+				UnitClass unit = (UnitClass) res;
+				buf.append(unit.getClassName());
+				buf.append(',');
+			}
+		}
+		return buf.toString();
+	}
+	
 	public int getType() {
 		return VARIABLE;
 	}

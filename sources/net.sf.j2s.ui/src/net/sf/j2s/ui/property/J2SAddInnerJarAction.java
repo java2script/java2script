@@ -13,7 +13,10 @@
 package net.sf.j2s.ui.property;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import net.sf.j2s.ui.classpath.CSSResource;
 import net.sf.j2s.ui.classpath.CompositeResources;
@@ -35,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
 import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.debug.ui.actions.ObjectFilter;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -110,10 +114,15 @@ public class J2SAddInnerJarAction implements SelectionListener {
 					return "Inner JS Library";
 				} else if (element instanceof J2SLibrary) {
 					J2SLibrary lib = (J2SLibrary) element;
-					return lib.getName();
+					String name = lib.getName();
+					return name;
 				} else if (element instanceof String) {
 					String res = (String) element;
-					return new File(res).getName();
+					String name = new File(res).getName();
+					if (name.endsWith(".j2x")) {
+						return name.substring(0, name.length() - 4);
+					}
+					return name;
 				}
 				return super.getText(element);
 			}
@@ -176,7 +185,18 @@ public class J2SAddInnerJarAction implements SelectionListener {
 					return libs;
 				} else if (parentElement instanceof J2SLibrary) {
 					J2SLibrary lib = (J2SLibrary) parentElement;
-					return lib.getResources();
+					String[] resources = lib.getResources();
+					try {
+						String[] ress = new String[resources.length];
+						for (int i = 0; i < resources.length; i++) {
+							ress[i] = "|" + (new File(resources[i].substring(1)).getCanonicalPath());
+						}
+						return ress;
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return resources;
 				}
 				return null;
 			}
@@ -194,9 +214,20 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			}
 		};
 		dialog.setValidator(validator);
-		dialog.setTitle(ActionMessages.AddJarAction_JAR_Selection_7); //$NON-NLS-1$
-		dialog.setMessage(ActionMessages.AddJarAction_Choose_jars_to_add__8); //$NON-NLS-1$
+		dialog.setTitle("Libraries Selection"); //$NON-NLS-1$
+		dialog.setMessage("Choose libraries (*.j2x)"); //$NON-NLS-1$
 //		dialog.addFilter(filter);
+		List rr = page.classpathModel.resources;
+		List al = new ArrayList(rr.size());
+		for (Iterator iter = rr.iterator(); iter.hasNext();) {
+			Resource res = (Resource) iter.next();
+			try {
+				al.add("|" + res.getAbsoluteFile().getCanonicalPath());
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		dialog.addFilter(new ObjectFilter(al));
 		String[] allKeys = ExternalResources.getAllKeys();
 		String[] allDescriptions = ExternalResources.getAllDescriptions();
 		String[][] allResources = ExternalResources.getAllResources();

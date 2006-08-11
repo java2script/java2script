@@ -36,6 +36,8 @@ public class UnitClass extends Resource {
 	}
 	public String toHTMLString() {
 		String bin = "";
+		// Class unit *.js is loaded by Clazz.load from now on.
+		if (true) return bin; 
 		if (this.getParent() != null 
 				&& (this.getParent() instanceof CompositeResources)) {
 			CompositeResources cc = (CompositeResources) this.getParent();
@@ -46,6 +48,7 @@ public class UnitClass extends Resource {
 		}
 		return J2SLaunchingUtil.wrapTypeJS(getClassName(), bin + getBinRelativePath());
 	}
+	
 	public int getType() {
 		return ARCHIVE;
 	}
