@@ -14,13 +14,12 @@
 package net.sf.j2s.lib.providers;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URL;
-
 import net.sf.j2s.lib.LibPlugin;
 import net.sf.j2s.ui.resources.FileSystemUtils;
 import net.sf.j2s.ui.resources.IExternalResourceProvider;
-
 import org.eclipse.core.runtime.Platform;
 
 /**
@@ -84,7 +83,6 @@ public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 	}
 
 	public String[][] getResources() {
-		String[][] list = new String[CORE_RESOURCE_LIST.length][];
         URL starterURL = LibPlugin.getDefault().getBundle()
 				.getEntry("/" + File.separator); //$NON-NLS-1$
 		String srcPath = "."; //$NON-NLS-1$
@@ -94,11 +92,40 @@ public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 			e1.printStackTrace();
 		}
 		srcPath = srcPath.replace('/', File.separatorChar);
+		/*
+		String[][] list = new String[CORE_RESOURCE_LIST.length][];
 		for (int i = 0; i < list.length; i++) {
 			list[i] = new String[CORE_RESOURCE_LIST[i].length];
 			for (int j = 0; j < CORE_RESOURCE_LIST[i].length; j++) {
 				list[i][j] = "|" + new File(srcPath, "j2slib/" + CORE_RESOURCE_LIST[i][j]).getAbsolutePath();
 			}
+		}
+		return list;
+		*/
+		File folder = new File(srcPath, "j2slib");
+		File[] files = folder.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				if (pathname.isFile() && pathname.getName().endsWith(".j2x")) {
+					return true;
+				}
+				return false;
+			}
+		});
+		/*
+		for (int i = 0; i < files.length; i++) {
+			Properties prop = new Properties();
+			try {
+				prop.load(new FileInputStream(files[i]));
+				prop.getProperty("package.prefix");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		*/
+		String[][] list = new String[1][];
+		list[0] = new String[files.length];
+		for (int i = 0; i < files.length; i++) {
+			list[0][i] = "|" + files[i].getAbsolutePath();
 		}
 		return list;
 	}
