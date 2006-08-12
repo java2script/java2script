@@ -2718,8 +2718,10 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					element.accept(this);
 				}
 			} else if (element instanceof Initializer) {
-				buffer.append(");\r\n");
-				staticCount = -1;
+				if (staticCount != -1) {
+					buffer.append(");\r\n");
+					staticCount = -1;
+				}
 					//buffer.append(",\r\nfunction () {\r\n");
 				element.accept(this);
 				//if (staticCount) {
