@@ -1,7 +1,6 @@
 package net.sf.j2s.ui.classpath;
 
 import java.io.File;
-import java.util.Iterator;
 
 
 public class ProjectResources extends CompositeResources {
