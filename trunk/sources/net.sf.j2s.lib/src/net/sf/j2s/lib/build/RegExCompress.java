@@ -58,13 +58,13 @@ public class RegExCompress {
 	public static void main(String[] args) throws FileNotFoundException {
 		boolean completelyCompressing = true;
 		int indexDelta = 0;
-		if (args.length % 2 == 0 && args.length > 0) {
+		if (args.length % 2 == 1 && args.length > 0) {
 			completelyCompressing = "true".equals(args[0]);
 			indexDelta = 1;
 		}
-		for (int i = 0; i < (args.length - 1 - indexDelta) / 2; i++) {
-			File src = new File(args[indexDelta], args[i + i + 1 + indexDelta]);
-			File dest = new File(args[indexDelta], args[i + i + 2 + indexDelta]);
+		for (int i = 0; i < (args.length - indexDelta) / 2; i++) {
+			File src = new File(args[i + i + indexDelta]);
+			File dest = new File(args[i + i + 1 + indexDelta]);
 			pack(src, dest, completelyCompressing);
 		}
 	}
