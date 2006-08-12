@@ -627,7 +627,7 @@ public class J2SUnitLaunchingUtil {
 			buf.append("\", true);\r\n");
 		}
 		buf.append(j2xStr);
-
+		
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
@@ -638,8 +638,6 @@ public class J2SUnitLaunchingUtil {
 		J2SCyclicProjectUtils.emptyTracks();
 		buf.append(generateClasspathExistedClasses(configuration, mainType, workingDir));
 
-		//String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
-		
 		//String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
 		buf.append("ClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 		buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");

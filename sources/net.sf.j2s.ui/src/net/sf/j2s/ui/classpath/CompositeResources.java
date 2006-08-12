@@ -1,6 +1,7 @@
 package net.sf.j2s.ui.classpath;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -257,6 +258,25 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		if (resources == null) {
 			this.load();
 		}
+		if (this instanceof ProjectResources) {
+			ProjectResources pr = (ProjectResources) this;
+			File binFolder = new File(pr.getAbsoluteFolder(), this.binRelativePath);
+			File[] files = binFolder.listFiles(new FileFilter() {
+				public boolean accept(File pathname) {
+					if (pathname.isFile() && pathname.getName().endsWith(".j2x")) {
+						return true;
+					}
+					return false;
+				}
+			});
+			if (files != null && files.length != 0) {
+				for (int i = 0; i < files.length; i++) {
+					buf.append(files[i].getAbsolutePath());
+					buf.append(',');
+				}
+				return buf.toString();
+			}
+		}
 		for (Iterator iter = resources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
 			if (!J2SCyclicProjectUtils.visit(res)) {
@@ -289,6 +309,33 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		if (resources == null) {
 			this.load();
+		}
+		if (this instanceof ProjectResources) {
+			ProjectResources pr = (ProjectResources) this;
+			File binFolder = new File(pr.getAbsoluteFolder(), this.binRelativePath);
+			File[] files = binFolder.listFiles(new FileFilter() {
+				public boolean accept(File pathname) {
+					if (pathname.isFile() && pathname.getName().endsWith(".j2x")) {
+						return true;
+					}
+					return false;
+				}
+			});
+			if (files != null && files.length != 0) { // should always one *.j2x file
+				Properties prop = new Properties();
+				try {
+					prop.load(new FileInputStream(files[0]));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				String pkg = prop.getProperty("package.prefix");
+				File pkgFile = new File(files[0].getParentFile(), pkg.replace('.', '/') + "/package.js");
+				if (pkgFile.exists()) {
+					return buf.toString();
+				}
+			}
 		}
 		buf.append('[');
 		try {
