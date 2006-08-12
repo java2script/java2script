@@ -813,6 +813,12 @@ abstract class Tab {
 		}
 	}
 	
+	/**
+	 * @param image
+	 * @param color
+	 * 
+	 * @j2sNative
+	 */
 	void drawImage (Image image, Color color) {
 		GC gc = new GC(image);
 		gc.setBackground(color);

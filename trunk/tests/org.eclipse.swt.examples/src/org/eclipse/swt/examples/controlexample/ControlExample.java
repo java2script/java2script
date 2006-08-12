@@ -60,12 +60,14 @@ public class ControlExample {
 		tabFolder = new TabFolder (parent, SWT.NONE);
 		String[] tabs = new String[] {
 				"Button", 
-				"Label", 
+//				"Label", 
 //				"Canvas",
-				"Combo",
-				"CLabel",
-				"CTabFolder",
-				"SashForm",
+				
+//				"Combo",
+//				"CLabel",
+//				"CTabFolder",
+//				"SashForm",
+				
 //				"CoolBar",
 //				"Dialog",
 				"Group",
@@ -74,22 +76,31 @@ public class ControlExample {
 //				"List",
 //				"Menu",
 				"ProgressBar",
-				"Sash",
+				
+//				"Sash",
 				// shellTab = new ShellTab(this),
 				"Shell",
 				"Slider",
 				"Spinner",
 				"TabFolder",
-//				"Table",
-				"Text"
+				"Table",
+				"Text",
 //				"ToolBar",
-//				"Tree"
+				"Tree"
 		};
 		for (int i=0; i<tabs.length; i++) {
 			TabItem item = new TabItem (tabFolder, SWT.NONE);
 		    item.setText (tabs [i]);
 		    //item.setControl (tabs [i].createTabFolderPage (tabFolder));
 		    item.setData ("org.eclipse.swt.examples.controlexample." + tabs [i] + "Tab");
+		    //ProgressBar progressBar = new ProgressBar(tabFolder, SWT.INDETERMINATE);
+			//item.setControl(progressBar);
+		    //*
+		    Label label = new Label(tabFolder, SWT.NONE);
+		    label.setText("Loading " + tabs [i] + " Tab ...");
+		    label.setAlignment(SWT.CENTER);
+		    item.setControl(label);
+		    // */
 		}
 		if (tabs.length > 0) {
 			final TabItem item = tabFolder.getItem(0);
@@ -99,7 +110,12 @@ public class ControlExample {
 						Constructor constructor = getClazz().getConstructor(new Class[] {ControlExample.class});
 						Object inst = constructor.newInstance(new Object[] {ControlExample.this});
 						Tab tab = (Tab) inst;
-						item.setControl(tab.createTabFolderPage(tabFolder));
+						Composite page = tab.createTabFolderPage(tabFolder);
+						Control control = item.getControl();
+						if (control != null && control instanceof Label) {
+							control.dispose();
+						}
+						item.setControl(page);
 						//item.getParent().getShell().pack();
 					} catch (Throwable e) {
 						//e.printStackTrace();
@@ -114,7 +130,8 @@ public class ControlExample {
 					int idx = tabFolder.getSelectionIndex();
 					if (idx != -1) {
 						final TabItem item = tabFolder.getItem(idx);
-						if (item.getControl() == null) {
+						Control control = item.getControl();
+						if (control == null || control instanceof Label) {
 							Object data = item.getData();
 							if (data != null) {
 								ASWTClass.shellLoad(tabFolder.getShell(), (String) data, new ARunnable() {
@@ -126,7 +143,12 @@ public class ControlExample {
 											if (((String) item.getData()).indexOf("Shell") != -1) {
 												shellTab = (ShellTab) tab;
 											}
-											item.setControl(tab.createTabFolderPage(tabFolder));
+											Composite page = tab.createTabFolderPage(tabFolder);
+											Control control = item.getControl();
+											if (control != null && control instanceof Label) {
+												control.dispose();
+											}
+											item.setControl(page);
 										} catch (Throwable e) {
 											//e.printStackTrace();
 											throw (Error) e;
@@ -305,20 +327,20 @@ public class ControlExample {
 		int styleNone = SWT.NONE;
 		int style = styleNone;
 		style = SWT.SHELL_TRIM;
-//		/**
-//		 * @j2sNative 
-//		 * style = styleNone;
-//		 */ {}
+		/**
+		 * @j2sNative 
+		 * style = styleNone;
+		 */ {}
 		
 		Shell shell = new Shell(display, style);
 		shell.setLayout(new FillLayout());
 		ControlExample instance = new ControlExample(shell);
 		shell.setText(getResourceString("window.title"));
 //		setShellSize(display, shell);
-//		/**
-//		 * @j2sNative
-//		 * shell.setMaximized(true);
-//		 */ {}
+		/**
+		 * @j2sNative
+		 * shell.setMaximized(true);
+		 */ {}
 		
 		shell.open();
 		while (! shell.isDisposed()) {
