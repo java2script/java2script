@@ -416,7 +416,7 @@ class TreeTab extends ScrollableTab {
 		Color color = itemBackgroundColor;
 		if (color == null) color = textNode1.getBackground ();
 		drawImage (itemBackgroundImage, color);
-		itemBackgroundButton.setImage (itemBackgroundImage);
+		//itemBackgroundButton.setImage (itemBackgroundImage);
 	}
 	
 	/**
@@ -429,7 +429,7 @@ class TreeTab extends ScrollableTab {
 		Color color = itemForegroundColor;
 		if (color == null) color = textNode1.getForeground ();
 		drawImage (itemForegroundImage, color);
-		itemForegroundButton.setImage (itemForegroundImage);
+		//itemForegroundButton.setImage (itemForegroundImage);
 	}
 	
 	/**
