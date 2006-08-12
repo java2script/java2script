@@ -3,8 +3,8 @@ package org.eclipse.swt.internal.xhtml;
 
 
 
-public class Element {
 	
+public class Element {
 	public ContentWindow contentWindow;
 	
 	public Element parentNode;
@@ -88,6 +88,8 @@ public class Element {
 	public Object onblur;
 	
 	public Object onhelp;
+
+	public String rel;
 	
 	//private String
 	
@@ -128,6 +130,9 @@ public class Element {
 		return new Element();
 	}
 
+	public Element getElementById(String id){
+		return new Element();
+	}
 //	public void write(String html) {
 //		
 //	}

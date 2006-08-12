@@ -137,11 +137,32 @@ private void configureItem() {
 			}
 		};
 	}
+	
+//	this.handle.onkeydown = new RunnableCompatibility() {
+//		public void run() {
+//			HTMLEvent evt = (HTMLEvent) getEvent();
+//			int index = parent.getSelectionIndex();
+//			System.out.println("on key down !2" + evt.keyCode);
+//			if(evt.keyCode == 40){
+//				if(index < parent.getColumnCount() - 1){
+//					parent.select(index+1);
+//				}
+//			}else if(evt.keyCode == 38){
+//				if(index > 0){
+//					parent.select(index-1);
+//				}
+//			}
+//		}
+//	};
+
+	
 	this.handle.onclick = new RunnableCompatibility() {
 		public void run() {
 			if(handle.disabled){
 				return;
 			}
+//			handle.focus();
+			parent.handle.focus();
 //			Element element = handle.childNodes[0].childNodes[0].childNodes[1];
 //			element.className = "tree-item-text-selected";
 			HTMLEvent evt = (HTMLEvent) getEvent();
@@ -153,6 +174,7 @@ private void configureItem() {
 			e.item = TableItem.this;
 			e.widget = TableItem.this;
 			parent.sendEvent(e);
+			parent.setCursorFocus(index);
 			toReturn(false);
 		}
 	};
