@@ -12,26 +12,14 @@
  *******************************************************************************/
 package net.sf.j2s.ui.property;
 
-import java.io.File;
-import java.util.ArrayList;
-
-import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
-import net.sf.j2s.ui.launching.JavaRuntime;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import net.sf.j2s.ui.classpath.UnitClass;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
-import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -39,8 +27,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 /**
@@ -48,7 +34,7 @@ import org.eclipse.ui.views.navigator.ResourceSorter;
  *
  * 2006-2-1
  */
-public class J2SAddJarAction implements SelectionListener {
+public class J2SAbandonClassesAction implements SelectionListener {
 	J2SConfigPage page;
 	
 	private ISelectionStatusValidator validator= new ISelectionStatusValidator() {
@@ -56,57 +42,53 @@ public class J2SAddJarAction implements SelectionListener {
 			if (selection.length == 0) {
 				return new Status(IStatus.ERROR, JDIDebugPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
 			}
-			for (int i= 0; i < selection.length; i++) {
-				if (!(selection[i] instanceof IFile)) {
-					return new Status(IStatus.ERROR, JDIDebugPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
-				}					
-			}
+//			for (int i= 0; i < selection.length; i++) {
+//				if (!(selection[i] instanceof IFile)) {
+//					return new Status(IStatus.ERROR, JDIDebugPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
+//				}					
+//			}
 			return new Status(IStatus.OK, JDIDebugPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
 		}			
 	};
 
 	
-	public J2SAddJarAction(J2SConfigPage page) {
+	public J2SAbandonClassesAction(J2SConfigPage page) {
 		super();
 		this.page = page;
 	}
 
 	public void widgetSelected(SelectionEvent e) {
-		ViewerFilter filter= new ArchiveFilter(new ArrayList());
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		String rootPath = root.getLocation().toOSString();
-		String rootTruePath = new File(rootPath).getAbsolutePath();
-		String j2sPath = page.j2sFile.getAbsolutePath();
-		String prjName = null;
-		if (j2sPath.startsWith(rootTruePath)) {
-			j2sPath = j2sPath.substring(rootTruePath.length());
-			if (j2sPath.startsWith(File.separator)) {
-				j2sPath = j2sPath.substring(1);
-			}
-			prjName = j2sPath.substring(0, j2sPath.indexOf(File.separatorChar));
-		}
-		final IProject project = (prjName != null) ? root.getProject(prjName) : null;
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new WorkbenchContentProvider();
+//		ViewerFilter filter= new ArchiveFilter(new ArrayList());
+//		String j2sPath = page.j2sFile.getAbsolutePath();
+		ILabelProvider lp= new J2SClasspathLabelProvider();
+		ITreeContentProvider cp= new J2SClasspathContentProvider();
 
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(e.display.getActiveShell(), lp, cp) {
 			protected TreeViewer createTreeViewer(Composite parent) {
 				TreeViewer treeViewer = super.createTreeViewer(parent);
 				
-				if (project != null) {
-					treeViewer.setSelection(new StructuredSelection(project));
-					treeViewer.expandToLevel(project, 2);
-				}
+//				if (project != null) {
+//					treeViewer.setSelection(new StructuredSelection(project));
+//					treeViewer.expandToLevel(project, 2);
+//				}
 				return treeViewer;
 			}
 		};
 		dialog.setValidator(validator);
-		dialog.setTitle("Java2Script Resources Selection"); //$NON-NLS-1$
-		dialog.setMessage("Choose Java2Scrip resources (*.js and *.css)"); //$NON-NLS-1$
-		dialog.addFilter(filter);
+		dialog.setTitle("Classes Selection"); //$NON-NLS-1$
+		dialog.setMessage("Choose classes to be abandoned"); //$NON-NLS-1$
+//		dialog.addFilter(filter);
 		//dialog.setInitialSelection(page.j2s);
 		//if (configuration == null) {
-			dialog.setInput(root);
+		boolean alreadyUpdated = false;
+		UnitClass[] unitClasses = page.classpathModel.getUnitClasses();
+		for (int i = 0; i < unitClasses.length; i++) {
+			if (!unitClasses[i].getAbsoluteFile().exists()) {
+				page.classpathModel.removeUnitClass(unitClasses[i]);
+				alreadyUpdated = true;
+			}
+		}
+			dialog.setInput(new J2SCategory(page.classpathModel, "Classes"));
 //		} else {
 //			try {
 //				String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
@@ -121,32 +103,26 @@ public class J2SAddJarAction implements SelectionListener {
 		if (dialog.open() == Window.OK) {
 			Object[] expandedElements = page.viewer.getExpandedElements();
 			Object[] elements= dialog.getResult();
-			boolean added = false;
 			for (int i= 0; i < elements.length; i++) {
-				IResource elem= (IResource)elements[i];
-				IRuntimeClasspathEntry entry = JavaRuntime.newArchiveRuntimeClasspathEntry(elem);
-				if (entry != null) {
-					page.classpathModel.resources.add(entry);
-					added = true;
-				}
+				page.classpathModel.abandonUnitClass((UnitClass) elements[i]);
 			}
-			if (added) {
-				ScrollBar bar =  page.viewer.getTree().getVerticalBar();
-				double selection = 0;
-				if (bar != null) {
-					selection = (0.0 + bar.getSelection()) / bar.getMaximum();
-				}
-				 page.viewer.refresh();
-				//viewer.expandToLevel(2);
-				 page.viewer.setExpandedElements(expandedElements);
-				if (bar != null) {
-					bar.setSelection((int) Math.round(selection * bar.getMaximum()));
-				}
-				 page.updateButtonGroup();
-				 page.fireConfigModified();
+			ScrollBar bar =  page.viewer.getTree().getVerticalBar();
+			double selection = 0;
+			if (bar != null) {
+				selection = (0.0 + bar.getSelection()) / bar.getMaximum();
 			}
-			//getViewer().addEntries(res);
-		}	
+			 page.viewer.refresh();
+			//viewer.expandToLevel(2);
+			 page.viewer.setExpandedElements(expandedElements);
+			if (bar != null) {
+				bar.setSelection((int) Math.round(selection * bar.getMaximum()));
+			}
+			 page.updateButtonGroup();
+			 page.fireConfigModified();
+		} else if (alreadyUpdated) {
+			//MessageDialog.openInformation(page.getShell(), "Detected Changes", "Java2Script detects you rename classes or remove unused classes.\r\nThe Java2Script properties is marked as modified.");
+			page.fireConfigModified();
+		}
 	}
 
 	public void widgetDefaultSelected(SelectionEvent e) {

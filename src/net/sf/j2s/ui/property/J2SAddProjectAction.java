@@ -17,10 +17,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
+import net.sf.j2s.ui.classpath.ProjectResources;
+import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -122,7 +125,26 @@ public class J2SAddProjectAction implements SelectionListener {
 					e1.printStackTrace();
 				}
 				if (isEnabled) {
-			remaining.add(projects[i]);
+					List ress = page.classpathModel.resources;
+					boolean existed = false;
+					for (Iterator iter = ress.iterator(); iter.hasNext();) {
+						Resource r = (Resource) iter.next();
+						if (r instanceof ProjectResources) {
+							ProjectResources pr = (ProjectResources) r;
+							try {
+								if (pr.getAbsoluteFile().getCanonicalPath().equals(file.getCanonicalPath())) {
+									existed = true;
+									break;
+								}
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+					if (!existed) {
+						remaining.add(projects[i]);
+					}
 				}
 			}
 		}

@@ -34,12 +34,16 @@ import net.sf.j2s.ui.classpath.ContactedUnitClass;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.classpath.UnitClass;
+import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.resources.ExternalResources;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.debug.internal.ui.SWTUtil;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -242,6 +246,9 @@ public class J2SConfigPage extends Composite {
 			}
 		});
 		buttonAbandon = SWTUtil.createPushButton(actionComp, "Abandon Classes", null);
+		buttonAbandon.addSelectionListener(new J2SAbandonClassesAction(this));
+
+		/*
 		buttonAbandon.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -264,6 +271,7 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
+		*/
 		buttonRestore = SWTUtil.createPushButton(actionComp, "Restore Classes", null);
 		buttonRestore.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -402,7 +410,7 @@ public class J2SConfigPage extends Composite {
 	}
 	
 	protected void updateButtonGroup() {
-		buttonAbandon.setEnabled(false);
+		buttonAbandon.setEnabled(true);
 		buttonRestore.setEnabled(false);
 		buttonRemove.setEnabled(false);
 		buttonDown.setEnabled(false);
@@ -414,7 +422,9 @@ public class J2SConfigPage extends Composite {
 			return ;
 		}
 		if (isSelectionInOneCategory()) {
-			buttonRemove.setEnabled(true);
+			if (!isAbandonsSelected()) {
+				buttonRemove.setEnabled(true);
+			}
 			if (!isLastElementSelected()) {
 				buttonDown.setEnabled(true);
 			}
@@ -433,7 +443,9 @@ public class J2SConfigPage extends Composite {
 				}
 			}
 		} else if (!isSelectionContainsCategory() && getSelection().length > 0) {
-			buttonRemove.setEnabled(true);
+			if (!isAbandonsSelected()) {
+				buttonRemove.setEnabled(true);
+			}
 		}
 		if (getSelection().length == 1) {
 			if (isResourceCategorySelected()) {
@@ -546,7 +558,7 @@ public class J2SConfigPage extends Composite {
 		for (int i = 0; i < sels.length; i++) {
 			if (sels[i] instanceof J2SCategory) {
 				J2SCategory ctg = (J2SCategory) sels[i];
-				if (J2SClasspathModel.categories[2].equals(ctg.getKey())) {
+				if (J2SClasspathModel.categories[J2SClasspathModel.categories.length - 1].equals(ctg.getKey())) {
 					b = true;
 					break;
 				}
@@ -596,6 +608,21 @@ public class J2SConfigPage extends Composite {
 			this.j2sFile = file;
 		}
 		classpathModel = new J2SClasspathModel();
+		String[][] allResources = ExternalResources.getAllResources();
+		String j2sLibPath = null;
+		if (allResources != null && allResources.length != 0 && allResources[0].length != 0) {
+			if ((allResources[0][0]).startsWith("|")) {
+				allResources[0][0] = allResources[0][0].substring(1).replace('\\', '/');
+			}
+			j2sLibPath = allResources[0][0].substring(0, allResources[0][0].lastIndexOf("/") + 1);
+		} else {
+			j2sLibPath = "../net.sf.j2s.lib/j2slib/";
+		}
+		IRuntimeClasspathEntry entry = JavaRuntime.newArchiveRuntimeClasspathEntry(j2sLibPath + "/java.runtime.j2x");
+		if (entry != null) {
+			((Resource) entry).setAbsolute(true);
+			classpathModel.resources.add(entry);
+		}
 		CompositeResources comp = new CompositeResources();
 		//File folder = new File("S:/eclipse-3.1.1/eclipse/workspace/net.sf.j2s.java.org.eclipse.swt/");
 		//comp.setFolder(folder);
@@ -800,6 +827,10 @@ public class J2SConfigPage extends Composite {
 	 */
 	public boolean setFocus() {
 		if (compilerEnabled) {
+			ISelection selection = viewer.getSelection();
+			if (selection == null || selection.isEmpty()) {
+				viewer.setSelection(new StructuredSelection(classpathModel.getCategories()[0]));
+			}
 			viewer.getControl().setFocus();
 		} else {
 			buttonEnable.setFocus();
