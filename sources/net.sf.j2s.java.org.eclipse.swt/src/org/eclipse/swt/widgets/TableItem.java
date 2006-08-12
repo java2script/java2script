@@ -174,7 +174,7 @@ private void configureItem() {
 			e.item = TableItem.this;
 			e.widget = TableItem.this;
 			parent.sendEvent(e);
-			parent.setCursorFocus(index);
+			parent.setFocusIndex(index);
 			toReturn(false);
 		}
 	};
