@@ -6,65 +6,72 @@
                    
      josson smith
      ====================================================================== -->
-<project name="j2s.core.build" default="j2s.pack.lib" basedir="..">
+<project name="j2s.core.build" default="j2s.pack.lib">
     <description>
             Building j2s-core-*.z.js
     </description>
 	
-	<property name="jcore.src.dir" value="../net.sf.j2s.java.core/src"/>
-	<property name="js.src.dir" value="../net.sf.j2s.java.core/bin"/>
-	<property name="js.swt.dir" value="../net.sf.j2s.java.org.eclipse.swt"/>
-	<property name="js.unit.dir" value="../net.sf.j2s.java.junit"/>
-	<property name="jswt.src.dir" value="${js.swt.dir}/bin"/>
-	<property name="junit.src.dir" value="${js.unit.dir}/bin"/>
-	<property name="ajaxcore.dir" value="../net.sf.j2s.ajax/j2sajax"/>
-	<property name="ajax.src.dir" value="../net.sf.j2s.ajax/bin"/>
-	<property name="jz.dist.dir" value="j2slib"/>
-	<property name="current.project.dir" value="."/>
+	<property name="workspace.base" value="../.."/>
+	
+	<property name="j2s.core.project" value="${workspace.base}/net.sf.j2s.java.core"/>
+	<property name="j2s.ajax.project" value="${workspace.base}/net.sf.j2s.ajax"/>
+	<property name="j2s.swt.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.swt"/>
+	<property name="j2s.junit.project" value="${workspace.base}/net.sf.j2s.java.junit"/>
+		
+	<property name="j2s.lib.project" value="${workspace.base}/net.sf.j2s.lib"/>
+	
+	<property name="j2s.core.bin" value="${j2s.core.project}/bin"/>
+	<property name="j2s.ajax.bin" value="${j2s.ajax.project}/bin"/>
+	<property name="j2s.swt.bin" value="${j2s.swt.project}/bin"/>
+	<property name="j2s.junit.bin" value="${j2s.junit.project}/bin"/>
+	
+	<property name="j2s.lib.dist" value="${j2s.lib.project}/j2slib"/>
+	
+	<property name="j2s.core.src" value="${j2s.core.project}/src"/>
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.core                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.core">
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${current.project.dir}/${jcore.src.dir}/java/lang/Class.js"/>
-        	<arg value="${current.project.dir}/${js.src.dir}/java/lang/Class.js"/>
+    		<arg value="${j2s.core.src}/java/lang/Class.js"/>
+        	<arg value="${j2s.core.bin}/java/lang/Class.js"/>
         	
     		<arg value="no.debug.support=false"/>
     		<arg value="no.javascript.support=true"/>
     		<arg value="link.compress=true"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
 
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${current.project.dir}/${jcore.src.dir}/java/lang/ClassLoader.js"/>
-   			<arg value="${current.project.dir}/${js.src.dir}/java/lang/ClassLoader.js"/>
+    		<arg value="${j2s.core.src}/java/lang/ClassLoader.js"/>
+   			<arg value="${j2s.core.bin}/java/lang/ClassLoader.js"/>
         	
     		<arg value="clazz.existed=true"/>
     		<arg value="no.clazzloader.mode=true"/>
     		<arg value="link.compress=true"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
     	
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${current.project.dir}/${js.src.dir}/java/lang/Console.js"/>
-    		<arg value="${current.project.dir}/${js.src.dir}/java/lang/Console.js"/>
+    		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
+    		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
         	
     		<arg value="no.window.support=false"/>
     		<arg value="no.system.support=false"/>
     		<arg value="link.compress=true"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
-        <concat destfile="${jz.dist.dir}/j2slib.z.js">
+        <concat destfile="${j2s.lib.dist}/j2slib.z.js">
             <header filtering="no" trimleading="yes">/******************************************************************************
             	 * Copyright (c) 2005-2006 ognize.com and others.
             	 * All rights reserved. This program and the accompanying materials
@@ -83,7 +90,7 @@
             	 * @create July 12, 2006
             	 *******/
             </header>
-        	<filelist dir="${js.src.dir}">
+        	<filelist dir="${j2s.core.bin}">
         		<file name="java/lang/Class.js"/>
         		<file name="java/lang/ClassLoader.js"/>
         		<file name="java/lang/Console.js"/>
@@ -99,9 +106,9 @@
     <target name="j2s.pack.error">
         <java classname="net.sf.j2s.lib.build.J2SConcat">
         	<arg value="false"/>
-        	<arg value="${js.src.dir}/java/error.z.js"/>
+        	<arg value="${j2s.core.bin}/java/error.z.js"/>
         	
-        	<arg value="${current.project.dir}/${js.src.dir}"/>
+        	<arg value="${j2s.core.bin}"/>
 
     		<arg value="java/lang/Throwable.js"/>
     		<arg value="java/lang/StackTraceElement.js"/>
@@ -181,7 +188,7 @@
         	<arg value="java/util/TooManyListenersException.js"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
     </target>
@@ -191,9 +198,9 @@
     <target name="j2s.pack.common" depends="j2s.pack.prepare">
         <java classname="net.sf.j2s.lib.build.J2SConcat">
         	<arg value="false"/>
-        	<arg value="${js.src.dir}/java/core.z.js"/>
+        	<arg value="${j2s.core.bin}/java/core.z.js"/>
         	
-        	<arg value="${current.project.dir}/${js.src.dir}"/>
+        	<arg value="${j2s.core.bin}"/>
 
         	<!-- Already defined in Class.js
     		<arg value="java/io/Serializable.js"/>
@@ -241,7 +248,7 @@
     		<arg value="net/sf/j2s/ajax/ASWTClass.js"/>
         	
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
 	</target>
@@ -250,8 +257,8 @@
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt">
-    	<copy todir="${jz.dist.dir}">
-    		<fileset dir="${ajax.src.dir}">
+    	<copy todir="${j2s.lib.dist}">
+    		<fileset dir="${j2s.ajax.bin}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/AjaxPlugin.js"/>
@@ -259,20 +266,20 @@
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
-    		<fileset dir="${js.src.dir}">
+    		<fileset dir="${j2s.core.bin}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
-    		<fileset dir="${jswt.src.dir}">
+    		<fileset dir="${j2s.swt.bin}">
     			<exclude name="org/eclipse/swt/internal/xhtml/**"/>
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
-    		<fileset dir="${junit.src.dir}">
+    		<fileset dir="${j2s.junit.bin}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>
@@ -285,9 +292,10 @@
           target: j2s.pack.zip                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.zip" depends="j2s.pack.lib">
-    	<zip destfile="j2slib.zip">
-    		<fileset dir=".">
+    	<zip destfile="${j2s.lib.project}/j2slib.zip">
+    		<fileset dir="${j2s.lib.project}">
     			<include name="j2slib/**"/>
+    			<exclude name="**/*.zip"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     			<exclude name="**/*.tmp"/>
@@ -300,31 +308,30 @@
           target: j2s.unzip                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.unzip">
-    	<unzip dest="." src="j2slib.zip"></unzip>
+    	<unzip dest="${j2s.lib.project}" src="${j2s.lib.project}/j2slib.zip"></unzip>
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.prepare                     
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.prepare" depends="j2s.pack.core">
-    	<mkdir dir="j2slib"/>
+    	<mkdir dir="${j2s.lib.dist}"/>
     	
-    	<delete file="${ajax.src.dir}/net/sf/j2s/ajax/HttpRequest.js" quiet="true"/>
+    	<delete file="${j2s.ajax.bin}/net/sf/j2s/ajax/HttpRequest.js" quiet="true"/>
         	
         <java classname="net.sf.j2s.lib.build.RegExCompress">
         	<arg value="false"/>
-        	<arg value="${current.project.dir}"/>
 
-    		<arg value="${ajaxcore.dir}/HttpRequest.js"/>
-    		<arg value="${ajax.src.dir}/net/sf/j2s/ajax/HttpRequest.js"/>
+    		<arg value="${j2s.ajax.project}/j2sajax/HttpRequest.js"/>
+    		<arg value="${j2s.ajax.bin}/net/sf/j2s/ajax/HttpRequest.js"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
     	
-    	<copy todir="${js.src.dir}">
-    		<fileset dir="${ajax.src.dir}">
+    	<copy todir="${j2s.core.bin}">
+    		<fileset dir="${j2s.ajax.bin}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/AjaxPlugin.js"/>
@@ -346,10 +353,10 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="pack.swt.css">
         <java classname="net.sf.j2s.lib.build.PackCSSIntoJS">
-        	<arg value="${jswt.src.dir}/"/>
+        	<arg value="${j2s.swt.bin}/"/>
         	
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
 	</target>
@@ -358,8 +365,8 @@
           target: pack.swt.widgets.css                     
          - - - - - - - - - - - - - - - - - -->
     <target name="pack.swt.widgets.css">
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/package.css">
-        	<fileset dir="${jswt.src.dir}/org/eclipse/swt/widgets/">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/package.css">
+        	<fileset dir="${j2s.swt.bin}/org/eclipse/swt/widgets/">
         	    <include name="*.css"/>
         	</fileset>
         </concat>
@@ -369,8 +376,8 @@
           target: pack.java.reflect              
          ================================= -->
     <target name="pack.java.reflect" description="Building j2s-swt-*.z.js">
-        <concat destfile="${js.src.dir}/java/lang/reflect.z.js">
-        	<filelist dir="${js.src.dir}">
+        <concat destfile="${j2s.core.bin}/java/lang/reflect.z.js">
+        	<filelist dir="${j2s.core.bin}">
         		<file name="java/lang/Void.js"/>
         		<!--
         		<file name="java/lang/reflect/Array.js"/>
@@ -395,8 +402,8 @@
           target: pack.swt.basic              
          ================================= -->
     <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/basic.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/basic.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<!--
         		<file name="org/eclipse/swt/SWT.js"/>
         		<file name="org/eclipse/swt/SWTError.js"/>
@@ -455,8 +462,8 @@
           target: pack.swt.more              
          ================================= -->
     <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/more.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/more.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/internal/ResizeHandler.js"/>
         		<file name="org/eclipse/swt/internal/ResizeSystem.js"/>
 
@@ -484,66 +491,66 @@
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/layout/GridLayout.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/GridLayout.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/layout/GridData.js"/>
     			<file name="org/eclipse/swt/layout/GridLayout.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/layout/FillLayout.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/FillLayout.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/layout/FillData.js"/>
     			<file name="org/eclipse/swt/layout/FillLayout.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/layout/RowLayout.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/RowLayout.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/layout/RowData.js"/>
     			<file name="org/eclipse/swt/layout/RowLayout.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/layout/FormLayout.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/FormLayout.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/layout/FormAttachment.js"/>
         		<file name="org/eclipse/swt/layout/FormData.js"/>
     			<file name="org/eclipse/swt/layout/FormLayout.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Tray.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Tray.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/widgets/TrayItem.js"/>
     			<file name="org/eclipse/swt/widgets/Tray.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/TabFolder.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/TabFolder.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/TabItem.js"/>
         		<file name="org/eclipse/swt/widgets/TabFolder.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Tree.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Tree.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/TreeItem.js"/>
     			<file name="org/eclipse/swt/widgets/TreeColumn.js"/>
         		<file name="org/eclipse/swt/widgets/Tree.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/ToolBar.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/ToolBar.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/ToolItem.js"/>
         		<file name="org/eclipse/swt/widgets/ToolBar.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Table.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Table.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/TableItem.js"/>
     			<file name="org/eclipse/swt/widgets/TableColumn.js"/>
         		<file name="org/eclipse/swt/widgets/Table.js"/>
@@ -551,8 +558,8 @@
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/custom/SashForm.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/internal/dnd/SashDND.js"/>
     			<file name="org/eclipse/swt/widgets/Sash.js"/>
     			<file name="org/eclipse/swt/custom/SashFormData.js"/>
@@ -561,8 +568,8 @@
         	</filelist>
         </concat>
 
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/custom/CTabFolder.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CTabFolder.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/custom/CTabFolderEvent.js"/>
     			<file name="org/eclipse/swt/custom/CTabFolderListener.js"/>
     			<file name="org/eclipse/swt/custom/CTabFolderAdapter.js"/>
@@ -574,57 +581,57 @@
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/custom/CLable.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CLable.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/custom/CLayoutData.js"/>
     			<file name="org/eclipse/swt/custom/CLabel.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/custom/CBanner.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CBanner.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/custom/CBannerLayout.js"/>
     			<file name="org/eclipse/swt/custom/CBanner.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/custom/ViewForm.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/ViewForm.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/custom/ViewFormLayout.js"/>
     			<file name="org/eclipse/swt/custom/ViewForm.js"/>
         	</filelist>
         </concat>
 
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Slider.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Slider.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/internal/dnd/SliderDND.js"/>
     			<file name="org/eclipse/swt/widgets/Slider.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Scale.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Scale.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/internal/dnd/ScaleDND.js"/>
     			<file name="org/eclipse/swt/widgets/Scale.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Menu.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Menu.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/MenuItem.js"/>
         		<file name="org/eclipse/swt/widgets/Menu.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/CoolBar.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/widgets/CoolItem.js"/>
         		<file name="org/eclipse/swt/widgets/CoolBar.js"/>
         	</filelist>
         </concat>
     	
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/graphics/Font.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/graphics/Font.z.js">
+        	<filelist dir="${j2s.swt.bin}">
     			<file name="org/eclipse/swt/graphics/FontData.js"/>
         		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
         		<file name="org/eclipse/swt/graphics/Font.js"/>
@@ -638,8 +645,8 @@
           target: pack.swt.shell              
          ================================= -->
     <target name="pack.swt.shell" description="Building j2s-swt-*.z.js">
-        <concat destfile="${jswt.src.dir}/org/eclipse/swt/widgets/Shell.z.js">
-        	<filelist dir="${jswt.src.dir}">
+        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Shell.z.js">
+        	<filelist dir="${j2s.swt.bin}">
         		<file name="org/eclipse/swt/widgets/Display.js"/>
         		<file name="org/eclipse/swt/widgets/Widget.js"/>
         		<file name="org/eclipse/swt/widgets/Control.js"/>
@@ -659,9 +666,9 @@
     <target name="pack.swt.event" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.J2SConcat">
         	<arg value="false"/>
-        	<arg value="${jswt.src.dir}/org/eclipse/swt/events.z.js"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/events.z.js"/>
         	
-        	<arg value="${current.project.dir}/${jswt.src.dir}"/>
+        	<arg value="${j2s.swt.bin}"/>
 
     		<arg value="org/eclipse/swt/internal/SWTEventListener.js"/>
     		<arg value="org/eclipse/swt/internal/SWTEventObject.js"/>
@@ -718,7 +725,7 @@
     		<arg value="org/eclipse/swt/widgets/EventTable.js"/>
 
         	<classpath>
-        		<pathelement path="bin"/>
+        		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
     </target>
