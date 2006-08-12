@@ -11,7 +11,7 @@
             Building j2s-core-*.z.js
     </description>
 	
-	<property name="workspace.base" value="../.."/>
+	<property name="workspace.base" value="${basedir}/../.."/>
 	
 	<property name="j2s.core.project" value="${workspace.base}/net.sf.j2s.java.core"/>
 	<property name="j2s.ajax.project" value="${workspace.base}/net.sf.j2s.ajax"/>
