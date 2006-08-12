@@ -96,7 +96,7 @@
       </shortcut>
       <shortcut
             label="Java2Script Unit Test"
-            icon="icons/z-logo.gif"
+            icon="icons/z-logo-u.gif"
             modes="run, debug"
             class="net.sf.j2s.ui.launching.J2SUnitLaunchShortcut"
             id="net.sf.j2s.debug.ui.localJ2SJUnitShortcut">
@@ -201,7 +201,7 @@
             icon="icons/z-logo.gif"
             id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sApplication"/>
       <launchConfigurationTypeImage
-            icon="icons/z-logo.gif"
+            icon="icons/z-logo-u.gif"
             configTypeID="net.sf.j2s.ui.launching.j2sUnit"
             id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sUnit"/>
    </extension>
