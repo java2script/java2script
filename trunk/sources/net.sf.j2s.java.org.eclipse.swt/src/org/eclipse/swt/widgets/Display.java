@@ -2196,7 +2196,7 @@ public Image getSystemImage (int id) {
 			break;
 	}
 	if (iconName == null) return null;
-	return new Image(this, Display.class.getResourceAsStream("../images/" + iconName + ".png"));
+	return new Image(this, Display.class.getResourceAsStream("images/" + iconName + ".png"));
 	//return new Image(this, "j2slib/images/" + iconName + ".png");
 }
 
