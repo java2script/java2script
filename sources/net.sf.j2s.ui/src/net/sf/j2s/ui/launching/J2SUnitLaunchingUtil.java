@@ -291,7 +291,12 @@ public class J2SUnitLaunchingUtil {
 		}
 
 		buf.append('[');
-		buf.append(relativePath);
+		try {
+			buf.append(new File(workingDir, relativePath).getCanonicalPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			buf.append(relativePath);
+		}
 		buf.append("],");
 		String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
 		if (classpath == null || classpath.trim().length() == 0) {
