@@ -27,6 +27,7 @@ import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 import org.eclipse.swt.layout.GridData;
@@ -569,6 +570,46 @@ protected void createHandle() {
 		});
 		dnd.bind(handle);
 	}
+	contentHandle.onclick = new RunnableCompatibility(){
+		public void run(){
+			contentHandle.focus();
+		}
+	};
+	contentHandle.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent e = (HTMLEvent) getEvent();
+			if(defaultButton == null){
+				return;
+			}
+			if(e.keyCode == 13){
+				if (!defaultButton.isEnabled()) {
+					toReturn(true);
+					return ;
+				}
+				if ((defaultButton.style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
+					
+					if ((defaultButton.style & SWT.CHECK) != 0) {
+						if (e.srcElement != defaultButton.btnHandle) {
+							defaultButton.setSelection (!defaultButton.getSelection ());
+						}
+					} else {
+						defaultButton.setSelection (!defaultButton.getSelection ());
+					}
+				} else {
+					if ((defaultButton.style & SWT.RADIO) != 0) {
+						if ((defaultButton.parent.getStyle () & SWT.NO_RADIO_GROUP) != 0) {
+							defaultButton.setSelection (!defaultButton.getSelection ());
+						} else {
+							defaultButton.selectRadio ();
+						}
+					}
+				}
+				defaultButton.postEvent (SWT.Selection);
+				toReturn(true);
+			}
+		}
+	}; 
+
 }
 
 private void nextWindowLocation() {
@@ -1898,8 +1939,12 @@ void setSystemMenu () {
 				fHandleStyle.zIndex = window.currentTopZIndex = ""
 						+ (Integer.parseInt(window.currentTopZIndex) + 2);
 			}
+			if(contentHandle != null){
+				contentHandle.focus();
+			}
 		}
 	};
+	
 	if (window.currentTopZIndex == null) {
 		handle.style.zIndex = window.currentTopZIndex = "1000";
 	} else {

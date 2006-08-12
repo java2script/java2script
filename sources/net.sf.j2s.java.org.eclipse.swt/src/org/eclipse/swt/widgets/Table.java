@@ -655,18 +655,51 @@ public class Table extends Composite {
 				}
 				System.out.println("on key down !" + evt.keyCode + " index "
 						+ index);
-				if (evt.keyCode == 38) {
+				switch(evt.keyCode){
+				case 13:
+					TableItem item = getItem(index);
+					toggleSelection(item, evt.ctrlKey, evt.shiftKey);
+					if(item.isSelected()){
+						Event e = new Event();
+						e.display = display;
+						e.type = SWT.DefaultSelection;
+						e.detail = SWT.NONE;
+						e.item = item;
+						e.widget = item;
+						sendEvent(e);
+						toReturn(false);
+					}
+					break;
+				case 32:
+					TableItem item2 = getItem(index);
+					toggleSelection(item2, evt.ctrlKey, evt.shiftKey);
+					if(item2.isSelected()){						
+						Event eDefault = new Event();
+						eDefault.display = display;
+						eDefault.type = SWT.Selection;
+						eDefault.detail = SWT.NONE;
+						eDefault.item = item2;
+						eDefault.widget = item2;
+						sendEvent(eDefault);
+						toReturn(false);
+					}
+					break;
+				case 38:
 					if (index > 0) {
 						System.out.println("selecting the before!");
 						setCursorFocus(index - 1);
+						toReturn(false);
 					}
-				} else if (evt.keyCode == 40) {
+					break;
+				case 40:
 					if (index < getItemCount() - 1) {
 						System.out.println("selecting the after !");
 						setCursorFocus(index + 1);
+						toReturn(false);
 					}
-				} else if (evt.keyCode == 32){
-					toggleSelection(getItem(index), evt.ctrlKey, evt.shiftKey);
+					break;
+				default:
+					toReturn(true);
 				}
 			}
 		};
