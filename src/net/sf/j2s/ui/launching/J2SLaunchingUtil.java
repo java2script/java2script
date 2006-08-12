@@ -623,17 +623,11 @@ public class J2SLaunchingUtil {
 			buf.append(j2sLibPath);
 			buf.append("\", true);\r\n");
 		}
-		if (j2xStr.indexOf("\"junit\"") == -1) {
-			buf.append("ClazzLoader.packageClasspath (\"junit\", \"");
-			buf.append(j2sLibPath);
-			buf.append("\", true);\r\n");
-		}
 		buf.append(j2xStr);
 		
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
-
 
 		J2SCyclicProjectUtils.emptyTracks();
 		buf.append(generateClasspathIgnoredClasses(configuration, mainType, workingDir));
