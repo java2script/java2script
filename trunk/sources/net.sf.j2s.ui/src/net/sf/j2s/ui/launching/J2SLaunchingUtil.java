@@ -612,7 +612,18 @@ public class J2SLaunchingUtil {
 		*/
 
 		J2SCyclicProjectUtils.emptyTracks();
-		buf.append(generateClasspathJ2X(configuration, mainType, workingDir));
+		String j2xStr = generateClasspathJ2X(configuration, mainType, workingDir);
+		if (j2xStr.indexOf("\"java\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"java\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		if (j2xStr.indexOf("\"junit\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"junit\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		buf.append(j2xStr);
 		
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);

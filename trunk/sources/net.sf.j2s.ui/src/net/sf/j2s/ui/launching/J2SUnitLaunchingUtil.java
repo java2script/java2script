@@ -572,9 +572,6 @@ public class J2SUnitLaunchingUtil {
 		J2SCyclicProjectUtils.emptyTracks();
 		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
 
-		J2SCyclicProjectUtils.emptyTracks();
-		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
-
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.TAIL_HEADER_HTML, ""));
 		buf.append("</head>\r\n");
@@ -611,10 +608,21 @@ public class J2SUnitLaunchingUtil {
 		buf.append(j2sLibPath);
 		buf.append("\");\r\n");
 		*/
-		buf.append("ClazzLoader.packageClasspath ([\"java\", \"junit\", \"swt\"], \"");
-		buf.append(j2sLibPath);
-		buf.append("\", true);\r\n");
-		
+
+		J2SCyclicProjectUtils.emptyTracks();
+		String j2xStr = generateClasspathJ2X(configuration, mainType, workingDir);
+		if (j2xStr.indexOf("\"java\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"java\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		if (j2xStr.indexOf("\"junit\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"junit\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		buf.append(j2xStr);
+
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
@@ -625,7 +633,7 @@ public class J2SUnitLaunchingUtil {
 		J2SCyclicProjectUtils.emptyTracks();
 		buf.append(generateClasspathExistedClasses(configuration, mainType, workingDir));
 
-		String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
+		//String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
 		
 		//String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
 		buf.append("ClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
