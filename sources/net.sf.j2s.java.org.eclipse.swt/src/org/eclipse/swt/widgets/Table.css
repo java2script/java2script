@@ -65,3 +65,6 @@ table, tr, td {
 	float:right;
 }
 
+.table-item-focus {
+	background-color:#E8F2FE;
+}

@@ -22,6 +22,11 @@ public class document {
 	public static Element createTextNode(String string) {
 		return null;
 	}
+	
+	public static Element getElementById(String id){
+		return new Element();
+	}
+	
 	public void write(String html) {
 		// TODO Auto-generated method stub
 		
