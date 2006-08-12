@@ -31,6 +31,13 @@ public class FileUtil {
 			File baseFile = new File(basePath).getCanonicalFile();
 			String absURL = absFile.toURL().toString();
 			String baseURL = baseFile.toURL().toString();
+			if (absURL.startsWith(baseURL)) {
+				String relativeURL = absURL.substring(baseURL.length());
+				if (relativeURL.startsWith("/") || relativeURL.startsWith("\\")) {
+					relativeURL = relativeURL.substring(1);
+				}
+				return relativeURL;
+			}
 			int index = absURL.indexOf('/');
 			int lastIndex = index;
 			while (index != -1) {

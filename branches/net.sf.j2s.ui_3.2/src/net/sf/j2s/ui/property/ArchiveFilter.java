@@ -81,7 +81,7 @@ public class ArchiveFilter extends ObjectFilter {
 					String ext = file.getFileExtension();
 					if (ext != null && (file.getName().endsWith(".z.js") 
 							|| ext.equalsIgnoreCase("css")
-							|| ext.equalsIgnoreCase("j2s"))) { //$NON-NLS-1$ //$NON-NLS-2$
+							/*|| ext.equalsIgnoreCase("j2s")*/)) { //$NON-NLS-1$ //$NON-NLS-2$
 						set.add(file);
 						added = true;
 					}

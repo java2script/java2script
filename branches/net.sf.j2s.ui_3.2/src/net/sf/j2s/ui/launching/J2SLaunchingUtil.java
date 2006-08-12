@@ -2,16 +2,21 @@ package net.sf.j2s.ui.launching;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
+import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.ui.classpath.CompositeResources;
+import net.sf.j2s.ui.classpath.ContactedClasses;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
+import net.sf.j2s.ui.classpath.UnitClass;
 import net.sf.j2s.ui.property.FileUtil;
 import net.sf.j2s.ui.resources.ExternalResources;
 
@@ -55,7 +60,6 @@ public class J2SLaunchingUtil {
 
 		if (workingDir != null) {
 			String url = generateHTML(configuration, mainType, workingDir);
-	
 			Display.getDefault().asyncExec(
 					new J2SApplicationRunnable(configuration, url));
 		} else {
@@ -99,6 +103,9 @@ public class J2SLaunchingUtil {
 			for (int i = 0; i < paths.length; i++) {
 				if (paths[i] instanceof Resource) {
 					Resource res = (Resource) paths[i];
+					if (!J2SCyclicProjectUtils.visit(res)) {
+						continue;
+					}
 					if (!existed.contains(res.getName())) {
 						existed.add(res.getName());
 						buf.append(res.toHTMLString());
@@ -126,9 +133,6 @@ public class J2SLaunchingUtil {
 			buf.append(fModel.toHTMLString());
 		}
 		
-		if (buf.indexOf(relativePath + "/" + mainType.replace('.', '/') + ".js") == -1) {
-			buf.append(wrapTypeJS(mainType, relativePath));
-		}
 		String str = buf.toString();
 		buf = new StringBuffer();
 		String[] split = str.split("\r\n|\r|\n");
@@ -150,6 +154,374 @@ public class J2SLaunchingUtil {
 		return buf.toString();
 	}
 
+	/*
+	 * Append the *.js in classpath
+	 */
+	private static String generateClasspathJ2X(
+			ILaunchConfiguration configuration, String mainType, File workingDir)
+			throws CoreException {
+		StringBuffer buf = new StringBuffer();
+		
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
+		if ((projectName == null) || (projectName.trim().length() < 1)) {
+			return buf.toString();
+		}			
+		IJavaProject javaProject = javaModel.getJavaProject(projectName);
+		if ((javaProject == null) || !javaProject.exists()) {
+			return buf.toString();
+		}
+
+//        IProject project = javaProject.getProject();
+//		String prjFolder = project.getLocation().toOSString();
+//		File workingDir = new File(prjFolder);
+		
+		String path = javaProject.getOutputLocation().toString();
+		int idx = path.indexOf('/', 2);
+		String relativePath = null;
+		if (idx != -1) {
+			relativePath = path.substring(idx + 1); 
+		}
+
+		String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
+		if (classpath == null || classpath.trim().length() == 0) {
+			IRuntimeClasspathEntry[] paths = JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
+			Set existed = new HashSet();
+			for (int i = 0; i < paths.length; i++) {
+				if (paths[i] instanceof ContactedClasses) {
+					ContactedClasses res = (ContactedClasses) paths[i];
+					if (!existed.contains(res.getName())) {
+						existed.add(res.getName());
+						buf.append(res.toJ2XString());
+						buf.append(',');
+					}
+				} else if (paths[i] instanceof CompositeResources) {
+					CompositeResources c = (CompositeResources) paths[i];
+					if (!existed.contains(c.getName())) {
+						existed.add(c.getName());
+						buf.append(c.toJ2XString());
+						buf.append(',');
+					}
+				}
+			}
+		} else {
+			CompositeResources fModel= new CompositeResources();
+			fModel.setFolder(workingDir);
+			fModel.setRelativePath(".j2s");
+			
+			fModel.setBinRelativePath(relativePath);
+
+			if (classpath == null || classpath.trim().length() == 0) {
+				fModel.load();
+			} else {
+				if (relativePath == null) {
+					relativePath = "";
+				}
+				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.resources.list=" + classpath;
+				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
+			}
+			buf.append(fModel.toJ2XString());
+		}
+		
+		String str = buf.toString();
+		buf = new StringBuffer();
+		String[] split = str.split("\r\n|\r|\n|,");
+		Set set = new HashSet();
+		Set keyPkg = new HashSet();
+		for (int i = 0; i < split.length; i++) {
+			if (set.contains(split[i])) {
+				continue;
+			}
+			set.add(split[i]);
+//			buf.append(split[i]);
+//			buf.append("\r\n");
+			if (split[i] != null && split[i].trim().length() != 0) {
+				File f = new File(split[i].trim());
+				if (f.exists()) {
+					Properties prop = new Properties();
+					try {
+						prop.load(new FileInputStream(f));
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					String pkg = prop.getProperty("package.prefix");
+					if (keyPkg.contains(pkg)) {
+						continue;
+					}
+					keyPkg.add(pkg);
+					buf.append("ClazzLoader.packageClasspath (\"");
+					buf.append(pkg);
+					buf.append("\", \"");
+					buf.append(FileUtil.toRelativePath(f.getParent(), workingDir.getAbsolutePath()));
+					buf.append("\"");
+					File pkgFile = new File(f.getParentFile(), pkg.replace('.', '/') + "/package.js");
+					if (pkgFile.exists()) {
+						buf.append(", true");
+					}
+					buf.append(");\r\n");
+				}
+			}
+		}
+		return buf.toString();
+	}
+	
+	/*
+	 * Append the *.js in classpath
+	 */
+	private static String generateClasspathExistedClasses (
+			ILaunchConfiguration configuration, String mainType, File workingDir)
+			throws CoreException {
+		StringBuffer buf = new StringBuffer();
+		
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
+		if ((projectName == null) || (projectName.trim().length() < 1)) {
+			return buf.toString();
+		}			
+		IJavaProject javaProject = javaModel.getJavaProject(projectName);
+		if ((javaProject == null) || !javaProject.exists()) {
+			return buf.toString();
+		}
+
+		String path = javaProject.getOutputLocation().toString();
+		int idx = path.indexOf('/', 2);
+		String relativePath = null;
+		if (idx != -1) {
+			relativePath = path.substring(idx + 1); 
+		}
+
+		buf.append('[');
+		try {
+			buf.append(new File(workingDir, relativePath).getCanonicalPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			buf.append(relativePath);
+		}
+		buf.append("],");
+		String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
+		if (classpath == null || classpath.trim().length() == 0) {
+			IRuntimeClasspathEntry[] paths = JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
+			Set existed = new HashSet();
+			for (int i = 0; i < paths.length; i++) {
+				Resource res = (Resource) paths[i];
+				if (paths[i] instanceof CompositeResources) {
+					CompositeResources c = (CompositeResources) paths[i];
+					if (!existed.contains(c.getName())) {
+						existed.add(c.getName());
+						buf.append(c.existedClassesString());
+						buf.append(',');
+					}
+				}
+				if (!J2SCyclicProjectUtils.visit(res)) {
+					continue;
+				}
+				if (res instanceof UnitClass) {
+					UnitClass unit = (UnitClass) res;
+					buf.append(unit.getClassName());
+					buf.append(',');
+				}
+			}
+		} else {
+			CompositeResources fModel= new CompositeResources();
+			fModel.setFolder(workingDir);
+			fModel.setRelativePath(".j2s");
+			
+			fModel.setBinRelativePath(relativePath);
+
+			if (classpath == null || classpath.trim().length() == 0) {
+				fModel.load();
+			} else {
+				if (relativePath == null) {
+					relativePath = "";
+				}
+				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.resources.list=" + classpath;
+				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
+			}
+			buf.append(fModel.existedClassesString());
+		}
+		
+//		if (buf.indexOf(relativePath + "/" + mainType.replace('.', '/') + ".js") == -1) {
+//			buf.append(wrapTypeJS(mainType, relativePath));
+//		}
+		String str = buf.toString();
+		buf = new StringBuffer();
+//		System.out.println(str);
+		String[] split = str.split("\r\n|\r|\n|,");
+		Set set = new HashSet();
+		boolean existedPackages = false;
+		String lastLocation = "";
+		for (int i = 0; i < split.length; i++) {
+			if (split[i] != null && split[i].trim().length() != 0) {
+				String clazzName = split[i].trim();
+				if (clazzName.startsWith("[") && clazzName.endsWith("]")) {
+					if (existedPackages) {
+						String[] arr = (String[]) set.toArray(new String[0]);
+						if (arr.length > 0) {
+							buf.append("ClazzLoader.packageClasspath (");
+						}
+						if (arr.length > 1) {
+							buf.append('[');
+						}
+						DependencyASTVisitor.joinArrayClasses(buf, arr, null);
+						if (arr.length > 1) {
+							buf.append(']');
+						}
+						if (arr.length > 0) {
+							buf.append(", \"");
+							buf.append(lastLocation);
+							buf.append("\");\r\n");
+						}
+						existedPackages = false;
+						set.clear();
+					}
+					clazzName = clazzName.substring(1, clazzName.length() - 1);
+					lastLocation = FileUtil.toRelativePath(clazzName, workingDir.getAbsolutePath());
+					continue;
+				}
+				int idx2 = clazzName.lastIndexOf(".");
+				if (idx2 != -1) {
+					clazzName = clazzName.substring(0, idx2);
+				}
+				set.add(clazzName);
+				existedPackages = true;
+			}
+		}
+		if (existedPackages) {
+			String[] arr = (String[]) set.toArray(new String[0]);
+			if (arr.length > 0) {
+				buf.append("ClazzLoader.packageClasspath (");
+			}
+			if (arr.length > 1) {
+				buf.append('[');
+			}
+			DependencyASTVisitor.joinArrayClasses(buf, arr, null);
+			if (arr.length > 1) {
+				buf.append(']');
+			}
+			if (arr.length > 0) {
+				buf.append(", \"");
+				buf.append(lastLocation);
+				buf.append("\");\r\n");
+			}
+			existedPackages = false;
+			set.clear();
+		}
+		return buf.toString();
+	}
+	
+	/*
+	 * To generate ClazzLoader.ignore (...)
+	 */
+	private static String generateClasspathIgnoredClasses (
+			ILaunchConfiguration configuration, String mainType, File workingDir)
+			throws CoreException {
+		StringBuffer buf = new StringBuffer();
+		
+		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
+		if ((projectName == null) || (projectName.trim().length() < 1)) {
+			return buf.toString();
+		}			
+		IJavaProject javaProject = javaModel.getJavaProject(projectName);
+		if ((javaProject == null) || !javaProject.exists()) {
+			return buf.toString();
+		}
+
+		String path = javaProject.getOutputLocation().toString();
+		int idx = path.indexOf('/', 2);
+		String relativePath = null;
+		if (idx != -1) {
+			relativePath = path.substring(idx + 1); 
+		}
+
+		String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
+		if (classpath == null || classpath.trim().length() == 0) {
+			IRuntimeClasspathEntry[] paths = JavaRuntime.computeUnresolvedIgnoredClasses(configuration);
+			Set existed = new HashSet();
+			for (int i = 0; i < paths.length; i++) {
+				if (paths[i] instanceof CompositeResources) {
+					CompositeResources c = (CompositeResources) paths[i];
+					if (!existed.contains(c.getName())) {
+						existed.add(c.getName());
+						buf.append(c.ignoredClassesString());
+						buf.append(',');
+					}
+				}
+			}
+		} else {
+			CompositeResources fModel= new CompositeResources();
+			fModel.setFolder(workingDir);
+			fModel.setRelativePath(".j2s");
+			
+			fModel.setBinRelativePath(relativePath);
+
+			//String classpath = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, (String) null);
+			//String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
+			if (classpath == null || classpath.trim().length() == 0) {
+				fModel.load();
+			} else {
+				if (relativePath == null) {
+					relativePath = "";
+				}
+				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.abandoned.resources.list=" + classpath;
+				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
+			}
+			buf.append(fModel.ignoredClassesString());
+		}
+		
+		classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
+		if (classpath == null || classpath.trim().length() == 0) {
+			IRuntimeClasspathEntry[] paths = JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
+			Set existed = new HashSet();
+			for (int i = 0; i < paths.length; i++) {
+				if (paths[i] instanceof CompositeResources) {
+					CompositeResources c = (CompositeResources) paths[i];
+					if (!existed.contains(c.getName())) {
+						existed.add(c.getName());
+						buf.append(c.ignoredClassesString());
+						buf.append(',');
+					}
+				}
+			}
+		} else {
+			CompositeResources fModel= new CompositeResources();
+			fModel.setFolder(workingDir);
+			fModel.setRelativePath(".j2s");
+			
+			fModel.setBinRelativePath(relativePath);
+
+			if (classpath == null || classpath.trim().length() == 0) {
+				fModel.load();
+			} else {
+				if (relativePath == null) {
+					relativePath = "";
+				}
+				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.resources.list=" + classpath;
+				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
+			}
+			buf.append(fModel.ignoredClassesString());
+		}
+
+		String str = buf.toString();
+		buf = new StringBuffer();
+		String[] split = str.split("\r\n|\r|\n|,");
+		Set set = new HashSet();
+		for (int i = 0; i < split.length; i++) {
+			if (split[i] != null && split[i].trim().length() != 0) {
+				set.add(split[i].trim());
+			}
+		}
+		String[] arr = (String[]) set.toArray(new String[0]);
+		if (arr.length > 0) {
+			buf.append("ClazzLoader.ignore (");
+			DependencyASTVisitor.joinArrayClasses(buf, arr, null);
+			buf.append(");\r\n");
+		}
+		return buf.toString();
+	}
+	
 	public static String wrapTypeJS(String className, String binFolder) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<script type=\"text/javascript\" src=\"");
@@ -191,7 +563,6 @@ public class J2SLaunchingUtil {
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.HEAD_HEADER_HTML, ""));
 
-//		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
 		String[][] allResources = ExternalResources.getAllResources();
 		String j2sLibPath = null;
 		if (allResources != null && allResources.length != 0 && allResources[0].length != 0) {
@@ -204,6 +575,9 @@ public class J2SLaunchingUtil {
 			j2sLibPath = "../net.sf.j2s.lib/j2slib/";
 		}
 		buf.append("<script type=\"text/javascript\" src=\"" + j2sLibPath + "j2slib.z.js\"></script>\r\n");
+
+		J2SCyclicProjectUtils.emptyTracks();
+		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
 
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.TAIL_HEADER_HTML, ""));
@@ -242,14 +616,31 @@ public class J2SLaunchingUtil {
 		buf.append("\");\r\n");
 		*/
 
-		buf.append("ClazzLoader.packageClasspath ([\"java\", \"swt\", \"junit\"], \"");
-		buf.append(j2sLibPath);
-		buf.append("\", true);\r\n");
-
+		J2SCyclicProjectUtils.emptyTracks();
+		String j2xStr = generateClasspathJ2X(configuration, mainType, workingDir);
+		if (j2xStr.indexOf("\"java\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"java\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		if (j2xStr.indexOf("\"junit\"") == -1) {
+			buf.append("ClazzLoader.packageClasspath (\"junit\", \"");
+			buf.append(j2sLibPath);
+			buf.append("\", true);\r\n");
+		}
+		buf.append(j2xStr);
+		
 		buf.append("ClazzLoader.setPrimaryFolder (\"");
 		buf.append(relativePath);
 		buf.append("\");\r\n");
-		
+
+
+		J2SCyclicProjectUtils.emptyTracks();
+		buf.append(generateClasspathIgnoredClasses(configuration, mainType, workingDir));
+
+		J2SCyclicProjectUtils.emptyTracks();
+		buf.append(generateClasspathExistedClasses(configuration, mainType, workingDir));
+
 		String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
 		buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
 		buf.append("" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args) + ");\r\n");

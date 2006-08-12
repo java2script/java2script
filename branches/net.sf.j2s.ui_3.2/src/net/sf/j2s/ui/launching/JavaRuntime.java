@@ -77,7 +77,7 @@ public class JavaRuntime {
 
 	public static IRuntimeClasspathEntry newArchiveRuntimeClasspathEntry(String relativePath) {
 		String path = new File(relativePath).getName();
-		if (path.endsWith(".z.js")) {
+		if (path.endsWith(".z.js") || path.endsWith(".j2x")) {
 			ContactedClasses cc = new ContactedClasses();
 			cc.setFolder(new File(relativePath).getParentFile());
 			cc.setRelativePath(path);
@@ -118,7 +118,7 @@ public class JavaRuntime {
 	public static IRuntimeClasspathEntry newProjectRuntimeClasspathEntry(IJavaProject jp) {
 		ProjectResources prjRes = new ProjectResources();
 		prjRes.setClasspathProperty(IRuntimeClasspathEntry.PROJECT);
-		prjRes.setFolder(jp.getProject().getLocation().toFile().getParentFile());
+		prjRes.setFolder(jp.getProject().getLocation().toFile()/*.getParentFile()*/);
 		prjRes.setRelativePath("/" + jp.getElementName() + "/.j2s");
 		prjRes.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 		return prjRes;
@@ -251,6 +251,71 @@ public class JavaRuntime {
 						children[i].setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
 					}
 				}
+			}
+			return children;
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		return new IRuntimeClasspathEntry[0];
+	}
+	
+
+	public static IRuntimeClasspathEntry[] computeUnresolvedIgnoredClasses(ILaunchConfiguration configuration) {
+		try {
+			CompositeResources fModel= new CompositeResources();
+			IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
+			if ((projectName == null) || (projectName.trim().length() < 1)) {
+				return new IRuntimeClasspathEntry[0];
+			}			
+			IJavaProject javaProject = javaModel.getJavaProject(projectName);
+			if ((javaProject == null) || !javaProject.exists()) {
+				return new IRuntimeClasspathEntry[0];
+			}
+	        IProject project = javaProject.getProject();
+			String prjFolder = project.getLocation().toOSString();
+			File workingDir = new File(prjFolder);
+			fModel.setFolder(workingDir);
+			fModel.setRelativePath(".j2s");
+			
+			String path = javaProject.getOutputLocation().toString();
+			int idx = path.indexOf('/', 2);
+			String relativePath = null;
+			if (idx != -1) {
+				relativePath = path.substring(idx + 1); 
+			}
+			fModel.setBinRelativePath(relativePath);
+
+			//String classpath = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, (String) null);
+			boolean useDefault = true;
+			try {
+				useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
+			} catch (CoreException e) {
+				//JDIDebugUIPlugin.log(e);
+			}
+			String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_ABANDON_CLASS_PATH, (String) null);
+			if (useDefault || classpath == null || classpath.trim().length() == 0) {
+				fModel.load();
+			} else {
+				if (relativePath == null) {
+					relativePath = "";
+				}
+				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.abandoned.resources.list=" + classpath;
+				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
+			}
+			fModel.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			Resource[] children = fModel.getAbandonedResources();
+			for (int i = 0; i < children.length; i++) {
+				children[i].setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+//				String xpath = children[i].getRelativePath();
+//				if (xpath != null && xpath.endsWith(".z.js")) {
+//					if (xpath.indexOf("j2s-core") != -1
+//							|| xpath.indexOf("j2s-swt") != -1) {
+//						children[i].setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
+//					} else {
+//						children[i].setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+//					}
+//				}
 			}
 			return children;
 		} catch (CoreException e) {

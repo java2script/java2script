@@ -33,8 +33,10 @@ public class J2SClasspathContentProvider implements ITreeContentProvider {
 			J2SCategory ctg = (J2SCategory) parentElement;
 			if (J2SClasspathModel.categories[0].equals(ctg.getKey())) {
 				return ctg.getParent().getResources();
-			} else if (J2SClasspathModel.categories[1].equals(ctg.getKey())) {
+			} else if ("Classes".equals(ctg.getKey())) {
 				return ctg.getParent().getUnitClasses();
+//			} else if (J2SClasspathModel.categories[1].equals(ctg.getKey())) {
+//				return ctg.getParent().getUnitClasses();
 			} else {
 				return ctg.getParent().getAbandonedClasses();
 			}

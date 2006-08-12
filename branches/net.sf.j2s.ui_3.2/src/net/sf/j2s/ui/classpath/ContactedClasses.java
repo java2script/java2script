@@ -1,10 +1,12 @@
 package net.sf.j2s.ui.classpath;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import net.sf.j2s.ui.launching.J2SCyclicProjectUtils;
 
 
 public class ContactedClasses extends Resource implements IExternalResource, IClasspathContainer {
@@ -124,6 +126,9 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 	}
 
 	public String toHTMLString() {
+		if (getRelativePath() != null && getRelativePath().endsWith(".j2x")) {
+			return "";
+		}
 		Resource p = this.getParent();
 		if (p != null) {
 			if (p instanceof ContactedClasses) {
@@ -139,6 +144,9 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 		}
 		for (Iterator iter = externalList.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
+			if (!J2SCyclicProjectUtils.visit(res)) {
+				continue;
+			}
 			buf.append(res.toHTMLString());
 		}
 		buf.append("<script type=\"text/javascript\" src=\"");
@@ -175,6 +183,18 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 		buf.append("\"></script>\r\n");
 		return buf.toString();
 	}
+
+	public String toJ2XString() {
+		if (getName().endsWith(".j2x")) {
+			try {
+				return getAbsoluteFile().getCanonicalPath();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return "";
+	}
+
 	public int getType() {
 		return CONTAINER;
 	}
