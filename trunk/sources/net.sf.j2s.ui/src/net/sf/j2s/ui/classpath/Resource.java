@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 public class Resource implements IRuntimeClasspathEntry {
 	private Resource parent;
