@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -580,11 +581,36 @@ protected void createHandle () {
 	textInput.ondblclick = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("button clicked!");
-			if(!isSimple) 
+			if(!isSimple)
+			{
 				show();
+				
+			}
 		}
 	};
 	
+	textInput.onkeydown = new RunnableCompatibility(){
+		public void run(){
+			HTMLEvent e = (HTMLEvent) getEvent();
+			switch(e.keyCode){
+			case 13:
+				/*
+				 * TODO: default selection;
+				 */
+				break;
+			case 40:
+				if(!isSimple){
+//					show();
+					toReturn(false);					
+					textInput.focus();
+				}
+				break;
+			default:
+				toReturn(true);
+			}
+
+		}
+	};
 	
 	dropDownButton.onclick = new RunnableCompatibility() {
 		public void run() {

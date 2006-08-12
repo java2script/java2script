@@ -1348,6 +1348,15 @@ void hookSelection() {
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		btnText.onclick = eventHandler;
 	}
+	handle.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent e = (HTMLEvent) getEvent();
+			if(e.keyCode == 32 || e.keyCode == 13){
+				toReturn(false);
+			}
+			toReturn(true);
+		}
+	};
 }
 
 /*

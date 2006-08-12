@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -244,6 +245,23 @@ public class Spinner extends Composite {
 				setSelection(getSelection());
 			}
 			
+		};
+		
+		textInputHandle.onkeydown = new RunnableCompatibility(){
+			public void run(){
+				HTMLEvent e = (HTMLEvent) getEvent();
+				switch(e.keyCode){
+				case 38:
+					setSelection(getSelection() + increment);
+					break;
+				case 40:
+					setSelection(getSelection() - increment);
+					break;
+				default:
+					toReturn(true);
+				}
+				
+			}
 		};
 //		System.out.println("spinner handle" + handle);
 	}
