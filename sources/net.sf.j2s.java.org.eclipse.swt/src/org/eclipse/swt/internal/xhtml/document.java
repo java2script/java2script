@@ -13,29 +13,13 @@ public class document {
 	public static Object onkeyup;
 	
 	public static Body body;
-	public static Element createElement(String tag) {
-		return new Element();
-	}
-	public static Element[] getElementsByTagName(String tag) {
-		return new Element[0];
-	}
-	public static Element createTextNode(String string) {
-		return null;
-	}
 	
-	public static Element getElementById(String id){
-		return new Element();
-	}
+	public native static Element createElement(String tag);
+	public native static Element[] getElementsByTagName(String tag);
+	public native static Element createTextNode(String string);
 	
-	public void write(String html) {
-		// TODO Auto-generated method stub
-		
-	}
-	/**
-	 * 
-	 */
-	public void close() {
-		// TODO Auto-generated method stub
-		
-	}
+	public native static Element getElementById(String id);
+	
+	public native void write(String html);
+	public native void close();
 }

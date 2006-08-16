@@ -5,16 +5,7 @@ public class ContentWindow {
 	public String location;
 	public History history;
 	
-	public void reload() {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void reload();
 
-	/**
-	 * 
-	 */
-	public void stop() {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void stop();
 }
