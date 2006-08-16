@@ -93,47 +93,21 @@ public class Element {
 	
 	//private String
 	
-	public void appendChild(Element child) {
-		//
-	}
+	public native void appendChild(Element child);
 
-	public void select() {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void select();
 
-	public void focus() {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void focus();
 
-	public void removeChild(Element handle) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void add(Object object) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void insertBefore(Element newTR, Element tbodyTR) {
-		// TODO Auto-generated method stub
-		
-	}
+	public native void removeChild(Element handle);
 	
-	public Element[] getElementsByTagName(String tag) {
-		return new Element[0];
-	}
-	
-	public Element cloneNode(boolean flag){
-		return new Element();
-	}
+	public native void add(Object object);
 
-	public Element getElementById(String id){
-		return new Element();
-	}
-//	public void write(String html) {
-//		
-//	}
+	public native void insertBefore(Element newTR, Element tbodyTR);
+	
+	public native Element[] getElementsByTagName(String tag);
+	
+	public native Element cloneNode(boolean flag);
+
+	public native Element getElementById(String id);
 }

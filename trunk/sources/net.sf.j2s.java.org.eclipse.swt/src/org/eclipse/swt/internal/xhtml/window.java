@@ -13,26 +13,11 @@ public class window {
 	public static Screen screen;
 	public static History history;
 	
-	public static int setInterval(Runnable runnable, int milliseconds) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native static int setInterval(Runnable runnable, int milliseconds);
 
-	public static void clearInterval(int timerId) {
-		// TODO Auto-generated method stub
-		
-	}
+	public native static void clearInterval(int timerId);
 
-	public static int setTimeout(Runnable runnable, int i) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public native static int setTimeout(Runnable runnable, int i);
 
-	/**
-	 * @param hoverTimerID
-	 */
-	public static void clearTimeout(int hoverTimerID) {
-		// TODO Auto-generated method stub
-		
-	}
+	public native static void clearTimeout(int hoverTimerID);
 }

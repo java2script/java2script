@@ -19,12 +19,11 @@ package org.eclipse.swt.internal.xhtml;
  * 2006-4-27
  */
 public class History {
-	public void forward() {
-	}
-	public void back() {
-		
-	}
-	public void go(String location) {
-		
-	}
+	
+	public native void forward();
+	
+	public native void back();
+	
+	public native void go(String location);
+	
 }
