@@ -85,6 +85,7 @@ public class TestSuite implements Test {
 	 * Constructs an empty TestSuite.
 	 */
 	public TestSuite(String name) {
+		fTests = new Vector(10);
 		setName(name);
 	}
 	
