@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import net.sf.j2s.core.astvisitors.Bindings;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.ui.classpath.CompositeResources;
 import net.sf.j2s.ui.classpath.ContactedClasses;
@@ -28,7 +29,10 @@ import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -642,7 +646,23 @@ public class J2SUnitLaunchingUtil {
 		buf.append("ClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 		buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
 		//buf.append("" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args) + ");\r\n");
-		buf.append("junit.textui.TestRunner.run (" + mainType + ");\r\n");
+		IType mType = JavaModelUtil.findType(javaProject, mainType);
+		boolean isTestSuite = false;
+		if (mType != null) {
+			IMethod suiteMethod = JavaModelUtil.findMethod("suite", new String[0], false, mType);
+			if (suiteMethod != null) {
+				String returnType = suiteMethod.getReturnType();
+				if ("QTest;".equals(returnType) 
+						|| "Qjunit.framework.Test;".equals(returnType) ) {
+					isTestSuite = true;
+				}
+			}
+		}
+		if (isTestSuite) {
+			buf.append("junit.textui.TestRunner.run (" + mainType + ".suite ());\r\n");
+		} else {
+			buf.append("junit.textui.TestRunner.run (" + mainType + ");\r\n");
+		}
 		buf.append("});\r\n");
 		buf.append("});\r\n");
 		buf.append("</script>\r\n");
