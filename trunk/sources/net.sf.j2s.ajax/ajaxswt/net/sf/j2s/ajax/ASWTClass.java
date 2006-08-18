@@ -17,6 +17,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 /**
+ * This class is designed to load class asynchronously within the same thread 
+ * of given Shell or Display. Because executing callback after given class is 
+ * loaded will be in another thread scope of current Display. In order to 
+ * avoid nasty codes of such 
+ * <pre>
+	Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				//...
+			}
+	});
+ * </pre>
+ * This class ASWTClass is designed so developer won't need to code in such 
+ * nasty way. Just call <code>ASWTClass#swtLoad</code> with the same
+ * parameter as <code>AClass#load</code>. Or call <code>ASWTClass#shellLoad</code>
+ * or <code>ASWTClass#displayLoad</code> with extra Shell/Display argument. 
+ * 
  * @author josson smith
  *
  * 2006-8-4
@@ -24,12 +40,24 @@ import org.eclipse.swt.widgets.Shell;
 public class ASWTClass extends AClass {
 	
 	/**
+	 * ASWTClass should NOT be instantialized outside package net.sf.j2s.ajax.
+	 * User should always use its static methods.
+	 * 
 	 * @j2sIgnore
 	 */
 	protected ASWTClass() {
 		// prevent from instantialization
 	}
 
+	/**
+	 * Load class by given class name and execute callback in the same thread
+	 * of default Display's thread.
+	 *  
+	 * @param clazzName String given class name.
+	 * @param afterLoaded Runnable given callback. If this parameter is an 
+	 * instance of <code>ARunnable</code>, the callback will receive the 
+	 * loaded class automatically.
+	 */
 	public static void swtLoad(String clazzName, Runnable afterLoaded) {
 		Display display = null;
 		/**
@@ -46,9 +74,14 @@ public class ASWTClass extends AClass {
 
 
 	/**
-	 * @param display
-	 * @param clazzName
-	 * @param afterLoaded
+	 * Load class by given class name and execute callback in the same thread
+	 * of given Display's thread.
+	 * 
+	 * @param display Display given display
+	 * @param clazzName String given class name.
+	 * @param afterLoaded Runnable given callback. If this parameter is an 
+	 * instance of <code>ARunnable</code>, the callback will receive the 
+	 * loaded class automatically.
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {
@@ -86,9 +119,30 @@ public class ASWTClass extends AClass {
 		});
 	}
 
+	/**
+	 * Load class asynchronously and execute callback in the same thread
+	 * of given Display's thread.
+	 * 
+	 * @param display Display given display
+	 * @param clazzName String given class name.
+	 * @param afterLoaded Runnable given callback. If this parameter is an 
+	 * instance of <code>ARunnable</code>, the callback will receive the 
+	 * loaded class automatically.
+	 */
 	public static void displayLoad(Display display, final String clazzName, final Runnable afterLoaded) {
 		objectLoad(display, clazzName, afterLoaded);
 	}
+	/**
+	 * Load class asynchronously and execute callback in the same thread of 
+	 * given Shell's Display.
+	 * 
+	 * @param shell Shell given shell
+	 * @param clazzName String given class name.
+	 * @param afterLoaded Runnable given callback. If this parameter is an 
+	 * instance of <code>ARunnable</code>, the callback will receive the 
+	 * loaded class automatically.
+	 * 
+	 */
 	public static void shellLoad(Shell shell, String clazzName, Runnable afterLoaded) {
 		objectLoad(shell.getDisplay(), clazzName, afterLoaded);
 	}

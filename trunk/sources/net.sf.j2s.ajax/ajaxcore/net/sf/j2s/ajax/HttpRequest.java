@@ -30,6 +30,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 
 /**
+ * This class is a Java implementation of browser's XMLHttpRequest object.
+ * This class can be considered as a bridge of Java's AJAX programming and
+ * JavaScript/Browser's AJAX programming.
+ * 
  * @author josson smith
  *
  * 2006-2-11
@@ -51,12 +55,26 @@ public final class HttpRequest {
 	private Map headers = new HashMap();
 	private String content;
 	
+	/**
+	 * Return read state of XMLHttpRequest.
+	 * @return int ready state
+	 */
 	public int getReadyState() {
 		return readyState;
 	}
+	/**
+	 * Return response raw text of XMLHttpRequest 
+	 * @return String response text. May be null if the request is not sent
+	 * or an error happens. 
+	 */
 	public String getResponseText() {
 		return responseText;
 	}
+	/**
+	 * Return the parsed XML document of the response of XMLHttpRequest.
+	 * @return Document XML document. May be null if the response text is not
+	 * a valid XML document.
+	 */
 	public Document getResponseXML() {
 		if (responseXML != null) {
 			return responseXML;
@@ -75,21 +93,57 @@ public final class HttpRequest {
 		}
 		return responseXML;
 	}
+	/**
+	 * Return respose code.
+	 * @return int response code. For more information please read about
+	 * HTTP protocol.
+	 */
 	public int getResponseCode() {
 		return status;
 	}
+	/**
+	 * Register XMLHttpRequest callback.
+	 * 
+	 * @param onreadystatechange IXHRCallback callback
+	 */
 	public void registerOnReadyStateChange(IXHRCallback onreadystatechange) {
 		this.onreadystatechange = onreadystatechange;
 	}
+	/**
+	 * Set request header with given key and value.
+	 * @param key String request header keyword. For more information please 
+	 * read about HTTP protocol.
+	 * @param value String request header value
+	 */
 	public void setRequestHeader(String key, String value) {
 		headers.put(key, value);
 	}
+	/**
+	 * Get response header with given key.
+	 * @param key String header keyword. For more information please 
+	 * read about HTTP protocol.
+	 * @return String the reponse header value.
+	 */
 	public String getResponseHeader(String key) {
 		return connection.getHeaderField(key);
 	}
+	/**
+	 * Open connection for HTTP request with given method and URL 
+	 * synchronously.
+	 * 
+	 * @param method String "POST" or "GET" usually.
+	 * @param url String remote URL. Should always be absolute URL.
+	 */
 	public void open(String method, String url) {
 		open(method, url, false);
 	}
+	/**
+	 * Open connection for HTTP request with given method, URL and mode.
+	 * 
+	 * @param method String "POST" or "GET" usually.
+	 * @param url String remote URL. Should always be absolute URL.
+	 * @param async boolean whether send request asynchronously or not. 
+	 */
 	public void open(String method, String url, boolean async) {
 		this.asynchronous = async;
 		this.method = method;
@@ -101,9 +155,17 @@ public final class HttpRequest {
 			onreadystatechange.onLoading();
 		}
 	}
+	
+	/**
+	 * Send the HTTP request without extra content.
+	 */
 	public void send() {
 		send(null);
 	}
+	/**
+	 * Send the HTTP request with given content.
+	 * @param str String HTTP request content. May be null.
+	 */
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
@@ -116,6 +178,9 @@ public final class HttpRequest {
 			request();
 		}
 	}
+	/*
+	 * Try setup the real connection and send the request over HTTP protocol. 
+	 */
 	private void request() {
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();

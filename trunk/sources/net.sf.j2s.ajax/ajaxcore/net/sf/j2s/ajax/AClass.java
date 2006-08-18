@@ -14,6 +14,12 @@
 package net.sf.j2s.ajax;
 
 /**
+ * This class is an asynchronous version of Class. It is designed for function
+ * of Class#forName. While Class#forName will try to load class in synchronous
+ * mode, this class AClass#load  is trying to load class in asynchronous mode.
+ * A callback object is provided for action to be executed after the class is
+ * loaded.
+ * 
  * @author josson smith
  *
  * 2006-8-4
@@ -21,6 +27,9 @@ package net.sf.j2s.ajax;
 public class AClass {
 	
 	/**
+	 * AClass should NOT be instantialized outside package net.sf.j2s.ajax.
+	 * User should always use its static methods.
+	 * 
 	 * @j2sIgnore
 	 */
 	protected AClass() {
@@ -28,8 +37,13 @@ public class AClass {
 	}
 	
 	/**
-	 * @param clazzName
-	 * @param afterLoaded
+	 * Load the class by the given class name and execute the given callback
+	 * after class is loaded.
+	 * 
+	 * @param clazzName String given class name.
+	 * @param afterLoaded Runnable given callback. If this parameter is an 
+	 * instance of <code>ARunnable</code>, the callback will receive the 
+	 * loaded class automatically.
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {

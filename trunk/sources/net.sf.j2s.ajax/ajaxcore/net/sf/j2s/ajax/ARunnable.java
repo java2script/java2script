@@ -14,6 +14,10 @@
 package net.sf.j2s.ajax;
 
 /**
+ * This abstract class provides a wrapper of interface Runnable to
+ * give convenience for <code>AClass</code> or <code>ASWTClass</code>
+ * to set and to get the class that is loaded.
+ *  
  * @author josson smith
  *
  * 2006-8-4
@@ -21,10 +25,18 @@ package net.sf.j2s.ajax;
 public abstract class ARunnable implements Runnable {
 	private Class clazz;
 
+	/**
+	 * Return the loaded class.
+	 * @return Class loaded class.
+	 */
 	public Class getClazz() {
 		return clazz;
 	}
 
+	/**
+	 * Set the loaded class
+	 * @param clazz Class class that is already loaded.
+	 */
 	public void setClazz(Class clazz) {
 		this.clazz = clazz;
 	}
