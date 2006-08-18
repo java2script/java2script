@@ -14,14 +14,29 @@
 package net.sf.j2s.ajax;
 
 /**
+ * Interface of XMLHttpRequest callback.
+ * 
  * @author josson smith
  *
  * 2006-2-11
  */
 public interface IXHRCallback {
 	//public void onUninitialized();
+	/**
+	 * Method will be called when XMLHttpRequest is loading.
+	 */
 	public void onLoading();
+	/**
+	 * Method will be called when XMLHttpRequest already setup HTTP connection.
+	 */
 	public void onLoaded();
+	/**
+	 * Method will be called when XMLHttpRequest is transforming request and 
+	 * receiving response.
+	 */
 	public void onInteractive();
+	/**
+	 * Method will be called when XMLHttpRequest receives all reponses.
+	 */
 	public void onComplete();
 }
