@@ -508,6 +508,8 @@ ClazzLoader.isClassExcluded = function (clazz) {
 /**
  * The following *.script* can be overriden to indicate the 
  * status of classes loading.
+ *
+ * TODO: There should be a Java interface with name like INativeLoaderStatus
  */
 /* protected */
 ClazzLoader.scriptLoading = function (file) {};
@@ -770,6 +772,10 @@ ClazzLoader.isResourceExisted = function (id, path, base) {
 	return false;
 };
 
+/*
+ * loadCSS may be considered part of SWT library. Should be packed with
+ * SWT not with Java core.
+ */
 /* public */
 ClazzLoader.loadCSS = function (cssName) {
 	var cssKey = "";
@@ -913,6 +919,9 @@ ClazzLoader.tryToLoadNext = function (file) {
 
 ClazzLoader.tracks = new Array ();
 
+/*
+ * There are classes reference cycles. Try to detect and break those cycles.
+ */
 /* protected */
 ClazzLoader.checkOptionalCycle = function (node) {
 	var ts = ClazzLoader.tracks;
@@ -1528,6 +1537,10 @@ ClazzLoader.runtimeLoaded = function () {
 	ClazzLoader.runtimeLoaded = function () {};
 };
 
+/*
+ * Load those key *.z.js. This *.z.js will be surely loaded before other 
+ * queued *.js.
+ */
 /* public */
 ClazzLoader.loadZJar = function (zjarPath, keyClazz) {
 	ClazzLoader.jarClasspath (zjarPath, [keyClazz]);
