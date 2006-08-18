@@ -16,6 +16,10 @@
  * @create Nov 5, 2005
  *******/
 
+/*
+ * The following *-# are used to compress the JavaScript file into small file.
+ * For more details, please read /net.sf.j2s.lib/build/build.xml
+ */
 /*-#
  # _x_CLASS_NAME__ -> C$N
  # _x_PKG_NAME__ -> P$N
@@ -1524,7 +1528,8 @@ Clazz.innerFunctions = {
 				if (x != -1) {
 					baseFolder = baseFolder.substring (0, x);
 				} else {
-					baseFolder = null;
+					baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
+					//baseFolder = null;
 				}
 			} else {
 				var bins = Clazz.binaryFolders;
