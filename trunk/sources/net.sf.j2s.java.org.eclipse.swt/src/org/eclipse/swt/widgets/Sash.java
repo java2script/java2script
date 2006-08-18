@@ -186,9 +186,9 @@ void createHandle() {
 			event.y = lastY; //e.currentY; //Integer.parseInt(thumb.style.top); //lastY;
 			Point size = getSize();
 			int delta = 0;
-			if ((style & SWT.BORDER) != 0) {
-				delta = 6;
-			}
+//			if ((style & SWT.BORDER) != 0) {
+//				delta = 6;
+//			}
 			int width = size.x + delta;
 			if (width < 2) {
 				width = 2;
@@ -231,9 +231,9 @@ void createHandle() {
 			}
 			Point size = getSize();
 			int delta = 0;
-			if ((style & SWT.BORDER) != 0) {
-				delta = 6;
-			}
+//			if ((style & SWT.BORDER) != 0) {
+//				delta = 4;
+//			}
 			int width = size.x + delta;
 			if (width < 2) {
 				width = 2;

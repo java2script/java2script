@@ -98,15 +98,15 @@ if (!isDebugging) {
 		"$.Table",
 		"$wt.internal.dnd.TableColumnDND"
 	]);
-	ClazzLoader.jarClasspath (wPath + "SashForm.z.js", [
+	
+	var cPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.custom.*");
+	ClazzLoader.jarClasspath (cPath + "SashForm.z.js", [
 		"$wt.internal.dnd.SashDND",
 		w + "Sash",
 		"$wt.custom.SashFormData",
 		"$.SashFormLayout",
 		"$.SashForm"
 	]);
-	
-	var cPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.custom.*");
 	var c = "$wt.custom.";
 	ClazzLoader.jarClasspath (cPath + "CBanner.z.js", [
 		c + "CBannerLayout",
