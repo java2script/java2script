@@ -1,3 +1,6 @@
+This plugin project should be exported "Package plug-ins as 
+individual Jar archives" UNCHECKED!
+
 If you are update this project net.sf.j2s.lib from subversion
 repository, you must unzip the j2slib.zip as folder j2slib before
 you can export the project as a plugin.
