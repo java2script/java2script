@@ -123,7 +123,7 @@ TableItem (Table parent, int style, int index, boolean create) {
 }
 
 private void configureItem() {
-	if((parent.style & SWT.CHECK) != 0){
+	if((parent.style & SWT.CHECK) != 0 && check != null){
 		check.onclick = new RunnableCompatibility() {
 			public void run() {
 				Event e = new Event();
@@ -770,7 +770,9 @@ public void setChecked (boolean checked) {
 
 void setChecked (boolean checked, boolean notify) {
 	this.checked = checked;
-	this.check.checked = this.checked;
+	if (this.check != null) {
+		this.check.checked = this.checked;
+	}
 	if (notify) {
 		Event event = new Event();
 		event.item = this;
@@ -1166,7 +1168,7 @@ public void setText (int index, String string) {
 	int elementIndex = ((parent.style & SWT.CHECK) != 0 && index == 0)? 1 : 0;
 	Element text = handle.childNodes[index].childNodes[0].childNodes[elementIndex];
 //	Element[] children = text.childNodes;
-	text.innerHTML = "<div class=\"table-item-cell-text-default\">" + string + "</div>";
+	text.innerHTML = string;
 	
 	int[] columnMaxWidth = parent.columnMaxWidth;
 	int width = OS.getContainerWidth(text.parentNode);
@@ -1334,7 +1336,9 @@ boolean isSelected(){
 
 public void enableWidget(boolean enabled) {
 	this.handle.disabled = !enabled;
-	this.check.disabled = !enabled;
+	if (this.check != null) {
+		this.check.disabled = !enabled;
+	}
 }
 
 }

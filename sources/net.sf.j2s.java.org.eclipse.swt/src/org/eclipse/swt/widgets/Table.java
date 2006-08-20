@@ -1025,6 +1025,12 @@ void createItem (TableColumn column, int index) {
 		for (int i = 0; i < items.length; i++) {
 			Element dataTD = document.createElement("TD");
 			items[i].handle.insertBefore(dataTD, items[i].handle.childNodes[index]);
+			Element el = document.createElement("DIV");
+			dataTD.appendChild(el);
+			el.className = "table-item-cell-default";
+			Element text = document.createElement("DIV");
+			el.appendChild(text);
+			text.className = "table-item-cell-text-default";
 			for (int j = items[i].strings.length; j > index; j--) {
 				items[i].strings[j] = items[i].strings[j - 1];
 			}
@@ -1032,11 +1038,7 @@ void createItem (TableColumn column, int index) {
 		}
 	}
 	if (theadTD.childNodes != null) {
-		for (int i = 0; i < theadTD.childNodes.length; i++) {
-			if (theadTD.childNodes[i] != null) {
-				theadTD.removeChild(theadTD.childNodes[i]);
-			}
-		}
+		OS.clearChildren(theadTD);
 	}
 	theadTD.appendChild(document.createTextNode(column.getText()));
 	theadTD.style.margin = "0";
