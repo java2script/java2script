@@ -418,8 +418,6 @@ void checkOrientation (Widget parent) {
 protected void _updateOrientation(){
 	if((style & SWT.RIGHT_TO_LEFT) != 0){
 		handle.style.direction = "rtl";
-	}else{
-		handle.style.direction = "ltr";
 	}
 }
 void checkOpened () {

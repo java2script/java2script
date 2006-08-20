@@ -13,8 +13,6 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -30,8 +28,6 @@ import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 
 /**
  * Instances of this class provide the appearance and
@@ -2250,12 +2246,34 @@ boolean traverseDecorations (boolean next) {
  */
 public void _updateMonitorSize() {
 	Monitor monitor = getMonitor();
+	Element el = monitor.handle;
+	if (el == document.body) {
+		monitor.clientWidth = document.body.clientWidth; 
+		monitor.clientHeight = document.body.clientHeight;
+		monitor.x = 0;
+		monitor.y = 0;
+		monitor.width = window.screen.availWidth;
+		monitor.height = window.screen.availHeight;
+	} else {
+		/*
+		 * Ignore non document.body's bounds change events
+		Point pt = OS.getElementPositionInShell(el, document.body);
+		//el.style.position = "absolute";
+		monitor.x = pt.x;
+		monitor.y = pt.y;
+		monitor.width = monitor.clientWidth = OS.getContainerWidth(el);
+		monitor.height = monitor.clientHeight = OS.getContainerHeight(el);
+		*/
+	}
+
+	/*
 	monitor.clientWidth = document.body.clientWidth; 
 	monitor.width = window.screen.availWidth;
 	monitor.clientHeight = document.body.clientHeight;
 	monitor.height = window.screen.availHeight;
 	monitor.clientX = monitor.x = 0;
 	monitor.clientY = monitor.y = 0;
+	*/
 }
 
 /*

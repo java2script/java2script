@@ -1033,7 +1033,15 @@ void setSelection (int index, boolean notify) {
 	}
 }
 protected void _updateOrientation(){
-	handle.style.direction = "ltr";
+	/*
+	 * Force left to right
+	 */
+	if((style & SWT.RIGHT_TO_LEFT) != 0){
+		handle.style.direction = "ltr";
+	} else if (parent != null 
+			&& (parent.style & SWT.RIGHT_TO_LEFT) != 0) {
+		handle.style.direction = "ltr";
+	}
 }
 
 void updateSelection(int index) {
