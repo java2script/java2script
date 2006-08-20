@@ -1277,7 +1277,7 @@ public void setRegion (Region region) {
 	*/
 }
 
-void setToolTipText (Element hwnd, String text) {
+void setToolTipText (Object hwnd, String text) {
 	/*
 	if (OS.IsWinCE) return;
 	if (toolTipHandle == 0) {

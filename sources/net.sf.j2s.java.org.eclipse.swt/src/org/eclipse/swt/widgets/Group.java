@@ -503,7 +503,15 @@ public void setText (String string) {
 	groupText = string;
 }
 protected void _updateOrientation(){
-	this.handle.style.direction = "ltr";
+	/*
+	 * Force left to right
+	 */
+	if((style & SWT.RIGHT_TO_LEFT) != 0){
+		handle.style.direction = "ltr";
+	} else if (parent != null 
+			&& (parent.style & SWT.RIGHT_TO_LEFT) != 0) {
+		handle.style.direction = "ltr";
+	}
 }
 /*
 int widgetStyle () {
