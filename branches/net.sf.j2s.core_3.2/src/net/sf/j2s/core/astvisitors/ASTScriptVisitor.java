@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -55,7 +56,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 public class ASTScriptVisitor extends ASTKeywordParser {
 
@@ -1370,6 +1370,17 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						argsList = superRet.arguments();
 					}
 				}
+			} else if (statement instanceof ExpressionStatement) {
+				ExpressionStatement sttmt = (ExpressionStatement) statement;
+				Expression exp = sttmt.getExpression();
+				if (exp instanceof SuperMethodInvocation) {
+					SuperMethodInvocation superRet = (SuperMethodInvocation) exp;
+					if (superRet.getName().toString().equals(node.getName().toString())) {
+						// same method name
+						needToCheckArgs = true;
+						argsList = superRet.arguments();
+					}
+				}
 			} else if (statement instanceof SuperConstructorInvocation) {
 				SuperConstructorInvocation superConstructor = (SuperConstructorInvocation) statement;
 				needToCheckArgs = true;
@@ -1394,6 +1405,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 							isOnlySuper = false;
 							break;
 						}
+					} else {
+						isOnlySuper = false;
+						break;
 					}
 				}
 				if (isOnlySuper) {
