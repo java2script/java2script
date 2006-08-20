@@ -177,15 +177,9 @@ package java.util;
 * @see PropertyResourceBundle
 * @see MissingResourceException
 * @since JDK1.1
+* 
+* @j2sOptionalImport net.sf.j2s.ajax.HttpRequest
 */
-
-/**
- * @author josson smith
- *
- * 2006-5-3
- * 
- * @j2sOptionalImport net.sf.j2s.ajax.HttpRequest
- */
 abstract public class ResourceBundle {
 
     /**
@@ -592,8 +586,8 @@ return r.join ('');
 				if (q.length > 0 && q.lastIndexOf ("/") != q.length - 1) {
 					q += "/";
 				}
-				r.open ("GET", q + n, false);
 				try {
+					r.open ("GET", q + n, false);
 					r.send ();
 					a = r.getResponseText ();
 				} catch (e) {
