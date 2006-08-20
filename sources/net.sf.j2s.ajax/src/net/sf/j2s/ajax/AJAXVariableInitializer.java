@@ -48,8 +48,7 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 	 */
 	public void initialize(String variable) {
 		IPath newPath= null;
-        URL starterURL = AjaxPlugin.getDefault().getBundle().getEntry(
-				"/" + File.separator); //$NON-NLS-1$
+        URL starterURL = AjaxPlugin.getDefault().getBundle().getEntry(File.separator);
 		String root = "."; //$NON-NLS-1$
 		try {
 			root = Platform.asLocalURL(starterURL).getFile();
