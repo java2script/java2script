@@ -1,0 +1,9 @@
+.browser-default {
+	width:100%;
+	height:100%;
+	background-color:white;
+}
+
+* html .browser-default {
+	border:2px solid menu;
+}

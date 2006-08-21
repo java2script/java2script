@@ -1,0 +1,4 @@
+package.prefix=java
+package.name=java
+package.description=Java runtime core library
+package.id=java
