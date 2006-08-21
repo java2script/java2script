@@ -2,6 +2,8 @@
 	/*background-color:#DDDccc;*/
 	/*height:20px;*/
 	white-space:nowrap;
+	font-size:9pt;
+	font-family:Arial,sans-serif;
 }
 .tree-default {
 	background-color:white;
