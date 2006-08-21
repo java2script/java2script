@@ -19,6 +19,8 @@ table, tr, td {
 .table-item-default {
 	cursor:default;
 	white-space:nowrap;
+	font-size:9pt;
+	font-family:Arial,sans-serif;
 }
 .table-item-selected {
 	background-color:#00008e;
