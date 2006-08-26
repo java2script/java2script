@@ -464,8 +464,23 @@ window.assert = function () {
 	System.getProperties = function () {
 		return System.props;
 	};
+	System.getProperty = function (key, def) {
+		if (System.props != null) {
+			return System.props.getProperty (key, def);
+		}
+		if (def != null) {
+			return def;
+		}
+		return key;
+	};
 	System.setProperties = function (props) {
 		System.props = props;
+	};
+	System.setProperty = function (key, val) {
+		if (System.props == null) {
+			return ;
+		}
+		System.props.setProperty (key, val);
 	};
 
 	/* public */
