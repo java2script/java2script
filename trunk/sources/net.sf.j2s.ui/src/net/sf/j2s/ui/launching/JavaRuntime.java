@@ -304,6 +304,8 @@ public class JavaRuntime {
 				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
 			}
 			fModel.setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
+			return new IRuntimeClasspathEntry[] { fModel };
+			/*
 			Resource[] children = fModel.getAbandonedResources();
 			for (int i = 0; i < children.length; i++) {
 				children[i].setClasspathProperty(IRuntimeClasspathEntry.USER_CLASSES);
@@ -318,6 +320,7 @@ public class JavaRuntime {
 //				}
 			}
 			return children;
+			*/
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
