@@ -1385,6 +1385,13 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				SuperConstructorInvocation superConstructor = (SuperConstructorInvocation) statement;
 				needToCheckArgs = true;
 				argsList = superConstructor.arguments();
+				if (argsList.size() == 0) {
+					IMethodBinding constructorBinding = superConstructor.resolveConstructorBinding();
+					ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
+					if ("java.lang.Object".equals(declaringClass.getQualifiedName())) {
+						needToCheckArgs = false;
+					}
+				}
 			}
 		}
 		if (needToCheckArgs) {
