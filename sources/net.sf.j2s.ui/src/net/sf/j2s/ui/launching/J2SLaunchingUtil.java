@@ -305,7 +305,16 @@ public class J2SLaunchingUtil {
 			IRuntimeClasspathEntry[] paths = JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 			Set existed = new HashSet();
 			for (int i = 0; i < paths.length; i++) {
-				Resource res = (Resource) paths[i];
+				if (paths[i] instanceof UnitClass) {
+					UnitClass unit = (UnitClass) paths[i];
+					if (!J2SCyclicProjectUtils.visit(unit)) {
+						continue;
+					}
+					buf.append(unit.getClassName());
+					buf.append(',');
+				}
+			}
+			for (int i = 0; i < paths.length; i++) {
 				if (paths[i] instanceof CompositeResources) {
 					CompositeResources c = (CompositeResources) paths[i];
 					if (!existed.contains(c.getName())) {
@@ -314,14 +323,16 @@ public class J2SLaunchingUtil {
 						buf.append(',');
 					}
 				}
-				if (!J2SCyclicProjectUtils.visit(res)) {
+				if (!J2SCyclicProjectUtils.visit(paths[i])) {
 					continue;
 				}
+				/*
 				if (res instanceof UnitClass) {
 					UnitClass unit = (UnitClass) res;
 					buf.append(unit.getClassName());
 					buf.append(',');
 				}
+				*/
 			}
 		} else {
 			CompositeResources fModel= new CompositeResources();
@@ -544,8 +555,6 @@ public class J2SLaunchingUtil {
 		StringBuffer buf = new StringBuffer();
 		boolean useXHTMLHeader = configuration.getAttribute(
 				IJ2SLauchingConfiguration.USE_XHTML_HEADER, true);
-		boolean useInnerConsole = configuration.getAttribute(
-				IJ2SLauchingConfiguration.INNER_CONSOLE, true);
 		if (useXHTMLHeader) {
 			buf
 					.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\r\n");
@@ -577,15 +586,15 @@ public class J2SLaunchingUtil {
 		buf.append("<script type=\"text/javascript\" src=\"" + j2sLibPath + "j2slib.z.js\"></script>\r\n");
 
 		J2SCyclicProjectUtils.emptyTracks();
-		buf.append(generateClasspathHTML(configuration, mainType, workingDir));
+		String extraHTML = generateClasspathHTML(configuration, mainType, workingDir);
+		if (extraHTML.trim().length() != 0) { 
+			buf.append(extraHTML);
+		}
 
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.TAIL_HEADER_HTML, ""));
 		buf.append("</head>\r\n");
 		buf.append("<body>\r\n");
-		if (useInnerConsole) {
-			//buf.append("<div id=\"_console_\" class=\"consolewindow\"></div>\r\n");
-		}
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.HEAD_BODY_HTML, ""));
 		
