@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,9 @@ package net.sf.j2s.ui.launching;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaLaunchTab;
 import org.eclipse.jdt.internal.debug.ui.IJavaDebugHelpContextIds;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.JavaDebugImages;
@@ -48,7 +48,7 @@ import org.eclipse.ui.PlatformUI;
  * </p>
  * @since 2.0
  */
-public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
+public class J2SArgumentsTab extends JavaLaunchTab {
 		
 	// Program arguments widgets
 	protected Label fPrgmArgumentsLabel;
@@ -80,7 +80,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 	 */
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
-		Composite comp = new Composite(parent, parent.getStyle());
+		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
 		comp.setLayout(layout);
 		comp.setFont(font);
@@ -96,7 +96,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 		group.setLayout(layout);
 		group.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		String controlName = (LauncherMessages.JavaArgumentsTab__Program_arguments__5); //$NON-NLS-1$
+		String controlName = (LauncherMessages.JavaArgumentsTab__Program_arguments__5); 
 		group.setText(controlName);
 		
 		fPrgmArgumentsText = new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
@@ -112,7 +112,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 		});
 		ControlAccessibleListener.addListener(fPrgmArgumentsText, group.getText());
 		
-		String buttonLabel = LauncherMessages.JavaArgumentsTab_5;  //$NON-NLS-1$
+		String buttonLabel = LauncherMessages.JavaArgumentsTab_5;  
 		Button pgrmArgVariableButton = createPushButton(group, buttonLabel, null); 
 		pgrmArgVariableButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		pgrmArgVariableButton.addSelectionListener(new SelectionListener() {
@@ -175,7 +175,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 			//fVMArgumentsBlock.initializeFrom(configuration);
 			fWorkingDirectoryBlock.initializeFrom(configuration);
 		} catch (CoreException e) {
-			setErrorMessage(LauncherMessages.JavaArgumentsTab_Exception_occurred_reading_configuration___15 + e.getStatus().getMessage()); //$NON-NLS-1$
+			setErrorMessage(LauncherMessages.JavaArgumentsTab_Exception_occurred_reading_configuration___15 + e.getStatus().getMessage()); 
 			JDIDebugUIPlugin.log(e);
 		}
 	}
@@ -190,7 +190,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	/**
-	 * Retuns the string in the text widget, or <code>null</code> if empty.
+	 * Returns the string in the text widget, or <code>null</code> if empty.
 	 * 
 	 * @return text or <code>null</code>
 	 */
@@ -206,7 +206,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return LauncherMessages.JavaArgumentsTab__Arguments_16; //$NON-NLS-1$
+		return LauncherMessages.JavaArgumentsTab__Arguments_16; 
 	}	
 	
 	/**
@@ -250,7 +250,7 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#activated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
-		// do nothing when activated
+		fWorkingDirectoryBlock.initializeFrom(workingCopy);
 	}
 
 	/* (non-Javadoc)
@@ -260,4 +260,3 @@ public class J2SArgumentsTab extends AbstractLaunchConfigurationTab {
 		// do nothing when deactivated
 	}
 }
-

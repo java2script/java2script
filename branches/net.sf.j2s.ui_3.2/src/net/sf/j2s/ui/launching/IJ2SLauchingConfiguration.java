@@ -2,8 +2,6 @@ package net.sf.j2s.ui.launching;
 
 public interface IJ2SLauchingConfiguration {
 
-	public static final String RUN_IN_BACKGROUND = "run.in.background";
-	public static final String INNER_CONSOLE = "inner.console";
 	public static final String FAST_VIEW_J2S_CONSOLE = "fast.view.j2s.console";
 	public static final String MAXIMIZE_J2S_CONSOLE = "maximize.j2s.console";
 	

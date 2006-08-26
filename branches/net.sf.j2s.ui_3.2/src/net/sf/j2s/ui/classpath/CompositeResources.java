@@ -279,9 +279,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		for (Iterator iter = resources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
-			if (!J2SCyclicProjectUtils.visit(res)) {
-				continue;
-			}
 			if (res instanceof CompositeResources) {
 				CompositeResources c = (CompositeResources) res;
 				buf.append(c.toJ2XString());
@@ -290,12 +287,12 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		for (Iterator iter = resources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
-			if (!J2SCyclicProjectUtils.visit(res)) {
-				continue;
-			}
 			if (res instanceof ContactedClasses) {
+				if (!J2SCyclicProjectUtils.visit(res)) {
+					continue;
+				}
 				ContactedClasses unit = (ContactedClasses) res;
-				buf.append(unit.getAbsoluteFile().getAbsolutePath());
+				buf.append(unit.toJ2XString());
 				buf.append(',');
 			}
 		}
@@ -378,10 +375,10 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		for (Iterator iter = resources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
-			if (!J2SCyclicProjectUtils.visit(res)) {
-				continue;
-			}
 			if (res instanceof CompositeResources) {
+				if (!J2SCyclicProjectUtils.visit(res)) {
+					continue;
+				}
 				CompositeResources c = (CompositeResources) res;
 				buf.append(c.ignoredClassesString());
 				buf.append(',');
@@ -389,10 +386,10 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 		for (Iterator iter = abandonedResources.iterator(); iter.hasNext();) {
 			Resource res = (Resource) iter.next();
-			if (!J2SCyclicProjectUtils.visit(res)) {
-				continue;
-			}
 			if (res instanceof UnitClass) {
+				if (!J2SCyclicProjectUtils.visit(res)) {
+					continue;
+				}
 				UnitClass unit = (UnitClass) res;
 				buf.append(unit.getClassName());
 				buf.append(',');
