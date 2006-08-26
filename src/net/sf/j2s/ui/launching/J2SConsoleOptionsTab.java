@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jdt.debug.ui.launchConfigurations.JavaLaunchTab;
 import org.eclipse.jdt.internal.debug.ui.JavaDebugImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -18,10 +19,6 @@ import org.eclipse.swt.widgets.Group;
 
 public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 
-	private Button btnBackground;
-
-	private Button btnInnerConsole;
-	
 	private Button btnFastView;
 
 	private Button btnMaximize;
@@ -32,7 +29,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
-		Composite comp = new Composite(parent, parent.getStyle());
+		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
 		comp.setLayout(layout);
 		comp.setFont(font);
@@ -50,24 +47,6 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 		String controlName = "Console UI Options";
 		group.setText(controlName);
 
-		btnBackground = new Button(group, SWT.CHECK);
-		btnBackground.setText("Run in background");
-		btnBackground.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
-		btnBackground.setEnabled(false);
-		
-		btnInnerConsole = new Button(group, SWT.CHECK);
-		btnInnerConsole.setText("Contains inner console");
-		btnInnerConsole.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
-		btnInnerConsole.setEnabled(false);
-		
 		btnFastView = new Button(group, SWT.CHECK);
 		btnFastView.setText("Make J2S console as fast view automatically");
 		btnFastView.addSelectionListener(new SelectionAdapter() {
@@ -86,10 +65,6 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(IJ2SLauchingConfiguration.RUN_IN_BACKGROUND,
-				true);
-		configuration.setAttribute(IJ2SLauchingConfiguration.INNER_CONSOLE,
-				true);
 		configuration.setAttribute(IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE,
 				false);
 		configuration.setAttribute(
@@ -98,10 +73,6 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			btnBackground.setSelection(configuration.getAttribute(
-					IJ2SLauchingConfiguration.RUN_IN_BACKGROUND, true));
-			btnInnerConsole.setSelection(configuration.getAttribute(
-					IJ2SLauchingConfiguration.INNER_CONSOLE, true));
 			btnFastView.setSelection(configuration.getAttribute(
 					IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE, false));
 			btnMaximize.setSelection(configuration.getAttribute(
@@ -112,10 +83,6 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(IJ2SLauchingConfiguration.RUN_IN_BACKGROUND,
-				btnBackground.getSelection());
-		configuration.setAttribute(IJ2SLauchingConfiguration.INNER_CONSOLE,
-				btnInnerConsole.getSelection());
 		configuration.setAttribute(IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE,
 				btnFastView.getSelection());
 		configuration.setAttribute(
@@ -133,5 +100,16 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 	public static Image getClasspathImage() {
 		return JavaDebugImages.get(JavaDebugImages.IMG_OBJS_MONITOR);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#activated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 */
+	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#deactivated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 */
+	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
+
 
 }
