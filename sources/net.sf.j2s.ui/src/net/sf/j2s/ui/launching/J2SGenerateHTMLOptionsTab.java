@@ -74,63 +74,6 @@ public class J2SGenerateHTMLOptionsTab extends AbstractLaunchConfigurationTab {
 				updateLaunchConfigurationDialog();
 			}
 		});
-		Composite c = new Composite(comp, parent.getStyle());
-		layout = new GridLayout(4, false);
-		c.setLayout(layout);
-		gd = new GridData(GridData.FILL_BOTH);
-		c.setLayoutData(gd);
-		new Label(c, SWT.NONE).setText("Generate System.out.*() by");
-		Button btnAlert = new Button(c, SWT.PUSH);
-		btnAlert.setText("window.alert");
-		btnAlert.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				String str = "<script type=\"text/javascript\">\r\n" +
-						"System = {};\r\n" +
-						"System.out = {};\r\n" +
-						"System.err = {};\r\n" +
-						"System.out.println = System.err.println = alert;\r\n" +
-						"System.out.print = System.err.print = alert;\r\n" +
-						"</script>";
-				headHeaderText.setText(str);
-			}
-		});
-		Button btnWrite = new Button(c, SWT.PUSH);
-		btnWrite.setText("document.write");
-		btnWrite.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				String str = "<script type=\"text/javascript\">\r\n" +
-						"System = {};\r\n" +
-						"System.out = {};\r\n" +
-						"System.err = {};\r\n" +
-						"System.out.println = System.err.println = function (str) {\r\n" +
-						"\tdocument.write (str + \"<br/>\");\r\n" +
-						"};\r\n" +
-						"System.out.print = System.err.print = function (str) {\r\n" +
-						"\tdocument.write (str);\r\n" +
-						"};\r\n" +
-						"</script>";
-				headHeaderText.setText(str);
-			}
-		});
-		Button btnInsert = new Button(c, SWT.PUSH);
-		btnInsert.setText("document.body.appendChild");
-		btnInsert.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				String str = "<script type=\"text/javascript\">\r\n" +
-						"System = {};\r\n" +
-						"System.out = {};\r\n" +
-						"System.err = {};\r\n" +
-						"System.out.println = System.err.println = function (str) {\r\n" +
-						"\tdocument.body.appendChild (document.createTextNode (str));\r\n" +
-						"\tdocument.body.appendChild (document.createElement (\"BR\"));\r\n" +
-						"};\r\n" +
-						"System.out.print = System.err.print = function (str) {\r\n" +
-						"\tdocument.body.appendChild (document.createTextNode (str));\r\n" +
-						"};\r\n" +
-						"</script>";
-				headHeaderText.setText(str);
-			}
-		});
 
 		new Label(comp, SWT.NONE).setText("Tail of Header:");
 		tailHeaderText = new Text(comp, SWT.MULTI | SWT.WRAP | SWT.BORDER
