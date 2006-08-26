@@ -313,6 +313,7 @@ ClazzLoader.classpathMap = new Object ();
 /* public */
 ClazzLoader.packageClasspath = function (pkg, base, index) {
 	if (pkg instanceof Array) {
+		ClazzLoader.unwrapArray (pkg);
 		for (var i = 0; i < pkg.length; i++) {
 			ClazzLoader.packageClasspath (pkg[i], base, index);
 		}
