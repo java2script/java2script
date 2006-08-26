@@ -646,6 +646,21 @@ System = {
 	setProperties : function (props) {
 		System.props = props;
 	},
+	getProperty : function (key, def) {
+		if (System.props != null) {
+			return System.props.getProperty (key, def);
+		}
+		if (def != null) {
+			return def;
+		}
+		return key;
+	},
+	setProperty : function (key, val) {
+		if (System.props == null) {
+			return ;
+		}
+		System.props.setProperty (key, val);
+	},
 	arraycopy : function (src, srcPos, dest, destPos, length) {
 		for (var i = 0; i < length; i++) {
 			dest[destPos + i] = src[srcPos + i];
