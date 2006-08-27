@@ -13,6 +13,7 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -46,6 +48,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
@@ -646,14 +649,14 @@ public class DependencyASTVisitor extends ASTVisitor {
 					isInteface = false;
 				}
 				if (isInteface || (node.getModifiers() & Modifier.STATIC) != 0) {
-					DependencyASTVisitor visitor = new DependencyASTVisitor();
+					DependencyASTVisitor visitor = getSelfVisitor();
 					element.accept(visitor);
 					requires.addAll(visitor.musts);
 					requires.addAll(visitor.requires);
 					requires.addAll(visitor.optionals);
 				}
 			} else if (element instanceof Initializer) {
-				DependencyASTVisitor visitor = new DependencyASTVisitor();
+				DependencyASTVisitor visitor = getSelfVisitor();
 				element.accept(this);
 				requires.addAll(visitor.musts);
 				requires.addAll(visitor.requires);
@@ -666,7 +669,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
 								.get(j);
 						Expression initializer = vdf.getInitializer();
-						DependencyASTVisitor visitor = new DependencyASTVisitor();
+						DependencyASTVisitor visitor = getSelfVisitor();
 						if (initializer != null) {
 							initializer.accept(visitor);
 						}
@@ -680,7 +683,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 //						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
 //								.get(j);
 //						Expression initializer = vdf.getInitializer();
-//						DependencyASTVisitor visitor = new DependencyASTVisitor();
+//						DependencyASTVisitor visitor = getSelfVisitor();
 //						if (initializer != null) {
 //							initializer.accept(visitor);
 //						}
@@ -691,6 +694,26 @@ public class DependencyASTVisitor extends ASTVisitor {
 //				}
 			}
 		}
+	}
+
+	private DependencyASTVisitor getSelfVisitor() {
+		try {
+			Object obj = this.getClass().getConstructor(new Class[0]).newInstance(new Object[0]);
+			return (DependencyASTVisitor) obj;
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	protected void visitForOptionals(AbstractTypeDeclaration node) {
@@ -713,6 +736,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 	public boolean visit(QualifiedName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)
 				&& isSimpleQualified(node)) {
 			//buffer.append(constValue);
@@ -726,12 +750,25 @@ public class DependencyASTVisitor extends ASTVisitor {
 	public boolean visit(SimpleName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
 			return false;
 		}
-		/*
 		ITypeBinding typeBinding = node.resolveTypeBinding();
-		if (typeBinding != null) {
+		IBinding binding = node.resolveBinding();
+		boolean isCasting = false;
+		boolean isQualified = false;
+		ASTNode nodeParent = node.getParent();
+		while (nodeParent != null && nodeParent instanceof QualifiedName) {
+			isQualified = true;
+			nodeParent = nodeParent.getParent();
+		}
+		if (nodeParent != null && nodeParent instanceof SimpleType) {
+			isCasting = true;
+		}
+		if (typeBinding != null && !isCasting && isQualified 
+				&& !(binding instanceof IVariableBinding)) {
+			QNTypeBinding qn = new QNTypeBinding();
 			String qualifiedName = null;
 			if (!typeBinding.isPrimitive()) {
 				if (typeBinding.isArray()) {
@@ -743,26 +780,28 @@ public class DependencyASTVisitor extends ASTVisitor {
 						ITypeBinding declaringClass = elementType.getDeclaringClass();
 						if (declaringClass != null) {
 							qualifiedName = declaringClass.getQualifiedName();
+							qn.binding = declaringClass;
 						} else {
 							qualifiedName = elementType.getQualifiedName();
+							qn.binding = elementType;
 						}
 					}
 				} else {
 					ITypeBinding declaringClass = typeBinding.getDeclaringClass();
 					if (declaringClass != null) {
 						qualifiedName = declaringClass.getQualifiedName();
+						qn.binding = declaringClass;
 					} else {
 						qualifiedName = typeBinding.getQualifiedName();
+						qn.binding = typeBinding;
 					}
 				}
-			}
-			if ("byte".equals(qualifiedName)) {
-				System.out.println("fds");
 			}
 			if (isQualifiedNameOK(qualifiedName, node) 
 					&& !musts.contains(qualifiedName)
 					&& !requires.contains(qualifiedName)) {
-				optionals.add(qualifiedName);
+				qn.qualifiedName = qualifiedName;
+				optionals.add(qn);
 			}
 		}
 //		ASTNode parent = node.getParent();
@@ -772,7 +811,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 //				
 //			}
 //		}
-		*/
 		return super.visit(node);
 	}
 	
@@ -970,6 +1008,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				}
 			}
 		} else if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
 			if ((exp instanceof QualifiedName) 
 					|| (exp instanceof QualifiedName && isSimpleQualified((QualifiedName) exp))) {
