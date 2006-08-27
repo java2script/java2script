@@ -1134,6 +1134,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			if (initializer != null) {
 				Object constValue = initializer.resolveConstantExpressionValue();
 				if (constValue != null && (constValue instanceof Number
+						|| constValue instanceof Character
 						|| constValue instanceof Boolean
 						|| constValue instanceof String)) {
 					return false;
@@ -1916,8 +1917,15 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	public boolean visit(SimpleName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 		IBinding binding = node.resolveBinding();

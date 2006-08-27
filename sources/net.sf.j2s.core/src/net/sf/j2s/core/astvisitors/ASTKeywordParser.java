@@ -1135,8 +1135,15 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	public boolean visit(InfixExpression node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
@@ -1506,8 +1513,15 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	public boolean visit(PrefixExpression node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 		String op = node.getOperator().toString();
@@ -1676,9 +1690,16 @@ public class ASTKeywordParser extends ASTEmptyParser {
 //		}
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)
 				&& isSimpleQualified(node)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 		ASTNode parent = node.getParent();
