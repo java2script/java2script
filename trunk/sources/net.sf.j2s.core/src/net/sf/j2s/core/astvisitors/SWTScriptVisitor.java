@@ -93,8 +93,15 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	public boolean visit(SimpleName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 		IBinding binding = node.resolveBinding();
@@ -124,9 +131,16 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	public boolean visit(QualifiedName node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
+				|| constValue instanceof Character
 				|| constValue instanceof Boolean)
 				&& isSimpleQualified(node)) {
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			buffer.append(constValue);
+			if (constValue instanceof Character) {
+				buffer.append('\'');
+			}
 			return false;
 		}
 //		IBinding nodeBinding = node.resolveBinding();
