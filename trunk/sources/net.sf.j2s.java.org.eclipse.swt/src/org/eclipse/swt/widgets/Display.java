@@ -3041,6 +3041,9 @@ public boolean readAndDispatch () {
 	}
 	return runAsyncMessages (false);
 	*/
+	if (messageProc != 0) {
+		return true; //already hooked, return directly
+	}
 	messageProc = window.setInterval(new RunnableCompatibility() {
 		private boolean messageLoop = false;
 		public void run() {
