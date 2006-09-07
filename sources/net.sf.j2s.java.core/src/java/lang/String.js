@@ -147,8 +147,8 @@ String.prototype.equals = function (anObject) {
 };
 
 String.prototype.equalsIgnoreCase = function (anotherString) {
-	return this == anotherString 
-			|| this.toLowerCase () == anotherString.toLowerCase ();
+	return (anotherString == null) ? false : (this == anotherString 
+			|| this.toLowerCase () == anotherString.toLowerCase ());
 };
 
 /* private */
