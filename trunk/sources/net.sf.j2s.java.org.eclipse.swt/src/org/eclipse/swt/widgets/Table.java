@@ -1045,7 +1045,6 @@ void createItem (TableColumn column, int index) {
 	theadTD.style.padding = "0";
 	column.handle = theadTD;
 	
-
 }
 
 void createItem (TableItem item, int index) {
