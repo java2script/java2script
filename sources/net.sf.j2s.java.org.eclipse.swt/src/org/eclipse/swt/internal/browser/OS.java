@@ -13,6 +13,7 @@
 
 package org.eclipse.swt.internal.browser;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -425,20 +426,86 @@ public class OS {
 		return new Point(getContainerWidth(c), getContainerHeight(c));
 	}
 	
-	static public Point getElementPositionInShell(Element elem, Element shellElem){
-		Element currentElem = elem;
+	public static Point calcuateRelativePosition(Element el, Element relativeEl){
+		Element currentEl = el;
 		int left = 0;
 		int top = 0;
-		while (currentElem != null && currentElem != shellElem) {
-			left += currentElem.offsetLeft;
-			top += currentElem.offsetTop;
-			currentElem = currentElem.offsetParent;
+		while (currentEl != null && currentEl != relativeEl) {
+			left += currentEl.offsetLeft;
+			top += currentEl.offsetTop;
+			currentEl = currentEl.offsetParent;
 		}
-//		System.out.println(getShell().she)
 		if(isFirefox){
+			// why?
 			left += 6;
 			top += 2;
 		}
-		return new Point(left, top + OS.getContainerHeight(elem));
+		return new Point(left, top + OS.getContainerHeight(el));
 	}
+	
+	public static void updateArrowSize(Object el, int style, int cx, int cy) {
+		int xx = Math.min(cx, cy) / 3;
+		final CSSStyle s = ((Element) el).style;
+		s.borderWidth = (xx > 0 ? xx : 0) + "px";
+		if ((style & SWT.LEFT) != 0) {
+			s.borderLeftWidth = "0";
+		} else if ((style & SWT.RIGHT) != 0) {
+			s.borderRightWidth = "0";
+		} else if ((style & SWT.UP) != 0) {
+			s.borderTopWidth = "0";
+		} else if ((style & SWT.DOWN) != 0) {
+			if (xx > 1) {
+				s.borderWidth = (xx - 1) + "px";
+			}
+			s.borderBottomWidth = "0";
+		} else {
+			s.borderTopWidth = "0";
+		} 
+		int x = cy / 6;
+		xx = cy / 3;
+		s.position = "relative";
+		if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
+			s.top = (x - 3) + "px";
+			if ((style & SWT.RIGHT) != 0) {
+				s.left = "1px";
+			}
+		} else {
+			if ((style & SWT.UP) != 0) {
+				s.top = (xx - 3)+ "px";
+			} else if ((style & SWT.DOWN) != 0) {
+				s.top = (xx - 2)+ "px";
+			}
+		}
+		/**
+		 * TODO: Get rid of these nasty position things!
+		 */
+		if (OS.isMozilla && !OS.isFirefox) {
+			if ((style & SWT.UP) != 0) {
+				s.left = "-2px";
+			} else if ((style & SWT.DOWN) != 0) {
+				s.left = "-1px";
+			}
+		}
+		if (OS.isFirefox) {
+			if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
+				s.top = "-2px";
+				if ((style & SWT.RIGHT) != 0) {
+					s.left = "1px";
+				}
+			} else {
+				if ((style & SWT.UP) != 0) {
+					if (Math.min(cx, cy) <= 12) {
+						s.left = "-1px";
+					} else {
+						s.left = "-2px";
+					}
+					s.top = "-1px";
+				} else if ((style & SWT.DOWN) != 0) {
+					s.left = "-1px";
+					s.top = "-1px";
+				}
+			}
+		}
+	}
+
 }

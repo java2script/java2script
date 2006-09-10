@@ -1773,7 +1773,7 @@ protected static void registerElementAsMonitor(Element el) {
 		monitor.width = window.screen.availWidth;
 		monitor.height = window.screen.availHeight;
 	} else {
-		Point pt = OS.getElementPositionInShell(el, document.body);
+		Point pt = OS.calcuateRelativePosition(el, document.body);
 		el.style.position = "absolute";
 		monitor.x = pt.x;
 		monitor.y = pt.y;

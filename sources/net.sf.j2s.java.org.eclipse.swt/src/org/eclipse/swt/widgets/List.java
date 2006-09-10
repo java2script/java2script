@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
@@ -263,19 +264,12 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 void createHandle () {
 	handle = document.createElement ("SELECT");
 	handle.size = 2;
-	/*
-	handle.style.width = "100%";
-	*/
 	handle.className = "list-default";
-//		handle.style.display = "none";
-//		if ((style & SWT.MULTI) != 0) {
-//			handle.size = 2;
-//		} else {
-//			handle.size = 1;
-//		}
-	//handle.appendChild (document.createTextNode(text));
-	//System.out.println(handle.innerHTML);
-	//System.out.println(parent.handle);
+	if ((style & SWT.BORDER) != 0) {
+		handle.className += " list-border";
+	}
+	handle.multiple = (style & SWT.MULTI) != 0;
+
 	if (parent != null) {
 		Element parentHandle = parent.containerHandle();
 		if (parentHandle!= null) {
@@ -365,7 +359,7 @@ public void deselect (int index) {
 		*/
 		return;
 	} 
-//	OS.SendMessage (handle, OS.LB_SETSEL, 0, index);
+	//OS.SendMessage (handle, OS.LB_SETSEL, 0, index);
 }
 
 /**
@@ -422,13 +416,26 @@ public void deselect (int start, int end) {
  */
 public void deselectAll () {
 	checkWidget ();
+	/*
 	if ((style & SWT.SINGLE) != 0) {
-//		OS.SendMessage (handle, OS.LB_SETCURSEL, -1, 0);
+		OS.SendMessage (handle, OS.LB_SETCURSEL, -1, 0);
 	} else {
-//		OS.SendMessage (handle, OS.LB_SETSEL, 0, -1);
+		OS.SendMessage (handle, OS.LB_SETSEL, 0, -1);
 	}
+	*/
 }
 
+/**
+ * Returns the zero-relative index of the item which currently
+ * has the focus in the receiver, or -1 if no item has focus.
+ *
+ * @return the index of the selected item
+ *
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ */
 public int getFocusIndex () {
 	checkWidget ();
 	/*
@@ -441,6 +448,7 @@ public int getFocusIndex () {
 	*/
 	return -1;
 }
+
 /**
  * Returns the item at the given, zero-relative index in the
  * receiver. Throws an exception if the index is out of range.
@@ -487,9 +495,11 @@ public String getItem (int index) {
  */
 public int getItemCount () {
 	checkWidget ();
-//	int result = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
-//	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_COUNT);
-//	return result;
+	/*
+	int result = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
+	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_COUNT);
+	return result;
+	*/
 	return 0;
 }
 
@@ -506,9 +516,11 @@ public int getItemCount () {
  */
 public int getItemHeight () {
 	checkWidget ();
-//	int result = OS.SendMessage (handle, OS.LB_GETITEMHEIGHT, 0, 0);
-//	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_ITEM_HEIGHT);
-//	return result;
+	/*
+	int result = OS.SendMessage (handle, OS.LB_GETITEMHEIGHT, 0, 0);
+	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_ITEM_HEIGHT);
+	return result;
+	*/
 	return 12;
 }
 
@@ -574,12 +586,14 @@ public String [] getSelection () {
  */
 public int getSelectionCount () {
 	checkWidget ();
-	/*
 	if ((style & SWT.SINGLE) != 0) {
+		/*
 		int result = OS.SendMessage (handle, OS.LB_GETCURSEL, 0, 0);
 		if (result == OS.LB_ERR) return 0;
+		*/
 		return 1;
 	}
+	/*
 	int result = OS.SendMessage (handle, OS.LB_GETSELCOUNT, 0, 0);
 	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_COUNT);
 	return result;
@@ -616,7 +630,7 @@ public int getSelectionIndex () {
 	if (result != 1) error (SWT.ERROR_CANNOT_GET_SELECTION);
 	return buffer [0];
 	*/
-	return 0;
+	return -1;
 }
 
 /**
@@ -650,9 +664,7 @@ public int [] getSelectionIndices () {
 	if (result != length) error (SWT.ERROR_CANNOT_GET_SELECTION);
 	return indices;
 	*/
-	return new int[] {
-			handle.selectedIndex,
-	};
+	return new int [] {0};
 }
 
 /**
@@ -669,7 +681,7 @@ public int [] getSelectionIndices () {
  */
 public int getTopIndex () {
 	checkWidget ();
-//	return OS.SendMessage (handle, OS.LB_GETTOPINDEX, 0, 0);
+	//return OS.SendMessage (handle, OS.LB_GETTOPINDEX, 0, 0);
 	return 0;
 }
 
@@ -733,16 +745,19 @@ public int indexOf (String string, int start) {
 		return -1;
 	}
 
-//	/* Use LB_FINDSTRINGEXACT to search for the item */
-//	int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
-//	if (!(0 <= start && start < count)) return -1;
+	/* Use LB_FINDSTRINGEXACT to search for the item */
+	/*
+	int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
+	if (!(0 <= start && start < count)) return -1;
 	int index = start - 1, last;
-//	TCHAR buffer = new TCHAR (getCodePage (), string, true);
-//	do {
-//		index = OS.SendMessage (handle, OS.LB_FINDSTRINGEXACT, last = index, buffer);
-//		if (index == OS.LB_ERR || index <= last) return -1;
-//	} while (!string.equals (getItem (index)));
+	TCHAR buffer = new TCHAR (getCodePage (), string, true);
+	do {
+		index = OS.SendMessage (handle, OS.LB_FINDSTRINGEXACT, last = index, buffer);
+		if (index == OS.LB_ERR || index <= last) return -1;
+	} while (!string.equals (getItem (index)));
 	return index;
+	*/
+	return -1;
 }
 
 /**
@@ -760,8 +775,10 @@ public int indexOf (String string, int start) {
  */
 public boolean isSelected (int index) {
 	checkWidget ();
-//	int result = OS.SendMessage (handle, OS.LB_GETSEL, index, 0);
-//	return (result != 0) && (result != OS.LB_ERR);
+	/*
+	int result = OS.SendMessage (handle, OS.LB_GETSEL, index, 0);
+	return (result != 0) && (result != OS.LB_ERR);
+	*/
 	return false;
 }
 
@@ -787,8 +804,8 @@ public void remove (int [] indices) {
 	int [] newIndices = new int [indices.length];
 	System.arraycopy (indices, 0, newIndices, 0, indices.length);
 	sort (newIndices);
-	int start = newIndices [newIndices.length - 1], end = newIndices [0];
 	/*
+	int start = newIndices [newIndices.length - 1], end = newIndices [0];
 	int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
 	if (!(0 <= start && start <= end && end < count)) {
 		error (SWT.ERROR_INVALID_RANGE);
@@ -1172,7 +1189,7 @@ void select (int start, int end, boolean scroll) {
 		select (start, scroll);
 		return;
 	}
-//	OS.SendMessage (handle, OS.LB_SELITEMRANGEEX, start, end);
+	// OS.SendMessage (handle, OS.LB_SELITEMRANGEEX, start, end);
 	if (scroll) showSelection ();
 }
 	
@@ -1189,17 +1206,17 @@ void select (int start, int end, boolean scroll) {
 public void selectAll () {
 	checkWidget ();
 	if ((style & SWT.SINGLE) != 0) return;
-//	OS.SendMessage (handle, OS.LB_SETSEL, 1, -1);
+	// OS.SendMessage (handle, OS.LB_SETSEL, 1, -1);
 }
 
 void setBounds (int x, int y, int width, int height, int flags) {
+	super.setBounds (x, y, width, height, flags);
 	/*
 	* Bug in Windows.  If the receiver is scrolled horizontally
 	* and is resized, the list does not redraw properly.  The fix
 	* is to redraw the control when resizing is not deferred and
 	* the new size is different from the previous size.
-	*/
-	/*
+	*-/
 	if (parent.lpwp != null || (flags & OS.SWP_NOSIZE) != 0) {	
 		super.setBounds (x, y, width, height, flags);
 		return;
@@ -1337,8 +1354,8 @@ public void setItems (String [] items) {
 		* and reminds us that we are relying on this undocumented
 		* behavior.
 		*-/
-//			int flags = OS.RDW_ERASE | OS.RDW_FRAME | OS.RDW_INVALIDATE;
-//			OS.RedrawWindow (handle, null, 0, flags);
+//		int flags = OS.RDW_ERASE | OS.RDW_FRAME | OS.RDW_INVALIDATE;
+//		OS.RedrawWindow (handle, null, 0, flags);
 	}
 	OS.SetWindowLong (handle, OS.GWL_WNDPROC, oldProc);
 	if (index < items.length) error (SWT.ERROR_ITEM_NOT_ADDED);
@@ -1430,7 +1447,7 @@ public void setSelection(int [] indices) {
 	select (indices, true);
 	if ((style & SWT.MULTI) != 0) {
 		int focusIndex = indices [0];
-//			if (focusIndex >= 0) setFocusIndex (focusIndex);
+		if (focusIndex >= 0) setFocusIndex (focusIndex);
 	}
 }
 
@@ -1481,7 +1498,7 @@ public void setSelection (String [] items) {
 		}
 	}
 	if ((style & SWT.MULTI) != 0) {
-//			if (focusIndex >= 0) setFocusIndex (focusIndex);
+		if (focusIndex >= 0) setFocusIndex (focusIndex);
 	}
 }
 
@@ -1505,7 +1522,7 @@ public void setSelection (int index) {
 	deselectAll ();
 	select (index, true);
 	if ((style & SWT.MULTI) != 0) {
-//			if (index >= 0) setFocusIndex (index);
+		if (index >= 0) setFocusIndex (index);
 	}
 }
 
@@ -1534,15 +1551,17 @@ public void setSelection (int start, int end) {
 	checkWidget ();
 	deselectAll ();
 	if (end < 0 || start > end || ((style & SWT.SINGLE) != 0 && start != end)) return;
-//		int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
-//		if (count == 0 || start >= count) return;
-//		start = Math.max (0, start);
-//		end = Math.min (end, count - 1);
+	/*
+	int count = OS.SendMessage (handle, OS.LB_GETCOUNT, 0, 0);
+	if (count == 0 || start >= count) return;
+	start = Math.max (0, start);
+	end = Math.min (end, count - 1);
+	*/
 	if ((style & SWT.SINGLE) != 0) {
 		select (start, true);
 	} else {
 		select (start, end, true);
-//			setFocusIndex (start);
+		setFocusIndex (start);
 	}
 }
 
@@ -1618,12 +1637,11 @@ int widgetStyle () {
 	}
 	return bits;
 }
-*/
-String windowClass () {
-	return "SELECT";//ListClass;
+
+TCHAR windowClass () {
+	return ListClass;
 }
 
-/*
 int windowProc () {
 	return ListProc;
 }
@@ -1641,5 +1659,7 @@ LRESULT wmCommandChild (int wParam, int lParam) {
 	return super.wmCommandChild (wParam, lParam);
 }
 */
+
+
 
 }
