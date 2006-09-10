@@ -55,6 +55,8 @@ public class Element {
 
 	public boolean readOnly;
 
+	public boolean multiple;
+	
 	public Object onchange;
 
 	public Object onselectchange;

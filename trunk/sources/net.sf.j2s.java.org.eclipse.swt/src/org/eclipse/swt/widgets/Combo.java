@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ModifyListener;
@@ -109,7 +110,7 @@ public class Combo extends Composite {
 		ComboProc = lpWndClass.lpfnWndProc;
 	}
 	*/
-
+	
 /**
  * Constructs a new instance of this class given its parent
  * and a style value describing its behavior and appearance.
@@ -144,7 +145,6 @@ public class Combo extends Composite {
  */
 public Combo (Composite parent, int style) {
 	super (parent, checkStyle (style));
-	//itemCount = 0;
 }
 
 /**
@@ -170,7 +170,6 @@ public void add (String string) {
 	int result = OS.SendMessage (handle, OS.CB_ADDSTRING, 0, buffer);
 	if (result == OS.CB_ERR) error (SWT.ERROR_ITEM_NOT_ADDED);
 	if (result == OS.CB_ERRSPACE) error (SWT.ERROR_ITEM_NOT_ADDED);
-	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	*/
 	if (selectInput != null) {
 		selectInput.options[itemCount] = new Option(string, string);
@@ -387,19 +386,15 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int width = 0, height = 0;
 	if (wHint == SWT.DEFAULT) {
-		
 		if(selectInput != null){
 			Option[] options = selectInput.options;
 			int length = itemCount;
 			for(int i = 0; i < length; i++){
-				width = Math.max(width, OS.getStringPlainWidth(options[i].value));	
+				width = Math.max(width, OS.getStringStyledWidth(options[i].value, "combo-input-box", null));	
 			}
 		} else{
 			width = DEFAULT_WIDTH;
 		}
-		
-		width += OS.getContainerWidth(dropDownButton);
-		//OS.getStringPlainWidth();
 		/*
 		int newFont, oldFont = 0;
 		int hDC = OS.GetDC (handle);
@@ -439,25 +434,24 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			*/
 			height = computeSelectHeight();
 		}
-		height += getTextHeight();
-		
 	}
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
-//	if ((style & SWT.READ_ONLY) != 0) {
-//		width += 8;
-//	} else {
-//		/*
-//		int hwndText = OS.GetDlgItem (handle, CBID_EDIT);
-//		if (hwndText != 0) {
-//			int margins = OS.SendMessage (hwndText, OS.EM_GETMARGINS, 0, 0);
-//			int marginWidth = (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
-//			width += marginWidth + 3;
-//		}
-//		*/
-//	}
+	if ((style & SWT.READ_ONLY) != 0) {
+		width += 8;
+	} else {
+		/*
+		int hwndText = OS.GetDlgItem (handle, CBID_EDIT);
+		if (hwndText != 0) {
+			int margins = OS.SendMessage (hwndText, OS.EM_GETMARGINS, 0, 0);
+			int marginWidth = (margins & 0xFFFF) + ((margins >> 16) & 0xFFFF);
+			width += marginWidth + 3;
+		}
+		*/
+		width += 1 + 3; // marginWidth + 3;
+	}
 	/*
 	COMBOBOXINFO pcbi = new COMBOBOXINFO ();
 	pcbi.cbSize = COMBOBOXINFO.sizeof;
@@ -468,19 +462,24 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		int border = OS.GetSystemMetrics (OS.SM_CXEDGE);
 		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL) + border * 2;		
 		int textHeight = OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, -1, 0);
+	*/
+	if ((style & SWT.SIMPLE) == 0) {
+		width += 19;
+		height = 21;
+	} else {
+		int border = 2; // OS.GetSystemMetrics (OS.SM_CXEDGE);
+		width += 16 + border * 2; // OS.GetSystemMetrics (OS.SM_CXVSCROLL) + border * 2;		
+		int textHeight = OS.getStringStyledHeight("A", "combo-input-box", null); //OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, -1, 0);
 		if ((style & SWT.DROP_DOWN) != 0) {
 			height = textHeight + 6;
 		} else {
 			height += textHeight + 10;
 		}
 	}
-	*/
-//	System.out.println("Combo : " + width + " " + height + " hints " + wHint + " " + hHint);
 	return new Point (width, height);
 }
 
 private int computeSelectHeight() {
-	// TODO Auto-generated method stub
 	return  getItemHeight() * visibleCount;
 }
 
@@ -541,7 +540,13 @@ protected void createHandle () {
 	//handle.appendChild (document.createTextNode(text));
 	
 	handle.className += " combo-default";
-	
+
+	dropDownButton = document.createElement("BUTTON");
+	handle.appendChild(dropDownButton);
+	Element btnArrow = document.createElement("DIV");
+	btnArrow.className = "combo-button-arrow-down";
+	dropDownButton.appendChild(btnArrow);
+
 	textInput = document.createElement("INPUT");
 	textInput.type = "text";
 	textInput.className = "combo-input-box";
@@ -549,21 +554,17 @@ protected void createHandle () {
 	textInput.size = Combo.LIMIT;
 	handle.appendChild(textInput);
 
-	dropDownButton = document.createElement("BUTTON");
-	dropDownButton.className = "combo-button";
-	handle.appendChild(dropDownButton);
-
 	int height = OS.getContainerHeight(dropDownButton);
 	
 	selectInput = document.createElement("SELECT");
-	if(isSimple){		
+	if(isSimple){
 		selectInput.style.top = height + "px";
 		selectInput.style.left = textInput.style.left;
 //		System.out.println("is Simple " + isSimple);
 		selectInput.className = "combo-select-box-visible";
 		selectInput.size = visibleCount;
 		handle.appendChild(selectInput);
-	}else{		
+	}else{
 		selectInput.style.top = height + "px" ;
 		selectInput.style.left = textInput.style.left;
 //		System.out.println("is Simple " + isSimple);
@@ -581,10 +582,8 @@ protected void createHandle () {
 	textInput.ondblclick = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("button clicked!");
-			if(!isSimple)
-			{
+			if(!isSimple && itemCount > 0) {
 				show();
-				
 			}
 		}
 	};
@@ -615,8 +614,13 @@ protected void createHandle () {
 	dropDownButton.onclick = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("button clicked!");
-			if(!isSimple) 
-				show();
+			if(!isSimple && itemCount > 0) {
+				if (!selectShown) {
+					show();
+				} else {
+					hide();
+				}
+			}
 		}
 	};
 	
@@ -625,16 +629,16 @@ protected void createHandle () {
 //			System.out.println("select changed!" + selectInput.selectedIndex);
 			noSelection = false;
 			updateSelection();
-			if(!isSimple)
-				hide();
+//			if(!isSimple)
+//				hide();
 		}
 	}; 
 
-	selectInput.onblur = new RunnableCompatibility() {
+	selectInput.onselectchange = selectInput.onblur = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("handle blurred!");
 //			updateSelection();
-			if(!isSimple)
+			if(!isSimple && itemCount > 0)
 				hide();
 		}
 	}; 
@@ -664,14 +668,18 @@ void show(){
 //		return;
 //	}
 
-	Point coordinate = OS.getElementPositionInShell(textInput, getShell().handle);
+	Point coordinate = OS.calcuateRelativePosition(textInput, getShell().handle);
 	this.selectShown = true;
 	selectInput.style.zIndex = "120";
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
-	selectInput.style.top = coordinate.y + "px";
-	selectInput.style.left = coordinate.x + "px";
+	selectInput.style.top = (coordinate.y + 2) + "px";
+	selectInput.style.left = (coordinate.x - 4) + "px";
 //	System.out.println("Z " + selectInput.style.zIndex);
-	selectInput.focus();	
+	try {
+		selectInput.focus();
+	} catch (Throwable e) {
+		// TODO: handle exception
+	}
 }
 
 void updateSelection(){
@@ -704,17 +712,15 @@ public void cut () {
 int defaultBackground () {
 	return OS.GetSysColor (OS.COLOR_WINDOW);
 }
-*/
 
 void deregister () {
 	super.deregister ();
-	/*
 	int hwndText = OS.GetDlgItem (handle, CBID_EDIT);
 	if (hwndText != 0) display.removeControl (hwndText);
 	int hwndList = OS.GetDlgItem (handle, CBID_LIST);
 	if (hwndList != 0) display.removeControl (hwndList);
-	*/
 }
+*/
 
 /**
  * Deselects the item at the given zero-relative index in the receiver's 
@@ -836,7 +842,7 @@ public int getItemHeight () {
 	return result;
 	*/
 	
-	return OS.getStringPlainHeight("A") + 1;
+	return OS.getStringStyledHeight("A", "combo-input-box", null) + 1;
 }
 
 /**
@@ -935,7 +941,6 @@ public int getSelectionIndex () {
 	checkWidget ();
 	if (noSelection) return -1;
 	//return OS.SendMessage (handle, OS.CB_GETCURSEL, 0, 0);
-//	System.out.println("combo selected Index " + selectInput.selectedIndex);
 	return selectInput.selectedIndex;
 }
 
@@ -985,7 +990,7 @@ public int getTextHeight () {
 	if (result == OS.CB_ERR) error (SWT.ERROR_CANNOT_GET_ITEM_HEIGHT);
 	return (style & SWT.DROP_DOWN) != 0 ? result + 6 : result + 10;
 	*/
-	return OS.getStringPlainHeight("A") + 6;
+	return OS.getStringStyledHeight("A", "combo-input-box", null) + 6;
 }
 
 /**
@@ -1156,15 +1161,15 @@ public void paste () {
 	//OS.SendMessage (handle, OS.WM_PASTE, 0, 0);
 }
 
+/*
 void register () {
 	super.register ();
-	/*
 	int hwndText = OS.GetDlgItem (handle, CBID_EDIT);
 	if (hwndText != 0) display.addControl (hwndText, this);
 	int hwndList = OS.GetDlgItem (handle, CBID_LIST);
 	if (hwndList != 0) display.addControl (hwndList, this);
-	*/
 }
+*/
 
 /**
  * Removes the item from the receiver's list at the given
@@ -1356,7 +1361,7 @@ public void removeAll () {
  * @see #addModifyListener
  */
 public void removeModifyListener (ModifyListener listener) {
-	//checkWidget ();
+	checkWidget ();
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (eventTable == null) return;
 	eventTable.unhook (SWT.Modify, listener);	
@@ -1531,6 +1536,7 @@ public void select (int index) {
 		setText(getItem(index));
 	}
 }
+
 /*
 void setBackgroundPixel (int pixel) {
 	if (background == pixel) return;
@@ -1541,6 +1547,7 @@ void setBackgroundPixel (int pixel) {
 	if (hwndList != 0) OS.InvalidateRect (hwndList, null, true);
 }
 */
+
 void setBounds (int x, int y, int width, int height, int flags) {
 	/*
 	* Feature in Windows.  If the combo box has the CBS_DROPDOWN
@@ -1594,16 +1601,16 @@ void setBounds (int x, int y, int width, int height, int flags) {
 //		}
 		super.setBounds (x, y, width, height, flags);
 //		SetWindowPos (handle, null, x, y, width, height, flags);
-		textInput.style.height = dropDownButton.style.height = Math.min(height, buttonHeight) + "px";
+		textInput.style.height = Math.min(height, buttonHeight) + "px";
 		dropDownButton.style.width = buttonWidth + "px";
-		textInput.style.width = Math.max(0, width - buttonWidth) + "px";
+		textInput.style.width = Math.max(0, width - buttonWidth - 5) + "px";
 		
 	} else {
 //		height = Math.min(height, 
 //				OS.getContainerHeight(dropDownButton) + computeSelectHeight());
 		super.setBounds (x, y, width, height, flags);
 		selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
-		textInput.style.height = dropDownButton.style.height = (buttonHeight) + "px";
+		textInput.style.height = (buttonHeight - 2) + "px";
 		//dropDownButton.style.width = 0 + "px";
 		dropDownButton.style.display = "none";
 		textInput.style.width = width + "px";
@@ -1695,7 +1702,6 @@ public void setItems (String [] items) {
 	// widget could be disposed at this point
 	sendEvent (SWT.Modify);
 }
-
 
 /**
  * Sets the orientation of the receiver, which must be one
@@ -1837,23 +1843,23 @@ public void setText (String string) {
 public void setText (String string, boolean modify) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	if ((style & SWT.READ_ONLY) != 0) {
-//		int index = indexOf (string);
-//		if(selectInput.selectedIndex != index && index != -1)
-//			select (index);
-//		return;
-//	}
+	if ((style & SWT.READ_ONLY) != 0) {
+		int index = indexOf (string);
+		//if (selectInput.selectedIndex != index && index != -1) select (index);
+		if (index != -1) select (index);
+		return;
+	}
 	textInput.readOnly = false;
 	textInput.value = string;
 	textInput.readOnly = (style & SWT.READ_ONLY) != 0;
-//	TCHAR buffer = new TCHAR (getCodePage (), string, true);
-//	if (OS.SetWindowText (handle, buffer)) {
+	/*
+	TCHAR buffer = new TCHAR (getCodePage (), string, true);
+	if (OS.SetWindowText (handle, buffer)) {
+	*/
 	if(modify){
-//		System.out.println("send event modify");
 		sendEvent (SWT.Modify);
-	}
 		// widget could be disposed at this point
-//	}
+	}
 }
 
 /**
@@ -2031,13 +2037,11 @@ int widgetStyle () {
 	if ((style & SWT.READ_ONLY) != 0) return bits | OS.CBS_DROPDOWNLIST;
 	return bits | OS.CBS_DROPDOWN;
 }
-*/
 
-String windowClass () {
-	return "DIV"; //ComboClass;
+TCHAR windowClass () {
+	return ComboClass;
 }
 
-/*
 int windowProc () {
 	return ComboProc;
 }
@@ -2483,7 +2487,7 @@ void enableWidget(boolean enabled) {
 	
 	String cssName = handle.className;
 	if (cssName == null) cssName = "";
-	String key = "text-disabled";
+	String key = "combo-disabled";
 	int idx = cssName.indexOf(key);
 	if (!enabled) {
 		if (idx == -1) {
@@ -2494,6 +2498,21 @@ void enableWidget(boolean enabled) {
 			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
 		}
 	}
+}
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if (OS.isIE) {
+		dropDownButton.style.height = (cy  - 2) + "px";
+	}
+	OS.updateArrowSize(dropDownButton.childNodes[0], SWT.DOWN, 16, cy);
+	
+	Element el = (Element) hWnd;
+	// TODO: What about hWndInsertAfter and uFlags
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	el.style.width = (cx - 4 > 0 ? cx - 4 : 0) + "px";
+	el.style.height = (cy - 4 > 0 ? cy - 4 : 0) + "px";
+	return true;
+	//return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 }

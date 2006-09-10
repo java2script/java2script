@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
@@ -24,7 +25,6 @@ import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
-
 
 /**
  * Instances of this class represent a selectable user interface object that
@@ -62,6 +62,10 @@ public class Button extends Control {
 	Image image, image2;
 	ImageList imageList;
 	boolean ignoreMouse;
+
+	Element btnText;
+	Element btnHandle; 
+	
 	/*
 	static final int ButtonProc;
 	static final TCHAR ButtonClass = new TCHAR (0,"BUTTON", true);
@@ -87,51 +91,47 @@ public class Button extends Control {
 		ButtonProc = lpWndClass.lpfnWndProc;
 	}
 	*/
-	Element btnText;
-	Element btnHandle; 
 
-	/**
-	 * Constructs a new instance of this class given its parent
-	 * and a style value describing its behavior and appearance.
-	 * <p>
-	 * The style value is either one of the style constants defined in
-	 * class <code>SWT</code> which is applicable to instances of this
-	 * class, or must be built by <em>bitwise OR</em>'ing together 
-	 * (that is, using the <code>int</code> "|" operator) two or more
-	 * of those <code>SWT</code> style constants. The class description
-	 * lists the style constants that are applicable to the class.
-	 * Style bits are also inherited from superclasses.
-	 * </p>
-	 *
-	 * @param parent a composite control which will be the parent of the new instance (cannot be null)
-	 * @param style the style of control to construct
-	 *
-	 * @exception IllegalArgumentException <ul>
-	 *    <li>ERROR_NULL_ARGUMENT - if the parent is null</li>
-	 * </ul>
-	 * @exception SWTException <ul>
-	 *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the parent</li>
-	 *    <li>ERROR_INVALID_SUBCLASS - if this class is not an allowed subclass</li>
-	 * </ul>
-	 *
-	 * @see SWT#ARROW
-	 * @see SWT#CHECK
-	 * @see SWT#PUSH
-	 * @see SWT#RADIO
-	 * @see SWT#TOGGLE
-	 * @see SWT#FLAT
-	 * @see SWT#LEFT
-	 * @see SWT#RIGHT
-	 * @see SWT#CENTER
-	 * @see Widget#checkSubclass
-	 * @see Widget#getStyle
-	 * 
-	 * @j2sIgnore
-	 */
-	public Button (Composite parent, int style) {
-		super (parent, checkStyle (style));
-	}
-	
+/**
+ * Constructs a new instance of this class given its parent
+ * and a style value describing its behavior and appearance.
+ * <p>
+ * The style value is either one of the style constants defined in
+ * class <code>SWT</code> which is applicable to instances of this
+ * class, or must be built by <em>bitwise OR</em>'ing together 
+ * (that is, using the <code>int</code> "|" operator) two or more
+ * of those <code>SWT</code> style constants. The class description
+ * lists the style constants that are applicable to the class.
+ * Style bits are also inherited from superclasses.
+ * </p>
+ *
+ * @param parent a composite control which will be the parent of the new instance (cannot be null)
+ * @param style the style of control to construct
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_NULL_ARGUMENT - if the parent is null</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the parent</li>
+ *    <li>ERROR_INVALID_SUBCLASS - if this class is not an allowed subclass</li>
+ * </ul>
+ *
+ * @see SWT#ARROW
+ * @see SWT#CHECK
+ * @see SWT#PUSH
+ * @see SWT#RADIO
+ * @see SWT#TOGGLE
+ * @see SWT#FLAT
+ * @see SWT#LEFT
+ * @see SWT#RIGHT
+ * @see SWT#CENTER
+ * @see Widget#checkSubclass
+ * @see Widget#getStyle
+ */
+public Button (Composite parent, int style) {
+	super (parent, checkStyle (style));
+}
+
 void _setImage (Image image) {
 	/*
 	if (OS.COMCTL32_MAJOR >= 6 && OS.IsAppThemed ()) {
@@ -274,7 +274,7 @@ void _setImage (Image image) {
  * @see SelectionEvent
  */
 public void addSelectionListener (SelectionListener listener) {
-checkWidget ();
+	checkWidget ();
 	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
 	TypedListener typedListener = new TypedListener (listener);
 	addListener (SWT.Selection,typedListener);
@@ -442,6 +442,81 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	return new Point (width, height);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#createHandle()
+ */
+void createHandle() {
+//	super.createHandle();
+	handle = document.createElement ("DIV");
+	String cssName = "button-default";
+	if ((style & SWT.BORDER) != 0) {
+		cssName += " button-border";
+	}
+	if ((style & SWT.FLAT) != 0) {
+		cssName += " button-flat";
+	}
+	handle.className = cssName;
+	if (parent != null) {
+		Element parentHandle = parent.containerHandle();
+		if (parentHandle!= null) {
+			parentHandle.appendChild(handle);
+		}
+	}
+	
+	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+		Element btnEl = document.createElement("DIV");
+		handle.appendChild(btnEl);
+		Element btnWrapperEl = document.createElement("DIV");
+		btnWrapperEl.className = "button-input-wrapper";
+		btnEl.appendChild(btnWrapperEl);
+		btnHandle = document.createElement("INPUT");
+		if ((style & SWT.CHECK) != 0) {
+			btnEl.className = "button-check";
+			btnHandle.type = "checkbox";
+		} else {
+			btnEl.className = "button-radio";
+			btnHandle.type = "radio";
+		}
+		btnWrapperEl.appendChild(btnHandle);
+		btnText = document.createElement("DIV");
+		btnText.className = "button-text";
+		btnEl.appendChild(btnText);
+	} else {
+		btnHandle = document.createElement ("BUTTON");
+		handle.appendChild(btnHandle);
+		btnText = document.createElement("DIV");
+		btnHandle.appendChild(btnText);
+		if ((style & SWT.TOGGLE) != 0) {
+			btnHandle.className = "button-toggle";
+		} else if ((style & SWT.ARROW) != 0) {
+			btnHandle.className = "button-arrow";
+			updateArrowStyle(); 
+		} else {
+			btnHandle.className = "button-push";
+		}
+	}
+	btnHandle.onmouseover = new RunnableCompatibility() {
+		public void run() {
+			String cssName = " button-hover";
+			int idx = btnHandle.className.indexOf(cssName);
+			if(idx == -1){
+				btnHandle.className = btnHandle.className + cssName;
+			}
+		}
+	};
+	btnHandle.onmouseout = new RunnableCompatibility() {
+		public void run() {
+			String cssName = " button-hover";
+			int idx = btnHandle.className.indexOf(cssName);
+			if(idx != -1){
+				btnHandle.className = btnHandle.className.substring(0, idx) + btnHandle.className.substring(cssName.length() + idx);
+			}
+		}
+	};
+	//bindHandle();
+	hookSelection();
+}
+
 /*
 int defaultBackground () {
 	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
@@ -531,8 +606,10 @@ public int getBorderWidth() {
 
 boolean getDefault () {
 	if ((style & SWT.PUSH) == 0) return false;
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	return (bits & OS.BS_DEFPUSHBUTTON) != 0;
+	/*
+	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
+	return (bits & OS.BS_DEFPUSHBUTTON) != 0;
+	*/ 
 	return false; // TODO
 }
 
@@ -575,8 +652,10 @@ String getNameText () {
 public boolean getSelection () {
 	checkWidget ();
 	if ((style & (SWT.CHECK | SWT.RADIO | SWT.TOGGLE)) == 0) return false;
-//	int state = OS.SendMessage (handle, OS.BM_GETCHECK, 0, 0);
-//	return (state & OS.BST_CHECKED) != 0;
+	/*
+	int state = OS.SendMessage (handle, OS.BM_GETCHECK, 0, 0);
+	return (state & OS.BST_CHECKED) != 0;
+	*/
 	if ((style & SWT.TOGGLE) != 0) {
 		//System.out.println(btnHandle.className);
 		return (btnHandle.className != null && btnHandle.className.indexOf("button-selected") != -1);
@@ -649,6 +728,7 @@ protected void releaseHandle() {
 	}
 	super.releaseHandle();
 }
+
 void releaseWidget () {
 	super.releaseWidget ();
 	if (imageList != null) imageList.dispose ();
@@ -737,7 +817,7 @@ public void setAlignment (int alignment) {
 			cx -= 4;
 			cy -= 4;
 		}
-		updateArrowSize(cx, cy);
+		OS.updateArrowSize(btnText, style, cx, cy);
 		return;
 	}
 	if ((alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER)) == 0) return;
@@ -932,7 +1012,6 @@ boolean setSavedFocus () {
 	return super.setSavedFocus ();
 }
 
-	
 /**
  * Sets the selection state of the receiver, if it is of type <code>CHECK</code>, 
  * <code>RADIO</code>, or <code>TOGGLE</code>.
@@ -969,7 +1048,8 @@ public void setSelection (boolean selected) {
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		btnHandle.checked = selected;
 	} 
-//	int flags = selected ? OS.BST_CHECKED : OS.BST_UNCHECKED;
+	/*
+	int flags = selected ? OS.BST_CHECKED : OS.BST_UNCHECKED;
 	
 	/*
 	* Feature in Windows. When BM_SETCHECK is used
@@ -977,10 +1057,11 @@ public void setSelection (boolean selected) {
 	* button, it sets the WM_TABSTOP style.  This
 	* is undocumented and unwanted.  The fix is
 	* to save and restore the window style bits.
+	*-/
+	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
+	OS.SendMessage (handle, OS.BM_SETCHECK, flags, 0);
+	OS.SetWindowLong (handle, OS.GWL_STYLE, bits);     
 	*/
-//	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
-//	OS.SendMessage (handle, OS.BM_SETCHECK, flags, 0);
-//	OS.SetWindowLong (handle, OS.GWL_STYLE, bits);     
 }
 
 /**
@@ -1083,7 +1164,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 		cy -= 4;
 	}
 	if ((style & SWT.ARROW) != 0) {
-		updateArrowSize(cx, cy);
+		OS.updateArrowSize(btnText, style, cx, cy);
 	}
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 //		boolean hasImage;
@@ -1132,67 +1213,6 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 //	return super.SetWindowPos(null, null, X, Y, cx, cy, uFlags);
 }
 
-private void updateArrowSize(int cx, int cy) {
-	int xx = Math.min(cx, cy) / 3;
-	final CSSStyle s = btnText.style;
-	s.borderWidth = (xx > 0 ? xx : 0) + "px";
-	if ((style & SWT.LEFT) != 0) {
-		s.borderLeftWidth = "0";
-	} else if ((style & SWT.RIGHT) != 0) {
-		s.borderRightWidth = "0";
-	} else if ((style & SWT.UP) != 0) {
-		s.borderTopWidth = "0";
-	} else if ((style & SWT.DOWN) != 0) {
-		if (xx > 1) {
-			s.borderWidth = (xx - 1) + "px";
-		}
-		s.borderBottomWidth = "0";
-	} else {
-		s.borderTopWidth = "0";
-	} 
-	int x = cy / 6;
-	xx = cy / 3;
-	s.position = "relative";
-	if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
-		s.top = (x - 3) + "px";
-		if ((style & SWT.RIGHT) != 0) {
-			s.left = "1px";
-		}
-	} else {
-		if ((style & SWT.UP) != 0) {
-			s.top = (xx - 3)+ "px";
-		} else if ((style & SWT.DOWN) != 0) {
-			s.top = (xx - 2)+ "px";
-		}
-	}
-	/**
-	 * TODO: Get rid of these nasty position things!
-	 */
-	if (OS.isMozilla && !OS.isFirefox) {
-		if ((style & SWT.UP) != 0) {
-			s.left = "-2px";
-		} else if ((style & SWT.DOWN) != 0) {
-			s.left = "-1px";
-		}
-	}
-	if (OS.isFirefox) {
-		if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
-			s.top = "-2px";
-			if ((style & SWT.RIGHT) != 0) {
-				s.left = "1px";
-			}
-		} else {
-			if ((style & SWT.UP) != 0) {
-				s.left = "-2px";
-				s.top = "-1px";
-			} else if ((style & SWT.DOWN) != 0) {
-				s.left = "-1px";
-				s.top = "-1px";
-			}
-		}
-	}
-}
-
 public void setCursor(Cursor cursor) {
 	if (handle != null) {
 		handle.style.cursor = cursor.handle;
@@ -1214,81 +1234,6 @@ int widgetStyle () {
 	return bits | OS.BS_PUSHBUTTON | OS.WS_TABSTOP;
 }
 */
-
-/* (non-Javadoc)
- * @see org.eclipse.swt.widgets.Control#createHandle()
- */
-void createHandle() {
-//	super.createHandle();
-	handle = document.createElement ("DIV");
-	String cssName = "button-default";
-	if ((style & SWT.BORDER) != 0) {
-		cssName += " button-border";
-	}
-	if ((style & SWT.FLAT) != 0) {
-		cssName += " button-flat";
-	}
-	handle.className = cssName;
-	if (parent != null) {
-		Element parentHandle = parent.containerHandle();
-		if (parentHandle!= null) {
-			parentHandle.appendChild(handle);
-		}
-	}
-	
-	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		Element btnEl = document.createElement("DIV");
-		handle.appendChild(btnEl);
-		Element btnWrapperEl = document.createElement("DIV");
-		btnWrapperEl.className = "button-input-wrapper";
-		btnEl.appendChild(btnWrapperEl);
-		btnHandle = document.createElement("INPUT");
-		if ((style & SWT.CHECK) != 0) {
-			btnEl.className = "button-check";
-			btnHandle.type = "checkbox";
-		} else {
-			btnEl.className = "button-radio";
-			btnHandle.type = "radio";
-		}
-		btnWrapperEl.appendChild(btnHandle);
-		btnText = document.createElement("DIV");
-		btnText.className = "button-text";
-		btnEl.appendChild(btnText);
-	} else {
-		btnHandle = document.createElement ("BUTTON");
-		handle.appendChild(btnHandle);
-		btnText = document.createElement("DIV");
-		btnHandle.appendChild(btnText);
-		if ((style & SWT.TOGGLE) != 0) {
-			btnHandle.className = "button-toggle";
-		} else if ((style & SWT.ARROW) != 0) {
-			btnHandle.className = "button-arrow";
-			updateArrowStyle(); 
-		} else {
-			btnHandle.className = "button-push";
-		}
-	}
-	btnHandle.onmouseover = new RunnableCompatibility() {
-		public void run() {
-			String cssName = " button-hover";
-			int idx = btnHandle.className.indexOf(cssName);
-			if(idx == -1){
-				btnHandle.className = btnHandle.className + cssName;
-			}
-		}
-	};
-	btnHandle.onmouseout = new RunnableCompatibility() {
-		public void run() {
-			String cssName = " button-hover";
-			int idx = btnHandle.className.indexOf(cssName);
-			if(idx != -1){
-				btnHandle.className = btnHandle.className.substring(0, idx) + btnHandle.className.substring(cssName.length() + idx);
-			}
-		}
-	};
-	//bindHandle();
-	hookSelection();
-}
 
 private void updateArrowStyle() {
 	if ((style & SWT.LEFT) != 0) {
@@ -1360,8 +1305,8 @@ void hookSelection() {
 }
 
 /*
-String windowClass() {
-	return "BUTTON";
+TCHAR windowClass () {
+	return ButtonClass;
 }
 
 int windowProc () {
@@ -1500,4 +1445,5 @@ LRESULT wmDrawChild (int wParam, int lParam) {
 	return null;
 }
 */
+
 }

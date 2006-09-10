@@ -1,35 +1,64 @@
-.combo-default{
+.combo-default {
 	padding: 0;
 	border-style:none;
-	overflow:visible;
+	overflow:hidden;
+	position:absolute;
+	border-width:2px;
+	border-style:inset;
+	border-color:gray;
 }
-.combo-button{
+
+.combo-input-box {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	border-style:none;
+	padding-left:1px;
+}
+
+.combo-default button {
+	float:right;
+	right:0;
+	top:0;
+	height:100%;
+	width:16px;
+	line-height:0;
+	padding:0;
+	font-size:0;
+	margin:0;
+}
+.combo-button-arrow-down {
 	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
 	line-height:0;
 	
-	border-style:none none none none;
-	border-color:black;
-	
-	height: 100%;
-	background-image:url('images/combo-button.gif');
-	background-repeat:no-repeat;
-	background-position:center center;
-	
+	border-style:solid solid none solid;
+	border-color:menu;
+	border-top-color:black;
+	border-bottom-width:0;
+}
+.combo-disabled .combo-button-arrow-down {
+	border-top-color:gray;
 }
 
-.combo-input-box{
-	border-style:none;
-}
-
-.combo-select-box-invisible{
+.combo-select-box-invisible {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
 	display:none;
-
 }
 
-.combo-select-box-visible{
+.combo-select-box-visible {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
 	display:block;
 }
 
-.combo-select-box-notsimple{
+.combo-select-box-notsimple {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
 	position:absolute;
 }

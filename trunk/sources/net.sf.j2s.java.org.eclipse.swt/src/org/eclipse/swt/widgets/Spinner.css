@@ -1,15 +1,15 @@
 .spinner-default {
 	position:absolute;
 }
-.spinner-border {
-	border:1px inset white;
-}	
 .spinner-text-default {
 	margin-right:16px;
 }
 .spinner-text-field-default {
-	font-family:Arial,sans-serif;
-	font-size:10pt;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	border:2px inset white;
+}
+.spinner-text-field-no-border {
 	border-style:none;
 }
 .spinner-up-down-default {
@@ -20,20 +20,45 @@
 	position:absolute;
 	line-height:0;
 	width:16px;
-	height:10px;
-	/*border:1px outset white;*/
+	height:50%;
 	padding:0;
 	font-size:0;
 	margin:0;/*1px 0;*/
-	background-repeat:no-repeat;
-	background-position:center center;
 }
 
 .spinner-up-button-default {
-	background-image:url('images/arrow-up.png');
-	top:1px;
+	top:0;
 }
 .spinner-down-button-default {
-	background-image:url('images/arrow-down.png');
-	top:13px;
+	bottom:0;
+}
+.spinner-button-arrow-up {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:none solid solid solid;
+	border-color:menu;
+	border-bottom-color:black;
+	border-top-width:0;
+}
+.spinner-button-arrow-down {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:solid solid none solid;
+	border-color:menu;
+	border-top-color:black;
+	border-bottom-width:0;
+}
+.spinner-disabled .spinner-button-arrow-up {
+	border-bottom-color:gray;
+}
+.spinner-disabled .spinner-button-arrow-down {
+	border-top-color:gray;
 }
