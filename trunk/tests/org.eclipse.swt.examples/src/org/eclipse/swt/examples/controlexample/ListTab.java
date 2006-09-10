@@ -34,7 +34,7 @@ class ListTab extends ScrollableTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ListTab(ControlExample instance) {
+	public ListTab(ControlExample instance) {
 		super(instance);
 	}
 	

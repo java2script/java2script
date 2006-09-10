@@ -123,7 +123,7 @@ abstract class Tab {
 		createOtherGroup ();
 		createSetGetGroup();
 		createSizeGroup ();
-//		createColorGroup ();
+		createColorGroup ();
 		if (RTL_SUPPORT_ENABLE) {
 			createOrientationGroup ();
 		}
@@ -197,7 +197,6 @@ abstract class Tab {
 	 * Creates the "Colors" group. This is typically
 	 * a child of the "Control" group. Subclasses override
 	 * this method to customize and set system colors.
-	 * @j2sIgnore
 	 */
 	void createColorGroup () {
 		/* Create the group */

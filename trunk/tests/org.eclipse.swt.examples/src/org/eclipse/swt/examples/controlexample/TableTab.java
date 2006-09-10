@@ -56,7 +56,7 @@ class TableTab extends ScrollableTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	TableTab(ControlExample instance) {
+	public TableTab(ControlExample instance) {
 		super(instance);
 	}
 	
