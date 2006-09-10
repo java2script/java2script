@@ -57,7 +57,7 @@ class TreeTab extends ScrollableTab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	TreeTab(ControlExample instance) {
+	public TreeTab(ControlExample instance) {
 		super(instance);
 	}
 

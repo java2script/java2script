@@ -63,21 +63,21 @@ public class ControlExample {
 //				"Label", 
 //				"Canvas",
 				
-//				"Combo",
+				"Combo",
 //				"CLabel",
 //				"CTabFolder",
-//				"SashForm",
+				"SashForm",
 				
 //				"CoolBar",
 //				"Dialog",
 				"Group",
 				"Label",
 				"Link",
-//				"List",
+				"List",
 //				"Menu",
 				"ProgressBar",
 				
-//				"Sash",
+				"Sash",
 				// shellTab = new ShellTab(this),
 				"Shell",
 				"Slider",
@@ -115,6 +115,8 @@ public class ControlExample {
 						if (control != null && control instanceof Label) {
 							control.dispose();
 						}
+					    item.setImage(images[(int) Math.round(3 * Math.random())]);
+					    tabFolder.setSelection(tabFolder.getSelectionIndex());
 						item.setControl(page);
 						//item.getParent().getShell().pack();
 					} catch (Throwable e) {
@@ -148,6 +150,8 @@ public class ControlExample {
 											if (control != null && control instanceof Label) {
 												control.dispose();
 											}
+										    item.setImage(images[(int) Math.round(3 * Math.random())]);
+										    tabFolder.setSelection(tabFolder.getSelectionIndex());
 											item.setControl(page);
 										} catch (Throwable e) {
 											//e.printStackTrace();
