@@ -33,6 +33,7 @@
           target: j2s.pack.core                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.core">
+    	<!-- This SmartJSCompressor will pack Class.js and ClassExt.js together -->
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.src}/java/lang/Class.js"/>
         	<arg value="${j2s.core.bin}/java/lang/Class.js"/>
@@ -96,6 +97,32 @@
         		<file name="java/lang/Console.js"/>
         		<!--
         		-->
+        	</filelist>
+        </concat>
+    	
+    	<!-- j2slibcore.z.js does not contains Console -->
+        <concat destfile="${j2s.lib.dist}/j2slibcore.z.js">
+            <header filtering="no" trimleading="yes">/******************************************************************************
+            	 * Copyright (c) 2005-2006 ognize.com and others.
+            	 * All rights reserved. This program and the accompanying materials
+            	 * are made available under the terms of the Eclipse Public License v1.0
+            	 * which accompanies this distribution, and is available at
+            	 * http://www.eclipse.org/legal/epl-v10.html
+            	 *
+            	 * Web:
+            	 *     http://j2s.sourceforge.net/
+            	 *     http://sourceforge.net/projects/j2s/
+            	 * Contributors:
+            	 *     ognize.com - initial API and implementation
+            	 *****************************************************************************/
+            	/*******
+            	 * @author zhou renjian
+            	 * @create July 12, 2006
+            	 *******/
+            </header>
+        	<filelist dir="${j2s.core.bin}">
+        		<file name="java/lang/Class.js"/>
+        		<file name="java/lang/ClassLoader.js"/>
         	</filelist>
         </concat>
 	</target>
