@@ -1,7 +1,7 @@
 .combo-default {
 	padding: 0;
 	border-style:none;
-	overflow:hidden;
+	/*overflow:hidden;*/
 	position:absolute;
 	border-width:2px;
 	border-style:inset;
@@ -16,7 +16,8 @@
 }
 
 .combo-default button {
-	float:right;
+	/*float:right;*/
+	position:absolute;
 	right:0;
 	top:0;
 	height:100%;
@@ -25,6 +26,9 @@
 	padding:0;
 	font-size:0;
 	margin:0;
+}
+* html .combo-default button {
+	right:-2px;
 }
 .combo-button-arrow-down {
 	margin:auto;
