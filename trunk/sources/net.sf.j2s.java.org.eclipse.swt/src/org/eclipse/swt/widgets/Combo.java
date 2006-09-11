@@ -24,6 +24,7 @@ import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class are controls that allow the user
@@ -551,33 +552,10 @@ protected void createHandle () {
 	textInput.type = "text";
 	textInput.className = "combo-input-box";
 	textInput.readOnly = (style & SWT.READ_ONLY)!=0;
-	textInput.size = Combo.LIMIT;
+	//textInput.size = Combo.LIMIT;
 	handle.appendChild(textInput);
 
-	int height = OS.getContainerHeight(dropDownButton);
-	
-	selectInput = document.createElement("SELECT");
-	if(isSimple){
-		selectInput.style.top = height + "px";
-		selectInput.style.left = textInput.style.left;
-//		System.out.println("is Simple " + isSimple);
-		selectInput.className = "combo-select-box-visible";
-		selectInput.size = visibleCount;
-		handle.appendChild(selectInput);
-	}else{
-		selectInput.style.top = height + "px" ;
-		selectInput.style.left = textInput.style.left;
-//		System.out.println("is Simple " + isSimple);
-		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
-		selectInput.size = visibleCount;
-//		System.out.println("ho combo1 "  + textInput.scrollHeight);
-//		System.out.println("ho combo2 "  + textInput.offsetHeight);
-//		System.out.println("ho combo3 "  + textInput.clientHeight);
-		//TODO: add the select to shell to be shown every where
-	
-		getShell().handle.appendChild(selectInput);
-//		handle.appendChild(selectInput);
-	}
+	//int height = OS.getContainerHeight(dropDownButton);
 	
 	textInput.ondblclick = new RunnableCompatibility() {
 		public void run() {
@@ -624,6 +602,28 @@ protected void createHandle () {
 		}
 	};
 	
+	createSelect();
+	configureSelect();
+}
+
+void createSelect() {
+	selectInput = document.createElement("SELECT");
+	if(isSimple){
+		selectInput.style.top = height + "px";
+		selectInput.style.left = textInput.style.left;
+		selectInput.className = "combo-select-box-visible";
+		selectInput.size = visibleCount;
+		handle.appendChild(selectInput);
+	}else{
+		selectInput.style.position = "absolute"; 
+		selectInput.style.top = height + "px" ;
+		selectInput.style.left = textInput.style.left;
+		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
+		selectInput.size = visibleCount;
+		handle.appendChild(selectInput);
+	}
+}
+void configureSelect() {
 	selectInput.onchange = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("select changed!" + selectInput.selectedIndex);
@@ -634,7 +634,7 @@ protected void createHandle () {
 		}
 	}; 
 
-	selectInput.onselectchange = selectInput.onblur = new RunnableCompatibility() {
+	selectInput.onblur = new RunnableCompatibility() {
 		public void run() {
 //			System.out.println("handle blurred!");
 //			updateSelection();
@@ -649,16 +649,18 @@ protected void createHandle () {
 //			hide();
 //		}
 //	}; 
-	
-	
 }
-
 void hide(){
-//	if(!this.selectShown){
-//		return;
-//	}
-	
+	if(!this.selectShown){
+		return;
+	}
 	this.selectShown = false;
+	try {
+		document.body.removeChild(selectInput);
+		handle.appendChild(selectInput);
+	} catch (Throwable e) {
+		
+	}
 	selectInput.className = "combo-select-box-invisible" + (isSimple ? "" : " combo-select-box-notsimple");
 }
 
@@ -668,13 +670,26 @@ void show(){
 //		return;
 //	}
 
-	Point coordinate = OS.calcuateRelativePosition(textInput, getShell().handle);
+	Point coordinate = OS.calcuateRelativePosition(handle, document.body);
+	coordinate.y += OS.getContainerHeight(handle);
+	if (OS.isFirefox) {
+		coordinate.x += 1;
+		coordinate.y += 1;
+	} else if (OS.isIE) {
+		coordinate.x -= 1;
+		coordinate.y -= 2;
+	}
 	this.selectShown = true;
-	selectInput.style.zIndex = "120";
+	window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 1);
+	selectInput.style.zIndex = window.currentTopZIndex;
+	try {
+		handle.removeChild(selectInput);
+		document.body.appendChild(selectInput);
+	} catch (Throwable e) {
+	}
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
-	selectInput.style.top = (coordinate.y + 2) + "px";
-	selectInput.style.left = (coordinate.x - 4) + "px";
-//	System.out.println("Z " + selectInput.style.zIndex);
+	selectInput.style.top = coordinate.y + "px";
+	selectInput.style.left = coordinate.x + "px";
 	try {
 		selectInput.focus();
 	} catch (Throwable e) {
@@ -2501,7 +2516,7 @@ void enableWidget(boolean enabled) {
 }
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	if (OS.isIE) {
-		dropDownButton.style.height = (cy  - 2) + "px";
+		dropDownButton.style.height = (cy  - 4) + "px";
 	}
 	OS.updateArrowSize(dropDownButton.childNodes[0], SWT.DOWN, 16, cy);
 	

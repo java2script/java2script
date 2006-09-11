@@ -427,20 +427,43 @@ public class OS {
 	}
 	
 	public static Point calcuateRelativePosition(Element el, Element relativeEl){
-		Element currentEl = el;
+		Element srcEl = el;
 		int left = 0;
 		int top = 0;
-		while (currentEl != null && currentEl != relativeEl) {
-			left += currentEl.offsetLeft;
-			top += currentEl.offsetTop;
-			currentEl = currentEl.offsetParent;
+		while (el != null && el != relativeEl) {
+			left += el.offsetLeft;
+			top += el.offsetTop;
+			if (el != srcEl)
+			/**
+			 * @j2sNative
+			var style = null;
+			if (document.defaultView != null) { // OS.isMozilla || OS.isOpera
+				style = document.defaultView.getComputedStyle (el, null);
+			} else if (el.currentStyle != null) { // OS.isIE
+				style = el.currentStyle;
+			}
+			if (!O$.isOpera && style != null) {
+				var w = 0;
+				var bw = style.borderLeftWidth;
+				if (bw.length != 0) {
+					w = parseInt (bw); // unit is considered as "px"
+					if (!isNaN(w)) {
+						left += w;
+					}
+				}
+				bw = style.borderTopWidth;
+				if (bw.length != 0) {
+					w = parseInt (bw); // unit is considered as "px"
+					if (!isNaN(w)) {
+						top += w;
+					}
+				}
+			}
+			 */ {}
+				 
+			el = el.offsetParent;
 		}
-		if(isFirefox){
-			// why?
-			left += 6;
-			top += 2;
-		}
-		return new Point(left, top + OS.getContainerHeight(el));
+		return new Point(left, top);
 	}
 	
 	public static void updateArrowSize(Object el, int style, int cx, int cy) {
