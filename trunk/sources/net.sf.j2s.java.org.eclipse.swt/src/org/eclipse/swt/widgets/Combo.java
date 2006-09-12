@@ -18,8 +18,10 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.browser.Popup;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.Option;
@@ -671,13 +673,26 @@ void show(){
 //	}
 
 	Point coordinate = OS.calcuateRelativePosition(handle, document.body);
-	coordinate.y += OS.getContainerHeight(handle);
+	//coordinate.y += OS.getContainerHeight(handle);
+	/*
 	if (OS.isFirefox) {
 		coordinate.x += 1;
 		coordinate.y += 1;
 	} else if (OS.isIE) {
 		coordinate.x -= 1;
 		coordinate.y -= 2;
+	}
+	*/
+	int w = OS.getContainerWidth(handle);
+	int h = OS.getContainerHeight(handle);
+	if (OS.isFirefox) {
+		coordinate.x += 1;
+		//coordinate.y -= 1;
+		h += 1;
+	} else if (OS.isIE) {
+		coordinate.x -= 1;
+		coordinate.y -= 2;
+		//h -= 2;
 	}
 	this.selectShown = true;
 	window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 1);
@@ -688,8 +703,16 @@ void show(){
 	} catch (Throwable e) {
 	}
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
-	selectInput.style.top = coordinate.y + "px";
-	selectInput.style.left = coordinate.x + "px";
+	int height = OS.getContainerHeight(selectInput);
+	Rectangle bounds = Popup.popupList(getMonitor().getClientArea(), new Rectangle(coordinate.x, coordinate.y, w, h), height);
+	selectInput.style.left = bounds.x + "px";
+	selectInput.style.top = bounds.y + "px";
+	if (bounds.height != height) {
+		try {
+			selectInput.style.overflow = "overflow";
+		} catch (Throwable e) {} // IE
+		selectInput.style.height = bounds.height + "px";
+	}
 	try {
 		selectInput.focus();
 	} catch (Throwable e) {
