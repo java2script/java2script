@@ -41,6 +41,8 @@ public class ComboTest extends AsyncTestCase {
 		final Combo spn2 = new Combo(shell, SWT.BORDER);
 		spn2.setLayoutData(new GridData(150, 50));
 		final Combo spn3 = new Combo(shell, SWT.NONE);
+		spn3.setItems(new String[] {"Helo", "Wrld", "Wrld", "Woooooooooorld", "Wrld", "Wrld", "Wrld", "Woooooooooorld", "Wrld", "Wrld", "Wrld", "Woooooooooorld", "Wrld", "Wrld", "Wrld", "Woooooooooorld", "Wrld", "Wrld", "Wrld", "Woooooooooorld", "Wrld"});
+		spn3.setVisibleItemCount(spn3.getItemCount());
 		spn3.setLayoutData(new GridData(120, 30));
 		final Combo spn0 = new Combo(shell, SWT.NONE);
 		spn0.setLayoutData(new GridData(120, 24));
