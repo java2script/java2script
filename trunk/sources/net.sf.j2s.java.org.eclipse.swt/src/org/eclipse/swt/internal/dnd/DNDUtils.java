@@ -104,10 +104,13 @@ public class DNDUtils {
 		document.onmousemove = DNDUtils.bindFunctionWith (DNDUtils.onmousemove, oThis);
 		document.onkeyup = DNDUtils.bindFunctionWith (DNDUtils.onkeyup, oThis);
 		document.onmouseup = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, oThis); //oThis.element.onmouseup;
+		/*
+		 * Why ? Sep 16, 2006
 		evt.preventDefault ();
 		evt.stopPropagation ();
 		return false;
-		//return true;
+		*/
+		return true;
 	}
 	public static boolean onkeyup(Object e, DragAndDrop oThis) {
 		HTMLEventWrapper evt = new HTMLEventWrapper (e);

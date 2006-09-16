@@ -1574,7 +1574,7 @@ public void setMaximized (boolean maximized) {
 	if (maximized) {
 		ResizeSystem.register(this, SWT.MAX);
 	} else {
-		ResizeSystem.unregister(this);
+		ResizeSystem.unregister(this, SWT.MAX);
 	}
 }
 
@@ -1589,7 +1589,7 @@ void toggleMaximize() {
 			titleBar.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
 		}
 		oldBounds = null;
-		ResizeSystem.unregister(this);
+		ResizeSystem.unregister(this, SWT.MAX);
 	} else {
 		setMaximized(true);
 		String cssName = titleBar.className;
@@ -1733,7 +1733,7 @@ public void setMinimized (boolean minimized) {
 	if (minimized) {
 		ResizeSystem.register(this, SWT.MIN);
 	} else {
-		ResizeSystem.unregister(this);
+		ResizeSystem.unregister(this, SWT.MIN);
 	}
 }
 
@@ -1883,7 +1883,7 @@ void setSystemMenu () {
 		titleBar.appendChild(shellMin);
 		shellMin.onclick = new RunnableCompatibility() {
 			public void run() {
-				ResizeSystem.unregister(Decorations.this);
+				ResizeSystem.unregister(Decorations.this, SWT.MIN);
 				setMinimized(true);
 			}
 		};
@@ -1938,6 +1938,7 @@ void setSystemMenu () {
 			if(contentHandle != null){
 				contentHandle.focus();
 			}
+			toReturn(true);
 		}
 	};
 	

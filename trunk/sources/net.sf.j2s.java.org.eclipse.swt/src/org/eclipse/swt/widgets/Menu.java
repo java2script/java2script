@@ -11,6 +11,7 @@
 package org.eclipse.swt.widgets;
 
  
+import java.util.Date;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.HelpListener;
@@ -18,9 +19,13 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class are user interface objects that contain
@@ -38,6 +43,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p><p>
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
+ * 
+ * @j2sPrefix
+ * Clazz.registerCSS ("$wt.widgets.Menu");
  */
 
 public class Menu extends Widget {
@@ -58,6 +66,13 @@ public class Menu extends Widget {
 	MenuItem cascade;
 	Decorations parent;
 	ImageList imageList;
+	
+	MenuItem[] items;
+	MenuItem defaultItem;
+	Element btnFocus;
+	int currentIndex;
+	
+	long lastFocusdTime;
 	
 	/* Resource ID for SHMENUBARINFO */
 	static final int ID_PPC = 100;
@@ -200,6 +215,17 @@ Menu (Decorations parent, int style, Element handle) {
 
 void _setVisible (boolean visible) {
 	if ((style & (SWT.BAR | SWT.DROP_DOWN)) != 0) return;
+	CSSStyle style = handle.style;
+	if (visible) {
+		//style.width = "200px";
+		style.left = x + "px";
+		style.top = y + "px";
+		style.zIndex = "1" + window.currentTopZIndex;
+		style.display = "block";
+		btnFocus.focus();
+	} else {
+		style.display = "none";
+	}
 	/*
 	int hwndParent = parent.handle;
 	if (visible) {
@@ -311,13 +337,121 @@ static int checkStyle (int style) {
 	return checkBits (style, SWT.POP_UP, SWT.BAR, SWT.DROP_DOWN, 0, 0, 0);
 }
 
+int nextMenuItemIndex (int dir) {
+	int index = currentIndex;
+	MenuItem[] menuItems = items;
+	int tested = 0;
+	int length = menuItems.length;
+	if (index == -1) {
+		index = dir < 0 ? length - 1 : 0;
+		while (tested < length && 
+				(menuItems[index].style & SWT.SEPARATOR) != 0) {
+			tested++;
+			index += dir;
+		}
+		return index;
+	} else {
+		index += dir;
+		if (index == -1 || index == length) {
+			index = dir < 0 ? length - 1 : 0;
+		}
+		while (tested < length &&
+				(menuItems[index].style & SWT.SEPARATOR) != 0) {
+			tested++;
+			index += dir;
+		}
+	}
+	if (index == length) {
+		index = -1;
+	}
+	return index;
+}
 void createHandle () {
+	items = new MenuItem[0];
+	currentIndex = -1;
+	lastFocusdTime = -1;
+	
 	if (handle != null) return;
 	handle = document.createElement("DIV");
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
-	}
-	handle.className = "tool-bar-default";
+	document.body.appendChild(handle);
+	handle.className = "menu-default";
+	
+	btnFocus = document.createElement("BUTTON");
+	//btnFocus.type = "BUTTON";
+	btnFocus.className = "menu-focus";
+	handle.appendChild(btnFocus);
+	btnFocus.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			//System.out.println(evt.keyCode);
+			MenuItem[] menuItems = items;
+			int index = currentIndex;
+			if (evt.keyCode == 13 || evt.keyCode == 10) {
+				if (index != -1) {
+					Element target = menuItems[index].handle;
+					if (menuItems[index].isEnabled() && target.onclick != null)
+					/**
+					 * @j2sNative
+					 * target.onclick (evt);
+					 */ { }
+				}
+			} else if (evt.keyCode == 38 || evt.keyCode == 104) {
+				if (index == -1) {
+					index = nextMenuItemIndex(-1);
+					Element el = menuItems[index].handle;
+					/**
+					 * @j2sNative el.onmouseover();
+					 */ {}
+				} else {
+					Element e = menuItems[index].handle;
+					index = nextMenuItemIndex(-1);
+					Element el = menuItems[index].handle;
+					/**
+					 * @j2sNative
+					 * e.onmouseout();
+					 * el.onmouseover();
+					 */ {}
+				} 
+			} else if (evt.keyCode == 40 || evt.keyCode == 98) {
+				if (index == -1) {
+					index = nextMenuItemIndex(1);
+					Element el = menuItems[index].handle;
+					/**
+					 * @j2sNative el.onmouseover();
+					 */ {}
+				} else {
+					Element e = menuItems[index].handle;
+					index = nextMenuItemIndex(1);
+					Element el = menuItems[index].handle;
+					/**
+					 * @j2sNative
+					 * e.onmouseout(); 
+					 * el.onmouseover();
+					 */ {}
+				}
+			}
+			currentIndex = index;
+		}
+	};
+	btnFocus.onblur = new RunnableCompatibility() {
+		public void run() {
+			long time = new Date().getTime();
+			if (time - lastFocusdTime > 20) {
+				handle.style.display = "none";
+			}
+		}
+	};
+	btnFocus.onfocus = new RunnableCompatibility() {
+		public void run() {
+			lastFocusdTime = new Date().getTime();
+		}
+	};
+	handle.onmousedown = new RunnableCompatibility() {
+		public void run() {
+			lastFocusdTime = new Date().getTime();
+		}
+	};
+	
 	if ((style & SWT.BAR) != 0) {
 		/*
 		if (OS.IsPPC) {
@@ -435,11 +569,50 @@ void createHandle () {
 }
 
 void createItem (MenuItem item, int index) {
-	int count = GetMenuItemCount (handle);
+	int count = items.length; //GetMenuItemCount (handle);
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
+	for (int i = 0; i < items.length; i++) {
+		if (items[i] == item) {
+			return;
+		}
+	}
+	items[items.length] = item;
 	display.addMenuItem (item);
-	boolean success = false;
+	item.handle = document.createElement("DIV");
+	item.handle.className = "menu-item";
+	handle.appendChild(item.handle);
+	
+	if ((item.style & SWT.SEPARATOR) == 0) {
+		if ((item.style & (SWT.CHECK | SWT.RADIO)) != 0) {
+			String key = "menu-enable-status";
+			String cssName = handle.className;
+			if (cssName == null) cssName = "";
+			int idx = cssName.indexOf(key);
+			if (idx == -1) {
+				handle.className += " " + key; 
+			}
+		}
+		Element el = document.createElement("DIV");
+		el.className = "menu-item-status";
+		item.handle.appendChild(el);
+		item.statusEl = el;
+		el = document.createElement("DIV");
+		el.className = "menu-item-image";
+		item.handle.appendChild(el);
+		item.imageEl = el;
+		el = document.createElement("DIV");
+		el.className = "menu-item-text";
+		item.handle.appendChild(el);
+		item.textEl = el;
+		el = document.createElement("DIV");
+		el.className = "menu-item-arrow";
+		item.handle.appendChild(el);
+		item.arrowEl = el;
+	} else {
+		item.handle.className += " menu-item-seperator";
+	}
 	/*
+	boolean success = false;
 	if ((OS.IsPPC || OS.IsSP) && hwndCB != 0) {
 		if (OS.IsSP) return;
 		TBBUTTON lpButton = new TBBUTTON ();
@@ -495,14 +668,11 @@ void createItem (MenuItem item, int index) {
 			if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
 		}
 	}
+	if (!success) {
+		display.removeMenuItem (item);
+		error (SWT.ERROR_ITEM_NOT_ADDED);
+	}
 	*/
-	item.handle = document.createElement("DIV");
-	item.handle.className = "tool-item-default";
-	handle.appendChild(item.handle);
-//	if (!success) {
-//		display.removeMenuItem (item);
-//		error (SWT.ERROR_ITEM_NOT_ADDED);
-//	}
 	redraw ();
 }
 	
@@ -528,22 +698,28 @@ void createWidget () {
 
 /*
 * Currently not used.
-*/
-//int defaultBackground () {
-//	return OS.GetSysColor (OS.COLOR_MENU);
-//}
+*-/
+int defaultBackground () {
+	return OS.GetSysColor (OS.COLOR_MENU);
+}
 /*
 * Currently not used.
+*-/
+int defaultForeground () {
+	return OS.GetSysColor (OS.COLOR_MENUTEXT);
+}
 */
-//int defaultForeground () {
-//	return OS.GetSysColor (OS.COLOR_MENUTEXT);
-//}
 
 void destroyAccelerators () {
 	parent.destroyAccelerators ();
 }
 
 void destroyItem (MenuItem item) {
+	try {
+		handle.removeChild(item.handle);
+	} catch (Throwable e) {
+		// may already be removed
+	}
 	/*
 	if (OS.IsWinCE) {
 		if ((OS.IsPPC || OS.IsSP) && hwndCB != 0) {
@@ -598,6 +774,10 @@ void destroyWidget () {
 		if (hMenu != 0) OS.DestroyMenu (hMenu);
 	}
 	*/
+	if (handle != null) {
+		OS.destroyHandle(handle);
+		handle = null;
+	}
 }
 
 void fixMenus (Decorations newParent) {
@@ -632,12 +812,12 @@ void fixMenus (Decorations newParent) {
  */
 /*public*/ Rectangle getBounds () {
 	checkWidget ();
-	/*
-	if (OS.IsWinCE) return new Rectangle (0, 0, 0, 0);
+	//if (OS.IsWinCE) return new Rectangle (0, 0, 0, 0);
 	if ((style & SWT.BAR) != 0) {
 		if (parent.menuBar != this) {
 			return new Rectangle (0, 0, 0, 0);
 		}
+		/*
 		int hwndShell = parent.handle;
 		MENUBARINFO info = new MENUBARINFO ();
 		info.cbSize = MENUBARINFO.sizeof;
@@ -646,9 +826,12 @@ void fixMenus (Decorations newParent) {
 			int height = info.bottom - info.top;
 			return new Rectangle (info.left, info.top, width, height);
 		}
+		*/
+		// TODO: SWT.BAR
 	} else {
-		int count = GetMenuItemCount (handle);
+		int count = items.length; //GetMenuItemCount (handle);
 		if (count != 0) {
+			/*
 			RECT rect1 = new RECT ();
 			if (OS.GetMenuItemRect (0, handle, 0, rect1)) {
 				RECT rect2 = new RECT ();
@@ -659,9 +842,57 @@ void fixMenus (Decorations newParent) {
 					return new Rectangle (x, y, width, height);
 				}
 			}
+			*/
+			int x, y, w, h;
+			Element hdl1 = items[0].handle;
+			Point pt1 = OS.calcuateRelativePosition(hdl1, document.body);
+			x = pt1.x;
+			y = pt1.y;
+			
+			int textWidth = 0;
+			int accelWidth = 0;
+			for (int i = 0; i < count; i++) {
+				String text = items[i].text;
+				if (text == null) {
+					continue;
+				}
+				int idx = text.indexOf('\t');
+				String normalText = text;
+				String accelText = null;
+				if (idx != -1) {
+					normalText = text.substring(0, idx);
+					accelText = text.substring(idx + 1);
+				}
+				if (accelText != null && accelText.length() != 0) {
+					int width = OS.getStringStyledWidth(accelText, "menu-item-text", null);
+					if (width > accelWidth) {
+						accelWidth = width;
+					}
+				}
+				int width = OS.getStringStyledWidth(normalText, "menu-item-text", null);
+				if (width > textWidth) {
+					textWidth = width;
+				}
+			}
+			//System.out.println(textWidth + "//" + accelWidth);
+			w = 16 + textWidth + accelWidth + 16 + 8; // 8 for extra safe width
+			if (handle.className.indexOf("menu-enable-status") != -1 &&
+					handle.className.indexOf("menu-enable-image") != -1) {
+				w += 16;
+			}
+			if (count == 1) {
+				//w = OS.getContainerWidth(hdl1);
+				h = OS.getContainerHeight(hdl1);
+			} else {
+				Element hdl2 = items[count - 1].handle;
+				Point pt2 = OS.calcuateRelativePosition(hdl2, document.body);
+				//w = OS.getContainerWidth(hdl2);
+				h = pt2.y - pt1.y + OS.getContainerHeight(hdl2);
+			}
+			//System.out.println(w + 4);
+			return new Rectangle(x - 2, y - 2, w + 4, h + 4);
 		}
 	}
-	*/
 	return new Rectangle (0, 0, 0, 0);
 }
 
@@ -690,7 +921,7 @@ public MenuItem getDefaultItem () {
 		return display.getMenuItem (info.wID);
 	}
 	*/
-	return null;
+	return defaultItem;
 }
 
 /**
@@ -730,8 +961,8 @@ public boolean getEnabled () {
  */
 public MenuItem getItem (int index) {
 	checkWidget ();
-	int id = 0;
 	/*
+	int id = 0;
 	if ((OS.IsPPC || OS.IsSP) && hwndCB != 0) {
 		if (OS.IsPPC) {
 			TBBUTTON lpButton = new TBBUTTON ();
@@ -752,8 +983,10 @@ public MenuItem getItem (int index) {
 		}
 		id = info.dwItemData;
 	}
-	*/
 	return display.getMenuItem (id);
+	*/
+	if (!(0 <= index && index <= items.length - 1)) error (SWT.ERROR_CANNOT_GET_ITEM);
+	return items[index];
 }
 
 /**
@@ -768,7 +1001,8 @@ public MenuItem getItem (int index) {
  */
 public int getItemCount () {
 	checkWidget ();
-	return GetMenuItemCount (handle);
+	//return GetMenuItemCount (handle);
+	return items.length;
 }
 
 /**
@@ -821,15 +1055,15 @@ public MenuItem [] getItems () {
 		items [count++] = display.getMenuItem (info.dwItemData);
 	}
 	if (count == items.length) return items;
+	*/
+	int count = items.length;
 	MenuItem [] result = new MenuItem [count];
 	System.arraycopy (items, 0, result, 0, count);
 	return result;
-	*/
-	return new MenuItem[0];
 }
 
+/*
 int GetMenuItemCount (Element handle) {
-	/*
 	if (OS.IsWinCE) {
 		if ((OS.IsPPC || OS.IsSP) && hwndCB != 0) {
 			return OS.IsSP ? 2 : OS.SendMessage (hwndCB, OS.TB_BUTTONCOUNT, 0, 0);
@@ -841,9 +1075,8 @@ int GetMenuItemCount (Element handle) {
 		return count;
 	}
 	return OS.GetMenuItemCount (handle);
-	*/
-	return 0;
 }
+*/
 
 String getNameText () {
 	String result = "";
@@ -1028,6 +1261,11 @@ public int indexOf (MenuItem item) {
 		index++;
 	}
 	*/
+	for (int i = 0; i < items.length; i++) {
+		if (items[i] == item) {
+			return i;
+		}
+	}
 	return -1;
 }
 
@@ -1106,17 +1344,22 @@ protected void releaseHandle () {
 }
 
 void releaseWidget () {
-	MenuItem [] items = getItems ();
+	//MenuItem [] items = getItems ();
 	for (int i=0; i<items.length; i++) {
 		MenuItem item = items [i];
 		if (!item.isDisposed ()) {
-//			if (OS.IsPPC && hwndCB != 0) {
+			/*
+			if (OS.IsPPC && hwndCB != 0) {
 				item.dispose ();
-//			} else {
-//				item.releaseResources ();
-//			}
+			} else {
+				item.releaseResources ();
+			}
+			*/
+			item.releaseResources ();
 		}
+		items[i] = null;
 	}
+	items = new MenuItem[0];
 	/*
 	if (OS.IsPPC && hwndCB != 0) {
 		if (imageList != null) {
@@ -1197,13 +1440,14 @@ public void removeMenuListener (MenuListener listener) {
  */
 public void setDefaultItem (MenuItem item) {
 	checkWidget ();
+	defaultItem = item;
+	/*
 	int newID = -1;
 	if (item != null) {
 		if (item.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 		if (item.parent != this) return;
 		newID = item.id;
 	}
-	/*
 	if (OS.IsWinCE) return;
 	int oldID = OS.GetMenuDefaultItem (handle, OS.MF_BYCOMMAND, OS.GMDI_USEDISABLED);
 	if (newID == oldID) return;
@@ -1346,6 +1590,7 @@ void update () {
 	if (OS.WIN32_VERSION < OS.VERSION (4, 10)) {
 		return;
 	}
+	*/
 	boolean hasCheck = false, hasImage = false;
 	MenuItem [] items = getItems ();
 	for (int i=0; i<items.length; i++) {

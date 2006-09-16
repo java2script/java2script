@@ -41,7 +41,7 @@ public class ResizeSystem {
 	static ResizeHandler[] handlers = new ResizeHandler[0];
 	public static void register(Decorations shell, int status) {
 		for (int i = 0; i < handlers.length; i++) {
-			if (handlers[i] != null && handlers[i].shell == shell) {
+			if (handlers[i] != null && handlers[i].shell == shell && handlers[i].status == status) {
 				return ;
 			}
 		}
@@ -54,19 +54,29 @@ public class ResizeSystem {
 		handlers[handlers.length] = new ResizeHandler(shell, status);
 		return ;
 	}
-	public static void unregister(Decorations shell) {
+	public static void unregister(Decorations shell, int status) {
 		for (int i = 0; i < handlers.length; i++) {
-			if (handlers[i] != null && handlers[i].shell == shell) {
+			if (handlers[i] != null && handlers[i].shell == shell && handlers[i].status == status) {
 				handlers[i] = null;
 				return ;
 			}
 		}
 	}
+	public static void reset() {
+		for (int i = 0; i < handlers.length; i++) {
+			if (handlers[i] != null) {
+				handlers[i].shell = null;
+				handlers[i] = null;
+				return ;
+			}
+		}
+		handlers = new ResizeHandler[0];
+	}
 	public static void updateResize() {
 		for (int i = 0; i < handlers.length; i++) {
 			ResizeHandler hdl = handlers[i];
-			hdl.shell._updateMonitorSize();
 			if (hdl != null) {
+				hdl.shell._updateMonitorSize();
 				int status = hdl.getStatus();
 				if (status == SWT.MAX) {
 					hdl.updateMaximized();

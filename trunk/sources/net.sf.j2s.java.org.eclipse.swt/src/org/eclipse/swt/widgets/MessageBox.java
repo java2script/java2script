@@ -14,13 +14,13 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 
@@ -300,6 +300,11 @@ public int open () {
 	}
 	dialogShell.setLocation((dialogShell.getMonitor().clientWidth - size.x) / 2, y);
 	ResizeSystem.register(dialogShell, SWT.CENTER);
+	dialogShell.addDisposeListener(new DisposeListener() {
+		public void widgetDisposed(DisposeEvent e) {
+			ResizeSystem.unregister(dialogShell, SWT.CENTER);
+		}
+	});
 	/*
 	* This code is intentionally commented.  On some
 	* platforms, the owner window is repainted right

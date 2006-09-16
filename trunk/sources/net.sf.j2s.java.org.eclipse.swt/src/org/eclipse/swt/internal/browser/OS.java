@@ -164,7 +164,7 @@ public class OS {
 //		el.appendChild (document.createTextNode (text));
 		/**
 		 * @j2sNativeSrc
-		if (!((/[\r\n\t&]/g).test (text))) {
+		if (!((/[\r\n\t&]/).test (text))) {
 			handle.style.display = "inline";
 			handle.appendChild(document.createTextNode(text));
 			return ;
@@ -182,7 +182,7 @@ public class OS {
 			lines = s.split (/\r\n|\r|\n/g);
 		}
 		 * @j2sNative
-		if (!((/[\r\n\t&]/g).test (b))) {
+		if (!((/[\r\n\t&]/).test (b))) {
 			d.style.display = "inline";
 			d.appendChild(document.createTextNode(b));
 			return ;
