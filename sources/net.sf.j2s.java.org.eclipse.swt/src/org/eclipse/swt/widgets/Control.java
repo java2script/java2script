@@ -32,6 +32,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.browser.Popup;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -2476,14 +2478,128 @@ public void setMenu (Menu menu) {
 		}
 	}
 	this.menu = menu;
-	
-	if (handle.oncontextmenu == null) {
-		handle.oncontextmenu = new RunnableCompatibility() {
+	Element el = null;
+	if (this instanceof Composite) {
+		el = ((Composite) this).containerHandle();
+	} else {
+		el = handle;
+	}
+	//if (el.oncontextmenu == null) {
+	if (OS.isOpera) {
+		el.onmousedown = new RunnableCompatibility() {
 			public void run() {
-				showMenu(0, 0);
+				Object evt = getEvent();
+				if (evt != null) {
+					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+					if (!evtHTML.leftButtonHold) {
+						evtHTML.preventDefault();
+						evtHTML.stopPropagation();
+						toReturn(false);
+						/**
+						 * @j2sNative
+						var bbtn = null;
+						var btns = document.getElementsByTagName ("INPUT");
+						for (var i = 0; i < btns.length; i++) {
+							if (btns[i].className == "opera-hide-context-menu") {
+								if (bbtn == null) {
+									bbtn = btns[i];
+								} else {
+									document.body.removeChild (btns[i]);
+								}
+							}
+						}
+						if (bbtn == null) {
+							bbtn = document.createElement ("INPUT");
+							bbtn.type = "BUTTON";
+							bbtn.className = "opera-hide-context-menu";
+							document.body.appendChild (bbtn);
+						}
+						bbtn.style.left = (evtHTML.x - 4) + "px";
+						bbtn.style.top = (evtHTML.y - 4) + "px";
+						bbtn.focus();
+						 */ {}
+					}
+				}
+			}
+		};
+		el.onmouseup = new RunnableCompatibility() {
+			public void run() {
+				Object evt = getEvent();
+				if (evt != null) {
+					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+					if (!evtHTML.leftButtonHold) {
+						Element bbtn = null;
+						int x = 0, y = 0;  
+						/**
+						 * @j2sNative
+							var btns = document.getElementsByTagName ("INPUT");
+							for (var i = 0; i < btns.length; i++) {
+								if (btns[i].className == "opera-hide-context-menu") {
+									if (bbtn == null) {
+										bbtn = btns[i];
+									} else {
+										document.body.removeChild (btns[i]);
+									}
+								}
+							}
+							x = parseInt (bbtn.style.left);
+							y = parseInt (bbtn.style.top);
+						 */ {}
+						if (evtHTML.x - x < 0 || evtHTML.x - x > 8
+								|| evtHTML.y - y < 0 || evtHTML.y - y > 8) {
+							document.body.removeChild(bbtn);
+							return;
+						}
+						Menu menu = getMenu ();
+						if (menu != null && !menu.isDisposed ()) {
+							menu.handle.style.left = "-10000px";
+							menu.handle.style.top = "-10000px";
+							menu.handle.style.display = "block";
+							Rectangle bounds = menu.getBounds();
+							Rectangle rect = Popup.popupMenu(getMonitor().getClientArea(), 
+									new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
+									bounds.width, bounds.height, 0);
+							menu.handle.style.width = rect.width + "px";
+							menu.setLocation (rect.x, rect.y);
+							showMenu(rect.x, rect.y);
+						}
+						evtHTML.preventDefault();
+						evtHTML.stopPropagation();
+						toReturn(false);
+						document.body.removeChild(bbtn);
+					}
+				}
+				
 			}
 		};
 	}
+		el.oncontextmenu = new RunnableCompatibility() {
+			public void run() {
+				System.out.println("..fsfd.s");
+				Object evt = getEvent();
+				if (evt != null) {
+					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+					Menu menu = getMenu ();
+					if (menu != null && !menu.isDisposed ()) {
+						menu.handle.style.left = "-10000px";
+						menu.handle.style.top = "-10000px";
+						menu.handle.style.display = "block";
+						Rectangle bounds = menu.getBounds();
+						Rectangle rect = Popup.popupMenu(getMonitor().getClientArea(), 
+								new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
+								bounds.width, bounds.height, 0);
+						menu.handle.style.width = rect.width + "px";
+						menu.setLocation (rect.x, rect.y);
+						showMenu(rect.x, rect.y);
+					}
+					evtHTML.preventDefault();
+					evtHTML.stopPropagation();
+				}
+				System.out.println("to return false...");
+				toReturn(false);
+			}
+		};
+	//}
 }
 
 boolean setRadioFocus () {

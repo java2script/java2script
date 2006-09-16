@@ -3047,6 +3047,7 @@ public boolean readAndDispatch () {
 	messageProc = window.setInterval(new RunnableCompatibility() {
 		private boolean messageLoop = false;
 		public void run() {
+			runPopups ();
 //			System.out.println("I'm entering the run");
 //			System.out.println("msg " + Display.this.msgs);
 //			List layoutQueue = new ArrayList();

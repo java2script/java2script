@@ -19,6 +19,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.browser.Popup;
@@ -623,6 +624,8 @@ void createSelect() {
 		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
 		selectInput.size = visibleCount;
 		handle.appendChild(selectInput);
+		
+		ResizeSystem.register(getShell(), SWT.NONE);
 	}
 }
 void configureSelect() {
@@ -683,6 +686,10 @@ void show(){
 		coordinate.y -= 2;
 	}
 	*/
+	if (selectInput.style.overflow == "scroll") {
+		selectInput.style.overflow = "auto";
+		selectInput.style.height = "auto";
+	}
 	int w = OS.getContainerWidth(handle);
 	int h = OS.getContainerHeight(handle);
 	if (OS.isFirefox) {
@@ -708,9 +715,7 @@ void show(){
 	selectInput.style.left = bounds.x + "px";
 	selectInput.style.top = bounds.y + "px";
 	if (bounds.height != height) {
-		try {
-			selectInput.style.overflow = "overflow";
-		} catch (Throwable e) {} // IE
+		selectInput.style.overflow = "scroll";
 		selectInput.style.height = bounds.height + "px";
 	}
 	try {
