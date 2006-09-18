@@ -50,7 +50,7 @@ public class HTMLEventWrapper {
 
 	// See more about Event properties at 
 	// http://www.quirksmode.org/js/events_properties.html
-	if (!e) {
+	if (!e || (window["O$"] != null && O$.isIE)) {
 		e = window.event;
 		this.stopPropagation = function () {
 			this.event.cancelBubble = true;
