@@ -49,7 +49,7 @@ public static void main (String [] args) {
 	item.setSelection(true);
 	item.setAccelerator(SWT.CTRL + 'X');
 	item = new MenuItem (menu, SWT.RADIO);
-	item.setText ("Copy a very long string \tCtrl+C");
+	item.setText ("Copy a very &long string \tCtrl+C");
 	item.setSelection(true);
 	item.setAccelerator(SWT.CTRL + 'T');
 	item.addSelectionListener(new SelectionAdapter() {
@@ -62,6 +62,43 @@ public static void main (String [] args) {
 	item.setImage(null);
 	item.setSelection(true);
 	item.setAccelerator(SWT.CTRL + 'R');
+	
+	item = new MenuItem (menu, SWT.CASCADE);
+	item.setText ("Pa&ste");
+	
+	Menu submenu = new Menu (item);
+	MenuItem subitem = new MenuItem (submenu, SWT.PUSH);
+	subitem.setText ("Popup");
+	subitem = new MenuItem (submenu, SWT.SEPARATOR);
+	subitem = new MenuItem (submenu, SWT.PUSH);
+	subitem.setText ("Pas&te");
+	subitem.setEnabled(false);
+	subitem = new MenuItem (submenu, SWT.PUSH | SWT.CHECK);
+	subitem.setText ("Copy\tCtrl+C");
+	subitem.setSelection(true);
+	subitem.setAccelerator(SWT.CTRL + 'C');
+	subitem = new MenuItem (submenu, SWT.CHECK);
+	subitem.setText ("&Cut\tCtrl+X");
+	subitem.setImage(imageOpen);
+	subitem.setSelection(true);
+	subitem.setAccelerator(SWT.CTRL + 'X');
+	subitem = new MenuItem (submenu, SWT.RADIO);
+	subitem.setText ("Copy a very long string \tCtrl+C");
+	subitem.setSelection(true);
+	subitem.setAccelerator(SWT.CTRL + 'T');
+	subitem.addSelectionListener(new SelectionAdapter() {
+		public void widgetSelected(SelectionEvent e) {
+			System.out.println("Copy cut");
+		}
+	});
+	subitem = new MenuItem (submenu, SWT.RADIO);
+	subitem.setText ("Remove\tCtrl+Shift+X");
+	subitem.setImage(null);
+	subitem.setSelection(true);
+	subitem.setAccelerator(SWT.CTRL + 'R');
+
+	item.setMenu(submenu);
+	
 	c1.setMenu (menu);
 	c2.setMenu (menu);
 	shell.setMenu (menu);
