@@ -714,20 +714,10 @@ public void removeSelectionListener (SelectionListener listener) {
  */
 public void setEnabled(boolean enabled) {
 	super.setEnabled(enabled);
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "link-disabled";
-	int idx = cssName.indexOf(key);
+	OS.updateCSSClass(handle, "link-disabled", !enabled);
 	if (!enabled) {
 		lastColor = handle.style.color; 
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-		//handle.style.color = "gray";
 	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
 		handle.style.color = lastColor;
 		lastColor = null;
 	}

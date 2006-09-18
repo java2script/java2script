@@ -327,13 +327,7 @@ void createItem (TabItem item, final int index) {
 	tab.className = "tab-item-default";
 	//titles.appendChild(tab);
 	borderFrame.insertBefore(tab, itemMore);
-	String cssName = borderFrame.className;
-	if (cssName == null) cssName = "";
-	String key = "tab-folder-no-tab";
-	int idx = cssName.indexOf(key);
-	if (idx != -1) {
-		borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-	}
+	OS.removeCSSClass(borderFrame, "tab-folder-no-tab");
 	item.textEl = document.createElement("SPAN");
 	tab.appendChild(item.textEl);
 	item.textEl.appendChild(document.createTextNode(item.getNameText()));
@@ -1052,12 +1046,7 @@ void updateSelection(int index) {
 		}
 		//items[i].handle.style.display = "none";
 		if (index >= offset) {
-			String cssName = items[i].handle.className;
-			if (cssName == null) cssName = "";
-			int idx = cssName.indexOf(key);
-			if (idx != -1) {
-				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-			}
+			OS.removeCSSClass(items[i].handle, key);
 		}
 	}
 	if (items[index] != null) {
@@ -1067,17 +1056,7 @@ void updateSelection(int index) {
 		for (int i = offset; i < items.length; i++) {
 			//items[i].handle.style.display = "block";
 			items[i].handle.style.zIndex = (i + 1) + "";
-			//if (index == i) continue;
-			String cssName = items[i].handle.className;
-			if (cssName == null) cssName = "";
-			int idx = cssName.indexOf(key);
-			if (idx != -1) {
-				items[i].handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-				//s.left = (Integer.parseInt(s.left) + 2) + "px";
-				if (i > index) {
-//					before = true;
-				}
-			}
+			OS.removeCSSClass(items[i].handle, key);
 			int w = OS.getContainerWidth(items[i].handle);
 			if (i < index) {
 				left += w;
@@ -1091,28 +1070,9 @@ void updateSelection(int index) {
 		}
 		int ww = Integer.parseInt(handle.style.width);
 		if (ww > 0) {
-			String cssName = borderFrame.className;
-			if (cssName == null) cssName = "";
-			String xkey = "tab-show-more-item";
-			int idx = cssName.indexOf(xkey);
-			if (x > ww || offset != 0) {
-				if (idx == -1) {
-					borderFrame.className += " " + xkey;
-				}
-			} else {
-				if (idx != -1) {
-					borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + xkey.length()); 
-				}
-			}
+			OS.updateCSSClass(borderFrame, "tab-show-more-item", x > ww || offset != 0);
 		}
-		String cssName = items[index].handle.className;
-		if (cssName == null) cssName = "";
-		int idx = cssName.indexOf(key);
-		if (idx == -1) {
-			items[index].handle.className += " " + key;
-//			CSSStyle s = items[index].handle.style;
-//			s.left = (Integer.parseInt(s.left) - 2) + "px";
-		}
+		OS.addCSSClass(items[index].handle, key);
 		items[index].handle.style.zIndex = (items.length + 1) + "";
 		//System.out.println("????");
 		if (this.width != 0) {

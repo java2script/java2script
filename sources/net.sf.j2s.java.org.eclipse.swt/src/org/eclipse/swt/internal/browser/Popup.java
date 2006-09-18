@@ -145,7 +145,7 @@ public class Popup {
 						}
 					}
 				} else {
-					x = rect.x + rect.width;
+					x = rect.x;
 				}
 			}
 		}

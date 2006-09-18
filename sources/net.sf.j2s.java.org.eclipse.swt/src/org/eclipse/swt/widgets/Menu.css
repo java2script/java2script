@@ -3,9 +3,9 @@
 	border:1px outset white;
 	background-color:menu;
 	font-family:Tahoma, Arial, sans-serif;
-	font-size:9pt;
+	font-size:8pt;
 	cursor:default;
-	padding:1px 0 0 1px;
+	padding:1px 0 1px 1px;
 	display:none;
 }
 * html .menu-default {
@@ -14,9 +14,9 @@
 .menu-item {
 	position:relative;
 	overflow:hidden;
-	margin:2px;
+	margin:0 2px 0 1px;
 	padding:2px;
-	height:16px;
+	height:13px;
 }
 .menu-item-enable-image {
 	height:18px;
@@ -40,7 +40,7 @@
 	overflow:hidden;
 	white-space:nowrap;
 	font-family:Tahoma, Arial, sans-serif;
-	font-size:9pt;
+	font-size:8pt;
 }
 .menu-item-enable-image .menu-item-text {
 	padding:1px;
@@ -79,7 +79,7 @@
 	position:relative;
 	border-width:4px;
 	border-right-width:0;
-	top:3px;
+	top:2px;
 	left:2px;
 }
 .menu-item-enable-image .menu-item-arrow-right {
@@ -93,19 +93,30 @@
 }
 .menu-item-status {
 	width:16px;
-	height:16px;
+	height:14px;
 	background-repeat:no-repeat;
 	background-position:center center;
 }
+.menu-item-enable-image .menu-item-status {
+	height:16px;
+}
 .menu-item-selected {
-	margin:6px 6px !important;
+	margin:5px 5px !important;
 	width:4px !important;
 	height:4px !important;
 	font-size:0;
 	background-color:black;
 }
+.menu-item-enable-image .menu-item-selected {
+	margin-top:6px !important;
+	margin-bottom:6px !important;
+}
 * html .menu-item-selected {
-	margin:6px 6px 6px 3px !important;
+	margin:5px 6px 5px 3px !important;
+}
+* html .menu-item-enable-image .menu-item-selected {
+	margin-top:6px !important;
+	margin-bottom:6px !important;
 }
 .menu-item-hover .menu-item-selected {
 	background-color:highlighttext;
@@ -224,4 +235,32 @@
 	font-size:0;
 	border-style:none;
 	z-index:4321;
+}
+
+.menu-bar {
+	position:absolute;
+	background-color:menu;
+	overflow:visible;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	cursor:default;
+	padding:4px 0;
+	z-index:9;
+	margin:1px 2px;
+}
+.menu-bar-item {
+	display:inline;
+	margin:0;
+	padding:3px 6px;
+	border:1px solid menu;
+	white-space:nowrap;
+}
+.menu-bar-item-hover {
+	border:1px outset white;
+}
+.menu-bar-selected .menu-bar-item-hover {
+	border:1px inset white !important;
+}
+.menu-bar-item span {
+	text-decoration:underline;
 }

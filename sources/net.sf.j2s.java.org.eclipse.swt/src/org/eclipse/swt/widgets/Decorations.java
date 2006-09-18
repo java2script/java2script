@@ -128,6 +128,8 @@ public class Decorations extends Canvas {
 	private Element shellIcon;
 	private Element titleBar;
 	private Element shellClose;
+	Element shellMenuBar;
+	Element shellToolBar;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -877,6 +879,9 @@ public Rectangle getClientArea () {
 			w -= 4;
 			h -= 4;
 		}
+		if (OS.existedCSSClass(handle, "shell-menu-bar")) {
+			h -= 21;
+		}
 	}
 	return new Rectangle(0, 0, w, h);
 }
@@ -1158,6 +1163,14 @@ protected void releaseHandle() {
 	if (titleBar != null) {
 		OS.destroyHandle(titleBar);
 		titleBar = null;
+	}
+	if (shellMenuBar != null) {
+		OS.destroyHandle(shellMenuBar);
+		shellMenuBar = null;
+	}
+	if (shellToolBar != null) {
+		OS.destroyHandle(shellToolBar);
+		shellToolBar = null;
 	}
 	if (contentHandle != null) {
 		OS.destroyHandle(contentHandle);
@@ -1582,22 +1595,12 @@ void toggleMaximize() {
 	String key = "shell-maximized";
 	if (oldBounds != null) {
 		setBounds(oldBounds);
-		String cssName = titleBar.className;
-		if (cssName == null) cssName = "";
-		int idx = cssName.indexOf(key);
-		if (idx != -1) {
-			titleBar.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-		}
+		OS.removeCSSClass(titleBar, key);
 		oldBounds = null;
 		ResizeSystem.unregister(this, SWT.MAX);
 	} else {
 		setMaximized(true);
-		String cssName = titleBar.className;
-		if (cssName == null) cssName = "";
-		int idx = cssName.indexOf(key);
-		if (idx == -1) {
-			titleBar.className += " " + key;
-		}
+		OS.addCSSClass(titleBar, key);
 	}
 }
 
@@ -2097,6 +2100,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			dw += 2;
 			dh += 3;
 			dww += 2;
+		}
+		if (OS.existedCSSClass(handle, "shell-menu-bar")) {
+			dh += 21;
 		}
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";

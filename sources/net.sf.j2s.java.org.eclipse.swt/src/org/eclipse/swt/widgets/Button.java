@@ -551,19 +551,7 @@ void enableWidget (boolean enabled) {
 	}
 	*/
 	btnHandle.disabled = !enabled;
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "button-disabled";
-	int idx = cssName.indexOf(key);
-	if (!enabled) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(btnHandle, "button-disabled", !enabled);
 }
 
 /**
@@ -658,7 +646,7 @@ public boolean getSelection () {
 	*/
 	if ((style & SWT.TOGGLE) != 0) {
 		//System.out.println(btnHandle.className);
-		return (btnHandle.className != null && btnHandle.className.indexOf("button-selected") != -1);
+		return OS.existedCSSClass(btnHandle, "button-selected");
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		return btnHandle.checked;
 	}
@@ -1032,19 +1020,7 @@ public void setSelection (boolean selected) {
 	checkWidget ();
 	if ((style & (SWT.CHECK | SWT.RADIO | SWT.TOGGLE)) == 0) return;
 	if ((style & SWT.TOGGLE) != 0) {
-		String cssName = btnHandle.className;
-		if (cssName == null) cssName = "";
-		String key = "button-selected";
-		int idx = cssName.indexOf(key);
-		if (selected) {
-			if (idx == -1) {
-				btnHandle.className += " " + key; 
-			}
-		} else {
-			if (idx != -1) {
-				btnHandle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-			}
-		}
+		OS.updateCSSClass(btnHandle, "button-selected", selected);
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		btnHandle.checked = selected;
 	} 

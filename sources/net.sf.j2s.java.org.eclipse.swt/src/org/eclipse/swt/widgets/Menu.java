@@ -373,8 +373,16 @@ void createHandle () {
 	
 	if (handle != null) return;
 	handle = document.createElement("DIV");
-	document.body.appendChild(handle);
-	handle.className = "menu-default";
+	if ((style & SWT.BAR) != 0) {
+		handle.className = "menu-bar";
+		OS.addCSSClass(parent.handle, "shell-menu-bar");
+		handle.style.top = "23px";
+		parent.handle.appendChild(handle);
+		parent.shellMenuBar = handle;
+	} else {
+		document.body.appendChild(handle);
+		handle.className = "menu-default";
+	}
 	
 	btnFocus = document.createElement("BUTTON");
 	//btnFocus.type = "BUTTON";
@@ -386,6 +394,7 @@ void createHandle () {
 			//System.out.println(evt.keyCode);
 			MenuItem[] menuItems = items;
 			int index = currentIndex;
+			//System.out.println(evt.keyCode);
 			if (evt.keyCode == 13 || evt.keyCode == 10) {
 				if (index != -1) {
 					Element target = menuItems[index].handle;
@@ -395,7 +404,7 @@ void createHandle () {
 					 * target.onclick (evt);
 					 */ { }
 				}
-			} else if (evt.keyCode == 38 || evt.keyCode == 104) {
+			} else if (evt.keyCode == 38 || evt.keyCode == 104) { // up
 				if (index == -1) {
 					index = nextMenuItemIndex(-1);
 					Element el = menuItems[index].handle;
@@ -412,7 +421,7 @@ void createHandle () {
 					 * el.onmouseover();
 					 */ {}
 				} 
-			} else if (evt.keyCode == 40 || evt.keyCode == 98) {
+			} else if (evt.keyCode == 40 || evt.keyCode == 98) { // down
 				if (index == -1) {
 					index = nextMenuItemIndex(1);
 					Element el = menuItems[index].handle;
@@ -429,15 +438,69 @@ void createHandle () {
 					 * el.onmouseover();
 					 */ {}
 				}
+			} else if (evt.keyCode == 37 || evt.keyCode == 100) { // left
+				if ((style & SWT.BAR) != 0) {
+					if (index == -1) {
+						index = nextMenuItemIndex(-1);
+						Element el = menuItems[index].handle;
+						/**
+						 * @j2sNative el.onmouseover();
+						 */ {}
+					} else {
+						Element e = menuItems[index].handle;
+						index = nextMenuItemIndex(-1);
+						Element el = menuItems[index].handle;
+						/**
+						 * @j2sNative
+						 * e.onmouseout();
+						 * el.onmouseover();
+						 */ {}
+					} 
+				}
+			} else if (evt.keyCode == 39 || evt.keyCode == 102) { // up
+				if ((style & SWT.BAR) != 0) {
+					if (index == -1) {
+						index = nextMenuItemIndex(1);
+						Element el = menuItems[index].handle;
+						/**
+						 * @j2sNative el.onmouseover();
+						 */ {}
+					} else {
+						Element e = menuItems[index].handle;
+						index = nextMenuItemIndex(1);
+						Element el = menuItems[index].handle;
+						/**
+						 * @j2sNative
+						 * e.onmouseout(); 
+						 * el.onmouseover();
+						 */ {}
+					}
+				}
+			} else {
+				for (int i = 0; i < menuItems.length; i++) {
+					if (menuItems[i] != null && menuItems[i].mnemonicChar == evt.keyCode) {
+						Element e = (Element) menuItems[i].handle;
+						/**
+						 * @j2sNative
+						 * e.onclick ();
+						 */ {}
+						break;
+					}
+				}
 			}
 			currentIndex = index;
 		}
 	};
 	btnFocus.onblur = new RunnableCompatibility() {
 		public void run() {
+			//System.out.println(Menu.this + "::" + "blur");
 			long time = new Date().getTime();
 			if (time - lastFocusdTime > 20) {
-				handle.style.display = "none";
+				if ((style & SWT.BAR) == 0) {
+					handle.style.display = "none";
+				} else {
+					//OS.removeCSSClass(handle, "menu-bar-selected");
+				}
 			}
 		}
 	};
@@ -579,35 +642,36 @@ void createItem (MenuItem item, int index) {
 	items[items.length] = item;
 	display.addMenuItem (item);
 	item.handle = document.createElement("DIV");
-	item.handle.className = "menu-item";
+	item.handle.className = ((style & SWT.BAR) != 0) ? "menu-bar-item" : "menu-item";
 	handle.appendChild(item.handle);
 	
 	if ((item.style & SWT.SEPARATOR) == 0) {
 		if ((item.style & (SWT.CHECK | SWT.RADIO)) != 0) {
-			String key = "menu-enable-status";
-			String cssName = handle.className;
-			if (cssName == null) cssName = "";
-			int idx = cssName.indexOf(key);
-			if (idx == -1) {
-				handle.className += " " + key; 
+			OS.addCSSClass(handle, "menu-enable-status");
+		}
+		if ((style & SWT.BAR) == 0) {
+			Element el = document.createElement("DIV");
+			el.className = "menu-item-status";
+			item.handle.appendChild(el);
+			item.statusEl = el;
+			el = document.createElement("DIV");
+			el.className = "menu-item-image";
+			item.handle.appendChild(el);
+			item.imageEl = el;
+			el = document.createElement("DIV");
+			el.className = "menu-item-text";
+			item.handle.appendChild(el);
+			item.textEl = el;
+			el = document.createElement("DIV");
+			el.className = "menu-item-arrow";
+			item.handle.appendChild(el);
+			item.arrowEl = el;
+			if ((item.style & SWT.CASCADE) != 0) {
+				el = document.createElement("DIV");
+				el.className = "menu-item-arrow-right";
+				item.arrowEl.appendChild(el);
 			}
 		}
-		Element el = document.createElement("DIV");
-		el.className = "menu-item-status";
-		item.handle.appendChild(el);
-		item.statusEl = el;
-		el = document.createElement("DIV");
-		el.className = "menu-item-image";
-		item.handle.appendChild(el);
-		item.imageEl = el;
-		el = document.createElement("DIV");
-		el.className = "menu-item-text";
-		item.handle.appendChild(el);
-		item.textEl = el;
-		el = document.createElement("DIV");
-		el.className = "menu-item-arrow";
-		item.handle.appendChild(el);
-		item.arrowEl = el;
 	} else {
 		item.handle.className += " menu-item-seperator";
 	}
@@ -875,7 +939,7 @@ void fixMenus (Decorations newParent) {
 				}
 			}
 			//System.out.println(textWidth + "//" + accelWidth);
-			w = 16 + textWidth + accelWidth + 16 + 8; // 8 for extra safe width
+			w = 16 + textWidth + 16 + accelWidth + 16 + 8; // 8 for extra safe width
 			if (handle.className.indexOf("menu-enable-status") != -1 &&
 					handle.className.indexOf("menu-enable-image") != -1) {
 				w += 16;

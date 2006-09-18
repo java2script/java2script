@@ -22,9 +22,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.browser.Popup;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class represent a selectable user interface object
@@ -49,6 +52,7 @@ public class MenuItem extends Item {
 
 	Element statusEl, imageEl, textEl, arrowEl;
 	
+	int mnemonicChar;
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>Menu</code>) and a style value
@@ -147,26 +151,35 @@ void configMenuItem() {
 		public void run() {
 			String className = handle.className;
 			if (className == null) {
-				handle.className = "menu-item-hover";
+				return;
 			} else {
+				String bar = "-";
+				if (className.indexOf ("menu-bar-item") != -1) {
+					bar = "-bar-";
+				}
+				String cssOver = "menu" + bar + "item-hover";
+				String cssDisabled = "menu" + bar + "item-disabled";
+				String cssDisabledHover = "menu" + bar + "item-disabled-hover";
+				String cssArrowRight = "menu" + bar + "item-arrow-right";
+				
 				String[] clazz = className.split ("\\s");
 				boolean existed = false;
 				boolean disabled = false;
 				boolean existedDisabled = false;
 				for (int i = 0; i < clazz.length; i++) {
-					if (clazz[i] == "menu-item-hover") {
+					if (clazz[i] == cssOver) {
 						existed = true;
-					} else if (clazz[i] == "menu-item-disabled") {
+					} else if (clazz[i] == cssDisabled) {
 						disabled = true;
-					} else if (clazz[i] == "menu-item-disabled-hover") {
+					} else if (clazz[i] == cssDisabledHover) {
 						existedDisabled = true;
 					}
 				}
 				if (!existed) {
-					clazz[clazz.length] = "menu-item-hover";
+					clazz[clazz.length] = cssOver;
 				}
 				if (disabled && !existedDisabled) {
-					clazz[clazz.length] = "menu-item-disabled-hover";
+					clazz[clazz.length] = cssDisabledHover;
 				}
 				if (!existed || (disabled && !existedDisabled)) {
 					String s = "";
@@ -181,7 +194,7 @@ void configMenuItem() {
 					boolean existedArrow = false;
 					for (int k = 0; k < divs.length; k++) {
 						Element div = divs[k];
-						if (div.className == "menu-item-arrow-right") {
+						if (div.className == cssArrowRight) {
 							existedArrow = true;
 							break;
 						}
@@ -201,6 +214,22 @@ void configMenuItem() {
 				 */ {}
 			}
 			p.currentIndex = indexOf;
+			if ((parent.style & SWT.BAR) != 0) {
+				if (parent.handle.className.indexOf("menu-bar-selected") != -1) {
+					if (menu != null && !menu.isDisposed ()) {
+						Object evt = getEvent();
+						if (evt != null) {
+							HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+							showSubMenu();
+							//menu._setVisible(true);
+							evtHTML.preventDefault();
+							evtHTML.stopPropagation();
+						}
+						toReturn(false);
+						//return;
+					}
+				}
+			}
 		}
 	};
 	handle.onmouseout = new RunnableCompatibility() {
@@ -209,16 +238,23 @@ void configMenuItem() {
 			if (className == null) {
 				return;
 			} else {
+				String bar = "-";
+				if (className.indexOf ("menu-bar-item") != -1) {
+					bar = "-bar-";
+				}
+				String cssOver = "menu" + bar + "item-hover";
+				String cssDisabledHover = "menu" + bar + "item-disabled-hover";
+				
 				String[] clazz = className.split ("\\s");
 				boolean existed = false;
 				for (int i = 0; i < clazz.length; i++) {
-					if (clazz[i] == "menu-item-hover" 
-							|| clazz[i] == "menu-item-disabled-hover") {
+					if (clazz[i] == cssOver 
+							|| clazz[i] == cssDisabledHover) {
 						existed = true;
 						int k = 0;
 						for (int j = i; j < clazz.length - 1; j++) {
-							if (clazz[j] != "menu-item-hover" 
-									&& clazz[j] != "menu-item-disabled-hover") {
+							if (clazz[j] != cssOver 
+									&& clazz[j] != cssDisabledHover) {
 								clazz[i + k] = clazz[j + 1];
 								k++;
 							}
@@ -259,7 +295,6 @@ void configMenuItem() {
 void hookSelection() {
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
-			Element btn = parent.btnFocus;
 			if (!isEnabled()) {
 				display.timerExec(40, new Runnable() {
 					public void run() {
@@ -267,6 +302,21 @@ void hookSelection() {
 					}
 				});
 				return;
+			}
+			if ((parent.style & SWT.BAR) != 0) {
+				if (menu != null && !menu.isDisposed ()) {
+					Object evt = getEvent();
+					if (evt != null) {
+						HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+						showSubMenu();
+						//menu._setVisible(true);
+						evtHTML.preventDefault();
+						evtHTML.stopPropagation();
+					}
+					toReturn(false);
+					//return;
+				}
+				OS.addCSSClass(parent.handle, "menu-bar-selected");
 			}
 			
 			if ((style & SWT.CHECK) != 0) {
@@ -284,6 +334,7 @@ void hookSelection() {
 			//setInputState (event, SWT.Selection);
 			postEvent (SWT.Selection, event);
 			parent.lastFocusdTime = -1;
+			Element btn = parent.btnFocus;
 			/**
 			 * @j2sNative btn.onblur();
 			 */ {}
@@ -559,7 +610,7 @@ public boolean getEnabled () {
 	if (!success) error (SWT.ERROR_CANNOT_GET_ENABLED);
 	return (info.fState & (OS.MFS_DISABLED | OS.MFS_GRAYED)) == 0;
 	*/
-	return handle.className == null || handle.className.indexOf("menu-item-disabled") == -1;
+	return !OS.existedCSSClass(handle, "menu-item-disabled");
 }
 
 /**
@@ -628,14 +679,8 @@ public boolean getSelection () {
 	if (!success) error (SWT.ERROR_CANNOT_GET_SELECTION);
 	return (info.fState & OS.MFS_CHECKED) !=0;
 	*/
-	if (statusEl.className != null) {
-		if ((style & SWT.CHECK) != 0 && statusEl.className.indexOf("menu-item-checked") != -1) {
-			return true;
-		} else if ((style & SWT.RADIO) != 0 && statusEl.className.indexOf("menu-item-selected") != -1) {
-			return true;
-		}  
-	}
-	return false;
+	String cssKey = ((style & SWT.CHECK) != 0) ? "menu-item-checked" : "menu-item-selected";
+	return OS.existedCSSClass(statusEl, cssKey);
 }
 
 /**
@@ -827,19 +872,7 @@ public void setAccelerator (int accelerator) {
  */
 public void setEnabled (boolean enabled) {
 	checkWidget ();
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "menu-item-disabled";
-	int idx = cssName.indexOf(key);
-	if (!enabled) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(handle, "menu-item-disabled", !enabled);
 	/*
 	if ((OS.IsPPC || OS.IsSP) && parent.hwndCB != 0) {
 		int hwndCB = parent.hwndCB;
@@ -899,14 +932,22 @@ public void setImage (Image image) {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	super.setImage (image);
 	if (image != null) {
-		String key = "menu-enable-image";
-		String cssName = parent.handle.className;
-		if (cssName == null) cssName = "";
-		int idx = cssName.indexOf(key);
-		if (idx == -1) {
-			parent.handle.className += " " + key; 
+		OS.addCSSClass(parent.handle, "menu-enable-image");
+		OS.addCSSClass(handle, "menu-item-enable-image");
+	} else {
+		boolean existedImage = false;
+		for (int i = 0; i < parent.items.length; i++) {
+			if (parent.items[i].image != null) {
+				existedImage = true;
+				break;
+			}
 		}
-		
+		if (!existedImage) {
+			OS.removeCSSClass(parent.handle, "menu-enable-image");
+		}
+		OS.removeCSSClass(handle, "menu-item-enable-image");
+	}
+	if (imageEl != null && image != null) {
 		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 			OS.clearChildren(imageEl);
 			CSSStyle handleStyle = imageEl.style;
@@ -1128,20 +1169,8 @@ public void setSelection (boolean selected) {
 	checkWidget ();
 	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return;
 	
-	String key = ((style & SWT.CHECK) != 0) ? "menu-item-checked" : "menu-item-selected";
-	
-	String cssName = statusEl.className;
-	if (cssName == null) cssName = "";
-	int idx = cssName.indexOf(key);
-	if (selected) {
-		if (idx == -1) {
-			statusEl.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			statusEl.className = cssName.substring(0, idx) + cssName.substring(idx + key.length());
-		}
-	}
+	String cssKey = ((style & SWT.CHECK) != 0) ? "menu-item-checked" : "menu-item-selected";
+	OS.updateCSSClass(statusEl, cssKey, selected);
 	
 	/*
 	if ((OS.IsPPC || OS.IsSP) && parent.hwndCB != 0) return;
@@ -1208,8 +1237,12 @@ public void setText (String string) {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	if (text.equals (string)) return;
 	super.setText (string);
-	if (textEl.childNodes != null && textEl.childNodes.length != 0) {
-		OS.clearChildren(textEl);
+	Element el = textEl;
+	if (textEl == null) {
+		el = handle;
+	}
+	if (el.childNodes != null && el.childNodes.length != 0) {
+		OS.clearChildren(el);
 	}
 	int idx = text.indexOf('\t');
 	String normalText = text;
@@ -1221,11 +1254,16 @@ public void setText (String string) {
 	if (accelText != null && accelText.length() != 0) {
 		Element accel = document.createElement("DIV");
 		accel.className = "menu-item-accel";
-		textEl.appendChild(accel);
+		el.appendChild(accel);
 		accel.appendChild(document.createTextNode(accelText));
 	}
-	OS.insertText(textEl, normalText);
-	textEl.style.display = "block";
+	String mChar = OS.insertText(el, normalText);
+	if (mChar != normalText) {
+		mnemonicChar = 0 + mChar.toUpperCase().charAt(0);
+	}
+	if ((parent.style & SWT.BAR) == 0) {
+		el.style.display = "block";
+	}
 	
 	/*
 	int hHeap = OS.GetProcessHeap ();
@@ -1304,6 +1342,41 @@ public void setText (String string) {
 	if (!success) error (SWT.ERROR_CANNOT_SET_TEXT);
 	*/
 	parent.redraw ();
+}
+
+void showSubMenu() {
+	menu.handle.style.left = "-10000px";
+	menu.handle.style.top = "-10000px";
+	menu.handle.style.display = "block";
+	Rectangle bounds = menu.getBounds();
+	Point coordinate = OS.calcuateRelativePosition(handle, document.body);
+	int w = OS.getContainerWidth(handle);
+	int h = OS.getContainerHeight(handle);
+	if (OS.isFirefox) {
+		coordinate.x += 1;
+		//coordinate.y -= 1;
+		h += 1;
+	} else if (OS.isIE) {
+		coordinate.x -= 1;
+		coordinate.y -= 2;
+		//h -= 2;
+	}
+	//int height = OS.getContainerHeight(handle);
+	//Rectangle rect = Popup.popupList(parent.parent.getMonitor().getClientArea(), new Rectangle(coordinate.x, coordinate.y, w, h), height);
+	Rectangle rect = Popup.popupMenu(parent.parent.getMonitor().getClientArea(), 
+			new Rectangle(coordinate.x, coordinate.y, w, h),
+			bounds.width, bounds.height, 0);
+	menu.handle.style.width = rect.width + "px";
+	//System.out.println(rect);
+	//menu.setLocation (rect.x, rect.y);
+	menu.x = rect.x;
+	menu.y = rect.y;
+	//showMenu(rect.x, rect.y);
+	menu.handle.style.left = rect.x + "px";
+	menu.handle.style.top = rect.y + "px";
+	menu.handle.style.zIndex = "1" + window.currentTopZIndex;
+	menu.handle.style.display = "block";
+	menu.btnFocus.focus();
 }
 
 /*

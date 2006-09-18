@@ -470,18 +470,8 @@ public void setText (String string) {
 	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 	OS.SetWindowText (handle, buffer);
 	*/
-	String cssName = borderFrame.className;
-	if (cssName == null) cssName = "";
-	String key = "group-no-title-text";
-	int idx = cssName.indexOf(key);
-	if (string.length() == 0) {
-		if (idx == -1) {
-			borderFrame.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			borderFrame.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
+	OS.updateCSSClass(borderFrame, "group-no-title-text", string.length() == 0);
+	if (string.length() != 0) {
 		if (!string.equals(groupText)) {
 			for (int i = titleText.childNodes.length - 1; i >= 0; i--) {
 				titleText.removeChild(titleText.childNodes[i]);

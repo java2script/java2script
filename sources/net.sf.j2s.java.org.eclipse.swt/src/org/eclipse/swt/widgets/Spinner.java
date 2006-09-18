@@ -517,19 +517,7 @@ void enableWidget (boolean enabled) {
 	upBtnHandle.disabled = !enabled;
 	downBtnHandle.disabled = !enabled;
 	textInputHandle.disabled = !enabled;
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "spinner-disabled";
-	int idx = cssName.indexOf(key);
-	if (!enabled) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(handle, "spinner-disabled", !enabled);
 }
 
 void deregister () {
