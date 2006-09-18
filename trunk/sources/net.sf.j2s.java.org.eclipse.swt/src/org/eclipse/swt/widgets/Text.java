@@ -1959,23 +1959,7 @@ public void setEditable (boolean editable) {
 	style &= ~SWT.READ_ONLY;
 	if (!editable) style |= SWT.READ_ONLY;
 	textHandle.readOnly = !editable;
-	String editableClass = "text-editable";
-	if (!editable) {
-		if (handle.className != null) {
-			int idx = handle.className.indexOf(editableClass);
-			if (idx != -1) {
-				String zzName = handle.className.substring(0, idx) + textHandle.className.substring(idx + editableClass.length());
-				handle.className = zzName;
-			}
-		}
-	} else {
-		if (handle.className != null) {
-			int idx = handle.className.indexOf(editableClass);
-			if (idx == -1) {
-				handle.className += " " + editableClass;
-			}
-		}
-	}
+	OS.updateCSSClass(handle, "text-editable", editable);
 	//OS.SendMessage (handle, OS.EM_SETREADONLY, editable ? 0 : 1, 0);
 }
 public void setFont (Font font) {
@@ -2804,19 +2788,7 @@ void enableWidget (boolean enabled) {
 	}
 	*/
 	this.textHandle.disabled = !enabled;
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "text-disabled";
-	int idx = cssName.indexOf(key);
-	if (!enabled) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(handle, "text-disabled", !enabled);
 }
 
 }

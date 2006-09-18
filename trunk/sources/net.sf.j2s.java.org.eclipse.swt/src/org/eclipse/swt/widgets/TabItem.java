@@ -288,20 +288,8 @@ public void setImage (Image image) {
 			textEl.style.filter = "";
 		}
 	}
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "tab-item-image";
-	int idx = cssName.indexOf(key);
 	hasImage = image != null; 
-	if (hasImage) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(handle, "tab-item-image", hasImage);
 }
 /**
  * Sets the receiver's text.  The string may include

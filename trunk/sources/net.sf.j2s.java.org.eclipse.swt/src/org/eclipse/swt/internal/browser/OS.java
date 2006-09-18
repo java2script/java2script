@@ -158,7 +158,7 @@ public class OS {
 		return max;
 	}
 
-	public static void insertText(Object el, String text) {
+	public static String insertText(Object el, String text) {
 		String[] lines = null;
 		Element handle = (Element) el;
 //		el.appendChild (document.createTextNode (text));
@@ -167,7 +167,7 @@ public class OS {
 		if (!((/[\r\n\t&]/).test (text))) {
 			handle.style.display = "inline";
 			handle.appendChild(document.createTextNode(text));
-			return ;
+			return text;
 		}
 		var c160 = String.fromCharCode (160);
 		var c160x8 = c160 + c160 + c160 + c160 + c160 + c160 + c160 + c160;
@@ -185,7 +185,7 @@ public class OS {
 		if (!((/[\r\n\t&]/).test (b))) {
 			d.style.display = "inline";
 			d.appendChild(document.createTextNode(b));
-			return ;
+			return b;
 		}
 		var z = String.fromCharCode (160);
 		var w = z + z + z + z + z + z + z + z;
@@ -235,6 +235,7 @@ public class OS {
 						lineEl.appendChild (span);
 						//span.style.whiteSpace = "nowrap";
 						span.appendChild (document.createTextNode ("" + c));
+						text = "" + c;
 						lastIndex = idx + 2;
 						idx = line.indexOf ('&', lastIndex);
 					}
@@ -259,6 +260,7 @@ public class OS {
 			*/ {}
 			lineEl.appendChild (document.createTextNode (s));
 		}
+		return text;
 	}
 
 	private static String wrapCSS(String a) {
@@ -531,4 +533,146 @@ public class OS {
 		}
 	}
 
+	public static boolean existedCSSClass(Object el, String cssClazz) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			return false;
+		}
+		String[] clazz = className.split("\\s");
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == cssClazz) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean removeCSSClass(Object el, String cssClazz) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			return false;
+		}
+		String[] clazz = className.split("\\s");
+		boolean existed = false;
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == cssClazz) {
+				existed = true;
+				for (int j = i; j < clazz.length - 1; j++) {
+					clazz[j] = clazz[j + 1];
+				}
+				/**
+				 * @j2sNative
+				 * clazz.length--;
+				 */ {}
+				break;
+			}
+		}
+		if (existed) 
+		/**
+		 * @j2sNative
+		 * e.className = clazz.join (" ");
+		 */ {}
+		return existed;
+	}
+
+	public static boolean addCSSClass(Object el, String cssClazz) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			e.className = cssClazz;
+			return true;
+		}
+		String[] clazz = className.split("\\s");
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == cssClazz) {
+				return false;
+			}
+		}
+		clazz[clazz.length] = cssClazz;
+		/**
+		 * @j2sNative
+		 * e.className = clazz.join (" ");
+		 */ {}
+		return true;
+	}
+	
+	public static void toggleCSSClass(Object el, String cssClazz) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			e.className = cssClazz;
+			return;
+		}
+		String[] clazz = className.split("\\s");
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == cssClazz) {
+				for (int j = i; j < clazz.length - 1; j++) {
+					clazz[j] = clazz[j + 1];
+				}
+				/**
+				 * @j2sNative
+				 * clazz.length--;
+				 * e.className = clazz.join (" ");
+				 */ {}
+				return;
+			}
+		}
+		clazz[clazz.length] = cssClazz;
+		/**
+		 * @j2sNative
+		 * e.className = clazz.join (" ");
+		 */ {}
+	}
+
+	/**
+	 * Keep or remove the given CSS class for the given element.
+	 * It's similar to the following code:
+	 * <pre>
+	 * if (kept) {
+	 *     OS.addCSSClass(el, cssClazz);
+	 * } else {
+	 *     OS.removeCSSClass(el, cssClazz);
+	 * }
+	 * </pre>
+	 * 
+	 * @param el
+	 * @param cssClazz
+	 * @param kept kept or remove CSS class 
+	 */
+	public static void updateCSSClass(Object el, String cssClazz, boolean kept) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			if (kept) {
+				e.className = cssClazz;
+			}
+			return;
+		}
+		String[] clazz = className.split("\\s");
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == cssClazz) {
+				if (kept) {
+					return;
+				}
+				for (int j = i; j < clazz.length - 1; j++) {
+					clazz[j] = clazz[j + 1];
+				}
+				/**
+				 * @j2sNative
+				 * clazz.length--;
+				 * e.className = clazz.join (" ");
+				 */ {}
+				return;
+			}
+		}
+		if (kept) {
+			clazz[clazz.length] = cssClazz;
+			/**
+			 * @j2sNative
+			 * e.className = clazz.join (" ");
+			 */ {}
+		}
+	}
 }

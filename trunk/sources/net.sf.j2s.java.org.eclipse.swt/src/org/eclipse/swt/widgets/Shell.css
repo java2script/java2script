@@ -38,6 +38,9 @@
 	/*background-color:navy;*/
 	z-index:3;
 }
+.shell-menu-bar .shell-content {
+	top:44px;
+}
 .shell-left-top, .shell-right-top, .shell-left-bottom, .shell-right-bottom {
 	position:absolute;
 	width:20px;

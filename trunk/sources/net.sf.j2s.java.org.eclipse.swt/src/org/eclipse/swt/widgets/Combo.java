@@ -611,20 +611,15 @@ protected void createHandle () {
 
 void createSelect() {
 	selectInput = document.createElement("SELECT");
+	selectInput.style.top = height + "px";
+	selectInput.style.left = textInput.style.left;
+	selectInput.size = visibleCount;
+	handle.appendChild(selectInput);
 	if(isSimple){
-		selectInput.style.top = height + "px";
-		selectInput.style.left = textInput.style.left;
 		selectInput.className = "combo-select-box-visible";
-		selectInput.size = visibleCount;
-		handle.appendChild(selectInput);
 	}else{
 		selectInput.style.position = "absolute"; 
-		selectInput.style.top = height + "px" ;
-		selectInput.style.left = textInput.style.left;
 		selectInput.className = "combo-select-box-invisible combo-select-box-notsimple";
-		selectInput.size = visibleCount;
-		handle.appendChild(selectInput);
-		
 		ResizeSystem.register(getShell(), SWT.NONE);
 	}
 }
@@ -2528,19 +2523,7 @@ void enableWidget(boolean enabled) {
 	this.textInput.disabled = !enabled;
 	this.dropDownButton.disabled = !enabled;
 	
-	String cssName = handle.className;
-	if (cssName == null) cssName = "";
-	String key = "combo-disabled";
-	int idx = cssName.indexOf(key);
-	if (!enabled) {
-		if (idx == -1) {
-			handle.className += " " + key; 
-		}
-	} else {
-		if (idx != -1) {
-			handle.className = cssName.substring(0, idx) + cssName.substring(idx + key.length()); 
-		}
-	}
+	OS.updateCSSClass(handle, "combo-disabled", !enabled);
 }
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	if (OS.isIE) {

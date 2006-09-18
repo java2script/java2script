@@ -2575,7 +2575,6 @@ public void setMenu (Menu menu) {
 	}
 		el.oncontextmenu = new RunnableCompatibility() {
 			public void run() {
-				System.out.println("..fsfd.s");
 				Object evt = getEvent();
 				if (evt != null) {
 					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
@@ -2595,7 +2594,6 @@ public void setMenu (Menu menu) {
 					evtHTML.preventDefault();
 					evtHTML.stopPropagation();
 				}
-				System.out.println("to return false...");
 				toReturn(false);
 			}
 		};
