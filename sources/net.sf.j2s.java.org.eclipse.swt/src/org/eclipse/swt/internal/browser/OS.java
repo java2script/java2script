@@ -675,4 +675,18 @@ public class OS {
 			 */ {}
 		}
 	}
+	
+	public static int fixBodyClientHeight() {
+	    Element b = document.body;
+	    Element p = b.parentNode;
+	    int bcHeight = b.clientHeight;
+	    int pcHeight = p.clientHeight;
+	    if (OS.isIE) { // && !OS.isOpera
+	        return (pcHeight == 0) ? bcHeight : pcHeight;
+	    } else if (OS.isFirefox) {
+	        return (pcHeight == p.offsetHeight 
+	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
+	    }
+	    return bcHeight;
+	}
 }

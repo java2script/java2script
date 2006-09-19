@@ -2256,7 +2256,7 @@ public void _updateMonitorSize() {
 	Element el = monitor.handle;
 	if (el == document.body) {
 		monitor.clientWidth = document.body.clientWidth; 
-		monitor.clientHeight = document.body.clientHeight;
+		monitor.clientHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
 		monitor.x = 0;
 		monitor.y = 0;
 		monitor.width = window.screen.availWidth;
