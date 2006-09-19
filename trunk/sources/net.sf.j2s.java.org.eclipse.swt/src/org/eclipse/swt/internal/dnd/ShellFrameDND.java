@@ -13,6 +13,7 @@
 
 package org.eclipse.swt.internal.dnd;
 
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -162,7 +163,7 @@ public class ShellFrameDND implements DragListener {
 		int xx = this.sourceX + e.deltaX ();
 		int yy = this.sourceY + e.deltaY ();
 		
-		int gHeight = document.body.clientHeight;
+		int gHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
 		int gWidth = document.body.clientWidth;
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
