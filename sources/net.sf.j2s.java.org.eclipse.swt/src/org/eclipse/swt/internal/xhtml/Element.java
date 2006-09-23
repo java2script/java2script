@@ -107,7 +107,7 @@ public class Element {
 	
 	public native void add(Object object);
 
-	public native void insertBefore(Element newTR, Element tbodyTR);
+	public native void insertBefore(Element el, Element afterEl);
 	
 	public native Element[] getElementsByTagName(String tag);
 	

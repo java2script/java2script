@@ -309,25 +309,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		}
 	}
 	if (image != null) {
-		if (image.width == 0 && image.height == 0) {
-			if (image.url != null && image.url.length() != 0) {
-				org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
-				img.src = this.image.url;
-				this.image.width = img.width;
-				this.image.height = img.height;
-				width += img.width;
-				height = Math.max(img.height, height);
-				// TODO: The above method to find out width & height is unsafe!
-				// TODO: Maybe the image may fail to be loaded!
-			} else {
-				// Default to 16x16 for common
-				width += 16;
-				height = Math.max(16, height);
-			}
-		} else {
-			width += image.width;
-			height = Math.max(image.height, height);
-		}
+		Point imageSize = OS.getImageSize(image);
+		width += imageSize.x;
+		height = Math.max(imageSize.y, height);
 	}
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;

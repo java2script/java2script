@@ -14,6 +14,7 @@
 package org.eclipse.swt.internal.browser;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -688,5 +689,25 @@ public class OS {
 	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
 	    }
 	    return bcHeight;
+	}
+	
+	public static Point getImageSize(Image image) {
+		int w = 16, h = 16; // Default to 16x16 for common
+		if (image.width == 0 && image.height == 0) {
+			if (image.url != null && image.url.length() != 0) {
+				org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
+				img.src = image.url;
+				image.width = img.width;
+				image.height = img.height;
+				w = img.width;
+				h = img.height;
+				// TODO: The above method to find out width & height is unsafe!
+				// TODO: Maybe the image may fail to be loaded!
+			} // else default 16x16
+		} else {
+			w = image.width;
+			h = image.height;
+		}
+		return new Point(w, h); 
 	}
 }

@@ -17,8 +17,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -44,6 +48,10 @@ public class ToolItem extends Item {
 	Image disabledImage, hotImage;
 	Image disabledImage2;
 	int id;
+	
+	int cachedTextWidth, cachedTextHeight;
+	boolean isInnerBounds;
+	Element dropDownEl;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -83,6 +91,7 @@ public ToolItem(ToolBar parent, int style) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
 	parent.createItem (this, parent.getItemCount ());
+	configureItem();
 }
 
 /**
@@ -124,8 +133,45 @@ public ToolItem(ToolBar parent, int style, int index) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
 	parent.createItem (this, index);
+	configureItem();
 }
 
+void configureItem() {
+	RunnableCompatibility eventHandler = new RunnableCompatibility() {
+		public void run() {
+			if (!isEnabled()) {
+				toReturn(false);
+				return ;
+			}
+			if ((style & SWT.CHECK) != 0) {
+				//HTMLEvent e = (HTMLEvent) getEvent();
+				setSelection (!getSelection ());
+			} else {
+				if ((style & SWT.RADIO) != 0) {
+					if ((parent.getStyle () & SWT.NO_RADIO_GROUP) != 0) {
+						setSelection (!getSelection ());
+					} else {
+						selectRadio ();
+					}
+				}
+			}
+			postEvent (SWT.Selection);
+			/*
+			if ((style & SWT.TOGGLE) != 0) {
+				setSelection(!getSelection());
+			}
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.Selection;
+			e.item = Button.this;
+			e.text = getText();
+			e.widget = Button.this;
+			sendEvent(e);
+			*/
+		}
+	};
+	handle.onclick = handle.ondblclick = eventHandler;
+}
 /**
  * Adds the listener to the collection of listeners who will
  * be notified when the control is selected, by sending
@@ -249,36 +295,233 @@ public Rectangle getBounds () {
 	int height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
-	int x = 0;//64;
-	int y = 0;//64;
-//	Element handle = parent.itemHandles[parent.indexOf(this)];
-	String left = handle.style.left;
-	if (left != null && left.length() != 0) {
-		x = Integer.parseInt(left);
+	
+	ToolBar p = parent;
+	
+	int x = 0, y = 0;
+	Point pos = OS.calcuateRelativePosition(handle, parent.handle);
+	if ((parent.style & SWT.FLAT) != 0) {
+		int idx = p.indexOf(this);
+		pos.x += idx;
 	}
-	String top = handle.style.top;
-	if (top != null && top.length() != 0) {
-		y = Integer.parseInt(top);
+	x = pos.x;
+	y = pos.y;
+	if ((parent.style & SWT.SHADOW_OUT) != 0) {
+		y -= 2;
+	}
+	if ((parent.style & SWT.BORDER) != 0) {
+		x += 2;
+		y += 2;
+	}
+	if ((style & SWT.SEPARATOR) != 0) {
+		if ((parent.style & SWT.VERTICAL) != 0) {
+			y -= 3;
+		} else {
+			x -= 3;
+		}
 	}
 	
-	int w = 64;
-	int h = 64;
-	String width = handle.style.width;
-	if (width != null && width.length() != 0) {
-		w = Integer.parseInt(width);
-	} else if (text != null && text.length() != 0) {
-//		w = UIStringUtil.calculatePlainStringLineWidth(text);
-		w = OS.getStringPlainWidth(text);
+	int w = 0, h = 0;
+	if (p.containsImage && p.imgMaxHeight == 0 && p.imgMaxWidth == 0) {
+		p.calculateImagesMaxSize();
 	}
-	String height = handle.style.height;
-	if (height != null && height.length() != 0) {
-		h = Integer.parseInt(height);
-	} else if (text != null && text.length() != 0) {
-//		h = UIStringUtil.calculatePlainStringLineHeight(text);
-		h = OS.getStringPlainHeight(text);
+	if (p.containsText && p.txtMaxHeight == 0 && p.txtMaxWidth == 0) {
+		p.calculateTextsMaxSize();
 	}
-
-	return new Rectangle (x, y, w + 6, h + 6);
+	boolean hasText = text != null && text.length() != 0;
+	boolean hasImage = image != null;
+	
+	int hPadding = 4 + 4;
+	int vPading = 2 + 3;
+	int border = 3;
+	if ((p.style & SWT.FLAT) != 0) {
+		border = 2;
+	}
+	if (p.containsImage) {
+		if (p.containsText) { // mixed mode
+			if ((p.style & SWT.RIGHT) != 0) {
+				h = Math.max(p.imgMaxHeight, p.txtMaxHeight) + 5 + border;
+				if (hasImage && hasText) {
+					w = p.imgMaxWidth + cachedTextWidth + 8 + border;
+				} else if (!hasImage && hasText) {
+					w = cachedTextWidth + 8 + border;
+				} else if (hasImage && !hasText) {
+					w = p.imgMaxWidth + 4 + border;
+				} else { // empty
+					if ((style & SWT.SEPARATOR) != 0) {
+						if ((p.style & SWT.VERTICAL) != 0) {
+							w = -1;
+						} else {
+							w = 8;
+						}
+					} else { // calculating maximized item ...
+						w = p.imgMaxWidth + p.txtMaxWidth + 8 + border;
+					}
+				}
+			} else {
+				h = p.imgMaxHeight + p.txtMaxHeight + 4 + border;
+				if (hasImage && hasText) {
+					w = Math.max(p.imgMaxWidth, cachedTextWidth) + 8 + border;
+				} else if (!hasImage && hasText) {
+					w = cachedTextWidth + 8 + border;
+				} else if (hasImage && !hasText) {
+					w = p.imgMaxWidth + 4 + border;
+				} else { // empty
+					if ((style & SWT.SEPARATOR) != 0) {
+						if ((p.style & SWT.VERTICAL) != 0) {
+							w = -1;
+						} else {
+							w = 8;
+						}
+					} else { // calculating maximized item ...
+						w = Math.max(p.imgMaxWidth, p.txtMaxWidth) + 8 + border;
+					}
+				}
+			}
+		} else { // image mode : image, empty, seperator
+			w = p.imgMaxWidth + 4 + border;
+			h = p.imgMaxHeight + 3 + border;
+			if ((style & SWT.SEPARATOR) != 0) {
+				if ((p.style & SWT.VERTICAL) != 0) {
+					h = 8;
+				} else {
+					w = 8;
+				}
+			}
+		}
+	} else {
+		if (p.containsText) { // text mode: text, empty, seperator
+			if (hasText) {
+				w = cachedTextWidth + 8 + border;
+				h = cachedTextHeight + 5 + border;
+			} else { // empty or seperator
+				if ((style & SWT.SEPARATOR) != 0) {
+					if ((p.style & SWT.VERTICAL) != 0) {
+						w = p.txtMaxWidth + 8 + border;
+						h = 8;
+					} else {
+						w = 8;
+						h = p.txtMaxHeight + 5 + border;
+					}
+				} else { // calculating maximized item ...
+					w = p.txtMaxWidth + 4 + border;
+					h = p.txtMaxHeight + 5 + border;
+				}
+			}
+		} else {
+			// empty ...
+			w = 21;
+			h = 21;
+		}
+	}
+	
+	if (!hasText && (style & SWT.SEPARATOR) == 0) {
+		handle.style.width = (w - 8 - border) + "px";
+		handle.style.height = (h - 5 - border) + "px";
+		if (!p.containsText) {
+			handle.style.backgroundPosition = "center center";
+		} else if ((parent.style & SWT.RIGHT) == 0) {
+			handle.style.backgroundPosition = "center top";
+		} else {
+			handle.style.backgroundPosition = "left center";
+		}
+	}
+	/*
+	if (p.containsImage) {
+		w = p.imgMaxWidth;
+		h = p.imgMaxHeight;
+		if ((parent.style & SWT.RIGHT) != 0) {
+			w += cachedTextWidth + 8 + 3;
+			h = Math.max(cachedTextHeight, h) + 8 - 1;
+		} else {
+			w = Math.max(cachedTextWidth, w) + 8 + 3;
+			h += cachedTextHeight + 8 - 1;
+		}
+		if (!hasText || cachedTextWidth < w - 8 - 3) {
+			w -= 4;
+			if ((style & SWT.DROP_DOWN) != 0) {
+				handle.style.width = (w - 8 - 1) + "px";
+			} else {
+				handle.style.width = (w - 8 - 3) + "px";
+			}
+			handle.style.height = (h - 8 + 1) + "px";
+			if ((parent.style & SWT.RIGHT) == 0) {
+				handle.style.backgroundPosition = "center center";
+			} else {
+				handle.style.backgroundPosition = "left center";
+			}
+		}
+		if (dropDownEl != null) {
+			dropDownEl.style.height = (h - 3 + 1) + "px";
+			dropDownEl.childNodes[0].style.top = ((h - 4) / 2 - 7) + "px";
+		}
+	} else {
+		if (hasText) {
+			w = cachedTextWidth + 8 + 3;
+			h = cachedTextHeight + 8;
+		} else {
+			if ((style & SWT.SEPARATOR) != 0) {
+				if ((parent.style & SWT.VERTICAL) != 0) {
+					h = 8;
+					if (isInnerBounds) {
+						w = -1;
+					} else {
+						w = OS.getContainerWidth(handle);
+					}
+				} else {
+					w = 8;
+					if (isInnerBounds) {
+						h = -1;
+					} else {
+						h = 21;//OS.getContainerHeight(handle);
+					}
+				}
+			} else {
+				w = 0;
+				h = 0;
+				for (int i = 0; i < p.items.length; i++) {
+					ToolItem item = p.items[i];
+					if ((item.text != null && item.text.length() != 0) || item.image != null) {
+						//System.out.println(item.text);
+						Rectangle bounds = item.getBounds();
+						w = Math.max(w, bounds.width);
+						h = Math.max(h, bounds.height);
+					}
+				}
+				if (w == 0) w = 16;
+				if (h == 0) h = 16;
+				//if ((style & SWT.DROP_DOWN) != 0) {
+					w -= 4;
+				//}
+					
+				if ((style & SWT.DROP_DOWN) != 0) {
+					handle.style.width = (w - 8 - 1) + "px";
+				} else {
+					handle.style.width = (w - 8 - 3) + "px";
+				}
+				handle.style.height = (17 - 4) + "px";
+//				if (dropDownEl != null) {
+//					dropDownEl.style.height = "18px";
+//					//dropDownEl.childNodes[0].style.top = "0";
+//				}
+			}
+		}
+	}
+	*/
+	if ((style & SWT.DROP_DOWN) != 0) {
+		w += 8 + 2 + border;
+	}
+	if ((p.style & SWT.FLAT) != 0) {
+		h += 1;
+		if ((style & SWT.SEPARATOR) == 0) {
+			w += 1;
+		}
+		if ((style & SWT.DROP_DOWN) != 0) {
+			w += 1;
+		}
+	}
+	//System.out.println("Item size:" + new Rectangle (x, y, w, h));
+	return new Rectangle (x, y, w, h);
 }
 
 /**
@@ -399,7 +642,7 @@ public boolean getSelection () {
 //	int hwnd = parent.handle;
 //	int fsState = OS.SendMessage (hwnd, OS.TB_GETSTATE, id, 0);
 //	return (fsState & OS.TBSTATE_CHECKED) != 0;
-	return true;
+	return OS.existedCSSClass(handle, "tool-item-selected");
 }
 
 /**
@@ -463,7 +706,16 @@ protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }
-
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (dropDownEl != null) {
+		OS.destroyHandle(dropDownEl);
+		dropDownEl = null;
+	}
+	super.releaseHandle();
+}
 protected void releaseWidget () {
 	super.releaseWidget ();
 	parent = null;
@@ -543,6 +795,12 @@ void resizeControl () {
 		rect.x = itemRect.x + (itemRect.width - rect.width) / 2;
 		rect.y = itemRect.y + (itemRect.height - rect.height) / 2;
 		control.setLocation (rect.x, rect.y);
+		if ((style & SWT.DROP_DOWN) != 0) {
+			handle.style.width = (itemRect.width - 8 - 4 - 1) + "px";
+		} else {
+			handle.style.width = itemRect.width + "px";
+		}
+		handle.style.height = itemRect.height + "px";
 	}
 }
 
@@ -580,6 +838,7 @@ public void setControl (Control control) {
 	}
 	if ((style & SWT.SEPARATOR) == 0) return;
 	this.control = control;
+	handle.appendChild(control.handle);
 	/*
 	* Feature in Windows.  When a tool bar wraps, tool items
 	* with the style BTNS_SEP are used as wrap points.  This
@@ -738,6 +997,17 @@ public void setImage (Image image) {
 	if ((style & SWT.SEPARATOR) != 0) return;
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 	super.setImage (image);
+	parent.imgMaxHeight = 0;
+	parent.imgMaxWidth = 0;
+	parent.containsImage = this.image != null;
+	if (!parent.containsImage) {
+		for (int i = 0; i < parent.items.length; i++) {
+			if (parent.items[i].image != null) {
+				parent.containsImage = true;
+				break;
+			}
+		}
+	}
 	updateImages (getEnabled () && parent.getEnabled ());
 }
 
@@ -784,6 +1054,9 @@ public void setSelection (boolean selected) {
 		fsState &= ~OS.TBSTATE_CHECKED;
 	}
 	OS.SendMessage (hwnd, OS.TB_SETSTATE, id, fsState);
+	*/
+	
+	OS.updateCSSClass(handle, "tool-item-selected", selected);
 	
 	/*
 	* Bug in Windows.  When a tool item with the style
@@ -794,7 +1067,6 @@ public void setSelection (boolean selected) {
 	* 
 	* NOTE: This means that the image list must be updated
 	* when the selection changes in a disabled tool item.
-	*-/
 	*/
 	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
 		if (!getEnabled () || !parent.getEnabled ()) {
@@ -832,7 +1104,22 @@ public void setText (String string) {
 	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if ((style & SWT.SEPARATOR) != 0) return;
+	if (text == string) return;
 	super.setText (string);
+	cachedTextHeight = 0;
+	cachedTextWidth = 0;
+	parent.txtMaxHeight = 0;
+	parent.txtMaxWidth = 0;
+	parent.containsText = string != null && string.length() != 0;
+	if (!parent.containsText) {
+		for (int i = 0; i < parent.items.length; i++) {
+			String txt = parent.items[i].text;
+			if (txt != null && txt.length() != 0) {
+				parent.containsImage = true;
+				break;
+			}
+		}
+	}
 	/*
 	int hwnd = parent.handle;
 	int hHeap = OS.GetProcessHeap ();
@@ -862,7 +1149,22 @@ public void setText (String string) {
 	*/
 	
 	if (handle != null) {
-		handle.appendChild(document.createTextNode(string));
+		Element textEl = null;
+		if (handle.childNodes.length == 0) {
+			textEl = document.createElement("DIV");
+			textEl.className = "tool-item-text";
+			handle.appendChild(textEl);
+		} else {
+			if (OS.existedCSSClass(handle.childNodes[0], "tool-item-text")) {
+				textEl = handle.childNodes[0];
+			} else {
+				textEl = document.createElement("DIV");
+				textEl.className = "tool-item-text";
+				handle.insertBefore(textEl, handle.childNodes[0]);
+			}
+			OS.clearChildren(textEl);
+		}
+		textEl.appendChild(document.createTextNode(string));
 	}
 	parent.layoutItems ();
 }
@@ -908,6 +1210,38 @@ public void setWidth (int width) {
 	parent.layoutItems ();
 }
 void updateImages (boolean enabled) {
+	if (image != null) {
+		OS.addCSSClass(parent.handle, "tool-item-enable-image");
+		OS.addCSSClass(handle, "tool-item-enable-image");
+	} else {
+		boolean existedImage = false;
+		for (int i = 0; i < parent.items.length; i++) {
+			if (parent.items[i].image != null) {
+				existedImage = true;
+				break;
+			}
+		}
+		if (!existedImage) {
+			OS.removeCSSClass(parent.handle, "tool-item-enable-image");
+		}
+		OS.removeCSSClass(handle, "tool-item-enable-image");
+	}
+	if (image != null) {
+		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
+			CSSStyle handleStyle = handle.style;
+			if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+//					Element imgBackground = document.createElement("DIV");
+//					imgBackground.style.position = "absolute";
+//					imgBackground.style.width = "100%";
+//					imgBackground.style.height = "100%";
+//					imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+//					handle.appendChild(imgBackground);
+				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+			} else {
+				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			}
+		}
+	}
 	/*
 	int hwnd = parent.handle;
 	TBBUTTONINFO info = new TBBUTTONINFO ();
