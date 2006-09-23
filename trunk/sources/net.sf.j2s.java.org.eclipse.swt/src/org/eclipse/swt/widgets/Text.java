@@ -25,6 +25,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class are selectable user interface
@@ -226,6 +227,11 @@ void createHandle () {
 	if (textCSSName != null) {
 		textHandle.className = textCSSName;
 	}
+	handle.onfocus = new RunnableCompatibility() {
+		public void run() {
+			textHandle.focus();
+		}
+	};
 	handle.appendChild(textHandle);
 
 	//setTabStops (tabs = 8);
@@ -326,12 +332,34 @@ void hookModify() {
 	};
 	textHandle.onblur = new RunnableCompatibility() {
 		public void run() {
+			String className = handle.className;
+			int idx = className.indexOf("text-focus"); 
+			if( idx != -1){
+				handle.className = className.substring(0, idx) + 
+					className.substring(idx + "text-focus".length());
+			}
+			System.out.println("class name " + handle.className);
 			Event e = new Event();
 			e.type = SWT.FocusOut;
 			e.item = Text.this;
 			e.widget = Text.this;
 			sendEvent(e);
 			toReturn(e.doit);			
+		}
+	};
+	textHandle.onfocus = new RunnableCompatibility() {
+		public void run() {
+			String className = handle.className;
+			if(className.indexOf("text-focus") == -1){
+				handle.className = className + " text-focus";
+			}
+			System.out.println("class name " + handle.className);
+			Event e = new Event();
+			e.type = SWT.FocusIn;
+			e.item = Text.this;
+			e.widget = Text.this;
+			sendEvent(e);
+			toReturn(e.doit);
 		}
 	};
 }
@@ -2790,5 +2818,12 @@ void enableWidget (boolean enabled) {
 	this.textHandle.disabled = !enabled;
 	OS.updateCSSClass(handle, "text-disabled", !enabled);
 }
+
+public boolean forceFocus() {
+	boolean ret = super.forceFocus();
+	this.textHandle.focus();
+	return ret;
+}
+
 
 }
