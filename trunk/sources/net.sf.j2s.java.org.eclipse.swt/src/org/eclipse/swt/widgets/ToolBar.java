@@ -15,8 +15,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class support the layout of selectable
@@ -50,6 +54,11 @@ public class ToolBar extends Composite {
 //	Element [] itemHandles;
 	boolean ignoreResize, ignoreMouse;
 	ImageList imageList, disabledImageList, hotImageList;
+	
+	Element btnFocus;
+	boolean containsImage, containsText;
+	int imgMaxHeight, imgMaxWidth, txtMaxHeight, txtMaxWidth;
+	
 	/*
 	static final int ToolBarProc;
 	static final TCHAR ToolBarClass = new TCHAR (0, OS.TOOLBARCLASSNAME, true);
@@ -172,6 +181,41 @@ protected void checkSubclass () {
 	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
 }
 
+Point calculateImagesMaxSize() {
+	if (!containsImage) {
+		return new Point(0, 0);
+	}
+	int w = 0, h = 0;
+	for (int i = 0; i < items.length; i++) {
+		if (items[i] != null && items[i].image != null) {
+			Point imageSize = OS.getImageSize(items[i].image);
+			w = Math.max(w, imageSize.x);
+			h = Math.max(h, imageSize.y);
+		}
+	}
+	imgMaxHeight = h;
+	imgMaxWidth = w;
+	return new Point(w, h);
+}
+
+Point calculateTextsMaxSize() {
+	if (!containsText) {
+		return new Point(0, 0);
+	}
+	int w = 0, h = 0;
+	for (int i = 0; i < items.length; i++) {
+		ToolItem item = items[i];
+		if (item != null && item.text != null && item.text.length() != 0) {
+			Point textSize = OS.getStringStyledSize(item.text, "tool-item-text", null);
+			item.cachedTextWidth = w = Math.max(w, textSize.x);
+			item.cachedTextHeight = h = Math.max(h, textSize.y);
+		}
+	}
+	txtMaxHeight = h;
+	txtMaxWidth = w;
+	return new Point(w, h);
+}
+
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int width = 0, height = 0;
@@ -219,6 +263,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		ignoreResize = false;
 	}
 	*/
+	calculateImagesMaxSize();
+	calculateTextsMaxSize();
 	if ((style & SWT.VERTICAL) != 0) {
 		int count = items.length;
 		for (int i=0; i<count; i++) {
@@ -234,9 +280,16 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	} else {
 		int count = items.length;
 		for (int i=0; i<count; i++) {
+			items[i].isInnerBounds = true;
 			Rectangle rect = items[i].getBounds();
+			items[i].isInnerBounds = false;
+			
 //			System.out.println(rect);
-			height = Math.max (height, rect.height);
+			if ((style & SWT.FLAT) != 0) {
+				height = Math.max (height, rect.height);
+			} else {
+				height = Math.max (height, rect.height + 2);
+			}
 			width += rect.width;
 //			if ((items[i].style & SWT.SEPARATOR) != 0) {
 //				width = Math.max (width, DEFAULT_WIDTH);
@@ -266,7 +319,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	Rectangle trim = super.computeTrim (x, y, width, height);
 //	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 //	if ((bits & OS.CCS_NODIVIDER) == 0) trim.height += 2;
-	trim.height += 2;
+	if ((style & SWT.SHADOW_OUT) != 0) trim.height += 2;
 	return trim;
 }
 
@@ -335,14 +388,38 @@ protected void createHandle () {
 	items = new ToolItem [0];
 	lastFocusId = -1;
 	
-	handle = document.createElement("DIV");
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
+	String[] css = new String[0];
+	css[0] = " tool-bar-default";
+	if ((style & SWT.VERTICAL) != 0) {
+		css[css.length] = "tool-bar-vertical";
+	} else {
+		css[css.length] = "tool-bar-horizontal";
 	}
-	handle.className = "tool-bar-default";
-	if ((style & SWT.BORDER) != 0) {
-		handle.className += " tool-bar-border";
+	if ((style & SWT.FLAT) != 0) {
+		css[css.length] = "tool-bar-flat";
 	}
+	if ((style & SWT.SHADOW_OUT) != 0) {
+		css[css.length] = "tool-bar-shadow-out";
+	}
+	if ((style & SWT.WRAP) != 0) {
+		css[css.length] = "tool-bar-wrap";
+	}
+	if ((style & SWT.RIGHT) != 0) {
+		css[css.length] = "tool-bar-right";
+	}
+	String s = "";
+	/**
+	 * @j2sNative
+	 * s = css.join (" ");
+	 */ {}
+	handle.className += s;
+	
+	Element shadow = document.createElement("DIV");
+	shadow.className = "tool-bar-shadow";
+	handle.appendChild(shadow);
+	btnFocus = document.createElement("BUTTON");
+	btnFocus.className = "tool-bar-focus";
+	handle.appendChild(shadow);
 }
 
 void createItem (ToolItem item, int index) {
@@ -383,17 +460,75 @@ void createItem (ToolItem item, int index) {
 	*/
 	
 	items [item.id = id] = item;
-	item.handle = document.createElement("DIV");
-	item.handle.className = "tool-item-default";
-	handle.appendChild(item.handle);
+	String cssName = "tool-item-default";
+	Element el = null;
+	if ((item.style & SWT.SEPARATOR) != 0) {
+		el = document.createElement("DIV");
+		handle.appendChild(el);
+		cssName += " tool-item-seperator";
+	} else if ((item.style & SWT.DROP_DOWN) != 0) {
+		el = document.createElement("DIV");
+		handle.appendChild(el);
+		item.dropDownEl = document.createElement("DIV");
+		item.dropDownEl.className = "tool-item-drop-down-button";
+		el.appendChild(item.dropDownEl);
+		Element btnArrow = document.createElement("DIV");
+		btnArrow.className = "tool-item-button-arrow-down";
+		item.dropDownEl.appendChild(btnArrow);
+		cssName += " tool-item-drop-down";
+	} else {
+		el = document.createElement("DIV");
+		handle.appendChild(el);
+	}
+//	el.onfocus = new RunnableCompatibility() {
+//		public void run() {
+//			System.out.println(".......");
+//			toReturn(false);
+//			//btnFocus.click();
+//			window.setTimeout(new RunnableCompatibility() {
+//				public void run() {
+//					System.out.println("..x..");
+//					System.out.println(".....");
+//				}
+//			}, 40);
+//		}
+//	};
+	if ((item.style & SWT.SEPARATOR) == 0) {
+		final Element eell = el;
+		if (item.dropDownEl != null) {
+			final Element el2 = item.dropDownEl;
+			el.onmousedown = 
+			item.dropDownEl.onmousedown = new RunnableCompatibility() {
+				public void run() {
+					OS.addCSSClass(eell, "tool-item-down");
+					OS.addCSSClass(el2, "tool-item-drop-down-button-down");
+				}
+			};
+			el.onmouseout = el.onmouseup = 
+			item.dropDownEl.onmouseup = item.dropDownEl.onmouseout = new RunnableCompatibility() {
+				public void run() {
+					OS.removeCSSClass(eell, "tool-item-down");
+					OS.removeCSSClass(el2, "tool-item-drop-down-button-down");
+				}
+			};
+		} else {
+			el.onmousedown = new RunnableCompatibility() {
+				public void run() {
+					OS.addCSSClass(eell, "tool-item-down");
+				}
+			};
+			el.onmouseout = el.onmouseup = new RunnableCompatibility() {
+				public void run() {
+					OS.removeCSSClass(eell, "tool-item-down");
+				}
+			};
+		}
+	}
+	el.className = cssName;
+	item.handle = el;
+	
 	if ((style & SWT.VERTICAL) != 0) setRowCount (count + 1);
 	layoutItems ();
-}
-
-protected void createWidget () {
-	super.createWidget ();
-	items = new ToolItem [0];
-	lastFocusId = -1;
 }
 
 /*
@@ -404,6 +539,12 @@ int defaultBackground () {
 */
 
 void destroyItem (ToolItem item) {
+	item.releaseResources();
+	for (int i = 0; i < items.length; i++) {
+		if (items[i] == item) {
+			items[i] = null;
+		}
+	}
 	/*
 	TBBUTTONINFO info = new TBBUTTONINFO ();
 	info.cbSize = TBBUTTONINFO.sizeof;
@@ -632,7 +773,16 @@ public int indexOf (ToolItem item) {
 	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (item.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 	//return OS.SendMessage (handle, OS.TB_COMMANDTOINDEX, item.id, 0);
-	return 0;
+	int idx = -1;
+	for (int i = 0; i < items.length; i++) {
+		if (items[i] != null) {
+			idx++;
+			if (items[i] == item) {
+				break;
+			}
+		}
+	}
+	return idx;
 }
 
 void layoutItems () {
@@ -739,6 +889,10 @@ protected void releaseWidget () {
 		display.releaseToolDisabledImageList (disabledImageList);
 	}
 	*/
+	if (btnFocus != null) {
+		OS.destroyHandle(btnFocus);
+		btnFocus = null;
+	}
 	imageList = hotImageList = disabledImageList = null;
 	super.releaseWidget ();
 }
@@ -914,7 +1068,6 @@ boolean setTabItemFocus () {
 	if (index == items.length) return false;
 	return super.setTabItemFocus ();
 }
-
 /*
 String toolTipText (NMTTDISPINFO hdr) {
 	if ((hdr.uFlags & OS.TTF_IDISHWND) != 0) {
