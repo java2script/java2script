@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -368,20 +367,13 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			}
 		}
 		File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
-		FileWriter fileWriter = null;
 		try {
-			fileWriter = new FileWriter(jsFile);
-			fileWriter.write(js);
+			FileOutputStream fos = new FileOutputStream(jsFile);
+			fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
+			fos.write(js.getBytes("UTF-8"));
+			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			if (fileWriter != null) {
-				try {
-					fileWriter.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		
 		String[] classNameSet = dvisitor.getClassName();
