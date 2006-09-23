@@ -124,8 +124,9 @@ protected void checkSubclass () {
 }
 
 private void configure(final int index) {
-	handle.onclick = new RunnableCompatibility() {
+	textEl.onclick = new RunnableCompatibility() {
 		public void run() {
+			System.out.println("hoy hoy ");
 			parent.setSelection(index, true);
 		}
 	};
@@ -335,7 +336,7 @@ public void setText (String string) {
 //	if (index == -1) return;
 //	super.setText (string);
 	this.text = string;
-	
+	configure(index);
 	/*
 	/*
 	* Bug in Windows.  In version 6.00 of COMCTL32.DLL, tab

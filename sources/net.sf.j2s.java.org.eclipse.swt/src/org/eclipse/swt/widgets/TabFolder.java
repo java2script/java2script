@@ -734,6 +734,8 @@ public int getSelectionIndex () {
 	//return handle.selectedIndex;
 }
 
+
+
 /*
 int imageIndex (Image image) {
 	if (image == null) return OS.I_IMAGENONE;
@@ -752,6 +754,9 @@ int imageIndex (Image image) {
 	return index;
 }
 */
+
+void hookSelection() {
+}
 
 /**
  * Searches the receiver's list starting at the first item
@@ -1342,4 +1347,5 @@ LRESULT wmNotifyChild (int wParam, int lParam) {
 	return super.wmNotifyChild (wParam, lParam);
 }
 */
+
 }
