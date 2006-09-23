@@ -288,14 +288,20 @@ public class J2SLaunchingUtil {
 		String path = javaProject.getOutputLocation().toString();
 		int idx = path.indexOf('/', 2);
 		String relativePath = null;
+		File srcFolder = null;
 		if (idx != -1) {
-			relativePath = path.substring(idx + 1); 
+			relativePath = path.substring(idx + 1);
+			srcFolder = new File(workingDir, relativePath);
+		} else {
+			relativePath = "";
+			srcFolder = workingDir;
 		}
 
 		buf.append('[');
 		try {
-			buf.append(new File(workingDir, relativePath).getCanonicalPath());
+			buf.append(srcFolder.getCanonicalPath());
 		} catch (IOException e) {
+			// should never run into these lines!
 			e.printStackTrace();
 			buf.append(relativePath);
 		}
@@ -394,9 +400,9 @@ public class J2SLaunchingUtil {
 				int idx2 = clazzName.lastIndexOf(".");
 				if (idx2 != -1) {
 					clazzName = clazzName.substring(0, idx2);
+					set.add(clazzName);
+					existedPackages = true;
 				}
-				set.add(clazzName);
-				existedPackages = true;
 			}
 		}
 		if (existedPackages) {

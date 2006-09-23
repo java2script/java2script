@@ -422,9 +422,9 @@ public class J2SConfigPage extends Composite {
 			return ;
 		}
 		if (isSelectionInOneCategory()) {
-			if (!isAbandonsSelected()) {
+			//if (!isAbandonsSelected()) {
 				buttonRemove.setEnabled(true);
-			}
+			//}
 			if (!isLastElementSelected()) {
 				buttonDown.setEnabled(true);
 			}
@@ -443,9 +443,9 @@ public class J2SConfigPage extends Composite {
 				}
 			}
 		} else if (!isSelectionContainsCategory() && getSelection().length > 0) {
-			if (!isAbandonsSelected()) {
+			//if (!isAbandonsSelected()) {
 				buttonRemove.setEnabled(true);
-			}
+			//}
 		}
 		if (getSelection().length == 1) {
 			if (isResourceCategorySelected()) {
