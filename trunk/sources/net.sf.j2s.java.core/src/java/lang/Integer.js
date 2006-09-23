@@ -47,7 +47,8 @@ Clazz.defineMethod (Integer, "parseInt",
 function (s) {
 return Integer.parseInt (s, 10);
 }, "String");
-Integer.parseInt = Integer.prototype.parseInt;
+
+Integer.$valueOf = Integer.parseInt = Integer.prototype.parseInt;
 
 Clazz.defineMethod (Integer, "equals", 
 function (s) {
@@ -66,3 +67,4 @@ Integer.toBinaryString = Integer.prototype.toBinaryString = function (i) {
 	return i.toString (2);
 };
 });
+
