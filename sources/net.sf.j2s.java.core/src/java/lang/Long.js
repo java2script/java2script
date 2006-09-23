@@ -42,7 +42,7 @@ throw  new NumberFormatException ("radix " + radix + " greater than Character.MA
 }
 return parseInt (s, radix);
 }, "String, Number");
-Long.parseLong = Long.prototype.parseLong;
+Long.$valueOf = Long.parseLong = Long.prototype.parseLong;
 Clazz.defineMethod (Long, "parseLong", 
 function (s) {
 return Long.parseLong (s, 10);
@@ -57,3 +57,4 @@ if(s == null || ! Clazz.instanceOf(s, Long) ){
 return s.valueOf()  == this.valueOf();
 }, "Object");
 });
+

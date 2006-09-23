@@ -51,7 +51,7 @@ throw  new NumberFormatException ("null");
 }
 return parseFloat (s);
 }, "String");
-Double.parseDouble = Double.prototype.parseDouble;
+Double.$valueOf = Double.parseDouble = Double.prototype.parseDouble;
 
 Clazz.defineMethod (Double, "equals", 
 function (s) {
@@ -61,3 +61,4 @@ if(s == null || ! Clazz.instanceOf(s, Double) ){
 return s.valueOf()  == this.valueOf();
 }, "Object");
 });
+
