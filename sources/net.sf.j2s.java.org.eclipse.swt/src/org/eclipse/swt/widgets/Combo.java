@@ -2529,6 +2529,10 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	if (OS.isIE) {
 		dropDownButton.style.height = (cy  - 4) + "px";
 	}
+	if((style & SWT.RIGHT_TO_LEFT) != 0){
+		dropDownButton.style.left = 1 + "px";
+	}
+	
 	OS.updateArrowSize(dropDownButton.childNodes[0], SWT.DOWN, 16, cy);
 	
 	Element el = (Element) hWnd;
