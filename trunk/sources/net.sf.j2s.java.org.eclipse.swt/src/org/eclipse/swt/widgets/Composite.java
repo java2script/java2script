@@ -900,6 +900,10 @@ public void setTabList (Control [] tabList) {
 		tabList = newList;
 	} 
 	this.tabList = tabList;
+	int length = tabList.length;
+	for(int i = 0; i < length ; i++){
+		tabList[i].handle.tabIndex = i + 1;
+	}
 }
 
 void setResizeChildren (boolean resize) {
