@@ -92,6 +92,8 @@ public class Element {
 	public Object onhelp;
 
 	public String rel;
+
+	public int tabIndex;
 	
 	//private String
 	
