@@ -2909,7 +2909,8 @@ public Point toDisplay (int x, int y) {
 	OS.ClientToScreen (handle, pt);
 	return new Point (pt.x, pt.y);
 	*/
-	return new Point (x, y);
+	Point pt = OS.calcuateRelativePosition(handle, document.body);
+	return new Point (pt.x + x, pt.y + y);
 }
 
 /**
