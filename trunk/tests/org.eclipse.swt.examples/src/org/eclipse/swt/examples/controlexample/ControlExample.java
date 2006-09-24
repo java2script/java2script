@@ -68,13 +68,13 @@ public class ControlExample {
 //				"CTabFolder",
 				"SashForm",
 				
-//				"CoolBar",
+				"CoolBar",
 //				"Dialog",
 				"Group",
 				"Label",
 				"Link",
 				"List",
-//				"Menu",
+				"Menu",
 				"ProgressBar",
 				
 				"Sash",
@@ -85,7 +85,7 @@ public class ControlExample {
 				"TabFolder",
 				"Table",
 				"Text",
-//				"ToolBar",
+				"ToolBar",
 				"Tree"
 		};
 		for (int i=0; i<tabs.length; i++) {
@@ -150,11 +150,11 @@ public class ControlExample {
 											if (control != null && control instanceof Label) {
 												control.dispose();
 											}
-										    item.setImage(images[(int) Math.round(3 * Math.random())]);
+										    item.setImage(images[(int) Math.floor(3 * Math.random())]);
 										    tabFolder.setSelection(tabFolder.getSelectionIndex());
 											item.setControl(page);
 										} catch (Throwable e) {
-											//e.printStackTrace();
+											e.printStackTrace();
 											throw (Error) e;
 										}
 									}
@@ -326,7 +326,7 @@ public class ControlExample {
 	 * Invokes as a standalone program.
 	 */
 	public static void main(String[] args) {
-		System.out.println("To begin control examples ..."); // bring the correct width and height of XHTML
+		//System.out.println("To begin control examples ..."); // bring the correct width and height of XHTML
 		Display display = new Display();
 		int styleNone = SWT.NONE;
 		int style = styleNone;

@@ -31,7 +31,7 @@ class ToolBarTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	ToolBarTab(ControlExample instance) {
+	public ToolBarTab(ControlExample instance) {
 		super(instance);
 	}
 

@@ -36,7 +36,7 @@ class CoolBarTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	CoolBarTab(ControlExample instance) {
+	public CoolBarTab(ControlExample instance) {
 		super(instance);
 	}
 	
