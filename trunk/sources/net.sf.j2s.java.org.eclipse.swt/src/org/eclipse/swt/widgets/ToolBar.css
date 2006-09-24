@@ -98,7 +98,6 @@ DIV.tool-item-down {
 	border:0 solid menu;
 	border-left-width:2px;
 	margin:0 3px;
-	/*height:18px;*/
 }
 .tool-bar-horizontal .tool-item-seperator:hover {
 	border:0 solid menu !important;
@@ -138,7 +137,6 @@ DIV.tool-item-down {
 .tool-bar-right .tool-item-default {
 	background-position:left center;
 }
-
 .tool-item-drop-down-button {
 	position:absolute;
 	top:-1px;
@@ -147,9 +145,6 @@ DIV.tool-item-down {
 	padding:0;
 	width:10px;
 	height:100%;
-}
-* html .tool-item-drop-down-button {
-	/*height:19px;*/
 }
 .tool-bar-flat .tool-item-drop-down-button {
 	border:1px solid menu;
@@ -196,6 +191,6 @@ DIV.tool-item-drop-down-button-down {
 	margin-top:-2px;
 }
 * html .tool-item-button-arrow-down {
-	margin-top:8px;
+	/*margin-top:-2px;*/
 	border-width:3px;
 }

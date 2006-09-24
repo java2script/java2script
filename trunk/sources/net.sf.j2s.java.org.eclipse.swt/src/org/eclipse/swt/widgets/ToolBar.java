@@ -8,19 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.swt.widgets;
+
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class support the layout of selectable
@@ -51,7 +48,6 @@ import org.eclipse.swt.internal.xhtml.window;
 public class ToolBar extends Composite {
 	int lastFocusId;
 	ToolItem [] items;
-//	Element [] itemHandles;
 	boolean ignoreResize, ignoreMouse;
 	ImageList imageList, disabledImageList, hotImageList;
 	
@@ -67,7 +63,6 @@ public class ToolBar extends Composite {
 		OS.GetClassInfo (0, ToolBarClass, lpWndClass);
 		ToolBarProc = lpWndClass.lpfnWndProc;
 	}
-	*/
 	
 	/*
 	* From the Windows SDK for TB_SETBUTTONSIZE:
@@ -127,15 +122,15 @@ public ToolBar (Composite parent, int style) {
 	* NOTE: The CCS_VERT style cannot be applied when the
 	* widget is created because of this conflict.
 	*/
-	/*
 	if ((style & SWT.VERTICAL) != 0) {
 		this.style |= SWT.VERTICAL;
+		/*
 		int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 		OS.SetWindowLong (handle, OS.GWL_STYLE, bits | OS.CCS_VERT);
+		*/
 	} else {
 		this.style |= SWT.HORIZONTAL;
 	}
-	*/
 }
 
 /*
@@ -220,6 +215,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int width = 0, height = 0;
 	/*
+	int width = 0, height = 0;
 	if ((style & SWT.VERTICAL) != 0) {
 		RECT rect = new RECT ();
 		TBBUTTON lpButton = new TBBUTTON ();
@@ -263,6 +259,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		ignoreResize = false;
 	}
 	*/
+	
 	calculateImagesMaxSize();
 	calculateTextsMaxSize();
 	if ((style & SWT.VERTICAL) != 0) {
@@ -326,7 +323,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 protected void createHandle () {
 	super.createHandle ();
 	state &= ~CANVAS;
-	/*
+	
 	/*
 	* Feature in Windows.  When TBSTYLE_FLAT is used to create
 	* a flat toolbar, for some reason TBSTYLE_TRANSPARENT is
@@ -458,7 +455,6 @@ void createItem (ToolItem item, int index) {
 		error (SWT.ERROR_ITEM_NOT_ADDED);
 	}
 	*/
-	
 	items [item.id = id] = item;
 	String cssName = "tool-item-default";
 	Element el = null;
@@ -480,50 +476,6 @@ void createItem (ToolItem item, int index) {
 		el = document.createElement("DIV");
 		handle.appendChild(el);
 	}
-//	el.onfocus = new RunnableCompatibility() {
-//		public void run() {
-//			System.out.println(".......");
-//			toReturn(false);
-//			//btnFocus.click();
-//			window.setTimeout(new RunnableCompatibility() {
-//				public void run() {
-//					System.out.println("..x..");
-//					System.out.println(".....");
-//				}
-//			}, 40);
-//		}
-//	};
-	if ((item.style & SWT.SEPARATOR) == 0) {
-		final Element eell = el;
-		if (item.dropDownEl != null) {
-			final Element el2 = item.dropDownEl;
-			el.onmousedown = 
-			item.dropDownEl.onmousedown = new RunnableCompatibility() {
-				public void run() {
-					OS.addCSSClass(eell, "tool-item-down");
-					OS.addCSSClass(el2, "tool-item-drop-down-button-down");
-				}
-			};
-			el.onmouseout = el.onmouseup = 
-			item.dropDownEl.onmouseup = item.dropDownEl.onmouseout = new RunnableCompatibility() {
-				public void run() {
-					OS.removeCSSClass(eell, "tool-item-down");
-					OS.removeCSSClass(el2, "tool-item-drop-down-button-down");
-				}
-			};
-		} else {
-			el.onmousedown = new RunnableCompatibility() {
-				public void run() {
-					OS.addCSSClass(eell, "tool-item-down");
-				}
-			};
-			el.onmouseout = el.onmouseup = new RunnableCompatibility() {
-				public void run() {
-					OS.removeCSSClass(eell, "tool-item-down");
-				}
-			};
-		}
-	}
 	el.className = cssName;
 	item.handle = el;
 	
@@ -532,6 +484,12 @@ void createItem (ToolItem item, int index) {
 }
 
 /*
+void createWidget () {
+	super.createWidget ();
+	items = new ToolItem [4];
+	lastFocusId = -1;
+}
+
 int defaultBackground () {
 	if (OS.IsWinCE) return OS.GetSysColor (OS.COLOR_BTNFACE);
 	return super.defaultBackground ();
@@ -789,9 +747,8 @@ void layoutItems () {
 	if ((style & SWT.WRAP) != 0) {
 		//OS.SendMessage (handle, OS.TB_AUTOSIZE, 0, 0);
 		try {
-		handle.style.whiteSpace = "wrap";
+			handle.style.whiteSpace = "wrap";
 		} catch (Exception e) {
-			
 		}
 	}
 	/*
@@ -1092,9 +1049,7 @@ String toolTipText (NMTTDISPINFO hdr) {
 	}
 	return super.toolTipText (hdr);
 }
-*/
 
-/*
 int widgetStyle () {
 	int bits = super.widgetStyle () | OS.CCS_NORESIZE | OS.TBSTYLE_TOOLTIPS | OS.TBSTYLE_CUSTOMERASE;
 	if ((style & SWT.SHADOW_OUT) == 0) bits |= OS.CCS_NODIVIDER;

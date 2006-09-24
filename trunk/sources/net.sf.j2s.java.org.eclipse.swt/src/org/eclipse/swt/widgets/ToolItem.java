@@ -8,9 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.swt.widgets;
 
+ 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -87,7 +88,7 @@ public class ToolItem extends Item {
  * @see Widget#checkSubclass
  * @see Widget#getStyle
  */
-public ToolItem(ToolBar parent, int style) {
+public ToolItem (ToolBar parent, int style) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
 	parent.createItem (this, parent.getItemCount ());
@@ -129,7 +130,7 @@ public ToolItem(ToolBar parent, int style) {
  * @see Widget#checkSubclass
  * @see Widget#getStyle
  */
-public ToolItem(ToolBar parent, int style, int index) {
+public ToolItem (ToolBar parent, int style, int index) {
 	super (parent, checkStyle (style));
 	this.parent = parent;
 	parent.createItem (this, index);
@@ -171,6 +172,61 @@ void configureItem() {
 		}
 	};
 	handle.onclick = handle.ondblclick = eventHandler;
+	
+	if ((style & SWT.SEPARATOR) == 0) {
+		if (dropDownEl != null) {
+			Element arrow = dropDownEl.childNodes[0];
+			handle.onmousedown = 
+			arrow.onmousedown = 
+			dropDownEl.onmousedown = new RunnableCompatibility() {
+				public void run() {
+					OS.addCSSClass(handle, "tool-item-down");
+					OS.addCSSClass(dropDownEl, "tool-item-drop-down-button-down");
+				}
+			};
+			handle.onmouseout = handle.onmouseup = 
+			arrow.onmouseout = arrow.onmouseup = 
+			dropDownEl.onmouseup = dropDownEl.onmouseout = new RunnableCompatibility() {
+				public void run() {
+					OS.removeCSSClass(handle, "tool-item-down");
+					OS.removeCSSClass(dropDownEl, "tool-item-drop-down-button-down");
+				}
+			};
+			arrow.onclick = dropDownEl.onclick = new RunnableCompatibility() {
+				public void run() {
+					if (!isEnabled()) {
+						toReturn(false);
+						return ;
+					}
+					Event event = new Event ();
+					event.detail = SWT.ARROW;
+					HTMLEventWrapper e = new HTMLEventWrapper(getEvent());
+					/*
+					int index = OS.SendMessage (handle, OS.TB_COMMANDTOINDEX, lpnmtb.iItem, 0);
+					RECT rect = new RECT ();
+					OS.SendMessage (handle, OS.TB_GETITEMRECT, index, rect);
+					event.x = rect.left;
+					event.y = rect.bottom;
+					*/
+					event.x = e.x;
+					event.y = e.y;
+					postEvent (SWT.Selection, event);
+				}
+			};
+		} else {
+			handle.onmousedown = new RunnableCompatibility() {
+				public void run() {
+					OS.addCSSClass(handle, "tool-item-down");
+				}
+			};
+			handle.onmouseout = handle.onmouseup = new RunnableCompatibility() {
+				public void run() {
+					OS.removeCSSClass(handle, "tool-item-down");
+				}
+			};
+		}
+	}
+
 }
 /**
  * Adds the listener to the collection of listeners who will
@@ -307,11 +363,16 @@ public Rectangle getBounds () {
 	x = pos.x;
 	y = pos.y;
 	if ((parent.style & SWT.SHADOW_OUT) != 0) {
-		y -= 2;
+		y -= OS.isIE ? 4 : 2;
 	}
 	if ((parent.style & SWT.BORDER) != 0) {
-		x += 2;
-		y += 2;
+		if (OS.isOpera) {
+			x -= 2;
+			y -= 2;
+		} else if (!OS.isIE) {
+			x += 2;
+			y += 2;
+		}
 	}
 	if ((style & SWT.SEPARATOR) != 0) {
 		if ((parent.style & SWT.VERTICAL) != 0) {
@@ -331,8 +392,8 @@ public Rectangle getBounds () {
 	boolean hasText = text != null && text.length() != 0;
 	boolean hasImage = image != null;
 	
-	int hPadding = 4 + 4;
-	int vPading = 2 + 3;
+	//int hPadding = 4 + 4;
+	//int vPading = 2 + 3;
 	int border = 3;
 	if ((p.style & SWT.FLAT) != 0) {
 		border = 2;
@@ -415,99 +476,8 @@ public Rectangle getBounds () {
 		}
 	}
 	
-	if (!hasText && (style & SWT.SEPARATOR) == 0) {
-		handle.style.width = (w - 8 - border) + "px";
-		handle.style.height = (h - 5 - border) + "px";
-		if (!p.containsText) {
-			handle.style.backgroundPosition = "center center";
-		} else if ((parent.style & SWT.RIGHT) == 0) {
-			handle.style.backgroundPosition = "center top";
-		} else {
-			handle.style.backgroundPosition = "left center";
-		}
-	}
-	/*
-	if (p.containsImage) {
-		w = p.imgMaxWidth;
-		h = p.imgMaxHeight;
-		if ((parent.style & SWT.RIGHT) != 0) {
-			w += cachedTextWidth + 8 + 3;
-			h = Math.max(cachedTextHeight, h) + 8 - 1;
-		} else {
-			w = Math.max(cachedTextWidth, w) + 8 + 3;
-			h += cachedTextHeight + 8 - 1;
-		}
-		if (!hasText || cachedTextWidth < w - 8 - 3) {
-			w -= 4;
-			if ((style & SWT.DROP_DOWN) != 0) {
-				handle.style.width = (w - 8 - 1) + "px";
-			} else {
-				handle.style.width = (w - 8 - 3) + "px";
-			}
-			handle.style.height = (h - 8 + 1) + "px";
-			if ((parent.style & SWT.RIGHT) == 0) {
-				handle.style.backgroundPosition = "center center";
-			} else {
-				handle.style.backgroundPosition = "left center";
-			}
-		}
-		if (dropDownEl != null) {
-			dropDownEl.style.height = (h - 3 + 1) + "px";
-			dropDownEl.childNodes[0].style.top = ((h - 4) / 2 - 7) + "px";
-		}
-	} else {
-		if (hasText) {
-			w = cachedTextWidth + 8 + 3;
-			h = cachedTextHeight + 8;
-		} else {
-			if ((style & SWT.SEPARATOR) != 0) {
-				if ((parent.style & SWT.VERTICAL) != 0) {
-					h = 8;
-					if (isInnerBounds) {
-						w = -1;
-					} else {
-						w = OS.getContainerWidth(handle);
-					}
-				} else {
-					w = 8;
-					if (isInnerBounds) {
-						h = -1;
-					} else {
-						h = 21;//OS.getContainerHeight(handle);
-					}
-				}
-			} else {
-				w = 0;
-				h = 0;
-				for (int i = 0; i < p.items.length; i++) {
-					ToolItem item = p.items[i];
-					if ((item.text != null && item.text.length() != 0) || item.image != null) {
-						//System.out.println(item.text);
-						Rectangle bounds = item.getBounds();
-						w = Math.max(w, bounds.width);
-						h = Math.max(h, bounds.height);
-					}
-				}
-				if (w == 0) w = 16;
-				if (h == 0) h = 16;
-				//if ((style & SWT.DROP_DOWN) != 0) {
-					w -= 4;
-				//}
-					
-				if ((style & SWT.DROP_DOWN) != 0) {
-					handle.style.width = (w - 8 - 1) + "px";
-				} else {
-					handle.style.width = (w - 8 - 3) + "px";
-				}
-				handle.style.height = (17 - 4) + "px";
-//				if (dropDownEl != null) {
-//					dropDownEl.style.height = "18px";
-//					//dropDownEl.childNodes[0].style.top = "0";
-//				}
-			}
-		}
-	}
-	*/
+	updateItemBounds(w, h);
+	
 	if ((style & SWT.DROP_DOWN) != 0) {
 		w += 8 + 2 + border;
 	}
@@ -520,8 +490,52 @@ public Rectangle getBounds () {
 			w += 1;
 		}
 	}
-	//System.out.println("Item size:" + new Rectangle (x, y, w, h));
 	return new Rectangle (x, y, w, h);
+}
+
+void updateItemBounds(int w, int h) {
+	ToolBar p = parent;
+	boolean hasText = text != null && text.length() != 0;
+	boolean hasImage = image != null;
+	int border = 3;
+	if ((p.style & SWT.FLAT) != 0) {
+		border = 2;
+	}
+	if ((style & SWT.SEPARATOR) != 0) {
+		handle.style.height = h + "px";
+	} else if (!hasText/* && (style & SWT.SEPARATOR) == 0*/) {
+		handle.style.width = (w - 8 - border) + "px";
+		handle.style.height = (h - 5 - border) + "px";
+		if (OS.isIE && (p.style & SWT.RIGHT) == 0) { // TODO: I hate this IE hacking!
+			// 2 : padding between image and text?
+			if (p.containsImage) {
+				handle.style.fontSize = "0";
+				if (hasImage && p.containsText) {
+					handle.style.height = (h - 5 - border - 2) + "px";
+				} else {
+					handle.style.height = (h - 5 - border - 1) + "px";
+				}
+			} else {
+				handle.style.fontSize = "0";
+				handle.style.height = (h - 5 - border + 1) + "px";
+			}
+		}
+		if (!p.containsText) {
+			handle.style.backgroundPosition = "center center";
+		} else if ((parent.style & SWT.RIGHT) == 0) {
+			handle.style.backgroundPosition = "center top";
+		} else {
+			handle.style.backgroundPosition = "left center";
+		}
+	}
+	if (OS.isIE && dropDownEl != null) { // TODO: I hate this IE hacking!
+		dropDownEl.style.height = (h - border + 1) + "px";
+		if (hasImage && (p.style & SWT.RIGHT) == 0) {
+			// 2 : padding between image and text?
+			dropDownEl.style.height = (h - 2 - border) + "px";
+		}
+		//dropDownEl.childNodes[0].style.top = ((h - 5 - border - 4) / 2 - 7) + "px";
+	}
 }
 
 /**
@@ -579,10 +593,12 @@ public boolean getEnabled () {
 	if ((style & SWT.SEPARATOR) != 0) {
 		return (state & DISABLED) == 0;
 	}
-//	int hwnd = parent.handle;
-//	int fsState = OS.SendMessage (hwnd, OS.TB_GETSTATE, id, 0);
-//	return (fsState & OS.TBSTATE_ENABLED) != 0;
-	return true;
+	/*
+	int hwnd = parent.handle;
+	int fsState = OS.SendMessage (hwnd, OS.TB_GETSTATE, id, 0);
+	return (fsState & OS.TBSTATE_ENABLED) != 0;
+	*/
+	return !OS.existedCSSClass(handle, "tool-item-disabled");
 }
 
 /**
@@ -639,9 +655,11 @@ public ToolBar getParent () {
 public boolean getSelection () {
 	checkWidget();
 	if ((style & (SWT.CHECK | SWT.RADIO)) == 0) return false;
-//	int hwnd = parent.handle;
-//	int fsState = OS.SendMessage (hwnd, OS.TB_GETSTATE, id, 0);
-//	return (fsState & OS.TBSTATE_CHECKED) != 0;
+	/*
+	int hwnd = parent.handle;
+	int fsState = OS.SendMessage (hwnd, OS.TB_GETSTATE, id, 0);
+	return (fsState & OS.TBSTATE_CHECKED) != 0;
+	*/
 	return OS.existedCSSClass(handle, "tool-item-selected");
 }
 
@@ -706,6 +724,7 @@ protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
 }
+
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Widget#releaseHandle()
  */
@@ -714,8 +733,12 @@ protected void releaseHandle() {
 		OS.destroyHandle(dropDownEl);
 		dropDownEl = null;
 	}
+	if (handle != null) {
+		OS.destroyHandle(handle);
+	}
 	super.releaseHandle();
 }
+
 protected void releaseWidget () {
 	super.releaseWidget ();
 	parent = null;
@@ -838,7 +861,6 @@ public void setControl (Control control) {
 	}
 	if ((style & SWT.SEPARATOR) == 0) return;
 	this.control = control;
-	handle.appendChild(control.handle);
 	/*
 	* Feature in Windows.  When a tool bar wraps, tool items
 	* with the style BTNS_SEP are used as wrap points.  This
@@ -1104,7 +1126,6 @@ public void setText (String string) {
 	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if ((style & SWT.SEPARATOR) != 0) return;
-	if (text == string) return;
 	super.setText (string);
 	cachedTextHeight = 0;
 	cachedTextWidth = 0;
@@ -1135,7 +1156,7 @@ public void setText (String string) {
 	if (string.length () != 0) info.fsStyle |= OS.BTNS_SHOWTEXT;
 	OS.SendMessage (hwnd, OS.TB_SETBUTTONINFO, id, info);
 	OS.HeapFree (hHeap, 0, pszText);
-	
+
 	/*
 	* Bug in Windows.  For some reason, when the font is set
 	* before any tool item has text, the tool items resize to
@@ -1147,7 +1168,7 @@ public void setText (String string) {
 	int hFont = OS.SendMessage (hwnd, OS.WM_GETFONT, 0, 0);
 	OS.SendMessage (hwnd, OS.WM_SETFONT, hFont, 0);
 	*/
-	
+		
 	if (handle != null) {
 		Element textEl = null;
 		if (handle.childNodes.length == 0) {
@@ -1166,6 +1187,7 @@ public void setText (String string) {
 		}
 		textEl.appendChild(document.createTextNode(string));
 	}
+	
 	parent.layoutItems ();
 }
 
@@ -1209,6 +1231,7 @@ public void setWidth (int width) {
 	*/
 	parent.layoutItems ();
 }
+
 void updateImages (boolean enabled) {
 	if (image != null) {
 		OS.addCSSClass(parent.handle, "tool-item-enable-image");
