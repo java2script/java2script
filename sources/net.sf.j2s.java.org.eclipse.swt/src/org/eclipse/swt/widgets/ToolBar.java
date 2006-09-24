@@ -566,6 +566,7 @@ void enableWidget (boolean enabled) {
 			}
 		}
 	}
+	OS.updateCSSClass(handle, "tool-bar-disabled", !enabled);
 }
 
 ImageList getDisabledImageList () {

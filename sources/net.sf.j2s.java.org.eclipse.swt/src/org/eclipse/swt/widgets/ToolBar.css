@@ -194,3 +194,48 @@ DIV.tool-item-drop-down-button-down {
 	/*margin-top:-2px;*/
 	border-width:3px;
 }
+
+.tool-item-disabled {
+	/*border-color:gray;*/
+}
+.tool-item-disabled .tool-item-text {
+	color:gray;
+}
+.tool-item-disabled .tool-item-drop-down-button {
+	/*border-color:gray;*/
+}
+.tool-item-disabled .tool-item-button-arrow-down {
+	border-top-color:gray;
+}
+
+.tool-bar-disabled .tool-item-default {
+	/*border-color:gray;*/
+}
+.tool-bar-disabled .tool-item-text {
+	color:gray;
+}
+.tool-bar-disabled .tool-item-drop-down-button {
+	/*border-color:gray;*/
+}
+.tool-bar-disabled .tool-item-button-arrow-down {
+	border-top-color:gray;
+}
+.tool-bar-disabled .tool-item-default:hover {
+	border-style:solid;
+}
+.tool-bar-disabled .tool-item-drop-down-button:hover {
+	border-style:solid;
+}
+
+.tool-item-inner-control {
+	margin:0 !important;
+	padding:0 !important;
+	border-style:none !important;
+	border-width:0 !important;
+}
+tool-bar-default .tool-item-inner-control:hover {
+	margin:0 !important;
+	padding:0 !important;
+	border-style:none !important;
+	border-width:0 !important;
+}

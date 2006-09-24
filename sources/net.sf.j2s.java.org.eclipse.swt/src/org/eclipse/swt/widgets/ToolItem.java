@@ -180,6 +180,10 @@ void configureItem() {
 			arrow.onmousedown = 
 			dropDownEl.onmousedown = new RunnableCompatibility() {
 				public void run() {
+					if (!isEnabled()) {
+						toReturn(false);
+						return ;
+					}
 					OS.addCSSClass(handle, "tool-item-down");
 					OS.addCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
@@ -188,6 +192,10 @@ void configureItem() {
 			arrow.onmouseout = arrow.onmouseup = 
 			dropDownEl.onmouseup = dropDownEl.onmouseout = new RunnableCompatibility() {
 				public void run() {
+					if (!isEnabled()) {
+						toReturn(false);
+						return ;
+					}
 					OS.removeCSSClass(handle, "tool-item-down");
 					OS.removeCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
@@ -216,11 +224,19 @@ void configureItem() {
 		} else {
 			handle.onmousedown = new RunnableCompatibility() {
 				public void run() {
+					if (!isEnabled()) {
+						toReturn(false);
+						return ;
+					}
 					OS.addCSSClass(handle, "tool-item-down");
 				}
 			};
 			handle.onmouseout = handle.onmouseup = new RunnableCompatibility() {
 				public void run() {
+					if (!isEnabled()) {
+						toReturn(false);
+						return ;
+					}
 					OS.removeCSSClass(handle, "tool-item-down");
 				}
 			};
@@ -475,6 +491,11 @@ public Rectangle getBounds () {
 			h = 21;
 		}
 	}
+	if ((style & SWT.SEPARATOR) != 0 && control != null) {
+		//if ((p.style & SWT.VERTICAL) != 0)
+		Point computeSize = control.computeSize(-1, h);
+		w = computeSize.x;
+	}
 	
 	updateItemBounds(w, h);
 	
@@ -503,6 +524,9 @@ void updateItemBounds(int w, int h) {
 	}
 	if ((style & SWT.SEPARATOR) != 0) {
 		handle.style.height = h + "px";
+		if (control != null) {
+			control.setSize(w, h);
+		}
 	} else if (!hasText/* && (style & SWT.SEPARATOR) == 0*/) {
 		handle.style.width = (w - 8 - border) + "px";
 		handle.style.height = (h - 5 - border) + "px";
@@ -861,6 +885,14 @@ public void setControl (Control control) {
 	}
 	if ((style & SWT.SEPARATOR) == 0) return;
 	this.control = control;
+	if (control != null) {
+		OS.removeCSSClass(handle, "tool-item-seperator");
+		OS.addCSSClass(handle, "tool-item-inner-control");
+		handle.appendChild(control.handle);
+	} else {
+		OS.addCSSClass(handle, "tool-item-seperator");
+		OS.removeCSSClass(handle, "tool-item-inner-control");
+	}
 	/*
 	* Feature in Windows.  When a tool bar wraps, tool items
 	* with the style BTNS_SEP are used as wrap points.  This
@@ -961,6 +993,7 @@ public void setEnabled (boolean enabled) {
 	}
 	OS.SendMessage (hwnd, OS.TB_SETSTATE, id, fsState);
 	*/
+	OS.updateCSSClass(handle, "tool-item-disabled", !enabled);
 	if (image != null) updateImages (enabled && parent.getEnabled ());
 }
 
