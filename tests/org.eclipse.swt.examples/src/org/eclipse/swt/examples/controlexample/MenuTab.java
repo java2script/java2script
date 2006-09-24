@@ -31,7 +31,7 @@ class MenuTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	MenuTab(ControlExample instance) {
+	public MenuTab(ControlExample instance) {
 		super(instance);
 	}
 
