@@ -8,13 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.swt.widgets;
+
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -42,9 +43,9 @@ import org.eclipse.swt.internal.xhtml.document;
  * @j2sPrefix
  * Clazz.registerCSS ("$wt.widgets.CoolBar");
  */
+
 public class CoolBar extends Composite {
 	CoolItem [] items;
-	Element [] itemHandles;
 	CoolItem [] originalItems;
 	boolean locked;
 	boolean ignoreResize;
@@ -102,6 +103,7 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
 	return OS.CallWindowProc (ReBarProc, hwnd, msg, wParam, lParam);
 }
 */
+
 static int checkStyle (int style) {
 	style |= SWT.NO_FOCUS;
 	/*
@@ -124,11 +126,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	int border = getBorderWidth ();
 	int newWidth = wHint == SWT.DEFAULT ? 0x3FFF : wHint + (border * 2);
 	int newHeight = hHint == SWT.DEFAULT ? 0x3FFF : hHint + (border * 2);
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//*
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	if (count != 0) {
 		ignoreResize = true;
 		boolean redraw = false;
+		/*
 		if (OS.IsWindowVisible (handle)) {
 			if (OS.COMCTL32_MAJOR >= 6) {
 				redraw = true;
@@ -151,31 +155,48 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		RECT rect = new RECT ();
 		OS.SendMessage (handle, OS.RB_GETRECT, count - 1, rect);
 		height = Math.max (height, rect.bottom);
+		*/
+		height = Math.max(height, OS.getContainerHeight(handle));
+		/*
 		SetWindowPos (handle, 0, 0, 0, oldWidth, oldHeight, flags);
 		REBARBANDINFO rbBand = new REBARBANDINFO ();
 		rbBand.cbSize = REBARBANDINFO.sizeof;
 		rbBand.fMask = OS.RBBIM_IDEALSIZE | OS.RBBIM_STYLE;
+		*/
 		int rowWidth = 0;
 		int separator = (style & SWT.FLAT) == 0 ? SEPARATOR_WIDTH : 0;
 		for (int i = 0; i < count; i++) {
+			/*
 			OS.SendMessage(handle, OS.RB_GETBANDINFO, i, rbBand);
 			if ((rbBand.fStyle & OS.RBBS_BREAK) != 0) {
 				width = Math.max(width, rowWidth - separator);
 				rowWidth = 0;
 			}
 			rowWidth += rbBand.cxIdeal + getMargin (i) + separator;
+			*/
+			if (items[i].handle.style.cssText.indexOf("clear") != -1) {
+				width = Math.max(width, rowWidth - separator);
+				rowWidth = 0;
+			}
+			if (items[i].control != null) {
+				rowWidth += items[i].control.getSize().x + getMargin (i) + separator;
+			} else {
+				rowWidth += OS.getContainerWidth(items[i].handle) + getMargin (i) + separator;
+			}
 		}
 		width = Math.max(width, rowWidth - separator);
 		if (redraw) {
+			/*
 			if (OS.COMCTL32_MAJOR >= 6) {
 				OS.DefWindowProc (handle, OS.WM_SETREDRAW, 1, 0);
 			} else {
 				OS.SendMessage (handle, OS.WM_SETREDRAW, 1, 0);
 			}
+			*/
 		}
 		ignoreResize = false;
 	}
-	*/
+	// */
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
@@ -205,15 +226,11 @@ protected void createHandle () {
 	int hFont = OS.GetStockObject (OS.SYSTEM_FONT);
 	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 0);
 	*/
-	
-	handle = document.createElement("DIV");
-	if (parent.handle != null) {
-		parent.handle.appendChild(handle);
+	String cssName = " cool-bar-default";
+	if ((style & SWT.FLAT) != 0) {
+		cssName += " cool-bar-flat";
 	}
-	handle.className = "cool-bar-default";
-	if ((style & SWT.BORDER) != 0) {
-		handle.className += " cool-bar-border";
-	}
+	handle.className += cssName;
 }
 
 void createItem (CoolItem item, int index) {
@@ -288,24 +305,41 @@ void createItem (CoolItem item, int index) {
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
 	int id = items.length;
 	items [item.id = id] = item;
-	itemHandles[id] = document.createElement("DIV");
-	Element handle = itemHandles[id];
-	handle.className = "cool-item-default";
+	Element el = document.createElement("DIV");
+	el.className = "cool-item-default";
 	if (index == count) {
-		handle.appendChild(handle);
+		handle.appendChild(el);
 	} else {
-		handle.insertBefore(handle, itemHandles[index]);
+		handle.insertBefore(el, items[index].handle);
 	}
+	item.handle = el;
 	
-//		if ((style & SWT.VERTICAL) != 0) setRowCount (count + 1);
-//		layoutItems ();
+	el = document.createElement("DIV");
+	el.className = "cool-item-handler";
+	item.handle.appendChild(el);
+	
+	el = document.createElement("DIV");
+	el.className = "cool-item-more";
+	item.handle.appendChild(el);
+	item.moreHandle = el;
+	el = document.createElement("SPAN");
+	el.appendChild(document.createTextNode(">"));
+	item.moreHandle.appendChild(el);
+	el = document.createElement("SPAN");
+	el.appendChild(document.createTextNode(">"));
+	el.className = "cool-item-more-arrow";
+	item.moreHandle.appendChild(el);
+	
+	el = document.createElement("DIV");
+	el.className = "cool-item-content";
+	item.handle.appendChild(el);
+	item.contentHandle = el;
 }
 
 protected void createWidget () {
 	super.createWidget ();
-	items = new CoolItem [4];
-	originalItems = new CoolItem [0];
 	items = new CoolItem [0];
+	originalItems = new CoolItem [0];
 }
 
 void destroyItem (CoolItem item) {
@@ -400,6 +434,13 @@ int getMargin (int index) {
 		margin += 8 + 8; 
 	}
 	return margin;
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#enableWidget(boolean)
+ */
+void enableWidget(boolean enabled) {
+	OS.updateCSSClass(handle, "cool-bar-disabled", !enabled);
 }
 
 Control findThemeControl () {
@@ -667,7 +708,7 @@ public int [] getWrapIndices () {
 public int indexOf (CoolItem item) {
 	checkWidget ();
 	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	if (item.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
+	if (item.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 //	return OS.SendMessage (handle, OS.RB_IDTOINDEX, item.id, 0);
 	for (int i = 0; i < items.length; i++) {
 		if (item == items[i]) {
@@ -929,6 +970,7 @@ void setItemSizes (Point [] sizes) {
 public void setLocked (boolean locked) {
 	checkWidget ();
 	this.locked = locked;
+	OS.updateCSSClass(handle, "cool-bar-locked", locked);
 	/*
 	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
 	REBARBANDINFO rbBand = new REBARBANDINFO ();

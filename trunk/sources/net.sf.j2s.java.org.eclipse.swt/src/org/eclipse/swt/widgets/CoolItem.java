@@ -8,14 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.swt.widgets;
+
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -33,11 +34,14 @@ import org.eclipse.swt.internal.xhtml.document;
  * IMPORTANT: This class is <em>not</em> intended to be subclassed.
  * </p>
  */
+
 public class CoolItem extends Item {
 	CoolBar parent;
 	Control control;
 	int id;
 	boolean ideal, minimum;
+	
+	Element contentHandle, moreHandle;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -106,7 +110,7 @@ public CoolItem (CoolBar parent, int style) {
  * @see Widget#checkSubclass
  * @see Widget#getStyle
  */
-public CoolItem(CoolBar parent, int style, int index) {
+public CoolItem (CoolBar parent, int style, int index) {
 	super (parent, style);
 	this.parent = parent;
 	parent.createItem (this, index);
@@ -336,6 +340,7 @@ public void setControl (Control control) {
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_CHILD;
 	rbBand.hwndChild = hwndChild;
+	*/
 	this.control = newControl;
 
 	/*
@@ -343,7 +348,8 @@ public void setControl (Control control) {
 	* it makes the new child visible and hides the old child and
 	* moves the new child to the top of the Z-order.  The fix is
 	* to save and restore the visibility and Z-order.
-	*-/	
+	*/	
+	/*
 	int hwndAbove = 0;
 	if (newControl != null) {
 		hwndAbove = OS.GetWindow (hwndChild, OS.GW_HWNDPREV);
@@ -358,7 +364,10 @@ public void setControl (Control control) {
 		SetWindowPos (hwndChild, hwndAbove, 0, 0, 0, 0, flags);
 	}
 	*/
-	this.control = newControl;
+	OS.clearChildren(contentHandle);
+	if (newControl != null) {
+		contentHandle.appendChild(newControl.handle);
+	}
 }
 
 /**
@@ -423,7 +432,6 @@ public void setPreferredSize (int width, int height) {
 	if (!minimum) rbBand.cyMinChild = height;
 	OS.SendMessage (hwnd, OS.RB_SETBANDINFO, index, rbBand);
 	*/
-	Element handle = parent.itemHandles[parent.indexOf(this)];
 	handle.style.width = width + "px";
 	handle.style.height = height + "px";
 }
@@ -451,10 +459,8 @@ public void setText (String string) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if ((style & SWT.SEPARATOR) != 0) return;
 	super.setText (string);
-	Element handle = parent.itemHandles[parent.indexOf(this)];
-	if (handle != null) {
-		handle.appendChild(document.createTextNode(string));
-	}
+	OS.clearChildren(contentHandle);
+	contentHandle.appendChild(document.createTextNode(string));
 	//parent.layoutItems ();
 }
 
@@ -494,7 +500,6 @@ public Point getSize() {
 	*/
 	return new Point (0, 0);
 }
-
 
 /**
  * Sets the receiver's size to the point specified by the arguments.

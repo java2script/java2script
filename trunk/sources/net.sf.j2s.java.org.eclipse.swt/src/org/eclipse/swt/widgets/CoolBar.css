@@ -1,13 +1,74 @@
 .cool-bar-default {
 	position:absolute;
+	background-color:menu;
+	cursor:default;
 }
 .cool-bar-border {
-	border:1px inset white;
-}	
-.cool-item-default {
-	border:1px outset white;
-	float:left;
-	cursor:default;
-	margin:1px;
-	white-space:nowrap;
+	border:2px inset white;
 }
+.cool-item-default {
+	position:relative;
+	border:1px outset white;
+	cursor:default;
+	margin:0;
+	white-space:nowrap;
+	height:24px;
+	padding-left:10px;
+	padding-right:4px;
+}
+* html .cool-item-default {
+	border-style:solid;
+	border-color:white gray gray white;
+}
+.cool-bar-flat .cool-item-default {
+	margin:1px; 
+	border:0 none transparent;
+}
+.cool-item-handler {
+	position:absolute;
+	left:0;
+	font-size:0;
+	margin:2px 2px;
+	padding:0;
+	border-left:4px ridge #ddd;
+	height:18px;
+	cursor:w-resize;
+}
+* html .cool-item-handler {
+	border-left:2px solid white;
+	border-right:2px solid gray;
+}
+.cool-bar-locked .cool-item-handler {
+	border-left:4px solid menu;
+	cursor:default;
+}
+.cool-item-more {
+	display:none;
+	position:absolute;
+	right:1px;
+	padding:2px 1px;
+	font-size:7pt;
+	font-family:Arial, sans-serif;
+}
+.cool-item-more .cool-item-more-arrow {
+	margin-left:-2px;
+}
+.cool-item-more-enabled .cool-item-more {
+	display:block !important;
+	float:right;
+	border:1px solid menu;
+}
+.cool-item-more-enabled .cool-item-more:hover {
+	border:1px outset white;
+}
+.cool-item-more-enabled {
+	padding-right:14px;
+}
+
+.cool-bar-disabled .cool-item-handler {
+	cursor:default;
+}
+.cool-bar-disabled .cool-item-more:hover {
+	border:1px solid menu !important;
+}
+
