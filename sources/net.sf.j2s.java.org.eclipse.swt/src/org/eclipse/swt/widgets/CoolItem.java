@@ -42,6 +42,9 @@ public class CoolItem extends Item {
 	boolean ideal, minimum;
 	
 	Element contentHandle, moreHandle;
+	int idealWidth, idealHeight;
+	int lastCachedWidth, lastCachedHeight;
+	boolean wrap;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -228,7 +231,32 @@ public Rectangle getBounds () {
 	int height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
-	return new Rectangle (0, 0, 0, 0);
+	//Point pt = OS.calcuateRelativePosition(handle, parent.handle);
+	int x = 0;
+	int y = 0;
+	int rowHeight = 0;
+	for (int i = 0; i <= index; i++) {
+		if (i != index) {
+			x += parent.items[i].lastCachedWidth;
+		}
+		if (parent.items[i].wrap) {
+			if (i != index) {
+				x = parent.items[i].lastCachedWidth;
+			} else {
+				x = 0;
+			}
+			y += rowHeight + 2;
+			rowHeight = 0;
+		} else {
+			if (parent.items[i].control == null) {
+				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight - 4);
+			} else {
+				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight);
+			}
+		}
+	}
+	Point size = getSize();
+	return new Rectangle (x, y, size.x, size.y);
 }
 
 /*
@@ -416,6 +444,8 @@ public void setPreferredSize (int width, int height) {
 	width = Math.max (0, width);
 	height = Math.max (0, height);
 	ideal = true;
+	idealWidth = Math.max (0, width - parent.getMargin (index));
+	idealHeight = height;
 	/*
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
@@ -432,8 +462,6 @@ public void setPreferredSize (int width, int height) {
 	if (!minimum) rbBand.cyMinChild = height;
 	OS.SendMessage (hwnd, OS.RB_SETBANDINFO, index, rbBand);
 	*/
-	handle.style.width = width + "px";
-	handle.style.height = height + "px";
 }
 
 /**
@@ -498,7 +526,25 @@ public Point getSize() {
 	int height = rect.bottom - rect.top;
 	return new Point (width, height);
 	*/
-	return new Point (0, 0);
+	int width = 13;
+	int height = 0;
+	if (ideal) {
+		width += idealWidth;
+		height = idealHeight;
+		if (control == null) {
+			height = 4;
+		}
+	} else if (control != null) {
+		height = 0; //control.getBounds().height;
+	} else {
+		height = 4;
+	}
+	if (!parent.isLastItemOfRow (index)) {
+		width += (parent.style & SWT.FLAT) == 0 ? CoolBar.SEPARATOR_WIDTH : 0;
+	}
+	lastCachedWidth = width;
+	lastCachedHeight = height;
+	return new Point (width, height);
 }
 
 /**
@@ -523,6 +569,12 @@ public void setSize (int width, int height) {
 	if (index == -1) return;
 	width = Math.max (0, width);
 	height = Math.max (0, height);
+	if (!ideal) idealWidth = Math.max (0, width - parent.getMargin (index));
+	if (!minimum) idealHeight = height;
+	if (control != null) {
+		Point location = control.getLocation();
+		control.setBounds(11, location.y, width - parent.getMargin (index), height/* - 4*/);
+	}
 	/*
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
@@ -665,8 +717,8 @@ public void setMinimumSize (Point size) {
 }
 
 boolean getWrap() {
-	int index = parent.indexOf (this);
 	/*
+	int index = parent.indexOf (this);
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
@@ -674,12 +726,12 @@ boolean getWrap() {
 	OS.SendMessage (hwnd, OS.RB_GETBANDINFO, index, rbBand);
 	return (rbBand.fStyle & OS.RBBS_BREAK) != 0;
 	*/
-	return false;
+	return wrap;
 }
 
 void setWrap(boolean wrap) {
-	int index = parent.indexOf (this);
 	/*
+	int index = parent.indexOf (this);
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
@@ -692,6 +744,7 @@ void setWrap(boolean wrap) {
 	}
 	OS.SendMessage (hwnd, OS.RB_SETBANDINFO, index, rbBand);
 	*/
+	this.wrap = wrap;
 }
 
 /**

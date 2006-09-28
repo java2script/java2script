@@ -16,6 +16,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -156,13 +157,14 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		OS.SendMessage (handle, OS.RB_GETRECT, count - 1, rect);
 		height = Math.max (height, rect.bottom);
 		*/
-		height = Math.max(height, OS.getContainerHeight(handle));
+		//height = Math.max(height, OS.getContainerHeight(handle));
 		/*
 		SetWindowPos (handle, 0, 0, 0, oldWidth, oldHeight, flags);
 		REBARBANDINFO rbBand = new REBARBANDINFO ();
 		rbBand.cbSize = REBARBANDINFO.sizeof;
 		rbBand.fMask = OS.RBBIM_IDEALSIZE | OS.RBBIM_STYLE;
 		*/
+		int rowHeight = 0;
 		int rowWidth = 0;
 		int separator = (style & SWT.FLAT) == 0 ? SEPARATOR_WIDTH : 0;
 		for (int i = 0; i < count; i++) {
@@ -174,17 +176,34 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			}
 			rowWidth += rbBand.cxIdeal + getMargin (i) + separator;
 			*/
-			if (items[i].handle.style.cssText.indexOf("clear") != -1) {
+			if (items[i].wrap) {
+				System.out.println("wrap...");
 				width = Math.max(width, rowWidth - separator);
 				rowWidth = 0;
+				height += rowHeight;
+				if (i != count - 1) {
+					height += 2;
+				}
+				rowHeight = 0;
 			}
-			if (items[i].control != null) {
-				rowWidth += items[i].control.getSize().x + getMargin (i) + separator;
+			if (items[i].ideal) {
+				rowWidth += items[i].idealWidth + getMargin (i) + separator;
+				if (items[i].control == null) {
+					rowHeight = Math.max(rowHeight, 4);
+				} else {
+					rowHeight = Math.max(rowHeight, items[i].idealHeight);
+				}
 			} else {
-				rowWidth += OS.getContainerWidth(items[i].handle) + getMargin (i) + separator;
+				if (items[i].control != null) {
+					rowWidth += items[i].control.getSize().x + getMargin (i) + separator;
+				} else {
+					rowWidth += 0 + getMargin (i) + separator;
+					rowHeight = Math.max(rowHeight, 4);
+				}
 			}
 		}
 		width = Math.max(width, rowWidth - separator);
+		height += rowHeight;
 		if (redraw) {
 			/*
 			if (OS.COMCTL32_MAJOR >= 6) {
@@ -234,10 +253,12 @@ protected void createHandle () {
 }
 
 void createItem (CoolItem item, int index) {
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
 	int id = 0;
+	id = items.length;
+	/*
 	while (id < items.length && items [id] != null) id++;
 	if (id == items.length) {
 		CoolItem [] newItems = new CoolItem [items.length + 4];
@@ -250,11 +271,14 @@ void createItem (CoolItem item, int index) {
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_TEXT | OS.RBBIM_STYLE | OS.RBBIM_ID;
 	rbBand.fStyle = OS.RBBS_VARIABLEHEIGHT | OS.RBBS_GRIPPERALWAYS;
+	*/
 	if ((item.style & SWT.DROP_DOWN) != 0) {
-		rbBand.fStyle |= OS.RBBS_USECHEVRON;
+		//rbBand.fStyle |= OS.RBBS_USECHEVRON;
 	}
+	/*
 	rbBand.lpText = lpText;
 	rbBand.wID = id;
+	*/
 
 	/*
 	* Feature in Windows.  When inserting an item at end of a row,
@@ -262,12 +286,14 @@ void createItem (CoolItem item, int index) {
 	* side of the cool bar.  The fix is to resize the new items to
 	* the maximum size and then resize the next to last item to the
 	* ideal size.
-	*-/
+	*/
 	int lastIndex = getLastIndexOfRow (index - 1);
 	boolean fixLast = index == lastIndex + 1;
-	if (fixLast) {  	
+	if (fixLast) {
+		/*
 		rbBand.fMask |= OS.RBBIM_SIZE;
-		rbBand.cx = MAX_WIDTH; 
+		rbBand.cx = MAX_WIDTH;
+		*/ 
 	}
 	
 	/*
@@ -277,7 +303,7 @@ void createItem (CoolItem item, int index) {
 	* a new line.  The fix is to detect this case and clear the
 	* RBBS_BREAK flag on the previous item before inserting the
 	* new item.
-	*-/
+	*/
 	if (index == 0 && count > 0) {
 		getItem (0).setWrap (false); 
 	}
@@ -286,25 +312,7 @@ void createItem (CoolItem item, int index) {
 	if (OS.SendMessage (handle, OS.RB_INSERTBAND, index, rbBand) == 0) {
 		error (SWT.ERROR_ITEM_NOT_ADDED);
 	}
-	
-	/* Resize the next to last item to the ideal size *-/
-	if (fixLast) {  	
-		resizeToPreferredWidth (lastIndex);
-	}
-	
-	OS.HeapFree (hHeap, 0, lpText);
-	items [item.id = id] = item;
-	int length = originalItems.length;
-	CoolItem [] newOriginals = new CoolItem [length + 1];
-	System.arraycopy (originalItems, 0, newOriginals, 0, index);
-	System.arraycopy (originalItems, index, newOriginals, index + 1, length - index);
-	newOriginals [index] = item;
-	originalItems = newOriginals;
 	*/
-	int count = items.length;
-	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
-	int id = items.length;
-	items [item.id = id] = item;
 	Element el = document.createElement("DIV");
 	el.className = "cool-item-default";
 	if (index == count) {
@@ -318,22 +326,42 @@ void createItem (CoolItem item, int index) {
 	el.className = "cool-item-handler";
 	item.handle.appendChild(el);
 	
-	el = document.createElement("DIV");
-	el.className = "cool-item-more";
-	item.handle.appendChild(el);
-	item.moreHandle = el;
-	el = document.createElement("SPAN");
-	el.appendChild(document.createTextNode(">"));
-	item.moreHandle.appendChild(el);
-	el = document.createElement("SPAN");
-	el.appendChild(document.createTextNode(">"));
-	el.className = "cool-item-more-arrow";
-	item.moreHandle.appendChild(el);
+	if ((item.style & SWT.DROP_DOWN) != 0) {
+		el = document.createElement("DIV");
+		el.className = "cool-item-more";
+		item.handle.appendChild(el);
+		item.moreHandle = el;
+		el = document.createElement("SPAN");
+		el.appendChild(document.createTextNode(">"));
+		item.moreHandle.appendChild(el);
+		el = document.createElement("SPAN");
+		el.appendChild(document.createTextNode(">"));
+		el.className = "cool-item-more-arrow";
+		item.moreHandle.appendChild(el);
+	}
 	
 	el = document.createElement("DIV");
 	el.className = "cool-item-content";
 	item.handle.appendChild(el);
 	item.contentHandle = el;
+	
+	/* Resize the next to last item to the ideal size */
+	if (fixLast) {  	
+		resizeToPreferredWidth (lastIndex);
+	}
+	
+	item.wrap = false;
+	//OS.HeapFree (hHeap, 0, lpText);
+	items [item.id = id] = item;
+	//*
+	int length = originalItems.length;
+	CoolItem [] newOriginals = new CoolItem [length + 1];
+	System.arraycopy (originalItems, 0, newOriginals, 0, index);
+	System.arraycopy (originalItems, index, newOriginals, index + 1, length - index);
+	newOriginals [index] = item;
+	originalItems = newOriginals;
+	//*/
+	//originalItems[index] = item;
 }
 
 protected void createWidget () {
@@ -346,6 +374,9 @@ void destroyItem (CoolItem item) {
 	/*
 	int index = OS.SendMessage (handle, OS.RB_IDTOINDEX, item.id, 0);
 	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	*/
+	int index = indexOf(item);
+	int count = items.length;
 	if (count != 0) {
 		int lastIndex = getLastIndexOfRow (index);
 		if (index == lastIndex) {
@@ -357,7 +388,7 @@ void destroyItem (CoolItem item) {
 			* item.  The fix is to size the last item of each row 
 			* so that it occupies all the available space to the
 			* right in the row.
-			*-/
+			*/
 			resizeToMaximumWidth (lastIndex - 1);
 		}						
 	}	
@@ -366,7 +397,7 @@ void destroyItem (CoolItem item) {
 	* Feature in Windows.  When Windows removed a rebar
 	* band, it makes the band child invisible.  The fix
 	* is to show the child.
-	*-/		
+	*/		
 	Control control = item.control;
 	boolean wasVisible = control != null && !control.isDisposed() && control.getVisible ();
 
@@ -376,7 +407,7 @@ void destroyItem (CoolItem item) {
 	* In order to avoid an unnecessary layout, temporarily
 	* ignore WM_SIZE.  If the next item is wrapped then a
 	* row will be deleted and the WM_SIZE is necessary.
-	*-/
+	*/
 	CoolItem nextItem = null;
 	if (item.getWrap ()) {
 		if (index + 1 < count) {
@@ -384,9 +415,13 @@ void destroyItem (CoolItem item) {
 			ignoreResize = !nextItem.getWrap ();
 		}
 	}
+	/*
 	if (OS.SendMessage (handle, OS.RB_DELETEBAND, index, 0) == 0) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
+	*/
+	handle.removeChild(items[index].handle);
+	
 	items [item.id] = null;
 	item.id = -1;
 	if (ignoreResize) {
@@ -394,7 +429,7 @@ void destroyItem (CoolItem item) {
 		ignoreResize = false;
 	}
 	
-	/* Restore the visible state tof the control *-/
+	/* Restore the visible state tof the control */
 	if (wasVisible) control.setVisible (true);
 	
 	index = 0;
@@ -407,7 +442,6 @@ void destroyItem (CoolItem item) {
 	System.arraycopy (originalItems, 0, newOriginals, 0, index);
 	System.arraycopy (originalItems, index + 1, newOriginals, index, length - index);
 	originalItems = newOriginals;
-	*/
 }
 
 int getMargin (int index) {
@@ -428,10 +462,10 @@ int getMargin (int index) {
 		* The fix is to add four pixels to the result.
 		*/	
 		//margin += rect.left + 4;
-		margin += 8 + 4;
+		margin += 13;
 	} else {
 		//margin += rect.left + rect.right; 
-		margin += 8 + 8; 
+		margin += 13; 
 	}
 	return margin;
 }
@@ -518,15 +552,20 @@ public int getItemCount () {
  */
 public int [] getItemOrder () {
 	checkWidget ();
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	int [] indices = new int [count];
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_ID;
+	*/
 	for (int i=0; i<count; i++) {
+		/*
 		OS.SendMessage (handle, OS.RB_GETBANDINFO, i, rbBand);
 		CoolItem item = items [rbBand.wID];
+		*/
+		CoolItem item = items [i];
 		int index = 0;
 		while (index<originalItems.length) {
 			if (originalItems [index] == item) break;
@@ -536,8 +575,6 @@ public int [] getItemOrder () {
 		indices [i] = index;
 	}
 	return indices;
-	*/
-	return new int[0];
 }
 
 /**
@@ -558,19 +595,22 @@ public int [] getItemOrder () {
  */
 public CoolItem [] getItems () {
 	checkWidget ();
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	CoolItem [] result = new CoolItem [count];
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_ID;
+	*/
 	for (int i=0; i<count; i++) {
+		/*
 		OS.SendMessage (handle, OS.RB_GETBANDINFO, i, rbBand);
 		result [i] = items [rbBand.wID];
+		*/
+		result[i] = items[i];
 	}
 	return result;
-	*/
-	return items;
 }
 
 /**
@@ -587,15 +627,18 @@ public CoolItem [] getItems () {
  */
 public Point [] getItemSizes () {
 	checkWidget ();	
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	Point [] sizes = new Point [count];
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_CHILDSIZE;
+	*/
 	int separator = (style & SWT.FLAT) == 0 ? SEPARATOR_WIDTH : 0;
-	MARGINS margins = new MARGINS ();
+	//MARGINS margins = new MARGINS ();
 	for (int i=0; i<count; i++) {
+		/*
 		RECT rect = new RECT ();
 		OS.SendMessage (handle, OS.RB_GETRECT, i, rect);
 		OS.SendMessage (handle, OS.RB_GETBANDINFO, i, rbBand);
@@ -606,28 +649,35 @@ public Point [] getItemSizes () {
 		}
 		if (!isLastItemOfRow(i)) rect.right += separator;
 		sizes [i] = new Point (rect.right - rect.left, rbBand.cyChild);
+		*/
+		Point size = items[i].getSize();
+		if (!isLastItemOfRow(i)) size.x += separator;
+		sizes [i] = size;
 	}
 	return sizes;
-	*/
-	return null;
 }
 
 int getLastIndexOfRow (int index) {
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	if (count == 0) return -1;
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();	
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_STYLE;
+	*/
 	for (int i=index + 1; i<count; i++) {
+		/*
 		OS.SendMessage (handle, OS.RB_GETBANDINFO, i, rbBand);
 		if ((rbBand.fStyle & OS.RBBS_BREAK) != 0) {
 			return i - 1;
 		}
+		*/
+		if (items[i].wrap) {
+			return i - 1;
+		}
 	}
 	return count - 1;
-	*/
-	return 0;
 }
 
 boolean isLastItemOfRow (int index) {
@@ -640,7 +690,9 @@ boolean isLastItemOfRow (int index) {
 	OS.SendMessage (handle, OS.RB_GETBANDINFO, index + 1, rbBand);
 	return (rbBand.fStyle & OS.RBBS_BREAK) != 0;
 	*/
-	return false;
+	int count = items.length;
+	if (index + 1 == count) return true;
+	return (items[index + 1].wrap);
 }
 
 /**
@@ -739,6 +791,10 @@ void resizeToPreferredWidth (int index) {
 		OS.SendMessage (handle, OS.RB_SETBANDINFO, index, rbBand);
 	}
 	*/
+	int count = items.length;
+	if (0 <= index && index < count) {
+		//items[index].setSize()
+	}
 }
 
 void resizeToMaximumWidth (int index) {
@@ -879,12 +935,12 @@ public void setItemLayout (int [] itemOrder, int [] wrapIndices, Point [] sizes)
  * </ul>
  */
 void setItemOrder (int [] itemOrder) {
-	/*
 	if (itemOrder == null) error (SWT.ERROR_NULL_ARGUMENT);
-	int itemCount = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int itemCount = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int itemCount = items.length;
 	if (itemOrder.length != itemCount) error (SWT.ERROR_INVALID_ARGUMENT);
 	
-	/* Ensure that itemOrder does not contain any duplicates. *-/
+	/* Ensure that itemOrder does not contain any duplicates. */
 	boolean [] set = new boolean [itemCount];
 	for (int i=0; i<itemOrder.length; i++) {
 		int index = itemOrder [i];
@@ -892,12 +948,14 @@ void setItemOrder (int [] itemOrder) {
 		if (set [index]) error (SWT.ERROR_INVALID_ARGUMENT);
 		set [index] = true;
 	}
-	
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
+	*/
 	for (int i=0; i<itemOrder.length; i++) {
 		int id = originalItems [itemOrder [i]].id;
-		int index = OS.SendMessage (handle, OS.RB_IDTOINDEX, id, 0);
+		//int index = OS.SendMessage (handle, OS.RB_IDTOINDEX, id, 0);
+		int index = id;
 		if (index != i) {
 			int lastItemSrcRow = getLastIndexOfRow (index);
 			int lastItemDstRow = getLastIndexOfRow (i);									
@@ -908,8 +966,13 @@ void setItemOrder (int [] itemOrder) {
 				resizeToPreferredWidth (i);
 			}	
 			
-			/* Move the item *-/
-			OS.SendMessage (handle, OS.RB_MOVEBAND, index, i);
+			/* Move the item */
+			//OS.SendMessage (handle, OS.RB_MOVEBAND, index, i);
+			if (i == handle.childNodes.length - 1) {
+				handle.appendChild(items[index].handle);
+			} else {
+				handle.insertBefore(items[index].handle, handle.childNodes[i]);
+			}
 
 			if (index == lastItemSrcRow && index - 1 >= 0) {
 				resizeToMaximumWidth (index - 1);
@@ -919,7 +982,6 @@ void setItemOrder (int [] itemOrder) {
 			}	
 		}	
 	}
-	*/
 }
 
 /*
@@ -941,17 +1003,21 @@ void setItemOrder (int [] itemOrder) {
  */
 void setItemSizes (Point [] sizes) {
 	if (sizes == null) error (SWT.ERROR_NULL_ARGUMENT);
-	/*
-	int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
+	int count = items.length;
 	if (sizes.length != count) error (SWT.ERROR_INVALID_ARGUMENT);
+	/*
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
 	rbBand.cbSize = REBARBANDINFO.sizeof;
 	rbBand.fMask = OS.RBBIM_ID;
+	*/
 	for (int i=0; i<count; i++) {
+		/*
 		OS.SendMessage (handle, OS.RB_GETBANDINFO, i, rbBand);
 		items [rbBand.wID].setSize (sizes [i].x, sizes [i].y);
+		*/
+		items [i].setSize (sizes [i].x, sizes [i].y);
 	}
-	*/
 }
 
 /**
@@ -1031,6 +1097,26 @@ public void setWrapIndices (int [] indices) {
 		}
 	}
 	setRedraw (true);
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	for (int i = 0; i < items.length; i++) {
+		CoolItem item = items[i];
+		CSSStyle s = item.handle.style;
+		Rectangle bounds = item.getBounds();
+		s.left = bounds.x + "px";
+		s.top = bounds.y + "px";
+		int w = bounds.width - getMargin(i) - getBorderWidth() * 2;
+		s.width = (w > 0 ? w : 0) + "px";
+		s.height = bounds.height + "px";
+		if (item.control != null) {
+			item.control.setSize(w, bounds.height/* - 4*/);
+		}
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 /*
