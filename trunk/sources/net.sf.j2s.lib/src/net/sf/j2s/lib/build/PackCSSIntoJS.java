@@ -106,9 +106,19 @@ public class PackCSSIntoJS {
 						String jsContent2 = jsContent.substring(0, idx3) + ", \"" + cssContent + "\");\r\n" + jsContent.substring(idx2);
 						if (!jsContent.equals(jsContent2)) {
 							System.out.println("Updating " + jsFile.getName() + " ...");
+							/*
 							FileOutputStream fos = new FileOutputStream(jsFile);
 							fos.write(jsContent2.getBytes());
 							fos.close();
+							*/
+							try {
+								FileOutputStream fos = new FileOutputStream(jsFile);
+								fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
+								fos.write(jsContent2.getBytes("UTF-8"));
+								fos.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}

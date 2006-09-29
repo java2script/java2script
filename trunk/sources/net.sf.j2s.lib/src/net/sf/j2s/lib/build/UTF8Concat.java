@@ -24,7 +24,7 @@ import java.io.IOException;
  *
  * 2006-7-29
  */
-public class J2SConcat {
+public class UTF8Concat {
 	/**
 	 * @param args
 	 */
@@ -65,15 +65,6 @@ public class J2SConcat {
 				String s = RegExCompress.readFileAll(new FileInputStream(src));
 				if (s.startsWith(j2sKeySig)) {
 					s = s.substring(j2sKeySig.length());
-				}
-				if (s.startsWith("Clazz.load") || s.startsWith("$_L")) {
-					int idx1 = s.indexOf("{") + 1;
-					if (idx1 != -1) {
-						int idx2 = s.lastIndexOf("}");
-						if (idx2 != -1) {
-							s = s.substring(idx1, idx2);
-						}
-					}
 				}
 				/*
 				if (completelyCompressing) {
