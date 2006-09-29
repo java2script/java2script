@@ -72,59 +72,35 @@
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
-        <concat destfile="${j2s.lib.dist}/j2slib.z.js">
-            <header filtering="no" trimleading="yes">/******************************************************************************
-            	 * Copyright (c) 2005-2006 ognize.com and others.
-            	 * All rights reserved. This program and the accompanying materials
-            	 * are made available under the terms of the Eclipse Public License v1.0
-            	 * which accompanies this distribution, and is available at
-            	 * http://www.eclipse.org/legal/epl-v10.html
-            	 *
-            	 * Web:
-            	 *     http://j2s.sourceforge.net/
-            	 *     http://sourceforge.net/projects/j2s/
-            	 * Contributors:
-            	 *     ognize.com - initial API and implementation
-            	 *****************************************************************************/
-            	/*******
-            	 * @author zhou renjian
-            	 * @create July 12, 2006
-            	 *******/
-            </header>
-        	<filelist dir="${j2s.core.bin}">
-        		<file name="java/lang/Class.js"/>
-        		<file name="java/lang/ClassLoader.js"/>
-        		<file name="java/lang/Console.js"/>
-        		<!--
-        		-->
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.lib.dist}/j2slib.z.js"/>
+        	
+        	<arg value="${j2s.core.bin}"/>
+        	
+    		<arg value="java/lang/Class.js"/>
+    		<arg value="java/lang/ClassLoader.js"/>
+    		<arg value="java/lang/Console.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
     	
     	<!-- j2slibcore.z.js does not contains Console -->
-        <concat destfile="${j2s.lib.dist}/j2slibcore.z.js">
-            <header filtering="no" trimleading="yes">/******************************************************************************
-            	 * Copyright (c) 2005-2006 ognize.com and others.
-            	 * All rights reserved. This program and the accompanying materials
-            	 * are made available under the terms of the Eclipse Public License v1.0
-            	 * which accompanies this distribution, and is available at
-            	 * http://www.eclipse.org/legal/epl-v10.html
-            	 *
-            	 * Web:
-            	 *     http://j2s.sourceforge.net/
-            	 *     http://sourceforge.net/projects/j2s/
-            	 * Contributors:
-            	 *     ognize.com - initial API and implementation
-            	 *****************************************************************************/
-            	/*******
-            	 * @author zhou renjian
-            	 * @create July 12, 2006
-            	 *******/
-            </header>
-        	<filelist dir="${j2s.core.bin}">
-        		<file name="java/lang/Class.js"/>
-        		<file name="java/lang/ClassLoader.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.lib.dist}/j2slibcore.z.js"/>
+        	
+        	<arg value="${j2s.core.bin}"/>
+        	
+    		<arg value="java/lang/Class.js"/>
+    		<arg value="java/lang/ClassLoader.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -403,267 +379,400 @@
           target: pack.java.reflect              
          ================================= -->
     <target name="pack.java.reflect" description="Building j2s-swt-*.z.js">
-        <concat destfile="${j2s.core.bin}/java/lang/reflect.z.js">
-        	<filelist dir="${j2s.core.bin}">
-        		<file name="java/lang/Void.js"/>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.core.bin}/java/lang/reflect.z.js"/>
+        	<arg value="${j2s.core.bin}"/>
+        		<arg value="java/lang/Void.js"/>
         		<!--
-        		<file name="java/lang/reflect/Array.js"/>
+        		<arg value="java/lang/reflect/Array.js"/>
         		-->
-				<file name="java/lang/reflect/AccessibleObject.js"/>
-				<file name="java/lang/reflect/InvocationHandler.js"/>
-				<file name="java/lang/reflect/Member.js"/>
-        		<file name="java/lang/reflect/Modifier.js"/>
-				<file name="java/lang/reflect/Constructor.js"/>
-        		<file name="java/lang/reflect/Field.js"/>
-        		<file name="java/lang/reflect/Method.js"/>
+				<arg value="java/lang/reflect/AccessibleObject.js"/>
+				<arg value="java/lang/reflect/InvocationHandler.js"/>
+				<arg value="java/lang/reflect/Member.js"/>
+        		<arg value="java/lang/reflect/Modifier.js"/>
+				<arg value="java/lang/reflect/Constructor.js"/>
+        		<arg value="java/lang/reflect/Field.js"/>
+        		<arg value="java/lang/reflect/Method.js"/>
         		<!--
-        		<file name="java/lang/reflect/Proxy.js"/>
-        		<file name="java/lang/reflect/ReflectAccess.js"/>
-        		<file name="java/lang/reflect/ReflectPermission.js"/>
+        		<arg value="java/lang/reflect/Proxy.js"/>
+        		<arg value="java/lang/reflect/ReflectAccess.js"/>
+        		<arg value="java/lang/reflect/ReflectPermission.js"/>
         		-->
-        	</filelist>
-        </concat>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
     </target>
 
     <!-- ================================= 
           target: pack.swt.basic              
          ================================= -->
     <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/basic.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<!--
-        		<file name="org/eclipse/swt/SWT.js"/>
-        		<file name="org/eclipse/swt/SWTError.js"/>
-           		<file name="org/eclipse/swt/SWTException.js"/>
-        		
-        		<file name="org/eclipse/swt/internal/SWTEventListener.js"/>
-        		<file name="org/eclipse/swt/internal/SWTEventObject.js"/>
-        		-->
-        		<file name="org/eclipse/swt/internal/SerializableCompatibility.js"/>
-        		<file name="org/eclipse/swt/internal/CloneableCompatibility.js"/>
-        		<file name="org/eclipse/swt/internal/RunnableCompatibility.js"/>
-        		
-        		<file name="org/eclipse/swt/internal/dnd/HTMLEventWrapper.js"/>
-        		<file name="org/eclipse/swt/internal/dnd/DragListener.js"/>
-        		<file name="org/eclipse/swt/internal/dnd/DragAdapter.js"/>
-        		<file name="org/eclipse/swt/internal/dnd/DragEvent.js"/>
-        		
-        		<file name="org/eclipse/swt/internal/struct/WINDOWPOS.js"/>
-        		<file name="org/eclipse/swt/internal/struct/MESSAGE.js"/>
-        		
-        		<file name="org/eclipse/swt/accessibility/Accessible.js"/>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/basic.z.js"/>
+        	
+        	<arg value="${j2s.swt.bin}"/>
+        	
+    		<!--
+    		<arg value="org/eclipse/swt/SWT.js"/>
+    		<arg value="org/eclipse/swt/SWTError.js"/>
+       		<arg value="org/eclipse/swt/SWTException.js"/>
+    		
+    		<arg value="org/eclipse/swt/internal/SWTEventListener.js"/>
+    		<arg value="org/eclipse/swt/internal/SWTEventObject.js"/>
+    		-->
+    		<arg value="org/eclipse/swt/internal/SerializableCompatibility.js"/>
+    		<arg value="org/eclipse/swt/internal/CloneableCompatibility.js"/>
+    		<arg value="org/eclipse/swt/internal/RunnableCompatibility.js"/>
+    		
+    		<arg value="org/eclipse/swt/internal/dnd/HTMLEventWrapper.js"/>
+    		<arg value="org/eclipse/swt/internal/dnd/DragListener.js"/>
+    		<arg value="org/eclipse/swt/internal/dnd/DragAdapter.js"/>
+    		<arg value="org/eclipse/swt/internal/dnd/DragEvent.js"/>
+    		
+    		<arg value="org/eclipse/swt/internal/struct/WINDOWPOS.js"/>
+    		<arg value="org/eclipse/swt/internal/struct/MESSAGE.js"/>
+    		
+    		<arg value="org/eclipse/swt/accessibility/Accessible.js"/>
 
-        		<file name="org/eclipse/swt/graphics/Point.js"/>
-        		<file name="org/eclipse/swt/graphics/Rectangle.js"/>
-        		<file name="org/eclipse/swt/graphics/RGB.js"/>
-        		
-        		<!--
-        		<file name="org/eclipse/swt/graphics/GC.js"/>
-        		-->
+    		<arg value="org/eclipse/swt/graphics/Point.js"/>
+    		<arg value="org/eclipse/swt/graphics/Rectangle.js"/>
+    		<arg value="org/eclipse/swt/graphics/RGB.js"/>
+    		
+    		<!--
+    		<arg value="org/eclipse/swt/graphics/GC.js"/>
+    		-->
 
-        		<file name="org/eclipse/swt/graphics/Resource.js"/>
-        		<file name="org/eclipse/swt/graphics/Color.js"/>
-        		<file name="org/eclipse/swt/graphics/Cursor.js"/>
+    		<arg value="org/eclipse/swt/graphics/Resource.js"/>
+    		<arg value="org/eclipse/swt/graphics/Color.js"/>
+    		<arg value="org/eclipse/swt/graphics/Cursor.js"/>
 
-        		<file name="org/eclipse/swt/graphics/Drawable.js"/>
-        		<file name="org/eclipse/swt/graphics/Device.js"/>
-        		<file name="org/eclipse/swt/graphics/DeviceData.js"/>
+    		<arg value="org/eclipse/swt/graphics/Drawable.js"/>
+    		<arg value="org/eclipse/swt/graphics/Device.js"/>
+    		<arg value="org/eclipse/swt/graphics/DeviceData.js"/>
 
-        		<file name="org/eclipse/swt/widgets/Monitor.js"/>
+    		<arg value="org/eclipse/swt/widgets/Monitor.js"/>
 
-        		<!--
-        		<file name="org/eclipse/swt/graphics/ImageData.js"/>
-        		<file name="org/eclipse/swt/graphics/ImageLoader.js"/>
-        		<file name="org/eclipse/swt/graphics/Image.js"/>
+    		<!--
+    		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
+    		<arg value="org/eclipse/swt/graphics/ImageLoader.js"/>
+    		<arg value="org/eclipse/swt/graphics/Image.js"/>
 
-        		<file name="org/eclipse/swt/graphics/Font.js"/>
-        		<file name="org/eclipse/swt/graphics/FontData.js"/>
-        		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
-        		-->
-
-        	</filelist>
-        </concat>
+    		<arg value="org/eclipse/swt/graphics/Font.js"/>
+    		<arg value="org/eclipse/swt/graphics/FontData.js"/>
+    		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
+    		-->
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
     </target>
 
     <!-- ================================= 
           target: pack.swt.more              
          ================================= -->
     <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/more.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/internal/ResizeHandler.js"/>
-        		<file name="org/eclipse/swt/internal/ResizeSystem.js"/>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/more.z.js"/>
+        	
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/internal/ResizeHandler.js"/>
+        		<arg value="org/eclipse/swt/internal/ResizeSystem.js"/>
 
-        		<file name="org/eclipse/swt/internal/dnd/DragAndDrop.js"/>
-        		<file name="org/eclipse/swt/internal/dnd/DNDUtils.js"/>
-        		<file name="org/eclipse/swt/internal/dnd/ShellFrameDND.js"/>
+        		<arg value="org/eclipse/swt/internal/dnd/DragAndDrop.js"/>
+        		<arg value="org/eclipse/swt/internal/dnd/DNDUtils.js"/>
+        		<arg value="org/eclipse/swt/internal/dnd/ShellFrameDND.js"/>
         		<!--
         		-->
-        		<file name="org/eclipse/swt/internal/browser/OS.js"/>
+        		<arg value="org/eclipse/swt/internal/browser/OS.js"/>
         		
-        		<file name="org/eclipse/swt/graphics/Image.js"/>
-        		<file name="org/eclipse/swt/graphics/ImageData.js"/>
+        		<arg value="org/eclipse/swt/graphics/Image.js"/>
+        		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
 
-        		<file name="org/eclipse/swt/widgets/Item.js"/>
-        		<file name="org/eclipse/swt/widgets/Layout.js"/>
+        		<arg value="org/eclipse/swt/widgets/Item.js"/>
+        		<arg value="org/eclipse/swt/widgets/Layout.js"/>
         		<!--
-        		<file name="org/eclipse/swt/graphics/ImageData.js"/>
-        		<file name="org/eclipse/swt/graphics/ImageLoader.js"/>
+        		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
+        		<arg value="org/eclipse/swt/graphics/ImageLoader.js"/>
 
-        		<file name="org/eclipse/swt/graphics/Font.js"/>
-        		<file name="org/eclipse/swt/graphics/FontData.js"/>
-        		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
+        		<arg value="org/eclipse/swt/graphics/Font.js"/>
+        		<arg value="org/eclipse/swt/graphics/FontData.js"/>
+        		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
         		-->
 
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/GridLayout.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/layout/GridData.js"/>
-    			<file name="org/eclipse/swt/layout/GridLayout.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/FillLayout.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/layout/FillData.js"/>
-    			<file name="org/eclipse/swt/layout/FillLayout.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/RowLayout.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/layout/RowData.js"/>
-    			<file name="org/eclipse/swt/layout/RowLayout.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/layout/FormLayout.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/layout/FormAttachment.js"/>
-        		<file name="org/eclipse/swt/layout/FormData.js"/>
-    			<file name="org/eclipse/swt/layout/FormLayout.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Tray.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/widgets/TrayItem.js"/>
-    			<file name="org/eclipse/swt/widgets/Tray.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/TabFolder.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/TabItem.js"/>
-        		<file name="org/eclipse/swt/widgets/TabFolder.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Tree.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/TreeItem.js"/>
-    			<file name="org/eclipse/swt/widgets/TreeColumn.js"/>
-        		<file name="org/eclipse/swt/widgets/Tree.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/ToolBar.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/ToolItem.js"/>
-        		<file name="org/eclipse/swt/widgets/ToolBar.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Table.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/TableItem.js"/>
-    			<file name="org/eclipse/swt/widgets/TableColumn.js"/>
-        		<file name="org/eclipse/swt/widgets/Table.js"/>
-    			<file name="org/eclipse/swt/internal/dnd/TableColumnDND.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/internal/dnd/SashDND.js"/>
-    			<file name="org/eclipse/swt/widgets/Sash.js"/>
-    			<file name="org/eclipse/swt/custom/SashFormData.js"/>
-    			<file name="org/eclipse/swt/custom/SashFormLayout.js"/>
-    			<file name="org/eclipse/swt/custom/SashForm.js"/>
-        	</filelist>
-        </concat>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
 
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CTabFolder.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/custom/CTabFolderEvent.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolderListener.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolderAdapter.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolder2Listener.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolder2Adapter.js"/>
-    			<file name="org/eclipse/swt/custom/CTabItem.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolderLayout.js"/>
-    			<file name="org/eclipse/swt/custom/CTabFolder.js"/>
-        	</filelist>
-        </concat>
     	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CLable.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/custom/CLayoutData.js"/>
-    			<file name="org/eclipse/swt/custom/CLabel.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/CBanner.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/custom/CBannerLayout.js"/>
-    			<file name="org/eclipse/swt/custom/CBanner.js"/>
-        	</filelist>
-        </concat>
-    	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/custom/ViewForm.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/custom/ViewFormLayout.js"/>
-    			<file name="org/eclipse/swt/custom/ViewForm.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/GridLayout.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/layout/GridData.js"/>
+    			<arg value="org/eclipse/swt/layout/GridLayout.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
 
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Slider.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/internal/dnd/SliderDND.js"/>
-    			<file name="org/eclipse/swt/widgets/Slider.js"/>
-        	</filelist>
-        </concat>
     	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Scale.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/internal/dnd/ScaleDND.js"/>
-    			<file name="org/eclipse/swt/widgets/Scale.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/FillLayout.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/layout/FillData.js"/>
+    			<arg value="org/eclipse/swt/layout/FillLayout.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
     	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Menu.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/MenuItem.js"/>
-        		<file name="org/eclipse/swt/widgets/Menu.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/RowLayout.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/layout/RowData.js"/>
+    			<arg value="org/eclipse/swt/layout/RowLayout.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
     	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/widgets/CoolItem.js"/>
-        		<file name="org/eclipse/swt/widgets/CoolBar.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/FormLayout.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/layout/FormAttachment.js"/>
+        		<arg value="org/eclipse/swt/layout/FormData.js"/>
+    			<arg value="org/eclipse/swt/layout/FormLayout.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
     	
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/graphics/Font.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-    			<file name="org/eclipse/swt/graphics/FontData.js"/>
-        		<file name="org/eclipse/swt/graphics/FontMetrics.js"/>
-        		<file name="org/eclipse/swt/graphics/Font.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Tray.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/widgets/TrayItem.js"/>
+    			<arg value="org/eclipse/swt/widgets/Tray.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/TabFolder.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/TabItem.js"/>
+        		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Tree.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/TreeItem.js"/>
+    			<arg value="org/eclipse/swt/widgets/TreeColumn.js"/>
+        		<arg value="org/eclipse/swt/widgets/Tree.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/ToolBar.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/ToolItem.js"/>
+        		<arg value="org/eclipse/swt/widgets/ToolBar.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Table.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/TableItem.js"/>
+    			<arg value="org/eclipse/swt/widgets/TableColumn.js"/>
+        		<arg value="org/eclipse/swt/widgets/Table.js"/>
+    			<arg value="org/eclipse/swt/internal/dnd/TableColumnDND.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/internal/dnd/SashDND.js"/>
+    			<arg value="org/eclipse/swt/widgets/Sash.js"/>
+    			<arg value="org/eclipse/swt/custom/SashFormData.js"/>
+    			<arg value="org/eclipse/swt/custom/SashFormLayout.js"/>
+    			<arg value="org/eclipse/swt/custom/SashForm.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CTabFolder.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolderEvent.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolderListener.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolderAdapter.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolder2Listener.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolder2Adapter.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabItem.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolderLayout.js"/>
+    			<arg value="org/eclipse/swt/custom/CTabFolder.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CLable.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/custom/CLayoutData.js"/>
+    			<arg value="org/eclipse/swt/custom/CLabel.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CBanner.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/custom/CBannerLayout.js"/>
+    			<arg value="org/eclipse/swt/custom/CBanner.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/ViewForm.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/custom/ViewFormLayout.js"/>
+    			<arg value="org/eclipse/swt/custom/ViewForm.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Slider.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/internal/dnd/SliderDND.js"/>
+    			<arg value="org/eclipse/swt/widgets/Slider.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Scale.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/internal/dnd/ScaleDND.js"/>
+    			<arg value="org/eclipse/swt/widgets/Scale.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Menu.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/MenuItem.js"/>
+        		<arg value="org/eclipse/swt/widgets/Menu.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/CoolItem.js"/>
+        		<arg value="org/eclipse/swt/widgets/CoolBar.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/graphics/Font.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/graphics/FontData.js"/>
+        		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
+        		<arg value="org/eclipse/swt/graphics/Font.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
 
     </target>
 
@@ -672,19 +781,26 @@
           target: pack.swt.shell              
          ================================= -->
     <target name="pack.swt.shell" description="Building j2s-swt-*.z.js">
-        <concat destfile="${j2s.swt.bin}/org/eclipse/swt/widgets/Shell.z.js">
-        	<filelist dir="${j2s.swt.bin}">
-        		<file name="org/eclipse/swt/widgets/Display.js"/>
-        		<file name="org/eclipse/swt/widgets/Widget.js"/>
-        		<file name="org/eclipse/swt/widgets/Control.js"/>
-        		<file name="org/eclipse/swt/widgets/ScrollBar.js"/>
-        		<file name="org/eclipse/swt/widgets/Scrollable.js"/>
-        		<file name="org/eclipse/swt/widgets/Composite.js"/>
-        		<file name="org/eclipse/swt/widgets/Canvas.js"/>
-        		<file name="org/eclipse/swt/widgets/Decorations.js"/>
-        		<file name="org/eclipse/swt/widgets/Shell.js"/>
-        	</filelist>
-        </concat>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Shell.z.js"/>
+        	
+        	<arg value="${j2s.swt.bin}"/>
+        	
+    		<arg value="org/eclipse/swt/widgets/Display.js"/>
+    		<arg value="org/eclipse/swt/widgets/Widget.js"/>
+    		<arg value="org/eclipse/swt/widgets/Control.js"/>
+    		<arg value="org/eclipse/swt/widgets/ScrollBar.js"/>
+    		<arg value="org/eclipse/swt/widgets/Scrollable.js"/>
+    		<arg value="org/eclipse/swt/widgets/Composite.js"/>
+    		<arg value="org/eclipse/swt/widgets/Canvas.js"/>
+    		<arg value="org/eclipse/swt/widgets/Decorations.js"/>
+    		<arg value="org/eclipse/swt/widgets/Shell.js"/>
+
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
     </target>
 	
     <!-- ================================= 
