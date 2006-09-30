@@ -2,9 +2,8 @@
 	position:absolute;
 	background-color:menu;
 	cursor:default;
-}
-.cool-bar-border {
-	border:2px inset white;
+	/*overflow:visible;
+	overflow-x:hidden;*/
 }
 .cool-item-default {
 	position:absolute;
@@ -45,7 +44,7 @@
 }
 .cool-item-content {
 	position:absolute;
-	left:11px;
+	left:10px;
 	top:0;
 }
 .cool-item-more {

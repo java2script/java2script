@@ -85,8 +85,8 @@ public class DNDUtils {
 				oThis.startX, oThis.startY);
 		if (oThis.status == 0) {
 			oThis.status = 1;
-			oThis.startX = evt.x;
-			oThis.startY = evt.y;
+			oThis.startX = dndEvt.startX = evt.x;
+			oThis.startY = dndEvt.startY = evt.y;
 			dndEvt.mouseMoveTo (evt.x, evt.y);
 			oThis.notifyDragBegan (dndEvt);
 		}

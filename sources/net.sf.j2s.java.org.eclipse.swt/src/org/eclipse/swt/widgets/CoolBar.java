@@ -16,6 +16,9 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.DragAdapter;
+import org.eclipse.swt.internal.dnd.DragAndDrop;
+import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -177,13 +180,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			rowWidth += rbBand.cxIdeal + getMargin (i) + separator;
 			*/
 			if (items[i].wrap) {
-				System.out.println("wrap...");
+				//System.out.println("wrap...");
 				width = Math.max(width, rowWidth - separator);
 				rowWidth = 0;
 				height += rowHeight;
-				if (i != count - 1) {
+				//if (i != count - 1) {
 					height += 2;
-				}
+				//}
 				rowHeight = 0;
 			}
 			if (items[i].ideal) {
@@ -252,7 +255,7 @@ protected void createHandle () {
 	handle.className += cssName;
 }
 
-void createItem (CoolItem item, int index) {
+void createItem (final CoolItem item, int index) {
 	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
 	int count = items.length;
 	if (!(0 <= index && index <= count)) error (SWT.ERROR_INVALID_RANGE);
@@ -325,6 +328,46 @@ void createItem (CoolItem item, int index) {
 	el = document.createElement("DIV");
 	el.className = "cool-item-handler";
 	item.handle.appendChild(el);
+	final DragAndDrop dnd = new DragAndDrop();
+	dnd.addDragListener(new DragAdapter() {
+		int dxx;
+		public boolean dragging(DragEvent e) {
+			Rectangle b1 = getBounds();
+			Rectangle b2 = item.getBounds();
+			int idx = indexOf(item);
+			int dx = e.deltaX() - dxx;
+			if (dx != 0 && idx != 0) {
+				CoolItem prevItem = items[idx - 1];
+				Point size = prevItem.getPreferredSize();
+				size.x += dx;
+				if (size.x > 13 && size.x + prevItem.getPosition().x< b1.width) {
+					prevItem.setPreferredSize(size);
+					size = item.getPreferredSize();
+					size.x -= dx;
+					if (size.x > 13 && size.x + b2.x < b1.width) {
+						item.setPreferredSize(size);
+						SetWindowPos(handle, null, left, top, width, height, 0);
+						dxx = e.deltaX();
+					} else {
+						
+					}
+				}
+			}
+//			System.out.println(b1);
+//			System.out.println(b2);
+//			System.out.println(e.currentX + ":" + e.currentY);
+			return true;
+		}
+		public boolean dragBegan(DragEvent e) {
+			dxx = e.deltaX();
+			return true;
+		}
+		public boolean dragEnded(DragEvent e) {
+			dxx = 0;
+			return super.dragEnded(e);
+		}
+	});
+	dnd.bind(el);
 	
 	if ((item.style & SWT.DROP_DOWN) != 0) {
 		el = document.createElement("DIV");
@@ -1103,17 +1146,21 @@ public void setWrapIndices (int [] indices) {
  * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	int bw = getBorderWidth() * 2;
 	for (int i = 0; i < items.length; i++) {
 		CoolItem item = items[i];
 		CSSStyle s = item.handle.style;
 		Rectangle bounds = item.getBounds();
 		s.left = bounds.x + "px";
 		s.top = bounds.y + "px";
-		int w = bounds.width - getMargin(i) - getBorderWidth() * 2;
+		int w = bounds.width - getMargin(i) - bw;
 		s.width = (w > 0 ? w : 0) + "px";
 		s.height = bounds.height + "px";
 		if (item.control != null) {
-			item.control.setSize(w, bounds.height/* - 4*/);
+			item.control.setSize(w + bw - (!isLastItemOfRow(i) ? 2 : 0), bounds.height);
+			Point pt = item.getPosition();
+			item.control.left = pt.x + getMargin(i) - 4;
+			item.control.top = pt.y;
 		}
 	}
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);

@@ -13,6 +13,6 @@
 .composite-border {
 	white-space:nowrap;
 	border-style:solid;
-	border-width:2px;
+	border-width:2px 1px 1px 2px;
 	border-color:black white white black;
 }
