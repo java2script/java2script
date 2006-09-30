@@ -901,8 +901,13 @@ ClazzLoader.tryToLoadNext = function (file) {
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
 			ClazzLoader.updateNode (n);
 		}
+		var lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_CONTENT_LOADED)) != null) {
+			if (lastNode == n) { // Already existed cycle ?
+				n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
+			}
 			ClazzLoader.updateNode (n);
+			lastNode = n;
 		}
 		while (ClazzLoader.checkOptionalCycle (ClazzLoader.clazzTreeRoot)) {
 		}
@@ -944,6 +949,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 				//log ("updating parent ::" + ts[i].parents[k].name);
 				ClazzLoader.updateNode (ts[i].parents[k]);
 			}
+			ts[i].parents = new Array ();
 		}
 		ts.length = 0;
 		return true;
@@ -979,6 +985,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 ClazzLoader.updateNode = function (node) {
 	if (node.name == null 
 			|| node.status >= ClazzNode.STATUS_OPTIONALS_LOADED) {
+		ClazzLoader.destroyClassNode (node);
 		return ;
 	}
 	var isMustsOK = false;
@@ -1140,6 +1147,9 @@ ClazzLoader.updateParents = function (node, level) {
 		}
 		ClazzLoader.updateNode (p);
 	}
+	if (level == ClazzNode.STATUS_OPTIONALS_LOADED) {
+		node.parents = new Array ();
+	}
 };
 
 /* private */
@@ -1187,45 +1197,45 @@ ClazzLoader.findNextOptionalClass = function (status) {
 /*-# findNodeNextOptionalClass -> fNNO #-*/
 ClazzLoader.findNodeNextOptionalClass = function (node, status) {
 	var rnd = ClazzLoader.clazzTreeRoot.random;
-	if (node != null) {
-		if (node.musts != null && node.musts.length != 0) {
-			for (var i = 0; i < node.musts.length; i++) {
-				var n = node.musts[i];
-				if (n.status == status) {
-					return n;
-				} else {
-					if (n.random == rnd) {
-						continue;
-					}
-					n.random = rnd;
-					var nn = ClazzLoader.findNodeNextOptionalClass (n, status);
-					if (nn != null) {
-						return nn;
-					}
-				}
-			}
-		}
-		if (node.optionals != null && node.optionals.length != 0) {
-			for (var i = 0; i < node.optionals.length; i++) {
-				var n = node.optionals[i];
-				if (n.status == status) {
-					return n;
-				} else {
-					if (n.random == rnd) {
-						continue;
-					}
-					n.random = rnd;
-					var nn = ClazzLoader.findNodeNextOptionalClass (n, status);
-					if (nn != null) {
-						return nn;
-					}
-				}
-			}
-		}
-		if (node.status == status) {
-			return node;
+	// search musts first
+	if (node.musts != null && node.musts.length != 0) {
+		var n = ClazzLoader.searchClassArray (node.musts, rnd, status);
+		if (n != null) {
+			return n;
 		}
 	}
+	// search optionals second
+	if (node.optionals != null && node.optionals.length != 0) {
+		var n = ClazzLoader.searchClassArray (node.optionals, rnd, status);
+		if (n != null) {
+			return n;
+		}
+	}
+	// search itself
+	if (node.status == status) {
+		return node;
+	}
+	return null;
+};
+
+/* private */
+ClazzLoader.searchClassArray = function (arr, rnd, status) {
+	for (var i = 0; i < arr.length; i++) {
+		var n = arr[i];
+		if (n.status == status) {
+			return n;
+		} else {
+			if (n.random == rnd) {
+				continue;
+			}
+			n.random = rnd; // mark as visited!
+			var nn = ClazzLoader.findNodeNextOptionalClass (n, status);
+			if (nn != null) {
+				return nn;
+			}
+		}
+	}
+	return null;
 };
 
 /**
@@ -1596,6 +1606,36 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 	}
 	if (!existed) {
 		child.parents[child.parents.length] = parent;
+	}
+};
+
+/* private */
+ClazzLoader.removeFromArray = function (node, arr) {
+	if (arr == null || node == null) {
+		return false;
+	}
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i] == node) {
+			arr[i] = null;
+			for (var j = i; j < arr.length - 1; j++) {
+				arr[j] = arr[j + 1];
+			}
+			arr.length--;
+			return true;
+		}
+	}
+	return false;
+};
+
+/* private */
+ClazzLoader.destroyClassNode = function (node) {
+	var parents = node.parents;
+	if (parents != null) {
+		for (var k = 0; k < parents.length; k++) {
+			if (!ClazzLoader.removeFromArray (node, parents[k].musts)) {
+				ClazzLoader.removeFromArray (node, parents[k].optionals);
+			}
+		}
 	}
 };
 
