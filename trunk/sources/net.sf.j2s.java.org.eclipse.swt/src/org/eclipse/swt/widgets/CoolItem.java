@@ -231,7 +231,13 @@ public Rectangle getBounds () {
 	int height = rect.bottom - rect.top;
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
-	//Point pt = OS.calcuateRelativePosition(handle, parent.handle);
+	Point size = getSize();
+	Point pos = getPosition();
+	return new Rectangle (pos.x, pos.y, size.x, size.y);
+}
+
+Point getPosition() {
+	int index = parent.indexOf (this);
 	int x = 0;
 	int y = 0;
 	int rowHeight = 0;
@@ -255,8 +261,7 @@ public Rectangle getBounds () {
 			}
 		}
 	}
-	Point size = getSize();
-	return new Rectangle (x, y, size.x, size.y);
+	return new Point(x, y);
 }
 
 /*
@@ -423,7 +428,11 @@ public Point getPreferredSize () {
 	int width = rbBand.cxIdeal + parent.getMargin (index);
 	return new Point (width, rbBand.cyMinChild);
 	*/
-	return new Point (0, 0);
+	if (ideal) {
+		return new Point (idealWidth + parent.getMargin (index), idealHeight);
+	} else {
+		return getSize();
+	}
 }
  
 /**
@@ -541,6 +550,8 @@ public Point getSize() {
 	}
 	if (!parent.isLastItemOfRow (index)) {
 		width += (parent.style & SWT.FLAT) == 0 ? CoolBar.SEPARATOR_WIDTH : 0;
+	} else if (ideal) {
+		width = parent.width - 2 * parent.getBorderWidth() - getPosition().x;
 	}
 	lastCachedWidth = width;
 	lastCachedHeight = height;
