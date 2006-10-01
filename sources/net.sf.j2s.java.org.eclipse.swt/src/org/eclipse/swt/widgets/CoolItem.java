@@ -43,6 +43,8 @@ public class CoolItem extends Item {
 	
 	Element contentHandle, moreHandle;
 	int idealWidth, idealHeight;
+	int minimumWidth, minimumHeight;
+	int preferredWidth, preferredHeight;
 	int lastCachedWidth, lastCachedHeight;
 	boolean wrap;
 
@@ -429,9 +431,9 @@ public Point getPreferredSize () {
 	return new Point (width, rbBand.cyMinChild);
 	*/
 	if (ideal) {
-		return new Point (idealWidth + parent.getMargin (index), idealHeight);
+		return new Point(preferredWidth, preferredHeight);
 	} else {
-		return getSize();
+		return new Point(parent.getMargin(index), (minimum ? minimumHeight : 0));
 	}
 }
  
@@ -453,8 +455,10 @@ public void setPreferredSize (int width, int height) {
 	width = Math.max (0, width);
 	height = Math.max (0, height);
 	ideal = true;
-	idealWidth = Math.max (0, width - parent.getMargin (index));
+	idealWidth = Math.max (0, width - 9);
 	idealHeight = height;
+	preferredWidth = width;
+	preferredHeight = height;
 	/*
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
@@ -535,10 +539,11 @@ public Point getSize() {
 	int height = rect.bottom - rect.top;
 	return new Point (width, height);
 	*/
-	int width = 13;
+	int width = 0;
 	int height = 0;
+	
+	height = idealHeight;
 	if (ideal) {
-		width += idealWidth;
 		height = idealHeight;
 		if (control == null) {
 			height = 4;
@@ -548,11 +553,18 @@ public Point getSize() {
 	} else {
 		height = 4;
 	}
-	if (!parent.isLastItemOfRow (index)) {
-		width += (parent.style & SWT.FLAT) == 0 ? CoolBar.SEPARATOR_WIDTH : 0;
-	} else if (ideal) {
+	if (!parent.isLastItemOfRow (parent.indexOf(this))) {
+		if (minimumWidth != 0) {
+			width = 9 + Math.max(idealWidth, minimumWidth + 4) + 2;
+		} else if (!ideal) {
+			width = 9 + 4 + 2;
+		} else {
+			width = 9 + idealWidth + 2;
+		}
+	} else {
 		width = parent.width - 2 * parent.getBorderWidth() - getPosition().x;
 	}
+
 	lastCachedWidth = width;
 	lastCachedHeight = height;
 	return new Point (width, height);
@@ -666,7 +678,11 @@ public Point getMinimumSize () {
 	OS.SendMessage (hwnd, OS.RB_GETBANDINFO, index, rbBand);
 	return new Point (rbBand.cxMinChild, rbBand.cyMinChild);
 	*/
-	return new Point(32, 16);
+	if (minimum) {
+		return new Point(minimumWidth, minimumHeight);
+	} else {
+		return new Point(0, 0);
+	}
 }
 
 /**
@@ -690,6 +706,8 @@ public void setMinimumSize (int width, int height) {
 	width = Math.max (0, width);
 	height = Math.max (0, height);
 	minimum = true;
+	minimumWidth = width;
+	minimumHeight = height;
 	/*
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();

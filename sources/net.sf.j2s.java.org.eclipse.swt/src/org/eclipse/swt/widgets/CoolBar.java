@@ -190,7 +190,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 				rowHeight = 0;
 			}
 			if (items[i].ideal) {
-				rowWidth += items[i].idealWidth + getMargin (i) + separator;
+				rowWidth += 7 + 2 + Math.max(items[i].idealWidth, items[i].minimumWidth + 2) + separator;
 				if (items[i].control == null) {
 					rowHeight = Math.max(rowHeight, 4);
 				} else {
@@ -198,9 +198,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 				}
 			} else {
 				if (items[i].control != null) {
-					rowWidth += items[i].control.getSize().x + getMargin (i) + separator;
+					rowWidth += items[i].control.getSize().x + 9 + 2 + 2 + separator;
 				} else {
-					rowWidth += 0 + getMargin (i) + separator;
+					rowWidth += 9 + 2 + 2 + separator;
 					rowHeight = Math.max(rowHeight, 4);
 				}
 			}
@@ -332,39 +332,21 @@ void createItem (final CoolItem item, int index) {
 	dnd.addDragListener(new DragAdapter() {
 		int dxx;
 		public boolean dragging(DragEvent e) {
-			Rectangle b1 = getBounds();
-			Rectangle b2 = item.getBounds();
+//			Rectangle b1 = getBounds();
+//			Rectangle b2 = item.getBounds();
 			int idx = indexOf(item);
 			int dx = e.deltaX() - dxx;
-			if (dx != 0 && idx != 0) {
-				CoolItem prevItem = items[idx - 1];
-				Point size = prevItem.getPreferredSize();
-				size.x += dx;
-				if (size.x > 13 && size.x + prevItem.getPosition().x< b1.width) {
-					prevItem.setPreferredSize(size);
-					size = item.getPreferredSize();
-					size.x -= dx;
-					if (size.x > 13 && size.x + b2.x < b1.width) {
-						item.setPreferredSize(size);
-						SetWindowPos(handle, null, left, top, width, height, 0);
-						dxx = e.deltaX();
-					} else {
-						
-					}
+			if (dx != 0) {
+				//System.out.println("//" + dx);
+				if (moveDelta(idx, 0, 0, dx, 0)) {
+					dxx = e.deltaX();
 				}
 			}
-//			System.out.println(b1);
-//			System.out.println(b2);
-//			System.out.println(e.currentX + ":" + e.currentY);
 			return true;
 		}
 		public boolean dragBegan(DragEvent e) {
-			dxx = e.deltaX();
-			return true;
-		}
-		public boolean dragEnded(DragEvent e) {
 			dxx = 0;
-			return super.dragEnded(e);
+			return true;
 		}
 	});
 	dnd.bind(el);
@@ -405,6 +387,148 @@ void createItem (final CoolItem item, int index) {
 	originalItems = newOriginals;
 	//*/
 	//originalItems[index] = item;
+}
+
+boolean moveDelta(int index, int cx, int cy, int dx, int dy) {
+	if (dx == 0 && dy == 0) return false;
+	boolean needLayout = false;
+	if (dy == 0) {
+		int[] ws = new int[items.length];
+		for (int i = 0; i < ws.length; i++) {
+			ws[i] = items[i].idealWidth;
+		}
+		boolean needCalculate = false;
+		
+		CoolItem item = items[index];
+		if (item.wrap && (dx < 0 || isLastItemOfRow(index))) {
+			return false;
+		}
+		if ((index == 0 && items.length > 1) // The first cool item
+				|| (item.wrap && !isLastItemOfRow(index))) { // The second+ line item
+			if (dx >= item.lastCachedWidth) {
+				CoolItem next = items[index + 1];
+				items[index] = next;
+				items[index + 1] = item;
+				int width = next.idealWidth;
+				next.idealWidth = item.idealWidth;
+				item.idealWidth = width;
+				dx = dx - item.lastCachedWidth;
+				index++;
+				needLayout = true;
+			}
+		}
+		if (dx != 0 && index > 0 && !(item.wrap && !isLastItemOfRow(index))) {
+			CoolItem cur = item;
+			CoolItem prev = items[index - 1];
+			int idx = index - 1;
+			while (dx < 0) { // Move left
+				if (prev.lastCachedWidth + dx < minWidth(prev)) {
+					int ddx = prev.lastCachedWidth - minWidth(prev); // > 0
+					prev.idealWidth -= ddx;
+					item.idealWidth += ddx;
+					needCalculate = true;
+					dx += ddx;
+					if (dx < 0) {
+						if (idx - 1 >= 0 && !items[idx].wrap) {
+							idx--;
+							prev = items[idx];
+						} else {
+							if (dx + 11 <= 0) {
+								CoolItem swpItem = prev; 
+								int swpIndex = index;
+								while (dx + minWidth(swpItem) <= 0) {
+									dx += minWidth(swpItem);
+									swpItem = items[swpIndex - 1]; 
+									items[swpIndex - 1] = items[swpIndex];
+									items[swpIndex] = swpItem;
+									if (swpItem.wrap) {
+										items[swpIndex - 1].wrap = true;
+										swpItem.wrap = false;
+									}
+									needLayout = true;
+									swpIndex--;
+									if (swpIndex == 0 || swpItem.wrap) {
+										break;
+									}
+								}
+							}
+							//prev.idealWidth -= dx;
+							dx = 0; // break dx < 0 loop
+							break;
+						}
+					}
+				} else {
+					break;
+				}
+			}
+			CoolItem next = null;
+			idx = index;
+			while (dx > 0 && cur.lastCachedWidth - dx < minWidth(cur)) { 
+				// reach current item's minimum size
+				int dxx = cur.lastCachedWidth - minWidth(cur); 
+				prev.idealWidth += dxx;
+				cur.idealWidth -= dxx;
+				needCalculate = true;
+				dx -= dxx;
+				if (dx > 0) { // need to push right more, select the next item
+					if (idx + 1 < items.length && !isLastItemOfRow(idx)) {
+						idx++;
+						cur = items[idx];
+						if (next == null) {
+							next = cur;
+						}
+					} else {
+						// Already piled up at the end. Try to swap the selected item
+						if (dx >= 11 && next != null) {
+							CoolItem swpItem = next; 
+							int swpIndex = index;
+							while (dx >= minWidth(swpItem)) {
+								items[swpIndex + 1] = items[swpIndex];
+								items[swpIndex] = swpItem;
+								swpItem = items[swpIndex + 1];
+								needLayout = true;
+								dx -= minWidth(swpItem);
+								swpIndex++;
+								if (swpIndex >= items.length || isLastItemOfRow(swpIndex)) {
+									break;
+								}
+							}
+						}
+						dx = 0;
+						break; // break while loop
+					}
+				}
+			}
+			prev.idealWidth += dx;
+			if (dx != 0) {
+				needCalculate = true;
+			}
+			if (item != cur) {
+				if (cur.idealWidth - dx < 0) {
+					if (cur.idealWidth != 0) {
+						needCalculate = true;
+					}
+					cur.idealWidth = 0;
+				} else {
+					cur.idealWidth -= dx;
+				}
+			} else {
+				item.idealWidth -= dx;
+			}
+		}
+		if (needCalculate && !needLayout) {
+			for (int i = 0; i < ws.length; i++) {
+				if (ws[i] != items[i].idealWidth) {
+					needLayout = true;
+					break;
+				}
+			}
+		}
+	}
+	if (needLayout) {
+		SetWindowPos(handle, null, 0, 0, width, height, -1);
+	}
+	return needLayout;
 }
 
 protected void createWidget () {
@@ -497,20 +621,26 @@ int getMargin (int index) {
 	}
 	RECT rect = new RECT ();
 	OS.SendMessage (handle, OS.RB_GETBANDBORDERS, index, rect);
-	*/
 	if ((style & SWT.FLAT) != 0) {
 		/*
 		* Bug in Windows.  When the style bit  RBS_BANDBORDERS is not set
 		* the rectangle returned by RBS_BANDBORDERS is four pixels too small.
 		* The fix is to add four pixels to the result.
-		*/	
-		//margin += rect.left + 4;
-		margin += 13;
+		*-/	
+		margin += rect.left + 4;
 	} else {
-		//margin += rect.left + rect.right; 
-		margin += 13; 
+		margin += rect.left + rect.right; 
+	}
+	*/
+	margin = 7 + 2;
+	if (!isLastItemOfRow(index)) {
+		margin += 2;
 	}
 	return margin;
+}
+
+int minWidth(CoolItem item) {
+	return 7 + 2 + item.minimumWidth + (item.minimumWidth != 0 ? 4 : 0) + (!isLastItemOfRow(indexOf(item)) ? 2 : 0);
 }
 
 /* (non-Javadoc)
@@ -1153,15 +1283,19 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		Rectangle bounds = item.getBounds();
 		s.left = bounds.x + "px";
 		s.top = bounds.y + "px";
-		int w = bounds.width - getMargin(i) - bw;
+		//int w = bounds.width - getMargin(i) - bw;
+		int w = bounds.width - 11;
 		s.width = (w > 0 ? w : 0) + "px";
 		s.height = bounds.height + "px";
 		if (item.control != null) {
-			item.control.setSize(w + bw - (!isLastItemOfRow(i) ? 2 : 0), bounds.height);
+			item.control.setSize(w - 2 - (isLastItemOfRow(i) ? 0 : 2), bounds.height);
 			Point pt = item.getPosition();
-			item.control.left = pt.x + getMargin(i) - 4;
+			item.control.left = pt.x + 9;
 			item.control.top = pt.y;
 		}
+	}
+	if (uFlags == -1) {
+		return false;
 	}
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
