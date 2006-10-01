@@ -424,7 +424,246 @@ public class CoolBarTest extends AsyncTestCase {
 		display.dispose ();
 	}
 	// */
+	public void testCoolBarItemWrapControlSize() {
+		Display display = new Display ();
+		final Shell shell = new Shell(display);
+		shell.setLayout(new GridLayout());
+		
+		final CoolBar bar5 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem5 = new CoolItem(bar5, SWT.NONE);
+		final Label label5 = new Label(bar5, SWT.NONE);
+		label5.setText("Hello World");
+		toolItem5.setControl(label5);
+		toolItem5.setPreferredSize(200, 24);
+		final CoolItem toolItem52 = new CoolItem(bar5, SWT.NONE);
+		final Label label52 = new Label(bar5, SWT.NONE);
+		label52.setText("Hello World");
+		toolItem52.setControl(label52);
+		toolItem52.setPreferredSize(100, 24);
+		final CoolItem toolItem53 = new CoolItem(bar5, SWT.NONE);
+		final Label label53 = new Label(bar5, SWT.NONE);
+		label53.setText("World");
+		toolItem53.setControl(label53);
+		toolItem53.setPreferredSize(60, 24);
+		final CoolItem toolItem54 = new CoolItem(bar5, SWT.NONE);
+		final Label label54 = new Label(bar5, SWT.NONE);
+		label54.setText("World");
+		toolItem54.setControl(label54);
+		toolItem54.setPreferredSize(60, 24);
+		bar5.setWrapIndices(new int[] { 3 });
+		
+		final CoolBar bar6 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem6 = new CoolItem(bar6, SWT.NONE);
+		final Text text6 = new Text(bar6, SWT.BORDER);
+		toolItem6.setControl(text6);
+		toolItem6.setPreferredSize(200, 24);
+		final CoolItem toolItem62 = new CoolItem(bar6, SWT.NONE);
+		final Text text62 = new Text(bar6, SWT.BORDER);
+		toolItem62.setControl(text62);
+		toolItem62.setPreferredSize(120, 24);
+		final CoolItem toolItem63 = new CoolItem(bar6, SWT.NONE);
+		final Text text63 = new Text(bar6, SWT.BORDER);
+		toolItem63.setControl(text63);
+		toolItem63.setPreferredSize(100, 24);
+		final CoolItem toolItem64 = new CoolItem(bar6, SWT.NONE);
+		final Text text64 = new Text(bar6, SWT.BORDER);
+		toolItem64.setControl(text64);
+		toolItem64.setPreferredSize(160, 24);
+		final CoolItem toolItem65 = new CoolItem(bar6, SWT.NONE);
+		final Text text65 = new Text(bar6, SWT.BORDER);
+		toolItem65.setControl(text65);
+		toolItem65.setPreferredSize(30, 24);
+		bar6.setWrapIndices(new int[] { 2 });
+		shell.pack();
+		shell.setLocation(320, 0);
+		shell.open ();
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+				System.out.println(bar5.getSize());
+				System.out.println(bar6.getSize());
+				System.out.println(label5.getBounds());
+				System.out.println(text6.getBounds());
+				
+				System.out.println(label52.getBounds());
+				System.out.println(text62.getBounds());
+				System.out.println(label53.getBounds());
+				System.out.println(text63.getBounds());
+				System.out.println(label54.getBounds());
+				System.out.println(text64.getBounds());
+				System.out.println(text65.getBounds());
+
+				assertEquals(bar5.getSize(), new Point(368, 54));
+				assertEquals(bar6.getSize(), new Point(326, 54));
+				assertEquals(label5.getBounds(), new Rectangle(9, 0, 187, 24));
+				assertEquals(text6.getBounds(), new Rectangle(9, 0, 187, 24));
+				assertEquals(label52.getBounds(), new Rectangle(211, 0, 87, 24));
+				assertEquals(text62.getBounds(), new Rectangle(211, 0, 107, 24));
+				assertEquals(label53.getBounds(), new Rectangle(313, 0, 47, 24));
+				assertEquals(text63.getBounds(), new Rectangle(9, 26, 87, 24));
+				assertEquals(label54.getBounds(), new Rectangle(9, 26, 351, 24));
+				assertEquals(text64.getBounds(), new Rectangle(111, 26, 147, 24));
+				assertEquals(text65.getBounds(), new Rectangle(273, 26, 45, 24));
+			}
+		});
+		display.dispose ();
+	}
 	
+	
+	public void testCoolBarItemWrap3() {
+		Display display = new Display ();
+		final Shell shell = new Shell(display);
+		shell.setLayout(new GridLayout());
+		
+		final CoolBar bar5 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem5 = new CoolItem(bar5, SWT.NONE);
+		Label label5 = new Label(bar5, SWT.NONE);
+		label5.setText("Hello World");
+		toolItem5.setControl(label5);
+		toolItem5.setPreferredSize(200, 24);
+		final CoolItem toolItem52 = new CoolItem(bar5, SWT.NONE);
+		Label label52 = new Label(bar5, SWT.NONE);
+		label52.setText("Hello World");
+		toolItem52.setControl(label52);
+		toolItem52.setPreferredSize(100, 24);
+		final CoolItem toolItem53 = new CoolItem(bar5, SWT.NONE);
+		Label label53 = new Label(bar5, SWT.NONE);
+		label53.setText("World");
+		toolItem53.setControl(label53);
+		toolItem53.setPreferredSize(60, 24);
+		final CoolItem toolItem54 = new CoolItem(bar5, SWT.NONE);
+		Label label54 = new Label(bar5, SWT.NONE);
+		label54.setText("World");
+		toolItem54.setControl(label54);
+		toolItem54.setPreferredSize(60, 24);
+		bar5.setWrapIndices(new int[] { 3 });
+		
+		final CoolBar bar6 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem6 = new CoolItem(bar6, SWT.NONE);
+		Text text6 = new Text(bar6, SWT.BORDER);
+		toolItem6.setControl(text6);
+		toolItem6.setPreferredSize(200, 24);
+		final CoolItem toolItem62 = new CoolItem(bar6, SWT.NONE);
+		Text text62 = new Text(bar6, SWT.BORDER);
+		toolItem62.setControl(text62);
+		toolItem62.setPreferredSize(120, 24);
+		final CoolItem toolItem63 = new CoolItem(bar6, SWT.NONE);
+		Text text63 = new Text(bar6, SWT.BORDER);
+		toolItem63.setControl(text63);
+		toolItem63.setPreferredSize(100, 24);
+		final CoolItem toolItem64 = new CoolItem(bar6, SWT.NONE);
+		Text text64 = new Text(bar6, SWT.BORDER);
+		toolItem64.setControl(text64);
+		toolItem64.setPreferredSize(160, 24);
+		final CoolItem toolItem65 = new CoolItem(bar6, SWT.NONE);
+		Text text65 = new Text(bar6, SWT.BORDER);
+		toolItem65.setControl(text65);
+		toolItem65.setPreferredSize(30, 24);
+		bar6.setWrapIndices(new int[] { 2 });
+		shell.pack();
+		shell.setLocation(320, 0);
+		shell.open ();
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+				System.out.println(bar5.getSize());
+				System.out.println(bar6.getSize());
+				System.out.println(toolItem5.getBounds());
+				System.out.println(toolItem6.getBounds());
+				
+				System.out.println(toolItem52.getBounds());
+				System.out.println(toolItem62.getBounds());
+				System.out.println(toolItem53.getBounds());
+				System.out.println(toolItem63.getBounds());
+				System.out.println(toolItem54.getBounds());
+				System.out.println(toolItem64.getBounds());
+				System.out.println(toolItem65.getBounds());
+
+				assertEquals(bar5.getSize(), new Point(368, 54));
+				assertEquals(bar6.getSize(), new Point(326, 54));
+				assertEquals(toolItem5.getBounds(), new Rectangle(0, 0, 202, 24));
+				assertEquals(toolItem6.getBounds(), new Rectangle(0, 0, 202, 24));
+				assertEquals(toolItem52.getBounds(), new Rectangle(202, 0, 102, 24));
+				assertEquals(toolItem62.getBounds(), new Rectangle(202, 0, 120, 24));
+				assertEquals(toolItem53.getBounds(), new Rectangle(304, 0, 60, 24));
+				assertEquals(toolItem63.getBounds(), new Rectangle(0, 26, 102, 24));
+				assertEquals(toolItem54.getBounds(), new Rectangle(0, 26, 364, 24));
+				assertEquals(toolItem64.getBounds(), new Rectangle(102, 26, 162, 24));
+				assertEquals(toolItem65.getBounds(), new Rectangle(264, 26, 58, 24));
+			}
+		});
+		display.dispose ();
+	}
+	
+	public void testCoolBarItemWrap2() {
+		Display display = new Display ();
+		final Shell shell = new Shell(display);
+		shell.setLayout(new GridLayout());
+		
+		final CoolBar bar5 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem5 = new CoolItem(bar5, SWT.NONE);
+		Label label5 = new Label(bar5, SWT.NONE);
+		label5.setText("Hello World");
+		toolItem5.setControl(label5);
+		toolItem5.setPreferredSize(200, 24);
+		final CoolItem toolItem52 = new CoolItem(bar5, SWT.NONE);
+		Label label52 = new Label(bar5, SWT.NONE);
+		label52.setText("Hello World");
+		toolItem52.setControl(label52);
+		toolItem52.setPreferredSize(100, 24);
+		final CoolItem toolItem53 = new CoolItem(bar5, SWT.NONE);
+		Label label53 = new Label(bar5, SWT.NONE);
+		label53.setText("World");
+		toolItem53.setControl(label53);
+		toolItem53.setPreferredSize(60, 24);
+		
+		final CoolBar bar6 = new CoolBar(shell, SWT.BORDER);
+		final CoolItem toolItem6 = new CoolItem(bar6, SWT.NONE);
+		Text text6 = new Text(bar6, SWT.BORDER);
+		toolItem6.setControl(text6);
+		toolItem6.setPreferredSize(200, 24);
+		final CoolItem toolItem62 = new CoolItem(bar6, SWT.NONE);
+		Text text62 = new Text(bar6, SWT.BORDER);
+		toolItem62.setControl(text62);
+		toolItem62.setPreferredSize(120, 24);
+		final CoolItem toolItem63 = new CoolItem(bar6, SWT.NONE);
+		Text text63 = new Text(bar6, SWT.BORDER);
+		toolItem63.setControl(text63);
+		toolItem63.setPreferredSize(100, 24);
+		final CoolItem toolItem64 = new CoolItem(bar6, SWT.NONE);
+		Text text64 = new Text(bar6, SWT.BORDER);
+		toolItem64.setControl(text64);
+		toolItem64.setPreferredSize(160, 24);
+		bar6.setWrapIndices(new int[] { 2 });
+		shell.pack();
+		shell.setLocation(320, 0);
+		shell.open ();
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+				System.out.println(bar5.getSize());
+				System.out.println(bar6.getSize());
+				System.out.println(toolItem5.getBounds());
+				System.out.println(toolItem6.getBounds());
+				
+				System.out.println(toolItem52.getBounds());
+				System.out.println(toolItem62.getBounds());
+				System.out.println(toolItem53.getBounds());
+				System.out.println(toolItem63.getBounds());
+				System.out.println(toolItem64.getBounds());
+
+				assertEquals(bar5.getSize(), new Point(368, 28));
+				assertEquals(bar6.getSize(), new Point(326, 54));
+				assertEquals(toolItem5.getBounds(), new Rectangle(0, 0, 202, 24));
+				assertEquals(toolItem6.getBounds(), new Rectangle(0, 0, 202, 24));
+				assertEquals(toolItem52.getBounds(), new Rectangle(202, 0, 102, 24));
+				assertEquals(toolItem62.getBounds(), new Rectangle(202, 0, 120, 24));
+				assertEquals(toolItem53.getBounds(), new Rectangle(304, 0, 60, 24));
+				assertEquals(toolItem63.getBounds(), new Rectangle(0, 26, 102, 24));
+				assertEquals(toolItem64.getBounds(), new Rectangle(102, 26, 220, 24));
+			}
+		});
+		display.dispose ();
+	}
+
+
 	public void testCoolBarItemWrap() {
 		Display display = new Display ();
 		final Shell shell = new Shell(display);
