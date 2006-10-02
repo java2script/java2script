@@ -1,15 +1,12 @@
 package net.sf.j2s.ui.actions;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.ui.actions.ExtractMethodAction;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -72,6 +69,14 @@ public class OpenJSEditorAction implements IEditorActionDelegate {
 			ICompilationUnit unit = SelectionConverter.getInputAsCompilationUnit(editor);
 			boolean enabled = false;
 			if (unit != null) {
+				IJavaModel javaModel = unit.getJavaModel();
+				if (javaModel == null) {
+					return; 
+				}
+				IResource resource = javaModel.getResource();
+				if (resource == null){
+					return;
+				}
 				enabled = UnitJavaScriptUtil.isUnitJSExisted(unit);
 			}
 			if (!enabled) {
