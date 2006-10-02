@@ -72,19 +72,17 @@ public class CoolItem {
 				x += parent.items[i].lastCachedWidth;
 			}
 			if (parent.items[i].wrap) {
+				y += rowHeight + 2;
 				if (i != index) {
 					x = parent.items[i].lastCachedWidth;
 				} else {
 					x = 0;
 				}
-				y += rowHeight + 2;
-				rowHeight = 0;
+			}
+			if (parent.items[i].control == null) {
+				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight - 4);
 			} else {
-				if (parent.items[i].control == null) {
-					rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight - 4);
-				} else {
-					rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight);
-				}
+				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight);
 			}
 		}
 		return new Point(x, y);
