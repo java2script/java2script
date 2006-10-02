@@ -93,8 +93,9 @@ public class CoolBar {
 	int minWidth(CoolItem item) {
 		return 7 + 2 + item.minimumWidth + (item.minimumWidth != 0 ? 4 : 0) + (!isLastItemOfRow(indexOf(item)) ? 2 : 0);
 	}
-	boolean moveDelta(int index, int cx, int cy, int dx, int dy) {
+	boolean moveDelta(int index, int dx, int dy) {
 		if (dx == 0 && dy == 0) return false;
+		boolean needResize = false;
 		boolean needLayout = false;
 		if (dy == 0) {
 			int[] ws = new int[items.length];
@@ -113,6 +114,10 @@ public class CoolBar {
 					CoolItem next = items[index + 1];
 					items[index] = next;
 					items[index + 1] = item;
+					if (item.wrap) {
+						next.wrap = true;
+						item.wrap = false;
+					}
 					int width = next.idealWidth;
 					next.idealWidth = item.idealWidth;
 					item.idealWidth = width;
@@ -189,6 +194,10 @@ public class CoolBar {
 								while (dx >= minWidth(swpItem)) {
 									items[swpIndex + 1] = items[swpIndex];
 									items[swpIndex] = swpItem;
+									if (swpItem.wrap) {
+										items[swpIndex].wrap = true;
+										swpItem.wrap = false;
+									}
 									swpItem = items[swpIndex + 1];
 									needLayout = true;
 									dx -= minWidth(swpItem);
@@ -228,13 +237,192 @@ public class CoolBar {
 					}
 				}
 			}
+		} else { // dy != 0
+			int line = verticalLine(index);
+			if (line + dy < 0) {
+				if (index == 0 && isLastItemOfRow(index)) {
+					// already the top line, no need to add a new line
+				} else {
+					// Move upwards, add a new line
+					CoolItem ci = items[index];
+					if ((index == 0 && items.length > 1) // first line's first item moves upwards
+							|| (ci.wrap && index < items.length - 1)) { // some inner item
+						items[index + 1].wrap = true;
+					}
+					for (int i = index; i > 0; i--) {
+						items[i] = items[i - 1];
+					}
+					items[0] = ci;
+					items[1].wrap = true;
+					ci.wrap = false;
+					needLayout = true;
+					needResize = true;
+				}
+			} else if (line + dy < getVerticalLines()) {
+				// inline move, no need to create new line, but maybe remove lines
+				int lineNumber = line + dy;
+				int i = 0;
+				for (i = 0; i < items.length; i++) {
+					if (lineNumber == 0) {
+						// should always breaks from here
+						//i++;
+						break;
+					}
+					if (items[i].wrap) {
+						lineNumber--;
+					}
+				}
+				if (i > 0) i--; // re-adjust the index the above line's last item
+				CoolItem ci = items[index];
+				if (index == 0 && isLastItemOfRow(index)) {
+					needResize = true;
+				}
+				if (ci.wrap) {
+					if (isLastItemOfRow(index)) {
+						// remove a line
+						needResize = true;
+					}
+					if (index < items.length - 1) { // index != 0 because ci.wrap
+						items[index + 1].wrap = true;
+					}
+				}
+				int x = ci.getPosition().x + dx;
+				if (x <= 0) { // to left most
+					if (i == 0) { // move upwards to line 0
+						ci.wrap = false;
+					} else {
+						if (index == 0 && i == 1) { // move the first single item to the second line
+						} else {
+							ci.wrap = true;
+						}
+						if (i < items.length - 1) {
+							items[i + 1].wrap = false;
+						}
+					}
+				} else { // inside the line
+					int rowWidth = 0;
+					int separator = 2;
+					for (; i < items.length; i++) {
+						CoolItem item = items[i];
+						int minimum = item.minimumWidth + (item.minimumWidth != 0 ? 2 : 0);
+						rowWidth += 7 + 2 + Math.max(item.idealWidth, minimum) + separator;
+						int xx = item.getPosition().x;
+						if (xx < x && (x <= rowWidth || isLastItemOfRow(i))) {
+							item.idealWidth = Math.max(0, x - xx - (7 + 2 + minimum + separator));
+							minimum = ci.minimumWidth + (ci.minimumWidth != 0 ? 2 : 0);
+							int mw = 7 + 2 + minimum + separator;
+							ci.idealWidth = Math.max(item.minimumWidth, Math.max(ci.idealWidth, rowWidth - x - mw));
+							if (rowWidth - x - mw < ci.idealWidth) {
+								needResize = true;
+							}
+							break;
+						}
+					}
+					ci.wrap = false;
+				}
+				// copy and move items -- re-order
+				if (dy < 0 && x > 0 && i < items.length - 1) {
+					i++;
+				}
+				if (dy > 0) {
+					for (int j = index; j < i; j++) {
+						items[j] = items[j + 1];
+					}
+				} else {
+					for (int j = index; j > i; j--) {
+						items[j] = items[j - 1];
+					}
+				}
+				items[i] = ci;
+				items[0].wrap = false;
+				needLayout = true;
+			} else { // total lines is greater than current line count
+				if ((items[index].wrap || index == 0) && isLastItemOfRow(index)) {
+					// already the bottom line!
+				} else {
+					// append new line
+					CoolItem ci = items[index];
+					if (index > 0 && ci.wrap) {
+						items[index + 1].wrap = true;
+					}
+					for (int i = index; i < items.length - 1; i++) {
+						items[i] = items[i + 1];
+					}
+					items[items.length - 1] = ci;
+					ci.wrap = true;
+					needLayout = true;
+					needResize = true;
+				}
+			}
+		}
+		int w = width;
+		int h = height;
+		if (needResize) {
+			Point computeSize = computeSize(-1, -1, false);
+			w = computeSize.x;
+			h = computeSize.y;
 		}
 		if (needLayout) {
-			SetWindowPos(null, null, 0, 0, width, height, -1);
+			SetWindowPos(null, null, 0, 0, width, h, -1);
+		}
+		if (w > width) {
+			for (int i = index + 1; i < items.length; i++) {
+				if (isLastItemOfRow(i)) {
+					moveDelta(i, width - height, 0);
+					break;
+				}
+			}
 		}
 		return needLayout;
 	}
 	
+	int getVerticalLines() {
+		int lines = 0;
+		for (int i = 0; i < items.length; i++) {
+			if (items[i].wrap) {
+				lines++;
+			}
+		}
+		return lines + 1;
+	}
+	int verticalLine(int index) {
+		int lines = 0;
+		for (int i = 0; i <= index; i++) {
+			if (items[i].wrap) {
+				lines++;
+			}
+		}
+		return lines;
+	}
+	
+	int verticalLineByPixel(int px) {
+		if (px < 0) {
+			return -1;
+		}
+		int lines = 0;
+		int rowHeight = 0;
+		int height = 0;
+		for (int i = 0; i < items.length; i++) {
+			if (items[i].wrap) {
+				height += rowHeight + 2;
+				rowHeight = 0;
+				if (px < height) {
+					return lines;
+				}
+				lines++;
+			}
+			if (items[i].control == null) {
+				rowHeight = Math.max(rowHeight, 4);
+			} else if (items[i].ideal) {
+				rowHeight = Math.max(rowHeight, items[i].idealHeight);
+			}
+		}
+		height += rowHeight;
+		if (px < height) {
+			return lines;
+		}
+		return lines + 1;
+	}
 	protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 		width = cx;
 		height = cy;
