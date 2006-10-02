@@ -255,12 +255,11 @@ Point getPosition() {
 			}
 			y += rowHeight + 2;
 			rowHeight = 0;
+		}
+		if (parent.items[i].control == null) {
+			rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight - 4);
 		} else {
-			if (parent.items[i].control == null) {
-				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight - 4);
-			} else {
-				rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight);
-			}
+			rowHeight = Math.max(rowHeight, parent.items[i].lastCachedHeight);
 		}
 	}
 	return new Point(x, y);
@@ -430,10 +429,10 @@ public Point getPreferredSize () {
 	int width = rbBand.cxIdeal + parent.getMargin (index);
 	return new Point (width, rbBand.cyMinChild);
 	*/
-	if (ideal) {
+	if (preferredWidth != 0 || preferredHeight != 0) {
 		return new Point(preferredWidth, preferredHeight);
 	} else {
-		return new Point(parent.getMargin(index), (minimum ? minimumHeight : 0));
+		return new Point(parent.getMargin(index) + (minimum ? minimumWidth + (minimumWidth != 0 ? 2 : 0) : 0), (minimum ? minimumHeight : 0));
 	}
 }
  
@@ -708,6 +707,11 @@ public void setMinimumSize (int width, int height) {
 	minimum = true;
 	minimumWidth = width;
 	minimumHeight = height;
+	if (!ideal) {
+		ideal = true;
+		idealWidth = width;
+		idealHeight = height;
+	}
 	/*
 	int hwnd = parent.handle;
 	REBARBANDINFO rbBand = new REBARBANDINFO ();
