@@ -1,6 +1,8 @@
 package net.sf.j2s.ui.actions;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.ui.actions.ExtractMethodAction;
@@ -72,6 +74,14 @@ public class OpenJSEditorAction implements IEditorActionDelegate {
 			ICompilationUnit unit = SelectionConverter.getInputAsCompilationUnit(editor);
 			boolean enabled = false;
 			if (unit != null) {
+				IJavaModel javaModel = unit.getJavaModel();
+				if (javaModel == null) {
+					return; 
+				}
+				IResource resource = javaModel.getResource();
+				if (resource == null){
+					return;
+				}
 				enabled = UnitJavaScriptUtil.isUnitJSExisted(unit);
 			}
 			if (!enabled) {
