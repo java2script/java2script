@@ -24,6 +24,10 @@ DIV.tool-item-default {
 	border-color:white #666 #666 white;
 	padding:3px 4px 2px 4px;
 }
+.tool-bar-vertical DIV.tool-item-default {
+	padding-left:4px;
+	padding-right:4px;
+}
 DIV.tool-item-selected {
 	border-color:#666 white white #666 !important;
 	border-width:2px 1px 1px 2px !important;
@@ -46,6 +50,7 @@ DIV.tool-item-down {
 .tool-item-text {
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
+	text-align:center;
 }
 .tool-bar-flat .tool-item-default {
 	border:1px solid menu;
@@ -82,17 +87,15 @@ DIV.tool-item-down {
 	font-size:0;
 }
 .tool-bar-vertical .tool-item-seperator {
+	font-size:0;
 	height:0;
 	width:100%;
 	border:0 solid menu !important;
 	border-top-width:2px;
 	margin:3px 0;
 }
-.tool-bar-vertical .tool-item-seperator:hover {
-	border:0 solid menu !important;
-	border-top-width:2px !important;
-}
 .tool-bar-horizontal .tool-item-seperator {
+	font-size:0;
 	width:0;
 	height:100%;
 	border:0 solid menu;
@@ -127,7 +130,6 @@ DIV.tool-item-down {
 
 .tool-item-enable-image .tool-item-text {
 	margin-top:15px;
-	text-align:center;
 } 
 .tool-bar-right .tool-item-enable-image .tool-item-text {
 	margin-top:0;
@@ -238,4 +240,8 @@ tool-bar-default .tool-item-inner-control:hover {
 	padding:0 !important;
 	border-style:none !important;
 	border-width:0 !important;
+}
+.tool-bar-vertical .tool-item-seperator:hover {
+	border:0 solid menu !important;
+	border-top-width:0px !important;
 }
