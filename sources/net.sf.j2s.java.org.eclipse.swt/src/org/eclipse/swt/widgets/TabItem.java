@@ -126,7 +126,6 @@ protected void checkSubclass () {
 private void configure(final int index) {
 	textEl.onclick = new RunnableCompatibility() {
 		public void run() {
-			System.out.println("hoy hoy ");
 			parent.setSelection(index, true);
 		}
 	};

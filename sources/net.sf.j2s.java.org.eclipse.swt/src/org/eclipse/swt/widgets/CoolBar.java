@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAdapter;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
@@ -366,6 +367,18 @@ void createItem (final CoolItem item, int index) {
 		el.appendChild(document.createTextNode(">"));
 		el.className = "cool-item-more-arrow";
 		item.moreHandle.appendChild(el);
+		item.moreHandle.onclick = new RunnableCompatibility() {
+			public void run() {
+				Event e = new Event();
+				e.detail = SWT.ARROW;
+				e.x = 0;
+				e.y = 0;
+				e.display = display;
+				e.widget = item;
+				e.type = SWT.Selection;
+				item.sendEvent(e);
+			}
+		};
 	}
 	
 	el = document.createElement("DIV");
@@ -1535,8 +1548,21 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			 * e.className = newClazz.join (" ");
 			 */ {}
 		}
+		
 		if (item.control != null) {
-			item.control.setSize(w - 2 - (isLastItemOfRow(i) ? 0 : 2), bounds.height);
+			int ww = w - 2 - (isLastItemOfRow(i) ? 0 : 2);
+			boolean more = false;
+			if ((item.style & SWT.DROP_DOWN) != 0) {
+				more = item.control.computeSize(SWT.DEFAULT, bounds.height).x + 8 >= ww;
+				OS.updateCSSClass(item.handle, "cool-item-more-enabled", more);
+			}
+			if (more) {
+				item.moreHandle.style.height = (bounds.height - 6 > 0 ? bounds.height - 6 : 0) + "px";
+				s.width = (w - 12 > 0 ? w - 12 : 0) + "px";
+				item.control.setSize(ww - 8, bounds.height);
+			} else {
+				item.control.setSize(ww, bounds.height);
+			}
 			Point pt = item.getPosition();
 			item.control.left = pt.x + 9;
 			item.control.top = pt.y;

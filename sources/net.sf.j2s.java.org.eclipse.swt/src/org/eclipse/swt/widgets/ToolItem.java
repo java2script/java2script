@@ -52,6 +52,7 @@ public class ToolItem extends Item {
 	
 	int cachedTextWidth, cachedTextHeight;
 	boolean isInnerBounds;
+	int seperatorWidth;
 	Element dropDownEl;
 
 /**
@@ -368,35 +369,10 @@ public Rectangle getBounds () {
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
 	
-	ToolBar p = parent;
+	Point pt = getLocation();
+	int x = pt.x, y = pt.y;
 	
-	int x = 0, y = 0;
-	Point pos = OS.calcuateRelativePosition(handle, parent.handle);
-	if ((parent.style & SWT.FLAT) != 0) {
-		int idx = p.indexOf(this);
-		pos.x += idx;
-	}
-	x = pos.x;
-	y = pos.y;
-	if ((parent.style & SWT.SHADOW_OUT) != 0) {
-		y -= OS.isIE ? 4 : 2;
-	}
-	if ((parent.style & SWT.BORDER) != 0) {
-		if (OS.isOpera) {
-			x -= 2;
-			y -= 2;
-		} else if (!OS.isIE) {
-			x += 2;
-			y += 2;
-		}
-	}
-	if ((style & SWT.SEPARATOR) != 0) {
-		if ((parent.style & SWT.VERTICAL) != 0) {
-			y -= 3;
-		} else {
-			x -= 3;
-		}
-	}
+	ToolBar p = parent;
 	
 	int w = 0, h = 0;
 	if (p.containsImage && p.imgMaxHeight == 0 && p.imgMaxWidth == 0) {
@@ -458,6 +434,9 @@ public Rectangle getBounds () {
 		} else { // image mode : image, empty, seperator
 			w = p.imgMaxWidth + 4 + border;
 			h = p.imgMaxHeight + 3 + border;
+			if ((p.style & SWT.VERTICAL) != 0) {
+				w += 4;
+			}
 			if ((style & SWT.SEPARATOR) != 0) {
 				if ((p.style & SWT.VERTICAL) != 0) {
 					h = 8;
@@ -475,7 +454,14 @@ public Rectangle getBounds () {
 				if ((style & SWT.SEPARATOR) != 0) {
 					if ((p.style & SWT.VERTICAL) != 0) {
 						w = p.txtMaxWidth + 8 + border;
-						h = 8;
+						//if ((p.style & SWT.VERTICAL) != 0) {
+							w += p.getBorderWidth() * 2;;
+						//}
+						if (control != null) {
+							h = 21;
+						} else {
+							h = 8;
+						}
 					} else {
 						w = 8;
 						h = p.txtMaxHeight + 5 + border;
@@ -483,6 +469,11 @@ public Rectangle getBounds () {
 				} else { // calculating maximized item ...
 					w = p.txtMaxWidth + 4 + border;
 					h = p.txtMaxHeight + 5 + border;
+					if ((style & SWT.DROP_DOWN) != 0) {
+						if ((p.style & SWT.VERTICAL) != 0) {
+							w += 4;
+						}
+					}
 				}
 			}
 		} else {
@@ -493,17 +484,29 @@ public Rectangle getBounds () {
 	}
 	if ((style & SWT.SEPARATOR) != 0 && control != null) {
 		//if ((p.style & SWT.VERTICAL) != 0)
-		Point computeSize = control.computeSize(-1, h);
-		w = computeSize.x;
+		/*
+		 * Because some set seperatorWidth are calculated by default packing.
+		 * So it's OK to recalculate it here.
+		 * 
+		 * TODO: need more studies
+		 */
+		int ww = (seperatorWidth != -1) ? -1 : w; 
+		if (ww == -1) {
+			Point computeSize = control.computeSize(ww, h);
+			w = computeSize.x - 1;
+		}
 	}
 	
-	updateItemBounds(w, h);
+	// TODO: Bounds should be set in ToolBar#setWindowPos
+	//updateItemBounds(w, h);
 	
 	if ((style & SWT.DROP_DOWN) != 0) {
 		w += 8 + 2 + border;
 	}
 	if ((p.style & SWT.FLAT) != 0) {
-		h += 1;
+		if ((p.style & SWT.VERTICAL) == 0 || (style & SWT.SEPARATOR) == 0) {
+			h += 1;
+		}
 		if ((style & SWT.SEPARATOR) == 0) {
 			w += 1;
 		}
@@ -511,7 +514,60 @@ public Rectangle getBounds () {
 			w += 1;
 		}
 	}
+	if ((p.style & SWT.VERTICAL) != 0) {
+		if ((style & SWT.DROP_DOWN) != 0) {
+			w += 1;
+		}
+		//if ((p.style & SWT.FLAT) == 0) {
+			w -= 4;
+		//}
+		if (!isInnerBounds) {
+			w = parent.cachedMaxItemWidth;
+			if ((style & SWT.SEPARATOR) != 0) {
+				w += p.getBorderWidth() * 2;
+			}
+		}
+		y += x;
+		x = 0;
+	}
 	return new Rectangle (x, y, w, h);
+}
+
+Point getLocation() {
+	ToolBar p = parent;
+	
+	int x = 0, y = 0;
+	Point pos = OS.calcuateRelativePosition(handle, parent.handle);
+	if ((parent.style & SWT.FLAT) != 0) {
+		int idx = p.indexOf(this);
+		pos.x += idx;
+	}
+	x = pos.x;
+	y = pos.y;
+	if ((parent.style & SWT.SHADOW_OUT) != 0) {
+		y -= OS.isIE ? 4 : 2;
+	}
+	if ((parent.style & SWT.BORDER) != 0) {
+		if (OS.isOpera) {
+			x -= 2;
+			y -= 2;
+		} else if (!OS.isIE) {
+			x += 2;
+			y += 2;
+		}
+	}
+	if ((style & SWT.SEPARATOR) != 0) {
+		if (control == null) {
+			if ((parent.style & SWT.VERTICAL) != 0) {
+				y -= 3;
+			} else {
+				x -= 3;
+			}
+		} else {
+			
+		}
+	}
+	return new Point(x, y);
 }
 
 void updateItemBounds(int w, int h) {
@@ -522,10 +578,18 @@ void updateItemBounds(int w, int h) {
 	if ((p.style & SWT.FLAT) != 0) {
 		border = 2;
 	}
+	handle.style.width = (w - 8 - border) + "px";
+	handle.style.height = (h - 5 - border) + "px";
 	if ((style & SWT.SEPARATOR) != 0) {
-		handle.style.height = h + "px";
 		if (control != null) {
+			handle.style.width = w + "px";
+			handle.style.height = h + "px";
 			control.setSize(w, h);
+			Point pt = getLocation();
+			control.left = pt.x;
+			control.top = pt.y;
+		} else {
+			handle.style.height = (h - 6) + "px";
 		}
 	} else if (!hasText/* && (style & SWT.SEPARATOR) == 0*/) {
 		handle.style.width = (w - 8 - border) + "px";
@@ -1254,6 +1318,7 @@ public void setWidth (int width) {
 	checkWidget();
 	if ((style & SWT.SEPARATOR) == 0) return;
 	if (width < 0) return;
+	seperatorWidth = width;
 	/*
 	int hwnd = parent.handle;
 	TBBUTTONINFO info = new TBBUTTONINFO ();

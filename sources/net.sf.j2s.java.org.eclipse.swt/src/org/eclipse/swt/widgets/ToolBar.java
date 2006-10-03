@@ -54,6 +54,7 @@ public class ToolBar extends Composite {
 	Element btnFocus;
 	boolean containsImage, containsText;
 	int imgMaxHeight, imgMaxWidth, txtMaxHeight, txtMaxWidth;
+	int cachedMaxItemWidth;
 	
 	/*
 	static final int ToolBarProc;
@@ -106,8 +107,6 @@ public class ToolBar extends Composite {
  * @see SWT#VERTICAL
  * @see Widget#checkSubclass()
  * @see Widget#getStyle()
- * 
- * @j2sIgnore
  */
 public ToolBar (Composite parent, int style) {
 	super (parent, checkStyle (style));
@@ -123,7 +122,11 @@ public ToolBar (Composite parent, int style) {
 	* widget is created because of this conflict.
 	*/
 	if ((style & SWT.VERTICAL) != 0) {
+		if (OS.existedCSSClass(handle, "tool-bar-horizontal")) {
+			OS.removeCSSClass(handle, "tool-bar-horizontal");
+		}
 		this.style |= SWT.VERTICAL;
+		OS.addCSSClass(handle, "tool-bar-vertical");
 		/*
 		int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 		OS.SetWindowLong (handle, OS.GWL_STYLE, bits | OS.CCS_VERT);
@@ -264,16 +267,28 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	calculateTextsMaxSize();
 	if ((style & SWT.VERTICAL) != 0) {
 		int count = items.length;
+		cachedMaxItemWidth = 0;
 		for (int i=0; i<count; i++) {
-			Rectangle rect = items[i].getBounds();
+			ToolItem item = items[i];
+			item.isInnerBounds = true;
+			Rectangle rect = item.getBounds();
+			item.isInnerBounds = false;
+			if ((item.style & SWT.SEPARATOR) != 0) {
+				cachedMaxItemWidth = Math.max(cachedMaxItemWidth, rect.width - getBorderWidth() * 2);
+			} else {
+				cachedMaxItemWidth = Math.max(cachedMaxItemWidth, rect.width);
+			}
 			//height = Math.max (height, rect.height);
+			//System.out.println("xx::" + rect);
 			height += rect.height;
-			if ((items[i].style & SWT.SEPARATOR) != 0) {
+			//if (i != count - 1) 
+			if ((item.style & SWT.SEPARATOR) != 0) {
 				width = Math.max (width, DEFAULT_WIDTH);
 			} else {
 				width = Math.max (width, rect.width);
 			}
 		}
+		if ((style & SWT.FLAT) == 0) height += 2;
 	} else {
 		int count = items.length;
 		for (int i=0; i<count; i++) {
@@ -387,6 +402,7 @@ protected void createHandle () {
 	
 	String[] css = new String[0];
 	css[0] = " tool-bar-default";
+	//System.out.println(".." + (style & SWT.VERTICAL));
 	if ((style & SWT.VERTICAL) != 0) {
 		css[css.length] = "tool-bar-vertical";
 	} else {
@@ -462,6 +478,7 @@ void createItem (ToolItem item, int index) {
 		el = document.createElement("DIV");
 		handle.appendChild(el);
 		cssName += " tool-item-seperator";
+		item.seperatorWidth = -1;
 	} else if ((item.style & SWT.DROP_DOWN) != 0) {
 		el = document.createElement("DIV");
 		handle.appendChild(el);
@@ -1026,6 +1043,45 @@ boolean setTabItemFocus () {
 	if (index == items.length) return false;
 	return super.setTabItemFocus ();
 }
+
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	int border = 3;
+	if ((style & SWT.FLAT) != 0) {
+		border = 2;
+	}
+//	int maxWidth = 0;
+//	Rectangle[] itemsBounds = null; 
+//	if ((style & SWT.VERTICAL) != 0) {
+//		itemsBounds = new Rectangle[items.length];
+//		for (int i = 0; i < items.length; i++) {
+//			ToolItem item = items[i];
+//			Rectangle bounds = item.getBounds();
+//			maxWidth = Math.max(maxWidth, bounds.width);
+//			itemsBounds[i] = bounds;
+//		}
+//	}
+	for (int i = 0; i < items.length; i++) {
+		ToolItem item = items[i];
+		Rectangle bounds = item.getBounds();
+		int w = bounds.width;
+		int h = bounds.height;
+		if ((item.style & SWT.DROP_DOWN) != 0) {
+			w -= 8 + 2 + border;
+		}
+		if ((style & SWT.FLAT) != 0) {
+			h -= 1;
+			if ((item.style & SWT.SEPARATOR) == 0) {
+				w -= 1;
+			}
+			if ((item.style & SWT.DROP_DOWN) != 0) {
+				w -= 1;
+			}
+		}
+		item.updateItemBounds(w, h);
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
 /*
 String toolTipText (NMTTDISPINFO hdr) {
 	if ((hdr.uFlags & OS.TTF_IDISHWND) != 0) {
