@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 /**
  * @author josson smith
@@ -45,11 +47,27 @@ public class TestCoolBar {
 		group.setLayout(new GridLayout());
 		final CoolBar bar5 = new CoolBar(group, SWT.BORDER);
 		bar5.setLayoutData(new GridData(GridData.FILL_BOTH));
-		final CoolItem toolItem5 = new CoolItem(bar5, SWT.NONE);
-		final Label label5 = new Label(bar5, SWT.NONE);
-		label5.setText("Hello x World");
-		toolItem5.setControl(label5);
+		final CoolItem toolItem5 = new CoolItem(bar5, SWT.DROP_DOWN);
+		ToolBar toolBar = new ToolBar (bar5, SWT.NONE);
+		ToolItem item = new ToolItem (toolBar, SWT.RADIO);
+		item.setText("Car");
+		item.setToolTipText ("SWT.RADIO");
+		item = new ToolItem (toolBar, SWT.RADIO);
+		item.setText("Bike");
+		item.setToolTipText ("SWT.RADIO");
+		item = new ToolItem (toolBar, SWT.RADIO);
+		item.setText("Plane");
+		item.setToolTipText ("SWT.RADIO");
+//		final Label label5 = new Label(bar5, SWT.NONE);
+//		label5.setText("Hello x World");
+//		toolItem5.setControl(label5);
+		toolItem5.setControl(toolBar);
 		toolItem5.setPreferredSize(200, 24);
+		toolItem5.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("x.vx.vx.v");
+			}
+		});
 		final CoolItem toolItem52 = new CoolItem(bar5, SWT.NONE);
 		final Label label52 = new Label(bar5, SWT.NONE);
 		label52.setText("Hello World");
