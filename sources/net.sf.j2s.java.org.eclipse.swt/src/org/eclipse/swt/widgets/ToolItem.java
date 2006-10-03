@@ -578,49 +578,50 @@ void updateItemBounds(int w, int h) {
 	if ((p.style & SWT.FLAT) != 0) {
 		border = 2;
 	}
-	handle.style.width = (w - 8 - border) + "px";
-	handle.style.height = (h - 5 - border) + "px";
+	CSSStyle s = handle.style;
+	s.width = Math.max(0, w - 8 - border) + "px";
+	s.height = Math.max(0, h - 5 - border) + "px";
 	if ((style & SWT.SEPARATOR) != 0) {
 		if (control != null) {
-			handle.style.width = w + "px";
-			handle.style.height = h + "px";
+			s.width = w + "px";
+			s.height = h + "px";
 			control.setSize(w, h);
 			Point pt = getLocation();
 			control.left = pt.x;
 			control.top = pt.y;
 		} else {
-			handle.style.height = (h - 6) + "px";
+			s.height = (h - 6) + "px";
 		}
 	} else if (!hasText/* && (style & SWT.SEPARATOR) == 0*/) {
-		handle.style.width = (w - 8 - border) + "px";
-		handle.style.height = (h - 5 - border) + "px";
+		s.width = Math.max(0, w - 8 - border) + "px";
+		s.height = Math.max(0, h - 5 - border) + "px";
 		if (OS.isIE && (p.style & SWT.RIGHT) == 0) { // TODO: I hate this IE hacking!
 			// 2 : padding between image and text?
 			if (p.containsImage) {
-				handle.style.fontSize = "0";
+				s.fontSize = "0";
 				if (hasImage && p.containsText) {
-					handle.style.height = (h - 5 - border - 2) + "px";
+					s.height = Math.max(0, h - 5 - border - 2) + "px";
 				} else {
-					handle.style.height = (h - 5 - border - 1) + "px";
+					s.height = Math.max(0, h - 5 - border - 1) + "px";
 				}
 			} else {
-				handle.style.fontSize = "0";
-				handle.style.height = (h - 5 - border + 1) + "px";
+				s.fontSize = "0";
+				s.height = Math.max(0, h - 5 - border + 1) + "px";
 			}
 		}
 		if (!p.containsText) {
-			handle.style.backgroundPosition = "center center";
+			s.backgroundPosition = "center center";
 		} else if ((parent.style & SWT.RIGHT) == 0) {
-			handle.style.backgroundPosition = "center top";
+			s.backgroundPosition = "center top";
 		} else {
-			handle.style.backgroundPosition = "left center";
+			s.backgroundPosition = "left center";
 		}
 	}
 	if (OS.isIE && dropDownEl != null) { // TODO: I hate this IE hacking!
 		dropDownEl.style.height = (h - border + 1) + "px";
 		if (hasImage && (p.style & SWT.RIGHT) == 0) {
 			// 2 : padding between image and text?
-			dropDownEl.style.height = (h - 2 - border) + "px";
+			dropDownEl.style.height = Math.max(0, h - 2 - border) + "px";
 		}
 		//dropDownEl.childNodes[0].style.top = ((h - 5 - border - 4) / 2 - 7) + "px";
 	}
