@@ -115,7 +115,7 @@ public class ControlExample {
 						if (control != null && control instanceof Label) {
 							control.dispose();
 						}
-					    item.setImage(images[(int) Math.round(3 * Math.random())]);
+					    item.setImage(images[(int) Math.floor(3 * Math.random())]);
 					    tabFolder.setSelection(tabFolder.getSelectionIndex());
 						item.setControl(page);
 						//item.getParent().getShell().pack();
@@ -343,7 +343,7 @@ public class ControlExample {
 //		setShellSize(display, shell);
 		/**
 		 * @j2sNative
-		 * shell.setMaximized(true);
+		 * //shell.setMaximized(true);
 		 */ {}
 		
 		shell.open();
