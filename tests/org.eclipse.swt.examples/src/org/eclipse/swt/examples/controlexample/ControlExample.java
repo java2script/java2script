@@ -60,16 +60,14 @@ public class ControlExample {
 		tabFolder = new TabFolder (parent, SWT.NONE);
 		String[] tabs = new String[] {
 				"Button", 
-//				"Label", 
 //				"Canvas",
+//				"CLabel",
 				
 				"Combo",
-//				"CLabel",
-//				"CTabFolder",
-				"SashForm",
 				
 				"CoolBar",
-//				"Dialog",
+//				"CTabFolder",
+				"Dialog",
 				"Group",
 				"Label",
 				"Link",
@@ -78,6 +76,7 @@ public class ControlExample {
 				"ProgressBar",
 				
 				"Sash",
+				"SashForm",
 				// shellTab = new ShellTab(this),
 				"Shell",
 				"Slider",
