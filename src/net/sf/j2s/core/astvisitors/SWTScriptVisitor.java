@@ -38,6 +38,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 
 //	private StringBuffer bufferRemoved = new StringBuffer();
 	private boolean metSWTBlockWhile = false;
+	private boolean metDialogOpen = false;
 
 	public SWTScriptVisitor() {
 		super();
@@ -368,6 +369,24 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
+		if ("open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
+			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
+				int lastIndexOf = buffer.lastIndexOf(";\r\n");
+				if (lastIndexOf == -1) {
+					lastIndexOf = 0;
+				}
+				String s = buffer.substring(lastIndexOf + 3);
+				buffer.delete(lastIndexOf + 3, buffer.length());
+				buffer.append("DialogSync2Async.block (");
+				node.getExpression().accept(this);
+				buffer.append(", this, function () {\r\n");
+				buffer.append(s);
+				node.getExpression().accept(this);
+				buffer.append(".dialogReturn");
+				metDialogOpen = true;
+				return false;
+			}
+		}
 		if ("net.sf.j2s.ajax.junit.AsyncSWT".equals(methodBinding.getDeclaringClass().getQualifiedName())
 				&& "waitLayout".equals(methodBinding.getName())) {
 			metSWTBlockWhile = true;
@@ -408,6 +427,11 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 */
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding methodBinding = node.resolveBinding();
+//		if ("open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
+//			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
+//				
+//			}
+//		}
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
 			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
@@ -419,9 +443,14 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	
 	public boolean visit(Block node) {
 		int swtBlockWhileCount = 0;
+		int swtDialogOpenCount = 0;
 		boolean lastSWTBlockWhile = metSWTBlockWhile;
 		metSWTBlockWhile = false;
+		boolean lastDialogOpen = metDialogOpen;
+		metDialogOpen = false;
 		if (super.visit(node) == false) {
+			metSWTBlockWhile = lastSWTBlockWhile;
+			metDialogOpen = lastDialogOpen;
 			return false;
 		}
 		List statements = node.statements();
@@ -447,11 +476,16 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				swtBlockWhileCount++;
 				metSWTBlockWhile = false;
 			}
+			if (metDialogOpen) {
+				swtDialogOpenCount++;
+				metDialogOpen = false;
+			}
 		}
-		for (int i = 0; i < swtBlockWhileCount; i++) {
+		for (int i = 0; i < swtBlockWhileCount + swtDialogOpenCount; i++) {
 			buffer.append("});\r\n");
 		}
 		metSWTBlockWhile = lastSWTBlockWhile;
+		metDialogOpen = lastDialogOpen;
 		return false;
 		//return super.visit(node);
 	}
