@@ -5,8 +5,10 @@ individual Jar archives" UNCHECKED!
 Aug 20, 2006
 
 This project requires JAVAX_SERVLET classpath variables for 
-building. But it does not require JAVAX_SERVLET for running
-AJAX client.
+building. You can use the plugin org.eclipse.tomcat's servlets.jar
+for JAVAX_SERVLET variables. 
+
+But JAVAX_SERVLET are not required for running AJAX client.
 
 Trying to export this plugin will fail because there are no
 dependency for JAVAX_SERVLET in the plugin dependencies. In
