@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -404,6 +405,11 @@ public class DependencyASTVisitor extends ASTVisitor {
 		System.out.println(buf.toString().replaceAll(", ", ",\r\n\t"));
 	}
 
+
+	public boolean visit(ImportDeclaration node) {
+		return false;
+	}
+	
 	public boolean visit(PackageDeclaration node) {
 		thisPackageName = "" + node.getName();
 		return false;
