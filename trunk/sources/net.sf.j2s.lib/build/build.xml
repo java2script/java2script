@@ -219,6 +219,7 @@
     		<arg value="java/lang/Long.js"/>
     		<arg value="java/lang/Float.js"/>
     		<arg value="java/lang/Double.js"/>
+    		<arg value="java/lang/Boolean.js"/>
     		
     		<arg value="java/lang/Encoding.js"/>
     		<arg value="java/lang/String.js"/>
@@ -250,6 +251,11 @@
     		<arg value="net/sf/j2s/ajax/AClass.js"/>
     		<arg value="net/sf/j2s/ajax/ASWTClass.js"/>
         	
+    		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
+    		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/AJAXServletRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/AJAXServletSWTRequest.js"/>
+        	
         	<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
@@ -266,6 +272,8 @@
     			<exclude name="**/*.class"/>
     			<exclude name="**/AjaxPlugin.js"/>
     			<exclude name="**/AJAXVariableInitializer.js"/>
+    			<exclude name="**/Base64.js"/>
+    			<exclude name="**/SimpleRPCHttpServlet.js"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
