@@ -59,7 +59,7 @@ public abstract class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
-		resp.setCharacterEncoding("utf-8");
+		//resp.setCharacterEncoding("utf-8");
 		String request = readAll(req.getInputStream());
 		runnable.deserialize(request);
 		runnable.ajaxRun();
@@ -72,7 +72,7 @@ public abstract class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
-		resp.setCharacterEncoding("utf-8");
+		//resp.setCharacterEncoding("utf-8");
 		runnable.deserialize(req.getQueryString());
 		runnable.ajaxRun();
 		writer.write(runnable.serialize());
