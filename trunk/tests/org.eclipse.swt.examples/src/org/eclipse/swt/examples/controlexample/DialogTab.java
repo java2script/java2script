@@ -44,7 +44,7 @@ class DialogTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	DialogTab(ControlExample instance) {
+	public DialogTab(ControlExample instance) {
 		super(instance);
 	}
 
