@@ -79,3 +79,72 @@ Encoding.convert2UTF8 = function (str) {
 	}
 	return arrs.join ('');
 };
+Encoding.base64Chars = new Array(
+    'A','B','C','D','E','F','G','H',
+    'I','J','K','L','M','N','O','P',
+    'Q','R','S','T','U','V','W','X',
+    'Y','Z','a','b','c','d','e','f',
+    'g','h','i','j','k','l','m','n',
+    'o','p','q','r','s','t','u','v',
+    'w','x','y','z','0','1','2','3',
+    '4','5','6','7','8','9','+','/'
+);
+Encoding.encodeBase64 = function (str) {
+	if (str == null || str.length == 0) return str;
+	var b64 = Encoding.base64Chars;
+	var length = str.length;
+	var index = 0;
+	var buf = [];
+	var c0, c1, c2;
+	var c = 0;
+	while (index < length && c++ < 60000) {
+		c0 = str.charCodeAt (index++);
+		buf[buf.length] = b64[c0 >> 2];
+		if (index < length) {
+			c1 = str.charCodeAt (index++);
+            buf[buf.length] = b64[((c0 << 4 ) & 0x30) | (c1 >> 4)];
+            if (index < length){
+				c2 = str.charCodeAt (index++);
+                buf[buf.length] = b64[((c1 << 2) & 0x3c) | (c1 >> 6)];
+                buf[buf.length] = b64[c2 & 0x3F];
+            } else {
+                buf[buf.length] = b64[((c1 << 2) & 0x3c)];
+                buf[buf.length] = '=';
+            }
+		} else {
+			buf[buf.length] = b64[(c0 << 4) & 0x30];
+			buf[buf.length] = '=';
+			buf[buf.length] = '=';
+		}
+	}
+	return buf.join ('');
+};
+Encoding.decodeBase64 = function (str) {
+	if (str == null || str.length == 0) return str;
+	var b64 = Encoding.base64Chars;
+	var xb64 = Encoding.xBase64Chars;
+	if (Encoding.xBase64Chars == null) {
+		xb64 = new Object();
+		for (var i = 0; i < b64.length; i++){
+		    xb64[b64[i]] = i;
+		}
+		Encoding.xBase64Chars = xb64;
+	}
+	var length = str.length;
+	var index = 0;
+	var buf = [];
+	var c0, c1, c2, c3;
+	var c = 0;
+	while (index < length && c++ < 60000) {
+		c0 = xb64[str.charAt (index++)];
+		c1 = xb64[str.charAt (index++)];
+		c2 = xb64[str.charAt (index++)];
+		c3 = xb64[str.charAt (index++)];
+		if (c2 == null) c2 = 0;
+		if (c3 == null) c3 = 0;
+		buf[buf.length] = String.fromCharCode(((c0 << 2) & 0xff) | c1 >> 4);
+		buf[buf.length] = String.fromCharCode(((c1 << 4) & 0xff) | c2 >> 2);
+		buf[buf.length] = String.fromCharCode(((c2 << 6) & 0xff) | c3);
+	}
+	return buf.join ('');
+};

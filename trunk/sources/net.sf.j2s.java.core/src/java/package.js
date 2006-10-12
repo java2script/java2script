@@ -1,6 +1,6 @@
 (function () {
 	ClazzLoader.registerPackages ("java", [
-			"io", "lang", "lang.reflect", "util", "net"]);
+			"io", "lang", "lang.reflect", "util", "net", "text"]);
 			
 	window["reflect"] = java.lang.reflect;
 
