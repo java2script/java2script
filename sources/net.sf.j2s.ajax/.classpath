@@ -5,5 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="ajaxcore"/>
 	<classpathentry kind="src" path="ajaxswt"/>
+	<classpathentry kind="src" path="ajaxrpc"/>
+	<classpathentry kind="var" path="JAVAX_SERVLET"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
