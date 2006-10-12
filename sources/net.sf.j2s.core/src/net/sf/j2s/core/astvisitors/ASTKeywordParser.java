@@ -1267,16 +1267,27 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	}
 
 	public boolean visit(InstanceofExpression node) {
-		buffer.append("Clazz.instanceOf (");
-		node.getLeftOperand().accept(this);
-		buffer.append(", ");
 		Type right = node.getRightOperand();
-		if (right instanceof ArrayType) {
-			buffer.append("Array");
-		} else {
-			right.accept(this);
-		}
-		buffer.append(")");
+		//ITypeBinding binding = right.resolveBinding();
+		//if (binding.isInterface()) { // only interfaces need wrapping 
+			buffer.append("Clazz.instanceOf (");
+			node.getLeftOperand().accept(this);
+			buffer.append(", ");
+			if (right instanceof ArrayType) {
+				buffer.append("Array");
+			} else {
+				right.accept(this);
+			}
+			buffer.append(")");
+		/*} else {
+			node.getLeftOperand().accept(this);
+			buffer.append(" instanceof ");
+			if (right instanceof ArrayType) {
+				buffer.append("Array");
+			} else {
+				right.accept(this);
+			}
+		}*/
 		return false;
 	}
 

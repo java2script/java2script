@@ -10,13 +10,16 @@
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 public class ASTScriptVisitor extends ASTKeywordParser {
 
@@ -3079,6 +3083,92 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		}
 		// Interface's inner interfaces or classes
 		buffer.append(laterBuffer);
+		
+		StringBuffer fieldsSerializables = new StringBuffer();
+		ITypeBinding binding = node.resolveBinding();
+		boolean isSimpleSerializable = (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof FieldDeclaration) {
+				if (node.isInterface()) {
+					/*
+					 * As members of interface should be treated
+					 * as final and for javascript interface won't
+					 * get instantiated, so the member will be
+					 * treated specially. 
+					 */
+					continue;
+				}
+				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				
+				if (isSimpleSerializable) {
+					List fragments = fieldDeclaration.fragments();
+					int modifiers = fieldDeclaration.getModifiers();
+					if ((Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) 
+							&& !Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
+						Type type = fieldDeclaration.getType();
+						int dims = 0;
+						if (type.isArrayType()) {
+							dims = 1;
+							type = ((ArrayType) type).getComponentType();
+						}
+						String mark = null;
+						if (type.isPrimitiveType()) {
+							PrimitiveType pType = (PrimitiveType) type;
+							Code code = pType.getPrimitiveTypeCode();
+							if (code == PrimitiveType.FLOAT) {
+								mark = "F";
+							} else if (code == PrimitiveType.DOUBLE) {
+								mark = "D";
+							} else if (code == PrimitiveType.INT) {
+								mark = "I";
+							} else if (code == PrimitiveType.LONG) {
+								mark = "L";
+							} else if (code == PrimitiveType.SHORT) {
+								mark = "S";
+							} else if (code == PrimitiveType.BYTE) {
+								mark = "B";
+							} else if (code == PrimitiveType.CHAR) {
+								mark = "C";
+							} else if (code == PrimitiveType.BOOLEAN) {
+								mark = "b";
+							} 
+						}
+						ITypeBinding resolveBinding = type.resolveBinding();
+						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
+							mark = "s";
+						}
+						if (mark != null) {
+							for (Iterator xiter = fragments.iterator(); xiter.hasNext();) {
+								VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
+								int curDim = dims + var.getExtraDimensions();
+								if (curDim <= 1) {
+									if (fieldsSerializables.length() > 0) {
+										fieldsSerializables.append(", ");
+									}
+									fieldsSerializables.append("\"" + var.getName() + "\", \"");
+									if (mark.charAt(0) == 's' && curDim == 1) {
+										fieldsSerializables.append("AX");
+									} else if (curDim == 1) {
+										fieldsSerializables.append("A");
+										fieldsSerializables.append(mark);
+									} else {
+										fieldsSerializables.append(mark);
+									}
+									fieldsSerializables.append("\"");
+								}
+							}					
+						}
+					}
+				}
+			}
+		}
+		if (fieldsSerializables.length() > 0) {
+			buffer.append("Clazz.registerSerializableFields(cla$$, ");
+			buffer.append(fieldsSerializables.toString());
+			buffer.append(");\r\n");
+		}
+		
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List tags = javadoc.tags();
@@ -3126,7 +3216,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 //		if (thisClassName == null || thisClassName.trim().length() == 0) {
 //			thisClassName = node.getName().toString();
 //		}
-		System.out.println();
 		
 		if ((node != rootTypeNode) && node.getParent() != null 
 				&& (node.getParent() instanceof AbstractTypeDeclaration

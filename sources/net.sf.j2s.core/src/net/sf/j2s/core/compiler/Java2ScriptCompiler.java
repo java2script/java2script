@@ -489,6 +489,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.inheritArgs", "G", //
 				"Clazz.checkPrivateMethod", "X", //
 				"Clazz.makeFunction", "Q", //
+				
+				"Clazz.registerSerializableFields", "s", //
 		};
 		return clazzAll;
 	}
