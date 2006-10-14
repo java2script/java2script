@@ -23,35 +23,30 @@ package net.sf.j2s.ajax;
 public class XHRCallbackAdapter implements IXHRCallback {
 
 	/**
-	 * Will be called when all responses are received.
-	 */
-	public void onComplete() {
-		
-	}
-
-	/**
-	 * Will be called when the request is sending and the reponse comes.
-	 */
-	public void onInteractive() {
-		
-	}
-
-	/**
-	 * Will be called when the HTTP connection is setup.
+	 * Method will be called when the data transfer has been completed.
 	 */
 	public void onLoaded() {
-		
 	}
 
 	/**
-	 * Will be called when <code>HttPRequest#open</code> is called.
+	 * Method will be called immediately before receiving the message body 
+	 * (if any). All HTTP headers have been received.
 	 */
-	public void onLoading() {
-		
+	public void onReceiving() {
 	}
 
-//	public void onUninitialized() {
-//		
-//	}
+	/**
+	 * Method will be called when the user agent successfully acknowledged
+	 * the request.
+	 */
+	public void onSent() {
+	}
+
+	/**
+	 * Method will be called when XMLHttpRequestthe#open method has been 
+	 * successfully called.
+	 */
+	public void onOpen() {
+	}
 
 }

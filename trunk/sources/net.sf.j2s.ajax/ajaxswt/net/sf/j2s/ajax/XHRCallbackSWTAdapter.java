@@ -28,59 +28,34 @@ import org.eclipse.swt.widgets.Display;
 public class XHRCallbackSWTAdapter implements IXHRCallback {
 	
 	/**
-	 * Method will be called when XMLHttpRequest receives all reponses.
-	 */
-	public void swtOnComplete() {
-	}
-
-	/**
-	 * Method will be called when XMLHttpRequest is transforming request and 
-	 * receiving response.
-	 */
-	public void swtOnInteractive() {
-	}
-
-	/**
-	 * Method will be called when XMLHttpRequest already setup HTTP connection.
+	 * Method will be called when the data transfer has been completed.
 	 */
 	public void swtOnLoaded() {
 	}
 
 	/**
-	 * Method will be called when XMLHttpRequest is loading.
+	 * Method will be called immediately before receiving the message body 
+	 * (if any). All HTTP headers have been received.
 	 */
-	public void swtOnLoading() {
-	}
-
-//	public void swtOnUninitialized() {
-//	}
-
-	/**
-	 * Call <code>#swtOnComplete</code> when all responses are received.
-	 * @j2sNative this.swtOnComplete();
-	 */
-	public void onComplete() {
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				swtOnComplete();
-			}
-		});
+	public void swtOnReceiving() {
 	}
 
 	/**
-	 * Call <code>#swtOnInteractive</code> when the request is sending and the reponse comes.
-	 * @j2sNative this.swtOnInteractive();
+	 * Method will be called when the user agent successfully acknowledged
+	 * the request.
 	 */
-	public void onInteractive() {
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				swtOnInteractive();
-			}
-		});
+	public void swtOnSent() {
 	}
 
 	/**
-	 * Call <code>#swtOnLoaded</code> when the HTTP connection is setup.
+	 * Method will be called when <code>XMLHttpRequestthe#open</code> method has been 
+	 * successfully called.
+	 */
+	public void swtOnOpen() {
+	}
+
+	/**
+	 * Call <code>#swtOnLoaded</code> when the data transfer has been completed.
 	 * @j2sNative this.swtOnLoaded();
 	 */
 	public void onLoaded() {
@@ -92,26 +67,42 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	}
 
 	/**
-	 * Call <code>#swtOnLoading</code> when <code>HttPRequest#open</code> is called.
-	 * @j2sNative this.swtOnLoading();
+	 * Call <code>#swtOnReceiving</code> immediately before receiving the 
+	 * message body (if any). All HTTP headers have been received.
+	 * @j2sNative this.swtOnReceiving();
 	 */
-	public void onLoading() {
+	public void onReceiving() {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				swtOnLoading();
+				swtOnReceiving();
 			}
 		});
 	}
 
-//	/**
-//	 * @j2sNative this.swtOnUninitialized();
-//	 */
-//	public void onUninitialized() {
-//		Display.getDefault().syncExec(new Runnable() {
-//			public void run() {
-//				swtOnUninitialized();
-//			}
-//		});
-//	}
+	/**
+	 * Call <code>#swtOnSent</code> when the user agent successfully acknowledged
+	 * the request.
+	 * @j2sNative this.swtOnSent();
+	 */
+	public void onSent() {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				swtOnSent();
+			}
+		});
+	}
+
+	/**
+	 * Call <code>#swtOnOpen</code> when <code>XMLHttpRequestthe#open</code> method has been 
+	 * successfully called.
+	 * @j2sNative this.swtOnOpen();
+	 */
+	public void onOpen() {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				swtOnOpen();
+			}
+		});
+	}
 
 }

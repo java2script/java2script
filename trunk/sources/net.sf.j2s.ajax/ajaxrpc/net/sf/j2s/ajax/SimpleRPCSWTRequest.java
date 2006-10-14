@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Display;
  *
  * 2006-10-10
  */
-public class AJAXServletSWTRequest extends AJAXServletRequest {
+public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	/**
 	 * @param runnable
 	 * @j2sNative
@@ -37,9 +37,9 @@ public class AJAXServletSWTRequest extends AJAXServletRequest {
 	
 	private static void swtAJAXRequest(final SimpleRPCRunnable runnable) {
 		final HttpRequest request = new HttpRequest();
-		request.open("POST", runnable.url(), true);
+		request.open(runnable.method(), runnable.url(), true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
-			public void swtOnComplete() {
+			public void swtOnLoaded() {
 				runnable.deserialize(request.getResponseText());
 				runnable.ajaxOut();
 			}
