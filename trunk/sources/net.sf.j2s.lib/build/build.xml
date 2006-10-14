@@ -253,8 +253,8 @@
         	
     		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
-    		<arg value="net/sf/j2s/ajax/AJAXServletRequest.js"/>
-    		<arg value="net/sf/j2s/ajax/AJAXServletSWTRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/SimpleRPCRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
         	
         	<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
