@@ -1,7 +1,7 @@
 package com.ognize.lz77js.ui;
 
-import net.sf.j2s.ajax.AJAXServletRequest;
-import net.sf.j2s.ajax.AJAXServletSWTRequest;
+import net.sf.j2s.ajax.SimpleRPCRequest;
+import net.sf.j2s.ajax.SimpleRPCSWTRequest;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -91,7 +91,7 @@ public class LZ77JS {
 				/*
 				 * Local Java Thread mode is already the default mode for Java client
 				 */
-				AJAXServletRequest.switchToLocalJavaThreadMode();
+				SimpleRPCRequest.switchToLocalJavaThreadMode();
 				/*
 				 * AJAX mode is only mode for Java2Script client.
 				 * You can uncomment the follow line to call a LZ77JS RPC of bl.ognize.com.
@@ -99,7 +99,7 @@ public class LZ77JS {
 				 * is no cross site script for XMLHttpRequest.
 				 */ 
 				//AJAXServletRequest.switchToAJAXMode();
-				AJAXServletSWTRequest.swtRequest(new LZ77JSSimpleRPCRunnable() {
+				SimpleRPCSWTRequest.swtRequest(new LZ77JSSimpleRPCRunnable() {
 					public void ajaxIn() {
 						jsContent = sourceText.getText();
 						toRegExpCompress = regExpButton.getSelection();

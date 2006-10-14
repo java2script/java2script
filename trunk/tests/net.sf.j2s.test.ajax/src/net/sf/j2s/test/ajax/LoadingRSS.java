@@ -31,7 +31,7 @@ public class LoadingRSS {
 		//http://j2s.sourceforge.net/blog/feed/atom/
 		request.open("POST", "http://bl.ognize.com:8080/servlets-examples/servlet/RequestParamExample?hello=world", true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
-			public void onComplete() {
+			public void onLoaded() {
 				System.out.println(request.getResponseText());
 			}
 		});
@@ -44,7 +44,7 @@ public class LoadingRSS {
 		//request.open("GET", "http://j2s.sourceforge.net/blog/feed/atom/", true);
 		request.open("GET", "http://bl.ognize.com/whizznotes/rss/all.xml", true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
-			public void onComplete() {
+			public void onLoaded() {
 				//System.out.println(request.getResponseText());
 				NodeList items = request.getResponseXML().getElementsByTagName("item");
 				for (int i = 0; i < items.getLength(); i++) {
