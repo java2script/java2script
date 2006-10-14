@@ -47,7 +47,6 @@ import org.eclipse.swt.layout.GridLayout;
 public  class MessageBox extends Dialog {
 	String message = "";
 	private Composite buttonPanel;
-	private Shell dialogShell;
 	private Button btn;
 	private int returnCode;
 	
@@ -207,7 +206,7 @@ public int open () {
 	}
 	*/
 	returnCode = -1;
-	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER);
+	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER | SWT.SHELL_TRIM);
 	dialogShell.addListener(SWT.Close, new Listener() {
 		public void handleEvent(Event event) {
 			updateReturnCode();
@@ -388,6 +387,10 @@ private void updateReturnCode() {
 		if ((style & (SWT.RETRY | SWT.CANCEL)) == (SWT.RETRY | SWT.CANCEL)) returnCode = SWT.CANCEL;
 		if ((style & (SWT.ABORT | SWT.RETRY | SWT.IGNORE)) == (SWT.ABORT | SWT.RETRY | SWT.IGNORE)) returnCode = SWT.IGNORE;
 	}
+	/**
+	 * @j2sNative
+	 * this.dialogReturn = this.returnCode;
+	 */{}
 }
 
 }

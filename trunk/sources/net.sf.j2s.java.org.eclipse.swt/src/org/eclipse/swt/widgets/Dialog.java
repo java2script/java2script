@@ -14,10 +14,8 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.*;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.ResizeSystem;
-import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 
@@ -45,6 +43,11 @@ import org.eclipse.swt.layout.GridLayout;
  *	public Object open () {
  *		Shell parent = getParent();
  *		Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+ *		// remove following "-"
+ *		/-**
+ *		 * @-j2sNative
+ *		 * this.dialogShell = shell;
+ *		 *-/ {}
  *		shell.setText(getText());
  *		// Your code goes here (widget creation, set result, etc).
  *		shell.open();
@@ -52,6 +55,11 @@ import org.eclipse.swt.layout.GridLayout;
  *		while (!shell.isDisposed()) {
  *			if (!display.readAndDispatch()) display.sleep();
  *		}
+ *		// remove following "-"
+ *		/-**
+ *		 * @-j2sNative
+ *		 * this.dialogReturn = this.result;
+ *		 *-/ {}
  *		return result;
  *	}
  * }
@@ -79,12 +87,44 @@ import org.eclipse.swt.layout.GridLayout;
  * </p>
  * 
  * @see Shell
+ * @j2sSuffix
+DialogSync2Async = {};
+DialogSync2Async.block = function (dialog, oThis, runnable) {
+if (dialog == null) return;
+dialog.open();
+var shell = dialog.dialogShell;
+if (shell == null) return; 
+shell.addDisposeListener ((function (innerThis, finalVars) {
+if (!Clazz.isClassDefined ("DialogSync2Async$1")) {
+Clazz.pu$h ();
+cla$$ = DialogSync2Async$1 = function () {
+Clazz.prepareCallback (this, arguments);
+Clazz.instantialize (this, arguments);
+};
+Clazz.decorateAsType (cla$$, "DialogSync2Async$1", null, $wt.events.DisposeListener);
+Clazz.defineMethod (cla$$, "widgetDisposed", 
+function (e) {
+var $runnable = this.f$.runnable;
+var $oThis = this.f$.oThis;
+window.setTimeout (function () {
+$runnable.apply ($oThis);
+}, 0);
+//this.f$.runnable.apply (this.f$.oThis);
+}, "$wt.events.DisposeEvent");
+cla$$ = Clazz.p0p ();
+}
+return Clazz.innerTypeInstance (DialogSync2Async$1, innerThis, finalVars);
+}) (this, Clazz.cloneFinals ("runnable", runnable, "oThis", oThis)));
+shell.getDisplay ().readAndDispatch ();
+};
  */
 
 public abstract class Dialog {
 	int style;
 	Shell parent;
 	String title;
+	Shell dialogShell;
+	Object dialogReturn;
 
 /**
  * Constructs a new instance of this class given only its
@@ -257,7 +297,7 @@ public void setText (String string) {
 
 
 protected void dialogUnimplemented() {
-	final Shell dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER);
+	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER | SWT.SHELL_TRIM);
 	dialogShell.addListener(SWT.Close, new Listener() {
 		public void handleEvent(Event event) {
 			//updateReturnCode();
@@ -267,7 +307,7 @@ protected void dialogUnimplemented() {
 	dialogShell.setLayout(new GridLayout(2, false));
 
 	Label icon = new Label(dialogShell, SWT.NONE);
-	icon.setImage(new Image(dialogShell.display, "j2slib/images/warning.png"));
+	icon.setImage(parent.display.getSystemImage(SWT.ICON_WARNING));
 	GridData gridData = new GridData(32, 32);
 	icon.setLayoutData(gridData);
 	
