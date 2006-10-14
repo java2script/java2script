@@ -18,7 +18,7 @@ package net.sf.j2s.ajax;
  *
  * 2006-10-10
  */
-public class AJAXServletRequest {
+public class SimpleRPCRequest {
 	
 	public static int MODE_AJAX = 1;
 	public static int MODE_LOCAL_JAVA_THREAD = 2;
@@ -53,9 +53,9 @@ public class AJAXServletRequest {
 	
 	private static void ajaxRequest(final SimpleRPCRunnable runnable) {
 		final HttpRequest request = new HttpRequest();
-		request.open("POST", runnable.url(), true);
+		request.open(runnable.method(), runnable.url(), true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
-			public void onComplete() {
+			public void onLoaded() {
 				runnable.deserialize(request.getResponseText());
 				runnable.ajaxOut();
 			}

@@ -23,6 +23,10 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable implements Ru
 	
 	public abstract String url();
 	
+	public String method() {
+		return "POST";
+	}
+	
 	/*
 	 * Actually there is synchronous call of this #ajaxIn method
 	 */
