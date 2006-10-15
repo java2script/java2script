@@ -17,6 +17,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.ResizeSystem;
@@ -1657,6 +1658,56 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	selectInput.style.width = width + "px";
 	
 //	System.out.println("combo left " + this.left + " " + this.top + " textInput " +dropDownButton.style.width + " " + dropDownButton.style.height);
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	checkWidget ();
+	if (color != null) {
+		textInput.style.color = color.getCSSHandle();
+	} else {
+		textInput.style.color = "";
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBackground(org.eclipse.swt.graphics.Color)
+ */
+public void setBackground(Color color) {
+	checkWidget ();
+	if (color != null) {
+		textInput.style.backgroundColor = color.getCSSHandle();
+	} else {
+		textInput.style.backgroundColor = "";
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getBackground()
+ */
+public Color getBackground() {
+	checkWidget ();
+//	return Color.win32_new (display, getBackgroundPixel ());
+	String bg = textInput.style.backgroundColor;
+	if (bg == null || bg.toString().length() == 0) {
+		return new Color(display, "white");
+	}
+	return new Color(display, bg);
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getForeground()
+ */
+public Color getForeground() {
+	checkWidget ();
+//	return Color.win32_new (display, getForegroundPixel ());
+	String fg = textInput.style.color;
+	if (fg == null || fg.toString().length() == 0) {
+		return new Color(display, "black");
+	}
+	return new Color(display, handle.style.color);
 }
 
 /*

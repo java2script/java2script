@@ -2008,8 +2008,11 @@ boolean sendFocusEvent (int type) {
  */
 public void setBackground (Color color) {
 	checkWidget ();
-	if (color != null)
-	handle.style.backgroundColor = color.getCSSHandle();
+	if (color != null) {
+		handle.style.backgroundColor = color.getCSSHandle();
+	} else {
+		handle.style.backgroundColor = "";
+	}
 }
 /*
 public void setBackground (Color color) {
@@ -2360,8 +2363,11 @@ public void setFont (Font font) {
  */
 public void setForeground (Color color) {
 	checkWidget ();
-	if (color != null)
-	handle.style.color = color.getCSSHandle();
+	if (color != null) {
+		handle.style.color = color.getCSSHandle();
+	} else {
+		handle.style.color = "";
+	}
 }
 /*
 public void setForeground (Color color) {
@@ -2694,7 +2700,7 @@ public void setSize (int width, int height) {
 	checkWidget ();
 //	int flags = OS.SWP_NOMOVE | OS.SWP_NOZORDER | OS.SWP_DRAWFRAME | OS.SWP_NOACTIVATE;
 	int flags = SWT.NONE;
-	setBounds (0, 0, Math.max (0, width), Math.max (0, height), flags);
+	setBounds (left, top, Math.max (0, width), Math.max (0, height), flags);
 }
 
 /**

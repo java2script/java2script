@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -865,6 +866,59 @@ boolean setFixedFocus () {
 	*/
 	if ((style & SWT.RADIO) != 0 && !getSelection ()) return false;
 	return super.setFixedFocus ();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setForeground(org.eclipse.swt.graphics.Color)
+ */
+public void setForeground(Color color) {
+	checkWidget ();
+	if (color != null) {
+		btnHandle.style.color = color.getCSSHandle();
+	} else {
+		btnHandle.style.color = "";
+	}
+	if (lastColor != null) {
+		lastColor = btnHandle.style.color;
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#setBackground(org.eclipse.swt.graphics.Color)
+ */
+public void setBackground(Color color) {
+	checkWidget ();
+	if (color != null) {
+		btnHandle.style.backgroundColor = color.getCSSHandle();
+	} else {
+		btnHandle.style.backgroundColor = "";
+	}
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getBackground()
+ */
+public Color getBackground() {
+	checkWidget ();
+//	return Color.win32_new (display, getBackgroundPixel ());
+	String bg = btnHandle.style.backgroundColor;
+	if (bg == null || bg.toString().length() == 0) {
+		return new Color(display, "menu");
+	}
+	return new Color(display, bg);
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Control#getForeground()
+ */
+public Color getForeground() {
+	checkWidget ();
+//	return Color.win32_new (display, getForegroundPixel ());
+	String fg = btnHandle.style.color;
+	if (fg == null || fg.toString().length() == 0) {
+		return new Color(display, "black");
+	}
+	return new Color(display, handle.style.color);
 }
 
 /**
