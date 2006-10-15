@@ -59,7 +59,7 @@ public class ColorDialog extends Dialog {
 		public RGB toRGB() {
 	        double r = 0, g = 0, b = 0;
 			double temp1, temp2;
-			double H = h / 239f; // h / 360.0;
+			double H = h / 240f; // h / 360.0;
 			double S = s / 240f; // s / 100.0;
 			double L = l / 240f; // l / 100.0;
 			if (L == 0) {
@@ -138,7 +138,7 @@ public class ColorDialog extends Dialog {
 				if ( H < 0 ) H += 1;
 				if ( H > 1 ) H -= 1;
 			}
-			h = (int)(239*H); // (int)(360*H);
+			h = (int)(240*H); // (int)(360*H);
 			s = (int)(S*240); // (int)(S*100);
 			l = (int)(L*240); // (int)(L*100);
 		}
@@ -555,7 +555,7 @@ for (var i = 0; i < 48; i++) {
 			int r = constrain(rText, 255);
 			int g = constrain(gText, 255);
 			int b = constrain(bText, 255);
-			rgb = new RGB(r, g, b);
+			lastSelectedColor = rgb = new RGB(r, g, b);
 			dialogReturn = rgb;
 			dialogShell.close();
 		}
@@ -597,13 +597,12 @@ for (var i = 0; i < 48; i++) {
 				String[] matrix = colorMatrix;
 		    	/**
 		    	 * @j2sNative
-		    	 * rgbColor = colorMap[colorMatrix[i]];
+		    	 * rgbColor = colorMap[matrix[i]];
 		    	 */ {}
+		    	HSL hsl = new HSL(0, 0, 0);
+		    	hsl.fromRGB(new RGB(rgbColor[0], rgbColor[1], rgbColor[2]));
+				updateFromHSL(hsl.h, hsl.s, hsl.l);
 		    	updateFromRGB(rgbColor[0], rgbColor[1], rgbColor[2]);
-				int h = constrain(hText, 239);
-				int s = constrain(sText, 240);
-				int l = constrain(lText, 240);
-				updateFromHSL(h, s, l);
 				switchColorBox(i);
 			}
 		};
@@ -614,15 +613,13 @@ for (var i = 0; i < 48; i++) {
 			public void run() {
 				RGB rgb = customColors[index];
 				if (rgb == null) {
-					updateFromRGB(255, 255, 255);
-				} else {
-					updateFromRGB(rgb.red, rgb.green, rgb.blue);
+			    	rgb = new RGB(255, 255, 255);
 				}
-				int h = constrain(hText, 239);
-				int s = constrain(sText, 240);
-				int l = constrain(lText, 240);
-				updateFromHSL(h, s, l);
+		    	HSL hsl = new HSL(0, 0, 0);
+		    	hsl.fromRGB(rgb);
+				updateFromHSL(hsl.h, hsl.s, hsl.l);
 				selectedCustomIndex = index;
+				updateFromRGB(rgb.red, rgb.green, rgb.blue);
 				switchColorBox(index + 48);
 			}
 		};
