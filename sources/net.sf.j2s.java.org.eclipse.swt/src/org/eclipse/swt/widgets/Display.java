@@ -3113,6 +3113,7 @@ public boolean readAndDispatch () {
 						}
 						if(c.layout != null){
 							c.layout.layout (c, (c.state & Composite.LAYOUT_CHANGED) != 0);
+							c.state &= ~(Composite.LAYOUT_NEEDED | Composite.LAYOUT_CHANGED);
 						}
 						if(c.waitingForLayoutWithResize){
 							c.setResizeChildren (true);
