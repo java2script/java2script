@@ -560,9 +560,16 @@ protected void createHandle() {
 					return false;
 				}
 			}
-			public boolean updateShellBounds(int x, int y, final int width,
-					final int height) {
-				setBounds(x, y, width, height);
+			public boolean updateShellBounds(int x, int y, int w, int h) {
+				boolean moved = (x != left || y != top);
+				boolean resized = (w != width || h != height);
+				setBounds(x, y, w, h);
+				if (moved) {
+					sendEvent(SWT.Move);
+				}
+				if (resized) {
+					sendEvent(SWT.Resize);
+				}
 				return true;
 			}
 		});
