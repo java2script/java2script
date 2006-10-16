@@ -1934,8 +1934,10 @@ public void setText (String string, boolean modify) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if ((style & SWT.READ_ONLY) != 0) {
 		int index = indexOf (string);
+		if(index != -1 && selectInput.selectedIndex != index){			
+			select (index);
+		}
 		//if (selectInput.selectedIndex != index && index != -1) select (index);
-		if (index != -1) select (index);
 		return;
 	}
 	textInput.readOnly = false;
