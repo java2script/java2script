@@ -54,7 +54,7 @@ public class Composite extends Scrollable {
 	Control [] tabList;
 	int layoutCount = 0;
 //	Control [] children = new Control[0];
-	Control [] children;
+	protected Control [] children;
 	boolean waitingForLayoutWithResize;
 
 /**
@@ -1017,15 +1017,15 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 
 void updateLayout (boolean resize, boolean all) {
 	if (isLayoutDeferred ()) return;
-	if ((state & LAYOUT_NEEDED) != 0) {
-		boolean changed = (state & LAYOUT_CHANGED) != 0;
-		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
+
+	if ((state & LAYOUT_NEEDED) != 0 && !waitingForLayout) {
+//		boolean changed = (state & LAYOUT_CHANGED) != 0;
+//		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 //		if (resize) setResizeChildren (false);
 //		layout.layout (this, changed);
 		this.waitingForLayout = true;
 		this.waitingForLayoutWithResize = resize;
 		display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
-//		if (resize) setResizeChildren (true);
 	}
 	
 	
@@ -1033,9 +1033,7 @@ void updateLayout (boolean resize, boolean all) {
 		Control [] children = _getChildren ();
 		int length = children.length;
 		for (int i=0; i<length; i++) {
-//			children [i].updateLayout (resize, all);
 			if (children[i] instanceof Composite) {
-//				System.out.println("update Layout " + children[i]);
 				display.sendMessage(new MESSAGE(children[i], MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
 			}
 		}
