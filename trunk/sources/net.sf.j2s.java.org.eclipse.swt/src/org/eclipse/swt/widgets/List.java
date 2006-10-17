@@ -254,9 +254,15 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	height += border * 2;
 	if ((style & SWT.V_SCROLL) != 0) {
 //		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
+		if (wHint == SWT.DEFAULT) {
+			width -= 16;
+		} else {
+			width += 16;
+		}
 	}
 	if ((style & SWT.H_SCROLL) != 0) {
 //		height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		height += 16;
 	}
 	return new Point (width, height);
 }
@@ -480,7 +486,8 @@ public String getItem (int index) {
 		error (SWT.ERROR_INVALID_RANGE);
 	}
 	*/
-	return "";
+	if (index == -1) return null;
+	return handle.options[index].value;
 }
 
 /**
@@ -598,7 +605,7 @@ public int getSelectionCount () {
 	if (result == OS.LB_ERR) error (SWT.ERROR_CANNOT_GET_COUNT);
 	return result;
 	*/
-	return 0;
+	return 1;
 }
 
 /**
@@ -630,7 +637,7 @@ public int getSelectionIndex () {
 	if (result != 1) error (SWT.ERROR_CANNOT_GET_SELECTION);
 	return buffer [0];
 	*/
-	return -1;
+	return handle.selectedIndex;
 }
 
 /**
@@ -664,7 +671,8 @@ public int [] getSelectionIndices () {
 	if (result != length) error (SWT.ERROR_CANNOT_GET_SELECTION);
 	return indices;
 	*/
-	return new int [] {0};
+	int idx = handle.selectedIndex;
+	return new int [] {idx};
 }
 
 /**
@@ -1140,6 +1148,7 @@ void select (int index, boolean scroll) {
 		}
 	}
 	*/
+	handle.selectedIndex = index;
 }
 
 /**
@@ -1437,6 +1446,8 @@ void setScrollWidth (int newWidth, boolean grow) {
  *
  * @see List#deselectAll()
  * @see List#select(int[])
+ * 
+ * @j2sIgnore // duplicated by #select(String[]) in JavaScript!
  */
 public void setSelection(int [] indices) {
 	checkWidget ();
@@ -1444,6 +1455,16 @@ public void setSelection(int [] indices) {
 	deselectAll ();
 	int length = indices.length;
 	if (length == 0 || ((style & SWT.SINGLE) != 0 && length > 1)) return;
+	select (indices, true);
+	if ((style & SWT.MULTI) != 0) {
+		int focusIndex = indices [0];
+		if (focusIndex >= 0) setFocusIndex (focusIndex);
+	}
+}
+/*
+ * Called by #setSelection(String[])
+ */
+void setIntSelection(int [] indices) {
 	select (indices, true);
 	if ((style & SWT.MULTI) != 0) {
 		int focusIndex = indices [0];
@@ -1479,6 +1500,13 @@ public void setSelection (String [] items) {
 	deselectAll ();
 	int length = items.length;
 	if (length == 0 || ((style & SWT.SINGLE) != 0 && length > 1)) return;
+	/**
+	 * @j2sNative
+	 * if (typeof items[0] == "number") {
+	 * 	this.setIntSelection(items);
+	 * 	return;
+	 * }
+	 */{}
 	int focusIndex = -1;
 	for (int i=length-1; i>=0; --i) {
 		String string = items [i];

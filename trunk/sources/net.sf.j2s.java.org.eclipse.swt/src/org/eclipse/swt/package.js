@@ -13,7 +13,9 @@ $wt = org.eclipse.swt;
 	    	"internal.dnd", 
 	    	"internal.browser", 
 	    	"internal.struct", 
-			"layout", 
+			"layout",
+			"printing",
+			"program",
 	    	"widgets"]);
 
 	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");

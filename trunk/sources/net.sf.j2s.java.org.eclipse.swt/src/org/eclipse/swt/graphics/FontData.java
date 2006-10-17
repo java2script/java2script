@@ -52,6 +52,10 @@ public final class FontData {
 	 */
 	//public LOGFONT data;
 	
+	public boolean isUnderline;
+	
+	public boolean isStrikeout;
+	
 	/**
 	 * The height of the font data in points
 	 * (Warning: This field is platform dependent)
@@ -235,11 +239,8 @@ public FontData(String string) {
 	*/
 	//if (string == null) SWT.error(SWT.ERROR_NULL_ARGUMENT);
 	name = string;
-	if (name == null) {
-		name = "Arial";
-	}
 	style = SWT.NORMAL;
-	height = 12;
+	height = 10;
 }
 
 /**	 
