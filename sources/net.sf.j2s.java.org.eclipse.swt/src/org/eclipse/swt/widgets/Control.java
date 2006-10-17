@@ -890,7 +890,7 @@ public Font getFont () {
 	*/
 	String ff = handle.style.fontFamily;
 	if (ff == null || ff.toString().length() == 0) {
-		ff = "Tahoma, Arial, sans-serif";
+		ff = null;//"Tahoma, Arial, sans-serif";
 	}
 	String fs = handle.style.fontSize;
 	if (fs == null || fs.toString().length() == 0) {
@@ -2320,7 +2320,6 @@ public boolean setFocus () {
  */
 public void setFont (Font font) {
 	checkWidget ();
-	if (font == null || font.data == null) return ;
 	/*
 	int hFont = 0;
 	if (font != null) { 
@@ -2330,7 +2329,17 @@ public void setFont (Font font) {
 	if (hFont == 0) hFont = defaultFont ();
 	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 1);
 	*/
-	handle.style.fontFamily = font.data.name;
+	if (font == null || font.data == null) {
+		handle.style.fontFamily = "";
+		handle.style.fontSize = "";
+		handle.style.fontWeight = "";
+		handle.style.fontStyle = "";
+		handle.style.textDecoration = "";
+		return;
+	}
+	if (font.data.name != null) {
+		handle.style.fontFamily = font.data.name;
+	}
 	handle.style.fontSize = font.data.height + "pt";
 	if ((font.data.style & SWT.BOLD) != 0) {
 		handle.style.fontWeight = "bold";
@@ -2342,6 +2351,18 @@ public void setFont (Font font) {
 	} else {
 		handle.style.fontStyle = "normal";
 	}
+	String td = "";
+	if (font.data.isStrikeout) {
+		td = "line-through";
+	}
+	if (font.data.isUnderline) {
+		if (td.length() > 0) {
+			td += " underline";
+		} else {
+			td = "underline";
+		}
+	}
+	handle.style.textDecoration = td;
 	//handle.style.fontVariant = font.data.style;
 	//TODO:
 }

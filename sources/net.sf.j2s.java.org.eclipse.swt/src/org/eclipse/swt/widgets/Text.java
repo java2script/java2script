@@ -332,13 +332,7 @@ void hookModify() {
 	};
 	textHandle.onblur = new RunnableCompatibility() {
 		public void run() {
-			String className = handle.className;
-			int idx = className.indexOf("text-focus"); 
-			if( idx != -1){
-				handle.className = className.substring(0, idx) + 
-					className.substring(idx + "text-focus".length());
-			}
-			System.out.println("class name " + handle.className);
+			OS.removeCSSClass(handle, "text-focus");
 			Event e = new Event();
 			e.type = SWT.FocusOut;
 			e.item = Text.this;
@@ -349,11 +343,7 @@ void hookModify() {
 	};
 	textHandle.onfocus = new RunnableCompatibility() {
 		public void run() {
-			String className = handle.className;
-			if(className.indexOf("text-focus") == -1){
-				handle.className = className + " text-focus";
-			}
-			System.out.println("class name " + handle.className);
+			OS.addCSSClass(handle, "text-focus");
 			Event e = new Event();
 			e.type = SWT.FocusIn;
 			e.item = Text.this;
@@ -2274,10 +2264,10 @@ public void setText (String string) {
 	* notify the application that the text has changed.
 	* The fix is to send the event.
 	*/
-	if ((style & SWT.MULTI) != 0) {
+	//if ((style & SWT.MULTI) != 0) {
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
-	}
+	//}
 }
 
 /**

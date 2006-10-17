@@ -13,10 +13,9 @@
 
 package org.eclipse.swt.internal;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.internal.xhtml.window;
 import org.eclipse.swt.widgets.Decorations;
 import org.eclipse.swt.widgets.Monitor;
 
@@ -52,8 +51,11 @@ public class ResizeHandler {
 		if (width > bounds.width) {
 			width = bounds.width;
 		}
+		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
+		// FIXME: maximized size is not accurate
+		shell.setBounds(shell.computeTrim(0, 0, width + 4, height - titleHeight + 6));
 //		shell.setBounds(0 - 4, 0 - 4, width - 2, height + 4);
-		shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
+		//shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
 	}
 	public void updateCentered() {
 		// Not used now
