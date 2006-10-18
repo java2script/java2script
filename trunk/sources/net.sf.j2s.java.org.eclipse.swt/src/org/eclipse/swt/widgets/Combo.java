@@ -1938,7 +1938,7 @@ public void setText (String string, boolean modify) {
 			select (index);
 		}
 		//if (selectInput.selectedIndex != index && index != -1) select (index);
-		return;
+//		return;
 	}
 	textInput.readOnly = false;
 	textInput.value = string;
