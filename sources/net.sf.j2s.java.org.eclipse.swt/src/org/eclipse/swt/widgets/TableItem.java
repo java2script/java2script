@@ -42,6 +42,10 @@ public class TableItem extends Item {
 	boolean checked, grayed, cached;
 	int imageIndent, background = -1, foreground = -1, font = -1;
 	int [] cellBackground, cellForeground, cellFont;
+	/**
+	 * TODO : the index is not valid after a remove is called.
+	 * 	But updating this field after a remove will degrade performance when the removed item is at the top
+	 */
 	int index;
 	private boolean selected;
 	Element check;
@@ -174,7 +178,7 @@ private void configureItem() {
 			e.item = TableItem.this;
 			e.widget = TableItem.this;
 			parent.sendEvent(e);
-			parent.setFocusIndex(index);
+			parent.setFocusIndex(parent.indexOf(TableItem.this));
 			toReturn(false);
 		}
 	};
