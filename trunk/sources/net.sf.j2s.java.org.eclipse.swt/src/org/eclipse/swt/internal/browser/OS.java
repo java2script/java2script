@@ -434,8 +434,8 @@ public class OS {
 		int left = 0;
 		int top = 0;
 		while (el != null && el != relativeEl) {
-			left += el.offsetLeft;
-			top += el.offsetTop;
+			left += el.offsetLeft - el.scrollLeft ;
+			top += el.offsetTop - el.scrollTop;
 			if (el != srcEl)
 			/**
 			 * @j2sNative
