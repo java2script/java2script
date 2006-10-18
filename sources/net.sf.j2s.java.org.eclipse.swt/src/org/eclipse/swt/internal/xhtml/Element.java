@@ -65,9 +65,9 @@ public class Element {
 
 	public int height;
 
-	public int offsetWidth, clientWidth, scrollWidth;
+	public int offsetWidth, clientWidth, scrollWidth, scrollLeft;
 	
-	public int offsetHeight, clientHeight, scrollHeight;
+	public int offsetHeight, clientHeight, scrollHeight, scrollTop;
 	
 	public String src;
 
