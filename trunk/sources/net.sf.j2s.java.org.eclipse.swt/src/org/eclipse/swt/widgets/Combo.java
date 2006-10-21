@@ -76,8 +76,11 @@ public class Combo extends Composite {
 			textInput,
 			selectInput;
 	private boolean selectShown;
+	private boolean visibleCountIsSet = false;
 	private boolean isSimple;
 	private int itemCount;
+	private int maxWidth = 0;
+	
 	
 	/**
 	 * the operating system limit for the number of characters
@@ -180,6 +183,10 @@ public void add (String string) {
 		selectInput.options[itemCount] = new Option(string, string);
 	}
 	itemCount++;
+	if(!visibleCountIsSet)
+		visibleCount = Math.max(itemCount, 5);
+	
+	maxWidth = Math.max(maxWidth, OS.getStringStyledWidth(string, "combo-input-box", null));
 }
 
 /**
@@ -223,6 +230,8 @@ public void add (String string, int index) {
 	if (selectInput != null) {
 		selectInput.options[index] = new Option(string, string);
 	}
+	if(!visibleCountIsSet)
+		visibleCount = Math.max(itemCount, 5);
 }
 
 /**
@@ -391,15 +400,16 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int width = 0, height = 0;
 	if (wHint == SWT.DEFAULT) {
-		if(selectInput != null){
-			Option[] options = selectInput.options;
-			int length = itemCount;
-			for(int i = 0; i < length; i++){
-				width = Math.max(width, OS.getStringStyledWidth(options[i].value, "combo-input-box", null));	
-			}
-		} else{
+//		if(selectInput != null){
+////			Option[] options = selectInput.options;
+////			int length = itemCount;
+//			width = maxWidth;
+////			for(int i = 0; i < length; i++){
+////				width = Math.max(width, OS.getStringStyledWidth(options[i].value, "combo-input-box", null));	
+////			}
+//		} else{
 			width = DEFAULT_WIDTH;
-		}
+//		}
 		/*
 		int newFont, oldFont = 0;
 		int hDC = OS.GetDC (handle);
@@ -474,7 +484,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	} else {
 		int border = 2; // OS.GetSystemMetrics (OS.SM_CXEDGE);
 		width += 16 + border * 2; // OS.GetSystemMetrics (OS.SM_CXVSCROLL) + border * 2;		
-		int textHeight = OS.getStringStyledHeight("A", "combo-input-box", null); //OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, -1, 0);
+		int textHeight = OS.getStringStyledHeight("M", "combo-input-box", null); //OS.SendMessage (handle, OS.CB_GETITEMHEIGHT, -1, 0);
 		if ((style & SWT.DROP_DOWN) != 0) {
 			height = textHeight + 6;
 		} else {
@@ -686,7 +696,8 @@ void show(){
 		selectInput.style.overflow = "auto";
 		selectInput.style.height = "auto";
 	}
-	int w = OS.getContainerWidth(handle);
+	selectInput.size = visibleCount;
+	int w = Math.max(maxWidth, OS.getContainerWidth(handle));
 	int h = OS.getContainerHeight(handle);
 	if (OS.isFirefox) {
 		coordinate.x += 1;
@@ -714,6 +725,7 @@ void show(){
 		selectInput.style.overflow = "scroll";
 		selectInput.style.height = bounds.height + "px";
 	}
+	selectInput.style.width = bounds.width +"px";
 	try {
 		selectInput.focus();
 	} catch (Throwable e) {
@@ -1266,6 +1278,8 @@ public void remove (int index) {
 	System.arraycopy(oldOptions, index + 1, newOptions, index, oldOptions.length - index - 1);
 	selectInput.options = newOptions;
 	itemCount--;
+	if(!visibleCountIsSet)
+		visibleCount = Math.max(itemCount, 5);
 	
 }
 
@@ -1330,6 +1344,8 @@ public void remove (int start, int end) {
 	System.arraycopy(oldOptions, end + 1, newOptions, start, oldOptions.length - end - 1);
 	selectInput.options = newOptions;
 	itemCount -= (end - start + 1);
+	if(!visibleCountIsSet)
+		visibleCount = Math.max(5, itemCount);
 }
 
 /**
@@ -1379,6 +1395,9 @@ public void removeAll () {
 	itemCount = 0;
 	textInput.value = "";
 	sendEvent (SWT.Modify);
+	itemCount = 0;
+	if(!visibleCountIsSet)
+		visibleCount = 5;
 	// widget could be disposed at this point
 }
 
@@ -2001,6 +2020,7 @@ public void setVisibleItemCount (int count) {
 	checkWidget ();
 	if (count < 0) return;
 	visibleCount = count;
+	visibleCountIsSet = true;
 	selectInput.size = count;
 	if ((style & SWT.DROP_DOWN) != 0) {
 		forceResize ();
