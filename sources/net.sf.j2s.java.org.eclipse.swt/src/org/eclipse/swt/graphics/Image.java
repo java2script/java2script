@@ -66,7 +66,28 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class Image extends Resource implements Drawable {
+	/**
+	 * Only used inside SWT package for JavaScript.
+	 */
 	public String url;
+	
+	/**
+	 * This field will be used to store packed image's order.
+	 * 0: not packed 3x3 image<br>
+	 * 1: top left image<br>
+	 * 2: top center image<br>
+	 * 3: top right image<br>
+	 * 4: middle left image<br>
+	 * 5: middle center image<br>
+	 * 6: middle right image<br>
+	 * 7: bottom left image<br>
+	 * 8: bottom center image<br>
+	 * 9: bottom right image<br>
+	 * 
+	 * Only used inside SWT package for JavaScript
+	 */
+	public int hash;
+	
 	public int width;
 	public int height;
 	private Element imgHandle;
@@ -525,6 +546,9 @@ public Image(Device device, Image srcImage, int flag) {
 	}
 	*/
 	this.url = srcImage.url;
+	this.hash = srcImage.hash;
+	this.width = srcImage.width;
+	this.height = srcImage.height;
 }
 
 /**
@@ -591,6 +615,9 @@ public Image(Device device, ImageData data) {
 //	init(device, data);
 //	if (device.tracking) device.new_Object(this);	
 	url = data.url;
+	hash = data.hash;
+	width = data.width;
+	height = data.height;
 }
 
 /**
@@ -630,6 +657,9 @@ public Image(Device device, ImageData source, ImageData mask) {
 //	init(device, this, source, mask);
 //	if (device.tracking) device.new_Object(this);
 	url = source.url;
+	hash = source.hash;
+	width = source.width;
+	height = source.height;
 }
 
 /**

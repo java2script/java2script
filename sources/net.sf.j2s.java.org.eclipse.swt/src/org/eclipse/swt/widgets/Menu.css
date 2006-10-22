@@ -125,13 +125,16 @@
 	background-color:gray;
 }
 .menu-item-checked {
-	background-image:url('images/menu-checked.gif');
+	background-image:url('images/menu-packed.gif');
+	background-position:left top;
 }
 .menu-item-hover .menu-item-checked {
-	background-image:url('images/menu-checked-hl.gif');
+	background-image:url('images/menu-packed.gif');
+	background-position:center top;
 }
 .menu-item-disabled .menu-item-checked {
-	background-image:url('images/menu-checked-gray.gif');
+	background-image:url('images/menu-packed.gif');
+	background-position:right top;
 }
 
 .menu-enable-image .menu-item-status {

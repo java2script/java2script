@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+ 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionEvent;
@@ -73,6 +74,7 @@ public class Table extends Composite {
 	int lastIndexOf, lastWidth;
 	boolean customDraw, cancelMove, dragStarted, fixScrollWidth, tipRequested;
 	boolean wasSelected, ignoreActivate, ignoreSelect, ignoreShrink, ignoreResize;
+	boolean headerVisible, lineVisible;
 	private Element tbodyTRTemplate;
 	int lineWidth;
 	int focusIndex = -1;
@@ -92,7 +94,9 @@ public class Table extends Composite {
 		TableProc = lpWndClass.lpfnWndProc;
 	}
 	*/
-	
+	private Element tableHandle;
+	private Element theadHandle;
+
 /**
  * Constructs a new instance of this class given its parent
  * and a style value describing its behavior and appearance.
@@ -130,15 +134,6 @@ public class Table extends Composite {
  */
 public Table (Composite parent, int style) {
 	super (parent, checkStyle (style));
-	/*
-	selection = new TableItem[0];
-	items = new TableItem[0];
-	columns = new TableColumn[0];
-	columnMaxWidth = new int[0];
-	lineWidth = 0;
-//	itemsStr = new String[0];
-	tbody = null;
-	*/
 }
 
 TableItem _getItem (int index) {
@@ -263,12 +258,12 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam, boolean forceSele
 */
 static int checkStyle (int style) {
 	/*
-	 * Feature in Windows.  It is not possible to create
-	 * a table that does not have scroll bars.  Therefore,
-	 * no matter what style bits are specified, set the
-	 * H_SCROLL and V_SCROLL bits so that the SWT style
-	 * will match the widget that Windows creates.
-	 */
+	* Feature in Windows.  It is not possible to create
+	* a table that does not have scroll bars.  Therefore,
+	* no matter what style bits are specified, set the
+	* H_SCROLL and V_SCROLL bits so that the SWT style
+	* will match the widget that Windows creates.
+	*/
 	style |= SWT.H_SCROLL | SWT.V_SCROLL;
 	return checkBits (style, SWT.SINGLE, SWT.MULTI, 0, 0, 0, 0);
 }
@@ -594,8 +589,34 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	height -= (oneItem >> 16) - (empty >> 16);
 	*/
 	
-	int width = lineWidth;
+	int width = 0;
 	int height = 0;
+	if (items.length == 0 && columns.length == 0) {
+		width = 10;
+		height = 2;
+	} else if (columns.length == 0) {
+		width = 10;
+		height = 2;
+		height += 14 * items.length;
+		height += (getHeaderVisible() ? 14 : 0);
+		int maxWidth = 1;
+		for (int i = 0; i < items.length; i++) {
+			String text = items[i].getText();
+			if (text != null) {
+				maxWidth = Math.max(OS.getStringPlainWidth(text), maxWidth);
+			}
+		}
+		width += maxWidth - 1;
+	} else {
+		width = 0;
+		for (int i = 0; i < columns.length; i++) {
+			width += columns[i].getWidth();
+		}
+		height = 2;
+		height += 14 * items.length;
+		height += (getHeaderVisible() ? 14 + 3: 0);
+	}
+//	width = lineWidth;
 //	lineWidth = 0;
 //	columnMaxWidth = new int[0];
 //	for (int i = 0; i < columns.length; i++) {
@@ -609,30 +630,20 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 //		lineWidth += maxWidth + 10;
 //	}
 //	width = lineWidth;
-	if (items.length > 0) {
-		String t = items[0].getNameText();
-//		System.out.println(t);
-//		height = (UIStringUtil.calculatePlainStringLineHeight(t) + 5) * (items.length + 0);
-		height = (OS.getStringPlainHeight(t) + 5) * (items.length + 0);
-	} else {
-		height = 24;
-	}
 	if (width == 0) width = DEFAULT_WIDTH;
-	if (height == 0) height = DEFAULT_HEIGHT * getItemCount();
+	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
 	if (hHint != SWT.DEFAULT) height = hHint;
 	int border = getBorderWidth ();
 	width += border * 2;  height += border * 2;
-	
-	/*
 	if ((style & SWT.V_SCROLL) != 0) {
-		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
+		//width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
+		width += 16;
 	}
 	if ((style & SWT.H_SCROLL) != 0) {
-		height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		//height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		height += 16;
 	}
-	*/
-	//System.out.println(new Point (width, height));
 	return new Point (width, height);
 }
 
@@ -735,9 +746,28 @@ protected void createHandle () {
 	*/
 //	handle = document.createElement("DIV");
 	handle.className += " table-default";
-	Element table = document.createElement ("TABLE");
+	
+	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
+		handle.style.overflow = "auto";
+	} else {
+		if ((style & SWT.V_SCROLL) != 0) {
+			handle.className += " table-v-scroll";
+		} else if ((style & SWT.H_SCROLL) != 0) {
+			handle.className += " table-h-scroll";
+		} 
+	}
+
+	tableHandle = document.createElement ("TABLE");
 	//table.style.backgroundColor = "white";
-	handle.appendChild(table);
+	String cssTable = "table-content";
+	if ((style & SWT.FULL_SELECTION) != 0) {
+		cssTable += " table-full-selection";
+	}
+	if ((style & SWT.CHECK) != 0) {
+		cssTable += " table-check";
+	}
+	tableHandle.className = cssTable;
+	handle.appendChild(tableHandle);
 	if (parent != null) {
 		Element parentHandle = parent.containerHandle();
 		if (parentHandle!= null) {
@@ -976,31 +1006,31 @@ void createItem (TableColumn column, int index) {
 	}
 
 	Element table = handle.childNodes[0];
-	Element thead = null;
+	theadHandle = null;
 	for (int i = 0; i < table.childNodes.length; i++) {
 		if ("THEAD".equals(table.childNodes[i].nodeName)) {
-			thead = table.childNodes[i];
+			theadHandle = table.childNodes[i];
 			break;
 		}
 	}
-	if (thead == null) {
-		thead = document.createElement ("THEAD");
-		thead.style.backgroundColor = "menu";
-		table.appendChild(thead);
+	if (theadHandle == null) {
+		theadHandle = document.createElement ("THEAD");
+		table.appendChild(theadHandle);
 	}
 	
 	Element theadTR = null;
-	if (thead.childNodes != null && thead.childNodes.length != 0) {
-		for (int i = 0; i < thead.childNodes.length; i++) {
-			if (thead.childNodes[i] != null
-					&& "TR".equals(thead.childNodes[i].nodeName)) {
-				theadTR = thead.childNodes[i];
+	if (theadHandle.childNodes != null && theadHandle.childNodes.length != 0) {
+		for (int i = 0; i < theadHandle.childNodes.length; i++) {
+			if (theadHandle.childNodes[i] != null
+					&& "TR".equals(theadHandle.childNodes[i].nodeName)) {
+				theadTR = theadHandle.childNodes[i];
 			}
 		}
 	}
 	if (theadTR == null) {
 		theadTR = document.createElement ("TR");
-		thead.appendChild(theadTR);
+		theadHandle.appendChild(theadTR);
+		theadTR.innerHTML = "<td class=\"table-column-last\"><div class=\"table-head-text\">&#160;</div></td>";
 	}
 //		if (index < theadTR.childNodes.length) {
 //			if (theadTR.childNodes[index] != null
@@ -1009,40 +1039,35 @@ void createItem (TableColumn column, int index) {
 //			}
 //		}
 	Element theadTD = document.createElement("TD");
-	theadTD.className = "table-column-default";
-	theadTD.style.whiteSpace = "nowrap";
+	theadTD.innerHTML = "<div class=\"table-head-text\">&#160;</div>";
+	theadTR.insertBefore(theadTD, theadTR.childNodes[theadTR.childNodes.length - 1]);
+	///*
 //	int childIndex = column.resizable ? index * 2 : index;
 	if (index < 0 || index >= theadTR.childNodes.length) { //theadTD == null){
 		theadTR.appendChild(theadTD);
 		columns[index] = column;
 	} else {
-//			System.out.println("existed");
 		theadTR.insertBefore(theadTD, theadTR.childNodes[index]);
 		for (int i = columns.length; i > index; i--) {
 			columns[i] = columns[i - 1];
 		}
 		columns[index] = column;
 		for (int i = 0; i < items.length; i++) {
-			Element dataTD = document.createElement("TD");
-			items[i].handle.insertBefore(dataTD, items[i].handle.childNodes[index]);
-			Element el = document.createElement("DIV");
-			dataTD.appendChild(el);
-			el.className = "table-item-cell-default";
-			Element text = document.createElement("DIV");
-			el.appendChild(text);
-			text.className = "table-item-cell-text-default";
-			for (int j = items[i].strings.length; j > index; j--) {
-				items[i].strings[j] = items[i].strings[j - 1];
-			}
-			items[i].strings[index] = "";
+//			Element dataTD = document.createElement("TD");
+//			items[i].handle.insertBefore(dataTD, items[i].handle.childNodes[index]);
+//			Element el = document.createElement("DIV");
+//			dataTD.appendChild(el);
+//			el.className = "table-item-cell-default";
+//			Element text = document.createElement("DIV");
+//			el.appendChild(text);
+//			text.className = "table-item-cell-text-default";
+//			for (int j = items[i].strings.length; j > index; j--) {
+//				items[i].strings[j] = items[i].strings[j - 1];
+//			}
+//			items[i].strings[index] = "";
 		}
 	}
-	if (theadTD.childNodes != null) {
-		OS.clearChildren(theadTD);
-	}
-	theadTD.appendChild(document.createTextNode(column.getText()));
-	theadTD.style.margin = "0";
-	theadTD.style.padding = "0";
+	//*/
 	column.handle = theadTD;
 	
 }
@@ -1116,30 +1141,26 @@ void createItem (TableItem item, int index) {
 	
 	if(tbodyTRTemplate == null){
 		tbodyTRTemplate = document.createElement("TR");
-//	String trStr = "<TR class=\"table-item-default\"></TR>";
-		tbodyTRTemplate.className = "table-item-default";
 		int length = Math.max(1,this.columns.length);
-		for(int i = 0; i < length; i++){
-			Element td = document.createElement("TD");
-			tbodyTRTemplate.appendChild(td);
-			Element el = document.createElement("DIV");
-			td.appendChild(el);
-			el.className = "table-item-cell-default";
-			if (i == 0 && (style & SWT.CHECK) != 0) {
-				Element check = document.createElement("INPUT");
-				check.type = "checkbox";
-				el.appendChild(check);
-				item.check = check;
-			}			
-			Element text = document.createElement("DIV");
-			el.appendChild(text);
-			text.className = "table-item-cell-text-default";
+		Element td = document.createElement("TD");
+		td.className = "table-column-first";
+		String str = "<div class=\"table-text\">";
+		if ((style & SWT.CHECK) != 0) {
+			str += "<input class=\"table-check-box image-p-4\" type=\"checkbox\"/>";
 		}
-//		tbodyTRTemplateInnerHTML = "<TR class=\"table-item-default\" >" + tbodyTRTemplate.innerHTML + "</TR>";
-//		/**
-//		 * @j2sNative
-//		 *alert(this.tbodyTRTemplateInnerHTML);
-//		 */{}
+		str += "<div class=\"table-text-inner\"></div></div>";
+		tbodyTRTemplate.appendChild(td);
+		td.innerHTML = str;
+		str = "";
+		for(int i = 1; i < length; i++){
+			td = document.createElement("TD");
+			td.innerHTML = "<div class=\"table-text-inner\"></div>";
+			tbodyTRTemplate.appendChild(td);
+		}
+		td = document.createElement("TD");
+		td.className = "table-column-last";
+		td.innerHTML = "<div class=\"table-text-inner\"></div>";
+		tbodyTRTemplate.appendChild(td);
 	}
 	
 	Element tbodyTR = tbodyTRTemplate.cloneNode(true);
@@ -1149,6 +1170,9 @@ void createItem (TableItem item, int index) {
 	if ((style & SWT.CHECK) != 0) {
 		Element[] nl = tbodyTR.getElementsByTagName("INPUT");
 		item.check = (Element) nl[0];
+	}
+	if (index == 0) {
+		OS.addCSSClass(tbodyTR, "table-row-first");
 	}
 	if (index < 0 || index >= tbody.childNodes.length) { //theadTD == null){
 		tbody.appendChild(tbodyTR);
@@ -1212,7 +1236,7 @@ int defaultBackground () {
  * </ul>
  */
 public void deselect (int [] indices) {
-//		checkWidget ();
+	checkWidget ();
 	if (indices == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (indices.length == 0) return;
 //	LVITEM lvItem = new LVITEM ();
@@ -1245,7 +1269,7 @@ public void deselect (int [] indices) {
  * </ul>
  */
 public void deselect (int index) {
-//		checkWidget ();
+	checkWidget ();
 	/*
 	* An index of -1 will apply the change to all
 	* items.  Ensure that index is greater than -1.
@@ -1278,7 +1302,7 @@ public void deselect (int index) {
  * </ul>
  */
 public void deselect (int start, int end) {
-	//checkWidget ();
+	checkWidget ();
 	int count = items.length;//OS.SendMessage (handle, OS.LVM_GETITEMCOUNT, 0, 0);
 	if (start == 0 && end == count - 1) {
 		deselectAll ();
@@ -1722,7 +1746,7 @@ public boolean getHeaderVisible () {
 	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
 	return (bits & OS.LVS_NOCOLUMNHEADER) == 0;
 	*/
-	return false;
+	return headerVisible;
 }
 
 /**
@@ -1871,7 +1895,7 @@ public boolean getLinesVisible () {
 	int bits = OS.SendMessage (handle, OS.LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 	return (bits & OS.LVS_EX_GRIDLINES) != 0;
 	*/
-	return true;
+	return lineVisible;
 }
 
 /**
@@ -2573,7 +2597,7 @@ public void select (int index) {
 	items[index].showSelection(true);
 	selection = new TableItem[1];
 	selection[0] = this.items[index];
-	items[index].handle.className = "table-item-selected";
+	OS.addCSSClass(items[index].handle, "table-item-selected");
 	/*
 	LVITEM lvItem = new LVITEM ();
 	lvItem.state = OS.LVIS_SELECTED;
@@ -2955,7 +2979,6 @@ void setFocusIndex (int index) {
 	OS.SendMessage (handle, OS.LVM_SETITEMSTATE, index, lvItem);
 	ignoreSelect = false;
 	*/
-	String focusStyle = " table-item-focus";
 	if(index == focusIndex){
 		return;
 	}
@@ -2964,20 +2987,11 @@ void setFocusIndex (int index) {
 		return;
 	}
 	if(this.focusItem != null){
-		int i = this.focusItem.handle.className.indexOf(focusStyle);
-		if(i != -1){
-			focusItem.handle.className = 
-				focusItem.handle.className.substring(0, i) + 
-				focusItem.handle.className.substring(i + focusStyle.length());
-		}
+		OS.removeCSSClass(focusItem.handle, "table-item-focus");
 	}
 	this.focusItem = item;
 	this.focusIndex = index;
-	String className = item.handle.className;
-	if(className.indexOf(focusStyle) == -1 && !item.isSelected()){
-		item.handle.className += focusStyle;
-	}
-
+	OS.addCSSClass(item.handle, "table-item-focus");
 }
 
 public void setFont (Font font) {
@@ -3071,6 +3085,10 @@ public void setHeaderVisible (boolean show) {
 		if ((bits & OS.LVS_EX_GRIDLINES) != 0) setItemHeight ();
 	}
 	*/
+	headerVisible = show;
+	if (theadHandle != null) {
+		theadHandle.style.display = (show ? "" : "none");
+	}
 }
 
 /**
@@ -3178,8 +3196,8 @@ void setItemHeight () {
  */
 public void setLinesVisible (boolean show) {
 	checkWidget ();
-	int newBits = 0;
 	/*
+	int newBits = 0;
 	if (show) {
 		newBits = OS.LVS_EX_GRIDLINES;
 		int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);	
@@ -3187,6 +3205,8 @@ public void setLinesVisible (boolean show) {
 	}
 	OS.SendMessage (handle, OS.LVM_SETEXTENDEDLISTVIEWSTYLE, OS.LVS_EX_GRIDLINES, newBits);
 	*/
+	lineVisible = show;
+	OS.updateCSSClass(tableHandle, "table-grid-line", show);
 }
 
 public void setRedraw (boolean redraw) {

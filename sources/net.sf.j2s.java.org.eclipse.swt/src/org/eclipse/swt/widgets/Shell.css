@@ -168,19 +168,24 @@
 }
 
 .shell-title-icon {
-	background-image:url('images/z-logo.gif');
+	background-image:url('images/shell-packed.gif');
+	background-position:center center;
 }
 .shell-title-min {
-	background-image:url('images/min_view.gif');
+	background-image:url('images/shell-packed.gif');
+	background-position:left center;
 }
 .shell-title-normal-max {
-	background-image:url('images/max_view.gif');
+	background-image:url('images/shell-packed.gif');
+	background-position:center top;
 }
 .shell-maximized .shell-title-normal-max {
-	background-image:url('images/restore_view.gif');
+	background-image:url('images/shell-packed.gif');
+	background-position:right top;
 }
 .shell-title-close {
-	background-image:url('images/close_view.gif');
+	background-image:url('images/shell-packed.gif');
+	background-position:left top;
 }
 
 .shell-modal-block {
