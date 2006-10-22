@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+ 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ControlListener;
@@ -41,7 +42,7 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TableColumn extends Item {
 //	Element handle;
-	private int lastX, lastY;
+	private int lastX, lastY, colWidth;
 	Table parent;
 	boolean resizable, moveable;
 	Element resizeHandle;
@@ -365,12 +366,17 @@ public int getWidth () {
 	if (index == -1) return 0;
 	//int hwnd = parent.handle;
 	//return OS.SendMessage (hwnd, OS.LVM_GETCOLUMNWIDTH, index, 0);
+	if (!parent.headerVisible) {
+		return colWidth;
+	}
+	//*
 	if (handle.style.width != null && handle.style.width.length() != 0) {
 		int styleWidth = Integer.parseInt(handle.style.width);
 		return this.text != null ? Math.max(OS.getStringPlainWidth(this.text), styleWidth) : styleWidth;
 	}
 //	return UIStringUtil.getContainerWidth(handle);
 	return OS.getContainerWidth(handle);
+	//*/
 }
 
 /**
@@ -519,6 +525,7 @@ public void removeControlListener (ControlListener listener) {
 	eventTable.unhook (SWT.Move, listener);
 	eventTable.unhook (SWT.Resize, listener);
 }
+
 /**
  * Removes the listener from the collection of listeners who will
  * be notified when the control is selected.
@@ -686,14 +693,15 @@ public void setText (String string) {
 	if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
 	if (result == 0) error (SWT.ERROR_CANNOT_SET_TEXT);
 	*/
-	if (handle.childNodes != null) {
-		for (int i = 0; i < handle.childNodes.length; i++) {
-			if (handle.childNodes[i] != null) {
-				handle.removeChild(handle.childNodes[i]);
+	Element text = handle.childNodes[0];
+	if (text.childNodes != null) {
+		for (int i = 0; i < text.childNodes.length; i++) {
+			if (text.childNodes[i] != null) {
+				text.removeChild(text.childNodes[i]);
 			}
 		}
 	}
-	handle.appendChild(document.createTextNode(string));
+	text.appendChild(document.createTextNode(string));
 	int[] columnMaxWidth = parent.columnMaxWidth;
 	int width = OS.getContainerWidth(handle);
 	if(columnMaxWidth.length > index){
@@ -725,12 +733,12 @@ public void setWidth (int width) {
 	if (index == -1) return;
 //	int hwnd = parent.handle;
 //	OS.SendMessage (hwnd, OS.LVM_SETCOLUMNWIDTH, index, width);
+	colWidth = width;
 	int tempWidth = width;
 	if(this.text != null){
 		tempWidth = Math.max(OS.getStringPlainWidth(this.text), width);
 	}
 	handle.style.width = tempWidth + "px";
-//	System.out.println("setting width to " + handle.style.width);
 //	configureColumn();
 }
 

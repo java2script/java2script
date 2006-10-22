@@ -18,8 +18,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
+import org.eclipse.swt.internal.xhtml.document;
 
 /**
  * Instances of this class represent a selectable user interface object
@@ -1075,6 +1077,35 @@ public void setImage (int index, Image image) {
 	/* Ensure that the image list is created */
 	//parent.imageIndex (image);
 	
+	if (index == 0) {
+		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
+			Element text = handle.childNodes[index].childNodes[0];
+			//text = text.childNodes[text.childNodes.length - 1];
+				
+			Element[] els = text.childNodes;
+			CSSStyle handleStyle = handle.style;
+			if (els.length == 1 || !OS.existedCSSClass(els[els.length - 2], "table-image")) {
+				Element div = document.createElement("DIV");
+				div.className = "table-image image-p-4 image-n-5";
+				text.insertBefore(div, els[els.length - 1]);
+				handleStyle = div.style; 
+			} else {
+				handleStyle = els[els.length - 2].style;
+			}
+			if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+//					Element imgBackground = document.createElement("DIV");
+//					imgBackground.style.position = "absolute";
+//					imgBackground.style.width = "100%";
+//					imgBackground.style.height = "100%";
+//					imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+//					handle.appendChild(imgBackground);
+				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+			} else {
+				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			}
+		}
+		OS.addCSSClass(handle.parentNode, "table-image");
+	}
 	//if (index == 0) parent.setScrollWidth (this, false);
 	redraw (index, false, true);
 }
@@ -1169,9 +1200,10 @@ public void setText (int index, String string) {
 		if (string.equals (strings [index])) return;
 		strings [index] = string;
 	}
-	int elementIndex = ((parent.style & SWT.CHECK) != 0 && index == 0)? 1 : 0;
-	Element text = handle.childNodes[index].childNodes[0].childNodes[elementIndex];
-//	Element[] children = text.childNodes;
+	Element text = handle.childNodes[index].childNodes[0];
+	if (index == 0) {
+		text = text.childNodes[text.childNodes.length - 1];
+	}
 	text.innerHTML = string;
 	
 	int[] columnMaxWidth = parent.columnMaxWidth;
@@ -1313,13 +1345,7 @@ void showSelection(boolean selected) {
 	if ((parent.style & SWT.CHECK) != 0) {
 		index++;
 	}
-	if((parent.style & SWT.FULL_SELECTION) != 0){
-		handle.className = selected ? "table-item-selected" : "table-item-default";
-	}else{
-//	System.out.println(handle.className);
-		Element element = handle.childNodes[0].childNodes[0].childNodes[index];
-		element.className = selected ? "table-item-cell-text-selected" : "table-item-cell-text-default";
-	}
+	OS.updateCSSClass(handle, "table-item-selected", selected);
 }
 
 //	void setSelected(boolean selected){
