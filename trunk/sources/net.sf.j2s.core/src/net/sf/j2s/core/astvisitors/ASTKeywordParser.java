@@ -1064,7 +1064,19 @@ public class ASTKeywordParser extends ASTEmptyParser {
 
 	public boolean visit(IfStatement node) {
 		buffer.append("if (");
-		node.getExpression().accept(this);
+		/**
+		 * Boolean x = Boolean.FALSE;
+		 * 
+		 * if( x ){
+		 * 
+		 * }
+		 * should converted to 
+		 * if(x.booleanValue()){
+		 * 
+		 * }
+		 */
+		boxingNode(node.getExpression());
+//		node.getExpression().accept(this);
 		buffer.append(") ");
 		node.getThenStatement().accept(this);
 		if (node.getElseStatement() != null) {
