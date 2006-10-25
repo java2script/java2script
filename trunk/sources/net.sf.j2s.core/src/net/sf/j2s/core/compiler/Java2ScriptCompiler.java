@@ -132,12 +132,22 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				root = (CompilationUnit) astParser.createAST(null);
 				
 				DependencyASTVisitor dvisitor = null;
-				if ("ASTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+				String visitorID = props.getProperty("j2s.compiler.visitor");
+				IExtendedVisitor extVisitor = null;
+				if ("ASTScriptVisitor".equals(visitorID)) {
 					dvisitor = new DependencyASTVisitor();
-				} else if ("SWTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+				} else if ("SWTScriptVisitor".equals(visitorID)) {
 					dvisitor = new SWTDependencyASTVisitor();
 				} else {
-					dvisitor = new SWTDependencyASTVisitor();
+					if (visitorID != null && visitorID.length() != 0) {
+						extVisitor = ExtendedVisitors.getExistedVisitor(visitorID);
+						if (extVisitor != null) {
+							dvisitor = extVisitor.getDependencyVisitor();
+						}
+					}
+					if (dvisitor == null) {
+						dvisitor = new SWTDependencyASTVisitor();
+					}
 				}
 				boolean errorOccurs = false;
 				try {
@@ -167,12 +177,17 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 
 				ASTScriptVisitor visitor = null;
-				if ("ASTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+				if ("ASTScriptVisitor".equals(visitorID)) {
 					visitor = new ASTScriptVisitor();
-				} else if ("SWTScriptVisitor".equals(props.getProperty("j2s.compiler.visitor"))) {
+				} else if ("SWTScriptVisitor".equals(visitorID)) {
 					visitor = new SWTScriptVisitor();
 				} else {
-					visitor = new SWTScriptVisitor();
+					if (extVisitor != null) {
+						visitor = extVisitor.getScriptVisitor();
+					}
+					if (visitor == null) {
+						visitor = new SWTScriptVisitor();
+					}
 				}
 				boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
 				visitor.setDebugging(isDebugging);
