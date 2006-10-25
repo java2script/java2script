@@ -8,6 +8,13 @@
 <extension-point name="Extended Compiler" 
 	id="extendedCompiler" 
 	schema="schema/extendedCompiler.exsd"/>
+
+<!-- =================================================================================== -->
+<!-- Extension Point: Extended AST Script Visitor                                           -->
+<!-- =================================================================================== -->
+<extension-point name="Extended AST Script Visitor" 
+	id="extendedASTScriptVisitor" 
+	schema="schema/extendedASTScriptVisitor.exsd"/>
 	
    <extension
          id="net.sf.j2s.core.j2scompiler"
@@ -53,5 +60,15 @@
 			</run>
 		</builder>
 	</extension>
+
+ <extension
+       point="net.sf.j2s.core.extendedASTScriptVisitor">
+    <extendedASTScriptVisitor
+          class="net.sf.j2s.core.compiler.ASTExtendedVisitor"
+          id="BasicASTScriptVisitor"/>
+    <extendedASTScriptVisitor
+          class="net.sf.j2s.core.compiler.SWTExtendedVisitor"
+          id="SWTASTScriptVisitor"/>
+ </extension>
 
 </plugin>
