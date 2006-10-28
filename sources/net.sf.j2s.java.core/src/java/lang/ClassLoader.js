@@ -365,6 +365,7 @@ ClazzLoader.jarClasspath = function (jar, clazzes) {
 
 /* public */
 ClazzLoader.registerPackages = function (prefix, pkgs) {
+	ClazzLoader.isInnerLoaded = true;
 	var base = ClazzLoader.getClasspathFor (prefix + ".*", true);
 	for (var i = 0; i < pkgs.length; i++) {
 		if (window["Clazz"] != null) {
@@ -542,7 +543,16 @@ ClazzLoader.mapPath2ClassNode = new Object ();
 ClazzLoader.xhrOnload = function (transport, file) {
 	if (transport.status >= 400 || transport.responseText == null
 			|| transport.responseText.length == 0) { // error
-		// TODO: Maybe should take another try before ignoring
+		var fs = ClazzLoader.failedScripts;
+		if (fs[file] == null) {
+			// Silently take another try for bad network
+			fs[file] = 1;
+			ClazzLoader.loadedScripts[file] = false;
+			ClazzLoader.loadScript (file);
+			return;
+		} else {
+			alert ("[Java2Script] Error in loading " + file + "!");
+		}
 		ClazzLoader.tryToLoadNext (file);
 	} else {
 		try {
@@ -576,6 +586,14 @@ ClazzLoader.emptyOnRSC = function () {
 
 /* private */
 ClazzLoader.lastScriptPath = null;
+
+/* protected */
+/*-# failedScripts -> fss #-*/
+ClazzLoader.failedScripts = new Object ();
+
+/* protected */
+/*-# failedHandles -> fhs #-*/
+ClazzLoader.failedHandles = new Object ();
 
 /**
  * Load *.js by adding script elements into head. Hook the onload event to
@@ -646,14 +664,15 @@ ClazzLoader.loadScript = function (file) {
 				transport.send (null);
 			} catch (e) {
 				alert ("[Java2Script] Loading file error: " + e.message);
-				throw e;
+				ClazzLoader.xhrOnload (transport, file);
+				//throw e;
 			}
 		} else {
 			try {
 				transport.send (null);
 			} catch (e) {
 				alert ("[Java2Script] Loading file error: " + e.message);
-				throw e;
+				//throw e;
 			}
 			ClazzLoader.xhrOnload (transport, file);
 		}
@@ -663,14 +682,18 @@ ClazzLoader.loadScript = function (file) {
 	var script = document.createElement ("SCRIPT");
 	script.type = "text/javascript";
 	script.src = file;
+	var head = document.getElementsByTagName ("HEAD")[0];
 
 	if (ignoreOnload) {
-		document.getElementsByTagName ("HEAD")[0].appendChild (script);
+		head.appendChild (script);
 		// ignore onload event and no call of ClazzLoader.scriptLoading
 		return ;
 	}
 	// Alert when the script is loaded
 	if (typeof (script.onreadystatechange) == "undefined") { // W3C
+		/*
+		 * What about Safari?
+		 */
 		/*
 		 * Opera will trigger onload event even there are no related *.js
 		 */
@@ -693,6 +716,16 @@ ClazzLoader.loadScript = function (file) {
 		script.onerror = function () { // Firefox/Mozilla
 			this.onerror = null; 
 			var path = arguments.callee.path;
+			var fss = ClazzLoader.failedScripts;
+			if (fss[path] == null) {
+				// silently take another try for bad network
+				fss[path] = 1;
+				ClazzLoader.loadedScripts[path] = false;
+				ClazzLoader.loadScript (path);
+				return;
+			} else {
+				alert ("[Java2Script] Error in loading " + path + "!");
+			}
 			ClazzLoader.scriptLoaded (path);
 			if (ClazzLoader.loadingTimeLag >= 0) {
 				window.setTimeout (function () {
@@ -704,19 +737,60 @@ ClazzLoader.loadScript = function (file) {
 		};
 		script.onerror.path = file;
 	} else { // IE
+		script.defer = true;
 		script.onreadystatechange = function () {
-			if (this.readyState != "loaded" && this.readyState != "complete") {
+			var ee = arguments.callee;
+			var path = ee.path;
+			var fhs = ClazzLoader.failedHandles;
+			var fss = ClazzLoader.failedScripts;
+			var state = "" + this.readyState;
+			// alert (state + "/" + this.src);
+			if (state != "loaded" && state != "complete") {
 				/*
-				 * When no such *.js existed for local file system, IE will be
-				 * stuck in here without loaded event!
+				 * When no such *.js existed, IE will be
+				 * stuck here without loaded event!
 				 */
+				/*
 				if ((window.location.protocol != "file:" 
 						&& script.src.indexOf ("file:") != 0)
 						|| this.readyState != "loading") {
 					return;
 				}
+				*/
+				if (fss[path] == null) {
+					var fun = function () {
+						var path = arguments.callee.path;
+						// next time in "loading" state won't get waiting!
+						ClazzLoader.failedScripts[path] = 0;
+						ClazzLoader.loadedScripts[path] = false;
+						// Take another try!
+						ClazzLoader.loadScript (path);
+					};
+					fun.path = path;
+					// consider 30 seconds available after failing!
+					fhs[path] = window.setTimeout (fun, 15000);
+					return;
+				}
+				if (fss[path] == 1) {
+					return;
+				}
 			}
-			var path = arguments.callee.path;
+			if (fhs[path] != null) {
+				window.clearTimeout (fhs[path]);
+				fhs[path] = null;
+			}
+			if (state == "loaded" && !ClazzLoader.isInnerLoaded) {
+				if (fss[path] == null || fss[path] == 0) {
+					// silently take another try for bad network
+					fss[path] = 1;
+					// log ("reloading ... " + path);
+					ClazzLoader.loadedScripts[path] = false;
+					ClazzLoader.loadScript (path);
+					return;
+				} else {
+					alert ("[Java2Script] Error in loading " + path + "!");
+				}
+			}
 			ClazzLoader.scriptLoaded (path);
 			// Unset onreadystatechange, leaks mem in IE
 			this.onreadystatechange = null; 
@@ -730,10 +804,13 @@ ClazzLoader.loadScript = function (file) {
 		};
 		script.onreadystatechange.path = file;
 	}
+	ClazzLoader.isInnerLoaded = false;
 	// Add script DOM element to document tree
-	document.getElementsByTagName ("HEAD")[0].appendChild (script);
+	head.appendChild (script);
 	ClazzLoader.scriptLoading (file);
 };
+
+ClazzLoader.isFirstScript = true;
 
 /* protected */
 ClazzLoader.isResourceExisted = function (id, path, base) {
@@ -1239,11 +1316,20 @@ ClazzLoader.searchClassArray = function (arr, rnd, status) {
 };
 
 /**
+ * This variable is used to mark that *.js is correctly loaded.
+ * In IE, ClazzLoader has defects to detect whether a *.js is correctly
+ * loaded or not, so inner loading mark is used for detecting.
+ */
+/* private */
+ClazzLoader.isInnerLoaded = false;
+
+/**
  * This method will be called in almost every *.js generated by Java2Script
  * compiler.
  */
 /* protected */
 ClazzLoader.load = function (musts, clazz, optionals, declaration) {
+	ClazzLoader.isInnerLoaded = true;
 	if (clazz instanceof Array) {
 		ClazzLoader.unwrapArray (clazz);
 		for (var i = 0; i < clazz.length; i++) {
