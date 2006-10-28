@@ -492,8 +492,8 @@ public FontData open () {
 	if (!success) return null;
 	*/
 	this.returnFD = null;
-	Display display = new Display();
-	dialogShell = new Shell(display);
+	//Display display = new Display();
+	dialogShell = new Shell(parent.display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 	dialogShell.setText("Font");
 	GridLayout gl = new GridLayout();
 	dialogShell.setLayout(gl);
@@ -798,7 +798,7 @@ public FontData open () {
 	dialogShell.open();
 	while (!dialogShell.isDisposed())
 		if (!dialogShell.getDisplay().readAndDispatch()) dialogShell.getDisplay().sleep();
-	display.dispose();
+	//display.dispose();
 	
 	/**
 	 * @j2sNative
