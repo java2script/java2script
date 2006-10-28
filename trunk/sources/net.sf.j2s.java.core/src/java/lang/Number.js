@@ -30,12 +30,12 @@ return Math.round (this);
 
 Clazz.defineMethod (Number, "floatValue", 
 function () {
-return this;
+return this.valueOf();
 });
 
 Clazz.defineMethod (Number, "doubleValue", 
 function () {
-return this;
+return this.valueOf();
 });
 
 Clazz.defineMethod (Number, "hashCode", 
