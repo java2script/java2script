@@ -142,7 +142,6 @@
 .shell-title-min, .shell-title-normal-max, .shell-title-close {
 	position:absolute;
 	top:1px;
-	background-position:center center;
 	background-repeat:no-repeat;
 	margin:1px;
 	padding:0;
@@ -156,15 +155,12 @@
 
 * html .shell-title-min {
 	margin-bottom:0;
-	background-position:top center;
 }
 * html .shell-title-normal-max {
 	margin-bottom:0;
-	background-position:top center;
 }
 * html .shell-title-close {
 	margin-bottom:0;
-	background-position:top center;
 }
 
 .shell-title-icon {
