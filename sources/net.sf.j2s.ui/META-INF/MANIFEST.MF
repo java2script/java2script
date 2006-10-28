@@ -31,4 +31,3 @@ Require-Bundle: org.eclipse.ui,
  org.junit,
  org.eclipse.jdt.junit
 Eclipse-AutoStart: true
-Main-Class: net.sf.j2s.ui.jdtenhancer.JDTCoreEnhancer
