@@ -1590,6 +1590,9 @@ Clazz.innerFunctions = {
 /* private */
 /*-# decorateFunction -> dF #-*/
 Clazz.decorateFunction = function (clazzFun, prefix, name) {
+	if (window["ClazzLoader"] != null) {
+		ClazzLoader.isInnerLoaded = true;
+	}
 	var qName = null;
 	if (prefix == null) {
 		// e.g. Clazz.declareInterface (null, "ICorePlugin", 

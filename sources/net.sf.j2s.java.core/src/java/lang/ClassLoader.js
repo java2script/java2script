@@ -810,8 +810,6 @@ ClazzLoader.loadScript = function (file) {
 	ClazzLoader.scriptLoading (file);
 };
 
-ClazzLoader.isFirstScript = true;
-
 /* protected */
 ClazzLoader.isResourceExisted = function (id, path, base) {
 	if (id != null && document.getElementById (id) != null) {
