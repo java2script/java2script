@@ -40,7 +40,11 @@ throw  new NumberFormatException ("radix " + radix + " less than Character.MIN_R
 }if (radix > 36) {
 throw  new NumberFormatException ("radix " + radix + " greater than Character.MAX_RADIX");
 }
-return parseInt (s, radix);
+var integer = parseInt (s, radix);
+if(isNaN(integer)){
+throw  new NumberFormatException ("Not a Number : " + s);
+}
+return integer;
 }, "String, Number");
 Integer.parseInt = Integer.prototype.parseInt;
 Clazz.defineMethod (Integer, "parseInt", 

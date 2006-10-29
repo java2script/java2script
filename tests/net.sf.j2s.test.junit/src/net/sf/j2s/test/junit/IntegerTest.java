@@ -302,6 +302,15 @@ public class IntegerTest extends junit.framework.TestCase {
 			exception = true;
 		}
 		assertTrue("Failed to throw exception for MIN_VALUE - 1", exception);
+		
+		exception = false;
+		try {
+			Integer.parseInt("a");
+		} catch (NumberFormatException e) {
+			// Correct
+			exception = true;
+		}
+		assertTrue("Failed to throw exception for non integer string", exception);
 	}
 
 	/**
@@ -383,6 +392,15 @@ public class IntegerTest extends junit.framework.TestCase {
 			exception = true;
 		}
 		assertTrue("Failed to throw exception for 9999999999", exception);
+
+		exception = false;
+		try {
+			Integer.parseInt("a");
+		} catch (NumberFormatException e) {
+			// Correct
+			exception = true;
+		}
+		assertTrue("Failed to throw exception for non integer string", exception);
 	}
 
 	/**

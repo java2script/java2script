@@ -301,6 +301,16 @@ public class LongTest extends junit.framework.TestCase {
 			exception = true;
 		}
 		assertTrue("Failed to throw exception for MIN_VALUE - 1", exception);
+		
+		exception = false;
+		try {
+			Long.parseLong("a");
+		} catch (NumberFormatException e) {
+			// Correct
+			exception = true;
+		}
+		assertTrue("Failed to throw exception for non long string ", exception);
+
 	}
 
 	/**
@@ -385,6 +395,15 @@ public class LongTest extends junit.framework.TestCase {
 		}
 		assertTrue("Failed to throw exception for 42325917317067571199",
 				exception);
+		
+		exception = false;
+		try {
+			Long.parseLong("a");
+		} catch (NumberFormatException e) {
+			// Correct
+			exception = true;
+		}
+		assertTrue("Failed to throw exception for non long string ", exception);
 	}
 
 	/**

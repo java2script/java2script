@@ -494,6 +494,15 @@ public class FloatTest extends junit.framework.TestCase {
 			}
 			fail(failString.toString());
 		}
+		
+		boolean exception = false;
+		try {
+			Float.parseFloat("a");
+		} catch (NumberFormatException e) {
+			// Correct
+			exception = true;
+		}
+		assertTrue("Failed to throw exception for non float string", exception);		
 	}
 
 	/**
