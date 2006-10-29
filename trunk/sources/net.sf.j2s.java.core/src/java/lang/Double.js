@@ -49,7 +49,11 @@ function (s) {
 if (s == null) {
 throw  new NumberFormatException ("null");
 }
-return parseFloat (s);
+var doubleVal = parseFloat (s);
+if(isNaN(doubleVal)){
+throw  new NumberFormatException ("Not a Number : " + s);
+}
+return doubleVal;
 }, "String");
 Double.$valueOf = Double.parseDouble = Double.prototype.parseDouble;
 

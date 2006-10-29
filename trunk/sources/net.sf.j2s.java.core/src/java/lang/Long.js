@@ -40,7 +40,11 @@ throw  new NumberFormatException ("radix " + radix + " less than Character.MIN_R
 }if (radix > 36) {
 throw  new NumberFormatException ("radix " + radix + " greater than Character.MAX_RADIX");
 }
-return parseInt (s, radix);
+var longVal = parseInt (s, radix);
+if(isNaN(longVal)){
+throw  new NumberFormatException ("Not a Number : " + s);
+}
+return longVal;
 }, "String, Number");
 Long.$valueOf = Long.parseLong = Long.prototype.parseLong;
 Clazz.defineMethod (Long, "parseLong", 
