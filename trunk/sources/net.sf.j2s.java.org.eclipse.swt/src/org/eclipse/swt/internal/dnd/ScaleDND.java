@@ -14,6 +14,7 @@
 package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -32,8 +33,9 @@ public class ScaleDND implements DragListener {
 		} else {
 			isHorizontal = false;
 		}
-		this.sourceX = Integer.parseInt (e.sourceElement.style.left);
-		this.sourceY = Integer.parseInt (e.sourceElement.style.top);
+		CSSStyle style = e.sourceElement.style;
+		this.sourceX = style.left.length() > 0 ? Integer.parseInt (style.left) : 0;
+		this.sourceY = style.top.length() > 0 ? Integer.parseInt (style.top) : 0;
 		/* first time, set start location to current location */
 		e.startX = e.currentX;
 		e.startY = e.currentY;
@@ -53,15 +55,17 @@ public class ScaleDND implements DragListener {
 	protected Point currentLocation(DragEvent e) {
 		int xx = this.sourceX + e.deltaX ();
 		int yy = this.sourceY + e.deltaY ();
+		CSSStyle parentStyle = e.sourceElement.parentNode.style;
 		
-		int gHeight = Integer.parseInt(e.sourceElement.parentNode.style.height);
-		int gWidth = Integer.parseInt(e.sourceElement.parentNode.style.width);
+		int gHeight = parentStyle.height.length() > 0 ? Integer.parseInt(parentStyle.height) : 0;
+		int gWidth = parentStyle.width.length() > 0 ? Integer.parseInt(parentStyle.width) : 0;
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
 		 * outside the browser window, so make bound for the dragging.
 		 */
-		int dWidth = Integer.parseInt(e.sourceElement.style.width);
-		int dHeight = Integer.parseInt(e.sourceElement.style.height);
+		CSSStyle style = e.sourceElement.style;
+		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
+		int dHeight = style.height.length() > 0 ? Integer.parseInt(style.height) : 0;
 		if (isHorizontal) {
 			//if (dWidth == NaN) {
 			dWidth = 10;

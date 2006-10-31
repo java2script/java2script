@@ -14,6 +14,7 @@
 package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -77,10 +78,12 @@ public class ShellFrameDND implements DragListener {
 			this.frame.style.top = this.sourceY + "px";
 			this.frame.style.display = "block";
 		}
-		this.sourceX = Integer.parseInt (e.sourceElement.style.left);
-		this.sourceY = Integer.parseInt (e.sourceElement.style.top);
-		this.sourceWidth = Integer.parseInt (e.sourceElement.style.width);
-		this.sourceHeight = Integer.parseInt (e.sourceElement.style.height);
+		
+		CSSStyle style = e.sourceElement.style;
+		this.sourceX = style.left.length() > 0 ? Integer.parseInt (style.left) : 0;
+		this.sourceY = style.top.length() > 0 ? Integer.parseInt (style.top) : 0;
+		this.sourceWidth = style.width.length() > 0 ? Integer.parseInt (style.width) : 0;
+		this.sourceHeight = style.height.length() > 0 ? Integer.parseInt (style.height) : 0;
 		/* first time, set start location to current location */
 		e.startX = e.currentX;
 		e.startY = e.currentY;
@@ -169,7 +172,8 @@ public class ShellFrameDND implements DragListener {
 		 * On mozilla, the mousemove event can contain mousemove
 		 * outside the browser window, so make bound for the dragging.
 		 */
-		int dWidth = Integer.parseInt(e.sourceElement.style.width);
+		CSSStyle style = e.sourceElement.style;
+		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
 		if (xx < -dWidth) {
 			xx = -dWidth;
 		} else if (xx > gWidth - 2) {
@@ -192,7 +196,8 @@ public class ShellFrameDND implements DragListener {
 			} else if (Math.abs (xx) < 10) {
 				xx = 0;
 			}
-			int dHeight = Integer.parseInt(e.sourceElement.style.height);
+
+			int dHeight = style.height.length() > 0 ? Integer.parseInt(style.height) : 0;
 			if (Math.abs (yy - gHeight + dHeight + 2) < 10) {
 				yy = gHeight - dHeight - 2;
 			} else if (Math.abs (yy - (-1)) < 10) {
@@ -213,10 +218,11 @@ public class ShellFrameDND implements DragListener {
 		return true;
 	};
 	public boolean dragEnded(DragEvent e) {
-		int x = Integer.parseInt (this.frame.style.left);
-		int y = Integer.parseInt (this.frame.style.top);
-		int width = Integer.parseInt (this.frame.style.width);
-		int height = Integer.parseInt (this.frame.style.height);
+		CSSStyle style = this.frame.style;
+		int x = Integer.parseInt (style.left);
+		int y = Integer.parseInt (style.top);
+		int width = Integer.parseInt (style.width);
+		int height = Integer.parseInt (style.height);
 		Element shell = e.sourceElement;
 //		shell.style.left = x + "px";
 //		shell.style.top = y + "px";
@@ -249,7 +255,8 @@ public class ShellFrameDND implements DragListener {
 		return true;
 	};
 	public static void fixShellHeight(Object shell) {
-		int height = Integer.parseInt (((Element) shell).style.height);
+		CSSStyle style = ((Element) shell).style;
+		int height = style.height.length() > 0 ? Integer.parseInt (style.height) : 0;
 		Element[] divs = ((Element) shell).getElementsByTagName ("DIV");
 		for (int i = 0; i < divs.length; i++) {
 			//Element div = divs.item (i);
@@ -274,7 +281,8 @@ public class ShellFrameDND implements DragListener {
 //		var needToFixedWidth = ("\n".split (/\n/).length != 2) 
 //			|| navigator.userAgent.toLowerCase ().indexOf ("opera") != -1;
 		boolean needToFixedWidth = true;
-		int width = Integer.parseInt (((Element) shell).style.width) - 6;
+		CSSStyle style = ((Element) shell).style;
+		int width = style.width.length() > 0 ? Integer.parseInt (style.width) - 6 : 0;
 		Element[] divs = ((Element) shell).getElementsByTagName ("DIV");
 		for (int i = 0; i < divs.length; i++) {
 			//Element div = divs.item (i);

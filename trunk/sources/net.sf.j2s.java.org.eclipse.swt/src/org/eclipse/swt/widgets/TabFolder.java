@@ -1073,7 +1073,10 @@ void updateSelection(int index) {
 			s.left = x + "px";
 			x += w;
 		}
-		int ww = Integer.parseInt(handle.style.width);
+		int ww = 0;
+		if(handle.style.width.length() > 0){			
+			ww = Integer.parseInt(handle.style.width);
+		}
 		if (ww > 0) {
 			OS.updateCSSClass(borderFrame, "tab-show-more-item", x > ww || offset != 0);
 		}

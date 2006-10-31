@@ -14,6 +14,7 @@
 package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -45,7 +46,8 @@ public class TableColumnDND extends DragAdapter {
 			e.sourceElement.parentNode.appendChild (thumb);
 		}
 
-		this.sourceX = Integer.parseInt (e.sourceElement.style.left);
+		CSSStyle style = e.sourceElement.style;
+		this.sourceX = style.left.length() > 0 ? Integer.parseInt (style.left) : 0;
 		/* first time, set start location to current location */
 		e.startX = e.currentX;
 		return true;
@@ -68,13 +70,15 @@ public class TableColumnDND extends DragAdapter {
 
 	protected Point currentLocation(DragEvent e) {
 		int xx = this.sourceX + e.deltaX ();
+		CSSStyle parentStyle = e.sourceElement.parentNode.style;
 		
-		int gWidth = Integer.parseInt(e.sourceElement.parentNode.style.width);
+		int gWidth = parentStyle.width.length() > 0 ? Integer.parseInt(parentStyle.width) : 0;
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
 		 * outside the browser window, so make bound for the dragging.
 		 */
-		int dWidth = Integer.parseInt(e.sourceElement.style.width);
+		CSSStyle style = e.sourceElement.style;
+		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
 		if (xx < 0) {
 			xx = 0;
 		} else if (xx > gWidth - dWidth - 2) {

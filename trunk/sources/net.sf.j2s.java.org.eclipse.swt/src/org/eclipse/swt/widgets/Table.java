@@ -2319,7 +2319,8 @@ public void remove (int [] indices) {
 				System.arraycopy (items, 0, newItems, 0, index);
 				System.arraycopy (items, index + 1, newItems, index, --count - index);
 				items = newItems;
-				newItems = new TableItem[count-1];
+				
+//				newItems = new TableItem[count-1];
 //				System.out.println("after remove " + items + " " + count + " " + index);
 				//items [count] = null; 
 				last = index;

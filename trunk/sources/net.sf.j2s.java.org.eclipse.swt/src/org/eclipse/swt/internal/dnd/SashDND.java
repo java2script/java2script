@@ -14,6 +14,7 @@
 package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -52,8 +53,10 @@ public class SashDND implements DragListener {
 		} else {
 			e.sourceElement.parentNode.appendChild (thumb);
 		}
-		this.sourceX = Integer.parseInt (e.sourceElement.style.left);
-		this.sourceY = Integer.parseInt (e.sourceElement.style.top);
+		CSSStyle style = e.sourceElement.style;
+		
+		this.sourceX = style.left.length() > 0 ? Integer.parseInt (style.left) : 0;
+		this.sourceY = style.top.length() > 0 ? Integer.parseInt (style.top) : 0;
 		/* first time, set start location to current location */
 		e.startX = e.currentX;
 		e.startY = e.currentY;
@@ -90,15 +93,23 @@ public class SashDND implements DragListener {
 	protected Point currentLocation(DragEvent e) {
 		int xx = this.sourceX + e.deltaX ();
 		int yy = this.sourceY + e.deltaY ();
-		
-		int gHeight = Integer.parseInt(e.sourceElement.parentNode.style.height);
-		int gWidth = Integer.parseInt(e.sourceElement.parentNode.style.width);
+		int gHeight = 0;
+		CSSStyle parentStyle = e.sourceElement.parentNode.style;
+		if(parentStyle.height.length() > 0){
+			gHeight = Integer.parseInt(parentStyle.height);
+		}
+		int gWidth = 0;
+		if(parentStyle.width.length() > 0){			
+			gWidth = Integer.parseInt(parentStyle.width);
+		}
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
 		 * outside the browser window, so make bound for the dragging.
 		 */
-		int dWidth = Integer.parseInt(e.sourceElement.style.width);
-		int dHeight = Integer.parseInt(e.sourceElement.style.height);
+		CSSStyle style = e.sourceElement.style;
+		
+		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
+		int dHeight = style.height.length() > 0 ? Integer.parseInt(style.height) : 0;
 		if (xx < 0) {
 			xx = 0;
 		} else if (xx > gWidth - dWidth - 2) {
