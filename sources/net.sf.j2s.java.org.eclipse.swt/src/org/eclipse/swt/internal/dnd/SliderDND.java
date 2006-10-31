@@ -13,6 +13,8 @@
 
 package org.eclipse.swt.internal.dnd;
 
+import org.eclipse.swt.internal.xhtml.CSSStyle;
+
 
 /**
  * @author josson smith
@@ -30,8 +32,9 @@ public class SliderDND extends DragAdapter {
 		} else {
 			isHorizontal = false;
 		}
-		this.sourceX = Integer.parseInt (e.sourceElement.style.left);
-		this.sourceY = Integer.parseInt (e.sourceElement.style.top);
+		CSSStyle style = e.sourceElement.style;
+		this.sourceX = style.left.length() > 0 ? Integer.parseInt (e.sourceElement.style.left) : 0;
+		this.sourceY = style.top.length() > 0 ? Integer.parseInt (e.sourceElement.style.top) : 0;
 		/* first time, set start location to current location */
 		e.startX = e.currentX;
 		e.startY = e.currentY;

@@ -3439,7 +3439,10 @@ void updateSelection(int index) {
 			s.width = w +"px";
 			x += w + 2;
 		}
-		int ww = Integer.parseInt(handle.style.width);
+		int ww = 0;
+		if(handle.style.width.length() > 0){
+			ww = Integer.parseInt(handle.style.width);
+		}
 		if (ww > 0) {
 			//TODO : ITEM MORE
 //			String cssName = borderFrame.className;

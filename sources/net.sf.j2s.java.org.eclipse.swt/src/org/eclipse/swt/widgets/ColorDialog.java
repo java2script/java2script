@@ -23,6 +23,7 @@ import org.eclipse.swt.internal.dnd.DragAdapter;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.layout.GridData;
@@ -759,7 +760,8 @@ void configureCustomPanel() {
 			return true;
 		}
 		public boolean dragBegan(DragEvent e) {
-			originalTop = Integer.parseInt(e.sourceElement.style.top);
+			CSSStyle style = e.sourceElement.style;
+			originalTop = style.top.length() > 0 ? Integer.parseInt(style.top) : 0;
 			return true;
 		}
 	});

@@ -20,6 +20,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.ScaleDND;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -503,11 +504,12 @@ public int getPageIncrement () {
 public int getSelection () {
 	checkWidget ();
 	//return OS.SendMessage (handle, OS.TBM_GETPOS, 0, 0);
+	CSSStyle thumbStyle = thumbHandle.style;
 	if ((style & SWT.HORIZONTAL) != 0) {
-		int left = Integer.parseInt(thumbHandle.style.left);
+		int left = thumbStyle.left.length() > 0 ? Integer.parseInt(thumbStyle.left) : 0;
 		selection = left * maximum / (getSize().x - 12);
 	} else {
-		int top = Integer.parseInt(thumbHandle.style.top);
+		int top = thumbStyle.top.length() > 0 ? Integer.parseInt(thumbStyle.top) : 0;
 		selection = maximum - top * maximum / (getSize().y - 12);
 	}
 	return selection;

@@ -20,6 +20,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.SliderDND;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -320,9 +321,10 @@ protected void createWidget() {
 		protected Point currentLocation(DragEvent e) {
 			int xx = this.sourceX + e.deltaX ();
 			int yy = this.sourceY + e.deltaY ();
+			CSSStyle parentStyle = e.sourceElement.parentNode.style;
 			
-			int gHeight = Integer.parseInt(e.sourceElement.parentNode.style.height);
-			int gWidth = Integer.parseInt(e.sourceElement.parentNode.style.width);
+			int gHeight = parentStyle.height.length() > 0 ? Integer.parseInt(parentStyle.height) : 0;
+			int gWidth = parentStyle.width.length() > 0 ? Integer.parseInt(parentStyle.width) : 0;
 			/*
 			 * On mozilla, the mousemove event can contain mousemove
 			 * outside the browser window, so make bound for the dragging.

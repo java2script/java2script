@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -74,6 +75,8 @@ public class Menu extends Widget {
 	
 	long lastFocusdTime;
 	
+	Object[] acceleratorTable;
+	
 	/* Resource ID for SHMENUBARINFO */
 	static final int ID_PPC = 100;
 	
@@ -84,7 +87,7 @@ public class Menu extends Widget {
 	static final int ID_SPBB = 105;
 	static final int ID_SPSOFTKEY0 = 106; 
 	static final int ID_SPSOFTKEY1 = 107;
-
+	static final int GROWTH_RATE = 5;
 /**
  * Constructs a new instance of this class given its parent,
  * and sets the style for the instance so that the instance
@@ -776,6 +779,38 @@ int defaultForeground () {
 
 void destroyAccelerators () {
 	parent.destroyAccelerators ();
+}
+
+void registerAccelerator(int accelerator, MenuItem item){
+	if(acceleratorTable == null){
+		acceleratorTable = new Object[0];
+	}
+	int size = acceleratorTable.length;
+	acceleratorTable[size] = new Integer(accelerator);
+	acceleratorTable[size+1] = item;
+}
+
+boolean isAccelerated(HTMLEvent keyEvent){
+	int size = acceleratorTable.length;
+	for(int i = 0; i < size; i+=2){
+		int acclCode = ((Integer) acceleratorTable[i]).intValue();
+		if(
+				(((acclCode & SWT.CONTROL) != 0 && keyEvent.ctrlKey) || ((acclCode & SWT.CONTROL) == 0 )) && 
+				(((acclCode & SWT.ALT) != 0 && keyEvent.altKey) || ((acclCode & SWT.ALT) == 0)) &&
+				((acclCode & SWT.SHIFT) != 0 && keyEvent.shiftKey) || ((acclCode & SWT.SHIFT) == 0)
+				) {
+			acclCode &= ~(SWT.ALT | SWT.SHIFT | SWT.CONTROL);
+			if(acclCode == keyEvent.keyCode){				
+				MenuItem item = (MenuItem) acceleratorTable[i+1];
+				/**
+				 * @j2sNative
+				 * item.handle.onclick();
+				 * 
+				 */{}
+			}
+		}
+	}
+	return false;
 }
 
 void destroyItem (MenuItem item) {
