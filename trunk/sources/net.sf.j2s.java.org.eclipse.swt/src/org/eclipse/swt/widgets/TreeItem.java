@@ -1175,7 +1175,6 @@ public void setExpanded (boolean expanded) {
 	}
 
 	TreeItem[] items = parent.getDescendantItems(index);
-//				TreeItem[] items = getItems();
 	for (int i = 0; i < items.length; i++) {
 		if(items[i] == null)
 			continue;

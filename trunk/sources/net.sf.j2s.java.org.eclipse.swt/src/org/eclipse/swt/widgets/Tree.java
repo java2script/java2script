@@ -764,12 +764,10 @@ void createItem (TreeItem item, Object hParent, int index) {
 		items = new TreeItem[0];
 	}
 	
-	boolean isAppending = false;
 	TreeItem[] itemList = (hParent == null ? directChildrens : item.parentItem.items);
 	int idx = -1;
 	if (index < 0 || index >= itemList.length) {
 		//append
-		isAppending = true;
 		if (hParent == null) {
 			idx = items.length; 
 		} else {
@@ -779,7 +777,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 			} else {
 				idx = findSiblingNextItem(item.parentItem.index);
 				if (idx != -1) {
-					idx--;
+					//idx--;
 				} else {
 					idx = items.length;
 				}
@@ -791,7 +789,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 		// insert
 		idx = findSiblingNextItem(itemList[index].index);
 		if (idx != -1) {
-			idx--;
+			//idx--;
 		} else {
 			idx = items.length;
 		}
@@ -802,7 +800,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 	}
 	for (int i = items.length - 1; i >= idx; i--) {
 		items[i + 1] = items[i];
-		items[i + 1].index = i;
+		items[i + 1].index = i + 1;
 	}
 	items[idx] = item;
 	item.index = idx;
@@ -838,10 +836,10 @@ void createItem (TreeItem item, Object hParent, int index) {
 			tbody.childNodes[0].className = ""; // remove tree-row-first!
 		}
 	}
-	if (isAppending) {
+	if (idx >= items.length) {
 		tbody.appendChild(tbodyTR);
 	} else {
-		tbody.insertBefore(tbodyTR, tbody.childNodes[index]);
+		tbody.insertBefore(tbodyTR, tbody.childNodes[idx]);
 	}
 	
 	Element td = document.createElement("TD");
@@ -887,7 +885,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 					cssClass += " tree-anchor-single";
 				}
 			} else {
-				cssClass += " tree-anchor-single";
+				cssClass += " tree-anchor-middle";
 			}
 		} else if (hParent != null && i == 0) {
 			cssClass += " tree-anchor-end";
@@ -930,7 +928,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 	tbodyTR.appendChild(td);
 	
 	if (item.parentItem != null) {
-		item.parentItem.addItem(item, index);
+		//item.parentItem.addItem(item, index);
 		//item.parentItem.setExpanded(false);
 //		item.parentItem.setExpanded(item.parentItem.getExpanded());
 //		item.handle.style.display = "none";
@@ -996,7 +994,10 @@ void createItem (TreeItem item, Object hParent, int index) {
 		item = item.parentItem;
 	}
 	if (!visible) {
-		 tbodyTR.style.display = "none";
+		/*
+		 * Developer can comment the following line to show all tree nodes expanded 
+		 */
+		tbodyTR.style.display = "none";
 	}
 }	
 
