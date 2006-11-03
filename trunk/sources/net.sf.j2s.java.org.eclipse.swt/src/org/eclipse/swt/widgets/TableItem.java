@@ -1341,25 +1341,8 @@ public void setText (int index, String string) {
 }
 void showSelection(boolean selected) {
 	this.selected = selected;
-	int index = 0;
-	if ((parent.style & SWT.CHECK) != 0) {
-		index++;
-	}
 	OS.updateCSSClass(handle, "table-item-selected", selected);
 }
-
-//	void setSelected(boolean selected){
-//		this.selected = selected;
-//		System.out.print("selected " + selected);
-//		if(selected){
-//			
-//			this.handle.className = "table-item-selected";
-//		}else{
-//			this.handle.className = "table-item-default";
-//		}
-//		System.out.print("selected handle " + this.handle.className );
-//	}
-
 boolean isSelected(){
 	return this.selected;
 }

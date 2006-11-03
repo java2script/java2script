@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+ 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Color;
@@ -18,6 +19,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -38,17 +40,29 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 
 public class TreeItem extends Item {
+	/**
+	 * the handle to the OS resource 
+	 * (Warning: This field is platform dependent)
+	 * <p>
+	 * <b>IMPORTANT:</b> This field is <em>not</em> part of the SWT
+	 * public API. It is marked public only so that it can be shared
+	 * within the packages provided by SWT. It is not available on all
+	 * platforms and should never be accessed from application code.
+	 * </p>
+	 */	
+	//public int handle;
+	Tree parent;
 	String [] strings;
 	Image [] images;
 //	int background = -1, foreground = -1, font = -1;
 //	int [] cellBackground, cellForeground, cellFont;
-	Tree parent;
 	TreeItem parentItem;
 	TreeItem[] items;
 	int index;
-	boolean expandStatus = false;
-	private Element checkElement;
-
+	int depth;
+	boolean expandStatus, selected;
+	Element checkElement;
+	
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>Tree</code> or a <code>TreeItem</code>)
@@ -85,6 +99,7 @@ public TreeItem (Tree parent, int style) {
 	this.items = new TreeItem[0];
 	//parent.createItem (this, 0, OS.TVI_LAST);
 	parent.createItem (this, null, -1);
+	configureItem();
 }
 
 /**
@@ -134,9 +149,10 @@ public TreeItem (Tree parent, int style, int index) {
 		}
 		if (hItem == 0) error (SWT.ERROR_INVALID_RANGE);
 	}
+	parent.createItem (this, 0, hItem);
 	*/
-//	System.out.println(index);
 	parent.createItem (this, null, index);
+	configureItem();
 }
 
 /**
@@ -170,12 +186,14 @@ public TreeItem (Tree parent, int style, int index) {
  * @see Widget#getStyle
  */
 public TreeItem (TreeItem parentItem, int style) {
-	super (parentItem.parent, style);
+	super (checkNull (parentItem).parent, style);
 	parent = parentItem.parent;
+//	int hItem = parentItem.handle;
+//	parent.createItem (this, hItem, OS.TVI_LAST);
 	this.parentItem = parentItem;
 	this.items = new TreeItem[0];
-//	Element hItem = parentItem.handle;
-	parent.createItem (this, parentItem.handle, -1);//OS.TVI_LAST);
+	parent.createItem (this, parentItem, -1);//OS.TVI_LAST);
+	configureItem();
 }
 
 /**
@@ -210,7 +228,7 @@ public TreeItem (TreeItem parentItem, int style) {
  * @see Widget#getStyle
  */
 public TreeItem (TreeItem parentItem, int style, int index) {
-	super (parentItem.parent, style);
+	super (checkNull (parentItem).parent, style);
 	if (index < 0) error (SWT.ERROR_INVALID_RANGE);
 	parent = parentItem.parent;
 	this.items = new TreeItem[0];
@@ -227,11 +245,75 @@ public TreeItem (TreeItem parentItem, int style, int index) {
 		}
 		if (hItem == 0) error (SWT.ERROR_INVALID_RANGE);
 	}
-	Element hItem = parentItem.handle;
+	parent.createItem (this, hParent, hItem);
 	*/
-	parent.createItem (this, parentItem.handle, index);
+	parent.createItem (this, parentItem, index);
+	configureItem();
 }
 
+void configureItem() {
+	//if (index != 0) return;
+	Element[] innerChildren = handle.childNodes[0] // td
+	                                            .childNodes[0].childNodes[0].childNodes;
+	for (int i = 0; i < innerChildren.length - 1; i++) {
+		Element hAnchor = innerChildren[i];
+		String css = hAnchor.childNodes[1].className;
+		if (css.indexOf("plus") != -1 || css.indexOf("minus") != -1) {
+			hAnchor.onclick = new RunnableCompatibility() {
+				public void run() {
+					toggleExpandStatus();
+				}
+			};
+		}
+	}
+	if ((parent.style & SWT.CHECK) != 0) {
+		checkElement.onclick = new RunnableCompatibility() {
+			public void run() {
+				Event e = new Event();
+				e.display = display;
+				e.type = SWT.Selection;
+				e.detail = SWT.CHECK;
+				e.item = TreeItem.this;
+				e.widget = TreeItem.this;
+				parent.sendEvent(e);
+			}
+		};
+	}
+	Element text = innerChildren[innerChildren.length - 1];
+	text.onclick = new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			parent.toggleSelection(TreeItem.this, evt.ctrlKey, evt.shiftKey);
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.Selection;
+			e.detail = SWT.NONE;
+			e.item = TreeItem.this;
+			e.widget = TreeItem.this;
+			parent.sendEvent(e);
+			toReturn(false);
+		}
+	};
+	text.ondblclick = new RunnableCompatibility() {
+		public void run() {
+			toggleExpandStatus();
+			// Adding default selection event for double click
+			Event e = new Event();
+			e.display = display;
+			e.type = SWT.DefaultSelection;
+			e.detail = SWT.NONE;
+			e.item = TreeItem.this;
+			e.widget = TreeItem.this;
+			parent.sendEvent(e);
+			toReturn(false);
+		}
+	};
+	text.onselectstart = new RunnableCompatibility() {
+		public void run() {
+			toReturn(false);
+		}
+	};
+}
 static TreeItem checkNull (TreeItem item) {
 	if (item == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
 	return item;
@@ -740,9 +822,20 @@ public Tree getParent () {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-public TreeItem getParentItem() {
+public TreeItem getParentItem () {
+	checkWidget ();
+	/*
+	int hwnd = parent.handle;
+	TVITEM tvItem = new TVITEM ();
+	tvItem.mask = OS.TVIF_HANDLE | OS.TVIF_PARAM;
+	tvItem.hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_PARENT, handle);
+	if (tvItem.hItem == 0) return null;
+	OS.SendMessage (hwnd, OS.TVM_GETITEM, 0, tvItem);
+	return parent.items [tvItem.lParam];
+	*/
 	return parentItem;
 }
+
 /**
  * Returns the text stored at the given column index in the receiver,
  * or empty string if the text has not been set.
@@ -790,7 +883,7 @@ public String getText (int index) {
  * @since 3.1
  */
 public int indexOf (TreeItem item) {
-	//checkWidget ();
+	checkWidget ();
 	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (item.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 //	int hwnd = parent.handle;
@@ -940,16 +1033,15 @@ public void setBackground (Color color) {
 	if (color != null && color.isDisposed ()) {
 		SWT.error (SWT.ERROR_INVALID_ARGUMENT);
 	}
-	/*
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
-		parent.customDraw = true;
-		pixel = color.handle;
+//		parent.customDraw = true;
+//		pixel = color.handle;
+		handle.style.backgroundColor = color.getCSSHandle();
 	}
-	if (background == pixel) return;
-	background = pixel;
-	*/
-	redraw ();
+//	if (background == pixel) return;
+//	background = pixel;
+//	redraw ();
 }
 
 /**
@@ -978,12 +1070,13 @@ public void setBackground (int index, Color color) {
 	}
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count - 1) return;
-	/*
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
-		parent.customDraw = true;
-		pixel = color.handle;
+		handle.childNodes[index].style.backgroundColor = color.getCSSHandle();
+//		parent.customDraw = true;
+//		pixel = color.handle;
 	}
+	/*
 	if (cellBackground == null) {
 		cellBackground = new int [count];
 		for (int i = 0; i < count; i++) {
@@ -1008,7 +1101,7 @@ public void setBackground (int index, Color color) {
  * </ul>
  */
 public void setChecked (boolean checked) {
-	//checkWidget ();
+	checkWidget ();
 	if ((parent.style & SWT.CHECK) == 0) return;
 	/*
 	int hwnd = parent.handle;
@@ -1042,7 +1135,7 @@ public void setChecked (boolean checked) {
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
  * </ul>
  */
-public void setExpanded(boolean expanded) {
+public void setExpanded (boolean expanded) {
 	checkWidget ();
 	/*
 	/*
@@ -1083,16 +1176,7 @@ public void setExpanded(boolean expanded) {
 
 	TreeItem[] items = parent.getDescendantItems(index);
 //				TreeItem[] items = getItems();
-//		System.out.println(expanded);
-//		System.out.println(items.length);
 	for (int i = 0; i < items.length; i++) {
-//					if (items[i] == null) {
-//						System.out.println("null" + i);
-//						continue;
-//					}
-//					System.out.println("...");
-//					System.out.println(items[i]);
-//					System.out.println(items[i].expandStatus);
 		if(items[i] == null)
 			continue;
 		if (items[i].parentItem == this) {
@@ -1106,12 +1190,17 @@ public void setExpanded(boolean expanded) {
 		}
 		//items[i].handle.style.display = toExpand ? "none" : "";
 	}
-	if (items.length == 0) {
-		updateModifier(0);
+	Element[] innerChildren = handle.childNodes[0] // td[class="tree-column-first"]
+	                                     .childNodes[0].childNodes[0] // tree-line-wrapper
+	                                                               .childNodes;
+	Element hAnchor = innerChildren[innerChildren.length - 2].childNodes[1];
+	if (expanded) {
+		hAnchor.className = "tree-anchor-h tree-anchor-minus";
 	} else {
-		updateModifier(expanded ? 1 : -1);
+		hAnchor.className = "tree-anchor-h tree-anchor-plus";
 	}
 }
+
 /**
  * Sets the font that the receiver will use to paint textual information
  * for this item to the font specified by the argument, or to the default font
@@ -1242,16 +1331,15 @@ public void setForeground (Color color) {
 	if (color != null && color.isDisposed ()) {
 		SWT.error (SWT.ERROR_INVALID_ARGUMENT);
 	}
-	/*
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
-		parent.customDraw = true;
-		pixel = color.handle;
+//		parent.customDraw = true;
+//		pixel = color.handle;
+		handle.style.color = color.getCSSHandle();
 	}
-	if (foreground == pixel) return;
-	foreground = pixel;
-	*/
-	redraw ();
+//	if (foreground == pixel) return;
+//	foreground = pixel;
+//	redraw ();
 }
 
 /**
@@ -1280,12 +1368,13 @@ public void setForeground (int index, Color color){
 	}
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count - 1) return;
-	/*
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
-		parent.customDraw = true;
-		pixel = color.handle;
+//		parent.customDraw = true;
+//		pixel = color.handle;
+		handle.childNodes[index].style.color = color.getCSSHandle();
 	}
+	/*
 	if (cellForeground == null) {
 		cellForeground = new int [count];
 		for (int i = 0; i < count; i++) {
@@ -1294,8 +1383,8 @@ public void setForeground (int index, Color color){
 	}
 	if (cellForeground [index] == pixel) return;
 	cellForeground [index] = pixel;
-	*/
 	redraw (index, true, false);
+	*/
 }
 
 /**
@@ -1418,6 +1507,43 @@ public void setImage (int index, Image image) {
 		redraw (index, false, true);
 	}
 	*/
+	if (index == 0) {
+		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
+			Element[] innerChildren = handle.childNodes[index].childNodes;
+			if (index == 0) {
+				innerChildren = innerChildren[0].childNodes[0].childNodes;
+			}
+			Element text = innerChildren[innerChildren.length - 1];
+//			if (index == 0) {
+//				text = text.childNodes[text.childNodes.length - 1];
+//			}
+			//Element text = handle.childNodes[index].childNodes[0].childNodes[0];
+			//text = text.childNodes[text.childNodes.length - 1];
+				
+			Element[] els = text.childNodes;
+			CSSStyle handleStyle = handle.style;
+			if (els.length == 1 || !OS.existedCSSClass(els[els.length - 2], "tree-image-icon")) {
+				Element div = document.createElement("DIV");
+				div.className = "tree-image-icon image-p-4 image-n-5";
+				text.insertBefore(div, els[els.length - 1]);
+				handleStyle = div.style; 
+			} else {
+				handleStyle = els[els.length - 2].style;
+			}
+			if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+//					Element imgBackground = document.createElement("DIV");
+//					imgBackground.style.position = "absolute";
+//					imgBackground.style.width = "100%";
+//					imgBackground.style.height = "100%";
+//					imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+//					handle.appendChild(imgBackground);
+				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+			} else {
+				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			}
+		}
+		OS.addCSSClass(handle.parentNode, "tree-image");
+	}
 }
 
 public void setImage (Image image) {
@@ -1466,7 +1592,7 @@ public void setText (String [] strings) {
  * @since 3.1
  */
 public void setText (int index, String string) {
-	//checkWidget();
+	checkWidget();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (index == 0) {
 		if (string.equals (text)) return;
@@ -1479,107 +1605,20 @@ public void setText (int index, String string) {
 		if (string.equals (strings [index])) return;
 		strings [index] = string;
 	}
-	
 	if (index == 0) {
 		
 	}
-	Element tbodyTD = null;
-//		System.out.println(string);
-//		System.out.println(this);
-	if (index < handle.childNodes.length) {
-		if (handle.childNodes[index] != null
-				&& "TD".equals(handle.childNodes[index].nodeName)) {
-			tbodyTD = handle.childNodes[index];
-		}
-	}
-	if (tbodyTD == null){
-		tbodyTD = document.createElement("TD");
-		handle.appendChild(tbodyTD);
-	}
-	if (tbodyTD.childNodes != null) {
-		OS.clearChildren(tbodyTD);
-	}
-	Element hItem = document.createElement("DIV");
-	hItem.className = "tree-item-default";
-	Element hAnchor = document.createElement("DIV");
-	hAnchor.className = "tree-item-anchor-default";
-	hAnchor.onclick = new RunnableCompatibility() {
-		public void run() {
-			toggleExpandStatus();
-		}
-	};
 	
-	hAnchor.appendChild(document.createTextNode("" + (char) 160 + (char) 160 + (char) 160));
-	hItem.appendChild(hAnchor);
-	if ((parent.style & SWT.CHECK) != 0) {
-		checkElement = document.createElement("INPUT");
-		checkElement.type = "checkbox";
-		hItem.appendChild(checkElement);
-		checkElement.onclick = new RunnableCompatibility() {
-			public void run() {
-				Event e = new Event();
-				e.display = display;
-				e.type = SWT.Selection;
-				e.detail = SWT.CHECK;
-				e.item = TreeItem.this;
-				e.widget = TreeItem.this;
-				parent.sendEvent(e);
-			}
-		};
+	Element[] innerChildren = handle.childNodes[index].childNodes;
+	if (index == 0) {
+		innerChildren = innerChildren[0].childNodes[0].childNodes;
 	}
-	String s = (index == 0) ? getText() : strings[index];
-	Element text = document.createElement("DIV");
-	text.className = "tree-item-text-default";
-	text.appendChild(document.createTextNode(s));
-	text.onclick = new RunnableCompatibility() {
-		public void run() {
-//				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
-//				element.className = "tree-item-text-selected";
-			HTMLEvent evt = (HTMLEvent) getEvent();
-			parent.toggleSelection(TreeItem.this, evt.ctrlKey, evt.shiftKey);
-			Event e = new Event();
-			e.display = display;
-			e.type = SWT.Selection;
-			e.detail = SWT.NONE;
-			e.item = TreeItem.this;
-			e.widget = TreeItem.this;
-			parent.sendEvent(e);
-			toReturn(false);
-		}
-	};
-	text.ondblclick = new RunnableCompatibility() {
-		public void run() {
-			toggleExpandStatus();
-			// Adding default selection event for double click
-			Event e = new Event();
-			e.display = display;
-			e.type = SWT.DefaultSelection;
-			e.detail = SWT.NONE;
-			e.item = TreeItem.this;
-			e.widget = TreeItem.this;
-			parent.sendEvent(e);
-			toReturn(false);
-		}
-	};
-	text.onselectstart = new RunnableCompatibility() {
-		public void run() {
-			toReturn(false);
-		}
-	};
-	hItem.appendChild(text);
-	TreeItem pItem = parentItem;
-	int padding = 0;
-	while (pItem != null) {
-		pItem = pItem.parentItem;
-		padding += 20;
+	Element text0 = innerChildren[innerChildren.length - 1];
+	if (index == 0) {
+		text0 = text0.childNodes[text0.childNodes.length - 1];
 	}
-	if((parent.style & SWT.RIGHT_TO_LEFT) != 0){
-		hItem.style.marginRight = padding + "px";
-		hAnchor.style.width = "20px";
-	}else{
-		hItem.style.marginLeft = padding + "px";
-	}
-	tbodyTD.appendChild(hItem);
+	OS.clearChildren(text0);
+	text0.appendChild(document.createTextNode(string));
 	/*
 	if (index == 0) {
 		int hwnd = parent.handle;
@@ -1600,12 +1639,8 @@ public void setText (String string) {
 }
 
 void showSelection(boolean selected) {
-	int index = 1;
-	if ((parent.style & SWT.CHECK) != 0) {
-		index++;
-	}
-	Element element = handle.childNodes[0].childNodes[0].childNodes[index];
-	element.className = selected ? "tree-item-text-selected" : "tree-item-text-default";
+	this.selected = selected;
+	OS.updateCSSClass(handle, "tree-item-selected", selected);
 }
 
 //	public TreeItem [] getDescendantItems () {
@@ -1615,19 +1650,22 @@ void showSelection(boolean selected) {
 
 
 void toggleExpandStatus() {
-	String clazzName = handle.childNodes[0].childNodes[0].childNodes[0].className;
+	Element[] innerChildren = handle.childNodes[0] // td[class="tree-column-first"]
+	                                     .childNodes[0].childNodes[0] // tree-line-wrapper
+	                                                               .childNodes;
+	String clazzName = innerChildren[innerChildren.length - 2].childNodes[1].className;
 	int type = 0;
 	if (clazzName == null) {
 		type = 0;
-	} else if (clazzName.indexOf("expanded") != -1) {
+	} else if (clazzName.indexOf("minus") != -1) {
 		type = -1;
-	} else if (clazzName.indexOf("collapsed") != -1){
+	} else if (clazzName.indexOf("plus") != -1){
 		type = 1;
 	}
 	if (type == 0) {
 		return ;
 	}
-	boolean toExpand = type >= 0;//updateModifier(type);
+	boolean toExpand = type >= 0;
 	setExpanded(toExpand);
 	Event e = new Event();
 	e.type = toExpand ? SWT.Expand : SWT.Collapse;
@@ -1636,24 +1674,6 @@ void toggleExpandStatus() {
 	e.item = this;
 	e.widget = this;
 	parent.sendEvent(e);
-}
-
-/*
- * Return expanded status of the item
- */
-boolean updateModifier(int type) {
-	boolean isRTL = (parent.style & SWT.RIGHT_TO_LEFT) != 0;
-	Element element = handle.childNodes[0].childNodes[0].childNodes[0];
-	if (type == -1) {
-		element.className = "tree-item-anchor-collapsed"  + (isRTL ? "-rtl" : "");
-		return false;
-	} else if (type == 1) {
-		element.className = "tree-item-anchor-expanded" + (isRTL ? "-rtl" : "");
-		return true;
-	} else {
-		element.className = "tree-item-anchor-default";
-		return true;
-	}
 }
 
 public void addItem(TreeItem item, int index) {
@@ -1669,4 +1689,15 @@ public void addItem(TreeItem item, int index) {
 	}
 //	System.out.println("adding item to list " + item);
 }
+boolean isSelected(){
+	return this.selected;
+}
+
+public void enableWidget(boolean enabled) {
+	this.handle.disabled = !enabled;
+	if (this.checkElement != null) {
+		this.checkElement.disabled = !enabled;
+	}
+}
+
 }

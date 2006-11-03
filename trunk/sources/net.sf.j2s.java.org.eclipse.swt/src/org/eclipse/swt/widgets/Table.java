@@ -768,21 +768,10 @@ protected void createHandle () {
 	}
 	tableHandle.className = cssTable;
 	handle.appendChild(tableHandle);
-	if (parent != null) {
-		Element parentHandle = parent.containerHandle();
-		if (parentHandle!= null) {
-			parentHandle.appendChild(handle);
-		}
-	}
 	handle.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			int index = focusIndex;
-//			if(index < 0){
-//				index = 0;
-//			}
-//			System.out.println("on key down !" + evt.keyCode + " index "
-//					+ index);
 			switch(evt.keyCode){
 			case 13:
 				TableItem item = getItem(index);
@@ -833,8 +822,6 @@ protected void createHandle () {
 			}
 		}
 	};
-
-	
 }
 
 //void setCursorFocus(int index){

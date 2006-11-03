@@ -13,6 +13,8 @@ package org.eclipse.swt.widgets;
  
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.events.*;
 
 /**
@@ -34,6 +36,7 @@ import org.eclipse.swt.events.*;
 public class TreeColumn extends Item {
 	Tree parent;
 	boolean resizable;
+	private int colWidth;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -259,7 +262,40 @@ public int getWidth () {
 	OS.SendMessage (hwndHeader, OS.HDM_GETITEM, index, hdItem);
 	return hdItem.cxy;
 	*/
-	return 0;
+	TreeItem[] items = parent.items;
+	int maxWidth = 0;
+	for (int i = 0; i < items.length; i++) {
+		int width = 0;
+		if (index == 0) {
+			width = (16 + 3) * items[i].depth;
+		}
+		Element[] innerChildren = items[i].handle.childNodes[index].childNodes;
+		if (index == 0) {
+			innerChildren = innerChildren[0].childNodes[0].childNodes;
+		}
+		if (items[i].text == null || items[i].text.length() == 0) {
+			width += (index == 0 ? 5 : 0);
+		} else {
+			Element text0 = innerChildren[innerChildren.length - 1];
+			width += OS.getContainerWidth(text0);
+		}
+		
+		maxWidth = Math.max(maxWidth, width);
+	}
+	if (!parent.headerVisible) {
+		if (colWidth <= 0 || (index == 0 && parent.columns.length == 1)) {
+		return Math.max(colWidth, maxWidth - 1);
+		} else {
+		return colWidth;
+		}
+	}
+	if (handle.style.width != null && handle.style.width.length() != 0) {
+		int styleWidth = Integer.parseInt(handle.style.width);
+		return this.text != null ? Math.max(OS.getStringPlainWidth(this.text), styleWidth) : styleWidth;
+	}
+	return maxWidth;
+	//return OS.getContainerWidth(handle);
+	//return 0;
 }
 
 /**
@@ -277,8 +313,8 @@ public void pack () {
 	checkWidget ();
 	int index = parent.indexOf (this);
 	if (index == -1) return;
-	int columnWidth = 0;
 	/*
+	int columnWidth = 0;
 	int hwnd = parent.handle;
 	int hDC = OS.GetDC (hwnd);
 	int oldFont = 0, newFont = OS.SendMessage (hwnd, OS.WM_GETFONT, 0, 0);
@@ -531,6 +567,12 @@ public void setWidth (int width) {
 	OS.SendMessage (hwndHeader, OS.HDM_SETITEM, index, hdItem);
 	parent.setScrollWidth ();
 	*/
+	colWidth = width;
+	int tempWidth = width;
+	if(this.text != null){
+		tempWidth = Math.max(OS.getStringPlainWidth(this.text), width);
+	}
+	handle.style.width = tempWidth + "px";
 }
 
 }

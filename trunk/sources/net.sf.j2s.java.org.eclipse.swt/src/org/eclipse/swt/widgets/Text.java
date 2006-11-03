@@ -25,7 +25,6 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * Instances of this class are selectable user interface

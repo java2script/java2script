@@ -12,11 +12,11 @@
 	margin:0;
 	border-collapse:collapse;
 }
-table-v-scroll {
+.table-v-scroll {
 	overflow:scroll;
 	overflow-x:hidden;
 }
-table-h-scroll {
+.table-h-scroll {
 	overflow:scroll;
 	overflow-y:hidden;
 }
@@ -86,6 +86,14 @@ thead .table-head-text {
 	min-height:13px;
 	_height:1em;
 }
+@media all and (min-width:0px){/* opera */
+.table-check-box {
+	top:50%;
+	margin-top:-8px;
+	left:-16px !important;
+}
+}
+
 .table-text {
 	min-height:16px;
 	height:100%;
