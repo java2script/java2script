@@ -16,7 +16,10 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -49,8 +52,6 @@ import org.eclipse.swt.internal.xhtml.document;
 public class Tree extends Composite {
 	TreeItem [] items;
 	TreeColumn [] columns;
-	Element [] itemHandles;
-	Element [] columnHandles;
 	//int hwndParent, hwndHeader, hAnchor, hInsert;
 	ImageList imageList;
 	boolean dragStarted, gestureCompleted, insertAfter;
@@ -72,8 +73,16 @@ public class Tree extends Composite {
 	*/
 	TreeItem [] selections;
 	TreeItem lastSelection;
+	TreeItem [] directChildrens;
 	
 	Element hwndParent, hwndHeader, hAnchor, hInsert;
+	boolean headerVisible, lineVisible;
+	int focusIndex = -1;
+	TreeItem focusItem;
+	
+	private Element tableHandle;
+	private Element theadHandle;
+	Element tbody;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -109,10 +118,6 @@ public class Tree extends Composite {
  */
 public Tree (Composite parent, int style) {
 	super (parent, checkStyle (style));
-	/*
-	selections = new TreeItem[0];
-	items = new TreeItem[0];
-	*/
 }
 
 static int checkStyle (int style) {
@@ -214,6 +219,7 @@ public void addTreeListener(TreeListener listener) {
 	addListener (SWT.Expand, typedListener);
 	addListener (SWT.Collapse, typedListener);
 } 
+
 /*
 int borderHandle () {
 	return hwndParent != 0 ? hwndParent : handle;
@@ -308,6 +314,34 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		hItem = OS.SendMessage (handle, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
 	}
 	*/
+	if (items.length == 0 && columns.length == 0 && !headerVisible) {
+//		width = 10;
+//		height = 2;
+	} else if (columns.length == 0 && !headerVisible) {
+		width = 10 + 13;
+		height = 2;
+		height += 14 * items.length + 2 * (items.length - 1);
+		height += (getHeaderVisible() ? 14 : 0);
+		int maxWidth = 1;
+		for (int i = 0; i < items.length; i++) {
+			String text = items[i].getText();
+			if (text != null) {
+				maxWidth = Math.max(1 + OS.getStringPlainWidth(text), maxWidth);
+			}
+		}
+		width += maxWidth - 1;
+	} else {
+		width = 0;
+		for (int i = 0; i < columns.length; i++) {
+			int colWidth = columns[i].getWidth();
+			//System.out.println(i + ":" + colWidth);
+			width += colWidth;
+		}
+		height = 2;
+		height += 14 * items.length + 2 * (items.length - 1);
+		height += (getHeaderVisible() ? 14 + 3: 0);
+	}
+
 	if (width == 0) width = DEFAULT_WIDTH;
 	if (height == 0) height = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) width = wHint;
@@ -317,9 +351,11 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	height += border * 2;
 	if ((style & SWT.V_SCROLL) != 0) {
 //		width += OS.GetSystemMetrics (OS.SM_CXVSCROLL);
+		width += 16;
 	}
 	if ((style & SWT.H_SCROLL) != 0) {
 //		height += OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		height += 16;
 	}
 	return new Point (width, height);
 }
@@ -373,13 +409,113 @@ protected void createHandle () {
 //		}
 //	}
 	handle.className += " tree-default";
-	if ((style & SWT.BORDER) != 0) {
-		handle.className += " tree-border";
+	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
+		handle.style.overflow = "auto";
+	} else {
+		if ((style & SWT.V_SCROLL) != 0) {
+			handle.className += " tree-v-scroll";
+		} else if ((style & SWT.H_SCROLL) != 0) {
+			handle.className += " tree-h-scroll";
+		} 
 	}
 
-	Element table = document.createElement ("TABLE");
-	table.style.backgroundColor = "white";
-	handle.appendChild(table);
+	tableHandle = document.createElement ("TABLE");
+	//table.style.backgroundColor = "white";
+	String cssTable = "tree-content";
+	if ((style & SWT.FULL_SELECTION) != 0) {
+		cssTable += " tree-full-selection";
+	}
+	if ((style & SWT.CHECK) != 0) {
+		cssTable += " tree-check";
+	}
+	tableHandle.className = cssTable;
+	handle.appendChild(tableHandle);
+	handle.onkeydown = new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			int index = focusIndex;
+			switch(evt.keyCode){
+			case 13:
+				TreeItem item = getItem(index);
+				if(item == null)
+					return;
+				toggleSelection(item, evt.ctrlKey, evt.shiftKey);
+				if(item.isSelected()){
+					Event e = new Event();
+					e.display = display;
+					e.type = SWT.DefaultSelection;
+					e.detail = SWT.NONE;
+					e.item = item;
+					e.widget = item;
+					sendEvent(e);
+					toReturn(false);
+				}
+				break;
+			case 32:
+				TreeItem item2 = getItem(index);
+				if(item2 == null)
+					return;
+				toggleSelection(item2, evt.ctrlKey, evt.shiftKey);
+				if(item2.isSelected()){						
+					Event eDefault = new Event();
+					eDefault.display = display;
+					eDefault.type = SWT.Selection;
+					eDefault.detail = SWT.NONE;
+					eDefault.item = item2;
+					eDefault.widget = item2;
+					sendEvent(eDefault);
+					toReturn(false);
+				}
+				break;
+			case 38:
+				if (index > 0) {
+					setFocusIndex(index - 1);
+					toReturn(false);
+				}
+				break;
+			case 40:
+				if (index < getItemCount() - 1) {
+					setFocusIndex(index + 1);
+					toReturn(false);
+				}
+				break;
+			default:
+				toReturn(true);
+			}
+		}
+	};
+}
+void setFocusIndex (int index) {
+	checkWidget ();	
+	/*
+	* An index of -1 will apply the change to all
+	* items.  Ensure that index is greater than -1.
+	*/
+	if (index < 0) return;
+	/*
+	 * TODO:Scroll the item into view!
+	 */
+	/*
+	LVITEM lvItem = new LVITEM ();
+	lvItem.state = OS.LVIS_FOCUSED;
+	lvItem.stateMask = OS.LVIS_FOCUSED;
+	ignoreSelect = true;
+	OS.SendMessage (handle, OS.LVM_SETITEMSTATE, index, lvItem);
+	ignoreSelect = false;
+	*/
+	if(index == focusIndex){
+		return;
+	}
+	TreeItem item = getItem(index);
+	if(item == null){
+		return;
+	}
+	if(this.focusItem != null){
+		OS.removeCSSClass(focusItem.handle, "tree-item-focus");
+	}
+	this.focusItem = item;
+	this.focusIndex = index;
+	OS.addCSSClass(item.handle, "tree-item-focus");
 }
 
 void createItem (TreeColumn column, int index) {
@@ -483,6 +619,91 @@ void createItem (TreeColumn column, int index) {
 		OS.InvalidateRect (handle, null, true);
 	}
 	*/
+	if (columns == null) {
+		columns = new TreeColumn[0];
+	}
+	if (handle == null) {
+		return ;
+	}
+
+	Element table = handle.childNodes[0];
+	theadHandle = null;
+	for (int i = 0; i < table.childNodes.length; i++) {
+		if ("THEAD".equals(table.childNodes[i].nodeName)) {
+			theadHandle = table.childNodes[i];
+			break;
+		}
+	}
+	if (theadHandle == null) {
+		theadHandle = document.createElement ("THEAD");
+		table.appendChild(theadHandle);
+	}
+	
+	Element theadTR = null;
+	if (theadHandle.childNodes != null && theadHandle.childNodes.length != 0) {
+		for (int i = 0; i < theadHandle.childNodes.length; i++) {
+			if (theadHandle.childNodes[i] != null
+					&& "TR".equals(theadHandle.childNodes[i].nodeName)) {
+				theadTR = theadHandle.childNodes[i];
+			}
+		}
+	}
+	if (theadTR == null) {
+		theadTR = document.createElement ("TR");
+		theadHandle.appendChild(theadTR);
+		//theadTR.innerHTML = "<td class=\"tree-column-last\"><div class=\"tree-head-text\">&#160;</div></td>";
+		Element theadTD = document.createElement("TD");
+		theadTD.className = "tree-column-last";
+		theadTR.appendChild(theadTD);
+		createCSSElement(theadTD, "tree-head-text").appendChild(document.createTextNode("" + (char) 160));
+	}
+//		if (index < theadTR.childNodes.length) {
+//			if (theadTR.childNodes[index] != null
+//					&& "TD".equals(theadTR.childNodes[index].nodeName)) {
+//				theadTD = theadTR.childNodes[index];
+//			}
+//		}
+	Element theadTD = document.createElement("TD");
+	theadTR.insertBefore(theadTD, theadTR.childNodes[theadTR.childNodes.length - 1]);
+	createCSSElement(theadTD, "tree-head-text").appendChild(document.createTextNode("" + (char) 160));
+	//theadTD.innerHTML = "<div class=\"tree-head-text\">&#160;</div>";
+	///*
+//	int childIndex = column.resizable ? index * 2 : index;
+	if (index < 0 || index >= theadTR.childNodes.length) { //theadTD == null){
+		theadTR.appendChild(theadTD);
+		columns[index] = column;
+	} else {
+		theadTR.insertBefore(theadTD, theadTR.childNodes[index]);
+		for (int i = columns.length; i > index; i--) {
+			columns[i] = columns[i - 1];
+		}
+		columns[index] = column;
+		for (int i = 0; i < items.length; i++) {
+//			Element dataTD = document.createElement("TD");
+//			items[i].handle.insertBefore(dataTD, items[i].handle.childNodes[index]);
+//			Element el = document.createElement("DIV");
+//			dataTD.appendChild(el);
+//			el.className = "table-item-cell-default";
+//			Element text = document.createElement("DIV");
+//			el.appendChild(text);
+//			text.className = "table-item-cell-text-default";
+//			for (int j = items[i].strings.length; j > index; j--) {
+//				items[i].strings[j] = items[i].strings[j - 1];
+//			}
+//			items[i].strings[index] = "";
+		}
+	}
+	//*/
+	column.handle = theadTD;
+}
+
+private Element createCSSElement(Object parent, String css) {
+	Element div = document.createElement("DIV");
+	div.className = css;
+	if (parent != null) {
+		((Element) parent).appendChild(div);
+	}
+	return div;
 }
 
 void createItem (TreeItem item, Object hParent, int index) {
@@ -542,16 +763,60 @@ void createItem (TreeItem item, Object hParent, int index) {
 	if (items == null) {
 		items = new TreeItem[0];
 	}
-	int count = 0;
-	for (int i = 0; i < items.length; i++) {
-		if (items[i] != null && items[i].handle == null) {
-			items[i] = null;
-			count++;
+	
+	boolean isAppending = false;
+	TreeItem[] itemList = (hParent == null ? directChildrens : item.parentItem.items);
+	int idx = -1;
+	if (index < 0 || index >= itemList.length) {
+		//append
+		isAppending = true;
+		if (hParent == null) {
+			idx = items.length; 
+		} else {
+			// sub child
+			if (itemList.length == 0) {
+				idx = item.parentItem.index + 1;
+			} else {
+				idx = findSiblingNextItem(item.parentItem.index);
+				if (idx != -1) {
+					idx--;
+				} else {
+					idx = items.length;
+				}
+			}
 		}
+		index = itemList.length;
+		itemList[index] = item;
+	} else {
+		// insert
+		idx = findSiblingNextItem(itemList[index].index);
+		if (idx != -1) {
+			idx--;
+		} else {
+			idx = items.length;
+		}
+		for (int i = itemList.length; i > index; i--) {
+			itemList[i] = itemList[i - 1];
+		}
+		itemList[index] = item;
 	}
-	if (count == items.length) {
-		items = new TreeItem[0];
+	for (int i = items.length - 1; i >= idx; i--) {
+		items[i + 1] = items[i];
+		items[i + 1].index = i;
 	}
+	items[idx] = item;
+	item.index = idx;
+	
+//	int count = 0;
+//	for (int i = 0; i < items.length; i++) {
+//		if (items[i] != null && items[i].handle == null) {
+//			items[i] = null;
+//			count++;
+//		}
+//	}
+//	if (count == items.length) {
+//		items = new TreeItem[0];
+//	}
 //		int id = 0;
 //		while (id < items.length && items [id] != null) id++;
 //		if (id == items.length) {
@@ -560,79 +825,179 @@ void createItem (TreeItem item, Object hParent, int index) {
 //			items = newItems;
 //		}
 	Element table = handle.childNodes[0];
-	Element tbody = null;
-	for (int i = 0; i < table.childNodes.length; i++) {
-		if ("TBODY".equals(table.childNodes[i].nodeName)) {
-			tbody = table.childNodes[i];
-			break;
-		}
-	}
 	if (tbody == null) {
 		tbody = document.createElement ("TBODY");
 		table.appendChild(tbody);
 	}
 	
-	int idx = -1;
-	if (hParent != null) {
-		for (int i = 0; i < tbody.childNodes.length; i++) {
-			if (tbody.childNodes[i] == hParent) {
-				idx = i;
-				break;
-			}
+	Element tbodyTR = document.createElement("TR");
+	item.handle = tbodyTR;
+	if (idx == 0) {
+		tbodyTR.className = "tree-row-first";
+		if (tbody.childNodes.length != 0) {
+			tbody.childNodes[0].className = ""; // remove tree-row-first!
 		}
 	}
-	Element newTR = document.createElement ("TR");
-	item.handle = newTR;
-	int existedIndex = -1;
-//		System.out.println("index:" + index);
-	if (index >= 0) { // Insert!
-		existedIndex = findItem (idx, index);
-		//System.out.println("existed:" + existedIndex);
-		if (existedIndex != -1) { // Same as insert to the last!
-			tbody.insertBefore(newTR, tbody.childNodes[existedIndex]);
-			for (int i = items.length; i > existedIndex; i--) {
-				items[i] = items[i - 1];
-				items[i].index = i;
-			}
-			item.index = existedIndex;
-			items [existedIndex] = item;
-		}
+	if (isAppending) {
+		tbody.appendChild(tbodyTR);
+	} else {
+		tbody.insertBefore(tbodyTR, tbody.childNodes[index]);
 	}
-	if (existedIndex == -1) {
-		if (idx < 0) {
-//				System.out.println("last");
-			tbody.appendChild(newTR);
-			item.index = items.length;
-			items [items.length] = item;
-		} else {
-//				System.out.println("existed parent");
-			int siblingIndex = findNextSiblingItem(idx);
-			if (siblingIndex == -1) {
-				tbody.appendChild(newTR);
-				item.index = items.length;
-				items [items.length] = item;
-			} else {
-				tbody.insertBefore(newTR, tbody.childNodes[siblingIndex]);
-				for (int i = items.length; i > siblingIndex; i--) {
-					items[i] = items[i - 1];
-					items[i].index = i;
+	
+	Element td = document.createElement("TD");
+	td.className = "tree-column-first";
+	tbodyTR.appendChild(td);
+	Element lineWrapper = createCSSElement(createCSSElement(td, "tree-line"), "tree-line-wrapper");
+	
+	TreeItem[] chains = new TreeItem[0]; 
+	chains[0] = item;
+	TreeItem parentItem = item.getParentItem();
+	while (parentItem != null) {
+		chains[chains.length] = parentItem;
+		parentItem = parentItem.getParentItem();
+	}
+	item.depth = chains.length;
+	TreeItem lastItem = null;
+	for (int i = chains.length - 1; i >= 0; i--) {
+		TreeItem currentItem = chains[i];
+		String cssClass = "tree-anchor";
+		TreeItem[] listItems = (lastItem == null ? directChildrens : lastItem.items);
+		if (listItems.length > 1) {
+			int j = 0;
+			boolean isNoBreak = true;
+			for (; j < listItems.length; j++) {
+				if (listItems[j] == currentItem) {
+					isNoBreak = false;
+					break;
 				}
-				item.index = siblingIndex;
-				items [siblingIndex] = item;
+			}
+			if (isNoBreak) {
+				System.out.println("No break!");
+			}
+			if (j == listItems.length - 1) {
+				if (i == 0) {
+					cssClass += " tree-anchor-end";
+				} else {
+					cssClass += " tree-anchor-single";
+				}
+			} else if (j == 0) {
+				if (i == 0) {
+					cssClass += " tree-anchor-begin";
+				} else {
+					cssClass += " tree-anchor-single";
+				}
+			} else {
+				cssClass += " tree-anchor-single";
+			}
+		} else if (hParent != null && i == 0) {
+			cssClass += " tree-anchor-end";
+		} else {
+			cssClass += " tree-anchor-single";
+		}
+		Element anchor = createCSSElement(lineWrapper, cssClass);
+		createCSSElement(anchor, "tree-anchor-v");
+		cssClass = "tree-anchor-h";
+		if (i == 0) {
+			if (currentItem.items == null || currentItem.items.length == 0) {
+				cssClass += " tree-anchor-line";
+			} else {
+				cssClass += " tree-anchor-plus";
 			}
 		}
+		createCSSElement(anchor, cssClass);
+		lastItem = currentItem;
 	}
+	
+	Element textEl = createCSSElement(lineWrapper, "tree-text");
+	if ((style & SWT.CHECK) != 0) {
+		Element input = document.createElement("INPUT");
+		input.type = "checkbox";
+		input.className = "tree-check-box image-p-4";
+		textEl.appendChild(input);
+		item.checkElement = input;
+	}
+	createCSSElement(textEl, "tree-text-inner");
+	
+	int length = Math.max(1, this.columns.length);
+	for(int i = 1; i < length; i++){
+		td = document.createElement("TD");
+		createCSSElement(td, "tree-text-inner");
+		tbodyTR.appendChild(td);
+	}
+	td = document.createElement("TD");
+	td.className = "tree-column-last";
+	createCSSElement(td, "tree-text-inner");
+	tbodyTR.appendChild(td);
+	
 	if (item.parentItem != null) {
 		item.parentItem.addItem(item, index);
-		item.parentItem.setExpanded(false);
+		//item.parentItem.setExpanded(false);
 //		item.parentItem.setExpanded(item.parentItem.getExpanded());
 //		item.handle.style.display = "none";
 //		item.parentItem.updateModifier(-1);
 //		System.out.println("adding " + item.parentItem + " " + item);
 	}
-	item.checkOrientation(this);
-	item._updateOrientation();
+//	item.checkOrientation(this);
+//	item._updateOrientation();
 	//items [id] = item;
+	
+	// update anchor
+	int elIndex = chains.length - 1;
+	if (index == itemList.length - 1) {
+		int prevIndex = 0;
+		if (itemList.length == 1) {
+			prevIndex = (hParent == null ? 0 : item.parentItem.index + 1);
+		} else {
+			prevIndex = itemList[index - 1].index;
+		}
+		for(int k = prevIndex; k < item.index; k++) {
+			TreeItem ti = items[k];
+			Element anchor = ti.handle.childNodes[0].childNodes[0].childNodes[0].childNodes[elIndex];
+			String cssClass = "tree-anchor";
+			if (ti.parentItem == item.parentItem) {
+				int i = 0;
+				for (i = 0; i < itemList.length; i++) {
+					if (ti == itemList[i]) {
+						break;
+					}
+				}
+				if (i == 0) {
+					if (ti.parentItem == null) {
+						cssClass += " tree-anchor-begin";
+					} else if (itemList.length > 1){
+						cssClass += " tree-anchor-middle";
+					} else {
+						cssClass += " tree-anchor-end";
+					}
+				} else if (i == itemList.length - 1) {
+					cssClass += " tree-anchor-end";
+				} else {
+					cssClass += " tree-anchor-middle";
+				}
+			} else {
+				cssClass += " tree-anchor-middle";
+			}
+			anchor.className = cssClass;
+		}
+		if (itemList.length == 1 && hParent != null) {
+			Element[] parentInnerChildren = item.parentItem.handle.childNodes[0].childNodes[0].childNodes[0].childNodes;
+			Element anchorV = parentInnerChildren[elIndex - 1];
+			anchorV.childNodes[1].className = "tree-anchor-h tree-anchor-plus";
+			final TreeItem ii = item.parentItem;
+			anchorV.onclick = new RunnableCompatibility() {
+				public void run() {
+					ii.toggleExpandStatus();
+				}
+			};
+		}
+	}
+	boolean visible = true;
+	while (item.parentItem != null && (visible = item.parentItem.getExpanded())) {
+		item = item.parentItem;
+	}
+	if (!visible) {
+		 tbodyTR.style.display = "none";
+	}
 }	
 
 boolean toggleSelection(TreeItem item, boolean isCtrlKeyHold, boolean isShiftKeyHold) {
@@ -823,6 +1188,7 @@ protected void createWidget () {
 	super.createWidget ();
 	items = new TreeItem [0];
 	columns = new TreeColumn [0];
+	directChildrens = new TreeItem [0];
 }
 
 /*
@@ -873,7 +1239,6 @@ public void deselectAll () {
 		selections[i].showSelection(false);
 	}
 }
-
 
 void destroyItem (TreeColumn column) {
 	/*
@@ -1197,7 +1562,7 @@ public boolean getHeaderVisible () {
 	int bits = OS.GetWindowLong (hwndHeader, OS.GWL_STYLE);
 	return (bits & OS.WS_VISIBLE) != 0;
 	*/
-	return false;
+	return headerVisible;
 }
 
 Point getImageSize () {
@@ -1297,7 +1662,6 @@ public TreeColumn [] getColumns () {
 
 TreeItem[] getDescendantItems (int index) {
 	int nextSiblingIdx = findNextSiblingItem(index);
-//		System.out.println("next:" + nextSiblingIdx);
 	if (nextSiblingIdx == -1) {
 		nextSiblingIdx = items.length;
 	}
@@ -1308,6 +1672,13 @@ TreeItem[] getDescendantItems (int index) {
 	return children;
 }
 
+/**
+ * Find direct child item in the given parent item.
+ * 
+ * @param parentIndex
+ * @param index
+ * @return index in the items array
+ */
 int findItem (int parentIndex, int index) {
 	if (parentIndex < 0) {
 		for (int i = 0; i < items.length; i++) {
@@ -1343,6 +1714,12 @@ int findItem (int parentIndex, int index) {
 	}
 	return -1;
 }
+
+/**
+ * Find index of next sibling item. If no next sibling item, return -1. 
+ * @param parentIndex
+ * @return
+ */
 int findNextSiblingItem (int parentIndex) {
 	if (parentIndex < 0) {
 		parentIndex = 0;
@@ -1351,14 +1728,10 @@ int findNextSiblingItem (int parentIndex) {
 	parentIndex++;
 	if (items[parentIndex] != null) {
 		TreeItem item = items[parentIndex];
-//			System.out.println(item);
 		if (item.parentItem != parentItem.parentItem) {
 			if (item.parentItem == items[parentIndex - 1]) {
-//					System.out.println("skipping:" + items[parentIndex - 1]);
 				parentIndex = skipItems(parentIndex - 1);
-//					System.out.println("..." + parentIndex);
 				if (parentIndex == -1) {
-//						System.out.println("Not found 3!");
 					return -1;
 				}
 				TreeItem ti = items[parentIndex];
@@ -1373,25 +1746,51 @@ int findNextSiblingItem (int parentIndex) {
 				if (outOfHierarchies) {
 					return parentIndex;
 				}
-//					if (items[parentIndex].parentItem == parentItem.parentItem) {
-//						return parentIndex;
-//					} else {
-////						System.out.println("Not found 2!");
-//						return -1;
-//					}
 			} else {
-//					System.out.println("Not found 1!");
-//					for (int i = 0; i < items.length; i++) {
-//						System.out.println(i + ":" + items[i].index + ":" + items[i]);
-//					}
+				// No sibling but other tree items
+				//return parentIndex;
+				return -1;
+			}
+		} else {
+			return parentIndex; 
+		}
+	}
+	return -1;
+}
+
+int findSiblingNextItem (int parentIndex) {
+	if (parentIndex < 0) {
+		parentIndex = 0;
+	}
+	TreeItem parentItem = items[parentIndex];
+	parentIndex++;
+	if (items[parentIndex] != null) {
+		TreeItem item = items[parentIndex];
+		if (item.parentItem != parentItem.parentItem) {
+			if (item.parentItem == items[parentIndex - 1]) {
+				parentIndex = skipItems(parentIndex - 1);
+				if (parentIndex == -1) {
+					return -1;
+				}
+				TreeItem ti = items[parentIndex];
+				boolean outOfHierarchies = true;
+				while (ti != null) {
+					ti = ti.parentItem;
+					if (ti == parentItem) {
+						outOfHierarchies = false;
+						break;
+					}
+				}
+				if (outOfHierarchies) {
+					return parentIndex;
+				}
+			} else {
 				// No sibling but other tree items
 				return parentIndex;
 			}
 		} else {
 			return parentIndex; 
 		}
-//			System.out.println("++");
-//			parentIndex++;
 	}
 	return -1;
 }
@@ -1539,8 +1938,8 @@ public int getItemCount () {
 }
 
 int getItemCount (int hItem) {
-	int count = 0;
 	/*
+	int count = 0;
 	while (hItem != 0) {
 		hItem = OS.SendMessage (handle, OS.TVM_GETNEXTITEM, OS.TVGN_NEXT, hItem);
 		count++;
@@ -1877,6 +2276,7 @@ int indexOf (int hItem, int hChild) {
 	return hItem == hChild ? index : -1;
 }
 */
+
 /**
  * Searches the receiver's list starting at the first column
  * (index 0) until a column is found that is equal to the 
@@ -2123,6 +2523,7 @@ public void removeTreeListener(TreeListener listener) {
 	eventTable.unhook (SWT.Expand, listener);
 	eventTable.unhook (SWT.Collapse, listener);
 }
+
 /**
  * Display a mark indicating the point at which an item will be inserted.
  * The drop insert item has a visual hint to show where a dragged item 
@@ -2275,8 +2676,8 @@ void setCursor () {
 
 void setCheckboxImageList () {
 	if ((style & SWT.CHECK) == 0) return;
-	int count = 5;
 	/*
+	int count = 5;
 	int height = OS.SendMessage (handle, OS.TVM_GETITEMHEIGHT, 0, 0), width = height;
 	int flags = ImageList.COLOR_FLAGS;
 	if ((style & SWT.RIGHT_TO_LEFT) != 0) flags |= OS.ILC_MIRROR;	
@@ -2380,6 +2781,10 @@ public void setHeaderVisible (boolean show) {
 		OS.ShowWindow (hwndHeader, OS.SW_HIDE);
 	}
 	*/
+	headerVisible = show;
+	if (theadHandle != null) {
+		theadHandle.style.display = (show ? "" : "none");
+	}
 	setScrollWidth ();
 	updateScrollBar ();
 }
