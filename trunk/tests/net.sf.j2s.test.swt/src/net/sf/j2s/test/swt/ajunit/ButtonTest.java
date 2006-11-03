@@ -37,7 +37,7 @@ public class ButtonTest extends AsyncTestCase {
 		Display display = new Display ();
 		final Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout());
-		Image imageOpen = new Image(display, ButtonTest.class.getResourceAsStream("../widgets/openFolder.gif"));
+		Image imageOpen = new Image(/** @j2sImage 16x32 images/hello-packed.gif #$ */display, ButtonTest.class.getResourceAsStream("../widgets/openFolder.gif"));
 		
 		Button btnImg = new Button(shell, SWT.TOGGLE);
 		btnImg.setImage(imageOpen);
