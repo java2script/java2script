@@ -2075,9 +2075,12 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	/**
 	 * A patch to send bounds to support mirroring features like what Windows have.
 	 */
+	int tempX = x;
 	if(parent != null){
 		if((parent.style & SWT.RIGHT_TO_LEFT) != 0){
+			System.out.println(this.toString() + " the x " + x + " y " + y + " w " + width + " height " + height);
 			x = Math.max(0, parent.getClientArea().width - x - width);
+			System.err.println("the x after " + x + " cw " + parent.getClientArea().width);
 		}
 	}
 	Element topHandle = topHandle ();
@@ -2135,6 +2138,11 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 		this.height = height;
 		SetWindowPos (topHandle, null, x, y, width, height, flags);
 	}
+	/*
+	 * The x coordination should be preserved, because the right to left emulation is just 
+	 * for the view, not the data!
+	 */
+	this.left = tempX;
 }
 
 /**
