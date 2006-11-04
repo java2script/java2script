@@ -859,6 +859,9 @@ void createItem (TreeItem item, Object hParent, int index) {
 	for (int i = chains.length - 1; i >= 0; i--) {
 		TreeItem currentItem = chains[i];
 		String cssClass = "tree-anchor";
+		if((style & SWT.RIGHT_TO_LEFT) != 0){
+			cssClass += " tree-anchor-rtl";
+		}
 		TreeItem[] listItems = (lastItem == null ? directChildrens : lastItem.items);
 		if (listItems.length > 1) {
 			int j = 0;
@@ -907,6 +910,8 @@ void createItem (TreeItem item, Object hParent, int index) {
 	}
 	
 	Element textEl = createCSSElement(lineWrapper, "tree-text");
+	if((style & SWT.RIGHT_TO_LEFT) != 0)
+		textEl.className += " tree-text-rtl";
 	if ((style & SWT.CHECK) != 0) {
 		Element input = document.createElement("INPUT");
 		input.type = "checkbox";
@@ -952,6 +957,9 @@ void createItem (TreeItem item, Object hParent, int index) {
 			TreeItem ti = items[k];
 			Element anchor = ti.handle.childNodes[0].childNodes[0].childNodes[0].childNodes[elIndex];
 			String cssClass = "tree-anchor";
+			if((style & SWT.RIGHT_TO_LEFT) != 0){
+				cssClass += " tree-anchor-rtl";
+			}
 			if (ti.parentItem == item.parentItem) {
 				int i = 0;
 				for (i = 0; i < itemList.length; i++) {

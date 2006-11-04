@@ -125,6 +125,11 @@ thead .tree-head-text {
 	white-space:nowrap;
 	float:left;
 }
+
+.tree-text-rtl {
+	float:right;
+}
+
 tree-image-icon {
 	_padding-bottom:2px;
 	_height:16px;
@@ -194,6 +199,7 @@ tree-image tree-image-icon {
 	float:right;
 }
 
+
 .tree-item-focus {
 	background-color:#E8F2FE;
 }
@@ -210,9 +216,16 @@ tree-image tree-image-icon {
 	line-height:1.39em;
 	overflow:hidden;
 }
+
 * html .tree-anchor {
 	margin-left:1px;
 }
+
+.tree-anchor-rtl {
+	float:right;
+}
+
+
 .tree-anchor-v {
 	position:absolute;
 	top:0;
