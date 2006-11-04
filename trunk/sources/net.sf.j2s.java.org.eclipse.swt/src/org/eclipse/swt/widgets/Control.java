@@ -2078,9 +2078,7 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	int tempX = x;
 	if(parent != null){
 		if((parent.style & SWT.RIGHT_TO_LEFT) != 0){
-			System.out.println(this.toString() + " the x " + x + " y " + y + " w " + width + " height " + height);
 			x = Math.max(0, parent.getClientArea().width - x - width);
-			System.err.println("the x after " + x + " cw " + parent.getClientArea().width);
 		}
 	}
 	Element topHandle = topHandle ();
