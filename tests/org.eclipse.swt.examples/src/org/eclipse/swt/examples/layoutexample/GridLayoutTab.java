@@ -49,7 +49,7 @@ class GridLayoutTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of LayoutExample.
 	 */
-	GridLayoutTab(LayoutExample instance) {
+	public GridLayoutTab(LayoutExample instance) {
 		super(instance);
 	}
 	

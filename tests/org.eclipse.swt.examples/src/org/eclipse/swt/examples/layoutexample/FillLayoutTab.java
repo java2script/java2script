@@ -29,7 +29,7 @@ class FillLayoutTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of LayoutExample.
 	 */
-	FillLayoutTab(LayoutExample instance) {
+	public FillLayoutTab(LayoutExample instance) {
 		super(instance);
 	}
 	
