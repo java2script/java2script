@@ -8,8 +8,6 @@
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 	/*white-space:nowrap;*/
-	overflow-y:auto;
-	overflow-x:hidden;
 }
 .text-default textarea {
 	border-style:none;
