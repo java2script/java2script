@@ -92,19 +92,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 //	}
 	
 	public boolean visit(SimpleName node) {
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			return false;
-		}
+		if (checkConstantValue(node)) return false;
 		IBinding binding = node.resolveBinding();
 		if (binding != null
 				&& binding instanceof ITypeBinding) {
@@ -130,20 +118,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return super.visit(node);
 	}
 	public boolean visit(QualifiedName node) {
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)
-				&& isSimpleQualified(node)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			return false;
-		}
+		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
 //		IBinding nodeBinding = node.resolveBinding();
 //		if (nodeBinding instanceof IVariableBinding) {
 //			IVariableBinding varBinding = (IVariableBinding) nodeBinding;
@@ -371,12 +346,37 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		if ("open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
 			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
-				int lastIndexOf = buffer.lastIndexOf(";\r\n");
-				if (lastIndexOf == -1) {
-					lastIndexOf = 0;
+				int lastIndexOf1 = buffer.lastIndexOf(";\r\n");
+				if (lastIndexOf1 != -1) {
+					lastIndexOf1 += 3;
 				}
-				String s = buffer.substring(lastIndexOf + 3);
-				buffer.delete(lastIndexOf + 3, buffer.length());
+				int lastIndexOf2 = buffer.lastIndexOf("}\r\n");
+				if (lastIndexOf2 != -1) {
+					lastIndexOf2 += 3;
+				}
+				int lastIndexOf3 = buffer.lastIndexOf("}");
+				if (lastIndexOf3 != -1) {
+					lastIndexOf3 += 1;
+				}
+				int lastIndexOf4 = buffer.lastIndexOf("{\r\n");
+				if (lastIndexOf4 != -1) {
+					lastIndexOf4 += 3;
+				}
+				int lastIndexOf5 = buffer.lastIndexOf("{");
+				if (lastIndexOf5 != -1) {
+					lastIndexOf5 += 1;
+				}
+				int lastIndexOf = -1;
+				if (lastIndexOf1 == -1 && lastIndexOf2 == -1 
+						&& lastIndexOf3 == -1 && lastIndexOf1 == -1 
+						&& lastIndexOf2 == -1 && lastIndexOf3 == -1) {
+					lastIndexOf = buffer.length(); // should never be in here!
+				} else {
+					lastIndexOf = Math.max(Math.max(Math.max(lastIndexOf1, lastIndexOf2), lastIndexOf3), 
+							Math.max(lastIndexOf4, lastIndexOf5)); 
+				}
+				String s = buffer.substring(lastIndexOf);
+				buffer.delete(lastIndexOf, buffer.length());
 				buffer.append("DialogSync2Async.block (");
 				node.getExpression().accept(this);
 				buffer.append(", this, function () {\r\n");
@@ -483,6 +483,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		for (int i = 0; i < swtBlockWhileCount + swtDialogOpenCount; i++) {
 			buffer.append("});\r\n");
+			buffer.append("return;\r\n"); /* always return directly when dialog#open is called */
 		}
 		metSWTBlockWhile = lastSWTBlockWhile;
 		metDialogOpen = lastDialogOpen;

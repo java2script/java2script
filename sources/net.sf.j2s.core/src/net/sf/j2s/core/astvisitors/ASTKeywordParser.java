@@ -1144,20 +1144,35 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		}
 	}
 	
-	public boolean visit(InfixExpression node) {
+	boolean checkConstantValue(Expression node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
 				|| constValue instanceof Boolean)) {
 			if (constValue instanceof Character) {
 				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
+				char charValue = ((Character)constValue).charValue();
+				if (charValue < 32 || charValue > 127) {
+					buffer.append("\\u");
+					String hexStr = Integer.toHexString(charValue);
+					int zeroLen = 4 - hexStr.length();
+					for (int i = 0; i < zeroLen; i++) {
+						buffer.append('0');
+					}
+					buffer.append(hexStr);
+				} else {
+					buffer.append(constValue);
+				}
 				buffer.append('\'');
+			} else {
+				buffer.append(constValue);
 			}
-			return false;
+			return true;
 		}
+		return false;
+	}
+	public boolean visit(InfixExpression node) {
+		if (checkConstantValue(node)) return false;
 		ITypeBinding expTypeBinding = node.resolveTypeBinding();
 		boolean beCare = false;
 		if (expTypeBinding != null 
@@ -1534,19 +1549,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	}
 
 	public boolean visit(PrefixExpression node) {
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			return false;
-		}
+		if (checkConstantValue(node)) return false;
 		String op = node.getOperator().toString();
 		if ("~".equals(op) || "!".equals(op)) {
 			buffer.append(op);
@@ -1711,20 +1714,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 //				}
 //			}
 //		}
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)
-				&& isSimpleQualified(node)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			return false;
-		}
+		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
