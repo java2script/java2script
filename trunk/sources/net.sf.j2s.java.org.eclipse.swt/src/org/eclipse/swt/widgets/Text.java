@@ -1074,7 +1074,8 @@ public int getCharCount () {
 	if (!OS.IsUnicode && OS.IsDBLocale) length = mbcsToWcsPos (length);
 	return length;
 	*/
-	return getSelectionCount();
+	//return getSelectionCount();
+	return this.textHandle.value.length();
 }
 
 /**

@@ -264,6 +264,6 @@
 .menu-bar-selected .menu-bar-item-hover {
 	border:1px inset white !important;
 }
-.menu-bar-item span {
+.menu-bar-item span span {
 	text-decoration:underline;
 }

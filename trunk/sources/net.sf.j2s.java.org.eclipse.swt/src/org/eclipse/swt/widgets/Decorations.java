@@ -11,8 +11,11 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -28,6 +31,8 @@ import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 
 /**
  * Instances of this class provide the appearance and
@@ -113,7 +118,6 @@ public class Decorations extends Canvas {
 	Menu menuBar;
 	Menu [] menus;
 	Control savedFocus;
-
 	Button defaultButton, saveDefault;
 	//int swFlags, hAccel, nAccel;
 	boolean moved, resized, opened;
@@ -210,14 +214,30 @@ void bringToTop () {
 //		OS.SetWindowPos (handle, OS.HWND_TOP, 0, 0, 0, 0, flags);
 //	} else {
 		//OS.BringWindowToTop (handle);
-		handle.style.visibility = "visible";
-		/*
-		 * TODO: Set the z-index of the style
-		 */
+		CSSStyle style = handle.style;
+		style.visibility = "visible";
 		if (window.currentTopZIndex == null) {
-			handle.style.zIndex = window.currentTopZIndex = "1000";
-		} else {
-			handle.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
+			window.currentTopZIndex = "1000";
+		}
+		if (style.zIndex != window.currentTopZIndex) {
+			style.zIndex = window.currentTopZIndex = ""
+					+ (Integer.parseInt(window.currentTopZIndex) + 2);
+		}
+		if ((style.width == null || style.width.length() == 0) 
+				&& (style.height == null || style.height.length() == 0)){
+			setSize(this.width, this.height);
+		}
+		int count = children.length; //handle.childNodes.length;
+		for (int i = 0; i < count; i++) {
+			Control control = children[i]; //display.getControl (handle.childNodes[i]);
+			if (control != null && control != this 
+					&& (control instanceof Shell) && control.isVisible()) {
+				style = control.handle.style;
+				if (style.zIndex != window.currentTopZIndex) {
+					style.zIndex = window.currentTopZIndex = ""
+							+ (Integer.parseInt(window.currentTopZIndex) + 2);
+				}
+			}
 		}
 		// widget could be disposed at this point
 //	}
@@ -270,7 +290,7 @@ static int checkStyle (int style) {
 	* keep the commented code around in case it comes
 	* back.
 	*/
-//		if ((style & SWT.RESIZE) != 0) style |= SWT.TITLE;
+//	if ((style & SWT.RESIZE) != 0) style |= SWT.TITLE;
 	
 	return style;
 }
@@ -529,13 +549,14 @@ protected void createHandle() {
 		});
 	}
 	handle = document.createElement("DIV");
-	handle.className = "shell-default";
+	handle.className = "shell-default shell-trim";
+	handle.style.visibility = "hidden";
 	nextWindowLocation();
 	this.width = 768;
 	this.height = 557;
-	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
-		handle.className += " shell-trim";
-	}
+//	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
+//		handle.className += " shell-trim";
+//	}
 	getMonitor().handle.appendChild(handle);
 	if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
 		createResizeHandles();
@@ -619,10 +640,10 @@ protected void createHandle() {
 
 private void nextWindowLocation() {
 	if (window.defaultWindowLeft == null) {
-		window.defaultWindowLeft = "332";
+		window.defaultWindowLeft = "132";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
-		num += 32;
+		if (this.parent == null) num += 32;
 		if (num > getMonitor().clientWidth) {
 			num = 32;
 		}
@@ -632,7 +653,7 @@ private void nextWindowLocation() {
 		window.defaultWindowTop = "32";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowTop);
-		num += 32;
+		if (this.parent == null) num += 32;
 		if (num > getMonitor().clientHeight) {
 			num = 32;
 		}
@@ -646,6 +667,10 @@ private void nextWindowLocation() {
 	}
 	left = Integer.parseInt(window.defaultWindowLeft);
 	top = Integer.parseInt(window.defaultWindowTop);
+	if (parent != null) {
+		left += 32;
+		top += 32;
+	}
 	width = Integer.parseInt(window.defaultWindowWidth);
 	height = Integer.parseInt(window.defaultWindowHeight);
 }
@@ -657,90 +682,93 @@ void addModalLayer() {
 	getMonitor().handle.insertBefore(modalHandle, handle);
 }
 
-///**
-// * TODO: Move this function into external *.js
-// * @j2sIgnore
-// */
-//void exportHTMLSource() {
-//	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
-////	shell.setLayout(new FillLayout());
-//	shell.setText("Export HTML Source");
-//	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
-//	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
-//	if (OS.isIE)
-//	/**
-//	 * @j2sNative
-//b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
-//	return $1 + $2.toLowerCase () + $3;
-//}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
-//	if (!((/;$/).test ($2))) {
-//		$2 += ";";
+/**
+ * TODO: Move this function into external *.js
+ * @xj2sIgnore
+ */
+void exportHTMLSource() {
+	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+//	shell.setLayout(new FillLayout());
+	shell.setText("Export HTML Source");
+	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
+	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
+	if (OS.isIE)
+	/**
+	 * @j2sNative
+b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+	return $1 + $2.toLowerCase () + $3;
+}).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+	if (!((/;$/).test ($2))) {
+		$2 += ";";
+	}
+	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
+}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
+	return " " + $2 + "=\"" + $3 + "\"" + $4;
+//}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
+//	$1 = $1.toLowerCase ();
+//	return " " + $1 + "=\"" + $1 + "\"" + $2;
+});
+	 */ {} else
+	/**
+	 * @j2sNative
+b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
+});
+	 */ {}
+	/**
+	 * @j2sNative
+b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
+	if ($2.length == 0) {
+		if ($3 != ">") {
+			return $3;
+		} else {
+			return ">";
+		}
+	} else {
+		return " class=\"" + $2 + "\"" + $3;
+	}
+});
+	 */ {}
+//	int length = innerHTML.length();
+//	if (length < 200) {
+//		length = 200;
+//	} else if (length > 1800) {
+//		length = 1800;
 //	}
-//	return "style=\"" + $2.toLowerCase ().replace (/(:|;)\s+/g, "$1") + "\"";
-//}).replace (/(\s+(\w+)\s*=\s*)([^\"\s>]+)(\s|>)/ig, function ($0, $1, $2, $3, $4) {
-//	return " " + $2 + "=\"" + $3 + "\"" + $4;
-////}).replace (/\s+(\w+)(\s|>)/ig, function ($0, $1, $2) {
-////	$1 = $1.toLowerCase ();
-////	return " " + $1 + "=\"" + $1 + "\"" + $2;
-//});
-//	 */ {} else
-//	/**
-//	 * @j2sNative
-//b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
-//	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
-//});
-//	 */ {}
-//	/**
-//	 * @j2sNative
-//b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
-//	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
-//	if ($2.length == 0) {
-//		if ($3 != ">") {
-//			return $3;
-//		} else {
-//			return ">";
-//		}
-//	} else {
-//		return " class=\"" + $2 + "\"" + $3;
-//	}
-//});
-//	 */ {}
-////	int length = innerHTML.length();
-////	if (length < 200) {
-////		length = 200;
-////	} else if (length > 1800) {
-////		length = 1800;
-////	}
-////	length = (length - 200) / 400;
-////	shell.setSize(480 + 80 * length, 280 + 50 * length);
-////	Composite composite = new Composite(shell, SWT.NONE);
-////	composite.setLayout(new GridLayout());
-//	shell.setLayout(new GridLayout());
-//	Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
-//	GridData gd = new GridData(GridData.FILL_BOTH);
-//	gd.widthHint = 400;
-//	gd.heightHint = 275;
-//	text.setLayoutData(gd);
-//	Rectangle rect = getClientArea();
-//	String html = "<div class=\"shell-content\" style=\"" + "width:"
-//				+ rect.width + "px;height:" + rect.height + "px;\">" + b
-//				+ "</div>";
-//	text.setText(html);
-//	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
-//			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//	Button button = new Button(shell, SWT.PUSH);
-//	button.setText("&OK");
-//	GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
-//	gridData.widthHint = 80;
-//	button.setLayoutData(gridData);
-//	button.addSelectionListener(new SelectionAdapter() {
-//		public void widgetSelected(SelectionEvent e) {
-//			shell.close();
-//		}
-//	});
-//	shell.pack();
-//	shell.open();
-//}
+//	length = (length - 200) / 400;
+//	shell.setSize(480 + 80 * length, 280 + 50 * length);
+//	Composite composite = new Composite(shell, SWT.NONE);
+//	composite.setLayout(new GridLayout());
+	shell.setLayout(new GridLayout());
+	Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+	GridData gd = new GridData(GridData.FILL_BOTH);
+	gd.widthHint = 400;
+	gd.heightHint = 275;
+	text.setLayoutData(gd);
+	Rectangle rect = getClientArea();
+	String html = "<div class=\"shell-content\" style=\"" + "width:"
+				+ rect.width + "px;height:" + rect.height + "px;\">" + b
+				+ "</div>";
+	text.setText(html);
+	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
+			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	Button button = new Button(shell, SWT.PUSH);
+	button.setText("&OK");
+	GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+	gridData.widthHint = 80;
+	button.setLayoutData(gridData);
+	button.addSelectionListener(new SelectionAdapter() {
+		public void widgetSelected(SelectionEvent e) {
+			shell.close();
+		}
+	});
+	shell.pack();
+	shell.open();
+	while (!shell.isDisposed ()) {
+		if (!display.readAndDispatch ()) display.sleep ();
+	}
+}
 
 protected void createWidget () {
 	super.createWidget ();
@@ -910,7 +938,6 @@ public Button getDefaultButton () {
 	checkWidget ();
 	return defaultButton;
 }
-
 
 /**
  * Returns the receiver's image if it had previously been 
@@ -1113,9 +1140,13 @@ public String getText () {
 	OS.GetWindowText (handle, buffer, length + 1);
 	return buffer.toString (0, length);
 	*/
-	return null; // TODO 
+	Element[] children = this.shellTitle.childNodes;
+	if (children.length <= 0) {
+		return "";
+	}
+	String text = children[0].nodeValue;
+	return text == null ? "" : text;
 }
-
 
 public boolean isReparentable () {
 	checkWidget ();
@@ -1323,7 +1354,7 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
  * </ul>
  */
 public void setDefaultButton (Button button) {
-	//checkWidget ();
+	checkWidget ();
 	setDefaultButton (button, true);
 }
 
@@ -1508,7 +1539,7 @@ void setImages (Image image, Image [] images) {
  * @since 3.0
  */
 public void setImages (Image [] images) {
-	//checkWidget ();
+	checkWidget ();
 	if (images == null) error (SWT.ERROR_INVALID_ARGUMENT);
 	for (int i = 0; i < images.length; i++) {
 		if (images [i] == null || images [i].isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
@@ -1689,7 +1720,6 @@ public void setMenuBar (Menu menu) {
 	 * Set the menu!
 	 */
 }
-
 
 /**
  * Sets the minimized stated of the receiver.
@@ -1879,11 +1909,11 @@ void setSystemMenu () {
 //		/**
 //		 * @j2sIgnore
 //		 */ {
-//		shellIcon.onclick = new RunnableCompatibility() {
-//			public void run() {
-//				exportHTMLSource();
-//			}
-//		};
+		shellIcon.onclick = new RunnableCompatibility() {
+			public void run() {
+				exportHTMLSource();
+			}
+		};
 //		 }
 	}
 
@@ -1940,11 +1970,7 @@ void setSystemMenu () {
 	handle.appendChild(titleBar);
 	titleBar.onclick = new RunnableCompatibility() {
 		public void run() {
-			CSSStyle fHandleStyle = handle.style;
-			if (fHandleStyle.zIndex != window.currentTopZIndex) {
-				fHandleStyle.zIndex = window.currentTopZIndex = ""
-						+ (Integer.parseInt(window.currentTopZIndex) + 2);
-			}
+			bringToTop();
 			if(contentHandle != null){
 				contentHandle.focus();
 			}
@@ -1997,8 +2023,9 @@ public void setVisible (boolean visible) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {
 		//if (visible == OS.IsWindowVisible (handle)) return;
-		if (visible == (contentHandle.style.visibility != "hidden")) return;
+		if (visible == (handle.style.visibility != "hidden")) return;
 	}
+	handle.style.visibility = visible ? "visible" : "hidden";
 	if (visible) {
 		/*
 		* It is possible (but unlikely), that application
@@ -2254,6 +2281,7 @@ boolean traverseDecorations (boolean next) {
 	}
 	return false;
 }
+
 /**
  * Updates the monitor size whenever the window is resized
  *
@@ -2586,6 +2614,6 @@ LRESULT WM_WINDOWPOSCHANGING (int wParam, int lParam) {
 	}
 	return result;
 }
-*/
 
+*/
 }

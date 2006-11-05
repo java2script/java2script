@@ -41,6 +41,8 @@ public class Element {
 
 	public String nodeName;
 
+	public String nodeValue;
+	
 	public String className;
 
 	public Object onmousedown;
@@ -94,7 +96,7 @@ public class Element {
 	public String rel;
 
 	public int tabIndex;
-	
+
 	//private String
 	
 	public native void appendChild(Element child);
