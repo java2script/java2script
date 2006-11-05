@@ -121,7 +121,7 @@ public SearchDialog(Shell parent) {
 			if (!findHandler.find()){
 				MessageBox box = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK | SWT.PRIMARY_MODAL);
 				box.setText(shell.getText());
-				box.setMessage(resAddressBook.getString("Cannot_find") + "\"" + searchText.getText() + "\"");
+				box.setMessage(resAddressBook.getString("Cannot_find") + " \"" + searchText.getText() + "\"");
 				box.open();	
 			}		
 		}

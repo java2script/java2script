@@ -40,7 +40,7 @@ class RowLayoutTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of LayoutExample.
 	 */
-	RowLayoutTab(LayoutExample instance) {
+	public RowLayoutTab(LayoutExample instance) {
 		super(instance);
 	}
 	

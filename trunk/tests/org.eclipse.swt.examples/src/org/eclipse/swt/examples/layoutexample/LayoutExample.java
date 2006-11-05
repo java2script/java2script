@@ -11,14 +11,20 @@
 package org.eclipse.swt.examples.layoutexample;
 
 
+import net.sf.j2s.ajax.ARunnable;
+import net.sf.j2s.ajax.ASWTClass;
 import org.eclipse.swt.*;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.events.*;
 
+import java.lang.reflect.Constructor;
 import java.text.*;
 import java.util.*;
 
+/**
+ * @j2sRequireImport java.lang.reflect.Constructor
+ */
 public class LayoutExample {
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("examples_layout");
 	private TabFolder tabFolder;
@@ -30,6 +36,7 @@ public class LayoutExample {
 	 * @param parent the container of the example
 	 */
 	public LayoutExample(Composite parent) {
+		/*
 		tabFolder = new TabFolder (parent, SWT.NULL);
 		Tab [] tabs = new Tab [] {
 			new FillLayoutTab (this),
@@ -41,6 +48,88 @@ public class LayoutExample {
 			TabItem item = new TabItem (tabFolder, SWT.NULL);
 		    item.setText (tabs [i].getTabText ());
 		    item.setControl (tabs [i].createTabFolderPage (tabFolder));
+		}
+		*/
+		tabFolder = new TabFolder (parent, SWT.NONE);
+		String[] tabs = new String[] {
+				"FillLayout", 
+				"RowLayout",
+				"GridLayout",
+				"FormLayout"
+		};
+		for (int i=0; i<tabs.length; i++) {
+			TabItem item = new TabItem (tabFolder, SWT.NONE);
+		    item.setText (tabs [i]);
+		    //item.setControl (tabs [i].createTabFolderPage (tabFolder));
+		    item.setData ("org.eclipse.swt.examples.layoutexample." + tabs [i] + "Tab");
+		    //ProgressBar progressBar = new ProgressBar(tabFolder, SWT.INDETERMINATE);
+			//item.setControl(progressBar);
+		    //*
+		    Label label = new Label(tabFolder, SWT.NONE);
+		    label.setText("Loading " + tabs [i] + " Tab ...");
+		    label.setAlignment(SWT.CENTER);
+		    item.setControl(label);
+		    // */
+		}
+		if (tabs.length > 0) {
+			final TabItem item = tabFolder.getItem(0);
+			ASWTClass.shellLoad(parent.getShell(), (String) item.getData(), new ARunnable() {
+				public void run() {
+					try {
+						Constructor constructor = getClazz().getConstructor(new Class[] {LayoutExample.class});
+						Object inst = constructor.newInstance(new Object[] {LayoutExample.this});
+						Tab tab = (Tab) inst;
+						Composite page = tab.createTabFolderPage(tabFolder);
+						Control control = item.getControl();
+						if (control != null && control instanceof Label) {
+							control.dispose();
+						}
+					    //item.setImage(images[(int) Math.floor(3 * Math.random())]);
+					    tabFolder.setSelection(tabFolder.getSelectionIndex());
+						item.setControl(page);
+						//item.getParent().getShell().pack();
+					} catch (Throwable e) {
+						//e.printStackTrace();
+						throw (Error) e;
+					}
+				}
+			});
+		}
+		if (tabs.length > 1) {
+			tabFolder.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					int idx = tabFolder.getSelectionIndex();
+					if (idx != -1) {
+						final TabItem item = tabFolder.getItem(idx);
+						Control control = item.getControl();
+						if (control == null || control instanceof Label) {
+							Object data = item.getData();
+							if (data != null) {
+								ASWTClass.shellLoad(tabFolder.getShell(), (String) data, new ARunnable() {
+									public void run() {
+										try {
+											Constructor constructor = getClazz().getConstructor(new Class[] {LayoutExample.class});
+											Object inst = constructor.newInstance(new Object[] {LayoutExample.this});
+											Tab tab = (Tab) inst;
+											Composite page = tab.createTabFolderPage(tabFolder);
+											Control control = item.getControl();
+											if (control != null && control instanceof Label) {
+												control.dispose();
+											}
+										    //item.setImage(images[(int) Math.floor(3 * Math.random())]);
+										    tabFolder.setSelection(tabFolder.getSelectionIndex());
+											item.setControl(page);
+										} catch (Throwable e) {
+											e.printStackTrace();
+											throw (Error) e;
+										}
+									}
+								});
+							}
+						}
+					}
+				}
+			});
 		}
 	}
 	
@@ -76,6 +165,7 @@ public class LayoutExample {
 				}
 			}
 		});
+		//shell.setSize(640, 480);
 		shell.open();
 		while (! shell.isDisposed()) {
 			if (! display.readAndDispatch()) display.sleep();

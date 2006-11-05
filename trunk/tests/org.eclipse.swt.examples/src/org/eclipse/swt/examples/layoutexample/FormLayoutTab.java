@@ -45,7 +45,7 @@ class FormLayoutTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of LayoutExample.
 	 */
-	FormLayoutTab(LayoutExample instance) {
+	public FormLayoutTab(LayoutExample instance) {
 		super(instance);
 	}
 	

@@ -170,7 +170,7 @@ abstract class Tab {
 		combo.setItems (new String [] {
 			"Button", "Canvas", "Combo", "Composite",
 			"CoolBar", "Group", "Label", "List",
-			"ProgressBar", "Scale", "Slider", "StyledText",
+			"ProgressBar", "Scale", "Slider", /*"StyledText",*/
 			"Table", "Text", "ToolBar", "Tree"});
 		combo.setText (newItem.getText (1));
 		

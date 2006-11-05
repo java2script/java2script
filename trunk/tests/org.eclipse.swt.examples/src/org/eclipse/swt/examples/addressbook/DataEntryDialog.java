@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
  * is added to a <code>Table</code> widget or edits a <code>TableItem</code> entry 
  * to represent the entered data.
  */
-public class DataEntryDialog {
+public class DataEntryDialog extends Dialog {
 
 	private static ResourceBundle resAddressBook = ResourceBundle.getBundle("examples_addressbook");
 	
@@ -33,7 +33,8 @@ public class DataEntryDialog {
 	String[] labels;
 	
 public DataEntryDialog(Shell parent) {
-	shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
+	super(new Shell(parent, SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL));
+	shell = this.getParent();
 	shell.setLayout(new GridLayout());		
 }
 
@@ -124,6 +125,9 @@ public String[] getValues() {
  *					The state the dialog should be opened in.
  */
 public String[] open() {
+	/**
+	 * @j2sNative this.dialogShell = this.shell;
+	 */ {}
 	createTextWidgets();
 	createControlButtons();
 	shell.pack();
@@ -134,6 +138,10 @@ public String[] open() {
 			display.sleep();
 	}
 	
+	/**
+	 * @j2sNative
+	 * this.dialogReturn = this.values;
+	 */ {}
 	return getValues();
 }
 public void setLabels(String[] labels) {
