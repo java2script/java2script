@@ -54,7 +54,7 @@ public class Composite extends Scrollable {
 	Control [] tabList;
 	int layoutCount = 0;
 //	Control [] children = new Control[0];
-	protected Control [] children;
+	Control [] children;
 	boolean waitingForLayoutWithResize;
 
 /**
@@ -115,7 +115,7 @@ protected Control [] _getChildren () {
 	Control [] newChildren = new Control [0];
 	for (int i = 0; i < count; i++) {
 		Control control = children[i]; //display.getControl (handle.childNodes[i]);
-		if (control != null && control != this) {
+		if (control != null && control != this && !(control instanceof Shell)) {
 			newChildren [index++] = control;
 		}
 	}
@@ -606,7 +606,7 @@ public void layout (Control [] changed) {
 	checkWidget ();
 //	System.out.print("control");
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
-	Date d = new Date();
+//	Date d = new Date();
 	int length = changed.length;
 	for (int i=0; i< length; i++) {
 		Control control = changed [i];
@@ -622,7 +622,7 @@ public void layout (Control [] changed) {
 		if (!ancestor) error (SWT.ERROR_INVALID_PARENT);
 	}
 //	System.out.println(":::" + (new Date().getTime() - d.getTime()));
-	d = new Date();
+//	d = new Date();
 	int updateCount = 0;
 	Composite [] update = new Composite [16];
 	for (int i=0; i< length; i++) {
@@ -645,12 +645,12 @@ public void layout (Control [] changed) {
 		}
 	}
 //	System.out.println(":::" + (new Date().getTime() - d.getTime()));
-	d = new Date();
+//	d = new Date();
 	for (int i=updateCount-1; i>=0; i--) {
 		update [i].updateLayout (true, false);
 	}
 //	System.out.println(":::" + (new Date().getTime() - d.getTime()));
-	d = new Date();
+//	d = new Date();
 }
 
 void markLayout (boolean changed, boolean all) {
@@ -1017,12 +1017,12 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 
 void updateLayout (boolean resize, boolean all) {
 	if (isLayoutDeferred ()) return;
-
 	if ((state & LAYOUT_NEEDED) != 0 && !waitingForLayout) {
 //		boolean changed = (state & LAYOUT_CHANGED) != 0;
 //		state &= ~(LAYOUT_NEEDED | LAYOUT_CHANGED);
 //		if (resize) setResizeChildren (false);
 //		layout.layout (this, changed);
+//		if (resize) setResizeChildren (true);
 		this.waitingForLayout = true;
 		this.waitingForLayoutWithResize = resize;
 		display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
@@ -1033,6 +1033,7 @@ void updateLayout (boolean resize, boolean all) {
 		Control [] children = _getChildren ();
 		int length = children.length;
 		for (int i=0; i<length; i++) {
+//			children [i].updateLayout (resize, all);
 			if (children[i] instanceof Composite) {
 				display.sendMessage(new MESSAGE(children[i], MESSAGE.CONTROL_LAYOUT, new boolean[] {resize, all}));
 			}

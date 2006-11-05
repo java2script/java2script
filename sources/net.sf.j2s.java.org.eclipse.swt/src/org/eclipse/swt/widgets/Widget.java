@@ -249,7 +249,7 @@ void checkHookType(final int eventType) {
 	if (eventType >= 0 && eventType <= 37) {
 		hooked = hookedStatus[eventType];
 	}
-	if (hooked) {
+	if (hooked || this.handle == null) { // ScrollBar has no handle yet!
 		return;
 	}
 	switch (eventType) {
@@ -418,7 +418,7 @@ void checkOrientation (Widget parent) {
 protected void _updateOrientation(){
 	if((style & SWT.RIGHT_TO_LEFT) != 0){
 		handle.style.direction = "rtl";
-	}else{
+	} else {
 		handle.style.direction = "ltr";
 	}
 }

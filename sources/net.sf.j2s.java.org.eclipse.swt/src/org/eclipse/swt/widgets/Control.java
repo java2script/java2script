@@ -2221,7 +2221,7 @@ public void setCursor (Cursor cursor) {
 	checkWidget ();
 	if (cursor != null && cursor.isDisposed()) SWT.error(SWT.ERROR_INVALID_ARGUMENT);
 	this.cursor = cursor;
-	handle.style.cursor = cursor.getCSSHandle();
+	handle.style.cursor = (cursor == null) ? "" : cursor.getCSSHandle();
 	/*
 	if (OS.IsWinCE) {
 		int hCursor = cursor != null ? cursor.handle : 0;

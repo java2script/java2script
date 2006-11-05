@@ -1354,12 +1354,11 @@ void setToolTipText (NMTTDISPINFO lpnmtdi, char [] buffer) {
 
 public void setVisible (boolean visible) {
 	checkWidget ();
-	super.setVisible(visible);
-	/*
 	if (drawCount != 0) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {
-		if (visible == OS.IsWindowVisible (handle)) return;
+		if (visible == (handle.style.visibility != "hidden")) return;
+		//if (visible == OS.IsWindowVisible (handle)) return;
 	}
 	
 	/*
@@ -1370,11 +1369,12 @@ public void setVisible (boolean visible) {
 	* a modal window before the parent is enabled, the parent will
 	* not come to the front.  The fix is to change the modal state
 	* before hiding or showing a window so that this does not occur.
-	*-/
+	*/
 	int mask = SWT.PRIMARY_MODAL | SWT.APPLICATION_MODAL | SWT.SYSTEM_MODAL;
 	if ((style & mask) != 0) {
 		if (visible) {
 			display.setModalShell (this);
+			/*
 			Control control = display._getFocusControl ();
 			if (control != null && !control.isActive ()) {
 				bringToTop ();
@@ -1388,6 +1388,7 @@ public void setVisible (boolean visible) {
 				OS.SendMessage (hwndShell, OS.WM_CANCELMODE, 0, 0);
 			}
 			OS.ReleaseCapture ();
+			*/
 		} else {
 			display.clearModal (this);
 		}
@@ -1400,21 +1401,25 @@ public void setVisible (boolean visible) {
 	* child windows of a hidden window causes the application
 	* to be deactivated.  The fix is to call ShowOwnedPopups()
 	* to hide children before hiding the parent.
-	*-/
+	*/
 	if (showWithParent && !visible) {
-		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, false);
+//		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, false);
 	}
 	super.setVisible (visible);
 	if (isDisposed ()) return;
 	if (showWithParent == visible) return;
 	showWithParent = visible;
 	if (visible) {
-		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, true);
-	}
-	*/
-	if (visible) {
+//		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, true);
 		SetWindowPos(handle, null, left, top, width, height, 0);
 	}
+	/*
+	if (visible) {
+		SetWindowPos(handle, null, left, top, width, height, 0);
+	} else {
+		SetWindowPos(handle, null, left, top, width, height, 0);
+	}
+	*/
 }
 
 /*

@@ -701,6 +701,7 @@ public void setText (String string) {
 			}
 		}
 	}
+	if (string.length() == 0) string = "" + (char) 160;
 	text.appendChild(document.createTextNode(string));
 	int[] columnMaxWidth = parent.columnMaxWidth;
 	int width = OS.getContainerWidth(handle);
