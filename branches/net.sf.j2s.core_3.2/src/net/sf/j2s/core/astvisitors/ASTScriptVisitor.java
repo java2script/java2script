@@ -1919,19 +1919,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 
 	public boolean visit(SimpleName node) {
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			buffer.append(constValue);
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-			}
-			return false;
-		}
+		if (checkConstantValue(node)) return false;
 		IBinding binding = node.resolveBinding();
 		if (binding != null
 				&& binding instanceof ITypeBinding) {

@@ -62,6 +62,8 @@
 	</extension>
 
  <extension
+       id="InternalASTScriptVisitor"
+       name="InternalASTScriptVisitor"
        point="net.sf.j2s.core.extendedASTScriptVisitor">
     <extendedASTScriptVisitor
           class="net.sf.j2s.core.compiler.ASTExtendedVisitor"
