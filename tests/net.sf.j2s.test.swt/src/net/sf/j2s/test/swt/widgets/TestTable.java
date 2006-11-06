@@ -14,6 +14,8 @@
 package net.sf.j2s.test.swt.widgets;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -80,7 +82,23 @@ public class TestTable {
 		final TableItem tableItem52 = new TableItem(table5, SWT.NONE); 
 		tableItem52.setText(new String[] {"Width", "Very long long string"});
 		table5.setHeaderVisible(true);
-		
+		final Table table6 = new Table(shell, SWT.NONE);
+		new TableColumn(table5, SWT.NONE).setText("I'm A Column");
+		table6.setHeaderVisible(true);
+		final TableItem doNotDeleteMe = new TableItem(table6, SWT.NONE);
+		doNotDeleteMe.setText("Do not click on me first! I will be deleted");
+		final TableItem deleteMeFirst = new TableItem(table6, SWT.NONE);
+		deleteMeFirst.setText("Click on me first! I will be deleted");
+		final TableItem deleteMeAfter = new TableItem(table6, SWT.NONE);
+		deleteMeAfter.setText("Click on me after! I will be deleted");
+		table6.addSelectionListener(new SelectionAdapter(){
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+//				table6.remove(table6.indexOf((TableItem) e.item));
+				table6.remove(table6.getSelectionIndex());
+			}
+			
+		});
 		shell.pack();
 		shell.open ();
 		while (!shell.isDisposed ()) {

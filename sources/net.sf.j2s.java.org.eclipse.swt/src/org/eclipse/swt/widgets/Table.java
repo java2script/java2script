@@ -1956,7 +1956,7 @@ public int getSelectionIndex () {
 	if(selection.length == 0){
 		return -1;
 	}
-	return selection[0].index;
+	return indexOf(selection[0]);
 }
 
 /**
@@ -1987,7 +1987,7 @@ public int [] getSelectionIndices () {
 	*/
 	int [] result = new int [selection.length];
 	for (int i = 0; i < selection.length; i++) {
-		result[i] = selection[i].index;
+		result[i] = indexOf(selection[i]);
 	}
 	return result;
 }
