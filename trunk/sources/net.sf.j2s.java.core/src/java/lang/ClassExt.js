@@ -72,11 +72,17 @@ Clazz.prepareCallback = function (objThis, args) {
 		var className = Clazz.getClassName (classThisObj, true);
 		//if (obs[className] == null) { /* == null make no sense! */
 			//obs[className] = classThisObj;
+			/*
+			 * TODO: the following line is SWT-specific! Try to move it out!
+			 */
 			obs[className.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
 			var clazz = Clazz.getClass (classThisObj);
 			while (clazz.superClazz != null) {
 				clazz = clazz.superClazz;
 				//obs[Clazz.getClassName (clazz)] = classThisObj;
+				/*
+				 * TODO: the following line is SWT-specific! Try to move it out!
+				 */
 				obs[Clazz.getClassName (clazz, true)
 						.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
 			}
@@ -792,100 +798,3 @@ Clazz.forName = function (clazzName) {
 	}
 };
 
-/* protected */
-Clazz.cssAlreadyAggregated = false;
-Clazz.cssForcedUsingFile = false;
-
-/**
- * Register css for the given class. If the given css text is null, it will
- * try to find relative *.css file instead loading css text directly.
- * @param clazzName Qualified name of a class
- * @param cssText Optional, if given, it will loaded into the page directly.
- */
-/* public */
-Clazz.registerCSS = function (clazzName, cssText) {
-	if (Clazz.cssAlreadyAggregated || window["ClazzLoader"] == null) {
-		return ;
-	}
-	clazzName = ClazzLoader.unwrapArray ([clazzName])[0];
-	var cssPath = ClazzLoader.getClasspathFor (clazzName, false, ".css");
-	
-	var basePath = ClazzLoader.getClasspathFor (clazzName, true);
-	var cssID = "c$$." + clazzName;
-	/*
-	 * Check whether the css resources is loaded or not
-	 */
-	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath)) {
-		ClazzLoader.registeredCSSs[ClazzLoader.registeredCSSs.length] = clazzName;
-		if (cssText == null || Clazz.cssForcedUsingFile) {
-			var cssLink = document.createElement ("LINK");
-			cssLink.rel = "stylesheet";
-			cssLink.id = cssID;
-			cssLink.href = cssPath;
-			document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
-		} else {
-			var prefix = "";
-			var idx = cssPath.lastIndexOf ("/");
-			if (idx != -1) {
-				prefix = cssPath.substring (0, idx + 1);
-			}
-			if (document.createStyleSheet != null) {
-				// prepare for createStyleSheet with "javascript:...";
-				/*
-				 * TODO: Make more tests on the correctness of prefix!
-				 */
-				//var protocol = window.location.protocol;
-				//var host = window.location.host;
-				var location = window.location.href.toString ();
-				//if (protocol == "file:" || host == "") {
-					var idx = location.lastIndexOf ("/");
-					if (idx != -1) {
-						prefix = location.substring (0, idx + 1) + prefix;
-					}
-				//}
-			}
-			/*
-			 * Fix the css images location
-			 */
-			cssText = cssText.replace (/(url\s*\(\s*['"])(.*)(['"])/ig, 
-					//"
-					function ($0, $1, $2, $3) {
-						if ($2.indexOf ("/") == 0
-								|| $2.indexOf ("http://") == 0 
-								|| $2.indexOf ("https://") == 0
-								|| $2.indexOf ("file:/") == 0
-								|| $2.indexOf ("ftp://") == 0
-								|| $2.indexOf ("javascript:") == 0) {
-							return $0;
-						}
-						return $1 + prefix + $2 + $3;
-					});
-			if (document.createStyleSheet != null) {
-				/*
-				 * Internet Explorer does not support loading dynamic css styles
-				 * by creating <STYLE> element!
-				 */
-				var sheet = document.createStyleSheet ();
-				sheet.cssText = cssText;
-				//sheet.id = cssID; // No ID support the this element for IE
-				window[cssID] = true;
-			} else {
-				var cssStyle = document.createElement ("STYLE");
-				cssStyle.id = cssID;
-				cssStyle.appendChild (document.createTextNode (cssText));
-				document.getElementsByTagName ("HEAD")[0].appendChild (cssStyle);
-			}
-		}
-		
-		var len = ClazzLoader.themes.length;
-		for(var i = 0; i < len; i++){
-			var themeName = ClazzLoader.themes[i];
-			var themePath = ClazzLoader.themePaths[themeName] + "/" + clazzName.replace (/\./g, "/") + ".css";
-			var cssLink = document.createElement ("LINK");
-			cssLink.rel = "stylesheet";
-			cssLink.id = cssID + themeName;
-			cssLink.href = themePath;
-			document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
-		}
-	}
-};
