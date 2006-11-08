@@ -816,6 +816,7 @@ Clazz.registerCSS = function (clazzName, cssText) {
 	 * Check whether the css resources is loaded or not
 	 */
 	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath)) {
+		ClazzLoader.registeredCSSs[ClazzLoader.registeredCSSs.length] = clazzName;
 		if (cssText == null || Clazz.cssForcedUsingFile) {
 			var cssLink = document.createElement ("LINK");
 			cssLink.rel = "stylesheet";
@@ -874,6 +875,17 @@ Clazz.registerCSS = function (clazzName, cssText) {
 				cssStyle.appendChild (document.createTextNode (cssText));
 				document.getElementsByTagName ("HEAD")[0].appendChild (cssStyle);
 			}
+		}
+		
+		var len = ClazzLoader.themes.length;
+		for(var i = 0; i < len; i++){
+			var themeName = ClazzLoader.themes[i];
+			var themePath = ClazzLoader.themePaths[themeName] + "/" + clazzName.replace (/\./g, "/") + ".css";
+			var cssLink = document.createElement ("LINK");
+			cssLink.rel = "stylesheet";
+			cssLink.id = cssID + themeName;
+			cssLink.href = themePath;
+			document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
 		}
 	}
 };
