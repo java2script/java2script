@@ -50,7 +50,7 @@ public class TestTheme {
 			public void widgetSelected(SelectionEvent e){
 				/**
 				 * @j2sNative
-				 * ClazzLoader.registerTheme("theme1", "theme1");
+				 * $WTC$$.registerTheme("theme1", "theme1");
 				 */{}
 			}
 		});
@@ -60,7 +60,7 @@ public class TestTheme {
 			public void widgetSelected(SelectionEvent e){
 				/**
 				 * @j2sNative
-				 * ClazzLoader.registerTheme("theme2", "theme2");
+				 * $WTC$$.registerTheme("theme2", "theme2");
 				 */{}
 			}
 		});
