@@ -46,7 +46,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.CoolBar");
+ * $WTC$$.registerCSS ("$wt.widgets.CoolBar");
  */
 
 public class CoolBar extends Composite {

@@ -43,7 +43,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Text");
+ * $WTC$$.registerCSS ("$wt.widgets.Text");
  */
 public class Text extends Scrollable {
 	int tabs, oldStart, oldEnd;

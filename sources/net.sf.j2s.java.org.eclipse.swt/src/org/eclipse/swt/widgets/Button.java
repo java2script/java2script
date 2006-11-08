@@ -51,7 +51,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Button");
+ * $WTC$$.registerCSS ("$wt.widgets.Button");
  */
 
 public class Button extends Control {

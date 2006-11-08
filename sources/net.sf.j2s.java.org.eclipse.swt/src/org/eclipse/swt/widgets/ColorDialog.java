@@ -44,7 +44,7 @@ import org.eclipse.swt.layout.GridLayout;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.ColorDialog");
+ * $WTC$$.registerCSS ("$wt.widgets.ColorDialog");
  */
 
 public class ColorDialog extends Dialog {

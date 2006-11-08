@@ -46,7 +46,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * @see Canvas
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Composite");
+ * $WTC$$.registerCSS ("$wt.widgets.Composite");
  */
 public class Composite extends Scrollable {
 	Layout layout;

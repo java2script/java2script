@@ -48,7 +48,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Table");
+ * $WTC$$.registerCSS ("$wt.widgets.Table");
  */
 
 public class Table extends Composite {

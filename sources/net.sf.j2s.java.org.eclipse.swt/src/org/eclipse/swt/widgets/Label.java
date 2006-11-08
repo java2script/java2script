@@ -45,7 +45,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Label");
+ * $WTC$$.registerCSS ("$wt.widgets.Label");
  */
 public class Label extends Control {
 	String text = "";
