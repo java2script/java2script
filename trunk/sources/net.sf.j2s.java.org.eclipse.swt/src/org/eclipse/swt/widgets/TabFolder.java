@@ -49,7 +49,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.TabFolder");
+ * $WTC$$.registerCSS ("$wt.widgets.TabFolder");
  */
 public class TabFolder extends Composite {
 	TabItem [] items;

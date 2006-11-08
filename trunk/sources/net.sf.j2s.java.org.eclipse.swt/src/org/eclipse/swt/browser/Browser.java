@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Widget;
  * @since 3.0
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.browser.Browser");
+ * $WTC$$.registerCSS ("$wt.browser.Browser");
  */
 public class Browser extends Composite {
 	/*

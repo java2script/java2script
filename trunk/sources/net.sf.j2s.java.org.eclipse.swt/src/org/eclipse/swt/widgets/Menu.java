@@ -46,7 +46,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Menu");
+ * $WTC$$.registerCSS ("$wt.widgets.Menu");
  */
 
 public class Menu extends Widget {

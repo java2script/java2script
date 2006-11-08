@@ -43,7 +43,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.ToolBar");
+ * $WTC$$.registerCSS ("$wt.widgets.ToolBar");
  */
 public class ToolBar extends Composite {
 	int lastFocusId;

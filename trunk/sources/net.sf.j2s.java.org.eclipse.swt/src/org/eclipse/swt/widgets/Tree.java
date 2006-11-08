@@ -47,7 +47,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Tree");
+ * $WTC$$.registerCSS ("$wt.widgets.Tree");
  */
 public class Tree extends Composite {
 	TreeItem [] items;

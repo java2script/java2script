@@ -43,7 +43,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.Scale");
+ * $WTC$$.registerCSS ("$wt.widgets.Scale");
  */
 
 public class Scale extends Control {

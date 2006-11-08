@@ -36,7 +36,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.ProgressBar");
+ * $WTC$$.registerCSS ("$wt.widgets.ProgressBar");
  */
 public class ProgressBar extends Control {
 	static final int DELAY = 100;

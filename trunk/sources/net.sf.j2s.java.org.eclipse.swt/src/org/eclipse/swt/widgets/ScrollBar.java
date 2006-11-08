@@ -82,7 +82,7 @@ import org.eclipse.swt.internal.xhtml.Element;
  * @see Scrollable#getVerticalBar
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.ScrollBar");
+ * $WTC$$.registerCSS ("$wt.widgets.ScrollBar");
  */
 
 public class ScrollBar extends Widget {

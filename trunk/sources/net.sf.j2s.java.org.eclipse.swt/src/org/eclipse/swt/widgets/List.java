@@ -39,7 +39,7 @@ import org.eclipse.swt.internal.xhtml.document;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.widgets.List");
+ * $WTC$$.registerCSS ("$wt.widgets.List");
  */
 
 public class List extends Scrollable {

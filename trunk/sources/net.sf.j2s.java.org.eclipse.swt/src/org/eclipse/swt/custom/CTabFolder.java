@@ -69,7 +69,7 @@ import org.eclipse.swt.widgets.TypedListener;
  * </p>
  * 
  * @j2sPrefix
- * Clazz.registerCSS ("$wt.custom.CTabFolder");
+ * $WTC$$.registerCSS ("$wt.custom.CTabFolder");
  */
  
 public class CTabFolder extends Composite {
