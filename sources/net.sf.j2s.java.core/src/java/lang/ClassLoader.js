@@ -847,65 +847,6 @@ ClazzLoader.isResourceExisted = function (id, path, base) {
 	}
 	return false;
 };
-
-/*
- * loadCSS may be considered part of SWT library. Should be packed with
- * SWT not with Java core.
- */
-/* public */
-ClazzLoader.loadCSS = function (cssName) {
-	var cssKey = "";
-	var idx = cssName.lastIndexOf (".");
-	if (idx == -1) {
-		cssKey = cssName + ".css";
-	} else {
-		cssKey = cssName.substring (idx + 1) + ".css";
-	}
-	var resLinks = document.getElementsByTagName ("LINK");
-	for (var i = 0; i < resLinks.length; i++) {
-		var cssPath = resLinks[i].href;
-		if (cssPath.lastIndexOf (cssKey) == cssPath.length - cssKey.length) {
-			return ;
-		}
-	}
-
-	/*-# cssLink -> rel #-*/
-	var cssLink = document.createElement ("LINK");
-	cssLink.rel = "stylesheet";
-	var path = ClazzLoader.getClasspathFor (cssName);
-	cssLink.href = path.substring (0, path.lastIndexOf (".js")) + ".css";
-	document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
-};
-/*
- * This array will preserves the themes order.
- */
-ClazzLoader.themes = new Array();
-ClazzLoader.themePaths = new Object();
-ClazzLoader.registeredCSSs = new Array();
-/**
- * This mehtod register a theme for overriding the default theme mechanism.
- *
- * @param themeName The name of the theme that must be unique
- * @param themePath The path of the theme that must contains the CSS files
- */
-ClazzLoader.registerTheme = function(themeName, themePath){
-	ClazzLoader.themes[ClazzLoader.themes.length] = themeName;
-	ClazzLoader.themePaths[themeName] = themePath;
-	
-	var len = ClazzLoader.registeredCSSs.length;
-	var cssID = "c$$." + clazzName;
-	
-	for (var i = 0 ; i < len; i++) {
-		var clazzName = ClazzLoader.registeredCSSs[i];
-		var cssPath = themePath + "/" + clazzName.replace (/\./g, "/") + ".css";
-		var cssLink = document.createElement ("LINK");
-		cssLink.rel = "stylesheet";
-		cssLink.id = cssID + themeName;
-		cssLink.href = cssPath;
-		document.getElementsByTagName ("HEAD")[0].appendChild (cssLink);
-	}
-	
-};
 /**
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
