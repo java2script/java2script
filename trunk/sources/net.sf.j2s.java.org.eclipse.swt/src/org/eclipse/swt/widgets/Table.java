@@ -1039,7 +1039,7 @@ void createItem (TableColumn column, int index) {
 //		}
 	Element theadTD = document.createElement("TD");
 	theadTD.innerHTML = "<div class=\"table-head-text\">&#160;</div>";
-	theadTR.insertBefore(theadTD, theadTR.childNodes[theadTR.childNodes.length - 1]);
+//	theadTR.insertBefore(theadTD, theadTR.childNodes[theadTR.childNodes.length - 1]);
 	///*
 //	int childIndex = column.resizable ? index * 2 : index;
 	if (index < 0 || index >= theadTR.childNodes.length) { //theadTD == null){
