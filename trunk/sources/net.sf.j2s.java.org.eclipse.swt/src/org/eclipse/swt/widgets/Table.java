@@ -849,6 +849,14 @@ protected void createHandle () {
 //	}
 //}
 
+private Element createCSSElement(Object parent, String css) {
+	Element div = document.createElement("DIV");
+	div.className = css;
+	if (parent != null) {
+		((Element) parent).appendChild(div);
+	}
+	return div;
+}
 
 void createItem (TableColumn column, int index) {
 	/*
@@ -1017,7 +1025,11 @@ void createItem (TableColumn column, int index) {
 	if (theadTR == null) {
 		theadTR = document.createElement ("TR");
 		theadHandle.appendChild(theadTR);
-		theadTR.innerHTML = "<td class=\"table-column-last\"><div class=\"table-head-text\">&#160;</div></td>";
+		//theadTR.innerHTML = "<td class=\"table-column-last\"><div class=\"table-head-text\">&#160;</div></td>";
+		Element theadTD = document.createElement("TD");
+		theadTD.className = "table-column-last";
+		theadTR.appendChild(theadTD);
+		createCSSElement(theadTD, "table-head-text").appendChild(document.createTextNode("" + (char) 160));
 	}
 //		if (index < theadTR.childNodes.length) {
 //			if (theadTR.childNodes[index] != null
