@@ -231,7 +231,11 @@ void createHandle () {
 			textHandle.focus();
 		}
 	};
-	handle.appendChild(textHandle);
+	Element wrapper = document.createElement("DIV");
+	wrapper.style.overflow = "auto";
+	handle.appendChild(wrapper);
+	wrapper.appendChild(textHandle);
+	//handle.appendChild(textHandle);
 
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
@@ -337,7 +341,7 @@ void hookModify() {
 			e.item = Text.this;
 			e.widget = Text.this;
 			sendEvent(e);
-			toReturn(e.doit);			
+			toReturn(e.doit);
 		}
 	};
 	textHandle.onfocus = new RunnableCompatibility() {
@@ -2340,8 +2344,8 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 //		textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
 //		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
 	}
-	textHandle.style.width = (cx > 0 ? cx : 0) + "px";
-	textHandle.style.height = (cy > 0 ? cy : 0) + "px";
+	textHandle.style.width = (cx - 2 > 0 ? cx - 2 : 0) + "px";
+	textHandle.style.height = (cy - 2 > 0 ? cy - 2 : 0) + "px";
 	Element el = (Element) hWnd;
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";

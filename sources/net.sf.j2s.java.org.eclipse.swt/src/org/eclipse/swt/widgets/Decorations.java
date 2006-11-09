@@ -596,11 +596,11 @@ protected void createHandle() {
 		});
 		dnd.bind(handle);
 	}
-	contentHandle.onclick = new RunnableCompatibility(){
-		public void run(){
-			contentHandle.focus();
-		}
-	};
+//	contentHandle.onclick = new RunnableCompatibility(){
+//		public void run(){
+//			contentHandle.focus();
+//		}
+//	};
 	contentHandle.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
