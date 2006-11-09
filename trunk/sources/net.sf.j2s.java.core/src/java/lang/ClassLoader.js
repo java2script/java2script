@@ -695,12 +695,27 @@ ClazzLoader.loadScript = function (file) {
 		 * What about Safari?
 		 */
 		/*
-		 * Opera will trigger onload event even there are no related *.js
+		 * Opera will trigger onload event even there are no *.js existed
 		 */
 		script.onload = function () { 
-			this.onload = null; 
+			this.onload = null;
 			var path = arguments.callee.path;
-			ClazzLoader.scriptLoaded (path);
+			if (!ClazzLoader.isInnerLoaded 
+					&& navigator.userAgent.indexOf("Opera") >= 0) {
+				// Opera will not take another try.
+				var fss = ClazzLoader.failedScripts;
+				if (fss[path] == null) {
+					// silently take another try for bad network
+					fss[path] = 1;
+					ClazzLoader.loadedScripts[path] = false;
+					ClazzLoader.loadScript (path);
+					return;
+				} else {
+					alert ("[Java2Script] Error in loading " + path + "!");
+				}
+			} else {
+				ClazzLoader.scriptLoaded (path);
+			}
 			if (ClazzLoader.loadingTimeLag >= 0) {
 				window.setTimeout (function () {
 						ClazzLoader.tryToLoadNext (path);
@@ -711,7 +726,7 @@ ClazzLoader.loadScript = function (file) {
 		};
 		script.onload.path = file;
 		/*
-		 * Fore Firefox/Mozilla, no related *.js will result in errors.
+		 * For Firefox/Mozilla, unexisted *.js will result in errors.
 		 */
 		script.onerror = function () { // Firefox/Mozilla
 			this.onerror = null; 
@@ -744,6 +759,12 @@ ClazzLoader.loadScript = function (file) {
 			var fhs = ClazzLoader.failedHandles;
 			var fss = ClazzLoader.failedScripts;
 			var state = "" + this.readyState;
+			
+			var local = state == "loading" 
+					&& (this.src.indexOf ("file:") == 0 
+					|| (window.location.protocol == "file:"
+					&& this.src.indexOf ("http") != 0));
+
 			// alert (state + "/" + this.src);
 			if (state != "loaded" && state != "complete") {
 				/*
@@ -768,7 +789,12 @@ ClazzLoader.loadScript = function (file) {
 					};
 					fun.path = path;
 					// consider 30 seconds available after failing!
-					fhs[path] = window.setTimeout (fun, 15000);
+					/*
+					 * Set 1s waiting in local file system. Is it 1s enough?
+					 * What about big *.z.js need more than 1s to initialize?
+					 */
+					var waitingTime = (local ? 500 : 15000); // 0.5s : 15s
+					fhs[path] = window.setTimeout (fun, waitingTime);
 					return;
 				}
 				if (fss[path] == 1) {
@@ -779,8 +805,8 @@ ClazzLoader.loadScript = function (file) {
 				window.clearTimeout (fhs[path]);
 				fhs[path] = null;
 			}
-			if (state == "loaded" && !ClazzLoader.isInnerLoaded) {
-				if (fss[path] == null || fss[path] == 0) {
+			if ((local || state == "loaded") && !ClazzLoader.isInnerLoaded) {
+				if (!local && (fss[path] == null || fss[path] == 0)) {
 					// silently take another try for bad network
 					fss[path] = 1;
 					// log ("reloading ... " + path);
