@@ -498,6 +498,11 @@ protected void releaseHandle() {
 		OS.destroyHandle(resizeHandle);
 		resizeHandle = null;
 	}
+	if (handle != null) {
+		OS.deepClearChildren(handle);
+		OS.destroyHandle(handle);
+		handle = null;
+	}
 	super.releaseHandle();
 }
 

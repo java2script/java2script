@@ -370,6 +370,17 @@ public void pack () {
 	*/
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (handle != null) {
+		OS.deepClearChildren(handle);
+		OS.destroyHandle(handle);
+		handle = null;
+	}
+	super.releaseHandle();
+}
 protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);

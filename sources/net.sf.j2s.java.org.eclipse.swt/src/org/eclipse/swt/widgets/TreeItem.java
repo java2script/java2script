@@ -961,7 +961,12 @@ private void destroyItem(TreeItem item) {
 protected void releaseHandle () {
 	super.releaseHandle ();
 //	handle = 0;
+	if (checkElement != null) {
+		OS.destroyHandle(checkElement);
+		checkElement = null;
+	}
 	if (handle != null) {
+		OS.deepClearChildren(handle);
 		OS.destroyHandle(handle);
 		handle = null;
 	}
@@ -970,10 +975,9 @@ protected void releaseHandle () {
 protected void releaseWidget () {
 	super.releaseWidget ();
 	//cellBackground = cellForeground = cellFont = null;
-	if (handle != null) {
-		OS.destroyHandle(handle);
-		handle = null;
-	}
+	parent = null;
+	parentItem = null;
+	items = null;
 }
 
 /**
@@ -1640,6 +1644,13 @@ public void setText (String string) {
 void showSelection(boolean selected) {
 	this.selected = selected;
 	OS.updateCSSClass(handle, "tree-item-selected", selected);
+	if (OS.isIE) { // IE won't update selected background! 
+		Element tmpDiv = document.createElement("DIV");
+		tmpDiv.style.width = "1px"; // hasLayout
+		Element innerEl = handle.childNodes[0].childNodes[0].childNodes[0];
+		innerEl.appendChild(tmpDiv);
+		innerEl.removeChild(tmpDiv);
+	}
 }
 
 //	public TreeItem [] getDescendantItems () {

@@ -103,7 +103,23 @@ public class OS {
 			el.removeChild(el.childNodes[i]);
 		}
 	}
-	
+
+	public static void deepClearChildren(Object handle) {
+		if (handle == null) {
+			return ;
+		}
+		Element el = (Element) handle;
+		for (int i = el.childNodes.length - 1; i >= 0; i--) {
+			Element child = el.childNodes[i];
+			if (child.nodeType == 1) {
+				deepClearChildren(child);
+				destroyHandle(child);
+			} else {
+				el.removeChild(child);
+			}
+		}
+	}
+
 	public static void SetWindowPos(Object handle, int x, int y, int w, int h, int flags) {
 		if (handle == null) {
 			return ;

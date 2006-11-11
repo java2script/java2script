@@ -97,6 +97,8 @@ public class Element {
 
 	public int tabIndex;
 
+	public int nodeType;
+
 	//private String
 	
 	public native void appendChild(Element child);

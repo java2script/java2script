@@ -2183,6 +2183,37 @@ void removeItems (int[] indices){
 	}
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (tbodyTRTemplate != null) {
+		OS.deepClearChildren(tbodyTRTemplate);
+		OS.destroyHandle(tbodyTRTemplate);
+		tbodyTRTemplate = null;
+	}
+	if (theadHandle != null) {
+		OS.deepClearChildren(theadHandle);
+		OS.destroyHandle(theadHandle);
+		theadHandle = null;
+	}
+	if (tbody != null) {
+		OS.deepClearChildren(tbody);
+		OS.destroyHandle(tbody);
+		tbody = null;
+	}
+	if (tableHandle != null) {
+		OS.deepClearChildren(tableHandle);
+		OS.destroyHandle(tableHandle);
+		tableHandle = null;
+	}
+	focusItem = null;
+	currentItem = null;
+	lastSelection = null;
+	selection = null;
+	super.releaseHandle();
+}
+
 protected void releaseWidget () {
 	//int hwndHeader =  OS.SendMessage (handle, OS.LVM_GETHEADER, 0, 0);
 	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
@@ -2597,7 +2628,6 @@ public void select (int index) {
 	items[index].showSelection(true);
 	selection = new TableItem[1];
 	selection[0] = this.items[index];
-	OS.addCSSClass(items[index].handle, "table-item-selected");
 	/*
 	LVITEM lvItem = new LVITEM ();
 	lvItem.state = OS.LVIS_SELECTED;
