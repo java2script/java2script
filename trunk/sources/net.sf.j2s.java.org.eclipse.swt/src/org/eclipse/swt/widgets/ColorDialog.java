@@ -336,7 +336,7 @@ public RGB open () {
 		}
 	}
 	
-	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER | SWT.RESIZE) {
+	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.APPLICATION_MODAL) {
 
 		protected void releaseHandle() {
 			releaseHandles();

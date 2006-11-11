@@ -297,7 +297,7 @@ public void setText (String string) {
 
 
 protected void dialogUnimplemented() {
-	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER | SWT.SHELL_TRIM);
+	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.APPLICATION_MODAL);
 	dialogShell.addListener(SWT.Close, new Listener() {
 		public void handleEvent(Event event) {
 			//updateReturnCode();

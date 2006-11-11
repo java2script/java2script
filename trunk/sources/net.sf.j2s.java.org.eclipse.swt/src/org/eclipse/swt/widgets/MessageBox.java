@@ -206,7 +206,7 @@ public int open () {
 	}
 	*/
 	returnCode = -1;
-	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.BORDER | SWT.SHELL_TRIM);
+	dialogShell = new Shell(parent.display, SWT.CLOSE | SWT.APPLICATION_MODAL);
 	dialogShell.addListener(SWT.Close, new Listener() {
 		public void handleEvent(Event event) {
 			updateReturnCode();
