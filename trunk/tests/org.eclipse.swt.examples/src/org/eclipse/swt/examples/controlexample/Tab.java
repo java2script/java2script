@@ -171,6 +171,10 @@ abstract class Tab {
 		final String [] methodNames = getMethodNames ();
 		if (methodNames != null) {
 			Button setGetButton = new Button (otherGroup, SWT.PUSH);
+			/**
+			 * @j2sNative
+			 * setGetButton.setEnabled(false);
+			 */ {}
 			setGetButton.setText (ControlExample.getResourceString ("Set_Get"));
 			setGetButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			setGetButton.addSelectionListener (new SelectionAdapter() {

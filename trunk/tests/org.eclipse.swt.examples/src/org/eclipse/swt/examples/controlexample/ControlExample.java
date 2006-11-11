@@ -32,7 +32,6 @@ import java.util.*;
  * 2006-7-9
  * 
  * @j2sRequireImport java.lang.reflect.Constructor
- * @j2sIgnoreImport java.text.MessageFormat
  */
 public class ControlExample {
 	private static ResourceBundle resourceBundle =
@@ -59,6 +58,7 @@ public class ControlExample {
 		initResources();
 		tabFolder = new TabFolder (parent, SWT.NONE);
 		String[] tabs = new String[] {
+//				"Table",
 				"Button", 
 //				"Canvas",
 //				"CLabel",
@@ -342,7 +342,7 @@ public class ControlExample {
 //		setShellSize(display, shell);
 		/**
 		 * @j2sNative
-		 * //shell.setMaximized(true);
+		 * shell.setMaximized(true);
 		 */ {}
 		
 		shell.open();
