@@ -24,6 +24,7 @@ import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.browser.Popup;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.Option;
@@ -567,7 +568,11 @@ protected void createHandle () {
 	textInput.className = "combo-input-box";
 	textInput.readOnly = (style & SWT.READ_ONLY)!=0;
 	//textInput.size = Combo.LIMIT;
-	handle.appendChild(textInput);
+	Element wrapper = document.createElement("DIV");
+	wrapper.style.overflow = "auto";
+	handle.appendChild(wrapper);
+	wrapper.appendChild(textInput);
+	//handle.appendChild(textInput);
 
 	//int height = OS.getContainerHeight(dropDownButton);
 	
@@ -653,13 +658,18 @@ void configureSelect() {
 				hide();
 		}
 	}; 
-//	selectInput.onmousedown = new RunnableCompatibility() {
-//		public void run() {
-//			System.out.println("select mouse down!");
-//			updateSelection();
-//			hide();
-//		}
-//	}; 
+	selectInput.onmouseup = new RunnableCompatibility() {
+		public void run() {
+			noSelection = false;
+			updateSelection();
+			if(!isSimple && itemCount > 0) {
+				Element el = new HTMLEventWrapper(getEvent()).target;
+				if (el != null && el.nodeName == "OPTION") {
+					hide();
+				}
+			}
+		}
+	}; 
 }
 void hide(){
 	if(!this.selectShown){
@@ -734,8 +744,10 @@ void show(){
 }
 
 void updateSelection(){
-	textInput.value = selectInput.options[getSelectionIndex()].value;
-	setText(getItem(getSelectionIndex()));
+	int i = getSelectionIndex();
+	if (i < 0) return;
+	textInput.value = selectInput.options[i].value;
+	setText(getItem(i));
 	sendEvent(SWT.Selection);
 }
 
