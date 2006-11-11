@@ -930,7 +930,6 @@ void redraw (int column, boolean drawText, boolean drawImage) {
 
 protected void releaseChild () {
 	super.releaseChild ();
-//	System.out.println("disposing " + this);
 	TreeItem[] children = this.getItems();
 	for (int i = 0; i < children.length; i++){
 		children[i].dispose();

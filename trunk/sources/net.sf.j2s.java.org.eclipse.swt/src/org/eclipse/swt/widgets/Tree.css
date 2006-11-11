@@ -5,6 +5,11 @@
 	padding:0;
 	background-color:white;
 }
+.tree-default {
+	padding-left:1px;
+	_padding-left:2px;
+	_padding-top:1px;
+}
 .tree-content {
 	padding:0;
 	margin:0;
@@ -122,8 +127,11 @@ thead .tree-head-text {
 	line-height:1.39em;
 	position:relative;
 	margin-left:2px;
+	left:-1px;
+	_left:-3px;
 	white-space:nowrap;
 	float:left;
+	padding-bottom:1px;
 }
 
 .tree-text-rtl {
@@ -152,13 +160,13 @@ tree-image tree-image-icon {
 	overflow:hidden;
 }
 .tree-text-inner {
-	padding:2px 3px 1px 2px;
+	/*padding:2px 3px 1px 2px;*/
 	min-height:14px;
 	_height:14px;
 	_width:1px;
 	overflow-x:visible;
 	white-space:nowrap;
-	padding:0 3px 0 2px;
+	padding:0 3px 2px 2px;
 }
 .tree-grid-line tbody .tree-text-inner {
 	padding-top:1px;
@@ -168,6 +176,17 @@ tree-image tree-image-icon {
 	width:1px;
 	height:1px;
 }
+.tree-no-columns .tree-column-last {
+	width:1px;
+	overflow-x:hidden;
+	padding-left:0;
+	padding-right:0;
+	margin-left:0;
+	margin-right:0;
+	border-left:0 none transparent;
+	border-right:0 none transparent;
+}
+
 .tree-item-selected .tree-column-first .tree-text-inner {
 	color:highlighttext;
 	background-color:highlight;

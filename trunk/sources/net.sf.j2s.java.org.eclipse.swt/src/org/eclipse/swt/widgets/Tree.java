@@ -420,7 +420,7 @@ protected void createHandle () {
 
 	tableHandle = document.createElement ("TABLE");
 	//table.style.backgroundColor = "white";
-	String cssTable = "tree-content";
+	String cssTable = "tree-content tree-no-columns";
 	if ((style & SWT.FULL_SELECTION) != 0) {
 		cssTable += " tree-full-selection";
 	}
@@ -626,6 +626,7 @@ void createItem (TreeColumn column, int index) {
 	}
 
 	Element table = handle.childNodes[0];
+	OS.removeCSSClass(handle, "tree-no-columns");
 	theadHandle = null;
 	for (int i = 0; i < table.childNodes.length; i++) {
 		if ("THEAD".equals(table.childNodes[i].nodeName)) {
@@ -887,8 +888,10 @@ void createItem (TreeItem item, Object hParent, int index) {
 			} else if (j == 0) {
 				if (i == 0) {
 					cssClass += " tree-anchor-begin";
-				} else {
+				} else if (listItems.length == 1) {
 					cssClass += " tree-anchor-single";
+				} else {
+					cssClass += " tree-anchor-middle";
 				}
 			} else {
 				cssClass += " tree-anchor-middle";
@@ -1440,6 +1443,7 @@ void destroyItem (TreeItem item) {
 	for(int i = 0; i < length; i++){
 		if(found){
 			items[i-1] = items[i];
+			items[i-1].index = i - 1;
 		}
 		if(items[i].equals(item)){
 			found = true;
@@ -2822,6 +2826,9 @@ public void setHeaderVisible (boolean show) {
 	if (theadHandle != null) {
 		theadHandle.style.display = (show ? "" : "none");
 	}
+	Element table = handle.childNodes[0];
+	OS.updateCSSClass(table, "tree-no-columns", !show || columns == null || columns.length == 0);
+	
 	setScrollWidth ();
 	updateScrollBar ();
 }
