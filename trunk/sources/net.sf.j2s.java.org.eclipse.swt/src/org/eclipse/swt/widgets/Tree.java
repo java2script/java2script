@@ -75,7 +75,6 @@ public class Tree extends Composite {
 	TreeItem lastSelection;
 	TreeItem [] directChildrens;
 	
-	Element hwndParent, hwndHeader, hAnchor, hInsert;
 	boolean headerVisible, lineVisible;
 	int focusIndex = -1;
 	TreeItem focusItem;
@@ -2383,6 +2382,31 @@ void releaseItems (TreeItem [] nodes, TVITEM tvItem) {
 }
 */
 
+protected void releaseHandle() {
+	if (theadHandle != null) {
+		OS.deepClearChildren(theadHandle);
+		OS.destroyHandle(theadHandle);
+		theadHandle = null;
+	}
+	if (tbody != null) {
+		OS.deepClearChildren(tbody);
+		OS.destroyHandle(tbody);
+		tbody = null;
+	}
+	if (tableHandle != null) {
+		OS.deepClearChildren(tableHandle);
+		OS.destroyHandle(tableHandle);
+		tableHandle = null;
+	}
+//	columns = null;
+//	items = null;
+	focusItem = null;
+	lastSelection = null;
+	directChildrens = null;
+	selections = null;
+	super.releaseHandle();
+}
+
 protected void releaseWidget () {
 	//int columnCount = OS.SendMessage (hwndHeader, OS.HDM_GETITEMCOUNT, 0, 0);
 	int columnCount = columns.length;
@@ -3268,10 +3292,6 @@ String toolTipText (NMTTDISPINFO hdr) {
 	return super.toolTipText (hdr);
 }
 */
-
-Element topHandle () {
-	return hwndParent != null ? hwndParent : handle;
-}
 
 void updateScrollBar () {
 	/*

@@ -664,6 +664,21 @@ void redraw (int column, boolean drawText, boolean drawImage) {
 //	OS.InvalidateRect (hwnd, rect, true);
 }
 
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Widget#releaseHandle()
+ */
+protected void releaseHandle() {
+	if (check != null) {
+		OS.destroyHandle(check);
+		check = null;
+	}
+	if (handle != null) {
+		OS.deepClearChildren(handle);
+		OS.destroyHandle(handle);
+		handle = null;
+	}
+	super.releaseHandle();
+}
 protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
@@ -1342,6 +1357,12 @@ public void setText (int index, String string) {
 void showSelection(boolean selected) {
 	this.selected = selected;
 	OS.updateCSSClass(handle, "table-item-selected", selected);
+	if (OS.isIE) { // IE won't update selected background! 
+		Element tmpDiv = document.createElement("DIV");
+		tmpDiv.style.width = "1px"; // hasLayout
+		handle.childNodes[0].appendChild(tmpDiv);
+		handle.childNodes[0].removeChild(tmpDiv);
+	}
 }
 boolean isSelected(){
 	return this.selected;
