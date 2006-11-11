@@ -13,7 +13,7 @@
             allowMultiple="true"
             category="net.sf.j2s.ui.views"
             class="net.sf.j2s.ui.generator.J2SView"
-            icon="icons/view.gif"
+            icon="icons/j2s-logo.gif"
             id="net.sf.j2s.ui.generator.J2SView"
             name="J2S View">
       </view>
@@ -48,7 +48,7 @@
             allowMultiple="true"
             category="net.sf.j2s.ui.views"
             class="net.sf.j2s.ui.console.J2SConsoleView"
-            icon="icons/z-logo.gif"
+            icon="icons/j2s-logo.gif"
             id="net.sf.j2s.ui.console.J2SConsoleView"
             name="J2S Console"/>
    </extension>
@@ -57,7 +57,7 @@
       <shortcut
             class="net.sf.j2s.ui.launching.J2SApplicationLaunchShortcut"
             helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
-            icon="icons/z-logo.gif"
+            icon="icons/j2s-app.gif"
             id="net.sf.j2s.debug.ui.localJava2ScriptShortcut"
             label="Java2Script Application"
             modes="run, debug">
@@ -96,7 +96,7 @@
       </shortcut>
       <shortcut
             label="Java2Script Unit Test"
-            icon="icons/z-logo-u.gif"
+            icon="icons/j2s-unit.gif"
             modes="run, debug"
             class="net.sf.j2s.ui.launching.J2SUnitLaunchShortcut"
             id="net.sf.j2s.debug.ui.localJ2SJUnitShortcut">
@@ -198,10 +198,10 @@
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="net.sf.j2s.ui.launching.j2sApplication"
-            icon="icons/z-logo.gif"
+            icon="icons/j2s-app.gif"
             id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sApplication"/>
       <launchConfigurationTypeImage
-            icon="icons/z-logo-u.gif"
+            icon="icons/j2s-unit.gif"
             configTypeID="net.sf.j2s.ui.launching.j2sUnit"
             id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sUnit"/>
    </extension>
@@ -211,7 +211,7 @@
             class="net.sf.j2s.ui.editors.J2SConfigEditor"
             contributorClass="net.sf.j2s.ui.editors.J2SConfigEditorContributor"
             extensions="j2s"
-            icon="icons/z-logo.gif"
+            icon="icons/j2s-logo.gif"
             id="net.sf.j2s.ui.editors.J2SConfigEditor"
             name="Java2Script Config Editor"/>
    </extension>
