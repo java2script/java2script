@@ -493,7 +493,7 @@ public FontData open () {
 	*/
 	this.returnFD = null;
 	//Display display = new Display();
-	dialogShell = new Shell(parent.display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
+	dialogShell = new Shell(parent.display, style | SWT.CLOSE | SWT.APPLICATION_MODAL);
 	dialogShell.setText("Font");
 	GridLayout gl = new GridLayout();
 	dialogShell.setLayout(gl);

@@ -186,8 +186,8 @@
 
 .shell-modal-block {
 	background-color:white;
-	opacity:0.2;
-	filter:Alpha(Opacity=20);
+	opacity:0.01;
+	filter:Alpha(Opacity=1);
 	position:absolute;
 	left:0;
 	top:0;
@@ -196,8 +196,8 @@
 }
 .over-iframe-layer {
 	background-color:white;
-	opacity:0.05;
-	filter:Alpha(Opacity=5);
+	opacity:0.01;
+	filter:Alpha(Opacity=1);
 	position:absolute;
 	left:0;
 	top:0;
