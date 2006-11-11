@@ -95,7 +95,7 @@ public class OS {
 	}
 	
 	public static void clearChildren(Object handle) {
-		if (handle == null) {
+		if (handle == null || ((Element) handle).nodeType != 1) {
 			return ;
 		}
 		Element el = (Element) handle;

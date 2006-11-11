@@ -699,13 +699,7 @@ public void setText (String string) {
 	if (result == 0) error (SWT.ERROR_CANNOT_SET_TEXT);
 	*/
 	Element text = handle.childNodes[0];
-	if (text.childNodes != null) {
-		for (int i = 0; i < text.childNodes.length; i++) {
-			if (text.childNodes[i] != null) {
-				text.removeChild(text.childNodes[i]);
-			}
-		}
-	}
+	OS.clearChildren(text);
 	if (string.length() == 0) string = "" + (char) 160;
 	text.appendChild(document.createTextNode(string));
 	int[] columnMaxWidth = parent.columnMaxWidth;

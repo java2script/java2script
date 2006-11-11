@@ -844,7 +844,11 @@ void createItem (TreeItem item, Object hParent, int index) {
 	Element td = document.createElement("TD");
 	td.className = "tree-column-first";
 	tbodyTR.appendChild(td);
-	Element lineWrapper = createCSSElement(createCSSElement(td, "tree-line"), "tree-line-wrapper");
+	Element treeLine = createCSSElement(td, "tree-line");
+	if (OS.isIE && columns != null && columns[0] != null && columns[0].cachedWidth != 0) {
+		treeLine.style.width = columns[0].cachedWidth + "px";
+	}
+	Element lineWrapper = createCSSElement(treeLine, "tree-line-wrapper");
 	
 	TreeItem[] chains = new TreeItem[0]; 
 	chains[0] = item;
@@ -3067,6 +3071,33 @@ public void setTopItem (TreeItem item) {
 	}
 	*/
 	updateScrollBar ();
+}
+
+/* (non-Javadoc)
+ * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
+ */
+protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	if (OS.isIE && (columns == null || columns[0] == null || columns[0].cachedWidth <= 0)) {
+		int cachedWidth = cx - 8;
+		if (columns == null || columns[0] == null) {
+			
+		} else if (columns[0].cachedWidth == 0) {
+			int w = cx - 10;
+			int count = 1;
+			for (int i = 1; i < columns.length; i++) {
+				if (columns[i] != null && columns[i].cachedWidth > 0) {
+					w -= columns[i].cachedWidth;
+				} else {
+					count++;
+				}
+			}
+			cachedWidth = w / count;
+		}
+		for (int i = 0; i < items.length; i++) {
+			items[i].handle.childNodes[0].childNodes[0].style.width = cachedWidth + "px";
+		}
+	}
+	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
 
 void showItem (Element hItem) {

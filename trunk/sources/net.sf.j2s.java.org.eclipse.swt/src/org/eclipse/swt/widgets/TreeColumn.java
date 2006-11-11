@@ -15,6 +15,7 @@ import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.events.*;
 
 /**
@@ -36,7 +37,8 @@ import org.eclipse.swt.events.*;
 public class TreeColumn extends Item {
 	Tree parent;
 	boolean resizable;
-	private int colWidth;
+	int colWidth;
+	int cachedWidth;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -553,6 +555,21 @@ public void setText (String string) {
 	if (pszText != 0) OS.HeapFree (hHeap, 0, pszText);
 	if (result == 0) error (SWT.ERROR_CANNOT_SET_TEXT);
 	*/
+	Element text = handle.childNodes[0];
+	OS.clearChildren(text);
+	if (string.length() == 0) string = "" + (char) 160;
+	text.appendChild(document.createTextNode(string));
+//	int[] columnMaxWidth = parent.columnMaxWidth;
+//	int width = OS.getContainerWidth(handle);
+//	if(columnMaxWidth.length > index){
+//		if(columnMaxWidth[index] < width){
+//			parent.lineWidth += width - columnMaxWidth[index];
+//			columnMaxWidth[index] = width;
+//		}
+//	}else{
+//		parent.lineWidth += width;
+//		columnMaxWidth[index] = width;
+//	}
 }
 
 /**
@@ -579,11 +596,16 @@ public void setWidth (int width) {
 	parent.setScrollWidth ();
 	*/
 	colWidth = width;
-	int tempWidth = width;
+	cachedWidth = width;
 	if(this.text != null){
-		tempWidth = Math.max(OS.getStringPlainWidth(this.text), width);
+		cachedWidth = Math.max(OS.getStringPlainWidth(this.text), width);
 	}
-	handle.style.width = tempWidth + "px";
+	handle.style.width = cachedWidth + "px";
+	if (OS.isIE) {
+		for (int i = 0; i < parent.items.length; i++) {
+			parent.items[i].handle.childNodes[0].childNodes[0].style.width = cachedWidth + "px";
+		}
+	}
 }
 
 }
