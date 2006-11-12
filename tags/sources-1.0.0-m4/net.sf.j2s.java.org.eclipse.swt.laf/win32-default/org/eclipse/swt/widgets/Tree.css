@@ -1,0 +1,97 @@
+.tree-item-default {
+	/*background-color:#cccccc;*/
+	/*height:20px;*/
+	white-space:nowrap;
+	font-size:9pt;
+	font-family:Arial,sans-serif;
+}
+.tree-default {
+	background-color:white;
+	overflow:auto;
+	position:absolute;
+}
+.tree-default table {
+	width:100%;
+	margin:0;
+	padding:0;
+}
+.tree-border {
+	border-style:inset;
+}
+/*
+.tree-border table {
+	border-style:inset;
+}
+*/
+.tree-item-anchor-default {
+	display:inline;
+	width:20px;
+	height:1em;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/T.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+}
+.tree-item-anchor-expanded {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/Lminus.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}
+.tree-item-anchor-collapsed {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/Lplus.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}
+.tree-item-text-default {
+	display:inline;
+	cursor:default;
+}
+.tree-item-text-selected {
+	display:inline;
+	background-color:#00008e;
+	color:white;
+	cursor:default;
+}
+
+/* Just for right to left images I used the arrow pngs this should be changed.*/
+
+.tree-item-anchor-expanded-rtl {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/Lminus_rtl.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}
+.tree-item-anchor-collapsed-rtl {
+	display:inline;
+	width:20px;
+	overflow:hidden;
+	padding-left:20px;
+	height:20px;
+	background-image:url('images/Lplus_rtl.png');
+	background-repeat:no-repeat;
+	background-position:center center;
+	cursor:default;
+	/*border:1px solid red;*/
+}

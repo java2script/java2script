@@ -1,0 +1,6 @@
+#Java2Script Configuration
+#Sun Aug 20 15:58:57 CST 2006
+j2s.resources.list=bin/junit/textui/TestRunner.js,bin/junit/textui/ResultPrinter.js,bin/junit/runner/Version.js,bin/junit/runner/TestSuiteLoader.js,bin/junit/runner/TestRunListener.js,bin/junit/runner/TestCollector.js,bin/junit/runner/TestCaseClassLoader.js,bin/junit/runner/StandardTestSuiteLoader.js,bin/junit/runner/Sorter.js,bin/junit/runner/SimpleTestCollector.js,bin/junit/runner/ReloadingTestSuiteLoader.js,bin/junit/runner/LoadingTestCollector.js,bin/junit/runner/FailureDetailView.js,bin/junit/runner/ClassPathTestCollector.js,bin/junit/runner/BaseTestRunner.js,bin/junit/framework/TestSuite.js,bin/junit/framework/TestResult.js,bin/junit/framework/TestListener.js,bin/junit/framework/TestFailure.js,bin/junit/framework/TestCase.js,bin/junit/framework/Test.js,bin/junit/framework/Protectable.js,bin/junit/framework/ComparisonFailure.js,bin/junit/framework/AssertionFailedError.js,bin/junit/framework/Assert.js,bin/junit/extensions/TestSetup.js,bin/junit/extensions/TestDecorator.js,bin/junit/extensions/RepeatedTest.js,bin/junit/extensions/ExceptionTestCase.js,bin/junit/extensions/ActiveTestSuite.js
+j2s.abandoned.resources.list=
+j2s.output.path=bin
+j2s.compiler.status=enable
