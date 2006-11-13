@@ -836,7 +836,10 @@ void createItem (TreeItem item, Object hParent, int index) {
 			tbody.childNodes[0].className = ""; // remove tree-row-first!
 		}
 	}
-	if (idx >= items.length || tbody.childNodes[idx] == null) {
+	/*
+	 * TODO: items.length is not equal to childNodes.length in IE
+	 */
+	if (idx >= tbody.childNodes.length || tbody.childNodes[idx] == null) {
 		tbody.appendChild(tbodyTR);
 	} else {
 		tbody.insertBefore(tbodyTR, tbody.childNodes[idx]);
