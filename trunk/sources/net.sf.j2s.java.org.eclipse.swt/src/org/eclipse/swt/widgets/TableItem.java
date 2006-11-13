@@ -1217,7 +1217,11 @@ public void setText (int index, String string) {
 	}
 	Element text = handle.childNodes[index].childNodes[0];
 	if (index == 0) {
-		text = text.childNodes[text.childNodes.length - 1];
+//		if((parent.style & SWT.RIGHT_TO_LEFT) == 0) {
+			text = text.childNodes[text.childNodes.length - 1];
+//		}else{
+//			text = text.childNodes[0];
+//		}
 	}
 	text.innerHTML = string;
 	
