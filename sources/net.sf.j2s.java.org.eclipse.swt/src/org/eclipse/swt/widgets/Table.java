@@ -1144,10 +1144,18 @@ void createItem (TableItem item, int index) {
 		Element td = document.createElement("TD");
 		td.className = "table-column-first";
 		String str = "<div class=\"table-text\">";
+		boolean isRTL = (style & SWT.RIGHT_TO_LEFT) != 0;
+//		if(isRTL){
+//			str += "<div class=\"table-text-inner\"></div>";
+//		}
 		if ((style & SWT.CHECK) != 0) {
-			str += "<input class=\"table-check-box image-p-4\" type=\"checkbox\"/>";
+			String checkClass = (isRTL && false) ? "table-check-box-rtl image-p-4" : "table-check-box image-p-4"; 
+			str += "<input class=\"" + checkClass + "\" type=\"checkbox\"/>";
 		}
-		str += "<div class=\"table-text-inner\"></div></div>";
+//		if(!isRTL){
+			str += "<div class=\"table-text-inner\"></div>";
+//		}
+		str += "</div>";
 		tbodyTRTemplate.appendChild(td);
 		td.innerHTML = str;
 		str = "";
@@ -2587,6 +2595,16 @@ public void select (int [] indices) {
 	if (indices == null) error (SWT.ERROR_NULL_ARGUMENT);
 	int length = indices.length;
 	if (length == 0 || ((style & SWT.SINGLE) != 0 && length > 1)) return;
+	deselectAll();
+	selection = new TableItem[length];
+	for(int i = 0 ; i < length; i++){
+		int index = indices[i];
+		items[index].showSelection(true);
+		selection[i] = this.items[index];
+	}
+	int focusIndex = indices [0];
+	if (focusIndex != -1) setFocusIndex (focusIndex);
+
 	/*
 	LVITEM lvItem = new LVITEM ();
 	lvItem.state = OS.LVIS_SELECTED;
@@ -2628,6 +2646,7 @@ public void select (int index) {
 	items[index].showSelection(true);
 	selection = new TableItem[1];
 	selection[0] = this.items[index];
+	setFocusIndex(index);
 	/*
 	LVITEM lvItem = new LVITEM ();
 	lvItem.state = OS.LVIS_SELECTED;
@@ -2690,6 +2709,7 @@ public void select (int start, int end) {
 //			ignoreSelect = false;
 		}
 	}
+	setFocusIndex (start);
 }
 /**
  * Selects all of the items in the receiver.
@@ -3438,8 +3458,6 @@ public void setSelection (int [] indices) {
 	int length = indices.length;
 	if (length == 0 || ((style & SWT.SINGLE) != 0 && length > 1)) return;
 	select (indices);
-	int focusIndex = indices [0];
-	if (focusIndex != -1) setFocusIndex (focusIndex);
 	showSelection ();
 }
 
@@ -3506,7 +3524,7 @@ public void setSelection (int index) {
 	/*
 	 *  Setting selection 
 	 */
-	setFocusIndex(index);
+	
 //	if (index != -1) setFocusIndex (index);
 //	showSelection ();
 }
@@ -3546,7 +3564,7 @@ public void setSelection (int start, int end) {
 	for (int i=start; i<=end; i++) {
 		selection[i-start] = items[i];
 	}
-	setFocusIndex (start);
+	
 	showSelection ();
 }
 
@@ -3633,8 +3651,9 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 				}
 			}
 			if (lastSelection != null) {
-				int idx1 = Math.min(lastSelection.index, item.index);
-				int idx2 = Math.max(lastSelection.index, item.index);
+				
+				int idx1 = Math.min(indexOf(lastSelection), indexOf(item));
+				int idx2 = Math.max(indexOf(lastSelection), indexOf(item));
 //				System.out.println("here!" + idx1 + ":" + idx2);
 				selection = new TableItem[0];
 				for (int i = idx1; i <= idx2; i++) {
