@@ -94,6 +94,17 @@ thead .table-head-text {
 }
 }
 
+.table-check-box-rtl {
+	margin:0;
+	padding:0;
+
+	display:block;
+	right:-14px !important;
+	_right:-18px !important;
+	min-height:13px;
+	_height:1em;
+}
+
 .table-text {
 	min-height:16px;
 	height:100%;
@@ -116,6 +127,10 @@ div.table-image {
 	color:black;
 	background-color:white;
 }
+
+.table-item-focus .table-column-first {
+	background-color:#E8F2FE;
+}
 .table-text-inner {
 	padding:2px 3px 1px 2px;
 	min-height:14px;
@@ -133,6 +148,7 @@ div.table-image {
 	color:highlighttext;
 	background-color:highlight;
 }
+
 .table-blur .table-item-selected .table-column-first .table-text-inner {
 	background-color:gray;
 }
@@ -161,7 +177,7 @@ div.table-image {
 	float:right;
 }
 
-.table-item-focus {
+.table-full-selection .table-item-focus {
 	background-color:#E8F2FE;
 }
 
