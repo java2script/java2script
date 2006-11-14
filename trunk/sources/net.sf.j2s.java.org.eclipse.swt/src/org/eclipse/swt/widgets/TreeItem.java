@@ -1011,6 +1011,9 @@ public void removeAll () {
 		items[i].dispose();
 	}
 	this.items = new TreeItem[0];
+	
+	OS.replaceCSSClassInDepth(this.handle, "tree-anchor-plus", "tree-anchor-line");
+	OS.replaceCSSClassInDepth(this.handle, "tree-anchor-minus", "tree-anchor-line");
 }
 
 /**
