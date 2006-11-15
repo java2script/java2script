@@ -44,15 +44,32 @@ var longVal = parseInt (s, radix);
 if(isNaN(longVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return new Long(longVal);
+return longVal;
 }, "String, Number");
-Long.$valueOf = Long.parseLong = Long.prototype.parseLong;
+
 Clazz.defineMethod (Long, "parseLong", 
 function (s) {
 return Long.parseLong (s, 10);
 }, "String");
+
 Long.parseLong = Long.prototype.parseLong;
 
+Clazz.defineMethod (Long, "$valueOf", 
+function (s) {
+return new Long(Long.parseLong (s, 10));
+}, "String");
+
+Clazz.defineMethod (Long, "$valueOf", 
+function (s) {
+return new Long(s);
+}, "Number");
+
+Clazz.defineMethod (Long, "$valueOf", 
+function (s, r) {
+return new Long(Long.parseLong (s, r));
+}, "String, Number");
+
+Long.$valueOf = Long.prototype.$valueOf;
 Clazz.defineMethod (Long, "equals", 
 function (s) {
 if(s == null || ! Clazz.instanceOf(s, Long) ){

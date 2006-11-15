@@ -44,7 +44,7 @@ var integer = parseInt (s, radix);
 if(isNaN(integer)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return new Integer(integer);
+return integer;
 }, "String, Number");
 Integer.parseInt = Integer.prototype.parseInt;
 Clazz.defineMethod (Integer, "parseInt", 
@@ -52,8 +52,24 @@ function (s) {
 return Integer.parseInt (s, 10);
 }, "String");
 
-Integer.$valueOf = Integer.parseInt = Integer.prototype.parseInt;
+Integer.parseInt = Integer.prototype.parseInt;
 
+Clazz.defineMethod (Integer, "$valueOf", 
+function (s) {
+return new Integer(Integer.parseInt (s, 10));
+}, "String");
+
+Clazz.defineMethod (Integer, "$valueOf", 
+function (s) {
+return new Integer(s);
+}, "Number");
+
+Clazz.defineMethod (Integer, "$valueOf", 
+function (s, r) {
+return new Integer(Integer.parseInt (s, r));
+}, "String, Number");
+
+Integer.$valueOf = Integer.prototype.$valueOf;
 Clazz.defineMethod (Integer, "equals", 
 function (s) {
 if(s == null || ! Clazz.instanceOf(s, Integer) ){
