@@ -627,7 +627,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			right.accept(this);
 			buffer.append(").charCodeAt (0)");
 		} else {
-			right.accept(this);
+			boxingNode(right);
+//			right.accept(this);
 		}
 		return false;
 	}
