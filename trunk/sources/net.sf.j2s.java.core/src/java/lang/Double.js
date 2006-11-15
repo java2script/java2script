@@ -21,7 +21,7 @@ this.valueOf = function () {
 }, "Number");
 Clazz.makeConstructor (Double, 
 function (s) {
-var value = Double.parseDouble (s, 10);
+var value = Double.parseDouble (s);
 this.valueOf = function () {
 	return value;
 };
@@ -53,9 +53,21 @@ var doubleVal = parseFloat (s);
 if(isNaN(doubleVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return new Double(doubleVal);
+return doubleVal;
 }, "String");
-Double.$valueOf = Double.parseDouble = Double.prototype.parseDouble;
+Double.parseDouble = Double.prototype.parseDouble;
+
+Clazz.defineMethod (Double, "$valueOf", 
+function (s) {
+return new Double(this.parseDouble(s));
+}, "String");
+
+Clazz.defineMethod (Double, "$valueOf", 
+function (v) {
+return new Double(v);
+}, "Number");
+
+Double.$valueOf = Double.prototype.$valueOf;
 
 Clazz.defineMethod (Double, "equals", 
 function (s) {

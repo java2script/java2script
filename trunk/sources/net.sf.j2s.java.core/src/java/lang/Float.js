@@ -23,7 +23,7 @@ Clazz.makeConstructor (Float,
 function (s) {
 var value = null;
 if (s != null) {
-	value = Float.parseFloat (s, 10);
+	value = Float.parseFloat (s);
 } else {
 	value = 0;
 }
@@ -47,9 +47,21 @@ var floatVal =  parseFloat (s);
 if(isNaN(floatVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return new Float(floatVal);
+return floatVal;
 }, "String");
-Float.$valueOf = Float.parseFloat = Float.prototype.parseFloat;
+Float.parseFloat = Float.prototype.parseFloat;
+
+Clazz.defineMethod (Float, "$valueOf", 
+function (s) {
+return new Float(Float.parseFloat (s, 10));
+}, "String");
+
+Clazz.defineMethod (Float, "$valueOf", 
+function (s) {
+return new Float(s);
+}, "Number");
+
+Float.$valueOf = Float.prototype.$valueOf;
 Clazz.defineMethod (Float, "isNaN", 
 function (num) {
 return isNaN (num);
