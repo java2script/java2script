@@ -44,7 +44,7 @@ var longVal = parseInt (s, radix);
 if(isNaN(longVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return longVal;
+return new Long(longVal);
 }, "String, Number");
 Long.$valueOf = Long.parseLong = Long.prototype.parseLong;
 Clazz.defineMethod (Long, "parseLong", 

@@ -53,7 +53,7 @@ var doubleVal = parseFloat (s);
 if(isNaN(doubleVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return doubleVal;
+return new Double(doubleVal);
 }, "String");
 Double.$valueOf = Double.parseDouble = Double.prototype.parseDouble;
 

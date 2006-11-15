@@ -44,7 +44,7 @@ var integer = parseInt (s, radix);
 if(isNaN(integer)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return integer;
+return new Integer(integer);
 }, "String, Number");
 Integer.parseInt = Integer.prototype.parseInt;
 Clazz.defineMethod (Integer, "parseInt", 

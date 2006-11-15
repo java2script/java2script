@@ -47,7 +47,7 @@ var floatVal =  parseFloat (s);
 if(isNaN(floatVal)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return floatVal;
+return new Float(floatVal);
 }, "String");
 Float.$valueOf = Float.parseFloat = Float.prototype.parseFloat;
 Clazz.defineMethod (Float, "isNaN", 
