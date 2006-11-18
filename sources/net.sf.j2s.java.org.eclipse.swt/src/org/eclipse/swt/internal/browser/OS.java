@@ -565,6 +565,58 @@ public class OS {
 		return false;
 	}
 
+	
+	public static boolean replaceCSSClassInDepth(Object el, String toBeRemovedCSSClazz, String toBeInsertedCSSClazz) {
+		Element e = (Element) el;
+		if (toBeRemovedCSSClazz == null || toBeRemovedCSSClazz.length() == 0 || toBeInsertedCSSClazz == null) {
+			return false;
+		}
+		replaceCSSClass(el, toBeRemovedCSSClazz, toBeInsertedCSSClazz);
+		int length = e.childNodes.length;
+		boolean replaced = false;
+		for(int i = 0; i < length; i++){
+			replaced = replaced || replaceCSSClassInDepth(e.childNodes[i], toBeRemovedCSSClazz, toBeInsertedCSSClazz);
+		}
+		return replaced; 
+	}
+	
+	public static boolean replaceCSSClass(Object el, String toBeRemovedCSSClazz, String toBeInsertedCSSClazz) {
+		Element e = (Element) el;
+		String className = e.className;
+		if (className == null || className.length() == 0) {
+			return false;
+		}
+		String[] clazz = className.split("\\s");
+		boolean existed = false;
+		for (int i = 0; i < clazz.length; i++) {
+			if (clazz[i] == toBeRemovedCSSClazz) {
+				existed = true;
+				clazz[i] = toBeInsertedCSSClazz;
+				break;
+			}
+		}
+		if (existed) 
+		/**
+		 * @j2sNative
+		 * e.className = clazz.join (" ");
+		 */ {}
+		return existed;
+	}
+	
+	public static boolean removeCSSClassInDepth(Object el, String cssClazz){
+		Element e = (Element) el;
+		if (cssClazz == null || cssClazz.length() == 0) {
+			return false;
+		}
+		removeCSSClass(el, cssClazz);
+		int length = e.childNodes.length;
+		boolean removed = false;
+		for(int i = 0; i < length; i++){
+			removed = removed || removeCSSClassInDepth(e.childNodes[i], cssClazz);
+		}
+		return removed; 
+	}
+	
 	public static boolean removeCSSClass(Object el, String cssClazz) {
 		Element e = (Element) el;
 		String className = e.className;
