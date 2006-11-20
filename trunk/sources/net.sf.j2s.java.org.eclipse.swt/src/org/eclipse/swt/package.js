@@ -239,7 +239,7 @@ if (!isDebugging) {
 	]);
 	ClazzLoader.jarClasspath (path + "more.z.js", [
 		"$wt.internal.ResizeHandler",
-		"$wt.ResizeSystem",
+		"$wt.internal.ResizeSystem",
 
 		"$wt.internal.dnd.DragAndDrop",
 		"$.DNDUtils",
