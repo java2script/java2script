@@ -3406,7 +3406,7 @@ void updateSelection(int index) {
 				items[i].rightEl.className = items[i].cssClassForRight();
 				Element el = (Element) buttonArea;
 	
-				items[i].handle.style.height = (OS.getContainerHeight(buttonArea)  -3) + "px";
+				items[i].handle.style.height = Math.max(0, (OS.getContainerHeight(buttonArea)  -3)) + "px";
 				items[i].isSelected = false;
 				//items[i].rightEl.style.backgroundColor = "red";
 //				items[i].handle.style.height = (OS.getContainerHeight(items[i].handle) - 2) + "px"; 
