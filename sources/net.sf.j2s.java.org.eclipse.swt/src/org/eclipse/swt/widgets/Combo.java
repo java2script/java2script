@@ -2616,6 +2616,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	}
 	if((style & SWT.RIGHT_TO_LEFT) != 0){
 		dropDownButton.style.left = 1 + "px";
+		dropDownButton.style.right = "auto";		
 	}
 	
 	OS.updateArrowSize(dropDownButton.childNodes[0], SWT.DOWN, 16, cy);
