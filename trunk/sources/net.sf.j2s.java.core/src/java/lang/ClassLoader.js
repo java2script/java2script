@@ -102,6 +102,29 @@ ClazzLoader.clazzTreeRoot = new ClazzNode ();
 ClazzLoader.loadedScripts = new Object ();
 
 /**
+ * Multiple threads are used to speed up *.js loading.
+ */
+/* private */
+/*-# inLoadingThreads -> ilt #-*/
+ClazzLoader.inLoadingThreads = 0;
+
+/**
+ * Maximum of loading threads
+ */
+/* protected */
+ClazzLoader.maxLoadingThreads = 6;
+
+/*
+ * Opera has different loading order which will result in performance degrade!
+ * So just return to single thread loading in Opera!
+ *
+ * FIXME: This different loading order also causes bugs in single thread!
+ */
+if (navigator.userAgent.toLowerCase ().indexOf ("opera") != -1) {
+	ClazzLoader.maxLoadingThreads = 1;
+}
+
+/**
  * Try to be compatiable with Clazz system.
  */
 if (window["Clazz"] != null && Clazz.isClassDefined) {
@@ -584,9 +607,6 @@ ClazzLoader.xhrOnload = function (transport, file) {
 ClazzLoader.emptyOnRSC = function () {
 };
 
-/* private */
-ClazzLoader.lastScriptPath = null;
-
 /* protected */
 /*-# failedScripts -> fss #-*/
 ClazzLoader.failedScripts = new Object ();
@@ -614,7 +634,6 @@ ClazzLoader.loadScript = function (file) {
 		ClazzLoader.tryToLoadNext (file);
 		return ;
 	}
-	ClazzLoader.lastScriptPath = file;
 	ClazzLoader.loadedScripts[file] = true;
 
 	if (ClazzLoader.isUsingXMLHttpRequest) {
@@ -641,6 +660,9 @@ ClazzLoader.loadScript = function (file) {
 		if (ClazzLoader.isAsynchronousLoading) {
 			transport.onreadystatechange = function () {
 				if (transport.readyState == 4) {
+					if (ClazzLoader.inLoadingThreads > 0) {
+						ClazzLoader.inLoadingThreads--;
+					}
 					if (isActiveX) {
 						transport.onreadystatechange = ClazzLoader.emptyOnRSC;
 						// For IE, try to avoid stack overflow errors
@@ -660,6 +682,7 @@ ClazzLoader.loadScript = function (file) {
 					}
 				}
 			};
+			ClazzLoader.inLoadingThreads++;
 			try {
 				transport.send (null);
 			} catch (e) {
@@ -698,6 +721,9 @@ ClazzLoader.loadScript = function (file) {
 		 * Opera will trigger onload event even there are no *.js existed
 		 */
 		script.onload = function () { 
+			if (ClazzLoader.inLoadingThreads > 0) {
+				ClazzLoader.inLoadingThreads--;
+			}
 			this.onload = null;
 			var path = arguments.callee.path;
 			if (!ClazzLoader.isInnerLoaded 
@@ -729,6 +755,9 @@ ClazzLoader.loadScript = function (file) {
 		 * For Firefox/Mozilla, unexisted *.js will result in errors.
 		 */
 		script.onerror = function () { // Firefox/Mozilla
+			if (ClazzLoader.inLoadingThreads > 0) {
+				ClazzLoader.inLoadingThreads--;
+			}
 			this.onerror = null; 
 			var path = arguments.callee.path;
 			var fss = ClazzLoader.failedScripts;
@@ -784,6 +813,10 @@ ClazzLoader.loadScript = function (file) {
 						// next time in "loading" state won't get waiting!
 						ClazzLoader.failedScripts[path] = 0;
 						ClazzLoader.loadedScripts[path] = false;
+						// failed count down!
+						if (ClazzLoader.inLoadingThreads > 0) {
+							ClazzLoader.inLoadingThreads--;
+						}
 						// Take another try!
 						ClazzLoader.loadScript (path);
 					};
@@ -797,7 +830,7 @@ ClazzLoader.loadScript = function (file) {
 					fhs[path] = window.setTimeout (fun, waitingTime);
 					return;
 				}
-				if (fss[path] == 1) {
+				if (fss[path] == 1) { // above function will be executed?!
 					return;
 				}
 			}
@@ -807,6 +840,10 @@ ClazzLoader.loadScript = function (file) {
 			}
 			if ((local || state == "loaded") && !ClazzLoader.isInnerLoaded) {
 				if (!local && (fss[path] == null || fss[path] == 0)) {
+					// failed! count down
+					if (ClazzLoader.inLoadingThreads > 0) {
+						ClazzLoader.inLoadingThreads--;
+					}
 					// silently take another try for bad network
 					fss[path] = 1;
 					// log ("reloading ... " + path);
@@ -816,6 +853,9 @@ ClazzLoader.loadScript = function (file) {
 				} else {
 					alert ("[Java2Script] Error in loading " + path + "!");
 				}
+			}
+			if (ClazzLoader.inLoadingThreads > 0) {
+				ClazzLoader.inLoadingThreads--;
 			}
 			ClazzLoader.scriptLoaded (path);
 			// Unset onreadystatechange, leaks mem in IE
@@ -831,6 +871,8 @@ ClazzLoader.loadScript = function (file) {
 		script.onreadystatechange.path = file;
 	}
 	ClazzLoader.isInnerLoaded = false;
+	ClazzLoader.inLoadingThreads++;
+	//alert("threads:"+ClazzLoader.inLoadingThreads);
 	// Add script DOM element to document tree
 	head.appendChild (script);
 	ClazzLoader.scriptLoading (file);
@@ -873,6 +915,7 @@ ClazzLoader.isResourceExisted = function (id, path, base) {
 	}
 	return false;
 };
+
 /**
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
@@ -904,7 +947,13 @@ ClazzLoader.tryToLoadNext = function (file) {
 				} else {
 					n = new ClazzNode ();
 					n.name = nm;
-					n.path = ClazzLoader.lastScriptPath;
+					var pp = ClazzLoader.classpathMap["#" + nm];
+					if (pp == null) {
+						log (nm);
+						error ("Java2Script implementation error! Please report this bug!");
+					}
+					//n.path = ClazzLoader.lastScriptPath;
+					n.path = pp;
 					//error ("..." + node.path + "//" + node.name);
 					ClazzLoader.mappingPathNameNode (n.path, nm, n);
 					n.status = ClazzNode.STATUS_CONTENT_LOADED;
@@ -941,14 +990,21 @@ ClazzLoader.tryToLoadNext = function (file) {
 	var loadFurther = false;
 	var n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, 
 			ClazzNode.STATUS_KNOWN);
-	//alert ("next..." + n) ;
+	//alert (file + " next ..." + n) ;
 	if (n != null) {
 		//log ("next ..." + n.name);
 		ClazzLoader.loadClassNode (n);
+		while (ClazzLoader.inLoadingThreads < ClazzLoader.maxLoadingThreads) {
+			var nn = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot,
+					ClazzNode.STATUS_KNOWN);
+			if (nn == null) break;
+			ClazzLoader.loadClassNode (nn); // will increase inLoadingThreads!
+		}
 	} else {
 		var cq = ClazzLoader.classQueue;
-		if (cq.length != 0) {
-			n = cq[0]; // popup class from the quue
+		if (cq.length != 0) { 
+			/* queue must be loaded in order! */
+			n = cq[0]; // popup class from the queue
 			for (var i = 0; i < cq.length - 1; i++) {
 				cq[i] = cq[i + 1];
 			}
@@ -958,16 +1014,23 @@ ClazzLoader.tryToLoadNext = function (file) {
 			//alert ("load from queue");
 			ClazzLoader.loadScript (n.path);
 		} else { // Optionals
+			//log ("options");
 			n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
 			if (n != null) {
 				//log ("in optionals unknown..." + n.name);
 				ClazzLoader.loadClassNode (n);
+				while (ClazzLoader.inLoadingThreads < ClazzLoader.maxLoadingThreads) {
+					var nn = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
+					//log ("in second loading " + nn);
+					if (nn == null) break;
+					ClazzLoader.loadClassNode (nn); // will increase inLoadingThreads!
+				}
 			} else {
 				loadFurther = true;
 			}
 		}
 	}
-	if (loadFurther) {
+	if (loadFurther && ClazzLoader.inLoadingThreads == 0) {
 		//error ("no optionals?");
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
 			ClazzLoader.updateNode (n);
@@ -1235,7 +1298,9 @@ ClazzLoader.findNextMustClass = function (node, status) {
 		if (node.musts != null && node.musts.length != 0) {
 			for (var i = 0; i < node.musts.length; i++) {
 				var n = node.musts[i];
-				if (n.status == status) {
+				if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
+						|| ClazzLoader.loadedScripts[n.path] != true)
+						&& !ClazzLoader.isClassDefined (n.name)) {
 					return n;
 				} else {
 					var nn = ClazzLoader.findNextMustClass (n, status);
@@ -1245,7 +1310,9 @@ ClazzLoader.findNextMustClass = function (node, status) {
 				}
 			}
 		}
-		if (node.status == status) {
+		if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
+				|| ClazzLoader.loadedScripts[node.path] != true)
+				&& !ClazzLoader.isClassDefined (node.name)) {
 			return node;
 		}
 	}
@@ -1271,19 +1338,25 @@ ClazzLoader.findNodeNextOptionalClass = function (node, status) {
 	// search musts first
 	if (node.musts != null && node.musts.length != 0) {
 		var n = ClazzLoader.searchClassArray (node.musts, rnd, status);
-		if (n != null) {
+		if (n != null && (status != ClazzNode.STATUS_KNOWN 
+				|| ClazzLoader.loadedScripts[n.path] != true)
+				&& !ClazzLoader.isClassDefined (n.name)) {
 			return n;
 		}
 	}
 	// search optionals second
 	if (node.optionals != null && node.optionals.length != 0) {
 		var n = ClazzLoader.searchClassArray (node.optionals, rnd, status);
-		if (n != null) {
+		if (n != null && (status != ClazzNode.STATUS_KNOWN 
+				|| ClazzLoader.loadedScripts[n.path] != true)
+				&& !ClazzLoader.isClassDefined (n.name)) {
 			return n;
 		}
 	}
 	// search itself
-	if (node.status == status) {
+	if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
+			|| ClazzLoader.loadedScripts[node.path] != true)
+			&& !ClazzLoader.isClassDefined (node.name)) {
 		return node;
 	}
 	return null;
@@ -1293,7 +1366,9 @@ ClazzLoader.findNodeNextOptionalClass = function (node, status) {
 ClazzLoader.searchClassArray = function (arr, rnd, status) {
 	for (var i = 0; i < arr.length; i++) {
 		var n = arr[i];
-		if (n.status == status) {
+		if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
+				|| ClazzLoader.loadedScripts[n.path] != true)
+				&& !ClazzLoader.isClassDefined (n.name)) {
 			return n;
 		} else {
 			if (n.random == rnd) {
@@ -1345,7 +1420,13 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 		//*
 		//node = new ClazzNode ();
 		node.name = clazz;
-		node.path = ClazzLoader.lastScriptPath;
+		var pp = ClazzLoader.classpathMap["#" + clazz];
+		if (pp == null) {
+			log (clazz);
+			error ("Java2Script implementation error! Please report this bug!");
+		}
+		//node.path = ClazzLoader.lastScriptPath;
+		node.path = pp;
 		//error ("..." + node.path + "//" + node.name);
 		ClazzLoader.mappingPathNameNode (node.path, clazz, node);
 		node.status = ClazzNode.STATUS_KNOWN;
@@ -1498,6 +1579,12 @@ ClazzLoader.findClassUnderNode = function (clazzName, node) {
 	return null;
 };
 
+/**
+ * Map different class to the same path!
+ * @path *.js path
+ * @name class name
+ * @node ClazzNode object
+ */
 /* private */
 /*-# mappingPathNameNode -> mpp #-*/
 ClazzLoader.mappingPathNameNode = function (path, name, node) {
@@ -1539,8 +1626,10 @@ ClazzLoader.loadClassNode = function (node) {
 		ClazzLoader.mappingPathNameNode (path, name, node);
 		if (!ClazzLoader.loadedScripts[path]) {
 			ClazzLoader.loadScript (path);
+			return true;
 		}
 	}
+	return false;
 };
 
 

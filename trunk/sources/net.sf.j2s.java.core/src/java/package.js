@@ -9,6 +9,21 @@
 	ClazzLoader.loadZJar (base + "error.z.js", "java.lang.Throwable");
 	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
 
+	ClazzLoader.jarClasspath (base + "core.z.js", [
+		"net.sf.j2s.ajax.HttpRequest",
+		"$.IXHRCallback",
+		"$.XHRCallbackAdapter",
+		"$.XHRCallbackSWTAdapter",
+		"$.ARunnable",
+		"$.AClass",
+		"$.ASWTClass",
+       	
+		"$.SimpleSerializable",
+		"$.SimpleRPCRunnable",
+		"$.SimpleRPCRequest",
+		"$.SimpleRPCSWTRequest"
+	]);
+
 	ClazzLoader.jarClasspath (base + "util/AbstractList.js", [
 		"java.util.AbstractList",
 		"$.RandomAccessSubList",
