@@ -46,6 +46,7 @@ public class OS {
 	
 	public static boolean isOpera = false;
 	
+	
 	/**
 	 * @j2sNative
 	var os = $wt.internal.browser.OS;
@@ -778,4 +779,9 @@ public class OS {
 		}
 		return new Point(w, h); 
 	}
+	
+	public static void SetFocus(Element handle) {
+		handle.focus();
+	}
+	
 }
