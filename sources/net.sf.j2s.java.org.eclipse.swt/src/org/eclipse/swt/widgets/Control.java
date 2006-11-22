@@ -661,13 +661,9 @@ public boolean forceFocus () {
 	if (display.focusEvent == SWT.FocusOut) return false;
 	Decorations shell = menuShell ();
 	shell.setSavedFocus (this);
-	System.out.println("1" + isEnabled() + " " + isVisible() + " " + handle.style.visibility + " " + getVisible ()  +" "+ isActive());
 	if (!isEnabled () || !isVisible () || !isActive ()) return false;
-	System.out.println("2");
 	if (isFocusControl ()) return true;
-	System.out.println("3");
 	shell.setSavedFocus (null);
-	System.out.println("4");
 	/*
 	* This code is intentionally commented.
 	*
@@ -685,12 +681,9 @@ public boolean forceFocus () {
 //	if (OS.GetFocus () != OS.SetFocus (handle)) return false;
 //	OS.SetFocus (handle); // TODO
 	if (isDisposed ()) return false;
-	System.out.println("5");
 	OS.SetFocus(handle);
 //		return false;
-	System.out.println("6");
 	shell.setSavedFocus (this);
-	System.out.println("7");
 	return isFocusControl ();
 }
 
