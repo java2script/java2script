@@ -661,7 +661,7 @@ public boolean forceFocus () {
 	if (display.focusEvent == SWT.FocusOut) return false;
 	Decorations shell = menuShell ();
 	shell.setSavedFocus (this);
-	if (!isEnabled () || !isVisible () || !isActive ()) return false;
+	if (!isEnabled () || !isVisible () || !j2sIsActive ()) return false;
 	if (isFocusControl ()) return true;
 	shell.setSavedFocus (null);
 	/*
@@ -1250,8 +1250,7 @@ public void internal_dispose_GC (int hDC, GCData data) {
 	}
 }
 */
-
-boolean isActive () {
+boolean j2sIsActive () {
 	Shell dialogShell = display.getModalDialogShell ();
 	if (dialogShell != null && dialogShell != getShell ()) {
 		return false;
@@ -3398,15 +3397,21 @@ public boolean setParent (Composite parent) {
 		fixChildren (newShell, oldShell, newDecorations, oldDecorations, menus);
 	}
 	//TODO
-//	Element topHandle = topHandle ();
+	Control[] children = parent.children;
+	children[children.length + 1] = this;
+	Element topHandle = topHandle ();
+	topHandle.parentNode.removeChild(handle);
+	parent.topHandle().appendChild(handle);
 //	if (OS.SetParent (topHandle, parent.handle) == 0) return false;
 //	Element newHandle = this.handle.cloneNode(true);
 //	parent.handle.appendChild(this.handle.cloneNode(true));
 //	this.parent.handle.removeChild(this.handle);
-//	display.sendMessage(new MESSAGE(parent, MESSAGE.CONTROL_LAYOUT, null));
+	Composite oldParent = this.parent;
 	this.parent = parent;
 //	this.handle = newHandle;
-//	display.sendMessage(new MESSAGE(parent, MESSAGE.CONTROL_LAYOUT, null));
+//	parent.layout(true);
+	display.sendMessage(new MESSAGE(oldParent, MESSAGE.CONTROL_LAYOUT, null));
+	display.sendMessage(new MESSAGE(parent, MESSAGE.CONTROL_LAYOUT, null));
 //	int flags = OS.SWP_NOSIZE | OS.SWP_NOMOVE | OS.SWP_NOACTIVATE; 
 //	SetWindowPos (topHandle, OS.HWND_BOTTOM, 0, 0, 0, 0, flags);
 	return true;
