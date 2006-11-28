@@ -399,6 +399,35 @@ ClazzLoader.registerPackages = function (prefix, pkgs) {
 };
 
 /**
+ * Using multiple sites to load *.js in multiple threads. Using multiple
+ * sites may avoid 2 HTTP 1.1 connections recommendation limit.
+ * Here is a default implementation for http://archive.java2script.org.
+ * In site archive.java2script.org, there are 6 sites:
+ * 1. http://archive.java2script.org
+ * 2. http://erchive.java2script.org
+ * 3. http://irchive.java2script.org
+ * 4. http://orchive.java2script.org
+ * 5. http://urchive.java2script.org
+ * 6. http://yrchive.java2script.org
+ */
+/* protected */
+ClazzLoader.multipleSites = function (path) {
+	var length = path.length;
+	if (ClazzLoader.maxLoadingThreads > 1 && length > 15 
+			&& path.substring (0, 15) == "http://archive.") {
+		var index = path.lastIndexOf ("/");
+		if (index < length - 3) {
+			var arr = ['a', 'e', 'i', 'o', 'u', 'y'];
+			var c1 = path.charCodeAt (index + 1);
+			var c2 = path.charCodeAt (index + 2);
+			var idx = (length - index) * 3 + c1 * 5 + c2 * 7;
+			return path.substring (0, 7) + arr[idx % 6] + path.substring (8);
+		}
+	}
+	return path;
+};
+
+/**
  * Return the *.js path of the given class. Maybe the class is contained
  * in a *.z.js jar file.
  * @param clazz Given class that the path is to be calculated for. May
@@ -415,7 +444,7 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 	var base = null;
 	if (path != null) {
 		if (!forRoot && ext == null) { // return directly
-			return path;
+			return ClazzLoader.multipleSites (path);
 		} else {
 			var idx = path.lastIndexOf (clazz.replace (/\./g, "/"));
 			if (idx != -1) {
@@ -461,10 +490,11 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 	
 	base = ClazzLoader.assureBase (base);
 	if (forRoot) {
-		return base;
+		return ClazzLoader.multipleSites (base);
 	}
 	if (clazz.lastIndexOf (".*") == clazz.length - 2) {
-		return base + clazz.substring (0, idx + 1).replace (/\./g, "/");
+		return ClazzLoader.multipleSites (base + clazz.substring (0, idx + 1)
+				.replace (/\./g, "/"));
 	}
 	if (ext == null) {
 		ext = ".js";
@@ -472,7 +502,7 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 		ext = "." + ext;
 	}
 	var jsPath = base + clazz.replace (/\./g, "/") + ext;
-	return jsPath;
+	return ClazzLoader.multipleSites (jsPath);
 };
 
 /* private */
@@ -615,6 +645,9 @@ ClazzLoader.failedScripts = new Object ();
 /*-# failedHandles -> fhs #-*/
 ClazzLoader.failedHandles = new Object ();
 
+/* protected */
+ClazzLoader.takeAnotherTry = false;
+
 /**
  * Load *.js by adding script elements into head. Hook the onload event to
  * load the next class in dependency tree.
@@ -730,7 +763,7 @@ ClazzLoader.loadScript = function (file) {
 					&& navigator.userAgent.indexOf("Opera") >= 0) {
 				// Opera will not take another try.
 				var fss = ClazzLoader.failedScripts;
-				if (fss[path] == null) {
+				if (fss[path] == null && ClazzLoader.takeAnotherTry) {
 					// silently take another try for bad network
 					fss[path] = 1;
 					ClazzLoader.loadedScripts[path] = false;
@@ -761,7 +794,7 @@ ClazzLoader.loadScript = function (file) {
 			this.onerror = null; 
 			var path = arguments.callee.path;
 			var fss = ClazzLoader.failedScripts;
-			if (fss[path] == null) {
+			if (fss[path] == null && ClazzLoader.takeAnotherTry) {
 				// silently take another try for bad network
 				fss[path] = 1;
 				ClazzLoader.loadedScripts[path] = false;
@@ -809,6 +842,9 @@ ClazzLoader.loadScript = function (file) {
 				*/
 				if (fss[path] == null) {
 					var fun = function () {
+						if (!ClazzLoader.takeAnotherTry) {
+							return;
+						}
 						var path = arguments.callee.path;
 						// next time in "loading" state won't get waiting!
 						ClazzLoader.failedScripts[path] = 0;
@@ -818,6 +854,7 @@ ClazzLoader.loadScript = function (file) {
 							ClazzLoader.inLoadingThreads--;
 						}
 						// Take another try!
+						// log ("re - loading ... " + path);
 						ClazzLoader.loadScript (path);
 					};
 					fun.path = path;
@@ -827,6 +864,7 @@ ClazzLoader.loadScript = function (file) {
 					 * What about big *.z.js need more than 1s to initialize?
 					 */
 					var waitingTime = (local ? 500 : 15000); // 0.5s : 15s
+					//alert ("waiting:" + waitingTime + " . " + path);
 					fhs[path] = window.setTimeout (fun, waitingTime);
 					return;
 				}
@@ -839,14 +877,15 @@ ClazzLoader.loadScript = function (file) {
 				fhs[path] = null;
 			}
 			if ((local || state == "loaded") && !ClazzLoader.isInnerLoaded) {
-				if (!local && (fss[path] == null || fss[path] == 0)) {
+				if (!local && (fss[path] == null || fss[path] == 0)
+						&& ClazzLoader.takeAnotherTry) {
 					// failed! count down
 					if (ClazzLoader.inLoadingThreads > 0) {
 						ClazzLoader.inLoadingThreads--;
 					}
 					// silently take another try for bad network
 					fss[path] = 1;
-					// log ("reloading ... " + path);
+					//log ("reloading ... " + path);
 					ClazzLoader.loadedScripts[path] = false;
 					ClazzLoader.loadScript (path);
 					return;
@@ -1084,6 +1123,10 @@ ClazzLoader.checkOptionalCycle = function (node) {
 				ClazzLoader.updateNode (ts[i].parents[k]);
 			}
 			ts[i].parents = new Array ();
+			if (ts[i].optionalsLoaded != null) {
+				ts[i].optionalsLoaded ();
+				ts[i].optionalsLoaded = null;
+			}
 		}
 		ts.length = 0;
 		return true;
@@ -1134,6 +1177,7 @@ ClazzLoader.updateNode = function (node) {
 			var n = node.musts[i];
 			if (n.status < ClazzNode.STATUS_DECLARED) {
 				if (ClazzLoader.isClassDefined (n.name)) {
+					var nns = new Array (); // for optional loaded events!
 					n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
 					ClazzLoader.updateNode (n);
 					/*
@@ -1150,12 +1194,30 @@ ClazzLoader.updateNode = function (node) {
 								nn.status = n.status;
 								nn.declaration = null;
 								ClazzLoader.updateNode (nn);
+								if (nn.optionalsLoaded != null) {
+									nns[nns.length] = nn;
+								}
 							}
 						}
 						n.declaration = null;
 					}
-				} else {
-					isMustsOK = false;
+					if (n.optionalsLoaded != null) {
+						nns[nns.length] = n;
+					}
+					for (var j = 0; j < nns.length; j++) {
+						if (nns[j].optionalsLoaded != null) {
+							nns[j].optionalsLoaded ();
+							nns[j].optionalsLoaded = null;
+						}
+					}
+				} else { // why not break? -Zhou Renjian @ Nov 28, 2006
+					if (n.status == ClazzNode.STATUS_CONTENT_LOADED) {
+						// may be lazy loading script!
+						ClazzLoader.updateNode (n);
+					}
+					if (n.status < ClazzNode.STATUS_DECLARED) {
+						isMustsOK = false;
+					}
 				}
 			}
 		}
@@ -1237,6 +1299,7 @@ ClazzLoader.updateNode = function (node) {
 			ClazzLoader.scriptCompleted (node.path);
 			if (node.optionalsLoaded != null) {
 				node.optionalsLoaded ();
+				node.optionalsLoaded = null;
 				if (!ClazzLoader.keepOnLoading) {
 					return false;
 				}
@@ -1256,6 +1319,7 @@ ClazzLoader.updateNode = function (node) {
 			ClazzLoader.scriptCompleted (nn.path);
 			if (nn.optionalsLoaded != null) {
 				nn.optionalsLoaded ();
+				nn.optionalsLoaded = null;
 				if (!ClazzLoader.keepOnLoading) {
 					return false;
 				}
@@ -1467,6 +1531,8 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 
 	/*
 	 * The following lines are commented intentionally.
+	 * So lots of class is not declared until there is a must?
+	 *
 	 * TODO: Test the commented won't break up the dependency tree.
 	 */
 	/*
@@ -1483,6 +1549,9 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 		declaration.clazzList = arguments[4];
 	}
 	node.declaration = declaration;
+	if (declaration != null) {
+		node.status = ClazzNode.STATUS_CONTENT_LOADED;
+	}
 	
 	var isOptionalsOK = true;
 	if (optionals != null && optionals.length != 0) {

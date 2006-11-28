@@ -1,4 +1,7 @@
 Clazz.load (["java.lang.CharSequence", "$.Comparable", "java.io.Serializable", "java.util.Comparator"], "java.lang.String", null, function () {
+if (String.$replace != null) { // already defined! Maybe ClazzLoader will try to load this again!
+	return;
+}
 java.lang.String = String;
 //Clazz.decorateAsType (String, "String", null, [java.io.Serializable, CharSequence, Comparable]);
 Clazz.implementOf (String, [java.io.Serializable, CharSequence, Comparable]);
