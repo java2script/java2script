@@ -1625,6 +1625,12 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 		clazzFun[inF[i]] = Clazz.innerFunctions[inF[i]];
 	}
 
+	if (window["ClazzLoader"] != null) {
+		var node = ClazzLoader.findClass (qName);
+		if (node != null && node.status == ClazzNode.STATUS_KNOWN) {
+			ClazzLoader.updateNode (node);
+		}
+	}
 };
 
 /* proected */
