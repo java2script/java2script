@@ -41,9 +41,11 @@ public class SimpleRPCRequest {
 	 * Java2Script client will always requests in AJAX mode. 
 	 * @param runnable
 	 * @j2sNative
-	 * net.sf.j2s.ajax.AJAXServletRequest.ajaxRequest(runnable);
+	 * runnable.ajaxIn ();
+	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
 	 */
 	public static void request(SimpleRPCRunnable runnable) {
+		runnable.ajaxIn();
 		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
 			new Thread(runnable).start();
 		} else {

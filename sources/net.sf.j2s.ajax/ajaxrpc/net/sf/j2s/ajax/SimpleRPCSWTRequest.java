@@ -24,7 +24,8 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	/**
 	 * @param runnable
 	 * @j2sNative
-	 * this.ajaxRequest(runnable);
+	 * runnable.ajaxIn ();
+	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
 	 */
 	public static void swtRequest(SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
