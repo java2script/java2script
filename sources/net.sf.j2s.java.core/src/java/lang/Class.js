@@ -1591,7 +1591,8 @@ Clazz.innerFunctions = {
 /*-# decorateFunction -> dF #-*/
 Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	if (window["ClazzLoader"] != null) {
-		ClazzLoader.isInnerLoaded = true;
+		//alert ("decorate " + name);
+		ClazzLoader.checkInteractive ();
 	}
 	var qName = null;
 	if (prefix == null) {

@@ -388,7 +388,8 @@ ClazzLoader.jarClasspath = function (jar, clazzes) {
 
 /* public */
 ClazzLoader.registerPackages = function (prefix, pkgs) {
-	ClazzLoader.isInnerLoaded = true;
+	//alert ("package " + pkgs);
+	ClazzLoader.checkInteractive ();
 	var base = ClazzLoader.getClasspathFor (prefix + ".*", true);
 	for (var i = 0; i < pkgs.length; i++) {
 		if (window["Clazz"] != null) {
@@ -646,7 +647,7 @@ ClazzLoader.failedScripts = new Object ();
 ClazzLoader.failedHandles = new Object ();
 
 /* protected */
-ClazzLoader.takeAnotherTry = false;
+ClazzLoader.takeAnotherTry = true;
 
 /**
  * Load *.js by adding script elements into head. Hook the onload event to
@@ -759,13 +760,15 @@ ClazzLoader.loadScript = function (file) {
 			}
 			this.onload = null;
 			var path = arguments.callee.path;
-			if (!ClazzLoader.isInnerLoaded 
+			if (!ClazzLoader.innerLoadedScripts[this.src]
 					&& navigator.userAgent.indexOf("Opera") >= 0) {
 				// Opera will not take another try.
 				var fss = ClazzLoader.failedScripts;
 				if (fss[path] == null && ClazzLoader.takeAnotherTry) {
 					// silently take another try for bad network
+					// alert ("re loading " + path + " ... ");
 					fss[path] = 1;
+					ClazzLoader.innerLoadedScripts[this.src] = false;
 					ClazzLoader.loadedScripts[path] = false;
 					ClazzLoader.loadScript (path);
 					return;
@@ -796,6 +799,7 @@ ClazzLoader.loadScript = function (file) {
 			var fss = ClazzLoader.failedScripts;
 			if (fss[path] == null && ClazzLoader.takeAnotherTry) {
 				// silently take another try for bad network
+				// alert ("re loading " + path + " ...");
 				fss[path] = 1;
 				ClazzLoader.loadedScripts[path] = false;
 				ClazzLoader.loadScript (path);
@@ -813,7 +817,11 @@ ClazzLoader.loadScript = function (file) {
 			}
 		};
 		script.onerror.path = file;
+		if (navigator.userAgent.indexOf("Opera") >= 0) {
+			ClazzLoader.needOnloadCheck = true;
+		}
 	} else { // IE
+		ClazzLoader.needOnloadCheck = true;
 		script.defer = true;
 		script.onreadystatechange = function () {
 			var ee = arguments.callee;
@@ -876,7 +884,8 @@ ClazzLoader.loadScript = function (file) {
 				window.clearTimeout (fhs[path]);
 				fhs[path] = null;
 			}
-			if ((local || state == "loaded") && !ClazzLoader.isInnerLoaded) {
+			if ((local || state == "loaded")
+					&& !ClazzLoader.innerLoadedScripts[this.src]) {
 				if (!local && (fss[path] == null || fss[path] == 0)
 						&& ClazzLoader.takeAnotherTry) {
 					// failed! count down
@@ -885,7 +894,7 @@ ClazzLoader.loadScript = function (file) {
 					}
 					// silently take another try for bad network
 					fss[path] = 1;
-					//log ("reloading ... " + path);
+					// log ("reloading ... " + path);
 					ClazzLoader.loadedScripts[path] = false;
 					ClazzLoader.loadScript (path);
 					return;
@@ -909,7 +918,6 @@ ClazzLoader.loadScript = function (file) {
 		};
 		script.onreadystatechange.path = file;
 	}
-	ClazzLoader.isInnerLoaded = false;
 	ClazzLoader.inLoadingThreads++;
 	//alert("threads:"+ClazzLoader.inLoadingThreads);
 	// Add script DOM element to document tree
@@ -1124,6 +1132,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 			}
 			ts[i].parents = new Array ();
 			if (ts[i].optionalsLoaded != null) {
+				//window.setTimeout (ts[i].optionalsLoaded, 25);
 				ts[i].optionalsLoaded ();
 				ts[i].optionalsLoaded = null;
 			}
@@ -1206,6 +1215,7 @@ ClazzLoader.updateNode = function (node) {
 					}
 					for (var j = 0; j < nns.length; j++) {
 						if (nns[j].optionalsLoaded != null) {
+							//window.setTimeout (nns[j].optionalsLoaded, 25);
 							nns[j].optionalsLoaded ();
 							nns[j].optionalsLoaded = null;
 						}
@@ -1298,6 +1308,7 @@ ClazzLoader.updateNode = function (node) {
 			node.status = level;
 			ClazzLoader.scriptCompleted (node.path);
 			if (node.optionalsLoaded != null) {
+				//window.setTimeout (node.optionalsLoaded, 25);
 				node.optionalsLoaded ();
 				node.optionalsLoaded = null;
 				if (!ClazzLoader.keepOnLoading) {
@@ -1318,6 +1329,7 @@ ClazzLoader.updateNode = function (node) {
 			nn.declaration = null;
 			ClazzLoader.scriptCompleted (nn.path);
 			if (nn.optionalsLoaded != null) {
+				//window.setTimeout (nn.optionalsLoaded, 25);
 				nn.optionalsLoaded ();
 				nn.optionalsLoaded = null;
 				if (!ClazzLoader.keepOnLoading) {
@@ -1449,12 +1461,58 @@ ClazzLoader.searchClassArray = function (arr, rnd, status) {
 };
 
 /**
- * This variable is used to mark that *.js is correctly loaded.
+ * This map variable is used to mark that *.js is correctly loaded.
  * In IE, ClazzLoader has defects to detect whether a *.js is correctly
  * loaded or not, so inner loading mark is used for detecting.
  */
 /* private */
-ClazzLoader.isInnerLoaded = false;
+/*-# innerLoadedScripts -> ilss #-*/
+ClazzLoader.innerLoadedScripts = new Object ();
+
+/**
+ * This variable is used to keep the latest interactive SCRIPT element.
+ */
+/* private */
+/*-# interactiveScript -> itst #-*/
+ClazzLoader.interactiveScript = null;
+
+/**
+ * IE and Firefox/Mozilla are different in using <SCRIPT> tag to load *.js.
+ */
+/* private */
+ClazzLoader.needOnloadCheck = false;
+
+/**
+ * Check the interactive status of SCRIPT elements to determine whether a
+ * *.js file is correctly loaded or not.
+ *
+ * Only make senses for IE.
+ */
+/* protected */
+ClazzLoader.checkInteractive = function () {
+	//alert ("checking...");
+	if (!ClazzLoader.needOnloadCheck) {
+		return;
+	}
+	var is = ClazzLoader.interactiveScript;
+	if (is != null && is.readyState == "interactive") { // IE
+		return;
+	}
+	ClazzLoader.interactiveScript = null;
+	var ss = document.getElementsByTagName ("SCRIPT");
+	for (var i = 0; i < ss.length; i++) {
+		if (ss[i].readyState == "interactive"
+				&& ss[i].onreadystatechange != null) { // IE
+			ClazzLoader.interactiveScript = ss[i];
+			ClazzLoader.innerLoadedScripts[ss[i].src] = true;
+		} else if (navigator.userAgent.indexOf("Opera") >= 0) { // Opera
+			if (ss[i].readyState == "loaded" 
+					&& ss[i].src != null && ss[i].src.length != 0) {
+				ClazzLoader.innerLoadedScripts[ss[i].src] = true;
+			}
+		}
+	}
+}
 
 /**
  * This method will be called in almost every *.js generated by Java2Script
@@ -1462,7 +1520,8 @@ ClazzLoader.isInnerLoaded = false;
  */
 /* protected */
 ClazzLoader.load = function (musts, clazz, optionals, declaration) {
-	ClazzLoader.isInnerLoaded = true;
+	//alert ("Loading " + clazz + " ...");
+	ClazzLoader.checkInteractive ();
 	if (clazz instanceof Array) {
 		ClazzLoader.unwrapArray (clazz);
 		for (var i = 0; i < clazz.length; i++) {
