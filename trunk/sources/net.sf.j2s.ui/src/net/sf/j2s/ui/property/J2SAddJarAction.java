@@ -14,10 +14,8 @@ package net.sf.j2s.ui.property;
 
 import java.io.File;
 import java.util.ArrayList;
-
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.launching.JavaRuntime;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -26,7 +24,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
-import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -104,18 +101,7 @@ public class J2SAddJarAction implements SelectionListener {
 		dialog.setTitle("Java2Script Resources Selection"); //$NON-NLS-1$
 		dialog.setMessage("Choose Java2Scrip resources (*.js and *.css)"); //$NON-NLS-1$
 		dialog.addFilter(filter);
-		//dialog.setInitialSelection(page.j2s);
-		//if (configuration == null) {
 			dialog.setInput(root);
-//		} else {
-//			try {
-//				String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
-//				dialog.setInput(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName));
-//			} catch (CoreException e) {
-//				e.printStackTrace();
-//				dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
-//			}
-//		}
 		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 
 		if (dialog.open() == Window.OK) {
@@ -150,7 +136,6 @@ public class J2SAddJarAction implements SelectionListener {
 	}
 
 	public void widgetDefaultSelected(SelectionEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
