@@ -218,7 +218,6 @@ public class J2SConsoleView extends ViewPart {
 		manager.add(actionBack);
 		manager.add(actionForward);
 		manager.add(actionReload);
-//		manager.add(actionStop);
 	}
 
 	private void makeActions() {
@@ -258,15 +257,7 @@ public class J2SConsoleView extends ViewPart {
 		if (lastURL == null || lastURL.length() == 0) {
 			actionReload.setEnabled(false);
 		}
-//		actionReload.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-//			getImageDescriptor(ISharedImages.IMG_TOOL_REDO));
 		J2SViewImages.setImageDescriptors(actionReload, J2SViewImages.REFRESH);
-//		try {
-//			actionReload.setImageDescriptor(ImageDescriptor.createFromURL(new URL("file:/icons/refresh_nav.gif")));
-//		} catch (MalformedURLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 
 		actionStop = new Action() {
 			public void run() {
@@ -285,8 +276,6 @@ public class J2SConsoleView extends ViewPart {
 		};
 		showAddressBarAction.setChecked(showAddressBar);
 		showAddressBarAction.setToolTipText("Show or hide the address bar"); //$NON-NLS-1$
-		//J2SViewImages.setImageDescriptors(fScriptWrittenAction, J2SViewImages.ADD_TO_TRAY);
-		//showAddressBarAction.setEnabled(showAddressBar);
 
 	}
 	protected void performAddressBarAction() {

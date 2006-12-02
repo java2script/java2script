@@ -17,34 +17,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import net.sf.j2s.ui.classpath.CSSResource;
-import net.sf.j2s.ui.classpath.CompositeResources;
-import net.sf.j2s.ui.classpath.ContactedClasses;
-import net.sf.j2s.ui.classpath.ContactedUnitClass;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
-import net.sf.j2s.ui.classpath.ProjectResources;
 import net.sf.j2s.ui.classpath.Resource;
-import net.sf.j2s.ui.classpath.UnitClass;
 import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.resources.ExternalResources;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
-import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.debug.ui.actions.ObjectFilter;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -56,9 +44,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 /**
  * @author josson smith
@@ -104,8 +89,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			prjName = j2sPath.substring(0, j2sPath.indexOf(File.separatorChar));
 		}
 		final IProject project = (prjName != null) ? root.getProject(prjName) : null;
-//		ILabelProvider lp= new WorkbenchLabelProvider();
-//		ITreeContentProvider cp= new WorkbenchContentProvider();
 		ILabelProvider lp= new LabelProvider() {
 		
 			public String getText(Object element) {
@@ -128,21 +111,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			}
 		
 			public Image getImage(Object element) {
-//				if (element instanceof UnitClass || element instanceof ContactedUnitClass) {
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CLASS);
-//				} else if (element instanceof CSSResource) {
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_CFILE);
-//				} else if (element instanceof ContactedClasses) {
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_LIBRARY);
-//				} else if (element instanceof ProjectResources) {
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
-//				} else if (element instanceof CompositeResources) {
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
-//				} else if (element instanceof J2SCategory) {
-//					J2SCategory ctg = (J2SCategory) element;
-//					//if (ctg)
-//		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_EMPTY_LOGICAL_PACKAGE);
-//				}
 				if (element instanceof J2SLibrary[]) {
 		            return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				} else if (element instanceof J2SLibrary) {
@@ -205,11 +173,7 @@ public class J2SAddInnerJarAction implements SelectionListener {
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(e.display.getActiveShell(), lp, cp) {
 			protected TreeViewer createTreeViewer(Composite parent) {
 				TreeViewer treeViewer = super.createTreeViewer(parent);
-				
-//				if (project != null) {
-//					treeViewer.setSelection(new StructuredSelection(project));
 				treeViewer.expandToLevel(2);
-//				}
 				return treeViewer;
 			}
 		};
@@ -240,19 +204,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			libs[i] = library;
 		}
 		dialog.setInput(libs);
-		//dialog.setInitialSelection(page.j2s);
-		//if (configuration == null) {
-		//	dialog.setInput(root);
-//		} else {
-//			try {
-//				String projectName = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
-//				dialog.setInput(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName));
-//			} catch (CoreException e) {
-//				e.printStackTrace();
-//				dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
-//			}
-//		}
-//		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 
 		if (dialog.open() == Window.OK) {
 			Object[] expandedElements = page.viewer.getExpandedElements();
@@ -260,10 +211,7 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			boolean added = false;
 			for (int i= 0; i < elements.length; i++) {
 				String elem= (String)elements[i];
-				//IResource elem= (IResource)elements[i];
 				String resPath = elem.substring(1);
-//				resPath = XFileUtil.toRelativePath(resPath.substring(1), j2sFile != null ? j2sFile.getAbsolutePath() : null);
-//				System.out.println(resPath);
 				IRuntimeClasspathEntry entry = JavaRuntime.newArchiveRuntimeClasspathEntry(resPath);
 				if (entry != null) {
 					((Resource) entry).setAbsolute(true);
@@ -291,7 +239,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 	}
 
 	public void widgetDefaultSelected(SelectionEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
