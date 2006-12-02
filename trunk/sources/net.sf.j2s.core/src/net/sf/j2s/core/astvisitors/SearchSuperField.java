@@ -26,7 +26,6 @@ public class SearchSuperField {
 			if (superclass != null) {
 				IVariableBinding[] declaredFields = superclass.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-//					String fieldName = declaredFields[i].getName();
 					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
 					if (name.equals(fieldName)) {
 						return true;
@@ -36,7 +35,6 @@ public class SearchSuperField {
 				// Interface
 				IVariableBinding[] declaredFields = binding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-//					String fieldName = declaredFields[i].getName();
 					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
 					if (name.equals(fieldName)) {
 						return true;
@@ -65,36 +63,14 @@ public class SearchSuperField {
 				StringBuffer buffer = new StringBuffer();
 				IVariableBinding[] declaredFields = superclass.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-//					String fieldName = declaredFields[i].getName();
 					String fieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
 					if (name.equals(fieldName)) {
 						buffer.append("$");
 					}
 				}
-//			} else {
-//				// Interface
-//				IVariableBinding[] declaredFields = binding.getDeclaredFields();
-//				for (int i = 0; i < declaredFields.length; i++) {
-//					if (name.equals(declaredFields[i].getName())) {
-//						buffer.append("$");
-//					}
-//				}
 				buffer.append(getFieldName(superclass, name));
 				return buffer.toString();
 			}
-			/*
-			 * The static final constant in the interfaces are not counted
-			 */
-			/*
-			ITypeBinding[] interfaces = binding.getInterfaces();
-			if (interfaces != null) {
-				for (int i = 0; i < interfaces.length; i++) {
-					if (isInheritedFieldName(interfaces[i], name)) {
-						buffer.append("$");
-					}
-				}
-			}
-			*/
 		}
 		return name;
 	}

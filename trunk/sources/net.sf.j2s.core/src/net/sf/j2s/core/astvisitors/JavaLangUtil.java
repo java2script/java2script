@@ -17,21 +17,10 @@ public class JavaLangUtil {
 			name = name.substring(0, index).trim();
 		}
 		index = name.indexOf("java.lang.");
-		//int idx2 = -1;
 		char ch = 0;
 		if (index != -1 && 
 				(name.indexOf('.', index + 10) == -1 
 						|| ((ch = name.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
-//				((idx2 = name.indexOf('.', index + 10)) == -1 
-//						|| !name.substring(index + 10, idx2).startsWith ("ref"))) {
-			/*
-			if (name.indexOf ("Error") != -1 || name.indexOf("Exception") != -1
-					|| name.indexOf("ThreadDeath") != -1) {
-				
-			} else {
-				name = name.substring(10);
-			}
-			*/
 			name = name.substring(10);
 		}
 		String swt = "org.eclipse.swt.SWT";
@@ -59,9 +48,6 @@ public class JavaLangUtil {
 			name = "$wt" + after;
 		}
 
-//		if (JavaScriptKeywords.checkKeyworkViolation(name)) {
-//			name = "$" + name;
-//		}
 		return name;
 	}
 	public static String ripGeneric(String name) {

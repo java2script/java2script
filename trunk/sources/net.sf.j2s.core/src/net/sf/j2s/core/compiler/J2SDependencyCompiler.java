@@ -30,7 +30,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 			 */
 			return ;
 		}
-		//boolean isEnabled = false;
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(file));
@@ -62,7 +61,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 			list = new ArrayList();
 		} else {
 			String[] splits = resPaths.split(",");
-			//list = Arrays.asList(splits);
 			list = new ArrayList();
 			for (int i = 0; i < splits.length; i++) {
 				list.add(splits[i]);
@@ -74,7 +72,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 			abandonedList = new ArrayList();
 		} else {
 			String[] splits = abandonedPaths.split(",");
-			//list = Arrays.asList(splits);
 			abandonedList = new ArrayList();
 			for (int i = 0; i < splits.length; i++) {
 				abandonedList.add(splits[i]);
@@ -98,7 +95,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				if (!list.contains(jsPath) && !abandonedList.contains(jsPath)) {
 					list.add(jsPath);
 				}
-				//System.out.println(jsPath);
 			}
 		}
 		StringBuffer buf = new StringBuffer();
@@ -109,20 +105,11 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				buf.append(",");
 			}
 		}
-//		props.setProperty("j2s.resources.list", buf.toString());
-//		props.setProperty("j2s.output.path", binaryFolder.getProjectRelativePath().toPortableString());
-//		try {
-//			props.store(new FileOutputStream(file), "Java2Script Configuration");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 
 		CompilationUnit root;
 		ASTParser astParser= ASTParser.newParser(AST.JLS3);
 		for (int i = 0; i < sourceUnits.length; i++) {
 			if (sourceUnits[i] instanceof SourceFile) {
-				//System.out.println(sourceUnits[i]);
 				SourceFile unitSource = (SourceFile) sourceUnits[i];
 				org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(new SourceFileProxy(unitSource).getResource());
 				astParser.setResolveBindings(true);
@@ -142,9 +129,7 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				} else {
 					String folderPath = binFolder;
 					String elementName = root.getJavaElement().getElementName();
-					//if (elementName.endsWith(".class") || elementName.endsWith(".java")) {  //$NON-NLS-1$//$NON-NLS-2$
 						elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-					//} /* maybe ended with other customized extension
 					String packageName = visitor.getPackageName();
 					if (packageName != null) {
 						File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
@@ -161,11 +146,8 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 
 	public static void outputJavaScript(DependencyASTVisitor visitor, CompilationUnit fRoot, String folderPath) {
 		String js = visitor.getBuffer().toString();
-//		js = visitor.getMusts() + "\r\n" + visitor.getRequires() + "\r\n" + visitor.getOptionals();
 		String elementName = fRoot.getJavaElement().getElementName();
-		//if (elementName.endsWith(".class") || elementName.endsWith(".java")) {  //$NON-NLS-1$//$NON-NLS-2$
 			elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		//} /* maybe ended with other customized extension
 		String packageName = visitor.getPackageName();
 		if (packageName != null) {
 			File folder = new File(folderPath, packageName.replace('.', File.separatorChar));
@@ -192,28 +174,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				}
 			}
 		}
-//		if (visitor instanceof SWTScriptVisitor) {
-//			SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
-//			String removedJS = swtVisitor.getBufferRemoved().toString();
-//			if (removedJS.trim().length() > 0) {
-//				jsFile = new File(folderPath, elementName + ".remmoved.js"); //$NON-NLS-1$
-//				fileWriter = null;
-//				try {
-//					fileWriter = new FileWriter(jsFile);
-//					fileWriter.write(removedJS);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				} finally {
-//					if (fileWriter != null) {
-//						try {
-//							fileWriter.close();
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
-//			}
-//		}
 	}
 
 }

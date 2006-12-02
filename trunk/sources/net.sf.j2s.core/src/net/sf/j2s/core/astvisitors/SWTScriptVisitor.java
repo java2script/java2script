@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
-//	private StringBuffer bufferRemoved = new StringBuffer();
 	private boolean metSWTBlockWhile = false;
 	private boolean metDialogOpen = false;
 
@@ -74,22 +73,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		System.arraycopy(swtInnerPackages, 0, packages, pkgs.length, swtInnerPackages.length);
 		return packages;
 	}
-//	public boolean visit(MethodDeclaration node) {
-//		String methodName = node.getName().getIdentifier();
-//		if (methodName.startsWith("WM_") || methodName.startsWith("wm")) {
-//			StringBuffer buf = buffer;
-//			buffer = new StringBuffer();
-//			boolean b = super.visit(node);
-//			bufferRemoved.append(buffer);
-//			buffer = buf;
-//			return b;
-//		}
-//		return super.visit(node);
-//	}
-//
-//	public StringBuffer getBufferRemoved() {
-//		return bufferRemoved;
-//	}
 	
 	public boolean visit(SimpleName node) {
 		if (checkConstantValue(node)) return false;
@@ -119,27 +102,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	}
 	public boolean visit(QualifiedName node) {
 		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
-//		IBinding nodeBinding = node.resolveBinding();
-//		if (nodeBinding instanceof IVariableBinding) {
-//			IVariableBinding varBinding = (IVariableBinding) nodeBinding;
-//			if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//				ASTNode parent = node.getParent();
-//				if (parent != null && !(parent instanceof QualifiedName)) {
-//					Name qName = node.getQualifier();
-//					IBinding qBinding = qName.resolveBinding();
-//					if (qBinding instanceof IVariableBinding) {
-//						buffer.append("(((");
-//						qName.accept(this);
-//						buffer.append(") || true) ? ");
-//						buffer.append(varBinding.getDeclaringClass().getQualifiedName());
-//						buffer.append('.');
-//						node.getName().accept(this);
-//						buffer.append(" : 0)");
-//						return false;
-//					}
-//				}
-//			}
-//		}
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
@@ -167,20 +129,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (declaringClass != null) {
 							name = declaringClass.getQualifiedName();
 						} else {
-//							IPackageBinding pkg = typeBinding.getPackage();
-//							if (pkg != null) {
-//								name = pkg.getName();
-//							} else {
-								name = "";
-//							}
+							name = "";
 						}
 						name = JavaLangUtil.ripJavaLang(name);
-//						System.out.println("---" + name);
-						//*
 						if (name.indexOf("java.lang") != -1) {
 							name = name.substring(9);
 						}
-						//*/
 						String xhtml = "org.eclipse.swt.internal.xhtml";
 						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
@@ -189,7 +143,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
 						}
-//						System.out.println("xvs - " + name);
 						if ("window".equals(name)) {
 							name = "w$";
 						} else if ("document".equals(name)) {
@@ -200,11 +153,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 							buffer.append('.');
 						}
 					}
-//				} else {
-//					IVariableBinding varBinding = (IVariableBinding) binding;
-//					if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//						
-//					}
 				}
 			}
 		}
@@ -225,29 +173,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		if (anonDeclare != null) {
-				/*
-				ITypeBinding[] interfaces = binding.getInterfaces();
-				if (interfaces != null && interfaces.length == 1) {
-					//System.out.println(interfaces[0].getQualifiedName());
-					if ("org.eclipse.swt.internal.RunnableCompatibility"
-							.equals(JavaLangUtil.ripGeneric(interfaces[0].getQualifiedName()))) {
-						buffer.append("Clazz.makeFunction (");
-						boolean result = super.visit(node);
-						buffer.append(")");
-						return result;
-					}
-				} else {
-					ITypeBinding superclass = binding.getSuperclass();
-					if ("org.eclipse.swt.internal.RunnableCompatibility"
-							.equals(JavaLangUtil.ripGeneric(superclass.getQualifiedName()))) {
-						buffer.append("Clazz.makeFunction (");
-						boolean result = super.visit(node);
-						buffer.append(")");
-						return result;
-					}
-				}
-				//System.out.println(interfaces);
-				*/
 		} else {
 			String fqName = null;
 			if (node.getAST().apiLevel() != AST.JLS3) {
@@ -259,15 +184,11 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				} else {
 					fqName = "noname";
 				}
-				//System.out.println("---- ---");
 			}
-			//System.out.println(fqName);
 			fqName = JavaLangUtil.ripJavaLang(fqName);
-			//System.out.println(fqName);
 			String filterKey = "org.eclipse.swt.internal.xhtml.";
 			if (fqName.startsWith(filterKey)) {
 				buffer.append(" new ");
-				//buffer.append(node.getName());
 				buffer.append(fqName.substring(filterKey.length()));
 				buffer.append(" (");
 				visitList(node.arguments(), ", ");
@@ -277,7 +198,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			filterKey = "$wt.internal.xhtml.";
 			if (fqName.startsWith(filterKey)) {
 				buffer.append(" new ");
-				//buffer.append(node.getName());
 				buffer.append(fqName.substring(filterKey.length()));
 				buffer.append(" (");
 				visitList(node.arguments(), ", ");
@@ -427,11 +347,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 */
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding methodBinding = node.resolveBinding();
-//		if ("open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
-//			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
-//				
-//			}
-//		}
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
 			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
@@ -488,7 +403,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		metSWTBlockWhile = lastSWTBlockWhile;
 		metDialogOpen = lastDialogOpen;
 		return false;
-		//return super.visit(node);
 	}
 	
 	private boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
@@ -521,13 +435,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			if (isMethodInvoking(methodBinding, className, methodName)) {
 				return true;
 			}
-			/*
-			IMethodBinding methodBinding = method.resolveMethodBinding();
-			if (methodName.equals(methodBinding.getName()) &&className.equals(
-					methodBinding.getDeclaringClass().getQualifiedName())) {
-				return true;
-			}
-			*/
 		}
 		return false;
 	}

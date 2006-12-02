@@ -164,13 +164,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				buffer.append(seperator);
 			}
 		}
-//		for (Iterator iter = list.iterator(); iter.hasNext();) {
-//			ASTNode element = (ASTNode) iter.next();
-//			element.accept(this);
-//			if (iter.hasNext()) {
-//				buffer.append(seperator);
-//			}
-//		}
 	}
 
 	protected void boxingNode(ASTNode element) {
@@ -248,13 +241,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				buffer.append(seperator);
 			}
 		}
-//		for (Iterator iter = list.iterator(); iter.hasNext();) {
-//			ASTNode element = (ASTNode) iter.next();
-//			element.accept(this);
-//			if (iter.hasNext()) {
-//				buffer.append(seperator);
-//			}
-//		}
 	}
 
 	protected String listFinalVariables(List list, String seperator, String scope) {
@@ -263,18 +249,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		}
 		StringBuffer buf = new StringBuffer();
 		buf.append("Clazz.cloneFinals (");
-		//Set set = new HashSet();
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
 			FinalVariable fv = (FinalVariable) iter.next();
 			String name = fv.getVariableName();
 			if (fv.getToVariableName() != null) {
 				name = fv.getToVariableName();
 			}
-			//if (!set.contains(name)) {
-//				if (buf.length() >= 2) {
-//					buf.append(seperator);
-//				}
-				//set.add(name);
 				buf.append("\"");
 				buf.append(name);
 				buf.append("\", ");
@@ -282,16 +262,10 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				if (methodScope == null && scope == null) {
 					buf.append(name);
 				} else if (methodScope == null || scope == null) {
-//					System.out.println(methodScope);
-//					System.out.println(scope);
-//					System.out.println("--==--");
 					buf.append("this.$finals." + name);
 				} else if (methodScope.equals(scope)) {
 					buf.append(name);
 				} else {
-//					System.out.println(methodScope);
-//					System.out.println(scope);
-//					System.out.println("------");
 					buf.append("this.$finals." + name);
 				}
 				if (iter.hasNext()) {
@@ -341,10 +315,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
-//			if (dim != null && dim.size() == 1) {
-//				ASTNode element = (ASTNode) dim.get(0);
-//				element.accept(this);
-//			}
 			ITypeBinding binding = node.getType().resolveBinding();
 			ITypeBinding elementType = binding.getElementType();
 			if (elementType.isPrimitive()) {
@@ -388,13 +358,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					buffer.append(")");
 				}
 			}
-//			buffer.append(" new Array (");
-//			List dim = node.dimensions();
-//			if (dim != null && dim.size() == 1) {
-//				ASTNode element = (ASTNode) dim.get(0);
-//				element.accept(this);
-//			}
-//			buffer.append(")");
 		}
 		return false;
 	}
@@ -474,12 +437,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
-						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -504,7 +464,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(op);
 			Expression right = node.getRightHandSide();
 			buffer.append(' ');
-//			right.accept(this);
 			boxingNode(right);
 			
 			buffer.append(", ");
@@ -628,7 +587,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(").charCodeAt (0)");
 		} else {
 			boxingNode(right);
-//			right.accept(this);
 		}
 		return false;
 	}
@@ -1077,7 +1035,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		 * }
 		 */
 		boxingNode(node.getExpression());
-//		node.getExpression().accept(this);
 		buffer.append(") ");
 		node.getThenStatement().accept(this);
 		if (node.getElseStatement() != null) {
@@ -1129,18 +1086,15 @@ public class ASTKeywordParser extends ASTEmptyParser {
 	
 	private void charVisit(ASTNode node, boolean beCare) {
 		if (!beCare || !(node instanceof Expression)) {
-//			node.accept(this);
 			boxingNode(node);
 			return ;
 		}
 		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
 		if (binding.isPrimitive() && "char".equals(binding.getName())) {
 			buffer.append("(");
-//			node.accept(this);
 			boxingNode(node);
 			buffer.append(").charCodeAt (0)");
 		} else {
-//			node.accept(this);
 			boxingNode(node);
 		}
 	}
@@ -1194,12 +1148,10 @@ public class ASTKeywordParser extends ASTEmptyParser {
 						
 						buffer.append("Math.floor (");
 						charVisit(left, beCare);
-						//left.accept(this);
 						buffer.append(' ');
 						buffer.append(operator);
 						buffer.append(' ');
 						charVisit(right, beCare);
-						//right.accept(this);
 						buffer.append(')');
 						List extendedOperands = node.extendedOperands();
 						if (extendedOperands.size() > 0) {
@@ -1218,7 +1170,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 								buffer.append(operator);
 								buffer.append(' ');
 								charVisit(element, beCare);
-								//element.accept(this);
 								if (is2Floor) {
 									buffer.append(')');
 								}
@@ -1245,12 +1196,10 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		}
 
 		charVisit(node.getLeftOperand(), beCare);
-		//node.getLeftOperand().accept(this);
 		buffer.append(' ');
 		buffer.append(operator);
 		buffer.append(' ');
 		charVisit(node.getRightOperand(), beCare);
-		//node.getRightOperand().accept(this);
 		List extendedOperands = node.extendedOperands();
 		if (extendedOperands.size() > 0) {
 			for (Iterator iter = extendedOperands.iterator(); iter.hasNext();) {
@@ -1259,7 +1208,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				buffer.append(' ');
 				ASTNode element = (ASTNode) iter.next();
 				charVisit(element, beCare);
-				//element.accept(this);
 			}
 		}
 		if (simple) {
@@ -1296,8 +1244,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 
 	public boolean visit(InstanceofExpression node) {
 		Type right = node.getRightOperand();
-		//ITypeBinding binding = right.resolveBinding();
-		//if (binding.isInterface()) { // only interfaces need wrapping 
 			buffer.append("Clazz.instanceOf (");
 			node.getLeftOperand().accept(this);
 			buffer.append(", ");
@@ -1307,15 +1253,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				right.accept(this);
 			}
 			buffer.append(")");
-		/*} else {
-			node.getLeftOperand().accept(this);
-			buffer.append(" instanceof ");
-			if (right instanceof ArrayType) {
-				buffer.append("Array");
-			} else {
-				right.accept(this);
-			}
-		}*/
 		return false;
 	}
 
@@ -1460,12 +1397,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
-						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -1589,8 +1523,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -1598,7 +1530,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			//String op = node.getOperator().toString();
 			buffer.append(op);
 			buffer.append(' ');
 			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
@@ -1655,7 +1586,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				node.getOperand().accept(this);
 				buffer.append(" = String.fromCharCode ((");
 				node.getOperand().accept(this);
-				//String op = node.getOperator().toString();
 				if ("++".equals(op)) {
 					buffer.append(").charCodeAt (0) + 1)");
 				} else {
@@ -1668,7 +1598,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		buffer.append(node.getOperator());
 		boxingNode(node.getOperand());
 		return false;
-		//return super.visit(node);
 	}
 
 	public void endVisit(PrimitiveType node) {
@@ -1679,7 +1608,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		/*
 		 * TODO: primitive type should be precisely mapped to JS types 
 		 */
-		//buffer.append("var ");
 		return super.visit(node);
 	}
 
@@ -1697,24 +1625,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 	public boolean visit(QualifiedName node) {
-//		IBinding nodeBinding = node.resolveBinding();
-//		if (nodeBinding instanceof IVariableBinding) {
-//			IVariableBinding varBinding = (IVariableBinding) nodeBinding;
-//			if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//				ASTNode parent = node.getParent();
-//				if (parent != null && !(parent instanceof QualifiedName)) {
-//					System.out.println("....");
-//					buffer.append("(((");
-//					node.getQualifier().accept(this);
-//					buffer.append(") || true) ? ");
-//					buffer.append(varBinding.getDeclaringClass().getQualifiedName());
-//					buffer.append('.');
-//					node.getName().accept(this);
-//					buffer.append(" : 0)");
-//					return false;
-//				}
-//			}
-//		}
 		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
@@ -1758,11 +1668,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 							buffer.append('.');
 						}
 					}
-//				} else {
-//					IVariableBinding varBinding = (IVariableBinding) binding;
-//					if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//						
-//					}
 				}
 			}
 		}
@@ -1860,7 +1765,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = (CatchClause) iter.next();
 				element.getException().getType().accept(this);
-				//buffer.append(element.getException().getType());
 				buffer.append(")) ");
 				element.getBody().accept(this);
 				if (iter.hasNext()) {
@@ -1958,7 +1862,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(" = ");
 			ITypeBinding typeBinding = initializer.resolveTypeBinding();
 			if (typeBinding != null && "char".equals(typeBinding.getName())) {
-				//if ()
 				ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 				String nameType = nameTypeBinding.getName();
 				if (!"char".equals(nameType) && nameType.indexOf("String") == -1) {
@@ -1971,7 +1874,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 			if (nameTypeBinding != null) {
 				String nameType = nameTypeBinding.getName();
-				//System.out.println("...x");
 				if ("char".equals(nameType)) {
 					if (typeBinding != null && !"char".equals(typeBinding.getName())) {
 						buffer.append("String.fromCharCode (");
@@ -1981,7 +1883,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					}
 				}
 			}
-//			initializer.accept(this);
 			boxingNode(initializer);
 		}
 		return false;
