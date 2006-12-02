@@ -115,47 +115,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 		return (String[]) classNameSet.toArray(new String[0]);
 	}
 	
-	/*
-	public String getMusts() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("musts=");
-		for (Iterator iter = musts.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	
-	public String getRequires() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("requires=");
-		for (Iterator iter = requires.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	
-	public String getOptionals() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("optionals=");
-		for (Iterator iter = optionals.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	*/
-	
 	protected void checkSuperType(Set set) {
 		Set removed = new HashSet();
 		Set reseted = new HashSet();
@@ -169,15 +128,12 @@ public class DependencyASTVisitor extends ASTVisitor {
 					ITypeBinding binding = (ITypeBinding) iterator.next();
 					if (Bindings.isSuperType(binding, qn.binding)) {
 						removed.add(qn);
-						//set.remove(qn);
 						isRemoved = true;
 						break;
 					}
 				}
 				if (!isRemoved) {
 					reseted.add(qn);
-					//set.remove(qn);
-					//set.add(qn.qualifiedName);
 				}
 			}
 		}
@@ -241,34 +197,12 @@ public class DependencyASTVisitor extends ASTVisitor {
 			String[] ss = (String[]) musts.toArray(new String[0]);
 			Arrays.sort(ss);
 			String lastClassName = joinArrayClasses(buf, ss, null);
-			/*
-			for (Iterator iter = musts.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			if (musts.size() != 0 && requires.size() != 0) {
 				buf.append(", ");
 			}
 			ss = (String[]) requires.toArray(new String[0]);
 			Arrays.sort(ss);
 			joinArrayClasses(buf, ss, lastClassName);
-			/*
-			for (Iterator iter = requires.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -277,24 +211,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 			buf.append("[");
 		}
 		joinArrayClasses(buf, getClassName(), null);
-		/*
-		buf.append("\"");
-		//buf.append(thisClassName);
-		String key = "org.eclipse.swt.";
-		for (Iterator iter = classNameSet.iterator(); iter.hasNext();) {
-			String thisClassName = (String) iter.next();
-			if (thisClassName.startsWith(key)) {
-				buf.append("$wt.");
-				buf.append(thisClassName.substring(key.length()));;
-			} else {
-				buf.append(thisClassName);
-			}
-			if (iter.hasNext()) {
-				buf.append("\", \"");
-			}
-		}
-		buf.append("\"");
-		*/
 		if (classNameSet.size() > 1) {
 			buf.append("]");
 		}
@@ -304,17 +220,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 			String[] ss = (String[]) optionals.toArray(new String[0]);
 			Arrays.sort(ss);
 			joinArrayClasses(buf, ss, null);
-			/*
-			for (Iterator iter = optionals.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -669,7 +574,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 				requires.addAll(visitor.optionals);
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-//				if ((field.getModifiers() & Modifier.STATIC) != 0) {
 					List fragments = field.fragments();
 					for (int j = 0; j < fragments.size(); j++) {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
@@ -683,21 +587,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 						requires.addAll(visitor.requires);
 						requires.addAll(visitor.optionals);
 					}
-//				} else if (node.isInterface()) {
-//					List fragments = field.fragments();
-//					for (int j = 0; j < fragments.size(); j++) {
-//						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
-//								.get(j);
-//						Expression initializer = vdf.getInitializer();
-//						DependencyASTVisitor visitor = getSelfVisitor();
-//						if (initializer != null) {
-//							initializer.accept(visitor);
-//						}
-//						requires.addAll(visitor.musts);
-//						requires.addAll(visitor.requires);
-//						requires.addAll(visitor.optionals);
-//					}
-//				}
 			}
 		}
 	}
@@ -810,13 +699,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 				optionals.add(qn);
 			}
 		}
-//		ASTNode parent = node.getParent();
-//		if (parent instanceof QualifiedName) {
-//			QualifiedName qName = (QualifiedName) parent;
-//			if (node == qName.getName()) {
-//				
-//			}
-//		}
 		return super.visit(node);
 	}
 	

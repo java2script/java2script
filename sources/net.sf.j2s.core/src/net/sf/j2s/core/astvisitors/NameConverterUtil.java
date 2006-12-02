@@ -29,42 +29,20 @@ public class NameConverterUtil {
 	private static Map maps;
 
 	public static String getJ2SName(SimpleName node) {
-//		initConvertionMaps();
-//		String className = null;
 		IBinding binding = node.resolveBinding();
 		if (binding == null) return node.getIdentifier();
 		if (binding instanceof IVariableBinding) {
 			return getJ2SName((IVariableBinding) binding);
-//			IVariableBinding varBinding = (IVariableBinding) binding;
-//			ITypeBinding declaringClass = varBinding.getDeclaringClass();
-//			if (declaringClass != null) {
-//				className = declaringClass.getQualifiedName();
-//			}
 		}
 		if (binding instanceof IMethodBinding) {
 			return getJ2SName((IMethodBinding) binding);
-//			IMethodBinding methodBinding = (IMethodBinding) binding;
-//			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-//			if (declaringClass != null) {
-//				className = declaringClass.getQualifiedName();
-//			}
 		}
-//		System.out.println("checking " + className + "." + nameID);
-		
-//		for (int i = 0; i < maps.length; i++) {
-//			NameConvertItem item = maps[i];
-//			if (item.className.equals(className) && item.varName.equals(nameID)) {
-//				return item.toVarName;
-//			}
-//		}
-//		return node.getIdentifier();
 		String nameID = node.getIdentifier();
 		return nameID;
 	}
 
 
 	public static String getJ2SName(IVariableBinding binding) {
-//		initConvertionMaps();
 		String nameID = binding.getName();
 		if (maps == null || maps.size() == 0) {
 			return nameID; 
@@ -75,7 +53,6 @@ public class NameConverterUtil {
 		if (declaringClass != null) {
 			className = declaringClass.getQualifiedName();
 		}
-//		System.out.println("checking " + className + "." + nameID);
 		
 		String key = className + "." + nameID;
 		Object value = maps.get(key);
@@ -88,7 +65,6 @@ public class NameConverterUtil {
 
 
 	public static String getJ2SName(IMethodBinding binding) {
-//		initConvertionMaps();
 		String nameID = binding.getName();
 		if (maps == null || maps.size() == 0) {
 			return nameID; 
@@ -117,21 +93,6 @@ public class NameConverterUtil {
 			return item.toVarName;
 		}
 		return nameID;
-	}
-
-	private static void initConvertionMaps() {
-		if (maps != null) {
-			return ;
-		}
-//		String swt = "org.eclipse.swt.";
-//		String widgets = swt + "widgets.";
-//		maps = new NameConvertItem[] {
-//					new NameConvertItem(widgets + "Widget", "data", "d"),	
-//					new NameConvertItem(widgets + "Widget", "display", "p"),	
-//					new NameConvertItem(widgets + "WWidget", "handle", "l"),	
-//					new NameConvertItem(widgets + "Widget", "create", "c"),	
-//					new NameConvertItem(widgets + "Widget", "handle", "h")	
-//				};
 	}
 	
 	public static void setJ2SMap(Map m) {

@@ -47,7 +47,6 @@ public class PropertyMethodMap {
 	}
 	
 	public static void register(String className, String methodName, String propertyName) {
-//		pmMap.put(className + "." + methodName, new PMPair(className, methodName, propertyName));
 		pmMap.put(className + "." + methodName, propertyName);
 		methodSet.add(methodName);
 	}
@@ -58,51 +57,7 @@ public class PropertyMethodMap {
 	
 	public static String translate(String className, String methodName) {
 		return (String) pmMap.get(className + "." + methodName);
-//		PMPair pair = (PMPair) pmMap.get(className + "." + methodName);
-//		if (pair == null) {
-//			return null;
-//		} else {
-//			return pair.propertyName;
-//		}
 	}
 	
 	
-//	private static class PMPair {
-//		String className;
-//		String methodName;
-//		String propertyName;
-//		
-//		private PMPair() {
-//			super();
-//		}
-//
-//		public PMPair(String className, String methodName, String propertyName) {
-//			super();
-//			this.className = className;
-//			this.methodName = methodName;
-//			this.propertyName = propertyName;
-//		}
-//		
-//		/* (non-Javadoc)
-//		 * @see java.lang.Object#equals(java.lang.Object)
-//		 */
-//		public boolean equals(Object obj) {
-//			if (obj == null || !(obj instanceof PMPair)) {
-//				return false;
-//			}
-//			PMPair pair = (PMPair) obj;
-//			return (className.equals(pair.className) 
-//					&& methodName.equals(pair.methodName)
-//					&& propertyName.equals(pair.propertyName));
-//		}
-//		
-//		/* (non-Javadoc)
-//		 * @see java.lang.Object#hashCode()
-//		 */
-//		public int hashCode() {
-//			return this.className.hashCode() 
-//					^ this.methodName.hashCode() 
-//					^ this.propertyName.hashCode();
-//		}
-//	}
 }

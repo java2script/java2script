@@ -15,12 +15,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class CheckFieldMethodName {
 	public static boolean checkSameName(ITypeBinding binding, String name) {
-		//System.out.println("check");
 		if (binding != null) {
-			//System.out.println("check in..");
 			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
-//				String methodName = declaredMethods[i].getName();
 				String methodName = NameConverterUtil.getJ2SName(declaredMethods[i]);
 				if (name.equals(methodName)) {
 					return true;
