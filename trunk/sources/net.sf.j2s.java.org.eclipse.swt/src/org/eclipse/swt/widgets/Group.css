@@ -232,3 +232,6 @@
 .group-shadow-etched-out .group-bottom-line-right {
 	border-style:none outset outset none;
 }
+.swt-widgets-group {
+	width:324px;
+}

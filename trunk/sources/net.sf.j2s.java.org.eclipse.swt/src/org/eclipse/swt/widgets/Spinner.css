@@ -62,3 +62,6 @@
 .spinner-disabled .spinner-button-arrow-down {
 	border-top-color:gray;
 }
+.swt-widgets-spinner {
+	width:324px;
+}

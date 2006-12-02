@@ -125,4 +125,6 @@
 .cool-bar-disabled .cool-item-more:hover {
 	border:1px solid menu !important;
 }
-
+.swt-widgets-coolbar {
+	width:324px;
+}

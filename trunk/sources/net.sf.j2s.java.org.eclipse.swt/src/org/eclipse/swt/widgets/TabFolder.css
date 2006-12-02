@@ -121,8 +121,8 @@
 	border-top:1px solid white;
 	border-left:1px solid white;
 	border-right:2px outset #777;
-	border-bottom-style:none;
 	background-color:menu;
+	border-bottom-style:none;
 }
 * html .tab-item-default {
 	padding-top:1px;
@@ -265,4 +265,7 @@
 	position:absolute;
 	width:100%;
 	z-index:120;
+}
+.swt-widgets-tabfolder {
+	width:324px;
 }

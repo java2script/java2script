@@ -86,3 +86,6 @@
     _font-size:14px;
     overflow:hidden;
 }
+.swt-widgets-composite {
+	width:324px;
+}

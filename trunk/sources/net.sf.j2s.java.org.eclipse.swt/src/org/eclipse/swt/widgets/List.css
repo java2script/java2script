@@ -7,4 +7,7 @@
 }
 .list-border {
 	border:2px inset gray;
-]
+}
+.swt-widgets-list {
+	width:324px;
+}

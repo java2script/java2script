@@ -204,4 +204,6 @@ div.table-image {
     _font-size:14px;
     overflow:hidden;
 }
-
+.swt-widgets-table {
+	width:324px;
+}
