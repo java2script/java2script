@@ -1284,7 +1284,8 @@ ClazzLoader.updateNode = function (node) {
 		var isOptionsOK = false;
 		if (((node.optionals == null || node.optionals.length == 0) 
 				&& (node.musts == null || node.musts.length == 0))
-				|| node.declaration == null) {
+				|| (node.status > ClazzNode.STATUS_KNOWN 
+				&& node.declaration == null)) {
 			isOptionsOK = true;
 		} else {
 			isOptionsOK = true;
@@ -1292,6 +1293,7 @@ ClazzLoader.updateNode = function (node) {
 				var n = node.musts[i];
 				if (n.status < ClazzNode.STATUS_OPTIONALS_LOADED) {
 					isOptionsOK = false;
+					break;
 				}
 			}
 			if (isOptionsOK) {
@@ -1299,6 +1301,7 @@ ClazzLoader.updateNode = function (node) {
 					var n = node.optionals[i];
 					if (n.status < ClazzNode.STATUS_OPTIONALS_LOADED) {
 						isOptionsOK = false;
+						break;
 					}
 				}
 			}
