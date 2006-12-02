@@ -340,5 +340,6 @@ tree-image tree-image-icon {
     _font-size:14px;
     overflow:hidden;
 }
-
-
+.swt-widgets-tree {
+	width:324px;
+}

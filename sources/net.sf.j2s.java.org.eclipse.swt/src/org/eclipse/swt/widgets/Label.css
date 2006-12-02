@@ -75,3 +75,6 @@
 .shadow-none .label-seperator-vertical-right {
 	border-style:none;
 }
+.swt-widgets-label {
+	width:324px;
+}

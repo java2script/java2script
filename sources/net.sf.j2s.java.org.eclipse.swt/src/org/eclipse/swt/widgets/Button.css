@@ -181,3 +181,6 @@
 .button-text-mnemonics {
 	text-decoration:underline;
 }
+.swt-widgets-button {
+	width:324px;
+}

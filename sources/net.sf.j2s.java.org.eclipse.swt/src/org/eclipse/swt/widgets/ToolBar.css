@@ -245,3 +245,6 @@ tool-bar-default .tool-item-inner-control:hover {
 	border:0 solid menu !important;
 	border-top-width:0px !important;
 }
+.swt-widgets-toolbar {
+	width:324px;
+}

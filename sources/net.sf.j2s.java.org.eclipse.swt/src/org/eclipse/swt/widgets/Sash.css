@@ -19,3 +19,6 @@
 	background-color:gray;
 	z-index:100;
 }
+.swt-widgets-sash {
+	width:324px;
+}

@@ -153,7 +153,7 @@
 	background-color:menu;
 }
 
-.ctab-item-attach-close-left{
+.ctab-item-attach-close-left {
 	float: right;
 	border-style:none none none none;
 	background-image:url('images/ctab-simple-close.gif');
@@ -177,7 +177,7 @@
 	font-size:8pt;
 }
 
-.ctab-item-attach-close-right{
+.ctab-item-attach-close-right {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -188,7 +188,7 @@
 	background-color:menu;
 }
 .ctab-item-attach-close-right-hover,
-.ctab-item-attach-close-right:hover{
+.ctab-item-attach-close-right:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
@@ -230,7 +230,7 @@
 	background-color:menu;
 }
 
-.ctab-item-attach-rounded-close-left{
+.ctab-item-attach-rounded-close-left {
 	float: right;
 	border-style:none none none none;
 	background-image:url('images/ctab-simple-close.gif');
@@ -254,7 +254,7 @@
 	font-size:8pt;
 }
 
-.ctab-item-attach-rounded-close-right{
+.ctab-item-attach-rounded-close-right {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -265,7 +265,7 @@
 	background-color:menu;
 }
 .ctab-item-attach-rounded-close-right-hover,
-.ctab-item-attach-rounded-close-right:hover{
+.ctab-item-attach-rounded-close-right:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
@@ -297,7 +297,7 @@
 	background-position:top right;
 	background-color:menu;
 }
-.ctab-item-selected .ctab-item-attach-default-right{
+.ctab-item-selected .ctab-item-attach-default-right {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -308,7 +308,7 @@
 	background-color:menu;
 }
 .ctab-item-selected .ctab-item-attach-default-right-hover, 
-.ctab-item-selected .ctab-item-attach-default-right:hover{
+.ctab-item-selected .ctab-item-attach-default-right:hover {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -319,7 +319,7 @@
 	background-color:menu;
 }
 /*
-.ctab-item-selected .ctab-item-attach-close-rounded-right{
+.ctab-item-selected .ctab-item-attach-close-rounded-right {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -330,7 +330,7 @@
 	background-color:blue;
 }
 
-.ctab-item-selected .ctab-item-attach-default-rounded-right{
+.ctab-item-selected .ctab-item-attach-default-rounded-right {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -342,7 +342,7 @@
 }
 */
 
-.ctab-item-selected .ctab-item-attach-close-left{
+.ctab-item-selected .ctab-item-attach-close-left {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -353,7 +353,7 @@
 	background-color:blue;
 }
 
-.ctab-item-selected .ctab-item-attach-default-left{
+.ctab-item-selected .ctab-item-attach-default-left {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -364,7 +364,7 @@
 	background-color:blue;
 }
 /*
-.ctab-item-selected .ctab-item-attach-close-rounded-left{
+.ctab-item-selected .ctab-item-attach-close-rounded-left {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -375,7 +375,7 @@
 	background-color:blue;
 }
 
-.ctab-item-selected .ctab-item-attach-default-rounded-left{
+.ctab-item-selected .ctab-item-attach-default-rounded-left {
 	float:right;
 	width:15px;
 	overflow:hidden;
@@ -409,7 +409,7 @@
 }
 
 .ctab-item-rounded-selected .ctab-item-attach-rounded-default-right-hover,
-.ctab-item-rounded-selected .ctab-item-attach-rounded-default-right:hover{
+.ctab-item-rounded-selected .ctab-item-attach-rounded-default-right:hover {
 	float:right;
 	width:37px;
 	overflow:hidden;
@@ -444,7 +444,7 @@
 	background-color:menu;
 }
 
-.ctab-item-rounded-selected .ctab-item-attach-rounded-close-left{
+.ctab-item-rounded-selected .ctab-item-attach-rounded-close-left {
 	float: right;
 	border-style:none none none none;
 	background-image:url('images/ctab-simple-close.gif');
@@ -468,7 +468,7 @@
 	font-size:8pt;
 }
 
-.ctab-item-rounded-selected .ctab-item-attach-rounded-close-right{
+.ctab-item-rounded-selected .ctab-item-attach-rounded-close-right {
 	float:right;
 	width:37px;
 	overflow:hidden;
@@ -479,11 +479,14 @@
 	background-color:menu;
 }
 .ctab-item-rounded-selected .ctab-item-attach-rounded-close-right-hover,
-.ctab-item-rounded-selected .ctab-item-attach-rounded-close-right:hover{
+.ctab-item-rounded-selected .ctab-item-attach-rounded-close-right:hover {
 	background-image:url('images/ctab-simple-close-hover.gif');
 	background-repeat:no-repeat;
 	background-position:top right;
 	background-color:menu;
 	font-family:Arial, sans-serif;
 	font-size:8pt;
+}
+.swt-custom-ctabfolder {
+	width:324px;
 }
