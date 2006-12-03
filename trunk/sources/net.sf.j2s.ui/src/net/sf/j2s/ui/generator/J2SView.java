@@ -11,9 +11,9 @@
 package net.sf.j2s.ui.generator;
 
 
+import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
-import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
@@ -303,7 +303,7 @@ public class J2SView extends ViewPart {
 			SWTScriptVisitor visitor = new SWTScriptVisitor();
 			
 			visitor.setToCompileVariableName(fCompressVarName);
-			NameConverterUtil.setJ2SMap(null);
+			ASTJ2SMapVisitor.setJ2SMap(null);
 			if (fCompressVarName) {
 				String prjFolder = null;
 				if (fOpenable instanceof IJavaElement) {
