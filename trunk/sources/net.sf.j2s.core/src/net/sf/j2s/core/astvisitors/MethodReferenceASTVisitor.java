@@ -13,6 +13,7 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -21,31 +22,32 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 /**
- * @author josson smith
- *
+ * This visitor is used to find out those private methods that are never 
+ * referenced.
+ * 
+ * @author zhou renjian
  * 2006-5-1
  */
 public class MethodReferenceASTVisitor extends ASTVisitor {
 
-	private boolean isReferenced = false;
+	private boolean isReferenced;
 	private String methodSignature;
-	
-	public MethodReferenceASTVisitor() {
+
+	private MethodReferenceASTVisitor(String methodSignature) {
 		super();
-	}
-
-	public MethodReferenceASTVisitor(boolean visitDocTags) {
-		super(visitDocTags);
-	}
-
-	public void setMethodSignature(String constructorSignature) {
-		this.methodSignature = constructorSignature;
-	}
-
-	public boolean isReferenced() {
-		return isReferenced;
+		this.methodSignature = methodSignature;
 	}
 	
+	public static boolean checkReference(ASTNode node, String methodSignature) {
+		MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor(methodSignature);
+		methodRefVisitor.isReferenced = false;
+		/*
+		 * TODO: Should use a faster return method!
+		 */
+		node.accept(methodRefVisitor);
+		return methodRefVisitor.isReferenced;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
 	 */

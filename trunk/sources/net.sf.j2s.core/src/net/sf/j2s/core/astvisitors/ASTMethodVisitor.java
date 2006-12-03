@@ -13,22 +13,54 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * @author josson smith
+ * @author zhou renjian
  *
- * 2006-2-15
+ * 2006-12-3
  */
-public class W3CDOM2Map {
-	
+public class ASTMethodVisitor extends ASTTypeVisitor {
+
+	private static Set methodSet;
+	private static Map pmMap;
+
+	static {
+		init();
+	}
+
+	public static void init() {
+		pmMap = new HashMap();
+		methodSet = new HashSet();
+		register("java.lang.String", "length", "length");
+		register("java.lang.String", "replace", "~replace");
+		register("java.lang.String", "split", "~plit");
+		ASTMethodVisitor.registerAllMaps();
+	}
+
+	public static boolean isMethodRegistered(String methodName) {
+		return methodSet.contains(methodName);
+	}
+
+	public static void register(String className, String methodName, String propertyName) {
+		pmMap.put(className + "." + methodName, propertyName);
+		methodSet.add(methodName);
+	}
+
+	public static String translate(String className, String methodName) {
+		return (String) pmMap.get(className + "." + methodName);
+	}
+
 	public static final String PACKAGE_PREFIX = "org.w3c.dom.";
-	
 	public static String[] mapDocument = new String[] {
 		"Document",
 		"doctype",
 		"implementation",
 		"documentElement"
 	};
-	
 	public static String[] mapNode = new String[] {
 		"Node",
 		"nodeName",
@@ -95,14 +127,15 @@ public class W3CDOM2Map {
 		"target",
 		"data"
 	};
-	
+
 	protected static void registerMap(String[] map) {
 		for (int i = 1; i < map.length; i++) {
-			PropertyMethodMap.register(PACKAGE_PREFIX + map[0], 
+			register(PACKAGE_PREFIX + map[0], 
 					"get" + map[i].substring(0, 1).toUpperCase() 
 					+ map[i].substring(1), map[i]);
 		}
 	}
+
 	public static void registerAllMaps() {
 		registerMap(mapDocument);
 		registerMap(mapNode);
@@ -115,5 +148,4 @@ public class W3CDOM2Map {
 		registerMap(mapNotation);
 		registerMap(mapEntity);
 		registerMap(mapProcessingInstruction);
-	}
-}
+	}}
