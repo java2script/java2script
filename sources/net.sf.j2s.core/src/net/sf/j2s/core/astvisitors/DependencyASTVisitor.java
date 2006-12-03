@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -59,14 +58,13 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
+ * 
  * @author josson smith
  * 
  * 2006-5-2
  */
-public class DependencyASTVisitor extends ASTVisitor {
+public class DependencyASTVisitor extends ASTEmptyParser {
 	protected StringBuffer buffer = new StringBuffer();
-
-	protected String thisPackageName = "";
 	
 	protected Set classNameSet = new HashSet();
 
@@ -88,14 +86,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 
 	protected boolean toCompileVariableName = true;
 	
-	public DependencyASTVisitor() {
-		super();
-	}
-
-	public DependencyASTVisitor(boolean visitDocTags) {
-		super(visitDocTags);
-	}
-
 	public StringBuffer getBuffer() {
 		return buffer;
 	}
@@ -103,15 +93,11 @@ public class DependencyASTVisitor extends ASTVisitor {
 	public void setBuffer(StringBuffer buffer) {
 		this.buffer = buffer;
 	}
-
-	public String getPackageName() {
-		return thisPackageName;
-	}
 	
 	/**
 	 * @return Returns the thisClassName.
 	 */
-	public String[] getClassName() {
+	public String[] getClassNames() {
 		return (String[]) classNameSet.toArray(new String[0]);
 	}
 	
@@ -210,7 +196,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (classNameSet.size() > 1) {
 			buf.append("[");
 		}
-		joinArrayClasses(buf, getClassName(), null);
+		joinArrayClasses(buf, getClassNames(), null);
 		if (classNameSet.size() > 1) {
 			buf.append("]");
 		}
@@ -359,7 +345,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 			qualifiedName = resolveTypeBinding.getQualifiedName();
 			qn.binding = resolveTypeBinding;
 		}
-		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
@@ -505,7 +491,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = superBinding.getQualifiedName();
 					qn.binding = superBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node)) {
 					musts.add(qn);
@@ -535,7 +521,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 						qualifiedName = binding.getQualifiedName();
 						qn.binding = binding;
 					}
-					qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+					qualifiedName = discardGenericType(qualifiedName);
 					qn.qualifiedName = qualifiedName;
 					if (isQualifiedNameOK(qualifiedName, node)) {
 						musts.add(qn);
@@ -722,7 +708,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				qn.binding = resolveTypeBinding;
 			}
 		}
-		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
@@ -750,7 +736,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				qualifiedName = resolveTypeBinding.getQualifiedName();
 				qn.binding = resolveTypeBinding;
 			}
-			qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+			qualifiedName = discardGenericType(qualifiedName);
 			qn.qualifiedName = qualifiedName;
 			if (isQualifiedNameOK(qualifiedName, node) 
 					&& !musts.contains(qn)
@@ -781,7 +767,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
 						&& !musts.contains(qn)
@@ -887,7 +873,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
 						&& !musts.contains(qn)

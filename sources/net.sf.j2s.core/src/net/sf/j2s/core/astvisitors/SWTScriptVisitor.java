@@ -12,8 +12,6 @@ package net.sf.j2s.core.astvisitors;
 
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -36,16 +34,30 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
+	/**
+	 * Mark whether current statement are before or after SWT's while block.
+	 * <code>
+	 * ...
+	 * shell.open();
+	 * while (!shell.isDisposed()) {
+	 * 	if (!display.readAndDispatch())
+	 * 		display.sleep();
+	 * }
+	 * display.dispose();
+	 * ...
+	 * </code>
+	 */
 	private boolean metSWTBlockWhile = false;
+	
+	/**
+	 * Mark whether current statement are before or after Dialog#open call.
+	 * <code>
+	 * ...
+	 * dialog.open();
+	 * ...
+	 * </code>
+	 */
 	private boolean metDialogOpen = false;
-
-	public SWTScriptVisitor() {
-		super();
-	}
-
-	public SWTScriptVisitor(boolean visitDocTags) {
-		super(visitDocTags);
-	}
 
 	/* (non-Javadoc)
 	 * @see net.sf.j2s.core.astvisitors.ASTKeywordParser#skipDeclarePackages()
@@ -75,7 +87,11 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	}
 	
 	public boolean visit(SimpleName node) {
-		if (checkConstantValue(node)) return false;
+		String constValue = checkConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
+			return false;
+		}
 		IBinding binding = node.resolveBinding();
 		if (binding != null
 				&& binding instanceof ITypeBinding) {
@@ -101,7 +117,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return super.visit(node);
 	}
 	public boolean visit(QualifiedName node) {
-		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
+		if (isSimpleQualified(node)) {
+			String constValue = checkConstantValue(node);
+			if (constValue != null) {
+				buffer.append(constValue);
+				return false;
+			}
+		}
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
@@ -131,7 +153,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						} else {
 							name = "";
 						}
-						name = JavaLangUtil.ripJavaLang(name);
+						name = shortenQualifiedName(name);
 						if (name.indexOf("java.lang") != -1) {
 							name = name.substring(9);
 						}
@@ -175,17 +197,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		if (anonDeclare != null) {
 		} else {
 			String fqName = null;
-			if (node.getAST().apiLevel() != AST.JLS3) {
-				fqName = node.getName().getFullyQualifiedName();
+			String name = getTypeStringName(node.getType());
+			if (name != null) {
+				fqName = name;//.getFullyQualifiedName();
 			} else {
-				String name = ASTJL3.getTypeStringName(node.getType());
-				if (name != null) {
-					fqName = name;//.getFullyQualifiedName();
-				} else {
-					fqName = "noname";
-				}
+				fqName = "noname";
 			}
-			fqName = JavaLangUtil.ripJavaLang(fqName);
+			fqName = shortenQualifiedName(fqName);
 			String filterKey = "org.eclipse.swt.internal.xhtml.";
 			if (fqName.startsWith(filterKey)) {
 				buffer.append(" new ");

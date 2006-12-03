@@ -12,8 +12,6 @@ package net.sf.j2s.core.astvisitors;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -32,16 +30,15 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -59,49 +56,30 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
-public class ASTScriptVisitor extends ASTKeywordParser {
+/**
+ * ASTScriptVisitor has to solve the following compiling problems:
+ * 1. Field and method names:
+ * 1.1 Java and JavaScript keywords;
+ * 1.2 super; 
+ * 1.3 private; 
+ * 1.4 .j2smap;
+ * 1.5 ...
+ * 2. Final variables
+ * 3. @-j2s* tags
+ * 4. 
+ * 
+ * @author zhou renjian
+ *
+ * 2006-12-3
+ */
+public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private StringBuffer laterBuffer = new StringBuffer();
 
-	private String thisClassName = "";
-	
-	private int anonymousCount = 0;
-	
 	//private boolean isInnerClass = false;
 
 	protected AbstractTypeDeclaration rootTypeNode;
 	
-	public ASTScriptVisitor() {
-		super();
-	}
-
-	public ASTScriptVisitor(boolean visitDocTags) {
-		super(visitDocTags);
-	}
-
-	public int getAnonymousCount() {
-		return anonymousCount;
-	}
-
-	public String getClassName() {
-		return thisClassName;
-	}
-	
-	public String getFullClassName() {
-		String fullClassName = null;
-		if (thisPackageName != null && thisPackageName.length() != 0
-				&& !"java.lang".equals(thisPackageName)) {
-			fullClassName = thisPackageName + '.' + thisClassName;
-		} else {
-			fullClassName = thisClassName;
-		}
-		return fullClassName;
-	}
-	
-	public void endVisit(AnonymousClassDeclaration node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(AnonymousClassDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
 		anonymousCount++;
@@ -201,7 +179,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(JavaLangUtil.ripJavaLang(fullClassName.substring(0, lastIndexOf)));
+			buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -211,7 +189,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			ITypeBinding superclass = binding.getSuperclass();
 			if (superclass != null) {
 				String clazzName = superclass.getQualifiedName();
-				clazzName = JavaLangUtil.ripJavaLang(clazzName);
+				clazzName = shortenQualifiedName(clazzName);
 				if (clazzName != null && clazzName.length() != 0
 						&& !"Object".equals(clazzName)) {
 					buffer.append(", ");
@@ -221,7 +199,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					if (declaredTypes != null && declaredTypes.length > 0) {
 						clazzName = declaredTypes[0].getQualifiedName();
 						if (clazzName != null && clazzName.length() != 0) {
-							clazzName = JavaLangUtil.ripJavaLang(clazzName);
+							clazzName = shortenQualifiedName(clazzName);
 							buffer.append(", null, ");
 							buffer.append(clazzName);
 						}
@@ -306,10 +284,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(CastExpression node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(CastExpression node) {
 		Type type = node.getType();
 		/*
@@ -364,10 +338,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(ClassInstanceCreation node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ClassInstanceCreation node) {
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		Expression expression = node.getExpression();
@@ -384,9 +354,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 						buffer.append("Clazz.innerTypeInstance (");
 						if (binding.isAnonymous() || binding.isLocal()) {
-							buffer.append(JavaLangUtil.ripJavaLang(binding.getBinaryName()));
+							buffer.append(shortenQualifiedName(binding.getBinaryName()));
 						} else {
-							buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+							buffer.append(shortenQualifiedName(binding.getQualifiedName()));
 						}
 						buffer.append(", this, ");
 						buffer.append("null"); // No final variables for non-anonymous class
@@ -400,13 +370,13 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 					}
 				}
 			}
-			String fqName = ASTJL3.getTypeStringName(node.getType());
+			String fqName = getTypeStringName(node.getType());
 			if ("String".equals(fqName) || "java.lang.String".equals(fqName)) {
 				buffer.append(" String.instantialize");
 			} else {
 				buffer.append(" new ");
 				if (fqName != null) {
-					fqName = JavaLangUtil.ripJavaLang(fqName);
+					fqName = shortenQualifiedName(fqName);
 					buffer.append(fqName);
 				}
 			}
@@ -444,7 +414,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			/*
 			 * TODO: Should get the class by type binding 
 			 */
-			buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
+			buffer.append(shortenQualifiedName(getFullClassName()));
 			buffer.append("$" + anonCount + ", innerThis, finalVars");
 			if (argSize > 0) {
 				buffer.append(", ");
@@ -494,20 +464,12 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(ConstructorInvocation node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ConstructorInvocation node) {
 		buffer.append("this.construct (");
 		visitList(node.arguments(), ", ");
 		buffer.append(");\r\n");
 		return false;
 	}
-	public void endVisit(EnumConstantDeclaration node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(EnumConstantDeclaration node) {
 		buffer.append("this.");
 		node.getName().accept(this);
@@ -546,7 +508,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(JavaLangUtil.ripJavaLang(fullClassName.substring(0, lastIndexOf)));
+			buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -567,7 +529,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			ITypeBinding binding = ((Type) element).resolveBinding();
 			if (binding != null) {
 				String clazzName = binding.getQualifiedName();
-				clazzName = JavaLangUtil.ripJavaLang(clazzName);
+				clazzName = shortenQualifiedName(clazzName);
 				buffer.append(clazzName);
 			} else {
 				buffer.append(element);
@@ -583,9 +545,24 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 
 		buffer.append(laterBuffer);
 		
-		EnumTypeWrapper enumWrapper = new EnumTypeWrapper(node);
-		
-		MethodDeclaration[] methods = enumWrapper.getMethods();
+//		EnumTypeWrapper enumWrapper = new EnumTypeWrapper(node);
+//		
+//		MethodDeclaration[] methods = enumWrapper.getMethods();
+		List bd = node.bodyDeclarations();
+		int methodCount = 0;
+		for (Iterator it = bd.listIterator(); it.hasNext(); ) {
+			if (it.next() instanceof MethodDeclaration) {
+				methodCount++;
+			}
+		}
+		MethodDeclaration[] methods = new MethodDeclaration[methodCount];
+		int next = 0;
+		for (Iterator it = bd.listIterator(); it.hasNext(); ) {
+			Object decl = it.next();
+			if (decl instanceof MethodDeclaration) {
+				methods[next++] = (MethodDeclaration) decl;
+			}
+		}
 		for (int i = 0; i < methods.length; i++) {
 			methods[i].accept(this);
 		}
@@ -780,10 +757,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 	}
 
 
-	public void endVisit(FieldAccess node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(FieldAccess node) {
 		/*
 		 * TODO: more complicated rules should be considered.
@@ -795,38 +768,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(FieldDeclaration node) {
-		super.endVisit(node);
-	}
-
-	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		if ((node.getModifiers() & Modifier.STATIC) != 0) {
-			return false;
-		}
-
-		List fragments = node.fragments();
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
-			Expression initializer = element.getInitializer();
-			if (initializer != null) {
-				Object constValue = initializer.resolveConstantExpressionValue();
-				if (constValue != null && (constValue instanceof Number
-						|| constValue instanceof Character
-						|| constValue instanceof Boolean
-						|| constValue instanceof String)) {
-					return false;
-				}
-				if (initializer instanceof NullLiteral) {
-					return false;
-				}
-				return true;
-			} else {
-				return false;
-			}
-		}
-		return false;
-	}
-	
 	public boolean visit(FieldDeclaration node) {
 		return visitWith(node, false);
 	}
@@ -855,21 +796,21 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		List fragments = node.fragments();
 		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
-			String fieldName = NameConverterUtil.getJ2SName(element.getName());
+			String fieldName = getJ2SName(element.getName());
 //			String fieldName = element.getName().getIdentifier();
 			String ext = "";
-			if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
+			if (checkKeyworkViolation(fieldName)) {
 				ext += "$";
 			}
 			if (typeBinding != null 
-					&& CheckFieldMethodName.checkSameName(typeBinding, fieldName)) {
+					&& checkSameName(typeBinding, fieldName)) {
 				ext += "$";
 			}
 			//fieldName = ext + fieldName;
 			//buffer.append(fieldName);
 			buffer.append("this.");
-			if (SearchSuperField.isInheritedFieldName(typeBinding, fieldName)) {
-				fieldName = SearchSuperField.getFieldName(typeBinding, fieldName);
+			if (isInheritedFieldName(typeBinding, fieldName)) {
+				fieldName = getFieldName(typeBinding, fieldName);
 				buffer.append(ext + fieldName);
 			} else {
 				buffer.append(ext + fieldName);
@@ -906,6 +847,161 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				}
 			buffer.append(";\r\n");
 		}
+		return false;
+	}
+
+
+	private boolean checkSimpleBooleanOperator(String op) {
+		if (op.equals("^")
+				|| op.equals("|")
+				|| op.equals("&")) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean checkInfixOperator(InfixExpression node) {
+		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
+			return true;
+		}
+		Expression left = node.getLeftOperand();
+		if (left instanceof InfixExpression) {
+			if (checkInfixOperator((InfixExpression) left)) {
+				return true;
+			}
+		}
+		Expression right = node.getRightOperand();
+		if (right instanceof InfixExpression) {
+			if (checkInfixOperator((InfixExpression) right)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void charVisit(ASTNode node, boolean beCare) {
+		if (!beCare || !(node instanceof Expression)) {
+			boxingNode(node);
+			return ;
+		}
+		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
+		if (binding.isPrimitive() && "char".equals(binding.getName())) {
+			buffer.append("(");
+			boxingNode(node);
+			buffer.append(").charCodeAt (0)");
+		} else {
+			boxingNode(node);
+		}
+	}
+	public boolean visit(InfixExpression node) {
+		String constValue = checkConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
+			return false;
+		}
+		ITypeBinding expTypeBinding = node.resolveTypeBinding();
+		boolean beCare = false;
+		if (expTypeBinding != null 
+				&& expTypeBinding.getName().indexOf("String") == -1) {
+			beCare = true;
+		}
+		String operator = node.getOperator().toString();
+		Expression left = node.getLeftOperand();
+		ITypeBinding typeBinding = left.resolveTypeBinding();
+		if ("/".equals(operator)) {
+			if (typeBinding != null && typeBinding.isPrimitive()) {
+				if (isIntegerType(typeBinding.getName())) {
+					Expression right = node.getRightOperand();
+					ITypeBinding rightTypeBinding = right.resolveTypeBinding();
+					if (isIntegerType(rightTypeBinding.getName())) {
+						StringBuffer tmpBuffer = buffer;
+						buffer = new StringBuffer();
+						
+						buffer.append("Math.floor (");
+						charVisit(left, beCare);
+						buffer.append(' ');
+						buffer.append(operator);
+						buffer.append(' ');
+						charVisit(right, beCare);
+						buffer.append(')');
+						List extendedOperands = node.extendedOperands();
+						if (extendedOperands.size() > 0) {
+							for (Iterator iter = extendedOperands.iterator(); iter.hasNext();) {
+								ASTNode element = (ASTNode) iter.next();
+								boolean is2Floor = false;
+								if (element instanceof Expression) {
+									Expression exp = (Expression) element;
+									ITypeBinding expBinding = exp.resolveTypeBinding();
+									if (isIntegerType(expBinding.getName())) {
+										buffer.insert(0, "Math.floor (");
+										is2Floor = true;
+									}
+								}
+								buffer.append(' ');
+								buffer.append(operator);
+								buffer.append(' ');
+								charVisit(element, beCare);
+								if (is2Floor) {
+									buffer.append(')');
+								}
+							}
+						}
+
+						tmpBuffer.append(buffer);
+						buffer = tmpBuffer;
+						tmpBuffer = null;
+						
+						return false;
+					}
+				}
+			}
+		}
+		boolean simple = false; 
+		if (typeBinding != null && typeBinding.isPrimitive()) {
+			if ("boolean".equals(typeBinding.getName())) {
+				if (checkInfixOperator(node)) {
+					buffer.append(" new Boolean (");
+					simple = true;
+				}
+			}
+		}
+
+		charVisit(node.getLeftOperand(), beCare);
+		buffer.append(' ');
+		buffer.append(operator);
+		buffer.append(' ');
+		charVisit(node.getRightOperand(), beCare);
+		List extendedOperands = node.extendedOperands();
+		if (extendedOperands.size() > 0) {
+			for (Iterator iter = extendedOperands.iterator(); iter.hasNext();) {
+				buffer.append(' ');
+				buffer.append(operator);
+				buffer.append(' ');
+				ASTNode element = (ASTNode) iter.next();
+				charVisit(element, beCare);
+			}
+		}
+		if (simple) {
+			buffer.append(").valueOf ()");
+		}
+		return false;
+	}
+
+	public boolean visit(Initializer node) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if ("@j2sIgnore".equals(tagEl.getTagName())) {
+						return false;
+					}
+				}
+			}
+		}
+		//visitList(node.getBody().statements(), "\r\n");
+		node.getBody().accept(this);
 		return false;
 	}
 
@@ -1101,10 +1197,9 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
-			MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor();
-			methodRefVisitor.setMethodSignature(node.resolveBinding().getKey());
-			node.getRoot().accept(methodRefVisitor);
-			if (!methodRefVisitor.isReferenced()) {
+			boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
+					node.resolveBinding().getKey());
+			if (!isReferenced) {
 				boolean isForced2Keep = false;
 				if (javadoc != null) {
 					List tags = javadoc.tags();
@@ -1156,17 +1251,12 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				if (testForceOverriding(methodBinding)) {
 					IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
 					if (superMethod != null) {
-						MethodReferenceASTVisitor methodRefVisitor = new MethodReferenceASTVisitor();
-						methodRefVisitor.setMethodSignature(superMethod.getKey());
 						ASTNode parentRoot = node.getParent();
 						while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {
 							parentRoot = parentRoot.getParent();
 						}
 						if (parentRoot != null) {
-							parentRoot.accept(methodRefVisitor);
-						}
-						if (!methodRefVisitor.isReferenced()) {
-							isOK2AutoOverriding = true;
+							isOK2AutoOverriding = !MethodReferenceASTVisitor.checkReference(parentRoot, superMethod.getKey());
 						}
 					}
 				}
@@ -1184,8 +1274,8 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append(", ");
 		} else {
 			buffer.append(", \"");
-			String identifier = NameConverterUtil.getJ2SName(node.getName());
-			if (JavaScriptKeywords.checkKeyworkViolation(identifier)) {
+			String identifier = getJ2SName(node.getName());
+			if (checkKeyworkViolation(identifier)) {
 				buffer.append('$');
 			}
 			buffer.append(identifier);
@@ -1227,7 +1317,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			if (binding != null) {
 				ITypeBinding declaringClass = binding.getDeclaringClass();
 				ITypeBinding superclass = declaringClass.getSuperclass();
-				String qualifiedName = JavaLangUtil.ripGeneric(superclass.getQualifiedName());
+				String qualifiedName = discardGenericType(superclass.getQualifiedName());
 				existedSuperClass = superclass != null 
 						&& !"java.lang.Object".equals(qualifiedName)
 						&& !"java.lang.Enum".equals(qualifiedName);
@@ -1236,7 +1326,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				blockLevel++;
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
-				buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
+				buffer.append(shortenQualifiedName(getFullClassName()));
 				buffer.append(", []);\r\n");
 				visitList(statements, ""); 
 				//buffer.append("}");
@@ -1293,7 +1383,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 						ITypeBinding binding = type.resolveBinding();
 						if (binding != null) {
 							String name = binding.getQualifiedName();
-							name = JavaLangUtil.ripJavaLang(name);
+							name = shortenQualifiedName(name);
 							if ("String".equals(name)) {
 								buffer.append("~S");
 							} else if ("Object".equals(name)) {
@@ -1316,33 +1406,27 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(MethodInvocation node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(MethodInvocation node) {
 		Expression expression = node.getExpression();
-		boolean existedPrefixExp =false;
 		if (expression != null) {
 			/*
 			 * Here?
 			 */
 			expression.accept(this);
 			buffer.append(".");
-			existedPrefixExp = true;
 		}
 		
 		String methodName = node.getName().getIdentifier();
 		List args = node.arguments();
 		int size = args.size();
 		boolean isSpecialMethod = false;
-		if (PropertyMethodMap.isMethodRegistered(methodName) 
+		if (isMethodRegistered(methodName) 
 				&& (size == 0 || methodName.equals("split") || methodName.equals("replace"))) {
 			IBinding binding = node.getName().resolveBinding();
 			if (binding != null && binding instanceof IMethodBinding) {
 				IMethodBinding mthBinding = (IMethodBinding) binding;
 				String className = mthBinding.getDeclaringClass().getQualifiedName();
-				String propertyName = PropertyMethodMap.translate(className, methodName);
+				String propertyName = translate(className, methodName);
 				if (propertyName != null) {
 					if (propertyName.startsWith("~")) {
 						buffer.append('$');
@@ -1377,37 +1461,12 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(NullLiteral node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(NullLiteral node) {
-		/*
-		 * TODO: Clazz.castNullAs should be used instead
-		 */
-		ITypeBinding binding = node.resolveTypeBinding();
-		if (binding != null)
-		buffer.append("null");
-		return super.visit(node);
-	}
-
-	public void endVisit(QualifiedType node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(QualifiedType node) {
-		/*
-		 * TODO: inner class
-		 */
-		return super.visit(node);
-	}
-
-	public void endVisit(SimpleName node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(SimpleName node) {
-		if (checkConstantValue(node)) return false;
+		String constValue = checkConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
+			return false;
+		}
 		IBinding binding = node.resolveBinding();
 		if (binding != null
 				&& binding instanceof ITypeBinding) {
@@ -1420,385 +1479,301 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				}
 			}
 		}
-		String thisClassName = getClassName();
 		ASTNode xparent = node.getParent();
 		if (xparent == null) {
 			buffer.append(node);
 			return false;
 		}
 		char ch = buffer.charAt(buffer.length() - 1);
-		if (xparent instanceof QualifiedName) {
-			if (ch == '.') {
-				if (binding != null) {
-					if (binding instanceof IVariableBinding) {
-						IVariableBinding varBinding = (IVariableBinding) binding;
-							IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-							ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-							String fieldName = NameConverterUtil.getJ2SName(node);
-							if (CheckFieldMethodName.checkSameName(declaringClass, fieldName)) {
-								buffer.append('$');
+		if (ch == '.' && xparent instanceof QualifiedName) {
+			if (binding != null && binding instanceof IVariableBinding) {
+				IVariableBinding varBinding = (IVariableBinding) binding;
+				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				String fieldName = getJ2SName(node);
+				if (checkSameName(declaringClass, fieldName)) {
+					buffer.append('$');
+				}
+				if (checkKeyworkViolation(fieldName)) {
+					buffer.append('$');
+				}
+				if (declaringClass != null
+						&& isInheritedFieldName(declaringClass, fieldName)) {
+					fieldName = getFieldName(declaringClass, fieldName);
+				}
+				buffer.append(fieldName);
+				return false;
+			}
+			buffer.append(node);
+			return false;
+		}
+		if (xparent instanceof ClassInstanceCreation 
+				&& !(binding instanceof IVariableBinding)) {
+			ITypeBinding binding2 = node.resolveTypeBinding();
+			if (binding != null) {
+				String name = binding2.getQualifiedName();
+				name = shortenQualifiedName(name);
+				buffer.append(name);
+			} else {
+				String nodeId = getJ2SName(node);
+				buffer.append(shortenQualifiedName(nodeId));
+			}
+			return false;
+		}
+		if (binding == null) {
+			String name = getJ2SName(node);
+			name = shortenQualifiedName(name);
+			if (checkKeyworkViolation(name)) {
+				buffer.append('$');
+			}
+			buffer.append(name);
+			return false;
+		}
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding varBinding = (IVariableBinding) binding;
+			simpleNameInVarBinding(node, ch, varBinding);
+		} else if (binding instanceof IMethodBinding) {
+			IMethodBinding mthBinding = (IMethodBinding) binding;
+			simpleNameInMethodBinding(node, ch, mthBinding);
+		} else {
+			ITypeBinding typeBinding = node.resolveTypeBinding();
+//				String name = NameConverterUtil.getJ2SName(node);
+			if (typeBinding != null) {
+				String name = typeBinding.getQualifiedName();
+				name = shortenQualifiedName(name);
+				if (checkKeyworkViolation(name)) {
+					buffer.append('$');
+				}
+				buffer.append(name);
+			} else {
+				String name = node.getFullyQualifiedName();
+				if (checkKeyworkViolation(name)) {
+					buffer.append('$');
+				}
+				buffer.append(name);
+			}
+		}
+		return false;
+	}
+
+	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
+		String thisClassName = getClassName();
+		if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
+			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			if (ch != '.' && ch != '\"'
+					&& declaringClass != null) {
+				String name = declaringClass.getQualifiedName();
+				if ((name == null || name.length() == 0) 
+						&& declaringClass.isAnonymous()) {
+					// TODO: FIXME: I count the anonymous class name myself
+					// and the binary name of the anonymous class will conflict
+					// with my anonymous class name!
+					name = declaringClass.getBinaryName();
+				}
+				name = shortenQualifiedName(name);
+				if (name.length() != 0) {
+					buffer.append(name);
+					buffer.append(".");
+				}
+			}
+			String fieldName = getJ2SName(node);
+			if (checkSameName(declaringClass, fieldName)) {
+				buffer.append('$');
+			}
+			if (checkKeyworkViolation(fieldName)) {
+				buffer.append('$');
+			}
+			if (declaringClass != null
+					&& isInheritedFieldName(declaringClass, fieldName)) {
+				fieldName = getFieldName(declaringClass, fieldName);
+			}
+			buffer.append(fieldName);				
+		} else {
+			ASTNode parent = node.getParent();
+			if (parent != null && !(parent instanceof FieldAccess)) {
+				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				if (declaringClass != null && thisClassName != null && ch != '.') {
+					appendFieldName(parent, declaringClass);
+				}
+			}
+			
+			String fieldVar = null;
+			if (this.isFinalSensible 
+					&& (varBinding.getModifiers() & Modifier.FINAL) != 0 
+					&& varBinding.getDeclaringMethod() != null) {
+				String key = varBinding.getDeclaringMethod().getKey();
+				if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
+					buffer.append("this.$finals.");
+					if (currentBlockForVisit != -1) {
+						int size = finalVars.size();
+						for (int i = 0; i < size; i++) {
+							FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
+							if (vv.getVariableName().equals(varBinding.getName())
+									&& vv.getBlockLevel() <= currentBlockForVisit) {
+								if (!visitedVars.contains(vv)) {
+									visitedVars.add(vv);
+								}
+								fieldVar = vv.getToVariableName();
 							}
-							if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
-								buffer.append('$');
-							}
-							if (declaringClass != null
-									&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
-								fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
-							}
-							buffer.append(fieldName);
-							return false;
+						}
 					}
 				}
-				buffer.append(node);
-				return false;
 			}
-		}
-		if (xparent instanceof ClassInstanceCreation) {
-			if (!(binding instanceof IVariableBinding)) {
-				ITypeBinding binding2 = node.resolveTypeBinding();
-				if (binding != null) {
-					String name = binding2.getQualifiedName();
-					name = JavaLangUtil.ripJavaLang(name);
-					buffer.append(name);
-				} else {
-					String nodeId = NameConverterUtil.getJ2SName(node);
-					buffer.append(JavaLangUtil.ripJavaLang(nodeId));
-				}
-				return false;
+
+			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+//					String fieldName = node.getFullyQualifiedName();
+			String fieldName = null;
+			if (declaringClass != null) {
+				fieldName = getJ2SName(node);
+			} else if (fieldVar == null) {
+				fieldName = getVariableName(node.getIdentifier());
+			} else {
+				fieldName = fieldVar;
 			}
+			//System.err.println(fieldName);
+			if (checkKeyworkViolation(fieldName)) {
+				buffer.append('$');
+			}
+			if (declaringClass != null 
+					&& checkSameName(declaringClass, fieldName)) {
+				buffer.append('$');
+			}
+			if (declaringClass != null
+					&& isInheritedFieldName(declaringClass, fieldName)) {
+				fieldName = getFieldName(declaringClass, fieldName);
+			}
+			buffer.append(fieldName);
 		}
-		if (binding != null) {
-			if (binding instanceof IVariableBinding) {
-				IVariableBinding varBinding = (IVariableBinding) binding;
-				if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-					IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-					ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-					if (ch != '.' && ch != '\"'
-							&& declaringClass != null) {
+	}
+
+	private void simpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
+		String thisClassName = getClassName();
+		if ((mthBinding.getModifiers() & Modifier.STATIC) != 0) {
+			IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+			boolean isClassString = false;
+			if (declaringClass != null) {
+				isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
+				ASTNode parent = node.getParent();
+				if (parent instanceof MethodInvocation) {
+					MethodInvocation mthInv = (MethodInvocation) parent;
+					if (mthInv.getExpression() == null) {
 						String name = declaringClass.getQualifiedName();
-						if ((name == null || name.length() == 0) 
-								&& declaringClass.isAnonymous()) {
-							// TODO: FIXME: I count the anonymous class name myself
-							// and the binary name of the anonymous class will conflict
-							// with my anonymous class name!
-							name = declaringClass.getBinaryName();
-						}
-						name = JavaLangUtil.ripJavaLang(name);
+						name = shortenQualifiedName(name);
 						if (name.length() != 0) {
 							buffer.append(name);
 							buffer.append(".");
 						}
 					}
-					String fieldName = NameConverterUtil.getJ2SName(node);
-					if (CheckFieldMethodName.checkSameName(declaringClass, fieldName)) {
-						buffer.append('$');
-					}
-					if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
-						buffer.append('$');
-					}
-					if (declaringClass != null
-							&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
-						fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
-					}
-					buffer.append(fieldName);				
-				} else {
-					ASTNode parent = node.getParent();
-					if (parent != null && !(parent instanceof FieldAccess)) {
-						IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-						ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-						if (declaringClass != null && thisClassName != null) {
-							if (ch != '.') {
-								String name = declaringClass.getQualifiedName();
-								boolean isThis = false;
-								int superLevel = 0;
-								while (parent != null) {
-									if (parent instanceof AbstractTypeDeclaration) {
-										AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
-										ITypeBinding typeBinding = type.resolveBinding();
-										superLevel++;
-//										if (SearchSuperClass.isInheritedClassName(typeBinding, name)) {
-										if (Bindings.isSuperType(declaringClass, typeBinding)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-											}
-											break;
-										}
-									} else if (parent instanceof AnonymousClassDeclaration) {
-										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
-										ITypeBinding typeBinding = type.resolveBinding();
-										superLevel++;
-										if (Bindings.isSuperType(declaringClass, typeBinding)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
-													name = typeBinding.getBinaryName();
-													int idx0 = name.lastIndexOf(".");
-													if (idx0 == -1) {
-														idx0 = 0;
-													}
-													int idx1 = name.indexOf('$', idx0);
-													if (idx1 != -1) {
-														// TODO: Comment the following codes!
-														// I can't understand why now -- Josson
-														int idx2 = name.indexOf('$', idx1 + 1);
-														String parentAnon = "";
-														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
-															parent = parent.getParent();
-															while (parent != null) {
-																if (parent instanceof AbstractTypeDeclaration) {
-																	break;
-																} else if (parent instanceof AnonymousClassDeclaration) {
-																	AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
-																	ITypeBinding aTypeBinding = atype.resolveBinding();
-																	String aName = aTypeBinding.getBinaryName();
-																	parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
-																}
-																parent = parent.getParent();
-															}
-															name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
-														}
-													}
-												}
-											}
-											break;
-										}
-									}
-									parent = parent.getParent();
-								}
-								if (!isThis) {
-									buffer.append("this.callbacks[\"");
-									buffer.append(JavaLangUtil.ripJavaLang(name));
-									buffer.append("\"].");
-								}
-							}
-						}
-					}
-					
-					String fieldVar = null;
-					if (this.isFinalSensible 
-							&& (varBinding.getModifiers() & Modifier.FINAL) != 0 
-							&& varBinding.getDeclaringMethod() != null) {
-						String key = varBinding.getDeclaringMethod().getKey();
-						if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
-							buffer.append("this.$finals.");
-							if (currentBlockForVisit != -1) {
-								int size = finalVars.size();
-								for (int i = 0; i < size; i++) {
-									FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
-									if (vv.getVariableName().equals(varBinding.getName())
-											&& vv.getBlockLevel() <= currentBlockForVisit) {
-										if (!visitedVars.contains(vv)) {
-											visitedVars.add(vv);
-										}
-										fieldVar = vv.getToVariableName();
-									}
-								}
-							}
-						}
-					}
-
-					IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-					ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-//					String fieldName = node.getFullyQualifiedName();
-					String fieldName = null;
-					if (declaringClass != null) {
-						fieldName = NameConverterUtil.getJ2SName(node);
-					} else {
-						if (fieldVar == null) {
-							fieldName = getVariableName(node.getIdentifier());
-						} else {
-							fieldName = fieldVar;
-						}
-					}
-					//System.err.println(fieldName);
-					if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
-						buffer.append('$');
-					}
-					if (declaringClass != null 
-							&& CheckFieldMethodName.checkSameName(declaringClass, fieldName)) {
-						buffer.append('$');
-					}
-					if (declaringClass != null
-							&& SearchSuperField.isInheritedFieldName(declaringClass, fieldName)) {
-						fieldName = SearchSuperField.getFieldName(declaringClass, fieldName);
-					}
-					buffer.append(fieldName);
-				}
-			} else if (binding instanceof IMethodBinding) {
-				IMethodBinding mthBinding = (IMethodBinding) binding;
-				if ((mthBinding.getModifiers() & Modifier.STATIC) != 0) {
-					IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
-					ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-					boolean isClassString = false;
-					if (declaringClass != null) {
-						isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-						ASTNode parent = node.getParent();
-						if (parent instanceof MethodInvocation) {
-							MethodInvocation mthInv = (MethodInvocation) parent;
-							if (mthInv.getExpression() == null) {
-								String name = declaringClass.getQualifiedName();
-								name = JavaLangUtil.ripJavaLang(name);
-								if (name.length() != 0) {
-									buffer.append(name);
-									buffer.append(".");
-								}
-							}
-						}
-					}
-//					String name = variableDeclaration.getName();
-					String name = NameConverterUtil.getJ2SName(node);
-					name = JavaLangUtil.ripJavaLang(name);
-					if (!(isClassString && "valueOf".equals(name)) && JavaScriptKeywords.checkKeyworkViolation(name)) {
-						buffer.append('$');
-					}
-					buffer.append(name);
-				} else {
-					ASTNode parent = node.getParent();
-					boolean isClassString = false;
-					if (parent != null && !(parent instanceof FieldAccess)) {
-						IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
-						ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
-						if (declaringClass != null && thisClassName != null) {
-							isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-							if (ch != '.') {
-								String name = declaringClass.getQualifiedName();
-								boolean isThis = false;
-								int superLevel = 0;
-								while (parent != null) {
-									if (parent instanceof AbstractTypeDeclaration) {
-										AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
-										ITypeBinding typeBinding = type.resolveBinding();
-										superLevel++;
-										if (Bindings.isSuperType(declaringClass, typeBinding)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-											}
-											break;
-										}
-									} else if (parent instanceof AnonymousClassDeclaration) {
-										AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
-										ITypeBinding typeBinding = type.resolveBinding();
-										superLevel++;
-										if (Bindings.isSuperType(declaringClass, typeBinding)) {
-											if (superLevel == 1) {
-												buffer.append("this.");
-												isThis = true;
-											} else {
-												name = typeBinding.getQualifiedName();
-												if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
-													name = typeBinding.getBinaryName();
-													int idx0 = name.lastIndexOf(".");
-													if (idx0 == -1) {
-														idx0 = 0;
-													}
-													int idx1 = name.indexOf('$', idx0);
-													if (idx1 != -1) {
-														int idx2 = name.indexOf('$', idx1 + 1);
-														String parentAnon = "";
-														if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
-															parent = parent.getParent();
-															while (parent != null) {
-																if (parent instanceof AbstractTypeDeclaration) {
-																	break;
-																} else if (parent instanceof AnonymousClassDeclaration) {
-																	AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
-																	ITypeBinding aTypeBinding = atype.resolveBinding();
-																	String aName = aTypeBinding.getBinaryName();
-																	parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
-																}
-																parent = parent.getParent();
-															}
-															name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
-														}
-													}
-												}
-											}
-											break;
-										}
-									}
-									parent = parent.getParent();
-								}
-								if (!isThis) {
-									buffer.append("this.callbacks[\"");
-									buffer.append(JavaLangUtil.ripJavaLang(name));
-									buffer.append("\"].");
-								}
-							}
-						}
-					}
-//					String name = node.getFullyQualifiedName();
-					String name = NameConverterUtil.getJ2SName(node);
-					name = JavaLangUtil.ripJavaLang(name);
-					if (!(isClassString && "valueOf".equals(name)) && JavaScriptKeywords.checkKeyworkViolation(name)) {
-						buffer.append('$');
-					}
-					buffer.append(name);
-				}
-			} else {
-				ITypeBinding typeBinding = node.resolveTypeBinding();
-//				String name = NameConverterUtil.getJ2SName(node);
-				if (typeBinding != null) {
-					String name = typeBinding.getQualifiedName();
-					name = JavaLangUtil.ripJavaLang(name);
-					if (JavaScriptKeywords.checkKeyworkViolation(name)) {
-						buffer.append('$');
-					}
-					buffer.append(name);
-				} else {
-					String name = node.getFullyQualifiedName();
-					if (JavaScriptKeywords.checkKeyworkViolation(name)) {
-						buffer.append('$');
-					}
-					buffer.append(name);
 				}
 			}
+//					String name = variableDeclaration.getName();
+			String name = getJ2SName(node);
+			name = shortenQualifiedName(name);
+			if (!(isClassString && "valueOf".equals(name)) && checkKeyworkViolation(name)) {
+				buffer.append('$');
+			}
+			buffer.append(name);
 		} else {
-			String name = NameConverterUtil.getJ2SName(node);
-			name = JavaLangUtil.ripJavaLang(name);
-			if (JavaScriptKeywords.checkKeyworkViolation(name)) {
+			ASTNode parent = node.getParent();
+			boolean isClassString = false;
+			if (parent != null && !(parent instanceof FieldAccess)) {
+				IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				if (declaringClass != null && thisClassName != null && ch != '.') {
+					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
+					appendFieldName(parent, declaringClass);
+				}
+			}
+//					String name = node.getFullyQualifiedName();
+			String name = getJ2SName(node);
+			name = shortenQualifiedName(name);
+			if (!(isClassString && "valueOf".equals(name)) && checkKeyworkViolation(name)) {
 				buffer.append('$');
 			}
 			buffer.append(name);
 		}
-		return false;
 	}
 
-	protected String getVariableName(String name) {
-		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) normalVars.get(i);
-			if (name.equals(var.getVariableName())) {
-				//return getIndexedVarName(name, i);
-				return var.getToVariableName();
+	private void appendFieldName(ASTNode parent, ITypeBinding declaringClass) {
+		String name = declaringClass.getQualifiedName();
+		boolean isThis = false;
+		int superLevel = 0;
+		while (parent != null) {
+			if (parent instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
+				ITypeBinding typeBinding = type.resolveBinding();
+				superLevel++;
+				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+					if (superLevel == 1) {
+						buffer.append("this.");
+						isThis = true;
+					} else {
+						name = typeBinding.getQualifiedName();
+					}
+					break;
+				}
+			} else if (parent instanceof AnonymousClassDeclaration) {
+				AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
+				ITypeBinding typeBinding = type.resolveBinding();
+				superLevel++;
+				if (Bindings.isSuperType(declaringClass, typeBinding)) {
+					if (superLevel == 1) {
+						buffer.append("this.");
+						isThis = true;
+					} else {
+						name = typeBinding.getQualifiedName();
+						if ((name == null || name.length() == 0) && typeBinding.isLocal()) {
+							name = typeBinding.getBinaryName();
+							int idx0 = name.lastIndexOf(".");
+							if (idx0 == -1) {
+								idx0 = 0;
+							}
+							int idx1 = name.indexOf('$', idx0);
+							if (idx1 != -1) {
+								int idx2 = name.indexOf('$', idx1 + 1);
+								String parentAnon = "";
+								if (idx2 == -1) { // maybe the name is already "$1$2..." for Java5.0+ in Eclipse 3.2+
+									parent = parent.getParent();
+									while (parent != null) {
+										if (parent instanceof AbstractTypeDeclaration) {
+											break;
+										} else if (parent instanceof AnonymousClassDeclaration) {
+											AnonymousClassDeclaration atype = (AnonymousClassDeclaration) parent;
+											ITypeBinding aTypeBinding = atype.resolveBinding();
+											String aName = aTypeBinding.getBinaryName();
+											parentAnon = aName.substring(aName.indexOf('$')) + parentAnon;
+										}
+										parent = parent.getParent();
+									}
+									name = name.substring(0, idx1) + parentAnon + name.substring(idx1);
+								}
+							}
+						}
+					}
+					break;
+				}
 			}
+			parent = parent.getParent();
 		}
-		return name;
-	}
-
-	public void endVisit(SimpleType node) {
-		super.endVisit(node);
+		if (!isThis) {
+			buffer.append("this.callbacks[\"");
+			buffer.append(shortenQualifiedName(name));
+			buffer.append("\"].");
+		}
 	}
 
 	public boolean visit(SimpleType node) {
 		ITypeBinding binding = node.resolveBinding();
 		if (binding != null) {
-			buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+			buffer.append(shortenQualifiedName(binding.getQualifiedName()));
 		} else {
 			buffer.append(node);
 		}
 		return false;
-	}
-
-	public void endVisit(SingleVariableDeclaration node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(SingleVariableDeclaration node) {
@@ -1821,10 +1796,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		}
 		name.accept(this);
 		return false;
-	}
-
-	public void endVisit(SuperConstructorInvocation node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(SuperConstructorInvocation node) {
@@ -1857,7 +1828,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		 * TODO: expression before the "super" should be considered.
 		 */
 		buffer.append("Clazz.superConstructor (this, ");
-		buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
+		buffer.append(shortenQualifiedName(getFullClassName()));
 		List arguments = node.arguments();
 		if (arguments.size() > 0) {
 			buffer.append(", [");
@@ -1866,10 +1837,6 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		}
 		buffer.append(");\r\n");
 		return false;
-	}
-
-	public void endVisit(SuperFieldAccess node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(SuperFieldAccess node) {
@@ -1889,18 +1856,18 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 				typeBinding = type.resolveBinding().getSuperclass();
 			}
 		}
-		String fieldName = NameConverterUtil.getJ2SName(node.getName());
-		if (SearchSuperField.isInheritedFieldName(typeBinding, fieldName)) {
+		String fieldName = getJ2SName(node.getName());
+		if (isInheritedFieldName(typeBinding, fieldName)) {
 			if (typeBinding != null) {
 				IVariableBinding[] declaredFields = typeBinding.getDeclaredFields();
 				for (int i = 0; i < declaredFields.length; i++) {
-					String superFieldName = NameConverterUtil.getJ2SName(declaredFields[i]);
+					String superFieldName = getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
 						buffer.append("this.");
-						if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
+						if (checkKeyworkViolation(fieldName)) {
 							buffer.append('$');
 						}
-						fieldName = SearchSuperField.getFieldName(typeBinding.getSuperclass(), fieldName);
+						fieldName = getFieldName(typeBinding.getSuperclass(), fieldName);
 						buffer.append(fieldName);
 						return false;
 					}
@@ -1908,7 +1875,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			}
 		}
 		buffer.append("this.");
-		if (JavaScriptKeywords.checkKeyworkViolation(fieldName)) {
+		if (checkKeyworkViolation(fieldName)) {
 			buffer.append('$');
 		}
 		buffer.append(fieldName);
@@ -1916,24 +1883,16 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		return false;
 	}
 
-	public void endVisit(SuperMethodInvocation node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(SuperMethodInvocation node) {
 		buffer.append("Clazz.superCall (this, ");
-		buffer.append(JavaLangUtil.ripJavaLang(getFullClassName()));
+		buffer.append(shortenQualifiedName(getFullClassName()));
 		buffer.append(", \"");
-		String name = NameConverterUtil.getJ2SName(node.getName());
+		String name = getJ2SName(node.getName());
 		buffer.append(name);
 		buffer.append("\", [");
 		visitList(node.arguments(), ", ");
 		buffer.append("])");
 		return false;
-	}
-
-	public void endVisit(ThisExpression node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ThisExpression node) {
@@ -2002,7 +1961,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append("Clazz.declareInterface (");
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(JavaLangUtil.ripJavaLang(fullClassName.substring(0, lastIndexOf)));
+				buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");
@@ -2011,7 +1970,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		} else {
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(JavaLangUtil.ripJavaLang(fullClassName.substring(0, lastIndexOf)));
+				buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");
@@ -2025,7 +1984,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			ITypeBinding superclass = typeBinding.getSuperclass();
 			if (superclass != null) {
 				String clazzName = superclass.getQualifiedName();
-				clazzName = JavaLangUtil.ripJavaLang(clazzName);
+				clazzName = shortenQualifiedName(clazzName);
 				if (clazzName != null && clazzName.length() != 0
 						&& !"Object".equals(clazzName)) {
 					buffer.append(clazzName);
@@ -2039,13 +1998,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 		buffer.append(", ");
 
 		//List superInterfaces = node.superInterfaceTypes();
-		List superInterfaces = null;
-		if (node.getAST().apiLevel() != AST.JLS3) {
-			// AST.JLS2
-			superInterfaces = node.superInterfaces();
-		} else {
-			superInterfaces = node.superInterfaceTypes();
-		}
+		List superInterfaces = node.superInterfaceTypes();
 		int size = superInterfaces.size();
 		if (size == 0) {
 			buffer.append("null");
@@ -2058,7 +2011,7 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			ITypeBinding binding = ((Type) element).resolveBinding();
 			if (binding != null) {
 				String clazzName = binding.getQualifiedName();
-				clazzName = JavaLangUtil.ripJavaLang(clazzName);
+				clazzName = shortenQualifiedName(clazzName);
 				buffer.append(clazzName);
 			} else {
 				buffer.append(element);
@@ -2071,25 +2024,16 @@ public class ASTScriptVisitor extends ASTKeywordParser {
 			buffer.append("]");
 		}
 		ITypeBinding superclass = null;
-		if (node.getAST().apiLevel() != AST.JLS3) {
-			// AST.JLS2
-			Name superClazz = node.getSuperclass();
-			if (superclass != null) {
-				superclass = superClazz.resolveTypeBinding();
-			}
-		} else {
-			//superclass 
-			Type type = node.getSuperclassType();
-			if (type != null) {
-				superclass = type.resolveBinding();
-			}
+		Type superType = node.getSuperclassType();
+		if (superType != null) {
+			superclass = superType.resolveBinding();
 		}
 		if (superclass != null) {
 			ITypeBinding binding = superclass;//.resolveTypeBinding();
 			if (binding != null && !binding.isTopLevel()) {
 				if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 					buffer.append(", Clazz.innerTypeInstance (");
-					buffer.append(JavaLangUtil.ripJavaLang(binding.getQualifiedName()));
+					buffer.append(shortenQualifiedName(binding.getQualifiedName()));
 					buffer.append(", this, null, Clazz.inheritArgs");
 					buffer.append(")");
 				}
@@ -2572,18 +2516,6 @@ public class CB extends CA {
 			element.accept(this);
 		}
 		return false;
-	}
-
-	public void endVisit(TypeDeclarationStatement node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(TypeDeclarationStatement node) {
-		return super.visit(node);
-	}
-
-	public void endVisit(TypeLiteral node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(TypeLiteral node) {
