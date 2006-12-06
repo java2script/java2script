@@ -449,8 +449,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					int size = finalVars.size();
 					for (int i = 0; i < size; i++) {
 						FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
-						if (vv.getVariableName().equals(fv.getVariableName())
-								&& vv.getBlockLevel() <= lastCurrentBlock
+						if (vv.variableName.equals(fv.variableName)
+								&& vv.blockLevel <= lastCurrentBlock
 								&& !lastVisitedVars.contains(vv)) {
 							lastVisitedVars.add(vv);
 						}
@@ -1025,44 +1025,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		super.endVisit(node);
 	}
 
-	private boolean testForceOverriding(IMethodBinding method) {
-		String methodName = method.getName();
-		ITypeBinding classInHierarchy = method.getDeclaringClass();
-		do {
-			IMethodBinding[] methods = classInHierarchy.getDeclaredMethods();
-			int count = 0;
-			IMethodBinding superMethod = null;
-			for (int i= 0; i < methods.length; i++) {
-				if (methodName.equals(methods[i].getName())) {
-					count++;
-					superMethod = methods[i];
-				}
-			}
-			if (count > 1) {
-				return false;
-			} else if (count == 1) {
-				if (!Bindings.isSubsignature(method, superMethod)) {
-					return false;
-				} else if ((superMethod.getModifiers() & Modifier.PRIVATE) != 0) {
-					return false;
-				}
-			}
-			classInHierarchy = classInHierarchy.getSuperclass();
-		} while (classInHierarchy != null);
-		return true;
-	}
 	public boolean visit(MethodDeclaration node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return false;
-					}
-				}
-			}
+		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+			return false;
 		}
 		IMethodBinding mBinding = node.resolveBinding();
 		if (mBinding != null) {
@@ -1073,39 +1038,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			/*
 			 * Abstract or native method
 			 */
-			boolean isJ2S = false;
-			if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-				if (javadoc != null) {
-					List tags = javadoc.tags();
-					if (tags.size() != 0) {
-						for (Iterator iter = tags.iterator(); iter.hasNext();) {
-							TagElement tagEl = (TagElement) iter.next();
-							if ("@j2sIgnore".equals(tagEl.getTagName())) {
-								return false;
-							}
-						}
-						if (isDebugging()) {
-							for (Iterator iter = tags.iterator(); iter.hasNext();) {
-								TagElement tagEl = (TagElement) iter.next();
-								if ("@j2sDebug".equals(tagEl.getTagName())) {
-									isJ2S = true;
-									break;
-								}
-							}
-						}
-						if (!isJ2S) {
-							for (Iterator iter = tags.iterator(); iter.hasNext();) {
-								TagElement tagEl = (TagElement) iter.next();
-								if ("@j2sNative".equals(tagEl.getTagName())) {
-									isJ2S = true;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-			if (!isJ2S) {
+			if (isMethodNativeIgnored(node)) {
 				return false;
 			}
 		}
@@ -1176,64 +1109,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						break;
 					}
 				}
-				if (isOnlySuper) {
-					boolean isForced2Keep = false;
-					if (javadoc != null) {
-						List tags = javadoc.tags();
-						if (tags.size() != 0) {
-							for (Iterator iter = tags.iterator(); iter.hasNext();) {
-								TagElement tagEl = (TagElement) iter.next();
-								if ("@j2sKeep".equals(tagEl.getTagName())) {
-									isForced2Keep = true;
-									break;
-								}
-							}
-						}
-					}
-					if (!isForced2Keep) {
-						return false;
-					}
+				if (isOnlySuper && getJ2SDocTag(node, "@j2sKeep") == null) {
+					return false;
 				}
 			}
 		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
 			boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
 					node.resolveBinding().getKey());
-			if (!isReferenced) {
-				boolean isForced2Keep = false;
-				if (javadoc != null) {
-					List tags = javadoc.tags();
-					if (tags.size() != 0) {
-						for (Iterator iter = tags.iterator(); iter.hasNext();) {
-							TagElement tagEl = (TagElement) iter.next();
-							if ("@j2sKeep".equals(tagEl.getTagName())) {
-								isForced2Keep = true;
-								break;
-							}
-						}
-					}
-				}
-				if (!isForced2Keep) {
-					return false;
-				}
+			if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
+				return false;
 			}
 		}
 		
 		if (node.isConstructor()) {
 			buffer.append("Clazz.makeConstructor (");
 		} else {
-			boolean isToOverride = false;
-			if (javadoc != null) {
-				List tags = javadoc.tags();
-				if (tags.size() != 0) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sOverride".equals(tagEl.getTagName())) {
-							isToOverride = true;;
-						}
-					}
-				}
-			}
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
 				buffer.append("cla$$");
@@ -1243,23 +1134,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				node.getName().accept(this);
 				buffer.append(" = ");
 			}
-			if (isToOverride) {
+			if (getJ2SDocTag(node, "@j2sOverride") != null) {
 				buffer.append("Clazz.overrideMethod (");
 			} else {
-				boolean isOK2AutoOverriding = false;
-				IMethodBinding methodBinding = node.resolveBinding();
-				if (testForceOverriding(methodBinding)) {
-					IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
-					if (superMethod != null) {
-						ASTNode parentRoot = node.getParent();
-						while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {
-							parentRoot = parentRoot.getParent();
-						}
-						if (parentRoot != null) {
-							isOK2AutoOverriding = !MethodReferenceASTVisitor.checkReference(parentRoot, superMethod.getKey());
-						}
-					}
-				}
+				boolean isOK2AutoOverriding = canAutoOverride(node);
 				if (isOK2AutoOverriding) {
 					buffer.append("Clazz.overrideMethod (");
 				} else {
@@ -1300,7 +1178,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					isSuperCalled = true;
 				}
 			}
-			//Javadoc javadoc = node.getJavadoc();
+			Javadoc javadoc = node.getJavadoc();
 			if (javadoc != null) {
 				List tags = javadoc.tags();
 				if (tags.size() != 0) {
@@ -1340,7 +1218,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			visitNativeJavadoc(node.getJavadoc(), null, false);
 			for (int i = normalVars.size() - 1; i >= 0; i--) {
 				FinalVariable var = (FinalVariable) normalVars.get(i);
-				if (var.getBlockLevel() >= blockLevel) {
+				if (var.blockLevel >= blockLevel) {
 					normalVars.remove(i);
 				}
 			}
@@ -1610,12 +1488,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						int size = finalVars.size();
 						for (int i = 0; i < size; i++) {
 							FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
-							if (vv.getVariableName().equals(varBinding.getName())
-									&& vv.getBlockLevel() <= currentBlockForVisit) {
+							if (vv.variableName.equals(varBinding.getName())
+									&& vv.blockLevel <= currentBlockForVisit) {
 								if (!visitedVars.contains(vv)) {
 									visitedVars.add(vv);
 								}
-								fieldVar = vv.getToVariableName();
+								fieldVar = vv.toVariableName;
 							}
 						}
 					}
@@ -1788,7 +1666,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				String methodSig = (String) methodDeclareStack.peek();
 				f = new FinalVariable(blockLevel + 1, identifier, methodSig);
 			}
-			f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
 				finalVars.add(f);
@@ -2238,6 +2116,37 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// Interface's inner interfaces or classes
 		buffer.append(laterBuffer);
 		
+		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
+		if (fieldsSerializables.length() > 0) {
+			buffer.append("Clazz.registerSerializableFields(cla$$, ");
+			buffer.append(fieldsSerializables.toString());
+			buffer.append(");\r\n");
+		}
+		
+		TagElement tagEl = getJ2SDocTag(node, "@j2sSuffix");
+		if (tagEl != null) {
+			List fragments = tagEl.fragments();
+			StringBuffer buf = new StringBuffer();
+			boolean isFirstLine = true;
+			for (Iterator iterator = fragments.iterator(); iterator
+					.hasNext();) {
+				TextElement commentEl = (TextElement) iterator.next();
+				String text = commentEl.getText().trim();
+				if (isFirstLine) {
+					if (text.length() == 0) {
+						continue;
+					}
+				}
+				buf.append(text);
+				buf.append("\r\n");
+			}
+			buffer.append("\r\n" + buf.toString().trim() + "\r\n");
+		}
+		laterBuffer = new StringBuffer();
+		super.endVisit(node);
+	}
+
+	private String prepareSimpleSerializable(TypeDeclaration node, List bodyDeclarations) {
 		StringBuffer fieldsSerializables = new StringBuffer();
 		ITypeBinding binding = node.resolveBinding();
 		boolean isSimpleSerializable = (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
@@ -2300,6 +2209,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									if (fieldsSerializables.length() > 0) {
 										fieldsSerializables.append(", ");
 									}
+									/*
+									 * TODO: What about when variable name is minimized?
+									 */
 									fieldsSerializables.append("\"" + var.getName() + "\", \"");
 									if (mark.charAt(0) == 's' && curDim == 1) {
 										fieldsSerializables.append("AX");
@@ -2317,41 +2229,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
-		if (fieldsSerializables.length() > 0) {
-			buffer.append("Clazz.registerSerializableFields(cla$$, ");
-			buffer.append(fieldsSerializables.toString());
-			buffer.append(");\r\n");
-		}
-		
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sSuffix".equals(tagEl.getTagName())) {
-						List fragments = tagEl.fragments();
-						StringBuffer buf = new StringBuffer();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buf.append(text);
-							buf.append("\r\n");
-						}
-						buffer.append("\r\n" + buf.toString().trim() + "\r\n");
-					}
-				}
-			}
-		}
-		laterBuffer = new StringBuffer();
-		super.endVisit(node);
+		return fieldsSerializables.toString();
 	}
 
 	public boolean visit(TypeDeclaration node) {

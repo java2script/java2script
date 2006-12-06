@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -33,16 +34,19 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 /**
+ * This level of Visitor will try to focus on dealing with those
+ * j2s* Javadoc tags.
+ * 
  * @author zhou renjian
  *
  * 2006-12-4
  */
-public class ASTJ2SDocVisitor extends ASTKeywordParser {
+public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	
 	private Javadoc[] nativeJavadoc = null;
 	
 	private ASTNode javadocRoot = null;
-
+	
 	private boolean isDebugging = false;
 
 	
@@ -134,7 +138,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordParser {
 						return false;
 					}
 				}
-				if (isDebugging) {
+				if (isDebugging()) {
 					for (Iterator iter = tags.iterator(); iter.hasNext();) {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sDebug".equals(tagEl.getTagName())) {
@@ -276,6 +280,49 @@ public class ASTJ2SDocVisitor extends ASTKeywordParser {
 			}
 		}
 		return previousStart;
+	}
+
+
+	/**
+	 * Method with "j2s*" tag.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected TagElement getJ2SDocTag(BodyDeclaration node, String tagName) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						return tagEl;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
+	 * directly.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
+		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
+			if (isDebugging() && getJ2SDocTag(node, "@j2sDebug") != null) {
+				return false;
+			}
+			if (getJ2SDocTag(node, "@j2sNative") != null) {
+				return false;
+			}
+			return true;
+		}
+		return true; // interface!
 	}
 
 }
