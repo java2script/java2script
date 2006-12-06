@@ -172,7 +172,7 @@ public class ASTJ2SMapVisitor extends ASTVariableVisitor {
 			 */
 			return false;
 		}
-		if (binding != null) {
+		if (binding == null) {
 			return false;
 		}
 		ITypeBinding superclass = binding.getSuperclass();

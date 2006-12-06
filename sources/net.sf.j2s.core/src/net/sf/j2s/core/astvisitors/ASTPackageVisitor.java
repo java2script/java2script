@@ -13,14 +13,13 @@
 
 package net.sf.j2s.core.astvisitors;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
 
 /**
  * @author zhou renjian
  *
  * 2006-12-3
  */
-public class ASTPackageVisitor extends ASTVisitor {
+public class ASTPackageVisitor extends ASTTigerVisitor {
 
 	protected String thisPackageName = "";
 	

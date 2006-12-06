@@ -63,8 +63,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 
  * 2006-5-2
  */
-public class DependencyASTVisitor extends ASTEmptyParser {
-	protected StringBuffer buffer = new StringBuffer();
+public class DependencyASTVisitor extends ASTJ2SMapVisitor {
 	
 	protected Set classNameSet = new HashSet();
 
@@ -85,14 +84,6 @@ public class DependencyASTVisitor extends ASTEmptyParser {
 	private ASTNode javadocRoot = null;
 
 	protected boolean toCompileVariableName = true;
-	
-	public StringBuffer getBuffer() {
-		return buffer;
-	}
-
-	public void setBuffer(StringBuffer buffer) {
-		this.buffer = buffer;
-	}
 	
 	/**
 	 * @return Returns the thisClassName.
