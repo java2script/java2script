@@ -12,7 +12,7 @@ public class document {
 	public static Object onkeydown;
 	public static Object onkeyup;
 	
-	public static Body body;
+	public static Element body;
 	
 	public native static Element createElement(String tag);
 	public native static Element[] getElementsByTagName(String tag);
