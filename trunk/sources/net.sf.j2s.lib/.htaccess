@@ -1,0 +1,4 @@
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault "access plus 5 years"
+</IfModule>
