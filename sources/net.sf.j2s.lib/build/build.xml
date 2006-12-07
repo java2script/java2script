@@ -266,6 +266,7 @@
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt">
+    	<copy file="${j2s.lib.dist}/../.htaccess" todir="${j2s.lib.dist}"/>
     	<copy todir="${j2s.lib.dist}">
     		<fileset dir="${j2s.ajax.bin}">
     			<exclude name="**/*.clazz"/>
