@@ -19,7 +19,38 @@ import org.eclipse.jdt.core.dom.*;
  * 
  * @author zhou renjian
  */
-public class ASTEmptyParser extends ASTJ2SMapVisitor {
+public class ASTEmptyVisitor extends ASTVisitor {
+
+	/**
+	 * Buffer that keep all compiled *.js.
+	 * @see ASTScriptVisitor#laterBuffer
+	 */
+	protected StringBuffer buffer = new StringBuffer();
+
+	/**
+	 * Return the buffer. Actually it is returning compiled *.js String
+	 * @return
+	 */
+	public StringBuffer getBuffer() {
+		return buffer;
+	}
+
+	/**
+	 * Buffer may be set to other buffer.
+	 * @see ASTScriptVisitor#visit(TypeDeclaration) 
+	 * @param buffer
+	 */
+	public void setBuffer(StringBuffer buffer) {
+		this.buffer = buffer;
+	}
+
+
+	/*
+	 * The following are empty super.* methods which will be use to help
+	 * developing Java2Script compiler.
+	 * 
+	 * In the final release of Java2Script, it may be commented out.
+	 */
 
 	public void endVisit(AnnotationTypeDeclaration node) {
 		super.endVisit(node);
