@@ -200,6 +200,11 @@ void createHandle () {
 	}
 	if ((style & SWT.READ_ONLY) != 0) {
 		textHandle.readOnly = true;
+		if (textCSSName != null) {
+			textCSSName += " text-readonly";
+		} else {
+			textCSSName = "text-readonly";
+		}
 	}
 //	if ((style & SWT.WRAP) != 0) {
 //		handle.style.whiteSpace = "normal";
