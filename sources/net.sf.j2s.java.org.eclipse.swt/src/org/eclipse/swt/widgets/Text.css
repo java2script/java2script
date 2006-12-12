@@ -57,6 +57,9 @@ input.text-border {
 .text-disable {
 	background-color:menu;
 }
+input.text-readonly {
+	background-color:menu;
+}
 .swt-widgets-text {
 	width:324px;
 }
