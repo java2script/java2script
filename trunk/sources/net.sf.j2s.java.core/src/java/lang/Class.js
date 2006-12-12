@@ -200,7 +200,7 @@ Clazz.getClass = function (clazzHost) {
 /*-# extendsProperties -> eP #-*/
 Clazz.extendsProperties = function (hostThis, hostSuper) {
 	for (var o in hostSuper) {
-		if (o != "prototype" && o != "superClazz"
+		if (o != "b$" && o != "prototype" && o != "superClazz"
 				&& o != "__CLASS_NAME__" && o != "implementz"
 				&& !Clazz.checkInnerFunction (hostSuper, o)) {
 			hostThis[o] = hostSuper[o];
@@ -227,7 +227,7 @@ Clazz.checkInnerFunction = function (hostSuper, funName) {
 /*-# implementsProperties -> ip #-*/
 Clazz.implementsProperties = function (hostThis, hostSuper) {
 	for (var o in hostSuper) {
-		if (o != "prototype" && o != "superClazz"
+		if (o != "b$" && o != "prototype" && o != "superClazz"
 				&& o != "__CLASS_NAME__" && o != "implementz") {
 			if (typeof hostSuper[o] == "function") {
 				/*
