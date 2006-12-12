@@ -64,9 +64,15 @@ Clazz.prepareCallback = function (objThis, args) {
 	var classThisObj = args[0];
 	var cbName = "b$"; // "callbacks";
 	if (objThis != null && classThisObj != null && classThisObj != window) {
-		var obs = objThis[cbName];
-		if (obs == null) {
-			obs = new Array ();
+		var obs = new Array ();
+		if (objThis[cbName] == null) {
+			objThis[cbName] = obs;
+		} else { // must make a copy!
+			for (var s in objThis[cbName]) {
+				if (s != "length") {
+					obs[s] = objThis[cbName][s];
+				}
+			}
 			objThis[cbName] = obs;
 		}
 		var className = Clazz.getClassName (classThisObj, true);
