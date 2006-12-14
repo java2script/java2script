@@ -1636,7 +1636,16 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 			/*-# 
 			 # updateNode -> uN 
 			 #-*/
-			ClazzLoader.updateNode (node);
+			window.setTimeout((function(nnn) {
+				return function() {
+					ClazzLoader.updateNode (nnn);
+				};
+			})(node), 1);
+			/*
+			 * #updateNode should be delayed! Or the class itself won't
+			 * be initialized completely before marking itself as loaded.
+			 */
+			// ClazzLoader.updateNode (node);
 		}
 	}
 };
