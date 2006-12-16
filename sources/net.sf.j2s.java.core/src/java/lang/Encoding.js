@@ -96,8 +96,7 @@ Encoding.encodeBase64 = function (str) {
 	var index = 0;
 	var buf = [];
 	var c0, c1, c2;
-	var c = 0;
-	while (index < length && c++ < 60000) {
+	while (index < length) {
 		c0 = str.charCodeAt (index++);
 		buf[buf.length] = b64[c0 >> 2];
 		if (index < length) {
@@ -105,7 +104,7 @@ Encoding.encodeBase64 = function (str) {
             buf[buf.length] = b64[((c0 << 4 ) & 0x30) | (c1 >> 4)];
             if (index < length){
 				c2 = str.charCodeAt (index++);
-                buf[buf.length] = b64[((c1 << 2) & 0x3c) | (c1 >> 6)];
+                buf[buf.length] = b64[((c1 << 2) & 0x3c) | (c2 >> 6)];
                 buf[buf.length] = b64[c2 & 0x3F];
             } else {
                 buf[buf.length] = b64[((c1 << 2) & 0x3c)];
@@ -140,11 +139,13 @@ Encoding.decodeBase64 = function (str) {
 		c1 = xb64[str.charAt (index++)];
 		c2 = xb64[str.charAt (index++)];
 		c3 = xb64[str.charAt (index++)];
-		if (c2 == null) c2 = 0;
-		if (c3 == null) c3 = 0;
 		buf[buf.length] = String.fromCharCode(((c0 << 2) & 0xff) | c1 >> 4);
-		buf[buf.length] = String.fromCharCode(((c1 << 4) & 0xff) | c2 >> 2);
-		buf[buf.length] = String.fromCharCode(((c2 << 6) & 0xff) | c3);
+		if (c2 != null) {
+			buf[buf.length] = String.fromCharCode(((c1 << 4) & 0xff) | c2 >> 2);
+			if (c3 != null) {
+				buf[buf.length] = String.fromCharCode(((c2 << 6) & 0xff) | c3);
+			}
+		}
 	}
 	return buf.join ('');
 };
