@@ -1845,7 +1845,13 @@ ClazzLoader.runtimeLoaded = function () {
 	for (var i = 0; i < qbs.length; i++) {
 		ClazzLoader.loadClass (qbs[i][0], qbs[i][1]);
 	}
-	ClazzLoader.runtimeLoaded = function () {};
+	/*
+	 * Should not set to empty function! Some later package may need this
+	 * runtimeLoaded function. For example, lazily loading SWT package may
+	 * require this runtimeLoaded function. 
+	 * -- zhou renjian @ Dec 17, 2006
+	 */
+	// ClazzLoader.runtimeLoaded = function () {};
 };
 
 /*
