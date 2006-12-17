@@ -68,6 +68,14 @@ public class ASTVariableVisitor extends ASTFieldVisitor {
 		public String toString() {
 			return variableName + ":" + variableName;
 		}
+
+		public int getBlockLevel() {
+			return blockLevel;
+		}
+
+		public void setToVariableName(String toVarName) {
+			toVariableName = toVarName;
+		}
 	}
 
 	/**
