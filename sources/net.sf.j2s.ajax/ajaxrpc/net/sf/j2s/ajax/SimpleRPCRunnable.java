@@ -21,7 +21,9 @@ package net.sf.j2s.ajax;
  */
 public abstract class SimpleRPCRunnable extends SimpleSerializable implements Runnable {
 	
-	public abstract String url();
+	public String baseURL() {
+		return "simplerpc/"; // url is relative to the servlet!
+	}
 	
 	public String method() {
 		return "POST";

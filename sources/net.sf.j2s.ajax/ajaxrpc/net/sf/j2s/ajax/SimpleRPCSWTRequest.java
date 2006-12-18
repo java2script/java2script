@@ -38,7 +38,12 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	
 	private static void swtAJAXRequest(final SimpleRPCRunnable runnable) {
 		final HttpRequest request = new HttpRequest();
-		request.open(runnable.method(), runnable.url(), true);
+		String url = getRunnableURL(runnable);
+		String method = runnable.method();
+		if (method == null) {
+			method = "POST";
+		}
+		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
 				runnable.deserialize(request.getResponseText());

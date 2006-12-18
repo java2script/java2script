@@ -17,6 +17,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,14 +34,77 @@ import javax.servlet.http.HttpServletResponse;
  *
  * 2006-10-10
  */
-public abstract class SimpleRPCHttpServlet extends HttpServlet {
+public class SimpleRPCHttpServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -3852449040495978018L;
 
-	protected SimpleRPCRunnable runnable;
+	protected Set runnables = new HashSet();
 	
-	public abstract void initSimpleRPC(HttpServletRequest req, HttpServletResponse resp);
+	protected Set mappings = new HashSet();
+	
+	protected SimpleRPCRunnable getRunnableByURL(String url) {
+		int lastIndexOf = url.lastIndexOf('/');
+		String shortURL = null;
+		if (lastIndexOf == url.length() - 1) {
+			lastIndexOf = url.lastIndexOf('/', lastIndexOf - 1);
+			if (lastIndexOf == -1) {
+				return null; // should never happen!
+			}
+			shortURL = url.substring(lastIndexOf + 1, url.length() - 1);
+		} else {
+			shortURL = url.substring(lastIndexOf + 1);
+		}
+		if (runnables.contains(shortURL)) {
+			if (url != null) {
+				Object obj = getNewInstanceByClassName(shortURL);
+				if (obj != null && obj instanceof SimpleRPCRunnable) {
+					return (SimpleRPCRunnable) obj;
+				}
+			}
+		}
+		for (Iterator iter = mappings.iterator(); iter.hasNext();) {
+			String mappingStr = (String) iter.next();
+			if (mappingStr != null) {
+				Object obj = getNewInstanceByClassName(mappingStr);
+				if (obj != null && obj instanceof SimpleRPCMapping) {
+					SimpleRPCMapping mapping = (SimpleRPCMapping) obj;
+					String mappedRunnable = mapping.getRunnableClassName(shortURL);
+					if (mappedRunnable != null) {
+						obj = getNewInstanceByClassName(mappedRunnable);
+						if (obj != null && obj instanceof SimpleRPCRunnable) {
+							return (SimpleRPCRunnable) obj;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 
+	public Object getNewInstanceByClassName(String className) {
+		try {
+			Class runnableClass = Class.forName(className);
+			if (runnableClass != null) {
+				Constructor constructor = runnableClass.getConstructor(new Class[0]);
+				return constructor.newInstance(new Object[0]);
+			}
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	public static String readAll(InputStream res) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -53,9 +121,37 @@ public abstract class SimpleRPCHttpServlet extends HttpServlet {
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
+	public void init() throws ServletException {
+		String runnableStr = getInitParameter("simple.rpc.runnables");
+		if (runnableStr != null) { 
+			String[] splits = runnableStr.trim().split("\\s*[,;:]\\s*");
+			for (int i = 0; i < splits.length; i++) {
+				String trim = splits[i].trim();
+				if (trim.length() != 0) {
+					runnables.add(trim);
+				}
+			}
+		}
+		String mappingStr = getInitParameter("simple.rpc.mappings");
+		if (mappingStr != null) {
+			String[] splits = mappingStr.trim().split("\\s*[,;:]\\s*");
+			for (int i = 0; i < splits.length; i++) {
+				String trim = splits[i].trim();
+				if (trim.length() != 0) {
+					mappings.add(trim);
+				}
+			}
+		}
+	}
+	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		SimpleRPCRunnable runnable = getRunnableByURL(req.getPathInfo());
 		if (runnable == null) {
-			initSimpleRPC(req, resp);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
 		}
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
@@ -67,8 +163,10 @@ public abstract class SimpleRPCHttpServlet extends HttpServlet {
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		SimpleRPCRunnable runnable = getRunnableByURL(req.getPathInfo());
 		if (runnable == null) {
-			initSimpleRPC(req, resp);
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
 		}
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
