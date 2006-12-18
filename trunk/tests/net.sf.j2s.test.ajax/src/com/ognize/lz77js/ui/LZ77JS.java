@@ -80,38 +80,37 @@ public class LZ77JS {
 					MessageBox messageBox = new MessageBox(shell, SWT.RESIZE | SWT.ICON_INFORMATION);
 					messageBox.setMessage("Source JavaScript can not be empty!");
 					messageBox.open();
-					return ;
 				} else if (trimJS.length() < 832 * 4 / 3) {
 					MessageBox messageBox = new MessageBox(shell, SWT.RESIZE | SWT.ICON_INFORMATION);
 					messageBox.setMessage("It's unnecessary to compress raw source that is less than 1k.");
 					messageBox.open();
-					return ;
+				} else {
+					ratioLabel.setText("Start JavaScript lz77 compressing to server, please wait ...");
+					/*
+					 * Local Java Thread mode is already the default mode for Java client
+					 */
+					SimpleRPCRequest.switchToLocalJavaThreadMode();
+					/*
+					 * AJAX mode is only mode for Java2Script client.
+					 * You can uncomment the follow line to call a LZ77JS RPC of bl.ognize.com.
+					 * In JavaScript mode, you should modify LZ77JSSimpleRPCRunnable#url so there
+					 * is no cross site script for XMLHttpRequest.
+					 */ 
+					//AJAXServletRequest.switchToAJAXMode();
+					SimpleRPCSWTRequest.swtRequest(new LZ77JSSimpleRPCRunnable() {
+						public void ajaxIn() {
+							jsContent = sourceText.getText();
+							toRegExpCompress = regExpButton.getSelection();
+							addLZ77Header = lz77HeaderButton.getSelection();
+						}
+						
+						public void ajaxOut() {
+							resultText.setText(result);
+							ratioLabel.setText("Compressed Ratio: " + result.length() + " / " + sourceText.getText().length() + " = " + (100.0 * result.length() / sourceText.getText().length()) + "%");
+						}
+						
+					});
 				}
-				ratioLabel.setText("Start JavaScript lz77 compressing to server, please wait ...");
-				/*
-				 * Local Java Thread mode is already the default mode for Java client
-				 */
-				SimpleRPCRequest.switchToLocalJavaThreadMode();
-				/*
-				 * AJAX mode is only mode for Java2Script client.
-				 * You can uncomment the follow line to call a LZ77JS RPC of bl.ognize.com.
-				 * In JavaScript mode, you should modify LZ77JSSimpleRPCRunnable#url so there
-				 * is no cross site script for XMLHttpRequest.
-				 */ 
-				//AJAXServletRequest.switchToAJAXMode();
-				SimpleRPCSWTRequest.swtRequest(new LZ77JSSimpleRPCRunnable() {
-					public void ajaxIn() {
-						jsContent = sourceText.getText();
-						toRegExpCompress = regExpButton.getSelection();
-						addLZ77Header = lz77HeaderButton.getSelection();
-					}
-					
-					public void ajaxOut() {
-						resultText.setText(result);
-						ratioLabel.setText("Compressed Ratio: " + result.length() + " / " + sourceText.getText().length() + " = " + (100.0 * result.length() / sourceText.getText().length()) + "%");
-					}
-					
-				});
 			}
 		});
 
