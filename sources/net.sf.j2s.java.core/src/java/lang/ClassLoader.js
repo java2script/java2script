@@ -136,6 +136,11 @@ if (window["Clazz"] != null && Clazz.isClassDefined) {
 		return ClazzLoader.definedClasses[clazzName] == true;
 	};
 }
+
+/*
+ * binaryFolders will be used for ResourceBundle to check *.properties
+ * files. The default should always be "bin/"!
+ */
 if (window["Clazz"] != null && Clazz.binaryFolders != null) {
 	ClazzLoader.binaryFolders = Clazz.binaryFolders;
 } else {
@@ -1774,6 +1779,45 @@ ClazzLoader.runtimeKeyClass = "java.lang.String";
 ClazzLoader.queueBe4KeyClazz = new Array ();
 
 /**
+ * Return J2SLib base path from existed SCRIPT src attribute.
+ */
+/* private */
+/*-# getJ2SLibBase -> gLB #-*/
+ClazzLoader.getJ2SLibBase = function () {
+	var ss = document.getElementsByTagName ("SCRIPT");
+	for (var i = 0; i < ss.length; i++) {
+		var src = ss[i].src;
+		var idx = src.indexOf ("j2slib.z.js"); // consider it as key string!
+		if (idx != -1) {
+			return src.substring (0, idx);
+		}
+		idx = src.indexOf ("java/lang/ClassLoader.js"); // may be not packed yet
+		if (idx != -1) {
+			return src.substring (0, idx);
+		}
+	}
+	return null;
+};
+
+/*
+ * Check whether given package's classpath is setup or not.
+ * Only "java" and "org.eclipse.swt" are accepted in argument.
+ */
+/* private */
+/*-# assurePackageClasspath -> acp #-*/
+ClazzLoader.assurePackageClasspath = function (pkg) {
+	var r = window[pkg + ".registered"];
+	if (r != false && r != true) {
+		window[pkg + ".registered"] = false;
+		var base = ClazzLoader.getJ2SLibBase ();
+		if (base == null) {
+			base = "http://archive.java2script.org/1.0.0/"; // only after 1.0.0
+		}
+		ClazzLoader.packageClasspath (pkg, base, true);
+	}
+};
+
+/**
  * Load the given class ant its related classes.
  */
 /* public */
@@ -1781,6 +1825,17 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (typeof optionalsLoaded == "boolean") {
 		return Clazz.evalType (name);
 	}
+	/*
+	 * Make sure that
+	 * ClazzLoader.packageClasspath ("java", base, true); 
+	 * is called before any ClazzLoader#loadClass is called.
+	 */
+	ClazzLoader.assurePackageClasspath ("java");
+	var swtPkg = "org.eclipse.swt";
+	if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
+		ClazzLoader.assurePackageClasspath (swtPkg);
+	}
+	
 	ClazzLoader.keepOnLoading = true;
 	if (!forced && ((ClazzLoader.pkgRefCount != 0 
 			&& name.lastIndexOf (".package") != name.length - 8)
@@ -1833,6 +1888,35 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 		}
 	}
 	
+};
+
+/**
+ * Load the application by the given class name and run its static main method.
+ */
+/* public */
+$w$ = ClazzLoader.loadAppMain = function (clazz, args) {
+	if (clazz == null) {
+		return ;
+	}
+	var clazzStr = clazz;
+	if (clazz.charAt (0) == '$') {
+		clazzStr = "org.eclipse.s" + clazz.substring (1);
+	}
+	var idx = -1;
+	if ((idx = clazzStr.indexOf ("@")) != -1) {
+		ClazzLoader.setPrimaryFolder (clazzStr.substring (idx + 1));
+		clazzStr = clazzStr.substring (0, idx);
+	}
+	var agmts = args;
+	if (agmts == null || !(agmts instanceof Array)) {
+		agmts = [];
+	}
+	var afterLoaded = (function (clazzName, argv) {
+		return function () {
+			Clazz.evalType (clazzName).main (argv);
+		};
+	}) (clazzStr, agmts);
+	ClazzLoader.loadClass (clazzStr, afterLoaded);
 };
 
 /* private */
