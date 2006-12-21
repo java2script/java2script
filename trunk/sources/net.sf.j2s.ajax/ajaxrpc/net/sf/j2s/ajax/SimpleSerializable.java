@@ -67,6 +67,9 @@ for (var i = 0; i < fields.length; i++) {
 		} else {
 			var l4 = this[name].length;
 			if (l4 > 52) {
+				if (l4 > 0x4000) { // 16 * 1024
+					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+				}
 				buffer[buffer.length] = String.fromCharCode (baseChar - 2);
 				var value = "" + l4;
 				buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
@@ -98,7 +101,11 @@ for (var i = 0; i < fields.length; i++) {
 		}
 	}
 }
-return buffer.join ('');
+var strBuf = buffer.join ('');
+if (strBuf.length > 0x1000000) { // 16 * 1024 * 1024
+	throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+}
+return strBuf;
 	 */
 	public String serialize() {
 		char baseChar = 'B';
@@ -315,6 +322,9 @@ return buffer.join ('');
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+		if (buffer.length() > 0x1000000) { // 16 * 1024 * 1024
+			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+		}
 		return buffer.toString();
 	}
 
@@ -327,6 +337,9 @@ return buffer.join ('');
 	private void serializeLength(StringBuffer buffer, int length) {
 		char baseChar = 'B';
 		if (length > 52) {
+			if (length > 0x4000) { // 16 * 1024
+				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+			}
 			buffer.append((char) (baseChar - 2));
 			String value = "" + length;
 			buffer.append((char) (baseChar + value.length()));
@@ -429,6 +442,9 @@ while (index < length) {
 				var c4 = str.charCodeAt(index++);
 				var l3 = c4 - baseChar;
 				l2 = parseInt(str.substring(index, index + l3));
+				if (l2 > 0x4000) { // 16 * 1024
+					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+				}
 				index += l3;
 			}
 			var arr = new Array (l2);
@@ -563,6 +579,13 @@ while (index < length) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
 							l2 = Integer.parseInt(str.substring(index, index + l3));
+							if (l2 > 0x4000) { // 16 * 1024
+								/*
+								 * Some malicious string may try to allocate huge size of array!
+								 * Limit the size of array here! 
+								 */
+								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+							}
 							index += l3;
 						}
 						String[] ss = new String[l2];

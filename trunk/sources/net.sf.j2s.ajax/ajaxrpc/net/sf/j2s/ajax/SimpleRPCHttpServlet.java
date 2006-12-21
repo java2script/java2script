@@ -105,13 +105,21 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		return null;
 	}
-	public static String readAll(InputStream res) {
+	private String readAll(InputStream res) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buf = new byte[1024];
 			int read = 0;
 			while ((read = res.read(buf)) != -1) {
 				baos.write(buf, 0, read);
+				if (baos.size() > 0x1000000) { // 16 * 1024 * 1024 // 16M!
+					/*
+					 * Some malicious request may try to allocate huge size of memory!
+					 * Limit the data size of HTTP request! 
+					 */
+					res.close();
+					throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+				}
 			}
 			res.close();
 			return baos.toString();
