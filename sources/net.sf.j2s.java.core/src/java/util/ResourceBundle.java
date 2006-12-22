@@ -587,7 +587,7 @@ return r.join ('');
 					q += "/";
 				}
 				try {
-					r.open ("GET", q + n, false);
+					r.open ("GET", q + n, false); // FIXME: using synchronized mode will freeze browser!
 					r.send ();
 					a = r.getResponseText ();
 				} catch (e) {

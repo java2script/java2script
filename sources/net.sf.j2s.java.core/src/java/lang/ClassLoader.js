@@ -154,7 +154,7 @@ ClazzLoader.addBinaryFolder = function (bin) {
 		var bins = ClazzLoader.binaryFolders;
 		for (var i = 0; i < bins.length; i++) {
 			if (bins[i] == bin) {
-				return ;
+				return;
 			}
 		}
 		bins[bins.length] = bin;
@@ -240,7 +240,7 @@ ClazzLoader.setLoadingMode = function (mode, timeLag) {
 		} else {
 			ClazzLoader.loadingTimeLag = -1;
 		}
-		return ;
+		return;
 	}
 	if (typeof mode == "string") {
 		mode = mode.toLowerCase ();
@@ -345,7 +345,7 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 		for (var i = 0; i < pkg.length; i++) {
 			ClazzLoader.packageClasspath (pkg[i], base, index);
 		}
-		return ;
+		return;
 	}
 	var map = ClazzLoader.classpathMap;
 	if (pkg == "java" || pkg == "java.*") {
@@ -671,9 +671,19 @@ ClazzLoader.loadScript = function (file) {
 	var ignoreOnload = (arguments[1] == true);
 	if (ClazzLoader.loadedScripts[file] && !ignoreOnload) {
 		ClazzLoader.tryToLoadNext (file);
-		return ;
+		return;
 	}
 	ClazzLoader.loadedScripts[file] = true;
+	var cq = ClazzLoader.classQueue;
+	for (var i = 0; i < cq.length; i++) {
+		if (cq[i] == file) {
+			for (var j = i; j < cq.length - 1; j++) {
+				cq[i] = cq[i + 1];
+			}
+			cq.length--;
+			break;
+		}
+	}
 
 	if (ClazzLoader.isUsingXMLHttpRequest) {
 		ClazzLoader.scriptLoading (file);
@@ -691,7 +701,7 @@ ClazzLoader.loadScript = function (file) {
 		}
 		if (transport == null) { // should never happen in modern browsers.
 			alert ("[Java2Script] XMLHttpRequest not supported!");
-			return ;
+			return;
 		}
 		transport.open ("GET", file, ClazzLoader.isAsynchronousLoading);
 		transport.setRequestHeader ("User-Agent",
@@ -738,7 +748,7 @@ ClazzLoader.loadScript = function (file) {
 			}
 			ClazzLoader.xhrOnload (transport, file);
 		}
-		return ;
+		return;
 	}
 	// Create script DOM element
 	var script = document.createElement ("SCRIPT");
@@ -749,7 +759,7 @@ ClazzLoader.loadScript = function (file) {
 	if (ignoreOnload) {
 		head.appendChild (script);
 		// ignore onload event and no call of ClazzLoader.scriptLoading
-		return ;
+		return;
 	}
 	// Alert when the script is loaded
 	if (typeof (script.onreadystatechange) == "undefined") { // W3C
@@ -968,6 +978,14 @@ ClazzLoader.isResourceExisted = function (id, path, base) {
 	return false;
 };
 
+/* private */
+/*-# queueBe4SWT -> q4T #-*/
+ClazzLoader.queueBe4SWT = [];
+
+/* private */
+/*-# lockQueueBe4SWT -> l4T #-*/
+ClazzLoader.lockQueueBe4SWT = true;
+
 /**
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
@@ -975,11 +993,20 @@ ClazzLoader.isResourceExisted = function (id, path, base) {
 /* private */
 /*-# tryToLoadNext -> next #-*/
 ClazzLoader.tryToLoadNext = function (file) {
+	var ua = navigator.userAgent.toLowerCase ();
+	if (ua.indexOf ("msie") == -1 && ua.indexOf ("opera") == -1
+			&& ClazzLoader.lockQueueBe4SWT && ClazzLoader.pkgRefCount != 0 
+			&& file.lastIndexOf ("package.js") != file.length - 10) {
+		var qbs = ClazzLoader.queueBe4SWT;
+		qbs[qbs.length] = file;
+		return;
+	}
+
 	//alert ("in tryToLoadNext");
 	var node = ClazzLoader.mapPath2ClassNode["@" + file];
 	if (node == null) { // maybe class tree root
 		//error (" null node ?" + file);
-		return ;
+		return;
 	}
 	//alert ("loaded .. " + file);
 	var clazzes = ClazzLoader.classpathMap["$" + file];
@@ -1036,7 +1063,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 	}
 	if (!ClazzLoader.keepOnLoading) {
-		return ;
+		return;
 	}
 
 	var loadFurther = false;
@@ -1062,9 +1089,17 @@ ClazzLoader.tryToLoadNext = function (file) {
 			}
 			cq.length--;
 			
-			ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
 			//alert ("load from queue");
-			ClazzLoader.loadScript (n.path);
+			if (!ClazzLoader.loadedScripts[n.path] || cq.length != 0 
+					|| (n.musts != null && n.musts.length != 0)
+					|| (n.optionals != null && n.optionals.length != 0)) {
+				ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
+				ClazzLoader.loadScript (n.path);
+			} else {
+				// alert ("Continue loading by SCRIPT onload event!");
+				//ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
+				//ClazzLoader.loadScript (n.path);
+			}
 		} else { // Optionals
 			//log ("options");
 			n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
@@ -1177,7 +1212,7 @@ ClazzLoader.updateNode = function (node) {
 	if (node.name == null 
 			|| node.status >= ClazzNode.STATUS_OPTIONALS_LOADED) {
 		ClazzLoader.destroyClassNode (node);
-		return ;
+		return;
 	}
 	var isMustsOK = false;
 	if (node.musts == null || node.musts.length == 0 
@@ -1356,7 +1391,7 @@ ClazzLoader.updateNode = function (node) {
 /*-# updateParents -> uP #-*/
 ClazzLoader.updateParents = function (node, level) {
 	if (node.parents == null || node.parents.length == 0) {
-		return ;
+		return;
 	}
 	for (var i = 0; i < node.parents.length; i++) {
 		var p = node.parents[i];
@@ -1530,16 +1565,18 @@ ClazzLoader.checkInteractive = function () {
 ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 	//alert ("Loading " + clazz + " ...");
 	ClazzLoader.checkInteractive ();
+
 	if (clazz instanceof Array) {
 		ClazzLoader.unwrapArray (clazz);
 		for (var i = 0; i < clazz.length; i++) {
 			ClazzLoader.load (musts, clazz[i], optionals, declaration, clazz);
 		}
-		return ;
+		return;
 	}
 	if (clazz.charAt (0) == '$') {
 		clazz = "org.eclipse.s" + clazz.substring (1);
 	}
+	
 	var node = ClazzLoader.mapPath2ClassNode["#" + clazz];
 	if (node == null) { // ClazzLoader.load called inside *.z.js?
 		var n = ClazzLoader.findClass (clazz);
@@ -1570,7 +1607,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 			declaration ();
 		}
 		alert ("[Java2Script] ClazzLoader#load is not executed correctly!");
-		return ;
+		return;
 		//*/
 	}
 	var okToInit = true;
@@ -1791,6 +1828,10 @@ ClazzLoader.getJ2SLibBase = function () {
 		if (idx != -1) {
 			return src.substring (0, idx);
 		}
+		var base = ClazzLoader.classpathMap["@java"];
+		if (base != null) {
+			return base;
+		}
 		idx = src.indexOf ("java/lang/ClassLoader.js"); // may be not packed yet
 		if (idx != -1) {
 			return src.substring (0, idx);
@@ -1807,7 +1848,7 @@ ClazzLoader.getJ2SLibBase = function () {
 /*-# assurePackageClasspath -> acp #-*/
 ClazzLoader.assurePackageClasspath = function (pkg) {
 	var r = window[pkg + ".registered"];
-	if (r != false && r != true) {
+	if (r != false && r != true && ClazzLoader.classpathMap["@" + pkg] == null) {
 		window[pkg + ".registered"] = false;
 		var base = ClazzLoader.getJ2SLibBase ();
 		if (base == null) {
@@ -1825,6 +1866,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (typeof optionalsLoaded == "boolean") {
 		return Clazz.evalType (name);
 	}
+
 	/*
 	 * Make sure that
 	 * ClazzLoader.packageClasspath ("java", base, true); 
@@ -1843,7 +1885,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			&& name.indexOf ("java.") != 0))) {
 		var qbs = ClazzLoader.queueBe4KeyClazz;
 		qbs[qbs.length] = [name, optionalsLoaded];
-		return ;
+		return;
 	}
 	if (!ClazzLoader.isClassDefined (name) 
 			&& !ClazzLoader.isClassExcluded (name)) {
@@ -1896,7 +1938,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 /* public */
 $w$ = ClazzLoader.loadAppMain = function (clazz, args) {
 	if (clazz == null) {
-		return ;
+		return;
 	}
 	var clazzStr = clazz;
 	if (clazz.charAt (0) == '$') {
@@ -1923,7 +1965,7 @@ $w$ = ClazzLoader.loadAppMain = function (clazz, args) {
 ClazzLoader.runtimeLoaded = function () {
 	if (ClazzLoader.pkgRefCount != 0 
 			|| !ClazzLoader.isClassDefined (ClazzLoader.runtimeKeyClass)) {
-		return ;
+		return;
 	}
 	var qbs = ClazzLoader.queueBe4KeyClazz;
 	for (var i = 0; i < qbs.length; i++) {
@@ -1983,9 +2025,23 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 			}
 		}
 		*/
-		if (!existed) {
+		/* above existed tests are commented */
+		//if (!existed) {
 			arr[arr.length] = child;
-		}
+			var swtPkg = "org.eclipse.swt";
+			if (child.name.indexOf (swtPkg) == 0 
+					|| child.name.indexOf ("$wt") == 0) {
+				window["swt.lazy.loading.callback"] =  function () {
+					ClazzLoader.lockQueueBe4SWT = false;
+					var qbs = ClazzLoader.queueBe4SWT;
+					for (var i = 0; i < qbs.length; i++) {
+						ClazzLoader.tryToLoadNext (qbs[i]);
+					}
+					ClazzLoader.queueBe4SWT  = [];
+				};
+				ClazzLoader.assurePackageClasspath (swtPkg);
+			}
+		//}
 	}
 	existed = false;
 	for (var i = 0; i < child.parents.length; i++) {

@@ -1,3 +1,6 @@
+/* private */
+window["java.registered"] = false;
+
 (function () {
 	ClazzLoader.registerPackages ("java", [
 			"io", "lang", "lang.reflect", "util", "net", "text"]);
