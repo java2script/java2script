@@ -65,60 +65,11 @@ public class SimpleRPCRequest {
 		}
 		return name;
 	}
-	
-	static SimpleRPCMapping[] mappings = new SimpleRPCMapping[4];
-	
-	public static boolean addMapping(SimpleRPCMapping mapping) {
-		int length = mappings.length;
-		for (int i = 0; i < length; i++) {
-			if (mappings[i] == mapping) {
-				return false;
-			}
-		}
-		for (int i = 0; i < length; i++) {
-			if (mappings[i] == null) {
-				mappings[i] = mapping;
-				return true;
-			}
-		}
-		SimpleRPCMapping[] newMappings = new SimpleRPCMapping[length + 4];
-		for (int i = 0; i < length; i++) {
-			newMappings[i] = mappings[i];
-		}
-		newMappings[length] = mapping;
-		mappings = newMappings;
-		return true;
-	}
-	
-	static String getRunnableURL(final SimpleRPCRunnable runnable) {
-		String clazzNameURL = getClassNameURL(runnable);
-		int length = mappings.length;
-		for (int i = 0; i < length; i++) {
-			if (mappings[i] != null) {
-				String shortURL = mappings[i].getRunnableURL(clazzNameURL);
-				if (shortURL != null) {
-					clazzNameURL = shortURL;
-					break;
-				}
-			}
-		}
-		String url = runnable.baseURL();
-		if (url == null || url.trim().length() == 0) {
-			url = clazzNameURL; 
-		} else {
-			url = url.trim();
-			if (url.charAt(url.length() - 1) != '/') {
-				url += '/';
-			}
-			url += clazzNameURL;
-		}
-		return url;
-	}
 
 	private static void ajaxRequest(final SimpleRPCRunnable runnable) {
 		final HttpRequest request = new HttpRequest();
-		String url = getRunnableURL(runnable);
-		String method = runnable.method();
+		String url = runnable.getHttpURL();
+		String method = runnable.getHttpMethod();
 		if (method == null) {
 			method = "POST";
 		}

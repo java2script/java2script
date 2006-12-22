@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,41 +39,18 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 
 	protected Set runnables = new HashSet();
 	
-	protected Set mappings = new HashSet();
-	
-	protected SimpleRPCRunnable getRunnableByURL(String url) {
-		int lastIndexOf = url.lastIndexOf('/');
-		String shortURL = null;
-		if (lastIndexOf == url.length() - 1) {
-			lastIndexOf = url.lastIndexOf('/', lastIndexOf - 1);
-			if (lastIndexOf == -1) {
-				return null; // should never happen!
-			}
-			shortURL = url.substring(lastIndexOf + 1, url.length() - 1);
-		} else {
-			shortURL = url.substring(lastIndexOf + 1);
-		}
-		if (runnables.contains(shortURL)) {
-			if (url != null) {
-				Object obj = getNewInstanceByClassName(shortURL);
+	protected SimpleRPCRunnable getRunnableByURL(String request) {
+		if (request == null) return null;
+		int length = request.length();
+		if (length <= 7 || !request.startsWith("WLL")) return null;
+		int index = request.indexOf('#');
+		if (index == -1) return null;
+		String clazzName = request.substring(6, index);
+		if (runnables.contains(clazzName)) {
+			if (request != null) {
+				Object obj = getNewInstanceByClassName(clazzName);
 				if (obj != null && obj instanceof SimpleRPCRunnable) {
 					return (SimpleRPCRunnable) obj;
-				}
-			}
-		}
-		for (Iterator iter = mappings.iterator(); iter.hasNext();) {
-			String mappingStr = (String) iter.next();
-			if (mappingStr != null) {
-				Object obj = getNewInstanceByClassName(mappingStr);
-				if (obj != null && obj instanceof SimpleRPCMapping) {
-					SimpleRPCMapping mapping = (SimpleRPCMapping) obj;
-					String mappedRunnable = mapping.getRunnableClassName(shortURL);
-					if (mappedRunnable != null) {
-						obj = getNewInstanceByClassName(mappedRunnable);
-						if (obj != null && obj instanceof SimpleRPCRunnable) {
-							return (SimpleRPCRunnable) obj;
-						}
-					}
 				}
 			}
 		}
@@ -143,20 +119,11 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				}
 			}
 		}
-		String mappingStr = getInitParameter("simple.rpc.mappings");
-		if (mappingStr != null) {
-			String[] splits = mappingStr.trim().split("\\s*[,;:]\\s*");
-			for (int i = 0; i < splits.length; i++) {
-				String trim = splits[i].trim();
-				if (trim.length() != 0) {
-					mappings.add(trim);
-				}
-			}
-		}
 	}
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		SimpleRPCRunnable runnable = getRunnableByURL(req.getPathInfo());
+		String request = readAll(req.getInputStream());
+		SimpleRPCRunnable runnable = getRunnableByURL(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -164,14 +131,14 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
 		//resp.setCharacterEncoding("utf-8");
-		String request = readAll(req.getInputStream());
 		runnable.deserialize(request);
 		runnable.ajaxRun();
 		writer.write(runnable.serialize());
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		SimpleRPCRunnable runnable = getRunnableByURL(req.getPathInfo());
+		String request = req.getQueryString();
+		SimpleRPCRunnable runnable = getRunnableByURL(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -179,7 +146,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		PrintWriter writer = resp.getWriter();
 		resp.setContentType("text/plain");
 		//resp.setCharacterEncoding("utf-8");
-		runnable.deserialize(req.getQueryString());
+		runnable.deserialize(request);
 		runnable.ajaxRun();
 		writer.write(runnable.serialize());
 	}

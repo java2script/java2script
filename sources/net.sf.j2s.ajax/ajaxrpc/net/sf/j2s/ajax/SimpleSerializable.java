@@ -34,7 +34,21 @@ public class SimpleSerializable {
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
 var buffer = [];
-var fields = this.getClass ().declared$Fields;
+buffer[0] = "WLL100";
+var oClass = this.getClass();
+var clazz = oClass;
+var clazzName = clazz.getName();
+while (clazzName.indexOf('$') != -1) {
+	clazz = clazz.getSuperclass();
+	if (clazz == null) {
+		break;
+	}
+	clazzName = clazz.getName();
+}
+buffer[1] = clazzName;
+buffer[2] = '#';
+
+var fields = oClass.declared$Fields;
 if (fields == null) return "";
 for (var i = 0; i < fields.length; i++) {
 	var field = fields[i];
@@ -110,8 +124,25 @@ return strBuf;
 	public String serialize() {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer();
-		Set fieldSet = new HashSet();
+		/*
+		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
+		 * # is used to mark the the beginning of serialized data  
+		 */
+		buffer.append("WLL100");
 		Class clazz = this.getClass();
+		String clazzName = clazz.getName();
+		while (clazzName.indexOf('$') != -1) {
+			clazz = clazz.getSuperclass();
+			if (clazz == null) {
+				break; // should never happen!
+			}
+			clazzName = clazz.getName();
+		}
+		buffer.append(clazzName);
+		buffer.append('#');
+
+		Set fieldSet = new HashSet();
+		clazz = this.getClass();
 		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 			Field[] fields = clazz.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
@@ -308,7 +339,8 @@ return strBuf;
 								}
 							}
 						} else {
-							// others
+							// others unknown or unsupported types!
+							throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
 						}
 					}
 				}
@@ -411,6 +443,13 @@ if (s == null) {
 	 * 
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
+if (str == null) return;
+var length = str.length;
+if (length <= 7 || str.indexOf ("WLL") != 0) return;
+var index = str.indexOf('#');
+if (index == -1) return;
+index++;
+
 var fieldMap = [];
 var fields = this.getClass ().declared$Fields;
 if (fields == null) return;
@@ -419,8 +458,6 @@ for (var i = 0; i < fields.length; i++) {
 	var name = field.name;
 	fieldMap[name] = true;
 }
-var length = str.length;
-var index = 0;
 while (index < length) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
@@ -533,7 +570,13 @@ while (index < length) {
 	 */
 	public void deserialize(String str) {
 		char baseChar = 'B';
-		if (str == null || str.length() == 0) return;
+		if (str == null) return;
+		int length = str.length();
+		if (length <= 7 || !str.startsWith("WLL")) return; // Should throw exception!
+		int index = str.indexOf('#');
+		if (index == -1) return; // Should throw exception!
+		index++;
+		
 		Map fieldMap = new HashMap();
 		Set fieldSet = new HashSet();
 		Class clazz = this.getClass();
@@ -555,8 +598,6 @@ while (index < length) {
 				fieldMap.put(name, field);
 			}
 		}
-		int length = str.length();
-		int index = 0;
 		while (index < length) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
