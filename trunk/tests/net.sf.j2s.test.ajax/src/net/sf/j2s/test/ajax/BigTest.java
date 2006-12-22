@@ -22,6 +22,9 @@ import junit.framework.TestCase;
  * 2006-10-13
  */
 public class BigTest extends TestCase {
+	String trim(String s) {
+		return s.substring(s.indexOf('#') + 1);
+	}
 	public void testJavaSource() {
 	    String tmpStr = "";
 	    tmpStr += "/*******************************************************************************\r\n";
@@ -191,7 +194,7 @@ public class BigTest extends TestCase {
 
 	    StringSS sss = new StringSS();
 	    sss.s = tmpStr;
-	    String serialize = sss.serialize();
+	    String serialize = trim(sss.serialize());
 	    System.out.println(serialize);
 	    System.out.println(serialize.length());
 	    assertEquals(6153, serialize.length());

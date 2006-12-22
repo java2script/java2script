@@ -22,18 +22,21 @@ import net.sf.j2s.ajax.SimpleSerializable;
  * 2006-10-11
  */
 public class ArrayDeserializeTest extends TestCase {
+	String trim(String s) {
+		return s.substring(s.indexOf('#') + 1);
+	}
 	public void testSimple() {
 		SimpleSerializable ss = new SimpleSerializable();
 		//System.out.println(ss.serialize());
-		assertEquals(0, ss.serialize().length());
-		assertEquals("", ss.serialize());
+		assertEquals(0, trim(ss.serialize()).length());
+		assertEquals("", trim(ss.serialize()));
 	}
 	public class FloatSerialize extends SimpleSerializable {
 		public float[] f = new float[] {23.2f};
 	}
 	public void testSimpleFloat() {
 		FloatSerialize ss = new FloatSerialize();
-		ss.deserialize("CfAFCF21.2");
+		ss.deserialize("WLL100#CfAFCF21.2");
 		assertEquals(21.2, ss.f[0], 0.0001);
 	}
 	public class DoubleSerialize extends SimpleSerializable {
@@ -41,7 +44,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleDouble() {
 		DoubleSerialize ss = new DoubleSerialize();
-		ss.deserialize("CdADCF21.2");
+		ss.deserialize("WLL100#CdADCF21.2");
 		assertEquals(21.2, ss.d[0], 0.0001);
 	}
 	public class IntSerialize extends SimpleSerializable {
@@ -49,7 +52,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleInt() {
 		IntSerialize ss = new IntSerialize();
-		ss.deserialize("CiAICD13");;
+		ss.deserialize("WLL100#CiAICD13");;
 		assertEquals(13, ss.i[0]);
 	}
 	public class LongSerialize extends SimpleSerializable {
@@ -57,7 +60,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleLong() {
 		LongSerialize ss = new LongSerialize();
-		ss.deserialize("ClALCD13");;
+		ss.deserialize("WLL100#ClALCD13");;
 		assertEquals(1, ss.l.length);
 		assertEquals(13, ss.l[0]);
 	}
@@ -66,7 +69,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleShort() {
 		ShortSerialize ss = new ShortSerialize();
-		ss.deserialize("CsASCD63");;
+		ss.deserialize("WLL100#CsASCD63");;
 		assertEquals(63, ss.s[0]);
 	}
 	public class ByteSerialize extends SimpleSerializable {
@@ -74,7 +77,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleByte() {
 		ByteSerialize ss = new ByteSerialize();
-		ss.deserialize("CbABCD33");;
+		ss.deserialize("WLL100#CbABCD33");;
 		assertEquals(33, ss.b[0]);
 	}
 	public class CharSerialize extends SimpleSerializable {
@@ -82,7 +85,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleChar() {
 		CharSerialize ss = new CharSerialize();
-		ss.deserialize("CcACCD65");;
+		ss.deserialize("WLL100#CcACCD65");;
 		assertEquals('A', ss.c[0]);
 	}
 	public class BooleanSerialize extends SimpleSerializable {
@@ -90,12 +93,12 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleBoolean() {
 		BooleanSerialize ss = new BooleanSerialize();
-		ss.deserialize("CbAbCGfalse");;
+		ss.deserialize("WLL100#CbAbCGfalse");;
 		assertEquals(false, ss.b[0]);
 	}
 	public void testSimpleBoolean2() {
 		BooleanSerialize ss = new BooleanSerialize();
-		ss.deserialize("CbAb@D56GfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalse");;
+		ss.deserialize("WLL100#CbAb@D56GfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalse");;
 		assertEquals(56, ss.b.length);
 	}
 	public class StringSerialize extends SimpleSerializable {
@@ -103,22 +106,22 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleString() {
 		StringSerialize ss = new StringSerialize();
-		ss.deserialize("CsAXCsQMy name iz jozz");;
+		ss.deserialize("WLL100#CsAXCsQMy name iz jozz");;
 		assertEquals("My name iz jozz", ss.s[0]);
 	}
 	public void testSimpleString2() {
 		StringSerialize ss = new StringSerialize();
-		ss.deserialize("CsAXA");;
+		ss.deserialize("WLL100#CsAXA");;
 		assertEquals(null, ss.s);
 	}
 	public void testSimpleString3() {
 		StringSerialize ss = new StringSerialize();
-		ss.deserialize("CsAXCs@D56abcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefg");;
+		ss.deserialize("WLL100#CsAXCs@D56abcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefg");;
 		assertEquals(56, ss.s[0].length());
 	}
 	public void testSimpleString7() {
 		StringSerialize ss = new StringSerialize();
-		ss.deserialize("CsAXCuN5ZGo5LuB5bu6");;
+		ss.deserialize("WLL100#CsAXCuN5ZGo5LuB5bu6");;
 		assertEquals("÷‹» Ω®", ss.s[0]);
 	}
 	public class MixedSerialize extends SimpleSerializable {
@@ -134,7 +137,7 @@ public class ArrayDeserializeTest extends TestCase {
 	}
 	public void testSimpleMixed() {
 		MixedSerialize ss = new MixedSerialize();
-		ss.deserialize("CfAFCF23.2CdADCF20.2CnAICD23ClALCD23CsASCD23CbABCD23CcACCD23CxAbCGfalseEstrAXCsLHell World");;
+		ss.deserialize("WLL100#CfAFCF23.2CdADCF20.2CnAICD23ClALCD23CsASCD23CbABCD23CcACCD23CxAbCGfalseEstrAXCsLHell World");;
 		assertEquals(20.2, ss.d[0], 0.001);
 	}
 }
