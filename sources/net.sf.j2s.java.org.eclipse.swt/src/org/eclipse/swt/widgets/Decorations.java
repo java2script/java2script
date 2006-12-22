@@ -226,6 +226,17 @@ void bringToTop () {
 		if ((style.width == null || style.width.length() == 0) 
 				&& (style.height == null || style.height.length() == 0)){
 			setSize(this.width, this.height);
+			/**
+			 * @j2sNative
+			 * var title = this.getText();
+			 * if (title == null) {
+			 * 	title = "-";
+			 * }
+			 * if (window["document.title"] == null) {
+			 * 	window["document.title"] = document.title;
+			 * }
+			 * document.title = title;
+			 */ {}
 		}
 		int count = children.length; //handle.childNodes.length;
 		for (int i = 0; i < count; i++) {
@@ -792,6 +803,12 @@ public void dispose () {
 		}
 	}
 	super.dispose ();
+	/**
+	 * @j2sNative
+	 * if (window["document.title"] != null) {
+	 * 	document.title = window["document.title"];
+	 * }
+	 */ {}
 }
 
 Menu findMenu (Element hMenu) {
