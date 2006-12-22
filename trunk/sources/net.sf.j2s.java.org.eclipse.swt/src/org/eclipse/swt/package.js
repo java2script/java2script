@@ -1,3 +1,6 @@
+/* private */
+window["org.eclipse.swt.registered"] = false;
+
 /*
  * Standing for SWT CSS, with all "S" into "$". We love dollors. -zhou renjian
  *
@@ -458,6 +461,11 @@ if (!isDebugging) {
 
 }) ();
 
-
 /* private */
 window["org.eclipse.swt.registered"] = true;
+
+var lazyCBKey = "swt.lazy.loading.callback";
+if (window[lazyCBKey] != null) {
+	window[lazyCBKey]();
+	window[lazyCBKey] = null;
+}
