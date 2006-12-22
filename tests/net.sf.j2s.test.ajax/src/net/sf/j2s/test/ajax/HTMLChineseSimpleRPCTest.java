@@ -23,6 +23,9 @@ import net.sf.j2s.ajax.SimpleSerializable;
  * 2006-12-16
  */
 public class HTMLChineseSimpleRPCTest extends TestCase {
+	String trim(String s) {
+		return s.substring(s.indexOf('#') + 1);
+	}
 	public class StringSerialize extends SimpleSerializable {
 		public String s = "青藏线：从青海省的格尔木开始，到拉萨约1083千米。有格尔木乘至拉萨的长途汽车，运行30~40小时，2天即到。路线如下：<br>格木尔--289--五道梁--150--雁石坪--100--唐古拉山口--89--安多--138--那曲--164--当雄--75--羊八井--78--拉萨 （其中数字的单位是千米）";
 	}
@@ -36,7 +39,7 @@ public class HTMLChineseSimpleRPCTest extends TestCase {
 	}
 	public void xtestSimpleString() {
 		StringSerialize ss = new StringSerialize();
-		String serialize = ss.serialize();
+		String serialize = trim(ss.serialize());
 		String expected = "Csu@E4406Z2S6JeP57q/77ya5LuO6Z2S5rW355yB55qE5qC85bCU5pyo5byA5aeL77yM5Yiw5ouJ6JCo57qmMTA4M+WNg+exs+OAguacieagvOWwlOacqOS5mOiHs+aLieiQqOeahOmVv+mAlOaxvei9pu+8jOi/kOihjDMwfjQw5bCP5pe277yMMuWkqeWNs+WIsOOAgui3r+e6v+WmguS4i++8mjxicj7moLzmnKjlsJQtLTI4OS0t5LqU6YGT5qKBLS0xNTAtLembgeefs+Wdqi0tMTAwLS3llJDlj6Tmi4nlsbHlj6MtLTg5LS3lronlpJotLTEzOC0t6YKj5puyLS0xNjQtLeW9k+mbhC0tNzUtLee+iuWFq+S6lS0tNzgtLeaLieiQqCDvvIjlhbbkuK3mlbDlrZfnmoTljZXkvY3mmK/ljYPnsbPvvIk=";
 		
 		System.out.println();
@@ -61,14 +64,14 @@ public class HTMLChineseSimpleRPCTest extends TestCase {
 		assertEquals(expected, serialize);
 		
 		StringSerialize ds = new StringSerialize();
-		ds.deserialize(serialize);
+		ds.deserialize("WLL100#" + serialize);
 		System.out.println(ds.s);
 		
 		assertEquals(ds.s, ss.s);
 		
 		
 		StringSerialize ds2 = new StringSerialize();
-		ds2.deserialize(expected);
+		ds2.deserialize("WLL100#" + expected);
 		System.out.println(ds2.s);
 		System.out.println(ss.s);
 		

@@ -22,95 +22,98 @@ import net.sf.j2s.ajax.SimpleSerializable;
  * 2006-10-11
  */
 public class ArraySerializeTest extends TestCase {
+	String trim(String s) {
+		return s.substring(s.indexOf('#') + 1);
+	}
 	public void testSimple() {
 		SimpleSerializable ss = new SimpleSerializable();
-		//System.out.println(ss.serialize());
-		assertEquals(0, ss.serialize().length());
-		assertEquals("", ss.serialize());
+		//System.out.println(trim(ss.serialize()));
+		assertEquals(0, trim(ss.serialize()).length());
+		assertEquals("", trim(ss.serialize()));
 	}
 	public class FloatSerialize extends SimpleSerializable {
 		public float[] f = new float[] {23.2f};
 	}
 	public void testSimpleFloat() {
 		SimpleSerializable ss = new FloatSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CfAFCF23.2", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CfAFCF23.2", trim(ss.serialize()));
 	}
 	public class DoubleSerialize extends SimpleSerializable {
 		public double[] d = new double[] {23.2};
 	}
 	public void testSimpleDouble() {
 		SimpleSerializable ss = new DoubleSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CdADCF23.2", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CdADCF23.2", trim(ss.serialize()));
 	}
 	public class IntSerialize extends SimpleSerializable {
 		public int[] i = new int[] {23};
 	}
 	public void testSimpleInt() {
 		SimpleSerializable ss = new IntSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CiAICD23", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CiAICD23", trim(ss.serialize()));
 	}
 	public class LongSerialize extends SimpleSerializable {
 		public long[] l = new long[] {23};
 	}
 	public void testSimpleLong() {
 		SimpleSerializable ss = new LongSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("ClALCD23", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("ClALCD23", trim(ss.serialize()));
 	}
 	public class ShortSerialize extends SimpleSerializable {
 		public short[] s = new short[] {23};
 	}
 	public void testSimpleShort() {
 		SimpleSerializable ss = new ShortSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CsASCD23", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CsASCD23", trim(ss.serialize()));
 	}
 	public class ByteSerialize extends SimpleSerializable {
 		public byte[] b = new byte[] {23};
 	}
 	public void testSimpleByte() {
 		SimpleSerializable ss = new ByteSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CbABCD23", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CbABCD23", trim(ss.serialize()));
 	}
 	public class CharSerialize extends SimpleSerializable {
 		public char[] c = new char[] {23};
 	}
 	public void testSimpleChar() {
 		SimpleSerializable ss = new CharSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CcACCD23", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CcACCD23", trim(ss.serialize()));
 	}
 	public class BooleanSerialize extends SimpleSerializable {
 		public boolean[] b = new boolean[] {true};
 	}
 	public void testSimpleBoolean() {
 		SimpleSerializable ss = new BooleanSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CbAbCFtrue", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CbAbCFtrue", trim(ss.serialize()));
 	}
 	public void testSimpleBoolean2() {
 		BooleanSerialize ss = new BooleanSerialize();
 		ss.b = new boolean[56];
-		System.out.println(ss.serialize());
-		assertEquals("CbAb@D56GfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalse", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CbAb@D56GfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalseGfalse", trim(ss.serialize()));
 	}
 	public class StringSerialize extends SimpleSerializable {
 		public String[] s = new String[] {"My name is jozz"};
 	}
 	public void testSimpleString() {
 		SimpleSerializable ss = new StringSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CsAXCsQMy name is jozz", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CsAXCsQMy name is jozz", trim(ss.serialize()));
 	}
 	public void testSimpleString2() {
 		StringSerialize ss = new StringSerialize();
 		ss.s = null;
-		System.out.println(ss.serialize());
-		assertEquals("CsAXA", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CsAXA", trim(ss.serialize()));
 	}
 	public void testSimpleString3() {
 		StringSerialize ss = new StringSerialize();
@@ -119,14 +122,14 @@ public class ArraySerializeTest extends TestCase {
 		ss.s[0] += ss.s[0];
 		ss.s[0] += ss.s[0];
 		System.out.println(ss.s[0].length());
-		System.out.println(ss.serialize());
-		assertEquals("CsAXCs@D56abcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefg", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CsAXCs@D56abcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefg", trim(ss.serialize()));
 	}
 	public void testSimpleString7() {
 		StringSerialize ss = new StringSerialize();
 		ss.s[0] = "÷‹» Ω®";
-		System.out.println(ss.serialize());
-		assertEquals("CsAXCuN5ZGo5LuB5bu6", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+		assertEquals("CsAXCuN5ZGo5LuB5bu6", trim(ss.serialize()));
 	}
 	public class MixedSerialize extends SimpleSerializable {
 		public float[] f = new float[] {23.2f};
@@ -141,7 +144,8 @@ public class ArraySerializeTest extends TestCase {
 	}
 	public void testSimpleMixed() {
 		SimpleSerializable ss = new MixedSerialize();
-		System.out.println(ss.serialize());
-		assertEquals("CfAFCF23.2CdADCF23.2CnAICD23ClALCD23CsASCD23CbABCD23CcACCD23CxAbCGfalseEstrAXCsLHell World", ss.serialize());
+		System.out.println(trim(ss.serialize()));
+//		assertEquals("CfAFCF23.2CdADCF23.2CnAICD23ClALCD23CsASCD23CbABCD23CcACCD23CxAbCGfalseEstrAXCsLHell World", trim(ss.serialize()));
+		assertEquals("CdADCF23.2CxAbCGfalseCfAFCF23.2CbABCD23CsASCD23EstrAXCsLHell WorldClALCD23CcACCD23CnAICD23", trim(ss.serialize()));
 	}
 }

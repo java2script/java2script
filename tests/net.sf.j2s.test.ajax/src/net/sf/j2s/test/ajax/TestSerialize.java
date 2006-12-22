@@ -42,7 +42,7 @@ public class TestSerialize extends SimpleRPCRunnable {
 	public char[] cs = new char[] {'Œ“'};
 	public String csx, xysx[];
 	public String[] acsx, axysx[];
-	public String[][] xacsx, xaxysx[];
+	public String[] xacsx, xaxysx[];
 	
 	/* (non-Javadoc)
 	 * @see net.sf.j2s.ajax.ServletRunnable#getServletURL()

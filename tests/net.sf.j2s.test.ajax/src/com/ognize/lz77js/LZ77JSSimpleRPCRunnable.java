@@ -26,11 +26,11 @@ public class LZ77JSSimpleRPCRunnable extends SimpleRPCRunnable {
 	public boolean addLZ77Header;
 	public String result;
 	
-	public String url() {
+	public String getHttpURL() {
 		/*
 		 * In JavaScript, this url must NOT be cross site URL!
 		 */
-		return "http://bl.ognize.com/lz77js/j2s-lz77js";
+		return "http://bl.ognize.com/lz77js/simplerpc"; /* this url doesn't work yet! */
 	}
 
 	public void ajaxRun() {
