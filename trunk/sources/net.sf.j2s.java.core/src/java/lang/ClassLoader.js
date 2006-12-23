@@ -19,12 +19,81 @@
 /**
  * TODO:
  * Make optimization over class dependency tree.
- * Give more ways for the feedback of loading.
- * Use multiple SCRIPT tags so *.js can be downloaded asynchronously.
- * Use Class.for.... to load tabs.
+ */
+
+/*
+ * ClassLoader Summary
+ * 
+ * ClassLoader creates SCRIPT elements and setup class path and onload 
+ * callback to continue class loading.
  *
- * Fix the bug that *.random are used to identify visited status.
- * Determine whether *.js is sucessfully loaded or failed.
+ * In the onload callbacks, ClazzLoader will try to calculate the next-to-be-
+ * load *.js and load it. In *.js, it will contains some codes like
+ * Clazz.load (..., "$wt.widgets.Control", ...);
+ * to provide information to build up the class dependency tree.
+ *
+ * Some known problems of different browsers:
+ * 1. In IE, loading *.js through SCRIPT will first triggers onreadstatechange 
+ * event, and then executes inner *.js source.
+ * 2. In Firefox, loading *.js will first executes *.js source and then 
+ * triggers onload event.
+ * 3. In Opera, similar to IE, but trigger onload event. (TODO: More details 
+ * should be studied.)
+ * 
+ * For class dependency tree, one class may require a set of must-classes, 
+ * which must be loaded before itself getting initialized, and also need a set
+ * of optional classes, which also be loaded before being called.
+ *
+ * The class loading status will be in 6 stages.
+ * 1. Unknown, the class is newly introduced by other class.
+ * 2. Known, the class is already mentioned by other class.
+ * 3. Loaded, *.js source is in memory, but may not be initialized yet. It 
+ * requires all its must-classes be intiailized, which is in the next stage.
+ * 4. Musts loaded, all must classes is already loaded and declared.
+ * 5. Delcared, the class is already declared (ClazzLoader#isClassDefined).
+ * 6. Optionals loaded, all optional classes is loaded and declared.
+ *
+ * The ClassLoader tries to load all necessary classes in order, and intialize
+ * them in order. For such job, it will traverse the dependency tree, and try 
+ * to next class to-be-loaded. Sometime, the class dependencies may be in one
+ * or more cycles, which must be broken down so classes is loaded in correct
+ * order.
+ *
+ * Loading order and intializing order is very important for the ClassLoader.
+ * The following technical options are considered:
+ * 1. SCRIPT is loading asynchronously, which means controling order must use
+ * callback methods to continue.
+ * 2. Multiple loading threads are later introduced, which requires the 
+ * ClassLoader should use variables to record the class status.
+ * 3. Different browsers have different loading orders, which means extra tests
+ * should be tested to make sure loading order won't be broken.
+ * 4. Java2Script simulator itself have some loading orders that is must be 
+ * honored, which means it should be integrated seamlessly to Clazz system.
+ * 5. Packed *.z.js is introduced to avoid lots of small *.js which requires 
+ * lots of HTTP connections, which means that packed *.z.js should be treated
+ * specially (There will be mappings for such packed classes).
+ * 6. *.js or *.css loading may fail according to network status, which means
+ * some another try should be performed to load classes.
+ * 7. SWT lazy loading is later introduced, which means that class loading
+ * process may be paused and should be later resumed.
+ *
+ * Some known bugs:
+ * <code>$_L(["$wt.graphics.Drawable","$wt.widgets.Widget"],
+ *  "$wt.widgets.Control", ...</code>
+ * has errors while must classes in different order such as
+ * <code>$_L(["$wt.widgets.Widget", "$wt.graphics.Drawable"],
+ *  "$wt.widgets.Control", ...</code>
+ * has no error.
+ * 
+ * Other maybe bug scenarios:
+ * 1. In <code>ClazzLoader.maxLoadingThreads = 1;</code> single loading thread 
+ * mode, there are no errors, but in default multiple thread loading mode, 
+ * there are errors.
+ * 2. No errors in one browser, but has errors on other browsers (Browser 
+ * script loading order differences).
+ * 3. First time loading has errors, but reloading it gets no errors (Maybe 
+ * HTTP connections timeout, but should not accur in local file system, or it
+ * is a loading bug by using JavaScript timeout thread).
  */
  
 /*-#
@@ -126,6 +195,8 @@ if (navigator.userAgent.toLowerCase ().indexOf ("opera") != -1) {
 
 /**
  * Try to be compatiable with Clazz system.
+ * In original design ClazzLoader and Clazz are independent!
+ *  -- zhourenjian @ December 23, 2006
  */
 if (window["Clazz"] != null && Clazz.isClassDefined) {
 	ClazzLoader.isClassDefined = Clazz.isClassDefined;
@@ -376,6 +447,10 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 
 ClazzLoader.pkgRefCount = 0;
 
+/**
+ * Register classes to a given *.z.js path, so only a single *.z.js is loaded
+ * for all those classes.
+ */
 /* public */
 /*-# clazzes -> zs #-*/
 ClazzLoader.jarClasspath = function (jar, clazzes) {
@@ -391,6 +466,10 @@ ClazzLoader.jarClasspath = function (jar, clazzes) {
 	}
 };
 
+/**
+ * Usually be used in .../package.js. All given packages will be registered
+ * to the same classpath of given prefix package.
+ */
 /* public */
 ClazzLoader.registerPackages = function (prefix, pkgs) {
 	//alert ("package " + pkgs);
@@ -426,7 +505,7 @@ ClazzLoader.multipleSites = function (path) {
 			var arr = ['a', 'e', 'i', 'o', 'u', 'y'];
 			var c1 = path.charCodeAt (index + 1);
 			var c2 = path.charCodeAt (index + 2);
-			var idx = (length - index) * 3 + c1 * 5 + c2 * 7;
+			var idx = (length - index) * 3 + c1 * 5 + c2 * 7; // Hash
 			return path.substring (0, 7) + arr[idx % 6] + path.substring (8);
 		}
 	}
@@ -533,6 +612,7 @@ ClazzLoader.assureBase = function (base) {
 	return base;
 };
 
+/* Used to keep ignored classes */
 /* private */
 /*-# excludeClassMap -> exmap #-*/
 ClazzLoader.excludeClassMap = new Object ();
@@ -674,6 +754,7 @@ ClazzLoader.loadScript = function (file) {
 		return;
 	}
 	ClazzLoader.loadedScripts[file] = true;
+	/* also remove from those queue */
 	var cq = ClazzLoader.classQueue;
 	for (var i = 0; i < cq.length; i++) {
 		if (cq[i] == file) {
@@ -993,10 +1074,14 @@ ClazzLoader.lockQueueBe4SWT = true;
 /* private */
 /*-# tryToLoadNext -> next #-*/
 ClazzLoader.tryToLoadNext = function (file) {
-	var ua = navigator.userAgent.toLowerCase ();
-	if (ua.indexOf ("msie") == -1 && ua.indexOf ("opera") == -1
-			&& ClazzLoader.lockQueueBe4SWT && ClazzLoader.pkgRefCount != 0 
-			&& file.lastIndexOf ("package.js") != file.length - 10) {
+	/*
+	 * Try to check whether current status is in SWT lazy loading mode. If
+	 * yes, try to keep ClazzLoader#tryToLoadNext in queue and wait until
+	 * all SWT core is loaded.
+	 */
+	if (ClazzLoader.lockQueueBe4SWT && ClazzLoader.pkgRefCount != 0 
+			&& file.lastIndexOf ("package.js") != file.length - 10
+			&& navigator.userAgent.toLowerCase ().indexOf ("gecko") != -1) {
 		var qbs = ClazzLoader.queueBe4SWT;
 		qbs[qbs.length] = file;
 		return;
@@ -1148,6 +1233,8 @@ ClazzLoader.tracks = new Array ();
 
 /*
  * There are classes reference cycles. Try to detect and break those cycles.
+ * TODO: Reference cycles should be broken down carefully. Or there will be 
+ * bugs!
  */
 /* protected */
 ClazzLoader.checkOptionalCycle = function (node) {
@@ -1438,12 +1525,26 @@ ClazzLoader.findNextMustClass = function (node, status) {
 	return null;
 };
 
+/*
+ * Be used to record already used random numbers. And next new random
+ * number should not be in the property set.
+ */
+/* private */
+/*-# usedRandoms -> Rms #-*/
+ClazzLoader.usedRandoms = {};
+ClazzLoader.usedRandoms["r" + 0.13412] = 0.13412;
+
 /* private */
 /*-# findNextOptionalClass -> fNO #-*/
 ClazzLoader.findNextOptionalClass = function (status) {
-	var rnd = Math.random ();
-	while (rnd == ClazzLoader.clazzTreeRoot.random) {
+	var rnd = 0;
+	while (true) { // try to generate a never used random number
 		rnd = Math.random ();
+		var s = "r" + rnd;
+		if (ClazzLoader.usedRandoms[s] != rnd) {
+			ClazzLoader.usedRandoms[s] = rnd;
+			break;
+		}
 	}
 	ClazzLoader.clazzTreeRoot.random = rnd;
 	var node = ClazzLoader.clazzTreeRoot;
@@ -1589,7 +1690,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 		//node = new ClazzNode ();
 		node.name = clazz;
 		var pp = ClazzLoader.classpathMap["#" + clazz];
-		if (pp == null) {
+		if (pp == null) { // TODO: Remove this test in final release
 			log (clazz);
 			error ("Java2Script implementation error! Please report this bug!");
 		}
@@ -1753,7 +1854,9 @@ ClazzLoader.findClassUnderNode = function (clazzName, node) {
 };
 
 /**
- * Map different class to the same path!
+ * Map different class to the same path! Many classes may be packed into
+ * a *.z.js already.
+ *
  * @path *.js path
  * @name class name
  * @node ClazzNode object
@@ -1877,7 +1980,11 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
 		ClazzLoader.assurePackageClasspath (swtPkg);
 	}
-	
+
+	/*
+	 * Any ClazzLoader#loadClass calls will be queued until java.* core classes
+	 * is loaded.
+	 */
 	ClazzLoader.keepOnLoading = true;
 	if (!forced && ((ClazzLoader.pkgRefCount != 0 
 			&& name.lastIndexOf (".package") != name.length - 8)
@@ -2031,14 +2138,7 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 			var swtPkg = "org.eclipse.swt";
 			if (child.name.indexOf (swtPkg) == 0 
 					|| child.name.indexOf ("$wt") == 0) {
-				window["swt.lazy.loading.callback"] =  function () {
-					ClazzLoader.lockQueueBe4SWT = false;
-					var qbs = ClazzLoader.queueBe4SWT;
-					for (var i = 0; i < qbs.length; i++) {
-						ClazzLoader.tryToLoadNext (qbs[i]);
-					}
-					ClazzLoader.queueBe4SWT  = [];
-				};
+				window["swt.lazy.loading.callback"] = ClazzLoader.swtLazyLoading;
 				ClazzLoader.assurePackageClasspath (swtPkg);
 			}
 		//}
@@ -2053,6 +2153,21 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 	if (!existed) {
 		child.parents[child.parents.length] = parent;
 	}
+};
+
+/*
+ * Some SWT classes may already skip ClazzLoader#tryToLoadNext when it's
+ * detected that SWT is in lazy loading mode. Here it will try to re-execute
+ * those ClazzLoader#tryToLoadNext
+ */
+/* private */
+ClazzLoader.swtLazyLoading = function () {
+	ClazzLoader.lockQueueBe4SWT = false;
+	var qbs = ClazzLoader.queueBe4SWT;
+	for (var i = 0; i < qbs.length; i++) {
+		ClazzLoader.tryToLoadNext (qbs[i]);
+	}
+	ClazzLoader.queueBe4SWT  = [];
 };
 
 /* private */
