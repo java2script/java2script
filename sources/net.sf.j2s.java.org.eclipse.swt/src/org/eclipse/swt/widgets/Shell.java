@@ -279,7 +279,10 @@ public Shell (Display display, int style) {
  * @param parent
  * @param style
  * @param handle
- * @j2sIgnoreSuperConstructor
+ *
+ * @j-2-s-Ignore-Super-Constructor
+ * The above ignore super constructor will bring a bug that Display object
+ * is not a Widget instance!
  */
 Shell (Display display, Shell parent, int style, int handle) {
 	super ();
