@@ -2590,7 +2590,10 @@ public void setMenu (Menu menu) {
 							menu.handle.style.top = "-10000px";
 							menu.handle.style.display = "block";
 							Rectangle bounds = menu.getBounds();
-							Rectangle rect = Popup.popupMenu(getMonitor().getClientArea(), 
+							Rectangle clientArea = getMonitor().getClientArea();
+							clientArea.x += OS.getFixedBodyOffsetLeft();
+							clientArea.y += OS.getFixedBodyOffsetTop();
+							Rectangle rect = Popup.popupMenu(clientArea, 
 									new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
 									bounds.width, bounds.height, 0);
 							menu.handle.style.width = rect.width + "px";
@@ -2618,7 +2621,10 @@ public void setMenu (Menu menu) {
 						menu.handle.style.top = "-10000px";
 						menu.handle.style.display = "block";
 						Rectangle bounds = menu.getBounds();
-						Rectangle rect = Popup.popupMenu(getMonitor().getClientArea(), 
+						Rectangle clientArea = getMonitor().getClientArea();
+						clientArea.x += OS.getFixedBodyOffsetLeft();
+						clientArea.y += OS.getFixedBodyOffsetTop();
+						Rectangle rect = Popup.popupMenu(clientArea, 
 								new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
 								bounds.width, bounds.height, 0);
 						menu.handle.style.width = rect.width + "px";

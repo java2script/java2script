@@ -127,6 +127,11 @@ public class Decorations extends Canvas {
 	Element shellTitle;
 	Element modalHandle;
 	private Rectangle oldBounds;
+	private String lastClientAreaCSSText;
+	private String lastBodyCSSText;
+	private int lastBodyScrollLeft;
+	private int lastBodyScrollTop;
+	private Object lastClientAreaOnScroll;
 	private Element shellMin;
 	private Element shellMax;
 	private Element shellIcon;
@@ -226,18 +231,18 @@ void bringToTop () {
 		if ((style.width == null || style.width.length() == 0) 
 				&& (style.height == null || style.height.length() == 0)){
 			setSize(this.width, this.height);
-			/**
-			 * @j2sNative
-			 * var title = this.getText();
-			 * if (title == null) {
-			 * 	title = "-";
-			 * }
-			 * if (window["document.title"] == null) {
-			 * 	window["document.title"] = document.title;
-			 * }
-			 * document.title = title;
-			 */ {}
 		}
+		/**
+		 * @j2sNative
+		 * var title = this.getText();
+		 * if (title == null) {
+		 * 	title = "-";
+		 * }
+		 * if (window["document.title"] == null) {
+		 * 	window["document.title"] = document.title;
+		 * }
+		 * document.title = title;
+		 */ {}
 		int count = children.length; //handle.childNodes.length;
 		for (int i = 0; i < count; i++) {
 			Control control = children[i]; //display.getControl (handle.childNodes[i]);
@@ -682,6 +687,9 @@ private void nextWindowLocation() {
 		left += 32;
 		top += 32;
 	}
+	left += OS.getFixedBodyOffsetLeft ();
+	top += OS.getFixedBodyOffsetTop ();
+	
 	width = Integer.parseInt(window.defaultWindowWidth);
 	height = Integer.parseInt(window.defaultWindowHeight);
 }
@@ -802,13 +810,18 @@ public void dispose () {
 			shell.setFocus ();
 		}
 	}
-	super.dispose ();
 	/**
 	 * @j2sNative
 	 * if (window["document.title"] != null) {
-	 * 	document.title = window["document.title"];
+	 * 	if (this.parent != null) {
+	 * 		var title = this.parent.getText();
+	 * 		document.title = (title == null ? "-" : title); 
+	 * 	} else {
+	 * 		document.title = window["document.title"];
+	 * 	}
 	 * }
 	 */ {}
+	super.dispose ();
 }
 
 Menu findMenu (Element hMenu) {
@@ -1626,18 +1639,21 @@ public void setMaximized (boolean maximized) {
 			oldBounds = getBounds();
 			oldBounds.width -= 4; // FIXME
 		}
-		int height = getMonitor().clientHeight - 0;
+		Monitor monitor = getMonitor();
+		int height = monitor.clientHeight - 0;
 //		if (height > getMonitor().height - 10) {
 //			height = getMonitor().height - 10;
 //		}
-		int width = getMonitor().clientWidth;
-		if (width > getMonitor().width) {
-			width = getMonitor().width;
+		int width = monitor.clientWidth;
+//		if (width > getMonitor().width) {
+//			width = getMonitor().width;
+//		}
+		if (monitor.handle == document.body) { // update with current body client area
+			width = document.body.parentNode.clientWidth;
+			height = OS.getFixedBodyClientHeight();
 		}
 		int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
-		// FIXME: maximized size is not accurate
-		setBounds(computeTrim(0, 0, width + 4, height - titleHeight + 6));
-		//setBounds(0 - 4, 0 - 4, width - 2, height + 4);
+		setBounds(computeTrim(0, 0, width, height - titleHeight));
 	}
 	if (maximized) {
 		ResizeSystem.register(this, SWT.MAX);
@@ -1648,12 +1664,54 @@ public void setMaximized (boolean maximized) {
 
 void toggleMaximize() {
 	String key = "shell-maximized";
+	Element b = document.body;
+	boolean isStrictMode = b.parentNode.clientHeight != 0;
+	Element node = b;
+	if ((OS.isIE) && isStrictMode) {
+		node = b.parentNode;
+	}
+	Monitor monitor = getMonitor();
+	boolean updateBody = (monitor.handle == document.body); // update with current body client area
 	if (oldBounds != null) {
 		setBounds(oldBounds);
 		OS.removeCSSClass(titleBar, key);
 		oldBounds = null;
 		ResizeSystem.unregister(this, SWT.MAX);
+		if (updateBody) {
+			node.style.cssText = lastClientAreaCSSText;
+			b.style.cssText = lastBodyCSSText;
+			node.scrollLeft = lastBodyScrollLeft;
+			node.scrollTop = lastBodyScrollTop;
+			node.onscroll = lastClientAreaOnScroll;
+		}
 	} else {
+		if (updateBody) {
+			lastBodyScrollLeft = node.scrollLeft;
+			lastBodyScrollTop = node.scrollTop;
+			
+			lastClientAreaCSSText = node.style.cssText;
+			lastBodyCSSText = b.style.cssText;
+			
+			lastClientAreaOnScroll = node.onscroll;
+			
+			node.style.border = "0 none transparent";
+			node.style.overflow = "hidden";
+			b.style.margin = "0";
+			b.style.padding = "0";
+			node.scrollLeft = 0;
+			node.scrollTop = 0;
+			
+			/**
+			 * TODO: IE does not trigger onscroll when overflow is hidden! 
+			 * It seems there is no needs for overriding this onscroll.
+			 * 
+			 * @j2sNative
+			 * node.onscroll = function (e) {
+			 * 	this.scrollLeft = 0;
+			 * 	this.scrollTop = 0;
+			 * };
+			 */ { }
+		}
 		setMaximized(true);
 		OS.addCSSClass(titleBar, key);
 	}
@@ -2308,7 +2366,7 @@ public void _updateMonitorSize() {
 	Element el = monitor.handle;
 	if (el == document.body) {
 		monitor.clientWidth = document.body.clientWidth; 
-		monitor.clientHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
+		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.x = 0;
 		monitor.y = 0;
 		monitor.width = window.screen.availWidth;

@@ -166,7 +166,7 @@ public class ShellFrameDND implements DragListener {
 		int xx = this.sourceX + e.deltaX ();
 		int yy = this.sourceY + e.deltaY ();
 		
-		int gHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
+		int gHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		int gWidth = document.body.clientWidth;
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
@@ -176,13 +176,14 @@ public class ShellFrameDND implements DragListener {
 		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
 		if (xx < -dWidth) {
 			xx = -dWidth;
-		} else if (xx > gWidth - 2) {
-			xx = gWidth - 2;
+// It's OK to move outside the width, as there will be scrollbar
+//		} else if (xx > gWidth - 2) {
+//			xx = gWidth - 2;
 		}
 		if (yy < 0) {
 			yy = 0;
-		} else if (yy > gHeight + 18) {
-			yy = gHeight + 18;
+//		} else if (yy > gHeight + 18) {
+//			yy = gHeight + 18;
 		}
 
 		/*

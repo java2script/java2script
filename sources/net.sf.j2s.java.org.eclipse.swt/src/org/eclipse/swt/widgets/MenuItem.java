@@ -1363,7 +1363,10 @@ void showSubMenu() {
 	}
 	//int height = OS.getContainerHeight(handle);
 	//Rectangle rect = Popup.popupList(parent.parent.getMonitor().getClientArea(), new Rectangle(coordinate.x, coordinate.y, w, h), height);
-	Rectangle rect = Popup.popupMenu(parent.parent.getMonitor().getClientArea(), 
+	Rectangle clientArea = parent.parent.getMonitor().getClientArea();
+	clientArea.x += OS.getFixedBodyOffsetLeft();
+	clientArea.y += OS.getFixedBodyOffsetTop();
+	Rectangle rect = Popup.popupMenu(clientArea, 
 			new Rectangle(coordinate.x, coordinate.y, w, h),
 			bounds.width, bounds.height, 0);
 	menu.handle.style.width = rect.width + "px";

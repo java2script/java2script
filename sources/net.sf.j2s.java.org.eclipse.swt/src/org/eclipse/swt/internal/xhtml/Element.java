@@ -26,6 +26,7 @@ public class Element {
 	public String target;
 	public String title;
 	
+	public Object onscroll;
 	public Object onclick;
 	public Object onkeypress;
 	public Object onkeydown;

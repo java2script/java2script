@@ -746,7 +746,7 @@ public class OS {
 		}
 	}
 	
-	public static int fixBodyClientHeight() {
+	public static int getFixedBodyClientHeight() {
 	    Element b = document.body;
 	    Element p = b.parentNode;
 	    int bcHeight = b.clientHeight;
@@ -758,6 +758,38 @@ public class OS {
 	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
 	    }
 	    return bcHeight;
+	}
+
+	public static int getFixedBodyOffsetTop() {
+	    Element b = document.body;
+	    Element p = b.parentNode;
+	    //int bcHeight = b.clientHeight;
+	    int pcHeight = p.clientHeight;
+	    int bcScrollTop = b.scrollTop + b.offsetTop;
+	    int pcScrollTop = p.scrollTop + p.offsetTop;
+	    if (OS.isIE) { // && !OS.isOpera
+	        return (pcHeight == 0) ? bcScrollTop : pcScrollTop;
+	    } else if (OS.isFirefox) {
+	        return (pcHeight == p.offsetHeight 
+	                && pcHeight == p.scrollHeight) ? bcScrollTop : pcScrollTop;
+	    }
+	    return bcScrollTop;
+	}
+
+	public static int getFixedBodyOffsetLeft() {
+	    Element b = document.body;
+	    Element p = b.parentNode;
+	    //int bcHeight = b.clientHeight;
+	    int pcHeight = p.clientHeight;
+	    int bcScrollLeft = b.scrollLeft + b.offsetLeft;
+	    int pcScrollLeft = p.scrollLeft + p.offsetLeft;
+	    if (OS.isIE) { // && !OS.isOpera
+	        return (pcHeight == 0) ? bcScrollLeft : pcScrollLeft;
+	    } else if (OS.isFirefox) {
+	        return (pcHeight == p.offsetHeight 
+	                && pcHeight == p.scrollHeight) ? bcScrollLeft : pcScrollLeft;
+	    }
+	    return bcScrollLeft;
 	}
 	
 	public static Point getImageSize(Image image) {
