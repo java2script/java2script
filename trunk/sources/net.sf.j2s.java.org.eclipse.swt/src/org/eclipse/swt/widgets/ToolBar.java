@@ -205,8 +205,10 @@ Point calculateTextsMaxSize() {
 		ToolItem item = items[i];
 		if (item != null && item.text != null && item.text.length() != 0) {
 			Point textSize = OS.getStringStyledSize(item.text, "tool-item-text", null);
-			item.cachedTextWidth = w = Math.max(w, textSize.x);
-			item.cachedTextHeight = h = Math.max(h, textSize.y);
+			w = Math.max(w, textSize.x);
+			item.cachedTextWidth = textSize.x;
+			h = Math.max(h, textSize.y);
+			item.cachedTextHeight = textSize.y;
 		}
 	}
 	txtMaxHeight = h;

@@ -1725,7 +1725,7 @@ public Monitor [] getMonitors () {
 		monitor.handle = document.body;
 		monitor.clientWidth = document.body.clientWidth; 
 		monitor.width = window.screen.availWidth;
-		monitor.clientHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
+		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.height = window.screen.availHeight;
 		monitor.clientX = monitor.x = 0;
 		monitor.clientY = monitor.y = 0;
@@ -1752,7 +1752,7 @@ protected static void registerElementAsMonitor(Element el) {
 		monitor.handle = document.body;
 		monitor.clientWidth = document.body.clientWidth; 
 		monitor.width = window.screen.availWidth;
-		monitor.clientHeight = OS.fixBodyClientHeight(); //document.body.clientHeight;
+		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.height = window.screen.availHeight;
 		monitor.clientX = monitor.x = 0;
 		monitor.clientY = monitor.y = 0;

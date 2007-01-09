@@ -184,9 +184,6 @@ void createHandle () {
 			textHandle.type = "text";
 		}
 	}
-	if (OS.isMozilla) {
-//		textHandle.style.position = "fixed";
-	}
 	String textCSSName = null;
 	if (OS.isIE) {
 		textCSSName = "text-ie-default";
@@ -196,6 +193,13 @@ void createHandle () {
 			textCSSName += " text-border";
 		} else {
 			textCSSName = "text-border";
+		}
+	}
+	if ((style & SWT.WRAP) != 0) {
+		if (textCSSName != null) {
+			textCSSName += " text-wrap";
+		} else {
+			textCSSName = "text-wrap";
 		}
 	}
 	if ((style & SWT.READ_ONLY) != 0) {
@@ -241,6 +245,15 @@ void createHandle () {
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textHandle);
 	//handle.appendChild(textHandle);
+	/**
+	 * TODO: IE does not trigger onscroll when dragging inner text input 
+	 * 
+	 * @j2sNative
+	 * wrapper.onscroll = function (e) {
+	 * 	this.scrollLeft = 0;
+	 * 	this.scrollTop = 0;
+	 * };
+	 */ { }
 
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
@@ -639,6 +652,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 				size = new Point(wHint, 
 						OS.getStringStyledWrappedHeight(text, "text-default", handle.style.cssText, wHint));
 			} else {
+				text = text.replaceAll("(^\\s)|(\\s$)", "" + (char) 160).replaceAll("\\s\\s", " " + (char) 160);
 				size = OS.getStringStyledSize(text, "text-default", handle.style.cssText);
 			}
 //			width = size.x - 2; // there are default padding "0 1px" for class "text-default";
@@ -2342,15 +2356,22 @@ public void setTopIndex (int index) {
  * @see org.eclipse.swt.widgets.Widget#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
 boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	int b = 0;
 	if ((style & SWT.BORDER) != 0) {
-		cx -= 4;
-		cy -= 4;
-//		textHandle.style.width = ((cx - 4) > 0 ? (cx - 4) : 0) + "px";
-//		textHandle.style.height = ((cy - 4) > 0 ? (cy - 4) : 0) + "px";
-//		return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx - 4, cy - 4, uFlags);
+		b = 4;
+		if (OS.isIE) {
+			b++;
+		}
 	}
-	textHandle.style.width = (cx - 2 > 0 ? cx - 2 : 0) + "px";
-	textHandle.style.height = (cy - 2 > 0 ? cy - 2 : 0) + "px";
+	textHandle.style.height = (cy - b > 0 ? cy - b : 0) + "px";
+	if (OS.isIE && b != 0) {
+		if ((style & (SWT.MULTI | SWT.WRAP)) != 0) {
+			b += 5; // inner padding for IE!
+		} else {
+			b++;
+		}
+	}
+	textHandle.style.width = (cx - b > 0 ? cx - b : 0) + "px";
 	Element el = (Element) hWnd;
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";
@@ -2815,6 +2836,7 @@ void enableWidget (boolean enabled) {
 	}
 	*/
 	this.textHandle.disabled = !enabled;
+	OS.updateCSSClass(textHandle, "text-disabled", !enabled);
 	OS.updateCSSClass(handle, "text-disabled", !enabled);
 }
 
