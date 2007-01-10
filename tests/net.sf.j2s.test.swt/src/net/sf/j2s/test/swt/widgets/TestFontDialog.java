@@ -13,9 +13,6 @@
 
 package net.sf.j2s.test.swt.widgets;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

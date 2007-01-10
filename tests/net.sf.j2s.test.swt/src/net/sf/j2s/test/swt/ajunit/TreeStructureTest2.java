@@ -20,6 +20,8 @@ import net.sf.j2s.ajax.junit.AsyncTestRunner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -31,6 +33,89 @@ import org.eclipse.swt.widgets.TreeItem;
  */
 public class TreeStructureTest2 extends AsyncTestCase {
 
+	public void testStruct6() {
+		Display display = new Display ();
+		Shell shell = new Shell (display);
+		shell.setLayout(new FillLayout());
+		final Tree tree = new Tree (shell, SWT.BORDER | SWT.CHECK);
+		tree.setSize (100, 100);
+		shell.setSize (300, 200);
+		for (int i = 0; i < 4; i++) {
+			TreeItem item = new TreeItem (tree, SWT.NONE);
+			item.setText("Node." + (i + 1));
+			if (i < 3) {
+				TreeItem subitem = new TreeItem (item, SWT.NONE);
+				subitem.setText("Node." + (i + 1) + ".1");
+			}
+		}
+		
+		tree.addListener (SWT.Expand, new Listener () {
+			public void handleEvent (final Event event) {
+				final TreeItem root = (TreeItem) event.item;
+				TreeItem [] items = root.getItems ();
+				for (int i= 0; i<items.length; i++) {
+					if (items [i].getData () != null) {
+						return;
+					}
+					items [i].dispose ();
+				}
+				for (int i = 0; i < 3; i++) {
+					TreeItem treeItem = new TreeItem (root, 0);
+					treeItem.setText("New " + i);
+					TreeItem subitem = new TreeItem (treeItem, SWT.NONE);
+					subitem.setText("Node." + i + ".1");
+				}
+				root.setExpanded(true);
+			}
+		});
+		shell.open ();
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+			}
+		});
+		display.dispose ();
+	}
+
+	public void testStruct5() {
+		Display display = new Display ();
+		Shell shell = new Shell (display);
+		shell.setLayout(new FillLayout());
+		final Tree tree = new Tree (shell, SWT.BORDER | SWT.CHECK);
+		tree.setSize (100, 100);
+		shell.setSize (300, 200);
+		for (int i = 0; i < 4; i++) {
+			TreeItem item = new TreeItem (tree, SWT.NONE);
+			item.setText("Node." + (i + 1));
+			if (i < 3) {
+				TreeItem subitem = new TreeItem (item, SWT.NONE);
+				subitem.setText("Node." + (i + 1) + ".1");
+			}
+		}
+		
+		tree.addListener (SWT.Expand, new Listener () {
+			public void handleEvent (final Event event) {
+				final TreeItem root = (TreeItem) event.item;
+				TreeItem [] items = root.getItems ();
+				for (int i= 0; i<items.length; i++) {
+					if (items [i].getData () != null) {
+						return;
+					}
+					items [i].dispose ();
+				}
+				for (int i = 0; i < 3; i++) {
+					TreeItem treeItem = new TreeItem (root, 0);
+					treeItem.setText("New " + i);
+				}
+				root.setExpanded(true);
+			}
+		});
+		shell.open ();
+		AsyncSWT.waitLayout(shell, new AsyncTestRunnable(this) {
+			public void run() {
+			}
+		});
+		display.dispose ();
+	}
 
 	public void testStruct4() {
 		Display display = new Display ();
