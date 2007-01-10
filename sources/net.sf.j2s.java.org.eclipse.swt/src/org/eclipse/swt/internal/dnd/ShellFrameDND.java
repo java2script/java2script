@@ -52,8 +52,8 @@ public class ShellFrameDND implements DragListener {
 		boolean firstTime = false;
 		if (this.frame == null) {
 			this.frame = document.createElement ("DIV");
-			this.frame.className = "shell-handle";
-			this.frame.style.backgroundColor = "transparent";
+			this.frame.className = "shell-handle shell-opacity";
+			this.frame.style.backgroundColor = "menu";
 			this.frame.style.left = this.sourceX + "px";
 			this.frame.style.top = this.sourceY + "px";
 			this.frame.style.zIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 100);
@@ -68,8 +68,10 @@ public class ShellFrameDND implements DragListener {
 			}
 			if (existedTitleBar) {
 				Element titleBar = document.createElement ("DIV");
-				titleBar.className = "shell-title-bar opacity";
-				titleBar.style.paddingTop = "4px";
+				titleBar.className = "shell-title-bar";
+				titleBar.style.margin = "4px 0";
+				titleBar.style.width = "100%";
+				
 				this.frame.appendChild (titleBar);
 			}
 			firstTime = true;

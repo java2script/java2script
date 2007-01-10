@@ -9,11 +9,11 @@
 	background-color:menu;
 	z-index:10;
 }
-.opacity {
+.shell-opacity {
 	width:100%;
 	margin:0;
-	opacity:0.25;
-	filter:Alpha (opacity=25);
+	opacity:0.35;
+	filter:Alpha (opacity=35);
 }
 .shell-default {
 	position:absolute;
