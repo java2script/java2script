@@ -38,9 +38,12 @@
  * 2. In Firefox, loading *.js will first executes *.js source and then 
  * triggers onload event.
  * 3. In Opera, similar to IE, but trigger onload event. (TODO: More details 
- * should be studied.)
+ * should be studied. Currently, Opera supports no multiple-thread-loading)
  * 
- * For class dependency tree, one class may require a set of must-classes, 
+ * For class dependency tree, actually, it is not a tree. It is a reference
+ * net with nodes have n parents and n children. There is a root, which 
+ * ClassLoader knows where to start searching and loading classes, for such
+ * a net. Each node is a class. Each class may require a set of must-classes, 
  * which must be loaded before itself getting initialized, and also need a set
  * of optional classes, which also be loaded before being called.
  *
@@ -67,15 +70,15 @@
  * ClassLoader should use variables to record the class status.
  * 3. Different browsers have different loading orders, which means extra tests
  * should be tested to make sure loading order won't be broken.
- * 4. Java2Script simulator itself have some loading orders that is must be 
+ * 4. Java2Script simulator itself have some loading orders that must be 
  * honored, which means it should be integrated seamlessly to Clazz system.
  * 5. Packed *.z.js is introduced to avoid lots of small *.js which requires 
  * lots of HTTP connections, which means that packed *.z.js should be treated
  * specially (There will be mappings for such packed classes).
  * 6. *.js or *.css loading may fail according to network status, which means
- * some another try should be performed to load classes.
+ * another loading try should be performed, so ClazzLoader is more robust.
  * 7. SWT lazy loading is later introduced, which means that class loading
- * process may be paused and should be later resumed.
+ * process may be paused and should be resumed later.
  *
  * Some known bugs:
  * <code>$_L(["$wt.graphics.Drawable","$wt.widgets.Widget"],
@@ -411,6 +414,24 @@ ClazzLoader.classpathMap = new Object ();
 
 /* public */
 ClazzLoader.packageClasspath = function (pkg, base, index) {
+	var map = ClazzLoader.classpathMap;
+	/*
+	 * In some situation, maybe,
+	 * ClazzLoader.packageClasspath ("java", ..., true);
+	 * is called after other ClazzLoader#packageClasspath, e.g.
+	 * <code>
+	 * ClazzLoader.packageClasspath ("org.eclipse.swt", "...", true);
+	 * ClazzLoader.packageClasspath ("java", "...", true);
+	 * </code>
+	 * which is not recommended. But ClazzLoader should try to adjust orders
+	 * which requires "java" to be declared before normal ClazzLoader
+	 * #packageClasspath call before that line! And later that line
+	 * should never initialize "java/package.js" again!
+	 */
+	var isPkgDeclared = index == true && map["@" + pkg] != null;
+	if (index && map["@java"] == null && pkg.indexOf ("java") != 0) {
+		ClazzLoader.assurePackageClasspath ("java");
+	}
 	if (pkg instanceof Array) {
 		ClazzLoader.unwrapArray (pkg);
 		for (var i = 0; i < pkg.length; i++) {
@@ -418,7 +439,6 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 		}
 		return;
 	}
-	var map = ClazzLoader.classpathMap;
 	if (pkg == "java" || pkg == "java.*") {
 		// support ajax for default
 		var key = "@net.sf.j2s.ajax";
@@ -434,7 +454,7 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 		pkg = pkg.substring (0, pkg.length - 2);
 	}
 	map["@" + pkg] = base;
-	if (index == true && window[pkg + ".package"] != true) {
+	if (index == true && window[pkg + ".registered"] != true && !isPkgDeclared) {
 		ClazzLoader.pkgRefCount++;
 		ClazzLoader.loadClass (pkg + ".package", function () {
 					ClazzLoader.pkgRefCount--;
@@ -1067,6 +1087,14 @@ ClazzLoader.queueBe4SWT = [];
 /*-# lockQueueBe4SWT -> l4T #-*/
 ClazzLoader.lockQueueBe4SWT = true;
 
+/* private */
+/*-# isLoadingEntryClass -> lec #-*/
+ClazzLoader.isLoadingEntryClass = true;
+
+/* private */
+/*-# besidesJavaPackage -> bJP #-*/
+ClazzLoader.besidesJavaPackage = false;
+
 /**
  * After class is loaded, this method will be executed to check whether there
  * are classes in the dependency tree that need to be loaded.
@@ -1147,6 +1175,11 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (node);
 		}
 	}
+	/*
+	 * Maybe in #optinalLoaded inside above ClazzLoader#updateNode calls, 
+	 * ClazzLoader.keepOnLoading is set false (Already loaded the wanted
+	 * classes), so here check to stop.
+	 */
 	if (!ClazzLoader.keepOnLoading) {
 		return;
 	}
@@ -1176,12 +1209,28 @@ ClazzLoader.tryToLoadNext = function (file) {
 			
 			//alert ("load from queue");
 			if (!ClazzLoader.loadedScripts[n.path] || cq.length != 0 
+					|| !ClazzLoader.isLoadingEntryClass
 					|| (n.musts != null && n.musts.length != 0)
-					|| (n.optionals != null && n.optionals.length != 0)) {
+					|| (n.optionals != null && n.optionals.length != 0)/*
+					|| window["org.eclipse.swt.registered"] != null*/) {
 				ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
 				ClazzLoader.loadScript (n.path);
 			} else {
-				// alert ("Continue loading by SCRIPT onload event!");
+				if (ClazzLoader.isLoadingEntryClass) {
+					/*
+					 * The first time reaching here is the time when ClassLoader
+					 * is trying to load entry class. Class with #main method and
+					 * is to be executed is call Entry Class.
+					 *
+					 * Here when loading entry class, ClassLoader should not call
+					 * the next following loading script. This is because, those
+					 * scripts will try to mark the class as loaded directly and
+					 * then continue to call #optionalLoaded callback method,
+					 * which results in an script error!
+					 */
+					ClazzLoader.isLoadingEntryClass = false;
+				}
+				//alert ("Continue loading by SCRIPT onload event!");
 				//ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
 				//ClazzLoader.loadScript (n.path);
 			}
@@ -1202,6 +1251,10 @@ ClazzLoader.tryToLoadNext = function (file) {
 			}
 		}
 	}
+	/*
+	 * The following codes still need more tests, e.g. cyclic tests.
+	 * And they also need optimization.
+	 */
 	if (loadFurther && ClazzLoader.inLoadingThreads == 0) {
 		//error ("no optionals?");
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
@@ -1224,6 +1277,9 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (n);
 		}
 
+		/*
+		 * It seems ClazzLoader#globalLoaded is seldom overrided.
+		 */
 		ClazzLoader.globalLoaded ();
 		//error ("end ?");
 	}
@@ -1798,15 +1854,14 @@ if (window["Clazz"] != null) {
 /* protected */
 /*-# findClass -> fC #-*/
 ClazzLoader.findClass = function (clazzName) {
-	/*
-	 * Random number is used as a visited mark so there won't get into
-	 * recurive searching.
-	 *
-	 * TODO: It's unsafe for such random-number-way for searching
-	 */
-	var rnd = Math.random ();
-	while (rnd == ClazzLoader.clazzTreeRoot.random) {
+	var rnd = 0;
+	while (true) { // try to generate a never used random number
 		rnd = Math.random ();
+		var s = "r" + rnd;
+		if (ClazzLoader.usedRandoms[s] != rnd) {
+			ClazzLoader.usedRandoms[s] = rnd;
+			break;
+		}
 	}
 	ClazzLoader.clazzTreeRoot.random = rnd;
 	return ClazzLoader.findClassUnderNode (clazzName, 
@@ -1980,6 +2035,12 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
 		ClazzLoader.assurePackageClasspath (swtPkg);
 	}
+	/*
+	 * "junit" is not considered as inner supported library.
+	 */
+	//if (name.indexOf ("junit") == 0) {
+	//	ClazzLoader.assurePackageClasspath ("junit");
+	//}
 
 	/*
 	 * Any ClazzLoader#loadClass calls will be queued until java.* core classes
@@ -2140,6 +2201,14 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 					|| child.name.indexOf ("$wt") == 0) {
 				window["swt.lazy.loading.callback"] = ClazzLoader.swtLazyLoading;
 				ClazzLoader.assurePackageClasspath (swtPkg);
+			}
+			if (ClazzLoader.isLoadingEntryClass 
+					&& child.name.indexOf ("java") != 0 
+					&& child.name.indexOf ("net.sf.j2s.ajax") != 0) {
+				if (ClazzLoader.besidesJavaPackage) {
+					ClazzLoader.isLoadingEntryClass = false;
+				}
+				ClazzLoader.besidesJavaPackage = true;
 			}
 		//}
 	}
