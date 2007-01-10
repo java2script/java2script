@@ -1680,6 +1680,16 @@ void toggleMaximize() {
 		if (updateBody) {
 			node.style.cssText = lastClientAreaCSSText;
 			b.style.cssText = lastBodyCSSText;
+			if (OS.isOpera) {
+				String ofl = node.style.overflow;
+				if (ofl == null || ofl.length() == 0) {
+					node.style.overflow = "auto";
+				}
+				ofl = node.style.overflow;
+				if (ofl == null || ofl.length() == 0) {
+					b.style.overflow = "auto";
+				}
+			}
 			node.scrollLeft = lastBodyScrollLeft;
 			node.scrollTop = lastBodyScrollTop;
 			node.onscroll = lastClientAreaOnScroll;
