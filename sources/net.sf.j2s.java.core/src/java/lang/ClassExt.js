@@ -12,7 +12,7 @@
  *     ognize.com - initial API and implementation
  *****************************************************************************/
 /*******
- * @author josson smith
+ * @author zhou renjian
  * @create March 10, 2006
  *******/
 
@@ -593,7 +593,7 @@ Clazz.setPrimaryFolder = function (bin) {
 /**
  * This is a simple implementation for Clazz#load. It just ignore dependencies
  * of the class. This will be fine for jar *.z.js file.
- * It will be overriden in ClazzLoader#loader.
+ * It will be overriden by ClazzLoader#load.
  * For more details, see ClazzLoader.js
  */
 /* protected */
@@ -728,7 +728,7 @@ Clazz.innerFunctions.getConstructor = function () {
 			java.lang.reflect.Modifier.PUBLIC, 0);
 };
 /**
- * TODO: fix bug for polynormical methods!
+ * TODO: fix bug for polymorphic methods!
  */
 Clazz.innerFunctions.getDeclaredMethods = Clazz.innerFunctions.getMethods = function () {
 	var ms = new Array ();

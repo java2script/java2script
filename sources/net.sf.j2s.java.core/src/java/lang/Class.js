@@ -12,7 +12,7 @@
  *     ognize.com - initial API and implementation
  *****************************************************************************/
 /*******
- * @author josson smith
+ * @author zhou renjian
  * @create Nov 5, 2005
  *******/
 
@@ -364,23 +364,6 @@ Clazz.equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
 };
 
 /* protected */
-/*
-Clazz.getClassNameEvalStr = function (clazzVarName, clazzName) {
-	var innerTypes = new Array (
-		"number", "string", "function", "object", "array", "boolean"
-	);
-	for (var i = 0; i < innerTypes.length; i++) {
-		if (innerTypes[i] == clazzName) {
-			return clazzVarName + " = " 
-					+ clazzName.substring (0, 1).toUpperCase ()
-					+ clazzName.substring (1) + ";";
-		}
-	}
-	return clazzVarName + " = " + clazzName + ";";
-};
-*/
-
-/* protected */
 /*-#
  # getInheritedLevel -> gIL 
  #
@@ -410,11 +393,9 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 		}
 	}
 	if (isTgtStr) {
-		//eval (Clazz.getClassNameEvalStr ("clazzTarget", clazzTarget));
 		clazzTarget = Clazz.evalType (clazzTarget);
 	}
 	if (isBaseStr) {
-		//eval (Clazz.getClassNameEvalStr ("clazzBase", clazzBase));
 		clazzBase = Clazz.evalType (clazzBase);
 	}
 	if (clazzBase == null || clazzTarget == null) {
@@ -482,14 +463,19 @@ Clazz.instanceOf = function (obj, clazz) {
  * <code> super.* () </code>
  * 
  * @param objThis host object
- * @param clazzThis host object's class. Can not get the class me by host 
- * object. Because the clazzThis is used as one signal for the JavaScript
- * to determine which class is the super.* method calling.
- * For example, class B extends A, and override the method run() with a 
- * supper.run () call. And class C extends B. And then instance of C 
- * invokes the run method will have objThis of C. Now objThis#getClassName
- * is "C", so clazzThis can not be detected when run method is invoked. So
- * it's necessary to declare clazzThis as a parameter in Clazz.superCall.
+ * @param clazzThis class of declaring method scope. It's hard to determine 
+ * which super class is right class for "super.*()" call when it's in runtime
+ * environment. For example,
+ * 1. ClasssA has method #run()
+ * 2. ClassB extends ClassA overriding method #run() with "super.run()" call
+ * 3. ClassC extends ClassB
+ * 4. objC is an instance of ClassC
+ * Now we have to decide which super #run() method is to be invoked. Without
+ * explicit clazzThis parameter, we only know that objC.getClass() is ClassC 
+ * and current method scope is #run(). We do not known we are in scope 
+ * ClassA#run() or scope of ClassB#run(). if ClassB is given, Clazz can search
+ * all super methods that are before ClassB and get the correct super method.
+ * This is the reason why there must be an extra clazzThis parameter.
  * @param funName method name to be called
  * @param funParams Array of method parameters
  */
@@ -682,7 +668,7 @@ Clazz.getParamsType = function (funParams) {
 };
 /**
  * Search the given class prototype, find the method with the same
- * method name and the same parameter signatures with the given 
+ * method name and the same parameter signatures by the given 
  * parameters, and then run the method with the given parameters.
  *
  * @param objThis the current host object
@@ -734,7 +720,7 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	/*
 	 * Search the inheritance stacks to get the given class' function
 	 */
-	var began = false;
+	var began = false; // began to search its super classes
 	for (var i = length - 1; i > -1; i--) {
 		//if (Clazz.getInheritedLevel (claxxRef, stacks[i]) >= 0) {
 		/*
@@ -748,25 +734,6 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 			 * with stacks[i] == claxxRef
 			 */
 			var clazzFun = stacks[i].prototype[fxName];
-			// March 10, 2006
-			// clazzFun should always be not null
-			// May 6, 2006
-			//if (clazzFun == null) {
-			//}
-			
-			/*
-			 * Maybe try and catch may require more CPU times.
-			 * I am not sure yet.
-			 * May 6, 2006
-			 */
-			//try {
-			//	return Clazz.tryToSearchAndExecute (objThis, clazzFun, params, 
-			//			funParams/*, isSuper, clazzThis*/);
-			//} catch (e) {
-			//	if (!(e instanceof Clazz.MethodException)) {
-			//		throw e;
-			//	}
-			//}
 			
 			var ret = Clazz.tryToSearchAndExecute (objThis, clazzFun, params, 
 					funParams/*, isSuper, clazzThis*/, fx);
@@ -774,7 +741,10 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 				return ret;
 			}
 			/*
-			 * the following search after began is true is super calling.
+			 * As there are no such methods in current class, Clazz will try 
+			 * to search its super class stacks. Here variable began indicates
+			 * that super searchi is began, and there is no need checking
+			 * <code>stacks[i] == claxxRef</code>
 			 */
 			began = true; 
 		} // end of if
@@ -953,7 +923,7 @@ Clazz.initializingException = false;
 /*# x<< #*/
 
 /**
- * Search the existed polynomial methods to get the matched method with
+ * Search the existed polymorphic methods to get the matched method with
  * the given parameter types.
  *
  * @param existedMethods Array of string which contains method parameters
@@ -1108,7 +1078,7 @@ Clazz.formatParameters = function (funParams) {
 /*
  * Override the existed methods which are in the same name.
  * Overriding methods is provided for the purpose that the JavaScript
- * does not need to search the whole hirarchied methods to find the
+ * does not need to search the whole hierarchied methods to find the
  * correct method to execute.
  * Be cautious about this method. Incorrectly using this method may
  * break the inheritance system.
@@ -1123,10 +1093,8 @@ Clazz.overrideMethod = function (clazzThis, funName, funBody, funParams) {
 	funBody.exName = funName;
 	var fpName = Clazz.formatParameters (funParams);
 	/*
-	 * For method the first time is defined, just keep it rather than
-	 * wrapping into deep hierarchies!
+	 * Replace old methods with new method. No super methods are kept.
 	 */
-	// property "funParams" will be used as a mark of only-one method
 	funBody.funParams = fpName; 
 	funBody.claxxOwner = clazzThis;
 	clazzThis.prototype[funName] = funBody;
@@ -1226,19 +1194,6 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 		f$ = clazzThis.prototype[funName] = Clazz
 				.generateDelegatingMethod (clazzThis, funName);
 		/*
-		 * March 10, 2006
-		 */
-		/*
-		f$ = clazzThis.prototype[funName] = (function (claxxRef, methodName) {
-			var proxy = function () {
-				return Clazz.searchAndExecuteMethod (this, claxxRef, 
-					methodName, arguments);
-			};
-			proxy.claxxReference = claxxRef;
-			return proxy;
-		}) (clazzThis, funName);
-		//*/
-		/*
 		 * Keep the class inheritance stacks
 		 */
 		var arr = new Array ();
@@ -1303,6 +1258,9 @@ Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
 	//clazzThis.con$truct = clazzThis.prototype.con$truct = null;
 };
 
+/*
+ * all root packages. e.g. java.*, org.*, com.*
+ */
 /* protected */
 Clazz.allPackage = new Object ();
 
