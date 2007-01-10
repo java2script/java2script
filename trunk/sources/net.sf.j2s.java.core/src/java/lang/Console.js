@@ -197,47 +197,10 @@ Console.loopChecking = function () {
  */
 /* protected */
 Console.createConsoleWindow = function (parentEl) {
-	var b = document.body;
-	var s = b.parentNode.style; // html
-	s.height = "100%";
-	s.margin = "0";
-	s.padding = "0";
-	s.overflow = "hidden";
-	s = b.style; // body
-	s.height = "100%";
-	s.margin = "0";
-	s.padding = "0";
-	s.overflow = "hidden";
-
 	var console = document.createElement ("DIV");
-	console.style.cssText = "background-color: black;" + 
-			"color: white;" + 
-			"overflow: scroll;" + 
-			"font-family: Arial, sans-serif;" + 
-			"font-size: 10pt;" + 
-			"font-weight: bold;" + 
-			"width: 100%;" + 
-			"height: 100%;";
-	//document.body.appendChild (console);
-	if (b.childNodes.length == 0) {
-		b.appendChild (console);
-	} else {
-		b.insertBefore (console, b.childNodes[0]);
-	}
-	return console;
-	/*
-	var console = document.createElement ("DIV");
-	console.style.cssText = "background-color: black;" + 
-			"color: white;" + 
-			"overflow: scroll;" + 
-			"font-family: Arial, sans-serif;" + 
-			"font-size: 10pt;" + 
-			"font-weight: bold;" + 
-			"width: 100%;" + 
-			"height: 200px;";
+	console.style.cssText = "font-family:monospace, Arial, sans-serif;";
 	document.body.appendChild (console);
 	return console;
-	*/
 };
 
 /* protected */
@@ -408,7 +371,7 @@ window.error = function (s) {
 
 /* public */
 window.log = function (s) {
-	Console.consoleOutput (s + "\r\n", "yellow");
+	Console.consoleOutput (s + "\r\n", "blue");
 };
 
 /**
