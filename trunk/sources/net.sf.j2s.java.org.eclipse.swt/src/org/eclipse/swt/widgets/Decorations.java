@@ -1080,7 +1080,8 @@ public boolean getMaximized () {
 	if (OS.IsWindowVisible (handle)) return OS.IsZoomed (handle);
 	return swFlags == OS.SW_SHOWMAXIMIZED;
 	*/
-	return false; // TODO
+	//return OS.existedCSSClass(titleBar, "shell-maximized");
+	return oldBounds != null;
 }
 
 /**
@@ -1170,6 +1171,9 @@ public String getText () {
 	OS.GetWindowText (handle, buffer, length + 1);
 	return buffer.toString (0, length);
 	*/
+	if (this.shellTitle == null) {
+		return "";
+	}
 	Element[] children = this.shellTitle.childNodes;
 	if (children.length <= 0) {
 		return "";
@@ -1634,35 +1638,6 @@ public void setMaximized (boolean maximized) {
 		OS.UpdateWindow (handle);
 	}
 	*/
-	if (maximized && contentHandle != null) {
-		if (oldBounds == null) {
-			oldBounds = getBounds();
-			oldBounds.width -= 4; // FIXME
-		}
-		Monitor monitor = getMonitor();
-		int height = monitor.clientHeight - 0;
-//		if (height > getMonitor().height - 10) {
-//			height = getMonitor().height - 10;
-//		}
-		int width = monitor.clientWidth;
-//		if (width > getMonitor().width) {
-//			width = getMonitor().width;
-//		}
-		if (monitor.handle == document.body) { // update with current body client area
-			width = document.body.parentNode.clientWidth;
-			height = OS.getFixedBodyClientHeight();
-		}
-		int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
-		setBounds(computeTrim(0, 0, width, height - titleHeight));
-	}
-	if (maximized) {
-		ResizeSystem.register(this, SWT.MAX);
-	} else {
-		ResizeSystem.unregister(this, SWT.MAX);
-	}
-}
-
-void toggleMaximize() {
 	String key = "shell-maximized";
 	Element b = document.body;
 	boolean isStrictMode = b.parentNode.clientHeight != 0;
@@ -1672,29 +1647,7 @@ void toggleMaximize() {
 	}
 	Monitor monitor = getMonitor();
 	boolean updateBody = (monitor.handle == document.body); // update with current body client area
-	if (oldBounds != null) {
-		setBounds(oldBounds);
-		OS.removeCSSClass(titleBar, key);
-		oldBounds = null;
-		ResizeSystem.unregister(this, SWT.MAX);
-		if (updateBody) {
-			node.style.cssText = lastClientAreaCSSText;
-			b.style.cssText = lastBodyCSSText;
-			if (OS.isOpera) {
-				String ofl = node.style.overflow;
-				if (ofl == null || ofl.length() == 0) {
-					node.style.overflow = "auto";
-				}
-				ofl = node.style.overflow;
-				if (ofl == null || ofl.length() == 0) {
-					b.style.overflow = "auto";
-				}
-			}
-			node.scrollLeft = lastBodyScrollLeft;
-			node.scrollTop = lastBodyScrollTop;
-			node.onscroll = lastClientAreaOnScroll;
-		}
-	} else {
+	if (maximized) {
 		if (updateBody) {
 			lastBodyScrollLeft = node.scrollLeft;
 			lastBodyScrollTop = node.scrollTop;
@@ -1722,8 +1675,49 @@ void toggleMaximize() {
 			 * };
 			 */ { }
 		}
-		setMaximized(true);
-		OS.addCSSClass(titleBar, key);
+		if (contentHandle != null) {
+			if (oldBounds == null) {
+				oldBounds = getBounds();
+				oldBounds.width -= 4; // FIXME
+			}
+			//Monitor monitor = getMonitor();
+			int height = monitor.clientHeight;
+			int width = monitor.clientWidth;
+			if (monitor.handle == document.body) { // update with current body client area
+				width = document.body.parentNode.clientWidth;
+				height = OS.getFixedBodyClientHeight();
+			}
+			int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
+			setBounds(computeTrim(0, 0, width, height - titleHeight));
+		}
+		ResizeSystem.register(this, SWT.MAX);
+		if (titleBar != null) {
+			OS.addCSSClass(titleBar, key);
+		}
+	} else {
+		setBounds(oldBounds);
+		if (titleBar != null) {
+			OS.removeCSSClass(titleBar, key);
+		}
+		oldBounds = null;
+		ResizeSystem.unregister(this, SWT.MAX);
+		if (updateBody) {
+			node.style.cssText = lastClientAreaCSSText;
+			b.style.cssText = lastBodyCSSText;
+			if (OS.isOpera) {
+				String ofl = node.style.overflow;
+				if (ofl == null || ofl.length() == 0) {
+					node.style.overflow = "auto";
+				}
+				ofl = node.style.overflow;
+				if (ofl == null || ofl.length() == 0) {
+					b.style.overflow = "auto";
+				}
+			}
+			node.scrollLeft = lastBodyScrollLeft;
+			node.scrollTop = lastBodyScrollTop;
+			node.onscroll = lastClientAreaOnScroll;
+		}
 	}
 }
 
@@ -2020,7 +2014,7 @@ void setSystemMenu () {
 		titleBar.appendChild(shellMax);
 		shellMax.onclick = new RunnableCompatibility() {
 			public void run() {
-				toggleMaximize();
+				setMaximized(!getMaximized());
 				display.timerExec(25, new Runnable() {
 					public void run() {
 						layout();

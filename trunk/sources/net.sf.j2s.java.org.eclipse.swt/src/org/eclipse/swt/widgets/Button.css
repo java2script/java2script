@@ -13,15 +13,15 @@
 }
 
 .button-flat .button-push {
-	border:2px solid gray;
+	border:2px solid buttonshadow;
 }
 
 .button-flat .button-toggle {
-	border:2px solid gray;
+	border:2px solid buttonshadow;
 }
 
 .button-flat .button-arrow {
-	border:2px solid gray;
+	border:2px solid buttonshadow;
 }
 
 .button-push, .button-toggle, .button-arrow {
@@ -30,10 +30,6 @@
 	font-family:inherit;
 	font-size:1em;
 	font-size:inherit;
-	/*
-	background-color:inherit;
-	color:inherit;
-	*/
 	margin:0;
 	padding:0;
 	width:100%;
@@ -52,7 +48,7 @@
 .button-push, .button-toggle, .button-arrow {
 	border-width:2px;
 	border-style:solid;
-	background-color:menu;
+	background-color:buttonface;
 	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
 }
 }

@@ -28,7 +28,7 @@
 }
 
 thead .table-head-text {
-	background-color:menu;
+	background-color:buttonface;
 	border-style:solid;
 	border-width:1px 2px 2px 1px;
 	border-color:#666 white white #666;
@@ -47,7 +47,7 @@ thead .table-head-text {
 }
 .table-grid-line tbody td {
 	border-style:solid;
-	border-color:menu;
+	border-color:buttonface;
 	border-width:1px 1px 0 0;
 }
 .table-column-last {

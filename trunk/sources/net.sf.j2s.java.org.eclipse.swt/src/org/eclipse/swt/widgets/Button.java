@@ -1273,6 +1273,7 @@ void hookSelection() {
 			if ((style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
 				HTMLEvent e = (HTMLEvent) getEvent();
 				if ((style & SWT.CHECK) != 0) {
+					// Still buggy on check button with image
 					if (e.srcElement != btnHandle) {
 						setSelection (!getSelection ());
 					}
