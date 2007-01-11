@@ -27,57 +27,8 @@ import org.eclipse.jdt.core.dom.Expression;
  *
  * 2006-12-3
  */
-public class ASTVariableVisitor extends ASTFieldVisitor {
+public class ASTVariableVisitor extends AbstractPluginVisitor {
 	
-	/**
-	 * FinalVariable that is used to record variable state, which will provide
-	 * information for compiler to decide the generated name in *.js. 
-	 * 
-	 * @author zhou renjian
-	 *
-	 * 2006-12-6
-	 */
-	public class FinalVariable {
-		/**
-		 * Level of the block
-		 */
-		int blockLevel;
-		
-		/**
-		 * Final variable may be in a very deep anonymous class 
-		 */
-		String methodScope;
-		
-		/**
-		 * Variable name that is defined in Java sources
-		 */
-		String variableName;
-		
-		/**
-		 * Variable name that is to be generated in the compiled *.js
-		 */
-		String toVariableName;
-		
-		public FinalVariable(int blockLevel, String variableName, String methodScope) {
-			super();
-			this.blockLevel = blockLevel;
-			this.variableName = variableName;
-			this.methodScope = methodScope;
-		}
-		
-		public String toString() {
-			return variableName + ":" + variableName;
-		}
-
-		public int getBlockLevel() {
-			return blockLevel;
-		}
-
-		public void setToVariableName(String toVarName) {
-			toVariableName = toVarName;
-		}
-	}
-
 	/**
 	 * List of variables that are declared as final.
 	 */
@@ -115,7 +66,7 @@ public class ASTVariableVisitor extends ASTFieldVisitor {
 
 	protected String getVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) normalVars.get(i);
+			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
 			if (name.equals(var.variableName)) {
 				//return getIndexedVarName(name, i);
 				return var.toVariableName;
@@ -151,7 +102,7 @@ public class ASTVariableVisitor extends ASTFieldVisitor {
 				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
 			}
 			for (Iterator iter = finalVars.iterator(); iter.hasNext();) {
-				FinalVariable f = (FinalVariable) iter.next();
+				ASTFinalVariable f = (ASTFinalVariable) iter.next();
 				if (newName.equals(f.toVariableName)) {
 					newName = null;
 					i++;
@@ -160,7 +111,7 @@ public class ASTVariableVisitor extends ASTFieldVisitor {
 			}
 			if (newName != null) {
 				for (Iterator iter = normalVars.iterator(); iter.hasNext();) {
-					FinalVariable f = (FinalVariable) iter.next();
+					ASTFinalVariable f = (ASTFinalVariable) iter.next();
 					if (newName.equals(f.toVariableName)) {
 						newName = null;
 						i++;
@@ -196,7 +147,7 @@ public class ASTVariableVisitor extends ASTFieldVisitor {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Clazz.cloneFinals (");
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			FinalVariable fv = (FinalVariable) iter.next();
+			ASTFinalVariable fv = (ASTFinalVariable) iter.next();
 			String name = fv.variableName;
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;

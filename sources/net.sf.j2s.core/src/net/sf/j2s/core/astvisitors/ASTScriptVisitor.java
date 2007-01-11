@@ -79,19 +79,95 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	//private boolean isInnerClass = false;
 
 	protected AbstractTypeDeclaration rootTypeNode;
+
+	public boolean isMethodRegistered(String methodName) {
+		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).isMethodRegistered(methodName);
+	}
+	
+	public String translate(String className, String methodName) {
+		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).translate(className, methodName);
+	}
+	
+	public String getPackageName() {
+		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+	}
+	
+	public String discardGenericType(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).discardGenericType(name);
+	}
+	
+	protected String listFinalVariables(List list, String seperator, String scope) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).listFinalVariables(list, seperator, scope);
+	}
+	
+	protected String getFullClassName() {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getFullClassName();
+	}
+	
+	public String getTypeStringName(Type type) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getTypeStringName(type);
+	}
+	
+	protected String getFieldName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getFieldName(binding, name);
+	}
+	
+	protected String getJ2SName(SimpleName node) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getJ2SName(node);
+	}
+
+	protected String getJ2SName(IVariableBinding binding) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getJ2SName(binding);
+	}
+	
+	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).isInheritedFieldName(binding, name);
+	}
+	
+	protected boolean checkKeyworkViolation(String name) {
+		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).checkKeyworkViolation(name);
+	}
+	
+	protected boolean checkSameName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).checkSameName(binding, name);
+	}
+	
+	public boolean isIntegerType(String type) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(type);
+	}
+	
+	public String getClassName() {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+	}
+	
+	protected String getVariableName(String name) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getVariableName(name);
+	}
+	
+	protected boolean canAutoOverride(MethodDeclaration node) {
+		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).canAutoOverride(node);
+	}
 	
 	public boolean visit(AnonymousClassDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
-		anonymousCount++;
+		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
+		typeVisitor.increaseAnonymousClassCount();
 		//ClassInstanceCreation parent = (ClassInstanceCreation) node.getParent();
-		String anonymousName = thisClassName + "$" + anonymousCount;
+		String className = typeVisitor.getClassName();
+		String anonymousName = className + "$" + typeVisitor.getAnonymousCount();
 
 		String fullClassName = null;
-		if (thisPackageName != null && thisPackageName.length() != 0) {
-			fullClassName = thisPackageName + '.' + anonymousName;
+		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		if (packageName != null && packageName.length() != 0) {
+			fullClassName = packageName + '.' + anonymousName;
 		} else {
 			fullClassName = anonymousName;
 		}
+//		if (thisPackageName != null && thisPackageName.length() != 0) {
+//			fullClassName = thisPackageName + '.' + anonymousName;
+//		} else {
+//			fullClassName = anonymousName;
+//		}
 		buffer.append("if (!Clazz.isClassDefined (\"");
 		buffer.append(fullClassName);
 		buffer.append("\")) {\r\n");
@@ -100,8 +176,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		//buffer.append("Clazz.decorateAsType (");
 		buffer.append("Clazz.decorateAsClass (");
 //		buffer.append(JavaLangUtil.ripJavaLang(fullClassName));
-		String oldClassName = thisClassName;
-		thisClassName = anonymousName;
+		String oldClassName = className;
+		typeVisitor.setClassName(anonymousName);
 //		buffer.append(" = function () {\r\n");
 		buffer.append("function () {\r\n");
 		if (!(node.getParent() instanceof EnumConstantDeclaration)) {
@@ -272,7 +348,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		
 		buffer.append("cla$$ = Clazz.p0p ();\r\n");
-		thisClassName = oldClassName;
+		typeVisitor.setClassName(oldClassName);
 		
 		buffer.append(laterBuffer);
 		laterBuffer = oldLaterBuffer;
@@ -384,14 +460,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			visitList(node.arguments(), ", ");
 			buffer.append(")");
 		} else {
-			int anonCount = anonymousCount + 1;
+			int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
 			buffer.append("(function (innerThis");
 			List arguments = node.arguments();
 			int argSize = arguments.size();
 			if (argSize > 0) {
 				buffer.append(", ");
 			}
-			this.isFinalSensible = false;
+			ASTVariableVisitor variableVisitor = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class));
+			variableVisitor.isFinalSensible = false;
 			/*visitList(arguments, ", ");*/
 			for (int i = 0; i < argSize; i++) {
 				buffer.append("arg" + i);
@@ -399,15 +476,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append(", ");
 				}
 			}
-			this.isFinalSensible = true;
+			variableVisitor.isFinalSensible = true;
 			buffer.append(", finalVars) {\r\n");
 			
 			int lastCurrentBlock = currentBlockForVisit;
+			List finalVars = variableVisitor.finalVars;
+			List visitedVars = variableVisitor.visitedVars;
+			List normalVars = variableVisitor.normalVars;
 			List lastVisitedVars = visitedVars;
 			List lastNormalVars = normalVars;
 			currentBlockForVisit = blockLevel;
-			visitedVars = new ArrayList();
-			normalVars = new ArrayList();
+			visitedVars = variableVisitor.visitedVars = new ArrayList();
+			variableVisitor.normalVars = new ArrayList();
 			anonDeclare.accept(this);
 
 			buffer.append("return Clazz.innerTypeInstance (");
@@ -419,7 +499,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (argSize > 0) {
 				buffer.append(", ");
 			}
-			this.isFinalSensible = false;
+			variableVisitor.isFinalSensible = false;
 			//visitList(arguments, ", ");
 			for (int i = 0; i < argSize; i++) {
 				buffer.append("arg" + i);
@@ -427,7 +507,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append(", ");
 				}
 			}
-			this.isFinalSensible = true;
+			variableVisitor.isFinalSensible = true;
 			buffer.append(");\r\n");
 			buffer.append("}) (this");
 			if (argSize > 0) {
@@ -439,16 +519,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (methodDeclareStack.size() != 0) {
 				scope = (String) methodDeclareStack.peek();
 			}
-			normalVars = lastNormalVars;
+			variableVisitor.normalVars = lastNormalVars;
 			buffer.append(listFinalVariables(visitedVars, ", ", scope));
 			
 			if (lastCurrentBlock != -1) {
 				/* add the visited variables into last visited variables */
 				for (int j = 0; j < visitedVars.size(); j++) {
-					FinalVariable fv = (FinalVariable) visitedVars.get(j);
+					ASTFinalVariable fv = (ASTFinalVariable) visitedVars.get(j);
 					int size = finalVars.size();
 					for (int i = 0; i < size; i++) {
-						FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
+						ASTFinalVariable vv = (ASTFinalVariable) finalVars.get(size - i - 1);
 						if (vv.variableName.equals(fv.variableName)
 								&& vv.blockLevel <= lastCurrentBlock
 								&& !lastVisitedVars.contains(vv)) {
@@ -457,7 +537,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
-			visitedVars = lastVisitedVars;
+			variableVisitor.visitedVars = lastVisitedVars;
 			currentBlockForVisit = lastCurrentBlock;
 			buffer.append(")");
 		}
@@ -500,11 +580,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 
 		String fullClassName = null;//getFullClassName();
-		if (thisPackageName != null && thisPackageName.length() != 0) {
-			fullClassName = thisPackageName + '.' + thisClassName;
+		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+		if (packageName != null && packageName.length() != 0) {
+			fullClassName = packageName + '.' + className;
 		} else {
-			fullClassName = thisClassName;
+			fullClassName = className;
 		}
+//		if (thisPackageName != null && thisPackageName.length() != 0) {
+//			fullClassName = thisPackageName + '.' + thisClassName;
+//		} else {
+//			fullClassName = thisClassName;
+//		}
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
@@ -652,7 +739,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("]);\r\n");
 				
 			} else {
-				int anonCount = anonymousCount + 1;
+				int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
 				anonDeclare.accept(this);
 
 				buffer.append("Clazz.defineEnumConstant (");
@@ -677,7 +764,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding binding = node.resolveBinding();
 		if (binding != null) {
 			if (binding.isTopLevel()) {
-				thisClassName = binding.getName();
+				((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).setClassName(binding.getName());
 			} else {
 			}
 		}
@@ -690,8 +777,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				visitor = new ASTScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
-			visitor.thisClassName = thisClassName + "." + node.getName();
-			visitor.thisPackageName = thisPackageName;
+//			visitor.thisClassName = thisClassName + "." + node.getName();
+//			visitor.thisPackageName = thisPackageName;
+			((ASTTypeVisitor) visitor.getAdaptable(ASTTypeVisitor.class)).setClassName(((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName());
+			((ASTPackageVisitor) visitor.getAdaptable(ASTPackageVisitor.class)).setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
+
 			node.accept(visitor);
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				String str = visitor.getBuffer().toString();
@@ -1216,8 +1306,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			blockLevel++;
 			buffer.append("{\r\n");
 			visitNativeJavadoc(node.getJavadoc(), null, false);
+			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 			for (int i = normalVars.size() - 1; i >= 0; i--) {
-				FinalVariable var = (FinalVariable) normalVars.get(i);
+				ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
 				if (var.blockLevel >= blockLevel) {
 					normalVars.remove(i);
 				}
@@ -1478,16 +1569,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			
 			String fieldVar = null;
-			if (this.isFinalSensible 
+			if (((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isFinalSensible 
 					&& (varBinding.getModifiers() & Modifier.FINAL) != 0 
 					&& varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareStack.size() == 0 || !key.equals(methodDeclareStack.peek())) {
 					buffer.append("this.$finals.");
 					if (currentBlockForVisit != -1) {
+						List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+						List visitedVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).visitedVars;
 						int size = finalVars.size();
 						for (int i = 0; i < size; i++) {
-							FinalVariable vv = (FinalVariable) finalVars.get(size - i - 1);
+							ASTFinalVariable vv = (ASTFinalVariable) finalVars.get(size - i - 1);
 							if (vv.variableName.equals(varBinding.getName())
 									&& vv.blockLevel <= currentBlockForVisit) {
 								if (!visitedVars.contains(vv)) {
@@ -1659,13 +1752,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			FinalVariable f = null;
+			ASTFinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				f = new FinalVariable(blockLevel + 1, identifier, null);
+				f = new ASTFinalVariable(blockLevel + 1, identifier, null);
 			} else {
 				String methodSig = (String) methodDeclareStack.peek();
-				f = new FinalVariable(blockLevel + 1, identifier, methodSig);
+				f = new ASTFinalVariable(blockLevel + 1, identifier, methodSig);
 			}
+			List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
@@ -1808,10 +1903,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		
 		String fullClassName = null;
-		if (thisPackageName != null && thisPackageName.length() != 0) {
-			fullClassName = thisPackageName + '.' + thisClassName;
+		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+		String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+		if (packageName != null && packageName.length() != 0) {
+			fullClassName = packageName + '.' + className;
 		} else {
-			fullClassName = thisClassName;
+			fullClassName = className;
 		}
 
 		if (node.isInterface()) {
@@ -2234,9 +2331,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(TypeDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
+		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
 		if (binding != null) {
 			if (binding.isTopLevel()) {
-				thisClassName = binding.getName();
+				typeVisitor.setClassName(binding.getName());
 			} else {
 			}
 		}
@@ -2252,17 +2350,20 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				visitor = new ASTScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
+			String className = typeVisitor.getClassName();
+			String visitorClassName = null;
 			if (node.getParent() instanceof TypeDeclarationStatement) {
-				anonymousCount++;
+				typeVisitor.increaseAnonymousClassCount();
 				if (node.resolveBinding().getBinaryName().matches(".*\\$[0-9]+\\$.*")) {
-					visitor.thisClassName = thisClassName + "$" + anonymousCount + "$" + node.getName();
+					visitorClassName = className + "$" + typeVisitor.getAnonymousCount() + "$" + node.getName();
 				} else {
-					visitor.thisClassName = thisClassName + "$" + anonymousCount + node.getName();
+					visitorClassName = className + "$" + typeVisitor.getAnonymousCount() + node.getName();
 				}
 			} else {
-				visitor.thisClassName = thisClassName + "." + node.getName();
+				visitorClassName = className + "." + node.getName();
 			}
-			visitor.thisPackageName = thisPackageName;
+			((ASTTypeVisitor) visitor.getAdaptable(ASTTypeVisitor.class)).setClassName(visitorClassName);
+			((ASTPackageVisitor) visitor.getAdaptable(ASTPackageVisitor.class)).setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
 			node.accept(visitor);
 			if (node.isInterface() || (node.getModifiers() & Modifier.STATIC) != 0 
 					|| (node.getParent() instanceof TypeDeclaration 

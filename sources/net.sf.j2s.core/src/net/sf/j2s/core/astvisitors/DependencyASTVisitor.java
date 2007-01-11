@@ -63,7 +63,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 
  * 2006-5-2
  */
-public class DependencyASTVisitor extends ASTJ2SMapVisitor {
+public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	protected Set classNameSet = new HashSet();
 
@@ -85,6 +85,13 @@ public class DependencyASTVisitor extends ASTJ2SMapVisitor {
 
 	protected boolean toCompileVariableName = true;
 	
+	public String discardGenericType(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).discardGenericType(name);
+	}
+	
+	public String getPackageName() {
+		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+	}
 	/**
 	 * @return Returns the thisClassName.
 	 */
@@ -293,7 +300,8 @@ public class DependencyASTVisitor extends ASTJ2SMapVisitor {
 	}
 	
 	public boolean visit(PackageDeclaration node) {
-		thisPackageName = "" + node.getName();
+		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		packageVisitor.setPackageName("" + node.getName());
 		return false;
 	}
 

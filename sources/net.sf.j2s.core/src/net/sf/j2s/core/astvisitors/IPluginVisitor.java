@@ -17,29 +17,11 @@ package net.sf.j2s.core.astvisitors;
 /**
  * @author zhou renjian
  *
- * 2006-12-3
+ * 2006-12-27
  */
-public class ASTPackageVisitor extends AbstractPluginVisitor {
-
-	protected String thisPackageName = "";
-	
-
-	protected String[] skipDeclarePackages() {
-		return new String[] {
-				"java.lang", 
-				"java.lang.ref", 
-				"java.lang.ref.reflect", 
-				"java.lang.reflect", 
-				"java.io", 
-				"java.util"};
-	}
-
-	public String getPackageName() {
-		return thisPackageName;
-	}
-
-	public void setPackageName(String thisPackageName) {
-		this.thisPackageName = thisPackageName;
-	}
-
+public interface IPluginVisitor {
+	public StringBuffer getBuffer();
+	public void setBuffer(StringBuffer buffer);
+	public ASTEmptyVisitor getVisitor();
+	public void setVisitor(ASTEmptyVisitor visitor);
 }

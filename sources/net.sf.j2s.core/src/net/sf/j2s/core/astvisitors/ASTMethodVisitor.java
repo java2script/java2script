@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.Modifier;
  *
  * 2006-12-3
  */
-public class ASTMethodVisitor extends ASTTypeVisitor {
+public class ASTMethodVisitor extends AbstractPluginVisitor {
 
 	private static Set methodSet;
 	private static Map pmMap;
@@ -135,7 +135,7 @@ public class ASTMethodVisitor extends ASTTypeVisitor {
 		ASTMethodVisitor.registerAllMaps();
 	}
 
-	public static boolean isMethodRegistered(String methodName) {
+	public boolean isMethodRegistered(String methodName) {
 		return methodSet.contains(methodName);
 	}
 
@@ -144,7 +144,7 @@ public class ASTMethodVisitor extends ASTTypeVisitor {
 		methodSet.add(methodName);
 	}
 
-	public static String translate(String className, String methodName) {
+	public String translate(String className, String methodName) {
 		return (String) pmMap.get(className + "." + methodName);
 	}
 

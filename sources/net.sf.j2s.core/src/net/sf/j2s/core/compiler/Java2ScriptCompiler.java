@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConvertItem;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
@@ -192,7 +193,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				visitor.setDebugging(isDebugging);
 				dvisitor.setDebugging(isDebugging);
 				boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
-				visitor.setToCompileVariableName(toCompress);
+				//visitor.setToCompileVariableName(toCompress);
+				((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
 				dvisitor.setToCompileVariableName(toCompress);
 				if (toCompress) {
 					updateJ2SMap(prjFolder);
