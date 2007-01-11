@@ -53,7 +53,7 @@ DIV.tool-item-down {
 	text-align:center;
 }
 .tool-bar-flat .tool-item-default {
-	border:1px solid menu;
+	border:1px solid buttonface;
 }
 .tool-bar-flat .tool-item-default:hover {
 	border:1px outset white;
@@ -90,7 +90,7 @@ DIV.tool-item-down {
 	font-size:0;
 	height:0;
 	width:100%;
-	border:0 solid menu !important;
+	border:0 solid buttonface !important;
 	border-top-width:2px;
 	margin:3px 0;
 }
@@ -98,12 +98,12 @@ DIV.tool-item-down {
 	font-size:0;
 	width:0;
 	height:100%;
-	border:0 solid menu;
+	border:0 solid buttonface;
 	border-left-width:2px;
 	margin:0 3px;
 }
 .tool-bar-horizontal .tool-item-seperator:hover {
-	border:0 solid menu !important;
+	border:0 solid buttonface !important;
 	border-left-width:2px !important;
 }
 .tool-bar-flat .tool-item-seperator {
@@ -149,7 +149,7 @@ DIV.tool-item-down {
 	height:100%;
 }
 .tool-bar-flat .tool-item-drop-down-button {
-	border:1px solid menu;
+	border:1px solid buttonface;
 	top:-1px !important;
 }
 .tool-bar-flat .tool-item-drop-down-button:hover {
@@ -180,7 +180,7 @@ DIV.tool-item-drop-down-button-down {
 	line-height:0;
 	
 	border-style:solid solid none solid;
-	border-color:menu;
+	border-color:buttonface;
 	border-top-color:black;
 	border-bottom-width:0;
 }
@@ -242,7 +242,7 @@ tool-bar-default .tool-item-inner-control:hover {
 	border-width:0 !important;
 }
 .tool-bar-vertical .tool-item-seperator:hover {
-	border:0 solid menu !important;
+	border:0 solid buttonface !important;
 	border-top-width:0px !important;
 }
 .swt-widgets-toolbar {

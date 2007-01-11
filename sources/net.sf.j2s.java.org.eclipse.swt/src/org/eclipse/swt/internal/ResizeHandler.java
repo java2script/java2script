@@ -16,6 +16,8 @@ package org.eclipse.swt.internal;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Decorations;
 import org.eclipse.swt.widgets.Monitor;
 
@@ -41,15 +43,17 @@ public class ResizeHandler {
 	}
 	public void updateMaximized() {
 		Monitor monitor = shell.getMonitor();
-		Rectangle clientArea = monitor.getClientArea();
-		Rectangle bounds = monitor.getBounds();
-		int height = clientArea.height - 0;
-		if (height > bounds.height - 10) {
-			height = bounds.height - 10;
-		}
-		int width = clientArea.width;
-		if (width > bounds.width) {
-			width = bounds.width;
+		Rectangle area = monitor.getClientArea();
+		int height = area.height;
+		int width = area.width;
+		boolean isBodyMonitor = false;
+		/**
+		 * @j2sNative
+		 * isBodyMonitor = monitor.handle == document.body;
+		 */ {}
+		if (isBodyMonitor) { // update with current body client area
+			width = document.body.parentNode.clientWidth;
+			height = OS.getFixedBodyClientHeight();
 		}
 		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
 		// FIXME: maximized size is not accurate

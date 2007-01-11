@@ -16,7 +16,7 @@
 	cursor:default;
 	font-size:0;
 	z-index:4;
-	background-color:menu;
+	background-color:buttonface;
 	border-width:1px;
 	border-style:outset;
 }
@@ -38,7 +38,7 @@
 	margin:0;
 	padding:0;
 	height:24px;
-	background-color:menu;
+	background-color:buttonface;
 	width:100%;
 	z-index:2;
 }
@@ -78,7 +78,7 @@
 	cursor:default;
 	font-size:0;
 	z-index:4;
-	background-color:menu;
+	background-color:buttonface;
 	border-width:1px;
 	border-style:outset;
 }
@@ -100,7 +100,7 @@
 	margin:0;
 	padding:0;
 	width:24px;
-	background-color:menu;
+	background-color:buttonface;
 	height:100%;
 	z-index:2;
 }

@@ -28,10 +28,10 @@
 	color:highlighttext;
 }
 .menu-item-disabled .menu-item-text {
-	color:gray;
+	color:graytext;
 }
 .menu-item-disabled .menu-item-accel {
-	color:gray;
+	color:graytext;
 }
 .menu-item-text span span {
 	text-decoration:underline;

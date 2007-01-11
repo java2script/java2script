@@ -57,13 +57,13 @@ input.text-wrap {
 	padding:0 3px;
 }
 .text-disabled {
-	background-color:menu;
+	background-color:buttonface;
 }
 input.text-readonly {
-	background-color:menu;
+	background-color:buttonface;
 }
 textarea.text-disabled, input.text-disabled {
-	background-color:menu;
+	background-color:buttonface;
 }
 .swt-widgets-text {
 	width:324px;

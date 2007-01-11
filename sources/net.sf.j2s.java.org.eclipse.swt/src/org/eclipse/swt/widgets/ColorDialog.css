@@ -3,7 +3,7 @@
 	font-size:0;
 	width:200px;
 	height:280px;
-	background-color:menu;
+	background-color:buttonface;
 	overflow:hidden;
 }
 .color-dialog-custom {
@@ -54,7 +54,7 @@
 .define-custom-colors-button, .color-dialog-button, .add-to-custom-colors-button {
 	border-width:2px;
 	border-style:solid;
-	background-color:menu;
+	background-color:buttonface;
 	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
 }
 }
@@ -94,12 +94,12 @@
 .box-focus {
 	float:left;
 	margin:1px;
-	border:1px solid menu;
+	border:1px solid buttonface;
 	width:21px;
 	height:16px;
 }
 .box-select {
-	border:1px solid menu;
+	border:1px solid buttonface;
 	width:19px;
 	height:14px;
 }
@@ -197,7 +197,7 @@ div.color-cross-right {
 	line-height:0;
 
 	border-style:solid solid solid none;
-	border-color:menu;
+	border-color:buttonface;
 	border-right-color:black;
 	border-width:5px;
 	border-left-width:0;

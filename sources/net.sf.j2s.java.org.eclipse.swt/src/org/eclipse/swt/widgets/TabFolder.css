@@ -121,7 +121,7 @@
 	border-top:1px solid white;
 	border-left:1px solid white;
 	border-right:2px outset #777;
-	background-color:menu;
+	background-color:buttonface;
 	border-bottom-style:none;
 }
 * html .tab-item-default {
