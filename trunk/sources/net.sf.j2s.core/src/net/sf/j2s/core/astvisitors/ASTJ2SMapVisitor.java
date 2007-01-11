@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  * 2006-12-3
  */
-public class ASTJ2SMapVisitor extends ASTVariableVisitor {
+public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 
 	private static Map maps;
 

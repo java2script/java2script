@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
  *
  * 2006-12-6
  */
-public class ASTTigerVisitor extends ASTEmptyVisitor {
+public class ASTTigerVisitor extends AbstractPluginVisitor {
 
 	protected void boxingNode(ASTNode element) {
 		if (element instanceof Expression) {
@@ -56,7 +56,7 @@ public class ASTTigerVisitor extends ASTEmptyVisitor {
 					} 
 					if (primitiveTypeName != null) {
 						buffer.append("new " + primitiveTypeName + " (");
-						element.accept(this);
+						element.accept(this.visitor);
 						buffer.append(")");
 						return ;
 					}
@@ -86,14 +86,14 @@ public class ASTTigerVisitor extends ASTEmptyVisitor {
 					 
 					if (primitiveName != null) {
 						buffer.append("(");
-						element.accept(this);
+						element.accept(this.visitor);
 						buffer.append(")." + primitiveName + "Value ()");
 						return ;
 					}
 				}
 			}
 		}
-		element.accept(this);
+		element.accept(this.visitor);
 	}
 	
 }

@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  *
  * 2006-12-3
  */
-public class ASTTypeVisitor extends ASTPackageVisitor {
+public class ASTTypeVisitor extends AbstractPluginVisitor {
 
 	protected String thisClassName = "";
 	
@@ -41,8 +41,17 @@ public class ASTTypeVisitor extends ASTPackageVisitor {
 		return thisClassName;
 	}
 	
+	public void increaseAnonymousClassCount() {
+		anonymousCount++;
+	}
+	
+	public void setClassName(String className) {
+		thisClassName = className;
+	}
+	
 	public String getFullClassName() {
 		String fullClassName = null;
+		String thisPackageName = ((ASTPackageVisitor) getVisitor().getAdaptable(ASTPackageVisitor.class)).getPackageName();
 		if (thisPackageName != null && thisPackageName.length() != 0
 				&& !"java.lang".equals(thisPackageName)) {
 			fullClassName = thisPackageName + '.' + thisClassName;

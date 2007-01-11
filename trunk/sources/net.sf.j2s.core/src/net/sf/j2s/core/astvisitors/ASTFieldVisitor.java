@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  *
  * 2006-12-3
  */
-public class ASTFieldVisitor extends ASTMethodVisitor {
+public class ASTFieldVisitor extends AbstractPluginVisitor {
 
 	/*
 	 * IE passes the following: 

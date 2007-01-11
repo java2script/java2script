@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -80,13 +81,40 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * @author zhou renjian
  *
  */
-public class ASTKeywordVisitor extends ASTJ2SMapVisitor {
+public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	
 	protected int blockLevel = 0;
 	
 	protected Stack methodDeclareStack = new Stack();
 	
 	protected int currentBlockForVisit = -1;
+	
+	protected void boxingNode(ASTNode element) {
+		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
+	}
+	
+	protected String shortenQualifiedName(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
+	}
+
+	protected String checkConstantValue(Expression node) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).checkConstantValue(node);
+	}
+	
+	protected String[] skipDeclarePackages() {
+		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).skipDeclarePackages();
+	}
+	protected boolean isSimpleQualified(QualifiedName node) {
+		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
+	}
+
+	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
+	}
+	
+	protected String getIndexedVarName(String name, int i) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getIndexedVarName(name, i);
+	}
 
 	protected void visitList(List list, String seperator) {
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
@@ -387,14 +415,16 @@ public class ASTKeywordVisitor extends ASTJ2SMapVisitor {
 
 	public void endVisit(Block node) {
 		buffer.append("}");
+		List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+		List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) finalVars.get(i);
+			ASTFinalVariable var = (ASTFinalVariable) finalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				finalVars.remove(i);
 			}
 		}
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) normalVars.get(i);
+			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				normalVars.remove(i);
 			}
@@ -622,13 +652,14 @@ public class ASTKeywordVisitor extends ASTJ2SMapVisitor {
 	}
 
 	public boolean visit(PackageDeclaration node) {
-		thisPackageName = "" + node.getName();
+		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		packageVisitor.setPackageName("" + node.getName());
 		String[] swtInnerPackages = skipDeclarePackages();
 		/*
 		 * All the SWT package will be declared manually.
 		 */
 		for (int i = 0; i < swtInnerPackages.length; i++) {
-			if (thisPackageName.equals(swtInnerPackages[i])) {
+			if (packageVisitor.getPackageName().equals(swtInnerPackages[i])) {
 				return false;
 			}
 		}
@@ -1057,13 +1088,15 @@ public class ASTKeywordVisitor extends ASTJ2SMapVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			FinalVariable f = null;
+			ASTFinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				f = new FinalVariable(blockLevel, identifier, null);
+				f = new ASTFinalVariable(blockLevel, identifier, null);
 			} else {
 				String methodSig = (String) methodDeclareStack.peek();
-				f = new FinalVariable(blockLevel, identifier, methodSig);
+				f = new ASTFinalVariable(blockLevel, identifier, methodSig);
 			}
+			List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
