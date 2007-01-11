@@ -113,14 +113,46 @@ if (window.attachEvent) {
 	window.attachEvent ("onunload", function () {
 		try {
 			org.eclipse.swt.widgets.Display.releaseAllDisplays ();
-			//popupAlert ("OK");
 		} catch (e) {
-		//	popupAlert (e.message);
-		//	throw e;
 		}
 		return true;
 	});
 }
+FontSizeSystem = new Object ();
+var fss = FontSizeSystem;
+fss.monitorEl = null;
+fss.cachedFontSize = 10;
+fss.isMonitoring = false;
+fss.initialize = function () {
+	this.monitorEl = document.createElement ("DIV");
+	this.monitorEl.style.cssText = "position:absolute;top:-1000px;left:-1000px;font-family:Arial, sans-serif;font-size:10pt;overflow:visible;";
+	document.body.appendChild (this.monitorEl);
+	this.monitorEl.appendChild (document.createTextNode ("Java2Script"));
+	this.cachedFontSize = this.getActualFontSize ();
+};
+fss.getActualFontSize = function () {
+	var el = this.monitorEl;
+	return Math.max (el.offsetHeight, Math.max (el.clientHeight, el.scrollHeight));
+};
+fss.monitorFontSize = function (looping) {
+	if (looping != true && this.isMonitoring) {
+		return; // already monitoring.
+	}
+	var el = this.monitorEl;
+	if (el == null) {
+		this.initialize ();
+	} else {
+		var width = this.getActualFontSize ();
+		if (width != this.cachedFontSize) {
+			this.cachedFontSize = width;
+			org.eclipse.swt.widgets.Display.updateAllShellLayouts ();
+		}
+	}
+	this.isMonitoring = true;
+	window.setTimeout (function () {
+				FontSizeSystem.monitorFontSize (true)
+			}, 250);
+};
  */
 
 public class Display extends Device {
@@ -419,6 +451,10 @@ public class Display extends Device {
  */
 public Display () {
 	this (null);
+	/**
+	 * @j2sNative
+	 * FontSizeSystem.monitorFontSize ();
+	 */ {}
 }
 
 /**
@@ -433,6 +469,10 @@ public Display () {
  */
 public Display (DeviceData data) {
 	super (data);
+	/**
+	 * @j2sNative
+	 * FontSizeSystem.monitorFontSize ();
+	 */ {}
 }
 
 /*
@@ -4277,6 +4317,23 @@ static void releaseAllDisplays() {
 		Displays = null;
 	}
 	Default = null; // Default will be disposed in the above for loop
+}
+
+
+static void updateAllShellLayouts() {
+	if (Displays != null) {
+		for (int i = 0; i < Displays.length; i++) {
+			if (Displays[i] != null && !Displays[i].isDisposed()) {
+				Shell[] shells = Displays[i].getShells();
+				for (int j = 0; j < shells.length; j++) {
+					Shell shell = shells[j];
+					if (shell != null && !shell.isDisposed()) {
+						shell.layout(true, true);
+					}
+				}
+			}
+		}
+	}
 }
 
 }
