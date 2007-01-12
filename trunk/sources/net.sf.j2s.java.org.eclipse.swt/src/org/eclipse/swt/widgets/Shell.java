@@ -923,6 +923,12 @@ public void open () {
 	if (!restoreFocus () && !traverseGroup (true)) setFocus ();
 	*/
 	layout();
+	/**
+	 * @j2sNative
+	 * if (window["ShellManagerSideBar"] != null && this.parent == null) {
+	 * 	ShellManagerSideBar.createShellItem (this);
+	 * }
+	 */ {}
 }
 
 protected void releaseChild () {

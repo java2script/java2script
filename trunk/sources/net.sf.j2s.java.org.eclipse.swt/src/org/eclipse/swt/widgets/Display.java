@@ -26,6 +26,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -451,10 +452,6 @@ public class Display extends Device {
  */
 public Display () {
 	this (null);
-	/**
-	 * @j2sNative
-	 * FontSizeSystem.monitorFontSize ();
-	 */ {}
 }
 
 /**
@@ -469,10 +466,6 @@ public Display () {
  */
 public Display (DeviceData data) {
 	super (data);
-	/**
-	 * @j2sNative
-	 * FontSizeSystem.monitorFontSize ();
-	 */ {}
 }
 
 /*
@@ -2418,6 +2411,14 @@ protected void init () {
 	
 	msgs = new MESSAGE[0];
 	messageProc = 0;
+	
+	/**
+	 * @j2sNative
+	 * FontSizeSystem.monitorFontSize ();
+	 */ {}
+	if (document.onclick == null) {
+		bringShellToTop();
+	}
 }
 
 /**	 
@@ -4334,6 +4335,44 @@ static void updateAllShellLayouts() {
 			}
 		}
 	}
+}
+
+static void bringShellToTop() {
+	RunnableCompatibility onclick = new RunnableCompatibility() {
+		public void run() {
+			HTMLEventWrapper evt = new HTMLEventWrapper(this.getEvent());
+			Element src = evt.target;
+			while (src != null) {
+				if (OS.existedCSSClass(src, "shell-default")) {
+					Display[] displs = Displays;
+					if (displs != null) {
+						for (int i = 0; i < displs.length; i++) {
+							Display disp = displs[i];
+							if (disp != null && !disp.isDisposed()) {
+								Control ctrl = disp.getControl(src);
+								if (ctrl != null && ctrl instanceof Shell) {
+									((Shell) ctrl).bringToTop();
+								}
+							}
+						}
+					}
+					break;
+				}
+				src = src.parentNode;
+			}
+		}
+	};
+	
+	/**
+	 * @j2sNative
+	 * if (document.addEventListener) {
+	 * 	document.addEventListener ("click", onclick, false);
+	 * } else if (document.attachEvent) {
+	 * 	document.attachEvent ("onclick", onclick);
+	 * }
+	 */ {
+		 document.onclick = onclick;
+	 }
 }
 
 }

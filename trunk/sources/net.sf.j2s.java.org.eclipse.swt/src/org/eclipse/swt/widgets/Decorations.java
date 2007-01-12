@@ -221,6 +221,9 @@ void bringToTop () {
 		//OS.BringWindowToTop (handle);
 		CSSStyle style = handle.style;
 		style.visibility = "visible";
+		if (style.display == "none") {
+			style.display = "block";
+		}
 		if (window.currentTopZIndex == null) {
 			window.currentTopZIndex = "1000";
 		}
@@ -821,6 +824,12 @@ public void dispose () {
 	 * 	}
 	 * }
 	 */ {}
+	/**
+	 * @j2sNative
+	 * if (window["ShellManagerSideBar"] != null) {
+	 * 	ShellManagerSideBar.removeShellItem (this);
+	 * }
+	 */ {}
 	super.dispose ();
 }
 
@@ -1121,6 +1130,12 @@ public boolean getMinimized () {
 	if (OS.IsWindowVisible (handle)) return OS.IsIconic (handle);
 	return swFlags == OS.SW_SHOWMINNOACTIVE;
 	*/
+	/**
+	 * @j2sNative
+	 * if (window["ShellManagerSideBar"] != null && this.parent == null) {
+	 * 	return this.handle.style.display == "none";
+	 * }
+	 */ {}
 	return false; // TODO
 }
 
@@ -1837,6 +1852,13 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
+	/**
+	 * @j2sNative
+	 * if (window["ShellManagerSideBar"] != null && this.parent == null && minimized) {
+	 * 	this.handle.style.display = "none";
+	 * 	return;
+	 * }
+	 */ {}
 	if (minimized && contentHandle != null) {
 		//handle.style.display = "none";
 		if (oldBounds == null) {
