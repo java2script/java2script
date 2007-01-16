@@ -925,8 +925,8 @@ public void open () {
 	layout();
 	/**
 	 * @j2sNative
-	 * if (window["ShellManagerSideBar"] != null && this.parent == null) {
-	 * 	ShellManagerSideBar.createShellItem (this);
+	 * if (window["ShellManager"] != null && this.parent == null) {
+	 * 	ShellManager.createShellItem (this);
 	 * }
 	 */ {}
 }

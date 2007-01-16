@@ -826,8 +826,8 @@ public void dispose () {
 	 */ {}
 	/**
 	 * @j2sNative
-	 * if (window["ShellManagerSideBar"] != null) {
-	 * 	ShellManagerSideBar.removeShellItem (this);
+	 * if (window["ShellManager"] != null) {
+	 * 	ShellManager.removeShellItem (this);
 	 * }
 	 */ {}
 	super.dispose ();
@@ -1132,7 +1132,7 @@ public boolean getMinimized () {
 	*/
 	/**
 	 * @j2sNative
-	 * if (window["ShellManagerSideBar"] != null && this.parent == null) {
+	 * if (window["ShellManager"] != null && this.parent == null) {
 	 * 	return this.handle.style.display == "none";
 	 * }
 	 */ {}
@@ -1706,7 +1706,7 @@ public void setMaximized (boolean maximized) {
 			boolean isOptMaximized = false;
 			/**
 			 * @j2sNative
-			 * isOptMaximized = window["ShellManagerSideBar"] != null; 
+			 * isOptMaximized = window["ShellManager"] != null; 
 			 */ {}
 			if (!isOptMaximized) {
 				setBounds(computeTrim(0, 0, width, height - titleHeight));
@@ -1863,7 +1863,7 @@ public void setMinimized (boolean minimized) {
 	*/
 	/**
 	 * @j2sNative
-	 * if (window["ShellManagerSideBar"] != null && this.parent == null && minimized) {
+	 * if (window["ShellManager"] != null && this.parent == null && minimized) {
 	 * 	this.handle.style.display = "none";
 	 * 	return;
 	 * }
@@ -2038,8 +2038,8 @@ void setSystemMenu () {
 				setMinimized(true);
 				/**
 				 * @j2sNative
-				 * if (window["ShellManagerSideBar"] != null) {
-				 * 	ShellManagerSideBar.returnTopMaximized (shell);
+				 * if (window["ShellManager"] != null) {
+				 * 	ShellManager.returnTopMaximized (shell);
 				 * }
 				 */ { }
 			}
@@ -2056,8 +2056,8 @@ void setSystemMenu () {
 				Decorations shell = Decorations.this;
 				/**
 				 * @j2sNative
-				 * if (window["ShellManagerSideBar"] != null) {
-				 * 	ShellManagerSideBar.returnTopMaximized (shell);
+				 * if (window["ShellManager"] != null) {
+				 * 	ShellManager.returnTopMaximized (shell);
 				 * }
 				 */ { shell.bringToTop(); }
 				display.timerExec(25, new Runnable() {
@@ -2079,8 +2079,8 @@ void setSystemMenu () {
 					Shell shell = (Shell) Decorations.this;
 					/**
 					 * @j2sNative
-					 * if (window["ShellManagerSideBar"] != null) {
-					 * 	ShellManagerSideBar.returnTopMaximized (shell);
+					 * if (window["ShellManager"] != null) {
+					 * 	ShellManager.returnTopMaximized (shell);
 					 * }
 					 */ { }
 					shell.close();
