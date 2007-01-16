@@ -936,18 +936,6 @@ protected void releaseChild () {
 }
 
 protected void releaseHandle () {
-//	try {
-//		BrowserNative.releaseHandle(shellTitle);
-//		BrowserNative.releaseHandle(titleBar);
-//		BrowserNative.releaseHandle(frameHandle);
-//		BrowserNative.releaseHandle(modalHandle);
-//		modalHandle = null;
-//		frameHandle = null;
-//		shellTitle = null;
-//		titleBar = null;
-//	} catch (Error e) {
-//		//System.out.println(e);
-//	}
 	super.releaseHandle ();
 	//hwndMDIClient = 0;
 }
