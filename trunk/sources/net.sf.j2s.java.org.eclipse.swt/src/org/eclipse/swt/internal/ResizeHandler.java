@@ -58,7 +58,16 @@ public class ResizeHandler {
 		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
 		// FIXME: maximized size is not accurate
 		//shell.setBounds(shell.computeTrim(0, 0, width + 4, height - titleHeight + 6));
-		shell.setBounds(shell.computeTrim(0, 0, width, height - titleHeight));
+		boolean isOptMaximized = false;
+		/**
+		 * @j2sNative
+		 * isOptMaximized = window["ShellManagerSideBar"] != null; 
+		 */ {}
+		if (!isOptMaximized) {
+			shell.setBounds(shell.computeTrim(0, 0, width, height - titleHeight));
+		} else {
+			shell.setBounds(shell.computeTrim(0,  -titleHeight, width, height));
+		}
 //		shell.setBounds(0 - 4, 0 - 4, width - 2, height + 4);
 		//shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
 	}

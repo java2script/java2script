@@ -5,30 +5,60 @@ ShellManagerSideBar = $_T($wt.widgets, "ShellManagerSideBar");
 var smsb = ShellManagerSideBar;
 smsb.sidebarEl = null;
 smsb.barEl = null;
+smsb.topbarEl = null;
+smsb.lastMaximizedShell = null;
 smsb.items = new Array ();
 smsb.initialize = function () {
 	if (this.sidebarEl != null) return;
 	var sb = document.createElement ("DIV");
 	sb.className = "shell-manager-sidebar";
 	sb.style.display = "none";
-	//sb.id = "shell-sidebar";
 	document.body.appendChild (sb);
 	this.sidebarEl = sb;
 	var bb = document.createElement ("DIV");
 	bb.className = "shell-manager-bar";
 	sb.appendChild (bb);
 	this.barEl = bb;
+
+	var tbc = document.createElement ("DIV");
+	tbc.className = "shell-manager-topbar-container";
+	document.body.appendChild (tbc);
+	tbc.style.display = "none";
+	tbc.style.width = "320px";
+	tbc.style.zIndex = "3456";
+	this.topbarContainerEl = tbc;
+	
+	var tb = document.createElement ("DIV");
+	tb.className = "shell-title-bar shell-maximized";
+	this.topbarContainerEl.appendChild (tb);
+	this.topbarEl = tb;
+
 	var listener = function (e) {
 		if (e == null) e = window.event;
 		var sidebar = ShellManagerSideBar.sidebarEl;
 		if (e.clientX <= 8) {
-			if (sidebar.style.display != "block") {
+			if (sidebar.style.display != "block" && ShellManagerSideBar.isAroundSideBar (e.clientY)) {
 				sidebar.style.display = "block";
 				ShellManagerSideBar.updateItems ();
 			}
 		} else if (e.clientX > 200) {
 			if (sidebar.style.display != "none") {
 				sidebar.style.display = "none";
+			}
+		}
+		var topbar = ShellManagerSideBar.topbarContainerEl;
+		if (topbar == null) return;
+		if (ShellManagerSideBar.getTopMaximizedShell () == null) return;
+		
+		if (e.clientY <= 8) {
+			if (topbar.style.display != "block" && ShellManagerSideBar.isAroundTopBar (e.clientX)) {
+				topbar.style.display = "block";
+				ShellManagerSideBar.updateTopMaximized ();
+			}
+		} else if (e.clientY > 32) {
+			if (topbar.style.display != "none") {
+				topbar.style.display = "none";
+				ShellManagerSideBar.returnTopMaximized ();
 			}
 		}
 	};
@@ -52,9 +82,15 @@ smsb.createShellItem = function (shell) {
 	if (text == null) {
 		text = "Java2Script";
 	}
-	var si = document.createElement ("A");
+	var tag = "A";
+	if (window["O$"] != null && !O$.isIE) {
+		tag = "DIV";
+	}
+	var si = document.createElement (tag);
 	si.className = "shell-item";
-	si.href = "#";
+	if (tag == "A") {
+		si.href = "#";
+	}
 	si.title = text;
 	si.onclick = function () {
 		return false;
@@ -97,7 +133,7 @@ smsb.removeShellItem = function (shell) {
 		}
 	}
 };
-smsb.updateItems = function () {
+smsb.syncItems = function () {
 	var delta = 0;
 	for (var i = 0; i < this.items.length - delta; i++) {
 		while (this.items[i + delta] == null 
@@ -107,13 +143,114 @@ smsb.updateItems = function () {
 		this.items[i] = this.items[i + delta];
 	}
 	this.items.length -= delta;
+};
+smsb.isAroundTopBar = function (x) {
+	var x1, x2, barWidth;
+	var length = 0; //this.items.length;
+	if (length == 0) {
+		barWidth = 320;
+	} else {
+		barWidth = 320 + 20; // TODO
+	}
+	var height = document.body.clientWidth;
+	var offset = Math.round ((height - barWidth) / 2);
+	x1 = offset - 72;
+	x2 = offset + barWidth + 72;
+	return (x >= x1 && x <= x2);
+};
+smsb.getTopMaximizedShell = function () {
+	// find the top maximized shell
+	var lastShell = null;
+	var lastMaxZIndex = 0;
+	var disps = $wt.widgets.Display.Displays;
+	for (var k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		var ss = disps[k].getShells ();
+		for (var i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/ && ss[i].getMaximized ()
+					&& ss[i].handle.style.display != "none") {
+				var idx = ss[i].handle.style.zIndex;
+				var zidx = 0;
+				if (idx == null || idx.length == 0) {
+					zidx = 0;
+				} else {
+					zidx = parseInt (idx);
+				}
+				if (zidx > lastMaxZIndex) {
+					lastMaxZIndex = zidx;
+					lastShell = ss[i];
+				}
+			}
+		}
+	}
+	return lastShell;
+};
+smsb.updateTopMaximized = function () {
+	var lastShell = this.getTopMaximizedShell ();
+	if (lastShell == null) return;
+	this.lastMaximizedShell = lastShell;
+	
+	// move the title bar elements into topbarEl
+	var els = [];
+	for (var i = 0; i < lastShell.titleBar.childNodes.length; i++) {
+		els[i] = lastShell.titleBar.childNodes[i];
+	}
+	for (var i = 0; i < els.length; i++) {
+		lastShell.titleBar.removeChild (els[i]);
+		this.topbarEl.appendChild (els[i]);
+	}
+
+	// update topbar
+	this.topbarContainerEl.style.left = Math.round ((document.body.clientWidth - 320) / 2) + "px";
+	this.topbarEl.style.width = "316px";
+	this.topbarEl.style.left = "2px";
+	this.topbarEl.style.top = "1px";
+	this.topbarContainerEl.ondblclick = lastShell.titleBar.ondblclick;
+	lastShell.updateShellTitle (320);
+};
+smsb.returnTopMaximized = function (shell) {
+	var lastShell = this.lastMaximizedShell;
+	if (shell != null && lastShell != shell) return;
+	if (lastShell == null || lastShell.titleBar == null) return;
+	
+	// move the title bar elements into topbarEl
+	var els = [];
+	for (var i = 0; i < this.topbarEl.childNodes.length; i++) {
+		els[i] = this.topbarEl.childNodes[i];
+	}
+	for (var i = 0; i < els.length; i++) {
+		lastShell.titleBar.appendChild (els[i]);
+	}
+	if (shell != null) {
+		this.topbarContainerEl.style.display = "none";
+	}
+};
+smsb.isAroundSideBar = function (y) {
+	var y1, y2, barHeight;
+	this.syncItems ();
+	var length = this.items.length;
+	if (length == 0) {
+		barHeight = 36;
+	} else {
+		var si = this.items[0].itemHandle;
+		var hh = Math.max (si.scrollHeight, si.offsetHeight, si.clientHeight) + 12;
+		barHeight = (length * hh + 36);
+	}
+	var height = O$.getFixedBodyClientHeight();
+	var offset = O$.getFixedBodyOffsetTop() + Math.round ((height - barHeight) / 2);
+	y1 = offset - 72;
+	y2 = offset + barHeight + 72;
+	return (y >= y1 && y <= y2);
+};
+smsb.updateItems = function () {
+	this.syncItems ();
 	var length = this.items.length;
 	if (length == 0) {
 		this.barEl.style.height = 36 + "px";
 		var offset = 0;
 		if (window["O$"] != null) {
 			var height = O$.getFixedBodyClientHeight();
-			offset = O$.getFixedBodyOffsetTop() + Math.round ((height - 36) / 2) - 72;
+			offset = O$.getFixedBodyOffsetTop() + Math.round ((height - 36) / 2);
 		}
 		this.barEl.style.top = offset + "px";
 		return;
@@ -123,7 +260,7 @@ smsb.updateItems = function () {
 	var offset = 50;
 	if (window["O$"] != null) {
 		var height = O$.getFixedBodyClientHeight();
-		offset = O$.getFixedBodyOffsetTop() + Math.round ((height - (length * hh + 36)) / 2) - 72;
+		offset = O$.getFixedBodyOffsetTop() + Math.round ((height - (length * hh + 36)) / 2);
 	}
 	for (var i = 0; i < length; i++) {
 		var item = this.items[i];
@@ -137,5 +274,11 @@ smsb.updateItems = function () {
 	}
 	this.barEl.style.height = (length * hh + 36) + "px";
 	this.barEl.style.top = offset + "px";
+	if (window["O$"] != null) {
+		offset = O$.getFixedBodyOffsetLeft();
+	} else {
+		offset = 0;
+	}
+	this.sidebarEl.style.left = offset + "px";
 };
 });

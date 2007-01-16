@@ -589,7 +589,7 @@ protected void createHandle() {
 		DragAndDrop dnd = new DragAndDrop();
 		dnd.addDragListener(new ShellFrameDND() {
 			public boolean isDraggable(HTMLEventWrapper e) {
-				if (super.isDraggable(e)) {
+				if (super.isDraggable(e) && !getMaximized()) {
 					String cssName = e.target.className;
 					if (cssName.indexOf("shell-title-text") != -1
 							&& oldBounds != null) {
@@ -1703,7 +1703,16 @@ public void setMaximized (boolean maximized) {
 				height = OS.getFixedBodyClientHeight();
 			}
 			int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
-			setBounds(computeTrim(0, 0, width, height - titleHeight));
+			boolean isOptMaximized = false;
+			/**
+			 * @j2sNative
+			 * isOptMaximized = window["ShellManagerSideBar"] != null; 
+			 */ {}
+			if (!isOptMaximized) {
+				setBounds(computeTrim(0, 0, width, height - titleHeight));
+			} else {
+				setBounds(computeTrim(0, -titleHeight, width, height));
+			}
 		}
 		ResizeSystem.register(this, SWT.MAX);
 		if (titleBar != null) {
@@ -2024,8 +2033,15 @@ void setSystemMenu () {
 		titleBar.appendChild(shellMin);
 		shellMin.onclick = new RunnableCompatibility() {
 			public void run() {
-				ResizeSystem.unregister(Decorations.this, SWT.MIN);
+				Decorations shell = Decorations.this;
+				ResizeSystem.unregister(shell, SWT.MIN);
 				setMinimized(true);
+				/**
+				 * @j2sNative
+				 * if (window["ShellManagerSideBar"] != null) {
+				 * 	ShellManagerSideBar.returnTopMaximized (shell);
+				 * }
+				 */ { }
 			}
 		};
 	}
@@ -2037,6 +2053,13 @@ void setSystemMenu () {
 		shellMax.onclick = new RunnableCompatibility() {
 			public void run() {
 				setMaximized(!getMaximized());
+				Decorations shell = Decorations.this;
+				/**
+				 * @j2sNative
+				 * if (window["ShellManagerSideBar"] != null) {
+				 * 	ShellManagerSideBar.returnTopMaximized (shell);
+				 * }
+				 */ { shell.bringToTop(); }
 				display.timerExec(25, new Runnable() {
 					public void run() {
 						layout();
@@ -2054,6 +2077,12 @@ void setSystemMenu () {
 			public void run() {
 				if (Decorations.this instanceof Shell) {
 					Shell shell = (Shell) Decorations.this;
+					/**
+					 * @j2sNative
+					 * if (window["ShellManagerSideBar"] != null) {
+					 * 	ShellManagerSideBar.returnTopMaximized (shell);
+					 * }
+					 */ { }
 					shell.close();
 				}
 			}
@@ -2242,29 +2271,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
-		int ww = 18;
-		int w = ww;
-		if (shellClose != null) {
-			shellClose.style.left = (width - 8 - 2 - w) + "px"; 
-			w += ww;
-		}
-		if (shellMax != null) {
-			shellMax.style.left = (width - 8 - 2 - w) + "px"; 
-			w += ww;
-		}
-		if (shellMin != null) {
-			shellMin.style.left = (width - 8 - 2 - w) + "px";
-			w += ww;
-		}
-		w -= ww;
-		if (shellIcon != null) {
-			shellIcon.style.left = 2 + "px"; 
-			shellTitle.style.left = (4 + ww) + "px";
-			w += ww;
-		} else {
-			shellTitle.style.left = 4 + "px";
-		}
-		shellTitle.style.width = (width - 8 - 8 - w) + "px";
+		updateShellTitle(width);
 	} else {
 		width -= 4;
 		height -= 4;
@@ -2292,6 +2299,32 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	el.style.height = (cy > 0 ? cy : 0) + "px";
 	return true;
 //	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
+protected void updateShellTitle(int width) {
+	int ww = 18;
+	int w = ww;
+	if (shellClose != null) {
+		shellClose.style.left = (width - 8 - 2 - w) + "px"; 
+		w += ww;
+	}
+	if (shellMax != null) {
+		shellMax.style.left = (width - 8 - 2 - w) + "px"; 
+		w += ww;
+	}
+	if (shellMin != null) {
+		shellMin.style.left = (width - 8 - 2 - w) + "px";
+		w += ww;
+	}
+	w -= ww;
+	if (shellIcon != null) {
+		shellIcon.style.left = 2 + "px"; 
+		shellTitle.style.left = (4 + ww) + "px";
+		w += ww;
+	} else {
+		shellTitle.style.left = 4 + "px";
+	}
+	shellTitle.style.width = (width - 8 - 8 - w) + "px";
 }
 
 /*

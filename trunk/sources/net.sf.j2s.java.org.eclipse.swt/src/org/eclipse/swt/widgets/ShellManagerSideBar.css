@@ -1,5 +1,6 @@
 .shell-manager-sidebar {
 	position:absolute;
+	top:0;
 	left:0;
 	z-index:3690;
 }
@@ -14,7 +15,7 @@
 	opacity:0.25;
 	filter:Alpha(Opacity=25);
 }
-a.shell-item {
+.shell-item, a.shell-item {
 	display:block;
 	text-decoration:none;
 	cursor:default;
@@ -26,12 +27,12 @@ a.shell-item {
 	background-color:buttonface;
 	border:1px solid buttonshadow;
 	color:buttontext;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
-}
-a.shell-item:hover {
 	opacity:0.55;
 	filter:Alpha(Opacity=55);
+}
+.shell-item:hover, a.shell-item:hover {
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 a.shell-item:focus {
 	background-color:buttonhighlight;
@@ -57,6 +58,16 @@ a.shell-item:focus {
 	left:24px;
 	_left:6px;
 	margin-top:-0.5em;
+}
+.shell-manager-topbar-container {
+	position:absolute;
+	left:0;
+	top:0;
+	border:1px solid windowframe;
+	border-top:0 none transparent;
+	background-color:buttonface;
+	padding:2px;
+	height:24px;
 }
 .swt-widgets-shellmanagersidebar {
 	width:324px;
