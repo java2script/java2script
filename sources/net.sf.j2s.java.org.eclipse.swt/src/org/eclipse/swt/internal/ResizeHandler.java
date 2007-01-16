@@ -61,7 +61,7 @@ public class ResizeHandler {
 		boolean isOptMaximized = false;
 		/**
 		 * @j2sNative
-		 * isOptMaximized = window["ShellManagerSideBar"] != null; 
+		 * isOptMaximized = window["ShellManager"] != null; 
 		 */ {}
 		if (!isOptMaximized) {
 			shell.setBounds(shell.computeTrim(0, 0, width, height - titleHeight));
