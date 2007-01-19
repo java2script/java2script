@@ -34,6 +34,8 @@ import org.eclipse.swt.graphics.RGB;
  * </p>
  * 
  * @since 3.1
+ *
+ * @j2sRequireImport java.util.ArrayList
  */
 public abstract class ResourceManager {
     

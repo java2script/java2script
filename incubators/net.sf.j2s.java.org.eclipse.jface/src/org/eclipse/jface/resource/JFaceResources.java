@@ -36,6 +36,8 @@ import org.eclipse.swt.widgets.Display;
  *   <li>a resource bundle</li>
  * </ul>
  * </p>
+ *
+ * @j2sRequireImport org.eclipse.jface.resource.DeviceResourceManager,org.eclipse.jface.resource.ImageRegistry
  */
 public class JFaceResources {
 

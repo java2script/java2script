@@ -81,6 +81,8 @@ class FileImageDescriptor extends ImageDescriptor {
      * Returns null if the image data cannot be read.
      */
     public ImageData getImageData() {
+    	if (true) return new ImageData(name);
+    	
         InputStream in = getStream();
         ImageData result = null;
         if (in != null) {
