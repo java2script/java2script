@@ -38,12 +38,12 @@ sm.initialize = function () {
 		var sidebar = ShellManager.sidebarEl;
 		if (sidebar.style.display != "none" && !ShellManager.isAroundSideBar (e.clientY)) {
 			sidebar.style.display = "none";
-		} else if (e.clientX <= 8) {
+		} else if (e.clientX <= 8 && !e.ctrlKey) {
 			if (sidebar.style.display != "block" && ShellManager.isAroundSideBar (e.clientY)) {
 				sidebar.style.display = "block";
 				ShellManager.updateItems ();
 			}
-		} else if (e.clientX > 200) {
+		} else if (e.clientX > 200 || e.ctrlKey) {
 			if (sidebar.style.display != "none") {
 				sidebar.style.display = "none";
 			}
@@ -55,12 +55,12 @@ sm.initialize = function () {
 		if (topbar.style.display != "none" && !ShellManager.isAroundTopBar (e.clientX)) {
 			topbar.style.display = "none";
 			ShellManager.returnTopMaximized ();
-		} else if (e.clientY <= 8) {
+		} else if (e.clientY <= 8 && !e.ctrlKey) {
 			if (topbar.style.display != "block" && ShellManager.isAroundTopBar (e.clientX)) {
 				topbar.style.display = "block";
 				ShellManager.updateTopMaximized ();
 			}
-		} else if (e.clientY > 32) {
+		} else if (e.clientY > 32 || e.ctrlKey) {
 			if (topbar.style.display != "none") {
 				topbar.style.display = "none";
 				ShellManager.returnTopMaximized ();
