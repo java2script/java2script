@@ -54,6 +54,8 @@ import org.eclipse.swt.widgets.Shell;
  * of the shell of the first one otherwise it is possible that the OS will give focus to
  * the first dialog potentially blocking the UI.
  * </p>
+ *
+ * @j2sRequireImport org.eclipse.jface.resource.FileImageDescriptor,org.eclipse.jface.resource.JFaceResources
  */
 public abstract class Dialog extends Window {
     /**
