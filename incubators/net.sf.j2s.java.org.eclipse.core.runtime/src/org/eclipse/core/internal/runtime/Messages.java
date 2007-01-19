@@ -12,6 +12,9 @@ package org.eclipse.core.internal.runtime;
 import org.eclipse.osgi.util.NLS;
 
 // Runtime plugin message catalog
+/**
+ * @j2sRequireImport org.eclipse.osgi.framework.internal.core.MessageResourceBundle
+ */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.core.internal.runtime.messages"; //$NON-NLS-1$
 
