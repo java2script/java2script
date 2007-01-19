@@ -1,0 +1,6 @@
+#Java2Script Configuration
+#Sat Jan 20 01:19:23 CST 2007
+j2s.resources.list=/net.sf.j2s.java.core/.j2s,/net.sf.j2s.java.org.eclipse.jface/.j2s,bin/com/ognize/jface/test/TitleAreaDialogTest.js,bin/com/ognize/jface/test/MyTitleAreaDialog.js,bin/com/ognize/jface/test/IWorld.js,bin/com/ognize/jface/test/AsyncWindowProxy.js,bin/com/ognize/jface/async/AsyncWindowRunnable.js,bin/com/ognize/jface/async/AsyncWindowProxy.js,bin/org/eclipse/jface/window/WindowProxy.js
+j2s.abandoned.resources.list=
+j2s.output.path=bin
+j2s.compiler.status=enable
