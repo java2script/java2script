@@ -16,6 +16,8 @@ import org.eclipse.core.internal.runtime.Assert;
 /**
  * A concrete status implementation, suitable either for 
  * instantiating or subclassing.
+ *
+ * @j2sRequireImport org.eclipse.core.internal.runtime.Assert
  */
 public class Status implements IStatus {
 	/**
@@ -78,7 +80,7 @@ public class Status implements IStatus {
 		setSeverity(severity);
 		setPlugin(pluginId);
 		setCode(code);
-		setMessage(message);
+		//setMessage(message);
 		setException(exception);
 	}
 
