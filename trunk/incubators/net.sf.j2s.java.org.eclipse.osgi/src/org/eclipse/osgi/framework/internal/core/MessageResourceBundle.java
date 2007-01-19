@@ -181,6 +181,8 @@ public class MessageResourceBundle {
 
 	/**
 	 * Load the given resource bundle using the specified class loader.
+	 * 
+	 * @j2sNative
 	 */
 	public static void load(final String bundleName, Class clazz) {
 		long start = System.currentTimeMillis();
