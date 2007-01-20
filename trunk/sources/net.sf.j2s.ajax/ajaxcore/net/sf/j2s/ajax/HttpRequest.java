@@ -19,6 +19,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -424,7 +425,22 @@ public final class HttpRequest {
 			if (checkAbort()) return; // stop receiving anything
 			is.close();
 			activeIS = null;
-			responseText = baos.toString();
+			responseText = null;
+			String charset = null;
+			String type = connection.getHeaderField("Content-Type");
+			if (type != null) {
+				int idx = type.toLowerCase().indexOf("charset=");
+				if (idx != -1) {
+					charset = type.substring(idx + 8);
+					try {
+						responseText = baos.toString(charset);
+					} catch (UnsupportedEncodingException e) {
+					}
+				}
+			}
+			if (responseText == null) {
+				responseText = baos.toString();
+			}
 			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onLoaded();
