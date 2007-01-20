@@ -35,34 +35,51 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SimpleRPCHttpServlet extends HttpServlet {
 
-	private static final long serialVersionUID = -3852449040495978018L;
+	private static final long serialVersionUID = -3852449040495666018L;
 
 	protected Set runnables = new HashSet();
 	
-	protected SimpleRPCRunnable getRunnableByURL(String request) {
+	/**
+	 * Get SimpleRPCRunnable instance correspond to the given request. 
+	 * 
+	 * @param request String that is from POST data or GET query  
+	 * @return SimpleRPCRunnable instance. If request is bad request, 
+	 * null will be returned.
+	 * 
+	 * TODO: request (May be large string) may be duplicated when being
+	 * passed in as parameter
+	 */
+	protected SimpleRPCRunnable getRunnableByRequest(String request) {
 		if (request == null) return null;
 		int length = request.length();
 		if (length <= 7 || !request.startsWith("WLL")) return null;
 		int index = request.indexOf('#');
 		if (index == -1) return null;
 		String clazzName = request.substring(6, index);
+		
 		if (runnables.contains(clazzName)) {
-			if (request != null) {
-				Object obj = getNewInstanceByClassName(clazzName);
-				if (obj != null && obj instanceof SimpleRPCRunnable) {
-					return (SimpleRPCRunnable) obj;
-				}
-			}
+			return createRunnableInstance(clazzName);
 		}
 		return null;
 	}
 
-	public Object getNewInstanceByClassName(String className) {
+	/**
+	 * Create SimpleRPCRunnable instance by given class name. May be inherited to
+	 * do more jobs before starting to deserialize request and running the main job.
+	 * 
+	 * @param clazzName full class name of inherited SimpleRPCRunnable class 
+	 * @return instance of given class name, null may be returned.
+	 */
+	protected SimpleRPCRunnable createRunnableInstance(String clazzName) {
 		try {
-			Class runnableClass = Class.forName(className);
+			Class runnableClass = Class.forName(clazzName);
 			if (runnableClass != null) {
+				// SimpleRPCRunnale should always has default constructor
 				Constructor constructor = runnableClass.getConstructor(new Class[0]);
-				return constructor.newInstance(new Object[0]);
+				Object obj = constructor.newInstance(new Object[0]);
+				if (obj != null && obj instanceof SimpleRPCRunnable) {
+					return (SimpleRPCRunnable) obj;
+				}
 			}
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -81,32 +98,26 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		return null;
 	}
-	private String readAll(InputStream res) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			int read = 0;
-			while ((read = res.read(buf)) != -1) {
-				baos.write(buf, 0, read);
-				if (baos.size() > 0x1000000) { // 16 * 1024 * 1024 // 16M!
-					/*
-					 * Some malicious request may try to allocate huge size of memory!
-					 * Limit the data size of HTTP request! 
-					 */
-					res.close();
-					throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
-				}
-			}
-			res.close();
-			return baos.toString();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.servlet.GenericServlet#init()
+	
+	/*
+	 * Example of web.xml:
+    <servlet>
+        <servlet-name>simplerpc</servlet-name>
+        <servlet-class>net.sf.j2s.ajax.SimpleRPCHttpServlet</servlet-class>
+		<init-param>
+			<param-name>simple.rpc.runnables</param-name>
+			<param-value>
+				org.java2script.notepad.AutoSaveRunnable;
+				org.java2script.notepad.LoadDraftRunnable;
+				org.java2script.notepad.LoadNoteRunnable;
+				org.java2script.notepad.SaveNoteRunnable;
+			</param-value>
+		</init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>simplerpc</servlet-name>
+        <url-pattern>/simplerpc</url-pattern>
+    </servlet-mapping>
 	 */
 	public void init() throws ServletException {
 		String runnableStr = getInitParameter("simple.rpc.runnables");
@@ -119,11 +130,39 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				}
 			}
 		}
+		super.init();
 	}
 	
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String request = readAll(req.getInputStream());
-		SimpleRPCRunnable runnable = getRunnableByURL(request);
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+			throws ServletException, IOException {
+		String request = null;
+		InputStream res = req.getInputStream();
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			byte[] buf = new byte[1024];
+			int read = 0;
+			while ((read = res.read(buf)) != -1) {
+				baos.write(buf, 0, read);
+				if (baos.size() > 0x1000000) { // 16 * 1024 * 1024 // 16M!
+					/*
+					 * Some malicious request may try to allocate huge size of memory! 
+					 * DoS attack? Limit the data size of HTTP request! 
+					 */
+					res.close();
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN, 
+							"Data size reaches the limit of Java2Script Simple RPC!");
+					return;
+				}
+			}
+			res.close();
+			request = baos.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		SimpleRPCRunnable runnable = getRunnableByRequest(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
@@ -136,9 +175,10 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		writer.write(runnable.serialize());
 	}
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+			throws ServletException, IOException {
 		String request = req.getQueryString();
-		SimpleRPCRunnable runnable = getRunnableByURL(request);
+		SimpleRPCRunnable runnable = getRunnableByRequest(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
