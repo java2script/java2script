@@ -1,3 +1,39 @@
+/******************************************************************************
+ * Copyright (c) 2005-2007 ognize.com and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Web:
+ *     http://j2s.sourceforge.net/
+ *     http://sourceforge.net/projects/j2s/
+ * Contributors:
+ *     ognize.com - initial API and implementation
+ *****************************************************************************/
+/*******
+ * @author zhou renjian
+ * @create Jan 17, 2007
+ *******/
+ 
+/*
+ * ShellManager is optional for SWT applications. When ShellManager is 
+ * activated, there are an automatically-hidden side bar for all windows,
+ * and there are no title bar for maximized Shells but with an automatically-
+ * hidden top bar. By using ShellManager, much of the inner browser window 
+ * space will be used, and minimize or maximize windows will be much more
+ * user-friendly.
+ *
+ * Example:
+<script>
+...
+ClazzLoader.loadClass ("org.eclipse.swt.widgets.ShellManager", function () {
+	ClazzLoader.loadClass ("com.example.Notepad", function () {
+		com.example.Notepad.main([]);
+	});
+});
+</script>
+ */
 $_L(["$wt.widgets.Shell"], "$wt.widgets.ShellManager", null, function(){
 $WTC$$.registerCSS ("$wt.widgets.ShellManager");
 //ShellManager = new Object ();
@@ -151,12 +187,7 @@ sm.syncItems = function () {
 };
 sm.isAroundTopBar = function (x) {
 	var x1, x2, barWidth;
-	var length = 0; //this.items.length;
-	if (length == 0) {
-		barWidth = 320;
-	} else {
-		barWidth = 320 + 20; // TODO
-	}
+	barWidth = 320;
 	var height = document.body.clientWidth;
 	var offset = Math.round ((height - barWidth) / 2);
 	x1 = offset - 72;
@@ -218,7 +249,7 @@ sm.returnTopMaximized = function (shell) {
 	if (shell != null && lastShell != shell) return;
 	if (lastShell == null || lastShell.titleBar == null) return;
 	
-	// move the title bar elements into topbarEl
+	// move the title bar elements back to Shell's title bar
 	var els = [];
 	for (var i = 0; i < this.topbarEl.childNodes.length; i++) {
 		els[i] = this.topbarEl.childNodes[i];
