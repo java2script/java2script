@@ -70,7 +70,7 @@ public class PackCSSIntoJS {
 			File jsFile = new File(path.substring(0, path.length() - 4) + ".js");
 			if (jsFile.exists()) {
 				String jsContent = RegExCompress.readFileAll(new FileInputStream(jsFile));
-				String key = "Clazz.registerCSS";
+				String key = "$WTC$$.registerCSS";
 				int idx1 = jsContent.indexOf(key);
 				if (idx1 != -1) {
 					int idx2 = jsContent.indexOf(");", idx1);
