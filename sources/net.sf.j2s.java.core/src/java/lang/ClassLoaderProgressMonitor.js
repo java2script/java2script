@@ -17,10 +17,13 @@
  *******/
  
 /*
- * ClassLoaderProgressMonitor is optional for show classes loading progress.
+ * ClassLoaderProgressMonitor is optional. It's used to display class loading 
+ * progress so that user know that background loading is still processing.
  *
  * Example:
-<script type="text/javascript" src="../net.sf.j2s.java.core/src/java/lang/ClassLoaderProgressMonitor.js"></script>
+<script type="text/javascript" 
+	src="../net.sf.j2s.java.core/src/java/lang/ClassLoaderProgressMonitor.js">
+</script>
 <script>
 ...
 ClazzLoader.scriptLoading = function (file) {
@@ -29,9 +32,9 @@ ClazzLoader.scriptLoading = function (file) {
 ClazzLoader.scriptLoaded = function (file) {
 	ClassLoaderProgressMonitor.showStatus (file + " loaded.", true);
 };
-ClazzLoader.loadClass ("org.java2script.notepad.Notepad", function () {
-ClassLoaderProgressMonitor.showStatus("org.java2script.notepad.Notepad loaded.", true);
-org.java2script.notepad.Notepad.main([]);
+ClazzLoader.loadClass ("com.example.Notepad", function () {
+ClassLoaderProgressMonitor.showStatus("com.example.Notepad loaded.", true);
+com.example.Notepad.main([]);
 });
 </script>
  */
@@ -62,7 +65,7 @@ clpm.DEFAULT_OPACITY = 75;
 		this.fadeOutTimer = null;
 	}
 	this.fadeAlpha = alpha;
-	if (navigator.userAgent.toString ().toLowerCase ().indexOf ("msie") != -1) {
+	if (navigator.userAgent.toLowerCase ().indexOf ("msie") != -1) {
 		this.monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
 	} else {
 		this.monitorEl.style.opacity = alpha / 100.0;
@@ -70,8 +73,9 @@ clpm.DEFAULT_OPACITY = 75;
 };
 /* private */ clpm.createHandle = function () {
 	var div = document.createElement ("DIV");
-	div.style.cssText = "position:absolute;top:4px;left:4px;padding:2px 8px;z-index:3333;"
-			+ "background-color:#8e0000;color:yellow;font-family:Arial, sans-serif;";
+	div.style.cssText = "position:absolute;top:4px;left:4px;padding:2px 8px;"
+			+ "z-index:3333;background-color:#8e0000;color:yellow;" 
+			+ "font-family:Arial, sans-serif;white-space:nowrap;";
 	div.onmouseover = function () {
 		this.style.display = "none";
 	};
@@ -111,7 +115,8 @@ clpm.DEFAULT_OPACITY = 75;
 	if (dua.indexOf("Opera") == -1 && document.all) {
 		return (pcHeight == 0) ? bcScrollTop : pcScrollTop;
 	} else if (dua.indexOf("Gecko") != -1) {
-		return (pcHeight == p.offsetHeight && pcHeight == p.scrollHeight) ? bcScrollTop : pcScrollTop;
+		return (pcHeight == p.offsetHeight 
+				&& pcHeight == p.scrollHeight) ? bcScrollTop : pcScrollTop;
 	}
 	return bcScrollTop;
 };
