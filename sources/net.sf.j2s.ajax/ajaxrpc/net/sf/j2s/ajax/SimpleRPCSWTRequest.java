@@ -37,19 +37,28 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	}
 	
 	private static void swtAJAXRequest(final SimpleRPCRunnable runnable) {
-		final HttpRequest request = new HttpRequest();
 		String url = runnable.getHttpURL();
 		String method = runnable.getHttpMethod();
+		String serialize = runnable.serialize();
 		if (method == null) {
 			method = "POST";
 		}
+		if (checkXSS(url, serialize, runnable)) {
+			return;
+		}
+		final HttpRequest request = new HttpRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
-				runnable.deserialize(request.getResponseText());
+				String responseText = request.getResponseText();
+				if (responseText == null || responseText.length() == 0) {
+					runnable.ajaxFail(); // should seldom fail!
+					return;
+				}
+				runnable.deserialize(responseText);
 				runnable.ajaxOut();
 			}
 		});
-		request.send(runnable.serialize());
+		request.send(serialize);
 	}
 }
