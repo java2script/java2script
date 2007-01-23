@@ -15,7 +15,7 @@ package net.sf.j2s.ajax;
 
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-10-10
  */
@@ -34,8 +34,10 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable implements Ru
 	 */
 	public void ajaxIn() {};
 	
-	/*
-	 * Called by local Java thread of XMLHttpRequest
+	/**
+	 * Called by local Java thread of XMLHttpRequest or by remote servlet.
+	 * In this method, those public fields which has no senses for #ajaxOut
+	 * should be set empty so the transfer is much smaller and faster.
 	 */
 	public abstract void ajaxRun();
 	
@@ -44,13 +46,24 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable implements Ru
 	 */
 	public void ajaxOut() {};
 	
+	/*
+	 * Called by local Java thread of XMLHttpRequest when #ajaxRun contains errors
+	 */
+	public void ajaxFail() {};
+	
 	/**
 	 * @j2sNative
 	 * net.sf.j2s.ajax.ServletThread.call(this);
 	 */
 	public void run() {
 		// ajaxIn(); // ajaxIn should be run outside of #run directly
-		ajaxRun();
+		try {
+			ajaxRun();
+		} catch (RuntimeException e) {
+			e.printStackTrace(); // should never fail in Java thread mode!
+			ajaxFail();
+			return;
+		}
 		ajaxOut();
 	}
 }

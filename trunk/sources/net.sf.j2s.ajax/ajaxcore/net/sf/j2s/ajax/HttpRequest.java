@@ -25,6 +25,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -370,7 +372,7 @@ public final class HttpRequest {
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
-					"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
+					"Mozilla/5.0 (compatible; Java2Script-Pacemaker/1.0; +http://j2s.sourceforge.net)");
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type",
@@ -426,12 +428,42 @@ public final class HttpRequest {
 			is.close();
 			activeIS = null;
 			responseText = null;
-			String charset = null;
 			String type = connection.getHeaderField("Content-Type");
 			if (type != null) {
-				int idx = type.toLowerCase().indexOf("charset=");
+				String charset = null;
+				String lowerType = type.toLowerCase();
+				int idx = lowerType.indexOf("charset=");
 				if (idx != -1) {
 					charset = type.substring(idx + 8);
+				} else {
+					idx = lowerType.indexOf("/xml"); // more xml Content-Type?
+					if (idx != -1) {
+						String tmp = baos.toString();
+						Matcher matcher = Pattern.compile(
+								"<\\?.*encoding\\s*=\\s*[\'\"]([^'\"]*)[\'\"].*\\?>", 
+								Pattern.MULTILINE).matcher(tmp);
+						if (matcher.find()) {
+							charset = matcher.group(1);
+						} else {
+							// default charset of xml is UTF-8?
+							responseText = tmp;
+						}
+					} else {
+						idx = lowerType.indexOf("html");
+						if (idx != -1) {
+							String tmp = baos.toString();
+							Matcher matcher = Pattern.compile(
+									"<meta.*content\\s*=\\s*[\'\"][^'\"]*charset\\s*=\\s*([^'\"]*)\\s*[\'\"].*>", 
+									Pattern.MULTILINE | Pattern.CASE_INSENSITIVE).matcher(tmp);
+							if (matcher.find()) {
+								charset = matcher.group(1);
+							} else {
+								responseText = tmp;
+							}
+						}
+					}
+				}
+				if (charset != null) {
 					try {
 						responseText = baos.toString(charset);
 					} catch (UnsupportedEncodingException e) {
