@@ -588,6 +588,8 @@ protected void createHandle() {
 	if (DragAndDrop.class != null) {
 		DragAndDrop dnd = new DragAndDrop();
 		dnd.addDragListener(new ShellFrameDND() {
+			protected int deltaWidth = 0;
+			protected int deltaHeight = 0;
 			public boolean isDraggable(HTMLEventWrapper e) {
 				if (super.isDraggable(e) && !getMaximized()) {
 					String cssName = e.target.className;
@@ -600,8 +602,16 @@ protected void createHandle() {
 					return false;
 				}
 			}
+			public boolean initFrameBounds(int x, int y, int width, int height) {
+				Rectangle bs = getBounds();
+				this.deltaWidth = this.sourceWidth - bs.width;
+				this.deltaHeight = this.sourceHeight - bs.height;
+				return true;
+			}
 			public boolean updateShellBounds(int x, int y, int w, int h) {
 				boolean moved = (x != left || y != top);
+				w -= deltaWidth;
+				h -= deltaHeight;
 				boolean resized = (w != width || h != height);
 				setBounds(x, y, w, h);
 				if (moved) {
