@@ -26,13 +26,14 @@ import org.eclipse.swt.internal.xhtml.window;
  * 2006-3-15
  */
 public class ShellFrameDND implements DragListener {
-	int sourceX = 0;
-	int sourceY = 0;
-	int sourceWidth = 0;
-	int sourceHeight = 0;
+	protected int sourceX = 0;
+	protected int sourceY = 0;
+	protected int sourceWidth = 0;
+	protected int sourceHeight = 0;
 	String resize = null;
 	Element frame = null;
 	private Element overFrameHandle;
+	
 	public boolean isDraggable(HTMLEventWrapper e) {
 		String cssName = e.target.className;
 		if (cssName != null) { 
@@ -90,6 +91,7 @@ public class ShellFrameDND implements DragListener {
 		e.startX = e.currentX;
 		e.startY = e.currentY;
 		if  (firstTime) {
+			this.initFrameBounds(this.sourceX, this.sourceY, this.sourceWidth, this.sourceHeight);
 			this.frame.style.width = this.sourceWidth + "px";
 			this.frame.style.height = this.sourceHeight + "px";
 		}
@@ -249,6 +251,12 @@ public class ShellFrameDND implements DragListener {
 			document.body.removeChild(overFrameHandle);
 			overFrameHandle = null;
 		}
+	};
+	/**
+	 * To initialize bounds.
+	 */
+	public boolean initFrameBounds(int x, int y, int width, int height) {
+		return true;
 	};
 	public boolean updateShellBounds(int x, int y, int width, int height) {
 		return true;
