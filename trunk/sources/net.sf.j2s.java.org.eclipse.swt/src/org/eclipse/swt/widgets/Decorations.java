@@ -2100,6 +2100,17 @@ void setSystemMenu () {
 	}
 	shellTitle = document.createElement("DIV");
 	shellTitle.className = "shell-title-text";
+	
+	/**
+	 * Ubuntu's Firefox has different active caption background color! 
+	 * @j2sNative
+	 * if (window["ubuntu.css.colors.fixed"] == null
+	 * 		&& navigator.userAgent.indexOf ("Ubuntu") != -1) {
+	 * 	this.titleBar.style.backgroundColor = "highlight";
+	 * 	this.shellTitle.style.color = "highlighttext";
+	 * }
+	 */ {}
+	 
 	titleBar.appendChild(shellTitle);
 	if ((style & SWT.MAX) != 0) {
 		titleBar.ondblclick = shellMax.onclick;
