@@ -42,24 +42,54 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 
 	protected Set runnables = new HashSet();
 	
+	protected long postLimit = 0x1000000; // 16 * 1024 * 1024 // 16M!
+	
+	protected boolean supportXSS = true;
+	
+	/* 
+	 * should never be bigger than 10!
+	 * each part will be an HTTP connection!
+	 */
+	protected int xssPartLimit = 128; // 8k * 128 = 1M, for IE it will 2k * 128 = 256k
+	
+	protected long xssLatency = 60 * 1000; // 60s to send a request?
+	
 	protected long maxPostLimit() {
-		return 0x1000000; // 16 * 1024 * 1024 // 16M!
+		return postLimit;
 	}
 	
+	/**
+	 * Return support cross site script request or not.
+	 * 
+	 * If cross site script is supported, http log format should be modified
+	 * so those requests are not logged.
+	 * If Apache httpd server is used, you can modify httpd.conf as following:
+	 * <pre>
+	 * LogFormat "%h %l %u %t \"%m %U %H\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" noquery
+	 * ...
+	 * CustomLog logs/dummy-host.example.com-access_log noquery
+	 * </pre>
+	 * Or use SetEnvIf
+	 * <pre>
+	 * SetEnvIf Request_URI "^/your-url" dontlog
+	 * CustomLog logs/dummy-host.example.com-access_log combined env=!dontlog
+	 * </pre>
+	 * 
+	 * @see http://httpd.apache.org/docs/2.0/mod/mod_log_config.html
+	 * @see http://httpd.apache.org/docs/1.3/logs.html
+	 * 
+	 * @return
+	 */
 	protected boolean supportXSSRequest() {
-		return true;
+		return supportXSS;
 	}
 	
 	protected int maxXSSRequestParts() { 
-		/* 
-		 * should never bigger than 10!
-		 * each part will be an HTTP connection!
-		 */
-		return 128; // 8k * 128 = 1M, for IE it will 2k * 128 = 256k
+		return xssPartLimit;
 	}
 	
 	protected long maxXSSRequestLatency() {
-		return 60 * 1000; // 60s to send a request?
+		return xssLatency;
 	}
 	
 	/**
@@ -145,6 +175,37 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				if (trim.length() != 0) {
 					runnables.add(trim);
 				}
+			}
+		}
+		String postLimitStr = getInitParameter("simple.rpc.post.limit");
+		if (postLimitStr != null) {
+			try {
+				postLimit = Long.parseLong(postLimitStr);
+				if (postLimit <= 0) {
+					postLimit = Long.MAX_VALUE;
+				}
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		String xssSupportStr = getInitParameter("simple.rpc.xss.support");
+		if (xssSupportStr != null) {
+			supportXSS = "true".equals(xssSupportStr);
+		}
+		String xssLatencytStr = getInitParameter("simple.rpc.xss.max.latency");
+		if (xssLatencytStr != null) {
+			try {
+				xssLatency = Long.parseLong(xssLatencytStr);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		String xssPartsStr = getInitParameter("simple.rpc.xss.max.parts");
+		if (xssPartsStr != null) {
+			try {
+				xssPartLimit = Integer.parseInt(xssPartsStr);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
 			}
 		}
 		super.init();
@@ -242,8 +303,15 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				}
 				int partsCount = Integer.parseInt(count);
 				int curPart = Integer.parseInt(current);
-				if (partsCount > maxXSSRequestParts() || curPart > partsCount) {
+				if (curPart > partsCount) {
 					resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+					return;
+				}
+				if (partsCount > maxXSSRequestParts()) {
+					resp.setContentType("text/javascript");
+					//resp.setCharacterEncoding("utf-8");
+					resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+							".xssNotify(\"" + nameID + "\", \"exceedrequestlimit\");");
 					return;
 				}
 				if (partsCount != 1) {
