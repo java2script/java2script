@@ -160,6 +160,14 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				org.java2script.notepad.SaveNoteRunnable;
 			</param-value>
 		</init-param>
+		<init-param>
+			<param-name>simple.rpc.xss.support</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>simple.rpc.xss.max.parts</param-name>
+			<param-value>10</param-value>
+		</init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>simplerpc</servlet-name>
