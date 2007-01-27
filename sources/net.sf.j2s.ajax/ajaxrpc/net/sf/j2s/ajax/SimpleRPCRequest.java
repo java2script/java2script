@@ -243,11 +243,33 @@ if (response == null && runnable != null) { // error!
 	return;
 }
 		 */ {}
-		if (response == "unsupported") {
+		if (response == "unsupported" || response == "exceedrequestlimit") {
+			/**
+			 * @j2sNative
+var existed = false;
+var ss = document.getElementsByTagName ("SCRIPT");
+for (var i = 0; i < ss.length; i++) {
+	var s = ss[i];
+	if (s.src != null && s.src.indexOf ("jzn=" + nameID) != -1) {
+		existed = true;
+		s.onreadystatechange = null;
+		s.onerror = null;
+		s.onload = null;
+		document.getElementsByTagName ("HEAD")[0].removeChild (s);
+ 	}
+}
+if (!existed && runnable == null) {
+	return; // already print out error message!
+}
+			 */ {}
 			if (runnable != null) {
 				runnable.ajaxFail();
 			} else {
-				System.err.println("[Java2Script] Sever error: Remote server does not support cross site script!");
+				if (response == "unsupported") {
+					System.err.println("[Java2Script] Sever error: Cross site script is not supported!");
+				} else {
+					System.err.println("[Java2Script] Sever error: Exceed cross site script request limit!");
+				}
 			}
 			return;
 		}
