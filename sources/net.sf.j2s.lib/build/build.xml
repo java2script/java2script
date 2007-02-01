@@ -253,7 +253,6 @@
         	
     		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
-    		<arg value="net/sf/j2s/ajax/SimpleRPCMapping.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRequest.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
         	
