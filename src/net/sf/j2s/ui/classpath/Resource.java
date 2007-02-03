@@ -121,7 +121,6 @@ public class Resource implements IRuntimeClasspathEntry {
 	}
 
 	public IClasspathEntry getClasspathEntry() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -130,7 +129,6 @@ public class Resource implements IRuntimeClasspathEntry {
 	}
 
 	public IJavaProject getJavaProject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -140,11 +138,9 @@ public class Resource implements IRuntimeClasspathEntry {
 
 	public IPath getPath() {
 		return Path.fromPortableString(relativePath);
-		//return null;
 	}
 
 	public IResource getResource() {
-		//return Path.fromPortableString(relativePath);
 		if (relativePath != null) {
 			if (relativePath.startsWith("/") && relativePath.endsWith("/.j2s")) {
 				IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());

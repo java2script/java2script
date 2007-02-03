@@ -210,17 +210,6 @@ public class PathUtil {
 					for (int j = 0; j < children.length; j++) {
 						System.out.println("--" + children[j].getName());
 					}
-//					if (item instanceof ContactedClasses) {
-//						ContactedClasses cc = (ContactedClasses) item;
-//						ContactedUnitClass[] classes = cc.getChildren();
-//						for (int j = 0; j < classes.length; j++) {
-//							System.out.println("--" + classes[j].getName());
-//						}
-//						IExternalResource[] externals = cc.getExternals();
-//						for (int j = 0; j < externals.length; j++) {
-//							System.out.println("==" + externals[j]);
-//						}
-//					}
 				}
 			}
 		}

@@ -149,15 +149,6 @@ public class J2SAddProjectAction implements SelectionListener {
 			}
 		}
 		List alreadySelected = new ArrayList();
-//		IRuntimeClasspathEntry[] entries = getViewer().getEntries();
-//		for (int i = 0; i < entries.length; i++) {
-//			if (entries[i].getType() == IRuntimeClasspathEntry.PROJECT) {
-//				IPath path = entries[i].getPath();
-//				IResource res = root.findMember(path);
-//				IJavaProject jp = (IJavaProject)JavaCore.create(res);
-//				alreadySelected.add(jp);
-//			}
-//		}
 		remaining.removeAll(alreadySelected);
 		return remaining;		
 	}

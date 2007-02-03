@@ -23,7 +23,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 public class J2SPropertyPage extends PropertyPage {
@@ -112,29 +111,6 @@ public class J2SPropertyPage extends PropertyPage {
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
-//			File folder = new File(prjFolder, "j2slib");
-//			if (!folder.exists() || !folder.isDirectory()) {
-//				folder.mkdir();
-//			}
-//            URL starterURL = Java2ScriptUIPlugin.getDefault().getBundle()
-//					.getEntry("/" + File.separator); //$NON-NLS-1$
-//			String path = "."; //$NON-NLS-1$
-//			try {
-//				path = Platform.asLocalURL(starterURL).getFile();
-//			} catch (IOException e1) {
-//				e1.printStackTrace();
-//			}
-//			path = path.replace('/', File.separatorChar);
-//
-//			FileSystemUtils.copyFolder(new File(path, "j2slib").getAbsolutePath(), folder.getAbsolutePath(), true);
-			
-//			String patternKey = configPage.getPatternKey();
-//			if (patternKey != null) {
-//				IExternalResourceProvider provider = ExternalResources.getProviderByName(patternKey);
-//				if (provider != null) {
-//					provider.copyResources(patternKey, path);
-//				}
-//			}
 			
 			List ress = configPage.classpathModel.resources;
 			StringBuffer buffer = new StringBuffer();
@@ -178,14 +154,6 @@ public class J2SPropertyPage extends PropertyPage {
 		}
 	}
 
-	private Label createLabel(Composite comp, String label) {
-		Label lbl = new Label(comp, SWT.WRAP);
-		lbl.setText(label);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.widthHint = 330;
-		lbl.setLayoutData(gd);
-		return lbl;
-	}
 	/**
 	 * @see PreferencePage#createContents(Composite)
 	 */
@@ -245,10 +213,5 @@ public class J2SPropertyPage extends PropertyPage {
 		}
 		return true;
 	}
-
-//	protected void performDefaults() {
-//		// TODO Auto-generated method stub
-//		super.performDefaults();
-//	}
 
 }

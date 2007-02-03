@@ -84,10 +84,6 @@ public class J2SLaunchingUtil {
 		if ((javaProject == null) || !javaProject.exists()) {
 			return buf.toString();
 		}
-
-//        IProject project = javaProject.getProject();
-//		String prjFolder = project.getLocation().toOSString();
-//		File workingDir = new File(prjFolder);
 		
 		String path = javaProject.getOutputLocation().toString();
 		int idx = path.indexOf('/', 2);
@@ -119,8 +115,6 @@ public class J2SLaunchingUtil {
 			
 			fModel.setBinRelativePath(relativePath);
 
-			//String classpath = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, (String) null);
-			//String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
 			if (classpath == null || classpath.trim().length() == 0) {
 				fModel.load();
 			} else {
@@ -171,10 +165,6 @@ public class J2SLaunchingUtil {
 		if ((javaProject == null) || !javaProject.exists()) {
 			return buf.toString();
 		}
-
-//        IProject project = javaProject.getProject();
-//		String prjFolder = project.getLocation().toOSString();
-//		File workingDir = new File(prjFolder);
 		
 		String path = javaProject.getOutputLocation().toString();
 		int idx = path.indexOf('/', 2);
@@ -233,8 +223,6 @@ public class J2SLaunchingUtil {
 				continue;
 			}
 			set.add(split[i]);
-//			buf.append(split[i]);
-//			buf.append("\r\n");
 			if (split[i] != null && split[i].trim().length() != 0) {
 				File f = new File(split[i].trim());
 				if (f.exists()) {
@@ -332,13 +320,6 @@ public class J2SLaunchingUtil {
 				if (!J2SCyclicProjectUtils.visit(paths[i])) {
 					continue;
 				}
-				/*
-				if (res instanceof UnitClass) {
-					UnitClass unit = (UnitClass) res;
-					buf.append(unit.getClassName());
-					buf.append(',');
-				}
-				*/
 			}
 		} else {
 			CompositeResources fModel= new CompositeResources();
@@ -359,12 +340,8 @@ public class J2SLaunchingUtil {
 			buf.append(fModel.existedClassesString());
 		}
 		
-//		if (buf.indexOf(relativePath + "/" + mainType.replace('.', '/') + ".js") == -1) {
-//			buf.append(wrapTypeJS(mainType, relativePath));
-//		}
 		String str = buf.toString();
 		buf = new StringBuffer();
-//		System.out.println(str);
 		String[] split = str.split("\r\n|\r|\n|,");
 		Set set = new HashSet();
 		boolean existedPackages = false;
@@ -474,8 +451,6 @@ public class J2SLaunchingUtil {
 			
 			fModel.setBinRelativePath(relativePath);
 
-			//String classpath = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, (String) null);
-			//String classpath = configuration.getAttribute(IJ2SLauchingConfiguration.J2S_CLASS_PATH, (String) null);
 			if (classpath == null || classpath.trim().length() == 0) {
 				fModel.load();
 			} else {
@@ -622,14 +597,7 @@ public class J2SLaunchingUtil {
 		/*
 		 * MainType Class may already included in the header section
 		 */
-		//buf.append(wrapTypeJS(mainType, relativePath));
-		
 		buf.append("<script type=\"text/javascript\">\r\n");
-		/*
-		buf.append("ClazzLoader.j2slibClasspath (\"");
-		buf.append(j2sLibPath);
-		buf.append("\");\r\n");
-		*/
 
 		J2SCyclicProjectUtils.emptyTracks();
 		String j2xStr = generateClasspathJ2X(configuration, mainType, workingDir);
@@ -661,7 +629,6 @@ public class J2SLaunchingUtil {
 		buf.append("</body>\r\n");
 		buf.append("</html>");
 
-		// String tmpl = J2SLaunchingUtil.readTemplate();
 		String html = buf.toString();
 		String rootPath = workingDir.getAbsolutePath();
 		File file = new File(rootPath, mainType + ".html");

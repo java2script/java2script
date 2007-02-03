@@ -24,7 +24,6 @@ public class J2STextEditor extends TextEditor {
 
 	public J2STextEditor() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public void setReadOnly(boolean readOnly) {

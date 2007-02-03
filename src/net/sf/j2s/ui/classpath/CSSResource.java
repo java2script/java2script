@@ -3,9 +3,6 @@ package net.sf.j2s.ui.classpath;
 
 public class CSSResource extends Resource implements IExternalResource {
 
-//	public String getName() {
-//		return getAbsoluteFile().getName();
-//	}
 	public String toHTMLString() {
 		Resource p = this.getParent();
 		if (p != null) {

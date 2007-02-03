@@ -10,8 +10,6 @@ import net.sf.j2s.ui.launching.J2SCyclicProjectUtils;
 
 
 public class ContactedClasses extends Resource implements IExternalResource, IClasspathContainer {
-//	private ContactedUnitClass[] children;
-//	private IExternalResource[] externals;
 	private String binRelativePath;
 	private List classList;
 	private List externalList;
@@ -22,8 +20,6 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 		externalList = new ArrayList();
 		if (file.exists()) {
 			Properties props = PathUtil.loadJZ(file);
-			//setFolder(file.getParentFile());
-			//setRelativePath(file.getName());
 			String[] reses = PathUtil.getResources(props);
 			binRelativePath = props.getProperty(PathUtil.J2S_OUTPUT_PATH);
 			for (int i = 0; i < reses.length; i++) {
@@ -51,18 +47,6 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 					}
 				}
 			}
-//			this.children = new ContactedUnitClass[classList.size()];
-//			for (int i = 0; i < classList.size(); i++) {
-//				ContactedUnitClass res = (ContactedUnitClass) classList.get(i);
-//				this.children[i] = res;
-//				res.setParent(this);
-//			}
-//			this.externals = new IExternalResource[externalList.size()];
-//			for (int i = 0; i < externalList.size(); i++) {
-//				Resource res = (Resource) externalList.get(i);
-//				this.externals[i] = (IExternalResource) res;
-//				res.setParent(this);
-//			}
 		}
 	}
 
@@ -71,12 +55,10 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < reses.length; i++) {
 			String str = reses[i].toResourceString();
-			//if (str != null) {
 				buf.append(str);
 				if (i != reses.length - 1) {
 					buf.append(",");
 				}
-			//}
 		}
 		props.setProperty(PathUtil.J2S_RESOURCES_LIST, buf.toString());
 		props.setProperty(PathUtil.J2S_OUTPUT_PATH, binRelativePath);
@@ -95,25 +77,14 @@ public class ContactedClasses extends Resource implements IExternalResource, ICl
 			res[i + size] = (Resource) classList.get(i);
 		}
 		
-		/*
-		Resource[] res = new Resource[children.length + externals.length];
-		for (int i = 0; i < externals.length; i++) {
-			res[i] = (Resource) externals[i];
-		}
-		for (int i = 0; i < children.length; i++) {
-			res[i + externals.length] = children[i];
-		}
-		*/
 		return res;
 	}
 
 	public ContactedUnitClass[] getClasses() {
-		//return children;
 		return (ContactedUnitClass[]) classList.toArray(new ContactedClasses[0]);
 	}
 
 	public IExternalResource[] getExternals() {
-		//return externals;
 		return (IExternalResource[]) externalList.toArray(new IExternalResource[0]);
 	}
 	
