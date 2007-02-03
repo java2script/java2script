@@ -13,11 +13,36 @@
 
 package net.sf.j2s.core.astvisitors;
 
+
 /**
- * @author josson smith
+ * @author zhou renjian
  *
- * 2006-4-25
+ * 2006-12-3
  */
-public class StaticExpressionUtil {
+public class ASTPackageVisitor extends AbstractPluginVisitor {
+
+	protected String thisPackageName = "";
+	
+
+	protected String[] skipDeclarePackages() {
+		return new String[] {
+				"java.lang", 
+				"java.lang.ref", 
+				"java.lang.ref.reflect", 
+				"java.lang.reflect", 
+				"java.lang.annotation",
+				"java.lang.instrument",
+				"java.lang.management",
+				"java.io", 
+				"java.util"};
+	}
+
+	public String getPackageName() {
+		return thisPackageName;
+	}
+
+	public void setPackageName(String thisPackageName) {
+		this.thisPackageName = thisPackageName;
+	}
 
 }

@@ -86,13 +86,6 @@ public class SWTDependencyASTVisitor extends DependencyASTVisitor {
 			if (isMethodInvoking(methodBinding, className, methodName)) {
 				return true;
 			}
-			/*
-			IMethodBinding methodBinding = method.resolveMethodBinding();
-			if (methodName.equals(methodBinding.getName()) &&className.equals(
-					methodBinding.getDeclaringClass().getQualifiedName())) {
-				return true;
-			}
-			*/
 		}
 		return false;
 	}
