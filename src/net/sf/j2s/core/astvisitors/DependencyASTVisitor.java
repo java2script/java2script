@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -59,14 +58,12 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
+ * 
  * @author josson smith
  * 
  * 2006-5-2
  */
-public class DependencyASTVisitor extends ASTVisitor {
-	protected StringBuffer buffer = new StringBuffer();
-
-	protected String thisPackageName = "";
+public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	protected Set classNameSet = new HashSet();
 
@@ -88,73 +85,19 @@ public class DependencyASTVisitor extends ASTVisitor {
 
 	protected boolean toCompileVariableName = true;
 	
-	public DependencyASTVisitor() {
-		super();
-	}
-
-	public DependencyASTVisitor(boolean visitDocTags) {
-		super(visitDocTags);
-	}
-
-	public StringBuffer getBuffer() {
-		return buffer;
-	}
-
-	public void setBuffer(StringBuffer buffer) {
-		this.buffer = buffer;
-	}
-
-	public String getPackageName() {
-		return thisPackageName;
+	public String discardGenericType(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).discardGenericType(name);
 	}
 	
+	public String getPackageName() {
+		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+	}
 	/**
 	 * @return Returns the thisClassName.
 	 */
-	public String[] getClassName() {
+	public String[] getClassNames() {
 		return (String[]) classNameSet.toArray(new String[0]);
 	}
-	
-	/*
-	public String getMusts() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("musts=");
-		for (Iterator iter = musts.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	
-	public String getRequires() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("requires=");
-		for (Iterator iter = requires.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	
-	public String getOptionals() {
-		StringBuffer buf = new StringBuffer();
-		buf.append("optionals=");
-		for (Iterator iter = optionals.iterator(); iter.hasNext();) {
-			String className = (String) iter.next();
-			buf.append(className);
-			if (iter.hasNext()) {
-				buf.append(", ");
-			}
-		}
-		return buf.toString();
-	}
-	*/
 	
 	protected void checkSuperType(Set set) {
 		Set removed = new HashSet();
@@ -169,15 +112,12 @@ public class DependencyASTVisitor extends ASTVisitor {
 					ITypeBinding binding = (ITypeBinding) iterator.next();
 					if (Bindings.isSuperType(binding, qn.binding)) {
 						removed.add(qn);
-						//set.remove(qn);
 						isRemoved = true;
 						break;
 					}
 				}
 				if (!isRemoved) {
 					reseted.add(qn);
-					//set.remove(qn);
-					//set.add(qn.qualifiedName);
 				}
 			}
 		}
@@ -241,34 +181,12 @@ public class DependencyASTVisitor extends ASTVisitor {
 			String[] ss = (String[]) musts.toArray(new String[0]);
 			Arrays.sort(ss);
 			String lastClassName = joinArrayClasses(buf, ss, null);
-			/*
-			for (Iterator iter = musts.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			if (musts.size() != 0 && requires.size() != 0) {
 				buf.append(", ");
 			}
 			ss = (String[]) requires.toArray(new String[0]);
 			Arrays.sort(ss);
 			joinArrayClasses(buf, ss, lastClassName);
-			/*
-			for (Iterator iter = requires.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -276,25 +194,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 		if (classNameSet.size() > 1) {
 			buf.append("[");
 		}
-		joinArrayClasses(buf, getClassName(), null);
-		/*
-		buf.append("\"");
-		//buf.append(thisClassName);
-		String key = "org.eclipse.swt.";
-		for (Iterator iter = classNameSet.iterator(); iter.hasNext();) {
-			String thisClassName = (String) iter.next();
-			if (thisClassName.startsWith(key)) {
-				buf.append("$wt.");
-				buf.append(thisClassName.substring(key.length()));;
-			} else {
-				buf.append(thisClassName);
-			}
-			if (iter.hasNext()) {
-				buf.append("\", \"");
-			}
-		}
-		buf.append("\"");
-		*/
+		joinArrayClasses(buf, getClassNames(), null);
 		if (classNameSet.size() > 1) {
 			buf.append("]");
 		}
@@ -304,17 +204,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 			String[] ss = (String[]) optionals.toArray(new String[0]);
 			Arrays.sort(ss);
 			joinArrayClasses(buf, ss, null);
-			/*
-			for (Iterator iter = optionals.iterator(); iter.hasNext();) {
-				String className = (String) iter.next();
-				buf.append("\"");
-				buf.append(className);
-				buf.append("\"");
-				if (iter.hasNext()) {
-					buf.append(", ");
-				}
-			}
-			*/
 			buf.append("], ");
 		} else {
 			buf.append("null, ");
@@ -411,7 +300,8 @@ public class DependencyASTVisitor extends ASTVisitor {
 	}
 	
 	public boolean visit(PackageDeclaration node) {
-		thisPackageName = "" + node.getName();
+		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		packageVisitor.setPackageName("" + node.getName());
 		return false;
 	}
 
@@ -454,7 +344,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 			qualifiedName = resolveTypeBinding.getQualifiedName();
 			qn.binding = resolveTypeBinding;
 		}
-		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
@@ -600,7 +490,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = superBinding.getQualifiedName();
 					qn.binding = superBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node)) {
 					musts.add(qn);
@@ -630,7 +520,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 						qualifiedName = binding.getQualifiedName();
 						qn.binding = binding;
 					}
-					qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+					qualifiedName = discardGenericType(qualifiedName);
 					qn.qualifiedName = qualifiedName;
 					if (isQualifiedNameOK(qualifiedName, node)) {
 						musts.add(qn);
@@ -669,7 +559,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 				requires.addAll(visitor.optionals);
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-//				if ((field.getModifiers() & Modifier.STATIC) != 0) {
 					List fragments = field.fragments();
 					for (int j = 0; j < fragments.size(); j++) {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
@@ -683,21 +572,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 						requires.addAll(visitor.requires);
 						requires.addAll(visitor.optionals);
 					}
-//				} else if (node.isInterface()) {
-//					List fragments = field.fragments();
-//					for (int j = 0; j < fragments.size(); j++) {
-//						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
-//								.get(j);
-//						Expression initializer = vdf.getInitializer();
-//						DependencyASTVisitor visitor = getSelfVisitor();
-//						if (initializer != null) {
-//							initializer.accept(visitor);
-//						}
-//						requires.addAll(visitor.musts);
-//						requires.addAll(visitor.requires);
-//						requires.addAll(visitor.optionals);
-//					}
-//				}
 			}
 		}
 	}
@@ -810,13 +684,6 @@ public class DependencyASTVisitor extends ASTVisitor {
 				optionals.add(qn);
 			}
 		}
-//		ASTNode parent = node.getParent();
-//		if (parent instanceof QualifiedName) {
-//			QualifiedName qName = (QualifiedName) parent;
-//			if (node == qName.getName()) {
-//				
-//			}
-//		}
 		return super.visit(node);
 	}
 	
@@ -840,7 +707,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				qn.binding = resolveTypeBinding;
 			}
 		}
-		qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
@@ -868,7 +735,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 				qualifiedName = resolveTypeBinding.getQualifiedName();
 				qn.binding = resolveTypeBinding;
 			}
-			qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+			qualifiedName = discardGenericType(qualifiedName);
 			qn.qualifiedName = qualifiedName;
 			if (isQualifiedNameOK(qualifiedName, node) 
 					&& !musts.contains(qn)
@@ -899,7 +766,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
 						&& !musts.contains(qn)
@@ -928,6 +795,11 @@ public class DependencyASTVisitor extends ASTVisitor {
 	}
 	
 	public boolean visit(MethodDeclaration node) {
+		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			return false;
+		}
+		
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List tags = javadoc.tags();
@@ -1005,7 +877,7 @@ public class DependencyASTVisitor extends ASTVisitor {
 					qualifiedName = resolveTypeBinding.getQualifiedName();
 					qn.binding = resolveTypeBinding;
 				}
-				qualifiedName = JavaLangUtil.ripGeneric(qualifiedName);
+				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node) 
 						&& !musts.contains(qn)

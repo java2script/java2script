@@ -10,11 +10,9 @@
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -28,8 +26,6 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.Comment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -38,41 +34,35 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -81,7 +71,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 /**
  * This class will traverse most of the common keyword and
@@ -89,71 +78,46 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
  * 
  * This class will not deal with binding.
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  */
-public class ASTKeywordParser extends ASTEmptyParser {
-
-	protected StringBuffer buffer = new StringBuffer();
+public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	
-	protected String thisPackageName = "";
-
 	protected int blockLevel = 0;
 	
 	protected Stack methodDeclareStack = new Stack();
 	
-	protected List finalVars = new ArrayList();
-	
-	protected boolean isFinalSensible = true;
-
-	protected List normalVars = new ArrayList();
-	
-	protected boolean toCompileVariableName = true;
-	
 	protected int currentBlockForVisit = -1;
 	
-	protected List visitedVars = new ArrayList();
+	protected void boxingNode(ASTNode element) {
+		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
+	}
 	
-	private Javadoc[] nativeJavadoc = null;
+	protected String shortenQualifiedName(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
+	}
 	
-	private ASTNode javadocRoot = null;
+	protected String shortenPackageName(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenPackageName(name);
+	}
 
-	private boolean isDebugging = false;
+	protected String checkConstantValue(Expression node) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).checkConstantValue(node);
+	}
 	
-	public ASTKeywordParser() {
-		super();
+	protected String[] skipDeclarePackages() {
+		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).skipDeclarePackages();
+	}
+	protected boolean isSimpleQualified(QualifiedName node) {
+		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
 	}
 
-	public ASTKeywordParser(boolean visitDocTags) {
-		super(visitDocTags);
+	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
 	}
-
-	public boolean isToCompileVariableName() {
-		return toCompileVariableName;
-	}
-
-	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
-	}
-
-	public boolean isDebugging() {
-		return isDebugging;
-	}
-
-	public void setDebugging(boolean isDebugging) {
-		this.isDebugging = isDebugging;
-	}
-
-	public StringBuffer getBuffer() {
-		return buffer;
-	}
-
-	public void setBuffer(StringBuffer buffer) {
-		this.buffer = buffer;
-	}
-
-	public String getPackageName() {
-		return thisPackageName;
+	
+	protected String getIndexedVarName(String name, int i) {
+		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getIndexedVarName(name, i);
 	}
 
 	protected void visitList(List list, String seperator) {
@@ -164,82 +128,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				buffer.append(seperator);
 			}
 		}
-//		for (Iterator iter = list.iterator(); iter.hasNext();) {
-//			ASTNode element = (ASTNode) iter.next();
-//			element.accept(this);
-//			if (iter.hasNext()) {
-//				buffer.append(seperator);
-//			}
-//		}
 	}
 
-	protected void boxingNode(ASTNode element) {
-		if (element instanceof Expression) {
-			Expression exp = (Expression) element;
-			if (exp.resolveBoxing()) {
-				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				if (typeBinding.isPrimitive()) {
-					String name = typeBinding.getName();
-					Code type = PrimitiveType.toCode(name);
-					String bigName = null;
-					if (type == PrimitiveType.INT) {
-						bigName = "Integer";
-					} else if (type == PrimitiveType.LONG) {
-						bigName = "Long";
-					} else if (type == PrimitiveType.FLOAT) {
-						bigName = "Float";
-					} else if (type == PrimitiveType.DOUBLE) {
-						bigName = "Double";
-					} else if (type == PrimitiveType.BOOLEAN) {
-						bigName = "Boolean";
-					} else if (type == PrimitiveType.BYTE) {
-						bigName = "Byte";
-					} else if (type == PrimitiveType.SHORT) {
-						bigName = "Short";
-					} else if (type == PrimitiveType.CHAR) {
-						bigName = "Character";
-					} 
-					if (bigName != null) {
-						buffer.append("new " + bigName + " (");
-						element.accept(this);
-						buffer.append(")");
-						return ;
-					}
-				}
-			} else if (exp.resolveUnboxing()) {
-				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				if (!typeBinding.isPrimitive()) {
-					String name = typeBinding.getQualifiedName();
-					String bigName = null;
-					if ("java.lang.Integer".equals(name)) {
-						bigName = "int";
-					} else if ("java.lang.Long".equals(name)) {
-						bigName = "long";
-					} else if ("java.lang.Float".equals(name)) {
-						bigName = "float";
-					} else if ("java.lang.Double".equals(name)) {
-						bigName = "double";
-					} else if ("java.lang.Boolean".equals(name)) {
-						bigName = "boolean";
-					} else if ("java.lang.Byte".equals(name)) {
-						bigName = "byte";
-					} else if ("java.lang.Short".equals(name)) {
-						bigName = "short";
-					} else if ("java.lang.Character".equals(name)) {
-						bigName = "char";
-					}
-					 
-					if (bigName != null) {
-						buffer.append("(");
-						element.accept(this);
-						buffer.append(")." + bigName + "Value ()");
-						return ;
-					}
-				}
-			}
-		}
-		element.accept(this);
-	}
 	protected void visitList(List list, String seperator, int begin, int end) {
 		for (int i = begin; i < end; i++) {
 			ASTNode element = (ASTNode) list.get(i);
@@ -248,71 +138,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				buffer.append(seperator);
 			}
 		}
-//		for (Iterator iter = list.iterator(); iter.hasNext();) {
-//			ASTNode element = (ASTNode) iter.next();
-//			element.accept(this);
-//			if (iter.hasNext()) {
-//				buffer.append(seperator);
-//			}
-//		}
-	}
-
-	protected String listFinalVariables(List list, String seperator, String scope) {
-		if (list.size() == 0) {
-			return "null";
-		}
-		StringBuffer buf = new StringBuffer();
-		buf.append("Clazz.cloneFinals (");
-		//Set set = new HashSet();
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			FinalVariable fv = (FinalVariable) iter.next();
-			String name = fv.getVariableName();
-			if (fv.getToVariableName() != null) {
-				name = fv.getToVariableName();
-			}
-			//if (!set.contains(name)) {
-//				if (buf.length() >= 2) {
-//					buf.append(seperator);
-//				}
-				//set.add(name);
-				buf.append("\"");
-				buf.append(name);
-				buf.append("\", ");
-				String methodScope = fv.getMethodScope();
-				if (methodScope == null && scope == null) {
-					buf.append(name);
-				} else if (methodScope == null || scope == null) {
-//					System.out.println(methodScope);
-//					System.out.println(scope);
-//					System.out.println("--==--");
-					buf.append("this.$finals." + name);
-				} else if (methodScope.equals(scope)) {
-					buf.append(name);
-				} else {
-//					System.out.println(methodScope);
-//					System.out.println(scope);
-//					System.out.println("------");
-					buf.append("this.$finals." + name);
-				}
-				if (iter.hasNext()) {
-					buf.append(seperator);
-				}
-			//}
-		}
-		buf.append(")");
-		return buf.toString();
-	}
-	
-	public void postVisit(ASTNode node) {
-		super.postVisit(node);
-	}
-
-	public void preVisit(ASTNode node) {
-		super.preVisit(node);
-	}
-
-	public void endVisit(ArrayAccess node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ArrayAccess node) {
@@ -328,10 +153,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(ArrayCreation node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ArrayCreation node) {
 		/*
 		 * TODO: multi-dimension Array creation
@@ -341,10 +162,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
-//			if (dim != null && dim.size() == 1) {
-//				ASTNode element = (ASTNode) dim.get(0);
-//				element.accept(this);
-//			}
 			ITypeBinding binding = node.getType().resolveBinding();
 			ITypeBinding elementType = binding.getElementType();
 			if (elementType.isPrimitive()) {
@@ -388,19 +205,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					buffer.append(")");
 				}
 			}
-//			buffer.append(" new Array (");
-//			List dim = node.dimensions();
-//			if (dim != null && dim.size() == 1) {
-//				ASTNode element = (ASTNode) dim.get(0);
-//				element.accept(this);
-//			}
-//			buffer.append(")");
 		}
 		return false;
-	}
-
-	public void endVisit(ArrayInitializer node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ArrayInitializer node) {
@@ -414,19 +220,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(ArrayType node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(ArrayType node) {
-//		buffer.append("var ");
-		return super.visit(node);
-	}
-
-	public void endVisit(AssertStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(AssertStatement node) {
 		/*
 		 * TODO: should be implemented
@@ -438,10 +231,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		 * throws errors.
 		 */
 		return false;
-	}
-
-	public void endVisit(Assignment node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(Assignment node) {
@@ -474,12 +263,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
-						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -487,7 +273,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -504,11 +290,10 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(op);
 			Expression right = node.getRightHandSide();
 			buffer.append(' ');
-//			right.accept(this);
 			boxingNode(right);
 			
 			buffer.append(", ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -521,7 +306,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -627,264 +412,34 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			right.accept(this);
 			buffer.append(").charCodeAt (0)");
 		} else {
-			right.accept(this);
+			boxingNode(right);
 		}
 		return false;
 	}
 
 	public void endVisit(Block node) {
 		buffer.append("}");
+		List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+		List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) finalVars.get(i);
-			if (var.getBlockLevel() >= blockLevel) {
+			ASTFinalVariable var = (ASTFinalVariable) finalVars.get(i);
+			if (var.blockLevel >= blockLevel) {
 				finalVars.remove(i);
 			}
 		}
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			FinalVariable var = (FinalVariable) normalVars.get(i);
-			if (var.getBlockLevel() >= blockLevel) {
+			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+			if (var.blockLevel >= blockLevel) {
 				normalVars.remove(i);
 			}
 		}
 		blockLevel--;
 		super.endVisit(node);
 	}
-
-	public boolean visit(Block node) {
-		blockLevel++;
-		buffer.append("{\r\n");
-		ASTNode parent = node.getParent();
-		if (parent instanceof MethodDeclaration) {
-			MethodDeclaration method = (MethodDeclaration) parent;
-			Javadoc javadoc = method.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-			IMethodBinding methodBinding = method.resolveBinding();
-			ITypeBinding superclass = methodBinding.getDeclaringClass().getSuperclass();
-			boolean containsSuperPrivateMethod = false; 
-			while (superclass != null) {
-				IMethodBinding[] methods = superclass.getDeclaredMethods();
-				for (int i = 0; i < methods.length; i++) {
-					if (methods[i].getName().equals(methodBinding.getName())
-							&& (methods[i].getModifiers() & Modifier.PRIVATE) != 0) {
-						containsSuperPrivateMethod = true;
-						break;
-					}
-				}
-				if (containsSuperPrivateMethod) {
-					break;
-				}
-				superclass = superclass.getSuperclass();
-			}
-			if (containsSuperPrivateMethod) {
-				buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
-				buffer.append("if ($private != null) {\r\n");
-				buffer.append("return $private.apply (this, arguments);\r\n");
-				buffer.append("}\r\n");
-			}
-		} else if (parent instanceof Initializer) {
-			Initializer initializer = (Initializer) parent;
-			Javadoc javadoc = initializer.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-		}
-		int blockStart = node.getStartPosition();
-		int previousStart = getPreviousStartPosition(node);
-		ASTNode root = node.getRoot();
-		checkJavadocs(root);
-		//for (int i = 0; i < nativeJavadoc.length; i++) {
-		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
-			Javadoc javadoc = nativeJavadoc[i];
-			int commentStart = javadoc.getStartPosition();
-			if (commentStart > previousStart && commentStart < blockStart) {
-				/*
-				 * if the block's leading comment contains "@j2sNative", 
-				 * then output the given native JavaScript codes directly. 
-				 */
-				if (visitNativeJavadoc(javadoc, node, true) == false) {
-					return false;
-				}
-			}
-		}
-		return super.visit(node);
-	}
 	
-	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						return false;
-					}
-				}
-				if (isDebugging) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sDebug".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
-							return false;
-						}
-					}
-				}
-				if (!toCompileVariableName) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
-							return false;
-						}
-					}
-				}
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sNative".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						List fragments = tagEl.fragments();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buffer.append(text);
-							buffer.append("\r\n");
-						}
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-
-	private void checkJavadocs(ASTNode root) {
-		if (root != javadocRoot) {
-			nativeJavadoc = null;
-			javadocRoot = root;
-		}
-		if (nativeJavadoc == null) {
-			nativeJavadoc = new Javadoc[0];
-			if (root instanceof CompilationUnit) {
-				CompilationUnit unit = (CompilationUnit) root;
-				List commentList = unit.getCommentList();
-				ArrayList list = new ArrayList();
-				for (Iterator iter = commentList.iterator(); iter.hasNext();) {
-					Comment comment = (Comment) iter.next();
-					if (comment instanceof Javadoc) {
-						Javadoc javadoc = (Javadoc) comment;
-						List tags = javadoc.tags();
-						if (tags.size() != 0) {
-							for (Iterator itr = tags.iterator(); itr.hasNext();) {
-								TagElement tagEl = (TagElement) itr.next();
-								String tagName = tagEl.getTagName();
-								if ("@j2sIgnore".equals(tagName)
-										|| "@j2sDebug".equals(tagName)
-										|| "@j2sNative".equals(tagName)) {
-									list.add(comment);
-								}
-							}
-						}
-					}
-				}
-				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
-			}
-		}
-	}
-
-	private int getPreviousStartPosition(Block node) {
-		int previousStart = 0;
-		ASTNode blockParent = node.getParent();
-		if (blockParent != null) {
-			if (blockParent instanceof Statement) {
-				Statement sttmt = (Statement) blockParent;
-				previousStart = sttmt.getStartPosition();
-				if (sttmt instanceof Block) {
-					Block parentBlock = (Block) sttmt;
-					for (Iterator iter = parentBlock.statements().iterator(); iter.hasNext();) {
-						Statement element = (Statement) iter.next();
-						if (element == node) {
-							break;
-						}
-						previousStart = element.getStartPosition() + element.getLength();
-					}
-				} else if (sttmt instanceof IfStatement) {
-					IfStatement ifSttmt = (IfStatement) sttmt;
-					if (ifSttmt.getElseStatement() == node) {
-						Statement thenSttmt = ifSttmt.getThenStatement();
-						previousStart = thenSttmt.getStartPosition() + thenSttmt.getLength();
-					}
-				}
-			} else if (blockParent instanceof MethodDeclaration) {
-				MethodDeclaration method = (MethodDeclaration) blockParent;
-				previousStart = method.getStartPosition();
-			} else if (blockParent instanceof Initializer) {
-				Initializer initializer = (Initializer) blockParent;
-				previousStart = initializer.getStartPosition();
-			} else if (blockParent instanceof CatchClause) {
-				CatchClause catchClause = (CatchClause) blockParent;
-				previousStart = catchClause.getStartPosition();
-			}
-		}
-		return previousStart;
-	}
-	
-	public void endVisit(BooleanLiteral node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(BooleanLiteral node) {
 		buffer.append(node.booleanValue());
 		return false;
-	}
-
-	public void endVisit(BreakStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(BreakStatement node) {
@@ -901,10 +456,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(CatchClause node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(CatchClause node) {
 		buffer.append(" catch (");
 		node.getException().accept(this);
@@ -913,17 +464,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(CharacterLiteral node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(CharacterLiteral node) {
 		buffer.append(node.getEscapedValue());
 		return false;
-	}
-
-	public void endVisit(ConditionalExpression node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ConditionalExpression node) {
@@ -933,10 +476,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		buffer.append(" : ");
 		node.getElseExpression().accept(this);
 		return false;
-	}
-
-	public void endVisit(ContinueStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ContinueStatement node) {
@@ -952,10 +491,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(DoStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(DoStatement node) {
 		buffer.append("do ");
 		node.getBody().accept(this);
@@ -965,18 +500,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(EmptyStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(EmptyStatement node) {
 		buffer.append(";");
 		return false;
-	}
-
-	public void endVisit(EnhancedForStatement node) {
-		// TODO Auto-generated method stub
-		super.endVisit(node);
 	}
 
 	public boolean visit(EnhancedForStatement node) {
@@ -1034,14 +560,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		super.endVisit(node);
 	}
 
-	public boolean visit(ExpressionStatement node) {
-		return super.visit(node);
-	}
-
-	public void endVisit(ForStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ForStatement node) {
 		buffer.append("for (");
 		visitList(node.initializers(), ", ");
@@ -1058,10 +576,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(IfStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(IfStatement node) {
 		buffer.append("if (");
 		/**
@@ -1076,7 +590,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		 * }
 		 */
 		boxingNode(node.getExpression());
-//		node.getExpression().accept(this);
 		buffer.append(") ");
 		node.getThenStatement().accept(this);
 		if (node.getElseStatement() != null) {
@@ -1086,217 +599,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(ImportDeclaration node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ImportDeclaration node) {
 		return false;
 	}
 
-	public void endVisit(InfixExpression node) {
-		super.endVisit(node);
-	}
-
-	private boolean checkSimpleBooleanOperator(String op) {
-		if (op.equals("^")
-				|| op.equals("|")
-				|| op.equals("&")) {
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean checkInfixOperator(InfixExpression node) {
-		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
-			return true;
-		}
-		Expression left = node.getLeftOperand();
-		if (left instanceof InfixExpression) {
-			if (checkInfixOperator((InfixExpression) left)) {
-				return true;
-			}
-		}
-		Expression right = node.getRightOperand();
-		if (right instanceof InfixExpression) {
-			if (checkInfixOperator((InfixExpression) right)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private void charVisit(ASTNode node, boolean beCare) {
-		if (!beCare || !(node instanceof Expression)) {
-//			node.accept(this);
-			boxingNode(node);
-			return ;
-		}
-		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
-		if (binding.isPrimitive() && "char".equals(binding.getName())) {
-			buffer.append("(");
-//			node.accept(this);
-			boxingNode(node);
-			buffer.append(").charCodeAt (0)");
-		} else {
-//			node.accept(this);
-			boxingNode(node);
-		}
-	}
-	
-	boolean checkConstantValue(Expression node) {
-		Object constValue = node.resolveConstantExpressionValue();
-		if (constValue != null && (constValue instanceof Number
-				|| constValue instanceof Character
-				|| constValue instanceof Boolean)) {
-			if (constValue instanceof Character) {
-				buffer.append('\'');
-				char charValue = ((Character)constValue).charValue();
-				if (charValue < 32 || charValue > 127) {
-					buffer.append("\\u");
-					String hexStr = Integer.toHexString(charValue);
-					int zeroLen = 4 - hexStr.length();
-					for (int i = 0; i < zeroLen; i++) {
-						buffer.append('0');
-					}
-					buffer.append(hexStr);
-				} else {
-					buffer.append(constValue);
-				}
-				buffer.append('\'');
-			} else {
-				buffer.append(constValue);
-			}
-			return true;
-		}
-		return false;
-	}
-	public boolean visit(InfixExpression node) {
-		if (checkConstantValue(node)) return false;
-		ITypeBinding expTypeBinding = node.resolveTypeBinding();
-		boolean beCare = false;
-		if (expTypeBinding != null 
-				&& expTypeBinding.getName().indexOf("String") == -1) {
-			beCare = true;
-		}
-		String operator = node.getOperator().toString();
-		Expression left = node.getLeftOperand();
-		ITypeBinding typeBinding = left.resolveTypeBinding();
-		if ("/".equals(operator)) {
-			if (typeBinding != null && typeBinding.isPrimitive()) {
-				if (OperatorTypeUtil.isIntegerType(typeBinding.getName())) {
-					Expression right = node.getRightOperand();
-					ITypeBinding rightTypeBinding = right.resolveTypeBinding();
-					if (OperatorTypeUtil.isIntegerType(rightTypeBinding.getName())) {
-						StringBuffer tmpBuffer = buffer;
-						buffer = new StringBuffer();
-						
-						buffer.append("Math.floor (");
-						charVisit(left, beCare);
-						//left.accept(this);
-						buffer.append(' ');
-						buffer.append(operator);
-						buffer.append(' ');
-						charVisit(right, beCare);
-						//right.accept(this);
-						buffer.append(')');
-						List extendedOperands = node.extendedOperands();
-						if (extendedOperands.size() > 0) {
-							for (Iterator iter = extendedOperands.iterator(); iter.hasNext();) {
-								ASTNode element = (ASTNode) iter.next();
-								boolean is2Floor = false;
-								if (element instanceof Expression) {
-									Expression exp = (Expression) element;
-									ITypeBinding expBinding = exp.resolveTypeBinding();
-									if (OperatorTypeUtil.isIntegerType(expBinding.getName())) {
-										buffer.insert(0, "Math.floor (");
-										is2Floor = true;
-									}
-								}
-								buffer.append(' ');
-								buffer.append(operator);
-								buffer.append(' ');
-								charVisit(element, beCare);
-								//element.accept(this);
-								if (is2Floor) {
-									buffer.append(')');
-								}
-							}
-						}
-
-						tmpBuffer.append(buffer);
-						buffer = tmpBuffer;
-						tmpBuffer = null;
-						
-						return false;
-					}
-				}
-			}
-		}
-		boolean simple = false; 
-		if (typeBinding != null && typeBinding.isPrimitive()) {
-			if ("boolean".equals(typeBinding.getName())) {
-				if (checkInfixOperator(node)) {
-					buffer.append(" new Boolean (");
-					simple = true;
-				}
-			}
-		}
-
-		charVisit(node.getLeftOperand(), beCare);
-		//node.getLeftOperand().accept(this);
-		buffer.append(' ');
-		buffer.append(operator);
-		buffer.append(' ');
-		charVisit(node.getRightOperand(), beCare);
-		//node.getRightOperand().accept(this);
-		List extendedOperands = node.extendedOperands();
-		if (extendedOperands.size() > 0) {
-			for (Iterator iter = extendedOperands.iterator(); iter.hasNext();) {
-				buffer.append(' ');
-				buffer.append(operator);
-				buffer.append(' ');
-				ASTNode element = (ASTNode) iter.next();
-				charVisit(element, beCare);
-				//element.accept(this);
-			}
-		}
-		if (simple) {
-			buffer.append(").valueOf ()");
-		}
-		return false;
-	}
-
-	public void endVisit(Initializer node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(Initializer node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return false;
-					}
-				}
-			}
-		}
-		//visitList(node.getBody().statements(), "\r\n");
-		node.getBody().accept(this);
-		return false;
-	}
-
-	public void endVisit(InstanceofExpression node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(InstanceofExpression node) {
 		Type right = node.getRightOperand();
-		//ITypeBinding binding = right.resolveBinding();
-		//if (binding.isInterface()) { // only interfaces need wrapping 
 			buffer.append("Clazz.instanceOf (");
 			node.getLeftOperand().accept(this);
 			buffer.append(", ");
@@ -1306,20 +614,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				right.accept(this);
 			}
 			buffer.append(")");
-		/*} else {
-			node.getLeftOperand().accept(this);
-			buffer.append(" instanceof ");
-			if (right instanceof ArrayType) {
-				buffer.append("Array");
-			} else {
-				right.accept(this);
-			}
-		}*/
 		return false;
-	}
-
-	public void endVisit(LabeledStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(LabeledStatement node) {
@@ -1329,16 +624,8 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(Modifier node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(Modifier node) {
 		return false;
-	}
-
-	public void endVisit(NumberLiteral node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(NumberLiteral node) {
@@ -1358,18 +645,25 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(PackageDeclaration node) {
-		super.endVisit(node);
+	public boolean visit(NullLiteral node) {
+		/*
+		 * TODO: Clazz.castNullAs should be used instead
+		 */
+		ITypeBinding binding = node.resolveTypeBinding();
+		if (binding != null)
+		buffer.append("null");
+		return super.visit(node);
 	}
 
 	public boolean visit(PackageDeclaration node) {
-		thisPackageName = "" + node.getName();
+		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
+		packageVisitor.setPackageName("" + node.getName());
 		String[] swtInnerPackages = skipDeclarePackages();
 		/*
 		 * All the SWT package will be declared manually.
 		 */
 		for (int i = 0; i < swtInnerPackages.length; i++) {
-			if (thisPackageName.equals(swtInnerPackages[i])) {
+			if (packageVisitor.getPackageName().equals(swtInnerPackages[i])) {
 				return false;
 			}
 		}
@@ -1377,20 +671,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		node.getName().accept(this);
 		buffer.append ("\");\r\n");
 		return false;
-	}
-
-	protected String[] skipDeclarePackages() {
-		return new String[] {
-				"java.lang", 
-				"java.lang.ref", 
-				"java.lang.ref.reflect", 
-				"java.lang.reflect", 
-				"java.io", 
-				"java.util"};
-	}
-
-	public void endVisit(ParenthesizedExpression node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ParenthesizedExpression node) {
@@ -1459,12 +739,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
-						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -1472,7 +749,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1489,7 +766,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(op);
 			
 			buffer.append(", ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1502,7 +779,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1544,12 +821,12 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		//return super.visit(node);
 	}
 
-	public void endVisit(PrefixExpression node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(PrefixExpression node) {
-		if (checkConstantValue(node)) return false;
+		String constValue = checkConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
+			return false;
+		}
 		String op = node.getOperator().toString();
 		if ("~".equals(op) || "!".equals(op)) {
 			buffer.append(op);
@@ -1588,8 +865,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
 					leftAccess.getExpression().accept(this);
 				}
-//			} else {
-//				buffer.append("true");
 			}
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
@@ -1597,10 +872,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			//String op = node.getOperator().toString();
 			buffer.append(op);
 			buffer.append(' ');
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1614,7 +888,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			}
 			
 			buffer.append(", ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1627,7 +901,7 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(JavaLangUtil.ripJavaLang(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1654,7 +928,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 				node.getOperand().accept(this);
 				buffer.append(" = String.fromCharCode ((");
 				node.getOperand().accept(this);
-				//String op = node.getOperator().toString();
 				if ("++".equals(op)) {
 					buffer.append(").charCodeAt (0) + 1)");
 				} else {
@@ -1667,54 +940,16 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		buffer.append(node.getOperator());
 		boxingNode(node.getOperand());
 		return false;
-		//return super.visit(node);
 	}
 
-	public void endVisit(PrimitiveType node) {
-		super.endVisit(node);
-	}
-
-	public boolean visit(PrimitiveType node) {
-		/*
-		 * TODO: primitive type should be precisely mapped to JS types 
-		 */
-		//buffer.append("var ");
-		return super.visit(node);
-	}
-
-	public void endVisit(QualifiedName node) {
-		super.endVisit(node);
-	}
-
-	protected boolean isSimpleQualified(QualifiedName node) {
-		Name qualifier = node.getQualifier();
-		if (qualifier instanceof SimpleName) {
-			return true;
-		} else if (qualifier instanceof QualifiedName) {
-			return isSimpleQualified((QualifiedName) qualifier);
-		}
-		return false;
-	}
 	public boolean visit(QualifiedName node) {
-//		IBinding nodeBinding = node.resolveBinding();
-//		if (nodeBinding instanceof IVariableBinding) {
-//			IVariableBinding varBinding = (IVariableBinding) nodeBinding;
-//			if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//				ASTNode parent = node.getParent();
-//				if (parent != null && !(parent instanceof QualifiedName)) {
-//					System.out.println("....");
-//					buffer.append("(((");
-//					node.getQualifier().accept(this);
-//					buffer.append(") || true) ? ");
-//					buffer.append(varBinding.getDeclaringClass().getQualifiedName());
-//					buffer.append('.');
-//					node.getName().accept(this);
-//					buffer.append(" : 0)");
-//					return false;
-//				}
-//			}
-//		}
-		if (isSimpleQualified(node) && checkConstantValue(node)) return false;
+		if (isSimpleQualified(node)) {
+			String constValue = checkConstantValue(node);
+			if (constValue != null) {
+				buffer.append(constValue);
+				return false;
+			}
+		}
 		ASTNode parent = node.getParent();
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
@@ -1757,11 +992,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 							buffer.append('.');
 						}
 					}
-//				} else {
-//					IVariableBinding varBinding = (IVariableBinding) binding;
-//					if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
-//						
-//					}
 				}
 			}
 		}
@@ -1769,10 +999,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		buffer.append('.');
 		node.getName().accept(this);
 		return false;
-	}
-
-	public void endVisit(ReturnStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(ReturnStatement node) {
@@ -1785,17 +1011,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(StringLiteral node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(StringLiteral node) {
 		buffer.append(node.getEscapedValue());
 		return false;
-	}
-
-	public void endVisit(SwitchCase node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(SwitchCase node) {
@@ -1809,10 +1027,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(SwitchStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(SwitchStatement node) {
 		buffer.append("switch (");
 		node.getExpression().accept(this);
@@ -1820,10 +1034,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		visitList(node.statements(), "");
 		buffer.append("}\r\n");
 		return false;
-	}
-
-	public void endVisit(SynchronizedStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(SynchronizedStatement node) {
@@ -1834,19 +1044,11 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(ThrowStatement node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(ThrowStatement node) {
 		buffer.append("throw ");
 		node.getExpression().accept(this);
 		buffer.append(";\r\n");
 		return false;
-	}
-
-	public void endVisit(TryStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(TryStatement node) {
@@ -1859,7 +1061,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = (CatchClause) iter.next();
 				element.getException().getType().accept(this);
-				//buffer.append(element.getException().getType());
 				buffer.append(")) ");
 				element.getBody().accept(this);
 				if (iter.hasNext()) {
@@ -1877,10 +1078,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		return false;
 	}
 
-	public void endVisit(VariableDeclarationExpression node) {
-		super.endVisit(node);
-	}
-
 	public boolean visit(VariableDeclarationExpression node) {
 		/*
 		 * TODO: Confirm that whether "var" is necessary or not
@@ -1889,63 +1086,22 @@ public class ASTKeywordParser extends ASTEmptyParser {
 		visitList(node.fragments(), ", ");
 		return false;
 	}
-
-	public void endVisit(VariableDeclarationFragment node) {
-		super.endVisit(node);
-	}
-
-	public String getIndexedVarName(String name, int i) {
-		if (!toCompileVariableName) {
-			return name;
-		}
-		String newName = null;
-		while (true) {
-			if (i < 26) {
-				newName = String.valueOf((char) ('a' + i));
-			} else if (i < 52) {
-				newName = String.valueOf((char) ('A' + (i - 26)));
-			} else {
-				int h = i / 26;
-				int l = i % 26;
-				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
-			}
-			for (Iterator iter = finalVars.iterator(); iter.hasNext();) {
-				FinalVariable f = (FinalVariable) iter.next();
-				if (newName.equals(f.getToVariableName())) {
-					newName = null;
-					i++;
-					break;
-				}
-			}
-			if (newName != null) {
-				for (Iterator iter = normalVars.iterator(); iter.hasNext();) {
-					FinalVariable f = (FinalVariable) iter.next();
-					if (newName.equals(f.getToVariableName())) {
-						newName = null;
-						i++;
-						break;
-					}
-				}
-			}
-			if (newName != null) {
-				break;
-			}
-		}
-		return newName;
-	}
+	
 	public boolean visit(VariableDeclarationFragment node) {
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			FinalVariable f = null;
+			ASTFinalVariable f = null;
 			if (methodDeclareStack.size() == 0) {
-				f = new FinalVariable(blockLevel, identifier, null);
+				f = new ASTFinalVariable(blockLevel, identifier, null);
 			} else {
 				String methodSig = (String) methodDeclareStack.peek();
-				f = new FinalVariable(blockLevel, identifier, methodSig);
+				f = new ASTFinalVariable(blockLevel, identifier, methodSig);
 			}
-			f.setToVariableName(getIndexedVarName(identifier, normalVars.size()));
+			List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
 				finalVars.add(f);
@@ -1957,7 +1113,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(" = ");
 			ITypeBinding typeBinding = initializer.resolveTypeBinding();
 			if (typeBinding != null && "char".equals(typeBinding.getName())) {
-				//if ()
 				ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 				String nameType = nameTypeBinding.getName();
 				if (!"char".equals(nameType) && nameType.indexOf("String") == -1) {
@@ -1970,7 +1125,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 			if (nameTypeBinding != null) {
 				String nameType = nameTypeBinding.getName();
-				//System.out.println("...x");
 				if ("char".equals(nameType)) {
 					if (typeBinding != null && !"char".equals(typeBinding.getName())) {
 						buffer.append("String.fromCharCode (");
@@ -1980,14 +1134,9 @@ public class ASTKeywordParser extends ASTEmptyParser {
 					}
 				}
 			}
-//			initializer.accept(this);
 			boxingNode(initializer);
 		}
 		return false;
-	}
-
-	public void endVisit(VariableDeclarationStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(VariableDeclarationStatement node) {
@@ -1999,10 +1148,6 @@ public class ASTKeywordParser extends ASTEmptyParser {
 			buffer.append(";\r\n");
 		}
 		return false;
-	}
-
-	public void endVisit(WhileStatement node) {
-		super.endVisit(node);
 	}
 
 	public boolean visit(WhileStatement node) {

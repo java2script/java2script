@@ -1,5 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2005 ognize.com and others.
+ * Java2Script Pacemaker (http://j2s.sourceforge.net)
+ *
+ * Copyright (c) 2006 ognize.com and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,17 +10,18 @@
  * Contributors:
  *     ognize.com - initial API and implementation
  *******************************************************************************/
+
 package net.sf.j2s.core.astvisitors;
 
-public class OperatorTypeUtil {
-	public static boolean isIntegerType(String type) {
-		if ("int".equals(type)
-				|| "long".equals(type)
-				|| "byte".equals(type)
-				|| "short".equals(type)
-				|| "char".equals(type)) {
-			return true;
-		}
-		return false;
-	}
+
+/**
+ * @author zhou renjian
+ *
+ * 2006-12-27
+ */
+public interface IPluginVisitor {
+	public StringBuffer getBuffer();
+	public void setBuffer(StringBuffer buffer);
+	public ASTEmptyVisitor getVisitor();
+	public void setVisitor(ASTEmptyVisitor visitor);
 }

@@ -13,10 +13,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.NameConvertItem;
-import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
@@ -39,7 +40,6 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			 */
 			return ;
 		}
-		boolean isEnabled = false;
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(file));
@@ -193,7 +193,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				visitor.setDebugging(isDebugging);
 				dvisitor.setDebugging(isDebugging);
 				boolean toCompress = "release".equals(props.getProperty("j2s.compiler.mode"));
-				visitor.setToCompileVariableName(toCompress);
+				//visitor.setToCompileVariableName(toCompress);
+				((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
 				dvisitor.setToCompileVariableName(toCompress);
 				if (toCompress) {
 					updateJ2SMap(prjFolder);
@@ -277,11 +278,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 						}
 					}
 				}
-				NameConverterUtil.setJ2SMap(varList);
+				ASTJ2SMapVisitor.setJ2SMap(varList);
 				return ;
 			}
 		}
-		NameConverterUtil.setJ2SMap(null);
+		ASTJ2SMapVisitor.setJ2SMap(null);
 	}
 
 	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot, String folderPath, Properties props) {
@@ -391,7 +392,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			e.printStackTrace();
 		}
 		
-		String[] classNameSet = dvisitor.getClassName();
+		String[] classNameSet = dvisitor.getClassNames();
 		if (classNameSet.length > 1) {
 			StringBuffer buffer = new StringBuffer();
 			String key = "ClazzLoader.jarClasspath (path + \"" + /*packageName.replace('.', '/') + "/" + */elementName + ".js\", [";
