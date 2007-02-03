@@ -9,6 +9,7 @@
  *     ognize.com - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -255,7 +257,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
+			buffer.append(shortenPackageName(fullClassName));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -595,7 +597,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
+			buffer.append(shortenPackageName(fullClassName));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -1119,7 +1121,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
 			return false;
 		}
+
 		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			return false;
+		}
 		if (mBinding != null) {
 			methodDeclareStack.push(mBinding.getKey());
 		}
@@ -1175,6 +1181,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
+//		} else if (node.isConstructor() && (body != null && body.statements().size() == 0)) {
+//			IMethodBinding superConstructorExisted = Bindings.findConstructorInHierarchy(mBinding.getDeclaringClass(), mBinding);
+//			if (superConstructorExisted != null) {
+//				needToCheckArgs = true;
+//				argsList = new ArrayList();
+//			}
 		}
 		if (needToCheckArgs) {
 			List params = node.parameters();
@@ -1351,14 +1363,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					} else {
 						ITypeBinding binding = type.resolveBinding();
 						if (binding != null) {
-							String name = binding.getQualifiedName();
-							name = shortenQualifiedName(name);
-							if ("String".equals(name)) {
-								buffer.append("~S");
-							} else if ("Object".equals(name)) {
+							if (binding.isTypeVariable()) {
 								buffer.append("~O");
 							} else {
-								buffer.append(name);
+								String name = binding.getQualifiedName();
+								name = shortenQualifiedName(name);
+								if ("String".equals(name)) {
+									buffer.append("~S");
+								} else if ("Object".equals(name)) {
+									buffer.append("~O");
+								} else {
+									buffer.append(name);
+								}
 							}
 						} else {
 							buffer.append(type);
@@ -1424,7 +1440,42 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			visitList(args, ", ", paramTypes.length - 1, size);
 			buffer.append("]");
 		} else {
-			visitList(args, ", ");
+			for (Iterator iter = args.iterator(); iter.hasNext();) {
+				ASTNode element = (ASTNode) iter.next();
+				String typeStr = null;
+				if (element instanceof CastExpression) {
+					CastExpression castExp = (CastExpression) element;
+					Expression exp = castExp.getExpression();
+					if (exp instanceof NullLiteral) {
+						ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
+						if (nullTypeBinding != null) {
+							if (nullTypeBinding.isArray()) {
+								typeStr = "Array";
+							} else if (nullTypeBinding.isPrimitive()) {
+								Code code = PrimitiveType.toCode(nullTypeBinding.getName());
+								if (code == PrimitiveType.BOOLEAN) {
+									typeStr = "Boolean";
+								} else{
+									typeStr = "Number";
+								}
+							} else if (!nullTypeBinding.isTypeVariable()) {
+								typeStr = shortenQualifiedName(nullTypeBinding.getQualifiedName());
+							}
+						}
+					}
+				}
+				if (typeStr != null) {
+					buffer.append("Clazz.castNullAs (\"");
+					buffer.append(typeStr);
+					buffer.append("\")");
+				} else {
+					boxingNode(element);
+				}
+				if (iter.hasNext()) {
+					buffer.append(", ");
+				}
+			}
+			//visitList(args, ", ");
 		}
 		buffer.append(")");
 		return false;
@@ -1936,7 +1987,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("Clazz.declareInterface (");
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
+				buffer.append(shortenPackageName(fullClassName));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");
@@ -1945,7 +1996,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(shortenQualifiedName(fullClassName.substring(0, lastIndexOf)));
+				buffer.append(shortenPackageName(fullClassName));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");

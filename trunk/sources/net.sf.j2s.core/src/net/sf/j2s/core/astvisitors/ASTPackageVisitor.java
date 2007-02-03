@@ -30,6 +30,9 @@ public class ASTPackageVisitor extends AbstractPluginVisitor {
 				"java.lang.ref", 
 				"java.lang.ref.reflect", 
 				"java.lang.reflect", 
+				"java.lang.annotation",
+				"java.lang.instrument",
+				"java.lang.management",
 				"java.io", 
 				"java.util"};
 	}

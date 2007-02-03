@@ -96,6 +96,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	protected String shortenQualifiedName(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
 	}
+	
+	protected String shortenPackageName(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenPackageName(name);
+	}
 
 	protected String checkConstantValue(Expression node) {
 		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).checkConstantValue(node);

@@ -37,10 +37,12 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 public class Bindings {
 	
@@ -75,6 +77,16 @@ public class Bindings {
 	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
 		boolean isEqualTo= b1.isEqualTo(b2);
+		if (!isEqualTo 
+				&& b1 instanceof ITypeBinding 
+				&& b2 instanceof ITypeBinding) {
+			ITypeBinding bb1 = (ITypeBinding) b1;
+			ITypeBinding bb2 = (ITypeBinding) b2;
+			String bb1Name = bb1.getBinaryName();
+			if (bb1Name != null) {
+				isEqualTo = bb1Name.equals(bb2.getBinaryName());
+			}
+		}
 		if (CHECK_CORE_BINDING_IS_EQUAL_TO) {
 			boolean originalEquals= originalEquals(b1, b2);
 			if (originalEquals != isEqualTo) {
@@ -374,6 +386,48 @@ public class Bindings {
 //		}
 //		return null;
 	}
+	
+	/**
+	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
+	 * Returns <code>null</code> if no such method exits.
+	 * @param type The type to search the method in
+	 * @param method The specified method that would override the result
+	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
+	 */
+	public static IMethodBinding findConstructorInType(ITypeBinding type, IMethodBinding method) {
+		if (type.isPrimitive())
+			return null;
+		ITypeBinding[] types = method.getParameterTypes();
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (methods[i].isConstructor() 
+					&& !methods[i].isDefaultConstructor()) {
+				ITypeBinding[] parameterTypes = methods[i].getParameterTypes();
+				if (types.length == parameterTypes.length) {
+					boolean equals = true;
+					for (int j = 0; j < parameterTypes.length; j++) {
+						if (!parameterTypes[j].equals(types[j])) {
+							equals = false;
+							break;
+						}
+					}
+					if (equals) {
+						return methods[i];
+					}
+				}
+			}
+		}
+		return null;
+//		String methodName= method.getName();
+//		IMethodBinding[] methods= type.getDeclaredMethods();
+//		for (int i= 0; i < methods.length; i++) {
+//			IMethodBinding curr= methods[i];
+//			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483; overrides checks return types: see bug 105808.
+//				return curr;
+//			}
+//		}
+//		return null;
+	}
 
 	/**
 	 * Finds the field specified by <code>fieldName</code> in
@@ -589,6 +643,29 @@ public class Bindings {
 				return method;
 			
 			method= findMethodDeclarationInHierarchy(superClass, methodBinding);
+			if (method != null)
+				return method;			
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds the declaration of a method in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
+	 * exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the implemented interfaces are examined and then the super class.
+	 * @param type The type to search the method in
+	 * @param methodBinding The binding of the method to find
+	 * @return the method binding representing the overridden method, or <code>null</code>
+	 */
+	public static IMethodBinding findConstructorInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			IMethodBinding method= findConstructorInType(superClass, methodBinding);
+			if (method != null)
+				return method;
+			
+			method= findConstructorInHierarchy(superClass, methodBinding);
 			if (method != null)
 				return method;			
 		}
@@ -1256,4 +1333,38 @@ public class Bindings {
 		return true;
 	}
 	
+	public static boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
+		if (methodName.equals(methodBinding.getName())) {
+			IMethodBinding findMethodInHierarchy = Bindings.findMethodInHierarchy(methodBinding.getDeclaringClass(), methodName, null);
+			IMethodBinding last = findMethodInHierarchy;
+			int count = 0;
+			while (findMethodInHierarchy != null && (count++) < 10) {
+				last = findMethodInHierarchy;
+				ITypeBinding superclass = last.getDeclaringClass().getSuperclass();
+				if (superclass == null) {
+					break;
+				}
+				findMethodInHierarchy = 
+					Bindings.findMethodInHierarchy(superclass, methodName, null);
+			}
+			if (last == null) {
+				last = methodBinding;
+			}
+			if (className.equals(last.getDeclaringClass().getQualifiedName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean isMethodInvoking(Expression exp, String className, String methodName) {
+		if (exp instanceof MethodInvocation) {
+			MethodInvocation method = (MethodInvocation) exp;
+			IMethodBinding methodBinding = method.resolveMethodBinding();
+			if (isMethodInvoking(methodBinding, className, methodName)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
