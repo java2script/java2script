@@ -1,66 +1,65 @@
 /*
- * @(#)Member.java	1.12 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.lang.reflect;
 
+
 /**
- * Member is an interface that reflects identifying information about
- * a single member (a field or a method) or a constructor.
- *
- * @see	java.lang.Class
- * @see	Field
- * @see	Method
- * @see	Constructor
- *
- * @author Nakul Saraiya
+ * Implementors of this interface model a class member.
+ * 
+ * @see Field
+ * @see Constructor
+ * @see Method
  */
-public
-interface Member {
+public interface Member {
+	
+	public static final int PUBLIC = 0;
 
+	public static final int DECLARED = 1;
+
+	/**
+	 * Return the {@link Class} associated with the class that defined this
+	 * member.
+	 * 
+	 * @return the declaring class
+	 */
+	@SuppressWarnings("unchecked")
+    Class getDeclaringClass();
+
+	/**
+	 * Return the modifiers for the member. The Modifier class should be used to
+	 * decode the result.
+	 * 
+	 * @return the modifiers
+	 * @see java.lang.reflect.Modifier
+	 */
+	int getModifiers();
+
+	/**
+	 * Return the name of the member.
+	 * 
+	 * @return the name
+	 */
+	String getName();
+    
     /**
-     * Identifies the set of all public members of a class or interface,
-     * including inherited members.
-     * @see java.lang.SecurityManager#checkMemberAccess
+     * <p>Indicates whether or not this member is synthetic (artificially introduced by
+     * the compiler).</p>
+     * @return A value of <code>true</code> if synthetic, otherwise <code>false</code>.
      */
-    public static final int PUBLIC = 0;
-
-    /**
-     * Identifies the set of declared members of a class or interface.
-     * Inherited members are not included.
-     * @see java.lang.SecurityManager#checkMemberAccess
-     */
-    public static final int DECLARED = 1;
-
-    /**
-     * Returns the Class object representing the class or interface
-     * that declares the member or constructor represented by this Member.
-     *
-     * @return an object representing the declaring class of the
-     * underlying member
-     */
-    public Class getDeclaringClass();
-
-    /**
-     * Returns the simple name of the underlying member or constructor
-     * represented by this Member.
-     * 
-     * @return the simple name of the underlying member
-     */
-    public String getName();
-
-    /**
-     * Returns the Java language modifiers for the member or
-     * constructor represented by this Member, as an integer.  The
-     * Modifier class should be used to decode the modifiers in
-     * the integer.
-     * 
-     * @return the Java language modifiers for the underlying member
-     * @see Modifier
-     */
-    public int getModifiers();
-
+    boolean isSynthetic();
 }

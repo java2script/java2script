@@ -18,7 +18,11 @@ Object.prototype.getClass = function () {
 };
 
 Object.prototype.clone = function () {
-	return this;
+	var obj = new this.constructor ();
+	for (var p in this) {
+		obj[p] = this[p];
+	}
+	return obj;
 };
 
 /*

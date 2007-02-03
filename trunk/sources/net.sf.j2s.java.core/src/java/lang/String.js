@@ -404,8 +404,7 @@ String.instantialize = function () {
 			return x.join ('');
 		} else if (x.__CLASS_NAME__ == "StringBuffer" 
 				|| x.__CLASS_NAME__ == "java.lang.StringBuffer") {
-			x.setShared();
-			var value = x.getValue();
+			var value = x.shareValue();
 			var length = x.length ();
 			var valueCopy = new Array (length);
 			for (var i = 0; i < length; i++) {
@@ -428,6 +427,11 @@ String.instantialize = function () {
 		var bytes = arguments[0];
 		var offset = arguments[1];
 		var length = arguments[2];
+		if (arguments[2] instanceof Array) {
+			bytes = arguments[2];
+			offset = arguments[0];
+			length = arguments[1];
+		}
 		var arr = new Array (length);
 		if (offset < 0 || length + offset > bytes.length) {
 			throw new IndexOutOfBoundsException ();

@@ -1,154 +1,159 @@
 /*
- * @(#)StringBufferInputStream.java	1.24 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.io;
 
+
 /**
- * This class allows an application to create an input stream in
- * which the bytes read are supplied by the contents of a string.
- * Applications can also read bytes from a byte array by using a
- * <code>ByteArrayInputStream</code>.
- * <p>
- * Only the low eight bits of each character in the string are used by
- * this class.
- *
- * @author     Arthur van Hoff
- * @version    1.24, 01/23/03
- * @see        java.io.ByteArrayInputStream
- * @see        java.io.StringReader
- * @since      JDK1.0
- * @deprecated This class does not properly convert characters into bytes.  As
- *             of JDK&nbsp;1.1, the preferred way to create a stream from a
- *             string is via the <code>StringReader</code> class.
+ * StringBufferInputStream is a class for to allow a String to be used as an
+ * InputStream.
+ * 
+ * @deprecated Use StringReader
  */
-public
-class StringBufferInputStream extends InputStream {
-    /**
-     * The string from which bytes are read.
-     */
-    protected String buffer;
+@Deprecated
+public class StringBufferInputStream extends InputStream {
+	/**
+	 * The String containing the data to read.
+	 */
+	protected String buffer;
 
-    /**
-     * The index of the next character to read from the input stream buffer.
-     *
-     * @see        java.io.StringBufferInputStream#buffer
-     */
-    protected int pos;
+	/**
+	 * The total number of characters inside the buffer.
+	 */
+	protected int count;
 
-    /**
-     * The number of valid characters in the input stream buffer.
-     *
-     * @see        java.io.StringBufferInputStream#buffer
-     */
-    protected int count;
+	/**
+	 * The current position within the String buffer.
+	 */
+	protected int pos;
 
-    /**
-     * Creates a string input stream to read data from the specified string.
-     *
-     * @param      s   the underlying input buffer.
-     */
-    public StringBufferInputStream(String s) {
-	this.buffer = s;
-	count = s.length();
-    }
-
-    /**
-     * Reads the next byte of data from this input stream. The value
-     * byte is returned as an <code>int</code> in the range
-     * <code>0</code> to <code>255</code>. If no byte is available
-     * because the end of the stream has been reached, the value
-     * <code>-1</code> is returned.
-     * <p>
-     * The <code>read</code> method of
-     * <code>StringBufferInputStream</code> cannot block. It returns the
-     * low eight bits of the next character in this input stream's buffer.
-     *
-     * @return     the next byte of data, or <code>-1</code> if the end of the
-     *             stream is reached.
-     */
-    public synchronized int read() {
-	return (pos < count) ? (buffer.charAt(pos++) & 0xFF) : -1;
-    }
-
-    /**
-     * Reads up to <code>len</code> bytes of data from this input stream
-     * into an array of bytes.
-     * <p>
-     * The <code>read</code> method of
-     * <code>StringBufferInputStream</code> cannot block. It copies the
-     * low eight bits from the characters in this input stream's buffer into
-     * the byte array argument.
-     *
-     * @param      b     the buffer into which the data is read.
-     * @param      off   the start offset of the data.
-     * @param      len   the maximum number of bytes read.
-     * @return     the total number of bytes read into the buffer, or
-     *             <code>-1</code> if there is no more data because the end of
-     *             the stream has been reached.
-     */
-    public synchronized int read(byte b[], int off, int len) {
-	if (b == null) {
-	    throw new NullPointerException();
-	} else if ((off < 0) || (off > b.length) || (len < 0) ||
-		   ((off + len) > b.length) || ((off + len) < 0)) {
-	    throw new IndexOutOfBoundsException();
-	}
-	if (pos >= count) {
-	    return -1;
-	}
-	if (pos + len > count) {
-	    len = count - pos;
-	}
-	if (len <= 0) {
-	    return 0;
-	}
-	String	s = buffer;
-	int cnt = len;
-	while (--cnt >= 0) {
-	    b[off++] = (byte)s.charAt(pos++);
+	/**
+	 * Constructs a new StringBufferInputStream on the String <code>str</code>.
+	 * 
+	 * @param str
+	 *            the String to read characters from.
+	 */
+	public StringBufferInputStream(String str) {
+		if (str != null) {
+			buffer = str;
+			count = str.length();
+		} else {
+            throw new NullPointerException();
+        }
 	}
 
-	return len;
-    }
-
-    /**
-     * Skips <code>n</code> bytes of input from this input stream. Fewer
-     * bytes might be skipped if the end of the input stream is reached.
-     *
-     * @param      n   the number of bytes to be skipped.
-     * @return     the actual number of bytes skipped.
-     */
-    public synchronized long skip(long n) {
-	if (n < 0) {
-	    return 0;
-	}
-	if (n > count - pos) {
-	    n = count - pos;
-	}
-	pos += n;
-	return n;
-    }
-
-    /**
-     * Returns the number of bytes that can be read from the input
-     * stream without blocking.
-     *
-     * @return     the value of <code>count&nbsp;-&nbsp;pos</code>, which is the
-     *             number of bytes remaining to be read from the input buffer.
-     */
+	/**
+	 * Answers an int representing then number of characters that are available
+	 * to read.
+	 * 
+	 * @return the number of characters available.
+	 * 
+	 */
+	@Override
     public synchronized int available() {
-	return count - pos;
-    }
+		return count - pos;
+	}
 
-    /**
-     * Resets the input stream to begin reading from the first character
-     * of this input stream's underlying buffer.
-     */
+	/**
+	 * Reads a single byte from this InputStream and returns the result as an
+	 * int. The low-order byte is returned or -1 of the end of stream was
+	 * encountered.
+	 * 
+	 * @return the byte read or -1 if end of stream.
+	 */
+	@Override
+    public synchronized int read() {
+		return pos < count ? buffer.charAt(pos++) & 0xFF : -1;
+	}
+
+	/**
+	 * Reads at most <code>length</code> bytes from this InputStream and
+	 * stores them in byte array <code>b</code> starting at
+	 * <code>offset</code>. Answer the number of bytes actually read or -1 if
+	 * no bytes were read and end of stream was encountered.
+	 * 
+	 * @param b
+	 *            the byte array in which to store the read bytes.
+	 * @param offset
+	 *            the offset in <code>b</code> to store the read bytes.
+	 * @param length
+	 *            the maximum number of bytes to store in <code>b</code>.
+	 * @return the number of bytes actually read or -1 if end of stream.
+	 */
+	@Override
+    public synchronized int read(byte b[], int offset, int length) {
+		// According to 22.7.6 should return -1 before checking other
+		// parameters.
+		if (pos >= count) {
+			return -1;
+		}
+		if (b != null) {
+			// avoid int overflow
+			if (0 <= offset && offset <= b.length && 0 <= length
+					&& length <= b.length - offset) {
+				if (length == 0) {
+					return 0;
+				}
+
+				int copylen = count - pos < length ? count - pos : length;
+				for (int i = 0; i < copylen; i++) {
+                    b[offset + i] = (byte) buffer.charAt(pos + i);
+                }
+				pos += copylen;
+				return copylen;
+			}
+			throw new ArrayIndexOutOfBoundsException();
+		}
+		throw new NullPointerException(org.apache.harmony.luni.util.Msg.getString("K0047")); //$NON-NLS-1$
+	}
+
+	/**
+	 * Reset this InputStream to position 0. Reads/Skips will now take place
+	 * from this position.
+	 * 
+	 */
+	@Override
     public synchronized void reset() {
-	pos = 0;
-    }
+		pos = 0;
+	}
+
+	/**
+	 * Skips <code>count</code> number of characters in this InputStream.
+	 * Subsequent <code>read()</code>'s will not return these characters
+	 * unless <code>reset()</code> is used.
+	 * 
+	 * @param n
+	 *            the number of characters to skip.
+	 * @return the number of characters actually skipped.
+	 */
+	@Override
+    public synchronized long skip(long n) {
+		if (n <= 0) {
+            return 0;
+        }
+
+		int numskipped;
+		if (this.count - pos < n) {
+			numskipped = this.count - pos;
+			pos = this.count;
+		} else {
+			numskipped = (int) n;
+			pos += n;
+		}
+		return numskipped;
+	}
 }

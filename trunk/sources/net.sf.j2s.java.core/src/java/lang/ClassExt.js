@@ -628,7 +628,7 @@ Object.prototype.getClass = function () {
 };
 
 Object.prototype.clone = function () {
-	var o = new Object ();
+	var o = new this.constructor ();
 	for (var i in this) {
 		o[i] = this[i];
 	}
@@ -693,8 +693,18 @@ System = {
 		System.props.setProperty (key, val);
 	},
 	arraycopy : function (src, srcPos, dest, destPos, length) {
-		for (var i = 0; i < length; i++) {
-			dest[destPos + i] = src[srcPos + i];
+		if (src != dest) {
+			for (var i = 0; i < length; i++) {
+				dest[destPos + i] = src[srcPos + i];
+			}
+		} else {
+			var swap = [];
+			for (var i = 0; i < length; i++) {
+				swap[i] = src[srcPos + i];
+			}
+			for (var i = 0; i < length; i++) {
+				dest[destPos + i] = swap[i];
+			}
 		}
 	}
 };
@@ -725,7 +735,7 @@ Clazz.innerFunctions.isAssignableFrom = function (clazz) {
 };
 Clazz.innerFunctions.getConstructor = function () {
 	return new java.lang.reflect.Constructor (this, [], [], 
-			java.lang.reflect.Modifier.PUBLIC, 0);
+			java.lang.reflect.Modifier.PUBLIC);
 };
 /**
  * TODO: fix bug for polymorphic methods!
@@ -737,7 +747,7 @@ Clazz.innerFunctions.getDeclaredMethods = Clazz.innerFunctions.getMethods = func
 		if (typeof p[attr] == "function" && p[attr].__CLASS_NAME__ == null) {
 			/* there are polynormical methods. */
 			ms[ms.length] = new java.lang.reflect.Method (this, attr,
-					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC, 0);
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC);
 		}
 	}
 	p = this;
@@ -745,7 +755,7 @@ Clazz.innerFunctions.getDeclaredMethods = Clazz.innerFunctions.getMethods = func
 		if (typeof p[attr] == "function" && p[attr].__CLASS_NAME__ == null) {
 			ms[ms.length] = new java.lang.reflect.Method (this, attr,
 					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
-					| java.lang.reflect.Modifier.STATIC, 0);
+					| java.lang.reflect.Modifier.STATIC);
 		}
 	}
 	return ms;
@@ -757,7 +767,7 @@ Clazz.innerFunctions.getDeclaredMethod = Clazz.innerFunctions.getMethod = functi
 				&& p[attr].__CLASS_NAME__ == null) {
 			/* there are polynormical methods. */
 			return new java.lang.reflect.Method (this, attr,
-					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC, 0);
+					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC);
 		}
 	}
 	p = this;
@@ -766,7 +776,7 @@ Clazz.innerFunctions.getDeclaredMethod = Clazz.innerFunctions.getMethod = functi
 				&& p[attr].__CLASS_NAME__ == null) {
 			return new java.lang.reflect.Method (this, attr,
 					[], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
-					| java.lang.reflect.Modifier.STATIC, 0);
+					| java.lang.reflect.Modifier.STATIC);
 		}
 	}
 	return null;

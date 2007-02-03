@@ -1,169 +1,165 @@
-/*
- * @(#)AccessibleObject.java	1.23 03/01/23
- *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+/* Copyright 1998, 2005 The Apache Software Foundation or its licensors, as applicable
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package java.lang.reflect;
 
-/*
-import java.security.AccessController;
-import sun.reflect.ReflectionFactory;
-*/
+import java.lang.annotation.Annotation;
 
 /**
- * The AccessibleObject class is the base class for Field, Method and
- * Constructor objects.  It provides the ability to flag a reflected
- * object as suppressing default Java language access control checks
- * when it is used.  The access checks--for public, default (package)
- * access, protected, and private members--are performed when Fields,
- * Methods or Constructors are used to set or get fields, to invoke
- * methods, or to create and initialize new instances of classes,
- * respectively.
- *
- * <p>Setting the <tt>accessible</tt> flag in a reflected object
- * permits sophisticated applications with sufficient privilege, such
- * as Java Object Serialization or other persistence mechanisms, to
- * manipulate objects in a manner that would normally be prohibited.
- *
+ * This class must be implemented by the VM vendor. This class is the superclass
+ * of all member reflect classes (Field, Constructor, Method). AccessibleObject
+ * provides the ability to toggle access checks for these objects. By default
+ * accessing a member (for example, setting a field or invoking a method) checks
+ * the validity of the access (for example, invoking a private method from
+ * outside the defining class is prohibited) and throws IllegalAccessException
+ * if the operation is not permitted. If the accessible flag is set to true,
+ * these checks are omitted. This allows privileged applications such as Java
+ * Object Serialization, inspectors, and debuggers to have complete access to
+ * objects.
+ * 
  * @see Field
- * @see Method
  * @see Constructor
+ * @see Method
  * @see ReflectPermission
- *
  * @since 1.2
  */
-public
-class AccessibleObject {
+public class AccessibleObject implements AnnotatedElement {
+	static final Object[] emptyArgs = new Object[0];
 
-    /**
-     * The Permission object that is used to check whether a client
-     * has sufficient privilege to defeat Java language access
-     * control checks.
-     */
-//    static final private java.security.Permission ACCESS_PERMISSION =
-//	new ReflectPermission("suppressAccessChecks");
-
-    /**
-     * Convenience method to set the <tt>accessible</tt> flag for an
-     * array of objects with a single security check (for efficiency).
-     *
-     * <p>First, if there is a security manager, its
-     * <code>checkPermission</code> method is called with a
-     * <code>ReflectPermission("suppressAccessChecks")</code> permission.
-     *
-     * <p>A <code>SecurityException</code> is raised if <code>flag</code> is
-     * <code>true</code> but accessibility of any of the elements of the input
-     * <code>array</code> may not be changed (for example, if the element
-     * object is a {@link Constructor} object for the class {@link
-     * java.lang.Class}).  In the event of such a SecurityException, the
-     * accessiblity of objects is set to <code>flag</code> for array elements
-     * upto (and excluding) the element for which the exception occurred; the
-     * accessiblity of elements beyond (and including) the element for which
-     * the exception occurred is unchanged.
-     *
-     * @param array the array of AccessibleObjects
-     * @param flag  the new value for the <tt>accessible</tt> flag
-     *              in each object
-     * @throws SecurityException if the request is denied.
-     * @see SecurityManager#checkPermission
-     * @see java.lang.RuntimePermission
-     */
-    public static void setAccessible(AccessibleObject[] array, boolean flag)
-	throws SecurityException {
-//	SecurityManager sm = System.getSecurityManager();
-//	if (sm != null) sm.checkPermission(ACCESS_PERMISSION);
-	for (int i = 0; i < array.length; i++) {
-	    setAccessible0(array[i], flag);
+	/**
+	 * AccessibleObject constructor. AccessibleObjects can only be created by
+	 * the Virtual Machine.
+	 */
+	protected AccessibleObject() {
+		super();
 	}
-    }
 
-    /**
-     * Set the <tt>accessible</tt> flag for this object to
-     * the indicated boolean value.  A value of <tt>true</tt> indicates that
-     * the reflected object should suppress Java language access
-     * checking when it is used.  A value of <tt>false</tt> indicates 
-     * that the reflected object should enforce Java language access checks.
-     *
-     * <p>First, if there is a security manager, its
-     * <code>checkPermission</code> method is called with a
-     * <code>ReflectPermission("suppressAccessChecks")</code> permission.
-     * 
-     * <p>A <code>SecurityException</code> is raised if <code>flag</code> is
-     * <code>true</code> but accessibility of this object may not be changed
-     * (for example, if this element object is a {@link Constructor} object for
-     * the class {@link java.lang.Class}).
-     *
-     * <p>A <code>SecurityException</code> is raised if this object is a {@link
-     * java.lang.reflect.Constructor} object for the class
-     * <code>java.lang.Class</code>, and <code>flag</code> is true.
-     *
-     * @param flag the new value for the <tt>accessible</tt> flag
-     * @throws SecurityException if the request is denied.
-     * @see SecurityManager#checkPermission
-     * @see java.lang.RuntimePermission
-     */
-    public void setAccessible(boolean flag) throws SecurityException {
-//	SecurityManager sm = System.getSecurityManager();
-//	if (sm != null) sm.checkPermission(ACCESS_PERMISSION);
-	setAccessible0(this, flag);
-    }
-
-    /* Check that you aren't exposing java.lang.Class.<init>. */
-    private static void setAccessible0(AccessibleObject obj, boolean flag)
-	throws SecurityException
-    {
-	if (obj instanceof Constructor && flag == true) {
-	    Constructor c = (Constructor)obj;
-	    if (c.getDeclaringClass() == Class.class) {
-		throw new SecurityException("Can not make a java.lang.Class" +
-					    " constructor accessible");
-	    }
+	/**
+	 * Returns the value of the accessible flag. This is false if access checks
+	 * are performed, true if they are skipped.
+	 * 
+	 * @return the value of the accessible flag
+	 */
+	public boolean isAccessible() {
+		return false;
 	}
-	obj.override = flag;
+
+	/**
+	 * Attempts to set the value of the accessible flag for all the objects in
+	 * the array provided. Only one security check is performed. Setting this
+	 * flag to false will enable access checks, setting to true will disable
+	 * them. If there is a security manager, checkPermission is called with a
+	 * ReflectPermission("suppressAccessChecks").
+	 * 
+	 * @param objects
+	 *            the accessible objects
+	 * @param flag
+	 *            the new value for the accessible flag
+	 * @see #setAccessible(boolean)
+	 * @see ReflectPermission
+	 * @throws SecurityException
+	 *             if the request is denied
+	 */
+	public static void setAccessible(AccessibleObject[] objects, boolean flag)
+			throws SecurityException {
+		return;
+	}
+
+	/**
+	 * Attempts to set the value of the accessible flag. Setting this flag to
+	 * false will enable access checks, setting to true will disable them. If
+	 * there is a security manager, checkPermission is called with a
+	 * ReflectPermission("suppressAccessChecks").
+	 * 
+	 * @param flag
+	 *            the new value for the accessible flag
+	 * @see ReflectPermission
+	 * @throws SecurityException
+	 *             if the request is denied
+	 */
+	public void setAccessible(boolean flag) throws SecurityException {
+		return;
+	}
+    
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
+        return false;
+    }
+    
+    public Annotation[] getDeclaredAnnotations() {
+        return new Annotation[0];
+    }
+    
+    public Annotation[] getAnnotations() {
+        return new Annotation[0];
+    }
+    
+    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
+        return null;
     }
 
-    /**
-     * Get the value of the <tt>accessible</tt> flag for this object.
-     *
-     * @return the value of the object's <tt>accessible</tt> flag
-     */
-    public boolean isAccessible() {
-	return override;
-    }
+	static Object[] marshallArguments(Class[] parameterTypes, Object[] args)
+			throws IllegalArgumentException {
+		return null;
+	}
 
-    /**
-     * Constructor: only used by the Java Virtual Machine.
-     */
-    protected AccessibleObject() {}
+	void invokeV(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return;
+	}
 
-    // Cache for security checks.
+	Object invokeL(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return null;
+	}
 
-    // For non-public members or members in package-private classes,
-    // it is necessary to perform somewhat expensive security checks.
-    // If the security check succeeds for a given class, it will
-    // always succeed (it is not affected by the granting or revoking
-    // of permissions); we speed up the check in the common case by
-    // remembering the last Class for which the check succeeded.  This
-    // field is used by Field, Method, and Constructor.
-    //
-    // NOTE: for security purposes, this field must not be visible
-    // outside this package.
-    volatile Class securityCheckCache;
+	int invokeI(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return 0;
+	}
 
-    // Indicates whether language-level access checks are overridden
-    // by this object. Initializes to "false". This field is used by
-    // Field, Method, and Constructor.
-    //
-    // NOTE: for security purposes, this field must not be visible
-    // outside this package.
-    boolean override;
+	long invokeJ(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return 0L;
+	}
 
-    // Reflection factory used by subclasses for creating field,
-    // method, and constructor accessors. Note that this is called
-    // very early in the bootstrapping process.
-//    static final ReflectionFactory reflectionFactory = (ReflectionFactory)
-//        AccessController.doPrivileged
-//            (new sun.reflect.ReflectionFactory.GetReflectionFactoryAction());
+	float invokeF(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return 0.0F;
+	}
+
+	double invokeD(Object receiver, Object args[])
+			throws InvocationTargetException {
+		return 0.0D;
+	}
+
+	native Class[] getParameterTypesImpl();
+
+	native int getModifiers();
+
+	native Class[] getExceptionTypesImpl();
+
+	native String getSignature();
+
+	native boolean checkAccessibility(Class senderClass, Object receiver);
+
+	static native void initializeClass(Class clazz);
+
+	/**
+	 * Answer the class at depth. Notes: 1) This method operates on the defining
+	 * classes of methods on stack. NOT the classes of receivers. 2) The item at
+	 * index zero describes the caller of this method.
+	 */
+	static final native Class getStackClass(int depth);
 }

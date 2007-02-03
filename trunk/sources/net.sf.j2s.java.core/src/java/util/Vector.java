@@ -1,1019 +1,1051 @@
 /*
- * @(#)Vector.java	1.89 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
 
+
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+
 /**
- * The <code>Vector</code> class implements a growable array of 
- * objects. Like an array, it contains components that can be 
- * accessed using an integer index. However, the size of a 
- * <code>Vector</code> can grow or shrink as needed to accommodate 
- * adding and removing items after the <code>Vector</code> has been created.<p>
- *
- * Each vector tries to optimize storage management by maintaining a 
- * <code>capacity</code> and a <code>capacityIncrement</code>. The 
- * <code>capacity</code> is always at least as large as the vector 
- * size; it is usually larger because as components are added to the 
- * vector, the vector's storage increases in chunks the size of 
- * <code>capacityIncrement</code>. An application can increase the 
- * capacity of a vector before inserting a large number of 
- * components; this reduces the amount of incremental reallocation. <p>
- *
- * As of the Java 2 platform v1.2, this class has been retrofitted to
- * implement List, so that it becomes a part of Java's collection framework.
- * Unlike the new collection implementations, Vector is synchronized.<p>
- *
- * The Iterators returned by Vector's iterator and listIterator
- * methods are <em>fail-fast</em>: if the Vector is structurally modified
- * at any time after the Iterator is created, in any way except through the
- * Iterator's own remove or add methods, the Iterator will throw a
- * ConcurrentModificationException.  Thus, in the face of concurrent
- * modification, the Iterator fails quickly and cleanly, rather than risking
- * arbitrary, non-deterministic behavior at an undetermined time in the future.
- * The Enumerations returned by Vector's elements method are <em>not</em>
- * fail-fast.
- *
- * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw <tt>ConcurrentModificationException</tt> on a best-effort basis. 
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness:  <i>the fail-fast behavior of iterators
- * should be used only to detect bugs.</i><p>
- *
- * This class is a member of the 
- * <a href="{@docRoot}/../guide/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @author  Lee Boynton
- * @author  Jonathan Payne
- * @version 1.89, 01/23/03
- * @see Collection
- * @see List
- * @see ArrayList
- * @see LinkedList
- * @since   JDK1.0
+ * Vector is a variable size contiguous indexable array of Objects. The size of
+ * the Vector is the number of Objects it contains. The capacity of the Vector
+ * is the number of Objects it can hold.
+ * <p>
+ * Objects may be inserted at any position up to the size of the Vector,
+ * increasing the size of the Vector. Objects at any position in the Vector may
+ * be removed, shrinking the size of the Vector. Objects at any position in the
+ * Vector may be replaced, which does not affect the Vector size.
+ * <p>
+ * The capacity of a Vector may be specified when the Vector is created. If the
+ * capacity of the Vector is exceeded, the capacity is increased, doubling by
+ * default.
+ * 
+ * @see java.lang.StringBuffer
  */
-public class Vector extends AbstractList
-        implements List, RandomAccess, Cloneable, java.io.Serializable
-{
-    /**
-     * The array buffer into which the components of the vector are
-     * stored. The capacity of the vector is the length of this array buffer, 
-     * and is at least large enough to contain all the vector's elements.<p>
-     *
-     * Any array elements following the last element in the Vector are null.
-     *
-     * @serial
-     */
-    protected Object elementData[];
+public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
+		Cloneable, Serializable {
+	
+	private static final long serialVersionUID = -2767605614048989439L;
 
-    /**
-     * The number of valid components in this <tt>Vector</tt> object. 
-     * Components <tt>elementData[0]</tt> through 
-     * <tt>elementData[elementCount-1]</tt> are the actual items.
-     *
-     * @serial
-     */
-    protected int elementCount;
+	/**
+	 * The number of elements or the size of the vector.
+	 */
+	protected int elementCount;
 
-    /**
-     * The amount by which the capacity of the vector is automatically 
-     * incremented when its size becomes greater than its capacity.  If 
-     * the capacity increment is less than or equal to zero, the capacity
-     * of the vector is doubled each time it needs to grow.
-     *
-     * @serial
-     */
-    protected int capacityIncrement;
+	/**
+	 * The elements of the vector.
+	 */
+	protected Object[] elementData;
 
-    /** use serialVersionUID from JDK 1.0.2 for interoperability */
-    private static final long serialVersionUID = -2767605614048989439L;
+	/**
+	 * How many elements should be added to the vector when it is detected that
+	 * it needs to grow to accommodate extra entries.
+	 */
+	protected int capacityIncrement;
 
-    /**
-     * Constructs an empty vector with the specified initial capacity and
-     * capacity increment. 
-     *
-     * @param   initialCapacity     the initial capacity of the vector.
-     * @param   capacityIncrement   the amount by which the capacity is
-     *                              increased when the vector overflows.
-     * @exception IllegalArgumentException if the specified initial capacity
-     *               is negative
-     */
-    public Vector(int initialCapacity, int capacityIncrement) {
-	super();
-        if (initialCapacity < 0)
-            throw new IllegalArgumentException("Illegal Capacity: "+
-                                               initialCapacity);
-	this.elementData = new Object[initialCapacity];
-	this.capacityIncrement = capacityIncrement;
-    }
+	private static final int DEFAULT_SIZE = 10;
 
-    /**
-     * Constructs an empty vector with the specified initial capacity and 
-     * with its capacity increment equal to zero.
-     *
-     * @param   initialCapacity   the initial capacity of the vector.
-     * @exception IllegalArgumentException if the specified initial capacity
-     *               is negative
-     */
-    public Vector(int initialCapacity) {
-	this(initialCapacity, 0);
-    }
-
-    /**
-     * Constructs an empty vector so that its internal data array 
-     * has size <tt>10</tt> and its standard capacity increment is 
-     * zero. 
-     */
-    public Vector() {
-	this(10);
-    }
-
-    /**
-     * Constructs a vector containing the elements of the specified
-     * collection, in the order they are returned by the collection's
-     * iterator.
-     *
-     * @param c the collection whose elements are to be placed into this
-     *       vector.
-     * @throws NullPointerException if the specified collection is null.
-     * @since   1.2
-     */
-    public Vector(Collection c) {
-        elementCount = c.size();
-        // 10% for growth
-        elementData = new Object[
-                      (int)Math.min((elementCount*110L)/100,Integer.MAX_VALUE)]; 
-        c.toArray(elementData);
-    }
-
-    /**
-     * Copies the components of this vector into the specified array. The 
-     * item at index <tt>k</tt> in this vector is copied into component 
-     * <tt>k</tt> of <tt>anArray</tt>. The array must be big enough to hold 
-     * all the objects in this vector, else an 
-     * <tt>IndexOutOfBoundsException</tt> is thrown.
-     *
-     * @param   anArray   the array into which the components get copied.
-     * @throws  NullPointerException if the given array is null.
-     */
-    public synchronized void copyInto(Object anArray[]) {
-	System.arraycopy(elementData, 0, anArray, 0, elementCount);
-    }
-
-    /**
-     * Trims the capacity of this vector to be the vector's current 
-     * size. If the capacity of this vector is larger than its current 
-     * size, then the capacity is changed to equal the size by replacing 
-     * its internal data array, kept in the field <tt>elementData</tt>, 
-     * with a smaller one. An application can use this operation to 
-     * minimize the storage of a vector. 
-     */
-    public synchronized void trimToSize() {
-	modCount++;
-	int oldCapacity = elementData.length;
-	if (elementCount < oldCapacity) {
-	    Object oldData[] = elementData;
-	    elementData = new Object[elementCount];
-	    System.arraycopy(oldData, 0, elementData, 0, elementCount);
+	/**
+	 * Constructs a new Vector using the default capacity.
+	 */
+	public Vector() {
+		this(DEFAULT_SIZE, 0);
 	}
-    }
 
-    /**
-     * Increases the capacity of this vector, if necessary, to ensure 
-     * that it can hold at least the number of components specified by 
-     * the minimum capacity argument.
-     *
-     * <p>If the current capacity of this vector is less than
-     * <tt>minCapacity</tt>, then its capacity is increased by replacing its
-     * internal data array, kept in the field <tt>elementData</tt>, with a
-     * larger one.  The size of the new data array will be the old size plus
-     * <tt>capacityIncrement</tt>, unless the value of
-     * <tt>capacityIncrement</tt> is less than or equal to zero, in which case
-     * the new capacity will be twice the old capacity; but if this new size
-     * is still smaller than <tt>minCapacity</tt>, then the new capacity will
-     * be <tt>minCapacity</tt>.
-     *
-     * @param minCapacity the desired minimum capacity.
-     */
-    public synchronized void ensureCapacity(int minCapacity) {
-	modCount++;
-	ensureCapacityHelper(minCapacity);
-    }
-    
-    /**
-     * This implements the unsynchronized semantics of ensureCapacity.
-     * Synchronized methods in this class can internally call this 
-     * method for ensuring capacity without incurring the cost of an 
-     * extra synchronization.
-     *
-     * @see java.util.Vector#ensureCapacity(int)
-     */ 
-    private void ensureCapacityHelper(int minCapacity) {
-	int oldCapacity = elementData.length;
-	if (minCapacity > oldCapacity) {
-	    Object oldData[] = elementData;
-	    int newCapacity = (capacityIncrement > 0) ?
-		(oldCapacity + capacityIncrement) : (oldCapacity * 2);
-    	    if (newCapacity < minCapacity) {
-		newCapacity = minCapacity;
-	    }
-	    elementData = new Object[newCapacity];
-	    System.arraycopy(oldData, 0, elementData, 0, elementCount);
+	/**
+	 * Constructs a new Vector using the specified capacity.
+	 * 
+	 * @param capacity
+	 *            the initial capacity of the new vector
+	 */
+	public Vector(int capacity) {
+		this(capacity, 0);
 	}
-    }
 
-    /**
-     * Sets the size of this vector. If the new size is greater than the 
-     * current size, new <code>null</code> items are added to the end of 
-     * the vector. If the new size is less than the current size, all 
-     * components at index <code>newSize</code> and greater are discarded.
-     *
-     * @param   newSize   the new size of this vector.
-     * @throws  ArrayIndexOutOfBoundsException if new size is negative.
-     */
-    public synchronized void setSize(int newSize) {
-	modCount++;
-	if (newSize > elementCount) {
-	    ensureCapacityHelper(newSize);
-	} else {
-	    for (int i = newSize ; i < elementCount ; i++) {
-		elementData[i] = null;
-	    }
-	}
-	elementCount = newSize;
-    }
-
-    /**
-     * Returns the current capacity of this vector.
-     *
-     * @return  the current capacity (the length of its internal 
-     *          data array, kept in the field <tt>elementData</tt> 
-     *          of this vector).
-     */
-    public synchronized int capacity() {
-	return elementData.length;
-    }
-
-    /**
-     * Returns the number of components in this vector.
-     *
-     * @return  the number of components in this vector.
-     */
-    public synchronized int size() {
-	return elementCount;
-    }
-
-    /**
-     * Tests if this vector has no components.
-     *
-     * @return  <code>true</code> if and only if this vector has 
-     *          no components, that is, its size is zero;
-     *          <code>false</code> otherwise.
-     */
-    public synchronized boolean isEmpty() {
-	return elementCount == 0;
-    }
-
-    /**
-     * Returns an enumeration of the components of this vector. The 
-     * returned <tt>Enumeration</tt> object will generate all items in 
-     * this vector. The first item generated is the item at index <tt>0</tt>, 
-     * then the item at index <tt>1</tt>, and so on. 
-     *
-     * @return  an enumeration of the components of this vector.
-     * @see     Enumeration
-     * @see     Iterator
-     */
-    public Enumeration elements() {
-	return new Enumeration() {
-	    int count = 0;
-
-	    public boolean hasMoreElements() {
-		return count < elementCount;
-	    }
-
-	    public Object nextElement() {
-		synchronized (Vector.this) {
-		    if (count < elementCount) {
-			return elementData[count++];
-		    }
+	/**
+	 * Constructs a new Vector using the specified capacity and capacity
+	 * increment.
+	 * 
+	 * @param capacity
+	 *            the initial capacity of the new Vector
+	 * @param capacityIncrement
+	 *            the amount to increase the capacity when this Vector is full
+	 */
+	public Vector(int capacity, int capacityIncrement) {
+		elementCount = 0;
+		try {
+			elementData = newElementArray(capacity);
+		} catch (NegativeArraySizeException e) {
+			throw new IllegalArgumentException();
 		}
-		throw new NoSuchElementException("Vector Enumeration");
-	    }
-	};
-    }
-
-    /**
-     * Tests if the specified object is a component in this vector.
-     *
-     * @param   elem   an object.
-     * @return  <code>true</code> if and only if the specified object 
-     * is the same as a component in this vector, as determined by the 
-     * <tt>equals</tt> method; <code>false</code> otherwise.
-     */
-    public boolean contains(Object elem) {
-	return indexOf(elem, 0) >= 0;
-    }
-
-    /**
-     * Searches for the first occurence of the given argument, testing 
-     * for equality using the <code>equals</code> method. 
-     *
-     * @param   elem   an object.
-     * @return  the index of the first occurrence of the argument in this
-     *          vector, that is, the smallest value <tt>k</tt> such that 
-     *          <tt>elem.equals(elementData[k])</tt> is <tt>true</tt>; 
-     *          returns <code>-1</code> if the object is not found.
-     * @see     Object#equals(Object)
-     */
-    public int indexOf(Object elem) {
-	return indexOf(elem, 0);
-    }
-
-    /**
-     * Searches for the first occurence of the given argument, beginning 
-     * the search at <code>index</code>, and testing for equality using 
-     * the <code>equals</code> method. 
-     *
-     * @param   elem    an object.
-     * @param   index   the non-negative index to start searching from.
-     * @return  the index of the first occurrence of the object argument in
-     *          this vector at position <code>index</code> or later in the
-     *          vector, that is, the smallest value <tt>k</tt> such that 
-     *          <tt>elem.equals(elementData[k]) && (k &gt;= index)</tt> is 
-     *          <tt>true</tt>; returns <code>-1</code> if the object is not 
-     *          found. (Returns <code>-1</code> if <tt>index</tt> &gt;= the
-     *          current size of this <tt>Vector</tt>.)
-     * @exception  IndexOutOfBoundsException  if <tt>index</tt> is negative.
-     * @see     Object#equals(Object)
-     */
-    public synchronized int indexOf(Object elem, int index) {
-	if (elem == null) {
-	    for (int i = index ; i < elementCount ; i++)
-		if (elementData[i]==null)
-		    return i;
-	} else {
-	    for (int i = index ; i < elementCount ; i++)
-		if (elem.equals(elementData[i]))
-		    return i;
-	}
-	return -1;
-    }
-
-    /**
-     * Returns the index of the last occurrence of the specified object in
-     * this vector.
-     *
-     * @param   elem   the desired component.
-     * @return  the index of the last occurrence of the specified object in
-     *          this vector, that is, the largest value <tt>k</tt> such that 
-     *          <tt>elem.equals(elementData[k])</tt> is <tt>true</tt>; 
-     *          returns <code>-1</code> if the object is not found.
-     */
-    public synchronized int lastIndexOf(Object elem) {
-	return lastIndexOf(elem, elementCount-1);
-    }
-
-    /**
-     * Searches backwards for the specified object, starting from the 
-     * specified index, and returns an index to it. 
-     *
-     * @param  elem    the desired component.
-     * @param  index   the index to start searching from.
-     * @return the index of the last occurrence of the specified object in this
-     *          vector at position less than or equal to <code>index</code> in
-     *          the vector, that is, the largest value <tt>k</tt> such that 
-     *          <tt>elem.equals(elementData[k]) && (k &lt;= index)</tt> is 
-     *          <tt>true</tt>; <code>-1</code> if the object is not found.
-     *          (Returns <code>-1</code> if <tt>index</tt> is negative.)
-     * @exception  IndexOutOfBoundsException  if <tt>index</tt> is greater
-     *             than or equal to the current size of this vector.
-     */
-    public synchronized int lastIndexOf(Object elem, int index) {
-        if (index >= elementCount)
-            throw new IndexOutOfBoundsException(index + " >= "+ elementCount);
-
-	if (elem == null) {
-	    for (int i = index; i >= 0; i--)
-		if (elementData[i]==null)
-		    return i;
-	} else {
-	    for (int i = index; i >= 0; i--)
-		if (elem.equals(elementData[i]))
-		    return i;
-	}
-	return -1;
-    }
-
-    /**
-     * Returns the component at the specified index.<p>
-     *
-     * This method is identical in functionality to the get method
-     * (which is part of the List interface).
-     *
-     * @param      index   an index into this vector.
-     * @return     the component at the specified index.
-     * @exception  ArrayIndexOutOfBoundsException  if the <tt>index</tt> 
-     *             is negative or not less than the current size of this 
-     *             <tt>Vector</tt> object.
-     *             given.
-     * @see	   #get(int)
-     * @see	   List
-     */
-    public synchronized Object elementAt(int index) {
-	if (index >= elementCount) {
-	    throw new ArrayIndexOutOfBoundsException(index + " >= " + elementCount);
+		this.capacityIncrement = capacityIncrement;
 	}
 
-        return elementData[index];
-    }
-
-    /**
-     * Returns the first component (the item at index <tt>0</tt>) of 
-     * this vector.
-     *
-     * @return     the first component of this vector.
-     * @exception  NoSuchElementException  if this vector has no components.
-     */
-    public synchronized Object firstElement() {
-	if (elementCount == 0) {
-	    throw new NoSuchElementException();
+	/**
+	 * Constructs a new instance of <code>Vector</code> containing the
+	 * elements in <code>collection</code>. The order of the elements in the
+	 * new <code>Vector</code> is dependent on the iteration order of the seed
+	 * collection.
+	 * 
+	 * @param collection
+	 *            the collection of elements to add
+	 */
+	public Vector(Collection<? extends E> collection) {
+		this(collection.size(), 0);
+		Iterator<? extends E> it = collection.iterator();
+		while (it.hasNext()) {
+            elementData[elementCount++] = it.next();
+        }
 	}
-	return elementData[0];
+    
+    @SuppressWarnings("unchecked")
+    private E[] newElementArray(int size) {
+        return (E[])new Object[size];
     }
 
-    /**
-     * Returns the last component of the vector.
-     *
-     * @return  the last component of the vector, i.e., the component at index
-     *          <code>size()&nbsp;-&nbsp;1</code>.
-     * @exception  NoSuchElementException  if this vector is empty.
-     */
-    public synchronized Object lastElement() {
-	if (elementCount == 0) {
-	    throw new NoSuchElementException();
+	/**
+	 * Adds the specified object into this Vector at the specified location. The
+	 * object is inserted before any previous element at the specified location.
+	 * If the location is equal to the size of this Vector, the object is added
+	 * at the end.
+	 * 
+	 * @param location
+	 *            the index at which to insert the element
+	 * @param object
+	 *            the object to insert in this Vector
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || > size()</code>
+	 * 
+	 * @see #addElement
+	 * @see #size
+	 */
+	@Override
+    public void add(int location, E object) {
+		insertElementAt(object, location);
 	}
-	return elementData[elementCount - 1];
-    }
 
-    /**
-     * Sets the component at the specified <code>index</code> of this 
-     * vector to be the specified object. The previous component at that 
-     * position is discarded.<p>
-     *
-     * The index must be a value greater than or equal to <code>0</code> 
-     * and less than the current size of the vector. <p>
-     *
-     * This method is identical in functionality to the set method
-     * (which is part of the List interface). Note that the set method reverses
-     * the order of the parameters, to more closely match array usage.  Note
-     * also that the set method returns the old value that was stored at the
-     * specified position.
-     *
-     * @param      obj     what the component is to be set to.
-     * @param      index   the specified index.
-     * @exception  ArrayIndexOutOfBoundsException  if the index was invalid.
-     * @see        #size()
-     * @see        List
-     * @see	   #set(int, java.lang.Object)
-     */
-    public synchronized void setElementAt(Object obj, int index) {
-	if (index >= elementCount) {
-	    throw new ArrayIndexOutOfBoundsException(index + " >= " + 
-						     elementCount);
+	/**
+	 * Adds the specified object at the end of this Vector.
+	 * 
+	 * @param object
+	 *            the object to add to the Vector
+	 * @return true
+	 */
+	@Override
+    public boolean add(E object) {
+		addElement(object);
+		return true;
 	}
-	elementData[index] = obj;
-    }
 
-    /**
-     * Deletes the component at the specified index. Each component in 
-     * this vector with an index greater or equal to the specified 
-     * <code>index</code> is shifted downward to have an index one 
-     * smaller than the value it had previously. The size of this vector 
-     * is decreased by <tt>1</tt>.<p>
-     *
-     * The index must be a value greater than or equal to <code>0</code> 
-     * and less than the current size of the vector. <p>
-     *
-     * This method is identical in functionality to the remove method
-     * (which is part of the List interface).  Note that the remove method
-     * returns the old value that was stored at the specified position.
-     *
-     * @param      index   the index of the object to remove.
-     * @exception  ArrayIndexOutOfBoundsException  if the index was invalid.
-     * @see        #size()
-     * @see	   #remove(int)
-     * @see	   List
-     */
-    public synchronized void removeElementAt(int index) {
-	modCount++;
-	if (index >= elementCount) {
-	    throw new ArrayIndexOutOfBoundsException(index + " >= " + 
-						     elementCount);
+	/**
+	 * Inserts the objects in the specified Collection at the specified location
+	 * in this Vector. The objects are inserted in the order in which they are
+	 * returned from the Collection iterator.
+	 * 
+	 * @param location
+	 *            the location to insert the objects
+	 * @param collection
+	 *            the Collection of objects
+	 * @return true if this Vector is modified, false otherwise
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0</code> or
+	 *                <code>location > size()</code>
+	 */
+	@Override
+    public synchronized boolean addAll(int location, Collection<? extends E> collection) {
+		if (0 <= location && location <= elementCount) {
+			int size = collection.size();
+			if (size == 0) {
+                return false;
+            }
+			int required = size - (elementData.length - elementCount);
+			if (required > 0) {
+                growBy(required);
+            }
+			int count = elementCount - location;
+			if (count > 0) {
+                System.arraycopy(elementData, location, elementData, location
+						+ size, count);
+            }
+			Iterator<? extends E> it = collection.iterator();
+			while (it.hasNext()) {
+                elementData[location++] = it.next();
+            }
+			elementCount += size;
+			modCount++;
+			return true;
+		}
+        throw new ArrayIndexOutOfBoundsException(location);
 	}
-	else if (index < 0) {
-	    throw new ArrayIndexOutOfBoundsException(index);
+
+	/**
+	 * Adds the objects in the specified Collection to the end of this Vector.
+	 * 
+	 * @param collection
+	 *            the Collection of objects
+	 * @return true if this Vector is modified, false otherwise
+	 */
+	@Override
+    public synchronized boolean addAll(Collection<? extends E> collection) {
+		return addAll(elementCount, collection);
 	}
-	int j = elementCount - index - 1;
-	if (j > 0) {
-	    System.arraycopy(elementData, index + 1, elementData, index, j);
+
+	/**
+	 * Adds the specified object at the end of this Vector.
+	 * 
+	 * @param object
+	 *            the object to add to the Vector
+	 */
+	public synchronized void addElement(E object) {
+		if (elementCount == elementData.length) {
+            growByOne();
+        }
+		elementData[elementCount++] = object;
+		modCount++;
 	}
-	elementCount--;
-	elementData[elementCount] = null; /* to let gc do its work */
-    }
 
-    /**
-     * Inserts the specified object as a component in this vector at the 
-     * specified <code>index</code>. Each component in this vector with 
-     * an index greater or equal to the specified <code>index</code> is 
-     * shifted upward to have an index one greater than the value it had 
-     * previously. <p>
-     *
-     * The index must be a value greater than or equal to <code>0</code> 
-     * and less than or equal to the current size of the vector. (If the
-     * index is equal to the current size of the vector, the new element
-     * is appended to the Vector.)<p>
-     *
-     * This method is identical in functionality to the add(Object, int) method
-     * (which is part of the List interface). Note that the add method reverses
-     * the order of the parameters, to more closely match array usage.
-     *
-     * @param      obj     the component to insert.
-     * @param      index   where to insert the new component.
-     * @exception  ArrayIndexOutOfBoundsException  if the index was invalid.
-     * @see        #size()
-     * @see	   #add(int, Object)
-     * @see	   List
-     */
-    public synchronized void insertElementAt(Object obj, int index) {
-	modCount++;
-	if (index > elementCount) {
-	    throw new ArrayIndexOutOfBoundsException(index
-						     + " > " + elementCount);
+	/**
+	 * Answers the number of elements this Vector can hold without growing.
+	 * 
+	 * @return the capacity of this Vector
+	 * 
+	 * @see #ensureCapacity
+	 * @see #size
+	 */
+	public synchronized int capacity() {
+		return elementData.length;
 	}
-	ensureCapacityHelper(elementCount + 1);
-	System.arraycopy(elementData, index, elementData, index + 1, elementCount - index);
-	elementData[index] = obj;
-	elementCount++;
-    }
 
-    /**
-     * Adds the specified component to the end of this vector, 
-     * increasing its size by one. The capacity of this vector is 
-     * increased if its size becomes greater than its capacity. <p>
-     *
-     * This method is identical in functionality to the add(Object) method
-     * (which is part of the List interface).
-     *
-     * @param   obj   the component to be added.
-     * @see	   #add(Object)
-     * @see	   List
-     */
-    public synchronized void addElement(Object obj) {
-	modCount++;
-	ensureCapacityHelper(elementCount + 1);
-	elementData[elementCount++] = obj;
-    }
-
-    /**
-     * Removes the first (lowest-indexed) occurrence of the argument 
-     * from this vector. If the object is found in this vector, each 
-     * component in the vector with an index greater or equal to the 
-     * object's index is shifted downward to have an index one smaller 
-     * than the value it had previously.<p>
-     *
-     * This method is identical in functionality to the remove(Object) 
-     * method (which is part of the List interface).
-     *
-     * @param   obj   the component to be removed.
-     * @return  <code>true</code> if the argument was a component of this
-     *          vector; <code>false</code> otherwise.
-     * @see	List#remove(Object)
-     * @see	List
-     */
-    public synchronized boolean removeElement(Object obj) {
-	modCount++;
-	int i = indexOf(obj);
-	if (i >= 0) {
-	    removeElementAt(i);
-	    return true;
-	}
-	return false;
-    }
-
-    /**
-     * Removes all components from this vector and sets its size to zero.<p>
-     *
-     * This method is identical in functionality to the clear method
-     * (which is part of the List interface).
-     *
-     * @see	#clear
-     * @see	List
-     */
-    public synchronized void removeAllElements() {
-        modCount++;
-	// Let gc do its work
-	for (int i = 0; i < elementCount; i++)
-	    elementData[i] = null;
-
-	elementCount = 0;
-    }
-
-    /**
-     * Returns a clone of this vector. The copy will contain a
-     * reference to a clone of the internal data array, not a reference 
-     * to the original internal data array of this <tt>Vector</tt> object. 
-     *
-     * @return  a clone of this vector.
-     */
-    public synchronized Object clone() {
-	try { 
-	    Vector v = (Vector)super.clone();
-	    v.elementData = new Object[elementCount];
-	    System.arraycopy(elementData, 0, v.elementData, 0, elementCount);
-	    v.modCount = 0;
-	    return v;
-	} catch (CloneNotSupportedException e) { 
-	    // this shouldn't happen, since we are Cloneable
-	    throw new InternalError();
-	}
-    }
-
-    /**
-     * Returns an array containing all of the elements in this Vector
-     * in the correct order.
-     *
-     * @since 1.2
-     */
-    public synchronized Object[] toArray() {
-	Object[] result = new Object[elementCount];
-	System.arraycopy(elementData, 0, result, 0, elementCount);
-	return result;
-    }
-
-    /**
-     * Returns an array containing all of the elements in this Vector in the
-     * correct order; the runtime type of the returned array is that of the
-     * specified array.  If the Vector fits in the specified array, it is
-     * returned therein.  Otherwise, a new array is allocated with the runtime
-     * type of the specified array and the size of this Vector.<p>
-     *
-     * If the Vector fits in the specified array with room to spare
-     * (i.e., the array has more elements than the Vector),
-     * the element in the array immediately following the end of the
-     * Vector is set to null.  This is useful in determining the length
-     * of the Vector <em>only</em> if the caller knows that the Vector
-     * does not contain any null elements.
-     *
-     * @param a the array into which the elements of the Vector are to
-     *		be stored, if it is big enough; otherwise, a new array of the
-     * 		same runtime type is allocated for this purpose.
-     * @return an array containing the elements of the Vector.
-     * @exception ArrayStoreException the runtime type of a is not a supertype
-     * of the runtime type of every element in this Vector.
-     * @throws NullPointerException if the given array is null.
-     * @since 1.2
-     */
-    public synchronized Object[] toArray(Object a[]) {
-        if (a.length < elementCount)
-            a = (Object[])java.lang.reflect.Array.newInstance(
-                                a.getClass().getComponentType(), elementCount);
-
-	System.arraycopy(elementData, 0, a, 0, elementCount);
-
-        if (a.length > elementCount)
-            a[elementCount] = null;
-
-        return a;
-    }
-
-    // Positional Access Operations
-
-    /**
-     * Returns the element at the specified position in this Vector.
-     *
-     * @param index index of element to return.
-     * @return object at the specified index
-     * @exception ArrayIndexOutOfBoundsException index is out of range (index
-     * 		  &lt; 0 || index &gt;= size()).
-     * @since 1.2
-     */
-    public synchronized Object get(int index) {
-	if (index >= elementCount)
-	    throw new ArrayIndexOutOfBoundsException(index);
-
-	return elementData[index];
-    }
-
-    /**
-     * Replaces the element at the specified position in this Vector with the
-     * specified element.
-     *
-     * @param index index of element to replace.
-     * @param element element to be stored at the specified position.
-     * @return the element previously at the specified position.
-     * @exception ArrayIndexOutOfBoundsException index out of range
-     *		  (index &lt; 0 || index &gt;= size()).
-     * @since 1.2
-     */
-    public synchronized Object set(int index, Object element) {
-	if (index >= elementCount)
-	    throw new ArrayIndexOutOfBoundsException(index);
-
-	Object oldValue = elementData[index];
-	elementData[index] = element;
-	return oldValue;
-    }
-
-    /**
-     * Appends the specified element to the end of this Vector.
-     *
-     * @param o element to be appended to this Vector.
-     * @return true (as per the general contract of Collection.add).
-     * @since 1.2
-     */
-    public synchronized boolean add(Object o) {
-	modCount++;
-	ensureCapacityHelper(elementCount + 1);
-	elementData[elementCount++] = o;
-        return true;
-    }
-
-    /**
-     * Removes the first occurrence of the specified element in this Vector
-     * If the Vector does not contain the element, it is unchanged.  More
-     * formally, removes the element with the lowest index i such that
-     * <code>(o==null ? get(i)==null : o.equals(get(i)))</code> (if such
-     * an element exists).
-     *
-     * @param o element to be removed from this Vector, if present.
-     * @return true if the Vector contained the specified element.
-     * @since 1.2
-     */
-    public boolean remove(Object o) {
-        return removeElement(o);
-    }
-
-    /**
-     * Inserts the specified element at the specified position in this Vector.
-     * Shifts the element currently at that position (if any) and any
-     * subsequent elements to the right (adds one to their indices).
-     *
-     * @param index index at which the specified element is to be inserted.
-     * @param element element to be inserted.
-     * @exception ArrayIndexOutOfBoundsException index is out of range
-     *		  (index &lt; 0 || index &gt; size()).
-     * @since 1.2
-     */
-    public void add(int index, Object element) {
-        insertElementAt(element, index);
-    }
-
-    /**
-     * Removes the element at the specified position in this Vector.
-     * shifts any subsequent elements to the left (subtracts one from their
-     * indices).  Returns the element that was removed from the Vector.
-     *
-     * @exception ArrayIndexOutOfBoundsException index out of range (index
-     * 		  &lt; 0 || index &gt;= size()).
-     * @param index the index of the element to removed.
-     * @return element that was removed
-     * @since 1.2
-     */
-    public synchronized Object remove(int index) {
-	modCount++;
-	if (index >= elementCount)
-	    throw new ArrayIndexOutOfBoundsException(index);
-	Object oldValue = elementData[index];
-
-	int numMoved = elementCount - index - 1;
-	if (numMoved > 0)
-	    System.arraycopy(elementData, index+1, elementData, index,
-			     numMoved);
-	elementData[--elementCount] = null; // Let gc do its work
-
-	return oldValue;
-    }
-
-    /**
-     * Removes all of the elements from this Vector.  The Vector will
-     * be empty after this call returns (unless it throws an exception).
-     *
-     * @since 1.2
-     */
+	/**
+	 * Removes all elements from this Vector, leaving it empty.
+	 * 
+	 * @see #isEmpty
+	 * @see #size
+	 */
+	@Override
     public void clear() {
-        removeAllElements();
-    }
+		removeAllElements();
+	}
 
-    // Bulk Operations
+	/**
+	 * Answers a new Vector with the same elements, size, capacity and capacity
+	 * increment as this Vector.
+	 * 
+	 * @return a shallow copy of this Vector
+	 * 
+	 * @see java.lang.Cloneable
+	 */
+	@Override
+    @SuppressWarnings("unchecked")
+    public synchronized Object clone() {
+		try {
+			Vector<E> vector = (Vector<E>) super.clone();
+			vector.elementData = elementData.clone();
+			return vector;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
 
-    /**
-     * Returns true if this Vector contains all of the elements in the
-     * specified Collection.
-     *
-     * @param   c a collection whose elements will be tested for containment
-     *          in this Vector
-     * @return true if this Vector contains all of the elements in the
-     *	       specified collection.
-     * @throws NullPointerException if the specified collection is null.
-     */
-    public synchronized boolean containsAll(Collection c) {
-        return super.containsAll(c);
-    }
+	/**
+	 * Searches this Vector for the specified object.
+	 * 
+	 * @param object
+	 *            the object to look for in this Vector
+	 * @return true if object is an element of this Vector, false otherwise
+	 * 
+	 * @see #indexOf(Object)
+	 * @see #indexOf(Object, int)
+	 * @see java.lang.Object#equals
+	 */
+	@Override
+    public boolean contains(Object object) {
+		return indexOf(object, 0) != -1;
+	}
 
-    /**
-     * Appends all of the elements in the specified Collection to the end of
-     * this Vector, in the order that they are returned by the specified
-     * Collection's Iterator.  The behavior of this operation is undefined if
-     * the specified Collection is modified while the operation is in progress.
-     * (This implies that the behavior of this call is undefined if the
-     * specified Collection is this Vector, and this Vector is nonempty.)
-     *
-     * @param c elements to be inserted into this Vector.
-     * @return <tt>true</tt> if this Vector changed as a result of the call.
-     * @throws NullPointerException if the specified collection is null.
-     * @since 1.2
-     */
-    public synchronized boolean addAll(Collection c) {
-	modCount++;
-        Object[] a = c.toArray();
-        int numNew = a.length;
-	ensureCapacityHelper(elementCount + numNew);
-        System.arraycopy(a, 0, elementData, elementCount, numNew);
-        elementCount += numNew;
-	return numNew != 0;
-    }
+	/**
+	 * Searches this Vector for all objects in the specified Collection.
+	 * 
+	 * @param collection
+	 *            the Collection of objects
+	 * @return true if all objects in the specified Collection are elements of
+	 *         this Vector, false otherwise
+	 */
+	@Override
+    public synchronized boolean containsAll(Collection<?> collection) {
+		return super.containsAll(collection);
+	}
 
-    /**
-     * Removes from this Vector all of its elements that are contained in the
-     * specified Collection.
-     *
-     * @param c a collection of elements to be removed from the Vector
-     * @return true if this Vector changed as a result of the call.
-     * @throws NullPointerException if the specified collection is null.
-     * @since 1.2
-     */
-    public synchronized boolean removeAll(Collection c) {
-        return super.removeAll(c);
-    }
+	/**
+	 * Attempts to copy elements contained by this <code>Vector</code> into
+	 * the corresponding elements of the supplied <code>Object</code> array.
+	 * 
+	 * @param elements
+	 *            the <code>Object</code> array into which the elements of
+	 *            this Vector are copied
+	 * 
+	 * @see #clone
+	 */
+	public synchronized void copyInto(Object[] elements) {
+		System.arraycopy(elementData, 0, elements, 0, elementCount);
+	}
 
-    /**
-     * Retains only the elements in this Vector that are contained in the
-     * specified Collection.  In other words, removes from this Vector all
-     * of its elements that are not contained in the specified Collection. 
-     *
-     * @param c a collection of elements to be retained in this Vector
-     *          (all other elements are removed)
-     * @return true if this Vector changed as a result of the call.
-     * @throws NullPointerException if the specified collection is null.
-     * @since 1.2
-     */
-    public synchronized boolean retainAll(Collection c)  {
-        return super.retainAll(c);
-    }
+	/**
+	 * Answers the element at the specified location in this Vector.
+	 * 
+	 * @param location
+	 *            the index of the element to return in this Vector
+	 * @return the element at the specified location
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see #size
+	 */
+	public synchronized E elementAt(int location) {
+		if (location < elementCount) {
+			return (E)elementData[location];
+		}
+		throw new ArrayIndexOutOfBoundsException(location);
+	}
 
-    /**
-     * Inserts all of the elements in in the specified Collection into this
-     * Vector at the specified position.  Shifts the element currently at
-     * that position (if any) and any subsequent elements to the right
-     * (increases their indices).  The new elements will appear in the Vector  
-     * in the order that they are returned by the specified Collection's
-     * iterator.
-     *
-     * @param index index at which to insert first element
-     *		    from the specified collection.
-     * @param c elements to be inserted into this Vector.
-     * @return <tt>true</tt> if this Vector changed as a result of the call.
-     * @exception ArrayIndexOutOfBoundsException index out of range (index
-     *		  &lt; 0 || index &gt; size()).
-     * @throws NullPointerException if the specified collection is null.
-     * @since 1.2
-     */
-    public synchronized boolean addAll(int index, Collection c) {
-	modCount++;
-	if (index < 0 || index > elementCount)
-	    throw new ArrayIndexOutOfBoundsException(index);
+	/**
+	 * Answers an Enumeration on the elements of this Vector. The results of the
+	 * Enumeration may be affected if the contents of this Vector are modified.
+	 * 
+	 * @return an Enumeration of the elements of this Vector
+	 * 
+	 * @see #elementAt
+	 * @see Enumeration
+	 */
+	public Enumeration<E> elements() {
+		return new Enumeration<E>() {
+			int pos = 0;
 
-        Object[] a = c.toArray();
-	int numNew = a.length;
-	ensureCapacityHelper(elementCount + numNew);
+			public boolean hasMoreElements() {
+				return pos < elementCount;
+			}
 
-	int numMoved = elementCount - index;
-	if (numMoved > 0)
-	    System.arraycopy(elementData, index, elementData, index + numNew,
-			     numMoved);
+			public E nextElement() {
+				synchronized (Vector.this) {
+					if (pos < elementCount) {
+						return (E)elementData[pos++];
+					}
+				}
+				throw new NoSuchElementException();
+			}
+		};
+	}
 
-        System.arraycopy(a, 0, elementData, index, numNew);
-	elementCount += numNew;
-	return numNew != 0;
-    }
+	/**
+	 * Ensures that this Vector can hold the specified number of elements
+	 * without growing.
+	 * 
+	 * @param minimumCapacity
+	 *            the minimum number of elements that this vector will hold
+	 *            before growing
+	 * 
+	 * @see #capacity
+	 */
+	public synchronized void ensureCapacity(int minimumCapacity) {
+		if (elementData.length < minimumCapacity) {
+			int next = (capacityIncrement <= 0 ? elementData.length
+					: capacityIncrement)
+					+ elementData.length;
+			grow(minimumCapacity > next ? minimumCapacity : next);
+		}
+	}
 
-    /**
-     * Compares the specified Object with this Vector for equality.  Returns
-     * true if and only if the specified Object is also a List, both Lists
-     * have the same size, and all corresponding pairs of elements in the two
-     * Lists are <em>equal</em>.  (Two elements <code>e1</code> and
-     * <code>e2</code> are <em>equal</em> if <code>(e1==null ? e2==null :
-     * e1.equals(e2))</code>.)  In other words, two Lists are defined to be
-     * equal if they contain the same elements in the same order.
-     *
-     * @param o the Object to be compared for equality with this Vector.
-     * @return true if the specified Object is equal to this Vector
-     */
-    public synchronized boolean equals(Object o) {
-        return super.equals(o);
-    }
+	/**
+	 * Compares the specified object to this Vector and answer if they are
+	 * equal. The object must be a List which contains the same objects in the
+	 * same order.
+	 * 
+	 * @param object
+	 *            the object to compare with this object
+	 * @return true if the specified object is equal to this Vector, false
+	 *         otherwise
+	 * 
+	 * @see #hashCode
+	 */
+	@Override
+    public synchronized boolean equals(Object object) {
+		if (this == object) {
+            return true;
+        }
+		if (object instanceof List) {
+			List<?> list = (List) object;
+			if (list.size() != size()) {
+                return false;
+            }
 
-    /**
-     * Returns the hash code value for this Vector.
-     */
+			int index = 0;
+			Iterator<?> it = list.iterator();
+			while (it.hasNext()) {
+				Object e1 = elementData[index++], e2 = it.next();
+				if (!(e1 == null ? e2 == null : e1.equals(e2))) {
+                    return false;
+                }
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Answers the first element in this Vector.
+	 * 
+	 * @return the element at the first position
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this vector is empty
+	 * 
+	 * @see #elementAt
+	 * @see #lastElement
+	 * @see #size
+	 */
+	public synchronized E firstElement() {
+		if (elementCount > 0) {
+			return (E)elementData[0];
+		}
+		throw new NoSuchElementException();
+	}
+
+	/**
+	 * Answers the element at the specified location in this Vector.
+	 * 
+	 * @param location
+	 *            the index of the element to return in this Vector
+	 * @return the element at the specified location
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see #size
+	 */
+	@Override
+    public E get(int location) {
+		return elementAt(location);
+	}
+
+	private void grow(int newCapacity) {
+		E[] newData = newElementArray(newCapacity);
+		// Assumes elementCount is <= newCapacity
+        assert elementCount <= newCapacity;
+		System.arraycopy(elementData, 0, newData, 0, elementCount); 
+		elementData = newData;
+	}
+
+	/**
+	 * JIT optimization
+	 */
+	private void growByOne() {
+		int adding = 0;
+		if (capacityIncrement <= 0) {
+			if ((adding = elementData.length) == 0) {
+                adding = 1;
+            }
+		} else {
+            adding = capacityIncrement;
+        }
+
+		E[] newData = newElementArray(elementData.length + adding);
+		System.arraycopy(elementData, 0, newData, 0, elementCount);
+		elementData = newData;
+	}
+
+	private void growBy(int required) {
+		int adding = 0;
+		if (capacityIncrement <= 0) {
+			if ((adding = elementData.length) == 0) {
+                adding = required;
+            }
+			while (adding < required) {
+                adding += adding;
+            }
+		} else {
+			adding = (required / capacityIncrement) * capacityIncrement;
+			if (adding < required) {
+                adding += capacityIncrement;
+            }
+		}
+		E[] newData = newElementArray(elementData.length + adding);
+		System.arraycopy(elementData, 0, newData, 0, elementCount);
+		elementData = newData;
+	}
+
+	/**
+	 * Answers an integer hash code for the receiver. Objects which are equal
+	 * answer the same value for this method.
+	 * 
+	 * @return the receiver's hash
+	 * 
+	 * @see #equals
+	 */
+	@Override
     public synchronized int hashCode() {
-        return super.hashCode();
-    }
+		int result = 1;
+		for (int i = 0; i < elementCount; i++) {
+            result = (31 * result)
+					+ (elementData[i] == null ? 0 : elementData[i].hashCode());
+        }
+		return result;
+	}
 
-    /**
-     * Returns a string representation of this Vector, containing
-     * the String representation of each element.
-     */
+	/**
+	 * Searches in this Vector for the index of the specified object. The search
+	 * for the object starts at the beginning and moves towards the end of this
+	 * Vector.
+	 * 
+	 * @param object
+	 *            the object to find in this Vector
+	 * @return the index in this Vector of the specified element, -1 if the
+	 *         element isn't found
+	 * 
+	 * @see #contains
+	 * @see #lastIndexOf(Object)
+	 * @see #lastIndexOf(Object, int)
+	 */
+	@Override
+    public int indexOf(Object object) {
+		return indexOf(object, 0);
+	}
+
+	/**
+	 * Searches in this Vector for the index of the specified object. The search
+	 * for the object starts at the specified location and moves towards the end
+	 * of this Vector.
+	 * 
+	 * @param object
+	 *            the object to find in this Vector
+	 * @param location
+	 *            the index at which to start searching
+	 * @return the index in this Vector of the specified element, -1 if the
+	 *         element isn't found
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0</code>
+	 * 
+	 * @see #contains
+	 * @see #lastIndexOf(Object)
+	 * @see #lastIndexOf(Object, int)
+	 */
+	public synchronized int indexOf(Object object, int location) {
+		if (object != null) {
+			for (int i = location; i < elementCount; i++) {
+                if (object.equals(elementData[i])) {
+                    return i;
+                }
+            }
+		} else {
+			for (int i = location; i < elementCount; i++) {
+                if (elementData[i] == null) {
+                    return i;
+                }
+            }
+		}
+		return -1;
+	}
+
+	/**
+	 * Inserts the specified object into this Vector at the specified location.
+	 * This object is inserted before any previous element at the specified
+	 * location. If the location is equal to the size of this Vector, the object
+	 * is added at the end.
+	 * 
+	 * @param object
+	 *            the object to insert in this Vector
+	 * @param location
+	 *            the index at which to insert the element
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || > size()</code>
+	 * 
+	 * @see #addElement
+	 * @see #size
+	 */
+	public synchronized void insertElementAt(E object, int location) {
+		if (0 <= location && location <= elementCount) {
+			if (elementCount == elementData.length) {
+                growByOne();
+            }
+			int count = elementCount - location;
+			if (count > 0) {
+                System.arraycopy(elementData, location, elementData,
+						location + 1, count);
+            }
+			elementData[location] = object;
+			elementCount++;
+			modCount++;
+		} else {
+            throw new ArrayIndexOutOfBoundsException(location);
+        }
+	}
+
+	/**
+	 * Answers if this Vector has no elements, a size of zero.
+	 * 
+	 * @return true if this Vector has no elements, false otherwise
+	 * 
+	 * @see #size
+	 */
+	@Override
+    public synchronized boolean isEmpty() {
+		return elementCount == 0;
+	}
+
+	/**
+	 * Answers the last element in this Vector.
+	 * 
+	 * @return the element at the last position
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this vector is empty
+	 * 
+	 * @see #elementAt
+	 * @see #firstElement
+	 * @see #size
+	 */
+	public synchronized E lastElement() {
+		try {
+			return (E)elementData[elementCount - 1];
+		} catch (IndexOutOfBoundsException e) {
+			throw new NoSuchElementException();
+		}
+	}
+
+	/**
+	 * Searches in this Vector for the index of the specified object. The search
+	 * for the object starts at the end and moves towards the start of this
+	 * Vector.
+	 * 
+	 * @param object
+	 *            the object to find in this Vector
+	 * @return the index in this Vector of the specified element, -1 if the
+	 *         element isn't found
+	 * 
+	 * @see #contains
+	 * @see #indexOf(Object)
+	 * @see #indexOf(Object, int)
+	 */
+	@Override
+    public synchronized int lastIndexOf(Object object) {
+		return lastIndexOf(object, elementCount - 1);
+	}
+
+	/**
+	 * Searches in this Vector for the index of the specified object. The search
+	 * for the object starts at the specified location and moves towards the
+	 * start of this Vector.
+	 * 
+	 * @param object
+	 *            the object to find in this Vector
+	 * @param location
+	 *            the index at which to start searching
+	 * @return the index in this Vector of the specified element, -1 if the
+	 *         element isn't found
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location >= size()</code>
+	 * 
+	 * @see #contains
+	 * @see #indexOf(Object)
+	 * @see #indexOf(Object, int)
+	 */
+	public synchronized int lastIndexOf(Object object, int location) {
+		if (location < elementCount) {
+			if (object != null) {
+				for (int i = location; i >= 0; i--) {
+                    if (object.equals(elementData[i])) {
+                        return i;
+                    }
+                }
+			} else {
+				for (int i = location; i >= 0; i--) {
+                    if (elementData[i] == null) {
+                        return i;
+                    }
+                }
+			}
+			return -1;
+		}
+        throw new ArrayIndexOutOfBoundsException(location);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.List#remove(int)
+	 */
+	@Override
+    public synchronized E remove(int location) {
+		if (location < elementCount) {
+			E result = (E)elementData[location];
+			elementCount--;
+			int size = elementCount - location;
+			if (size > 0) {
+                System.arraycopy(elementData, location + 1, elementData,
+						location, size);
+            }
+			elementData[elementCount] = null;
+			modCount++;
+			return result;
+		}
+        throw new ArrayIndexOutOfBoundsException(location);
+	}
+
+	/**
+	 * Removes the first occurrence, starting at the beginning and moving
+	 * towards the end, of the specified object from this Vector.
+	 * 
+	 * @param object
+	 *            the object to remove from this Vector
+	 * @return true if the specified object was found, false otherwise
+	 * 
+	 * @see #removeAllElements
+	 * @see #removeElementAt
+	 * @see #size
+	 */
+	@Override
+    public boolean remove(Object object) {
+		return removeElement(object);
+	}
+
+	/**
+	 * Removes all occurrences in this Vector of each object in the specified
+	 * Collection.
+	 * 
+	 * @param collection
+	 *            the Collection of objects to remove
+	 * @return true if this Vector is modified, false otherwise
+	 */
+	@Override
+    public synchronized boolean removeAll(Collection<?> collection) {
+		return super.removeAll(collection);
+	}
+
+	/**
+	 * Removes all elements from this Vector, leaving the size zero and the
+	 * capacity unchanged.
+	 * 
+	 * @see #isEmpty
+	 * @see #size
+	 */
+	public synchronized void removeAllElements() {
+		Arrays.fill(elementData, 0, elementCount, null);
+		modCount++;
+		elementCount = 0;
+	}
+
+	/**
+	 * Removes the first occurrence, starting at the beginning and moving
+	 * towards the end, of the specified object from this Vector.
+	 * 
+	 * @param object
+	 *            the object to remove from this Vector
+	 * @return true if the specified object was found, false otherwise
+	 * 
+	 * @see #removeAllElements
+	 * @see #removeElementAt
+	 * @see #size
+	 */
+	public synchronized boolean removeElement(Object object) {
+		int index;
+		if ((index = indexOf(object, 0)) == -1) {
+            return false;
+        }
+		removeElementAt(index);
+		return true;
+	}
+
+	/**
+	 * Removes the element found at index position <code>location</code> from
+	 * this <code>Vector</code> and decrements the size accordingly.
+	 * 
+	 * @param location
+	 *            the index of the element to remove
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see #removeElement
+	 * @see #removeAllElements
+	 * @see #size
+	 */
+	public synchronized void removeElementAt(int location) {
+		if (0 <= location && location < elementCount) {
+			elementCount--;
+			int size = elementCount - location;
+			if (size > 0) {
+                System.arraycopy(elementData, location + 1, elementData,
+						location, size);
+            }
+			elementData[elementCount] = null;
+			modCount++;
+		} else {
+            throw new ArrayIndexOutOfBoundsException(location);
+        }
+	}
+
+	/**
+	 * Removes the objects in the specified range from the start to the, but not
+	 * including, end index.
+	 * 
+	 * @param start
+	 *            the index at which to start removing
+	 * @param end
+	 *            the index one past the end of the range to remove
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>start < 0, start > end</code> or
+	 *                <code>end > size()</code>
+	 */
+	@Override
+    protected void removeRange(int start, int end) {
+		if (start >= 0 && start <= end && end <= size()) {
+			if (start == end) {
+                return;
+            }
+			if (end != elementCount) {
+				System.arraycopy(elementData, end, elementData, start,
+						elementCount - end);
+				int newCount = elementCount - (end - start);
+				Arrays.fill(elementData, newCount, elementCount, null);
+				elementCount = newCount;
+			} else {
+				Arrays.fill(elementData, start, elementCount, null);
+				elementCount = start;
+			}
+			modCount++;
+		} else {
+            throw new IndexOutOfBoundsException();
+        }
+	}
+
+	/**
+	 * Removes all objects from this Vector that are not contained in the
+	 * specified Collection.
+	 * 
+	 * @param collection
+	 *            the Collection of objects to retain
+	 * @return true if this Vector is modified, false otherwise
+	 */
+	@Override
+    public synchronized boolean retainAll(Collection<?> collection) {
+		return super.retainAll(collection);
+	}
+
+	/**
+	 * Replaces the element at the specified location in this Vector with the
+	 * specified object.
+	 * 
+	 * @param location
+	 *            the index at which to put the specified object
+	 * @param object
+	 *            the object to add to this Vector
+	 * @return the previous element at the location
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see #size
+	 */
+	@Override
+    public synchronized E set(int location, E object) {
+		if (location < elementCount) {
+			E result = (E)elementData[location];
+			elementData[location] = object;
+			return result;
+		}
+        throw new ArrayIndexOutOfBoundsException(location);
+	}
+
+	/**
+	 * Replaces the element at the specified location in this Vector with the
+	 * specified object.
+	 * 
+	 * @param object
+	 *            the object to add to this Vector
+	 * @param location
+	 *            the index at which to put the specified object
+	 * 
+	 * @exception ArrayIndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see #size
+	 */
+	public synchronized void setElementAt(E object, int location) {
+		if (location < elementCount) {
+            elementData[location] = object;
+        } else {
+            throw new ArrayIndexOutOfBoundsException(location);
+        }
+	}
+
+	/**
+	 * Sets the size of this Vector to the specified size. If there are more
+	 * than length elements in this Vector, the elements at end are lost. If
+	 * there are less than length elements in the Vector, the additional
+	 * elements contain null.
+	 * 
+	 * @param length
+	 *            the new size of this Vector
+	 * 
+	 * @see #size
+	 */
+	public synchronized void setSize(int length) {
+		if (length == elementCount) {
+            return;
+        }
+		ensureCapacity(length);
+		if (elementCount > length) {
+			Arrays.fill(elementData, length, elementCount, null);
+		}
+		elementCount = length;
+		modCount++;
+	}
+
+	/**
+	 * Answers the number of elements in this Vector.
+	 * 
+	 * @return the number of elements in this Vector
+	 * 
+	 * @see #elementCount
+	 * @see #lastElement
+	 */
+	@Override
+    public synchronized int size() {
+		return elementCount;
+	}
+
+	/**
+	 * Answers a List of the specified portion of this Vector from the start
+	 * index to one less than the end index. The returned List is backed by this
+	 * Vector so changes to one are reflected by the other.
+	 * 
+	 * @param start
+	 *            the index at which to start the sublist
+	 * @param end
+	 *            the index one past the end of the sublist
+	 * @return a List of a portion of this Vector
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>start < 0 or <code>end > size()</code>
+	 * @exception	IllegalArgumentException when <code>start > end</code>
+	 */
+	@Override
+    public synchronized List<E> subList(int start, int end) {
+		return new Collections.SynchronizedRandomAccessList<E>(
+                super.subList(start, end), this);
+	}
+
+	/**
+	 * Answers a new array containing all elements contained in this Vector.
+	 * 
+	 * @return an array of the elements from this Vector
+	 */
+	@Override
+    public synchronized Object[] toArray() {
+		Object[] result = new Object[elementCount];
+		System.arraycopy(elementData, 0, result, 0, elementCount);
+		return result;
+	}
+
+	/**
+	 * Answers an array containing all elements contained in this Vector. If the
+	 * specified array is large enough to hold the elements, the specified array
+	 * is used, otherwise an array of the same type is created. If the specified
+	 * array is used and is larger than this Vector, the array element following
+	 * the collection elements is set to null.
+	 * 
+	 * @param contents
+	 *            the array
+	 * @return an array of the elements from this Vector
+	 * 
+	 * @exception ArrayStoreException
+	 *                when the type of an element in this Vector cannot be
+	 *                stored in the type of the specified array
+	 */
+	@Override
+    @SuppressWarnings("unchecked")
+    public synchronized <T> T[] toArray(T[] contents) {
+		if (elementCount > contents.length) {
+            Class<?> ct = contents.getClass().getComponentType();
+			contents = (T[]) Array.newInstance(ct, elementCount);
+        }
+		System.arraycopy(elementData, 0, contents, 0, elementCount);
+		if (elementCount < contents.length) {
+            contents[elementCount] = null;
+        }
+		return contents;
+	}
+
+	/**
+	 * Answers the string representation of this Vector.
+	 * 
+	 * @return the string representation of this Vector
+	 * 
+	 * @see #elements
+	 */
+	@Override
     public synchronized String toString() {
-        return super.toString();
-    }
+		if (elementCount == 0) {
+            return "[]";
+        }
+		int length = elementCount - 1;
+		StringBuffer buffer = new StringBuffer(size() * 16);
+		buffer.append('[');
+		for (int i = 0; i < length; i++) {
+			if (elementData[i] == this) {
+				buffer.append("(this Collection)");
+			} else {
+				buffer.append(elementData[i]);
+			}
+			buffer.append(", ");
+		}
+		if (elementData[length] == this) {
+			buffer.append("(this Collection)");
+		} else {
+			buffer.append(elementData[length]);
+		}
+		buffer.append(']');
+		return buffer.toString();
+	}
 
-    /**
-     * Returns a view of the portion of this List between fromIndex,
-     * inclusive, and toIndex, exclusive.  (If fromIndex and ToIndex are
-     * equal, the returned List is empty.)  The returned List is backed by this
-     * List, so changes in the returned List are reflected in this List, and
-     * vice-versa.  The returned List supports all of the optional List
-     * operations supported by this List.<p>
-     *
-     * This method eliminates the need for explicit range operations (of
-     * the sort that commonly exist for arrays).   Any operation that expects
-     * a List can be used as a range operation by operating on a subList view
-     * instead of a whole List.  For example, the following idiom
-     * removes a range of elements from a List:
-     * <pre>
-     *	    list.subList(from, to).clear();
-     * </pre>
-     * Similar idioms may be constructed for indexOf and lastIndexOf,
-     * and all of the algorithms in the Collections class can be applied to
-     * a subList.<p>
-     *
-     * The semantics of the List returned by this method become undefined if
-     * the backing list (i.e., this List) is <i>structurally modified</i> in
-     * any way other than via the returned List.  (Structural modifications are
-     * those that change the size of the List, or otherwise perturb it in such
-     * a fashion that iterations in progress may yield incorrect results.)
-     *
-     * @param fromIndex low endpoint (inclusive) of the subList.
-     * @param toIndex high endpoint (exclusive) of the subList.
-     * @return a view of the specified range within this List.
-     * @throws IndexOutOfBoundsException endpoint index value out of range
-     *         <code>(fromIndex &lt; 0 || toIndex &gt; size)</code>
-     * @throws IllegalArgumentException endpoint indices out of order
-     *	       <code>(fromIndex &gt; toIndex)</code>
-     */
-    public synchronized List subList(int fromIndex, int toIndex) {
-        return Collections.synchronizedList(super.subList(fromIndex, toIndex),
-                                            this);
-    }
+	/**
+	 * Sets the capacity of this Vector to be the same as the size.
+	 * 
+	 * @see #capacity
+	 * @see #ensureCapacity
+	 * @see #size
+	 */
+	public synchronized void trimToSize() {
+		if (elementData.length != elementCount) {
+            grow(elementCount);
+        }
+	}
 
-    /**
-     * Removes from this List all of the elements whose index is between
-     * fromIndex, inclusive and toIndex, exclusive.  Shifts any succeeding
-     * elements to the left (reduces their index).
-     * This call shortens the ArrayList by (toIndex - fromIndex) elements.  (If
-     * toIndex==fromIndex, this operation has no effect.)
-     *
-     * @param fromIndex index of first element to be removed.
-     * @param toIndex index after last element to be removed.
-     */
-    protected void removeRange(int fromIndex, int toIndex) {
-	modCount++;
-	int numMoved = elementCount - toIndex;
-        System.arraycopy(elementData, toIndex, elementData, fromIndex,
-                         numMoved);
-
-	// Let gc do its work
-	int newElementCount = elementCount - (toIndex-fromIndex);
-	while (elementCount != newElementCount)
-	    elementData[--elementCount] = null;
-    }
-
-    /**
-     * Save the state of the <tt>Vector</tt> instance to a stream (that
-     * is, serialize it).  This method is present merely for synchronization.
-     * It just calls the default readObject method.
-     */
-    private synchronized void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException
-    {
-	s.defaultWriteObject();
-    }
+	private synchronized void writeObject(ObjectOutputStream stream)
+			throws IOException {
+		stream.defaultWriteObject();
+	}
 }

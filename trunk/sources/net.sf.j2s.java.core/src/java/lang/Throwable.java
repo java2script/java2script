@@ -614,25 +614,19 @@ while (index > -1 || caller != null) {
 		}
 	}
 
-	var st = new StackTraceElement ();
+	var st = new StackTraceElement (
+			((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
+					nativeClazz.__CLASS_NAME__ : "anonymous"), 
+			((superCaller.exName == null) ? "anonymous" : superCaller.exName) 
+					+ " (" + Clazz.getParamsType (superCaller.arguments) + ")",
+			null, -1);
 	st.nativeClazz = nativeClazz;
-	st.declaringClass = (nativeClazz != null 
-			&& nativeClazz.__CLASS_NAME__.length != 0) ? 
-			nativeClazz.__CLASS_NAME__ : "anonymous";
-	st.methodName = ((superCaller.exName == null) ? "anonymous" : superCaller.exName) 
-			+ " (" + Clazz.getParamsType (superCaller.arguments) + ")";
-	st.fileName = null;
-	st.lineNumber = -1;
 	this.stackTrace[this.stackTrace.length] = st;
 	for (var i = 0; i < callerList.length; i++) {
 		if (callerList[i] == superCaller) {
 			// ... stack information lost as recursive invocation existed ...
-			var st = new StackTraceElement ();
+			var st = new StackTraceElement ("lost", "missing", null, -3);
 			st.nativeClazz = null;
-			st.declaringClass = "lost";
-			st.methodName = "missing";
-			st.fileName = null;
-			st.lineNumber = -3;
 			this.stackTrace[this.stackTrace.length] = st;
  
 			noLooping = false;
@@ -674,25 +668,19 @@ while (x > -1 || r != null) {
 		}
 	}
 
-	var st = new StackTraceElement ();
+	var st = new StackTraceElement (
+			((z != null && z.__CLASS_NAME__.length != 0) ? 
+					z.__CLASS_NAME__ : "anonymous"),
+			((s.exName == null) ? "anonymous" : s.exName) 
+					+ " (" + Clazz.getParamsType (s.arguments) + ")",
+			null, -1);
 	st.z = z;
-	st.b = (z != null 
-			&& z.__CLASS_NAME__.length != 0) ? 
-			z.__CLASS_NAME__ : "anonymous";
-	st.e = ((s.exName == null) ? "anonymous" : s.exName) 
-			+ " (" + Clazz.getParamsType (s.arguments) + ")";
-	st.c = null;
-	st.d = -1;
 	this.c[this.c.length] = st;
 	for (var i = 0; i < l.length; i++) {
 		if (l[i] == s) {
 			// ... stack information lost as recursive invocation existed ...
-			var st = new StackTraceElement ();
+			var st = new StackTraceElement ("lost", "missing", null, -3);
 			st.z = null;
-			st.b = "lost";
-			st.e = "missing";
-			st.c = null;
-			st.d = -3;
 			this.c[this.c.length] = st;
  
 			p = false;

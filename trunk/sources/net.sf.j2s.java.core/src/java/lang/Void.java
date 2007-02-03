@@ -1,38 +1,57 @@
 /*
- * @(#)Void.java	1.11 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.lang;
 
-/**
- * The Void class is an uninstantiable placeholder class to hold a
- * reference to the Class object representing the Java keyword
- * void.
- *
- * @author  unascribed
- * @version 1.11, 01/23/03
- * @since   JDK1.1
- */
-public final
-class Void {
+import java.lang.reflect.Method;
 
-    /**
-     * The Class object representing the primitive Java type void.
+/**
+ * This class is a placeholder class for the Java keyword <code>void</code>
+ * @since 1.1
+ */
+public final class Void extends Object {
+    
+	/**
+     * The {@link Class} instance that represents primitive type
+     * <code>void</code>.
      */
-    public static final Class TYPE = null;// = Class.getPrimitiveClass("void");
+    public static final Class<Void> TYPE = null; // lookupType();
+
+    // Note: This can't be set to "void.class", since *that* is
+    // defined to be "java.lang.Void.TYPE";
+
+    @SuppressWarnings("unchecked")
+    private static Class<Void> lookupType() {
+        Class<?> voidType = null;
+        try {
+            Method method = Runnable.class.getMethod("run", new Class[0]);
+            voidType = method.getReturnType();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return (Class<Void>) voidType;
+    }
+
+	private Void() {
+	}
 
     /**
      * @j2sNative
      * java.lang.Void.TYPE = java.lang.Void;
      */
-    static {
-    	
-    }
-    /*
-     * The Void class cannot be instantiated.
-     */
-    private Void() {}
+    static { }
 }

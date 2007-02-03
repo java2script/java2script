@@ -1,30 +1,34 @@
 /*
- * @(#)Observer.java	1.18 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
+
 package java.util;
 
+
 /**
- * A class can implement the <code>Observer</code> interface when it
- * wants to be informed of changes in observable objects.
- *
- * @author  Chris Warth
- * @version 1.18, 01/23/03
- * @see     java.util.Observable
- * @since   JDK1.0
+ * Observer must be implemented by objects which are added to an Observable.
  */
 public interface Observer {
-    /**
-     * This method is called whenever the observed object is changed. An
-     * application calls an <tt>Observable</tt> object's
-     * <code>notifyObservers</code> method to have all the object's
-     * observers notified of the change.
-     *
-     * @param   o     the observable object.
-     * @param   arg   an argument passed to the <code>notifyObservers</code>
-     *                 method.
-     */
-    void update(Observable o, Object arg);
+	/*
+	 * When the specified observable object's <code>notifyObservers</code>
+	 * method is called and the observable object has changed, this method is
+	 * called.
+	 * 
+	 * @param observable the observable object @param data the data passed to
+	 * <code>notifyObservers</code>
+	 */
+	void update(Observable observable, Object data);
 }

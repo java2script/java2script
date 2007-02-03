@@ -1,16 +1,18 @@
-/* Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
@@ -20,8 +22,7 @@ package java.util;
  * Set is a collection which does not allow duplicate elements.
  * @since 1.2
  */
-//public interface Set<E> extends Collection<E> {
-public interface Set extends Collection {
+public interface Set<E> extends Collection<E> {
 	
 	/**
 	 * Adds the specified object to this Set. The Set is not modified if it
@@ -38,8 +39,7 @@ public interface Set extends Collection {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to this Set
 	 */
-//	public boolean add(E object);
-	public boolean add(Object object);
+	public boolean add(E object);
 
 	/**
 	 * Adds the objects in the specified Collection which do not exist in this
@@ -56,8 +56,7 @@ public interface Set extends Collection {
 	 * @exception IllegalArgumentException
 	 *                when an object cannot be added to this Set
 	 */
-//	public boolean addAll(Collection<? extends E> collection);
-	public boolean addAll(Collection collection);
+	public boolean addAll(Collection<? extends E> collection);
 
 	/**
 	 * Removes all elements from this Set, leaving it empty.
@@ -87,8 +86,7 @@ public interface Set extends Collection {
 	 * @return true if all objects in the specified Collection are elements of
 	 *         this Set, false otherwise
 	 */
-//	public boolean containsAll(Collection<?> collection);
-	public boolean containsAll(Collection collection);
+	public boolean containsAll(Collection<?> collection);
 
 	/**
 	 * Compares the argument to the receiver, and answers true if they represent
@@ -128,8 +126,7 @@ public interface Set extends Collection {
 	 * 
 	 * @see Iterator
 	 */
-//	public Iterator<E> iterator();
-	public Iterator iterator();
+	public Iterator<E> iterator();
 
 	/**
 	 * Removes any occurrence of the specified object from this Set.
@@ -153,8 +150,7 @@ public interface Set extends Collection {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Set is not supported
 	 */
-//	public boolean removeAll(Collection<?> collection);
-	public boolean removeAll(Collection collection);
+	public boolean removeAll(Collection<?> collection);
 
 	/**
 	 * Removes all objects from this Set that are not contained in the specified
@@ -167,8 +163,7 @@ public interface Set extends Collection {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Set is not supported
 	 */
-//	public boolean retainAll(Collection<?> collection);
-	public boolean retainAll(Collection collection);
+	public boolean retainAll(Collection<?> collection);
 
 	/**
 	 * Answers the number of elements in this Set.
@@ -199,6 +194,5 @@ public interface Set extends Collection {
 	 *                when the type of an element in this Set cannot be stored
 	 *                in the type of the specified array
 	 */
-//	public <T> T[] toArray(T[] array);
-	public Object[] toArray(Object[] array);
+	public <T> T[] toArray(T[] array);
 }

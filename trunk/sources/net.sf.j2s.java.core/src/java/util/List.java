@@ -1,16 +1,18 @@
-/* Copyright 1998, 2006 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
@@ -20,8 +22,7 @@ package java.util;
  * List is a collection which maintains an ordering for its elements. Every
  * element in the list has an index.
  */
-//public interface List<E> extends Collection<E> {
-public interface List extends Collection {
+public interface List<E> extends Collection<E> {
 	/**
 	 * Inserts the specified object into this Vector at the specified location.
 	 * The object is inserted before any previous element at the specified
@@ -43,8 +44,7 @@ public interface List extends Collection {
 	 * @exception IndexOutOfBoundsException
 	 *                when <code>location < 0 || >= size()</code>
 	 */
-//	public void add(int location, E object);
-	public void add(int location, Object object);
+	public void add(int location, E object);
 
 	/**
 	 * Adds the specified object at the end of this List.
@@ -61,8 +61,7 @@ public interface List extends Collection {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to this List
 	 */
-//	public boolean add(E object);
-	public boolean add(Object object);
+	public boolean add(E object);
 
 	/**
 	 * Inserts the objects in the specified Collection at the specified location
@@ -84,8 +83,7 @@ public interface List extends Collection {
 	 * @exception IndexOutOfBoundsException
 	 *                when <code>location < 0 || >= size()</code>
 	 */
-//	public boolean addAll(int location, Collection<? extends E> collection);
-	public boolean addAll(int location, Collection collection);
+	public boolean addAll(int location, Collection<? extends E> collection);
 
 	/**
 	 * Adds the objects in the specified Collection to the end of this List. The
@@ -103,8 +101,7 @@ public interface List extends Collection {
 	 * @exception IllegalArgumentException
 	 *                when an object cannot be added to this List
 	 */
-//	public boolean addAll(Collection<? extends E> collection);
-	public boolean addAll(Collection collection);
+	public boolean addAll(Collection<? extends E> collection);
 
 	/**
 	 * Removes all elements from this List, leaving it empty.
@@ -134,8 +131,7 @@ public interface List extends Collection {
 	 * @return true if all objects in the specified Collection are elements of
 	 *         this List, false otherwise
 	 */
-//	public boolean containsAll(Collection<?> collection);
-	public boolean containsAll(Collection collection);
+	public boolean containsAll(Collection<?> collection);
 
 	/**
 	 * Compares the argument to the receiver, and answers true if they represent
@@ -159,8 +155,7 @@ public interface List extends Collection {
 	 * @exception IndexOutOfBoundsException
 	 *                when <code>location < 0 || >= size()</code>
 	 */
-//	public E get(int location);
-	public Object get(int location);
+	public E get(int location);
 
 	/**
 	 * Answers an integer hash code for the receiver. Objects which are equal
@@ -199,8 +194,7 @@ public interface List extends Collection {
 	 * 
 	 * @see Iterator
 	 */
-//	public Iterator<E> iterator();
-	public Iterator iterator();
+	public Iterator<E> iterator();
 
 	/**
 	 * Searches this List for the specified object and returns the index of the
@@ -220,8 +214,7 @@ public interface List extends Collection {
 	 * 
 	 * @see ListIterator
 	 */
-//	public ListIterator<E> listIterator();
-	public ListIterator listIterator();
+	public ListIterator<E> listIterator();
 
 	/**
 	 * Answers a ListIterator on the elements of this List. The elements are
@@ -237,8 +230,7 @@ public interface List extends Collection {
 	 * 
 	 * @see ListIterator
 	 */
-//	public ListIterator<E> listIterator(int location);
-	public ListIterator listIterator(int location);
+	public ListIterator<E> listIterator(int location);
 
 	/**
 	 * Removes the object at the specified location from this List.
@@ -252,8 +244,7 @@ public interface List extends Collection {
 	 * @exception IndexOutOfBoundsException
 	 *                when <code>location < 0 || >= size()</code>
 	 */
-//	public E remove(int location);
-	public Object remove(int location);
+	public E remove(int location);
 
 	/**
 	 * Removes the first occurrence of the specified object from this List.
@@ -278,8 +269,7 @@ public interface List extends Collection {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this List is not supported
 	 */
-//	public boolean removeAll(Collection<?> collection);
-	public boolean removeAll(Collection collection);
+	public boolean removeAll(Collection<?> collection);
 
 	/**
 	 * Removes all objects from this List that are not contained in the
@@ -292,8 +282,7 @@ public interface List extends Collection {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this List is not supported
 	 */
-//	public boolean retainAll(Collection<?> collection);
-	public boolean retainAll(Collection collection);
+	public boolean retainAll(Collection<?> collection);
 
 	/**
 	 * Replaces the element at the specified location in this List with the
@@ -314,8 +303,7 @@ public interface List extends Collection {
 	 * @exception IndexOutOfBoundsException
 	 *                when <code>location < 0 || >= size()</code>
 	 */
-//	public E set(int location, E object);
-	public Object set(int location, Object object);
+	public E set(int location, E object);
 
 	/**
 	 * Answers the number of elements in this List.
@@ -339,8 +327,7 @@ public interface List extends Collection {
 	 *                when <code>start < 0, start > end</code> or
 	 *                <code>end > size()</code>
 	 */
-//	public List<E> subList(int start, int end);
-	public List subList(int start, int end);
+	public List<E> subList(int start, int end);
 
 	/**
 	 * Answers an array containing all elements contained in this List.
@@ -364,6 +351,5 @@ public interface List extends Collection {
 	 *                when the type of an element in this List cannot be stored
 	 *                in the type of the specified array
 	 */
-//	public <T> T[] toArray(T[] array);
-	public Object[] toArray(Object[] array);
+	public <T> T[] toArray(T[] array);
 }

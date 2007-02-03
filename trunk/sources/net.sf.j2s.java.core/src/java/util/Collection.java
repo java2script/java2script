@@ -1,16 +1,18 @@
-/* Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
@@ -19,8 +21,7 @@ package java.util;
 /**
  * Collection is the root of the collection hierarchy.
  */
-//public interface Collection<E> extends Iterable<E> {
-public interface Collection extends Iterable {
+public interface Collection<E> extends Iterable<E> {
 
 	/**
 	 * Attempts to add <code>object</code> to the contents of this
@@ -39,8 +40,7 @@ public interface Collection extends Iterable {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to this Collection
 	 */
-//	public boolean add(E object);
-	public boolean add(Object object);
+	public boolean add(E object);
 
 	/**
 	 * Attempts to add all of the objects contained in <code>collection</code>
@@ -58,8 +58,7 @@ public interface Collection extends Iterable {
 	 * @exception IllegalArgumentException
 	 *                when an object cannot be added to this Collection
 	 */
-//	public boolean addAll(Collection<? extends E> collection);
-	public boolean addAll(Collection collection);
+	public boolean addAll(Collection<? extends E> collection);
 
 	/**
 	 * Removes all elements from this Collection, leaving it empty.
@@ -89,8 +88,7 @@ public interface Collection extends Iterable {
 	 * @return true if all objects in the specified Collection are elements of
 	 *         this Collection, false otherwise
 	 */
-	public boolean containsAll(Collection collection);
-//	public boolean containsAll(Collection<?> collection);
+	public boolean containsAll(Collection<?> collection);
 
 	/**
 	 * Compares the argument to the receiver, and answers true if they represent
@@ -129,8 +127,7 @@ public interface Collection extends Iterable {
 	 * 
 	 * @return an iterator for accessing the collection contents
 	 */
-//	public Iterator<E> iterator();
-	public Iterator iterator();
+	public Iterator<E> iterator();
 
 	/**
 	 * Removes the first occurrence of the specified object from this
@@ -156,8 +153,7 @@ public interface Collection extends Iterable {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Collection is not supported
 	 */
-//	public boolean removeAll(Collection<?> collection);
-	public boolean removeAll(Collection collection);
+	public boolean removeAll(Collection<?> collection);
 
 	/**
 	 * Removes all objects from this Collection that are not also found in the
@@ -170,8 +166,7 @@ public interface Collection extends Iterable {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Collection is not supported
 	 */
-//	public boolean retainAll(Collection<?> collection);
-	public boolean retainAll(Collection collection);
+	public boolean retainAll(Collection<?> collection);
 
 	/**
 	 * Returns a count of how many objects are contained by this collection.
@@ -202,6 +197,5 @@ public interface Collection extends Iterable {
 	 *                when the type of an element in this Collection cannot be
 	 *                stored in the type of the specified array
 	 */
-//	public <T> T[] toArray(T[] array);
-	public Object[] toArray(Object[] array);
+	public <T> T[] toArray(T[] array);
 }

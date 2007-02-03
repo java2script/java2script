@@ -1,29 +1,61 @@
-/*******************************************************************************
- * Java2Script Pacemaker (http://j2s.sourceforge.net)
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright (c) 2006 ognize.com and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Contributors:
- *     ognize.com - initial API and implementation
- *******************************************************************************/
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 
 package java.lang;
 
 import java.io.Serializable;
 
 /**
- * @author josson smith
- *
- * 2006-8-5
+ * <p>
+ * Character is the wrapper for the primitive type <code>char</code>. This
+ * class also provides a number of utility methods for working with
+ * <code>char</code>s.
+ * </p>
+ * 
+ * <p>
+ * Character data is based upon the Unicode Standard, 4.0. The Unicode
+ * specification, character tables and other information are available at <a
+ * href="http://www.unicode.org/">http://www.unicode.org/</a>.
+ * </p>
+ * 
+ * <p>
+ * Unicode characters are referred to as <i>code points</i>. The range of valid
+ * code points is U+0000 to U+10FFFF. The <i>Basic Multilingual Plane (BMP)</i>
+ * is the code point range U+0000 to U+FFFF. Characters above the BMP are
+ * referred to as <i>Supplementary Characters</i>. On the Java platform, UTF-16
+ * encoding and <code>char</code> pairs are used to represent code points in
+ * the supplementary range. A pair of <code>char</code> values that represent
+ * a supplementary character are made up of a <i>high surrogate</i> with a
+ * value range of 0xD800 to 0xDBFF and a <i>low surrogate</i> with a value
+ * range of 0xDC00 to 0xDFFF.
+ * </p>
+ * 
+ * <p>
+ * On the Java platform a <code>char</code> value represents either a single
+ * BMP code point or a UTF-16 unit that's part of a surrogate pair. The
+ * <code>int</code> type is used to represent all Unicode code points.
+ * </p>
+ * 
+ * @since 1.0
  */
-public class Character implements Serializable, Comparable {
-	private static final long serialVersionUID = 3786198910865385080L;
+public final class Character implements Serializable, Comparable<Character> {
+    private static final long serialVersionUID = 3786198910865385080L;
 
-	private final char value;
+    private final char value;
 
 	/**
 	 * Constructs a new instance of the receiver which represents the char
@@ -45,24 +77,22 @@ public class Character implements Serializable, Comparable {
 		return value;
 	}
 
-	/**
-	 * Compare the receiver to the specified Character to determine the relative
-	 * ordering.
-	 * 
-	 * @param c
-	 *            the Character
-	 * @return an int < 0 if this Character is less than the specified
-	 *         Character, 0 if they are equal, and > 0 if this Character is
-	 *         greater
-     * @throws NullPointerException if <code>c</code> is <code>null</code>.
+
+    /**
+     * Compares the receiver to the specified Character to determine the
+     * relative ordering.
+     * 
+     * @param c
+     *            the Character
+     * @return an int < 0 if this Character is less than the specified
+     *         Character, 0 if they are equal, and > 0 if this Character is
+     *         greater
+     * @throws NullPointerException
+     *             if <code>c</code> is <code>null</code>.
      * @since 1.2
-	 */
-	public int compareTo(Character c) {
-		return value - c.value;
-	}
-	
-    public int compareTo(Object o) {
-        return compareTo((Character) o);
+     */
+    public int compareTo(Character c) {
+        return value - c.value;
     }
     
 	/**
@@ -178,4 +208,38 @@ public class Character implements Serializable, Comparable {
 				|| c == 0x3000;
 	}
 
+	/**
+	 * @j2sIgnore
+	 */
+	public static int codePointCount(char[] chs, int begin, int offset) {
+		return 0;
+	}
+	
+	/**
+	 * @j2sIgnore
+	 */
+	public static int codePointAt(char[] chs, int begin, int offset) {
+		return 0;
+	}
+	
+	/**
+	 * @j2sIgnore
+	 */
+	public static int codePointBefore(char[] chs, int begin) {
+		return 0;
+	}
+	
+	/**
+	 * @j2sIgnore
+	 */
+	public static int offsetByCodePoints(char[] chs, int begin, int offset, int end, int length) {
+		return 0;
+	}
+	
+	/**
+	 * @j2sIgnore
+	 */
+	public static char[] toChars(int point) {
+		return null;
+	}
 }

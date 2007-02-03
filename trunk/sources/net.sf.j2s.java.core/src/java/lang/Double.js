@@ -4,7 +4,10 @@ Clazz.instantialize (this, arguments);
 };
 Clazz.decorateAsType (Double, "Double", Number, Comparable);
 Double.prototype.valueOf = function () { return 0; };
-Double.prototype.toString = function () {
+Double.toString = Double.prototype.toString = function () {
+	if (arguments.length != 0) {
+		return "" + arguments[0];
+	}
 	return "" + this.valueOf ();
 };
 Clazz.makeConstructor (Double, 

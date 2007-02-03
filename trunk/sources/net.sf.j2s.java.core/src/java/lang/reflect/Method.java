@@ -1,41 +1,32 @@
-/*
- * @(#)Method.java	1.36 03/01/23
- *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+/* Copyright 1998, 2005 The Apache Software Foundation or its licensors, as applicable
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package java.lang.reflect;
 
-import sun.reflect.MethodAccessor;
-import sun.reflect.Reflection;
+import java.lang.annotation.Annotation;
 
 /**
- * A <code>Method</code> provides information about, and access to, a single method
- * on a class or interface.  The reflected method may be a class method
- * or an instance method (including an abstract method).
- *
- * <p>A <code>Method</code> permits widening conversions to occur when matching the
- * actual parameters to invokewith the underlying method's formal
- * parameters, but it throws an <code>IllegalArgumentException</code> if a
- * narrowing conversion would occur.
- *
- * @see Member
- * @see java.lang.Class
- * @see java.lang.Class#getMethods()
- * @see java.lang.Class#getMethod(String, Class[])
- * @see java.lang.Class#getDeclaredMethods()
- * @see java.lang.Class#getDeclaredMethod(String, Class[])
- *
- * @author Kenneth Russell
- * @author Nakul Saraiya
+ * This class must be implemented by the VM vendor. This class models a method.
+ * Information about the method can be accessed, and the method can be invoked
+ * dynamically.
+ * 
  * @j2sRequireImport java.lang.Void
  */
-public final
-class Method extends AccessibleObject implements Member {
+public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 
-    private Class		clazz;
-    private int			slot;
+	private Class		clazz;
     // This is guaranteed to be interned by the VM in the 1.4
     // reflection implementation
     private String		name;
@@ -43,16 +34,7 @@ class Method extends AccessibleObject implements Member {
     private Class[]		parameterTypes;
     private Class[]		exceptionTypes;
     private int			modifiers;
-    private volatile MethodAccessor methodAccessor;
-    // For sharing of MethodAccessors. This branching structure is
-    // currently only two levels deep (i.e., one root Method and
-    // potentially many Method objects pointing to it.)
-    private Method              root;
-
-    // More complicated security check cache needed here than for
-    // Class.newInstance() and Constructor.newInstance()
-    private volatile Class      securityCheckTargetClassCache;
-
+    
     /**
      * Package-private constructor used by ReflectAccess to enable
      * instantiation of these objects in Java code from the java.lang
@@ -63,8 +45,7 @@ class Method extends AccessibleObject implements Member {
            Class[] parameterTypes,
            Class returnType,
            Class[] checkedExceptions,
-           int modifiers,
-           int slot)
+           int modifiers)
     {
         this.clazz = declaringClass;
         this.name = name;
@@ -72,356 +53,327 @@ class Method extends AccessibleObject implements Member {
         this.returnType = returnType;
         this.exceptionTypes = checkedExceptions;
         this.modifiers = modifiers;
-        this.slot = slot;
+    }
+    
+    public TypeVariable<Method>[] getTypeParameters() {
+        return null;
     }
 
     /**
-     * Package-private routine (exposed to java.lang.Class via
-     * ReflectAccess) which returns a copy of this Method. The copy's
-     * "root" field points to this Method.
-     */
-    Method copy() {
-        // This routine enables sharing of MethodAccessor objects
-        // among Method objects which refer to the same underlying
-        // method in the VM. (All of this contortion is only necessary
-        // because of the "accessibility" bit in AccessibleObject,
-        // which implicitly requires that new java.lang.reflect
-        // objects be fabricated for each reflective call on Class
-        // objects.)
-        Method res = new Method(clazz, name, parameterTypes, returnType,
-                                exceptionTypes, modifiers, slot);
-        res.root = this;
-        // Might as well eagerly propagate this if already present
-        res.methodAccessor = methodAccessor;
-        return res;
-    }
-
-    /**
-     * Returns the <code>Class</code> object representing the class or interface
-     * that declares the method represented by this <code>Method</code> object.
-     */
-    public Class getDeclaringClass() {
-	return clazz;
-    }
-
-    /**
-     * Returns the name of the method represented by this <code>Method</code> 
-     * object, as a <code>String</code>.
-     */
-    public String getName() {
-	return name;
-    }
-
-    /**
-     * Returns the Java language modifiers for the method represented
-     * by this <code>Method</code> object, as an integer. The <code>Modifier</code> class should
-     * be used to decode the modifiers.
-     *
-     * @see Modifier
-     */
-    public int getModifiers() {
-	return modifiers;
-    }
-
-    /**
-     * Returns a <code>Class</code> object that represents the formal return type
-     * of the method represented by this <code>Method</code> object.
+     * <p>
+     * Returns the String representation of the method's declaration, including
+     * the type parameters.
+     * </p>
      * 
-     * @return the return type for the method this object represents
+     * @return An instance of String.
+     * @since 1.5
      */
-    public Class getReturnType() {
-	return returnType;
+    public String toGenericString() {
+        return null;
     }
 
     /**
-     * Returns an array of <code>Class</code> objects that represent the formal
-     * parameter types, in declaration order, of the method
-     * represented by this <code>Method</code> object.  Returns an array of length
-     * 0 if the underlying method takes no parameters.
+     * <p>
+     * Gets the parameter types as an array of {@link Type} instances, in
+     * declaration order. If the method has no parameters, then an empty array
+     * is returned.
+     * </p>
      * 
-     * @return the parameter types for the method this object
-     * represents
+     * @return An array of {@link Type} instances.
+     * @throws GenericSignatureFormatError if the generic method signature is
+     *         invalid.
+     * @throws TypeNotPresentException if the component type points to a missing
+     *         type.
+     * @throws MalformedParameterizedTypeException if the component type points
+     *         to a type that can't be instantiated for some reason.
+     * @since 1.5
      */
-    public Class[] getParameterTypes() {
-	return copy(parameterTypes);
+    public Type[] getGenericParameterTypes() {
+        return null;
     }
 
     /**
-     * Returns an array of <code>Class</code> objects that represent 
-     * the types of the exceptions declared to be thrown
-     * by the underlying method
-     * represented by this <code>Method</code> object.  Returns an array of length
-     * 0 if the method declares no exceptions in its <code>throws</code> clause.
+     * <p>
+     * Gets the exception types as an array of {@link Type} instances. If the
+     * method has no declared exceptions, then an empty array is returned.
+     * </p>
      * 
-     * @return the exception types declared as being thrown by the
-     * method this object represents
+     * @return An array of {@link Type} instances.
+     * @throws GenericSignatureFormatError if the generic method signature is
+     *         invalid.
+     * @throws TypeNotPresentException if the component type points to a missing
+     *         type.
+     * @throws MalformedParameterizedTypeException if the component type points
+     *         to a type that can't be instantiated for some reason.
+     * @since 1.5
      */
-    public Class[] getExceptionTypes() {
-	return copy(exceptionTypes);
+    public Type[] getGenericExceptionTypes() {
+        return null;
     }
 
     /**
-     * Compares this <code>Method</code> against the specified object.  Returns
-     * true if the objects are the same.  Two <code>Methods</code> are the same if
-     * they were declared by the same class and have the same name
-     * and formal parameter types and return type.
+     * <p>
+     * Gets the return type as a {@link Type} instance.
+     * </p>
+     * 
+     * @return A {@link Type} instance.
+     * @throws GenericSignatureFormatError if the generic method signature is
+     *         invalid.
+     * @throws TypeNotPresentException if the component type points to a missing
+     *         type.
+     * @throws MalformedParameterizedTypeException if the component type points
+     *         to a type that can't be instantiated for some reason.
+     * @since 1.5
      */
-    public boolean equals(Object obj) {
-	if (obj != null && obj instanceof Method) {
-	    Method other = (Method)obj;
-	    if ((getDeclaringClass() == other.getDeclaringClass())
-		&& (getName() == other.getName())) {
-		/* Avoid unnecessary cloning */
-		Class[] params1 = parameterTypes;
-		Class[] params2 = other.parameterTypes;
-		if (params1.length == params2.length) {
-		    for (int i = 0; i < params1.length; i++) {
-			if (params1[i] != params2[i])
-			    return false;
+    public Type getGenericReturnType() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Gets an array of arrays that represent the annotations of the formal
+     * parameters of this method. If there are no parameters on this method,
+     * then an empty array is returned. If there are no annotations set, then
+     * and array of empty arrays is returned.
+     * </p>
+     * 
+     * @return An array of arrays of {@link Annotation} instances.
+     * @since 1.5
+     */
+    public Annotation[][] getParameterAnnotations() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Indicates whether or not this method takes a variable number argument.
+     * </p>
+     * 
+     * @return A value of <code>true</code> if a vararg is declare, otherwise
+     *         <code>false</code>.
+     * @since 1.5
+     */
+    public boolean isVarArgs() {
+        return false;
+    }
+
+    /**
+     * <p>
+     * Indicates whether or not this method is a bridge.
+     * </p>
+     * 
+     * @return A value of <code>true</code> if this method's a bridge,
+     *         otherwise <code>false</code>.
+     * @since 1.5
+     */
+    public boolean isBridge() {
+        return false;
+    }
+
+    public boolean isSynthetic() {
+        return false;
+    }
+    
+    /**
+     * <p>Gets the default value for the annotation member represented by
+     * this method.</p>
+     * @return The default value or <code>null</code> if none.
+     * @throws TypeNotPresentException if the annotation is of type {@link Class}
+     * and no definition can be found.
+     * @since 1.5
+     */
+    public Object getDefaultValue() {
+        return null;
+    }
+    
+	/**
+	 * Compares the specified object to this Method and answer if they are
+	 * equal. The object must be an instance of Method with the same defining
+	 * class and parameter types.
+	 * 
+	 * @param object
+	 *            the object to compare
+	 * @return true if the specified object is equal to this Method, false
+	 *         otherwise
+	 * @see #hashCode
+	 */
+	public boolean equals(Object object) {
+		if (object != null && object instanceof Method) {
+		    Method other = (Method)object;
+		    if ((getDeclaringClass() == other.getDeclaringClass())
+			&& (getName() == other.getName())) {
+			/* Avoid unnecessary cloning */
+			Class[] params1 = parameterTypes;
+			Class[] params2 = other.parameterTypes;
+			if (params1.length == params2.length) {
+			    for (int i = 0; i < params1.length; i++) {
+				if (params1[i] != params2[i])
+				    return false;
+			    }
+			    return true;
+			}
 		    }
-		    return true;
 		}
-	    }
+		return false;
 	}
-	return false;
-    }
 
-    /**
-     * Returns a hashcode for this <code>Method</code>.  The hashcode is computed
-     * as the exclusive-or of the hashcodes for the underlying
-     * method's declaring class name and the method's name.
-     */
-    public int hashCode() {
-	return getDeclaringClass().getName().hashCode() ^ getName().hashCode();
-    }
-
-    /**
-     * Returns a string describing this <code>Method</code>.  The string is
-     * formatted as the method access modifiers, if any, followed by
-     * the method return type, followed by a space, followed by the
-     * class declaring the method, followed by a period, followed by
-     * the method name, followed by a parenthesized, comma-separated
-     * list of the method's formal parameter types. If the method
-     * throws checked exceptions, the parameter list is followed by a
-     * space, followed by the word throws followed by a
-     * comma-separated list of the thrown exception types.
-     * For example:
-     * <pre>
-     *    public boolean java.lang.Object.equals(java.lang.Object)
-     * </pre>
-     *
-     * <p>The access modifiers are placed in canonical order as
-     * specified by "The Java Language Specification".  This is
-     * <tt>public</tt>, <tt>protected</tt> or <tt>private</tt> first,
-     * and then other modifiers in the following order:
-     * <tt>abstract</tt>, <tt>static</tt>, <tt>final</tt>,
-     * <tt>synchronized</tt> <tt>native</tt>.
-     */
-    public String toString() {
-	try {
-		/*
-	    StringBuffer sb = new StringBuffer();
-	    int mod = getModifiers();
-	    if (mod != 0) {
-		sb.append(Modifier.toString(mod) + " ");
-	    }
-	    sb.append(Field.getTypeName(getReturnType()) + " ");
-	    sb.append(Field.getTypeName(getDeclaringClass()) + ".");
-	    sb.append(getName() + "(");
-	    Class[] params = parameterTypes; // avoid clone
-	    for (int j = 0; j < params.length; j++) {
-		sb.append(Field.getTypeName(params[j]));
-		if (j < (params.length - 1))
-		    sb.append(",");
-	    }
-	    sb.append(")");
-	    Class[] exceptions = exceptionTypes; // avoid clone
-	    if (exceptions.length > 0) {
-		sb.append(" throws ");
-		for (int k = 0; k < exceptions.length; k++) {
-		    sb.append(exceptions[k].getName());
-		    if (k < (exceptions.length - 1))
-			sb.append(",");
-		}
-	    }
-	    return sb.toString();
-	    */
-	    String[] sb = new String[0];
-	    int mod = getModifiers();
-	    if (mod != 0) {
-	    	sb[sb.length] = Modifier.toString(mod) + " ";
-	    }
-	    sb[sb.length] = Field.getTypeName(getReturnType()) + " ";
-	    sb[sb.length] = Field.getTypeName(getDeclaringClass()) + ".";
-	    sb[sb.length] = getName() + "(";
-	    Class[] params = parameterTypes; // avoid clone
-	    for (int j = 0; j < params.length; j++) {
-	    	sb[sb.length] = Field.getTypeName(params[j]);
-	    	if (j < (params.length - 1))
-	    		sb[sb.length] = ",";
-	    }
-	    sb[sb.length] = ")";
-	    Class[] exceptions = exceptionTypes; // avoid clone
-	    if (exceptions.length > 0) {
-	    	sb[sb.length] = " throws ";
-	    	for (int k = 0; k < exceptions.length; k++) {
-	    		sb[sb.length] = exceptions[k].getName();
-	    		if (k < (exceptions.length - 1))
-	    			sb[sb.length] = ",";
-	    	}
-	    }
-	    /**
-	     * @j2sNativeSrc
-	     * return sb.join ('');
-	     * @j2sNative
-	     * return a.join ('');
-	     */ {}
-	    return sb.toString();
-	} catch (Exception e) {
-	    return "<" + e + ">";
+	/**
+	 * Return the {@link Class} associated with the class that defined this
+	 * method.
+	 * 
+	 * @return the declaring class
+	 */
+	public Class<?> getDeclaringClass() {
+		return clazz;
 	}
-    }
 
-    /**
-     * Invokes the underlying method represented by this <code>Method</code> 
-     * object, on the specified object with the specified parameters.
-     * Individual parameters are automatically unwrapped to match
-     * primitive formal parameters, and both primitive and reference
-     * parameters are subject to method invocation conversions as
-     * necessary.
-     *
-     * <p>If the underlying method is static, then the specified <code>obj</code> 
-     * argument is ignored. It may be null.
-     *
-     * <p>If the number of formal parameters required by the underlying method is
-     * 0, the supplied <code>args</code> array may be of length 0 or null.
-     *
-     * <p>If the underlying method is an instance method, it is invoked
-     * using dynamic method lookup as documented in The Java Language
-     * Specification, Second Edition, section 15.12.4.4; in particular,
-     * overriding based on the runtime type of the target object will occur.
-     *
-     * <p>If the underlying method is static, the class that declared
-     * the method is initialized if it has not already been initialized.
-     *
-     * <p>If the method completes normally, the value it returns is
-     * returned to the caller of invoke; if the value has a primitive
-     * type, it is first appropriately wrapped in an object. If the
-     * underlying method return type is void, the invocation returns
-     * null.
-     *
-     * @param obj  the object the underlying method is invoked from
-     * @param args the arguments used for the method call
-     * @return the result of dispatching the method represented by
-     * this object on <code>obj</code> with parameters
-     * <code>args</code>
-     *
-     * @exception IllegalAccessException    if this <code>Method</code> object
-     *              enforces Java language access control and the underlying
-     *              method is inaccessible.
-     * @exception IllegalArgumentException  if the method is an
-     *              instance method and the specified object argument
-     *              is not an instance of the class or interface
-     *              declaring the underlying method (or of a subclass
-     *              or implementor thereof); if the number of actual
-     *              and formal parameters differ; if an unwrapping
-     *              conversion for primitive arguments fails; or if,
-     *              after possible unwrapping, a parameter value
-     *              cannot be converted to the corresponding formal
-     *              parameter type by a method invocation conversion.
-     * @exception InvocationTargetException if the underlying method
-     *              throws an exception.
-     * @exception NullPointerException      if the specified object is null
-     *              and the method is an instance method.
-     * @exception ExceptionInInitializerError if the initialization
-     * provoked by this method fails.
+	/**
+	 * Return an array of the {@link Class} objects associated with the
+	 * exceptions declared to be thrown by this method. If the method was not
+	 * declared to throw any exceptions, the array returned will be empty.
+	 * 
+	 * @return the declared exception classes
+	 */
+	public Class<?>[] getExceptionTypes() {
+		return exceptionTypes;
+	}
+
+	/**
+	 * Return the modifiers for the modelled method. The Modifier class
+	 * should be used to decode the result.
+	 * 
+	 * @return the modifiers
+	 * @see java.lang.reflect.Modifier
+	 */
+	public int getModifiers() {
+		return modifiers;
+	}
+
+	/**
+	 * Return the name of the modelled method.
+	 * 
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Return an array of the {@link Class} objects associated with the
+	 * parameter types of this method. If the method was declared with no
+	 * parameters, the array returned will be empty.
+	 * 
+	 * @return the parameter types
+	 */
+	public Class<?>[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	/**
+	 * Return the {@link Class} associated with the return type of this
+	 * method.
+	 * 
+	 * @return the return type
+	 */
+	public Class<?> getReturnType() {
+		return returnType;
+	}
+
+	/**
+	 * Answers an integer hash code for the receiver. Objects which are equal
+	 * answer the same value for this method. The hash code for a Method is the
+	 * hash code of the method's name.
+	 * 
+	 * @return the receiver's hash
+	 * @see #equals
+	 */
+	public int hashCode() {
+		return getDeclaringClass().getName().hashCode() ^ getName().hashCode();
+	}
+
+	/**
+	 * Return the result of dynamically invoking the modelled method. This
+	 * reproduces the effect of
+	 * <code>receiver.methodName(arg1, arg2, ... , argN)</code> This method
+	 * performs the following:
+	 * <ul>
+	 * <li>If the modelled method is static, the receiver argument is ignored.
+	 * </li>
+	 * <li>Otherwise, if the receiver is null, a NullPointerException is
+	 * thrown.</li>
+	 * If the receiver is not an instance of the declaring class of the method,
+	 * an IllegalArgumentException is thrown.
+	 * <li>If this Method object is enforcing access control (see
+	 * AccessibleObject) and the modelled method is not accessible from the
+	 * current context, an IllegalAccessException is thrown.</li>
+	 * <li>If the number of arguments passed and the number of parameters do
+	 * not match, an IllegalArgumentException is thrown.</li>
+	 * <li>For each argument passed:
+	 * <ul>
+	 * <li>If the corresponding parameter type is a base type, the argument is
+	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
+	 * thrown.</li>
+	 * <li>If the resulting argument cannot be converted to the parameter type
+	 * via a widening conversion, an IllegalArgumentException is thrown.</li>
+	 * </ul>
+	 * <li>If the modelled method is static, it is invoked directly. If it is
+	 * non-static, the modelled method and the receiver are then used to perform
+	 * a standard dynamic method lookup. The resulting method is then invoked.
+	 * </li>
+	 * <li>If an exception is thrown during the invocation it is caught and
+	 * wrapped in an InvocationTargetException. This exception is then thrown.
+	 * </li>
+	 * <li>If the invocation completes normally, the return value is itself
+	 * returned. If the method is declared to return a base type, the return
+	 * value is first wrapped. If the return type is void, null is returned.
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param receiver
+	 * 	          The object on which to call the modelled method
+	 * @param args
+	 *            the arguments to the method
+	 * @return the new, initialized, object
+	 * @exception java.lang.NullPointerException
+	 *                if the receiver is null for a non-static method
+	 * @exception java.lang.IllegalAccessException
+	 *                if the modelled method is not accessible
+	 * @exception java.lang.IllegalArgumentException
+	 *                if an incorrect number of arguments are passed, the
+	 *                receiver is incompatible with the declaring class, or an
+	 *                argument could not be converted by a widening conversion
+	 * @exception java.lang.reflect.InvocationTargetException
+	 *                if an exception was thrown by the invoked method
+	 * @see java.lang.reflect.AccessibleObject
      * 
      * @j2sNative
-     * var m = this.clazz.prototype[this.name]; 
+     * var m = this.clazz.prototype[this.getName ()]; 
      * if (m == null) {
-     * 	m = this.clazz[this.name];
+     * 	m = this.clazz[this.getName ()];
      * }
      * if (m != null) {
-     * 	m.apply(obj,args);
+     * 	m.apply(receiver,args);
      * } else {
      * 	// should never reach here!
      * }
-     */
-    public Object invoke(Object obj, Object[] args)
-	throws IllegalAccessException, IllegalArgumentException,
-           InvocationTargetException
-    {
-        if (!override) {
-            if (!Reflection.quickCheckMemberAccess(clazz, modifiers)) {
-                Class caller = Reflection.getCallerClass(1);
-                Class targetClass = ((obj == null || !Modifier.isProtected(modifiers))
-                                     ? clazz
-                                     : obj.getClass());
-                if (securityCheckCache != caller ||
-                    targetClass != securityCheckTargetClassCache) {
-                    Reflection.ensureMemberAccess(caller, clazz, obj, modifiers);
-                    securityCheckCache = caller;
-                    securityCheckTargetClassCache = targetClass;
-                }
-            }
-        }
-        if (methodAccessor == null) acquireMethodAccessor();
-        return methodAccessor.invoke(obj, args);
-    }
+	 */
+	public Object invoke(Object receiver, Object args[])
+			throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		return null;
+	}
 
-    /**
-     * @j2sIgnore
-     */
-    // NOTE that there is no synchronization used here. It is correct
-    // (though not efficient) to generate more than one MethodAccessor
-    // for a given Method. However, avoiding synchronization will
-    // probably make the implementation more scalable.
-    private void acquireMethodAccessor() {
-        // First check to see if one has been created yet, and take it
-        // if so
-        MethodAccessor tmp = null;
-        if (root != null) tmp = root.getMethodAccessor();
-        if (tmp != null) {
-            methodAccessor = tmp;
-            return;
-        }
-        // Otherwise fabricate one and propagate it up to the root
-//        tmp = reflectionFactory.newMethodAccessor(this);
-//        setMethodAccessor(tmp);
-    }
-
-    /**
-     * @j2sIgnore
-     */
-    // Returns MethodAccessor for this Method object, not looking up
-    // the chain to the root
-    MethodAccessor getMethodAccessor() {
-        return methodAccessor;
-    }
-
-    /**
-     * @j2sIgnore
-     */
-    // Sets the MethodAccessor for this Method object and
-    // (recursively) its root
-    void setMethodAccessor(MethodAccessor accessor) {
-        methodAccessor = accessor;
-        // Propagate up
-        if (root != null) {
-            root.setMethodAccessor(accessor);
-        }
-    }
-
-    /*
-     * Avoid clone()
-     */
-    static Class[] copy(Class[] in) {
-	int l = in.length;
-	if (l == 0)
-	    return in;
-	Class[] out = new Class[l];
-	for (int i = 0; i < l; i++)
-	    out[i] = in[i];
-	return out;
-    }
+	/**
+	 * Answers a string containing a concise, human-readable description of the
+	 * receiver. The format of the string is modifiers (if any) return type
+	 * declaring class name '.' method name '(' parameter types, separated by
+	 * ',' ')' If the method throws exceptions, ' throws ' exception types,
+	 * separated by ',' For example:
+	 * <code>public native Object java.lang.Method.invoke(Object,Object) throws IllegalAccessException,IllegalArgumentException,InvocationTargetException</code>
+	 * 
+	 * @return a printable representation for the receiver
+	 */
+	public String toString() {
+		return null;
+	}
 }

@@ -1,158 +1,129 @@
 /*
- * @(#)ListResourceBundle.java	1.24 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
-/*
- * (C) Copyright Taligent, Inc. 1996, 1997 - All Rights Reserved
- * (C) Copyright IBM Corp. 1996 - 1998 - All Rights Reserved
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * The original version of this source code and documentation
- * is copyrighted and owned by Taligent, Inc., a wholly-owned
- * subsidiary of IBM. These materials are provided under terms
- * of a License Agreement between Taligent and Sun. This technology
- * is protected by multiple US and International patents.
- *
- * This notice and attribution to Taligent may not be removed.
- * Taligent is a registered trademark of Taligent, Inc.
- *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
 
+
 /**
- * <code>ListResourceBundle</code> is an abstract subclass of
- * <code>ResourceBundle</code> that manages resources for a locale
- * in a convenient and easy to use list. See <code>ResourceBundle</code> for
- * more information about resource bundles in general.
- *
- * <P>
- * Subclasses must override <code>getContents</code> and provide an array,
- * where each item in the array is a pair of objects.
- * The first element of each pair is the key, which must be a
- * <code>String</code>, and the second element is the value associated with
- * that key.
- *
- * <p>
- * The following <a name="sample">example</a> shows two members of a resource
- * bundle family with the base name "MyResources".
- * "MyResources" is the default member of the bundle family, and
- * "MyResources_fr" is the French member.
- * These members are based on <code>ListResourceBundle</code>
- * (a related <a href="PropertyResourceBundle.html#sample">example</a> shows
- * how you can add a bundle to this family that's based on a properties file).
- * The keys in this example are of the form "s1" etc. The actual
- * keys are entirely up to your choice, so long as they are the same as
- * the keys you use in your program to retrieve the objects from the bundle.
- * Keys are case-sensitive.
- * <blockquote>
- * <pre>
+ * ListResourceBundle is the abstract superclass of classes which provide
+ * resources by implementing the <code>getContents()</code> method to return
+ * the list of resources.
  * 
- * public class MyResources extends ListResourceBundle {
- *     public Object[][] getContents() {
- *         return contents;
- *     }
- *     static final Object[][] contents = {
- *     // LOCALIZE THIS
- *         {"s1", "The disk \"{1}\" contains {0}."},  // MessageFormat pattern
- *         {"s2", "1"},                               // location of {0} in pattern
- *         {"s3", "My Disk"},                         // sample disk name
- *         {"s4", "no files"},                        // first ChoiceFormat choice
- *         {"s5", "one file"},                        // second ChoiceFormat choice
- *         {"s6", "{0,number} files"},                // third ChoiceFormat choice
- *         {"s7", "3 Mar 96"},                        // sample date
- *         {"s8", new Dimension(1,5)}                 // real object, not just string
- *     // END OF MATERIAL TO LOCALIZE
- *     };
- * }
- *
- * public class MyResources_fr extends ListResourceBundle {
- *     public Object[][] getContents() {
- *         return contents;
- *     }
- *     static final Object[][] contents = {
- *     // LOCALIZE THIS
- *         {"s1", "Le disque \"{1}\" {0}."},          // MessageFormat pattern
- *         {"s2", "1"},                               // location of {0} in pattern
- *         {"s3", "Mon disque"},                      // sample disk name
- *         {"s4", "ne contient pas de fichiers"},     // first ChoiceFormat choice
- *         {"s5", "contient un fichier"},             // second ChoiceFormat choice
- *         {"s6", "contient {0,number} fichiers"},    // third ChoiceFormat choice
- *         {"s7", "3 mars 1996"},                     // sample date
- *         {"s8", new Dimension(1,3)}                 // real object, not just string
- *     // END OF MATERIAL TO LOCALIZE
- *     };
- * }
- * </pre>
- * </blockquote>
  * @see ResourceBundle
- * @see PropertyResourceBundle
- * @since JDK1.1
+ * @since 1.1
  */
 public abstract class ListResourceBundle extends ResourceBundle {
-    /**
-     * Sole constructor.  (For invocation by subclass constructors, typically
-     * implicit.)
-     */
-    public ListResourceBundle() {
-    }
+	Hashtable<String, Object> table;
 
-    // Implements java.util.ResourceBundle.handleGetObject; inherits javadoc specification.
+	/**
+	 * Constructs a new instance of this class.
+	 */
+	public ListResourceBundle() {
+		super();
+	}
+
+	/**
+	 * Answers an Object array which contains the resources of this
+	 * ListResourceBundle. Each element in the array is an array of two
+	 * elements, the first is the resource key and the second is the resource.
+	 * 
+	 * @return a Object array containing the resources
+	 */
+	protected abstract Object[][] getContents();
+
+	/**
+	 * Answers the names of the resources contained in this ListResourceBundle.
+	 * 
+	 * @return an Enumeration of the resource names
+	 */
+	@Override
+    public Enumeration<String> getKeys() {
+		if (table == null) {
+            initializeTable();
+        }
+		if (parent == null) {
+            return table.keys();
+        }
+		return new Enumeration<String>() {
+			Enumeration<String> local = table.keys();
+
+			Enumeration<String> pEnum = parent.getKeys();
+
+			String nextElement;
+
+			private boolean findNext() {
+				if (nextElement != null) {
+                    return true;
+                }
+				while (pEnum.hasMoreElements()) {
+					String next = pEnum.nextElement();
+					if (!table.containsKey(next)) {
+						nextElement = next;
+						return true;
+					}
+				}
+				return false;
+			}
+
+			public boolean hasMoreElements() {
+				if (local.hasMoreElements()) {
+                    return true;
+                }
+				return findNext();
+			}
+
+			public String nextElement() {
+				if (local.hasMoreElements()) {
+                    return local.nextElement();
+                }
+				if (findNext()) {
+					String result = nextElement;
+					nextElement = null;
+					return result;
+				}
+				// Cause an exception
+				return pEnum.nextElement();
+			}
+		};
+	}
+
+	/**
+	 * Answers the named resource from this ResourceBundle, or null if the
+	 * resource is not found.
+	 * 
+	 * @param key
+	 *            the name of the resource
+	 * @return the resource object
+	 */
+	@Override
     public final Object handleGetObject(String key) {
-        // lazily load the lookup hashtable.
-        if (lookup == null) {
-            loadLookup();
+		if (table == null) {
+            initializeTable();
         }
-        if (key == null) {
-            throw new NullPointerException();
-        }
-        return lookup.get(key); // this class ignores locales
-    }
+		return table.get(key);
+	}
 
-    /**
-     * Implementation of ResourceBundle.getKeys.
-     */
-    public Enumeration getKeys() {
-        // lazily load the lookup hashtable.
-        if (lookup == null) {
-            loadLookup();
-        }
-        
-        ResourceBundle parent = this.parent;
-        return new ResourceBundleEnumeration(lookup.keySet(),
-                (parent != null) ? parent.getKeys() : null);
-    }
-
-    /**
-     * See class description.
-     */
-    abstract protected Object[][] getContents();
-
-    // ==================privates====================
-
-    /**
-     * We lazily load the lookup hashtable.  This function does the
-     * loading.
-     */
-    private synchronized void loadLookup() {
-        if (lookup != null)
-            return;
-
-        Object[][] contents = getContents();
-        HashMap temp = new HashMap(contents.length);
-        for (int i = 0; i < contents.length; ++i) {
-            // key must be non-null String, value must be non-null
-            String key = (String) contents[i][0];
-            Object value = contents[i][1];
-            if (key == null || value == null) {
-                throw new NullPointerException();
-            }
-            temp.put(key, value);
-        }
-        lookup = temp;
-    }
-
-    private Map lookup = null;
+	private synchronized void initializeTable() {
+		if (table == null) {
+			Object[][] contents = getContents();
+			table = new Hashtable<String, Object>(contents.length / 3 * 4 + 3);
+			for (int i = 0; i < contents.length; i++) {
+				table.put((String)contents[i][0], contents[i][1]);
+			}
+		}
+	}
 }
