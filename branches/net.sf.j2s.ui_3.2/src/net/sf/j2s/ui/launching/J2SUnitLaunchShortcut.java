@@ -264,11 +264,6 @@ public class J2SUnitLaunchShortcut implements ILaunchShortcut {
 			ILaunchConfigurationWorkingCopy wc= newWorkingCopy(name);
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainType);
 			wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
-			wc.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, false);
-			wc.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, container);
-			if (testName.length() > 0)
-				wc.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testName);	
-			AssertionVMArg.setArgDefault(wc);
 			config= wc.doSave();		
 		} catch (CoreException ce) {
 			JUnitPlugin.log(ce);

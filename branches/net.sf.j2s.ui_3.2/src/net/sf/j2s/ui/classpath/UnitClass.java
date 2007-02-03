@@ -16,9 +16,6 @@ public class UnitClass extends Resource {
 		return getClassName();
 	}
 
-//	public void setClassName(String className) {
-//		this.className = className;
-//	}
 	public void parseClassName() {
 		this.className = PathUtil.convertClassName(getRelativePath(), binRelativePath);
 	}

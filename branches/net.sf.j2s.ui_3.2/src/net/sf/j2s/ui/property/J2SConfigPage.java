@@ -63,11 +63,8 @@ public class J2SConfigPage extends Composite {
 	private Button buttonEnable;
 	private Button buttonDisable;
 	private boolean compilerEnabled = true;
-//	private Combo comboPattern;
 	private Composite compilerStatusComp;
-//	private Label patternLeadingLabel;
 	private Button buttonUp;
-//	private Label tipsLabel;
 	protected TreeViewer viewer;
 	protected J2SClasspathModel classpathModel;
 	private Button buttonDown;
@@ -156,17 +153,9 @@ public class J2SConfigPage extends Composite {
 		buttonAddInnerRes.addSelectionListener(addInnerJarAction);
 		
 		buttonAddRes = SWTUtil.createPushButton(actionComp, "Add Resources", null);
-//		buttonAddRes.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//			}
-//		});
 		buttonAddRes.addSelectionListener(new J2SAddJarAction(this));
 		
 		buttonAddPrj = SWTUtil.createPushButton(actionComp, "Add Projects", null);
-//		buttonAddPrj.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//			}
-//		});
 		buttonAddPrj.addSelectionListener(new J2SAddProjectAction(this));
 
 		buttonUp = SWTUtil.createPushButton(actionComp, "Up", null);
@@ -248,30 +237,6 @@ public class J2SConfigPage extends Composite {
 		buttonAbandon = SWTUtil.createPushButton(actionComp, "Abandon Classes", null);
 		buttonAbandon.addSelectionListener(new J2SAbandonClassesAction(this));
 
-		/*
-		buttonAbandon.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				Object[] expandedElements = viewer.getExpandedElements();
-				Object[] sels = getSelection();
-				for (int i = 0; i < sels.length; i++) {
-					classpathModel.abandonUnitClass((UnitClass) sels[i]);
-				}
-				ScrollBar bar = viewer.getTree().getVerticalBar();
-				double selection = 0;
-				if (bar != null) {
-					selection = (0.0 + bar.getSelection()) / bar.getMaximum();
-				}
-				viewer.refresh();
-				//viewer.expandToLevel(2);
-				viewer.setExpandedElements(expandedElements);
-				if (bar != null) {
-					bar.setSelection((int) Math.round(selection * bar.getMaximum()));
-				}
-				updateButtonGroup();
-				fireConfigModified();
-			}
-		});
-		*/
 		buttonRestore = SWTUtil.createPushButton(actionComp, "Restore Classes", null);
 		buttonRestore.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -315,11 +280,9 @@ public class J2SConfigPage extends Composite {
 	public void forClasspathTab() {
 		GridData gd3 = new GridData();
 		buttonDefault.setLayoutData(gd3);
-		//buttonRestore.getParent().layout(true);
 		GridData gd1 = new GridData(GridData.FILL_HORIZONTAL);
 		gd1.exclude = true;
 		compilerStatusComp.setLayoutData(gd1);
-		//compilerStatusComp.getParent().layout(true);
 	}
 	
 	private boolean isLastElementSelected() {
@@ -443,9 +406,7 @@ public class J2SConfigPage extends Composite {
 				}
 			}
 		} else if (!isSelectionContainsCategory() && getSelection().length > 0) {
-			//if (!isAbandonsSelected()) {
 				buttonRemove.setEnabled(true);
-			//}
 		}
 		if (getSelection().length == 1) {
 			if (isResourceCategorySelected()) {
@@ -624,10 +585,6 @@ public class J2SConfigPage extends Composite {
 			classpathModel.resources.add(entry);
 		}
 		CompositeResources comp = new CompositeResources();
-		//File folder = new File("S:/eclipse-3.1.1/eclipse/workspace/net.sf.j2s.java.org.eclipse.swt/");
-		//comp.setFolder(folder);
-		//comp.setRelativePath("swt.test.j2s");
-		//j2sFile = ;
 		comp.setFolder(j2sFile.getParentFile());
 		comp.setRelativePath(j2sFile.getName());
 		if (addInnerJarAction != null) {
@@ -674,45 +631,6 @@ public class J2SConfigPage extends Composite {
 			enableCompiler();
 		}
 	}
-	/*
-	public static void main (String [] args) {
-		Display display = new Display ();
-		Shell shell = new Shell(display);
-		
-		final J2SConfigPage page = new J2SConfigPage(shell, SWT.NONE);
-		page.initConfigPage(new File("S:/eclipse-3.1.1/eclipse/workspace/net.sf.j2s.java.org.eclipse.swt/swt.test.j2s"));
-		shell.setLayout(new GridLayout());
-		//shell.layout();
-		Button button = new Button(shell, SWT.PUSH);
-		button.setText("Test");
-		button.addSelectionListener(new SelectionAdapter() {
-		
-			public void widgetSelected(SelectionEvent e) {
-				J2SClasspathModel model = page.classpathModel;
-				for (Iterator iter = model.resources.iterator(); iter.hasNext();) {
-					Resource res = (Resource) iter.next();
-					System.out.println(res.toHTMLString());
-				}
-				for (Iterator iter = model.unitClasses.iterator(); iter.hasNext();) {
-					Resource res = (Resource) iter.next();
-					System.out.println(res.toHTMLString());
-				}
-				System.out.println("========");
-				for (Iterator iter = model.abandonedClasses.iterator(); iter.hasNext();) {
-					Resource res = (Resource) iter.next();
-					System.out.println(res.toHTMLString());
-				}
-			}
-		
-		});
-		shell.pack ();
-		shell.open ();
-		while (!shell.isDisposed ()) {
-			if (!display.readAndDispatch ()) display.sleep ();
-		}
-		display.dispose ();
-	}
-	*/
 
 	private void enableCompiler() {
 		buttonDisable.setSelection(false);
@@ -738,11 +656,7 @@ public class J2SConfigPage extends Composite {
 	}
 
 	private void setConfigEditable(boolean editable) {
-//		patternLeadingLabel.setEnabled(editable);
-//		comboPattern.setEnabled(editable);
-//		tipsLabel.setEnabled(editable);
 		viewer.getTree().setEnabled(editable);
-		//buttonUp.setEnabled(editable);
 		if (editable) {
 			updateButtonGroup();
 		} else {

@@ -11,9 +11,10 @@
 package net.sf.j2s.ui.generator;
 
 
+import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
-import net.sf.j2s.core.astvisitors.NameConverterUtil;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.compiler.Java2ScriptCompiler;
@@ -83,7 +84,6 @@ public class J2SView extends ViewPart {
 	private Action fClearAction;
 	private Action fSelectAllAction;
 	private Action fCopyAction;
-	private Action fScriptWrittenAction;
 	private Action fCompressVarNameAction;
 
 	private Text scriptText;
@@ -95,7 +95,6 @@ public class J2SView extends ViewPart {
 	private ITextEditor fEditor;
 	private IOpenable fOpenable;
 	private CompilationUnit fRoot;
-	private IDocument fCurrentDocument;
 	
 	private boolean fDoLinkWithEditor;
 	private IDialogSettings fDialogSettings;
@@ -148,12 +147,8 @@ public class J2SView extends ViewPart {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-//		manager.add(fFocusAction);
-//		manager.add(fLinkWithEditor);
-//		manager.add(fScriptWrittenAction);
 		manager.add(fCompressVarNameAction);
 		manager.add(new Separator());
-		//manager.add(fClearAction);
 		manager.add(fSelectAllAction);
 	}
 
@@ -306,12 +301,11 @@ public class J2SView extends ViewPart {
 			
 			//installModificationListener();
 
-			//ASTScriptVisitor visitor = new ASTScriptVisitor();
-//			SWTScriptVisitor visitor = new CompressedSWTScriptVisitor();
 			SWTScriptVisitor visitor = new SWTScriptVisitor();
 			
-			visitor.setToCompileVariableName(fCompressVarName);
-			NameConverterUtil.setJ2SMap(null);
+			//visitor.setToCompileVariableName(fCompressVarName);
+			((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(fCompressVarName);
+			ASTJ2SMapVisitor.setJ2SMap(null);
 			if (fCompressVarName) {
 				String prjFolder = null;
 				if (fOpenable instanceof IJavaElement) {
@@ -328,26 +322,17 @@ public class J2SView extends ViewPart {
 			fRoot.accept(visitor);
 			DependencyASTVisitor dvisitor = new SWTDependencyASTVisitor();
 			dvisitor.setToCompileVariableName(fCompressVarName);
-			boolean errorOccurs = false;
 			try {
 				fRoot.accept(dvisitor);
 			} catch (Throwable e) {
 				e.printStackTrace();
-				errorOccurs = true;
 			}
 			outputJavaScript(visitor, dvisitor);
-			
-//			DependencyASTVisitor dependencyASTVisitor = new DependencyASTVisitor();
-//			fRoot.accept(dependencyASTVisitor);
-//			String js = dependencyASTVisitor.getMusts() + "\r\n" + dependencyASTVisitor.getRequires() + "\r\n" + dependencyASTVisitor.getOptionals();
-//			scriptText.setText(js);
 		}
 
 	}
 	
 	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
-		long startTime;
-		long endTime;
 		CompilationUnit root;
 		ASTParser parser= ASTParser.newParser(astLevel);
 		parser.setResolveBindings(true);
@@ -356,9 +341,7 @@ public class J2SView extends ViewPart {
 		} else {
 			parser.setSource((IClassFile) input);
 		}
-		startTime= System.currentTimeMillis();
 		root= (CompilationUnit) parser.createAST(null);
-		endTime= System.currentTimeMillis();
 		if (root == null) {
 			throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
 		}
@@ -378,78 +361,6 @@ public class J2SView extends ViewPart {
 				.replaceAll("\\.callbacks", "\\.b\\$")
 				.replaceAll("\\.\\$finals", "\\.f\\$");
 		scriptText.setText(js);
-		/*
-		if (!fScriptWritten) {
-			return ;
-		}
-		String elementName = fRoot.getJavaElement().getElementName();
-		//if (elementName.endsWith(".class") || elementName.endsWith(".java")) {
-			elementName = elementName.substring(0, elementName.lastIndexOf('.'));
-		//}
-		String folderPath = null;
-		String path = J2SViewPlugin.getDefault().getPreferenceStore().getString("net.sf.j2s.output.path");
-		if (path != null) {
-			folderPath = path;
-		} else {
-			folderPath = J2SViewPlugin.getDefault().getPreferenceStore().getDefaultString("net.sf.j2s.output.path");
-		}
-		if (folderPath == null || folderPath.trim().length() == 0) {
-			folderPath = System.getProperty("user.home");
-		}
-		String packageName = visitor.getPackageName();
-		if (packageName != null) {
-			File folder = new File(folderPath, packageName.replace('.', '\\'));
-			folderPath = folder.getAbsolutePath();
-			if (!folder.exists() || !folder.isDirectory()) {
-				if (!folder.mkdirs()) {
-					System.err.println("Failed to create folder " + folderPath);;
-					return ;
-				}
-			}
-		}
-		File jsFile = new File(folderPath, elementName + ".js");
-		FileWriter fileWriter = null;
-		try {
-			fileWriter = new FileWriter(jsFile);
-			fileWriter.write(js);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			if (fileWriter != null) {
-				try {
-					fileWriter.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		*/
-		
-//		if (visitor instanceof SWTScriptVisitor) {
-//			SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
-//			String removedJS = swtVisitor.getBufferRemoved().toString();
-//			if (removedJS.trim().length() > 0) {
-//				scriptText.setText(js + "\r\n/*======removed=====*/\r\n\r\n" + removedJS);
-//				jsFile = new File(folderPath, elementName + ".remmoved.js");
-//				fileWriter = null;
-//				try {
-//					fileWriter = new FileWriter(jsFile);
-//					fileWriter.write(removedJS);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} finally {
-//					if (fileWriter != null) {
-//						try {
-//							fileWriter.close();
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
-//			}
-//		}
 	}
 	
 	protected void performLinkWithEditor() {
@@ -470,14 +381,6 @@ public class J2SView extends ViewPart {
 		ITextSelection textSelection= (ITextSelection) selection;
 		int offset= textSelection.getOffset();
 		int length= textSelection.getLength();
-		
-//		NodeFinder finder= new NodeFinder(offset, length);
-//		fRoot.accept(finder);
-//		ASTNode covering= finder.getCoveringNode();
-//		if (covering != null) {
-//			fViewer.reveal(covering);
-//			fViewer.setSelection(new StructuredSelection(covering));
-//		}
 	}
 	
 	/*(non-Javadoc)
@@ -521,18 +424,6 @@ public class J2SView extends ViewPart {
 	}
 	
 	protected void handleSelectionChanged(ISelection selection) {
-//		fExpandAction.setEnabled(!selection.isEmpty());
-//		fCollapseAction.setEnabled(!selection.isEmpty());
-//		fCopyAction.setEnabled(!selection.isEmpty());
-		
-//		boolean addEnabled= false;
-//		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-//		if (structuredSelection.size() == 1) {
-//			Object first= structuredSelection.getFirstElement();
-//			if (first instanceof Binding)
-//				addEnabled= ((Binding) first).getBinding() != null && fViewer.getTree().isFocusControl();
-//		}
-		//fAddToTrayAction.setEnabled(addEnabled);
 	}
 	protected void handleDoubleClick(DoubleClickEvent event) {
 		//fDoubleClickAction.run();

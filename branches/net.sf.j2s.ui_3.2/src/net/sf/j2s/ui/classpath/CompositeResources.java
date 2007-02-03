@@ -16,7 +16,6 @@ import net.sf.j2s.ui.launching.J2SCyclicProjectUtils;
 public class CompositeResources extends Resource implements IClasspathContainer {
 	protected List resources;
 	protected List abandonedResources;
-	//private Resource[] children;
 	private String binRelativePath;
 
 	private String compilerStatus;
@@ -29,8 +28,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		}
 	}
 	public String getName() {
-//		String path = getRelativePath();
-//		return path.substring(1, path.indexOf('/', 2));
 		return super.getName();
 	}
 
@@ -46,9 +43,7 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 			return getRelativePath().substring(0, getRelativePath().lastIndexOf('/') + 1);
 		} else {
 			return "";
-			//return binRelativePath;
 		}
-		//return super.getBinRelativePath();
 	}
 
 	public void load() {
@@ -81,8 +76,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			//setFolder(file.getParentFile());
-			//setRelativePath(file.getName());
 			compilerStatus = props.getProperty("j2s.compiler.status");
 			
 			binRelativePath = props.getProperty(PathUtil.J2S_OUTPUT_PATH);
@@ -93,14 +86,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 			reses = PathUtil.getAbandonedResources(props);
 			addResourceByString(abandonedResources, reses);
 
-			/*
-			this.children = new Resource[resources.size()];
-			for (int i = 0; i < resources.size(); i++) {
-				Resource res = (Resource) resources.get(i);
-				this.children[i] = res;
-				res.setParent(this);
-			}
-			*/
 		}
 	}
 	
@@ -172,12 +157,10 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < reses.length; i++) {
 			String str = reses[i].toResourceString();
-			//if (str != null) {
 				buf.append(str);
 				if (i != reses.length - 1) {
 					buf.append(",");
 				}
-			//}
 		}
 		props.setProperty(PathUtil.J2S_RESOURCES_LIST, buf.toString());
 		props.setProperty(PathUtil.J2S_OUTPUT_PATH, binRelativePath);
@@ -188,7 +171,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 			this.load();
 		}
 		return (Resource[]) resources.toArray(new Resource[0]);
-		//return children;
 	}
 	public void addResource(Resource res) {
 		if (!resources.contains(res)) {
@@ -228,9 +210,6 @@ public class CompositeResources extends Resource implements IClasspathContainer 
 	public void bottomResource(int res) {
 		
 	}
-//	public String getBinRelativePath() {
-//		return binRelativePath;
-//	}
 
 	public void setBinRelativePath(String binRelativePath) {
 		this.binRelativePath = binRelativePath;

@@ -90,9 +90,7 @@ public class J2SConfigEditor extends MultiPageEditorPart implements IResourceCha
 		try {
 			J2STextEditor readOnlyEditor = new J2STextEditor();
 			int index = addPage(readOnlyEditor, getEditorInput());
-//			readOnlyEditor.setReadOnly(true);
 			editor = readOnlyEditor;
-			//setPageText(index, editor.getTitle());
 			setPageText(index, "Source");
 		} catch (PartInitException e) {
 			ErrorDialog.openError(
