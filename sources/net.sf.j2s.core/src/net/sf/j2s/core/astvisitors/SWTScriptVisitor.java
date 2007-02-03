@@ -340,7 +340,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
 				return false;
 			}
 		}
@@ -353,7 +353,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IMethodBinding methodBinding = node.resolveBinding();
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
 				return ;
 			}
 		}
@@ -367,7 +367,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IMethodBinding methodBinding = node.resolveBinding();
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
 				return false;
 			}
 		}
@@ -395,7 +395,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				String[] filterMethods = getFilterMethods();
 				boolean isContinue = false;
 				for (int i = 0; i < filterMethods.length; i += 2) {
-					if (isMethodInvoking(exp, filterMethods[i], filterMethods[i + 1])) {
+					if (Bindings.isMethodInvoking(exp, filterMethods[i], filterMethods[i + 1])) {
 						isContinue = true;
 						break;
 					}
@@ -423,40 +423,6 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		return false;
 	}
 	
-	private boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
-		if (methodName.equals(methodBinding.getName())) {
-			IMethodBinding findMethodInHierarchy = Bindings.findMethodInHierarchy(methodBinding.getDeclaringClass(), methodName, null);
-			IMethodBinding last = findMethodInHierarchy;
-			int count = 0;
-			while (findMethodInHierarchy != null && (count++) < 10) {
-				last = findMethodInHierarchy;
-				ITypeBinding superclass = last.getDeclaringClass().getSuperclass();
-				if (superclass == null) {
-					break;
-				}
-				findMethodInHierarchy = 
-					Bindings.findMethodInHierarchy(superclass, methodName, null);
-			}
-			if (last == null) {
-				last = methodBinding;
-			}
-			if (className.equals(last.getDeclaringClass().getQualifiedName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	private boolean isMethodInvoking(Expression exp, String className, String methodName) {
-		if (exp instanceof MethodInvocation) {
-			MethodInvocation method = (MethodInvocation) exp;
-			IMethodBinding methodBinding = method.resolveMethodBinding();
-			if (isMethodInvoking(methodBinding, className, methodName)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public boolean visit(IfStatement node) {
 		if (node.getElseStatement() == null) {
 			Statement thenStatement = node.getThenStatement();
@@ -470,13 +436,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			if (thenStatement instanceof ExpressionStatement) {
 				ExpressionStatement expStmt = (ExpressionStatement) thenStatement;
 				Expression exp = expStmt.getExpression();
-				if (isMethodInvoking(exp, "org.eclipse.swt.widgets.Widget", "error")) {
+				if (Bindings.isMethodInvoking(exp, "org.eclipse.swt.widgets.Widget", "error")) {
 					return false;
 				}
-				if (isMethodInvoking(exp, "org.eclipse.swt.SWT", "error")) {
+				if (Bindings.isMethodInvoking(exp, "org.eclipse.swt.SWT", "error")) {
 					return false;
 				}
-				if (isMethodInvoking(exp, "org.eclipse.swt.widgets.Display", "error")) {
+				if (Bindings.isMethodInvoking(exp, "org.eclipse.swt.widgets.Display", "error")) {
 					return false;
 				}
 			}

@@ -795,6 +795,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 	
 	public boolean visit(MethodDeclaration node) {
+		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			return false;
+		}
+		
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List tags = javadoc.tags();

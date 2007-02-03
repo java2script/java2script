@@ -137,7 +137,12 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		if (index != -1
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
 						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
-			name = name.substring(10);
+			if (!name.startsWith("java.lang.ref")
+							&& !name.startsWith("java.lang.annotaion")
+							&& !name.startsWith("java.lang.instrument")
+							&& !name.startsWith("java.lang.management")) {
+				name = name.substring(10);
+			}
 		}
 		String swt = "org.eclipse.swt.SWT";
 		index = name.indexOf(swt);
@@ -164,7 +169,51 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		}
 		return name;
 	}
-	
+
+	public String shortenPackageName(String fullName) {
+		String name = fullName.substring(0, fullName.lastIndexOf('.'));
+		int index = name.indexOf('<');
+		if (index != -1) {
+			name = name.substring(0, index).trim();
+		}
+		index = name.indexOf("java.lang.");
+		char ch = 0;
+		if (index != -1
+				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
+						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
+			if (!fullName.startsWith("java.lang.ref")
+							&& !fullName.startsWith("java.lang.annotation")
+							&& !fullName.startsWith("java.lang.instrument")
+							&& !fullName.startsWith("java.lang.management")) {
+				name = name.substring(10);
+			}
+		}
+		String swt = "org.eclipse.swt.SWT";
+		index = name.indexOf(swt);
+		if (index != -1) {
+			String after = name.substring(swt.length());
+			if (after.length() == 0 || after.startsWith(".")) {
+				name = "$WT" + after;
+			}
+		} else {
+			String os = "org.eclipse.swt.internal.browser.OS";
+			index = name.indexOf(os);
+			if (index != -1) {
+				String after = name.substring(os.length());
+				if (after.length() == 0 || after.startsWith(".")) {
+					name = "O$" + after;
+				}
+			}
+		}
+		swt = "org.eclipse.swt";
+		index = name.indexOf(swt);
+		if (index != -1) {
+			String after = name.substring(swt.length());
+			name = "$wt" + after;
+		}
+		return name;
+	}
+
 	public String getTypeStringName(Type type) {
 		if (type == null) {
 			return null;
