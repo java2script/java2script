@@ -1220,7 +1220,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 					/*
 					 * The first time reaching here is the time when ClassLoader
 					 * is trying to load entry class. Class with #main method and
-					 * is to be executed is call Entry Class.
+					 * is to be executed is called Entry Class.
 					 *
 					 * Here when loading entry class, ClassLoader should not call
 					 * the next following loading script. This is because, those
@@ -2086,8 +2086,17 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 				qq[qq.length] = n;
 			//}
 			if (!needBeingQueued) { // can be loaded directly
+				/*-# bakEntryClassLoading -> bkECL #-*/
+				var bakEntryClassLoading = false;
+				if (optionalsLoaded != null) {
+					bakEntryClassLoading = ClazzLoader.isLoadingEntryClass;
+					ClazzLoader.isLoadingEntryClass = true;
+				}
 				ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
 				ClazzLoader.loadScript (n.path);
+				if (optionalsLoaded != null) {
+					ClazzLoader.isLoadingEntryClass = bakEntryClassLoading;
+				}
 			}
 		}
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {

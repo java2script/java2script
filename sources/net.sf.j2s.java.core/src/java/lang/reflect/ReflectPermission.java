@@ -1,74 +1,53 @@
 /*
- * @(#)ReflectPermission.java	1.18 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.lang.reflect;
 
+
+import java.security.BasicPermission;
+
 /**
- * The Permission class for reflective operations.  A
- * ReflectPermission is a <em>named permission</em> and has no
- * actions.  The only name currently defined is <tt>suppressAccessChecks</tt>,
- * which allows suppressing the standard Java language access checks
- * -- for public, default (package) access, protected, and private
- * members -- performed by reflected objects at their point of use.
- * <P>
- * The following table
- * provides a summary description of what the permission allows,
- * and discusses the risks of granting code the permission.
- * <P>
- *
- * <table border=1 cellpadding=5 summary="Table shows permission target name, what the permission allows, and associated risks">
- * <tr>
- * <th>Permission Target Name</th>
- * <th>What the Permission Allows</th>
- * <th>Risks of Allowing this Permission</th>
- * </tr>
- *
- * <tr>
- *   <td>suppressAccessChecks</td>
- *   <td>ability to access
- * fields and invoke methods in a class. Note that this includes
- * not only public, but protected and private fields and methods as well.</td>
- *   <td>This is dangerous in that information (possibly confidential) and
- * methods normally unavailable would be accessible to malicious code.</td>
- * </tr>
- *
- * </table>
- *
- * @see java.security.Permission
- * @see java.security.BasicPermission
- * @see AccessibleObject
- * @see Field#get
- * @see Field#set
- * @see Method#invoke
- * @see Constructor#newInstance
- *
- * @since 1.2
+ * ReflectPermission objects represent permission to access dangerous operations
+ * in the reflection layer.
  */
-public final
-class ReflectPermission extends java.security.BasicPermission {
+public final class ReflectPermission extends BasicPermission {
+
+    private static final long serialVersionUID = 7412737110241507485L;
 
     /**
-     * Constructs a ReflectPermission with the specified name.
-     *
-     * @param name the name of the ReflectPermission
-     */
-    public ReflectPermission(String name) {
-	super(name);
-    }
+	 * Creates an instance of this class with given name.
+	 * 
+	 * @param permissionName
+	 *            String the name of the new permission.
+	 */
+	public ReflectPermission(String permissionName) {
+		super(permissionName);
+	}
 
-    /**
-     * Constructs a ReflectPermission with the specified name and actions.
-     * The actions should be null; they are ignored.
-     *
-     * @param name the name of the ReflectPermission
-     * @param actions should be null.
-     */
-    public ReflectPermission(String name, String actions) {
-	super(name, actions);
-    }
-
+	/**
+	 * Creates an instance of this class with the given name and action list.
+	 * The action list is ignored.
+	 * 
+	 * @param name
+	 *            String the name of the new permission.
+	 * @param actions
+	 *            String ignored.
+	 */
+	public ReflectPermission(String name, String actions) {
+		super(name, actions);
+	}
 }

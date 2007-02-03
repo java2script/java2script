@@ -1,127 +1,179 @@
 /*
- * @(#)BufferedOutputStream.java	1.31 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.io;
 
+import org.apache.harmony.luni.util.Msg;
+
 /**
- * The class implements a buffered output stream. By setting up such 
- * an output stream, an application can write bytes to the underlying 
- * output stream without necessarily causing a call to the underlying 
- * system for each byte written.
- *
- * @author  Arthur van Hoff
- * @version 1.31, 01/23/03
- * @since   JDK1.0
+ * BufferedOutputStream is a class which takes an output stream and
+ * <em>buffers</em> the writes to that stream. In this way, costly interaction
+ * with the original output stream can be minimized by writing buffered amounts
+ * of data infrequently. The drawback is that extra space is required to hold
+ * the buffer and copying takes place when writing that buffer.
+ * 
+ * @see BufferedInputStream
  */
-public 
-class BufferedOutputStream extends FilterOutputStream {
+public class BufferedOutputStream extends FilterOutputStream {
     /**
-     * The internal buffer where data is stored. 
+     * The buffer containing the bytes to be written to the target OutputStream.
      */
-    protected byte buf[];
+    protected byte[] buf;
 
     /**
-     * The number of valid bytes in the buffer. This value is always 
-     * in the range <tt>0</tt> through <tt>buf.length</tt>; elements 
-     * <tt>buf[0]</tt> through <tt>buf[count-1]</tt> contain valid 
-     * byte data.
+     * The total number of bytes inside the byte array <code>buf</code>.
      */
     protected int count;
-    
+
     /**
-     * Creates a new buffered output stream to write data to the 
-     * specified underlying output stream with a default 512-byte 
-     * buffer size.
-     *
-     * @param   out   the underlying output stream.
+     * Constructs a new BufferedOutputStream on the OutputStream
+     * <code>out</code>. The default buffer size (8Kb) is allocated and all
+     * writes are now filtered through this stream.
+     * 
+     * @param out
+     *            the OutputStream to buffer writes on.
      */
     public BufferedOutputStream(OutputStream out) {
-	this(out, 512);
+        super(out);
+        buf = new byte[8192];
     }
 
     /**
-     * Creates a new buffered output stream to write data to the 
-     * specified underlying output stream with the specified buffer 
-     * size. 
-     *
-     * @param   out    the underlying output stream.
-     * @param   size   the buffer size.
-     * @exception IllegalArgumentException if size &lt;= 0.
+     * Constructs a new BufferedOutputStream on the OutputStream
+     * <code>out</code>. The buffer size is set to <code>size</code> and
+     * all writes are now filtered through this stream.
+     * 
+     * @param out
+     *            the OutputStream to buffer writes on.
+     * @param size
+     *            the size of the buffer in bytes.
+     * @throws IllegalArgumentException
+     *             the size is <= 0
      */
     public BufferedOutputStream(OutputStream out, int size) {
-	super(out);
+        super(out);
         if (size <= 0) {
-            throw new IllegalArgumentException("Buffer size <= 0");
+            // K0058=size must be > 0
+            throw new IllegalArgumentException(Msg.getString("K0058")); //$NON-NLS-1$
         }
-	buf = new byte[size];
-    }
-
-    /** Flush the internal buffer */
-    private void flushBuffer() throws IOException {
-        if (count > 0) {
-	    out.write(buf, 0, count);
-	    count = 0;
-        }
+        buf = new byte[size];
     }
 
     /**
-     * Writes the specified byte to this buffered output stream. 
-     *
-     * @param      b   the byte to be written.
-     * @exception  IOException  if an I/O error occurs.
+     * Flush this BufferedOutputStream to ensure all pending data is written out
+     * to the target OutputStream. In addition, the target stream is also
+     * flushed.
+     * 
+     * @throws IOException
+     *             If an error occurs attempting to flush this
+     *             BufferedOutputStream.
      */
-    public synchronized void write(int b) throws IOException {
-	if (count >= buf.length) {
-	    flushBuffer();
-	}
-	buf[count++] = (byte)b;
-    }
-
-    /**
-     * Writes <code>len</code> bytes from the specified byte array 
-     * starting at offset <code>off</code> to this buffered output stream.
-     *
-     * <p> Ordinarily this method stores bytes from the given array into this
-     * stream's buffer, flushing the buffer to the underlying output stream as
-     * needed.  If the requested length is at least as large as this stream's
-     * buffer, however, then this method will flush the buffer and write the
-     * bytes directly to the underlying output stream.  Thus redundant
-     * <code>BufferedOutputStream</code>s will not copy data unnecessarily.
-     *
-     * @param      b     the data.
-     * @param      off   the start offset in the data.
-     * @param      len   the number of bytes to write.
-     * @exception  IOException  if an I/O error occurs.
-     */
-    public synchronized void write(byte b[], int off, int len) throws IOException {
-	if (len >= buf.length) {
-	    /* If the request length exceeds the size of the output buffer,
-    	       flush the output buffer and then write the data directly.
-    	       In this way buffered streams will cascade harmlessly. */
-	    flushBuffer();
-	    out.write(b, off, len);
-	    return;
-	}
-	if (len > buf.length - count) {
-	    flushBuffer();
-	}
-	System.arraycopy(b, off, buf, count, len);
-	count += len;
-    }
-
-    /**
-     * Flushes this buffered output stream. This forces any buffered 
-     * output bytes to be written out to the underlying output stream. 
-     *
-     * @exception  IOException  if an I/O error occurs.
-     * @see        java.io.FilterOutputStream#out
-     */
+    @Override
     public synchronized void flush() throws IOException {
-        flushBuffer();
-	out.flush();
+        if (count > 0) {
+            out.write(buf, 0, count);
+        }
+        count = 0;
+        out.flush();
+    }
+
+    /**
+     * Writes <code>count</code> <code>bytes</code> from the byte array
+     * <code>buffer</code> starting at <code>offset</code> to this
+     * BufferedOutputStream. If there is room in the buffer to hold the bytes,
+     * they are copied in. If not, the buffered bytes plus the bytes in
+     * <code>buffer</code> are written to the target stream, the target is
+     * flushed, and the buffer is cleared.
+     * 
+     * @param buffer
+     *            the buffer to be written
+     * @param offset
+     *            offset in buffer to get bytes
+     * @param length
+     *            number of bytes in buffer to write
+     * 
+     * @throws IOException
+     *             If an error occurs attempting to write to this
+     *             BufferedOutputStream.
+     * @throws NullPointerException
+     *             If buffer is null.
+     * @throws ArrayIndexOutOfBoundsException
+     *             If offset or count is outside of bounds.
+     */
+    @Override
+    public synchronized void write(byte[] buffer, int offset, int length)
+            throws IOException {
+        if (buffer == null) {
+            // K0047=buffer is null
+            throw new NullPointerException(Msg.getString("K0047")); //$NON-NLS-1$
+        }
+        if (offset < 0 || offset > buffer.length - length || length < 0) {
+            // K002f=Arguments out of bounds
+            throw new ArrayIndexOutOfBoundsException(Msg.getString("K002f")); //$NON-NLS-1$
+        }
+        if (count == 0 && length >= buf.length) {
+            out.write(buffer, offset, length);
+            return;
+        }
+        int available = buf.length - count;
+        if (length < available) {
+            available = length;
+        }
+        if (available > 0) {
+            System.arraycopy(buffer, offset, buf, count, available);
+            count += available;
+        }
+        if (count == buf.length) {
+            out.write(buf, 0, buf.length);
+            count = 0;
+            if (length > available) {
+                offset += available;
+                available = length - available;
+                if (available >= buf.length) {
+                    out.write(buffer, offset, available);
+                } else {
+                    System.arraycopy(buffer, offset, buf, count, available);
+                    count += available;
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes the specified byte <code>oneByte</code> to this
+     * BufferedOutputStream. Only the low order byte of <code>oneByte</code>
+     * is written. If there is room in the buffer, the byte is copied in and the
+     * count incremented. Otherwise, the buffer plus <code>oneByte</code> are
+     * written to the target stream, the target is flushed, and the buffer is
+     * reset.
+     * 
+     * @param oneByte
+     *            the byte to be written
+     * 
+     * @throws IOException
+     *             If an error occurs attempting to write to this
+     *             BufferedOutputStream.
+     */
+    @Override
+    public synchronized void write(int oneByte) throws IOException {
+        if (count == buf.length) {
+            out.write(buf, 0, count);
+            count = 0;
+        }
+        buf[count++] = (byte) oneByte;
     }
 }

@@ -1,16 +1,18 @@
-/* Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
@@ -19,14 +21,12 @@ package java.util;
 /**
  * Map has a set of keys, each key is mapped to a single value.
  */
-//public interface Map<K,V> {
-public interface Map {
+public interface Map<K,V> {
 	/**
 	 * Map.Entry is a key/value mapping which is contained in a Map.
 	 * 
 	 */
-//	public abstract static interface Entry<K,V> {
-	public abstract static interface Entry {
+	public abstract static interface Entry<K,V> {
 		/**
 		 * Compares the specified object to this Map.Entry and answer if they
 		 * are equal. The object must be an instance of Map.Entry and have the
@@ -46,16 +46,14 @@ public interface Map {
 		 * 
 		 * @return the key
 		 */
-//		public K getKey();
-		public Object getKey();
+		public K getKey();
 
 		/**
 		 * Gets the value.
 		 * 
 		 * @return the value
 		 */
-//		public V getValue();
-		public Object getValue();
+		public V getValue();
 
 		/**
 		 * Answers an integer hash code for the receiver. Objects which are
@@ -74,8 +72,7 @@ public interface Map {
 		 *            the new value
 		 * @return object
 		 */
-//		public V setValue(V object);
-		public Object setValue(Object object);
+		public V setValue(V object);
 	};
 
 	/**
@@ -118,8 +115,7 @@ public interface Map {
 	 * 
 	 * @return a <code>Set</code> of the mappings
 	 */
-//	public Set<Map.Entry<K,V>> entrySet();
-	public Set entrySet();
+	public Set<Map.Entry<K,V>> entrySet();
 
 	/**
 	 * Compares the argument to the receiver, and answers true if they represent
@@ -140,8 +136,7 @@ public interface Map {
 	 *            the key
 	 * @return the value of the mapping with the specified key
 	 */
-//	public V get(Object key);
-	public Object get(Object key);
+	public V get(Object key);
 
 	/**
 	 * Answers an integer hash code for the receiver. Objects which are equal
@@ -169,8 +164,7 @@ public interface Map {
 	 * 
 	 * @return a Set of the keys
 	 */
-//	public Set<K> keySet();
-	public Set keySet();
+	public Set<K> keySet();
 
 	/**
 	 * Maps the specified key to the specified value.
@@ -193,8 +187,7 @@ public interface Map {
 	 *                when the key or value is null and this Map does not
 	 *                support null keys or values
 	 */
-//	public V put(K key, V value);
-	public Object put(Object key, Object value);
+	public V put(K key, V value);
 
 	/**
 	 * Copies every mapping in the specified Map to this Map.
@@ -213,8 +206,7 @@ public interface Map {
 	 *                when a key or value is null and this Map does not support
 	 *                null keys or values
 	 */
-//	public void putAll(Map<? extends K,? extends V> map);
-	public void putAll(Map map);
+	public void putAll(Map<? extends K,? extends V> map);
 
 	/**
 	 * Removes a mapping with the specified key from this Map.
@@ -227,8 +219,7 @@ public interface Map {
 	 * @exception UnsupportedOperationException
 	 *                when removing from this Map is not supported
 	 */
-//	public V remove(Object key);
-	public Object remove(Object key);
+	public V remove(Object key);
 
 	/**
 	 * Answers the number of elements in this Map.
@@ -245,6 +236,5 @@ public interface Map {
 	 * 
 	 * @return a Collection of the values
 	 */
-//	public Collection<V> values();
-	public Collection values();
+	public Collection<V> values();
 }

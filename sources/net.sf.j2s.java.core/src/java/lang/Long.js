@@ -4,7 +4,10 @@ Clazz.instantialize (this, arguments);
 };
 Clazz.decorateAsType (Long, "Long", Number, Comparable);
 Long.prototype.valueOf = function () { return 0; };
-Long.prototype.toString = function () {
+Long.toString = Long.prototype.toString = function () {
+	if (arguments.length != 0) {
+		return "" + arguments[0];
+	}
 	return "" + this.valueOf ();
 };
 Clazz.makeConstructor (Long, 

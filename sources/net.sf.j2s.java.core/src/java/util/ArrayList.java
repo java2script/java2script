@@ -1,549 +1,682 @@
 /*
- * @(#)ArrayList.java	1.41 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
 
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+
 /**
- * Resizable-array implementation of the <tt>List</tt> interface.  Implements
- * all optional list operations, and permits all elements, including
- * <tt>null</tt>.  In addition to implementing the <tt>List</tt> interface,
- * this class provides methods to manipulate the size of the array that is
- * used internally to store the list.  (This class is roughly equivalent to
- * <tt>Vector</tt>, except that it is unsynchronized.)<p>
- *
- * The <tt>size</tt>, <tt>isEmpty</tt>, <tt>get</tt>, <tt>set</tt>,
- * <tt>iterator</tt>, and <tt>listIterator</tt> operations run in constant
- * time.  The <tt>add</tt> operation runs in <i>amortized constant time</i>,
- * that is, adding n elements requires O(n) time.  All of the other operations
- * run in linear time (roughly speaking).  The constant factor is low compared
- * to that for the <tt>LinkedList</tt> implementation.<p>
- *
- * Each <tt>ArrayList</tt> instance has a <i>capacity</i>.  The capacity is
- * the size of the array used to store the elements in the list.  It is always
- * at least as large as the list size.  As elements are added to an ArrayList,
- * its capacity grows automatically.  The details of the growth policy are not
- * specified beyond the fact that adding an element has constant amortized
- * time cost.<p> 
- *
- * An application can increase the capacity of an <tt>ArrayList</tt> instance
- * before adding a large number of elements using the <tt>ensureCapacity</tt>
- * operation.  This may reduce the amount of incremental reallocation.<p>
- *
- * <strong>Note that this implementation is not synchronized.</strong> If
- * multiple threads access an <tt>ArrayList</tt> instance concurrently, and at
- * least one of the threads modifies the list structurally, it <i>must</i> be
- * synchronized externally.  (A structural modification is any operation that
- * adds or deletes one or more elements, or explicitly resizes the backing
- * array; merely setting the value of an element is not a structural
- * modification.)  This is typically accomplished by synchronizing on some
- * object that naturally encapsulates the list.  If no such object exists, the
- * list should be "wrapped" using the <tt>Collections.synchronizedList</tt>
- * method.  This is best done at creation time, to prevent accidental
- * unsynchronized access to the list:
- * <pre>
- *	List list = Collections.synchronizedList(new ArrayList(...));
- * </pre><p>
- *
- * The iterators returned by this class's <tt>iterator</tt> and
- * <tt>listIterator</tt> methods are <i>fail-fast</i>: if list is structurally
- * modified at any time after the iterator is created, in any way except
- * through the iterator's own remove or add methods, the iterator will throw a
- * ConcurrentModificationException.  Thus, in the face of concurrent
- * modification, the iterator fails quickly and cleanly, rather than risking
- * arbitrary, non-deterministic behavior at an undetermined time in the
- * future.<p>
- *
- * Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw <tt>ConcurrentModificationException</tt> on a best-effort basis. 
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness: <i>the fail-fast behavior of iterators
- * should be used only to detect bugs.</i><p>
- *
- * This class is a member of the 
- * <a href="{@docRoot}/../guide/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @author  Josh Bloch
- * @version 1.41, 01/23/03
- * @see	    Collection
- * @see	    List
- * @see	    LinkedList
- * @see	    Vector
- * @see	    Collections#synchronizedList(List)
- * @since   1.2
+ * ArrayList is an implementation of List, backed by an array. All optional
+ * operations are supported, adding, removing, and replacing. The elements can
+ * be any objects.
+ * @since 1.2
  */
+public class ArrayList<E> extends AbstractList<E> implements List<E>, Cloneable,
+		Serializable, RandomAccess {
 
-public class ArrayList extends AbstractList
-        implements List, RandomAccess, Cloneable, java.io.Serializable
-{
-    private static final long serialVersionUID = 8683452581122892189L;
+	private static final long serialVersionUID = 8683452581122892189L;
 
-    /**
-     * The array buffer into which the elements of the ArrayList are stored.
-     * The capacity of the ArrayList is the length of this array buffer.
-     */
-    private transient Object elementData[];
+	private transient int firstIndex;
+    
+    private transient int lastIndex;
 
-    /**
-     * The size of the ArrayList (the number of elements it contains).
-     *
-     * @serial
-     */
-    private int size;
+	private transient E[] array;
 
-    /**
-     * Constructs an empty list with the specified initial capacity.
-     *
-     * @param   initialCapacity   the initial capacity of the list.
-     * @exception IllegalArgumentException if the specified initial capacity
-     *            is negative
-     */
-    public ArrayList(int initialCapacity) {
-	super();
-        if (initialCapacity < 0)
-            throw new IllegalArgumentException("Illegal Capacity: "+
-                                               initialCapacity);
-	this.elementData = new Object[initialCapacity];
-    }
-
-    /**
-     * Constructs an empty list with an initial capacity of ten.
-     */
-    public ArrayList() {
-	this(10);
-    }
-
-    /**
-     * Constructs a list containing the elements of the specified
-     * collection, in the order they are returned by the collection's
-     * iterator.  The <tt>ArrayList</tt> instance has an initial capacity of
-     * 110% the size of the specified collection.
-     *
-     * @param c the collection whose elements are to be placed into this list.
-     * @throws NullPointerException if the specified collection is null.
-     */
-    public ArrayList(Collection c) {
-        size = c.size();
-        // Allow 10% room for growth
-        elementData = new Object[
-                      (int)Math.min((size*110L)/100,Integer.MAX_VALUE)]; 
-        c.toArray(elementData);
-    }
-
-    /**
-     * Trims the capacity of this <tt>ArrayList</tt> instance to be the
-     * list's current size.  An application can use this operation to minimize
-     * the storage of an <tt>ArrayList</tt> instance.
-     */
-    public void trimToSize() {
-	modCount++;
-	int oldCapacity = elementData.length;
-	if (size < oldCapacity) {
-	    Object oldData[] = elementData;
-	    elementData = new Object[size];
-	    System.arraycopy(oldData, 0, elementData, 0, size);
+	/**
+	 * Constructs a new instance of ArrayList with zero capacity.
+	 */
+	public ArrayList() {
+		this(0);
 	}
-    }
 
-    /**
-     * Increases the capacity of this <tt>ArrayList</tt> instance, if
-     * necessary, to ensure  that it can hold at least the number of elements
-     * specified by the minimum capacity argument. 
-     *
-     * @param   minCapacity   the desired minimum capacity.
-     */
-    public void ensureCapacity(int minCapacity) {
-	modCount++;
-	int oldCapacity = elementData.length;
-	if (minCapacity > oldCapacity) {
-	    Object oldData[] = elementData;
-	    int newCapacity = (oldCapacity * 3)/2 + 1;
-    	    if (newCapacity < minCapacity)
-		newCapacity = minCapacity;
-	    elementData = new Object[newCapacity];
-	    System.arraycopy(oldData, 0, elementData, 0, size);
+	/**
+	 * Constructs a new instance of ArrayList with the specified capacity.
+	 * 
+	 * @param capacity
+	 *            the initial capacity of this ArrayList
+	 */
+	public ArrayList(int capacity) {
+		firstIndex = lastIndex = 0;
+		try {
+			array = newElementArray(capacity);
+		} catch (NegativeArraySizeException e) {
+			throw new IllegalArgumentException();
+		}
 	}
-    }
 
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return  the number of elements in this list.
-     */
-    public int size() {
-	return size;
-    }
-
-    /**
-     * Tests if this list has no elements.
-     *
-     * @return  <tt>true</tt> if this list has no elements;
-     *          <tt>false</tt> otherwise.
-     */
-    public boolean isEmpty() {
-	return size == 0;
-    }
-
-    /**
-     * Returns <tt>true</tt> if this list contains the specified element.
-     *
-     * @param elem element whose presence in this List is to be tested.
-     * @return  <code>true</code> if the specified element is present;
-     *		<code>false</code> otherwise.
-     */
-    public boolean contains(Object elem) {
-	return indexOf(elem) >= 0;
-    }
-
-    /**
-     * Searches for the first occurence of the given argument, testing 
-     * for equality using the <tt>equals</tt> method. 
-     *
-     * @param   elem   an object.
-     * @return  the index of the first occurrence of the argument in this
-     *          list; returns <tt>-1</tt> if the object is not found.
-     * @see     Object#equals(Object)
-     */
-    public int indexOf(Object elem) {
-	if (elem == null) {
-	    for (int i = 0; i < size; i++)
-		if (elementData[i]==null)
-		    return i;
-	} else {
-	    for (int i = 0; i < size; i++)
-		if (elem.equals(elementData[i]))
-		    return i;
+	/**
+	 * Constructs a new instance of ArrayList containing the elements in the
+	 * specified collection. The ArrayList will have an initial capacity which
+	 * is 110% of the size of the collection. The order of the elements in this
+	 * ArrayList is the order they are returned by the collection iterator.
+	 * 
+	 * @param collection
+	 *            the collection of elements to add
+	 */
+	public ArrayList(Collection<? extends E> collection) {
+		int size = collection.size();
+		firstIndex = lastIndex = 0;
+		array = newElementArray(size + (size / 10));
+		addAll(collection);
 	}
-	return -1;
+    
+    @SuppressWarnings("unchecked")
+    private E[] newElementArray(int size) {
+        return (E[])new Object[size];
     }
 
-    /**
-     * Returns the index of the last occurrence of the specified object in
-     * this list.
-     *
-     * @param   elem   the desired element.
-     * @return  the index of the last occurrence of the specified object in
-     *          this list; returns -1 if the object is not found.
-     */
-    public int lastIndexOf(Object elem) {
-	if (elem == null) {
-	    for (int i = size-1; i >= 0; i--)
-		if (elementData[i]==null)
-		    return i;
-	} else {
-	    for (int i = size-1; i >= 0; i--)
-		if (elem.equals(elementData[i]))
-		    return i;
+	/**
+	 * Inserts the specified object into this ArrayList at the specified
+	 * location. The object is inserted before any previous element at the
+	 * specified location. If the location is equal to the size of this
+	 * ArrayList, the object is added at the end.
+	 * 
+	 * @param location
+	 *            the index at which to insert
+	 * @param object
+	 *            the object to add
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public void add(int location, E object) {
+		int size = size();
+		if (0 < location && location < size) {
+			if (firstIndex == 0 && lastIndex == array.length) {
+				growForInsert(location, 1);
+			} else if ((location < size / 2 && firstIndex > 0)
+					|| lastIndex == array.length) {
+				System.arraycopy(array, firstIndex, array, --firstIndex,
+						location);
+			} else {
+				int index = location + firstIndex;
+				System.arraycopy(array, index, array, index + 1, size
+						- location);
+				lastIndex++;
+			}
+			array[location + firstIndex] = object;
+		} else if (location == 0) {
+			if (firstIndex == 0) {
+                growAtFront(1);
+            }
+			array[--firstIndex] = object;
+		} else if (location == size) {
+			if (lastIndex == array.length) {
+                growAtEnd(1);
+            }
+			array[lastIndex++] = object;
+		} else {
+            throw new IndexOutOfBoundsException();
+        }
+
+		modCount++;
 	}
-	return -1;
-    }
 
-    /**
-     * Returns a shallow copy of this <tt>ArrayList</tt> instance.  (The
-     * elements themselves are not copied.)
-     *
-     * @return  a clone of this <tt>ArrayList</tt> instance.
-     */
-    public Object clone() {
-	try { 
-	    ArrayList v = (ArrayList)super.clone();
-	    v.elementData = new Object[size];
-	    System.arraycopy(elementData, 0, v.elementData, 0, size);
-	    v.modCount = 0;
-	    return v;
-	} catch (CloneNotSupportedException e) { 
-	    // this shouldn't happen, since we are Cloneable
-	    throw new InternalError();
+	/**
+	 * Adds the specified object at the end of this ArrayList.
+	 * 
+	 * @param object
+	 *            the object to add
+	 * @return true
+	 */
+	@Override
+    public boolean add(E object) {
+		if (lastIndex == array.length) {
+            growAtEnd(1);
+        }
+		array[lastIndex++] = object;
+		modCount++;
+		return true;
 	}
+
+	/**
+     * Inserts the objects in the specified Collection at the specified location
+     * in this ArrayList. The objects are added in the order they are returned
+     * from the Collection iterator.
+     * 
+     * @param location the index at which to insert
+     * @param collection the Collection of objects
+     * @return true if this ArrayList is modified, false otherwise
+     * 
+     * @exception IndexOutOfBoundsException when
+     *            <code>location < 0 || > size()</code>
+     */
+    @Override
+    public boolean addAll(int location, Collection<? extends E> collection) {
+        int size = size();
+        if (location < 0 || location > size) {
+            throw new IndexOutOfBoundsException();
+        }
+        int growSize = collection.size();
+        if (0 < location && location < size) {
+            if (array.length - size < growSize) {
+                growForInsert(location, growSize);
+            } else if ((location < size / 2 && firstIndex > 0)
+                    || lastIndex > array.length - growSize) {
+                int newFirst = firstIndex - growSize;
+                if (newFirst < 0) {
+                    int index = location + firstIndex;
+                    System.arraycopy(array, index, array, index - newFirst,
+                            size - location);
+                    lastIndex -= newFirst;
+                    newFirst = 0;
+                }
+                System.arraycopy(array, firstIndex, array, newFirst, location);
+                firstIndex = newFirst;
+            } else {
+                int index = location + firstIndex;
+                System.arraycopy(array, index, array, index + growSize, size
+                        - location);
+                lastIndex += growSize;
+            }
+        } else if (location == 0) {
+            growAtFront(growSize);
+            firstIndex -= growSize;
+        } else if (location == size) {
+            if (lastIndex > array.length - growSize) {
+                growAtEnd(growSize);
+            }
+            lastIndex += growSize;
+        }
+
+        if (growSize > 0) {
+            Iterator<? extends E> it = collection.iterator();
+            int index = location + firstIndex;
+            int end = index + growSize;
+            while (index < end) {
+                array[index++] = it.next();
+            }
+            modCount++;
+            return true;
+        }
+        return false;
     }
 
-    /**
-     * Returns an array containing all of the elements in this list
-     * in the correct order.
-     *
-     * @return an array containing all of the elements in this list
-     * 	       in the correct order.
-     */
-    public Object[] toArray() {
-	Object[] result = new Object[size];
-	System.arraycopy(elementData, 0, result, 0, size);
-	return result;
-    }
+	/**
+	 * Adds the objects in the specified Collection to this ArrayList.
+	 * 
+	 * @param collection
+	 *            the Collection of objects
+	 * @return true if this ArrayList is modified, false otherwise
+	 */
+	@Override
+    public boolean addAll(Collection<? extends E> collection) {
+		int growSize = collection.size();
+		if (growSize > 0) {
+			if (lastIndex > array.length - growSize) {
+                growAtEnd(growSize);
+            }
+			Iterator<? extends E> it = collection.iterator();
+			int end = lastIndex + growSize;
+			while (lastIndex < end) {
+                array[lastIndex++] = it.next();
+            }
+			modCount++;
+			return true;
+		}
+		return false;
+	}
 
-    /**
-     * Returns an array containing all of the elements in this list in the
-     * correct order; the runtime type of the returned array is that of the
-     * specified array.  If the list fits in the specified array, it is
-     * returned therein.  Otherwise, a new array is allocated with the runtime
-     * type of the specified array and the size of this list.<p>
-     *
-     * If the list fits in the specified array with room to spare (i.e., the
-     * array has more elements than the list), the element in the array
-     * immediately following the end of the collection is set to
-     * <tt>null</tt>.  This is useful in determining the length of the list
-     * <i>only</i> if the caller knows that the list does not contain any
-     * <tt>null</tt> elements.
-     *
-     * @param a the array into which the elements of the list are to
-     *		be stored, if it is big enough; otherwise, a new array of the
-     * 		same runtime type is allocated for this purpose.
-     * @return an array containing the elements of the list.
-     * @throws ArrayStoreException if the runtime type of a is not a supertype
-     *         of the runtime type of every element in this list.
-     */
-    public Object[] toArray(Object a[]) {
-        if (a.length < size)
-            a = (Object[])java.lang.reflect.Array.newInstance(
-                                a.getClass().getComponentType(), size);
-
-	System.arraycopy(elementData, 0, a, 0, size);
-
-        if (a.length > size)
-            a[size] = null;
-
-        return a;
-    }
-
-    // Positional Access Operations
-
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * @param  index index of element to return.
-     * @return the element at the specified position in this list.
-     * @throws    IndexOutOfBoundsException if index is out of range <tt>(index
-     * 		  &lt; 0 || index &gt;= size())</tt>.
-     */
-    public Object get(int index) {
-	RangeCheck(index);
-
-	return elementData[index];
-    }
-
-    /**
-     * Replaces the element at the specified position in this list with
-     * the specified element.
-     *
-     * @param index index of element to replace.
-     * @param element element to be stored at the specified position.
-     * @return the element previously at the specified position.
-     * @throws    IndexOutOfBoundsException if index out of range
-     *		  <tt>(index &lt; 0 || index &gt;= size())</tt>.
-     */
-    public Object set(int index, Object element) {
-	RangeCheck(index);
-
-	Object oldValue = elementData[index];
-	elementData[index] = element;
-	return oldValue;
-    }
-
-    /**
-     * Appends the specified element to the end of this list.
-     *
-     * @param o element to be appended to this list.
-     * @return <tt>true</tt> (as per the general contract of Collection.add).
-     */
-    public boolean add(Object o) {
-	ensureCapacity(size + 1);  // Increments modCount!!
-	elementData[size++] = o;
-	return true;
-    }
-
-    /**
-     * Inserts the specified element at the specified position in this
-     * list. Shifts the element currently at that position (if any) and
-     * any subsequent elements to the right (adds one to their indices).
-     *
-     * @param index index at which the specified element is to be inserted.
-     * @param element element to be inserted.
-     * @throws    IndexOutOfBoundsException if index is out of range
-     *		  <tt>(index &lt; 0 || index &gt; size())</tt>.
-     */
-    public void add(int index, Object element) {
-	if (index > size || index < 0)
-	    throw new IndexOutOfBoundsException(
-		"Index: "+index+", Size: "+size);
-
-	ensureCapacity(size+1);  // Increments modCount!!
-	System.arraycopy(elementData, index, elementData, index + 1,
-			 size - index);
-	elementData[index] = element;
-	size++;
-    }
-
-    /**
-     * Removes the element at the specified position in this list.
-     * Shifts any subsequent elements to the left (subtracts one from their
-     * indices).
-     *
-     * @param index the index of the element to removed.
-     * @return the element that was removed from the list.
-     * @throws    IndexOutOfBoundsException if index out of range <tt>(index
-     * 		  &lt; 0 || index &gt;= size())</tt>.
-     */
-    public Object remove(int index) {
-	RangeCheck(index);
-
-	modCount++;
-	Object oldValue = elementData[index];
-
-	int numMoved = size - index - 1;
-	if (numMoved > 0)
-	    System.arraycopy(elementData, index+1, elementData, index,
-			     numMoved);
-	elementData[--size] = null; // Let gc do its work
-
-	return oldValue;
-    }
-
-    /**
-     * Removes all of the elements from this list.  The list will
-     * be empty after this call returns.
-     */
+	/**
+	 * Removes all elements from this ArrayList, leaving it empty.
+	 * 
+	 * @see #isEmpty
+	 * @see #size
+	 */
+	@Override
     public void clear() {
-	modCount++;
+		if (firstIndex != lastIndex) {
+			Arrays.fill(array, firstIndex, lastIndex, null);
+			firstIndex = lastIndex = 0;
+			modCount++;
+		}
+	}
 
-	// Let gc do its work
-	for (int i = 0; i < size; i++)
-	    elementData[i] = null;
+	/**
+	 * Answers a new ArrayList with the same elements, size and capacity as this
+	 * ArrayList.
+	 * 
+	 * @return a shallow copy of this ArrayList
+	 * 
+	 * @see java.lang.Cloneable
+	 */
+	@Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+		try {
+			ArrayList<E> newList = (ArrayList<E>) super.clone();
+			newList.array = array.clone();
+			return newList;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
 
-	size = 0;
-    }
+	/**
+	 * Searches this ArrayList for the specified object.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return true if <code>object</code> is an element of this ArrayList,
+	 *         false otherwise
+	 */
+	@Override
+    public boolean contains(Object object) {
+		if (object != null) {
+			for (int i = firstIndex; i < lastIndex; i++) {
+                if (object.equals(array[i])) {
+                    return true;
+                }
+            }
+		} else {
+			for (int i = firstIndex; i < lastIndex; i++) {
+                if (array[i] == null) {
+                    return true;
+                }
+            }
+		}
+		return false;
+	}
 
-    /**
-     * Appends all of the elements in the specified Collection to the end of
-     * this list, in the order that they are returned by the
-     * specified Collection's Iterator.  The behavior of this operation is
-     * undefined if the specified Collection is modified while the operation
-     * is in progress.  (This implies that the behavior of this call is
-     * undefined if the specified Collection is this list, and this
-     * list is nonempty.)
-     *
-     * @param c the elements to be inserted into this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * @throws    NullPointerException if the specified collection is null.
-     */
-    public boolean addAll(Collection c) {
-        Object[] a = c.toArray();
-        int numNew = a.length;
-	ensureCapacity(size + numNew);  // Increments modCount
-        System.arraycopy(a, 0, elementData, size, numNew);
-        size += numNew;
-	return numNew != 0;
-    }
+	/**
+	 * Ensures that this ArrayList can hold the specified number of elements
+	 * without growing.
+	 * 
+	 * @param minimumCapacity
+	 *            the minimum number of elements that this ArrayList will hold
+	 *            before growing
+	 */
+	public void ensureCapacity(int minimumCapacity) {
+		if (array.length < minimumCapacity) {
+			if (firstIndex > 0) {
+                growAtFront(minimumCapacity - array.length);
+            } else {
+                growAtEnd(minimumCapacity - array.length);
+            }
+		}
+	}
 
-    /**
-     * Inserts all of the elements in the specified Collection into this
-     * list, starting at the specified position.  Shifts the element
-     * currently at that position (if any) and any subsequent elements to
-     * the right (increases their indices).  The new elements will appear
-     * in the list in the order that they are returned by the
-     * specified Collection's iterator.
-     *
-     * @param index index at which to insert first element
-     *		    from the specified collection.
-     * @param c elements to be inserted into this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * @throws    IndexOutOfBoundsException if index out of range <tt>(index
-     *		  &lt; 0 || index &gt; size())</tt>.
-     * @throws    NullPointerException if the specified Collection is null.
-     */
-    public boolean addAll(int index, Collection c) {
-	if (index > size || index < 0)
-	    throw new IndexOutOfBoundsException(
-		"Index: " + index + ", Size: " + size);
+	/**
+	 * Answers the element at the specified location in this ArrayList.
+	 * 
+	 * @param location
+	 *            the index of the element to return
+	 * @return the element at the specified index
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public E get(int location) {
+		if (0 <= location && location < size()) {
+			return array[firstIndex + location];
+        }
+		throw new IndexOutOfBoundsException();
+	}
 
-        Object[] a = c.toArray();
-	int numNew = a.length;
-	ensureCapacity(size + numNew);  // Increments modCount
+	private void growAtEnd(int required) {
+		int size = size();
+		if (firstIndex >= required - (array.length - lastIndex)) {
+			int newLast = lastIndex - firstIndex;
+			if (size > 0) {
+				System.arraycopy(array, firstIndex, array, 0, size);
+				int start = newLast < firstIndex ? firstIndex : newLast;
+				Arrays.fill(array, start, array.length, null);
+			}
+			firstIndex = 0;
+			lastIndex = newLast;
+		} else {
+			int increment = size / 2;
+			if (required > increment) {
+                increment = required;
+            }
+			if (increment < 12) {
+                increment = 12;
+            }
+			E[] newArray = newElementArray(size + increment);
+			if (size > 0) {
+                System.arraycopy(array, firstIndex, newArray, firstIndex, size);
+            }
+			array = newArray;
+		}
+	}
 
-	int numMoved = size - index;
-	if (numMoved > 0)
-	    System.arraycopy(elementData, index, elementData, index + numNew,
-			     numMoved);
+	private void growAtFront(int required) {
+		int size = size();
+		if (array.length - lastIndex >= required) {
+			int newFirst = array.length - size;
+			if (size > 0) {
+				System.arraycopy(array, firstIndex, array, newFirst, size);
+				int length = firstIndex + size > newFirst ? newFirst
+						: firstIndex + size;
+				Arrays.fill(array, firstIndex, length, null);
+			}
+			firstIndex = newFirst;
+			lastIndex = array.length;
+		} else {
+			int increment = size / 2;
+			if (required > increment) {
+                increment = required;
+            }
+			if (increment < 12) {
+                increment = 12;
+            }
+			E[] newArray = newElementArray(size + increment);
+			if (size > 0) {
+                System.arraycopy(array, firstIndex, newArray, newArray.length
+						- size, size);
+            }
+			firstIndex = newArray.length - size;
+			lastIndex = newArray.length;
+			array = newArray;
+		}
+	}
 
-        System.arraycopy(a, 0, elementData, index, numNew);
-	size += numNew;
-	return numNew != 0;
-    }
+	private void growForInsert(int location, int required) {
+		int size = size(), increment = size / 2;
+		if (required > increment) {
+            increment = required;
+        }
+		if (increment < 12) {
+            increment = 12;
+        }
+		E[] newArray = newElementArray(size + increment);
+		if (location < size / 2) {
+			int newFirst = newArray.length - (size + required);
+			System.arraycopy(array, location, newArray, location + increment,
+					size - location);
+			System.arraycopy(array, firstIndex, newArray, newFirst, location);
+			firstIndex = newFirst;
+			lastIndex = newArray.length;
+		} else {
+			System.arraycopy(array, firstIndex, newArray, 0, location);
+			System.arraycopy(array, location, newArray, location + required,
+					size - location);
+			firstIndex = 0;
+			lastIndex += required;
+		}
+		array = newArray;
+	}
 
-    /**
-     * Removes from this List all of the elements whose index is between
-     * fromIndex, inclusive and toIndex, exclusive.  Shifts any succeeding
-     * elements to the left (reduces their index).
-     * This call shortens the list by <tt>(toIndex - fromIndex)</tt> elements.
-     * (If <tt>toIndex==fromIndex</tt>, this operation has no effect.)
-     *
-     * @param fromIndex index of first element to be removed.
-     * @param toIndex index after last element to be removed.
-     */
-    protected void removeRange(int fromIndex, int toIndex) {
-	modCount++;
-	int numMoved = size - toIndex;
-        System.arraycopy(elementData, toIndex, elementData, fromIndex,
-                         numMoved);
+	/**
+	 * Searches this ArrayList for the specified object and returns the index of
+	 * the first occurrence.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return the index of the first occurrence of the object
+	 */
+	@Override
+    public int indexOf(Object object) {
+		if (object != null) {
+			for (int i = firstIndex; i < lastIndex; i++) {
+                if (object.equals(array[i])) {
+                    return i - firstIndex;
+                }
+            }
+		} else {
+			for (int i = firstIndex; i < lastIndex; i++) {
+                if (array[i] == null) {
+                    return i - firstIndex;
+                }
+            }
+		}
+		return -1;
+	}
 
-	// Let gc do its work
-	int newSize = size - (toIndex-fromIndex);
-	while (size != newSize)
-	    elementData[--size] = null;
-    }
+	/**
+	 * Answers if this ArrayList has no elements, a size of zero.
+	 * 
+	 * @return true if this ArrayList has no elements, false otherwise
+	 * 
+	 * @see #size
+	 */
+	@Override
+    public boolean isEmpty() {
+		return lastIndex == firstIndex;
+	}
 
-    /**
-     * Check if the given index is in range.  If not, throw an appropriate
-     * runtime exception.  This method does *not* check if the index is
-     * negative: It is always used immediately prior to an array access,
-     * which throws an ArrayIndexOutOfBoundsException if index is negative.
-     */
-    private void RangeCheck(int index) {
-	if (index >= size)
-	    throw new IndexOutOfBoundsException(
-		"Index: "+index+", Size: "+size);
-    }
+	/**
+	 * Searches this ArrayList for the specified object and returns the index of
+	 * the last occurrence.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return the index of the last occurrence of the object
+	 */
+	@Override
+    public int lastIndexOf(Object object) {
+		if (object != null) {
+			for (int i = lastIndex - 1; i >= firstIndex; i--) {
+                if (object.equals(array[i])) {
+                    return i - firstIndex;
+                }
+            }
+		} else {
+			for (int i = lastIndex - 1; i >= firstIndex; i--) {
+                if (array[i] == null) {
+                    return i - firstIndex;
+                }
+            }
+		}
+		return -1;
+	}
 
-    /**
-     * Save the state of the <tt>ArrayList</tt> instance to a stream (that
-     * is, serialize it).
-     *
-     * @serialData The length of the array backing the <tt>ArrayList</tt>
-     *             instance is emitted (int), followed by all of its elements
-     *             (each an <tt>Object</tt>) in the proper order.
-     */
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException{
-	// Write out element count, and any hidden stuff
-	s.defaultWriteObject();
+	/**
+	 * Removes the object at the specified location from this ArrayList.
+	 * 
+	 * @param location
+	 *            the index of the object to remove
+	 * @return the removed object
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public E remove(int location) {
+		E result;
+		int size = size();
+		if (0 <= location && location < size) {
+			if (location == size - 1) {
+				result = array[--lastIndex];
+				array[lastIndex] = null;
+			} else if (location == 0) {
+				result = array[firstIndex];
+				array[firstIndex++] = null;
+			} else {
+				int elementIndex = firstIndex + location;
+				result = array[elementIndex];
+				if (location < size / 2) {
+					System.arraycopy(array, firstIndex, array, firstIndex + 1,
+							location);
+					array[firstIndex++] = null;
+				} else {
+					System.arraycopy(array, elementIndex + 1, array,
+							elementIndex, size - location - 1);
+					array[--lastIndex] = null;
+				}
+			}
+		} else {
+            throw new IndexOutOfBoundsException();
+        }
 
-        // Write out array length
-        s.writeInt(elementData.length);
+		modCount++;
+		return result;
+	}
 
-	// Write out all elements in the proper order.
-	for (int i=0; i<size; i++)
-            s.writeObject(elementData[i]);
-    }
+	/**
+	 * Removes the objects in the specified range from the start to the end, but
+	 * not including the end index.
+	 * 
+	 * @param start
+	 *            the index at which to start removing
+	 * @param end
+	 *            the index one past the end of the range to remove
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>start < 0, start > end</code> or
+	 *                <code>end > size()</code>
+	 */
+	@Override
+    protected void removeRange(int start, int end) {
+		if (start >= 0 && start <= end && end <= size()) {
+			if (start == end) {
+                return;
+            }
+			int size = size();
+			if (end == size) {
+				Arrays.fill(array, firstIndex + start, lastIndex, null);
+				lastIndex = firstIndex + start;
+			} else if (start == 0) {
+				Arrays.fill(array, firstIndex, firstIndex + end, null);
+				firstIndex += end;
+			} else {
+				System.arraycopy(array, firstIndex + end, array, firstIndex
+						+ start, size - end);
+				int newLast = lastIndex + start - end;
+				Arrays.fill(array, newLast, lastIndex, null);
+				lastIndex = newLast;
+			}
+			modCount++;
+		} else {
+            throw new IndexOutOfBoundsException();
+        }
+	}
 
-    /**
-     * Reconstitute the <tt>ArrayList</tt> instance from a stream (that is,
-     * deserialize it).
-     */
-    private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
-	// Read in size, and any hidden stuff
-	s.defaultReadObject();
+	/**
+	 * Replaces the element at the specified location in this ArrayList with the
+	 * specified object.
+	 * 
+	 * @param location
+	 *            the index at which to put the specified object
+	 * @param object
+	 *            the object to add
+	 * @return the previous element at the index
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public E set(int location, E object) {
+		if (0 <= location && location < size()) {
+			E result = array[firstIndex + location];
+			array[firstIndex + location] = object;
+			return result;
+		}
+		throw new IndexOutOfBoundsException();
+	}
 
-        // Read in array length and allocate array
-        int arrayLength = s.readInt();
-        elementData = new Object[arrayLength];
+	/**
+	 * Answers the number of elements in this ArrayList.
+	 * 
+	 * @return the number of elements in this ArrayList
+	 */
+	@Override
+    public int size() {
+		return lastIndex - firstIndex;
+	}
 
-	// Read in all elements in the proper order.
-	for (int i=0; i<size; i++)
-            elementData[i] = s.readObject();
-    }
+	/**
+	 * Answers a new array containing all elements contained in this ArrayList.
+	 * 
+	 * @return an array of the elements from this ArrayList
+	 */
+	@Override
+    public Object[] toArray() {
+		int size = size();
+		Object[] result = new Object[size];
+		System.arraycopy(array, firstIndex, result, 0, size);
+		return result;
+	}
+
+	/**
+	 * Answers an array containing all elements contained in this ArrayList. If
+	 * the specified array is large enough to hold the elements, the specified
+	 * array is used, otherwise an array of the same type is created. If the
+	 * specified array is used and is larger than this ArrayList, the array
+	 * element following the collection elements is set to null.
+	 * 
+	 * @param contents
+	 *            the array
+	 * @return an array of the elements from this ArrayList
+	 * 
+	 * @exception ArrayStoreException
+	 *                when the type of an element in this ArrayList cannot be
+	 *                stored in the type of the specified array
+	 */
+	@Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] contents) {
+		int size = size();
+		if (size > contents.length) {
+            Class<?> ct = contents.getClass().getComponentType();
+			contents = (T[]) Array.newInstance(ct, size);
+        }
+		System.arraycopy(array, firstIndex, contents, 0, size);
+		if (size < contents.length) {
+            contents[size] = null;
+        }
+		return contents;
+	}
+
+	/**
+	 * Sets the capacity of this ArrayList to be the same as the size.
+	 * 
+	 * @see #size
+	 */
+	public void trimToSize() {
+		int size = size();
+		E[] newArray = newElementArray(size);
+		System.arraycopy(array, firstIndex, newArray, 0, size);
+		array = newArray;
+		firstIndex = 0;
+		lastIndex = array.length;
+	}
+
+	/*
+	private static final ObjectStreamField[] serialPersistentFields = { new ObjectStreamField(
+			"size", Integer.TYPE) }; //$NON-NLS-1$
+	*/
+
+	private void writeObject(ObjectOutputStream stream) throws IOException {
+		ObjectOutputStream.PutField fields = stream.putFields();
+		fields.put("size", size()); //$NON-NLS-1$
+		stream.writeFields();
+		stream.writeInt(array.length);
+		Iterator<?> it = iterator();
+		while (it.hasNext()) {
+            stream.writeObject(it.next());
+        }
+	}
+
+	@SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream stream) throws IOException,
+			ClassNotFoundException {
+		ObjectInputStream.GetField fields = stream.readFields();
+		lastIndex = fields.get("size", 0); //$NON-NLS-1$
+		array = newElementArray(stream.readInt());
+		for (int i = 0; i < lastIndex; i++) {
+            array[i] = (E)stream.readObject();
+        }
+	}
 }

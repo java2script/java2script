@@ -1,16 +1,18 @@
-/* Copyright 1998, 2002 The Apache Software Foundation or its licensors, as applicable
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
@@ -20,8 +22,7 @@ package java.util;
  * An ListIterator is used to sequence over a List of objects. ListIterator can
  * move backwards or forwards through the List.
  */
-//public interface ListIterator<E> extends Iterator<E> {
-public interface ListIterator extends Iterator {
+public interface ListIterator<E> extends Iterator<E> {
 	
 	/**
 	 * Inserts the specified object into the list between <code>next</code>
@@ -38,8 +39,7 @@ public interface ListIterator extends Iterator {
 	 * @exception IllegalArgumentException
 	 *                when the object cannot be added to the list
 	 */
-//	void add(E object);
-	void add(Object object);
+	void add(E object);
 
 	/**
 	 * Answers if there are more elements to iterate.
@@ -69,8 +69,7 @@ public interface ListIterator extends Iterator {
 	 * 
 	 * @see #hasNext
 	 */
-//	public E next();
-	public Object next();
+	public E next();
 
 	/**
 	 * Answers the index of the next object in the iteration.
@@ -94,8 +93,7 @@ public interface ListIterator extends Iterator {
 	 * 
 	 * @see #hasPrevious
 	 */
-//	public E previous();
-	public Object previous();
+	public E previous();
 
 	/**
 	 * Answers the index of the previous object in the iteration.
@@ -142,6 +140,5 @@ public interface ListIterator extends Iterator {
 	 *                <code>add</code> have already been called after the last
 	 *                call to <code>next</code> or <code>previous</code>
 	 */
-//	void set(E object);
-	void set(Object object);
+	void set(E object);
 }

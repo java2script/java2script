@@ -51,6 +51,7 @@ clpm.DEFAULT_OPACITY = 75;
 	if (el == null) return;
 	for (var i = el.childNodes.length - 1; i >= 0; i--) {
 		var child = el.childNodes[i];
+		if (child == null) continue;
 		if (child.childNodes != null && child.childNodes.length != 0) {
 			this.clearChildren (child);
 		}
@@ -144,3 +145,14 @@ clpm.showStatus = function (msg, fading) {
 		this.fadeOut();
 	}
 };
+if (window["ClazzLoader"] != null) {
+	ClazzLoader.scriptLoading = function (file) {
+		ClassLoaderProgressMonitor.showStatus ("Loading " + file + "...");
+	};
+	ClazzLoader.scriptLoaded = function (file) {
+		ClassLoaderProgressMonitor.showStatus (file + " loaded.", true);
+	};
+	ClazzLoader.globalLoaded = function (file) {
+		ClassLoaderProgressMonitor.showStatus ("Application loaded.", true);
+	};
+}

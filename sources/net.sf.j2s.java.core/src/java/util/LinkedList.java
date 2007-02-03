@@ -1,708 +1,791 @@
 /*
- * @(#)LinkedList.java	1.46 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.util;
 
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+
 /**
- * Linked list implementation of the <tt>List</tt> interface.  Implements all
- * optional list operations, and permits all elements (including
- * <tt>null</tt>).  In addition to implementing the <tt>List</tt> interface,
- * the <tt>LinkedList</tt> class provides uniformly named methods to
- * <tt>get</tt>, <tt>remove</tt> and <tt>insert</tt> an element at the
- * beginning and end of the list.  These operations allow linked lists to be
- * used as a stack, queue, or double-ended queue (deque).<p>
- *
- * All of the stack/queue/deque operations could be easily recast in terms of
- * the standard list operations.  They're included here primarily for
- * convenience, though they may run slightly faster than the equivalent List
- * operations.<p>
- *
- * All of the operations perform as could be expected for a doubly-linked
- * list.  Operations that index into the list will traverse the list from
- * the begining or the end, whichever is closer to the specified index.<p>
- *
- * <b>Note that this implementation is not synchronized.</b> If multiple
- * threads access a list concurrently, and at least one of the threads
- * modifies the list structurally, it <i>must</i> be synchronized
- * externally.  (A structural modification is any operation that adds or
- * deletes one or more elements; merely setting the value of an element is not
- * a structural modification.)  This is typically accomplished by
- * synchronizing on some object that naturally encapsulates the list.  If no
- * such object exists, the list should be "wrapped" using the
- * Collections.synchronizedList method.  This is best done at creation time,
- * to prevent accidental unsynchronized access to the list: <pre>
- *     List list = Collections.synchronizedList(new LinkedList(...));
- * </pre><p>
- *
- * The iterators returned by the this class's <tt>iterator</tt> and
- * <tt>listIterator</tt> methods are <i>fail-fast</i>: if the list is
- * structurally modified at any time after the iterator is created, in any way
- * except through the Iterator's own <tt>remove</tt> or <tt>add</tt> methods,
- * the iterator will throw a <tt>ConcurrentModificationException</tt>.  Thus,
- * in the face of concurrent modification, the iterator fails quickly and
- * cleanly, rather than risking arbitrary, non-deterministic behavior at an
- * undetermined time in the future.
- *
- * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
- * as it is, generally speaking, impossible to make any hard guarantees in the
- * presence of unsynchronized concurrent modification.  Fail-fast iterators
- * throw <tt>ConcurrentModificationException</tt> on a best-effort basis. 
- * Therefore, it would be wrong to write a program that depended on this
- * exception for its correctness:   <i>the fail-fast behavior of iterators
- * should be used only to detect bugs.</i><p>
- *
- * This class is a member of the 
- * <a href="{@docRoot}/../guide/collections/index.html">
- * Java Collections Framework</a>.
- *
- * @author  Josh Bloch
- * @version 1.46, 01/23/03 
- * @see	    List
- * @see	    ArrayList
- * @see	    Vector
- * @see	    Collections#synchronizedList(List)
+ * LinkedList is an implementation of List, backed by a linked list. All
+ * optional operations are supported, adding, removing and replacing. The
+ * elements can be any objects.
  * @since 1.2
  */
+public class LinkedList<E> extends AbstractSequentialList<E> implements
+        List<E>, Queue<E>, Cloneable, Serializable {
+	
+	private static final long serialVersionUID = 876323262645176354L;
 
-public class LinkedList extends AbstractSequentialList
-		        implements List, Cloneable, java.io.Serializable
-{
-    private transient Entry header = new Entry(null, null, null);
-    private transient int size = 0;
+	transient int size = 0;
 
-    /**
-     * Constructs an empty list.
-     */
-    public LinkedList() {
-        header.next = header.previous = header;
-    }
+	transient Link<E> voidLink;
 
-    /**
-     * Constructs a list containing the elements of the specified
-     * collection, in the order they are returned by the collection's
-     * iterator.
-     *
-     * @param  c the collection whose elements are to be placed into this list.
-     * @throws NullPointerException if the specified collection is null.
-     */
-     public LinkedList(Collection c) {
-	 this();
-	 addAll(c);
-     }
+	private static final class Link<ET> {
+		ET data;
 
-    /**
-     * Returns the first element in this list.
-     *
-     * @return the first element in this list.
-     * @throws    NoSuchElementException if this list is empty.
-     */
-    public Object getFirst() {
-	if (size==0)
-	    throw new NoSuchElementException();
+		Link<ET> previous, next;
 
-	return header.next.element;
-    }
+		Link(ET o, Link<ET> p, Link<ET> n) {
+			data = o;
+			previous = p;
+			next = n;
+		}
+	}
 
-    /**
-     * Returns the last element in this list.
-     *
-     * @return the last element in this list.
-     * @throws    NoSuchElementException if this list is empty.
-     */
-    public Object getLast()  {
-	if (size==0)
-	    throw new NoSuchElementException();
+	private static final class LinkIterator<ET> implements ListIterator<ET> {
+		int pos, expectedModCount;
 
-	return header.previous.element;
-    }
+		final LinkedList<ET> list;
 
-    /**
-     * Removes and returns the first element from this list.
-     *
-     * @return the first element from this list.
-     * @throws    NoSuchElementException if this list is empty.
-     */
-    public Object removeFirst() {
-	Object first = header.next.element;
-	remove(header.next);
-	return first;
-    }
+		Link<ET> link, lastLink;
 
-    /**
-     * Removes and returns the last element from this list.
-     *
-     * @return the last element from this list.
-     * @throws    NoSuchElementException if this list is empty.
-     */
-    public Object removeLast() {
-	Object last = header.previous.element;
-	remove(header.previous);
-	return last;
-    }
-
-    /**
-     * Inserts the given element at the beginning of this list.
-     * 
-     * @param o the element to be inserted at the beginning of this list.
-     */
-    public void addFirst(Object o) {
-	addBefore(o, header.next);
-    }
-
-    /**
-     * Appends the given element to the end of this list.  (Identical in
-     * function to the <tt>add</tt> method; included only for consistency.)
-     * 
-     * @param o the element to be inserted at the end of this list.
-     */
-    public void addLast(Object o) {
-	addBefore(o, header);
-    }
-
-    /**
-     * Returns <tt>true</tt> if this list contains the specified element.
-     * More formally, returns <tt>true</tt> if and only if this list contains
-     * at least one element <tt>e</tt> such that <tt>(o==null ? e==null
-     * : o.equals(e))</tt>.
-     *
-     * @param o element whose presence in this list is to be tested.
-     * @return <tt>true</tt> if this list contains the specified element.
-     */
-    public boolean contains(Object o) {
-        return indexOf(o) != -1;
-    }
-
-    /**
-     * Returns the number of elements in this list.
-     *
-     * @return the number of elements in this list.
-     */
-    public int size() {
-	return size;
-    }
-
-    /**
-     * Appends the specified element to the end of this list.
-     *
-     * @param o element to be appended to this list.
-     * @return <tt>true</tt> (as per the general contract of
-     * <tt>Collection.add</tt>).
-     */
-    public boolean add(Object o) {
-	addBefore(o, header);
-        return true;
-    }
-
-    /**
-     * Removes the first occurrence of the specified element in this list.  If
-     * the list does not contain the element, it is unchanged.  More formally,
-     * removes the element with the lowest index <tt>i</tt> such that
-     * <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt> (if such an
-     * element exists).
-     *
-     * @param o element to be removed from this list, if present.
-     * @return <tt>true</tt> if the list contained the specified element.
-     */
-    public boolean remove(Object o) {
-        if (o==null) {
-            for (Entry e = header.next; e != header; e = e.next) {
-                if (e.element==null) {
-                    remove(e);
-                    return true;
-                }
+		LinkIterator(LinkedList<ET> object, int location) {
+			list = object;
+			expectedModCount = list.modCount;
+			if (0 <= location && location <= list.size) {
+				// pos ends up as -1 if list is empty, it ranges from -1 to
+				// list.size - 1
+				// if link == voidLink then pos must == -1
+				link = list.voidLink;
+				if (location < list.size / 2) {
+					for (pos = -1; pos + 1 < location; pos++) {
+                        link = link.next;
+                    }
+				} else {
+					for (pos = list.size; pos >= location; pos--) {
+                        link = link.previous;
+                    }
+				}
+			} else {
+                throw new IndexOutOfBoundsException();
             }
-        } else {
-            for (Entry e = header.next; e != header; e = e.next) {
-                if (o.equals(e.element)) {
-                    remove(e);
-                    return true;
-                }
+		}
+
+		public void add(ET object) {
+			if (expectedModCount == list.modCount) {
+				Link<ET> next = link.next;
+				Link<ET> newLink = new Link<ET>(object, link, next);
+				link.next = newLink;
+				next.previous = newLink;
+				link = newLink;
+				lastLink = null;
+				pos++;
+				expectedModCount++;
+				list.size++;
+				list.modCount++;
+			} else {
+                throw new ConcurrentModificationException();
             }
+		}
+
+		public boolean hasNext() {
+			return link.next != list.voidLink;
+		}
+
+		public boolean hasPrevious() {
+			return link != list.voidLink;
+		}
+
+		public ET next() {
+			if (expectedModCount == list.modCount) {
+				LinkedList.Link<ET> next = link.next;
+				if (next != list.voidLink) {
+					lastLink = link = next;
+					pos++;
+					return link.data;
+				}
+                throw new NoSuchElementException();
+			}
+            throw new ConcurrentModificationException();
+		}
+
+		public int nextIndex() {
+			return pos + 1;
+		}
+
+		public ET previous() {
+			if (expectedModCount == list.modCount) {
+				if (link != list.voidLink) {
+					lastLink = link;
+					link = link.previous;
+					pos--;
+					return lastLink.data;
+				}
+                throw new NoSuchElementException();
+			}
+            throw new ConcurrentModificationException();
+		}
+
+		public int previousIndex() {
+			return pos;
+		}
+
+		public void remove() {
+			if (expectedModCount == list.modCount) {
+				if (lastLink != null) {
+					Link<ET> next = lastLink.next;
+					Link<ET> previous = lastLink.previous;
+					next.previous = previous;
+					previous.next = next;
+					if (lastLink == link) {
+                        pos--;
+                    }
+					link = previous;
+					lastLink = null;
+					expectedModCount++;
+					list.size--;
+					list.modCount++;
+				} else {
+                    throw new IllegalStateException();
+                }
+			} else {
+                throw new ConcurrentModificationException();
+            }
+		}
+
+		public void set(ET object) {
+			if (expectedModCount == list.modCount) {
+				if (lastLink != null) {
+                    lastLink.data = object;
+                } else {
+                    throw new IllegalStateException();
+                }
+			} else {
+                throw new ConcurrentModificationException();
+            }
+		}
+	}
+
+	/**
+	 * Constructs a new empty instance of LinkedList.
+	 * 
+	 */
+	public LinkedList() {
+		voidLink = new Link<E>(null, null, null);
+		voidLink.previous = voidLink;
+		voidLink.next = voidLink;
+	}
+
+	/**
+	 * Constructs a new instance of <code>LinkedList</code> that holds 
+	 * all of the elements contained in the supplied <code>collection</code>
+	 * argument. The order of the elements in this new <code>LinkedList</code> 
+	 * will be determined by the iteration order of <code>collection</code>. 
+	 * 
+	 * @param collection
+	 *            the collection of elements to add
+	 */
+	public LinkedList(Collection<? extends E> collection) {
+		this();
+		addAll(collection);
+	}
+
+	/**
+	 * Inserts the specified object into this LinkedList at the specified
+	 * location. The object is inserted before any previous element at the
+	 * specified location. If the location is equal to the size of this
+	 * LinkedList, the object is added at the end.
+	 * 
+	 * @param location
+	 *            the index at which to insert
+	 * @param object
+	 *            the object to add
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public void add(int location, E object) {
+		if (0 <= location && location <= size) {
+			Link<E> link = voidLink;
+			if (location < (size / 2)) {
+				for (int i = 0; i <= location; i++) {
+                    link = link.next;
+                }
+			} else {
+				for (int i = size; i > location; i--) {
+                    link = link.previous;
+                }
+			}
+			Link<E> previous = link.previous;
+			Link<E> newLink = new Link<E>(object, previous, link);
+			previous.next = newLink;
+			link.previous = newLink;
+			size++;
+			modCount++;
+		} else {
+            throw new IndexOutOfBoundsException();
         }
-        return false;
-    }
+	}
 
-    /**
-     * Appends all of the elements in the specified collection to the end of
-     * this list, in the order that they are returned by the specified
-     * collection's iterator.  The behavior of this operation is undefined if
-     * the specified collection is modified while the operation is in
-     * progress.  (This implies that the behavior of this call is undefined if
-     * the specified Collection is this list, and this list is nonempty.)
-     *
-     * @param c the elements to be inserted into this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * @throws NullPointerException if the specified collection is null.
-     */
-    public boolean addAll(Collection c) {
-        return addAll(size, c);
-    }
+	/**
+	 * Adds the specified object at the end of this LinkedList.
+	 * 
+	 * @param object
+	 *            the object to add
+	 * @return true
+	 */
+	@Override
+    public boolean add(E object) {
+		// Cannot call addLast() as subclasses can override
+		Link<E> oldLast = voidLink.previous;
+		Link<E> newLink = new Link<E>(object, oldLast, voidLink);
+		voidLink.previous = newLink;
+		oldLast.next = newLink;
+		size++;
+		modCount++;
+		return true;
+	}
 
-    /**
-     * Inserts all of the elements in the specified collection into this
-     * list, starting at the specified position.  Shifts the element
-     * currently at that position (if any) and any subsequent elements to
-     * the right (increases their indices).  The new elements will appear
-     * in the list in the order that they are returned by the
-     * specified collection's iterator.
-     *
-     * @param index index at which to insert first element
-     *		    from the specified collection.
-     * @param c elements to be inserted into this list.
-     * @return <tt>true</tt> if this list changed as a result of the call.
-     * @throws IndexOutOfBoundsException if the specified index is out of
-     *            range (<tt>index &lt; 0 || index &gt; size()</tt>).
-     * @throws NullPointerException if the specified collection is null.
+	/**
+     * Inserts the objects in the specified Collection at the specified location
+     * in this LinkedList. The objects are added in the order they are returned
+     * from the <code>Collection</code> iterator.
+     * 
+     * @param location the index at which to insert
+     * @param collection the Collection of objects
+     * @return true if this LinkedList is modified, false otherwise
+     * 
+     * @exception IndexOutOfBoundsException when
+     *            <code>location < 0 || > size()</code>
      */
-    public boolean addAll(int index, Collection c) {
-        Object[] a = c.toArray();
-        int numNew = a.length;
-        if (numNew==0)
+    @Override
+    public boolean addAll(int location, Collection<? extends E> collection) {
+        if (location < 0 || location > size) {
+            throw new IndexOutOfBoundsException();
+        }
+        int adding = collection.size();
+        if (adding == 0) {
             return false;
-	modCount++;
-
-        Entry successor = (index==size ? header : entry(index));
-        Entry predecessor = successor.previous;
-	for (int i=0; i<numNew; i++) {
-            Entry e = new Entry(a[i], successor, predecessor);
-            predecessor.next = e;
-            predecessor = e;
         }
-        successor.previous = predecessor;
-
-        size += numNew;
+        Link<E> previous = voidLink;
+        if (location < (size / 2)) {
+            for (int i = 0; i < location; i++) {
+                previous = previous.next;
+            }
+        } else {
+            for (int i = size; i >= location; i--) {
+                previous = previous.previous;
+            }
+        }
+        Link<E> next = previous.next;
+        for (E e : collection) {
+            Link<E> newLink = new Link<E>(e, previous, null);
+            previous.next = newLink;
+            previous = newLink;
+        }
+        previous.next = next;
+        next.previous = previous;
+        size += adding;
+        modCount++;
         return true;
     }
 
-    /**
-     * Removes all of the elements from this list.
-     */
+
+	/**
+	 * Adds the objects in the specified Collection to this LinkedList.
+	 * 
+	 * @param collection
+	 *            the Collection of objects
+	 * @return true if this LinkedList is modified, false otherwise
+	 */
+	@Override
+    public boolean addAll(Collection<? extends E> collection) {
+		int adding = collection.size();
+		if (adding == 0) {
+            return false;
+        }
+		Link<E> previous = voidLink.previous;
+        for (E e : collection) {
+			Link<E> newLink = new Link<E>(e, previous, null);
+			previous.next = newLink;
+			previous = newLink;
+		}
+		previous.next = voidLink;
+		voidLink.previous = previous;
+		size += adding;
+		modCount++;
+		return true;
+	}
+
+	/**
+	 * Adds the specified object at the beginning of this LinkedList.
+	 * 
+	 * @param object
+	 *            the object to add
+	 */
+	public void addFirst(E object) {
+		Link<E> oldFirst = voidLink.next;
+		Link<E> newLink = new Link<E>(object, voidLink, oldFirst);
+		voidLink.next = newLink;
+		oldFirst.previous = newLink;
+		size++;
+		modCount++;
+	}
+
+	/**
+	 * Adds the specified object at the end of this LinkedList.
+	 * 
+	 * @param object
+	 *            the object to add
+	 */
+	public void addLast(E object) {
+		Link<E> oldLast = voidLink.previous;
+		Link<E> newLink = new Link<E>(object, oldLast, voidLink);
+		voidLink.previous = newLink;
+		oldLast.next = newLink;
+		size++;
+		modCount++;
+	}
+
+	/**
+	 * Removes all elements from this LinkedList, leaving it empty.
+	 * 
+	 * @see List#isEmpty
+	 * @see #size
+	 */
+	@Override
     public void clear() {
-	modCount++;
-        header.next = header.previous = header;
-	size = 0;
-    }
-
-
-    // Positional Access Operations
-
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * @param index index of element to return.
-     * @return the element at the specified position in this list.
-     * 
-     * @throws IndexOutOfBoundsException if the specified index is is out of
-     * range (<tt>index &lt; 0 || index &gt;= size()</tt>).
-     */
-    public Object get(int index) {
-        return entry(index).element;
-    }
-
-    /**
-     * Replaces the element at the specified position in this list with the
-     * specified element.
-     *
-     * @param index index of element to replace.
-     * @param element element to be stored at the specified position.
-     * @return the element previously at the specified position.
-     * @throws IndexOutOfBoundsException if the specified index is out of
-     *		  range (<tt>index &lt; 0 || index &gt;= size()</tt>).
-     */
-    public Object set(int index, Object element) {
-        Entry e = entry(index);
-        Object oldVal = e.element;
-        e.element = element;
-        return oldVal;
-    }
-
-    /**
-     * Inserts the specified element at the specified position in this list.
-     * Shifts the element currently at that position (if any) and any
-     * subsequent elements to the right (adds one to their indices).
-     *
-     * @param index index at which the specified element is to be inserted.
-     * @param element element to be inserted.
-     * 
-     * @throws IndexOutOfBoundsException if the specified index is out of
-     *		  range (<tt>index &lt; 0 || index &gt; size()</tt>).
-     */
-    public void add(int index, Object element) {
-        addBefore(element, (index==size ? header : entry(index)));
-    }
-
-    /**
-     * Removes the element at the specified position in this list.  Shifts any
-     * subsequent elements to the left (subtracts one from their indices).
-     * Returns the element that was removed from the list.
-     *
-     * @param index the index of the element to removed.
-     * @return the element previously at the specified position.
-     * 
-     * @throws IndexOutOfBoundsException if the specified index is out of
-     * 		  range (<tt>index &lt; 0 || index &gt;= size()</tt>).
-     */
-    public Object remove(int index) {
-        Entry e = entry(index);
-        remove(e);
-        return e.element;
-    }
-
-    /**
-     * Return the indexed entry.
-     */
-    private Entry entry(int index) {
-        if (index < 0 || index >= size)
-            throw new IndexOutOfBoundsException("Index: "+index+
-                                                ", Size: "+size);
-        Entry e = header;
-        if (index < (size >> 1)) {
-            for (int i = 0; i <= index; i++)
-                e = e.next;
-        } else {
-            for (int i = size; i > index; i--)
-                e = e.previous;
-        }
-        return e;
-    }
-
-
-    // Search Operations
-
-    /**
-     * Returns the index in this list of the first occurrence of the
-     * specified element, or -1 if the List does not contain this
-     * element.  More formally, returns the lowest index i such that
-     * <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt>, or -1 if
-     * there is no such index.
-     *
-     * @param o element to search for.
-     * @return the index in this list of the first occurrence of the
-     * 	       specified element, or -1 if the list does not contain this
-     * 	       element.
-     */
-    public int indexOf(Object o) {
-        int index = 0;
-        if (o==null) {
-            for (Entry e = header.next; e != header; e = e.next) {
-                if (e.element==null)
-                    return index;
-                index++;
-            }
-        } else {
-            for (Entry e = header.next; e != header; e = e.next) {
-                if (o.equals(e.element))
-                    return index;
-                index++;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns the index in this list of the last occurrence of the
-     * specified element, or -1 if the list does not contain this
-     * element.  More formally, returns the highest index i such that
-     * <tt>(o==null ? get(i)==null : o.equals(get(i)))</tt>, or -1 if
-     * there is no such index.
-     *
-     * @param o element to search for.
-     * @return the index in this list of the last occurrence of the
-     * 	       specified element, or -1 if the list does not contain this
-     * 	       element.
-     */
-    public int lastIndexOf(Object o) {
-        int index = size;
-        if (o==null) {
-            for (Entry e = header.previous; e != header; e = e.previous) {
-                index--;
-                if (e.element==null)
-                    return index;
-            }
-        } else {
-            for (Entry e = header.previous; e != header; e = e.previous) {
-                index--;
-                if (o.equals(e.element))
-                    return index;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns a list-iterator of the elements in this list (in proper
-     * sequence), starting at the specified position in the list.
-     * Obeys the general contract of <tt>List.listIterator(int)</tt>.<p>
-     *
-     * The list-iterator is <i>fail-fast</i>: if the list is structurally
-     * modified at any time after the Iterator is created, in any way except
-     * through the list-iterator's own <tt>remove</tt> or <tt>add</tt>
-     * methods, the list-iterator will throw a
-     * <tt>ConcurrentModificationException</tt>.  Thus, in the face of
-     * concurrent modification, the iterator fails quickly and cleanly, rather
-     * than risking arbitrary, non-deterministic behavior at an undetermined
-     * time in the future.
-     *
-     * @param index index of first element to be returned from the
-     *		    list-iterator (by a call to <tt>next</tt>).
-     * @return a ListIterator of the elements in this list (in proper
-     * 	       sequence), starting at the specified position in the list.
-     * @throws    IndexOutOfBoundsException if index is out of range
-     *		  (<tt>index &lt; 0 || index &gt; size()</tt>).
-     * @see List#listIterator(int)
-     */
-    public ListIterator listIterator(int index) {
-	return new ListItr(index);
-    }
-
-    private class ListItr implements ListIterator {
-	private Entry lastReturned = header;
-	private Entry next;
-	private int nextIndex;
-	private int expectedModCount = modCount;
-
-	ListItr(int index) {
-	    if (index < 0 || index > size)
-		throw new IndexOutOfBoundsException("Index: "+index+
-						    ", Size: "+size);
-	    if (index < (size >> 1)) {
-		next = header.next;
-		for (nextIndex=0; nextIndex<index; nextIndex++)
-		    next = next.next;
-	    } else {
-		next = header;
-		for (nextIndex=size; nextIndex>index; nextIndex--)
-		    next = next.previous;
-	    }
+		if (size > 0) {
+			size = 0;
+			voidLink.next = voidLink;
+			voidLink.previous = voidLink;
+			modCount++;
+		}
 	}
 
-	public boolean hasNext() {
-	    return nextIndex != size;
-	}
-
-	public Object next() {
-	    checkForComodification();
-	    if (nextIndex == size)
-		throw new NoSuchElementException();
-
-	    lastReturned = next;
-	    next = next.next;
-	    nextIndex++;
-	    return lastReturned.element;
-	}
-
-	public boolean hasPrevious() {
-	    return nextIndex != 0;
-	}
-
-	public Object previous() {
-	    if (nextIndex == 0)
-		throw new NoSuchElementException();
-
-	    lastReturned = next = next.previous;
-	    nextIndex--;
-	    checkForComodification();
-	    return lastReturned.element;
-	}
-
-	public int nextIndex() {
-	    return nextIndex;
-	}
-
-	public int previousIndex() {
-	    return nextIndex-1;
-	}
-
-	public void remove() {
-            checkForComodification();
-            try {
-                LinkedList.this.remove(lastReturned);
-            } catch (NoSuchElementException e) {
-                throw new IllegalStateException();
-            }
-	    if (next==lastReturned)
-                next = lastReturned.next;
-            else
-		nextIndex--;
-	    lastReturned = header;
-	    expectedModCount++;
-	}
-
-	public void set(Object o) {
-	    if (lastReturned == header)
-		throw new IllegalStateException();
-	    checkForComodification();
-	    lastReturned.element = o;
-	}
-
-	public void add(Object o) {
-	    checkForComodification();
-	    lastReturned = header;
-	    addBefore(o, next);
-	    nextIndex++;
-	    expectedModCount++;
-	}
-
-	final void checkForComodification() {
-	    if (modCount != expectedModCount)
-		throw new ConcurrentModificationException();
-	}
-    }
-
-    private static class Entry {
-	Object element;
-	Entry next;
-	Entry previous;
-
-	Entry(Object element, Entry next, Entry previous) {
-	    this.element = element;
-	    this.next = next;
-	    this.previous = previous;
-	}
-    }
-
-    private Entry addBefore(Object o, Entry e) {
-	Entry newEntry = new Entry(o, e, e.previous);
-	newEntry.previous.next = newEntry;
-	newEntry.next.previous = newEntry;
-	size++;
-	modCount++;
-	return newEntry;
-    }
-
-    private void remove(Entry e) {
-	if (e == header)
-	    throw new NoSuchElementException();
-
-	e.previous.next = e.next;
-	e.next.previous = e.previous;
-	size--;
-	modCount++;
-    }
-
-    /**
-     * Returns a shallow copy of this <tt>LinkedList</tt>. (The elements
-     * themselves are not cloned.)
-     *
-     * @return a shallow copy of this <tt>LinkedList</tt> instance.
-     */
+	/**
+	 * Answers a new LinkedList with the same elements and size as this
+	 * LinkedList.
+	 * 
+	 * @return a shallow copy of this LinkedList
+	 * 
+	 * @see java.lang.Cloneable
+	 */
+	@Override
     public Object clone() {
-        LinkedList clone = null;
-	try { 
-	    clone = (LinkedList)super.clone();
-	} catch (CloneNotSupportedException e) { 
-	    throw new InternalError();
+		return new LinkedList<E>(this);
 	}
 
-        // Put clone into "virgin" state
-        clone.header = new Entry(null, null, null);
-        clone.header.next = clone.header.previous = clone.header;
-        clone.size = 0;
-        clone.modCount = 0;
+	/**
+	 * Searches this LinkedList for the specified object.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return true if <code>object</code> is an element of this LinkedList,
+	 *         false otherwise
+	 */
+	@Override
+    public boolean contains(Object object) {
+		Link<E> link = voidLink.next;
+		if (object != null) {
+			while (link != voidLink) {
+				if (object.equals(link.data)) {
+                    return true;
+                }
+				link = link.next;
+			}
+		} else {
+			while (link != voidLink) {
+				if (link.data == null) {
+                    return true;
+                }
+				link = link.next;
+			}
+		}
+		return false;
+	}
 
-        // Initialize clone with our elements
-        for (Entry e = header.next; e != header; e = e.next)
-            clone.add(e.element);
+	@Override
+    public E get(int location) {
+		if (0 <= location && location < size) {
+			Link<E> link = voidLink;
+			if (location < (size / 2)) {
+				for (int i = 0; i <= location; i++) {
+                    link = link.next;
+                }
+			} else {
+				for (int i = size; i > location; i--) {
+                    link = link.previous;
+                }
+			}
+			return link.data;
+		}
+        throw new IndexOutOfBoundsException();
+	}
 
-        return clone;
+	/**
+	 * Answers the first element in this LinkedList.
+	 * 
+	 * @return the first element
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this LinkedList is empty
+	 */
+	public E getFirst() {
+		Link<E> first = voidLink.next;
+		if (first != voidLink) {
+            return first.data;
+        }
+		throw new NoSuchElementException();
+	}
+
+	/**
+	 * Answers the last element in this LinkedList.
+	 * 
+	 * @return the last element
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this LinkedList is empty
+	 */
+	public E getLast() {
+		Link<E> last = voidLink.previous;
+		if (last != voidLink) {
+            return last.data;
+        }
+		throw new NoSuchElementException();
+	}
+
+	/**
+	 * Searches this LinkedList for the specified object and returns the index
+	 * of the first occurrence.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return the index of the first occurrence of the object
+	 */
+	@Override
+    public int indexOf(Object object) {
+		int pos = 0;
+		Link<E> link = voidLink.next;
+		if (object != null) {
+			while (link != voidLink) {
+				if (object.equals(link.data)) {
+                    return pos;
+                }
+				link = link.next;
+				pos++;
+			}
+		} else {
+			while (link != voidLink) {
+				if (link.data == null) {
+                    return pos;
+                }
+				link = link.next;
+				pos++;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Searches this LinkedList for the specified object and returns the index
+	 * of the last occurrence.
+	 * 
+	 * @param object
+	 *            the object to search for
+	 * @return the index of the last occurrence of the object
+	 */
+	@Override
+    public int lastIndexOf(Object object) {
+		int pos = size;
+		Link<E> link = voidLink.previous;
+		if (object != null) {
+			while (link != voidLink) {
+				pos--;
+				if (object.equals(link.data)) {
+                    return pos;
+                }
+				link = link.previous;
+			}
+		} else {
+			while (link != voidLink) {
+				pos--;
+				if (link.data == null) {
+                    return pos;
+                }
+				link = link.previous;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Answers a ListIterator on the elements of this LinkedList. The elements
+	 * are iterated in the same order that they occur in the LinkedList. The
+	 * iteration starts at the specified location.
+	 * 
+	 * @param location
+	 *            the index at which to start the iteration
+	 * @return a ListIterator on the elements of this LinkedList
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 * 
+	 * @see ListIterator
+	 */
+	@Override
+    public ListIterator<E> listIterator(int location) {
+		return new LinkIterator<E>(this, location);
+	}
+
+	/**
+	 * Removes the object at the specified location from this LinkedList.
+	 * 
+	 * @param location
+	 *            the index of the object to remove
+	 * @return the removed object
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public E remove(int location) {
+		if (0 <= location && location < size) {
+			Link<E> link = voidLink;
+			if (location < (size / 2)) {
+				for (int i = 0; i <= location; i++) {
+                    link = link.next;
+                }
+			} else {
+				for (int i = size; i > location; i--) {
+                    link = link.previous;
+                }
+			}
+			Link<E> previous = link.previous;
+			Link<E> next = link.next;
+			previous.next = next;
+			next.previous = previous;
+			size--;
+			modCount++;
+			return link.data;
+		}
+        throw new IndexOutOfBoundsException();
+	}
+
+	@Override
+    public boolean remove(Object object) {
+		Link<E> link = voidLink.next;
+		if (object != null) {
+			while (link != voidLink && !object.equals(link.data)) {
+                link = link.next;
+            }
+		} else {
+			while (link != voidLink && link.data != null) {
+                link = link.next;
+            }
+		}
+		if (link == voidLink) {
+            return false;
+        }
+		Link<E> next = link.next;
+		Link<E> previous = link.previous;
+		previous.next = next;
+		next.previous = previous;
+		size--;
+		modCount++;
+		return true;
+	}
+
+	/**
+	 * Removes the first object from this LinkedList.
+	 * 
+	 * @return the removed object
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this LinkedList is empty
+	 */
+	public E removeFirst() {
+		Link<E> first = voidLink.next;
+		if (first != voidLink) {
+			Link<E> next = first.next;
+			voidLink.next = next;
+			next.previous = voidLink;
+			size--;
+			modCount++;
+			return first.data;
+		}
+        throw new NoSuchElementException();
+	}
+
+	/**
+	 * Removes the last object from this LinkedList.
+	 * 
+	 * @return the removed object
+	 * 
+	 * @exception NoSuchElementException
+	 *                when this LinkedList is empty
+	 */
+	public E removeLast() {
+		Link<E> last = voidLink.previous;
+		if (last != voidLink) {
+			Link<E> previous = last.previous;
+			voidLink.previous = previous;
+			previous.next = voidLink;
+			size--;
+			modCount++;
+			return last.data;
+		}
+        throw new NoSuchElementException();
+	}
+
+	/**
+	 * Replaces the element at the specified location in this LinkedList with
+	 * the specified object.
+	 * 
+	 * @param location
+	 *            the index at which to put the specified object
+	 * @param object
+	 *            the object to add
+	 * @return the previous element at the index
+	 * 
+	 * @exception IndexOutOfBoundsException
+	 *                when <code>location < 0 || >= size()</code>
+	 */
+	@Override
+    public E set(int location, E object) {
+		if (0 <= location && location < size) {
+			Link<E> link = voidLink;
+			if (location < (size / 2)) {
+				for (int i = 0; i <= location; i++) {
+                    link = link.next;
+                }
+			} else {
+				for (int i = size; i > location; i--) {
+                    link = link.previous;
+                }
+			}
+			E result = link.data;
+			link.data = object;
+			return result;
+		}
+        throw new IndexOutOfBoundsException();
+	}
+
+	/**
+	 * Answers the number of elements in this LinkedList.
+	 * 
+	 * @return the number of elements in this LinkedList
+	 */
+	@Override
+    public int size() {
+		return size;
+	}
+    
+    public boolean offer(E o) {
+        add(o);
+        return true;
     }
 
-    /**
-     * Returns an array containing all of the elements in this list
-     * in the correct order.
-     *
-     * @return an array containing all of the elements in this list
-     * 	       in the correct order.
-     */
+    public E poll() {
+        return size == 0 ? null : removeFirst();
+    }
+
+    public E remove() {
+        return removeFirst();
+    }
+
+    public E peek() {
+        Link<E> first = voidLink.next;
+        return first == voidLink ? null : first.data;
+    }
+
+    public E element() {
+        return getFirst();
+    }
+
+	/**
+	 * Answers a new array containing all elements contained in this LinkedList.
+	 * 
+	 * @return an array of the elements from this LinkedList
+	 */
+	@Override
     public Object[] toArray() {
-	Object[] result = new Object[size];
-        int i = 0;
-        for (Entry e = header.next; e != header; e = e.next)
-            result[i++] = e.element;
-	return result;
-    }
+		int index = 0;
+		Object[] contents = new Object[size];
+		Link<E> link = voidLink.next;
+		while (link != voidLink) {
+			contents[index++] = link.data;
+			link = link.next;
+		}
+		return contents;
+	}
 
-    /**
-     * Returns an array containing all of the elements in this list in
-     * the correct order; the runtime type of the returned array is that of
-     * the specified array.  If the list fits in the specified array, it
-     * is returned therein.  Otherwise, a new array is allocated with the
-     * runtime type of the specified array and the size of this list.<p>
-     *
-     * If the list fits in the specified array with room to spare
-     * (i.e., the array has more elements than the list),
-     * the element in the array immediately following the end of the
-     * collection is set to null.  This is useful in determining the length
-     * of the list <i>only</i> if the caller knows that the list
-     * does not contain any null elements.
-     *
-     * @param a the array into which the elements of the list are to
-     *		be stored, if it is big enough; otherwise, a new array of the
-     * 		same runtime type is allocated for this purpose.
-     * @return an array containing the elements of the list.
-     * @throws ArrayStoreException if the runtime type of a is not a
-     *         supertype of the runtime type of every element in this list.
-     * @throws NullPointerException if the specified array is null.
-     */
-    public Object[] toArray(Object a[]) {
-        if (a.length < size)
-            a = (Object[])java.lang.reflect.Array.newInstance(
-                                a.getClass().getComponentType(), size);
-        int i = 0;
-        for (Entry e = header.next; e != header; e = e.next)
-            a[i++] = e.element;
+	/**
+	 * Answers an array containing all elements contained in this LinkedList. If
+	 * the specified array is large enough to hold the elements, the specified
+	 * array is used, otherwise an array of the same type is created. If the
+	 * specified array is used and is larger than this LinkedList, the array
+	 * element following the collection elements is set to null.
+	 * 
+	 * @param contents
+	 *            the array
+	 * @return an array of the elements from this LinkedList
+	 * 
+	 * @exception ArrayStoreException
+	 *                when the type of an element in this LinkedList cannot be
+	 *                stored in the type of the specified array
+	 */
+	@Override
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] contents) {
+		int index = 0;
+		if (size > contents.length) {
+            Class<?> ct = contents.getClass().getComponentType();
+            contents = (T[]) Array.newInstance(ct, size);
+        }
+		Link<E> link = voidLink.next;
+		while (link != voidLink) {
+			contents[index++] = (T)link.data;
+			link = link.next;
+		}
+		if (index < contents.length) {
+            contents[index] = null;
+        }
+		return contents;
+	}
 
-        if (a.length > size)
-            a[size] = null;
+	private void writeObject(ObjectOutputStream stream) throws IOException {
+		stream.defaultWriteObject();
+		stream.writeInt(size);
+		Iterator<E> it = iterator();
+		while (it.hasNext()) {
+            stream.writeObject(it.next());
+        }
+	}
 
-        return a;
-    }
-
-    private static final long serialVersionUID = 876323262645176354L;
-
-    /**
-     * Save the state of this <tt>LinkedList</tt> instance to a stream (that
-     * is, serialize it).
-     *
-     * @serialData The size of the list (the number of elements it
-     *		   contains) is emitted (int), followed by all of its
-     * elements (each an Object) in the proper order.  
-     */
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException {
-	// Write out any hidden serialization magic
-	s.defaultWriteObject();
-
-        // Write out size
-        s.writeInt(size);
-
-	// Write out all elements in the proper order.
-        for (Entry e = header.next; e != header; e = e.next)
-            s.writeObject(e.element);
-    }
-
-    /**
-     * Reconstitute this <tt>LinkedList</tt> instance from a stream (that is
-     * deserialize it).
-     */
-    private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
-	// Read in any hidden serialization magic
-	s.defaultReadObject();
-
-        // Read in size
-        int size = s.readInt();
-
-        // Initialize header
-        header = new Entry(null, null, null);
-        header.next = header.previous = header;
-
-	// Read in all elements in the proper order.
-	for (int i=0; i<size; i++)
-            add(s.readObject());
-    }
+	@SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream stream) throws IOException,
+			ClassNotFoundException {
+		stream.defaultReadObject();
+		size = stream.readInt();
+		voidLink = new Link<E>(null, null, null);
+		Link<E> link = voidLink;
+		for (int i = size; --i >= 0;) {
+			Link<E> nextLink = new Link<E>((E)stream.readObject(), link, null);
+			link.next = nextLink;
+			link = nextLink;
+		}
+		link.next = voidLink;
+		voidLink.previous = link;
+	}
 }

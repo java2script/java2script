@@ -1,258 +1,215 @@
 /*
- * @(#)ByteArrayInputStream.java	1.42 03/01/23
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package java.io;
 
 /**
- * A <code>ByteArrayInputStream</code> contains
- * an internal buffer that contains bytes that
- * may be read from the stream. An internal
- * counter keeps track of the next byte to
- * be supplied by the <code>read</code> method.
- * <p>
- * Closing a <tt>ByteArrayInputStream</tt> has no effect. The methods in
- * this class can be called after the stream has been closed without
- * generating an <tt>IOException</tt>.
- *
- * @author  Arthur van Hoff
- * @version 1.42, 01/23/03
- * @see     java.io.StringBufferInputStream
- * @since   JDK1.0
+ * ByteArrayInputStream is used for streaming over a byte array.
+ * 
+ * @see ByteArrayOutputStream
  */
-public
-class ByteArrayInputStream extends InputStream {
+public class ByteArrayInputStream extends InputStream {
+	/**
+	 * The <code>byte</code> array containing the bytes to stream over.
+	 */
+	protected byte[] buf;
 
-    /**
-     * An array of bytes that was provided
-     * by the creator of the stream. Elements <code>buf[0]</code>
-     * through <code>buf[count-1]</code> are the
-     * only bytes that can ever be read from the
-     * stream;  element <code>buf[pos]</code> is
-     * the next byte to be read.
-     */
-    protected byte buf[];
+	/**
+	 * The current position within the byte array.
+	 */
+	protected int pos;
 
-    /**
-     * The index of the next character to read from the input stream buffer.
-     * This value should always be nonnegative
-     * and not larger than the value of <code>count</code>.
-     * The next byte to be read from the input stream buffer 
-     * will be <code>buf[pos]</code>.
-     */
-    protected int pos;
+	/**
+	 * The current mark position. Initially set to 0 or the <code>offset</code>
+	 * parameter within the constructor.
+	 */
+	protected int mark;
 
-    /**
-     * The currently marked position in the stream.
-     * ByteArrayInputStream objects are marked at position zero by
-     * default when constructed.  They may be marked at another
-     * position within the buffer by the <code>mark()</code> method.
-     * The current buffer position is set to this point by the
-     * <code>reset()</code> method.
-     * <p>
-     * If no mark has been set, then the value of mark is the offset
-     * passed to the constructor (or 0 if the offset was not supplied).
-     *
-     * @since   JDK1.1
-     */
-    protected int mark = 0;
+	/**
+	 * The total number of bytes initially available in the byte array
+	 * <code>buf</code>.
+	 */
+	protected int count;
 
-    /**
-     * The index one greater than the last valid character in the input 
-     * stream buffer. 
-     * This value should always be nonnegative
-     * and not larger than the length of <code>buf</code>.
-     * It  is one greater than the position of
-     * the last byte within <code>buf</code> that
-     * can ever be read  from the input stream buffer.
-     */
-    protected int count;
-
-    /**
-     * Creates a <code>ByteArrayInputStream</code>
-     * so that it  uses <code>buf</code> as its
-     * buffer array. 
-     * The buffer array is not copied. 
-     * The initial value of <code>pos</code>
-     * is <code>0</code> and the initial value
-     * of  <code>count</code> is the length of
-     * <code>buf</code>.
-     *
-     * @param   buf   the input buffer.
-     */
-    public ByteArrayInputStream(byte buf[]) {
-	this.buf = buf;
-        this.pos = 0;
-	this.count = buf.length;
-    }
-
-    /**
-     * Creates <code>ByteArrayInputStream</code>
-     * that uses <code>buf</code> as its
-     * buffer array. The initial value of <code>pos</code>
-     * is <code>offset</code> and the initial value
-     * of <code>count</code> is the minimum of <code>offset+length</code>
-     * and <code>buf.length</code>.
-     * The buffer array is not copied. The buffer's mark is
-     * set to the specified offset.
-     *
-     * @param   buf      the input buffer.
-     * @param   offset   the offset in the buffer of the first byte to read.
-     * @param   length   the maximum number of bytes to read from the buffer.
-     */
-    public ByteArrayInputStream(byte buf[], int offset, int length) {
-	this.buf = buf;
-        this.pos = offset;
-	this.count = Math.min(offset + length, buf.length);
-        this.mark = offset;
-    }
-
-    /**
-     * Reads the next byte of data from this input stream. The value 
-     * byte is returned as an <code>int</code> in the range 
-     * <code>0</code> to <code>255</code>. If no byte is available 
-     * because the end of the stream has been reached, the value 
-     * <code>-1</code> is returned. 
-     * <p>
-     * This <code>read</code> method 
-     * cannot block. 
-     *
-     * @return  the next byte of data, or <code>-1</code> if the end of the
-     *          stream has been reached.
-     */
-    public synchronized int read() {
-	return (pos < count) ? (buf[pos++] & 0xff) : -1;
-    }
-
-    /**
-     * Reads up to <code>len</code> bytes of data into an array of bytes 
-     * from this input stream. 
-     * If <code>pos</code> equals <code>count</code>,
-     * then <code>-1</code> is returned to indicate
-     * end of file. Otherwise, the  number <code>k</code>
-     * of bytes read is equal to the smaller of
-     * <code>len</code> and <code>count-pos</code>.
-     * If <code>k</code> is positive, then bytes
-     * <code>buf[pos]</code> through <code>buf[pos+k-1]</code>
-     * are copied into <code>b[off]</code>  through
-     * <code>b[off+k-1]</code> in the manner performed
-     * by <code>System.arraycopy</code>. The
-     * value <code>k</code> is added into <code>pos</code>
-     * and <code>k</code> is returned.
-     * <p>
-     * This <code>read</code> method cannot block. 
-     *
-     * @param   b     the buffer into which the data is read.
-     * @param   off   the start offset of the data.
-     * @param   len   the maximum number of bytes read.
-     * @return  the total number of bytes read into the buffer, or
-     *          <code>-1</code> if there is no more data because the end of
-     *          the stream has been reached.
-     */
-    public synchronized int read(byte b[], int off, int len) {
-	if (b == null) {
-	    throw new NullPointerException();
-	} else if ((off < 0) || (off > b.length) || (len < 0) ||
-		   ((off + len) > b.length) || ((off + len) < 0)) {
-	    throw new IndexOutOfBoundsException();
+	/**
+	 * Constructs a new ByteArrayInputStream on the byte array <code>buf</code>.
+	 * 
+	 * @param buf
+	 *            the byte array to stream over
+	 */
+	public ByteArrayInputStream(byte buf[]) {
+		this.mark = 0;
+		this.buf = buf;
+		this.count = buf.length;
 	}
-	if (pos >= count) {
-	    return -1;
-	}
-	if (pos + len > count) {
-	    len = count - pos;
-	}
-	if (len <= 0) {
-	    return 0;
-	}
-	System.arraycopy(buf, pos, b, off, len);
-	pos += len;
-	return len;
-    }
 
-    /**
-     * Skips <code>n</code> bytes of input from this input stream. Fewer 
-     * bytes might be skipped if the end of the input stream is reached. 
-     * The actual number <code>k</code>
-     * of bytes to be skipped is equal to the smaller
-     * of <code>n</code> and  <code>count-pos</code>.
-     * The value <code>k</code> is added into <code>pos</code>
-     * and <code>k</code> is returned.
-     *
-     * @param   n   the number of bytes to be skipped.
-     * @return  the actual number of bytes skipped.
-     */
-    public synchronized long skip(long n) {
-	if (pos + n > count) {
-	    n = count - pos;
+	/**
+	 * Constructs a new ByteArrayInputStream on the byte array <code>buf</code>
+	 * with the position set to <code>offset</code> and the number of bytes
+	 * available set to <code>offset</code> + <code>length</code>.
+	 * 
+	 * @param buf
+	 *            the byte array to stream over
+	 * @param offset
+	 *            the offset in <code>buf</code> to start streaming at
+	 * @param length
+	 *            the number of bytes available to stream over.
+	 */
+	public ByteArrayInputStream(byte buf[], int offset, int length) {
+		this.buf = buf;
+		pos = offset >= buf.length ? buf.length : offset;
+		mark = pos;
+		count = length + pos > buf.length ? buf.length : length + pos;
 	}
-	if (n < 0) {
-	    return 0;
-	}
-	pos += n;
-	return n;
-    }
 
-    /**
-     * Returns the number of bytes that can be read from this input 
-     * stream without blocking. 
-     * The value returned is
-     * <code>count&nbsp;- pos</code>, 
-     * which is the number of bytes remaining to be read from the input buffer.
-     *
-     * @return  the number of bytes that can be read from the input stream
-     *          without blocking.
-     */
+	/**
+	 * Answers a int representing then number of bytes that are available before
+	 * this ByteArrayInputStream will block. This method returns the number of
+	 * bytes yet to be read from the underlying byte array.
+	 * 
+	 * @return the number of bytes available before blocking.
+	 */
+	@Override
     public synchronized int available() {
-	return count - pos;
-    }
+		return count - pos;
+	}
 
-    /**
-     * Tests if this <code>InputStream</code> supports mark/reset. The
-     * <code>markSupported</code> method of <code>ByteArrayInputStream</code>
-     * always returns <code>true</code>.
-     *
-     * @since   JDK1.1
-     */
-    public boolean markSupported() {
-	return true;
-    }
-
-    /**
-     * Set the current marked position in the stream.
-     * ByteArrayInputStream objects are marked at position zero by
-     * default when constructed.  They may be marked at another
-     * position within the buffer by this method.
-     * <p>
-     * If no mark has been set, then the value of the mark is the
-     * offset passed to the constructor (or 0 if the offset was not
-     * supplied).
-     *
-     * @since   JDK1.1
-     */
-    public void mark(int readAheadLimit) {
-	mark = pos;
-    }
-
-    /**
-     * Resets the buffer to the marked position.  The marked position
-     * is 0 unless another position was marked or an offset was specified
-     * in the constructor.
-     */
-    public synchronized void reset() {
-	pos = mark;
-    }
-
-    /**
-     * Closing a <tt>ByteArrayInputStream</tt> has no effect. The methods in
-     * this class can be called after the stream has been closed without
-     * generating an <tt>IOException</tt>.
-     * <p>
-     */
+	/**
+	 * Close the ByteArrayInputStream. This implementation frees up resources
+	 * associated with this stream.
+	 * 
+	 * @throws IOException
+	 *             If an error occurs attempting to close this InputStream.
+	 */
+	@Override
     public void close() throws IOException {
-    }
+		// Do nothing on close, this matches JDK behaviour.
+	}
 
+	/**
+	 * Set a Mark position in this ByteArrayInputStream. The parameter
+	 * <code>readLimit</code> is ignored. Sending reset() will reposition the
+	 * stream back to the marked position.
+	 * 
+	 * @param readlimit
+	 *            ignored.
+	 */
+	@Override
+    public synchronized void mark(int readlimit) {
+		mark = pos;
+	}
+
+	/**
+	 * Answers a boolean indicating whether or not this ByteArrayInputStream
+	 * supports mark() and reset(). This implementation answers
+	 * <code>true</code>.
+	 * 
+	 * @return <code>true</code> indicates this stream supports mark/reset,
+	 *         <code>false
+	 *				<code> otherwise.
+	 */
+	@Override
+    public boolean markSupported() {
+		return true;
+	}
+
+	/**
+	 * Reads a single byte from this ByteArrayInputStream and returns the result
+	 * as an int. The low-order byte is returned or -1 of the end of stream was
+	 * encountered. This implementation returns the next available byte from the
+	 * target byte array.
+	 * 
+	 * @return the byte read or -1 if end of stream.
+	 */
+	@Override
+    public synchronized int read() {
+		return pos < count ? buf[pos++] & 0xFF : -1;
+	}
+
+	/**
+	 * Reads at most <code>len</code> bytes from this ByteArrayInputStream and
+	 * stores them in byte array <code>b</code> starting at offset
+	 * <code>off</code>. Answer the number of bytes actually read or -1 if no
+	 * bytes were read and end of stream was encountered. This implementation
+	 * reads bytes from the target byte array.
+	 * 
+	 * @param b
+	 *            the byte array in which to store the read bytes.
+	 * @param offset
+	 *            the offset in <code>b</code> to store the read bytes.
+	 * @param length
+	 *            the maximum number of bytes to store in <code>b</code>.
+	 * @return the number of bytes actually read or -1 if end of stream.
+	 */
+	@Override
+    public synchronized int read(byte b[], int offset, int length) {
+		// Are there any bytes available
+		if (this.pos >= this.count) {
+            return -1;
+        }
+
+		if (b != null) {
+			// avoid int overflow
+			if (0 <= offset && offset <= b.length && 0 <= length
+					&& length <= b.length - offset) {
+				if (length == 0) {
+                    return 0;
+                }
+
+				int copylen = this.count - pos < length ? this.count - pos
+						: length;
+				System.arraycopy(buf, pos, b, offset, copylen);
+				pos += copylen;
+				return copylen;
+			}
+			throw new ArrayIndexOutOfBoundsException();
+		}
+		throw new NullPointerException();
+	}
+
+	/**
+	 * Reset this ByteArrayInputStream to the last marked location. This
+	 * implementation resets the position to either the marked position, the
+	 * start position supplied in the constructor or <code>0</code> if neither
+	 * is provided.
+	 * 
+	 */
+	@Override
+    public synchronized void reset() {
+		pos = mark;
+	}
+
+	/**
+	 * Skips <code>count</code> number of bytes in this InputStream.
+	 * Subsequent <code>read()</code>'s will not return these bytes unless
+	 * <code>reset()</code> is used. This implementation skips
+	 * <code>count</code> number of bytes in the target stream.
+	 * 
+	 * @param n
+	 *            the number of bytes to skip.
+	 * @return the number of bytes actually skipped.
+	 */
+	@Override
+    public synchronized long skip(long n) {
+		if (n <= 0) {
+            return 0;
+        }
+		int temp = pos;
+		pos = this.count - pos < n ? this.count : (int) (pos + n);
+		return pos - temp;
+	}
 }

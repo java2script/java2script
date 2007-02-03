@@ -4,7 +4,10 @@ Clazz.instantialize (this, arguments);
 };
 Clazz.decorateAsType (Float, "Float", Number, Comparable);
 Float.prototype.valueOf = function () { return 0; };
-Float.prototype.toString = function () {
+Float.toString = Float.prototype.toString = function () {
+	if (arguments.length != 0) {
+		return "" + arguments[0];
+	}
 	return "" + this.valueOf ();
 };
 Clazz.makeConstructor (Float, 

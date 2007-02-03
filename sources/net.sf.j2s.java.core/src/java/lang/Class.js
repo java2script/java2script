@@ -419,7 +419,14 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 		zzalc = zzalc.superClazz;
 		if (zzalc == null) {
 			if (clazzBase == Object) {
-				return level + 1;
+				/*
+				 * getInheritedLevel(String, CharSequence) == 1
+				 * getInheritedLevel(String, Object) == 1.5
+				 * So if both #test(CharSequence) and #test(Object) existed,
+				 * #test("hello") will correctly call #test(CharSequence)
+				 * insted of #test(Object).
+				 */
+				return level + 1.5; // 1.5! Special!
 			} else {
 				return -1;
 			}
@@ -997,22 +1004,11 @@ Clazz.searchMethod = function (roundOne, paramTypes) {
 		}
 	}
 	var index = min[paramTypes.length]; // Get the previously stored index
-	return roundOne[index].join ('\\');
-	/*
-	var params = resultOne[index];
-	var methodParams = "";
-	for (var i = 0; i < params.length; i++) {
-		methodParams += params[i];
-		if (i != params.length - 1) {
-			methodParams += "\\";
-		}
-	}
-	*/
 	/*
 	 * Return the method parameters' type string as indentifier of the
 	 * choosen method.
 	 */
-	//return methodParams;
+	return roundOne[index].join ('\\');
 };
 
 /**
@@ -1688,8 +1684,12 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");
+Clazz.declarePackage ("java.lang.annotation"); // java.lang
+Clazz.declarePackage ("java.lang.instrument"); // java.lang
+Clazz.declarePackage ("java.lang.management"); // java.lang
 Clazz.declarePackage ("java.lang.reflect"); // java.lang
-Clazz.declarePackage ("java.lang.ref.reflect");  // java.lang.ref
+Clazz.declarePackage ("java.lang.ref");  // java.lang.ref
+java.lang.ref.reflect = java.lang.reflect;
 Clazz.declarePackage ("java.util");
 
 /*

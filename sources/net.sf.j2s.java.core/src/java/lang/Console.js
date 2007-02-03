@@ -418,8 +418,18 @@ window.assert = function () {
 
 	/* public */
 	System.arraycopy = function (src, srcPos, dest, destPos, length) {
-		for (var i = 0; i < length; i++) {
-			dest[destPos + i] = src[srcPos + i];
+		if (src != dest) {
+			for (var i = 0; i < length; i++) {
+				dest[destPos + i] = src[srcPos + i];
+			}
+		} else {
+			var swap = [];
+			for (var i = 0; i < length; i++) {
+				swap[i] = src[srcPos + i];
+			}
+			for (var i = 0; i < length; i++) {
+				dest[destPos + i] = swap[i];
+			}
 		}
 	};
 	

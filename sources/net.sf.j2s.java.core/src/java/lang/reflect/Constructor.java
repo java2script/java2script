@@ -1,366 +1,299 @@
-/*
- * @(#)Constructor.java	1.33 03/01/23
- *
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+/* Copyright 1998, 2005 The Apache Software Foundation or its licensors, as applicable
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package java.lang.reflect;
 
-import sun.reflect.ConstructorAccessor;
-import sun.reflect.Reflection;
+import java.lang.annotation.Annotation;
 
 /**
- * <code>Constructor</code> provides information about, and access to, a single
- * constructor for a class.
- *
- * <p><code>Constructor</code> permits widening conversions to occur when matching the
- * actual parameters to newInstance() with the underlying
- * constructor's formal parameters, but throws an
- * <code>IllegalArgumentException</code> if a narrowing conversion would occur.
- *
- * @see Member
- * @see java.lang.Class
- * @see java.lang.Class#getConstructors()
- * @see java.lang.Class#getConstructor(Class[])
- * @see java.lang.Class#getDeclaredConstructors()
- *
- * @author	Kenneth Russell
- * @author	Nakul Saraiya
+ * This class must be implemented by the VM vendor. This class models a
+ * constructor. Information about the constructor can be accessed, and the
+ * constructor can be invoked dynamically.
  * 
  * @j2sRequireImport java.lang.Void
  */
-public final
-class Constructor extends AccessibleObject implements Member {
+public final class Constructor<T> extends AccessibleObject implements GenericDeclaration, Member {
 
-    private Class		clazz;
-    private int			slot;
+    private Class<T>	clazz;
     private Class[]		parameterTypes;
     private Class[]		exceptionTypes;
     private int			modifiers;
-    private volatile ConstructorAccessor constructorAccessor;
-    // For sharing of ConstructorAccessors. This branching structure
-    // is currently only two levels deep (i.e., one root Constructor
-    // and potentially many Constructor objects pointing to it.)
-    private Constructor         root;
 
     /**
      * Package-private constructor used by ReflectAccess to enable
      * instantiation of these objects in Java code from the java.lang
      * package via sun.reflect.LangReflectAccess.
      */
-    Constructor(Class declaringClass,
+    Constructor(Class<T> declaringClass,
                 Class[] parameterTypes,
                 Class[] checkedExceptions,
-                int modifiers,
-                int slot)
+                int modifiers)
     {
         this.clazz = declaringClass;
         this.parameterTypes = parameterTypes;
         this.exceptionTypes = checkedExceptions;
         this.modifiers = modifiers;
-        this.slot = slot;
     }
 
-    /**
-     * Package-private routine (exposed to java.lang.Class via
-     * ReflectAccess) which returns a copy of this Constructor. The copy's
-     * "root" field points to this Constructor.
-     */
-    Constructor copy() {
-        // This routine enables sharing of ConstructorAccessor objects
-        // among Constructor objects which refer to the same underlying
-        // method in the VM. (All of this contortion is only necessary
-        // because of the "accessibility" bit in AccessibleObject,
-        // which implicitly requires that new java.lang.reflect
-        // objects be fabricated for each reflective call on Class
-        // objects.)
-        Constructor res = new Constructor(clazz, parameterTypes,
-                                          exceptionTypes, modifiers, slot);
-        res.root = this;
-        // Might as well eagerly propagate this if already present
-        res.constructorAccessor = constructorAccessor;
-        return res;
+    public TypeVariable<Constructor<T>>[] getTypeParameters() {
+        return null;
     }
-
+    
     /**
-     * Returns the <code>Class</code> object representing the class that declares
-     * the constructor represented by this <code>Constructor</code> object.
-     */
-    public Class getDeclaringClass() {
-	return clazz;
-    }
-
-    /**
-     * Returns the name of this constructor, as a string.  This is
-     * always the same as the simple name of the constructor's declaring
-     * class.
-     */
-    public String getName() {
-	return getDeclaringClass().getName();
-    }
-
-    /**
-     * Returns the Java language modifiers for the constructor
-     * represented by this <code>Constructor</code> object, as an integer. The
-     * <code>Modifier</code> class should be used to decode the modifiers.
-     *
-     * @see Modifier
-     */
-    public int getModifiers() {
-	return modifiers;
-    }
-
-    /**
-     * Returns an array of <code>Class</code> objects that represent the formal
-     * parameter types, in declaration order, of the constructor
-     * represented by this <code>Constructor</code> object.  Returns an array of
-     * length 0 if the underlying constructor takes no parameters.
-     *
-     * @return the parameter types for the constructor this object
-     * represents
-     */
-    public Class[] getParameterTypes() {
-	return Method.copy(parameterTypes);
-    }
-
-    /**
-     * Returns an array of <code>Class</code> objects that represent the types of
-     * of exceptions declared to be thrown by the underlying constructor
-     * represented by this <code>Constructor</code> object.  Returns an array of
-     * length 0 if the constructor declares no exceptions in its <code>throws</code> clause.
-     *
-     * @return the exception types declared as being thrown by the
-     * constructor this object represents
-     */
-    public Class[] getExceptionTypes() {
-	return Method.copy(exceptionTypes);
-    }
-
-    /**
-     * Compares this <code>Constructor</code> against the specified object.
-     * Returns true if the objects are the same.  Two <code>Constructor</code> objects are
-     * the same if they were declared by the same class and have the
-     * same formal parameter types.
-     */
-    public boolean equals(Object obj) {
-	if (obj != null && obj instanceof Constructor) {
-	    Constructor other = (Constructor)obj;
-	    if (getDeclaringClass() == other.getDeclaringClass()) {
-		/* Avoid unnecessary cloning */
-		Class[] params1 = parameterTypes;
-		Class[] params2 = other.parameterTypes;
-		if (params1.length == params2.length) {
-		    for (int i = 0; i < params1.length; i++) {
-			if (params1[i] != params2[i])
-			    return false;
-		    }
-		    return true;
-		}
-	    }
-	}
-	return false;
-    }
-
-    /**
-     * Returns a hashcode for this <code>Constructor</code>. The hashcode is
-     * the same as the hashcode for the underlying constructor's
-     * declaring class name.
-     */
-    public int hashCode() {
-	return getDeclaringClass().getName().hashCode();
-    }
-
-    /**
-     * Returns a string describing this <code>Constructor</code>.  The string is
-     * formatted as the constructor access modifiers, if any,
-     * followed by the fully-qualified name of the declaring class,
-     * followed by a parenthesized, comma-separated list of the
-     * constructor's formal parameter types.  For example:
-     * <pre>
-     *    public java.util.Hashtable(int,float)
-     * </pre>
-     *
-     * <p>The only possible modifiers for constructors are the access
-     * modifiers <tt>public</tt>, <tt>protected</tt> or
-     * <tt>private</tt>.  Only one of these may appear, or none if the
-     * constructor has default (package) access.
-     */
-    public String toString() {
-	try {
-		/*
-	    StringBuffer sb = new StringBuffer();
-	    int mod = getModifiers();
-	    if (mod != 0) {
-		sb.append(Modifier.toString(mod) + " ");
-	    }
-	    sb.append(Field.getTypeName(getDeclaringClass()));
-	    sb.append("(");
-	    Class[] params = parameterTypes; // avoid clone
-	    for (int j = 0; j < params.length; j++) {
-		sb.append(Field.getTypeName(params[j]));
-		if (j < (params.length - 1))
-		    sb.append(",");
-	    }
-	    sb.append(")");
-	    Class[] exceptions = exceptionTypes; // avoid clone
-	    if (exceptions.length > 0) {
-		sb.append(" throws ");
-		for (int k = 0; k < exceptions.length; k++) {
-		    sb.append(exceptions[k].getName());
-		    if (k < (exceptions.length - 1))
-			sb.append(",");
-		}
-	    }
-	    return sb.toString();
-	    */
-	    String[] sb = new String[0];
-	    int mod = getModifiers();
-	    if (mod != 0) {
-		sb[sb.length] = Modifier.toString(mod) + " ";
-	    }
-	    sb[sb.length] = Field.getTypeName(getDeclaringClass());
-	    sb[sb.length] = "(";
-	    Class[] params = parameterTypes; // avoid clone
-	    for (int j = 0; j < params.length; j++) {
-		sb[sb.length] = Field.getTypeName(params[j]);
-		if (j < (params.length - 1))
-		    sb[sb.length] = ",";
-	    }
-	    sb[sb.length] = ")";
-	    Class[] exceptions = exceptionTypes; // avoid clone
-	    if (exceptions.length > 0) {
-		sb[sb.length] = " throws ";
-		for (int k = 0; k < exceptions.length; k++) {
-		    sb[sb.length] = exceptions[k].getName();
-		    if (k < (exceptions.length - 1))
-			sb[sb.length] = ",";
-		}
-	    }
-	    /**
-	     * @j2sNativeSrc
-	     * return sb.join ('');
-	     * @j2sNative
-	     * return a.join ('');
-	     */ {}
-	    return sb.toString();
-	} catch (Exception e) {
-	    return "<" + e + ">";
-	}
-    }
-
-    /**
-     * Uses the constructor represented by this <code>Constructor</code> object to
-     * create and initialize a new instance of the constructor's
-     * declaring class, with the specified initialization parameters.
-     * Individual parameters are automatically unwrapped to match
-     * primitive formal parameters, and both primitive and reference
-     * parameters are subject to method invocation conversions as necessary.
-     *
-     * <p>If the number of formal parameters required by the underlying constructor
-     * is 0, the supplied <code>initargs</code> array may be of length 0 or null.
-     *
-     * <p>If the required access and argument checks succeed and the
-     * instantiation will proceed, the constructor's declaring class
-     * is initialized if it has not already been initialized.
-     *
-     * <p>If the constructor completes normally, returns the newly
-     * created and initialized instance.
-     *
-     * @param initargs array of objects to be passed as arguments to
-     * the constructor call; values of primitive types are wrapped in
-     * a wrapper object of the appropriate type (e.g. a <tt>float</tt>
-     * in a {@link java.lang.Float Float})
-     *
-     * @return a new object created by calling the constructor
-     * this object represents
+     * <p>
+     * Returns the String representation of the constructor's declaration,
+     * including the type parameters.
+     * </p>
      * 
-     * @exception IllegalAccessException    if this <code>Constructor</code> object
-     *              enforces Java language access control and the underlying
-     *              constructor is inaccessible.
-     * @exception IllegalArgumentException  if the number of actual
-     *              and formal parameters differ; if an unwrapping
-     *              conversion for primitive arguments fails; or if,
-     *              after possible unwrapping, a parameter value
-     *              cannot be converted to the corresponding formal
-     *              parameter type by a method invocation conversion.
-     * @exception InstantiationException    if the class that declares the
-     *              underlying constructor represents an abstract class.
-     * @exception InvocationTargetException if the underlying constructor
-     *              throws an exception.
-     * @exception ExceptionInInitializerError if the initialization provoked
-     *              by this method fails.
+     * @return An instance of String.
+     * @since 1.5
+     */
+    public String toGenericString() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Gets the parameter types as an array of {@link Type} instances, in
+     * declaration order. If the constructor has no parameters, then an empty
+     * array is returned.
+     * </p>
+     * 
+     * @return An array of {@link Type} instances.
+     * @throws GenericSignatureFormatError if the generic method signature is
+     *         invalid.
+     * @throws TypeNotPresentException if the component type points to a missing
+     *         type.
+     * @throws MalformedParameterizedTypeException if the component type points
+     *         to a type that can't be instantiated for some reason.
+     * @since 1.5
+     */
+    public Type[] getGenericParameterTypes() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Gets the exception types as an array of {@link Type} instances. If the
+     * constructor has no declared exceptions, then an empty array is returned.
+     * </p>
+     * 
+     * @return An array of {@link Type} instances.
+     * @throws GenericSignatureFormatError if the generic method signature is
+     *         invalid.
+     * @throws TypeNotPresentException if the component type points to a missing
+     *         type.
+     * @throws MalformedParameterizedTypeException if the component type points
+     *         to a type that can't be instantiated for some reason.
+     * @since 1.5
+     */
+    public Type[] getGenericExceptionTypes() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Gets an array of arrays that represent the annotations of the formal
+     * parameters of this constructor. If there are no parameters on this
+     * constructor, then an empty array is returned. If there are no annotations
+     * set, then and array of empty arrays is returned.
+     * </p>
+     * 
+     * @return An array of arrays of {@link Annotation} instances.
+     * @since 1.5
+     */
+    public Annotation[][] getParameterAnnotations() {
+        return null;
+    }
+
+    /**
+     * <p>
+     * Indicates whether or not this constructor takes a variable number
+     * argument.
+     * </p>
+     * 
+     * @return A value of <code>true</code> if a vararg is declare, otherwise
+     *         <code>false</code>.
+     * @since 1.5
+     */
+    public boolean isVarArgs() {
+        return false;
+    }
+
+    public boolean isSynthetic() {
+        return false;
+    }
+    
+	/**
+     * Compares the specified object to this Constructor and answer if they are
+     * equal. The object must be an instance of Constructor with the same
+     * defining class and parameter types.
+     * 
+     * @param object the object to compare
+     * @return true if the specified object is equal to this Constructor, false
+     *         otherwise
+     * @see #hashCode
+     */
+	public boolean equals(Object object) {
+		if (object != null && object instanceof Constructor) {
+		    Constructor other = (Constructor)object;
+		    if (getDeclaringClass() == other.getDeclaringClass()) {
+			/* Avoid unnecessary cloning */
+			Class[] params1 = parameterTypes;
+			Class[] params2 = other.parameterTypes;
+			if (params1.length == params2.length) {
+			    for (int i = 0; i < params1.length; i++) {
+				if (params1[i] != params2[i])
+				    return false;
+			    }
+			    return true;
+			}
+		    }
+		}
+		return false;
+	}
+
+	/**
+	 * Return the {@link Class} associated with the class that defined this
+	 * constructor.
+	 * 
+	 * @return the declaring class
+	 */
+	public Class<T> getDeclaringClass() {
+		return clazz;
+	}
+
+	/**
+	 * Return an array of the {@link Class} objects associated with the
+	 * exceptions declared to be thrown by this constructor. If the constructor
+	 * was not declared to throw any exceptions, the array returned will be
+	 * empty.
+	 * 
+	 * @return the declared exception classes
+	 */
+	public Class<?>[] getExceptionTypes() {
+		return exceptionTypes;
+	}
+
+	/**
+	 * Return the modifiers for the modelled constructor. The Modifier class
+	 * should be used to decode the result.
+	 * 
+	 * @return the modifiers
+	 * @see java.lang.reflect.Modifier
+	 */
+	public int getModifiers() {
+		return modifiers;
+	}
+
+	/**
+	 * Return the name of the modelled constructor. This is the name of the
+	 * declaring class.
+	 * 
+	 * @return the name
+	 */
+	public String getName() {
+		return getDeclaringClass().getName();
+	}
+
+	/**
+	 * Return an array of the {@link Class} objects associated with the
+	 * parameter types of this constructor. If the constructor was declared with
+	 * no parameters, the array returned will be empty.
+	 * 
+	 * @return the parameter types
+	 */
+	public Class<?>[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	/**
+	 * Answers an integer hash code for the receiver. Objects which are equal
+	 * answer the same value for this method. The hash code for a Constructor is
+	 * the hash code of the declaring class' name.
+	 * 
+	 * @return the receiver's hash
+	 * @see #equals
+	 */
+	public int hashCode() {
+		return getDeclaringClass().getName().hashCode();
+	}
+
+	/**
+	 * Return a new instance of the declaring class, initialized by dynamically
+	 * invoking the modelled constructor. This reproduces the effect of
+	 * <code>new declaringClass(arg1, arg2, ... , argN)</code> This method
+	 * performs the following:
+	 * <ul>
+	 * <li>A new instance of the declaring class is created. If the declaring
+	 * class cannot be instantiated (i.e. abstract class, an interface, an array
+	 * type, or a base type) then an InstantiationException is thrown.</li>
+	 * <li>If this Constructor object is enforcing access control (see
+	 * AccessibleObject) and the modelled constructor is not accessible from the
+	 * current context, an IllegalAccessException is thrown.</li>
+	 * <li>If the number of arguments passed and the number of parameters do
+	 * not match, an IllegalArgumentException is thrown.</li>
+	 * <li>For each argument passed:
+	 * <ul>
+	 * <li>If the corresponding parameter type is a base type, the argument is
+	 * unwrapped. If the unwrapping fails, an IllegalArgumentException is
+	 * thrown.</li>
+	 * <li>If the resulting argument cannot be converted to the parameter type
+	 * via a widening conversion, an IllegalArgumentException is thrown.</li>
+	 * </ul>
+	 * <li>The modelled constructor is then invoked. If an exception is thrown
+	 * during the invocation, it is caught and wrapped in an
+	 * InvocationTargetException. This exception is then thrown. If the
+	 * invocation completes normally, the newly initialized object is returned.
+	 * </ul>
+	 * 
+	 * @param args
+	 *            the arguments to the constructor
+	 * @return the new, initialized, object
+	 * @exception java.lang.InstantiationException
+	 *                if the class cannot be instantiated
+	 * @exception java.lang.IllegalAccessException
+	 *                if the modelled constructor is not accessible
+	 * @exception java.lang.IllegalArgumentException
+	 *                if an incorrect number of arguments are passed, or an
+	 *                argument could not be converted by a widening conversion
+	 * @exception java.lang.reflect.InvocationTargetException
+	 *                if an exception was thrown by the invoked constructor
+	 * @see java.lang.reflect.AccessibleObject
      * 
      * @j2sNative 
      * var instance = new this.clazz (Clazz.inheritArgs);
-     * Clazz.instantialize (instance, initargs);
+     * Clazz.instantialize (instance, args);
      * return instance;
-     */
-    public Object newInstance(Object[] initargs)
-	throws InstantiationException, IllegalAccessException,
-               IllegalArgumentException, InvocationTargetException
-    {
-        if (!override) {
-            if (!Reflection.quickCheckMemberAccess(clazz, modifiers)) {
-                Class caller = Reflection.getCallerClass(2);
-                if (securityCheckCache != caller) {
-                    Reflection.ensureMemberAccess(caller, clazz, null, modifiers);
-                    securityCheckCache = caller;
-                }
-            }
-        }
-        if (constructorAccessor == null) acquireConstructorAccessor();
-        return constructorAccessor.newInstance(initargs);
-    }
+	 */
+	public T newInstance(Object... args) throws InstantiationException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		return null;
+	}
 
-    /**
-     * @j2sIgnore
-     */
-    // NOTE that there is no synchronization used here. It is correct
-    // (though not efficient) to generate more than one
-    // ConstructorAccessor for a given Constructor. However, avoiding
-    // synchronization will probably make the implementation more
-    // scalable.
-    private void acquireConstructorAccessor() {
-        // First check to see if one has been created yet, and take it
-        // if so.
-        ConstructorAccessor tmp = null;
-        if (root != null) tmp = root.getConstructorAccessor();
-        if (tmp != null) {
-            constructorAccessor = tmp;
-            return;
-        }
-        // Otherwise fabricate one and propagate it up to the root
-//        tmp = reflectionFactory.newConstructorAccessor(this);
-//        setConstructorAccessor(tmp);
-    }
-
-    /**
-     * @j2sIgnore
-     */
-    // Returns ConstructorAccessor for this Constructor object, not
-    // looking up the chain to the root
-    ConstructorAccessor getConstructorAccessor() {
-        return constructorAccessor;
-    }
-
-    /**
-     * @j2sIgnore
-     */
-    // Sets the ConstructorAccessor for this Constructor object and
-    // (recursively) its root
-    void setConstructorAccessor(ConstructorAccessor accessor) {
-        constructorAccessor = accessor;
-        // Propagate up
-        if (root != null) {
-            root.setConstructorAccessor(accessor);
-        }
-    }
-
-    /**
-     * @j2sIgnore
-     */
-    int getSlot() {
-        return slot;
-    }
+	/**
+	 * Answers a string containing a concise, human-readable description of the
+	 * receiver. The format of the string is modifiers (if any) declaring class
+	 * name '(' parameter types, separated by ',' ')' If the constructor throws
+	 * exceptions, ' throws ' exception types, separated by ',' For example:
+	 * <code>public String(byte[],String) throws UnsupportedEncodingException</code>
+	 * 
+	 * @return a printable representation for the receiver
+	 */
+	public String toString() {
+		return null;
+	}
 }
