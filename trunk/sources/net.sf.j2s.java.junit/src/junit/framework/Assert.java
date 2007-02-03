@@ -70,6 +70,11 @@ public class Assert {
 	/**
 	 * Asserts that two objects are equal. If they are not
 	 * an AssertionFailedError is thrown.
+	 * 
+	 * @j2sNativeSrc
+	 * junit.framework.Assert.assertEquals (Clazz.castNullAs("String"), expected, actual);
+	 * @j2sNative
+	 * junit.framework.Assert.assertEquals (Clazz.castNullAs("String"), a, b);
 	 */
 	static public void assertEquals(Object expected, Object actual) {
 	    assertEquals(null, expected, actual);
