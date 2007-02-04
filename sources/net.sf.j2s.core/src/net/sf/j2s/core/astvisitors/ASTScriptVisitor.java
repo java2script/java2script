@@ -1098,19 +1098,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return ;
-					}
-				}
+		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+			return;
+		}
+
+		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				return;
 			}
 		}
-		IMethodBinding mBinding = node.resolveBinding();
 		if (mBinding != null) {
 			methodDeclareStack.pop();
 		}
@@ -1124,7 +1121,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			return false;
+			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				return false;
+			}
 		}
 		if (mBinding != null) {
 			methodDeclareStack.push(mBinding.getKey());
