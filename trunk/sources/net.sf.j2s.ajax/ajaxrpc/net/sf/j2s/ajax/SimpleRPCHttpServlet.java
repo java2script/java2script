@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -273,104 +274,39 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
 			throws ServletException, IOException {
 		String request = req.getQueryString();
-		/*
-		 * may be start with "jz[n|p|c|z]=", normal request may start with 
-		 * "WLL100" or other tokens but charAt(3) should never be '='.
-		 */
-		boolean isScriptRequest = request.charAt(3) == '=';
-		
-		boolean supportScriptRequest = supportXSSRequest();
-		
-		String nameID = null;
-		if (supportScriptRequest) {
-			HttpSession ses = req.getSession(false);
-			if (ses != null) { // try to clean expired request!
-				Enumeration attrNames = ses.getAttributeNames();
-				while (attrNames.hasMoreElements()) {
-					String name = (String) attrNames.nextElement();
-					if (name.startsWith("jzt")) {
-						Date dt = (Date) ses.getAttribute(name);
-						if (new Date().getTime() - dt.getTime() > maxXSSRequestLatency()) {
-							ses.removeAttribute(name);
-							ses.removeAttribute("jzn" + name.substring(3));
-						}
-					}
-				}
-			}
-			if (isScriptRequest) { // simplerpc?jzn=604107&jzp=1&jzc=1&jzz=WLL100...
-				nameID = req.getParameter("jzn");
-				String count = req.getParameter("jzp");
-				String current = req.getParameter("jzc");
-				String content = req.getParameter("jzz");
-				if (nameID == null || !nameID.matches("\\d{6,}")
-						|| count == null || !count.matches("[1-9]\\d{0,2}")
-						|| current == null || !current.matches("[1-9]\\d{0,2}")
-						|| content == null || content.trim().length() == 0) {
-					resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-					return;
-				}
-				int partsCount = Integer.parseInt(count);
-				int curPart = Integer.parseInt(current);
-				if (curPart > partsCount) {
-					resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-					return;
-				}
-				if (partsCount > maxXSSRequestParts()) {
-					resp.setContentType("text/javascript");
-					//resp.setCharacterEncoding("utf-8");
-					resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
-							".xssNotify(\"" + nameID + "\", \"exceedrequestlimit\");");
-					return;
-				}
-				if (partsCount != 1) {
-					HttpSession session = req.getSession();
-					String attrName = "jzn" + nameID;
-					String attrTime = "jzt" + nameID;
-					Object attr = session.getAttribute(attrName);
-					String[] parts = null;
-					if (attr == null) {
-						parts = new String[partsCount];
-						session.setAttribute(attrName, parts);
-						session.setAttribute(attrTime, new Date());
-					} else { // attr instanceof String[]
-						parts = (String []) attr;
-						if (partsCount != parts.length) {
-							resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-							return;
-						}
-					}
-					parts[curPart - 1] = content;
-					for (int i = 0; i < parts.length; i++) {
-						if (parts[i] == null) {
-							resp.setContentType("text/javascript");
-							//resp.setCharacterEncoding("utf-8");
-							resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
-									".xssNotify(\"" + nameID + "\", \"continue\");");
-							return;
-						}
-					}
-					synchronized (session) {
-						session.removeAttribute(attrName);
-						session.removeAttribute(attrTime);
-					}
-					StringBuffer buf = new StringBuffer();
-					for (int i = 0; i < parts.length; i++) {
-						buf.append(parts[i]);
-						parts[i] = null;
-					}
-					request = buf.toString();
-				} else { // bad request !
-					request = content;
-				}
-			}
-		} else if (isScriptRequest) {
-			resp.setContentType("text/javascript");
-			//resp.setCharacterEncoding("utf-8");
-			nameID = req.getParameter("jzn");
-			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
-					".xssNotify(\"" + nameID + "\", \"unsupported\");");
+		// a quick check!
+		if (request == null || request.length() < 4) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
+		
+		boolean isScriptReuest = false;
+		String requestID = null;
+		/*
+		 * may be start with "jz[n|p|c|z]=", normal request may start with 
+		 * raw "WLL100" or other tokens but charAt(3) should never be '='.
+		 */
+		if (request.charAt(3) == '=') { // simplerpc?jzn=604107&jzp=1&jzc=1&jzz=WLL100...
+			request = req.getParameter("jzz"); // jzz without jzn is considered as XHR requests!
+			if (request == null || request.trim().length() == 0) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
+			
+			requestID = req.getParameter("jzn");
+			if (requestID != null && requestID.length() != 0) {
+				isScriptReuest = true;
+				
+				// when jzn is defined, it's considered as a script request!
+				request = prepareScriptRequest(req, resp, requestID, request);
+				if (request == null) { // already send out reponses
+					return;
+				}
+			}
+		} else { // ?WLL100net.sf....%23...
+			request = URLDecoder.decode(request, "UTF-8");
+		}
+		
 		SimpleRPCRunnable runnable = getRunnableByRequest(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -379,23 +315,138 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		runnable.deserialize(request);
 		runnable.ajaxRun();
 		String serialize = runnable.serialize();
-		if (!isScriptRequest) {
-			resp.setContentType("text/plain");
-			//resp.setCharacterEncoding("utf-8");
-			PrintWriter writer = resp.getWriter();
-			writer.write(serialize);
-		} else {
+		
+		if (isScriptReuest) { // cross site script response
 			resp.setContentType("text/javascript");
 			//resp.setCharacterEncoding("utf-8");
 			PrintWriter writer = resp.getWriter();
 			writer.write("net.sf.j2s.ajax.SimpleRPCRequest.xssNotify(");
-			writer.write("\"" + nameID + "\", \"");
+			writer.write("\"" + requestID + "\", \"");
 			writer.write(serialize.replaceAll("\r", "\\r")
 					.replaceAll("\n", "\\n")
 					.replaceAll("\"", "\\\""));
 			writer.write("\");");
+			return;
 		}
+		
+		// normal text response
+		resp.setContentType("text/plain");
+		//resp.setCharacterEncoding("utf-8");
+		PrintWriter writer = resp.getWriter();
+		writer.write(serialize);
+	}
+
+	private String prepareScriptRequest(HttpServletRequest req, HttpServletResponse resp, 
+			String scriptRequestID, String request) throws IOException {
+		
+		// check request id: must be 6 digitals
+		if (!scriptRequestID.matches("\\d{6,}")) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		
+		// make sure that servlet support cross site script request
+		if (!supportXSSRequest()) {
+			resp.setContentType("text/javascript");
+			//resp.setCharacterEncoding("utf-8");
+			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+					".xssNotify(\"" + scriptRequestID + "\", \"unsupported\");");
+			return null;
+		}
+		
+		// check script request counts
+		String count = req.getParameter("jzp");
+		if (count == null || !count.matches("[1-9]\\d{0,2}")) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		int partsCount = Integer.parseInt(count);
+		if (partsCount == 1) {
+			return request; // can be return directly
+		}
+		
+		// check curent request index
+		String current = req.getParameter("jzc");
+		if (current == null || !current.matches("[1-9]\\d{0,2}")) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		int curPart = Integer.parseInt(current);
+		if (partsCount < 1 || curPart > partsCount) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		
+		// check whether servlet can deal the requests
+		if (partsCount > maxXSSRequestParts()) {
+			resp.setContentType("text/javascript");
+			//resp.setCharacterEncoding("utf-8");
+			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+					".xssNotify(\"" + scriptRequestID + "\", \"exceedrequestlimit\");");
+			return null;
+		}
+		
+		// clean dead session bodies
+		cleanSession(req);
+
+		// store request in session before the request is completed
+		HttpSession session = req.getSession();
+		String attrName = "jzn" + scriptRequestID;
+		String attrTime = "jzt" + scriptRequestID;
+		Object attr = session.getAttribute(attrName);
+		String[] parts = null;
+		if (attr == null) {
+			parts = new String[partsCount];
+			session.setAttribute(attrName, parts);
+			session.setAttribute(attrTime, new Date());
+		} else { // attr instanceof String[]
+			parts = (String []) attr;
+			if (partsCount != parts.length) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				return null;
+			}
+		}
+		parts[curPart - 1] = request;
+		for (int i = 0; i < parts.length; i++) {
+			if (parts[i] == null) {
+				// not completed yet! just response and wait next request.
+				
+				resp.setContentType("text/javascript");
+				//resp.setCharacterEncoding("utf-8");
+				resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+						".xssNotify(\"" + scriptRequestID + "\", \"continue\");");
+				return null;
+			}
+		}
+		
+		// request is completed. return the request
+		synchronized (session) {
+			session.removeAttribute(attrName);
+			session.removeAttribute(attrTime);
+		}
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < parts.length; i++) {
+			buf.append(parts[i]);
+			parts[i] = null;
+		}
+		return buf.toString();
 	}
 	
+	private void cleanSession(HttpServletRequest req) {
+		HttpSession ses = req.getSession(false);
+		if (ses != null) { // try to clean expired request!
+			Enumeration attrNames = ses.getAttributeNames();
+			while (attrNames.hasMoreElements()) {
+				String name = (String) attrNames.nextElement();
+				if (name.startsWith("jzt")) {
+					Date dt = (Date) ses.getAttribute(name);
+					if (new Date().getTime() - dt.getTime() > maxXSSRequestLatency()) {
+						ses.removeAttribute(name);
+						ses.removeAttribute("jzn" + name.substring(3));
+					}
+				}
+			}
+		}
+	}
 	
 }
