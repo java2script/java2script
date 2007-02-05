@@ -17,6 +17,7 @@
 	margin:0 2px 0 1px;
 	padding:2px;
 	height:13px;
+	height:1.5em;
 }
 .menu-item-enable-image {
 	height:18px;
@@ -250,6 +251,7 @@
 	padding:4px 0;
 	z-index:9;
 	margin:1px 2px;
+	min-height:16px;
 }
 .menu-bar-item {
 	display:inline;
