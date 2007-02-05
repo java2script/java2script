@@ -66,7 +66,8 @@ clpm.DEFAULT_OPACITY = 75;
 		this.fadeOutTimer = null;
 	}
 	this.fadeAlpha = alpha;
-	if (navigator.userAgent.toLowerCase ().indexOf ("msie") != -1) {
+	var ua = navigator.userAgent.toLowerCase ();
+	if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
 		this.monitorEl.style.filter = "Alpha(Opacity=" + alpha + ")";
 	} else {
 		this.monitorEl.style.opacity = alpha / 100.0;
@@ -155,4 +156,8 @@ if (window["ClazzLoader"] != null) {
 	ClazzLoader.globalLoaded = function (file) {
 		ClassLoaderProgressMonitor.showStatus ("Application loaded.", true);
 	};
+	var ua = navigator.userAgent.toLowerCase ();
+	if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
+		ClazzLoader.setLoadingMode ("script", 5);
+	}
 }
