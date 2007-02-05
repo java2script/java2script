@@ -120,7 +120,7 @@ public class Decorations extends Canvas {
 	Control savedFocus;
 	Button defaultButton, saveDefault;
 	//int swFlags, hAccel, nAccel;
-	boolean moved, resized, opened;
+	boolean moved, resized, opened, maximized, minimized;
 	//int oldX = OS.CW_USEDEFAULT, oldY = OS.CW_USEDEFAULT;
 	//int oldWidth = OS.CW_USEDEFAULT, oldHeight = OS.CW_USEDEFAULT;
 	Element contentHandle;
@@ -135,8 +135,8 @@ public class Decorations extends Canvas {
 	private Element shellMin;
 	private Element shellMax;
 	private Element shellIcon;
-	private Element titleBar;
 	private Element shellClose;
+	Element titleBar;
 	Element shellMenuBar;
 	Element shellToolBar;
 
@@ -383,7 +383,8 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
 	if ((style & SWT.NO_TRIM) == 0) {
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
-			height += 20;
+			//height += 20;
+			height += OS.getContainerHeight(titleBar);
 			if (width < 105) {
 				width = 105;
 			}
@@ -718,16 +719,21 @@ void addModalLayer() {
  * TODO: Move this function into external *.js
  * @xj2sIgnore
  */
-void exportHTMLSource() {
+void exportHTMLSource(boolean onlyContent) {
 	final Shell shell = new Shell(display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 //	shell.setLayout(new FillLayout());
 	shell.setText("Export HTML Source");
-	String b = contentHandle.innerHTML; // always be "b" for "@j2sNative/Src" 
+	String c = null; // always be "b" for "@j2sNative/Src"
+	if (onlyContent) {
+		c = contentHandle.innerHTML;
+	} else {
+		c = handle.innerHTML;
+	}
 	//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
 	if (OS.isIE)
 	/**
 	 * @j2sNative
-b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
+c = c.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
 	return $1 + $2.toLowerCase () + $3;
 }).replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
 	if (!((/;$/).test ($2))) {
@@ -743,13 +749,13 @@ b = b.replace (/(<\/?)(\w+)(\s|>)/ig, function ($0, $1, $2, $3) {
 	 */ {} else
 	/**
 	 * @j2sNative
-b = b.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
+c = c.replace (/(style\s*=\s*")([^"]+)(")/ig, function ($0, $1, $2, $3) {
 	return "style=\"" + $2.replace (/(:|;)\s+/g, "$1") + "\"";
 });
 	 */ {}
 	/**
 	 * @j2sNative
-b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
+c = c.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
 	$2 = $2.replace (/\s\s+/g, ' ').replace (/^\s+/, '').replace (/\s+$/g, '');
 	if ($2.length == 0) {
 		if ($3 != ">") {
@@ -779,9 +785,23 @@ b = b.replace (/(\sclass\s*=\s*)"([^"]*)"(\s|>)/ig, function ($0, $1, $2, $3) {
 	gd.heightHint = 275;
 	text.setLayoutData(gd);
 	Rectangle rect = getClientArea();
-	String html = "<div class=\"shell-content\" style=\"" + "width:"
-				+ rect.width + "px;height:" + rect.height + "px;\">" + b
+	String html = null;
+	if (onlyContent) {
+		html = "<div class=\"shell-content\" style=\"" + "width:"
+				+ rect.width + "px;height:" + rect.height + "px;\">" + c
 				+ "</div>";
+	} else {
+		String cssText = handle.style.cssText;
+		if (cssText != null && cssText.trim().length() != 0) 
+		/**
+		 * @j2sNative
+		 * cssText = cssText.replace (/([;\s]*)(top|left|right|bottom)\s*:\s*[^;"']*([;"'])/i, "$3").replace (/([;\s]*)(top|left|right|bottom)\s*:\s*[^;"']*([;"'])/i, "$3");
+		 */ {}
+		html = "<div class=\"" + handle.className + "\"" +
+				((cssText != null && cssText.trim().length() != 0) ? 
+						" style=\"" + cssText + "\"" : "") +
+								">" + c + "</div>";
+	}
 	text.setText(html);
 	new Label(shell, SWT.HORIZONTAL | SWT.SEPARATOR)
 			.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -956,7 +976,8 @@ public Rectangle getClientArea () {
 	int w = width;
 	int h = height;
 	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
-		h -= 20;
+		//h -= 20;
+		h -= OS.getContainerHeight(titleBar);
 		w -= 8;
 		h -= 8;
 		if ((style & SWT.BORDER) != 0) {
@@ -964,7 +985,8 @@ public Rectangle getClientArea () {
 			h -= 4;
 		}
 		if (OS.existedCSSClass(handle, "shell-menu-bar")) {
-			h -= 21;
+			//h -= 21;
+			h -= 1 + OS.getContainerHeight(shellMenuBar);
 		}
 	}
 	return new Rectangle(0, 0, w, h);
@@ -1146,7 +1168,7 @@ public boolean getMinimized () {
 	 * 	return this.handle.style.display == "none";
 	 * }
 	 */ {}
-	return false; // TODO
+	return this.minimized; // TODO
 }
 
 String getNameText () {
@@ -1169,7 +1191,11 @@ public Point getSize () {
 	return super.getSize ();
 	*/
 	Point size = super.getSize();
-	size.y += 26;
+	//size.y += 26;
+	size.y += 6;
+	if (titleBar != null) {
+		size.y += OS.getContainerHeight(titleBar);
+	}
 	return size;
 }
 
@@ -1663,6 +1689,7 @@ public void setMaximized (boolean maximized) {
 		OS.UpdateWindow (handle);
 	}
 	*/
+	this.maximized = maximized;
 	String key = "shell-maximized";
 	Element b = document.body;
 	boolean isStrictMode = b.parentNode.clientHeight != 0;
@@ -1712,7 +1739,8 @@ public void setMaximized (boolean maximized) {
 				width = document.body.parentNode.clientWidth;
 				height = OS.getFixedBodyClientHeight();
 			}
-			int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
+			//int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
+			int titleHeight = ((style & SWT.TITLE) != 0) ? OS.getContainerHeight(titleBar) : 0;
 			boolean isOptMaximized = false;
 			/**
 			 * @j2sNative
@@ -1871,6 +1899,13 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
+	this.minimized = minimized;
+	if (this.minimized && !minimized) {
+		if (this.maximized) {
+			this.setMaximized(true);
+			return;
+		}
+	}
 	/**
 	 * @j2sNative
 	 * if (window["ShellManager"] != null && this.parent == null && minimized) {
@@ -1888,7 +1923,8 @@ public void setMinimized (boolean minimized) {
 		if (width < 200) {
 			width = 200;
 		}
-		setBounds(-1, getMonitor().clientHeight - 26, 120, 0);
+		//setBounds(-1, getMonitor().clientHeight - 26, 120, 0);
+		setBounds(-1, getMonitor().clientHeight - 6 - (titleBar != null ? OS.getContainerHeight(titleBar) : 0), 120, 0);
 	}
 	if (minimized) {
 		ResizeSystem.register(this, SWT.MIN);
@@ -2031,7 +2067,8 @@ void setSystemMenu () {
 //		 */ {
 		shellIcon.onclick = new RunnableCompatibility() {
 			public void run() {
-				exportHTMLSource();
+				HTMLEvent e = (HTMLEvent)getEvent();
+				exportHTMLSource(e == null || !e.ctrlKey);
 			}
 		};
 //		 }
@@ -2259,7 +2296,8 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		int h = 0;
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 			w = 113;
-			h = 28;
+			//h = 28;
+			h = 8 + OS.getContainerHeight(titleBar);
 		}
 		if ((style & SWT.BORDER) != 0) {
 			w += 2;
@@ -2279,7 +2317,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		contentHandle.style.width = width + "px";
 	} else if (titleBar != null) {
 		int dw = 8;
-		int dh = 28;
+		//int dh = 28;
+		int tbh = OS.getContainerHeight(titleBar);
+		int dh = 8 + tbh;
 		int dww = 8; 
 		if ((style & SWT.BORDER) != 0) {
 			dw += 2;
@@ -2287,8 +2327,17 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			dww += 2;
 		}
 		if (OS.existedCSSClass(handle, "shell-menu-bar")) {
-			dh += 21;
+			shellMenuBar.style.top = (3 + tbh) + "px";
+			int mbh = OS.getContainerHeight(shellMenuBar);
+			if (mbh < 20) {
+				mbh = tbh - 2;
+			}
+//			dh += 21;
+//			tbh += 21;
+			dh += mbh + 1;
+			tbh += mbh + 1;
 		}
+		contentHandle.style.top = (3 + tbh) + "px"; 
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";

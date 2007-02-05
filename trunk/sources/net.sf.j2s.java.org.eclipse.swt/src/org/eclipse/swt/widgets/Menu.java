@@ -379,7 +379,11 @@ void createHandle () {
 	if ((style & SWT.BAR) != 0) {
 		handle.className = "menu-bar";
 		OS.addCSSClass(parent.handle, "shell-menu-bar");
-		handle.style.top = "23px";
+		int top = 3;
+		if (parent.titleBar != null) {
+			top = 3 + OS.getContainerHeight(parent.titleBar);
+		}
+		handle.style.top = top + "px";
 		parent.handle.appendChild(handle);
 		parent.shellMenuBar = handle;
 	} else {

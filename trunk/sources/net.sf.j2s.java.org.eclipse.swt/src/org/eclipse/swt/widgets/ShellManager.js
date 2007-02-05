@@ -86,7 +86,8 @@ sm.initialize = function () {
 		}
 		var topbar = ShellManager.topbarContainerEl;
 		if (topbar == null) return;
-		if (ShellManager.getTopMaximizedShell () == null) return;
+		var topShell = ShellManager.getTopMaximizedShell ();
+		if (topShell == null) return;
 		
 		if (topbar.style.display != "none" && !ShellManager.isAroundTopBar (e.clientX)) {
 			topbar.style.display = "none";
@@ -96,7 +97,8 @@ sm.initialize = function () {
 				topbar.style.display = "block";
 				ShellManager.updateTopMaximized ();
 			}
-		} else if (e.clientY > 32 || e.ctrlKey) {
+		} else if (e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null 
+				&& window["O$"] != null) ? O$.getContainerHeight (topShell.titleBar) : 20)) {
 			if (topbar.style.display != "none") {
 				topbar.style.display = "none";
 				ShellManager.returnTopMaximized ();

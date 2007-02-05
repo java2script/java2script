@@ -4325,13 +4325,39 @@ static void updateAllShellLayouts() {
 	if (Displays != null) {
 		for (int i = 0; i < Displays.length; i++) {
 			if (Displays[i] != null && !Displays[i].isDisposed()) {
+				boolean isOptMaximized = false;
+				boolean existedMaximized = false;
+				/**
+				 * @j2sNative
+				 * isOptMaximized = window["ShellManager"] != null; 
+				 */ {}
 				Shell[] shells = Displays[i].getShells();
 				for (int j = 0; j < shells.length; j++) {
 					Shell shell = shells[j];
 					if (shell != null && !shell.isDisposed()) {
+						if ((shell.style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
+							Rectangle bounds = shell.getBounds();
+							if (isOptMaximized && shell.getMaximized() && shell.titleBar != null) {
+								shell.setMaximized(true);
+								existedMaximized = true;
+								continue;
+							} else {
+								shell.SetWindowPos(shell.handle, null, bounds.x, bounds.y, 
+										bounds.width, bounds.height, 0);
+							}
+						}
 						shell.layout(true, true);
 					}
 				}
+				if (isOptMaximized && existedMaximized)
+					/**
+					 * @j2sNative
+					 * if (ShellManager.topbarContainerEl.style.display != "none") {
+					 * 	ShellManager.returnTopMaximized ();
+					 * 	ShellManager.updateTopMaximized ();
+					 * }
+					 */
+				{ }
 			}
 		}
 	}

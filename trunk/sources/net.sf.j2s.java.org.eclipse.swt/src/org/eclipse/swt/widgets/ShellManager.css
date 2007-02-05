@@ -68,6 +68,10 @@ a.shell-item:focus {
 	background-color:buttonface;
 	padding:2px;
 	height:24px;
+	font-size:10pt;
+	height:1.6em;
+	min-height:24px;
+	_height:1.7em;
 }
 .swt-widgets-shellmanager {
 	width:324px;

@@ -17,6 +17,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Decorations;
 import org.eclipse.swt.widgets.Monitor;
@@ -39,7 +40,13 @@ public class ResizeHandler {
 	}
 	
 	public void updateMinimized() {
-		shell.setLocation(-1, shell.getMonitor().getClientArea().height - 26);
+		Element tb = null;
+		/**
+		 * @j2sNative
+		 * tb = this.shell.titleBar;
+		 */ {}
+		int h = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
+		shell.setLocation(-1, shell.getMonitor().getClientArea().height - h - 6);
 	}
 	public void updateMaximized() {
 		Monitor monitor = shell.getMonitor();
@@ -55,7 +62,13 @@ public class ResizeHandler {
 			width = document.body.parentNode.clientWidth;
 			height = OS.getFixedBodyClientHeight();
 		}
-		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
+		//int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
+		Element tb = null;
+		/**
+		 * @j2sNative
+		 * tb = this.shell.titleBar;
+		 */ {}
+		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
 		// FIXME: maximized size is not accurate
 		//shell.setBounds(shell.computeTrim(0, 0, width + 4, height - titleHeight + 6));
 		boolean isOptMaximized = false;
@@ -72,10 +85,17 @@ public class ResizeHandler {
 		//shell.setBounds(shell.computeTrim(0, 0, width + 2, height - 18));
 	}
 	public void updateCentered() {
+		Element tb = null;
+		/**
+		 * @j2sNative
+		 * tb = this.shell.titleBar;
+		 */ {}
+		int h = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
+		
 		// Not used now
 		Monitor monitor = shell.getMonitor();
 		Point size = shell.getSize();
-		int y = (monitor.getClientArea().height - size.y) / 2 - 20;
+		int y = (monitor.getClientArea().height - size.y) / 2 - h;
 		if (y < 0) {
 			y = 0;
 		}
