@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+	<Description about="urn:mozilla:install-manifest">
+
+		<em:id>{d60b46a9-bfe3-4b22-8844-07089202e0e6}</em:id>
+		<em:name>Java2Script Library</em:name>
+		<em:version>1.0.0_20070206</em:version>
+		<em:description>Java2Script Library Packages</em:description>
+		<em:creator>Zhou Renjian</em:creator>
+		<em:homepageURL>http://j2s.sourceforge.net/</em:homepageURL>
+		<em:iconURL>chrome://java2script/skin/j2s-logo.gif</em:iconURL>
+		<em:aboutURL>chrome://java2script/content/about.xul</em:aboutURL>
+		<em:updateURL>http://java2script.org/update.rdf</em:updateURL>
+		<em:file>
+			<Description about="urn:mozilla:extension:file:java2script">
+				<em:package>content/java2script</em:package>
+				<em:skin>skin/classic/java2script</em:skin>
+			</Description>
+		</em:file>
+
+		<em:targetApplication>
+			<Description>
+				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+				<em:minVersion>1.0</em:minVersion>
+				<em:maxVersion>3.0</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+
+	</Description>
+
+</RDF>
