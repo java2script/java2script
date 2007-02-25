@@ -1365,7 +1365,31 @@ ClazzLoader.updateNode = function (node) {
 	} else {
 		//alert ("checking " + node.musts.length + " musts");
 		isMustsOK = true;
-		for (var i = 0; i < node.musts.length; i++) {
+		var mustLength = node.musts.length;
+		for (var i = mustLength - 1; i >= 0; i--) {
+			/*
+			 * Soheil reported a strange bug:
+The problem here is that, Widget functions and field are not added to
+the Control !
+Control is not an instance of Widget! I got an error that says
+this.checkOrientation is not a function ( in Control's constructor).
+
+When I changed the order of Drawable and Widget in the definition of
+Control's constructor, the line bellow, it works fine!
+$_L(["$wt.graphics.Drawable","$wt.widgets.Widget"],"$wt.widgets.Control",
+... : has the error
+$_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control", 
+... : does not have the error 
+			 *
+			 * In the bug fix procedure, it's known that node.musts will
+			 * be changed according to the later codes:
+			 * ClazzLoader.updateNode (n); // (see about 20 lines below)
+			 * 
+			 * As node.musts may become smaller, node.musts should be 
+			 * traversed in reverse order, so all musts are checked.
+			 *
+			 * TODO:
+			 */
 			var n = node.musts[i];
 			if (n.status < ClazzNode.STATUS_DECLARED) {
 				if (ClazzLoader.isClassDefined (n.name)) {
@@ -1406,7 +1430,20 @@ ClazzLoader.updateNode = function (node) {
 				} else { // why not break? -Zhou Renjian @ Nov 28, 2006
 					if (n.status == ClazzNode.STATUS_CONTENT_LOADED) {
 						// may be lazy loading script!
-						ClazzLoader.updateNode (n);
+						/*
+						window.setTimeout ((function (node) {
+								return function () {
+										ClazzLoader.updateNode (node);
+								};
+							}) (n), 1);
+						// */
+						ClazzLoader.updateNode (n); // fix above strange bug
+						if (node.musts.length != mustLength) {
+							// length changed!
+							mustLength = node.musts.length;
+							i = mustLength; // -1
+							isMustsOK = true;
+						}
 					}
 					if (n.status < ClazzNode.STATUS_DECLARED) {
 						isMustsOK = false;
