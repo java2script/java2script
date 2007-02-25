@@ -59,6 +59,19 @@
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
        	</java>
+
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${j2s.core.src}/java/lang/ClassLoaderProgressMonitor.js"/>
+   			<arg value="${j2s.core.bin}/java/lang/ClassLoaderProgressMonitor.js"/>
+        	
+    		<arg value="clazz.existed=true"/>
+    		<arg value="no.clazzloader.mode=true"/>
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="${j2s.lib.project}/bin"/>
+        	</classpath>
+       	</java>
     	
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
@@ -80,6 +93,7 @@
         	
     		<arg value="java/lang/Class.js"/>
     		<arg value="java/lang/ClassLoader.js"/>
+    		<arg value="java/lang/ClassLoaderProgressMonitor.js"/>
     		<arg value="java/lang/Console.js"/>
         	
 	    	<classpath>
