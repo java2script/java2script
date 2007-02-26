@@ -818,6 +818,7 @@
     		<arg value="org/eclipse/swt/widgets/Composite.js"/>
     		<arg value="org/eclipse/swt/widgets/Canvas.js"/>
     		<arg value="org/eclipse/swt/widgets/Decorations.js"/>
+    		<arg value="org/eclipse/swt/widgets/ShellManager.js"/>
     		<arg value="org/eclipse/swt/widgets/Shell.js"/>
 
 	    	<classpath>
