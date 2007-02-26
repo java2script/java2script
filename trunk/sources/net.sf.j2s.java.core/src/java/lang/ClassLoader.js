@@ -754,6 +754,37 @@ ClazzLoader.failedHandles = new Object ();
 /* protected */
 ClazzLoader.takeAnotherTry = true;
 
+/*
+ * Dynamically SCRIPT elements are removed after they are parsed into memory.
+ * And removed *.js may not be fetched again by "Refresh" action. And it will
+ * save loading time for Java2Script applications.
+ *
+ * This may disturb debugging tools such as Firebug. Setting
+ * window["j2s.script.debugging"] = true;
+ * will ignore removing SCRIPT elements requests.
+ */
+/* private */
+/*-# removeScriptNode -> RsN #-*/
+ClazzLoader.removeScriptNode = function (n) {
+	// lazily remove script nodes.
+	window.setTimeout ((function (node) {
+		return function () {
+			if (!window["j2s.script.debugging"] && node.readyState != "interactive") {
+				try {
+					if (node.parentNode != null) {
+						node.parentNode.removeChild (node);
+					}
+				} catch (e) { }
+			}
+		};
+	}) (n), 1);
+};
+
+/*
+ * There is another thread trying to remove j2slib.z.js or similar SCRIPT.
+ * See the end of this file.
+ */
+
 /**
  * Load *.js by adding script elements into head. Hook the onload event to
  * load the next class in dependency tree.
@@ -887,6 +918,8 @@ ClazzLoader.loadScript = function (file) {
 					ClazzLoader.innerLoadedScripts[this.src] = false;
 					ClazzLoader.loadedScripts[path] = false;
 					ClazzLoader.loadScript (path);
+
+					ClazzLoader.removeScriptNode (this);
 					return;
 				} else {
 					alert ("[Java2Script] Error in loading " + path + "!");
@@ -901,6 +934,8 @@ ClazzLoader.loadScript = function (file) {
 			} else {
 				ClazzLoader.tryToLoadNext (path);
 			}
+			
+			ClazzLoader.removeScriptNode (this);
 		};
 		script.onload.path = file;
 		/*
@@ -919,6 +954,8 @@ ClazzLoader.loadScript = function (file) {
 				fss[path] = 1;
 				ClazzLoader.loadedScripts[path] = false;
 				ClazzLoader.loadScript (path);
+				
+				ClazzLoader.removeScriptNode (this);
 				return;
 			} else {
 				alert ("[Java2Script] Error in loading " + path + "!");
@@ -931,6 +968,8 @@ ClazzLoader.loadScript = function (file) {
 			} else {
 				ClazzLoader.tryToLoadNext (path);
 			}
+
+			ClazzLoader.removeScriptNode (this);
 		};
 		script.onerror.path = file;
 		if (navigator.userAgent.indexOf("Opera") >= 0) {
@@ -1013,6 +1052,8 @@ ClazzLoader.loadScript = function (file) {
 					// log ("reloading ... " + path);
 					ClazzLoader.loadedScripts[path] = false;
 					ClazzLoader.loadScript (path);
+
+					ClazzLoader.removeScriptNode (this);
 					return;
 				} else {
 					alert ("[Java2Script] Error in loading " + path + "!");
@@ -1031,6 +1072,8 @@ ClazzLoader.loadScript = function (file) {
 			} else {
 				ClazzLoader.tryToLoadNext (path);
 			}
+
+			ClazzLoader.removeScriptNode (this);
 		};
 		script.onreadystatechange.path = file;
 	}
@@ -1395,7 +1438,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 				if (ClazzLoader.isClassDefined (n.name)) {
 					var nns = new Array (); // for optional loaded events!
 					n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
-					ClazzLoader.updateNode (n);
+					ClazzLoader.updateNode (n); // musts may be changed
 					/*
 					 * For those classes within one *.js file, update
 					 * them synchronously.
@@ -1429,25 +1472,19 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 					}
 				} else { // why not break? -Zhou Renjian @ Nov 28, 2006
 					if (n.status == ClazzNode.STATUS_CONTENT_LOADED) {
-						// may be lazy loading script!
-						/*
-						window.setTimeout ((function (node) {
-								return function () {
-										ClazzLoader.updateNode (node);
-								};
-							}) (n), 1);
-						// */
-						ClazzLoader.updateNode (n); // fix above strange bug
-						if (node.musts.length != mustLength) {
-							// length changed!
-							mustLength = node.musts.length;
-							i = mustLength; // -1
-							isMustsOK = true;
-						}
+						// lazy loading script doesn't work! - 2/26/2007
+						ClazzLoader.updateNode (n); // musts may be changed
 					}
 					if (n.status < ClazzNode.STATUS_DECLARED) {
 						isMustsOK = false;
 					}
+				}
+				// fix the above strange bug
+				if (node.musts.length != mustLength) {
+					// length changed!
+					mustLength = node.musts.length;
+					i = mustLength; // -1
+					isMustsOK = true;
 				}
 			}
 		}
@@ -2023,6 +2060,10 @@ ClazzLoader.getJ2SLibBase = function () {
 		if (idx != -1) {
 			return src.substring (0, idx);
 		}
+		idx = src.indexOf ("j2slib.core.js"); // consider it as key string!
+		if (idx != -1) {
+			return src.substring (0, idx);
+		}
 		var base = ClazzLoader.classpathMap["@java"];
 		if (base != null) {
 			return base;
@@ -2035,6 +2076,17 @@ ClazzLoader.getJ2SLibBase = function () {
 	return null;
 };
 
+/* private static */
+/*-# J2SLibBase -> JLB #-*/
+ClazzLoader.J2SLibBase = null;
+/*-# fastGetJ2SLibBase -> fgLB #-*/
+ClazzLoader.fastGetJ2SLibBase = function () {
+	if (ClazzLoader.J2SLibBase == null) {
+		ClazzLoader.J2SLibBase = ClazzLoader.getJ2SLibBase ();
+	}
+	return ClazzLoader.J2SLibBase;
+};
+
 /*
  * Check whether given package's classpath is setup or not.
  * Only "java" and "org.eclipse.swt" are accepted in argument.
@@ -2045,7 +2097,7 @@ ClazzLoader.assurePackageClasspath = function (pkg) {
 	var r = window[pkg + ".registered"];
 	if (r != false && r != true && ClazzLoader.classpathMap["@" + pkg] == null) {
 		window[pkg + ".registered"] = false;
-		var base = ClazzLoader.getJ2SLibBase ();
+		var base = ClazzLoader.fastGetJ2SLibBase ();
 		if (base == null) {
 			base = "http://archive.java2script.org/1.0.0/"; // only after 1.0.0
 		}
@@ -2314,6 +2366,22 @@ ClazzLoader.destroyClassNode = function (node) {
 		}
 	}
 };
+
+/*
+ * Remove j2slib.z.js, j2slib.core.js or Class/Ext/Loader/.js.
+ */
+window.setTimeout (function () {
+	var ss = document.getElementsByTagName ("SCRIPT");
+	for (var i = 0; i < ss.length; i++) {
+		var src = ss[i].src;
+		if ((src.indexOf ("j2slib.z.js") != -1) 
+				|| (src.indexOf ("j2slib.core.js") != -1)) {
+			ClazzLoader.getJ2SLibBase (); // cached ...
+			ClazzLoader.removeScriptNode (ss[i]);
+			break;
+		}
+	}
+}, 324); // 0.324 seconds is considered as enough before refresh action
 
 ClassLoader = ClazzLoader;
 
