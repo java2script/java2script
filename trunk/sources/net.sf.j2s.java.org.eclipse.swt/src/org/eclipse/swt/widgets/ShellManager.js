@@ -151,7 +151,18 @@ sm.createShellItem = function (shell) {
 	if (shell != null) {
 		si.onclick = (function (ss) {
 				return function () {
-					ss.bringToTop ();
+					if (ss.getMinimized ()) {
+						ss.bringToTop ();
+					} else {
+						var lastShell = $wt.widgets.ShellManager.getTopShell ();
+						if (ss == lastShell) {
+							$wt.internal.ResizeSystem.unregister(ss, 128);
+							ss.setMinimized(true);
+							$wt.widgets.ShellManager.returnTopMaximized (ss);
+						} else {
+							ss.bringToTop ();
+						}
+					}
 					return false;
 				};
 			}) (shell);
@@ -197,6 +208,32 @@ sm.isAroundTopBar = function (x) {
 	x1 = offset - 72;
 	x2 = offset + barWidth + 72;
 	return (x >= x1 && x <= x2);
+};
+sm.getTopShell = function () {
+	var lastShell = null;
+	var lastZIndex = 0;
+	var disps = $wt.widgets.Display.Displays;
+	for (var k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		var ss = disps[k].getShells ();
+		for (var i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/
+					&& ss[i].handle.style.display != "none") {
+				var idx = ss[i].handle.style.zIndex;
+				var zidx = 0;
+				if (idx == null || idx.length == 0) {
+					zidx = 0;
+				} else {
+					zidx = parseInt (idx);
+				}
+				if (zidx > lastZIndex) {
+					lastZIndex = zidx;
+					lastShell = ss[i];
+				}
+			}
+		}
+	}
+	return lastShell;
 };
 sm.getTopMaximizedShell = function () {
 	// find the top maximized shell
