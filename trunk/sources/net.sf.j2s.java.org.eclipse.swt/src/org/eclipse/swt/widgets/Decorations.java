@@ -1761,8 +1761,10 @@ public void setMaximized (boolean maximized) {
 		if (toUpdateMax)
 		/**
 		 * @j2sNative
-		 * ShellManager.topbarContainerEl.style.display = "block";
-		 * ShellManager.updateTopMaximized ();
+		 * window.setTimeout (function () {
+		 * 	ShellManager.topbarContainerEl.style.display = "block";
+		 * 	ShellManager.updateTopMaximized ();
+		 * }, 250);
 		 */ {}
 	} else {
 		setBounds(oldBounds);
