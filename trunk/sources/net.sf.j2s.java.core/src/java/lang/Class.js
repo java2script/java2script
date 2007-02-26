@@ -1699,6 +1699,7 @@ Clazz.declareInterface (java.io,"Serializable");
 Clazz.declareInterface (java.lang,"Iterable");
 Clazz.declareInterface (java.lang,"CharSequence");
 Clazz.declareInterface (java.lang,"Cloneable");
+Clazz.declareInterface (java.lang,"Appendable");
 Clazz.declareInterface (java.lang,"Comparable");
 Clazz.declareInterface (java.lang,"Runnable");
 Clazz.declareInterface (java.util,"Comparator");
