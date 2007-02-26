@@ -346,6 +346,7 @@ if (!isDebugging) {
 		"$.Composite",
 		"$.Canvas",
 		"$.Decorations",
+		"$.ShellManager",
 		"$.Shell"
 	]);
 	var w = "$wt.widgets.";

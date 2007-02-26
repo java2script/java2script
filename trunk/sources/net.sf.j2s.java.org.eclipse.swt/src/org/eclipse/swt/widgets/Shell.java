@@ -102,6 +102,7 @@ import org.eclipse.swt.graphics.Region;
  * @see Decorations
  * @see SWT
  * 
+ * @j2sRequireImport org.eclipse.swt.widgets.ShellManager
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.Shell");
  * @j2sSuffix
@@ -280,9 +281,7 @@ public Shell (Display display, int style) {
  * @param style
  * @param handle
  *
- * @j-2-s-Ignore-Super-Constructor
- * The above ignore super constructor will bring a bug that Display object
- * is not a Widget instance!
+ * @j2sIgnoreSuperConstructor
  */
 Shell (Display display, Shell parent, int style, int handle) {
 	super ();

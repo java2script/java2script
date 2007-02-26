@@ -1727,6 +1727,7 @@ public void setMaximized (boolean maximized) {
 			 * };
 			 */ { }
 		}
+		boolean toUpdateMax = false;
 		if (contentHandle != null) {
 			if (oldBounds == null) {
 				oldBounds = getBounds();
@@ -1750,12 +1751,19 @@ public void setMaximized (boolean maximized) {
 				setBounds(computeTrim(0, 0, width, height - titleHeight));
 			} else {
 				setBounds(computeTrim(0, -titleHeight, width, height));
+				toUpdateMax = true;
 			}
 		}
 		ResizeSystem.register(this, SWT.MAX);
 		if (titleBar != null) {
 			OS.addCSSClass(titleBar, key);
 		}
+		if (toUpdateMax)
+		/**
+		 * @j2sNative
+		 * ShellManager.topbarContainerEl.style.display = "block";
+		 * ShellManager.updateTopMaximized ();
+		 */ {}
 	} else {
 		setBounds(oldBounds);
 		if (titleBar != null) {
@@ -1910,6 +1918,8 @@ public void setMinimized (boolean minimized) {
 	 * @j2sNative
 	 * if (window["ShellManager"] != null && this.parent == null && minimized) {
 	 * 	this.handle.style.display = "none";
+	 * 	ShellManager.sidebarEl.style.display = "block";
+	 * 	ShellManager.updateItems ();
 	 * 	return;
 	 * }
 	 */ {}
@@ -2099,11 +2109,12 @@ void setSystemMenu () {
 		titleBar.appendChild(shellMax);
 		shellMax.onclick = new RunnableCompatibility() {
 			public void run() {
-				setMaximized(!getMaximized());
+				boolean cur = !getMaximized();
+				setMaximized(cur);
 				Decorations shell = Decorations.this;
 				/**
 				 * @j2sNative
-				 * if (window["ShellManager"] != null) {
+				 * if (window["ShellManager"] != null && !cur) {
 				 * 	ShellManager.returnTopMaximized (shell);
 				 * }
 				 */ { shell.bringToTop(); }

@@ -33,8 +33,10 @@ ClazzLoader.loadClass ("org.eclipse.swt.widgets.ShellManager", function () {
 	});
 });
 </script>
+ * 
+ * Update: Above example is out of date. -- Feb 26, 2007
  */
-$_L(["$wt.widgets.Shell"], "$wt.widgets.ShellManager", null, function(){
+$_L(null, "$wt.widgets.ShellManager", null, function(){
 $WTC$$.registerCSS ("$wt.widgets.ShellManager");
 //ShellManager = new Object ();
 ShellManager = $_T($wt.widgets, "ShellManager");
