@@ -209,17 +209,21 @@ public class ShellFrameDND implements DragListener {
 				yy = -1;
 			}
 		}
-//		try {
-			this.frame.style.left = xx + "px";
-			this.frame.style.top = yy + "px";
-			if (document.body.scrollLeft != 0) {
-				document.body.scrollLeft = 0;
-			}
-			if (document.body.scrollTop != 0) {
-				document.body.scrollTop = 0;
-			}
-//		} catch (e) {
-//		}
+		this.frame.style.left = xx + "px";
+		this.frame.style.top = yy + "px";
+		/*
+		 * In early SWT implementation, document.body is always with
+		 * "overflow:hidden;" CSS. Now, there are no such constraints.
+		 * 
+		 * -Feb 27, 2007
+		 * 
+		if (document.body.scrollLeft != 0) {
+			document.body.scrollLeft = 0;
+		}
+		if (document.body.scrollTop != 0) {
+			document.body.scrollTop = 0;
+		}
+		*/
 		return true;
 	};
 	public boolean dragEnded(DragEvent e) {
