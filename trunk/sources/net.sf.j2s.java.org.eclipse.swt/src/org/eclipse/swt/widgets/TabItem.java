@@ -248,6 +248,7 @@ public void setImage (Image image) {
 	checkWidget();
 	int index = parent.indexOf (this);
 	if (index == -1) return;
+	boolean boundsChanged = (image != null && this.image == null) || (image == null && this.image != null);
 	super.setImage (image);
 	/*
 	* Bug in Windows.  In version 6.00 of COMCTL32.DLL, tab
@@ -290,6 +291,9 @@ public void setImage (Image image) {
 	}
 	hasImage = image != null; 
 	OS.updateCSSClass(handle, "tab-item-image", hasImage);
+	if (boundsChanged) {
+		parent.updateSelection(parent.getSelectionIndex());
+	}
 }
 /**
  * Sets the receiver's text.  The string may include
@@ -322,6 +326,7 @@ public void setText (String string) {
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	int index = parent.indexOf (this);
 	if (index == -1) return;
+	boolean boundsChanged = string != this.text;
 	super.setText (string);
 	if (handle != null) {
 		OS.clearChildren(handle);
@@ -336,6 +341,9 @@ public void setText (String string) {
 //	super.setText (string);
 	this.text = string;
 	configure(index);
+	if (boundsChanged) {
+		parent.updateSelection(parent.getSelectionIndex());
+	}
 	/*
 	/*
 	* Bug in Windows.  In version 6.00 of COMCTL32.DLL, tab

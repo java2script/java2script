@@ -568,6 +568,16 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		if (ctrl != null)
 			ctrl.setBounds(getClientArea());
 		setSelection(selectionIndex, false);
+		/*
+		 * Need to make sure < > button should be shown or not
+		 */
+		int ww = 0;
+		if(handle.style.width.length() > 0){			
+			ww = Integer.parseInt(handle.style.width);
+		}
+		if (ww == 0) {
+			updateSelectionWithWidth(selectionIndex, cx);
+		}
 	}
 	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
@@ -1044,9 +1054,12 @@ protected void _updateOrientation(){
 }
 
 void updateSelection(int index) {
+	updateSelectionWithWidth(index, -1);
+}
+void updateSelectionWithWidth(int index, int prefWidth) {
 	String key = "tab-item-selected";
 	for (int i = 0; i < offset; i++) {
-		if(items[i].control != null){
+		if(i != index && items[i].control != null){
 			items[i].control.setVisible(false);
 		}
 		//items[i].handle.style.display = "none";
@@ -1077,12 +1090,14 @@ void updateSelection(int index) {
 		if(handle.style.width.length() > 0){			
 			ww = Integer.parseInt(handle.style.width);
 		}
+		if (prefWidth != -1 && ww == 0) {
+			ww = prefWidth;
+		}
 		if (ww > 0) {
 			OS.updateCSSClass(borderFrame, "tab-show-more-item", x > ww || offset != 0);
 		}
 		OS.addCSSClass(items[index].handle, key);
-		items[index].handle.style.zIndex = (items.length + 1) + "";
-		//System.out.println("????");
+		items[index].handle.style.zIndex = ((index >= offset) ? items.length + 1 : -1) + "";
 		if (this.width != 0) {
 			int w = OS.getContainerWidth(items[index].handle);
 			left += 4;

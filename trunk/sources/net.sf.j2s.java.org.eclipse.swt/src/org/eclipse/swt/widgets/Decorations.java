@@ -988,6 +988,9 @@ public Rectangle getClientArea () {
 			//h -= 21;
 			h -= 1 + OS.getContainerHeight(shellMenuBar);
 		}
+	} else {
+		h -= 6;
+		w -= 6;
 	}
 	return new Rectangle(0, 0, w, h);
 }
@@ -1763,6 +1766,8 @@ public void setMaximized (boolean maximized) {
 		/**
 		 * @j2sNative
 		 * window.setTimeout (function () {
+		 * 	var lastShell = ShellManager.getTopMaximizedShell ();
+		 * 	if (lastShell == null || lastShell.titleBar == null) return;
 		 * 	ShellManager.topbarContainerEl.style.display = "block";
 		 * 	ShellManager.updateTopMaximized ();
 		 * }, 250);
@@ -2361,8 +2366,8 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		height -= 4;
 		cx -= 4;
 		cy -= 4;
-		int dw = 7;
-		int dh = 7;
+		int dw = 6;
+		int dh = 6;
 //		if ((style & SWT.BORDER) != 0) {
 //			dw -= 2;
 //			dh -= 2;
