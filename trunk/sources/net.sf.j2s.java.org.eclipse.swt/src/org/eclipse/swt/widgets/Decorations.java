@@ -1694,7 +1694,8 @@ public void setMaximized (boolean maximized) {
 	Element b = document.body;
 	boolean isStrictMode = b.parentNode.clientHeight != 0;
 	Element node = b;
-	if ((OS.isIE) && isStrictMode) {
+	if (((OS.isFirefox && node.scrollLeft == 0 && node.scrollTop == 0)
+			|| OS.isIE) && isStrictMode) {
 		node = b.parentNode;
 	}
 	Monitor monitor = getMonitor();
@@ -1731,7 +1732,7 @@ public void setMaximized (boolean maximized) {
 		if (contentHandle != null) {
 			if (oldBounds == null) {
 				oldBounds = getBounds();
-				oldBounds.width -= 4; // FIXME
+				//oldBounds.width -= 4; // FIXME
 			}
 			//Monitor monitor = getMonitor();
 			int height = monitor.clientHeight;
