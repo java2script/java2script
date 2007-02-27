@@ -92,9 +92,9 @@ public class ShellFrameDND implements DragListener {
 		e.startY = e.currentY;
 		if  (firstTime) {
 			this.initFrameBounds(this.sourceX, this.sourceY, this.sourceWidth, this.sourceHeight);
-			this.frame.style.width = this.sourceWidth + "px";
-			this.frame.style.height = this.sourceHeight + "px";
 		}
+		this.frame.style.width = this.sourceWidth + "px";
+		this.frame.style.height = this.sourceHeight + "px";
 		Element[] frames = document.getElementsByTagName("IFRAME");
 		if (frames.length != 0) {
 			overFrameHandle = document.createElement ("DIV");

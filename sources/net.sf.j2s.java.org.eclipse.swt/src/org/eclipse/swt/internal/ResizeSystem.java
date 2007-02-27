@@ -75,7 +75,7 @@ public class ResizeSystem {
 	public static void updateResize() {
 		for (int i = 0; i < handlers.length; i++) {
 			ResizeHandler hdl = handlers[i];
-			if (hdl != null) {
+			if (hdl != null && hdl.shell != null && hdl.shell.handle != null) {
 				hdl.shell._updateMonitorSize();
 				int status = hdl.getStatus();
 				if (status == SWT.MAX) {
