@@ -96,8 +96,11 @@ sm.initialize = function () {
 			ShellManager.returnTopMaximized ();
 		} else if (e.clientY <= 8 && !e.ctrlKey) {
 			if (topbar.style.display != "block" && ShellManager.isAroundTopBar (e.clientX)) {
-				topbar.style.display = "block";
-				ShellManager.updateTopMaximized ();
+				var lastShell = ShellManager.getTopMaximizedShell ();
+				if (lastShell != null && lastShell.titleBar != null) {
+					topbar.style.display = "block";
+					ShellManager.updateTopMaximized ();
+				}
 			}
 		} else if (e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null 
 				&& window["O$"] != null) ? O$.getContainerHeight (topShell.titleBar) : 20)) {
@@ -264,7 +267,7 @@ sm.getTopMaximizedShell = function () {
 };
 sm.updateTopMaximized = function () {
 	var lastShell = this.getTopMaximizedShell ();
-	if (lastShell == null) return;
+	if (lastShell == null || lastShell.titleBar == null) return;
 	this.lastMaximizedShell = lastShell;
 	
 	// move the title bar elements into topbarEl

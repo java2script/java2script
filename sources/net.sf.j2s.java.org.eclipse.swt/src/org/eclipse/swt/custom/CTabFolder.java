@@ -3390,7 +3390,7 @@ void updateSelection(int index) {
 //			items[i].handle.style.display = "block";
 			Control control = items[i].control;
 			
-			if(control != null && !control.isDisposed()){
+			if(i != index && control != null && !control.isDisposed()){
 				control.setVisible(false);
 			}
 			items[i].handle.style.zIndex = (i + 1) + "";
@@ -3483,7 +3483,7 @@ void updateSelection(int index) {
 			CSSStyle s = items[index].handle.style;
 			s.width = w + "px";
 		}
-		items[index].handle.style.zIndex = (items.length + 1) + "";
+		items[index].handle.style.zIndex = ((index >= offset) ? items.length + 1 : -1) + "";
 		//System.out.println("????");
 		
 		if (this.width != 0) {
