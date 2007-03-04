@@ -1,3 +1,6 @@
+/* private */
+window["junit.registered"] = false;
+
 (function () {
 	ClazzLoader.registerPackages ("junit", [
 			"awtui", "extensions", "framework", "runner",
@@ -5,4 +8,4 @@
 }) ();
 
 /* private */
-window["junit.package"] = true;
+window["junit.registered"] = true;
