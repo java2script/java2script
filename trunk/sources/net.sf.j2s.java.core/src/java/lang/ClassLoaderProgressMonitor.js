@@ -17,6 +17,9 @@
  *******/
  
 /*
+ * Update: March 5, 2007
+ * ClassLoaderProgressMonitor were already in default j2slib.z.js.
+ *
  * ClassLoaderProgressMonitor is optional. It's used to display class loading 
  * progress so that user know that background loading is still processing.
  *
@@ -46,7 +49,7 @@ clpm.fadeAlpha = 0;
 clpm.monitorEl = null;
 clpm.lastScrollTop = 0;
 clpm.bindingParent = null;
-clpm.DEFAULT_OPACITY = 75;
+clpm.DEFAULT_OPACITY = 55;
 /* private static */ clpm.clearChildren = function (el) {
 	if (el == null) return;
 	for (var i = el.childNodes.length - 1; i >= 0; i--) {
