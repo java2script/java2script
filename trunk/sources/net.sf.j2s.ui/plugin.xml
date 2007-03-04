@@ -252,6 +252,96 @@
          </action>
       </viewerContribution>
    </extension>
+   <extension
+         point="org.eclipse.jdt.ui.javadocCompletionProcessor">
+      <javadocCompletionProcessor
+            class="net.sf.j2s.ui.text.javadoc.JavaDocCompletionEvaluator"
+            id="net.sf.j2s.javadocCompletionProcessor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="net.sf.j2s.ui.preferences.Java2ScriptPreferencePage"
+            id="net.sf.j2s.ui.preferences.Java2ScriptPreferencePage"
+            name="Java2Script"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="net.sf.j2s.ui.preferences.PreferenceInitializer"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Java2Script"
+            id="net.sf.j2s.ui.java2script">
+      </category>
+      <wizard
+            name="Java2Script Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptProjectWizard">
+         <description>
+            Create Java Project with Java2Script enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script AJAX Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptAJAXProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptAJAXProjectWizard">
+         <description>
+            Create Java Project with Java2Script AJAX enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script SWT Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptSWTProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptSWTProjectWizard">
+         <description>
+            Create Java Project with Java2Script and SWT enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script SWT AJAX Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptSWTAJAXProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptSWTAJAXProjectWizard">
+         <description>
+            Create Java Project with Java2Script AJAX and SWT enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script Servlet Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptServletProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptServletProjectWizard">
+         <description>
+            Create Java Servlet Project with Java2Script AJAX and SWT enabled.
+         </description>
+      </wizard>
+   </extension>
    <!--
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -264,11 +354,4 @@
       </wizard>
    </extension>
    -->
-   <extension
-         point="org.eclipse.jdt.ui.javadocCompletionProcessor">
-      <javadocCompletionProcessor
-            class="net.sf.j2s.ui.text.javadoc.JavaDocCompletionEvaluator"
-            id="net.sf.j2s.javadocCompletionProcessor"/>
-   </extension>
-
 </plugin>
