@@ -16,7 +16,7 @@ public class J2SUnitConfigurationDelegate extends LaunchConfigurationDelegate {
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		if (configuration != null) {
 			try {
-				J2SUnitLaunchingUtil.launchingJ2SUnit(configuration);
+				J2SUnitLaunchingUtil.launchingJ2SUnit(configuration, mode);
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
