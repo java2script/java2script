@@ -395,10 +395,10 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 			x -= 4;
 			y -= 4;
 		} else {
-			width += 4;
-			height += 4;
-			x -= 2;
-			y -= 2;
+			width += 6;
+			height += 6;
+			x -= 3;
+			y -= 3;
 		}
 	}
 //	System.err.println( new Rectangle (x, y, width, height));
@@ -2366,16 +2366,16 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		height -= 4;
 		cx -= 4;
 		cy -= 4;
-		int dw = 6;
-		int dh = 6;
+		int dw = 4;
+		int dh = 4;
 //		if ((style & SWT.BORDER) != 0) {
 //			dw -= 2;
 //			dh -= 2;
 //		}
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
-		contentHandle.style.top = 2 + "px";
-		contentHandle.style.marginRight = 1 + "px";
+		contentHandle.style.top = 3 + "px";
+		contentHandle.style.left = 1 + "px";
 	}
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 4;

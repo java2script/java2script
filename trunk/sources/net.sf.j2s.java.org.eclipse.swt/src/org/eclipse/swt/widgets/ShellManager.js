@@ -346,7 +346,7 @@ sm.updateItems = function () {
 		var item = this.items[i];
 		item.itemHandle.style.top = offset + (i * hh + 24) + "px";
 		if (item.shell != null && item.shell.getText () != item.text) {
-			for (var j = item.textHandle.childNodes.length; j >= 0; j--) {
+			for (var j = item.textHandle.childNodes.length - 1; j >= 0; j--) {
 				item.textHandle.removeChild (item.textHandle.childNodes[j]);
 			}
 			item.textHandle.appendChild (document.createTextNode (item.shell.getText ()));
