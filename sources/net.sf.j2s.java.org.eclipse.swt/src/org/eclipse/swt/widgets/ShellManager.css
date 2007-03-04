@@ -12,8 +12,8 @@
 	border-style:solid solid solid none;
 	border-width:1px;
 	border-height:buttonshadow;
-	opacity:0.25;
-	filter:Alpha(Opacity=25);
+	/*opacity:0.25;
+	filter:Alpha(Opacity=25);*/
 }
 .shell-item, a.shell-item {
 	display:block;
@@ -27,8 +27,8 @@
 	background-color:buttonface;
 	border:1px solid buttonshadow;
 	color:buttontext;
-	opacity:0.55;
-	filter:Alpha(Opacity=55);
+	/*opacity:0.55;
+	filter:Alpha(Opacity=55);*/
 }
 .shell-item:hover, a.shell-item:hover {
 	opacity:0.85;
