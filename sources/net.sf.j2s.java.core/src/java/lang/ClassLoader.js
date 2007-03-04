@@ -2060,7 +2060,7 @@ ClazzLoader.getJ2SLibBase = function () {
 		if (idx != -1) {
 			return src.substring (0, idx);
 		}
-		idx = src.indexOf ("j2slib.core.js"); // consider it as key string!
+		idx = src.indexOf ("j2slibcore.z.js"); // consider it as key string!
 		if (idx != -1) {
 			return src.substring (0, idx);
 		}
@@ -2124,12 +2124,9 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (name.indexOf (swtPkg) == 0 || name.indexOf ("$wt") == 0) {
 		ClazzLoader.assurePackageClasspath (swtPkg);
 	}
-	/*
-	 * "junit" is not considered as inner supported library.
-	 */
-	//if (name.indexOf ("junit") == 0) {
-	//	ClazzLoader.assurePackageClasspath ("junit");
-	//}
+	if (name.indexOf ("junit") == 0) {
+		ClazzLoader.assurePackageClasspath ("junit");
+	}
 
 	/*
 	 * Any ClazzLoader#loadClass calls will be queued until java.* core classes
@@ -2189,11 +2186,14 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			}
 		}
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
-		if (async) {
-			window.setTimeout (optionalsLoaded, 25);
-		} else {
-			optionalsLoaded ();
-		}
+		var nn = ClazzLoader.findClass (name);
+		if (nn == null || nn.status >= ClazzNode.STATUS_OPTIONALS_LOADED) {
+			if (async) {
+				window.setTimeout (optionalsLoaded, 25);
+			} else {
+				optionalsLoaded ();
+			}
+		} // else ... should be called later
 	}
 	
 };
@@ -2202,7 +2202,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
  * Load the application by the given class name and run its static main method.
  */
 /* public */
-$w$ = ClazzLoader.loadAppMain = function (clazz, args) {
+$w$ = ClazzLoader.loadJ2SApp = function (clazz, args, loaded) {
 	if (clazz == null) {
 		return;
 	}
@@ -2219,12 +2219,31 @@ $w$ = ClazzLoader.loadAppMain = function (clazz, args) {
 	if (agmts == null || !(agmts instanceof Array)) {
 		agmts = [];
 	}
-	var afterLoaded = (function (clazzName, argv) {
-		return function () {
-			Clazz.evalType (clazzName).main (argv);
-		};
-	}) (clazzStr, agmts);
+	var afterLoaded = loaded;
+	if (afterLoaded == null) {
+		afterLoaded = (function (clazzName, argv) {
+			return function () {
+				Clazz.evalType (clazzName).main (argv);
+			};
+		}) (clazzStr, agmts);
+	} else {
+		afterLoaded = loaded(clazzStr, agmts);
+	}
 	ClazzLoader.loadClass (clazzStr, afterLoaded);
+};
+/**
+ * Load JUnit tests by the given class name.
+ */
+/* public */
+$u$ = ClazzLoader.loadJUnit = function (clazz, args) {
+	var afterLoaded = function (clazzName, argv) {
+		return function () {
+			ClazzLoader.loadClass ("junit.textui.TestRunner", function () {
+				junit.textui.TestRunner.run (Clazz.evalType (clazzName));
+			});
+		};
+	};
+	ClazzLoader.loadJ2SApp (clazz, args, afterLoaded);
 };
 
 /* private */
@@ -2368,14 +2387,14 @@ ClazzLoader.destroyClassNode = function (node) {
 };
 
 /*
- * Remove j2slib.z.js, j2slib.core.js or Class/Ext/Loader/.js.
+ * Remove j2slib.z.js, j2slibcore.z.js or Class/Ext/Loader/.js.
  */
 window.setTimeout (function () {
 	var ss = document.getElementsByTagName ("SCRIPT");
 	for (var i = 0; i < ss.length; i++) {
 		var src = ss[i].src;
-		if ((src.indexOf ("j2slib.z.js") != -1) 
-				|| (src.indexOf ("j2slib.core.js") != -1)) {
+		if (src.indexOf ("chrome:") != 0 && (src.indexOf ("j2slib.z.js") != -1
+				|| src.indexOf ("j2slibcore.z.js") != -1)) {
 			ClazzLoader.getJ2SLibBase (); // cached ...
 			ClazzLoader.removeScriptNode (ss[i]);
 			break;
