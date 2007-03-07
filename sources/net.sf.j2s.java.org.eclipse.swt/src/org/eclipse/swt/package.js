@@ -178,7 +178,11 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 				var location = window.location.href.toString ();
 				//if (protocol == "file:" || host == "") {
 					var idx = location.lastIndexOf ("/");
-					if (idx != -1) {
+					if (idx != -1 && prefix.indexOf ("http://") != 0
+							&& prefix.indexOf ("https://") != 0
+							&& prefix.indexOf ("file://") != 0
+							&& prefix.indexOf ("ftp://") != 0
+							&& prefix.indexOf ("javascript://") != 0) {
 						prefix = location.substring (0, idx + 1) + prefix;
 					}
 				//}
@@ -273,18 +277,18 @@ $wt = org.eclipse.swt;
 	ClazzLoader.registerPackages ("org.eclipse.swt", [
 			"accessibility", 
 			"browser", 
-	    	"custom", 
+			"custom", 
 			"dnd",
-	    	"events", 
+			"events", 
 			"graphics", 
-	    	"internal", 
-	    	"internal.dnd", 
-	    	"internal.browser", 
-	    	"internal.struct", 
+			"internal", 
+			"internal.dnd", 
+			"internal.browser", 
+			"internal.struct", 
 			"layout",
 			"printing",
 			"program",
-	    	"widgets"]);
+			"widgets"]);
 
 	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
 	
