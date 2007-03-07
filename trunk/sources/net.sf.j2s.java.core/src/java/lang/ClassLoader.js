@@ -98,7 +98,13 @@
  * HTTP connections timeout, but should not accur in local file system, or it
  * is a loading bug by using JavaScript timeout thread).
  */
- 
+
+/*
+ * The following comments with "#" are special configurations for a much
+ * smaller *.js file size.
+ *
+ * @see net.sf.j2s.lib/src/net/sf/j2s/lib/build/SmartJSCompressor.java
+ */
 /*-#
  # ClazzNode -> $CN$
  # ClazzLoader -> $CL$
@@ -186,13 +192,18 @@ ClazzLoader.inLoadingThreads = 0;
 /* protected */
 ClazzLoader.maxLoadingThreads = 6;
 
+ClazzLoader.userAgent = navigator.userAgent.toLowerCase ();
+ClazzLoader.isOpera = (ClazzLoader.userAgent.indexOf ("opera") != -1);
+ClazzLoader.isIE = (ClazzLoader.userAgent.indexOf ("msie") != -1) && !ClazzLoader.isOpera;
+ClazzLoader.isGecko = (ClazzLoader.userAgent.indexOf ("gecko") != -1);
+
 /*
  * Opera has different loading order which will result in performance degrade!
  * So just return to single thread loading in Opera!
  *
  * FIXME: This different loading order also causes bugs in single thread!
  */
-if (navigator.userAgent.toLowerCase ().indexOf ("opera") != -1) {
+if (ClazzLoader.isOpera) {
 	ClazzLoader.maxLoadingThreads = 1;
 }
 
@@ -907,8 +918,7 @@ ClazzLoader.loadScript = function (file) {
 			}
 			this.onload = null;
 			var path = arguments.callee.path;
-			if (!ClazzLoader.innerLoadedScripts[this.src]
-					&& navigator.userAgent.indexOf("Opera") >= 0) {
+			if (!ClazzLoader.innerLoadedScripts[this.src] && ClazzLoader.isOpera) {
 				// Opera will not take another try.
 				var fss = ClazzLoader.failedScripts;
 				if (fss[path] == null && ClazzLoader.takeAnotherTry) {
@@ -972,7 +982,7 @@ ClazzLoader.loadScript = function (file) {
 			ClazzLoader.removeScriptNode (this);
 		};
 		script.onerror.path = file;
-		if (navigator.userAgent.indexOf("Opera") >= 0) {
+		if (ClazzLoader.isOpera) {
 			ClazzLoader.needOnloadCheck = true;
 		}
 	} else { // IE
@@ -1152,7 +1162,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 	 */
 	if (ClazzLoader.lockQueueBe4SWT && ClazzLoader.pkgRefCount != 0 
 			&& file.lastIndexOf ("package.js") != file.length - 10
-			&& navigator.userAgent.toLowerCase ().indexOf ("gecko") != -1) {
+			&& (ClazzLoader.isGecko || ClazzLoader.isIE)) { // No Opera!
 		var qbs = ClazzLoader.queueBe4SWT;
 		qbs[qbs.length] = file;
 		return;
@@ -1245,12 +1255,13 @@ ClazzLoader.tryToLoadNext = function (file) {
 		if (cq.length != 0) { 
 			/* queue must be loaded in order! */
 			n = cq[0]; // popup class from the queue
+			//alert ("load from queue");
+			//alert (cq.length + ":" + cq);
 			for (var i = 0; i < cq.length - 1; i++) {
 				cq[i] = cq[i + 1];
 			}
 			cq.length--;
-			
-			//alert ("load from queue");
+			//log (cq.length + ":" + cq);
 			if (!ClazzLoader.loadedScripts[n.path] || cq.length != 0 
 					|| !ClazzLoader.isLoadingEntryClass
 					|| (n.musts != null && n.musts.length != 0)
@@ -1779,7 +1790,7 @@ ClazzLoader.checkInteractive = function () {
 				&& ss[i].onreadystatechange != null) { // IE
 			ClazzLoader.interactiveScript = ss[i];
 			ClazzLoader.innerLoadedScripts[ss[i].src] = true;
-		} else if (navigator.userAgent.indexOf("Opera") >= 0) { // Opera
+		} else if (ClazzLoader.isOpera) { // Opera
 			if (ss[i].readyState == "loaded" 
 					&& ss[i].src != null && ss[i].src.length != 0) {
 				ClazzLoader.innerLoadedScripts[ss[i].src] = true;
@@ -2053,6 +2064,13 @@ ClazzLoader.queueBe4KeyClazz = new Array ();
 /* private */
 /*-# getJ2SLibBase -> gLB #-*/
 ClazzLoader.getJ2SLibBase = function () {
+	var o = window["j2s.lib"];
+	if (o != null) {
+		if (o.base == null) {
+			o.base = "http://archive.java2script.org/";
+		}
+		return o.base + (o.alias ? o.alias : (o.version ? o.version : "1.0.0")) + "/";
+	}
 	var ss = document.getElementsByTagName ("SCRIPT");
 	for (var i = 0; i < ss.length; i++) {
 		var src = ss[i].src;
@@ -2154,23 +2172,32 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			/*-# needBeingQueued -> nQ #-*/
 			var needBeingQueued = false;
 			var qq = ClazzLoader.classQueue;
+			//error (qq.length + ":" + qq);
+			//error (path);
 			for (var i = qq.length - 1; i >= 0; i--) {
 				if (qq[i].status != ClazzNode.STATUS_OPTIONALS_LOADED) {
 					needBeingQueued = true;
 					break;
 				}
 			}
-			/*
-			if (forced) {
+			if (path.lastIndexOf ("package.js") == path.length - 10) {//forced
 				// push class to queue
+				var inserted = false;
 				for (var i = qq.length - 1; i >= 0; i--) {
+					var name = qq[i].name;
+					if (name.lastIndexOf ("package.js") == name.length - 10) {
+						qq[i + 1] = n;
+						inserted = true;
+						break;
+					}
 					qq[i + 1] = qq[i];
 				}
-				qq[0] = n;
+				if (!inserted) {
+					qq[0] = n;
+				}
 			} else {
-			//*/
 				qq[qq.length] = n;
-			//}
+			}
 			if (!needBeingQueued) { // can be loaded directly
 				/*-# bakEntryClassLoading -> bkECL #-*/
 				var bakEntryClassLoading = false;

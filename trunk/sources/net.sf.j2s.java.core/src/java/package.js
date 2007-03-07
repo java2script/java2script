@@ -94,9 +94,9 @@ window["java.registered"] = false;
         "$.Method"
 	]);
 	base = base.substring (0, base.lastIndexOf ("java/"));
-	ClazzLoader.jarClasspath (base + "/org/apache/harmony/luni/util/Msg.js", 
+	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/Msg.js", 
 		["org.apache.harmony.luni.util.Msg"]);
-	ClazzLoader.jarClasspath (base + "/org/apache/harmony/luni/util/MsgHelp.js", 
+	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/MsgHelp.js", 
 		["org.apache.harmony.luni.util.MsgHelp"]);
 }) ();
 
