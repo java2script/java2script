@@ -25,7 +25,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 
 	private Button btnCompatiable;
 	
-	private Button btnCompatiableJS; // whether import or include mozilla.addon.js 
+	private Button btnCompatiableRawJS; // whether import or include mozilla.addon.js 
 
 	private Button btnFastView;
 
@@ -92,16 +92,16 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 		btnCompatiable.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				updateLaunchConfigurationDialog();
-				btnCompatiableJS.setEnabled(btnCompatiable.getSelection());
+				btnCompatiableRawJS.setEnabled(btnCompatiable.getSelection());
 			}
 		});
 		
-		btnCompatiableJS = new Button(group, SWT.CHECK);
+		btnCompatiableRawJS = new Button(group, SWT.CHECK);
 		GridData gdjs = new GridData();
 		gdjs.horizontalIndent = 32;
-		btnCompatiableJS.setLayoutData(gdjs);
-		btnCompatiableJS.setText("Write compatiable JavaScript instead of including mozilla.addon.js");
-		btnCompatiableJS.addSelectionListener(new SelectionAdapter() {
+		btnCompatiableRawJS.setLayoutData(gdjs);
+		btnCompatiableRawJS.setText("Write compatiable JavaScript instead of including mozilla.addon.js");
+		btnCompatiableRawJS.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				updateLaunchConfigurationDialog();
 			}
@@ -128,7 +128,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE, preferred);
 		
 		configuration.setAttribute(
-				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_JS, false);
+				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, true);
 	}
 
 	public void initializeFrom(ILaunchConfiguration configuration) {
@@ -137,8 +137,8 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 					IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE, false));
 			btnMaximize.setSelection(configuration.getAttribute(
 					IJ2SLauchingConfiguration.MAXIMIZE_J2S_CONSOLE, false));
-			btnCompatiableJS.setSelection(configuration.getAttribute(
-					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_JS, false));
+			btnCompatiableRawJS.setSelection(configuration.getAttribute(
+					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, true));
 			
 			IPreferenceStore store = Java2ScriptUIPlugin.getDefault()
 				.getPreferenceStore();
@@ -156,7 +156,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 			boolean compatiable = configuration.getAttribute(
 					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE, preferred);
 			btnCompatiable.setSelection(compatiable);
-			btnCompatiableJS.setEnabled(compatiable);
+			btnCompatiableRawJS.setEnabled(compatiable);
 			
 		} catch (CoreException e) {
 			e.printStackTrace();
@@ -173,7 +173,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 		configuration.setAttribute(
 				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE, btnCompatiable.getSelection());
 		configuration.setAttribute(
-				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_JS, btnCompatiableJS.getSelection());
+				IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, btnCompatiableRawJS.getSelection());
 	}
 
 	public String getName() {
