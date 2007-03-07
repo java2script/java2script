@@ -13,7 +13,7 @@ public interface IJ2SLauchingConfiguration {
 	public static final String HEAD_HEADER_HTML = "head.header.html";
 	
 	public static final String J2S_MOZILLA_ADDON_COMPATIABLE = "j2s.mozilla.addon.compatiable";
-	public static final String J2S_MOZILLA_ADDON_COMPATIABLE_JS = "j2s.mozilla.addon.compatiable.js";
+	public static final String J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS = "j2s.mozilla.addon.compatiable.raw.js";
 	
 	public static final String J2S_CLASS_PATH = "j2s.class.path";
 	public static final String J2S_ABANDON_CLASS_PATH = "j2s.abandon.class.path";

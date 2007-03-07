@@ -738,7 +738,7 @@ public class J2SLaunchingUtil {
 			buf.append("};\r\n");
 
 			boolean addonCompatiableJS = configuration.getAttribute(
-					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_JS, false);
+					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, false);
 			
 			if (addonCompatiableJS) {
 				buf.append("</script>\r\n<script type=\"text/javascript\" src=\"" + j2sLibPath + "mozilla.addon.js\">");

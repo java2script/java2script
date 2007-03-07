@@ -1,13 +1,11 @@
 package net.sf.j2s.ui.launching;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -758,10 +756,10 @@ public class J2SUnitLaunchingUtil {
 			buf.append("\t}\r\n");
 			buf.append("};\r\n");
 
-			boolean addonCompatiableJS = configuration.getAttribute(
-					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_JS, false);
+			boolean addonCompatiableRawJS = configuration.getAttribute(
+					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, true);
 			
-			if (addonCompatiableJS) {
+			if (!addonCompatiableRawJS) {
 				buf.append("</script>\r\n<script type=\"text/javascript\" src=\"" + j2sLibPath + "mozilla.addon.js\">");
 			} else {
 				buf.append("\r\n");
