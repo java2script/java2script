@@ -1695,6 +1695,11 @@ Clazz.declarePackage ("java.util");
 /*
  * Consider these interfaces are basic!
  */
+Clazz.declareInterface (java.io,"Closeable");
+Clazz.declareInterface (java.io,"DataInput");
+Clazz.declareInterface (java.io,"DataOutput");
+Clazz.declareInterface (java.io,"Externalizable");
+Clazz.declareInterface (java.io,"Flushable");
 Clazz.declareInterface (java.io,"Serializable");
 Clazz.declareInterface (java.lang,"Iterable");
 Clazz.declareInterface (java.lang,"CharSequence");

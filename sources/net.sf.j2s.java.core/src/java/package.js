@@ -16,6 +16,9 @@ window["java.registered"] = false;
 	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
 
 	ClazzLoader.jarClasspath (base + "core.z.js", [
+		"java.net.URLEncoder",
+		"java.net.URLDecoder",
+		
 		"net.sf.j2s.ajax.HttpRequest",
 		"$.IXHRCallback",
 		"$.XHRCallbackAdapter",
@@ -93,11 +96,11 @@ window["java.registered"] = false;
         "$.Field",
         "$.Method"
 	]);
+	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
+		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
 	base = base.substring (0, base.lastIndexOf ("java/"));
-	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/Msg.js", 
-		["org.apache.harmony.luni.util.Msg"]);
-	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/MsgHelp.js", 
-		["org.apache.harmony.luni.util.MsgHelp"]);
+	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/Msg.z.js", 
+		["org.apache.harmony.luni.util.Msg", "$.MsgHelp"]);
 }) ();
 
 /* private */
