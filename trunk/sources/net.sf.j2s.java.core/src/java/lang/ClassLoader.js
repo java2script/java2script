@@ -1162,7 +1162,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 	 */
 	if (ClazzLoader.lockQueueBe4SWT && ClazzLoader.pkgRefCount != 0 
 			&& file.lastIndexOf ("package.js") != file.length - 10
-			&& (ClazzLoader.isGecko || ClazzLoader.isIE)) { // No Opera!
+			&& !ClazzLoader.isOpera) { // No Opera! Opera is in single thread.
 		var qbs = ClazzLoader.queueBe4SWT;
 		qbs[qbs.length] = file;
 		return;
@@ -2298,11 +2298,17 @@ ClazzLoader.runtimeLoaded = function () {
  */
 /* public */
 ClazzLoader.loadZJar = function (zjarPath, keyClazz) {
-	ClazzLoader.jarClasspath (zjarPath, [keyClazz]);
+	var keyClass = keyClazz;
+	var isArr = (keyClazz instanceof Array);
+	if (isArr) {
+		keyClass = keyClazz[keyClazz.length - 1];
+	}
+	ClazzLoader.jarClasspath (zjarPath, isArr ? keyClazz
+			: [keyClazz]);
 	if (keyClazz == ClazzLoader.runtimeKeyClass) {
-		ClazzLoader.loadClass (keyClazz, ClazzLoader.runtimeLoaded, true);
+		ClazzLoader.loadClass (keyClass, ClazzLoader.runtimeLoaded, true);
 	} else {
-		ClazzLoader.loadClass (keyClazz, null, true);
+		ClazzLoader.loadClass (keyClass, null, true);
 	}
 };
 
@@ -2363,7 +2369,8 @@ ClazzLoader.addChildClassNode = function (parent, child, type) {
 			break;
 		}
 	}
-	if (!existed) {
+	if (!existed && parent.name != null && parent != ClazzLoader.clazzTreeRoot
+			&& parent != child) {
 		child.parents[child.parents.length] = parent;
 	}
 };
