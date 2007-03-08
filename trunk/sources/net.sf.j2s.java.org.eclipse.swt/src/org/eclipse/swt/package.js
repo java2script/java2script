@@ -293,7 +293,56 @@ $wt = org.eclipse.swt;
 	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
 	
 	// The core.z.js should already intialized
-	ClazzLoader.loadZJar (path + "events.z.js", "org.eclipse.swt.widgets.EventTable");
+	ClazzLoader.loadZJar (path + "events.z.js", [
+		"org.eclipse.swt.internal.SWTEventListener",
+		"$.SWTEventObject",
+		"org.eclipse.swt.widgets.Event",
+		"org.eclipse.swt.events.TypedEvent",
+		"$.ArmEvent",
+		"$.ControlEvent",
+		"$.DisposeEvent",
+		"$.FocusEvent",
+		"$.HelpEvent",
+		"$.KeyEvent",
+		"$.MenuEvent",
+		"$.ModifyEvent",
+		"$.MouseAdapter",
+		"$.MouseEvent",
+		"$.PaintEvent",
+		"$.SelectionEvent",
+		"$.ShellEvent",
+		"$.TraverseEvent",
+		"$.TreeEvent",
+		"$.VerifyEvent",
+		"org.eclipse.swt.widgets.Listener",
+		"$.TypedListener",
+		"org.eclipse.swt.events.ArmListener",
+		"$.ControlListener",
+		"$.ControlAdapter",
+		"$.DisposeListener",
+		"$.FocusListener",
+		"$.FocusAdapter",
+		"$.HelpListener",
+		"$.KeyListener",
+		"$.KeyAdapter",
+		"$.MenuListener",
+		"$.MenuAdapter",
+		"$.ModifyListener",
+		"$.MouseListener",
+		"$.MouseMoveListener",
+		"$.MouseTrackListener",
+		"$.MouseTrackAdapter",
+		"$.PaintListener",
+		"$.SelectionListener",
+		"$.SelectionAdapter",
+		"$.ShellListener",
+		"$.ShellAdapter",
+		"$.TraverseListener",
+		"$.TreeListener",
+		"$.TreeAdapter",
+		"$.VerifyListener",
+		"org.eclipse.swt.widgets.EventTable"
+	]);
 
 var isDebugging = (window["swt.debugging"] == true);
 if (!isDebugging) {
@@ -323,6 +372,10 @@ if (!isDebugging) {
 		"$.Device",
 		"$.DeviceData",
 
+		"$.FontData",
+		"$.FontMetrics",
+		"$.Font",
+
 		"$wt.widgets.Monitor"
 	]);
 	ClazzLoader.jarClasspath (path + "more.z.js", [
@@ -334,12 +387,20 @@ if (!isDebugging) {
 		"$.ShellFrameDND",
         		
 		"$wt.internal.browser.OS",
+		"$.Popup",
         		
 		"$wt.graphics.Image",
 		"$.ImageData",
 		"$wt.widgets.Item",
 		"$.Layout"
 	]);
+	
+	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("org.eclipse.swt.*") + "SWT.z.js", [
+		"$wt.SWT",
+		"$.SWTError",
+		"$.SWTException"
+	]);
+	
 	var wPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.widgets.*");
 	ClazzLoader.jarClasspath (wPath + "Shell.z.js", [
 		"$wt.widgets.Display",
@@ -351,7 +412,8 @@ if (!isDebugging) {
 		"$.Canvas",
 		"$.Decorations",
 		"$.ShellManager",
-		"$.Shell"
+		"$.Shell",
+		"$.Dialog"
 	]);
 	var w = "$wt.widgets.";
 	ClazzLoader.jarClasspath (wPath + "Tree.z.js", [
@@ -414,11 +476,6 @@ if (!isDebugging) {
 		"$wt.internal.dnd.ScaleDND",
 		w + "Scale"
 	]);
-	//if (false)
-	ClazzLoader.jarClasspath (wPath + "TabFolder.z.js", [
-		w + "TabItem",
-		"$.TabFolder"
-	]);
 	ClazzLoader.jarClasspath (wPath + "Menu.z.js", [
 		w + "MenuItem",
 		"$.Menu"
@@ -426,6 +483,14 @@ if (!isDebugging) {
 	ClazzLoader.jarClasspath (wPath + "CoolBar.z.js", [
 		w + "CoolItem",
 		"$.CoolBar"
+	]);
+	ClazzLoader.jarClasspath (wPath + "Common.z.js", [
+		w + "Label",
+		"$.Button",
+		"$.Text",
+		"$.Group",
+		"$.TabItem",
+		"$.TabFolder"
 	]);
 	
 	var lPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.layout.*");
@@ -448,13 +513,6 @@ if (!isDebugging) {
 		"$.FormLayout"
 	]);
 
-	var gPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.graphics.*");
-	var g = "$wt.graphics.";
-	ClazzLoader.jarClasspath (gPath + "Font.z.js", [
-		g + "FontData",
-		"$.FontMetrics",
-		"$.Font"
-	]);
 	/*
 	ClazzLoader.jarClasspath (path + "events.js", [
 		"java.util.AbstractList",
