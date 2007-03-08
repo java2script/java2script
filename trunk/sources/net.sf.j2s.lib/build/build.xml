@@ -256,6 +256,9 @@
     		<arg value="java/util/Map.js"/>
     		<arg value="java/util/List.js"/>
     		<arg value="java/util/RandomAccess.js"/>
+        	
+    		<arg value="java/net/URLEncoder.js"/>
+    		<arg value="java/net/URLDecoder.js"/>
 
     		<arg value="net/sf/j2s/ajax/HttpRequest.js"/>
     		<arg value="net/sf/j2s/ajax/IXHRCallback.js"/>
@@ -274,6 +277,30 @@
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.core.bin}/org/apache/harmony/luni/util/Msg.z.js"/>
+        	<arg value="${j2s.core.bin}"/>
+        		<arg value="org/apache/harmony/luni/util/Msg.js"/>
+        		<arg value="org/apache/harmony/luni/util/MsgHelp.js"/>
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.core.bin}/java/lang/StringBuilder.z.js"/>
+        	<arg value="${j2s.core.bin}"/>
+        		<arg value="java/lang/AbstractStringBuilder.js"/>
+        		<arg value="java/lang/StringBuilder.js"/>
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -484,11 +511,11 @@
     		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
     		<arg value="org/eclipse/swt/graphics/ImageLoader.js"/>
     		<arg value="org/eclipse/swt/graphics/Image.js"/>
+    		-->
 
     		<arg value="org/eclipse/swt/graphics/Font.js"/>
     		<arg value="org/eclipse/swt/graphics/FontData.js"/>
     		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
-    		-->
         	
 	    	<classpath>
 	    		<pathelement path="${j2s.lib.project}/bin"/>
@@ -514,6 +541,7 @@
         		<!--
         		-->
         		<arg value="org/eclipse/swt/internal/browser/OS.js"/>
+        		<arg value="org/eclipse/swt/internal/browser/Popup.js"/>
         		
         		<arg value="org/eclipse/swt/graphics/Image.js"/>
         		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
@@ -529,6 +557,20 @@
         		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
         		-->
 
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+    	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/SWT.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+        		<arg value="org/eclipse/swt/SWT.js"/>
+    			<arg value="org/eclipse/swt/SWTError.js"/>
+    			<arg value="org/eclipse/swt/SWTException.js"/>
         	
 	    	<classpath>
 	    		<pathelement path="${j2s.lib.project}/bin"/>
@@ -657,6 +699,22 @@
 	    </java>
 
     	
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Common.z.js"/>
+        	<arg value="${j2s.swt.bin}"/>
+    			<arg value="org/eclipse/swt/widgets/Label.js"/>
+    			<arg value="org/eclipse/swt/widgets/Button.js"/>
+        		<arg value="org/eclipse/swt/widgets/Text.js"/>
+        		<arg value="org/eclipse/swt/widgets/Group.js"/>
+        		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+
+
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js"/>
@@ -820,6 +878,7 @@
     		<arg value="org/eclipse/swt/widgets/Decorations.js"/>
     		<arg value="org/eclipse/swt/widgets/ShellManager.js"/>
     		<arg value="org/eclipse/swt/widgets/Shell.js"/>
+    		<arg value="org/eclipse/swt/widgets/Dialog.js"/>
 
 	    	<classpath>
 	    		<pathelement path="${j2s.lib.project}/bin"/>
