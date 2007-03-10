@@ -30,5 +30,6 @@ Require-Bundle: org.eclipse.ui,
  net.sf.j2s.core,
  org.eclipse.core.filesystem;
  org.junit,
- org.eclipse.jdt.junit
+ org.eclipse.jdt.junit,
+ net.sf.j2s.ajax
 Eclipse-AutoStart: true
