@@ -69,7 +69,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
-		Composite comp = new Composite(parent, parent.getStyle());
+		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
 		comp.setLayout(layout);
 		comp.setFont(font);
@@ -294,7 +294,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 			}
 			String path = javaProject.getOutputLocation().toString();
 			int idx = path.indexOf('/', 2);
-			String relativePath = "";
+			String relativePath = "./";
 			if (idx != -1) {
 				relativePath = path.substring(idx + 1); 
 			}

@@ -284,6 +284,9 @@ public class J2SUnitLaunchingUtil {
 					String gj2sLibPath = j2slibPath;
 					if (isUseGlobalURL) {
 						gj2sLibPath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_J2SLIB_URL, j2slibPath);
+						if (gj2sLibPath.length() == 0) {
+							gj2sLibPath = "./";
+						}
 						if (!gj2sLibPath.endsWith("/")) {
 							gj2sLibPath += "/";
 						}
@@ -416,6 +419,9 @@ public class J2SUnitLaunchingUtil {
 							String glastLocation = lastLocation;
 							if (isUseGlobalURL) {
 								glastLocation = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, lastLocation);
+								if (glastLocation.length() == 0) {
+									glastLocation = "./";
+								}
 								if (!glastLocation.endsWith("/")) {
 									glastLocation += "/";
 								}
@@ -456,6 +462,9 @@ public class J2SUnitLaunchingUtil {
 				String glastLocation = lastLocation;
 				if (isUseGlobalURL) {
 					glastLocation = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, lastLocation);
+					if (glastLocation.length() == 0) {
+						glastLocation = "./";
+					}
 					if (!glastLocation.endsWith("/")) {
 						glastLocation += "/";
 					}
@@ -644,6 +653,9 @@ public class J2SUnitLaunchingUtil {
 		String gj2sLibPath = j2sLibPath;
 		if (isUseGlobalURL) {
 			gj2sLibPath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_J2SLIB_URL, j2sLibPath);
+			if (gj2sLibPath.length() == 0) {
+				gj2sLibPath = "./";
+			}
 			if (!gj2sLibPath.endsWith("/")) {
 				gj2sLibPath += "/";
 			}
@@ -706,6 +718,9 @@ public class J2SUnitLaunchingUtil {
 		String grelativePath = relativePath;
 		if (isUseGlobalURL) {
 			grelativePath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, relativePath);
+			if (grelativePath.length() == 0) {
+				grelativePath = "./";
+			}
 			if (!grelativePath.endsWith("/")) {
 				grelativePath += "/";
 			}
