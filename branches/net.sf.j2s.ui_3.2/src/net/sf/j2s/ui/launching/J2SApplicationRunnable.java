@@ -1,10 +1,16 @@
 package net.sf.j2s.ui.launching;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
 import net.sf.j2s.ui.console.J2SConsoleView;
+import net.sf.j2s.ui.preferences.PreferenceConstants;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchPage;
@@ -23,15 +29,40 @@ public class J2SApplicationRunnable implements Runnable {
 	}
 
 	public void run() {
+		boolean isToViewInConsole = true;
 		boolean isViewFast = false;
 		boolean isViewMaximize = false;
 		try {
+			IPreferenceStore store = Java2ScriptUIPlugin.getDefault().getPreferenceStore();
+
+			boolean preferred = store.getBoolean(PreferenceConstants.INNER_CONSOLE);
+		
+			isToViewInConsole = configuration.getAttribute(
+					IJ2SLauchingConfiguration.VIEW_IN_INNER_J2S_CONSOLE, preferred);
 			isViewMaximize = configuration.getAttribute(
 					IJ2SLauchingConfiguration.MAXIMIZE_J2S_CONSOLE, false);
 			isViewFast = configuration.getAttribute(
 					IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE, false);
 		} catch (CoreException e1) {
 			e1.printStackTrace();
+		}
+		
+		if (!isToViewInConsole) {
+			if (url != null && url.length() != 0) {
+				try {
+					String file = new URL(url).getFile();
+					boolean win32 = ((System.getProperty("os.name").indexOf("Windows") != -1) //$NON-NLS-1$ //$NON-NLS-2$ 
+							|| (System.getProperty("os.name").indexOf("windows") != -1)); //$NON-NLS-1$ //$NON-NLS-2$
+					if (win32 && file.startsWith("/")) {
+						file = file.substring(1);
+					}
+					file = file.replace('/', File.separatorChar);
+					Program.launch(file);
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				}
+			}
+			return;
 		}
 		IWorkbenchPage activePage = Java2ScriptUIPlugin.getDefault()
 				.getWorkbench().getWorkbenchWindows()[0].getActivePage();

@@ -127,7 +127,7 @@ public class ArgsUtil {
 		return buffer.toString();
 	}
 	
-	public static String wrapAsArgumentArray(String s) {
+	public static String wrapAsArgumentArray(String s, boolean whitespace) {
 		String[] args = splitArguments(s);
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('[');
@@ -136,7 +136,10 @@ public class ArgsUtil {
 			buffer.append(outputString(args[i]));
 			buffer.append('\"');
 			if (i != args.length - 1) {
-				buffer.append(", ");
+				buffer.append(",");
+				if (whitespace) {
+					buffer.append(" ");
+				}
 			}
 		}
 		buffer.append(']');
