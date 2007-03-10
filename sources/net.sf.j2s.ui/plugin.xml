@@ -4,6 +4,13 @@
    <extension-point id="externalResourceProvider" name="External Resource Provider" schema="schema/externalResourceProvider.exsd"/>
 
    <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            class="net.sf.j2s.ui.variables.SWTVariableInitializer"
+            variable="ECLIPSE_SWT"/>
+   </extension>
+
+   <extension
          point="org.eclipse.ui.views">
       <category
             name="Java2Script"

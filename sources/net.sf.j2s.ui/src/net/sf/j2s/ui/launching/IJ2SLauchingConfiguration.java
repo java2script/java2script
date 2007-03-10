@@ -6,6 +6,10 @@ public interface IJ2SLauchingConfiguration {
 	public static final String FAST_VIEW_J2S_CONSOLE = "fast.view.j2s.console";
 	public static final String MAXIMIZE_J2S_CONSOLE = "maximize.j2s.console";
 	
+	public static final String USE_GLOBAL_ALAA_URL = "use.global.alaa.url";
+	public static final String GLOBAL_J2SLIB_URL = "global.j2slib.url";
+	public static final String GLOBAL_BINARY_URL = "global.bin.url";
+	
 	public static final String USE_XHTML_HEADER = "use.xhtml.header";
 	public static final String TAIL_BODY_HTML = "tail.body.html";
 	public static final String HEAD_BODY_HTML = "head.body.html";
