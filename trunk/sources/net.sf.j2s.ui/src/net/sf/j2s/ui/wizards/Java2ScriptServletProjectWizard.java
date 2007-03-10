@@ -58,10 +58,11 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			String classpath = J2SLaunchingUtil.readAFile(fis);
 			if (classpath != null) {
 				boolean needUpdate = false;
-				if (classpath.indexOf("SWT_LIBRARY") == -1 && classpath.indexOf("eclipse.swt") == -1) {
+				if (classpath.indexOf("ECLIPSE_SWT") == -1 && classpath.indexOf("SWT_LIBRARY") == -1 &&  
+						classpath.indexOf("eclipse.swt") == -1) {
 					int idx = classpath.lastIndexOf("<");
 					classpath = classpath.substring(0, idx)
-							+ "\t<classpathentry kind=\"var\" path=\"SWT_LIBRARY\"/>\r\n"
+							+ "\t<classpathentry kind=\"var\" path=\"ECLIPSE_SWT\"/>\r\n"
 							+ classpath.substring(idx);
 					needUpdate = true;
 				}

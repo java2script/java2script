@@ -56,15 +56,20 @@ public class Java2ScriptPreferencePage
 //		addField(new DirectoryFieldEditor(PreferenceConstants.P_PATH, 
 //				"&Directory preference:", getFieldEditorParent()));
 		addField(
-			new BooleanFieldEditor(
+			new RadioGroupFieldEditor(
 				PreferenceConstants.INNER_CONSOLE,
-				"Open Java2Script applications in inner console instead of external browsers",
-				getFieldEditorParent()));
+				"Console",
+				1,
+				new String[][] {
+						{ "Inner J2S Console", "true" },
+						{ "Registered external browsers, like Firefox, IE", "false" }
+				},
+				getFieldEditorParent(), true));
 
 		addField(
 				new BooleanFieldEditor(
 					PreferenceConstants.ADDON_COMPATIABLE,
-					"Generate Java2Script applications with Mozilla Addon compatiabilities",
+					"Generate Java2Script applications with Mozilla Add-on supports",
 					getFieldEditorParent()));
 //		addField(
 //			new StringFieldEditor(PreferenceConstants.P_STRING, "A &text preference:", getFieldEditorParent()));

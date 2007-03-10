@@ -3,12 +3,14 @@ package net.sf.j2s.ui.launching;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -30,6 +32,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.IJavaModel;
@@ -38,6 +41,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.widgets.Display;
 
 public class J2SLaunchingUtil {
@@ -160,6 +164,7 @@ public class J2SLaunchingUtil {
 	private static String generateClasspathJ2X(
 			ILaunchConfiguration configuration, String mainType, File workingDir)
 			throws CoreException {
+		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
 		StringBuffer buf = new StringBuffer();
 		
 		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
@@ -230,7 +235,33 @@ public class J2SLaunchingUtil {
 			}
 			set.add(split[i]);
 			if (split[i] != null && split[i].trim().length() != 0) {
-				File f = new File(split[i].trim());
+				String j2xPath = split[i].trim();
+				File f = new File(j2xPath);
+				if (!f.exists() && j2xPath.indexOf("net.sf.j2s.lib") != -1) {
+					if (j2xPath.matches(".*\\.v\\d{3}.*")) { // installed by update manager
+						j2xPath = j2xPath.replaceAll("\\.v\\d{3}", "");
+						f = new File(j2xPath);
+					} else { // is normally installed but is importing incompatiable projects 
+						Location location = Platform.getInstallLocation();
+						URL url = location.getURL();
+						File file = new File(url.getFile(), "plugins");
+						File[] j2sFolders = file.listFiles(new FileFilter() {
+							public boolean accept(File pathname) {
+								String name = pathname.getName().toLowerCase();
+								if (name.startsWith("net.sf.j2s.lib")) {
+									return true;
+								}
+								return false;
+							}
+						});
+						File j2slib = null;
+						if (j2sFolders != null && j2sFolders.length != 0) {
+							j2slib = j2sFolders[0];
+							j2xPath = j2xPath.replaceAll("net\\.sf\\.j2s\\.lib([^\\/\\\\])*(\\/|\\\\)", j2slib.getName() + "$2");
+							f = new File(j2xPath);
+						}
+					}
+				}
 				if (f.exists()) {
 					Properties prop = new Properties();
 					try {
@@ -248,7 +279,15 @@ public class J2SLaunchingUtil {
 					buf.append("ClazzLoader.packageClasspath (\"");
 					buf.append(pkg);
 					buf.append("\", \"");
-					buf.append(FileUtil.toRelativePath(f.getParent(), workingDir.getAbsolutePath()));
+					String j2slibPath = FileUtil.toRelativePath(f.getParent(), workingDir.getAbsolutePath());
+					String gj2sLibPath = j2slibPath;
+					if (isUseGlobalURL) {
+						gj2sLibPath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_J2SLIB_URL, j2slibPath);
+						if (!gj2sLibPath.endsWith("/")) {
+							gj2sLibPath += "/";
+						}
+					}
+					buf.append(gj2sLibPath);
 					buf.append("\"");
 					File pkgFile = new File(f.getParentFile(), pkg.replace('.', '/') + "/package.js");
 					if (pkgFile.exists()) {
@@ -267,6 +306,8 @@ public class J2SLaunchingUtil {
 	private static String generateClasspathExistedClasses (
 			ILaunchConfiguration configuration, String mainType, File workingDir, String indent)
 			throws CoreException {
+		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
+		
 		StringBuffer buf = new StringBuffer();
 		
 		IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
@@ -371,7 +412,14 @@ public class J2SLaunchingUtil {
 						}
 						if (arr.length > 0) {
 							buf.append(", \"");
-							buf.append(lastLocation);
+							String glastLocation = lastLocation;
+							if (isUseGlobalURL) {
+								glastLocation = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, lastLocation);
+								if (!glastLocation.endsWith("/")) {
+									glastLocation += "/";
+								}
+							}
+							buf.append(glastLocation);
 							buf.append("\");\r\n");
 						}
 						existedPackages = false;
@@ -404,7 +452,14 @@ public class J2SLaunchingUtil {
 			}
 			if (arr.length > 0) {
 				buf.append(", \"");
-				buf.append(lastLocation);
+				String glastLocation = lastLocation;
+				if (isUseGlobalURL) {
+					glastLocation = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, lastLocation);
+					if (!glastLocation.endsWith("/")) {
+						glastLocation += "/";
+					}
+				}
+				buf.append(glastLocation);
 				buf.append("\");\r\n");
 			}
 			existedPackages = false;
@@ -583,9 +638,18 @@ public class J2SLaunchingUtil {
 		} else {
 			j2sLibPath = "../net.sf.j2s.lib/j2slib/";
 		}
-		
+
+		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
+		String gj2sLibPath = j2sLibPath;
+		if (isUseGlobalURL) {
+			gj2sLibPath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_J2SLIB_URL, j2sLibPath);
+			if (!gj2sLibPath.endsWith("/")) {
+				gj2sLibPath += "/";
+			}
+		}
+
 		if (!addonCompatiable) {
-			buf.append("<script type=\"text/javascript\" src=\"" + j2sLibPath + "j2slib.z.js\"></script>\r\n");
+			buf.append("<script type=\"text/javascript\" src=\"" + gj2sLibPath + "j2slib.z.js\"></script>\r\n");
 		}
 		
 		J2SCyclicProjectUtils.emptyTracks();
@@ -598,6 +662,12 @@ public class J2SLaunchingUtil {
 				IJ2SLauchingConfiguration.TAIL_HEADER_HTML, ""));
 		
 		buf.append("<style text=\"text/css\">\r\n");
+		buf.append("div.powered {\r\n");
+		buf.append("\tposition:absolute;\r\n" +
+				"\tright:0;\r\n" +
+				"\ttop:0;\r\n" +
+				"\tmargin:1em;\r\n");
+		buf.append("}\r\n");
 		buf.append("a.alaa {\r\n");
 		buf.append("\tdisplay:block;\r\n" +
 				"\twhite-space:nowrap;\r\n" +
@@ -632,17 +702,25 @@ public class J2SLaunchingUtil {
 		if (idx != -1) {
 			relativePath = path.substring(idx + 1); 
 		}
-		
+		String grelativePath = relativePath;
+		if (isUseGlobalURL) {
+			grelativePath = configuration.getAttribute(IJ2SLauchingConfiguration.GLOBAL_BINARY_URL, relativePath);
+			if (!grelativePath.endsWith("/")) {
+				grelativePath += "/";
+			}
+		}
+
 		String args = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null);
 
 		// The following is a link for developers to load application for 
 		// any times. And this link may be used as "A Link An Application"
 		// if relative part
 		buf.append("<!-- A Link An Application (ALAA) -->\r\n");
+		buf.append("<div class=\"powered\">Powered by <a href=\"http://j2s.sourceforge.net/\">Java2Script</a></div>\r\n");
 		buf.append("<a class=\"alaa\" href=\"javascript:if(a='");
 		buf.append(mainType);
 		buf.append('@');
-		buf.append(relativePath);
+		buf.append(grelativePath);
 		buf.append("'");
 		if (args != null && args.length() > 2) { // []
 			buf.append(",r=");
@@ -658,7 +736,7 @@ public class J2SLaunchingUtil {
 			buf.append(",r");
 		}
 		buf.append(");}};x.src='");
-		buf.append(j2sLibPath);
+		buf.append(gj2sLibPath);
 		buf.append("j2slib.z.js';(typeof x[t]=='undefined')?x.onload=f:x[t]=f;" +
 				"d.getElementsByTagName('HEAD')[0].appendChild(x);void(0);}\">");
 		buf.append(mainType);
@@ -701,15 +779,19 @@ public class J2SLaunchingUtil {
 				version = release.getProperty("version");
 			}
 			
-			String kPath = j2sLibPath.trim();
+			String kPath = gj2sLibPath.trim();
 			if (kPath.charAt(kPath.length() - 1) == '/') {
 				kPath = kPath.substring(0, kPath.length() - 1);
 			}
 			int j2sIdx = kPath.lastIndexOf("/");
 			if (j2sIdx != -1) {
-				buf.append("\t/*base : \"http://archive.java2script.org/\",*/\r\n");
+				if (!"http://archive.java2script.org/".equals(kPath.substring(0, j2sIdx + 1))) {
+					buf.append("\t/*base : \"http://archive.java2script.org/\",*/\r\n");
+				}
 				buf.append("\tbase : \"" + kPath.substring(0, j2sIdx + 1) + "\",\r\n");
-				buf.append("\t/*alias : \"" + alias + "\",*/\r\n");
+				if (!alias.equals(kPath.substring(j2sIdx + 1))) {
+					buf.append("\t/*alias : \"" + alias + "\",*/\r\n");
+				}
 				buf.append("\talias : \"" + kPath.substring(j2sIdx + 1) + "\",\r\n");
 			} else {
 				buf.append("\tbase : \"http://archive.java2script.org/\",\r\n");
@@ -721,7 +803,7 @@ public class J2SLaunchingUtil {
 			buf.append("\tonload : function () {\r\n");
 			
 			buf.append("\t\tClazzLoader.setPrimaryFolder (\"");
-			buf.append(relativePath);
+			buf.append(grelativePath);
 			buf.append("\");\r\n");
 			
 			J2SCyclicProjectUtils.emptyTracks();
@@ -737,11 +819,11 @@ public class J2SLaunchingUtil {
 			buf.append("\t}\r\n");
 			buf.append("};\r\n");
 
-			boolean addonCompatiableJS = configuration.getAttribute(
+			boolean addonCompatiableRawJS = configuration.getAttribute(
 					IJ2SLauchingConfiguration.J2S_MOZILLA_ADDON_COMPATIABLE_RAW_JS, true);
 			
-			if (!addonCompatiableJS) {
-				buf.append("</script>\r\n<script type=\"text/javascript\" src=\"" + j2sLibPath + "mozilla.addon.js\">");
+			if (!addonCompatiableRawJS) {
+				buf.append("</script>\r\n<script type=\"text/javascript\" src=\"" + gj2sLibPath + "mozilla.addon.js\">");
 			} else {
 				buf.append("\r\n");
 				File folder = new File(workingDir.getAbsolutePath(), j2sLibPath);
@@ -760,13 +842,13 @@ public class J2SLaunchingUtil {
 		} else {
 			if (j2xStr.indexOf("\"java\"") == -1) {
 				buf.append("ClazzLoader.packageClasspath (\"java\", \"");
-				buf.append(j2sLibPath);
+				buf.append(gj2sLibPath);
 				buf.append("\", true);\r\n");
 			}
 			buf.append(j2xStr);
 			
 			buf.append("ClazzLoader.setPrimaryFolder (\"");
-			buf.append(relativePath);
+			buf.append(grelativePath);
 			buf.append("\");\r\n");
 			
 			J2SCyclicProjectUtils.emptyTracks();
@@ -835,7 +917,7 @@ public class J2SLaunchingUtil {
 		return null;
 	}
 
-	private static File getWorkingDirectory(ILaunchConfiguration configuration)
+	static File getWorkingDirectory(ILaunchConfiguration configuration)
 			throws CoreException {
 		File workingDir = null;
 		String path = configuration.getAttribute(
