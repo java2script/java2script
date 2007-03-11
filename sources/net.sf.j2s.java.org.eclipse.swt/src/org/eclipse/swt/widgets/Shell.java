@@ -888,6 +888,7 @@ int hwndMDIClient () {
  */
 public void open () {
 	checkWidget ();
+	nextWindowLocation(width, height);
 	bringToTop ();
 	if (isDisposed ()) return;
 	/*

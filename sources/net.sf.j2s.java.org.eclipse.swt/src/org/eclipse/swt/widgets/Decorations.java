@@ -235,6 +235,7 @@ void bringToTop () {
 				&& (style.height == null || style.height.length() == 0)){
 			setSize(this.width, this.height);
 		}
+		setLocation(this.left, this.top);
 		/**
 		 * @j2sNative
 		 * var title = this.getText();
@@ -571,7 +572,18 @@ protected void createHandle() {
 	handle = document.createElement("DIV");
 	handle.className = "shell-default shell-trim";
 	handle.style.visibility = "hidden";
-	nextWindowLocation();
+	
+	//nextWindowLocation();
+	
+	if (window.defaultWindowWidth == null) {
+		window.defaultWindowWidth = "768";
+	}
+	if (window.defaultWindowHeight == null) {
+		window.defaultWindowHeight = "557";
+	}
+	width = Integer.parseInt(window.defaultWindowWidth);
+	height = Integer.parseInt(window.defaultWindowHeight);
+
 	this.width = 768;
 	this.height = 557;
 //	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
@@ -668,44 +680,36 @@ protected void createHandle() {
 
 }
 
-private void nextWindowLocation() {
+void nextWindowLocation(int wHint, int hHint) {
+	int delta = OS.getStringPlainHeight("A") + 4 + 6 + 1;
 	if (window.defaultWindowLeft == null) {
-		window.defaultWindowLeft = "132";
+		window.defaultWindowLeft = "64";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
-		if (this.parent == null) num += 32;
-		if (num > getMonitor().clientWidth) {
-			num = 32;
+		if (this.parent == null) num += delta;
+		if (num + wHint > getMonitor().clientWidth) {
+			num = delta;
 		}
 		window.defaultWindowLeft = "" + num;
 	}
 	if (window.defaultWindowTop == null) {
-		window.defaultWindowTop = "32";
+		window.defaultWindowTop = "64";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowTop);
-		if (this.parent == null) num += 32;
-		if (num > getMonitor().clientHeight) {
-			num = 32;
+		if (this.parent == null) num += delta;
+		if (num + hHint > getMonitor().clientHeight) {
+			num = delta;
 		}
 		window.defaultWindowTop = "" + num;
-	}
-	if (window.defaultWindowWidth == null) {
-		window.defaultWindowWidth = "768";
-	}
-	if (window.defaultWindowHeight == null) {
-		window.defaultWindowHeight = "557";
 	}
 	left = Integer.parseInt(window.defaultWindowLeft);
 	top = Integer.parseInt(window.defaultWindowTop);
 	if (parent != null) {
-		left += 32;
-		top += 32;
+		left += delta;
+		top += delta;
 	}
 	left += OS.getFixedBodyOffsetLeft ();
 	top += OS.getFixedBodyOffsetTop ();
-	
-	width = Integer.parseInt(window.defaultWindowWidth);
-	height = Integer.parseInt(window.defaultWindowHeight);
 }
 
 void addModalLayer() {
@@ -2156,6 +2160,7 @@ void setSystemMenu () {
 	}
 	shellTitle = document.createElement("DIV");
 	shellTitle.className = "shell-title-text";
+	shellTitle.appendChild(document.createTextNode("" + (char) 160));
 	
 	/**
 	 * Ubuntu's Firefox has different active caption background color! 
