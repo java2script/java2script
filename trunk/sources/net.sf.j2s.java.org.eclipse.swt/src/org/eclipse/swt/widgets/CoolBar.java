@@ -1563,9 +1563,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			} else {
 				item.control.setSize(ww, bounds.height);
 			}
-			Point pt = item.getPosition();
-			item.control.left = pt.x + 9;
-			item.control.top = pt.y;
+//			Point pt = item.getPosition();
+//			item.control.left = pt.x + 9;
+//			item.control.top = pt.y;
 		}
 		itemNo++;
 	}
