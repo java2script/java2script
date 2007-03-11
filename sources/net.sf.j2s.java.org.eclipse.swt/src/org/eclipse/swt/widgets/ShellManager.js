@@ -350,6 +350,7 @@ sm.updateItems = function () {
 				item.textHandle.removeChild (item.textHandle.childNodes[j]);
 			}
 			item.textHandle.appendChild (document.createTextNode (item.shell.getText ()));
+			item.itemHandle.title = item.shell.getText ();
 		}
 	}
 	this.barEl.style.height = (length * hh + 36) + "px";
