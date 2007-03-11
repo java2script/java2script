@@ -3265,6 +3265,18 @@ protected void release () {
 		}
 	}
 	disposeList = null;
+	if (timerIds != null) {
+		for (int i=0; i<timerIds.length; i++) {
+			if (timerIds [i] != 0) window.clearInterval(timerIds[i]);
+		}
+	}
+	timerIds = null;
+	if (timerList != null) {
+		for (int i=0; i<timerList.length; i++) {
+			if (timerList [i] != null) timerList[i] = null;
+		}
+	}
+	timerList = null;
 //	synchronizer.releaseSynchronizer ();
 //	synchronizer = null;
 	releaseDisplay ();
