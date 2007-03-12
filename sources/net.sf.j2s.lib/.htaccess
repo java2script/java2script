@@ -7,6 +7,8 @@
     BrowserMatch ^Mozilla/4 no-gzip
     # IE 5.5 and IE 6.0 have bugs! Ignore them until IE 7.0+
     BrowserMatch \bMSIE\s7 !no-gzip
+    # IE 6.0 after SP2 has no gzip bugs!
+    BrowserMatch \bMSIE.*SV !no-gzip
     # Sometimes Opera pretends to be IE with "Mozila/4.0"
     BrowserMatch \bOpera !no-gzip
     AddOutputFilterByType DEFLATE text/css text/javascript application/x-javascript
