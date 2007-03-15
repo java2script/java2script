@@ -17,7 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-10-10
  */
@@ -47,10 +47,21 @@ public class SimpleRPCRequest {
 	 * runnable.ajaxIn ();
 	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
 	 */
-	public static void request(SimpleRPCRunnable runnable) {
+	public static void request(final SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
 		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
-			new Thread(runnable).start();
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						runnable.ajaxRun();
+					} catch (RuntimeException e) {
+						e.printStackTrace(); // should never fail in Java thread mode!
+						runnable.ajaxFail();
+						return;
+					}
+					runnable.ajaxOut();
+				}
+			}).start();
 		} else {
 			ajaxRequest(runnable);
 		}

@@ -18,7 +18,7 @@ import java.net.URLEncoder;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-10-10
  */
@@ -29,10 +29,35 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	 * runnable.ajaxIn ();
 	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
 	 */
-	public static void swtRequest(SimpleRPCRunnable runnable) {
+	public static void swtRequest(final SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
 		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
-			Display.getDefault().asyncExec(runnable);
+			new Thread(new Runnable(){
+				public void run() {
+					try {
+						runnable.ajaxRun();
+					} catch (RuntimeException e) {
+						e.printStackTrace(); // should never fail in Java thread mode!
+						Display disp = Display.getDefault();
+						if (disp != null) {
+							disp.syncExec(new Runnable() {
+								public void run() {
+									runnable.ajaxFail();
+								}
+							});
+						}
+						return;
+					}
+					Display disp = Display.getDefault();
+					if (disp != null) {
+						disp.syncExec(new Runnable() {
+							public void run() {
+								runnable.ajaxOut();
+							}
+						});
+					}
+				}
+			}).start();
 		} else {
 			swtAJAXRequest(runnable);
 		}

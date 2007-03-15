@@ -20,7 +20,7 @@ package net.sf.j2s.ajax;
  * A callback object is provided for action to be executed after the class is
  * loaded.
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-8-4
  */

@@ -38,7 +38,7 @@ import org.w3c.dom.Document;
  * This class can be considered as a bridge of Java's AJAX programming and
  * JavaScript/Browser's AJAX programming.
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-2-11
  */

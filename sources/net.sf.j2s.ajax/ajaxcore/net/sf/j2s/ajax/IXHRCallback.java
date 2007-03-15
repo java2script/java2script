@@ -30,7 +30,7 @@ package net.sf.j2s.ajax;
  *    4 Loaded<br>
  *        The data transfer has been completed.<br> 
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-2-11
  */

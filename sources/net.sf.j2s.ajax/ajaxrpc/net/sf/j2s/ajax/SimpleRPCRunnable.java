@@ -19,7 +19,7 @@ package net.sf.j2s.ajax;
  *
  * 2006-10-10
  */
-public abstract class SimpleRPCRunnable extends SimpleSerializable implements Runnable {
+public abstract class SimpleRPCRunnable extends SimpleSerializable {
 	
 	public String getHttpURL() {
 		return "simplerpc"; // url is relative to the servlet!
@@ -51,19 +51,4 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable implements Ru
 	 */
 	public void ajaxFail() {};
 	
-	/**
-	 * @j2sNative
-	 * net.sf.j2s.ajax.ServletThread.call(this);
-	 */
-	public void run() {
-		// ajaxIn(); // ajaxIn should be run outside of #run directly
-		try {
-			ajaxRun();
-		} catch (RuntimeException e) {
-			e.printStackTrace(); // should never fail in Java thread mode!
-			ajaxFail();
-			return;
-		}
-		ajaxOut();
-	}
 }

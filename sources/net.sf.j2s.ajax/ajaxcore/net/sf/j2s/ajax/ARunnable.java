@@ -18,7 +18,7 @@ package net.sf.j2s.ajax;
  * give convenience for <code>AClass</code> or <code>ASWTClass</code>
  * to set and to get the class that is loaded.
  *  
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-8-4
  */
