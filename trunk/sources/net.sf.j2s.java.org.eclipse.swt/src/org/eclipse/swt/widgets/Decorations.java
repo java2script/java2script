@@ -2079,6 +2079,16 @@ void setSystemMenu () {
 	*/
 	titleBar = document.createElement("DIV");
 	titleBar.className = "shell-title-bar";
+	/**
+	 * @j2sNative
+	if (typeof this.titleBar.style.MozUserSelect != "undefined") {
+		this.titleBar.style.MozUserSelect = "none";
+	} else if (typeof this.titleBar.style.KhtmlUserSelect != "undefined") {
+		this.titleBar.style.KhtmlUserSelect = "none";
+	} else {
+		this.titleBar.onselectstart = function () { return false; };
+	}
+	 */ {}
 
 	if ((style & SWT.BORDER) == 0 || (style & SWT.RESIZE) != 0) {
 		shellIcon = document.createElement("DIV");

@@ -305,6 +305,13 @@ void configureItem() {
 			e.item = TreeItem.this;
 			e.widget = TreeItem.this;
 			parent.sendEvent(e);
+			e = new Event();
+			e.display = display;
+			e.type = SWT.MouseDoubleClick;
+			e.detail = SWT.NONE;
+			e.item = TreeItem.this;
+			e.widget = TreeItem.this;
+			parent.sendEvent(e);
 			toReturn(false);
 		}
 	};
@@ -313,6 +320,14 @@ void configureItem() {
 			toReturn(false);
 		}
 	};
+	/**
+	 * @j2sNative
+	 * if (typeof text.style.MozUserSelect != "undefined") {
+	 * 	text.style.MozUserSelect = "none";
+	 * } else if (typeof text.style.KhtmlUserSelect != "undefined") {
+	 * 	text.style.KhtmlUserSelect = "none";
+	 * }
+	 */ {}
 }
 static TreeItem checkNull (TreeItem item) {
 	if (item == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);

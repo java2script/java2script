@@ -347,7 +347,9 @@ protected Button createButton(final int btnStyle, String btnLabel, boolean force
 	if ((style & btnStyle) != 0 || forced) {
 		btn = new Button(buttonPanel, SWT.PUSH);
 		btn.setText(btnLabel);
-		GridData gridData = new GridData(75, 24);
+		GridData gridData = new GridData();
+		gridData.widthHint = 75;
+		gridData.minimumHeight = 24;
 		//gridData.horizontalAlignment = GridData.HORIZONTAL_ALIGN_CENTER;
 		btn.setLayoutData(gridData);
 		btn.addSelectionListener(new SelectionAdapter() {
