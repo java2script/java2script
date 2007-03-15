@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Display;
  * This adapter class provides a default implementation of IXHRCallback.
  * This adapter class wraps current thread scope for those swtOnXXXX method. 
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-2-11
  */

@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Shell;
  * parameter as <code>AClass#load</code>. Or call <code>ASWTClass#shellLoad</code>
  * or <code>ASWTClass#displayLoad</code> with extra Shell/Display argument. 
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-8-4
  */

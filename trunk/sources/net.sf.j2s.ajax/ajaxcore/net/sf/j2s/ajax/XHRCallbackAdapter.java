@@ -16,7 +16,7 @@ package net.sf.j2s.ajax;
 /**
  * This adapter provides a default implementation of IXHRCallback.
  * 
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-2-11
  */

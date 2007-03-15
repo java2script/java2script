@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-6-5
  */

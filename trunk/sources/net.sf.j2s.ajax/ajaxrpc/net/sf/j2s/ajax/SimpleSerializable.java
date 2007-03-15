@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-10-11
  */
