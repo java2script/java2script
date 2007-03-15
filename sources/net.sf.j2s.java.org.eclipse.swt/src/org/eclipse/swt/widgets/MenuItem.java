@@ -286,6 +286,11 @@ void configMenuItem() {
 	this.handle.oncontextmenu = function () {
 		return false;
 	};
+	if (typeof this.handle.style.MozUserSelect != "undefined") {
+		this.handle.style.MozUserSelect = "none";
+	} else if (typeof this.handle.style.KhtmlUserSelect != "undefined") {
+		this.handle.style.KhtmlUserSelect = "none";
+	}
 	 */ {}
 }
 
