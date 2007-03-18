@@ -104,7 +104,7 @@ public class NewJiglooComposite extends org.eclipse.swt.widgets.Composite {
 					GridData link1LData = new GridData();
 					link1.setLayoutData(link1LData);
 					link1
-						.setText("<a href=\"http://bl.oginze.com/\">bl.ognize</a>");
+						.setText("<a href=\"http://bl.ognize.com/\">bl.ognize</a>");
 				}
 			}
 			{
