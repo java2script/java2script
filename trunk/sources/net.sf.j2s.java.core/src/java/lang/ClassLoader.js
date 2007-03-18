@@ -1324,11 +1324,17 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 		while (ClazzLoader.checkOptionalCycle (ClazzLoader.clazzTreeRoot)) {
 		}
+		lastNode = null;
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
+			if (lastNode == n) break;
 			ClazzLoader.updateNode (n);
+			lastNode = n;
 		}
+		lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_DECLARED)) != null) {
+			if (lastNode == n) break;
 			ClazzLoader.updateNode (n);
+			lastNode = n;
 		}
 
 		/*
