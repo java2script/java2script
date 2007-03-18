@@ -1,0 +1,73 @@
+/*
+ * FIXME: The following css rule breaks the whole page's CSS!
+ */
+table, tr, td {
+	font-family:Tahoma, Arial,sans-serif;
+	font-size:8pt;
+	margin:0;
+	padding:0;
+}
+
+.table-default {
+	overflow:scroll;
+	position:absolute;
+	background-color:white;
+}
+.table-default table {
+
+}
+.table-item-default {
+	cursor:default;
+	white-space:nowrap;
+	font-size:9pt;
+	font-family:Arial,sans-serif;
+}
+.table-item-selected {
+	background-color:#58D;
+	color:white;
+	cursor:default;
+	white-space:nowrap;
+}
+.table-item-cell-default {
+	display:inline;
+	overflow:hidden;
+	white-space:nowrap;
+	margin:0;
+	padding:0;
+}
+.table-item-cell-text-default {
+	display:inline;
+	overflow:hidden;
+	white-space:nowrap;
+	margin:0;
+	padding:0;
+}
+.table-item-cell-text-selected {
+	display:inline;
+	overflow:hidden;
+	white-space:nowrap;
+	margin:0;
+	padding:0;
+	background-color:#58D;
+	color:white;
+}
+.table-column-default {
+	overflow: invisible;
+	background-image:url('images/table-column.png');
+	background-repeat:repeat-x;
+}
+
+.table-column-resize {
+	top:1px;
+	position:absolute;
+	cursor:e-resize;
+	width:3px;
+  	font-size:0;
+	z-index:100;
+	background-color:red;
+	float:right;
+}
+
+.table-item-focus {
+	background-color:#E8F2FE;
+}
