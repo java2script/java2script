@@ -1,14 +1,12 @@
 /*******************************************************************************
- * Java2Script Pacemaker (http://j2s.sourceforge.net)
- *
- * Copyright (c) 2006 ognize.com and others.
+ * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     ognize.com - initial API and implementation
+ *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
 package net.sf.j2s.test.ajax;
@@ -17,7 +15,7 @@ import net.sf.j2s.ajax.SimpleSerializable;
 import junit.framework.TestCase;
 
 /**
- * @author josson smith
+ * @author zhou renjian
  *
  * 2006-10-13
  */
@@ -28,16 +26,14 @@ public class BigTest extends TestCase {
 	public void testJavaSource() {
 	    String tmpStr = "";
 	    tmpStr += "/*******************************************************************************\r\n";
-	    tmpStr += " * Java2Script Pacemaker (http://j2s.sourceforge.net)\r\n";
-	    tmpStr += " *\r\n";
-	    tmpStr += " * Copyright (c) 2006 ognize.com and others.\r\n";
+	    tmpStr += " * Copyright (c) 2007 java2script and others.\r\n";
 	    tmpStr += " * All rights reserved. This program and the accompanying materials\r\n";
 	    tmpStr += " * are made available under the terms of the Eclipse Public License v1.0\r\n";
 	    tmpStr += " * which accompanies this distribution, and is available at\r\n";
 	    tmpStr += " * http://www.eclipse.org/legal/epl-v10.html\r\n";
 	    tmpStr += " *\r\n";
 	    tmpStr += " * Contributors:\r\n";
-	    tmpStr += " *     ognize.com - initial API and implementation\r\n";
+	    tmpStr += " *     Zhou Renjian - initial API and implementation\r\n";
 	    tmpStr += " *******************************************************************************/\r\n";
 
 	    tmpStr += "package net.sf.j2s.ajax.test;\r\n";
@@ -46,7 +42,7 @@ public class BigTest extends TestCase {
 	    tmpStr += "import net.sf.j2s.ajax.SimpleSerializable;\r\n";
 
 	    tmpStr += "/**\r\n";
-	    tmpStr += " * @author josson smith\r\n";
+	    tmpStr += " * @author zhou renjian\r\n";
 	    tmpStr += " *\r\n";
 	    tmpStr += " * 2006-10-11\r\n";
 	    tmpStr += " */\r\n";
