@@ -1,6 +1,0 @@
-#Java2Script Configuration
-#Sun Mar 18 18:51:22 CST 2007
-j2s.resources.list=../../plugins/net.sf.j2s.lib_1.0.0/j2slib/java.runtime.j2x,../../plugins/net.sf.j2s.lib_1.0.0/j2slib/junit.j2x,bin/net/sf/j2s/ajax/test/LoadingRSS.js,bin/net/sf/j2s/ajax/test/TestSerialize.js,bin/net/sf/j2s/ajax/test/SerializeTest.js,bin/net/sf/j2s/ajax/test/DeserializeTest.js,bin/net/sf/j2s/ajax/test/ArraySerializeTest.js,bin/net/sf/j2s/ajax/test/ArrayDeserializeTest.js,bin/net/sf/j2s/ajax/test/BigTest.js,bin/net/sf/j2s/test/ajax/ArrayDeserializeTest.js,bin/net/sf/j2s/test/ajax/ArraySerializeTest.js,bin/net/sf/j2s/test/ajax/BigTest.js,bin/net/sf/j2s/test/ajax/DeserializeTest.js,bin/net/sf/j2s/test/ajax/LoadingRSS.js,bin/net/sf/j2s/test/ajax/SerializeTest.js,bin/net/sf/j2s/test/ajax/TestSerialize.js,bin/net/sf/j2s/test/lz77js/LZ77ServletRunnable.js,bin/net/sf/j2s/test/lz77js/client/LZ77JS.js,bin/net/sf/j2s/test/lz77js/server/LZ77JSServlet.js,bin/com/ognize/lz77js/LZ77JSSimpleRPCRunnable.js,bin/com/ognize/lz77js/servlet/LZ77JSServlet.js,bin/com/ognize/lz77js/ui/LZ77JS.js,bin/net/sf/j2s/test/ajax/Base64UserPasswordTest.js,bin/net/sf/j2s/test/ajax/HTMLChineseSimpleRPCTest.js,bin/net/sf/j2s/test/ajax/ZZRunnable.js,bin/net/sf/j2s/test/ajax/ZZRunnableTest.js
-j2s.output.path=bin
-j2s.abandoned.resources.list=
-j2s.compiler.status=enable
