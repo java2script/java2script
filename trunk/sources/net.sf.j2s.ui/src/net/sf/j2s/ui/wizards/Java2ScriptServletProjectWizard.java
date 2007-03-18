@@ -223,6 +223,10 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			webxml.append("        <servlet-class>net.sf.j2s.ajax.SimpleRPCHttpServlet</servlet-class>\r\n");
 			webxml.append("	       <init-param>\r\n");
 			webxml.append("            <param-name>simple.rpc.runnables</param-name>\r\n");
+			webxml.append("            <!--\r\n");
+			webxml.append("              Qualified names of inherited net.sf.j2s.ajax.SimpleRPCRunnable\r\n");
+			webxml.append("              classes, seperated by \";\".\r\n");
+			webxml.append("            -->\r\n");
 			webxml.append("            <param-value>\r\n");
 			webxml.append("            </param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
