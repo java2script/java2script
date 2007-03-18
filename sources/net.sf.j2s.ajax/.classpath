@@ -7,5 +7,6 @@
 	<classpathentry kind="src" path="ajaxswt"/>
 	<classpathentry kind="src" path="ajaxrpc"/>
 	<classpathentry kind="var" path="JAVAX_SERVLET"/>
+	<classpathentry kind="src" path="ajaxdom"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
