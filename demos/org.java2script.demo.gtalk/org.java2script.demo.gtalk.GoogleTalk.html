@@ -29,19 +29,17 @@ a.alaa {
 <body>
 <!-- A Link An Application (ALAA) -->
 <div class="powered">Powered by <a href="http://j2s.sourceforge.net/">Java2Script</a></div>
-<a class="alaa" href="javascript:if(a='org.java2script.demo.gtalk.GoogleTalk@bin',window['ClazzLoader']!=null)$w$(a);else{var d=document,t='onreadystatechange',x=d.createElement('SCRIPT'),f=function(){var s=this.readyState;if(s==null||s=='loaded'||s=='complete'){$w$(a);}};x.src='../../plugins/net.sf.j2s.lib_1.0.0/j2slib/j2slib.z.js';(typeof x[t]=='undefined')?x.onload=f:x[t]=f;d.getElementsByTagName('HEAD')[0].appendChild(x);void(0);}">org.java2script.demo.gtalk.GoogleTalk</a>
+<a class="alaa" href="javascript:if(a='org.java2script.demo.gtalk.GoogleTalk@bin/',window['ClazzLoader']!=null)$w$(a);else{var d=document,t='onreadystatechange',x=d.createElement('SCRIPT'),f=function(){var s=this.readyState;if(s==null||s=='loaded'||s=='complete'){$w$(a);}};x.src='http://archive.java2script.org/1.0.0-m5/j2slib.z.js';(typeof x[t]=='undefined')?x.onload=f:x[t]=f;d.getElementsByTagName('HEAD')[0].appendChild(x);void(0);}">org.java2script.demo.gtalk.GoogleTalk</a>
 
 <script type="text/javascript">
 window["j2s.lib"] = {
-	/*base : "http://archive.java2script.org/",*/
-	base : "../../plugins/net.sf.j2s.lib_1.0.0/",
-	/*alias : "1.0.0-m5",*/
-	alias : "j2slib",
+	base : "http://archive.java2script.org/",
+	alias : "1.0.0-m5",
 	version : "20070315",
 	/*forward : true,*/
 	mode : "dailybuild",
 	onload : function () {
-		ClazzLoader.setPrimaryFolder ("bin");
+		ClazzLoader.setPrimaryFolder ("bin/");
 		ClazzLoader.packageClasspath ("org.java2script.demo.gtalk", "bin/");
 		ClazzLoader.loadClass ("org.java2script.demo.gtalk.GoogleTalk", function () {
 			org.java2script.demo.gtalk.GoogleTalk.main([]);
