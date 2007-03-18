@@ -1,5 +1,5 @@
 #Java2Script Configuration
-#Sun Nov 12 23:36:33 CST 2006
+#Sun Mar 18 17:32:58 CST 2007
 j2s.compiler.visitor=SWTScriptVisitor
 j2s.abandoned.resources.list=bin/org/eclipse/swt/internal/xhtml/window.js,bin/org/eclipse/swt/internal/xhtml/document.js,bin/org/eclipse/swt/internal/xhtml/Screen.js,bin/org/eclipse/swt/internal/xhtml/Option.js,bin/org/eclipse/swt/internal/xhtml/Element.js,bin/org/eclipse/swt/internal/xhtml/ContentWindow.js,bin/org/eclipse/swt/internal/xhtml/Clazz.js,bin/org/eclipse/swt/internal/xhtml/CSSStyle.js,bin/org/eclipse/swt/internal/xhtml/Body.js,bin/org/eclipse/swt/internal/xhtml/HTMLEvent.js
 j2s.compiler.abbreviation=true
