@@ -84,7 +84,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 		group.setLayout(layout);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		String controlName = "Java2Script Console Misc Options";
+		String controlName = "Java2Script Console";
 		group.setText(controlName);
 		
 		btnInner = new Button(group, SWT.RADIO);
@@ -370,7 +370,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	public String getName() {
-		return "Misc";
+		return "Miscellaneous";
 	}
 	
 	public Image getImage() {
