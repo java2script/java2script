@@ -1,14 +1,12 @@
 /*******************************************************************************
- * Java2Script Pacemaker (http://j2s.sourceforge.net)
- *
- * Copyright (c) 2006 ognize.com and others.
+ * Copyright (c) 2007 java2script.org and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     ognize.com - initial API and implementation
+ *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
 package net.sf.j2s.ui.wizards;
@@ -223,6 +221,10 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			webxml.append("        <servlet-class>net.sf.j2s.ajax.SimpleRPCHttpServlet</servlet-class>\r\n");
 			webxml.append("	       <init-param>\r\n");
 			webxml.append("            <param-name>simple.rpc.runnables</param-name>\r\n");
+			webxml.append("            <!--\r\n");
+			webxml.append("              Qualified names of inherited net.sf.j2s.ajax.SimpleRPCRunnable\r\n");
+			webxml.append("              classes, seperated by \";\".\r\n");
+			webxml.append("            -->\r\n");
 			webxml.append("            <param-value>\r\n");
 			webxml.append("            </param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
