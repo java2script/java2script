@@ -707,6 +707,7 @@
     			<arg value="org/eclipse/swt/widgets/Button.js"/>
         		<arg value="org/eclipse/swt/widgets/Text.js"/>
         		<arg value="org/eclipse/swt/widgets/Group.js"/>
+        		<arg value="org/eclipse/swt/widgets/TabItem.js"/>
         		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
         	
 	    	<classpath>
