@@ -1062,7 +1062,20 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				CatchClause element = (CatchClause) iter.next();
 				element.getException().getType().accept(this);
 				buffer.append(")) ");
+				SimpleName exName = element.getException().getName();
+				String eName = exName.getIdentifier();
+				boolean notEName = false;
+				if (!"e".equals(eName)) {
+					buffer.append("{\r\n");
+					buffer.append("var ");
+					buffer.append(eName);
+					buffer.append(" = e;\r\n");
+					notEName = true;
+				}
 				element.getBody().accept(this);
+				if (notEName) {
+					buffer.append("\r\n}");
+				}
 				if (iter.hasNext()) {
 					buffer.append(" else if (Clazz.instanceOf (e, ");
 				}
