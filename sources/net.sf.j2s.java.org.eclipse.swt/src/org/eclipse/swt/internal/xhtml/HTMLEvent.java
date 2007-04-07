@@ -2,6 +2,7 @@ package org.eclipse.swt.internal.xhtml;
 
 public class HTMLEvent {
 	public Element srcElement;
+	public Element target;
 	public int type;
 	public int returnValue;
 	public boolean cancelBubble;
