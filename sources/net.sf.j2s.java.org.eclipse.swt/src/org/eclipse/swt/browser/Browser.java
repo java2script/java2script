@@ -957,7 +957,8 @@ public String getUrl() {
 	pVarResult.dispose();
 	return result;
 	*/
-	return url;
+	return handle.contentWindow.location;
+//	return url;
 }
 
 /**
