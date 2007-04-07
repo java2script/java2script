@@ -654,6 +654,7 @@ protected void createHandle() {
 					toReturn(true);
 					return ;
 				}
+				
 				if ((defaultButton.style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
 					
 					if ((defaultButton.style & SWT.CHECK) != 0) {
