@@ -657,7 +657,7 @@ protected void createHandle() {
 				if ((defaultButton.style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
 					
 					if ((defaultButton.style & SWT.CHECK) != 0) {
-						if (e.srcElement != defaultButton.btnHandle) {
+						if (e.srcElement != defaultButton.btnHandle  && e.target != defaultButton.btnHandle) {
 							defaultButton.setSelection (!defaultButton.getSelection ());
 						}
 					} else {
@@ -681,6 +681,13 @@ protected void createHandle() {
 }
 
 void nextWindowLocation(int wHint, int hHint) {
+	/*
+	 * if the user has set the bounds of the shell we should not override it!
+	 */
+	if(boundsSet) {
+		return;
+	}
+	
 	int delta = OS.getStringPlainHeight("A") + 4 + 6 + 1;
 	if (window.defaultWindowLeft == null) {
 		window.defaultWindowLeft = "64";
@@ -1708,6 +1715,7 @@ public void setMaximized (boolean maximized) {
 	Monitor monitor = getMonitor();
 	boolean updateBody = (monitor.handle == document.body); // update with current body client area
 	if (maximized) {
+		
 		if (updateBody) {
 			lastBodyScrollLeft = node.scrollLeft;
 			lastBodyScrollTop = node.scrollTop;
@@ -1755,10 +1763,13 @@ public void setMaximized (boolean maximized) {
 			 * @j2sNative
 			 * isOptMaximized = window["ShellManager"] != null; 
 			 */ {}
+			 
+			
 			if (!isOptMaximized) {
 				setBounds(computeTrim(0, 0, width, height - titleHeight));
 			} else {
-				setBounds(computeTrim(0, -titleHeight, width, height));
+				Rectangle trim = computeTrim(0, -titleHeight, width, height);
+				setBounds(trim.x, trim.y, trim.width, trim.height);
 				toUpdateMax = true;
 			}
 		}
@@ -2401,6 +2412,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	el.style.top = Y + "px";
 	el.style.width = (cx > 0 ? cx : 0) + "px";
 	el.style.height = (cy > 0 ? cy : 0) + "px";
+	
 	return true;
 //	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }

@@ -1274,7 +1274,7 @@ void hookSelection() {
 				HTMLEvent e = (HTMLEvent) getEvent();
 				if ((style & SWT.CHECK) != 0) {
 					// Still buggy on check button with image
-					if (e.srcElement != btnHandle) {
+					if (e.srcElement != btnHandle && e.target != btnHandle) {
 						setSelection (!getSelection ());
 					}
 				} else {
@@ -1307,6 +1307,9 @@ void hookSelection() {
 	handle.onclick = handle.ondblclick = eventHandler;
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		btnText.onclick = eventHandler;
+	}
+	if((style & SWT.CHECK) != 0){
+		
 	}
 	handle.onkeydown = new RunnableCompatibility() {
 		public void run() {
