@@ -389,39 +389,55 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 
 		// store request in session before the request is completed
 		HttpSession session = req.getSession();
+		
 		String attrName = "jzn" + scriptRequestID;
 		String attrTime = "jzt" + scriptRequestID;
-		Object attr = session.getAttribute(attrName);
 		String[] parts = null;
-		if (attr == null) {
-			parts = new String[partsCount];
-			session.setAttribute(attrName, parts);
-			session.setAttribute(attrTime, new Date());
-		} else { // attr instanceof String[]
-			parts = (String []) attr;
-			if (partsCount != parts.length) {
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				return null;
+		
+		boolean badRequest = false;
+		boolean toContinue = false;
+		synchronized (session) {
+			Object attr = session.getAttribute(attrName);
+			if (attr == null) {
+				parts = new String[partsCount];
+				session.setAttribute(attrName, parts);
+				session.setAttribute(attrTime, new Date());
+			} else { // attr instanceof String[]
+				parts = (String []) attr;
+				if (partsCount != parts.length) {
+					badRequest = true;
+				}
+			}
+			if (!badRequest) {
+				synchronized (parts) {
+					parts[curPart - 1] = request;
+					for (int i = 0; i < parts.length; i++) {
+						if (parts[i] == null) {
+							// not completed yet! just response and wait next request.
+							toContinue = true;
+							break;
+						}
+					}
+				}
+				if (!toContinue) {
+					// request is completed. return the request
+					session.removeAttribute(attrName);
+					session.removeAttribute(attrTime);
+				}
 			}
 		}
-		parts[curPart - 1] = request;
-		for (int i = 0; i < parts.length; i++) {
-			if (parts[i] == null) {
-				// not completed yet! just response and wait next request.
-				
-				resp.setContentType("text/javascript");
-				//resp.setCharacterEncoding("utf-8");
-				resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
-						".xssNotify(\"" + scriptRequestID + "\", \"continue\");");
-				return null;
-			}
+		if (badRequest) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+		if (toContinue) {
+			resp.setContentType("text/javascript");
+			//resp.setCharacterEncoding("utf-8");
+			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+					".xssNotify(\"" + scriptRequestID + "\", \"continue\");");
+			return null;
 		}
 		
-		// request is completed. return the request
-		synchronized (session) {
-			session.removeAttribute(attrName);
-			session.removeAttribute(attrTime);
-		}
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < parts.length; i++) {
 			buf.append(parts[i]);
