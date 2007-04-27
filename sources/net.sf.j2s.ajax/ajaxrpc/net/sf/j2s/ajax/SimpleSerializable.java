@@ -390,7 +390,7 @@ if (s == null) {
 	buffer[buffer.length] = 's';
 	buffer[buffer.length] = String.fromCharCode (baseChar - 1);
 } else {
-	var normal = /^[\u0000-\u00ff]*$/.test(s);
+	var normal = /^[\r\n\t\u0020-\u007e]*$/.test(s);
 	if (normal) {
 		buffer[buffer.length] = 's';
 	} else {
@@ -459,6 +459,7 @@ for (var i = 0; i < fields.length; i++) {
 while (index < length) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
+	if (l1 < 0) return;
 	var fieldName = str.substring (index, index + l1);
 	index += l1;
 	var c2 = str.charAt (index++);
@@ -476,6 +477,7 @@ while (index < length) {
 			if (l2 == -2) {
 				var c4 = str.charCodeAt(index++);
 				var l3 = c4 - baseChar;
+				if (l3 < 0) return;
 				l2 = parseInt(str.substring(index, index + l3));
 				if (l2 > 0x4000) { // 16 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
@@ -502,7 +504,9 @@ while (index < length) {
 					} else if (l3 == -2) {
 						var c6 = str.charCodeAt (index++);
 						var l4 = c6 - baseChar;
+						if (l4 < 0) return;
 						var l5 = parseInt (str.substring( index, index + l4));
+						if (l5 < 0) return;
 						index += l4;
 						s = str.substring (index, index + l5);
 						index += l5;
@@ -538,7 +542,9 @@ while (index < length) {
 		} else if (l2 == -2) {
 			var c4 = str.charCodeAt(index++);
 			var l3 = c4 - baseChar;
+			if (l3 < 0) return;
 			var l4 = parseInt(str.substring(index, index + l3));
+			if (l4 < 0) return;
 			index += l3;
 			s = str.substring(index, index + l4);
 			index += l4;
@@ -599,6 +605,7 @@ while (index < length) {
 		while (index < length) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
+			if (l1 < 0) return;
 			String fieldName = str.substring(index, index + l1);
 			index += l1;
 			char c2 = str.charAt(index++);
@@ -617,6 +624,7 @@ while (index < length) {
 						if (l2 == -2) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
+							if (l3 < 0) return;
 							l2 = Integer.parseInt(str.substring(index, index + l3));
 							if (l2 > 0x4000) { // 16 * 1024
 								/*
@@ -645,7 +653,9 @@ while (index < length) {
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
+									if (l4 < 0) return;
 									int l5 = Integer.parseInt(str.substring(index, index + l4));
+									if (l5 < 0) return;
 									index += l4;
 									ss[i] = str.substring(index, index + l5);
 									index += l5;
@@ -761,7 +771,9 @@ while (index < length) {
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
+					if (l3 < 0) return;
 					int l4 = Integer.parseInt(str.substring(index, index + l3));
+					if (l4 < 0) return;
 					index += l3;
 					s = str.substring(index, index + l4);
 					index += l4;
