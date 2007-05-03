@@ -431,14 +431,9 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		if (toContinue) {
 			resp.setContentType("text/javascript");
 			//resp.setCharacterEncoding("utf-8");
-			PrintWriter writer = resp.getWriter();
-			if (curPart == 1) {
-				// Cookie may be disabled in client side!
-				writer.write("net.sf.j2s.ajax.SimpleRPCRequest" +
-						".xssSession(\"" + scriptRequestID + "\", \"" + session.getId() + "\");\r\n");
-			}
-			writer.write("net.sf.j2s.ajax.SimpleRPCRequest" +
-					".xssNotify(\"" + scriptRequestID + "\", \"continue\");");
+			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+					".xssNotify(\"" + scriptRequestID + "\", \"continue\"" +
+					((curPart == 1) ? ", \"" + session.getId() + "\");" : ");"));
 			return null;
 		}
 		

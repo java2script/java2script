@@ -130,41 +130,41 @@ public class SimpleRPCRequest {
 	protected static boolean checkXSS(String url, String serialize, SimpleRPCRunnable runnable) {
 		/**
 		 * @j2sNative
- if (url != null && (url.indexOf ("http://") == 0
- 		|| url.indexOf ("https://") == 0)) {
- 	var host = null;
- 	var idx = url.indexOf ('/', 9);
- 	if (idx != -1) {
- 		host = url.substring (url.indexOf ("//") + 2, idx); 
- 	} else {
- 		host = url.substring (url.indexOf ("//") + 2); 
- 	}
- 	if (window.location.host != host || window.location.protocol == "file:") {
- 		var g = net.sf.j2s.ajax.SimpleRPCRequest;
- 		if (g.idSet == null) {
- 			g.idSet = new Object ();
- 		}
- 		var rnd = null;
- 		while (true) {
- 			var rnd = Math.random () + "0000000.*";
- 			rnd = rnd.substring (2, 8);
- 			if (g.idSet["o" + rnd] == null) {
- 				g.idSet["o" + rnd] = runnable;
- 				break;
- 			}
- 		}
- 		var limit = 7168; //8192;
- 		if (window["script.get.url.limit"] != null) {
- 			limit = window["script.get.url.limit"]; 
- 		}
- 		var ua = navigator.userAgent.toLowerCase ();
- 		if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
- 			limit = 2048;
- 			limit = 2048 - 44; // ;jsessionid=
- 		}
- 		limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
- 		var contents = [];
- 		var content = encodeURIComponent(serialize);
+if (url != null && (url.indexOf ("http://") == 0
+		|| url.indexOf ("https://") == 0)) {
+	var host = null;
+	var idx = url.indexOf ('/', 9);
+	if (idx != -1) {
+		host = url.substring (url.indexOf ("//") + 2, idx); 
+	} else {
+		host = url.substring (url.indexOf ("//") + 2); 
+	}
+	if (window.location.host != host || window.location.protocol == "file:") {
+		var g = net.sf.j2s.ajax.SimpleRPCRequest;
+		if (g.idSet == null) {
+			g.idSet = new Object ();
+		}
+		var rnd = null;
+		while (true) {
+			var rnd = Math.random () + "0000000.*";
+			rnd = rnd.substring (2, 8);
+			if (g.idSet["o" + rnd] == null) {
+				g.idSet["o" + rnd] = runnable;
+				break;
+			}
+		}
+		var limit = 7168; //8192;
+		if (window["script.get.url.limit"] != null) {
+			limit = window["script.get.url.limit"]; 
+		}
+		var ua = navigator.userAgent.toLowerCase ();
+		if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
+			limit = 2048;
+			limit = 2048 - 44; // ;jsessionid=
+		}
+		limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
+		var contents = [];
+		var content = encodeURIComponent(serialize);
 		if (content.length > limit) {
 			parts = Math.ceil (content.length / limit);
 			var lastEnd = 0;
@@ -190,11 +190,11 @@ public class SimpleRPCRequest {
 		g.idSet["x" + rnd] = contents;
 		// Only send the first request, later server return "continue", and client will get
 		// the session id and continue later requests.
- 		net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
- 		contents[0] = null;
- 		return true; // cross site script!
- 	}
- }
+		net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
+		contents[0] = null;
+		return true; // cross site script!
+	}
+}
 		 */ { }
 		 return false;
 	}
@@ -210,60 +210,42 @@ var session = g.idSet["s" + rnd];
 if (session != null && window["script.get.session.url"] != false) {
 	url += ";jsessionid=" + session;
 }
- 			var script = document.createElement ("SCRIPT");
- 			script.type = "text/javascript";
- 			script.src = url + "?jzn=" + rnd + "&jzp=" + length 
- 					+ "&jzc=" + (i + 1) + "&jzz=" + content;
- 			if (typeof (script.onreadystatechange) == "undefined") { // W3C
-	 			script.onerror = function () {
-	 				this.onerror = null;
-	 				var idx = this.src.indexOf ("jzn=");
-	 				var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-	 				net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-	 				document.getElementsByTagName ("HEAD")[0].removeChild (this);
-	 			};
-	 			script.onload = function () {
-	 				this.onload = null;
-	 				if (navigator.userAgent.indexOf ("Opera") >= 0) {
-	 					var idx = this.src.indexOf ("jzn=");
-	 					var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-	 					net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
- 					}
- 					document.getElementsByTagName ("HEAD")[0].removeChild (this);
- 				};
-	 		} else { // IE
-				script.defer = true;
-				script.onreadystatechange = function () {
-					var state = "" + this.readyState;
-					if (state == "loaded" || state == "complete") {
-						this.onreadystatechange = null; 
-		 				var idx = this.src.indexOf ("jzn=");
-		 				var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-		 				net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-	 					document.getElementsByTagName ("HEAD")[0].removeChild (this);
-					}
-				};
-	 		}
- 			var head = document.getElementsByTagName ("HEAD")[0];
- 			head.appendChild (script);
-		 */ {}
-	}
-	
-	static void sendRestRequests(String nameID) {
-		/**
-		 * The following codes may be modified to send out requests one by one.  
-		 * @j2sNative
-		 * var g = net.sf.j2s.ajax.SimpleRPCRequest;
-		 * var xcontent = g.idSet["x" + nameID]; 
-		 * if (xcontent != null) {
-		 * 	for (var i = 0; i < xcontent.length; i++) {
-		 * 		if (xcontent[i] != null) {
-		 * 			g.callByScript(nameID, xcontent.length, i, xcontent[i]);
-		 * 			xcontent[i] = null;
-		 * 		}
-		 * 	}  
-		 * 	g.idSet["x" + nameID] = null;
-		 * }
+var script = document.createElement ("SCRIPT");
+script.type = "text/javascript";
+script.src = url + "?jzn=" + rnd + "&jzp=" + length 
+		+ "&jzc=" + (i + 1) + "&jzz=" + content;
+if (typeof (script.onreadystatechange) == "undefined") { // W3C
+	script.onerror = function () {
+		this.onerror = null;
+		var idx = this.src.indexOf ("jzn=");
+		var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
+		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+		document.getElementsByTagName ("HEAD")[0].removeChild (this);
+	};
+	script.onload = function () {
+		this.onload = null;
+		if (navigator.userAgent.indexOf ("Opera") >= 0) {
+			var idx = this.src.indexOf ("jzn=");
+			var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
+			net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+		}
+		document.getElementsByTagName ("HEAD")[0].removeChild (this);
+	};
+} else { // IE
+	script.defer = true;
+	script.onreadystatechange = function () {
+		var state = "" + this.readyState;
+		if (state == "loaded" || state == "complete") {
+			this.onreadystatechange = null; 
+			var idx = this.src.indexOf ("jzn=");
+			var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
+			net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+			document.getElementsByTagName ("HEAD")[0].removeChild (this);
+		}
+	};
+}
+var head = document.getElementsByTagName ("HEAD")[0];
+head.appendChild (script);
 		 */ {}
 	}
 	
@@ -272,8 +254,9 @@ if (session != null && window["script.get.session.url"] != false) {
 	 * 
 	 * @param nameID
 	 * @param response
+	 * @param session
 	 */
-	static void xssNotify(String nameID, String response) {
+	static void xssNotify(String nameID, String response, String session) {
 		/**
 		 * @j2sNative
 var ua = navigator.userAgent.toLowerCase ();
@@ -295,15 +278,26 @@ if (response != null && ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1)
 }
 		 */ { }
 		if (response == "continue") {
-			boolean restNotEmpty = false;
 			/**
 			 * @j2sNative
 			 * var g = net.sf.j2s.ajax.SimpleRPCRequest;
-			 * if (g.idSet["x" + nameID] != null) {
-			 * 	restNotEmpty = true; 
+			 * if (session != null){
+			 * 	g.idSet["s" + nameID] = session;
+			 * }
+			 * var xcontent = g.idSet["x" + nameID]; 
+			 * if (xcontent != null) {
+			 * 	//The following codes may be modified to send out requests one by one.  
+			 * 	if (xcontent != null) {
+			 * 		for (var i = 0; i < xcontent.length; i++) {
+			 * 			if (xcontent[i] != null) {
+			 * 				g.callByScript(nameID, xcontent.length, i, xcontent[i]);
+			 * 				xcontent[i] = null;
+			 * 			}
+			 * 		}  
+			 * 		g.idSet["x" + nameID] = null;
+			 * 	}
 			 * }
 			 */ {}
-			if (restNotEmpty) sendRestRequests(nameID);
 			return;
 		}
 		SimpleRPCRunnable runnable = null;
@@ -354,13 +348,5 @@ if (!existed && runnable == null) {
 			runnable.deserialize(response);
 			runnable.ajaxOut();
 		}
-	}
-	
-	static void xssSession(String nameID, String sessionID) {
-		/**
-		 * @j2sNative
-		 var g = net.sf.j2s.ajax.SimpleRPCRequest;
-		 g.idSet["s" + nameID] = sessionID;
-		 */ {}
 	}
 }
