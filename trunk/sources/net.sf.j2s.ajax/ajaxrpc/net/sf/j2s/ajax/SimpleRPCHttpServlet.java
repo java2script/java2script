@@ -384,19 +384,19 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			return null;
 		}
 		
-		// clean dead session bodies
-		cleanSession(req);
-
-		// store request in session before the request is completed
-		HttpSession session = req.getSession();
-		
 		String attrName = "jzn" + scriptRequestID;
 		String attrTime = "jzt" + scriptRequestID;
 		String[] parts = null;
 		
 		boolean badRequest = false;
 		boolean toContinue = false;
+
+		// store request in session before the request is completed
+		HttpSession session = req.getSession();
 		synchronized (session) {
+			// clean dead session bodies
+			cleanSession(session);
+			
 			Object attr = session.getAttribute(attrName);
 			if (attr == null) {
 				parts = new String[partsCount];
@@ -409,14 +409,12 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				}
 			}
 			if (!badRequest) {
-				synchronized (parts) {
-					parts[curPart - 1] = request;
-					for (int i = 0; i < parts.length; i++) {
-						if (parts[i] == null) {
-							// not completed yet! just response and wait next request.
-							toContinue = true;
-							break;
-						}
+				parts[curPart - 1] = request;
+				for (int i = 0; i < parts.length; i++) {
+					if (parts[i] == null) {
+						// not completed yet! just response and wait next request.
+						toContinue = true;
+						break;
 					}
 				}
 				if (!toContinue) {
@@ -433,7 +431,13 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		if (toContinue) {
 			resp.setContentType("text/javascript");
 			//resp.setCharacterEncoding("utf-8");
-			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
+			PrintWriter writer = resp.getWriter();
+			if (curPart == 1) {
+				// Cookie may be disabled in client side!
+				writer.write("net.sf.j2s.ajax.SimpleRPCRequest" +
+						".xssSession(\"" + scriptRequestID + "\", \"" + session.getId() + "\");\r\n");
+			}
+			writer.write("net.sf.j2s.ajax.SimpleRPCRequest" +
 					".xssNotify(\"" + scriptRequestID + "\", \"continue\");");
 			return null;
 		}
@@ -446,18 +450,16 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		return buf.toString();
 	}
 	
-	private void cleanSession(HttpServletRequest req) {
-		HttpSession ses = req.getSession(false);
-		if (ses != null) { // try to clean expired request!
-			Enumeration attrNames = ses.getAttributeNames();
-			while (attrNames.hasMoreElements()) {
-				String name = (String) attrNames.nextElement();
-				if (name.startsWith("jzt")) {
-					Date dt = (Date) ses.getAttribute(name);
-					if (new Date().getTime() - dt.getTime() > maxXSSRequestLatency()) {
-						ses.removeAttribute(name);
-						ses.removeAttribute("jzn" + name.substring(3));
-					}
+	private void cleanSession(HttpSession ses) {
+		// try to clean expired request!
+		Enumeration attrNames = ses.getAttributeNames();
+		while (attrNames.hasMoreElements()) {
+			String name = (String) attrNames.nextElement();
+			if (name.startsWith("jzt")) {
+				Date dt = (Date) ses.getAttribute(name);
+				if (new Date().getTime() - dt.getTime() > maxXSSRequestLatency()) {
+					ses.removeAttribute(name);
+					ses.removeAttribute("jzn" + name.substring(3));
 				}
 			}
 		}
