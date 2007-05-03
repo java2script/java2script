@@ -160,6 +160,7 @@ public class SimpleRPCRequest {
  		var ua = navigator.userAgent.toLowerCase ();
  		if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
  			limit = 2048;
+ 			limit = 2048 - 44; // ;jsessionid=
  		}
  		limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
  		var contents = [];
@@ -186,11 +187,33 @@ public class SimpleRPCRequest {
 		} else {
 			contents[0] = content;
 		}
- 		for (var i = 0; i < contents.length; i++) {
+		g.idSet["x" + rnd] = contents;
+		// Only send the first request, later server return "continue", and client will get
+		// the session id and continue later requests.
+ 		net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
+ 		contents[0] = null;
+ 		return true; // cross site script!
+ 	}
+ }
+		 */ { }
+		 return false;
+	}
+	
+	static void callByScript(String rnd, String length, String i, String content) {
+		/**
+		 * @j2sNative
+var g = net.sf.j2s.ajax.SimpleRPCRequest;
+var runnable = g.idSet["o" + rnd];
+if (runnable == null) return;
+var url = runnable.getHttpURL();
+var session = g.idSet["s" + rnd];
+if (session != null && window["script.get.session.url"] != false) {
+	url += ";jsessionid=" + session;
+}
  			var script = document.createElement ("SCRIPT");
  			script.type = "text/javascript";
- 			script.src = url + "?jzn=" + rnd + "&jzp=" + contents.length 
- 					+ "&jzc=" + (i + 1) + "&jzz=" + contents[i];
+ 			script.src = url + "?jzn=" + rnd + "&jzp=" + length 
+ 					+ "&jzc=" + (i + 1) + "&jzz=" + content;
  			if (typeof (script.onreadystatechange) == "undefined") { // W3C
 	 			script.onerror = function () {
 	 				this.onerror = null;
@@ -223,12 +246,25 @@ public class SimpleRPCRequest {
 	 		}
  			var head = document.getElementsByTagName ("HEAD")[0];
  			head.appendChild (script);
- 		}  
- 		return true; // cross site script!
- 	}
- }
-		 */ { }
-		 return false;
+		 */ {}
+	}
+	
+	static void sendRestRequests(String nameID) {
+		/**
+		 * The following codes may be modified to send out requests one by one.  
+		 * @j2sNative
+		 * var g = net.sf.j2s.ajax.SimpleRPCRequest;
+		 * var xcontent = g.idSet["x" + nameID]; 
+		 * if (xcontent != null) {
+		 * 	for (var i = 0; i < xcontent.length; i++) {
+		 * 		if (xcontent[i] != null) {
+		 * 			g.callByScript(nameID, xcontent.length, i, xcontent[i]);
+		 * 			xcontent[i] = null;
+		 * 		}
+		 * 	}  
+		 * 	g.idSet["x" + nameID] = null;
+		 * }
+		 */ {}
 	}
 	
 	/**
@@ -258,13 +294,27 @@ if (response != null && ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1)
 	}
 }
 		 */ { }
-		if (response == "continue") return;
+		if (response == "continue") {
+			boolean restNotEmpty = false;
+			/**
+			 * @j2sNative
+			 * var g = net.sf.j2s.ajax.SimpleRPCRequest;
+			 * if (g.idSet["x" + nameID] != null) {
+			 * 	restNotEmpty = true; 
+			 * }
+			 */ {}
+			if (restNotEmpty) sendRestRequests(nameID);
+			return;
+		}
 		SimpleRPCRunnable runnable = null;
 		/**
 		 * @j2sNative
 var g = net.sf.j2s.ajax.SimpleRPCRequest;
 runnable = g.idSet["o" + nameID];
 g.idSet["o" + nameID] = null;
+if (g.idSet["s" + nameID] != null) {
+	g.idSet["s" + nameID] = null;
+}
 if (response == null && runnable != null) { // error!
 	runnable.ajaxFail();
 	return;
@@ -304,5 +354,13 @@ if (!existed && runnable == null) {
 			runnable.deserialize(response);
 			runnable.ajaxOut();
 		}
+	}
+	
+	static void xssSession(String nameID, String sessionID) {
+		/**
+		 * @j2sNative
+		 var g = net.sf.j2s.ajax.SimpleRPCRequest;
+		 g.idSet["s" + nameID] = sessionID;
+		 */ {}
 	}
 }
