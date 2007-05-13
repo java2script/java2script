@@ -36,7 +36,7 @@ import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.resources.ExternalResources;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.debug.internal.ui.SWTUtil;
+import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -146,17 +146,17 @@ public class J2SConfigPage extends Composite {
 		actionComp.setLayout(new GridLayout());
 		actionComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
-		buttonAddInnerRes = SWTUtil.createPushButton(actionComp, "Add Libraries", null);
+		buttonAddInnerRes = SWTFactory.createPushButton(actionComp, "Add Libraries", null);
 		addInnerJarAction = new J2SAddInnerJarAction(this);
 		buttonAddInnerRes.addSelectionListener(addInnerJarAction);
 		
-		buttonAddRes = SWTUtil.createPushButton(actionComp, "Add Resources", null);
+		buttonAddRes = SWTFactory.createPushButton(actionComp, "Add Resources", null);
 		buttonAddRes.addSelectionListener(new J2SAddJarAction(this));
 		
-		buttonAddPrj = SWTUtil.createPushButton(actionComp, "Add Projects", null);
+		buttonAddPrj = SWTFactory.createPushButton(actionComp, "Add Projects", null);
 		buttonAddPrj.addSelectionListener(new J2SAddProjectAction(this));
 
-		buttonUp = SWTUtil.createPushButton(actionComp, "Up", null);
+		buttonUp = SWTFactory.createPushButton(actionComp, "Up", null);
 		buttonUp.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -183,7 +183,7 @@ public class J2SConfigPage extends Composite {
 			}
 		});
 		
-		buttonDown = SWTUtil.createPushButton(actionComp, "Down", null);
+		buttonDown = SWTFactory.createPushButton(actionComp, "Down", null);
 		buttonDown.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -209,7 +209,7 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonRemove = SWTUtil.createPushButton(actionComp, "Remove", null);
+		buttonRemove = SWTFactory.createPushButton(actionComp, "Remove", null);
 		buttonRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -232,10 +232,10 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonAbandon = SWTUtil.createPushButton(actionComp, "Abandon Classes", null);
+		buttonAbandon = SWTFactory.createPushButton(actionComp, "Abandon Classes", null);
 		buttonAbandon.addSelectionListener(new J2SAbandonClassesAction(this));
 
-		buttonRestore = SWTUtil.createPushButton(actionComp, "Restore Classes", null);
+		buttonRestore = SWTFactory.createPushButton(actionComp, "Restore Classes", null);
 		buttonRestore.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Object[] expandedElements = viewer.getExpandedElements();
@@ -264,7 +264,7 @@ public class J2SConfigPage extends Composite {
 				fireConfigModified();
 			}
 		});
-		buttonDefault = SWTUtil.createPushButton(actionComp, "Restore Default Classpath", null);
+		buttonDefault = SWTFactory.createPushButton(actionComp, "Restore Default Classpath", null);
 		GridData gd3 = new GridData();
 		gd3.exclude = true;
 		buttonDefault.setLayoutData(gd3);

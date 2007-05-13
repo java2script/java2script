@@ -46,7 +46,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
-import org.eclipse.ui.internal.editors.text.JavaFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
 /**
@@ -166,7 +165,10 @@ public class UnitJavaScriptUtil {
 		IFile workspaceFile= getWorkspaceFile(fileStore);
 		if (workspaceFile != null)
 			return new FileEditorInput(workspaceFile);
-		return new JavaFileEditorInput(fileStore);
+		else {
+			//return new FileEditorInput(new Path(fileStore.toURI().getPath()).)
+			return null;
+		}
 	}
 
 	private static IFile getWorkspaceFile(IFileStore fileStore) {
