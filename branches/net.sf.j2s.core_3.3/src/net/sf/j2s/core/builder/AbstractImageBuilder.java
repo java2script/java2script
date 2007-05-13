@@ -18,6 +18,8 @@ import net.sf.j2s.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.Compiler;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
@@ -34,7 +36,7 @@ import java.util.*;
  * Provides the building and compilation mechanism
  * in common with the batch and incremental builders.
  */
-public abstract class AbstractImageBuilder implements ICompilerRequestor {
+public abstract class AbstractImageBuilder implements ICompilerRequestor, ICompilationUnitLocator {
 
 protected JavaBuilder javaBuilder;
 protected State newState;
@@ -51,6 +53,7 @@ protected boolean compiledAllAtOnce;
 
 private boolean inCompiler;
 
+protected boolean keepStoringProblemMarkers;
 protected SimpleSet filesWithAnnotations = null;
 
 public static int MAX_AT_ONCE = 2000; // best compromise between space used and speed
@@ -72,6 +75,7 @@ public final static String[] JAVA_TASK_MARKER_ATTRIBUTE_NAMES = {
 	IMarker.CHAR_END, 
 	IMarker.LINE_NUMBER, 
 	IMarker.USER_EDITABLE,
+	IMarker.SOURCE_ID,
 };
 public final static Integer S_ERROR = new Integer(IMarker.SEVERITY_ERROR);
 public final static Integer S_WARNING = new Integer(IMarker.SEVERITY_WARNING);
@@ -85,6 +89,7 @@ protected AbstractImageBuilder(JavaBuilder javaBuilder, boolean buildStarting, S
 	this.nameEnvironment = javaBuilder.nameEnvironment;
 	this.sourceLocations = this.nameEnvironment.sourceLocations;
 	this.notifier = javaBuilder.notifier;
+	this.keepStoringProblemMarkers = true; // may get disabled when missing classfiles are encountered
 
 	if (buildStarting) {
 		this.newState = newState == null ? new State(javaBuilder) : newState;
@@ -198,6 +203,57 @@ public void acceptResult(CompilationResult result) {
 
 protected void acceptSecondaryType(ClassFile classFile) {
 	// noop
+}
+
+protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreException {
+	for (int i = 0, l = sourceLocations.length; i < l; i++) {
+		final ClasspathMultiDirectory sourceLocation = sourceLocations[i];
+		final char[][] exclusionPatterns = sourceLocation.exclusionPatterns;
+		final char[][] inclusionPatterns = sourceLocation.inclusionPatterns;
+		final boolean isAlsoProject = sourceLocation.sourceFolder.equals(javaBuilder.currentProject);
+		final int segmentCount = sourceLocation.sourceFolder.getFullPath().segmentCount();
+		final IContainer outputFolder = sourceLocation.binaryFolder;
+		final boolean isOutputFolder = sourceLocation.sourceFolder.equals(outputFolder);
+		sourceLocation.sourceFolder.accept(
+			new IResourceProxyVisitor() {
+				public boolean visit(IResourceProxy proxy) throws CoreException {
+					switch(proxy.getType()) {
+						case IResource.FILE :
+							if (org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(proxy.getName())) {
+								IResource resource = proxy.requestResource();
+								if (exclusionPatterns != null || inclusionPatterns != null)
+									if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
+										return false;
+								sourceFiles.add(new SourceFile((IFile) resource, sourceLocation));
+							}
+							return false;
+						case IResource.FOLDER :
+							IPath folderPath = null;
+							if (isAlsoProject)
+								if (isExcludedFromProject(folderPath = proxy.requestFullPath()))
+									return false;
+							if (exclusionPatterns != null) {
+								if (folderPath == null)
+									folderPath = proxy.requestFullPath();
+								if (Util.isExcluded(folderPath, inclusionPatterns, exclusionPatterns, true)) {
+									// must walk children if inclusionPatterns != null, can skip them if == null
+									// but folder is excluded so do not create it in the output folder
+									return inclusionPatterns != null;
+								}
+							}
+							if (!isOutputFolder) {
+								if (folderPath == null)
+									folderPath = proxy.requestFullPath();
+								createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+							}
+					}
+					return true;
+				}
+			},
+			IResource.NONE
+		);
+		notifier.checkCancel();
+	}
 }
 
 protected void cleanUp() {
@@ -319,8 +375,8 @@ protected void createProblemFor(IResource resource, IMember javaElement, String 
 		int start = range == null ? 0 : range.getOffset();
 		int end = range == null ? 1 : start + range.getLength();
 		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IMarker.CHAR_START, IMarker.CHAR_END},
-			new Object[] {message, new Integer(severity), new Integer(start), new Integer(end)});
+			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IMarker.CHAR_START, IMarker.CHAR_END, IMarker.SOURCE_ID},
+			new Object[] {message, new Integer(severity), new Integer(start), new Integer(end), JavaBuilder.SOURCE_ID});
 	} catch (CoreException e) {
 		throw internalException(e);
 	}
@@ -330,8 +386,8 @@ protected void deleteGeneratedFiles(IFile[] deletedGeneratedFiles) {
 	// no op by default
 }
 
-protected SourceFile findSourceFile(IFile file) {
-	if (!file.exists()) return null;
+protected SourceFile findSourceFile(IFile file, boolean mustExist) {
+	if (mustExist && !file.exists()) return null;
 
 	// assumes the file exists in at least one of the source folders & is not excluded
 	ClasspathMultiDirectory md = sourceLocations[0];
@@ -382,6 +438,25 @@ protected IContainer createFolder(IPath packagePath, IContainer outputFolder) th
 	return folder;
 }
 
+
+
+/* (non-Javadoc)
+ * @see org.eclipse.jdt.internal.core.builder.ICompilationUnitLocator#fromIFile(org.eclipse.core.resources.IFile)
+ */
+public ICompilationUnit fromIFile(IFile file) {
+	return findSourceFile(file, true);
+}
+
+protected void initializeAnnotationProcessorManager(Compiler newCompiler) {
+	AbstractAnnotationProcessorManager annotationManager = JavaModelManager.getJavaModelManager().createAnnotationProcessorManager();
+	if (annotationManager != null) {
+		annotationManager.configureFromPlatform(newCompiler, this, javaBuilder.javaProject);
+		annotationManager.setErr(new PrintWriter(System.err));
+		annotationManager.setOut(new PrintWriter(System.out));
+	}
+	newCompiler.annotationProcessorManager = annotationManager;
+}
+
 protected RuntimeException internalException(CoreException t) {
 	ImageBuilderInternalException imageBuilderException = new ImageBuilderInternalException(t);
 	if (inCompiler)
@@ -420,6 +495,7 @@ protected Compiler newCompiler() {
 	
 	// called once when the builder is initialized... can override if needed
 	CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
+	compilerOptions.performMethodsFullRecovery = true;
 	compilerOptions.performStatementsRecovery = true;
 	Compiler newCompiler = new Compiler(
 		nameEnvironment,
@@ -428,10 +504,16 @@ protected Compiler newCompiler() {
 		this,
 		ProblemFactory.getProblemFactory(Locale.getDefault()));
 	CompilerOptions options = newCompiler.options;
-
+	
 	// enable the compiler reference info support
 	options.produceReferenceInfo = true;
 
+	if (options.complianceLevel >= ClassFileConstants.JDK1_6
+			&& options.processAnnotations) {
+		// support for Java 6 annotation processors
+		initializeAnnotationProcessorManager(newCompiler);
+	}
+	
 	return newCompiler;
 }
 
@@ -462,15 +544,14 @@ protected BuildContext[] notifyParticipants(SourceFile[] unitsAboutToCompile) {
 		IFile[] addedGeneratedFiles = result.addedFiles;
 		if (addedGeneratedFiles != null) {
 			for (int j = addedGeneratedFiles.length; --j >= 0;) {
-				SourceFile sourceFile = findSourceFile(addedGeneratedFiles[j]);
+				SourceFile sourceFile = findSourceFile(addedGeneratedFiles[j], true);
 				if (sourceFile == null) continue;
 				if (uniqueFiles == null) {
 					uniqueFiles = new SimpleSet(unitsAboutToCompile.length + 3);
 					for (int f = unitsAboutToCompile.length; --f >= 0;)
 						uniqueFiles.add(unitsAboutToCompile[f]);
 				}
-				if (!uniqueFiles.includes(sourceFile))
-					uniqueFiles.add(sourceFile);
+				if (uniqueFiles.addIfNotIncluded(sourceFile) == sourceFile) {
 					CompilationParticipantResult newResult = new BuildContext(sourceFile);
 					// is there enough room to add all the addedGeneratedFiles.length ?
 					if (toAdd == null) {
@@ -481,6 +562,7 @@ protected BuildContext[] notifyParticipants(SourceFile[] unitsAboutToCompile) {
 							System.arraycopy(toAdd, 0, toAdd = new CompilationParticipantResult[length + addedGeneratedFiles.length], 0, length);
 					}
 					toAdd[added++] = newResult;
+				}
 			}
 		}
 	}
@@ -547,50 +629,89 @@ protected void recordParticipantResult(CompilationParticipantResult result) {
  *	 - its priority reflects the severity of the problem
  *	 - its range is the problem's range
  *	 - it has an extra attribute "ID" which holds the problem's id
+ *   - it's GENERATED_BY attribute is positioned to JavaBuilder.GENERATED_BY if
+ *     the problem was generated by JDT; else the GENERATED_BY attribute is 
+ *     carried from the problem to the marker in extra attributes, if present.
  */
 protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] problems) throws CoreException {
 	if (sourceFile == null || problems == null || problems.length == 0) return;
+	 // once a classpath error is found, ignore all other problems for this project so the user can see the main error
+	// but still try to compile as many source files as possible to help the case when the base libraries are in source
+	if (!this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
 
-	String missingClassFile = null;
 	IResource resource = sourceFile.resource;
 	HashSet managedMarkerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
 	for (int i = 0, l = problems.length; i < l; i++) {
 		CategorizedProblem problem = problems[i];
 		int id = problem.getID();
+
+		// handle missing classfile situation
 		if (id == IProblem.IsClassPathCorrect) {
-			JavaBuilder.removeProblemsAndTasksFor(javaBuilder.currentProject); // make this the only problem for this project
-			String[] args = problem.getArguments();
-			missingClassFile = args[0];
-		}
-		
-		String markerType = problem.getMarkerType();
-		if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(markerType)
-				|| managedMarkerTypes.contains(markerType)) {			
-			IMarker marker = resource.createMarker(markerType);
-			
-			// standard attributes
+			String missingClassfileName = problem.getArguments()[0];
+			if (JavaBuilder.DEBUG)
+				System.out.println(Messages.bind(Messages.build_incompleteClassPath, missingClassfileName));
+			boolean isInvalidClasspathError = JavaCore.ERROR.equals(javaBuilder.javaProject.getOption(JavaCore.CORE_INCOMPLETE_CLASSPATH, true));
+			// insert extra classpath problem, and make it the only problem for this project (optional)
+			if (isInvalidClasspathError && JavaCore.ABORT.equals(javaBuilder.javaProject.getOption(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH, true))) {
+				JavaBuilder.removeProblemsAndTasksFor(javaBuilder.currentProject); // make this the only problem for this project
+				this.keepStoringProblemMarkers = false;
+			}
+			IMarker marker = this.javaBuilder.currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 			marker.setAttributes(
-				JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES,
-				new Object[] { 
-					problem.getMessage(), // message
-					problem.isError() ? S_ERROR : S_WARNING, // severity
-					new Integer(id), // ID
-					new Integer(problem.getSourceStart()), // start
-					new Integer(problem.getSourceEnd() + 1), // end
-					new Integer(problem.getSourceLineNumber()), // line
-					Util.getProblemArgumentsForMarker(problem.getArguments()), // arguments
-					new Integer(problem.getCategoryID()), // category ID
+				new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
+				new Object[] {
+					Messages.bind(Messages.build_incompleteClassPath, missingClassfileName),
+					new Integer(isInvalidClasspathError ? IMarker.SEVERITY_ERROR : IMarker.SEVERITY_WARNING),
+					new Integer(CategorizedProblem.CAT_BUILDPATH),
+					JavaBuilder.SOURCE_ID
 				}
 			);
-			// optional extra attributes
+			// even if we're not keeping more markers, still fall through rest of the problem reporting, so that offending
+			// IsClassPathCorrect problem gets recorded since it may help locate the offending reference
+		}
+
+		String markerType = problem.getMarkerType();
+		boolean managedProblem = false;
+		if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(markerType)
+				|| (managedProblem = managedMarkerTypes.contains(markerType))) {
+			IMarker marker = resource.createMarker(markerType);
+
+			String[] attributeNames = JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES;
+			int standardLength = attributeNames.length;
+			String[] allNames = attributeNames;
+			int managedLength = managedProblem ? 0 : 1;
 			String[] extraAttributeNames = problem.getExtraMarkerAttributeNames();
 			int extraLength = extraAttributeNames == null ? 0 : extraAttributeNames.length;
-			if (extraLength > 0) {
-				marker.setAttributes(extraAttributeNames, problem.getExtraMarkerAttributeValues());
+			if (managedLength > 0 || extraLength > 0) {
+				allNames = new String[standardLength + managedLength + extraLength];
+				System.arraycopy(attributeNames, 0, allNames, 0, standardLength);
+				if (managedLength > 0)
+					allNames[standardLength] = IMarker.SOURCE_ID;
+				System.arraycopy(extraAttributeNames, 0, allNames, standardLength + managedLength, extraLength);
 			}
+
+			Object[] allValues = new Object[allNames.length];
+			// standard attributes
+			int index = 0;
+			allValues[index++] = problem.getMessage(); // message
+			allValues[index++] = problem.isError() ? S_ERROR : S_WARNING; // severity
+			allValues[index++] = new Integer(id); // ID
+			allValues[index++] = new Integer(problem.getSourceStart()); // start
+			allValues[index++] = new Integer(problem.getSourceEnd() + 1); // end
+			allValues[index++] = new Integer(problem.getSourceLineNumber()); // line
+			allValues[index++] = Util.getProblemArgumentsForMarker(problem.getArguments()); // arguments
+			allValues[index++] = new Integer(problem.getCategoryID()); // category ID
+			// GENERATED_BY attribute for JDT problems
+			if (managedLength > 0)
+				allValues[index++] = JavaBuilder.SOURCE_ID;
+			// optional extra attributes
+			if (extraLength > 0)
+				System.arraycopy(problem.getExtraMarkerAttributeValues(), 0, allValues, index, extraLength);
+
+			marker.setAttributes(allNames, allValues);
+
+			if (!this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
 		}
-		if (missingClassFile != null)
-			throw new MissingClassFileException(missingClassFile);
 	}
 }
 
@@ -608,21 +729,34 @@ protected void storeTasksFor(SourceFile sourceFile, CategorizedProblem[] tasks) 
 				priority = P_HIGH;
 			else if (JavaCore.COMPILER_TASK_PRIORITY_LOW.equals(compilerPriority))
 				priority = P_LOW;
-			marker.setAttributes(
-				JAVA_TASK_MARKER_ATTRIBUTE_NAMES,
-				new Object[] { 
-					task.getMessage(),
-					priority,
-					new Integer(task.getID()),
-					new Integer(task.getSourceStart()),
-					new Integer(task.getSourceEnd() + 1),
-					new Integer(task.getSourceLineNumber()),
-					Boolean.FALSE,
-				});
+
+			String[] attributeNames = JAVA_TASK_MARKER_ATTRIBUTE_NAMES;
+			int standardLength = attributeNames.length;
+			String[] allNames = attributeNames;
 			String[] extraAttributeNames = task.getExtraMarkerAttributeNames();
 			int extraLength = extraAttributeNames == null ? 0 : extraAttributeNames.length;
+			if (extraLength > 0) {
+				allNames = new String[standardLength + extraLength];
+				System.arraycopy(attributeNames, 0, allNames, 0, standardLength);
+				System.arraycopy(extraAttributeNames, 0, allNames, standardLength, extraLength);
+			}
+
+			Object[] allValues = new Object[allNames.length];
+			// standard attributes
+			int index = 0;
+			allValues[index++] = task.getMessage();
+			allValues[index++] = priority;
+			allValues[index++] = new Integer(task.getID());
+			allValues[index++] = new Integer(task.getSourceStart());
+			allValues[index++] = new Integer(task.getSourceEnd() + 1);
+			allValues[index++] = new Integer(task.getSourceLineNumber());
+			allValues[index++] = Boolean.FALSE;
+			allValues[index++] = JavaBuilder.SOURCE_ID;
+			// optional extra attributes
 			if (extraLength > 0)
-				marker.setAttributes(extraAttributeNames, task.getExtraMarkerAttributeValues());
+				System.arraycopy(task.getExtraMarkerAttributeValues(), 0, allValues, index, extraLength);
+
+			marker.setAttributes(allNames, allValues);
 		}
 	}
 }

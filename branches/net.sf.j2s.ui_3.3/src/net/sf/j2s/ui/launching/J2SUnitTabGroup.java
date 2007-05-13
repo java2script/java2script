@@ -18,7 +18,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.debug.ui.ILaunchConfigurationTabGroup;
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
-import org.eclipse.jdt.internal.junit.launcher.JUnitMainTab;
+import org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationTab;
 
  
 public class J2SUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
@@ -35,7 +35,7 @@ public class J2SUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 //			new EnvironmentTab(),
 //			new CommonTab()
 //		};
-		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[]{new JUnitMainTab(),
+		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[]{new JUnitLaunchConfigurationTab(),
 				new J2SArgumentsTab(),
 				new J2SClasspathOptionTab(), 
 				new J2SGenerateHTMLOptionsTab(),

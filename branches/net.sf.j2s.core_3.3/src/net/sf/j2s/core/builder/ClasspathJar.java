@@ -65,9 +65,8 @@ static SimpleSet findPackageSet(ClasspathJar jar) {
 		while (last > 0) {
 			// extract the package name
 			String packageName = fileName.substring(0, last);
-			if (packageSet.includes(packageName))
-				continue nextEntry;
-			packageSet.add(packageName);
+			if (packageSet.addIfNotIncluded(packageName) == null)
+				continue nextEntry; // already existed
 			last = packageName.lastIndexOf('/');
 		}
 	}
@@ -195,9 +194,10 @@ public String toString() {
 }
 
 public String debugPathString() {
-	if (this.lastModified == 0)
+	long time = lastModified();
+	if (time == 0)
 		return this.zipFilename;
-	return this.zipFilename + '(' + (new Date(this.lastModified)) + " : " + this.lastModified + ')'; //$NON-NLS-1$
+	return this.zipFilename + '(' + (new Date(time)) + " : " + time + ')'; //$NON-NLS-1$
 }
 
 }

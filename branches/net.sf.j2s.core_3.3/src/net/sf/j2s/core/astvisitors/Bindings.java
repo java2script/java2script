@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -147,10 +148,10 @@ public class Bindings {
 		return key.hashCode();
 	}
 	
-	/*
+	/**
 	 * Note: this method is for debugging and testing purposes only.
-	 * There are tests whose precomputed test results rely on the returned String's format.
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabels
+	 * There are tests whose pre-computed test results rely on the returned String's format.
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
 	 */
 	public static String asString(IBinding binding) {
 		if (binding instanceof IMethodBinding)
@@ -221,9 +222,6 @@ public class Bindings {
 	 * @return the fully qualified name
 	 */
 	public static String getFullyQualifiedName(ITypeBinding type) {
-
-		// TW: replace by call to type.getJavaElement().getFullyQualifiedName (see 78087)
-
 		String name= type.getQualifiedName();
 		final int index= name.indexOf('<');
 		if (index > 0)
@@ -231,6 +229,30 @@ public class Bindings {
 		return name;
 	}	
 
+//	public static String getImportName(IBinding binding) {
+//		ITypeBinding declaring= null;
+//		switch (binding.getKind()) {
+//			case IBinding.TYPE:
+//				return getRawQualifiedName((ITypeBinding) binding);
+//			case IBinding.PACKAGE:
+//				return binding.getName() + ".*"; //$NON-NLS-1$
+//			case IBinding.METHOD:
+//				declaring= ((IMethodBinding) binding).getDeclaringClass();
+//				break;
+//			case IBinding.VARIABLE:
+//				declaring= ((IVariableBinding) binding).getDeclaringClass();
+//				if (declaring == null) {
+//					return binding.getName(); // array.length
+//				}
+//				
+//				break;
+//			default:
+//				return binding.getName();
+//		}
+//		return JavaModelUtil.concatenateName(getRawQualifiedName(declaring), binding.getName());
+//	}	
+	
+	
 	private static void createName(ITypeBinding type, boolean includePackage, List list) {
 		ITypeBinding baseType= type;
 		if (type.isArray()) {
@@ -525,7 +547,7 @@ public class Bindings {
 	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is 
 	 * returned. First the super class is examined and than the implemented interfaces.
 	 * @param type The type to search the method in
-	 * @param binding The method that overrrides
+	 * @param binding The method that overrides
 	 * @return the method binding overridden the method
 	 */
 	public static IMethodBinding findOverriddenMethodInHierarchy(ITypeBinding type, IMethodBinding binding) {
@@ -780,25 +802,25 @@ public class Bindings {
 	}
 
 	/**
-	 * @param m1 overriding method
-	 * @param m2 overridden method
+	 * @param overriding overriding method (m1)
+	 * @param overridden overridden method (m2)
 	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
 	 * 		This is one of the requirements for m1 to override m2.
 	 * 		Accessibility and return types are not taken into account.
 	 * 		Note that subsignature is <em>not</em> symmetric!
 	 */
-	public static boolean isSubsignature(IMethodBinding m1, IMethodBinding m2) {
+	public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
 		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
-		if (! m1.getName().equals(m2.getName()))
+		if (!overriding.getName().equals(overridden.getName()))
 			return false;
 			
-		ITypeBinding[] m1Params= m1.getParameterTypes();
-		ITypeBinding[] m2Params= m2.getParameterTypes();
+		ITypeBinding[] m1Params= overriding.getParameterTypes();
+		ITypeBinding[] m2Params= overridden.getParameterTypes();
 		if (m1Params.length != m2Params.length)
 			return false;
 		
-		ITypeBinding[] m1TypeParams= m1.getTypeParameters();
-		ITypeBinding[] m2TypeParams= m2.getTypeParameters();
+		ITypeBinding[] m1TypeParams= overriding.getTypeParameters();
+		ITypeBinding[] m2TypeParams= overridden.getTypeParameters();
 		if (m1TypeParams.length != m2TypeParams.length
 				&& m1TypeParams.length != 0) //non-generic m1 can override a generic m2
 			return false;
@@ -976,29 +998,29 @@ public class Bindings {
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
-	 * @param type the type to inspect
-	 * @param candidate the candidates
-	 * @return <code>true</code> is a super type of one of the candidates; otherwise
-	 *  <code>false</code>
+	 * @param possibleSuperType the type to inspect
+	 * @param type the type whose super types are looked at
+	 * @return <code>true</code> iff <code>possibleSuperType</code> is
+	 * 		a super type of <code>type</code> or is equal to it
 	 */
-	public static boolean isSuperType(ITypeBinding type, ITypeBinding candidate) {
-		if (candidate.isArray() || candidate.isPrimitive()) {
+	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
+		if (type.isArray() || type.isPrimitive()) {
 			return false;
 		}
-		if (Bindings.equals(candidate, type)) {
+		if (Bindings.equals(type, possibleSuperType)) {
 			return true;
 		}
-		ITypeBinding superClass= candidate.getSuperclass();
+		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
-			if (isSuperType(type, superClass)) {
+			if (isSuperType(possibleSuperType, superClass)) {
 				return true;
 			}
 		}
 		
-		if (type.isInterface()) {
-			ITypeBinding[] superInterfaces= candidate.getInterfaces();
+		if (possibleSuperType.isInterface()) {
+			ITypeBinding[] superInterfaces= type.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				if (isSuperType(type, superInterfaces[i])) {
+				if (isSuperType(possibleSuperType, superInterfaces[i])) {
 					return true;
 				}			
 			}
@@ -1006,6 +1028,22 @@ public class Bindings {
 		return false;
 	}
 	
+	/**
+	 * Finds the compilation unit where the type of the given <code>ITypeBinding</code> is defined,
+	 * using the class path defined by the given Java project. Returns <code>null</code>
+	 * if no compilation unit is found (e.g. type binding is from a binary type)
+	 * @param typeBinding the type binding to search for
+	 * @param project the project used as a scope
+	 * @return the compilation unit containing the type
+	 * @throws JavaModelException if an errors occurs in the Java model
+	 */
+//	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
+//		IJavaElement type= typeBinding.getJavaElement();
+//		if (type instanceof IType)
+//			return ((IType) type).getCompilationUnit();
+//		else
+//			return null;
+//	}
 
 
 	/**
@@ -1015,6 +1053,7 @@ public class Bindings {
 	 * @param type the type to look in
 	 * @return the corresponding IMethod or <code>null</code>
 	 * @throws JavaModelException if an error occurs in the Java model
+	 * @deprecated Use {@link #findMethodInHierarchy(ITypeBinding, String, String[])} or {@link JavaModelUtil}
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
@@ -1056,7 +1095,7 @@ public class Bindings {
 			type= type.getElementType();
 		candidate= Signature.getElementType(candidate);
 		
-		if (isPrimitiveType(candidate) != type.isPrimitive()) {
+		if ((Signature.getTypeSignatureKind(candidate) == Signature.BASE_TYPE_SIGNATURE) != type.isPrimitive()) {
 			return false;
 		}
 			
@@ -1067,7 +1106,7 @@ public class Bindings {
 			candidate= Signature.getTypeErasure(candidate);
 			type= type.getErasure();
 			
-			if (isResolvedType(candidate)) {
+			if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
 				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
@@ -1128,6 +1167,8 @@ public class Bindings {
 	 * Normalizes the binding so that it can be used as a type inside a declaration
 	 * (e.g. variable declaration, method return type, parameter type, ...). For
 	 * null bindings Object is returned.
+	 * @param binding binding to normalize
+	 * @param ast current ast
 	 * 
 	 * @return the normalized type to be used in declarations
 	 */
@@ -1147,9 +1188,9 @@ public class Bindings {
 	}
 
 	/**
-	 * Returns the type binding of the node's parent type declaration
+	 * Returns the type binding of the node's parent type declaration.
 	 * @param node
-	 * @return CompilationUnit
+	 * @return the type binding of the node's parent type declaration
 	 */
 	public static ITypeBinding getBindingOfParentType(ASTNode node) {
 		while (node != null) {
@@ -1180,7 +1221,7 @@ public class Bindings {
 		final String EMPTY= ""; //$NON-NLS-1$
 		
 		if (binding.isAnonymous() || binding.isLocal()) {
-			return EMPTY; //$NON-NLS-1$
+			return EMPTY; 
 		}
 		
 		if (binding.isPrimitive() || binding.isNullType() || binding.isTypeVariable()) {
@@ -1269,6 +1310,12 @@ public class Bindings {
 		return false;
 	}
 
+
+	/**
+	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
+	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
+	 * else.
+	 */
 	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
 		for (int index= 0; index < candidates.length; index++) {
 			if (isSignatureEquivalentConstructor(candidates[index], overridable))
@@ -1288,6 +1335,11 @@ public class Bindings {
 		return areSubTypeCompatible(overridden, overridable);
 	}
 	
+	/**
+	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
+	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
+	 * else.
+	 */
 	public static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))
