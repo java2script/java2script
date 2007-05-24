@@ -19,6 +19,7 @@ import net.sf.j2s.core.compiler.Java2ScriptImageCompiler;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 /**
@@ -32,10 +33,8 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 	 */
 	public Java2ScriptIncrementalImageBuilder(JavaBuilder javaBuilder) {
 		super(javaBuilder);
-		// TODO Auto-generated constructor stub
 	}
 	
-
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
 		Map projectOptions = javaBuilder.javaProject.getOptions(true);
@@ -55,6 +54,7 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 		
 		// called once when the builder is initialized... can override if needed
 		CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
+		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
 		Compiler newCompiler = new Java2ScriptImageCompiler(
 			nameEnvironment,
@@ -63,10 +63,16 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 			this,
 			ProblemFactory.getProblemFactory(Locale.getDefault()));
 		CompilerOptions options = newCompiler.options;
-
+		
 		// enable the compiler reference info support
 		options.produceReferenceInfo = true;
 
+		if (options.complianceLevel >= ClassFileConstants.JDK1_6
+				&& options.processAnnotations) {
+			// support for Java 6 annotation processors
+			initializeAnnotationProcessorManager(newCompiler);
+		}
+		
 		return newCompiler;
 	}
 }

@@ -73,14 +73,14 @@ public class ExtendedCompilers {
 		return null;
 	}
 
-	public static void compile(ICompilationUnit[] sourceUnits,
+	public static void process(ICompilationUnit sourceUnit,
 			IContainer binFolder) {
 		checkExtensionPoints();
 		if (!compilers.isEmpty()) {
 			for (Iterator iter = compilers.values().iterator(); iter.hasNext();) {
 				IExtendedCompiler compiler = (IExtendedCompiler) iter.next();
 				try {
-					compiler.compile(sourceUnits, binFolder);
+					compiler.process(sourceUnit, binFolder);
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
