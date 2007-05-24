@@ -16,6 +16,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
+
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.launching.J2SLaunchingUtil;
@@ -42,6 +50,18 @@ public class Java2ScriptSWTAJAXProjectWizard extends Java2ScriptProjectWizard {
 			((Resource) entry).setAbsolute(true);
 			classpathModel.addResource((Resource) entry);
 		}
+	}
+	
+	protected IClasspathEntry[] updateJavaLibraries(
+			IClasspathEntry[] defaultEntries) {
+		List list = new ArrayList();
+		for (int i = 0; i < defaultEntries.length; i++) {
+			list.add(i, defaultEntries[i]);
+		}
+		list.add(JavaCore.newVariableEntry(new Path("ECLIPSE_SWT"), null, null));
+		list.add(JavaCore.newVariableEntry(new Path("AJAX_SWT"), new Path("AJAX_SWT_SRC"), null));
+		list.add(JavaCore.newVariableEntry(new Path("AJAX_RPC"), new Path("AJAX_RPC_SRC"), null));
+		return super.updateJavaLibraries((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]));
 	}
 
 	protected void updateJava2ScriptProject(String prjFolder, String binRelative) {
