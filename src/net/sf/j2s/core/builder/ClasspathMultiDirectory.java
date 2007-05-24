@@ -15,14 +15,14 @@ import org.eclipse.core.resources.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.util.Util;
 
-class ClasspathMultiDirectory extends ClasspathDirectory {
+public class ClasspathMultiDirectory extends ClasspathDirectory {
 
 IContainer sourceFolder;
 char[][] inclusionPatterns; // used by builders when walking source folders
 char[][] exclusionPatterns; // used by builders when walking source folders
 boolean hasIndependentOutputFolder; // if output folder is not equal to any of the source folders
 
-ClasspathMultiDirectory(IContainer sourceFolder, IContainer binaryFolder, char[][] inclusionPatterns, char[][] exclusionPatterns) {
+public ClasspathMultiDirectory(IContainer sourceFolder, IContainer binaryFolder, char[][] inclusionPatterns, char[][] exclusionPatterns) {
 	super(binaryFolder, true, null);
 
 	this.sourceFolder = sourceFolder;

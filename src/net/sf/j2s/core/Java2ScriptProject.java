@@ -12,6 +12,8 @@
 package net.sf.j2s.core;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.internal.core.ExternalJavaProject;
 
 /**
  * @author zhou renjian
@@ -20,10 +22,21 @@ import org.eclipse.core.resources.IProject;
  */
 public class Java2ScriptProject {
 
-	public static boolean hasJava2ScriptNature(IProject project) {
-		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
-		pn.setProject(project);
-		return pn.hasNature();
+	/**
+	 * Returns true if the given project is accessible and it has
+	 * a java nature, otherwise false.
+	 * @param project IProject
+	 * @return boolean
+	 */
+	public static boolean hasJava2ScriptNature(IProject project) { 
+		try {
+			return project.hasNature("net.sf.j2s.java2scriptnature");
+		} catch (CoreException e) {
+			if (ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(project.getName()))
+				return true;
+			// project does not exist or is not open
+		}
+		return false;
 	}
 	
 }

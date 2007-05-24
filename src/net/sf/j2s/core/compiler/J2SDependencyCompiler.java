@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 public class J2SDependencyCompiler implements IExtendedCompiler {
 
-	public void compile(ICompilationUnit[] sourceUnits, IContainer binaryFolder) {
+	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
 		String prjFolder = binaryFolder.getProject().getLocation().toOSString();
 		File file = new File(prjFolder, ".j2s"); //$NON-NLS-1$
 		if (!file.exists()) {
@@ -77,9 +77,8 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 				abandonedList.add(splits[i]);
 			}
 		}
-		for (int i = 0; i < sourceUnits.length; i++) {
-			if (sourceUnits[i] instanceof SourceFile) {
-				SourceFile unitSource = (SourceFile) sourceUnits[i];
+			if (sourceUnit instanceof SourceFile) {
+				SourceFile unitSource = (SourceFile) sourceUnit;
 				String fileName = new String(unitSource.getFileName());
 				int idx = fileName.lastIndexOf('/');
 				String className = fileName.substring(idx + 1, fileName.lastIndexOf('.'));
@@ -96,7 +95,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 					list.add(jsPath);
 				}
 			}
-		}
 		StringBuffer buf = new StringBuffer();
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
 			String path = (String) iter.next();
@@ -108,9 +106,8 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 
 		CompilationUnit root;
 		ASTParser astParser= ASTParser.newParser(AST.JLS3);
-		for (int i = 0; i < sourceUnits.length; i++) {
-			if (sourceUnits[i] instanceof SourceFile) {
-				SourceFile unitSource = (SourceFile) sourceUnits[i];
+			if (sourceUnit instanceof SourceFile) {
+				SourceFile unitSource = (SourceFile) sourceUnit;
 				org.eclipse.jdt.core.ICompilationUnit createdUnit = JavaCore.createCompilationUnitFrom(new SourceFileProxy(unitSource).getResource());
 				astParser.setResolveBindings(true);
 				astParser.setSource(createdUnit);
@@ -141,7 +138,6 @@ public class J2SDependencyCompiler implements IExtendedCompiler {
 					}
 				}
 			}
-		}
 	}
 
 	public static void outputJavaScript(DependencyASTVisitor visitor, CompilationUnit fRoot, String folderPath) {

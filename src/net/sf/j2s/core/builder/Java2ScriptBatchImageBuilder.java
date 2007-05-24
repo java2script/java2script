@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
 /**
@@ -29,12 +30,9 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
  */
 public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 	
-
 	public Java2ScriptBatchImageBuilder(JavaBuilder javaBuilder, boolean buildStarting) {
 		super(javaBuilder, buildStarting);
-		// TODO Auto-generated constructor stub
 	}
-
 
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
@@ -55,6 +53,7 @@ public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 		
 		// called once when the builder is initialized... can override if needed
 		CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
+		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
 		Compiler newCompiler = new Java2ScriptImageCompiler(
 			nameEnvironment,
@@ -63,16 +62,17 @@ public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 			this,
 			ProblemFactory.getProblemFactory(Locale.getDefault()));
 		CompilerOptions options = newCompiler.options;
-
+		
 		// enable the compiler reference info support
 		options.produceReferenceInfo = true;
 
+		if (options.complianceLevel >= ClassFileConstants.JDK1_6
+				&& options.processAnnotations) {
+			// support for Java 6 annotation processors
+			initializeAnnotationProcessorManager(newCompiler);
+		}
+		
 		return newCompiler;
-	}
-
-
-	protected void cleanOutputFolders(boolean copyBack) throws CoreException {
-		//super.cleanOutputFolders(copyBack);
 	}
 	
 }
