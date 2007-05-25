@@ -73,7 +73,6 @@ public class Java2ScriptImageCompiler extends Compiler {
 		super.compile(sourceUnits);
 	}
 	
-	@Override
 	protected void addCompilationUnit(ICompilationUnit sourceUnit,
 			CompilationUnitDeclaration parsedUnit) {
 		sourceUnits.add(sourceUnit);

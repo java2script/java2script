@@ -32,17 +32,14 @@ public class HackedJDTBuildContext extends org.eclipse.jdt.core.compiler.BuildCo
 		this.j2sSourceFile = sourceFile;
 	}
 
-	@Override
 	public char[] getContents() {
 		return this.j2sSourceFile.getContents();
 	}
 
-	@Override
 	public IFile getFile() {
 		return this.j2sSourceFile.resource;
 	}
 
-	@Override
 	public String toString() {
 		return this.j2sSourceFile.toString();
 	}
