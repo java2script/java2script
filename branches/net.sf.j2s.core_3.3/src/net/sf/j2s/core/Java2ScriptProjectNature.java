@@ -209,6 +209,7 @@ public class Java2ScriptProjectNature implements IProjectNature {
 	}
 	
 	public static boolean removeJavaBuilder(IProject project) {
+		boolean removed = false;
 		try {
 			IProjectDescription description = project.getDescription();
 			ICommand[] commands = description.getBuildSpec();
@@ -219,12 +220,32 @@ public class Java2ScriptProjectNature implements IProjectNature {
 					System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
 					description.setBuildSpec(newCommands);
 					project.setDescription(description, null);
-					return true;
+					removed = true;
+					break;
+				}
+			}
+			if (removed) { // remove java2script builder, so later the builder can be the first builder
+				for (int i = 0; i < commands.length; ++i) {
+					if (commands[i].getBuilderName().equals("net.sf.j2s.core.java2scriptbuilder")) {
+						ICommand[] newCommands = new ICommand[commands.length - 1];
+						System.arraycopy(commands, 0, newCommands, 0, i);
+						System.arraycopy(commands, i + 1, newCommands, i, commands.length - i - 1);
+						description.setBuildSpec(newCommands);
+						project.setDescription(description, null);
+						break;
+					}
 				}
 			}
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		return false;
+		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
+		pn.setProject(project);
+		try {
+			pn.configure();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		return removed;
 	}
 }
