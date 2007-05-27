@@ -131,18 +131,23 @@ public class HotspotWorker implements Runnable {
                     break;
                 }
             }
-//            String fname = new String(buf, 0, index, i-index);
-//            if (fname.startsWith(File.separator)) {
-//                fname = fname.substring(1);
-//            }
-//            int idx = fname.indexOf('.');
-//            if (idx != -1) {
-//            	fname = fname.substring(0, idx);
-//            }
-//            idx = fname.indexOf('?');
-//            if (idx != -1) {
-//                fname = fname.substring(idx + 1);
-//            }
+            String fname = new String(buf, 0, index, i-index);
+            if (fname.startsWith("/") || fname.startsWith("\\")) {
+                fname = fname.substring(1);
+            }
+            int idx = fname.indexOf('.');
+            if (idx != -1) {
+            	fname = fname.substring(0, idx);
+            }
+            idx = fname.indexOf('?');
+            if (idx != -1) {
+                fname = fname.substring(idx + 1);
+            }
+            long sessionID = -1;
+            try {
+				sessionID = Long.parseLong(fname);
+			} catch (NumberFormatException e) {
+			}
             ps.print("HTTP/1.0 200 OK");
             ps.write(EOL);
             ps.print("Server: Java2Script Hotspot Sever");
@@ -154,20 +159,20 @@ public class HotspotWorker implements Runnable {
             ps.print("Content-type: text/javascript");
             ps.write(EOL);
             if (doingGet) {
-            	sendLatestHotspot(ps);
+            	sendLatestHotspot(sessionID, ps);
             }
         } finally {
             s.close();
         }
     }
 
-    void sendLatestHotspot(PrintStream ps) throws IOException {
+    void sendLatestHotspot(long session, PrintStream ps) throws IOException {
         ps.write(EOL);
         StringBuffer strBuf = new StringBuffer();
         strBuf.append("ClazzLoader.updateHotspot (");
         long time = 0;
         while (time < 5000) {
-	        String hotspotJS = InnerHotspotServer.getHotspotJavaScript();
+	        String hotspotJS = InnerHotspotServer.getHotspotJavaScript(session);
 	        if (hotspotJS.length() != 0) {
 	        	strBuf.append("\r\n");
 	        	strBuf.append(hotspotJS);

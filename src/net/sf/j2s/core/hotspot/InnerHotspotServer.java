@@ -23,11 +23,28 @@ public class InnerHotspotServer {
     
     private static int port = -1;
 
+    private static InnerHotspotServer server = null;
+    
     private ServerSocket ss;
+    
+    private InnerHotspotServer() {
+    	// prevent ...
+    }
+    
+    public static InnerHotspotServer getSingletonServer() {
+    	if (server == null) {
+    		server = new InnerHotspotServer();
+    	}
+    	return server;
+    }
+    
+    public static boolean isServerStarted() {
+    	return serverStarted;
+    }
     
     public static int getHotspotPort() {
     	if (port == -1) {
-    		return new InnerHotspotServer().startServer();
+    		return getSingletonServer().startServer();
     	}
     	return port;
     }
@@ -53,13 +70,14 @@ public class InnerHotspotServer {
     	}
     }
     
-    public static String getHotspotJavaScript() {
+    public static String getHotspotJavaScript(long session) {
     	StringBuffer buf = new StringBuffer();
     	long now = new Date().getTime();
     	synchronized (hotspotItems) {
     		for (Iterator iterator = hotspotItems.iterator(); iterator.hasNext();) {
     			Java2ScriptCompiledItem item = (Java2ScriptCompiledItem) iterator.next();
-    			if (item.getTime() >= now - 10000) { // 10 seconds delay!
+    			if ((session > 0 && item.getId() > session) 
+    					|| (session <= 0 && item.getTime() >= now - 10000)) { // 10 seconds delay!
     				buf.append(item.getTime());
     				buf.append(", ");
     				buf.append(item.getId());
@@ -68,7 +86,7 @@ public class InnerHotspotServer {
     				buf.append("\",\r\n");
     			}
     		}
-		}
+    	}
     	return buf.toString();
     }
     
@@ -174,13 +192,5 @@ public class InnerHotspotServer {
         }
         return port;
 	}
-    
-    public static void main(String[] args) {
-        new InnerHotspotServer().startServer();
-        new InnerHotspotServer().startServer();
-        new InnerHotspotServer().startServer();
-        new InnerHotspotServer().startServer();
-        addCompiledItem("hello.world.SeeYou");
-    }
 }
 
