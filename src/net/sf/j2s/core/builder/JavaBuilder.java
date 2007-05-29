@@ -418,6 +418,9 @@ private SimpleLookupTable findDeltas() {
 
 public State getLastState(IProject project) {
 	org.eclipse.jdt.internal.core.builder.State lastBuiltState = (org.eclipse.jdt.internal.core.builder.State) JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
+	if (lastBuiltState == null) {
+		return null;
+	}
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	DataOutputStream out = new DataOutputStream(baos);
 	try {
