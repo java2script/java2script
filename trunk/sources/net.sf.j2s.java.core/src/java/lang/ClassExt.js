@@ -811,3 +811,57 @@ Clazz.forName = function (clazzName) {
 	}
 };
 
+/* For hotspot and unloading */
+
+Clazz.unloadClass = function (qClazzName) {
+	var cc = Clazz.evalType (qClazzName);
+	if (cc != null) {
+		Clazz.unloadedClasses[qClazzName] = cc;
+		var clazzName = qClazzName;
+		var pkgFrags = clazzName.split (/\./);
+		var pkg = null;
+		for (var i = 0; i < pkgFrags.length - 1; i++) {
+			if (pkg == null) {
+				pkg = Clazz.allPackage[pkgFrags[0]];
+			} else {
+				pkg = pkg[pkgFrags[i]]
+			}
+		}
+		if (pkg == null) {
+			Clazz.allPackage[pkgFrags[0]] = null;
+			window[pkgFrags[0]] = null;
+			// also try to unload inner or anonymous classes
+			for (var c in window) {
+				if (c.indexOf (qClazzName + "$") == 0) {
+					window[c] = null;
+				}
+			}
+		} else {
+			pkg[pkgFrags[pkgFrags.length - 1]] = null;
+			// also try to unload inner or anonymous classes
+			for (var c in pkg) {
+				if (c.indexOf (pkgFrags[pkgFrags.length - 1] + "$") == 0) {
+					pkg[c] = null;
+				}
+			}
+		}
+
+		if (Clazz.allClasses[qClazzName] == true) {
+			Clazz.allClasses[qClazzName] = false;
+			// also try to unload inner or anonymous classes
+			for (var c in Clazz.allClasses) {
+				if (c.indexOf (qClazzName + "$") == 0) {
+					Clazz.allClasses[c] = false;
+				}
+			}
+		}
+
+		if (window["ClazzLoader"] != null) {
+			ClazzLoader.unloadClassExt (qClazzName);
+		}
+		
+		return true;
+	}
+	return false;
+};
+

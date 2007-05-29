@@ -2166,7 +2166,13 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			&& !ClazzLoader.isClassExcluded (name)) {
 		var path = ClazzLoader.getClasspathFor (name/*, true*/);
 		if (!ClazzLoader.loadedScripts[path]) {
-			var n = new ClazzNode ();
+			var n = null;
+			if (Clazz.unloadedClasses[name] != null) {
+				n = ClazzLoader.findClass (name);
+			}
+			if (n == null) {
+				n = new ClazzNode ();
+			}
 			n.name = name;
 			n.path = path;
 			ClazzLoader.mappingPathNameNode (path, name, n);
@@ -2423,6 +2429,174 @@ ClazzLoader.destroyClassNode = function (node) {
 	}
 };
 
+/* For hotspot and unloading */
+
+/* protected */
+ClazzLoader.unloadClassExt = function (qClazzName) {
+	if (ClazzLoader.definedClasses != null) {
+		ClazzLoader.definedClasses[qClazzName] = false;
+	}
+	if (ClazzLoader.classpathMap["#" + qClazzName] != null) {
+		var pp = ClazzLoader.classpathMap["#" + qClazzName];
+		ClazzLoader.classpathMap["#" + qClazzName] = null;
+		var arr = ClazzLoader.classpathMap["$" + pp];
+		var removed = false;
+		for (var i = 0; i < arr.length; i++) {
+			if (arr[i] == qClazzName) {
+				for (var j = i; j < arr.length - 1; j++) {
+					arr[j] = arr[j + 1];
+				}
+				arr.length--;
+				removed = true;
+				break;
+			}
+		}
+		if (removed) {
+			ClazzLoader.classpathMap["$" + pp] = arr;
+		}
+	}
+	var n = ClazzLoader.findClass (qClazzName);
+	if (n != null) {
+		n.status = ClazzNode.STATUS_KNOWN;
+		ClazzLoader.loadedScripts[n.path] = false;
+	}
+	var path = ClazzLoader.getClasspathFor (qClazzName);
+	ClazzLoader.loadedScripts[path] = false;
+	if (ClazzLoader.innerLoadedScripts[path]) {
+		ClazzLoader.innerLoadedScripts[path] = false;
+	}
+
+	if (window["ClassLoaderProgressMonitor"] != null) {
+		ClassLoaderProgressMonitor.showStatus ("Class " + qClazzName + " is unloaded.", true);
+	}
+};
+
+ClazzLoader.lastHotspotUpdated = new Date ().getTime ();
+ClazzLoader.lastHotspotSessionID = 0;
+
+/*
+ * This method will be called in server-return-script:
+ *
+ * ClazzLoader.updateHotspot (
+ * 134324344, 1, "org.eclipse.swt.widgets.Menu",
+ * 134324345, 2, "org.eclipse.swt.widgets.MenuItem",
+ * null);
+ *
+ */
+/* public */
+ClazzLoader.updateHotspot = function () {
+	var length = (arguments.length - 1) / 3;
+	var lastID = 0;
+	var lastUpdated = 0;
+	var toUpdateClasses = new Array ();
+	for (var i = 0; i < length; i++) {
+		var time = arguments[i * 3];
+		var id = arguments[i * 3 + 1];
+		var clazz = arguments[i * 3 + 2];
+		if ((time > ClazzLoader.lastHotspotUpdated) 
+				|| (time == ClazzLoader.lastHotspotUpdated
+				&& id > ClazzLoader.lastHotspotSessionID)) {
+			toUpdateClasses[toUpdateClasses.length] = clazz;
+			lastID = id;
+			lastUpdated = time;
+		}
+	}
+	if (toUpdateClasses.length > 0) {
+		ClazzLoader.lastHotspotUpdated = lastUpdated;
+		ClazzLoader.lastHotspotSessionID = lastID;
+		var needUpdateClasses = new Array ();
+		for (var i = 0; i < toUpdateClasses.length; i++) {
+			needUpdateClasses[i] = Clazz.unloadClass (toUpdateClasses[i]);
+		}
+		for (var i = 0; i < toUpdateClasses.length; i++) {
+			if (needUpdateClasses[i]) {
+				var clzz = toUpdateClasses[i];
+				ClazzLoader.loadClass (clzz, (function (clazz) {
+					return function () {
+						// succeeded!
+						if (window["ClassLoaderProgressMonitor"] != null) {
+							ClassLoaderProgressMonitor.showStatus ("Class " + qClazzName + " is reloaded.", true);
+						}
+						Clazz.unloadedClasses[clazz] = null;
+					};
+				}) (clzz));
+			}
+		}
+	}
+	ClazzLoader.lastHotspotJSFailed = false;
+};
+
+/* private */
+ClazzLoader.removeHotspotScriptNode = function (n) {
+	// lazily remove script nodes.
+	window.setTimeout ((function (node) {
+		return function () {
+			if (node.readyState != "interactive") {
+				try {
+					if (node.parentNode != null) {
+						node.parentNode.removeChild (node);
+					}
+				} catch (e) { }
+			}
+		};
+	}) (n), 1);
+	
+	if (ClazzLoader.hotspotMonitoringTimeout != null) {
+		window.clearTimeout (ClazzLoader.hotspotMonitoringTimeout);
+		ClazzLoader.hotspotMonitoringTimeout = null;
+	}
+};
+
+ClazzLoader.lastHotspotScriptLoaded = true;
+ClazzLoader.hotspotMonitoringTimeout = null;
+ClazzLoader.lastHotspotJSFailed = false;
+
+/* protected */
+ClazzLoader.hotspotMonitoring = function () {
+	if (ClazzLoader.lastHotspotScriptLoaded) {
+		var port = window["j2s.hotspot.port"];
+		if (port == null) {
+			port = 1725;
+		}
+		var hotspotURL = "http://127.0.0.1:" + port;
+		if (ClazzLoader.lastHotspotSessionID == 0) {
+			hotspotURL += "/hotspot.js";
+		} else {
+			hotspotURL += "/" + ClazzLoader.lastHotspotSessionID + ".js";
+		}
+		var script = document.createElement ("SCRIPT");
+		script.type = "text/javascript";
+		script.src = hotspotURL;
+		if (typeof (script.onreadystatechange) == "undefined") { // W3C
+			script.onload = script.onerror = function () {
+				ClazzLoader.lastHotspotScriptLoaded = true;
+				ClazzLoader.removeHotspotScriptNode (this);
+			};
+		} else {
+			script.onreadystatechange = function () {
+				var state = "" + this.readyState;
+				if (state == "loaded" || state == "complete") {
+					ClazzLoader.lastHotspotScriptLoaded = true;
+					ClazzLoader.removeHotspotScriptNode (this);
+				}
+			};
+		}
+
+		ClazzLoader.lastHotspotJSFailed = true;
+		ClazzLoader.lastHotspotScriptLoaded = false;
+		var head = document.getElementsByTagName ("HEAD")[0];
+		head.appendChild (script);
+	}
+	
+	window.setTimeout (ClazzLoader.hotspotMonitoring, 250);
+	if (ClazzLoader.hotspotMonitoringTimeout == null) {
+		ClazzLoader.hotspotMonitoringTimeout = window.setTimeout (function () {
+				ClazzLoader.lastHotspotScriptLoaded = true; // timeout
+				window.setTimeout (ClazzLoader.hotspotMonitoring, 50);
+		}, 7500); // 7.5 seconds to time out
+	}
+};
+
 /*
  * Remove j2slib.z.js, j2slibcore.z.js or Class/Ext/Loader/.js.
  */
@@ -2436,6 +2610,10 @@ window.setTimeout (function () {
 			ClazzLoader.removeScriptNode (ss[i]);
 			break;
 		}
+	}
+	/* start ClazzLoader hotspot monitoring after 1 second */
+	if (window["j2s.script.debugging"] == true) {
+		window.setTimeout (ClazzLoader.hotspotMonitoring, 1000);
 	}
 }, 324); // 0.324 seconds is considered as enough before refresh action
 
