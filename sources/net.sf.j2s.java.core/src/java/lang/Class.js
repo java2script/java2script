@@ -276,7 +276,9 @@ Clazz.inheritArgs = new Clazz.args4InheritClass ();
 Clazz.inheritClass = function (clazzThis, clazzSuper, objSuper) {
 	//var thisClassName = Clazz.getClassName (clazzThis);
 	Clazz.extendsProperties (clazzThis, clazzSuper);
-	if (objSuper != null) {
+	if (Clazz.isClassUnloaded (clazzThis)) {
+		// Don't change clazzThis.protoype! Keep it!
+	} else if (objSuper != null) {
 		// ! Unsafe of refrence prototype to an instance!
 		// Feb 19, 2006 --josson
 		// OK for this refrence to an instance, as this is anonymous instance,
@@ -1114,18 +1116,14 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	 * wrapping into deep hierarchies!
 	 */
 	var f$ = clazzThis.prototype[funName];
-	if (f$ == null) {
-		//*
+	if (f$ == null || (f$.claxxOwner == clazzThis
+			&& f$.funParams == fpName)) {
 		// property "funParams" will be used as a mark of only-one method
 		funBody.funParams = fpName; 
 		funBody.claxxOwner = clazzThis;
 		clazzThis.prototype[funName] = funBody;
 		funBody.exClazz = clazzThis; // make it traceable
 		return funBody;
-		// */
-	} else if (f$.claxxOwner == clazzThis
-			&& f$.funParams == fpName) {
-		return f$;
 	}
 	var oldFun = null;
 	var oldStacks = new Array ();
@@ -1266,6 +1264,15 @@ Clazz.allClasses = new Object ();
 Clazz.lastPackageName = null;
 Clazz.lastPackage = null;
 
+/* protected */
+Clazz.unloadedClasses = new Array ();
+
+/* public */
+Clazz.isClassUnloaded = function (clzz) {
+	var thisClassName = Clazz.getClassName (clzz, true);
+	return Clazz.unloadedClasses[thisClassName] != null;
+};
+
 /* public */
 Clazz.declarePackage = function (pkgName) {
 	if (Clazz.lastPackageName == pkgName) {
@@ -1348,6 +1355,10 @@ Clazz.evalType = function (typeStr, isQualified) {
  */
 /* public */
 Clazz.defineType = function (qClazzName, clazzFun, clazzParent, interfacez) {
+	var cf = Clazz.unloadedClasses[qClazzName];
+	if (cf != null) {
+		clazzFun = cf;
+	}
 	var idx = qClazzName.lastIndexOf (".");
 	if (idx != -1) {
 		var pkgName = qClazzName.substring (0, idx);
@@ -1618,6 +1629,10 @@ Clazz.declareInterface = function (prefix, name, interfacez) {
  #-*/
 Clazz.decorateAsClass = function (clazzFun, prefix, name, clazzParent, 
 		interfacez, parentClazzInstance) {
+	var cf = Clazz.unloadedClasses[prefix.__PKG_NAME__ + "." + name];
+	if (cf != null) {
+		clazzFun = cf;
+	}
 	var qName = null;
 	Clazz.decorateFunction (clazzFun, prefix, name);
 	if (parentClazzInstance != null) {
