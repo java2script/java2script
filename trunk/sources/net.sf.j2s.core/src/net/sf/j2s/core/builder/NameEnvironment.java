@@ -10,7 +10,6 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import net.sf.j2s.core.Java2ScriptProject;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 
@@ -119,7 +118,7 @@ private void computeClasspathLocations(
 			case IClasspathEntry.CPE_PROJECT :
 				if (!(target instanceof IProject)) continue nextEntry;
 				IProject prereqProject = (IProject) target;
-				if (!Java2ScriptProject.hasJava2ScriptNature(prereqProject)) continue nextEntry; // if project doesn't have java nature or is not accessible
+				if (!JavaProject.hasJavaNature(prereqProject)) continue nextEntry; // if project doesn't have java nature or is not accessible
 
 				JavaProject prereqJavaProject = (JavaProject) JavaCore.create(prereqProject);
 				IClasspathEntry[] prereqClasspathEntries = prereqJavaProject.getRawClasspath();

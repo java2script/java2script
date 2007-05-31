@@ -540,8 +540,7 @@ protected void removeClassFile(IPath typePath, IContainer outputFolder) throws C
 			System.out.println("Found removed type " + typePath); //$NON-NLS-1$
 		addDependentsOf(typePath, true); // when member types are removed, their enclosing type is structurally changed
 	}
-//	IFile classFile = outputFolder.getFile(typePath.addFileExtension(SuffixConstants.EXTENSION_class));
-	IFile classFile = outputFolder.getFile(typePath.addFileExtension("clazz"));
+	IFile classFile = outputFolder.getFile(typePath.addFileExtension(SuffixConstants.EXTENSION_class));
 	if (classFile.exists()) {
 		if (JavaBuilder.DEBUG)
 			System.out.println("Deleting class file of removed type " + typePath); //$NON-NLS-1$

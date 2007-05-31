@@ -481,8 +481,7 @@ protected char[] writeClassFile(ClassFile classFile, SourceFile compilationUnit,
 		filePath = new Path(filePath.lastSegment());
 	}
 
-//	IFile file = container.getFile(filePath.addFileExtension(SuffixConstants.EXTENSION_class));
-	IFile file = container.getFile(filePath.addFileExtension("clazz"));
+	IFile file = container.getFile(filePath.addFileExtension(SuffixConstants.EXTENSION_class));
 	writeClassFileBytes(classFile.getBytes(), file, fileName, isSecondaryType, compilationUnit.updateClassFile);
 	if (classFile.ownSharedArrays) {
 		org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment env = this.compiler.lookupEnvironment;
