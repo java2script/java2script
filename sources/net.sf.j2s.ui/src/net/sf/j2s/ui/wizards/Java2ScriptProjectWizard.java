@@ -15,8 +15,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import net.sf.j2s.core.Java2ScriptProjectNature;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
@@ -28,36 +27,81 @@ import net.sf.j2s.ui.resources.ExternalResources;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizardFirstPage;
+import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizardSecondPage;
+import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 /**
  * @author zhou renjian
  *
  * 2007-3-4
  */
-public class Java2ScriptProjectWizard extends JavaProjectWizard {
-	/**
-	 * 
-	 */
-	public Java2ScriptProjectWizard() {
-		super();
+public class Java2ScriptProjectWizard extends NewElementWizard implements IExecutableExtension {
+    
+    private JavaProjectWizardFirstPage fFirstPage;
+    private JavaProjectWizardSecondPage fSecondPage;
+    
+    private IConfigurationElement fConfigElement;
+    
+    public Java2ScriptProjectWizard() {
+        setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
+        setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+        setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
 		updateJava2ScriptWizardTitle();
-	}
+    }
 
-	protected void updateJava2ScriptWizardTitle() {
-		setWindowTitle(getWindowTitle() + " with Java2Script Enabled");
-	}
-	
+    /*
+     * @see Wizard#addPages
+     */	
+    public void addPages() {
+        super.addPages();
+        fFirstPage= new JavaProjectWizardFirstPage();
+        addPage(fFirstPage);
+        fSecondPage= new JavaProjectWizardSecondPage(fFirstPage) {
+    		
+			public void init(IJavaProject jproject, IPath defaultOutputLocation,
+					IClasspathEntry[] defaultEntries,
+					boolean defaultsOverrideExistingClasspath) {
+				super.init(jproject, defaultOutputLocation, updateJavaLibraries(defaultEntries),
+						defaultsOverrideExistingClasspath);
+			}
+		
+		};
+        addPage(fSecondPage);
+    }		
+    
+    /* (non-Javadoc)
+     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+     */
+    protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+    	fSecondPage.performFinish(monitor); // use the full progress monitor
+    }
+       
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard#performFinish()
+	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
 	public boolean performFinish() {
-		boolean finished = super.performFinish();
+		boolean finished= super.performFinish();
 		if (finished) {
+			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
+			
 	        if (getContainer() instanceof PreferenceDialog) {
 	            PreferenceDialog dialog = (PreferenceDialog) getContainer();
 	            dialog.close();
@@ -139,7 +183,7 @@ public class Java2ScriptProjectWizard extends JavaProjectWizard {
 	    	try {
 	    		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
 	    		pn.setProject(project);
-	    		pn.addToBuildSpec("net.sf.j2s.core.java2scriptbuilder");
+	    		pn.configure();
 	    	} catch (CoreException e) {
 	    		e.printStackTrace();
 	    	}
@@ -151,10 +195,48 @@ public class Java2ScriptProjectWizard extends JavaProjectWizard {
 		}
 		return finished;
 	}
+    
+    protected void handleFinishException(Shell shell, InvocationTargetException e) {
+        String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
+        String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
+        ExceptionHandler.handle(e, getShell(), title, message);
+    }	
+    
+    /*
+     * Stores the configuration element for the wizard.  The config element will be used
+     * in <code>performFinish</code> to set the result perspective.
+     */
+    public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+        fConfigElement= cfig;
+    }
+    
+    /* (non-Javadoc)
+     * @see IWizard#performCancel()
+     */
+    public boolean performCancel() {
+        fSecondPage.performCancel();
+        return super.performCancel();
+    }
+    
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
+	 */
+	public IJavaElement getCreatedElement() {
+		return JavaCore.create(fFirstPage.getProjectHandle());
+	}
+
+	protected void updateJava2ScriptWizardTitle() {
+		setWindowTitle(getWindowTitle() + " with Java2Script Enabled");
+	}
 	
 	protected void updateJava2ScriptLibraries(J2SClasspathModel classpathModel, String j2sLibPath) {
 	}
 
 	protected void updateJava2ScriptProject(String prjFolder, String binRelative) {
 	}
+	
+	protected IClasspathEntry[] updateJavaLibraries(IClasspathEntry[] defaultEntries) {
+		return defaultEntries;
+	}
+        
 }
