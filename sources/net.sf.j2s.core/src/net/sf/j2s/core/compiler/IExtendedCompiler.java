@@ -5,6 +5,6 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 public interface IExtendedCompiler {
 	
-	public void compile(ICompilationUnit[] sourceUnits, IContainer binFolder);
+	public void process(ICompilationUnit sourceUnits, IContainer binFolder);
 	
 }

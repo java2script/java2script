@@ -9,21 +9,13 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core;
+package net.sf.j2s.core.builder;
 
-import net.sf.j2s.core.builder.JavaBuilder;
 
 /**
  * @author zhou renjian
  *
  * 2006-6-14
  */
-public class Java2ScriptProjectBuilder extends JavaBuilder {
-	/**
-	 * 
-	 */
-	public Java2ScriptProjectBuilder() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+public class Java2ScriptBuilder extends JavaBuilder {
 }
