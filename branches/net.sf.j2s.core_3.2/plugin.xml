@@ -56,7 +56,7 @@
 		id="java2scriptbuilder"
 		name="Java2Script Builder">
 		<builder>
-			<run class="net.sf.j2s.core.Java2ScriptProjectBuilder">
+			<run class="net.sf.j2s.core.builder.Java2ScriptBuilder">
 			</run>
 		</builder>
 	</extension>
