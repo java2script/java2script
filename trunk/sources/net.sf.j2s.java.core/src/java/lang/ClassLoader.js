@@ -114,6 +114,7 @@
  # xxxoptionals -> so
  # declaration -> dcl
  # optionalsLoaded -> oled
+ # qClazzName ->Nq
  #-*/
  
 /**
@@ -2515,7 +2516,7 @@ ClazzLoader.updateHotspot = function () {
 					return function () {
 						// succeeded!
 						if (window["ClassLoaderProgressMonitor"] != null) {
-							ClassLoaderProgressMonitor.showStatus ("Class " + qClazzName + " is reloaded.", true);
+							ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is reloaded.", true);
 						}
 						Clazz.unloadedClasses[clazz] = null;
 					};
@@ -2569,15 +2570,19 @@ ClazzLoader.hotspotMonitoring = function () {
 		script.src = hotspotURL;
 		if (typeof (script.onreadystatechange) == "undefined") { // W3C
 			script.onload = script.onerror = function () {
-				ClazzLoader.lastHotspotScriptLoaded = true;
-				ClazzLoader.removeHotspotScriptNode (this);
+				try {
+					ClazzLoader.lastHotspotScriptLoaded = true;
+					ClazzLoader.removeHotspotScriptNode (this);
+				} catch (e) {}; // refreshing browser may cause exceptions
 			};
 		} else {
 			script.onreadystatechange = function () {
 				var state = "" + this.readyState;
 				if (state == "loaded" || state == "complete") {
-					ClazzLoader.lastHotspotScriptLoaded = true;
-					ClazzLoader.removeHotspotScriptNode (this);
+					try {
+						ClazzLoader.lastHotspotScriptLoaded = true;
+						ClazzLoader.removeHotspotScriptNode (this);
+					} catch (e) {}; // refreshing browser may cause exceptions
 				}
 			};
 		}

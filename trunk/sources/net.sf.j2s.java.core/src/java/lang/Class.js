@@ -497,6 +497,8 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				// This is a single method, call directly!
 				fx = clazzFun;
 			}
+		} else if (clazzFun.stacks == null) { // super.toString
+			fx = clazzFun;
 		} else { // normal wrapped method
 			var stacks = clazzFun.stacks;
 			var length = stacks.length;
