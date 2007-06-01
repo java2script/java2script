@@ -191,7 +191,7 @@ public class J2SPropertyPage extends PropertyPage {
 	    	try {
 	    		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
 	    		pn.setProject(project);
-	    		pn.addToBuildSpec("net.sf.j2s.core.java2scriptbuilder");
+	    		pn.configure();
 	    	} catch (CoreException e) {
 	    		e.printStackTrace();
 	    	}
@@ -206,7 +206,7 @@ public class J2SPropertyPage extends PropertyPage {
 	    	try {
 	    		Java2ScriptProjectNature pn = new Java2ScriptProjectNature();
 	    		pn.setProject(project);
-	    		pn.removeFromBuildSpec("net.sf.j2s.core.java2scriptbuilder");
+	    		pn.deconfigure();
 	    	} catch (CoreException e) {
 	    		e.printStackTrace();
 	    	}
