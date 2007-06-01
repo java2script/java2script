@@ -306,7 +306,7 @@ private void cleanup() {
 }
 
 private void clearLastState() {
-	net.sf.j2s.core.JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, null);
+	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, null);
 }
 
 boolean filterExtraResource(IResource resource) {
@@ -388,7 +388,27 @@ private SimpleLookupTable findDeltas() {
 }
 
 public State getLastState(IProject project) {
-	return (State) net.sf.j2s.core.JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
+	org.eclipse.jdt.internal.core.builder.State lastBuiltState = (org.eclipse.jdt.internal.core.builder.State) JavaModelManager.getJavaModelManager().getLastBuiltState(project, notifier.monitor);
+	if (lastBuiltState == null) {
+		return null;
+	}
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	DataOutputStream out = new DataOutputStream(baos);
+	try {
+		org.eclipse.jdt.internal.core.builder.JavaBuilder.writeState(lastBuiltState, out);
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+	
+	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+	DataInputStream in = new DataInputStream(bais);
+	State state = null;
+	try {
+		state = State.read(project, in);
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+	return state;
 }
 
 /* Return the list of projects for which it requires a resource delta. This builder's project
@@ -696,8 +716,26 @@ private void recordNewState(State state) {
 
 	if (DEBUG)
 		System.out.println("Recording new state : " + state); //$NON-NLS-1$
+	
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	DataOutputStream out = new DataOutputStream(baos);
+	try {
+		state.write(out);
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+	
+	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+	DataInputStream in = new DataInputStream(bais);
+	org.eclipse.jdt.internal.core.builder.State newState = null;
+	try {
+		newState = org.eclipse.jdt.internal.core.builder.JavaBuilder.readState(currentProject, in);
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+
 	// state.dump();
-	net.sf.j2s.core.JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, state);
+	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, newState);
 }
 
 /**

@@ -32,10 +32,8 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 	 */
 	public Java2ScriptIncrementalImageBuilder(JavaBuilder javaBuilder) {
 		super(javaBuilder);
-		// TODO Auto-generated constructor stub
 	}
 	
-
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
 		Map projectOptions = javaBuilder.javaProject.getOptions(true);

@@ -10,24 +10,46 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.resources.*;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
 
-import org.eclipse.jdt.core.*;
 import net.sf.j2s.core.compiler.BuildContext;
-import org.eclipse.jdt.core.compiler.*;
-import org.eclipse.jdt.internal.compiler.*;
+import net.sf.j2s.core.compiler.BuildContextBridge;
+import net.sf.j2s.core.compiler.HackedJDTBuildContext;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.Compiler;
+import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.problem.*;
+import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
-
-import java.io.*;
-import java.util.*;
 
 /**
  * The abstract superclass of Java builders.
@@ -440,13 +462,15 @@ protected BuildContext[] notifyParticipants(SourceFile[] unitsAboutToCompile) {
 	for (int i = unitsAboutToCompile.length; --i >= 0;)
 		results[i] = new BuildContext(unitsAboutToCompile[i]);
 
+	HackedJDTBuildContext[] contexts = BuildContextBridge.convertToJDTBuildContexts(results);
+	
 	// TODO (kent) do we expect to have more than one participant?
 	// and if so should we pass the generated files from the each processor to the others to process?
 	// and what happens if some participants do not expect to be called with only a few files, after seeing 'all' the files?
-	/*
 	for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
-		this.javaBuilder.participants[i].buildStarting(results, this instanceof BatchImageBuilder);
-	*/
+		this.javaBuilder.participants[i].buildStarting(contexts, this instanceof BatchImageBuilder);
+
+	BuildContextBridge.updateJ2SBuildContexts(contexts, results);
 
 	SimpleSet uniqueFiles = null;
 	CompilationParticipantResult[] toAdd = null;
@@ -505,12 +529,15 @@ protected void processAnnotations(BuildContext[] results) {
 	for (int i = results.length; --i >= 0;)
 		((CompilationParticipantResult) results[i]).reset(foundAnnotations && this.filesWithAnnotations.includes(results[i].sourceFile));
 
+	HackedJDTBuildContext[] contexts = BuildContextBridge.convertToJDTBuildContexts(results);
+	
 	// even if no files have annotations, must still tell every annotation processor in case the file used to have them
-	/*
 	for (int i = 0, l = this.javaBuilder.participants.length; i < l; i++)
 		if (this.javaBuilder.participants[i].isAnnotationProcessor())
-			this.javaBuilder.participants[i].processAnnotations(results);
-	*/
+			this.javaBuilder.participants[i].processAnnotations(contexts);
+	
+	BuildContextBridge.updateJ2SBuildContexts(contexts, results);
+	
 	processAnnotationResults(results);
 }
 

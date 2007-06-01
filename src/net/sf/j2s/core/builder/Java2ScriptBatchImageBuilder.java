@@ -35,7 +35,6 @@ public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 		// TODO Auto-generated constructor stub
 	}
 
-
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
 		Map projectOptions = javaBuilder.javaProject.getOptions(true);
@@ -70,9 +69,4 @@ public class Java2ScriptBatchImageBuilder extends BatchImageBuilder {
 		return newCompiler;
 	}
 
-
-	protected void cleanOutputFolders(boolean copyBack) throws CoreException {
-		//super.cleanOutputFolders(copyBack);
-	}
-	
 }
