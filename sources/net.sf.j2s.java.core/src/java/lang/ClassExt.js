@@ -813,6 +813,18 @@ Clazz.forName = function (clazzName) {
 
 /* For hotspot and unloading */
 
+/* private */
+Clazz.cleanDelegateMethod = function (m) {
+	if (m == null) return;
+	if (typeof m == "function" && m.lastMethod != null
+			&& m.lastParams != null && m.lastClaxxRef != null) {
+		m.lastMethod = null;
+		m.lastParams = null;
+		m.lastClaxxRef = null;
+	}
+};
+
+/* public */
 Clazz.unloadClass = function (qClazzName) {
 	var cc = Clazz.evalType (qClazzName);
 	if (cc != null) {
@@ -854,6 +866,13 @@ Clazz.unloadClass = function (qClazzName) {
 					Clazz.allClasses[c] = false;
 				}
 			}
+		}
+		
+		for (var m in cc) {
+			Clazz.cleanDelegateMethod (cc[m]);
+		}
+		for (var m in cc.prototype) {
+			Clazz.cleanDelegateMethod (cc.prototype[m]);
 		}
 
 		if (window["ClazzLoader"] != null) {
