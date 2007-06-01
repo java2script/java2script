@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
+import net.sf.j2s.core.hotspot.InnerHotspotServer;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
 import net.sf.j2s.ui.classpath.CompositeResources;
 import net.sf.j2s.ui.classpath.ContactedClasses;
@@ -771,7 +772,9 @@ public class J2SUnitLaunchingUtil {
 			if (j2xStr.indexOf("swt") != -1) {
 				buf.append("window[\"swt.debugging\"] = true;\r\n");
 			}
-			buf.append("\r\n");
+			buf.append("window[\"j2s.hotspot.port\"] = ");
+			buf.append(InnerHotspotServer.getHotspotPort());
+			buf.append(";\r\n\r\n");
 		}
 		
 		if (addonCompatiable) {
