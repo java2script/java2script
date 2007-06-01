@@ -24,6 +24,8 @@ import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
 import net.sf.j2s.core.builder.SourceFileProxy;
+import net.sf.j2s.core.hotspot.InnerHotspotServer;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -405,6 +407,9 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					throw new RuntimeException("Failed to create folder " + folderPath); //$NON-NLS-1$
 				}
 			}
+			InnerHotspotServer.addCompiledItem(packageName + "." + elementName);
+		} else {
+			InnerHotspotServer.addCompiledItem(elementName);
 		}
 		File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
 		try {
