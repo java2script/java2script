@@ -2425,6 +2425,7 @@ ClazzLoader.removeFromArray = function (node, arr) {
 };
 
 /* private */
+/*-# destroyClassNode -> dCN #-*/
 ClazzLoader.destroyClassNode = function (node) {
 	var parents = node.parents;
 	if (parents != null) {
@@ -2476,7 +2477,7 @@ ClazzLoader.unloadClassExt = function (qClazzName) {
 	ClazzLoader.classUnloaded (qClazzName);
 };
 
-/* private */
+/* protected */ /* Clazz#assureInnerClass */
 ClazzLoader.assureInnerClass = function (clzz, fun) {
 	var clzzName = clzz.__CLASS_NAME__;
 	if (Clazz.unloadedClasses[clzzName]) {
@@ -2517,7 +2518,9 @@ ClazzLoader.assureInnerClass = function (clzz, fun) {
 	}
 };
 
+/*-# lastHotspotUpdated -> ltUd #-*/
 ClazzLoader.lastHotspotUpdated = new Date ().getTime ();
+/*-# lastHotspotSessionID -> ltSI #-*/
 ClazzLoader.lastHotspotSessionID = 0;
 
 /*
@@ -2536,7 +2539,9 @@ ClazzLoader.updateHotspot = function () {
 	}
 	var length = (arguments.length - 1) / 3;
 	var lastID = 0;
+	/*-# lastUpdated -> lUd #-*/
 	var lastUpdated = 0;
+	/*-# toUpdateClasses -> tUs #-*/
 	var toUpdateClasses = new Array ();
 	for (var i = 0; i < length; i++) {
 		var time = arguments[i * 3];
@@ -2553,6 +2558,7 @@ ClazzLoader.updateHotspot = function () {
 	if (toUpdateClasses.length > 0) {
 		ClazzLoader.lastHotspotUpdated = lastUpdated;
 		ClazzLoader.lastHotspotSessionID = lastID;
+		/*-# needUpdateClasses -> nUC #-*/
 		var needUpdateClasses = new Array ();
 		for (var i = 0; i < toUpdateClasses.length; i++) {
 			needUpdateClasses[i] = Clazz.unloadClass (toUpdateClasses[i]);
@@ -2574,6 +2580,7 @@ ClazzLoader.updateHotspot = function () {
 };
 
 /* private */
+/*-# removeHotspotScriptNode -> rtSN #-*/
 ClazzLoader.removeHotspotScriptNode = function (n) {
 	// lazily remove script nodes.
 	window.setTimeout ((function (node) {
@@ -2594,23 +2601,33 @@ ClazzLoader.removeHotspotScriptNode = function (n) {
 	}
 };
 
+/*-# lastHotspotScriptLoaded -> ltSL #-*/
 ClazzLoader.lastHotspotScriptLoaded = true;
-ClazzLoader.hotspotMonitoringTimeout = null;
+/*-# hotspotJSTimeout -> hJSt #-*/
+ClazzLoader.hotspotJSTimeout = null;
+/*-# lastHotspotJSFailed -> ltJF #-*/
 ClazzLoader.lastHotspotJSFailed = false;
 
 /* protected */
+/*-# hotspotMonitoring -> htMr #-*/
 ClazzLoader.hotspotMonitoring = function () {
-	if (ClazzLoader.lastHotspotScriptLoaded) {
+	if (ClazzLoader.lastHotspotScriptLoaded 
+			&& !ClazzLoader.lastHotspotJSFailed) {
 		var port = window["j2s.hotspot.port"];
 		if (port == null) {
 			port = 1725;
 		}
 		var hotspotURL = "http://127.0.0.1:" + port;
 		if (ClazzLoader.lastHotspotSessionID == 0) {
-			hotspotURL += "/hotspot.js";
+			hotspotURL += "/hotspot.js?" + Math.random ();
 		} else {
-			hotspotURL += "/" + ClazzLoader.lastHotspotSessionID + ".js";
+			hotspotURL += "/" + ClazzLoader.lastHotspotSessionID + ".js?"
+					+ Math.random ();
 		}
+
+		ClazzLoader.lastHotspotJSFailed = true;
+		ClazzLoader.lastHotspotScriptLoaded = false;
+		
 		var script = document.createElement ("SCRIPT");
 		script.type = "text/javascript";
 		script.src = hotspotURL;
@@ -2633,19 +2650,19 @@ ClazzLoader.hotspotMonitoring = function () {
 			};
 		}
 
-		ClazzLoader.lastHotspotJSFailed = true;
-		ClazzLoader.lastHotspotScriptLoaded = false;
 		var head = document.getElementsByTagName ("HEAD")[0];
 		head.appendChild (script);
+		if (ClazzLoader.hotspotJSTimeout != null) {
+			window.clearTimeout (ClazzLoader.hotspotJSTimeout);
+			ClazzLoader.hotspotJSTimeout = null;
+		}
+		ClazzLoader.hotspotJSTimeout = window.setTimeout (function () {
+				ClazzLoader.lastHotspotScriptLoaded = true; // timeout
+				ClazzLoader.lastHotspotJSFailed = false; // timeout
+		}, 7500); // 7.5 seconds to time out
 	}
 	
 	window.setTimeout (ClazzLoader.hotspotMonitoring, 250);
-	if (ClazzLoader.hotspotMonitoringTimeout == null) {
-		ClazzLoader.hotspotMonitoringTimeout = window.setTimeout (function () {
-				ClazzLoader.lastHotspotScriptLoaded = true; // timeout
-				window.setTimeout (ClazzLoader.hotspotMonitoring, 50);
-		}, 7500); // 7.5 seconds to time out
-	}
 };
 
 /*

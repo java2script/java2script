@@ -394,7 +394,18 @@ Clazz.registerSerializableFields = function (clazz) {
 	if (length > 0 && length % 2 == 1) {
 		var fs = clazz.declared$Fields;
 		for (var i = 1; i <= (length - 1) / 2; i++) {
-			fs[fs.length] = { name : args[i + i - 1], type : args[i + i] };
+			var o = { name : args[i + i - 1], type : args[i + i] };
+			var existed = false;
+			for (var j = 0; j < fs.length; j++) {
+				if (fs[j].name == o.name) { // reloaded classes
+					fs[j].type = o.type; // update type
+					existed = true;
+					break;
+				}
+			}
+			if (!existed) {
+				fs[fs.length] = o;
+			}
 		}
 	}
 };
