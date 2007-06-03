@@ -1087,6 +1087,7 @@ Clazz.formatParameters = function (funParams) {
  */
 /* public */
 Clazz.overrideMethod = function (clazzThis, funName, funBody, funParams) {
+	if (Clazz.assureInnerClass) Clazz.assureInnerClass (clazzThis, funBody);
 	funBody.exName = funName;
 	var fpName = Clazz.formatParameters (funParams);
 	/*
@@ -1111,6 +1112,7 @@ Clazz.overrideMethod = function (clazzThis, funName, funBody, funParams) {
  */
 /* public */
 Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
+	if (Clazz.assureInnerClass) Clazz.assureInnerClass (clazzThis, funBody);
 	funBody.exName = funName;
 	var fpName = Clazz.formatParameters (funParams);
 	/*

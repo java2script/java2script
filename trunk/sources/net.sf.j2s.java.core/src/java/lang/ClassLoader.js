@@ -693,6 +693,12 @@ ClazzLoader.scriptInited = function (file) {};
 /* protected */
 ClazzLoader.scriptCompleted = function (file) {};
 
+/* protected */
+ClazzLoader.classUnloaded = function (clazz) {};
+
+/* protected */
+ClazzLoader.classReloaded = function (clazz) {};
+
 /**
  * After all the classes are loaded, this method will be called.
  * Should be overriden to run *.main([]).
@@ -2467,8 +2473,47 @@ ClazzLoader.unloadClassExt = function (qClazzName) {
 		ClazzLoader.innerLoadedScripts[path] = false;
 	}
 
-	if (window["ClassLoaderProgressMonitor"] != null) {
-		ClassLoaderProgressMonitor.showStatus ("Class " + qClazzName + " is unloaded.", true);
+	ClazzLoader.classUnloaded (qClazzName);
+};
+
+/* private */
+ClazzLoader.assureInnerClass = function (clzz, fun) {
+	var clzzName = clzz.__CLASS_NAME__;
+	if (Clazz.unloadedClasses[clzzName]) {
+		if (clzzName.indexOf ("$") != -1) return;
+		var list = new Array ();
+		var key = clzzName + "$";
+		for (var s in Clazz.unloadedClasses) {
+			if (Clazz.unloadedClasses[s] != null && s.indexOf (key) == 0) {
+				list[list.length] = s;
+			}
+		}
+		if (list.length == 0) return;
+		var funStr = "" + fun;
+		var idx1 = funStr.indexOf (key);
+		if (idx1 == -1) return;
+		var idx2 = funStr.indexOf ("\"", idx1 + key.length);
+		if (idx2 == -1) return; // idx2 should never be -1;
+		var anonyClazz = funStr.substring (idx1, idx2);
+		if (Clazz.unloadedClasses[anonyClazz] == null) return;
+		var idx3 = funStr.indexOf ("{", idx2);
+		if (idx3 == -1) return;
+		idx3++;
+		var idx4 = funStr.indexOf ("(" + anonyClazz + ",", idx3 + 3);
+		if (idx4 == -1) return; // idx3 should never be -1;
+		var idx5 = funStr.lastIndexOf ("}", idx4 - 1);
+		if (idx5 == -1) return;
+		var innerClazzStr = funStr.substring (idx3, idx5);
+		eval (innerClazzStr);
+		Clazz.unloadedClasses[anonyClazz] = null;
+		/*
+		window.setTimeout ((function (clz, str) {
+			return function () {
+				eval (str);
+				Clazz.unloadedClasses[clz] = null;
+			};
+		}) (anonyClazz, innerClazzStr), 10);
+		*/
 	}
 };
 
@@ -2486,6 +2531,9 @@ ClazzLoader.lastHotspotSessionID = 0;
  */
 /* public */
 ClazzLoader.updateHotspot = function () {
+	if (Clazz.assureInnerClass == null) {
+		Clazz.assureInnerClass = ClazzLoader.assureInnerClass;
+	}
 	var length = (arguments.length - 1) / 3;
 	var lastID = 0;
 	var lastUpdated = 0;
@@ -2515,10 +2563,8 @@ ClazzLoader.updateHotspot = function () {
 				ClazzLoader.loadClass (clzz, (function (clazz) {
 					return function () {
 						// succeeded!
-						if (window["ClassLoaderProgressMonitor"] != null) {
-							ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is reloaded.", true);
-						}
 						Clazz.unloadedClasses[clazz] = null;
+						ClazzLoader.classReloaded (clazz);
 					};
 				}) (clzz));
 			}

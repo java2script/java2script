@@ -156,6 +156,13 @@ if (window["ClazzLoader"] != null) {
 	ClazzLoader.globalLoaded = function (file) {
 		ClassLoaderProgressMonitor.showStatus ("Application loaded.", true);
 	};
+	ClazzLoader.classUnloaded = function (clazz) {
+		ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is unloaded.", true);
+	};
+	ClazzLoader.classReloaded = function (clazz) {
+		ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is reloaded.", true);
+	};
+
 	var ua = navigator.userAgent.toLowerCase ();
 	if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
 		ClazzLoader.setLoadingMode ("script", 5);

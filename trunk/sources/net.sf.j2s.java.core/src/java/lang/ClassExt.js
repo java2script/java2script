@@ -845,6 +845,7 @@ Clazz.unloadClass = function (qClazzName) {
 			// also try to unload inner or anonymous classes
 			for (var c in window) {
 				if (c.indexOf (qClazzName + "$") == 0) {
+					Clazz.unloadClass (c);
 					window[c] = null;
 				}
 			}
@@ -853,6 +854,7 @@ Clazz.unloadClass = function (qClazzName) {
 			// also try to unload inner or anonymous classes
 			for (var c in pkg) {
 				if (c.indexOf (pkgFrags[pkgFrags.length - 1] + "$") == 0) {
+					Clazz.unloadClass (pkg.__PKG_NAME__ + "." + c);
 					pkg[c] = null;
 				}
 			}
