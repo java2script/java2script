@@ -320,7 +320,8 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			PrintWriter writer = resp.getWriter();
 			writer.write("net.sf.j2s.ajax.SimpleRPCRequest.xssNotify(");
 			writer.write("\"" + requestID + "\", \"");
-			writer.write(serialize.replaceAll("\r", "\\\\r")
+			writer.write(serialize.replaceAll("\\\\", "\\\\\\\\")
+					.replaceAll("\r", "\\\\r")
 					.replaceAll("\n", "\\\\n")
 					.replaceAll("\"", "\\\\\""));
 			writer.write("\");");
