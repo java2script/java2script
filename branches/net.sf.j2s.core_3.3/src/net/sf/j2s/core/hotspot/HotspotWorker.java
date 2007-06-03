@@ -158,6 +158,8 @@ public class HotspotWorker implements Runnable {
             ps.write(EOL);
             ps.print("Content-type: text/javascript");
             ps.write(EOL);
+            ps.print("Pragma: no-cache");
+            ps.write(EOL);
             if (doingGet) {
             	sendLatestHotspot(sessionID, ps);
             }
@@ -170,8 +172,8 @@ public class HotspotWorker implements Runnable {
         ps.write(EOL);
         StringBuffer strBuf = new StringBuffer();
         strBuf.append("ClazzLoader.updateHotspot (");
-        long time = 0;
-        while (time < 5000) {
+        long time = new Date().getTime();
+        while (new Date().getTime() - time < 5000) {
 	        String hotspotJS = InnerHotspotServer.getHotspotJavaScript(session);
 	        if (hotspotJS.length() != 0) {
 	        	strBuf.append("\r\n");
@@ -193,7 +195,6 @@ public class HotspotWorker implements Runnable {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				time += 250;
 	        }
         }
         strBuf.append("null);");
