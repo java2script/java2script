@@ -715,34 +715,34 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return super.visit(node);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
-	 */
-	public boolean visit(ArrayCreation node) {
-		ArrayType type = node.getType();
-		Type elementType = type.getElementType();
-		if (!elementType.isPrimitiveType()) {
-			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
-			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
-			QNTypeBinding qn = new QNTypeBinding();
-			String qualifiedName = null;
-			if (declaringClass != null) {
-				qualifiedName = declaringClass.getQualifiedName();
-				qn.binding = declaringClass;
-			} else {
-				qualifiedName = resolveTypeBinding.getQualifiedName();
-				qn.binding = resolveTypeBinding;
-			}
-			qualifiedName = discardGenericType(qualifiedName);
-			qn.qualifiedName = qualifiedName;
-			if (isQualifiedNameOK(qualifiedName, node) 
-					&& !musts.contains(qn)
-					&& !requires.contains(qn)) {
-				optionals.add(qn);
-			}
-		}
-		return super.visit(node);
-	}
+//	/* (non-Javadoc)
+//	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
+//	 */
+//	public boolean visit(ArrayCreation node) {
+//		ArrayType type = node.getType();
+//		Type elementType = type.getElementType();
+//		if (!elementType.isPrimitiveType()) {
+//			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
+//			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+//			QNTypeBinding qn = new QNTypeBinding();
+//			String qualifiedName = null;
+//			if (declaringClass != null) {
+//				qualifiedName = declaringClass.getQualifiedName();
+//				qn.binding = declaringClass;
+//			} else {
+//				qualifiedName = resolveTypeBinding.getQualifiedName();
+//				qn.binding = resolveTypeBinding;
+//			}
+//			qualifiedName = discardGenericType(qualifiedName);
+//			qn.qualifiedName = qualifiedName;
+//			if (isQualifiedNameOK(qualifiedName, node) 
+//					&& !musts.contains(qn)
+//					&& !requires.contains(qn)) {
+//				optionals.add(qn);
+//			}
+//		}
+//		return super.visit(node);
+//	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)

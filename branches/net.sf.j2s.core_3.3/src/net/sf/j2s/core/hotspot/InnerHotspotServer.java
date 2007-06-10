@@ -147,8 +147,9 @@ public class InnerHotspotServer {
             try {
                 s = ss.accept();
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
+            if (s == null) continue;
             HotspotWorker w = null;
             synchronized (threads) {
                 if (threads.isEmpty()) {
