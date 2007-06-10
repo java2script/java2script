@@ -18,7 +18,7 @@
 package java.lang;
 
 import java.io.InvalidObjectException;
-import java.util.Arrays;
+//import java.util.Arrays;
 
 import org.apache.harmony.luni.util.Msg;
 
@@ -507,7 +507,10 @@ abstract class AbstractStringBuilder {
                     value = newData;
                     shared = false;
                 } else {
-                    Arrays.fill(value, count, length, (char) 0);
+                    //Arrays.fill(value, count, length, (char) 0);
+                    for (int i = count; i < length; i++) {
+						value[i] = 0;
+					}
                 }
             }
         }

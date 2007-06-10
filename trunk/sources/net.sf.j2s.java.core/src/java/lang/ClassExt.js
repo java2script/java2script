@@ -125,7 +125,12 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
 	} else */if (arguments.length == 3) {
 		obj = new clazzInner (objThis);
 	} else if (arguments.length == 4) {
-		obj = new clazzInner (objThis, arguments[3]);
+		if (objThis.__CLASS_NAME__ == clazzInner.__CLASS_NAME__
+				&& arguments[3] == Clazz.inheritArgs) {
+			obj = objThis;
+		} else {
+			obj = new clazzInner (objThis, arguments[3]);
+		}
 	} else if (arguments.length == 5) {
 		obj = new clazzInner (objThis, arguments[3], arguments[4]);
 	} else if (arguments.length == 6) {
