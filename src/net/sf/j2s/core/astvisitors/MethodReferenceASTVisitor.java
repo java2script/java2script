@@ -34,6 +34,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	private MethodReferenceASTVisitor(String methodSignature) {
 		super();
 		this.methodSignature = methodSignature;
+		System.out.println("visitor:" + methodSignature);
 	}
 	
 	public static boolean checkReference(ASTNode node, String methodSignature) {
@@ -51,7 +52,11 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		if (methodSignature.equals(constructorBinding.getKey())) {
+		String key = constructorBinding.getKey();
+		if (key != null) {
+			key = key.replaceAll("<[^>]+>", "");
+		}
+		if (methodSignature.equals(key)) {
 			isReferenced = true;
 			return false;
 		}
@@ -63,7 +68,11 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(ConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		if (methodSignature.equals(constructorBinding.getKey())) {
+		String key = constructorBinding.getKey();
+		if (key != null) {
+			key = key.replaceAll("<[^>]+>", "");
+		}
+		if (methodSignature.equals(key)) {
 			isReferenced = true;
 			return false;
 		}
@@ -75,7 +84,11 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if (methodSignature.equals(methodBinding.getKey())) {
+		String key = methodBinding.getKey();
+		if (key != null) {
+			key = key.replaceAll("<[^>]+>", "");
+		}
+		if (methodSignature.equals(key)) {
 			isReferenced = true;
 			return false;
 		}
@@ -87,7 +100,11 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if (methodSignature.equals(methodBinding.getKey())) {
+		String key = methodBinding.getKey();
+		if (key != null) {
+			key = key.replaceAll("<[^>]+>", "");
+		}
+		if (methodSignature.equals(key)) {
 			isReferenced = true;
 			return false;
 		}
