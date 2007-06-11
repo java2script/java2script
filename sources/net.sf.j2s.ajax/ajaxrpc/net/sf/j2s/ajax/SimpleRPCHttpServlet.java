@@ -16,8 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -265,8 +268,29 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
 		runnable.deserialize(request);
+		SimpleRPCRunnable clonedRunnable = null;
+		try {
+			clonedRunnable = (SimpleRPCRunnable) runnable.clone();
+		} catch (CloneNotSupportedException e) {
+			//e.printStackTrace();
+		}
 		runnable.ajaxRun();
-		writer.write(runnable.serialize());
+		final String[] diffs = compareDiffs(runnable, clonedRunnable);
+		String serialize = runnable.serialize(new SimpleFieldFilter() {
+		
+			public boolean filter(String field) {
+				if (diffs == null || diffs.length == 0)	return true;
+				for (int i = 0; i < diffs.length; i++) {
+					if (diffs[i].equals(field)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		
+		});
+		
+		writer.write(serialize);
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
@@ -311,8 +335,27 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			return;
 		}
 		runnable.deserialize(request);
+		SimpleRPCRunnable clonedRunnable = null;
+		try {
+			clonedRunnable = (SimpleRPCRunnable) runnable.clone();
+		} catch (CloneNotSupportedException e) {
+			//e.printStackTrace();
+		}
 		runnable.ajaxRun();
-		String serialize = runnable.serialize();
+		final String[] diffs = compareDiffs(runnable, clonedRunnable);
+		String serialize = runnable.serialize(new SimpleFieldFilter() {
+		
+			public boolean filter(String field) {
+				if (diffs == null || diffs.length == 0)	return true;
+				for (int i = 0; i < diffs.length; i++) {
+					if (diffs[i].equals(field)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		
+		});
 		
 		if (isScriptReuest) { // cross site script response
 			resp.setContentType("text/javascript");
@@ -461,4 +504,94 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 	}
 	
+	protected String[] compareDiffs(SimpleRPCRunnable runnable1, SimpleRPCRunnable runnable2) {
+		Set diffSet = new HashSet();
+		Set fieldSet = new HashSet();
+		Class clazz = runnable1.getClass();
+		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
+			Field[] fields = clazz.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				fieldSet.add(fields[i]);
+			}
+			clazz = clazz.getSuperclass();
+		}
+		Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			int modifiers = field.getModifiers();
+			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+					&& (modifiers & Modifier.TRANSIENT) == 0
+					&& (modifiers & Modifier.STATIC) == 0) {
+				String name = field.getName();
+				Object field1 = null;
+				try {
+					field1 = field.get(runnable1);
+				} catch (IllegalArgumentException e1) {
+					//e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					//e1.printStackTrace();
+				}
+				Object field2 = null;
+				try {
+					field2 = field.get(runnable2);
+				} catch (IllegalArgumentException e) {
+					//e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					//e.printStackTrace();
+				}
+				System.out.println(field1.getClass().getName());
+				if (field1 == null) {
+					if (field2 != null) {
+						diffSet.add(name);
+					}
+				} else if (field1.getClass().getName().startsWith("[")) {
+					Class type = field.getType();
+					if (type == float[].class) {
+						if (!Arrays.equals((float[]) field1, (float[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == double[].class) {
+						if (!Arrays.equals((double[]) field1, (double[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == int[].class) {
+						if (!Arrays.equals((int[]) field1, (int[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == long[].class) {
+						if (!Arrays.equals((long[]) field1, (long[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == short[].class) {
+						if (!Arrays.equals((short[]) field1, (short[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == byte[].class) {
+						if (!Arrays.equals((byte[]) field1, (byte[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == char[].class) {
+						if (!Arrays.equals((char[]) field1, (char[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == boolean[].class) {
+						if (!Arrays.equals((boolean[]) field1, (boolean[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == String[].class) {
+						if (!Arrays.equals((String[]) field1, (String[]) field2)) {
+							diffSet.add(name);
+						}
+					} else if (type == Object[].class) {
+						if (!Arrays.equals((Object[]) field1, (Object[]) field2)) {
+							diffSet.add(name);
+						}
+					}
+				} else if (!field1.equals(field2)) {
+					diffSet.add(name);
+				}
+			}
+		}
+		return (String []) diffSet.toArray(new String[diffSet.size()]);
+	}
 }
