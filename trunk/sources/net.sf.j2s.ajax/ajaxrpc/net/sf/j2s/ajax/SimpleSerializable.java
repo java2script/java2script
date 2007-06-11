@@ -24,7 +24,7 @@ import java.util.Set;
  *
  * 2006-10-11
  */
-public class SimpleSerializable {
+public class SimpleSerializable implements Cloneable {
 	
 	/**
 	 * @return
@@ -120,6 +120,16 @@ if (strBuf.length > 0x1000000) { // 16 * 1024 * 1024
 return strBuf;
 	 */
 	public String serialize() {
+		return serialize(null);
+	}
+	
+	/**
+	 * @param filter
+	 * @return
+	 * 
+	 * @j2sIgnore Only public to Java!
+	 */
+	public String serialize(SimpleFieldFilter filter) {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer();
 		/*
@@ -157,6 +167,7 @@ return strBuf;
 						&& (modifiers & Modifier.TRANSIENT) == 0
 						&& (modifiers & Modifier.STATIC) == 0) {
 					String name = field.getName();
+					if (filter != null && filter.filter(name)) continue;
 					buffer.append((char)(baseChar + name.length()));
 					buffer.append(name);
 					Class type = field.getType();
@@ -580,6 +591,7 @@ while (index < length) {
 		int index = str.indexOf('#');
 		if (index == -1) return; // Should throw exception!
 		index++;
+		if (index >= length) return; // may be empty deserized string!
 		
 		Map fieldMap = new HashMap();
 		Set fieldSet = new HashSet();
@@ -833,4 +845,174 @@ while (index < length) {
 		}
 	}
 
+	/**
+	 * Override Object@clone, so this object can be cloned.
+	 * 
+	 * @j2sIgnore
+	 */
+	public Object clone() throws CloneNotSupportedException {
+		Object clone = super.clone();
+		Set fieldSet = new HashSet();
+		Class clazz = this.getClass();
+		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
+			Field[] fields = clazz.getDeclaredFields();
+			for (int i = 0; i < fields.length; i++) {
+				fieldSet.add(fields[i]);
+			}
+			clazz = clazz.getSuperclass();
+		}
+		Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+		for (int i = 0; i < fields.length; i++) {
+			Field field = fields[i];
+			int modifiers = field.getModifiers();
+			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+					&& (modifiers & Modifier.TRANSIENT) == 0
+					&& (modifiers & Modifier.STATIC) == 0) {
+				String name = field.getName();
+				Class type = field.getType();
+				Object value = null;
+				try {
+					value = field.get(this);
+				} catch (IllegalArgumentException e1) {
+					//e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					//e1.printStackTrace();
+				}
+				if (value != null && type.getName().startsWith("[")) {
+					if (type == float[].class) {
+						float[] as = (float[]) value;
+						float[] clones = new float[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == double[].class) {
+						double[] as = (double[]) value;
+						double[] clones = new double[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == int[].class) {
+						int[] as = (int[]) value;
+						int[] clones = new int[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == long[].class) {
+						long[] as = (long[]) value;
+						long[] clones = new long[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == short[].class) {
+						short[] as = (short[]) value;
+						short[] clones = new short[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == byte[].class) {
+						byte[] as = (byte[]) value;
+						byte[] clones = new byte[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == char[].class) {
+						char[] as = (char[]) value;
+						char[] clones = new char[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == boolean[].class) {
+						boolean[] as = (boolean[]) value;
+						boolean[] clones = new boolean[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == String[].class) {
+						String[] as = (String[]) value;
+						String[] clones = new String[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					} else if (type == Object[].class) {
+						Object[] as = (Object[]) value;
+						Object[] clones = new Object[as.length];
+						for (int j = 0; j < clones.length; j++) {
+							clones[j] = as[j];
+						}
+						try {
+							field.set(clone, clones);
+						} catch (IllegalArgumentException e) {
+							//e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							//e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return clone;
+	}
 }
