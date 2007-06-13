@@ -611,7 +611,7 @@ public Color getSystemColor (int id) {
 	return new Color(this, 
 			pixel & 0x000000FF, 
 			(pixel & 0x0000FF00) >> 8, 
-			(pixel & 0x00FF00) >> 16);
+			(pixel & 0x00FF0000) >> 16);
 	//return Color.win32_new (this, pixel);
 }
 
