@@ -34,7 +34,6 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	private MethodReferenceASTVisitor(String methodSignature) {
 		super();
 		this.methodSignature = methodSignature;
-		System.out.println("visitor:" + methodSignature);
 	}
 	
 	public static boolean checkReference(ASTNode node, String methodSignature) {
