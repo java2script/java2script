@@ -1435,9 +1435,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (paramTypes.length - 1 > 0) {
 				buffer.append(", ");
 			}
-			buffer.append("[");
+			boolean needBrackets = true;
+			if (args.size() == 1) {
+				Expression arg = (Expression) args.get(0);
+				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
+				if (resolveTypeBinding.isArray()) {
+					needBrackets = false;
+				}
+			}
+			if (needBrackets) buffer.append("[");
 			visitList(args, ", ", paramTypes.length - 1, size);
-			buffer.append("]");
+			if (needBrackets) buffer.append("]");
 		} else {
 			for (Iterator iter = args.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
@@ -2548,7 +2556,22 @@ public class CB extends CA {
 	}
 
 	public boolean visit(TypeLiteral node) {
-		node.getType().accept(this);
+		Type type = node.getType();
+		if (type.isPrimitiveType()) {
+			ITypeBinding resolveBinding = type.resolveBinding();
+			String name = resolveBinding.getName();
+			if ("boolean".equals(name)) {
+				buffer.append("Boolean");
+				return false;
+			} else { // TODO: More types? Integer, Long, Double, ... ?
+				buffer.append("Number");
+				return false;
+			}
+		} else if (type.isArrayType()) {
+			buffer.append("Array");
+			return false;
+		}
+		type.accept(this);
 		return false;
 	}
 
