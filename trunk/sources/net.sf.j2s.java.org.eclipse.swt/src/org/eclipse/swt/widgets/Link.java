@@ -597,6 +597,9 @@ String parse (String string, Object handle) {
 		mnemonics = newMnemonics;		
 	}
 	cachedText = result2.toString();
+	if (anchors != null && anchors.length > 0 && (hooks(SWT.Selection) || hooks(SWT.DefaultSelection))) {
+		hookSelection();
+	}
 	return result.toString ();
 }
 
