@@ -2547,15 +2547,19 @@ public Point map (Control from, Control to, int x, int y) {
 	checkDevice ();
 	if (from != null && from.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 	if (to != null && to.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
-//	Element hwndFrom = from != null ? from.handle : null;
-//	Element hwndTo = to != null ? to.handle : null;
+	if (from == to) return new Point (x, y);
+	Element hwndFrom = from != null ? from.handle : document.body;
+	Element hwndTo = to != null ? to.handle : document.body;
 	
 //	POINT point = new POINT ();
 //	point.x = x;
 //	point.y = y;
 //	OS.MapWindowPoints (hwndFrom, hwndTo, point, 1);
 //	return new Point (point.x, point.y);
-	return new Point (0, 0);
+	Point p = OS.calcuateRelativePosition(hwndFrom, hwndTo);
+	p.x += x;
+	p.y += y;
+	return p;
 }
 
 /**
@@ -2642,8 +2646,9 @@ public Rectangle map (Control from, Control to, int x, int y, int width, int hei
 	checkDevice ();
 	if (from != null && from.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
 	if (to != null && to.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
-//	Element hwndFrom = from != null ? from.handle : null;
-//	Element hwndTo = to != null ? to.handle : null;
+	if (from == to) return new Rectangle (x, y, width, height); 
+	Element hwndFrom = from != null ? from.handle : document.body;
+	Element hwndTo = to != null ? to.handle : document.body;
 	
 //	RECT rect = new RECT ();
 //	rect.left = x;
@@ -2652,7 +2657,10 @@ public Rectangle map (Control from, Control to, int x, int y, int width, int hei
 //	rect.bottom = y + height;
 //	OS.MapWindowPoints (hwndFrom, hwndTo, rect, 2);
 //	return new Rectangle (rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
-	return new Rectangle (0, 0, 0, 0);
+	Point p = OS.calcuateRelativePosition(hwndFrom, hwndTo);
+	p.x += x;
+	p.y += y;
+	return new Rectangle (p.x + x, p.y + y, OS.getContainerWidth(hwndTo), OS.getContainerHeight(hwndTo));
 }
 
 /*
