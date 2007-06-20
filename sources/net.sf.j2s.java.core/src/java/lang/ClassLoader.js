@@ -2681,7 +2681,7 @@ window.setTimeout (function () {
 	}
 	/* start ClazzLoader hotspot monitoring after 1 second */
 	if (window["j2s.script.debugging"] == true && window["j2s.disable.hotspot"] != true) {
-		window.setTimeout (ClazzLoader.hotspotMonitoring, 1000);
+		window.setTimeout (ClazzLoader.hotspotMonitoring, 10000); // 10s, initializing 
 	}
 }, 324); // 0.324 seconds is considered as enough before refresh action
 
