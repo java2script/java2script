@@ -597,7 +597,11 @@ protected void createHandle() {
 			&& (style & (SWT.TITLE | SWT.MIN | SWT.MAX | SWT.CLOSE)) != 0) {
 		setSystemMenu();
 	}
-	contentHandle = createCSSDiv("shell-content");
+	String contentCSS = "shell-content";
+	if ((style & SWT.TOOL) != 0) {
+		contentCSS += " shell-tool";
+	}
+	contentHandle = createCSSDiv(contentCSS);
 	if (DragAndDrop.class != null) {
 		DragAndDrop dnd = new DragAndDrop();
 		dnd.addDragListener(new ShellFrameDND() {
@@ -2403,6 +2407,8 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
 		contentHandle.style.top = 3 + "px";
 		contentHandle.style.left = 1 + "px";
+		width += 4;
+		height += 4;
 	}
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 4;
