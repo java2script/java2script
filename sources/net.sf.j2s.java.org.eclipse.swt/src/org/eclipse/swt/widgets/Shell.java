@@ -634,6 +634,7 @@ public void forceActive () {
 	checkWidget ();
 	if(!isVisible()) return;
 //	OS.SetForegroundWindow (handle);
+	bringToTop();
 }
 
 protected void forceResize () {
