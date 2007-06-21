@@ -829,7 +829,7 @@ void hookMouseDown() {
 				dragStatus = true;
 			}
 			if (!hoverHooked || hooks(SWT.MouseDown)) {
-				sendEvent(SWT.MouseDown);
+				sendMouseEvent(SWT.MouseDown, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
 		}
 	};
@@ -840,7 +840,8 @@ void hookMouseUp() {
 			boolean hoverHooked = mouseHoverProc();
 			dragStatus = false;
 			if (!hoverHooked || hooks(SWT.MouseUp)) {
-				sendEvent(SWT.MouseUp);
+				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+				sendMouseEvent(SWT.MouseUp, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
 		}
 	};
@@ -858,7 +859,7 @@ void hookMouseMove() {
 				dragStatus = false;
 			}
 			if ((!dragHooked && !hoverHooked) || hooks(SWT.MouseMove)) {
-				sendEvent(SWT.MouseMove);
+				sendMouseEvent(SWT.MouseMove, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
 		}
 	};
@@ -868,7 +869,8 @@ void hookMouseEnter() {
 		public void run() {
 			boolean hoverHooked = mouseHoverProc();
 			if (!hoverHooked || hooks(SWT.MouseEnter)) {
-				sendEvent(SWT.MouseEnter);
+				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+				sendMouseEvent(SWT.MouseEnter, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
 		}
 	};
@@ -883,7 +885,8 @@ void hookMouseExit() {
 				hoverTimerID = 0;
 			}
 			if (!hoverHooked || hooks(SWT.MouseExit)) {
-				sendEvent(SWT.MouseExit);
+				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+				sendMouseEvent(SWT.MouseExit, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
 		}
 	};
@@ -891,7 +894,8 @@ void hookMouseExit() {
 void hookMouseDoubleClick() {
 	handle.ondblclick = new RunnableCompatibility() {
 		public void run() {
-			sendEvent(SWT.MouseDoubleClick);
+			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			sendMouseEvent(SWT.MouseDoubleClick, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 		}
 	};
 }

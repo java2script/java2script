@@ -771,8 +771,10 @@ public void setText (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
 	if (string.equals (text)) return;
-	text = string;	
+	text = string;
 	textSizeCached = false;
+	anchors = new Element[0];
+	OS.clearChildren(handle);
 	parse (string, handle);
 	/*
 	System.out.println(cachedText);
