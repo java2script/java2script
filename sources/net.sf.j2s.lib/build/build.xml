@@ -911,7 +911,6 @@
     		<arg value="org/eclipse/swt/events/KeyEvent.js"/>
     		<arg value="org/eclipse/swt/events/MenuEvent.js"/>
     		<arg value="org/eclipse/swt/events/ModifyEvent.js"/>
-    		<arg value="org/eclipse/swt/events/MouseAdapter.js"/>
     		<arg value="org/eclipse/swt/events/MouseEvent.js"/>
     		<arg value="org/eclipse/swt/events/PaintEvent.js"/>
     		<arg value="org/eclipse/swt/events/SelectionEvent.js"/>
@@ -936,6 +935,7 @@
     		<arg value="org/eclipse/swt/events/MenuAdapter.js"/>
     		<arg value="org/eclipse/swt/events/ModifyListener.js"/>
     		<arg value="org/eclipse/swt/events/MouseListener.js"/>
+    		<arg value="org/eclipse/swt/events/MouseAdapter.js"/>
     		<arg value="org/eclipse/swt/events/MouseMoveListener.js"/>
     		<arg value="org/eclipse/swt/events/MouseTrackListener.js"/>
     		<arg value="org/eclipse/swt/events/MouseTrackAdapter.js"/>
