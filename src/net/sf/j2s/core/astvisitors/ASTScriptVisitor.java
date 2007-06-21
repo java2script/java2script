@@ -1436,13 +1436,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(", ");
 			}
 			boolean needBrackets = true;
-			if (args.size() == 1) {
-				Expression arg = (Expression) args.get(0);
+			//if (args.size() == 1) {
+				Expression arg = (Expression) args.get(args.size() - 1);
 				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
 				if (resolveTypeBinding.isArray()) {
 					needBrackets = false;
 				}
-			}
+			//}
 			if (needBrackets) buffer.append("[");
 			visitList(args, ", ", paramTypes.length - 1, size);
 			if (needBrackets) buffer.append("]");
