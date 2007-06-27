@@ -232,6 +232,8 @@ void bringToTop () {
 			setSize(this.width, this.height);
 		}
 		setLocation(this.left, this.top);
+		
+		if ((this.style & SWT.TOOL) == 0)
 		/**
 		 * @j2sNative
 		 * var title = this.getText();
@@ -761,6 +763,7 @@ public void dispose () {
 			shell.setFocus ();
 		}
 	}
+	if ((this.style & SWT.TOOL) == 0)
 	/**
 	 * @j2sNative
 	 * if (window["document.title"] != null) {
