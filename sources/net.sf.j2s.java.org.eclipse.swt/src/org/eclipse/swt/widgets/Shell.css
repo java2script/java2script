@@ -39,8 +39,7 @@
 	z-index:3;
 }
 .shell-tool {
-	margin:1px !important;
-	margin-top:-1px !important;
+	margin:0 !important;
 }
 .shell-menu-bar .shell-content {
 	top:44px;

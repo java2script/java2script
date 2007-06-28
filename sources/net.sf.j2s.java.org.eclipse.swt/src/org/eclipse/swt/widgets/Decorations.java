@@ -909,6 +909,9 @@ public Rectangle getClientArea () {
 			//h -= 21;
 			h -= 1 + OS.getContainerHeight(shellMenuBar);
 		}
+	} else if ((style & SWT.TOOL) != 0){
+		h -= 2;
+		w -= 2;
 	} else {
 		h -= 6;
 		w -= 6;
@@ -2298,22 +2301,27 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
 		updateShellTitle(width);
 	} else {
-		width -= 4;
-		height -= 4;
-		cx -= 4;
-		cy -= 4;
-		int dw = 4;
-		int dh = 4;
+		int dw = 8;
+		int dh = 8;
+		if ((style & SWT.TOOL) != 0) {
+			dw = 0;
+			dh = 0;
+			contentHandle.style.top = "0px";
+			contentHandle.style.left = "0px";
+			cx -= 2;
+			cy -= 2;
+		} else {
+			contentHandle.style.top = 3 + "px";
+			contentHandle.style.left = 1 + "px";
+			cx -= 4;
+			cy -= 4;
+		}
 //		if ((style & SWT.BORDER) != 0) {
 //			dw -= 2;
 //			dh -= 2;
 //		}
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
-		contentHandle.style.top = 3 + "px";
-		contentHandle.style.left = 1 + "px";
-		width += 4;
-		height += 4;
 	}
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 4;
