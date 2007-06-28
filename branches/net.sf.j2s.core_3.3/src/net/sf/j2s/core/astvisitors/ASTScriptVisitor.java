@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -1113,6 +1115,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		super.endVisit(node);
 	}
+	
+	protected String[] getFilterMethods() {
+		return new String[0];
+	}
 
 	public boolean visit(MethodDeclaration node) {
 		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
@@ -1144,8 +1150,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		Block body = node.getBody();
 		boolean needToCheckArgs = false;
 		List argsList = null;
-		if (body != null && body.statements().size() == 1) {
-			Object statement = body.statements().get(0);
+		if (body != null && containsOnlySuperCall(body)) {
+			List sts = body.statements();
+			Object statement = sts.get(sts.size() - 1);
 			if (statement instanceof ReturnStatement) {
 				ReturnStatement ret = (ReturnStatement) statement;
 				Expression exp = ret.getExpression();
@@ -1388,6 +1395,81 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 		return false;
+	}
+
+	private boolean containsOnlySuperCall(Block body) {
+		boolean isOnlyOneCall = false;
+		List ss = body.statements();
+		int size = ss.size();
+		if (size == 1) {
+			isOnlyOneCall = true;
+		} else {
+			/*
+			 * If all method invocations before super call is filtered, then super call
+			 * is still considered as the only one.
+			 * 
+			 * For example, the filtered methods may be:
+			 * checkWidget();
+			 * checkDevice();
+			 */
+			String[] filterMethods = getFilterMethods();
+			if (filterMethods.length > 0 && size > 1) {
+				Object obj = ss.get(size - 1);
+				if (obj instanceof ExpressionStatement) {
+					ExpressionStatement smt = (ExpressionStatement) obj;
+					Expression e = smt.getExpression();
+					if (e instanceof SuperMethodInvocation) { // the last is super call
+						isOnlyOneCall = true;
+						for (int i = 0; i < size - 1; i++) { // check previous calls
+							Object statement = ss.get(i);
+							MethodInvocation method = null;
+							if (statement instanceof ExpressionStatement) {
+								ExpressionStatement sttmt = (ExpressionStatement) statement;
+								Expression exp = sttmt.getExpression();
+								if (exp instanceof MethodInvocation) {
+									method = (MethodInvocation) exp;
+								}
+							} else if (statement instanceof IfStatement) { // if (...) checkWidget();
+								IfStatement ifSss = (IfStatement) statement;
+								if (ifSss.getElseStatement() == null) {
+									Statement thenStatement = ifSss.getThenStatement();
+									if (thenStatement instanceof Block) {
+										Block block = (Block) thenStatement;
+										List statements = block.statements();
+										if (statements.size() == 1) {
+											thenStatement = (Statement) statements.get(0);
+										}
+									}
+									if (thenStatement instanceof ExpressionStatement) {
+										ExpressionStatement expStmt = (ExpressionStatement) thenStatement;
+										Expression exp = expStmt.getExpression();
+										if (exp instanceof MethodInvocation) {
+											method = (MethodInvocation) exp;
+										}
+									}
+								}
+							}
+							if (method != null) {
+								boolean isFiltered = false;
+								IMethodBinding methodBinding = method.resolveMethodBinding();
+								for (int j = 0; j < filterMethods.length; j += 2) {
+									if (Bindings.isMethodInvoking(methodBinding, filterMethods[j], filterMethods[j + 1])) {
+										isFiltered = true;
+										break;
+									}
+								}
+								if (isFiltered) {
+									continue;
+								}
+							}
+							isOnlyOneCall = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return isOnlyOneCall;
 	}
 
 	public boolean visit(MethodInvocation node) {
