@@ -2011,9 +2011,25 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(ThisExpression node) {
 		Name qualifier = node.getQualifier();
 		if (qualifier != null) {
-			buffer.append("this.callbacks[\"");
-			qualifier.accept(this);
-			buffer.append("\"]");
+			ASTNode xparent = node.getParent();
+			while (xparent != null 
+					&& !(xparent instanceof AbstractTypeDeclaration)
+					&& !(xparent instanceof AnonymousClassDeclaration)) {
+				xparent = xparent.getParent();
+			}
+			if (xparent == null 
+					|| xparent.getParent() == null // CompilationUnit
+							|| xparent.getParent().getParent() == null) {
+				buffer.append("this");
+			} else {
+				/*
+				 * only need callbacks wrapper in inner classes
+				 * or anonymous classes.
+				 */
+				buffer.append("this.callbacks[\"");
+				qualifier.accept(this);
+				buffer.append("\"]");
+			}
 		} else {
 			buffer.append("this");
 		}
