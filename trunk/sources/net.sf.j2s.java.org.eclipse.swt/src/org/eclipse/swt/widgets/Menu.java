@@ -221,13 +221,29 @@ void _setVisible (boolean visible) {
 	CSSStyle style = handle.style;
 	if (visible) {
 		//style.width = "200px";
-		style.left = x + "px";
-		style.top = y + "px";
+		Rectangle clientArea = getDisplay().getPrimaryMonitor().getClientArea();
 		style.zIndex = "1" + window.currentTopZIndex;
 		style.display = "block";
+		int height = OS.getContainerHeight(handle);
+		int width = OS.getContainerWidth(handle);
+		int left = x, top = y;
+		if (y + height > clientArea.y + clientArea.height) {
+			if (y + height - clientArea.y - clientArea.height > height - y) {
+				top = y - height;
+			}
+		}
+		if (x + width > clientArea.x + clientArea.width) {
+			if (x + width - clientArea.x - clientArea.width > width - x) {
+				left = x - width;
+			}
+		}
+		style.left = left + "px";
+		style.top = top + "px";
 		btnFocus.focus();
+		if (hooks(SWT.Show)) sendEvent(SWT.Show);
 	} else {
 		style.display = "none";
+		if (hooks(SWT.Hide)) sendEvent(SWT.Hide);
 	}
 	/*
 	int hwndParent = parent.handle;
@@ -505,6 +521,7 @@ void createHandle () {
 			if (time - lastFocusdTime > 20) {
 				if ((style & SWT.BAR) == 0) {
 					handle.style.display = "none";
+					sendEvent(SWT.Hide);
 				} else {
 					//OS.removeCSSClass(handle, "menu-bar-selected");
 				}
