@@ -523,7 +523,10 @@ String parse (String string, Object handle) {
 					if (anchor != null) {
 						anchor.href = ids[linkIndex];
 						anchor.target = "_blank";
-						anchor.title = ids[linkIndex];
+						String title = ids[linkIndex];
+						if (title != null && title.length() > 0 && !title.startsWith("#")) {
+							anchor.title = ids[linkIndex];
+						}
 					}
 					linkIndex++;
 					start = tagStart = linkStart = endtagStart = refStart = index + 1;

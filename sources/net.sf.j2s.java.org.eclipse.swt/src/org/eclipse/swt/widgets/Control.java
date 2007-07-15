@@ -2073,6 +2073,8 @@ void setBounds (int x, int y, int width, int height, int flags) {
 }
 
 void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
+	boolean resized = this.width != width || this.height != height;
+	boolean moved = this.left != x || this.top != y;
 	/**
 	 * A patch to send bounds to support mirroring features like what Windows have.
 	 */
@@ -2143,6 +2145,8 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	 * for the view, not the data!
 	 */
 	this.left = tempX;
+	if (resized && hooks(SWT.Resize)) sendEvent(SWT.Resize);
+	if (moved && hooks(SWT.Move)) sendEvent(SWT.Move);
 }
 
 /**
@@ -2821,8 +2825,8 @@ public void setVisible (boolean visible) {
 			display.sendMessage(new MESSAGE(this, MESSAGE.CONTROL_LAYOUT, null));
 		}
 	}
-	handle.style.visibility = visible ? "visible" : "hidden";
-	handle.style.display = visible ? "block" : "none";
+	handle.style.visibility = visible ? "" : "hidden";
+	handle.style.display = visible ? "" : "none";
 	/*
 	* Feature in Windows.  If the receiver has focus, hiding
 	* the receiver causes no window to have focus.  The fix is

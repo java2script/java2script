@@ -731,11 +731,11 @@ void addModalLayer() {
 
 /**
  * @j2sNative
- * ClazzLoader.loadClass ("$wt.widgets.HTMLSource", function () {
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", function () {
  * new $wt.widgets.HTMLSource ().exportSource (this, a);
  * });
  * @j2sNativeSrc
- * ClazzLoader.loadClass ("$wt.widgets.HTMLSource", function () {
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", function () {
  * new $wt.widgets.HTMLSource ().exportSource (this, onlyContent);
  * });
  */
@@ -2171,7 +2171,8 @@ public void setVisible (boolean visible) {
 		//if (visible == OS.IsWindowVisible (handle)) return;
 		if (visible == (handle.style.visibility != "hidden")) return;
 	}
-	handle.style.visibility = visible ? "visible" : "hidden";
+	handle.style.visibility = visible ? "" : "hidden";
+	handle.style.display = visible ? "" : "none";
 	if (visible) {
 		/*
 		* It is possible (but unlikely), that application

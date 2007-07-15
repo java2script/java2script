@@ -1322,6 +1322,21 @@ void hookSelection() {
 	};
 }
 
+void hookMouseEnter() {
+	super.hookMouseEnter();
+	btnHandle.onmouseover = btnText.onmouseover = handle.onmouseover;
+}
+
+void hookMouseExit() {
+	super.hookMouseExit();
+	btnHandle.onmouseout = btnText.onmouseout = handle.onmouseout;
+}
+
+void hookMouseMove() {
+	super.hookMouseMove();
+	btnHandle.onmousemove = btnText.onmousemove = handle.onmousemove;
+}
+
 /*
 TCHAR windowClass () {
 	return ButtonClass;

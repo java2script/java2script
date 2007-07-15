@@ -15,6 +15,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.SWTEventListener;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
@@ -783,7 +784,23 @@ public int getStyle () {
 void hookKeyDown() {
 	handle.onkeydown = new RunnableCompatibility() {
 		public void run() {
-			sendEvent(SWT.KeyDown);
+			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			HTMLEvent evt = (HTMLEvent) e.event;
+			int keyCode = evt.keyCode;
+			if (keyCode == 27) {
+				dragStatus = false;
+			}
+			Event event = new Event();
+			event.character = (char) keyCode;
+			event.keyCode = keyCode;
+			event.type = SWT.KeyDown;
+			event.display = display;
+			event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0); 
+			event.widget = Widget.this;
+			if (event.time == 0) {
+				event.time = display.getLastEventTime ();
+			}
+			sendEvent(event);
 		}
 	};
 }
@@ -791,10 +808,22 @@ void hookKeyUp() {
 	handle.onkeyup = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
-			if (((HTMLEvent) e.event).keyCode == 27) {
+			HTMLEvent evt = (HTMLEvent) e.event;
+			int keyCode = evt.keyCode;
+			if (keyCode == 27) {
 				dragStatus = false;
 			}
-			sendEvent(SWT.KeyUp);
+			Event event = new Event();
+			event.character = (char) keyCode;
+			event.keyCode = keyCode;
+			event.type = SWT.KeyUp;
+			event.display = display;
+			event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0); 
+			event.widget = Widget.this;
+			if (event.time == 0) {
+				event.time = display.getLastEventTime ();
+			}
+			sendEvent(event);
 		}
 	};
 }
