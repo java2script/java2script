@@ -23,11 +23,11 @@ String.prototype.$replace = function (c1, c2) {
 };
 String.prototype.replaceAll = function (exp, str) {
 	var regExp = new RegExp (exp, "gm");
-	return this.replace (regExp, str);
+	return this.replace (regExp, str.replace (/\\\\/gm, "\\"));
 };
 String.prototype.replaceFirst = function (exp, str) {
 	var regExp = new RegExp (exp, "m");
-	return this.replace (regExp, str);
+	return this.replace (regExp, str.replace (/\\\\/gm, "\\"));
 };
 String.prototype.matches = function (exp) {
 	var regExp = new RegExp (exp, "gm");
