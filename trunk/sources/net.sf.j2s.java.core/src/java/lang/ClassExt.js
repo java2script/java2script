@@ -393,9 +393,14 @@ Clazz.prepareFields = function (clazz, fieldsFun) {
 Clazz.registerSerializableFields = function (clazz) {
 	var args = arguments;
 	var length = args.length;
-	if (clazz.declared$Fields == null) {
-		clazz.declared$Fields = new Array ();
+	var newArr = new Array ();
+	if (clazz.declared$Fields != null) {
+		for (var i = 0; i < clazz.declared$Fields.length; i++) {
+			newArr[i] = clazz.declared$Fields[i];
+		}
 	}
+	clazz.declared$Fields = newArr;
+	
 	if (length > 0 && length % 2 == 1) {
 		var fs = clazz.declared$Fields;
 		for (var i = 1; i <= (length - 1) / 2; i++) {
