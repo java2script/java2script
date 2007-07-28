@@ -248,10 +248,10 @@ void bringToTop () {
 		int count = children.length; //handle.childNodes.length;
 		for (int i = 0; i < count; i++) {
 			Control control = children[i]; //display.getControl (handle.childNodes[i]);
-			if (control != null && control != this 
-					&& (control instanceof Shell) && control.isVisible()) {
+			if (control != null && control != this && control.handle != null
+					&& (control instanceof Shell)/* && control.isVisible()*/) {
 				style = control.handle.style;
-				if (style.zIndex != window.currentTopZIndex) {
+				if (style != null && style.zIndex != window.currentTopZIndex) {
 					style.zIndex = window.currentTopZIndex = ""
 							+ (Integer.parseInt(window.currentTopZIndex) + 2);
 				}
@@ -2304,7 +2304,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	} else {
 		int dw = 8;
 		int dh = 8;
-		if ((style & SWT.TOOL) != 0) {
+		if ((style & SWT.TOOL) != 0 || style == SWT.NONE) {
 			dw = 0;
 			dh = 0;
 			contentHandle.style.top = "0px";

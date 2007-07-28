@@ -322,6 +322,7 @@ void hookKeyDown() {
 					event.time = display.getLastEventTime ();
 				}
 				sendEvent(event);
+				toReturn(!(!ev.doit || !event.doit));
 				//sendEvent(SWT.KeyDown);
 			}
 		}
@@ -349,6 +350,7 @@ void hookKeyUp() {
 				event.time = display.getLastEventTime ();
 			}
 			sendEvent(event);
+			toReturn(event.doit);
 		}
 	};
 }
