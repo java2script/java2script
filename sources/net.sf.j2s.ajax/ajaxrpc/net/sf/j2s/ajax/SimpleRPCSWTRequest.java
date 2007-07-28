@@ -29,7 +29,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	 */
 	public static void swtRequest(final SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
-		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
+		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
 			new Thread(new Runnable(){
 				public void run() {
 					try {
@@ -43,7 +43,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 									runnable.ajaxFail();
 								}
 							});
-						}
+						} // else ?
 						return;
 					}
 					Display disp = Display.getDefault();
@@ -53,7 +53,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 								runnable.ajaxOut();
 							}
 						});
-					}
+					} // else ?
 				}
 			}).start();
 		} else {
