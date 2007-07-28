@@ -12,6 +12,7 @@
 package net.sf.j2s.ajax;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -32,11 +33,18 @@ public class SimpleSerializable implements Cloneable {
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
 var buffer = [];
-buffer[0] = "WLL100";
+buffer[0] = "WLL101";
 var oClass = this.getClass();
 var clazz = oClass;
 var clazzName = clazz.getName();
-while (clazzName.indexOf('$') != -1) {
+var idx = -1;
+while ((idx = clazzName.lastIndexOf('$')) != -1) {
+	if (clazzName.length > idx + 1) {
+		var ch = clazzName.charCodeAt (idx + 1);
+		if (ch < 48 || ch >= 58) { // not a number!
+			break; // inner class
+		} 
+	}
 	clazz = clazz.getSuperclass();
 	if (clazz == null) {
 		break;
@@ -45,6 +53,8 @@ while (clazzName.indexOf('$') != -1) {
 }
 buffer[1] = clazzName;
 buffer[2] = '#';
+buffer[3] = "00000000$"
+var headSize = buffer.join ('').length;
 
 var fields = oClass.declared$Fields;
 if (fields == null) return "";
@@ -114,9 +124,12 @@ for (var i = 0; i < fields.length; i++) {
 	}
 }
 var strBuf = buffer.join ('');
-if (strBuf.length > 0x1000000) { // 16 * 1024 * 1024
+var size = strBuf.length; 
+if (size > 0x1000000) { // 16 * 1024 * 1024
 	throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
 }
+var sizeStr = "" + (size - headSize);
+strBuf = strBuf.substring (0, headSize - sizeStr.length - 1) + sizeStr + strBuf.substring(headSize - 1);
 return strBuf;
 	 */
 	public String serialize() {
@@ -129,17 +142,24 @@ return strBuf;
 	 * 
 	 * @j2sIgnore Only public to Java!
 	 */
-	public String serialize(SimpleFieldFilter filter) {
+	public String serialize(SimpleFilter filter) {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer();
 		/*
 		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
 		 * # is used to mark the the beginning of serialized data  
 		 */
-		buffer.append("WLL100");
+		buffer.append("WLL101");
 		Class clazz = this.getClass();
 		String clazzName = clazz.getName();
-		while (clazzName.indexOf('$') != -1) {
+		int idx = -1;
+		while ((idx = clazzName.lastIndexOf('$')) != -1) {
+			if (clazzName.length() > idx + 1) {
+				char ch = clazzName.charAt(idx + 1);
+				if (ch < '0' || ch > '9') { // not a number
+					break; // inner class
+				}
+			}
 			clazz = clazz.getSuperclass();
 			if (clazz == null) {
 				break; // should never happen!
@@ -148,6 +168,8 @@ return strBuf;
 		}
 		buffer.append(clazzName);
 		buffer.append('#');
+		buffer.append("00000000$"); // later the number of size will be updated!
+		int headSize = buffer.length();
 
 		Set fieldSet = new HashSet();
 		clazz = this.getClass();
@@ -167,7 +189,7 @@ return strBuf;
 						&& (modifiers & Modifier.TRANSIENT) == 0
 						&& (modifiers & Modifier.STATIC) == 0) {
 					String name = field.getName();
-					if (filter != null && filter.filter(name)) continue;
+					if (filter != null && !filter.accept(name)) continue;
 					buffer.append((char)(baseChar + name.length()));
 					buffer.append(name);
 					Class type = field.getType();
@@ -354,18 +376,15 @@ return strBuf;
 					}
 				}
 			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			//e.printStackTrace();
 		}
-		if (buffer.length() > 0x1000000) { // 16 * 1024 * 1024
+		int size = buffer.length();
+		if (size > 0x1000000) { // 16 * 1024 * 1024
 			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
 		}
+		String sizeStr = "" + (size - headSize);
+		buffer.replace(headSize - sizeStr.length() - 1, headSize - 1, sizeStr); // update size!
 		return buffer.toString();
 	}
 
@@ -449,15 +468,32 @@ if (s == null) {
 	
 	/**
 	 * @param str
+	 * @return whether given string is deserialized as expected or not
 	 * 
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
-if (str == null) return;
+if (str == null) return false;
 var length = str.length;
-if (length <= 7 || str.indexOf ("WLL") != 0) return;
+if (length <= 7 || str.indexOf ("WLL") != 0) return false;
 var index = str.indexOf('#');
-if (index == -1) return;
+if (index == -1) return false;
 index++;
+var nextCharCode = str.charCodeAt(index);
+if (nextCharCode >= 48 && nextCharCode <= 57) {
+	var last = index;
+	index = str.indexOf('$', last);
+	if (index == -1) return false;
+	var sizeStr = str.substring(last + 1, index);
+	sizeStr = sizeStr.replace(/^0+/, '');
+	var size = 0;
+	if (sizeStr.length != 0) {
+		try {
+			size = parseInt(sizeStr);
+		} catch (e) { }
+	}
+	index++;
+	if (size == 0 || size > length - index) return false; 
+}
 
 var fieldMap = [];
 var fields = this.getClass ().declared$Fields;
@@ -467,10 +503,11 @@ for (var i = 0; i < fields.length; i++) {
 	var name = field.name;
 	fieldMap[name] = true;
 }
-while (index < length) {
+var end = index + size;
+while (index < length && index < end) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
-	if (l1 < 0) return;
+	if (l1 < 0) return true;
 	var fieldName = str.substring (index, index + l1);
 	index += l1;
 	var c2 = str.charAt (index++);
@@ -488,7 +525,7 @@ while (index < length) {
 			if (l2 == -2) {
 				var c4 = str.charCodeAt(index++);
 				var l3 = c4 - baseChar;
-				if (l3 < 0) return;
+				if (l3 < 0) return true;
 				l2 = parseInt(str.substring(index, index + l3));
 				if (l2 > 0x4000) { // 16 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
@@ -515,9 +552,9 @@ while (index < length) {
 					} else if (l3 == -2) {
 						var c6 = str.charCodeAt (index++);
 						var l4 = c6 - baseChar;
-						if (l4 < 0) return;
+						if (l4 < 0) return true;
 						var l5 = parseInt (str.substring( index, index + l4));
-						if (l5 < 0) return;
+						if (l5 < 0) return true;
 						index += l4;
 						s = str.substring (index, index + l5);
 						index += l5;
@@ -553,9 +590,9 @@ while (index < length) {
 		} else if (l2 == -2) {
 			var c4 = str.charCodeAt(index++);
 			var l3 = c4 - baseChar;
-			if (l3 < 0) return;
+			if (l3 < 0) return true;
 			var l4 = parseInt(str.substring(index, index + l3));
-			if (l4 < 0) return;
+			if (l4 < 0) return true;
 			index += l3;
 			s = str.substring(index, index + l4);
 			index += l4;
@@ -582,16 +619,38 @@ while (index < length) {
 		}
 	}
 }
+return true;
 	 */
-	public void deserialize(String str) {
+	public boolean deserialize(String str) {
 		char baseChar = 'B';
-		if (str == null) return;
+		if (str == null) return false;
 		int length = str.length();
-		if (length <= 7 || !str.startsWith("WLL")) return; // Should throw exception!
+		if (length <= 7 || !str.startsWith("WLL")) return false; // Should throw exception!
 		int index = str.indexOf('#');
-		if (index == -1) return; // Should throw exception!
+		if (index == -1) return false; // Should throw exception!
 		index++;
-		if (index >= length) return; // may be empty deserized string!
+		if (index >= length) return false; // may be empty string!
+		
+		int size = 0;
+		char nextChar = str.charAt(index);
+		if (nextChar >= '0' && nextChar <= '9') {
+			// have size!
+			int last = index;
+			index = str.indexOf('$', last);
+			if (index == -1) return false; // Should throw exception!
+			String sizeStr = str.substring(last + 1, index);
+			sizeStr = sizeStr.replaceFirst("^0+", "");
+			if (sizeStr.length() != 0) {
+				try {
+					size = Integer.parseInt(sizeStr);
+				} catch (NumberFormatException e) {
+					//
+				}
+			}
+			index++;
+			// may be empty string or not enough string!
+			if (size == 0 || size > length - index) return false; 
+		}
 		
 		Map fieldMap = new HashMap();
 		Set fieldSet = new HashSet();
@@ -614,10 +673,11 @@ while (index < length) {
 				fieldMap.put(name, field);
 			}
 		}
-		while (index < length) {
+		int end = index + size;
+		while (index < length && index < end) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
-			if (l1 < 0) return;
+			if (l1 < 0) return true;
 			String fieldName = str.substring(index, index + l1);
 			index += l1;
 			char c2 = str.charAt(index++);
@@ -636,7 +696,7 @@ while (index < length) {
 						if (l2 == -2) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
-							if (l3 < 0) return;
+							if (l3 < 0) return true;
 							l2 = Integer.parseInt(str.substring(index, index + l3));
 							if (l2 > 0x4000) { // 16 * 1024
 								/*
@@ -665,9 +725,9 @@ while (index < length) {
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
-									if (l4 < 0) return;
+									if (l4 < 0) return true;
 									int l5 = Integer.parseInt(str.substring(index, index + l4));
-									if (l5 < 0) return;
+									if (l5 < 0) return true;
 									index += l4;
 									ss[i] = str.substring(index, index + l5);
 									index += l5;
@@ -766,11 +826,7 @@ while (index < length) {
 						}
 						}
 					}
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {
@@ -783,9 +839,9 @@ while (index < length) {
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
-					if (l3 < 0) return;
+					if (l3 < 0) return true;
 					int l4 = Integer.parseInt(str.substring(index, index + l3));
-					if (l4 < 0) return;
+					if (l4 < 0) return true;
 					index += l3;
 					s = str.substring(index, index + l4);
 					index += l4;
@@ -832,17 +888,12 @@ while (index < length) {
 						field.set(this, s);
 						break;
 					}
-				} catch (NumberFormatException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -868,14 +919,12 @@ while (index < length) {
 			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
 					&& (modifiers & Modifier.TRANSIENT) == 0
 					&& (modifiers & Modifier.STATIC) == 0) {
-				String name = field.getName();
+				//String name = field.getName();
 				Class type = field.getType();
 				Object value = null;
 				try {
 					value = field.get(this);
-				} catch (IllegalArgumentException e1) {
-					//e1.printStackTrace();
-				} catch (IllegalAccessException e1) {
+				} catch (Exception e1) {
 					//e1.printStackTrace();
 				}
 				if (value != null && type.getName().startsWith("[")) {
@@ -887,9 +936,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == double[].class) {
@@ -900,9 +947,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == int[].class) {
@@ -913,9 +958,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == long[].class) {
@@ -926,9 +969,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == short[].class) {
@@ -939,9 +980,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == byte[].class) {
@@ -952,9 +991,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == char[].class) {
@@ -965,9 +1002,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == boolean[].class) {
@@ -978,9 +1013,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == String[].class) {
@@ -991,9 +1024,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					} else if (type == Object[].class) {
@@ -1004,9 +1035,7 @@ while (index < length) {
 						}
 						try {
 							field.set(clone, clones);
-						} catch (IllegalArgumentException e) {
-							//e.printStackTrace();
-						} catch (IllegalAccessException e) {
+						} catch (Exception e) {
 							//e.printStackTrace();
 						}
 					}
@@ -1014,5 +1043,73 @@ while (index < length) {
 			}
 		}
 		return clone;
+	}
+	
+	/**
+	 * Get SimpleSerializable instance according to the given string. 
+	 * 
+	 * @param str String that is from POST data or GET query
+	 * @return SimpleRPCRunnable instance. If request is bad request or 
+	 * specified class name is invalid, null will be returned.
+	 * 
+	 * @j2sNative
+if (str == null) return null;
+var length = str.length;
+if (length <= 7 || !str.startsWith("WLL")) return null;
+var index = str.indexOf('#');
+if (index == -1) return null;
+var clazzName = str.substring(6, index);
+clazzName = clazzName.replace (/\$/g, '.');
+var runnableClass = null;
+if (Clazz.isClassDefined (clazzName)) {
+	runnableClass = Clazz.evalType (clazzName);
+}
+if (runnableClass != null) {
+	var obj = new runnableClass (Clazz.inheritArgs);
+	if (obj != null && Clazz.instanceOf (obj,
+			net.sf.j2s.ajax.SimpleSerializable)) {
+		return obj;
+	}
+}
+return null;
+	 */
+	public static SimpleSerializable parseInstance(String str) {
+		return parseInstance(str, null);
+	}
+	
+	/**
+	 * Get SimpleSerializable instance according to the given string and the filter. 
+	 * 
+	 * @param str String that is from POST data or GET query  
+	 * @param filter SimpleFilter is used to filter out those invalid class name
+	 * @return SimpleRPCRunnable instance. If request is bad request or 
+	 * specified class name is invalid, null will be returned.
+	 * 
+	 * @j2sIgnore Only public to Java!
+	 */
+	public static SimpleSerializable parseInstance(String str, SimpleFilter filter) {
+		if (str == null) return null;
+		int length = str.length();
+		if (length <= 7 || !str.startsWith("WLL")) return null;
+		int index = str.indexOf('#');
+		if (index == -1) return null;
+		String clazzName = str.substring(6, index);
+		if (filter != null) {
+			if (!filter.accept(clazzName)) return null;
+		}
+		try {
+			Class runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
+			if (runnableClass != null) {
+				// SimpleRPCRunnale should always has default constructor
+				Constructor constructor = runnableClass.getConstructor(new Class[0]);
+				Object obj = constructor.newInstance(new Object[0]);
+				if (obj != null && obj instanceof SimpleSerializable) {
+					return (SimpleSerializable) obj;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

@@ -15,9 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -102,48 +100,13 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	 * specified class name is invalid, null will be returned.
 	 */
 	protected SimpleRPCRunnable getRunnableByRequest(String request) {
-		if (request == null) return null;
-		int length = request.length();
-		if (length <= 7 || !request.startsWith("WLL")) return null;
-		int index = request.indexOf('#');
-		if (index == -1) return null;
-		String clazzName = request.substring(6, index);
-		if (!validateRunnable(clazzName)) return null;
-		return createRunnableInstance(clazzName);
-	}
-	
-	/**
-	 * Create SimpleRPCRunnable instance by given class name. May be inherited to
-	 * do more jobs before starting to deserialize request and running the main job.
-	 * 
-	 * @param clazzName full class name of inherited SimpleRPCRunnable class 
-	 * @return instance of given class name, null may be returned.
-	 */
-	protected SimpleRPCRunnable createRunnableInstance(String clazzName) {
-		try {
-			Class runnableClass = Class.forName(clazzName);
-			if (runnableClass != null) {
-				// SimpleRPCRunnale should always has default constructor
-				Constructor constructor = runnableClass.getConstructor(new Class[0]);
-				Object obj = constructor.newInstance(new Object[0]);
-				if (obj != null && obj instanceof SimpleRPCRunnable) {
-					return (SimpleRPCRunnable) obj;
-				}
+		SimpleSerializable instance = SimpleSerializable.parseInstance(request, new SimpleFilter() {
+			public boolean accept(String clazzName) {
+				return validateRunnable(clazzName);
 			}
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+		});
+		if (instance instanceof SimpleRPCRunnable) {
+			return (SimpleRPCRunnable) instance;
 		}
 		return null;
 	}
@@ -264,7 +227,10 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		resp.setContentType("text/plain");
+		resp.setHeader("Pragma", "no-cache");
+		resp.setHeader("Cache-Control", "no-cache");
+		resp.setDateHeader("Expires", 0);
+		resp.setContentType("text/plain;charset=utf-8");
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
 		runnable.deserialize(request);
@@ -276,16 +242,16 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		runnable.ajaxRun();
 		final String[] diffs = compareDiffs(runnable, clonedRunnable);
-		String serialize = runnable.serialize(new SimpleFieldFilter() {
+		String serialize = runnable.serialize(new SimpleFilter() {
 		
-			public boolean filter(String field) {
+			public boolean accept(String field) {
 				if (diffs == null || diffs.length == 0)	return true;
 				for (int i = 0; i < diffs.length; i++) {
 					if (diffs[i].equals(field)) {
-						return false;
+						return true;
 					}
 				}
-				return true;
+				return false;
 			}
 		
 		});
@@ -343,20 +309,24 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		runnable.ajaxRun();
 		final String[] diffs = compareDiffs(runnable, clonedRunnable);
-		String serialize = runnable.serialize(new SimpleFieldFilter() {
+		String serialize = runnable.serialize(new SimpleFilter() {
 		
-			public boolean filter(String field) {
+			public boolean accept(String field) {
 				if (diffs == null || diffs.length == 0)	return true;
 				for (int i = 0; i < diffs.length; i++) {
 					if (diffs[i].equals(field)) {
-						return false;
+						return true;
 					}
 				}
-				return true;
+				return false;
 			}
 		
 		});
 		
+		resp.setHeader("Pragma", "no-cache");
+		resp.setHeader("Cache-Control", "no-cache");
+		resp.setDateHeader("Expires", 0);
+
 		if (isScriptReuest) { // cross site script response
 			resp.setContentType("text/javascript");
 			//resp.setCharacterEncoding("utf-8");
@@ -539,7 +509,6 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				} catch (IllegalAccessException e) {
 					//e.printStackTrace();
 				}
-				System.out.println(field1.getClass().getName());
 				if (field1 == null) {
 					if (field2 != null) {
 						diffSet.add(name);

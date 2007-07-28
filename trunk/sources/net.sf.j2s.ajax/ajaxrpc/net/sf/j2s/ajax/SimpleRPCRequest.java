@@ -21,10 +21,14 @@ import java.net.URLEncoder;
  */
 public class SimpleRPCRequest {
 	
-	public static int MODE_AJAX = 1;
-	public static int MODE_LOCAL_JAVA_THREAD = 2;
+	public static final int MODE_AJAX = 1;
+	public static final int MODE_LOCAL_JAVA_THREAD = 2;
 	
-	static int runningMode = MODE_LOCAL_JAVA_THREAD;
+	private static int runningMode = MODE_LOCAL_JAVA_THREAD;
+	
+	public static int getRequstMode() {
+		return runningMode;
+	}
 	
 	public static void switchToAJAXMode() {
 		runningMode = MODE_AJAX;
