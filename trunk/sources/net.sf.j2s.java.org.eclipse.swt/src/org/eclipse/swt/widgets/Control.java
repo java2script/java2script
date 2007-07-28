@@ -3412,7 +3412,7 @@ public boolean setParent (Composite parent) {
 	children[children.length + 1] = this;
 	Element topHandle = topHandle ();
 	topHandle.parentNode.removeChild(handle);
-	parent.topHandle().appendChild(handle);
+	parent.containerHandle().appendChild(handle);
 //	if (OS.SetParent (topHandle, parent.handle) == 0) return false;
 //	Element newHandle = this.handle.cloneNode(true);
 //	parent.handle.appendChild(this.handle.cloneNode(true));

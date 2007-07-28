@@ -1372,12 +1372,12 @@ public void setVisible (boolean visible) {
 	if ((style & mask) != 0) {
 		if (visible) {
 			display.setModalShell (this);
-			/*
-			Control control = display._getFocusControl ();
-			if (control != null && !control.isActive ()) {
+			Control control = this; // display._getFocusControl ();
+			if (control != null && !control.j2sIsActive ()) {
 				bringToTop ();
 				if (isDisposed ()) return;
 			}
+			/*
 			int hwndShell = OS.GetActiveWindow ();
 			if (hwndShell == 0) {
 				if (parent != null) hwndShell = parent.handle;
