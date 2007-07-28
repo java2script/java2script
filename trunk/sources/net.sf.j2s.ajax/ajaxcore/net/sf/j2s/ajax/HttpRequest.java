@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
  *
  * 2006-2-11
  */
-public final class HttpRequest {
+public class HttpRequest {
 	/*
 	 * @(#)Base64.java	1.4 03/01/23
 	 *
@@ -115,6 +115,24 @@ public final class HttpRequest {
 	        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
 	    };
 	}
+	
+	/**
+	 * This class is used to monitoring data-receiving process.
+	 * 
+	 * Attention: Only be visible in Java.
+	 */
+	protected static interface IXHRReceiving {
+		/**
+		 * Monitoring the received data along with the given output stream.
+		 * 
+		 * @param baos an output stream
+		 * @param b buffer
+		 * @param off offset
+		 * @param len length
+		 * @return whether the data is dealt into the given output stream or not
+		 */
+		public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len);
+	}
 
 	private int status;
 	private String statusText;
@@ -124,6 +142,7 @@ public final class HttpRequest {
 	private Document responseXML;
 	private IXHRCallback onreadystatechange;
 	//private boolean overrideMimeType;
+	private IXHRReceiving receiving;
 	
 	private boolean asynchronous;
 	private HttpURLConnection connection;
@@ -184,7 +203,7 @@ public final class HttpRequest {
 		}
 	}
 	/**
-	 * Return respose code.
+	 * Return response code.
 	 * @return int response code. For more information please read about
 	 * HTTP protocol.
 	 */
@@ -192,7 +211,7 @@ public final class HttpRequest {
 		return status;
 	}
 	/**
-	 * Return respose code related text.
+	 * Return response code related text.
 	 * @return int response code. For more information please read about
 	 * HTTP protocol.
 	 */
@@ -208,6 +227,20 @@ public final class HttpRequest {
 		this.onreadystatechange = onreadystatechange;
 	}
 	/**
+	 * Register XMLHttpRequest receiving monitor.
+	 * 
+	 * This method is to given inherited class a chance to set a monitor to
+	 * monitor the process that the data is receiving from the connection. 
+	 * 
+	 * Attention: Only be visible inside Java! There is no such JavaScript
+	 * methods.
+	 *  
+	 * @param receiving IXHRReceiving monitor
+	 */
+	protected IXHRReceiving initializeReceivingMonitor() {
+		return null;
+	}
+	/**
 	 * Set request header with given key and value.
 	 * @param key String request header keyword. For more information please 
 	 * read about HTTP protocol.
@@ -217,8 +250,8 @@ public final class HttpRequest {
 		headers.put(key, value);
 	}
 	/**
-	 * Get all response heades.
-	 * @return String the all reponse header value.
+	 * Get all response headers.
+	 * @return String the all response header value.
 	 */
 	public String getAllResponseHeaders() {
 		StringBuffer buffer = new StringBuffer();
@@ -243,7 +276,7 @@ public final class HttpRequest {
 	 * Get response header with given key.
 	 * @param key String header keyword. For more information please 
 	 * read about HTTP protocol.
-	 * @return String the reponse header value.
+	 * @return String the response header value.
 	 */
 	public String getResponseHeader(String key) {
 		return connection.getHeaderField(key);
@@ -399,27 +432,55 @@ public final class HttpRequest {
 				activeOS = null;
 			}
 			if (checkAbort()) return; // just disconnect without receiving anything
-			InputStream is = connection.getInputStream();
+			InputStream is = null;
+			try {
+				is = connection.getInputStream();
+			} catch (IOException e) {
+				if (checkAbort()) return; // exception caused by abort action
+				e.printStackTrace();
+				readyState = 4;
+				if (onreadystatechange != null) {
+					onreadystatechange.onLoaded();
+				}
+				connection = null;
+				readyState = 0;
+				/*
+				if (onreadystatechange != null) {
+					onreadystatechange.onUninitialized();
+				}
+				*/
+				return;
+			}
 			activeIS = is;
+			
+			if (readyState < 2) {
+				readyState = 2;
+				status = connection.getResponseCode();
+				statusText = connection.getResponseMessage();
+				if (onreadystatechange != null) {
+					onreadystatechange.onSent();
+				}
+			}
+			
+			receiving = initializeReceivingMonitor();
+			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
 			int read;
 			while (!toAbort && (read = is.read(buffer)) != -1) {
 				if (checkAbort()) return; // stop receiving anything
-				if (readyState < 2) {
-					readyState = 2;
-					status = connection.getResponseCode();
-					statusText = connection.getResponseMessage();
-					if (onreadystatechange != null) {
-						onreadystatechange.onSent();
-					}
-				}
-				baos.write(buffer, 0, read);
 				if (readyState != 3) {
 					readyState = 3;
 					if (onreadystatechange != null) {
 						onreadystatechange.onReceiving();
 					}
+				}
+				boolean received = false;
+				if (receiving != null) {
+					received = receiving.receiving(baos, buffer, 0, read);
+				}
+				if (!received) {
+					baos.write(buffer, 0, read);
 				}
 			}
 			if (checkAbort()) return; // stop receiving anything
