@@ -230,7 +230,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		resp.setHeader("Pragma", "no-cache");
 		resp.setHeader("Cache-Control", "no-cache");
 		resp.setDateHeader("Expires", 0);
-		resp.setContentType("text/plain;charset=utf-8");
+		resp.setContentType("text/plain; charset=utf-8");
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
 		runnable.deserialize(request);

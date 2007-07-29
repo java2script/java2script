@@ -83,27 +83,27 @@ public class ASWTClass extends AClass {
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {
-	 * 	if (Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
+	 * 	if (afterLoaded != null && Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (clazzName);
 	 * 		afterLoaded.setClazz (clz);
 	 * 	}
-	 * 	afterLoaded.run ();
+	 * 	if (afterLoaded != null) afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
 	 * ClazzLoader.loadClass (b, function () {
-	 * 	if (Clazz.instanceOf (c, net.sf.j2s.ajax.ARunnable)) {
+	 * 	if (c != null && Clazz.instanceOf (c, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (b);
 	 * 		c.setClazz (clz);
 	 * 	}
-	 * 	c.run ();
+	 * 	if (c != null) c.run ();
 	 * }, false, true);
 	 */
 	static void objectLoad(Object display, final String clazzName, final Runnable afterLoaded) {
 		((Display) display).asyncExec(new Runnable() {
 			public void run() {
 				try {
-					Class clz = Class.forName(clazzName);
-					if (afterLoaded instanceof ARunnable) {
+					Class clz = Class.forName(clazzName); // May freeze UI!
+					if (afterLoaded != null && afterLoaded instanceof ARunnable) {
 						ARunnable runnable = (ARunnable) afterLoaded;
 						runnable.setClazz(clz);
 					}
@@ -112,7 +112,7 @@ public class ASWTClass extends AClass {
 					return ;
 				}
 				
-				afterLoaded.run();
+				if (afterLoaded != null) afterLoaded.run();
 			}
 		});
 	}
