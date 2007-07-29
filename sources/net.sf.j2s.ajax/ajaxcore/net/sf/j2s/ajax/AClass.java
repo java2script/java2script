@@ -45,19 +45,19 @@ public class AClass {
 	 * 
 	 * @j2sNativeSrc
 	 * ClazzLoader.loadClass (clazzName, function () {
-	 * 	if (Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
+	 * 	if (afterLoaded != null && Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (clazzName);
 	 * 		afterLoaded.setClazz (clz);
 	 * 	}
-	 * 	afterLoaded.run ();
+	 * 	if (afterLoaded != null) afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
 	 * ClazzLoader.loadClass (a, function () {
-	 * 	if (Clazz.instanceOf (b, net.sf.j2s.ajax.ARunnable)) {
+	 * 	if (b != null && Clazz.instanceOf (b, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (a);
 	 * 		b.setClazz (clz);
 	 * 	}
-	 * 	b.run ();
+	 * 	if (b != null) b.run ();
 	 * }, false, true);
 	 */
 	public static void load(final String clazzName, final Runnable afterLoaded) {
@@ -65,7 +65,7 @@ public class AClass {
 			public void run() {
 				try {
 					Class clz = Class.forName(clazzName);
-					if (afterLoaded instanceof ARunnable) {
+					if (afterLoaded != null && afterLoaded instanceof ARunnable) {
 						ARunnable runnable = (ARunnable) afterLoaded;
 						runnable.setClazz(clz);
 					}
@@ -73,7 +73,7 @@ public class AClass {
 					e.printStackTrace();
 					return ;
 				}
-				afterLoaded.run();
+				if (afterLoaded != null) afterLoaded.run();
 			}
 		}).start();
 	}
