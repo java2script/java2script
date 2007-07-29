@@ -2227,6 +2227,21 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 					ClazzLoader.isLoadingEntryClass = bakEntryClassLoading;
 				}
 			}
+		} else if (optionalsLoaded != null) {
+			var n = ClazzLoader.findClass (name);
+			if (n != null) {
+				if (n.optionalsLoaded == null) {
+					n.optionalsLoaded = optionalsLoaded;
+				} else {
+					var oldOL = n.optionalsLoaded;
+					n.optionalsLoaded = (function (oF, nF) {
+						return function () {
+							oF();
+							nF();
+						};
+					}) (oldOL, optionalsLoaded);
+				}
+			}
 		}
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
 		var nn = ClazzLoader.findClass (name);
