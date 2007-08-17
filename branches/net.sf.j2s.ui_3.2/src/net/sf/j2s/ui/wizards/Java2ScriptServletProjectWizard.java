@@ -26,6 +26,7 @@ import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
 import net.sf.j2s.ui.launching.J2SLaunchingUtil;
 import net.sf.j2s.ui.launching.JavaRuntime;
+import net.sf.j2s.ui.property.FileUtil;
 import net.sf.j2s.ui.property.J2SClasspathModel;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -163,7 +164,6 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			buildxml.append("                <exclude name=\"WEB-INF/**\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.java\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.class\"/>\r\n");
-			buildxml.append("                <exclude name=\"**/*.clazz\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.swp\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.swo\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.jar\"/>\r\n");
@@ -191,7 +191,6 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			buildxml.append("        <zip destfile=\"${basedir}/lib/${java2script.app.name}.jar\">\r\n");
 			buildxml.append("            <fileset dir=\"${bin.folder}\">\r\n");
 			buildxml.append("                <exclude name=\"WEB-INF/**\"/>\r\n");
-			buildxml.append("                <exclude name=\"**/*.clazz\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.html\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.js\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.css\"/>\r\n");
@@ -212,6 +211,41 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			buildxml.append("                <exclude name=\"build.properties\"/>\r\n");
 			buildxml.append("                <exclude name=\"plugin.xml\"/>\r\n");
 			buildxml.append("                <exclude name=\"plugin.properties\"/>\r\n");
+			buildxml.append("            </fileset>\r\n");
+			buildxml.append("        </zip>\r\n");
+			buildxml.append("    </target>\r\n");
+			buildxml.append("\r\n");
+	        starterURL = AjaxPlugin.getDefault().getBundle().getEntry(File.separator);
+			root = "."; //$NON-NLS-1$
+			try {
+				root = Platform.asLocalURL(starterURL).getFile();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			newPath = Path.fromPortableString(root);
+			String ajaxPath = newPath.toOSString();
+			String key = "net.sf.j2s.ajax";
+			int idx = ajaxPath.lastIndexOf(key);
+			if (idx != -1) {
+				ajaxPath = ajaxPath.substring(0, idx) + "net.sf.j2s.lib" + ajaxPath.substring(idx + key.length());
+			}
+			File libFile = new File(ajaxPath);
+			String j2sRelativePath = FileUtil.toRelativePath(libFile.getAbsolutePath(), webinf.getAbsolutePath());
+			if (j2sRelativePath.length() > 0 && !j2sRelativePath.endsWith("/")) {
+				j2sRelativePath += "/";
+			}
+			int slashIndex = j2sRelativePath.lastIndexOf('/', j2sRelativePath.length() - 2);
+			String pluginPath = j2sRelativePath.substring(0, slashIndex);
+			String libPluginPath = j2sRelativePath.substring(slashIndex + 1, j2sRelativePath.length() - 1);
+
+			buildxml.append("    <target name=\"pack.plugins.j2slib.war\">\r\n");
+			buildxml.append("        <delete file=\"${basedir}/../plugins.war\" quiet=\"true\"/>\r\n");
+			buildxml.append("        <zip destfile=\"${basedir}/../plugins.war\">\r\n");
+			buildxml.append("            <fileset dir=\"${basedir}/" + pluginPath + "/\">\r\n");
+			buildxml.append("                <include name=\"" + libPluginPath + "/**\"/>\r\n");
+			buildxml.append("                <exclude name=\"" + libPluginPath + "/library.jar\"/>\r\n");
+			buildxml.append("                <exclude name=\"" + libPluginPath + "/plugin.xml\"/>\r\n");
+			buildxml.append("                <exclude name=\"" + libPluginPath + "/META-INF/**\"/>\r\n");
 			buildxml.append("            </fileset>\r\n");
 			buildxml.append("        </zip>\r\n");
 			buildxml.append("    </target>\r\n");

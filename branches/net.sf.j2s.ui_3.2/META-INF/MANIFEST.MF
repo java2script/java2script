@@ -28,7 +28,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui.console,
  net.sf.j2s.core,
- org.eclipse.core.filesystem;
+ org.eclipse.core.filesystem,
  org.junit,
  org.eclipse.jdt.junit,
  net.sf.j2s.ajax

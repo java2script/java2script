@@ -16,7 +16,7 @@ public class J2SLaunchConfigurationDelegate extends LaunchConfigurationDelegate 
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		if (configuration != null) {
 			try {
-				J2SLaunchingUtil.launchingJ2SApp(configuration, mode);
+				J2SLaunchingUtil.launchingJ2SApp(configuration, mode, "html");
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
