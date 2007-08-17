@@ -164,7 +164,6 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			buildxml.append("                <exclude name=\"WEB-INF/**\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.java\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.class\"/>\r\n");
-			buildxml.append("                <exclude name=\"**/*.clazz\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.swp\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.swo\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.jar\"/>\r\n");
@@ -192,7 +191,6 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			buildxml.append("        <zip destfile=\"${basedir}/lib/${java2script.app.name}.jar\">\r\n");
 			buildxml.append("            <fileset dir=\"${bin.folder}\">\r\n");
 			buildxml.append("                <exclude name=\"WEB-INF/**\"/>\r\n");
-			buildxml.append("                <exclude name=\"**/*.clazz\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.html\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.js\"/>\r\n");
 			buildxml.append("                <exclude name=\"**/*.css\"/>\r\n");
