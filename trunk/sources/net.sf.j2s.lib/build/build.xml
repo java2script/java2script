@@ -437,6 +437,8 @@
         		<!--
         		<arg value="java/lang/reflect/Array.js"/>
         		-->
+				<arg value="java/lang/reflect/GenericDeclaration.js"/>
+				<arg value="java/lang/reflect/AnnotatedElement.js"/>
 				<arg value="java/lang/reflect/AccessibleObject.js"/>
 				<arg value="java/lang/reflect/InvocationHandler.js"/>
 				<arg value="java/lang/reflect/Member.js"/>
