@@ -59,7 +59,14 @@ public class SashDND implements DragListener {
 		e.startX = e.currentX;
 		e.startY = e.currentY;
 		Element[] frames = document.getElementsByTagName("IFRAME");
-		if (frames.length != 0) {
+		boolean needOverIFrameLayer = false;
+		for (int i = 0; i < frames.length; i++) {
+			if (frames[i].style.display != "none") {
+				needOverIFrameLayer = true;
+				break;
+			}
+		}
+		if (needOverIFrameLayer) {
 			overFrameHandle = document.createElement ("DIV");
 			overFrameHandle.className = "over-iframe-layer";
 			overFrameHandle.style.zIndex = window.currentTopZIndex;

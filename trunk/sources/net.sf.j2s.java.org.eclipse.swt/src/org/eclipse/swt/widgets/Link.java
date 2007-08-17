@@ -335,13 +335,16 @@ void hookSelection() {
 		}
 	};
 	for (int i = 0; i < anchors.length; i++) {
-		anchors[i].href = "#";
+		anchors[i].href = "javascript:void(0);";
 		anchors[i].target = null;
 		anchors[i].onclick = linkHandler;
 		anchors[i].ondblclick = linkHandler;
 	}
 }
 
+/**
+ * @j2sIgnore
+ */
 void initAccessible () {
 	Accessible accessible = getAccessible ();
 	accessible.addAccessibleListener (new AccessibleAdapter () {
@@ -456,8 +459,10 @@ String parse (String string, Object handle) {
 	offsets = new Point [length / 4];
 	ids = new String [length / 4];
 	mnemonics = new int [length / 4 + 1];
-	StringBuffer result = new StringBuffer ();
-	StringBuffer result2 = new StringBuffer ();
+//	StringBuffer result = new StringBuffer ();
+//	StringBuffer result2 = new StringBuffer ();
+	char[] result = new char[0];
+	char[] result2 = new char[0];
 	char [] buffer = new char [length];
 	string.getChars (0, string.length (), buffer, 0);
 	int index = 0, state = 0, linkIndex = 0;
@@ -508,7 +513,8 @@ String parse (String string, Object handle) {
 			case 6:
 				if (c == '>') {
 					mnemonics [linkIndex] = parseMnemonics (buffer, start, tagStart, result, result2, handle);
-					int offset = result.length ();
+//					int offset = result.length ();
+					int offset = result.length;
 					Element anchor = null;
 					if (handle != null) {
 						anchor = document.createElement("A");
@@ -516,13 +522,19 @@ String parse (String string, Object handle) {
 						anchors[anchors.length] = anchor;
 					}
 					parseMnemonics (buffer, linkStart, endtagStart, result, result2, anchor);
-					offsets [linkIndex] = new Point (offset, result.length () - 1);
+//					offsets [linkIndex] = new Point (offset, result.length () - 1);
+					offsets [linkIndex] = new Point (offset, result.length - 1);
 					if (ids [linkIndex] == null) {
 						ids [linkIndex] = new String (buffer, linkStart, endtagStart - linkStart);
 					}
 					if (anchor != null) {
-						anchor.href = ids[linkIndex];
-						anchor.target = "_blank";
+						if ("#".equals(ids[linkIndex])) {
+							anchor.href = "javascript:void(0);";
+							anchor.target = "_self";
+						} else {
+							anchor.href = ids[linkIndex];
+							anchor.target = "_blank";
+						}
 						String title = ids[linkIndex];
 						if (title != null && title.length() > 0 && !title.startsWith("#")) {
 							anchor.title = ids[linkIndex];
@@ -599,31 +611,47 @@ String parse (String string, Object handle) {
 		System.arraycopy (mnemonics, 0, newMnemonics, 0, linkIndex + 1);
 		mnemonics = newMnemonics;		
 	}
-	cachedText = result2.toString();
+//	cachedText = result2.toString();
+	/**
+	 * @j2sNative
+	 * this.cachedText = result2.join ('');
+	 */ {}
 	if (anchors != null && anchors.length > 0 && (hooks(SWT.Selection) || hooks(SWT.DefaultSelection))) {
 		hookSelection();
 	}
+	/**
+	 * @j2sNative
+	 * return result.join ('');
+	 */ {}
 	return result.toString ();
 }
 
-int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, StringBuffer result2, Object handle) {
+//int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, StringBuffer result2, Object handle) {
+int parseMnemonics (char[] buffer, int start, int end, char[] result, char[] result2, Object handle) {
 	Element el = (Element) handle;
 	int mnemonic = -1, index = start;
-	int lastIndex = result.length();
+//	int lastIndex = result.length();
+	int lastIndex = result.length;
 	while (index < end) {
 		char c = buffer [index];
-		result2.append(c);
+//		result2.append(c);
+		result2[result2.length] = c;
 		if (c == '&') {
 			if (index + 1 < end && buffer [index + 1] == '&') {
-				result.append (c);
+//				result.append (c);
+				result[result.length] = c;
 				index++;
 			} else {
-				mnemonic = result.length();
+//				mnemonic = result.length();
+				mnemonic = result.length;
 				if (el != null) {
 					if ((mnemonic > lastIndex) && (el != null)) {
 						int len = mnemonic - lastIndex;
 						char[] cs = new char[len];
-						result.getChars(lastIndex, mnemonic, cs, 0);
+//						result.getChars(lastIndex, mnemonic, cs, 0);
+						for (int i = 0; i < cs.length; i++) {
+							cs[i] = result[lastIndex + i];
+						}
 						String s = new String(cs, 0, len);
 						el.appendChild(document.createTextNode(s));
 					}
@@ -634,12 +662,14 @@ int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, Stri
 				}
 			}
 		} else {
-			result.append (c);
+//			result.append (c);
+			result[result.length] = c;
 		}
 		boolean lineBreak = false;
 		if (c == '\r') {
 			if (index + 1 < end && buffer [index + 1] == '\n') {
-				result.append ('\n');
+//				result.append ('\n');
+				result[result.length] = '\n';
 				index++;
 			}
 			lineBreak = true;
@@ -648,11 +678,15 @@ int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, Stri
 			lineBreak = true;
 		}
 		if (lineBreak && el != null) {
-			int idx = result.length();
+//			int idx = result.length();
+			int idx = result.length;
 			if (idx > lastIndex) {
 				int len = idx - lastIndex;
 				char[] cs = new char[len];
-				result.getChars(lastIndex, idx, cs, 0);
+//				result.getChars(lastIndex, idx, cs, 0);
+				for (int i = 0; i < cs.length; i++) {
+					cs[i] = result[lastIndex + i];
+				}
 				String s = new String(cs, 0, len);
 				el.appendChild(document.createTextNode(s));
 			}
@@ -661,11 +695,15 @@ int parseMnemonics (char[] buffer, int start, int end, StringBuffer result, Stri
 		}
 		index++;
 	}
-	int idx = result.length();
+//	int idx = result.length();
+	int idx = result.length;
 	if (idx > lastIndex && el != null) {
 		int len = idx - lastIndex;
 		char[] cs = new char[len];
-		result.getChars(lastIndex, idx, cs, 0);
+//		result.getChars(lastIndex, idx, cs, 0);
+		for (int i = 0; i < cs.length; i++) {
+			cs[i] = result[lastIndex + i];
+		}
 		String s = new String(cs, 0, len);
 		el.appendChild(document.createTextNode(s));
 	}
@@ -833,10 +871,16 @@ public void setText (String string) {
 
 void unhookSelection() {
 	for (int i = 0; i < anchors.length; i++) {
-		anchors[i].onclick = null;
-		anchors[i].ondblclick = null;
-		anchors[i].href = ids[i];
-		anchors[i].target = "_blank";
+		Element anchor = anchors[i];
+		anchor.onclick = null;
+		anchor.ondblclick = null;
+		if ("#".equals(ids[i])) {
+			anchor.href = "javascript:void(0);";
+			anchor.target = "_self";
+		} else {
+			anchor.href = ids[i];
+			anchor.target = "_blank";
+		}
 	}
 }
 
