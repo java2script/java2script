@@ -12,8 +12,8 @@ Boolean.prototype.parseBoolean = function(val){
 
 Boolean.$valueOf = Boolean.parseBoolean = Boolean.prototype.parseBoolean;
 
-Boolean.TRUE=Boolean.prototype.TRUE=new Boolean(true);
-Boolean.FALSE=Boolean.prototype.FALSE=new Boolean(false);
-
+Boolean.TRUE = Boolean.prototype.TRUE = new Boolean(true);
+Boolean.FALSE = Boolean.prototype.FALSE = new Boolean(false);
+Boolean.TYPE = Boolean.prototype.TYPE = Boolean;
 
 

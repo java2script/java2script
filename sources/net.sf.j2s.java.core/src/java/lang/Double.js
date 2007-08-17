@@ -36,6 +36,8 @@ Double.MAX_VALUE = Double.prototype.MAX_VALUE = 1.7976931348623157e+308;
 Double.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 Double.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
 Double.NaN = Number.NaN;
+Double.TYPE = Double.prototype.TYPE = Double;
+
 Clazz.defineMethod (Double, "isNaN", 
 function (num) {
 return isNaN (num);
