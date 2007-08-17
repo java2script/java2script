@@ -89,6 +89,8 @@ window["java.registered"] = false;
 	ClazzLoader.jarClasspath (base + "lang/reflect.z.js", [
         "java.lang.Void",
 		"$.reflect.AccessibleObject",
+		"$.AnnotatedElement",
+		"$.GenericDeclaration",
 		"$.InvocationHandler",
 		"$.Member",
         "$.Modifier",
