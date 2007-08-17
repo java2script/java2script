@@ -108,7 +108,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				for (Iterator iterator = classBindingSet.iterator(); iterator
 						.hasNext();) {
 					ITypeBinding binding = (ITypeBinding) iterator.next();
-					if (Bindings.isSuperType(binding, qn.binding)) {
+					if (qn.binding != null && Bindings.isSuperType(binding, qn.binding)) {
 						removed.add(qn);
 						isRemoved = true;
 						break;
@@ -126,11 +126,38 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			set.add(qn.qualifiedName);
 		}
 	}
+	
+
+	protected void remedyReflectionDependency(Set set) {
+		boolean needRemedy = false;;
+		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
+			Object next = iterator.next();
+			String name = null;
+			if (next instanceof QNTypeBinding) {
+				QNTypeBinding qn = (QNTypeBinding) next;
+				name = qn.qualifiedName;
+			} else {
+				name = (String) next;
+			}
+			if ("net.sf.j2s.ajax.AClass".equals(name)
+					|| "net.sf.j2s.ajax.ASWTClass".equals(name)) {
+				needRemedy = true;
+				break;
+			}
+		}
+		if (needRemedy) {
+			set.add("java.lang.reflect.Constructor");
+		}
+	}
+
 	public String getDependencyScript(StringBuffer mainJS) {
 		checkSuperType(musts);
 		checkSuperType(requires);
 		checkSuperType(optionals);
-		
+		remedyReflectionDependency(musts);
+		remedyReflectionDependency(requires);
+		remedyReflectionDependency(optionals);
+
 		musts.remove("");
 		requires.remove("");
 		optionals.remove("");
@@ -449,6 +476,15 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
 		if (qualifiedName != null 
 				&& !isClassKnown(qualifiedName)
+				&& qualifiedName.indexOf('[') == -1
+				&& !"int".equals(qualifiedName)
+				&& !"float".equals(qualifiedName)
+				&& !"double".equals(qualifiedName)
+				&& !"long".equals(qualifiedName)
+				&& !"short".equals(qualifiedName)
+				&& !"byte".equals(qualifiedName)
+				&& !"char".equals(qualifiedName)
+				&& !"boolean".equals(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
 				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")) {
 			ASTNode root = node.getRoot();
@@ -573,7 +609,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			}
 		}
 	}
-
+	
 	private DependencyASTVisitor getSelfVisitor() {
 		try {
 			Object obj = this.getClass().getConstructor(new Class[0]).newInstance(new Object[0]);
@@ -715,41 +751,41 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return super.visit(node);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
-	 */
-	public boolean visit(ArrayCreation node) {
-		ArrayType type = node.getType();
-		Type elementType = type.getElementType();
-		if (!elementType.isPrimitiveType()) {
-			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
-			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
-			QNTypeBinding qn = new QNTypeBinding();
-			String qualifiedName = null;
-			if (declaringClass != null) {
-				qualifiedName = declaringClass.getQualifiedName();
-				qn.binding = declaringClass;
-			} else {
-				qualifiedName = resolveTypeBinding.getQualifiedName();
-				qn.binding = resolveTypeBinding;
-			}
-			qualifiedName = discardGenericType(qualifiedName);
-			qn.qualifiedName = qualifiedName;
-			if (isQualifiedNameOK(qualifiedName, node) 
-					&& !musts.contains(qn)
-					&& !requires.contains(qn)) {
-				optionals.add(qn);
-			}
-		}
-		return super.visit(node);
-	}
+//	/* (non-Javadoc)
+//	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ArrayCreation)
+//	 */
+//	public boolean visit(ArrayCreation node) {
+//		ArrayType type = node.getType();
+//		Type elementType = type.getElementType();
+//		if (!elementType.isPrimitiveType()) {
+//			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
+//			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+//			QNTypeBinding qn = new QNTypeBinding();
+//			String qualifiedName = null;
+//			if (declaringClass != null) {
+//				qualifiedName = declaringClass.getQualifiedName();
+//				qn.binding = declaringClass;
+//			} else {
+//				qualifiedName = resolveTypeBinding.getQualifiedName();
+//				qn.binding = resolveTypeBinding;
+//			}
+//			qualifiedName = discardGenericType(qualifiedName);
+//			qn.qualifiedName = qualifiedName;
+//			if (isQualifiedNameOK(qualifiedName, node) 
+//					&& !musts.contains(qn)
+//					&& !requires.contains(qn)) {
+//				optionals.add(qn);
+//			}
+//		}
+//		return super.visit(node);
+//	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
-		if (Modifier.isStatic(resolveMethodBinding.getModifiers())) {
+		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
 			Expression expression = node.getExpression();
 			if (expression instanceof Name) {
 				Name name = (Name) expression;
