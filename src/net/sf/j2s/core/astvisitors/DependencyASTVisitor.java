@@ -785,7 +785,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
-		if (Modifier.isStatic(resolveMethodBinding.getModifiers())) {
+		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
 			Expression expression = node.getExpression();
 			if (expression instanceof Name) {
 				Name name = (Name) expression;
