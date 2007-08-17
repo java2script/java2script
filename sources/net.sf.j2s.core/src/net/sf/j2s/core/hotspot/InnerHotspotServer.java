@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import javax.print.attribute.standard.Severity;
-
 /**
  * Only send out *.js about current modified *.js.
  *
@@ -147,8 +145,9 @@ public class InnerHotspotServer {
             try {
                 s = ss.accept();
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
+            if (s == null) continue;
             HotspotWorker w = null;
             synchronized (threads) {
                 if (threads.isEmpty()) {
