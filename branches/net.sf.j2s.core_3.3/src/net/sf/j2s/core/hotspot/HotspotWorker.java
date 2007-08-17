@@ -160,6 +160,8 @@ public class HotspotWorker implements Runnable {
             ps.write(EOL);
             ps.print("Pragma: no-cache");
             ps.write(EOL);
+            ps.print("Cache-Control: no-cache");
+            ps.write(EOL);
             if (doingGet) {
             	sendLatestHotspot(sessionID, ps);
             }
