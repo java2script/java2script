@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.ContentWindow;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Composite;
@@ -861,6 +862,14 @@ public boolean execute(String script) {
 	if (pVarResult == null) return false;
 	pVarResult.dispose();
 	*/
+	/**
+	 * @j2sNative
+	 * try {
+	 * 	this.browserHandle.contentWindow.eval (script);
+	 * } catch (e) {
+	 * 	return false;
+	 * }
+	 */ { }
 	return true;
 }
 

@@ -94,7 +94,14 @@ public class ShellFrameDND implements DragListener {
 		this.frame.style.width = this.sourceWidth + "px";
 		this.frame.style.height = this.sourceHeight + "px";
 		Element[] frames = document.getElementsByTagName("IFRAME");
-		if (frames.length != 0) {
+		boolean needOverIFrameLayer = false;
+		for (int i = 0; i < frames.length; i++) {
+			if (frames[i].style.display != "none") {
+				needOverIFrameLayer = true;
+				break;
+			}
+		}
+		if (needOverIFrameLayer) {
 			overFrameHandle = document.createElement ("DIV");
 			overFrameHandle.className = "over-iframe-layer";
 			overFrameHandle.style.zIndex = window.currentTopZIndex;
@@ -245,7 +252,9 @@ public class ShellFrameDND implements DragListener {
 		return true;
 	}
 	private void clean() {
-		this.frame.style.display = "none";
+		if(this.frame != null) {
+			this.frame.style.display = "none";
+		}
 		document.body.style.cursor = "auto";
 		this.resize = null;
 
@@ -254,6 +263,15 @@ public class ShellFrameDND implements DragListener {
 			overFrameHandle = null;
 		}
 	};
+	
+	public void dispose() {
+		clean();
+		if (this.frame != null) {
+			this.frame.parentNode.removeChild(this.frame);
+			this.frame = null;
+		}
+	}
+	
 	/**
 	 * To initialize bounds.
 	 */

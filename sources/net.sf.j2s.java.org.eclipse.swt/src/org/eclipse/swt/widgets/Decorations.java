@@ -135,6 +135,7 @@ public class Decorations extends Canvas {
 	Element titleBar;
 	Element shellMenuBar;
 	Element shellToolBar;
+	private ShellFrameDND shellFrameDND;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -602,7 +603,7 @@ protected void createHandle() {
 	contentHandle = createCSSDiv(contentCSS);
 	if (DragAndDrop.class != null) {
 		DragAndDrop dnd = new DragAndDrop();
-		dnd.addDragListener(new ShellFrameDND() {
+		shellFrameDND = new ShellFrameDND() {
 			protected int deltaWidth = 0;
 			protected int deltaHeight = 0;
 			public boolean isDraggable(HTMLEventWrapper e) {
@@ -635,9 +636,11 @@ protected void createHandle() {
 				if (resized) {
 					sendEvent(SWT.Resize);
 				}
+				bringToTop();
 				return true;
 			}
-		});
+		};
+		dnd.addDragListener(shellFrameDND);
 		dnd.bind(handle);
 	}
 //	contentHandle.onclick = new RunnableCompatibility(){
@@ -763,6 +766,12 @@ public void dispose () {
 			shell.setFocus ();
 		}
 	}
+	
+	if (shellFrameDND != null) {
+		shellFrameDND.dispose();
+		shellFrameDND = null;
+	}
+	
 	if ((this.style & SWT.TOOL) == 0)
 	/**
 	 * @j2sNative

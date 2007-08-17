@@ -108,6 +108,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * @see #sleep
  * @see Device#dispose
  * 
+ * @j2sIgnoreImport org.eclipse.swt.widgets.Tray
  * @j2sSuffix
 // Only IE need to release the resources so that no memory is leaked
 if (window.attachEvent) {
