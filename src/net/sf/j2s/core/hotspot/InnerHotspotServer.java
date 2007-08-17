@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import javax.print.attribute.standard.Severity;
-
 /**
  * Only send out *.js about current modified *.js.
  *
