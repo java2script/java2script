@@ -51,9 +51,39 @@ import java.io.Serializable;
  * </p>
  * 
  * @since 1.0
+ * 
+ * @j2sSuffix java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
  */
 public final class Character implements Serializable, Comparable<Character> {
     private static final long serialVersionUID = 3786198910865385080L;
+
+    /**
+     * The minimum possible Character value.
+     */
+    public static final char MIN_VALUE = '\u0000';
+
+    /**
+     * The maximum possible Character value.
+     */
+    public static final char MAX_VALUE = '\uffff';
+
+    /**
+     * The minimum possible radix used for conversions between Characters and
+     * integers.
+     */
+    public static final int MIN_RADIX = 2;
+
+    /**
+     * The maximum possible radix used for conversions between Characters and
+     * integers.
+     */
+    public static final int MAX_RADIX = 36;
+
+    /**
+     * The <code>char</code> {@link Class} object.
+     */
+    @SuppressWarnings("unchecked")
+    public static final Class<Character> TYPE = null;
 
     private final char value;
 
@@ -236,6 +266,64 @@ public final class Character implements Serializable, Comparable<Character> {
 		return 0;
 	}
 	
+    /**
+     * Convenient method to determine the value of character <code>c</code> in
+     * the supplied radix. The value of <code>radix</code> must be between
+     * MIN_RADIX and MAX_RADIX.
+     * 
+     * @param c
+     *            the character
+     * @param radix
+     *            the radix
+     * @return if <code>radix</code> lies between {@link #MIN_RADIX} and
+     *         {@link #MAX_RADIX} then the value of the character in the radix,
+     *         otherwise -1.
+     */
+    public static int digit(char c, int radix) {
+        if (radix >= MIN_RADIX && radix <= MAX_RADIX) {
+            if (c < 128) {
+                // Optimized for ASCII
+                int result = -1;
+                if ('0' <= c && c <= '9') {
+                    result = c - '0';
+                } else if ('a' <= c && c <= 'z') {
+                    result = c - ('a' - 10);
+                } else if ('A' <= c && c <= 'Z') {
+                    result = c - ('A' - 10);
+                }
+                return result < radix ? result : -1;
+            }
+//            int result = BinarySearch.binarySearchRange(digitKeys, c);
+//            if (result >= 0 && c <= digitValues[result * 2]) {
+//                int value = (char) (c - digitValues[result * 2 + 1]);
+//                if (value >= radix) {
+//                    return -1;
+//                }
+//                return value;
+//            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Convenient method to determine the value of character
+     * <code>codePoint</code> in the supplied radix. The value of
+     * <code>radix</code> must be between MIN_RADIX and MAX_RADIX.
+     * 
+     * @param codePoint
+     *            the character, including supplementary characters
+     * @param radix
+     *            the radix
+     * @return if <code>radix</code> lies between {@link #MIN_RADIX} and
+     *         {@link #MAX_RADIX} then the value of the character in the radix,
+     *         otherwise -1.
+     * @j2sIgnore
+     */
+    public static int digit(int codePoint, int radix) {
+        //return UCharacter.digit(codePoint, radix);
+    	return -1;
+    }
+
 	/**
 	 * @j2sIgnore
 	 */

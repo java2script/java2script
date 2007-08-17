@@ -1,41 +1,41 @@
-Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Long", null, function () {
-java.lang.Long = Long = function () {
+Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Short", null, function () {
+java.lang.Short = Short = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Long, "Long", Number, Comparable);
-Long.prototype.valueOf = function () { return 0; };
-Long.toString = Long.prototype.toString = function () {
+Clazz.decorateAsType (Short, "Short", Number, Comparable);
+Short.prototype.valueOf = function () { return 0; };
+Short.toString = Short.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
 	}
 	return "" + this.valueOf ();
 };
-Clazz.makeConstructor (Long, 
+Clazz.makeConstructor (Short, 
 function () {
 this.valueOf = function () {
 	return 0;
 };
 });
-Clazz.makeConstructor (Long, 
+Clazz.makeConstructor (Short, 
 function (value) {
-var v = Math.round (value);
+var v = Math.round (value) & 0xffffffff;
 this.valueOf = function () {
 	return v;
 };
 }, "Number");
-Clazz.makeConstructor (Long, 
+Clazz.makeConstructor (Short, 
 function (s) {
-var value = Long.parseLong (s, 10);
+var value = Short.parseShort (s, 10);
 this.valueOf = function () {
 	return value;
 };
 }, "String");
-Long.serialVersionUID = Long.prototype.serialVersionUID = 4290774380558885855;
-Long.MIN_VALUE = Long.prototype.MIN_VALUE = -0x8000000000000000;
-Long.MAX_VALUE = Long.prototype.MAX_VALUE = 0x7fffffffffffffff;
-Long.TYPE = Long.prototype.TYPE = Long;
+Short.serialVersionUID = Short.prototype.serialVersionUID = 7515723908773894738;
+Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
+Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
+Short.TYPE = Short.prototype.TYPE = Short;
 
-Clazz.defineMethod (Long, "parseLong", 
+Clazz.defineMethod (Short, "parseShort", 
 function (s, radix) {
 if (s == null) {
 throw  new NumberFormatException ("null");
@@ -44,53 +44,53 @@ throw  new NumberFormatException ("radix " + radix + " less than Character.MIN_R
 }if (radix > 36) {
 throw  new NumberFormatException ("radix " + radix + " greater than Character.MAX_RADIX");
 }
-var longVal = parseInt (s, radix);
-if(isNaN(longVal)){
+var integer = parseInt (s, radix);
+if(isNaN(integer)){
 throw  new NumberFormatException ("Not a Number : " + s);
 }
-return longVal;
+return integer;
 }, "String, Number");
-
-Clazz.defineMethod (Long, "parseLong", 
+Short.parseShort = Short.prototype.parseShort;
+Clazz.defineMethod (Short, "parseShort", 
 function (s) {
-return Long.parseLong (s, 10);
+return Short.parseShort (s, 10);
 }, "String");
 
-Long.parseLong = Long.prototype.parseLong;
+Short.parseShort = Short.prototype.parseShort;
 
-Clazz.defineMethod (Long, "$valueOf", 
+Clazz.defineMethod (Short, "$valueOf", 
 function (s) {
-return new Long(Long.parseLong (s, 10));
+return new Short(Short.parseShort (s, 10));
 }, "String");
 
-Clazz.defineMethod (Long, "$valueOf", 
+Clazz.defineMethod (Short, "$valueOf", 
 function (s) {
-return new Long(s);
+return new Short(s);
 }, "Number");
 
-Clazz.defineMethod (Long, "$valueOf", 
+Clazz.defineMethod (Short, "$valueOf", 
 function (s, r) {
-return new Long(Long.parseLong (s, r));
+return new Short(Short.parseShort (s, r));
 }, "String, Number");
 
-Long.$valueOf = Long.prototype.$valueOf;
-Clazz.defineMethod (Long, "equals", 
+Short.$valueOf = Short.prototype.$valueOf;
+Clazz.defineMethod (Short, "equals", 
 function (s) {
-if(s == null || !Clazz.instanceOf(s, Long) ){
+if(s == null || !Clazz.instanceOf(s, Short) ){
 	return false;
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
-Long.toHexString = Long.prototype.toHexString = function (i) {
+Short.toHexString = Short.prototype.toHexString = function (i) {
 	return i.toString (16);
 };
-Long.toOctalString = Long.prototype.toOctalString = function (i) {
+Short.toOctalString = Short.prototype.toOctalString = function (i) {
 	return i.toString (8);
 };
-Long.toBinaryString = Long.prototype.toBinaryString = function (i) {
+Short.toBinaryString = Short.prototype.toBinaryString = function (i) {
 	return i.toString (2);
 };
-Long.decode = Clazz.defineMethod (Long, "decode", 
+Short.decode = Clazz.defineMethod (Short, "decode", 
 function (nm) {
 var radix = 10;
 var index = 0;
@@ -110,12 +110,12 @@ index++;
 radix = 8;
 }if (nm.startsWith ("-", index)) throw  new NumberFormatException ("Negative sign in wrong position");
 try {
-result = Long.$valueOf (nm.substring (index), radix);
-result = negative ?  new Long (-result.longValue ()) : result;
+result = Short.$valueOf (nm.substring (index), radix);
+result = negative ?  new Short (-result.shortValue ()) : result;
 } catch (e) {
 if (Clazz.instanceOf (e, NumberFormatException)) {
 var constant = negative ?  String.instantialize ("-" + nm.substring (index)) : nm.substring (index);
-result = Long.$valueOf (constant, radix);
+result = Short.$valueOf (constant, radix);
 } else {
 throw e;
 }
@@ -123,4 +123,3 @@ throw e;
 return result;
 }, "~S");
 });
-

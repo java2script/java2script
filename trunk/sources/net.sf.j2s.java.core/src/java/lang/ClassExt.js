@@ -734,6 +734,127 @@ Thread.currentThread = Thread.prototype.currentThread = function () {
 	return this.J2S_THREAD;
 };
 
+/* public */
+Clazz.intCast = function (n) { // 32bit
+	var b1 = (n & 0xff000000) >> 24;
+	var b2 = (n & 0xff0000) >> 16;
+	var b3 = (n & 0xff00) >> 8;
+	var b4 = n & 0xff;
+	if ((b1 & 0x80) != 0) {
+		return -(((b1 & 0x7f) << 24) + (b2 << 16) + (b3 << 8) + b4 + 1);
+	} else {
+		return (b1 << 24) + (b2 << 16) + (b3 << 8) + b4;
+	}
+};
+
+/* public */
+Clazz.shortCast = function (s) { // 16bit
+	var b1 = (n & 0xff00) >> 8;
+	var b2 = n & 0xff;
+	if ((b1 & 0x80) != 0) {
+		return -(((b1 & 0x7f) << 8) + b2 + 1);
+	} else {
+		return (b1 << 8) + b4;
+	}
+};
+
+/* public */
+Clazz.byteCast = function (b) { // 8bit
+	if ((b & 0x80) != 0) {
+		return -((b & 0x7f) + 1);
+	} else {
+		return b & 0xff;
+	}
+};
+
+/* public */
+Clazz.charCast = function (c) { // 8bit
+	return String.fromCharCode (c & 0xff).charAt (0);
+};
+
+/**
+ * Warning: Unsafe conversion!
+ */
+/* public */
+Clazz.floatCast = function (f) { // 32bit
+	return f;
+};
+
+/*
+ * Try to fix JavaScript's shift operator defects on long type numbers.
+ */
+
+Clazz.longMasks = [];
+
+Clazz.longReverseMasks = [];
+
+Clazz.longBits = [];
+
+(function () {
+	var arr = [1];
+	for (var i = 1; i < 53; i++) {
+		arr[i] = arr[i - 1] + arr[i - 1]; // * 2 or << 1
+	}
+	Clazz.longBits = arr;
+	Clazz.longMasks[52] = arr[52];
+	for (var i = 51; i >= 0; i--) {
+		Clazz.longMasks[i] = Clazz.longMasks[i + 1] + arr[i];
+	}
+	Clazz.longReverseMasks[0] = arr[0];
+	for (var i = 1; i < 52; i++) {
+		Clazz.longReverseMasks[i] = Clazz.longReverseMasks[i - 1] + arr[i];
+	}
+}) ();
+
+/* public */
+Clazz.longLeftShift = function (l, o) { // 64bit
+	if (o == 0) return l;
+	if (o >= 64) return 0;
+	if (o > 52) {
+		error ("[Java2Script] Error : JavaScript does not support long shift!");
+		return l;
+	}
+	if ((l & Clazz.longMasks[o - 1]) != 0) {
+		error ("[Java2Script] Error : Such shift operator results in wrong calculation!");
+		return l;
+	}
+	var high = l & Clazz.longMasks[52 - 32 + o];
+	if (high != 0) {
+		return high * Clazz.longBits[o] + (l & Clazz.longReverseMasks[32 - o]) << 0;
+	} else {
+		return l << o;
+	}
+};
+
+/* public */
+Clazz.intLeftShift = function (n, o) { // 32bit
+	return (n << o) & 0xffffffff;
+};
+
+/* public */
+Clazz.longRightShift = function (l, o) { // 64bit
+	if ((l & Clazz.longMasks[52 - 32]) != 0) {
+		return Math.round((l & Clazz.longMasks[52 - 32]) / Clazz.longBits[32 - o]) + (l & Clazz.longReverseMasks[o]) >> o;
+	} else {
+		return l >> o;
+	}
+};
+
+/* public */
+Clazz.intRightShift = function (n, o) { // 32bit
+	return n >> o; // no needs for this shifting wrapper
+};
+
+/* public */
+Clazz.long0RightShift = function (l, o) { // 64bit
+	return l >>> o;
+};
+
+/* public */
+Clazz.int0RightShift = function (n, o) { // 64bit
+	return n >>> o; // no needs for this shifting wrapper
+};
+
 // Compress the common public API method in shorter name
 $_L=Clazz.load;$_W=Clazz.declareAnonymous;$_T=Clazz.declareType;$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;$_s=Clazz.registerSerializableFields;
 

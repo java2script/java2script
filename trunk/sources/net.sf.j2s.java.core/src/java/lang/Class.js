@@ -1404,6 +1404,11 @@ Clazz.instantialize = function (objThis, args) {
 		objThis.construct.apply (objThis, args);
 	}
 	*/
+	if (objThis instanceof Number) {
+		objThis.valueOf = function () {
+			return this;
+		};
+	}
 	var c = objThis.construct;
 	if (c != null) {
 		if (objThis.con$truct == null) { // no need to init fields
@@ -1473,6 +1478,9 @@ Clazz.innerFunctions = {
 
 	getResourceAsStream : function (name) {
 		var is = null;
+		if (name == null) {
+			return is;
+		}
 		if (java.io.InputStream != null) {
 			is = new java.io.InputStream ();
 		} else {

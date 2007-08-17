@@ -40,6 +40,7 @@ Float.MAX_VALUE = Float.prototype.MAX_VALUE = 1.4e-45;
 Float.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 Float.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
 Float.NaN = Number.NaN;
+Float.TYPE = Float.prototype.TYPE = Float;
 
 Clazz.defineMethod (Float, "parseFloat", 
 function (s) {

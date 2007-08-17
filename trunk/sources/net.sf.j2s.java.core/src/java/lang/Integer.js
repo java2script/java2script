@@ -33,6 +33,7 @@ this.valueOf = function () {
 Integer.serialVersionUID = Integer.prototype.serialVersionUID = 1360826667806852920;
 Integer.MIN_VALUE = Integer.prototype.MIN_VALUE = -0x80000000;
 Integer.MAX_VALUE = Integer.prototype.MAX_VALUE = 0x7fffffff;
+Integer.TYPE = Integer.prototype.TYPE = Integer;
 
 Clazz.defineMethod (Integer, "parseInt", 
 function (s, radix) {
@@ -89,5 +90,37 @@ Integer.toOctalString = Integer.prototype.toOctalString = function (i) {
 Integer.toBinaryString = Integer.prototype.toBinaryString = function (i) {
 	return i.toString (2);
 };
+Integer.decode = Clazz.defineMethod (Integer, "decode", 
+function (nm) {
+var radix = 10;
+var index = 0;
+var negative = false;
+var result;
+if (nm.startsWith ("-")) {
+negative = true;
+index++;
+}if (nm.startsWith ("0x", index) || nm.startsWith ("0X", index)) {
+index += 2;
+radix = 16;
+} else if (nm.startsWith ("#", index)) {
+index++;
+radix = 16;
+} else if (nm.startsWith ("0", index) && nm.length > 1 + index) {
+index++;
+radix = 8;
+}if (nm.startsWith ("-", index)) throw  new NumberFormatException ("Negative sign in wrong position");
+try {
+result = Integer.$valueOf (nm.substring (index), radix);
+result = negative ?  new Integer (-result.intValue ()) : result;
+} catch (e) {
+if (Clazz.instanceOf (e, NumberFormatException)) {
+var constant = negative ?  String.instantialize ("-" + nm.substring (index)) : nm.substring (index);
+result = Integer.$valueOf (constant, radix);
+} else {
+throw e;
+}
+}
+return result;
+}, "~S");
 });
 
