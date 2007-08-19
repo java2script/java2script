@@ -751,7 +751,7 @@ public class OS {
 	    int pcHeight = p.clientHeight;
 	    if (OS.isIE) { // && !OS.isOpera
 	        return (pcHeight == 0) ? bcHeight : pcHeight;
-	    } else if (OS.isFirefox) {
+	    } else if (OS.isFirefox || OS.isSafari) {
 	        return (pcHeight == p.offsetHeight 
 	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
 	    }
