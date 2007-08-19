@@ -162,9 +162,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
-			ITypeBinding binding = node.getType().resolveBinding();
-			if(binding != null){
-				ITypeBinding elementType = binding.getElementType();
+			node.getType().resolveBinding();
+			node.getType().getComponentType().resolveBinding();
+			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
+			elementType = node.getType().getElementType().resolveBinding();
+			if(elementType != null){
 				if (elementType.isPrimitive()) {
 					String typeCode = elementType.getName();
 					if ("int".equals(typeCode)
@@ -195,16 +197,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 							buffer.append(")");
 						}
 					}
-				}
-			} else {
-				if (dim != null && dim.size() > 1) {
-					buffer.append(" Clazz.newArray (");
-					visitList(dim, ", ");
-					buffer.append(", null)");
 				} else {
-					buffer.append(" new Array (");
-					visitList(dim, "");
-					buffer.append(")");
+					if (dim != null && dim.size() > 1) {
+						buffer.append(" Clazz.newArray (");
+						visitList(dim, ", ");
+						buffer.append(", null)");
+					} else {
+						buffer.append(" new Array (");
+						visitList(dim, "");
+						buffer.append(")");
+					}
 				}
 			}
 		}
