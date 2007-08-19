@@ -1334,7 +1334,7 @@ public class Bindings {
 	}
 	
 	public static boolean isMethodInvoking(IMethodBinding methodBinding, String className, String methodName) {
-		if (methodName.equals(methodBinding.getName())) {
+		if (methodBinding != null && methodName.equals(methodBinding.getName())) {
 			IMethodBinding findMethodInHierarchy = Bindings.findMethodInHierarchy(methodBinding.getDeclaringClass(), methodName, null);
 			IMethodBinding last = findMethodInHierarchy;
 			int count = 0;

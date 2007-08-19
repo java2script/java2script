@@ -728,10 +728,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		ITypeBinding resolveTypeBinding = node.resolveTypeBinding();
 		QNTypeBinding qn = new QNTypeBinding();
 		String qualifiedName = null;
-		if (resolveTypeBinding.isAnonymous()) {
+		if (resolveTypeBinding != null && resolveTypeBinding.isAnonymous()) {
 			qualifiedName = node.getType().resolveBinding().getQualifiedName();
 			qn.binding = node.getType().resolveBinding();
-		} else {
+		} else if(resolveTypeBinding != null){
 			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
 			if (declaringClass != null) {
 				qualifiedName = declaringClass.getQualifiedName();
@@ -740,6 +740,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				qualifiedName = resolveTypeBinding.getQualifiedName();
 				qn.binding = resolveTypeBinding;
 			}
+		}else{
+			return super.visit(node);
 		}
 		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
@@ -759,22 +761,24 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		Type elementType = type.getElementType();
 //		if (!elementType.isPrimitiveType()) {
 //			ITypeBinding resolveTypeBinding = elementType.resolveBinding();
-//			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
-//			QNTypeBinding qn = new QNTypeBinding();
-//			String qualifiedName = null;
-//			if (declaringClass != null) {
-//				qualifiedName = declaringClass.getQualifiedName();
-//				qn.binding = declaringClass;
-//			} else {
-//				qualifiedName = resolveTypeBinding.getQualifiedName();
-//				qn.binding = resolveTypeBinding;
-//			}
-//			qualifiedName = discardGenericType(qualifiedName);
-//			qn.qualifiedName = qualifiedName;
-//			if (isQualifiedNameOK(qualifiedName, node) 
-//					&& !musts.contains(qn)
-//					&& !requires.contains(qn)) {
-//				optionals.add(qn);
+//			if(resolveTypeBinding != null){
+//				ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+//				QNTypeBinding qn = new QNTypeBinding();
+//				String qualifiedName = null;
+//				if (declaringClass != null) {
+//					qualifiedName = declaringClass.getQualifiedName();
+//					qn.binding = declaringClass;
+//				} else {
+//					qualifiedName = resolveTypeBinding.getQualifiedName();
+//					qn.binding = resolveTypeBinding;
+//				}
+//				qualifiedName = discardGenericType(qualifiedName);
+//				qn.qualifiedName = qualifiedName;
+//				if (isQualifiedNameOK(qualifiedName, node) 
+//						&& !musts.contains(qn)
+//						&& !requires.contains(qn)) {
+//					optionals.add(qn);
+//				}
 //			}
 //		}
 //		return super.visit(node);
@@ -912,7 +916,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		Object constValue = node.resolveConstantExpressionValue();
 		IVariableBinding resolveFieldBinding = node.resolveFieldBinding();
 		Expression exp = node.getExpression();
-		if (constValue == null && Modifier.isStatic(resolveFieldBinding.getModifiers())) {
+		if (resolveFieldBinding != null && constValue == null && Modifier.isStatic(resolveFieldBinding.getModifiers())) {
 			Expression expression = exp;
 			if (expression instanceof Name) {
 				Name name = (Name) expression;

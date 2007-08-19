@@ -230,7 +230,9 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 			return getTypeStringName(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();//.getFullyQualifiedName();
 		} else if (type instanceof SimpleType) {
 			SimpleType simpType = (SimpleType) type;
-			return simpType.resolveBinding().getQualifiedName();
+			if(simpType.resolveBinding() != null){
+				return simpType.resolveBinding().getQualifiedName();
+			}
 		}
 		return null;
 	}
