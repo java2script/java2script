@@ -162,10 +162,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
-			node.getType().resolveBinding();
-			node.getType().getComponentType().resolveBinding();
 			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
-			elementType = node.getType().getElementType().resolveBinding();
 			if(elementType != null){
 				if (elementType.isPrimitive()) {
 					String typeCode = elementType.getName();
@@ -411,7 +408,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		buffer.append(' ');
 		buffer.append(op);
 		buffer.append(' ');
-		if (right.resolveTypeBinding() != null && "char".equals(right.resolveTypeBinding().getName())) {
+		ITypeBinding binding = right.resolveTypeBinding();
+		if (binding != null && "char".equals(binding.getName())) {
 			buffer.append('(');
 			right.accept(this);
 			buffer.append(").charCodeAt (0)");
