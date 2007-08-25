@@ -171,6 +171,9 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 
 
 	private boolean testForceOverriding(IMethodBinding method) {
+		if(method == null){
+			return true;
+		}
 		String methodName = method.getName();
 		ITypeBinding classInHierarchy = method.getDeclaringClass();
 		do {
@@ -205,7 +208,7 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	protected boolean canAutoOverride(MethodDeclaration node) {
 		boolean isOK2AutoOverriding = false;
 		IMethodBinding methodBinding = node.resolveBinding();
-		if (testForceOverriding(methodBinding)) {
+		if (methodBinding != null && testForceOverriding(methodBinding)) {
 			IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
 			if (superMethod != null) {
 				ASTNode parentRoot = node.getParent();

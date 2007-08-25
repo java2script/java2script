@@ -146,7 +146,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Expression index = node.getIndex();
 		index.accept(this);
 		ITypeBinding rightTypeBinding = index.resolveTypeBinding();
-		if ("char".equals(rightTypeBinding.getName())) {
+		if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName())) {
 			buffer.append(".charCodeAt (0)");
 		}
 		buffer.append(']');
@@ -162,27 +162,38 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
-			ITypeBinding binding = node.getType().resolveBinding();
-			ITypeBinding elementType = binding.getElementType();
-			if (elementType.isPrimitive()) {
-				String typeCode = elementType.getName();
-				if ("int".equals(typeCode)
-						|| "float".equals(typeCode)
-						|| "double".equals(typeCode)
-						|| "byte".equals(typeCode)
-						|| "long".equals(typeCode)
-						|| "short".equals(typeCode)) {
-					buffer.append(" Clazz.newArray (");
-					visitList(dim, ", ");
-					buffer.append(", 0)");
-				} else if ("char".equals(typeCode)) {
-					buffer.append(" Clazz.newArray (");
-					visitList(dim, ", ");
-					buffer.append(", '\\0')");
-				} else if ("boolean".equals(typeCode)) {
-					buffer.append(" Clazz.newArray (");
-					visitList(dim, ", ");
-					buffer.append(", false)");
+			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
+			if(elementType != null){
+				if (elementType.isPrimitive()) {
+					String typeCode = elementType.getName();
+					if ("int".equals(typeCode)
+							|| "float".equals(typeCode)
+							|| "double".equals(typeCode)
+							|| "byte".equals(typeCode)
+							|| "long".equals(typeCode)
+							|| "short".equals(typeCode)) {
+						buffer.append(" Clazz.newArray (");
+						visitList(dim, ", ");
+						buffer.append(", 0)");
+					} else if ("char".equals(typeCode)) {
+						buffer.append(" Clazz.newArray (");
+						visitList(dim, ", ");
+						buffer.append(", '\\0')");
+					} else if ("boolean".equals(typeCode)) {
+						buffer.append(" Clazz.newArray (");
+						visitList(dim, ", ");
+						buffer.append(", false)");
+					} else {
+						if (dim != null && dim.size() > 1) {
+							buffer.append(" Clazz.newArray (");
+							visitList(dim, ", ");
+							buffer.append(", null)");
+						} else {
+							buffer.append(" new Array (");
+							visitList(dim, "");
+							buffer.append(")");
+						}
+					}
 				} else {
 					if (dim != null && dim.size() > 1) {
 						buffer.append(" Clazz.newArray (");
@@ -193,16 +204,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						visitList(dim, "");
 						buffer.append(")");
 					}
-				}
-			} else {
-				if (dim != null && dim.size() > 1) {
-					buffer.append(" Clazz.newArray (");
-					visitList(dim, ", ");
-					buffer.append(", null)");
-				} else {
-					buffer.append(" new Array (");
-					visitList(dim, "");
-					buffer.append(")");
 				}
 			}
 		}
@@ -329,7 +330,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding typeBinding = left.resolveTypeBinding();
 		String op = node.getOperator().toString();
 		Expression right = node.getRightHandSide();
-		if (typeBinding.isPrimitive()) {
+		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("boolean".equals(typeBinding.getName())) {
 				if (op.startsWith("^")
 						|| op.startsWith("|")
@@ -352,7 +353,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append(".valueOf ()");
 					return false;
 				}
-			} else if ("char".equals(typeBinding.getName())) {
+			} else if (typeBinding != null &&  "char".equals(typeBinding.getName())) {
 				boolean isMixedOp = op.trim().length() > 1;
 				if (!isMixedOp) {
 					if (right instanceof Name || right instanceof CharacterLiteral
@@ -407,7 +408,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		buffer.append(' ');
 		buffer.append(op);
 		buffer.append(' ');
-		if ("char".equals(right.resolveTypeBinding().getName())) {
+		ITypeBinding binding = right.resolveTypeBinding();
+		if (binding != null && "char".equals(binding.getName())) {
 			buffer.append('(');
 			right.accept(this);
 			buffer.append(").charCodeAt (0)");
@@ -700,7 +702,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return ;
 		}
 		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
-		if (typeBinding.isPrimitive()) {
+		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
 				return ;
 			}
@@ -800,7 +802,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		}
 		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
-		if (typeBinding.isPrimitive()) {
+		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
 				buffer.append("(");
 				node.getOperand().accept(this);

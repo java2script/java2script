@@ -372,45 +372,47 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 */
 		if (type.isPrimitiveType()) {
 			ITypeBinding resolveTypeBinding = node.getExpression().resolveTypeBinding();
-			String name = resolveTypeBinding.getName();
-			PrimitiveType pType = (PrimitiveType) type;
-			if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
-					|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
-					|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
-					|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
-				if ("char".equals(name)) {
-					buffer.append("(");
-					node.getExpression().accept(this);
-					buffer.append (").charCodeAt (0)");
-					return false;
-				} else if ("float".equals(name) || "double".equals(name)) {
-					buffer.append("Math.round (");
-					node.getExpression().accept(this);
-					buffer.append (")");
-					return false;
+			if(resolveTypeBinding != null){
+				String name = resolveTypeBinding.getName();
+				PrimitiveType pType = (PrimitiveType) type;
+				if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
+					if ("char".equals(name)) {
+						buffer.append("(");
+						node.getExpression().accept(this);
+						buffer.append (").charCodeAt (0)");
+						return false;
+					} else if ("float".equals(name) || "double".equals(name)) {
+						buffer.append("Math.round (");
+						node.getExpression().accept(this);
+						buffer.append (")");
+						return false;
+					}
 				}
-			}
-			if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-				if ("char".equals(name)) {
-//					buffer.append("(");
-//					node.getExpression().accept(this);
-//					buffer.append (").charCodeAt (0)");
-//					return false;
-				} else if ("float".equals(name) || "double".equals(name)) {
-					// TODO:
-					buffer.append("String.fromCharCode (");
-					buffer.append("Math.round (");
-					node.getExpression().accept(this);
-					buffer.append (")");
-					buffer.append (")");
-					return false;
-				} else if ("int".equals(name) || "byte".equals(name)
-						|| "double".equals(name) || "float".equals(name)
-						|| "short".equals(name) || "long".equals(name)) {
-					buffer.append("String.fromCharCode (");
-					node.getExpression().accept(this);
-					buffer.append (")");
-					return false;
+				if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+					if ("char".equals(name)) {
+//						buffer.append("(");
+//						node.getExpression().accept(this);
+//						buffer.append (").charCodeAt (0)");
+//						return false;
+					} else if ("float".equals(name) || "double".equals(name)) {
+						// TODO:
+						buffer.append("String.fromCharCode (");
+						buffer.append("Math.round (");
+						node.getExpression().accept(this);
+						buffer.append (")");
+						buffer.append (")");
+						return false;
+					} else if ("int".equals(name) || "byte".equals(name)
+							|| "double".equals(name) || "float".equals(name)
+							|| "short".equals(name) || "long".equals(name)) {
+						buffer.append("String.fromCharCode (");
+						node.getExpression().accept(this);
+						buffer.append (")");
+						return false;
+					}
 				}
 			}
 		}
@@ -1223,10 +1225,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
-			boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
-					node.resolveBinding().getKey());
-			if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
-				return false;
+			if(mBinding != null){
+				boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
+						mBinding.getKey());
+				if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
+					return false;
+				}
 			}
 		}
 		
