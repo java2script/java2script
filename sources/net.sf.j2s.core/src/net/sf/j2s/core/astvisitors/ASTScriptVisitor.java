@@ -1225,9 +1225,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		if ((node.getModifiers() & Modifier.PRIVATE) != 0) {
-			if(node.resolveBinding() != null){
+			if(mBinding != null){
 				boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
-						node.resolveBinding().getKey());
+						mBinding.getKey());
 				if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
 					return false;
 				}
