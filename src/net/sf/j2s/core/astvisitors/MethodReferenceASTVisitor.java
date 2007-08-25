@@ -51,13 +51,15 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(ClassInstanceCreation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		String key = constructorBinding.getKey();
-		if (key != null) {
-			key = key.replaceAll("<[^>]+>", "");
-		}
-		if (methodSignature.equals(key)) {
-			isReferenced = true;
-			return false;
+		if (constructorBinding != null) {
+			String key = constructorBinding.getKey();
+			if (key != null) {
+				key = key.replaceAll("<[^>]+>", "");
+			}
+			if (methodSignature.equals(key)) {
+				isReferenced = true;
+				return false;
+			}
 		}
 		return super.visit(node);
 	}
@@ -83,13 +85,15 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		String key = methodBinding.getKey();
-		if (key != null) {
-			key = key.replaceAll("<[^>]+>", "");
-		}
-		if (methodSignature.equals(key)) {
-			isReferenced = true;
-			return false;
+		if (methodBinding != null) {
+			String key = methodBinding.getKey();
+			if (key != null) {
+				key = key.replaceAll("<[^>]+>", "");
+			}
+			if (methodSignature.equals(key)) {
+				isReferenced = true;
+				return false;
+			}
 		}
 		return super.visit(node);
 	}

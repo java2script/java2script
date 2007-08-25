@@ -282,7 +282,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if ("open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
+		if (methodBinding != null && "open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
 			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
 				int lastIndexOf1 = buffer.lastIndexOf(";\r\n");
 				if (lastIndexOf1 != -1) {
@@ -325,7 +325,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				return false;
 			}
 		}
-		if ("net.sf.j2s.ajax.junit.AsyncSWT".equals(methodBinding.getDeclaringClass().getQualifiedName())
+		if (methodBinding != null && "net.sf.j2s.ajax.junit.AsyncSWT".equals(methodBinding.getDeclaringClass().getQualifiedName())
 				&& "waitLayout".equals(methodBinding.getName())) {
 			metSWTBlockWhile = true;
 			node.getExpression().accept(this);
