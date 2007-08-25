@@ -71,27 +71,29 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				return false;
 			}
 			IMethodBinding methodBinding = method.resolveBinding();
-			ITypeBinding superclass = methodBinding.getDeclaringClass().getSuperclass();
-			boolean containsSuperPrivateMethod = false; 
-			while (superclass != null) {
-				IMethodBinding[] methods = superclass.getDeclaredMethods();
-				for (int i = 0; i < methods.length; i++) {
-					if (methods[i].getName().equals(methodBinding.getName())
-							&& (methods[i].getModifiers() & Modifier.PRIVATE) != 0) {
-						containsSuperPrivateMethod = true;
+			if(methodBinding != null){
+				ITypeBinding superclass = methodBinding.getDeclaringClass().getSuperclass();
+				boolean containsSuperPrivateMethod = false; 
+				while (superclass != null) {
+					IMethodBinding[] methods = superclass.getDeclaredMethods();
+					for (int i = 0; i < methods.length; i++) {
+						if (methods[i].getName().equals(methodBinding.getName())
+								&& (methods[i].getModifiers() & Modifier.PRIVATE) != 0) {
+							containsSuperPrivateMethod = true;
+							break;
+						}
+					}
+					if (containsSuperPrivateMethod) {
 						break;
 					}
+					superclass = superclass.getSuperclass();
 				}
 				if (containsSuperPrivateMethod) {
-					break;
+					buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
+					buffer.append("if ($private != null) {\r\n");
+					buffer.append("return $private.apply (this, arguments);\r\n");
+					buffer.append("}\r\n");
 				}
-				superclass = superclass.getSuperclass();
-			}
-			if (containsSuperPrivateMethod) {
-				buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
-				buffer.append("if ($private != null) {\r\n");
-				buffer.append("return $private.apply (this, arguments);\r\n");
-				buffer.append("}\r\n");
 			}
 		} else if (parent instanceof Initializer) {
 			Initializer initializer = (Initializer) parent;
