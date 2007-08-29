@@ -1,0 +1,5 @@
+package.prefix=org.eclipse.swt
+package.name=swt
+package.description=Eclipse SWT 3.1 library
+package.id=swt
+

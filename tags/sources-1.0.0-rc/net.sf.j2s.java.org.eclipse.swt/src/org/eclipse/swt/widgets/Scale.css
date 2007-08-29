@@ -1,0 +1,131 @@
+.scale-default {
+	position:absolute;
+}
+.scale-border {
+	border-width:2px;
+	border-style:inset;
+}
+.scale-thumb-pressed {
+	background-color:#e0e0e0;
+}
+.scale-thumb-horizontal {
+	position:absolute;
+	width:10px;
+	height:18px;
+	top:14px;
+	cursor:default;
+	font-size:0;
+	z-index:4;
+	background-color:buttonface;
+	border-width:1px;
+	border-style:outset;
+}
+.scale-line-decoration-horizontal {
+	position:absolute;
+	top:8px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	width:0;
+	height:32px;
+	border-left:1px solid black; 
+	z-index:1;
+}
+.scale-center-block-horizontal {
+	position:absolute;
+	top:12px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:24px;
+	background-color:buttonface;
+	width:100%;
+	z-index:2;
+}
+.scale-line-polar-top {
+	position:absolute;
+	top:23px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:0;
+	width:100%;
+	border-bottom:1px solid gray;
+	z-index:3;
+}
+.scale-line-polar-bottom {
+	position:absolute;
+	top:24px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:0;
+	width:100%;
+	border-top:1px solid white;
+	z-index:3;
+}
+* html .scale-line-polar-top {
+	top:21px;
+}
+* html .scale-line-polar-bottom {
+	top:24px;
+}
+.scale-thumb-vertical {
+	position:absolute;
+	width:18px;
+	height:10px;
+	left:14px;
+	cursor:default;
+	font-size:0;
+	z-index:4;
+	background-color:buttonface;
+	border-width:1px;
+	border-style:outset;
+}
+.scale-line-decoration-vertical {
+	position:absolute;
+	left:8px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	width:32px;
+	height:0;
+	border-bottom:1px solid black; 
+	z-index:1;
+}
+.scale-center-block-vertical {
+	position:absolute;
+	left:12px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	width:24px;
+	background-color:buttonface;
+	height:100%;
+	z-index:2;
+}
+.scale-line-polar-left {
+	position:absolute;
+	left:23px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:100%;
+	width:0;
+	border-right:1px solid gray;
+	z-index:3;
+}
+.scale-line-polar-right {
+	position:absolute;
+	left:24px;
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:100%;
+	width:0;
+	border-left:1px solid white;
+	z-index:3;
+}
+.swt-widgets-scale {
+	width:324px;
+}

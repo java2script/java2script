@@ -1,0 +1,5 @@
+package.prefix=net.sf.j2s.ajax
+package.name=ajax
+package.description=Java2Script AJAX library
+package.id=ajax
+

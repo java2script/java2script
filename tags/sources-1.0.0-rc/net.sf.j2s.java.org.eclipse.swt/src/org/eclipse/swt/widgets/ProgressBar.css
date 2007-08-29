@@ -1,0 +1,26 @@
+.progress-bar-default {
+	position:absolute;
+	margin:0;
+	padding:0;
+	border:1px inset white;
+	overflow:hidden;
+}
+.progress-bar-horizontal {
+	background-color:highlight;
+	width:0;
+	font-size:0;
+	position:absolute;
+	top:1px;
+	left:1px;
+}
+.progress-bar-vertical {
+	background-color:highlight;
+	height:0;
+	font-size:0;
+	position:absolute;
+	bottom:1px;
+	left:1px;
+}
+.swt-widgets-progressbar {
+	width:324px;
+}
