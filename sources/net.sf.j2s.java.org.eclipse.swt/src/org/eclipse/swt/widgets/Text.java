@@ -329,7 +329,6 @@ void hookKeyDown() {
 	};
 }
 
-@Override
 void hookKeyUp() {
 	textHandle.onkeyup = new RunnableCompatibility() {
 		public void run() {
