@@ -1,9 +1,0 @@
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /update/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-#RewriteRule ^net\.sf\.j2s\.(.*)\.jar$ http://j2ssite.ognize.com/plugins/net.sf.j2s.$1.jar [R]
-RewriteRule ^net\.sf\.j2s\.(.*)\.jar$ http://superb-east.dl.sourceforge.net/sourceforge/j2s/net.sf.j2s.$1.jar [R]
-</IfModule>
-
