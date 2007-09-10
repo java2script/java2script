@@ -9,12 +9,13 @@
 	margin:0;
 	padding:0;
 	overflow:hidden;
+	background-color:buttonface;
 }
 .composite-border {
 	white-space:nowrap;
 	border-style:solid;
 	border-width:2px 1px 1px 2px;
-	border-color:black white white black;
+	border-color:#333 #ddd #ddd #333;
 }
 
 .image-icon, .image-n-1, .image-n-2, .image-n-3, .image-n-4, .image-n-5, .image-n-6, .image-n-7, .image-n-8, .image-n-9 {
