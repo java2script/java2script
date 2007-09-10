@@ -1340,6 +1340,18 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
+		var dList = [];
+		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
+			dList[dList.length] = n;
+			n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
+		}
+		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_DECLARED)) != null) {
+			dList[dList.length] = n;
+			n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
+		}
+		for (var i = 0; i < dList.length; i++) {
+			ClazzLoader.updateNode (dList[i]);
+		}
 
 		/*
 		 * It seems ClazzLoader#globalLoaded is seldom overrided.
@@ -1657,7 +1669,8 @@ ClazzLoader.findNextMustClass = function (node, status) {
 				var n = node.musts[i];
 				if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
 						|| ClazzLoader.loadedScripts[n.path] != true)
-						&& !ClazzLoader.isClassDefined (n.name)) {
+						&& (status == ClazzNode.STATUS_DECLARED
+						|| !ClazzLoader.isClassDefined (n.name))) {
 					return n;
 				} else {
 					var nn = ClazzLoader.findNextMustClass (n, status);
@@ -1669,7 +1682,8 @@ ClazzLoader.findNextMustClass = function (node, status) {
 		}
 		if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
 				|| ClazzLoader.loadedScripts[node.path] != true)
-				&& !ClazzLoader.isClassDefined (node.name)) {
+				&& (status == ClazzNode.STATUS_DECLARED
+				|| !ClazzLoader.isClassDefined (node.name))) {
 			return node;
 		}
 	}
@@ -1711,7 +1725,8 @@ ClazzLoader.findNodeNextOptionalClass = function (node, status) {
 		var n = ClazzLoader.searchClassArray (node.musts, rnd, status);
 		if (n != null && (status != ClazzNode.STATUS_KNOWN 
 				|| ClazzLoader.loadedScripts[n.path] != true)
-				&& !ClazzLoader.isClassDefined (n.name)) {
+				&& (status == ClazzNode.STATUS_DECLARED
+				|| !ClazzLoader.isClassDefined (n.name))) {
 			return n;
 		}
 	}
@@ -1720,14 +1735,16 @@ ClazzLoader.findNodeNextOptionalClass = function (node, status) {
 		var n = ClazzLoader.searchClassArray (node.optionals, rnd, status);
 		if (n != null && (status != ClazzNode.STATUS_KNOWN 
 				|| ClazzLoader.loadedScripts[n.path] != true)
-				&& !ClazzLoader.isClassDefined (n.name)) {
+				&& (status == ClazzNode.STATUS_DECLARED
+				|| !ClazzLoader.isClassDefined (n.name))) {
 			return n;
 		}
 	}
 	// search itself
 	if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
 			|| ClazzLoader.loadedScripts[node.path] != true)
-			&& !ClazzLoader.isClassDefined (node.name)) {
+			&& (status == ClazzNode.STATUS_DECLARED
+			|| !ClazzLoader.isClassDefined (node.name))) {
 		return node;
 	}
 	return null;
@@ -1739,7 +1756,8 @@ ClazzLoader.searchClassArray = function (arr, rnd, status) {
 		var n = arr[i];
 		if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
 				|| ClazzLoader.loadedScripts[n.path] != true)
-				&& !ClazzLoader.isClassDefined (n.name)) {
+				&& (status == ClazzNode.STATUS_DECLARED
+				|| !ClazzLoader.isClassDefined (n.name))) {
 			return n;
 		} else {
 			if (n.random == rnd) {
