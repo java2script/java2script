@@ -1283,7 +1283,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 					 * Here when loading entry class, ClassLoader should not call
 					 * the next following loading script. This is because, those
 					 * scripts will try to mark the class as loaded directly and
-					 * then continue to call #optionalLoaded callback method,
+					 * then continue to call #optionalsLoaded callback method,
 					 * which results in an script error!
 					 */
 					ClazzLoader.isLoadingEntryClass = false;
@@ -1351,6 +1351,12 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 		for (var i = 0; i < dList.length; i++) {
 			ClazzLoader.updateNode (dList[i]);
+		}
+		for (var i = 0; i < dList.length; i++) {
+			if (dList[i].optionalsLoaded != null) {
+				dList[i].optionalsLoaded ();
+				dList[i].optionalsLoaded = null;
+			}
 		}
 
 		/*
