@@ -11,8 +11,6 @@
 
 package net.sf.j2s.ajax;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -71,20 +69,9 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 		if (checkXSS(url, serialize, runnable)) {
 			return;
 		}
-		if ("get".equals(method.toLowerCase())) {
-			try {
-				String query = URLEncoder.encode(serialize, "UTF-8");
-				if (url.indexOf('?') != -1) {
-					/* should not come to this branch! */
-					url += "&jzz=" + query;
-				} else {
-					url += "?" + query;
-				}
-				serialize = null;
-			} catch (UnsupportedEncodingException e) {
-				// should never throws such exception!
-				//e.printStackTrace();
-			}
+		String url2 = SimpleRPCRequest.adjustRequestURL(method, url, serialize);
+		if (url2 != url) {
+			serialize = null;
 		}
 		final HttpRequest request = new HttpRequest();
 		request.open(method, url, true);

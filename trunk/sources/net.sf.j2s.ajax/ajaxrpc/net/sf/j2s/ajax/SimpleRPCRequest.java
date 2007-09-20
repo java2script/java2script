@@ -92,21 +92,11 @@ public class SimpleRPCRequest {
 		if (checkXSS(url, serialize, runnable)) {
 			return;
 		}
-		if ("get".equals(method.toLowerCase())) {
-			try {
-				String query = URLEncoder.encode(serialize, "UTF-8");
-				if (url.indexOf('?') != -1) {
-					/* should not come to this branch! */
-					url += "&jzz=" + query;
-				} else {
-					url += "?" + query;
-				}
-				serialize = null;
-			} catch (UnsupportedEncodingException e) {
-				// should never throws such exception!
-				//e.printStackTrace();
-			}
+		String url2 = adjustRequestURL(method, url, serialize);
+		if (url2 != url) {
+			serialize = null;
 		}
+		
 		final HttpRequest request = new HttpRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
@@ -123,6 +113,46 @@ public class SimpleRPCRequest {
 		request.send(serialize);
 	}
 
+	protected static String adjustRequestURL(String method, String url, String serialize) {
+		if ("GET".equals(method.toUpperCase())) {
+			try {
+				String query = URLEncoder.encode(serialize, "UTF-8");
+				if (url.indexOf('?') != -1) {
+					/* should not come to this branch! */
+					url += "&jzz=" + query;
+				} else {
+					url += "?" + query;
+				}
+			} catch (UnsupportedEncodingException e) {
+				// should never throws such exception!
+				//e.printStackTrace();
+			}
+		}
+		return url;
+	}
+	
+	/**
+	 * Check that whether it is in cross site script mode or not.
+	 * @param url
+	 * @return
+	 * @j2sNative
+if (url != null && (url.indexOf ("http://") == 0
+		|| url.indexOf ("https://") == 0)) {
+	var host = null;
+	var idx = url.indexOf ('/', 9);
+	if (idx != -1) {
+		host = url.substring (url.indexOf ("//") + 2, idx); 
+	} else {
+		host = url.substring (url.indexOf ("//") + 2); 
+	}
+	return (window.location.host != host || window.location.protocol == "file:");
+}
+return false; // ftp ...
+	 */
+	protected static boolean isXSSMode(String url) {
+		return false;
+	}
+	
 	/**
 	 * Check cross site script. Only make senses for JavaScript.
 	 * 
@@ -134,70 +164,60 @@ public class SimpleRPCRequest {
 	protected static boolean checkXSS(String url, String serialize, SimpleRPCRunnable runnable) {
 		/**
 		 * @j2sNative
-if (url != null && (url.indexOf ("http://") == 0
-		|| url.indexOf ("https://") == 0)) {
-	var host = null;
-	var idx = url.indexOf ('/', 9);
-	if (idx != -1) {
-		host = url.substring (url.indexOf ("//") + 2, idx); 
-	} else {
-		host = url.substring (url.indexOf ("//") + 2); 
+if (net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode (url)) {
+	var g = net.sf.j2s.ajax.SimpleRPCRequest;
+	if (g.idSet == null) {
+		g.idSet = new Object ();
 	}
-	if (window.location.host != host || window.location.protocol == "file:") {
-		var g = net.sf.j2s.ajax.SimpleRPCRequest;
-		if (g.idSet == null) {
-			g.idSet = new Object ();
+	var rnd = null;
+	while (true) {
+		var rnd = Math.random () + "0000000.*";
+		rnd = rnd.substring (2, 8);
+		if (g.idSet["o" + rnd] == null) {
+			g.idSet["o" + rnd] = runnable;
+			break;
 		}
-		var rnd = null;
-		while (true) {
-			var rnd = Math.random () + "0000000.*";
-			rnd = rnd.substring (2, 8);
-			if (g.idSet["o" + rnd] == null) {
-				g.idSet["o" + rnd] = runnable;
-				break;
-			}
-		}
-		var limit = 7168; //8192;
-		if (window["script.get.url.limit"] != null) {
-			limit = window["script.get.url.limit"]; 
-		}
-		var ua = navigator.userAgent.toLowerCase ();
-		if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
-			limit = 2048;
-			limit = 2048 - 44; // ;jsessionid=
-		}
-		limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
-		var contents = [];
-		var content = encodeURIComponent(serialize);
-		if (content.length > limit) {
-			parts = Math.ceil (content.length / limit);
-			var lastEnd = 0;
-			for (var i = 0; i < parts; i++) {
-				var end = (i + 1) * limit;
-				if (end > content.length) {
-					end = content.length;
-				} else {
-					for (var j = 0; j < 3; j++) {
-						var ch = content.charAt (end - j);
-						if (ch == '%') {
-							end -= j;
-							break;
-						}
+	}
+	var limit = 7168; //8192;
+	if (window["script.get.url.limit"] != null) {
+		limit = window["script.get.url.limit"]; 
+	}
+	var ua = navigator.userAgent.toLowerCase ();
+	if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
+		limit = 2048;
+		limit = 2048 - 44; // ;jsessionid=
+	}
+	limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
+	var contents = [];
+	var content = encodeURIComponent(serialize);
+	if (content.length > limit) {
+		parts = Math.ceil (content.length / limit);
+		var lastEnd = 0;
+		for (var i = 0; i < parts; i++) {
+			var end = (i + 1) * limit;
+			if (end > content.length) {
+				end = content.length;
+			} else {
+				for (var j = 0; j < 3; j++) {
+					var ch = content.charAt (end - j);
+					if (ch == '%') {
+						end -= j;
+						break;
 					}
 				}
-				contents[i] = content.substring (lastEnd, end);
-				lastEnd = end; 
 			}
-		} else {
-			contents[0] = content;
+			contents[i] = content.substring (lastEnd, end);
+			lastEnd = end; 
 		}
-		g.idSet["x" + rnd] = contents;
-		// Only send the first request, later server return "continue", and client will get
-		// the session id and continue later requests.
-		net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
-		contents[0] = null;
-		return true; // cross site script!
+	} else {
+		contents[0] = content;
 	}
+	g.idSet["x" + rnd] = contents;
+	// Only send the first request, later server return "continue", and client will get
+	// the session id and continue later requests.
+	net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
+	contents[0] = null;
+	return true; // cross site script!
 }
 		 */ { }
 		 return false;
@@ -284,23 +304,23 @@ if (response != null && ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1)
 		if (response == "continue") {
 			/**
 			 * @j2sNative
-			 * var g = net.sf.j2s.ajax.SimpleRPCRequest;
-			 * if (session != null){
-			 * 	g.idSet["s" + nameID] = session;
-			 * }
-			 * var xcontent = g.idSet["x" + nameID]; 
-			 * if (xcontent != null) {
-			 * 	//The following codes may be modified to send out requests one by one.  
-			 * 	if (xcontent != null) {
-			 * 		for (var i = 0; i < xcontent.length; i++) {
-			 * 			if (xcontent[i] != null) {
-			 * 				g.callByScript(nameID, xcontent.length, i, xcontent[i]);
-			 * 				xcontent[i] = null;
-			 * 			}
-			 * 		}  
-			 * 		g.idSet["x" + nameID] = null;
-			 * 	}
-			 * }
+var g = net.sf.j2s.ajax.SimpleRPCRequest;
+if (session != null){
+	g.idSet["s" + nameID] = session;
+}
+var xcontent = g.idSet["x" + nameID]; 
+if (xcontent != null) {
+	//The following codes may be modified to send out requests one by one.  
+	if (xcontent != null) {
+		for (var i = 0; i < xcontent.length; i++) {
+			if (xcontent[i] != null) {
+				g.callByScript(nameID, xcontent.length, i, xcontent[i]);
+				xcontent[i] = null;
+			}
+		}  
+		g.idSet["x" + nameID] = null;
+	}
+}
 			 */ {}
 			return;
 		}

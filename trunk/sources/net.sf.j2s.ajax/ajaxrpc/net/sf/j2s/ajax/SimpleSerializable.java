@@ -471,13 +471,20 @@ if (s == null) {
 	 * @return whether given string is deserialized as expected or not
 	 * 
 	 * @j2sNative
+var start = 0;
+if (arguments.length == 2) {
+	start = arguments[1];
+}
 var baseChar = 'B'.charCodeAt (0);
-if (str == null) return false;
-var length = str.length;
-if (length <= 7 || str.indexOf ("WLL") != 0) return false;
-var index = str.indexOf('#');
+if (str == null || start < 0) return false;
+var length = str.length - start;
+if (length <= 7 || str.substring(start, start + 3) != "WLL") return false;
+var index = str.indexOf('#', start);
 if (index == -1) return false;
 index++;
+if (index >= length + start) return false; // may be empty string!
+
+var size = 0;
 var nextCharCode = str.charCodeAt(index);
 if (nextCharCode >= 48 && nextCharCode <= 57) {
 	var last = index;
@@ -485,26 +492,25 @@ if (nextCharCode >= 48 && nextCharCode <= 57) {
 	if (index == -1) return false;
 	var sizeStr = str.substring(last + 1, index);
 	sizeStr = sizeStr.replace(/^0+/, '');
-	var size = 0;
 	if (sizeStr.length != 0) {
 		try {
 			size = parseInt(sizeStr);
 		} catch (e) { }
 	}
 	index++;
-	if (size == 0 || size > length - index) return false; 
+	if (size == 0 || size > length + start - index) return false; 
 }
 
 var fieldMap = [];
 var fields = this.getClass ().declared$Fields;
-if (fields == null) return;
+if (fields == null) return false;
 for (var i = 0; i < fields.length; i++) {
 	var field = fields[i];
 	var name = field.name;
 	fieldMap[name] = true;
 }
 var end = index + size;
-while (index < length && index < end) {
+while (index < start + length && index < end) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
 	if (l1 < 0) return true;
@@ -621,15 +627,27 @@ while (index < length && index < end) {
 }
 return true;
 	 */
-	public boolean deserialize(String str) {
+	public boolean deserialize(final String str) {
+		return deserialize(str, 0);
+	}
+	
+	/**
+	 * 
+	 * @param str
+	 * @param start
+	 * @return
+	 * 
+	 * @j2sIgnore
+	 */
+	public boolean deserialize(final String str, int start) {
 		char baseChar = 'B';
-		if (str == null) return false;
-		int length = str.length();
-		if (length <= 7 || !str.startsWith("WLL")) return false; // Should throw exception!
-		int index = str.indexOf('#');
+		if (str == null || start < 0) return false;
+		int length = str.length() - start;
+		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return false; // Should throw exception!
+		int index = str.indexOf('#', start);
 		if (index == -1) return false; // Should throw exception!
 		index++;
-		if (index >= length) return false; // may be empty string!
+		if (index >= length + start) return false; // may be empty string!
 		
 		int size = 0;
 		char nextChar = str.charAt(index);
@@ -649,7 +667,7 @@ return true;
 			}
 			index++;
 			// may be empty string or not enough string!
-			if (size == 0 || size > length - index) return false; 
+			if (size == 0 || size > length + start - index) return false; 
 		}
 		
 		Map fieldMap = new HashMap();
@@ -674,7 +692,7 @@ return true;
 			}
 		}
 		int end = index + size;
-		while (index < length && index < end) {
+		while (index < length + start && index < end) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
 			if (l1 < 0) return true;
@@ -1053,12 +1071,16 @@ return true;
 	 * specified class name is invalid, null will be returned.
 	 * 
 	 * @j2sNative
-if (str == null) return null;
-var length = str.length;
-if (length <= 7 || !str.startsWith("WLL")) return null;
-var index = str.indexOf('#');
+var start = 0;
+if (arguments.length == 2) {
+	start = arguments[1];
+}
+if (str == null || start < 0) return null;
+var length = str.length - start;
+if (length <= 7 || str.substring(start, start + 3) != "WLL") return null;
+var index = str.indexOf('#', start);
 if (index == -1) return null;
-var clazzName = str.substring(6, index);
+var clazzName = str.substring(start + 6, index);
 clazzName = clazzName.replace (/\$/g, '.');
 var runnableClass = null;
 if (Clazz.isClassDefined (clazzName)) {
@@ -1074,7 +1096,21 @@ if (runnableClass != null) {
 return null;
 	 */
 	public static SimpleSerializable parseInstance(String str) {
-		return parseInstance(str, null);
+		return parseInstance(str, 0, null);
+	}
+	
+	/**
+	 * Get SimpleSerializable instance according to the given string, 
+	 * starting from the given index. 
+	 * 
+	 * @param str
+	 * @param start
+	 * @return
+	 * 
+	 * @j2sIgnore Already implemented in previous method!
+	 */
+	public static SimpleSerializable parseInstance(String str, int start) {
+		return parseInstance(str, start, null);
 	}
 	
 	/**
@@ -1088,12 +1124,26 @@ return null;
 	 * @j2sIgnore Only public to Java!
 	 */
 	public static SimpleSerializable parseInstance(String str, SimpleFilter filter) {
-		if (str == null) return null;
-		int length = str.length();
-		if (length <= 7 || !str.startsWith("WLL")) return null;
-		int index = str.indexOf('#');
+		return parseInstance(str, 0, filter);
+	}
+	
+	/**
+	 * Get SimpleSerializable instance according to the given string starting from
+	 * the given index and the filter. 
+	 * 
+	 * @param str
+	 * @param filter
+	 * @return
+	 * 
+	 * @j2sIgnore Only public to Java!
+	 */
+	public static SimpleSerializable parseInstance(String str, int start, SimpleFilter filter) {
+		if (str == null || start < 0) return null;
+		int length = str.length() - start;
+		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return null;
+		int index = str.indexOf('#', start);
 		if (index == -1) return null;
-		String clazzName = str.substring(6, index);
+		String clazzName = str.substring(start + 6, index);
 		if (filter != null) {
 			if (!filter.accept(clazzName)) return null;
 		}

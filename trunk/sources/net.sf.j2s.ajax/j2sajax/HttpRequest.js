@@ -1,6 +1,7 @@
 Clazz.declarePackage ("net.sf.j2s.ajax");
 c$ = Clazz.decorateAsClass (function () {
 	this.transport = null;
+	this.xssErrorHandler = null;
 	if (window.XMLHttpRequest) {
 		this.transport = new XMLHttpRequest();
 	} else {
@@ -27,6 +28,7 @@ c$.prototype.getStatusText = function () {
 	return this.transport.statusText;
 };
 c$.prototype.registerOnReadyStateChange = function (handler) {
+	this.xssErrorHandler = handler;
 	this.transport.onreadystatechange = (function (transport, handler) {
 		return function () {
 			var state = transport.readyState;
@@ -91,5 +93,14 @@ c$.prototype.send = function () {
 };
 */
 c$.prototype.send = function (str) {
-	this.transport.send (str);
+	try {
+		this.transport.send (str);
+	} catch (e) {
+		// may be cross-domains exceptions
+		this.transport.onreadystatechange = function () {};
+		if (this.xssErrorHandler != null) {
+			this.xssErrorHandler.onLoaded ();
+		}
+		this.xssErrorHandler = null;
+	}
 };
