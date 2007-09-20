@@ -188,6 +188,10 @@ sm.removeShellItem = function (shell) {
 			break;
 		}
 	}
+	var smStyle = this.topbarContainerEl.style;
+	if (smStyle.display == "block" && shell.getMaximized()) {
+		smStyle.display == "none";
+	}
 };
 sm.syncItems = function () {
 	var delta = 0;
