@@ -3923,6 +3923,10 @@ protected Control[] _getChildren() {
 	return new Control[0];
 }
 
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 ///**
 // * @j2sNative
 // * this.tbody.innerHTML = this.itemsStr.join('');

@@ -1655,6 +1655,10 @@ public void showSelection () {
 	*/
 }
 
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 /*
 int widgetStyle () {
 	int bits = super.widgetStyle () | OS.LBS_NOTIFY | OS.LBS_NOINTEGRALHEIGHT;

@@ -1517,6 +1517,9 @@ public void setBounds(int x, int y, int width, int height) {
 		browserHandle.style.height = (height - 4 > 0 ? height - 4 : 0) + "px";
 	}
 }
-	
-	
+
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 }

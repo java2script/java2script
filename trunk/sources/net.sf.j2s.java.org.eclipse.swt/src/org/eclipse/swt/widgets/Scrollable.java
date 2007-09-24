@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 
 /**
@@ -125,7 +126,14 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	 * TODO: implement the computeTrim!
 	 */
 	int border = getBorderWidth();
-	return new Rectangle (x - border, y - border, width + border * 2, height + border * 2);
+	Rectangle rect = new Rectangle (x - border, y - border, width + border * 2, height + border * 2);
+	if (horizontalBar != null) rect.height += OS.getScrollBarHeight();
+	if (verticalBar != null) rect.width += OS.getScrollBarWidth();
+	return rect;
+}
+
+protected boolean useNativeScrollBar() {
+	return false;
 }
 
 ScrollBar createScrollBar (int type) {

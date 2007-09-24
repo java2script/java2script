@@ -7993,4 +7993,9 @@ void wordWrapResize(int oldClientAreaWidth) {
 	// word wrap may have changed on one of the visible lines
     super.redraw();
 }
+
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 }

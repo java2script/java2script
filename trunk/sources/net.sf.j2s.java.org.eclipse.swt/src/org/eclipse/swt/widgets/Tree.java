@@ -3356,6 +3356,10 @@ void updateScrollBar () {
 	*/
 }
 
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 /*
 int widgetStyle () {
 	int bits = super.widgetStyle () | OS.TVS_SHOWSELALWAYS | OS.TVS_LINESATROOT | OS.TVS_HASBUTTONS;
