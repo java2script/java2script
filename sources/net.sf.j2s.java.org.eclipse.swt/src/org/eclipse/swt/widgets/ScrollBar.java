@@ -16,7 +16,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.document;
 
 /**
  * Instances of this class are selectable user interface
@@ -87,7 +91,19 @@ import org.eclipse.swt.internal.xhtml.Element;
 
 public class ScrollBar extends Widget {
 	Scrollable parent;
+	
 	int increment, pageIncrement;
+	
+	int minimum;
+	int maximum;
+	int thumb;
+	int selection;
+
+	int size;
+	
+	Element outerHandle;
+	Element sbHandle;
+	Element innerHandle;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -183,6 +199,148 @@ void createWidget () {
 	* override the initial values provided by the
 	* list widget.
 	*/
+	minimum = 0;
+	maximum = 100;
+	thumb = 10;
+	selection = 0;
+	increment = 1;
+	pageIncrement = 10;
+	size = 100;
+	
+	if (!parent.useNativeScrollBar()) {
+		if ((style & SWT.H_SCROLL) != 0) {
+			createHorizontalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
+		} else {
+			createVerticalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
+		}
+		sbHandle.onscroll = new RunnableCompatibility() {
+		
+			public void run() {
+				/*
+				* Send the event because WM_HSCROLL and
+				* WM_VSCROLL are sent from a modal message
+				* loop in Windows that is active when the
+				* user is scrolling.
+				*/
+				Event event = new Event ();
+				event.detail = SWT.NONE;
+				/*
+				switch (code) {
+					case OS.SB_THUMBPOSITION:	event.detail = SWT.NONE;  break;
+					case OS.SB_THUMBTRACK:		event.detail = SWT.DRAG;  break;
+					case OS.SB_TOP: 			event.detail = SWT.HOME;  break;
+					case OS.SB_BOTTOM:			event.detail = SWT.END;  break;
+					case OS.SB_LINEDOWN:		event.detail = SWT.ARROW_DOWN;  break;
+					case OS.SB_LINEUP: 			event.detail = SWT.ARROW_UP;  break;
+					case OS.SB_PAGEDOWN:		event.detail = SWT.PAGE_DOWN;  break;
+					case OS.SB_PAGEUP:			event.detail = SWT.PAGE_UP;  break;
+				}
+				*/
+				sendEvent (SWT.Selection, event);
+			}
+		
+		};
+	}
+}
+
+
+protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sbInnerHeight) {
+	outerHandle = document.createElement("DIV");
+	parent.appendChild(outerHandle);
+	CSSStyle style = outerHandle.style;
+	style.position = "absolute";
+	style.margin = "0";
+	style.padding = "0";
+	style.borderStyle = "none";
+	style.overflow = "hidden";
+	int sbWidth = OS.getScrollBarWidth();
+	style.width = sbWidth + "px";
+	style.height = sbOuterHeight + "px";
+	
+	sbHandle = document.createElement("DIV");
+	sbHandle.style.backgroundColor = "blue";
+	sbHandle.style.overflow = "auto";
+	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-y:scroll;";
+	
+	if (OS.isIE) {
+		sbHandle.style.width = (sbWidth + 1) + "px";
+		sbHandle.style.marginLeft = "-1px";
+	} else {
+		sbHandle.style.width = sbWidth + "px";
+	}
+	sbHandle.style.height = sbOuterHeight + "px";
+	outerHandle.appendChild(sbHandle);
+	
+	innerHandle = document.createElement("DIV");
+	innerHandle.style.height = sbInnerHeight + "px";
+	sbHandle.appendChild(innerHandle);
+}
+
+
+protected void createHorizontalScrollBar(Element parent, int sbOuterWidth, int sbInnerWidth) {
+	outerHandle = document.createElement("DIV");
+	parent.appendChild(outerHandle);
+	CSSStyle style = outerHandle.style;
+	style.position = "absolute";
+	style.margin = "0";
+	style.padding = "0";
+	style.borderStyle = "none";
+	style.overflow = "hidden";
+	style.width = sbOuterWidth + "px";
+	int sbHeight = OS.getScrollBarHeight();
+	style.height = sbHeight + "px";
+	
+	sbHandle = document.createElement("DIV");
+	sbHandle.style.backgroundColor = "blue";
+	sbHandle.style.overflow = "auto";
+	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-x:scroll;overflow-y:hidden;";
+	
+	if (OS.isIE || OS.isOpera) {
+		sbHandle.style.height = (sbHeight + 1) + "px";
+		sbHandle.style.marginTop = "-1px";
+	} else {
+		sbHandle.style.height = sbHeight + "px";
+	}
+	sbHandle.style.width = sbOuterWidth + "px";
+	outerHandle.appendChild(sbHandle);
+	
+	innerHandle = document.createElement("DIV");
+	innerHandle.style.width = sbInnerWidth + "px";
+	if (OS.isOpera) {
+		innerHandle.style.lineHeight = "1px";
+		innerHandle.style.fontSize = "1px";
+		innerHandle.style.height = "1px";
+	}
+	sbHandle.appendChild(innerHandle);
+}
+
+protected void updateSizeBinding(int size) {
+	this.size = size;
+	if ((style & SWT.H_SCROLL) != 0) {
+		outerHandle.style.width = (size > 0 ? size : 0) + "px";
+		sbHandle.style.width = (size > 0 ? size : 0) + "px";
+	} else {
+		outerHandle.style.height = (size > 0 ? size : 0) + "px";
+		sbHandle.style.height = (size > 0 ? size : 0) + "px";
+	}
+	// update scrollbar size binding.
+	updateScrollBar();
+}
+
+void updateScrollBar() {
+	int innerSize = Math.round(size * (maximum - minimum) / thumb);
+	if ((style & SWT.V_SCROLL) != 0) {
+		innerHandle.style.height = innerSize + "px";
+	} else {
+		innerHandle.style.width = innerSize + "px";
+	}
+	if (maximum != minimum) { 
+		if ((style & SWT.H_SCROLL) != 0) {
+			sbHandle.scrollLeft = (this.selection - this.minimum) * sbHandle.scrollWidth / (maximum - minimum);
+		} else {
+			sbHandle.scrollTop = (this.selection - this.minimum) * sbHandle.scrollHeight / (maximum - minimum);
+		}
+	}
 }
 
 public void dispose () {
@@ -203,6 +361,18 @@ public void dispose () {
 		OS.ShowScrollBar (hwnd, type, false);
 	}
 	*/
+	if (innerHandle != null) {
+		OS.destroyHandle(innerHandle);
+		innerHandle = null;
+	}
+	if (sbHandle != null) {
+		OS.destroyHandle(sbHandle);
+		sbHandle = null;
+	}
+	if (outerHandle != null) {
+		OS.destroyHandle(outerHandle);
+		outerHandle = null;
+	}
 }
 
 /*
@@ -226,7 +396,8 @@ Rectangle getBounds () {
 	}
 	return new Rectangle (x, y, width, height);
 	*/
-	return new Rectangle (0, 0, 0, 0);
+	//return new Rectangle (0, 0, 0, 0);
+	return new Rectangle (0, 0, OS.getContainerWidth(outerHandle), OS.getContainerHeight(outerHandle));
 }
 
 /**
@@ -287,7 +458,7 @@ public int getMaximum () {
 	OS.GetScrollInfo (hwnd, type, info);
 	return info.nMax;
 	*/
-	return 100;
+	return maximum;
 }
 
 /**
@@ -311,7 +482,7 @@ public int getMinimum () {
 	OS.GetScrollInfo (hwnd, type, info);
 	return info.nMin;
 	*/
-	return 0;
+	return minimum;
 }
 
 /**
@@ -367,7 +538,14 @@ public int getSelection () {
 	OS.GetScrollInfo (hwnd, type, info);
 	return info.nPos;
 	*/
-	return 0;
+	if (maximum != minimum) { 
+		if ((style & SWT.H_SCROLL) != 0) {
+			this.selection = minimum + sbHandle.scrollLeft * (maximum - minimum) / sbHandle.scrollWidth;
+		} else {
+			this.selection = minimum + sbHandle.scrollTop * (maximum - minimum) / sbHandle.scrollHeight;
+		}
+	}
+	return selection;
 }
 
 /**
@@ -389,17 +567,20 @@ public Point getSize () {
 	/*
 	RECT rect = new RECT ();
 	OS.GetClientRect (parent.scrolledHandle (), rect);
+	*/
 	int width, height;
 	if ((style & SWT.HORIZONTAL) != 0) {
-		width = rect.right - rect.left;
-		height = OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+//		width = rect.right - rect.left;
+//		height = OS.GetSystemMetrics (OS.SM_CYHSCROLL);
+		width = size;
+		height = OS.getScrollBarHeight();
 	} else {
-		width = OS.GetSystemMetrics (OS.SM_CXVSCROLL);
-		height = rect.bottom - rect.top;
+//		width = OS.GetSystemMetrics (OS.SM_CXVSCROLL);
+//		height = rect.bottom - rect.top;
+		width = OS.getScrollBarWidth();
+		height = size;
 	}
 	return new Point (width, height);
-	*/
-	return new Point (0, 0);
 }
 
 /**
@@ -427,7 +608,7 @@ public int getThumb () {
 	if (info.nPage != 0) --info.nPage;
 	return info.nPage;
 	*/
-	return 10;
+	return thumb;
 }
 
 /**
@@ -624,6 +805,12 @@ public void setMaximum (int value) {
 	info.nMax = value;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	if (value < minimum) return ;
+	maximum = value;
+	if (selection > maximum) {
+		selection = maximum;
+	}
+	updateScrollBar();
 }
 
 /**
@@ -652,6 +839,12 @@ public void setMinimum (int value) {
 	info.nMin = value;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	if (value > maximum) return;
+	minimum = value;
+	if (selection < minimum) {
+		selection = minimum;
+	}
+	updateScrollBar();
 }
 
 /**
@@ -760,6 +953,15 @@ public void setSelection (int selection) {
 	info.nPos = selection;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	if (selection < 0) return;
+	if (selection < minimum) {
+		this.selection = minimum; 
+	} else if (selection > maximum - thumb) {
+		this.selection = maximum - thumb;
+	} else {
+		this.selection = selection;
+	}
+	updateScrollBar();
 }
 
 /**
@@ -789,6 +991,8 @@ public void setThumb (int value) {
 	if (info.nPage != 0) info.nPage++;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	thumb = value;
+	updateScrollBar();
 }
 
 /**
@@ -833,6 +1037,17 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
 	int hwnd = hwndScrollBar (), type = scrollBarType ();
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	
+	this.minimum = minimum;
+	this.maximum = maximum;
+	this.thumb = thumb;
+	
+	if (this.selection < this.minimum) {
+		this.selection = this.minimum;
+	} else if (this.selection > this.maximum) {
+		this.selection = this.maximum;
+	}
+	updateScrollBar();
 }
 
 /**

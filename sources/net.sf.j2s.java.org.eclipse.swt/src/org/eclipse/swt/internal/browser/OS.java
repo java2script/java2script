@@ -160,6 +160,39 @@ public class OS {
 		}
 	}
 
+
+	private static int wScrollBar = -1;
+	private static int hScrollBar = -1;
+	
+	private static void checkScrollBar() {
+		Element el = document.createElement("DIV");
+		CSSStyle s = el.style;
+		s.position = "absolute";
+		s.left = "-4000px";
+		s.top = "-1000px";
+		s.overflow = "scroll";
+		s.width = "324px";
+		s.height = "324px";
+		document.body.appendChild(el);
+		wScrollBar = el.offsetWidth - el.clientWidth;
+		hScrollBar = el.offsetHeight - el.clientHeight;
+		document.body.removeChild(el);
+	}
+	
+	public static int getScrollBarWidth() {
+		if (wScrollBar == -1) {
+			checkScrollBar();
+		}
+		return wScrollBar;
+	}
+	
+	public static int getScrollBarHeight() {
+		if (hScrollBar == -1) {
+			checkScrollBar();
+		}
+		return hScrollBar;
+	}
+	
 	public static int getContainerWidth(Object container) {
 		Element el = (Element) container;
 		return Math.max(el.offsetWidth, Math.max(el.clientWidth, el.scrollWidth));

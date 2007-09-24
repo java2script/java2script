@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
-import java.util.Date;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -995,6 +995,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		cx -= 4;
 		cy -= 4;
 	}
+	
 //	if (!isLayoutDeferred()) {
 //		setLayoutDeferred(true);
 //	}
@@ -1011,8 +1012,28 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	el.style.top = Y + "px";
 	el.style.width = (cx > 0 ? cx : 0) + "px";
 	el.style.height = (cy > 0 ? cy : 0) + "px";
+	
+	updateScrollBar(cx, cy);
 	return true;
 //	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+}
+
+protected void updateScrollBar(int cx, int cy) {
+	int sbw = cx, sbh = cy;
+	if (verticalBar != null) { //if ((style & SWT.V_SCROLL) != 0) {
+		sbw -= OS.getScrollBarWidth();
+	}
+	if (horizontalBar != null) { //if ((style & SWT.H_SCROLL) != 0) {
+		sbh -= OS.getScrollBarHeight();
+	}
+	if (verticalBar != null) { //if ((style & SWT.V_SCROLL) != 0) {
+		verticalBar.outerHandle.style.left = ((sbw > 0 ? sbw : 0)) + "px";
+		verticalBar.updateSizeBinding(sbh);
+	}
+	if (horizontalBar != null) { //if ((style & SWT.H_SCROLL) != 0) {
+		horizontalBar.outerHandle.style.top = ((sbh > 0 ? sbh : 0)) + "px";
+		horizontalBar.updateSizeBinding(sbw);
+	}
 }
 
 void updateLayout (boolean resize, boolean all) {

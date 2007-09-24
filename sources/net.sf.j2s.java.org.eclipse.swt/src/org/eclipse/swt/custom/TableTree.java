@@ -811,4 +811,9 @@ public void showSelection () {
 	checkWidget();
 	table.showSelection();
 }
+
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 }

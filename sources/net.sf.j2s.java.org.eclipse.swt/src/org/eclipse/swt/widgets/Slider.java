@@ -946,9 +946,6 @@ public void setValues (int selection, int minimum, int maximum, int thumb, int i
 	SetScrollInfo (handle, OS.SB_CTL, info, true);
 	*/
 	
-	this.increment = increment;
-	this.pageIncrement = pageIncrement;
-	
 	this.minimum = minimum;
 	this.maximum = maximum;
 	this.thumb = thumb;

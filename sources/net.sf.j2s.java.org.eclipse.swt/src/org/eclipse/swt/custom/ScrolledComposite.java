@@ -513,4 +513,9 @@ protected void createHandle () {
 //	};
 
 }
+
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 }

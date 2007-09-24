@@ -2481,6 +2481,10 @@ String verifyText (String string, int start, int end, Event keyEvent) {
 	return event.text;
 }
 
+protected boolean useNativeScrollBar() {
+	return true;
+}
+
 /*
 int wcsToMbcsPos (int wcsPos) {
 	if (wcsPos <= 0) return 0;
