@@ -83,8 +83,8 @@ public class DNDUtils {
 				oThis.startX, oThis.startY);
 		if (oThis.status == 0) {
 			oThis.status = 1;
-			oThis.startX = dndEvt.startX = evt.x;
-			oThis.startY = dndEvt.startY = evt.y;
+			dndEvt.startX = oThis.startX;
+			dndEvt.startY = oThis.startY;
 			dndEvt.mouseMoveTo (evt.x, evt.y);
 			oThis.notifyDragBegan (dndEvt);
 		}
@@ -99,6 +99,8 @@ public class DNDUtils {
 		}
 		document.onselectstart = DNDUtils.onselectstart;
 		evt.target.onselectstart = DNDUtils.onselectstart;
+		oThis.startX = evt.x;
+		oThis.startY = evt.y;
 		document.onmousemove = DNDUtils.bindFunctionWith (DNDUtils.onmousemove, oThis);
 		document.onkeyup = DNDUtils.bindFunctionWith (DNDUtils.onkeyup, oThis);
 		document.onmouseup = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, oThis); //oThis.element.onmouseup;
