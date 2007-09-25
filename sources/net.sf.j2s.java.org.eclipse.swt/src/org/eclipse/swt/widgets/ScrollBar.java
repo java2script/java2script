@@ -253,6 +253,7 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 	style.padding = "0";
 	style.borderStyle = "none";
 	style.overflow = "hidden";
+	style.zIndex = "1";
 	int sbWidth = OS.getScrollBarWidth();
 	style.width = sbWidth + "px";
 	style.height = sbOuterHeight + "px";
@@ -286,6 +287,7 @@ protected void createHorizontalScrollBar(Element parent, int sbOuterWidth, int s
 	style.padding = "0";
 	style.borderStyle = "none";
 	style.overflow = "hidden";
+	style.zIndex = "1";
 	style.width = sbOuterWidth + "px";
 	int sbHeight = OS.getScrollBarHeight();
 	style.height = sbHeight + "px";
@@ -776,6 +778,7 @@ public void setEnabled (boolean enabled) {
 public void setIncrement (int value) {
 	checkWidget();
 	if (value < 1) return;
+	if (increment == value) return;
 	increment = value;
 }
 
@@ -805,7 +808,8 @@ public void setMaximum (int value) {
 	info.nMax = value;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
-	if (value < minimum) return ;
+	if (value < minimum) return;
+	if (maximum == value) return;
 	maximum = value;
 	if (selection > maximum) {
 		selection = maximum;
@@ -840,6 +844,7 @@ public void setMinimum (int value) {
 	SetScrollInfo (hwnd, type, info, true);
 	*/
 	if (value > maximum) return;
+	if (minimum == value) return;
 	minimum = value;
 	if (selection < minimum) {
 		selection = minimum;
@@ -954,6 +959,7 @@ public void setSelection (int selection) {
 	SetScrollInfo (hwnd, type, info, true);
 	*/
 	if (selection < 0) return;
+	if (this.selection == selection) return;
 	if (selection < minimum) {
 		this.selection = minimum; 
 	} else if (selection > maximum - thumb) {
@@ -991,6 +997,7 @@ public void setThumb (int value) {
 	if (info.nPage != 0) info.nPage++;
 	SetScrollInfo (hwnd, type, info, true);
 	*/
+	if (thumb == value) return;
 	thumb = value;
 	updateScrollBar();
 }

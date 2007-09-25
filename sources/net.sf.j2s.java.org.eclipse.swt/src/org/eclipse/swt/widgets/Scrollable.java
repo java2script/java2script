@@ -189,6 +189,12 @@ public Rectangle getClientArea () {
 //	}
 	w = width;
 	h = height;
+	if (verticalBar != null) { //if ((style & SWT.V_SCROLL) != 0) {
+		w -= OS.getScrollBarWidth();
+	}
+	if (horizontalBar != null) { //if ((style & SWT.H_SCROLL) != 0) {
+		h -= OS.getScrollBarHeight();
+	}
 	if (w < 0) {
 		w = 64;
 	}

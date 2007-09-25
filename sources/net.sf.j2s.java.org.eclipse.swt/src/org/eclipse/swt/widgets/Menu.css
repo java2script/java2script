@@ -1,6 +1,8 @@
 .menu-default {
 	position:absolute;
-	border:1px outset white;
+	border-width:2px;
+	border-style:groove solid solid groove;
+	border-color:white gray gray white;
 	background-color:menu;
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;

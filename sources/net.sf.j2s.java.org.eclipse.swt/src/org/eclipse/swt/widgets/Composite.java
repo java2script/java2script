@@ -109,7 +109,7 @@ protected Control [] _getChildren () {
 	/* 
 	 * TODO: search the DOM and filter out the children
 	 */
-	int count = children.length; //handle.childNodes.length;
+	int count = children != null ? children.length : 0; //handle.childNodes.length;
 	//Control [] children = new Control [0];
 	int index = 0;
 	Control [] newChildren = new Control [0];
