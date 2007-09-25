@@ -7,6 +7,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -73,8 +74,8 @@ public class TestScrollBar extends Shell {
 		
 		final Composite composite_2 = new Composite(composite, SWT.H_SCROLL | SWT.V_SCROLL);
 		composite_2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		composite_2.setLayout(new GridLayout());
-		
+		composite_2.setLayout(new FillLayout());
+		new Button(composite_2, SWT.PUSH).setText("Hello World");
 		composite_2.getVerticalBar().addSelectionListener(new SelectionAdapter() {
 		
 			@Override
