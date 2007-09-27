@@ -137,6 +137,7 @@ protected boolean useNativeScrollBar() {
 }
 
 ScrollBar createScrollBar (int type) {
+	if (useNativeScrollBar()) return null;
 	ScrollBar bar = new ScrollBar (this, type);
 	if ((state & CANVAS) != 0) {
 		bar.setMaximum (100);

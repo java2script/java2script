@@ -408,6 +408,17 @@ static int checkStyle (int style) {
 	return bits;
 }
 
+public Point computeSize(int wHint, int hHint, boolean changed) {
+	Point size = super.computeSize(wHint, hHint, changed);
+	if (size.x < minWidth) {
+		size.x = minWidth;
+	}
+	if (size.y < minHeight) {
+		size.y = minHeight;
+	}
+	return size;
+}
+
 /**
  * Adds the listener to the collection of listeners who will
  * be notified when operations are performed on the receiver,

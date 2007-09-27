@@ -578,13 +578,13 @@ protected void createHandle() {
 		window.defaultWindowWidth = "768";
 	}
 	if (window.defaultWindowHeight == null) {
-		window.defaultWindowHeight = "557";
+		window.defaultWindowHeight = "558";
 	}
 	width = Integer.parseInt(window.defaultWindowWidth);
 	height = Integer.parseInt(window.defaultWindowHeight);
 
 	this.width = 768;
-	this.height = 557;
+	this.height = 558;
 //	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
 //		handle.className += " shell-trim";
 //	}
@@ -690,7 +690,7 @@ void nextWindowLocation(int wHint, int hHint) {
 	/*
 	 * if the user has set the bounds of the shell we should not override it!
 	 */
-	if(boundsSet) {
+	if(locationSet) {
 		return;
 	}
 	
@@ -699,7 +699,7 @@ void nextWindowLocation(int wHint, int hHint) {
 		window.defaultWindowLeft = "64";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
-		if (this.parent == null) num += delta;
+		num += delta;
 		if (num + wHint > getMonitor().clientWidth) {
 			num = delta;
 		}
@@ -709,7 +709,7 @@ void nextWindowLocation(int wHint, int hHint) {
 		window.defaultWindowTop = "64";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowTop);
-		if (this.parent == null) num += delta;
+		num += delta;
 		if (num + hHint > getMonitor().clientHeight) {
 			num = delta;
 		}
@@ -717,10 +717,6 @@ void nextWindowLocation(int wHint, int hHint) {
 	}
 	left = Integer.parseInt(window.defaultWindowLeft);
 	top = Integer.parseInt(window.defaultWindowTop);
-	if (parent != null) {
-		left += delta;
-		top += delta;
-	}
 	left += OS.getFixedBodyOffsetLeft ();
 	top += OS.getFixedBodyOffsetTop ();
 }
@@ -909,7 +905,8 @@ public Rectangle getClientArea () {
 		//h -= 20;
 		h -= OS.getContainerHeight(titleBar);
 		w -= 8;
-		h -= 8;
+		//h -= 8;
+		h -= 5;
 		if ((style & SWT.BORDER) != 0) {
 			w -= 4;
 			h -= 4;
@@ -1124,15 +1121,15 @@ public Point getSize () {
 			return new Point (width, height);
 		}
 	}
-	return super.getSize ();
 	*/
-	Point size = super.getSize();
-	//size.y += 26;
-	size.y += 6;
-	if (titleBar != null) {
-		size.y += OS.getContainerHeight(titleBar);
-	}
-	return size;
+	return super.getSize ();
+//	Point size = super.getSize();
+//	//size.y += 26;
+//	size.y += 6;
+//	if (titleBar != null) {
+//		size.y += OS.getContainerHeight(titleBar);
+//	}
+//	return size;
 }
 
 /**

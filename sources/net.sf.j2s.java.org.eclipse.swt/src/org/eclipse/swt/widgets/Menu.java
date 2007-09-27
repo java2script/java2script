@@ -225,6 +225,9 @@ void _setVisible (boolean visible) {
 		style.zIndex = "1" + window.currentTopZIndex;
 		style.display = "block";
 		int height = OS.getContainerHeight(handle);
+		if (OS.isIE) {
+			handle.style.width = "200px";
+		}
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
 		if (y + height > clientArea.y + clientArea.height) {

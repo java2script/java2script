@@ -192,10 +192,10 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	*/
 	if (text != null) {
 		if ((style & SWT.WRAP) != 0 && wHint != SWT.DEFAULT && hHint == SWT.DEFAULT) {
-			height = OS.getStringStyledWrappedHeight(cachedText, "label-default", handle.style.cssText, wHint);
+			height = OS.getStringStyledWrappedHeight(cachedText, "link-default", handle.style.cssText, wHint);
 		} else {
 			if (!textSizeCached || changed) {
-				Point cssSize = OS.getStringStyledSize(cachedText, "label-default", handle.style.cssText);
+				Point cssSize = OS.getStringStyledSize(cachedText, "link-default", handle.style.cssText);
 				textSizeCached = true;
 				textWidthCached = cssSize.x;
 				textHeightCached = cssSize.y;
