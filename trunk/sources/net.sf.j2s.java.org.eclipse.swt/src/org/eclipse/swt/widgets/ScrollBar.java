@@ -207,24 +207,23 @@ void createWidget () {
 	pageIncrement = 10;
 	size = 100;
 	
-	if (!parent.useNativeScrollBar()) {
-		if ((style & SWT.H_SCROLL) != 0) {
-			createHorizontalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
-		} else {
-			createVerticalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
-		}
-		sbHandle.onscroll = new RunnableCompatibility() {
+	if ((style & SWT.H_SCROLL) != 0) {
+		createHorizontalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
+	} else {
+		createVerticalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
+	}
+	sbHandle.onscroll = new RunnableCompatibility() {
 		
-			public void run() {
-				/*
-				* Send the event because WM_HSCROLL and
-				* WM_VSCROLL are sent from a modal message
-				* loop in Windows that is active when the
-				* user is scrolling.
-				*/
-				Event event = new Event ();
-				event.detail = SWT.NONE;
-				/*
+		public void run() {
+			/*
+			 * Send the event because WM_HSCROLL and
+			 * WM_VSCROLL are sent from a modal message
+			 * loop in Windows that is active when the
+			 * user is scrolling.
+			 */
+			Event event = new Event ();
+			event.detail = SWT.NONE;
+			/*
 				switch (code) {
 					case OS.SB_THUMBPOSITION:	event.detail = SWT.NONE;  break;
 					case OS.SB_THUMBTRACK:		event.detail = SWT.DRAG;  break;
@@ -235,12 +234,11 @@ void createWidget () {
 					case OS.SB_PAGEDOWN:		event.detail = SWT.PAGE_DOWN;  break;
 					case OS.SB_PAGEUP:			event.detail = SWT.PAGE_UP;  break;
 				}
-				*/
-				sendEvent (SWT.Selection, event);
-			}
+			 */
+			sendEvent (SWT.Selection, event);
+		}
 		
-		};
-	}
+	};
 }
 
 

@@ -71,7 +71,7 @@ public abstract class Control extends Widget implements Drawable {
 	protected int height;
 	protected int width;
 	//private int lastLeft, lastTop, lastHeight, lastWidth; 
-	boolean boundsSet = false;
+	boolean locationSet = false;
 /**
  * Prevents uninitialized instances from being created outside the package.
  * @j2sIgnore
@@ -2082,7 +2082,9 @@ void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	/**
 	 * A patch to send bounds to support mirroring features like what Windows have.
 	 */
-	boundsSet = true;
+	if (!locationSet) {
+		locationSet = moved;
+	}
 	int tempX = x;
 	if(parent != null){
 		if((parent.style & SWT.RIGHT_TO_LEFT) != 0){

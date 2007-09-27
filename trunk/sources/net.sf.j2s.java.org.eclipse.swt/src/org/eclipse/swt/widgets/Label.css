@@ -7,6 +7,7 @@
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 	overflow:hidden;
+	background-color:buttonface;
 }
 .label-default span span {
 	text-decoration:underline;
