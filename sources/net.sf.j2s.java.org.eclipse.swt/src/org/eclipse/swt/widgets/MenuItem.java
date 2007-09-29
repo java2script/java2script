@@ -966,6 +966,7 @@ public void setImage (Image image) {
 				handleStyle.backgroundImage = "";
 				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 			} else {
+				if (handleStyle.filter != null) handleStyle.filter = ""; 
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			}
 		}

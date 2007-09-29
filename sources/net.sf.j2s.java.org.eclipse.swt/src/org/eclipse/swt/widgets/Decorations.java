@@ -1446,6 +1446,7 @@ public void setImage (Image image) {
 			iconStyle.backgroundImage = "";
 			iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
+			if (iconStyle.filter != null) iconStyle.filter = ""; 
 			iconStyle.backgroundRepeat = "no-repeat";
 			iconStyle.backgroundPosition = "center center";
 			iconStyle.backgroundImage = "url(\"" + this.image.url + "\")";

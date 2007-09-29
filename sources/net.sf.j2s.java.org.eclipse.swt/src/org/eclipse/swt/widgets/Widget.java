@@ -1602,6 +1602,7 @@ public void setData (String key, Object value) {
 	Object [] table = null;
 	if ((state & KEYED_DATA) != 0) {
 		table = (Object []) data;
+		if (table == null) return;
 		while (index < table.length) {
 			if (key.equals (table [index])) break;
 			index += 2;
@@ -1609,6 +1610,7 @@ public void setData (String key, Object value) {
 	}
 	if (value != null) {
 		if ((state & KEYED_DATA) != 0) {
+			if (table == null) return;
 			if (index == table.length) {
 				Object [] newTable = new Object [table.length + 2];
 				System.arraycopy (table, 0, newTable, 0, table.length);
@@ -1624,6 +1626,7 @@ public void setData (String key, Object value) {
 		table [index + 1] = value;
 	} else {
 		if ((state & KEYED_DATA) != 0) {
+			if (table == null) return;
 			if (index != table.length) {
 				int length = table.length - 2;
 				if (length == 1) {
