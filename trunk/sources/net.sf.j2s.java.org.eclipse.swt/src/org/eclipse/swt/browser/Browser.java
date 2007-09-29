@@ -1392,15 +1392,19 @@ if (handle.contentWindow != null) {
 	handle.src = "about:blank";
 }
 try {
-	handle.contentWindow.document.write (html);
-	handle.contentWindow.document.close ();
+	var doc = handle.contentWindow.document;
+	doc.open ();
+	doc.write (html);
+	doc.close ();
 } catch (e) {
-	window.setTimeout ((function () {
+	window.setTimeout ((function (handle, html) {
 		return function () {
-			handle.contentWindow.document.write (html);
-			handle.contentWindow.document.close ();
+			var doc = handle.contentWindow.document;
+			doc.open ();
+			doc.write (html);
+			doc.close ();
 		};
-	}) (), 25);
+	}) (handle, html), 25);
 }
  */
 private native void iframeDocumentWrite(Object handle, String html);
