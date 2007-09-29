@@ -963,6 +963,7 @@ public void setImage (Image image) {
 //					imgBackground.style.height = "100%";
 //					imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 //					handle.appendChild(imgBackground);
+				handleStyle.backgroundImage = "";
 				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 			} else {
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";

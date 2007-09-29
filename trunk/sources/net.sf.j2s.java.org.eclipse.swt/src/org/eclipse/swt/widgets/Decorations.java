@@ -1443,6 +1443,7 @@ public void setImage (Image image) {
 //				imgBackground.style.height = "100%";
 //				imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 //				handle.appendChild(imgBackground);
+			iconStyle.backgroundImage = "";
 			iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
 			iconStyle.backgroundRepeat = "no-repeat";
