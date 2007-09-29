@@ -11,7 +11,7 @@
 	background-color:buttonface;
 	border-style:solid solid solid none;
 	border-width:1px;
-	border-height:buttonshadow;
+	border-color:buttonshadow;
 	/*opacity:0.25;
 	filter:Alpha(Opacity=25);*/
 }

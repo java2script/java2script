@@ -225,8 +225,23 @@ void _setVisible (boolean visible) {
 		style.zIndex = "1" + window.currentTopZIndex;
 		style.display = "block";
 		int height = OS.getContainerHeight(handle);
-		if (OS.isIE) {
-			handle.style.width = "200px";
+		if (OS.isIE || OS.isOpera) {
+			int maxWidth = 0;
+			boolean hasImage = false;
+			boolean hasSelection = false;
+			MenuItem[] children = getItems();
+			for (int i = 0; i < children.length; i++) {
+				MenuItem item = children[i];
+				int width = OS.getStringStyledWidth(item.getText(), "menu-item-text", null);
+				if (item.getImage() != null) {
+					hasImage = true;
+				}
+				if ((item.getStyle() & (SWT.CHECK | SWT.RADIO)) != 0) {
+					hasImage = true;
+				}
+				maxWidth = Math.max(maxWidth, width);
+			}
+			handle.style.width = (maxWidth + (hasImage ? 18 : 0) + (hasSelection ? 18 : 0) + 32) + "px";
 		}
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
