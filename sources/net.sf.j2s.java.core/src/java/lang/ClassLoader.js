@@ -1932,7 +1932,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 	if (declaration != null) {
 		node.status = ClazzNode.STATUS_CONTENT_LOADED;
 	}
-	
+
 	var isOptionalsOK = true;
 	if (optionals != null && optionals.length != 0) {
 		ClazzLoader.unwrapArray (optionals);
@@ -2577,9 +2577,9 @@ ClazzLoader.updateHotspot = function () {
 		Clazz.assureInnerClass = ClazzLoader.assureInnerClass;
 	}
 	var args = arguments[0];
-	//if (arguments.length != 1 || arguments[0] == null) {
-	//	args = arguments;
-	//}
+	if (arguments.length != 1 || arguments[0] == null) {
+		args = arguments;
+	}
 	var length = (args.length - 1) / 3;
 	var lastID = 0;
 	/*-# lastUpdated -> lUd #-*/
@@ -2659,21 +2659,8 @@ ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 	if (typeof (script.onreadystatechange) == "undefined") { // W3C
 		script.onload = script.onerror = function () {
 			try {
-				//if (iframeID != null) {
-					if (window.parent == null || window.parent["ClassLoader"] == null) return;
-					window.parent.ClassLoader.lastHotspotScriptLoaded = true;
-					var iframe = window.parent.document.getElementById (iframeID);
-					if (iframe != null) {
-						iframe.parentNode.removeChild (iframe);
-						if (window.parent.ClassLoader.hotspotMonitoringTimeout != null) {
-							window.parent.clearTimeout (window.parent.ClassLoader.hotspotMonitoringTimeout);
-							window.parent.ClassLoader.hotspotMonitoringTimeout = null;
-						}
-					}
-				//	return;
-				//}
-				//ClazzLoader.lastHotspotScriptLoaded = true;
-				//ClazzLoader.removeHotspotScriptNode (this);
+				ClazzLoader.lastHotspotScriptLoaded = true;
+				ClazzLoader.removeHotspotScriptNode (this);
 			} catch (e) {}; // refreshing browser may cause exceptions
 		};
 	} else {
@@ -2681,78 +2668,14 @@ ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 			var state = "" + this.readyState;
 			if (state == "loaded" || state == "complete") {
 				try {
-					//if (iframeID != null) {
-						if (window.parent == null || window.parent["ClassLoader"] == null) return;
-						window.parent.ClassLoader.lastHotspotScriptLoaded = true;
-						var iframe = window.parent.document.getElementById (iframeID);
-						if (iframe != null) {
-							iframe.parentNode.removeChild (iframe);
-							if (window.parent.ClassLoader.hotspotMonitoringTimeout != null) {
-								window.parent.clearTimeout (window.parent.ClassLoader.hotspotMonitoringTimeout);
-								window.parent.ClassLoader.hotspotMonitoringTimeout = null;
-							}
-						}
-					//	return;
-					//}
-					//ClazzLoader.lastHotspotScriptLoaded = true;
-					//ClazzLoader.removeHotspotScriptNode (this);
+					ClazzLoader.lastHotspotScriptLoaded = true;
+					ClazzLoader.removeHotspotScriptNode (this);
 				} catch (e) {}; // refreshing browser may cause exceptions
 			}
 		};
 	}
 	var head = document.getElementsByTagName ("HEAD")[0];
 	head.appendChild (script);
-};
-
-/* private */
-ClazzLoader.iframeDocumentWrite = function (handle, html) {
-	if (handle.contentWindow != null) {
-		handle.contentWindow.location = "about:blank";
-	} else { // Opera
-		handle.src = "about:blank";
-	}
-	try {
-		handle.contentWindow.document.write (html);
-		handle.contentWindow.document.close ();
-	} catch (e) {
-		window.setTimeout ((function () {
-			return function () {
-				handle.contentWindow.document.write (html);
-				handle.contentWindow.document.close ();
-			};
-		}) (), 25);
-	}
-};
-
-/* private */
-ClazzLoader.loadHostspotIFrame = function (hotspotURL) {
-	var iframe = document.createElement ("IFRAME");
-	iframe.style.display = "none";
-	var iframeID = null;
-	do {
-		iframeID = "hotspot-script-" + Math.round (10000000 * Math.random ());
-	} while (document.getElementById (iframeID) != null);
-	iframe.id = iframeID;
-	document.body.appendChild (iframe);
-	var html = "<html><head><title></title>";
-	html += "<script type=\"text/javascript\">\r\n";
-	html += "var Clazz" + "Loader = new Object ();\r\n";
-	html += "Clazz" + "Loader.updateHotspot = function () {\r\n";
-	html += "		var args = new Array ();\r\n";
-	html += "		for (var i = 0; i < arguments.length; i++) {\r\n";
-	html += "			args[i] = arguments[i];\r\n";
-	html += "		}\r\n";
-	html += "		with (window.parent) {\r\n";
-	html += "			ClassLoader.updateHotspot (args);\r\n";
-	html += "		};\r\n";
-	html += "};\r\n";
-	html += "</scr" + "ipt></head><body><script type=\"text/javascript\">\r\n";
-	html += "(" + ClazzLoader.loadHotspotScript + ") (";
-	html += "\"" + hotspotURL.replace (/"/g, "\\\"") + "\", \"" + iframeID + "\"";
-	html += ");\r\n";
-	html += "</scr" + "ipt></body></html>";
-	ClazzLoader.iframeDocumentWrite (iframe, html);
-	return iframeID;
 };
 
 /* protected */
@@ -2775,8 +2698,7 @@ ClazzLoader.hotspotMonitoring = function () {
 		ClazzLoader.lastHotspotJSFailed = true;
 		ClazzLoader.lastHotspotScriptLoaded = false;
 		
-		//ClazzLoader.loadHotspotScript (hotspotURL);
-		ClazzLoader.loadHostspotIFrame (hotspotURL);
+		ClazzLoader.loadHotspotScript (hotspotURL);
 
 		if (ClazzLoader.hotspotJSTimeout != null) {
 			window.clearTimeout (ClazzLoader.hotspotJSTimeout);
@@ -2785,10 +2707,14 @@ ClazzLoader.hotspotMonitoring = function () {
 		ClazzLoader.hotspotJSTimeout = window.setTimeout (function () {
 				ClazzLoader.lastHotspotScriptLoaded = true; // timeout
 				ClazzLoader.lastHotspotJSFailed = false; // timeout
-		}, 7500); // 7.5 seconds to time out
+		}, 2000);
+		/*
+		 * 2 seconds to time out. For local server running inside Eclipse
+		 * 2 seconds is already a very long time!
+		 */
 	}
 	
-	window.setTimeout (ClazzLoader.hotspotMonitoring, 250);
+	window.setTimeout (ClazzLoader.hotspotMonitoring, 2500);
 };
 
 /*
