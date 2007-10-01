@@ -167,7 +167,7 @@ public class J2SLaunchingUtil {
 						workingDir, configuration);
 			} else {
 				generatePreLoadingJavaScript(buf, j2xStr, mainType, gj2sLibPath,
-						grelativePath, workingDir, configuration);
+						isJUnit, grelativePath, workingDir, configuration);
 				
 				buf.append("ClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 				buf.append("\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
@@ -302,7 +302,7 @@ public class J2SLaunchingUtil {
 						workingDir, configuration);
 			} else {
 				generatePreLoadingJavaScript(buf, j2xStr, mainType, gj2sLibPath,
-						grelativePath, workingDir, configuration);
+						isJUnit, grelativePath, workingDir, configuration);
 				
 				buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
 				buf.append("\t" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args, true) + ");\r\n");
@@ -346,7 +346,7 @@ public class J2SLaunchingUtil {
 	}
 
 	private static void generatePreLoadingJavaScript(StringBuffer buf,
-			String j2xStr, String mainType, String gj2sLibPath,
+			String j2xStr, String mainType, String gj2sLibPath, boolean isJUnit,
 			String grelativePath, File workingDir,
 			ILaunchConfiguration configuration) throws CoreException {
 		if (j2xStr.indexOf("\"java\"") == -1) {
@@ -354,7 +354,7 @@ public class J2SLaunchingUtil {
 			buf.append(gj2sLibPath);
 			buf.append("\", true);\r\n");
 		}
-		if (j2xStr.indexOf("\"junit\"") == -1) {
+		if (isJUnit && j2xStr.indexOf("\"junit\"") == -1) {
 			buf.append("ClazzLoader.packageClasspath (\"junit\", \"");
 			buf.append(gj2sLibPath);
 			buf.append("\", true);\r\n");
@@ -406,7 +406,7 @@ public class J2SLaunchingUtil {
 		File j2sRelease = new File(j2slibFolder, ".release");
 		Properties release = new Properties();
 		String alias = "1.0.0";
-		String version = "20070304";
+		String version = "20071001";
 		release.put("alias", alias);
 		release.put("version", version);
 		if (j2sRelease.exists()) {
