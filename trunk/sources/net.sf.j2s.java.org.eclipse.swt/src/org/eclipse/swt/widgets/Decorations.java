@@ -2102,7 +2102,6 @@ void setSystemMenu () {
 	}
 	shellTitle = document.createElement("DIV");
 	shellTitle.className = "shell-title-text";
-	shellTitle.appendChild(document.createTextNode("" + (char) 160));
 	
 	/**
 	 * Ubuntu's Firefox has different active caption background color! 
