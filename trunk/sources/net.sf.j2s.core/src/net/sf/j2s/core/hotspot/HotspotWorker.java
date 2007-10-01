@@ -174,31 +174,31 @@ public class HotspotWorker implements Runnable {
         ps.write(EOL);
         StringBuffer strBuf = new StringBuffer();
         strBuf.append("ClazzLoader.updateHotspot (");
-        long time = new Date().getTime();
-        while (new Date().getTime() - time < 5000) {
+//        long time = new Date().getTime();
+//        while (new Date().getTime() - time < 5000) {
 	        String hotspotJS = InnerHotspotServer.getHotspotJavaScript(session);
 	        if (hotspotJS.length() != 0) {
 	        	strBuf.append("\r\n");
 	        	strBuf.append(hotspotJS);
-	        	break;
-	        } else {
-	        	Thread thread = new Thread(new Runnable() {
-					public void run() {
-						try {
-							Thread.sleep(250);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				});
-	        	thread.start();
-	        	try {
-					thread.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//	        	break;
+//	        } else {
+//	        	Thread thread = new Thread(new Runnable() {
+//					public void run() {
+//						try {
+//							Thread.sleep(250);
+//						} catch (InterruptedException e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				});
+//	        	thread.start();
+//	        	try {
+//					thread.join();
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 	        }
-        }
+//        }
         strBuf.append("null);");
         ps.write(strBuf.toString().getBytes("utf-8"));
     }
