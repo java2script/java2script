@@ -204,6 +204,20 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			}
 			return buffer.toString();
 		}
+		if (constValue != null && (constValue instanceof String)) {
+			StringBuffer buffer = new StringBuffer();
+			String str = (String) constValue;
+			if (str.length() > 20) {
+				return null;
+			}
+			buffer.append("\"");
+			buffer.append(str.replaceAll("\\\\", "\\\\\\\\")
+					.replaceAll("\r", "\\\\r")
+					.replaceAll("\n", "\\\\n")
+					.replaceAll("\"", "\\\\\""));
+			buffer.append("\"");
+			return buffer.toString();
+		}
 		return null;
 	}
 }
