@@ -2256,14 +2256,13 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			if (n != null) {
 				if (n.optionalsLoaded == null) {
 					n.optionalsLoaded = optionalsLoaded;
-				} else {
-					var oldOL = n.optionalsLoaded;
+				} else if (optionalsLoaded != n.optionalsLoaded) {
 					n.optionalsLoaded = (function (oF, nF) {
 						return function () {
 							oF();
 							nF();
 						};
-					}) (oldOL, optionalsLoaded);
+					}) (n.optionalsLoaded, optionalsLoaded);
 				}
 			}
 		}
@@ -2309,7 +2308,7 @@ $w$ = ClazzLoader.loadJ2SApp = function (clazz, args, loaded) {
 			};
 		}) (clazzStr, agmts);
 	} else {
-		afterLoaded = loaded(clazzStr, agmts);
+		afterLoaded = loaded (clazzStr, agmts);
 	}
 	ClazzLoader.loadClass (clazzStr, afterLoaded);
 };
