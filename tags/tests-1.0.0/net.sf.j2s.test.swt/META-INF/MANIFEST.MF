@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test SWT Plug-in
+Bundle-SymbolicName: net.sf.j2s.test.swt
+Bundle-Version: 1.0.0
+Bundle-Activator: net.sf.j2s.test.swt.TestSWTPlugin
+Bundle-Localization: plugin
+Require-Bundle: org.junit,
+ org.eclipse.swt
+Eclipse-AutoStart: true

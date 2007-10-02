@@ -1,0 +1,6 @@
+#Java2Script Configuration
+#Sun Mar 18 18:31:47 CST 2007
+j2s.resources.list=../../plugins/net.sf.j2s.lib_1.0.0/j2slib/java.runtime.j2x,/net.sf.j2s.java.junit/.j2s,bin/net/sf/j2s/test/junit/HelloTest.js,bin/net/sf/j2s/test/junit/MyTest.js,bin/net/sf/j2s/test/junit/WorldTest.js,bin/net/sf/j2s/test/junit/MathTest.js,bin/net/sf/j2s/test/junit/StringTest.js,bin/net/sf/j2s/test/junit/ObjectTest.js,bin/net/sf/j2s/test/junit/DoubleTest.js,bin/net/sf/j2s/test/junit/FloatTest.js,bin/net/sf/j2s/test/junit/IntegerTest.js,bin/net/sf/j2s/test/junit/LongTest.js,bin/net/sf/j2s/test/junit/NumberTest.js,bin/net/sf/j2s/test/junit/StringBufferTest.js,bin/net/sf/j2s/test/junit/AllTests.js,bin/net/sf/j2s/test/junit/ArrayTest.js,bin/net/sf/j2s/test/junit/ArraysTest.js
+j2s.abandoned.resources.list=
+j2s.output.path=bin
+j2s.compiler.status=enable
