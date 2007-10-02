@@ -1,0 +1,209 @@
+/*
+ * FIXME: The following css rule breaks the whole page's CSS!
+ */
+.table-default table, .table-default tr, .table-default td {
+	font-family:Tahoma, Arial,sans-serif;
+	font-size:8pt;
+	margin:0;
+	padding:0;
+}
+.table-content {
+	padding:0;
+	margin:0;
+	border-collapse:collapse;
+}
+.table-v-scroll {
+	overflow:scroll;
+	overflow-x:hidden;
+}
+.table-h-scroll {
+	overflow:scroll;
+	overflow-y:hidden;
+}
+
+.table-default thead td {
+	overflow:hidden;
+	background-color:red;
+	padding:0 !important;
+}
+
+thead .table-head-text {
+	background-color:buttonface;
+	border-style:solid;
+	border-width:1px 2px 2px 1px;
+	border-color:#666 white white #666;
+	border-color:white #666 #666 white;
+	cursor:default;
+	padding:1px 2px;
+	white-space:nowrap;
+}
+.table-column-last .table-head-text {
+	border-width:1px 0 2px 1px;
+}
+
+.table-default tbody td {
+	cursor:default;
+	white-space:nowrap;
+}
+.table-grid-line tbody td {
+	border-style:solid;
+	border-color:buttonface;
+	border-width:1px 1px 0 0;
+}
+.table-column-last {
+	width:16px;
+	padding-right:2px;
+	background-color:white
+}
+.table-grid-line tbody .table-column-last {
+	border-width:1px 0 0 0;
+}
+.table-grid-line .table-row-first td {
+}
+.table-full-selection tr.table-item-selected td {
+	color:highlighttext;
+	background-color:highlight;
+}
+.table-blur .table-full-selection tr.table-item-selected td {
+	background-color:gray;
+}
+
+.table-full-selection tr.table-item-selected td.table-column-first {
+	color:black;
+	background-color:white;
+}
+.table-full-selection tr.table-item-selected td.table-column-last {
+	color:black;
+	background-color:white;
+}
+.table-check-box {
+	margin:0;
+	padding:0;
+	position:absolute;
+	display:block;
+	left:-14px !important;
+	_left:-18px !important;
+	min-height:13px;
+	_height:1em;
+}
+@media all and (min-width:0px){/* opera */
+.table-check-box {
+	top:50%;
+	margin-top:-8px;
+	left:-16px !important;
+}
+}
+
+.table-check-box-rtl {
+	margin:0;
+	padding:0;
+
+	display:block;
+	right:-14px !important;
+	_right:-18px !important;
+	min-height:13px;
+	_height:1em;
+}
+
+.table-text {
+	min-height:16px;
+	height:100%;
+	position:relative;
+	margin-left:2px;
+	white-space:nowrap;
+	/*border:1px solid red;*/
+}
+div.table-image {
+	_padding-bottom:2px;
+	_height:16px;
+}
+.table-image .table-text {
+	padding-left:18px;
+}
+.table-check .table-text {
+	margin-left:16px;
+}
+.table-column-first {
+	color:black;
+	background-color:white;
+}
+
+.table-item-focus .table-column-first {
+	background-color:#E8F2FE;
+}
+.table-text-inner {
+	padding:2px 3px 1px 2px;
+	min-height:14px;
+	_height:14px;
+}
+.table-grid-line tbody .table-text-inner {
+	padding-top:1px;
+	padding-right:2px;
+}
+.table-column-last .table-text-inner {
+	width:1px;
+	height:1px;
+}
+.table-item-selected .table-column-first .table-text-inner {
+	color:highlighttext;
+	background-color:highlight;
+}
+
+.table-blur .table-item-selected .table-column-first .table-text-inner {
+	background-color:gray;
+}
+.table-default {
+	overflow:hidden;
+	position:absolute;
+	background-color:white;
+}
+.table-default td {
+	overflow:hidden;
+}
+.table-item-default {
+	cursor:default;
+	white-space:nowrap;
+	font-size:9pt;
+	font-family:Arial,sans-serif;
+}
+.table-column-resize {
+	top:1px;
+	position:absolute;
+	cursor:e-resize;
+	width:3px;
+  	font-size:0;
+	z-index:100;
+	background-color:red;
+	float:right;
+}
+
+.table-full-selection .table-item-focus {
+	background-color:#E8F2FE;
+}
+
+.image-p-4, .image-p-5 {
+    position:absolute;
+    /*top:50%;
+    margin-top:-0.5em;
+	*/
+	bottom:50%;
+	margin-bottom:-0.5em;
+}
+.image-p-4 {
+    left:0;
+}
+.image-p-5 {
+    left:50%;
+    margin-left:-0.5em;
+}
+/* default icon size 16x16 */
+.image-n-4, .image-n-5 {
+    width:16px;
+    height:16px;
+    font-size:16px;
+    _font-size:14px;
+    overflow:hidden;
+}
+.swt-widgets-table {
+	width:324px;
+}

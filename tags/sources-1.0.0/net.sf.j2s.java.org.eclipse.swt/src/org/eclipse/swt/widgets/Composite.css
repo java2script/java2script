@@ -1,0 +1,92 @@
+.composite-default {
+	position:absolute;
+	white-space:nowrap;
+	/*
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	*/
+	font-size:0;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	background-color:buttonface;
+}
+.composite-border {
+	white-space:nowrap;
+	border-style:solid;
+	border-width:2px 1px 1px 2px;
+	border-color:#333 #ddd #ddd #333;
+}
+
+.image-icon, .image-n-1, .image-n-2, .image-n-3, .image-n-4, .image-n-5, .image-n-6, .image-n-7, .image-n-8, .image-n-9 {
+	border:0 none transparent;
+    padding:0;
+    margin:0;
+    line-height:0;
+	background-repeat:no-repeat;
+}
+.image-n-1 {
+	background-position:left top;
+}
+.image-n-2 {
+	background-position:center top;
+}
+.image-n-3 {
+	background-position:right top;
+}
+.image-n-4 {
+	background-position:left center;
+}
+.image-n-5 {
+	background-position:center center;
+}
+.image-n-6 {
+	background-position:right center;
+}
+.image-n-7 {
+	background-position:left bottom;
+}
+.image-n-8 {
+	background-position:center bottom;
+}
+.image-n-9 {
+	background-position:right bottom;
+}
+
+.image-p-1, .image-p-2, .image-p-3, .image-p-4, .image-p-5, .image-p-6, .image-p-7, .image-p-8, .image-p-9 {
+    position:absolute;
+}
+.image-p-1, .image-p-2, .image-p-3 {
+    top:0;
+}
+.image-p-4, .image-p-5, .image-p-6 {
+    /*top:50%;
+    margin-top:-0.5em;
+	*/
+	bottom:50%;
+	margin-bottom:-0.5em;
+}
+.image-p-7, .image-p-8, .image-p-9 {
+    bottom:0;
+}
+.image-p-1, .image-p-4, .image-p-7 {
+    left:0;
+}
+.image-p-2, .image-p-5, .image-p-8 {
+    left:50%;
+    margin-left:-0.5em;
+}
+.image-p-3, .image-p-6, .image-p-9 {
+    right:0;
+}
+/* default icon size 16x16 */
+.image-icon, .image-n-1, .image-n-2, .image-n-3, .image-n-4, .image-n-5, .image-n-6, .image-n-7, .image-n-8, .image-n-9 {
+    width:16px;
+    height:16px;
+    font-size:16px;
+    _font-size:14px;
+    overflow:hidden;
+}
+.swt-widgets-composite {
+	width:324px;
+}

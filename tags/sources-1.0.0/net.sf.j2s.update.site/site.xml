@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://j2s.sourceforge.net/">
+      Java2Script (J2S) Pacemaker provides an Eclipse Java to JavaScript compiler 
+plugin and an implementation of JavaScript version of Eclipse Standard Widget
+Toolkit (SWT) with other common utilities, such as java.lang.* and java.util.*.
+You can convert your SWT-base Rich Client Platform (RCP) into Rich Internet 
+Application (RIA) by Java2Script Pacemaker.
+   </description>
+   <feature url="features/net.sf.j2s_1.0.0.jar" id="net.sf.j2s" version="1.0.0">
+      <category name="j2s-1.0.0"/>
+   </feature>
+   <archive path="plugins/net.sf.j2s.ajax_1.0.0.jar" url="plugins/net.sf.j2s.ajax_1.0.0.jar"/>
+   <archive path="plugins/net.sf.j2s.core_1.0.0.jar" url="plugins/net.sf.j2s.core_1.0.0.jar"/>
+   <archive path="plugins/net.sf.j2s.lib_1.0.0.jar" url="plugins/net.sf.j2s.lib_1.0.0.jar"/>
+   <archive path="plugins/net.sf.j2s.ui_1.0.0.jar" url="plugins/net.sf.j2s.ui_1.0.0.jar"/>
+   <category-def name="j2s-1.0.0" label="j2s-1.0.0">
+      <description>
+         Java2Script 1.0.0
+      </description>
+   </category-def>
+</site>
