@@ -1,8 +1,0 @@
-/* scrolled composite */
-.vscroll-default{
-	overflow-y:scroll;
-}
-
-.hscroll-default{
-	overflow-x:scroll;
-}
