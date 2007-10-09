@@ -1666,9 +1666,19 @@ void showSelection(boolean selected) {
 	if (OS.isIE) { // IE won't update selected background! 
 		Element tmpDiv = document.createElement("DIV");
 		tmpDiv.style.width = "1px"; // hasLayout
-		Element innerEl = handle.childNodes[0].childNodes[0].childNodes[0];
+		tmpDiv.style.height = "1px";
+		Element tempElem = handle.childNodes[0].childNodes[0].childNodes[0];
+		Element innerEl = tempElem.childNodes[tempElem.childNodes.length-1].childNodes[0];
+		System.out.println(innerEl);
+		innerEl.style.hasLayout = true;
 		innerEl.appendChild(tmpDiv);
 		innerEl.removeChild(tmpDiv);
+		innerEl.style.display = "inline-block";
+//		handle.style.hasLayout = true;
+		if((style & SWT.RIGHT_TO_LEFT) != 0){
+			innerEl.style.left = "0px";
+			tempElem.childNodes[tempElem.childNodes.length-1].style.left = "0px";
+		}
 	}
 }
 
