@@ -100,6 +100,8 @@ public class Element {
 
 	public int nodeType;
 
+	public boolean hasLayout;
+
 	//private String
 	
 	public native void appendChild(Element child);

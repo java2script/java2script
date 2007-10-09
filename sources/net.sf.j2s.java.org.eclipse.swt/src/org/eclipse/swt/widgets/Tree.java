@@ -905,6 +905,9 @@ void createItem (TreeItem item, Object hParent, int index) {
 			cssClass += " tree-anchor-single";
 		}
 		Element anchor = createCSSElement(lineWrapper, cssClass);
+		if(OS.isIE && (style & SWT.RIGHT_TO_LEFT) != 0){
+			anchor.style.position = "static";
+		}
 		createCSSElement(anchor, "tree-anchor-v");
 		cssClass = "tree-anchor-h";
 		if (i == 0) {

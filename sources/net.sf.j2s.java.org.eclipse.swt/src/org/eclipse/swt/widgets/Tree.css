@@ -63,8 +63,9 @@ thead .tree-head-text {
 .tree-grid-line .tree-row-first td {
 }
 .tree-full-selection tr.tree-item-selected td {
+	background-color:ActiveCaption;
 	color:highlighttext;
-	background-color:highlight;
+	min-height:1px;
 }
 .tree-blur .tree-full-selection tr.tree-item-selected td {
 	background-color:gray;
@@ -125,7 +126,6 @@ thead .tree-head-text {
 	min-height:16px;
 	height:1.39em;
 	line-height:1.39em;
-	position:relative;
 	margin-left:2px;
 	left:-1px;
 	_left:-3px;
@@ -133,11 +133,20 @@ thead .tree-head-text {
 	float:left;
 	padding-bottom:1px;
 }
+/*
+	
+	position:relative;
 
+	*/
 .tree-text-rtl {
 	float:right;
+	margin-left:auto;
+	margin-right:2px;
 }
+/*
+	right:0px !important;
 
+*/
 tree-image-icon {
 	_padding-bottom:2px;
 	_height:16px;
@@ -188,8 +197,10 @@ tree-image tree-image-icon {
 }
 
 .tree-item-selected .tree-column-first .tree-text-inner {
-	color:highlighttext;
-	background-color:highlight;
+	background:ActiveCaption;
+	color:highlighttext;	
+	min-height:1px;
+	
 }
 .tree-blur .tree-item-selected .tree-column-first .tree-text-inner {
 	background-color:gray;
@@ -228,6 +239,7 @@ tree-image tree-image-icon {
 	float:left;
 	top:0;
 	left:0;
+	right:0;
 	margin-left:3px;
 	width:16px;
 	min-height:16px;
@@ -242,6 +254,8 @@ tree-image tree-image-icon {
 
 .tree-anchor-rtl {
 	float:right;
+	left:auto;
+	right:0px;
 }
 
 
@@ -260,10 +274,17 @@ tree-image tree-image-icon {
 	/*border-left:0 none transparent;*/
 	width:16px;
 	left:0;
+	right:0;
 	background-repeat:repeat-y;
 	background-position:center center;
 	background-image:url('images/tree-packed.gif');
 }
+
+.tree-anchor-rtl .tree-anchor-v{
+	right:5px;
+	left:auto;
+}
+
 .tree-anchor-single .tree-anchor-v {
 	background-image:none;
 }
@@ -277,6 +298,7 @@ tree-image tree-image-icon {
 .tree-anchor-h {
 	position:absolute;
 	left:0;
+	right:0;
 	top:50%;
 	margin-top:-8px;
 	width:15px;
@@ -284,6 +306,10 @@ tree-image tree-image-icon {
 	font-size:0;
 	height:16px;
 	background-repeat:no-repeat;
+}
+.tree-anchor-rtl .tree-anchor-h{
+	left:auto;
+	right:0;
 }
 .tree-image .tree-anchor-h {
 	width:16px;

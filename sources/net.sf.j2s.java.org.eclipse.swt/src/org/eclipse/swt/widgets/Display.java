@@ -32,7 +32,6 @@ import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
-
 /**
  * Instances of this class are responsible for managing the
  * connection between SWT and the underlying operating
