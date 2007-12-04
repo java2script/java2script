@@ -7,6 +7,8 @@ Double.prototype.valueOf = function () { return 0; };
 Double.toString = Double.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
+	} else if (this == Double) {
+		return "[Double]"; // Double.toString
 	}
 	return "" + this.valueOf ();
 };
