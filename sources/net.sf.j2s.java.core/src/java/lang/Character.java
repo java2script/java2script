@@ -330,4 +330,37 @@ public final class Character implements Serializable, Comparable<Character> {
 	public static char[] toChars(int point) {
 		return null;
 	}
+
+    /**
+     * Returns a <code>String</code> object representing this
+     * <code>Character</code>'s value.  The result is a string of
+     * length 1 whose sole component is the primitive
+     * <code>char</code> value represented by this
+     * <code>Character</code> object.
+     *
+     * @return  a string representation of this object.
+     */
+    public String toString() {
+        char buf[] = {value};
+        return String.valueOf(buf);
+    }
+
+    /**
+     * Returns a <code>String</code> object representing the
+     * specified <code>char</code>.  The result is a string of length
+     * 1 consisting solely of the specified <code>char</code>.
+     *
+     * @param c the <code>char</code> to be converted
+     * @return the string representation of the specified <code>char</code>
+     * @since 1.4
+     */
+    public static String toString(char c) {
+    	/**
+    	 * @j2sNative
+    	 * if (this == Charater) {
+    	 * 	return "[Charater]";
+    	 * }
+    	 */ {}
+        return String.valueOf(c);
+    }
 }
