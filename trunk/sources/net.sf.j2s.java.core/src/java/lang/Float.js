@@ -7,6 +7,8 @@ Float.prototype.valueOf = function () { return 0; };
 Float.toString = Float.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
+	} else if (this == Float) {
+		return "[Float]"; // Float.toString
 	}
 	return "" + this.valueOf ();
 };

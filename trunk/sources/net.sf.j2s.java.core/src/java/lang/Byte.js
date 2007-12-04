@@ -7,6 +7,8 @@ Byte.prototype.valueOf = function () { return 0; };
 Byte.toString = Byte.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
+	} else if (this == Byte) {
+		return "[Byte]"; // Byte.toString
 	}
 	return "" + this.valueOf ();
 };
