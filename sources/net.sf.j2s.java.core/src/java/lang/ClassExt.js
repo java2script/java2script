@@ -60,7 +60,7 @@ Clazz.MethodNotFoundException = function (obj, clazz, method, params) {
 Clazz.prepareCallback = function (objThis, args) {
 	var classThisObj = args[0];
 	var cbName = "b$"; // "callbacks";
-	if (objThis != null && classThisObj != null && classThisObj != window) {
+	if (objThis != null && classThisObj != null && classThisObj !== window) {
 		var obs = new Array ();
 		if (objThis[cbName] == null) {
 			objThis[cbName] = obs;
@@ -126,7 +126,7 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
 		obj = new clazzInner (objThis);
 	} else if (arguments.length == 4) {
 		if (objThis.__CLASS_NAME__ == clazzInner.__CLASS_NAME__
-				&& arguments[3] == Clazz.inheritArgs) {
+				&& arguments[3] === Clazz.inheritArgs) {
 			obj = objThis;
 		} else {
 			obj = new clazzInner (objThis, arguments[3]);
@@ -434,13 +434,13 @@ Clazz.getMixedCallerMethod = function (args) {
 	var o = new Object ();
 	var argc = args.callee.caller; // Clazz.tryToSearchAndExecute
 	if (argc == null) return null;
-	if (argc != Clazz.tryToSearchAndExecute) { // inherited method's apply
+	if (argc !== Clazz.tryToSearchAndExecute) { // inherited method's apply
 		argc = argc.arguments.callee.caller;
 		if (argc == null) return null;
 	}
-	if (argc != Clazz.tryToSearchAndExecute) return null;
+	if (argc !== Clazz.tryToSearchAndExecute) return null;
 	argc = argc.arguments.callee.caller; // Clazz.searchAndExecuteMethod
-	if (argc == null || argc != Clazz.searchAndExecuteMethod) return null;
+	if (argc == null || argc !== Clazz.searchAndExecuteMethod) return null;
 	o.claxxRef = argc.arguments[1];
 	o.fxName = argc.arguments[2];
 	o.paramTypes = Clazz.getParamsType (argc.arguments[3]);
@@ -483,11 +483,11 @@ Clazz.checkPrivateMethod = function (args) {
 		var stacks = callerFx.stacks;
 		for (var i = stacks.length - 1; i >= 0; i--) {
 			var fx = stacks[i].prototype[m.caller.exName];
-			if (fx == m.caller) {
+			if (fx === m.caller) {
 				ppFun = stacks[i].prototype[m.fxName];
 			} else if (fx != null) {
 				for (var fn in fx) {
-					if (fn.indexOf ('\\') == 0 && fx[fn] == m.caller) {
+					if (fn.indexOf ('\\') == 0 && fx[fn] === m.caller) {
 						ppFun = stacks[i].prototype[m.fxName];
 						break;
 					}
@@ -501,7 +501,7 @@ Clazz.checkPrivateMethod = function (args) {
 	if (ppFun != null && ppFun.claxxOwner == null) {
 		ppFun = ppFun["\\" + m.paramTypes];
 	}
-	if (ppFun != null && ppFun.isPrivate && ppFun != args.callee) {
+	if (ppFun != null && ppFun.isPrivate && ppFun !== args.callee) {
 		return ppFun;
 	}
 	return null;
@@ -711,7 +711,7 @@ System = {
 		System.props.setProperty (key, val);
 	},
 	arraycopy : function (src, srcPos, dest, destPos, length) {
-		if (src != dest) {
+		if (src !== dest) {
 			for (var i = 0; i < length; i++) {
 				dest[destPos + i] = src[srcPos + i];
 			}

@@ -7,8 +7,8 @@ Integer.prototype.valueOf = function () { return 0; };
 Integer.toString = Integer.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
-	} else if (this == Integer) {
-		return "[Integer]"; // Integer.toString
+	} else if (this === Integer) {
+		return "class java.lang.Integer"; // Integer.class.toString
 	}
 	return "" + this.valueOf ();
 };
