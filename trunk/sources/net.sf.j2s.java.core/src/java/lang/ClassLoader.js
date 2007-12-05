@@ -1320,7 +1320,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 		var lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_CONTENT_LOADED)) != null) {
-			if (lastNode == n) { // Already existed cycle ?
+			if (lastNode === n) { // Already existed cycle ?
 				n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
 			}
 			ClazzLoader.updateNode (n);
@@ -1330,13 +1330,13 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 		lastNode = null;
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
-			if (lastNode == n) break;
+			if (lastNode === n) break;
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
 		lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_DECLARED)) != null) {
-			if (lastNode == n) break;
+			if (lastNode === n) break;
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
@@ -1380,7 +1380,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 	var length = ts.length;
 	var cycleFound = -1;
 	for (var i = 0; i < ts.length; i++) {
-		if (ts[i] == node && ts[i].status >= ClazzNode.STATUS_DECLARED) { 
+		if (ts[i] === node && ts[i].status >= ClazzNode.STATUS_DECLARED) { 
 			// Cycle is found;
 			cycleFound = i;
 			break;
@@ -1488,7 +1488,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						for (var j = 0; j < list.length; j++) {
 							var nn = ClazzLoader.findClass (list[j]);
 							if (nn.status != ClazzNode.STATUS_OPTIONALS_LOADED
-									&& nn != n) {
+									&& nn !== n) {
 								nn.status = n.status;
 								nn.declaration = null;
 								ClazzLoader.updateNode (nn);
@@ -1566,7 +1566,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						for (var j = 0; j < list.length; j++) {
 							var nn = ClazzLoader.findClass (list[j]);
 							if (nn.status != ClazzNode.STATUS_DECLARED
-									&& nn != node) {
+									&& nn !== node) {
 			nn.status = ClazzNode.STATUS_DECLARED;
 			if (ClazzLoader.definedClasses != null) {
 				ClazzLoader.definedClasses[nn.name] = true;
@@ -1623,7 +1623,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						var list = node.declaration.clazzList;
 						for (var j = 0; j < list.length; j++) {
 							var nn = ClazzLoader.findClass (list[j]);
-							if (nn.status != level && nn != node) {
+							if (nn.status != level && nn !== node) {
 			nn.status = level;
 			nn.declaration = null;
 			ClazzLoader.scriptCompleted (nn.path);

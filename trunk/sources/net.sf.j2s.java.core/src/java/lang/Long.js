@@ -7,8 +7,8 @@ Long.prototype.valueOf = function () { return 0; };
 Long.toString = Long.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
-	} else if (this == Long) {
-		return "[Long]"; // Long.toString
+	} else if (this === Long) {
+		return "class java.lang.Long"; // Long.class.toString
 	}
 	return "" + this.valueOf ();
 };

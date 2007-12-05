@@ -210,7 +210,7 @@ Clazz.extendsProperties = function (hostThis, hostSuper) {
 Clazz.checkInnerFunction = function (hostSuper, funName) {
 	for (var k = 0; k < Clazz.innerFunctionNames.length; k++) {
 		if (funName == Clazz.innerFunctionNames[k] && 
-				Clazz.innerFunctions[funName] == hostSuper[funName]) {
+				Clazz.innerFunctions[funName] === hostSuper[funName]) {
 			return true;
 		}
 	}
@@ -285,7 +285,7 @@ Clazz.inheritClass = function (clazzThis, clazzSuper, objSuper) {
 		// which is not referenced elsewhere.
 		// March 13, 2006
 		clazzThis.prototype = objSuper; 
-	} else if (clazzSuper != Number) {
+	} else if (clazzSuper !== Number) {
 		clazzThis.prototype = new clazzSuper (Clazz.inheritArgs);
 	} else { // Number
 		clazzThis.prototype = new Number ();
@@ -347,7 +347,7 @@ Clazz.extendInterface = Clazz.implementOf;
  # clazzAncestor -> anc
  #-*/
 Clazz.equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
-	if (clazzThis == clazzAncestor) {
+	if (clazzThis === clazzAncestor) {
 		return 0;
 	}
 	if (clazzThis.implementz != null) {
@@ -370,7 +370,7 @@ Clazz.equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
  # clazzTarget -> tg
  #-*/
 Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
-	if (clazzTarget == clazzBase) {
+	if (clazzTarget === clazzBase) {
 		return 0;
 	}
 	var isTgtStr = (typeof clazzTarget == "string");
@@ -385,9 +385,9 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 	 * March 10, 2006
 	 */
 	if ((isTgtStr && "NullObject" == clazzTarget) 
-			|| NullObject == clazzTarget) {
-		if (clazzBase != Number && clazzBase != Boolean
-				&& clazzBase != NullObject) {
+			|| NullObject === clazzTarget) {
+		if (clazzBase !== Number && clazzBase !== Boolean
+				&& clazzBase !== NullObject) {
 			return 0;
 		}
 	}
@@ -402,7 +402,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 	}
 	var level = 0;
 	var zzalc = clazzTarget; // zzalc <--> clazz
-	while (zzalc != clazzBase && level < 10) {
+	while (zzalc !== clazzBase && level < 10) {
 		/* maybe clazzBase is interface */
 		if (zzalc.implementz != null) {
 			var impls = zzalc.implementz;
@@ -417,7 +417,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 		
 		zzalc = zzalc.superClazz;
 		if (zzalc == null) {
-			if (clazzBase == Object) {
+			if (clazzBase === Object) {
 				/*
 				 * getInheritedLevel(String, CharSequence) == 1
 				 * getInheritedLevel(String, Object) == 1.5
@@ -493,7 +493,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 	if (clazzFun != null) {
 		if (clazzFun.claxxOwner != null) { 
 			// claxxOwner is a mark for methods that is single.
-			if (clazzFun.claxxOwner != clazzThis) {
+			if (clazzFun.claxxOwner !== clazzThis) {
 				// This is a single method, call directly!
 				fx = clazzFun;
 			}
@@ -509,7 +509,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				 * comparision
 				 */
 				//var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
-				if (clazzThis == stacks[i]) { // level == 0
+				if (clazzThis === stacks[i]) { // level == 0
 					if (i > 0) {
 						i--;
 						fx = stacks[i].prototype[funName];
@@ -549,7 +549,7 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		/*# {$no.debug.support} >>x #*/
 		if (Clazz.tracingCalling) {
 			var caller = arguments.callee.caller;
-			if (caller == Clazz.superConstructor) {
+			if (caller === Clazz.superConstructor) {
 				caller = caller.arguments.callee.caller;
 			}
 			Clazz.pu$hCalling (new Clazz.callingStack (caller, clazzThis));
@@ -695,7 +695,7 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	/*
 	 * Cache last matched method
 	 */
-	if (fx.lastParams == params.typeString && fx.lastClaxxRef == claxxRef) {
+	if (fx.lastParams == params.typeString && fx.lastClaxxRef === claxxRef) {
 		var methodParams = null;
 		if (params.hasCastedNull) {
 			methodParams = new Array ();
@@ -736,10 +736,10 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 		 * right claxxRef in the stacks, and the inherited level of stacks
 		 * are in order.
 		 */
-		if (began || stacks[i] == claxxRef) {
+		if (began || stacks[i] === claxxRef) {
 			/*
 			 * First try to search method within the same class scope
-			 * with stacks[i] == claxxRef
+			 * with stacks[i] === claxxRef
 			 */
 			var clazzFun = stacks[i].prototype[fxName];
 			
@@ -752,7 +752,7 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 			 * As there are no such methods in current class, Clazz will try 
 			 * to search its super class stacks. Here variable began indicates
 			 * that super searchi is began, and there is no need checking
-			 * <code>stacks[i] == claxxRef</code>
+			 * <code>stacks[i] === claxxRef</code>
 			 */
 			began = true; 
 		} // end of if
@@ -894,8 +894,8 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 					Clazz.pu$hCalling (new Clazz.callingStack (xcaller, owner));
 				}
 				
-				var noInnerWrapper = caller != Clazz.instantialize 
-						&& caller != Clazz.superCall;
+				var noInnerWrapper = caller !== Clazz.instantialize 
+						&& caller !== Clazz.superCall;
 				if (noInnerWrapper) {
 					var fun = caller.arguments.callee;
 					var owner = fun.claxxReference;
@@ -1120,7 +1120,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	 * wrapping into deep hierarchies!
 	 */
 	var f$ = clazzThis.prototype[funName];
-	if (f$ == null || (f$.claxxOwner == clazzThis
+	if (f$ == null || (f$.claxxOwner === clazzThis
 			&& f$.funParams == fpName)) {
 		// property "funParams" will be used as a mark of only-one method
 		funBody.funParams = fpName; 
@@ -1154,7 +1154,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 		 */
 		//oldStacks[0] = oldFun.claxxOwner;
 		/*
-		if (oldFun.claxxOwner != clazzThis) {
+		if (oldFun.claxxOwner !== clazzThis) {
 			if ("releaseChild" == funName) {
 				error (" in here ");
 			}
@@ -1182,7 +1182,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	/* method is defined in super class */
 	if (/*f$ == null 
 			|| */f$.stacks == null 
-			|| f$.claxxReference != clazzThis) {
+			|| f$.claxxReference !== clazzThis) {
 		/*
 		 * Generate a new delegating method for the class
 		 */
@@ -1199,12 +1199,12 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	}
 	var ss = f$.stacks;
 
-	if (ss.length == 0/* || ss[ss.length - 1] != clazzThis*/) {
+	if (ss.length == 0/* || ss[ss.length - 1] !== clazzThis*/) {
 		ss[ss.length] = clazzThis;
 	} else {
 		var existed = false;
 		for (var i = ss.length - 1; i >= 0; i--) {
-			if (ss[i] == clazzThis) {
+			if (ss[i] === clazzThis) {
 				existed = true;
 				break;
 			}
@@ -1215,7 +1215,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 	}
 
 	if (oldFun != null) {
-		if (oldFun.claxxOwner == clazzThis) {
+		if (oldFun.claxxOwner === clazzThis) {
 			f$[oldFun.funParams] = oldFun;
 			oldFun.claxxOwner = null;
 			// property "funParams" will be used as a mark of only-one method
@@ -1417,7 +1417,7 @@ Clazz.instantialize = function (objThis, args) {
 			objThis.con$truct.apply (objThis, []);
 			c.apply (objThis, args);
 		} else if ((c.claxxOwner != null 
-				&& c.claxxOwner == objThis.getClass ())
+				&& c.claxxOwner === objThis.getClass ())
 				|| (c.stacks != null 
 				&& c.stacks[c.stacks.length - 1] == objThis.getClass ())) {
 			/*
@@ -1466,7 +1466,7 @@ Clazz.innerFunctions = {
 	 * Similar to Object#equals
 	 */
 	equals : function (aFun) {
-		return this == aFun;
+		return this === aFun;
 	},
 
 	/*
@@ -1579,7 +1579,7 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 		//		org.eclipse.ui.IPlugin);
 		qName = prefix.__PKG_NAME__ + "." + name;
 		prefix[name] = clazzFun;
-		if (prefix == java.lang) {
+		if (prefix === java.lang) {
 			window[name] = clazzFun;
 		}
 	} else {

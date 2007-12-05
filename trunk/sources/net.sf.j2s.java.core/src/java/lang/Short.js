@@ -7,8 +7,8 @@ Short.prototype.valueOf = function () { return 0; };
 Short.toString = Short.prototype.toString = function () {
 	if (arguments.length != 0) {
 		return "" + arguments[0];
-	} else if (this == Short) {
-		return "[Short]"; // Short.toString
+	} else if (this === Short) {
+		return "class java.lang.Short"; // Short.class.toString
 	}
 	return "" + this.valueOf ();
 };
