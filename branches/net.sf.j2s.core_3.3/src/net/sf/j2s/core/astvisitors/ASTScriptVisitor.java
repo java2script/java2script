@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -1065,6 +1066,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		charVisit(node.getLeftOperand(), beCare);
 		buffer.append(' ');
 		buffer.append(operator);
+		if ("==".equals(operator) || "!=".equals(operator)) {
+			if (typeBinding != null && !typeBinding.isPrimitive()
+					&& !(node.getLeftOperand() instanceof NullLiteral)
+					&& !(node.getRightOperand() instanceof NullLiteral)
+					/*&& !(node.getLeftOperand() instanceof StringLiteral) // "abc" == ...
+					&& !(node.getRightOperand() instanceof StringLiteral)*/) {
+				buffer.append('=');
+			}
+		}
 		buffer.append(' ');
 		charVisit(node.getRightOperand(), beCare);
 		List extendedOperands = node.extendedOperands();
