@@ -70,11 +70,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		if (name == null) {
 			return null;
 		}
-		int index = name.indexOf('<');
-		if (index != -1) {
-			name = name.substring(0, index).trim();
-		}
-		return name;
+		return Bindings.removeBrackets(name);
 	}
 
 	/**
@@ -126,11 +122,8 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * @return
 	 */
 	public String shortenQualifiedName(String name) {
-		int index = name.indexOf('<');
-		if (index != -1) {
-			name = name.substring(0, index).trim();
-		}
-		index = name.indexOf("java.lang.");
+		name = Bindings.removeBrackets(name);
+		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index != -1
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
@@ -170,11 +163,8 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 
 	public String shortenPackageName(String fullName) {
 		String name = fullName.substring(0, fullName.lastIndexOf('.'));
-		int index = name.indexOf('<');
-		if (index != -1) {
-			name = name.substring(0, index).trim();
-		}
-		index = name.indexOf("java.lang.");
+		name = Bindings.removeBrackets(name);
+		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index != -1
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
