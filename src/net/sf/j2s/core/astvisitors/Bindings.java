@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -43,7 +42,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 public class Bindings {
 	
@@ -223,6 +221,8 @@ public class Bindings {
 	 */
 	public static String getFullyQualifiedName(ITypeBinding type) {
 		String name= type.getQualifiedName();
+		// TODO: ?
+		// return removeBrackets(name);
 		final int index= name.indexOf('<');
 		if (index > 0)
 			name= name.substring(0, index);
@@ -930,10 +930,14 @@ public class Bindings {
 		int index;
 		for (int i= 0; i < parameters.length; i++) {
 			first= parameters[i];
+			// TODO: ?
+			// first = removeBrackets(first);
 			index= first.indexOf('<');
 			if (index > 0)
 				first= first.substring(0, index);
 			second= methodParameters[i].getErasure().getQualifiedName();
+			// TODO: ?
+			// second = removeBrackets(second);
 			index= second.indexOf('<');
 			if (index > 0)
 				second= second.substring(0, index);
@@ -1125,6 +1129,7 @@ public class Bindings {
 		return false;
 	}
 
+	/*
 	private static boolean isPrimitiveType(String s) {
 		return Signature.getTypeSignatureKind(s) == Signature.BASE_TYPE_SIGNATURE;
 	}
@@ -1133,6 +1138,7 @@ public class Bindings {
 		int arrayCount= Signature.getArrayCount(s);
 		return s.charAt(arrayCount) == Signature.C_RESOLVED;
 	}
+	*/
 
 	/**
 	 * Normalizes a type binding received from an expression to a type binding that can be used in a declaration signature. 
@@ -1208,6 +1214,8 @@ public class Bindings {
 	public static String getRawName(ITypeBinding binding) {
 		String name= binding.getName();
 		if (binding.isParameterizedType() || binding.isGenericType()) {
+			// TODO: ?
+			// return removeBrackets(name);
 			int idx= name.indexOf('<');
 			if (idx != -1) {
 				return name.substring(0, idx);
@@ -1418,5 +1426,24 @@ public class Bindings {
 			}
 		}
 		return false;
+	}
+
+	public static String removeBrackets(String qName) {
+		int length = qName.length();
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		for (int i = 0; i < length; i++) {
+			char c = qName.charAt(i);
+			if (c == '<') {
+				ltCount++;
+			} else if (c == '>') {
+				ltCount--;
+			}
+			if (ltCount == 0 && c != '>') {
+				buf.append(c);
+			}
+		}
+		qName = buf.toString().trim();
+		return qName;
 	}
 }
