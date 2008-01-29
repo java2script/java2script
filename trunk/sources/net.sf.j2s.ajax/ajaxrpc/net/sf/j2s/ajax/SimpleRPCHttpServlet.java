@@ -196,31 +196,35 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
 			throws ServletException, IOException {
 		String request = null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buf = new byte[1024];
+		int read = 0;
 		InputStream res = req.getInputStream();
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			int read = 0;
-			while ((read = res.read(buf)) != -1) {
-				baos.write(buf, 0, read);
-				if (baos.size() > maxPostLimit()) {
-					/*
-					 * Some malicious request may try to allocate huge size of memory! 
-					 * DoS attack? Limit the data size of HTTP request! 
-					 */
-					res.close();
-					resp.sendError(HttpServletResponse.SC_FORBIDDEN, 
-							"Data size reaches the limit of Java2Script Simple RPC!");
-					return;
-				}
+		while (true) {
+			try {
+				read = res.read(buf);
+			} catch (IOException e) {
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				res.close();
+				return;
 			}
-			res.close();
-			request = baos.toString();
-		} catch (IOException e) {
-			e.printStackTrace();
-			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			return;
+			if (read == -1) {
+				break;
+			}
+			baos.write(buf, 0, read);
+			if (baos.size() > maxPostLimit()) {
+				/*
+				 * Some malicious request may try to allocate huge size of memory! 
+				 * DoS attack? Limit the data size of HTTP request! 
+				 */
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, 
+						"Data size reaches the limit of Java2Script Simple RPC!");
+				res.close();
+				return;
+			}
 		}
+		request = baos.toString();
+		res.close();
 		
 		SimpleRPCRunnable runnable = getRunnableByRequest(request);
 		if (runnable == null) {

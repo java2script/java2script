@@ -139,13 +139,38 @@ public class SimpleRPCRequest {
 if (url != null && (url.indexOf ("http://") == 0
 		|| url.indexOf ("https://") == 0)) {
 	var host = null;
-	var idx = url.indexOf ('/', 9);
-	if (idx != -1) {
-		host = url.substring (url.indexOf ("//") + 2, idx); 
+	var idx1 = url.indexOf ("//") + 2;
+	var idx2 = url.indexOf ('/', 9);
+	if (idx2 != -1) {
+		host = url.substring (idx1, idx2); 
 	} else {
-		host = url.substring (url.indexOf ("//") + 2); 
+		host = url.substring (idx1); 
 	}
-	return (window.location.host != host || window.location.protocol == "file:");
+	var protocol = null; // http: or https:
+	var idx0 = url.indexOf ("://");
+	if (idx0 != -1) {
+		protocol = url.substring (0, idx0 + 1);
+	} else {
+		protocol = window.location.protocol;
+	}
+	var port = null;
+	var idx3 = host.indexOf (':'); // there is port number
+	if (idx3 != -1) {
+		port = parseInt (host.substring (idx3 + 1));
+		host = host.substring (0, idx3);
+	} else {
+		if ("http:" == protocol) {
+			port = 80;
+		} else if ("https:" == protocol) {
+			port = 443;
+		} else {
+			port = window.location.port;
+		}
+	}
+	var loc = window.location;
+	return (loc.host != host || loc.protocol != protocol
+			|| loc.port != port
+			|| loc.protocol == "file:");
 }
 return false; // ftp ...
 	 */
