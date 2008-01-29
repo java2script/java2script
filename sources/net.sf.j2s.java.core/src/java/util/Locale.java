@@ -23,10 +23,10 @@
 package java.util;
 
 import java.io.*;
-import java.security.AccessController;
+// import java.security.AccessController;
 import java.text.MessageFormat;
-import sun.security.action.GetPropertyAction;
-import sun.text.resources.LocaleData;
+// import sun.security.action.GetPropertyAction;
+// import sun.text.resources.LocaleData;
 
 /**
  *
@@ -325,11 +325,11 @@ public final class Locale implements Cloneable, Serializable {
          */
         {
             String language, region, country, variant;
-            language = (String) AccessController.doPrivileged(
-                            new GetPropertyAction("user.language", "en"));
+            language = null; /* (String) AccessController.doPrivileged(
+                            new GetPropertyAction("user.language", "en")); */
             // for compatibility, check for old user.region property
-            region = (String) AccessController.doPrivileged(
-                            new GetPropertyAction("user.region"));
+            region = null; /* (String) AccessController.doPrivileged(
+                            new GetPropertyAction("user.region")); */
             if (region != null) {
                 // region can be of form country, country_variant, or _variant
                 int i = region.indexOf('_');
@@ -341,10 +341,10 @@ public final class Locale implements Cloneable, Serializable {
                     variant = "";
                 }
             } else {
-                country = (String) AccessController.doPrivileged(
-                                new GetPropertyAction("user.country", ""));
-                variant = (String) AccessController.doPrivileged(
-                                new GetPropertyAction("user.variant", ""));
+                country = null; /* (String) AccessController.doPrivileged(
+                                new GetPropertyAction("user.country", "")); */
+                variant = null; /* (String) AccessController.doPrivileged(
+                                new GetPropertyAction("user.variant", "")); */
             }
             defaultLocale = new Locale(language, country, variant);
         }
@@ -421,7 +421,7 @@ return [
 ];
      */
     public static Locale[] getAvailableLocales() {
-        return LocaleData.getAvailableLocales("LocaleString");
+        return null; // LocaleData.getAvailableLocales("LocaleString");
     }
 
     /**
@@ -623,7 +623,7 @@ return [
 
         while (!done) {
             try {
-                ResourceBundle bundle = LocaleData.getLocaleElements(workingLocale);
+                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
                 result = findStringMatch((String[][])bundle.getObject("Languages"),
                                     langCode, langCode);
                 if (result.length() != 0)
@@ -709,7 +709,7 @@ return [
 
         while (!done) {
             try {
-                ResourceBundle bundle = LocaleData.getLocaleElements(workingLocale);
+                ResourceBundle bundle = null; // LocaleData.getLocaleElements(workingLocale);
                 result = findStringMatch((String[][])bundle.getObject("Countries"),
                                     ctryCode, ctryCode);
                 if (result.length() != 0)
@@ -767,7 +767,7 @@ return [
         if (variant.length() == 0)
             return "";
 
-        ResourceBundle bundle = LocaleData.getLocaleElements(inLocale);
+        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
 
         String names[] = getDisplayVariantArray(bundle);
 
@@ -827,7 +827,7 @@ return [
      * }
      */
     public String getDisplayName(Locale inLocale) {
-        ResourceBundle bundle = LocaleData.getLocaleElements(inLocale);
+        ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
 
         String languageName = getDisplayLanguage(inLocale);
         String countryName = getDisplayCountry(inLocale);
@@ -1198,6 +1198,7 @@ return [
      * avoid circularity problems between Locale and String.
      * The most straightforward algorithm is used. Look at optimizations later.
      */
+    /*
     private String toLowerCase(String str) {
         char[] buf = str.toCharArray();
         for (int i = 0; i < buf.length; i++) {
@@ -1205,12 +1206,14 @@ return [
         }
         return new String( buf );
     }
+    */
 
     /*
      * Locale needs its own, locale insensitive version of toUpperCase to
      * avoid circularity problems between Locale and String.
      * The most straightforward algorithm is used. Look at optimizations later.
      */
+    /*
     private String toUpperCase(String str) {
         char[] buf = str.toCharArray();
         for (int i = 0; i < buf.length; i++) {
@@ -1218,6 +1221,7 @@ return [
         }
         return new String( buf );
     }
+    */
 
     /**
      * @j2sIgnore
