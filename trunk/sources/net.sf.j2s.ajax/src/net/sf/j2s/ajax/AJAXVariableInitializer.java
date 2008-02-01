@@ -59,12 +59,16 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 			newPath = Path.fromPortableString(root + "/ajaxswt.jar");
 		} else if ("AJAX_RPC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxrpc.jar");
+		} else if ("AJAX_PIPE".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/ajaxpipe.jar");
 		} else if ("AJAX_CORE_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxcoresrc.zip");
 		} else if ("AJAX_SWT_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxswtsrc.zip");
 		} else if ("AJAX_RPC_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxrpcsrc.zip");
+		} else if ("AJAX_PIPE_SRC".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/ajaxpipesrc.zip");
 		}
 
 		if (newPath == null) {
