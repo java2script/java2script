@@ -201,6 +201,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (needPreparation) {
 					break;
 				}
+			} else if (element instanceof Initializer) {
+				Initializer init = (Initializer) element;
+				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+					needPreparation = true;
+					break;
+				}
 			}
 		}
 		
@@ -302,6 +308,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						continue;
 					}
 					element.accept(this);
+				} else if (element instanceof Initializer) {
+					Initializer init = (Initializer) element;
+					if ((init.getModifiers() & Modifier.STATIC) == 0) {
+						element.accept(this);
+					}
 				}
 			}
 			buffer.append("});\r\n");
@@ -672,6 +683,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (needPreparation) {
 					break;
 				}
+			} else if (element instanceof Initializer) {
+				Initializer init = (Initializer) element;
+				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+					needPreparation = true;
+					break;
+				}
 			}
 		}
 		if (needPreparation) {
@@ -684,6 +701,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						continue;
 					}
 					element.accept(this);
+				} else if (element instanceof Initializer) {
+					Initializer init = (Initializer) element;
+					if ((init.getModifiers() & Modifier.STATIC) == 0) {
+						element.accept(this);
+					}
 				}
 			}
 			buffer.append("};\r\n");
@@ -2208,6 +2230,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (needPreparation) {
 					break;
 				}
+			} else if (element instanceof Initializer) {
+				Initializer init = (Initializer) element;
+				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+					needPreparation = true;
+					break;
+				}
 			}
 		}
 		if (needPreparation) {
@@ -2220,6 +2248,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						continue;
 					}
 					element.accept(this);
+				} else if (element instanceof Initializer) {
+					Initializer init = (Initializer) element;
+					if ((init.getModifiers() & Modifier.STATIC) == 0) {
+						element.accept(this);
+					}
 				}
 			}
 			buffer.append("});\r\n");
@@ -2256,7 +2289,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append(");\r\n");
 					staticCount = -1;
 				}
-				element.accept(this);
+				if ((((Initializer) element).getModifiers() & Modifier.STATIC) != 0) {
+					element.accept(this);
+				} else {
+					continue; // ignore here
+				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
 			if ((field.getModifiers() & Modifier.STATIC) != 0) {
