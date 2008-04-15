@@ -363,6 +363,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		QNTypeBinding qn = new QNTypeBinding();
 		String qualifiedName = null;
 		if (declaringClass != null) {
+			ITypeBinding dclClass = null;
+			while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+				declaringClass = dclClass;
+			}
 			qualifiedName = declaringClass.getQualifiedName();
 			qn.binding = declaringClass;
 		} else {
@@ -518,6 +522,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				String qualifiedName;
 				ITypeBinding declaringClass = superBinding.getDeclaringClass();
 				if (declaringClass != null) {
+					ITypeBinding dclClass = null;
+					while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+						declaringClass = dclClass;
+					}
 					qualifiedName = declaringClass.getQualifiedName();
 					qn.binding = declaringClass;
 				} else {
@@ -548,6 +556,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					String qualifiedName;
 					ITypeBinding declaringClass = binding.getDeclaringClass();
 					if (declaringClass != null) {
+						ITypeBinding dclClass = null;
+						while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+							declaringClass = dclClass;
+						}
 						qualifiedName = declaringClass.getQualifiedName();
 						qn.binding = declaringClass;
 					} else {
@@ -693,6 +705,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					if (!elementType.isPrimitive()) {
 						ITypeBinding declaringClass = elementType.getDeclaringClass();
 						if (declaringClass != null) {
+							ITypeBinding dclClass = null;
+							while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+								declaringClass = dclClass;
+							}
 							qualifiedName = declaringClass.getQualifiedName();
 							qn.binding = declaringClass;
 						} else {
@@ -703,6 +719,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				} else {
 					ITypeBinding declaringClass = typeBinding.getDeclaringClass();
 					if (declaringClass != null) {
+						ITypeBinding dclClass = null;
+						while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+							declaringClass = dclClass;
+						}
 						qualifiedName = declaringClass.getQualifiedName();
 						qn.binding = declaringClass;
 					} else {
@@ -717,6 +737,29 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				qn.qualifiedName = qualifiedName;
 				optionals.add(qn);
 			}
+		} else if (binding instanceof IVariableBinding) {
+			IVariableBinding varBinding = (IVariableBinding) binding;
+			if ((varBinding.getModifiers() & Modifier.STATIC) != 0) {
+				QNTypeBinding qn = new QNTypeBinding();
+				String qualifiedName = null;
+				
+				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
+				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				
+				ITypeBinding dclClass = null;
+				while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+					declaringClass = dclClass;
+				}
+				qualifiedName = declaringClass.getQualifiedName();
+				if (isQualifiedNameOK(qualifiedName, node) 
+						&& !musts.contains(qualifiedName)
+						&& !requires.contains(qualifiedName)) {
+					qn.qualifiedName = qualifiedName;
+					optionals.add(qn);
+				}
+
+			}
+			
 		}
 		return super.visit(node);
 	}
@@ -734,6 +777,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		} else if(resolveTypeBinding != null){
 			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
 			if (declaringClass != null) {
+				ITypeBinding dclClass = null;
+				while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+					declaringClass = dclClass;
+				}
 				qualifiedName = declaringClass.getQualifiedName();
 				qn.binding = declaringClass;
 			} else {
@@ -766,6 +813,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //				QNTypeBinding qn = new QNTypeBinding();
 //				String qualifiedName = null;
 //				if (declaringClass != null) {
+//					ITypeBinding dclClass = null;
+//					while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+//						declaringClass = dclClass;
+//					}
 //					qualifiedName = declaringClass.getQualifiedName();
 //					qn.binding = declaringClass;
 //				} else {
@@ -798,6 +849,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName = null;
 				if (declaringClass != null) {
+					ITypeBinding dclClass = null;
+					while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+						declaringClass = dclClass;
+					}
 					qualifiedName = declaringClass.getQualifiedName();
 					qn.binding = declaringClass;
 				} else {
@@ -925,6 +980,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName = null;
 				if (declaringClass != null) {
+					ITypeBinding dclClass = null;
+					while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+						declaringClass = dclClass;
+					}
 					qualifiedName = declaringClass.getQualifiedName();
 					qn.binding = declaringClass;
 				} else {
