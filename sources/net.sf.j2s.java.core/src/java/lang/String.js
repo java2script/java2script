@@ -21,13 +21,63 @@ String.prototype.$replace = function (c1, c2) {
 	var regExp = new RegExp (c1, "gm");
 	return this.replace (regExp, c2);
 };
+String.prototype.$generateExpFunction = function (str) {
+	var arr = [];
+	var orders = [];
+	var idx = 0;
+	arr[0] = "";
+	var i = 0;
+	for (; i < str.length; i++) {
+		var ch = str.charAt (i);
+		if (i != str.length - 1 && ch == '\\') {
+			i++;
+			var c = str.charAt (i);
+			if (c == '\\') {
+				arr[idx] += '\\';
+			}
+			arr[idx] += c;
+		} else if (i != str.length - 1 && ch == '$') {
+			i++;
+			orders[idx] = parseInt (str.charAt (i));
+			idx++;
+			arr[idx] = "";
+		} else if (ch == '\r') {
+			arr[idx] += "\\r";
+		} else if (ch == '\n') {
+			arr[idx] += "\\n";
+		} else if (ch == '\t') {
+			arr[idx] += "\\t";
+		} else if (ch == '\"') {
+			arr[idx] += "\\\"";
+		} else {
+			arr[idx] += ch;
+		}
+	}
+	var funStr = "f = function (";
+	var max = Math.max.apply({},orders);
+	for (i = 0; i <= max; i++) {
+		funStr += "$" + i;
+		if (i != max) {
+			funStr += ", ";
+		}
+	}
+	funStr += ") { return ";
+	for (i = 0; i < arr.length - 1; i++) {
+		funStr += "\"" + arr[i] + "\" + $" + orders[i] + " + ";
+	}
+	funStr += "\"" + arr[i] + "\"; }";
+	var f = null;
+	eval (funStr)
+	return f;
+};
+
 String.prototype.replaceAll = function (exp, str) {
 	var regExp = new RegExp (exp, "gm");
-	return this.replace (regExp, str.replace (/\\\\/gm, "\\"));
+	return this.replace (regExp, this.$generateExpFunction (str));
 };
 String.prototype.replaceFirst = function (exp, str) {
 	var regExp = new RegExp (exp, "m");
-	return this.replace (regExp, str.replace (/\\\\/gm, "\\"));
+	return this.replace (regExp, this.$generateExpFunction (str));
 };
 String.prototype.matches = function (exp) {
 	var regExp = new RegExp (exp, "gm");
