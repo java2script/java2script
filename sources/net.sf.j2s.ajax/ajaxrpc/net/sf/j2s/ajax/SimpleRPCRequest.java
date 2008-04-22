@@ -165,11 +165,24 @@ if (url != null && (url.indexOf ("http://") == 0
 			port = 443;
 		} else {
 			port = window.location.port;
+			if (port != "") {
+				port = parseInt (port);
+			}
 		}
 	}
 	var loc = window.location;
+	var locPort = loc.port;
+	if (locPort == "") {
+		if ("http:" == loc.protocol) {
+			locPort = 80;
+		} else if ("https:" == loc.protocol) {
+			locPort = 443;
+		}
+	} else {
+		locPort = parseInt (locPort);
+	}
 	return (loc.host != host || loc.protocol != protocol
-			|| loc.port != port
+			|| locPort != port
 			|| loc.protocol == "file:");
 }
 return false; // ftp ...

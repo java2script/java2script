@@ -141,12 +141,15 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			int size = vector.size();
 			if (size > 0) {
 				for (int i = size - 1; i >= 0; i--) {
+					SimpleSerializable ss = null;
 					/*
 					 * Still need to check vector size!
 					 * Maybe multiple pipe servlets! 
 					 */
-					if (vector.size() <= 0) break;
-					SimpleSerializable ss = vector.remove(0);
+					synchronized (vector) {
+						if (vector.size() <= 0) break;
+						ss = vector.remove(0);
+					}
 					if (ss == null) break; // terminating signal
 					output(writer, type, key, ss.serialize());
 					writer.flush();
