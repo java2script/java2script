@@ -255,6 +255,7 @@
     		<arg value="java/util/Set.js"/>
     		<arg value="java/util/Map.js"/>
     		<arg value="java/util/List.js"/>
+    		<arg value="java/util/Queue.js"/>
     		<arg value="java/util/RandomAccess.js"/>
         	
     		<arg value="java/net/URLEncoder.js"/>
@@ -272,6 +273,10 @@
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRequest.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
+        	
+    		<arg value="net/sf/j2s/ajax/SimplePipeRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/SimplePipeRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/SimplePipeSWTRequest.js"/>
         	
         	<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
