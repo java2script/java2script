@@ -14,6 +14,9 @@
             variable="AJAX_RPC"/>
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_PIPE"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
             variable="AJAX_CORE_SRC"/>
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
@@ -21,6 +24,9 @@
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
             variable="AJAX_RPC_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_PIPE_SRC"/>
    </extension>
 
 </plugin>
