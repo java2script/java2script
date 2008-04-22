@@ -30,7 +30,11 @@ window["java.registered"] = false;
 		"$.SimpleSerializable",
 		"$.SimpleRPCRunnable",
 		"$.SimpleRPCRequest",
-		"$.SimpleRPCSWTRequest"
+		"$.SimpleRPCSWTRequest",
+       	
+		"$.SimplePipeRunnable",
+		"$.SimplePipeRequest",
+		"$.SimplePipeSWTRequest"
 	]);
 
 	ClazzLoader.jarClasspath (base + "util/AbstractList.js", [
