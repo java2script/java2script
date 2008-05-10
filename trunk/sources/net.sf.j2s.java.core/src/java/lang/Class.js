@@ -1641,11 +1641,15 @@ Clazz.declareInterface = function (prefix, name, interfacez) {
  #-*/
 Clazz.decorateAsClass = function (clazzFun, prefix, name, clazzParent, 
 		interfacez, parentClazzInstance) {
-	var prefixName = prefix.__PKG_NAME__;
-	if (prefixName == null) {
-		prefixName = prefix.__CLASS_NAME__;
+	var prefixName = null;
+	if (prefix != null) {
+		prefixName = prefix.__PKG_NAME__;
+		if (prefixName == null) {
+			prefixName = prefix.__CLASS_NAME__;
+		}
 	}
-	var cf = Clazz.unloadedClasses[prefixName + "." + name];
+	var qName = (prefixName == null ? "" : prefixName + ".") + name;
+	var cf = Clazz.unloadedClasses[qName];
 	if (cf != null) {
 		clazzFun = cf;
 	}
