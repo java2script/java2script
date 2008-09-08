@@ -400,6 +400,7 @@ public class HttpRequest {
 	private void request() {
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
+			connection.setReadTimeout(30000); // 30 seconds
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
@@ -437,7 +438,7 @@ public class HttpRequest {
 				is = connection.getInputStream();
 			} catch (IOException e) {
 				if (checkAbort()) return; // exception caused by abort action
-				e.printStackTrace();
+				//e.printStackTrace();
 				readyState = 4;
 				if (onreadystatechange != null) {
 					onreadystatechange.onLoaded();
@@ -545,7 +546,7 @@ public class HttpRequest {
 			*/
 		} catch (IOException e) {
 			if (checkAbort()) return; // exception caused by abort action
-			e.printStackTrace();
+			//e.printStackTrace();
 			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onLoaded();
