@@ -31,61 +31,62 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	/**
 	 * Status of pipe: ok.
 	 */
-	protected static final String PIPE_STATUS_OK = "ok";
+	protected static final String PIPE_STATUS_OK = "o"; // "ok";
 
 	/**
 	 * Status of pipe: destroyed.
 	 */
-	protected static final String PIPE_STATUS_DESTROYED = "destroyed";
+	protected static final String PIPE_STATUS_DESTROYED = "d"; // "destroyed";
 	
 	/**
 	 * Status of pipe: lost.
 	 */
-	protected static final String PIPE_STATUS_LOST = "lost";
+	protected static final String PIPE_STATUS_LOST = "l"; // "lost";
 
 	
 	/**
 	 * Type of pipe request: query
 	 */
-	protected static final String PIPE_TYPE_QUERY = "query";
+	protected static final String PIPE_TYPE_QUERY = "q"; // "query";
 	
 	/**
 	 * Type of pipe request: notify
 	 */
-	protected static final String PIPE_TYPE_NOTIFY = "notify";
+	protected static final String PIPE_TYPE_NOTIFY = "n"; // "notify";
 	
 	/**
 	 * Type of pipe request: script
 	 */
-	protected static final String PIPE_TYPE_SCRIPT = "script";
+	protected static final String PIPE_TYPE_SCRIPT = "s"; // "script";
 	
 	/**
 	 * Type of pipe request: xss
 	 */
-	protected static final String PIPE_TYPE_XSS = "xss";
+	protected static final String PIPE_TYPE_XSS = "x"; // "xss";
 	
 	/**
 	 * Type of pipe request: continuum
 	 */
-	protected static final String PIPE_TYPE_CONTINUUM = "continuum";
+	protected static final String PIPE_TYPE_CONTINUUM = "c"; // "continuum";
 	
 	
 	/**
 	 * Query key for pipe: pipekey
 	 */
-	protected static final String FORM_PIPE_KEY = "pipekey";
+	protected static final String FORM_PIPE_KEY = "k"; // "pipekey";
 	
 	/**
 	 * Query key for pipe: pipetype
 	 */
-	protected static final String FORM_PIPE_TYPE = "pipetype";
+	protected static final String FORM_PIPE_TYPE = "t"; // "pipetype";
 	
 	/**
 	 * Query key for pipe: pipernd
 	 */
-	protected static final String FORM_PIPE_RANDOM = "pipernd";
+	protected static final String FORM_PIPE_RANDOM = "r"; // "pipernd";
 	
-	
+	static final int PIPE_KEY_LENGTH = 6;
+
 	public static final int MODE_PIPE_QUERY = 3;
 	
 	public static final int MODE_PIPE_CONTINUUM = 4;
@@ -95,6 +96,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	private static long pipeQueryInterval = 1000;
 	
 	static long pipeLiveNotifyInterval = 25000;
+	
+	private static long reqCount = 0;
 	
 	public static int getPipeMode() {
 		return pipeMode;
@@ -129,9 +132,10 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * @return request data for both GET and POST request. 
 	 */
 	protected static String constructRequest(String pipeKey, String pipeRequestType, boolean rand) {
+		reqCount++;
 		return FORM_PIPE_KEY + "=" + pipeKey + "&" 
 				+ FORM_PIPE_TYPE + "=" + pipeRequestType 
-				+ (rand ? "&" + FORM_PIPE_RANDOM + "=" + Math.round(100000000 * Math.random()) : "");
+				+ (rand ? "&" + FORM_PIPE_RANDOM + "=" + reqCount : "");
 	}
 	
 	protected static void sendRequest(HttpRequest request, String method, String url, 
@@ -168,7 +172,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					keepPipeLive(runnable);
 					runnable.ajaxOut();
 				}
-			}).start();
+			}, "Pipe Request Thread").start();
 		} else {
 			pipeRequest(runnable);
 		}
@@ -226,6 +230,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
 							if (response != null && response.indexOf(PIPE_STATUS_LOST) != -1) {
+								runnable.pipeAlive = false;
 								runnable.pipeLost();
 								SimplePipeHelper.removePipe(pipeKey);
 								// may need to inform user that connection is already lost!
@@ -302,7 +307,10 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url;
 var iframeID = arguments[1];
-if (typeof (script.onreadystatechange) == "undefined") { // W3C
+var userAgent = navigator.userAgent.toLowerCase ();
+var isOpera = (userAgent.indexOf ("opera") != -1);
+var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
+if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 	script.onerror = function () {
 		this.onerror = null;
 		if (iframeID != null) {
@@ -458,6 +466,7 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 		if (PIPE_STATUS_LOST.equals(result)) {
 			SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
 			if (pipe != null) {
+				pipe.pipeAlive = false;
 				pipe.pipeLost();
 				SimplePipeHelper.removePipe(key);
 			}
@@ -492,9 +501,10 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 						String destroyedKey = PIPE_STATUS_DESTROYED;
 						if (retStr.indexOf(destroyedKey) == 0) {
 							int beginIndex = destroyedKey.length() + 1;
-							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + 32);
+							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 							SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 							if (pipe != null) {
+								pipe.pipeAlive = false;
 								pipe.pipeClosed();
 								SimplePipeHelper.removePipe(pipeKeyStr);
 							}
@@ -542,7 +552,6 @@ var url = runnable.getPipeURL();
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
 		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true);
 document.body.appendChild (ifr);
-
 var threadFun = function (pipeFun, key) {
 		return function () {
 			var runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe(key);
@@ -558,7 +567,7 @@ var threadFun = function (pipeFun, key) {
 };
 //spr.lastQueryReceived = true;
 var fun = threadFun (spr.pipeNotify, runnable.pipeKey);
-fun ();
+window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 */
 	static void pipeContinuum(final SimplePipeRunnable runnable) {
 		HttpRequest pipeRequest = new HttpRequest() {
@@ -586,13 +595,14 @@ fun ();
 							if (resetString.indexOf(destroyedKey) == 0) {
 								int beginIndex = destroyedKey.length() + 1;
 								// Following 32 is the length of pipe key string
-								String pipeKeyStr = resetString.substring(beginIndex, beginIndex + 32);
+								String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 								SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 								if (pipe != null) {
+									pipe.pipeAlive = false;
 									pipe.pipeClosed();
 									SimplePipeHelper.removePipe(pipeKeyStr);
 								}
-								resetString = resetString.substring(beginIndex + 32 + 1);
+								resetString = resetString.substring(beginIndex + PIPE_KEY_LENGTH + 1);
 							}
 							baos.reset();
 							try {
@@ -621,7 +631,7 @@ fun ();
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM, false);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_SCRIPT, false);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	
@@ -649,22 +659,27 @@ fun ();
 	public static String parseReceived(final String string) {
 		SimpleSerializable ss = null;
 		int start = 0;
-		while (string.length() > start + 32) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
+		while (string.length() > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
 			String destroyedKey = PIPE_STATUS_DESTROYED;
-			if (destroyedKey.equals(string.substring(start + 32, 
-					start + 32 + destroyedKey.length()))) {
+			int end = start + PIPE_KEY_LENGTH;
+			if (destroyedKey.equals(string.substring(end,
+					end + destroyedKey.length()))) {
 				/**
 				 * @j2sNative
-				 * var key = string.substring(start, start + 32);
+				 * var key = string.substring(start, end);
+				 * var pipe = net.sf.j2s.ajax.SimplePipeHelper.getPipe(key)
+				 * pipe.pipeAlive = false;
+				 * pipe.pipeClosed();
 				 * net.sf.j2s.ajax.SimplePipeHelper.removePipe(key);
 				 */ {}
-				return destroyedKey + ":" + string.substring(start, start + 32) + ":" + string.substring(start + 32 + destroyedKey.length());
+				return destroyedKey + ":" + string.substring(start, end) 
+						+ ":" + string.substring(end + destroyedKey.length());
 			}
-			if ((ss = SimpleSerializable.parseInstance(string, start + 32)) == null
-					|| !ss.deserialize(string, start + 32)) {
+			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
+					|| !ss.deserialize(string, end)) {
 				break;
 			}
-			String key = string.substring(start, start + 32);
+			String key = string.substring(start, end);
 			SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 			if (runnable != null) { // should always satisfy this condition
 				runnable.deal(ss);
@@ -742,28 +757,24 @@ fun ();
 			/**
 			 * @j2sNative
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
-var f = (!isXSS) ? spr.pipeQuery 
-		: spr.pipeScript;
-var threadFun = function (pipeFun, key) {
-		return function () {
-			var runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe(key);
-			if (runnable != null) {
-				var spr = net.sf.j2s.ajax.SimplePipeRequest;
-				if (spr.lastQueryReceived) {
-					spr.lastQueryReceived = false;
-					pipeFun (runnable);
-				}
-				spr.queryTimeoutHandle = window.setTimeout (arguments.callee, spr.pipeQueryInterval);
-			}
-		};
-};
 spr.lastQueryReceived = true;
 if (spr.queryTimeoutHandle != null) {
 	window.clearTimeout (spr.queryTimeoutHandle);
+	spr.queryTimeoutHandle = null;
 }
-spr.queryTimeoutHandle = null;
-var fun = threadFun (f, runnable.pipeKey);
-fun ();
+(function (pipeFun, key) { // Function that simulate a thread
+	return function () {
+		var runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe(key);
+		if (runnable != null) {
+			var spr = net.sf.j2s.ajax.SimplePipeRequest;
+			if (spr.lastQueryReceived) {
+				spr.lastQueryReceived = false;
+				pipeFun (runnable);
+			}
+			spr.queryTimeoutHandle = window.setTimeout (arguments.callee, spr.pipeQueryInterval);
+		}
+	};
+}) ((!isXSS) ? spr.pipeQuery : spr.pipeScript, runnable.pipeKey) ()
 			 */
 		{
 			final String key = runnable.pipeKey;

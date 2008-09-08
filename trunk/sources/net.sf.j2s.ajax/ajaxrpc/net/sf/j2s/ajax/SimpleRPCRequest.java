@@ -26,6 +26,17 @@ public class SimpleRPCRequest {
 	
 	private static int runningMode = MODE_LOCAL_JAVA_THREAD;
 	
+	static {
+		boolean ajax = false;
+		/**
+		 * @j2sNative
+		 * ajax = true;
+		 */ {}
+		if (ajax) {
+			runningMode = MODE_AJAX;
+		}
+	}
+	
 	public static int getRequstMode() {
 		return runningMode;
 	}
@@ -181,9 +192,13 @@ if (url != null && (url.indexOf ("http://") == 0
 	} else {
 		locPort = parseInt (locPort);
 	}
-	return (loc.host != host || loc.protocol != protocol
-			|| locPort != port
-			|| loc.protocol == "file:");
+	var locHost = loc.host;
+	var idx4 = locHost.indexOf (":");
+	if (idx4 != -1) {
+		locHost = locHost.substring (0, idx4);
+	}
+	return (locHost != host || locPort != port
+			|| loc.protocol != protocol || loc.protocol == "file:");
 }
 return false; // ftp ...
 	 */
@@ -276,7 +291,10 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url + "?jzn=" + rnd + "&jzp=" + length 
 		+ "&jzc=" + (i + 1) + "&jzz=" + content;
-if (typeof (script.onreadystatechange) == "undefined") { // W3C
+var userAgent = navigator.userAgent.toLowerCase ();
+var isOpera = (userAgent.indexOf ("opera") != -1);
+var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
+if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 	script.onerror = function () {
 		this.onerror = null;
 		var idx = this.src.indexOf ("jzn=");

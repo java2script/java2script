@@ -26,9 +26,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	public String pipeKey;
 
-	private boolean pipeAlive;
+	public boolean pipeAlive;
 	
-	private SimplePipeHelper.IPipeThrough helper;
+	SimplePipeHelper.IPipeThrough helper;
 	
 	/**
 	 * 
@@ -54,15 +54,13 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	@Override
 	public void ajaxRun() {
-		pipeKey = SimplePipeHelper.registerPipe(this);
-		if (pipeKey != null) {
-			pipeSetup();
-			keepPipeLive();
-			pipeAlive = true;
-			pipeMonitoring();
-		} else { // failed!
-			pipeAlive = false;
+		pipeAlive = pipeSetup();
+		if (!pipeAlive) {
+			return; // setup failed
 		}
+		pipeKey = SimplePipeHelper.registerPipe(this);
+		keepPipeLive();
+		pipeMonitoring();
 	}
 
 	@Override
@@ -72,13 +70,17 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	@Override
 	public void ajaxOut() {
-		pipeCreated();
+		if (pipeAlive) {
+			pipeCreated();
+		} else {
+			pipeFailed();
+		}
 	}
 	
 	/**
 	 * Listening on given events and pipe events from Simple RPC to client.
 	 */
-	public abstract void pipeSetup();
+	public abstract boolean pipeSetup();
 	
 	/**
 	 * Destroy the pipe and remove listeners.
@@ -205,14 +207,21 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * 
 	 * @param args
 	 * @return SimpleSerializable objects to be sent through the pipe.
+	 * If return null, it means that this pipe does not recognize the
+	 * argument objects.
 	 */
 	public abstract SimpleSerializable[] through(Object ... args);
 
-	public void deal(SimpleSerializable ss) {
+	/**
+	 * Deal the object from pipe.
+	 * @param ss
+	 * @return boolean Whether the object is dealt
+	 */
+	public boolean deal(SimpleSerializable ss) {
 		try {
 			Class<? extends SimpleSerializable> clazz = ss.getClass();
 			if ("net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
-				return;
+				return true; // seldom or never reach this branch, just ignore
 			}
 			Method method = null;
 			
@@ -222,7 +231,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			while ((idx = clazzName.lastIndexOf('$')) != -1) {
 				if (clazzName.length() > idx + 1) {
 					char ch = clazzName.charAt(idx + 1);
-					if (ch < '0' && ch > '9') { // not a number
+					if (ch < '0' || ch > '9') { // not a number
 						break; // inner class
 					}
 				}
@@ -235,14 +244,17 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			if (clzz != null) {
 				method = clzz.getMethod("deal", clazz);
 				if (method != null) {
-					method.invoke(this, ss);
-					return;
+					Class<?> returnType = method.getReturnType();
+					if (returnType == boolean.class) {
+						Object result = method.invoke(this, ss);
+						return ((Boolean) result).booleanValue();
+					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// default
+		return false; // unknown object
 	}
 
 	/**

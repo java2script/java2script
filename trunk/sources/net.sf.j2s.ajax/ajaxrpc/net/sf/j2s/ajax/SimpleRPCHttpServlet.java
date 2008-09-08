@@ -106,6 +106,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			}
 		});
 		if (instance instanceof SimpleRPCRunnable) {
+			instance.deserialize(request);
 			return (SimpleRPCRunnable) instance;
 		}
 		return null;
@@ -237,7 +238,6 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		resp.setContentType("text/plain; charset=utf-8");
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
-		runnable.deserialize(request);
 		SimpleRPCRunnable clonedRunnable = null;
 		try {
 			clonedRunnable = (SimpleRPCRunnable) runnable.clone();
@@ -261,6 +261,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		});
 		
 		writer.write(serialize);
+		runnable.ajaxOut();
 	}
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
@@ -298,13 +299,11 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		} else { // ?WLL100net.sf....%23...
 			request = URLDecoder.decode(request, "UTF-8");
 		}
-		
 		SimpleRPCRunnable runnable = getRunnableByRequest(request);
 		if (runnable == null) {
 			resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
-		runnable.deserialize(request);
 		SimpleRPCRunnable clonedRunnable = null;
 		try {
 			clonedRunnable = (SimpleRPCRunnable) runnable.clone();
@@ -342,6 +341,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 					.replaceAll("\n", "\\\\n")
 					.replaceAll("\"", "\\\\\""));
 			writer.write("\");");
+			runnable.ajaxOut();
 			return;
 		}
 		
@@ -350,6 +350,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
 		writer.write(serialize);
+		runnable.ajaxOut();
 	}
 
 	private String prepareScriptRequest(HttpServletRequest req, HttpServletResponse resp, 

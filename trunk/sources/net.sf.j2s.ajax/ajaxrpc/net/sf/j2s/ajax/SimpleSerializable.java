@@ -377,7 +377,7 @@ return strBuf;
 				}
 			}
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		int size = buffer.length();
 		if (size > 0x1000000) { // 16 * 1024 * 1024
@@ -584,6 +584,9 @@ while (index < start + length && index < end) {
 					arr[i] = s;
 				}
 			}
+			if (!fieldMap[fieldName]) {
+				continue;
+			}
 			this[fieldName] = arr;
 		}
 	} else {
@@ -756,6 +759,9 @@ return true;
 									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
 								}
 							}
+						}
+						if (field == null) {
+							continue;
 						}
 						switch (c2) {
 						case 'F': {
