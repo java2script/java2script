@@ -169,6 +169,44 @@ public final class Character implements Serializable, Comparable<Character> {
 		return false;
 	}
 
+    /**
+     * Answers whether the character is an upper case letter.
+     * 
+     * @param c
+     *            the character
+     * @return true when the character is a upper case letter, false otherwise
+     */
+    public static boolean isUpperCase(char c) {
+        // Optimized case for ASCII
+        if ('A' <= c && c <= 'Z') {
+            return true;
+        }
+//        if (c < 128) {
+            return false;
+//        }
+//
+//        return getType(c) == UPPERCASE_LETTER;
+    }
+
+    /**
+     * Answers whether the character is a lower case letter.
+     * 
+     * @param c
+     *            the character
+     * @return true when the character is a lower case letter, false otherwise
+     */
+    public static boolean isLowerCase(char c) {
+        // Optimized case for ASCII
+        if ('a' <= c && c <= 'z') {
+            return true;
+        }
+//        if (c < 128) {
+            return false;
+//        }
+//
+//        return getType(c) == LOWERCASE_LETTER;
+    }
+
 	/**
 	 * Answers whether the character is a whitespace character in Java.
 	 * 
