@@ -111,21 +111,24 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			boolean updated = SimplePipeHelper.notifyPipeStatus(key, true); // update it!
 			resp.setContentType("text/plain; charset=utf-8");
 			writer = resp.getWriter();
-//			writer.write("net.sf.j2s.ajax.SimplePipeRequest.pipeNotifyCallBack (\""); // $p1p3b$
-			writer.write("$p1p3b$ (\"");
+			writer.write("$p1p3b$ (\""); // $p1p3b$ = net.sf.j2s.ajax.SimplePipeRequest.pipeNotifyCallBack
 			writer.write(key);
 			writer.write("\", \"");
 			writer.write(updated ? SimplePipeRequest.PIPE_STATUS_OK : SimplePipeRequest.PIPE_STATUS_LOST);
 			writer.write("\");");
 			return;
 		}
+		
+		resp.setHeader("Transfer-Encoding", "chunked");
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
 			resp.setContentType("text/html; charset=utf-8");
-			writer = resp.getWriter();;
-			writer.write("<html><head><title></title></head><body>\r\n");
-//			writer.write("<script type=\"text/javascript\">");
-//			writer.write("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }\r\n");
-//			writer.write("</script>\r\n");
+			writer = resp.getWriter();
+			StringBuffer buffer = new StringBuffer();
+			buffer.append("<html><head><title></title></head><body>\r\n");
+			buffer.append("<script type=\"text/javascript\">");
+			buffer.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
+			buffer.append("</script>\r\n");
+			writer.write(buffer.toString());
 		} else {
 			resp.setContentType("text/plain; charset=utf-8");
 			writer = resp.getWriter();
@@ -133,6 +136,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 
 		SimplePipeHelper.notifyPipeStatus(key, true); // update it!
 		
+		boolean hasPipeData = false;
+
 		long beforeLoop = new Date().getTime();
 		Vector<SimpleSerializable> vector = null;
 		while ((vector = SimplePipeHelper.getPipeVector(key)) != null
@@ -152,6 +157,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 					}
 					if (ss == null) break; // terminating signal
 					output(writer, type, key, ss.serialize());
+					hasPipeData = true;
 					writer.flush();
 				}
 			} else {
@@ -178,7 +184,6 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				break;
 			}
 		} // end of while
-		
 		if (SimplePipeHelper.getPipeVector(key) == null
 				|| !SimplePipeHelper.isPipeLive(key)) { // pipe is tore down!
 			SimplePipeHelper.notifyPipeStatus(key, false);
@@ -186,28 +191,33 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			SimplePipeHelper.removePipe(key);
 			try {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_DESTROYED);
+				hasPipeData = true;
 			} catch (Exception e) {
-				// HTTP connection may already be closed!
+				// HTTP connection may be closed already!
 			}
+		}
+		if (!hasPipeData) {
+			//output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
 		}
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
 			try {
 				writer.write("</body></html>\r\n");
 			} catch (Exception e) {
-				// HTTP connection may already be closed!
+				// HTTP connection may be closed already!
 			}
 		}
 	}
 
 	protected void output(PrintWriter writer, String type, String key,
 			String str) {
+		StringBuffer buffer = new StringBuffer();
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { 
 			// iframe, so $ is a safe method identifier
-			writer.write("<script type=\"text/javascript\">$p1p3p$ (\"");
+			buffer.append("<script type=\"text/javascript\">$ (\"");
 		} else if (SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
-			writer.write("$p1p3p$ (\""); // $p1p3p$
+			buffer.append("$p1p3p$ (\""); // $p1p3p$
 		}
-		writer.write(key);
+		buffer.append(key);
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type) 
 				|| SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
 			str = str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\r", "\\\\r")
@@ -216,12 +226,13 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				str = str.replaceAll("<\\/script>", "<\\/scr\" + \"ipt>");
 			}
 		}
-		writer.write(str);
+		buffer.append(str);
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
-			writer.write("\");</script>\r\n");
+			buffer.append("\");</script>\r\n");
 		} else if (SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
-			writer.write("\");\r\n");
+			buffer.append("\");\r\n");
 		}
+		writer.write(buffer.toString());
 	}
 
 	@Override

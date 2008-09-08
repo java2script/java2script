@@ -40,20 +40,13 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 			runnable.setPipeHelper(new SimplePipeHelper.IPipeThrough() {
 				
 				public void helpThrough(final SimplePipeRunnable pipe, final SimpleSerializable[] objs) {
-					Display disp = Display.getDefault();
-					if (disp != null) {
-						disp.syncExec(new Runnable() {
-							public void run() {
-								for (int i = 0; i < objs.length; i++) {
-									pipe.deal(objs[i]);
-								}
+					SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+						public void run() {
+							for (int i = 0; i < objs.length; i++) {
+								pipe.deal(objs[i]);
 							}
-						});
-					} else {
-						for (int i = 0; i < objs.length; i++) {
-							pipe.deal(objs[i]);
 						}
-					}
+					});
 				}
 			
 			});
@@ -63,20 +56,17 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						runnable.ajaxRun();
 					} catch (RuntimeException e) {
 						e.printStackTrace(); // should never fail in Java thread mode!
-						Display disp = Display.getDefault();
-						if (disp != null) {
-							disp.syncExec(new Runnable() {
-								public void run() {
-									runnable.ajaxFail();
-								}
-							});
-						} // else ?
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+							public void run() {
+								runnable.ajaxFail();
+							}
+						});
 						return;
 					}
 					Display disp = Display.getDefault();
 					if (disp != null) {
 						swtKeepPipeLive(runnable, disp);
-						disp.syncExec(new Runnable() {
+						SWTHelper.syncExec(disp, new Runnable() {
 							public void run() {
 								runnable.ajaxOut();
 							}
@@ -128,14 +118,11 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						if (pipeLive) {
 							runnable.keepPipeLive();
 						} else {
-							// runnable.pipeClosed(); //?
-							if (!disp.isDisposed()) {
-								disp.syncExec(new Runnable() {
-									public void run() {
-										runnable.pipeClosed(); //?
-									}
-								});
-							}
+							SWTHelper.syncExec(disp, new Runnable() {
+								public void run() {
+									runnable.pipeClosed(); //?
+								}
+							});
 							break;
 						}
 					} else {
@@ -150,14 +137,11 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
 							if (response != null && response.indexOf(PIPE_STATUS_LOST) != -1) {
-								//runnable.pipeLost();
-								if (!disp.isDisposed()) {
-									disp.syncExec(new Runnable() {
-										public void run() {
-											runnable.pipeLost();
-										}
-									});
-								}
+								SWTHelper.syncExec(disp, new Runnable() {
+									public void run() {
+										runnable.pipeLost();
+									}
+								});
 								SimplePipeHelper.removePipe(pipeKey);
 								// may need to inform user that connection is already lost!
 								break;
@@ -253,7 +237,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						String destroyedKey = PIPE_STATUS_DESTROYED;
 						if (retStr.indexOf(destroyedKey) == 0) {
 							int beginIndex = destroyedKey.length() + 1;
-							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + 32);
+							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 							SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 							if (pipe != null) {
 								pipe.pipeClosed();
@@ -293,13 +277,13 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							String destroyedKey = PIPE_STATUS_DESTROYED;
 							if (resetString.indexOf(destroyedKey) == 0) {
 								int beginIndex = destroyedKey.length() + 1;
-								String pipeKeyStr = resetString.substring(beginIndex, beginIndex + 32);
+								String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 								SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 								if (pipe != null) {
 									pipe.pipeClosed();
 									SimplePipeHelper.removePipe(pipeKeyStr);
 								}
-								resetString = resetString.substring(beginIndex + 32 + 1);
+								resetString = resetString.substring(beginIndex + PIPE_KEY_LENGTH + 1);
 							}
 							baos.reset();
 							try {
@@ -343,34 +327,28 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 	static String swtParseReceived(String string) {
 		SimpleSerializable ss = null;
 		int start = 0;
-		while (string.length() > start + 32) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
+		while (string.length() > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
 			String destroyedKey = PIPE_STATUS_DESTROYED;
-			if (PIPE_STATUS_DESTROYED.equals(string.substring(start + 32, 
-					start + 32 + destroyedKey.length()))) {
-				/**
-				 * @j2sNative
-				 * var key = string.substring(start, start + 32);
-				 * net.sf.j2s.ajax.SimplePipeHelper.removePipe(key);
-				 */ {}
-				return destroyedKey + ":" + string.substring(start, start + 32) + ":" + string.substring(start + 32 + destroyedKey.length());
+			int end = start + PIPE_KEY_LENGTH;
+			if (PIPE_STATUS_DESTROYED.equals(string.substring(end, 
+					end + destroyedKey.length()))) {
+				return destroyedKey + ":" + string.substring(start, end) 
+						+ ":" + string.substring(end + destroyedKey.length());
 			}
-			if ((ss = SimpleSerializable.parseInstance(string, start + 32)) == null
-					|| !ss.deserialize(string, start + 32)) {
+			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
+					|| !ss.deserialize(string, end)) {
 				break;
 			}
-			String key = string.substring(start, start + 32);
+			String key = string.substring(start, end);
 			final SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 			if (runnable != null) { // should be always fulfill this condition
 				//runnable.deal(ss);
-				Display disp = Display.getDefault();
-				if (disp != null) {
-					final SimpleSerializable instance = ss;
-					disp.syncExec(new Runnable() {
-						public void run() {
-							runnable.deal(instance);
-						}
-					});
-				} // else ?
+				final SimpleSerializable instance = ss;
+				SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+					public void run() {
+						runnable.deal(instance);
+					}
+				});
 			}
 			
 			start = restStringIndex(string, start);

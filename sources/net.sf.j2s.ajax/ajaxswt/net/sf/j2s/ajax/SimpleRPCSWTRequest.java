@@ -26,7 +26,11 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
 	 */
 	public static void swtRequest(final SimpleRPCRunnable runnable) {
-		runnable.ajaxIn();
+		SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+			public void run() {
+				runnable.ajaxIn();
+			}
+		});
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
 			new Thread(new Runnable(){
 				public void run() {
@@ -34,24 +38,18 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 						runnable.ajaxRun();
 					} catch (RuntimeException e) {
 						e.printStackTrace(); // should never fail in Java thread mode!
-						Display disp = Display.getDefault();
-						if (disp != null) {
-							disp.syncExec(new Runnable() {
-								public void run() {
-									runnable.ajaxFail();
-								}
-							});
-						} // else ?
-						return;
-					}
-					Display disp = Display.getDefault();
-					if (disp != null) {
-						disp.syncExec(new Runnable() {
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 							public void run() {
-								runnable.ajaxOut();
+								runnable.ajaxFail();
 							}
 						});
-					} // else ?
+						return;
+					}
+					SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+						public void run() {
+							runnable.ajaxOut();
+						}
+					});
 				}
 			}).start();
 		} else {

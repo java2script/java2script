@@ -57,7 +57,7 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	 * @j2sNative this.swtOnLoaded();
 	 */
 	public void onLoaded() {
-		Display.getDefault().syncExec(new Runnable() {
+		SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 			public void run() {
 				swtOnLoaded();
 			}
@@ -70,7 +70,7 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	 * @j2sNative this.swtOnReceiving();
 	 */
 	public void onReceiving() {
-		Display.getDefault().syncExec(new Runnable() {
+		SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 			public void run() {
 				swtOnReceiving();
 			}
@@ -83,7 +83,7 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	 * @j2sNative this.swtOnSent();
 	 */
 	public void onSent() {
-		Display.getDefault().syncExec(new Runnable() {
+		SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 			public void run() {
 				swtOnSent();
 			}
@@ -96,7 +96,7 @@ public class XHRCallbackSWTAdapter implements IXHRCallback {
 	 * @j2sNative this.swtOnOpen();
 	 */
 	public void onOpen() {
-		Display.getDefault().syncExec(new Runnable() {
+		SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 			public void run() {
 				swtOnOpen();
 			}

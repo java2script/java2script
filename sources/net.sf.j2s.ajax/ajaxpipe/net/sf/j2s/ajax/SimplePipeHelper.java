@@ -62,7 +62,7 @@ class SimplePipeHelper {
 	 * @j2sIgnore
 	 */
 	static String registerPipe(SimplePipeRunnable pipe) {
-		if (pipe == null) return null;
+		// if (pipe == null) return null; // should never register null pipe!
 		if (pipes == null) {
 			pipes = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(50));
 		}
@@ -90,13 +90,19 @@ class SimplePipeHelper {
 	 * 
 	 * @j2sIgnore
 	 */
-	private static String nextPipeKey() {
-		StringBuffer hexString = new StringBuffer();
-		while (hexString.length() < 32) {
-			long rnd = Math.abs(Math.round(Long.MAX_VALUE * Math.random()));
-			hexString.append(Long.toHexString(rnd));
+	static String nextPipeKey() {
+		StringBuffer buf = new StringBuffer();
+		for (int i = 0; i < SimplePipeRequest.PIPE_KEY_LENGTH; i++) {
+			int r = (int) Math.round((float) Math.random() * 61); // 0..61, total 62 numbers
+			if (r < 10) {
+				buf.append((char) (r + '0'));
+			} else if (r < 10 + 26) {
+				buf.append((char) ((r - 10) + 'a'));
+			} else {
+				buf.append((char) ((r - 10 - 26) + 'A'));
+			}
 		}
-		return hexString.substring(0, 32);
+		return buf.toString();
 	}
 	
 	/**
@@ -127,9 +133,11 @@ class SimplePipeHelper {
 	 * @return
 	 * 
 	 * @j2sNative
-	 * return net.sf.j2s.ajax.SimplePipeHelper.pipes[key];
+	 * var ps = net.sf.j2s.ajax.SimplePipeHelper.pipes;
+	 * if (ps == null || key == null) return null;
+	 * return ps[key];
 	 */
-	static SimplePipeRunnable getPipe(String key) {
+	public static SimplePipeRunnable getPipe(String key) {
 		if (pipes == null || key == null) return null;
 		return pipes.get(key);
 	}
@@ -158,7 +166,7 @@ class SimplePipeHelper {
 		if (vector == null) return;
 		vector.add(null); // terminating signal
 		synchronized (vector) {
-			//System.out.println("Tear down...");
+			// Tear down...
 			vector.notifyAll();
 		}
 		pipeMap.remove(key);
@@ -178,7 +186,7 @@ class SimplePipeHelper {
 			vector.add(ss[i]);
 		}
 		synchronized (vector) {
-			//System.out.println("Notify pipe in!");
+			// Notify pipe in!
 			vector.notifyAll();
 		}
 	}
