@@ -497,10 +497,15 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				// This is a single method, call directly!
 				fx = clazzFun;
 			}
-		} else if (clazzFun.stacks == null) { // super.toString
+		} else if (clazzFun.stacks == null && !(clazzFun.lastClaxxRef != null
+					&& clazzFun.lastClaxxRef.prototype[funName] != null
+					&& clazzFun.lastClaxxRef.prototype[funName].stacks != null)) { // super.toString
 			fx = clazzFun;
 		} else { // normal wrapped method
 			var stacks = clazzFun.stacks;
+			if (stacks == null) {
+				stacks = clazzFun.lastClaxxRef.prototype[funName].stacks;
+			}
 			var length = stacks.length;
 			for (i = length - 1; i >= 0; i--) {
 				/*
@@ -724,6 +729,9 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	fx.lastClaxxRef = claxxRef;
 
 	var stacks = fx.stacks;
+	if (stacks == null) {
+		stacks = claxxRef.prototype[fxName].stacks;
+	}
 	var length = stacks.length;
 	/*
 	 * Search the inheritance stacks to get the given class' function
@@ -1490,12 +1498,30 @@ Clazz.innerFunctions = {
 		}
 		is.read = function () { return 0; };
 		name = name.replace (/\\/g, '/');
+		/*-# baseFolder -> bFr #-*/
+		var baseFolder = null;
+		var clazzName = this.__CLASS_NAME__;
+		if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
+			name = "/" + name;
+		}
 		if (name.indexOf ('/') == 0) {
-			is.url = name.substring (1);
+			//is.url = name.substring (1);
+			if (arguments.length == 2) { // additional argument
+				baseFolder = ClazzLoader.binaryFolders[0];
+			} else if (window["ClazzLoader"] != null) {
+				baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
+			}
+			if (baseFolder == null || baseFolder.length == 0) {
+				is.url = name.substring (1);
+			}
+			baseFolder = baseFolder.replace (/\\/g, '/');
+			var length = baseFolder.length;
+			var lastChar = baseFolder.charAt (length - 1);
+			if (lastChar != '/') {
+				baseFolder += "/";
+			}
+			is.url = baseFolder + name.substring (1);
 		} else {
-			var clazzName = this.__CLASS_NAME__;
-			/*-# baseFolder -> bFr #-*/
-			var baseFolder = null;
 			if (window["ClazzLoader"] != null) {
 				baseFolder = ClazzLoader.getClasspathFor (clazzName);
 				var x = baseFolder.lastIndexOf (clazzName.replace (/\./g, "/"));

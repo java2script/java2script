@@ -517,18 +517,19 @@ ClazzLoader.registerPackages = function (prefix, pkgs) {
  * sites may avoid 2 HTTP 1.1 connections recommendation limit.
  * Here is a default implementation for http://archive.java2script.org.
  * In site archive.java2script.org, there are 6 sites:
- * 1. http://archive.java2script.org
- * 2. http://erchive.java2script.org
- * 3. http://irchive.java2script.org
- * 4. http://orchive.java2script.org
- * 5. http://urchive.java2script.org
- * 6. http://yrchive.java2script.org
+ * 1. http://archive.java2script.org or http://a.java2script.org
+ * 2. http://erchive.java2script.org or http://e.java2script.org
+ * 3. http://irchive.java2script.org or http://i.java2script.org
+ * 4. http://orchive.java2script.org or http://o.java2script.org
+ * 5. http://urchive.java2script.org or http://u.java2script.org
+ * 6. http://yrchive.java2script.org or http://y.java2script.org
  */
 /* protected */
 ClazzLoader.multipleSites = function (path) {
 	var length = path.length;
-	if (ClazzLoader.maxLoadingThreads > 1 && length > 15 
-			&& path.substring (0, 15) == "http://archive.") {
+	if (ClazzLoader.maxLoadingThreads > 1 
+			&& ((length > 15 && path.substring (0, 15) == "http://archive.")
+			|| (length > 9 && path.substring (0, 9) == "http://a."))) {
 		var index = path.lastIndexOf ("/");
 		if (index < length - 3) {
 			var arr = ['a', 'e', 'i', 'o', 'u', 'y'];
@@ -909,7 +910,7 @@ ClazzLoader.loadScript = function (file) {
 		return;
 	}
 	// Alert when the script is loaded
-	if (typeof (script.onreadystatechange) == "undefined") { // W3C
+	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
 		/*
 		 * What about Safari?
 		 */

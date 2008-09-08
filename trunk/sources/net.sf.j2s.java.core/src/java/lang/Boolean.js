@@ -1,10 +1,11 @@
 /* http://j2s.sf.net/ */
+java.lang.Boolean = Boolean;
 Boolean.prototype.booleanValue=function(){
 return this.valueOf();
 }
 
 Boolean.prototype.parseBoolean = function(val){
-	if(val == "false" || val == false){
+	if(val == null || val.toLowerCase() == "false" || val == false){
 		return false;
 	}
 	return true;
