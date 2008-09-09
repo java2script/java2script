@@ -37,6 +37,7 @@ import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -2529,72 +2530,13 @@ public void setMenu (Menu menu) {
 	} else {
 		el = handle;
 	}
-	//if (el.oncontextmenu == null) {
 	if (OS.isOpera) {
-		el.onmousedown = new RunnableCompatibility() {
-			public void run() {
-				Object evt = getEvent();
-				if (evt != null) {
-					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
-					if (!evtHTML.leftButtonHold) {
-						evtHTML.preventDefault();
-						evtHTML.stopPropagation();
-						toReturn(false);
-						/**
-						 * @j2sNative
-						var bbtn = null;
-						var btns = document.getElementsByTagName ("INPUT");
-						for (var i = 0; i < btns.length; i++) {
-							if (btns[i].className == "opera-hide-context-menu") {
-								if (bbtn == null) {
-									bbtn = btns[i];
-								} else {
-									document.body.removeChild (btns[i]);
-								}
-							}
-						}
-						if (bbtn == null) {
-							bbtn = document.createElement ("INPUT");
-							bbtn.type = "BUTTON";
-							bbtn.className = "opera-hide-context-menu";
-							document.body.appendChild (bbtn);
-						}
-						bbtn.style.left = (evtHTML.x - 4) + "px";
-						bbtn.style.top = (evtHTML.y - 4) + "px";
-						bbtn.focus();
-						 */ {}
-					}
-				}
-			}
-		};
 		el.onmouseup = new RunnableCompatibility() {
 			public void run() {
 				Object evt = getEvent();
-				if (evt != null) {
+				if (evt != null && ((HTMLEvent) evt).ctrlKey) {
 					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
 					if (!evtHTML.leftButtonHold) {
-						Element bbtn = null;
-						int x = 0, y = 0;  
-						/**
-						 * @j2sNative
-							var btns = document.getElementsByTagName ("INPUT");
-							for (var i = 0; i < btns.length; i++) {
-								if (btns[i].className == "opera-hide-context-menu") {
-									if (bbtn == null) {
-										bbtn = btns[i];
-									} else {
-										document.body.removeChild (btns[i]);
-									}
-								}
-							}
-							x = parseInt (bbtn.style.left);
-							y = parseInt (bbtn.style.top);
-						 */ {}
-						if (evtHTML.x - x < 0 || evtHTML.x - x > 8
-								|| evtHTML.y - y < 0 || evtHTML.y - y > 8) {
-							document.body.removeChild(bbtn);
-							return;
-						}
 						Menu menu = getMenu ();
 						if (menu != null && !menu.isDisposed ()) {
 							menu.handle.style.left = "-10000px";
@@ -2614,7 +2556,6 @@ public void setMenu (Menu menu) {
 						evtHTML.preventDefault();
 						evtHTML.stopPropagation();
 						toReturn(false);
-						document.body.removeChild(bbtn);
 					}
 				}
 				

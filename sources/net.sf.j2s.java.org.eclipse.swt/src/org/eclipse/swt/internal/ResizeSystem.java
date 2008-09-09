@@ -13,6 +13,7 @@ package org.eclipse.swt.internal;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Decorations;
+import org.eclipse.swt.widgets.Monitor;
 
 /**
  * @author zhou renjian
@@ -60,10 +61,34 @@ public class ResizeSystem {
 			}
 		}
 	}
+	public static void register(Monitor monitor) {
+		for (int i = 0; i < handlers.length; i++) {
+			if (handlers[i] != null && handlers[i].monitor == monitor) {
+				return ;
+			}
+		}
+		for (int i = 0; i < handlers.length; i++) {
+			if (handlers[i] == null) {
+				handlers[i] = new ResizeHandler(monitor);
+				return ;
+			}
+		}
+		handlers[handlers.length] = new ResizeHandler(monitor);
+		return ;
+	}
+	public static void unregister(Monitor monitor) {
+		for (int i = 0; i < handlers.length; i++) {
+			if (handlers[i] != null && handlers[i].monitor == monitor) {
+				handlers[i] = null;
+				return ;
+			}
+		}
+	}
 	public static void reset() {
 		for (int i = 0; i < handlers.length; i++) {
 			if (handlers[i] != null) {
 				handlers[i].shell = null;
+				handlers[i].monitor = null;
 				handlers[i] = null;
 				return ;
 			}
@@ -83,7 +108,14 @@ public class ResizeSystem {
 				} else if (status == SWT.CENTER) {
 					hdl.updateCentered();
 				}
+			} else if (hdl != null && hdl.monitor != null){
+				hdl.updateMonitor();
 			}
 		}
+		
+		/**
+		 * @j2sNative
+		 * $wt.widgets.ShellManager.layoutShortcuts();
+		 */ {}
 	}
 }

@@ -272,7 +272,9 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 	
 	innerHandle = document.createElement("DIV");
 	innerHandle.style.height = sbInnerHeight + "px";
+	innerHandle.style.fontSize = "1px";
 	sbHandle.appendChild(innerHandle);
+	innerHandle.appendChild(document.createTextNode("."));
 }
 
 
@@ -306,12 +308,13 @@ protected void createHorizontalScrollBar(Element parent, int sbOuterWidth, int s
 	
 	innerHandle = document.createElement("DIV");
 	innerHandle.style.width = sbInnerWidth + "px";
+	innerHandle.style.fontSize = "1px";
 	if (OS.isOpera) {
 		innerHandle.style.lineHeight = "1px";
-		innerHandle.style.fontSize = "1px";
 		innerHandle.style.height = "1px";
 	}
 	sbHandle.appendChild(innerHandle);
+	innerHandle.appendChild(document.createTextNode("."));
 }
 
 protected void updateSizeBinding(int size) {

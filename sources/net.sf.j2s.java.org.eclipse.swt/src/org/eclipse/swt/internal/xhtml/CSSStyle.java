@@ -78,4 +78,9 @@ public class CSSStyle {
 	public String direction;
 	public String cssText;
 	public boolean hasLayout;
+
+	public String minWidth;
+	public String minHeight;
+	public String maxWidth;
+	public String maxHeight;
 }

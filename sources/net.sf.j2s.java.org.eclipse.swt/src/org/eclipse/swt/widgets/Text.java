@@ -50,6 +50,8 @@ public class Text extends Scrollable {
 	int tabs, oldStart, oldEnd;
 	boolean doubleClick, ignoreModify, ignoreVerify, ignoreCharacter;
 	
+	boolean keyDownOK;
+	
 	Element textHandle;
 	
 	int lineHeight;
@@ -189,11 +191,11 @@ void createHandle () {
 	if (OS.isIE) {
 		textCSSName = "text-ie-default";
 	}
-	if ((style & SWT.BORDER) != 0) {
+	if ((style & SWT.BORDER) == 0) { // try to use inherit border
 		if (textCSSName != null) {
-			textCSSName += " text-border";
+			textCSSName += " text-no-border";
 		} else {
-			textCSSName = "text-border";
+			textCSSName = "text-no-border";
 		}
 	}
 	if ((style & SWT.WRAP) != 0) {
@@ -242,7 +244,7 @@ void createHandle () {
 		}
 	};
 	Element wrapper = document.createElement("DIV");
-	wrapper.style.overflow = "auto";
+	wrapper.style.overflow = ((style & SWT.MULTI) != 0) ? "auto" : "hidden";
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textHandle);
 	//handle.appendChild(textHandle);
@@ -264,23 +266,22 @@ void createHandle () {
  * @see org.eclipse.swt.widgets.Widget#hookKeyDown()
  */
 void hookKeyDown() {
-
 	textHandle.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			boolean verifyHooked = false;
 			if (hooks(SWT.Verify)) {
 				verifyHooked = true;
 				HTMLEvent evt = (HTMLEvent) getEvent();
-				if (!isInputCharacter(evt.keyCode, evt.shiftKey, evt.altKey, evt.ctrlKey)) {
+				if (!OS.isInputCharacter(evt.keyCode, evt.shiftKey, evt.altKey, evt.ctrlKey)) {
 					toReturn(true);
 				} else {
 					Event e = new Event();
-					e.character = getInputCharacter (evt.keyCode, evt.shiftKey, false);
+					e.character = OS.getInputCharacter (evt.keyCode, evt.shiftKey);
 					String txt = "" + e.character;
 					if (e.character == 8 || e.character == 46) {
 						txt = "";
 					}
-					e.keyCode = evt.keyCode;
+					e.keyCode = e.character; // evt.keyCode;
 					e.stateMask = (evt.shiftKey ? SWT.SHIFT : SWT.NONE) | (evt.ctrlKey ? SWT.CTRL : SWT.NONE);
 					String s = verifyText(txt, 0, 0, e);
 					if (s == null) {
@@ -296,6 +297,7 @@ void hookKeyDown() {
 					}
 				}
 			}
+			keyDownOK = this.isReturned();
 			if (!verifyHooked || hooks(SWT.KeyDown)) {
 				Event ev = new Event();
 				ev.type = SWT.Modify;
@@ -312,8 +314,8 @@ void hookKeyDown() {
 					dragStatus = false;
 				}
 				Event event = new Event();
-				event.character = (char) keyCode;
-				event.keyCode = keyCode;
+				event.character = OS.getInputCharacter (evt.keyCode, evt.shiftKey);
+				event.keyCode = event.character; // keyCode;
 				event.type = SWT.KeyDown;
 				event.display = display;
 				event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0); 
@@ -324,8 +326,33 @@ void hookKeyDown() {
 				sendEvent(event);
 				toReturn(!(!ev.doit || !event.doit));
 				//sendEvent(SWT.KeyDown);
+				keyDownOK = ev.doit && event.doit;
 			}
 		}
+	};
+	textHandle.onkeypress = new RunnableCompatibility() {
+	
+		public void run() {
+			HTMLEventWrapper evt = new HTMLEventWrapper (getEvent());
+			HTMLEvent e = (HTMLEvent) evt.event;
+			int kc = 0;
+			/**
+			 * @j2sNative
+				 if (e.which) {
+					 kc = e.which;
+				 } else {
+					 kc = e.keyCode;
+				 }
+			 */ {
+				 
+			 }
+			OS.isCapsLockOn = (kc > 64 && kc < 91 && !e.shiftKey)
+					|| (kc >= 97 && kc <= 122 && e.shiftKey);
+			if (OS.isOpera) {
+				toReturn(keyDownOK);
+			}
+		}
+	
 	};
 }
 
@@ -339,8 +366,8 @@ void hookKeyUp() {
 				dragStatus = false;
 			}
 			Event event = new Event();
-			event.character = (char) keyCode;
-			event.keyCode = keyCode;
+			event.character = OS.getInputCharacter (evt.keyCode, evt.shiftKey);
+			event.keyCode = event.character; // keyCode;
 			event.type = SWT.KeyUp;
 			event.display = display;
 			event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0);
@@ -379,7 +406,7 @@ void hookModify() {
 			}
 			String newText = textHandle.value;
 			if (newText != null) {
-				String oldText = newText;
+				//String oldText = newText;
 				newText = verifyText (newText, 0, 0, null);
 				if (newText == null) {
 					toReturn(true);
@@ -418,78 +445,6 @@ void hookModify() {
 			toReturn(e.doit);
 		}
 	};
-}
-
-private char getInputCharacter(int keyCode, boolean shiftKey, boolean capsLockStatus) {
-	char ch = '\0';
-	if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32) {
-		ch = (char) keyCode;
-	} else if (keyCode >= 48 && keyCode < 58) {
-		if (!shiftKey) {
-			ch = (char) keyCode;
-		} else {
-			char chs[] = {')', '!', '@', '#', '$', '%', '^', '&', '*', '('};
-			ch = chs[keyCode - 48];
-		}
-	} else if (keyCode == 61) {
-		if (!shiftKey) {
-			ch = '=';
-		} else {
-			ch = '+';
-		}
-	} else if (keyCode == 59) {
-		if (!shiftKey) {
-			ch = ';';
-		} else {
-			ch = ':';
-		}
-	} else if (keyCode >= 65 && keyCode <= 90) {
-		if ((shiftKey && capsLockStatus) || (!shiftKey && !capsLockStatus)) {
-			ch = (char) (keyCode + 'a' - 'A');
-		} else {
-			ch = (char) keyCode;
-		}
-	} else if (keyCode >= 96 && keyCode <= 105) {
-		ch = (char) (keyCode - 96 + '0');
-	} else if (keyCode >= 106 && keyCode <= 111 && keyCode != 108) {
-		char chs[] = {'*', '+', '?', '-', '.', '/'};
-		ch = chs[keyCode - 106];
-	} else if (keyCode >= 186 && keyCode <= 192) {
-		if (!shiftKey) {
-			char chs[] = {';', '=', ',', '-', '.', '/', '`'};
-			ch = chs[keyCode - 186];
-		} else {
-			char chs[] = {':', '+', '<', '_', '>', '?', '~'};
-			ch = chs[keyCode - 186];
-		}
-	} else if (keyCode >= 219 && keyCode <= 222) {
-		if (!shiftKey) {
-			char chs[] = {'[', '\\', ']', '\''};
-			ch = chs[keyCode - 219];
-		} else {
-			char chs[] = {'{', '|', '}', '\"'};
-			ch = chs[keyCode - 219];
-		}
-	} else {
-		ch = (char) keyCode;
-	}
-	return ch;
-}
-private boolean isInputCharacter(int keyCode, boolean shiftKey, boolean altKey, boolean ctrlKey) {
-	if (altKey || ctrlKey) {
-		return false;
-	}
-	if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32
-			|| keyCode == 8 || keyCode == 46 // Backspace and Delete
-			|| (keyCode >= 48 && keyCode <= 57)
-			|| keyCode == 59 || keyCode == 61
-			|| (keyCode >= 65 && keyCode <= 90)
-			|| (keyCode >= 96 && keyCode <= 111 && keyCode != 108)
-			|| (keyCode >= 186 && keyCode <= 192)
-			|| (keyCode >= 218 && keyCode <= 222)) {
-		return true;
-	}
-	return false;
 }
 
 /**
@@ -2891,7 +2846,13 @@ void enableWidget (boolean enabled) {
 
 public boolean forceFocus() {
 	boolean ret = super.forceFocus();
-	this.textHandle.focus();
+	//this.textHandle.focus();
+	/**
+	 * @j2sNative
+	 * try {
+	 * 	this.textHandle.focus();
+	 * } catch (e) {}
+	 */ {}
 	return ret;
 }
 

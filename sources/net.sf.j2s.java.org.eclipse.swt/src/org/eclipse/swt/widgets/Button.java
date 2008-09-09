@@ -357,7 +357,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		hasImage = (bits & (OS.BS_BITMAP | OS.BS_ICON)) != 0;		
 	}
 	*/
-	if (!hasImage) {
+	//if (!hasImage) {
 		/*
 		int oldFont = 0;
 		int hDC = OS.GetDC (handle);
@@ -398,10 +398,13 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			}
 			extra = Math.max (8, height);
 		}
-	} else {
+	//} else {
 		if (image != null) {
 			Point imageSize = OS.getImageSize(image);
 			width += imageSize.x;
+			if (text != null && text.length () != 0) {
+				width += 4 * 2;
+			}
 			height = Math.max(imageSize.y, height);
 			extra = 8;
 		}
@@ -413,7 +416,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			extra = 8;
 		}
 		*/
-	}
+	//}
 	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
 		width += CHECK_WIDTH + extra;
 		height = Math.max (height, CHECK_HEIGHT + 3);
@@ -453,6 +456,10 @@ void createHandle() {
 		handle.appendChild(btnEl);
 		Element btnWrapperEl = document.createElement("DIV");
 		btnWrapperEl.className = "button-input-wrapper";
+		if (OS.isIE70) {
+			btnWrapperEl.style.marginTop = "-2px";
+			btnWrapperEl.style.marginLeft = "-4px";
+		}
 		btnEl.appendChild(btnWrapperEl);
 		btnHandle = document.createElement("INPUT");
 		if ((style & SWT.CHECK) != 0) {
@@ -461,6 +468,9 @@ void createHandle() {
 		} else {
 			btnEl.className = "button-radio";
 			btnHandle.type = "radio";
+		}
+		if (OS.isIE) {
+			btnWrapperEl.style.bottom = "-0.5em";
 		}
 		btnWrapperEl.appendChild(btnHandle);
 		btnText = document.createElement("DIV");
@@ -478,6 +488,9 @@ void createHandle() {
 			updateArrowStyle(); 
 		} else {
 			btnHandle.className = "button-push";
+		}
+		if (OS.isChrome) {
+			btnHandle.className += " " + btnHandle.className + "-chrome"; 
 		}
 	}
 	btnHandle.onmouseover = new RunnableCompatibility() {
@@ -536,6 +549,7 @@ void enableWidget (boolean enabled) {
 	}
 	*/
 	btnHandle.disabled = !enabled;
+	OS.updateCSSClass(handle, "button-disabled", !enabled);
 	OS.updateCSSClass(btnHandle, "button-disabled", !enabled);
 }
 
@@ -850,11 +864,11 @@ void setDefault (boolean value) {
 	OS.SendMessage (handle, OS.BM_SETSTYLE, bits, 1);
 	*/
 	if (value) {
+		System.out.println("Set default.");
 		try {
 			handle.focus();
-		} catch (Error e) {
-			
-		}
+		} catch (Error e) { }
+		System.out.println("Set default ok.");
 	}
 }
 
@@ -875,8 +889,10 @@ public void setForeground(Color color) {
 	checkWidget ();
 	if (color != null) {
 		btnHandle.style.color = color.getCSSHandle();
+		btnText.style.color = color.getCSSHandle();
 	} else {
 		btnHandle.style.color = "";
+		btnText.style.color = "";
 	}
 	if (lastColor != null) {
 		lastColor = btnHandle.style.color;
@@ -889,9 +905,9 @@ public void setForeground(Color color) {
 public void setBackground(Color color) {
 	checkWidget ();
 	if (color != null) {
-		btnHandle.style.backgroundColor = color.getCSSHandle();
+		handle.style.backgroundColor = color.getCSSHandle();
 	} else {
-		btnHandle.style.backgroundColor = "";
+		handle.style.backgroundColor = "";
 	}
 }
 
@@ -938,6 +954,14 @@ public Color getForeground() {
 public void setImage (Image image) {
 	checkWidget ();
 	if ((style & SWT.ARROW) != 0) return ;
+	if (image == null) {
+		hasImage = false;
+		btnText.style.backgroundImage = "";
+		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
+				&& btnText.style.filter != null) {
+			btnText.style.filter = "";
+		}
+	}
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 //	_setImage (this.image = image);
 //	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
@@ -948,32 +972,52 @@ public void setImage (Image image) {
 	this.image = image;
 	hasImage = true;
 	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
-		OS.clearChildren(btnText);
+//		OS.clearChildren(btnText);
 		btnText.style.display = "";
 		btnText.style.paddingTop = "";
-		btnHandle.parentNode.style.bottom = ""; 
-		btnHandle.parentNode.style.top = "";
+		//btnHandle.parentNode.style.bottom = ""; 
+		//btnHandle.parentNode.style.top = "";
 		btnHandle.style.top = "";
-		btnText.parentNode.style.position = "";
-		btnText.parentNode.style.top = "";
+		//btnText.parentNode.style.position = "";
+		//btnText.parentNode.style.top = "";
 		
 		CSSStyle handleStyle = null;
-		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-			handleStyle = btnText.style;
-			org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
-			img.src = this.image.url;
+		handleStyle = btnText.style;
+		org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
+		img.src = this.image.url;
+		if (image.width == 0) {
 			this.image.width = img.width;
-			this.image.height = img.height;
-//			handleStyle.fontSize = this.image.height + "px";
-			handleStyle.display = "block";
-			handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
-			handleStyle.paddingTop = this.image.height + "px"; 
-//			handleStyle.lineHeight = this.image.width + "px"; 
-//			btnText.appendChild(document.createTextNode(" "));
-		} else {
-			handleStyle = btnHandle.style;
 		}
-		if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+		if (image.height == 0) {
+			this.image.height = img.height;
+		}
+		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+////			handleStyle.fontSize = this.image.height + "px";
+//			handleStyle.display = "block";
+			handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
+			handleStyle.paddingLeft = (this.image.width + 3) + "px";
+//			handleStyle.paddingTop = this.image.height + "px"; 
+////			handleStyle.lineHeight = this.image.width + "px"; 
+////			btnText.appendChild(document.createTextNode(" "));
+		} else {
+			//handleStyle = btnHandle.style;
+			if (!OS.isSafari || OS.isChrome) {
+				if (OS.isIE) {
+					handleStyle.marginLeft = "3px"; 
+				} else {
+					handleStyle.marginLeft = "1px"; 
+				}
+			} else {
+				if (text != null && text.length() > 0) {
+					handleStyle.marginLeft = 6 + "px"; 
+				} else {
+					handleStyle.marginLeft = 4 + "px"; 
+				}
+			}
+			handleStyle.paddingLeft = (this.image.width + 1) + "px";
+		}
+		handleStyle.minHeight = this.image.height + "px";
+		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
 //				imgBackground.style.width = "100%";
@@ -983,7 +1027,7 @@ public void setImage (Image image) {
 			handleStyle.backgroundImage = "";
 			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
-			if (handleStyle.filter != null) handleStyle.filter = ""; 
+			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 			handleStyle.backgroundRepeat = "no-repeat";
 			String bgXPos = "center";
 			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
@@ -994,10 +1038,14 @@ public void setImage (Image image) {
 				} else {
 					bgXPos = "left";
 				}
+			} else if ((style & SWT.PUSH) != 0) {
+				bgXPos = "left";
 			}
 			handleStyle.backgroundPosition = bgXPos + " center";
-			
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+		}
+		if (text == null || text.length() == 0) {
+			btnText.appendChild(document.createTextNode("" + (char) 160));
 		}
 		//btnText.appendChild(document.createTextNode("hello"));
 //	} else if (handle.childNodes.length == 0) {
@@ -1010,7 +1058,16 @@ public void setImage (Image image) {
 //			handle.insertBefore(image.handle.childNodes[i], txt);
 //		}
 	}
-	
+	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
+		boolean emptyText = (image != null || text.length() == 0);
+		if (OS.isIE70) {
+			btnHandle.parentNode.style.marginTop = emptyText ? "-2px" : "-3px";
+		} else if ((style & SWT.RADIO) != 0) {
+			btnHandle.parentNode.style.marginTop = emptyText ? "0" : "2px";
+		} else {
+			btnHandle.parentNode.style.marginTop = emptyText ? "-1px" : "1px";
+		}
+	}
 }
 
 boolean setRadioFocus () {
@@ -1133,17 +1190,18 @@ public void setText (String string) {
 //	hasImage = image != null && (text == null || text.length() == 0);
 //	String bg = "" + btnText.style.backgroundImage;
 //	hasImage = bg != null && bg.length() != 0;
-	if (hasImage) {
-		btnText.style.backgroundImage = "";
-		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
-				&& btnText.style.filter != null) {
-			btnText.style.filter = "";
-		}
-	}
+
+//	if (hasImage) {
+//		btnText.style.backgroundImage = "";
+//		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
+//				&& btnText.style.filter != null) {
+//			btnText.style.filter = "";
+//		}
+//	}
 	text = string;
-	hasImage = false;
+//	hasImage = false;
 	//string = string.replaceAll("&&", "&");
-	string = string.replaceAll("(&(&))|([\r\n]+)", "$2");
+	string = string.replaceAll("[\r\n]+", "").replaceAll("(&(&))", "$2");
 	int idx = string.indexOf('&');
 	if (idx == -1) {
 		btnText.appendChild(document.createTextNode(string));
@@ -1155,6 +1213,15 @@ public void setText (String string) {
 		underline.className = "button-text-mnemonics";
 		btnText.appendChild(underline);
 		btnText.appendChild(document.createTextNode(string.substring(idx + 2)));
+	}
+	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
+		if (OS.isIE70) {
+			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "-2px" : "-2px";
+		} else if ((style & SWT.RADIO) != 0) {
+			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "0" : "2px";
+		} else {
+			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "-1px" : "1px";
+		}
 	}
 	/*
 	* Bug in Windows.  When a Button control is right-to-left and
@@ -1189,7 +1256,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 //		hasImage = bg != null && bg.length() != 0;
 
 		int h = 0;
-		if (!hasImage) {
+		//if (!hasImage) {
 			if (textSizeCached) {
 				btnText.style.display = "block";
 				if (textHeightCached < CHECK_HEIGHT) {
@@ -1203,7 +1270,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 				}
 			}
 			h = textHeightCached;
-		} else {
+		//} else {
 //			btnText.style.display = "block";
 //			if (image.height < CHECK_HEIGHT) {
 //				//btnText.style.paddingTop = ((image.height - textHeightCached) / 2) + "px";
@@ -1211,8 +1278,10 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 //				btnHandle.parentNode.style.top = "auto";
 //				btnHandle.style.top = "auto";
 //			}
-			h = image.height;
-		}
+			if (hasImage) {
+				h = Math.max(image.height, h);
+			}
+		//}
 		h = Math.max(CHECK_HEIGHT + 3, h);
 		if (h < cy) {
 			btnText.parentNode.style.position = "relative";

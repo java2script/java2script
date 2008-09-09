@@ -207,6 +207,10 @@ void init(Device device, int width, int height) {
 //	imgHandle.alt = "Inner Image";
 }
 
+void setSize(int width, int height) {
+	this.width = width;
+	this.height = height;
+}
 /**
  * Constructs a new instance of this class based on the
  * provided image, with an appearance that varies depending

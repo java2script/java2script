@@ -130,6 +130,14 @@ public void handleEvent (Event e) {
 			e.doit = event.doit;
 			break;
 		}
+		case SWT.MenuDetect: {
+			MenuDetectEvent event = new MenuDetectEvent(e);
+			((MenuDetectListener) eventListener).menuDetected(event);
+			e.x = event.x;
+			e.y = event.y;
+			e.doit = event.doit;
+			break;
+		}
 		case SWT.MouseDown: {
 			((MouseListener) eventListener).mouseDown(new MouseEvent(e));
 			break;

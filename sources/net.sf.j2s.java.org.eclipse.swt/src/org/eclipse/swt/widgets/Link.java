@@ -336,7 +336,7 @@ void hookSelection() {
 	};
 	for (int i = 0; i < anchors.length; i++) {
 		anchors[i].href = "javascript:void(0);";
-		anchors[i].target = null;
+		anchors[i].target = "_self";
 		anchors[i].onclick = linkHandler;
 		anchors[i].ondblclick = linkHandler;
 	}

@@ -15,9 +15,9 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.SWTEventListener;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -791,8 +791,8 @@ void hookKeyDown() {
 				dragStatus = false;
 			}
 			Event event = new Event();
-			event.character = (char) keyCode;
-			event.keyCode = keyCode;
+			event.character = OS.getInputCharacter (evt.keyCode, evt.shiftKey);
+			event.keyCode = event.character; // keyCode;
 			event.type = SWT.KeyDown;
 			event.display = display;
 			event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0); 
@@ -802,6 +802,33 @@ void hookKeyDown() {
 			}
 			sendEvent(event);
 		}
+	};
+	hookKeyPress();
+}
+private void hookKeyPress() {
+	if (handle.onkeypress != null) {
+		return;
+	}
+	handle.onkeypress = new RunnableCompatibility() {
+		
+		public void run() {
+			HTMLEventWrapper evt = new HTMLEventWrapper (getEvent());
+			HTMLEvent e = (HTMLEvent) evt.event;
+			int kc = 0;
+			/**
+			 * @j2sNative
+				 if (e.which) {
+					 kc = e.which;
+				 } else {
+					 kc = e.keyCode;
+				 }
+			 */ {
+				 
+			 }
+			OS.isCapsLockOn = (kc > 64 && kc < 91 && !e.shiftKey)
+					|| (kc >= 97 && kc <= 122 && e.shiftKey);
+		}
+	
 	};
 }
 void hookKeyUp() {
@@ -814,8 +841,8 @@ void hookKeyUp() {
 				dragStatus = false;
 			}
 			Event event = new Event();
-			event.character = (char) keyCode;
-			event.keyCode = keyCode;
+			event.character = OS.getInputCharacter (evt.keyCode, evt.shiftKey);
+			event.keyCode = event.character; // keyCode;
 			event.type = SWT.KeyUp;
 			event.display = display;
 			event.stateMask = (evt.altKey ? SWT.ALT : 0) | (evt.shiftKey ? SWT.SHIFT : 0) | (evt.ctrlKey ? SWT.CTRL : 0); 
@@ -826,6 +853,7 @@ void hookKeyUp() {
 			sendEvent(event);
 		}
 	};
+	hookKeyPress();
 }
 
 boolean mouseHoverProc() {

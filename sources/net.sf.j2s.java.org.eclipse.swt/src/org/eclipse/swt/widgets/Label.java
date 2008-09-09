@@ -512,7 +512,7 @@ public void setImage (Image image) {
 	this.image = image;
 	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle handleStyle = handle.style;
-		if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
 //				imgBackground.style.width = "100%";
@@ -522,7 +522,7 @@ public void setImage (Image image) {
 			handleStyle.backgroundImage = "";
 			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
-			if (handleStyle.filter != null) handleStyle.filter = ""; 
+			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 			handleStyle.backgroundRepeat = "no-repeat";
 			handleStyle.backgroundPosition = "left center";
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";

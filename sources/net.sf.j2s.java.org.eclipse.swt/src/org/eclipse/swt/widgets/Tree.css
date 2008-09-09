@@ -197,13 +197,15 @@ tree-image tree-image-icon {
 }
 
 .tree-item-selected .tree-column-first .tree-text-inner {
-	background:ActiveCaption;
+	background:ActiveCaption !important;
 	color:highlighttext;	
 	min-height:1px;
-	
 }
 .tree-blur .tree-item-selected .tree-column-first .tree-text-inner {
 	background-color:gray;
+}
+.tree-item-selected .tree-column-first .tree-text {
+	background-color:ActiveCaption !important;
 }
 .tree-default {
 	overflow:hidden;

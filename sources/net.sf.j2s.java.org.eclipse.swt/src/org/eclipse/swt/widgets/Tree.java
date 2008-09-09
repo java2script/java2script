@@ -2925,6 +2925,32 @@ void setScrollWidth () {
 }
 
 /**
+ * Sets the receiver's selection to the given item.
+ * The current selection is cleared before the new item is selected.
+ * <p>
+ * If the item is not in the receiver, then it is ignored.
+ * </p>
+ *
+ * @param item the item to select
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_NULL_ARGUMENT - if the item is null</li>
+ *    <li>ERROR_INVALID_ARGUMENT - if the item has been disposed</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ * 
+ * @since 3.2
+ */
+public void setSelection (TreeItem item) {
+	checkWidget ();
+	if (item == null) error (SWT.ERROR_NULL_ARGUMENT);
+	setSelection (new TreeItem [] {item});
+}
+
+/**
  * Sets the receiver's selection to be the given array of items.
  * The current selection is cleared before the new items are selected.
  * <p>

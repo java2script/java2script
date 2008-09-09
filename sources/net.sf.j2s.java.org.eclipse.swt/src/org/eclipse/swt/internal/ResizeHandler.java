@@ -26,10 +26,12 @@ import org.eclipse.swt.widgets.Monitor;
  * 2006-4-24
  */
 public class ResizeHandler {
+	Monitor monitor;
 	Decorations shell;
 	int status;
 	
-	private ResizeHandler() {
+	public ResizeHandler(Monitor monitor) {
+		this.monitor = monitor;
 	}
 
 	public ResizeHandler(Decorations shell, int status) {
@@ -88,8 +90,7 @@ public class ResizeHandler {
 		 * @j2sNative
 		 * tb = this.shell.titleBar;
 		 */ {}
-		int h = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
-		
+		int h = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 20;
 		// Not used now
 		Monitor monitor = shell.getMonitor();
 		Point size = shell.getSize();
@@ -98,6 +99,13 @@ public class ResizeHandler {
 			y = 0;
 		}
 		shell.setLocation((monitor.getClientArea().width - size.x) / 2, y);
+	}
+	/**
+	 * @j2sNative
+	 * this.monitor.clientWidth = document.body.clientWidth;
+	 * this.monitor.clientHeight = O$.getFixedBodyClientHeight(); //document.body.clientHeight;
+	 */
+	public void updateMonitor() {
 	}
 	public int getStatus() {
 		return status;
