@@ -263,6 +263,7 @@
 
     		<arg value="net/sf/j2s/ajax/HttpRequest.js"/>
     		<arg value="net/sf/j2s/ajax/IXHRCallback.js"/>
+    		<arg value="net/sf/j2s/ajax/SWTHelper.js"/>
     		<arg value="net/sf/j2s/ajax/XHRCallbackAdapter.js"/>
     		<arg value="net/sf/j2s/ajax/XHRCallbackSWTAdapter.js"/>
     		<arg value="net/sf/j2s/ajax/ARunnable.js"/>
@@ -350,6 +351,9 @@
           target: j2s.pack.zip                      
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.zip" depends="j2s.pack.lib">
+        <tstamp>
+            <format property="today" pattern="yyyyMMdd"/>
+        </tstamp>
     	<zip destfile="${j2s.lib.project}/j2slib.zip">
     		<fileset dir="${j2s.lib.project}">
     			<include name="j2slib/**"/>
@@ -359,6 +363,15 @@
     			<exclude name="**/*.tmp"/>
     			<exclude name="**/*.svn"/>
     		</fileset>
+    	</zip>
+    	<zip destfile="${j2s.lib.project}/1.1.0-v${today}.zip">
+    		<zipfileset dir="${j2s.lib.project}/j2slib" prefix="1.1.0-v${today}">
+    			<exclude name="**/*.zip"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    			<exclude name="**/*.tmp"/>
+    			<exclude name="**/*.svn"/>
+    		</zipfileset>
     	</zip>
 	</target>
 
@@ -917,6 +930,7 @@
     		<arg value="org/eclipse/swt/events/HelpEvent.js"/>
     		<arg value="org/eclipse/swt/events/KeyEvent.js"/>
     		<arg value="org/eclipse/swt/events/MenuEvent.js"/>
+    		<arg value="org/eclipse/swt/events/MenuDetectEvent.js"/>
     		<arg value="org/eclipse/swt/events/ModifyEvent.js"/>
     		<arg value="org/eclipse/swt/events/MouseEvent.js"/>
     		<arg value="org/eclipse/swt/events/PaintEvent.js"/>
@@ -940,6 +954,7 @@
     		<arg value="org/eclipse/swt/events/KeyAdapter.js"/>
     		<arg value="org/eclipse/swt/events/MenuListener.js"/>
     		<arg value="org/eclipse/swt/events/MenuAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/MenuDetectListener.js"/>
     		<arg value="org/eclipse/swt/events/ModifyListener.js"/>
     		<arg value="org/eclipse/swt/events/MouseListener.js"/>
     		<arg value="org/eclipse/swt/events/MouseAdapter.js"/>
