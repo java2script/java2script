@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import net.sf.j2s.core.astvisitors.ASTTigerVisitor;
+import net.sf.j2s.core.astvisitors.ASTTypeVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
 import net.sf.j2s.ui.Java2ScriptUIPlugin;
@@ -152,10 +154,11 @@ public class J2SLaunchingUtil {
 						}
 					}
 				}
+				String mainTypeName = new ASTTypeVisitor().assureQualifiedName(mainType);
 				if (isTestSuite) {
-					buf.append("\t\t\t\tjunit.textui.TestRunner.run (" + mainType + ".suite ());\r\n");
+					buf.append("\t\t\t\tjunit.textui.TestRunner.run (" + mainTypeName + ".suite ());\r\n");
 				} else {
-					buf.append("\t\t\t\tjunit.textui.TestRunner.run (" + mainType + ");\r\n");
+					buf.append("\t\t\t\tjunit.textui.TestRunner.run (" + mainTypeName + ");\r\n");
 				}
 				buf.append("\t\t\t});\r\n");
 				buf.append("\t\t});\r\n");
@@ -183,10 +186,11 @@ public class J2SLaunchingUtil {
 						}
 					}
 				}
+				String mainTypeName = new ASTTypeVisitor().assureQualifiedName(mainType);
 				if (isTestSuite) {
-					buf.append("\t\tjunit.textui.TestRunner.run (" + mainType + ".suite ());\r\n");
+					buf.append("\t\tjunit.textui.TestRunner.run (" + mainTypeName + ".suite ());\r\n");
 				} else {
-					buf.append("\t\tjunit.textui.TestRunner.run (" + mainType + ");\r\n");
+					buf.append("\t\tjunit.textui.TestRunner.run (" + mainTypeName + ");\r\n");
 				}
 				buf.append("\t});\r\n");
 				buf.append("});\r\n");
@@ -292,7 +296,8 @@ public class J2SLaunchingUtil {
 						grelativePath, mainType, workingDir, configuration);
 				
 				buf.append("\t\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
-				buf.append("\t\t\t" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args, true) + ");\r\n");
+				String mainTypeName = new ASTTypeVisitor().assureQualifiedName(mainType);
+				buf.append("\t\t\t" + mainTypeName + ".main(" + ArgsUtil.wrapAsArgumentArray(args, true) + ");\r\n");
 				buf.append("\t\t});\r\n");
 
 				buf.append("\t}\r\n");
@@ -305,7 +310,8 @@ public class J2SLaunchingUtil {
 						isJUnit, grelativePath, workingDir, configuration);
 				
 				buf.append("ClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
-				buf.append("\t" + mainType + ".main(" + ArgsUtil.wrapAsArgumentArray(args, true) + ");\r\n");
+				String mainTypeName = new ASTTypeVisitor().assureQualifiedName(mainType);
+				buf.append("\t" + mainTypeName + ".main(" + ArgsUtil.wrapAsArgumentArray(args, true) + ");\r\n");
 				buf.append("});\r\n");
 			}
 
@@ -443,7 +449,15 @@ public class J2SLaunchingUtil {
 		buf.append("\t/*forward : true,*/\r\n");
 		buf.append("\tmode : \"dailybuild\",\r\n");
 		buf.append("\tonload : function () {\r\n");
-		
+		String j2xStr = J2SLaunchingUtil.generateClasspathJ2X(configuration, "j2slibPath", workingDir);
+		if (j2xStr != null && j2xStr.length() != 0) {
+			buf.append("\t\tvar o = window[\"j2s.lib\"];\r\n");
+			buf.append("\t\tvar j2slibPath = o.base + (o.alias ? o.alias : o.version) + \"/\";\r\n");
+			buf.append("\t\t");
+			buf.append(j2xStr.replaceAll("\r\n", "\r\n\t\t").trim());
+			buf.append("\r\n");
+		}
+
 		buf.append("\t\tClazzLoader.setPrimaryFolder (\"");
 		buf.append(grelativePath);
 		buf.append("\");\r\n");
@@ -459,7 +473,9 @@ public class J2SLaunchingUtil {
 			String grelativePath, String gj2sLibPath, boolean isJUnit, String mode,
 			String mainType, File workingDir, ILaunchConfiguration configuration)
 			throws CoreException {
-		buf.append("<a class=\"alaa\" href=\"javascript:if(a='");
+		buf.append("<a class=\"alaa\" title=\"Launch ");
+		buf.append(mainType);
+		buf.append("\" href=\"javascript:if(a='");
 		buf.append(mainType);
 		buf.append('@');
 		buf.append(grelativePath);
@@ -481,6 +497,7 @@ public class J2SLaunchingUtil {
 		buf.append(gj2sLibPath);
 		buf.append("j2slib.z.js';(typeof x[t]=='undefined')?x.onload=f:x[t]=f;" +
 				"d.getElementsByTagName('HEAD')[0].appendChild(x);void(0);}\">");
+		buf.append("<span class=\"alaa-icon\"></span>");
 		buf.append(mainType);
 		buf.append("</a>\r\n\r\n");
 		
@@ -490,7 +507,7 @@ public class J2SLaunchingUtil {
 		buf.append("<script type=\"text/javascript\">\r\n");
 
 		J2SCyclicProjectUtils.emptyTracks();
-		String j2xStr = J2SLaunchingUtil.generateClasspathJ2X(configuration, mainType, workingDir);
+		String j2xStr = J2SLaunchingUtil.generateClasspathJ2X(configuration, null, workingDir);
 		
 		if ("debug".equals(mode)) {
 			buf.append("window[\"j2s.script.debugging\"] = true;\r\n");
@@ -549,12 +566,19 @@ public class J2SLaunchingUtil {
 				"\twidth:1em;\r\n" +
 				"\toverflow-x:visible;\r\n" +
 				"\ttext-decoration:none;\r\n" +
-				"\tborder-left:1em solid rgb(57,61,254);\r\n" +
-				"\tpadding-left:4px;\r\n" +
+				"\tpadding-left:32px;\r\n" +
 				"\tmargin:2em;\r\n" +
 				"\tcolor:navy;\r\n" +
 				"\tcursor:pointer;\r\n" +
 				"\tcursor:hand;\r\n");
+		buf.append("}\r\n");
+		buf.append("span.alaa-icon {\r\n");
+		buf.append("\tdisplay:block;\r\n" +
+				"\tposition:absolute;\r\n" +
+				"\twidth:16px;\r\n" +
+				"\theight:16px;\r\n" +
+				"\tmargin:2px 8px 0 -24px;\r\n" +
+				"\tbackground-color:rgb(57,61,254);\r\n");
 		buf.append("}\r\n");
 		buf.append("</style>\r\n");
 		buf.append("</head>\r\n");
@@ -667,7 +691,7 @@ public class J2SLaunchingUtil {
 	 * Append the *.js in classpath
 	 */
 	static String generateClasspathJ2X(
-			ILaunchConfiguration configuration, String mainType, File workingDir)
+			ILaunchConfiguration configuration, String varName, File workingDir)
 			throws CoreException {
 		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
 		StringBuffer buf = new StringBuffer();
@@ -783,7 +807,7 @@ public class J2SLaunchingUtil {
 					keyPkg.add(pkg);
 					buf.append("ClazzLoader.packageClasspath (\"");
 					buf.append(pkg);
-					buf.append("\", \"");
+					buf.append("\", ");
 					String j2slibPath = FileUtil.toRelativePath(f.getParent(), workingDir.getAbsolutePath());
 					String gj2sLibPath = j2slibPath;
 					if (isUseGlobalURL) {
@@ -795,8 +819,13 @@ public class J2SLaunchingUtil {
 							gj2sLibPath += "/";
 						}
 					}
-					buf.append(gj2sLibPath);
-					buf.append("\"");
+					if (varName == null) {
+						buf.append("\"");
+						buf.append(gj2sLibPath);
+						buf.append("\"");
+					} else {
+						buf.append(varName);
+					}
 					File pkgFile = new File(f.getParentFile(), pkg.replace('.', '/') + "/package.js");
 					if (pkgFile.exists()) {
 						buf.append(", true");
