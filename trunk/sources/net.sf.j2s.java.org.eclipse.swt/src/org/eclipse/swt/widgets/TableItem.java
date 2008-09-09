@@ -1107,7 +1107,7 @@ public void setImage (int index, Image image) {
 			} else {
 				handleStyle = els[els.length - 2].style;
 			}
-			if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+			if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //					Element imgBackground = document.createElement("DIV");
 //					imgBackground.style.position = "absolute";
 //					imgBackground.style.width = "100%";
@@ -1117,7 +1117,7 @@ public void setImage (int index, Image image) {
 				handleStyle.backgroundImage = "";
 				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 			} else {
-				if (handleStyle.filter != null) handleStyle.filter = ""; 
+				if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			}
 		}

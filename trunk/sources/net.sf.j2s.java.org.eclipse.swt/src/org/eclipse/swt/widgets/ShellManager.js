@@ -12,7 +12,7 @@
  * @author zhou renjian
  * @create Jan 17, 2007
  *******/
- 
+
 /*
  * ShellManager is optional for SWT applications. When ShellManager is 
  * activated, there are an automatically-hidden side bar for all windows,
@@ -43,6 +43,8 @@ sm.barEl = null;
 sm.topbarEl = null;
 sm.lastMaximizedShell = null;
 sm.items = new Array ();
+// the last time that a window is minimized or maximized
+sm.lastMMed = new Date().getTime();
 sm.initialize = function () {
 	if (this.sidebarEl != null) return;
 	var sb = document.createElement ("DIV");
@@ -74,13 +76,39 @@ sm.initialize = function () {
 		if (sidebar.style.display != "none" && !ShellManager.isAroundSideBar (e.clientY)) {
 			sidebar.style.display = "none";
 		} else if (e.clientX <= 8 && !e.ctrlKey) {
-			if (sidebar.style.display != "block" && ShellManager.isAroundSideBar (e.clientY)) {
+			if (sidebar.style.display != "block"
+					&& ShellManager.isAroundSideBar (e.clientY)
+					&& ShellManager.items.length != 0) {
 				sidebar.style.display = "block";
 				ShellManager.updateItems ();
 			}
 		} else if (e.clientX > 200 || e.ctrlKey) {
-			if (sidebar.style.display != "none") {
+			var now = new Date().getTime();
+			if ((now - ShellManager.lastMMed >= 1000 || ShellManager.items.length == 0)
+					&& sidebar.style.display != "none") {
 				sidebar.style.display = "none";
+			}
+		}
+		
+		if (ShellManager.shortcutBarDiv != null) {
+			if (!e.ctrlKey && e.clientY >= O$.getFixedBodyClientHeight () - 8
+					&& ShellManager.isAroundTopBar (e.clientX)) {
+				var zIndex = "";
+				if (window.currentTopZIndex == null) {
+					zIndex = "1000";
+				} else {
+					zIndex = (Integer.parseInt(window.currentTopZIndex) + 1) + "";
+				}
+				if (ShellManager.shortcutBarDiv.style.zIndex != zIndex) {
+					ShellManager.shortcutZIndex = ShellManager.shortcutBarDiv.style.zIndex;
+					ShellManager.bringShortcutsToTop (zIndex);
+				}
+			} else if (e.clientY <= O$.getFixedBodyClientHeight () - 70
+					|| !ShellManager.isAroundTopBar (e.clientX)) {
+				if (ShellManager.shortcutZIndex != null) {
+					ShellManager.bringShortcutsToTop (ShellManager.shortcutZIndex);
+					ShellManager.shortcutZIndex = null;
+				}
 			}
 		}
 		var topbar = ShellManager.topbarContainerEl;
@@ -101,7 +129,8 @@ sm.initialize = function () {
 			}
 		} else if (e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null 
 				&& window["O$"] != null) ? O$.getContainerHeight (topShell.titleBar) : 20)) {
-			if (topbar.style.display != "none") {
+			var now = new Date().getTime();
+			if (now - ShellManager.lastMMed >= 1000 && topbar.style.display != "none") {
 				topbar.style.display = "none";
 				ShellManager.returnTopMaximized ();
 			}
@@ -114,6 +143,12 @@ sm.initialize = function () {
 	}
 };
 sm.createShellItem = function (shell) {
+	for (var i = 0; i < this.items.length; i++) {
+		var item = this.items[i];
+		if (item != null && item.shell == shell) {
+			return; // existed already
+		}
+	}
 	if (this.sidebarEl == null) {
 		this.initialize ();
 	}
@@ -128,7 +163,7 @@ sm.createShellItem = function (shell) {
 		text = "Java2Script";
 	}
 	var tag = "A";
-	if (window["O$"] != null && !O$.isIE) {
+	if (window["O$"] != null && !O$.isIENeedPNGFix) {
 		tag = "DIV";
 	}
 	var si = document.createElement (tag);
@@ -141,10 +176,10 @@ sm.createShellItem = function (shell) {
 		return false;
 	};
 	this.sidebarEl.appendChild (si);
+	var icon = document.createElement ("DIV");
+	icon.className = "shell-item-icon";
+	si.appendChild (icon);
 	var div = document.createElement ("DIV");
-	div.className = "shell-item-icon";
-	si.appendChild (div);
-	div = document.createElement ("DIV");
 	div.className = "shell-item-text";
 	si.appendChild (div);
 	div.appendChild (document.createTextNode (text));
@@ -163,6 +198,7 @@ sm.createShellItem = function (shell) {
 							ss.bringToTop ();
 						}
 					}
+					$wt.widgets.ShellManager.updateItems ();
 					return false;
 				};
 			}) (shell);
@@ -171,7 +207,8 @@ sm.createShellItem = function (shell) {
 		shell : shell,
 		text : text,
 		itemHandle : si,
-		textHandle : div
+		textHandle : div,
+		iconHandle : icon
 	};
 	this.updateItems ();
 };
@@ -184,13 +221,18 @@ sm.removeShellItem = function (shell) {
 			this.sidebarEl.removeChild (item.itemHandle);
 			item.itemHandle = null;
 			item.textHandle = null;
+			item.iconHandle = null;
 			this.items[i] = null;
 			break;
 		}
 	}
 	var smStyle = this.topbarContainerEl.style;
 	if (smStyle.display == "block" && shell.getMaximized()) {
-		smStyle.display == "none";
+		smStyle.display = "none";
+	}
+	this.syncItems ();
+	if (this.items.length == 0) {
+		ShellManager.sidebarEl.style.display = "none";
 	}
 };
 sm.syncItems = function () {
@@ -205,6 +247,10 @@ sm.syncItems = function () {
 	this.items.length -= delta;
 };
 sm.isAroundTopBar = function (x) {
+	var now = new Date().getTime();
+	if (now - this.lastMMed < 1000) {
+		return true;
+	}
 	var x1, x2, barWidth;
 	barWidth = 320;
 	var height = document.body.clientWidth;
@@ -307,6 +353,10 @@ sm.returnTopMaximized = function (shell) {
 	}
 };
 sm.isAroundSideBar = function (y) {
+	var now = new Date().getTime();
+	if (now - this.lastMMed < 1000 && this.items.length != 0) {
+		return true;
+	}
 	var y1, y2, barHeight;
 	this.syncItems ();
 	var length = this.items.length;
@@ -343,24 +393,171 @@ sm.updateItems = function () {
 		var height = O$.getFixedBodyClientHeight();
 		offset = O$.getFixedBodyOffsetTop() + Math.round ((height - (length * hh + 36)) / 2);
 	}
+	var topShell = this.getTopShell ();
 	for (var i = 0; i < length; i++) {
 		var item = this.items[i];
 		item.itemHandle.style.top = offset + (i * hh + 24) + "px";
-		if (item.shell != null && item.shell.getText () != item.text) {
-			for (var j = item.textHandle.childNodes.length - 1; j >= 0; j--) {
-				item.textHandle.removeChild (item.textHandle.childNodes[j]);
+		if (item.shell != null) {
+			if (item.shell.getText () != item.text) {
+				for (var j = item.textHandle.childNodes.length - 1; j >= 0; j--) {
+					item.textHandle.removeChild (item.textHandle.childNodes[j]);
+				}
+				item.textHandle.appendChild (document.createTextNode (item.shell.getText ()));
+				item.itemHandle.title = item.shell.getText ();
+			} else {
+				var img = item.shell.getImage ();
+				if (img != null) {
+					item.iconHandle.style.backgroundImage = "url(\"" + img.url + "\")";
+				}
 			}
-			item.textHandle.appendChild (document.createTextNode (item.shell.getText ()));
-			item.itemHandle.title = item.shell.getText ();
+			item.itemHandle.style.borderColor = item.shell.getMinimized () ? "buttonshadow" : "";
+			if (item.shell == topShell) {
+				O$.addCSSClass(item.itemHandle, "shell-top-item");
+			} else {
+				O$.removeCSSClass(item.itemHandle, "shell-top-item");
+			}
 		}
 	}
 	this.barEl.style.height = (length * hh + 36) + "px";
 	this.barEl.style.top = offset + "px";
 	if (window["O$"] != null) {
-		offset = O$.getFixedBodyOffsetLeft();
+		offset = O$.getFixedBodyOffsetLeft ();
 	} else {
 		offset = 0;
 	}
 	this.sidebarEl.style.left = offset + "px";
+};
+sm.shortcutBarDiv = null;
+sm.shortcutCount = 0;
+sm.shortcutItems = [];
+sm.shortcutZIndex = null;
+sm.initShortcutBar = function () {
+	this.shortcutBarDiv = document.createElement ("DIV");
+	this.shortcutBarDiv.className = "shortcut-bar";
+	document.body.appendChild (this.shortcutBarDiv);
+	this.shortcutBarDiv.onclick = function () {
+		var sm = $wt.widgets.ShellManager;
+		sm.bringShortcutsToTop (null);
+	};
+	this.shortcutBarDiv.title = "Doubleclick to hide shortcuts";
+	this.shortcutBarDiv.ondblclick = function () {
+		var sm = $wt.widgets.ShellManager;
+		if (sm.shortcutBarDiv.className.indexOf ("minized") == -1) {
+			sm.shortcutBarDiv.className = "shortcut-bar-minized";
+			sm.shortcutBarDiv.title = "Doubleclick to show shortcuts";
+			sm.setShortcutsVisible (false);
+		} else {
+			sm.shortcutBarDiv.className = "shortcut-bar";
+			sm.shortcutBarDiv.title = "Doubleclick to hide shortcuts";
+			sm.setShortcutsVisible (true);
+		}
+		sm.bringShortcutsToTop (null);
+	};
+};
+sm.setShortcutsVisible = function (visible) {
+	if (this.shortcutCount <= 0) {
+		return;
+	}
+	for (var i = 0; i < this.shortcutCount; i++) {
+		var itemDiv = this.shortcutItems[i];
+		itemDiv.style.display = visible ? "" : "none";
+	}
+};
+sm.bringShortcutsToTop = function (zIdx) {
+	if (this.shortcutCount <= 0) {
+		return;
+	}
+	var zIndex = "";
+	if (zIdx == null) {
+		if (window.currentTopZIndex == null) {
+			zIndex = "1000";
+		} else {
+			zIndex = (Integer.parseInt(window.currentTopZIndex) + 1) + "";
+		}
+		if (this.getTopMaximizedShell () == null) {
+			this.shortcutZIndex = zIndex;
+		}
+	} else {
+		zIndex = zIdx;
+	}
+	this.shortcutBarDiv.style.zIndex = zIndex;
+	for (var i = 0; i < this.shortcutCount; i++) {
+		var itemDiv = this.shortcutItems[i];
+		itemDiv.style.zIndex = zIndex;
+	}
+};
+sm.layoutShortcuts = function () {
+	if (this.shortcutCount <= 0) {
+		return;
+	}
+	var barWidth = 20 + this.shortcutCount * 60;
+	var barOffset = (O$.getFixedBodyClientWidth () - barWidth) / 2;
+	for (var i = 0; i < this.shortcutCount; i++) {
+		var itemDiv = this.shortcutItems[i];
+		itemDiv.style.left = (barOffset + 20 + i * 60) + "px";
+	}
+	this.shortcutBarDiv.style.left = barOffset + "px";
+	this.shortcutBarDiv.style.width = barWidth + "px";
+};
+sm.addShortcut = function (name, icon, clickFun) {
+	if (this.shortcutBarDiv == null) {
+		this.initShortcutBar ();
+	}
+	var tag = "A";
+	if (!O$.isIENeedPNGFix) {
+		tag = "DIV";
+	}
+	var itemDiv = document.createElement (tag);
+	itemDiv.className = "shortcut-item";
+	if (O$.isIENeedPNGFix) {
+		if (icon.toLowerCase().endsWith(".png")) {
+			itemDiv.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + icon + "\", sizingMethod=\"image\")";
+		} else {
+			itemDiv.style.backgroundImage = "url('" + icon + "')";
+		}	
+		itemDiv.href = "#";
+		itemDiv.onclick = (function (f) {
+				return function () {
+					f();
+					return false;
+				};
+		})(clickFun);
+	} else {
+		itemDiv.style.backgroundImage = "url('" + icon + "')";
+		itemDiv.onclick = clickFun;
+	}
+	itemDiv.title = name;
+	document.body.appendChild (itemDiv);
+
+	this.shortcutItems[this.shortcutCount] = itemDiv;
+	this.shortcutCount++;
+	this.layoutShortcuts ();
+	return itemDiv;
+};
+sm.markActiveItem = function (item) {
+	if (this.shortcutCount <= 0 || item == null) {
+		return;
+	}
+	for (var i = 0; i < this.shortcutCount; i++) {
+		var itemDiv = this.shortcutItems[i];
+		if (item == itemDiv) {
+			O$.addCSSClass(itemDiv, "shortcut-active-item");
+		} else {
+			O$.removeCSSClass(itemDiv, "shortcut-active-item");
+		}
+	}
+}
+sm.isAroundShortcutBar = function (x) {
+	/*var now = new Date().getTime();
+	if (now - this.lastMMed < 1000) {
+		return true;
+	}*/
+	var x1, x2, barWidth;
+	var barWidth = 20 + this.shortcutCount * 60;
+	var height = document.body.clientWidth;
+	var offset = Math.round ((height - barWidth) / 2);
+	x1 = offset - 72;
+	x2 = offset + barWidth + 72;
+	return (x >= x1 && x <= x2);
 };
 });

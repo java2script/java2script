@@ -937,7 +937,8 @@ public void open () {
 	layout();
 	/**
 	 * @j2sNative
-	 * if (window["ShellManager"] != null && this.parent == null) {
+	 * if (window["ShellManager"] != null && this.parent == null
+	 * 		&& (this.getStyle() & 4) == 0) { // SWT.TOOL
 	 * 	ShellManager.createShellItem (this);
 	 * }
 	 */ {}
@@ -1363,6 +1364,18 @@ void setToolTipText (NMTTDISPINFO lpnmtdi, char [] buffer) {
 
 public void setVisible (boolean visible) {
 	checkWidget ();
+	
+	/**
+	 * @j2sNative
+	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
+	 * 	if (!visible) {
+	 * 		ShellManager.removeShellItem (this);
+	 * 	} else {
+	 * 		ShellManager.createShellItem (this);
+	 * 	}
+	 * }
+	 */ {}
+	
 	if (drawCount != 0) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {

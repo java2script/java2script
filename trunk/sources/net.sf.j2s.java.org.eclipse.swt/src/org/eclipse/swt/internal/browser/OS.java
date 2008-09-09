@@ -32,9 +32,13 @@ public class OS {
 	
 	public static boolean isIE = false;
 	
+	public static boolean isIE80 = false;
+	public static boolean isIE70 = false;
 	public static boolean isIE60 = false;
 	public static boolean isIE55 = false;
 	public static boolean isIE50 = false;
+	
+	public static boolean isIENeedPNGFix = false;
 	
 	public static boolean isMozilla = false;
 	
@@ -44,7 +48,12 @@ public class OS {
 	
 	public static boolean isOpera = false;
 	
+	public static boolean isChrome = false;
 	
+	
+	/* Record Caps Lock status */
+	public static boolean isCapsLockOn = false;
+
 	/**
 	 * @j2sNative
 	var os = $wt.internal.browser.OS;
@@ -53,6 +62,7 @@ public class OS {
 	os.isOpera = dua.indexOf("Opera") >= 0;
 	var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
 	os.isSafari = dav.indexOf("Safari") >= 0;
+	os.isChrome = dav.indexOf("Chrome") >= 0;
 	var geckoPos = dua.indexOf("Gecko");
 	os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
 	os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
@@ -60,6 +70,9 @@ public class OS {
 	os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
 	os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
 	os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
+	os.isIE70 = os.isIE && dav.indexOf("MSIE 7.0")>=0;
+	os.isIE80 = os.isIE && dav.indexOf("MSIE 8.0")>=0;
+	os.isIENeedPNGFix = os.isIE50 || os.isIE55 || os.isIE60;
 	 */
 	static {
 		
@@ -518,7 +531,7 @@ public class OS {
 	}
 	
 	public static void updateArrowSize(Object el, int style, int cx, int cy) {
-		int xx = Math.min(cx, cy) / 3;
+		int xx = Math.min(cx, cy) / 4;
 		final CSSStyle s = ((Element) el).style;
 		s.borderWidth = (xx > 0 ? xx : 0) + "px";
 		if ((style & SWT.LEFT) != 0) {
@@ -539,7 +552,7 @@ public class OS {
 		xx = cy / 3;
 		s.position = "relative";
 		if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
-			s.top = (x - 3) + "px";
+			s.top = (x - 2) + "px";
 			if ((style & SWT.RIGHT) != 0) {
 				s.left = "1px";
 			}
@@ -579,7 +592,23 @@ public class OS {
 					s.top = "-1px";
 				}
 			}
+		} else if (OS.isSafari) {
+			if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
+				s.top = "1px";
+				if ((style & SWT.RIGHT) != 0) {
+					s.left = "1px";
+				}
+			} else {
+				if ((style & SWT.UP) != 0) {
+					s.left = "-1px";
+					s.top = "0";
+				} else if ((style & SWT.DOWN) != 0) {
+					s.left = "0";
+					s.top = "1px";
+				}
+			}
 		}
+
 	}
 
 	public static boolean existedCSSClass(Object el, String cssClazz) {
@@ -777,6 +806,20 @@ public class OS {
 		}
 	}
 	
+	public static int getFixedBodyClientWidth() {
+		Element b = document.body;
+		Element p = b.parentNode;
+		int bcWidth = b.clientWidth;
+		int pcWidth = p.clientWidth;
+		if (OS.isIE) { // && !OS.isOpera
+			return (pcWidth == 0) ? bcWidth : pcWidth;
+		} else if (OS.isFirefox || OS.isSafari) {
+			return (pcWidth == p.offsetWidth 
+					&& pcWidth == p.scrollWidth) ? bcWidth : pcWidth;
+		}
+		return bcWidth;
+	}
+	
 	public static int getFixedBodyClientHeight() {
 	    Element b = document.body;
 	    Element p = b.parentNode;
@@ -847,4 +890,78 @@ public class OS {
 		handle.focus();
 	}
 	
+
+	public static char getInputCharacter(int keyCode, boolean shiftKey) {
+		char ch = '\0';
+		if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32) {
+			ch = (char) keyCode;
+		} else if (keyCode >= 48 && keyCode < 58) {
+			if (!shiftKey) {
+				ch = (char) keyCode;
+			} else {
+				char chs[] = {')', '!', '@', '#', '$', '%', '^', '&', '*', '('};
+				ch = chs[keyCode - 48];
+			}
+		} else if (keyCode == 61) {
+			if (!shiftKey) {
+				ch = '=';
+			} else {
+				ch = '+';
+			}
+		} else if (keyCode == 59) {
+			if (!shiftKey) {
+				ch = ';';
+			} else {
+				ch = ':';
+			}
+		} else if (keyCode >= 65 && keyCode <= 90) {
+			if ((shiftKey && isCapsLockOn) || (!shiftKey && !isCapsLockOn)) {
+				ch = (char) (keyCode + 'a' - 'A');
+			} else {
+				ch = (char) keyCode;
+			}
+		} else if (keyCode >= 96 && keyCode <= 105) {
+			ch = (char) (keyCode - 96 + '0');
+		} else if (keyCode >= 106 && keyCode <= 111 && keyCode != 108) {
+			char chs[] = {'*', '+', '?', '-', '.', '/'};
+			ch = chs[keyCode - 106];
+		} else if (keyCode >= 186 && keyCode <= 192) {
+			if (!shiftKey) {
+				char chs[] = {';', '=', ',', '-', '.', '/', '`'};
+				ch = chs[keyCode - 186];
+			} else {
+				char chs[] = {':', '+', '<', '_', '>', '?', '~'};
+				ch = chs[keyCode - 186];
+			}
+		} else if (keyCode >= 219 && keyCode <= 222) {
+			if (!shiftKey) {
+				char chs[] = {'[', '\\', ']', '\''};
+				ch = chs[keyCode - 219];
+			} else {
+				char chs[] = {'{', '|', '}', '\"'};
+				ch = chs[keyCode - 219];
+			}
+		} else {
+			ch = (char) keyCode;
+		}
+		return ch;
+	}
+	
+	public static boolean isInputCharacter(int keyCode, boolean shiftKey, boolean altKey, boolean ctrlKey) {
+		if (altKey || ctrlKey) {
+			return false;
+		}
+		if (keyCode == 10 || keyCode == 13 || keyCode == 9 || keyCode == 32
+				|| keyCode == 8 || keyCode == 46 // Backspace and Delete
+				|| (keyCode >= 48 && keyCode <= 57)
+				|| keyCode == 59 || keyCode == 61
+				|| (keyCode >= 65 && keyCode <= 90)
+				|| (keyCode >= 96 && keyCode <= 111 && keyCode != 108)
+				|| (keyCode >= 186 && keyCode <= 192)
+				|| (keyCode >= 218 && keyCode <= 222)) {
+			return true;
+		}
+		return false;
+	}
+
 }

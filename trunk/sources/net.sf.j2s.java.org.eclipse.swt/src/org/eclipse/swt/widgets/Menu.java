@@ -242,6 +242,10 @@ void _setVisible (boolean visible) {
 				maxWidth = Math.max(maxWidth, width);
 			}
 			handle.style.width = (maxWidth + (hasImage ? 18 : 0) + (hasSelection ? 18 : 0) + 32) + "px";
+		} else {
+			handle.style.width = "";
+			int width = OS.getContainerWidth(handle);
+			handle.style.width = (width + 32) + "px";
 		}
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
@@ -257,10 +261,13 @@ void _setVisible (boolean visible) {
 		}
 		style.left = left + "px";
 		style.top = top + "px";
-		btnFocus.focus();
+		try {
+			btnFocus.focus();
+		} catch (Error err) {}
 		if (hooks(SWT.Show)) sendEvent(SWT.Show);
 	} else {
 		style.display = "none";
+		style.width = "";
 		if (hooks(SWT.Hide)) sendEvent(SWT.Hide);
 	}
 	/*

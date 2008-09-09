@@ -12,6 +12,10 @@ package org.eclipse.swt.widgets;
 
 
 import org.eclipse.swt.*;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.document;
 
 /**
  * Instances of this class represent the system tray that is part
@@ -30,11 +34,27 @@ import org.eclipse.swt.*;
  * @see Display#getSystemTray
  * 
  * @since 3.0
+ * 
+ * @j2sPrefix
+ * $WTC$$.registerCSS ("$wt.widgets.Tray");
  */
 public class Tray extends Widget {
 	int itemCount;
 	TrayItem [] items = new TrayItem [4];
+	
+	private int cellLines;
+	private Element[] allCells;
+	private Element[] allItems;
+	private Element[] allFloats;
+	private Element logoEl;
 
+/**
+ * 
+ * @param display
+ * @param style
+ * 
+ * @j2sIgnoreSuperConstructor
+ */
 Tray (Display display, int style) {
 	if (display == null) display = Display.getCurrent ();
 	if (display == null) display = Display.getDefault ();
@@ -42,8 +62,188 @@ Tray (Display display, int style) {
 		error (SWT.ERROR_THREAD_INVALID_ACCESS);
 	}
 	this.display = display;
-}
 	
+	items = new TrayItem [4];
+	cellLines = 0;
+	allCells = new Element[0];
+	allItems = new Element[0];
+	allFloats = new Element[0];
+	initTrayArea();
+}
+
+private String trayLineColor(int line) {
+	if (line <= 2) {
+		return "white";
+	} else {
+		int gray = line * 32;
+		if (gray > 240) {
+			gray = 240; // should never exceed 255
+		}
+		return "rgb(" + gray + "," + gray + ",255)";
+	}
+}
+
+private void addTrayLine () {
+	cellLines++;
+	String lineColor = trayLineColor (cellLines);
+	for (int i = 0; i < cellLines; i++) {
+		Element cell = document.createElement ("DIV");
+		cell.className = "tray-cell";
+		cell.style.left = ((cellLines - 1 - i) * 36) + "px";
+		cell.style.top = (i * 36) + "px";
+		cell.style.borderColor = lineColor + " transparent transparent transparent";
+		if (OS.isIENeedPNGFix) { // IE < 6.0
+			cell.style.borderRightColor = "white";
+		}
+		allCells[cellLines * (cellLines - 1) / 2 + i] = cell;
+		document.body.appendChild (cell);
+	}
+	for (int i = 0; i < cellLines - 1; i++) {
+		Element cell = allCells[(cellLines - 1) * (cellLines - 2) / 2 + i];
+		cell.style.borderRightColor = lineColor;
+	}
+	Element floatDiv = document.createElement ("DIV");
+	floatDiv.className = "tray-float-block";
+	floatDiv.style.width = cellLines * 36 + "px";
+	allFloats[cellLines - 1] = floatDiv;
+	document.body.insertBefore (floatDiv, document.body.childNodes[0]);
+}
+
+private void removeTrayLine () {
+	if (cellLines <= 2) {
+		return;
+	}
+	for (int i = cellLines - 1; i >= 0 ; i--) {
+		int index = cellLines * (cellLines - 1) / 2 + i;
+		Element cell = allCells[index];
+		allCells[index] = null;
+		document.body.removeChild (cell);
+	}
+	cellLines--;
+	for (int i = 0; i < cellLines; i++) {
+		Element cell = allCells[cellLines * (cellLines - 1) / 2 + i];
+		cell.style.borderRightColor = "transparent";
+		if (OS.isIENeedPNGFix) { // IE < 6.0
+			cell.style.borderRightColor = "white";
+		}
+	}
+	document.body.removeChild (allFloats[cellLines]);
+	allFloats[cellLines] = null;
+}
+
+private void initTrayArea () {
+	addTrayLine ();
+	addTrayLine ();
+	logoEl = document.createElement("DIV");
+	logoEl.className = "tray-logo-item";
+	logoEl.title = "Java2Script";
+	document.body.appendChild(logoEl);
+	logoEl.onclick = new RunnableCompatibility() {
+		public void run() {
+			if (display != null) {
+				Shell shell = display.getActiveShell();
+				if (shell != null) {
+					shell.openAboutJava2Script();
+				} else {
+					Shell[] shells = display.getShells();
+					for (int i = 0; i < shells.length; i++) {
+						if (shells[i] != null) {
+							shells[i].openAboutJava2Script();
+							break;
+						}
+					}
+				}
+			}
+		}
+	};
+}
+
+Element addTrayItem () {
+	if (allItems.length + 6 - cellLines * (cellLines + 1) / 2 > cellLines) {
+		addTrayLine ();
+	}
+	
+	if (allItems.length == 0) {
+		for (int i = 0; i < 3; i++) {
+			allCells[i].style.display = "";
+			Element div = allFloats[i];
+			if (div != null) {
+				div.style.display = "";
+			}
+		}
+		logoEl.style.display = "";
+	}
+
+	Element item = document.createElement ("DIV");
+	item.className = "tray-item";
+	allItems[allItems.length] = item;
+	orderTrayItem (item, allItems.length - 1);
+
+	document.body.appendChild (item);
+	return item;
+}
+
+void orderTrayItem (Element item, int order) {
+	int index = -1;
+	int currentLine = -1;
+	for (int i = cellLines; i >= 2; i--) {
+		if (order + 6 >= i * (i + 1) / 2) {
+			index = order + 6 - i * (i + 1) / 2;
+			currentLine = i;
+			break;
+		}
+	}
+	int offset = 0;
+	if (currentLine % 2 == 0) {
+		offset = -12;
+	}
+	if (index % 2 == 0) {
+		offset += (index + 1) * (10 + currentLine - 3);
+	} else {
+		offset += - index * (10 + currentLine - 3);
+	}
+	if (currentLine % 2 == 0) {
+		offset *= -1;
+	}
+	item.style.left = ((currentLine - 3) * 18 + 37 + offset) + "px";
+	item.style.top = ((currentLine - 3) * 18 + 37 - offset) + "px";
+
+}
+
+void removeTrayItem (Element item) {
+	for (int i = allItems.length - 1; i >= 0; i--) {
+		if (allItems[i] == item) {
+			document.body.removeChild (item);
+			for (int j = i; j < allItems.length - 1; j++) {
+				allItems[j] = allItems[j + 1];
+				orderTrayItem (allItems[j], j);
+			}
+			allItems[allItems.length - 1] = null;
+			/**
+			 * @j2sNative
+			 * this.allItems.length--;
+			 */ {
+				 Element el = allItems[0];
+				 el.checked = false;
+			 }
+			if (allItems.length + 6 <= cellLines * (cellLines + 1) / 2) {
+				removeTrayLine ();
+			}
+			break;
+		}
+	}
+	if (allItems.length == 0) {
+		for (int i = 0; i < 3; i++) {
+			allCells[i].style.display = "none";
+			Element div = allFloats[i];
+			if (div != null) {
+				div.style.display = "none";
+			}
+		}
+		logoEl.style.display = "none";
+	}
+}
+
 void createItem (TrayItem item, int index) {
 	if (!(0 <= index && index <= itemCount)) error (SWT.ERROR_INVALID_RANGE);
 	if (itemCount == items.length) {
@@ -134,10 +334,45 @@ void releaseWidget () {
 	for (int i=0; i<items.length; i++) {
 		TrayItem item = items [i];
 		if (item != null && !item.isDisposed ()) {
-			//item.releaseResources ();
+			item.releaseResources ();
 		}
 	}
 	items = null;
+	
+	for (int i = 0; i < allCells.length; i++) {
+		Element cell = allCells[i];
+		if (cell != null) {
+			OS.destroyHandle(cell);
+			cell = null;
+			allCells[i] = null;
+		}
+	}
+	allCells = null;
+	
+	for (int i = 0; i < allItems.length; i++) {
+		Element item = allItems[i];
+		if (item != null) {
+			OS.destroyHandle(item);
+			item = null;
+			allItems[i] = null;
+		}
+	}
+	allItems = null;
+
+	for (int i = 0; i < allFloats.length; i++) {
+		Element item = allFloats[i];
+		if (item != null) {
+			OS.destroyHandle(item);
+			item = null;
+			allFloats[i] = null;
+		}
+	}
+	allFloats = null;
+
+	if (logoEl != null) {
+		OS.destroyHandle(logoEl);
+		logoEl = null;
+	}
 	super.releaseWidget ();
 }
 

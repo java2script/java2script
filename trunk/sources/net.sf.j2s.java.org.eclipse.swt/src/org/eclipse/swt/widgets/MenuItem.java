@@ -303,7 +303,9 @@ void hookSelection() {
 			if (!isEnabled()) {
 				display.timerExec(40, new Runnable() {
 					public void run() {
-						parent.btnFocus.focus();
+						try {
+							parent.btnFocus.focus();
+						} catch (Error e) { }
 					}
 				});
 				return;
@@ -956,7 +958,7 @@ public void setImage (Image image) {
 		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 			OS.clearChildren(imageEl);
 			CSSStyle handleStyle = imageEl.style;
-			if (image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+			if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //					Element imgBackground = document.createElement("DIV");
 //					imgBackground.style.position = "absolute";
 //					imgBackground.style.width = "100%";
@@ -966,7 +968,7 @@ public void setImage (Image image) {
 				handleStyle.backgroundImage = "";
 				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 			} else {
-				if (handleStyle.filter != null) handleStyle.filter = ""; 
+				if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			}
 		}
@@ -1386,7 +1388,9 @@ void showSubMenu() {
 	menu.handle.style.top = rect.y + "px";
 	menu.handle.style.zIndex = "1" + window.currentTopZIndex;
 	menu.handle.style.display = "block";
-	menu.btnFocus.focus();
+	try {
+		menu.btnFocus.focus();
+	} catch (Error err) {}
 }
 
 /*

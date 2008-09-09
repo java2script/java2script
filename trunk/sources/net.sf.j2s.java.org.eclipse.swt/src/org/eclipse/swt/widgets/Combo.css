@@ -13,6 +13,16 @@
 	font-size:8pt;
 	border-style:none;
 	padding-left:1px;
+	background-color:white;
+}
+
+@media all and (min-width:0px){/* opera and safari */
+.combo-input-box {
+	margin-top:-1px;
+}
+html:first-child .combo-input-box {
+	margin-top:-2px !important;
+}
 }
 
 .combo-default button {
@@ -38,12 +48,19 @@
 	line-height:0;
 	
 	border-style:solid solid none solid;
-	border-color:buttonface;
-	border-top-color:black;
+	border-color:transparent;
+	border-top-color:black !important;
 	border-bottom-width:0;
 }
+* html .combo-button-arrow-down {
+	border-color:buttonface;
+}
+
 .combo-disabled .combo-button-arrow-down {
-	border-top-color:gray;
+	border-top-color:gray !important;
+}
+.combo-disabled .combo-input-box {
+	background-color:buttonface !important;
 }
 
 .combo-select-box-invisible {

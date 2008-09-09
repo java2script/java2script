@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
@@ -107,7 +108,6 @@ import org.eclipse.swt.internal.xhtml.window;
  * @see #sleep
  * @see Device#dispose
  * 
- * @j2sIgnoreImport org.eclipse.swt.widgets.Tray
  * @j2sSuffix
 // Only IE need to release the resources so that no memory is leaked
 if (window.attachEvent) {
@@ -1145,6 +1145,12 @@ public Shell getActiveShell () {
 //	Control control = findControl (OS.GetActiveWindow ());
 //	return control != null ? control.getShell () : null;
 	// TODO:
+	/**
+	 * @j2sNative
+	 * if (window["ShellManager"] != null) { // SWT.TOOL
+	 * 	return ShellManager.getTopShell ();
+	 * }
+	 */ {}
 	return null;
 }
 
@@ -1937,6 +1943,7 @@ if (window[key] != null) {
  */
 protected void bindMonitor(Monitor m) {
 	currentMonitor = m;
+	ResizeSystem.register(m);
 }
 /**
  * Returns a (possibly empty) array containing all shells which have
@@ -3260,8 +3267,8 @@ protected void release () {
 		Shell shell = shells [i];
 		if (!shell.isDisposed ()) shell.dispose ();
 	}
-//	if (tray != null) tray.dispose ();
-//	tray = null;
+	if (tray != null) tray.dispose ();
+	tray = null;
 	/*
 	 * Don't loop this "while"!
 	 * May 7, 2006 Josson

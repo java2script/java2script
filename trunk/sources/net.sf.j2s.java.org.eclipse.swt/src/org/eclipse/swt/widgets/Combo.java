@@ -11,6 +11,8 @@
 package org.eclipse.swt.widgets;
 
 
+import java.util.Date;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ModifyListener;
@@ -76,6 +78,8 @@ public class Combo extends Composite {
 	Element dropDownButton, 
 			textInput,
 			selectInput;
+	private long lastBlurred = -1;
+	private int currentIndex = 0;
 	private boolean selectShown;
 	private boolean visibleCountIsSet = false;
 	private boolean isSimple;
@@ -569,7 +573,7 @@ protected void createHandle () {
 	textInput.readOnly = (style & SWT.READ_ONLY)!=0;
 	//textInput.size = Combo.LIMIT;
 	Element wrapper = document.createElement("DIV");
-	wrapper.style.overflow = "auto";
+	wrapper.style.overflow = "hidden";
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textInput);
 	//handle.appendChild(textInput);
@@ -578,39 +582,65 @@ protected void createHandle () {
 	
 	textInput.ondblclick = new RunnableCompatibility() {
 		public void run() {
-//			System.out.println("button clicked!");
 			if(!isSimple && itemCount > 0) {
 				show();
 			}
 		}
 	};
-	
-	textInput.onkeydown = new RunnableCompatibility(){
+
+	textInput.onkeyup = new RunnableCompatibility(){
 		public void run(){
 			HTMLEvent e = (HTMLEvent) getEvent();
+			String[] items = getItems();
+			if (items.length == 0) {
+				return;
+			}
 			switch(e.keyCode){
-			case 13:
-				/*
-				 * TODO: default selection;
-				 */
+			case 38:
+				selectInput.selectedIndex = currentIndex;
+				noSelection = false;
+				updateSelection();
+				noSelection = true;
+				if (currentIndex > 0) {
+					currentIndex--;
+				}
+				if (currentIndex >= items.length) {
+					currentIndex = items.length - 1;
+				}
+				toReturn(false);
 				break;
 			case 40:
-				if(!isSimple){
-//					show();
-					toReturn(false);					
-					textInput.focus();
+				selectInput.selectedIndex = currentIndex;
+				noSelection = false;
+				updateSelection();
+				noSelection = true;
+				if (currentIndex < items.length) {
+					currentIndex++;
 				}
+				if (currentIndex >= items.length) {
+					currentIndex = items.length - 1;
+				}
+				toReturn(false);
 				break;
-			default:
-				toReturn(true);
 			}
-
 		}
 	};
-	
+//	dropDownButton.onmousedown = new RunnableCompatibility() {
+//		public void run() {
+//			long now = new Date().getTime();
+//			if (now - lastBlurred < 250) {
+//				HTMLEventWrapper e = new HTMLEventWrapper(getEvent());
+//				e.preventDefault();
+//				e.stopPropagation();
+//			}
+//		}
+//	};
 	dropDownButton.onclick = new RunnableCompatibility() {
 		public void run() {
-//			System.out.println("button clicked!");
+			long now = new Date().getTime();
+			if (now - lastBlurred < 200) {
+				return;
+			}
 			if(!isSimple && itemCount > 0) {
 				if (!selectShown) {
 					show();
@@ -652,8 +682,7 @@ void configureSelect() {
 
 	selectInput.onblur = new RunnableCompatibility() {
 		public void run() {
-//			System.out.println("handle blurred!");
-//			updateSelection();
+			lastBlurred = new Date().getTime();
 			if(!isSimple && itemCount > 0)
 				hide();
 		}
@@ -664,12 +693,29 @@ void configureSelect() {
 			updateSelection();
 			if(!isSimple && itemCount > 0) {
 				Element el = new HTMLEventWrapper(getEvent()).target;
-				if (el != null && el.nodeName == "OPTION") {
-					hide();
+				if (OS.isIE || OS.isSafari || (el != null && el.nodeName == "OPTION")) {
+					if (OS.isIE) {
+						getDisplay().timerExec(50, new Runnable() {
+							public void run() {
+								hide();
+							}
+						});
+					} else {
+						hide();
+					}
 				}
 			}
 		}
-	}; 
+	};
+	selectInput.onkeyup =  new RunnableCompatibility() {
+		public void run() {
+			HTMLEvent evt = (HTMLEvent) getEvent();
+			int keyCode = evt.keyCode;
+			if (keyCode == 27 || keyCode == 13 || keyCode == 10) {
+				hide();
+			}
+		}
+	};
 }
 void hide(){
 	if(!this.selectShown){
@@ -683,6 +729,7 @@ void hide(){
 		
 	}
 	selectInput.className = "combo-select-box-invisible" + (isSimple ? "" : " combo-select-box-notsimple");
+	dropDownButton.focus();
 }
 
 void show(){
@@ -748,6 +795,7 @@ void updateSelection(){
 	if (i < 0) return;
 	textInput.value = selectInput.options[i].value;
 	setText(getItem(i));
+	//textInput.select();
 	sendEvent(SWT.Selection);
 }
 

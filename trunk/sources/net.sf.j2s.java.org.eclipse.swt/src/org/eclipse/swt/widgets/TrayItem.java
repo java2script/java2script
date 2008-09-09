@@ -13,9 +13,16 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 
 /**
  * Instances of this class represent icons that can be placed on the
@@ -36,9 +43,11 @@ import org.eclipse.swt.graphics.Image;
 public class TrayItem extends Item {
 	Tray parent;
 	int id;
-	Image image2;
+	//Image image2;
 	String toolTipText;
 	boolean visible = true;
+	
+	Element handle;
 	
 /**
  * Constructs a new instance of this class given its parent
@@ -109,6 +118,34 @@ public void addSelectionListener(SelectionListener listener) {
 	addListener (SWT.DefaultSelection,typedListener);
 }
 
+/**
+ * Adds the listener to the collection of listeners who will
+ * be notified when the platform-specific context menu trigger
+ * has occurred, by sending it one of the messages defined in
+ * the <code>MenuDetectListener</code> interface.
+ *
+ * @param listener the listener which should be notified
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_NULL_ARGUMENT - if the listener is null</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ *
+ * @see MenuDetectListener
+ * @see #removeMenuDetectListener
+ *
+ * @since 3.3
+ */
+public void addMenuDetectListener (MenuDetectListener listener) {
+	checkWidget ();
+	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
+	TypedListener typedListener = new TypedListener (listener);
+	addListener (SWT.MenuDetect, typedListener);
+}
+
 protected void checkSubclass () {
 	if (!isValidSubclass ()) error (SWT.ERROR_INVALID_SUBCLASS);
 }
@@ -170,6 +207,57 @@ void createWidget () {
 	iconData.uCallbackMessage = Display.SWT_TRAYICONMSG;
 	OS.Shell_NotifyIcon (OS.NIM_ADD, iconData);
 	*/
+	handle = parent.addTrayItem();
+	
+	handle.onclick =  new RunnableCompatibility() {
+		public void run() {
+			postEvent (SWT.Selection);
+		}
+	};
+	handle.oncontextmenu = new RunnableCompatibility() {
+		public void run() {
+			Event ev = new Event();
+			ev.type = SWT.MenuDetect;
+			ev.widget = TrayItem.this;
+			ev.display = display;
+			ev.time = display.getLastEventTime();
+			Object evt = getEvent();
+			if (evt != null) {
+				HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+				ev.x = evtHTML.x;
+				ev.y = evtHTML.y;
+				sendEvent(ev);
+				evtHTML.preventDefault();
+				toReturn(false);
+				return;
+			}
+			sendEvent(ev);
+			toReturn(false);
+			//postEvent (SWT.MenuDetect);
+		}
+	};
+	
+	if (OS.isOpera) {
+		handle.onmouseup = new RunnableCompatibility() {
+			public void run() {
+				Object evt = getEvent();
+				if (evt != null && ((HTMLEvent) evt).ctrlKey) {
+					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+					Event ev = new Event();
+					ev.type = SWT.MenuDetect;
+					ev.widget = TrayItem.this;
+					ev.display = display;
+					ev.time = display.getLastEventTime();
+					ev.x = evtHTML.x;
+					ev.y = evtHTML.y;
+					sendEvent(ev);
+					evtHTML.preventDefault();
+					toReturn(false);
+				}
+			}
+		};
+	}
+
 }
 
 /**
@@ -260,9 +348,14 @@ protected void releaseChild () {
 
 protected void releaseWidget () {
 	super.releaseWidget ();
-	if (image2 != null) image2.dispose ();
-	image2 = null;
+//	if (image2 != null) image2.dispose ();
+//	image2 = null;
 	toolTipText = null;
+	if (handle != null) {
+		parent.removeTrayItem(handle);
+		OS.destroyHandle(handle);
+		handle = null;
+	}
 	/*
 	if (OS.IsWinCE) return;
 	NOTIFYICONDATA iconData = OS.IsUnicode ? (NOTIFYICONDATA) new NOTIFYICONDATAW () : new NOTIFYICONDATAA ();
@@ -299,6 +392,33 @@ public void removeSelectionListener(SelectionListener listener) {
 }
 
 /**
+ * Removes the listener from the collection of listeners who will
+ * be notified when the platform-specific context menu trigger has
+ * occurred.
+ *
+ * @param listener the listener which should no longer be notified
+ *
+ * @exception IllegalArgumentException <ul>
+ *    <li>ERROR_NULL_ARGUMENT - if the listener is null</li>
+ * </ul>
+ * @exception SWTException <ul>
+ *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+ *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+ * </ul>
+ *
+ * @see MenuDetectListener
+ * @see #addMenuDetectListener
+ *
+ * @since 3.3
+ */
+public void removeMenuDetectListener (MenuDetectListener listener) {
+	checkWidget ();
+	if (listener == null) error (SWT.ERROR_NULL_ARGUMENT);
+	if (eventTable == null) return;
+	eventTable.unhook (SWT.MenuDetect, listener);
+}
+
+/**
  * Sets the receiver's image.
  *
  * @param image the new image
@@ -315,10 +435,27 @@ public void setImage (Image image) {
 	checkWidget ();
 	if (image != null && image.isDisposed ()) error (SWT.ERROR_INVALID_ARGUMENT);
 	super.setImage (image);
+	if (image == null) {
+		handle.style.backgroundImage = "";
+		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
+				&& handle.style.filter != null) {
+			handle.style.filter = "";
+		}
+	} else {
+		CSSStyle handleStyle = handle.style;
+		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+			handleStyle.backgroundImage = "";
+			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+		} else {
+			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
+			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+		}
+	}
+
 	//if (OS.IsWinCE) return;
+	/*
 	if (image2 != null) image2.dispose ();
 	image2 = null;
-	/*
 	int hIcon = 0;
 	Image icon = image;
 	if (icon != null) {
@@ -356,6 +493,7 @@ public void setImage (Image image) {
 public void setToolTipText (String value) {
 	checkWidget ();
 	toolTipText = value;
+	handle.title = value;
 	/*
 	if (OS.IsWinCE) return;
 	NOTIFYICONDATA iconData = OS.IsUnicode ? (NOTIFYICONDATA) new NOTIFYICONDATAW () : new NOTIFYICONDATAA ();

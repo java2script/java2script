@@ -176,6 +176,12 @@
 	margin-bottom:0;
 }
 
+.alaa-icon {
+	background-image:url('images/shell-packed.gif');
+	background-position:center center;
+	background-color:transparent !important;
+}
+
 .shell-title-icon {
 	background-image:url('images/shell-packed.gif');
 	background-position:center center;

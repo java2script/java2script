@@ -730,15 +730,28 @@ void addModalLayer() {
 
 /**
  * @j2sNative
- * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", function () {
- * new $wt.widgets.HTMLSource ().exportSource (this, a);
- * });
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", (function (o) { return function () {
+ * new $wt.widgets.HTMLSource ().exportSource (o, a);
+ * }; }) (this));
  * @j2sNativeSrc
- * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", function () {
- * new $wt.widgets.HTMLSource ().exportSource (this, onlyContent);
- * });
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.HTMLSource", (function (o) { return function () {
+ * new $wt.widgets.HTMLSource ().exportSource (o, onlyContent);
+ * }; }) (this));
  */
 void exportHTMLSource(boolean onlyContent) {
+}
+
+/**
+ * @j2sNative
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.AboutJava2Script", (function (o) { return function () {
+ * 	$wt.widgets.AboutJava2Script.openAbout (o);
+ * }; }) (this));
+ * @j2sNativeSrc
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.AboutJava2Script", (function (o) { return function () {
+ * 	$wt.widgets.AboutJava2Script.openAbout (o);
+ * }; }) (this));
+ */
+void openAboutJava2Script() {
 }
 
 protected void createWidget () {
@@ -782,7 +795,7 @@ public void dispose () {
 	 */ {}
 	/**
 	 * @j2sNative
-	 * if (window["ShellManager"] != null) {
+	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
 	 * 	ShellManager.removeShellItem (this);
 	 * }
 	 */ {}
@@ -1436,7 +1449,7 @@ public void setImage (Image image) {
 //		}
 	if (shellIcon != null && this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle iconStyle = shellIcon.style;
-		if (image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {
+		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
 //				imgBackground.style.width = "100%";
@@ -1446,7 +1459,7 @@ public void setImage (Image image) {
 			iconStyle.backgroundImage = "";
 			iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
-			if (iconStyle.filter != null) iconStyle.filter = ""; 
+			if (OS.isIENeedPNGFix && iconStyle.filter != null) iconStyle.filter = ""; 
 			iconStyle.backgroundRepeat = "no-repeat";
 			iconStyle.backgroundPosition = "center center";
 			iconStyle.backgroundImage = "url(\"" + this.image.url + "\")";
@@ -1698,6 +1711,12 @@ public void setMaximized (boolean maximized) {
 		if (titleBar != null) {
 			OS.addCSSClass(titleBar, key);
 		}
+		if (window.currentTopZIndex == null) {
+			handle.style.zIndex = window.currentTopZIndex = "1000";
+		} else {
+			handle.style.zIndex = window.currentTopZIndex = ""
+					+ (Integer.parseInt(window.currentTopZIndex) + 1);
+		}
 		if (toUpdateMax)
 		/**
 		 * @j2sNative
@@ -1706,6 +1725,7 @@ public void setMaximized (boolean maximized) {
 		 * 	if (lastShell == null || lastShell.titleBar == null) return;
 		 * 	ShellManager.topbarContainerEl.style.display = "block";
 		 * 	ShellManager.updateTopMaximized ();
+		 * 	ShellManager.lastMMed = new Date().getTime();
 		 * }, 250);
 		 */ {}
 	} else {
@@ -1864,6 +1884,7 @@ public void setMinimized (boolean minimized) {
 	 * 	this.handle.style.display = "none";
 	 * 	ShellManager.sidebarEl.style.display = "block";
 	 * 	ShellManager.updateItems ();
+	 * 	ShellManager.lastMMed = new Date().getTime();
 	 * 	return;
 	 * }
 	 */ {}
@@ -1879,6 +1900,8 @@ public void setMinimized (boolean minimized) {
 		}
 		//setBounds(-1, getMonitor().clientHeight - 26, 120, 0);
 		setBounds(-1, getMonitor().clientHeight - 6 - (titleBar != null ? OS.getContainerHeight(titleBar) : 0), 120, 0);
+	} else if (!minimized) {
+		bringToTop();
 	}
 	if (minimized) {
 		ResizeSystem.register(this, SWT.MIN);
@@ -2032,7 +2055,11 @@ void setSystemMenu () {
 		shellIcon.onclick = new RunnableCompatibility() {
 			public void run() {
 				HTMLEvent e = (HTMLEvent)getEvent();
-				exportHTMLSource(e == null || !e.ctrlKey);
+				if (e == null || (!e.ctrlKey && !e.altKey && !e.shiftKey)) {
+					openAboutJava2Script();
+				} else {
+					exportHTMLSource(e.shiftKey);
+				}
 			}
 		};
 //		 }

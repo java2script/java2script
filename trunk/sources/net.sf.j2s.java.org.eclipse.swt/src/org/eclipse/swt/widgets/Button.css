@@ -44,27 +44,51 @@
 	font-size:1em;
 }
 
-@media all and (min-width:0px){/* opera */
-.button-push, .button-toggle, .button-arrow {
-	border-width:2px;
-	border-style:solid;
-	background-color:buttonface;
-	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
+@media all and (min-width:0px){/* opera and safari */
+.button-push, .button-toggle {
+	height:auto !important;
+	top:-0.9em;
+	margin-top:50%;
+	padding:0.25em 0 0.35em 0;
+}
+.button-arrow {
+	height:auto !important;
+	top:-0.7em;
+	margin-top:50%;
+	padding:0.25em 0 0.35em 0;
+}
+html:first-child .button-push, html:first-child .button-toggle, html:first-child .button-arrow {
+	top:auto;
+	margin:auto;
+	padding:auto;
+	height:100% !important;
 }
 }
 
-.button-check, .button-radio {
+body:nth-of-type(1) .button-push-chrome, 
+body:nth-of-type(1) .button-toggle-chrome, 
+body:nth-of-type(1) .button-arrow-chrome {
+	top:auto;
+	margin:0 !important;
+	padding:0 !important;
+	height:100% !important;
 }
 
 .button-check .button-input-wrapper {
 	float:left;
 	position:relative;
-	bottom:-0.5em;
+	/*bottom:-0.5em;*/
+	margin-top:4px;
+	_bottom:-0.5em;
+	_margin-top:auto;
 }
 .button-radio .button-input-wrapper {
 	float:left;
 	position:relative;
-	bottom:-0.5em;
+	/*bottom:-0.5em;*/
+	margin-top:4px;
+	_bottom:-0.5em;
+	_margin-top:auto;
 }
 .button-text {
 	position:relative;
@@ -76,7 +100,7 @@
 }
 
 .button-disabled .button-text {
-	color:gray;
+	color:gray !important;
 }
 
 .button-input-wrapper INPUT {
@@ -89,7 +113,11 @@
 }
 * html .button-input-wrapper INPUT {
 	left:-1px;
-	top:-4px;
+	top:-3px;
+	margin-top:0;
+	_left:0;
+	_top:-5px;
+	_margin-top:auto;
 	width:13px;
 	height:13px;
 	overflow:hidden;
@@ -99,6 +127,7 @@
 .button-input-wrapper INPUT {
 	left:0;
 	top:-4px;
+	margin-top:0;
 	width:13px;
 	height:13px;
 	margin-right:2px;
@@ -118,8 +147,8 @@
 	line-height:0;
 	
 	border-style:solid solid solid none;
-	border-color:menu;
-	border-right-color:black;
+	border-color:transparent;
+	border-right-color:black !important;
 	border-left-width:0;
 }
 .button-arrow-right {
@@ -130,8 +159,8 @@
 	line-height:0;
 	
 	border-style:solid none solid solid;
-	border-color:menu;
-	border-left-color:black;
+	border-color:transparent;
+	border-left-color:black !important;
 	border-right-width:0;
 }
 .button-arrow-up {
@@ -142,8 +171,8 @@
 	line-height:0;
 	
 	border-style:none solid solid solid;
-	border-color:menu;
-	border-bottom-color:black;
+	border-color:transparent;
+	border-bottom-color:black !important;
 	border-top-width:0;
 }
 .button-arrow-down {
@@ -154,21 +183,25 @@
 	line-height:0;
 	
 	border-style:solid solid none solid;
-	border-color:menu;
-	border-top-color:black;
+	border-color:transparent;
+	border-top-color:black !important;
 	border-bottom-width:0;
 }
+* html .button-arrow-left, * html .button-arrow-right, * html .button-arrow-up, * html .button-arrow-down {
+	border-color:buttonface;
+}
+
 .button-disabled .button-arrow-left {
-	border-right-color:gray;
+	border-right-color:gray !important;
 }
 .button-disabled .button-arrow-right {
-	border-left-color:gray;
+	border-left-color:gray !important;
 }
 .button-disabled .button-arrow-up {
-	border-bottom-color:gray;
+	border-bottom-color:gray !important;
 }
 .button-disabled .button-arrow-down {
-	border-top-color:gray;
+	border-top-color:gray !important;
 }
 
 .button-default span {
@@ -177,6 +210,7 @@
 .button-text-mnemonics {
 	text-decoration:underline;
 }
+
 .swt-widgets-button {
 	width:324px;
 }
