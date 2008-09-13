@@ -142,7 +142,7 @@ public class J2SLaunchingUtil {
 				
 				buf.append("\t\tClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 				buf.append("\t\t\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
-				IType mType = JavaModelUtil.findType(javaProject, mainType);
+				IType mType = (IType) JavaModelUtil.findTypeContainer(javaProject, mainType);
 				boolean isTestSuite = false;
 				if (mType != null) {
 					IMethod suiteMethod = JavaModelUtil.findMethod("suite", new String[0], false, mType);
@@ -174,7 +174,7 @@ public class J2SLaunchingUtil {
 				
 				buf.append("ClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 				buf.append("\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
-				IType mType = JavaModelUtil.findType(javaProject, mainType);
+				IType mType = (IType) JavaModelUtil.findTypeContainer(javaProject, mainType);
 				boolean isTestSuite = false;
 				if (mType != null) {
 					IMethod suiteMethod = JavaModelUtil.findMethod("suite", new String[0], false, mType);
