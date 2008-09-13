@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.impl.CompilerStats;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -70,7 +71,9 @@ public void build() {
 	} catch (CoreException e) {
 		throw internalException(e);
 	} finally {
-		cleanUp();
+		if (JavaBuilder.SHOW_STATS)
+			printStats();
+		cleanUp();		
 	}
 }
 
@@ -133,6 +136,8 @@ protected void cleanOutputFolders(boolean copyBack) throws CoreException {
 									if (exclusionPatterns != null || inclusionPatterns != null)
 										if (Util.isExcluded(resource.getFullPath(), inclusionPatterns, exclusionPatterns, false))
 											return false;
+									if (!resource.isDerived())
+										resource.setDerived(true);
 									resource.delete(IResource.FORCE, null);
 								}
 								return false;
@@ -214,8 +219,7 @@ protected void copyExtraResourcesBack(ClasspathMultiDirectory sourceLocation, fi
 							copiedResource.delete(IResource.FORCE, null); // last one wins
 						}
 						createFolder(partialPath.removeLastSegments(1), outputFolder); // ensure package folder exists
-						resource.copy(copiedResource.getFullPath(), IResource.FORCE | IResource.DERIVED, null);
-						Util.setReadOnly(copiedResource, false); // just in case the original was read only
+						copyResource(resource, copiedResource);
 						return false;
 					case IResource.FOLDER :
 						resource = proxy.requestResource();
@@ -243,6 +247,20 @@ protected IResource findOriginalResource(IPath partialPath) {
 	return null;
 }
 
+private void printStats() {
+	if (this.compiler == null) return;
+	CompilerStats compilerStats = this.compiler.stats;
+	long time = compilerStats.elapsedTime();
+	long lineCount = compilerStats.lineCount;
+	double speed = ((int) (lineCount * 10000.0 / time)) / 10.0;
+	System.out.println(">FULL BUILD STATS for: "+this.javaBuilder.javaProject.getElementName()); //$NON-NLS-1$
+	System.out.println(">   compiled " + lineCount + " lines in " + time + "ms:" + speed + "lines/s"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	System.out.print(">   parse: " + compilerStats.parseTime + " ms (" + ((int) (compilerStats.parseTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.print(", resolve: " + compilerStats.resolveTime + " ms (" + ((int) (compilerStats.resolveTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.print(", analyze: " + compilerStats.analyzeTime + " ms (" + ((int) (compilerStats.analyzeTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	System.out.println(", generate: " + compilerStats.generateTime + " ms (" + ((int) (compilerStats.generateTime * 1000.0 / time)) / 10.0 + "%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+}
+
 protected void processAnnotationResults(CompilationParticipantResult[] results) {
 	// to compile the compilation participant results, we need to incrementally recompile all affected types
 	// whenever the generated types are initially added or structurally changed
@@ -258,14 +276,17 @@ protected void rebuildTypesAffectedBySecondaryTypes() {
 	if (this.incrementalBuilder == null)
 		this.incrementalBuilder = new IncrementalImageBuilder(this);
 
-	for (int i = this.secondaryTypes.size(); --i >=0;) {
-		char[] secondaryTypeName = (char[]) this.secondaryTypes.get(i);
+	int count = this.secondaryTypes.size();
+	StringSet qualifiedNames = new StringSet(count * 2);
+	StringSet simpleNames = new StringSet(count);
+	while (--count >=0) {
+		char[] secondaryTypeName = (char[]) this.secondaryTypes.get(count);
 		IPath path = new Path(null, new String(secondaryTypeName));
-		this.incrementalBuilder.addDependentsOf(path, false);
+		this.incrementalBuilder.addDependentsOf(path, false, qualifiedNames, simpleNames);
 	}
 	this.incrementalBuilder.addAffectedSourceFiles(
-		this.incrementalBuilder.qualifiedStrings,
-		this.incrementalBuilder.simpleStrings,
+		qualifiedNames,
+		simpleNames,
 		this.typeLocatorsWithUndefinedTypes);
 }
 

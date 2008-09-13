@@ -38,6 +38,7 @@ String[] extraResourceFolderFilters;
 public static final String SOURCE_ID = "JDT"; //$NON-NLS-1$
 
 public static boolean DEBUG = false;
+public static boolean SHOW_STATS = false;
 
 /**
  * A list of project names that have been built.
@@ -209,28 +210,10 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 		}
 	} catch (CoreException e) {
 		Util.log(e, "JavaBuilder handling CoreException while building: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				new Integer(IMarker.SEVERITY_ERROR),
-				new Integer(CategorizedProblem.CAT_BUILDPATH),
-				JavaBuilder.SOURCE_ID
-			}
-		);
+		createInconsistentBuildMarker(e);
 	} catch (ImageBuilderInternalException e) {
 		Util.log(e.getThrowable(), "JavaBuilder handling ImageBuilderInternalException while building: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				new Integer(IMarker.SEVERITY_ERROR),
-				new Integer(CategorizedProblem.CAT_BUILDPATH),
-				JavaBuilder.SOURCE_ID
-			}
-		);
+		createInconsistentBuildMarker(e.coreException);
 	} catch (MissingSourceFileException e) {
 		// do not log this exception since its thrown to handle aborted compiles because of missing source files
 		if (DEBUG)
@@ -246,6 +229,8 @@ protected IProject[] build(int kind, Map ignored, IProgressMonitor monitor) thro
 			}
 		);
 	} finally {
+		for (int i = 0, l = this.participants == null ? 0 : this.participants.length; i < l; i++)
+			this.participants[i].buildFinished(this.javaProject);
 		if (!ok)
 			// If the build failed, clear the previously built state, forcing a full build next time.
 			clearLastState();
@@ -306,15 +291,7 @@ protected void clean(IProgressMonitor monitor) throws CoreException {
 		new BatchImageBuilder(this, false).cleanOutputFolders(false);
 	} catch (CoreException e) {
 		Util.log(e, "JavaBuilder handling CoreException while cleaning: " + currentProject.getName()); //$NON-NLS-1$
-		IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
-		marker.setAttributes(
-			new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IMarker.SOURCE_ID},
-			new Object[] {
-				Messages.bind(Messages.build_inconsistentProject, e.getLocalizedMessage()),
-				new Integer(IMarker.SEVERITY_ERROR),
-				JavaBuilder.SOURCE_ID
-			}
-		);
+		createInconsistentBuildMarker(e);
 	} finally {
 		notifier.done();
 		cleanup();
@@ -322,6 +299,29 @@ protected void clean(IProgressMonitor monitor) throws CoreException {
 	if (DEBUG)
 		System.out.println("Finished cleaning " + currentProject.getName() //$NON-NLS-1$
 			+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+}
+
+private void createInconsistentBuildMarker(CoreException coreException) throws CoreException {
+	String message = null;
+	IStatus status = coreException.getStatus();
+ 	if (status.isMultiStatus()) {
+ 		IStatus[] children = status.getChildren();
+ 		if (children != null && children.length > 0)
+ 		    message = children[0].getMessage();
+ 	}
+ 	if (message == null)
+ 		message = coreException.getMessage();
+
+	IMarker marker = currentProject.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+	marker.setAttributes(
+		new String[] {IMarker.MESSAGE, IMarker.SEVERITY, IJavaModelMarker.CATEGORY_ID, IMarker.SOURCE_ID},
+		new Object[] {
+			Messages.bind(Messages.build_inconsistentProject, message),
+			new Integer(IMarker.SEVERITY_ERROR),
+			new Integer(CategorizedProblem.CAT_BUILDPATH),
+			JavaBuilder.SOURCE_ID
+		}
+	);
 }
 
 private void cleanup() {
@@ -450,6 +450,7 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 	if (javaProject == null || workspaceRoot == null) return new IProject[0];
 
 	ArrayList projects = new ArrayList();
+	ExternalFoldersManager externalFoldersManager = JavaModelManager.getExternalManager();
 	try {
 		IClasspathEntry[] entries = javaProject.getExpandedClasspath();
 		for (int i = 0, l = entries.length; i < l; i++) {
@@ -466,8 +467,13 @@ private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 					if (includeBinaryPrerequisites && path.segmentCount() > 1) {
 						// some binary resources on the class path can come from projects that are not included in the project references
 						IResource resource = workspaceRoot.findMember(path.segment(0));
-						if (resource instanceof IProject)
+						if (resource instanceof IProject) {
 							p = (IProject) resource;
+						} else {
+							resource = externalFoldersManager.getFolder(path);
+							if (resource != null)
+								p = resource.getProject();
+						}
 					}
 			}
 			if (p != null && !projects.contains(p))
@@ -607,7 +613,7 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 	}
 
 	this.binaryLocationsPerProject = new SimpleLookupTable(3);
-	this.nameEnvironment = new NameEnvironment(workspaceRoot, javaProject, binaryLocationsPerProject);
+	this.nameEnvironment = new NameEnvironment(workspaceRoot, javaProject, binaryLocationsPerProject, notifier);
 
 	if (forBuild) {
 		String filterSequence = javaProject.getOption(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, true);

@@ -216,6 +216,10 @@ protected void addAffectedSourceFiles(StringSet qualifiedSet, StringSet simpleSe
 }
 
 protected void addDependentsOf(IPath path, boolean isStructuralChange) {
+	addDependentsOf(path, isStructuralChange, this.qualifiedStrings, this.simpleStrings);
+}
+
+protected void addDependentsOf(IPath path, boolean isStructuralChange, StringSet qualifiedNames, StringSet simpleNames) {
 	if (isStructuralChange && !this.hasStructuralChanges) {
 		newState.tagAsStructurallyChanged();
 		this.hasStructuralChanges = true;
@@ -223,12 +227,12 @@ protected void addDependentsOf(IPath path, boolean isStructuralChange) {
 	// the qualifiedStrings are of the form 'p1/p2' & the simpleStrings are just 'X'
 	path = path.setDevice(null);
 	String packageName = path.removeLastSegments(1).toString();
-	qualifiedStrings.add(packageName);
+	qualifiedNames.add(packageName);
 	String typeName = path.lastSegment();
 	int memberIndex = typeName.indexOf('$');
 	if (memberIndex > 0)
 		typeName = typeName.substring(0, memberIndex);
-	if (simpleStrings.add(typeName) && JavaBuilder.DEBUG)
+	if (simpleNames.add(typeName) && JavaBuilder.DEBUG)
 		System.out.println("  will look for dependents of " //$NON-NLS-1$
 			+ typeName + " in " + packageName); //$NON-NLS-1$
 }
@@ -329,7 +333,7 @@ protected void deleteGeneratedFiles(IFile[] deletedGeneratedFiles) {
 		}
 	} catch (CoreException e) {
 		// must continue with compile loop so just log the CoreException
-		e.printStackTrace();
+		Util.log(e, "JavaBuilder logging CompilationParticipant's CoreException to help debugging"); //$NON-NLS-1$
 	}
 }
 
@@ -501,10 +505,15 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 				    if (!isExcluded) {
 						IPath addedPackagePath = resource.getFullPath().removeFirstSegments(segmentCount);
 						createFolder(addedPackagePath, md.binaryFolder); // ensure package exists in the output folder
-						// add dependents even when the package thinks it exists to be on the safe side
-						if (JavaBuilder.DEBUG)
-							System.out.println("Found added package " + addedPackagePath); //$NON-NLS-1$
-						addDependentsOf(addedPackagePath, true);
+						// see if any known source file is from the same package... classpath already includes new package
+						if (sourceLocations.length > 1 && newState.isKnownPackage(addedPackagePath.toString())) {
+							if (JavaBuilder.DEBUG)
+								System.out.println("Skipped dependents of added package " + addedPackagePath); //$NON-NLS-1$
+						} else {
+							if (JavaBuilder.DEBUG)
+								System.out.println("Found added package " + addedPackagePath); //$NON-NLS-1$
+							addDependentsOf(addedPackagePath, true);
+						}
 				    }
 					// fall thru & collect all the source files
 				case IResourceDelta.CHANGED :
@@ -535,6 +544,12 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 								return true;
 							}
 						}
+					}
+					if ((sourceDelta.getFlags() & IResourceDelta.MOVED_TO) != 0) {
+						// same idea as moving a source file
+						// see bug 163200
+						IResource movedFolder = javaBuilder.workspaceRoot.getFolder(sourceDelta.getMovedToPath());
+						JavaBuilder.removeProblemsAndTasksFor(movedFolder); 
 					}
 					IFolder removedPackageFolder = md.binaryFolder.getFolder(removedPackagePath);
 					if (removedPackageFolder.exists())
@@ -625,8 +640,7 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 						if (JavaBuilder.DEBUG)
 							System.out.println("Copying added file " + resourcePath); //$NON-NLS-1$
 						createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure package exists in the output folder
-						resource.copy(outputFile.getFullPath(), IResource.FORCE | IResource.DERIVED, null);
-						Util.setReadOnly(outputFile, false); // just in case the original was read only
+						copyResource(resource, outputFile);
 						return true;
 					case IResourceDelta.REMOVED :
 						if (outputFile.exists()) {
@@ -647,8 +661,7 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 						if (JavaBuilder.DEBUG)
 							System.out.println("Copying changed file " + resourcePath); //$NON-NLS-1$
 						createFolder(resourcePath.removeLastSegments(1), md.binaryFolder); // ensure package exists in the output folder
-						resource.copy(outputFile.getFullPath(), IResource.FORCE | IResource.DERIVED, null);
-						Util.setReadOnly(outputFile, false); // just in case the original was read only
+						copyResource(resource, outputFile);
 				}
 				return true;
 			}
@@ -776,11 +789,15 @@ protected void updateTasksFor(SourceFile sourceFile, CompilationResult result) t
 	storeTasksFor(sourceFile, tasks);
 }
 
-protected void writeClassFileBytes(byte[] bytes, IFile file, String qualifiedFileName, boolean isTopLevelType, boolean updateClassFile) throws CoreException {
+/**
+ * @see org.eclipse.jdt.internal.core.builder.AbstractImageBuilder#writeClassFileContents(org.eclipse.jdt.internal.compiler.ClassFile, org.eclipse.core.resources.IFile, java.lang.String, boolean, org.eclipse.jdt.internal.core.builder.SourceFile)
+ */
+protected void writeClassFileContents(ClassFile classfile, IFile file, String qualifiedFileName, boolean isTopLevelType, SourceFile compilationUnit) throws CoreException {
 	// Before writing out the class file, compare it to the previous file
-	// If structural changes occured then add dependent source files
+	// If structural changes occurred then add dependent source files
+	byte[] bytes = classfile.getBytes();
 	if (file.exists()) {
-		if (writeClassFileCheck(file, qualifiedFileName, bytes) || updateClassFile) { // see 46093
+		if (writeClassFileCheck(file, qualifiedFileName, bytes) || compilationUnit.updateClassFile) { // see 46093
 			if (JavaBuilder.DEBUG)
 				System.out.println("Writing changed class file " + file.getName());//$NON-NLS-1$
 			if (!file.isDerived())
@@ -797,9 +814,40 @@ protected void writeClassFileBytes(byte[] bytes, IFile file, String qualifiedFil
 		try {
 			file.create(new ByteArrayInputStream(bytes), IResource.FORCE | IResource.DERIVED, null);
 		} catch (CoreException e) {
-			if (e.getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS)
-				// catch the case that a nested type has been renamed and collides on disk with an as-yet-to-be-deleted type
+			if (e.getStatus().getCode() == IResourceStatus.CASE_VARIANT_EXISTS) {
+				IStatus status = e.getStatus();
+				if (status instanceof IResourceStatus) {
+					IPath oldFilePath = ((IResourceStatus) status).getPath();
+					char[] oldTypeName = oldFilePath.removeFileExtension().lastSegment().toCharArray();
+					char[][] previousTypeNames = newState.getDefinedTypeNamesFor(compilationUnit.typeLocator());
+					boolean fromSameFile = false;
+					if (previousTypeNames == null) {
+						fromSameFile = CharOperation.equals(compilationUnit.getMainTypeName(), oldTypeName);
+					} else {
+						for (int i = 0, l = previousTypeNames.length; i < l; i++) {
+							if (CharOperation.equals(previousTypeNames[i], oldTypeName)) {
+								fromSameFile = true;
+								break;
+							}
+						}
+					}
+					if (fromSameFile) {
+						// file is defined by the same compilationUnit, but won't be deleted until later so do it now
+						IFile collision = file.getParent().getFile(new Path(oldFilePath.lastSegment()));
+						collision.delete(true, false, null);
+						boolean success = false;
+						try {
+							file.create(new ByteArrayInputStream(bytes), IResource.FORCE | IResource.DERIVED, null);
+							success = true;
+						} catch (CoreException ignored) {
+							// ignore the second exception
+						}
+						if (success) return;
+					}
+				}
+				// catch the case that a type has been renamed and collides on disk with an as-yet-to-be-deleted type
 				throw new AbortCompilation(true, new AbortIncrementalBuildException(qualifiedFileName));
+			}
 			throw e; // rethrow
 		}
 	}

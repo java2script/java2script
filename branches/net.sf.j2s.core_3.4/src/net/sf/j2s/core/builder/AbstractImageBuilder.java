@@ -11,6 +11,7 @@
 package net.sf.j2s.core.builder;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,11 +32,13 @@ import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
@@ -174,7 +177,7 @@ public void acceptResult(CompilationResult result) {
 
 			char[][] compoundName = classFile.getCompoundName();
 			char[] typeName = compoundName[compoundName.length - 1];
-			boolean isNestedType = classFile.enclosingClassFile != null;
+			boolean isNestedType = classFile.isNestedType;
 
 			// Look for a possible collision, if one exists, report an error but do not write the class file
 			if (isNestedType) {
@@ -206,7 +209,7 @@ public void acceptResult(CompilationResult result) {
 					continue;
 				}
 				newState.recordLocatorForType(qualifiedTypeName, typeLocator);
-				if (!qualifiedTypeName.equals(compilationUnit.initialTypeName))
+				if (result.checkSecondaryTypes && !qualifiedTypeName.equals(compilationUnit.initialTypeName))
 					acceptSecondaryType(classFile);
 			}
 			try {
@@ -222,6 +225,7 @@ public void acceptResult(CompilationResult result) {
 		if (result.hasAnnotations && this.filesWithAnnotations != null) // only initialized if an annotation processor is attached
 			this.filesWithAnnotations.add(compilationUnit);
 
+		this.compiler.lookupEnvironment.releaseClassFiles(classFiles);
 		finishedWith(typeLocator, result, compilationUnit.getMainTypeName(), definedTypeNames, duplicateTypeNames);
 		notifier.compiled(compilationUnit);
 	}
@@ -270,7 +274,13 @@ protected void addAllSourceFiles(final ArrayList sourceFiles) throws CoreExcepti
 							if (!isOutputFolder) {
 								if (folderPath == null)
 									folderPath = proxy.requestFullPath();
-								createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+								String packageName = folderPath.lastSegment();
+								if (packageName.length() > 0) {
+									String sourceLevel = javaBuilder.javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+									String complianceLevel = javaBuilder.javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+									if (JavaConventions.validatePackageName(packageName, sourceLevel, complianceLevel).getSeverity() != IStatus.ERROR)
+										createFolder(folderPath.removeFirstSegments(segmentCount), outputFolder);
+								}
 							}
 					}
 					return true;
@@ -390,6 +400,19 @@ protected void compile(SourceFile[] units, SourceFile[] additionalUnits, boolean
 	// Check for cancel immediately after a compile, because the compiler may
 	// have been cancelled but without propagating the correct exception
 	notifier.checkCancel();
+}
+
+protected void copyResource(IResource source, IResource destination) throws CoreException {
+	IPath destPath = destination.getFullPath();
+	try {
+		source.copy(destPath, IResource.FORCE | IResource.DERIVED, null);
+	} catch (CoreException e) {
+		// handle the case when the source resource is deleted
+		source.refreshLocal(0, null);
+		if (!source.exists()) return; // source resource was deleted so skip it
+		throw e;
+	}
+	Util.setReadOnly(destination, false); // just in case the original was read only
 }
 
 protected void createProblemFor(IResource resource, IMember javaElement, String message, String problemSeverity) {
@@ -530,7 +553,10 @@ protected Compiler newCompiler() {
 		this,
 		ProblemFactory.getProblemFactory(Locale.getDefault()));
 	CompilerOptions options = newCompiler.options;
-	
+	// temporary code to allow the compiler to revert to a single thread
+	String setting = System.getProperty("jdt.compiler.useSingleThread"); //$NON-NLS-1$
+	newCompiler.useSingleThread = setting != null && setting.equals("true"); //$NON-NLS-1$
+
 	// enable the compiler reference info support
 	options.produceReferenceInfo = true;
 
@@ -639,7 +665,7 @@ protected void recordParticipantResult(CompilationParticipantResult result) {
 			storeProblemsFor(result.sourceFile, problems);
 		} catch (CoreException e) {
 			// must continue with compile loop so just log the CoreException
-			e.printStackTrace();
+			Util.log(e, "JavaBuilder logging CompilationParticipant's CoreException to help debugging"); //$NON-NLS-1$
 		}
 	}
 
@@ -660,8 +686,8 @@ protected void recordParticipantResult(CompilationParticipantResult result) {
  *	 - its priority reflects the severity of the problem
  *	 - its range is the problem's range
  *	 - it has an extra attribute "ID" which holds the problem's id
- *   - it's GENERATED_BY attribute is positioned to JavaBuilder.GENERATED_BY if
- *     the problem was generated by JDT; else the GENERATED_BY attribute is 
+ *   - it's {@link IMarker#SOURCE_ID} attribute is positioned to {@link JavaBuilder#SOURCE_ID} if
+ *     the problem was generated by JDT; else the {@link IMarker#SOURCE_ID} attribute is 
  *     carried from the problem to the marker in extra attributes, if present.
  */
 protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] problems) throws CoreException {
@@ -728,11 +754,12 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 			allValues[index++] = problem.isError() ? S_ERROR : S_WARNING; // severity
 			allValues[index++] = new Integer(id); // ID
 			allValues[index++] = new Integer(problem.getSourceStart()); // start
-			allValues[index++] = new Integer(problem.getSourceEnd() + 1); // end
+			int end = problem.getSourceEnd();
+			allValues[index++] = new Integer(end > 0 ? end + 1 : end); // end
 			allValues[index++] = new Integer(problem.getSourceLineNumber()); // line
 			allValues[index++] = Util.getProblemArgumentsForMarker(problem.getArguments()); // arguments
 			allValues[index++] = new Integer(problem.getCategoryID()); // category ID
-			// GENERATED_BY attribute for JDT problems
+			// SOURCE_ID attribute for JDT problems
 			if (managedLength > 0)
 				allValues[index++] = JavaBuilder.SOURCE_ID;
 			// optional extra attributes
@@ -818,27 +845,28 @@ protected char[] writeClassFile(ClassFile classFile, SourceFile compilationUnit,
 	}
 
 	IFile file = container.getFile(filePath.addFileExtension(SuffixConstants.EXTENSION_class));
-	writeClassFileBytes(classFile.getBytes(), file, fileName, isTopLevelType, compilationUnit.updateClassFile);
-	if (classFile.isShared) {
-		this.compiler.lookupEnvironment.classFilePool.release(classFile);
-	}
+	writeClassFileContents(classFile, file, fileName, isTopLevelType, compilationUnit);
 	// answer the name of the class file as in Y or Y$M
 	return filePath.lastSegment().toCharArray();
 }
 
-protected void writeClassFileBytes(byte[] bytes, IFile file, String qualifiedFileName, boolean isTopLevelType, boolean updateClassFile) throws CoreException {
+protected void writeClassFileContents(ClassFile classFile, IFile file, String qualifiedFileName, boolean isTopLevelType, SourceFile compilationUnit) throws CoreException {
+//	InputStream input = new SequenceInputStream(
+//			new ByteArrayInputStream(classFile.header, 0, classFile.headerOffset),
+//			new ByteArrayInputStream(classFile.contents, 0, classFile.contentsOffset));
+	InputStream input = new ByteArrayInputStream(classFile.getBytes());
 	if (file.exists()) {
 		// Deal with shared output folders... last one wins... no collision cases detected
 		if (JavaBuilder.DEBUG)
 			System.out.println("Writing changed class file " + file.getName());//$NON-NLS-1$
 		if (!file.isDerived())
 			file.setDerived(true);
-		file.setContents(new ByteArrayInputStream(bytes), true, false, null);
+		file.setContents(input, true, false, null);
 	} else {
 		// Default implementation just writes out the bytes for the new class file...
 		if (JavaBuilder.DEBUG)
 			System.out.println("Writing new class file " + file.getName());//$NON-NLS-1$
-		file.create(new ByteArrayInputStream(bytes), IResource.FORCE | IResource.DERIVED, null);
+		file.create(input, IResource.FORCE | IResource.DERIVED, null);
 	}
 }
 }
