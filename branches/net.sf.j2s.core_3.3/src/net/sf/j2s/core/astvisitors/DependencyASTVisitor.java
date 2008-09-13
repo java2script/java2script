@@ -489,6 +489,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				&& !"byte".equals(qualifiedName)
 				&& !"char".equals(qualifiedName)
 				&& !"boolean".equals(qualifiedName)
+				&& !"void".equals(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
 				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")) {
 			ASTNode root = node.getRoot();
