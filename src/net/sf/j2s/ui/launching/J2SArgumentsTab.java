@@ -21,12 +21,15 @@ import org.eclipse.jdt.internal.debug.ui.IJavaDebugHelpContextIds;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.JavaDebugImages;
 import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
+import org.eclipse.jdt.internal.debug.ui.launcher.JavaWorkingDirectoryBlock;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
+import org.eclipse.jdt.internal.debug.ui.launcher.VMArgumentsBlock;
 import org.eclipse.jdt.internal.debug.ui.launcher.WorkingDirectoryBlock;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
@@ -49,7 +52,7 @@ import org.eclipse.ui.PlatformUI;
  * @since 2.0
  */
 public class J2SArgumentsTab extends JavaLaunchTab {
-		
+	
 	// Program arguments widgets
 	protected Label fPrgmArgumentsLabel;
 	protected Text fPrgmArgumentsText;
@@ -70,9 +73,9 @@ public class J2SArgumentsTab extends JavaLaunchTab {
 //	protected VMArgumentsBlock createVMArgsBlock() {
 //		return new VMArgumentsBlock();
 //	}
-//	
+	
 	protected WorkingDirectoryBlock createWorkingDirBlock() {
-		return new WorkingDirectoryBlock();
+		return new JavaWorkingDirectoryBlock();
 	}
 	
 	/**
@@ -115,7 +118,7 @@ public class J2SArgumentsTab extends JavaLaunchTab {
 		String buttonLabel = LauncherMessages.JavaArgumentsTab_5;  
 		Button pgrmArgVariableButton = createPushButton(group, buttonLabel, null); 
 		pgrmArgVariableButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		pgrmArgVariableButton.addSelectionListener(new SelectionListener() {
+		pgrmArgVariableButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				StringVariableSelectionDialog dialog = new StringVariableSelectionDialog(getShell());
 				dialog.open();
@@ -124,9 +127,6 @@ public class J2SArgumentsTab extends JavaLaunchTab {
                     fPrgmArgumentsText.insert(variable);
 				}
 			}
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-			
 		});
 		
 		//fVMArgumentsBlock.createControl(comp);
@@ -245,6 +245,15 @@ public class J2SArgumentsTab extends JavaLaunchTab {
 	public Image getImage() {
 		return JavaDebugImages.get(JavaDebugImages.IMG_VIEW_ARGUMENTS_TAB);
 	}	
+	
+	/**
+	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getId()
+	 * 
+	 * @since 3.3
+	 */
+	public String getId() {
+		return "org.eclipse.jdt.debug.ui.javaArgumentsTab"; //$NON-NLS-1$
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#activated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)

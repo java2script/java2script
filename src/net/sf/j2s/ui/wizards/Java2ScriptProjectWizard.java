@@ -16,9 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
+
 import net.sf.j2s.core.Java2ScriptProjectNature;
 import net.sf.j2s.ui.classpath.IRuntimeClasspathEntry;
 import net.sf.j2s.ui.classpath.Resource;
@@ -26,36 +25,33 @@ import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.property.FileUtil;
 import net.sf.j2s.ui.property.J2SClasspathModel;
 import net.sf.j2s.ui.resources.ExternalResources;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
-import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizardFirstPage;
-import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizardSecondPage;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetConfigurationBlock;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 /**
@@ -64,47 +60,47 @@ import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
  * 2007-3-4
  */
 public class Java2ScriptProjectWizard extends NewElementWizard implements IExecutableExtension {
-    
-    private JavaProjectWizardFirstPage fFirstPage;
-    private JavaProjectWizardSecondPage fSecondPage;
-    
-    private IConfigurationElement fConfigElement;
-    
-    public Java2ScriptProjectWizard() {
-        setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
-        setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-        setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
-		updateJava2ScriptWizardTitle();
-    }
 
-    /*
-     * @see Wizard#addPages
-     */	
-    public void addPages() {
-        super.addPages();
-        fFirstPage= new JavaProjectWizardFirstPage();
-        fFirstPage.setWorkingSets(getWorkingSets(getSelection()));
-        addPage(fFirstPage);
-        fSecondPage= new JavaProjectWizardSecondPage(fFirstPage) {
+	private NewJavaProjectWizardPageOne fFirstPage;
+	private NewJavaProjectWizardPageTwo fSecondPage;
+
+	private IConfigurationElement fConfigElement;
+
+	public Java2ScriptProjectWizard() {
+		this(null, null);
+	}
+
+	public Java2ScriptProjectWizard(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo) {
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+		setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
+
+		fFirstPage= pageOne;
+		fSecondPage= pageTwo;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.Wizard#addPages()
+	 */
+	public void addPages() {
+		if (fFirstPage == null)
+			fFirstPage= new NewJavaProjectWizardPageOne();
+		addPage(fFirstPage);
+
+		if (fSecondPage == null)
+			fSecondPage= new NewJavaProjectWizardPageTwo(fFirstPage);
+		addPage(fSecondPage);
 		
-			public void init(IJavaProject jproject, IPath defaultOutputLocation,
-					IClasspathEntry[] defaultEntries,
-					boolean defaultsOverrideExistingClasspath) {
-				super.init(jproject, defaultOutputLocation, updateJavaLibraries(defaultEntries),
-						defaultsOverrideExistingClasspath);
-			}
-		
-		};
-        addPage(fSecondPage);
-    }		
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
-     */
-    protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-    	fSecondPage.performFinish(monitor); // use the full progress monitor
-    }
-       
+		fFirstPage.init(getSelection(), getActivePart());
+	}		
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fSecondPage.performFinish(monitor); // use the full progress monitor
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -112,26 +108,23 @@ public class Java2ScriptProjectWizard extends NewElementWizard implements IExecu
 		boolean finished= super.performFinish();
 		if (finished) {
 			final IJavaElement newElement= getCreatedElement();
-			
+
 			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
-			WorkingSetConfigurationBlock.addToWorkingSets(newElement, workingSets);
-			
+			if (workingSets.length > 0) {
+				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
+			}
+
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			selectAndReveal(fSecondPage.getJavaProject().getProject());				
-			
+
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
-					if (activePackageExplorer != null) {
-						activePackageExplorer.tryToReveal(newElement);
+					IWorkbenchPart activePart= getActivePart();
+					if (activePart instanceof IPackagesViewPart) {
+						(new ShowInPackageViewAction(activePart.getSite())).run(newElement);
 					}
 				}
 			});
-			
-	        if (getContainer() instanceof PreferenceDialog) {
-	            PreferenceDialog dialog = (PreferenceDialog) getContainer();
-	            dialog.close();
-	        }
 	        IProgressMonitor monitor = null;
 	    	IJavaProject jproject = (IJavaProject) getCreatedElement();
 	        IProject project = jproject.getProject();
@@ -221,97 +214,47 @@ public class Java2ScriptProjectWizard extends NewElementWizard implements IExecu
 		}
 		return finished;
 	}
+	
+	private IWorkbenchPart getActivePart() {
+		IWorkbenchWindow activeWindow= getWorkbench().getActiveWorkbenchWindow();
+		if (activeWindow != null) {
+			IWorkbenchPage activePage= activeWindow.getActivePage();
+			if (activePage != null) {
+				return activePage.getActivePart();
+			}
+		}
+		return null;
+	}
 
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
-        String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
-        String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
-        ExceptionHandler.handle(e, getShell(), title, message);
-    }	
-    
-    /*
-     * Stores the configuration element for the wizard.  The config element will be used
-     * in <code>performFinish</code> to set the result perspective.
-     */
-    public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
-        fConfigElement= cfig;
-    }
-    
-    /* (non-Javadoc)
-     * @see IWizard#performCancel()
-     */
-    public boolean performCancel() {
-        fSecondPage.performCancel();
-        return super.performCancel();
-    }
-    
+		String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
+		String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
+		ExceptionHandler.handle(e, getShell(), title, message);
+	}	
+
+	/*
+	 * Stores the configuration element for the wizard.  The config element will be used
+	 * in <code>performFinish</code> to set the result perspective.
+	 */
+	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+		fConfigElement= cfig;
+	}
+
+	/* (non-Javadoc)
+	 * @see IWizard#performCancel()
+	 */
+	public boolean performCancel() {
+		fSecondPage.performCancel();
+		return super.performCancel();
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
 	public IJavaElement getCreatedElement() {
-		return JavaCore.create(fFirstPage.getProjectHandle());
+		return fSecondPage.getJavaProject();
 	}
 	
-	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
-		IWorkingSet[] selected= WorkingSetConfigurationBlock.getSelectedWorkingSet(selection);
-		if (selected != null && selected.length == 1 && isValidWorkingSet(selected[0]))
-			return selected;
-		
-		PackageExplorerPart explorerPart= getActivePackageExplorer();
-		if (explorerPart == null)
-			return null;
-		
-		if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
-			//Get active filter
-			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
-			if (filterWorkingSet == null)
-				return null;
-			
-			if (!isValidWorkingSet(filterWorkingSet))
-				return null;
-			
-			return new IWorkingSet[] {filterWorkingSet};
-		} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
-			//If we have been gone into a working set return the working set
-			Object input= explorerPart.getViewPartInput();
-			if (!(input instanceof IWorkingSet))
-				return null;
-			
-			IWorkingSet workingSet= (IWorkingSet)input;
-			if (!isValidWorkingSet(workingSet))
-				return null;
-			
-			return new IWorkingSet[] {workingSet};
-		}
-		
-		return null;
-	}
-
-	private PackageExplorerPart getActivePackageExplorer() {
-		PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
-		if (explorerPart == null)
-			return null;
-		
-		IWorkbenchPage activePage= explorerPart.getViewSite().getWorkbenchWindow().getActivePage();
-		if (activePage == null)
-			return null;
-		
-		if (activePage.getActivePart() != explorerPart)
-			return null;
-		
-		return explorerPart;
-	}
-
-	private boolean isValidWorkingSet(IWorkingSet workingSet) {
-		String id= workingSet.getId();	
-		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
-			return false;
-		
-		if (workingSet.isAggregateWorkingSet())
-			return false;
-		
-		return true;
-	}
-
 	protected void updateJava2ScriptWizardTitle() {
 		setWindowTitle(getWindowTitle() + " with Java2Script Enabled");
 	}

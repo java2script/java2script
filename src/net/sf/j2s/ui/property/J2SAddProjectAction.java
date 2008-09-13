@@ -26,20 +26,18 @@ import net.sf.j2s.ui.launching.JavaRuntime;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.ui.IJavaDebugUIConstants;
 import org.eclipse.jdt.internal.debug.ui.JDIDebugUIPlugin;
 import org.eclipse.jdt.internal.debug.ui.actions.ActionMessages;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.debug.ui.actions.ProjectSelectionDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 /**
  * @author zhou renjian
@@ -49,39 +47,6 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
 public class J2SAddProjectAction implements SelectionListener {
 	
 	J2SConfigPage page;
-	
-	class ContentProvider implements IStructuredContentProvider {
-		
-		private List fProjects;
-		
-		public ContentProvider(List projects) {
-			fProjects = projects;
-		}
-		
-		/**
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
-		public Object[] getElements(Object inputElement) {
-			return fProjects.toArray();
-		}
-
-		/**
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
-		public void dispose() {
-		}
-
-		/**
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
-		public void inputChanged(
-			Viewer viewer,
-			Object oldInput,
-			Object newInput) {
-		}
-
-	}
-	
 	
 	public J2SAddProjectAction(J2SConfigPage page) {
 		super();
@@ -153,11 +118,9 @@ public class J2SAddProjectAction implements SelectionListener {
 
 	public void widgetSelected(SelectionEvent e) {
 		List projects = getPossibleAdditions();
-		
-		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		IStructuredContentProvider content = new ContentProvider(projects);
-		ListSelectionDialog dialog= new ListSelectionDialog(e.display.getActiveShell(), projects, content, labelProvider, ActionMessages.AddProjectAction_Choose__project_s__to_add__3); //$NON-NLS-1$
-		dialog.setTitle(ActionMessages.AddProjectAction_Project_Selection_2); //$NON-NLS-1$
+		ProjectSelectionDialog dialog= new ProjectSelectionDialog(page.getShell(),projects);
+		dialog.setTitle(ActionMessages.AddProjectAction_Project_Selection_2); 
+		MultiStatus status = new MultiStatus(JDIDebugUIPlugin.getUniqueIdentifier(), IJavaDebugUIConstants.INTERNAL_ERROR, "One or more exceptions occurred while adding projects.", null);  //$NON-NLS-1$
 				
 		if (dialog.open() == Window.OK) {			
 			Object[] expandedElements = page.viewer.getExpandedElements();
@@ -187,8 +150,6 @@ public class J2SAddProjectAction implements SelectionListener {
 				 page.fireConfigModified();
 			}
 		}		
-		content.dispose();
-		labelProvider.dispose();			
 	}
 
 	public void widgetDefaultSelected(SelectionEvent e) {

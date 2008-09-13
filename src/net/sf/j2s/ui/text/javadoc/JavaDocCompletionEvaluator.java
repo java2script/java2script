@@ -425,7 +425,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 					// for top level types, we use a fake import statement and the current type is never suggested
 					IType type= (IType) currElem;
 					char[] name= type.getElementName().toCharArray();
-					fResult.add(createSeeTypeCompletion(0, wordStart, fCurrentPos, name, JavaModelUtil.getFullyQualifiedName(type), 50));
+					fResult.add(createSeeTypeCompletion(0, wordStart, fCurrentPos, name, JavaModelUtil.getTypeContainerName(type), 50));
 				}
 			} finally {
 				preparedCU.discardWorkingCopy();
