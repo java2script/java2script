@@ -120,6 +120,9 @@ public class JavaRuntimeJSProvider implements IExternalResourceProvider {
 			}
 		}
 		*/
+		if (files == null) {
+			return new String[0][];
+		}
 		String[][] list = new String[1][];
 		list[0] = new String[files.length];
 		for (int i = 0; i < files.length; i++) {
