@@ -30,12 +30,14 @@ public class NameEnvironment implements INameEnvironment, SuffixConstants {
 boolean isIncrementalBuild;
 ClasspathMultiDirectory[] sourceLocations;
 ClasspathLocation[] binaryLocations;
-	
+BuildNotifier notifier;
+
 SimpleSet initialTypeNames; // assumed that each name is of the form "a/b/ClassName"
 SimpleLookupTable additionalUnits;
 
-NameEnvironment(IWorkspaceRoot root, JavaProject javaProject, SimpleLookupTable binaryLocationsPerProject) throws CoreException {
+NameEnvironment(IWorkspaceRoot root, JavaProject javaProject, SimpleLookupTable binaryLocationsPerProject, BuildNotifier notifier) throws CoreException {
 	this.isIncrementalBuild = false;
+	this.notifier = notifier;
 	computeClasspathLocations(root, javaProject, binaryLocationsPerProject);
 	setNames(null, null);
 }
@@ -94,7 +96,7 @@ private void computeClasspathLocations(
 	nextEntry : for (int i = 0, l = classpathEntries.length; i < l; i++) {
 		ClasspathEntry entry = (ClasspathEntry) classpathEntries[i];
 		IPath path = entry.getPath();
-		Object target = JavaModel.getTarget(root, path, true);
+		Object target = JavaModel.getTarget(path, true);
 		if (target == null) continue nextEntry;
 
 		switch(entry.getEntryKind()) {
@@ -109,7 +111,7 @@ private void computeClasspathLocations(
 				} else {
 					outputFolder = root.getFolder(outputPath);
 					if (!outputFolder.exists())
-						createFolder(outputFolder);
+						createOutputFolder(outputFolder);
 				}
 				sLocations.add(
 					ClasspathLocation.forSourceFolder((IContainer) target, outputFolder, entry.fullInclusionPatternChars(), entry.fullExclusionPatternChars()));
@@ -126,7 +128,7 @@ private void computeClasspathLocations(
 				nextPrereqEntry: for (int j = 0, m = prereqClasspathEntries.length; j < m; j++) {
 					IClasspathEntry prereqEntry = prereqClasspathEntries[j];
 					if (prereqEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-						Object prereqTarget = JavaModel.getTarget(root, prereqEntry.getPath(), true);
+						Object prereqTarget = JavaModel.getTarget(prereqEntry.getPath(), true);
 						if (!(prereqTarget instanceof IContainer)) continue nextPrereqEntry;
 						IPath prereqOutputPath = prereqEntry.getOutputLocation() != null 
 							? prereqEntry.getOutputLocation() 
@@ -159,8 +161,6 @@ private void computeClasspathLocations(
 					IResource resource = (IResource) target;
 					ClasspathLocation bLocation = null;
 					if (resource instanceof IFile) {
-						if (!(org.eclipse.jdt.internal.compiler.util.Util.isArchiveFileName(path.lastSegment())))
-							continue nextEntry;
 						AccessRuleSet accessRuleSet = 
 							(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
 							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
@@ -189,8 +189,6 @@ private void computeClasspathLocations(
 						binaryLocationsPerProject.put(p, existingLocations);
 					}
 				} else if (target instanceof File) {
-					if (!(org.eclipse.jdt.internal.compiler.util.Util.isArchiveFileName(path.lastSegment())))
-						continue nextEntry;
 					AccessRuleSet accessRuleSet = 
 						(JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
 							&& JavaCore.IGNORE.equals(javaProject.getOption(JavaCore.COMPILER_PB_DISCOURAGED_REFERENCE, true)))
@@ -246,14 +244,22 @@ public void cleanup() {
 		binaryLocations[i].cleanup();
 }
 
-private void createFolder(IContainer folder) throws CoreException {
-	if (!folder.exists()) {
-		createFolder(folder.getParent());
-		((IFolder) folder).create(true, true, null);
+private void createOutputFolder(IContainer outputFolder) throws CoreException {
+	createParentFolder(outputFolder.getParent());
+	((IFolder) outputFolder).create(IResource.FORCE | IResource.DERIVED, true, null);
+}
+
+private void createParentFolder(IContainer parent) throws CoreException {
+	if (!parent.exists()) {
+		createParentFolder(parent.getParent());
+		((IFolder) parent).create(true, true, null);
 	}
 }
 
 private NameEnvironmentAnswer findClass(String qualifiedTypeName, char[] typeName) {
+	if (this.notifier != null)
+		this.notifier.checkCancelWithinCompiler();
+
 	if (this.initialTypeNames != null && this.initialTypeNames.includes(qualifiedTypeName)) {
 		if (isIncrementalBuild)
 			// catch the case that a type inside a source file has been renamed but other class files are looking for it
