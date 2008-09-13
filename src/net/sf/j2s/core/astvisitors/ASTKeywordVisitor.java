@@ -93,6 +93,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
 	}
 	
+	protected String assureQualifiedName(String name) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).assureQualifiedName(name);
+	}
+	
 	protected String shortenQualifiedName(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
 	}

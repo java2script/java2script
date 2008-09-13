@@ -207,14 +207,36 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 		if (constValue != null && (constValue instanceof String)) {
 			StringBuffer buffer = new StringBuffer();
 			String str = (String) constValue;
-			if (str.length() > 20) {
+			int length = str.length();
+			if (length > 20) {
 				return null;
 			}
 			buffer.append("\"");
-			buffer.append(str.replaceAll("\\\\", "\\\\\\\\")
-					.replaceAll("\r", "\\\\r")
-					.replaceAll("\n", "\\\\n")
-					.replaceAll("\"", "\\\\\""));
+			for (int i = 0; i < length; i++) {
+				char c = str.charAt(i);
+				if (c == '\\' || c == '\'' || c == '\"') {
+					buffer.append('\\');
+					buffer.append(c);
+				} else if (c == '\r') {
+					buffer.append("\\r");
+				} else if (c == '\n') {
+					buffer.append("\\n");
+				} else if (c == '\t') {
+					buffer.append("\\t");
+				} else if (c == '\f') {
+					buffer.append("\\f");
+				} else if (c < 32 || c > 127) {
+					buffer.append("\\u");
+					String hexStr = Integer.toHexString(c);
+					int zeroLen = 4 - hexStr.length();
+					for (int k = 0; k < zeroLen; k++) {
+						buffer.append('0');
+					}
+					buffer.append(hexStr);
+				} else {
+					buffer.append(c);
+				}
+			}
 			buffer.append("\"");
 			return buffer.toString();
 		}

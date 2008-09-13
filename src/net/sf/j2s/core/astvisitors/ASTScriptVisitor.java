@@ -266,7 +266,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(shortenPackageName(fullClassName));
+			buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -276,7 +276,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding superclass = binding.getSuperclass();
 			if (superclass != null) {
 				String clazzName = superclass.getQualifiedName();
-				clazzName = shortenQualifiedName(clazzName);
+				clazzName = assureQualifiedName(shortenQualifiedName(clazzName));
 				if (clazzName != null && clazzName.length() != 0
 						&& !"Object".equals(clazzName)) {
 					buffer.append(", ");
@@ -286,7 +286,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					if (declaredTypes != null && declaredTypes.length > 0) {
 						clazzName = declaredTypes[0].getQualifiedName();
 						if (clazzName != null && clazzName.length() != 0) {
-							clazzName = shortenQualifiedName(clazzName);
+							clazzName = assureQualifiedName(shortenQualifiedName(clazzName));
 							buffer.append(", null, ");
 							buffer.append(clazzName);
 						}
@@ -448,9 +448,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 						buffer.append("Clazz.innerTypeInstance (");
 						if (binding.isAnonymous() || binding.isLocal()) {
-							buffer.append(shortenQualifiedName(binding.getBinaryName()));
+							buffer.append(assureQualifiedName(shortenQualifiedName(binding.getBinaryName())));
 						} else {
-							buffer.append(shortenQualifiedName(binding.getQualifiedName()));
+							buffer.append(assureQualifiedName(shortenQualifiedName(binding.getQualifiedName())));
 						}
 						buffer.append(", this, ");
 						buffer.append("null"); // No final variables for non-anonymous class
@@ -470,7 +470,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			} else {
 				buffer.append(" new ");
 				if (fqName != null) {
-					fqName = shortenQualifiedName(fqName);
+					fqName = assureQualifiedName(shortenQualifiedName(fqName));
 					buffer.append(fqName);
 				}
 			}
@@ -512,7 +512,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			/*
 			 * TODO: Should get the class by type binding 
 			 */
-			buffer.append(shortenQualifiedName(getFullClassName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 			buffer.append("$" + anonCount + ", innerThis, finalVars");
 			if (argSize > 0) {
 				buffer.append(", ");
@@ -613,7 +613,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int lastIndexOf = fullClassName.lastIndexOf ('.');
 		if (lastIndexOf != -1) {
-			buffer.append(shortenPackageName(fullClassName));
+			buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
 			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 		} else {
 			buffer.append("null, \"" + fullClassName + "\"");
@@ -634,7 +634,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding binding = ((Type) element).resolveBinding();
 			if (binding != null) {
 				String clazzName = binding.getQualifiedName();
-				clazzName = shortenQualifiedName(clazzName);
+				clazzName = assureQualifiedName(shortenQualifiedName(clazzName));
 				buffer.append(clazzName);
 			} else {
 				buffer.append(element);
@@ -1165,6 +1165,26 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				return false;
 			}
 		}
+		String[] pipeMethods = new String[] {
+				"isPipeLive", 
+				"keepPipeLive", 
+				"pipeDestroy", 
+				"pipeSetup", 
+				"pipeThrough", 
+				"through",
+				"pipeInit",
+				"pipeMonitoring",
+				"pipeMonitoringInterval",
+				"setPipeHelper",
+				"updateStatus"
+		};
+		for (int i = 0; i < pipeMethods.length; i++) {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+					return false;
+				}
+			}
+		}
 		if (mBinding != null) {
 			methodDeclareStack.push(mBinding.getKey());
 		}
@@ -1348,7 +1368,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				blockLevel++;
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
-				buffer.append(shortenQualifiedName(getFullClassName()));
+				buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 				buffer.append(", []);\r\n");
 				visitList(statements, ""); 
 				//buffer.append("}");
@@ -1584,7 +1604,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									typeStr = "Number";
 								}
 							} else if (!nullTypeBinding.isTypeVariable()) {
-								typeStr = shortenQualifiedName(nullTypeBinding.getQualifiedName());
+								typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
 							}
 						}
 					}
@@ -1657,11 +1677,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding binding2 = node.resolveTypeBinding();
 			if (binding != null) {
 				String name = binding2.getQualifiedName();
-				name = shortenQualifiedName(name);
+				name = assureQualifiedName(shortenQualifiedName(name));
 				buffer.append(name);
 			} else {
 				String nodeId = getJ2SName(node);
-				buffer.append(shortenQualifiedName(nodeId));
+				buffer.append(assureQualifiedName(shortenQualifiedName(nodeId)));
 			}
 			return false;
 		}
@@ -1685,7 +1705,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //				String name = NameConverterUtil.getJ2SName(node);
 			if (typeBinding != null) {
 				String name = typeBinding.getQualifiedName();
-				name = shortenQualifiedName(name);
+				name = assureQualifiedName(shortenQualifiedName(name));
 				if (checkKeyworkViolation(name)) {
 					buffer.append('$');
 				}
@@ -1716,7 +1736,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					// with my anonymous class name!
 					name = declaringClass.getBinaryName();
 				}
-				name = shortenQualifiedName(name);
+				name = assureQualifiedName(shortenQualifiedName(name));
 				if (name.length() != 0) {
 					buffer.append(name);
 					buffer.append(".");
@@ -1809,7 +1829,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					MethodInvocation mthInv = (MethodInvocation) parent;
 					if (mthInv.getExpression() == null) {
 						String name = declaringClass.getQualifiedName();
-						name = shortenQualifiedName(name);
+						name = assureQualifiedName(shortenQualifiedName(name));
 						if (name.length() != 0) {
 							buffer.append(name);
 							buffer.append(".");
@@ -1916,7 +1936,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(SimpleType node) {
 		ITypeBinding binding = node.resolveBinding();
 		if (binding != null) {
-			buffer.append(shortenQualifiedName(binding.getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(binding.getQualifiedName())));
 		} else {
 			buffer.append(node);
 		}
@@ -1977,7 +1997,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 * TODO: expression before the "super" should be considered.
 		 */
 		buffer.append("Clazz.superConstructor (this, ");
-		buffer.append(shortenQualifiedName(getFullClassName()));
+		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 		List arguments = node.arguments();
 		if (arguments.size() > 0) {
 			buffer.append(", [");
@@ -2034,7 +2054,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SuperMethodInvocation node) {
 		buffer.append("Clazz.superCall (this, ");
-		buffer.append(shortenQualifiedName(getFullClassName()));
+		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 		buffer.append(", \"");
 		String name = getJ2SName(node.getName());
 		buffer.append(name);
@@ -2128,7 +2148,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("Clazz.declareInterface (");
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(shortenPackageName(fullClassName));
+				buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");
@@ -2137,7 +2157,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			int lastIndexOf = fullClassName.lastIndexOf ('.');
 			if (lastIndexOf != -1) {
-				buffer.append(shortenPackageName(fullClassName));
+				buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
 				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
 			} else {
 				buffer.append("null, \"" + fullClassName + "\"");
@@ -2151,7 +2171,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding superclass = typeBinding.getSuperclass();
 			if (superclass != null) {
 				String clazzName = superclass.getQualifiedName();
-				clazzName = shortenQualifiedName(clazzName);
+				clazzName = assureQualifiedName(shortenQualifiedName(clazzName));
 				if (clazzName != null && clazzName.length() != 0
 						&& !"Object".equals(clazzName)) {
 					buffer.append(clazzName);
@@ -2178,7 +2198,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding binding = ((Type) element).resolveBinding();
 			if (binding != null) {
 				String clazzName = binding.getQualifiedName();
-				clazzName = shortenQualifiedName(clazzName);
+				clazzName = assureQualifiedName(shortenQualifiedName(clazzName));
 				buffer.append(clazzName);
 			} else {
 				buffer.append(element);
@@ -2200,7 +2220,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (binding != null && !binding.isTopLevel()) {
 				if ((binding.getModifiers() & Modifier.STATIC) == 0) {
 					buffer.append(", Clazz.innerTypeInstance (");
-					buffer.append(shortenQualifiedName(binding.getQualifiedName()));
+					buffer.append(assureQualifiedName(shortenQualifiedName(binding.getQualifiedName())));
 					buffer.append(", this, null, Clazz.inheritArgs");
 					buffer.append(")");
 				}
