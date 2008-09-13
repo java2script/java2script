@@ -1,6 +1,0 @@
-#Java2Script Configuration
-#Sun Mar 18 22:29:00 CST 2007
-j2s.resources.list=../../plugins/net.sf.j2s.lib_1.0.0/j2slib/java.runtime.j2x,../../plugins/net.sf.j2s.lib_1.0.0/j2slib/swt.j2x,bin/org/java2script/demo/gtalk/GTalkRunnable.js,bin/org/java2script/demo/gtalk/AddFriendDialog.js,bin/org/java2script/demo/gtalk/AddFriendRunnable.js,bin/org/java2script/demo/gtalk/ChatDialog.js,bin/org/java2script/demo/gtalk/CloseChattingRunnable.js,bin/org/java2script/demo/gtalk/GoogleTalk.js,bin/org/java2script/demo/gtalk/JabberPool.js,bin/org/java2script/demo/gtalk/LoginRunnable.js,bin/org/java2script/demo/gtalk/LogoutRunnable.js,bin/org/java2script/demo/gtalk/ReceivingRunnable.js,bin/org/java2script/demo/gtalk/SendingRunnable.js,bin/org/java2script/demo/gtalk/UpdatingRunnable.js
-j2s.abandoned.resources.list=
-j2s.output.path=bin
-j2s.compiler.status=enable
