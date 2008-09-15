@@ -181,7 +181,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			rowWidth += rbBand.cxIdeal + getMargin (i) + separator;
 			*/
 			if (items[i].wrap) {
-				//System.out.println("wrap...");
 				width = Math.max(width, rowWidth - separator);
 				rowWidth = 0;
 				height += rowHeight;
@@ -688,7 +687,6 @@ boolean moveDelta(int index, int dx, int dy) {
 		setBounds (left, top, Math.max (0, width), Math.max (0, h), SWT.NONE);
 		sendEvent(SWT.Resize);
 	}
-	//System.out.println("Length:" + items.length);
 	return needLayout;
 }
 

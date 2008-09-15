@@ -758,7 +758,6 @@ public TreeItem [] getItems () {
 //	int hwnd = parent.handle;
 //	int hItem = OS.SendMessage (hwnd, OS.TVM_GETNEXTITEM, OS.TVGN_CHILD, handle);
 //	if (hItem == 0) return new TreeItem [0];
-//	System.out.println("index: " + this.index);
 	return items;
 }
 
@@ -1715,7 +1714,6 @@ void toggleExpandStatus() {
 }
 
 public void addItem(TreeItem item, int index) {
-//	System.out.println("adding item to list " + item);
 	if(index == -1 || index == items.length){
 		items[items.length] = item;
 	}else{
@@ -1725,7 +1723,6 @@ public void addItem(TreeItem item, int index) {
 		newItem[index] = item;
 		items = newItem;
 	}
-//	System.out.println("adding item to list " + item);
 }
 boolean isSelected(){
 	return this.selected;

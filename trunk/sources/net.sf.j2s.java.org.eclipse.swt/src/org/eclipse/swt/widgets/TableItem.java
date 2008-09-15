@@ -148,7 +148,6 @@ private void configureItem() {
 //		public void run() {
 //			HTMLEvent evt = (HTMLEvent) getEvent();
 //			int index = parent.getSelectionIndex();
-//			System.out.println("on key down !2" + evt.keyCode);
 //			if(evt.keyCode == 40){
 //				if(index < parent.getColumnCount() - 1){
 //					parent.select(index+1);
@@ -191,7 +190,6 @@ private void configureItem() {
 			}
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-//			System.out.println("An event is runned " + evt);
 			Event e = new Event();
 			e.display = display;
 			e.type = SWT.DefaultSelection;
@@ -1253,9 +1251,7 @@ public void setText (int index, String string) {
 //	if (tbodyTD == null){
 //		tbodyTD = document.createElement("TD");
 //		handle.appendChild(tbodyTD);
-////			System.out.println("extisted already." + index);
 ////		} else {
-////			System.out.println("No existed yet?" + index);
 //	}
 //	if (tbodyTD.childNodes != null) {
 //		for (int i = 0; i < tbodyTD.childNodes.length; i++) {
@@ -1311,7 +1307,6 @@ public void setText (int index, String string) {
 //			public void run(){
 //				HTMLEvent evt = (HTMLEvent) getEvent();
 //				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
-//				System.out.println("An event is runned " + evt);
 //				Event e = new Event();
 //				e.display = display;
 //				e.type = SWT.DefaultSelection;

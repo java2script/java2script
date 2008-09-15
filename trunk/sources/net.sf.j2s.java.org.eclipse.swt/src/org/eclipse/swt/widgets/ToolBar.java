@@ -281,7 +281,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 				cachedMaxItemWidth = Math.max(cachedMaxItemWidth, rect.width);
 			}
 			//height = Math.max (height, rect.height);
-			//System.out.println("xx::" + rect);
 			height += rect.height;
 			//if (i != count - 1) 
 			if ((item.style & SWT.SEPARATOR) != 0) {
@@ -298,7 +297,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			Rectangle rect = items[i].getBounds();
 			items[i].isInnerBounds = false;
 			
-//			System.out.println(rect);
 			if ((style & SWT.FLAT) != 0) {
 				height = Math.max (height, rect.height);
 			} else {
@@ -404,7 +402,6 @@ protected void createHandle () {
 	
 	String[] css = new String[0];
 	css[0] = " tool-bar-default";
-	//System.out.println(".." + (style & SWT.VERTICAL));
 	if ((style & SWT.VERTICAL) != 0) {
 		css[css.length] = "tool-bar-vertical";
 	} else {

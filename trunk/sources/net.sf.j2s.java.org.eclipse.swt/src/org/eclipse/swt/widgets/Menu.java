@@ -439,10 +439,8 @@ void createHandle () {
 	btnFocus.onkeydown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
-			//System.out.println(evt.keyCode);
 			MenuItem[] menuItems = items;
 			int index = currentIndex;
-			//System.out.println(evt.keyCode);
 			if (evt.keyCode == 13 || evt.keyCode == 10) {
 				if (index != -1) {
 					Element target = menuItems[index].handle;
@@ -541,7 +539,6 @@ void createHandle () {
 	};
 	btnFocus.onblur = new RunnableCompatibility() {
 		public void run() {
-			//System.out.println(Menu.this + "::" + "blur");
 			long time = new Date().getTime();
 			if (time - lastFocusdTime > 20) {
 				if ((style & SWT.BAR) == 0) {
@@ -1019,7 +1016,6 @@ void fixMenus (Decorations newParent) {
 					textWidth = width;
 				}
 			}
-			//System.out.println(textWidth + "//" + accelWidth);
 			w = 16 + textWidth + 16 + accelWidth + 16 + 8; // 8 for extra safe width
 			if (handle.className.indexOf("menu-enable-status") != -1 &&
 					handle.className.indexOf("menu-enable-image") != -1) {
@@ -1034,7 +1030,6 @@ void fixMenus (Decorations newParent) {
 				//w = OS.getContainerWidth(hdl2);
 				h = pt2.y - pt1.y + OS.getContainerHeight(hdl2);
 			}
-			//System.out.println(w + 4);
 			return new Rectangle(x - 2, y - 2, w + 4, h + 4);
 		}
 	}

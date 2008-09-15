@@ -672,7 +672,6 @@ void createSelect() {
 void configureSelect() {
 	selectInput.onchange = new RunnableCompatibility() {
 		public void run() {
-//			System.out.println("select changed!" + selectInput.selectedIndex);
 			noSelection = false;
 			updateSelection();
 //			if(!isSimple)
@@ -1735,8 +1734,6 @@ void setBounds (int x, int y, int width, int height, int flags) {
 		
 	}
 	selectInput.style.width = width + "px";
-	
-//	System.out.println("combo left " + this.left + " " + this.top + " textInput " +dropDownButton.style.width + " " + dropDownButton.style.height);
 }
 
 /* (non-Javadoc)

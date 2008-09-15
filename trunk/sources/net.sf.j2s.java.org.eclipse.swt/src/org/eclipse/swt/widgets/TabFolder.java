@@ -206,7 +206,6 @@ protected void checkSubclass () {
 
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
-//	System.out.println(wHint + "," + hHint + "," + changed);
 	Point size = super.computeSize (wHint, hHint, changed);
 	int width = -124; // this number is an experimental number from WinXP in classical style
 	if (items != null && items.length != 0) {
@@ -282,7 +281,6 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	y -= border;
 	width += border * 2;
 	height += border * 2;
-	//System.out.println("after t");
 	return new Rectangle(x, y, width, height);
 }
 
@@ -343,7 +341,6 @@ void createItem (TabItem item, final int index) {
 		width = 2;
 	}
 	tab.style.left = width + "px";
-	//System.out.println(index + "..." + item);
 	items[index] = item;
 	items[index].handle = tab;
 //	tab.onclick = new RunnableCompatibility() {
@@ -427,7 +424,6 @@ protected void createHandle () {
 				if (w > width) {
 					if (i < items.length - 1) {
 						offset++;
-//						System.out.println("Offset:" + offset);
 						setSelection(getSelectionIndex(), false);
 						return ;
 					}
@@ -435,11 +431,9 @@ protected void createHandle () {
 			}
 			if (ww > width) {
 				offset++;
-//				System.out.println("Offset:" + offset);
 				setSelection(getSelectionIndex(), false);
 				return ;
 			}
-//			System.err.println("false...");
 		}
 	};
 	el = (Element) createCSSElement(itemMore, "tab-item-button");
@@ -453,10 +447,8 @@ protected void createHandle () {
 	}
 	el.onclick = btnPrevTab.onclick = new RunnableCompatibility() {
 		public void run() {
-//			System.out.println("in Offset:" + offset);
 			if (offset <= 0) return ;
 			offset--;
-//			System.out.println("Offset:" + offset);
 			setSelection(getSelectionIndex(), false);
 		}
 	};
@@ -540,9 +532,7 @@ public void setBounds(int x, int y, int width, int height) {
 //		
 //		Control control = items[selectedIndex].control;
 //		if(control != null)
-//		System.out.println(" tab folder conrol for bounds 1 " + control + " " + getClientArea() + " " + control.isDisposed());
 //		if(control != null && control.isDisposed()){
-//			System.out.println("tab folder set bounds for " + control + " " + getClientArea());
 //			control.setBounds(getClientArea());
 //		}
 //	}
@@ -602,7 +592,6 @@ public Rectangle getClientArea () {
 	return new Rectangle (rect.left, rect.top, width, height);
 	*/
 //	return super.getClientArea();
-	//System.err.println(super.getClientArea());
 	int x = 4, y = 4;
 	int h = height - 8, w = width - 8;
 	if (items != null && items.length != 0) {
@@ -612,7 +601,6 @@ public Rectangle getClientArea () {
 			lineHeight -= 2; // padding-top:2px
 		}
 		h -= lineHeight;
-//		System.out.println("hi..." + height + "," + lineHeight + ":" + );
 		if ((style & SWT.BOTTOM) == 0) {
 			y += lineHeight;
 		} else {
@@ -736,7 +724,6 @@ public int getSelectionIndex () {
 			return i;
 		}
 	}
-//	System.out.println("The selection is not happend yet!");
 	/*
 	 * should return -1 instead of 0
 	 */
@@ -1001,7 +988,6 @@ void setSelection (int index, boolean notify) {
 	 * TODO: When a tab is selected programmly, should move
 	 * the tab into visible tab area.
 	 */
-//	System.out.println("set selection is called!");
 //	int oldIndex = OS.SendMessage (handle, OS.TCM_GETCURSEL, 0, 0);
 	int oldIndex = getSelectionIndex();
 	
@@ -1030,7 +1016,6 @@ void setSelection (int index, boolean notify) {
 			 * later layout should relayout the control.
 			 */
 			control.setBounds (getClientArea ());
-//			System.out.println("set selection bounds " + getClientArea());
 			control.setVisible (true);
 			//control.handle.style.display = "block";
 		}
@@ -1118,10 +1103,7 @@ void updateSelectionWithWidth(int index, int prefWidth) {
 			if ((style & SWT.BOTTOM) != 0) {
 				borderSW.style.width = (left - 2) + "px";
 				borderSE.style.width = y + "px";
-//				System.out.println("L:" + (left - 2) + ":R:" + y);
 			} else {
-//				System.out.println(this.width + "-" + left + "-" + w);
-//				System.out.println("L:" + (left - 2) + ":R:" + y);
 				borderNW.style.width = (left - 2) + "px";
 				borderNE.style.width = y + "px";
 			}

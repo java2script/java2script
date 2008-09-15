@@ -391,7 +391,6 @@ private void decorateScale() {
 		outerSize = getSize().y;
 	}
 	
-	//System.err.println(outerSize);
 	int pages = (maximum - minimum) / pageIncrement;
 	
 	for (int i = pages; i < lines.length; i++) {

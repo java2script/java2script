@@ -818,22 +818,6 @@ public void setText (String string) {
 	OS.clearChildren(handle);
 	parse (string, handle);
 	/*
-	System.out.println(cachedText);
-//	OS.insertText(handle, cachedText);
-	System.out.println("ids==");
-	for (int i = 0; i < ids.length; i++) {
-		System.out.println(i + "/" + ids[i]);
-	}
-	System.out.println("mnemonics==");
-	for (int i = 0; i < mnemonics.length; i++) {
-		System.out.println(i + "/" + mnemonics[i]);
-	}
-	System.out.println("offsets==");
-	for (int i = 0; i < offsets.length; i++) {
-		System.out.println(i + "/" + offsets[i]);
-	}
-	*/
-	/*
 	if (OS.COMCTL32_MAJOR >= 6) {
 		TCHAR buffer = new TCHAR (getCodePage (), string, true);
 		OS.SetWindowText (handle, buffer);

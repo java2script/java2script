@@ -313,7 +313,6 @@ public Rectangle getClientArea () {
 	int border = getBorderWidth();
 	int width = this.width - border * 2 - CLIENT_INSET * 2;
 	int height = this.height - border * 2 - y - CLIENT_INSET;
-	//System.out.println("-->" + new Rectangle (x, y, width, height));
 //	if (groupText == null || groupText.length() == 0) {
 //		return new Rectangle (x, y / 2, width, height);
 //	} else {
