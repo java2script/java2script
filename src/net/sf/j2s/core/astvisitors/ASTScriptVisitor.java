@@ -1144,6 +1144,26 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				return;
 			}
 		}
+		String[] pipeMethods = new String[] {
+				"isPipeLive", 
+				"keepPipeLive", 
+				"pipeDestroy", 
+				"pipeSetup", 
+				"pipeThrough", 
+				"through",
+				"pipeInit",
+				"pipeMonitoring",
+				"pipeMonitoringInterval",
+				"setPipeHelper",
+				"updateStatus"
+		};
+		for (int i = 0; i < pipeMethods.length; i++) {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+					return;
+				}
+			}
+		}
 		if (mBinding != null) {
 			methodDeclareStack.pop();
 		}
