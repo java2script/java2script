@@ -201,7 +201,6 @@ void createHandle() {
 			event.height = height;
 			event.widget = Sash.this;
 			event.item = Sash.this;
-//			System.out.println("drop");
 			sendEvent (SWT.Selection, event);
 			if (event.doit) {
 				if ((style & SWT.SMOOTH) != 0) {

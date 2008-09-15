@@ -333,7 +333,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		width = 0;
 		for (int i = 0; i < columns.length; i++) {
 			int colWidth = columns[i].getWidth();
-			//System.out.println(i + ":" + colWidth);
 			width += colWidth;
 		}
 		height = 2;
@@ -880,7 +879,7 @@ void createItem (TreeItem item, Object hParent, int index) {
 				}
 			}
 			if (isNoBreak) {
-				System.out.println("No break!");
+				//
 			}
 			if (j == listItems.length - 1) {
 				if (i == 0) {
@@ -950,7 +949,6 @@ void createItem (TreeItem item, Object hParent, int index) {
 //		item.parentItem.setExpanded(item.parentItem.getExpanded());
 //		item.handle.style.display = "none";
 //		item.parentItem.updateModifier(-1);
-//		System.out.println("adding " + item.parentItem + " " + item);
 	}
 //	item.checkOrientation(this);
 //	item._updateOrientation();
@@ -1047,7 +1045,6 @@ boolean toggleSelection(TreeItem item, boolean isCtrlKeyHold, boolean isShiftKey
 			item.showSelection(true);
 		} else {
 			for (int i = 0; i < selections.length; i++) {
-//					System.out.println(item);
 				if (selections[i] != null) {
 					selections[i].showSelection(false);
 				}
@@ -1115,7 +1112,6 @@ int skipItems (int index) {
 		}
 		index++;
 	}
-//		System.out.println("end..." + parentItem);
 	return -1;//items.length - 1;
 }
 

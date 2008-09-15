@@ -95,7 +95,6 @@ private void configureColumn() {
 	};
 //
 //	this.handle.style.height = (OS.getStringPlainHeight("A")+ 2) + "px";
-////	System.out.println("configuring table column " + this.handle.style.height);
 //	if(resizeHandle != null){
 //		OS.destroyHandle(resizeHandle);
 //	}
@@ -107,14 +106,11 @@ private void configureColumn() {
 //	if(resizable){		
 //		resizeHandle.style.display = "block";
 //		resizeHandle.style.height = Math.max(0, OS.getContainerHeight(this.handle)) + "px";
-////		System.out.println(" height is " + resizeHandle.style.height);
 //		int left = 0;
 //		for(int i = 0; i <= parent.indexOf(this); i++){
 //			left += Math.max(0, parent.columns[i].getWidth() + 2);
-////			System.out.println(" at " + i + " left is "+ left);
 //		}
 //		resizeHandle.style.left = (left  - 3)+ "px"; 
-////		System.out.println("resize handle for " + this.text + " " + resizeHandle.style.left);
 //		/*
 //		 * Resizing the columns
 //		 */
@@ -132,14 +128,12 @@ private void configureColumn() {
 //					lastX = event.x;
 //				}
 //				int tempWidth = lastX - Integer.parseInt(resizeHandle.style.left) + getWidth();
-////				System.out.println("drag ends" + lastX + " " + getWidth() + " " + tempWidth);
 //				setWidth(Math.max(0, tempWidth));
 //				return true;
 //			}
 //			
 //			public boolean dragging(DragEvent e) {
 //				super.dragging(e);
-////				System.out.println("draggin");
 //				//e.sourceElement.style.top = currentLocation(e).y + "px";
 //				//caculateSelection();
 //				Event event = new Event ();

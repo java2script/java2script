@@ -202,7 +202,6 @@ public Rectangle getClientArea () {
 	if (h < 0) {
 		h = 64;
 	}
-	//System.out.println(new Rectangle (0, 0, w, h));
 	return new Rectangle (0, 0, w, h);
 }
 

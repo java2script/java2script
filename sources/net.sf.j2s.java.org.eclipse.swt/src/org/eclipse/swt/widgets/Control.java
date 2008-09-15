@@ -1602,7 +1602,6 @@ public void pack () {
 public void pack (boolean changed) {
 	checkWidget ();
 	Point computeSize = computeSize (SWT.DEFAULT, SWT.DEFAULT, changed);
-//	System.out.println(computeSize);
 	setSize (computeSize);
 }
 
@@ -2710,7 +2709,6 @@ public void setSize (int width, int height) {
 public void setSize (Point size) {
 	checkWidget ();
 	if (size == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	System.err.println(size);
 	setSize (size.x, size.y);
 }
 

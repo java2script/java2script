@@ -1379,7 +1379,6 @@ void showSubMenu() {
 			new Rectangle(coordinate.x, coordinate.y, w, h),
 			bounds.width, bounds.height, 0);
 	menu.handle.style.width = rect.width + "px";
-	//System.out.println(rect);
 	//menu.setLocation (rect.x, rect.y);
 	menu.x = rect.x;
 	menu.y = rect.y;

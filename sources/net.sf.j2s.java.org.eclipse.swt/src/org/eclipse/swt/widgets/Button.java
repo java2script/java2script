@@ -644,7 +644,6 @@ public boolean getSelection () {
 	return (state & OS.BST_CHECKED) != 0;
 	*/
 	if ((style & SWT.TOGGLE) != 0) {
-		//System.out.println(btnHandle.className);
 		return OS.existedCSSClass(btnHandle, "button-selected");
 	} else if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		return btnHandle.checked;
@@ -864,11 +863,9 @@ void setDefault (boolean value) {
 	OS.SendMessage (handle, OS.BM_SETSTYLE, bits, 1);
 	*/
 	if (value) {
-		System.out.println("Set default.");
 		try {
 			handle.focus();
 		} catch (Error e) { }
-		System.out.println("Set default ok.");
 	}
 }
 

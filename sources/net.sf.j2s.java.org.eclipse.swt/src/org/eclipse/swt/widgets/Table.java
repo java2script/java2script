@@ -1117,7 +1117,6 @@ void createItem (TableItem item, int index) {
 //		itemsStr = new String[0];		
 	}
 //	if(itemsStr == null){
-//		System.out.println("init itemStr");
 //	}
 	item.index = index;
 	items[index] = item;
@@ -1171,7 +1170,6 @@ void createItem (TableItem item, int index) {
 	}
 	
 	Element tbodyTR = tbodyTRTemplate.cloneNode(true);
-//	System.out.println("the table is now " + tbodyTR.innerHTML);
 //	tbodyTR.className = "table-item-default";
 //	tbodyTR.innerHTML = tbodyTRTemplateInnerHTML;
 	if ((style & SWT.CHECK) != 0) {
@@ -1186,7 +1184,6 @@ void createItem (TableItem item, int index) {
 		items[index] = item;
 //		itemsStr[index] = trStr;
 	} else {
-//		System.out.println("existed");
 		tbody.insertBefore(tbodyTR, tbody.childNodes[index]);
 		for (int i = items.length; i > index; i--) {
 			items[i] = items[i - 1];
@@ -1197,7 +1194,6 @@ void createItem (TableItem item, int index) {
 //		itemsStr[index] = trStr;
 	}
 //	fillTbody();
-//	System.out.println(tbody.innerHTML);
 //	item.handle = tbody.childNodes[index];
 	item.handle = tbodyTR;
 }
@@ -1352,10 +1348,8 @@ public void deselectAll () {
 	OS.SendMessage (handle, OS.LVM_SETITEMSTATE, -1, lvItem);
 	ignoreSelect = false;
 	*/
-//	System.out.println("deselect " + items + " " + items.length);
 	TableItem[] items = getSelection();
 	for (int i = 0; i < items.length; i++) {
-//		System.out.println("deselecting " + i + items[i] + " " + items.length);
 		items[i].showSelection(false);
 	}
 	selection = new TableItem[0];
@@ -2359,7 +2353,6 @@ public void remove (int [] indices) {
 				items = newItems;
 				
 //				newItems = new TableItem[count-1];
-//				System.out.println("after remove " + items + " " + count + " " + index);
 				//items [count] = null; 
 				last = index;
 			}
@@ -3611,7 +3604,6 @@ private void removeFromSelection(int[] indices){
 	int j = 0;
 	for (int i =0; i < indices.length; i++) {
 		if(selection[i].isSelected()){
-//				System.out.println("The item #" + i + " is selected again.");
 			newSelection[j++] = selection[i];
 		}
 	}
@@ -3622,7 +3614,6 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 	if (item == null) {
 		return false;
 	}
-	//System.out.println("...." + ((style & SWT.MULTI) != 0 && (isCtrlKeyHold || isShiftKeyHold)));
 	if ((style & SWT.MULTI) != 0 && (isCtrlKeyHold || isShiftKeyHold)) {
 		if (isCtrlKeyHold) {
 			for (int i = 0; i < selection.length; i++) {
@@ -3645,7 +3636,6 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 			item.showSelection(true);
 		} else {
 			for (int i = 0; i < selection.length; i++) {
-//					System.out.println(item);
 				if (selection[i] != null) {
 					selection[i].showSelection(false);
 				}
@@ -3654,7 +3644,6 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 				
 				int idx1 = Math.min(indexOf(lastSelection), indexOf(item));
 				int idx2 = Math.max(indexOf(lastSelection), indexOf(item));
-//				System.out.println("here!" + idx1 + ":" + idx2);
 				selection = new TableItem[0];
 				for (int i = idx1; i <= idx2; i++) {
 					TableItem ti = items[i];
@@ -3672,10 +3661,8 @@ boolean toggleSelection(TableItem item, boolean isCtrlKeyHold, boolean isShiftKe
 			}
 		}
 	} else {
-		//System.out.println(selection.length);
 		item.showSelection(true);
 		for (int i = 0; i < selection.length; i++) {
-			//System.out.println(item);
 			if (selection[i] != null && selection[i] != item) {
 				selection[i].showSelection(false);
 			}

@@ -247,8 +247,6 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			changed |= (state & LAYOUT_CHANGED) != 0;
 			state &= ~LAYOUT_CHANGED;
 			size = layout.computeSize (this, wHint, hHint, changed);
-//			System.out.println(wHint + "," + hHint + "," + changed);
-//			System.out.println(size);
 		} else {
 			size = new Point (wHint, hHint);
 		}
@@ -259,9 +257,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	if (size.y == 0) size.y = DEFAULT_HEIGHT;
 	if (wHint != SWT.DEFAULT) size.x = wHint;
 	if (hHint != SWT.DEFAULT) size.y = hHint;
-//	System.out.println("before trimming " + size);
 	Rectangle trim = computeTrim (0, 0, size.x, size.y);
-//	System.out.println("after trimming " + trim);
 	return new Point (trim.width, trim.height);
 }
 
@@ -604,7 +600,6 @@ public void layout (boolean changed, boolean all) {
  */
 public void layout (Control [] changed) {
 	checkWidget ();
-//	System.out.print("control");
 	if (changed == null) error (SWT.ERROR_INVALID_ARGUMENT);
 //	Date d = new Date();
 	int length = changed.length;
@@ -669,18 +664,13 @@ void markLayout (boolean changed, boolean all) {
 
 Point minimumSize (int wHint, int hHint, boolean changed) {
 	Control [] children = _getChildren ();
-	//System.out.println("minimumSize@Composite");
 	int width = 0, height = 0;
 	int length = children.length;
 	for (int i=0; i< length; i++) {
-		//System.out.println(i + "..." + children [i]);
 		Rectangle rect = children [i].getBounds ();
 		width = Math.max (width, rect.x + rect.width);
 		height = Math.max (height, rect.y + rect.height);
-		//System.out.println(children[i].getBounds);
-		//System.out.println(rect);
 	}
-	//System.out.println(new Point (width, height));
 	return new Point (width, height);
 }
 
