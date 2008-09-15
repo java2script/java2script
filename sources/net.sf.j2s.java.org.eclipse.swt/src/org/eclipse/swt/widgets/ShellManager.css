@@ -2,12 +2,23 @@
 	position:absolute;
 	top:0;
 	left:0;
-	z-index:3690;
+	/*z-index:3690;*/
 }
 .shell-manager-bar {
 	position:absolute;
 	left:0;
-	width:120px;
+	width:48px;
+	background-color:rgb(57,61,254);
+	border-style:solid solid solid none;
+	border-width:1px;
+	border-color:buttonshadow;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.shell-manager-bar-minimized {
+	position:absolute;
+	left:0;
+	width:8px;
 	background-color:rgb(57,61,254);
 	border-style:solid solid solid none;
 	border-width:1px;
@@ -21,7 +32,7 @@
 	cursor:default;
 	font-family:Arial, sans-serif;
 	position:absolute;
-	left:1em;
+	left:16px;
 	width:150px;
 	height:2em;
 	background-color:buttonface;
@@ -36,12 +47,14 @@
 	filter:Alpha(Opacity=95);
 }
 .shell-top-item {
-	border:1px solid darkred;
+	/*border:1px solid darkred;*/
 	opacity:1;
 	filter:Alpha(Opacity=100);
 }
 .shell-top-item:hover, a.shell-top-item:hover {
-	border:1px solid navy;
+	/*border:1px solid navy;*/
+	opacity:0.55;
+	filter:Alpha(Opacity=55);
 }
 a.shell-item:focus {
 	background-color:buttonhighlight;
@@ -55,7 +68,7 @@ a.shell-item:focus {
 	width:16px;
 	height:16px;
 	position:relative;
-	left:4px;
+	left:8px;
 	top:50%;
 	margin-top:-7px;
 	_margin-top:-8px;
@@ -65,17 +78,17 @@ a.shell-item:focus {
 }
 .shell-item-text {
 	position:relative;
-	width:120px;
+	/*width:108px;*/
 	overflow:hidden;
 	height:1.5em;
 	white-space:nowrap;
 	top:50%;
-	left:24px;
-	_left:6px;
-	margin-top:-0.5em;
+	left:36px;
+	_left:18px;
+	margin-top:-0.6em;
 }
 *:first-child+html .shell-item-text { /* IE7 */
-	left:6px;
+	left:18px;
 }
 .shell-manager-topbar-container {
 	position:absolute;
@@ -113,6 +126,7 @@ a.shell-item:focus {
 	background-color:menu;
 	background-repeat:no-repeat;
 	background-position:center center;
+	background-image: url('images/z-logo.png');
 	border:1px solid buttonshadow;
 	margin:0;
 	padding:0;
@@ -120,7 +134,7 @@ a.shell-item:focus {
 	opacity:0.6;
 	filter:Alpha(Opacity=60);
 }
-.shortcut-bar-minized {
+.shortcut-bar-minimized {
 	position:absolute;
 	bottom:0;
 	height:8px;
@@ -137,12 +151,14 @@ a.shell-item:focus {
 	filter:Alpha(Opacity=95);
 }
 .shortcut-active-item {
-	border:1px solid darkred;
+	/*border:1px solid darkred;*/
 	opacity:1;
 	filter:Alpha(Opacity=100);
 }
 .shortcut-active-item:hover, a.shortcut-active-item:hover {
-	border:1px solid navy;
+	/*border:1px solid navy;*/
+	opacity:0.6;
+	filter:Alpha(Opacity=60);
 }
 .swt-widgets-shellmanager {
 	width:324px;

@@ -212,6 +212,10 @@ void createWidget () {
 	handle.onclick =  new RunnableCompatibility() {
 		public void run() {
 			postEvent (SWT.Selection);
+			/**
+			 * @j2sNative
+			 * ShellManager.bringTrayToTop (null);
+			 */ {}
 		}
 	};
 	handle.oncontextmenu = new RunnableCompatibility() {
@@ -234,6 +238,10 @@ void createWidget () {
 			sendEvent(ev);
 			toReturn(false);
 			//postEvent (SWT.MenuDetect);
+			/**
+			 * @j2sNative
+			 * ShellManager.bringTrayToTop (null);
+			 */ {}
 		}
 	};
 	
@@ -253,6 +261,10 @@ void createWidget () {
 					sendEvent(ev);
 					evtHTML.preventDefault();
 					toReturn(false);
+					/**
+					 * @j2sNative
+					 * ShellManager.bringTrayToTop (null);
+					 */ {}
 				}
 			}
 		};

@@ -489,6 +489,17 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
 public void close () {
 	checkWidget ();
 	closeWidget ();
+	/**
+	 * @j2sNative
+	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
+	 * 	ShellManager.removeShellItem (this);
+	 * 	if (ShellManager.sidebarEl != null) {
+	 * 		ShellManager.sidebarEl.style.display = "block";
+	 * 	}
+	 * 	ShellManager.updateItems ();
+	 * 	ShellManager.lastMMed = new Date().getTime();
+	 * }
+	 */ {}
 }
 
 protected void createHandle () {
@@ -940,6 +951,13 @@ public void open () {
 	 * if (window["ShellManager"] != null && this.parent == null
 	 * 		&& (this.getStyle() & 4) == 0) { // SWT.TOOL
 	 * 	ShellManager.createShellItem (this);
+	 * 	if (ShellManager.sidebarEl != null) {
+	 * 		ShellManager.sidebarEl.style.display = "block";
+	 * 	}
+	 * 	window.setTimeout (function () {
+	 * 		ShellManager.updateItems ();
+	 * 		ShellManager.lastMMed = new Date().getTime();
+	 * 	}, 50);
 	 * }
 	 */ {}
 }
@@ -1373,6 +1391,13 @@ public void setVisible (boolean visible) {
 	 * 	} else {
 	 * 		ShellManager.createShellItem (this);
 	 * 	}
+	 * 	if (ShellManager.sidebarEl != null) {
+	 * 		ShellManager.sidebarEl.style.display = "block";
+	 * 	}
+	 * 	window.setTimeout (function () {
+	 * 		ShellManager.updateItems ();
+	 * 		ShellManager.lastMMed = new Date().getTime();
+	 * 	}, 50);
 	 * }
 	 */ {}
 	

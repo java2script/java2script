@@ -2255,6 +2255,14 @@ public Image getSystemImage (int id) {
 public Tray getSystemTray () {
 	checkDevice ();
 	if (tray != null) return tray;
+	for (int i = 0; i < Displays.length; i++) {
+		Display disp = Displays[i];
+		if (disp != null) {
+			if (disp.tray != null) {
+				return disp.tray;
+			}
+		}
+	}
 	return tray = new Tray (this, SWT.NONE);
 }
 
@@ -3104,7 +3112,6 @@ public boolean readAndDispatch () {
 		private boolean messageLoop = false;
 		public void run() {
 			runPopups ();
-//			System.out.println("I'm entering the run");
 //			System.out.println("msg " + Display.this.msgs);
 //			List layoutQueue = new ArrayList();
 			MESSAGE[] msgs = Display.this.msgs;
@@ -3693,7 +3700,6 @@ void sendEvent (int eventType, Event event) {
 }
 
 void sendMessage(MESSAGE msg) {
-//	System.out.println("message:" + msg.control);
 	msgs[msgs.length] = msg;
 }
 /**

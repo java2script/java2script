@@ -44,7 +44,12 @@ public class AboutJava2Script {
 	 */
 	public static void openAbout(Shell objShell) {
 		try {
-			Shell aboutShell = new Shell(objShell, SWT.TOOL);
+			Shell aboutShell = null;
+			if (objShell == null) {
+				aboutShell = new Shell(SWT.TOOL);
+			} else {
+				aboutShell = new Shell(objShell, SWT.TOOL);
+			}
 			aboutShell.setText("About Java2Script");
 
 			createContents(aboutShell);
@@ -56,6 +61,7 @@ public class AboutJava2Script {
 			gridLayout.horizontalSpacing = 0;
 			aboutShell.setLayout(gridLayout);
 
+			aboutShell.setMinimumSize(442, 301);
 			aboutShell.open();
 			aboutShell.layout();
 			aboutShell.pack();
