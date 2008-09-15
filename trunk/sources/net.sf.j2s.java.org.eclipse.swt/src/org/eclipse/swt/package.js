@@ -152,7 +152,7 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 	 */
 	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath)) {
 		$WTC$$.registeredCSSs[$WTC$$.registeredCSSs.length] = clazzName;
-		if (cssText == null || $WTC$$.cssForcedUsingFile) {
+		if (window["swt.debugging"] == true || cssText == null || $WTC$$.cssForcedUsingFile) {
 			var cssLink = document.createElement ("LINK");
 			cssLink.rel = "stylesheet";
 			cssLink.id = cssID;

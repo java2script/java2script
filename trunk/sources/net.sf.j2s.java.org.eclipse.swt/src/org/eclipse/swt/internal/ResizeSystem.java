@@ -115,6 +115,7 @@ public class ResizeSystem {
 		
 		/**
 		 * @j2sNative
+		 * $wt.widgets.ShellManager.layoutTasks();
 		 * $wt.widgets.ShellManager.layoutShortcuts();
 		 */ {}
 	}

@@ -391,17 +391,25 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 		}
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX | SWT.BORDER)) != 0) {
 			width += 8;
-			height += 8;
+			height += 5;
 			x -= 4;
-			y -= 4;
+			y -= 3;
+			if (OS.isIE50 || OS.isIE55 || OS.isIE60) {
+				y -= 2;
+			}
 		} else {
 			width += 6;
 			height += 6;
 			x -= 3;
 			y -= 3;
 		}
+		if ((style & SWT.BORDER) != 0) {
+			width += 4;
+			height += 2;
+			x += 1;
+			//y += 1;
+		}
 	}
-//	System.err.println( new Rectangle (x, y, width, height));
 	return new Rectangle (x, y, width, height);
 	/*
 	/* Get the size of the trimmings *-/
@@ -696,7 +704,7 @@ void nextWindowLocation(int wHint, int hHint) {
 	
 	int delta = OS.getStringPlainHeight("A") + 4 + 6 + 1;
 	if (window.defaultWindowLeft == null) {
-		window.defaultWindowLeft = "64";
+		window.defaultWindowLeft = "160";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowLeft);
 		num += delta;
@@ -706,7 +714,7 @@ void nextWindowLocation(int wHint, int hHint) {
 		window.defaultWindowLeft = "" + num;
 	}
 	if (window.defaultWindowTop == null) {
-		window.defaultWindowTop = "64";
+		window.defaultWindowTop = "48";
 	} else {
 		int num = Integer.parseInt("" + window.defaultWindowTop);
 		num += delta;
@@ -1723,7 +1731,9 @@ public void setMaximized (boolean maximized) {
 		 * window.setTimeout (function () {
 		 * 	var lastShell = ShellManager.getTopMaximizedShell ();
 		 * 	if (lastShell == null || lastShell.titleBar == null) return;
-		 * 	ShellManager.topbarContainerEl.style.display = "block";
+		 * 	if (ShellManager.topbarContainerEl != null) {
+		 * 		ShellManager.topbarContainerEl.style.display = "block";
+		 * 	}
 		 * 	ShellManager.updateTopMaximized ();
 		 * 	ShellManager.lastMMed = new Date().getTime();
 		 * }, 250);
@@ -1882,7 +1892,9 @@ public void setMinimized (boolean minimized) {
 	 * @j2sNative
 	 * if (window["ShellManager"] != null && this.parent == null && minimized) {
 	 * 	this.handle.style.display = "none";
-	 * 	ShellManager.sidebarEl.style.display = "block";
+	 * 	if (ShellManager.sidebarEl != null) {
+	 * 		ShellManager.sidebarEl.style.display = "block";
+	 * 	}
 	 * 	ShellManager.updateItems ();
 	 * 	ShellManager.lastMMed = new Date().getTime();
 	 * 	return;
@@ -2194,6 +2206,19 @@ public void setText (String string) {
 			}
 		}
 		shellTitle.appendChild(document.createTextNode(string));
+		/**
+		 * @j2sNative
+		 * if (window["ShellManager"] != null && this.parent == null
+		 * 		&& (this.getStyle() & 4) == 0) { // SWT.TOOL
+		 * 	if (ShellManager.sidebarEl != null) {
+		 * 		ShellManager.sidebarEl.style.display = "block";
+		 * 	}
+		 * 	window.setTimeout (function () {
+		 * 		ShellManager.updateItems ();
+		 * 		ShellManager.lastMMed = new Date().getTime();
+		 * 	}, 50);
+		 * }
+		 */ {}
 	}
 }
 
@@ -2312,12 +2337,18 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		int dw = 8;
 		//int dh = 28;
 		int tbh = OS.getContainerHeight(titleBar);
-		int dh = 8 + tbh;
+		if (tbh == 0 || tbh == 20 || tbh > 30) { // FIXME
+			tbh = 22;
+		}
+		if (OS.isIE && (tbh == 19)) {
+			tbh = 21;
+		}
+		int dh = 5 + tbh;
 		int dww = 8; 
 		if ((style & SWT.BORDER) != 0) {
-			dw += 2;
-			dh += 3;
-			dww += 2;
+			dw += 4;
+			dh += 4;
+			dww += 4;
 		}
 		if (OS.existedCSSClass(handle, "shell-menu-bar")) {
 			shellMenuBar.style.top = (3 + tbh) + "px";
@@ -2330,11 +2361,11 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			dh += mbh + 1;
 			tbh += mbh + 1;
 		}
-		contentHandle.style.top = (3 + tbh) + "px"; 
+		contentHandle.style.top = (((style & SWT.BORDER) != 0 ? 1 : 1) + tbh) + "px"; 
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
-		updateShellTitle(width);
+		updateShellTitle(width - dww + 8);
 	} else {
 		int dw = 8;
 		int dh = 8;
@@ -2359,8 +2390,10 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
 	}
 	if ((style & SWT.BORDER) != 0) {
-		cx -= 4;
+		cx -= 6;
 		cy -= 4;
+	} else {
+		cx -= 2;
 	}
 	Element el = (Element) hWnd;
 	el.style.left = X + "px";

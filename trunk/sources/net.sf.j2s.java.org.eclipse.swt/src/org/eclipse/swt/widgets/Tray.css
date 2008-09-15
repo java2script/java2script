@@ -7,6 +7,8 @@
 	border-width: 0;
 	border-top-width: 36px;
 	border-right-width: 36px;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 .tray-item {
 	position: absolute;
@@ -23,16 +25,19 @@
 	top: 0;
 	width: 36px;
 	height: 36px;
-	cursor: default;
+	cursor: pointer;
+	_cursor: hand;
 	background-image: url('images/z-logo.png');
 	background-position: right bottom;
 	background-repeat: no-repeat;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 .tray-float-block {
 	float: left;
 	clear: both;
 	font-size: 0;
-	height: 36px;
+	height: 18px;
 }
 
 .swt-widgets-tray {
