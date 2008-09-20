@@ -1,0 +1,332 @@
+/*******************************************************************************
+ * Copyright (c) 2007 java2script.org and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Zhou Renjian - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.swt.widgets;
+
+import java.util.Date;
+
+import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
+import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
+
+/**
+ * @author Zhou Renjian (http://zhourenjian.com)
+ *
+ * Sep 16, 2008
+ * 
+ * @j2sPrefix
+ * $WTC$$.registerCSS ("$wt.widgets.QuickLaunch");
+ */
+public class QuickLaunch implements DesktopListener, DesktopItem {
+
+	private int shortcutCount = 0;
+	private Element shortcutBarDiv = null;
+	private Element[] shortcutItems = new Element[0];
+	private String shortcutZIndex = null;
+	private boolean isJustUpdated = false;
+	private boolean isAutoHide = false;
+
+	// the last time that quicklaunch is updated
+	private long lastUpdated = new Date().getTime();
+
+	Display display;
+	
+	public QuickLaunch(Display display) {
+		super();
+		this.display = display;
+	}
+	public void initialize() {
+		if (document.body.style.overflow != "hidden") {
+			document.body.style.overflow = "hidden";
+			document.body.parentNode.style.overflow = "hidden";
+		}
+		this.shortcutBarDiv = document.createElement ("DIV");
+		this.shortcutBarDiv.className = "shortcut-bar";
+		document.body.appendChild (this.shortcutBarDiv);
+		this.shortcutBarDiv.onmouseover = new RunnableCompatibility() {
+		
+			@Override
+			public void run() {
+				if (isAutoHide) {
+					setMinimized(false);
+				}
+				String zIndex = Display.getNextZIndex(false);
+				if ("" + shortcutBarDiv.style.zIndex != zIndex) {
+					shortcutZIndex = "" + shortcutBarDiv.style.zIndex;
+					bringToTop (zIndex);
+				}
+			}
+		
+		};
+		this.shortcutBarDiv.onclick = new RunnableCompatibility(){
+		
+			@Override
+			public void run() {
+				if (setMinimized(false)) {
+					isJustUpdated = true;
+					window.setTimeout (new RunnableCompatibility() {
+					
+						@Override
+						public void run() {
+							isJustUpdated = false;
+						}
+					
+					}, 500);
+				}
+				bringToTop (null);
+			}
+		
+		};
+		this.shortcutBarDiv.title = "Doubleclick to hide shortcuts";
+		this.shortcutBarDiv.ondblclick = new RunnableCompatibility(){
+		
+			@Override
+			public void run() {
+				isAutoHide = !isAutoHide;
+				shortcutBarDiv.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
+						: "Doubleclick to set quicklaunch auto-hide";
+				setMinimized(isAutoHide);
+				if (isJustUpdated) {
+					return;
+				}
+				bringToTop (null);
+			}
+		
+		};
+		Element[] childNodes = document.body.childNodes;
+		Element[] children = new Element[childNodes.length];
+		for (int i = 0; i < childNodes.length; i++) {
+			children[i] = childNodes[i];
+		}
+		for (int i = 0; i < children.length; i++) {
+			Element child = children[i];
+			if (child.nodeName == "A" && child.className != null
+					&& child.className.indexOf ("alaa") != -1
+					&& child.className.indexOf ("ignored") == -1) {
+				Object js = child.href;
+				if (js == "#") {
+					js = child.onclick;
+				}
+				/*if (typeof js == "string") {
+					if (js.indexOf ("javascript:") == 0) {
+						js = js.substring (11);
+					}
+					js = decodeURIComponent(js);
+				}
+				var fun = null;
+				eval ("fun = function () {" + js + "};");
+				*/
+				String icon = null;
+				for (int j = 0; j < child.childNodes.length; j++) {
+					Element item = child.childNodes[j];
+					if (item != null && item.className != null
+							&& item.className.indexOf ("alaa-icon") != -1) {
+						icon = item.style.backgroundImage;
+						if (icon != null) {
+							if (icon.indexOf ("url(") == 0) {
+								icon = icon.substring (4, icon.length() - 1);
+							}
+							char ch = icon.charAt (0);
+							if (ch == '\'' || ch == '\"') {
+								icon = icon.substring (1, icon.length() - 1);
+							}
+						}
+						break;
+					}
+				}
+				this.addShortcut (child.text != null ? child.text : child.innerText, icon, js);
+				document.body.removeChild (child);
+			}
+		}
+	}
+
+	/**
+	 * @param minimized
+	 * @return whether taskbar is updated or not
+	 */
+	public boolean setMinimized(boolean minimized) {
+		boolean alreadyMinimized = shortcutBarDiv.className.indexOf("minimized") != -1;
+		if (alreadyMinimized == minimized)
+			return false;
+		shortcutBarDiv.className = "shortcut-bar" + (minimized ? "-minimized" : "");
+		setShortcutsVisible(!minimized);
+		return true;
+	}
+
+	public void setShortcutsVisible(boolean visible) {
+		if (this.shortcutCount <= 0) {
+			return;
+		}
+		for (int i = 0; i < this.shortcutCount; i++) {
+			Element itemDiv = this.shortcutItems[i];
+			itemDiv.style.display = visible ? "" : "none";
+		}
+	}
+	public void bringToTop(String zIdx) {
+		if (this.shortcutCount <= 0) {
+			return;
+		}
+		String zIndex = "";
+		if (zIdx == null) {
+			zIndex = Display.getNextZIndex(true);
+			if (Display.getTopMaximizedShell () == null) {
+				this.shortcutZIndex = zIndex;
+			}
+		} else {
+			zIndex = zIdx;
+		}
+		this.shortcutBarDiv.style.zIndex = zIndex;
+		for (int i = 0; i < this.shortcutCount; i++) {
+			Element itemDiv = this.shortcutItems[i];
+			itemDiv.style.zIndex = zIndex;
+		}
+	}
+	public void updateLayout() {
+		if (this.shortcutCount <= 0) {
+			return;
+		}
+		int barWidth = 20 + this.shortcutCount * 60;
+		int barOffset = (OS.getFixedBodyClientWidth () - barWidth) / 2;
+		if (this.shortcutBarDiv != null) {
+			this.shortcutBarDiv.style.left = barOffset + "px";
+			this.shortcutBarDiv.style.width = barWidth + "px";
+		}
+		for (int i = 0; i < this.shortcutCount; i++) {
+			Element itemDiv = this.shortcutItems[i];
+			itemDiv.style.left = (barOffset + 20 + i * 60) + "px";
+		}
+	}
+	public Element addShortcut(String name, String icon, Object clickFun) {
+		/**
+		 * @j2sNative
+		if (window["swt.shortcut.bar"] == false) {
+			return false;
+		}
+		 */ {}
+		if (this.shortcutBarDiv == null) {
+			this.initialize ();
+		}
+		String tag = "A";
+		/*if (!O$.isIENeedPNGFix) {
+			tag = "DIV";
+		}*/
+		Element itemDiv = document.createElement (tag);
+		itemDiv.className = "shortcut-item";
+		if (OS.isIENeedPNGFix) {
+			if (icon != null && icon.length() != 0) {
+//				if (icon.toLowerCase().endsWith(".png")) {
+//					itemDiv.style.backgroundImage = "url(\"about:blank\")";
+//					itemDiv.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + icon + "\", sizingMethod=\"image\")";
+//				} else {
+					itemDiv.style.backgroundImage = "url('" + icon + "')";
+//				}
+			}
+			/**
+			 * @j2sNative
+			if (typeof clickFun == "string") {
+				itemDiv.href = clickFun;
+			} else {
+				itemDiv.href = "#";
+				itemDiv.onclick = (function (f) {
+						return function () {
+							f();
+							return false;
+						};
+				})(clickFun);
+			}
+			 */ {}
+		} else {
+			if (icon != null && icon.length() != 0) {
+				itemDiv.style.backgroundImage = "url('" + icon + "')";
+			}
+			/**
+			 * @j2sNative
+			if (typeof clickFun == "string") {
+				itemDiv.href = clickFun;
+			} else {
+				itemDiv.onclick = clickFun;
+			}
+			 */ {}
+		}
+		itemDiv.title = name;
+		document.body.appendChild (itemDiv);
+		itemDiv.onmouseover = this.shortcutBarDiv.onmouseover;
+
+		this.shortcutItems[this.shortcutCount] = itemDiv;
+		this.shortcutCount++;
+		this.bringToTop (null);
+		this.updateLayout ();
+		setMinimized(false);
+		updateLastModified();
+		return itemDiv;
+	}
+	public void markActiveItem (Element item) {
+		if (this.shortcutCount <= 0 || item == null) {
+			return;
+		}
+		for (int i = 0; i < this.shortcutCount; i++) {
+			Element itemDiv = this.shortcutItems[i];
+			if (item == itemDiv) {
+				OS.addCSSClass(itemDiv, "shortcut-active-item");
+			} else {
+				OS.removeCSSClass(itemDiv, "shortcut-active-item");
+			}
+		}
+	};
+	
+	boolean isAround(int x, int y) {
+		int barWidth = 20 + this.shortcutCount * 60;
+		int height = document.body.clientWidth;
+		int offset = Math.round ((height - barWidth) / 2);
+		int x1 = offset - 72;
+		int x2 = offset + barWidth + 72;
+		return (x >= x1 && x <= x2);
+	}
+	
+	@Override
+	public boolean isApproaching(HTMLEvent e) {
+		return (!e.ctrlKey && e.clientY >= OS.getFixedBodyClientHeight () - 8
+				&& isAround(e.clientX, e.clientY));
+	}
+	@Override
+	public boolean isLeaving(HTMLEvent e) {
+		long now = new Date().getTime();
+		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
+		return (e.clientY <= OS.getFixedBodyClientHeight () - 70
+				|| !isAround (e.clientX, e.clientY));
+	}
+	@Override
+	public void handleApproaching() {
+		String zIndex = Display.getNextZIndex(false);
+		if ("" + shortcutBarDiv.style.zIndex != zIndex) {
+			shortcutZIndex = "" + shortcutBarDiv.style.zIndex;
+			bringToTop (zIndex);
+		}
+	}
+	@Override
+	public void handleLeaving() {
+		if (shortcutZIndex != null) {
+			bringToTop (shortcutZIndex);
+			shortcutZIndex = null;
+		}
+		if (isAutoHide) {
+			setMinimized(true);
+		}
+	}
+	
+	public void updateLastModified() {
+		this.lastUpdated = new Date().getTime();
+	}
+
+}

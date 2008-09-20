@@ -14,8 +14,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.*;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.*;
 
 /**
  * Instances of this class represent the system tray that is part
@@ -42,11 +41,13 @@ public class Tray extends Widget {
 	int itemCount;
 	TrayItem [] items = new TrayItem [4];
 	
-	private int cellLines;
-	private Element[] allCells;
-	private Element[] allItems;
-	private Element[] allFloats;
-	private Element logoEl;
+	int cellLines;
+	Element[] allCells;
+	Element[] allItems;
+	Element[] allFloats;
+	Element logoEl;
+	Element minimizedEl;
+	String trayZIndex = null;
 
 /**
  * 
@@ -68,7 +69,7 @@ Tray (Display display, int style) {
 	allCells = new Element[0];
 	allItems = new Element[0];
 	allFloats = new Element[0];
-	initTrayArea();
+	initialize();
 }
 
 private String trayLineColor(int line) {
@@ -86,41 +87,6 @@ private String trayLineColor(int line) {
 private void addTrayLine () {
 	cellLines++;
 	String lineColor = trayLineColor (cellLines);
-	RunnableCompatibility mouseClick = new RunnableCompatibility() {
-		
-		/**
-		 * @j2sNative
-		 * ShellManager.bringTrayToTop (null);
-		 */
-		public void run() {
-	
-		}
-	
-	};
-	RunnableCompatibility mouseOver = new RunnableCompatibility() {
-		
-		public void run() {
-			Tray tray = Tray.this;
-			/**
-			 * @j2sNative
-		var sm = $wt.widgets.ShellManager;
-		var zIndex = "";
-		if (window.currentTopZIndex == null) {
-			zIndex = "1000";
-		} else {
-			zIndex = (Integer.parseInt(window.currentTopZIndex) + 1) + "";
-		}
-		if (tray.logoEl.style.zIndex != zIndex) {
-			ShellManager.trayZIndex = tray.logoEl.style.zIndex;
-			ShellManager.bringTrayToTop (zIndex);
-		}
-			 */ { tray.getName(); }
-		}
-		
-	};
-	if (logoEl != null && logoEl.onmouseover == null) {
-		logoEl.onmouseover = mouseOver;
-	}
 	for (int i = 0; i < cellLines; i++) {
 		Element cell = document.createElement ("DIV");
 		cell.className = "tray-cell";
@@ -131,9 +97,11 @@ private void addTrayLine () {
 			cell.style.borderRightColor = "rgb(0,255,0)";
 			cell.style.filter = "Chroma(Color=#00ff00);";
 		}
+		cell.title = "Doubleclick to set notification area auto-hide";
 		allCells[cellLines * (cellLines - 1) / 2 + i] = cell;
-		cell.onclick = mouseClick;
-		cell.onmouseover = mouseOver;
+		if (display.trayCorner != null) {
+			display.trayCorner.bindEvents(cell);
+		}
 		document.body.appendChild (cell);
 	}
 	for (int i = 0; i < cellLines - 1; i++) {
@@ -161,6 +129,7 @@ private void removeTrayLine () {
 		Element cell = allCells[index];
 		cell.onclick = null;
 		cell.onmouseover = null;
+		cell.ondblclick = null;
 		allCells[index] = null;
 		document.body.removeChild (cell);
 	}
@@ -179,7 +148,19 @@ private void removeTrayLine () {
 	allFloats[cellLines * 2] = null;
 }
 
-private void initTrayArea () {
+void initialize () {
+	minimizedEl = document.createElement("DIV");
+	minimizedEl.className = "tray-cell tray-minimized";
+	minimizedEl.title = "Doubleclick to set notification area always-visible";
+	minimizedEl.style.display = "none";
+	String lineColor = trayLineColor (3);
+	minimizedEl.style.borderColor = lineColor + " transparent transparent transparent";
+	if (OS.isIENeedPNGFix) { // IE < 6.0
+		minimizedEl.style.borderRightColor = "rgb(0,255,0)";
+		minimizedEl.style.filter = "Chroma(Color=#00ff00);";
+	}
+	//display.trayCorner.bindEvents(minimizedEl);
+	document.body.appendChild(minimizedEl);
 	addTrayLine ();
 	addTrayLine ();
 	logoEl = document.createElement("DIV");
@@ -195,11 +176,10 @@ private void initTrayArea () {
 	document.body.appendChild(logoEl);
 	logoEl.onclick = new RunnableCompatibility() {
 		public void run() {
-			/**
-			 * @j2sNative
-			 * ShellManager.bringTrayToTop (null);
-			 */ {}
 			if (display != null) {
+				if (display.trayCorner != null) {
+					display.trayCorner.bringToTop(null);
+				}
 				Shell shell = display.getActiveShell();
 				if (shell != null) {
 					shell.openAboutJava2Script();
@@ -207,14 +187,19 @@ private void initTrayArea () {
 				} else {
 					Shell[] shells = display.getShells();
 					for (int i = 0; i < shells.length; i++) {
-						if (shells[i] != null) {
+						if (shells[i] != null && !shells[i].isDisposed()) {
 							shells[i].openAboutJava2Script();
 							return;
 						}
 					}
 				}
 			}
-			AboutJava2Script.openAbout(null);
+			/**
+			 * @j2sNative
+			 * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function () { return function () {
+			 * 	$wt.widgets.About.openAbout (null);
+			 * }; }) ());
+			 */ {}
 		}
 	};
 }
@@ -245,12 +230,29 @@ Element addTrayItem () {
 	item.className = "tray-item";
 	allItems[allItems.length] = item;
 	orderTrayItem (item, allItems.length - 1);
-	if (logoEl.style.zIndex != null && logoEl.style.zIndex != "") {
+	if (logoEl.style.zIndex != null && "" + logoEl.style.zIndex != "") {
 		item.style.zIndex = logoEl.style.zIndex;
 	}
 
 	document.body.appendChild (item);
+	if (display.trayCorner != null) {
+		display.trayCorner.setMinimized(false);
+		display.trayCorner.updateLastModified();
+	}
 	return item;
+}
+
+void updateEvents() {
+	if (display.trayCorner == null) {
+		return;
+	}
+	for (int i = 0; i < allCells.length; i++) {
+		Element cell = allCells[i];
+		if (cell != null) {
+			display.trayCorner.bindEvents(cell);
+		}
+	}
+	display.trayCorner.bindEvents(minimizedEl);
 }
 
 void orderTrayItem (Element item, int order) {
@@ -318,6 +320,10 @@ void removeTrayItem (Element item) {
 		logoEl.style.display = "none";
 	}
 	*/
+	if (display.trayCorner != null) {
+		display.trayCorner.setMinimized(false);
+		display.trayCorner.updateLastModified();
+	}
 }
 
 void createItem (TrayItem item, int index) {
@@ -452,26 +458,25 @@ void releaseWidget () {
 	super.releaseWidget ();
 }
 
-void setZIndex(String zIdx) {
+boolean isMinimized() {
+	return minimizedEl.style.display != "none";
+}
+
+boolean setMinimized(boolean minimized) {
+	if (minimized == isMinimized()) {
+		return false;
+	}
+	minimizedEl.style.display = !minimized ? "none" : "block";
 	for (int i = 0; i < allCells.length; i++) {
-		Element cell = allCells[i];
-		if (cell != null) {
-			cell.style.zIndex = zIdx;
-		}
+		allCells[i].style.display = minimized ? "none" : "block";
+	}
+	for (int i = 0; i < allFloats.length; i++) {
+		allFloats[i].style.display = minimized ? "none" : "block";
 	}
 	for (int i = 0; i < allItems.length; i++) {
-		Element item = allItems[i];
-		if (item != null) {
-			item.style.zIndex = zIdx;
-		}
+		allItems[i].style.display = minimized ? "none" : "block";
 	}
-	if (logoEl != null) {
-		logoEl.style.zIndex = zIdx;
-	}
+	logoEl.style.display = minimized ? "none" : "block";
+	return false;
 }
-
-int getRange() {
-	return cellLines * 36;
-}
-
 }

@@ -18,6 +18,8 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.internal.xhtml.Clazz;
+import org.eclipse.swt.internal.xhtml.window;
 
 
 /**
@@ -102,7 +104,6 @@ import org.eclipse.swt.graphics.Region;
  * @see Decorations
  * @see SWT
  * 
- * @j2sRequireImport org.eclipse.swt.widgets.ShellManager
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.Shell");
  * @j2sSuffix
@@ -488,18 +489,15 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
  */
 public void close () {
 	checkWidget ();
+	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
+		TaskBar taskBar = display.taskBar;
+		taskBar.removeShellItem(this);
+		taskBar.handleApproaching();
+		taskBar.updateLayout();
+		taskBar.setMinimized(false);
+		taskBar.updateLastModified();
+	}
 	closeWidget ();
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
-	 * 	ShellManager.removeShellItem (this);
-	 * 	if (ShellManager.sidebarEl != null) {
-	 * 		ShellManager.sidebarEl.style.display = "block";
-	 * 	}
-	 * 	ShellManager.updateItems ();
-	 * 	ShellManager.lastMMed = new Date().getTime();
-	 * }
-	 */ {}
 }
 
 protected void createHandle () {
@@ -946,20 +944,23 @@ public void open () {
 	if (!restoreFocus () && !traverseGroup (true)) setFocus ();
 	*/
 	layout();
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && this.parent == null
-	 * 		&& (this.getStyle() & 4) == 0) { // SWT.TOOL
-	 * 	ShellManager.createShellItem (this);
-	 * 	if (ShellManager.sidebarEl != null) {
-	 * 		ShellManager.sidebarEl.style.display = "block";
-	 * 	}
-	 * 	window.setTimeout (function () {
-	 * 		ShellManager.updateItems ();
-	 * 		ShellManager.lastMMed = new Date().getTime();
-	 * 	}, 50);
-	 * }
-	 */ {}
+	 
+	if (this.parent == null && (this.getStyle() & SWT.TOOL) == 0
+			&& display.taskBar != null) {
+		TaskBar taskBar = display.taskBar;
+		taskBar.createShellItem(this);
+		taskBar.handleApproaching();
+		window.setTimeout(Clazz.makeFunction(new Runnable() {
+		
+			@Override
+			public void run() {
+				display.taskBar.updateLayout();
+			}
+		
+		}), 50);
+		taskBar.setMinimized(false);
+		taskBar.updateLastModified();
+	}
 }
 
 protected void releaseChild () {
@@ -1383,24 +1384,26 @@ void setToolTipText (NMTTDISPINFO lpnmtdi, char [] buffer) {
 public void setVisible (boolean visible) {
 	checkWidget ();
 	
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
-	 * 	if (!visible) {
-	 * 		ShellManager.removeShellItem (this);
-	 * 	} else {
-	 * 		ShellManager.createShellItem (this);
-	 * 	}
-	 * 	if (ShellManager.sidebarEl != null) {
-	 * 		ShellManager.sidebarEl.style.display = "block";
-	 * 	}
-	 * 	window.setTimeout (function () {
-	 * 		ShellManager.updateItems ();
-	 * 		ShellManager.lastMMed = new Date().getTime();
-	 * 	}, 50);
-	 * }
-	 */ {}
-	
+	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
+		TaskBar taskBar = display.taskBar;
+		if (!visible) {
+			taskBar.removeShellItem(this);
+		} else {
+			taskBar.createShellItem(this);
+		}
+		taskBar.handleApproaching();
+		window.setTimeout(Clazz.makeFunction(new Runnable() {
+		
+			@Override
+			public void run() {
+				display.taskBar.updateLayout();
+			}
+		
+		}), 50);
+		taskBar.setMinimized(false);
+		taskBar.updateLastModified();
+	}
+
 	if (drawCount != 0) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {

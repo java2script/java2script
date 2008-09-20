@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Shell;
  *
  * Aug 3, 2008
  */
-public class AboutJava2Script {
+public class About {
 
 	/**
 	 * Launch the application
@@ -107,7 +107,7 @@ public class AboutJava2Script {
 		 * @j2sNative
 		 * logoImage = new $wt.graphics.Image ($wt.widgets.Display.getCurrent (), this.getClass().getResourceAsStream ("images/j2s-logo.gif"));
 		 */ {}
-		//logo.setImage(SWTResourceManager.getImage(AboutJava2Script.class, "images/j2s-logo.gif"));
+		//logo.setImage(SWTResourceManager.getImage(About.class, "images/j2s-logo.gif"));
 		logo.setImage(logoImage);
 		
 		logo.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
