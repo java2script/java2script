@@ -61,7 +61,7 @@ a.shell-item:focus {
 }
 .shell-item-icon {
 	float:left;
-	/*background-color:navy;*/
+	background-color:buttonface;
 	background-repeat:no-repeat;
 	background-position:center center;
 	background-image:url('images/shell-packed.gif');
@@ -90,76 +90,6 @@ a.shell-item:focus {
 *:first-child+html .shell-item-text { /* IE7 */
 	left:18px;
 }
-.shell-manager-topbar-container {
-	position:absolute;
-	left:0;
-	top:0;
-	border:1px solid windowframe;
-	border-top:0 none transparent;
-	background-color:buttonface;
-	padding:2px;
-	height:24px;
-	font-size:10pt;
-	height:1.6em;
-	min-height:24px;
-	_height:1.7em;
-}
-*:first-child+html .shell-manager-topbar-container { /* IE7 */
-	height:1.7em;
-}
-.shortcut-bar {
-	position:absolute;
-	bottom:0;
-	height:32px;
-	background-color:rgb(57,61,254);
-	margin:0;
-	padding:0;
-	font-size:0;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
-}
-.shortcut-item {
-	position:absolute;
-	bottom:12px;
-	height:40px;
-	width:40px;
-	background-color:menu;
-	background-repeat:no-repeat;
-	background-position:center center;
-	background-image: url('images/z-logo.png');
-	border:1px solid buttonshadow;
-	margin:0;
-	padding:0;
-	font-size:0;
-	opacity:0.6;
-	filter:Alpha(Opacity=60);
-}
-.shortcut-bar-minimized {
-	position:absolute;
-	bottom:0;
-	height:8px;
-	background-color:rgb(57,61,254);
-	margin:0;
-	padding:0;
-	font-size:0;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
-}
-.shortcut-item:hover, a.shortcut-item:hover .shortcut-item-highlight {
-	border:1px solid navy;
-	opacity:0.95;
-	filter:Alpha(Opacity=95);
-}
-.shortcut-active-item {
-	/*border:1px solid darkred;*/
-	opacity:1;
-	filter:Alpha(Opacity=100);
-}
-.shortcut-active-item:hover, a.shortcut-active-item:hover {
-	/*border:1px solid navy;*/
-	opacity:0.6;
-	filter:Alpha(Opacity=60);
-}
-.swt-widgets-shellmanager {
+.swt-widgets-taskbar {
 	width:324px;
 }

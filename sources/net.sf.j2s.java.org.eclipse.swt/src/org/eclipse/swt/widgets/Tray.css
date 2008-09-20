@@ -19,6 +19,12 @@
 	background-repeat: no-repeat;
 	background-position: center center;
 }
+.tray-minimized {
+	left: 0;
+	top: 0;
+	border-top-width: 16px;
+	border-right-width: 16px;
+}
 .tray-logo-item {
 	position: absolute;
 	left: 0;

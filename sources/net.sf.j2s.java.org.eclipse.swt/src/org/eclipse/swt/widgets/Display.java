@@ -31,6 +31,7 @@ import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 /**
@@ -377,6 +378,16 @@ public class Display extends Device {
 	Shell modalDialogShell;
 	static boolean TrimEnabled = false;
 
+	/* Desktop components */
+	TaskBar taskBar;
+	MaximizedTitle topBar;
+	QuickLaunch shortcutBar;
+	NotificationCorner trayCorner;
+
+	DesktopItem[] desktopItems;
+	
+	static int AUTO_HIDE_DELAY = 2000;
+	
 	/* Private SWT Window Messages */
 	/*
 	static final int SWT_GETACCELCOUNT	= OS.WM_APP;
@@ -1144,14 +1155,7 @@ public Shell getActiveShell () {
 	checkDevice ();
 //	Control control = findControl (OS.GetActiveWindow ());
 //	return control != null ? control.getShell () : null;
-	// TODO:
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null) { // SWT.TOOL
-	 * 	return ShellManager.getTopShell ();
-	 * }
-	 */ {}
-	return null;
+	return Display.getTopShell();
 }
 
 /**
@@ -1334,7 +1338,7 @@ public static synchronized Display getDefault () {
 	return Default;
 }
 
-static boolean isValidClass (Class clazz) {
+static boolean isValidClass (Class<? extends Object> clazz) {
 	String name = clazz.getName ();
 	int index = name.lastIndexOf ('.');
 	return name.substring (0, index + 1).equals (PACKAGE_PREFIX);
@@ -2434,6 +2438,49 @@ protected void init () {
 	if (document.onclick == null) {
 		bringShellToTop();
 	}
+	
+	initializeDekstop();
+}
+
+void initializeDekstop() {
+	if (desktopItems != null) return;
+	
+	desktopItems = new DesktopItem[] {
+			taskBar = new TaskBar(this),
+			topBar = new MaximizedTitle(this),
+			shortcutBar = new QuickLaunch(this),
+			trayCorner = new NotificationCorner(this)
+	};
+	for (int i = 0; i < desktopItems.length; i++) {
+		desktopItems[i].initialize();
+	}
+	
+	RunnableCompatibility listener = new RunnableCompatibility(){
+	
+		@Override
+		public void run() {
+			HTMLEvent e = (HTMLEvent) getEvent();
+			for (int i = 0; i < desktopItems.length; i++) {
+				DesktopListener item = (DesktopListener) desktopItems[i];
+				if (item.isApproaching(e)) {
+					item.handleApproaching();
+				} else if (item.isLeaving(e)) {
+					item.handleLeaving();
+				}
+			}
+		}
+	
+	};
+	
+	/**
+	 * @j2sNative
+	if (document.addEventListener) {
+		document.addEventListener ("mousemove", listener, false);
+	} else if (document.attachEvent) {
+		document.attachEvent ("onmousemove", listener);
+	}
+	 */ { listener.run(); }
+
 }
 
 /**	 
@@ -4292,6 +4339,101 @@ static int wcsToMbcs (char ch) {
 }
 */
 
+static String getNextZIndex(boolean increase) {
+	String zIndex = "";
+	if (window.currentTopZIndex == null) {
+		zIndex = "1000";
+	} else {
+		zIndex = (Integer.parseInt(window.currentTopZIndex) + 1) + "";
+		if (increase) {
+			window.currentTopZIndex = zIndex;
+		}
+	}
+	return zIndex;
+}
+
+static Tray getTray() {
+	Tray tray = null;
+	if (Default != null) {
+		tray = Default.tray;
+	}
+	if (tray != null) {
+		for (int i = 0; i < Displays.length; i++){
+			Display disp = Displays[i];
+			if (disp != null) {
+				if (disp.tray != null){
+					tray = disp.tray;
+					break;
+				}
+			}
+		}
+	}
+	return tray;
+}
+
+static Shell getTopShell() {
+	Shell lastShell = null;
+	int lastZIndex = 0;
+	Display[] disps = Displays;
+	for (int k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		Shell[] ss = disps[k].getShells ();
+		for (int i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/
+					&& ss[i].handle.style.display != "none") {
+				String idx = "" + ss[i].handle.style.zIndex;
+				int zidx = 0;
+				if (idx == null || idx.length() == 0) {
+					zidx = 0;
+				} else {
+					zidx = Integer.parseInt (idx);
+				}
+				if (zidx > lastZIndex) {
+					lastZIndex = zidx;
+					lastShell = ss[i];
+				}
+			}
+		}
+	}
+	return lastShell;
+}
+
+static Shell getTopMaximizedShell() {
+	// find the top maximized shell
+	Shell lastShell = null;
+	int lastMaxZIndex = 0;
+	Display[] disps = Displays;
+	for (int k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		Shell[] ss = disps[k].getShells ();
+		for (int i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/ && ss[i].getMaximized ()
+					&& ss[i].handle.style.display != "none") {
+				String idx = "" + ss[i].handle.style.zIndex;
+				int zidx = 0;
+				if (idx == null || idx.length() == 0) {
+					zidx = 0;
+				} else {
+					zidx = Integer.parseInt (idx);
+				}
+				if (zidx > lastMaxZIndex) {
+					lastMaxZIndex = zidx;
+					lastShell = ss[i];
+				}
+			}
+		}
+	}
+	return lastShell;
+}
+public void updateLayout() {
+	if (desktopItems != null) {
+		for (int i = 0; i < desktopItems.length; i++) {
+			DesktopItem item = desktopItems[i];
+			item.updateLayout();
+		}
+	}
+}
+
 /**
  * @j2sIgnore
  */
@@ -4357,20 +4499,17 @@ static void releaseAllDisplays() {
 static void updateAllShellLayouts() {
 	if (Displays != null) {
 		for (int i = 0; i < Displays.length; i++) {
-			if (Displays[i] != null && !Displays[i].isDisposed()) {
-				boolean isOptMaximized = false;
+			Display display = Displays[i];
+			if (display != null && !display.isDisposed()) {
+//				boolean isOptMaximized = false;
 				boolean existedMaximized = false;
-				/**
-				 * @j2sNative
-				 * isOptMaximized = window["ShellManager"] != null; 
-				 */ {}
-				Shell[] shells = Displays[i].getShells();
+				Shell[] shells = display.getShells();
 				for (int j = 0; j < shells.length; j++) {
 					Shell shell = shells[j];
 					if (shell != null && !shell.isDisposed()) {
 						if ((shell.style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 							Rectangle bounds = shell.getBounds();
-							if (isOptMaximized && shell.getMaximized() && shell.titleBar != null) {
+							if (shell.getMaximized() && shell.titleBar != null) {
 								shell.setMaximized(true);
 								existedMaximized = true;
 								continue;
@@ -4382,15 +4521,13 @@ static void updateAllShellLayouts() {
 						shell.layout(true, true);
 					}
 				}
-				if (isOptMaximized && existedMaximized)
-					/**
-					 * @j2sNative
-					 * if (ShellManager.topbarContainerEl.style.display != "none") {
-					 * 	ShellManager.returnTopMaximized ();
-					 * 	ShellManager.updateTopMaximized ();
-					 * }
-					 */
-				{ }
+				if (existedMaximized && display.topBar != null) {
+					MaximizedTitle topBar = display.topBar;
+					if (topBar.isVisible()) {
+						topBar.returnTopMaximized(null);
+						topBar.updateLayout();
+					}
+				}
 			}
 		}
 	}

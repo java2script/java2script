@@ -17,7 +17,8 @@ public class Element {
 	public CSSStyle style;
 	public String id;
 	public String innerHTML;
-	public String innerText;
+	public String innerText; // IE
+	public String text; // Mozilla
 
 	public String value;
 	public String type;

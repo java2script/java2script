@@ -13,6 +13,7 @@ package org.eclipse.swt.internal;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Decorations;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Monitor;
 
 /**
@@ -113,10 +114,6 @@ public class ResizeSystem {
 			}
 		}
 		
-		/**
-		 * @j2sNative
-		 * $wt.widgets.ShellManager.layoutTasks();
-		 * $wt.widgets.ShellManager.layoutShortcuts();
-		 */ {}
+		Display.getDefault().updateLayout();
 	}
 }

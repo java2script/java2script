@@ -25,6 +25,7 @@ import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.dnd.ShellFrameDND;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -751,12 +752,12 @@ void exportHTMLSource(boolean onlyContent) {
 
 /**
  * @j2sNative
- * ClazzLoader.loadClass ("org.eclipse.swt.widgets.AboutJava2Script", (function (o) { return function () {
- * 	$wt.widgets.AboutJava2Script.openAbout (o);
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function (o) { return function () {
+ * 	$wt.widgets.About.openAbout (o);
  * }; }) (this));
  * @j2sNativeSrc
- * ClazzLoader.loadClass ("org.eclipse.swt.widgets.AboutJava2Script", (function (o) { return function () {
- * 	$wt.widgets.AboutJava2Script.openAbout (o);
+ * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function (o) { return function () {
+ * 	$wt.widgets.About.openAbout (o);
  * }; }) (this));
  */
 void openAboutJava2Script() {
@@ -801,12 +802,9 @@ public void dispose () {
 	 * 	}
 	 * }
 	 */ {}
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && (this.getStyle() & 4) == 0) { // SWT.TOOL
-	 * 	ShellManager.removeShellItem (this);
-	 * }
-	 */ {}
+	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
+		display.taskBar.removeShellItem ((Shell) this);
+	}
 	super.dispose ();
 }
 
@@ -1116,12 +1114,9 @@ public boolean getMinimized () {
 	if (OS.IsWindowVisible (handle)) return OS.IsIconic (handle);
 	return swFlags == OS.SW_SHOWMINNOACTIVE;
 	*/
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && this.parent == null) {
-	 * 	return this.handle.style.display == "none";
-	 * }
-	 */ {}
+	if (this.parent == null) {
+		return this.handle.style.display == "none";
+	}
 	return this.minimized; // TODO
 }
 
@@ -1464,7 +1459,7 @@ public void setImage (Image image) {
 //				imgBackground.style.height = "100%";
 //				imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 //				handle.appendChild(imgBackground);
-			iconStyle.backgroundImage = "";
+			iconStyle.backgroundImage = "url(\"about:blank\")";
 			iconStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
 			if (OS.isIENeedPNGFix && iconStyle.filter != null) iconStyle.filter = ""; 
@@ -1685,7 +1680,7 @@ public void setMaximized (boolean maximized) {
 			 * };
 			 */ { }
 		}
-		boolean toUpdateMax = false;
+//		boolean toUpdateMax = false;
 		if (contentHandle != null) {
 			if (oldBounds == null) {
 				oldBounds = getBounds();
@@ -1700,44 +1695,43 @@ public void setMaximized (boolean maximized) {
 			}
 			//int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
 			int titleHeight = ((style & SWT.TITLE) != 0) ? OS.getContainerHeight(titleBar) : 0;
-			boolean isOptMaximized = false;
-			/**
-			 * @j2sNative
-			 * isOptMaximized = window["ShellManager"] != null; 
-			 */ {}
-			 
-			
-			if (!isOptMaximized) {
-				setBounds(computeTrim(0, 0, width, height - titleHeight));
-			} else {
+//			boolean isOptMaximized = false;
+//			/**
+//			 * @j2sNative
+//			 * isOptMaximized = window["ShellManager"] != null; 
+//			 */ {}
+//			 
+//			
+//			if (!isOptMaximized) {
+//				setBounds(computeTrim(0, 0, width, height - titleHeight));
+//			} else {
 				Rectangle trim = computeTrim(0, -titleHeight, width, height);
 				setBounds(trim.x, trim.y, trim.width, trim.height);
-				toUpdateMax = true;
-			}
+//				toUpdateMax = true;
+//			}
 		}
 		ResizeSystem.register(this, SWT.MAX);
 		if (titleBar != null) {
 			OS.addCSSClass(titleBar, key);
 		}
-		if (window.currentTopZIndex == null) {
-			handle.style.zIndex = window.currentTopZIndex = "1000";
-		} else {
-			handle.style.zIndex = window.currentTopZIndex = ""
-					+ (Integer.parseInt(window.currentTopZIndex) + 1);
+		handle.style.zIndex = Display.getNextZIndex(true);
+		if (contentHandle != null) {
+			window.setTimeout(Clazz.makeFunction(new Runnable() {
+			
+				@Override
+				public void run() {
+					Shell lastShell = Display.getTopMaximizedShell();
+					if (lastShell == null || lastShell.titleBar == null) return;
+					if (display.topBar != null) {
+						MaximizedTitle topBar = display.topBar;
+						topBar.handleApproaching();
+						topBar.updateLayout();
+						topBar.updateLastModified();
+					}
+				}
+			
+			}), 250);
 		}
-		if (toUpdateMax)
-		/**
-		 * @j2sNative
-		 * window.setTimeout (function () {
-		 * 	var lastShell = ShellManager.getTopMaximizedShell ();
-		 * 	if (lastShell == null || lastShell.titleBar == null) return;
-		 * 	if (ShellManager.topbarContainerEl != null) {
-		 * 		ShellManager.topbarContainerEl.style.display = "block";
-		 * 	}
-		 * 	ShellManager.updateTopMaximized ();
-		 * 	ShellManager.lastMMed = new Date().getTime();
-		 * }, 250);
-		 */ {}
 	} else {
 		setBounds(oldBounds);
 		if (titleBar != null) {
@@ -1888,18 +1882,13 @@ public void setMinimized (boolean minimized) {
 			return;
 		}
 	}
-	/**
-	 * @j2sNative
-	 * if (window["ShellManager"] != null && this.parent == null && minimized) {
-	 * 	this.handle.style.display = "none";
-	 * 	if (ShellManager.sidebarEl != null) {
-	 * 		ShellManager.sidebarEl.style.display = "block";
-	 * 	}
-	 * 	ShellManager.updateItems ();
-	 * 	ShellManager.lastMMed = new Date().getTime();
-	 * 	return;
-	 * }
-	 */ {}
+	if (this.parent == null && minimized && display.taskBar != null) {
+		this.handle.style.display = "none";
+		display.taskBar.handleApproaching();
+		display.taskBar.updateLayout();
+		// lastMMed
+		return;
+	}
 	if (minimized && contentHandle != null) {
 		//handle.style.display = "none";
 		if (oldBounds == null) {
@@ -2086,12 +2075,9 @@ void setSystemMenu () {
 				Decorations shell = Decorations.this;
 				ResizeSystem.unregister(shell, SWT.MIN);
 				setMinimized(true);
-				/**
-				 * @j2sNative
-				 * if (window["ShellManager"] != null) {
-				 * 	ShellManager.returnTopMaximized (shell);
-				 * }
-				 */ { }
+				if (display.topBar != null) {
+					display.topBar.returnTopMaximized((Shell) shell);
+				}
 			}
 		};
 	}
@@ -2105,12 +2091,9 @@ void setSystemMenu () {
 				boolean cur = !getMaximized();
 				setMaximized(cur);
 				Decorations shell = Decorations.this;
-				/**
-				 * @j2sNative
-				 * if (window["ShellManager"] != null && !cur) {
-				 * 	ShellManager.returnTopMaximized (shell);
-				 * }
-				 */ { shell.bringToTop(); }
+				if (!cur && display.topBar != null) {
+					display.topBar.returnTopMaximized((Shell) shell);
+				}
 				display.timerExec(25, new Runnable() {
 					public void run() {
 						layout();
@@ -2128,12 +2111,9 @@ void setSystemMenu () {
 			public void run() {
 				if (Decorations.this instanceof Shell) {
 					Shell shell = (Shell) Decorations.this;
-					/**
-					 * @j2sNative
-					 * if (window["ShellManager"] != null) {
-					 * 	ShellManager.returnTopMaximized (shell);
-					 * }
-					 */ { }
+					if (display.topBar != null) {
+						display.topBar.returnTopMaximized(shell);
+					}
 					shell.close();
 				}
 			}
@@ -2170,12 +2150,8 @@ void setSystemMenu () {
 		}
 	};
 	
-	if (window.currentTopZIndex == null) {
-		handle.style.zIndex = window.currentTopZIndex = "1000";
-	} else {
-		handle.style.zIndex = window.currentTopZIndex = ""
-				+ (Integer.parseInt(window.currentTopZIndex) + 2);
-	}
+	Display.getNextZIndex(true);
+	handle.style.zIndex = Display.getNextZIndex(true);
 }
 
 /**
@@ -2206,19 +2182,22 @@ public void setText (String string) {
 			}
 		}
 		shellTitle.appendChild(document.createTextNode(string));
-		/**
-		 * @j2sNative
-		 * if (window["ShellManager"] != null && this.parent == null
-		 * 		&& (this.getStyle() & 4) == 0) { // SWT.TOOL
-		 * 	if (ShellManager.sidebarEl != null) {
-		 * 		ShellManager.sidebarEl.style.display = "block";
-		 * 	}
-		 * 	window.setTimeout (function () {
-		 * 		ShellManager.updateItems ();
-		 * 		ShellManager.lastMMed = new Date().getTime();
-		 * 	}, 50);
-		 * }
-		 */ {}
+		
+		if (this.parent == null && (this.getStyle() & SWT.TOOL) == 0
+				&& display.taskBar != null) {
+			display.taskBar.handleApproaching();
+		}
+		if (display.taskBar != null) {
+			window.setTimeout(Clazz.makeFunction(new Runnable() {
+			
+				@Override
+				public void run() {
+					display.taskBar.updateLayout();
+					// lastMM
+				}
+			
+			}), 50);
+		}
 	}
 }
 
