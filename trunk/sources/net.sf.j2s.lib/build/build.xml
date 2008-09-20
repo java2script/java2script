@@ -889,6 +889,12 @@
         	
         	<arg value="${j2s.swt.bin}"/>
         	
+    		<arg value="org/eclipse/swt/widgets/DesktopListener.js"/>
+    		<arg value="org/eclipse/swt/widgets/DesktopItem.js"/>
+    		<arg value="org/eclipse/swt/widgets/TaskBar.js"/>
+    		<arg value="org/eclipse/swt/widgets/MaximizedTitle.js"/>
+    		<arg value="org/eclipse/swt/widgets/QuickLaunch.js"/>
+    		<arg value="org/eclipse/swt/widgets/NotificationCorner.js"/>
     		<arg value="org/eclipse/swt/widgets/Display.js"/>
     		<arg value="org/eclipse/swt/widgets/Widget.js"/>
     		<arg value="org/eclipse/swt/widgets/Control.js"/>
@@ -897,7 +903,6 @@
     		<arg value="org/eclipse/swt/widgets/Composite.js"/>
     		<arg value="org/eclipse/swt/widgets/Canvas.js"/>
     		<arg value="org/eclipse/swt/widgets/Decorations.js"/>
-    		<arg value="org/eclipse/swt/widgets/ShellManager.js"/>
     		<arg value="org/eclipse/swt/widgets/Shell.js"/>
     		<arg value="org/eclipse/swt/widgets/Dialog.js"/>
 
