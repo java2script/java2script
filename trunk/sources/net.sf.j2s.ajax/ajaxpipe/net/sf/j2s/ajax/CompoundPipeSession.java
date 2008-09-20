@@ -10,7 +10,6 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
 	@Override
 	public void ajaxRun() {
-		//pipeKey = SimplePipeHelper.registerPipe(this);
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe != null) {
 			pipeAlive = pipeSetup();
@@ -45,9 +44,6 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		}
 	}
 	
-	/**
-	 * @j2sIgnore
-	 */
 	@Override
 	final public SimpleSerializable[] through(Object... args) {
 		CompoundSerializable[] cs = convert(args);
@@ -63,9 +59,6 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	public abstract CompoundSerializable[] convert(Object... args);
 
-	/**
-	 * @j2sIgnore
-	 */
 	@Override
 	protected void pipeThrough(Object... args) {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);

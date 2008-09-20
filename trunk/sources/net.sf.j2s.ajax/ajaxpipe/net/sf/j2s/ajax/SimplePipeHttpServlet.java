@@ -71,6 +71,10 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		String key = req.getParameter(SimplePipeRequest.FORM_PIPE_KEY);
+		if (key == null) {
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
 		String type = req.getParameter(SimplePipeRequest.FORM_PIPE_TYPE);
 		if (type == null) {
 			type = SimplePipeRequest.PIPE_TYPE_CONTINUUM;
@@ -118,8 +122,9 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write("\");");
 			return;
 		}
-		
-		resp.setHeader("Transfer-Encoding", "chunked");
+		if (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
+			resp.setHeader("Transfer-Encoding", "chunked");
+		}
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
