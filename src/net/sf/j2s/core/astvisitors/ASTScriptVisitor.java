@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -1145,23 +1144,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		String[] pipeMethods = new String[] {
-				"isPipeLive", 
-				"keepPipeLive", 
-				"pipeDestroy", 
 				"pipeSetup", 
 				"pipeThrough", 
 				"through",
-				"pipeInit",
 				"pipeMonitoring",
 				"pipeMonitoringInterval",
-				"setPipeHelper",
-				"updateStatus"
+				"setPipeHelper"
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
 				if (getJ2SDocTag(node, "@j2sKeep") == null) {
 					return;
 				}
+			}
+		}
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				return;
 			}
 		}
 		if (mBinding != null) {
@@ -1186,23 +1185,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		String[] pipeMethods = new String[] {
-				"isPipeLive", 
-				"keepPipeLive", 
-				"pipeDestroy", 
 				"pipeSetup", 
 				"pipeThrough", 
 				"through",
-				"pipeInit",
 				"pipeMonitoring",
 				"pipeMonitoringInterval",
-				"setPipeHelper",
-				"updateStatus"
+				"setPipeHelper"
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
 				if (getJ2SDocTag(node, "@j2sKeep") == null) {
 					return false;
 				}
+			}
+		}
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				return false;
 			}
 		}
 		if (mBinding != null) {
