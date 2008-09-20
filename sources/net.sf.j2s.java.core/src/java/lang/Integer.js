@@ -40,15 +40,15 @@ Integer.TYPE = Integer.prototype.TYPE = Integer;
 Clazz.defineMethod (Integer, "parseInt", 
 function (s, radix) {
 if (s == null) {
-throw  new NumberFormatException ("null");
+throw new NumberFormatException ("null");
 }if (radix < 2) {
-throw  new NumberFormatException ("radix " + radix + " less than Character.MIN_RADIX");
+throw new NumberFormatException ("radix " + radix + " less than Character.MIN_RADIX");
 }if (radix > 36) {
-throw  new NumberFormatException ("radix " + radix + " greater than Character.MAX_RADIX");
+throw new NumberFormatException ("radix " + radix + " greater than Character.MAX_RADIX");
 }
 var integer = parseInt (s, radix);
 if(isNaN(integer)){
-throw  new NumberFormatException ("Not a Number : " + s);
+throw new NumberFormatException ("Not a Number : " + s);
 }
 return integer;
 }, "String, Number");
