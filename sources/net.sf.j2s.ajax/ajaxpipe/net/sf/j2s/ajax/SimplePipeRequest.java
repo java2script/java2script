@@ -668,8 +668,10 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 				 * @j2sNative
 				 * var key = string.substring(start, end);
 				 * var pipe = net.sf.j2s.ajax.SimplePipeHelper.getPipe(key)
-				 * pipe.pipeAlive = false;
-				 * pipe.pipeClosed();
+				 * if (pipe != null) {
+				 * 	pipe.pipeAlive = false;
+				 * 	pipe.pipeClosed();
+				 * }
 				 * net.sf.j2s.ajax.SimplePipeHelper.removePipe(key);
 				 */ {}
 				return destroyedKey + ":" + string.substring(start, end) 

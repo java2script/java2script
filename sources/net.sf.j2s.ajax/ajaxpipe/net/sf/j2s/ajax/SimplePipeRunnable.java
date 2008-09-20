@@ -149,7 +149,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * Start pipe monitor to monitor the pipe status. If pipe is non-active,
 	 * try to destroy pipe by calling {@link #pipeDestroy()}.
 	 * User may override this method to use its own monitoring method.
-	 * @j2sIgnore
 	 */
 	protected void pipeMonitoring() {
 		new Thread(new Runnable() {
@@ -180,7 +179,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * If return interval is less than or equals to 0, the interval time will
 	 * be set to 1000 in {@link #pipeMonitoring()}. 
 	 * @return time interval in millisecond.
-	 * @j2sIgnore
 	 */
 	protected long pipeMonitoringInterval() {
 		return 1000;
@@ -262,7 +260,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * 
 	 * Attention: Only visible inside {@link #pipeSetup()}.
 	 * @param args
-	 * @j2sIgnore
 	 */
 	protected void pipeThrough(Object ... args) {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
