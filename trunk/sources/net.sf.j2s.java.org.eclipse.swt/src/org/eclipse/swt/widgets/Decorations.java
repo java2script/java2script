@@ -218,10 +218,10 @@ void bringToTop () {
 //	} else {
 		//OS.BringWindowToTop (handle);
 		CSSStyle style = handle.style;
-		style.visibility = "visible";
-		if (style.display == "none") {
-			style.display = "block";
-		}
+//		style.visibility = "visible";
+//		if (style.display == "none") {
+//			style.display = "block";
+//		}
 		if (window.currentTopZIndex == null) {
 			window.currentTopZIndex = "1000";
 		}
@@ -1875,20 +1875,28 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
-	this.minimized = minimized;
-	if (this.minimized && !minimized) {
+	if (!minimized) {
 		if (this.maximized) {
+			this.minimized = minimized;
 			this.setMaximized(true);
 			return;
 		}
 	}
-	if (this.parent == null && minimized && display.taskBar != null) {
-		this.handle.style.display = "none";
-		display.taskBar.handleApproaching();
-		display.taskBar.updateLayout();
-		// lastMMed
+	if (display.taskBar != null) {
+		this.handle.style.display = minimized ? "none" : "";
+		if (this.minimized != minimized) {
+			display.taskBar.handleApproaching();
+			display.taskBar.setMinimized(false);
+			display.taskBar.updateLastModified();
+			display.taskBar.updateLayout();
+		}
+		if (!minimized) {
+			bringToTop();
+		}
+		this.minimized = minimized;
 		return;
 	}
+	this.minimized = minimized;
 	if (minimized && contentHandle != null) {
 		//handle.style.display = "none";
 		if (oldBounds == null) {

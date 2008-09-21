@@ -1,11 +1,62 @@
 package org.eclipse.swt.widgets;
 
-public interface DesktopItem {
+import java.util.Date;
 
-	public void initialize();
+import org.eclipse.swt.internal.xhtml.Clazz;
+import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.window;
+
+public abstract class DesktopItem implements DesktopListener {
+
+	Display display;
 	
-	public void bringToTop(String zIndex);
+	Element handle = null;
 	
-	public void updateLayout();
+	boolean isAutoHide = true;
+
+	// the last time that item is updated
+	long lastUpdated = new Date().getTime();
+	
+	boolean isJustUpdated = false;
+
+	boolean mouseAlreadyMoved;
+	
+	String layerZIndex = null;
+
+	private Runnable leaving;
+
+	private int leavingTimeoutHandle = 0;
+
+	public void updateLastModified() {
+		this.lastUpdated = new Date().getTime();
+		mouseAlreadyMoved = false;
+		if (isAutoHide) {
+			if (leavingTimeoutHandle != 0) {
+				window.clearTimeout(leavingTimeoutHandle);
+				leavingTimeoutHandle = 0;
+			}
+			if (leaving == null) {
+				leaving = Clazz.makeFunction(new Runnable() {
+				
+					public void run() {
+						if (!mouseAlreadyMoved) {
+							handleLeaving();
+						}
+						leavingTimeoutHandle = 0;
+					}
+				
+				});
+			}
+			leavingTimeoutHandle = window.setTimeout(leaving, Display.AUTO_HIDE_DELAY);
+		}
+	}
+
+	public abstract void initialize();
+	
+	public abstract void bringToTop(String zIndex);
+	
+	public abstract void updateLayout();
+	
+	public abstract void releaseWidget();
 
 }

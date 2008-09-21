@@ -1400,8 +1400,11 @@ public void setVisible (boolean visible) {
 			}
 		
 		}), 50);
-		taskBar.setMinimized(false);
-		taskBar.updateLastModified();
+		if (visible != isVisible()) {
+			taskBar.setMinimized(false);
+			taskBar.updateLastModified();
+			taskBar.updateLayout();
+		}
 	}
 
 	if (drawCount != 0) {
