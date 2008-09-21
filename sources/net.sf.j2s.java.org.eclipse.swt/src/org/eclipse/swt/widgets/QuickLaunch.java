@@ -28,33 +28,25 @@ import org.eclipse.swt.internal.xhtml.window;
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.QuickLaunch");
  */
-public class QuickLaunch implements DesktopListener, DesktopItem {
+public class QuickLaunch extends DesktopItem implements DesktopListener {
 
 	private int shortcutCount = 0;
-	private Element shortcutBarDiv = null;
 	private Element[] shortcutItems = new Element[0];
-	private String shortcutZIndex = null;
-	private boolean isJustUpdated = false;
-	private boolean isAutoHide = false;
 
-	// the last time that quicklaunch is updated
-	private long lastUpdated = new Date().getTime();
-
-	Display display;
-	
 	public QuickLaunch(Display display) {
 		super();
 		this.display = display;
+		this.isAutoHide = false;
 	}
 	public void initialize() {
 		if (document.body.style.overflow != "hidden") {
 			document.body.style.overflow = "hidden";
 			document.body.parentNode.style.overflow = "hidden";
 		}
-		this.shortcutBarDiv = document.createElement ("DIV");
-		this.shortcutBarDiv.className = "shortcut-bar";
-		document.body.appendChild (this.shortcutBarDiv);
-		this.shortcutBarDiv.onmouseover = new RunnableCompatibility() {
+		this.handle = document.createElement ("DIV");
+		this.handle.className = "shortcut-bar";
+		document.body.appendChild (this.handle);
+		this.handle.onmouseover = new RunnableCompatibility() {
 		
 			@Override
 			public void run() {
@@ -62,14 +54,14 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 					setMinimized(false);
 				}
 				String zIndex = Display.getNextZIndex(false);
-				if ("" + shortcutBarDiv.style.zIndex != zIndex) {
-					shortcutZIndex = "" + shortcutBarDiv.style.zIndex;
+				if ("" + handle.style.zIndex != zIndex) {
+					layerZIndex = "" + handle.style.zIndex;
 					bringToTop (zIndex);
 				}
 			}
 		
 		};
-		this.shortcutBarDiv.onclick = new RunnableCompatibility(){
+		this.handle.onclick = new RunnableCompatibility(){
 		
 			@Override
 			public void run() {
@@ -88,13 +80,13 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 			}
 		
 		};
-		this.shortcutBarDiv.title = "Doubleclick to hide shortcuts";
-		this.shortcutBarDiv.ondblclick = new RunnableCompatibility(){
+		this.handle.title = "Doubleclick to hide shortcuts";
+		this.handle.ondblclick = new RunnableCompatibility(){
 		
 			@Override
 			public void run() {
 				isAutoHide = !isAutoHide;
-				shortcutBarDiv.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
+				handle.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
 						: "Doubleclick to set quicklaunch auto-hide";
 				setMinimized(isAutoHide);
 				if (isJustUpdated) {
@@ -156,10 +148,10 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 	 * @return whether taskbar is updated or not
 	 */
 	public boolean setMinimized(boolean minimized) {
-		boolean alreadyMinimized = shortcutBarDiv.className.indexOf("minimized") != -1;
+		boolean alreadyMinimized = handle.className.indexOf("minimized") != -1;
 		if (alreadyMinimized == minimized)
 			return false;
-		shortcutBarDiv.className = "shortcut-bar" + (minimized ? "-minimized" : "");
+		handle.className = "shortcut-bar" + (minimized ? "-minimized" : "");
 		setShortcutsVisible(!minimized);
 		return true;
 	}
@@ -181,12 +173,12 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 		if (zIdx == null) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell () == null) {
-				this.shortcutZIndex = zIndex;
+				this.layerZIndex = zIndex;
 			}
 		} else {
 			zIndex = zIdx;
 		}
-		this.shortcutBarDiv.style.zIndex = zIndex;
+		this.handle.style.zIndex = zIndex;
 		for (int i = 0; i < this.shortcutCount; i++) {
 			Element itemDiv = this.shortcutItems[i];
 			itemDiv.style.zIndex = zIndex;
@@ -198,9 +190,9 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 		}
 		int barWidth = 20 + this.shortcutCount * 60;
 		int barOffset = (OS.getFixedBodyClientWidth () - barWidth) / 2;
-		if (this.shortcutBarDiv != null) {
-			this.shortcutBarDiv.style.left = barOffset + "px";
-			this.shortcutBarDiv.style.width = barWidth + "px";
+		if (this.handle != null) {
+			this.handle.style.left = barOffset + "px";
+			this.handle.style.width = barWidth + "px";
 		}
 		for (int i = 0; i < this.shortcutCount; i++) {
 			Element itemDiv = this.shortcutItems[i];
@@ -214,7 +206,7 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 			return false;
 		}
 		 */ {}
-		if (this.shortcutBarDiv == null) {
+		if (this.handle == null) {
 			this.initialize ();
 		}
 		String tag = "A";
@@ -261,7 +253,7 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 		}
 		itemDiv.title = name;
 		document.body.appendChild (itemDiv);
-		itemDiv.onmouseover = this.shortcutBarDiv.onmouseover;
+		itemDiv.onmouseover = this.handle.onmouseover;
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;
 		this.shortcutCount++;
@@ -296,11 +288,13 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 	
 	@Override
 	public boolean isApproaching(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		return (!e.ctrlKey && e.clientY >= OS.getFixedBodyClientHeight () - 8
 				&& isAround(e.clientX, e.clientY));
 	}
 	@Override
 	public boolean isLeaving(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return (e.clientY <= OS.getFixedBodyClientHeight () - 70
@@ -309,24 +303,37 @@ public class QuickLaunch implements DesktopListener, DesktopItem {
 	@Override
 	public void handleApproaching() {
 		String zIndex = Display.getNextZIndex(false);
-		if ("" + shortcutBarDiv.style.zIndex != zIndex) {
-			shortcutZIndex = "" + shortcutBarDiv.style.zIndex;
+		if ("" + handle.style.zIndex != zIndex) {
+			layerZIndex = "" + handle.style.zIndex;
 			bringToTop (zIndex);
 		}
 	}
 	@Override
 	public void handleLeaving() {
-		if (shortcutZIndex != null) {
-			bringToTop (shortcutZIndex);
-			shortcutZIndex = null;
+		if (layerZIndex != null) {
+			bringToTop (layerZIndex);
+			layerZIndex = null;
 		}
 		if (isAutoHide) {
 			setMinimized(true);
 		}
 	}
-	
-	public void updateLastModified() {
-		this.lastUpdated = new Date().getTime();
+	@Override
+	public void releaseWidget() {
+		if (handle != null) {
+			OS.destroyHandle(handle);
+			handle = null;
+		}
+		if (shortcutItems != null) {
+			for (int i = 0; i < shortcutItems.length; i++) {
+				Element item = shortcutItems[i];
+				if (item != null) {
+					OS.destroyHandle(item);
+				}
+			}
+			shortcutItems = null;
+			shortcutCount = 0;
+		}
 	}
 
 }

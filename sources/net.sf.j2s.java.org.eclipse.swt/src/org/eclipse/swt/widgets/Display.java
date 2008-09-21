@@ -3348,8 +3348,20 @@ protected void release () {
 	timerList = null;
 //	synchronizer.releaseSynchronizer ();
 //	synchronizer = null;
+	releaseDesktop ();
 	releaseDisplay ();
 	super.release ();
+}
+
+void releaseDesktop () {
+	for (int i = 0; i < desktopItems.length; i++) {
+		desktopItems[i].releaseWidget();
+	}
+	desktopItems = null;
+	trayCorner = null;
+	taskBar = null;
+	shortcutBar = null;
+	topBar = null;
 }
 
 void releaseDisplay () {

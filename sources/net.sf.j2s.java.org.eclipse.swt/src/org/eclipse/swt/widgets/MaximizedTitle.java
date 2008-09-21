@@ -27,16 +27,10 @@ import org.eclipse.swt.internal.xhtml.document;
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.MaximizedTitle");
  */
-public class MaximizedTitle implements DesktopListener, DesktopItem {
+public class MaximizedTitle extends DesktopItem {
 	private Shell lastMaximizedShell = null;
 	private Element topbarEl = null;
-	private Element topbarContainerEl = null;
-	
-	// the last time that a window is minimized or maximized
-	private long lastMMed = new Date().getTime();
 
-	Display display;
-	
 	public MaximizedTitle(Display display) {
 		super();
 		this.display = display;
@@ -58,7 +52,7 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 		}
 
 		// update topbar
-		this.topbarContainerEl.style.left = Math.round ((document.body.clientWidth - 320) / 2) + "px";
+		this.handle.style.left = Math.round ((document.body.clientWidth - 320) / 2) + "px";
 		this.topbarEl.style.width = "316px";
 		if (OS.isIE) {
 			this.topbarEl.style.left = "1px";
@@ -66,7 +60,7 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 			this.topbarEl.style.left = "2px";
 		}
 		this.topbarEl.style.top = "1px";
-		this.topbarContainerEl.ondblclick = lastShell.titleBar.ondblclick;
+		this.handle.ondblclick = lastShell.titleBar.ondblclick;
 		lastShell.updateShellTitle (320 + 4);
 	}
 	public void returnTopMaximized(Shell shell) {
@@ -83,11 +77,11 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 			lastShell.titleBar.appendChild (els[i]);
 		}
 		if (shell != null) {
-			this.topbarContainerEl.style.display = "none";
+			this.handle.style.display = "none";
 		}
 	}
 	public void initialize() {
-		if (this.topbarContainerEl != null) return;
+		if (this.handle != null) return;
 
 		Element tbc = document.createElement ("DIV");
 		tbc.className = "shell-manager-topbar-container";
@@ -95,17 +89,17 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 		tbc.style.display = "none";
 		tbc.style.width = "320px";
 		tbc.style.zIndex = "3456";
-		this.topbarContainerEl = tbc;
+		this.handle = tbc;
 		
 		Element tb = document.createElement ("DIV");
 		tb.className = "shell-title-bar shell-maximized";
-		this.topbarContainerEl.appendChild (tb);
+		this.handle.appendChild (tb);
 		this.topbarEl = tb;
 	}
 
 	boolean isAround(int x, int y) {
 		long now = new Date().getTime();
-		if (now - this.lastMMed < 1000) {
+		if (now - this.lastUpdated < 1000) {
 			return true;
 		}
 		int barWidth = 320;
@@ -117,7 +111,7 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 	};
 
 	void hide() {
-		CSSStyle smStyle = this.topbarContainerEl.style;
+		CSSStyle smStyle = this.handle.style;
 		if (smStyle.display == "block") {
 			smStyle.display = "none";
 		}
@@ -125,7 +119,7 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 	}
 	@Override
 	public void handleApproaching() {
-		Element topbar = topbarContainerEl;
+		Element topbar = handle;
 		if (topbar == null) return;
 		if (topbar.style.display != "block") {
 			Shell lastShell = Display.getTopMaximizedShell ();
@@ -137,7 +131,7 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 	}
 	@Override
 	public void handleLeaving() {
-		Element topbar = topbarContainerEl;
+		Element topbar = handle;
 		if (topbar == null) return;
 		if (topbar.style.display != "none") {
 			topbar.style.display = "none";
@@ -146,14 +140,16 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 	}
 	@Override
 	public boolean isApproaching(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		return (e.clientY <= 8 && !e.ctrlKey) && isAround (e.clientX, e.clientY);
 	}
 	@Override
 	public boolean isLeaving(HTMLEvent e) {
+		mouseAlreadyMoved = true;
+		long now = new Date().getTime();
+		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		Shell topShell = Display.getTopMaximizedShell ();
 		if (topShell == null) return false;
-		long now = new Date().getTime();
-		if (now - lastMMed <= Display.AUTO_HIDE_DELAY) return false;
 		return !isAround (e.clientX, e.clientY) || e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null) ? OS.getContainerHeight (topShell.titleBar) : 20);
 	}
 	
@@ -162,12 +158,21 @@ public class MaximizedTitle implements DesktopListener, DesktopItem {
 		// TODO Auto-generated method stub
 		
 	}
-	
-	public void updateLastModified() {
-		this.lastMMed = new Date().getTime();
-	}
-	
+
 	public boolean isVisible() {
-		return topbarContainerEl.style.display != "none";
+		return handle.style.display != "none";
 	}
+
+	@Override
+	public void releaseWidget() {
+		if (handle != null) {
+			OS.destroyHandle(handle);
+			handle = null;
+		}
+		if (topbarEl != null) {
+			OS.destroyHandle(topbarEl);
+			topbarEl = null;
+		}
+	}
+	
 }

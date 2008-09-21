@@ -31,7 +31,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.TaskBar");
  */
-public class TaskBar implements DesktopListener, DesktopItem {
+public class TaskBar extends DesktopItem {
 
 	static class TaskItem {
 		public Shell shell;
@@ -52,18 +52,8 @@ public class TaskBar implements DesktopListener, DesktopItem {
 
 	}
 
-	Display display;
-
-	private Element sidebarEl = null;
 	private Element barEl = null;
-	private boolean isJustUpdated = false;
-	private TaskItem[] items = new TaskItem[0];
-	private String taskZIndex = null;
-
-	private boolean isAutoHide = true;
-
-	// the last time that taskbar is updated
-	private long lastUpdated = new Date().getTime();
+	TaskItem[] items = new TaskItem[0];
 
 	public TaskBar(Display display) {
 		super();
@@ -88,12 +78,12 @@ public class TaskBar implements DesktopListener, DesktopItem {
 		if (zIdx == null) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell() == null) {
-				this.taskZIndex = zIndex;
+				this.layerZIndex = zIndex;
 			}
 		} else {
 			zIndex = zIdx;
 		}
-		this.sidebarEl.style.zIndex = zIndex;
+		this.handle.style.zIndex = zIndex;
 	}
 
 	public void updateLayout() {
@@ -107,7 +97,7 @@ public class TaskBar implements DesktopListener, DesktopItem {
 				return; // existed already
 			}
 		}
-		if (this.sidebarEl == null) {
+		if (this.handle == null) {
 			this.initialize();
 		}
 		String text = null;
@@ -151,7 +141,7 @@ public class TaskBar implements DesktopListener, DesktopItem {
 			si.style.display = "none";
 		}
 		si.onmouseover = this.barEl.onmouseover;
-		this.sidebarEl.appendChild(si);
+		this.handle.appendChild(si);
 		Element icon = document.createElement("DIV");
 		icon.className = "shell-item-icon";
 		si.appendChild(icon);
@@ -212,7 +202,7 @@ public class TaskBar implements DesktopListener, DesktopItem {
 			if (item != null && item.shell == shell) {
 				item.shell = null;
 				item.itemHandle.onclick = null;
-				this.sidebarEl.removeChild(item.itemHandle);
+				this.handle.removeChild(item.itemHandle);
 				item.itemHandle.onmouseover = null;
 				item.itemHandle = null;
 				item.textHandle = null;
@@ -231,7 +221,7 @@ public class TaskBar implements DesktopListener, DesktopItem {
 		this.syncItems();
 		this.updateItems();
 		if (this.items.length == 0) {
-			sidebarEl.style.display = "none";
+			handle.style.display = "none";
 			barEl.style.display = "none";
 		}
 	}
@@ -349,7 +339,7 @@ public class TaskBar implements DesktopListener, DesktopItem {
 		this.barEl.style.height = (length * hh + 36) + "px";
 		this.barEl.style.top = offset + "px";
 		offset = OS.getFixedBodyOffsetLeft();
-		this.sidebarEl.style.left = offset + "px";
+		this.handle.style.left = offset + "px";
 	}
 
 	public void initialize() {
@@ -363,13 +353,13 @@ public class TaskBar implements DesktopListener, DesktopItem {
 			document.body.style.overflow = "hidden";
 			document.body.parentNode.style.overflow = "hidden";
 		}
-		if (this.sidebarEl != null)
+		if (this.handle != null)
 			return;
 		Element sb = document.createElement("DIV");
 		sb.className = "shell-manager-sidebar";
 		sb.style.display = "none";
 		document.body.appendChild(sb);
-		this.sidebarEl = sb;
+		this.handle = sb;
 		Element bb = document.createElement("DIV");
 		bb.className = "shell-manager-bar";
 		sb.appendChild(bb);
@@ -382,8 +372,8 @@ public class TaskBar implements DesktopListener, DesktopItem {
 					setMinimized(false);
 				}
 				String zIndex = Display.getNextZIndex(false);
-				if ("" + sidebarEl.style.zIndex != zIndex) {
-					taskZIndex = "" + sidebarEl.style.zIndex;
+				if ("" + handle.style.zIndex != zIndex) {
+					layerZIndex = "" + handle.style.zIndex;
 					bringToTop(zIndex);
 				}
 			}
@@ -442,10 +432,10 @@ public class TaskBar implements DesktopListener, DesktopItem {
 	@Override
 	public void handleApproaching() {
 		if (items.length != 0) {
-			sidebarEl.style.display = "block";
+			handle.style.display = "block";
 			String zIndex = Display.getNextZIndex(false);
-			if ("" + sidebarEl.style.zIndex != zIndex) {
-				taskZIndex = "" + sidebarEl.style.zIndex;
+			if ("" + handle.style.zIndex != zIndex) {
+				layerZIndex = "" + handle.style.zIndex;
 				bringToTop(zIndex);
 			}
 			updateItems();
@@ -455,11 +445,11 @@ public class TaskBar implements DesktopListener, DesktopItem {
 	@Override
 	public void handleLeaving() {
 		if (items.length == 0) {
-			sidebarEl.style.display = "none";
+			handle.style.display = "none";
 		}
-		if (taskZIndex != null) {
-			bringToTop(taskZIndex);
-			taskZIndex = null;
+		if (layerZIndex != null) {
+			bringToTop(layerZIndex);
+			layerZIndex = null;
 		}
 		if (isAutoHide) {
 			setMinimized(true);
@@ -468,18 +458,44 @@ public class TaskBar implements DesktopListener, DesktopItem {
 
 	@Override
 	public boolean isApproaching(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		return !e.ctrlKey && e.clientX <= 8 && isAround(e.clientX, e.clientY);
 	}
 
 	@Override
 	public boolean isLeaving(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return e.ctrlKey || e.clientX > 200 || !isAround(e.clientX, e.clientY);
 	}
 
-	public void updateLastModified() {
-		this.lastUpdated = new Date().getTime();
+	@Override
+	public void releaseWidget() {
+		if (handle != null) {
+			OS.destroyHandle(handle);
+			handle = null;
+		}
+		if (barEl != null) {
+			OS.destroyHandle(barEl);
+			barEl = null;
+		}
+		if (items != null) {
+			for (int i = 0; i < items.length; i++) {
+				TaskItem item = items[i];
+				if (item != null) {
+					if (item.iconHandle != null) {
+						OS.destroyHandle(item.iconHandle);
+						item.iconHandle = null;
+					}
+					if (item.itemHandle != null) {
+						OS.destroyHandle(item.itemHandle);
+						item.itemHandle = null;
+					}
+				}
+			}
+			items = null;
+		}
 	}
 
 }

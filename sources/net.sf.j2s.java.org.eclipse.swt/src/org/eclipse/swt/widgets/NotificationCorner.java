@@ -3,34 +3,85 @@ package org.eclipse.swt.widgets;
 import java.util.Date;
 
 import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
+import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 
-public class NotificationCorner implements DesktopListener, DesktopItem {
+public class NotificationCorner extends DesktopItem {
 
 	Tray tray;
 
-	Display display;
-	
 	private RunnableCompatibility mouseClick;
 	private RunnableCompatibility mouseOver;
 
 	private RunnableCompatibility mouseDoubleClick;
-	private boolean isJustUpdated = false;
-	private boolean isAutoHide = false;
-
-	// the last time that notification area is updated
-	private long lastUpdated = new Date().getTime();
+	
+	private Element minimizedEl;
 
 	public NotificationCorner(Display display) {
 		super();
 		this.display = display;
+		this.isAutoHide = false;
 	}
 
 	public void initialize() {
+		minimizedEl = document.createElement("DIV");
+		minimizedEl.className = "tray-cell tray-minimized";
+		minimizedEl.title = "Doubleclick to set notification area always-visible";
+		minimizedEl.style.display = "none";
+		String lineColor = Tray.trayLineColor (3);
+		minimizedEl.style.borderColor = lineColor + " transparent transparent transparent";
+		if (OS.isIENeedPNGFix) { // IE < 6.0
+			minimizedEl.style.borderRightColor = "rgb(0,255,0)";
+			minimizedEl.style.filter = "Chroma(Color=#00ff00);";
+		}
+		//display.trayCorner.bindEvents(minimizedEl);
+		document.body.appendChild(minimizedEl);
+
 		tray = Display.getDefault().getSystemTray();
 		
+		handle = document.createElement("DIV");
+		handle.className = "tray-logo-item";
+		handle.title = "Powered by Java2Script";
+		Element[] divs = document.body.childNodes;
+		for (int i = 0; i < divs.length; i++) {
+			if (divs[i].className == "powered") {
+				document.body.removeChild(divs[i]);
+				break;
+			}
+		}
+		document.body.appendChild(handle);
+		handle.onclick = new RunnableCompatibility() {
+			public void run() {
+				if (display != null) {
+					if (display.trayCorner != null) {
+						display.trayCorner.bringToTop(null);
+					}
+					Shell shell = display.getActiveShell();
+					if (shell != null) {
+						shell.openAboutJava2Script();
+						return;
+					} else {
+						Shell[] shells = display.getShells();
+						for (int i = 0; i < shells.length; i++) {
+							if (shells[i] != null && !shells[i].isDisposed()) {
+								shells[i].openAboutJava2Script();
+								return;
+							}
+						}
+					}
+				}
+				/**
+				 * @j2sNative
+				 * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function () { return function () {
+				 * 	$wt.widgets.About.openAbout (null);
+				 * }; }) ());
+				 */ {}
+			}
+		};
+
 		if (mouseOver == null) {
 			mouseOver = new RunnableCompatibility() {
 				
@@ -39,8 +90,8 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 						setMinimized(false);
 					}
 					String zIndex = Display.getNextZIndex(false);
-					if ("" + tray.logoEl.style.zIndex != zIndex) {
-						tray.trayZIndex = "" + tray.logoEl.style.zIndex;
+					if ("" + handle.style.zIndex != zIndex) {
+						layerZIndex = "" + handle.style.zIndex;
 						bringToTop (zIndex);
 					}
 				}
@@ -74,7 +125,7 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 				@Override
 				public void run() {
 					isAutoHide = !isAutoHide;
-					tray.minimizedEl.title = isAutoHide ? "Doubleclick to set notification area always-visible"
+					minimizedEl.title = isAutoHide ? "Doubleclick to set notification area always-visible"
 							: "Doubleclick to set notification area auto-hide";
 					setMinimized(isAutoHide);
 					if (isJustUpdated) {
@@ -85,25 +136,21 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 			
 			};
 		}
-		if (tray.logoEl != null && tray.logoEl.onmouseover == null) {
-			tray.logoEl.onmouseover = mouseOver;
+		if (handle != null && handle.onmouseover == null) {
+			handle.onmouseover = mouseOver;
 		}
 
-		tray.updateEvents();
+		updateEvents();
 	}
 
-	/**
-	 * @param minimized
-	 * @return whether taskbar is updated or not
-	 */
-	public boolean setMinimized(boolean minimized) {
-		boolean alreadyMinimized = tray.isMinimized();
-		if (alreadyMinimized == minimized)
-			return false;
-		tray.setMinimized(minimized);
-		//barEl.className = "shell-manager-bar" + (minimized ? "-minimized" : "");
-		//tray.(!minimized);
-		return true;
+	void updateEvents() {
+		for (int i = 0; i < tray.allCells.length; i++) {
+			Element cell = tray.allCells[i];
+			if (cell != null) {
+				bindEvents(cell);
+			}
+		}
+		bindEvents(minimizedEl);
 	}
 
 	public void bindEvents(Element cell) {
@@ -115,8 +162,8 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 	@Override
 	public void handleApproaching() {
 		String zIndex = Display.getNextZIndex(false);
-		if ("" + tray.logoEl.style.zIndex != zIndex) {
-			tray.trayZIndex = "" + tray.logoEl.style.zIndex;
+		if ("" + handle.style.zIndex != zIndex) {
+			layerZIndex = "" + handle.style.zIndex;
 			if (!isAutoHide) {
 				setMinimized(false);
 			}
@@ -126,9 +173,9 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 
 	@Override
 	public void handleLeaving() {
-		if (tray.trayZIndex != null) {
-			bringToTop (tray.trayZIndex);
-			tray.trayZIndex = null;
+		if (layerZIndex != null) {
+			bringToTop (layerZIndex);
+			layerZIndex = null;
 		}
 		if (isAutoHide) {
 			setMinimized(true);
@@ -137,11 +184,13 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 
 	@Override
 	public boolean isApproaching(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		return !e.ctrlKey && isAround (e.clientX, e.clientY);
 	}
 
 	@Override
 	public boolean isLeaving(HTMLEvent e) {
+		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return !isAroundCorner (e.clientX, e.clientY);
@@ -169,8 +218,8 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 	}
 
 	void setZIndex(String zIdx) {
-		if (tray.isMinimized()) {
-			tray.minimizedEl.style.zIndex = zIdx;
+		if (isMinimized()) {
+			minimizedEl.style.zIndex = zIdx;
 			return;
 		}
 		for (int i = 0; i < tray.allCells.length; i++) {
@@ -185,12 +234,37 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 				item.style.zIndex = zIdx;
 			}
 		}
-		if (tray.logoEl != null) {
-			tray.logoEl.style.zIndex = zIdx;
+		if (handle != null) {
+			handle.style.zIndex = zIdx;
 		}
-		if (tray.minimizedEl != null) {
-			tray.minimizedEl.style.zIndex = zIdx;
+		if (minimizedEl != null) {
+			minimizedEl.style.zIndex = zIdx;
 		}
+	}
+	boolean isMinimized() {
+		return minimizedEl.style.display != "none";
+	}
+
+	/**
+	 * @param minimized
+	 * @return whether taskbar is updated or not
+	 */
+	public boolean setMinimized(boolean minimized) {
+		if (minimized == isMinimized()) {
+			return false;
+		}
+		minimizedEl.style.display = !minimized ? "none" : "block";
+		for (int i = 0; i < tray.allCells.length; i++) {
+			tray.allCells[i].style.display = minimized ? "none" : "block";
+		}
+		for (int i = 0; i < tray.allFloats.length; i++) {
+			tray.allFloats[i].style.display = minimized ? "none" : "block";
+		}
+		for (int i = 0; i < tray.allItems.length; i++) {
+			tray.allItems[i].style.display = minimized ? "none" : "block";
+		}
+		handle.style.display = minimized ? "none" : "block";
+		return true;
 	}
 
 	int getRange() {
@@ -206,7 +280,7 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 		if (zIdx == null) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell () == null) {
-				tray.trayZIndex = zIndex;
+				layerZIndex = zIndex;
 			}
 		} else {
 			zIndex = zIdx;
@@ -220,8 +294,16 @@ public class NotificationCorner implements DesktopListener, DesktopItem {
 		
 	}
 
-	public void updateLastModified() {
-		this.lastUpdated = new Date().getTime();
+	@Override
+	public void releaseWidget() {
+		if (handle != null) {
+			OS.destroyHandle(handle);
+			handle = null;
+		}
+		if (minimizedEl != null) {
+			OS.destroyHandle(minimizedEl);
+			minimizedEl = null;
+		}
 	}
 
 }

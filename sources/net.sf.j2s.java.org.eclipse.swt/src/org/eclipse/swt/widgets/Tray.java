@@ -11,10 +11,11 @@
 package org.eclipse.swt.widgets;
 
 
-import org.eclipse.swt.*;
-import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.*;
+import org.eclipse.swt.internal.xhtml.Element;
+import org.eclipse.swt.internal.xhtml.document;
 
 /**
  * Instances of this class represent the system tray that is part
@@ -45,9 +46,6 @@ public class Tray extends Widget {
 	Element[] allCells;
 	Element[] allItems;
 	Element[] allFloats;
-	Element logoEl;
-	Element minimizedEl;
-	String trayZIndex = null;
 
 /**
  * 
@@ -72,7 +70,7 @@ Tray (Display display, int style) {
 	initialize();
 }
 
-private String trayLineColor(int line) {
+static String trayLineColor(int line) {
 	if (line <= 2) {
 		return "white";
 	} else {
@@ -149,59 +147,9 @@ private void removeTrayLine () {
 }
 
 void initialize () {
-	minimizedEl = document.createElement("DIV");
-	minimizedEl.className = "tray-cell tray-minimized";
-	minimizedEl.title = "Doubleclick to set notification area always-visible";
-	minimizedEl.style.display = "none";
-	String lineColor = trayLineColor (3);
-	minimizedEl.style.borderColor = lineColor + " transparent transparent transparent";
-	if (OS.isIENeedPNGFix) { // IE < 6.0
-		minimizedEl.style.borderRightColor = "rgb(0,255,0)";
-		minimizedEl.style.filter = "Chroma(Color=#00ff00);";
-	}
-	//display.trayCorner.bindEvents(minimizedEl);
-	document.body.appendChild(minimizedEl);
 	addTrayLine ();
 	addTrayLine ();
-	logoEl = document.createElement("DIV");
-	logoEl.className = "tray-logo-item";
-	logoEl.title = "Powered by Java2Script";
-	Element[] divs = document.body.childNodes;
-	for (int i = 0; i < divs.length; i++) {
-		if (divs[i].className == "powered") {
-			document.body.removeChild(divs[i]);
-			break;
-		}
-	}
-	document.body.appendChild(logoEl);
-	logoEl.onclick = new RunnableCompatibility() {
-		public void run() {
-			if (display != null) {
-				if (display.trayCorner != null) {
-					display.trayCorner.bringToTop(null);
-				}
-				Shell shell = display.getActiveShell();
-				if (shell != null) {
-					shell.openAboutJava2Script();
-					return;
-				} else {
-					Shell[] shells = display.getShells();
-					for (int i = 0; i < shells.length; i++) {
-						if (shells[i] != null && !shells[i].isDisposed()) {
-							shells[i].openAboutJava2Script();
-							return;
-						}
-					}
-				}
-			}
-			/**
-			 * @j2sNative
-			 * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function () { return function () {
-			 * 	$wt.widgets.About.openAbout (null);
-			 * }; }) ());
-			 */ {}
-		}
-	};
+	addTrayLine ();
 }
 
 Element addTrayItem () {
@@ -230,8 +178,9 @@ Element addTrayItem () {
 	item.className = "tray-item";
 	allItems[allItems.length] = item;
 	orderTrayItem (item, allItems.length - 1);
-	if (logoEl.style.zIndex != null && "" + logoEl.style.zIndex != "") {
-		item.style.zIndex = logoEl.style.zIndex;
+	Element el = allCells[0];
+	if (el.style.zIndex != null && "" + el.style.zIndex != "") {
+		item.style.zIndex = el.style.zIndex;
 	}
 
 	document.body.appendChild (item);
@@ -240,19 +189,6 @@ Element addTrayItem () {
 		display.trayCorner.updateLastModified();
 	}
 	return item;
-}
-
-void updateEvents() {
-	if (display.trayCorner == null) {
-		return;
-	}
-	for (int i = 0; i < allCells.length; i++) {
-		Element cell = allCells[i];
-		if (cell != null) {
-			display.trayCorner.bindEvents(cell);
-		}
-	}
-	display.trayCorner.bindEvents(minimizedEl);
 }
 
 void orderTrayItem (Element item, int order) {
@@ -451,32 +387,7 @@ void releaseWidget () {
 	}
 	allFloats = null;
 
-	if (logoEl != null) {
-		OS.destroyHandle(logoEl);
-		logoEl = null;
-	}
 	super.releaseWidget ();
 }
 
-boolean isMinimized() {
-	return minimizedEl.style.display != "none";
-}
-
-boolean setMinimized(boolean minimized) {
-	if (minimized == isMinimized()) {
-		return false;
-	}
-	minimizedEl.style.display = !minimized ? "none" : "block";
-	for (int i = 0; i < allCells.length; i++) {
-		allCells[i].style.display = minimized ? "none" : "block";
-	}
-	for (int i = 0; i < allFloats.length; i++) {
-		allFloats[i].style.display = minimized ? "none" : "block";
-	}
-	for (int i = 0; i < allItems.length; i++) {
-		allItems[i].style.display = minimized ? "none" : "block";
-	}
-	logoEl.style.display = minimized ? "none" : "block";
-	return false;
-}
 }
