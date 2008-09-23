@@ -1078,7 +1078,12 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		}
 		item.updateItemBounds(w, h);
 	}
-	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	if (parent instanceof CoolBar) {
+		X = 0;
+		Y = 0;
+	}
+	boolean set = super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+	return set;
 }
 
 /*
