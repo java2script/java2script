@@ -22,6 +22,9 @@
 	border-top:1px solid white;
 	margin-top:1.2em;
 }
+body:nth-of-type(1) .tab-folder-border-nw {
+	top:8px;
+}
 * html .tab-folder-border-nw {
 	top:6px;
 	margin-top:1.3em;
@@ -37,6 +40,9 @@
 	border-style:outset outset none none;
 	border-top:1px solid white;
 	margin-top:1.2em;
+}
+body:nth-of-type(1) .tab-folder-border-ne {
+	top:8px;
 }
 * html .tab-folder-border-ne {
 	top:6px;
@@ -183,7 +189,7 @@
 	height:16px;
 	left:-36px;
 	/*margin-top:2px;*/
-	top:-4px;
+	/*top:-4px;*/
 	/*
 	left:-3em;
 	top:-0.4em;
