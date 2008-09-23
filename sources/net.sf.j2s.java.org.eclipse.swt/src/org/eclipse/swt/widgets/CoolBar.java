@@ -1491,7 +1491,7 @@ public void setWrapIndices (int [] indices) {
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
 	int lines = getVerticalLines();
 	int lineNo = 0, itemNo = 0;
-	int bw = getBorderWidth() * 2;
+	//int bw = getBorderWidth() * 2;
 	for (int i = 0; i < items.length; i++) {
 		CoolItem item = items[i];
 		if (items[i].wrap) {
