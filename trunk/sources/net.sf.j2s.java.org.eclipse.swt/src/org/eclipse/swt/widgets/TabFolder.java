@@ -207,18 +207,29 @@ protected void checkSubclass () {
 public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	Point size = super.computeSize (wHint, hHint, changed);
-	int width = -124; // this number is an experimental number from WinXP in classical style
+	int width = 12;
+	int height = 0;
 	if (items != null && items.length != 0) {
 //		int height = OS.getContainerHeight(items[0].handle);
 //		size.y += height;
 		for (int i = 0; i < items.length; i++) {
 			if (items[i] != null && !items[i].isDisposed()) {
-				width += OS.getContainerWidth(items[i].handle);
+				int containerWidth = OS.getContainerWidth(items[i].handle);
+				if (containerWidth == document.body.clientWidth) {
+					if (items[i].image != null) {
+						containerWidth = 18;
+					} else {
+						containerWidth = 0;
+					}
+					containerWidth += 6 + OS.getStringStyledWidth(items[i].text, "tab-folder-default", null);
+				}
+				width += containerWidth;
+				if (items[i].control != null) {
+					Point s = items[i].control.computeSize(wHint, hHint);
+					height = Math.max(height, s.y);
+				}
 			}
 		}
-	}
-	if (width < 0) {
-		width += 124 + 12;
 	}
 	/*
 	RECT insetRect = new RECT (), itemRect = new RECT ();
@@ -238,6 +249,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 //	width = rect.right - rect.left;
 	width += border * 2;
 	size.x = Math.max (width, size.x);
+	size.y = Math.max (height, size.y);
 	
 //	size.x += items.length * 32;
 //	size.y += 24;
@@ -259,7 +271,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	*/
 	int lineHeight = 0;
 	if (items != null && items.length > 0) {
-		lineHeight = OS.getContainerHeight(items[offset].handle);
+		lineHeight = Math.max(OS.getContainerHeight(items[offset].handle), 20);
 		if (getSelectionIndex() == offset) {
 			lineHeight -= 2; // padding-top:2px
 		}
@@ -406,8 +418,16 @@ protected void createHandle () {
 	btnNextTab = document.createElement("BUTTON");
 	el.appendChild(btnNextTab);
 	Element arrowRight = (Element) createCSSElement(btnNextTab, "button-arrow-right");
-	if (OS.isMozilla && !OS.isFirefox) {
+	if (((OS.isSafari && OS.isChrome) || OS.isMozilla) && !OS.isFirefox) {
 		arrowRight.style.left = "-5px";
+		arrowRight.style.top = "0";
+	} else if (OS.isIE) {
+		arrowRight.style.top = "0";
+	} else if (OS.isSafari) {
+		arrowRight.style.left = "-1px";
+		arrowRight.style.top = "1px";
+	} else if (OS.isOpera) {
+		arrowRight.style.left = "-4px";
 		arrowRight.style.top = "0";
 	}
 	
@@ -441,8 +461,16 @@ protected void createHandle () {
 	el.appendChild(btnPrevTab);
 	//createCSSElement(btnPrevTab, "button-arrow-left");
 	Element arrowLeft = (Element) createCSSElement(btnPrevTab, "button-arrow-left");
-	if (OS.isMozilla && !OS.isFirefox) {
+	if (((OS.isSafari && OS.isChrome) || OS.isMozilla) && !OS.isFirefox) {
 		arrowLeft.style.left = "-6px";
+		arrowLeft.style.top = "0";
+	} else if (OS.isIE) {
+		arrowLeft.style.top = "0";
+	} else if (OS.isSafari) {
+		arrowLeft.style.left = "-3px";
+		arrowLeft.style.top = "1px";
+	} else if (OS.isOpera) {
+		arrowLeft.style.left = "-4px";
 		arrowLeft.style.top = "0";
 	}
 	el.onclick = btnPrevTab.onclick = new RunnableCompatibility() {
@@ -1058,6 +1086,9 @@ void updateSelectionWithWidth(int index, int prefWidth) {
 		int x = 2;
 		for (int i = offset; i < items.length; i++) {
 			//items[i].handle.style.display = "block";
+			if ("" + items[i].handle.style.zIndex == "-1") {
+				items[i].handle.style.display = "";
+			}
 			items[i].handle.style.zIndex = (i + 1) + "";
 			OS.removeCSSClass(items[i].handle, key);
 			int w = OS.getContainerWidth(items[i].handle);
@@ -1083,6 +1114,11 @@ void updateSelectionWithWidth(int index, int prefWidth) {
 		}
 		OS.addCSSClass(items[index].handle, key);
 		items[index].handle.style.zIndex = ((index >= offset) ? items.length + 1 : -1) + "";
+		if (index < offset) {
+			items[index].handle.style.display = "none";
+		} else {
+			items[index].handle.style.display = "";
+		}
 		if (this.width != 0) {
 			int w = OS.getContainerWidth(items[index].handle);
 			left += 4;
