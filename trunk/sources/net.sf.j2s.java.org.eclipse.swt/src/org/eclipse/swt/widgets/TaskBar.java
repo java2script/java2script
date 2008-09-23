@@ -161,7 +161,7 @@ public class TaskBar extends DesktopItem {
 		 */ { }
 		si.appendChild(div);
 		div.appendChild(document.createTextNode(text));
-		int w = OS.getStringStyledWidth(text, "shell-item-text", "");
+		int w = OS.getStringStyledWidth(text, "shell-item-text", "") + 8;
 		if (w > 120) {
 			w = 120;
 		}
@@ -173,6 +173,7 @@ public class TaskBar extends DesktopItem {
 				@Override
 				public void run() {
 					if (shell.getMinimized()) {
+						shell.setMinimized(false);
 						shell.bringToTop();
 					} else {
 						Shell lastShell = Display.getTopShell();

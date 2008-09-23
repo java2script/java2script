@@ -2438,11 +2438,23 @@ protected void init () {
 	if (document.onclick == null) {
 		bringShellToTop();
 	}
-	
+
 	initializeDekstop();
 }
 
 void initializeDekstop() {
+	for (int i = 0; i < Displays.length; i++) {
+		Display disp = Displays[i];
+		if (disp != this && disp != null && !disp.isDisposed()) {
+			taskBar = disp.taskBar;
+			topBar = disp.topBar;
+			shortcutBar = disp.shortcutBar;
+			trayCorner = disp.trayCorner;
+			desktopItems = disp.desktopItems;
+			return;
+		}
+	}
+	
 	if (desktopItems != null) return;
 	
 	desktopItems = new DesktopItem[] {
@@ -3354,6 +3366,18 @@ protected void release () {
 }
 
 void releaseDesktop () {
+	boolean existed = false;
+	for (int i = 0; i < Displays.length; i++) {
+		Display disp = Displays[i];
+		if (disp != this && disp != null && !disp.isDisposed()) {
+			existed = true;
+			break;
+		}
+	}
+	if (existed) {
+		return;
+	}
+
 	for (int i = 0; i < desktopItems.length; i++) {
 		desktopItems[i].releaseWidget();
 	}

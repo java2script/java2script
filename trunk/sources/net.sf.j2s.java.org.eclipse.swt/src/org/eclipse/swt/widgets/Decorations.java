@@ -385,7 +385,7 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 	if ((style & SWT.NO_TRIM) == 0) {
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 			//height += 20;
-			height += OS.getContainerHeight(titleBar);
+			height += Math.max(OS.getContainerHeight(titleBar), 19);
 			if (width < 105) {
 				width = 105;
 			}
@@ -922,7 +922,7 @@ public Rectangle getClientArea () {
 	int h = height;
 	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		//h -= 20;
-		h -= OS.getContainerHeight(titleBar);
+		h -= Math.max(OS.getContainerHeight(titleBar), 19);
 		w -= 8;
 		//h -= 8;
 		h -= 5;
