@@ -386,7 +386,7 @@ public class Display extends Device {
 
 	DesktopItem[] desktopItems;
 	
-	static String bodyOverflow, htmlOverflow;
+	static String bodyHeight, bodyOverflow, htmlOverflow;
 	
 	static int AUTO_HIDE_DELAY = 2000;
 	
@@ -480,6 +480,7 @@ public Display () {
  */
 public Display (DeviceData data) {
 	super (data);
+	System.out.println("hi...");
 }
 
 /*
@@ -3422,6 +3423,10 @@ protected void release () {
 			document.body.style.overflow = bodyOverflow;
 			bodyOverflow = null;
 		}
+		if (bodyHeight != null) {
+			document.body.style.height = bodyHeight;
+			bodyHeight = null;
+		}
 	}
 }
 
@@ -4569,6 +4574,20 @@ public void updateLayout() {
 	}
 }
 
+public static void updateMonitor() {
+	Display disp = Default;
+	if (disp == null || disp.isDisposed()) {
+		for (int i = 0; i < Displays.length; i++) {
+			disp = Displays[i];
+			if (disp != null && !disp.isDisposed()) {
+				break;
+			}
+		}
+	}
+	if (disp != null) {
+		disp.updateLayout();
+	}
+}
 /**
  * @j2sIgnore
  */
