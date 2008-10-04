@@ -1383,7 +1383,7 @@ void setToolTipText (NMTTDISPINFO lpnmtdi, char [] buffer) {
 public void setVisible (boolean visible) {
 	checkWidget ();
 	
-	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
+	if (this.parent == null && (this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
 		TaskBar taskBar = display.taskBar;
 		if (!visible) {
 			taskBar.removeShellItem(this);

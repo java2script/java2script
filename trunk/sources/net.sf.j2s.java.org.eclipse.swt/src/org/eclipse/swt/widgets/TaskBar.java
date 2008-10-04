@@ -332,9 +332,14 @@ public class TaskBar extends DesktopItem {
 						handleStyle.filter = "";
 					}
 				}
-				item.itemHandle.style.borderColor = item.shell.getMinimized() ? "buttonshadow"
-						: "";
-				if (item.shell == topShell) {
+				item.itemHandle.style.borderColor = item.shell.getMinimized() ? "buttonshadow" : "";
+				boolean isTopShell = item.shell == topShell;
+				Shell sh = topShell;
+				while (!isTopShell && sh != null) {
+					isTopShell = item.shell == sh;
+					sh = (Shell) sh.parent;
+				}
+				if (isTopShell) {
 					OS.addCSSClass(item.itemHandle, "shell-top-item");
 				} else {
 					OS.removeCSSClass(item.itemHandle, "shell-top-item");

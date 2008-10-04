@@ -204,6 +204,20 @@ void addMenu (Menu menu) {
 }
 
 void bringToTop () {
+	bringToTop(true, true);
+}
+
+void bringToTop (boolean parentShell, boolean childShells) {
+	if (parentShell && childShells) {
+		Display.deactivateAllTitleBarShells();
+	}
+	if (parentShell && parent != null && parent instanceof Decorations) {
+		((Decorations) parent).bringToTop(true, false);
+	}
+	if (titleBar != null) {
+		titleBar.style.backgroundColor = "activecaption";
+		shellTitle.style.color = "captiontext";
+	}
 	/*
 	* This code is intentionally commented.  On some platforms,
 	* the ON_TOP style creates a shell that will stay on top
@@ -261,6 +275,16 @@ void bringToTop () {
 		}
 		// widget could be disposed at this point
 //	}
+	if (childShells && this instanceof Shell) {
+		Shell sh = (Shell) this;
+		Shell[] children = sh.getShells();
+		for (int i = 0; i < children.length; i++) {
+			Shell s = children[i];
+			if ((s.style & (SWT.APPLICATION_MODAL | SWT.PRIMARY_MODAL | SWT.SYSTEM_MODAL)) != 0) {
+				s.bringToTop(false, true);
+			}
+		}
+	}
 }
 
 static int checkStyle (int style) {
