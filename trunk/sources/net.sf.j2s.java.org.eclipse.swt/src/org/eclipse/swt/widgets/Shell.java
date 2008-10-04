@@ -952,7 +952,6 @@ public void open () {
 		taskBar.handleApproaching();
 		window.setTimeout(Clazz.makeFunction(new Runnable() {
 		
-			@Override
 			public void run() {
 				display.taskBar.updateLayout();
 			}
@@ -1394,7 +1393,6 @@ public void setVisible (boolean visible) {
 		taskBar.handleApproaching();
 		window.setTimeout(Clazz.makeFunction(new Runnable() {
 		
-			@Override
 			public void run() {
 				display.taskBar.updateLayout();
 			}

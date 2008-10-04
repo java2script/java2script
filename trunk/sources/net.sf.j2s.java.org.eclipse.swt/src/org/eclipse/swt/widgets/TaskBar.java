@@ -128,7 +128,6 @@ public class TaskBar extends DesktopItem {
 		si.title = text;
 		si.onclick = new RunnableCompatibility() {
 
-			@Override
 			public void run() {
 				toReturn(false);
 			}
@@ -170,7 +169,6 @@ public class TaskBar extends DesktopItem {
 		if (shell != null) {
 			si.onclick = new RunnableCompatibility() {
 
-				@Override
 				public void run() {
 					if (shell.getMinimized()) {
 						shell.setMinimized(false);
@@ -228,6 +226,9 @@ public class TaskBar extends DesktopItem {
 	}
 
 	void syncItems() {
+		if (barEl == null) {
+			return;
+		}
 		int delta = 0;
 		for (int i = 0; i < this.items.length - delta; i++) {
 			while (this.items[i + delta] == null
@@ -267,6 +268,9 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public void updateItems() {
+		if (barEl == null) {
+			return;
+		}
 		this.syncItems();
 		/**
 		 * @j2sNative
@@ -350,9 +354,14 @@ public class TaskBar extends DesktopItem {
 		 * 	return;
 		 * }
 		 */ { }
-		if (document.body.style.overflow != "hidden") {
-			document.body.style.overflow = "hidden";
-			document.body.parentNode.style.overflow = "hidden";
+		if (Display.bodyOverflow == null) {
+			Element body = document.body;
+			Display.bodyOverflow = body.style.overflow;
+			Display.htmlOverflow = body.parentNode.style.overflow;
+			if (body.style.overflow != "hidden") {
+				body.style.overflow = "hidden";
+				body.parentNode.style.overflow = "hidden";
+			}
 		}
 		if (this.handle != null)
 			return;
@@ -367,7 +376,6 @@ public class TaskBar extends DesktopItem {
 		this.barEl = bb;
 		this.barEl.onmouseover = new RunnableCompatibility() {
 
-			@Override
 			public void run() {
 				if (isAutoHide) {
 					setMinimized(false);
@@ -382,13 +390,11 @@ public class TaskBar extends DesktopItem {
 		};
 		this.barEl.onclick = new RunnableCompatibility() {
 
-			@Override
 			public void run() {
 				if (setMinimized(false)) {
 					isJustUpdated = true;
 					window.setTimeout(new RunnableCompatibility() {
 
-						@Override
 						public void run() {
 							isJustUpdated = false;
 						}
@@ -401,7 +407,6 @@ public class TaskBar extends DesktopItem {
 		};
 		this.barEl.ondblclick = new RunnableCompatibility() {
 
-			@Override
 			public void run() {
 				isAutoHide = !isAutoHide;
 				barEl.title = isAutoHide ? "Doubleclick to set taskbar always-visible"
@@ -430,8 +435,10 @@ public class TaskBar extends DesktopItem {
 		return true;
 	}
 
-	@Override
 	public void handleApproaching() {
+		if (barEl == null) {
+			return;
+		}
 		if (items.length != 0) {
 			handle.style.display = "block";
 			String zIndex = Display.getNextZIndex(false);
@@ -443,8 +450,10 @@ public class TaskBar extends DesktopItem {
 		}
 	}
 
-	@Override
 	public void handleLeaving() {
+		if (barEl == null) {
+			return;
+		}
 		if (items.length == 0) {
 			handle.style.display = "none";
 		}
@@ -457,21 +466,24 @@ public class TaskBar extends DesktopItem {
 		}
 	}
 
-	@Override
 	public boolean isApproaching(HTMLEvent e) {
+		if (barEl == null) {
+			return false;
+		}
 		mouseAlreadyMoved = true;
 		return !e.ctrlKey && e.clientX <= 8 && isAround(e.clientX, e.clientY);
 	}
 
-	@Override
 	public boolean isLeaving(HTMLEvent e) {
+		if (barEl == null) {
+			return false;
+		}
 		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return e.ctrlKey || e.clientX > 200 || !isAround(e.clientX, e.clientY);
 	}
 
-	@Override
 	public void releaseWidget() {
 		if (handle != null) {
 			OS.destroyHandle(handle);

@@ -117,7 +117,7 @@ public class MaximizedTitle extends DesktopItem {
 		}
 
 	}
-	@Override
+
 	public void handleApproaching() {
 		Element topbar = handle;
 		if (topbar == null) return;
@@ -129,7 +129,7 @@ public class MaximizedTitle extends DesktopItem {
 			}
 		}
 	}
-	@Override
+	
 	public void handleLeaving() {
 		Element topbar = handle;
 		if (topbar == null) return;
@@ -138,12 +138,12 @@ public class MaximizedTitle extends DesktopItem {
 			returnTopMaximized (null);
 		}
 	}
-	@Override
+
 	public boolean isApproaching(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		return (e.clientY <= 8 && !e.ctrlKey) && isAround (e.clientX, e.clientY);
 	}
-	@Override
+
 	public boolean isLeaving(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
@@ -153,7 +153,6 @@ public class MaximizedTitle extends DesktopItem {
 		return !isAround (e.clientX, e.clientY) || e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null) ? OS.getContainerHeight (topShell.titleBar) : 20);
 	}
 	
-	@Override
 	public void bringToTop(String index) {
 		// TODO Auto-generated method stub
 		
@@ -163,7 +162,6 @@ public class MaximizedTitle extends DesktopItem {
 		return handle.style.display != "none";
 	}
 
-	@Override
 	public void releaseWidget() {
 		if (handle != null) {
 			OS.destroyHandle(handle);

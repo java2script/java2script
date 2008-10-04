@@ -22,6 +22,8 @@
 	background-color:buttonface;
 	overflow:hidden;
 	font-size:0;
+	text-align:left;
+	color:black;
 }
 .shell-trim {
 	border:1px solid windowframe;

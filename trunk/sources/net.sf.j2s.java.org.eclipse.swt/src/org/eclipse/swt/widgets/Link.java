@@ -397,9 +397,11 @@ void initAccessible () {
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Control#getBorderWidth()
  */
+/*
 public int getBorderWidth() {
 	return 2;
 }
+*/
 
 String getNameText () {
 	return getText ();

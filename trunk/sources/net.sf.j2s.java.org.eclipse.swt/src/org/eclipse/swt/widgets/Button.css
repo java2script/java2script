@@ -106,6 +106,7 @@ body:nth-of-type(1) .button-arrow-chrome {
 .button-input-wrapper INPUT {
 	position:relative;
 	top:-6px;
+	margin:3px;
 	margin-left:0;
 	/*margin-right:0;*/
 	padding-left:0;
