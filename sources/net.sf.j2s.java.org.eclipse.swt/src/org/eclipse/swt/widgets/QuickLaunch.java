@@ -49,9 +49,15 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		if (Display.bodyOverflow == null) {
 			Element body = document.body;
 			Display.bodyOverflow = body.style.overflow;
+			Display.bodyHeight = body.style.height;
 			Display.htmlOverflow = body.parentNode.style.overflow;
 			if (body.style.overflow != "hidden") {
 				body.style.overflow = "hidden";
+			}
+			if (body.style.height != "100%") {
+				body.style.height = "100%";
+			}
+			if (body.parentNode.style.overflow != "hidden") {
 				body.parentNode.style.overflow = "hidden";
 			}
 		}

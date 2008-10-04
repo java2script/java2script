@@ -114,6 +114,6 @@ public class ResizeSystem {
 			}
 		}
 		
-		Display.getDefault().updateLayout();
+		Display.updateMonitor();
 	}
 }
