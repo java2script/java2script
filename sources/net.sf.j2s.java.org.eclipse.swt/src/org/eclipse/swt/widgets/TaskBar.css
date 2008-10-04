@@ -42,9 +42,11 @@
 	filter:Alpha(Opacity=55);
 }
 .shell-item:hover, a.shell-item:hover {
+	background-color:highlight;
+	color:highlighttext;
 	border:1px solid navy;
-	opacity:0.95;
-	filter:Alpha(Opacity=95);
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 .shell-top-item {
 	/*border:1px solid darkred;*/
@@ -53,15 +55,19 @@
 }
 .shell-top-item:hover, a.shell-top-item:hover {
 	/*border:1px solid navy;*/
-	opacity:0.55;
-	filter:Alpha(Opacity=55);
+	background-color:highlight;
+	color:highlighttext;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+	/*opacity:0.55;
+	filter:Alpha(Opacity=55);*/
 }
 a.shell-item:focus {
 	background-color:buttonhighlight;
 }
 .shell-item-icon {
 	float:left;
-	background-color:buttonface;
+	/*background-color:buttonface;*/
 	background-repeat:no-repeat;
 	background-position:center center;
 	background-image:url('images/shell-packed.gif');

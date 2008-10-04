@@ -480,7 +480,6 @@ public Display () {
  */
 public Display (DeviceData data) {
 	super (data);
-	System.out.println("hi...");
 }
 
 /*
@@ -4536,6 +4535,23 @@ static Shell getTopShell() {
 		}
 	}
 	return lastShell;
+}
+
+static void deactivateAllTitleBarShells() {
+	Shell lastShell = null;
+	int lastZIndex = 0;
+	Display[] disps = Displays;
+	for (int k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		Shell[] ss = disps[k].getShells ();
+		for (int i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () && ss[i].titleBar != null
+					&& ss[i].handle.style.display != "none") {
+				ss[i].titleBar.style.backgroundColor = "inactivecaption";
+				ss[i].shellTitle.style.color = "inactivecaptiontext";
+			}
+		}
+	}
 }
 
 static Shell getTopMaximizedShell() {

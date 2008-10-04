@@ -42,8 +42,10 @@
 }
 .shortcut-item:hover, a.shortcut-item:hover .shortcut-item-highlight {
 	border:1px solid navy;
-	opacity:0.95;
-	filter:Alpha(Opacity=95);
+	background-color:highlight;
+	color:highlighttext;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 .shortcut-active-item {
 	/*border:1px solid darkred;*/
@@ -52,8 +54,10 @@
 }
 .shortcut-active-item:hover, a.shortcut-active-item:hover {
 	/*border:1px solid navy;*/
-	opacity:0.6;
-	filter:Alpha(Opacity=60);
+	background-color:highlight;
+	color:highlighttext;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
 }
 .swt-widgets-quicklaunch {
 	width:324px;
