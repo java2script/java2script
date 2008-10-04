@@ -106,6 +106,14 @@ private void addTrayLine () {
 		Element cell = allCells[(cellLines - 1) * (cellLines - 2) / 2 + i];
 		cell.style.borderRightColor = lineColor;
 	}
+	boolean supportNotificationCornerFloat = false;
+	/**
+	 * @j2sNative
+	 * supportNotificationCornerFloat = window["swt.notification.corner.float"];
+	 */ {}
+	if (!supportNotificationCornerFloat) {
+		return;
+	}
 	Element floatDiv1 = document.createElement ("DIV");
 	floatDiv1.className = "tray-float-block";
 	Element floatDiv2 = document.createElement ("DIV");
@@ -139,6 +147,14 @@ private void removeTrayLine () {
 			cell.style.borderRightColor = "rgb(0,255,0)";
 			cell.style.filter = "Chroma(Color=#00ff00);";
 		}
+	}
+	boolean supportNotificationCornerFloat = false;
+	/**
+	 * @j2sNative
+	 * supportNotificationCornerFloat = window["swt.notification.corner.float"];
+	 */ {}
+	if (!supportNotificationCornerFloat) {
+		return;
 	}
 	document.body.removeChild (allFloats[cellLines * 2 + 1]);
 	allFloats[cellLines * 2 + 1] = null;

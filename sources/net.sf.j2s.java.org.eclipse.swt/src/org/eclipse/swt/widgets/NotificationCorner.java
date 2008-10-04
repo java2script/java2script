@@ -11,6 +11,8 @@ import org.eclipse.swt.internal.xhtml.window;
 
 public class NotificationCorner extends DesktopItem {
 
+	static NotificationCorner defaultNotificationCorner = null;
+	
 	Tray tray;
 
 	private RunnableCompatibility mouseClick;
@@ -19,14 +21,56 @@ public class NotificationCorner extends DesktopItem {
 	private RunnableCompatibility mouseDoubleClick;
 	
 	private Element minimizedEl;
+	
+	private boolean alreadyInitialized;
 
 	public NotificationCorner(Display display) {
 		super();
 		this.display = display;
 		this.isAutoHide = false;
+		alreadyInitialized = false;
 	}
 
 	public void initialize() {
+		boolean existed = false;
+		Element[] divs = document.body.childNodes;
+		for (int i = 0; i < divs.length; i++) {
+			if (divs[i].className == "powered") {
+				document.body.removeChild(divs[i]);
+				existed = true;
+				/**
+				 * @j2sNative
+				 * if (window["swt.notification.corner.float"] == null) {
+				 * 	window["swt.notification.corner.float"] = true;
+				 * }
+				 */ {}
+				break;
+			}
+		}
+		if (!existed && tray == null) {
+			return;
+		}
+		if (existed) {
+			defaultNotificationCorner = this;
+		}
+		
+		if (tray == null) {
+			/**
+			 * @j2sNative
+			 * this.tray = new Object ();
+			 */ {}
+			tray = Display.getDefault().getSystemTray();
+		} 
+		if (alreadyInitialized) {
+			handle.style.display = "block";
+			document.body.removeChild(minimizedEl);
+			document.body.removeChild(handle);
+			document.body.appendChild(minimizedEl);
+			document.body.appendChild(handle);
+			return;
+		}
+		alreadyInitialized = true;
+		
 		minimizedEl = document.createElement("DIV");
 		minimizedEl.className = "tray-cell tray-minimized";
 		minimizedEl.title = "Doubleclick to set notification area always-visible";
@@ -39,23 +83,14 @@ public class NotificationCorner extends DesktopItem {
 		}
 		//display.trayCorner.bindEvents(minimizedEl);
 		document.body.appendChild(minimizedEl);
-
-		tray = Display.getDefault().getSystemTray();
 		
 		handle = document.createElement("DIV");
 		handle.className = "tray-logo-item";
 		handle.title = "Powered by Java2Script";
-		Element[] divs = document.body.childNodes;
-		for (int i = 0; i < divs.length; i++) {
-			if (divs[i].className == "powered") {
-				document.body.removeChild(divs[i]);
-				break;
-			}
-		}
 		document.body.appendChild(handle);
 		handle.onclick = new RunnableCompatibility() {
 			public void run() {
-				if (display != null) {
+				if (display != null && !display.isDisposed()) {
 					if (display.trayCorner != null) {
 						display.trayCorner.bringToTop(null);
 					}
@@ -106,7 +141,6 @@ public class NotificationCorner extends DesktopItem {
 						isJustUpdated = true;
 						window.setTimeout(new RunnableCompatibility() {
 
-							@Override
 							public void run() {
 								isJustUpdated = false;
 							}
@@ -122,7 +156,6 @@ public class NotificationCorner extends DesktopItem {
 		if (mouseDoubleClick == null) {
 			mouseDoubleClick = new RunnableCompatibility() {
 			
-				@Override
 				public void run() {
 					isAutoHide = !isAutoHide;
 					minimizedEl.title = isAutoHide ? "Doubleclick to set notification area always-visible"
@@ -144,12 +177,14 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	void updateEvents() {
-		for (int i = 0; i < tray.allCells.length; i++) {
-			Element cell = tray.allCells[i];
-			if (cell != null) {
-				bindEvents(cell);
+		//if (tray.allCells != null) {
+			for (int i = 0; i < tray.allCells.length; i++) {
+				Element cell = tray.allCells[i];
+				if (cell != null) {
+					bindEvents(cell);
+				}
 			}
-		}
+		//}
 		bindEvents(minimizedEl);
 	}
 
@@ -159,8 +194,10 @@ public class NotificationCorner extends DesktopItem {
 		cell.ondblclick = mouseDoubleClick;
 	}
 	
-	@Override
 	public void handleApproaching() {
+		if (handle == null) {
+			return;
+		}
 		String zIndex = Display.getNextZIndex(false);
 		if ("" + handle.style.zIndex != zIndex) {
 			layerZIndex = "" + handle.style.zIndex;
@@ -171,8 +208,10 @@ public class NotificationCorner extends DesktopItem {
 		}
 	}
 
-	@Override
 	public void handleLeaving() {
+		if (handle == null) {
+			return;
+		}
 		if (layerZIndex != null) {
 			bringToTop (layerZIndex);
 			layerZIndex = null;
@@ -182,13 +221,11 @@ public class NotificationCorner extends DesktopItem {
 		}
 	}
 
-	@Override
 	public boolean isApproaching(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		return !e.ctrlKey && isAround (e.clientX, e.clientY);
 	}
 
-	@Override
 	public boolean isLeaving(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
@@ -288,14 +325,17 @@ public class NotificationCorner extends DesktopItem {
 		setZIndex (zIndex);
 	}
 
-	@Override
 	public void updateLayout() {
-		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void releaseWidget() {
+		tray = null;
+
+		if (defaultNotificationCorner != null) {
+			return;
+		}
+		
 		if (handle != null) {
 			OS.destroyHandle(handle);
 			handle = null;

@@ -77,9 +77,13 @@ public class About {
 					ResizeSystem.unregister((Shell) e.widget, SWT.CENTER);
 				}
 			});
+			Display disp = aboutShell.display;
 			while (!aboutShell.isDisposed()) {
-				if (!objShell.display.readAndDispatch())
-					objShell.display.sleep();
+				if (!aboutShell.display.readAndDispatch())
+					aboutShell.display.sleep();
+			}
+			if (objShell == null) {
+				disp.dispose();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

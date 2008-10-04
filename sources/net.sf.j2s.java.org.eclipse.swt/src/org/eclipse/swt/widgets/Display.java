@@ -386,6 +386,8 @@ public class Display extends Device {
 
 	DesktopItem[] desktopItems;
 	
+	static String bodyOverflow, htmlOverflow;
+	
 	static int AUTO_HIDE_DELAY = 2000;
 	
 	/* Private SWT Window Messages */
@@ -404,6 +406,7 @@ public class Display extends Device {
 	
 	/* Package Name */
 	static final String PACKAGE_PREFIX = "org.eclipse.swt.widgets."; //$NON-NLS-1$
+	private RunnableCompatibility mouseMoveListener;
 	/*
 	* This code is intentionally commented.  In order
 	* to support CLDC, .class cannot be used because
@@ -939,6 +942,14 @@ protected void destroy () {
 }
 
 void destroyDisplay () {
+}
+
+public void dispose() {
+	Shell[] shells = getShells();
+	if (shells == null || shells.length == 0) {
+		super.dispose();
+	}
+	//super.dispose();
 }
 
 /**
@@ -1767,6 +1778,10 @@ public Monitor [] getMonitors () {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
 		monitor.clientWidth = document.body.clientWidth; 
+		int parentWidth = OS.getContainerWidth(document.body.parentNode);
+		if (parentWidth > monitor.clientWidth) {
+			monitor.clientWidth = parentWidth;
+		}
 		monitor.width = window.screen.availWidth;
 		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.height = window.screen.availHeight;
@@ -2261,13 +2276,20 @@ public Tray getSystemTray () {
 	if (tray != null) return tray;
 	for (int i = 0; i < Displays.length; i++) {
 		Display disp = Displays[i];
-		if (disp != null) {
-			if (disp.tray != null) {
-				return disp.tray;
+		if (disp != null && disp.tray != null && !disp.tray.isDisposed()) {
+			tray = disp.tray;
+			if (disp.trayCorner != null) {
+				disp.trayCorner.tray = tray;
 			}
+			return tray;
 		}
 	}
-	return tray = new Tray (this, SWT.NONE);
+	tray = new Tray (this, SWT.NONE);
+	if (trayCorner != null) {
+		trayCorner.tray = tray;
+		trayCorner.initialize();
+	}
+	return tray;
 }
 
 /**
@@ -2445,7 +2467,8 @@ protected void init () {
 void initializeDekstop() {
 	for (int i = 0; i < Displays.length; i++) {
 		Display disp = Displays[i];
-		if (disp != this && disp != null && !disp.isDisposed()) {
+		if (disp != this && disp != null && !disp.isDisposed()
+				&& disp.taskBar != null && disp.topBar != null) {
 			taskBar = disp.taskBar;
 			topBar = disp.topBar;
 			shortcutBar = disp.shortcutBar;
@@ -2454,22 +2477,33 @@ void initializeDekstop() {
 			return;
 		}
 	}
-	
 	if (desktopItems != null) return;
 	
+	taskBar = new TaskBar(this);
+	topBar = new MaximizedTitle(this);
+	if (QuickLaunch.defaultQuickLaunch != null) {
+		shortcutBar = QuickLaunch.defaultQuickLaunch;
+	} else {
+		shortcutBar = new QuickLaunch(this);
+	}
+	if (NotificationCorner.defaultNotificationCorner != null) {
+		trayCorner = NotificationCorner.defaultNotificationCorner;
+	} else {
+		trayCorner = new NotificationCorner(this);
+	}
+	
 	desktopItems = new DesktopItem[] {
-			taskBar = new TaskBar(this),
-			topBar = new MaximizedTitle(this),
-			shortcutBar = new QuickLaunch(this),
-			trayCorner = new NotificationCorner(this)
+			taskBar,
+			topBar,
+			shortcutBar,
+			trayCorner
 	};
 	for (int i = 0; i < desktopItems.length; i++) {
 		desktopItems[i].initialize();
 	}
 	
-	RunnableCompatibility listener = new RunnableCompatibility(){
+	mouseMoveListener = new RunnableCompatibility(){
 	
-		@Override
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
 			for (int i = 0; i < desktopItems.length; i++) {
@@ -2483,15 +2517,14 @@ void initializeDekstop() {
 		}
 	
 	};
-	
 	/**
 	 * @j2sNative
 	if (document.addEventListener) {
-		document.addEventListener ("mousemove", listener, false);
+		document.addEventListener ("mousemove", this.mouseMoveListener, false);
 	} else if (document.attachEvent) {
-		document.attachEvent ("onmousemove", listener);
+		document.attachEvent ("onmousemove", this.mouseMoveListener);
 	}
-	 */ { listener.run(); }
+	 */ { mouseMoveListener.run(); }
 
 }
 
@@ -3333,7 +3366,16 @@ protected void release () {
 		Shell shell = shells [i];
 		if (!shell.isDisposed ()) shell.dispose ();
 	}
-	if (tray != null) tray.dispose ();
+	int trayRefs = 1;
+	for (int i = 0; i < Displays.length; i++) {
+		Display disp = Displays[i];
+		if (disp != this && disp != null && !disp.isDisposed()) {
+			if (disp.tray != null) {
+				trayRefs++;
+			}
+		}
+	}
+	if (tray != null && trayRefs < 2) tray.dispose ();
 	tray = null;
 	/*
 	 * Don't loop this "while"!
@@ -3363,6 +3405,24 @@ protected void release () {
 	releaseDesktop ();
 	releaseDisplay ();
 	super.release ();
+	
+	if (NotificationCorner.defaultNotificationCorner != null) {
+		new Display().getSystemTray();
+		NotificationCorner corner = NotificationCorner.defaultNotificationCorner;
+		document.body.removeChild(corner.handle);
+		document.body.appendChild(corner.handle);
+	}
+	if (NotificationCorner.defaultNotificationCorner == null 
+			&& QuickLaunch.defaultQuickLaunch == null) {
+		if (htmlOverflow != null) {
+			document.body.parentNode.style.overflow = htmlOverflow;
+			htmlOverflow = null;
+		}
+		if (bodyOverflow != null) {
+			document.body.style.overflow = bodyOverflow;
+			bodyOverflow = null;
+		}
+	}
 }
 
 void releaseDesktop () {
@@ -3375,10 +3435,35 @@ void releaseDesktop () {
 		}
 	}
 	if (existed) {
+		existed = false;
+		for (int i = 0; i < Displays.length; i++) {
+			Display disp = Displays[i];
+			if (disp != this && disp != null && !disp.isDisposed() 
+					&& disp.tray != null && !disp.tray.isDisposed()) {
+				existed = true;
+				break;
+			}
+		}
+		if (!existed && trayCorner.handle != null) {
+			trayCorner.handle.style.display = "none";
+		}
 		return;
 	}
 
+	int trayRefs = 1;
+	for (int i = 0; i < Displays.length; i++) {
+		Display disp = Displays[i];
+		if (disp != this && disp != null && !disp.isDisposed()) {
+			if (disp.tray != null) {
+				trayRefs++;
+			}
+		}
+	}
+
 	for (int i = 0; i < desktopItems.length; i++) {
+		if (trayRefs > 1 && desktopItems[i] == trayCorner) {
+			continue;
+		}
 		desktopItems[i].releaseWidget();
 	}
 	desktopItems = null;
@@ -3386,6 +3471,15 @@ void releaseDesktop () {
 	taskBar = null;
 	shortcutBar = null;
 	topBar = null;
+	
+	/**
+	 * @j2sNative
+	if (document.removeEventListener) {
+		document.removeEventListener ("mousemove", this.mouseMoveListener, false);
+	} else if (document.detachEvent) {
+		document.detachEvent ("onmousemove", this.mouseMoveListener);
+	}
+	 */ { mouseMoveListener.run(); }
 }
 
 void releaseDisplay () {
@@ -3655,7 +3749,7 @@ void removeBar (Menu menu) {
 Control removeControl (Object handle) {
 	if (handle == null) return null;
 	Control control = null;
-	int index = 0;
+	int index = -1;
 	/*
 	if (USE_PROPERTY) {
 		index = OS.RemoveProp (handle, SWT_OBJECT_INDEX) - 1;
@@ -3663,6 +3757,13 @@ Control removeControl (Object handle) {
 		index = OS.GetWindowLong (handle, OS.GWL_USERDATA) - 1;
 	}
 	*/
+	for (int i = 0; i < controlTable.length; i++) {
+		Control ctrl = controlTable [i];
+		if (ctrl != null && ctrl.handle == handle) {
+			index = i;
+			break;
+		}
+	}
 	if (0 <= index && index < controlTable.length) {
 		control = controlTable [index];
 		controlTable [index] = null;
@@ -4393,14 +4494,12 @@ static Tray getTray() {
 	if (Default != null) {
 		tray = Default.tray;
 	}
-	if (tray != null) {
+	if (tray == null || tray.isDisposed()) {
 		for (int i = 0; i < Displays.length; i++){
 			Display disp = Displays[i];
-			if (disp != null) {
-				if (disp.tray != null){
-					tray = disp.tray;
-					break;
-				}
+			if (disp != null && disp.tray != null && !disp.tray.isDisposed()){
+				tray = disp.tray;
+				break;
 			}
 		}
 	}

@@ -1718,7 +1718,6 @@ public void setMaximized (boolean maximized) {
 		if (contentHandle != null) {
 			window.setTimeout(Clazz.makeFunction(new Runnable() {
 			
-				@Override
 				public void run() {
 					Shell lastShell = Display.getTopMaximizedShell();
 					if (lastShell == null || lastShell.titleBar == null) return;
@@ -2198,7 +2197,6 @@ public void setText (String string) {
 		if (display.taskBar != null) {
 			window.setTimeout(Clazz.makeFunction(new Runnable() {
 			
-				@Override
 				public void run() {
 					display.taskBar.updateLayout();
 					// lastMM

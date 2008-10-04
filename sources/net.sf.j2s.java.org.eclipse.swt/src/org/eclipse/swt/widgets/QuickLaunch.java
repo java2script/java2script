@@ -30,8 +30,11 @@ import org.eclipse.swt.internal.xhtml.window;
  */
 public class QuickLaunch extends DesktopItem implements DesktopListener {
 
+	static QuickLaunch defaultQuickLaunch = null;
+	
 	private int shortcutCount = 0;
 	private Element[] shortcutItems = new Element[0];
+	private boolean alreadyInitialized = false;
 
 	public QuickLaunch(Display display) {
 		super();
@@ -39,16 +42,24 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		this.isAutoHide = false;
 	}
 	public void initialize() {
-		if (document.body.style.overflow != "hidden") {
-			document.body.style.overflow = "hidden";
-			document.body.parentNode.style.overflow = "hidden";
+		if (alreadyInitialized) {
+			return;
+		}
+		alreadyInitialized = true;
+		if (Display.bodyOverflow == null) {
+			Element body = document.body;
+			Display.bodyOverflow = body.style.overflow;
+			Display.htmlOverflow = body.parentNode.style.overflow;
+			if (body.style.overflow != "hidden") {
+				body.style.overflow = "hidden";
+				body.parentNode.style.overflow = "hidden";
+			}
 		}
 		this.handle = document.createElement ("DIV");
 		this.handle.className = "shortcut-bar";
 		document.body.appendChild (this.handle);
 		this.handle.onmouseover = new RunnableCompatibility() {
 		
-			@Override
 			public void run() {
 				if (isAutoHide) {
 					setMinimized(false);
@@ -63,13 +74,11 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		};
 		this.handle.onclick = new RunnableCompatibility(){
 		
-			@Override
 			public void run() {
 				if (setMinimized(false)) {
 					isJustUpdated = true;
 					window.setTimeout (new RunnableCompatibility() {
 					
-						@Override
 						public void run() {
 							isJustUpdated = false;
 						}
@@ -83,7 +92,6 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		this.handle.title = "Doubleclick to hide shortcuts";
 		this.handle.ondblclick = new RunnableCompatibility(){
 		
-			@Override
 			public void run() {
 				isAutoHide = !isAutoHide;
 				handle.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
@@ -101,11 +109,13 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		for (int i = 0; i < childNodes.length; i++) {
 			children[i] = childNodes[i];
 		}
+		boolean existed = false;
 		for (int i = 0; i < children.length; i++) {
 			Element child = children[i];
 			if (child.nodeName == "A" && child.className != null
 					&& child.className.indexOf ("alaa") != -1
 					&& child.className.indexOf ("ignored") == -1) {
+				existed = true;
 				Object js = child.href;
 				if (js == "#") {
 					js = child.onclick;
@@ -140,6 +150,9 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 				this.addShortcut (child.text != null ? child.text : child.innerText, icon, js);
 				document.body.removeChild (child);
 			}
+		}
+		if (existed) {
+			defaultQuickLaunch = this;
 		}
 	}
 
@@ -191,12 +204,12 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		int barWidth = 20 + this.shortcutCount * 60;
 		int barOffset = (OS.getFixedBodyClientWidth () - barWidth) / 2;
 		if (this.handle != null) {
-			this.handle.style.left = barOffset + "px";
+			this.handle.style.left = barOffset + 10 + "px";
 			this.handle.style.width = barWidth + "px";
 		}
 		for (int i = 0; i < this.shortcutCount; i++) {
 			Element itemDiv = this.shortcutItems[i];
-			itemDiv.style.left = (barOffset + 20 + i * 60) + "px";
+			itemDiv.style.left = (barOffset + 20 + 10 + i * 60) + "px";
 		}
 	}
 	public Element addShortcut(String name, String icon, Object clickFun) {
@@ -286,13 +299,12 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		return (x >= x1 && x <= x2);
 	}
 	
-	@Override
 	public boolean isApproaching(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		return (!e.ctrlKey && e.clientY >= OS.getFixedBodyClientHeight () - 8
 				&& isAround(e.clientX, e.clientY));
 	}
-	@Override
+
 	public boolean isLeaving(HTMLEvent e) {
 		mouseAlreadyMoved = true;
 		long now = new Date().getTime();
@@ -300,7 +312,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		return (e.clientY <= OS.getFixedBodyClientHeight () - 70
 				|| !isAround (e.clientX, e.clientY));
 	}
-	@Override
+
 	public void handleApproaching() {
 		String zIndex = Display.getNextZIndex(false);
 		if ("" + handle.style.zIndex != zIndex) {
@@ -308,7 +320,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			bringToTop (zIndex);
 		}
 	}
-	@Override
+
 	public void handleLeaving() {
 		if (layerZIndex != null) {
 			bringToTop (layerZIndex);
@@ -318,8 +330,11 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			setMinimized(true);
 		}
 	}
-	@Override
+
 	public void releaseWidget() {
+		if (defaultQuickLaunch != null) {
+			return;
+		}
 		if (handle != null) {
 			OS.destroyHandle(handle);
 			handle = null;
