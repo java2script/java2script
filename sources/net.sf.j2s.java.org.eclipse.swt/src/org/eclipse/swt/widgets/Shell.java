@@ -489,7 +489,7 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
  */
 public void close () {
 	checkWidget ();
-	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
+	if (parent == null && (this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
 		TaskBar taskBar = display.taskBar;
 		taskBar.removeShellItem(this);
 		taskBar.handleApproaching();
@@ -498,6 +498,18 @@ public void close () {
 		taskBar.updateLastModified();
 	}
 	closeWidget ();
+	Shell topShell = Display.getTopShell();
+	if (topShell != null && !topShell.isDisposed()) {
+		topShell.bringToTop();
+	} else 
+	/**
+	 * Return to default title
+	 * @j2sNative
+	 * if (window["document.title"] != null) {
+	 * 	document.title = window["document.title"];
+	 * }
+	 */ {}
+
 }
 
 protected void createHandle () {
