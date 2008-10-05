@@ -2479,6 +2479,26 @@ void initializeDekstop() {
 	}
 	if (desktopItems != null) return;
 	
+	Element el = document.getElementById("_console_");
+	if (el != null) {
+		el.style.display = "none";
+		insertOpenConsoleLink(el);
+	} else 
+	/**
+	 * @j2sNative
+	 * if (Console == null) Console = C_$;
+	 * if (C_$.createC_$Window.wrapped == null) {
+	 * 	C_$.createC_$Window_ = Console.createC_$Window;
+	 * 	C_$.createC_$Window = function (parentEl) {
+	 * 		var console = C_$.createC_$Window_ (parentEl);
+	 * 		console.style.display = "none";
+	 * 		$wt.widgets.Display.insertOpenConsoleLink(console);
+	 * 		return console;
+	 * 	};
+	 * 	C_$.createC_$Window.wrapped = true;
+	 * }
+	 */ {}
+	
 	taskBar = new TaskBar(this);
 	topBar = new MaximizedTitle(this);
 	if (QuickLaunch.defaultQuickLaunch != null) {
@@ -2526,6 +2546,19 @@ void initializeDekstop() {
 	}
 	 */ { mouseMoveListener.run(); }
 
+}
+
+static void insertOpenConsoleLink(Element el) {
+	Element anchor = document.createElement ("A");
+	anchor.id = "_launch_console_";
+	anchor.title = "Open System Console";
+	anchor.className = "alaa ignored";
+	anchor.href = "javascript:ClazzLoader.loadClass('org.eclipse.swt.widgets.Console',function(){$wt.widgets.Console.openConsole();});";
+	document.body.insertBefore (anchor, el);
+	Element iconSpan = document.createElement ("SPAN");
+	iconSpan.className = "alaa-icon";
+	anchor.appendChild (iconSpan);
+	anchor.appendChild (document.createTextNode ("Open System Console"));
 }
 
 /**	 
@@ -4538,8 +4571,6 @@ static Shell getTopShell() {
 }
 
 static void deactivateAllTitleBarShells() {
-	Shell lastShell = null;
-	int lastZIndex = 0;
 	Display[] disps = Displays;
 	for (int k = 0; k < disps.length; k++) {
 		if (disps[k] == null) continue;

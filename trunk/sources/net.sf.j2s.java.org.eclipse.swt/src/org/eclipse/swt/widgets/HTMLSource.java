@@ -14,6 +14,7 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.layout.GridData;
@@ -88,6 +89,12 @@ public class HTMLSource {
 //		composite.setLayout(new GridLayout());
 		shell.setLayout(new GridLayout());
 		Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+		Font font = null;
+		/**
+	     * @j2sNative
+	     * font = new $wt.graphics.Font ($wt.widgets.Display.getCurrent (),  new $wt.graphics.FontData ("Courier New", 10, 0));
+	     */ {}
+	    text.setFont(font);
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.widthHint = 400;
 		gd.heightHint = 275;

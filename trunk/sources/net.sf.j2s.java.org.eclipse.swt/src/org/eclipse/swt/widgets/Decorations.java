@@ -253,13 +253,18 @@ void bringToTop (boolean parentShell, boolean childShells) {
 		/**
 		 * @j2sNative
 		 * var title = this.getText();
-		 * if (title == null) {
-		 * 	title = "-";
+		 * if (title != null) {
+		 * 	// Record default title
+		 * 	if (window["document.title"] == null) {
+		 * 		window["document.title"] = document.title;
+		 * 	}
+		 * 	if (window["document.title.setter"] == null) {
+		 * 		document.title = title; // set title directly
+		 * 	} else {
+		 * 		// document.title.setter may modify title
+		 * 		window["document.title.setter"] (title);
+		 * 	}
 		 * }
-		 * if (window["document.title"] == null) {
-		 * 	window["document.title"] = document.title;
-		 * }
-		 * document.title = title;
 		 */ {}
 		int count = children.length; //handle.childNodes.length;
 		for (int i = 0; i < count; i++) {
@@ -816,14 +821,10 @@ public void dispose () {
 	
 	if ((this.style & SWT.TOOL) == 0)
 	/**
+	 * Return to default title
 	 * @j2sNative
 	 * if (window["document.title"] != null) {
-	 * 	if (this.parent != null) {
-	 * 		var title = this.parent.getText();
-	 * 		document.title = (title == null ? "-" : title); 
-	 * 	} else {
-	 * 		document.title = window["document.title"];
-	 * 	}
+	 * 	document.title = window["document.title"];
 	 * }
 	 */ {}
 	if ((this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
@@ -1901,7 +1902,10 @@ public void setMinimized (boolean minimized) {
 	if (!minimized) {
 		if (this.maximized) {
 			this.minimized = minimized;
-			this.setMaximized(true);
+//			this.setMaximized(true);
+			if (display.taskBar != null) {
+				this.handle.style.display = minimized ? "none" : "";
+			}
 			return;
 		}
 	}
