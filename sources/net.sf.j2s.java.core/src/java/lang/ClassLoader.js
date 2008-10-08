@@ -1229,8 +1229,26 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 	} else {
 		if (node.status < ClazzNode.STATUS_CONTENT_LOADED) {
-			node.status = ClazzNode.STATUS_CONTENT_LOADED;
-			ClazzLoader.updateNode (node);
+			var stillLoading = false;
+			var ss = document.getElementsByTagName ("SCRIPT");
+			for (var i = 0; i < ss.length; i++) {
+				if (ClazzLoader.isIE) {
+					if (ss[i].onreadystatechange != null && ss[i].onreadystatechange.path == node.path
+							&& ss[i].readyState == "interactive") {
+						stillLoading = true;
+						break;
+					}
+				} else {
+					if (ss[i].onload != null && ss[i].onload.path == node.path) {
+						stillLoading = true;
+						break;
+					}
+				}
+			}
+			if (!stillLoading) {
+				node.status = ClazzNode.STATUS_CONTENT_LOADED;
+				ClazzLoader.updateNode (node);
+			}
 		}
 	}
 	/*
@@ -1354,9 +1372,10 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (dList[i]);
 		}
 		for (var i = 0; i < dList.length; i++) {
-			if (dList[i].optionalsLoaded != null) {
-				dList[i].optionalsLoaded ();
+			var optLoaded = dList[i].optionalsLoaded;
+			if (optLoaded != null) {
 				dList[i].optionalsLoaded = null;
+				optLoaded ();
 			}
 		}
 
@@ -1397,10 +1416,11 @@ ClazzLoader.checkOptionalCycle = function (node) {
 				ClazzLoader.updateNode (ts[i].parents[k]);
 			}
 			ts[i].parents = new Array ();
-			if (ts[i].optionalsLoaded != null) {
-				//window.setTimeout (ts[i].optionalsLoaded, 25);
-				ts[i].optionalsLoaded ();
+			var optLoaded = ts[i].optionalsLoaded;
+			if (optLoaded != null) {
 				ts[i].optionalsLoaded = null;
+				//window.setTimeout (optLoaded, 25);
+				optLoaded ();
 			}
 		}
 		ts.length = 0;
@@ -1504,10 +1524,12 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						nns[nns.length] = n;
 					}
 					for (var j = 0; j < nns.length; j++) {
-						if (nns[j].optionalsLoaded != null) {
-							//window.setTimeout (nns[j].optionalsLoaded, 25);
-							nns[j].optionalsLoaded ();
+						var optLoaded = nns[j].optionalsLoaded;
+						if (optLoaded != null) {
 							nns[j].optionalsLoaded = null;
+							//window.setTimeout (optLoaded, 25);
+							alert (1);
+							optLoaded ();
 						}
 					}
 				} else { // why not break? -Zhou Renjian @ Nov 28, 2006
@@ -1607,10 +1629,11 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 			level = ClazzNode.STATUS_OPTIONALS_LOADED;
 			node.status = level;
 			ClazzLoader.scriptCompleted (node.path);
-			if (node.optionalsLoaded != null) {
-				//window.setTimeout (node.optionalsLoaded, 25);
-				node.optionalsLoaded ();
+			var optLoaded = node.optionalsLoaded;
+			if (optLoaded != null) {
 				node.optionalsLoaded = null;
+				//window.setTimeout (optLoaded, 25);
+				optLoaded ();
 				if (!ClazzLoader.keepOnLoading) {
 					return false;
 				}
@@ -1628,10 +1651,11 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 			nn.status = level;
 			nn.declaration = null;
 			ClazzLoader.scriptCompleted (nn.path);
-			if (nn.optionalsLoaded != null) {
-				//window.setTimeout (nn.optionalsLoaded, 25);
-				nn.optionalsLoaded ();
+			var optLoaded = nn.optionalsLoaded;
+			if (optLoaded != null) {
 				nn.optionalsLoaded = null;
+				//window.setTimeout (optLoaded, 25);
+				optLoaded ();
 				if (!ClazzLoader.keepOnLoading) {
 					return false;
 				}
@@ -2338,6 +2362,7 @@ ClazzLoader.runtimeLoaded = function () {
 	for (var i = 0; i < qbs.length; i++) {
 		ClazzLoader.loadClass (qbs[i][0], qbs[i][1]);
 	}
+	ClazzLoader.queueBe4KeyClazz = [];
 	/*
 	 * Should not set to empty function! Some later package may need this
 	 * runtimeLoaded function. For example, lazily loading SWT package may
