@@ -107,6 +107,30 @@ public final class Character implements Serializable, Comparable<Character> {
 		return value;
 	}
 
+    /**
+     * Returns a hash code for this <code>Character</code>.
+     * @return  a hash code value for this object.
+     */
+    public int hashCode() {
+        return (int)value;
+    }
+
+    /**
+     * Compares this object against the specified object.
+     * The result is <code>true</code> if and only if the argument is not
+     * <code>null</code> and is a <code>Character</code> object that
+     * represents the same <code>char</code> value as this object.
+     *
+     * @param   obj   the object to compare with.
+     * @return  <code>true</code> if the objects are the same;
+     *          <code>false</code> otherwise.
+     */
+    public boolean equals(Object obj) {
+        if (obj instanceof Character) {
+            return value == ((Character)obj).charValue();
+        }
+        return false;
+    }
 
     /**
      * Compares the receiver to the specified Character to determine the
