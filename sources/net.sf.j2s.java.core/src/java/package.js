@@ -18,23 +18,11 @@ window["java.registered"] = false;
 	ClazzLoader.jarClasspath (base + "core.z.js", [
 		"java.net.URLEncoder",
 		"java.net.URLDecoder",
-		
+
 		"net.sf.j2s.ajax.HttpRequest",
-		"$.IXHRCallback",
-		"$.XHRCallbackAdapter",
-		"$.XHRCallbackSWTAdapter",
 		"$.ARunnable",
 		"$.AClass",
 		"$.ASWTClass",
-       	
-		"$.SimpleSerializable",
-		"$.SimpleRPCRunnable",
-		"$.SimpleRPCRequest",
-		"$.SimpleRPCSWTRequest",
-       	
-		"$.SimplePipeRunnable",
-		"$.SimplePipeRequest",
-		"$.SimplePipeSWTRequest"
 	]);
 
 	ClazzLoader.jarClasspath (base + "util/AbstractList.js", [
@@ -102,6 +90,30 @@ window["java.registered"] = false;
         "$.Field",
         "$.Method"
 	]);
+
+	/* ajax library */
+	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("net.sf.j2s.ajax.*") + "simple.z.js", [
+		"net.sf.j2s.ajax.IXHRCallback",
+		"$.XHRCallbackAdapter",
+		"$.XHRCallbackSWTAdapter",
+       	
+		"$.SimpleSerializable",
+		"$.SimpleRPCRunnable",
+		"$.SimpleRPCRequest",
+		"$.SimpleRPCSWTRequest",
+       	
+		"$.SimplePipeRunnable",
+		"$.SimplePipeHelper",
+		"$.SimplePipeRequest",
+		"$.SimplePipeSWTRequest",
+       	
+		"$.CompoundSerializable",
+		"$.CompoundPipeSession",
+		"$.CompoundPipeRunnable",
+		"$.CompoundPipeRequest",
+		"$.CompoundPipeSWTRequest"
+	]);
+	
 	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
 		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
 	base = base.substring (0, base.lastIndexOf ("java/"));

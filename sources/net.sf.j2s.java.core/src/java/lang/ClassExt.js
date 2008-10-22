@@ -337,7 +337,7 @@ Clazz.makeFunction = function (jsr) {
 			jsr.setEvent (e);
 		}
 		jsr.run ();
-		if (e != null) {
+		if (e != null && jsr.isReturned != null && jsr.isReturned()) {
 			// Is it correct to stopPropagation here? --Feb 19, 2006
 			e.cancelBubble = true;
 			if (e.stopPropagation) {

@@ -1507,20 +1507,24 @@ Clazz.innerFunctions = {
 		if (name.indexOf ('/') == 0) {
 			//is.url = name.substring (1);
 			if (arguments.length == 2) { // additional argument
-				baseFolder = ClazzLoader.binaryFolders[0];
+				baseFolder = arguments[1];
+				if (baseFolder == null) {
+					baseFolder = ClazzLoader.binaryFolders[0];
+				}
 			} else if (window["ClazzLoader"] != null) {
 				baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
 			}
 			if (baseFolder == null || baseFolder.length == 0) {
 				is.url = name.substring (1);
+			} else {
+				baseFolder = baseFolder.replace (/\\/g, '/');
+				var length = baseFolder.length;
+				var lastChar = baseFolder.charAt (length - 1);
+				if (lastChar != '/') {
+					baseFolder += "/";
+				}
+				is.url = baseFolder + name.substring (1);
 			}
-			baseFolder = baseFolder.replace (/\\/g, '/');
-			var length = baseFolder.length;
-			var lastChar = baseFolder.charAt (length - 1);
-			if (lastChar != '/') {
-				baseFolder += "/";
-			}
-			is.url = baseFolder + name.substring (1);
 		} else {
 			if (window["ClazzLoader"] != null) {
 				baseFolder = ClazzLoader.getClasspathFor (clazzName);

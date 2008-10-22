@@ -77,7 +77,7 @@ clpm.DEFAULT_OPACITY = 55;
 	var div = document.createElement ("DIV");
 	div.style.cssText = "position:absolute;top:4px;left:4px;padding:2px 8px;"
 			+ "z-index:3333;background-color:#8e0000;color:yellow;" 
-			+ "font-family:Arial, sans-serif;white-space:nowrap;";
+			+ "font-family:Arial, sans-serif;font-size:10pt;white-space:nowrap;";
 	div.onmouseover = function () {
 		this.style.display = "none";
 	};
