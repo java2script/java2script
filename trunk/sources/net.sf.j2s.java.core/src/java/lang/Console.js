@@ -358,7 +358,33 @@ Console.consoleOutput = function (s, color, isBuffered) {
 		}
 	}
 	
+	var cssClazzName = console.parentNode.className;
+	if (!Console.pinning && cssClazzName != null
+			&& cssClazzName.indexOf ("composite") != -1) {
+		console.parentNode.scrollTop = console.parentNode.scrollHeight;
+	}
 	Console.lastOutputTime = new Date ().getTime ();
+};
+
+/*
+ * Clear all contents inside the console.
+ */
+/* public */
+Console.clear = function () {
+	Console.metLineBreak = true;
+	var console = document.getElementById ("_console_");;
+	if (console == null) {
+		if (document.body == null) {
+			Console.consoleBuffer = [];
+		}
+		return;
+	}
+	Console.consoleBuffer = [];
+	var childNodes = console.childNodes;
+	for (var i = childNodes.length - 1; i >= 0; i--) {
+		console.removeChild (childNodes[i]);
+	}
+	Console.linesCount = 0;
 };
 
 /**
