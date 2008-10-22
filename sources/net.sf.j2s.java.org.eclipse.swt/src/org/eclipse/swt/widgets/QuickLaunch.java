@@ -51,6 +51,14 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			Display.bodyOverflow = body.style.overflow;
 			Display.bodyHeight = body.style.height;
 			Display.htmlOverflow = body.parentNode.style.overflow;
+			Display.bodyScrollLeft = body.scrollLeft;
+			Display.bodyScrollTop = body.scrollTop;
+			Display.htmlScrollLeft = body.parentNode.scrollLeft;
+			Display.htmlScrollTop = body.parentNode.scrollTop;
+			body.parentNode.scrollLeft = 0;
+			body.parentNode.scrollTop = 0;
+			body.scrollLeft = 0;
+			body.scrollTop = 0;
 			if (body.style.overflow != "hidden") {
 				body.style.overflow = "hidden";
 			}
@@ -115,6 +123,15 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		for (int i = 0; i < childNodes.length; i++) {
 			children[i] = childNodes[i];
 		}
+		Element qlContainer = document.getElementById("quick-launch");
+		if (qlContainer != null) {
+			childNodes = qlContainer.childNodes;
+			int length = children.length;
+			//children = new Element[childNodes.length];
+			for (int i = 0; i < childNodes.length; i++) {
+				children[i + length] = childNodes[i];
+			}
+		}
 		boolean existed = false;
 		for (int i = 0; i < children.length; i++) {
 			Element child = children[i];
@@ -154,7 +171,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 					}
 				}
 				this.addShortcut (child.text != null ? child.text : child.innerText, icon, js);
-				document.body.removeChild (child);
+				child.parentNode.removeChild (child);
 			}
 		}
 		if (existed) {

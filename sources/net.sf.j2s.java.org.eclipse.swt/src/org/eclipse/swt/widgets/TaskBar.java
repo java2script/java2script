@@ -326,6 +326,10 @@ public class TaskBar extends DesktopItem {
 						handleStyle.backgroundImage = "url(\"" + image.url + "\")";
 					}
 				} else {
+					String cssClazzName = item.shell.shellIcon.className;
+					if (cssClazzName != null && cssClazzName.indexOf("shell-title-icon-console") != -1) {
+						OS.addCSSClass(item.iconHandle, "shell-item-icon-console");
+					}
 					handleStyle.backgroundImage = "";
 					if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
 							&& handleStyle.filter != null) {
@@ -364,6 +368,14 @@ public class TaskBar extends DesktopItem {
 			Display.bodyOverflow = body.style.overflow;
 			Display.bodyHeight = body.style.height;
 			Display.htmlOverflow = body.parentNode.style.overflow;
+			Display.bodyScrollLeft = body.scrollLeft;
+			Display.bodyScrollTop = body.scrollTop;
+			Display.htmlScrollLeft = body.parentNode.scrollLeft;
+			Display.htmlScrollTop = body.parentNode.scrollTop;
+			body.parentNode.scrollLeft = 0;
+			body.parentNode.scrollTop = 0;
+			body.scrollLeft = 0;
+			body.scrollTop = 0;
 			if (body.style.overflow != "hidden") {
 				body.style.overflow = "hidden";
 			}

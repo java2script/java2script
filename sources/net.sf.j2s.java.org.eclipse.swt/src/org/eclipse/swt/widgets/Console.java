@@ -3,27 +3,47 @@ package org.eclipse.swt.widgets;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 public class Console extends Shell {
 
+	static Console console;
+	
+	static Rectangle lastBounds;
+	
+	static Point scrollOffset;
+
+	Composite consoleWrapper;
+	
+	
 	/**
 	 * Launch the console
 	 */
 	public static void openConsole() {
+		if (console != null && !console.isDisposed()) {
+			console.setVisible(true);
+			console.bringToTop();
+			return;
+		}
 		try {
 			Display display = Display.getDefault();
-			Console console = new Console(display, SWT.SHELL_TRIM);
+			console = new Console(display, SWT.SHELL_TRIM);
 			
 			console.addShellListener(new ShellAdapter() {
 			
-				@Override
 				public void shellClosed(ShellEvent e) {
 					//console.setVisible(false);
 					//e.doit = false;
+					lastBounds = console.getBounds();
+					Element wrapperEl = console.consoleWrapper.handle;
+					scrollOffset = new Point(wrapperEl.scrollLeft, wrapperEl.scrollTop);
 					Element el = document.getElementById("_console_");
 					if (el != null) {
 						el.parentNode.removeChild(el);
@@ -31,16 +51,36 @@ public class Console extends Shell {
 						el.style.fontSize = "";
 						document.body.appendChild(el);
 					}
+					console = null;
 				}
 				
 			});
 			
 			console.open();
+			if (lastBounds != null) {
+				console.setBounds(lastBounds);
+			} else {
+				console.pack();
+			}
 			console.layout();
+			if (scrollOffset != null) {
+				// Wait 50ms, so console shell may complete its layout
+				console.getDisplay().timerExec(50, new Runnable() {
+				
+					public void run() {
+						Element wrapperEl = console.consoleWrapper.handle;
+						wrapperEl.scrollLeft = scrollOffset.x;
+						wrapperEl.scrollTop = scrollOffset.y;
+				
+					}
+				
+				});
+			}
 			while (!console.isDisposed()) {
 				if (!display.readAndDispatch())
 					display.sleep();
 			}
+			display.dispose();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -54,7 +94,12 @@ public class Console extends Shell {
 	public Console(Display display, int style) {
 		super(display, style);
 		createContents();
-		setLayout(new FillLayout());
+		GridLayout gridLayout = new GridLayout();
+		gridLayout.marginWidth = 0;
+		gridLayout.marginHeight = 0;
+		gridLayout.horizontalSpacing = 0;
+		gridLayout.verticalSpacing = 0;
+		setLayout(gridLayout);
 	}
 
 	/**
@@ -62,13 +107,24 @@ public class Console extends Shell {
 	 */
 	protected void createContents() {
 		setText("Console");
-		setSize(500, 375);
-
-		final Composite composite = new Composite(this, SWT.NONE);
-		composite.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		this.shellIcon.className = "shell-title-icon shell-title-icon-console";
+		consoleWrapper = new Composite(this, SWT.NONE);
+		consoleWrapper.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		//
+		String str = "0123456789";
+		str += str; // 20
+		str += str; // 40
+		str += str; // 80
+		Point defaultSize = OS.getStringStyledSize(str, null, "font-size:10pt;font-family:monospace,Arial,sans-serif;");
 		
-		composite.handle.style.overflow = "scroll";
+		GridData gridData = new GridData(GridData.FILL_BOTH);
+		gridData.widthHint = defaultSize.x + OS.getScrollBarWidth();
+		gridData.heightHint = defaultSize.y * 25 + OS.getScrollBarHeight();
+		consoleWrapper.setLayoutData(gridData);
+
+		consoleWrapper.handle.style.overflow = "scroll";
+		consoleWrapper.handle.style.backgroundColor = "black";
+		consoleWrapper.handle.style.color = "white";
 		
 		Element el = document.getElementById("_console_");
 		if (el == null) {
@@ -80,10 +136,9 @@ public class Console extends Shell {
 			el.style.display = "";
 		}
 		el.style.fontSize = "10pt";
-		composite.handle.appendChild(el);
+		consoleWrapper.handle.appendChild(el);
 	}
 
-	@Override
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components
 	}

@@ -509,7 +509,6 @@ public void close () {
 	 * 	document.title = window["document.title"];
 	 * }
 	 */ {}
-
 }
 
 protected void createHandle () {
@@ -1475,6 +1474,18 @@ public void setVisible (boolean visible) {
 	if (visible) {
 //		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, true);
 		SetWindowPos(handle, null, left, top, width, height, 0);
+	} else {
+		Shell topShell = Display.getTopShell();
+		if (topShell != null) {
+			topShell.bringToTop();
+		} else 
+		/**
+		 * Return to default title
+		 * @j2sNative
+		 * if (window["document.title"] != null) {
+		 * 	document.title = window["document.title"];
+		 * }
+		 */ {}
 	}
 	/*
 	if (visible) {

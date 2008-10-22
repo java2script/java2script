@@ -538,7 +538,8 @@ String parse (String string, Object handle) {
 							anchor.target = "_blank";
 						}
 						String title = ids[linkIndex];
-						if (title != null && title.length() > 0 && !title.startsWith("#")) {
+						if (title != null && title.length() > 0
+								&& !title.startsWith("#") && !title.startsWith("javascript:")) {
 							anchor.title = ids[linkIndex];
 						}
 					}

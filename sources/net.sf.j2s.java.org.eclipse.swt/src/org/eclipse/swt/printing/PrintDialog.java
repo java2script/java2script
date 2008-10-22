@@ -13,7 +13,18 @@ package org.eclipse.swt.printing;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.ResizeSystem;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
@@ -323,7 +334,47 @@ public PrinterData open() {
 	}
 	return data;
 	*/
-	dialogUnimplemented();
+	dialogShell = new Shell(parent.getDisplay(), style | SWT.CLOSE | SWT.APPLICATION_MODAL);
+	dialogShell.addListener(SWT.Close, new Listener() {
+		public void handleEvent(Event event) {
+			//updateReturnCode();
+		}
+	});
+	dialogShell.setText(title);
+	dialogShell.setLayout(new GridLayout(2, false));
+
+	Label icon = new Label(dialogShell, SWT.NONE);
+	icon.setImage(parent.getDisplay().getSystemImage(SWT.ICON_WARNING));
+	GridData gridData = new GridData(32, 32);
+	icon.setLayoutData(gridData);
+	
+	Label label = new Label(dialogShell, SWT.NONE);
+	label.setText("Not implemented yet.");
+	
+	Composite buttonPanel = new Composite(dialogShell, SWT.NONE);
+	GridData gd = new GridData(GridData.END, GridData.CENTER, false, false); //new GridData();
+	gd.horizontalSpan = 2;
+	buttonPanel.setLayoutData(gd);
+	buttonPanel.setLayout(new GridLayout());
+	
+	Button btn = new Button(buttonPanel, SWT.PUSH);
+	btn.setText("&OK");
+	btn.setLayoutData(new GridData(75, 24));
+	btn.addSelectionListener(new SelectionAdapter() {
+		public void widgetSelected(SelectionEvent e) {
+			dialogShell.close();
+		}
+	});
+
+	dialogShell.pack();
+	dialogShell.open();
+	Point size = dialogShell.getSize();
+	int y = (dialogShell.getMonitor().getBounds().height - size.y) / 2 - 20;
+	if (y < 0) {
+		y = 0;
+	}
+	dialogShell.setLocation((dialogShell.getMonitor().getBounds().width - size.x) / 2, y);
+	ResizeSystem.register(dialogShell, SWT.CENTER);
 	return null;
 }
 }

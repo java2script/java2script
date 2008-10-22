@@ -19,6 +19,10 @@
 	background-repeat: no-repeat;
 	background-position: center center;
 }
+.tray-item-console {
+	background-position:bottom left !important;
+	background-image:url('images/shell-packed.gif');
+}
 .tray-minimized {
 	left: 0;
 	top: 0;
