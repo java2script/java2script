@@ -159,6 +159,8 @@ public class HttpRequest {
 	private OutputStream activeOS;
 	private InputStream activeIS;
 	
+	private boolean isCometConnection = false;
+	
 	/**
 	 * Return read state of XMLHttpRequest.
 	 * @return int ready state
@@ -400,7 +402,11 @@ public class HttpRequest {
 	private void request() {
 		try {
 			connection = (HttpURLConnection) new URL(url).openConnection();
-			connection.setReadTimeout(30000); // 30 seconds
+			if (isCometConnection) {
+				connection.setReadTimeout(0); // 0 infinite
+			} else {
+				connection.setReadTimeout(30000); // 30s
+			}
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
@@ -559,6 +565,15 @@ public class HttpRequest {
 			}
 			*/
 		}
+	}
+	
+	/**
+	 * Enabling Comet mode for HTTP request connection.
+	 * Comet connection is used on Java level to provide SimplePipe connection.
+	 * @param isCometConnection
+	 */
+	void setCometConnection(boolean isCometConnection) {
+		this.isCometConnection = isCometConnection;
 	}
 	
 }

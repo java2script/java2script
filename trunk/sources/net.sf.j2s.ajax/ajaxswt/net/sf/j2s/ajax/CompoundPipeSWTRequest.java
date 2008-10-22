@@ -2,10 +2,35 @@ package net.sf.j2s.ajax;
 
 import java.util.Date;
 
+import org.eclipse.swt.widgets.Display;
+
 
 public class CompoundPipeSWTRequest extends SimplePipeRequest {
 	
+	private static SimplePipeHelper.IPipeClosing pipeClosingWrapper;
+
 	public static void swtWeave(final CompoundPipeSession p) {
+		/**
+		 * // For JavaScript, there is no need to wrap SWT context 
+		 * @j2sNative
+		 */
+		{
+			if (pipeClosingWrapper == null) {
+				pipeClosingWrapper = new SimplePipeHelper.IPipeClosing() {
+					
+					public void helpClosing(final SimplePipeRunnable pipe) {
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+							public void run() {
+								pipe.pipeClosed();
+							}
+						});
+					}
+					
+				};
+			}
+			p.setPipeCloser(pipeClosingWrapper);
+		}
+		
 		CompoundPipeRunnable pipe = CompoundPipeRequest.pipe;
 		if (pipe == null || !pipe.isPipeLive()) {
 			CompoundPipeRequest.pipe = new CompoundPipeRunnable() {

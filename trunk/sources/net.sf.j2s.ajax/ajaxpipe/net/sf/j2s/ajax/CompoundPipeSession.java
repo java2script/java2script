@@ -2,7 +2,7 @@ package net.sf.j2s.ajax;
 
 public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
-	public static class PipeSessionClosedEvent extends CompoundSerializable {
+	private static class PipeSessionClosedEvent extends CompoundSerializable {
 		
 	}
 	
@@ -21,6 +21,8 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
 	@Override
 	public void pipeCreated() {
+		super.pipeCreated();
+		
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe instanceof CompoundPipeRunnable) {
 			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
@@ -32,7 +34,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	}
 
 	@Override
-	public void pipeDestroy() {
+	public boolean pipeDestroy() {
+		if (!super.pipeDestroy()) return false;
+		
 		PipeSessionClosedEvent evt = new PipeSessionClosedEvent();
 		evt.session = session;
 		pipeThrough(evt);
@@ -42,6 +46,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
 			cp.unweave(this);
 		}
+		return true;
 	}
 	
 	@Override
@@ -97,6 +102,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	public boolean deal(PipeSessionClosedEvent evt) {
 		if (SimplePipeRequest.getRequstMode() == SimplePipeRequest.MODE_LOCAL_JAVA_THREAD) {
+			this.pipeClosed();
 			return true;
 		}
 		this.updateStatus(false);

@@ -27,6 +27,10 @@ class SimplePipeHelper {
 		public void helpThrough(SimplePipeRunnable pipe, SimpleSerializable[] objs);
 	}
 	
+	static interface IPipeClosing {
+		public void helpClosing(SimplePipeRunnable pipe);
+	}
+	
 	private static Map<String, Vector<SimpleSerializable>> pipeMap = null;
 
 	private SimplePipeHelper() {
@@ -218,6 +222,29 @@ class SimplePipeHelper {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Wait some more seconds to check whether the pipe is to be closed or not.
+	 * @param runnable
+	 * @return whether the pipe is to be closed or not.
+	 */
+	static boolean waitAMomentForClosing(final SimplePipeRunnable runnable) {
+		long extra = runnable.pipeWaitClosingInterval();
+		long interval = runnable.pipeMonitoringInterval();
+		if (interval <= 0) {
+			interval = 1000; // default as 1s
+		}
+	
+		while (!runnable.isPipeLive() && extra > 0) {
+			try {
+				Thread.sleep(interval);
+				extra -= interval;
+			} catch (InterruptedException e) {
+				//e.printStackTrace();
+			}
+		}
+		return !runnable.isPipeLive();
 	}
 	
 }

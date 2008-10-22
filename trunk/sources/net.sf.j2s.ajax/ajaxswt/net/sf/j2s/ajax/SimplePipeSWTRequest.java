@@ -16,7 +16,6 @@ import java.io.IOException;
 import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
 import net.sf.j2s.ajax.SimpleSerializable;
-import net.sf.j2s.ajax.XHRCallbackAdapter;
 import net.sf.j2s.ajax.XHRCallbackSWTAdapter;
 
 import org.eclipse.swt.widgets.Display;
@@ -118,11 +117,17 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						if (pipeLive) {
 							runnable.keepPipeLive();
 						} else {
-							SWTHelper.syncExec(disp, new Runnable() {
-								public void run() {
-									runnable.pipeClosed(); //?
-								}
-							});
+							boolean okToClose = SimplePipeHelper.waitAMomentForClosing(runnable);
+							if (okToClose) {
+								runnable.pipeDestroy();
+								SWTHelper.syncExec(disp, new Runnable() {
+									public void run() {
+										runnable.pipeClosed();
+									}
+								});
+								break;
+							}
+
 							break;
 						}
 					} else {
@@ -136,7 +141,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, false);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
-							if (response != null && response.indexOf(PIPE_STATUS_LOST) != -1) {
+							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 								SWTHelper.syncExec(disp, new Runnable() {
 									public void run() {
 										runnable.pipeLost();
@@ -277,11 +282,15 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							String destroyedKey = PIPE_STATUS_DESTROYED;
 							if (resetString.indexOf(destroyedKey) == 0) {
 								int beginIndex = destroyedKey.length() + 1;
-								String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
-								SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
+								final String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
+								final SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 								if (pipe != null) {
-									pipe.pipeClosed();
-									SimplePipeHelper.removePipe(pipeKeyStr);
+									SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+										public void run() {
+											pipe.pipeClosed();
+											SimplePipeHelper.removePipe(pipeKeyStr);
+										}
+									});
 								}
 								resetString = resetString.substring(beginIndex + PIPE_KEY_LENGTH + 1);
 							}
@@ -300,15 +309,24 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		
 		};
 		
-		pipeRequest.registerOnReadyStateChange(new XHRCallbackAdapter() {
+		pipeRequest.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 		
 			@Override
 			public void onReceiving() {
-				keepPipeLive(runnable);
+				swtKeepPipeLive(runnable, Display.getDefault());
+			}
+
+			@Override
+			public void swtOnLoaded() { // on case that no destroy event is sent to client
+				if (SimplePipeHelper.getPipe(runnable.pipeKey) != null) {
+					runnable.pipeClosed();
+					SimplePipeHelper.removePipe(runnable.pipeKey);
+				}
 			}
 		
 		});
-		
+		pipeRequest.setCometConnection(true);
+
 		String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();

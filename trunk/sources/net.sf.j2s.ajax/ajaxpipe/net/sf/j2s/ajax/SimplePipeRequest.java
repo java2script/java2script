@@ -204,7 +204,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 								break;
 							}
 						} else {
-							if (SimplePipeHelper.getPipe(runnable.pipeKey) == null) {
+							SimplePipeRunnable pipeRunnable = SimplePipeHelper.getPipe(runnable.pipeKey);
+							if (pipeRunnable == null || !pipeRunnable.isPipeLive()) {
 								break;
 							}
 						}
@@ -215,8 +216,12 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 						if (pipeLive) {
 							runnable.keepPipeLive();
 						} else {
-							runnable.pipeClosed(); //?
-							break;
+							boolean okToClose = SimplePipeHelper.waitAMomentForClosing(runnable);
+							if (okToClose) {
+								runnable.pipeDestroy(); // Pipe's server side destroying
+								runnable.pipeClosed(); // Pipe's client side closing
+								break;
+							}
 						}
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
@@ -229,7 +234,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, false);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
-							if (response != null && response.indexOf(PIPE_STATUS_LOST) != -1) {
+							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 								runnable.pipeAlive = false;
 								runnable.pipeLost();
 								SimplePipeHelper.removePipe(pipeKey);
@@ -245,7 +250,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		
 		}, "Pipe Live Notifier Thread").start();
 	}
-	
+
 	private static void pipeRequest(final SimplePipeRunnable runnable) {
 		String url = runnable.getHttpURL();
 		String method = runnable.getHttpMethod();
@@ -463,6 +468,7 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 	}
 	
 	static void pipeNotifyCallBack(String key, String result) {
+		//System.out.println(key + "::" + result);
 		if (PIPE_STATUS_LOST.equals(result)) {
 			SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
 			if (pipe != null) {
@@ -625,8 +631,18 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 			public void onReceiving() {
 				keepPipeLive(runnable);
 			}
+
+			@Override
+			public void onLoaded() { // on case that no destroy event is sent to client
+				if (SimplePipeHelper.getPipe(runnable.pipeKey) != null) {
+					runnable.pipeClosed();
+					SimplePipeHelper.removePipe(runnable.pipeKey);
+				}
+			}
 		
 		});
+		pipeRequest.setCometConnection(true);
+
 		String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
@@ -657,6 +673,7 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 * being parsed.
 	 */
 	public static String parseReceived(final String string) {
+		//System.out.println(string);
 		SimpleSerializable ss = null;
 		int start = 0;
 		while (string.length() > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
