@@ -146,8 +146,14 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		long beforeLoop = new Date().getTime();
 		Vector<SimpleSerializable> vector = null;
 		while ((vector = SimplePipeHelper.getPipeVector(key)) != null
-				&& SimplePipeHelper.isPipeLive(key) // check it!
+				/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 				&& !writer.checkError()) {
+			if (!SimplePipeHelper.isPipeLive(key)) {
+				boolean okToClose = SimplePipeHelper.waitAMomentForClosing(SimplePipeHelper.getPipe(key));
+				if (okToClose) {
+					break;
+				}
+			}
 			int size = vector.size();
 			if (size > 0) {
 				for (int i = size - 1; i >= 0; i--) {

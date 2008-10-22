@@ -30,6 +30,10 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	SimplePipeHelper.IPipeThrough helper;
 	
+	SimplePipeHelper.IPipeClosing closer;
+	
+	private boolean destroyed;
+	
 	/**
 	 * 
 	 * @param helper
@@ -37,6 +41,15 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		this.helper = helper;
+	}
+	
+	/**
+	 * 
+	 * @param closer
+	 * @j2sIgnore
+	 */
+	void setPipeCloser(SimplePipeHelper.IPipeClosing closer) {
+		this.closer = closer;
 	}
 	
 	public String getPipeURL() {
@@ -86,7 +99,13 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * Destroy the pipe and remove listeners.
 	 * After pipe is destroyed, {@link #isPipeLive()} must be false
 	 */
-	public abstract void pipeDestroy();
+	public boolean pipeDestroy() {
+		if (destroyed) {
+			return false; // already destroyed, no further destroy actions
+		}
+		destroyed = true;
+		return true;
+	}
 
 	/**
 	 * To initialize pipe with given parameters.
@@ -99,8 +118,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * Success to create a pipe.
 	 */
 	public void pipeCreated() {
-		// to be override
 		// notify pipe is created
+		destroyed = false;
 	}
 	
 	/**
@@ -140,6 +159,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	/**
 	 * Notify that the pipe is still alive.
+	 * 
+	 * This method is run on server side
 	 */
 	public void keepPipeLive() {
 		// to be override
@@ -147,33 +168,45 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 
 	/**
 	 * Start pipe monitor to monitor the pipe status. If pipe is non-active,
-	 * try to destroy pipe by calling {@link #pipeDestroy()}.
+	 * try to destroy pipe by calling {@link #pipeDestroy()} and then close
+	 * pipe by calling {@link #pipeClosed()}.
+	 * 
 	 * User may override this method to use its own monitoring method.
+	 * 
+	 * This method is run on server side
 	 */
 	protected void pipeMonitoring() {
 		new Thread(new Runnable() {
 			
 			public void run() {
+				long interval = pipeMonitoringInterval();
+				if (interval <= 0) {
+					interval = 1000;
+				}
 				while (true) {
 					try {
-						long interval = pipeMonitoringInterval();
-						if (interval <= 0) {
-							interval = 1000;
-						}
 						Thread.sleep(interval);
 					} catch (InterruptedException e) {
 						//e.printStackTrace();
 					}
 					if (!isPipeLive()) {
-						pipeDestroy();
-						break;
+						boolean okToClose = SimplePipeHelper.waitAMomentForClosing(SimplePipeRunnable.this);
+						if (okToClose) {
+							pipeDestroy();
+							if (closer != null) {
+								closer.helpClosing(SimplePipeRunnable.this);
+							} else {
+								pipeClosed();
+							}
+							break;
+						}
 					}
 				}
 			}
 		
 		}, "Pipe Monitor").start();
 	}
-	
+
 	/**
 	 * Return interval time between two pipe status checking by monitor.
 	 * If return interval is less than or equals to 0, the interval time will
@@ -182,6 +215,15 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	protected long pipeMonitoringInterval() {
 		return 1000;
+	}
+
+	/**
+	 * Return interval time before a pipe is closed.
+	 * For compound pipe, two pipe session may have some milliseconds interval. 
+	 * @return time interval in millisecond.
+	 */
+	protected long pipeWaitClosingInterval() {
+		return 5000;
 	}
 	
 	/**

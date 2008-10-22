@@ -34,13 +34,15 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	}
 	
 	@Override
-	public void pipeDestroy() {
+	public boolean pipeDestroy() {
+		if (!super.pipeDestroy()) return false;
+
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
 				pipes[i].pipeDestroy();
-				pipes[i] = null;
 			}
 		}
+		return true;
 	}
 
 	@Override
@@ -69,7 +71,12 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	public void pipeClosed() {
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
-				pipes[i].pipeClosed();
+				if (pipes[i].closer != null) {
+					pipes[i].closer.helpClosing(pipes[i]);
+				} else {
+					pipes[i].pipeClosed();
+				}
+				pipes[i] = null;
 			}
 		}
 	}
@@ -79,6 +86,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
 				pipes[i].pipeLost();
+				pipes[i] = null;
 			}
 		}
 	}
