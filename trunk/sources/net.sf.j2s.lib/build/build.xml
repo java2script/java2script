@@ -260,15 +260,28 @@
         	
     		<arg value="java/net/URLEncoder.js"/>
     		<arg value="java/net/URLDecoder.js"/>
-
+        	
     		<arg value="net/sf/j2s/ajax/HttpRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/ARunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/AClass.js"/>
+    		<arg value="net/sf/j2s/ajax/ASWTClass.js"/>
+
+        	<classpath>
+        		<pathelement path="${j2s.lib.project}/bin"/>
+        	</classpath>
+        </java>
+    	
+        <java classname="net.sf.j2s.lib.build.J2SConcat">
+        	<arg value="false"/>
+        	<arg value="${j2s.ajax.bin}/net/sf/j2s/ajax/simple.z.js"/>
+        	
+        	<arg value="${j2s.ajax.bin}"/>
+
+    		<!--arg value="net/sf/j2s/ajax/CookieMonster.js"/-->
     		<arg value="net/sf/j2s/ajax/IXHRCallback.js"/>
     		<arg value="net/sf/j2s/ajax/SWTHelper.js"/>
     		<arg value="net/sf/j2s/ajax/XHRCallbackAdapter.js"/>
     		<arg value="net/sf/j2s/ajax/XHRCallbackSWTAdapter.js"/>
-    		<arg value="net/sf/j2s/ajax/ARunnable.js"/>
-    		<arg value="net/sf/j2s/ajax/AClass.js"/>
-    		<arg value="net/sf/j2s/ajax/ASWTClass.js"/>
         	
     		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
@@ -276,14 +289,21 @@
     		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
         	
     		<arg value="net/sf/j2s/ajax/SimplePipeRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/SimplePipeHelper.js"/>
     		<arg value="net/sf/j2s/ajax/SimplePipeRequest.js"/>
     		<arg value="net/sf/j2s/ajax/SimplePipeSWTRequest.js"/>
+        	
+    		<arg value="net/sf/j2s/ajax/CompoundSerializable.js"/>
+    		<arg value="net/sf/j2s/ajax/CompoundPipeSession.js"/>
+    		<arg value="net/sf/j2s/ajax/CompoundPipeRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/CompoundPipeRequest.js"/>
+    		<arg value="net/sf/j2s/ajax/CompoundPipeSWTRequest.js"/>
         	
         	<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
-    	
+
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.core.bin}/org/apache/harmony/luni/util/Msg.z.js"/>
