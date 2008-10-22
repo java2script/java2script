@@ -189,6 +189,12 @@
 	background-image:url('images/shell-packed.gif');
 	background-position:center center;
 }
+.shell-title-icon-console {
+	width:16px !important;
+	height:16px !important;
+	margin-top:-8px;
+	background-position:bottom left !important;
+}
 .shell-title-min {
 	background-image:url('images/shell-packed.gif');
 	background-position:left center;

@@ -31,10 +31,10 @@ $browserLayoutResize = function () {
 	}, 50);
 };
 
-try {
+if (document.addEventListener) {
 	window.addEventListener('resize', $browserLayoutResize, true);
-} catch (e) {
-	window.onresize = $browserLayoutResize;
+} else if (document.attachEvent) {
+	document.attachEvent('onresize', $browserLayoutResize);
 }
  */
 public class ResizeSystem {

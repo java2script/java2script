@@ -24,6 +24,7 @@
 	font-size:0;
 	opacity:0.6;
 	filter:Alpha(Opacity=60);
+	text-align:left;
 }
 * html .shortcut-item {
 	width:42px;

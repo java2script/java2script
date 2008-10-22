@@ -122,6 +122,7 @@ public class Decorations extends Canvas {
 	//int oldWidth = OS.CW_USEDEFAULT, oldHeight = OS.CW_USEDEFAULT;
 	Element contentHandle;
 	Element shellTitle;
+	Element shellIcon;
 	Element modalHandle;
 	private Rectangle oldBounds;
 	private String lastClientAreaCSSText;
@@ -129,10 +130,9 @@ public class Decorations extends Canvas {
 	private int lastBodyScrollLeft;
 	private int lastBodyScrollTop;
 	private Object lastClientAreaOnScroll;
-	private Element shellMin;
-	private Element shellMax;
-	private Element shellIcon;
-	private Element shellClose;
+	Element shellMin;
+	Element shellMax;
+	Element shellClose;
 	Element titleBar;
 	Element shellMenuBar;
 	Element shellToolBar;
@@ -1919,6 +1919,18 @@ public void setMinimized (boolean minimized) {
 		}
 		if (!minimized) {
 			bringToTop();
+		} else {
+			Shell topShell = Display.getTopShell();
+			if (topShell != null) {
+				topShell.bringToTop();
+			} else 
+			/**
+			 * Return to default title
+			 * @j2sNative
+			 * if (window["document.title"] != null) {
+			 * 	document.title = window["document.title"];
+			 * }
+			 */ {}
 		}
 		this.minimized = minimized;
 		return;

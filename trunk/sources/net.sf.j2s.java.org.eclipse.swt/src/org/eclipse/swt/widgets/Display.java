@@ -16,6 +16,8 @@ import java.util.Date;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Device;
@@ -387,6 +389,8 @@ public class Display extends Device {
 	DesktopItem[] desktopItems;
 	
 	static String bodyHeight, bodyOverflow, htmlOverflow;
+	static int bodyScrollTop, bodyScrollLeft;
+	static int htmlScrollTop, htmlScrollLeft;
 	
 	static int AUTO_HIDE_DELAY = 2000;
 	
@@ -2479,26 +2483,6 @@ void initializeDekstop() {
 	}
 	if (desktopItems != null) return;
 	
-	Element el = document.getElementById("_console_");
-	if (el != null) {
-		el.style.display = "none";
-		insertOpenConsoleLink(el);
-	} else 
-	/**
-	 * @j2sNative
-	 * if (Console == null) Console = C_$;
-	 * if (C_$.createC_$Window.wrapped == null) {
-	 * 	C_$.createC_$Window_ = Console.createC_$Window;
-	 * 	C_$.createC_$Window = function (parentEl) {
-	 * 		var console = C_$.createC_$Window_ (parentEl);
-	 * 		console.style.display = "none";
-	 * 		$wt.widgets.Display.insertOpenConsoleLink(console);
-	 * 		return console;
-	 * 	};
-	 * 	C_$.createC_$Window.wrapped = true;
-	 * }
-	 */ {}
-	
 	taskBar = new TaskBar(this);
 	topBar = new MaximizedTitle(this);
 	if (QuickLaunch.defaultQuickLaunch != null) {
@@ -2545,20 +2529,60 @@ void initializeDekstop() {
 		document.attachEvent ("onmousemove", this.mouseMoveListener);
 	}
 	 */ { mouseMoveListener.run(); }
+	
+	Element el = document.getElementById("_console_");
+	if (el != null) {
+		el.style.display = "none";
+		insertOpenConsoleLink(el);
+	} else 
+	/**
+	 * @j2sNative
+	 * if (Console == null) Console = C_$;
+	 * if (C_$.createC_$Window.wrapped == null) {
+	 * 	C_$.createC_$Window_ = Console.createC_$Window;
+	 * 	C_$.createC_$Window = function (parentEl) {
+	 * 		var console = C_$.createC_$Window_ (parentEl);
+	 * 		console.style.display = "none";
+	 * 		$wt.widgets.Display.insertOpenConsoleLink(console);
+	 * 		return console;
+	 * 	};
+	 * 	C_$.createC_$Window.wrapped = true;
+	 * }
+	 */ {}
 
 }
 
 static void insertOpenConsoleLink(Element el) {
+	TrayItem item = new TrayItem(getTray(), SWT.NONE);
+	item.setText("Console");
+	item.handle.className = "tray-item tray-item-console";
+	item.setToolTipText("Console");
+	//item.setImage(null);
+	item.addSelectionListener(new SelectionAdapter() {
+	
+		/**
+		 * @j2sNative
+		 * ClazzLoader.loadClass('org.eclipse.swt.widgets.Console',function(){$wt.widgets.Console.openConsole();});
+		 */
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			
+		}
+	
+	});
+	/*
 	Element anchor = document.createElement ("A");
 	anchor.id = "_launch_console_";
-	anchor.title = "Open System Console";
+	anchor.title = "Open Console";
+	anchor.style.display = "block";
 	anchor.className = "alaa ignored";
 	anchor.href = "javascript:ClazzLoader.loadClass('org.eclipse.swt.widgets.Console',function(){$wt.widgets.Console.openConsole();});";
 	document.body.insertBefore (anchor, el);
 	Element iconSpan = document.createElement ("SPAN");
 	iconSpan.className = "alaa-icon";
 	anchor.appendChild (iconSpan);
-	anchor.appendChild (document.createTextNode ("Open System Console"));
+	anchor.appendChild (document.createTextNode ("Open Console"));
+	*/
 }
 
 /**	 
@@ -3459,6 +3483,10 @@ protected void release () {
 			document.body.style.height = bodyHeight;
 			bodyHeight = null;
 		}
+		document.body.parentNode.scrollLeft = htmlScrollLeft;
+		document.body.parentNode.scrollTop = htmlScrollTop;
+		document.body.scrollLeft = bodyScrollLeft;
+		document.body.scrollTop = bodyScrollTop;
 	}
 }
 

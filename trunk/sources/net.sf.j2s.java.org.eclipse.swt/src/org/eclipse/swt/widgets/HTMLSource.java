@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.layout.GridData;
@@ -31,11 +32,12 @@ public class HTMLSource {
 	public void exportSource(Shell objShell, boolean onlyContent) {
 		final Shell shell = new Shell(objShell.display, SWT.SHELL_TRIM | SWT.APPLICATION_MODAL);
 //		shell.setLayout(new FillLayout());
-		shell.setText("Export HTML Source");
 		String c = null; // always be "b" for "@j2sNative/Src"
 		if (onlyContent) {
+			shell.setText("Shell Content's HTML Source");
 			c = objShell.contentHandle.innerHTML;
 		} else {
+			shell.setText("Shell's HTML Source");
 			c = objShell.handle.innerHTML;
 		}
 		//b.replaceAll("(<\\/?)(\\w+)(\\s|>)", "$0$1$2");
@@ -96,8 +98,15 @@ public class HTMLSource {
 	     */ {}
 	    text.setFont(font);
 		GridData gd = new GridData(GridData.FILL_BOTH);
-		gd.widthHint = 400;
-		gd.heightHint = 275;
+		
+		String str = "0123456789";
+		str += str; // 20
+		str += str; // 40
+		str += str; // 80
+		Point defaultSize = OS.getStringStyledSize(str, null, "font-size:10pt;font-family:monospace,Arial,sans-serif;");
+		
+		gd.widthHint = defaultSize.x/* + OS.getScrollBarWidth()*/;
+		gd.heightHint = defaultSize.y * 25/* + OS.getScrollBarHeight()*/;
 		text.setLayoutData(gd);
 		Rectangle rect = objShell.getClientArea();
 		String html = null;

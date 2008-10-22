@@ -31,6 +31,8 @@
 	text-decoration:none;
 	cursor:default;
 	font-family:Arial, sans-serif;
+	font-size:10pt;
+	text-align:left;
 	position:absolute;
 	left:16px;
 	width:150px;
@@ -38,8 +40,8 @@
 	background-color:buttonface;
 	border:1px solid navy;
 	color:buttontext;
-	opacity:0.55;
-	filter:Alpha(Opacity=55);
+	opacity:0.75;
+	filter:Alpha(Opacity=75);
 }
 .shell-item:hover, a.shell-item:hover {
 	background-color:highlight;
@@ -59,8 +61,8 @@
 	color:highlighttext;
 	opacity:0.85;
 	filter:Alpha(Opacity=85);
-	/*opacity:0.55;
-	filter:Alpha(Opacity=55);*/
+	/*opacity:0.75;
+	filter:Alpha(Opacity=75);*/
 }
 a.shell-item:focus {
 	background-color:buttonhighlight;
@@ -78,6 +80,9 @@ a.shell-item:focus {
 	top:50%;
 	margin-top:-7px;
 	_margin-top:-8px;
+}
+.shell-item-icon-console {
+	background-position:bottom left !important;
 }
 *:first-child+html .shell-item-icon { /* IE7 */
 	margin-top:-8px;

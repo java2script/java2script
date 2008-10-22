@@ -9,6 +9,7 @@
 	cursor:default;
 	padding:1px 0 1px 1px;
 	display:none;
+	text-align:left;
 }
 * html .menu-default {
 	padding-left:0;
@@ -44,6 +45,7 @@
 	white-space:nowrap;
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
+	color:menutext;
 }
 .menu-item-enable-image .menu-item-text {
 	padding:1px;
