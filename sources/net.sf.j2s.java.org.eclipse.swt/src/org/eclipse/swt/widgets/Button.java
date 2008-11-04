@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
@@ -954,10 +955,10 @@ public void setImage (Image image) {
 	if (image == null) {
 		hasImage = false;
 		btnText.style.backgroundImage = "";
-		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
-				&& btnText.style.filter != null) {
+		if (OS.isIENeedPNGFix && btnText.style.filter != null) {
 			btnText.style.filter = "";
 		}
+		return;
 	}
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 //	_setImage (this.image = image);
@@ -1014,7 +1015,7 @@ public void setImage (Image image) {
 			handleStyle.paddingLeft = (this.image.width + 1) + "px";
 		}
 		handleStyle.minHeight = this.image.height + "px";
-		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
 //				imgBackground.style.width = "100%";
@@ -1213,7 +1214,7 @@ public void setText (String string) {
 	}
 	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		if (OS.isIE70) {
-			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "-2px" : "-2px";
+			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "-5px" : "-6px";
 		} else if ((style & SWT.RADIO) != 0) {
 			btnHandle.parentNode.style.marginTop = text.length() == 0 ? "0" : "2px";
 		} else {
@@ -1344,6 +1345,10 @@ void hookSelection() {
 					// Still buggy on check button with image
 					if (e.srcElement != btnHandle && e.target != btnHandle) {
 						setSelection (!getSelection ());
+						toReturn(false);
+					} else if (OS.isIE){
+						toReturn(true);
+						new HTMLEventWrapper(e).stopPropagation();
 					}
 				} else {
 					setSelection (!getSelection ());

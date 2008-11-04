@@ -446,13 +446,12 @@ public void setImage (Image image) {
 	super.setImage (image);
 	if (image == null) {
 		handle.style.backgroundImage = "";
-		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
-				&& handle.style.filter != null) {
+		if (OS.isIENeedPNGFix && handle.style.filter != null) {
 			handle.style.filter = "";
 		}
 	} else {
 		CSSStyle handleStyle = handle.style;
-		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 			handleStyle.backgroundImage = "";
 			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {

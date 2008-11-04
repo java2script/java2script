@@ -253,6 +253,8 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		itemDiv.className = "shortcut-item";
 		if (OS.isIENeedPNGFix) {
 			if (icon != null && icon.length() != 0) {
+				// The following is commented out intentionally.
+				// Using filter may result in black blocks 
 //				if (icon.toLowerCase().endsWith(".png")) {
 //					itemDiv.style.backgroundImage = "url(\"about:blank\")";
 //					itemDiv.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + icon + "\", sizingMethod=\"image\")";
