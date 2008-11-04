@@ -1060,7 +1060,7 @@ Clazz.formatParameters = function (funParams) {
 		 * If funParams is Array, funParams.toString() will
 		 * also return "*,*,..." string.
 		 */
-		var s = funParams.toString ();
+		var s = funParams; //.toString (); // Google Chrome v8native.js error
 		s = s.replace (/~([NABSO])/g, function ($0, $1) {
 			if ($1 == 'N') {
 				return "Number";
