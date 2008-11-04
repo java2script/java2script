@@ -1475,6 +1475,14 @@ public void setImage (Image image) {
 //		if (image != null) {
 //			shellIcon.style.backgroundImage = "url('" + image.url + "')";
 //		}
+	if (image == null) {
+		shellIcon.style.backgroundImage = "";
+		if (OS.isIENeedPNGFix && shellIcon.style.filter != null) {
+			shellIcon.style.filter = "";
+		}
+		return;
+	}
+
 	if (shellIcon != null && this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle iconStyle = shellIcon.style;
 		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {

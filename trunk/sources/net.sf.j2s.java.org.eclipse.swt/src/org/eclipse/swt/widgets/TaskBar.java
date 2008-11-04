@@ -318,7 +318,7 @@ public class TaskBar extends DesktopItem {
 				Image image = item.shell.getImage();
 				CSSStyle handleStyle = item.iconHandle.style;
 				if (image != null) {
-					if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+					if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 						handleStyle.backgroundImage = "url(\"about:blank\")";
 						handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + image.url + "\", sizingMethod=\"image\")";
 					} else {
@@ -331,8 +331,7 @@ public class TaskBar extends DesktopItem {
 						OS.addCSSClass(item.iconHandle, "shell-item-icon-console");
 					}
 					handleStyle.backgroundImage = "";
-					if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png")
-							&& handleStyle.filter != null) {
+					if (OS.isIENeedPNGFix && handleStyle.filter != null) {
 						handleStyle.filter = "";
 					}
 				}

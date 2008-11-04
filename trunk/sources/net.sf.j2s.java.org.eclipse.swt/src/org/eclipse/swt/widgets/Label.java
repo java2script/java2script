@@ -510,6 +510,13 @@ public void setImage (Image image) {
 	if (image != null && image.isDisposed()) error(SWT.ERROR_INVALID_ARGUMENT);
 	//_setImage (this.image = image);
 	this.image = image;
+	if (image == null) {
+		handle.style.backgroundImage = "";
+		if (OS.isIENeedPNGFix && handle.style.filter != null) {
+			handle.style.filter = "";
+		}
+		return;
+	}
 	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle handleStyle = handle.style;
 		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {

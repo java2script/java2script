@@ -286,8 +286,7 @@ public void setImage (Image image) {
 		}
 	} else {
 		textEl.style.backgroundImage = "";
-		if (OS.isIE && image.url != null && image.url.toLowerCase().endsWith(".png")
-				&& textEl.style.filter != null) {
+		if (OS.isIENeedPNGFix && textEl.style.filter != null) {
 			textEl.style.filter = "";
 		}
 	}

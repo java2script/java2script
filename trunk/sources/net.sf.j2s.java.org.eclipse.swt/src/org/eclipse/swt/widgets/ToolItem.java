@@ -1352,12 +1352,6 @@ void updateImages (boolean enabled) {
 		if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 			CSSStyle handleStyle = handle.style;
 			if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
-//					Element imgBackground = document.createElement("DIV");
-//					imgBackground.style.position = "absolute";
-//					imgBackground.style.width = "100%";
-//					imgBackground.style.height = "100%";
-//					imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
-//					handle.appendChild(imgBackground);
 				handleStyle.backgroundImage = "";
 				handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 			} else {
@@ -1365,6 +1359,10 @@ void updateImages (boolean enabled) {
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			}
 		}
+	} else {
+		CSSStyle handleStyle = handle.style;
+		if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
+		handleStyle.backgroundImage = "";
 	}
 	/*
 	int hwnd = parent.handle;

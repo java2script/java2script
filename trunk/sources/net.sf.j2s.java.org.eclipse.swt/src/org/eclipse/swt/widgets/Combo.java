@@ -766,7 +766,8 @@ void show(){
 	}
 	this.selectShown = true;
 	window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 1);
-	selectInput.style.zIndex = window.currentTopZIndex;
+	// related bug: http://groups.google.com/group/java2script/browse_thread/thread/8085561fcf953fc?hl=en
+	selectInput.style.zIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 4); //sgurin
 	try {
 		handle.removeChild(selectInput);
 		document.body.appendChild(selectInput);
@@ -1684,7 +1685,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	* items and ignore the height value that the programmer supplies.
 	*/
 	int buttonHeight =  getTextHeight();
-	int buttonWidth = OS.getContainerWidth(dropDownButton); 
+	int buttonWidth = OS.getContainerHeight(dropDownButton); 
 	
 	if (!isSimple) {
 		//height = getTextHeight () + (getItemHeight () * visibleCount) + 2;
