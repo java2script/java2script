@@ -228,8 +228,12 @@ class SimplePipeHelper {
 	 * Wait some more seconds to check whether the pipe is to be closed or not.
 	 * @param runnable
 	 * @return whether the pipe is to be closed or not.
+	 * @j2sIgnore
 	 */
 	static boolean waitAMomentForClosing(final SimplePipeRunnable runnable) {
+		if (runnable == null) {
+			return true;
+		}
 		long extra = runnable.pipeWaitClosingInterval();
 		long interval = runnable.pipeMonitoringInterval();
 		if (interval <= 0) {
