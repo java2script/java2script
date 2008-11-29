@@ -28,6 +28,7 @@ public class Console extends Shell {
 	 */
 	public static void openConsole() {
 		if (console != null && !console.isDisposed()) {
+			console.setMinimized(false);
 			console.setVisible(true);
 			console.bringToTop();
 			return;
