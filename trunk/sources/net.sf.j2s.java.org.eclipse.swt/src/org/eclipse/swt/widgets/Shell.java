@@ -138,7 +138,7 @@ public class Shell extends Decorations {
 	//int hIMC, hwndMDIClient, toolTipHandle, lpstrTip;
 	int minWidth = SWT.DEFAULT, minHeight = SWT.DEFAULT;
 	//int [] brushes;
-	boolean showWithParent;
+	//boolean showWithParent;
 	Control lastActive;
 	
 //	SHACTIVATEINFO psai;
@@ -1464,13 +1464,13 @@ public void setVisible (boolean visible) {
 	* to be deactivated.  The fix is to call ShowOwnedPopups()
 	* to hide children before hiding the parent.
 	*/
-	if (showWithParent && !visible) {
-//		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, false);
-	}
+//	if (showWithParent && !visible) {
+////		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, false);
+//	}
 	super.setVisible (visible);
 	if (isDisposed ()) return;
-	if (showWithParent == visible) return;
-	showWithParent = visible;
+//	if (showWithParent == visible) return;
+//	showWithParent = visible;
 	if (visible) {
 //		if (!OS.IsWinCE) OS.ShowOwnedPopups (handle, true);
 		SetWindowPos(handle, null, left, top, width, height, 0);
