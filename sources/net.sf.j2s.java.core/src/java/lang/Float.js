@@ -2,7 +2,7 @@ Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Float", null, funct
 java.lang.Float = Float = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Float, "Float", Number, Comparable);
+Clazz.decorateAsType (Float, "Float", Number, Comparable, null, true);
 Float.prototype.valueOf = function () { return 0; };
 Float.toString = Float.prototype.toString = function () {
 	if (arguments.length != 0) {

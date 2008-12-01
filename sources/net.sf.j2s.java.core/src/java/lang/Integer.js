@@ -2,7 +2,7 @@ Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Integer", null, fun
 java.lang.Integer = Integer = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Integer, "Integer", Number, Comparable);
+Clazz.decorateAsType (Integer, "Integer", Number, Comparable, null, true);
 Integer.prototype.valueOf = function () { return 0; };
 Integer.toString = Integer.prototype.toString = function () {
 	if (arguments.length != 0) {

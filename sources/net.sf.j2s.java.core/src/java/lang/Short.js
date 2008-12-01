@@ -2,7 +2,7 @@ Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Short", null, funct
 java.lang.Short = Short = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Short, "Short", Number, Comparable);
+Clazz.decorateAsType (Short, "Short", Number, Comparable, null, true);
 Short.prototype.valueOf = function () { return 0; };
 Short.toString = Short.prototype.toString = function () {
 	if (arguments.length != 0) {
