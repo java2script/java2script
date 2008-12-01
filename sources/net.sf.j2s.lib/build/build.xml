@@ -233,6 +233,7 @@
     		<arg value="java/lang/Long.js"/>
     		<arg value="java/lang/Float.js"/>
     		<arg value="java/lang/Double.js"/>
+    		<arg value="java/lang/Byte.js"/>
     		<arg value="java/lang/Boolean.js"/>
     		
     		<arg value="java/lang/Encoding.js"/>
