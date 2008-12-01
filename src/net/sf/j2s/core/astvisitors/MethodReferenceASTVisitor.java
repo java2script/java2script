@@ -33,7 +33,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 
 	private MethodReferenceASTVisitor(String methodSignature) {
 		super();
-		this.methodSignature = methodSignature;
+		this.methodSignature = methodSignature.replaceAll("<[^>]+>", "");
 	}
 	
 	public static boolean checkReference(ASTNode node, String methodSignature) {
