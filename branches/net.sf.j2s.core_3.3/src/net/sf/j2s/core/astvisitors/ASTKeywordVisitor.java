@@ -1061,19 +1061,39 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		buffer.append("try ");
 		node.getBody().accept(this);
 		List catchClauses = node.catchClauses();
-		if (catchClauses.size() > 0) {
-			buffer.append(" catch (e) {\r\n");
-			buffer.append("if (Clazz.instanceOf (e, ");
+		int size = catchClauses.size();
+		if (size > 0) {
+			String catchEName = "e$$";
+			if (size == 1) {
+				CatchClause element = (CatchClause) catchClauses.get(0);
+				SimpleName exName = element.getException().getName();
+				catchEName = exName.getIdentifier();
+			}
+			buffer.append(" catch (" + catchEName + ") {\r\n");
+			buffer.append("if (Clazz.instanceOf (" + catchEName + ", ");
 			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = (CatchClause) iter.next();
 				element.getException().getType().accept(this);
 				buffer.append(")) ");
+				SimpleName exName = element.getException().getName();
+				String eName = exName.getIdentifier();
+				boolean notEName = false;
+				if (!catchEName.equals(eName)) {
+					buffer.append("{\r\n");
+					buffer.append("var ");
+					buffer.append(eName);
+					buffer.append(" = " + catchEName + ";\r\n");
+					notEName = true;
+				}
 				element.getBody().accept(this);
+				if (notEName) {
+					buffer.append("\r\n}");
+				}
 				if (iter.hasNext()) {
-					buffer.append(" else if (Clazz.instanceOf (e, ");
+					buffer.append(" else if (Clazz.instanceOf (" + catchEName + ", ");
 				}
 			}
-			buffer.append(" else {\r\nthrow e;\r\n}\r\n}");
+			buffer.append(" else {\r\nthrow " + catchEName + ";\r\n}\r\n}");
 		}
 		Block finallys = node.getFinally();
 		if (finallys != null) {
