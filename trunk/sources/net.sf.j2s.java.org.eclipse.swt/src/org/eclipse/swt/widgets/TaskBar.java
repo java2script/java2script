@@ -326,7 +326,10 @@ public class TaskBar extends DesktopItem {
 						handleStyle.backgroundImage = "url(\"" + image.url + "\")";
 					}
 				} else {
-					String cssClazzName = item.shell.shellIcon.className;
+					String cssClazzName = null;
+					if (item.shell.shellIcon != null) {
+						cssClazzName = item.shell.shellIcon.className;
+					}
 					if (cssClazzName != null && cssClazzName.indexOf("shell-title-icon-console") != -1) {
 						OS.addCSSClass(item.iconHandle, "shell-item-icon-console");
 					}

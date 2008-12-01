@@ -2101,7 +2101,7 @@ void setSystemMenu () {
 	}
 	 */ {}
 
-	if ((style & SWT.BORDER) == 0 || (style & SWT.RESIZE) != 0) {
+	if ((style & SWT.TOOL) == 0 && (style & (SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		shellIcon = document.createElement("DIV");
 		shellIcon.className = "shell-title-icon";
 		titleBar.appendChild(shellIcon);
