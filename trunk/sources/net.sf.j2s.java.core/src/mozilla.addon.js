@@ -28,12 +28,14 @@ if (navigator.userAgent.toLowerCase ().indexOf ("gecko") != -1) {
 		if (o.base == null) {
 			o.base = "http://archive.java2script.org/";
 		}
-		loadJ2SLibZJS(o.base + (o.alias ? o.alias : o.version) + "/j2slib.z.js", o.onload);
+		o.j2sBase = o.base + (o.alias ? o.alias : o.version) + "/";
+		loadJ2SLibZJS(o.j2sBase + "j2slib.z.js", o.onload);
 	}, 300); // with 0.3 second lag! 0.3 is enough for chrome://*.js to be loaded.
 } else {
 	var o = window["j2s.lib"];
 	if (o.base == null) {
 		o.base = "http://archive.java2script.org/";
 	}
-	loadJ2SLibZJS(o.base + (o.alias ? o.alias : o.version) + "/j2slib.z.js", o.onload);
+	o.j2sBase = o.base + (o.alias ? o.alias : o.version) + "/";
+	loadJ2SLibZJS(o.j2sBase + "j2slib.z.js", o.onload);
 }
