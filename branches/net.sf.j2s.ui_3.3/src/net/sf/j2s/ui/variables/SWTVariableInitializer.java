@@ -57,7 +57,7 @@ public class SWTVariableInitializer extends ClasspathVariableInitializer {
 			File[] swtJars = file.listFiles(new FileFilter() {
 				public boolean accept(File pathname) {
 					String name = pathname.getName().toLowerCase();
-					if (name.startsWith("org.eclipse.swt.") && name.endsWith(".jar")) {
+					if (name.startsWith("org.eclipse.swt.") && name.endsWith(".jar") && name.indexOf("source") == -1) {
 						return true;
 					}
 					return false;
