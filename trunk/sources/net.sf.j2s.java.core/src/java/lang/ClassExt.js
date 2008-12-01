@@ -936,7 +936,11 @@ Clazz.innerFunctions.newInstance = function () {
 	var inF = Clazz.innerFunctionNames;
 	for (var i = 0; i < inF.length; i++) {
 		Object[inF[i]] = Clazz.innerFunctions[inF[i]];
+		Array[inF[i]] = Clazz.innerFunctions[inF[i]];
 	}
+	Array["isArray"] = function () {
+		return true;
+	};
 }
 
 /* public */
