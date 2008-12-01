@@ -2,7 +2,7 @@ Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Byte", null, functi
 java.lang.Byte = Byte = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Byte, "Byte", Number, Comparable);
+Clazz.decorateAsType (Byte, "Byte", Number, Comparable, null, true);
 Byte.prototype.valueOf = function () { return 0; };
 Byte.toString = Byte.prototype.toString = function () {
 	if (arguments.length != 0) {

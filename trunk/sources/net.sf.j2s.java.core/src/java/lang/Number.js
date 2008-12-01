@@ -1,6 +1,6 @@
 Clazz.load (["java.io.Serializable"], "java.lang.Number", null, function () {
 java.lang.Number = Number;
-//Clazz.decorateAsType (Number, "Number", null, java.io.Serializable);
+//Clazz.decorateAsType (Number, "Number", null, java.io.Serializable, null, true);
 Number.__CLASS_NAME__ = "Number";
 Clazz.implementOf (Number, java.io.Serializable);
 Number.equals = Clazz.innerFunctions.equals;

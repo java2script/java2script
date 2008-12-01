@@ -2,7 +2,7 @@ Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Long", null, functi
 java.lang.Long = Long = function () {
 Clazz.instantialize (this, arguments);
 };
-Clazz.decorateAsType (Long, "Long", Number, Comparable);
+Clazz.decorateAsType (Long, "Long", Number, Comparable, null, true);
 Long.prototype.valueOf = function () { return 0; };
 Long.toString = Long.prototype.toString = function () {
 	if (arguments.length != 0) {

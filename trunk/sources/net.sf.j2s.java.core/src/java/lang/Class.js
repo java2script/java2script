@@ -1719,7 +1719,7 @@ Clazz.declareAnonymous = function (prefix, name, clazzParent, interfacez,
 
 /* protected */
 Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent, 
-		interfacez, parentClazzInstance) {
+		interfacez, parentClazzInstance, inheritClazzFuns) {
 	clazzFun.__CLASS_NAME__ = qClazzName;
 	//if (qClazzName != "String" && qClazzName != "Object"
 	//		&& qClazzName != "Number" && qClazzName != "Date") {
@@ -1727,12 +1727,12 @@ Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent,
 	//}
 	clazzFun.equals = Clazz.innerFunctions.equals;
 	clazzFun.getName = Clazz.innerFunctions.getName;
-	/*
-	for (var i = 0; i < Clazz.innerFunctionNames.length; i++) {
-		var methodName = Clazz.innerFunctionNames[i];
-		clazzFun[methodName] = Clazz.innerFunctions[methodName];
+	if (inheritClazzFuns) {
+		for (var i = 0; i < Clazz.innerFunctionNames.length; i++) {
+			var methodName = Clazz.innerFunctionNames[i];
+			clazzFun[methodName] = Clazz.innerFunctions[methodName];
+		}
 	}
-	*/
 	if (parentClazzInstance != null) {
 		Clazz.inheritClass (clazzFun, clazzParent, parentClazzInstance);
 	} else if (clazzParent != null) {
