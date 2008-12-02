@@ -1,0 +1,262 @@
+.color-dialog {
+	position:absolute;
+	font-size:0;
+	width:200px;
+	height:280px;
+	background-color:buttonface;
+	overflow:hidden;
+}
+.color-dialog-custom {
+	width:480px;
+}
+.color-dialog-label {
+	clear:both;
+	white-space:nowrap;
+	cursor:default;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	overflow:hidden;
+	color:black;
+}
+.basic-panel {
+	position:absolute;
+	left:0;
+	top:0;
+	width:200px;
+}
+.custom-panel {
+	position:absolute;
+	right:0;
+	top:0;
+	width:250px;
+	padding:0 4px;
+	display:none;
+}
+.color-dialog-custom .custom-panel {
+	display:block;
+}
+.color-diaglog button {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	overflow:hidden;
+	color:black;
+}
+.define-custom-colors-button, .color-dialog-button, .add-to-custom-colors-button {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	overflow:hidden;
+	color:black;
+	margin:2px;
+	height:22px;
+	padding-bottom:2px;
+}
+@media all and (min-width:0px){/* opera */
+.define-custom-colors-button, .color-dialog-button, .add-to-custom-colors-button {
+	border-width:2px;
+	border-style:solid;
+	background-color:buttonface;
+	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
+}
+}
+
+.define-custom-colors-button {
+	width:196px;
+}
+.add-to-custom-colors-button {
+	width:240px;
+	margin:2px 0;
+}
+.color-dialog-button {
+	width:56px;
+}
+.color-dialog-label span {
+	text-decoration:underline;
+}
+.color-dialog button span {
+	text-decoration:underline;
+}
+.basic-colors-grid {
+	width:200px;
+	_width:201px;
+	height:120px;
+	margin-top:2px;
+	margin-bottom:22px;
+	_margin-bottom:16px;
+}
+.custom-colors-grid {
+	width:200px;
+	_width:201px;
+	height:32px;
+	margin-top:2px;
+	margin-bottom:20px;
+	_margin-bottom:16px;
+}
+.box-focus {
+	float:left;
+	margin:1px;
+	border:1px solid buttonface;
+	width:21px;
+	height:16px;
+}
+.box-select {
+	border:1px solid buttonface;
+	width:19px;
+	height:14px;
+}
+.box-focus:hover {
+	border:1px dotted black;
+}
+.color-selected {
+	border:1px solid black;
+}
+.color-box {
+	border-style:solid;
+	border-color:#666 #ddd #ddd #666;
+	border-width:2px;
+	width:15px;
+	height:10px;
+	background-color:white;
+}
+.color-picker-panel {
+	width:250px;
+	height:180px;
+}
+.color-hs-block {
+	position:absolute;
+	left:4px;
+	width:198px;
+	height:172px;
+	background-image:url('images/color-dialog.png');
+	background-position:left top;
+	background-repeat:no-repeat;
+	border:1px inset white;
+	overflow:hidden;
+}
+.color-cross-picker {
+	position:absolute;
+	left:30px;
+	top:30px;
+}
+.color-cross-picker div {
+	position:absolute;
+	background-color:black;
+	font-size:0;
+	width:3px;
+	height:3px;
+}
+div.color-cross-top {
+	top:-10px;
+	left:-1px;
+	height:5px;
+}
+div.color-cross-bottom {
+	left:-1px;
+	top:5px;
+	height:5px;
+}
+div.color-cross-left {
+	left:-10px;
+	top:-1px;
+	width:5px;
+}
+div.color-cross-right {
+	left:5px;
+	top:-1px;
+	width:5px;
+}
+.color-l-picker {
+	position:absolute;
+	right:0px;
+	height:172px;
+	width:32px;
+}
+.color-strip {
+	position:absolute;
+	top:0;
+	right:16px;
+	border:1px inset white;
+	width:24px;
+	height:172px;
+	background-color:navy;
+	overflow:hidden;
+}
+.color-strip div {
+	font-size:0;
+	width:100%;
+	height:6px;
+	background-color:gray;
+}
+.color-slider {
+	position:absolute;
+	top:0;
+	right:8px;
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+
+	border-style:solid solid solid none;
+	border-color:buttonface;
+	border-right-color:black;
+	border-width:5px;
+	border-left-width:0;
+}
+.color-selector-panel {
+	margin:2px 0;
+	height:68px;
+	_height:66px;
+	overflow:hidden;
+}
+.color-preview {
+	position:relative;
+	width:70px;
+	height:54px;
+	float:left;
+}
+.color-preview-block {
+	width:60px;
+	height:39px;
+	border:1px inset white;
+	margin:2px 0;
+	background-color:blue;
+}
+.color-hsl-selector {
+	position:relative;
+	width:85px;
+	height:54px;
+	float:left;
+}
+.color-rgb-selector {
+	position:relative;
+	width:85px;
+	height:54px;
+	float:left;
+}
+.color-dialog-selector {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	width:22px;
+	_width:20px;
+	height:9pt;
+	float:right;
+	margin:2px;
+}
+.color-hsl-selector .color-dialog-label {
+	width:46px;
+	text-align:right;
+	float:left;
+	margin:2px;
+	height:19px;
+}
+.color-rgb-selector .color-dialog-label {
+	width:46px;
+	text-align:right;
+	float:left;
+	margin:4px 2px 2px 2px;
+	height:17px;
+	_height:16px;
+}
+.swt-widgets-colordialog {
+	width:324px;
+}

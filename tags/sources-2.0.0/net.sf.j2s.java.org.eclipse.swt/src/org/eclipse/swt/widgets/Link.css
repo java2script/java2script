@@ -1,0 +1,36 @@
+.link-default {
+	position:absolute;
+	left:0;
+	top:0;
+	cursor:default;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	white-space:normal;
+	overflow:hidden;
+	background-color:buttonface;
+}
+.link-default a {
+	color:rgb(0,51,153);
+}
+.link-disabled a {
+	color:gray;
+	cursor:default;
+}
+.link-default span {
+	text-decoration:underline;
+}
+.link-default a span {
+	text-decoration:underline;
+}
+.link-wrap {
+	white-space:normal;
+	overflow:hidden;
+}
+.link-border {
+	border-style:inset;
+	border-width:2px;
+	border-color:white;
+}
+.swt-widgets-link {
+	width:324px;
+}

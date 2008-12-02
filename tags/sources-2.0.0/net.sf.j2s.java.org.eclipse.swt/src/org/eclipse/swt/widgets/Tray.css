@@ -1,0 +1,55 @@
+.tray-cell {
+	position: absolute;
+	width: 0;
+	height: 0;
+	font-size: 0;
+	border-style: solid;
+	border-width: 0;
+	border-top-width: 36px;
+	border-right-width: 36px;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.tray-item {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	font-size: 0;
+	cursor: default;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.tray-item-console {
+	background-position:bottom left !important;
+	background-image:url('images/shell-packed.gif');
+}
+.tray-minimized {
+	left: 0;
+	top: 0;
+	border-top-width: 16px;
+	border-right-width: 16px;
+}
+.tray-logo-item {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 36px;
+	height: 36px;
+	cursor: pointer;
+	_cursor: hand;
+	background-image: url('images/z-logo.png');
+	background-position: right bottom;
+	background-repeat: no-repeat;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.tray-float-block {
+	float: left;
+	clear: both;
+	font-size: 0;
+	height: 18px;
+}
+
+.swt-widgets-tray {
+	width:324px;
+}
