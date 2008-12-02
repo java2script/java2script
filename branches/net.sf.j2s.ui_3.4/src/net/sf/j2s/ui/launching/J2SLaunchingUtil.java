@@ -138,7 +138,7 @@ public class J2SLaunchingUtil {
 			
 			if (addonCompatiable) {
 				generateFirefoxAddonPreJavaScript(buf, j2sLibPath, gj2sLibPath,
-						grelativePath, mainType, workingDir, configuration);
+						grelativePath, isJUnit, mainType, workingDir, configuration);
 				
 				buf.append("\t\tClazzLoader.loadClass (\"junit.textui.TestRunner\", function () {\r\n");
 				buf.append("\t\t\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
@@ -293,7 +293,7 @@ public class J2SLaunchingUtil {
 			
 			if (addonCompatiable) {
 				generateFirefoxAddonPreJavaScript(buf, j2sLibPath, gj2sLibPath,
-						grelativePath, mainType, workingDir, configuration);
+						grelativePath, isJUnit, mainType, workingDir, configuration);
 				
 				buf.append("\t\tClazzLoader.loadClass (\"" + mainType + "\", function () {\r\n");
 				String mainTypeName = new ASTTypeVisitor().assureQualifiedName(mainType);
@@ -405,14 +405,14 @@ public class J2SLaunchingUtil {
 
 	private static void generateFirefoxAddonPreJavaScript(StringBuffer buf,
 			String j2sLibPath, String gj2sLibPath, String grelativePath,
-			String mainType, File workingDir, ILaunchConfiguration configuration)
+			boolean isJUnit, String mainType, File workingDir, ILaunchConfiguration configuration)
 			throws CoreException {
 		buf.append("window[\"j2s.lib\"] = {\r\n");
 		File j2slibFolder = new File(workingDir.getAbsolutePath(), j2sLibPath);
 		File j2sRelease = new File(j2slibFolder, ".release");
 		Properties release = new Properties();
 		String alias = "1.0.0";
-		String version = "20071001";
+		String version = "20081203";
 		release.put("alias", alias);
 		release.put("version", version);
 		if (j2sRelease.exists()) {
@@ -449,10 +449,15 @@ public class J2SLaunchingUtil {
 		buf.append("\t/*forward : true,*/\r\n");
 		buf.append("\tmode : \"dailybuild\",\r\n");
 		buf.append("\tonload : function () {\r\n");
-		String j2xStr = J2SLaunchingUtil.generateClasspathJ2X(configuration, "j2slibPath", workingDir);
+		String j2xStr = J2SLaunchingUtil.generateClasspathJ2X(configuration, "j2sBase", workingDir);
 		if (j2xStr != null && j2xStr.length() != 0) {
-			buf.append("\t\tvar o = window[\"j2s.lib\"];\r\n");
-			buf.append("\t\tvar j2slibPath = o.base + (o.alias ? o.alias : o.version) + \"/\";\r\n");
+			buf.append("\t\tvar j2sBase = window[\"j2s.lib\"].j2sBase;\r\n");
+			if (j2xStr.indexOf("\"java\"") == -1) {
+				buf.append("\t\tClazzLoader.packageClasspath (\"java\", j2sBase, true);\r\n");
+			}
+			if (isJUnit && j2xStr.indexOf("\"junit\"") == -1) {
+				buf.append("\t\tClazzLoader.packageClasspath (\"junit\", j2sBase, true);\r\n");
+			}
 			buf.append("\t\t");
 			buf.append(j2xStr.replaceAll("\r\n", "\r\n\t\t").trim());
 			buf.append("\r\n");
@@ -750,6 +755,7 @@ public class J2SLaunchingUtil {
 				String propStr = "j2s.output.path=" + relativePath + "\r\nj2s.resources.list=" + classpath;
 				fModel.load(new ByteArrayInputStream(propStr.getBytes()));
 			}
+			J2SCyclicProjectUtils.emptyTracks();
 			buf.append(fModel.toJ2XString());
 		}
 		
