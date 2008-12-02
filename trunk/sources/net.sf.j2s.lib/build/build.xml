@@ -385,8 +385,8 @@
     			<exclude name="**/*.svn"/>
     		</fileset>
     	</zip>
-    	<zip destfile="${j2s.lib.project}/1.1.0-v${today}.zip">
-    		<zipfileset dir="${j2s.lib.project}/j2slib" prefix="1.1.0-v${today}">
+    	<zip destfile="${j2s.lib.project}/2.0.0-v${today}.zip">
+    		<zipfileset dir="${j2s.lib.project}/j2slib" prefix="2.0.0-v${today}">
     			<exclude name="**/*.zip"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
