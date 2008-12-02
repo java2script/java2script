@@ -411,7 +411,7 @@ public class J2SLaunchingUtil {
 		File j2slibFolder = new File(workingDir.getAbsolutePath(), j2sLibPath);
 		File j2sRelease = new File(j2slibFolder, ".release");
 		Properties release = new Properties();
-		String alias = "1.0.0";
+		String alias = "2.0.0";
 		String version = "20081203";
 		release.put("alias", alias);
 		release.put("version", version);
