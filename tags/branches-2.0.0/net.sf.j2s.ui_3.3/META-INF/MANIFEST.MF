@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Java2Script Development Tools UI
+Bundle-SymbolicName: net.sf.j2s.ui; singleton:=true
+Bundle-Version: 2.0.0
+Bundle-Activator: net.sf.j2s.ui.Java2ScriptUIPlugin
+Bundle-Vendor: j2s.sourceforge.net
+Bundle-Localization: plugin
+Export-Package: net.sf.j2s.ui.resources
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.views,
+ org.eclipse.jface.text,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.ui.editors,
+ org.eclipse.core.resources,
+ org.eclipse.jdt.core,
+ org.eclipse.core.filebuffers,
+ org.eclipse.jdt.ui,
+ org.eclipse.debug.core,
+ org.eclipse.debug.ui,
+ org.eclipse.jdt.debug.ui,
+ org.eclipse.jdt.debug,
+ org.eclipse.jdt.launching,
+ org.eclipse.core.variables,
+ org.eclipse.ltk.core.refactoring,
+ org.eclipse.ltk.ui.refactoring,
+ org.eclipse.ui.console,
+ net.sf.j2s.core,
+ org.eclipse.core.filesystem,
+ org.junit,
+ org.eclipse.jdt.junit,
+ net.sf.j2s.ajax
+Eclipse-AutoStart: true
