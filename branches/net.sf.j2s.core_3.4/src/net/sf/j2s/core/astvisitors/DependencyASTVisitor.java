@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -129,6 +127,12 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 
 	protected void remedyReflectionDependency(Set set) {
+		String[] classNames = getClassNames();
+		for (int i = 0; i < classNames.length; i++) {
+			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
+				return;
+			}
+		}
 		boolean needRemedy = false;;
 		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
 			Object next = iterator.next();
@@ -890,7 +894,32 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
+		boolean toBeIgnored = false;
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			toBeIgnored = true;
+		}
+		if (!toBeIgnored) {
+			String[] pipeMethods = new String[] {
+					"pipeSetup", 
+					"pipeThrough", 
+					"through",
+					"pipeMonitoring",
+					"pipeMonitoringInterval",
+					"setPipeHelper"
+			};
+			for (int i = 0; i < pipeMethods.length; i++) {
+				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+					toBeIgnored = true;
+					break;
+				}
+			}
+		}
+		if (!toBeIgnored) {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+				toBeIgnored = true;
+			}
+		}
+		if (toBeIgnored) {
 			boolean toKeep = false;
 			Javadoc javadoc = node.getJavadoc();
 			if (javadoc != null) {
