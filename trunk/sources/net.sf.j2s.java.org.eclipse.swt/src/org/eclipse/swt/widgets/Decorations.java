@@ -2171,6 +2171,7 @@ void setSystemMenu () {
 					}
 					shell.close();
 				}
+				toReturn(false);
 			}
 		};
 	}
