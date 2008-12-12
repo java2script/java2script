@@ -750,7 +750,7 @@ public Color getBackground () {
 	checkWidget ();
 //	return Color.win32_new (display, getBackgroundPixel ());
 	String bg = handle.style.backgroundColor;
-	if (bg == null || bg.toString().length() == 0) {
+	if (bg == null || ("" + bg).length() == 0) {
 		return new Color(display, "menu");
 	}
 	return new Color(display, bg);
@@ -892,11 +892,11 @@ public Font getFont () {
 	return Font.win32_new (display, hFont);
 	*/
 	String ff = handle.style.fontFamily;
-	if (ff == null || ff.toString().length() == 0) {
+	if (ff == null || ("" + ff).length() == 0) {
 		ff = null;//"Tahoma, Arial, sans-serif";
 	}
 	String fs = handle.style.fontSize;
-	if (fs == null || fs.toString().length() == 0) {
+	if (fs == null || ("" + fs).length() == 0) {
 		fs = "8";
 	}
 	return new Font(display, ff, Integer.parseInt(fs) , SWT.NONE);
@@ -916,7 +916,7 @@ public Color getForeground () {
 	checkWidget ();
 //	return Color.win32_new (display, getForegroundPixel ());
 	String fg = handle.style.color;
-	if (fg == null || fg.toString().length() == 0) {
+	if (fg == null || ("" + fg).length() == 0) {
 		return new Color(display, "black");
 	}
 	return new Color(display, handle.style.color);
