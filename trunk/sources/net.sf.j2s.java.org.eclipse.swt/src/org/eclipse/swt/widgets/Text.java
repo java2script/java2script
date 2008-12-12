@@ -448,6 +448,21 @@ void hookModify() {
 	};
 }
 
+void hookMouseDoubleClick() {
+	super.hookMouseDoubleClick();
+	textHandle.ondblclick = handle.ondblclick;
+}
+
+void hookMouseDown() {
+	super.hookMouseDown();
+	textHandle.onmousedown = handle.onmousedown;
+}
+
+void hookMouseUp() {
+	super.hookMouseUp();
+	textHandle.onmouseup = handle.onmouseup;
+}
+
 /**
  * Adds the listener to the collection of listeners who will
  * be notified when the receiver's text is modified, by sending

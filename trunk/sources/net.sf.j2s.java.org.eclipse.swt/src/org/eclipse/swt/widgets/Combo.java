@@ -1768,7 +1768,7 @@ public Color getBackground() {
 	checkWidget ();
 //	return Color.win32_new (display, getBackgroundPixel ());
 	String bg = textInput.style.backgroundColor;
-	if (bg == null || bg.toString().length() == 0) {
+	if (bg == null || ("" + bg).length() == 0) {
 		return new Color(display, "white");
 	}
 	return new Color(display, bg);
@@ -1781,7 +1781,7 @@ public Color getForeground() {
 	checkWidget ();
 //	return Color.win32_new (display, getForegroundPixel ());
 	String fg = textInput.style.color;
-	if (fg == null || fg.toString().length() == 0) {
+	if (fg == null || ("" + fg).length() == 0) {
 		return new Color(display, "black");
 	}
 	return new Color(display, handle.style.color);
