@@ -4580,6 +4580,7 @@ static Shell getTopShell() {
 		Shell[] ss = disps[k].getShells ();
 		for (int i = 0; i < ss.length; i++) {
 			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/
+					&& ss[i].isVisible()
 					&& ss[i].handle.style.display != "none") {
 				String idx = "" + ss[i].handle.style.zIndex;
 				int zidx = 0;
