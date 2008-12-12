@@ -177,6 +177,9 @@ public class ShellFrameDND implements DragListener {
 		
 		int gHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		int gWidth = document.body.clientWidth;
+		if (document.body.style.overflow == "hidden") {
+			gWidth = document.body.parentNode.clientWidth;
+		}
 		/*
 		 * On mozilla, the mousemove event can contain mousemove
 		 * outside the browser window, so make bound for the dragging.

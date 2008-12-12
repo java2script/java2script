@@ -102,11 +102,12 @@ public class ResizeHandler {
 	}
 	/**
 	 * @j2sNative
-	 * this.monitor.clientWidth = document.body.clientWidth;
+	 * this.monitor.clientWidth = document.body.parentNode.clientWidth;
 	 * this.monitor.clientHeight = O$.getFixedBodyClientHeight(); //document.body.clientHeight;
 	 */
 	public void updateMonitor() {
 	}
+
 	public int getStatus() {
 		return status;
 	}
