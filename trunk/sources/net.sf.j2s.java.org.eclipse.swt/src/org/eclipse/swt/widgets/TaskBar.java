@@ -306,14 +306,14 @@ public class TaskBar extends DesktopItem {
 			TaskItem item = this.items[i];
 			item.itemHandle.style.top = offset + (i * hh + 24) + "px";
 			if (item.shell != null) {
-				if (item.shell.getText() != item.text) {
+				String text = item.shell.getText();
+				if (text != item.text) {
 					for (int j = item.textHandle.childNodes.length - 1; j >= 0; j--) {
-						item.textHandle
-								.removeChild(item.textHandle.childNodes[j]);
+						item.textHandle.removeChild(item.textHandle.childNodes[j]);
 					}
-					item.textHandle.appendChild(document
-							.createTextNode(item.shell.getText()));
-					item.itemHandle.title = item.shell.getText();
+					item.textHandle.appendChild(document.createTextNode(text));
+					item.itemHandle.title = text;
+					item.text = text;
 				}
 				Image image = item.shell.getImage();
 				CSSStyle handleStyle = item.iconHandle.style;
