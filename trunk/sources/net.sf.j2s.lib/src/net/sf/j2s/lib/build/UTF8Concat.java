@@ -28,9 +28,12 @@ public class UTF8Concat {
 	 */
 	public static void main(String[] args) {
 		boolean completelyCompressing = true;
+		boolean noCompressing = false;
 		int indexDelta = 1;
-		if (args.length > 0 && ("true".equals(args[0]) || "false".equals(args[0]))) {
+		if (args.length > 0 && ("true".equals(args[0]) || "false".equals(args[0])
+				|| "none".equals(args[0]))) {
 			completelyCompressing = "true".equals(args[0]);
+			noCompressing = "none".equals(args[0]);
 			indexDelta++;
 		}
 		File dest = new File(args[indexDelta - 1]);
@@ -80,7 +83,9 @@ public class UTF8Concat {
 		try {
 			FileOutputStream fos = new FileOutputStream(dest);
 			fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
-			if (completelyCompressing) {
+			if (noCompressing) {
+				fos.write(buf.toString().getBytes("UTF-8"));
+			} else if (completelyCompressing) {
 				fos.write(RegExCompress.regexCompress(buf.toString()).getBytes("UTF-8"));
 			} else {
 				fos.write(RegExCompress.regexCompress2(buf.toString()).getBytes("UTF-8"));

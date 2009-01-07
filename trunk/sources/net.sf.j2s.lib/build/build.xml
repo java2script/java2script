@@ -86,7 +86,7 @@
         	</classpath>
        	</java>
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slib.z.js"/>
         	
         	<arg value="${j2s.core.bin}"/>
@@ -103,7 +103,7 @@
     	
     	<!-- j2slibcore.z.js does not contains Console -->
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="none"/>
         	<arg value="${j2s.lib.dist}/j2slibcore.z.js"/>
         	
         	<arg value="${j2s.core.bin}"/>
