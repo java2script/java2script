@@ -110,6 +110,24 @@ public class ShellFrameDND implements DragListener {
 		return true;
 	};
 	public boolean dragging(DragEvent e) {
+		
+		int gHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
+		int gWidth = document.body.clientWidth;
+		boolean noScroll = (document.body.style.overflow == "hidden");
+		/**
+		 * @j2sNative
+		 * noScroll = noScroll || document.body.style.overflowX == "hidden";
+		 */ {}
+		if (noScroll) {
+			gWidth = document.body.parentNode.clientWidth;
+		}
+
+		CSSStyle style = e.sourceElement.style;
+		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
+		int dHeight = style.height.length() > 0 ? Integer.parseInt(style.height) : 0;
+		int dX = style.left.length() > 0 ? Integer.parseInt(style.left) : 0;
+		int dY = style.top.length() > 0 ? Integer.parseInt(style.top) : 0;
+		
 		if (this.resize != null) {
 			int xx = this.sourceX;
 			int yy = this.sourceY;
@@ -164,6 +182,13 @@ public class ShellFrameDND implements DragListener {
 				hh += e.deltaY ();
 				document.body.style.cursor = "se-resize";
 			}
+
+			xx = adjustX(e, xx, gWidth, dWidth);
+			yy = adjustY(e, yy, gHeight, dHeight);
+			
+			ww = adjustW(e, ww, gWidth, dX);
+			hh = adjustH(e, hh, gHeight, dY);
+
 			this.frame.style.left = xx + "px";
 			this.frame.style.top = yy + "px";
 //			this.frame.style.width = ((ww > 104) ? ww : 110)  + "px";
@@ -174,49 +199,10 @@ public class ShellFrameDND implements DragListener {
 		}
 		int xx = this.sourceX + e.deltaX ();
 		int yy = this.sourceY + e.deltaY ();
+
+		xx = adjustX(e, xx, gWidth, dWidth);
+		yy = adjustY(e, yy, gHeight, dHeight);
 		
-		int gHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
-		int gWidth = document.body.clientWidth;
-		if (document.body.style.overflow == "hidden") {
-			gWidth = document.body.parentNode.clientWidth;
-		}
-		/*
-		 * On mozilla, the mousemove event can contain mousemove
-		 * outside the browser window, so make bound for the dragging.
-		 */
-		CSSStyle style = e.sourceElement.style;
-		int dWidth = style.width.length() > 0 ? Integer.parseInt(style.width) : 0;
-		if (xx < -dWidth) {
-			xx = -dWidth;
-// It's OK to move outside the width, as there will be scrollbar
-//		} else if (xx > gWidth - 2) {
-//			xx = gWidth - 2;
-		}
-		if (yy < 0) {
-			yy = 0;
-//		} else if (yy > gHeight + 18) {
-//			yy = gHeight + 18;
-		}
-
-		/*
-		 * When no Ctrl key is pressed while dragging, the
-		 * bound will try to attach the edge to the bounds
-		 * of the browser client area.
-		 */
-		if (!((HTMLEvent) e.event.event).ctrlKey) {
-			if (Math.abs (xx - gWidth + dWidth) < 10) {
-				xx = gWidth - dWidth;
-			} else if (Math.abs (xx) < 10) {
-				xx = 0;
-			}
-
-			int dHeight = style.height.length() > 0 ? Integer.parseInt(style.height) : 0;
-			if (Math.abs (yy - gHeight + dHeight + 2) < 10) {
-				yy = gHeight - dHeight - 2;
-			} else if (Math.abs (yy - (-1)) < 10) {
-				yy = -1;
-			}
-		}
 		this.frame.style.left = xx + "px";
 		this.frame.style.top = yy + "px";
 		/*
@@ -233,7 +219,101 @@ public class ShellFrameDND implements DragListener {
 		}
 		*/
 		return true;
+	}
+	private int adjustY(DragEvent e, int yy, int gHeight, int dHeight) {
+		/*
+		 * On mozilla, the mousemove event can contain mousemove
+		 * outside the browser window, so make bound for the dragging.
+		 */
+		if (yy < 0) {
+			yy = 0;
+		// It's OK to move outside the width, as there will be scrollbar
+		// } else if (yy > gHeight + 18) {
+		//	yy = gHeight + 18;
+		}
+		if (!((HTMLEvent) e.event.event).ctrlKey) {
+			int dTop = Math.abs (yy);
+			int dBottom = Math.abs (yy - gHeight + dHeight + 2);
+			if (dBottom < 10) {
+				if (dBottom < dTop) {
+					yy = gHeight - dHeight - 2;
+				} else { // dTop <= dBottom < 10
+					yy = 0;
+				}
+			} else if (dTop < 10) {
+				yy = 0;
+			}
+		}
+		return yy;
+	}
+	private int adjustX(DragEvent e, int xx, int gWidth, int dWidth) {
+		/*
+		 * On mozilla, the mousemove event can contain mousemove
+		 * outside the browser window, so make bound for the dragging.
+		 */
+		if (xx < -dWidth) {
+			xx = -dWidth;
+		// It's OK to move outside the width, as there will be scrollbar
+		// } else if (xx > gWidth - 2) {
+		//	xx = gWidth - 2;
+		}
+
+		/*
+		 * When no Ctrl key is pressed while dragging, the
+		 * bound will try to attach the edge to the bounds
+		 * of the browser client area.
+		 */
+		if (!((HTMLEvent) e.event.event).ctrlKey) {
+			int dLeft = Math.abs (xx);
+			int dRight = Math.abs (xx - gWidth + dWidth + 2);
+			if (dRight < 10) {
+				if (dRight < dLeft) {
+					xx = gWidth - dWidth - 2;
+				} else { // dLeft <= dRight < 10
+					xx = 0;
+				}
+			} else if (dLeft < 10) {
+				xx = 0;
+			}
+		}
+		return xx;
 	};
+	private int adjustH(DragEvent e, int hh, int gHeight, int dY) {
+		if (hh < 0) {
+			hh = 16;
+		}
+		/*
+		 * When no Ctrl key is pressed while dragging, the
+		 * bound will try to attach the edge to the bounds
+		 * of the browser client area.
+		 */
+		if (!((HTMLEvent) e.event.event).ctrlKey) {
+			int dBottom = Math.abs (dY + hh - gHeight + 2);
+			if (dBottom < 10) {
+				hh = gHeight - dY - 2;
+			}
+		}
+		return hh;
+	}
+	private int adjustW(DragEvent e, int ww, int gWidth, int dX) {
+		if (ww < 16) {
+			ww = 16;
+		}
+		/*
+		 * When no Ctrl key is pressed while dragging, the
+		 * bound will try to attach the edge to the bounds
+		 * of the browser client area.
+		 */
+		if (!((HTMLEvent) e.event.event).ctrlKey) {
+			int dRight = Math.abs (dX + ww - gWidth + 2);
+			//System.out.println(dRight);
+			if (dRight < 10) {
+				ww = gWidth - dX - 2;
+			}
+		}
+		return ww;
+	};
+
 	public boolean dragEnded(DragEvent e) {
 		CSSStyle style = this.frame.style;
 		int x = Integer.parseInt (style.left);
