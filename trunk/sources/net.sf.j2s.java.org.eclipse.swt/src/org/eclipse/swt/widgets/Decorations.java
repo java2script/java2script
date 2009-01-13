@@ -566,13 +566,14 @@ Image createIcon (Image image) {
 	return null;
 }
 
-private Element createCSSDiv(String css) {
+private static Element createCSSDiv(Element handle, String css) {
 	Element el = document.createElement("DIV");
 	el.className = css;
 	handle.appendChild(el);
 	return el;
 }
-private void createResizeHandles() {
+
+protected static void createResizeHandles(Element handle) {
 	String[] handles = new String[] {
 			"shell-left-top",
 			"shell-right-top",
@@ -585,7 +586,27 @@ private void createResizeHandles() {
 			"shell-center-bottom"
 	};
 	for (int i = 0; i < handles.length; i++) {
-		createCSSDiv(handles[i]);
+		createCSSDiv(handle, handles[i]);
+	}
+}
+
+protected static void createShadowHandles(Element handle) {
+	String[] handles = new String[] {
+			"shadow-left-top",
+			"shadow-right-top",
+			"shadow-center-top",
+			"shadow-left-middle",
+			"shadow-right-middle",
+			"shadow-center-middle",
+			"shadow-left-bottom",
+			"shadow-right-bottom",
+			"shadow-center-bottom"
+	};
+	for (int i = 0; i < handles.length; i++) {
+		createCSSDiv(handle, handles[i]);
+	}
+	if (OS.isChrome) {
+		handle.style.opacity = "1";
 	}
 }
 
@@ -628,7 +649,21 @@ protected void createHandle() {
 //	}
 	getMonitor().handle.appendChild(handle);
 	if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
-		createResizeHandles();
+		createResizeHandles(handle);
+	}
+	boolean supportShadow = false;
+	/**
+	 * @j2sNative
+	 * supportShadow = window["swt.shell.shadow"];
+	 */ {}
+	if (supportShadow) {
+		if (OS.isIE) {
+			if (!OS.isIE50 && !OS.isIE55 && OS.isIE60) {
+				createShadowHandles(handle);
+			}
+		} else {
+			createShadowHandles(handle);
+		}
 	}
 	if ((style & SWT.NO_TRIM) == 0
 			&& (style & (SWT.TITLE | SWT.MIN | SWT.MAX | SWT.CLOSE)) != 0) {
@@ -638,7 +673,7 @@ protected void createHandle() {
 	if ((style & SWT.TOOL) != 0) {
 		contentCSS += " shell-tool";
 	}
-	contentHandle = createCSSDiv(contentCSS);
+	contentHandle = createCSSDiv(handle, contentCSS);
 	if (DragAndDrop.class != null) {
 		DragAndDrop dnd = new DragAndDrop();
 		shellFrameDND = new ShellFrameDND() {
@@ -947,7 +982,7 @@ public Rectangle getClientArea () {
 	int h = height;
 	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		//h -= 20;
-		h -= Math.max(OS.getContainerHeight(titleBar), 19);
+		h -= Math.max(OS.getContainerHeight(titleBar), 19) + 2;
 		w -= 8;
 		//h -= 8;
 		h -= 5;
@@ -2364,10 +2399,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			cy = h;
 		}
 	}
-	if ((style & SWT.NO_TRIM) != 0) {
-		contentHandle.style.height = height + "px";
-		contentHandle.style.width = width + "px";
-	} else if (titleBar != null) {
+	if (titleBar != null) {
 		int dw = 8;
 		//int dh = 28;
 		int tbh = OS.getContainerHeight(titleBar);
@@ -2377,7 +2409,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		if (OS.isIE && (tbh == 19)) {
 			tbh = 21;
 		}
-		int dh = 5 + tbh;
+		int dh = 5 + tbh + 2;
 		int dww = 8; 
 		if ((style & SWT.BORDER) != 0) {
 			dw += 4;
@@ -2395,24 +2427,28 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			dh += mbh + 1;
 			tbh += mbh + 1;
 		}
-		contentHandle.style.top = (((style & SWT.BORDER) != 0 ? 1 : 1) + tbh) + "px"; 
+		contentHandle.style.top = (((style & SWT.BORDER) != 0 ? 1 : 1) + tbh + 2) + "px"; 
+		contentHandle.style.left = (((style & SWT.BORDER) != 0 ? 1 : 1) + 2) + "px"; 
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
 		updateShellTitle(width - dww + 8);
 	} else {
+		contentHandle.style.top = "0px";
+		contentHandle.style.left = "0px";
 		int dw = 8;
 		int dh = 8;
-		if ((style & SWT.TOOL) != 0 || style == SWT.NONE) {
+		if ((style & SWT.NO_TRIM) != 0) {
 			dw = 0;
 			dh = 0;
-			contentHandle.style.top = "0px";
-			contentHandle.style.left = "0px";
+		} else if ((style & SWT.TOOL) != 0) {
+			dw = 4;
+			dh = 2;
 			cx -= 2;
 			cy -= 2;
 		} else {
-			contentHandle.style.top = 3 + "px";
-			contentHandle.style.left = 1 + "px";
+			dw = 6;
+			dh = 4;
 			cx -= 4;
 			cy -= 4;
 		}
@@ -2426,7 +2462,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 6;
 		cy -= 4;
-	} else {
+	} else if ((style & SWT.NO_TRIM) == 0) {
 		cx -= 2;
 	}
 	Element el = (Element) hWnd;

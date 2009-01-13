@@ -118,6 +118,16 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			}
 		
 		};
+		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.shell.shadow"];
+		 */ {}
+		if (supportShadow) {
+			Decorations.createShadowHandles(handle);
+		}
+
 		Element[] childNodes = document.body.childNodes;
 		Element[] children = new Element[childNodes.length];
 		for (int i = 0; i < childNodes.length; i++) {
@@ -292,6 +302,15 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		itemDiv.title = name;
 		document.body.appendChild (itemDiv);
 		itemDiv.onmouseover = this.handle.onmouseover;
+		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.shell.shadow"];
+		 */ {}
+		if (supportShadow && !OS.isIE) {
+			Decorations.createShadowHandles(itemDiv);
+		}
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;
 		this.shortcutCount++;

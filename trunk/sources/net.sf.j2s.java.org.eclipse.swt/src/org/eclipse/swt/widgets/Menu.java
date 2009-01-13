@@ -430,6 +430,20 @@ void createHandle () {
 	} else {
 		document.body.appendChild(handle);
 		handle.className = "menu-default";
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.shell.shadow"];
+		 */ {}
+		if (supportShadow) {
+			if (OS.isIE) {
+				if (!OS.isIE50 && !OS.isIE55 && OS.isIE60) {
+					Decorations.createShadowHandles(handle);
+				}
+			} else {
+				Decorations.createShadowHandles(handle);
+			}
+		}
 	}
 	
 	btnFocus = document.createElement("BUTTON");
