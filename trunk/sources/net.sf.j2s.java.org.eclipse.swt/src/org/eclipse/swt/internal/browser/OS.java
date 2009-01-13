@@ -66,7 +66,7 @@ public class OS {
 	var geckoPos = dua.indexOf("Gecko");
 	os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
 	os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
-	os.isIE = (document.all)&&(!os.isOpera);
+	os.isIE = (document.all!=null)&&(!os.isOpera);
 	os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
 	os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
 	os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
@@ -830,6 +830,8 @@ public class OS {
 	    } else if (OS.isFirefox || OS.isSafari) {
 	        return (pcHeight == p.offsetHeight 
 	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
+	    } else if (OS.isOpera) {
+	    	return pcHeight;
 	    }
 	    return bcHeight;
 	}
