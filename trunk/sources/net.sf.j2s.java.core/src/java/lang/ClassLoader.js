@@ -203,6 +203,16 @@ ClazzLoader.isGecko = (ClazzLoader.userAgent.indexOf ("gecko") != -1);
  */
 if (ClazzLoader.isOpera) {
 	ClazzLoader.maxLoadingThreads = 1;
+	var index = ClazzLoader.userAgent.indexOf ("opera/");
+	if (index != -1) {
+		var verNumber = 9.0;
+		try {
+			verNumber = parseFloat(ClazzLoader.userAgent.subString (index + 6));
+		} catch (e) {}
+		if (verNumber >= 9.6) {
+			ClazzLoader.maxLoadingThreads = 6;
+		}
+	} 
 }
 
 /**
