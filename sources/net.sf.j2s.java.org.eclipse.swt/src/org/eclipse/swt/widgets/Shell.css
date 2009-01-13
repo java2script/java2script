@@ -20,7 +20,7 @@
 	/*top:0;
 	left:0;*/
 	background-color:buttonface;
-	overflow:hidden;
+	/*overflow:hidden;*/
 	font-size:0;
 	text-align:left;
 	color:black;
@@ -32,9 +32,6 @@
 	position:absolute;
 	left:0;
 	top:23px;
-	margin:3px;
-	margin-top:1px;
-	margin-right:2px;
 	overflow:hidden;
 	background-color:buttonface;
 	/*background-color:navy;*/
@@ -76,7 +73,6 @@
 
 .shell-center-top, .shell-left-middle, .shell-right-middle, .shell-center-bottom {
 	position:absolute;
-	/*background-color:#7777ff;*/
 	z-index:0;
 }
 .shell-center-top {
@@ -107,6 +103,84 @@
 	left:0;
 	bottom:0;
 }
+
+/* Begin of Shell Shadow */
+.shadow-left-top, .shadow-right-top, .shadow-left-bottom, .shadow-right-bottom {
+	position:absolute;
+	width:16px;
+	height:16px;
+	z-index:1;
+}
+.shadow-left-top {
+	left:-16px;
+	top:-16px;
+	background-image: url('images/top-left.png');
+	background-position: right bottom;
+	background-repeat: no-repeat;
+}
+.shadow-right-top {
+	right:-16px;
+	top:-16px;
+	background-image: url('images/top-right.png');
+	background-position: left bottom;
+	background-repeat: no-repeat;
+}
+.shadow-left-bottom {
+	left:-16px;
+	bottom:-16px;
+	background-image: url('images/bottom-left.png');
+	background-position: right top;
+	background-repeat: no-repeat;
+}
+.shadow-right-bottom {
+	right:-16px;
+	bottom:-16px;
+	background-image: url('images/bottom-right.png');
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
+.shadow-center-top, .shadow-left-middle, .shadow-right-middle, .shadow-center-bottom {
+	position:absolute;
+	z-index:0;
+}
+.shadow-center-top {
+	width:100%;
+	height:16px;
+	left:0;
+	top:-16px;
+	background-image: url('images/top.png');
+	background-position: center bottom;
+	background-repeat: repeat-x;
+}
+.shadow-left-middle {
+	left:-16px;
+	top:0;
+	width:16px;
+	height:100%;
+	background-image: url('images/left.png');
+	background-position: right center;
+	background-repeat: repeat-y;
+}
+.shadow-right-middle {
+	right:-16px;
+	top:0;
+	width:16px;
+	height:100%;
+	background-image: url('images/right.png');
+	background-position: left center;
+	background-repeat: repeat-y;
+}
+.shadow-center-bottom {
+	width:100%;
+	height:16px;
+	left:0;
+	bottom:-16px;
+	background-image: url('images/bottom.png');
+	background-position: center top;
+	background-repeat: repeat-x;
+}
+/* End of Shell Shadow */
 
 .shell-title-bar {
 	position:absolute;

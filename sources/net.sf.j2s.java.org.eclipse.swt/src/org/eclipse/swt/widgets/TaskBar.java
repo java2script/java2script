@@ -192,6 +192,16 @@ public class TaskBar extends DesktopItem {
 			};
 		}
 		this.items[this.items.length] = new TaskItem(shell, text, si, div, icon);
+		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.shell.shadow"];
+		 */ {}
+		if (supportShadow && !OS.isIE) {
+			Decorations.createShadowHandles(si);
+		}
+
 		this.updateItems();
 	}
 
@@ -445,6 +455,16 @@ public class TaskBar extends DesktopItem {
 
 		};
 		this.barEl.title = "Doubleclick to set taskbar auto-hide";
+		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.shell.shadow"];
+		 */ {}
+		if (supportShadow && !OS.isIE) {
+			Decorations.createShadowHandles(barEl);
+		}
+
 	}
 
 	/**
