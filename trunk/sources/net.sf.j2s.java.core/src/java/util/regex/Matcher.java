@@ -608,7 +608,7 @@ public final class Matcher implements MatchResult {
 //        this.start = pat.start;
         this.string = cs;
         this.leftBound = 0;
-        this.rightBound = string.length();
+        this.rightBound = string.toString().length();// sgurin: replaced  this.rightBound = string.length();
 //        matchResult = new MatchResultImpl(cs, leftBound, rightBound, pat
 //                .groupCount(), pat.compCount(), pat.consCount());
     }
