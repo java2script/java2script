@@ -132,6 +132,7 @@ thead .tree-head-text {
 	white-space:nowrap;
 	float:left;
 	padding-bottom:1px;
+	position:relative;
 }
 /*
 	
@@ -359,6 +360,17 @@ tree-image tree-image-icon {
 .image-p-5 {
     left:50%;
     margin-left:-0.5em;
+}
+@media all and (-webkit-min-device-pixel-ratio:0){/* safari only */
+.image-p-4, .image-p-5 {
+	margin-bottom:-0.48em;
+}
+}
+*:first-child+html .image-p-4, *:first-child+html .image-p-5 { /* IE7 */
+	margin-bottom:-0.4em;
+}
+* html .image-p-4, * html .image-p-5 { /* IE6 */
+	margin-bottom:-0.4em;
 }
 /* default icon size 16x16 */
 .image-n-4, .image-n-5 {
