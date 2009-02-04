@@ -98,8 +98,8 @@ public class RegExCompress {
 		}
 	}
 	public static String regexCompress(String str) {
-		String regEx = "('[^'\\n\\r]*')|" + // 1:1
-				"(\"[^\"\\n\\r]*\")|" + // 1:2
+		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
+				"(\"[^\\n\\r]*[^\\\\]\")|" + // 1:2
 				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:3
 				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:4,5
 				"(\\s+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:6,7
@@ -114,8 +114,8 @@ public class RegExCompress {
 	}
 	public static String regexCompress2(String str) {
 		String whiteSpace = "[ \\f\\t\\v]";
-		String regEx = "('[^'\\n\\r]*')|" + // 1:1
-				"(\"[^\"\\n\\r]*\")|" + // 1:2
+		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
+				"(\"[^\\n\\r]*[^\\\\]\")|" + // 1:2
 				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:3 // line comments
 				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:4,5 // block comments
 				"(" + whiteSpace + "+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:6,7 // regular expression
