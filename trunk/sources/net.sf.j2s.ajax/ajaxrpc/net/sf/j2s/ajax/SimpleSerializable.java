@@ -57,7 +57,9 @@ buffer[3] = "00000000$"
 var headSize = buffer.join ('').length;
 
 var fields = oClass.declared$Fields;
-if (fields == null) return "";
+if (fields == null) {
+	fields = [];
+}
 for (var i = 0; i < fields.length; i++) {
 	var field = fields[i];
 	var name = field.name;
