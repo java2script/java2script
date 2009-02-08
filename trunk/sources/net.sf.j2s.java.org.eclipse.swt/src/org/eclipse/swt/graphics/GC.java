@@ -151,10 +151,13 @@ public GC(Drawable drawable, int style) {
 	} else if (drawable instanceof Image) {
 		Image img = (Image) drawable;
 		handle = img.handle;
+		img.gcDrawn = true;
+		img.drawings = new int[0][5];
 	} else {
 		handle = document.createElement("DIV");
 		handle.style.position = "absolute";
 	}
+	this.drawable = drawable;
 }
 
 static int checkStyle(int style) {
@@ -1678,18 +1681,20 @@ public void drawRectangle (int x, int y, int width, int height) {
 	OS.Rectangle (handle, x, y, x + width + 1, y + height + 1);
 	OS.SelectObject (handle, hOld);
 	*/
-	Element rect = document.createElement("DIV");
-	rect.style.position = "absolute";
-	rect.style.fontSize = "0px";
-	rect.style.left = x + "px";
-	rect.style.top = y + "px";
-	rect.style.width = width + "px";
-	rect.style.height = height + "px";
-	if (fgColor != null)
-	rect.style.borderColor = fgColor.getCSSHandle();
-	rect.style.borderStyle = "solid";
-	rect.style.borderWidth = "1px";
-	handle.appendChild(rect);
+	if (drawable instanceof Image) {
+		int[] drawing = new int[5];
+		drawing[0] = 1;
+		drawing[1] = x;
+		drawing[2] = y;
+		drawing[3] = width;
+		drawing[4] = height;
+		/**
+		 * @j2sNative
+		 * drawing[5] = this.fgColor == null ? "black" : this.fgColor.getCSSHandle();
+		 */ {}
+		Image image = (Image) this.drawable;
+		image.drawings[image.drawings.length] = drawing;
+	}
 }
 
 /** 
@@ -2544,14 +2549,20 @@ public void fillRectangle (int x, int y, int width, int height) {
 	int dwRop = rop2 == OS.R2_XORPEN ? OS.PATINVERT : OS.PATCOPY;
 	OS.PatBlt(handle, x, y, width, height, dwRop);
 	*/
-	Element rect = document.createElement("DIV");
-	rect.style.position = "absolute";
-	rect.style.left = x + "px";
-	rect.style.top = y + "px";
-	rect.style.width = width + "px";
-	rect.style.height = height + "px";
-	rect.style.backgroundColor = bgColor.getCSSHandle();
-	handle.appendChild(rect);
+	if (drawable instanceof Image) {
+		int[] drawing = new int[5];
+		drawing[0] = 2;
+		drawing[1] = x;
+		drawing[2] = y;
+		drawing[3] = width;
+		drawing[4] = height;
+		/**
+		 * @j2sNative
+		 * drawing[5] = this.bgColor == null ? "white" : this.bgColor.getCSSHandle();
+		 */ {}
+		Image image = (Image) this.drawable;
+		image.drawings[image.drawings.length] = drawing;
+	}
 }
 
 /** 

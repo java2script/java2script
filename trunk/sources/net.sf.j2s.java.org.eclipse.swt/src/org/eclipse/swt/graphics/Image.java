@@ -14,6 +14,7 @@ import java.io.InputStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -90,7 +91,7 @@ public class Image extends Resource implements Drawable {
 	
 	public int width;
 	public int height;
-	private Element imgHandle;
+	//private Element imgHandle;
 	
 	
 	/**
@@ -110,6 +111,10 @@ public class Image extends Resource implements Drawable {
 	 * </p>
 	 */
 	public Element handle;
+	
+	public boolean gcDrawn = false;
+	
+	public int[][] drawings;
 	
 	/**
 	 * specifies the transparent pixel
@@ -200,7 +205,7 @@ void init(Device device, int width, int height) {
 	handle.style.height = height + "px"; 
 //	imgHandle = document.createElement("IMG");
 //	handle.appendChild(imgHandle);
-	imgHandle = handle;
+//	imgHandle = handle;
 //	imgHandle.width = width;
 //	imgHandle.height = height;
 //	imgHandle.src = url;
@@ -2132,6 +2137,63 @@ public void setBackground(Color color) {
 public String toString () {
 	if (isDisposed()) return "Image {*DISPOSED*}";
 	return "Image {" + handle + "}";
+}
+
+public void draw(Element handle) {
+	OS.clearChildren(handle);
+	if (drawings != null) {
+		Element rect = null;
+		for (int i = 0; i < this.drawings.length; i++) {
+			int[] drawing = this.drawings[i];
+			int type = drawing[0];
+			switch (type) {
+			case 1:
+				rect = document.createElement("DIV");
+				rect.style.position = "absolute";
+				rect.style.fontSize = "0";
+				rect.style.left = drawing[1] + "px";
+				if (OS.isFirefox && handle.nodeName == "BUTTON") {
+					rect.style.top = (drawing[2] - drawing[4] / 2 - 3) + "px";
+				} else {
+					rect.style.top = drawing[2] + "px";
+				}
+				rect.style.width = drawing[3] + "px";
+				rect.style.height = drawing[4] + "px";
+				rect.style.borderColor = "" + drawing[5];
+				rect.style.borderStyle = "solid";
+				rect.style.borderWidth = "1px";
+				handle.appendChild(rect);
+				break;
+			case 2:
+				rect = document.createElement("DIV");
+				rect.style.position = "absolute";
+				rect.style.fontSize = "0";
+				rect.style.left = drawing[1] + "px";
+				if (OS.isFirefox) {
+					rect.style.top = (drawing[2] - drawing[4] / 2 - 1) + "px";
+				} else {
+					rect.style.top = drawing[2] + "px";
+				}
+				rect.style.width = drawing[3] + "px";
+				rect.style.height = drawing[4] + "px";
+				rect.style.backgroundColor = "" + drawing[5];
+				handle.appendChild(rect);
+				break;
+			default:
+				;
+			}
+		}
+	} else {
+		Element rect = document.createElement("DIV");
+		rect.style.position = "absolute";
+		rect.style.fontSize = "0";
+		rect.style.left = 0 + "px";
+		rect.style.top = 0 + "px";
+		rect.style.width = width + "px";
+		rect.style.height = height + "px";
+		rect.style.backgroundColor = "black";
+		handle.appendChild(rect);
+	}
 }
 
 /*
