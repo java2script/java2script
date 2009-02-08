@@ -542,7 +542,7 @@ public boolean getExpanded () {
 	OS.SendMessage (hwnd, OS.TVM_GETITEM, 0, tvItem);
 	return (tvItem.state & OS.TVIS_EXPANDED) != 0;
 	*/
-	return false;
+	return expandStatus;
 }
 
 /**

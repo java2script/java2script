@@ -35,8 +35,11 @@ import org.eclipse.swt.internal.xhtml.document;
  * 
  * @since 3.0
  * 
+ * @j2sRequireImport org.eclipse.swt.widgets.TrayItem
+ * 
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.Tray");
+ * $WTC$$.registerCSS ("$wt.widgets.Tray.IE");
  */
 public class Tray extends Widget {
 	int itemCount;
@@ -46,6 +49,8 @@ public class Tray extends Widget {
 	Element[] allCells;
 	Element[] allItems;
 	Element[] allFloats;
+	Element[] outerShadows;
+	boolean supportShadow;
 
 /**
  * 
@@ -106,6 +111,24 @@ private void addTrayLine () {
 		Element cell = allCells[(cellLines - 1) * (cellLines - 2) / 2 + i];
 		cell.style.borderRightColor = lineColor;
 	}
+	if (supportShadow) {
+		if (cellLines % 2 == 0 && outerShadows.length < cellLines + 1) {
+			Element cell = document.createElement ("DIV");
+			cell.className = "tray-cell-outer-shadow";
+			cell.style.top = (cellLines - 1) * 36 + "px";
+			outerShadows[outerShadows.length] = cell;
+			document.body.appendChild (cell);
+			cell = document.createElement ("DIV");
+			cell.className = "tray-cell-outer-wide-shadow";
+			cell.style.top = (cellLines * 36) + "px";
+			outerShadows[outerShadows.length] = cell;
+			document.body.appendChild (cell);
+		}
+		for (int i = 0; i < outerShadows.length; i++) {
+			Element cell = outerShadows[i];
+			cell.style.left = ((cellLines - i - 1) * 36 - 1) + "px";
+		}
+	}
 	boolean supportNotificationCornerFloat = false;
 	/**
 	 * @j2sNative
@@ -148,6 +171,12 @@ private void removeTrayLine () {
 			cell.style.filter = "Chroma(Color=#00ff00);";
 		}
 	}
+	if (supportShadow) {
+		for (int i = 0; i < outerShadows.length; i++) {
+			Element cell = outerShadows[i];
+			cell.style.left = ((cellLines - i - 1) * 36 - 1) + "px";
+		}
+	}
 	boolean supportNotificationCornerFloat = false;
 	/**
 	 * @j2sNative
@@ -163,6 +192,18 @@ private void removeTrayLine () {
 }
 
 void initialize () {
+	/**
+	 * @j2sNative
+	 * this.supportShadow = window["swt.disable.shadow"] != true;
+	 */ {}
+	if (supportShadow) {
+		outerShadows = new Element[0];
+		Element cell = document.createElement ("DIV");
+		cell.className = "tray-cell-outer-wide-shadow";
+		cell.style.top = 0 + "px";
+		outerShadows[outerShadows.length] = cell;
+		document.body.appendChild (cell);
+	}
 	addTrayLine ();
 	addTrayLine ();
 	addTrayLine ();
@@ -373,37 +414,30 @@ void releaseWidget () {
 	}
 	items = null;
 	
-	for (int i = 0; i < allCells.length; i++) {
-		Element cell = allCells[i];
-		if (cell != null) {
-			OS.destroyHandle(cell);
-			cell = null;
-			allCells[i] = null;
-		}
-	}
+	destroyItems(allCells);
 	allCells = null;
 	
-	for (int i = 0; i < allItems.length; i++) {
-		Element item = allItems[i];
-		if (item != null) {
-			OS.destroyHandle(item);
-			item = null;
-			allItems[i] = null;
-		}
-	}
+	destroyItems(allItems);
 	allItems = null;
 
-	for (int i = 0; i < allFloats.length; i++) {
-		Element item = allFloats[i];
-		if (item != null) {
-			OS.destroyHandle(item);
-			item = null;
-			allFloats[i] = null;
-		}
-	}
+	destroyItems(allFloats);
 	allFloats = null;
 
+	destroyItems(outerShadows);
+	outerShadows = null;
+
 	super.releaseWidget ();
+}
+
+private void destroyItems(Element[] els) {
+	if (els == null) return;
+	for (int i = 0; i < els.length; i++) {
+		Element item = els[i];
+		if (item != null) {
+			OS.destroyHandle(item);
+			els[i] = null;
+		}
+	}
 }
 
 }

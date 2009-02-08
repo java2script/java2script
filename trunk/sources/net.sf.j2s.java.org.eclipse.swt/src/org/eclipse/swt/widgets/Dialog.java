@@ -85,6 +85,7 @@ import org.eclipse.swt.*;
 DialogSync2Async = {};
 DialogSync2Async.block = function (dialog, oThis, runnable) {
 if (dialog == null) return;
+org.eclipse.swt.widgets.Dialog.addDialog (dialog);
 dialog.open();
 var shell = dialog.dialogShell;
 if (shell == null) return; 
@@ -98,6 +99,7 @@ Clazz.instantialize (this, arguments);
 Clazz.decorateAsType (cla$$, "DialogSync2Async$1", null, $wt.events.DisposeListener);
 Clazz.defineMethod (cla$$, "widgetDisposed", 
 function (e) {
+org.eclipse.swt.widgets.Dialog.removeDialog (dialog);
 var $runnable = this.f$.runnable;
 var $oThis = this.f$.oThis;
 window.setTimeout (function () {
@@ -120,6 +122,66 @@ public abstract class Dialog {
 	public Shell dialogShell;
 	public Object dialogReturn;
 
+	static Dialog[] activeDialogs;
+
+	static void addDialog(Dialog dialog) {
+		if (activeDialogs == null) {
+			activeDialogs = new Dialog[3];
+		}
+		int length = activeDialogs.length;
+		for (int i = 0; i < length; i++) {
+			if (activeDialogs[i] == dialog) {
+				return;
+			}
+		}
+		for (int i = 0; i < length; i++) {
+			if (activeDialogs[i] == null) {
+				activeDialogs[i] = dialog;
+				return;
+			}
+		}
+		Dialog[] newActiveDialogs = new Dialog[length + 3];
+		System.arraycopy(activeDialogs, 0, newActiveDialogs, 0, length);
+		activeDialogs[length] = dialog;
+	}
+	
+	static void removeDialog(Dialog dialog) {
+		if (activeDialogs == null) {
+			return;
+		}
+		int length = activeDialogs.length;
+		for (int i = 0; i < length; i++) {
+			if (activeDialogs[i] == dialog) {
+				activeDialogs[i] = null;
+				return;
+			}
+		}
+	}
+	
+	static void checkExistedDialogs(Shell shell) {
+		if (activeDialogs == null) {
+			return;
+		}
+		for (int i = 0; i < activeDialogs.length; i++) {
+			Dialog dialog = activeDialogs[i];
+			if (dialog != null && dialog.parent == shell) {
+				dialog.dialogShell.bringToTop();
+			}
+		}
+	}
+	
+	static boolean isDialog(Shell shell) {
+		if (activeDialogs == null) {
+			return false;
+		}
+		for (int i = 0; i < activeDialogs.length; i++) {
+			Dialog dialog = activeDialogs[i];
+			if (dialog != null && dialog.dialogShell == shell) {
+				return true;
+			}
+		}
+		return false;
+	}
 /**
  * Constructs a new instance of this class given only its
  * parent.

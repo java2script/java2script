@@ -50,6 +50,41 @@
 	height: 18px;
 }
 
+.tray-cell-inner-wide-shadow {
+	position:absolute;
+	width:48px;
+	height:48px;
+	background-image: url('images/strip-inner-wide.png');
+	background-position: right bottom;
+	background-repeat: no-repeat;
+}
+.tray-cell-inner-shadow {
+	position:absolute;
+	width:36px;
+	height:36px;
+	background-image: url('images/strip-inner.png');
+	background-position: right bottom;
+	background-repeat: no-repeat;
+}
+.tray-cell-outer-wide-shadow {
+	position:absolute;
+	width:60px;
+	height:60px;
+	background-color:transparent;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAB7UlEQVR4nGNIS0tjGIT4CBAvBOIOIC4F4lQgDgdibyB2BGJzINYHYnUgVgRiaSAWA2JBIOYFYi4gZgdiViBmBmJGKGYYaI9hwzTzLAgPpMewYZp6FoQHymPYMM09C8ID4TFsmC6eBWF6ewwbpptnQZieHsOG6epZEKaXx7BhunsWhOnhMWx4QDwLwrT2GDY8YJ4FYVp6DBseUM+CMK08hg0PuGdBmBYew4YHhWdBmNoew4YHjWdBmJoew4YHlWdBmFoew4YHnWdBmBoew4YHpWdBmIEahqDhQetZEGaglkFQPKg9C8IMVDRs0HsWhKll0JDwLAhTw5Ah41kQptSAIeVZEKZE85DzLAiTq3FIehaEydE0ZD0LwqRqGNKeBWFSFA95z4IwsQqHhWdBmBhFw8azIExIwbDyLAjjkxx2ngVhXBLD0rMgjE1w2HoWhNEFhrVnQRiZM+w9C8IwxojwLAiDiBHjWRAGESPGsyAMIkaMZ0EYRIwYz4IwiBgxngVhEDFiPAvCIGLEeBaEQcSI8SwIg4gR41kQBhEjxrMgDCJGjGdBGESMGM+CMIgYMZ4FYRAxYjwLwiBixHgWhEHEiPEsCIOIEeNZEAYRI8azIAwiRoxnQRhEjBjPgjCIGDGeBWEQMWI8C8ID7gB6YwDBdJsCtiZfcAAAAABJRU5ErkJggg==);
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+.tray-cell-outer-shadow {
+	position:absolute;
+	width:36px;
+	height:36px;
+	background-color:transparent;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAA4UlEQVR4nGNIS0tjGEx4wB2AjgfcAWh460A7ABlvBeLpA+0IGAY7BogbB9ohIAx3DBDnDyrHAHHCoHIMEAcPKscAsfugcgwQ2w4qxwCxyaByDBDrDCrHALHqoHIMEMsNKscAseSgcgwQiwwqxwAx/6ByDBDzDCrHADHnoHIMELMNKscAMcugcgwQMw0qxwAx46ByTBoFDqKJY0BmDyrHpJHhIJo6Jo1EB9HcMWkkOIgujkkj0kF0c0waEQ6iq2PSCDiI7o5Jw+OgAXFMGg4HDZhj0rA4aEAdk4bmoAF3DAgDACxckICqNdGgAAAAAElFTkSuQmCC);
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
 .swt-widgets-tray {
 	width:324px;
 }

@@ -12,6 +12,9 @@
 	border-style:solid solid solid none;
 	border-width:1px;
 	border-color:buttonshadow;
+	font-size:0;
+	margin:0;
+	padding:0;
 	opacity:0.85;
 	filter:Alpha(Opacity=85);
 }
@@ -19,6 +22,9 @@
 	position:absolute;
 	left:0;
 	width:8px;
+	font-size:0;
+	margin:0;
+	padding:0;
 	background-color:rgb(57,61,254);
 	border-style:solid solid solid none;
 	border-width:1px;
@@ -30,16 +36,15 @@
 	display:block;
 	text-decoration:none;
 	cursor:default;
-	font-family:Arial, sans-serif;
-	font-size:10pt;
-	text-align:left;
 	position:absolute;
 	left:16px;
 	width:150px;
-	height:2em;
+	height:26px;
+	font-size:0;
+	margin:0;
+	padding:0;
 	background-color:buttonface;
 	border:1px solid navy;
-	color:buttontext;
 	opacity:0.75;
 	filter:Alpha(Opacity=75);
 }
@@ -89,6 +94,10 @@ a.shell-item:focus {
 }
 .shell-item-text {
 	position:relative;
+	text-align:left;
+	font-family:Arial, sans-serif;
+	font-size:10pt;
+	color:buttontext;
 	/*width:108px;*/
 	overflow:hidden;
 	height:1.5em;

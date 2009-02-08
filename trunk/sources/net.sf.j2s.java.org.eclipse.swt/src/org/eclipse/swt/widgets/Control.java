@@ -733,6 +733,7 @@ protected void forceResize () {
 public Accessible getAccessible () {
 	checkWidget ();
 //	if (accessible == null) accessible = new_Accessible (this);
+	if (accessible == null) accessible = new Accessible (this);
 	return accessible;
 }
 

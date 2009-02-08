@@ -151,12 +151,12 @@ public class About {
 		gd_homepageLink.verticalIndent = 8;
 		homepageLink.setLayoutData(gd_homepageLink);
 		homepageLink.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		homepageLink.setText("Home: <a href=\"http:/" + "/java2script.org/\">java2script.org</a> / <a href=\"http:/" + "/j2s.sourceforge.net/\">j2s.sourceforge.net</a>");
+		homepageLink.setText("Home: <a href=\"http://java2script.org/\">java2script.org</a> / <a href=\"http://j2s.sourceforge.net/\">j2s.sourceforge.net</a>");
 
 		final Link founderLink = new Link(description, SWT.NONE);
 		founderLink.setFont(j2sFont);
 		founderLink.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		founderLink.setText("Founder: <a href=\"http:/" + "/zhourenjian.name/\">Zhou Renjian</a>");
+		founderLink.setText("Founder: <a href=\"http://zhourenjian.name/\">Zhou Renjian</a>");
 
 		Composite blank = new Composite(description, SWT.NONE);
 		blank.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));

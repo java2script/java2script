@@ -1,0 +1,124 @@
+/* IE 7.0 + */
+*:first-child+html .shadow-left-top {
+	background-image: url('images/top-left.png');
+}
+*:first-child+html .shadow-right-top {
+	background-image: url('images/top-right.png');
+}
+*:first-child+html .shadow-left-bottom {
+	background-image: url('images/bottom-left.png');
+}
+*:first-child+html .shadow-right-bottom {
+	background-image: url('images/bottom-right.png');
+}
+*:first-child+html .shadow-center-top {
+	background-image: url('images/top.png');
+}
+*:first-child+html .shadow-left-middle {
+	background-image: url('images/left.png');
+}
+*:first-child+html .shadow-center-bottom {
+	background-image: url('images/bottom.png');
+}
+*:first-child+html .shadow-right-middle {
+	background-image: url('images/right.png');
+}
+/* IE 6.0 - */
+* html .shadow-left-top,
+* html .shadow-right-top,
+* html .shadow-left-bottom,
+* html .shadow-right-bottom,
+* html .shadow-center-top,
+* html .shadow-left-middle,
+* html .shadow-right-middle,
+* html .shadow-center-bottom {
+	background-image: none;
+}
+* html .shadow-left-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/top-left.png', sizingMethod='scale');
+}
+* html .shadow-right-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/top-right.png', sizingMethod='scale');
+}
+* html .shadow-left-bottom {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/bottom-left.png', sizingMethod='scale');
+}
+* html .shadow-right-bottom {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/bottom-right.png', sizingMethod='scale');
+}
+* html .shadow-center-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/top.png', sizingMethod='scale');
+}
+* html .shadow-left-middle {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/left.png', sizingMethod='scale');
+}
+* html .shadow-right-middle {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/right.png', sizingMethod='scale');
+}
+* html .shadow-center-bottom {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/bottom.png', sizingMethod='scale');
+}
+
+/* IE 7.0 + */
+*:first-child+html .shadow-narrow-left-top {
+	background-image: url('images/narrow-top-left.png');
+}
+*:first-child+html .shadow-narrow-right-top {
+	background-image: url('images/narrow-top-right.png');
+}
+*:first-child+html .shadow-narrow-left-bottom {
+	background-image: url('images/narrow-bottom-left.png');
+}
+*:first-child+html .shadow-narrow-right-bottom {
+	background-image: url('images/narrow-bottom-right.png');
+}
+*:first-child+html .shadow-narrow-center-top {
+	background-image: url('images/narrow-top.png');
+}
+*:first-child+html .shadow-narrow-left-middle {
+	background-image: url('images/narrow-left.png');
+}
+*:first-child+html .shadow-narrow-center-bottom {
+	background-image: url('images/narrow-bottom.png');
+}
+*:first-child+html .shadow-narrow-right-middle {
+	background-image: url('images/narrow-right.png');
+}
+/* IE 6.0 - */
+* html .shadow-narrow-left-top,
+* html .shadow-narrow-right-top,
+* html .shadow-narrow-left-bottom,
+* html .shadow-narrow-right-bottom,
+* html .shadow-narrow-center-top,
+* html .shadow-narrow-left-middle,
+* html .shadow-narrow-right-middle,
+* html .shadow-narrow-center-bottom {
+	background-image: none;
+}
+* html .shadow-narrow-left-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-top-left.png', sizingMethod='scale');
+}
+* html .shadow-narrow-right-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-top-right.png', sizingMethod='scale');
+}
+* html .shadow-narrow-left-bottom {s
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-bottom-left.png', sizingMethod='scale');
+}
+* html .shadow-narrow-right-bottom {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-bottom-right.png', sizingMethod='scale');
+}
+* html .shadow-narrow-center-top {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-top.png', sizingMethod='scale');
+}
+* html .shadow-narrow-left-middle {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-left.png', sizingMethod='scale');
+}
+* html .shadow-narrow-right-middle {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-right.png', sizingMethod='scale');
+}
+* html .shadow-narrow-center-bottom {
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-bottom.png', sizingMethod='scale');
+}
+.swt-widgets-shell-ie {
+	width:324px;
+}

@@ -107,6 +107,8 @@ import org.eclipse.swt.internal.xhtml.window;
  * @see #getMaximized
  * @see Shell
  * @see SWT
+ * 
+ * @j2sRequireImport org.eclipse.swt.internal.browser.OS
  */
 
 public class Decorations extends Canvas {
@@ -289,6 +291,12 @@ void bringToTop (boolean parentShell, boolean childShells) {
 				s.bringToTop(false, true);
 			}
 		}
+		
+		Dialog.checkExistedDialogs((Shell) this);
+	}
+	
+	if (modalHandle != null) {
+		modalHandle.style.zIndex = "" + (Integer.parseInt("" + handle.style.zIndex) - 1);
 	}
 }
 
@@ -608,6 +616,32 @@ protected static void createShadowHandles(Element handle) {
 	if (OS.isChrome) {
 		handle.style.opacity = "1";
 	}
+	if (OS.isIE) {
+		handle.style.filter = "";
+	}
+}
+
+protected static void createNarrowShadowHandles(Element handle) {
+	String[] handles = new String[] {
+			"shadow-narrow-left-top",
+			"shadow-narrow-right-top",
+			"shadow-narrow-center-top",
+			"shadow-narrow-left-middle",
+			"shadow-narrow-right-middle",
+			"shadow-narrow-center-middle",
+			"shadow-narrow-left-bottom",
+			"shadow-narrow-right-bottom",
+			"shadow-narrow-center-bottom"
+	};
+	for (int i = 0; i < handles.length; i++) {
+		createCSSDiv(handle, handles[i]);
+	}
+	if (OS.isChrome) {
+		handle.style.opacity = "1";
+	}
+	if (OS.isIE) {
+		handle.style.filter = "";
+	}
 }
 
 protected void createHandle() {
@@ -654,16 +688,10 @@ protected void createHandle() {
 	boolean supportShadow = false;
 	/**
 	 * @j2sNative
-	 * supportShadow = window["swt.shell.shadow"];
+	 * supportShadow = window["swt.disable.shadow"] != true;
 	 */ {}
 	if (supportShadow) {
-		if (OS.isIE) {
-			if (!OS.isIE50 && !OS.isIE55 && OS.isIE60) {
-				createShadowHandles(handle);
-			}
-		} else {
-			createShadowHandles(handle);
-		}
+		createShadowHandles(handle);
 	}
 	if ((style & SWT.NO_TRIM) == 0
 			&& (style & (SWT.TITLE | SWT.MIN | SWT.MAX | SWT.CLOSE)) != 0) {
@@ -2267,13 +2295,27 @@ public void setText (String string) {
 //	TCHAR buffer = new TCHAR (0, string, true);
 //	OS.SetWindowText (handle, buffer);
 	if (shellTitle != null && shellTitle.childNodes != null) {
-		for (int i = shellTitle.childNodes.length - 1; i >= 0; i--) {
-			if (shellTitle.childNodes[i] != null) {
-				shellTitle.removeChild(shellTitle.childNodes[i]);
-			}
-		}
+		OS.clearChildren(shellTitle);
 		shellTitle.appendChild(document.createTextNode(string));
 		
+		if ((this.style & SWT.TOOL) == 0 && Display.getTopShell() == this)
+		/**
+		 * @j2sNative
+		 * var title = this.getText();
+		 * if (title != null) {
+		 * 	// Record default title
+		 * 	if (window["document.title"] == null) {
+		 * 		window["document.title"] = document.title;
+		 * 	}
+		 * 	if (window["document.title.setter"] == null) {
+		 * 		document.title = title; // set title directly
+		 * 	} else {
+		 * 		// document.title.setter may modify title
+		 * 		window["document.title.setter"] (title);
+		 * 	}
+		 * }
+		 */ {}
+
 		if (this.parent == null && (this.getStyle() & SWT.TOOL) == 0
 				&& display.taskBar != null) {
 			display.taskBar.handleApproaching();

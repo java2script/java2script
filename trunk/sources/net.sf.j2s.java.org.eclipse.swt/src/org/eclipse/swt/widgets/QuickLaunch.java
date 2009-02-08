@@ -32,7 +32,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 
 	static QuickLaunch defaultQuickLaunch = null;
 	
-	private int shortcutCount = 0;
+	int shortcutCount = 0;
 	private Element[] shortcutItems = new Element[0];
 	private boolean alreadyInitialized = false;
 
@@ -122,7 +122,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.shell.shadow"];
+		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
 			Decorations.createShadowHandles(handle);
@@ -306,10 +306,10 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.shell.shadow"];
+		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
-		if (supportShadow && !OS.isIE) {
-			Decorations.createShadowHandles(itemDiv);
+		if (supportShadow) {
+			Decorations.createNarrowShadowHandles(itemDiv);
 		}
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;

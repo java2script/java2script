@@ -16,7 +16,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.MenuListener;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -224,6 +223,7 @@ void _setVisible (boolean visible) {
 		Rectangle clientArea = getDisplay().getPrimaryMonitor().getClientArea();
 		style.zIndex = "1" + window.currentTopZIndex;
 		style.display = "block";
+		handle.style.height = "";
 		int height = OS.getContainerHeight(handle);
 		if (OS.isIE || OS.isOpera) {
 			int maxWidth = 0;
@@ -247,6 +247,7 @@ void _setVisible (boolean visible) {
 			int width = OS.getContainerWidth(handle);
 			handle.style.width = (width + 32) + "px";
 		}
+		handle.style.height = height + "px";
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
 		if (y + height > clientArea.y + clientArea.height) {
@@ -433,16 +434,10 @@ void createHandle () {
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.shell.shadow"];
+		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			if (OS.isIE) {
-				if (!OS.isIE50 && !OS.isIE55 && OS.isIE60) {
-					Decorations.createShadowHandles(handle);
-				}
-			} else {
-				Decorations.createShadowHandles(handle);
-			}
+			Decorations.createNarrowShadowHandles(handle);
 		}
 	}
 	
@@ -470,7 +465,7 @@ void createHandle () {
 					Element el = menuItems[index].handle;
 					/**
 					 * @j2sNative el.onmouseover();
-					 */ {}
+					 */ { el.toString(); }
 				} else {
 					Element e = menuItems[index].handle;
 					index = nextMenuItemIndex(-1);
@@ -479,7 +474,7 @@ void createHandle () {
 					 * @j2sNative
 					 * e.onmouseout();
 					 * el.onmouseover();
-					 */ {}
+					 */ { e.toString(); el.toString(); }
 				} 
 			} else if (evt.keyCode == 40 || evt.keyCode == 98) { // down
 				if (index == -1) {
@@ -487,7 +482,7 @@ void createHandle () {
 					Element el = menuItems[index].handle;
 					/**
 					 * @j2sNative el.onmouseover();
-					 */ {}
+					 */ { el.toString(); }
 				} else {
 					Element e = menuItems[index].handle;
 					index = nextMenuItemIndex(1);
@@ -496,7 +491,7 @@ void createHandle () {
 					 * @j2sNative
 					 * e.onmouseout(); 
 					 * el.onmouseover();
-					 */ {}
+					 */ { e.toString(); el.toString(); }
 				}
 			} else if (evt.keyCode == 37 || evt.keyCode == 100) { // left
 				if ((style & SWT.BAR) != 0) {
@@ -505,7 +500,7 @@ void createHandle () {
 						Element el = menuItems[index].handle;
 						/**
 						 * @j2sNative el.onmouseover();
-						 */ {}
+						 */ { el.toString(); }
 					} else {
 						Element e = menuItems[index].handle;
 						index = nextMenuItemIndex(-1);
@@ -514,7 +509,7 @@ void createHandle () {
 						 * @j2sNative
 						 * e.onmouseout();
 						 * el.onmouseover();
-						 */ {}
+						 */ { e.toString(); el.toString(); }
 					} 
 				}
 			} else if (evt.keyCode == 39 || evt.keyCode == 102) { // up
@@ -524,7 +519,7 @@ void createHandle () {
 						Element el = menuItems[index].handle;
 						/**
 						 * @j2sNative el.onmouseover();
-						 */ {}
+						 */ { el.toString(); }
 					} else {
 						Element e = menuItems[index].handle;
 						index = nextMenuItemIndex(1);
@@ -533,7 +528,7 @@ void createHandle () {
 						 * @j2sNative
 						 * e.onmouseout(); 
 						 * el.onmouseover();
-						 */ {}
+						 */ { e.toString(); el.toString(); }
 					}
 				}
 			} else {
@@ -543,7 +538,7 @@ void createHandle () {
 						/**
 						 * @j2sNative
 						 * e.onclick ();
-						 */ {}
+						 */ { e.toString(); }
 						break;
 					}
 				}
@@ -863,7 +858,7 @@ boolean isAccelerated(HTMLEvent keyEvent){
 				 * @j2sNative
 				 * item.handle.onclick();
 				 * 
-				 */{}
+				 */{ item.toString(); }
 			}
 		}
 	}

@@ -139,11 +139,24 @@ $WTC$$.getCSSRuleID = function (clazzName) {
  */
 /* public */
 $WTC$$.registerCSS = function (clazzName, cssText) {
+	var isDebugging = (window["swt.debugging"] == true);
+	if (!isDebugging) {
+		cssText = null;
+	}
 	if ($WTC$$.cssAlreadyAggregated || window["ClazzLoader"] == null) {
-		return ;
+		return;
+	}
+	if (!ClazzLoader.isIE && clazzName.indexOf (".IE") != -1) {
+		return;
 	}
 	clazzName = ClazzLoader.unwrapArray ([clazzName])[0];
-	var cssPath = ClazzLoader.getClasspathFor (clazzName, false, ".css");
+	var cssPath = null;
+	var idx = clazzName.indexOf (".IE");
+	if (idx != -1) {
+		cssPath = ClazzLoader.getClasspathFor (clazzName.substring(0, idx), false, ".IE.css");
+	} else {
+		cssPath = ClazzLoader.getClasspathFor (clazzName, false, ".css");
+	}
 	
 	var basePath = ClazzLoader.getClasspathFor (clazzName, true);
 	var cssID = "c$$." + clazzName;
@@ -188,20 +201,20 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 				//}
 			}
 			/*
-			 * Fix the css images location
+			 * Fix the css images location: url('...') or filter:...(src='...')
 			 */
-			cssText = cssText.replace (/(url\s*\(\s*['"])(.*)(['"])/ig, 
+			cssText = cssText.replace (/((url\s*\(\s*['"])|(src\s*=\s*['"]))(.*)(['"])/ig, 
 					//"
-					function ($0, $1, $2, $3) {
-						if ($2.indexOf ("/") == 0
-								|| $2.indexOf ("http://") == 0 
-								|| $2.indexOf ("https://") == 0
-								|| $2.indexOf ("file:/") == 0
-								|| $2.indexOf ("ftp://") == 0
-								|| $2.indexOf ("javascript:") == 0) {
+					function ($0, $1, $2, $3, $4, $5) {
+						if ($4.indexOf ("/") == 0
+								|| $4.indexOf ("http://") == 0 
+								|| $4.indexOf ("https://") == 0
+								|| $4.indexOf ("file:/") == 0
+								|| $4.indexOf ("ftp://") == 0
+								|| $4.indexOf ("javascript:") == 0) {
 							return $0;
 						}
-						return $1 + prefix + $2 + $3;
+						return $1 + prefix + $4 + $5;
 					});
 			if (document.createStyleSheet != null) {
 				/*
