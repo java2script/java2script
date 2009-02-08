@@ -4,12 +4,12 @@
 	border-style:groove solid solid groove;
 	border-color:white gray gray white;
 	background-color:menu;
-	font-family:Tahoma, Arial, sans-serif;
-	font-size:8pt;
 	cursor:default;
 	padding:1px 0 1px 1px;
 	display:none;
 	text-align:left;
+	font-size:0;
+	margin:0;
 }
 * html .menu-default {
 	padding-left:0;
@@ -17,6 +17,8 @@
 .menu-item {
 	position:relative;
 	overflow:hidden;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
 	margin:0 2px 0 1px;
 	padding:2px;
 	height:13px;

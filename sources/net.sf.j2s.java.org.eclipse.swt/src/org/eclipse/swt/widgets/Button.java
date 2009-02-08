@@ -812,11 +812,11 @@ public void setAlignment (int alignment) {
 	style |= alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
 		CSSStyle handleStyle = null;
-		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+//		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 			handleStyle = btnText.style;
-		} else {
-			handleStyle = btnHandle.style;
-		}
+//		} else {
+//			handleStyle = btnHandle.style;
+//		}
 		if ((style & SWT.LEFT) != 0) {
 			btnText.style.textAlign = "left";
 			handleStyle.backgroundPosition = "left center";
@@ -1028,7 +1028,7 @@ public void setImage (Image image) {
 			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 			handleStyle.backgroundRepeat = "no-repeat";
 			String bgXPos = "center";
-			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+//			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 				if ((style & SWT.RIGHT) != 0) {
 					bgXPos = "right";
 				} else if ((style & SWT.CENTER) != 0) {
@@ -1036,9 +1036,9 @@ public void setImage (Image image) {
 				} else {
 					bgXPos = "left";
 				}
-			} else if ((style & SWT.PUSH) != 0) {
-				bgXPos = "left";
-			}
+//			} else if ((style & SWT.PUSH) != 0) {
+//				bgXPos = "left";
+//			}
 			handleStyle.backgroundPosition = bgXPos + " center";
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 		}
@@ -1055,6 +1055,8 @@ public void setImage (Image image) {
 //		for (int i = 0; i < image.handle.childNodes.length; i++) {
 //			handle.insertBefore(image.handle.childNodes[i], txt);
 //		}
+	} else if (this.image != null) {
+		this.image.draw(btnHandle);
 	}
 	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
 		boolean emptyText = (image != null || text.length() == 0);

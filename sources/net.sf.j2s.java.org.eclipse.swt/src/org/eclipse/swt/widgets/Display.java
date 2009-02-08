@@ -111,6 +111,8 @@ import org.eclipse.swt.internal.xhtml.window;
  * @see #sleep
  * @see Device#dispose
  * 
+ * @j2sRequireImport org.eclipse.swt.widgets.Tray
+ * 
  * @j2sSuffix
 // Only IE need to release the resources so that no memory is leaked
 if (window.attachEvent) {
@@ -951,7 +953,10 @@ void destroyDisplay () {
 public void dispose() {
 	Shell[] shells = getShells();
 	if (shells == null || shells.length == 0) {
-		super.dispose();
+		if (shortcutBar == null || shortcutBar.shortcutCount == 0) {
+			// only dispose Display object in ALAA mode
+			super.dispose();
+		}
 	}
 	//super.dispose();
 }
@@ -2533,14 +2538,22 @@ void initializeDekstop() {
 	Element el = document.getElementById("_console_");
 	if (el != null) {
 		el.style.display = "none";
-		insertOpenConsoleLink(el);
+		/**
+		 * @j2sNative
+		 * window.setTimeout(org.eclipse.swt.widgets.Display.insertOpenConsoleLink, 500);
+		 */ {}
+		// insertOpenConsoleLink();
 	} else 
 	/**
 	 * @j2sNative
+	 * if (window["C_$"] == null && Console != null) {
+	 * 	C_$ = Console;
+	 * 	C_$.createC_$Window = Console.createConsoleWindow;
+	 * }
 	 * if (Console == null) Console = C_$;
 	 * if (C_$.createC_$Window.wrapped == null) {
 	 * 	C_$.createC_$Window_ = Console.createC_$Window;
-	 * 	C_$.createC_$Window = function (parentEl) {
+	 * 	C_$.createConsoleWindow = C_$.createC_$Window = function (parentEl) {
 	 * 		var console = C_$.createC_$Window_ (parentEl);
 	 * 		console.style.display = "none";
 	 * 		$wt.widgets.Display.insertOpenConsoleLink(console);
@@ -2552,7 +2565,7 @@ void initializeDekstop() {
 
 }
 
-static void insertOpenConsoleLink(Element el) {
+static void insertOpenConsoleLink() {
 	TrayItem item = new TrayItem(getTray(), SWT.NONE);
 	item.setText("Console");
 	item.handle.className = "tray-item tray-item-console";

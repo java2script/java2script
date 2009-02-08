@@ -300,6 +300,17 @@ public class NotificationCorner extends DesktopItem {
 		for (int i = 0; i < tray.allItems.length; i++) {
 			tray.allItems[i].style.display = minimized ? "none" : "block";
 		}
+		if (tray.supportShadow) {
+			for (int i = 0; i < tray.outerShadows.length; i++) {
+				Element cell = tray.outerShadows[i];
+				if (minimized) {
+					cell.style.left = (- i * 36 - 21) + "px";
+				} else {
+					cell.style.left = ((tray.cellLines - i - 1) * 36 - 1) + "px";
+				}
+			}
+		}
+
 		handle.style.display = minimized ? "none" : "block";
 		return true;
 	}

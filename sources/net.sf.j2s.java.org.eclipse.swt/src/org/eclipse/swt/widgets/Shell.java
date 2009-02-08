@@ -21,7 +21,6 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.window;
 
-
 /**
  * Instances of this class represent the "windows"
  * which the desktop or "window manager" is managing.
@@ -106,6 +105,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * 
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.Shell");
+ * $WTC$$.registerCSS ("$wt.widgets.Shell.IE");
  * @j2sSuffix
 Sync2Async = {};
 Sync2Async.block = function (shell, oThis, runnable) {

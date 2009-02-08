@@ -91,6 +91,15 @@ public class MaximizedTitle extends DesktopItem {
 		tbc.style.zIndex = "3456";
 		this.handle = tbc;
 		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.disable.shadow"] != true;
+		 */ {}
+		if (supportShadow) {
+			Decorations.createShadowHandles(handle);
+		}
+
 		Element tb = document.createElement ("DIV");
 		tb.className = "shell-title-bar shell-maximized";
 		this.handle.appendChild (tb);

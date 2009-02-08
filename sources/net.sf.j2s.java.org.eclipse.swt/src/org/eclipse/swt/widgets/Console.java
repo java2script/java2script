@@ -81,7 +81,9 @@ public class Console extends Shell {
 				if (!display.readAndDispatch())
 					display.sleep();
 			}
-			display.dispose();
+			if (display.shortcutBar == null || display.shortcutBar.shortcutCount == 0) {
+				display.dispose();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

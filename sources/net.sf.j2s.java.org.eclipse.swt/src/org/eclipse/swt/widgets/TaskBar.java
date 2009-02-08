@@ -97,6 +97,9 @@ public class TaskBar extends DesktopItem {
 				return; // existed already
 			}
 		}
+		if (Dialog.isDialog(shell)) {
+			return;
+		}
 		if (this.handle == null) {
 			this.initialize();
 		}
@@ -196,10 +199,10 @@ public class TaskBar extends DesktopItem {
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.shell.shadow"];
+		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
-		if (supportShadow && !OS.isIE) {
-			Decorations.createShadowHandles(si);
+		if (supportShadow) {
+			Decorations.createNarrowShadowHandles(si);
 		}
 
 		this.updateItems();
@@ -459,9 +462,9 @@ public class TaskBar extends DesktopItem {
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.shell.shadow"];
+		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
-		if (supportShadow && !OS.isIE) {
+		if (supportShadow) {
 			Decorations.createShadowHandles(barEl);
 		}
 
