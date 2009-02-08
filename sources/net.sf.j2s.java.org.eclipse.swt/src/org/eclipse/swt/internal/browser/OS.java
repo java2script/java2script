@@ -352,10 +352,13 @@ public class OS {
 			c = lineContainer;
 		}
 		clearChildren(c);
+		c.style.display = "inline";
 		insertText(c, str);
 		return c;
 	}
 
+	static String[] oldDisplays = new String[0];
+	
 	private static Element setupAsStyled(String str, String className, String cssText, int wrappedWidth) {
 		init ();
 		cssText = wrapCSS(cssText);
@@ -397,6 +400,23 @@ public class OS {
 		}
 		if (wrappedWidth > 0) {
 			f.style.width = wrappedWidth + "px";
+		}
+		/*
+		 * Set other container invisible to make sure the size is accurate
+		 */
+		Element[] childNodes = invisibleContainer.childNodes;
+		for (int i = 0; i < childNodes.length; i++) {
+			CSSStyle s = childNodes[i].style;
+			if (childNodes[i] != f) {
+				if (s.display != "none") {
+					oldDisplays[i] = s.display;
+					s.display = "none";
+				}
+			} else {
+				if (oldDisplays[i] != null) {
+					s.display = oldDisplays[i];
+				}
+			}
 		}
 		insertText (f, str);
 		return f;
