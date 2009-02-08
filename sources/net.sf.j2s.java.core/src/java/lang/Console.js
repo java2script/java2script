@@ -12,7 +12,8 @@
  * @author zhou renjian
  * @create Nov 5, 2005
  *******/
- 
+
+if (window["Console"] == null) {
 /*-#
  # Console -> C_$
  #
@@ -619,3 +620,4 @@ window.assert = function () {
 		return o;
 	};
 //}
+}

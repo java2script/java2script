@@ -13,6 +13,7 @@
  * @create July 10, 2006
  *******/
 
+if (window["ClazzNode"] == null) {
 /**
  * TODO:
  * Make optimization over class dependency tree.
@@ -164,6 +165,20 @@ ClazzNode.STATUS_OPTIONALS_LOADED = 5;
  */
 ClazzLoader = function () {};
 
+ClazzLoader.loaders = [];
+
+ClazzLoader.requireLoaderByBase = function (base) {
+	for (var i = 0; i < ClazzLoader.loaders.length; i++) {
+		if (ClazzLoader.loaders[i].base == base) {
+			return ClazzLoader.loaders[i];
+		}
+	}
+	var loader = new ClazzLoader ();
+	loader.base = base; 
+	ClazzLoader.loaders[ClazzLoader.loaders.length] = loader;
+	return loader;
+};
+
 /**
  * Class dependency tree
  */
@@ -194,6 +209,7 @@ ClazzLoader.userAgent = navigator.userAgent.toLowerCase ();
 ClazzLoader.isOpera = (ClazzLoader.userAgent.indexOf ("opera") != -1);
 ClazzLoader.isIE = (ClazzLoader.userAgent.indexOf ("msie") != -1) && !ClazzLoader.isOpera;
 ClazzLoader.isGecko = (ClazzLoader.userAgent.indexOf ("gecko") != -1);
+ClazzLoader.isChrome = (ClazzLoader.userAgent.indexOf ("chrome") != -1);
 
 /*
  * Opera has different loading order which will result in performance degrade!
@@ -911,7 +927,11 @@ ClazzLoader.loadScript = function (file) {
 	// Create script DOM element
 	var script = document.createElement ("SCRIPT");
 	script.type = "text/javascript";
-	script.src = file;
+	if (ClazzLoader.isChrome && ClazzLoader.reloadingClasses[file]) {
+		script.src = file + "?" + Math.floor (100000 * Math.random ());
+	} else {
+		script.src = file;
+	}
 	var head = document.getElementsByTagName ("HEAD")[0];
 
 	if (ignoreOnload) {
@@ -921,13 +941,25 @@ ClazzLoader.loadScript = function (file) {
 	}
 	// Alert when the script is loaded
 	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
+		if (ClazzLoader.isGecko && (file.indexOf ("file:") == 0 
+				|| (window.location.protocol == "file:" && file.indexOf ("http") != 0))) {
+			script.timeoutHandle = window.setTimeout ((function (scriptEl) {
+					return function () {
+						scriptEl.onerror ();
+					};
+			}) (script), 500); // 0.5s for loading a local file is considered enough long
+		}
 		/*
 		 * What about Safari?
 		 */
 		/*
 		 * Opera will trigger onload event even there are no *.js existed
 		 */
-		script.onload = function () { 
+		script.onload = function () {
+			if (ClazzLoader.isGecko && this.timeoutHandle != null) {
+				window.clearTimeout (this.timeoutHandle);
+				this.timeoutHandle = null;
+			}
 			if (ClazzLoader.inLoadingThreads > 0) {
 				ClazzLoader.inLoadingThreads--;
 			}
@@ -967,6 +999,10 @@ ClazzLoader.loadScript = function (file) {
 		 * For Firefox/Mozilla, unexisted *.js will result in errors.
 		 */
 		script.onerror = function () { // Firefox/Mozilla
+			if (ClazzLoader.isGecko && this.timeoutHandle != null) {
+				window.clearTimeout (this.timeoutHandle);
+				this.timeoutHandle = null;
+			}
 			if (ClazzLoader.inLoadingThreads > 0) {
 				ClazzLoader.inLoadingThreads--;
 			}
@@ -2597,6 +2633,11 @@ ClazzLoader.lastHotspotUpdated = new Date ().getTime ();
 /*-# lastHotspotSessionID -> ltSI #-*/
 ClazzLoader.lastHotspotSessionID = 0;
 
+/* Google Chrome need to load *.js using url + "?" + random number */
+if (ClazzLoader.isChrome) {
+	ClazzLoader.reloadingClasses = new Object ();
+}
+
 /*
  * This method will be called in server-return-script:
  *
@@ -2644,11 +2685,17 @@ ClazzLoader.updateHotspot = function () {
 		for (var i = 0; i < toUpdateClasses.length; i++) {
 			if (needUpdateClasses[i]) {
 				var clzz = toUpdateClasses[i];
+				if (ClazzLoader.isChrome) {
+					ClazzLoader.reloadingClasses[ClazzLoader.getClasspathFor (clzz)] = true;
+				}
 				ClazzLoader.loadClass (clzz, (function (clazz) {
 					return function () {
 						// succeeded!
 						Clazz.unloadedClasses[clazz] = null;
 						ClazzLoader.classReloaded (clazz);
+						if (ClazzLoader.isChrome) {
+							ClazzLoader.reloadingClasses[ClazzLoader.getClasspathFor (clazz)] = false;
+						}
 					};
 				}) (clzz));
 			}
@@ -2691,7 +2738,7 @@ ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 	var script = document.createElement ("SCRIPT");
 	script.type = "text/javascript";
 	script.src = hotspotURL;
-	if (typeof (script.onreadystatechange) == "undefined") { // W3C
+	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
 		script.onload = script.onerror = function () {
 			try {
 				ClazzLoader.lastHotspotScriptLoaded = true;
@@ -2773,4 +2820,4 @@ window.setTimeout (function () {
 }, 324); // 0.324 seconds is considered as enough before refresh action
 
 ClassLoader = ClazzLoader;
-
+}

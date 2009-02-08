@@ -13,6 +13,7 @@
  * @create Nov 5, 2005
  *******/
 
+if (window["Clazz"] == null) {
 /*
  * The following *-# are used to compress the JavaScript file into small file.
  * For more details, please read /net.sf.j2s.lib/build/build.xml
@@ -38,12 +39,10 @@
  * Class Clazz. All the methods are static in this class.
  */
 /* static */
-function Clazz () {
+Class = Clazz = function () {
 };
 
-Class = Clazz;
-
-function NullObject () {
+NullObject = function () {
 };
 
 /**
@@ -1461,7 +1460,7 @@ Clazz.instantialize = function (objThis, args) {
 /* protected */
 /*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "getName", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"equals", "getName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
 	"makeConstructor" /*# x<< #*/
 ];
 
@@ -1482,6 +1481,20 @@ Clazz.innerFunctions = {
 	 */
 	getName : function () {
 		return Clazz.getClassName (this, true);
+	},
+
+	getClassLoader : function () {
+		var clazzName = this.__CLASS_NAME__;
+		var baseFolder = ClazzLoader.getClasspathFor (clazzName);
+		var x = baseFolder.lastIndexOf (clazzName.replace (/\./g, "/"));
+		if (x != -1) {
+			baseFolder = baseFolder.substring (0, x);
+		} else {
+			baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
+		}
+		var loader = ClassLoader.requireLoaderByBase (baseFolder);
+		loader.getResourceAsStream = Clazz.innerFunctions.getResourceAsStream;
+		return loader;
 	},
 
 	getResourceAsStream : function (name) {
@@ -1526,7 +1539,9 @@ Clazz.innerFunctions = {
 				is.url = baseFolder + name.substring (1);
 			}
 		} else {
-			if (window["ClazzLoader"] != null) {
+			if (this.base != null) {
+				baseFolder = this.base;
+			} else if (window["ClazzLoader"] != null) {
 				baseFolder = ClazzLoader.getClasspathFor (clazzName);
 				var x = baseFolder.lastIndexOf (clazzName.replace (/\./g, "/"));
 				if (x != -1) {
@@ -1556,12 +1571,16 @@ Clazz.innerFunctions = {
 			//if (baseFolder.indexOf ('/') == 0) {
 			//	baseFolder = baseFolder.substring (1);
 			//}
-			var idx = clazzName.lastIndexOf ('.');
-			if (idx == -1) {
+			if (this.base != null) {
 				is.url = baseFolder + name;
 			} else {
-				is.url = baseFolder + clazzName.substring (0, idx)
-						.replace (/\./g, '/') +  "/" + name;
+				var idx = clazzName.lastIndexOf ('.');
+				if (idx == -1 || this.base != null) {
+					is.url = baseFolder + name;
+				} else {
+					is.url = baseFolder + clazzName.substring (0, idx)
+							.replace (/\./g, '/') +  "/" + name;
+				}
 			}
 		}
 		return is;
@@ -1774,4 +1793,4 @@ Clazz.declareInterface (java.util,"Comparator");
 java.lang.ClassLoader = {
 	__CLASS_NAME__ : "ClassLoader"
 };
-
+}
