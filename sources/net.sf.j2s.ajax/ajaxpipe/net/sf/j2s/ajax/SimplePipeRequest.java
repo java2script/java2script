@@ -434,6 +434,8 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 		doc.open ();
 		doc.write (html);
 		doc.close ();
+		// To avoid blank title in title bar
+		document.title = document.title;
 	} catch (e) {
 		window.setTimeout ((function (handle, html) {
 			return function () {
@@ -441,6 +443,8 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 				doc.open ();
 				doc.write (html);
 				doc.close ();
+				// To avoid blank title in title bar
+				document.title = document.title;
 			};
 		}) (handle, html), 25);
 	}
