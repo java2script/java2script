@@ -12,7 +12,8 @@
  * @author zhou renjian
  * @create Jan 11, 2007
  *******/
- 
+
+if (window["ClazzLoaderProgressMonitor"] == null) { 
 /*
  * Update: March 5, 2007
  * ClassLoaderProgressMonitor were already in default j2slib.z.js.
@@ -75,7 +76,7 @@ clpm.DEFAULT_OPACITY = 55;
 };
 /* private */ clpm.createHandle = function () {
 	var div = document.createElement ("DIV");
-	div.style.cssText = "position:absolute;top:4px;left:4px;padding:2px 8px;"
+	div.style.cssText = "position:absolute;bottom:4px;left:4px;padding:2px 8px;"
 			+ "z-index:3333;background-color:#8e0000;color:yellow;" 
 			+ "font-family:Arial, sans-serif;font-size:10pt;white-space:nowrap;";
 	div.onmouseover = function () {
@@ -140,7 +141,7 @@ clpm.showStatus = function (msg, fading) {
 	var offTop = this.getFixedOffsetTop ();
 	if (this.lastScrollTop != offTop) {
 		this.lastScrollTop = offTop;
-		this.monitorEl.style.top = (this.lastScrollTop + 4) + "px";
+		this.monitorEl.style.bottom = (this.lastScrollTop + 4) + "px";
 	}
 	if (fading) {
 		this.fadeOut();
@@ -167,4 +168,5 @@ if (window["ClazzLoader"] != null) {
 	if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
 		ClazzLoader.setLoadingMode ("script", 5);
 	}
+}
 }

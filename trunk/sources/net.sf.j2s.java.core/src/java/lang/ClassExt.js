@@ -13,6 +13,7 @@
  * @create March 10, 2006
  *******/
 
+if (window["Clazz"] == null || window["Clazz"].unloadClass == null) {
 /**
  * Once ClassExt.js is part of Class.js.
  * In order to make the Class.js as small as possible, part of its content
@@ -119,6 +120,9 @@ Clazz.prepareCallback = function (objThis, args) {
  */
 /* public */
 Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
+	if (clazzInner == null) {
+		clazzInner = arguments.callee.caller;
+	}
 	var obj = null;
 	/*if (arguments.length == 2) {
 		obj = new clazzInner (objThis);
@@ -638,7 +642,15 @@ Object.prototype.equals = function (obj) {
 };
 
 Object.prototype.hashCode = function () {
-	return this.toString ().hashCode ();
+	try {
+		return this.toString ().hashCode ();
+	} catch (e) {
+		var str = ":";
+		for (var s in this) {
+			str += s + ":"
+		}
+		return str.hashCode ();
+	}
 };
 
 Object.prototype.getClass = function () {
@@ -1031,4 +1043,4 @@ Clazz.unloadClass = function (qClazzName) {
 	}
 	return false;
 };
-
+}
