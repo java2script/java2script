@@ -29,6 +29,8 @@ import java.io.Serializable;
  * comparable to each other either using their natural order or a specified
  * Comparator.
  * @since 1.2
+ * 
+ * @j2sRequireImport java.util.TreeMap
  */
 public class TreeSet<E> extends AbstractSet<E> implements SortedSet<E>, Cloneable,
 		Serializable {
