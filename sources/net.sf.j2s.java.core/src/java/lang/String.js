@@ -80,6 +80,9 @@ String.prototype.replaceFirst = function (exp, str) {
 	return this.replace (regExp, this.$generateExpFunction (str));
 };
 String.prototype.matches = function (exp) {
+	if (exp != null) {
+		exp = "^(" + exp + ")$";
+	}
 	var regExp = new RegExp (exp, "gm");
 	var m = this.match (regExp);
 	return m != null && m.length != 0;
@@ -543,5 +546,12 @@ String.instantialize = function () {
 		return s;
 	}
 };
+
+if (navigator.userAgent.toLowerCase ().indexOf ("chrome") != -1) { // Google Chrome's bug
+	String.prototype.toString = function () {
+		return this;
+	};
+}
+
 } // end of String.prototype.$replace
 });
