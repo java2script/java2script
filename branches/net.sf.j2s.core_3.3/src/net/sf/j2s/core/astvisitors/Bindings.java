@@ -1429,6 +1429,9 @@ public class Bindings {
 	}
 
 	public static String removeBrackets(String qName) {
+		if (qName == null) {
+			return qName;
+		}
 		int length = qName.length();
 		StringBuffer buf = new StringBuffer();
 		int ltCount = 0;

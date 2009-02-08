@@ -208,9 +208,10 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			StringBuffer buffer = new StringBuffer();
 			String str = (String) constValue;
 			int length = str.length();
+			/*
 			if (length > 20) {
 				return null;
-			}
+			}*/
 			buffer.append("\"");
 			for (int i = 0; i < length; i++) {
 				char c = str.charAt(i);

@@ -283,7 +283,11 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
 		if (methodBinding != null && "open".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) {
-			if (Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null) {
+			boolean isDialogBlock = false;
+			boolean isWindowBlock = false;
+			if ((isDialogBlock = Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.swt.widgets.Dialog") != null)
+					|| (!getPackageName().startsWith("org.eclipse.jface.")
+							&& (isWindowBlock = Bindings.findTypeInHierarchy(methodBinding.getDeclaringClass(), "org.eclipse.jface.window.Window") != null))) {
 				int lastIndexOf1 = buffer.lastIndexOf(";\r\n");
 				if (lastIndexOf1 != -1) {
 					lastIndexOf1 += 3;
@@ -315,12 +319,20 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				}
 				String s = buffer.substring(lastIndexOf);
 				buffer.delete(lastIndexOf, buffer.length());
-				buffer.append("DialogSync2Async.block (");
+				if (isDialogBlock) {
+					buffer.append("DialogSync2Async.block (");
+				} else if (isWindowBlock) {
+					buffer.append("net.sf.j2s.ajax.AWindowDelegate.asyncOpen (");
+				}
 				node.getExpression().accept(this);
 				buffer.append(", this, function () {\r\n");
 				buffer.append(s);
 				node.getExpression().accept(this);
-				buffer.append(".dialogReturn");
+				if (isDialogBlock) {
+					buffer.append(".dialogReturn");
+				} else if (isWindowBlock) {
+					buffer.append(".getReturnCode ()");
+				}
 				metDialogOpen = true;
 				return false;
 			}

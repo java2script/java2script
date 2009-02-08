@@ -474,7 +474,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			buffer.append(" (");
-			visitList(node.arguments(), ", ");
+			IMethodBinding methodDeclaration = null;
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(node.arguments(), methodDeclaration);
+			//visitList(node.arguments(), ", ");
 			buffer.append(")");
 		} else {
 			int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
@@ -530,7 +536,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (argSize > 0) {
 				buffer.append(", ");
 			}
-			visitList(arguments, ", ");
+			IMethodBinding methodDeclaration = null;
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(node.arguments(), methodDeclaration);
+
+			//visitList(arguments, ", ");
 			buffer.append(", ");
 			String scope = null;
 			if (methodDeclareStack.size() != 0) {
@@ -561,9 +574,113 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
+	protected void visitMethodParameterList(List arguments,
+			IMethodBinding methodDeclaration, int begin, int end) {
+		ITypeBinding[] parameterTypes = null;
+		String clazzName = null;
+		String methodName = null;
+		/*
+		Object[] ignores = new Object[] {
+				"java.lang.String", "indexOf", new int[] { 0 },
+				"java.lang.String", "lastIndexOf", new int[] { 0 },
+				"java.lang.StringBuffer", "append", new int[] { 0 },
+				"java.lang.StringBuilder", "append", new int[] { 0 }
+		};
+		*/
+		if (methodDeclaration != null) {
+			parameterTypes = methodDeclaration.getParameterTypes();
+			ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+			if (declaringClass != null) {
+				clazzName = declaringClass.getQualifiedName();
+			}
+			methodName = methodDeclaration.getName();
+		}
+		for (int i = begin; i < end; i++) {
+			ASTNode element = (ASTNode) arguments.get(i);
+			String typeStr = null;
+			if (element instanceof CastExpression) {
+				CastExpression castExp = (CastExpression) element;
+				Expression exp = castExp.getExpression();
+				if (exp instanceof NullLiteral) {
+					ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
+					if (nullTypeBinding != null) {
+						if (nullTypeBinding.isArray()) {
+							typeStr = "Array";
+						} else if (nullTypeBinding.isPrimitive()) {
+							Code code = PrimitiveType.toCode(nullTypeBinding.getName());
+							if (code == PrimitiveType.BOOLEAN) {
+								typeStr = "Boolean";
+							} else{
+								typeStr = "Number";
+							}
+						} else if (!nullTypeBinding.isTypeVariable()) {
+							typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
+						}
+					}
+				}
+			}
+			if (typeStr != null) {
+				buffer.append("Clazz.castNullAs (\"");
+				buffer.append(typeStr);
+				buffer.append("\")");
+			} else {
+				boxingNode(element);
+				Expression exp = (Expression) element;
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				String typeName = typeBinding.getName();
+				String parameterTypeName = null;
+				if (parameterTypes != null) {
+					parameterTypeName = parameterTypes[i].getName();
+				}
+				if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
+					boolean ignored = false;
+					/*
+					for (int j = 0; j < ignores.length / 3; j++) {
+						int[] indexes = (int[]) ignores[i + i + i + 2];
+						boolean existed = false;
+						for (int k = 0; k < indexes.length; k++) {
+							if (indexes[k] == i) {
+								existed = true;
+								break;
+							}
+						}
+						if (existed) {
+							if (ignores[0].equals(Bindings.removeBrackets(clazzName)) && ignores[1].equals(methodName)) {
+								ignored = true;
+								break;
+							}
+						}
+					}
+					*/
+					// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
+					ignored = (i == 0 
+							&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
+							&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+					if (!ignored) {
+						buffer.append(".charCodeAt (0)");
+					}
+				}
+			}
+			if (i < end - 1) {
+				buffer.append(", ");
+			}
+		}
+	}
+
+	protected void visitMethodParameterList(List arguments,
+			IMethodBinding methodDeclaration) {
+		visitMethodParameterList(arguments, methodDeclaration, 0, arguments.size());
+	}
+
 	public boolean visit(ConstructorInvocation node) {
 		buffer.append("this.construct (");
-		visitList(node.arguments(), ", ");
+		IMethodBinding methodDeclaration = null;
+		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+		if (constructorBinding != null) {
+			methodDeclaration = constructorBinding.getMethodDeclaration();
+		}
+		visitMethodParameterList(node.arguments(), methodDeclaration);
+		//visitList(node.arguments(), ", ");
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -1586,8 +1703,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(" (");
 
 		IMethodBinding methodBinding = node.resolveMethodBinding();
+		ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
 		if (methodBinding != null && methodBinding.isVarargs()) {
-			ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
 			visitList(args, ", ", 0, paramTypes.length - 1);
 			if (paramTypes.length - 1 > 0) {
 				buffer.append(", ");
@@ -1601,44 +1718,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			//}
 			if (needBrackets) buffer.append("[");
+			//IMethodBinding methodDeclaration = node.resolveMethodBinding();
+			//visitMethodParameterList(node.arguments(), methodDeclaration, paramTypes.length - 1, size);
 			visitList(args, ", ", paramTypes.length - 1, size);
 			if (needBrackets) buffer.append("]");
 		} else {
-			for (Iterator iter = args.iterator(); iter.hasNext();) {
-				ASTNode element = (ASTNode) iter.next();
-				String typeStr = null;
-				if (element instanceof CastExpression) {
-					CastExpression castExp = (CastExpression) element;
-					Expression exp = castExp.getExpression();
-					if (exp instanceof NullLiteral) {
-						ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
-						if (nullTypeBinding != null) {
-							if (nullTypeBinding.isArray()) {
-								typeStr = "Array";
-							} else if (nullTypeBinding.isPrimitive()) {
-								Code code = PrimitiveType.toCode(nullTypeBinding.getName());
-								if (code == PrimitiveType.BOOLEAN) {
-									typeStr = "Boolean";
-								} else{
-									typeStr = "Number";
-								}
-							} else if (!nullTypeBinding.isTypeVariable()) {
-								typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
-							}
-						}
-					}
-				}
-				if (typeStr != null) {
-					buffer.append("Clazz.castNullAs (\"");
-					buffer.append(typeStr);
-					buffer.append("\")");
-				} else {
-					boxingNode(element);
-				}
-				if (iter.hasNext()) {
-					buffer.append(", ");
-				}
-			}
+			IMethodBinding methodDeclaration = node.resolveMethodBinding();
+			visitMethodParameterList(node.arguments(), methodDeclaration);
 			//visitList(args, ", ");
 		}
 		buffer.append(")");
@@ -2020,7 +2106,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		List arguments = node.arguments();
 		if (arguments.size() > 0) {
 			buffer.append(", [");
-			visitList(arguments, ", ");
+			IMethodBinding methodDeclaration = null;
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(arguments, methodDeclaration);
+			//visitList(arguments, ", ");
 			buffer.append("]");
 		}
 		buffer.append(");\r\n");
@@ -2078,7 +2169,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String name = getJ2SName(node.getName());
 		buffer.append(name);
 		buffer.append("\", [");
-		visitList(node.arguments(), ", ");
+		IMethodBinding methodDeclaration = node.resolveMethodBinding();
+		visitMethodParameterList(node.arguments(), methodDeclaration);
+		//visitList(node.arguments(), ", ");
 		buffer.append("])");
 		return false;
 	}
