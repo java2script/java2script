@@ -67,13 +67,15 @@ public class UTF8Concat {
 				if (s.startsWith(j2sKeySig)) {
 					s = s.substring(j2sKeySig.length());
 				}
-				/*
-				if (completelyCompressing) {
+				//*
+				if (noCompressing) {
+					buf.append(s);
+				} else if (completelyCompressing) {
 					buf.append(RegExCompress.regexCompress(s));
 				} else {
 					buf.append(RegExCompress.regexCompress2(s));
 				}
-				*/
+				//*/
 				buf.append(s);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -83,6 +85,8 @@ public class UTF8Concat {
 		try {
 			FileOutputStream fos = new FileOutputStream(dest);
 			fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
+			fos.write(buf.toString().getBytes("UTF-8"));
+			/*
 			if (noCompressing) {
 				fos.write(buf.toString().getBytes("UTF-8"));
 			} else if (completelyCompressing) {
@@ -90,6 +94,7 @@ public class UTF8Concat {
 			} else {
 				fos.write(RegExCompress.regexCompress2(buf.toString()).getBytes("UTF-8"));
 			}
+			*/
 			fos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
