@@ -36,9 +36,9 @@ public class RegExCompress {
             StringBuffer sb = new StringBuffer();
             do {
             	if (matcher.group(10) != null) {
-            		matcher.appendReplacement(sb, "$10 $11");
+            		matcher.appendReplacement(sb, "$11 $12");
             	} else if (matcher.group(13) != null) {
-            		matcher.appendReplacement(sb, "$13 $14");
+            		matcher.appendReplacement(sb, "$14 $15");
             	} else {
             		matcher.appendReplacement(sb, replacement);
             	}
@@ -98,34 +98,78 @@ public class RegExCompress {
 		}
 	}
 	public static String regexCompress(String str) {
+		str = str.replaceAll("(\r([^\n]))|(([^\r])\n)", "$4\r\n$2"); // fix line terminators
+		boolean ignoreCSS = false;
+		String cssCodes = null;
+		int idx1 = str.indexOf("$WTC$$.registerCSS");
+		int idx2 = -1;
+		String specialFunKey = "@324@();\r\n";
+		if (idx1 != -1) {
+			idx2 = str.indexOf("\");\r\n", idx1);
+			if (idx2 != -1) {
+				ignoreCSS = true;
+				cssCodes = str.substring(idx1, idx2 + 5);
+				str = str.substring(0, idx1) + specialFunKey + str.substring(idx2 + 5);
+			}
+		}
 		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
-				"(\"[^\\n\\r]*[^\\\\]\")|" + // 1:2
-				"(\\/\\/[^\\n\\r]*$)|" + // 1:3
-				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:4,5
-				"(\\s+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:6,7
-				"([^\\w\\x24\\/'\"*)\\?:]\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*)"; // 1:8
+				"(\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 1:3
+				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:4
+				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:5,6
+				"(\\s+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:7,8
+				"([^\\w\\x24\\/'\"*)\\?:]\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*)"; // 1:9
 		//str = str.replaceAll(regEx,	"$1$2$7$8");
 		str = mk(str, regEx +
-				"|((\\b|\\x24)\\s+(\\b|\\x24))|" + // 3:9,10,11
-				"(([+\\-])\\s+([+\\-]))|" + // 3:12,13,14
+				"|((\\b|\\x24)\\s+(\\b|\\x24))|" + // 3:10,11,12
+				"(([+\\-])\\s+([+\\-]))|" + // 3:13,14,15
 				"(\\s+)",
-				"$1$2$7$8");
+				"$1$2$8$9");
+		if (ignoreCSS) {
+			int idx = str.indexOf(specialFunKey);
+			if (idx != -1) {
+				str = str.substring(0, idx) + cssCodes + str.substring(idx + specialFunKey.length());
+			} else {
+				System.err.println("Error! Fail to ignore CSS codes!");
+			}
+		}
 		return str;
 	}
 	public static String regexCompress2(String str) {
+		str = str.replaceAll("(\r([^\n]))|(([^\r])\n)", "$4\r\n$2"); // fix line terminators
+		boolean ignoreCSS = false;
+		String cssCodes = null;
+		int idx1 = str.indexOf("$WTC$$.registerCSS");
+		int idx2 = -1;
+		String specialFunKey = "@324@();\r\n";
+		if (idx1 != -1) {
+			idx2 = str.indexOf("\");\r\n", idx1);
+			if (idx2 != -1) {
+				ignoreCSS = true;
+				cssCodes = str.substring(idx1, idx2 + 5);
+				str = str.substring(0, idx1) + specialFunKey + str.substring(idx2 + 5);
+			}
+		}
 		String whiteSpace = "[ \\f\\t\\v]";
 		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
-				"(\"[^\\n\\r]*[^\\\\]\")|" + // 1:2
-				"(\\/\\/[^\\n\\r]*$)|" + // 1:3 // line comments
-				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:4,5 // block comments
-				"(" + whiteSpace + "+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:6,7 // regular expression
-				"([^\\w\\x24\\/'\"*)\\?:]\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*)"; // 1:8 // regular expression 
+				"(\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 2:2,3
+				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:4 // line comments
+				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:5,6 // block comments
+				"(" + whiteSpace + "+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:7,8 // regular expression
+				"([^\\w\\x24\\/'\"*)\\?:]\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*)"; // 1:9 // regular expression 
 		//str = str.replaceAll(regEx,	"$1$2$7$8");
 		str = mk(str, regEx +
-				"|((\\b|\\x24)" + whiteSpace + "+(\\b|\\x24))|" + // 3:9,10,11
-				"(([+\\-])" + whiteSpace + "+([+\\-]))|" + // 3:12,13,14
+				"|((\\b|\\x24)" + whiteSpace + "+(\\b|\\x24))|" + // 3:10,11,12
+				"(([+\\-])" + whiteSpace + "+([+\\-]))|" + // 3:13,14,15
 				"(" + whiteSpace + "+)",
-				"$1$2$7$8");
+				"$1$2$8$9");
+		if (ignoreCSS) {
+			int idx = str.indexOf(specialFunKey);
+			if (idx != -1) {
+				str = str.substring(0, idx) + cssCodes + str.substring(idx + specialFunKey.length());
+			} else {
+				System.err.println("Error! Fail to ignore CSS codes!");
+			}
+		}
 		return str;
 	}
 	public static String readFileAll(InputStream res) {
