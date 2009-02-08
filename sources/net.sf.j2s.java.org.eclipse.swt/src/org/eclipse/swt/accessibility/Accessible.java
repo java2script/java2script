@@ -18,6 +18,10 @@ public class Accessible {
 	//Object[] variants;
 	Control control;
 	
+	public Accessible(Control control) {
+		this.control = control;
+	}
+
 	private void addElement(Object[] arr, Object element) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i] == element) {
