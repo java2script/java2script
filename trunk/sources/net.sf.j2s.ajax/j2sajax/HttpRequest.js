@@ -70,7 +70,7 @@ c$.prototype.open = function (method, url, async, user) {
 c$.prototype.open = function (method, url, async, user, password) {
 	this.transport.open (method, url, async, user, password);
 	this.transport.setRequestHeader ("User-Agent",
-			"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
+			"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
 	if (method != null && method.toLowerCase () == "post") {
 		this.transport.setRequestHeader ("Content-type", 
 				"application/x-www-form-urlencoded");
