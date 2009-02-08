@@ -794,7 +794,7 @@
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CLable.z.js"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CLabel.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/custom/CLayoutData.js"/>
     			<arg value="org/eclipse/swt/custom/CLabel.js"/>
