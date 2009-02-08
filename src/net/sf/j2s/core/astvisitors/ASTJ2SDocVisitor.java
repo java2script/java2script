@@ -14,6 +14,8 @@ package net.sf.j2s.core.astvisitors;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -143,20 +145,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sDebug".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
+							visitJavadocJ2SSource(tagEl);
 							return false;
 						}
 					}
@@ -168,20 +157,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
+							visitJavadocJ2SSource(tagEl);
 							return false;
 						}
 					}
@@ -190,20 +166,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
-						List fragments = tagEl.fragments();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buffer.append(text);
-							buffer.append("\r\n");
-						}
+						visitJavadocJ2SSource(tagEl);
 						return false;
 					}
 				}
@@ -212,7 +175,34 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return true;
 	}
 
+	private void visitJavadocJ2SSource(TagElement tagEl) {
+		List fragments = tagEl.fragments();
+		boolean isFirstLine = true;
+		StringBuffer buf = new StringBuffer();
+		for (Iterator iterator = fragments.iterator(); iterator
+				.hasNext();) {
+			TextElement commentEl = (TextElement) iterator.next();
+			String text = commentEl.getText().trim();
+			if (isFirstLine) {
+				if (text.length() == 0) {
+					continue;
+				}
+			}
+			buf.append(text);
+			buf.append("\r\n");
+		}
+		buffer.append(fixCommentBlock(buf.toString()));
+	}
 
+	private String fixCommentBlock(String text) {
+		if (text == null || text.length() == 0) {
+			return text;
+		}
+		return Pattern.compile("\\/-\\*(.*)\\*-\\/",
+				Pattern.MULTILINE | Pattern.DOTALL)
+				.matcher(text).replaceAll("/*$1*/");
+	}
+	
 	private void checkJavadocs(ASTNode root) {
 		if (root != javadocRoot) {
 			nativeJavadoc = null;

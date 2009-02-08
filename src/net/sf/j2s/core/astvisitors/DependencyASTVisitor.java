@@ -668,6 +668,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
+				|| constValue instanceof String
 				|| constValue instanceof Boolean)
 				&& isSimpleQualified(node)) {
 			//buffer.append(constValue);
