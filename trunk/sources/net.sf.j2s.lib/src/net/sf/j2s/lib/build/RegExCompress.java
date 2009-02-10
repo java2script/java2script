@@ -103,14 +103,21 @@ public class RegExCompress {
 		String cssCodes = null;
 		int idx1 = str.indexOf("$WTC$$.registerCSS");
 		int idx2 = -1;
-		String specialFunKey = "@324@();\r\n";
-		if (idx1 != -1) {
-			idx2 = str.indexOf("\");\r\n", idx1);
-			if (idx2 != -1) {
+		int idx = idx1;
+		while (idx != -1) {
+			int index = str.indexOf("\");\r\n", idx);
+			if (index != -1) {
+				idx2 = index + 5;
 				ignoreCSS = true;
-				cssCodes = str.substring(idx1, idx2 + 5);
-				str = str.substring(0, idx1) + specialFunKey + str.substring(idx2 + 5);
+				idx = str.indexOf("$WTC$$.registerCSS", idx2);
+			} else {
+				break;
 			}
+		}
+		String specialFunKey = "@324@();\r\n";
+		if (ignoreCSS) {
+			cssCodes = str.substring(idx1, idx2);
+			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
 		}
 		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
 				"(\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 1:3
@@ -125,7 +132,7 @@ public class RegExCompress {
 				"(\\s+)",
 				"$1$2$8$9");
 		if (ignoreCSS) {
-			int idx = str.indexOf(specialFunKey);
+			idx = str.indexOf(specialFunKey);
 			if (idx != -1) {
 				str = str.substring(0, idx) + cssCodes + str.substring(idx + specialFunKey.length());
 			} else {
@@ -140,14 +147,21 @@ public class RegExCompress {
 		String cssCodes = null;
 		int idx1 = str.indexOf("$WTC$$.registerCSS");
 		int idx2 = -1;
-		String specialFunKey = "@324@();\r\n";
-		if (idx1 != -1) {
-			idx2 = str.indexOf("\");\r\n", idx1);
-			if (idx2 != -1) {
+		int idx = idx1;
+		while (idx != -1) {
+			int index = str.indexOf("\");\r\n", idx);
+			if (index != -1) {
+				idx2 = index + 5;
 				ignoreCSS = true;
-				cssCodes = str.substring(idx1, idx2 + 5);
-				str = str.substring(0, idx1) + specialFunKey + str.substring(idx2 + 5);
+				idx = str.indexOf("$WTC$$.registerCSS", idx2);
+			} else {
+				break;
 			}
+		}
+		String specialFunKey = "@324@();\r\n";
+		if (ignoreCSS) {
+			cssCodes = str.substring(idx1, idx2);
+			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
 		}
 		String whiteSpace = "[ \\f\\t\\v]";
 		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
@@ -163,7 +177,7 @@ public class RegExCompress {
 				"(" + whiteSpace + "+)",
 				"$1$2$8$9");
 		if (ignoreCSS) {
-			int idx = str.indexOf(specialFunKey);
+			idx = str.indexOf(specialFunKey);
 			if (idx != -1) {
 				str = str.substring(0, idx) + cssCodes + str.substring(idx + specialFunKey.length());
 			} else {
