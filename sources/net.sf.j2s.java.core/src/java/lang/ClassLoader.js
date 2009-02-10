@@ -613,7 +613,7 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 		}
 		*/
 		var idx = clazz.lastIndexOf (".");
-		/*
+		//*
 		while (idx != -1) {
 			var pkg = clazz.substring (0, idx);
 			base = ClazzLoader.classpathMap["@" + pkg];
@@ -622,11 +622,13 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 			}
 			idx = clazz.lastIndexOf (".", idx - 2);
 		}
-		*/
+		//*/
+		/*
 		if (idx != -1) {
 			var pkg = clazz.substring (0, idx);
 			base = ClazzLoader.classpathMap["@" + pkg];
 		}
+		//*/
 	}
 	
 	base = ClazzLoader.assureBase (base);
