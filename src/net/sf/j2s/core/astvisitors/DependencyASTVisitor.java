@@ -126,13 +126,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 	
 
-	protected void remedyReflectionDependency(Set set) {
+	protected void remedyDependency(Set set) {
 		String[] classNames = getClassNames();
 		for (int i = 0; i < classNames.length; i++) {
 			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
 				return;
 			}
 		}
+		List toRemoveList = new ArrayList();
 		boolean needRemedy = false;;
 		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
 			Object next = iterator.next();
@@ -146,11 +147,20 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			if ("net.sf.j2s.ajax.AClass".equals(name)
 					|| "net.sf.j2s.ajax.ASWTClass".equals(name)) {
 				needRemedy = true;
-				break;
+				//break;
+			}
+			for (Iterator itr = classNameSet.iterator(); itr.hasNext();) {
+				String className = (String) itr.next();
+				if (name.startsWith(className + ".")) { // inner class dependency
+					toRemoveList.add(next);
+				}
 			}
 		}
 		if (needRemedy) {
 			set.add("java.lang.reflect.Constructor");
+		}
+		for (Iterator iterator = toRemoveList.iterator(); iterator.hasNext();) {
+			set.remove(iterator.next());
 		}
 	}
 
@@ -158,9 +168,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		checkSuperType(musts);
 		checkSuperType(requires);
 		checkSuperType(optionals);
-		remedyReflectionDependency(musts);
-		remedyReflectionDependency(requires);
-		remedyReflectionDependency(optionals);
+		remedyDependency(musts);
+		remedyDependency(requires);
+		remedyDependency(optionals);
 
 		musts.remove("");
 		requires.remove("");
