@@ -67,6 +67,7 @@ public class UTF8Concat {
 				if (s.startsWith(j2sKeySig)) {
 					s = s.substring(j2sKeySig.length());
 				}
+				System.out.println("Packing " + src.getName() + " ...");
 				//*
 				if (noCompressing) {
 					buf.append(s);
