@@ -16,6 +16,10 @@
 	<property name="j2s.core.project" value="${workspace.base}/net.sf.j2s.java.core"/>
 	<property name="j2s.ajax.project" value="${workspace.base}/net.sf.j2s.ajax"/>
 	<property name="j2s.swt.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.swt"/>
+	<property name="j2s.jface.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.jface"/>
+	<property name="j2s.osgi.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.osgi"/>
+	<property name="j2s.commands.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.core.commands"/>
+	<property name="j2s.runtime.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.core.runtime"/>
 	<property name="j2s.junit.project" value="${workspace.base}/net.sf.j2s.java.junit"/>
 		
 	<property name="j2s.lib.project" value="${workspace.base}/net.sf.j2s.lib"/>
@@ -360,6 +364,30 @@
     			<exclude name="**/*.swo"/>
     		</fileset>
     		<fileset dir="${j2s.junit.bin}">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${j2s.jface.project}/bin">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${j2s.osgi.project}/bin">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${j2s.commands.project}/bin">
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${j2s.runtime.project}/bin">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>
