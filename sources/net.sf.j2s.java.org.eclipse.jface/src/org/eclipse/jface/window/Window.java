@@ -81,6 +81,8 @@ import org.eclipse.swt.widgets.Shell;
  * shell closings</li>
  * </ul>
  * </p>
+ * 
+ * @j2sRequireImport net.sf.j2s.ajax.AWindowDelegate
  */
 public abstract class Window implements IShellProvider {
 
@@ -275,6 +277,11 @@ public abstract class Window implements IShellProvider {
      * @since 3.1
      */
     protected Window(IShellProvider shellProvider) {
+    	if (shellProvider == null) {
+    		this.parentShell = new SameShellProvider(null);
+            setShellStyle(getShellStyle() | getDefaultOrientation());
+            return;
+    	}
         Assert.isNotNull(shellProvider);
         this.parentShell = shellProvider;   
     }
@@ -340,7 +347,7 @@ public abstract class Window implements IShellProvider {
 	 *            the shell
 	 */
 	protected void configureShell(Shell newShell) {
-
+		
 		// The single image version of this code had a comment related to bug
 		// 46624,
 		// and some code that did nothing if the stored image was already

@@ -32,6 +32,8 @@ import org.osgi.framework.Bundle;
  * <li>the platform log</li>
  * <li>the authorization info management</li>
  * </ul>
+ * 
+ * @j2sIgnoreImport org.eclipse.core.internal.runtime.InternalPlatform,org.eclipse.core.internal.runtime.FindSupport,org.eclipse.core.internal.runtime.CompatibilityHelper
  */
 public final class Platform {
 

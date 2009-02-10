@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+//import java.security.AccessController;
+//import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -25,6 +25,8 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
  * Class responsible for loading message values from a property file
  * and assigning them directly to the fields of a messages class.
  * @since 3.1
+ * 
+ * @j2sIgnoreImport org.eclipse.osgi.framework.debug.Debug
  */
 public class MessageResourceBundle {
 	/**
@@ -73,8 +75,8 @@ public class MessageResourceBundle {
 				// Check to see if we are allowed to modify the field. If we aren't (for instance 
 				// if the class is not public) then change the accessible attribute of the field
 				// before trying to set the value.
-				if (!isAccessible)
-					makeAccessible(field);
+//				if (!isAccessible)
+//					makeAccessible(field);
 				// Set the value into the field. We should never get an exception here because
 				// we know we have a public static non-final field. If we do get an exception, silently
 				// log it and continue. This means that the field will (most likely) be un-initialized and
@@ -136,6 +138,7 @@ public class MessageResourceBundle {
 	 * Change the accessibility of the specified field so we can set its value
 	 * to be the appropriate message string.
 	 */
+	/*
 	static void makeAccessible(final Field field) {
 		if (System.getSecurityManager() == null) {
 			field.setAccessible(true);
@@ -178,6 +181,7 @@ public class MessageResourceBundle {
 			}
 		}
 	}
+	*/
 
 	/**
 	 * Load the given resource bundle using the specified class loader.
@@ -219,7 +223,7 @@ public class MessageResourceBundle {
 					}
 			}
 		}
-		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
+//		computeMissingMessages(bundleName, clazz, fields, fieldArray, isAccessible);
 		if (Debug.DEBUG_MESSAGE_BUNDLES)
 			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

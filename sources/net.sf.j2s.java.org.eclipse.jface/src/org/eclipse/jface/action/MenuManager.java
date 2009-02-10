@@ -170,9 +170,9 @@ public class MenuManager extends ContributionManager implements IMenuManager {
      * @return the menu control
      * @deprecated use <code>createMenuBar(Decorations)</code> instead.
      */
-    public Menu createMenuBar(Shell parent) {
-        return createMenuBar((Decorations) parent);
-    }
+//    public Menu createMenuBar(Shell parent) {
+//        return createMenuBar((Decorations) parent);
+//    }
 
     /**
      * Disposes of this menu manager and frees all allocated SWT resources.

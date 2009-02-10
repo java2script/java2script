@@ -47,6 +47,8 @@ import org.eclipse.swt.widgets.ToolItem;
  * <p>
  * This is an internal class, not intended to be used outside the JFace framework.
  * </p>
+ * 
+ * @j2sRequireImport org.eclipse.jface.resource.FileImageDescriptor
  */
 /* package */class StatusLine extends Composite implements IProgressMonitor {
 

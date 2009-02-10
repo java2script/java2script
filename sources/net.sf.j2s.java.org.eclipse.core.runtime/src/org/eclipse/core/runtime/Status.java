@@ -25,7 +25,7 @@ public class Status implements IStatus {
 	 *
 	 * @since 3.0
 	 */
-	public static final IStatus OK_STATUS = new Status(OK, Platform.PI_RUNTIME, OK, Messages.ok, null);
+	public static final IStatus OK_STATUS = new Status(OK, Platform.PI_RUNTIME, OK, "OK", null);
 	/**
 	 * A standard CANCEL status with no message.
 	 * 

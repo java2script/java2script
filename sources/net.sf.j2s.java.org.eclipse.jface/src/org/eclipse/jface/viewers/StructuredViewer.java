@@ -114,6 +114,144 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 	 */
 	private ListenerList postSelectionChangedListeners = new ListenerList(1);
 
+	
+	/**
+	 * The ColorAndFontManager collects fonts and colors without a
+	 * a color or font provider.
+	 *
+	 */
+	class ColorAndFontCollector {
+
+		Color foreground = null;
+
+		Color background = null;
+
+		Font font = null;
+
+		boolean usedDecorators = false;
+
+		/**
+		 * Create a new instance of the receiver with
+		 * no colour and font provider.	
+		 */
+		public ColorAndFontCollector(){
+			super();
+		}
+		
+
+		/**
+		 * Clear all of the results.
+		 */
+		public void clear() {
+			foreground = null;
+			background = null;
+			font = null;
+			usedDecorators = false;
+		}
+
+		
+		/**
+		 * Set the initial fonts and colors for the element from the
+		 * content providers.
+		 * @param element Object
+		 */
+		public void setFontsAndColors(Object element){
+			//Do nothing if there are no providers
+		}
+
+		/**
+		 * Set that decorators were applied.
+		 */
+		public void setUsedDecorators() {
+			this.usedDecorators = true;
+		}
+
+		/**
+		 * Apply the fonts and colors to the control if
+		 * required.
+		 * @param control
+		 */
+		public void applyFontsAndColors(TableItem control) {
+			
+			if(usedDecorators){
+				//If there is no provider only apply set values
+				if(background != null)
+					control.setBackground(background);
+			
+				if(foreground != null)
+					control.setForeground(foreground);
+		
+				if(font != null)
+					control.setFont(font);
+			}
+			clear();
+		}
+		
+		/**
+		 * Apply the fonts and colors to the control if
+		 * required.
+		 * @param control
+		 */
+		public void applyFontsAndColors(TreeItem control) {
+			if(usedDecorators){
+				//If there is no provider only apply set values
+				if(background != null)
+					control.setBackground(background);
+			
+				if(foreground != null)
+					control.setForeground(foreground);
+		
+				if(font != null)
+					control.setFont(font);
+			}
+			clear();
+		}
+		
+		/**
+		 * Apply the fonts and colors to the control if
+		 * required.
+		 * @param control
+		 */
+		public void applyFontsAndColors(TableTreeItem control) {
+			if(usedDecorators){
+				//If there is no provider only apply set values
+				if(background != null)
+					control.setBackground(background);
+			
+				if(foreground != null)
+					control.setForeground(foreground);
+		
+				if(font != null)
+					control.setFont(font);
+			}
+			clear();
+		}
+		
+		/**
+		 * Set the background color.
+		 * @param background 
+		 */
+		public void setBackground(Color background) {
+			this.background = background;
+		}
+		/**
+		 * Set the font.
+		 * @param font 
+		 */
+		public void setFont(Font font) {
+			this.font = font;
+		}
+		/**
+		 * Set the foreground color.
+		 * @param foreground
+		 */
+		public void setForeground(Color foreground) {
+			this.foreground = foreground;
+		}
+	
+		
+	}
+
 	/**
 	 * The colorAndFontCollector is an object used by viewers that
 	 * support the IColorProvider, the IFontProvider and/or the 
@@ -274,143 +412,6 @@ public abstract class StructuredViewer extends ContentViewer implements IPostSel
 			clear();
 		}
 		
-		
-	}
-	
-	/**
-	 * The ColorAndFontManager collects fonts and colors without a
-	 * a color or font provider.
-	 *
-	 */
-	class ColorAndFontCollector {
-
-		Color foreground = null;
-
-		Color background = null;
-
-		Font font = null;
-
-		boolean usedDecorators = false;
-
-		/**
-		 * Create a new instance of the receiver with
-		 * no colour and font provider.	
-		 */
-		public ColorAndFontCollector(){
-			super();
-		}
-		
-
-		/**
-		 * Clear all of the results.
-		 */
-		public void clear() {
-			foreground = null;
-			background = null;
-			font = null;
-			usedDecorators = false;
-		}
-
-		
-		/**
-		 * Set the initial fonts and colors for the element from the
-		 * content providers.
-		 * @param element Object
-		 */
-		public void setFontsAndColors(Object element){
-			//Do nothing if there are no providers
-		}
-
-		/**
-		 * Set that decorators were applied.
-		 */
-		public void setUsedDecorators() {
-			this.usedDecorators = true;
-		}
-
-		/**
-		 * Apply the fonts and colors to the control if
-		 * required.
-		 * @param control
-		 */
-		public void applyFontsAndColors(TableItem control) {
-			
-			if(usedDecorators){
-				//If there is no provider only apply set values
-				if(background != null)
-					control.setBackground(background);
-			
-				if(foreground != null)
-					control.setForeground(foreground);
-		
-				if(font != null)
-					control.setFont(font);
-			}
-			clear();
-		}
-		
-		/**
-		 * Apply the fonts and colors to the control if
-		 * required.
-		 * @param control
-		 */
-		public void applyFontsAndColors(TreeItem control) {
-			if(usedDecorators){
-				//If there is no provider only apply set values
-				if(background != null)
-					control.setBackground(background);
-			
-				if(foreground != null)
-					control.setForeground(foreground);
-		
-				if(font != null)
-					control.setFont(font);
-			}
-			clear();
-		}
-		
-		/**
-		 * Apply the fonts and colors to the control if
-		 * required.
-		 * @param control
-		 */
-		public void applyFontsAndColors(TableTreeItem control) {
-			if(usedDecorators){
-				//If there is no provider only apply set values
-				if(background != null)
-					control.setBackground(background);
-			
-				if(foreground != null)
-					control.setForeground(foreground);
-		
-				if(font != null)
-					control.setFont(font);
-			}
-			clear();
-		}
-		
-		/**
-		 * Set the background color.
-		 * @param background 
-		 */
-		public void setBackground(Color background) {
-			this.background = background;
-		}
-		/**
-		 * Set the font.
-		 * @param font 
-		 */
-		public void setFont(Font font) {
-			this.font = font;
-		}
-		/**
-		 * Set the foreground color.
-		 * @param foreground
-		 */
-		public void setForeground(Color foreground) {
-			this.foreground = foreground;
-		}
-	
 		
 	}
 
