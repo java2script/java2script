@@ -64,6 +64,127 @@ import org.eclipse.jface.util.Util;
 public final class ExternalActionManager {
 
 	/**
+	 * Defines a callback mechanism for developer who wish to further control
+	 * the visibility of legacy action-based contribution items.
+	 * 
+	 * @since 3.1
+	 */
+	public static interface IActiveChecker {
+		/**
+		 * Checks whether the command with the given identifier should be
+		 * considered active. This can be used in systems using some kind of
+		 * user interface filtering (e.g., activities in the Eclipse workbench).
+		 * 
+		 * @param commandId
+		 *            The identifier for the command; must not be
+		 *            <code>null</code>
+		 * @return <code>true</code> if the command is active;
+		 *         <code>false</code> otherwise.
+		 */
+		public boolean isActive(String commandId);
+	}
+
+	/**
+	 * A callback mechanism for some external tool to communicate extra
+	 * information to actions and action contribution items.
+	 * 
+	 * @since 3.0
+	 */
+	public static interface ICallback {
+
+		/**
+		 * <p>
+		 * Adds a listener to the object referenced by <code>identifier</code>.
+		 * This listener will be notified if a property of the item is to be
+		 * changed. This identifier is specific to mechanism being used. In the
+		 * case of the Eclipse workbench, this is the command identifier.
+		 * </p>
+		 * <p>
+		 * A single instance of the listener may only ever be associated with
+		 * one identifier. Attempts to add the listener twice (without a removal
+		 * inbetween) has undefined behaviour.
+		 * </p>
+		 * 
+		 * @param identifier
+		 *            The identifier of the item to which the listener should be
+		 *            attached; must not be <code>null</code>.
+		 * @param listener
+		 *            The listener to be added; must not be <code>null</code>.
+		 */
+		public void addPropertyChangeListener(String identifier,
+				IPropertyChangeListener listener);
+
+		/**
+		 * An accessor for the accelerator associated with the item indicated by
+		 * the identifier. This identifier is specific to mechanism being used.
+		 * In the case of the Eclipse workbench, this is the command identifier.
+		 * 
+		 * @param identifier
+		 *            The identifier of the item from which the accelerator
+		 *            should be obtained ; must not be <code>null</code>.
+		 * @return An integer representation of the accelerator. This is the
+		 *         same accelerator format used by SWT.
+		 */
+		public Integer getAccelerator(String identifier);
+
+		/**
+		 * An accessor for the accelerator text associated with the item
+		 * indicated by the identifier. This identifier is specific to mechanism
+		 * being used. In the case of the Eclipse workbench, this is the command
+		 * identifier.
+		 * 
+		 * @param identifier
+		 *            The identifier of the item from which the accelerator text
+		 *            should be obtained ; must not be <code>null</code>.
+		 * @return A string representation of the accelerator. This is the
+		 *         string representation that should be displayed to the user.
+		 */
+		public String getAcceleratorText(String identifier);
+
+		/**
+		 * Checks to see whether the given accelerator is being used by some
+		 * other mechanism (outside of the menus controlled by JFace). This is
+		 * used to keep JFace from trying to grab accelerators away from someone
+		 * else.
+		 * 
+		 * @param accelerator
+		 *            The accelerator to check -- in SWT's internal accelerator
+		 *            format.
+		 * @return <code>true</code> if the accelerator is already being used
+		 *         and shouldn't be used again; <code>false</code> otherwise.
+		 */
+		public boolean isAcceleratorInUse(int accelerator);
+
+		/**
+		 * Checks whether the item matching this identifier is active. This is
+		 * used to decide whether a contribution item with this identifier
+		 * should be made visible. An inactive item is not visible.
+		 * 
+		 * @param identifier
+		 *            The identifier of the item from which the active state
+		 *            should be retrieved; must not be <code>null</code>.
+		 * @return <code>true</code> if the item is active; <code>false</code>
+		 *         otherwise.
+		 */
+		public boolean isActive(String identifier);
+
+		/**
+		 * Removes a listener from the object referenced by
+		 * <code>identifier</code>. This identifier is specific to mechanism
+		 * being used. In the case of the Eclipse workbench, this is the command
+		 * identifier.
+		 * 
+		 * @param identifier
+		 *            The identifier of the item to from the listener should be
+		 *            removed; must not be <code>null</code>.
+		 * @param listener
+		 *            The listener to be removed; must not be <code>null</code>.
+		 */
+		public void removePropertyChangeListener(String identifier,
+				IPropertyChangeListener listener);
+	}
+
+	/**
 	 * A simple implementation of the <code>ICallback</code> mechanism that
 	 * simply takes a <code>BindingManager</code> and a
 	 * <code>CommandManager</code>.
@@ -342,127 +463,6 @@ public final class ExternalActionManager {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Defines a callback mechanism for developer who wish to further control
-	 * the visibility of legacy action-based contribution items.
-	 * 
-	 * @since 3.1
-	 */
-	public static interface IActiveChecker {
-		/**
-		 * Checks whether the command with the given identifier should be
-		 * considered active. This can be used in systems using some kind of
-		 * user interface filtering (e.g., activities in the Eclipse workbench).
-		 * 
-		 * @param commandId
-		 *            The identifier for the command; must not be
-		 *            <code>null</code>
-		 * @return <code>true</code> if the command is active;
-		 *         <code>false</code> otherwise.
-		 */
-		public boolean isActive(String commandId);
-	}
-
-	/**
-	 * A callback mechanism for some external tool to communicate extra
-	 * information to actions and action contribution items.
-	 * 
-	 * @since 3.0
-	 */
-	public static interface ICallback {
-
-		/**
-		 * <p>
-		 * Adds a listener to the object referenced by <code>identifier</code>.
-		 * This listener will be notified if a property of the item is to be
-		 * changed. This identifier is specific to mechanism being used. In the
-		 * case of the Eclipse workbench, this is the command identifier.
-		 * </p>
-		 * <p>
-		 * A single instance of the listener may only ever be associated with
-		 * one identifier. Attempts to add the listener twice (without a removal
-		 * inbetween) has undefined behaviour.
-		 * </p>
-		 * 
-		 * @param identifier
-		 *            The identifier of the item to which the listener should be
-		 *            attached; must not be <code>null</code>.
-		 * @param listener
-		 *            The listener to be added; must not be <code>null</code>.
-		 */
-		public void addPropertyChangeListener(String identifier,
-				IPropertyChangeListener listener);
-
-		/**
-		 * An accessor for the accelerator associated with the item indicated by
-		 * the identifier. This identifier is specific to mechanism being used.
-		 * In the case of the Eclipse workbench, this is the command identifier.
-		 * 
-		 * @param identifier
-		 *            The identifier of the item from which the accelerator
-		 *            should be obtained ; must not be <code>null</code>.
-		 * @return An integer representation of the accelerator. This is the
-		 *         same accelerator format used by SWT.
-		 */
-		public Integer getAccelerator(String identifier);
-
-		/**
-		 * An accessor for the accelerator text associated with the item
-		 * indicated by the identifier. This identifier is specific to mechanism
-		 * being used. In the case of the Eclipse workbench, this is the command
-		 * identifier.
-		 * 
-		 * @param identifier
-		 *            The identifier of the item from which the accelerator text
-		 *            should be obtained ; must not be <code>null</code>.
-		 * @return A string representation of the accelerator. This is the
-		 *         string representation that should be displayed to the user.
-		 */
-		public String getAcceleratorText(String identifier);
-
-		/**
-		 * Checks to see whether the given accelerator is being used by some
-		 * other mechanism (outside of the menus controlled by JFace). This is
-		 * used to keep JFace from trying to grab accelerators away from someone
-		 * else.
-		 * 
-		 * @param accelerator
-		 *            The accelerator to check -- in SWT's internal accelerator
-		 *            format.
-		 * @return <code>true</code> if the accelerator is already being used
-		 *         and shouldn't be used again; <code>false</code> otherwise.
-		 */
-		public boolean isAcceleratorInUse(int accelerator);
-
-		/**
-		 * Checks whether the item matching this identifier is active. This is
-		 * used to decide whether a contribution item with this identifier
-		 * should be made visible. An inactive item is not visible.
-		 * 
-		 * @param identifier
-		 *            The identifier of the item from which the active state
-		 *            should be retrieved; must not be <code>null</code>.
-		 * @return <code>true</code> if the item is active; <code>false</code>
-		 *         otherwise.
-		 */
-		public boolean isActive(String identifier);
-
-		/**
-		 * Removes a listener from the object referenced by
-		 * <code>identifier</code>. This identifier is specific to mechanism
-		 * being used. In the case of the Eclipse workbench, this is the command
-		 * identifier.
-		 * 
-		 * @param identifier
-		 *            The identifier of the item to from the listener should be
-		 *            removed; must not be <code>null</code>.
-		 * @param listener
-		 *            The listener to be removed; must not be <code>null</code>.
-		 */
-		public void removePropertyChangeListener(String identifier,
-				IPropertyChangeListener listener);
 	}
 
 	/**

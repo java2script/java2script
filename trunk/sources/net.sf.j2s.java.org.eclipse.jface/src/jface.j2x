@@ -1,0 +1,5 @@
+package.prefix=org.eclipse.jface
+package.name=jface
+package.description=Eclipse JFace 3.1 library
+package.id=jface
+
