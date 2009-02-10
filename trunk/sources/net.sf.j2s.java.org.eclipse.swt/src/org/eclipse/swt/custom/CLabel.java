@@ -605,7 +605,6 @@ private Color getComputedBackground () {
 	 * 	bg = document.defaultView.getComputedStyle (this.handle, null).backgroundColor;
 	 * }
 	 */ {}
-	System.out.println(bg);
 	if (bg == null || ("" + bg).length() == 0) {
 		return new Color(display, "menu");
 	}
