@@ -41,7 +41,7 @@ public class UTF8Concat {
 		String j2sKeySig = "/* http://j2s.sf.net/ */";
 		buf.append(j2sKeySig);
 		System.out.println("To " + dest.getAbsolutePath());
-		boolean isAllFileEarlier = dest.exists();
+		boolean isAllFileEarlier = false; //dest.exists();
 		if (isAllFileEarlier) {
 			for (int i = 0; i < args.length - 1 - indexDelta; i++) {
 				File src = new File(args[indexDelta], args[i + 1 + indexDelta]);
@@ -77,7 +77,6 @@ public class UTF8Concat {
 					buf.append(RegExCompress.regexCompress2(s));
 				}
 				//*/
-				buf.append(s);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				return;
