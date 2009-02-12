@@ -621,7 +621,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			if (typeStr != null) {
 				buffer.append("Clazz.castNullAs (\"");
-				buffer.append(typeStr);
+				buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
 				buffer.append("\")");
 			} else {
 				boxingNode(element);
