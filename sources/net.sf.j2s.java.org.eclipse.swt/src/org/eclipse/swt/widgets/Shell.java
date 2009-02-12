@@ -163,7 +163,8 @@ public class Shell extends Decorations {
  * </ul>
  */
 public Shell () {
-	this ((Display) null);
+	//this ((Display) null);
+	this (null, null, SWT.SHELL_TRIM, 0);
 }
 
 /**
@@ -202,7 +203,8 @@ public Shell () {
  * @see SWT#SYSTEM_MODAL
  */
 public Shell (int style) {
-	this ((Display) null, style);
+	//this ((Display) null, style);
+	this (null, null, style, 0);
 }
 
 /**
@@ -225,7 +227,8 @@ public Shell (int style) {
  * </ul>
  */
 public Shell (Display display) {
-	this (display, SWT.SHELL_TRIM);
+	//this (display, SWT.SHELL_TRIM);
+	this (display, null, SWT.SHELL_TRIM, 0);
 	//this (display, OS.IsWinCE ? SWT.NONE : SWT.SHELL_TRIM);
 }
 
@@ -328,7 +331,8 @@ Shell (Display display, Shell parent, int style, int handle) {
  * </ul>
  */
 public Shell (Shell parent) {
-	this (parent, SWT.DIALOG_TRIM);
+	//this (parent, SWT.DIALOG_TRIM);
+	this (parent != null ? parent.display : null, parent, SWT.DIALOG_TRIM, 0);
 }
 
 /**
