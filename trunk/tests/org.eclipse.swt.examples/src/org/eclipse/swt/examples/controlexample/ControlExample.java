@@ -57,36 +57,7 @@ public class ControlExample {
 	public ControlExample(Composite parent) {
 		initResources();
 		tabFolder = new TabFolder (parent, SWT.NONE);
-		String[] tabs = new String[] {
-//				"Table",
-				"Button", 
-//				"Canvas",
-//				"CLabel",
-				
-				"Combo",
-				
-				"CoolBar",
-//				"CTabFolder",
-				"Dialog",
-				"Group",
-				"Label",
-				"Link",
-				"List",
-				"Menu",
-				"ProgressBar",
-				
-				"Sash",
-				"SashForm",
-				// shellTab = new ShellTab(this),
-				"Shell",
-				"Slider",
-				"Spinner",
-				"TabFolder",
-				"Table",
-				"Text",
-				"ToolBar",
-				"Tree"
-		};
+		String[] tabs = getTabs();
 		for (int i=0; i<tabs.length; i++) {
 			TabItem item = new TabItem (tabFolder, SWT.NONE);
 		    item.setText (tabs [i]);
@@ -196,6 +167,40 @@ public class ControlExample {
 		}
 		*/
 		startup = false;
+	}
+
+	String[] getTabs() {
+		String[] tabs = new String[] {
+//				"Table",
+				"Button", 
+//				"Canvas",
+//				"CLabel",
+				
+				"Combo",
+				
+				"CoolBar",
+//				"CTabFolder",
+				"Dialog",
+				"Group",
+				"Label",
+				"Link",
+				"List",
+				"Menu",
+				"ProgressBar",
+				
+				"Sash",
+				"SashForm",
+				// shellTab = new ShellTab(this),
+				"Shell",
+				"Slider",
+				"Spinner",
+				"TabFolder",
+				"Table",
+				"Text",
+				"ToolBar",
+				"Tree"
+		};
+		return tabs;
 	}
 
 	/**

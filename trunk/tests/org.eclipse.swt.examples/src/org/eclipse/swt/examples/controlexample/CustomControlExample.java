@@ -26,19 +26,31 @@ public class CustomControlExample extends ControlExample {
 		super (parent);
 	}
 	
-	/**
-	 * Answers the set of example Tabs
-	 */
-	Tab[] createTabs() {
-		return new Tab [] {
-			new CComboTab (this),
-			new CLabelTab (this),
-			new CTabFolderTab (this),
-			new SashFormTab (this),
-			new StyledTextTab (this),
+//	/**
+//	 * Answers the set of example Tabs
+//	 */
+//	Tab[] createTabs() {
+//		return new Tab [] {
+//			new CComboTab (this),
+//			new CLabelTab (this),
+//			new CTabFolderTab (this),
+//			new SashFormTab (this),
+//			new StyledTextTab (this),
+//		};
+//	}
+//	
+	@Override
+	String[] getTabs() {
+		String[] tabs = new String[] {
+				"CLabel",
+				"CCombo",
+				"CTabFolder",
+				"SashForm",
+				"StyledText"
 		};
+		return tabs;
 	}
-	
+
 	/**
 	 * Invokes as a standalone program.
 	 */
@@ -48,7 +60,7 @@ public class CustomControlExample extends ControlExample {
 		shell.setLayout(new FillLayout());
 		CustomControlExample instance = new CustomControlExample(shell);
 		shell.setText(getResourceString("custom.window.title"));
-		setShellSize(display, shell);
+		//setShellSize(display, shell);
 		shell.open();
 		while (! shell.isDisposed()) {
 			if (! display.readAndDispatch()) display.sleep();
