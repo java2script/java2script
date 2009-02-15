@@ -38,7 +38,7 @@ class CComboTab extends Tab {
 	/**
 	 * Creates the Tab within a given instance of ControlExample.
 	 */
-	CComboTab(ControlExample instance) {
+	public CComboTab(ControlExample instance) {
 		super(instance);
 	}
 	
