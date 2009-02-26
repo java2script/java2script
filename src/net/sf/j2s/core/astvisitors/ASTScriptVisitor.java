@@ -627,7 +627,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				boxingNode(element);
 				Expression exp = (Expression) element;
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				String typeName = typeBinding.getName();
+				String typeName = null;
+				if (typeBinding != null) {
+					typeName = typeBinding.getName();
+				}
 				String parameterTypeName = null;
 				if (parameterTypes != null) {
 					parameterTypeName = parameterTypes[i].getName();
@@ -1703,8 +1706,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(" (");
 
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
 		if (methodBinding != null && methodBinding.isVarargs()) {
+			ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
 			visitList(args, ", ", 0, paramTypes.length - 1);
 			if (paramTypes.length - 1 > 0) {
 				buffer.append(", ");
@@ -2585,7 +2588,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private String prepareSimpleSerializable(TypeDeclaration node, List bodyDeclarations) {
 		StringBuffer fieldsSerializables = new StringBuffer();
 		ITypeBinding binding = node.resolveBinding();
-		boolean isSimpleSerializable = (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
+		boolean isSimpleSerializable = binding != null
+				&& (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
