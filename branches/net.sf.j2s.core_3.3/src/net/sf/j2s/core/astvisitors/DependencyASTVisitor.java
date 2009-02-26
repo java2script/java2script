@@ -905,6 +905,24 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", "deal")) {
+			ITypeBinding[] parameterTypes = mBinding.getParameterTypes();
+			if (parameterTypes != null && parameterTypes.length == 1) {
+				ITypeBinding paramType = parameterTypes[0];
+				ITypeBinding declaringClass = paramType.getDeclaringClass();
+				QNTypeBinding qn = new QNTypeBinding();
+				String qualifiedName = null;
+				if (declaringClass != null) {
+					qn.binding = declaringClass;
+					qualifiedName = declaringClass.getQualifiedName();
+				} else {
+					qn.binding = paramType;
+					qualifiedName = paramType.getQualifiedName();
+				}
+				qn.qualifiedName = discardGenericType(qualifiedName);
+				optionals.add(qn);
+			}
+		}
 		boolean toBeIgnored = false;
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
 			toBeIgnored = true;
