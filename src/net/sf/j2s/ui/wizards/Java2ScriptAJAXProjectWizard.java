@@ -52,6 +52,7 @@ public class Java2ScriptAJAXProjectWizard extends Java2ScriptProjectWizard {
 		}
 		list.add(JavaCore.newVariableEntry(new Path("AJAX_CORE"), new Path("AJAX_CORE_SRC"), null));
 		list.add(JavaCore.newVariableEntry(new Path("AJAX_RPC"), new Path("AJAX_RPC_SRC"), null));
+		list.add(JavaCore.newVariableEntry(new Path("AJAX_PIPE"), new Path("AJAX_PIPE_SRC"), null));
 		return super.updateJavaLibraries((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]));
 	}
 
@@ -73,6 +74,13 @@ public class Java2ScriptAJAXProjectWizard extends Java2ScriptProjectWizard {
 					int idx = classpath.lastIndexOf("<");
 					classpath = classpath.substring(0, idx)
 					+ "\t<classpathentry sourcepath=\"AJAX_RPC_SRC\" kind=\"var\" path=\"AJAX_RPC\"/>\r\n"
+					+ classpath.substring(idx);
+					needUpdate = true;
+				}
+				if (classpath.indexOf("AJAX_PIPE") == -1 && classpath.indexOf("ajaxpipe.jar") == -1) {
+					int idx = classpath.lastIndexOf("<");
+					classpath = classpath.substring(0, idx)
+					+ "\t<classpathentry sourcepath=\"AJAX_PIPE_SRC\" kind=\"var\" path=\"AJAX_PIPE\"/>\r\n"
 					+ classpath.substring(idx);
 					needUpdate = true;
 				}

@@ -538,10 +538,10 @@ public class J2SLaunchingUtil {
 			buf.append("<html>\r\n");
 		}
 		buf.append("<head>\r\n");
+		buf.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>\r\n");
 		buf.append("<title>");
 		buf.append(mainType);
 		buf.append("</title>\r\n");
-		buf.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>\r\n");
 		buf.append(configuration.getAttribute(
 				IJ2SLauchingConfiguration.HEAD_HEADER_HTML, ""));
 
