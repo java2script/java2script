@@ -146,7 +146,8 @@ public Widget (Widget parent, int style) {
 	this.style = style;
 	/**
 	 * @j2sNative
-	 * if (!this.styleChecked && this.checkStyle != null) {
+	 * if (!this.styleChecked && this.checkStyle != null
+	 * 		&& this.checkStyle.funParams == "\Number") {
 	 * 	this.style = this.checkStyle (this.style);
 	 * 	this.styleChecked = true;
 	 * }

@@ -305,7 +305,8 @@ public boolean equals (Object object) {
 //		data.lfClipPrecision == lf.lfClipPrecision &&
 //		data.lfQuality == lf.lfQuality &&
 //		data.lfPitchAndFamily == lf.lfPitchAndFamily &&
-		getName().equals(fd.getName());
+		(getName() == null && fd.getName() == null)
+			|| (getName ()!= null && getName().equals(fd.getName()));
 }
 
 /*
