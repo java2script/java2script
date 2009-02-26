@@ -79,7 +79,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		if (type == null) {
 			type = SimplePipeRequest.PIPE_TYPE_CONTINUUM;
 		}
-		doPipe(resp, key, type);
+		String domain = req.getParameter(SimplePipeRequest.FORM_PIPE_DOMAIN);
+		doPipe(resp, key, type, domain);
 	}
 
 	/**
@@ -101,7 +102,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	 * type = notify
 	 * Notify that client (browser) still keeps the pipe connection.
 	 */ 
-	protected void doPipe(final HttpServletResponse resp, String key, String type)
+	protected void doPipe(final HttpServletResponse resp, String key, String type, String domain)
 			throws IOException {
 		PrintWriter writer = null;
 		resp.setHeader("Pragma", "no-cache");
@@ -122,6 +123,24 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write("\");");
 			return;
 		}
+		if (SimplePipeRequest.PIPE_TYPE_SUBDOMAIN_QUERY.equals(type)) { // subdomain query
+			resp.setContentType("text/html; charset=utf-8");
+			writer = resp.getWriter();
+			StringBuffer buffer = new StringBuffer();
+			buffer.append("<html><head><title></title></head><body>\r\n");
+			buffer.append("<script type=\"text/javascript\">");
+			buffer.append("p = new Object ();\r\n");
+			buffer.append("p.originalDomain = document.domain;\r\n");
+			buffer.append("document.domain = \"" + domain + "\";\r\n");
+			buffer.append("p.key = \"" + key + "\";\r\n");
+			buffer.append("var spr = window.parent.net.sf.j2s.ajax.SimplePipeRequest;\r\n");
+			buffer.append("eval (\"(\" + spr.subdomainInit + \") (p);\");\r\n");
+			buffer.append("eval (\"((\" + spr.subdomainLoopQuery + \") (p)) ();\");\r\n");
+			buffer.append("</script>\r\n");
+			buffer.append("</body></html>\r\n");
+			writer.write(buffer.toString());
+			return;
+		}
 		if (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
 			resp.setHeader("Transfer-Encoding", "chunked");
 		}
@@ -131,6 +150,9 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			StringBuffer buffer = new StringBuffer();
 			buffer.append("<html><head><title></title></head><body>\r\n");
 			buffer.append("<script type=\"text/javascript\">");
+			if (domain != null) {
+				buffer.append("document.domain = \"" + domain + "\";");
+			}
 			buffer.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
 			buffer.append("</script>\r\n");
 			writer.write(buffer.toString());

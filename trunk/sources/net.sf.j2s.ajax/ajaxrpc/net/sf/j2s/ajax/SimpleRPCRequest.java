@@ -197,6 +197,10 @@ if (url != null && (url.indexOf ("http://") == 0
 	if (idx4 != -1) {
 		locHost = locHost.substring (0, idx4);
 	}
+	if (arguments.length == 2) { // check subdomain
+		return host.indexOf ("." + locHost) != -1 && locPort == port
+				&& loc.protocol == protocol && loc.protocol != "file:";
+	}
 	return (locHost != host || locPort != port
 			|| loc.protocol != protocol || loc.protocol == "file:");
 }
@@ -206,6 +210,16 @@ return false; // ftp ...
 		return false;
 	}
 	
+	/**
+	 * Check that whether it is a subdomain of current location.
+	 * @param url
+	 * @return
+	 * @j2sNative
+	 * return net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode(url, true);
+	 */
+	protected static boolean isSubdomain(String url) {
+		return false;
+	}
 	/**
 	 * Check cross site script. Only make senses for JavaScript.
 	 * 

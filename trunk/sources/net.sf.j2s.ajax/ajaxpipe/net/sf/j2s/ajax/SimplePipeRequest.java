@@ -50,6 +50,11 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	protected static final String PIPE_TYPE_QUERY = "q"; // "query";
 	
 	/**
+	 * Type of pipe request: subdomain-query
+	 */
+	protected static final String PIPE_TYPE_SUBDOMAIN_QUERY = "u"; // "subdomain-query";
+	
+	/**
 	 * Type of pipe request: notify
 	 */
 	protected static final String PIPE_TYPE_NOTIFY = "n"; // "notify";
@@ -80,6 +85,11 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 */
 	protected static final String FORM_PIPE_TYPE = "t"; // "pipetype";
 	
+	/**
+	 * Query key for pipe: pipetype
+	 */
+	protected static final String FORM_PIPE_DOMAIN = "d"; // "pipedomain";
+
 	/**
 	 * Query key for pipe: pipernd
 	 */
@@ -464,6 +474,24 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 		// only for JavaScript
 	}
 	
+	/**
+	 * @param runnable
+	 * @param domain
+	 * @j2sNative
+var ifr = document.createElement ("IFRAME");
+ifr.style.display = "none";
+var pipeKey = runnable.pipeKey;
+var spr = net.sf.j2s.ajax.SimplePipeRequest;
+var url = runnable.getPipeURL();
+ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY, true)
+		+ "&" + spr.FORM_PIPE_DOMAIN + "=" + domain;
+document.body.appendChild (ifr);
+	 */
+	static void pipeSubdomainQuery(SimplePipeRunnable runnable, String domain) {
+		// only for JavaScript
+	}
+	
 	static void pipeNotify(SimplePipeRunnable runnable) { // notifier
 		String url = runnable.getPipeURL();
 		loadPipeScript(url + (url.indexOf('?') != -1 ? "&" : "?")
@@ -504,25 +532,7 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 				 * @j2sNative
 				 * if (window == null || window["net"] == null) return;
 				 */ {}
-				String responseText = pipeRequest.getResponseText();
-				if (responseText != null) {
-					String retStr = parseReceived(responseText);
-					if (retStr != null && retStr.length() > 0) {
-						String destroyedKey = PIPE_STATUS_DESTROYED;
-						if (retStr.indexOf(destroyedKey) == 0) {
-							int beginIndex = destroyedKey.length() + 1;
-							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
-							SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
-							if (pipe != null) {
-								pipe.pipeAlive = false;
-								pipe.pipeClosed();
-								SimplePipeHelper.removePipe(pipeKeyStr);
-							}
-							//SimplePipeHelper.removePipe(pipeKeyStr);
-						}
-					}
-				}
-				
+				onPipeDataReceived(pipeRequest.getResponseText());
 				/**
 				 * @j2sNative
 				 * net.sf.j2s.ajax.SimplePipeRequest.lastQueryReceived = true;
@@ -539,6 +549,26 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 		 */ {}
 		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, true);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, async);
+	}
+
+	static void onPipeDataReceived(String responseText) {
+		if (responseText != null) {
+			String retStr = parseReceived(responseText);
+			if (retStr != null && retStr.length() > 0) {
+				String destroyedKey = PIPE_STATUS_DESTROYED;
+				if (retStr.indexOf(destroyedKey) == 0) {
+					int beginIndex = destroyedKey.length() + 1;
+					String pipeKeyStr = retStr.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
+					SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
+					if (pipe != null) {
+						pipe.pipeAlive = false;
+						pipe.pipeClosed();
+						SimplePipeHelper.removePipe(pipeKeyStr);
+					}
+					//SimplePipeHelper.removePipe(pipeKeyStr);
+				}
+			}
+		}
 	}
 
 	/**
@@ -559,8 +589,11 @@ ifr.style.display = "none";
 var pipeKey = runnable.pipeKey;
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
 var url = runnable.getPipeURL();
+var subdomain = arguments[1];
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
-		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true);
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true)
+		+ (subdomain == null ? ""
+				: "&" + spr.FORM_PIPE_DOMAIN + "=" + subdomain);
 document.body.appendChild (ifr);
 var threadFun = function (pipeFun, key) {
 		return function () {
@@ -762,12 +795,28 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		 * Here in JavaScript mode, try to detect whether it's in cross site
 		 * script mode or not. In XSS mode, <SCRIPT> is used to make requests. 
 		 */
-		boolean isXSS = isXSSMode(runnable.getPipeURL());
+		String pipeURL = runnable.getPipeURL();
+		boolean isXSS = isXSSMode(pipeURL);
+		boolean isSubdomain = false;
+		if (isXSS) {
+			isSubdomain = isSubdomain(pipeURL);
+		}
 
-		if (!isXSS && pipeMode == MODE_PIPE_CONTINUUM)
+		if ((!isXSS || isSubdomain) && pipeMode == MODE_PIPE_CONTINUUM)
 			/**
 			 * @j2sNative
-			 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum (runnable);
+			 * var subdomain = null;
+			 * if (isSubdomain) {
+			 * 	subdomain = window.location.host;
+			 * 	if (subdomain != null) {
+			 * 		var idx = subdomain.indexOf (":");
+			 * 		if (idx != -1) {
+			 * 			subdomain = subdomain.substring (0, idx);
+			 * 		}
+			 * 		document.domain = subdomain; // set owner iframe's domain
+			 * 	}
+			 * }
+			 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum (runnable, subdomain);
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
@@ -779,6 +828,20 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		} else
 			/**
 			 * @j2sNative
+if (isXSS && isSubdomain
+ 		&& net.sf.j2s.ajax.SimplePipeRequest.isSubdomainXSSSupported ()) {
+	var subdomain = null;
+	subdomain = window.location.host;
+	if (subdomain != null) {
+		var idx = subdomain.indexOf (":");
+		if (idx != -1) {
+			subdomain = subdomain.substring (0, idx);
+		}
+		document.domain = subdomain; // set owner iframe's domain
+	}
+	net.sf.j2s.ajax.SimplePipeRequest.pipeSubdomainQuery (runnable, subdomain);
+	return;
+}
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
 spr.lastQueryReceived = true;
 if (spr.queryTimeoutHandle != null) {
@@ -817,4 +880,135 @@ if (spr.queryTimeoutHandle != null) {
 		}
 	}
 
+	/**
+	 * For early version of Firefox (<1.5) and Opera (<9.6), subdomain XSS
+	 * query may be unsupported.
+	 * 
+	 * @return whether subdomain XSS is supported or not.
+	 * 
+	 * @j2sNative
+	var dua = navigator.userAgent;
+	var dav = navigator.appVersion;
+	if (dua.indexOf("Opera") != -1 && parseFloat (dav) < 9.6) {
+		return false;
+	}
+	if (dua.indexOf("Firefox") != -1 && parseFloat (dav) < 1.5) {
+		return false;
+	}
+	if (dua.indexOf("MSIE") != -1 && parseFloat (dav) < 6.0) {
+		return false;
+	}
+	return true;
+	 */
+	static boolean isSubdomainXSSSupported() {
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param p
+	 * @j2sNative
+p.initParameters = function () {
+	this.parentDomain = document.domain;
+	this.pipeQueryInterval = 1000;
+	this.lastQueryReceived = true;
+	this.runnable = null;
+	var oThis = this;
+	with (window.parent) {
+		var sph = net.sf.j2s.ajax.SimplePipeHelper;
+		var spr = net.sf.j2s.ajax.SimplePipeRequest;
+		this.runnable = sph.getPipe(this.key);
+		this.pipeQueryInterval = spr.getQueryInterval ();
+	}
+};
+p.initHttpRequest = function () {
+	this.xhrHandle = null;
+	if (window.XMLHttpRequest) {
+		this.xhrHandle = new XMLHttpRequest();
+	} else {
+		try {
+			this.xhrHandle = new ActiveXObject("Msxml2.XMLHTTP");
+		} catch (e) {
+			this.xhrHandle = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+	}
+	var oThis = this;
+	this.xhrHandle.onreadystatechange = function () {
+		var state = oThis.xhrHandle.readyState;
+		if (state == 4) {
+			var pipeData = oThis.xhrHandle.responseText;
+			oThis.xhrHandle.onreadystatechange = function () {};
+			oThis.xhrHandle = null;
+			document.domain = oThis.parentDomain;
+			oThis.lastQueryReceived = true;
+			with (window.parent) {
+				var sph = net.sf.j2s.ajax.SimplePipeHelper;
+				var spr = net.sf.j2s.ajax.SimplePipeRequest;
+				spr.onPipeDataReceived (pipeData);
+				oThis.runnable = sph.getPipe (oThis.key);
+			}
+		}
+	};
+};
+p.pipeXHRQuery = function (request, method, url, data) {
+	if ("GET" == method.toUpperCase ()) {
+		request.open (method, url + (url.indexOf ('?') != -1 ? "&" : "?") + data, true, null, null);
+		data = null;
+	} else {
+		request.open (method, url, true, null, null);
+	}
+	request.setRequestHeader ("User-Agent",
+			"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
+	if (method != null && method.toLowerCase () == "post") {
+		request.setRequestHeader ("Content-type", 
+				"application/x-www-form-urlencoded");
+		if (request.overrideMimeType) {
+			request.setRequestHeader ("Connection", "close");
+		}
+	}
+	request.send(data);
+};
+p.initParameters ();
+	 */
+	static void subdomainInit(Object p) {
+		// for JavaScript only
+	}
+	
+	/**
+	 * 
+	 * @param p
+	 * @j2sNative
+return function () {
+	if (p.runnable != null) {
+		if (p.lastQueryReceived) {
+			p.lastQueryReceived = false;
+			var method = null;
+			var url = null;
+			var data = null;
+			with (window.parent) {
+				method = p.runnable.getPipeMethod ();
+				url = p.runnable.getPipeURL ();
+				var spr = net.sf.j2s.ajax.SimplePipeRequest;
+				data = spr.constructRequest(p.key, spr.PIPE_TYPE_QUERY, true);
+			}
+			try {
+				document.domain = p.originalDomain;
+			} catch (e) {};
+			p.initHttpRequest ();
+			try {
+				p.pipeXHRQuery (p.xhrHandle, method, url, data);
+			} catch (e) {
+				p.xhrHandle.onreadystatechange = function () {};
+				p.xhrHandle = null;
+				document.domain = p.parentDomain;
+				p.lastQueryReceived = true;
+			}
+		}
+		window.setTimeout (arguments.callee, p.pipeQueryInterval);
+	}
+};
+	 */
+	static void subdomainLoopQuery(Object p) {
+		// for JavaScript only
+	}
 }
