@@ -1397,6 +1397,18 @@ Clazz.defineType = function (qClazzName, clazzFun, clazzParent, interfacez) {
 	return clazzFun;
 };
 
+Clazz.isSafari = (navigator.userAgent.indexOf ("Safari") != -1);
+Clazz.isSafari4Plus = false;
+if (Clazz.isSafari) {
+	var ua = navigator.userAgent;
+	var verIdx = ua.indexOf ("Version/");
+	if (verIdx  != -1) {
+		var verStr = ua.substring (verIdx + 8);
+		var verNumber = parseFloat (verStr);
+		Clazz.isSafari4Plus = verNumber >= 4.0;
+	}
+}
+
 /* protected */
 Clazz.instantialize = function (objThis, args) {
 	if (args != null && args.length == 1 && args[0] != null 
@@ -1415,6 +1427,13 @@ Clazz.instantialize = function (objThis, args) {
 		objThis.valueOf = function () {
 			return this;
 		};
+	}
+	if (Clazz.isSafari4Plus) { // Fix bug of Safari 4.0+'s over-optimization
+		var argsClone = new Array ();
+		for (var k = 0; k < args.length; k++) {
+			argsClone[k] = args[k];
+		}
+		args = argsClone;
 	}
 	var c = objThis.construct;
 	if (c != null) {
