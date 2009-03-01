@@ -492,6 +492,21 @@ void createHandle() {
 		}
 		if (OS.isChrome) {
 			btnHandle.className += " " + btnHandle.className + "-chrome"; 
+		} else if (OS.isSafari) {
+			boolean isSafari4Plus = false;
+			/**
+			 * @j2sNative
+			 * var ua = navigator.userAgent;
+			 * var verIdx = ua.indexOf ("Version/");
+			 * if (verIdx  != -1) {
+			 * 	var verStr = ua.substring (verIdx + 8);
+			 * 	var verNumber = parseFloat (verStr);
+			 * 	isSafari4Plus = verNumber >= 4.0
+			 * }
+			 */ {}
+			if (!isSafari4Plus) { // There is no need of CSS hack for Safari 4.0+
+				btnHandle.className += " " + btnHandle.className + "-safari"; 
+			}
 		}
 	}
 	btnHandle.onmouseover = new RunnableCompatibility() {
