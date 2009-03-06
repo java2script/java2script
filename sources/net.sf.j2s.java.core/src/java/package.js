@@ -103,6 +103,7 @@ window["java.registered"] = false;
 		"$.SimpleRPCSWTRequest",
        	
 		"$.SimplePipeRunnable",
+		"$.ISimplePipePriority",
 		"$.SimplePipeHelper",
 		"$.SimplePipeRequest",
 		"$.SimplePipeSWTRequest",
