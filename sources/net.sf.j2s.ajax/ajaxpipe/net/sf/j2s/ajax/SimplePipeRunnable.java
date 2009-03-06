@@ -28,11 +28,17 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 
 	public boolean pipeAlive;
 	
-	SimplePipeHelper.IPipeThrough helper;
+	SimplePipeHelper.IPipeThrough helper; // For Java server side
 	
-	SimplePipeHelper.IPipeClosing closer;
+	SimplePipeHelper.IPipeClosing closer; // For Java server side
 	
 	private boolean destroyed;
+	
+	int queryFailedRetries; // >=3 will mark pipe broken
+	
+	boolean queryEnded;
+	
+	long lastPipeDataReceived;
 	
 	/**
 	 * 
@@ -112,6 +118,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	public void pipeInit() {
 		// to be override
+		queryFailedRetries = 0;
+		lastPipeDataReceived = -1;
 	}
 	
 	/**

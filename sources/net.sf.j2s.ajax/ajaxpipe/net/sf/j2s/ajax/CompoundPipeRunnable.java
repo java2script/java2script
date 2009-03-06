@@ -16,9 +16,24 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 
 	int status;
 	
+	String id; // id for CompoundPipeRequest
+	String pipeMethod;
+	String rpcMethod;
+	String pipeURL;
+	String rpcURL;
+	
+	int setupFailedRetries;
+	long lastSetupRetried;
+
 	public CompoundPipeRunnable() {
 		pipes = new CompoundPipeSession[100];
 		status = 0; // starting
+		setupFailedRetries = 0;
+		lastSetupRetried = 0;
+		pipeMethod = "GET";
+		rpcMethod = "POST";
+		pipeURL = "simplepipe";
+		rpcURL = "piperpc";
 	}
 
 	protected CompoundPipeSession getSession(String session) {
@@ -121,6 +136,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				newPipes[pipes.length] = pipe;
 			}
 		}
+		pipe.parent = this;
 		while (pipe.session == null) {
 			String key = nextSessionKey();
 			boolean isKeyOK = true;
@@ -188,22 +204,22 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	
 	@Override
 	public String getHttpURL() {
-		return CompoundPipeRequest.rpcURL;
+		return rpcURL;
 	}
 
 	@Override
 	public String getHttpMethod() {
-		return CompoundPipeRequest.rpcMethod;
+		return rpcMethod;
 	}
 
 	@Override
 	public String getPipeURL() {
-		return CompoundPipeRequest.pipeURL;
+		return pipeURL;
 	}
 
 	@Override
 	public String getPipeMethod() {
-		return CompoundPipeRequest.pipeMethod;
+		return pipeMethod;
 	}
 
 }
