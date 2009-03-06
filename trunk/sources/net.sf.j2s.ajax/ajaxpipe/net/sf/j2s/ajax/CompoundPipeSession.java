@@ -8,6 +8,8 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	public String session;
 
+	CompoundPipeRunnable parent;
+	
 	@Override
 	public void ajaxRun() {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
@@ -129,22 +131,22 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	@Override
 	public String getHttpURL() {
-		return CompoundPipeRequest.rpcURL;
+		return parent.getHttpURL();
 	}
 
 	@Override
 	public String getHttpMethod() {
-		return CompoundPipeRequest.rpcMethod;
+		return parent.getHttpMethod();
 	}
 
 	@Override
 	public String getPipeURL() {
-		return CompoundPipeRequest.pipeURL;
+		return parent.getPipeURL();
 	}
 
 	@Override
 	public String getPipeMethod() {
-		return CompoundPipeRequest.pipeMethod;
+		return parent.getHttpMethod();
 	}
 
 }

@@ -4,45 +4,11 @@ import java.util.Date;
 
 public class CompoundPipeRequest extends SimplePipeRequest {
 
-	static CompoundPipeRunnable pipe;
+	static CompoundPipeRunnable[] pipes = new CompoundPipeRunnable[3];
 	
-	static int count = 0;
-	
-	static long lastTried = 0;
-	
-	static String pipeMethod = "GET";
-	
-	static String rpcMethod = "POST";
-	
-	static String pipeURL = "simplepipe";
-	
-	static String rpcURL = "piperpc";
-	
-
-	public static void weave(CompoundPipeSession p) {
-		if (pipe == null || !pipe.isPipeLive()) {
-			pipe = new CompoundPipeRunnable() {
-			
-				@Override
-				public void ajaxOut() {
-					super.ajaxOut();
-					for (int i = 0; i < pipes.length; i++) {
-						if (pipes[i] != null) {
-							pipes[i].pipeKey = pipe.pipeKey;
-							SimpleRPCRequest.request(pipes[i]);
-							if (pipe.status < 2) {
-								pipe.status = 2; // requested
-							}
-						}
-					}
-				}
-			
-				@Override
-				public void ajaxFail() {
-					CompoundPipeRequest.pipeFailed(this);
-				}
-			
-			};
+	public static void weave(String id, CompoundPipeSession p) {
+		final CompoundPipeRunnable pipe = retrievePipe(id, true);
+		if (pipe.status == 0 || !pipe.isPipeLive()) {
 			pipe.weave(p);
 			pipe.updateStatus(true);
 			SimplePipeRequest.pipe(pipe);
@@ -61,14 +27,14 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 	
 	static void pipeFailed(CompoundPipeRunnable pipe) {
 		long now = new Date().getTime();
-		if (now - lastTried > 5 * 60 * 1000) { // five minutes
-			count = 0;
+		if (now - pipe.lastSetupRetried > 5 * 60 * 1000) { // five minutes
+			pipe.setupFailedRetries = 0;
 		}
-		count++;
-		if (count <= 3) {
+		pipe.setupFailedRetries++;
+		if (pipe.setupFailedRetries <= 3) {
 			// take another trys
 			pipe.updateStatus(true);
-			lastTried = now;
+			pipe.lastSetupRetried = now;
 			SimplePipeRequest.pipe(pipe);
 		} else {
 			for (int i = 0; i < pipe.pipes.length; i++) {
@@ -77,22 +43,112 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 				}
 				pipe.pipes[i] = null;
 			}
-			pipe = null;
+			unregisterPipe(pipe.id);
 		}
 	}
 	
-	public static void configure(String pipeURL, String pipeMethod, String rpcURL, String rpcMethod) {
+	public static void configure(String id, String pipeURL, String pipeMethod,
+			String rpcURL, String rpcMethod) {
+		CompoundPipeRunnable cfg = retrievePipe(id, true);
 		if (pipeURL != null) {
-			CompoundPipeRequest.pipeURL = pipeURL;
+			cfg.pipeURL = pipeURL;
 		}
 		if (pipeMethod != null) {
-			CompoundPipeRequest.pipeMethod = pipeMethod;
+			cfg.pipeMethod = pipeMethod;
 		}
 		if (rpcURL != null) {
-			CompoundPipeRequest.rpcURL = rpcURL;
+			cfg.rpcURL = rpcURL;
 		}
 		if (rpcMethod != null) {
-			CompoundPipeRequest.rpcMethod = rpcMethod;
+			cfg.rpcMethod = rpcMethod;
+		}
+	}
+	
+	static CompoundPipeRunnable retrievePipe(String id, boolean createNew) {
+		CompoundPipeRunnable[] allPipes = pipes;
+		synchronized (allPipes) {
+			for (int i = 0; i < allPipes.length; i++) {
+				if (allPipes[i] != null && allPipes[i].id.equals(id)) {
+					return allPipes[i];
+				}
+			}
+			if (!createNew) {
+				return null;
+			}
+			
+			CompoundPipeRunnable pipe = createPipe(id);
+			addPipe(pipe);
+			return pipe;
+		}
+	}
+
+	private static CompoundPipeRunnable createPipe(String id) {
+		CompoundPipeRunnable pipe = new CompoundPipeRunnable() {
+		
+			@Override
+			public void ajaxOut() {
+				super.ajaxOut();
+				for (int i = 0; i < pipes.length; i++) {
+					if (pipes[i] != null) {
+						pipes[i].pipeKey = pipeKey;
+						SimpleRPCRequest.request(pipes[i]);
+						if (status < 2) {
+							status = 2; // requested
+						}
+					}
+				}
+			}
+		
+			@Override
+			public void ajaxFail() {
+				CompoundPipeRequest.pipeFailed(this);
+			}
+		
+		};
+
+		pipe.id = id;
+		return pipe;
+	}
+
+	private static void addPipe(CompoundPipeRunnable pipe) {
+		CompoundPipeRunnable[] allPipes = pipes;
+		for (int i = 0; i < allPipes.length; i++) {
+			if (allPipes[i] == null) {
+				allPipes[i] = pipe;
+				return;
+			}
+		}
+		CompoundPipeRunnable[] newPipes = new CompoundPipeRunnable[allPipes.length + 100];
+		System.arraycopy(allPipes, 0, newPipes, 0, allPipes.length);
+		newPipes[allPipes.length] = pipe;
+		pipes = newPipes;
+	}
+	
+	static CompoundPipeRunnable registerPipe(CompoundPipeRunnable pipe) {
+		if (pipe == null) return null;
+		String id = pipe.id;
+		CompoundPipeRunnable[] allPipes = pipes;
+		synchronized (allPipes) {
+			for (int i = 0; i < allPipes.length; i++) {
+				if (allPipes[i] != null && allPipes[i].id.equals(id)) {
+					return allPipes[i];
+				}
+			}
+			addPipe(pipe);
+			return pipe;
+		}
+	}
+	
+	static CompoundPipeRunnable unregisterPipe(String id) {
+		CompoundPipeRunnable[] allPipes = pipes;
+		synchronized (allPipes) {
+			for (int i = 0; i < allPipes.length; i++) {
+				if (allPipes[i] != null && allPipes[i].id.equals(id)) {
+					allPipes[i] = null;
+					return allPipes[i];
+				}
+			}
+			return null;
 		}
 	}
 }

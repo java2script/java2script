@@ -32,6 +32,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 
 	protected long pipeQueryTimeout = 5000; // 5 seconds
 	
+	protected long pipeScriptBreakout = 1200000; // 20 minutes
+
 	/*
 	 * Example of web.xml:
     <servlet>
@@ -40,6 +42,10 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		<init-param>
 			<param-name>simple.pipe.query.timeout</param-name>
 			<param-value>1000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>simple.pipe.script.breakout</param-name>
+			<param-value>1200000</param-value>
 		</init-param>
     </servlet>
     <servlet-mapping>
@@ -59,6 +65,19 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				 */
 				if (pipeQueryTimeout < 0 || pipeQueryTimeout > 20000) {
 					pipeQueryTimeout = 20000; // 20s: less than 30s should be safe!
+				}
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		String breakoutStr = getInitParameter("simple.pipe.script.breakout");
+		if (breakoutStr != null) {
+			try {
+				pipeScriptBreakout = Long.parseLong(breakoutStr);
+				if (pipeScriptBreakout <= 0 || pipeScriptBreakout > 1200000) {
+					pipeScriptBreakout = 1200000; // take a break for every 20 minutes
+				} else if (pipeScriptBreakout <= 60000) {
+					pipeScriptBreakout = 60000; // at least 1 minute
 				}
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
@@ -151,11 +170,13 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			buffer.append("<html><head><title></title></head><body>\r\n");
 			buffer.append("<script type=\"text/javascript\">");
 			if (domain != null) {
-				buffer.append("document.domain = \"" + domain + "\";");
+				buffer.append("document.domain = \"" + domain + "\";\r\n");
 			}
 			buffer.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
+			buffer.append("if (window.parent) eval (\"(\" + window.parent.net.sf.j2s.ajax.SimplePipeRequest.checkIFrameSrc + \") ();\");\r\n");
 			buffer.append("</script>\r\n");
 			writer.write(buffer.toString());
+			writer.flush();
 		} else {
 			resp.setContentType("text/plain; charset=utf-8");
 			writer = resp.getWriter();
@@ -163,10 +184,11 @@ public class SimplePipeHttpServlet extends HttpServlet {
 
 		SimplePipeHelper.notifyPipeStatus(key, true); // update it!
 		
-		boolean hasPipeData = false;
+		long lastPipeDataWritten = -1;
 
 		long beforeLoop = new Date().getTime();
 		Vector<SimpleSerializable> vector = null;
+		int priority = 0;
 		while ((vector = SimplePipeHelper.getPipeVector(key)) != null
 				/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 				&& !writer.checkError()) {
@@ -190,8 +212,18 @@ public class SimplePipeHttpServlet extends HttpServlet {
 					}
 					if (ss == null) break; // terminating signal
 					output(writer, type, key, ss.serialize());
-					hasPipeData = true;
+					lastPipeDataWritten = new Date().getTime();
 					writer.flush();
+					if (ss instanceof ISimplePipePriority) {
+						ISimplePipePriority spp = (ISimplePipePriority) ss;
+						int p = spp.getPriority();
+						if (p <= 0) {
+							p = ISimplePipePriority.IMPORTANT;
+						}
+						priority += p;
+					} else {
+						priority += ISimplePipePriority.IMPORTANT;
+					}
 				}
 			} else {
 				writer.flush();
@@ -202,10 +234,20 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			// SimplePipeHelper.notifyPipeStatus(key, true);
 			
 			long now = new Date().getTime();
+			if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
+					|| (lastPipeDataWritten > 0
+							&& now - lastPipeDataWritten >= pipeQueryTimeout)) {
+				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
+				lastPipeDataWritten = new Date().getTime();
+			}
+			
+			now = new Date().getTime();
 			if ((vector = SimplePipeHelper.getPipeVector(key)) != null // may be broken down already!!
-					&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type) 
-							|| SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
-					|| (size <= 0 && now - beforeLoop < pipeQueryTimeout))) {
+					&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
+					|| (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
+							&& now - beforeLoop < pipeScriptBreakout)
+					|| (priority < ISimplePipePriority.IMPORTANT
+							&& now - beforeLoop < pipeQueryTimeout))) {
 				synchronized (vector) {
 					try {
 						vector.wait(1000);
@@ -224,13 +266,21 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			SimplePipeHelper.removePipe(key);
 			try {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_DESTROYED);
-				hasPipeData = true;
+				lastPipeDataWritten = new Date().getTime();
+			} catch (Exception e) {
+				// HTTP connection may be closed already!
+			}
+		} else if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
+				&& new Date().getTime() - beforeLoop >= pipeScriptBreakout) {
+			try {
+				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_CONTINUE);
+				lastPipeDataWritten = new Date().getTime();
 			} catch (Exception e) {
 				// HTTP connection may be closed already!
 			}
 		}
-		if (!hasPipeData) {
-			//output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
+		if (lastPipeDataWritten == -1) {
+			output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
 		}
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
 			try {
