@@ -215,11 +215,13 @@ return false; // ftp ...
 	 * @param url
 	 * @return
 	 * @j2sNative
-	 * return net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode(url, true);
+	 * return window["j2s.disable.subdomain.xss"] != true
+	 * 		&& net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode(url, true);
 	 */
 	protected static boolean isSubdomain(String url) {
 		return false;
 	}
+	
 	/**
 	 * Check cross site script. Only make senses for JavaScript.
 	 * 
@@ -290,9 +292,32 @@ if (net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode (url)) {
 		 return false;
 	}
 	
-	static void callByScript(String rnd, String length, String i, String content) {
-		/**
-		 * @j2sNative
+	/**
+	 * Clean up SCRIPT element's event handlers.
+	 * @param scriptObj
+	 * @return whether the SCRIPT element is already OK to clean up.
+	 * @j2sNative
+var userAgent = navigator.userAgent.toLowerCase ();
+var isOpera = (userAgent.indexOf ("opera") != -1);
+var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
+if (isIE) {
+	var done = false;
+	var state = "" + scriptObj.readyState;
+	if (state == "loaded" || state == "complete") {
+		scriptObj.onreadystatechange = null; 
+		done = true;
+	}
+	return done;
+} else {
+	scriptObj.onerror = null;
+	scriptObj.onload = null;
+	return true;
+}
+	 */
+	native static boolean cleanUp(Object scriptObj); // for JavaScript only
+	
+	/**
+	 * @j2sNative
 var g = net.sf.j2s.ajax.SimpleRPCRequest;
 var runnable = g.idSet["o" + rnd];
 if (runnable == null) return;
@@ -305,43 +330,28 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url + "?jzn=" + rnd + "&jzp=" + length 
 		+ "&jzc=" + (i + 1) + "&jzz=" + content;
+var fun = function () {
+	if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
+		return; // IE, not completed yet
+	}
+	var idx = this.src.indexOf ("jzn=");
+	var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
+	net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+	document.getElementsByTagName ("HEAD")[0].removeChild (this);
+};
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
 if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
-	script.onerror = function () {
-		this.onerror = null;
-		var idx = this.src.indexOf ("jzn=");
-		var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-	};
-	script.onload = function () {
-		this.onload = null;
-		if (navigator.userAgent.indexOf ("Opera") >= 0) {
-			var idx = this.src.indexOf ("jzn=");
-			var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-			net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-		}
-		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-	};
+	script.onerror = script.onload = fun;
 } else { // IE
 	script.defer = true;
-	script.onreadystatechange = function () {
-		var state = "" + this.readyState;
-		if (state == "loaded" || state == "complete") {
-			this.onreadystatechange = null; 
-			var idx = this.src.indexOf ("jzn=");
-			var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-			net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-			document.getElementsByTagName ("HEAD")[0].removeChild (this);
-		}
-	};
+	script.onreadystatechange = fun;
 }
 var head = document.getElementsByTagName ("HEAD")[0];
 head.appendChild (script);
-		 */ {}
-	}
+	 */
+	native static void callByScript(String rnd, String length, String i, String content);
 	
 	/**
 	 * Cross site script notify. Only make senses for JavaScript.
