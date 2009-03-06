@@ -294,6 +294,7 @@
     		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
         	
     		<arg value="net/sf/j2s/ajax/SimplePipeRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimplePipePriority.js"/>
     		<arg value="net/sf/j2s/ajax/SimplePipeHelper.js"/>
     		<arg value="net/sf/j2s/ajax/SimplePipeRequest.js"/>
     		<arg value="net/sf/j2s/ajax/SimplePipeSWTRequest.js"/>
