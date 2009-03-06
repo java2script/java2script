@@ -304,6 +304,10 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			webxml.append("            <param-name>simple.pipe.query.timeout</param-name>\r\n");
 			webxml.append("            <param-value>20000</param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
+			webxml.append("        <init-param>\r\n");
+			webxml.append("            <param-name>simple.pipe.script.breakout</param-name>\r\n");
+			webxml.append("            <param-value>1200000</param-value>\r\n");
+			webxml.append("        </init-param>\r\n");
 			webxml.append("    </servlet>\r\n");
 
 			webxml.append("    <servlet-mapping>\r\n");
