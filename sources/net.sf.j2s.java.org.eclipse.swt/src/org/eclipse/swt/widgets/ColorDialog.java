@@ -546,7 +546,7 @@ for (var i = 0; i < 48; i++) {
 			OS.addCSSClass(containerHandle.childNodes[0], "color-dialog-custom");
 //			parent.display.asyncExec(new Runnable() {
 //				public void run() {
-//					hText.focus();
+//					OS.SetFocus(hText); //hText.focus();
 //				}
 //			});
 		}

@@ -262,9 +262,7 @@ void _setVisible (boolean visible) {
 		}
 		style.left = left + "px";
 		style.top = top + "px";
-		try {
-			btnFocus.focus();
-		} catch (Error err) {}
+		OS.SetFocus(btnFocus); //btnFocus.focus();
 		if (hooks(SWT.Show)) sendEvent(SWT.Show);
 	} else {
 		style.display = "none";

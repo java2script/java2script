@@ -908,8 +908,14 @@ public class OS {
 		return new Point(w, h); 
 	}
 	
+	/**
+	 * @j2sNative
+	 * try {
+	 * handle.focus();
+	 * } catch (e) {}
+	 */
 	public static void SetFocus(Element handle) {
-		handle.focus();
+		// handle.focus();
 	}
 	
 
