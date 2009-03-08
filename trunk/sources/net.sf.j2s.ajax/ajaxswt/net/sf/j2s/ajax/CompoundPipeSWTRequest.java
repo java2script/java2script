@@ -105,7 +105,7 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 			String rpcURL, String rpcMethod) {
 		pipe = CompoundPipeRequest.retrievePipe(id, false);
 		if (pipe == null) {
-			pipe = createSWTWrappedPipe(id);
+			pipe = CompoundPipeRequest.registerPipe(createSWTWrappedPipe(id));
 		}
 		if (pipeURL != null) {
 			pipe.pipeURL = pipeURL;
