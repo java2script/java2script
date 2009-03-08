@@ -167,7 +167,7 @@ private void configureItem() {
 				return;
 			}
 //			handle.focus();
-			parent.handle.focus();
+			OS.SetFocus(parent.handle); //parent.handle.focus();
 //			Element element = handle.childNodes[0].childNodes[0].childNodes[1];
 //			element.className = "tree-item-text-selected";
 			HTMLEvent evt = (HTMLEvent) getEvent();

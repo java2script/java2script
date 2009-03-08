@@ -240,7 +240,7 @@ void createHandle () {
 	}
 	handle.onfocus = new RunnableCompatibility() {
 		public void run() {
-			textHandle.focus();
+			OS.SetFocus(textHandle); //textHandle.focus();
 		}
 	};
 	Element wrapper = document.createElement("DIV");
@@ -2860,15 +2860,8 @@ void enableWidget (boolean enabled) {
 
 public boolean forceFocus() {
 	boolean ret = super.forceFocus();
-	//this.textHandle.focus();
-	/**
-	 * @j2sNative
-	 * try {
-	 * 	this.textHandle.focus();
-	 * } catch (e) {}
-	 */ {}
+	OS.SetFocus(textHandle); //this.textHandle.focus();
 	return ret;
 }
-
 
 }

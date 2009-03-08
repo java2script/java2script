@@ -728,7 +728,8 @@ void hide(){
 		
 	}
 	selectInput.className = "combo-select-box-invisible" + (isSimple ? "" : " combo-select-box-notsimple");
-	dropDownButton.focus();
+	//dropDownButton.focus();
+	OS.SetFocus(dropDownButton);
 }
 
 void show(){
@@ -783,11 +784,7 @@ void show(){
 		selectInput.style.height = bounds.height + "px";
 	}
 	selectInput.style.width = bounds.width +"px";
-	try {
-		selectInput.focus();
-	} catch (Throwable e) {
-		// TODO: handle exception
-	}
+	OS.SetFocus(selectInput); // selectInput.focus();
 }
 
 void updateSelection(){

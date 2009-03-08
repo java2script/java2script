@@ -835,12 +835,15 @@ public void setAlignment (int alignment) {
 		if ((style & SWT.LEFT) != 0) {
 			btnText.style.textAlign = "left";
 			handleStyle.backgroundPosition = "left center";
-		} if ((style & SWT.CENTER) != 0) {
+		} else if ((style & SWT.CENTER) != 0) {
 			btnText.style.textAlign = "center";
 			handleStyle.backgroundPosition = "center center";
 		} else if ((style & SWT.RIGHT) != 0) {
 			btnText.style.textAlign = "right";
 			handleStyle.backgroundPosition = "right center";
+		}
+		if (text != null && text.trim().length() != 0) {
+			handleStyle.backgroundPosition = "left center";
 		}
 	}
 	/*
@@ -879,9 +882,7 @@ void setDefault (boolean value) {
 	OS.SendMessage (handle, OS.BM_SETSTYLE, bits, 1);
 	*/
 	if (value) {
-		try {
-			handle.focus();
-		} catch (Error e) { }
+		OS.SetFocus(handle); // handle.focus();
 	}
 }
 
@@ -1048,6 +1049,9 @@ public void setImage (Image image) {
 					bgXPos = "right";
 				} else if ((style & SWT.CENTER) != 0) {
 					bgXPos = "center";
+					if (text != null && text.trim().length() != 0) {
+						bgXPos = "left";
+					}
 				} else {
 					bgXPos = "left";
 				}

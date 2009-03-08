@@ -746,7 +746,7 @@ protected void createHandle() {
 	}
 //	contentHandle.onclick = new RunnableCompatibility(){
 //		public void run(){
-//			contentHandle.focus();
+//			OS.SetFocus(contentHandle); //contentHandle.focus();
 //		}
 //	};
 	contentHandle.onkeydown = new RunnableCompatibility() {
@@ -2263,7 +2263,7 @@ void setSystemMenu () {
 		public void run() {
 			bringToTop();
 			if(contentHandle != null){
-				contentHandle.focus();
+				OS.SetFocus(contentHandle); //contentHandle.focus();
 			}
 			toReturn(true);
 		}

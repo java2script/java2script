@@ -303,9 +303,7 @@ void hookSelection() {
 			if (!isEnabled()) {
 				display.timerExec(40, new Runnable() {
 					public void run() {
-						try {
-							parent.btnFocus.focus();
-						} catch (Error e) { }
+						OS.SetFocus(parent.btnFocus); //parent.btnFocus.focus();
 					}
 				});
 				return;
@@ -1388,9 +1386,7 @@ void showSubMenu() {
 	menu.handle.style.top = rect.y + "px";
 	menu.handle.style.zIndex = "1" + window.currentTopZIndex;
 	menu.handle.style.display = "block";
-	try {
-		menu.btnFocus.focus();
-	} catch (Error err) {}
+	OS.SetFocus(menu.btnFocus); // menu.btnFocus.focus();
 }
 
 /*
