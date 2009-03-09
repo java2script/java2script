@@ -87,6 +87,14 @@ public class NotificationCorner extends DesktopItem {
 		handle = document.createElement("DIV");
 		handle.className = "tray-logo-item";
 		handle.title = "Powered by Java2Script";
+		boolean needFixing = OS.isFirefox;
+		/**
+		 * @j2sNative
+		 * needFixing &= (navigator.userAgent.indexOf ("Firefox/2.0") != -1);
+		 */ {}
+		if (needFixing) {
+			handle.style.backgroundColor = "white";
+		}
 		document.body.appendChild(handle);
 		handle.onclick = new RunnableCompatibility() {
 			public void run() {
@@ -269,6 +277,14 @@ public class NotificationCorner extends DesktopItem {
 			Element item = tray.allItems[i];
 			if (item != null) {
 				item.style.zIndex = zIdx;
+			}
+		}
+		if (tray.supportShadow && tray.outerShadows != null) {
+			for (int i = 0; i < tray.outerShadows.length; i++) {
+				Element item = tray.outerShadows[i];
+				if (item != null) {
+					item.style.zIndex = zIdx;
+				}
 			}
 		}
 		if (handle != null) {

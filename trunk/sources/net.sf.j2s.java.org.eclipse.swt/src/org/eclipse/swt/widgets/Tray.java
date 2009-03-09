@@ -90,11 +90,19 @@ static String trayLineColor(int line) {
 private void addTrayLine () {
 	cellLines++;
 	String lineColor = trayLineColor (cellLines);
+	boolean needFixing = cellLines == 1 && OS.isFirefox;
+	/**
+	 * @j2sNative
+	 * needFixing &= (navigator.userAgent.indexOf ("Firefox/2.0") != -1);
+	 */ {}
 	for (int i = 0; i < cellLines; i++) {
 		Element cell = document.createElement ("DIV");
 		cell.className = "tray-cell";
 		cell.style.left = ((cellLines - 1 - i) * 36) + "px";
 		cell.style.top = (i * 36) + "px";
+		if (i == 0 && needFixing) {
+			cell.style.visibility = "hidden";
+		}
 		cell.style.borderColor = lineColor + " transparent transparent transparent";
 		if (OS.isIENeedPNGFix) { // IE < 6.0
 			cell.style.borderRightColor = "rgb(0,255,0)";
