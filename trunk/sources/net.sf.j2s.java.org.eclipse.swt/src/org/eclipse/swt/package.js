@@ -140,7 +140,7 @@ $WTC$$.getCSSRuleID = function (clazzName) {
 /* public */
 $WTC$$.registerCSS = function (clazzName, cssText) {
 	var isDebugging = (window["swt.debugging"] == true);
-	if (!isDebugging) {
+	if (isDebugging) {
 		cssText = null;
 	}
 	if ($WTC$$.cssAlreadyAggregated || window["ClazzLoader"] == null) {
