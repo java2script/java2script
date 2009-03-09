@@ -265,7 +265,12 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 		sbHandle.style.width = (sbWidth + 1) + "px";
 		sbHandle.style.marginLeft = "-1px";
 	} else {
-		sbHandle.style.width = sbWidth + "px";
+		boolean needFixing = OS.isFirefox;
+		/**
+		 * @j2sNative
+		 * needFixing &= (navigator.userAgent.indexOf ("Firefox/2.0") != -1);
+		 */ {}
+		sbHandle.style.width = (sbWidth + (needFixing ? 0.1 : 0)) + "px";
 	}
 	sbHandle.style.height = sbOuterHeight + "px";
 	outerHandle.appendChild(sbHandle);
