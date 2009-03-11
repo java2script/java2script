@@ -21,6 +21,8 @@ public class NotificationCorner extends DesktopItem {
 	
 	private boolean alreadyInitialized;
 
+	private int currentZIndex;
+	
 	public NotificationCorner(Display display) {
 		super();
 		this.display = display;
@@ -129,7 +131,7 @@ public class NotificationCorner extends DesktopItem {
 					if (isAutoHide) {
 						setMinimized(false);
 					}
-					int zIndex = Display.getNextZIndex(false);
+					int zIndex = window.currentTopZIndex + 1;
 					if (handle.style.zIndex != zIndex) {
 						layerZIndex = handle.style.zIndex;
 						bringToTop(zIndex);
@@ -203,7 +205,7 @@ public class NotificationCorner extends DesktopItem {
 		if (handle == null) {
 			return;
 		}
-		int zIndex = Display.getNextZIndex(false);
+		int zIndex = window.currentTopZIndex + 1;
 		if (handle.style.zIndex != zIndex) {
 			layerZIndex = handle.style.zIndex;
 			if (!isAutoHide) {
@@ -227,18 +229,15 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
 		return !ctrlKey && isAround(x, y);
 	}
 
 	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
-		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return !isAroundCorner(x, y);
 	}
 	boolean isAround(int x, int y) {
 		int range = 32;
-		if (x < range && y < range && x + y < range) {
+		if (x + y < range) {
 			return true;
 		}
 		return false;
@@ -252,24 +251,17 @@ public class NotificationCorner extends DesktopItem {
 		if (tray != null) {
 			range = getRange() + 16;
 		}
-		if (x < range && y < range && x + y < range) {
-			return true;
-		}
-		return false;
-	}
-
-	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
-		if (this.isApproaching(now, x, y, ctrlKey)) {
-			this.handleApproaching();
-			return true;
-		} else if (this.isLeaving(now, x, y, ctrlKey)) {
-			this.handleLeaving();
+		if (x + y < range) {
 			return true;
 		}
 		return false;
 	}
 
 	void setZIndex(int zIdx) {
+		if (currentZIndex == zIdx) {
+			return;
+		}
+		currentZIndex = zIdx;
 		if (zIdx == -1 && !OS.isIE)
 		/**
 		 * @j2sNative
@@ -348,13 +340,14 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	public void bringToTop(int zIdx) {
-		Tray tray = Display.getTray();
+		//Tray tray = Display.getTray();
 		if (tray == null) {
 			return;
 		}
 		int zIndex = -1;
 		if (zIdx == -1) {
-			zIndex = Display.getNextZIndex(true);
+			window.currentTopZIndex++;
+			zIndex = window.currentTopZIndex;
 			if (Display.getTopMaximizedShell() == null) {
 				layerZIndex = zIndex;
 			}

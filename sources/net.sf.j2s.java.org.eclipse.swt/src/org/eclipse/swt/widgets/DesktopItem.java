@@ -26,7 +26,7 @@ public abstract class DesktopItem {
 	private Runnable leaving;
 
 	private int leavingTimeoutHandle = 0;
-
+	
 	public void updateLastModified() {
 		this.lastUpdated = new Date().getTime();
 		mouseAlreadyMoved = false;

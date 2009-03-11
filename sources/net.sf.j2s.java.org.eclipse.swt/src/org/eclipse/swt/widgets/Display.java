@@ -393,7 +393,10 @@ public class Display extends Device {
 	static int bodyScrollTop, bodyScrollLeft;
 	static int htmlScrollTop, htmlScrollLeft;
 	
-	static int AUTO_HIDE_DELAY = 2000;
+	static final int AUTO_HIDE_DELAY = 2000;
+	
+	static boolean topMaxShellNeedUpdated = true;
+	static Shell topMaxShell = null;
 	
 	/* Private SWT Window Messages */
 	/*
@@ -2512,20 +2515,49 @@ void initializeDekstop() {
 			// Hacks: Return as quickly as possible to avoid CPU 100%
 			int x = e.clientX;
 			int y = e.clientY;
-			if (x > 220 && y > 32 && y < height - 90) {
+			if (x > 264 && y >= 100 && y <= height - 128) {
 				return;
 			}
 
 			long now = new Date().getTime();
 			boolean ctrlKey = e.ctrlKey;
-			boolean handled = taskBar.handleMouseMove(now, x, y, ctrlKey);
-			//if (handled) return;
-			handled = shortcutBar.handleMouseMove(now, x, y, ctrlKey);
-			//if (handled) return;
-			handled = trayCorner.handleMouseMove(now, x, y, ctrlKey);
-			//if (handled) return;
-			handled = topBar.handleMouseMove(now, x, y, ctrlKey);
-			if (handled) return;
+			taskBar.mouseAlreadyMoved = true;
+			shortcutBar.mouseAlreadyMoved = true;
+			trayCorner.mouseAlreadyMoved = true;
+			topBar.mouseAlreadyMoved = true;
+			boolean inDelay = (now - taskBar.lastUpdated <= Display.AUTO_HIDE_DELAY);
+
+			if (taskBar.barEl != null && x < 264) {
+				if (taskBar.isApproaching(now, x, y, ctrlKey)) {
+					taskBar.handleApproaching();
+				} else if (!inDelay && taskBar.isLeaving(now, x, y, ctrlKey)) {
+					taskBar.handleLeaving();
+				}
+			}
+
+			if (y > height - 128) {
+				if (shortcutBar.isApproaching(now, x, y, ctrlKey)) {
+					shortcutBar.handleApproaching();
+				} else if (!inDelay && shortcutBar.isLeaving(now, x, y, ctrlKey)) {
+					shortcutBar.handleLeaving();
+				}
+			}
+
+			if (x + y < 200) {
+				if (trayCorner.isApproaching(now, x, y, ctrlKey)) {
+					trayCorner.handleApproaching();
+				} else if (!inDelay && trayCorner.isLeaving(now, x, y, ctrlKey)) {
+					trayCorner.handleLeaving();
+				}
+			}
+
+			if (y < 100) {
+				if (topBar.isApproaching(now, x, y, ctrlKey)) {
+					topBar.handleApproaching();
+				} else if (!inDelay && topBar.isLeaving(now, x, y, ctrlKey)) {
+					topBar.handleLeaving();
+				}
+			}
 		}
 	
 	};
@@ -4555,14 +4587,6 @@ static int wcsToMbcs (char ch) {
 }
 */
 
-static int getNextZIndex(boolean increase) {
-	int zIndex = window.currentTopZIndex + 1;
-	if (increase) {
-		window.currentTopZIndex = zIndex;
-	}
-	return zIndex;
-}
-
 static Tray getTray() {
 	Tray tray = null;
 	if (Default != null) {
@@ -4624,6 +4648,9 @@ static void deactivateAllTitleBarShells() {
 }
 
 static Shell getTopMaximizedShell() {
+	if (!topMaxShellNeedUpdated) {
+		return topMaxShell; // Cached shell to avoid mousemove's CPU 100% bug
+	}
 	// find the top maximized shell
 	Shell lastShell = null;
 	int lastMaxZIndex = 0;
@@ -4648,6 +4675,8 @@ static Shell getTopMaximizedShell() {
 			}
 		}
 	}
+	topMaxShell = lastShell;
+	topMaxShellNeedUpdated = false;
 	return lastShell;
 }
 public void updateLayout() {
@@ -4732,6 +4761,7 @@ static void releaseAllDisplays() {
 		Displays = null;
 	}
 	Default = null; // Default will be disposed in the above for loop
+	topMaxShell = null;
 }
 
 

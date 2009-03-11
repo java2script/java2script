@@ -413,7 +413,7 @@ for (var i = 0; i < 48; i++) {
 	colorMap[colors[i4]] = arr;
 	map[colors[i4]] = arr.join (',');
 }
-     */ {}
+     */ { map.toString(); colors.toString(); }
      
     final String[] colorMatrix = new String[] { "salmon", "pale yellow",
 				"pale green", "spring green", "pale turquoise",
@@ -599,7 +599,7 @@ for (var i = 0; i < 48; i++) {
 		    	/**
 		    	 * @j2sNative
 		    	 * rgbColor = colorMap[matrix[i]];
-		    	 */ {}
+		    	 */ { map.toString(); matrix.toString(); }
 		    	HSL hsl = new HSL(0, 0, 0);
 		    	hsl.fromRGB(new RGB(rgbColor[0], rgbColor[1], rgbColor[2]));
 				updateFromHSL(hsl.h, hsl.s, hsl.l);
