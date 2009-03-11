@@ -939,7 +939,6 @@
         	
         	<arg value="${j2s.swt.bin}"/>
         	
-    		<arg value="org/eclipse/swt/widgets/DesktopListener.js"/>
     		<arg value="org/eclipse/swt/widgets/DesktopItem.js"/>
     		<arg value="org/eclipse/swt/widgets/TaskBar.js"/>
     		<arg value="org/eclipse/swt/widgets/MaximizedTitle.js"/>
