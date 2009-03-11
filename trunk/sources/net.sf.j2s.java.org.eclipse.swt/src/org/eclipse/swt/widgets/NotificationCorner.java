@@ -97,7 +97,7 @@ public class NotificationCorner extends DesktopItem {
 			public void run() {
 				if (display != null && !display.isDisposed()) {
 					if (display.trayCorner != null) {
-						display.trayCorner.bringToTop(null);
+						display.trayCorner.bringToTop(-1);
 					}
 					Shell shell = display.getActiveShell();
 					if (shell != null) {
@@ -129,9 +129,9 @@ public class NotificationCorner extends DesktopItem {
 					if (isAutoHide) {
 						setMinimized(false);
 					}
-					String zIndex = Display.getNextZIndex(false);
-					if ("" + handle.style.zIndex != zIndex) {
-						layerZIndex = "" + handle.style.zIndex;
+					int zIndex = Display.getNextZIndex(false);
+					if (handle.style.zIndex != zIndex) {
+						layerZIndex = handle.style.zIndex;
 						bringToTop(zIndex);
 					}
 				}
@@ -152,7 +152,7 @@ public class NotificationCorner extends DesktopItem {
 
 						}, 500);
 					}
-					bringToTop(null);
+					bringToTop(-1);
 				}
 			
 			};
@@ -169,7 +169,7 @@ public class NotificationCorner extends DesktopItem {
 					if (isJustUpdated) {
 						return;
 					}
-					bringToTop(null);
+					bringToTop(-1);
 				}
 			
 			};
@@ -203,9 +203,9 @@ public class NotificationCorner extends DesktopItem {
 		if (handle == null) {
 			return;
 		}
-		String zIndex = Display.getNextZIndex(false);
-		if ("" + handle.style.zIndex != zIndex) {
-			layerZIndex = "" + handle.style.zIndex;
+		int zIndex = Display.getNextZIndex(false);
+		if (handle.style.zIndex != zIndex) {
+			layerZIndex = handle.style.zIndex;
 			if (!isAutoHide) {
 				setMinimized(false);
 			}
@@ -217,9 +217,9 @@ public class NotificationCorner extends DesktopItem {
 		if (handle == null) {
 			return;
 		}
-		if (layerZIndex != null) {
+		if (layerZIndex != -1) {
 			bringToTop(layerZIndex);
-			layerZIndex = null;
+			layerZIndex = -1;
 		}
 		if (isAutoHide) {
 			setMinimized(true);
@@ -269,7 +269,12 @@ public class NotificationCorner extends DesktopItem {
 		return false;
 	}
 
-	void setZIndex(String zIdx) {
+	void setZIndex(int zIdx) {
+		if (zIdx == -1 && !OS.isIE)
+		/**
+		 * @j2sNative
+		 * zIdx = "";
+		 */{ }
 		if (isMinimized()) {
 			minimizedEl.style.zIndex = zIdx;
 			return;
@@ -342,13 +347,13 @@ public class NotificationCorner extends DesktopItem {
 		return tray.cellLines * 36;
 	}
 
-	public void bringToTop(String zIdx) {
+	public void bringToTop(int zIdx) {
 		Tray tray = Display.getTray();
 		if (tray == null) {
 			return;
 		}
-		String zIndex = "";
-		if (zIdx == null) {
+		int zIndex = -1;
+		if (zIdx == -1) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell() == null) {
 				layerZIndex = zIndex;

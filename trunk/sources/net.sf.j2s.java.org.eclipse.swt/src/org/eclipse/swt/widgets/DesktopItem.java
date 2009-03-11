@@ -21,7 +21,7 @@ public abstract class DesktopItem {
 
 	boolean mouseAlreadyMoved;
 	
-	String layerZIndex = null;
+	int layerZIndex = -1;
 
 	private Runnable leaving;
 
@@ -53,7 +53,7 @@ public abstract class DesktopItem {
 
 	public abstract void initialize();
 	
-	public abstract void bringToTop(String zIndex);
+	public abstract void bringToTop(int zIndex);
 	
 	public abstract void updateLayout();
 	

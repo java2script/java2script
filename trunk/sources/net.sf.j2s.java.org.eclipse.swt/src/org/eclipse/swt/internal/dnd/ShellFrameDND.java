@@ -55,7 +55,7 @@ public class ShellFrameDND implements DragListener {
 			this.frame.style.backgroundColor = "menu";
 			this.frame.style.left = this.sourceX + "px";
 			this.frame.style.top = this.sourceY + "px";
-			this.frame.style.zIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 100);
+			this.frame.style.zIndex = window.currentTopZIndex + 100;
 			document.body.appendChild (this.frame);
 			boolean existedTitleBar = false;
 			Element[] els = e.sourceElement.getElementsByTagName("DIV");
@@ -325,7 +325,7 @@ public class ShellFrameDND implements DragListener {
 //		shell.style.top = y + "px";
 //		shell.style.width = width + "px";
 //		shell.style.height = height + "px";
-		shell.style.zIndex = window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 2);
+		shell.style.zIndex = window.currentTopZIndex = window.currentTopZIndex + 2;
 		
 //		ShellFrameDND.fixShellHeight (e.sourceElement);
 //		ShellFrameDND.fixShellWidth (e.sourceElement);

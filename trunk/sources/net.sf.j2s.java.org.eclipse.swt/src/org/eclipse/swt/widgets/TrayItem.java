@@ -213,7 +213,7 @@ void createWidget () {
 		public void run() {
 			postEvent (SWT.Selection);
 			if (display.trayCorner != null) {
-				display.trayCorner.bringToTop(null);
+				display.trayCorner.bringToTop(-1);
 			}
 		}
 	};
@@ -238,7 +238,7 @@ void createWidget () {
 			toReturn(false);
 			//postEvent (SWT.MenuDetect);
 			if (display.trayCorner != null) {
-				display.trayCorner.bringToTop(null);
+				display.trayCorner.bringToTop(-1);
 			}
 		}
 	};
@@ -260,7 +260,7 @@ void createWidget () {
 					evtHTML.preventDefault();
 					toReturn(false);
 					if (display.trayCorner != null) {
-						display.trayCorner.bringToTop(null);
+						display.trayCorner.bringToTop(-1);
 					}
 				}
 			}

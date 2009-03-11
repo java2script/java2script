@@ -221,7 +221,7 @@ void _setVisible (boolean visible) {
 	if (visible) {
 		//style.width = "200px";
 		Rectangle clientArea = getDisplay().getPrimaryMonitor().getClientArea();
-		style.zIndex = "1" + window.currentTopZIndex;
+		style.zIndex = window.currentTopZIndex + 1000;
 		style.display = "block";
 		handle.style.height = "";
 		int height = OS.getContainerHeight(handle);

@@ -67,12 +67,12 @@ public class TaskBar extends DesktopItem {
 		}
 	}
 
-	public void bringToTop(String zIdx) {
+	public void bringToTop(int zIdx) {
 		if (this.items.length <= 0) {
 			return;
 		}
-		String zIndex = "";
-		if (zIdx == null) {
+		int zIndex = -1;
+		if (zIdx == -1) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
@@ -80,6 +80,11 @@ public class TaskBar extends DesktopItem {
 		} else {
 			zIndex = zIdx;
 		}
+		if (zIndex == -1 && !OS.isIE)
+		/**
+		 * @j2sNative
+		 * zIndex = "";
+		 */{ }
 		this.handle.style.zIndex = zIndex;
 	}
 
@@ -415,10 +420,10 @@ public class TaskBar extends DesktopItem {
 				if (isAutoHide) {
 					setMinimized(false);
 				}
-				String zIndex = Display.getNextZIndex(false);
-				if ("" + handle.style.zIndex != zIndex) {
-					layerZIndex = "" + handle.style.zIndex;
-					bringToTop(zIndex);
+				int zIndex = Display.getNextZIndex(false);
+				if (handle.style.zIndex != zIndex) {
+					layerZIndex = handle.style.zIndex;
+					bringToTop(-1);
 				}
 			}
 
@@ -436,7 +441,7 @@ public class TaskBar extends DesktopItem {
 
 					}, 500);
 				}
-				bringToTop(null);
+				bringToTop(-1);
 			}
 
 		};
@@ -450,7 +455,7 @@ public class TaskBar extends DesktopItem {
 				if (isJustUpdated) {
 					return;
 				}
-				bringToTop(null);
+				bringToTop(-1);
 			}
 
 		};
@@ -486,9 +491,9 @@ public class TaskBar extends DesktopItem {
 		}
 		if (items.length != 0) {
 			handle.style.display = "block";
-			String zIndex = Display.getNextZIndex(false);
-			if ("" + handle.style.zIndex != zIndex) {
-				layerZIndex = "" + handle.style.zIndex;
+			int zIndex = Display.getNextZIndex(false);
+			if (handle.style.zIndex != zIndex) {
+				layerZIndex = handle.style.zIndex;
 				bringToTop(zIndex);
 			}
 			updateItems();
@@ -502,9 +507,9 @@ public class TaskBar extends DesktopItem {
 		if (items.length == 0) {
 			handle.style.display = "none";
 		}
-		if (layerZIndex != null) {
+		if (layerZIndex != -1) {
 			bringToTop(layerZIndex);
-			layerZIndex = null;
+			layerZIndex = -1;
 		}
 		if (isAutoHide) {
 			setMinimized(true);

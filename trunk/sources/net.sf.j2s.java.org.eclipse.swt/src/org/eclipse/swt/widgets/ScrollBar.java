@@ -251,7 +251,7 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 	style.padding = "0";
 	style.borderStyle = "none";
 	style.overflow = "hidden";
-	style.zIndex = "1";
+	style.zIndex = 1;
 	int sbWidth = OS.getScrollBarWidth();
 	style.width = sbWidth + "px";
 	style.height = sbOuterHeight + "px";
@@ -292,7 +292,7 @@ protected void createHorizontalScrollBar(Element parent, int sbOuterWidth, int s
 	style.padding = "0";
 	style.borderStyle = "none";
 	style.overflow = "hidden";
-	style.zIndex = "1";
+	style.zIndex = 1;
 	style.width = sbOuterWidth + "px";
 	int sbHeight = OS.getScrollBarHeight();
 	style.height = sbHeight + "px";

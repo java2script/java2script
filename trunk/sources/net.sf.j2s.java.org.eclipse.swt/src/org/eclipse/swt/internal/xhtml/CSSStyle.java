@@ -17,7 +17,7 @@ public class CSSStyle {
 	public String overflow;
 	public String opacity;
 	
-	public String zIndex;
+	public int zIndex;
 	public String textIndent;
 	public String textDecoration;
 	public String textAlign;

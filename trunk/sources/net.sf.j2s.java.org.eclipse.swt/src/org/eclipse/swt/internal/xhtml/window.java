@@ -5,7 +5,7 @@ public class window {
 	public static String defaultWindowTop;
 	public static String defaultWindowWidth;
 	public static String defaultWindowHeight;
-	public static String currentTopZIndex;
+	public static int currentTopZIndex;
 	
 	public static int clientWidth;
 	public static int clientHeight;
