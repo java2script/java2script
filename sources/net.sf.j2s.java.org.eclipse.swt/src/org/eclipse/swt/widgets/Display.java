@@ -388,8 +388,6 @@ public class Display extends Device {
 	QuickLaunch shortcutBar;
 	NotificationCorner trayCorner;
 
-	DesktopItem[] desktopItems;
-	
 	static String bodyHeight, bodyOverflow, htmlOverflow;
 	static int bodyScrollTop, bodyScrollLeft;
 	static int htmlScrollTop, htmlScrollLeft;
@@ -2482,11 +2480,10 @@ void initializeDekstop() {
 			topBar = disp.topBar;
 			shortcutBar = disp.shortcutBar;
 			trayCorner = disp.trayCorner;
-			desktopItems = disp.desktopItems;
 			return;
 		}
 	}
-	if (desktopItems != null) return;
+	if (taskBar != null) return;
 	
 	taskBar = new TaskBar(this);
 	topBar = new MaximizedTitle(this);
@@ -2500,29 +2497,34 @@ void initializeDekstop() {
 	} else {
 		trayCorner = new NotificationCorner(this);
 	}
-	
-	desktopItems = new DesktopItem[] {
-			taskBar,
-			topBar,
-			shortcutBar,
-			trayCorner
-	};
-	for (int i = 0; i < desktopItems.length; i++) {
-		desktopItems[i].initialize();
-	}
+
+	taskBar.initialize();
+	topBar.initialize();
+	shortcutBar.initialize();
+	trayCorner.initialize();
 	
 	mouseMoveListener = new RunnableCompatibility(){
 	
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
-			for (int i = 0; i < desktopItems.length; i++) {
-				DesktopListener item = (DesktopListener) desktopItems[i];
-				if (item.isApproaching(e)) {
-					item.handleApproaching();
-				} else if (item.isLeaving(e)) {
-					item.handleLeaving();
-				}
+			int height = OS.getFixedBodyClientHeight();
+			// Hacks: Return as quickly as possible to avoid CPU 100%
+			int x = e.clientX;
+			int y = e.clientY;
+			if (x > 220 && y > 32 && y < height - 90) {
+				return;
 			}
+
+			long now = new Date().getTime();
+			boolean ctrlKey = e.ctrlKey;
+			boolean handled = taskBar.handleMouseMove(now, x, y, ctrlKey);
+			//if (handled) return;
+			handled = shortcutBar.handleMouseMove(now, x, y, ctrlKey);
+			//if (handled) return;
+			handled = trayCorner.handleMouseMove(now, x, y, ctrlKey);
+			//if (handled) return;
+			handled = topBar.handleMouseMove(now, x, y, ctrlKey);
+			if (handled) return;
 		}
 	
 	};
@@ -3538,17 +3540,15 @@ void releaseDesktop () {
 		}
 	}
 
-	for (int i = 0; i < desktopItems.length; i++) {
-		if (trayRefs > 1 && desktopItems[i] == trayCorner) {
-			continue;
-		}
-		desktopItems[i].releaseWidget();
-	}
-	desktopItems = null;
-	trayCorner = null;
+
+	taskBar.releaseWidget();
 	taskBar = null;
-	shortcutBar = null;
+	topBar.releaseWidget();
 	topBar = null;
+	shortcutBar.releaseWidget();
+	shortcutBar = null;
+	if (trayRefs <= 1) trayCorner.releaseWidget();
+	trayCorner = null;
 	
 	/**
 	 * @j2sNative
@@ -4655,11 +4655,11 @@ static Shell getTopMaximizedShell() {
 	return lastShell;
 }
 public void updateLayout() {
-	if (desktopItems != null) {
-		for (int i = 0; i < desktopItems.length; i++) {
-			DesktopItem item = desktopItems[i];
-			item.updateLayout();
-		}
+	if (taskBar != null) {
+		taskBar.updateLayout();
+		topBar.updateLayout();
+		shortcutBar.updateLayout();
+		trayCorner.updateLayout();
 	}
 }
 
