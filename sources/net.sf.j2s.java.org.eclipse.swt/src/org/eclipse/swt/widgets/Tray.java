@@ -244,7 +244,8 @@ Element addTrayItem () {
 	allItems[allItems.length] = item;
 	orderTrayItem (item, allItems.length - 1);
 	Element el = allCells[0];
-	if (el.style.zIndex != null && "" + el.style.zIndex != "") {
+	if ((OS.isIE && el.style.zIndex != 0)
+			|| (!OS.isIE && "" + el.style.zIndex != "")) {
 		item.style.zIndex = el.style.zIndex;
 	}
 

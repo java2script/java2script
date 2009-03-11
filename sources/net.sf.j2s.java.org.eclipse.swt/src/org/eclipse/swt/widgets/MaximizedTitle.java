@@ -84,8 +84,6 @@ public class MaximizedTitle extends DesktopItem {
 		tbc.className = "shell-manager-topbar-container";
 		document.body.appendChild(tbc);
 		tbc.style.display = "none";
-		tbc.style.width = "320px";
-		tbc.style.zIndex = "3456";
 		this.handle = tbc;
 		
 		boolean supportShadow = false;
@@ -170,8 +168,7 @@ public class MaximizedTitle extends DesktopItem {
 		return false;
 	}
 
-	public void bringToTop(String index) {
-		// TODO Auto-generated method stub
+	public void bringToTop(int index) {
 		
 	}
 

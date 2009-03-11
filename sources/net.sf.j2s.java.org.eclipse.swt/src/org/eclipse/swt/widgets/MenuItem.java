@@ -211,7 +211,7 @@ void configMenuItem() {
 				/**
 				 * @j2sNative
 				 * el.onmouseout();
-				 */ {}
+				 */ { el.toString(); }
 			}
 			p.currentIndex = indexOf;
 			if ((parent.style & SWT.BAR) != 0) {
@@ -342,7 +342,7 @@ void hookSelection() {
 			Element btn = parent.btnFocus;
 			/**
 			 * @j2sNative btn.onblur();
-			 */ {}
+			 */ { btn.toString(); }
 		}
 	};
 }
@@ -1384,7 +1384,7 @@ void showSubMenu() {
 	//showMenu(rect.x, rect.y);
 	menu.handle.style.left = rect.x + "px";
 	menu.handle.style.top = rect.y + "px";
-	menu.handle.style.zIndex = "1" + window.currentTopZIndex;
+	menu.handle.style.zIndex = window.currentTopZIndex + 1000;
 	menu.handle.style.display = "block";
 	OS.SetFocus(menu.btnFocus); // menu.btnFocus.focus();
 }

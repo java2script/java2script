@@ -75,10 +75,10 @@ public class QuickLaunch extends DesktopItem {
 				if (isAutoHide) {
 					setMinimized(false);
 				}
-				String zIndex = Display.getNextZIndex(false);
-				if ("" + handle.style.zIndex != zIndex) {
-					layerZIndex = "" + handle.style.zIndex;
-					bringToTop(zIndex);
+				int zIndex = Display.getNextZIndex(false);
+				if (handle.style.zIndex != zIndex) {
+					layerZIndex = handle.style.zIndex;
+					bringToTop(-1);
 				}
 			}
 		
@@ -96,7 +96,7 @@ public class QuickLaunch extends DesktopItem {
 					
 					}, 500);
 				}
-				bringToTop(null);
+				bringToTop(-1);
 			}
 		
 		};
@@ -111,7 +111,7 @@ public class QuickLaunch extends DesktopItem {
 				if (isJustUpdated) {
 					return;
 				}
-				bringToTop(null);
+				bringToTop(-1);
 			}
 		
 		};
@@ -212,12 +212,12 @@ public class QuickLaunch extends DesktopItem {
 			itemDiv.style.display = visible ? "" : "none";
 		}
 	}
-	public void bringToTop(String zIdx) {
+	public void bringToTop(int zIdx) {
 		if (this.shortcutCount <= 0) {
 			return;
 		}
-		String zIndex = "";
-		if (zIdx == null) {
+		int zIndex = -1;
+		if (zIdx == -1) {
 			zIndex = Display.getNextZIndex(true);
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
@@ -225,6 +225,11 @@ public class QuickLaunch extends DesktopItem {
 		} else {
 			zIndex = zIdx;
 		}
+		if (zIndex == -1 && !OS.isIE)
+		/**
+		 * @j2sNative
+		 * zIndex = "";
+		 */{ }
 		this.handle.style.zIndex = zIndex;
 		for (int i = 0; i < this.shortcutCount; i++) {
 			Element itemDiv = this.shortcutItems[i];
@@ -315,7 +320,7 @@ public class QuickLaunch extends DesktopItem {
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;
 		this.shortcutCount++;
-		this.bringToTop(null);
+		this.bringToTop(-1);
 		this.updateLayout();
 		setMinimized(false);
 		updateLastModified();
@@ -357,17 +362,17 @@ public class QuickLaunch extends DesktopItem {
 	}
 
 	public void handleApproaching() {
-		String zIndex = Display.getNextZIndex(false);
-		if ("" + handle.style.zIndex != zIndex) {
-			layerZIndex = "" + handle.style.zIndex;
+		int zIndex = Display.getNextZIndex(false);
+		if (handle.style.zIndex != zIndex) {
+			layerZIndex = handle.style.zIndex;
 			bringToTop(zIndex);
 		}
 	}
 
 	public void handleLeaving() {
-		if (layerZIndex != null) {
+		if (layerZIndex != -1) {
 			bringToTop(layerZIndex);
-			layerZIndex = null;
+			layerZIndex = -1;
 		}
 		if (isAutoHide) {
 			setMinimized(true);

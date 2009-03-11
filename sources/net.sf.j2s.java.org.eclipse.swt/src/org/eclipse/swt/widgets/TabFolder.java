@@ -1086,10 +1086,10 @@ void updateSelectionWithWidth(int index, int prefWidth) {
 		int x = 2;
 		for (int i = offset; i < items.length; i++) {
 			//items[i].handle.style.display = "block";
-			if ("" + items[i].handle.style.zIndex == "-1") {
+			if (items[i].handle.style.zIndex == -1) {
 				items[i].handle.style.display = "";
 			}
-			items[i].handle.style.zIndex = (i + 1) + "";
+			items[i].handle.style.zIndex = i + 1;
 			OS.removeCSSClass(items[i].handle, key);
 			int w = OS.getContainerWidth(items[i].handle);
 			if (i < index) {
@@ -1113,7 +1113,7 @@ void updateSelectionWithWidth(int index, int prefWidth) {
 			OS.updateCSSClass(borderFrame, "tab-show-more-item", x > ww || offset != 0);
 		}
 		OS.addCSSClass(items[index].handle, key);
-		items[index].handle.style.zIndex = ((index >= offset) ? items.length + 1 : -1) + "";
+		items[index].handle.style.zIndex = (index >= offset) ? items.length + 1 : -1;
 		if (index < offset) {
 			items[index].handle.style.display = "none";
 		} else {

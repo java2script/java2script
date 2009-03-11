@@ -238,12 +238,8 @@ void bringToTop (boolean parentShell, boolean childShells) {
 //		if (style.display == "none") {
 //			style.display = "block";
 //		}
-		if (window.currentTopZIndex == null) {
-			window.currentTopZIndex = "1000";
-		}
 		if (style.zIndex != window.currentTopZIndex) {
-			style.zIndex = window.currentTopZIndex = ""
-					+ (Integer.parseInt(window.currentTopZIndex) + 2);
+			style.zIndex = window.currentTopZIndex = window.currentTopZIndex + 2;
 		}
 		if ((style.width == null || style.width.length() == 0) 
 				&& (style.height == null || style.height.length() == 0)){
@@ -275,8 +271,7 @@ void bringToTop (boolean parentShell, boolean childShells) {
 					&& (control instanceof Shell)/* && control.isVisible()*/) {
 				style = control.handle.style;
 				if (style != null && style.zIndex != window.currentTopZIndex) {
-					style.zIndex = window.currentTopZIndex = ""
-							+ (Integer.parseInt(window.currentTopZIndex) + 2);
+					style.zIndex = window.currentTopZIndex = window.currentTopZIndex + 2;
 				}
 			}
 		}
@@ -296,7 +291,7 @@ void bringToTop (boolean parentShell, boolean childShells) {
 	}
 	
 	if (modalHandle != null) {
-		modalHandle.style.zIndex = "" + (Integer.parseInt("" + handle.style.zIndex) - 1);
+		modalHandle.style.zIndex = handle.style.zIndex - 1;
 	}
 }
 
@@ -825,7 +820,7 @@ void nextWindowLocation(int wHint, int hHint) {
 void addModalLayer() {
 	modalHandle = document.createElement ("DIV");
 	modalHandle.className = "shell-modal-block";
-	modalHandle.style.zIndex = "" + (Integer.parseInt("" + handle.style.zIndex) - 1);
+	modalHandle.style.zIndex = handle.style.zIndex - 1;
 	getMonitor().handle.insertBefore(modalHandle, handle);
 }
 

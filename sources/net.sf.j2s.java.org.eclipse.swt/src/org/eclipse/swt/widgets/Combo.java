@@ -766,9 +766,9 @@ void show(){
 		//h -= 2;
 	}
 	this.selectShown = true;
-	window.currentTopZIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 1);
+	window.currentTopZIndex = window.currentTopZIndex + 1;
 	// related bug: http://groups.google.com/group/java2script/browse_thread/thread/8085561fcf953fc?hl=en
-	selectInput.style.zIndex = "" + (Integer.parseInt(window.currentTopZIndex) + 4); //sgurin
+	selectInput.style.zIndex = window.currentTopZIndex + 4; //sgurin
 	try {
 		handle.removeChild(selectInput);
 		document.body.appendChild(selectInput);

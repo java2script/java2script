@@ -159,6 +159,7 @@ fss.monitorFontSize = function (looping) {
 				FontSizeSystem.monitorFontSize (true)
 			}, 250);
 };
+window.currentTopZIndex = 1000;
  */
 
 public class Display extends Device {
@@ -4554,15 +4555,10 @@ static int wcsToMbcs (char ch) {
 }
 */
 
-static String getNextZIndex(boolean increase) {
-	String zIndex = "";
-	if (window.currentTopZIndex == null) {
-		zIndex = "1000";
-	} else {
-		zIndex = (Integer.parseInt(window.currentTopZIndex) + 1) + "";
-		if (increase) {
-			window.currentTopZIndex = zIndex;
-		}
+static int getNextZIndex(boolean increase) {
+	int zIndex = window.currentTopZIndex + 1;
+	if (increase) {
+		window.currentTopZIndex = zIndex;
 	}
 	return zIndex;
 }
