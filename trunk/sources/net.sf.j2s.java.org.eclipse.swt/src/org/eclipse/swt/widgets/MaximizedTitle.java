@@ -11,12 +11,9 @@
 
 package org.eclipse.swt.widgets;
 
-import java.util.Date;
-
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
 /**
@@ -37,7 +34,7 @@ public class MaximizedTitle extends DesktopItem {
 	}
 	
 	public void updateLayout() {
-		Shell lastShell = Display.getTopMaximizedShell ();
+		Shell lastShell = Display.getTopMaximizedShell();
 		if (lastShell == null || lastShell.titleBar == null) return;
 		this.lastMaximizedShell = lastShell;
 		
@@ -47,12 +44,12 @@ public class MaximizedTitle extends DesktopItem {
 			els[i] = lastShell.titleBar.childNodes[i];
 		}
 		for (int i = 0; i < els.length; i++) {
-			lastShell.titleBar.removeChild (els[i]);
-			this.topbarEl.appendChild (els[i]);
+			lastShell.titleBar.removeChild(els[i]);
+			this.topbarEl.appendChild(els[i]);
 		}
 
 		// update topbar
-		this.handle.style.left = Math.round ((document.body.clientWidth - 320) / 2) + "px";
+		this.handle.style.left = Math.round((document.body.clientWidth - 320) / 2) + "px";
 		this.topbarEl.style.width = "316px";
 		if (OS.isIE) {
 			this.topbarEl.style.left = "1px";
@@ -61,7 +58,7 @@ public class MaximizedTitle extends DesktopItem {
 		}
 		this.topbarEl.style.top = "1px";
 		this.handle.ondblclick = lastShell.titleBar.ondblclick;
-		lastShell.updateShellTitle (320 + 4);
+		lastShell.updateShellTitle(320 + 4);
 	}
 	public void returnTopMaximized(Shell shell) {
 		Shell lastShell = this.lastMaximizedShell;
@@ -74,7 +71,7 @@ public class MaximizedTitle extends DesktopItem {
 			els[i] = this.topbarEl.childNodes[i];
 		}
 		for (int i = 0; i < els.length; i++) {
-			lastShell.titleBar.appendChild (els[i]);
+			lastShell.titleBar.appendChild(els[i]);
 		}
 		if (shell != null) {
 			this.handle.style.display = "none";
@@ -83,9 +80,9 @@ public class MaximizedTitle extends DesktopItem {
 	public void initialize() {
 		if (this.handle != null) return;
 
-		Element tbc = document.createElement ("DIV");
+		Element tbc = document.createElement("DIV");
 		tbc.className = "shell-manager-topbar-container";
-		document.body.appendChild (tbc);
+		document.body.appendChild(tbc);
 		tbc.style.display = "none";
 		tbc.style.width = "320px";
 		tbc.style.zIndex = "3456";
@@ -100,20 +97,19 @@ public class MaximizedTitle extends DesktopItem {
 			Decorations.createShadowHandles(handle);
 		}
 
-		Element tb = document.createElement ("DIV");
+		Element tb = document.createElement("DIV");
 		tb.className = "shell-title-bar shell-maximized";
-		this.handle.appendChild (tb);
+		this.handle.appendChild(tb);
 		this.topbarEl = tb;
 	}
 
-	boolean isAround(int x, int y) {
-		long now = new Date().getTime();
+	boolean isAround(long now, int x, int y) {
 		if (now - this.lastUpdated < 1000) {
 			return true;
 		}
 		int barWidth = 320;
-		int height = document.body.clientWidth;
-		int offset = Math.round ((height - barWidth) / 2);
+		int width = document.body.clientWidth;
+		int offset = Math.round((width - barWidth) / 2);
 		int x1 = offset - 72;
 		int x2 = offset + barWidth + 72;
 		return (x >= x1 && x <= x2);
@@ -131,10 +127,10 @@ public class MaximizedTitle extends DesktopItem {
 		Element topbar = handle;
 		if (topbar == null) return;
 		if (topbar.style.display != "block") {
-			Shell lastShell = Display.getTopMaximizedShell ();
+			Shell lastShell = Display.getTopMaximizedShell();
 			if (lastShell != null && lastShell.titleBar != null) {
 				topbar.style.display = "block";
-				updateLayout ();
+				updateLayout();
 			}
 		}
 	}
@@ -144,24 +140,36 @@ public class MaximizedTitle extends DesktopItem {
 		if (topbar == null) return;
 		if (topbar.style.display != "none") {
 			topbar.style.display = "none";
-			returnTopMaximized (null);
+			returnTopMaximized(null);
 		}
 	}
 
-	public boolean isApproaching(HTMLEvent e) {
+	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		return (e.clientY <= 8 && !e.ctrlKey) && isAround (e.clientX, e.clientY);
+		return (y <= 8 && !ctrlKey) && isAround(now, x, y);
 	}
 
-	public boolean isLeaving(HTMLEvent e) {
+	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
-		Shell topShell = Display.getTopMaximizedShell ();
+		Shell topShell = Display.getTopMaximizedShell();
 		if (topShell == null) return false;
-		return !isAround (e.clientX, e.clientY) || e.ctrlKey || e.clientY > 12 + ((topShell.titleBar != null) ? OS.getContainerHeight (topShell.titleBar) : 20);
+		return !isAround(now, x, y) || ctrlKey
+				|| y > 12 + ((topShell.titleBar != null) ?
+						OS.getContainerHeight(topShell.titleBar) : 20);
 	}
-	
+
+	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
+		if (this.isApproaching(now, x, y, ctrlKey)) {
+			this.handleApproaching();
+			return true;
+		} else if (this.isLeaving(now, x, y, ctrlKey)) {
+			this.handleLeaving();
+			return true;
+		}
+		return false;
+	}
+
 	public void bringToTop(String index) {
 		// TODO Auto-generated method stub
 		

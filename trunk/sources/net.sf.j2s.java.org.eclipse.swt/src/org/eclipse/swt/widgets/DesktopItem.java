@@ -6,7 +6,7 @@ import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.window;
 
-public abstract class DesktopItem implements DesktopListener {
+public abstract class DesktopItem {
 
 	Display display;
 	
@@ -56,6 +56,8 @@ public abstract class DesktopItem implements DesktopListener {
 	public abstract void bringToTop(String zIndex);
 	
 	public abstract void updateLayout();
+	
+	public abstract void handleLeaving();
 	
 	public abstract void releaseWidget();
 

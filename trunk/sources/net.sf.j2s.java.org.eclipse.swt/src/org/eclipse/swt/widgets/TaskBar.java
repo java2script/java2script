@@ -11,15 +11,12 @@
 
 package org.eclipse.swt.widgets;
 
-import java.util.Date;
-
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 
@@ -514,22 +511,32 @@ public class TaskBar extends DesktopItem {
 		}
 	}
 
-	public boolean isApproaching(HTMLEvent e) {
+	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
 		if (barEl == null) {
 			return false;
 		}
 		mouseAlreadyMoved = true;
-		return !e.ctrlKey && e.clientX <= 8 && isAround(e.clientX, e.clientY);
+		return !ctrlKey && x <= 8 && isAround(x, y);
 	}
 
-	public boolean isLeaving(HTMLEvent e) {
+	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
 		if (barEl == null) {
 			return false;
 		}
 		mouseAlreadyMoved = true;
-		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
-		return e.ctrlKey || e.clientX > 200 || !isAround(e.clientX, e.clientY);
+		return ctrlKey || x > 200 || !isAround(x, y);
+	}
+
+	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
+		if (this.isApproaching(now, x, y, ctrlKey)) {
+			this.handleApproaching();
+			return true;
+		} else if (this.isLeaving(now, x, y, ctrlKey)) {
+			this.handleLeaving();
+			return true;
+		}
+		return false;
 	}
 
 	public void releaseWidget() {

@@ -418,8 +418,7 @@ if (!isDebugging) {
 	
 	var wPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.widgets.*");
 	ClazzLoader.jarClasspath (wPath + "Shell.z.js", [
-		"$wt.widgets.DesktopListener",
-		"$.DesktopItem",
+		"$wt.widgets.DesktopItem",
 		"$.TaskBar",
 		"$.MaximizedTitle",
 		"$.QuickLaunch",

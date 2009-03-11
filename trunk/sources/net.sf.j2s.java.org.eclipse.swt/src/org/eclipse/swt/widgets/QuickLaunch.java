@@ -11,12 +11,9 @@
 
 package org.eclipse.swt.widgets;
 
-import java.util.Date;
-
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 
@@ -28,7 +25,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * @j2sPrefix
  * $WTC$$.registerCSS ("$wt.widgets.QuickLaunch");
  */
-public class QuickLaunch extends DesktopItem implements DesktopListener {
+public class QuickLaunch extends DesktopItem {
 
 	static QuickLaunch defaultQuickLaunch = null;
 	
@@ -69,9 +66,9 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 				body.parentNode.style.overflow = "hidden";
 			}
 		}
-		this.handle = document.createElement ("DIV");
+		this.handle = document.createElement("DIV");
 		this.handle.className = "shortcut-bar";
-		document.body.appendChild (this.handle);
+		document.body.appendChild(this.handle);
 		this.handle.onmouseover = new RunnableCompatibility() {
 		
 			public void run() {
@@ -81,7 +78,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 				String zIndex = Display.getNextZIndex(false);
 				if ("" + handle.style.zIndex != zIndex) {
 					layerZIndex = "" + handle.style.zIndex;
-					bringToTop (zIndex);
+					bringToTop(zIndex);
 				}
 			}
 		
@@ -91,7 +88,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			public void run() {
 				if (setMinimized(false)) {
 					isJustUpdated = true;
-					window.setTimeout (new RunnableCompatibility() {
+					window.setTimeout(new RunnableCompatibility() {
 					
 						public void run() {
 							isJustUpdated = false;
@@ -99,7 +96,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 					
 					}, 500);
 				}
-				bringToTop (null);
+				bringToTop(null);
 			}
 		
 		};
@@ -114,7 +111,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 				if (isJustUpdated) {
 					return;
 				}
-				bringToTop (null);
+				bringToTop(null);
 			}
 		
 		};
@@ -146,8 +143,8 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		for (int i = 0; i < children.length; i++) {
 			Element child = children[i];
 			if (child.nodeName == "A" && child.className != null
-					&& child.className.indexOf ("alaa") != -1
-					&& child.className.indexOf ("ignored") == -1) {
+					&& child.className.indexOf("alaa") != -1
+					&& child.className.indexOf("ignored") == -1) {
 				existed = true;
 				Object js = child.href;
 				if (js == "#") {
@@ -166,22 +163,26 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 				for (int j = 0; j < child.childNodes.length; j++) {
 					Element item = child.childNodes[j];
 					if (item != null && item.className != null
-							&& item.className.indexOf ("alaa-icon") != -1) {
+							&& item.className.indexOf("alaa-icon") != -1) {
 						icon = item.style.backgroundImage;
 						if (icon != null) {
-							if (icon.indexOf ("url(") == 0) {
-								icon = icon.substring (4, icon.length() - 1);
+							if (icon.indexOf("url(") == 0) {
+								icon = icon.substring(4, icon.length() - 1);
 							}
-							char ch = icon.charAt (0);
+							char ch = icon.charAt(0);
 							if (ch == '\'' || ch == '\"') {
-								icon = icon.substring (1, icon.length() - 1);
+								icon = icon.substring(1, icon.length() - 1);
 							}
 						}
 						break;
 					}
 				}
-				this.addShortcut (child.text != null ? child.text : child.innerText, icon, js);
-				child.parentNode.removeChild (child);
+				Element shortcut = this.addShortcut(child.text != null ? child.text : child.innerText, icon, js);
+				String id = child.id;
+				child.parentNode.removeChild(child);
+				if (id != null && id.length() > 0) {
+					shortcut.id = id;
+				}
 			}
 		}
 		if (existed) {
@@ -218,7 +219,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		String zIndex = "";
 		if (zIdx == null) {
 			zIndex = Display.getNextZIndex(true);
-			if (Display.getTopMaximizedShell () == null) {
+			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
 			}
 		} else {
@@ -235,7 +236,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			return;
 		}
 		int barWidth = 20 + this.shortcutCount * 60;
-		int barOffset = (OS.getFixedBodyClientWidth () - barWidth) / 2;
+		int barOffset = (OS.getFixedBodyClientWidth() - barWidth) / 2;
 		if (this.handle != null) {
 			this.handle.style.left = barOffset + 10 + "px";
 			this.handle.style.width = barWidth + "px";
@@ -253,13 +254,13 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		}
 		 */ {}
 		if (this.handle == null) {
-			this.initialize ();
+			this.initialize();
 		}
 		String tag = "A";
 		/*if (!O$.isIENeedPNGFix) {
 			tag = "DIV";
 		}*/
-		Element itemDiv = document.createElement (tag);
+		Element itemDiv = document.createElement(tag);
 		itemDiv.className = "shortcut-item";
 		if (OS.isIENeedPNGFix) {
 			if (icon != null && icon.length() != 0) {
@@ -300,7 +301,7 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 			 */ {}
 		}
 		itemDiv.title = name;
-		document.body.appendChild (itemDiv);
+		document.body.appendChild(itemDiv);
 		itemDiv.onmouseover = this.handle.onmouseover;
 		
 		boolean supportShadow = false;
@@ -314,13 +315,13 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;
 		this.shortcutCount++;
-		this.bringToTop (null);
-		this.updateLayout ();
+		this.bringToTop(null);
+		this.updateLayout();
 		setMinimized(false);
 		updateLastModified();
 		return itemDiv;
 	}
-	public void markActiveItem (Element item) {
+	public void markActiveItem(Element item) {
 		if (this.shortcutCount <= 0 || item == null) {
 			return;
 		}
@@ -337,37 +338,35 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 	boolean isAround(int x, int y) {
 		int barWidth = 20 + this.shortcutCount * 60;
 		int height = document.body.clientWidth;
-		int offset = Math.round ((height - barWidth) / 2);
+		int offset = Math.round((height - barWidth) / 2);
 		int x1 = offset - 72;
 		int x2 = offset + barWidth + 72;
 		return (x >= x1 && x <= x2);
 	}
 	
-	public boolean isApproaching(HTMLEvent e) {
+	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		return (!e.ctrlKey && e.clientY >= OS.getFixedBodyClientHeight () - 8
-				&& isAround(e.clientX, e.clientY));
+		return (!ctrlKey && y >= OS.getFixedBodyClientHeight() - 8
+				&& isAround(x, y));
 	}
 
-	public boolean isLeaving(HTMLEvent e) {
+	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
-		return (e.clientY <= OS.getFixedBodyClientHeight () - 70
-				|| !isAround (e.clientX, e.clientY));
+		return (y <= OS.getFixedBodyClientHeight() - 70 || !isAround(x, y));
 	}
 
 	public void handleApproaching() {
 		String zIndex = Display.getNextZIndex(false);
 		if ("" + handle.style.zIndex != zIndex) {
 			layerZIndex = "" + handle.style.zIndex;
-			bringToTop (zIndex);
+			bringToTop(zIndex);
 		}
 	}
 
 	public void handleLeaving() {
 		if (layerZIndex != null) {
-			bringToTop (layerZIndex);
+			bringToTop(layerZIndex);
 			layerZIndex = null;
 		}
 		if (isAutoHide) {
@@ -375,6 +374,17 @@ public class QuickLaunch extends DesktopItem implements DesktopListener {
 		}
 	}
 
+	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
+		if (this.isApproaching(now, x, y, ctrlKey)) {
+			this.handleApproaching();
+			return true;
+		} else if (this.isLeaving(now, x, y, ctrlKey)) {
+			this.handleLeaving();
+			return true;
+		}
+		return false;
+	}
+	
 	public void releaseWidget() {
 		if (defaultQuickLaunch != null) {
 			return;

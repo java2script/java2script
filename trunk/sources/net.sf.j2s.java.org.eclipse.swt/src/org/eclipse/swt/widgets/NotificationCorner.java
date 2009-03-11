@@ -1,11 +1,8 @@
 package org.eclipse.swt.widgets;
 
-import java.util.Date;
-
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
-import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
 
@@ -75,7 +72,7 @@ public class NotificationCorner extends DesktopItem {
 		minimizedEl.className = "tray-cell tray-minimized";
 		minimizedEl.title = "Doubleclick to set notification area always-visible";
 		minimizedEl.style.display = "none";
-		String lineColor = Tray.trayLineColor (3);
+		String lineColor = Tray.trayLineColor(3);
 		minimizedEl.style.borderColor = lineColor + " transparent transparent transparent";
 		if (OS.isIENeedPNGFix) { // IE < 6.0
 			minimizedEl.style.borderRightColor = "rgb(0,255,0)";
@@ -135,7 +132,7 @@ public class NotificationCorner extends DesktopItem {
 					String zIndex = Display.getNextZIndex(false);
 					if ("" + handle.style.zIndex != zIndex) {
 						layerZIndex = "" + handle.style.zIndex;
-						bringToTop (zIndex);
+						bringToTop(zIndex);
 					}
 				}
 				
@@ -212,7 +209,7 @@ public class NotificationCorner extends DesktopItem {
 			if (!isAutoHide) {
 				setMinimized(false);
 			}
-			bringToTop (zIndex);
+			bringToTop(zIndex);
 		}
 	}
 
@@ -221,7 +218,7 @@ public class NotificationCorner extends DesktopItem {
 			return;
 		}
 		if (layerZIndex != null) {
-			bringToTop (layerZIndex);
+			bringToTop(layerZIndex);
 			layerZIndex = null;
 		}
 		if (isAutoHide) {
@@ -229,16 +226,15 @@ public class NotificationCorner extends DesktopItem {
 		}
 	}
 
-	public boolean isApproaching(HTMLEvent e) {
+	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		return !e.ctrlKey && isAround (e.clientX, e.clientY);
+		return !ctrlKey && isAround(x, y);
 	}
 
-	public boolean isLeaving(HTMLEvent e) {
+	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
 		mouseAlreadyMoved = true;
-		long now = new Date().getTime();
 		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
-		return !isAroundCorner (e.clientX, e.clientY);
+		return !isAroundCorner(x, y);
 	}
 	boolean isAround(int x, int y) {
 		int range = 32;
@@ -252,11 +248,22 @@ public class NotificationCorner extends DesktopItem {
 	 */
 	boolean isAroundCorner(int x, int y) {
 		int range = 32;
-		Tray tray = Display.getTray ();
+		Tray tray = Display.getTray();
 		if (tray != null) {
-			range = getRange () + 16;
+			range = getRange() + 16;
 		}
 		if (x < range && y < range && x + y < range) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
+		if (this.isApproaching(now, x, y, ctrlKey)) {
+			this.handleApproaching();
+			return true;
+		} else if (this.isLeaving(now, x, y, ctrlKey)) {
+			this.handleLeaving();
 			return true;
 		}
 		return false;
@@ -336,20 +343,20 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	public void bringToTop(String zIdx) {
-		Tray tray = Display.getTray ();
+		Tray tray = Display.getTray();
 		if (tray == null) {
 			return;
 		}
 		String zIndex = "";
 		if (zIdx == null) {
 			zIndex = Display.getNextZIndex(true);
-			if (Display.getTopMaximizedShell () == null) {
+			if (Display.getTopMaximizedShell() == null) {
 				layerZIndex = zIndex;
 			}
 		} else {
 			zIndex = zIdx;
 		}
-		setZIndex (zIndex);
+		setZIndex(zIndex);
 	}
 
 	public void updateLayout() {
