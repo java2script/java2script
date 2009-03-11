@@ -118,7 +118,6 @@ public class MaximizedTitle extends DesktopItem {
 		if (smStyle.display == "block") {
 			smStyle.display = "none";
 		}
-
 	}
 
 	public void handleApproaching() {
@@ -143,29 +142,15 @@ public class MaximizedTitle extends DesktopItem {
 	}
 
 	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
 		return (y <= 8 && !ctrlKey) && isAround(now, x, y);
 	}
 
 	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
-		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		Shell topShell = Display.getTopMaximizedShell();
 		if (topShell == null) return false;
 		return !isAround(now, x, y) || ctrlKey
 				|| y > 12 + ((topShell.titleBar != null) ?
 						OS.getContainerHeight(topShell.titleBar) : 20);
-	}
-
-	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
-		if (this.isApproaching(now, x, y, ctrlKey)) {
-			this.handleApproaching();
-			return true;
-		} else if (this.isLeaving(now, x, y, ctrlKey)) {
-			this.handleLeaving();
-			return true;
-		}
-		return false;
 	}
 
 	public void bringToTop(int index) {

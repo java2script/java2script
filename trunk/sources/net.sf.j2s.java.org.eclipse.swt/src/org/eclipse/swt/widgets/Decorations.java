@@ -210,6 +210,8 @@ void bringToTop () {
 }
 
 void bringToTop (boolean parentShell, boolean childShells) {
+	Display.topMaxShell = null;
+	Display.topMaxShellNeedUpdated = true;
 	if (parentShell && childShells) {
 		Display.deactivateAllTitleBarShells();
 	}
@@ -1731,6 +1733,8 @@ public void setMaximized (boolean maximized) {
 		OS.UpdateWindow (handle);
 	}
 	*/
+	Display.topMaxShell = null;
+	Display.topMaxShellNeedUpdated = true;
 	this.maximized = maximized;
 	String key = "shell-maximized";
 	Element b = document.body;
@@ -1805,7 +1809,8 @@ public void setMaximized (boolean maximized) {
 		if (titleBar != null) {
 			OS.addCSSClass(titleBar, key);
 		}
-		handle.style.zIndex = Display.getNextZIndex(true);
+		window.currentTopZIndex++;
+		handle.style.zIndex = window.currentTopZIndex;
 		if (contentHandle != null) {
 			window.setTimeout(Clazz.makeFunction(new Runnable() {
 			
@@ -1965,6 +1970,8 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
+	Display.topMaxShell = null;
+	Display.topMaxShellNeedUpdated = true;
 	if (!minimized) {
 		if (this.maximized) {
 			this.minimized = minimized;
@@ -2264,8 +2271,8 @@ void setSystemMenu () {
 		}
 	};
 	
-	Display.getNextZIndex(true);
-	handle.style.zIndex = Display.getNextZIndex(true);
+	window.currentTopZIndex += 2;
+	handle.style.zIndex = window.currentTopZIndex;
 }
 
 /**

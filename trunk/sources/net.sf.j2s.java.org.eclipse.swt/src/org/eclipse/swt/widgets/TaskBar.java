@@ -49,7 +49,7 @@ public class TaskBar extends DesktopItem {
 
 	}
 
-	private Element barEl = null;
+	Element barEl = null;
 	TaskItem[] items = new TaskItem[0];
 
 	public TaskBar(Display display) {
@@ -73,7 +73,8 @@ public class TaskBar extends DesktopItem {
 		}
 		int zIndex = -1;
 		if (zIdx == -1) {
-			zIndex = Display.getNextZIndex(true);
+			window.currentTopZIndex++;
+			zIndex = window.currentTopZIndex;
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
 			}
@@ -420,10 +421,10 @@ public class TaskBar extends DesktopItem {
 				if (isAutoHide) {
 					setMinimized(false);
 				}
-				int zIndex = Display.getNextZIndex(false);
+				int zIndex = window.currentTopZIndex + 1;
 				if (handle.style.zIndex != zIndex) {
 					layerZIndex = handle.style.zIndex;
-					bringToTop(-1);
+					bringToTop(zIndex);
 				}
 			}
 
@@ -491,7 +492,7 @@ public class TaskBar extends DesktopItem {
 		}
 		if (items.length != 0) {
 			handle.style.display = "block";
-			int zIndex = Display.getNextZIndex(false);
+			int zIndex = window.currentTopZIndex + 1;
 			if (handle.style.zIndex != zIndex) {
 				layerZIndex = handle.style.zIndex;
 				bringToTop(zIndex);
@@ -517,31 +518,11 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
-		if (barEl == null) {
-			return false;
-		}
-		mouseAlreadyMoved = true;
 		return !ctrlKey && x <= 8 && isAround(x, y);
 	}
 
 	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
-		if (barEl == null) {
-			return false;
-		}
-		mouseAlreadyMoved = true;
-		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return ctrlKey || x > 200 || !isAround(x, y);
-	}
-
-	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
-		if (this.isApproaching(now, x, y, ctrlKey)) {
-			this.handleApproaching();
-			return true;
-		} else if (this.isLeaving(now, x, y, ctrlKey)) {
-			this.handleLeaving();
-			return true;
-		}
-		return false;
 	}
 
 	public void releaseWidget() {

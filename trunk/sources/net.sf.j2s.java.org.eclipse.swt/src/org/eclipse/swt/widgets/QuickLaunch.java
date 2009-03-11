@@ -75,10 +75,10 @@ public class QuickLaunch extends DesktopItem {
 				if (isAutoHide) {
 					setMinimized(false);
 				}
-				int zIndex = Display.getNextZIndex(false);
+				int zIndex = window.currentTopZIndex + 1;
 				if (handle.style.zIndex != zIndex) {
 					layerZIndex = handle.style.zIndex;
-					bringToTop(-1);
+					bringToTop(zIndex);
 				}
 			}
 		
@@ -208,8 +208,7 @@ public class QuickLaunch extends DesktopItem {
 			return;
 		}
 		for (int i = 0; i < this.shortcutCount; i++) {
-			Element itemDiv = this.shortcutItems[i];
-			itemDiv.style.display = visible ? "" : "none";
+			shortcutItems[i].style.display = visible ? "" : "none";
 		}
 	}
 	public void bringToTop(int zIdx) {
@@ -218,7 +217,8 @@ public class QuickLaunch extends DesktopItem {
 		}
 		int zIndex = -1;
 		if (zIdx == -1) {
-			zIndex = Display.getNextZIndex(true);
+			window.currentTopZIndex++;
+			zIndex = window.currentTopZIndex;
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
 			}
@@ -232,8 +232,7 @@ public class QuickLaunch extends DesktopItem {
 		 */{ }
 		this.handle.style.zIndex = zIndex;
 		for (int i = 0; i < this.shortcutCount; i++) {
-			Element itemDiv = this.shortcutItems[i];
-			itemDiv.style.zIndex = zIndex;
+			shortcutItems[i].style.zIndex = zIndex;
 		}
 	}
 	public void updateLayout() {
@@ -247,8 +246,7 @@ public class QuickLaunch extends DesktopItem {
 			this.handle.style.width = barWidth + "px";
 		}
 		for (int i = 0; i < this.shortcutCount; i++) {
-			Element itemDiv = this.shortcutItems[i];
-			itemDiv.style.left = (barOffset + 20 + 10 + i * 60) + "px";
+			shortcutItems[i].style.left = (barOffset + 20 + 10 + i * 60) + "px";
 		}
 	}
 	public Element addShortcut(String name, String icon, Object clickFun) {
@@ -350,19 +348,16 @@ public class QuickLaunch extends DesktopItem {
 	}
 	
 	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
 		return (!ctrlKey && y >= OS.getFixedBodyClientHeight() - 8
 				&& isAround(x, y));
 	}
 
 	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
-		mouseAlreadyMoved = true;
-		if (now - lastUpdated <= Display.AUTO_HIDE_DELAY) return false;
 		return (y <= OS.getFixedBodyClientHeight() - 70 || !isAround(x, y));
 	}
 
 	public void handleApproaching() {
-		int zIndex = Display.getNextZIndex(false);
+		int zIndex = window.currentTopZIndex + 1;
 		if (handle.style.zIndex != zIndex) {
 			layerZIndex = handle.style.zIndex;
 			bringToTop(zIndex);
@@ -377,17 +372,6 @@ public class QuickLaunch extends DesktopItem {
 		if (isAutoHide) {
 			setMinimized(true);
 		}
-	}
-
-	public boolean handleMouseMove(long now, int x, int y, boolean ctrlKey) {
-		if (this.isApproaching(now, x, y, ctrlKey)) {
-			this.handleApproaching();
-			return true;
-		} else if (this.isLeaving(now, x, y, ctrlKey)) {
-			this.handleLeaving();
-			return true;
-		}
-		return false;
 	}
 	
 	public void releaseWidget() {
