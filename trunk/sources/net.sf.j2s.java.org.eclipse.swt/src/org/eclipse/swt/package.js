@@ -2,7 +2,7 @@
 window["org.eclipse.swt.registered"] = false;
 
 /*
- * Standing for SWT CSS, with all "S" into "$". We love dollors. -zhou renjian
+ * Standing for SWT CSS, with all "S" into "$". We love dollars. -zhou renjian
  *
  * ATTENTION: Should only be used for SWT only. 
  */
@@ -234,7 +234,7 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 		}
 		
 		/*
-		 * This method will generated a lot non existed *.css resouce requests (404) for server.
+		 * This method will generated a lot non existed *.css resource requests (404) for server.
 		 */
 		var len = $WTC$$.themes.length;
 		for(var i = 0; i < len; i++){
