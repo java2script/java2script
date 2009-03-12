@@ -3393,7 +3393,7 @@ void updateSelection(int index) {
 			if(i != index && control != null && !control.isDisposed()){
 				control.setVisible(false);
 			}
-			items[i].handle.style.zIndex = (i + 1) + "";
+			items[i].handle.style.zIndex = i + 1;
 		
 			//if (index == i) continue;
 			String cssName = items[i].handle.className;
@@ -3483,7 +3483,7 @@ void updateSelection(int index) {
 			CSSStyle s = items[index].handle.style;
 			s.width = w + "px";
 		}
-		items[index].handle.style.zIndex = ((index >= offset) ? items.length + 1 : -1) + "";
+		items[index].handle.style.zIndex = (index >= offset) ? items.length + 1 : -1;
 		//System.out.println("????");
 		
 		if (this.width != 0) {
