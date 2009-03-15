@@ -284,7 +284,8 @@ void bringToTop (boolean parentShell, boolean childShells) {
 		Shell[] children = sh.getShells();
 		for (int i = 0; i < children.length; i++) {
 			Shell s = children[i];
-			if ((s.style & (SWT.APPLICATION_MODAL | SWT.PRIMARY_MODAL | SWT.SYSTEM_MODAL)) != 0) {
+			if ((s.style & (SWT.APPLICATION_MODAL | SWT.PRIMARY_MODAL | SWT.SYSTEM_MODAL)) != 0
+					&& s.isVisible() && !s.isDisposed()) {
 				s.bringToTop(false, true);
 			}
 		}
@@ -2263,9 +2264,11 @@ void setSystemMenu () {
 	handle.appendChild(titleBar);
 	titleBar.onclick = new RunnableCompatibility() {
 		public void run() {
-			bringToTop();
-			if(contentHandle != null){
-				OS.SetFocus(contentHandle); //contentHandle.focus();
+			if (isVisible()) { // may be invisible after clicking close button
+				bringToTop();
+				if(contentHandle != null){
+					OS.SetFocus(contentHandle); //contentHandle.focus();
+				}
 			}
 			toReturn(true);
 		}

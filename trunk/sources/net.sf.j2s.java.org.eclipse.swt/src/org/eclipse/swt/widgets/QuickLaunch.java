@@ -280,7 +280,7 @@ public class QuickLaunch extends DesktopItem {
 			 * @j2sNative
 			if (typeof clickFun == "string") {
 				itemDiv.href = clickFun;
-			} else {
+			} else if (clickFun != null) {
 				itemDiv.href = "#";
 				itemDiv.onclick = (function (f) {
 						return function () {
@@ -298,7 +298,7 @@ public class QuickLaunch extends DesktopItem {
 			 * @j2sNative
 			if (typeof clickFun == "string") {
 				itemDiv.href = clickFun;
-			} else {
+			} else if (clickFun != null) {
 				itemDiv.onclick = clickFun;
 			}
 			 */ {}
