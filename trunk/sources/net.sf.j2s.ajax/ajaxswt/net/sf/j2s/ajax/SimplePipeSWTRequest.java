@@ -17,6 +17,7 @@ import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.ajax.XHRCallbackSWTAdapter;
+import net.sf.j2s.annotation.J2SIgnore;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -84,9 +85,8 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 	 * Be used in Java mode to keep the pipe live.
 	 * 
 	 * @param runnable
-	 * 
-	 * @j2sIgnore
 	 */
+    @J2SIgnore
 	static void swtKeepPipeLive(final SimplePipeRunnable runnable, final Display disp) {
 		new Thread(new Runnable() {
 			
@@ -161,12 +161,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		}, "Pipe Live Notifier Thread").start();
 	}
 
-	/**
-	 * 
-	 * @param runnable
-	 * 
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	private static void swtPipeRequest(final SimplePipeRunnable runnable) {
 		String url = runnable.getHttpURL();
 		String method = runnable.getHttpMethod();
@@ -220,11 +215,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		request.send(serialize);
 	}
 
-	/**
-	 * 
-	 * @param runnable
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	static void swtPipeQuery(SimplePipeRunnable runnable) {
 		final HttpRequest pipeRequest = new HttpRequest();
 		final String pipeKey = runnable.pipeKey;
@@ -259,11 +250,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, false);
 	}
 	
-	/**
-	 * 
-	 * @param runnable
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	static void swtPipeContinuum(final SimplePipeRunnable runnable) {
 		HttpRequest pipeRequest = new HttpRequest() {
 			
@@ -335,13 +322,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	
-	/**
-	 * 
-	 * @param string
-	 * @return
-	 * 
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	static String swtParseReceived(String string) {
 		SimpleSerializable ss = null;
 		int start = 0;

@@ -18,6 +18,7 @@ import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.ajax.XHRCallbackAdapter;
+import net.sf.j2s.annotation.J2SIgnore;
 
 /**
  * 
@@ -200,9 +201,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * Be used in Java mode to keep the pipe live.
 	 * 
 	 * @param runnable
-	 * 
-	 * @j2sIgnore
 	 */
+	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
 		new Thread(new Runnable() {
 			

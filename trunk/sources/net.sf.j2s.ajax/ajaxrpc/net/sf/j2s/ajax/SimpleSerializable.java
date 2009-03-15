@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.j2s.annotation.J2SIgnore;
+import net.sf.j2s.annotation.J2SKeep;
+
 /**
  * @author zhou renjian
  *
@@ -138,12 +141,7 @@ return strBuf;
 		return serialize(null);
 	}
 	
-	/**
-	 * @param filter
-	 * @return
-	 * 
-	 * @j2sIgnore Only public to Java!
-	 */
+    @J2SIgnore
 	public String serialize(SimpleFilter filter) {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer();
@@ -390,12 +388,7 @@ return strBuf;
 		return buffer.toString();
 	}
 
-	/**
-	 * @param buffer
-	 * @param length
-	 * 
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	private void serializeLength(StringBuffer buffer, int length) {
 		char baseChar = 'B';
 		if (length > 52) {
@@ -441,6 +434,7 @@ if (s == null) {
 	buffer[buffer.length] = s;
 }
 	 */
+    @J2SKeep
 	private void serializeString(StringBuffer buffer, String s) throws UnsupportedEncodingException {
 		char baseChar = 'B';
 		if (s != null) {
@@ -636,14 +630,7 @@ return true;
 		return deserialize(str, 0);
 	}
 	
-	/**
-	 * 
-	 * @param str
-	 * @param start
-	 * @return
-	 * 
-	 * @j2sIgnore
-	 */
+    @J2SIgnore
 	public boolean deserialize(final String str, int start) {
 		char baseChar = 'B';
 		if (str == null || start < 0) return false;
@@ -924,9 +911,8 @@ return true;
 
 	/**
 	 * Override Object@clone, so this object can be cloned.
-	 * 
-	 * @j2sIgnore
 	 */
+    @J2SIgnore
 	public Object clone() throws CloneNotSupportedException {
 		Object clone = super.clone();
 		Set fieldSet = new HashSet();
@@ -1114,9 +1100,8 @@ return null;
 	 * @param str
 	 * @param start
 	 * @return
-	 * 
-	 * @j2sIgnore Already implemented in previous method!
 	 */
+    @J2SIgnore // Already implemented in previous method!
 	public static SimpleSerializable parseInstance(String str, int start) {
 		return parseInstance(str, start, null);
 	}
@@ -1128,10 +1113,9 @@ return null;
 	 * @param filter SimpleFilter is used to filter out those invalid class name
 	 * @return SimpleRPCRunnable instance. If request is bad request or 
 	 * specified class name is invalid, null will be returned.
-	 * 
-	 * @j2sIgnore Only public to Java!
 	 */
-	public static SimpleSerializable parseInstance(String str, SimpleFilter filter) {
+    @J2SIgnore // Only public to Java!
+    public static SimpleSerializable parseInstance(String str, SimpleFilter filter) {
 		return parseInstance(str, 0, filter);
 	}
 	
@@ -1142,9 +1126,8 @@ return null;
 	 * @param str
 	 * @param filter
 	 * @return
-	 * 
-	 * @j2sIgnore Only public to Java!
 	 */
+    @J2SIgnore // Only public to Java!
 	public static SimpleSerializable parseInstance(String str, int start, SimpleFilter filter) {
 		if (str == null || start < 0) return null;
 		int length = str.length() - start;

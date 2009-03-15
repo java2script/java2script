@@ -11,6 +11,8 @@
 
 package net.sf.j2s.ajax;
 
+import net.sf.j2s.annotation.J2SIgnore;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -40,9 +42,8 @@ public class ASWTClass extends AClass {
 	/**
 	 * ASWTClass should NOT be instantialized outside package net.sf.j2s.ajax.
 	 * User should always use its static methods.
-	 * 
-	 * @j2sIgnore
 	 */
+    @J2SIgnore
 	protected ASWTClass() {
 		// prevent from instantialization
 	}
