@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 
 import net.sf.j2s.ajax.SimpleRPCRunnable;
 import net.sf.j2s.ajax.SimpleSerializable;
+import net.sf.j2s.annotation.J2SIgnore;
 
 /**
  * 
@@ -40,20 +41,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	long lastPipeDataReceived;
 	
-	/**
-	 * 
-	 * @param helper
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		this.helper = helper;
 	}
 	
-	/**
-	 * 
-	 * @param closer
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	void setPipeCloser(SimplePipeHelper.IPipeClosing closer) {
 		this.closer = closer;
 	}

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import net.sf.j2s.ajax.SimpleSerializable;
+import net.sf.j2s.annotation.J2SIgnore;
 
 /**
  * 
@@ -59,12 +60,7 @@ class SimplePipeHelper {
 		pipes.put(key, pipe);
 	}
 	
-	/**
-	 * 
-	 * @param pipe
-	 * @return
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	static String registerPipe(SimplePipeRunnable pipe) {
 		// if (pipe == null) return null; // should never register null pipe!
 		if (pipes == null) {
@@ -91,9 +87,8 @@ class SimplePipeHelper {
 	/**
 	 * Generate random pipe key.
 	 * @return
-	 * 
-	 * @j2sIgnore
 	 */
+	@J2SIgnore
 	static String nextPipeKey() {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < SimplePipeRequest.PIPE_KEY_LENGTH; i++) {
@@ -146,12 +141,7 @@ class SimplePipeHelper {
 		return pipes.get(key);
 	}
 	
-	/**
-	 * 
-	 * @param key
-	 * @return
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	static Vector<SimpleSerializable> getPipeVector(String key) {
 		if (pipeMap == null) {
 			return null;
@@ -162,8 +152,8 @@ class SimplePipeHelper {
 	/**
 	 * Tear down the pipe and release its resources.
 	 * @param key
-	 * @j2sIgnore
 	 */
+	@J2SIgnore
 	static void pipeTearDown(String key) {
 		if (pipeMap == null) return;
 		Vector<SimpleSerializable> vector = pipeMap.get(key);
@@ -176,13 +166,7 @@ class SimplePipeHelper {
 		pipeMap.remove(key);
 	}
 
-	/**
-	 * Pipe in datum.
-	 * 
-	 * @param key
-	 * @param ss
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	static void pipeIn(String key, SimpleSerializable[] ss) {
 		Vector<SimpleSerializable> vector = getPipeVector(key);
 		if (vector == null) return; // throw exception?
@@ -195,12 +179,7 @@ class SimplePipeHelper {
 		}
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @return
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	static boolean isPipeLive(String key) {
 		SimplePipeRunnable pipe = getPipe(key);
 		if (pipe != null) {
@@ -209,12 +188,7 @@ class SimplePipeHelper {
 		return false;
 	}
 	
-	/**
-	 * 
-	 * @param key
-	 * @param live
-	 * @j2sIgnore
-	 */
+	@J2SIgnore
 	static boolean notifyPipeStatus(String key, boolean live) {
 		SimplePipeRunnable pipe = getPipe(key);
 		if (pipe != null) {
@@ -228,8 +202,8 @@ class SimplePipeHelper {
 	 * Wait some more seconds to check whether the pipe is to be closed or not.
 	 * @param runnable
 	 * @return whether the pipe is to be closed or not.
-	 * @j2sIgnore
 	 */
+	@J2SIgnore
 	static boolean waitAMomentForClosing(final SimplePipeRunnable runnable) {
 		if (runnable == null) {
 			return true;

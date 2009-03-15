@@ -11,6 +11,8 @@
 
 package net.sf.j2s.ajax;
 
+import net.sf.j2s.annotation.J2SIgnore;
+
 /**
  * This class is an asynchronous version of Class. It is designed for function
  * of Class#forName. While Class#forName will try to load class in synchronous
@@ -27,9 +29,8 @@ public class AClass {
 	/**
 	 * AClass should NOT be instantialized outside package net.sf.j2s.ajax.
 	 * User should always use its static methods.
-	 * 
-	 * @j2sIgnore
 	 */
+	@J2SIgnore
 	protected AClass() {
 		// prevent from instantialization
 	}

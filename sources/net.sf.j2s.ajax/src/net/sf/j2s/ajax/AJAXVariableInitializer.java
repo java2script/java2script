@@ -61,6 +61,8 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 			newPath = Path.fromPortableString(root + "/ajaxrpc.jar");
 		} else if ("AJAX_PIPE".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxpipe.jar");
+		} else if ("J2S_ANNOTATION".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/j2stag.jar");
 		} else if ("AJAX_CORE_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxcoresrc.zip");
 		} else if ("AJAX_SWT_SRC".equals(variable)) {
@@ -69,6 +71,8 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 			newPath = Path.fromPortableString(root + "/ajaxrpcsrc.zip");
 		} else if ("AJAX_PIPE_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxpipesrc.zip");
+		} else if ("J2S_ANNOTATION_SRC".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/j2stagsrc.zip");
 		}
 
 		if (newPath == null) {
