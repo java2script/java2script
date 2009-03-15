@@ -11,13 +11,21 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TagElement;
 
 /**
  * This visitor is used to find out those private methods that are never 
@@ -110,6 +118,78 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		if (methodSignature.equals(key)) {
 			isReferenced = true;
 			return false;
+		}
+		return super.visit(node);
+	}
+
+	/**
+	 * Method with "j2s*" tag.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected Object getJ2STag(BodyDeclaration node, String tagName) {
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						return tagEl;
+					}
+				}
+			}
+		}
+		List modifiers = node.modifiers();
+		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = (Object) iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int idx = qName.indexOf("J2S");
+				if (idx != -1) {
+					String annName = qName.substring(idx);
+					annName = annName.replaceFirst("J2S", "@j2s");
+					if (annName.startsWith(tagName)) {
+						return annotation;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public boolean visit(MethodDeclaration node) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
+		}
+
+		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
+				return false;
+			}
+		}
+		String[] pipeMethods = new String[] {
+				"pipeSetup", 
+				"pipeThrough", 
+				"through",
+				"pipeMonitoring",
+				"pipeMonitoringInterval",
+				"setPipeHelper"
+		};
+		for (int i = 0; i < pipeMethods.length; i++) {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+				if (getJ2STag(node, "@j2sKeep") == null) {
+					return false;
+				}
+			}
+		}
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
+				return false;
+			}
 		}
 		return super.visit(node);
 	}

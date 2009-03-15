@@ -17,11 +17,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -193,6 +196,82 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		}
 		buffer.append(fixCommentBlock(buf.toString()));
 	}
+	/*
+	 * Read JavaScript sources from @j2sNative, @J2SPrefix or others
+	 */
+	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
+		boolean existed = false;
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						if (tagEl != null) {
+							List fragments = tagEl.fragments();
+							StringBuffer buf = new StringBuffer();
+							boolean isFirstLine = true;
+							for (Iterator iterator = fragments.iterator(); iterator
+									.hasNext();) {
+								TextElement commentEl = (TextElement) iterator.next();
+								String text = commentEl.getText().trim();
+								if (isFirstLine) {
+									if (text.length() == 0) {
+										continue;
+									}
+								}
+								buf.append(text);
+								buf.append("\r\n");
+							}
+							buffer.append(prefix + buf.toString().trim() + suffix);
+							existed = true;
+						}
+					}
+				}
+			}
+		}
+		if (existed && !both) {
+			return existed;
+		}
+		List modifiers = node.modifiers();
+		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = (Object) iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int index = qName.indexOf("J2S");
+				if (index != -1) {
+					String annName = qName.substring(index);
+					annName = annName.replaceFirst("J2S", "@j2s");
+					if (annName.startsWith(tagName)) {
+						StringBuffer buf = new StringBuffer();
+						IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+						if (annotationBinding != null) {
+							IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
+							if (valuePairs != null && valuePairs.length > 0) {
+								for (int i = 0; i < valuePairs.length; i++) {
+									Object value = valuePairs[i].getValue();
+									if (value != null) {
+										if (value instanceof Object[]) {
+											Object[] lines = (Object[]) value;
+											for (int j = 0; j < lines.length; j++) {
+												buf.append(lines[j]);
+												buf.append("\r\n");
+											}
+										}
+									}
+								}
+							}
+						}
+						buffer.append(prefix + buf.toString().trim() + suffix);
+						existed = true;
+					}
+				}
+			}
+		}
+		return existed;
+	}
 
 	private String fixCommentBlock(String text) {
 		if (text == null || text.length() == 0) {
@@ -274,14 +353,13 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return previousStart;
 	}
 
-
 	/**
 	 * Method with "j2s*" tag.
 	 * 
 	 * @param node
 	 * @return
 	 */
-	protected TagElement getJ2SDocTag(BodyDeclaration node, String tagName) {
+	protected Object getJ2STag(BodyDeclaration node, String tagName) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List tags = javadoc.tags();
@@ -290,6 +368,24 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						return tagEl;
+					}
+				}
+			}
+		}
+		List modifiers = node.modifiers();
+		if (modifiers != null && modifiers.size() > 0) {
+			for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+				Object obj = (Object) iter.next();
+				if (obj instanceof Annotation) {
+					Annotation annotation = (Annotation) obj;
+					String qName = annotation.getTypeName().getFullyQualifiedName();
+					int idx = qName.indexOf("J2S");
+					if (idx != -1) {
+						String annName = qName.substring(idx);
+						annName = annName.replaceFirst("J2S", "@j2s");
+						if (annName.startsWith(tagName)) {
+							return annotation;
+						}
 					}
 				}
 			}
@@ -306,10 +402,10 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	 */
 	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
 		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-			if (isDebugging() && getJ2SDocTag(node, "@j2sDebug") != null) {
+			if (isDebugging() && getJ2STag(node, "@j2sDebug") != null) {
 				return false;
 			}
-			if (getJ2SDocTag(node, "@j2sNative") != null) {
+			if (getJ2STag(node, "@j2sNative") != null) {
 				return false;
 			}
 			return true;

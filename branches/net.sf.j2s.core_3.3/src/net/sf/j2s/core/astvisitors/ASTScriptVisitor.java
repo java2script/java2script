@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -50,8 +49,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -1235,17 +1232,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(Initializer node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return false;
-					}
-				}
-			}
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
 		}
 		//visitList(node.getBody().statements(), "\r\n");
 		node.getBody().accept(this);
@@ -1253,13 +1241,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return;
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return;
 			}
 		}
@@ -1273,13 +1261,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (getJ2STag(node, "@j2sKeep") == null) {
 					return;
 				}
 			}
 		}
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return;
 			}
 		}
@@ -1294,13 +1282,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(MethodDeclaration node) {
-		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return false;
 			}
 		}
@@ -1314,13 +1302,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
 		}
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return false;
 			}
 		}
@@ -1410,7 +1398,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						break;
 					}
 				}
-				if (isOnlySuper && getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (isOnlySuper && getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
@@ -1419,7 +1407,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if(mBinding != null){
 				boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
 						mBinding.getKey());
-				if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (!isReferenced && getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
@@ -1437,7 +1425,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				node.getName().accept(this);
 				buffer.append(" = ");
 			}
-			if (getJ2SDocTag(node, "@j2sOverride") != null) {
+			if (getJ2STag(node, "@j2sOverride") != null) {
 				buffer.append("Clazz.overrideMethod (");
 			} else {
 				boolean isOK2AutoOverriding = canAutoOverride(node);
@@ -1481,17 +1469,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					isSuperCalled = true;
 				}
 			}
-			Javadoc javadoc = node.getJavadoc();
-			if (javadoc != null) {
-				List tags = javadoc.tags();
-				if (tags.size() != 0) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sIgnoreSuperConstructor".equals(tagEl.getTagName())) {
-							isSuperCalled = true;
-						}
-					}
-				}
+			if (getJ2STag(node, "@j2sIgnoreSuperConstructor") != null) {
+				isSuperCalled = true;
 			}
 			boolean existedSuperClass = false;
 			IMethodBinding binding = node.resolveBinding();
@@ -1504,32 +1483,46 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						&& !"java.lang.Enum".equals(qualifiedName);
 			}
 			if (!isSuperCalled && existedSuperClass) {
-				blockLevel++;
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
 				buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 				buffer.append(", []);\r\n");
-				visitList(statements, ""); 
-				//buffer.append("}");
-				endVisit(node.getBody());
+				boolean read = checkJ2STags(node, false);
+				if (!read) {
+					blockLevel++;
+					visitList(statements, ""); 
+					//buffer.append("}");
+					endVisit(node.getBody());
+				} else {
+					buffer.append("}");
+				}
 			} else {
-				node.getBody().accept(this);
+				boolean read = checkJ2STags(node, true);
+				if (!read) {
+					node.getBody().accept(this);
+				}
 			}
 		} else if (node.getBody() == null) {
 			blockLevel++;
-			buffer.append("{\r\n");
-			visitNativeJavadoc(node.getJavadoc(), null, false);
-			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
-			for (int i = normalVars.size() - 1; i >= 0; i--) {
-				ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
-				if (var.blockLevel >= blockLevel) {
-					normalVars.remove(i);
+			boolean read = checkJ2STags(node, true);
+			if (!read) {
+				buffer.append("{\r\n");
+				visitNativeJavadoc(node.getJavadoc(), null, false);
+				List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+				for (int i = normalVars.size() - 1; i >= 0; i--) {
+					ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+					if (var.blockLevel >= blockLevel) {
+						normalVars.remove(i);
+					}
 				}
+				buffer.append("}");
 			}
 			blockLevel--;
-			buffer.append("}");
 		} else {
-			node.getBody().accept(this);
+			boolean read = checkJ2STags(node, true);
+			if (!read) {
+				node.getBody().accept(this);
+			}
 		}
 		if (isPrivate) {
 			buffer.append(", $fz.isPrivate = true, $fz)");
@@ -1590,6 +1583,32 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 		return false;
+	}
+
+	/*
+	 * Check to see whether there are @j2s* and append sources to buffer
+	 */
+	private boolean checkJ2STags(MethodDeclaration node, boolean needScope) {
+		String prefix = "{\r\n";
+		String suffix = "\r\n}";
+		if (!needScope) {
+			prefix = "";
+			suffix = "";
+		}
+		boolean read = false;
+		if (isDebugging()) {
+			read = readSources(node, "@j2sDebug", prefix, suffix, false);
+		}
+		if (!read) {
+			boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
+			if (!toCompileVariableName) {
+				read = readSources(node, "@j2sNativeSrc", prefix, suffix, false);
+			}
+		}
+		if (!read) {
+			read = readSources(node, "@j2sNative", prefix, suffix, false);
+		}
+		return read;
 	}
 
 	private boolean containsOnlySuperCall(Block body) {
@@ -2087,17 +2106,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode methodParent = methoBlock.getParent();
 			if (methodParent instanceof MethodDeclaration) {
 				MethodDeclaration method = (MethodDeclaration) methodParent;
-				Javadoc javadoc = method.getJavadoc();
-				if (javadoc != null) {
-					List tags = javadoc.tags();
-					if (tags.size() != 0) {
-						for (Iterator iter = tags.iterator(); iter.hasNext();) {
-							TagElement tagEl = (TagElement) iter.next();
-							if ("@j2sIgnoreSuperConstructor".equals(tagEl.getTagName())) {
-								return false;
-							}
-						}
-					}
+				if (getJ2STag(method, "@j2sIgnoreSuperConstructor") != null) {
+					return false;
 				}
 			}
 		}
@@ -2562,25 +2572,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(");\r\n");
 		}
 		
-		TagElement tagEl = getJ2SDocTag(node, "@j2sSuffix");
-		if (tagEl != null) {
-			List fragments = tagEl.fragments();
-			StringBuffer buf = new StringBuffer();
-			boolean isFirstLine = true;
-			for (Iterator iterator = fragments.iterator(); iterator
-					.hasNext();) {
-				TextElement commentEl = (TextElement) iterator.next();
-				String text = commentEl.getText().trim();
-				if (isFirstLine) {
-					if (text.length() == 0) {
-						continue;
-					}
-				}
-				buf.append(text);
-				buf.append("\r\n");
-			}
-			buffer.append("\r\n" + buf.toString().trim() + "\r\n");
-		}
+		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
 		laterBuffer = new StringBuffer();
 		super.endVisit(node);
 	}
@@ -2762,33 +2754,7 @@ public class CB extends CA {
 		if (node.isInterface()) {
 			return false;
 		}
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sPrefix".equals(tagEl.getTagName())) {
-						List fragments = tagEl.fragments();
-						StringBuffer buf = new StringBuffer();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buf.append(text);
-							buf.append("\r\n");
-						}
-						buffer.append(buf.toString().trim() + " ");
-					}
-				}
-			}
-		}
+		readSources(node, "@j2sPrefix", "", " ", true);
 		buffer.append("cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
