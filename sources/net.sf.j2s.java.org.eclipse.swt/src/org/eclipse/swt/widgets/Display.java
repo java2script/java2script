@@ -4815,7 +4815,8 @@ static void bringShellToTop() {
 							Display disp = displs[i];
 							if (disp != null && !disp.isDisposed()) {
 								Control ctrl = disp.getControl(src);
-								if (ctrl != null && ctrl instanceof Shell) {
+								if (ctrl != null && ctrl instanceof Shell
+										&& ctrl.isVisible()) {
 									((Shell) ctrl).bringToTop();
 								}
 							}
