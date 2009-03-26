@@ -2253,9 +2253,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			for (Iterator iter = node.bodyDeclarations().iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof Initializer) {
+					if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+						continue;
+					}
 					needReturn = true;
 				} else if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((field.getModifiers() & Modifier.STATIC) != 0) {
 						needReturn = true;
 					} else if (node.isInterface()) {
@@ -2371,12 +2377,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 				needPreparation = isFieldNeedPreparation(field);
 				if (needPreparation) {
 					break;
 				}
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
 				if ((init.getModifiers() & Modifier.STATIC) == 0) {
 					needPreparation = true;
 					break;
@@ -2389,12 +2401,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if (node.isInterface() || !isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
+					if (getJ2STag(init, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((init.getModifiers() & Modifier.STATIC) == 0) {
 						element.accept(this);
 					}
@@ -2430,6 +2448,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					element.accept(this);
 				}
 			} else if (element instanceof Initializer) {
+				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (staticCount != -1) {
 					buffer.append(");\r\n");
 					staticCount = -1;
@@ -2441,6 +2462,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 			if ((field.getModifiers() & Modifier.STATIC) != 0) {
 				List fragments = field.fragments();
 				for (int j = 0; j < fragments.size(); j++) {
@@ -2786,6 +2810,9 @@ public class CB extends CA {
 					continue;
 				}
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (getJ2STag(fieldDeclaration, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (isFieldNeedPreparation(fieldDeclaration)) {
 					visitWith(fieldDeclaration, true);
 					continue;

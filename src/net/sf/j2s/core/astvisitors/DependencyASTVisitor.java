@@ -446,6 +446,20 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return super.visit(node);
 	}
 
+	public boolean visit(FieldDeclaration node) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
+		}
+		return super.visit(node);
+	}
+
+	public boolean visit(Initializer node) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
+		}
+		return super.visit(node);
+	}
+
 	private void readTags(AbstractTypeDeclaration node) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
@@ -653,6 +667,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					requires.addAll(visitor.optionals);
 				}
 			} else if (element instanceof Initializer) {
+				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+					continue;
+				}
 				DependencyASTVisitor visitor = getSelfVisitor();
 				element.accept(this);
 				requires.addAll(visitor.musts);
@@ -660,6 +677,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				requires.addAll(visitor.optionals);
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 					List fragments = field.fragments();
 					for (int j = 0; j < fragments.size(); j++) {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
