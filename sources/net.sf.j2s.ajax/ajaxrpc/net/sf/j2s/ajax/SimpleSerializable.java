@@ -63,19 +63,34 @@ var fields = oClass.declared$Fields;
 if (fields == null) {
 	fields = [];
 }
+var filter = arguments[0];
+var ignoring = (filter == null || filter.ignoreDefaultFields ());
 for (var i = 0; i < fields.length; i++) {
 	var field = fields[i];
 	var name = field.name;
-	buffer[buffer.length] = String.fromCharCode (baseChar + name.length);
-	buffer[buffer.length] = name;
+	if (filter != null && !filter.accept (name)) continue;
+	var nameStr = String.fromCharCode (baseChar + name.length) + name;
 	var type = field.type;
 	if (type == 'F' || type == 'D' || type == 'I' || type == 'L'
 			|| type == 'S' || type == 'B' || type == 'b') {
+		if (ignoring && this[name] == 0
+				&& (type == 'F' || type == 'D' || type == 'I'
+				|| type == 'L' || type == 'S' || type == 'B')) {
+			continue;
+		}
+		if (ignoring && this[name] == false && type == 'b') {
+			continue;
+		}
+		buffer[buffer.length] = nameStr;
 		buffer[buffer.length] = type;
 		var value = "" + this[name];
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 		buffer[buffer.length] = value;
 	} else if (type == 'C') {
+		if (ignoring && this[name] == 0 || this[name] == '\0') {
+			continue;
+		}
+		buffer[buffer.length] = nameStr;
 		buffer[buffer.length] = type;
 		var value = "";
 		if (typeof this[name] == 'number') {
@@ -86,12 +101,21 @@ for (var i = 0; i < fields.length; i++) {
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 		buffer[buffer.length] = value;
 	} else if (type == 's') {
+		if (ignoring && this[name] == null) {
+			continue;
+		}
+		buffer[buffer.length] = nameStr;
 		this.serializeString(buffer, this[name]);
 	} else if (type.charAt (0) == 'A') {
-		buffer[buffer.length] = type;
 		if (this[name] == null) {
+			if (ignoring) {
+				continue;
+			}
+			buffer[buffer.length] = nameStr;
 			buffer[buffer.length] = String.fromCharCode (baseChar - 1);
 		} else {
+			buffer[buffer.length] = nameStr;
+			buffer[buffer.length] = type;
 			var l4 = this[name].length;
 			if (l4 > 52) {
 				if (l4 > 0x4000) { // 16 * 1024
@@ -180,6 +204,7 @@ return strBuf;
 			}
 			clazz = clazz.getSuperclass();
 		}
+		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		try {
 			Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
 			for (int i = 0; i < fields.length; i++) {
@@ -190,64 +215,83 @@ return strBuf;
 						&& (modifiers & Modifier.STATIC) == 0) {
 					String name = field.getName();
 					if (filter != null && !filter.accept(name)) continue;
-					buffer.append((char)(baseChar + name.length()));
-					buffer.append(name);
+					String nameStr = (char)(baseChar + name.length()) + name;
 					Class type = field.getType();
 					if (type == float.class) {
-						buffer.append('F');
 						float f = field.getFloat(this);
+						if (f == 0.0 && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('F');
 						String value = "" + f;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(f);
 					} else if (type == double.class) {
-						buffer.append('D');
 						double d = field.getDouble(this);
+						if (d == 0.0d && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('D');
 						String value = "" + d;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(d);
 					} else if (type == int.class) {
-						buffer.append('I');
 						int n = field.getInt(this);
+						if (n == 0 && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('I');
 						String value = "" + n;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(n);
 					} else if (type == long.class) {
-						buffer.append('L');
 						long l = field.getLong(this);
+						if (l == 0L && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('L');
 						String value = "" + l;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(l);
 					} else if (type == short.class) {
-						buffer.append('S');
 						short s = field.getShort(this);
+						if (s == 0 && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('S');
 						String value = "" + s;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(s);
 					} else if (type == byte.class) {
-						buffer.append('B');
 						byte b = field.getByte(this);
+						if (b == 0 && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('B');
 						String value = "" + b;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(b);
 					} else if (type == char.class) {
-						buffer.append('C');
 						int c = 0 + field.getChar(this);
+						if (c == 0 && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('C');
 						String value = "" + c;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(c);
 					} else if (type == boolean.class) {
-						buffer.append('b');
 						boolean b = field.getBoolean(this);
+						if (b == false && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append('b');
 						String value = "" + b;
 						buffer.append((char) (baseChar + value.length()));
 						buffer.append(b);
 					} else if (type == String.class) {
 						String s = (String) field.get(this);
+						if (s == null && ignoring) continue;
+						buffer.append(nameStr);
 						serializeString(buffer, s);
 					} else { // Array ...
 						if (type == float[].class) {
-							buffer.append("AF");
 							float[] fs = (float[]) field.get(this);
+							if (fs == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AF");
 							if (fs == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -260,8 +304,10 @@ return strBuf;
 								}
 							}
 						} else if (type == double[].class) {
-							buffer.append("AD");
 							double [] ds = (double []) field.get(this);
+							if (ds == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AD");
 							if (ds == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -274,8 +320,10 @@ return strBuf;
 								}
 							}
 						} else if (type == int[].class) {
-							buffer.append("AI");
 							int [] ns = (int []) field.get(this);
+							if (ns == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AI");
 							if (ns == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -288,8 +336,10 @@ return strBuf;
 								}
 							}
 						} else if (type == long[].class) {
-							buffer.append("AL");
 							long [] ls = (long []) field.get(this);
+							if (ls == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AL");
 							if (ls == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -302,8 +352,10 @@ return strBuf;
 								}
 							}
 						} else if (type == short[].class) {
-							buffer.append("AS");
 							short [] ss = (short []) field.get(this);
+							if (ss == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AS");
 							if (ss == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -316,8 +368,10 @@ return strBuf;
 								}
 							}
 						} else if (type == byte[].class) {
-							buffer.append("AB");
 							byte [] bs = (byte []) field.get(this);
+							if (bs == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AB");
 							if (bs == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -330,8 +384,10 @@ return strBuf;
 								}
 							}
 						} else if (type == char[].class) {
-							buffer.append("AC");
 							char [] cs = (char []) field.get(this);
+							if (cs == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AC");
 							if (cs == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -344,8 +400,10 @@ return strBuf;
 								}
 							}
 						} else if (type == boolean[].class) {
-							buffer.append("Ab");
 							boolean [] bs = (boolean []) field.get(this);
+							if (bs == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("Ab");
 							if (bs == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -358,8 +416,10 @@ return strBuf;
 								}
 							}
 						} else if (type == String[].class) {
-							buffer.append("AX"); // special
 							String[] ss = (String []) field.get(this);
+							if (ss == null && ignoring) continue;
+							buffer.append(nameStr);
+							buffer.append("AX"); // special
 							if (ss == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
@@ -493,8 +553,10 @@ if (nextCharCode >= 48 && nextCharCode <= 57) {
 			size = parseInt(sizeStr);
 		} catch (e) { }
 	}
+	// all fields are in their default values or no fields
+	if (size == 0) return true;
 	index++;
-	if (size == 0 || size > length + start - index) return false; 
+	if (size > length + start - index) return false; 
 }
 
 var fieldMap = [];
@@ -654,12 +716,14 @@ return true;
 				try {
 					size = Integer.parseInt(sizeStr);
 				} catch (NumberFormatException e) {
-					//
+					return false;
 				}
 			}
+			// all fields are in their default values or no fields
+			if (size == 0) return true;
 			index++;
 			// may be empty string or not enough string!
-			if (size == 0 || size > length + start - index) return false; 
+			if (size > length + start - index) return false;
 		}
 		
 		Map fieldMap = new HashMap();

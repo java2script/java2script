@@ -101,9 +101,15 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	 */
 	protected SimpleRPCRunnable getRunnableByRequest(String request) {
 		SimpleSerializable instance = SimpleSerializable.parseInstance(request, new SimpleFilter() {
+
 			public boolean accept(String clazzName) {
 				return validateRunnable(clazzName);
 			}
+
+			public boolean ignoreDefaultFields() {
+				return false;
+			}
+
 		});
 		if (instance instanceof SimpleRPCRunnable) {
 			instance.deserialize(request);
@@ -249,12 +255,15 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		String serialize = runnable.serialize(new SimpleFilter() {
 		
 			public boolean accept(String field) {
-				if (diffs == null || diffs.length == 0)	return true;
 				for (int i = 0; i < diffs.length; i++) {
 					if (diffs[i].equals(field)) {
 						return true;
 					}
 				}
+				return false;
+			}
+
+			public boolean ignoreDefaultFields() {
 				return false;
 			}
 		
@@ -315,12 +324,15 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		String serialize = runnable.serialize(new SimpleFilter() {
 		
 			public boolean accept(String field) {
-				if (diffs == null || diffs.length == 0)	return true;
 				for (int i = 0; i < diffs.length; i++) {
 					if (diffs[i].equals(field)) {
 						return true;
 					}
 				}
+				return false;
+			}
+
+			public boolean ignoreDefaultFields() {
 				return false;
 			}
 		

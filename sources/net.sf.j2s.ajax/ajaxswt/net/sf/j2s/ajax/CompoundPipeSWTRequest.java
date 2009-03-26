@@ -59,6 +59,9 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 			@Override
 			public void ajaxOut() {
 				super.ajaxOut();
+				if (!pipeAlive) {
+					return; // Not setup yet
+				}
 				for (int i = 0; i < pipes.length; i++) {
 					if (pipes[i] != null) {
 						pipes[i].pipeKey = pipeKey;

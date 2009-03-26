@@ -388,7 +388,8 @@ var g = net.sf.j2s.ajax.SimpleRPCRequest;
 if (session != null){
 	g.idSet["s" + nameID] = session;
 }
-var xcontent = g.idSet["x" + nameID]; 
+var k = "x" + nameID;
+var xcontent = g.idSet[k]; 
 if (xcontent != null) {
 	//The following codes may be modified to send out requests one by one.  
 	if (xcontent != null) {
@@ -398,7 +399,8 @@ if (xcontent != null) {
 				xcontent[i] = null;
 			}
 		}  
-		g.idSet["x" + nameID] = null;
+		g.idSet[k] = null;
+		delete g.idSet[k];
 	}
 }
 			 */ {}
@@ -408,10 +410,14 @@ if (xcontent != null) {
 		/**
 		 * @j2sNative
 var g = net.sf.j2s.ajax.SimpleRPCRequest;
-runnable = g.idSet["o" + nameID];
-g.idSet["o" + nameID] = null;
-if (g.idSet["s" + nameID] != null) {
-	g.idSet["s" + nameID] = null;
+var oK = "o" + nameID;
+runnable = g.idSet[oK];
+g.idSet[oK] = null;
+delete g.idSet[oK];
+var sK = "s" + nameID;
+if (g.idSet[sK] != null) {
+	g.idSet[sK] = null;
+	delete g.idSet[sK];
 }
 if (response == null && runnable != null) { // error!
 	runnable.ajaxFail();
