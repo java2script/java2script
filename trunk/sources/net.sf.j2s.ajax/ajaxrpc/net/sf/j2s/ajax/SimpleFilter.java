@@ -36,4 +36,10 @@ public interface SimpleFilter {
 	 */
 	public boolean accept(String field);
 	
+	/**
+	 * Ignore fields with default value or not.
+	 * @return true for to enable ignoring and false to keep serializing
+	 */
+	public boolean ignoreDefaultFields();
+
 }
