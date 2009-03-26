@@ -224,7 +224,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 								buf.append(text);
 								buf.append("\r\n");
 							}
-							buffer.append(prefix + buf.toString().trim() + suffix);
+							String sources = buf.toString().trim();
+							sources = sources.replaceAll("(\\/)-\\*|\\*-(\\/)", "$1*$2").replaceAll("<@>", "@");
+							buffer.append(prefix + sources + suffix);
 							existed = true;
 						}
 					}
