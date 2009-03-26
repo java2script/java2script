@@ -91,6 +91,8 @@ window["java.registered"] = false;
         "$.Method"
 	]);
 
+var isDebugging = (window["ajax.debugging"] == true);
+if (!isDebugging) {
 	/* ajax library */
 	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("net.sf.j2s.ajax.*") + "simple.z.js", [
 		"net.sf.j2s.ajax.IXHRCallback",
@@ -98,6 +100,7 @@ window["java.registered"] = false;
 		"$.XHRCallbackSWTAdapter",
        	
 		"$.SimpleSerializable",
+		"$.SimpleFilter",
 		"$.SimpleRPCRunnable",
 		"$.SimpleRPCRequest",
 		"$.SimpleRPCSWTRequest",
@@ -114,6 +117,7 @@ window["java.registered"] = false;
 		"$.CompoundPipeRequest",
 		"$.CompoundPipeSWTRequest"
 	]);
+}
 	
 	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
 		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
