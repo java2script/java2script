@@ -16,7 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.*;
 
-@Target({METHOD, CONSTRUCTOR})
+@Target({METHOD, CONSTRUCTOR, FIELD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface J2SIgnore {
 
