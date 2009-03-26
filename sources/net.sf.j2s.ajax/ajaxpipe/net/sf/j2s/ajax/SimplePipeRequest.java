@@ -472,9 +472,14 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 	 * @param runnable
 	 * @param domain
 	 * @j2sNative
+var pipeKey = runnable.pipeKey;
+var ifrEl = document.getElementById (pipeKey);
+if (ifrEl != null) {
+	ifrEl.parentNode.removeChild (ifrEl);
+	ifrEl = null;
+}
 var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
-var pipeKey = runnable.pipeKey;
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
 var url = runnable.getPipeURL();
 var src = url + (url.indexOf('?') != -1 ? "&" : "?") 
@@ -855,8 +860,9 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		if ((!isXSS || isSubdomain) && pipeMode == MODE_PIPE_CONTINUUM)
 			/**
 			 * @j2sNative
-			 * var subdomain = net.sf.j2s.ajax.SimplePipeRequest.adjustSubdomain (isSubdomain);
-			 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum (runnable, subdomain);
+			 * var spr = net.sf.j2s.ajax.SimplePipeRequest;
+			 * var subdomain = spr.adjustSubdomain (isSubdomain);
+			 * spr.pipeContinuum (runnable, subdomain);
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
@@ -868,14 +874,13 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		} else
 			/**
 			 * @j2sNative
-if (isXSS && isSubdomain
- 		&& net.sf.j2s.ajax.SimplePipeRequest.isSubdomainXSSSupported ()) {
-	var subdomain = net.sf.j2s.ajax.SimplePipeRequest.adjustSubdomain (isSubdomain);
-	net.sf.j2s.ajax.SimplePipeRequest.pipeSubdomainQuery (runnable, subdomain);
+var spr = net.sf.j2s.ajax.SimplePipeRequest;
+if (isXSS && isSubdomain && spr.isSubdomainXSSSupported ()) {
+	var subdomain = spr.adjustSubdomain (isSubdomain);
+	spr.pipeSubdomainQuery (runnable, subdomain);
 	return;
 }
 runnable.queryEnded = true;
-var spr = net.sf.j2s.ajax.SimplePipeRequest;
 (function (pipeFun, key, created) { // Function that simulate a thread
 	return function () {
 		var sph = net.sf.j2s.ajax.SimplePipeHelper;
@@ -1073,7 +1078,6 @@ return function () {
 			try {
 				p.pipeXHRQuery (p.xhrHandle, method, url, data);
 			} catch (e) {
-				alert (e);
 				p.xhrHandle.onreadystatechange = function () {};
 				p.xhrHandle = null;
 				document.domain = p.parentDomain;
@@ -1090,8 +1094,8 @@ return function () {
 			document.domain = p.parentDomain;
 			with (window.parent) {
 				runnable.pipeAlive = false;
-				runnable.pipeClosed();
-				net.sf.j2s.ajax.SimplePipeHelper.removePipe(p.key);
+				runnable.pipeClosed ();
+				net.sf.j2s.ajax.SimplePipeHelper.removePipe (p.key);
 				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (p.key);
 			}
 		} else {

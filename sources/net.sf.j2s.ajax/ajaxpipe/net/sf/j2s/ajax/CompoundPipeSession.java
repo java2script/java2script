@@ -52,6 +52,18 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	}
 	
 	@Override
+	public void pipeFailed() {
+		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
+		if (pipe instanceof CompoundPipeRunnable) {
+			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
+			if (cp.status < 3) {
+				cp.status = 3; // connected but failed to create child pipe
+			}
+			updateStatus(false);
+		}
+	}
+
+	@Override
 	final public SimpleSerializable[] through(Object... args) {
 		CompoundSerializable[] cs = convert(args);
 		if (cs != null) {
