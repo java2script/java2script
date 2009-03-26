@@ -67,15 +67,13 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 
 	@Override
 	public boolean isPipeLive() {
-		if (status < 3) { // connected
+		if (pipeAlive && status < 3) { // connected
 			return true; // still in starting status
 		}
 		if (super.isPipeLive()) {
 			for (int i = 0; i < pipes.length; i++) {
-				if (pipes[i] != null) {
-					if (pipes[i].isPipeLive()) {
-						return true;
-					}
+				if (pipes[i] != null && pipes[i].isPipeLive()) {
+					return true;
 				}
 			}
 		}
