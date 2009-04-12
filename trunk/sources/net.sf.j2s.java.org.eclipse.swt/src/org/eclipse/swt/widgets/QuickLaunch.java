@@ -104,14 +104,7 @@ public class QuickLaunch extends DesktopItem {
 		this.handle.ondblclick = new RunnableCompatibility(){
 		
 			public void run() {
-				isAutoHide = !isAutoHide;
-				handle.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
-						: "Doubleclick to set quicklaunch auto-hide";
-				setMinimized(isAutoHide);
-				if (isJustUpdated) {
-					return;
-				}
-				bringToTop(-1);
+				toggleAutoHide();
 			}
 		
 		};
@@ -122,13 +115,22 @@ public class QuickLaunch extends DesktopItem {
 		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			Decorations.createShadowHandles(handle);
+			//Decorations.createShadowHandles(handle);
+			Decorations.appendShadowHandles(handle, true, true, false, true);
 		}
 
 		Element[] childNodes = document.body.childNodes;
 		Element[] children = new Element[childNodes.length];
 		for (int i = 0; i < childNodes.length; i++) {
 			children[i] = childNodes[i];
+		}
+		Element panel = document.getElementById("swt-desktop-panel");
+		if (panel != null) {
+			int offset = children.length;
+			childNodes = panel.childNodes;
+			for (int i = 0; i < childNodes.length; i++) {
+				children[offset + i] = childNodes[i];
+			}
 		}
 		Element qlContainer = document.getElementById("quick-launch");
 		if (qlContainer != null) {
@@ -392,6 +394,16 @@ public class QuickLaunch extends DesktopItem {
 			shortcutItems = null;
 			shortcutCount = 0;
 		}
+	}
+	void toggleAutoHide() {
+		isAutoHide = !isAutoHide;
+		handle.title = isAutoHide ? "Doubleclick to set quicklaunch always-visible"
+				: "Doubleclick to set quicklaunch auto-hide";
+		setMinimized(isAutoHide);
+		if (isJustUpdated) {
+			return;
+		}
+		bringToTop(-1);
 	}
 
 }

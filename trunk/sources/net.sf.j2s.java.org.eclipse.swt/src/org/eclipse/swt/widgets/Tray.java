@@ -153,8 +153,18 @@ private void addTrayLine () {
 	floatDiv2.style.width = (cellLines * 36 - 18) + "px";
 	allFloats[cellLines * 2 - 2] = floatDiv2;
 	allFloats[cellLines * 2 - 1] = floatDiv1;
-	document.body.insertBefore (floatDiv2, document.body.childNodes[0]);
-	document.body.insertBefore (floatDiv1, document.body.childNodes[0]);
+	Element panel = document.getElementById("swt-desktop-panel");
+	if (panel != null) {
+		if (panel.childNodes.length > 0) {
+			panel.insertBefore (floatDiv2, panel.childNodes[0]);
+		} else {
+			panel.appendChild(floatDiv2);
+		}
+		panel.insertBefore (floatDiv1, panel.childNodes[0]);
+	} else {
+		document.body.insertBefore (floatDiv2, document.body.childNodes[0]);
+		document.body.insertBefore (floatDiv1, document.body.childNodes[0]);
+	}
 }
 
 private void removeTrayLine () {

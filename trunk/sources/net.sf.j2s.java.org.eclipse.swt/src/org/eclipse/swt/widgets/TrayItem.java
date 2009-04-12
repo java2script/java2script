@@ -11,6 +11,8 @@
 package org.eclipse.swt.widgets;
 
 
+import java.util.Date;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.MenuDetectListener;
@@ -266,7 +268,25 @@ void createWidget () {
 			}
 		};
 	}
+}
 
+void keepAutoHide() {
+	NotificationCorner trayCorner = display.trayCorner;
+	if (trayCorner != null && trayCorner.isAutoHide) {
+		final long createdTime = new Date().getTime();
+		trayCorner.lastUpdated = createdTime;
+		display.timerExec(Display.AUTO_HIDE_DELAY, new Runnable() {
+		
+			@Override
+			public void run() {
+				NotificationCorner trayCorner = display.trayCorner;
+				if (trayCorner.lastUpdated == createdTime) {
+					trayCorner.setMinimized(trayCorner.isAutoHide);
+				}
+			}
+		
+		});
+	}
 }
 
 /**
@@ -459,6 +479,8 @@ public void setImage (Image image) {
 			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 		}
 	}
+
+	keepAutoHide();
 
 	//if (OS.IsWinCE) return;
 	/*

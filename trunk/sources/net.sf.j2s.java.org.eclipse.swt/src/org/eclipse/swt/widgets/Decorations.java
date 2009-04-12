@@ -596,20 +596,22 @@ protected static void createResizeHandles(Element handle) {
 	}
 }
 
-protected static void createShadowHandles(Element handle) {
+protected static void appendShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
 	String[] handles = new String[] {
-			"shadow-left-top",
-			"shadow-right-top",
-			"shadow-center-top",
-			"shadow-left-middle",
-			"shadow-right-middle",
+			left && top ? "shadow-left-top" : null,
+			right && top ? "shadow-right-top" : null,
+			top ? "shadow-center-top" : null,
+			left ? "shadow-left-middle" : null,
+			right ? "shadow-right-middle" : null,
 			"shadow-center-middle",
-			"shadow-left-bottom",
-			"shadow-right-bottom",
-			"shadow-center-bottom"
+			left && bottom ? "shadow-left-bottom" : null,
+			right && bottom ? "shadow-right-bottom" : null,
+			bottom ? "shadow-center-bottom" : null
 	};
 	for (int i = 0; i < handles.length; i++) {
-		createCSSDiv(handle, handles[i]);
+		if (handles[i] != null) {
+			createCSSDiv(handle, handles[i]);
+		}
 	}
 	if (OS.isChrome) {
 		handle.style.opacity = "1";
@@ -617,6 +619,10 @@ protected static void createShadowHandles(Element handle) {
 	if (OS.isIE) {
 		handle.style.filter = "";
 	}
+}
+
+protected static void createShadowHandles(Element handle) {
+	appendShadowHandles(handle, true, true, true, true);
 }
 
 protected static void createNarrowShadowHandles(Element handle) {
