@@ -1008,8 +1008,13 @@ public void setImage (Image image) {
 		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 ////			handleStyle.fontSize = this.image.height + "px";
 //			handleStyle.display = "block";
-			handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
-			handleStyle.paddingLeft = (this.image.width + 3) + "px";
+			if (!OS.isIE) {
+				handleStyle.marginLeft = (CHECK_WIDTH + 3) + "px"; 
+				handleStyle.paddingLeft = (this.image.width + 3) + "px";
+			} else {
+				handleStyle.marginLeft = CHECK_WIDTH + "px"; 
+				//handleStyle.paddingLeft = (this.image.width + 3) + "px";				
+			}
 //			handleStyle.paddingTop = this.image.height + "px"; 
 ////			handleStyle.lineHeight = this.image.width + "px"; 
 ////			btnText.appendChild(document.createTextNode(" "));
@@ -1031,6 +1036,9 @@ public void setImage (Image image) {
 			handleStyle.paddingLeft = (this.image.width + 1) + "px";
 		}
 		handleStyle.minHeight = this.image.height + "px";
+		if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK | SWT.TOGGLE | SWT.PUSH)) != 0) {
+			handleStyle.height = this.image.height + "px";
+		}
 		if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
@@ -1078,13 +1086,10 @@ public void setImage (Image image) {
 		this.image.draw(btnHandle);
 	}
 	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		boolean emptyText = (image != null || text.length() == 0);
-		if (OS.isIE70) {
-			btnHandle.parentNode.style.marginTop = emptyText ? "-2px" : "-3px";
-		} else if ((style & SWT.RADIO) != 0) {
-			btnHandle.parentNode.style.marginTop = emptyText ? "0" : "2px";
+		if (OS.isIE70 || OS.isIE80) {
+			btnHandle.parentNode.style.marginTop = "-3px";
 		} else {
-			btnHandle.parentNode.style.marginTop = emptyText ? "-1px" : "1px";
+			btnHandle.parentNode.style.marginTop = "1px";
 		}
 	}
 }
@@ -1363,13 +1368,14 @@ void hookSelection() {
 			if ((style & (SWT.CHECK | SWT.TOGGLE)) != 0) {
 				HTMLEvent e = (HTMLEvent) getEvent();
 				if ((style & SWT.CHECK) != 0) {
-					// Still buggy on check button with image
 					if (e.srcElement != btnHandle && e.target != btnHandle) {
 						setSelection (!getSelection ());
 						toReturn(false);
-					} else if (OS.isIE){
+					} else {
 						toReturn(true);
-						new HTMLEventWrapper(e).stopPropagation();
+						if (OS.isIE) {
+							new HTMLEventWrapper(e).stopPropagation();
+						}
 					}
 				} else {
 					setSelection (!getSelection ());
@@ -1400,10 +1406,8 @@ void hookSelection() {
 	};
 	handle.onclick = handle.ondblclick = eventHandler;
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		btnText.onclick = eventHandler;
-	}
-	if((style & SWT.CHECK) != 0){
-		
+		handle.onclick = handle.ondblclick = null;
+		btnHandle.onclick = btnText.onclick = btnText.ondblclick = eventHandler;
 	}
 	handle.onkeydown = new RunnableCompatibility() {
 		public void run() {

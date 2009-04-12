@@ -753,11 +753,18 @@ void show(){
 		selectInput.style.overflow = "auto";
 		selectInput.style.height = "auto";
 	}
+	selectInput.style.left = "";
+	selectInput.style.top = "";
+	selectInput.style.width = "";
+	selectInput.style.height = "";
+	
 	selectInput.size = visibleCount;
 	int w = Math.max(maxWidth, OS.getContainerWidth(handle));
+	selectInput.style.display = "none";
 	int h = OS.getContainerHeight(handle);
+	selectInput.style.display = "";
 	if (OS.isFirefox) {
-		coordinate.x += 1;
+		//coordinate.x += 1;
 		//coordinate.y -= 1;
 		h += 1;
 	} else if (OS.isIE) {
@@ -769,21 +776,26 @@ void show(){
 	window.currentTopZIndex = window.currentTopZIndex + 1;
 	// related bug: http://groups.google.com/group/java2script/browse_thread/thread/8085561fcf953fc?hl=en
 	selectInput.style.zIndex = window.currentTopZIndex + 4; //sgurin
-	try {
-		handle.removeChild(selectInput);
-		document.body.appendChild(selectInput);
-	} catch (Throwable e) {
-	}
+
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
 	int height = OS.getContainerHeight(selectInput);
 	Rectangle bounds = Popup.popupList(getMonitor().getClientArea(), new Rectangle(coordinate.x, coordinate.y, w, h), height);
-	selectInput.style.left = bounds.x + "px";
+	if (OS.isIE) {
+		selectInput.style.left = (bounds.x + 1) + "px";
+	} else {
+		selectInput.style.left = bounds.x + "px";
+	}
 	selectInput.style.top = bounds.y + "px";
 	if (bounds.height != height) {
 		selectInput.style.overflow = "scroll";
 		selectInput.style.height = bounds.height + "px";
 	}
 	selectInput.style.width = bounds.width +"px";
+	try {
+		handle.removeChild(selectInput);
+		document.body.appendChild(selectInput);
+	} catch (Throwable e) {
+	}
 	OS.SetFocus(selectInput); // selectInput.focus();
 }
 
@@ -1720,6 +1732,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 		dropDownButton.style.width = buttonWidth + "px";
 		textInput.style.width = Math.max(0, width - buttonWidth - 5) + "px";
 		
+		selectInput.style.width = width + "px";
 	} else {
 //		height = Math.min(height, 
 //				OS.getContainerHeight(dropDownButton) + computeSelectHeight());
@@ -1730,8 +1743,14 @@ void setBounds (int x, int y, int width, int height, int flags) {
 		dropDownButton.style.display = "none";
 		textInput.style.width = width + "px";
 		
+		selectInput.style.marginLeft = "-3px";
+		if (OS.isIE) {
+			selectInput.style.marginTop = "-2px";
+			selectInput.style.width = (width + 3) + "px";
+		} else {
+			selectInput.style.width = width + "px";
+		}
 	}
-	selectInput.style.width = width + "px";
 }
 
 /* (non-Javadoc)
