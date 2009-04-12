@@ -34,7 +34,7 @@ $browserLayoutResize = function () {
 if (document.addEventListener) {
 	window.addEventListener('resize', $browserLayoutResize, true);
 } else if (document.attachEvent) {
-	document.attachEvent('onresize', $browserLayoutResize);
+	window.attachEvent('onresize', $browserLayoutResize);
 }
  */
 public class ResizeSystem {

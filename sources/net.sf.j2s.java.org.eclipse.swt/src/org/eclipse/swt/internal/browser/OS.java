@@ -833,9 +833,12 @@ public class OS {
 		int pcWidth = p.clientWidth;
 		if (OS.isIE) { // && !OS.isOpera
 			return (pcWidth == 0) ? bcWidth : pcWidth;
-		} else if (OS.isFirefox || OS.isSafari) {
+		} else if (OS.isFirefox || OS.isSafari || OS.isOpera) {
+			return pcWidth;
+			/*
 			return (pcWidth == p.offsetWidth 
 					&& pcWidth == p.scrollWidth) ? bcWidth : pcWidth;
+			*/
 		}
 		return bcWidth;
 	}

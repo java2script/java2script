@@ -32,17 +32,29 @@ public class NotificationCorner extends DesktopItem {
 
 	public void initialize() {
 		boolean existed = false;
-		Element[] divs = document.body.childNodes;
-		for (int i = 0; i < divs.length; i++) {
-			if (divs[i].className == "powered") {
-				document.body.removeChild(divs[i]);
-				existed = true;
-				/**
-				 * @j2sNative
-				 * if (window["swt.notification.corner.float"] == null) {
-				 * 	window["swt.notification.corner.float"] = true;
-				 * }
-				 */ {}
+		Element[] containers = new Element[2];
+		containers[0] = document.body;
+		containers[1] = document.getElementById("swt-desktop-panel");
+		for (int k = 0; k < containers.length; k++) {
+			Element container = containers[k];
+			if (containers[k] == null) {
+				continue;
+			}
+			Element[] divs = container.childNodes;
+			for (int i = 0; i < divs.length; i++) {
+				if (divs[i].className == "powered") {
+					container.removeChild(divs[i]);
+					existed = true;
+					/**
+					 * @j2sNative
+					 * if (window["swt.notification.corner.float"] == null) {
+					 * 	window["swt.notification.corner.float"] = true;
+					 * }
+					 */ {}
+					break;
+				}
+			}
+			if (existed) {
 				break;
 			}
 		}
@@ -164,14 +176,7 @@ public class NotificationCorner extends DesktopItem {
 			mouseDoubleClick = new RunnableCompatibility() {
 			
 				public void run() {
-					isAutoHide = !isAutoHide;
-					minimizedEl.title = isAutoHide ? "Doubleclick to set notification area always-visible"
-							: "Doubleclick to set notification area auto-hide";
-					setMinimized(isAutoHide);
-					if (isJustUpdated) {
-						return;
-					}
-					bringToTop(-1);
+					toggleAutoHide();
 				}
 			
 			};
@@ -312,21 +317,32 @@ public class NotificationCorner extends DesktopItem {
 		}
 		minimizedEl.style.display = !minimized ? "none" : "block";
 		for (int i = 0; i < tray.allCells.length; i++) {
-			tray.allCells[i].style.display = minimized ? "none" : "block";
+			Element cell = tray.allCells[i];
+			if (cell != null) {
+				cell.style.display = minimized ? "none" : "block";
+			}
 		}
 		for (int i = 0; i < tray.allFloats.length; i++) {
-			tray.allFloats[i].style.display = minimized ? "none" : "block";
+			Element divFloat = tray.allFloats[i];
+			if (divFloat != null) {
+				divFloat.style.display = minimized ? "none" : "block";
+			}
 		}
 		for (int i = 0; i < tray.allItems.length; i++) {
-			tray.allItems[i].style.display = minimized ? "none" : "block";
+			Element item = tray.allItems[i];
+			if (item != null) {
+				item.style.display = minimized ? "none" : "block";
+			}
 		}
 		if (tray.supportShadow) {
 			for (int i = 0; i < tray.outerShadows.length; i++) {
 				Element cell = tray.outerShadows[i];
-				if (minimized) {
-					cell.style.left = (- i * 36 - 21) + "px";
-				} else {
-					cell.style.left = ((tray.cellLines - i - 1) * 36 - 1) + "px";
+				if (cell != null) {
+					if (minimized) {
+						cell.style.left = (- i * 36 - 21) + "px";
+					} else {
+						cell.style.left = ((tray.cellLines - i - 1) * 36 - 1) + "px";
+					}
 				}
 			}
 		}
@@ -376,6 +392,17 @@ public class NotificationCorner extends DesktopItem {
 			OS.destroyHandle(minimizedEl);
 			minimizedEl = null;
 		}
+	}
+
+	void toggleAutoHide() {
+		isAutoHide = !isAutoHide;
+		minimizedEl.title = isAutoHide ? "Doubleclick to set notification area always-visible"
+				: "Doubleclick to set notification area auto-hide";
+		setMinimized(isAutoHide);
+		if (isJustUpdated) {
+			return;
+		}
+		bringToTop(-1);
 	}
 
 }

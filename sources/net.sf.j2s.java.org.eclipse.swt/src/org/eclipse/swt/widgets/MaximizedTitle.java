@@ -92,7 +92,8 @@ public class MaximizedTitle extends DesktopItem {
 		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			Decorations.createShadowHandles(handle);
+			//Decorations.createShadowHandles(handle);
+			Decorations.appendShadowHandles(handle, false, true, true, true);
 		}
 
 		Element tb = document.createElement("DIV");

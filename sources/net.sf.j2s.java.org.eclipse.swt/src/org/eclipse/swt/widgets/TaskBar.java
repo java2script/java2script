@@ -11,6 +11,8 @@
 
 package org.eclipse.swt.widgets;
 
+import java.util.Date;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
@@ -205,10 +207,32 @@ public class TaskBar extends DesktopItem {
 		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			Decorations.createNarrowShadowHandles(si);
+			//Decorations.createNarrowShadowHandles(si);
+			Decorations.appendShadowHandles(si, true, true, true, false);
 		}
 
 		this.updateItems();
+		
+		keepAutoHide();
+	}
+
+	void keepAutoHide() {
+		TaskBar taskBar = display.taskBar;
+		if (taskBar != null && taskBar.isAutoHide) {
+			final long createdTime = new Date().getTime();
+			taskBar.lastUpdated = createdTime;
+			display.timerExec(Display.AUTO_HIDE_DELAY, new Runnable() {
+			
+				@Override
+				public void run() {
+					TaskBar taskBar = display.taskBar;
+					if (Math.abs(taskBar.lastUpdated - createdTime) < 250) {
+						taskBar.setMinimized(taskBar.isAutoHide);
+					}
+				}
+			
+			});
+		}
 	}
 
 	public void removeShellItem(Shell shell) {
@@ -239,6 +263,7 @@ public class TaskBar extends DesktopItem {
 			handle.style.display = "none";
 			barEl.style.display = "none";
 		}
+		keepAutoHide();
 	}
 
 	void syncItems() {
@@ -449,14 +474,7 @@ public class TaskBar extends DesktopItem {
 		this.barEl.ondblclick = new RunnableCompatibility() {
 
 			public void run() {
-				isAutoHide = !isAutoHide;
-				barEl.title = isAutoHide ? "Doubleclick to set taskbar always-visible"
-						: "Doubleclick to set taskbar auto-hide";
-				setMinimized(isAutoHide);
-				if (isJustUpdated) {
-					return;
-				}
-				bringToTop(-1);
+				toggleAutoHide();
 			}
 
 		};
@@ -550,6 +568,17 @@ public class TaskBar extends DesktopItem {
 			}
 			items = null;
 		}
+	}
+
+	void toggleAutoHide() {
+		isAutoHide = !isAutoHide;
+		barEl.title = isAutoHide ? "Doubleclick to set taskbar always-visible"
+				: "Doubleclick to set taskbar auto-hide";
+		setMinimized(isAutoHide);
+		if (isJustUpdated) {
+			return;
+		}
+		bringToTop(-1);
 	}
 
 }

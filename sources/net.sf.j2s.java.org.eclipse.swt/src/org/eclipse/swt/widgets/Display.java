@@ -2507,6 +2507,57 @@ void initializeDekstop() {
 	shortcutBar.initialize();
 	trayCorner.initialize();
 	
+	/**
+	 * @j2sNative
+	 * var autoHide = window["swt.notification.corner.autohide"];
+	 * if (autoHide != null && (autoHide == true || autoHide == "true")) {
+	 * 	this.trayCorner.toggleAutoHide(); // by default, it is being shown normally.
+	 * }
+	 * autoHide = window["swt.quick.launch.autohide"];
+	 * if (autoHide != null && (autoHide == true || autoHide == "true")) {
+	 * 	this.shortcutBar.toggleAutoHide(); // by default, it is being shown normally.
+	 * }
+	 * autoHide = window["swt.task.bar.autohide"];
+	 * if (autoHide != null && (autoHide == false || autoHide == "false")) {
+	 * 	this.taskBar.toggleAutoHide(); // by default, it is being hide automatically.
+	 * }
+	 */ {}
+	
+	Element panel = document.getElementById("swt-desktop-panel");
+	if (panel != null) {
+		int height = OS.getFixedBodyClientHeight();
+		int width = OS.getFixedBodyClientWidth();
+		panel.style.position = "absolute";
+		panel.style.backgroundColor = "white";
+		/**
+		 * @j2sNative
+		 * var vsb = window["swt.desktop.vscrollbar"];
+		 * if (vsb != null && (vsb == true || vsb == "true" || vsb == "enable")) {
+		 * 	panel.style.overflowY = "auto";
+		 * }
+		 * var hsb = window["swt.desktop.hscrollbar"];
+		 * if (hsb != null && (hsb == true || hsb == "true" || hsb == "enable")) {
+		 * 	panel.style.overflowX = "auto";
+		 * }
+		 */ {}
+		panel.style.paddingBottom = "80px";
+		if (!OS.isIE) {
+			Element div = document.createElement("DIV");
+			/**
+			 * @j2sNative
+			 * div.style.cssFloat = "left";
+			 */ {}
+			div.style.height = "80px";
+			div.style.width = "1px";
+			div.style.marginLeft = "-1px";
+			panel.appendChild(div);
+		}
+		panel.style.left = "0";
+		panel.style.top = "0";
+		panel.style.width = width + "px";
+		panel.style.height = (height - 80) + "px";
+	}
+
 	mouseMoveListener = new RunnableCompatibility(){
 	
 		public void run() {
@@ -4685,6 +4736,13 @@ public void updateLayout() {
 		topBar.updateLayout();
 		shortcutBar.updateLayout();
 		trayCorner.updateLayout();
+		Element panel = document.getElementById("swt-desktop-panel");
+		if (panel != null) {
+			int height = OS.getFixedBodyClientHeight();
+			int width = OS.getFixedBodyClientWidth();
+			panel.style.width = width + "px";
+			panel.style.height = (height - 80) + "px";
+		}
 	}
 }
 
@@ -4808,6 +4866,10 @@ static void bringShellToTop() {
 			HTMLEventWrapper evt = new HTMLEventWrapper(this.getEvent());
 			Element src = evt.target;
 			while (src != null) {
+				String className = src.className;
+				if (className != null && className.indexOf("shadow-") != -1) {
+					return;
+				}
 				if (OS.existedCSSClass(src, "shell-default")) {
 					Display[] displs = Displays;
 					if (displs != null) {
