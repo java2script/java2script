@@ -282,12 +282,16 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		 * 
 		 * @j2sNative
 		 * ajaxOut = runnable.ajaxOut;
+		 * if (ajaxOut.wrapped != true) {
 		 * runnable.ajaxOut = (function (aO, r) {
 		 * 	return function () {
 		 * 		aO.apply (r, []);
+		 * 		r.ajaxOut = aO;
 		 * 		net.sf.j2s.ajax.SimplePipeRequest.ajaxPipe (r);
 		 * 	};
-		 * }) (ajaxOut, runnable); 
+		 * }) (ajaxOut, runnable);
+		 * runnable.ajaxOut.wrapped = true;
+		 * }
 		 */ { if (ajaxOut == null) ajaxOut = null; /* no warning */ }
 		if (checkXSS(url, serialize, runnable)) {
 			// Already send out pipe request in XSS mode. Just return here.
@@ -888,6 +892,10 @@ runnable.queryEnded = true;
 		if (runnable != null) {
 			if (runnable.queryEnded && runnable.queryFailedRetries < 3) {
 				runnable.queryEnded = false;
+				if (runnable.received == runnable.lastPipeDataReceived
+						&& runnable.retries == runnable.queryFailedRetries) {
+					runnable.queryFailedRetries++; // response must not be empty
+				}
 				pipeFun (runnable);
 			}
 			var spr = net.sf.j2s.ajax.SimplePipeRequest;
@@ -896,6 +904,8 @@ runnable.queryEnded = true;
 			if (last == -1) {
 				last = created;
 			}
+			runnable.retries = runnable.queryFailedRetries;
+			runnable.received = runnable.lastPipeDataReceived;
 			if (runnable.queryFailedRetries >= 3
 					|| now - last > 2 * spr.pipeLiveNotifyInterval) {
 				runnable.pipeAlive = false;
@@ -1032,13 +1042,25 @@ p.pipeXHRQuery = function (request, method, url, data) {
 	} else {
 		request.open (method, url, true, null, null);
 	}
-	request.setRequestHeader ("User-Agent",
-			"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
+	try {
+		request.setRequestHeader ("User-Agent",
+				"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
+	} catch (e) {
+		log ("Setting 'User-Agent' header error : " + e);
+	}
 	if (method != null && method.toLowerCase () == "post") {
-		request.setRequestHeader ("Content-type", 
-				"application/x-www-form-urlencoded");
+		try {
+			request.setRequestHeader ("Content-type", 
+					"application/x-www-form-urlencoded");
+		} catch (e) {
+			log ("Setting 'Content-type' header error : " + e);
+		}
 		if (request.overrideMimeType) {
-			request.setRequestHeader ("Connection", "close");
+			try {
+				// request.setRequestHeader ("Connection", "close");
+			} catch (e) {
+				log ("Setting 'Connection' header error : " + e);
+			}
 		}
 	}
 	request.send(data);
@@ -1082,6 +1104,7 @@ return function () {
 				p.xhrHandle = null;
 				document.domain = p.parentDomain;
 				runnable.queryEnded = true;
+				runnable.queryFailedRetries++; // Failed
 			}
 		}
 		var now = new Date ().getTime ();

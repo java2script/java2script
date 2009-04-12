@@ -69,18 +69,30 @@ c$.prototype.open = function (method, url, async, user) {
 */
 c$.prototype.open = function (method, url, async, user, password) {
 	this.transport.open (method, url, async, user, password);
+	try {
 	this.transport.setRequestHeader ("User-Agent",
 			"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
+	} catch (e) {
+		log ("Setting 'User-Agent' header error : " + e);
+	}
 	if (method != null && method.toLowerCase () == "post") {
-		this.transport.setRequestHeader ("Content-type", 
-				"application/x-www-form-urlencoded");
+		try {
+			this.transport.setRequestHeader ("Content-type", 
+					"application/x-www-form-urlencoded");
+		} catch (e) {
+			log ("Setting 'Content-type' header error : " + e);
+		}
 
 		/* Force "Connection: close" for Mozilla browsers to work around
 		 * a bug where XMLHttpReqeuest sends an incorrect Content-length
 		 * header. See Mozilla Bugzilla #246651. 
 		 */
 		if (this.transport.overrideMimeType) {
-			this.transport.setRequestHeader ("Connection", "close");
+			try {
+				// this.transport.setRequestHeader ("Connection", "close");
+			} catch (e) {
+				log ("Setting 'Connection' header error : " + e);
+			}
 		}
 	}
 };

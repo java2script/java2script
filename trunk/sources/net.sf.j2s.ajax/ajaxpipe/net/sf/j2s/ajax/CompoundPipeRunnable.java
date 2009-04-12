@@ -26,7 +26,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	long lastSetupRetried;
 
 	public CompoundPipeRunnable() {
-		pipes = new CompoundPipeSession[100];
+		pipes = new CompoundPipeSession[4];
 		status = 0; // starting
 		setupFailedRetries = 0;
 		lastSetupRetried = 0;
@@ -58,6 +58,16 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void pipeInit() {
+		super.pipeInit();
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				pipes[i].pipeInit();
+			}
+		}
 	}
 
 	@Override
@@ -129,7 +139,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				}
 			}
 			if (!added) {
-				CompoundPipeSession[] newPipes = new CompoundPipeSession[pipes.length + 100];
+				CompoundPipeSession[] newPipes = new CompoundPipeSession[pipes.length + 4];
 				System.arraycopy(pipes, 0, newPipes, 0, pipes.length);
 				newPipes[pipes.length] = pipe;
 			}

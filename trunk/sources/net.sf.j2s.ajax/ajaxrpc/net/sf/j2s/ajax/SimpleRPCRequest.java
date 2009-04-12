@@ -281,7 +281,9 @@ if (net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode (url)) {
 	} else {
 		contents[0] = content;
 	}
-	g.idSet["x" + rnd] = contents;
+	if (contents.length > 1) {
+		g.idSet["x" + rnd] = contents;
+	}
 	// Only send the first request, later server return "continue", and client will get
 	// the session id and continue later requests.
 	net.sf.j2s.ajax.SimpleRPCRequest.callByScript(rnd, contents.length, 0, contents[0]);
@@ -301,6 +303,9 @@ var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
 if (isIE) {
+	if (scriptObj.onreadystatechange == null) {
+		return false; // already cleaned up
+	}
 	var done = false;
 	var state = "" + scriptObj.readyState;
 	if (state == "loaded" || state == "complete") {
@@ -309,6 +314,9 @@ if (isIE) {
 	}
 	return done;
 } else {
+	if (scriptObj.onerror == null) {
+		return false; // already cleaned up
+	}
 	scriptObj.onerror = null;
 	scriptObj.onload = null;
 	return true;
@@ -330,15 +338,24 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url + "?jzn=" + rnd + "&jzp=" + length 
 		+ "&jzc=" + (i + 1) + "&jzz=" + content;
-var fun = function () {
-	if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
-		return; // IE, not completed yet
-	}
-	var idx = this.src.indexOf ("jzn=");
-	var rid = this.src.substring (idx + 4, this.src.indexOf ("&", idx));
-	net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-	document.getElementsByTagName ("HEAD")[0].removeChild (this);
-};
+var fun = (function (oScript) {
+	return function () {
+		var g = net.sf.j2s.ajax.SimpleRPCRequest;
+		var hKey = "h" + rnd;
+		if (g.idSet[hKey] != null) {
+			window.clearTimeout (g.idSet[hKey]);
+			delete g.idSet[hKey];
+		}
+		if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(oScript)) {
+			return; // IE, not completed yet
+		}
+		var src = oScript.src;
+		var idx = src.indexOf ("jzn=");
+		var rid = src.substring (idx + 4, src.indexOf ("&", idx));
+		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+		document.getElementsByTagName ("HEAD")[0].removeChild (oScript);
+	};
+}) (script);
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
@@ -350,6 +367,7 @@ if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 }
 var head = document.getElementsByTagName ("HEAD")[0];
 head.appendChild (script);
+g.idSet["h" + rnd] = window.setTimeout (fun, 20000); // 20s timeout
 	 */
 	native static void callByScript(String rnd, String length, String i, String content);
 	
@@ -390,18 +408,16 @@ if (session != null){
 }
 var k = "x" + nameID;
 var xcontent = g.idSet[k]; 
+// TODO: The following codes should be modified to send out requests one by one.  
 if (xcontent != null) {
-	//The following codes may be modified to send out requests one by one.  
-	if (xcontent != null) {
-		for (var i = 0; i < xcontent.length; i++) {
-			if (xcontent[i] != null) {
-				g.callByScript(nameID, xcontent.length, i, xcontent[i]);
-				xcontent[i] = null;
-			}
-		}  
-		g.idSet[k] = null;
-		delete g.idSet[k];
-	}
+	for (var i = 0; i < xcontent.length; i++) {
+		if (xcontent[i] != null) {
+			g.callByScript(nameID, xcontent.length, i, xcontent[i]);
+			xcontent[i] = null;
+		}
+	}  
+	g.idSet[k] = null;
+	delete g.idSet[k];
 }
 			 */ {}
 			return;

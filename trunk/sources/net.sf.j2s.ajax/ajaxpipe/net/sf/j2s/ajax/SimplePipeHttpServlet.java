@@ -236,7 +236,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			long now = new Date().getTime();
 			if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
 					|| (lastPipeDataWritten > 0
-							&& now - lastPipeDataWritten >= pipeQueryTimeout)) {
+							&& now - lastPipeDataWritten >= pipeQueryTimeout
+							&& SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))) {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
 				lastPipeDataWritten = new Date().getTime();
 			}

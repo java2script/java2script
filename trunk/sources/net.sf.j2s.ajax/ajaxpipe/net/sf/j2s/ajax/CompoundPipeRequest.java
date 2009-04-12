@@ -41,9 +41,12 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 				if (pipe.pipes[i] != null) {
 					pipe.pipes[i].pipeFailed();
 				}
-				pipe.pipes[i] = null;
+				// pipe.pipes[i] = null;
 			}
-			unregisterPipe(pipe.id);
+			pipe.setupFailedRetries = 0;
+			pipe.status = 0;
+			pipe.lastSetupRetried = 0;
+			// unregisterPipe(pipe.id);
 		}
 	}
 	
