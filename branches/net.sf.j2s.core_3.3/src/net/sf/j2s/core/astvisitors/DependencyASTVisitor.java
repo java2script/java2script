@@ -356,10 +356,22 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			if (valuePairs != null && valuePairs.length > 0) {
 				for (int i = 0; i < valuePairs.length; i++) {
 					Object value = valuePairs[i].getValue();
-					if (value instanceof Class) {
-						Class clzz = (Class) value;
-						value = clzz.getName();
+					if (value instanceof Object[]) {
+						Object[] values = (Object[]) value;
+						for (int j = 0; j < values.length; j++) {
+							Object item = values[j];
+							if (item instanceof ITypeBinding) {
+								ITypeBinding binding = (ITypeBinding) item;
+								buf.append(binding.getQualifiedName());
+								buf.append(",");
+							}
+						}
+						continue;
+					} else if (value instanceof ITypeBinding) {
+						ITypeBinding binding = (ITypeBinding) value;
+						value = binding.getQualifiedName();
 					}
+
 					buf.append(value);
 					buf.append(",");
 				}
