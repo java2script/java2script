@@ -29,8 +29,10 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 
 	public boolean pipeAlive;
 	
+	@J2SIgnore
 	SimplePipeHelper.IPipeThrough helper; // For Java server side
 	
+	@J2SIgnore
 	SimplePipeHelper.IPipeClosing closer; // For Java server side
 	
 	private boolean destroyed;
@@ -129,6 +131,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public void pipeFailed() {
 		// to be override
 		// notify that pipe is not created correctly.
+		pipeDestroy();
 	}
 	
 	/**
@@ -138,6 +141,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public void pipeLost() {
 		// to be override
 		// notify that pipe is lost. Maybe trying to reconnect the pipe
+		pipeDestroy();
 	}
 	
 	/**
@@ -148,6 +152,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public void pipeClosed() {
 		// to be override
 		// notify that pipe is closed by server.
+		pipeDestroy();
 	}
 	
 	/**

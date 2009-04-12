@@ -36,7 +36,7 @@ public class SimpleSerializable implements Cloneable {
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
 var buffer = [];
-buffer[0] = "WLL101";
+buffer[0] = "WLL201";
 var oClass = this.getClass();
 var clazz = oClass;
 var clazzName = clazz.getName();
@@ -65,11 +65,24 @@ if (fields == null) {
 }
 var filter = arguments[0];
 var ignoring = (filter == null || filter.ignoreDefaultFields ());
+var fMap = this.fieldMapping ();
 for (var i = 0; i < fields.length; i++) {
 	var field = fields[i];
 	var name = field.name;
 	if (filter != null && !filter.accept (name)) continue;
-	var nameStr = String.fromCharCode (baseChar + name.length) + name;
+	var fName = name;
+	if (fMap != null && fMap.length > 1) {
+		for (var j = 0; j < fMap.length / 2; j++) {
+			if (name == fMap[j + j]) {
+				var newName = fMap[j + j + 1];
+				if (newName != null && newName.length > 0) {
+					fName = newName;
+				}
+				break;
+			}
+		}
+	}
+	var nameStr = String.fromCharCode (baseChar + fName.length) + fName;
 	var type = field.type;
 	if (type == 'F' || type == 'D' || type == 'I' || type == 'L'
 			|| type == 'S' || type == 'B' || type == 'b') {
@@ -83,7 +96,12 @@ for (var i = 0; i < fields.length; i++) {
 		}
 		buffer[buffer.length] = nameStr;
 		buffer[buffer.length] = type;
-		var value = "" + this[name];
+		var value = null;
+		if (type == 'b') {
+			value = (this[name] == true) ? "1" : "0";
+		} else {
+			value = "" + this[name];
+		}
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 		buffer[buffer.length] = value;
 	} else if (type == 'C') {
@@ -133,7 +151,12 @@ for (var i = 0; i < fields.length; i++) {
 			for (var j = 0; j < arr.length; j++) {
 				if (t == 'F' || t == 'D' || t == 'I' || t == 'L'
 						|| t == 'S' || t == 'B' || t == 'b') {
-					var value = "" + arr[j];
+					var value = null;
+					if (type == 'b') {
+						value = (arr[j] == true) ? "1" : "0";
+					} else {
+						value = "" + arr[j];
+					}
 					buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 					buffer[buffer.length] = value;
 				} else if (t == 'C') {
@@ -173,7 +196,7 @@ return strBuf;
 		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
 		 * # is used to mark the the beginning of serialized data  
 		 */
-		buffer.append("WLL101");
+		buffer.append("WLL201");
 		Class clazz = this.getClass();
 		String clazzName = clazz.getName();
 		int idx = -1;
@@ -205,6 +228,7 @@ return strBuf;
 			clazz = clazz.getSuperclass();
 		}
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
+		String[] fMap = fieldMapping();
 		try {
 			Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
 			for (int i = 0; i < fields.length; i++) {
@@ -215,6 +239,17 @@ return strBuf;
 						&& (modifiers & Modifier.STATIC) == 0) {
 					String name = field.getName();
 					if (filter != null && !filter.accept(name)) continue;
+					if (fMap != null && fMap.length > 1) {
+						for (int j = 0; j < fMap.length / 2; j++) {
+							if (name.equals(fMap[j + j])) {
+								String newName = fMap[j + j + 1];
+								if (newName != null && newName.length() > 0) {
+									name = newName;
+								}
+								break;
+							}
+						}
+					}
 					String nameStr = (char)(baseChar + name.length()) + name;
 					Class type = field.getType();
 					if (type == float.class) {
@@ -278,9 +313,9 @@ return strBuf;
 						if (b == false && ignoring) continue;
 						buffer.append(nameStr);
 						buffer.append('b');
-						String value = "" + b;
+						String value = b ? "1" : "0";
 						buffer.append((char) (baseChar + value.length()));
-						buffer.append(b);
+						buffer.append(value);
 					} else if (type == String.class) {
 						String s = (String) field.get(this);
 						if (s == null && ignoring) continue;
@@ -410,9 +445,9 @@ return strBuf;
 								serializeLength(buffer, bs.length);
 								for (int j = 0; j < bs.length; j++) {
 									boolean b = bs[j];
-									String value = "" + b;
+									String value = b ? "1" : "0";
 									buffer.append((char) (baseChar + value.length()));
-									buffer.append(b);
+									buffer.append(value);
 								}
 							}
 						} else if (type == String[].class) {
@@ -568,11 +603,23 @@ for (var i = 0; i < fields.length; i++) {
 	fieldMap[name] = true;
 }
 var end = index + size;
+var fMap = this.fieldMapping ();
 while (index < start + length && index < end) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
 	if (l1 < 0) return true;
 	var fieldName = str.substring (index, index + l1);
+	if (fMap != null && fMap.length > 1) {
+		for (var i = 0; i < fMap.length / 2; i++) {
+			if (fieldName == fMap[i + i + 1]) {
+				var trueName = fMap[i + i];
+				if (trueName != null && trueName.length > 0) {
+					fieldName = trueName;
+				}
+				break;
+			}
+		}
+	}
 	index += l1;
 	var c2 = str.charAt (index++);
 	if (c2 == 'A') {
@@ -637,7 +684,7 @@ while (index < start + length && index < end) {
 				} else if (type == 'C') {
 					arr[i] = String.fromCharCode (parseInt (s));
 				} else if (type == 'b') {
-					arr[i] = (s == "true");
+					arr[i] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 				} else if (type == 'X') {
 					arr[i] = s;
 				}
@@ -676,7 +723,7 @@ while (index < start + length && index < end) {
 		} else if (type == 'C') {
 			this[fieldName] = String.fromCharCode (parseInt (s));
 		} else if (type == 'b') {
-			this[fieldName] = (s == "true");
+			this[fieldName] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 		} else if (type == 's') {
 			this[fieldName] = s;
 		} else if (type == 'u') {
@@ -748,11 +795,23 @@ return true;
 			}
 		}
 		int end = index + size;
+		String[] fMap = fieldMapping();
 		while (index < length + start && index < end) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
 			if (l1 < 0) return true;
 			String fieldName = str.substring(index, index + l1);
+			if (fMap != null && fMap.length > 1) {
+				for (int i = 0; i < fMap.length / 2; i++) {
+					if (fieldName.equals(fMap[i + i + 1])) {
+						String trueName = fMap[i + i];
+						if (trueName != null && trueName.length() > 0) {
+							fieldName = trueName;
+						}
+						break;
+					}
+				}
+			}
 			index += l1;
 			char c2 = str.charAt(index++);
 			if (c2 == 'A') {
@@ -890,8 +949,10 @@ return true;
 						case 'b': {
 							boolean[] bs = new boolean[l2];
 							for (int i = 0; i < l2; i++) {
-								if (ss[i] != null) {
-									bs[i] = Boolean.valueOf(ss[i]).booleanValue();
+								if (ss[i] != null && ss[i].length() > 0) {
+									char c = ss[i].charAt(0);
+									bs[i] = (c == '1' || c == 't');
+									// bs[i] = Boolean.valueOf(ss[i]).booleanValue();
 								}
 							}
 							field.set(this, bs);
@@ -951,7 +1012,8 @@ return true;
 						field.setChar(this, (char) Integer.parseInt(s));
 						break;
 					case 'b':
-						field.setBoolean(this, Boolean.valueOf(s).booleanValue());
+						field.setBoolean(this, s.charAt(0) == '1' || s.charAt(0) == 't');
+						// field.setBoolean(this, Boolean.valueOf(s).booleanValue());
 						break;
 					case 's':
 						field.set(this, s);
@@ -973,6 +1035,10 @@ return true;
 		return true;
 	}
 
+    protected String[] fieldMapping() {
+    	return null;
+    }
+    
 	/**
 	 * Override Object@clone, so this object can be cloned.
 	 */

@@ -22,7 +22,7 @@ import net.sf.j2s.annotation.J2SIgnore;
  * 
  * @author zhou renjian
  */
-class SimplePipeHelper {
+public class SimplePipeHelper {
 	
 	static interface IPipeThrough {
 		public void helpThrough(SimplePipeRunnable pipe, SimpleSerializable[] objs);
@@ -223,6 +223,15 @@ class SimplePipeHelper {
 			}
 		}
 		return !runnable.isPipeLive();
+	}
+	
+	@J2SIgnore
+	public static void helpClosing(SimplePipeRunnable pipe) {
+		if (pipe.closer != null) {
+			pipe.closer.helpClosing(pipe);
+		} else {
+			pipe.pipeClosed();
+		}
 	}
 	
 }

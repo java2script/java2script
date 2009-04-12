@@ -39,9 +39,14 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	public boolean pipeDestroy() {
 		if (!super.pipeDestroy()) return false;
 		
-		PipeSessionClosedEvent evt = new PipeSessionClosedEvent();
-		evt.session = session;
-		pipeThrough(evt);
+		/**
+		 * @j2sNative
+		 */
+		{
+			PipeSessionClosedEvent evt = new PipeSessionClosedEvent();
+			evt.session = session;
+			pipeThrough(evt);
+		}
 
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe instanceof CompoundPipeRunnable) {
@@ -53,6 +58,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	@Override
 	public void pipeFailed() {
+		super.pipeFailed();
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe instanceof CompoundPipeRunnable) {
 			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;

@@ -2,13 +2,15 @@ package net.sf.j2s.ajax;
 
 import java.util.Date;
 
+import net.sf.j2s.annotation.J2SIgnore;
+
 import org.eclipse.swt.widgets.Display;
 
 
 public class CompoundPipeSWTRequest extends SimplePipeRequest {
 	
+	@J2SIgnore
 	private static SimplePipeHelper.IPipeClosing pipeClosingWrapper;
-	private static CompoundPipeRunnable pipe;
 
 	public static void swtWeave(String id, final CompoundPipeSession p) {
 		/**
@@ -98,15 +100,18 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 				if (pipe.pipes[i] != null) {
 					pipe.pipes[i].pipeFailed();
 				}
-				pipe.pipes[i] = null;
+				//pipe.pipes[i] = null;
 			}
-			CompoundPipeRequest.unregisterPipe(pipe.id);
+			pipe.setupFailedRetries = 0;
+			pipe.status = 0;
+			pipe.lastSetupRetried = 0;
+			//CompoundPipeRequest.unregisterPipe(pipe.id);
 		}
 	}
 	
 	public static void configure(String id, String pipeURL, String pipeMethod,
 			String rpcURL, String rpcMethod) {
-		pipe = CompoundPipeRequest.retrievePipe(id, false);
+		CompoundPipeRunnable pipe = CompoundPipeRequest.retrievePipe(id, false);
 		if (pipe == null) {
 			pipe = CompoundPipeRequest.registerPipe(createSWTWrappedPipe(id));
 		}
