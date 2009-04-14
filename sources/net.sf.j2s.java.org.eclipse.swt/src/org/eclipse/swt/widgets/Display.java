@@ -4655,6 +4655,44 @@ static Tray getTray() {
 	return tray;
 }
 
+static Shell[] getAllVisibleShells() {
+	Shell[] shells = new Shell[0]; // auto-incremental array
+	int[] orders = new int[0];
+	Display[] disps = Displays;
+	for (int k = 0; k < disps.length; k++) {
+		if (disps[k] == null) continue;
+		Shell[] ss = disps[k].getShells ();
+		for (int i = 0; i < ss.length; i++) {
+			if (!ss[i].isDisposed () /*&& ss[i].parent == null*/
+					&& ss[i].isVisible()
+					&& ss[i].handle.style.display != "none") {
+				shells[shells.length] = ss[i];
+				String idx = "" + ss[i].handle.style.zIndex;
+				int zidx = 0;
+				if (idx == null || idx.length() == 0) {
+					zidx = 0;
+				} else {
+					zidx = Integer.parseInt (idx);
+				}
+				orders[orders.length] = zidx;
+			}
+		}
+	}
+	for (int i = 0; i < shells.length; i++) {
+		for (int j = i + 1; j < shells.length; j++) {
+			if (orders[i] < orders[j]) {
+				Shell s = shells[i];
+				shells[i] = shells[j];
+				shells[j] = s;
+				int idx = orders[i];
+				orders[i] = orders[j];
+				orders[j] = idx;
+			}
+		}
+	}
+	return shells;
+}
+
 static Shell getTopShell() {
 	Shell lastShell = null;
 	int lastZIndex = 0;
@@ -4868,7 +4906,16 @@ static void bringShellToTop() {
 			while (src != null) {
 				String className = src.className;
 				if (className != null && className.indexOf("shadow-") != -1) {
-					return;
+					Shell[] allVisibleShells = getAllVisibleShells();
+					for (int i = 0; i < allVisibleShells.length; i++) {
+						Rectangle bounds = allVisibleShells[i].getBounds();
+						// border width is taking into consideration
+						if (evt.x >= bounds.x + 2 && evt.x <= bounds.x + bounds.width - 4
+								&& evt.y >= bounds.y + 2 && evt.y <= bounds.y + bounds.height - 4) {
+							allVisibleShells[i].bringToTop();
+							return;
+						}
+					}
 				}
 				if (OS.existedCSSClass(src, "shell-default")) {
 					Display[] displs = Displays;
