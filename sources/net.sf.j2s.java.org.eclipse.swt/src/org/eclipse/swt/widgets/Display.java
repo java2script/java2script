@@ -2641,7 +2641,18 @@ void initializeDekstop() {
 	 * 	C_$.createC_$Window_ = Console.createC_$Window;
 	 * 	C_$.createConsoleWindow = C_$.createC_$Window = function (parentEl) {
 	 * 		var console = C_$.createC_$Window_ (parentEl);
-	 * 		console.style.display = "none";
+	 * 		if (O$.isIE) {
+	 * 			var consoleStyle = console.style;
+	 * 			consoleStyle.display = "block"
+	 * 			consoleStyle.position = "absolute";
+	 * 			consoleStyle.width = "200px";
+	 * 			consoleStyle.height = "200px";
+	 * 			consoleStyle.left = "-400px";
+	 * 			consoleStyle.top = "-400px";
+	 * 			consoleStyle.overflow = "hidden";
+	 * 		} else {
+	 * 			console.style.display = "none";
+	 * 		}
 	 * 		$wt.widgets.Display.insertOpenConsoleLink(console);
 	 * 		return console;
 	 * 	};
@@ -3375,9 +3386,7 @@ public boolean readAndDispatch () {
 			if (msgs.length != 0) {
 				messageLoop = true; 
 //				System.out.println("msgs.legnth" + msgs.length);
-				MESSAGE[] defered = new MESSAGE[0];
-				
-				int defsize = 0;
+				int idx = 0;
 				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m1 = msgs[i];
 					if (m1 == null) {
@@ -3393,23 +3402,25 @@ public boolean readAndDispatch () {
 					}
 					
 					if(m1.type == MESSAGE.CONTROL_LAYOUT){
-						if(m1.control.parent != null && m1.control.parent.waitingForLayout){
+						Composite p = m1.control.parent;
+						if(p != null && p.waitingForLayout){
 //							System.out.println(m1.control.getName()+ " is waiting for parent " +
-//									m1.control.parent.getName());
+//									p.getName());
 							m1.defer = true;
-							defered[defsize++] = m1;
 						}
 					}
 					
 				}
 				long time = 0;
 
+				boolean deferred = false;
 
 				for (int i = 0; i < msgs.length; i++) {
 //				for (int i = msgs.length - 1; i >= 0; i--) {
 					MESSAGE m = msgs[i];
 					
 					if(m != null && m.defer){
+						deferred = true;
 //						System.out.println("deffer " + m.control.getName());
 						continue;
 					}
@@ -3417,7 +3428,7 @@ public boolean readAndDispatch () {
 					if (m != null && m.type == MESSAGE.CONTROL_LAYOUT) {
 						m.control.waitingForLayout = false;
 						if (!m.control.isVisible()) { continue; }
-						Date d = new Date();
+						long d = new Date().getTime();
 						Composite c = (Composite) m.control;
 						if(c.waitingForLayoutWithResize){
 							c.setResizeChildren (false);
@@ -3437,41 +3448,50 @@ public boolean readAndDispatch () {
 						} else {
 							c.layout();
 						}
-						time += new Date().getTime() - d.getTime();
+						time += new Date().getTime() - d;
 //						System.err.println(c.getName() + " cost " + (time));
 						if (time > 200) {
 //							System.out.println("before deferring:" + msgs.length);
-							for (int j = i + 1; j < msgs.length; j++) {
-								msgs[j - i - 1] = msgs[j];
+							idx = 0;
+							if (deferred) {
+								for (int j = 0; j < i + 1; j++) {
+									m = msgs[j];
+									if (m != null && m.defer) {
+										msgs[idx++] = m;
+									}
+									msgs[j] = null;
+								}
 							}
-//							for (int j = 0; j < i; j++) {
-//								msgs[msgs.length - 1 - j] = null;
-//							}
-							int length = msgs.length - i - 1;
-							for(int j = 0; j < defsize; j++){
-								msgs[length + j] = defered[j];
+							for (int j = i + 1; j < msgs.length; j++) {
+								msgs[idx++] = msgs[j];
+								msgs[j] = null;
 							}
 							/**
 							 * @j2sNativeSrc
-							 * msgs.length -= i + 1;
+							 * msgs.length = idx;
 							 * @j2sNative
-							 * a.length -= f + 1;
+							 * a.length = b;
 							 */ {}
 //							System.out.println("after deferring:" + msgs.length);
 							return ;
 						}
 					}
 				}
+				idx = 0;
+				if (deferred) {
+					for(int j = 0; j < msgs.length; j++){
+						MESSAGE m = msgs[j];
+						if (m != null && m.defer) {
+							msgs[idx++] = m;
+						}
+					}
+				}
 				/**
 				 * @j2sNativeSrc
-				 * msgs.length = 0;
+				 * msgs.length = idx;
 				 * @j2sNative
-				 * a.length = 0;
+				 * a.length = b;
 				 */ {}
-				 Display.this.msgs = defered;
-//				for(int j = 0; j < defsize; j++){
-//					msgs[j] = defered[j];
-//				}
 			}
 		}
 	}, 100);
@@ -3746,6 +3766,7 @@ void releaseDisplay () {
 	filterTable = null;
 	if (messageProc != 0) {
 		window.clearInterval(messageProc);
+		messageProc = 0;
 	}
 	msgs = null;
 }
@@ -4016,7 +4037,7 @@ boolean runPopups () {
 boolean runTimer (int id) {
 	if (timerList != null && timerIds != null) {
 		int index = 0;
-		while (index <timerIds.length) {
+		while (index < timerIds.length) {
 			if (timerIds [index] == id) {
 				//OS.KillTimer (hwndMessage, timerIds [index]);
 				window.clearInterval(timerIds [index]);
