@@ -259,7 +259,7 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 	sbHandle = document.createElement("DIV");
 	sbHandle.style.backgroundColor = "blue";
 	sbHandle.style.overflow = "auto";
-	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-y:scroll;";
+	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-x:hidden;overflow-y:scroll;";
 	
 	if (OS.isIE) {
 		sbHandle.style.width = (sbWidth + 1) + "px";
