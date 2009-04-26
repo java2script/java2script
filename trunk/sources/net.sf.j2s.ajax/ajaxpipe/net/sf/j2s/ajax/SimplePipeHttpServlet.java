@@ -189,14 +189,28 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		long beforeLoop = new Date().getTime();
 		Vector<SimpleSerializable> vector = null;
 		int priority = 0;
+        long lastLiveDetected = System.currentTimeMillis();
+        SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+        long waitClosingInterval = 5000;
+        if (pipe != null) {
+        	waitClosingInterval = pipe.pipeWaitClosingInterval();
+        }
 		while ((vector = SimplePipeHelper.getPipeVector(key)) != null
 				/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 				&& !writer.checkError()) {
 			if (!SimplePipeHelper.isPipeLive(key)) {
-				boolean okToClose = SimplePipeHelper.waitAMomentForClosing(SimplePipeHelper.getPipe(key));
-				if (okToClose) {
+				if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
+					// break out while loop so pipe connection will be closed
 					break;
+				} else { // sleep 1s and continue to check pipe status again
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+					continue;
 				}
+			} else {
+				lastLiveDetected = System.currentTimeMillis();
 			}
 			int size = vector.size();
 			if (size > 0) {

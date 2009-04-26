@@ -198,33 +198,6 @@ public class SimplePipeHelper {
 		return false;
 	}
 
-	/**
-	 * Wait some more seconds to check whether the pipe is to be closed or not.
-	 * @param runnable
-	 * @return whether the pipe is to be closed or not.
-	 */
-	@J2SIgnore
-	static boolean waitAMomentForClosing(final SimplePipeRunnable runnable) {
-		if (runnable == null) {
-			return true;
-		}
-		long extra = runnable.pipeWaitClosingInterval();
-		long interval = runnable.pipeMonitoringInterval();
-		if (interval <= 0) {
-			interval = 1000; // default as 1s
-		}
-	
-		while (!runnable.isPipeLive() && extra > 0) {
-			try {
-				Thread.sleep(interval);
-				extra -= interval;
-			} catch (InterruptedException e) {
-				//e.printStackTrace();
-			}
-		}
-		return !runnable.isPipeLive();
-	}
-	
 	@J2SIgnore
 	public static void helpClosing(SimplePipeRunnable pipe) {
 		if (pipe.closer != null) {

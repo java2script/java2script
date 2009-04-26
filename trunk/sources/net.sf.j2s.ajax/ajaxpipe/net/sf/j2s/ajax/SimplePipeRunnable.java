@@ -44,6 +44,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	long lastPipeDataReceived;
 	
 	@J2SIgnore
+	boolean pipeManaged; // For Java server side's monitoring thread
+	
+	@J2SIgnore
+	long lastLiveDetected;
+	
+	@J2SIgnore
 	void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		this.helper = helper;
 	}
@@ -182,9 +188,14 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * This method is run on server side
 	 */
 	protected void pipeMonitoring() {
+		if (pipeManaged) {
+			ManagedPipeHelper.monitoringPipe(this);
+			return;
+		}
 		new Thread(new Runnable() {
 			
 			public void run() {
+				lastLiveDetected = System.currentTimeMillis();
 				long interval = pipeMonitoringInterval();
 				if (interval <= 0) {
 					interval = 1000;
@@ -196,8 +207,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 						//e.printStackTrace();
 					}
 					if (!isPipeLive()) {
-						boolean okToClose = SimplePipeHelper.waitAMomentForClosing(SimplePipeRunnable.this);
-						if (okToClose) {
+						if (System.currentTimeMillis() - lastLiveDetected > pipeWaitClosingInterval()) {
 							pipeDestroy();
 							if (closer != null) {
 								closer.helpClosing(SimplePipeRunnable.this);
@@ -206,6 +216,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 							}
 							break;
 						}
+					} else {
+						lastLiveDetected = System.currentTimeMillis();
 					}
 				}
 			}

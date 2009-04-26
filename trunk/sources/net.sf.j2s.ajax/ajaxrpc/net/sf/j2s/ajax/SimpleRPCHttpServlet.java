@@ -54,6 +54,8 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	
 	protected long xssLatency = 60 * 1000; // 60s to send a request?
 	
+	protected boolean managingPipe = false;
+	
 	protected long maxPostLimit() {
 		return postLimit;
 	}
@@ -140,6 +142,10 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			<param-name>simple.rpc.xss.max.parts</param-name>
 			<param-value>10</param-value>
 		</init-param>
+		<init-param>
+			<param-name>simple.pipe.managable</param-name>
+			<param-value>true</param-value>
+		</init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>simplerpc</servlet-name>
@@ -187,6 +193,10 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			}
+		}
+		String managablePipeStr = getInitParameter("simple.pipe.managable");
+		if (managablePipeStr != null) {
+			managingPipe = "true".equals(managablePipeStr);
 		}
 		super.init();
 	}
