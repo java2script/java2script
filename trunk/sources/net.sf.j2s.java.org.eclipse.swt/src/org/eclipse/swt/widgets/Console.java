@@ -48,7 +48,17 @@ public class Console extends Shell {
 					Element el = document.getElementById("_console_");
 					if (el != null) {
 						el.parentNode.removeChild(el);
-						el.style.display = "none";
+						if (OS.isIE) {
+							el.style.display = "block";
+							el.style.position = "absolute";
+							el.style.width = "200px";
+							el.style.height = "200px";
+							el.style.left = "-400px";
+							el.style.top = "-400px";
+							el.style.overflow = "hidden";
+						} else {
+							el.style.display = "none";
+						}
 						el.style.fontSize = "";
 						document.body.appendChild(el);
 					}
@@ -137,6 +147,14 @@ public class Console extends Shell {
 		} else {
 			el.parentNode.removeChild(el);
 			el.style.display = "";
+			if (OS.isIE) {
+				el.style.position = "";
+				el.style.width = "";
+				el.style.height = "";
+				el.style.left = "";
+				el.style.top = "";
+				el.style.overflow = "";
+			}
 		}
 		el.style.fontSize = "10pt";
 		consoleWrapper.handle.appendChild(el);
