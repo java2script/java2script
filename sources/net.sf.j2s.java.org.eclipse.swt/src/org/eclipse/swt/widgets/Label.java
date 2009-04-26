@@ -714,6 +714,8 @@ void createHandle() {
 			parentHandle.appendChild(handle);
 		}
 	}
+	
+	OS.setTextSelection(this.handle, false);
 }
 
 public void setBounds(int x, int y, int width, int height) {

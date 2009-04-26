@@ -1284,6 +1284,8 @@ public void setText (String string) {
 			OS.clearChildren(textEl);
 		}
 		textEl.appendChild(document.createTextNode(string));
+		
+		OS.setTextSelection(textEl, false);
 	}
 	
 	parent.layoutItems ();

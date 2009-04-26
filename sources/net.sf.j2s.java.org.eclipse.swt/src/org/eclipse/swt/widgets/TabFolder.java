@@ -375,6 +375,8 @@ void createItem (TabItem item, final int index) {
 		sendEvent (SWT.Selection, event);
 		// the widget could be destroyed at this point
 	}
+	
+	OS.setTextSelection(tab, false);
 }
 
 protected void createHandle () {

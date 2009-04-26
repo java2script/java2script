@@ -403,6 +403,7 @@ public void redraw() {
 			textHandle = document.createElement("DIV");
 			textHandle.className = "clabel-text";
 			this.containerHandle().appendChild(textHandle);
+			OS.setTextSelection(textHandle, false);
 		}
 		OS.clearChildren(textHandle);
 	} else {

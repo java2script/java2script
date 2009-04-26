@@ -286,6 +286,7 @@ protected void createHandle () {
 	contentBox = (Element) createCSSElement(handle, "group-content-box");
 	content = (Element) createCSSElement(contentBox, "group-content");
 	
+	OS.setTextSelection(this.titleText, false);
 }
 
 public Rectangle getClientArea () {
