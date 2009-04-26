@@ -83,7 +83,7 @@ public class ASWTClass extends AClass {
 	 * loaded class automatically.
 	 * 
 	 * @j2sNativeSrc
-	 * ClazzLoader.loadClass (clazzName, function () {
+	 * ClazzLoader.loadClass (clazzName, afterLoaded == null ? null : function () {
 	 * 	if (afterLoaded != null && Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (clazzName);
 	 * 		afterLoaded.setClazz (clz);
@@ -91,7 +91,7 @@ public class ASWTClass extends AClass {
 	 * 	if (afterLoaded != null) afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
-	 * ClazzLoader.loadClass (b, function () {
+	 * ClazzLoader.loadClass (b, c == null ? null : function () {
 	 * 	if (c != null && Clazz.instanceOf (c, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (b);
 	 * 		c.setClazz (clz);
