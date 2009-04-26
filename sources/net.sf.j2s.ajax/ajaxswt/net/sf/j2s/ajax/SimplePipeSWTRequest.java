@@ -91,6 +91,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		new Thread(new Runnable() {
 			
 			public void run() {
+				long lastLiveDetected = System.currentTimeMillis();
 				do {
 					long interval = pipeLiveNotifyInterval;
 					
@@ -116,9 +117,9 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						boolean pipeLive = runnable.isPipeLive();
 						if (pipeLive) {
 							runnable.keepPipeLive();
+							lastLiveDetected = System.currentTimeMillis();
 						} else {
-							boolean okToClose = SimplePipeHelper.waitAMomentForClosing(runnable);
-							if (okToClose) {
+							if (System.currentTimeMillis() - lastLiveDetected > runnable.pipeWaitClosingInterval()) {
 								runnable.pipeDestroy();
 								SWTHelper.syncExec(disp, new Runnable() {
 									public void run() {
@@ -127,8 +128,6 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 								});
 								break;
 							}
-
-							break;
 						}
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);

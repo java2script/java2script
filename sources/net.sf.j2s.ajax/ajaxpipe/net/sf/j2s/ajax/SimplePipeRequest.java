@@ -207,6 +207,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		new Thread(new Runnable() {
 			
 			public void run() {
+				long lastLiveDetected = System.currentTimeMillis();
 				do {
 					long interval = pipeLiveNotifyInterval;
 					
@@ -233,9 +234,9 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 						boolean pipeLive = runnable.isPipeLive();
 						if (pipeLive) {
 							runnable.keepPipeLive();
+							lastLiveDetected = System.currentTimeMillis();
 						} else {
-							boolean okToClose = SimplePipeHelper.waitAMomentForClosing(runnable);
-							if (okToClose) {
+							if (System.currentTimeMillis() - lastLiveDetected > runnable.pipeWaitClosingInterval()) {
 								runnable.pipeDestroy(); // Pipe's server side destroying
 								runnable.pipeClosed(); // Pipe's client side closing
 								break;
