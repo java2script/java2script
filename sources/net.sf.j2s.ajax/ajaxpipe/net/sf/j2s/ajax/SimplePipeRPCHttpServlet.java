@@ -35,6 +35,7 @@ public class SimplePipeRPCHttpServlet extends SimpleRPCHttpServlet {
 				}
 			
 			});
+			pipeRunnable.pipeManaged = managingPipe;
 		}
 		return runnable;
 	}
