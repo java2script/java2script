@@ -857,23 +857,25 @@ void hookKeyUp() {
 	hookKeyPress();
 }
 
-boolean mouseHoverProc() {
+boolean mouseHoverProc(boolean clear) {
 	boolean hoverHooked = false;
-	if (hoverTimerID != 0) {
+	if (hoverTimerID != 0 && clear) {
 		hoverHooked = true;
 		window.clearTimeout(hoverTimerID);
 		hoverTimerID = 0;
 	}
 	if (hoverHooked || hooks(SWT.MouseHover)) {
 		hoverHooked = true;
-		hoverTimerID = window.setTimeout(Clazz.makeFunction(new Runnable() {
-			public void run() {
-				if (!isDisposed()) {
-					sendEvent(SWT.MouseHover);
+		if (hoverTimerID == 0) {
+			hoverTimerID = window.setTimeout(Clazz.makeFunction(new Runnable() {
+				public void run() {
+					if (!isDisposed()) {
+						sendEvent(SWT.MouseHover);
+					}
+					hoverTimerID = 0;
 				}
-				hoverTimerID = 0;
-			}
-		}), 400);
+			}), 400);
+		}
 	}
 	return hoverHooked;
 }
@@ -881,7 +883,7 @@ boolean mouseHoverProc() {
 void hookMouseDown() {
 	handle.onmousedown = new RunnableCompatibility() {
 		public void run() {
-			boolean hoverHooked = mouseHoverProc();
+			boolean hoverHooked = mouseHoverProc(true);
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			if (e.leftButtonHold) {
 				dragStatus = true;
@@ -895,7 +897,7 @@ void hookMouseDown() {
 void hookMouseUp() {
 	handle.onmouseup = new RunnableCompatibility() {
 		public void run() {
-			boolean hoverHooked = mouseHoverProc();
+			boolean hoverHooked = mouseHoverProc(true);
 			dragStatus = false;
 			if (!hoverHooked || hooks(SWT.MouseUp)) {
 				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
@@ -907,9 +909,20 @@ void hookMouseUp() {
 void hookMouseMove() {
 	handle.onmousemove = new RunnableCompatibility() {
 		public void run() {
-			boolean hoverHooked = mouseHoverProc();
-			boolean dragHooked = false;
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
+			Widget widgetThis = Widget.this;
+			/**
+			 * @j2sNative
+			 * if (O$.isIE60 || O$.isIE55 || O$.isIE50) {
+			 * 	if (e.x == widgetThis.lastMouseMoveX && e.y == widgetThis.lastMouseMoveY) {
+			 * 		return true;
+			 * 	}
+			 * 	widgetThis.lastMouseMoveX = e.x;
+			 * 	widgetThis.lastMouseMoveY = e.y;
+			 * }
+			 */ { widgetThis.toString(); }
+			boolean hoverHooked = mouseHoverProc(false);
+			boolean dragHooked = false;
 			if (dragStatus && e.leftButtonHold 
 					&& hooks(SWT.DragDetect)) {
 				dragHooked = true;
@@ -919,13 +932,14 @@ void hookMouseMove() {
 			if ((!dragHooked && !hoverHooked) || hooks(SWT.MouseMove)) {
 				sendMouseEvent(SWT.MouseMove, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 			}
+			toReturn(true);
 		}
 	};
 }
 void hookMouseEnter() {
 	handle.onmouseover = new RunnableCompatibility() {
 		public void run() {
-			boolean hoverHooked = mouseHoverProc();
+			boolean hoverHooked = mouseHoverProc(true);
 			if (!hoverHooked || hooks(SWT.MouseEnter)) {
 				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 				sendMouseEvent(SWT.MouseEnter, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
