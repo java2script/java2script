@@ -529,6 +529,8 @@ void createHandle() {
 	};
 	//bindHandle();
 	hookSelection();
+	
+	OS.setTextSelection(this.handle, false);
 }
 
 /*

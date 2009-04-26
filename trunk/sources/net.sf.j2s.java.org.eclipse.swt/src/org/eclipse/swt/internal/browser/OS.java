@@ -156,6 +156,8 @@ public class OS {
 			s.height = "100px";
 			s.overflow = "scroll";
 			invisibleContainer = el;
+			setTextSelection(el, false);
+			
 			containers = new Object();
 			
 			el = document.createElement ("DIV");
@@ -995,4 +997,14 @@ public class OS {
 		return false;
 	}
 
+	/**
+	 * @j2sNative
+	 * if (O$.isMozilla || O$.isFirefox) {
+	 * 	handle.style.MozUserSelect = enabled ? "all" : "none";
+	 * } else if (typeof handle.onselectstart != "undefined") {
+	 * 	handle.onselectstart = enabled ? null : function () { return false; };
+	 * }
+	 */
+	public static void setTextSelection(Element handle, boolean enabled) {
+	}
 }

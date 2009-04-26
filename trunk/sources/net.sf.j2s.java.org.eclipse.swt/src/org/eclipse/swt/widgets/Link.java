@@ -239,6 +239,8 @@ void createHandle () {
 			parentHandle.appendChild(handle);
 		}
 	}
+	
+	OS.setTextSelection(this.handle, false);
 }
 
 void createWidget () {
