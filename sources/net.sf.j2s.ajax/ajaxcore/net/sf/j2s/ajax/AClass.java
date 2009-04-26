@@ -45,7 +45,7 @@ public class AClass {
 	 * loaded class automatically.
 	 * 
 	 * @j2sNativeSrc
-	 * ClazzLoader.loadClass (clazzName, function () {
+	 * ClazzLoader.loadClass (clazzName, afterLoaded == null ? null : function () {
 	 * 	if (afterLoaded != null && Clazz.instanceOf (afterLoaded, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (clazzName);
 	 * 		afterLoaded.setClazz (clz);
@@ -53,7 +53,7 @@ public class AClass {
 	 * 	if (afterLoaded != null) afterLoaded.run ();
 	 * }, false, true);
 	 * @j2sNative
-	 * ClazzLoader.loadClass (a, function () {
+	 * ClazzLoader.loadClass (a, b == null ? null : function () {
 	 * 	if (b != null && Clazz.instanceOf (b, net.sf.j2s.ajax.ARunnable)) {
 	 * 		var clz = Clazz.evalType (a);
 	 * 		b.setClazz (clz);
