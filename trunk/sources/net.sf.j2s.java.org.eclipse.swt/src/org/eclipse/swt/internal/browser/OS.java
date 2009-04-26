@@ -893,16 +893,29 @@ public class OS {
 	    return bcScrollLeft;
 	}
 	
+	private static Object imageCaches = new Object();
+
 	public static Point getImageSize(Image image) {
 		int w = 16, h = 16; // Default to 16x16 for common
 		if (image.width == 0 && image.height == 0) {
 			if (image.url != null && image.url.length() != 0) {
-				org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
-				img.src = image.url;
+				org.eclipse.swt.internal.xhtml.Image img = null;
+				/**
+				 * @j2sNative
+				 * img = O$.imageCaches[image.url];
+				 */ {}
+				if (img == null) {
+					img = new org.eclipse.swt.internal.xhtml.Image ();
+					img.src = image.url;
+				}
 				image.width = img.width;
 				image.height = img.height;
 				w = img.width;
 				h = img.height;
+				/**
+				 * @j2sNative
+				 * O$.imageCaches[image.url] = img;
+				 */ {}
 				// TODO: The above method to find out width & height is unsafe!
 				// TODO: Maybe the image may fail to be loaded!
 			} // else default 16x16

@@ -999,14 +999,7 @@ public void setImage (Image image) {
 		
 		CSSStyle handleStyle = null;
 		handleStyle = btnText.style;
-		org.eclipse.swt.internal.xhtml.Image img = new org.eclipse.swt.internal.xhtml.Image ();
-		img.src = this.image.url;
-		if (image.width == 0) {
-			this.image.width = img.width;
-		}
-		if (image.height == 0) {
-			this.image.height = img.height;
-		}
+		OS.getImageSize(this.image);
 		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 ////			handleStyle.fontSize = this.image.height + "px";
 //			handleStyle.display = "block";

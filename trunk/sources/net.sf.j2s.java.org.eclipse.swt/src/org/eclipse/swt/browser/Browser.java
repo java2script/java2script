@@ -14,7 +14,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.ContentWindow;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.widgets.Composite;
@@ -984,12 +983,21 @@ public void refresh() {
 	checkWidget();
 //	int[] rgdispid = auto.getIDsOfNames(new String[] { "Refresh" }); //$NON-NLS-1$
 //	auto.invoke(rgdispid[0]);
-	if (browserHandle != null) {
-		if (browserHandle.contentWindow != null) {
-			browserHandle.contentWindow.reload();
-		} else { // Opera
-			browserHandle.src = url; //?
-		}
+	if (browserHandle != null)
+	/**
+	 * @j2sNative
+	 * try {
+	 * 	var win = this.browserHandle.contentWindow;
+	 * 	if (win != null) {
+	 * 		win.reload();
+	 * 	} else { // Opera ?
+	 * 		this.browserHandle.src = this.url;
+	 * 	}
+	 * } catch (e) {
+	 * 	this.browserHandle.src = this.url;
+	 * }
+	 */ {
+		browserHandle.src = url;
 	}
 }
 
@@ -1476,12 +1484,21 @@ public boolean setUrl(String url) {
 	*/
 	this.url = url;
 	
-	if (browserHandle != null) {
-		if (browserHandle.contentWindow != null) {
-			browserHandle.contentWindow.location = url;
-		} else { // Opera
-			browserHandle.src = url;
-		}
+	if (browserHandle != null)
+	/**
+	 * @j2sNative
+	 * try {
+	 * 	var win = this.browserHandle.contentWindow;
+	 * 	if (win != null) {
+	 * 		win.location = this.url;
+	 * 	} else {
+	 * 		this.browserHandle.src = this.url;
+	 * 	}
+	 * } catch (e) {
+	 * 	this.browserHandle.src = this.url;
+	 * }
+	 */ {
+		browserHandle.src = url;
 	}
 	back = true;
 	return true;
