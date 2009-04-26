@@ -1393,7 +1393,11 @@ ClazzLoader.tryToLoadNext = function (file) {
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
-		while (ClazzLoader.checkOptionalCycle (ClazzLoader.clazzTreeRoot)) {
+		while (true) {
+			ClazzLoader.tracks = new Array ();
+			if (!ClazzLoader.checkOptionalCycle (ClazzLoader.clazzTreeRoot)) {
+				break;
+			}
 		}
 		lastNode = null;
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
@@ -1423,6 +1427,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 			var optLoaded = dList[i].optionalsLoaded;
 			if (optLoaded != null) {
 				dList[i].optionalsLoaded = null;
+				//window.setTimeout (optLoaded, 25);
 				optLoaded ();
 			}
 		}
@@ -1456,6 +1461,12 @@ ClazzLoader.checkOptionalCycle = function (node) {
 	}
 	ts[ts.length] = node;
 	if (cycleFound != -1) {
+		/*
+		for (var i = cycleFound; i < ts.length; i++) {
+			alert (ts[i].name + ":::" + ts[i].status);
+		}
+		alert ("===");
+		*/
 		for (var i = cycleFound; i < ts.length; i++) {
 			ts[i].status = ClazzNode.STATUS_OPTIONALS_LOADED;
 			ClazzLoader.updateNode (ts[i]);
@@ -1467,6 +1478,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 			var optLoaded = ts[i].optionalsLoaded;
 			if (optLoaded != null) {
 				ts[i].optionalsLoaded = null;
+				//alert ("check cycle.");
 				//window.setTimeout (optLoaded, 25);
 				optLoaded ();
 			}
@@ -1576,7 +1588,6 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						if (optLoaded != null) {
 							nns[j].optionalsLoaded = null;
 							//window.setTimeout (optLoaded, 25);
-							alert (1);
 							optLoaded ();
 						}
 					}
@@ -2269,7 +2280,16 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	if (!ClazzLoader.isClassDefined (name) 
 			&& !ClazzLoader.isClassExcluded (name)) {
 		var path = ClazzLoader.getClasspathFor (name/*, true*/);
-		if (!ClazzLoader.loadedScripts[path]) {
+		var existed = ClazzLoader.loadedScripts[path];
+		var qq = ClazzLoader.classQueue;
+		if (!existed) {
+			for (var i = qq.length - 1; i >= 0; i--) {
+				if (qq[i].path == path || qq[i].name == name) {
+					existed = true;
+				}
+			}
+		}
+		if (!existed) {
 			var n = null;
 			if (Clazz.unloadedClasses[name] != null) {
 				n = ClazzLoader.findClass (name);
@@ -2284,7 +2304,6 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			n.status = ClazzNode.STATUS_KNOWN;
 			/*-# needBeingQueued -> nQ #-*/
 			var needBeingQueued = false;
-			var qq = ClazzLoader.classQueue;
 			//error (qq.length + ":" + qq);
 			//error (path);
 			for (var i = qq.length - 1; i >= 0; i--) {
@@ -2366,8 +2385,14 @@ $w$ = ClazzLoader.loadJ2SApp = function (clazz, args, loaded) {
 	}
 	var idx = -1;
 	if ((idx = clazzStr.indexOf ("@")) != -1) {
-		ClazzLoader.setPrimaryFolder (clazzStr.substring (idx + 1));
+		var path = clazzStr.substring (idx + 1);
+		ClazzLoader.setPrimaryFolder (path); // TODO: No primary folder?
 		clazzStr = clazzStr.substring (0, idx);
+		idx = clazzStr.lastIndexOf (".");
+		if (idx != -1) {
+			var pkgName = clazzStr.substring (0, idx);
+			ClazzLoader.packageClasspath (pkgName, path);
+		}
 	}
 	var agmts = args;
 	if (agmts == null || !(agmts instanceof Array)) {
