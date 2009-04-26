@@ -2003,6 +2003,7 @@ public void setMinimized (boolean minimized) {
 			Shell topShell = Display.getTopShell();
 			if (topShell != null) {
 				topShell.bringToTop();
+				topShell.forceFocus();
 			} else 
 			/**
 			 * Return to default title
@@ -2205,6 +2206,8 @@ void setSystemMenu () {
 				if (display.topBar != null) {
 					display.topBar.returnTopMaximized((Shell) shell);
 				}
+				toReturn(false);
+				new HTMLEventWrapper(getEvent()).stopPropagation();
 			}
 		};
 	}
@@ -2272,9 +2275,12 @@ void setSystemMenu () {
 		public void run() {
 			if (isVisible()) { // may be invisible after clicking close button
 				bringToTop();
+				forceFocus();
+				/*
 				if(contentHandle != null){
 					OS.SetFocus(contentHandle); //contentHandle.focus();
 				}
+				*/
 			}
 			toReturn(true);
 		}

@@ -41,6 +41,12 @@
 	opacity:0.85;
 	filter:Alpha(Opacity=85);
 }
+* html .shortcut-bar {
+	bottom:-1px;
+}
+* html .shortcut-bar-minimized {
+	bottom:-1px;
+}
 .shortcut-item:hover, a.shortcut-item:hover .shortcut-item-highlight {
 	border:1px solid navy;
 	background-color:highlight;

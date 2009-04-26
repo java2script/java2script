@@ -501,10 +501,17 @@ public void close () {
 		taskBar.setMinimized(false);
 		taskBar.updateLastModified();
 	}
+	Shell nextShell = null;
+	if (parent instanceof Shell) {
+		nextShell = (Shell) parent;
+	}
 	closeWidget ();
-	Shell topShell = Display.getTopShell();
-	if (topShell != null && !topShell.isDisposed()) {
-		topShell.bringToTop();
+	if (nextShell == null || nextShell.isDisposed()) {
+		nextShell = Display.getTopShell();
+	}
+	if (nextShell != null && !nextShell.isDisposed()) {
+		nextShell.bringToTop();
+		nextShell.forceFocus();
 	} else 
 	/**
 	 * Return to default title
