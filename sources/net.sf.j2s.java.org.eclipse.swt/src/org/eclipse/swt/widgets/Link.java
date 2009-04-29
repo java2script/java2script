@@ -331,9 +331,7 @@ void hookSelection() {
 			e.widget = Link.this;
 			e.display = display;
 			sendEvent(SWT.Selection);
-			if (!e.doit) {
-				toReturn(false);
-			}
+			toReturn(false);
 		}
 	};
 	for (int i = 0; i < anchors.length; i++) {

@@ -3290,11 +3290,21 @@ public boolean post (Event event) {
 			*/
 		}
 	} 
+	/**
+	 * @j2sNative
+	 * window.setTimeout (function (disp) {
+	 * 	return function () {
+	 * 		disp.runDeferredEvents ();
+	 * 	};
+	 * } (this), 1);
+	 */ {}
+	/*
 	timerExec(1, new Runnable() {
 		public void run() {
 			runDeferredEvents();
 		}
 	});
+	*/
 	return false;
 }
 
@@ -3318,11 +3328,21 @@ void postEvent (Event event) {
 		eventQueue = newQueue;
 	}
 	eventQueue [index] = event;
+	/**
+	 * @j2sNative
+	 * window.setTimeout (function (disp) {
+	 * 	return function () {
+	 * 		disp.runDeferredEvents ();
+	 * 	};
+	 * } (this), 1);
+	 */ {}
+	/*
 	timerExec(1, new Runnable() {
 		public void run() {
 			runDeferredEvents();
 		}
 	});
+	*/
 }
 
 /**
@@ -4034,6 +4054,7 @@ boolean runPopups () {
 	return result;
 }
 
+/*
 boolean runTimer (int id) {
 	if (timerList != null && timerIds != null) {
 		int index = 0;
@@ -4052,6 +4073,7 @@ boolean runTimer (int id) {
 	}
 	return false;
 }
+*/
 
 void sendEvent (int eventType, Event event) {
 	if (eventTable == null && filterTable == null) {
@@ -4396,9 +4418,9 @@ public void timerExec (int milliseconds, Runnable runnable) {
 	int timerId = 0;
 	if (index != timerList.length) {
 		timerId = timerIds [index];
-		if (milliseconds < 0) {			
+		if (milliseconds < 0 && timerIds [index] != 0) {			
 			//OS.KillTimer (hwndMessage, timerId);
-			window.clearInterval(timerId);
+			window.clearTimeout(timerId);
 			timerList [index] = null;
 			timerIds [index] = 0;
 			return;
@@ -4422,7 +4444,21 @@ public void timerExec (int milliseconds, Runnable runnable) {
 		}
 	}
 	//int newTimerID = OS.SetTimer (hwndMessage, timerId, milliseconds, 0);
-	int newTimerID = window.setTimeout(Clazz.makeFunction(runnable), milliseconds);
+	Runnable fun = null;
+	/**
+	 * @j2sNative
+	 * fun = (function (jsr, idx, disp) {
+	 * 	return function () {
+	 * 		try {
+	 * 			jsr.run ();
+	 * 		} finally {
+	 * 			disp.timerList[idx] = null;
+	 * 			disp.timerIds[idx] = 0;
+	 * 		}
+	 * 	};
+	 * }) (runnable, index, this);
+	 */ {}
+	int newTimerID = window.setTimeout(fun, milliseconds);
 	if (newTimerID != 0) {
 		timerList [index] = runnable;
 		timerIds [index] = newTimerID;
