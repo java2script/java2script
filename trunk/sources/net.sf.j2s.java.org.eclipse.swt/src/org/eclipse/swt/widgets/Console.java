@@ -82,7 +82,6 @@ public class Console extends Shell {
 						Element wrapperEl = console.consoleWrapper.handle;
 						wrapperEl.scrollLeft = scrollOffset.x;
 						wrapperEl.scrollTop = scrollOffset.y;
-				
 					}
 				
 				});
