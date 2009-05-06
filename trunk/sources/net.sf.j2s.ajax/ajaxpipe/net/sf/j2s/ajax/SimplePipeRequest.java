@@ -179,7 +179,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	public static void pipe(final SimplePipeRunnable runnable) {
 		runnable.ajaxIn();
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			new Thread(new Runnable() {
+			(new Thread("Pipe Request Thread") {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -191,7 +191,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					keepPipeLive(runnable);
 					runnable.ajaxOut();
 				}
-			}, "Pipe Request Thread").start();
+			}).start();
 		} else {
 			pipeRequest(runnable);
 		}
@@ -204,7 +204,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 */
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
-		new Thread(new Runnable() {
+		Thread thread = new Thread(new Runnable() {
 			
 			public void run() {
 				long lastLiveDetected = System.currentTimeMillis();
@@ -267,7 +267,9 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 				} while (true);
 			}
 		
-		}, "Pipe Live Notifier Thread").start();
+		}, "Pipe Live Notifier Thread");
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	private static void pipeRequest(final SimplePipeRunnable runnable) {
@@ -871,7 +873,7 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
-			new Thread(new Runnable(){
+			(new Thread(){
 				public void run() {
 					pipeContinuum(runnable);
 				}
@@ -923,7 +925,7 @@ runnable.queryEnded = true;
 		{
 			final String key = runnable.pipeKey;
 			final long created = new Date().getTime();
-			new Thread(new Runnable() {
+			Thread thread = new Thread("Pipe Monitor Thread") {
 				public void run() {
 					SimplePipeRunnable runnable = null;
 					while ((runnable = SimplePipeHelper.getPipe(key)) != null) {
@@ -949,7 +951,9 @@ runnable.queryEnded = true;
 						}
 					}
 				}
-			}, "Pipe Monitor Thread").start();
+			};
+			thread.setDaemon(true);
+			thread.start();
 		}
 	}
 

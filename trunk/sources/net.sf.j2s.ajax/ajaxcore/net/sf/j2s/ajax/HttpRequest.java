@@ -353,7 +353,7 @@ public class HttpRequest {
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
-			new Thread(new Runnable() {
+			(new Thread() {
 				public void run() {
 					if (!toAbort) {
 						request();

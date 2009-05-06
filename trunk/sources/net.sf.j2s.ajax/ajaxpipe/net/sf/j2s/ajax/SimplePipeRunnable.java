@@ -166,7 +166,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * @return pipe is live or not.
 	 */
 	public boolean isPipeLive() {
-		return pipeAlive;
+		return pipeAlive && !destroyed;
 	}
 	
 	/**
@@ -192,7 +192,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			ManagedPipeHelper.monitoringPipe(this);
 			return;
 		}
-		new Thread(new Runnable() {
+		Thread thread = new Thread("Pipe Monitor") {
 			
 			public void run() {
 				lastLiveDetected = System.currentTimeMillis();
@@ -222,7 +222,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 				}
 			}
 		
-		}, "Pipe Monitor").start();
+		};
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	/**
