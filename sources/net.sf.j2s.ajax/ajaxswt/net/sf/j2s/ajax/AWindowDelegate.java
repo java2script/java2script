@@ -89,7 +89,7 @@ public class AWindowDelegate {
 			 * @j2sNative
 			 */
 		{
-			new Thread(new Runnable() {
+			(new Thread() {
 				public void run() {
 					while (win.getShell() == null) {
 						try {
