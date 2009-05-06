@@ -1,11 +1,11 @@
 package net.sf.j2s.ajax;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import net.sf.j2s.annotation.J2SIgnore;
 
@@ -13,15 +13,15 @@ public class ManagedPipeHelper {
 
 	@J2SIgnore
 	private static Map<String, SimplePipeRunnable> pipeSessions = null;
+	
 	@J2SIgnore
 	private static boolean monitored = false;
 	
 	@J2SIgnore
-	private static boolean monitorRunning = false;
+	private static long monitoringInterval = 10000; // 10s
 
 	@J2SIgnore
-	private static long monitoringInterval = 10000; // 10s
-	
+	private static ReentrantLock lock = new ReentrantLock();
 	
     @J2SIgnore
 	public static long getMonitoringInterval() {
@@ -34,24 +34,11 @@ public class ManagedPipeHelper {
 	}
 
 	@J2SIgnore
-	public static void stopMonitor() {
-		monitorRunning = false;
-	}
-	
-	static synchronized void init() {
-		if (pipeSessions == null) {
-			pipeSessions = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(20));
-		}
-	}
-
-	@J2SIgnore
-	static void startMonitor() {
-		init();
-		monitorRunning = true;
-		new Thread(new Runnable() {
+	private static void startMonitor() {
+		Thread thread = new Thread("Managed Pipe Session Monitor") {
 			
 			public void run() {
-				while (monitorRunning) {
+				while (true) {
 					try {
 						Thread.sleep(getMonitoringInterval());
 					} catch (InterruptedException e) {
@@ -60,7 +47,15 @@ public class ManagedPipeHelper {
 						System.err.println("Pipe sessions are null or empty! Managed pipe session monitor exited!");
 						break;
 					}
-					Set<SimplePipeRunnable> pipes = new HashSet<SimplePipeRunnable>(pipeSessions.values());
+					Set<SimplePipeRunnable> pipes = null;
+					try {
+				    	synchronized (pipeSessions) {
+				    		pipes = new HashSet<SimplePipeRunnable>(pipeSessions.values());
+				    	}
+					} catch (Throwable e) {
+						e.printStackTrace();
+						continue; //
+					}
 					for (Iterator<SimplePipeRunnable> itr = pipes.iterator(); itr.hasNext();) {
 					    SimplePipeRunnable pipe = itr.next();
 					    try {
@@ -80,7 +75,9 @@ public class ManagedPipeHelper {
 		                        	} catch (Throwable e) {
 		                        		e.printStackTrace();
 		                        	}
-		                        	pipeSessions.remove(pipe.pipeKey);
+		                        	synchronized (pipeSessions) {
+		                        		pipeSessions.remove(pipe.pipeKey);
+									}
 		                        }
 							} else {
 							    pipe.lastLiveDetected = System.currentTimeMillis();
@@ -89,22 +86,41 @@ public class ManagedPipeHelper {
                     		e.printStackTrace();
                     	}
 					}
+					lock.lock();
+					try {
+						if (pipeSessions == null || pipeSessions.isEmpty()) {
+							monitored = false;
+							break;
+						}
+					} finally {
+						lock.unlock();
+					}
 				}
 			}
 		
-		}, "Managed Pipe Session Monitor").start();
+		};
+		thread.setDaemon(true);
+		thread.start();
 	}
 
     @J2SIgnore
 	public static void monitoringPipe(SimplePipeRunnable pipe) {
-    	init();
-	    pipeSessions.put(pipe.pipeKey, pipe);
-	    pipe.lastLiveDetected = System.currentTimeMillis();
-	    if (monitored) {
-            return;
-        }
-        monitored = true;
-        startMonitor();
+    	long now = System.currentTimeMillis();
+    	lock.lock();
+    	try {
+			if (pipeSessions == null) {
+				pipeSessions = new HashMap<String, SimplePipeRunnable>(20);
+			}
+			pipeSessions.put(pipe.pipeKey, pipe);
+			pipe.lastLiveDetected = now;
+			if (monitored) {
+				return;
+			}
+			monitored = true;
+    	} finally {
+    		lock.unlock();
+    	}
+    	startMonitor();
 	}
 
 }

@@ -50,14 +50,12 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	
 	@Override
 	public boolean pipeDestroy() {
-		if (!super.pipeDestroy()) return false;
-
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
 				pipes[i].pipeDestroy();
 			}
 		}
-		return true;
+		return super.pipeDestroy();
 	}
 
 	@Override
