@@ -182,101 +182,100 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer = resp.getWriter();
 		}
 
-		SimplePipeHelper.notifyPipeStatus(key, true); // update it!
-		
 		long lastPipeDataWritten = -1;
-
 		long beforeLoop = new Date().getTime();
-		Vector<SimpleSerializable> vector = null;
-		int priority = 0;
-        long lastLiveDetected = System.currentTimeMillis();
-        SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
-        long waitClosingInterval = 5000;
-        if (pipe != null) {
-        	waitClosingInterval = pipe.pipeWaitClosingInterval();
-        }
-		while ((vector = SimplePipeHelper.getPipeVector(key)) != null
-				/* && SimplePipeHelper.isPipeLive(key) */ // check it!
-				&& !writer.checkError()) {
-			if (!SimplePipeHelper.isPipeLive(key)) {
-				if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
-					// break out while loop so pipe connection will be closed
-					break;
-				} else { // sleep 1s and continue to check pipe status again
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-					}
-					continue;
-				}
-			} else {
-				lastLiveDetected = System.currentTimeMillis();
-			}
-			int size = vector.size();
-			if (size > 0) {
-				for (int i = 0; i < size; i++) {
-					SimpleSerializable ss = null;
-					/*
-					 * Still need to check vector size!
-					 * Maybe multiple pipe servlets! 
-					 */
-					synchronized (vector) {
-						if (vector.size() <= 0) break;
-						ss = vector.remove(0);
-					}
-					if (ss == null) break; // terminating signal
-					output(writer, type, key, ss.serialize());
-					lastPipeDataWritten = new Date().getTime();
-					writer.flush();
-					if (ss instanceof ISimplePipePriority) {
-						ISimplePipePriority spp = (ISimplePipePriority) ss;
-						int p = spp.getPriority();
-						if (p <= 0) {
-							p = ISimplePipePriority.IMPORTANT;
+		if (SimplePipeHelper.notifyPipeStatus(key, true)) { // update it!
+			Vector<SimpleSerializable> vector = null;
+			int priority = 0;
+	        long lastLiveDetected = System.currentTimeMillis();
+	        SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+	        long waitClosingInterval = 5000;
+	        if (pipe != null) {
+	        	waitClosingInterval = pipe.pipeWaitClosingInterval();
+	        }
+			while ((vector = SimplePipeHelper.getPipeVector(key)) != null
+					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
+					&& !writer.checkError()) {
+				if (!SimplePipeHelper.isPipeLive(key)) {
+					if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
+						// break out while loop so pipe connection will be closed
+						break;
+					} else { // sleep 1s and continue to check pipe status again
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
 						}
-						priority += p;
-					} else {
-						priority += ISimplePipePriority.IMPORTANT;
+						continue;
 					}
+				} else {
+					lastLiveDetected = System.currentTimeMillis();
 				}
-			} else {
-				writer.flush();
-			}
-			/*
-			 * Client should send in "notify" request to simulate the following #notifyPipeStatus
-			 */
-			// SimplePipeHelper.notifyPipeStatus(key, true);
-			
-			long now = new Date().getTime();
-			if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
-					|| (lastPipeDataWritten > 0
-							&& now - lastPipeDataWritten >= pipeQueryTimeout
-							&& SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))) {
-				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
-				lastPipeDataWritten = new Date().getTime();
-			}
-			
-			now = new Date().getTime();
-			if ((vector = SimplePipeHelper.getPipeVector(key)) != null // may be broken down already!!
-					&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
-					|| (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
-							&& now - beforeLoop < pipeScriptBreakout)
-					|| (priority < ISimplePipePriority.IMPORTANT
-							&& now - beforeLoop < pipeQueryTimeout))) {
-				synchronized (vector) {
-					try {
-						vector.wait(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+				int size = vector.size();
+				if (size > 0) {
+					for (int i = 0; i < size; i++) {
+						SimpleSerializable ss = null;
+						/*
+						 * Still need to check vector size!
+						 * Maybe multiple pipe servlets! 
+						 */
+						synchronized (vector) {
+							if (vector.size() <= 0) break;
+							ss = vector.remove(0);
+						}
+						if (ss == null) break; // terminating signal
+						output(writer, type, key, ss.serialize());
+						lastPipeDataWritten = new Date().getTime();
+						writer.flush();
+						if (ss instanceof ISimplePipePriority) {
+							ISimplePipePriority spp = (ISimplePipePriority) ss;
+							int p = spp.getPriority();
+							if (p <= 0) {
+								p = ISimplePipePriority.IMPORTANT;
+							}
+							priority += p;
+						} else {
+							priority += ISimplePipePriority.IMPORTANT;
+						}
 					}
+				} else {
+					writer.flush();
 				}
-			} else {
-				break;
-			}
-		} // end of while
+				/*
+				 * Client should send in "notify" request to simulate the following #notifyPipeStatus
+				 */
+				// SimplePipeHelper.notifyPipeStatus(key, true);
+				
+				long now = new Date().getTime();
+				if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
+						|| (lastPipeDataWritten > 0
+								&& now - lastPipeDataWritten >= pipeQueryTimeout
+								&& SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))) {
+					output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
+					lastPipeDataWritten = new Date().getTime();
+				}
+				
+				now = new Date().getTime();
+				if ((vector = SimplePipeHelper.getPipeVector(key)) != null // may be broken down already!!
+						&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
+						|| (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
+								&& now - beforeLoop < pipeScriptBreakout)
+						|| (priority < ISimplePipePriority.IMPORTANT
+								&& now - beforeLoop < pipeQueryTimeout))) {
+					synchronized (vector) {
+						try {
+							vector.wait(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				} else {
+					break;
+				}
+			} // end of while
+		} // else pips is already closed or in other statuses
 		if (SimplePipeHelper.getPipeVector(key) == null
 				|| !SimplePipeHelper.isPipeLive(key)) { // pipe is tore down!
-			SimplePipeHelper.notifyPipeStatus(key, false);
+			//SimplePipeHelper.notifyPipeStatus(key, false); // Leave for pipe monitor to destroy it
 			SimplePipeHelper.pipeTearDown(key);
 			SimplePipeHelper.removePipe(key);
 			try {

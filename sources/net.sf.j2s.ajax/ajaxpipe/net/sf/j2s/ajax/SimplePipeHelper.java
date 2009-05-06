@@ -114,13 +114,11 @@ public class SimplePipeHelper {
 	static void removePipe(String key) {
 		if (pipes == null || key == null) return;
 		SimplePipeRunnable removedPipe = pipes.remove(key);
-		if (removedPipe != null) {
-			if (pipeMap != null) {
-				Vector<SimpleSerializable> removedVector = pipeMap.remove(key);
-				if (removedVector != null) {
-					synchronized (removedVector) {
-						removedVector.notifyAll();
-					}
+		if (removedPipe != null && pipeMap != null) {
+			Vector<SimpleSerializable> removedVector = pipeMap.remove(key);
+			if (removedVector != null) {
+				synchronized (removedVector) {
+					removedVector.notifyAll();
 				}
 			}
 		}
@@ -191,7 +189,7 @@ public class SimplePipeHelper {
 	@J2SIgnore
 	static boolean notifyPipeStatus(String key, boolean live) {
 		SimplePipeRunnable pipe = getPipe(key);
-		if (pipe != null) {
+		if (pipe != null && pipe.isPipeLive()) {
 			pipe.updateStatus(live);
 			return true;
 		}
