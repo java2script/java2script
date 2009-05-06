@@ -207,8 +207,7 @@ public class TaskBar extends DesktopItem {
 		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			//Decorations.createNarrowShadowHandles(si);
-			Decorations.appendShadowHandles(si, true, true, true, false);
+			Decorations.createNarrowShadowHandles(si);
 		}
 
 		this.updateItems();
@@ -486,7 +485,7 @@ public class TaskBar extends DesktopItem {
 		 * supportShadow = window["swt.disable.shadow"] != true;
 		 */ {}
 		if (supportShadow) {
-			Decorations.createShadowHandles(barEl);
+			Decorations.appendShadowHandles(barEl, true, true, true, false);
 		}
 
 	}
