@@ -34,6 +34,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	
 	protected long pipeScriptBreakout = 1200000; // 20 minutes
 
+	protected int pipeMaxItemsPerQuery = -1; // infinite
+
 	/*
 	 * Example of web.xml:
     <servlet>
@@ -46,6 +48,10 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		<init-param>
 			<param-name>simple.pipe.script.breakout</param-name>
 			<param-value>1200000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>simple.pipe.max.items.per.query</param-name>
+			<param-value>60</param-value>
 		</init-param>
     </servlet>
     <servlet-mapping>
@@ -78,6 +84,19 @@ public class SimplePipeHttpServlet extends HttpServlet {
 					pipeScriptBreakout = 1200000; // take a break for every 20 minutes
 				} else if (pipeScriptBreakout <= 60000) {
 					pipeScriptBreakout = 60000; // at least 1 minute
+				}
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			}
+		}
+		String perQueryStr = getInitParameter("simple.pipe.max.items.per.query");
+		if (perQueryStr != null) {
+			try {
+				pipeMaxItemsPerQuery = Integer.parseInt(perQueryStr);
+				if (pipeMaxItemsPerQuery <= 0 ) {
+					pipeMaxItemsPerQuery = -1; // 0, -1 means infinite items
+				} else if (pipeMaxItemsPerQuery < 5) {
+					pipeMaxItemsPerQuery = 5; // hey, we think limiting for less than 5 items make no senses.
 				}
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
@@ -193,6 +212,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	        if (pipe != null) {
 	        	waitClosingInterval = pipe.pipeWaitClosingInterval();
 	        }
+	        int items = 0;
 			while ((vector = SimplePipeHelper.getPipeVector(key)) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
@@ -224,6 +244,11 @@ public class SimplePipeHttpServlet extends HttpServlet {
 						}
 						if (ss == null) break; // terminating signal
 						output(writer, type, key, ss.serialize());
+						items++;
+						if (pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
+								&& !SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
+							break;
+						}
 						lastPipeDataWritten = new Date().getTime();
 						writer.flush();
 						if (ss instanceof ISimplePipePriority) {
@@ -256,6 +281,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				
 				now = new Date().getTime();
 				if ((vector = SimplePipeHelper.getPipeVector(key)) != null // may be broken down already!!
+						&& (pipeMaxItemsPerQuery <= 0 || items < pipeMaxItemsPerQuery
+								|| SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))
 						&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
 						|| (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
 								&& now - beforeLoop < pipeScriptBreakout)

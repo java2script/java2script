@@ -90,6 +90,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 
 	@Override
 	public void pipeClosed() {
+		super.pipeClosed();
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
 				if (pipes[i].closer != null) {
@@ -104,6 +105,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 
 	@Override
 	public void pipeLost() {
+		super.pipeLost();
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
 				pipes[i].pipeLost();
