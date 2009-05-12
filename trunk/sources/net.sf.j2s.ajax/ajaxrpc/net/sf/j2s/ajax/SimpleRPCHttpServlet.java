@@ -143,6 +143,10 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			<param-value>10</param-value>
 		</init-param>
 		<init-param>
+			<param-name>simple.rpc.xss.max.latency</param-name>
+			<param-value>6000</param-value>
+		</init-param>
+		<init-param>
 			<param-name>simple.pipe.managable</param-name>
 			<param-value>true</param-value>
 		</init-param>

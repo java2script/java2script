@@ -308,6 +308,10 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			webxml.append("            <param-name>simple.pipe.script.breakout</param-name>\r\n");
 			webxml.append("            <param-value>1200000</param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
+			webxml.append("        <init-param>\r\n");
+			webxml.append("            <param-name>simple.pipe.max.items.per.query</param-name>\r\n");
+			webxml.append("            <param-value>60</param-value>\r\n");
+			webxml.append("        </init-param>\r\n");
 			webxml.append("    </servlet>\r\n");
 
 			webxml.append("    <servlet-mapping>\r\n");
@@ -370,6 +374,10 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 		webxml.append("        <init-param>\r\n");
 		webxml.append("            <param-name>simple.rpc.xss.max.latency</param-name>\r\n");
 		webxml.append("            <param-value>6000</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.pipe.managable</param-name>\r\n");
+		webxml.append("            <param-value>true</param-value>\r\n");
 		webxml.append("        </init-param>\r\n");
 		webxml.append("        -->\r\n");
 		webxml.append("    </servlet>\r\n");
