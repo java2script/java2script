@@ -42,7 +42,7 @@ public class FileUtil {
 			int lastIndex = index;
 			while (index != -1) {
 				String partURL = absURL.substring(0, index);
-				if (!baseURL.startsWith(partURL)) {
+				if (!baseURL.startsWith(partURL + "/") && !baseURL.equals(partURL)) {
 					break;
 				}
 				lastIndex = index;
@@ -69,4 +69,10 @@ public class FileUtil {
 			return null;
 		}
 	}
+	
+//	public static void main(String[] args) {
+//		String relativeStr = toRelativePath("D:/eclipse-3.3/eclipse/workspace/org.eclipse.draw2d/bin", "D:/eclipse-3.3/eclipse/workspace/org.eclipse.draw2d.examples");
+//		String relativeStr = toRelativePath("D:/eclipse-3.3/eclipse/workspace/org.eclipse.draw2d.examples/bin", "D:/eclipse-3.3/eclipse/workspace/org.eclipse.draw2d.examples/");
+//		System.out.println(relativeStr);
+//	}
 }
