@@ -111,9 +111,12 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 */
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		String key = methodBinding.getKey();
-		if (key != null) {
-			key = key.replaceAll("<[^>]+>", "");
+		String key = null;
+		if (methodBinding != null) {
+			key = methodBinding.getKey();
+			if (key != null) {
+				key = key.replaceAll("<[^>]+>", "");
+			}
 		}
 		if (methodSignature.equals(key)) {
 			isReferenced = true;

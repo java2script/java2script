@@ -1735,7 +1735,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			//if (args.size() == 1) {
 				Expression arg = (Expression) args.get(args.size() - 1);
 				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-				if (resolveTypeBinding.isArray()) {
+				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) {
 					needBrackets = false;
 				}
 			//}
@@ -2437,6 +2437,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int staticCount = -1;
 		ReferenceASTVisitor refVisitor = new ReferenceASTVisitor();
+		/*
+		 * Fixing bug#2797539 : Incorrect instantiation of member before inner class declaration inside interface
+		 * http://sourceforge.net/tracker/?func=detail&aid=2797539&group_id=155436&atid=795800
+		 * Interface's inner classes declaration is not in the correct order. Fix it by move codes a few lines
+		 * ahead of member initialization. 
+		 */
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
@@ -2446,6 +2452,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					 * and laterBuffer may be filled with contents.
 					 */
 					element.accept(this);
+				}
+			}
+		}
+		// Interface's inner interfaces or classes
+		buffer.append(laterBuffer);
+		
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof TypeDeclaration) {
+				if (node.isInterface()) {
+					// the above codes have already dealt those inner classes inside interface
+					// just ignore here
+					continue;
 				}
 			} else if (element instanceof Initializer) {
 				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
@@ -2586,8 +2605,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (staticCount != -1) {
 			buffer.append(");\r\n");
 		}
-		// Interface's inner interfaces or classes
-		buffer.append(laterBuffer);
 		
 		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
 		if (fieldsSerializables.length() > 0) {
