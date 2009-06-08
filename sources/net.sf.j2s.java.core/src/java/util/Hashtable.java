@@ -66,6 +66,9 @@ public class Hashtable<K,V> extends Dictionary<K,V> implements Map<K,V>, Cloneab
         }
     };
 
+    /**
+     * @j2sKeep
+     */
 	private static <K, V> Entry<K, V> newEntry(K key, V value, int hash) {
 		return new Entry<K, V>(key, value);
 	}
