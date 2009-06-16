@@ -57,24 +57,29 @@ public class ManagedPipeHelper {
 						continue; //
 					}
 					for (Iterator<SimplePipeRunnable> itr = pipes.iterator(); itr.hasNext();) {
-					    SimplePipeRunnable pipe = itr.next();
+					    final SimplePipeRunnable pipe = itr.next();
 					    try {
 							if (!pipe.isPipeLive()) {
 		                        if (System.currentTimeMillis() - pipe.lastLiveDetected > pipe.pipeWaitClosingInterval()) {
-		                        	try {
-		                        		pipe.pipeDestroy();
-		                        	} catch (Throwable e) {
-		                        		e.printStackTrace();
-		                        	}
-		                        	try {
-			                        	if (pipe.closer != null) {
-			                        		pipe.closer.helpClosing(pipe);
-			                        	} else {
-			                        		pipe.pipeClosed();
-			                        	}
-		                        	} catch (Throwable e) {
-		                        		e.printStackTrace();
-		                        	}
+		                        	(new Thread("Destroy Pipe Thread") {
+		                        		@Override
+		                        		public void run() {
+		                        			try {
+		                        				pipe.pipeDestroy();
+		                        			} catch (Throwable e) {
+		                        				e.printStackTrace();
+		                        			}
+		                        			try {
+		                        				if (pipe.closer != null) {
+		                        					pipe.closer.helpClosing(pipe);
+		                        				} else {
+		                        					pipe.pipeClosed();
+		                        				}
+		                        			} catch (Throwable e) {
+		                        				e.printStackTrace();
+		                        			}
+		                        		}
+		                        	}).start();
 		                        	synchronized (pipeSessions) {
 		                        		pipeSessions.remove(pipe.pipeKey);
 									}
