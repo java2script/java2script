@@ -65,7 +65,7 @@ public class AClass {
 		(new Thread() {
 			public void run() {
 				try {
-					Class clz = Class.forName(clazzName);
+					Class<?> clz = Class.forName(clazzName);
 					if (afterLoaded != null && afterLoaded instanceof ARunnable) {
 						ARunnable runnable = (ARunnable) afterLoaded;
 						runnable.setClazz(clz);

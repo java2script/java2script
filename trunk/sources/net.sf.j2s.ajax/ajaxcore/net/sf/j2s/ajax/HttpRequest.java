@@ -151,7 +151,7 @@ public class HttpRequest {
 	private String user;
 	private String password;
 	
-	private Map headers = new HashMap();
+	private Map<String, String> headers = new HashMap<String, String>();
 	private String content;
 	
 	private boolean toAbort = false;
@@ -410,7 +410,7 @@ public class HttpRequest {
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
-					"Mozilla/5.0 (compatible; Java2Script-Pacemaker/1.0; +http://j2s.sourceforge.net)");
+					"Mozilla/5.0 (compatible; Java2Script/2.0.0)");
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type",
@@ -421,7 +421,7 @@ public class HttpRequest {
 				String base64Auth = HttpRequest.Base64.byteArrayToBase64(auth.getBytes());
 				connection.setRequestProperty("Authorization", "Basic " + base64Auth);
 			}
-			for (Iterator iter = headers.keySet().iterator(); iter.hasNext();) {
+			for (Iterator<String> iter = headers.keySet().iterator(); iter.hasNext();) {
 				String key = (String) iter.next();
 				connection.setRequestProperty(key, (String) headers.get(key));
 			}
