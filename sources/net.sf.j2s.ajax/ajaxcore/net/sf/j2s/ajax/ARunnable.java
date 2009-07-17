@@ -21,13 +21,13 @@ package net.sf.j2s.ajax;
  * 2006-8-4
  */
 public abstract class ARunnable implements Runnable {
-	private Class clazz;
+	private Class<?> clazz;
 
 	/**
 	 * Return the loaded class.
 	 * @return Class loaded class.
 	 */
-	public Class getClazz() {
+	public Class<?> getClazz() {
 		return clazz;
 	}
 
@@ -35,7 +35,7 @@ public abstract class ARunnable implements Runnable {
 	 * Set the loaded class
 	 * @param clazz Class class that is already loaded.
 	 */
-	public void setClazz(Class clazz) {
+	public void setClazz(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 }
