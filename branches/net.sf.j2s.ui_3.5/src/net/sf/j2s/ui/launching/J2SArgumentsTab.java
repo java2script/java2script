@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.jdt.internal.debug.ui.launcher.JavaWorkingDirectoryBlock;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
 import org.eclipse.jdt.internal.debug.ui.launcher.VMArgumentsBlock;
-import org.eclipse.jdt.internal.debug.ui.launcher.WorkingDirectoryBlock;
+import org.eclipse.debug.ui.WorkingDirectoryBlock;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
