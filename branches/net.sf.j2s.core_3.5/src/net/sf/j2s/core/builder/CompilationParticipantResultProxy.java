@@ -11,6 +11,7 @@
 package net.sf.j2s.core.builder;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 
 
@@ -18,12 +19,53 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
  * @author zhou renjian
  *
  */
-public class CompilationParticipantResultProxy {
+public class CompilationParticipantResultProxy extends CompilationParticipantResult {
 	
 	private CompilationParticipantResult context;
 	
-	public CompilationParticipantResultProxy(CompilationParticipantResult context) {
+	public CompilationParticipantResultProxy(SourceFile sourceFile, CompilationParticipantResult context) {
+		super(sourceFile);
 		this.context = context;
+	}
+
+	public boolean equals(Object obj) {
+		return context.equals(obj);
+	}
+
+	public char[] getContents() {
+		return context.getContents();
+	}
+
+	public IFile getFile() {
+		return context.getFile();
+	}
+
+	public boolean hasAnnotations() {
+		return context.hasAnnotations();
+	}
+
+	public int hashCode() {
+		return context.hashCode();
+	}
+
+	public void recordAddedGeneratedFiles(IFile[] addedGeneratedFiles) {
+		context.recordAddedGeneratedFiles(addedGeneratedFiles);
+	}
+
+	public void recordDeletedGeneratedFiles(IFile[] deletedGeneratedFiles) {
+		context.recordDeletedGeneratedFiles(deletedGeneratedFiles);
+	}
+
+	public void recordDependencies(String[] typeNameDependencies) {
+		context.recordDependencies(typeNameDependencies);
+	}
+
+	public void recordNewProblems(CategorizedProblem[] newProblems) {
+		context.recordNewProblems(newProblems);
+	}
+
+	public String toString() {
+		return context.toString();
 	}
 
 	public SourceFile getSourceFile() {
