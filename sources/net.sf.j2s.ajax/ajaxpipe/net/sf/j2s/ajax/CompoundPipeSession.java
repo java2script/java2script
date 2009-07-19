@@ -2,7 +2,7 @@ package net.sf.j2s.ajax;
 
 public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
-	private static class PipeSessionClosedEvent extends CompoundSerializable {
+	public static final class PipeSessionClosedEvent extends CompoundSerializable {
 		
 	}
 	
@@ -19,6 +19,11 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		} else { // failed!
 			updateStatus(false);
 		}
+	}
+
+	@Override
+	public boolean isPipeLive() {
+		return super.isPipeLive() && session != null;
 	}
 
 	@Override
@@ -51,24 +56,15 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe instanceof CompoundPipeRunnable) {
 			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
+			if (cp.status < 3) {
+				cp.status = 3; // no matter what happens, mark status as completed
+			}
 			cp.unweave(this);
 		}
+		session = null;
 		return true;
 	}
 	
-	@Override
-	public void pipeFailed() {
-		super.pipeFailed();
-		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
-		if (pipe instanceof CompoundPipeRunnable) {
-			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
-			if (cp.status < 3) {
-				cp.status = 3; // connected but failed to create child pipe
-			}
-			updateStatus(false);
-		}
-	}
-
 	@Override
 	final public SimpleSerializable[] through(Object... args) {
 		CompoundSerializable[] cs = convert(args);
@@ -85,7 +81,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	public abstract CompoundSerializable[] convert(Object... args);
 
 	@Override
-	protected void pipeThrough(Object... args) {
+	public void pipeThrough(Object... args) {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (!(pipe instanceof CompoundPipeRunnable)) return;
 		CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
@@ -140,8 +136,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 			}
 			
 			if (!p.isPipeLive()) {
+				String pipeKey = this.pipeKey;
 				p.pipeDestroy();
-				SimplePipeHelper.removePipe(this.pipeKey);
+				SimplePipeHelper.removePipe(pipeKey);
 			}
 		}
 		return true;

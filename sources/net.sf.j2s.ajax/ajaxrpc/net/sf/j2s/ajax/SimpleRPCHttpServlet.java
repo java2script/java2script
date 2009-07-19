@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +39,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -3852449040495666018L;
 
-	protected Set runnables = new HashSet();
+	protected Set<String> runnables = new HashSet<String>();
 	
 	protected long postLimit = 0x1000000; // 16 * 1024 * 1024 // 16M!
 	
@@ -446,7 +445,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			if (attr == null) {
 				parts = new String[partsCount];
 				session.setAttribute(attrName, parts);
-				session.setAttribute(attrTime, new Date());
+				session.setAttribute(attrTime, new Long(System.currentTimeMillis()));
 			} else { // attr instanceof String[]
 				parts = (String []) attr;
 				if (partsCount != parts.length) {
@@ -492,12 +491,12 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	
 	private void cleanSession(HttpSession ses) {
 		// try to clean expired request!
-		Enumeration attrNames = ses.getAttributeNames();
+		Enumeration<?> attrNames = ses.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
 			String name = (String) attrNames.nextElement();
 			if (name.startsWith("jzt")) {
-				Date dt = (Date) ses.getAttribute(name);
-				if (new Date().getTime() - dt.getTime() > maxXSSRequestLatency()) {
+				Long time = (Long) ses.getAttribute(name);
+				if (System.currentTimeMillis() - time.longValue() > maxXSSRequestLatency()) {
 					ses.removeAttribute(name);
 					ses.removeAttribute("jzn" + name.substring(3));
 				}
@@ -506,9 +505,9 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	}
 	
 	protected String[] compareDiffs(SimpleRPCRunnable runnable1, SimpleRPCRunnable runnable2) {
-		Set diffSet = new HashSet();
-		Set fieldSet = new HashSet();
-		Class clazz = runnable1.getClass();
+		Set<String> diffSet = new HashSet<String>();
+		Set<Field> fieldSet = new HashSet<Field>();
+		Class<?> clazz = runnable1.getClass();
 		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 			Field[] fields = clazz.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
@@ -516,7 +515,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			}
 			clazz = clazz.getSuperclass();
 		}
-		Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+		Field[] fields = fieldSet.toArray(new Field[0]);
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
 			int modifiers = field.getModifiers();
@@ -545,7 +544,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 						diffSet.add(name);
 					}
 				} else if (field1.getClass().getName().startsWith("[")) {
-					Class type = field.getType();
+					Class<?> type = field.getType();
 					if (type == float[].class) {
 						if (!Arrays.equals((float[]) field1, (float[]) field2)) {
 							diffSet.add(name);
@@ -592,6 +591,6 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 				}
 			}
 		}
-		return (String []) diffSet.toArray(new String[diffSet.size()]);
+		return diffSet.toArray(new String[diffSet.size()]);
 	}
 }

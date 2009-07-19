@@ -74,11 +74,13 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	@Override
 	public void ajaxRun() {
+		pipeKey = SimplePipeHelper.registerPipe(this);
 		pipeAlive = pipeSetup();
 		if (!pipeAlive) {
+			SimplePipeHelper.removePipe(pipeKey);
+			pipeKey = null;
 			return; // setup failed
 		}
-		pipeKey = SimplePipeHelper.registerPipe(this);
 		keepPipeLive();
 		pipeMonitoring();
 	}
@@ -161,12 +163,16 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		pipeDestroy();
 	}
 	
+	public void pipeReset() {
+		destroyed = false;
+	}
+	
 	/**
 	 * Return whether the pipe is still live or not.
 	 * @return pipe is live or not.
 	 */
 	public boolean isPipeLive() {
-		return pipeAlive && !destroyed;
+		return pipeAlive && !destroyed && pipeKey != null;
 	}
 	
 	/**
@@ -189,7 +195,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	protected void pipeMonitoring() {
 		if (pipeManaged) {
-			ManagedPipeHelper.monitoringPipe(this);
+			SimplePipeHelper.monitoringPipe(this);
 			return;
 		}
 		Thread thread = new Thread("Pipe Monitor") {
@@ -323,7 +329,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * Attention: Only visible inside {@link #pipeSetup()}.
 	 * @param args
 	 */
-	protected void pipeThrough(Object ... args) {
+	public void pipeThrough(Object ... args) {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe == null) return;
 		SimpleSerializable[] objs = pipe.through(args);

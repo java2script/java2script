@@ -13,7 +13,6 @@ public class CompoundPipeRPCHttpServlet extends SimplePipeRPCHttpServlet {
 			if (pipe instanceof CompoundPipeRunnable) {
 				CompoundPipeRunnable p = (CompoundPipeRunnable) pipe;
 				p.weave(session);
-				//p.status = 3;
 			}
 		}
 		return runnable;

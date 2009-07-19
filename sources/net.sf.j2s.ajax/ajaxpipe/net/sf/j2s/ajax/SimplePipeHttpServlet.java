@@ -12,7 +12,6 @@ package net.sf.j2s.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 import java.util.Vector;
 
 import javax.servlet.ServletException;
@@ -202,7 +201,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		}
 
 		long lastPipeDataWritten = -1;
-		long beforeLoop = new Date().getTime();
+		long beforeLoop = System.currentTimeMillis();
 		if (SimplePipeHelper.notifyPipeStatus(key, true)) { // update it!
 			Vector<SimpleSerializable> vector = null;
 			int priority = 0;
@@ -249,7 +248,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 								&& !SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
 							break;
 						}
-						lastPipeDataWritten = new Date().getTime();
+						lastPipeDataWritten = System.currentTimeMillis();
 						writer.flush();
 						if (ss instanceof ISimplePipePriority) {
 							ISimplePipePriority spp = (ISimplePipePriority) ss;
@@ -270,16 +269,16 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				 */
 				// SimplePipeHelper.notifyPipeStatus(key, true);
 				
-				long now = new Date().getTime();
+				long now = System.currentTimeMillis();
 				if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
 						|| (lastPipeDataWritten > 0
 								&& now - lastPipeDataWritten >= pipeQueryTimeout
 								&& SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))) {
 					output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
-					lastPipeDataWritten = new Date().getTime();
+					lastPipeDataWritten = System.currentTimeMillis();
 				}
 				
-				now = new Date().getTime();
+				now = System.currentTimeMillis();
 				if ((vector = SimplePipeHelper.getPipeVector(key)) != null // may be broken down already!!
 						&& (pipeMaxItemsPerQuery <= 0 || items < pipeMaxItemsPerQuery
 								|| SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))
@@ -303,19 +302,18 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		if (SimplePipeHelper.getPipeVector(key) == null
 				|| !SimplePipeHelper.isPipeLive(key)) { // pipe is tore down!
 			//SimplePipeHelper.notifyPipeStatus(key, false); // Leave for pipe monitor to destroy it
-			SimplePipeHelper.pipeTearDown(key);
 			SimplePipeHelper.removePipe(key);
 			try {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_DESTROYED);
-				lastPipeDataWritten = new Date().getTime();
+				lastPipeDataWritten = System.currentTimeMillis();
 			} catch (Exception e) {
 				// HTTP connection may be closed already!
 			}
 		} else if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
-				&& new Date().getTime() - beforeLoop >= pipeScriptBreakout) {
+				&& System.currentTimeMillis() - beforeLoop >= pipeScriptBreakout) {
 			try {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_CONTINUE);
-				lastPipeDataWritten = new Date().getTime();
+				lastPipeDataWritten = System.currentTimeMillis();
 			} catch (Exception e) {
 				// HTTP connection may be closed already!
 			}

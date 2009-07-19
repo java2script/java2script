@@ -1,7 +1,5 @@
 package net.sf.j2s.ajax;
 
-import java.util.Date;
-
 import net.sf.j2s.annotation.J2SIgnore;
 
 import org.eclipse.swt.widgets.Display;
@@ -39,18 +37,21 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 			pipe = CompoundPipeRequest.registerPipe(createSWTWrappedPipe(id));
 		}
 		if (pipe.status == 0 || !pipe.isPipeLive()) {
-			pipe.weave(p);
+			pipe.weave(p); // no matter woven or not, continue to start the pipe
 			pipe.updateStatus(true);
-			SimplePipeSWTRequest.swtPipe(pipe);
-			pipe.status = 1; // pipe
+			if (pipe.status == 0) { // pipe is not started yet
+				pipe.status = 1; // pipe request is sent
+				pipe.pipeKey = null;
+				SimplePipeSWTRequest.swtPipe(pipe);
+			}
 		} else {
-			pipe.weave(p);
-			if (pipe.pipeKey != null) {
-				p.pipeKey = pipe.pipeKey;
-				SimpleRPCSWTRequest.swtRequest(p);
-				if (pipe.status < 2) {
-					pipe.status = 2; // requested
-				}
+			if (!pipe.weave(p) && p.isPipeLive()) { // already woven!
+				return;
+			}
+			p.pipeKey = pipe.pipeKey;
+			SimpleRPCSWTRequest.swtRequest(p);
+			if (pipe.status < 2) {
+				pipe.status = 2; // requested
 			}
 		}
 	}
@@ -62,6 +63,7 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 			public void ajaxOut() {
 				super.ajaxOut();
 				if (!pipeAlive) {
+					CompoundPipeSWTRequest.pipeFailed(this);
 					return; // Not setup yet
 				}
 				for (int i = 0; i < pipes.length; i++) {
@@ -86,7 +88,7 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 	}
 	
 	static void pipeFailed(CompoundPipeRunnable pipe) {
-		long now = new Date().getTime();
+		long now = System.currentTimeMillis();
 		if (now - pipe.lastSetupRetried > 5 * 60 * 1000) { // five minutes
 			pipe.setupFailedRetries = 0;
 		}

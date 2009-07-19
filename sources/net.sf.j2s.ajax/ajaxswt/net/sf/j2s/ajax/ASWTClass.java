@@ -103,7 +103,7 @@ public class ASWTClass extends AClass {
 		((Display) display).asyncExec(new Runnable() {
 			public void run() {
 				try {
-					Class clz = Class.forName(clazzName); // May freeze UI!
+					Class<?> clz = Class.forName(clazzName); // May freeze UI!
 					if (afterLoaded != null && afterLoaded instanceof ARunnable) {
 						ARunnable runnable = (ARunnable) afterLoaded;
 						runnable.setClazz(clz);

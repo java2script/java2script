@@ -197,7 +197,7 @@ return strBuf;
 		 * # is used to mark the the beginning of serialized data  
 		 */
 		buffer.append("WLL201");
-		Class clazz = this.getClass();
+		Class<?> clazz = this.getClass();
 		String clazzName = clazz.getName();
 		int idx = -1;
 		while ((idx = clazzName.lastIndexOf('$')) != -1) {
@@ -218,7 +218,7 @@ return strBuf;
 		buffer.append("00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
-		Set fieldSet = new HashSet();
+		Set<Field> fieldSet = new HashSet<Field>();
 		clazz = this.getClass();
 		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 			Field[] fields = clazz.getDeclaredFields();
@@ -230,7 +230,7 @@ return strBuf;
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		String[] fMap = fieldMapping();
 		try {
-			Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+			Field[] fields = fieldSet.toArray(new Field[0]);
 			for (int i = 0; i < fields.length; i++) {
 				Field field = fields[i];
 				int modifiers = field.getModifiers();
@@ -251,7 +251,7 @@ return strBuf;
 						}
 					}
 					String nameStr = (char)(baseChar + name.length()) + name;
-					Class type = field.getType();
+					Class<?> type = field.getType();
 					if (type == float.class) {
 						float f = field.getFloat(this);
 						if (f == 0.0 && ignoring) continue;
@@ -465,8 +465,9 @@ return strBuf;
 								}
 							}
 						} else {
+							continue; // just ignore it
 							// others unknown or unsupported types!
-							throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
+							// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
 						}
 					}
 				}
@@ -773,9 +774,9 @@ return true;
 			if (size > length + start - index) return false;
 		}
 		
-		Map fieldMap = new HashMap();
-		Set fieldSet = new HashSet();
-		Class clazz = this.getClass();
+		Map<String, Field> fieldMap = new HashMap<String, Field>();
+		Set<Field> fieldSet = new HashSet<Field>();
+		Class<?> clazz = this.getClass();
 		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 			Field[] fields = clazz.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
@@ -783,7 +784,7 @@ return true;
 			}
 			clazz = clazz.getSuperclass();
 		}
-		Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+		Field[] fields = fieldSet.toArray(new Field[0]);
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
 			int modifiers = field.getModifiers();
@@ -1045,8 +1046,8 @@ return true;
     @J2SIgnore
 	public Object clone() throws CloneNotSupportedException {
 		Object clone = super.clone();
-		Set fieldSet = new HashSet();
-		Class clazz = this.getClass();
+		Set<Field> fieldSet = new HashSet<Field>();
+		Class<?> clazz = this.getClass();
 		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 			Field[] fields = clazz.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
@@ -1054,7 +1055,7 @@ return true;
 			}
 			clazz = clazz.getSuperclass();
 		}
-		Field[] fields = (Field []) fieldSet.toArray(new Field[0]);
+		Field[] fields = fieldSet.toArray(new Field[0]);
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
 			int modifiers = field.getModifiers();
@@ -1062,7 +1063,7 @@ return true;
 					&& (modifiers & Modifier.TRANSIENT) == 0
 					&& (modifiers & Modifier.STATIC) == 0) {
 				//String name = field.getName();
-				Class type = field.getType();
+				Class<?> type = field.getType();
 				Object value = null;
 				try {
 					value = field.get(this);
@@ -1269,10 +1270,10 @@ return null;
 			if (!filter.accept(clazzName)) return null;
 		}
 		try {
-			Class runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
+			Class<?> runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
 			if (runnableClass != null) {
 				// SimpleRPCRunnale should always has default constructor
-				Constructor constructor = runnableClass.getConstructor(new Class[0]);
+				Constructor<?> constructor = runnableClass.getConstructor(new Class[0]);
 				Object obj = constructor.newInstance(new Object[0]);
 				if (obj != null && obj instanceof SimpleSerializable) {
 					return (SimpleSerializable) obj;

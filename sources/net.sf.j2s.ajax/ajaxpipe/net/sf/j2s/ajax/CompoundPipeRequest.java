@@ -1,7 +1,5 @@
 package net.sf.j2s.ajax;
 
-import java.util.Date;
-
 public class CompoundPipeRequest extends SimplePipeRequest {
 
 	static CompoundPipeRunnable[] pipes = new CompoundPipeRunnable[3];
@@ -9,24 +7,27 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 	public static void weave(String id, CompoundPipeSession p) {
 		final CompoundPipeRunnable pipe = retrievePipe(id, true);
 		if (pipe.status == 0 || !pipe.isPipeLive()) {
-			pipe.weave(p);
+			pipe.weave(p); // no matter woven or not, continue to start the pipe
 			pipe.updateStatus(true);
-			SimplePipeRequest.pipe(pipe);
-			pipe.status = 1; // pipe
+			if (pipe.status == 0) { // pipe is not started yet
+				pipe.status = 1; // pipe request is sent
+				pipe.pipeKey = null;
+				SimplePipeRequest.pipe(pipe);
+			}
 		} else {
-			pipe.weave(p);
-			if (pipe.pipeKey != null) {
-				p.pipeKey = pipe.pipeKey;
-				SimpleRPCRequest.request(p);
-				if (pipe.status < 2) {
-					pipe.status = 2; // requested
-				}
+			if (!pipe.weave(p) && p.isPipeLive()) { // already woven!
+				return;
+			}
+			p.pipeKey = pipe.pipeKey;
+			SimpleRPCRequest.request(p);
+			if (pipe.status < 2) {
+				pipe.status = 2; // requested
 			}
 		}
 	}
 	
 	static void pipeFailed(CompoundPipeRunnable pipe) {
-		long now = new Date().getTime();
+		long now = System.currentTimeMillis();
 		if (now - pipe.lastSetupRetried > 5 * 60 * 1000) { // five minutes
 			pipe.setupFailedRetries = 0;
 		}
@@ -92,6 +93,7 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 			public void ajaxOut() {
 				super.ajaxOut();
 				if (!pipeAlive) {
+					CompoundPipeRequest.pipeFailed(this);
 					return; // Not setup yet!
 				}
 				for (int i = 0; i < pipes.length; i++) {

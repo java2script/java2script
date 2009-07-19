@@ -143,6 +143,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 								SWTHelper.syncExec(disp, new Runnable() {
 									public void run() {
+										runnable.pipeAlive = false;
 										runnable.pipeLost();
 									}
 								});
@@ -306,9 +307,10 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 
 			@Override
 			public void swtOnLoaded() { // on case that no destroy event is sent to client
-				if (SimplePipeHelper.getPipe(runnable.pipeKey) != null) {
-					runnable.pipeClosed();
-					SimplePipeHelper.removePipe(runnable.pipeKey);
+				String pipeKey = runnable.pipeKey;
+				if (SimplePipeHelper.getPipe(pipeKey) != null) {
+					runnable.pipeClosed(); // may set runnable.pipeKey = null
+					SimplePipeHelper.removePipe(pipeKey);
 				}
 			}
 		
