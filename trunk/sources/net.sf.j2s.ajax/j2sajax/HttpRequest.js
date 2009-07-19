@@ -70,29 +70,22 @@ c$.prototype.open = function (method, url, async, user) {
 c$.prototype.open = function (method, url, async, user, password) {
 	this.transport.open (method, url, async, user, password);
 	try {
-	this.transport.setRequestHeader ("User-Agent",
-			"Java2Script-Pacemaker/2.0.0 (+http://j2s.sourceforge.net)");
+		if (ClassLoader != null && ClassLoader.isGecko) {
+			this.transport.setRequestHeader ("User-Agent", "Java2Script/2.0.0");
+		}
 	} catch (e) {
-		log ("Setting 'User-Agent' header error : " + e);
+	}
+	try {
+		var l = window.location;
+		this.transport.setRequestHeader ("Referer",
+				l.protocol + "//" + l.host + (l.port != "" ? ":" + l.port : "") + "/");
+	} catch (e) {
 	}
 	if (method != null && method.toLowerCase () == "post") {
 		try {
 			this.transport.setRequestHeader ("Content-type", 
 					"application/x-www-form-urlencoded");
 		} catch (e) {
-			log ("Setting 'Content-type' header error : " + e);
-		}
-
-		/* Force "Connection: close" for Mozilla browsers to work around
-		 * a bug where XMLHttpReqeuest sends an incorrect Content-length
-		 * header. See Mozilla Bugzilla #246651. 
-		 */
-		if (this.transport.overrideMimeType) {
-			try {
-				// this.transport.setRequestHeader ("Connection", "close");
-			} catch (e) {
-				log ("Setting 'Connection' header error : " + e);
-			}
 		}
 	}
 };

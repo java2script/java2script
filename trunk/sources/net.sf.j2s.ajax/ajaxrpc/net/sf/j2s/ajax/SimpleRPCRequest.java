@@ -81,7 +81,7 @@ public class SimpleRPCRequest {
 	}
 	
 	static String getClassNameURL(SimpleRPCRunnable runnable) {
-		Class oClass = runnable.getClass();
+		Class<?> oClass = runnable.getClass();
 		String name = oClass.getName();
 		while (name.indexOf('$') != -1) {
 			oClass = oClass.getSuperclass();
@@ -234,6 +234,9 @@ return false; // ftp ...
 		/**
 		 * @j2sNative
 if (net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode (url)) {
+	if (runnable.$fai13d$ == true) {
+		runnable.$fai13d$ = false;
+	}
 	var g = net.sf.j2s.ajax.SimpleRPCRequest;
 	if (g.idSet == null) {
 		g.idSet = new Object ();
@@ -353,6 +356,11 @@ var fun = (function (oScript) {
 		var idx = src.indexOf ("jzn=");
 		var rid = src.substring (idx + 4, src.indexOf ("&", idx));
 		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+		if (oScript.onerror != null) { // W3C
+			oScript.onerror = oScript.onload = null;
+		} else { // IE
+			oScript.onreadystatechange = null;
+		}
 		document.getElementsByTagName ("HEAD")[0].removeChild (oScript);
 	};
 }) (script);
@@ -367,7 +375,7 @@ if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 }
 var head = document.getElementsByTagName ("HEAD")[0];
 head.appendChild (script);
-g.idSet["h" + rnd] = window.setTimeout (fun, 20000); // 20s timeout
+g.idSet["h" + rnd] = window.setTimeout (fun, 30000); // 30s timeout // TODO: Expose to configuration
 	 */
 	native static void callByScript(String rnd, String length, String i, String content);
 	
@@ -436,6 +444,7 @@ if (g.idSet[sK] != null) {
 	delete g.idSet[sK];
 }
 if (response == null && runnable != null) { // error!
+	runnable.$fai13d$ = true;
 	runnable.ajaxFail();
 	return;
 }
@@ -471,6 +480,12 @@ if (!existed && runnable == null) {
 			return;
 		}
 		if (runnable != null) {
+			/**
+			 * @j2sNative
+			 * if (runnable.$fai13d$ == true) {
+			 * 	return; // already failed, should not call #ajaxOut!
+			 * }
+			 */ {}
 			runnable.deserialize(response);
 			runnable.ajaxOut();
 		}

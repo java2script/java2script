@@ -25,6 +25,8 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	int setupFailedRetries;
 	long lastSetupRetried;
 
+	long lastSetup;
+	
 	public CompoundPipeRunnable() {
 		pipes = new CompoundPipeSession[4];
 		status = 0; // starting
@@ -34,6 +36,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 		rpcMethod = "POST";
 		pipeURL = "simplepipe";
 		rpcURL = "piperpc";
+		lastSetup = System.currentTimeMillis();
 	}
 
 	protected CompoundPipeSession getSession(String session) {
@@ -55,6 +58,8 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				pipes[i].pipeDestroy();
 			}
 		}
+		pipeKey = null;
+		status = 0; // starting
 		return super.pipeDestroy();
 	}
 
@@ -77,6 +82,9 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	public boolean isPipeLive() {
 		if (pipeAlive && status < 3) { // connected
 			return true; // still in starting status
+		}
+		if (status == 3 && System.currentTimeMillis() - lastSetup < 30000) {
+			return true;
 		}
 		if (super.isPipeLive()) {
 			for (int i = 0; i < pipes.length; i++) {
@@ -117,17 +125,29 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	@Override
 	public void keepPipeLive() {
 		for (int i = 0; i < pipes.length; i++) {
-			if (pipes[i] != null) {
+			if (pipes[i] != null && pipes[i].isPipeLive()) {
 				pipes[i].keepPipeLive();
 			}
 		}
 	}
 
-	public void weave(CompoundPipeSession pipe) {
+	public boolean weave(CompoundPipeSession pipe) {
+		pipe.pipeReset();
 		synchronized (pipes) {
 			for (int i = 0; i < pipes.length; i++) {
 				if (pipe == pipes[i]) {
-					return;
+					return false;
+				}
+			}
+			for (int i = 0; i < pipes.length; i++) {
+				if (pipe.session != null && pipes[i] != null
+						&& pipe.session.equals(pipes[i].session)) {
+					if (pipes[i].isPipeLive()) {
+						System.out.println("pipe session " + pipes[i].session + " is still live!!");
+					}
+					pipes[i] = pipe; // replace it!!!
+					lastSetup = System.currentTimeMillis();
+					return true;
 				}
 			}
 			boolean added = false;
@@ -142,6 +162,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				CompoundPipeSession[] newPipes = new CompoundPipeSession[pipes.length + 4];
 				System.arraycopy(pipes, 0, newPipes, 0, pipes.length);
 				newPipes[pipes.length] = pipe;
+				lastSetup = System.currentTimeMillis();
 			}
 		}
 		pipe.parent = this;
@@ -159,15 +180,41 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				break;
 			}
 		}
+		return true;
 	}
 
-	public void unweave(CompoundPipeSession pipe) {
+	public boolean unweave(CompoundPipeSession pipe) {
+		if (pipeKey == null || !pipeKey.equals(pipe.pipeKey)) {
+			return false;
+		}
 		for (int i = 0; i < pipes.length; i++) {
-			if (pipe == pipes[i]) {
+			if (pipe == pipes[i] || (pipe.session != null && pipes[i] != null
+					&& pipe.session.equals(pipes[i].session))) {
 				pipes[i] = null;
-				break;
+				lastSetup = System.currentTimeMillis();
+				return true;
 			}
 		}
+		return false;
+	}
+	
+	public int getActivePipeSessionCount() {
+		int count = 0;
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public boolean isEmpty() {
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override
@@ -228,6 +275,28 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	@Override
 	public String getPipeMethod() {
 		return pipeMethod;
+	}
+
+	@Override
+	protected long pipeMonitoringInterval() {
+		long monitorInterval = super.pipeMonitoringInterval();
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				monitorInterval = Math.min(monitorInterval, pipes[i].pipeWaitClosingInterval());
+			}
+		}
+		return monitorInterval;
+	}
+
+	@Override
+	protected long pipeWaitClosingInterval() {
+		long closingInterval = super.pipeWaitClosingInterval();
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				closingInterval = Math.max(closingInterval, pipes[i].pipeWaitClosingInterval());
+			}
+		}
+		return closingInterval;
 	}
 
 }

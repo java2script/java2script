@@ -11,12 +11,14 @@
 package net.sf.j2s.ajax;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.annotation.J2SIgnore;
+import net.sf.j2s.annotation.J2SNative;
 
 /**
  * 
@@ -32,26 +34,32 @@ public class SimplePipeHelper {
 		public void helpClosing(SimplePipeRunnable pipe);
 	}
 	
+	@J2SIgnore
 	private static Map<String, Vector<SimpleSerializable>> pipeMap = null;
+	
+	@J2SIgnore
+	private static boolean monitored = false;
+	
+	@J2SIgnore
+	private static long monitoringInterval = 10000; // 10s
+	
+	static Map<String, SimplePipeRunnable> pipes;
 
+	@J2SIgnore
 	private SimplePipeHelper() {
 		//
 	}
-	
-	private static Map<String, SimplePipeRunnable> pipes;
 
-	/**
-	 * 
-	 * @param key
-	 * @param pipe
-	 * 
-	 * @j2sNative
-	 * if (key == null || pipe == null) return;
-	 * if (net.sf.j2s.ajax.SimplePipeHelper.pipes == null) {
-	 * 	net.sf.j2s.ajax.SimplePipeHelper.pipes = new Object ();
-	 * }
-	 * net.sf.j2s.ajax.SimplePipeHelper.pipes[key] = pipe;
+	/*
+	 * Browser mode
 	 */
+	@J2SNative({
+		"if (key == null || pipe == null) return;",
+		"if (net.sf.j2s.ajax.SimplePipeHelper.pipes == null) {",
+		"	net.sf.j2s.ajax.SimplePipeHelper.pipes = new Object ();",
+		"}",
+		"net.sf.j2s.ajax.SimplePipeHelper.pipes[key] = pipe;"
+	})
 	public static void registerPipe(String key, SimplePipeRunnable pipe) {
 		if (key == null || pipe == null) return;
 		if (pipes == null) {
@@ -60,12 +68,20 @@ public class SimplePipeHelper {
 		pipes.put(key, pipe);
 	}
 	
+	/*
+	 * Server side
+	 */
 	@J2SIgnore
 	static String registerPipe(SimplePipeRunnable pipe) {
+		if (pipe.pipeKey != null) {
+			System.out.println("ERROR!!! pipeKey should be null here! " + pipe.pipeKey);
+		}
 		// if (pipe == null) return null; // should never register null pipe!
 		if (pipes == null) {
 			pipes = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(50));
 		}
+		
+		// TODO: Synchronize pipe key
 		String key = nextPipeKey();
 		while (pipes.get(key) != null) {
 			key = nextPipeKey();;
@@ -84,9 +100,8 @@ public class SimplePipeHelper {
 		return key;
 	}
 
-	/**
+	/*
 	 * Generate random pipe key.
-	 * @return
 	 */
 	@J2SIgnore
 	static String nextPipeKey() {
@@ -104,17 +119,23 @@ public class SimplePipeHelper {
 		return buf.toString();
 	}
 	
-	/**
-	 * 
-	 * @param key
-	 * 
-	 * @j2sNative
-	 * delete net.sf.j2s.ajax.SimplePipeHelper.pipes[key];
-	 */
+	@J2SNative({
+		"delete net.sf.j2s.ajax.SimplePipeHelper.pipes[key];"
+	})
 	static void removePipe(String key) {
-		if (pipes == null || key == null) return;
-		SimplePipeRunnable removedPipe = pipes.remove(key);
-		if (removedPipe != null && pipeMap != null) {
+		if (key == null) {
+			System.out.println("Removing pipe for null key???");
+			return;
+		}
+		if (pipes != null) {
+			SimplePipeRunnable removedPipe = pipes.remove(key);
+			if (removedPipe != null) {
+				removedPipe.pipeAlive = false;
+			//} else {
+			//	System.out.println("Pipe " + key + " is already removed!");
+			}
+		}
+		if (pipeMap != null) {
 			Vector<SimpleSerializable> removedVector = pipeMap.remove(key);
 			if (removedVector != null) {
 				synchronized (removedVector) {
@@ -124,16 +145,11 @@ public class SimplePipeHelper {
 		}
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @return
-	 * 
-	 * @j2sNative
-	 * var ps = net.sf.j2s.ajax.SimplePipeHelper.pipes;
-	 * if (ps == null || key == null) return null;
-	 * return ps[key];
-	 */
+	@J2SNative({
+		"var ps = net.sf.j2s.ajax.SimplePipeHelper.pipes;",
+		"if (ps == null || key == null) return null;",
+		"return ps[key];"
+	})
 	public static SimplePipeRunnable getPipe(String key) {
 		if (pipes == null || key == null) return null;
 		return pipes.get(key);
@@ -146,28 +162,14 @@ public class SimplePipeHelper {
 		}
 		return pipeMap.get(key);
 	}
-	
-	/**
-	 * Tear down the pipe and release its resources.
-	 * @param key
-	 */
-	@J2SIgnore
-	static void pipeTearDown(String key) {
-		if (pipeMap == null) return;
-		Vector<SimpleSerializable> vector = pipeMap.get(key);
-		if (vector == null) return;
-		vector.add(null); // terminating signal
-		synchronized (vector) {
-			// Tear down...
-			vector.notifyAll();
-		}
-		pipeMap.remove(key);
-	}
 
 	@J2SIgnore
 	static void pipeIn(String key, SimpleSerializable[] ss) {
 		Vector<SimpleSerializable> vector = getPipeVector(key);
-		if (vector == null) return; // throw exception?
+		if (vector == null) {
+			System.out.println("There are no pipe listening?!!!!");
+			return; // throw exception?
+		}
 		for (int i = 0; i < ss.length; i++) {
 			vector.add(ss[i]);
 		}
@@ -203,6 +205,152 @@ public class SimplePipeHelper {
 		} else {
 			pipe.pipeClosed();
 		}
+	}
+	
+	@J2SIgnore
+	public static void printStatistics() {
+		if (pipes != null) {
+			System.out.println("Totoal pipe count: " + pipes.size());
+			System.out.println("Totoal pipe map count: " + pipeMap.size());
+//			int toooooooCount = 0;
+			System.out.println(new Date());
+			Object[] keys = pipeMap.keySet().toArray();
+			for (int i = 0; i < keys.length; i++) {
+				String key = (String) keys[i];
+				Vector<?> vector = pipeMap.get(key);
+				SimplePipeRunnable p = pipes.get(key);
+//				if (p != null) {
+//					if (System.currentTimeMillis() - p.lastLiveDetected > 150000) { // 2.5 minutes
+//						System.out.println("Pipe " + p.pipeKey + " is too old!");
+//						toooooooCount++;
+//					}
+//				}
+				if (p instanceof CompoundPipeRunnable) {
+					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
+					if (cp.status < 3) {
+						System.out.println("Error status for pipe " + cp.pipeKey + " with status " + cp.status);
+					}
+					if (cp.isEmpty()) {
+						System.out.println("Pipe " + cp.pipeKey + " was created at " + new Date(cp.lastSetup));
+					}
+					System.out.println(i + " :: CompoundPipeRunnable status " + cp.status + " and live status is " + cp.isPipeLive());
+					for (int j = 0; j < cp.pipes.length; j++) {
+						if (cp.pipes[j] != null) {
+							System.out.println(j + " : " + cp.pipes[j].session + " / " + cp.pipes[j].isPipeLive());
+						}
+					}
+				}
+				if (vector != null) {
+					int size = vector.size();
+					//if (size > 5) {
+						if (p != null) {
+							System.out.println("::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive);
+						} else {
+							System.out.println("Error pipe " + key + " with size : " + size);
+						}
+					//}
+				}
+			}
+			//System.out.println("Totoal old pipe count: " + toooooooCount);
+		}
+	}
+
+	@J2SIgnore
+	public static long getMonitoringInterval() {
+		return monitoringInterval;
+	}
+
+	@J2SIgnore
+	public static void setMonitoringInterval(long monitoringInterval) {
+		SimplePipeHelper.monitoringInterval = monitoringInterval;
+	}
+
+	@J2SIgnore
+	private static void monitoringAllPipes() {
+		while (true) {
+			try {
+				Thread.sleep(getMonitoringInterval());
+			} catch (InterruptedException e) {
+			}
+			if (pipes == null) {
+				System.err.println("Pipe sessions are null or empty! Managed pipe session monitor exited!");
+				break;
+			}
+			Object[] allPipes = pipes.values().toArray();
+			if (allPipes.length > 500) {
+				System.out.println("Monitoring " + allPipes.length + " pipes ... ");
+			}
+			int nonManaged = 0;
+			for (int i = 0; i < allPipes.length; i++) {
+			    final SimplePipeRunnable pipe = (SimplePipeRunnable) allPipes[i];
+			    if (!pipe.pipeManaged) {
+			    	nonManaged++;
+			    	continue;
+			    }
+			    try {
+					if (!pipe.isPipeLive() || (pipe instanceof CompoundPipeRunnable
+							&& ((CompoundPipeRunnable) pipe).isEmpty()
+							&& System.currentTimeMillis() - ((CompoundPipeRunnable) pipe).lastSetup > 30000)) {
+						//System.out.println("Pipe " + pipe.pipeKey + " live status is " + pipe.isPipeLive());
+                        if (System.currentTimeMillis() - pipe.lastLiveDetected > pipe.pipeWaitClosingInterval()) {
+                        	String pipeKey = pipe.pipeKey;
+                        	(new Thread("Destroy Pipe Thread") {
+                        		@Override
+                        		public void run() {
+                        			//System.out.println("pipe.pipeDestroy...." + pipe.pipeKey);
+                        			try {
+                        				pipe.pipeDestroy();
+                        			} catch (Throwable e) {
+                        				e.printStackTrace();
+                        			}
+                        			try {
+                        				if (pipe.closer != null) {
+                        					//System.out.println("pipe.closer.helpClosing...." + pipe.pipeKey);
+                        					pipe.closer.helpClosing(pipe);
+                        				} else {
+                        					//System.out.println("pipe.pipeClosed...." + pipe.pipeKey);
+                        					pipe.pipeClosed();
+                        				}
+                        			} catch (Throwable e) {
+                        				e.printStackTrace();
+                        			}
+                        		}
+                        	}).start();
+                        	//System.out.println("Use pipe monitor's thread to destroy pipe! " + pipe.pipeKey);
+                        	removePipe(pipeKey);
+                        }
+					} else {
+					    pipe.lastLiveDetected = System.currentTimeMillis();
+					}
+            	} catch (Throwable e) {
+            		e.printStackTrace();
+            	}
+			}
+			//System.out.println("Monitoring skip " + nonManaged + " pipes ... ");
+
+			if (pipes == null || pipes.isEmpty()) {
+				monitored = false;
+				break;
+			}
+		}
+		System.err.println("Pipe sessions are null or empty! Pipe session monitor exited!");
+	}
+
+	@J2SIgnore
+	static void monitoringPipe(SimplePipeRunnable pipe) {
+		long now = System.currentTimeMillis();
+		pipe.lastLiveDetected = now;
+		if (monitored) {
+			return;
+		}
+		monitored = true;
+		Thread thread = new Thread("Managed Pipe Session Monitor") {
+			public void run() {
+				monitoringAllPipes();
+			}
+		};
+		thread.setDaemon(true);
+		thread.start();
 	}
 	
 }
