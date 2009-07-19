@@ -18,14 +18,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 
 /**
  * @author zhou renjian
@@ -49,7 +50,7 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
         URL starterURL = AjaxPlugin.getDefault().getBundle().getEntry(File.separator);
 		String root = "."; //$NON-NLS-1$
 		try {
-			root = Platform.asLocalURL(starterURL).getFile();
+			root = FileLocator.toFileURL(starterURL).getFile();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -61,6 +62,8 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 			newPath = Path.fromPortableString(root + "/ajaxrpc.jar");
 		} else if ("AJAX_PIPE".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxpipe.jar");
+		} else if ("AJAX_STORE".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/ajaxstore.jar");
 		} else if ("J2S_ANNOTATION".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/j2stag.jar");
 		} else if ("AJAX_CORE_SRC".equals(variable)) {
@@ -71,6 +74,8 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 			newPath = Path.fromPortableString(root + "/ajaxrpcsrc.zip");
 		} else if ("AJAX_PIPE_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/ajaxpipesrc.zip");
+		} else if ("AJAX_STORE_SRC".equals(variable)) {
+			newPath = Path.fromPortableString(root + "/ajaxstoresrc.zip");
 		} else if ("J2S_ANNOTATION_SRC".equals(variable)) {
 			newPath = Path.fromPortableString(root + "/j2stagsrc.zip");
 		}
@@ -87,13 +92,15 @@ public class AJAXVariableInitializer extends ClasspathVariableInitializer {
 				setAutobuild(workspace, false);
 				setJREVariable(newPath, variable);	
 			} catch (CoreException ce) {
-				LaunchingPlugin.log(ce);
+				AjaxPlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
+						"net.sf.j2s.ajax", IStatus.ERROR, ce.getMessage(), ce));
 				return;
 			} finally {
 				try {
 					setAutobuild(workspace, wasAutobuild);
 				} catch (CoreException ce) {
-					LaunchingPlugin.log(ce);
+					AjaxPlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
+							"net.sf.j2s.ajax", IStatus.ERROR, ce.getMessage(), ce));
 				}
 			}
 //		}
