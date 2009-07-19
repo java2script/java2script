@@ -17,6 +17,9 @@
             variable="AJAX_PIPE"/>
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_STORE"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
             variable="J2S_ANNOTATION"/>
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
@@ -30,6 +33,9 @@
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
             variable="AJAX_PIPE_SRC"/>
+      <classpathVariableInitializer
+            class="net.sf.j2s.ajax.AJAXVariableInitializer"
+            variable="AJAX_STORE_SRC"/>
       <classpathVariableInitializer
             class="net.sf.j2s.ajax.AJAXVariableInitializer"
             variable="J2S_ANNOTATION_SRC"/>

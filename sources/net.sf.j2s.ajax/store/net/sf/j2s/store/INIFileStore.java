@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Properties;
 
 class INIFileStore implements IStore {
@@ -40,7 +39,7 @@ class INIFileStore implements IStore {
 				}
 			}
 		}
-		lastUpdated = new Date().getTime();
+		lastUpdated = System.currentTimeMillis();
 	}
 
 	public String getProperty(String name) {
@@ -78,7 +77,7 @@ class INIFileStore implements IStore {
 				}
 			}
 		}
-		lastUpdated = new Date().getTime();
+		lastUpdated = System.currentTimeMillis();
 	}
 
 	public boolean isReady() {
