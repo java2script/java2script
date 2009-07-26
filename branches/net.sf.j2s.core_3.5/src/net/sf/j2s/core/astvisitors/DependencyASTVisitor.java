@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
@@ -29,7 +31,9 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -126,13 +130,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 	
 
-	protected void remedyReflectionDependency(Set set) {
+	protected void remedyDependency(Set set) {
 		String[] classNames = getClassNames();
 		for (int i = 0; i < classNames.length; i++) {
 			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
 				return;
 			}
 		}
+		List toRemoveList = new ArrayList();
 		boolean needRemedy = false;;
 		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
 			Object next = iterator.next();
@@ -146,11 +151,20 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			if ("net.sf.j2s.ajax.AClass".equals(name)
 					|| "net.sf.j2s.ajax.ASWTClass".equals(name)) {
 				needRemedy = true;
-				break;
+				//break;
+			}
+			for (Iterator itr = classNameSet.iterator(); itr.hasNext();) {
+				String className = (String) itr.next();
+				if (name.startsWith(className + ".")) { // inner class dependency
+					toRemoveList.add(next);
+				}
 			}
 		}
 		if (needRemedy) {
 			set.add("java.lang.reflect.Constructor");
+		}
+		for (Iterator iterator = toRemoveList.iterator(); iterator.hasNext();) {
+			set.remove(iterator.next());
 		}
 	}
 
@@ -158,9 +172,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		checkSuperType(musts);
 		checkSuperType(requires);
 		checkSuperType(optionals);
-		remedyReflectionDependency(musts);
-		remedyReflectionDependency(requires);
-		remedyReflectionDependency(optionals);
+		remedyDependency(musts);
+		remedyDependency(requires);
+		remedyDependency(optionals);
 
 		musts.remove("");
 		requires.remove("");
@@ -334,6 +348,44 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	protected void readClasses(Annotation annotation, Set set) {
+		StringBuffer buf = new StringBuffer();
+		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+		if (annotationBinding != null) {
+			IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
+			if (valuePairs != null && valuePairs.length > 0) {
+				for (int i = 0; i < valuePairs.length; i++) {
+					Object value = valuePairs[i].getValue();
+					if (value instanceof Object[]) {
+						Object[] values = (Object[]) value;
+						for (int j = 0; j < values.length; j++) {
+							Object item = values[j];
+							if (item instanceof ITypeBinding) {
+								ITypeBinding binding = (ITypeBinding) item;
+								buf.append(binding.getQualifiedName());
+								buf.append(",");
+							}
+						}
+						continue;
+					} else if (value instanceof ITypeBinding) {
+						ITypeBinding binding = (ITypeBinding) value;
+						value = binding.getQualifiedName();
+					}
+
+					buf.append(value);
+					buf.append(",");
+				}
+			}
+		}
+		String[] split = buf.toString().trim().split("\\s*,\\s*");
+		for (int i = 0; i < split.length; i++) {
+			String s = split[i].trim();
+			if (s.length() > 0) {
+				set.add(s);
+			}
+		}
+	}
+
 	protected void readClasses(TagElement tagEl, Set set) {
 		List fragments = tagEl.fragments();
 		StringBuffer buf = new StringBuffer();
@@ -398,6 +450,29 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			classNameSet.add(thisClassName);
 			classBindingSet.add(resolveBinding);
 		}
+		readTags(node);
+
+		visitForMusts(node);
+		visitForRequires(node);
+		visitForOptionals(node);
+		return super.visit(node);
+	}
+
+	public boolean visit(FieldDeclaration node) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
+		}
+		return super.visit(node);
+	}
+
+	public boolean visit(Initializer node) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
+		}
+		return super.visit(node);
+	}
+
+	private void readTags(AbstractTypeDeclaration node) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List tags = javadoc.tags();
@@ -415,10 +490,26 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				}
 			}
 		}
-		visitForMusts(node);
-		visitForRequires(node);
-		visitForOptionals(node);
-		return super.visit(node);
+		List modifiers = node.modifiers();
+		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = (Object) iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int idx = qName.indexOf("J2S");
+				if (idx != -1) {
+					String annName = qName.substring(idx);
+					annName = annName.replaceFirst("J2S", "@j2s");
+					if (annName.startsWith("@j2sRequireImport")) {
+						readClasses(annotation, requires);
+					} else if (annName.startsWith("@j2sOptionalImport")) {
+						readClasses(annotation, optionals);
+					} else if (annName.startsWith("@j2sIgnoreImport")) {
+						readClasses(annotation, ignores);
+					}
+				}
+			}
+		}
 	}
 	/*
 	 * (non-Javadoc)
@@ -432,23 +523,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			classNameSet.add(thisClassName);
 			classBindingSet.add(resolveBinding);
 		}
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					String tagName = tagEl.getTagName();
-					if ("@j2sRequireImport".equals(tagName)) {
-						readClasses(tagEl, requires);
-					} else if ("@j2sOptionalImport".equals(tagName)) {
-						readClasses(tagEl, optionals);
-					} else if ("@j2sIgnoreImport".equals(tagName)) {
-						readClasses(tagEl, ignores);
-					} 
-				}
-			}
-		}
+		readTags(node);
+
 		musts.add("java.lang.Enum");
 		visitForMusts(node);
 		visitForRequires(node);
@@ -603,6 +679,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					requires.addAll(visitor.optionals);
 				}
 			} else if (element instanceof Initializer) {
+				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+					continue;
+				}
 				DependencyASTVisitor visitor = getSelfVisitor();
 				element.accept(this);
 				requires.addAll(visitor.musts);
@@ -610,6 +689,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				requires.addAll(visitor.optionals);
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 					List fragments = field.fragments();
 					for (int j = 0; j < fragments.size(); j++) {
 						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments
@@ -668,6 +750,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
+				|| constValue instanceof String
 				|| constValue instanceof Boolean)
 				&& isSimpleQualified(node)) {
 			//buffer.append(constValue);
@@ -894,6 +977,24 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	
 	public boolean visit(MethodDeclaration node) {
 		IMethodBinding mBinding = node.resolveBinding();
+		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", "deal")) {
+			ITypeBinding[] parameterTypes = mBinding.getParameterTypes();
+			if (parameterTypes != null && parameterTypes.length == 1) {
+				ITypeBinding paramType = parameterTypes[0];
+				ITypeBinding declaringClass = paramType.getDeclaringClass();
+				QNTypeBinding qn = new QNTypeBinding();
+				String qualifiedName = null;
+				if (declaringClass != null) {
+					qn.binding = declaringClass;
+					qualifiedName = declaringClass.getQualifiedName();
+				} else {
+					qn.binding = paramType;
+					qualifiedName = paramType.getQualifiedName();
+				}
+				qn.qualifiedName = discardGenericType(qualifiedName);
+				optionals.add(qn);
+			}
+		}
 		boolean toBeIgnored = false;
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
 			toBeIgnored = true;
@@ -919,78 +1020,19 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				toBeIgnored = true;
 			}
 		}
-		if (toBeIgnored) {
-			boolean toKeep = false;
-			Javadoc javadoc = node.getJavadoc();
-			if (javadoc != null) {
-				List tags = javadoc.tags();
-				if (tags.size() != 0) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sKeep".equals(tagEl.getTagName())) {
-							toKeep = true;
-							break;
-						}
-					}
-				}
-			}
-			if (!toKeep) {
-				return false;
-			}
+		if (toBeIgnored && getJ2STag(node, "@j2sKeep") == null) {
+			return false;
 		}
 		
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return false;
-					}
-				}
-			}
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
 		}
 		
 		if (node.getBody() == null) {
 			/*
 			 * Abstract or native method
 			 */
-			boolean isJ2S = false;
-			if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-				if (javadoc != null) {
-					List tags = javadoc.tags();
-					if (tags.size() != 0) {
-						for (Iterator iter = tags.iterator(); iter.hasNext();) {
-							TagElement tagEl = (TagElement) iter.next();
-							if ("@j2sIgnore".equals(tagEl.getTagName())) {
-								return false;
-							}
-						}
-						if (isDebugging()) {
-							for (Iterator iter = tags.iterator(); iter.hasNext();) {
-								TagElement tagEl = (TagElement) iter.next();
-								if ("@j2sDebug".equals(tagEl.getTagName())) {
-									isJ2S = true;
-									break;
-								}
-							}
-						}
-						if (!isJ2S) {
-							for (Iterator iter = tags.iterator(); iter.hasNext();) {
-								TagElement tagEl = (TagElement) iter.next();
-								if ("@j2sNative".equals(tagEl.getTagName())) {
-									isJ2S = true;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-			if (!isJ2S) {
-				return false;
-			}
+			return false;
 		}
 		return super.visit(node);
 	}
@@ -1100,20 +1142,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sDebug".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
 							return false;
 						}
 					}
@@ -1123,20 +1151,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
-							List fragments = tagEl.fragments();
-							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buffer.append(text);
-								buffer.append("\r\n");
-							}
 							return false;
 						}
 					}
@@ -1145,20 +1159,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
-						List fragments = tagEl.fragments();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buffer.append(text);
-							buffer.append("\r\n");
-						}
 						return false;
 					}
 				}
@@ -1238,6 +1238,43 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return previousStart;
 	}
 	
+	/**
+	 * Method with "j2s*" tag.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	protected Object getJ2STag(BodyDeclaration node, String tagName) {
+		List modifiers = node.modifiers();
+		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+			Object obj = (Object) iter.next();
+			if (obj instanceof Annotation) {
+				Annotation annotation = (Annotation) obj;
+				String qName = annotation.getTypeName().getFullyQualifiedName();
+				int idx = qName.indexOf("J2S");
+				if (idx != -1) {
+					String annName = qName.substring(idx);
+					annName = annName.replaceFirst("J2S", "@j2s");
+					if (annName.startsWith(tagName)) {
+						return annotation;
+					}
+				}
+			}
+		}
+		Javadoc javadoc = node.getJavadoc();
+		if (javadoc != null) {
+			List tags = javadoc.tags();
+			if (tags.size() != 0) {
+				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					TagElement tagEl = (TagElement) iter.next();
+					if (tagName.equals(tagEl.getTagName())) {
+						return tagEl;
+					}
+				}
+			}
+		}
+		return null;
+	}
 
 }
 
@@ -1262,5 +1299,5 @@ class QNTypeBinding {
 	public int hashCode() {
 		return qualifiedName.hashCode();
 	}
-	
+
 }

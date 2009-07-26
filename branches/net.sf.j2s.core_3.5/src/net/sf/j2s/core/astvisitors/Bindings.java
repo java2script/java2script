@@ -955,7 +955,7 @@ public class Bindings {
 	 * @return the type binding
 	 */
 	public static ITypeBinding findTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
-		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
+		if (hierarchyType == null || hierarchyType.isArray() || hierarchyType.isPrimitive()) {
 			return null;
 		}
 		if (fullyQualifiedTypeName.equals(hierarchyType.getQualifiedName())) {
@@ -1429,6 +1429,9 @@ public class Bindings {
 	}
 
 	public static String removeBrackets(String qName) {
+		if (qName == null) {
+			return qName;
+		}
 		int length = qName.length();
 		StringBuffer buf = new StringBuffer();
 		int ltCount = 0;

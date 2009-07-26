@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -57,6 +59,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -442,7 +445,36 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		blockLevel--;
 		super.endVisit(node);
 	}
-	
+
+	public void endVisit(MethodDeclaration node) {
+		List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+		List visitedVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).visitedVars;
+		List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+		List parameters = node.parameters();
+		String methodSig = null;
+		IMethodBinding resolveBinding = node.resolveBinding();
+		if (resolveBinding != null) {
+			methodSig = resolveBinding.getKey();
+		}
+		for (int i = parameters.size() - 1; i >= 0; i--) {
+			SingleVariableDeclaration varDecl = (SingleVariableDeclaration) parameters.get(i);
+			
+			SimpleName name = varDecl.getName();
+			IBinding binding = name.resolveBinding();
+			if (binding != null) {
+				String identifier = name.getIdentifier();
+				ASTFinalVariable f = new ASTFinalVariable(blockLevel + 1, identifier, methodSig);
+				f.toVariableName = getIndexedVarName(identifier, normalVars.size());
+				normalVars.remove(f);
+				if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+					finalVars.remove(f);
+				}
+				visitedVars.remove(f);
+			}
+		}
+		super.endVisit(node);
+	}
+
 	public boolean visit(BooleanLiteral node) {
 		buffer.append(node.booleanValue());
 		return false;

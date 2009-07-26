@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -50,8 +49,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -474,7 +471,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			buffer.append(" (");
-			visitList(node.arguments(), ", ");
+			IMethodBinding methodDeclaration = null;
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(node.arguments(), methodDeclaration);
+			//visitList(node.arguments(), ", ");
 			buffer.append(")");
 		} else {
 			int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
@@ -530,7 +533,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (argSize > 0) {
 				buffer.append(", ");
 			}
-			visitList(arguments, ", ");
+			IMethodBinding methodDeclaration = null;
+			IMethodBinding constructorBinding = node.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(node.arguments(), methodDeclaration);
+
+			//visitList(arguments, ", ");
 			buffer.append(", ");
 			String scope = null;
 			if (methodDeclareStack.size() != 0) {
@@ -561,9 +571,116 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
+	protected void visitMethodParameterList(List arguments,
+			IMethodBinding methodDeclaration, int begin, int end) {
+		ITypeBinding[] parameterTypes = null;
+		String clazzName = null;
+		String methodName = null;
+		/*
+		Object[] ignores = new Object[] {
+				"java.lang.String", "indexOf", new int[] { 0 },
+				"java.lang.String", "lastIndexOf", new int[] { 0 },
+				"java.lang.StringBuffer", "append", new int[] { 0 },
+				"java.lang.StringBuilder", "append", new int[] { 0 }
+		};
+		*/
+		if (methodDeclaration != null) {
+			parameterTypes = methodDeclaration.getParameterTypes();
+			ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+			if (declaringClass != null) {
+				clazzName = declaringClass.getQualifiedName();
+			}
+			methodName = methodDeclaration.getName();
+		}
+		for (int i = begin; i < end; i++) {
+			ASTNode element = (ASTNode) arguments.get(i);
+			String typeStr = null;
+			if (element instanceof CastExpression) {
+				CastExpression castExp = (CastExpression) element;
+				Expression exp = castExp.getExpression();
+				if (exp instanceof NullLiteral) {
+					ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
+					if (nullTypeBinding != null) {
+						if (nullTypeBinding.isArray()) {
+							typeStr = "Array";
+						} else if (nullTypeBinding.isPrimitive()) {
+							Code code = PrimitiveType.toCode(nullTypeBinding.getName());
+							if (code == PrimitiveType.BOOLEAN) {
+								typeStr = "Boolean";
+							} else{
+								typeStr = "Number";
+							}
+						} else if (!nullTypeBinding.isTypeVariable()) {
+							typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
+						}
+					}
+				}
+			}
+			if (typeStr != null) {
+				buffer.append("Clazz.castNullAs (\"");
+				buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
+				buffer.append("\")");
+			} else {
+				boxingNode(element);
+				Expression exp = (Expression) element;
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				String typeName = null;
+				if (typeBinding != null) {
+					typeName = typeBinding.getName();
+				}
+				String parameterTypeName = null;
+				if (parameterTypes != null) {
+					parameterTypeName = parameterTypes[i].getName();
+				}
+				if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
+					boolean ignored = false;
+					/*
+					for (int j = 0; j < ignores.length / 3; j++) {
+						int[] indexes = (int[]) ignores[i + i + i + 2];
+						boolean existed = false;
+						for (int k = 0; k < indexes.length; k++) {
+							if (indexes[k] == i) {
+								existed = true;
+								break;
+							}
+						}
+						if (existed) {
+							if (ignores[0].equals(Bindings.removeBrackets(clazzName)) && ignores[1].equals(methodName)) {
+								ignored = true;
+								break;
+							}
+						}
+					}
+					*/
+					// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
+					ignored = (i == 0 
+							&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
+							&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+					if (!ignored) {
+						buffer.append(".charCodeAt (0)");
+					}
+				}
+			}
+			if (i < end - 1) {
+				buffer.append(", ");
+			}
+		}
+	}
+
+	protected void visitMethodParameterList(List arguments,
+			IMethodBinding methodDeclaration) {
+		visitMethodParameterList(arguments, methodDeclaration, 0, arguments.size());
+	}
+
 	public boolean visit(ConstructorInvocation node) {
 		buffer.append("this.construct (");
-		visitList(node.arguments(), ", ");
+		IMethodBinding methodDeclaration = null;
+		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+		if (constructorBinding != null) {
+			methodDeclaration = constructorBinding.getMethodDeclaration();
+		}
+		visitMethodParameterList(node.arguments(), methodDeclaration);
+		//visitList(node.arguments(), ", ");
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -1115,17 +1232,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(Initializer node) {
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						return false;
-					}
-				}
-			}
+		if (getJ2STag(node, "@j2sIgnore") != null) {
+			return false;
 		}
 		//visitList(node.getBody().statements(), "\r\n");
 		node.getBody().accept(this);
@@ -1133,13 +1241,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return;
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return;
 			}
 		}
@@ -1153,13 +1261,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (getJ2STag(node, "@j2sKeep") == null) {
 					return;
 				}
 			}
 		}
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return;
 			}
 		}
@@ -1174,13 +1282,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(MethodDeclaration node) {
-		if (getJ2SDocTag(node, "@j2sIgnore") != null) {
+		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
 		}
 
 		IMethodBinding mBinding = node.resolveBinding();
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return false;
 			}
 		}
@@ -1194,13 +1302,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
 			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
-				if (getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
 		}
 		if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert")) {
-			if (getJ2SDocTag(node, "@j2sKeep") == null) {
+			if (getJ2STag(node, "@j2sKeep") == null) {
 				return false;
 			}
 		}
@@ -1290,7 +1398,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						break;
 					}
 				}
-				if (isOnlySuper && getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (isOnlySuper && getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
@@ -1299,7 +1407,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if(mBinding != null){
 				boolean isReferenced = MethodReferenceASTVisitor.checkReference(node.getRoot(), 
 						mBinding.getKey());
-				if (!isReferenced && getJ2SDocTag(node, "@j2sKeep") == null) {
+				if (!isReferenced && getJ2STag(node, "@j2sKeep") == null) {
 					return false;
 				}
 			}
@@ -1317,7 +1425,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				node.getName().accept(this);
 				buffer.append(" = ");
 			}
-			if (getJ2SDocTag(node, "@j2sOverride") != null) {
+			if (getJ2STag(node, "@j2sOverride") != null) {
 				buffer.append("Clazz.overrideMethod (");
 			} else {
 				boolean isOK2AutoOverriding = canAutoOverride(node);
@@ -1361,17 +1469,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					isSuperCalled = true;
 				}
 			}
-			Javadoc javadoc = node.getJavadoc();
-			if (javadoc != null) {
-				List tags = javadoc.tags();
-				if (tags.size() != 0) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sIgnoreSuperConstructor".equals(tagEl.getTagName())) {
-							isSuperCalled = true;
-						}
-					}
-				}
+			if (getJ2STag(node, "@j2sIgnoreSuperConstructor") != null) {
+				isSuperCalled = true;
 			}
 			boolean existedSuperClass = false;
 			IMethodBinding binding = node.resolveBinding();
@@ -1384,32 +1483,46 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						&& !"java.lang.Enum".equals(qualifiedName);
 			}
 			if (!isSuperCalled && existedSuperClass) {
-				blockLevel++;
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
 				buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 				buffer.append(", []);\r\n");
-				visitList(statements, ""); 
-				//buffer.append("}");
-				endVisit(node.getBody());
+				boolean read = checkJ2STags(node, false);
+				if (!read) {
+					blockLevel++;
+					visitList(statements, ""); 
+					//buffer.append("}");
+					endVisit(node.getBody());
+				} else {
+					buffer.append("}");
+				}
 			} else {
-				node.getBody().accept(this);
+				boolean read = checkJ2STags(node, true);
+				if (!read) {
+					node.getBody().accept(this);
+				}
 			}
 		} else if (node.getBody() == null) {
 			blockLevel++;
-			buffer.append("{\r\n");
-			visitNativeJavadoc(node.getJavadoc(), null, false);
-			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
-			for (int i = normalVars.size() - 1; i >= 0; i--) {
-				ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
-				if (var.blockLevel >= blockLevel) {
-					normalVars.remove(i);
+			boolean read = checkJ2STags(node, true);
+			if (!read) {
+				buffer.append("{\r\n");
+				visitNativeJavadoc(node.getJavadoc(), null, false);
+				List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+				for (int i = normalVars.size() - 1; i >= 0; i--) {
+					ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+					if (var.blockLevel >= blockLevel) {
+						normalVars.remove(i);
+					}
 				}
+				buffer.append("}");
 			}
 			blockLevel--;
-			buffer.append("}");
 		} else {
-			node.getBody().accept(this);
+			boolean read = checkJ2STags(node, true);
+			if (!read) {
+				node.getBody().accept(this);
+			}
 		}
 		if (isPrivate) {
 			buffer.append(", $fz.isPrivate = true, $fz)");
@@ -1470,6 +1583,32 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 		return false;
+	}
+
+	/*
+	 * Check to see whether there are @j2s* and append sources to buffer
+	 */
+	private boolean checkJ2STags(MethodDeclaration node, boolean needScope) {
+		String prefix = "{\r\n";
+		String suffix = "\r\n}";
+		if (!needScope) {
+			prefix = "";
+			suffix = "";
+		}
+		boolean read = false;
+		if (isDebugging()) {
+			read = readSources(node, "@j2sDebug", prefix, suffix, false);
+		}
+		if (!read) {
+			boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
+			if (!toCompileVariableName) {
+				read = readSources(node, "@j2sNativeSrc", prefix, suffix, false);
+			}
+		}
+		if (!read) {
+			read = readSources(node, "@j2sNative", prefix, suffix, false);
+		}
+		return read;
 	}
 
 	private boolean containsOnlySuperCall(Block body) {
@@ -1596,49 +1735,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			//if (args.size() == 1) {
 				Expression arg = (Expression) args.get(args.size() - 1);
 				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-				if (resolveTypeBinding.isArray()) {
+				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) {
 					needBrackets = false;
 				}
 			//}
 			if (needBrackets) buffer.append("[");
+			//IMethodBinding methodDeclaration = node.resolveMethodBinding();
+			//visitMethodParameterList(node.arguments(), methodDeclaration, paramTypes.length - 1, size);
 			visitList(args, ", ", paramTypes.length - 1, size);
 			if (needBrackets) buffer.append("]");
 		} else {
-			for (Iterator iter = args.iterator(); iter.hasNext();) {
-				ASTNode element = (ASTNode) iter.next();
-				String typeStr = null;
-				if (element instanceof CastExpression) {
-					CastExpression castExp = (CastExpression) element;
-					Expression exp = castExp.getExpression();
-					if (exp instanceof NullLiteral) {
-						ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
-						if (nullTypeBinding != null) {
-							if (nullTypeBinding.isArray()) {
-								typeStr = "Array";
-							} else if (nullTypeBinding.isPrimitive()) {
-								Code code = PrimitiveType.toCode(nullTypeBinding.getName());
-								if (code == PrimitiveType.BOOLEAN) {
-									typeStr = "Boolean";
-								} else{
-									typeStr = "Number";
-								}
-							} else if (!nullTypeBinding.isTypeVariable()) {
-								typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
-							}
-						}
-					}
-				}
-				if (typeStr != null) {
-					buffer.append("Clazz.castNullAs (\"");
-					buffer.append(typeStr);
-					buffer.append("\")");
-				} else {
-					boxingNode(element);
-				}
-				if (iter.hasNext()) {
-					buffer.append(", ");
-				}
-			}
+			IMethodBinding methodDeclaration = node.resolveMethodBinding();
+			visitMethodParameterList(node.arguments(), methodDeclaration);
 			//visitList(args, ", ");
 		}
 		buffer.append(")");
@@ -1998,17 +2106,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode methodParent = methoBlock.getParent();
 			if (methodParent instanceof MethodDeclaration) {
 				MethodDeclaration method = (MethodDeclaration) methodParent;
-				Javadoc javadoc = method.getJavadoc();
-				if (javadoc != null) {
-					List tags = javadoc.tags();
-					if (tags.size() != 0) {
-						for (Iterator iter = tags.iterator(); iter.hasNext();) {
-							TagElement tagEl = (TagElement) iter.next();
-							if ("@j2sIgnoreSuperConstructor".equals(tagEl.getTagName())) {
-								return false;
-							}
-						}
-					}
+				if (getJ2STag(method, "@j2sIgnoreSuperConstructor") != null) {
+					return false;
 				}
 			}
 		}
@@ -2020,7 +2119,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		List arguments = node.arguments();
 		if (arguments.size() > 0) {
 			buffer.append(", [");
-			visitList(arguments, ", ");
+			IMethodBinding methodDeclaration = null;
+			if (constructorBinding != null) {
+				methodDeclaration = constructorBinding.getMethodDeclaration();
+			}
+			visitMethodParameterList(arguments, methodDeclaration);
+			//visitList(arguments, ", ");
 			buffer.append("]");
 		}
 		buffer.append(");\r\n");
@@ -2078,7 +2182,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String name = getJ2SName(node.getName());
 		buffer.append(name);
 		buffer.append("\", [");
-		visitList(node.arguments(), ", ");
+		IMethodBinding methodDeclaration = node.resolveMethodBinding();
+		visitMethodParameterList(node.arguments(), methodDeclaration);
+		//visitList(node.arguments(), ", ");
 		buffer.append("])");
 		return false;
 	}
@@ -2147,9 +2253,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			for (Iterator iter = node.bodyDeclarations().iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof Initializer) {
+					if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+						continue;
+					}
 					needReturn = true;
 				} else if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((field.getModifiers() & Modifier.STATIC) != 0) {
 						needReturn = true;
 					} else if (node.isInterface()) {
@@ -2265,12 +2377,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 				needPreparation = isFieldNeedPreparation(field);
 				if (needPreparation) {
 					break;
 				}
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
 				if ((init.getModifiers() & Modifier.STATIC) == 0) {
 					needPreparation = true;
 					break;
@@ -2283,12 +2401,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if (node.isInterface() || !isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
+					if (getJ2STag(init, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((init.getModifiers() & Modifier.STATIC) == 0) {
 						element.accept(this);
 					}
@@ -2313,6 +2437,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		int staticCount = -1;
 		ReferenceASTVisitor refVisitor = new ReferenceASTVisitor();
+		/*
+		 * Fixing bug#2797539 : Incorrect instantiation of member before inner class declaration inside interface
+		 * http://sourceforge.net/tracker/?func=detail&aid=2797539&group_id=155436&atid=795800
+		 * Interface's inner classes declaration is not in the correct order. Fix it by move codes a few lines
+		 * ahead of member initialization. 
+		 */
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
@@ -2323,7 +2453,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					 */
 					element.accept(this);
 				}
+			}
+		}
+		// Interface's inner interfaces or classes
+		buffer.append(laterBuffer);
+		
+		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
+			ASTNode element = (ASTNode) iter.next();
+			if (element instanceof TypeDeclaration) {
+				if (node.isInterface()) {
+					// the above codes have already dealt those inner classes inside interface
+					// just ignore here
+					continue;
+				}
 			} else if (element instanceof Initializer) {
+				if (getJ2STag((Initializer) element, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (staticCount != -1) {
 					buffer.append(");\r\n");
 					staticCount = -1;
@@ -2335,6 +2481,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 			if ((field.getModifiers() & Modifier.STATIC) != 0) {
 				List fragments = field.fragments();
 				for (int j = 0; j < fragments.size(); j++) {
@@ -2456,8 +2605,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (staticCount != -1) {
 			buffer.append(");\r\n");
 		}
-		// Interface's inner interfaces or classes
-		buffer.append(laterBuffer);
 		
 		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
 		if (fieldsSerializables.length() > 0) {
@@ -2466,25 +2613,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(");\r\n");
 		}
 		
-		TagElement tagEl = getJ2SDocTag(node, "@j2sSuffix");
-		if (tagEl != null) {
-			List fragments = tagEl.fragments();
-			StringBuffer buf = new StringBuffer();
-			boolean isFirstLine = true;
-			for (Iterator iterator = fragments.iterator(); iterator
-					.hasNext();) {
-				TextElement commentEl = (TextElement) iterator.next();
-				String text = commentEl.getText().trim();
-				if (isFirstLine) {
-					if (text.length() == 0) {
-						continue;
-					}
-				}
-				buf.append(text);
-				buf.append("\r\n");
-			}
-			buffer.append("\r\n" + buf.toString().trim() + "\r\n");
-		}
+		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
 		laterBuffer = new StringBuffer();
 		super.endVisit(node);
 	}
@@ -2492,7 +2621,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private String prepareSimpleSerializable(TypeDeclaration node, List bodyDeclarations) {
 		StringBuffer fieldsSerializables = new StringBuffer();
 		ITypeBinding binding = node.resolveBinding();
-		boolean isSimpleSerializable = (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
+		boolean isSimpleSerializable = binding != null
+				&& (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
@@ -2665,33 +2795,7 @@ public class CB extends CA {
 		if (node.isInterface()) {
 			return false;
 		}
-		Javadoc javadoc = node.getJavadoc();
-		if (javadoc != null) {
-			List tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sPrefix".equals(tagEl.getTagName())) {
-						List fragments = tagEl.fragments();
-						StringBuffer buf = new StringBuffer();
-						boolean isFirstLine = true;
-						for (Iterator iterator = fragments.iterator(); iterator
-								.hasNext();) {
-							TextElement commentEl = (TextElement) iterator.next();
-							String text = commentEl.getText().trim();
-							if (isFirstLine) {
-								if (text.length() == 0) {
-									continue;
-								}
-							}
-							buf.append(text);
-							buf.append("\r\n");
-						}
-						buffer.append(buf.toString().trim() + " ");
-					}
-				}
-			}
-		}
+		readSources(node, "@j2sPrefix", "", " ", true);
 		buffer.append("cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
@@ -2723,6 +2827,9 @@ public class CB extends CA {
 					continue;
 				}
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (getJ2STag(fieldDeclaration, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (isFieldNeedPreparation(fieldDeclaration)) {
 					visitWith(fieldDeclaration, true);
 					continue;
