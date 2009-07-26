@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import net.sf.j2s.core.Java2ScriptProjectNature;
@@ -32,9 +34,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -266,7 +270,12 @@ public class Java2ScriptProjectWizard extends NewElementWizard implements IExecu
 	}
 	
 	protected IClasspathEntry[] updateJavaLibraries(IClasspathEntry[] defaultEntries) {
-		return defaultEntries;
+		List list = new ArrayList();
+		for (int i = 0; i < defaultEntries.length; i++) {
+			list.add(i, defaultEntries[i]);
+		}
+		list.add(JavaCore.newVariableEntry(new Path("J2S_ANNOTATION"), new Path("J2S_ANNOTATION_SRC"), null));
+		return (IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]);
 	}
 	
 }

@@ -18,7 +18,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.sf.j2s.ajax.AjaxPlugin;
@@ -28,12 +27,12 @@ import net.sf.j2s.ui.launching.J2SLaunchingUtil;
 import net.sf.j2s.ui.launching.JavaRuntime;
 import net.sf.j2s.ui.property.FileUtil;
 import net.sf.j2s.ui.property.J2SClasspathModel;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPVariableElement;
 
 /**
  * @author zhou renjian
@@ -66,6 +65,7 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 		list.add(JavaCore.newVariableEntry(new Path("ECLIPSE_SWT"), null, null));
 		list.add(JavaCore.newVariableEntry(new Path("AJAX_SWT"), new Path("AJAX_SWT_SRC"), null));
 		list.add(JavaCore.newVariableEntry(new Path("AJAX_RPC"), new Path("AJAX_RPC_SRC"), null));
+		list.add(JavaCore.newVariableEntry(new Path("AJAX_PIPE"), new Path("AJAX_PIPE_SRC"), null));
 		return super.updateJavaLibraries((IClasspathEntry[]) list.toArray(new IClasspathEntry[list.size()]));
 	}
 
@@ -95,6 +95,13 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 					int idx = classpath.lastIndexOf("<");
 					classpath = classpath.substring(0, idx)
 					+ "\t<classpathentry sourcepath=\"AJAX_RPC_SRC\" kind=\"var\" path=\"AJAX_RPC\"/>\r\n"
+					+ classpath.substring(idx);
+					needUpdate = true;
+				}
+				if (classpath.indexOf("AJAX_PIPE") == -1 && classpath.indexOf("ajaxpipe.jar") == -1) {
+					int idx = classpath.lastIndexOf("<");
+					classpath = classpath.substring(0, idx)
+					+ "\t<classpathentry sourcepath=\"AJAX_PIPE_SRC\" kind=\"var\" path=\"AJAX_PIPE\"/>\r\n"
 					+ classpath.substring(idx);
 					needUpdate = true;
 				}
@@ -143,6 +150,22 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 				e1.printStackTrace();
 			}
 
+			newPath = Path.fromPortableString(root + "/ajaxpipe.jar");
+			File pipeFile = new File(newPath.toOSString());
+			
+			try {
+				FileInputStream is = new FileInputStream(pipeFile);
+				FileOutputStream os = new FileOutputStream(new File(lib, "ajaxpipe.jar"));
+				byte[] buf = new byte[1024];
+				int read = -1;
+				while ((read = is.read(buf)) != -1) {
+					os.write(buf, 0, read);
+				}
+				os.close();
+				is.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			StringBuffer buildxml = new StringBuffer();
 			buildxml.append("<?xml version=\"1.0\"?>\r\n");
 			buildxml.append("<project name=\"java2script.servlet.pack\" default=\"pack.war\" basedir=\".\">\r\n");
@@ -269,40 +292,41 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			webxml.append("<web-app>\r\n");
 			webxml.append("    <display-name>Java2Script</display-name>\r\n");
 			webxml.append("    <description>Java2Script application</description>\r\n");
+
+			webxml.append(genereateServlet("simplerpc", "net.sf.j2s.ajax.SimpleRPCHttpServlet"));
+			//webxml.append(genereateServlet("simplepiperpc", "net.sf.j2s.ajax.SimplePipeRPCHttpServlet"));
+			webxml.append(genereateServlet("piperpc", "net.sf.j2s.ajax.CompoundPipeRPCHttpServlet"));
+			
 			webxml.append("    <servlet>\r\n");
-			webxml.append("        <servlet-name>simplerpc</servlet-name>\r\n");
-			webxml.append("        <servlet-class>net.sf.j2s.ajax.SimpleRPCHttpServlet</servlet-class>\r\n");
-			webxml.append("	       <init-param>\r\n");
-			webxml.append("            <param-name>simple.rpc.runnables</param-name>\r\n");
-			webxml.append("            <!--\r\n");
-			webxml.append("              Qualified names of inherited net.sf.j2s.ajax.SimpleRPCRunnable\r\n");
-			webxml.append("              classes, seperated by \";\".\r\n");
-			webxml.append("            -->\r\n");
-			webxml.append("            <param-value>\r\n");
-			webxml.append("            </param-value>\r\n");
+			webxml.append("        <servlet-name>simplepipe</servlet-name>\r\n");
+			webxml.append("        <servlet-class>net.sf.j2s.ajax.SimplePipeHttpServlet</servlet-class>\r\n");
+			webxml.append("        <init-param>\r\n");
+			webxml.append("            <param-name>simple.pipe.query.timeout</param-name>\r\n");
+			webxml.append("            <param-value>20000</param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
 			webxml.append("        <init-param>\r\n");
-			webxml.append("            <param-name>simple.rpc.xss.support</param-name>\r\n");
-			webxml.append("            <param-value>true</param-value>\r\n");
-			webxml.append("        </init-param>\r\n");
-			webxml.append("        <!--\r\n");
-			webxml.append("        <init-param>\r\n");
-			webxml.append("            <param-name>simple.rpc.post.limit</param-name>\r\n");
-			webxml.append("            <param-value>16777216</param-value>\r\n");
+			webxml.append("            <param-name>simple.pipe.script.breakout</param-name>\r\n");
+			webxml.append("            <param-value>1200000</param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
 			webxml.append("        <init-param>\r\n");
-			webxml.append("            <param-name>simple.rpc.xss.max.parts</param-name>\r\n");
-			webxml.append("            <param-value>8</param-value>\r\n");
+			webxml.append("            <param-name>simple.pipe.max.items.per.query</param-name>\r\n");
+			webxml.append("            <param-value>60</param-value>\r\n");
 			webxml.append("        </init-param>\r\n");
-			webxml.append("        <init-param>\r\n");
-			webxml.append("            <param-name>simple.rpc.xss.max.latency</param-name>\r\n");
-			webxml.append("            <param-value>6000</param-value>\r\n");
-			webxml.append("        </init-param>\r\n");
-			webxml.append("        -->\r\n");
 			webxml.append("    </servlet>\r\n");
+
 			webxml.append("    <servlet-mapping>\r\n");
 			webxml.append("        <servlet-name>simplerpc</servlet-name>\r\n");
 			webxml.append("        <url-pattern>/simplerpc</url-pattern>\r\n");
+			webxml.append("    </servlet-mapping>\r\n");
+			
+			webxml.append("    <servlet-mapping>\r\n");
+			webxml.append("        <servlet-name>piperpc</servlet-name>\r\n");
+			webxml.append("        <url-pattern>/piperpc</url-pattern>\r\n");
+			webxml.append("    </servlet-mapping>\r\n");
+			
+			webxml.append("    <servlet-mapping>\r\n");
+			webxml.append("        <servlet-name>simplepipe</servlet-name>\r\n");
+			webxml.append("        <url-pattern>/simplepipe</url-pattern>\r\n");
 			webxml.append("    </servlet-mapping>\r\n");
 			webxml.append("</web-app>\r\n");
 			try {
@@ -318,5 +342,45 @@ public class Java2ScriptServletProjectWizard extends Java2ScriptProjectWizard {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	
+	private String genereateServlet(String name, String clazz) {
+		StringBuffer webxml = new StringBuffer();
+		webxml.append("    <servlet>\r\n");
+		webxml.append("        <servlet-name>" + name + "</servlet-name>\r\n");
+		webxml.append("        <servlet-class>" + clazz + "</servlet-class>\r\n");
+		webxml.append("	       <init-param>\r\n");
+		webxml.append("            <param-name>simple.rpc.runnables</param-name>\r\n");
+		webxml.append("            <!--\r\n");
+		webxml.append("              Qualified names of inherited net.sf.j2s.ajax.SimpleRPCRunnable\r\n");
+		webxml.append("              classes, seperated by \";\".\r\n");
+		webxml.append("            -->\r\n");
+		webxml.append("            <param-value>\r\n");
+		webxml.append("            </param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.rpc.xss.support</param-name>\r\n");
+		webxml.append("            <param-value>true</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <!--\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.rpc.post.limit</param-name>\r\n");
+		webxml.append("            <param-value>16777216</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.rpc.xss.max.parts</param-name>\r\n");
+		webxml.append("            <param-value>8</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.rpc.xss.max.latency</param-name>\r\n");
+		webxml.append("            <param-value>6000</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        <init-param>\r\n");
+		webxml.append("            <param-name>simple.pipe.managable</param-name>\r\n");
+		webxml.append("            <param-value>true</param-value>\r\n");
+		webxml.append("        </init-param>\r\n");
+		webxml.append("        -->\r\n");
+		webxml.append("    </servlet>\r\n");
+		return webxml.toString();
 	}
 }
