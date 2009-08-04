@@ -152,8 +152,9 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 		synchronized (allPipes) {
 			for (int i = 0; i < allPipes.length; i++) {
 				if (allPipes[i] != null && allPipes[i].id.equals(id)) {
+					CompoundPipeRunnable pipe = allPipes[i];
 					allPipes[i] = null;
-					return allPipes[i];
+					return pipe;
 				}
 			}
 			return null;

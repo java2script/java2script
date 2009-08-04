@@ -12,6 +12,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 	
 	@Override
 	public void ajaxRun() {
+		lastLiveDetected = System.currentTimeMillis();
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe != null) {
 			pipeAlive = pipeSetup();
@@ -42,7 +43,11 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
 	@Override
 	public boolean pipeDestroy() {
-		if (!super.pipeDestroy()) return false;
+		if (destroyed) {
+			return false; // already destroyed, no further destroy actions
+		}
+		pipeAlive = false;
+		destroyed = true;
 		
 		/**
 		 * @j2sNative
@@ -54,6 +59,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		}
 
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
+		if (pipe == null) {
+			pipe = parent;
+		}
 		if (pipe instanceof CompoundPipeRunnable) {
 			CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
 			if (cp.status < 3) {
@@ -62,6 +70,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 			cp.unweave(this);
 		}
 		session = null;
+		pipeKey = null;
 		return true;
 	}
 	
@@ -82,6 +91,8 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 
 	@Override
 	public void pipeThrough(Object... args) {
+		if (args == null || args.length == 0) return;
+		
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (!(pipe instanceof CompoundPipeRunnable)) return;
 		CompoundPipeRunnable cp = (CompoundPipeRunnable) pipe;
@@ -123,6 +134,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		}
 		this.updateStatus(false);
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(this.pipeKey);
+		if (pipe == null) {
+			pipe = this.parent;
+		}
 		if (pipe instanceof CompoundPipeRunnable) {
 			CompoundPipeRunnable p = (CompoundPipeRunnable) pipe;
 			if (p.pipes != null) {
@@ -134,12 +148,12 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 					}
 				}
 			}
-			
-			if (!p.isPipeLive()) {
-				String pipeKey = this.pipeKey;
-				p.pipeDestroy();
-				SimplePipeHelper.removePipe(pipeKey);
-			}
+		}
+		
+		if (pipe != null && !pipe.isPipeLive()) {
+			String pipeKey = this.pipeKey;
+			pipe.pipeDestroy();
+			SimplePipeHelper.removePipe(pipeKey);
 		}
 		return true;
 	}

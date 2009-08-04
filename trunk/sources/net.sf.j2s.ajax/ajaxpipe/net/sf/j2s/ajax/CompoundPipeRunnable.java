@@ -58,7 +58,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				pipes[i].pipeDestroy();
 			}
 		}
-		pipeKey = null;
+		//pipeKey = null;
 		status = 0; // starting
 		return super.pipeDestroy();
 	}
@@ -136,6 +136,9 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 		synchronized (pipes) {
 			for (int i = 0; i < pipes.length; i++) {
 				if (pipe == pipes[i]) {
+					pipe.pipeKey = this.pipeKey;
+					pipe.parent = this;
+					initPipeSession(pipe);
 					return false;
 				}
 			}
@@ -147,6 +150,8 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 					}
 					pipes[i] = pipe; // replace it!!!
 					lastSetup = System.currentTimeMillis();
+					pipe.pipeKey = this.pipeKey;
+					pipe.parent = this;
 					return true;
 				}
 			}
@@ -165,7 +170,13 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				lastSetup = System.currentTimeMillis();
 			}
 		}
+		pipe.pipeKey = this.pipeKey;
 		pipe.parent = this;
+		initPipeSession(pipe);
+		return true;
+	}
+
+	private void initPipeSession(CompoundPipeSession pipe) {
 		while (pipe.session == null) {
 			String key = nextSessionKey();
 			boolean isKeyOK = true;
@@ -180,18 +191,20 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 				break;
 			}
 		}
-		return true;
 	}
 
 	public boolean unweave(CompoundPipeSession pipe) {
+		/*
 		if (pipeKey == null || !pipeKey.equals(pipe.pipeKey)) {
 			return false;
 		}
+		//*/
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipe == pipes[i] || (pipe.session != null && pipes[i] != null
 					&& pipe.session.equals(pipes[i].session))) {
 				pipes[i] = null;
 				lastSetup = System.currentTimeMillis();
+				pipe.pipeKey = null;
 				return true;
 			}
 		}
