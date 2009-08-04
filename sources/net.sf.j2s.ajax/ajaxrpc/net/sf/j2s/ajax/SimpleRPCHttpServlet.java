@@ -356,7 +356,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		resp.setDateHeader("Expires", 0);
 
 		if (isScriptReuest) { // cross site script response
-			resp.setContentType("text/javascript");
+			resp.setContentType("text/javascript; charset=utf-8");
 			//resp.setCharacterEncoding("utf-8");
 			PrintWriter writer = resp.getWriter();
 			writer.write("net.sf.j2s.ajax.SimpleRPCRequest.xssNotify(");
@@ -371,7 +371,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		
 		// normal text response
-		resp.setContentType("text/plain");
+		resp.setContentType("text/plain; charset=utf-8");
 		//resp.setCharacterEncoding("utf-8");
 		PrintWriter writer = resp.getWriter();
 		writer.write(serialize);

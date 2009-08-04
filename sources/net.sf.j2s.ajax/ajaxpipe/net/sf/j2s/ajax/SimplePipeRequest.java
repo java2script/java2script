@@ -499,7 +499,6 @@ document.body.appendChild (ifr);
 	}
 	
 	static void pipeNotifyCallBack(String key, String result) {
-		//System.out.println(key + "::" + result);
 		if (PIPE_STATUS_LOST.equals(result)) {
 			SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
 			if (pipe != null) {
@@ -566,12 +565,13 @@ document.body.appendChild (ifr);
 	 * @param runnable
 	 * 
 	 * @j2sNative
-var ifr = document.createElement ("IFRAME");
-ifr.style.display = "none";
 var pipeKey = runnable.pipeKey;
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
 var url = runnable.getPipeURL();
+spr.pipeIFrameClean (pipeKey, url);
 var subdomain = arguments[1];
+var ifr = document.createElement ("IFRAME");
+ifr.style.display = "none";
 ifr.id = "pipe-" + pipeKey;
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
 		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true)
@@ -672,25 +672,29 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 * @param pipeKey
 	 * 
 	 * @j2sNative
-	 * 
-	 * var iframes = document.getElementsByTagName ("IFRAME");
-	 * for (var i = 0; i < iframes.length; i++) {
-	 * 	var el = iframes[i];
-	 * 	if (urlPrefix != null) {
-	 * 		var url = null;
-	 * 		try {
-	 * 			url = el.url;
-	 * 		} catch (e) {}
-	 * 		if (url != null && url.indexOf (urlPrefix) == 0) {
-	 * 			el.parentNode.removeChild (el);
-	 * 			continue;
-	 * 		}
-	 * 	}
-	 * 	if (el.id == pipeKey || el.id == "pipe-" + pipeKey) {
-	 * 		el.parentNode.removeChild (el);
-	 * 		continue;
-	 * 	}
-	 * }
+var iframes = document.getElementsByTagName ("IFRAME");
+for (var i = 0; i < iframes.length; i++) {
+	var el = iframes[i];
+	if (urlPrefix != null) {
+		var url = null;
+		try {
+			url = el.url;
+		} catch (e) {
+			try {
+				url = el.contentWindow.location;
+			} catch (e) {
+			}
+		}
+		if (url != null && url.indexOf (urlPrefix) == 0) {
+			el.parentNode.removeChild (el);
+			continue;
+		}
+	}
+	if (el.id == pipeKey || el.id == "pipe-" + pipeKey) {
+		el.parentNode.removeChild (el);
+		continue;
+	}
+}
 	 */
 	native static void pipeIFrameClean(String pipeKey, String urlPrefix); // for JavaScript only
 	
@@ -991,6 +995,7 @@ p.initParameters = function () {
 	this.pipeQueryInterval = 1000;
 	this.pipeLiveNotifyInterval = 25000;
 	this.runnable = null;
+	this.lastXHR = -1;
 	var oThis = this;
 	with (window.parent) {
 		var sph = net.sf.j2s.ajax.SimplePipeHelper;
@@ -1021,6 +1026,9 @@ p.initHttpRequest = function () {
 	}
 	var oThis = this;
 	this.xhrHandle.onreadystatechange = function () {
+		if (oThis.xhrHandle == null) {
+			return;
+		}
 		var state = oThis.xhrHandle.readyState;
 		if (state == 4) {
 			var pipeData = oThis.xhrHandle.responseText;
@@ -1089,12 +1097,18 @@ var created = new Date ().getTime ();
 return function () {
 	var runnable = p.runnable;
 	if (runnable != null) {
+		if (runnable.pipeKey != p.key) {
+			net.sf.j2s.ajax.SimplePipeHelper.removePipe (p.key);
+			net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (p.key, p.pipeURL);
+			return;
+		}
 		var now = new Date ().getTime ();
 		var last = runnable.lastPipeDataReceived;
 		if (last == -1) {
 			last = created;
 		}
-		if ((runnable.queryEnded || now - last >= p.pipeLiveNotifyInterval)
+		if ((runnable.queryEnded || (now - last >= p.pipeLiveNotifyInterval
+				&& (p.lastXHR == -1 || now - p.lastXHR >= p.pipeLiveNotifyInterval)))
 				&& runnable.queryFailedRetries < 3) {
 			runnable.queryEnded = false;
 			var method = null;
@@ -1117,6 +1131,7 @@ return function () {
 			} catch (e) {};
 			try {
 				p.pipeXHRQuery (p.xhrHandle, method, url, data);
+				p.lastXHR = new Date ().getTime ();
 			} catch (e) {
 				p.xhrHandle.onreadystatechange = function () {};
 				p.xhrHandle = null;

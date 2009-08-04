@@ -42,6 +42,7 @@ public class CompoundPipeSWTRequest extends SimplePipeRequest {
 			if (pipe.status == 0) { // pipe is not started yet
 				pipe.status = 1; // pipe request is sent
 				pipe.pipeKey = null;
+				p.pipeKey = null;
 				SimplePipeSWTRequest.swtPipe(pipe);
 			}
 		} else {

@@ -35,7 +35,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	@J2SIgnore
 	SimplePipeHelper.IPipeClosing closer; // For Java server side
 	
-	private boolean destroyed;
+	boolean destroyed;
 	
 	int queryFailedRetries; // >=3 will mark pipe broken
 	
@@ -74,6 +74,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	@Override
 	public void ajaxRun() {
+		lastLiveDetected = System.currentTimeMillis();
 		pipeKey = SimplePipeHelper.registerPipe(this);
 		pipeAlive = pipeSetup();
 		if (!pipeAlive) {
@@ -112,7 +113,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		if (destroyed) {
 			return false; // already destroyed, no further destroy actions
 		}
+		pipeAlive = false;
 		destroyed = true;
+		if (pipeKey != null) {
+			SimplePipeHelper.removePipe(pipeKey);
+			pipeKey = null;
+		}
 		return true;
 	}
 
@@ -194,6 +200,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * This method is run on server side
 	 */
 	protected void pipeMonitoring() {
+		lastLiveDetected = System.currentTimeMillis();
 		if (pipeManaged) {
 			SimplePipeHelper.monitoringPipe(this);
 			return;
@@ -201,7 +208,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		Thread thread = new Thread("Pipe Monitor") {
 			
 			public void run() {
-				lastLiveDetected = System.currentTimeMillis();
 				long interval = pipeMonitoringInterval();
 				if (interval <= 0) {
 					interval = 1000;
