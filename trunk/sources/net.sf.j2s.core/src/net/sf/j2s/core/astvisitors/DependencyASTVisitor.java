@@ -1006,6 +1006,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					"through",
 					"pipeMonitoring",
 					"pipeMonitoringInterval",
+					"pipeWaitClosingInterval",
 					"setPipeHelper"
 			};
 			for (int i = 0; i < pipeMethods.length; i++) {
@@ -1021,6 +1022,13 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			}
 		}
 		if (toBeIgnored && getJ2STag(node, "@j2sKeep") == null) {
+			return false;
+		}
+		
+		if (getJ2STag(node, "@j2sNative") != null) {
+			return false;
+		}
+		if (getJ2STag(node, "@j2sNativeSrc") != null) {
 			return false;
 		}
 		

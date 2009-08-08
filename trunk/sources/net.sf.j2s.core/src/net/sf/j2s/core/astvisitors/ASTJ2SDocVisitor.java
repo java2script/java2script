@@ -261,6 +261,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 												buf.append(lines[j]);
 												buf.append("\r\n");
 											}
+										} else if (value instanceof String) {
+											buf.append(value);
+											buf.append("\r\n");
 										}
 									}
 								}
