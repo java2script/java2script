@@ -34,8 +34,6 @@ import org.eclipse.swt.graphics.RGB;
  * </p>
  * 
  * @since 3.1
- *
- * @j2sRequireImport java.util.ArrayList
  */
 public abstract class ResourceManager {
     
@@ -266,11 +264,20 @@ public abstract class ResourceManager {
     public void disposeExec(Runnable r) {
         Assert.isNotNull(r);
         
-        if (disposeExecs == null) {
+        if (disposeExecs == null)
+        /**
+         * @j2sNative
+         * this.disposeExecs = new Array ();
+         */
+        {
             disposeExecs = new ArrayList();
         }
-        
+        /**
+         * @j2sNative
+         * this.disposeExecs[this.disposeExecs.length] = r;  
+         */ {
         disposeExecs.add(r);
+        }
     }
     
     /**
@@ -287,10 +294,36 @@ public abstract class ResourceManager {
             return;
         }
         
+        /**
+         * @j2sNative
+         * var empty = true;
+         * var removed = false;
+         * var length = this.disposeExecs.length;
+         * for (var i = 0; i < length; i++) {
+         * 	if (this.disposeExecs[i] === r) {
+         * 		this.disposeExecs[i] = null;
+         * 		removed = true;
+         * 		if (!empty) {
+         * 			break;
+         * 		}
+         * 	}
+         * 	if (this.disposeExecs[i] != null) {
+         * 		empty = false;
+         * 		if (removed) {
+         * 			break;
+         * 		}
+         * 	}
+         * }
+         * if (empty) {
+         * 	this.disposeExecs = null;
+         * }
+         */
+        {
         disposeExecs.remove(r);
         
         if (disposeExecs.isEmpty()) {
             disposeExecs = null;
+        }
         }
     }
 }

@@ -42,8 +42,6 @@ import org.eclipse.swt.widgets.Display;
  * Unlike the FontRegistry, it is an error to replace images. As a result
  * there are no events that fire when values are changed in the registry
  * </p>
- *
- * @j2sRequireImport org.eclipse.jface.util.Assert
  */
 public class ImageRegistry {
     /**

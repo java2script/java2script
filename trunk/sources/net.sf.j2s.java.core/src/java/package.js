@@ -118,7 +118,14 @@ if (!isDebugging) {
 		"$.CompoundPipeSWTRequest"
 	]);
 }
-	
+
+	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("net.sf.j2s.*") + "store.z.js", [
+  		"net.sf.j2s.store.IStore",
+  		"$.CookieStore",
+  		"$.XSSCookieStore",
+  		"$.SimpleStore"
+  	]);
+
 	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
 		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
 	base = base.substring (0, base.lastIndexOf ("java/"));

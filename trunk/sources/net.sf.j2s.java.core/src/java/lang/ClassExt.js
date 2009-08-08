@@ -341,6 +341,7 @@ Clazz.makeFunction = function (jsr) {
 			jsr.setEvent (e);
 		}
 		jsr.run ();
+		/*
 		if (e != null && jsr.isReturned != null && jsr.isReturned()) {
 			// Is it correct to stopPropagation here? --Feb 19, 2006
 			e.cancelBubble = true;
@@ -348,6 +349,7 @@ Clazz.makeFunction = function (jsr) {
 				e.stopPropagation();
 			}
 		}
+		*/
 		if (jsr.returnSet == 1) {
 			return jsr.returnNumber;
 		} else if (jsr.returnSet == 2) {
@@ -674,11 +676,12 @@ Object.prototype.notify = function () {};
 Object.prototype.notifyAll = function () {};
 Object.prototype.wait = function () {};
 
+Object.prototype.to$tring = Object.prototype.toString;
 Object.prototype.toString = function () {
 	if (this.__CLASS_NAME__ != null) {
 		return "[" + this.__CLASS_NAME__ + " object]";
 	} else {
-		return "[object]";
+		return this.to$tring ();
 	}
 };
 
@@ -721,6 +724,9 @@ System = {
 			return ;
 		}
 		System.props.setProperty (key, val);
+	},
+	currentTimeMillis : function () {
+		return new Date ().getTime ();
 	},
 	arraycopy : function (src, srcPos, dest, destPos, length) {
 		if (src !== dest) {

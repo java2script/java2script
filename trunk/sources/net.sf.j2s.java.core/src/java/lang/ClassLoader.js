@@ -480,10 +480,16 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 		if (map[key] == null) {
 			map[key] = base;
 		}
+		key = "@net.sf.j2s";
+		if (map[key] == null) {
+			map[key] = base;
+		}
 	} else if (pkg == "swt") { //abbrev
 		pkg = "org.eclipse.swt";
 	} else if (pkg == "ajax") { //abbrev
 		pkg = "net.sf.j2s.ajax";
+	} else if (pkg == "j2s") { //abbrev
+		pkg = "net.sf.j2s";
 	}
 	if (pkg.lastIndexOf (".*") == pkg.length - 2) {
 		pkg = pkg.substring (0, pkg.length - 2);
@@ -941,6 +947,7 @@ ClazzLoader.loadScript = function (file) {
 		// ignore onload event and no call of ClazzLoader.scriptLoading
 		return;
 	}
+	script.defer = true;
 	// Alert when the script is loaded
 	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
 		if (ClazzLoader.isGecko && (file.indexOf ("file:") == 0 
@@ -1040,7 +1047,6 @@ ClazzLoader.loadScript = function (file) {
 		}
 	} else { // IE
 		ClazzLoader.needOnloadCheck = true;
-		script.defer = true;
 		script.onreadystatechange = function () {
 			var ee = arguments.callee;
 			var path = ee.path;
@@ -2764,6 +2770,7 @@ ClazzLoader.lastHotspotJSFailed = false;
 ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 	var script = document.createElement ("SCRIPT");
 	script.type = "text/javascript";
+	script.defer = true;
 	script.src = hotspotURL;
 	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
 		script.onload = script.onerror = function () {
