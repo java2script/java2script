@@ -28,6 +28,7 @@
 	<property name="j2s.ajax.bin" value="${j2s.ajax.project}/bin"/>
 	<property name="j2s.swt.bin" value="${j2s.swt.project}/bin"/>
 	<property name="j2s.junit.bin" value="${j2s.junit.project}/bin"/>
+	<property name="j2s.jface.bin" value="${j2s.jface.project}/bin"/>
 	
 	<property name="j2s.lib.dist" value="${j2s.lib.project}/j2slib"/>
 	
@@ -306,7 +307,23 @@
     		<arg value="net/sf/j2s/ajax/CompoundPipeRequest.js"/>
     		<arg value="net/sf/j2s/ajax/CompoundPipeSWTRequest.js"/>
         	
-        	<classpath>
+    		<classpath>
+        		<pathelement path="${j2s.lib.project}/bin"/>
+        	</classpath>
+        </java>
+    	
+        <java classname="net.sf.j2s.lib.build.J2SConcat">
+        	<arg value="false"/>
+        	<arg value="${j2s.ajax.bin}/net/sf/j2s/store.z.js"/>
+        	
+        	<arg value="${j2s.ajax.bin}"/>
+        	
+    		<arg value="net/sf/j2s/store/IStore.js"/>
+    		<arg value="net/sf/j2s/store/CookieStore.js"/>
+    		<arg value="net/sf/j2s/store/XSSCookieStore.js"/>
+    		<arg value="net/sf/j2s/store/SimpleStore.js"/>
+
+    		<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
@@ -339,7 +356,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.lib                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt">
+    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt,j2s.pack.jface">
     	<copy file="${j2s.lib.dist}/../.htaccess" todir="${j2s.lib.dist}"/>
     	<copy todir="${j2s.lib.dist}">
     		<fileset dir="${j2s.ajax.bin}">
@@ -405,6 +422,7 @@
         <tstamp>
             <format property="today" pattern="yyyyMMdd"/>
         </tstamp>
+    	<!--
     	<zip destfile="${j2s.lib.project}/j2slib.zip">
     		<fileset dir="${j2s.lib.project}">
     			<include name="j2slib/**"/>
@@ -415,8 +433,9 @@
     			<exclude name="**/*.svn"/>
     		</fileset>
     	</zip>
-    	<zip destfile="${j2s.lib.project}/2.0.0-v${today}.zip">
-    		<zipfileset dir="${j2s.lib.project}/j2slib" prefix="2.0.0-v${today}">
+    	-->
+    	<zip destfile="${j2s.lib.project}/2.0.1-v${today}.zip">
+    		<zipfileset dir="${j2s.lib.project}/j2slib" prefix="2.0.1-v${today}">
     			<exclude name="**/*.zip"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
@@ -467,7 +486,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.swt                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.css,pack.swt.more,pack.swt.event,pack.swt.shell">
+    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.css,pack.swt.more,pack.swt.event,pack.swt.shell,pack.swt.dnd">
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -1034,5 +1053,192 @@
         </java>
     </target>
 
-</project>
 
+    <!-- ================================= 
+          target: pack.swt.dnd              
+         ================================= -->
+    <target name="pack.swt.dnd" description="Building j2s-swt-*.z.js">
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/dnd.z.js"/>
+        	
+        	<arg value="${j2s.swt.bin}"/>
+        	
+   			<arg value="org/eclipse/swt/dnd/DND.js"/>
+    		<arg value="org/eclipse/swt/dnd/DNDEvent.js"/>
+    		<arg value="org/eclipse/swt/dnd/DNDListener.js"/>
+    		<arg value="org/eclipse/swt/dnd/DragSourceListener.js"/>
+    		<arg value="org/eclipse/swt/dnd/DragSourceAdapter.js"/>
+    		<arg value="org/eclipse/swt/dnd/DragSourceEvent.js"/>
+    		<arg value="org/eclipse/swt/dnd/DropTargetListener.js"/>
+    		<arg value="org/eclipse/swt/dnd/DropTargetAdapter.js"/>
+    		<arg value="org/eclipse/swt/dnd/DropTargetEvent.js"/>
+    		<arg value="org/eclipse/swt/dnd/TransferData.js"/>
+    		<arg value="org/eclipse/swt/dnd/Transfer.js"/>
+    		<arg value="org/eclipse/swt/dnd/DragSource.js"/>
+    		<arg value="org/eclipse/swt/dnd/DropTarget.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: j2s.pack.jface                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="j2s.pack.jface" depends="pack.jface.viewer,pack.jface.resource,pack.jface.util,pack.jface.window">
+	</target>
+
+    <!-- ================================= 
+          target: pack.jface.viewer             
+         ================================= -->
+    <target name="pack.jface.viewer" description="Building jface/viewers.interfaces.z.js">
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.jface.bin}/org/eclipse/jface/viewers.interfaces.z.js"/>
+        	
+        	<arg value="${j2s.jface.bin}"/>
+        	
+    		<arg value="org/eclipse/jface/viewers/IBaseLabelProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IBasicPropertyConstants.js"/>
+    		<arg value="org/eclipse/jface/viewers/ICellEditorListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/ICellEditorValidator.js"/>
+    		<arg value="org/eclipse/jface/viewers/ICellModifier.js"/>
+    		<arg value="org/eclipse/jface/viewers/ICheckable.js"/>
+    		<arg value="org/eclipse/jface/viewers/ICheckStateListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/IColorDecorator.js"/>
+    		<arg value="org/eclipse/jface/viewers/IColorProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IContentProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IDecoration.js"/>
+    		<arg value="org/eclipse/jface/viewers/IDoubleClickListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/IElementComparer.js"/>
+    		<arg value="org/eclipse/jface/viewers/IFilter.js"/>
+    		<arg value="org/eclipse/jface/viewers/IFontDecorator.js"/>
+    		<arg value="org/eclipse/jface/viewers/IFontProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IInputProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IInputSelectionProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ILabelDecorator.js"/>
+    		<arg value="org/eclipse/jface/viewers/IDelayedLabelDecorator.js"/>
+    		<arg value="org/eclipse/jface/viewers/ILabelProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ILabelProviderListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/ILazyContentProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ILightweightLabelDecorator.js"/>
+    		<arg value="org/eclipse/jface/viewers/IOpenListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/ISelection.js"/>
+    		<arg value="org/eclipse/jface/viewers/ISelectionChangedListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/ISelectionProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IPostSelectionProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IStructuredContentProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/IStructuredSelection.js"/>
+    		<arg value="org/eclipse/jface/viewers/ITableColorProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ITableFontProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ITableLabelProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ITreeContentProvider.js"/>
+    		<arg value="org/eclipse/jface/viewers/ITreeViewerListener.js"/>
+    		<arg value="org/eclipse/jface/viewers/IViewerLabelProvider.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+    </target>
+
+    <!-- ================================= 
+          target: pack.jface.resource             
+         ================================= -->
+    <target name="pack.jface.resource" description="Building jface/resource.z.js">
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.jface.bin}/org/eclipse/jface/resource.z.js"/>
+        	
+        	<arg value="${j2s.jface.bin}"/>
+        	
+        	<arg value="org/eclipse/jface/resource/DataFormatException.js"/>
+        	<arg value="org/eclipse/jface/resource/DeviceResourceDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ColorDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/DeviceResourceException.js"/>
+        	<arg value="org/eclipse/jface/resource/FontDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ArrayFontDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ImageDataImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/FileImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/DerivedImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/CompositeImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ImageRegistry.js"/>
+        	<arg value="org/eclipse/jface/resource/JFaceResources.js"/>
+        	<arg value="org/eclipse/jface/resource/JFaceColors.js"/>
+        	<arg value="org/eclipse/jface/resource/MissingImageDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/NamedFontDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ResourceRegistry.js"/>
+        	<arg value="org/eclipse/jface/resource/RGBColorDescriptor.js"/>
+        	<arg value="org/eclipse/jface/resource/ColorRegistry.js"/>
+        	<arg value="org/eclipse/jface/resource/FontRegistry.js"/>
+        	<arg value="org/eclipse/jface/resource/ResourceManager.js"/>
+        	<arg value="org/eclipse/jface/resource/AbstractResourceManager.js"/>
+        	<arg value="org/eclipse/jface/resource/DeviceResourceManager.js"/>
+        	<arg value="org/eclipse/jface/resource/LocalResourceManager.js"/>
+        	<arg value="org/eclipse/jface/resource/StringConverter.js"/>
+        	<arg value="org/eclipse/jface/resource/URLImageDescriptor.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+    </target>
+
+    <!-- ================================= 
+          target: pack.jface.util             
+         ================================= -->
+    <target name="pack.jface.util" description="Building jface/util.z.js">
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.jface.bin}/org/eclipse/jface/util.z.js"/>
+        	
+        	<arg value="${j2s.jface.bin}"/>
+        	
+        	<arg value="org/eclipse/jface/util/Geometry.js"/>
+        	<arg value="org/eclipse/jface/util/ILogger.js"/>
+        	<arg value="org/eclipse/jface/util/IOpenEventListener.js"/>
+        	<arg value="org/eclipse/jface/util/IPropertyChangeListener.js"/>
+        	<arg value="org/eclipse/jface/util/ISafeRunnableRunner.js"/>
+        	<arg value="org/eclipse/jface/util/ListenerList.js"/>
+        	<arg value="org/eclipse/jface/util/OpenStrategy.js"/>
+        	<arg value="org/eclipse/jface/util/Policy.js"/>
+        	<arg value="org/eclipse/jface/util/PropertyChangeEvent.js"/>
+        	<arg value="org/eclipse/jface/util/SafeRunnable.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+    </target>
+
+    <!-- ================================= 
+          target: pack.jface.window             
+         ================================= -->
+    <target name="pack.jface.window" description="Building jface/window.z.js">
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="false"/>
+        	<arg value="${j2s.jface.bin}/org/eclipse/jface/window.z.js"/>
+        	
+        	<arg value="${j2s.jface.bin}"/>
+        	
+        	<arg value="../../net.sf.j2s.ajax/bin/net/sf/j2s/ajax/AWindowDelegate.js"/>
+        	<arg value="../../net.sf.j2s.ajax/bin/net/sf/j2s/ajax/AWindowRunnable.js"/>
+        	<arg value="org/eclipse/jface/operation/IRunnableContext.js"/>
+        	<arg value="org/eclipse/jface/operation/IRunnableWithProgress.js"/>
+        	<arg value="org/eclipse/jface/operation/IThreadListener.js"/>
+        	<arg value="org/eclipse/jface/window/IShellProvider.js"/>
+        	<arg value="org/eclipse/jface/window/SameShellProvider.js"/>
+        	<arg value="org/eclipse/jface/window/WindowManager.js"/>
+        	<arg value="org/eclipse/jface/window/Window.js"/>
+        	<!--arg value="org/eclipse/jface/window/ApplicationWindow.js"/-->
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+    </target>
+
+</project>
