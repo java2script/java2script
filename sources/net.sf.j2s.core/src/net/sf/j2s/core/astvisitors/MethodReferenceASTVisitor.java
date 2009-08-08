@@ -41,7 +41,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 
 	private MethodReferenceASTVisitor(String methodSignature) {
 		super();
-		this.methodSignature = methodSignature.replaceAll("<[^>]+>", "");
+		this.methodSignature = methodSignature.replaceAll("%?<[^>]+>", "");
 	}
 	
 	public static boolean checkReference(ASTNode node, String methodSignature) {
@@ -62,7 +62,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		if (constructorBinding != null) {
 			String key = constructorBinding.getKey();
 			if (key != null) {
-				key = key.replaceAll("<[^>]+>", "");
+				key = key.replaceAll("%?<[^>]+>", "");
 			}
 			if (methodSignature.equals(key)) {
 				isReferenced = true;
@@ -79,7 +79,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		String key = constructorBinding.getKey();
 		if (key != null) {
-			key = key.replaceAll("<[^>]+>", "");
+			key = key.replaceAll("%?<[^>]+>", "");
 		}
 		if (methodSignature.equals(key)) {
 			isReferenced = true;
@@ -96,7 +96,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		if (methodBinding != null) {
 			String key = methodBinding.getKey();
 			if (key != null) {
-				key = key.replaceAll("<[^>]+>", "");
+				key = key.replaceAll("%?<[^>]+>", "");
 			}
 			if (methodSignature.equals(key)) {
 				isReferenced = true;
@@ -115,7 +115,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 		if (methodBinding != null) {
 			key = methodBinding.getKey();
 			if (key != null) {
-				key = key.replaceAll("<[^>]+>", "");
+				key = key.replaceAll("%?<[^>]+>", "");
 			}
 		}
 		if (methodSignature.equals(key)) {
@@ -180,6 +180,7 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 				"through",
 				"pipeMonitoring",
 				"pipeMonitoringInterval",
+				"pipeWaitClosingInterval",
 				"setPipeHelper"
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {

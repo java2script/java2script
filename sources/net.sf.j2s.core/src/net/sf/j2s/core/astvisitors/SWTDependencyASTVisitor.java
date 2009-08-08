@@ -35,10 +35,57 @@ public class SWTDependencyASTVisitor extends DependencyASTVisitor {
 				"org.eclipse.swt.widgets.Dialog", "checkSubclass",
 				"org.eclipse.swt.widgets.Widget", "checkWidget",
 				"org.eclipse.swt.widgets.Display", "checkDevice",
-				"org.eclipse.swt.graphics.Device", "checkDevice"
+				"org.eclipse.swt.graphics.Device", "checkDevice",
+				"org.eclipse.jface.util.Assert", "*",
+				"org.eclipse.core.internal.commands.util.Assert", "*",
+				"org.eclipse.core.internal.runtime.Assert", "*"
 		};
 	}
 	
+	/* (non-Javadoc)
+	 * @see net.sf.j2s.core.astvisitors.ASTScriptVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
+	 */
+	public boolean visit(MethodInvocation node) {
+		IMethodBinding methodBinding = node.resolveMethodBinding();
+		String[] filterMethods = getFilterMethods();
+		for (int i = 0; i < filterMethods.length; i += 2) {
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return false;
+				}
+			} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+				return false;
+			}
+		}
+		return super.visit(node);
+	}
+	
+	/* (non-Javadoc)
+	 * @see net.sf.j2s.core.astvisitors.ASTScriptVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
+	 */
+	public boolean visit(MethodDeclaration node) {
+		IMethodBinding methodBinding = node.resolveBinding();
+		String[] filterMethods = getFilterMethods();
+		for (int i = 0; i < filterMethods.length; i += 2) {
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return false;
+				}
+			} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+				return false;
+			}
+		}
+		return super.visit(node);
+	}
+
 	/* (non-Javadoc)
 	 * @see net.sf.j2s.core.astvisitors.ASTScriptVisitor#endVisit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
@@ -46,8 +93,16 @@ public class SWTDependencyASTVisitor extends DependencyASTVisitor {
 		IMethodBinding methodBinding = node.resolveBinding();
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
-				return ;
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return;
+				}
+			} else if (isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+				return;
 			}
 		}
 		super.endVisit(node);

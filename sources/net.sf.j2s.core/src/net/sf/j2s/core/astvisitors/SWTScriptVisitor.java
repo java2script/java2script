@@ -274,7 +274,10 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				"org.eclipse.swt.widgets.Dialog", "checkSubclass",
 				"org.eclipse.swt.widgets.Widget", "checkWidget",
 				"org.eclipse.swt.widgets.Display", "checkDevice",
-				"org.eclipse.swt.graphics.Device", "checkDevice"
+				"org.eclipse.swt.graphics.Device", "checkDevice",
+				"org.eclipse.jface.util.Assert", "*",
+				"org.eclipse.core.internal.commands.util.Assert", "*",
+				"org.eclipse.core.internal.runtime.Assert", "*"
 		};
 	}
 	/* (non-Javadoc)
@@ -352,7 +355,15 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return false;
+				}
+			} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
 				return false;
 			}
 		}
@@ -365,8 +376,16 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IMethodBinding methodBinding = node.resolveBinding();
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
-				return ;
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return;
+				}
+			} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+				return;
 			}
 		}
 		super.endVisit(node);
@@ -379,7 +398,15 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		IMethodBinding methodBinding = node.resolveBinding();
 		String[] filterMethods = getFilterMethods();
 		for (int i = 0; i < filterMethods.length; i += 2) {
-			if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
+			if ("*".equals(filterMethods[i + 1])) {
+				if (methodBinding == null) {
+					continue;
+				}
+				ITypeBinding type = methodBinding.getDeclaringClass();
+				if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+					return false;
+				}
+			} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[i], filterMethods[i + 1])) {
 				return false;
 			}
 		}
@@ -407,7 +434,9 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				String[] filterMethods = getFilterMethods();
 				boolean isContinue = false;
 				for (int i = 0; i < filterMethods.length; i += 2) {
-					if (Bindings.isMethodInvoking(exp, filterMethods[i], filterMethods[i + 1])) {
+					if ("*".equals(filterMethods[i + 1])) {
+						continue;
+					} else if (Bindings.isMethodInvoking(exp, filterMethods[i], filterMethods[i + 1])) {
 						isContinue = true;
 						break;
 					}

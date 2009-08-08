@@ -629,7 +629,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					typeName = typeBinding.getName();
 				}
 				String parameterTypeName = null;
-				if (parameterTypes != null) {
+				if (parameterTypes != null && parameterTypes.length > i) { // parameterTypes.length <= i, incorrect method invocation
 					parameterTypeName = parameterTypes[i].getName();
 				}
 				if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
@@ -1257,6 +1257,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				"through",
 				"pipeMonitoring",
 				"pipeMonitoringInterval",
+				"pipeWaitClosingInterval",
 				"setPipeHelper"
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
@@ -1298,6 +1299,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				"through",
 				"pipeMonitoring",
 				"pipeMonitoringInterval",
+				"pipeWaitClosingInterval",
 				"setPipeHelper"
 		};
 		for (int i = 0; i < pipeMethods.length; i++) {
@@ -1508,14 +1510,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (!read) {
 				buffer.append("{\r\n");
 				visitNativeJavadoc(node.getJavadoc(), null, false);
-				List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
-				for (int i = normalVars.size() - 1; i >= 0; i--) {
-					ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
-					if (var.blockLevel >= blockLevel) {
-						normalVars.remove(i);
-					}
-				}
 				buffer.append("}");
+			}
+			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+			for (int i = normalVars.size() - 1; i >= 0; i--) {
+				ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+				if (var.blockLevel >= blockLevel) {
+					normalVars.remove(i);
+				}
 			}
 			blockLevel--;
 		} else {
@@ -1667,7 +1669,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 								boolean isFiltered = false;
 								IMethodBinding methodBinding = method.resolveMethodBinding();
 								for (int j = 0; j < filterMethods.length; j += 2) {
-									if (Bindings.isMethodInvoking(methodBinding, filterMethods[j], filterMethods[j + 1])) {
+									if ("*".equals(filterMethods[i + 1])) {
+										if (methodBinding == null) {
+											continue;
+										}
+										ITypeBinding type = methodBinding.getDeclaringClass();
+										if (type != null && filterMethods[i].equals(type.getQualifiedName())) {
+											isFiltered = true;
+											break;
+										}
+									} else if (Bindings.isMethodInvoking(methodBinding, filterMethods[j], filterMethods[j + 1])) {
 										isFiltered = true;
 										break;
 									}
