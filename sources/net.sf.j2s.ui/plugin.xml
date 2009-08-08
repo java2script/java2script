@@ -358,8 +358,19 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="J2SCompletionProposalComputer">
 		<javaCompletionProposalComputer
-			class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+        activate="true"
+        categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
+        class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="J2SCompletionProposalComputer_all">
+		<javaCompletionProposalComputer
+        activate="true"
+        categoryId="org.eclipse.jdt.ui.javaAllProposalCategory"
+        class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
