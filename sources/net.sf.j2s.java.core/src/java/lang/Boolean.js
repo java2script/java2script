@@ -1,5 +1,11 @@
 Clazz.load (["java.lang.Comparable", "java.io.Serializable"], "java.lang.Boolean", null, function () {
 java.lang.Boolean = Boolean;
+if (Clazz.supportsNativeObject) {
+	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+		var p = Clazz.extendedObjectMethods[i];
+		Boolean.prototype[p] = JavaObject.prototype[p];
+	}
+}
 Boolean.__CLASS_NAME__ = "Boolean";
 Clazz.implementOf (Boolean, [java.io.Serializable, java.lang.Comparable]);
 Boolean.equals = Clazz.innerFunctions.equals;

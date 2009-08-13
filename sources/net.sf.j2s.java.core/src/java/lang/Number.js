@@ -1,5 +1,11 @@
 Clazz.load (["java.io.Serializable"], "java.lang.Number", null, function () {
 java.lang.Number = Number;
+if (Clazz.supportsNativeObject) {
+	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+		var p = Clazz.extendedObjectMethods[i];
+		Number.prototype[p] = JavaObject.prototype[p];
+	}
+}
 //Clazz.decorateAsType (Number, "Number", null, java.io.Serializable, null, true);
 Number.__CLASS_NAME__ = "Number";
 Clazz.implementOf (Number, java.io.Serializable);

@@ -445,7 +445,7 @@ window.assert = function () {
 	 * java.lang.System may be overriden later
 	 */
 	/* public */
-	System = new Object ();
+	System = new JavaObject ();
 	
 	System.currentTimeMillis = function () {
 		return new Date ().getTime ();
@@ -492,9 +492,8 @@ window.assert = function () {
 	};
 
 	/* public */
-	System.out = {
-		__CLASS_NAME__ : "java.io.PrintStream"
-	}; //new Object ();
+	System.out = new JavaObject ();
+	System.out.__CLASS_NAME__ = "java.io.PrintStream";
 	
 	/* public */
 	System.out.print = function (s) { 
@@ -514,9 +513,8 @@ window.assert = function () {
 	};
 	
 	/* public */
-	System.err = {
-		__CLASS_NAME__ : "java.io.PrintStream"
-	}; //new Object ();
+	System.err = new JavaObject ();
+	System.err.__CLASS_NAME__ = "java.io.PrintStream";
 	
 	/* public */
 	System.err.print = function (s) { 
