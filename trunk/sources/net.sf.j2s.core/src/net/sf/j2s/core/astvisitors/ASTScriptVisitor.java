@@ -463,6 +463,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			String fqName = getTypeStringName(node.getType());
 			if ("String".equals(fqName) || "java.lang.String".equals(fqName)) {
 				buffer.append(" String.instantialize");
+			} else if ("Object".equals(fqName) || "java.lang.Object".equals(fqName)) {
+				// For discussion, please visit http://groups.google.com/group/java2script/browse_thread/thread/3d6deb9c3c0a0cda
+				buffer.append(" new JavaObject");
 			} else {
 				buffer.append(" new ");
 				if (fqName != null) {
@@ -2876,6 +2879,13 @@ public class CB extends CA {
 		} else if (type.isArrayType()) {
 			buffer.append("Array");
 			return false;
+		} else {
+			ITypeBinding resolveBinding = type.resolveBinding();
+			String name = resolveBinding.getName();
+			if ("Object".equals(name) || "java.lang.Object".equals(name)) {
+				buffer.append("JavaObject");
+				return false;
+			}
 		}
 		type.accept(this);
 		return false;
