@@ -45,6 +45,74 @@ Class = Clazz = function () {
 NullObject = function () {
 };
 
+JavaObject = Object;
+
+/* protected */
+Clazz.supportsNativeObject = window["j2s.object.native"];
+
+if (Clazz.supportsNativeObject) {
+	JavaObject = function () {};
+}
+
+JavaObject.prototype.equals = function (obj) {
+	return this == obj;
+};
+
+JavaObject.prototype.hashCode = function () {
+	try {
+		return this.toString ().hashCode ();
+	} catch (e) {
+		var str = ":";
+		for (var s in this) {
+			str += s + ":"
+		}
+		return str.hashCode ();
+	}
+};
+
+JavaObject.prototype.getClass = function () {
+	return Clazz.getClass (this);
+};
+
+JavaObject.prototype.clone = function () {
+	var o = new this.constructor ();
+	for (var i in this) {
+		o[i] = this[i];
+	}
+	return o;
+};
+
+/*
+ * Methods for thread in Object
+ */
+JavaObject.prototype.finalize = function () {};
+JavaObject.prototype.notify = function () {};
+JavaObject.prototype.notifyAll = function () {};
+JavaObject.prototype.wait = function () {};
+
+JavaObject.prototype.to$tring = Object.prototype.toString;
+JavaObject.prototype.toString = function () {
+	if (this.__CLASS_NAME__ != null) {
+		return "[" + this.__CLASS_NAME__ + " object]";
+	} else {
+		return this.to$tring ();
+	}
+};
+
+if (Clazz.supportsNativeObject) {
+	/* protected */
+	Clazz.extendedObjectMethods = [
+			"equals", "hashCode", "getClass", "clone", "finalize", "notify", "notifyAll", "wait", "to$tring", "toString"
+	];
+
+	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+		var p = Clazz.extendedObjectMethods[i];
+		Array.prototype[p] = JavaObject.prototype[p];
+	}
+	JavaObject.__CLASS_NAME__ = "Object";
+	JavaObject["getClass"] = function () { return JavaObject; }; 
+}
+
 /**
  * Try to fix bug on Safari
  */
@@ -154,7 +222,7 @@ Clazz.getClass = function (clazzHost) {
 		 * null is always treated as Object.
 		 * But what about "undefined"?
 		 */
-		return Object;
+		return JavaObject;
 	}
 	if (typeof clazzHost == "function") {
 		return clazzHost;
@@ -172,7 +240,7 @@ Clazz.getClass = function (clazzHost) {
 				if (obj.__CLASS_NAME__ != null) {
 					clazzName = obj.__CLASS_NAME__;
 				} else if (obj.constructor == null) {
-					return Object; // Is it safe?
+					return JavaObject; // Is it safe?
 				} else {
 					return obj.constructor;
 				}
@@ -416,7 +484,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 		
 		zzalc = zzalc.superClazz;
 		if (zzalc == null) {
-			if (clazzBase === Object) {
+			if (clazzBase === Object || clazzBase === JavaObject) {
 				/*
 				 * getInheritedLevel(String, CharSequence) == 1
 				 * getInheritedLevel(String, Object) == 1.5
@@ -1337,7 +1405,7 @@ Clazz.evalType = function (typeStr, isQualified) {
 	} else if (typeStr == "number") {
 		return Number;
 	} else if (typeStr == "object") {
-		return Object;
+		return JavaObject;
 	} else if (typeStr == "string") {
 		return String;
 	} else if (typeStr == "boolean") {
@@ -1524,7 +1592,7 @@ Clazz.innerFunctions = {
 		if (java.io.InputStream != null) {
 			is = new java.io.InputStream ();
 		} else {
-			is = new Object ();
+			is = new JavaObject ();
 			is.__CLASS_NAME__ = "java.io.InputStream";
 			is.close = function () {};
 		}
@@ -1657,6 +1725,12 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 		prefix[name] = clazzFun;
 	}
 	clazzFun.__CLASS_NAME__ = qName;
+	if (Clazz.supportsNativeObject) {
+		for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+			var p = Clazz.extendedObjectMethods[i];
+			clazzFun.prototype[p] = JavaObject.prototype[p];
+		}
+	}
 	clazzFun.prototype.__CLASS_NAME__ = qName;
 	/*
 	clazzFun.equals = Clazz.innerFunctions.equals;
@@ -1759,6 +1833,12 @@ Clazz.declareAnonymous = function (prefix, name, clazzParent, interfacez,
 Clazz.decorateAsType = function (clazzFun, qClazzName, clazzParent, 
 		interfacez, parentClazzInstance, inheritClazzFuns) {
 	clazzFun.__CLASS_NAME__ = qClazzName;
+	if (Clazz.supportsNativeObject) {
+		for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+			var p = Clazz.extendedObjectMethods[i];
+			clazzFun.prototype[p] = JavaObject.prototype[p];
+		}
+	}
 	//if (qClazzName != "String" && qClazzName != "Object"
 	//		&& qClazzName != "Number" && qClazzName != "Date") {
 		clazzFun.prototype.__CLASS_NAME__ = qClazzName;

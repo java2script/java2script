@@ -632,74 +632,13 @@ Clazz.load = function (musts, clazz, optionals, declaration) {
  * TODO: make sure that invading Object prototype does not affect other
  * existed library, such as Dojo, YUI, Prototype, ...
  */
-java.lang.Object = Object;
+java.lang.Object = JavaObject;
 
-//Clazz.decorateAsType (java.lang.Object, "Object");
-//Object.__CLASS_NAME__ = "Object";
-
-Object.getName = Clazz.innerFunctions.getName;
-
-Object.prototype.equals = function (obj) {
-	return this == obj;
-};
-
-Object.prototype.hashCode = function () {
-	try {
-		return this.toString ().hashCode ();
-	} catch (e) {
-		var str = ":";
-		for (var s in this) {
-			str += s + ":"
-		}
-		return str.hashCode ();
-	}
-};
-
-Object.prototype.getClass = function () {
-	return Clazz.getClass (this);
-};
-
-Object.prototype.clone = function () {
-	var o = new this.constructor ();
-	for (var i in this) {
-		o[i] = this[i];
-	}
-	return o;
-	//return this;
-};
-
-/*
- * Methods for thread in Object
- */
-Object.prototype.finalize = function () {};
-Object.prototype.notify = function () {};
-Object.prototype.notifyAll = function () {};
-Object.prototype.wait = function () {};
-
-Object.prototype.to$tring = Object.prototype.toString;
-Object.prototype.toString = function () {
-	if (this.__CLASS_NAME__ != null) {
-		return "[" + this.__CLASS_NAME__ + " object]";
-	} else {
-		return this.to$tring ();
-	}
-};
+JavaObject.getName = Clazz.innerFunctions.getName;
 
 w$ = window; // Short for browser's window object
 d$ = document; // Short for browser's document object
 System = {
-	out : {
-		__CLASS_NAME__ : "java.io.PrintStream",
-		print : function () {},
-		printf : function () {},
-		println : function () {}
-	},
-	err : {
-		__CLASS_NAME__ : "java.io.PrintStream",
-		print : function () {},
-		printf : function () {},
-		println : function () {}
-	},
 	currentTimeMillis : function () {
 		return new Date ().getTime ();
 	},
@@ -744,6 +683,18 @@ System = {
 		}
 	}
 };
+System.out = new JavaObject ();
+System.out.__CLASS_NAME__ = "java.io.PrintStream";
+System.out.print = function () {};
+System.out.printf = function () {};
+System.out.println = function () {};
+
+System.err = new JavaObject ();
+System.err.__CLASS_NAME__ = "java.io.PrintStream";
+System.err.print = function () {};
+System.err.printf = function () {};
+System.err.println = function () {};
+
 popup = assert = log = error = window.alert;
 
 Thread = function () {};
@@ -953,7 +904,7 @@ Clazz.innerFunctions.newInstance = function () {
 {
 	var inF = Clazz.innerFunctionNames;
 	for (var i = 0; i < inF.length; i++) {
-		Object[inF[i]] = Clazz.innerFunctions[inF[i]];
+		JavaObject[inF[i]] = Clazz.innerFunctions[inF[i]];
 		Array[inF[i]] = Clazz.innerFunctions[inF[i]];
 	}
 	Array["isArray"] = function () {
