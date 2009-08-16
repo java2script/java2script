@@ -329,6 +329,33 @@ if (isIE) {
 	
 	/**
 	 * @j2sNative
+return function () {
+	var g = net.sf.j2s.ajax.SimpleRPCRequest;
+	var hKey = "h" + rnd;
+	if (g.idSet[hKey] != null) {
+		window.clearTimeout (g.idSet[hKey]);
+		delete g.idSet[hKey];
+	}
+	if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(oScript)) {
+		return; // IE, not completed yet
+	}
+	var src = oScript.src;
+	var idx = src.indexOf ("jzn=");
+	var rid = src.substring (idx + 4, src.indexOf ("&", idx));
+	net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
+	if (oScript.onerror != null) { // W3C
+		oScript.onerror = oScript.onload = null;
+	} else { // IE
+		oScript.onreadystatechange = null;
+	}
+	document.getElementsByTagName ("HEAD")[0].removeChild (oScript);
+	oScript = null;
+};
+	 */
+	native static Object generateCallback4Script(Object oScript, String rnd);
+	
+	/**
+	 * @j2sNative
 var g = net.sf.j2s.ajax.SimpleRPCRequest;
 var runnable = g.idSet["o" + rnd];
 if (runnable == null) return;
@@ -341,36 +368,14 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url + "?jzn=" + rnd + "&jzp=" + length 
 		+ "&jzc=" + (i + 1) + "&jzz=" + content;
-var fun = (function (oScript) {
-	return function () {
-		var g = net.sf.j2s.ajax.SimpleRPCRequest;
-		var hKey = "h" + rnd;
-		if (g.idSet[hKey] != null) {
-			window.clearTimeout (g.idSet[hKey]);
-			delete g.idSet[hKey];
-		}
-		if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(oScript)) {
-			return; // IE, not completed yet
-		}
-		var src = oScript.src;
-		var idx = src.indexOf ("jzn=");
-		var rid = src.substring (idx + 4, src.indexOf ("&", idx));
-		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-		if (oScript.onerror != null) { // W3C
-			oScript.onerror = oScript.onload = null;
-		} else { // IE
-			oScript.onreadystatechange = null;
-		}
-		document.getElementsByTagName ("HEAD")[0].removeChild (oScript);
-	};
-}) (script);
+var fun = g.generateCallback4Script (script, rnd);
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
+script.defer = true;
 if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 	script.onerror = script.onload = fun;
 } else { // IE
-	script.defer = true;
 	script.onreadystatechange = fun;
 }
 var head = document.getElementsByTagName ("HEAD")[0];
@@ -378,7 +383,17 @@ head.appendChild (script);
 g.idSet["h" + rnd] = window.setTimeout (fun, 30000); // 30s timeout // TODO: Expose to configuration
 	 */
 	native static void callByScript(String rnd, String length, String i, String content);
-	
+
+	/**
+	 * @j2sNative
+var state = "" + this.readyState;
+if (state == "loaded" || state == "complete") {
+	this.onreadystatechange = null; 
+	document.getElementsByTagName ("HEAD")[0].removeChild (this);
+}
+	 */
+	native static void ieScriptCleanup();
+
 	/**
 	 * Cross site script notify. Only make senses for JavaScript.
 	 * 
@@ -396,13 +411,7 @@ if (response != null && ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1)
 		var s = ss[i];
 		if (s.src != null && s.src.indexOf ("jzn=" + nameID) != -1
 				&& s.readyState == "interactive") {
- 			s.onreadystatechange =  function () {
-				var state = "" + this.readyState;
-				if (state == "loaded" || state == "complete") {
-					this.onreadystatechange = null; 
- 					document.getElementsByTagName ("HEAD")[0].removeChild (this);
-				}
-			};
+ 			s.onreadystatechange = net.sf.j2s.ajax.SimpleRPCRequest.ieScriptCleanup;
 	 	}
 	}
 }

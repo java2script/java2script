@@ -74,14 +74,27 @@ clpm.DEFAULT_OPACITY = 55;
 		this.monitorEl.style.opacity = alpha / 100.0;
 	}
 };
+/* private */ clpm.hiddingOnMouseOver = function () {
+	this.style.display = "none";
+};
+/* private */ clpm.attached = false;
+/* private */ clpm.cleanup = function () {
+	var oThis = ClassLoaderProgressMonitor;
+	if (oThis.monitorEl != null) {
+		oThis.monitorEl.onmouseover = null;
+	}
+	oThis.monitorEl = null;
+	oThis.bindingParent = null;
+	Clazz.removeEvent (window, "unload", oThis.cleanup);
+	//window.detachEvent ("onunload", oThis.cleanup);
+	oThis.attached = false;
+};
 /* private */ clpm.createHandle = function () {
 	var div = document.createElement ("DIV");
 	div.style.cssText = "position:absolute;bottom:4px;left:4px;padding:2px 8px;"
 			+ "z-index:3333;background-color:#8e0000;color:yellow;" 
 			+ "font-family:Arial, sans-serif;font-size:10pt;white-space:nowrap;";
-	div.onmouseover = function () {
-		this.style.display = "none";
-	};
+	div.onmouseover = this.hiddingOnMouseOver;
 	this.monitorEl = div;
 	if (this.bindingParent == null) {
 		document.body.appendChild (div);
@@ -126,11 +139,21 @@ clpm.DEFAULT_OPACITY = 55;
 /* public */
 clpm.initialize = function (parent) {
 	this.bindingParent = parent;
+	if (parent != null && !this.attached) {
+		this.attached = true;
+		Clazz.addEvent (window, "unload", this.cleanup);
+		// window.attachEvent ("onunload", this.cleanup);
+	}
 };
 /* public */
 clpm.showStatus = function (msg, fading) {
 	if (this.monitorEl == null) {
 		this.createHandle ();
+		if (!this.attached) {
+			this.attached = true;
+			Clazz.addEvent (window, "unload", this.cleanup);
+			// window.attachEvent ("onunload", this.cleanup);
+		}
 	}
 	this.clearChildren (this.monitorEl);
 	this.monitorEl.appendChild (document.createTextNode ("" + msg));

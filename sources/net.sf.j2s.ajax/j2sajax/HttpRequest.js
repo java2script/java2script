@@ -41,7 +41,8 @@ c$.prototype.registerOnReadyStateChange = function (handler) {
 					handler.onReceiving ();
 				} else if (state == 4) {
 					handler.onLoaded ();
-					transport.onreadystatechange = function () {};
+					transport.onreadystatechange = NullObject; // function () {};
+					transport = null;
 				}
 			}
 		};
@@ -102,7 +103,7 @@ c$.prototype.send = function (str) {
 		this.transport.send (str);
 	} catch (e) {
 		// may be cross-domains exceptions
-		this.transport.onreadystatechange = function () {};
+		this.transport.onreadystatechange = NullObject; // function () {};
 		if (this.xssErrorHandler != null) {
 			this.xssErrorHandler.onLoaded ();
 		}

@@ -1,17 +1,22 @@
 // mozilla.addon.js
 // Following script will make J2SLib compatiable with Java2Script addon
+function generateScriptCallback () {
+	return function () {
+		var s = this.readyState;
+		if (s == null || s == "loaded" || s == "complete") {
+			window["j2s.lib"].onload ();
+			this.onreadystatechange = null;
+			this.onload = null;
+		}
+	};
+};
 function loadJ2SLibZJS (path, cb) {
 	var sxr = document.createElement ("SCRIPT");
 	sxr.src = path;
 	sxr.type = "text/javascript";
 	if (cb) {
 		var t = "onreadystatechange";
-		var xhrCallback = function () {
-			var s = this.readyState;
-			if (s == null || s == "loaded" || s == "complete") {
-				window["j2s.lib"].onload ();
-			}
-		};
+		var xhrCallback = generateScriptCallback ();
 		if (typeof sxr[t] == "undefined") {
 			sxr.onload = xhrCallback;
 		} else {

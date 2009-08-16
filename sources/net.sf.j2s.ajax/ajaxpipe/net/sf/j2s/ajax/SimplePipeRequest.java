@@ -338,6 +338,34 @@ if (pipe != null) {
 	native static void updatePipeByURL(String url);
 
 	/**
+	 * @j2sNative
+return function () {
+	if (iframeID != null) {
+		if (window.parent == null || window.parent["net"] == null) return;
+		if (!window.parent.net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
+			return; // IE, not completed yet
+		}
+		window.parent.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
+		this.url = null;
+		document.getElementsByTagName ("HEAD")[0].removeChild (this);
+		var iframe = window.parent.document.getElementById (iframeID);
+		if (iframe != null) {
+			iframe.parentNode.removeChild (iframe);
+		}
+	} else {
+		if (window == null || window["net"] == null) return;
+		if (!net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
+			return; // IE, not completed yet
+		}
+		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
+		this.url = null;
+		document.getElementsByTagName ("HEAD")[0].removeChild (this);
+	}
+};
+	 */
+	native static Object generatePipeScriptCallback(String iframeID);
+	
+	/**
 	 * Load or send data for pipe using SCRIPT tag.
 	 * 
 	 * @param url
@@ -351,31 +379,11 @@ var iframeID = arguments[1];
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
-var fun = function () {
-	if (iframeID != null) {
-		if (window.parent == null || window.parent["net"] == null) return;
-		if (!window.parent.net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
-			return; // IE, not completed yet
-		}
-		window.parent.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
-		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-		var iframe = window.parent.document.getElementById (iframeID);
-		if (iframe != null) {
-			iframe.parentNode.removeChild (iframe);
-		}
-	} else {
-		if (window == null || window["net"] == null) return;
-		if (!net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
-			return; // IE, not completed yet
-		}
-		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
-		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-	}
-};
+var fun = net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback (iframeID);
+script.defer = true;
 if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 	script.onload = script.onerror = fun;
 } else { // IE
-	script.defer = true;
 	script.onreadystatechange = fun;
 }
 var head = document.getElementsByTagName ("HEAD")[0];
@@ -412,6 +420,7 @@ html += "};\r\n";
 html += "</scr" + "ipt></head><body><script type=\"text/javascript\">\r\n";
 if (ClassLoader.isOpera)
 html += "window.setTimeout (function () {\r\n";
+html += "net = { sf : { j2s : { ajax : { SimplePipeRequest : { generatePipeScriptCallback : " + net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback + " } } } } };";
 html += "(" + net.sf.j2s.ajax.SimplePipeRequest.loadPipeScript + ") (";
 html += "\"" + url.replace (/"/g, "\\\"") + "\", \"" + iframeID + "\"";
 html += ");\r\n";
@@ -421,6 +430,20 @@ html += "</scr" + "ipt></body></html>";
 net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 	 */
 	native static void loadPipeIFrameScript(String url); // for JavaScript only
+	
+	/**
+	 * @j2sNative
+return function () {
+	var doc = handle.contentWindow.document;
+	doc.open ();
+	doc.write (html);
+	doc.close ();
+	// To avoid blank title in title bar
+	document.title = document.title;
+	handle = null;
+};
+	 */
+	native static Object generateLazyIframeWriting(Object handle, String html);
 	
 	/**
 	 * @param handle
@@ -441,16 +464,7 @@ net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 		// To avoid blank title in title bar
 		document.title = document.title;
 	} catch (e) {
-		window.setTimeout ((function (handle, html) {
-			return function () {
-				var doc = handle.contentWindow.document;
-				doc.open ();
-				doc.write (html);
-				doc.close ();
-				// To avoid blank title in title bar
-				document.title = document.title;
-			};
-		}) (handle, html), 25);
+		window.setTimeout (net.sf.j2s.ajax.SimplePipeRequest.generateLazyIframeWriting (handle, html), 25);
 	}
 	 */
 	native static void iframeDocumentWrite(Object handle, String html);
@@ -570,6 +584,7 @@ var spr = net.sf.j2s.ajax.SimplePipeRequest;
 var url = runnable.getPipeURL();
 spr.pipeIFrameClean (pipeKey, url);
 var subdomain = arguments[1];
+(function () { // avoiding element reference in closure
 var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
 ifr.id = "pipe-" + pipeKey;
@@ -578,6 +593,7 @@ ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?")
 		+ (subdomain == null ? ""
 				: "&" + spr.FORM_PIPE_DOMAIN + "=" + subdomain);
 document.body.appendChild (ifr);
+}) ();
 var fun = (function (key, pipeURL, created) {
 	return function () {
 		var sph = net.sf.j2s.ajax.SimplePipeHelper;
@@ -1027,12 +1043,13 @@ p.initHttpRequest = function () {
 	var oThis = this;
 	this.xhrHandle.onreadystatechange = function () {
 		if (oThis.xhrHandle == null) {
+			oThis = null;
 			return;
 		}
 		var state = oThis.xhrHandle.readyState;
 		if (state == 4) {
 			var pipeData = oThis.xhrHandle.responseText;
-			oThis.xhrHandle.onreadystatechange = function () {};
+			oThis.xhrHandle.onreadystatechange = NullObject;
 			var pipe = oThis.runnable;
 			if (oThis.xhrHandle.status != 200 && pipe != null) {
 				oThis.xhrHandle = null;
@@ -1041,6 +1058,7 @@ p.initHttpRequest = function () {
 					pipe.queryFailedRetries++;
 					pipe.queryEnded = true;
 				}
+				oThis = null;
 				return;
 			}
 			pipe.queryFailedRetries = 0; // succeeded
@@ -1051,6 +1069,7 @@ p.initHttpRequest = function () {
 				net.sf.j2s.ajax.SimplePipeRequest.parseReceived (pipeData);
 				oThis.runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe (oThis.key);
 			}
+			oThis = null;
 		}
 	};
 };
@@ -1133,7 +1152,7 @@ return function () {
 				p.pipeXHRQuery (p.xhrHandle, method, url, data);
 				p.lastXHR = new Date ().getTime ();
 			} catch (e) {
-				p.xhrHandle.onreadystatechange = function () {};
+				p.xhrHandle.onreadystatechange = NullObject;
 				p.xhrHandle = null;
 				document.domain = p.parentDomain;
 				runnable.queryEnded = true;
@@ -1159,35 +1178,48 @@ return function () {
 	
 	/**
 	 * @j2sNative
-var curLoc = "" + window.location;
-var existed = false;
-with (window.parent) {
-	var iframes = document.getElementsByTagName ("IFRAME");
-	for (var i = 0; i < iframes.length; i++) {
-		if (iframes[i].src == curLoc) {
-			existed = true;
-			break;
-		}
-	}
-}
-if (!existed) { // refreshing in Firefox 3.0 will trigger this scenario
-	var idx = curLoc.indexOf ("?");
-	if (idx != -1) {
-		var urlPrefix = curLoc.substring (0, idx);
-		var goalURL = null;
-		with (window.parent) {
-			var iframes = document.getElementsByTagName ("IFRAME");
-			for (var i = 0; i < iframes.length; i++) {
-				if (iframes[i].src.indexOf (urlPrefix) == 0) {
-					goalURL = iframes[i].src;
-					break;
-				}
+try {
+	var curLoc = "" + window.location;
+	var existed = false;
+	with (window.parent) {
+		var iframes = document.getElementsByTagName ("IFRAME");
+		for (var i = 0; i < iframes.length; i++) {
+			if (iframes[i].src == curLoc) {
+				existed = true;
+				break;
 			}
 		}
-		if (goalURL != null) {
-			window.location.replace (goalURL);
+	}
+	if (!existed) { // refreshing in Firefox 3.0 will trigger this scenario
+		var idx = curLoc.indexOf ("?");
+		if (idx != -1) {
+			var urlPrefix = curLoc.substring (0, idx);
+			var goalURL = null;
+			with (window.parent) {
+				var iframes = document.getElementsByTagName ("IFRAME");
+				for (var i = 0; i < iframes.length; i++) {
+					if (iframes[i].src.indexOf (urlPrefix) == 0) {
+						goalURL = iframes[i].src;
+						break;
+					}
+				}
+			}
+			if (goalURL != null) {
+				window.location.replace (goalURL);
+			}
 		}
 	}
+} catch (e) {}
+$$ = $; 
+$ = function (s) {
+	$$ (s);
+	try {
+		var length = document.body.childNodes.length;
+		for (var i = length - 1; i >= 0; i--) { // remove old SCRIPT elements
+			var child = document.body.childNodes[i];
+			child.parentNode.removeChild (child);
+		}
+	} catch (e) {}
 }
 	 */
 	native static void checkIFrameSrc(); // for JavaScript only
