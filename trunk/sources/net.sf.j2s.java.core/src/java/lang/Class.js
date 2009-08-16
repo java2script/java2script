@@ -1114,6 +1114,22 @@ Clazz.generateDelegatingMethod = function (claxxRef, funName) {
 
 SAEM = Clazz.searchAndExecuteMethod;
 
+/* private */
+Clazz.expExpandParameters = function ($0, $1) {
+	if ($1 == 'N') {
+		return "Number";
+	} else if ($1 == 'B') {
+		return "Boolean"
+	} else if ($1 == 'S') {
+		return "String";
+	} else if ($1 == 'O') {
+		return "Object";
+	} else if ($1 == 'A') {
+		return "Array"
+	}
+	return "Unknown";
+};
+
 /*
  * Other developers may need to extend this formatParameters method
  * to deal complicated situation.
@@ -1128,20 +1144,7 @@ Clazz.formatParameters = function (funParams) {
 		 * also return "*,*,..." string.
 		 */
 		var s = funParams; //.toString (); // Google Chrome v8native.js error
-		s = s.replace (/~([NABSO])/g, function ($0, $1) {
-			if ($1 == 'N') {
-				return "Number";
-			} else if ($1 == 'B') {
-				return "Boolean"
-			} else if ($1 == 'S') {
-				return "String";
-			} else if ($1 == 'O') {
-				return "Object";
-			} else if ($1 == 'A') {
-				return "Array"
-			}
-			return "Unknown";
-		});
+		s = s.replace (/~([NABSO])/g, Clazz.expExpandParameters);
 		return s.replace (/\s+/g, "").replace (/^|,/g, "\\")
 				.replace (/\$/g, "org.eclipse.s");
 	}
@@ -1594,7 +1597,7 @@ Clazz.innerFunctions = {
 		} else {
 			is = new JavaObject ();
 			is.__CLASS_NAME__ = "java.io.InputStream";
-			is.close = function () {};
+			is.close = NullObject; // function () {};
 		}
 		is.read = function () { return 0; };
 		name = name.replace (/\\/g, '/');

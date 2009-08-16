@@ -42,9 +42,7 @@ var xssIfr = document.getElementById ("xss-cookie");
 if (xssIfr != null) {
 	return;
 }
-window.xssCookieReadyCallback = function () {
-	net.sf.j2s.store.XSSCookieStore.initialized = true;
-};
+net.sf.j2s.store.XSSCookieStore.initializeCallback ();
 var xssIfr = document.createElement ("IFRAME");
 xssIfr.id = "xss-cookie";
 xssIfr.src = url;
@@ -52,6 +50,16 @@ xssIfr.style.display = "none";
 document.body.appendChild (xssIfr);
 	 */
 	private static void initialize(String url) {
+		
+	}
+	
+	/**
+	 * @j2sNative
+window.xssCookieReadyCallback = function () {
+	net.sf.j2s.store.XSSCookieStore.initialized = true;
+};
+	 */
+	static void initializeCallback() {
 		
 	}
 	

@@ -804,6 +804,21 @@ ClazzLoader.failedHandles = new Object ();
 /* protected */
 ClazzLoader.takeAnotherTry = true;
 
+/* private */
+/*-# generateRemovingFunction -> gRF #-*/
+ClazzLoader.generateRemovingFunction = function (node) {
+	return function () {
+		if (node.readyState != "interactive") {
+			try {
+				if (node.parentNode != null) {
+					node.parentNode.removeChild (node);
+				}
+			} catch (e) { }
+			node = null;
+		}
+	};
+};
+
 /*
  * Dynamically SCRIPT elements are removed after they are parsed into memory.
  * And removed *.js may not be fetched again by "Refresh" action. And it will
@@ -816,18 +831,209 @@ ClazzLoader.takeAnotherTry = true;
 /* private */
 /*-# removeScriptNode -> RsN #-*/
 ClazzLoader.removeScriptNode = function (n) {
+	if (window["j2s.script.debugging"]) {
+		return;
+	}
 	// lazily remove script nodes.
-	window.setTimeout ((function (node) {
-		return function () {
-			if (!window["j2s.script.debugging"] && node.readyState != "interactive") {
-				try {
-					if (node.parentNode != null) {
-						node.parentNode.removeChild (node);
-					}
-				} catch (e) { }
+	window.setTimeout (ClazzLoader.generateRemovingFunction (n), 1);
+};
+
+/* private */
+/*-# generatingXHROnload -> gXOd #-*/
+ClazzLoader.generatingXHROnload = function (transport, file) {
+	return function () {
+		ClazzLoader.xhrOnload (transport, file);
+		transport = null;
+		file = null;
+	};
+};
+
+/* private */
+/*-# generatingXHRCallback -> gXcb #-*/
+ClazzLoader.generatingXHRCallback = function (transport, file) {
+	return function () {
+		if (transport.readyState == 4) {
+			if (ClazzLoader.inLoadingThreads > 0) {
+				ClazzLoader.inLoadingThreads--;
 			}
-		};
-	}) (n), 1);
+			var lazyFun = ClazzLoader.generatingXHROnload (transport, file);
+			if (isActiveX) {
+				transport.onreadystatechange = ClazzLoader.emptyOnRSC;
+				// For IE, try to avoid stack overflow errors
+				window.setTimeout (lazyFun,
+						ClazzLoader.loadingTimeLag < 0 ? 0 : ClazzLoader.loadingTimeLag);
+			} else {
+				transport.onreadystatechange = null;
+				if (ClazzLoader.loadingTimeLag >= 0) {
+					window.setTimeout (lazyFun, ClazzLoader.loadingTimeLag);
+				} else {
+					ClazzLoader.xhrOnload (transport, file);
+				}
+			}
+			transport = null;
+			file = null;
+		}
+	};
+};
+
+/* private */
+/*-# loadingNextByPath -> lNBP #-*/
+ClazzLoader.loadingNextByPath = function (path) {
+	if (ClazzLoader.loadingTimeLag >= 0) {
+		window.setTimeout (function () {
+					ClazzLoader.tryToLoadNext (path);
+				}, ClazzLoader.loadingTimeLag);
+	} else {
+		ClazzLoader.tryToLoadNext (path);
+	}
+};
+
+/* private */
+/*-# ieToLoadScriptAgain -> iTLA #-*/
+ClazzLoader.ieToLoadScriptAgain = function (path, local) {
+	var fun = function () {
+		if (!ClazzLoader.takeAnotherTry) {
+			return;
+		}
+		// next time in "loading" state won't get waiting!
+		ClazzLoader.failedScripts[path] = 0;
+		ClazzLoader.loadedScripts[path] = false;
+		// failed count down!
+		if (ClazzLoader.inLoadingThreads > 0) {
+			ClazzLoader.inLoadingThreads--;
+		}
+		// Take another try!
+		// log ("re - loading ... " + path);
+		ClazzLoader.loadScript (path);
+	};
+	// consider 30 seconds available after failing!
+	/*
+	 * Set 1s waiting in local file system. Is it 1s enough?
+	 * What about big *.z.js need more than 1s to initialize?
+	 */
+	var waitingTime = (local ? 500 : 15000); // 0.5s : 15s
+	//alert ("waiting:" + waitingTime + " . " + path);
+	return window.setTimeout (fun, waitingTime);
+};
+
+/* private */
+/*-# w3cFailedLoadingTest -> wFLT #-*/
+ClazzLoader.w3cFailedLoadingTest = function (script) {
+	return window.setTimeout (function () {
+				script.onerror ();
+				script.timeoutHandle = null;
+				script = null;
+			}, 500); // 0.5s for loading a local file is considered enough long
+};
+
+/* private */
+/*-# generatingW3CScriptOnCallback -> gWSC #-*/
+ClazzLoader.generatingW3CScriptOnCallback = function (path, forError) {
+	return function () {
+		if (ClazzLoader.isGecko && this.timeoutHandle != null) {
+			window.clearTimeout (this.timeoutHandle);
+			this.timeoutHandle = null;
+		}
+		if (ClazzLoader.inLoadingThreads > 0) {
+			ClazzLoader.inLoadingThreads--;
+		}
+		this.onload = null;
+		this.onerror = null;
+		if (forError || (!ClazzLoader.innerLoadedScripts[this.src]
+					&& ClazzLoader.isOpera)) {
+			// Opera will not take another try.
+			var fss = ClazzLoader.failedScripts;
+			if (fss[path] == null && ClazzLoader.takeAnotherTry) {
+				// silently take another try for bad network
+				// alert ("re loading " + path + " ... ");
+				fss[path] = 1;
+				if (!forError) {
+					ClazzLoader.innerLoadedScripts[this.src] = false;
+				}
+				ClazzLoader.loadedScripts[path] = false;
+				ClazzLoader.loadScript (path);
+				ClazzLoader.removeScriptNode (this);
+				return;
+			} else {
+				alert ("[Java2Script] Error in loading " + path + "!");
+			}
+			if (forError) {
+				ClazzLoader.scriptLoaded (path);
+			}
+		} else {
+			ClazzLoader.scriptLoaded (path);
+		}
+		ClazzLoader.loadingNextByPath (path);
+		ClazzLoader.removeScriptNode (this);
+	};
+};
+
+/* private */
+/*-# generatingIEScriptOnCallback -> gISC #-*/
+ClazzLoader.generatingIEScriptOnCallback = function (path) {
+	return function () {
+		var fhs = ClazzLoader.failedHandles;
+		var fss = ClazzLoader.failedScripts;
+		var state = "" + this.readyState;
+		
+		var local = state == "loading" 
+				&& (this.src.indexOf ("file:") == 0 
+				|| (window.location.protocol == "file:"
+				&& this.src.indexOf ("http") != 0));
+
+		// alert (state + "/" + this.src);
+		if (state != "loaded" && state != "complete") {
+			/*
+			 * When no such *.js existed, IE will be
+			 * stuck here without loaded event!
+			 */
+			/*
+			if ((window.location.protocol != "file:" 
+					&& this.src.indexOf ("file:") != 0)
+					|| this.readyState != "loading") {
+				return;
+			}
+			*/
+			if (fss[path] == null) {
+				fhs[path] = ClazzLoader.ieToLoadScriptAgain (path, local);
+				return;
+			}
+			if (fss[path] == 1) { // above function will be executed?!
+				return;
+			}
+		}
+		if (fhs[path] != null) {
+			window.clearTimeout (fhs[path]);
+			fhs[path] = null;
+		}
+		if ((local || state == "loaded")
+				&& !ClazzLoader.innerLoadedScripts[this.src]) {
+			if (!local && (fss[path] == null || fss[path] == 0)
+					&& ClazzLoader.takeAnotherTry) {
+				// failed! count down
+				if (ClazzLoader.inLoadingThreads > 0) {
+					ClazzLoader.inLoadingThreads--;
+				}
+				// silently take another try for bad network
+				fss[path] = 1;
+				// log ("reloading ... " + path);
+				ClazzLoader.loadedScripts[path] = false;
+				ClazzLoader.loadScript (path);
+				ClazzLoader.removeScriptNode (this);
+				return;
+			} else {
+				alert ("[Java2Script] Error in loading " + path + "!");
+			}
+		}
+		if (ClazzLoader.inLoadingThreads > 0) {
+			ClazzLoader.inLoadingThreads--;
+		}
+		ClazzLoader.scriptLoaded (path);
+		// Unset onreadystatechange, leaks mem in IE
+		this.onreadystatechange = null; 
+		ClazzLoader.loadingNextByPath (path);
+		ClazzLoader.removeScriptNode (this);
+	};
 };
 
 /*
@@ -886,33 +1092,11 @@ ClazzLoader.loadScript = function (file) {
 			return;
 		}
 		transport.open ("GET", file, ClazzLoader.isAsynchronousLoading);
-		transport.setRequestHeader ("User-Agent",
-				"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
+		// transport.setRequestHeader ("User-Agent",
+		// 		"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
 		if (ClazzLoader.isAsynchronousLoading) {
-			transport.onreadystatechange = function () {
-				if (transport.readyState == 4) {
-					if (ClazzLoader.inLoadingThreads > 0) {
-						ClazzLoader.inLoadingThreads--;
-					}
-					if (isActiveX) {
-						transport.onreadystatechange = ClazzLoader.emptyOnRSC;
-						// For IE, try to avoid stack overflow errors
-						window.setTimeout (function () {
-								ClazzLoader.xhrOnload (transport, file);
-						}, ClazzLoader.loadingTimeLag < 0 ? 0 : 
-								ClazzLoader.loadingTimeLag);
-					} else {
-						transport.onreadystatechange = null;
-						if (ClazzLoader.loadingTimeLag >= 0) {
-							window.setTimeout (function () {
-									ClazzLoader.xhrOnload (transport, file);
-							}, ClazzLoader.loadingTimeLag);
-						} else {
-							ClazzLoader.xhrOnload (transport, file);
-						}
-					}
-				}
-			};
+			transport.onreadystatechange = ClazzLoader.generatingXHRCallback (
+					transport, file);
 			ClazzLoader.inLoadingThreads++;
 			try {
 				transport.send (null);
@@ -952,199 +1136,27 @@ ClazzLoader.loadScript = function (file) {
 	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
 		if (ClazzLoader.isGecko && (file.indexOf ("file:") == 0 
 				|| (window.location.protocol == "file:" && file.indexOf ("http") != 0))) {
-			script.timeoutHandle = window.setTimeout ((function (scriptEl) {
-					return function () {
-						scriptEl.onerror ();
-					};
-			}) (script), 500); // 0.5s for loading a local file is considered enough long
+			script.timeoutHandle = ClazzLoader.w3cFailedLoadingTest (script);
 		}
+
 		/*
-		 * What about Safari?
+		 * What about Safari and Google Chrome?
 		 */
 		/*
 		 * Opera will trigger onload event even there are no *.js existed
 		 */
-		script.onload = function () {
-			if (ClazzLoader.isGecko && this.timeoutHandle != null) {
-				window.clearTimeout (this.timeoutHandle);
-				this.timeoutHandle = null;
-			}
-			if (ClazzLoader.inLoadingThreads > 0) {
-				ClazzLoader.inLoadingThreads--;
-			}
-			this.onload = null;
-			var path = arguments.callee.path;
-			if (!ClazzLoader.innerLoadedScripts[this.src] && ClazzLoader.isOpera) {
-				// Opera will not take another try.
-				var fss = ClazzLoader.failedScripts;
-				if (fss[path] == null && ClazzLoader.takeAnotherTry) {
-					// silently take another try for bad network
-					// alert ("re loading " + path + " ... ");
-					fss[path] = 1;
-					ClazzLoader.innerLoadedScripts[this.src] = false;
-					ClazzLoader.loadedScripts[path] = false;
-					ClazzLoader.loadScript (path);
-
-					ClazzLoader.removeScriptNode (this);
-					return;
-				} else {
-					alert ("[Java2Script] Error in loading " + path + "!");
-				}
-			} else {
-				ClazzLoader.scriptLoaded (path);
-			}
-			if (ClazzLoader.loadingTimeLag >= 0) {
-				window.setTimeout (function () {
-						ClazzLoader.tryToLoadNext (path);
-				}, ClazzLoader.loadingTimeLag);
-			} else {
-				ClazzLoader.tryToLoadNext (path);
-			}
-			
-			ClazzLoader.removeScriptNode (this);
-		};
-		script.onload.path = file;
+		script.onload = ClazzLoader.generatingW3CScriptOnCallback (file, false);
 		/*
 		 * For Firefox/Mozilla, unexisted *.js will result in errors.
 		 */
-		script.onerror = function () { // Firefox/Mozilla
-			if (ClazzLoader.isGecko && this.timeoutHandle != null) {
-				window.clearTimeout (this.timeoutHandle);
-				this.timeoutHandle = null;
-			}
-			if (ClazzLoader.inLoadingThreads > 0) {
-				ClazzLoader.inLoadingThreads--;
-			}
-			this.onerror = null; 
-			var path = arguments.callee.path;
-			var fss = ClazzLoader.failedScripts;
-			if (fss[path] == null && ClazzLoader.takeAnotherTry) {
-				// silently take another try for bad network
-				// alert ("re loading " + path + " ...");
-				fss[path] = 1;
-				ClazzLoader.loadedScripts[path] = false;
-				ClazzLoader.loadScript (path);
-				
-				ClazzLoader.removeScriptNode (this);
-				return;
-			} else {
-				alert ("[Java2Script] Error in loading " + path + "!");
-			}
-			ClazzLoader.scriptLoaded (path);
-			if (ClazzLoader.loadingTimeLag >= 0) {
-				window.setTimeout (function () {
-						ClazzLoader.tryToLoadNext (path);
-				}, ClazzLoader.loadingTimeLag);
-			} else {
-				ClazzLoader.tryToLoadNext (path);
-			}
+		script.onerror = ClazzLoader.generatingW3CScriptOnCallback (file, true);
 
-			ClazzLoader.removeScriptNode (this);
-		};
-		script.onerror.path = file;
 		if (ClazzLoader.isOpera) {
 			ClazzLoader.needOnloadCheck = true;
 		}
 	} else { // IE
 		ClazzLoader.needOnloadCheck = true;
-		script.onreadystatechange = function () {
-			var ee = arguments.callee;
-			var path = ee.path;
-			var fhs = ClazzLoader.failedHandles;
-			var fss = ClazzLoader.failedScripts;
-			var state = "" + this.readyState;
-			
-			var local = state == "loading" 
-					&& (this.src.indexOf ("file:") == 0 
-					|| (window.location.protocol == "file:"
-					&& this.src.indexOf ("http") != 0));
-
-			// alert (state + "/" + this.src);
-			if (state != "loaded" && state != "complete") {
-				/*
-				 * When no such *.js existed, IE will be
-				 * stuck here without loaded event!
-				 */
-				/*
-				if ((window.location.protocol != "file:" 
-						&& script.src.indexOf ("file:") != 0)
-						|| this.readyState != "loading") {
-					return;
-				}
-				*/
-				if (fss[path] == null) {
-					var fun = function () {
-						if (!ClazzLoader.takeAnotherTry) {
-							return;
-						}
-						var path = arguments.callee.path;
-						// next time in "loading" state won't get waiting!
-						ClazzLoader.failedScripts[path] = 0;
-						ClazzLoader.loadedScripts[path] = false;
-						// failed count down!
-						if (ClazzLoader.inLoadingThreads > 0) {
-							ClazzLoader.inLoadingThreads--;
-						}
-						// Take another try!
-						// log ("re - loading ... " + path);
-						ClazzLoader.loadScript (path);
-					};
-					fun.path = path;
-					// consider 30 seconds available after failing!
-					/*
-					 * Set 1s waiting in local file system. Is it 1s enough?
-					 * What about big *.z.js need more than 1s to initialize?
-					 */
-					var waitingTime = (local ? 500 : 15000); // 0.5s : 15s
-					//alert ("waiting:" + waitingTime + " . " + path);
-					fhs[path] = window.setTimeout (fun, waitingTime);
-					return;
-				}
-				if (fss[path] == 1) { // above function will be executed?!
-					return;
-				}
-			}
-			if (fhs[path] != null) {
-				window.clearTimeout (fhs[path]);
-				fhs[path] = null;
-			}
-			if ((local || state == "loaded")
-					&& !ClazzLoader.innerLoadedScripts[this.src]) {
-				if (!local && (fss[path] == null || fss[path] == 0)
-						&& ClazzLoader.takeAnotherTry) {
-					// failed! count down
-					if (ClazzLoader.inLoadingThreads > 0) {
-						ClazzLoader.inLoadingThreads--;
-					}
-					// silently take another try for bad network
-					fss[path] = 1;
-					// log ("reloading ... " + path);
-					ClazzLoader.loadedScripts[path] = false;
-					ClazzLoader.loadScript (path);
-
-					ClazzLoader.removeScriptNode (this);
-					return;
-				} else {
-					alert ("[Java2Script] Error in loading " + path + "!");
-				}
-			}
-			if (ClazzLoader.inLoadingThreads > 0) {
-				ClazzLoader.inLoadingThreads--;
-			}
-			ClazzLoader.scriptLoaded (path);
-			// Unset onreadystatechange, leaks mem in IE
-			this.onreadystatechange = null; 
-			if (ClazzLoader.loadingTimeLag >= 0) {
-				window.setTimeout (function () {
-						ClazzLoader.tryToLoadNext (path);
-				}, 5);
-			} else {
-				ClazzLoader.tryToLoadNext (path);
-			}
-
-			ClazzLoader.removeScriptNode (this);
-		};
-		script.onreadystatechange.path = file;
+		script.onreadystatechange = ClazzLoader.generatingIEScriptOnCallback (file);
 	}
 	ClazzLoader.inLoadingThreads++;
 	//alert("threads:"+ClazzLoader.inLoadingThreads);
@@ -1427,7 +1439,8 @@ ClazzLoader.tryToLoadNext = function (file) {
 			n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
 		}
 		for (var i = 0; i < dList.length; i++) {
-			ClazzLoader.updateNode (dList[i]);
+			// ClazzLoader.updateNode (dList[i]);
+			ClazzLoader.destroyClassNode (dList[i]); // Same as above
 		}
 		for (var i = 0; i < dList.length; i++) {
 			var optLoaded = dList[i].optionalsLoaded;
@@ -1475,7 +1488,8 @@ ClazzLoader.checkOptionalCycle = function (node) {
 		*/
 		for (var i = cycleFound; i < ts.length; i++) {
 			ts[i].status = ClazzNode.STATUS_OPTIONALS_LOADED;
-			ClazzLoader.updateNode (ts[i]);
+			//ClazzLoader.updateNode (ts[i]);
+			ClazzLoader.destroyClassNode (ts[i]); // Same as above
 			for (var k = 0; k < ts[i].parents.length; k++) {
 				//log ("updating parent ::" + ts[i].parents[k].name);
 				ClazzLoader.updateNode (ts[i].parents[k]);
@@ -1564,7 +1578,8 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 				if (ClazzLoader.isClassDefined (n.name)) {
 					var nns = new Array (); // for optional loaded events!
 					n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
-					ClazzLoader.updateNode (n); // musts may be changed
+					// ClazzLoader.updateNode (n); // musts may be changed
+					ClazzLoader.destroyClassNode (n); // Same as above
 					/*
 					 * For those classes within one *.js file, update
 					 * them synchronously.
@@ -1578,7 +1593,9 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 									&& nn !== n) {
 								nn.status = n.status;
 								nn.declaration = null;
-								ClazzLoader.updateNode (nn);
+								// ClazzLoader.updateNode (nn);
+								// Same as above
+								ClazzLoader.destroyClassNode (nn);
 								if (nn.optionalsLoaded != null) {
 									nns[nns.length] = nn;
 								}
@@ -1703,6 +1720,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 					return false;
 				}
 			}
+			ClazzLoader.destroyClassNode (node);
 					/*
 					 * For those classes within one *.js file, update
 					 * them synchronously.
@@ -1725,6 +1743,7 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 					return false;
 				}
 			}
+			ClazzLoader.destroyClassNode (node);
 							}
 						}
 					}
@@ -2367,6 +2386,9 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
 		var nn = ClazzLoader.findClass (name);
 		if (nn == null || nn.status >= ClazzNode.STATUS_OPTIONALS_LOADED) {
+			/*if (nn != null) {
+				ClazzLoader.destroyClassNode (nn);
+			}*/
 			if (async) {
 				window.setTimeout (optionalsLoaded, 25);
 			} else {
@@ -2554,22 +2576,26 @@ ClazzLoader.removeFromArray = function (node, arr) {
 	if (arr == null || node == null) {
 		return false;
 	}
+	/*var isPackedJS = (node.path != null
+			&& node.path.indexOf (".z.js") == node.path.length - 5);
+	log ("... remove " + node.path + " :: " + isPackedJS);*/
+	var j = 0;
 	for (var i = 0; i < arr.length; i++) {
-		if (arr[i] == node) {
-			arr[i] = null;
-			for (var j = i; j < arr.length - 1; j++) {
-				arr[j] = arr[j + 1];
+		if (!(arr[i] === node/* || (isPackedJS && arr[i].path == node.path)*/)) {
+			if (j < i) {
+				arr[j] = arr[i];
 			}
-			arr.length--;
-			return true;
+			j++;
 		}
 	}
+	arr.length = j;
 	return false;
 };
 
 /* private */
 /*-# destroyClassNode -> dCN #-*/
 ClazzLoader.destroyClassNode = function (node) {
+	//log (node.name + " // " + node.path);
 	var parents = node.parents;
 	if (parents != null) {
 		for (var k = 0; k < parents.length; k++) {
@@ -2578,6 +2604,14 @@ ClazzLoader.destroyClassNode = function (node) {
 			}
 		}
 	}
+	/*
+	if (node.optionalsLoaded != null) {
+		node.optionalsLoaded ();
+	}
+	if (!ClazzLoader.removeFromArray (node, ClazzLoader.clazzTreeRoot.musts)) {
+		ClazzLoader.removeFromArray (node, ClazzLoader.clazzTreeRoot.optionals);
+	}
+	*/
 };
 
 /* For hotspot and unloading */
@@ -2739,10 +2773,9 @@ ClazzLoader.updateHotspot = function () {
 
 /* private */
 /*-# removeHotspotScriptNode -> rtSN #-*/
-ClazzLoader.removeHotspotScriptNode = function (n) {
+ClazzLoader.removeHotspotScriptNode = function (node) {
 	// lazily remove script nodes.
-	window.setTimeout ((function (node) {
-		return function () {
+	window.setTimeout (function () {
 			if (node.readyState != "interactive") {
 				try {
 					if (node.parentNode != null) {
@@ -2750,8 +2783,8 @@ ClazzLoader.removeHotspotScriptNode = function (n) {
 					}
 				} catch (e) { }
 			}
-		};
-	}) (n), 1);
+			node = null;
+		}, 1);
 	
 	if (ClazzLoader.hotspotMonitoringTimeout != null) {
 		window.clearTimeout (ClazzLoader.hotspotMonitoringTimeout);
@@ -2766,6 +2799,32 @@ ClazzLoader.hotspotJSTimeout = null;
 /*-# lastHotspotJSFailed -> ltJF #-*/
 ClazzLoader.lastHotspotJSFailed = false;
 
+/*-# generatingHotspotW3COnCallback -> gHWC #-*/
+ClazzLoader.generatingHotspotW3COnCallback = function () {
+	return function () {
+		try {
+			ClazzLoader.lastHotspotScriptLoaded = true;
+			ClazzLoader.removeHotspotScriptNode (this);
+		} catch (e) {}; // refreshing browser may cause exceptions
+		this.onload = null;
+		this.onerror = null;
+	};
+};
+
+/*-# generatingHotspotIEOnCallback -> gHIC #-*/
+ClazzLoader.generatingHotspotIEOnCallback = function () {
+	return function () {
+		var state = "" + this.readyState;
+		if (state == "loaded" || state == "complete") {
+			try {
+				ClazzLoader.lastHotspotScriptLoaded = true;
+				ClazzLoader.removeHotspotScriptNode (this);
+			} catch (e) {}; // refreshing browser may cause exceptions
+			this.onreadystatechange = null;
+		}
+	};
+};
+
 /* private */
 ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 	var script = document.createElement ("SCRIPT");
@@ -2773,25 +2832,19 @@ ClazzLoader.loadHotspotScript = function (hotspotURL, iframeID) {
 	script.defer = true;
 	script.src = hotspotURL;
 	if (typeof (script.onreadystatechange) == "undefined" || !ClazzLoader.isIE) { // W3C
-		script.onload = script.onerror = function () {
-			try {
-				ClazzLoader.lastHotspotScriptLoaded = true;
-				ClazzLoader.removeHotspotScriptNode (this);
-			} catch (e) {}; // refreshing browser may cause exceptions
-		};
+		script.onload = script.onerror = ClazzLoader.generatingHotspotW3COnCallback ();
 	} else {
-		script.onreadystatechange = function () {
-			var state = "" + this.readyState;
-			if (state == "loaded" || state == "complete") {
-				try {
-					ClazzLoader.lastHotspotScriptLoaded = true;
-					ClazzLoader.removeHotspotScriptNode (this);
-				} catch (e) {}; // refreshing browser may cause exceptions
-			}
-		};
+		script.onreadystatechange = ClazzLoader.generatingHotspotIEOnCallback ();
 	}
 	var head = document.getElementsByTagName ("HEAD")[0];
 	head.appendChild (script);
+};
+
+/* private */
+/*-# hotspotLoadingTimeout -> hLTo #-*/
+ClazzLoader.hotspotLoadingTimeout = function () {
+	ClazzLoader.lastHotspotScriptLoaded = true; // timeout
+	ClazzLoader.lastHotspotJSFailed = false; // timeout
 };
 
 /* protected */
@@ -2820,10 +2873,8 @@ ClazzLoader.hotspotMonitoring = function () {
 			window.clearTimeout (ClazzLoader.hotspotJSTimeout);
 			ClazzLoader.hotspotJSTimeout = null;
 		}
-		ClazzLoader.hotspotJSTimeout = window.setTimeout (function () {
-				ClazzLoader.lastHotspotScriptLoaded = true; // timeout
-				ClazzLoader.lastHotspotJSFailed = false; // timeout
-		}, 2000);
+		ClazzLoader.hotspotJSTimeout = window.setTimeout (
+				ClazzLoader.hotspotLoadingTimeout, 2000);
 		/*
 		 * 2 seconds to time out. For local server running inside Eclipse
 		 * 2 seconds is already a very long time!
