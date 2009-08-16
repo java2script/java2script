@@ -222,22 +222,9 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			while ((list = SimplePipeHelper.getPipeDataList(key)) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
-				if (!SimplePipeHelper.isPipeLive(key)) {
-					if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
-						// break out while loop so pipe connection will be closed
-						break;
-					} else { // sleep 1s and continue to check pipe status again
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-						}
-						continue;
-					}
-				} else {
-					lastLiveDetected = System.currentTimeMillis();
-				}
 				int size = list.size();
 				if (size > 0) {
+					boolean live = SimplePipeHelper.isPipeLive(key);
 					for (int i = 0; i < size; i++) {
 						SimpleSerializable ss = null;
 						/*
@@ -249,7 +236,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 						if (ss == null) break; // terminating signal
 						output(writer, type, key, ss.serialize());
 						items++;
-						if (pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
+						if (live && pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
 								&& !SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
 							break;
 						}
@@ -268,6 +255,20 @@ public class SimplePipeHttpServlet extends HttpServlet {
 					}
 				} else {
 					writer.flush();
+				}
+				if (!SimplePipeHelper.isPipeLive(key)) {
+					if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
+						// break out while loop so pipe connection will be closed
+						break;
+					} else { // sleep 1s and continue to check pipe status again
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+						}
+						continue;
+					}
+				} else {
+					lastLiveDetected = System.currentTimeMillis();
 				}
 				/*
 				 * Client should send in "notify" request to simulate the following #notifyPipeStatus
