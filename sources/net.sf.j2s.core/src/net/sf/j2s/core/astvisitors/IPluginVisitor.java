@@ -19,7 +19,7 @@ package net.sf.j2s.core.astvisitors;
  */
 public interface IPluginVisitor {
 	public StringBuffer getBuffer();
-	public void setBuffer(StringBuffer buffer);
+	//public void setBuffer(StringBuffer buffer);
 	public ASTEmptyVisitor getVisitor();
 	public void setVisitor(ASTEmptyVisitor visitor);
 }

@@ -21,15 +21,15 @@ public class AbstractPluginVisitor implements IPluginVisitor {
 
 	protected ASTEmptyVisitor visitor;
 	
-	protected StringBuffer buffer;
+//	protected StringBuffer buffer;
 
 	public StringBuffer getBuffer() {
-		return buffer;
+		return visitor.getBuffer();
 	}
 
-	public void setBuffer(StringBuffer buffer) {
-		this.buffer = buffer;
-	}
+//	public void setBuffer(StringBuffer buffer) {
+//		this.buffer = buffer;
+//	}
 
 	public ASTEmptyVisitor getVisitor() {
 		return visitor;

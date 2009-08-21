@@ -53,9 +53,9 @@ public class ASTTigerVisitor extends AbstractPluginVisitor {
 						primitiveTypeName = "Character";
 					} 
 					if (primitiveTypeName != null) {
-						buffer.append("new " + primitiveTypeName + " (");
+						getBuffer().append("new " + primitiveTypeName + " (");
 						element.accept(this.visitor);
-						buffer.append(")");
+						getBuffer().append(")");
 						return ;
 					}
 				}
@@ -83,9 +83,9 @@ public class ASTTigerVisitor extends AbstractPluginVisitor {
 					}
 					 
 					if (primitiveName != null) {
-						buffer.append("(");
+						getBuffer().append("(");
 						element.accept(this.visitor);
-						buffer.append(")." + primitiveName + "Value ()");
+						getBuffer().append(")." + primitiveName + "Value ()");
 						return ;
 					}
 				}

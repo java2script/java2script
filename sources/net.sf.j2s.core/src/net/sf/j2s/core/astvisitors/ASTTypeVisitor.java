@@ -29,19 +29,19 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 
 	protected String thisClassName = "";
 	
-	protected int anonymousCount = 0;
-
-	public int getAnonymousCount() {
-		return anonymousCount;
-	}
+//	protected int anonymousCount = 0;
+//
+//	public int getAnonymousCount() {
+//		return anonymousCount;
+//	}
 
 	public String getClassName() {
 		return thisClassName;
 	}
 	
-	public void increaseAnonymousClassCount() {
-		anonymousCount++;
-	}
+//	public void increaseAnonymousClassCount() {
+//		anonymousCount++;
+//	}
 	
 	public void setClassName(String className) {
 		thisClassName = className;
@@ -125,7 +125,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		name = Bindings.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
-		if (index != -1
+		if (index == 0
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
 						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
 			if (!name.startsWith("java.lang.ref")
