@@ -504,6 +504,9 @@ public void close () {
 	Shell nextShell = null;
 	if (parent instanceof Shell) {
 		nextShell = (Shell) parent;
+		if (!nextShell.isVisible()) {
+			nextShell = null;
+		}
 	}
 	closeWidget ();
 	if (nextShell == null || nextShell.isDisposed()) {

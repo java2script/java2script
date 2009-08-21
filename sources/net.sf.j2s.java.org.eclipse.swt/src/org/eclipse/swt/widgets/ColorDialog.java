@@ -24,6 +24,7 @@ import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.layout.GridData;
@@ -157,7 +158,21 @@ public class ColorDialog extends Dialog {
 	Element[] basicColorBoxes, customColorBoxes;
 	Element[] colorStrips;
 	Element previewBlock, colorBlock, hsPicker, stripBlock, lPicker;
-	
+
+	private RunnableCompatibility updateRGBRunnable;
+	private RunnableCompatibility updateHSLRunnable;
+
+	private Object hColorBlockClick;
+	private Object hStripBlockClick;
+	private Object hAdd2CustomClick;
+	private Object hCustomClick;
+	private Object hOKClick;
+	private Object hCancelClick;
+
+	private Object[] basicColorBoxClicks, customColorBoxClicks;
+
+	private DragAndDrop dnd;
+
 /**
  * Constructs a new instance of this class given only its parent.
  * 
@@ -244,6 +259,35 @@ public RGB getRGB () {
 }
 
 void releaseHandles() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
+	Object[] hsl = new Object[] { hText, sText, lText };
+	for (int i = 0; i < hsl.length; i++) {
+		if (hsl[i] != null) {
+			Clazz.removeEvent(hsl[i], "change", updateRGBRunnable);
+			Clazz.removeEvent(hsl[i], "keyup", updateRGBRunnable);
+			OS.destroyHandle(hsl[i]);
+		}
+	}
+	Object[] rgb = new Object[] { rText, gText, bText };
+	for (int i = 0; i < rgb.length; i++) {
+		if (rgb[i] != null) {
+			Clazz.removeEvent(rgb[i], "change", updateHSLRunnable);
+			Clazz.removeEvent(rgb[i], "keyup", updateHSLRunnable);
+			OS.destroyHandle(rgb[i]);
+		}
+	}
+	hText = null;
+	sText = null;
+	lText = null;
+	rText = null;
+	gText = null;
+	bText = null;
+	updateHSLRunnable = null;
+	updateRGBRunnable = null;
+
 	if (customButton != null) {
 		OS.destroyHandle(customButton);
 		customButton = null;
@@ -259,30 +303,6 @@ void releaseHandles() {
 	if (cancelButton != null) {
 		OS.destroyHandle(cancelButton);
 		cancelButton = null;
-	}
-	if (hText != null) {
-		OS.destroyHandle(hText);
-		hText = null;
-	}
-	if (sText != null) {
-		OS.destroyHandle(sText);
-		sText = null;
-	}
-	if (lText != null) {
-		OS.destroyHandle(lText);
-		lText = null;
-	}
-	if (rText != null) {
-		OS.destroyHandle(rText);
-		rText = null;
-	}
-	if (gText != null) {
-		OS.destroyHandle(gText);
-		gText = null;
-	}
-	if (bText != null) {
-		OS.destroyHandle(bText);
-		bText = null;
 	}
 	if (hsPicker != null) {
 		OS.destroyHandle(hsPicker);
@@ -302,12 +322,20 @@ void releaseHandles() {
 	}
 	for (int i = 0; i < basicColorBoxes.length; i++) {
 		if (basicColorBoxes[i] != null) {
+			if (basicColorBoxClicks[i] != null) {
+				Clazz.removeEvent(basicColorBoxes[i], "click", basicColorBoxClicks[i]);
+				basicColorBoxClicks[i] = null;
+			}
 			OS.destroyHandle(basicColorBoxes[i]);
 			basicColorBoxes[i] = null;
 		}
 	}
 	for (int i = 0; i < customColorBoxes.length; i++) {
 		if (customColorBoxes[i] != null) {
+			if (customColorBoxClicks[i] != null) {
+				Clazz.removeEvent(customColorBoxes[i], "click", customColorBoxClicks[i]);
+				customColorBoxClicks[i] = null;
+			}
 			OS.destroyHandle(customColorBoxes[i]);
 			customColorBoxes[i] = null;
 		}
@@ -533,13 +561,13 @@ for (var i = 0; i < 48; i++) {
 		}
 	}
 	Element dialogEl = containerHandle.childNodes[0];
-	customButton.onclick = new RunnableCompatibility() {
+	hCustomClick = new RunnableCompatibility() {
 		public void run() {
 			composite.setLayoutData(new GridData(480, 280));
 			dialogShell.pack();
 			customButton.disabled = true;
 			customButton.style.color = "gray";
-			customButton.onclick = null;
+			//customButton.onclick = null;
 			
 			configureCustomPanel();
 			
@@ -551,7 +579,10 @@ for (var i = 0; i < 48; i++) {
 //			});
 		}
 	};
-	okButton.onclick = new RunnableCompatibility() {
+	// customButton.onclick = ...
+	Clazz.addEvent(customButton, "click", hCustomClick);
+	
+	hOKClick = new RunnableCompatibility() {
 		public void run() {
 			int r = constrain(rText, 255);
 			int g = constrain(gText, 255);
@@ -561,11 +592,16 @@ for (var i = 0; i < 48; i++) {
 			dialogShell.close();
 		}
 	};
-	cancelButton.onclick = new RunnableCompatibility() {
+	// okButton.onclick = ...
+	Clazz.addEvent(okButton, "click", hOKClick);
+	
+	hCancelClick = new RunnableCompatibility() {
 		public void run() {
 			dialogShell.close();
 		}
 	};
+	// cancelButton.onclick = ...
+	Clazz.addEvent(cancelButton, "click", hCancelClick);
 	
 	Element[] inputs = containerHandle.getElementsByTagName("INPUT");
 	hText = inputs[0];
@@ -588,9 +624,12 @@ for (var i = 0; i < 48; i++) {
 	customColorBoxes = copyChildNodes(basicEl.childNodes[3]);
 	colorStrips = copyChildNodes(colorPanel.childNodes[1].childNodes[0]);
 	
+	basicColorBoxClicks = new Object[basicColorBoxes.length];
+	customColorBoxClicks = new Object[customColorBoxes.length];
+	
 	for (int i = 0; i < basicColorBoxes.length; i++) {
 		final int index = i;
-		basicColorBoxes[i].onclick = new RunnableCompatibility() {
+		basicColorBoxClicks[i] = new RunnableCompatibility() {
 			public void run() {
 				int i = index;
 				int[] rgbColor = null;
@@ -607,10 +646,12 @@ for (var i = 0; i < 48; i++) {
 				switchColorBox(i);
 			}
 		};
+		// basicColorBoxes[i].onclick = ...
+		Clazz.addEvent(basicColorBoxes[i], "click", basicColorBoxClicks[i]);
 	}
 	for (int i = 0; i < customColorBoxes.length; i++) {
 		final int index = i;
-		customColorBoxes[i].onclick = new RunnableCompatibility() {
+		customColorBoxClicks[i] = new RunnableCompatibility() {
 			public void run() {
 				RGB rgb = customColors[index];
 				if (rgb == null) {
@@ -624,6 +665,8 @@ for (var i = 0; i < 48; i++) {
 				switchColorBox(index + 48);
 			}
 		};
+		// customColorBoxes[i].onclick = ...
+		Clazz.addEvent(customColorBoxes[i], "click", customColorBoxClicks[i]);
 		if (customColors[i] != null) {
 			RGB color = customColors[i]; 
 			customColorBoxes[i].childNodes[0].childNodes[0].style.backgroundColor = "rgb(" + color.red + "," + color.green + "," + color.blue + ")";
@@ -731,7 +774,7 @@ for (var i = 0; i < 48; i++) {
 }
 
 void configureCustomPanel() {
-	addToCustomButton.onclick = new RunnableCompatibility() {
+	hAdd2CustomClick = new RunnableCompatibility() {
 		public void run() {
 			int r = constrain(rText, 255);
 			int g = constrain(gText, 255);
@@ -741,8 +784,10 @@ void configureCustomPanel() {
 			selectedCustomIndex = (selectedCustomIndex + 1) % 16;
 		}
 	};
+	// addToCustomButton.onclick = ...
+	Clazz.addEvent(addToCustomButton, "click", hAdd2CustomClick);
 
-	final DragAndDrop dnd = new DragAndDrop();
+	dnd = new DragAndDrop();
 	dnd.addDragListener(new DragAdapter() {
 		int originalTop = 0;
 		public boolean dragging(DragEvent e) {
@@ -767,7 +812,7 @@ void configureCustomPanel() {
 	});
 	dnd.bind(lPicker);
 	
-	colorBlock.onclick = new RunnableCompatibility() {
+	hColorBlockClick = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper(getEvent());
 			Point pt = OS.calcuateRelativePosition(colorBlock, document.body);
@@ -782,7 +827,10 @@ void configureCustomPanel() {
 			updateFromHSL(h, s, l);
 		}
 	};
-	stripBlock.onclick = new RunnableCompatibility() {
+	// colorBlock.onclick = ...
+	Clazz.addEvent(colorBlock, "click", hColorBlockClick);
+	
+	hStripBlockClick = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper(getEvent());
 			Point pt = OS.calcuateRelativePosition(stripBlock, document.body);
@@ -795,8 +843,10 @@ void configureCustomPanel() {
 			updateFromHSL(h, s, l);
 		}
 	};
+	// stripBlock.onclick = ...
+	Clazz.addEvent(hStripBlockClick, "click", hStripBlockClick);
 	
-	RunnableCompatibility updateRGBRunnable = new RunnableCompatibility() {
+	updateRGBRunnable = new RunnableCompatibility() {
 		public void run() {
 			int h = constrain(hText, 239);
 			int s = constrain(sText, 240);
@@ -805,7 +855,7 @@ void configureCustomPanel() {
 		}
 	};
 
-	RunnableCompatibility updateHSLRunnable = new RunnableCompatibility() {
+	updateHSLRunnable = new RunnableCompatibility() {
 		public void run() {
 			int r = constrain(rText, 255);
 			int g = constrain(gText, 255);
@@ -814,10 +864,20 @@ void configureCustomPanel() {
 		}
 	};
 
-	hText.onchange = sText.onchange = lText.onchange = updateRGBRunnable;
-	rText.onchange = gText.onchange = bText.onchange = updateHSLRunnable;
-	hText.onkeyup = sText.onkeyup = lText.onkeyup = updateRGBRunnable;
-	rText.onkeyup = gText.onkeyup = bText.onkeyup = updateHSLRunnable;
+//	hText.onchange = sText.onchange = lText.onchange = updateRGBRunnable;
+//	rText.onchange = gText.onchange = bText.onchange = updateHSLRunnable;
+//	hText.onkeyup = sText.onkeyup = lText.onkeyup = updateRGBRunnable;
+//	rText.onkeyup = gText.onkeyup = bText.onkeyup = updateHSLRunnable;
+	Object[] hsl = new Object[] { hText, sText, lText };
+	for (int i = 0; i < hsl.length; i++) {
+		Clazz.addEvent(hsl[i], "change", updateRGBRunnable);
+		Clazz.addEvent(hsl[i], "keyup", updateRGBRunnable);
+	}
+	Object[] rgb = new Object[] { rText, gText, bText };
+	for (int i = 0; i < rgb.length; i++) {
+		Clazz.addEvent(rgb[i], "change", updateHSLRunnable);
+		Clazz.addEvent(rgb[i], "keyup", updateHSLRunnable);
+	}
 }
 
 int constrain(Object el, int max) {

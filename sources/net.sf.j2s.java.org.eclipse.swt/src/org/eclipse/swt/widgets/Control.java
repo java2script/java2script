@@ -36,6 +36,7 @@ import org.eclipse.swt.internal.browser.Popup;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.struct.MESSAGE;
 import org.eclipse.swt.internal.struct.WINDOWPOS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -73,6 +74,8 @@ public abstract class Control extends Widget implements Drawable {
 	protected int width;
 	//private int lastLeft, lastTop, lastHeight, lastWidth; 
 	boolean locationSet = false;
+	private Object hOperaMouseUp;
+	private Object hControlMenuDetect;
 /**
  * Prevents uninitialized instances from being created outside the package.
  * @j2sIgnore
@@ -1695,6 +1698,22 @@ protected void releaseChild () {
 }
 
 protected void releaseHandle () {
+	if (hOperaMouseUp != null || hControlMenuDetect != null) {
+		Element el = null;
+		if (this instanceof Composite) {
+			el = ((Composite) this).containerHandle();
+		} else {
+			el = handle;
+		}
+		if (hOperaMouseUp != null) {
+			Clazz.removeEvent(el, "mouseup", hOperaMouseUp);
+			hOperaMouseUp = null;
+		}
+		if (hControlMenuDetect != null) {
+			Clazz.removeEvent(el, "contextmenu", hControlMenuDetect);
+			hControlMenuDetect = null;
+		}
+	}
 	super.releaseHandle ();
 	if (handle != null) {
 		OS.destroyHandle(handle);
@@ -2531,38 +2550,42 @@ public void setMenu (Menu menu) {
 		el = handle;
 	}
 	if (OS.isOpera) {
-		el.onmouseup = new RunnableCompatibility() {
-			public void run() {
-				Object evt = getEvent();
-				if (evt != null && ((HTMLEvent) evt).ctrlKey) {
-					HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
-					if (!evtHTML.leftButtonHold) {
-						Menu menu = getMenu ();
-						if (menu != null && !menu.isDisposed ()) {
-							menu.handle.style.left = "-10000px";
-							menu.handle.style.top = "-10000px";
-							menu.handle.style.display = "block";
-							Rectangle bounds = menu.getBounds();
-							Rectangle clientArea = getMonitor().getClientArea();
-							clientArea.x += OS.getFixedBodyOffsetLeft();
-							clientArea.y += OS.getFixedBodyOffsetTop();
-							Rectangle rect = Popup.popupMenu(clientArea, 
-									new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
-									bounds.width, bounds.height, 0);
-							menu.handle.style.width = rect.width + "px";
-							menu.setLocation (rect.x, rect.y);
-							showMenu(rect.x, rect.y);
+		if (hOperaMouseUp == null) {
+			hOperaMouseUp = new RunnableCompatibility() {
+				public void run() {
+					Object evt = getEvent();
+					if (evt != null && ((HTMLEvent) evt).ctrlKey) {
+						HTMLEventWrapper evtHTML = new HTMLEventWrapper(evt);
+						if (!evtHTML.leftButtonHold) {
+							Menu menu = getMenu ();
+							if (menu != null && !menu.isDisposed ()) {
+								menu.handle.style.left = "-10000px";
+								menu.handle.style.top = "-10000px";
+								menu.handle.style.display = "block";
+								Rectangle bounds = menu.getBounds();
+								Rectangle clientArea = getMonitor().getClientArea();
+								clientArea.x += OS.getFixedBodyOffsetLeft();
+								clientArea.y += OS.getFixedBodyOffsetTop();
+								Rectangle rect = Popup.popupMenu(clientArea, 
+										new Rectangle(evtHTML.x, evtHTML.y, 0, 0),
+										bounds.width, bounds.height, 0);
+								menu.handle.style.width = rect.width + "px";
+								menu.setLocation (rect.x, rect.y);
+								showMenu(rect.x, rect.y);
+							}
+							evtHTML.preventDefault();
+							evtHTML.stopPropagation();
+							toReturn(false);
 						}
-						evtHTML.preventDefault();
-						evtHTML.stopPropagation();
-						toReturn(false);
 					}
+					
 				}
-				
-			}
-		};
+			};
+			Clazz.addEvent(el, "mouseup", hOperaMouseUp);
+		}
 	}
-		el.oncontextmenu = new RunnableCompatibility() {
+	if (hControlMenuDetect == null) {
+		hControlMenuDetect = new RunnableCompatibility() {
 			public void run() {
 				Object evt = getEvent();
 				if (evt != null) {
@@ -2589,7 +2612,8 @@ public void setMenu (Menu menu) {
 				toReturn(false);
 			}
 		};
-	//}
+		Clazz.addEvent(el, "contextmenu", hControlMenuDetect);
+	}
 }
 
 boolean setRadioFocus () {

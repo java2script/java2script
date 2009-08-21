@@ -11,6 +11,7 @@
 
 package org.eclipse.swt.internal.dnd;
 
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -98,7 +99,9 @@ public class DNDUtils {
 			return true;
 		}
 		document.onselectstart = DNDUtils.onselectstart;
-		evt.target.onselectstart = DNDUtils.onselectstart;
+		//evt.target.onselectstart = DNDUtils.onselectstart;
+		Clazz.addEvent(evt.target, "selectstart", DNDUtils.onselectstart);
+		
 		oThis.startX = evt.x;
 		oThis.startY = evt.y;
 		document.onmousemove = DNDUtils.bindFunctionWith (DNDUtils.onmousemove, oThis);

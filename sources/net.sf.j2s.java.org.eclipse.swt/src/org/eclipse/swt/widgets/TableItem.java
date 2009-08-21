@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -51,6 +52,9 @@ public class TableItem extends Item {
 	int index;
 	private boolean selected;
 	Element check;
+	private Object hCheckSelection;
+	private Object hItemDefaultSelection;
+	private Object hItemSelection;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -130,7 +134,7 @@ TableItem (Table parent, int style, int index, boolean create) {
 
 private void configureItem() {
 	if((parent.style & SWT.CHECK) != 0 && check != null){
-		check.onclick = new RunnableCompatibility() {
+		hCheckSelection = new RunnableCompatibility() {
 			public void run() {
 				Event e = new Event();
 				e.display = display;
@@ -142,6 +146,8 @@ private void configureItem() {
 				setChecked(!checked);
 			}
 		};
+		// check.onclick = ...
+		Clazz.addEvent(check, "click", hCheckSelection);
 	}
 	
 //	this.handle.onkeydown = new RunnableCompatibility() {
@@ -161,7 +167,7 @@ private void configureItem() {
 //	};
 
 	
-	this.handle.onclick = new RunnableCompatibility() {
+	hItemSelection = new RunnableCompatibility() {
 		public void run() {
 			if(handle.disabled){
 				return;
@@ -183,7 +189,10 @@ private void configureItem() {
 			toReturn(false);
 		}
 	};
-	this.handle.ondblclick = new RunnableCompatibility(){
+	// this.handle.onclick = ...
+	Clazz.addEvent(handle, "click", hItemSelection);
+	
+	hItemDefaultSelection = new RunnableCompatibility(){
 		public void run(){
 			if(handle.disabled){
 				return;
@@ -200,7 +209,8 @@ private void configureItem() {
 			toReturn(false);					
 		}
 	};
-	
+	// this.handle.ondblclick = ...
+	Clazz.addEvent(handle, "dblclick", hItemDefaultSelection);
 }
 
 static Table checkNull (Table control) {
@@ -667,10 +677,22 @@ void redraw (int column, boolean drawText, boolean drawImage) {
  */
 protected void releaseHandle() {
 	if (check != null) {
+		if (hCheckSelection != null) {
+			Clazz.removeEvent(check, "click", hCheckSelection);
+			hCheckSelection = null;
+		}
 		OS.destroyHandle(check);
 		check = null;
 	}
 	if (handle != null) {
+		if (hItemSelection != null) {
+			Clazz.removeEvent(handle, "click", hItemSelection);
+			hItemSelection = null;
+		}
+		if (hItemDefaultSelection != null) {
+			Clazz.removeEvent(handle, "dblclick", hItemDefaultSelection);
+			hItemDefaultSelection = null;
+		}
 		OS.deepClearChildren(handle);
 		OS.destroyHandle(handle);
 		handle = null;

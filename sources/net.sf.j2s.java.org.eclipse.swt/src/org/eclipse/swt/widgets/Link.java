@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -81,6 +82,7 @@ public class Link extends Control {
 		}
 	}
 	*/
+	private Object hLinkSelectionHandler;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -322,7 +324,13 @@ void enableWidget (boolean enabled) {
  * @see org.eclipse.swt.widgets.Widget#hookSelection()
  */
 void hookSelection() {
-	RunnableCompatibility linkHandler = new RunnableCompatibility() {
+	if (anchors == null || anchors.length == 0) {
+		return;
+	}
+	if (hLinkSelectionHandler != null) {
+		return;
+	}
+	hLinkSelectionHandler = new RunnableCompatibility() {
 		public void run() {
 			Event e = new Event();
 			e.type = SWT.Selection;
@@ -337,8 +345,10 @@ void hookSelection() {
 	for (int i = 0; i < anchors.length; i++) {
 		anchors[i].href = "javascript:void(0);";
 		anchors[i].target = "_self";
-		anchors[i].onclick = linkHandler;
-		anchors[i].ondblclick = linkHandler;
+		//anchors[i].onclick = hLinkSelectionHandler;
+		//anchors[i].ondblclick = hLinkSelectionHandler;
+		Clazz.addEvent(anchors[i], "click", hLinkSelectionHandler);
+		Clazz.addEvent(anchors[i], "dblclick", hLinkSelectionHandler);
 	}
 }
 
@@ -857,10 +867,15 @@ public void setText (String string) {
 }
 
 void unhookSelection() {
+	if (hLinkSelectionHandler == null) {
+		return;
+	}
 	for (int i = 0; i < anchors.length; i++) {
 		Element anchor = anchors[i];
-		anchor.onclick = null;
-		anchor.ondblclick = null;
+		//anchor.onclick = null;
+		//anchor.ondblclick = null;
+		Clazz.removeEvent(anchor, "click", hLinkSelectionHandler);
+		Clazz.removeEvent(anchor, "dblclick", hLinkSelectionHandler);
 		if ("#".equals(ids[i])) {
 			anchor.href = "javascript:void(0);";
 			anchor.target = "_self";
@@ -869,6 +884,7 @@ void unhookSelection() {
 			anchor.target = "_blank";
 		}
 	}
+	hLinkSelectionHandler = null;
 }
 
 /*

@@ -23,6 +23,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 
@@ -50,6 +51,9 @@ public class TrayItem extends Item {
 	boolean visible = true;
 	
 	Element handle;
+	private Object hOperaMouseUp;
+	private Object hTrayMenu;
+	private Object hTraySelection;
 	
 /**
  * Constructs a new instance of this class given its parent
@@ -211,7 +215,7 @@ void createWidget () {
 	*/
 	handle = parent.addTrayItem();
 	
-	handle.onclick =  new RunnableCompatibility() {
+	hTraySelection = new RunnableCompatibility() {
 		public void run() {
 			postEvent (SWT.Selection);
 			if (display.trayCorner != null) {
@@ -219,7 +223,10 @@ void createWidget () {
 			}
 		}
 	};
-	handle.oncontextmenu = new RunnableCompatibility() {
+	// handle.onclick = ...
+	Clazz.addEvent(handle, "click", hTraySelection);
+	
+	hTrayMenu = new RunnableCompatibility() {
 		public void run() {
 			Event ev = new Event();
 			ev.type = SWT.MenuDetect;
@@ -244,9 +251,11 @@ void createWidget () {
 			}
 		}
 	};
+	// handle.oncontextmenu = ...
+	Clazz.addEvent(handle, "contextmenu", hTrayMenu);
 	
 	if (OS.isOpera) {
-		handle.onmouseup = new RunnableCompatibility() {
+		hOperaMouseUp = new RunnableCompatibility() {
 			public void run() {
 				Object evt = getEvent();
 				if (evt != null && ((HTMLEvent) evt).ctrlKey) {
@@ -267,6 +276,8 @@ void createWidget () {
 				}
 			}
 		};
+		// handle.onmouseup = ...
+		Clazz.addEvent(handle, "mouseup", hOperaMouseUp);
 	}
 }
 
@@ -376,6 +387,20 @@ protected void releaseChild () {
 }
 
 protected void releaseWidget () {
+	if (handle != null) {
+		if (hTraySelection != null) {
+			Clazz.removeEvent(handle, "click", hTraySelection);
+			hTraySelection = null;
+		}
+		if (hTrayMenu != null) {
+			Clazz.removeEvent(handle, "contextmenu", hTrayMenu);
+			hTrayMenu = null;
+		}
+		if (hOperaMouseUp != null) {
+			Clazz.removeEvent(handle, "mouseup", hOperaMouseUp);
+			hOperaMouseUp = null;
+		}
+	}
 	super.releaseWidget ();
 //	if (image2 != null) image2.dispose ();
 //	image2 = null;

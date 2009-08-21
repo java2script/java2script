@@ -21,6 +21,7 @@ import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.SliderDND;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -87,6 +88,9 @@ public class Slider extends Control {
 	private Element thumbHandle;
 	
 	private int lastX, lastY;
+	private Object hIncreaseClick;
+	private Object hDecreaseClick;
+	private DragAndDrop dnd;
 
 
 /**
@@ -228,7 +232,7 @@ protected void createWidget() {
 	} else {
 		decBtnHandle.className = "slider-top-button-default";
 	}
-	decBtnHandle.onclick = new RunnableCompatibility() {
+	hDecreaseClick = new RunnableCompatibility() {
 		public void run() {
 			setSelection(getSelection() - increment);
 			Event event = new Event ();
@@ -244,6 +248,8 @@ protected void createWidget() {
 			sendEvent (SWT.Selection, event);
 		}
 	};
+	// decBtnHandle.onclick = ...
+	Clazz.addEvent(decBtnHandle, "click", hDecreaseClick);
 
 	incBtnHandle = document.createElement("BUTTON");
 	handle.appendChild(incBtnHandle);
@@ -252,7 +258,7 @@ protected void createWidget() {
 	} else {
 		incBtnHandle.className = "slider-bottom-button-default";
 	}
-	incBtnHandle.onclick = new RunnableCompatibility() {
+	hIncreaseClick = new RunnableCompatibility() {
 		public void run() {
 			setSelection(getSelection() + increment);
 			Event event = new Event ();
@@ -268,6 +274,8 @@ protected void createWidget() {
 			sendEvent (SWT.Selection, event);
 		}
 	};
+	// incBtnHandle.onclick = ...
+	Clazz.addEvent(incBtnHandle, "click", hIncreaseClick);
 
 	thumbHandle = document.createElement("BUTTON");
 	handle.appendChild(thumbHandle);
@@ -292,7 +300,7 @@ protected void createWidget() {
 	* get a thumb that is 10.
 	*/
 	
-	DragAndDrop dnd = new DragAndDrop();
+	dnd = new DragAndDrop();
 	dnd.addDragListener(new SliderDND() {
 		public boolean dragEnded(DragEvent e) {
 			caculateSelection();
@@ -594,6 +602,22 @@ public int getThumb () {
 	return info.nPage;
 	*/
 	return thumb;
+}
+
+protected void releaseHandle() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
+	if (decBtnHandle != null && hDecreaseClick != null) {
+		Clazz.removeEvent(decBtnHandle, "click", hDecreaseClick);
+		hDecreaseClick = null;
+	}
+	if (incBtnHandle != null && hIncreaseClick != null) {
+		Clazz.removeEvent(incBtnHandle, "click", hIncreaseClick);
+		hIncreaseClick = null;
+	}
+	super.releaseHandle();
 }
 
 /**

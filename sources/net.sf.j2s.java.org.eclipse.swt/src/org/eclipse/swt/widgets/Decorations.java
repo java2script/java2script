@@ -131,7 +131,7 @@ public class Decorations extends Canvas {
 	private String lastBodyCSSText;
 	private int lastBodyScrollLeft;
 	private int lastBodyScrollTop;
-	private Object lastClientAreaOnScroll;
+//	private Object lastClientAreaOnScroll;
 	Element shellMin;
 	Element shellMax;
 	Element shellClose;
@@ -139,6 +139,13 @@ public class Decorations extends Canvas {
 	Element shellMenuBar;
 	Element shellToolBar;
 	private ShellFrameDND shellFrameDND;
+	private Object hContentKeyDown;
+	private Object hIconClick;
+	private Object hMinClick;
+	Object hMaxClick;
+	private Object hCloseClick;
+	private Object hTitleBarClick;
+	private DragAndDrop dnd;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -613,7 +620,7 @@ protected static void appendShadowHandles(Element handle, boolean top, boolean r
 			createCSSDiv(handle, handles[i]);
 		}
 	}
-	if (OS.isChrome) {
+	if (OS.isChrome10) {
 		handle.style.opacity = "1";
 	}
 	if (OS.isIE) {
@@ -640,7 +647,7 @@ protected static void createNarrowShadowHandles(Element handle) {
 	for (int i = 0; i < handles.length; i++) {
 		createCSSDiv(handle, handles[i]);
 	}
-	if (OS.isChrome) {
+	if (OS.isChrome10) {
 		handle.style.opacity = "1";
 	}
 	if (OS.isIE) {
@@ -707,7 +714,7 @@ protected void createHandle() {
 	}
 	contentHandle = createCSSDiv(handle, contentCSS);
 	if (DragAndDrop.class != null) {
-		DragAndDrop dnd = new DragAndDrop();
+		dnd = new DragAndDrop();
 		shellFrameDND = new ShellFrameDND() {
 			protected int deltaWidth = 0;
 			protected int deltaHeight = 0;
@@ -753,7 +760,7 @@ protected void createHandle() {
 //			OS.SetFocus(contentHandle); //contentHandle.focus();
 //		}
 //	};
-	contentHandle.onkeydown = new RunnableCompatibility() {
+	hContentKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
 			if(defaultButton == null){
@@ -788,7 +795,8 @@ protected void createHandle() {
 			}
 		}
 	}; 
-
+	// contentHandle.onkeydown = ...
+	Clazz.addEvent(contentHandle, "keydown", hContentKeyDown);
 }
 
 void nextWindowLocation(int wHint, int hHint) {
@@ -1304,19 +1312,38 @@ Decorations menuShell () {
 }
 
 protected void releaseHandle() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
 	if (shellMin != null) {
+		if (hMinClick != null) {
+			Clazz.removeEvent(shellMin, "click", hMinClick);
+			hMinClick = null;
+		}
 		OS.destroyHandle(shellMin);
 		shellMin = null;
 	}
 	if (shellMax != null) {
+		if (hMaxClick != null) {
+			Clazz.removeEvent(shellMax, "click", hMaxClick);
+		}
 		OS.destroyHandle(shellMax);
 		shellMax = null;
 	}
 	if (shellClose != null) {
+		if (hCloseClick != null) {
+			Clazz.removeEvent(shellClose, "click", hCloseClick);
+			hCloseClick = null;
+		}
 		OS.destroyHandle(shellClose);
 		shellClose = null;
 	}
 	if (shellIcon != null) {
+		if (hIconClick != null) {
+			Clazz.removeEvent(shellIcon, "click", hIconClick);
+			hIconClick = null;
+		}
 		OS.destroyHandle(shellIcon);
 		shellIcon = null;
 	}
@@ -1325,6 +1352,13 @@ protected void releaseHandle() {
 		shellTitle = null;
 	}
 	if (titleBar != null) {
+		if ((style & SWT.MAX) != 0 && hMaxClick != null) {
+			Clazz.removeEvent(titleBar, "click", hMaxClick);
+		}
+		if (hTitleBarClick != null) {
+			Clazz.removeEvent(titleBar, "click", hTitleBarClick);
+			hTitleBarClick = null;
+		}
 		OS.destroyHandle(titleBar);
 		titleBar = null;
 	}
@@ -1337,6 +1371,10 @@ protected void releaseHandle() {
 		shellToolBar = null;
 	}
 	if (contentHandle != null) {
+		if (hContentKeyDown != null) {
+			Clazz.removeEvent(contentHandle, "keydown", hContentKeyDown);
+			hContentKeyDown = null;
+		}
 		OS.destroyHandle(contentHandle);
 		contentHandle = null;
 	}
@@ -1344,6 +1382,7 @@ protected void releaseHandle() {
 		OS.destroyHandle(modalHandle);
 		modalHandle = null;
 	}
+	hMaxClick = null;
 	super.releaseHandle();
 }
 protected void releaseWidget () {
@@ -1762,7 +1801,7 @@ public void setMaximized (boolean maximized) {
 			lastClientAreaCSSText = node.style.cssText;
 			lastBodyCSSText = b.style.cssText;
 			
-			lastClientAreaOnScroll = node.onscroll;
+			//lastClientAreaOnScroll = node.onscroll;
 			
 			node.style.border = "0 none transparent";
 			node.style.overflow = "hidden";
@@ -1771,16 +1810,16 @@ public void setMaximized (boolean maximized) {
 			node.scrollLeft = 0;
 			node.scrollTop = 0;
 			
-			/**
-			 * TODO: IE does not trigger onscroll when overflow is hidden! 
-			 * It seems there is no needs for overriding this onscroll.
-			 * 
-			 * @j2sNative
-			 * node.onscroll = function (e) {
-			 * 	this.scrollLeft = 0;
-			 * 	this.scrollTop = 0;
-			 * };
-			 */ { }
+//			/**
+//			 * TODO: IE does not trigger onscroll when overflow is hidden! 
+//			 * It seems there is no needs for overriding this onscroll.
+//			 * 
+//			 * @j2sNative
+//			 * node.onscroll = function (e) {
+//			 * 	this.scrollLeft = 0;
+//			 * 	this.scrollTop = 0;
+//			 * };
+//			 */ { }
 		}
 //		boolean toUpdateMax = false;
 		if (contentHandle != null) {
@@ -1815,6 +1854,9 @@ public void setMaximized (boolean maximized) {
 		ResizeSystem.register(this, SWT.MAX);
 		if (titleBar != null) {
 			OS.addCSSClass(titleBar, key);
+			if (shellMax != null) {
+				shellMax.title = "Restore";
+			}
 		}
 		window.currentTopZIndex++;
 		handle.style.zIndex = window.currentTopZIndex;
@@ -1838,6 +1880,9 @@ public void setMaximized (boolean maximized) {
 		setBounds(oldBounds);
 		if (titleBar != null) {
 			OS.removeCSSClass(titleBar, key);
+			if (shellMax != null) {
+				shellMax.title = "Maximize";
+			}
 		}
 		oldBounds = null;
 		ResizeSystem.unregister(this, SWT.MAX);
@@ -1856,7 +1901,7 @@ public void setMaximized (boolean maximized) {
 			}
 			node.scrollLeft = lastBodyScrollLeft;
 			node.scrollTop = lastBodyScrollTop;
-			node.onscroll = lastClientAreaOnScroll;
+//			node.onscroll = lastClientAreaOnScroll;
 		}
 	}
 }
@@ -2178,10 +2223,7 @@ void setSystemMenu () {
 		shellIcon = document.createElement("DIV");
 		shellIcon.className = "shell-title-icon";
 		titleBar.appendChild(shellIcon);
-//		/**
-//		 * @j2sIgnore
-//		 */ {
-		shellIcon.onclick = new RunnableCompatibility() {
+		hIconClick = new RunnableCompatibility() {
 			public void run() {
 				HTMLEvent e = (HTMLEvent)getEvent();
 				if (e == null || (!e.ctrlKey && !e.altKey && !e.shiftKey)) {
@@ -2191,14 +2233,16 @@ void setSystemMenu () {
 				}
 			}
 		};
-//		 }
+		// shellIcon.onclick = ...
+		Clazz.addEvent(shellIcon, "click", hIconClick);
 	}
 
 	if (minable()) {
 		shellMin = document.createElement("DIV");
 		shellMin.className = "shell-title-min";
+		shellMin.title = "Minimze";
 		titleBar.appendChild(shellMin);
-		shellMin.onclick = new RunnableCompatibility() {
+		hMinClick = new RunnableCompatibility() {
 			public void run() {
 				Decorations shell = Decorations.this;
 				ResizeSystem.unregister(shell, SWT.MIN);
@@ -2210,13 +2254,16 @@ void setSystemMenu () {
 				new HTMLEventWrapper(getEvent()).stopPropagation();
 			}
 		};
+		// shellMin.onclick = ...
+		Clazz.addEvent(shellMin, "click", hMinClick);
 	}
 
 	if ((style & SWT.MAX) != 0) {
 		shellMax = document.createElement("DIV");
 		shellMax.className = "shell-title-normal-max";
+		shellMax.title = "Maximize";
 		titleBar.appendChild(shellMax);
-		shellMax.onclick = new RunnableCompatibility() {
+		hMaxClick = new RunnableCompatibility() {
 			public void run() {
 				boolean cur = !getMaximized();
 				setMaximized(cur);
@@ -2231,13 +2278,16 @@ void setSystemMenu () {
 				});
 			}
 		};
+		// shellMax.onclick = ...
+		Clazz.addEvent(shellMax, "click", hMaxClick);
 	}
 
 	if ((style & SWT.CLOSE) != 0) {
 		shellClose = document.createElement("DIV");
 		shellClose.className = "shell-title-close";
+		shellClose.title = "Close";
 		titleBar.appendChild(shellClose);
-		shellClose.onclick = new RunnableCompatibility() {
+		hCloseClick = new RunnableCompatibility() {
 			public void run() {
 				if (Decorations.this instanceof Shell) {
 					Shell shell = (Shell) Decorations.this;
@@ -2249,6 +2299,8 @@ void setSystemMenu () {
 				toReturn(false);
 			}
 		};
+		// shellClose.onclick = ...
+		Clazz.addEvent(shellClose, "click", hCloseClick);
 	}
 	shellTitle = document.createElement("DIV");
 	shellTitle.className = "shell-title-text";
@@ -2265,13 +2317,14 @@ void setSystemMenu () {
 	 
 	titleBar.appendChild(shellTitle);
 	if ((style & SWT.MAX) != 0) {
-		titleBar.ondblclick = shellMax.onclick;
+		//titleBar.ondblclick = shellMax.onclick;
+		Clazz.addEvent(titleBar, "dblclick", hMaxClick);
 	}
 
 	//shellTitle.appendChild(document.createTextNode("-"));
 
 	handle.appendChild(titleBar);
-	titleBar.onclick = new RunnableCompatibility() {
+	hTitleBarClick = new RunnableCompatibility() {
 		public void run() {
 			if (isVisible()) { // may be invisible after clicking close button
 				bringToTop();
@@ -2285,6 +2338,8 @@ void setSystemMenu () {
 			toReturn(true);
 		}
 	};
+	// titleBar.onclick = ...
+	Clazz.addEvent(titleBar, "click", hTitleBarClick);
 	
 	window.currentTopZIndex += 2;
 	handle.style.zIndex = window.currentTopZIndex;

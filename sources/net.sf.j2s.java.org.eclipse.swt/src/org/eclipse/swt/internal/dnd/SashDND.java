@@ -13,6 +13,7 @@ package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -44,7 +45,8 @@ public class SashDND implements DragListener {
 		thumb.style.top = e.sourceElement.style.top;
 		thumb.style.width = e.sourceElement.style.width;
 		thumb.style.height = e.sourceElement.style.height;
-		thumb.onselectstart = DNDUtils.onselectstart;
+		//thumb.onselectstart = DNDUtils.onselectstart;
+		Clazz.addEvent(thumb, "selectstart", DNDUtils.onselectstart);
 		if (e.sourceElement.nextSibling != null) {
 			e.sourceElement.parentNode.insertBefore (thumb, 
 					e.sourceElement.nextSibling);
@@ -88,6 +90,7 @@ public class SashDND implements DragListener {
 	protected void clean() {
 		thumb.style.display = "none";
 		document.body.style.cursor = "auto";
+		Clazz.removeEvent(thumb, "selectstart", DNDUtils.onselectstart);
 		thumb.parentNode.removeChild(thumb);
 		if (overFrameHandle != null) {
 			document.body.removeChild(overFrameHandle);

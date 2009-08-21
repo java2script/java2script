@@ -2,6 +2,7 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -12,10 +13,10 @@ public class NotificationCorner extends DesktopItem {
 	
 	Tray tray;
 
-	private RunnableCompatibility mouseClick;
-	private RunnableCompatibility mouseOver;
-
-	private RunnableCompatibility mouseDoubleClick;
+	private Object mouseClick;
+	private Object mouseOver;
+	private Object mouseDoubleClick;
+	private Object hLogoClick;
 	
 	private Element minimizedEl;
 	
@@ -107,7 +108,7 @@ public class NotificationCorner extends DesktopItem {
 			handle.style.backgroundColor = "white";
 		}
 		document.body.appendChild(handle);
-		handle.onclick = new RunnableCompatibility() {
+		hLogoClick = new RunnableCompatibility() {
 			public void run() {
 				if (display != null && !display.isDisposed()) {
 					if (display.trayCorner != null) {
@@ -135,6 +136,8 @@ public class NotificationCorner extends DesktopItem {
 				 */ {}
 			}
 		};
+		// handle.onclick = ...
+		Clazz.addEvent(handle, "click", hLogoClick);
 
 		if (mouseOver == null) {
 			mouseOver = new RunnableCompatibility() {
@@ -181,8 +184,11 @@ public class NotificationCorner extends DesktopItem {
 			
 			};
 		}
-		if (handle != null && handle.onmouseover == null) {
-			handle.onmouseover = mouseOver;
+//		if (handle != null && handle.onmouseover == null) {
+//			handle.onmouseover = mouseOver;
+//		}
+		if (handle != null) {
+			Clazz.addEvent(handle, "mouseover", mouseOver);
 		}
 
 		updateEvents();
@@ -200,12 +206,43 @@ public class NotificationCorner extends DesktopItem {
 		bindEvents(minimizedEl);
 	}
 
+	private void unbindAllEvents() {
+		if (tray.allCells != null) {
+			for (int i = 0; i < tray.allCells.length; i++) {
+				Element cell = tray.allCells[i];
+				if (cell != null) {
+					unbindEvents(cell);
+				}
+			}
+		}
+		unbindEvents(minimizedEl);
+	}
+
 	public void bindEvents(Element cell) {
-		cell.onclick = mouseClick;
-		cell.onmouseover = mouseOver;
-		cell.ondblclick = mouseDoubleClick;
+//		cell.onclick = mouseClick;
+//		cell.onmouseover = mouseOver;
+//		cell.ondblclick = mouseDoubleClick;
+		if (mouseClick != null) {
+			Clazz.addEvent(cell, "click", mouseClick);
+		}
+		if (mouseOver != null) {
+			Clazz.addEvent(cell, "mouseover", mouseOver);
+		}
+		if (mouseDoubleClick != null) {
+			Clazz.addEvent(cell, "dblclick", mouseDoubleClick);
+		}
 	}
 	
+	void unbindEvents(Element cell) {
+		if (cell == null) {
+			return;
+		}
+		Clazz.removeEvent(cell, "click", mouseClick);
+		Clazz.removeEvent(cell, "mouseover", mouseOver);
+		Clazz.removeEvent(cell, "dblclick", mouseDoubleClick);
+	}
+	
+
 	public void handleApproaching() {
 		if (handle == null) {
 			return;
@@ -384,7 +421,15 @@ public class NotificationCorner extends DesktopItem {
 			return;
 		}
 		
+		unbindAllEvents();
+		
 		if (handle != null) {
+			if (hLogoClick != null) {
+				Clazz.removeEvent(handle, "click", hLogoClick);
+				hLogoClick = null;
+			}
+			Clazz.removeEvent(handle, "mouseover", mouseOver);
+			
 			OS.destroyHandle(handle);
 			handle = null;
 		}
@@ -392,6 +437,10 @@ public class NotificationCorner extends DesktopItem {
 			OS.destroyHandle(minimizedEl);
 			minimizedEl = null;
 		}
+		
+		mouseOver = null;
+		mouseClick = null;
+		mouseDoubleClick = null;
 	}
 
 	void toggleAutoHide() {

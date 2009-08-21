@@ -27,6 +27,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.browser.Popup;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.Option;
@@ -86,6 +87,13 @@ public class Combo extends Composite {
 	private int itemCount;
 	private int maxWidth = 0;
 	
+	private Object hDropDownClick;
+	private Object hEditKeyUp;
+	private Object hEditShow;
+	private Object hTextChange;
+	private Object hTextBlur;
+	private Object hTextMouseUp;
+	private Object hTextKeyUp;
 	
 	/**
 	 * the operating system limit for the number of characters
@@ -580,15 +588,17 @@ protected void createHandle () {
 
 	//int height = OS.getContainerHeight(dropDownButton);
 	
-	textInput.ondblclick = new RunnableCompatibility() {
+	hEditShow = new RunnableCompatibility() {
 		public void run() {
 			if(!isSimple && itemCount > 0) {
 				show();
 			}
 		}
 	};
+	// textInput.ondblclick = ...
+	Clazz.addEvent(textInput, "dblclick", hEditShow);
 
-	textInput.onkeyup = new RunnableCompatibility(){
+	hEditKeyUp = new RunnableCompatibility(){
 		public void run(){
 			HTMLEvent e = (HTMLEvent) getEvent();
 			String[] items = getItems();
@@ -625,17 +635,10 @@ protected void createHandle () {
 			}
 		}
 	};
-//	dropDownButton.onmousedown = new RunnableCompatibility() {
-//		public void run() {
-//			long now = new Date().getTime();
-//			if (now - lastBlurred < 250) {
-//				HTMLEventWrapper e = new HTMLEventWrapper(getEvent());
-//				e.preventDefault();
-//				e.stopPropagation();
-//			}
-//		}
-//	};
-	dropDownButton.onclick = new RunnableCompatibility() {
+	// textInput.onkeyup = ...
+	Clazz.addEvent(textInput, "keyup", hEditKeyUp);
+	
+	hDropDownClick = new RunnableCompatibility() {
 		public void run() {
 			long now = new Date().getTime();
 			if (now - lastBlurred < 200) {
@@ -650,6 +653,7 @@ protected void createHandle () {
 			}
 		}
 	};
+	Clazz.addEvent(dropDownButton, "click", hDropDownClick);
 	
 	createSelect();
 	configureSelect();
@@ -670,23 +674,28 @@ void createSelect() {
 	}
 }
 void configureSelect() {
-	selectInput.onchange = new RunnableCompatibility() {
+	hTextChange = new RunnableCompatibility() {
 		public void run() {
 			noSelection = false;
 			updateSelection();
 //			if(!isSimple)
 //				hide();
 		}
-	}; 
+	};
+	// selectInput.onchange = ...
+	Clazz.addEvent(selectInput, "change", hTextChange);
 
-	selectInput.onblur = new RunnableCompatibility() {
+	hTextBlur = new RunnableCompatibility() {
 		public void run() {
 			lastBlurred = new Date().getTime();
 			if(!isSimple && itemCount > 0)
 				hide();
 		}
-	}; 
-	selectInput.onmouseup = new RunnableCompatibility() {
+	};
+	// selectInput.onblur = ...
+	Clazz.addEvent(selectInput, "blue", hTextBlur);
+	
+	hTextMouseUp = new RunnableCompatibility() {
 		public void run() {
 			noSelection = false;
 			updateSelection();
@@ -706,7 +715,10 @@ void configureSelect() {
 			}
 		}
 	};
-	selectInput.onkeyup =  new RunnableCompatibility() {
+	// selectInput.onmouseup = ...
+	Clazz.addEvent(selectInput, "mouseup", hTextMouseUp);
+	
+	hTextKeyUp = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			int keyCode = evt.keyCode;
@@ -715,6 +727,8 @@ void configureSelect() {
 			}
 		}
 	};
+	// selectInput.onkeyup = ...
+	Clazz.addEvent(selectInput, "keyup", hTextKeyUp);
 }
 void hide(){
 	if(!this.selectShown){
@@ -2645,18 +2659,32 @@ LRESULT wmIMEChar (int hwnd, int wParam, int lParam) {
 }
 */
 protected void releaseHandle() {
-
 	if (selectInput != null) {
+		Clazz.removeEvent(selectInput, "change", hTextChange);
+		hTextChange = null;
+		Clazz.removeEvent(selectInput, "blur", hTextBlur);
+		hTextBlur = null;
+		Clazz.removeEvent(selectInput, "mouseup", hTextMouseUp);
+		hTextMouseUp = null;
+		Clazz.removeEvent(selectInput, "keyup", hTextKeyUp);
+		hTextKeyUp = null;
+
 		OS.destroyHandle(selectInput);
 		selectInput  = null;
 	}
 
 	if (dropDownButton != null) {
+		Clazz.removeEvent(dropDownButton, "click", hDropDownClick);
+		hDropDownClick = null;
 		OS.destroyHandle(dropDownButton);
 		dropDownButton = null;
 	}
 
 	if (textInput != null) {
+		Clazz.removeEvent(textInput, "dblclick", hEditShow);
+		hEditShow = null;
+		Clazz.removeEvent(textInput, "keyup", hEditKeyUp);
+		hEditKeyUp = null;
 		OS.destroyHandle(textInput);
 		textInput = null;
 	}

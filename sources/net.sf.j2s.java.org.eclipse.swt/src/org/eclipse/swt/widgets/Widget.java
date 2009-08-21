@@ -77,6 +77,23 @@ public abstract class Widget {
 
 	boolean styleChecked;
 	
+	Object hKeyPress; // special
+	Object hKeyDown;
+	Object hKeyUp;
+	Object hFocusIn;
+	Object hFocusOut;
+	Object hMouseMove;
+	Object hMouseDown;
+	Object hMouseUp;
+	Object hMouseEnter;
+	Object hMouseExit;
+	Object hMouseDoubleClick;
+	Object hMouseWheel;
+	Object hSelection;
+	Object hModify;
+	Object hMenuDetect;
+	Object hHelp;
+	
 	/* Global state flags */
 	static protected final int DISPOSED		= 1<<0;
 	static protected final int CANVAS			= 1<<1;
@@ -783,7 +800,10 @@ public int getStyle () {
 }
 
 void hookKeyDown() {
-	handle.onkeydown = new RunnableCompatibility() {
+	if (hKeyDown != null) {
+		return;
+	}
+	hKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			HTMLEvent evt = (HTMLEvent) e.event;
@@ -804,13 +824,14 @@ void hookKeyDown() {
 			sendEvent(event);
 		}
 	};
+	Clazz.addEvent(handle, "keydown", hKeyDown);
 	hookKeyPress();
 }
 private void hookKeyPress() {
-	if (handle.onkeypress != null) {
+	if (hKeyPress != null) {
 		return;
 	}
-	handle.onkeypress = new RunnableCompatibility() {
+	hKeyPress = new RunnableCompatibility() {
 		
 		public void run() {
 			HTMLEventWrapper evt = new HTMLEventWrapper (getEvent());
@@ -831,9 +852,13 @@ private void hookKeyPress() {
 		}
 	
 	};
+	Clazz.addEvent(handle, "keypress", hKeyPress);
 }
 void hookKeyUp() {
-	handle.onkeyup = new RunnableCompatibility() {
+	if (hKeyUp != null) {
+		return;
+	}
+	hKeyUp = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			HTMLEvent evt = (HTMLEvent) e.event;
@@ -854,6 +879,7 @@ void hookKeyUp() {
 			sendEvent(event);
 		}
 	};
+	Clazz.addEvent(handle, "keyup", hKeyUp);
 	hookKeyPress();
 }
 
@@ -881,7 +907,10 @@ boolean mouseHoverProc(boolean clear) {
 }
 
 void hookMouseDown() {
-	handle.onmousedown = new RunnableCompatibility() {
+	if (hMouseDown != null) {
+		return;
+	}
+	hMouseDown = new RunnableCompatibility() {
 		public void run() {
 			boolean hoverHooked = mouseHoverProc(true);
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
@@ -893,9 +922,13 @@ void hookMouseDown() {
 			}
 		}
 	};
+	Clazz.addEvent(handle, "mousedown", hMouseDown);
 }
 void hookMouseUp() {
-	handle.onmouseup = new RunnableCompatibility() {
+	if (hMouseUp != null) {
+		return;
+	}
+	hMouseUp = new RunnableCompatibility() {
 		public void run() {
 			boolean hoverHooked = mouseHoverProc(true);
 			dragStatus = false;
@@ -905,9 +938,13 @@ void hookMouseUp() {
 			}
 		}
 	};
+	Clazz.addEvent(handle, "mouseup", hMouseUp);
 }
 void hookMouseMove() {
-	handle.onmousemove = new RunnableCompatibility() {
+	if (hMouseMove != null) {
+		return;
+	}
+	hMouseMove = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			Widget widgetThis = Widget.this;
@@ -935,9 +972,13 @@ void hookMouseMove() {
 			toReturn(true);
 		}
 	};
+	Clazz.addEvent(handle, "mousemove", hMouseMove);
 }
 void hookMouseEnter() {
-	handle.onmouseover = new RunnableCompatibility() {
+	if (hMouseEnter != null) {
+		return;
+	}
+	hMouseEnter = new RunnableCompatibility() {
 		public void run() {
 			boolean hoverHooked = mouseHoverProc(true);
 			if (!hoverHooked || hooks(SWT.MouseEnter)) {
@@ -946,9 +987,13 @@ void hookMouseEnter() {
 			}
 		}
 	};
+	Clazz.addEvent(handle, "mouseover", hMouseEnter);
 }
 void hookMouseExit() {
-	handle.onmouseout = new RunnableCompatibility() {
+	if (hMouseExit != null) {
+		return;
+	}
+	hMouseExit = new RunnableCompatibility() {
 		public void run() {
 			boolean hoverHooked = false;
 			if (hoverTimerID != 0) {
@@ -962,14 +1007,19 @@ void hookMouseExit() {
 			}
 		}
 	};
+	Clazz.addEvent(handle, "mouseout", hMouseExit);
 }
 void hookMouseDoubleClick() {
-	handle.ondblclick = new RunnableCompatibility() {
+	if (hMouseDoubleClick != null) {
+		return;
+	}
+	hMouseDoubleClick = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			sendMouseEvent(SWT.MouseDoubleClick, ((HTMLEvent) getEvent()).button, e.target, e.x, e.y);
 		}
 	};
+	Clazz.addEvent(handle, "dblclick", hMouseDoubleClick);
 }
 /*
 void hookPaint() {
@@ -1002,11 +1052,15 @@ void hookDispose() {
 }
 */
 void hookSelection() {
-	handle.onclick = new RunnableCompatibility() {
+	if (hSelection != null) {
+		return;
+	}
+	hSelection = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Selection);
 		}
 	};
+	Clazz.addEvent(handle, "click", hSelection);
 }
 /*
 void hookDefaultSelection() {
@@ -1018,18 +1072,26 @@ void hookDefaultSelection() {
 }
 */
 void hookFocusIn() {
-	handle.onfocus = new RunnableCompatibility() {
+	if (hFocusIn != null) {
+		return;
+	}
+	hFocusIn = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.FocusIn);
 		}
 	};
+	Clazz.addEvent(handle, "focus", hFocusIn);
 }
 void hookFocusOut() {
-	handle.onblur = new RunnableCompatibility() {
+	if (hFocusOut != null) {
+		return;
+	}
+	hFocusOut = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.FocusOut);
 		}
 	};
+	Clazz.addEvent(handle, "blur", hFocusOut);
 }
 /*
 void hookExpand() {
@@ -1083,11 +1145,15 @@ void hookHide() {
 }
 */
 void hookModify() {
-	handle.onchange = new RunnableCompatibility() {
+	if (hModify != null) {
+		return;
+	}
+	hModify = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Modify);
 		}
 	};
+	Clazz.addEvent(handle, "change", hModify);
 }
 /*
 void hookVerify() {
@@ -1113,26 +1179,36 @@ void hookDeactivate() {
 }
 */
 void hookHelp() {
-	handle.onhelp = new RunnableCompatibility() {
+	if (hHelp != null) {
+		return;
+	}
+	hHelp = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Help);
 		}
 	};
+	Clazz.addEvent(handle, "help", hHelp);
 }
 void hookArm() {
+	// FIXME
+	/*
 	handle.onchange = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Arm);
 		}
 	};
+	*/
 }
 void hookTraverse() {
+	// FIXME
+	/*
 	handle.onkeypress = new RunnableCompatibility() {
 		public void run() {
 			//if (TAB)
 			//sendEvent(SWT.Traverse);
 		}
 	};
+	*/
 }
 /*
 void hookHardKeyDown() {
@@ -1151,11 +1227,15 @@ void hookHardKeyUp() {
 }
 */
 void hookMenuDetect() {
-	handle.oncontextmenu = new RunnableCompatibility() {
+	if (hMenuDetect != null) {
+		return;
+	}
+	hMenuDetect = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.MenuDetect);
 		}
 	};
+	Clazz.addEvent(handle, "contextmenu", hMenuDetect);
 }
 /*
 void hookSetData() {
@@ -1167,6 +1247,7 @@ void hookSetData() {
 }
 */
 void hookMouseWheel() {
+	// TODO:
 	/*
 	handle.onchange = new RunnableCompatibility() {
 		public void run() {
@@ -1333,6 +1414,74 @@ protected void releaseChild () {
 protected void releaseHandle () {
 	state |= DISPOSED;
 	display = null;
+	if (handle != null) {
+		if (hFocusIn != null) {
+			Clazz.removeEvent(handle, "focus", hFocusIn);
+			hFocusIn = null;
+		}
+		if (hFocusOut != null) {
+			Clazz.removeEvent(handle, "blur", hFocusOut);
+			hFocusOut = null;
+		}
+		if (hKeyDown != null) {
+			Clazz.removeEvent(handle, "keydown", hKeyDown);
+			hKeyDown = null;
+		}
+		if (hKeyUp != null) {
+			Clazz.removeEvent(handle, "keyup", hKeyUp);
+			hKeyUp = null;
+		}
+		if (hKeyPress != null) {
+			Clazz.removeEvent(handle, "keypress", hKeyPress);
+			hKeyPress = null;
+		}
+		if (hMouseDown != null) {
+			Clazz.removeEvent(handle, "mousedown", hMouseDown);
+			hMouseDown = null;
+		}
+		if (hMouseUp != null) {
+			Clazz.removeEvent(handle, "mouseup", hMouseUp);
+			hMouseUp = null;
+		}
+		if (hMouseEnter != null) {
+			Clazz.removeEvent(handle, "mouseover", hMouseEnter);
+			hMouseEnter = null;
+		}
+		if (hMouseExit != null) {
+			Clazz.removeEvent(handle, "mouseout", hMouseExit);
+			hMouseExit = null;
+		}
+		if (hMouseDoubleClick != null) {
+			Clazz.removeEvent(handle, "dblclick", hMouseDoubleClick);
+			hMouseDoubleClick = null;
+		}
+		if (hMouseMove != null) {
+			Clazz.removeEvent(handle, "mousemove", hMouseMove);
+			hMouseMove = null;
+		}
+		if (hMouseWheel != null) {
+			Clazz.removeEvent(handle, "scroll", hMouseWheel);
+			hMouseWheel = null;
+		}
+		if (hSelection != null) {
+			Clazz.removeEvent(handle, "click", hSelection);
+			hSelection = null;
+		}
+		if (hMenuDetect != null) {
+			Clazz.removeEvent(handle, "contextmenu", hMenuDetect);
+			hMenuDetect = null;
+		}
+		if (hModify != null) {
+			Clazz.removeEvent(handle, "change", hModify);
+			hModify = null;
+		}
+		if (hHelp != null) {
+			Clazz.removeEvent(handle, "help", hHelp);
+			hHelp = null;
+		}
+		// FIXME
+		//handle = null;
+	}
 }
 
 public void releaseResources () {

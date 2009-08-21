@@ -13,6 +13,7 @@ package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -36,7 +37,8 @@ public class TableColumnDND extends DragAdapter {
 		thumb.style.top = e.sourceElement.style.top;
 		thumb.style.width = e.sourceElement.style.width;
 		thumb.style.height = e.sourceElement.style.height;
-		thumb.onselectstart = DNDUtils.onselectstart;
+		//thumb.onselectstart = DNDUtils.onselectstart;
+		Clazz.addEvent(thumb, "selectstart", DNDUtils.onselectstart);
 		if (e.sourceElement.nextSibling != null) {
 			e.sourceElement.parentNode.insertBefore (thumb, 
 					e.sourceElement.nextSibling);
@@ -62,6 +64,7 @@ public class TableColumnDND extends DragAdapter {
 
 	protected void clean() {
 		thumb.style.display = "none";
+		Clazz.removeEvent(thumb, "selectstart", DNDUtils.onselectstart);
 		document.body.style.cursor = "auto";
 		thumb.parentNode.removeChild(thumb);
 	}

@@ -23,6 +23,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.DragAndDrop;
 import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.dnd.TableColumnDND;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -46,6 +47,7 @@ public class TableColumn extends Item {
 	Table parent;
 	boolean resizable, moveable;
 	Element resizeHandle;
+	private Object hColumnSelection;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -88,11 +90,14 @@ public TableColumn (Table parent, int style) {
 }
 
 private void configureColumn() {
-	handle.ondblclick = new RunnableCompatibility() {
+	hColumnSelection = new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.DefaultSelection);
 		}
 	};
+	// handle.ondblclick = ...
+	Clazz.addEvent(handle, "dblclick", hColumnSelection);
+	
 //
 //	this.handle.style.height = (OS.getStringPlainHeight("A")+ 2) + "px";
 //	if(resizeHandle != null){
@@ -493,6 +498,10 @@ protected void releaseHandle() {
 		resizeHandle = null;
 	}
 	if (handle != null) {
+		if (hColumnSelection != null) {
+			Clazz.removeEvent(handle, "click", hColumnSelection);
+			hColumnSelection = null;
+		}
 		OS.deepClearChildren(handle);
 		OS.destroyHandle(handle);
 		handle = null;

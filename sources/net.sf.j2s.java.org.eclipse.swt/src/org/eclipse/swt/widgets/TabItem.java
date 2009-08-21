@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -41,6 +42,7 @@ public class TabItem extends Item {
 
 	boolean hasImage;
 	Element textEl;
+	private Object hItemSelection;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -124,11 +126,13 @@ protected void checkSubclass () {
 }
 
 private void configure(final int index) {
-	textEl.onclick = new RunnableCompatibility() {
+	hItemSelection = new RunnableCompatibility() {
 		public void run() {
 			parent.setSelection(index, true);
 		}
 	};
+	// textEl.onclick = ...
+	Clazz.addEvent(textEl, "click", hItemSelection);
 }
 
 /**
@@ -190,6 +194,10 @@ protected void releaseChild () {
 
 protected void releaseHandle() {
 	if (textEl != null) {
+		if (hItemSelection != null) {
+			Clazz.removeEvent(textEl, "click", hItemSelection);
+			hItemSelection = null;
+		}
 		OS.destroyHandle(textEl);
 		textEl = null;
 	}

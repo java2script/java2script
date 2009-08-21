@@ -114,16 +114,19 @@ import org.eclipse.swt.internal.xhtml.window;
  * @j2sRequireImport org.eclipse.swt.widgets.Tray
  * 
  * @j2sSuffix
-// Only IE need to release the resources so that no memory is leaked
-if (window.attachEvent) {
-	window.attachEvent ("onunload", function () {
-		try {
-			org.eclipse.swt.widgets.Display.releaseAllDisplays ();
-		} catch (e) {
-		}
-		return true;
-	});
-}
+// Release the resources to avoid memory leak
+var cleanUpObject = new Object ();
+var f = function () {
+	try {
+		org.eclipse.swt.widgets.Display.releaseAllDisplays ();
+	} catch (e) {
+	}
+	Clazz.removeEvent (window, "unload", cleanUpObject.f);
+	return true;
+};
+cleanUpObject.f = f;
+Clazz.addEvent (window, "unload", f);
+
 FontSizeSystem = new Object ();
 var fss = FontSizeSystem;
 fss.monitorEl = null;
@@ -4904,10 +4907,36 @@ static String withCrLf (String string) {
 }
 
 static void releaseAllDisplays() {
+	boolean first = true;
 	if (Displays != null) {
 		for (int i = 0; i < Displays.length; i++) {
-			if (Displays[i] != null) {
-				Displays[i].dispose();
+			Display d = Displays[i];
+			if (d != null) {
+				d.dispose();
+				if (first) {
+					first = false;
+					if (d.trayCorner != null) {
+						d.trayCorner.releaseWidget();
+						d.trayCorner = null;
+					}
+					if (d.taskBar != null) {
+						d.taskBar.releaseWidget();
+						d.taskBar = null;
+					}
+					if (d.shortcutBar != null) {
+						d.shortcutBar.releaseWidget();
+						d.shortcutBar = null;
+					}
+					if (d.topBar != null) {
+						d.topBar.releaseWidget();
+						d.topBar = null;
+					}
+					if (d.tray != null) {
+						d.tray.dispose();
+						d.tray = null;
+					}
+					OS.dispose();
+				}
 				Displays[i] = null;
 			}
 		}
