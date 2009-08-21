@@ -16,7 +16,6 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
@@ -282,6 +281,8 @@ void createHandle () {
 			parentHandle.appendChild(handle);
 		}
 	}
+	
+	/*
 	handle.onclick = new RunnableCompatibility() {
 		public void run() {
 			Event e = new Event();
@@ -292,6 +293,7 @@ void createHandle () {
 			sendEvent(e);
 		}
 	};
+	*/
 }
 
 /*

@@ -46,6 +46,7 @@ public class Sash extends Control {
 	int /*startX, startY, */lastX, lastY;
 	final static int INCREMENT = 1;
 	final static int PAGE_INCREMENT = 9;
+	private DragAndDrop dnd;
 	
 /**
  * Constructs a new instance of this class given its parent
@@ -173,7 +174,7 @@ void createHandle() {
 			parentHandle.appendChild(handle);
 		}
 	}
-	DragAndDrop dnd = new DragAndDrop();
+	dnd = new DragAndDrop();
 	dnd.addDragListener(new SashDND() {
 	
 		public boolean dragEnded(DragEvent e) {
@@ -267,6 +268,14 @@ void createHandle() {
 		
 	});
 	dnd.bind(handle);
+}
+
+protected void releaseHandle() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
+	super.releaseHandle();
 }
 
 /**

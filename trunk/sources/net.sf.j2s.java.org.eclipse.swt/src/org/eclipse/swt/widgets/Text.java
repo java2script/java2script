@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -72,6 +73,13 @@ public class Text extends Scrollable {
 	* this delimiter.
 	*/
 	public static final String DELIMITER = "\r\n";
+	private Object hTextKeyUp;
+	private Object hTextKeyPress;
+	private Object hTextKeyDown;
+	private Object hFocus;
+	private Object hModifyFocus;
+	private Object hModifyBlur;
+	private Object hModifyKeyUp;
 	/*
 	public static final String DELIMITER;
 	
@@ -238,11 +246,15 @@ void createHandle () {
 	if (textCSSName != null) {
 		textHandle.className = textCSSName;
 	}
-	handle.onfocus = new RunnableCompatibility() {
+	
+	hFocus = new RunnableCompatibility() {
 		public void run() {
 			OS.SetFocus(textHandle); //textHandle.focus();
 		}
 	};
+	// handle.onfocus = ...
+	Clazz.addEvent(handle, "focus", hFocus);
+	
 	Element wrapper = document.createElement("DIV");
 	wrapper.style.overflow = ((style & SWT.MULTI) != 0) ? "auto" : "hidden";
 	handle.appendChild(wrapper);
@@ -267,7 +279,10 @@ void createHandle () {
  * @see org.eclipse.swt.widgets.Widget#hookKeyDown()
  */
 void hookKeyDown() {
-	textHandle.onkeydown = new RunnableCompatibility() {
+	if (hTextKeyDown != null) {
+		return;
+	}
+	hTextKeyDown = new RunnableCompatibility() {
 		public void run() {
 			boolean verifyHooked = false;
 			if (hooks(SWT.Verify)) {
@@ -331,7 +346,10 @@ void hookKeyDown() {
 			}
 		}
 	};
-	textHandle.onkeypress = new RunnableCompatibility() {
+	// textHandle.onkeydown = ...
+	Clazz.addEvent(textHandle, "keydown", hTextKeyDown);
+	
+	hTextKeyPress = new RunnableCompatibility() {
 	
 		public void run() {
 			HTMLEventWrapper evt = new HTMLEventWrapper (getEvent());
@@ -355,10 +373,15 @@ void hookKeyDown() {
 		}
 	
 	};
+	// textHandle.onkeypress = ...
+	Clazz.addEvent(textHandle, "keypress", hTextKeyPress);
 }
 
 void hookKeyUp() {
-	textHandle.onkeyup = new RunnableCompatibility() {
+	if (hTextKeyUp != null) {
+		return;
+	}
+	hTextKeyUp = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 			HTMLEvent evt = (HTMLEvent) e.event;
@@ -380,20 +403,18 @@ void hookKeyUp() {
 			toReturn(event.doit);
 		}
 	};
+	// textHandle.onkeyup = ...
+	Clazz.addEvent(textHandle, "keyup", hTextKeyUp);
 }
 
 /* (non-Javadoc)
  * @see org.eclipse.swt.widgets.Widget#hookModify()
  */
 void hookModify() {
-	/*
-	 * TODO: Maybe pasting string into Text component should be limited.
-	 */
-	/*
-	 * I have changed, the change event to onkeyup. I think change is 
-	 * just fired after the blur.
-	 */
-	textHandle.onkeyup = new RunnableCompatibility() {
+	if (hModifyKeyUp != null) {
+		return;
+	}
+	hModifyKeyUp = new RunnableCompatibility() {
 		public void run() {
 			if ((style & SWT.READ_ONLY) != 0
 					/*
@@ -424,7 +445,10 @@ void hookModify() {
 			}
 		}
 	};
-	textHandle.onblur = new RunnableCompatibility() {
+	// textHandle.onkeyup = ...
+	Clazz.addEvent(textHandle, "keyup", hModifyKeyUp);
+	
+	hModifyBlur = new RunnableCompatibility() {
 		public void run() {
 			OS.removeCSSClass(handle, "text-focus");
 			Event e = new Event();
@@ -435,7 +459,10 @@ void hookModify() {
 			toReturn(e.doit);
 		}
 	};
-	textHandle.onfocus = new RunnableCompatibility() {
+	// textHandle.onblur = ...
+	Clazz.addEvent(textHandle, "blur", hModifyBlur);
+	
+	hModifyFocus = new RunnableCompatibility() {
 		public void run() {
 			OS.addCSSClass(handle, "text-focus");
 			Event e = new Event();
@@ -446,21 +473,26 @@ void hookModify() {
 			toReturn(e.doit);
 		}
 	};
+	// textHandle.onfocus = ...
+	Clazz.addEvent(textHandle, "focus", hModifyFocus);
 }
 
 void hookMouseDoubleClick() {
 	super.hookMouseDoubleClick();
-	textHandle.ondblclick = handle.ondblclick;
+	//textHandle.ondblclick = handle.ondblclick;
+	Clazz.addEvent(textHandle, "dblclick", hMouseDoubleClick);
 }
 
 void hookMouseDown() {
 	super.hookMouseDown();
-	textHandle.onmousedown = handle.onmousedown;
+	//textHandle.onmousedown = handle.onmousedown;
+	Clazz.addEvent(textHandle, "mousedown", hMouseDown);
 }
 
 void hookMouseUp() {
 	super.hookMouseUp();
-	textHandle.onmouseup = handle.onmouseup;
+	//textHandle.onmouseup = handle.onmouseup;
+	Clazz.addEvent(textHandle, "mouseup", hMouseUp);
 }
 
 /**
@@ -954,7 +986,7 @@ if (idx1 != -1) {
 }
 return null;
  */
-private native String parseInnerText(String s, String key);
+native String parseInnerText(String s, String key);
 
 /**
  * Returns a point describing the receiver's location relative
@@ -1092,7 +1124,7 @@ if (typeof handle.selectionEnd != "undefined") {
 }
 return -1;
  */
-private native int getTextCaretPositionEnd(Object handle);
+native int getTextCaretPositionEnd(Object handle);
 
 /**
  * Returns the number of characters.
@@ -1686,7 +1718,47 @@ public void paste () {
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
 protected void releaseHandle() {
+	if (handle != null && hFocus != null) {
+		Clazz.removeEvent(handle, "focus", hFocus);
+		hFocus = null;
+	}
+	
 	if (textHandle != null) {
+		if (hMouseDoubleClick != null) {
+			Clazz.removeEvent(textHandle, "dblclick", hMouseDoubleClick);
+		}
+		if (hMouseDown != null) {
+			Clazz.removeEvent(textHandle, "mousedown", hMouseDown);
+		}
+		if (hMouseUp != null) {
+			Clazz.removeEvent(textHandle, "mouseup", hMouseUp);
+		}
+		
+		if (hTextKeyUp != null) {
+			Clazz.removeEvent(textHandle, "keyup", hTextKeyUp);
+			hTextKeyUp = null;
+		}
+		if (hTextKeyDown != null) {
+			Clazz.removeEvent(textHandle, "keydown", hTextKeyDown);
+			hTextKeyDown = null;
+		}
+		if (hTextKeyPress != null) {
+			Clazz.removeEvent(textHandle, "keypress", hTextKeyPress);
+			hTextKeyPress = null;
+		}
+
+		if (hModifyBlur != null) {
+			Clazz.removeEvent(textHandle, "blur", hModifyBlur);
+			hModifyBlur = null;
+		}
+		if (hModifyFocus != null) {
+			Clazz.removeEvent(textHandle, "focus", hModifyFocus);
+			hModifyFocus = null;
+		}
+		if (hModifyKeyUp != null) {
+			Clazz.removeEvent(textHandle, "keyup", hModifyKeyUp);
+			hModifyKeyUp = null;
+		}
 		OS.destroyHandle(textHandle);
 		textHandle = null;
 	}

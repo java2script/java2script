@@ -50,6 +50,12 @@ public class OS {
 	
 	public static boolean isChrome = false;
 	
+	public static boolean isChrome10 = false; // Chrome 1.0 or Chrome 0.*
+	
+	public static boolean isChrome20 = false;
+	
+	public static boolean isChrome30 = false;
+	
 	
 	/* Record Caps Lock status */
 	public static boolean isCapsLockOn = false;
@@ -63,6 +69,9 @@ public class OS {
 	var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
 	os.isSafari = dav.indexOf("Safari") >= 0;
 	os.isChrome = dav.indexOf("Chrome") >= 0;
+	os.isChrome10 = dav.indexOf("Chrome/1.") >= 0 || dav.indexOf("Chrome/0.") >= 0;
+	os.isChrome20 = dav.indexOf("Chrome/2.") >= 0;
+	os.isChrome30 = dav.indexOf("Chrome/3.") >= 0;
 	var geckoPos = dua.indexOf("Gecko");
 	os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
 	os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
@@ -175,6 +184,31 @@ public class OS {
 		}
 	}
 
+	public static void dispose() {
+		if (blockContainer != null) {
+			destroyHandle(blockContainer);
+			blockContainer = null;
+		}
+		if (lineContainer != null) {
+			destroyHandle(lineContainer);
+			lineContainer = null;
+		}
+		if (invisibleContainer != null) {
+			destroyHandle(invisibleContainer);
+			invisibleContainer = null;
+		}
+		if (containers != null) {
+			Object c = containers;
+			/**
+			 * @j2sNative
+			 * for (var p in c) {
+			 * 	try {
+			 * 	c[p] = null;
+			 * 	} catch (e) {}
+			 * }
+			 */ {}
+		}
+	}
 
 	private static int wScrollBar = -1;
 	private static int hScrollBar = -1;

@@ -532,6 +532,22 @@ if (!isDebugging) {
 		"$.FormLayout"
 	]);
 
+	ClazzLoader.jarClasspath (path + "dnd.z.js", [
+		"$wt.dnd.DND",
+		"$.DNDEvent",
+		"$.DNDListener",
+		"$.DragSourceListener",
+		"$.DragSourceAdapter",
+		"$.DragSourceEvent",
+		"$.DropTargetListener",
+		"$.DropTargetAdapter",
+		"$.DropTargetEvent",
+		"$.TransferData",
+		"$.Transfer",
+		"$.DragSource",
+		"$.DropTarget"
+	]);
+
 	/*
 	ClazzLoader.jarClasspath (path + "events.js", [
 		"java.util.AbstractList",

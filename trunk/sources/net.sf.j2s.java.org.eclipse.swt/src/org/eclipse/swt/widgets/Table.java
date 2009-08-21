@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -96,6 +97,7 @@ public class Table extends Composite {
 	*/
 	private Element tableHandle;
 	private Element theadHandle;
+	private Object hTableKeyDown;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -768,7 +770,7 @@ protected void createHandle () {
 	}
 	tableHandle.className = cssTable;
 	handle.appendChild(tableHandle);
-	handle.onkeydown = new RunnableCompatibility() {
+	hTableKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			int index = focusIndex;
@@ -822,6 +824,8 @@ protected void createHandle () {
 			}
 		}
 	};
+	// handle.onkeydown = ...
+	Clazz.addEvent(handle, "keydown", hTableKeyDown);
 }
 
 //void setCursorFocus(int index){
@@ -2189,6 +2193,10 @@ void removeItems (int[] indices){
  * @see org.eclipse.swt.widgets.Scrollable#releaseHandle()
  */
 protected void releaseHandle() {
+	if (hTableKeyDown != null) {
+		Clazz.removeEvent(handle, "keydown", hTableKeyDown);
+		hTableKeyDown = null;
+	}
 	if (tbodyTRTemplate != null) {
 		OS.deepClearChildren(tbodyTRTemplate);
 		OS.destroyHandle(tbodyTRTemplate);

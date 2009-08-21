@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -27,6 +28,7 @@ import org.eclipse.swt.internal.xhtml.document;
 public class MaximizedTitle extends DesktopItem {
 	private Shell lastMaximizedShell = null;
 	private Element topbarEl = null;
+	private Object hMaxClick;
 
 	public MaximizedTitle(Display display) {
 		super();
@@ -57,7 +59,11 @@ public class MaximizedTitle extends DesktopItem {
 			this.topbarEl.style.left = "2px";
 		}
 		this.topbarEl.style.top = "1px";
-		this.handle.ondblclick = lastShell.titleBar.ondblclick;
+		// this.handle.ondblclick = lastShell.titleBar.ondblclick;
+		hMaxClick = lastShell.hMaxClick;
+		if (hMaxClick != null) {
+			Clazz.addEvent(handle, "dblclick", hMaxClick);
+		}
 		lastShell.updateShellTitle(320 + 4);
 	}
 	public void returnTopMaximized(Shell shell) {
@@ -164,6 +170,10 @@ public class MaximizedTitle extends DesktopItem {
 
 	public void releaseWidget() {
 		if (handle != null) {
+			if (hMaxClick != null) {
+				Clazz.removeEvent(handle, "dblclick", hMaxClick);
+				hMaxClick = null;
+			}
 			OS.destroyHandle(handle);
 			handle = null;
 		}

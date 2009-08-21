@@ -174,9 +174,12 @@ private void removeTrayLine () {
 	for (int i = cellLines - 1; i >= 0 ; i--) {
 		int index = cellLines * (cellLines - 1) / 2 + i;
 		Element cell = allCells[index];
-		cell.onclick = null;
-		cell.onmouseover = null;
-		cell.ondblclick = null;
+//		cell.onclick = null;
+//		cell.onmouseover = null;
+//		cell.ondblclick = null;
+		if (display != null && display.trayCorner != null) {
+			display.trayCorner.unbindEvents(cell);
+		}
 		allCells[index] = null;
 		document.body.removeChild (cell);
 	}

@@ -15,11 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.dnd.DragAdapter;
-import org.eclipse.swt.internal.dnd.DragAndDrop;
-import org.eclipse.swt.internal.dnd.DragEvent;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -328,31 +324,6 @@ void createItem (final CoolItem item, int index) {
 	el = document.createElement("DIV");
 	el.className = "cool-item-handler";
 	item.handle.appendChild(el);
-	final DragAndDrop dnd = new DragAndDrop();
-	dnd.addDragListener(new DragAdapter() {
-		int dxx, dyy, y;
-		public boolean dragging(DragEvent e) {
-			int dx = e.deltaX() - dxx;
-			int dLine = verticalLineByPixel(y + e.deltaY() - dyy);
-			if (dx != 0 || dLine != 0) {
-				if (moveDelta(indexOf(item), dx, dLine)) {
-					dxx = e.deltaX();
-					if (dLine != 0) {
-						y = e.currentY - OS.calcuateRelativePosition(e.sourceElement, document.body).y; 
-						dyy = e.deltaY();
-					}
-				}
-			}
-			return true;
-		}
-		public boolean dragBegan(DragEvent e) {
-			dxx = 0;
-			dyy = 0;
-			y = e.currentY - OS.calcuateRelativePosition(e.sourceElement, document.body).y; 
-			return true;
-		}
-	});
-	dnd.bind(el);
 	
 	if ((item.style & SWT.DROP_DOWN) != 0) {
 		el = document.createElement("DIV");
@@ -366,19 +337,9 @@ void createItem (final CoolItem item, int index) {
 		el.appendChild(document.createTextNode(">"));
 		el.className = "cool-item-more-arrow";
 		item.moreHandle.appendChild(el);
-		item.moreHandle.onclick = new RunnableCompatibility() {
-			public void run() {
-				Event e = new Event();
-				e.detail = SWT.ARROW;
-				e.x = 0;
-				e.y = 0;
-				e.display = display;
-				e.widget = item;
-				e.type = SWT.Selection;
-				item.sendEvent(e);
-			}
-		};
+		item.configure();
 	}
+	item.configureDND(el);
 	
 	el = document.createElement("DIV");
 	el.className = "cool-item-content";

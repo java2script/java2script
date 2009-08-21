@@ -23,6 +23,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -54,6 +55,12 @@ public class ToolItem extends Item {
 	boolean isInnerBounds;
 	int seperatorWidth;
 	Element dropDownEl;
+	private RunnableCompatibility hItemSelection;
+	private Object hItemMouseDown;
+	private Object hItemMouseUp;
+	private Object hArrowSelection;
+	private Object hToolMouseDown;
+	private Object hToolMouseUp;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -139,7 +146,7 @@ public ToolItem (ToolBar parent, int style, int index) {
 }
 
 void configureItem() {
-	RunnableCompatibility eventHandler = new RunnableCompatibility() {
+	hItemSelection = new RunnableCompatibility() {
 		public void run() {
 			if (!isEnabled()) {
 				toReturn(false);
@@ -172,14 +179,14 @@ void configureItem() {
 			*/
 		}
 	};
-	handle.onclick = handle.ondblclick = eventHandler;
+	// handle.onclick = handle.ondblclick = hItemSelection;
+	Clazz.addEvent(handle, "click", hItemSelection);
+	Clazz.addEvent(handle, "dblclick", hItemSelection);
 	
 	if ((style & SWT.SEPARATOR) == 0) {
 		if (dropDownEl != null) {
 			Element arrow = dropDownEl.childNodes[0];
-			handle.onmousedown = 
-			arrow.onmousedown = 
-			dropDownEl.onmousedown = new RunnableCompatibility() {
+			hItemMouseDown = new RunnableCompatibility() {
 				public void run() {
 					if (!isEnabled()) {
 						toReturn(false);
@@ -189,9 +196,12 @@ void configureItem() {
 					OS.addCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
 			};
-			handle.onmouseout = handle.onmouseup = 
-			arrow.onmouseout = arrow.onmouseup = 
-			dropDownEl.onmouseup = dropDownEl.onmouseout = new RunnableCompatibility() {
+			// handle.onmousedown = arrow.onmousedown = dropDownEl.onmousedown = ...
+			Clazz.addEvent(handle, "mousedown", hItemMouseDown);
+			Clazz.addEvent(arrow, "mousedown", hItemMouseDown);
+			Clazz.addEvent(dropDownEl, "mousedown", hItemMouseDown);
+			
+			hItemMouseUp = new RunnableCompatibility() {
 				public void run() {
 					if (!isEnabled()) {
 						toReturn(false);
@@ -201,7 +211,15 @@ void configureItem() {
 					OS.removeCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
 			};
-			arrow.onclick = dropDownEl.onclick = new RunnableCompatibility() {
+			// handle.onmouseout = handle.onmouseup = arrow.onmouseout = arrow.onmouseup = dropDownEl.onmouseup = dropDownEl.onmouseout = ...
+			Clazz.addEvent(handle, "mouseup", hItemMouseUp);
+			Clazz.addEvent(arrow, "mouseup", hItemMouseUp);
+			Clazz.addEvent(dropDownEl, "mouseup", hItemMouseUp);
+			Clazz.addEvent(handle, "mouseout", hItemMouseUp);
+			Clazz.addEvent(arrow, "mouseout", hItemMouseUp);
+			Clazz.addEvent(dropDownEl, "mouseout", hItemMouseUp);
+			
+			hArrowSelection = new RunnableCompatibility() {
 				public void run() {
 					if (!isEnabled()) {
 						toReturn(false);
@@ -222,8 +240,11 @@ void configureItem() {
 					postEvent (SWT.Selection, event);
 				}
 			};
+			// arrow.onclick = dropDownEl.onclick = 
+			Clazz.addEvent(arrow, "click", hArrowSelection);
+			Clazz.addEvent(dropDownEl, "click", hArrowSelection);
 		} else {
-			handle.onmousedown = new RunnableCompatibility() {
+			hToolMouseDown = new RunnableCompatibility() {
 				public void run() {
 					if (!isEnabled()) {
 						toReturn(false);
@@ -232,7 +253,10 @@ void configureItem() {
 					OS.addCSSClass(handle, "tool-item-down");
 				}
 			};
-			handle.onmouseout = handle.onmouseup = new RunnableCompatibility() {
+			// handle.onmousedown = ...
+			Clazz.addEvent(handle, "mousedown", hToolMouseDown);
+			
+			hToolMouseUp = new RunnableCompatibility() {
 				public void run() {
 					if (!isEnabled()) {
 						toReturn(false);
@@ -241,6 +265,9 @@ void configureItem() {
 					OS.removeCSSClass(handle, "tool-item-down");
 				}
 			};
+			// handle.onmouseout = handle.onmouseup = 
+			Clazz.addEvent(handle, "mouseup", hToolMouseUp);
+			Clazz.addEvent(handle, "mouseout", hToolMouseUp);
 		}
 	}
 
@@ -819,10 +846,50 @@ protected void releaseChild () {
  */
 protected void releaseHandle() {
 	if (dropDownEl != null) {
+		Element arrow = dropDownEl.childNodes[0];
+		if (hItemMouseDown != null) {
+			Clazz.removeEvent(dropDownEl, "mousedown", hItemMouseDown);
+			Clazz.removeEvent(arrow, "mousedown", hItemMouseDown);
+		}
+		if (hItemMouseUp != null) {
+			Clazz.removeEvent(dropDownEl, "mouseup", hItemMouseUp);
+			Clazz.removeEvent(dropDownEl, "mouseout", hItemMouseUp);
+			Clazz.removeEvent(arrow, "mouseup", hItemMouseUp);
+			Clazz.removeEvent(arrow, "mouseout", hItemMouseUp);
+		}
+		if (hArrowSelection != null) {
+			Clazz.removeEvent(dropDownEl, "click", hArrowSelection);
+			Clazz.removeEvent(arrow, "click", hArrowSelection);
+			hArrowSelection = null;
+		}
 		OS.destroyHandle(dropDownEl);
 		dropDownEl = null;
 	}
 	if (handle != null) {
+		if (hItemSelection != null) {
+			Clazz.removeEvent(handle, "click", hItemSelection);
+			Clazz.removeEvent(handle, "dblclick", hItemSelection);
+			hItemSelection = null;
+		}
+		if (hItemMouseDown != null) {
+			Clazz.removeEvent(handle, "mousedown", hItemMouseDown);
+		}
+		if (hItemMouseUp != null) {
+			Clazz.removeEvent(handle, "mouseup", hItemMouseUp);
+			Clazz.removeEvent(handle, "mouseout", hItemMouseUp);
+		}
+
+		if (hToolMouseDown != null) {
+			Clazz.removeEvent(handle, "mousedown", hToolMouseDown);
+			hToolMouseDown = null;
+		}
+		if (hToolMouseUp != null) {
+			Clazz.removeEvent(handle, "mouseup", hToolMouseUp);
+			Clazz.removeEvent(handle, "mouseout", hToolMouseUp);
+			hToolMouseUp = null;
+		}
+		hItemMouseDown = null;
+		hItemMouseUp = null;
 		OS.destroyHandle(handle);
 	}
 	super.releaseHandle();

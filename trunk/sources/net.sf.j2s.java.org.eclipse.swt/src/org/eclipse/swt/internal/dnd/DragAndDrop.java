@@ -11,6 +11,7 @@
 
 package org.eclipse.swt.internal.dnd;
 
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -25,6 +26,7 @@ public class DragAndDrop {
 	int startX = 0;
 	int startY = 0;
 	private DragListener[] listeners = new DragListener[0];
+	private Object hDND;
 	
 	protected void reset() {
 		status = 0;
@@ -33,13 +35,22 @@ public class DragAndDrop {
 		document.onselectstart = null;
 		document.onkeyup = null;
 		if (this.element != null) {
-			this.element.onselectstart = null;
+			//this.element.onselectstart = null;
+			Clazz.removeEvent(element, "selectstart", DNDUtils.onselectstart);
 		}
 	}
 	public void bind(Element el) {
 		this.element = el;
-		el.onmousedown =  DNDUtils.bindFunctionWith (DNDUtils.onmousedown, this);
-		//el.onmouseup =  DNDUtils.bindFunctionWith (DNDUtils.onmouseup, this);
+		hDND = DNDUtils.bindFunctionWith (DNDUtils.onmousedown, this);
+		// el.onmousedown = ;
+		Clazz.addEvent(el, "mousedown", hDND);
+		//el.onmouseup = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, this);
+	}
+	public void unbind()  {
+		if (hDND != null) {
+			Clazz.removeEvent(element, "mouseover", hDND);
+			hDND = null;
+		}
 	}
 	public boolean checkDraggable(HTMLEventWrapper e) {
 		for (int i = 0; i < this.listeners.length; i++) {

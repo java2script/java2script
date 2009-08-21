@@ -317,20 +317,26 @@
 	height:14px;
 	overflow:hidden;
 	z-index:1;
-	background-color:buttonface;
-	border:1px outset white;
+	background-color:white;
+	border:1px solid white;
 	top:50%;
 	margin-top:-8px;
+	opacity:0.65;
 }
-
+.shell-title-min:hover, .shell-title-normal-max:hover, .shell-title-close:hover {
+	opacity:1;
+}
 * html .shell-title-min {
 	margin-bottom:0;
+	filter:Alpha(Opacity=65);
 }
 * html .shell-title-normal-max {
 	margin-bottom:0;
+	filter:Alpha(Opacity=65);
 }
 * html .shell-title-close {
 	margin-bottom:0;
+	filter:Alpha(Opacity=65);
 }
 
 .alaa-icon {

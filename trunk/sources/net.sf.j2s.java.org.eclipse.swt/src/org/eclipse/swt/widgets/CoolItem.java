@@ -16,7 +16,12 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.dnd.DragAdapter;
+import org.eclipse.swt.internal.dnd.DragAndDrop;
+import org.eclipse.swt.internal.dnd.DragEvent;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -47,6 +52,8 @@ public class CoolItem extends Item {
 	int preferredWidth, preferredHeight;
 	int lastCachedWidth, lastCachedHeight;
 	boolean wrap;
+	private Object hArrowSelection;
+	private DragAndDrop dnd;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -119,6 +126,51 @@ public CoolItem (CoolBar parent, int style, int index) {
 	super (parent, style);
 	this.parent = parent;
 	parent.createItem (this, index);
+}
+
+void configureDND(Element el) {
+	dnd = new DragAndDrop();
+	dnd.addDragListener(new DragAdapter() {
+		int dxx, dyy, y;
+		public boolean dragging(DragEvent e) {
+			int dx = e.deltaX() - dxx;
+			int dLine = parent.verticalLineByPixel(y + e.deltaY() - dyy);
+			if (dx != 0 || dLine != 0) {
+				if (parent.moveDelta(parent.indexOf(CoolItem.this), dx, dLine)) {
+					dxx = e.deltaX();
+					if (dLine != 0) {
+						y = e.currentY - OS.calcuateRelativePosition(e.sourceElement, document.body).y; 
+						dyy = e.deltaY();
+					}
+				}
+			}
+			return true;
+		}
+		public boolean dragBegan(DragEvent e) {
+			dxx = 0;
+			dyy = 0;
+			y = e.currentY - OS.calcuateRelativePosition(e.sourceElement, document.body).y; 
+			return true;
+		}
+	});
+	dnd.bind(el);
+}
+
+void configure() {
+	hArrowSelection = new RunnableCompatibility() {
+		public void run() {
+			Event e = new Event();
+			e.detail = SWT.ARROW;
+			e.x = 0;
+			e.y = 0;
+			e.display = display;
+			e.widget = CoolItem.this;
+			e.type = SWT.Selection;
+			sendEvent(e);
+		}
+	};
+	// this.moreHandle.onclick = ...
+	Clazz.addEvent(moreHandle, "click", hArrowSelection);
 }
 
 /**
@@ -332,6 +384,17 @@ public CoolBar getParent () {
 protected void releaseChild () {
 	super.releaseChild ();
 	parent.destroyItem (this);
+}
+
+protected void releaseHandle() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
+	if (hArrowSelection != null) {
+		Clazz.removeEvent(moreHandle, "click", hArrowSelection);
+	}
+	super.releaseHandle();
 }
 
 protected void releaseWidget () {

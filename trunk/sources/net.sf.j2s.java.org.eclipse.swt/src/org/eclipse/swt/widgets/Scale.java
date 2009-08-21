@@ -97,6 +97,7 @@ public class Scale extends Control {
 	//private Object draggingEvent;
 	private Element trackHandle;
 	private Element[] lines;
+	private DragAndDrop dnd;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -281,7 +282,7 @@ void createHandle () {
 	}
 	handle.appendChild (line2);
 	
-	DragAndDrop dnd = new DragAndDrop();
+	dnd = new DragAndDrop();
 	dnd.addDragListener(new ScaleDND() {
 		public boolean dragging(DragEvent e) {
 			super.dragging(e);
@@ -359,6 +360,10 @@ void createHandle () {
  * @see org.eclipse.swt.widgets.Control#releaseHandle()
  */
 protected void releaseHandle() {
+	if (dnd != null) {
+		dnd.unbind();
+		dnd = null;
+	}
 	if (lines != null) {
 		for (int i = 0; i < lines.length; i++) {
 			OS.destroyHandle(lines[i]);

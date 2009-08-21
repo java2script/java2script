@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -62,6 +63,12 @@ public class TreeItem extends Item {
 	int depth;
 	boolean expandStatus, selected;
 	Element checkElement;
+	private Object hAnchorToggle;
+	private Object hCheckSelection;
+	private Object hTextSelection;
+	private Object hTextDefaultSelection;
+	private Object hNoTextSelection;
+	private Element anchorElement;
 	
 /**
  * Constructs a new instance of this class given its parent
@@ -259,15 +266,19 @@ void configureItem() {
 		Element hAnchor = innerChildren[i];
 		String css = hAnchor.childNodes[1].className;
 		if (css.indexOf("plus") != -1 || css.indexOf("minus") != -1) {
-			hAnchor.onclick = new RunnableCompatibility() {
+			anchorElement = hAnchor;
+			hAnchorToggle = new RunnableCompatibility() {
 				public void run() {
 					toggleExpandStatus();
 				}
 			};
+			// hAnchor.onclick = ...
+			Clazz.addEvent(hAnchor, "click", hAnchorToggle);
+			break;
 		}
 	}
 	if ((parent.style & SWT.CHECK) != 0) {
-		checkElement.onclick = new RunnableCompatibility() {
+		hCheckSelection = new RunnableCompatibility() {
 			public void run() {
 				Event e = new Event();
 				e.display = display;
@@ -278,9 +289,11 @@ void configureItem() {
 				parent.sendEvent(e);
 			}
 		};
+		// checkElement.onclick = ...
+		Clazz.addEvent(checkElement, "click", hCheckSelection);
 	}
 	Element text = innerChildren[innerChildren.length - 1];
-	text.onclick = new RunnableCompatibility() {
+	hTextSelection = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			parent.toggleSelection(TreeItem.this, evt.ctrlKey, evt.shiftKey);
@@ -294,7 +307,10 @@ void configureItem() {
 			toReturn(false);
 		}
 	};
-	text.ondblclick = new RunnableCompatibility() {
+	// text.onclick = ...
+	Clazz.addEvent(text, "click", hTextSelection);
+	
+	hTextDefaultSelection = new RunnableCompatibility() {
 		public void run() {
 			toggleExpandStatus();
 			// Adding default selection event for double click
@@ -315,11 +331,17 @@ void configureItem() {
 			toReturn(false);
 		}
 	};
-	text.onselectstart = new RunnableCompatibility() {
+	// text.ondblclick = ...
+	Clazz.addEvent(text, "dblclick", hTextDefaultSelection);
+	
+	hNoTextSelection = new RunnableCompatibility() {
 		public void run() {
 			toReturn(false);
 		}
 	};
+	// text.onselectstart = ...
+	Clazz.addEvent(text, "selectstart", hNoTextSelection);
+	
 	/**
 	 * @j2sNative
 	 * if (typeof text.style.MozUserSelect != "undefined") {
@@ -972,6 +994,31 @@ private void destroyItem(TreeItem item) {
 }
 
 protected void releaseHandle () {
+	if (text != null) {
+		if (hNoTextSelection != null) {
+			Clazz.removeEvent(text, "selectstart", hNoTextSelection);
+			hNoTextSelection = null;
+		}
+		if (hTextSelection != null) {
+			Clazz.removeEvent(text, "click", hTextSelection);
+			hTextSelection = null;
+		}
+		if (hTextDefaultSelection != null) {
+			Clazz.removeEvent(text, "dblclick", hTextDefaultSelection);
+			hTextDefaultSelection = null;
+		}
+		OS.destroyHandle(text);
+		text = null;
+	}
+	if (hCheckSelection != null) {
+		Clazz.removeEvent(checkElement, "click", hCheckSelection);
+		hCheckSelection = null;
+	}
+	if (anchorElement != null && hAnchorToggle != null) {
+		Clazz.removeEvent(anchorElement, "click", hAnchorToggle);
+		anchorElement = null;
+		hAnchorToggle = null;
+	}
 	super.releaseHandle ();
 //	handle = 0;
 	if (checkElement != null) {
@@ -1190,9 +1237,9 @@ public void setExpanded (boolean expanded) {
 	}
 	*/
 	expandStatus = expanded;
-	if(getItemCount() == 0){
-		return;
-	}
+//	if(getItemCount() == 0){
+//		return;
+//	}
 
 	TreeItem[] items = parent.getDescendantItems(index);
 	for (int i = 0; i < items.length; i++) {

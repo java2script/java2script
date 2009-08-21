@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -87,6 +88,11 @@ public class Menu extends Widget {
 	static final int ID_SPSOFTKEY0 = 106; 
 	static final int ID_SPSOFTKEY1 = 107;
 	static final int GROWTH_RATE = 5;
+
+	private Object hMenuKeyDown;
+	Object hMenuBlur;
+	private Object hMenuFocus;
+	private Object hMenuMouseDown;
 /**
  * Constructs a new instance of this class given its parent,
  * and sets the style for the instance so that the instance
@@ -443,100 +449,130 @@ void createHandle () {
 	//btnFocus.type = "BUTTON";
 	btnFocus.className = "menu-focus";
 	handle.appendChild(btnFocus);
-	btnFocus.onkeydown = new RunnableCompatibility() {
+	hMenuKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			MenuItem[] menuItems = items;
 			int index = currentIndex;
 			if (evt.keyCode == 13 || evt.keyCode == 10) {
 				if (index != -1) {
+					MenuItem i = menuItems[index];
 					Element target = menuItems[index].handle;
-					if (menuItems[index].isEnabled() && target.onclick != null)
+					if (i.isEnabled()/* && target.onclick != null*/)
 					/**
 					 * @j2sNative
-					 * target.onclick (evt);
-					 */ { }
+					 * try {
+					 * 	target.click ();
+					 * } catch (e) {
+					 * 	try {
+					 * 		var clickEvent = document.createEvent("MouseEvents");
+					 * 		clickEvent.initEvent("click", true, true);
+					 * 		target.dispatchEvent(clickEvent);
+					 * 	} catch (e) {
+					 * 		if (target.onclick != null) {
+					 * 			target.onclick (evt);
+					 * 		}
+					 * 	}
+					 * }
+					 */ { target.toString(); }
 				}
 			} else if (evt.keyCode == 38 || evt.keyCode == 104) { // up
 				if (index == -1) {
 					index = nextMenuItemIndex(-1);
-					Element el = menuItems[index].handle;
-					/**
-					 * @j2sNative el.onmouseover();
-					 */ { el.toString(); }
-				} else {
-					Element e = menuItems[index].handle;
-					index = nextMenuItemIndex(-1);
-					Element el = menuItems[index].handle;
+					MenuItem i = menuItems[index];
 					/**
 					 * @j2sNative
-					 * e.onmouseout();
-					 * el.onmouseover();
-					 */ { e.toString(); el.toString(); }
+					 * i.hItemMouseEnter ();
+					 */ { i.toString(); }
+				} else {
+					MenuItem i = menuItems[index];
+					index = nextMenuItemIndex(-1);
+					MenuItem i1 = menuItems[index];
+					/**
+					 * @j2sNative
+					 * i.hItemMouseExit ();
+					 * i1.hItemMouseEnter ();
+					 */ { i.toString(); i1.toString(); }
 				} 
 			} else if (evt.keyCode == 40 || evt.keyCode == 98) { // down
 				if (index == -1) {
 					index = nextMenuItemIndex(1);
-					Element el = menuItems[index].handle;
-					/**
-					 * @j2sNative el.onmouseover();
-					 */ { el.toString(); }
-				} else {
-					Element e = menuItems[index].handle;
-					index = nextMenuItemIndex(1);
-					Element el = menuItems[index].handle;
+					MenuItem i = menuItems[index];
 					/**
 					 * @j2sNative
-					 * e.onmouseout(); 
-					 * el.onmouseover();
-					 */ { e.toString(); el.toString(); }
+					 * i.hItemMouseEnter ();
+					 */ { i.toString(); }
+				} else {
+					MenuItem i = menuItems[index];
+					index = nextMenuItemIndex(1);
+					MenuItem i1 = menuItems[index];
+					/**
+					 * @j2sNative
+					 * i.hItemMouseExit ();
+					 * i1.hItemMouseEnter ();
+					 */ { i.toString(); i1.toString(); }
 				}
 			} else if (evt.keyCode == 37 || evt.keyCode == 100) { // left
 				if ((style & SWT.BAR) != 0) {
 					if (index == -1) {
 						index = nextMenuItemIndex(-1);
-						Element el = menuItems[index].handle;
-						/**
-						 * @j2sNative el.onmouseover();
-						 */ { el.toString(); }
-					} else {
-						Element e = menuItems[index].handle;
-						index = nextMenuItemIndex(-1);
-						Element el = menuItems[index].handle;
+						MenuItem i = menuItems[index];
 						/**
 						 * @j2sNative
-						 * e.onmouseout();
-						 * el.onmouseover();
-						 */ { e.toString(); el.toString(); }
+						 * i.hItemMouseEnter ();
+						 */ { i.toString(); }
+					} else {
+						MenuItem i = menuItems[index];
+						index = nextMenuItemIndex(-1);
+						MenuItem i1 = menuItems[index];
+						/**
+						 * @j2sNative
+						 * i.hItemMouseExit ();
+						 * i1.hItemMouseEnter ();
+						 */ { i.toString(); i1.toString(); }
 					} 
 				}
 			} else if (evt.keyCode == 39 || evt.keyCode == 102) { // up
 				if ((style & SWT.BAR) != 0) {
 					if (index == -1) {
 						index = nextMenuItemIndex(1);
-						Element el = menuItems[index].handle;
-						/**
-						 * @j2sNative el.onmouseover();
-						 */ { el.toString(); }
-					} else {
-						Element e = menuItems[index].handle;
-						index = nextMenuItemIndex(1);
-						Element el = menuItems[index].handle;
+						MenuItem i = menuItems[index];
 						/**
 						 * @j2sNative
-						 * e.onmouseout(); 
-						 * el.onmouseover();
-						 */ { e.toString(); el.toString(); }
+						 * i.hItemMouseEnter ();
+						 */ { i.toString(); }
+					} else {
+						MenuItem i = menuItems[index];
+						index = nextMenuItemIndex(1);
+						MenuItem i1 = menuItems[index];
+						/**
+						 * @j2sNative
+						 * i.hItemMouseExit ();
+						 * i1.hItemMouseEnter ();
+						 */ { i.toString(); i1.toString(); }
 					}
 				}
 			} else {
 				for (int i = 0; i < menuItems.length; i++) {
 					if (menuItems[i] != null && menuItems[i].mnemonicChar == evt.keyCode) {
-						Element e = (Element) menuItems[i].handle;
+						Element target = (Element) menuItems[i].handle;
+						if (menuItems[i].isEnabled())
 						/**
 						 * @j2sNative
-						 * e.onclick ();
-						 */ { e.toString(); }
+						 * try {
+						 * 	target.click ();
+						 * } catch (e) {
+						 * 	try {
+						 * 		var clickEvent = document.createEvent("MouseEvents");
+						 * 		clickEvent.initEvent("click", true, true);
+						 * 		target.dispatchEvent(clickEvent);
+						 * 	} catch (e) {
+						 * 		if (target.onclick != null) {
+						 * 			target.onclick (evt);
+						 * 		}
+						 * 	}
+						 * }
+						 */ { target.toString(); }
 						break;
 					}
 				}
@@ -544,7 +580,10 @@ void createHandle () {
 			currentIndex = index;
 		}
 	};
-	btnFocus.onblur = new RunnableCompatibility() {
+	// btnFocus.onkeydown = ...
+	Clazz.addEvent(btnFocus, "keydown", hMenuKeyDown);
+	
+	hMenuBlur = new RunnableCompatibility() {
 		public void run() {
 			long time = new Date().getTime();
 			if (time - lastFocusdTime > 20) {
@@ -557,16 +596,24 @@ void createHandle () {
 			}
 		}
 	};
-	btnFocus.onfocus = new RunnableCompatibility() {
+	// btnFocus.onblur = ...
+	Clazz.addEvent(btnFocus, "blur", hMenuBlur);
+	
+	hMenuFocus = new RunnableCompatibility() {
 		public void run() {
 			lastFocusdTime = new Date().getTime();
 		}
 	};
-	handle.onmousedown = new RunnableCompatibility() {
+	// btnFocus.onfocus = ...
+	Clazz.addEvent(btnFocus, "focus", hMenuFocus);
+	
+	hMenuMouseDown = new RunnableCompatibility() {
 		public void run() {
 			lastFocusdTime = new Date().getTime();
 		}
 	};
+	// handle.onmousedown = ...
+	Clazz.addEvent(handle, "mousedown", hMenuMouseDown);
 	
 	if ((style & SWT.BAR) != 0) {
 		/*
@@ -1482,7 +1529,25 @@ protected void releaseChild () {
 }
 
 protected void releaseHandle () {
+	if (btnFocus != null) {
+		if (hMenuKeyDown != null) {
+			Clazz.removeEvent(btnFocus, "keydown", hMenuKeyDown);
+			hMenuKeyDown = null;
+		}
+		if (hMenuBlur != null) {
+			Clazz.removeEvent(btnFocus, "blur", hMenuBlur);
+			hMenuBlur = null;
+		}
+		if (hMenuFocus != null) {
+			Clazz.removeEvent(btnFocus, "focus", hMenuFocus);
+			hMenuFocus = null;
+		}
+	}
 	if (handle != null) {
+		if (hMenuMouseDown != null) {
+			Clazz.removeEvent(handle, "mousedown", hMenuMouseDown);
+			hMenuMouseDown = null;
+		}
 		OS.destroyHandle(handle);
 		handle = null;
 	}

@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -32,6 +33,12 @@ public class QuickLaunch extends DesktopItem {
 	int shortcutCount = 0;
 	private Element[] shortcutItems = new Element[0];
 	private boolean alreadyInitialized = false;
+
+	private Object hLaunchMouseEnter;
+
+	private Object hLaunchClick;
+
+	private Object hLaunchToggle;
 
 	public QuickLaunch(Display display) {
 		super();
@@ -69,7 +76,7 @@ public class QuickLaunch extends DesktopItem {
 		this.handle = document.createElement("DIV");
 		this.handle.className = "shortcut-bar";
 		document.body.appendChild(this.handle);
-		this.handle.onmouseover = new RunnableCompatibility() {
+		hLaunchMouseEnter = new RunnableCompatibility() {
 		
 			public void run() {
 				if (isAutoHide) {
@@ -83,7 +90,9 @@ public class QuickLaunch extends DesktopItem {
 			}
 		
 		};
-		this.handle.onclick = new RunnableCompatibility(){
+		// this.handle.onmouseover = ...
+		Clazz.addEvent(handle, "mouseover", hLaunchMouseEnter);
+		hLaunchClick = new RunnableCompatibility(){
 		
 			public void run() {
 				if (setMinimized(false)) {
@@ -100,14 +109,19 @@ public class QuickLaunch extends DesktopItem {
 			}
 		
 		};
+		// this.handle.onclick = ...
+		Clazz.addEvent(handle, "click", hLaunchClick);
+		
 		this.handle.title = "Doubleclick to hide shortcuts";
-		this.handle.ondblclick = new RunnableCompatibility(){
+		hLaunchToggle = new RunnableCompatibility(){
 		
 			public void run() {
 				toggleAutoHide();
 			}
 		
 		};
+		// this.handle.ondblclick = ...
+		Clazz.addEvent(handle, "dblclick", hLaunchToggle);
 		
 		boolean supportShadow = false;
 		/**
@@ -149,8 +163,13 @@ public class QuickLaunch extends DesktopItem {
 					&& child.className.indexOf("ignored") == -1) {
 				existed = true;
 				Object js = child.href;
-				if (js == "#") {
-					js = child.onclick;
+				if (js == "#")
+				/**
+				 * @j2sNative
+				 * js = child.onclick;
+				 */
+				{
+					// js = child.onclick;
 				}
 				/*if (typeof js == "string") {
 					if (js.indexOf ("javascript:") == 0) {
@@ -307,7 +326,8 @@ public class QuickLaunch extends DesktopItem {
 		}
 		itemDiv.title = name;
 		document.body.appendChild(itemDiv);
-		itemDiv.onmouseover = this.handle.onmouseover;
+		// itemDiv.onmouseover = this.handle.onmouseover;
+		Clazz.addEvent(itemDiv, "mouseover", hLaunchMouseEnter);
 		
 		boolean supportShadow = false;
 		/**
@@ -381,6 +401,17 @@ public class QuickLaunch extends DesktopItem {
 			return;
 		}
 		if (handle != null) {
+			if (hLaunchToggle != null) {
+				Clazz.removeEvent(handle, "dblclick", hLaunchToggle);
+				hLaunchToggle = null;
+			}
+			if (hLaunchClick != null) {
+				Clazz.removeEvent(handle, "click", hLaunchClick);
+				hLaunchClick = null;
+			}
+			if (hLaunchMouseEnter != null) {
+				Clazz.removeEvent(handle, "mouseover", hLaunchMouseEnter);
+			}
 			OS.destroyHandle(handle);
 			handle = null;
 		}
@@ -388,12 +419,14 @@ public class QuickLaunch extends DesktopItem {
 			for (int i = 0; i < shortcutItems.length; i++) {
 				Element item = shortcutItems[i];
 				if (item != null) {
+					Clazz.removeEvent(item, "mouseover", hLaunchMouseEnter);
 					OS.destroyHandle(item);
 				}
 			}
 			shortcutItems = null;
 			shortcutCount = 0;
 		}
+		hLaunchMouseEnter = null;
 	}
 	void toggleAutoHide() {
 		isAutoHide = !isAutoHide;

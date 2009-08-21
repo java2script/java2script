@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -104,6 +105,8 @@ public class ScrollBar extends Widget {
 	Element outerHandle;
 	Element sbHandle;
 	Element innerHandle;
+
+	private Object hScroll;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -212,7 +215,7 @@ void createWidget () {
 	} else {
 		createVerticalScrollBar(parent.scrolledHandle(), size, size * (maximum - minimum) / thumb);
 	}
-	sbHandle.onscroll = new RunnableCompatibility() {
+	hScroll = new RunnableCompatibility() {
 		
 		public void run() {
 			/*
@@ -239,6 +242,8 @@ void createWidget () {
 		}
 		
 	};
+	// sbHandle.onscroll = ...
+	Clazz.addEvent(sbHandle, "scroll", hScroll);
 }
 
 
@@ -688,6 +693,14 @@ protected void releaseChild () {
 	super.releaseChild ();
 	if (parent.horizontalBar == this) parent.horizontalBar = null;
 	if (parent.verticalBar == this) parent.verticalBar = null;
+}
+
+protected void releaseHandle() {
+	if (sbHandle != null && hScroll != null) {
+		Clazz.removeEvent(sbHandle, "scroll", hScroll);
+		hScroll = null;
+	}
+	super.releaseHandle();
 }
 
 void releaseWidget () {

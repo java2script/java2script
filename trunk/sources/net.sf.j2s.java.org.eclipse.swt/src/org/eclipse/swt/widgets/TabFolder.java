@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 
@@ -58,6 +59,7 @@ public class TabFolder extends Composite {
 	private int offset;
 	
 	ImageList imageList;
+	private Object hMorePrevClick;
 	/*
 	static final int TabFolderProc;
 	static final TCHAR TabFolderClass = new TCHAR (0, OS.WC_TABCONTROL, true);
@@ -105,6 +107,7 @@ public class TabFolder extends Composite {
 //		OS.HeapFree (hHeap, 0, lpszClassName);	
 	}
 	*/
+	private Object hMoreNextClick;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -433,7 +436,7 @@ protected void createHandle () {
 		arrowRight.style.top = "0";
 	}
 	
-	el.onclick = btnNextTab.onclick = new RunnableCompatibility() {
+	hMoreNextClick = new RunnableCompatibility() {
 		public void run() {
 			if (offset + 1 >= items.length) return ;
 			int w = 0;
@@ -458,6 +461,10 @@ protected void createHandle () {
 			}
 		}
 	};
+	// el.onclick = btnNextTab.onclick = ...
+	Clazz.addEvent(el, "click", hMoreNextClick);
+	Clazz.addEvent(btnNextTab, "click", hMoreNextClick);
+	
 	el = (Element) createCSSElement(itemMore, "tab-item-button");
 	btnPrevTab = document.createElement("BUTTON");
 	el.appendChild(btnPrevTab);
@@ -475,13 +482,16 @@ protected void createHandle () {
 		arrowLeft.style.left = "-4px";
 		arrowLeft.style.top = "0";
 	}
-	el.onclick = btnPrevTab.onclick = new RunnableCompatibility() {
+	hMorePrevClick = new RunnableCompatibility() {
 		public void run() {
 			if (offset <= 0) return ;
 			offset--;
 			setSelection(getSelectionIndex(), false);
 		}
 	};
+	// el.onclick = btnPrevTab.onclick = ...
+	Clazz.addEvent(el, "click", hMorePrevClick);
+	Clazz.addEvent(btnPrevTab, "click", hMorePrevClick);
 	
 	borderNW = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-nw");
 	borderNE = (Element) createCSSElement(borderFrame, cssName + "tab-folder-border-ne");
@@ -891,11 +901,21 @@ protected void releaseHandle() {
 		borderSE = null;
 	}
 	if (btnPrevTab != null) {
+		if (hMorePrevClick != null) {
+			Clazz.removeEvent(btnPrevTab, "click", hMorePrevClick);
+			Clazz.removeEvent(btnPrevTab.parentNode, "click", hMorePrevClick);
+			hMorePrevClick = null;
+		}
 		OS.destroyHandle(btnPrevTab.parentNode);
 		OS.destroyHandle(btnPrevTab);
 		btnPrevTab = null;
 	}
 	if (btnNextTab != null) {
+		if (hMoreNextClick != null) {
+			Clazz.removeEvent(btnNextTab, "click", hMoreNextClick);
+			Clazz.removeEvent(btnNextTab.parentNode, "click", hMoreNextClick);
+			hMoreNextClick = null;
+		}
 		OS.destroyHandle(btnNextTab.parentNode);
 		OS.destroyHandle(btnNextTab);
 		btnNextTab = null;

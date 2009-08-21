@@ -24,6 +24,7 @@ import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -68,6 +69,9 @@ public class Button extends Control {
 	Element btnText;
 	Element btnHandle; 
 	
+	private Object hSelectionHandler;
+	private Object hSelectionKeyDown;
+
 	/*
 	static final int ButtonProc;
 	static final TCHAR ButtonClass = new TCHAR (0,"BUTTON", true);
@@ -509,6 +513,8 @@ void createHandle() {
 			}
 		}
 	}
+	// Why there are CSS class "button-hover"?
+	/*
 	btnHandle.onmouseover = new RunnableCompatibility() {
 		public void run() {
 			String cssName = " button-hover";
@@ -527,6 +533,8 @@ void createHandle() {
 			}
 		}
 	};
+	*/
+	
 	//bindHandle();
 	hookSelection();
 	
@@ -722,11 +730,44 @@ boolean mnemonicMatch (char key) {
  * @see org.eclipse.swt.widgets.Control#releaseHandle()
  */
 protected void releaseHandle() {
+	if (hSelectionKeyDown != null) {
+		Clazz.removeEvent(handle, "keydown", hSelectionKeyDown);
+		hSelectionKeyDown = null;
+	}
+	if (hSelectionHandler != null) {
+		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
+			Clazz.removeEvent(btnHandle, "click", hSelectionHandler);
+			Clazz.removeEvent(btnText, "click", hSelectionHandler);
+			Clazz.removeEvent(btnText, "dblclick", hSelectionHandler);
+		} else {
+			Clazz.removeEvent(handle, "click", hSelectionHandler);
+			Clazz.removeEvent(handle, "dblclick", hSelectionHandler);
+		}
+		hSelectionHandler = null;
+	}
 	if (btnText != null) {
+		if (hMouseEnter != null) {
+			Clazz.removeEvent(btnText, "mouseover", hMouseEnter);
+		}
+		if (hMouseExit != null) {
+			Clazz.removeEvent(btnText, "mouseout", hMouseExit);
+		}
+		if (hMouseMove != null) {
+			Clazz.removeEvent(btnText, "mousemove", hMouseMove);
+		}
 		OS.destroyHandle(btnText);
 		btnText = null;
 	}
 	if (btnHandle != null) {
+		if (hMouseEnter != null) {
+			Clazz.removeEvent(btnHandle, "mouseover", hMouseEnter);
+		}
+		if (hMouseExit != null) {
+			Clazz.removeEvent(btnHandle, "mouseout", hMouseExit);
+		}
+		if (hMouseMove != null) {
+			Clazz.removeEvent(btnHandle, "mousemove", hMouseMove);
+		}
 		OS.destroyHandle(btnHandle);
 		btnHandle = null;
 	}
@@ -1354,7 +1395,10 @@ private void updateArrowStyle() {
 }
 
 void hookSelection() {
-	RunnableCompatibility eventHandler = new RunnableCompatibility() {
+	if (hSelectionHandler != null) {
+		return;
+	}
+	hSelectionHandler = new RunnableCompatibility() {
 		public void run() {
 			if (!isEnabled()) {
 				toReturn(false);
@@ -1399,12 +1443,18 @@ void hookSelection() {
 			*/
 		}
 	};
-	handle.onclick = handle.ondblclick = eventHandler;
+	//handle.onclick = handle.ondblclick = hSelectionHandler;
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		handle.onclick = handle.ondblclick = null;
-		btnHandle.onclick = btnText.onclick = btnText.ondblclick = eventHandler;
+		//handle.onclick = handle.ondblclick = null;
+		//btnHandle.onclick = btnText.onclick = btnText.ondblclick = hSelectionHandler;
+		Clazz.addEvent(btnHandle, "click", hSelectionHandler);
+		Clazz.addEvent(btnText, "click", hSelectionHandler);
+		Clazz.addEvent(btnText, "dblclick", hSelectionHandler);
+	} else {
+		Clazz.addEvent(handle, "click", hSelectionHandler);
+		Clazz.addEvent(handle, "dblclick", hSelectionHandler);
 	}
-	handle.onkeydown = new RunnableCompatibility() {
+	hSelectionKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
 			if(e.keyCode == 32 || e.keyCode == 13){
@@ -1413,21 +1463,29 @@ void hookSelection() {
 			toReturn(true);
 		}
 	};
+	//handle.onkeydown = ...
+	Clazz.addEvent(handle, "keydown", hSelectionKeyDown);
 }
 
 void hookMouseEnter() {
 	super.hookMouseEnter();
-	btnHandle.onmouseover = btnText.onmouseover = handle.onmouseover;
+	Clazz.addEvent(btnHandle, "mouseover", hMouseEnter);
+	Clazz.addEvent(btnText, "mouseover", hMouseEnter);
+	//btnHandle.onmouseover = btnText.onmouseover = handle.onmouseover;
 }
 
 void hookMouseExit() {
 	super.hookMouseExit();
-	btnHandle.onmouseout = btnText.onmouseout = handle.onmouseout;
+	Clazz.addEvent(btnHandle, "mouseout", hMouseExit);
+	Clazz.addEvent(btnText, "mouseout", hMouseExit);
+	//btnHandle.onmouseout = btnText.onmouseout = handle.onmouseout;
 }
 
 void hookMouseMove() {
 	super.hookMouseMove();
-	btnHandle.onmousemove = btnText.onmousemove = handle.onmousemove;
+	Clazz.addEvent(btnHandle, "mousemove", hMouseMove);
+	Clazz.addEvent(btnText, "mousemove", hMouseMove);
+	//btnHandle.onmousemove = btnText.onmousemove = handle.onmousemove;
 }
 
 /*

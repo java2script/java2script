@@ -18,6 +18,7 @@ import org.eclipse.swt.events.TreeListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -82,6 +83,7 @@ public class Tree extends Composite {
 	private Element tableHandle;
 	private Element theadHandle;
 	Element tbody;
+	private Object hTreeKeyDown;
 
 /**
  * Constructs a new instance of this class given its parent
@@ -428,7 +430,7 @@ protected void createHandle () {
 	}
 	tableHandle.className = cssTable;
 	handle.appendChild(tableHandle);
-	handle.onkeydown = new RunnableCompatibility() {
+	hTreeKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
 			int index = focusIndex;
@@ -482,6 +484,8 @@ protected void createHandle () {
 			}
 		}
 	};
+	// handle.onkeydown = ...
+	Clazz.addEvent(handle, "keydown", hTreeKeyDown);
 }
 void setFocusIndex (int index) {
 	checkWidget ();	
@@ -998,13 +1002,14 @@ void createItem (TreeItem item, Object hParent, int index) {
 		if (itemList.length == 1 && hParent != null) {
 			Element[] parentInnerChildren = item.parentItem.handle.childNodes[0].childNodes[0].childNodes[0].childNodes;
 			Element anchorV = parentInnerChildren[elIndex - 1];
-			anchorV.childNodes[1].className = "tree-anchor-h tree-anchor-plus";
-			final TreeItem ii = item.parentItem;
-			anchorV.onclick = new RunnableCompatibility() {
-				public void run() {
-					ii.toggleExpandStatus();
-				}
-			};
+			anchorV.childNodes[1].className = item.parentItem.expandStatus ? "tree-anchor-h tree-anchor-minus" : "tree-anchor-h tree-anchor-plus";
+			// TODO: Verify toggling is correct or not
+//			final TreeItem ii = item.parentItem;
+//			anchorV.onclick = new RunnableCompatibility() {
+//				public void run() {
+//					ii.toggleExpandStatus();
+//				}
+//			};
 		}
 	}
 	boolean visible = true;
@@ -2393,6 +2398,10 @@ void releaseItems (TreeItem [] nodes, TVITEM tvItem) {
 */
 
 protected void releaseHandle() {
+	if (hTreeKeyDown != null) {
+		Clazz.removeEvent(handle, "keydown", hTreeKeyDown);
+		hTreeKeyDown = null;
+	}
 	if (theadHandle != null) {
 		OS.deepClearChildren(theadHandle);
 		OS.destroyHandle(theadHandle);

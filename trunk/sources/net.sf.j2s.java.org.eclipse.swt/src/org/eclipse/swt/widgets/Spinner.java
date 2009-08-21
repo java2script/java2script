@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 import org.eclipse.swt.internal.xhtml.document;
@@ -55,6 +56,10 @@ public class Spinner extends Composite {
 	private Element textInputHandle;
 	private Element downBtnHandle;
 	private Element upBtnHandle;
+	private Object hTextKeyDown;
+	private Object hTextChange;
+	private Object hDownClick;
+	private Object hUpClick;
 	
 	/*
 	static final int EditProc;
@@ -208,13 +213,15 @@ protected void createHandle () {
 	Element btnArrow = document.createElement("DIV");
 	btnArrow.className = "spinner-button-arrow-up";
 	upBtnHandle.appendChild(btnArrow);
-	upBtnHandle.onclick = new RunnableCompatibility() {
+	hUpClick = new RunnableCompatibility() {
 		
 		public void run() {
 			setSelection(getSelection() + increment);
 		}
 		
 	};
+	// upBtnHandle.onclick = ...
+	Clazz.addEvent(upBtnHandle, "click", hUpClick);
 	
 	downBtnHandle = document.createElement("BUTTON");
 	updownHandle.appendChild(downBtnHandle);
@@ -222,13 +229,15 @@ protected void createHandle () {
 	btnArrow = document.createElement("DIV");
 	btnArrow.className = "spinner-button-arrow-down";
 	downBtnHandle.appendChild(btnArrow);
-	downBtnHandle.onclick = new RunnableCompatibility() {
+	hDownClick = new RunnableCompatibility() {
 		
 		public void run() {
 			setSelection(getSelection() - increment);
 		}
 		
 	};
+	// downBtnHandle.onclick = ...
+	Clazz.addEvent(downBtnHandle, "click", hDownClick);
 	
 	textHandle = document.createElement("DIV");
 	handle.appendChild(textHandle);
@@ -246,15 +255,17 @@ protected void createHandle () {
 	
 	textHandle.appendChild(textInputHandle);
 	setSelection(0, false);
-	textInputHandle.onchange = new RunnableCompatibility() {
+	hTextChange = new RunnableCompatibility() {
 		
 		public void run() {
 			setSelection(getSelection());
 		}
 		
 	};
+	// textInputHandle.onchange = ...
+	Clazz.addEvent(textInputHandle, "change", hTextChange);
 	
-	textInputHandle.onkeydown = new RunnableCompatibility(){
+	hTextKeyDown = new RunnableCompatibility(){
 		public void run(){
 			HTMLEvent e = (HTMLEvent) getEvent();
 			switch(e.keyCode){
@@ -270,6 +281,8 @@ protected void createHandle () {
 			
 		}
 	};
+	// textInputHandle.onkeydown = ...
+	Clazz.addEvent(textInputHandle, "keydown", hTextKeyDown);
 }
 
 /**
@@ -758,14 +771,30 @@ void register () {
 
 protected void releaseHandle() {
 	if (textHandle != null) {
+		if (hTextChange != null) {
+			Clazz.removeEvent(textHandle, "change", hTextChange);
+			hTextChange = null;
+		}
+		if (hTextKeyDown != null) {
+			Clazz.removeEvent(textHandle, "keydown", hTextKeyDown);
+			hTextKeyDown = null;
+		}
 		OS.destroyHandle(textHandle);
 		textHandle = null;
 	}
 	if(upBtnHandle != null){
+		if (hUpClick != null) {
+			Clazz.removeEvent(upBtnHandle, "click", hUpClick);
+			hUpClick = null;
+		}
 		OS.destroyHandle(upBtnHandle);
 		upBtnHandle = null;
 	}
 	if(downBtnHandle != null){
+		if (hDownClick != null) {
+			Clazz.removeEvent(downBtnHandle, "click", hDownClick);
+			hDownClick = null;
+		}
 		OS.destroyHandle(downBtnHandle);
 		downBtnHandle = null;
 	}

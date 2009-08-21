@@ -18,6 +18,7 @@ import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -38,21 +39,27 @@ public class TaskBar extends DesktopItem {
 		public Element itemHandle;
 		public Element textHandle;
 		public Element iconHandle;
+		public Object hShellItemClick;
 
 		public TaskItem(Shell shell, String text, Element itemHandle,
-				Element textHandle, Element iconHandle) {
+				Element textHandle, Element iconHandle, Object itemClick) {
 			super();
 			this.shell = shell;
 			this.text = text;
 			this.itemHandle = itemHandle;
 			this.textHandle = textHandle;
 			this.iconHandle = iconHandle;
+			this.hShellItemClick = itemClick;
 		}
 
 	}
 
 	Element barEl = null;
 	TaskItem[] items = new TaskItem[0];
+	private Object hBarToggle;
+	private Object hBarClick;
+	private Object hBarMouesEnter;
+//	private Object hNoReturn;
 
 	public TaskBar(Display display) {
 		super();
@@ -134,20 +141,25 @@ public class TaskBar extends DesktopItem {
 			si.href = "#";
 		}
 		si.title = text;
-		si.onclick = new RunnableCompatibility() {
-
-			public void run() {
-				toReturn(false);
-			}
-
-		};
+//		hNoReturn = new RunnableCompatibility() {
+//
+//			public void run() {
+//				toReturn(false);
+//			}
+//
+//		};
+//		// si.onclick = ...
+//		Clazz.addEvent(si, "click", hNoReturn);
+		
 		if (barEl.style.display == "none") {
 			barEl.style.display = "";
 		}
 		if (barEl.className.indexOf("minimized") != -1) {
 			si.style.display = "none";
 		}
-		si.onmouseover = this.barEl.onmouseover;
+		// si.onmouseover = this.barEl.onmouseover;
+		Clazz.addEvent(si, "mouseover", hBarMouesEnter);
+		
 		this.handle.appendChild(si);
 		Element icon = document.createElement("DIV");
 		icon.className = "shell-item-icon";
@@ -174,8 +186,9 @@ public class TaskBar extends DesktopItem {
 		}
 		div.style.width = w + "px";
 		si.style.width = (w + 48) + "px";
+		Object hShellItemClick = null;
 		if (shell != null) {
-			si.onclick = new RunnableCompatibility() {
+			hShellItemClick = new RunnableCompatibility() {
 
 				public void run() {
 					if (shell.getMinimized()) {
@@ -198,8 +211,10 @@ public class TaskBar extends DesktopItem {
 				}
 
 			};
+			// si.onclick = ...
+			Clazz.addEvent(si, "click", hShellItemClick);
 		}
-		this.items[this.items.length] = new TaskItem(shell, text, si, div, icon);
+		this.items[this.items.length] = new TaskItem(shell, text, si, div, icon, hShellItemClick);
 		
 		boolean supportShadow = false;
 		/**
@@ -239,9 +254,15 @@ public class TaskBar extends DesktopItem {
 			TaskItem item = this.items[i];
 			if (item != null && item.shell == shell) {
 				item.shell = null;
-				item.itemHandle.onclick = null;
+				//item.itemHandle.onclick = null;
+				if (item.hShellItemClick != null) {
+					Clazz.removeEvent(item.itemHandle, "click", item.hShellItemClick);
+					item.hShellItemClick = null;
+				}
 				this.handle.removeChild(item.itemHandle);
-				item.itemHandle.onmouseover = null;
+				//item.itemHandle.onmouseover = null;
+				Clazz.removeEvent(item.itemHandle, "mouseover", hBarMouesEnter);
+				
 				item.itemHandle = null;
 				item.textHandle = null;
 				item.iconHandle = null;
@@ -439,7 +460,7 @@ public class TaskBar extends DesktopItem {
 		bb.className = "shell-manager-bar";
 		sb.appendChild(bb);
 		this.barEl = bb;
-		this.barEl.onmouseover = new RunnableCompatibility() {
+		hBarMouesEnter = new RunnableCompatibility() {
 
 			public void run() {
 				if (isAutoHide) {
@@ -453,7 +474,10 @@ public class TaskBar extends DesktopItem {
 			}
 
 		};
-		this.barEl.onclick = new RunnableCompatibility() {
+		// this.barEl.onmouseover = ...
+		Clazz.addEvent(barEl, "mouseover", hBarMouesEnter);
+		
+		hBarClick = new RunnableCompatibility() {
 
 			public void run() {
 				if (setMinimized(false)) {
@@ -470,13 +494,19 @@ public class TaskBar extends DesktopItem {
 			}
 
 		};
-		this.barEl.ondblclick = new RunnableCompatibility() {
+		// this.barEl.onclick = ...
+		Clazz.addEvent(barEl, "click", hBarClick);
+		
+		hBarToggle = new RunnableCompatibility() {
 
 			public void run() {
 				toggleAutoHide();
 			}
 
 		};
+		// this.barEl.ondblclick = .. 
+		Clazz.addEvent(barEl, "dblclick", hBarToggle);
+		
 		this.barEl.title = "Doubleclick to set taskbar auto-hide";
 		
 		boolean supportShadow = false;
@@ -548,6 +578,17 @@ public class TaskBar extends DesktopItem {
 			handle = null;
 		}
 		if (barEl != null) {
+			if (hBarClick != null) {
+				Clazz.removeEvent(barEl, "click", hBarClick);
+				hBarClick = null;
+			}
+			if (hBarToggle != null) {
+				Clazz.removeEvent(barEl, "dblclick", hBarToggle);
+				hBarToggle = null;
+			}
+			if (hBarMouesEnter != null) {
+				Clazz.removeEvent(barEl, "mouseover", hBarMouesEnter);
+			}
 			OS.destroyHandle(barEl);
 			barEl = null;
 		}
@@ -560,6 +601,11 @@ public class TaskBar extends DesktopItem {
 						item.iconHandle = null;
 					}
 					if (item.itemHandle != null) {
+						if (item.hShellItemClick != null) {
+							Clazz.removeEvent(item.itemHandle, "click", item.hShellItemClick);
+							item.hShellItemClick = null;
+						}
+						Clazz.removeEvent(item.itemHandle, "mouseover", hBarMouesEnter);
 						OS.destroyHandle(item.itemHandle);
 						item.itemHandle = null;
 					}
@@ -567,6 +613,7 @@ public class TaskBar extends DesktopItem {
 			}
 			items = null;
 		}
+		hBarMouesEnter = null;
 	}
 
 	void toggleAutoHide() {

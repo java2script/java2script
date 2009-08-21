@@ -25,6 +25,7 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.browser.Popup;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
+import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
 import org.eclipse.swt.internal.xhtml.window;
@@ -53,6 +54,9 @@ public class MenuItem extends Item {
 	Element statusEl, imageEl, textEl, arrowEl;
 	
 	int mnemonicChar;
+	Object hItemMouseEnter;
+	Object hItemMouseExit;
+	private Object hNoReturn;
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>Menu</code>) and a style value
@@ -147,7 +151,7 @@ MenuItem (Menu parent, Menu menu, int style, int index) {
 
 void configMenuItem() {
 	if ((style & SWT.SEPARATOR) != 0) return;
-	handle.onmouseover = new RunnableCompatibility() {
+	hItemMouseEnter = new RunnableCompatibility() {
 		public void run() {
 			String className = handle.className;
 			if (className == null) {
@@ -232,7 +236,10 @@ void configMenuItem() {
 			}
 		}
 	};
-	handle.onmouseout = new RunnableCompatibility() {
+	// handle.onmouseover = ...
+	Clazz.addEvent(handle, "mouseover", hItemMouseEnter);
+	
+	hItemMouseExit = new RunnableCompatibility() {
 		public void run() {
 			String className = handle.className;
 			if (className == null) {
@@ -277,15 +284,23 @@ void configMenuItem() {
 			parent.currentIndex = -1;
 		}
 	};
+	// handle.onmouseout = ...
+	Clazz.addEvent(handle, "mouseout", hItemMouseExit);
+	
 	checkHookType(SWT.Selection);
+	
+	hNoReturn = new RunnableCompatibility() {
+		
+		@Override
+		public void run() {
+			toReturn(false);
+		}
+	};
+	Clazz.addEvent(handle, "selectstart", hNoReturn);
+	Clazz.addEvent(handle, "contextmenu", hNoReturn);
+	
 	/**
 	 * @j2sNative
-	this.handle.onselectstart = function () {
-		return false;
-	};
-	this.handle.oncontextmenu = function () {
-		return false;
-	};
 	if (typeof this.handle.style.MozUserSelect != "undefined") {
 		this.handle.style.MozUserSelect = "none";
 	} else if (typeof this.handle.style.KhtmlUserSelect != "undefined") {
@@ -298,7 +313,10 @@ void configMenuItem() {
  * @see org.eclipse.swt.widgets.Widget#hookSelection()
  */
 void hookSelection() {
-	handle.onclick = new RunnableCompatibility() {
+	if (hSelection != null) {
+		return;
+	}
+	hSelection = new RunnableCompatibility() {
 		public void run() {
 			if (!isEnabled()) {
 				display.timerExec(40, new Runnable() {
@@ -339,12 +357,14 @@ void hookSelection() {
 			//setInputState (event, SWT.Selection);
 			postEvent (SWT.Selection, event);
 			parent.lastFocusdTime = -1;
-			Element btn = parent.btnFocus;
+			Menu p = parent;
 			/**
-			 * @j2sNative btn.onblur();
-			 */ { btn.toString(); }
+			 * @j2sNative
+			 * p.hMenuBlur ();
+			 */ { p.toString(); }
 		}
 	};
+	Clazz.addEvent(handle, "click", hSelection);
 }
 
 /**
@@ -735,6 +755,19 @@ protected void releaseHandle() {
 		statusEl = null;
 	}
 	if (handle != null) {
+		if (hItemMouseEnter != null) {
+			Clazz.removeEvent(handle, "mouseover", hItemMouseEnter);
+			hItemMouseEnter = null;
+		}
+		if (hItemMouseExit != null) {
+			Clazz.removeEvent(handle, "mouseout", hItemMouseExit);
+			hItemMouseExit = null;
+		}
+		if (hNoReturn != null) {
+			Clazz.removeEvent(handle, "selectstart", hNoReturn);
+			Clazz.removeEvent(handle, "contextmenu", hNoReturn);
+			hNoReturn = null;
+		}
 		OS.destroyHandle(handle);
 		handle = null;
 	}
