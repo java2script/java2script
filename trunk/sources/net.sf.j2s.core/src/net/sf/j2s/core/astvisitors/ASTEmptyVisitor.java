@@ -149,7 +149,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public void registerPluginVisitor(IPluginVisitor visitor) {
-		visitor.setBuffer(buffer);
+		//visitor.setBuffer(buffer);
 		visitor.setVisitor(this);
 		visitorMap.put(visitor.getClass(), visitor);
 	}

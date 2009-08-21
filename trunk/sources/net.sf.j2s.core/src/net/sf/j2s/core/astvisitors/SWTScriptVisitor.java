@@ -154,8 +154,8 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 							name = "";
 						}
 						name = shortenQualifiedName(name);
-						if (name.indexOf("java.lang") != -1) {
-							name = name.substring(9);
+						if (name.indexOf("java.lang.") == 0) {
+							name = name.substring(10);
 						}
 						String xhtml = "org.eclipse.swt.internal.xhtml";
 						if (name.indexOf(xhtml) == 0) {

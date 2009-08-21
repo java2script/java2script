@@ -1022,8 +1022,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 								name = "";
 							}
 						}
-						if (name.indexOf("java.lang") != -1) {
-							name = name.substring(9);
+						if (name.indexOf("java.lang.") == 0) {
+							name = name.substring(10);
 						}
 						if (name.length() != 0) {
 							buffer.append(name);
