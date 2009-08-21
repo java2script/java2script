@@ -1049,7 +1049,7 @@ p.initHttpRequest = function () {
 		var state = oThis.xhrHandle.readyState;
 		if (state == 4) {
 			var pipeData = oThis.xhrHandle.responseText;
-			oThis.xhrHandle.onreadystatechange = NullObject;
+			oThis.xhrHandle.onreadystatechange = null;
 			var pipe = oThis.runnable;
 			if (oThis.xhrHandle.status != 200 && pipe != null) {
 				oThis.xhrHandle = null;
@@ -1117,9 +1117,16 @@ return function () {
 	var runnable = p.runnable;
 	if (runnable != null) {
 		if (runnable.pipeKey != p.key) {
-			net.sf.j2s.ajax.SimplePipeHelper.removePipe (p.key);
-			net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (p.key, p.pipeURL);
-			return;
+			var key = p.key;
+			var url = p.pipeURL;
+			with (window.parent) {
+				try {
+					net.sf.j2s.ajax.SimplePipeHelper.removePipe (key);
+					net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key, url);
+					return;
+				} catch (e) {
+				}
+			}
 		}
 		var now = new Date ().getTime ();
 		var last = runnable.lastPipeDataReceived;
@@ -1133,12 +1140,13 @@ return function () {
 			var method = null;
 			var url = null;
 			var data = null;
+			var key = p.key;
 			with (window.parent) {
 				try {
 					method = runnable.getPipeMethod ();
 					url = runnable.getPipeURL ();
 					var spr = net.sf.j2s.ajax.SimplePipeRequest;
-					data = spr.constructRequest(p.key, spr.PIPE_TYPE_QUERY, true);
+					data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, true);
 				} catch (e) {
 				}
 			}
@@ -1152,7 +1160,7 @@ return function () {
 				p.pipeXHRQuery (p.xhrHandle, method, url, data);
 				p.lastXHR = new Date ().getTime ();
 			} catch (e) {
-				p.xhrHandle.onreadystatechange = NullObject;
+				p.xhrHandle.onreadystatechange = null;
 				p.xhrHandle = null;
 				document.domain = p.parentDomain;
 				runnable.queryEnded = true;
@@ -1162,11 +1170,13 @@ return function () {
 		if (runnable.queryFailedRetries >= 3
 				|| now - last > 3 * p.pipeLiveNotifyInterval) {
 			document.domain = p.parentDomain;
+			var key = p.key;
+			var url = p.pipeURL;
 			with (window.parent) {
 				runnable.pipeAlive = false;
 				runnable.pipeClosed ();
-				net.sf.j2s.ajax.SimplePipeHelper.removePipe (p.key);
-				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (p.key, p.pipeURL);
+				net.sf.j2s.ajax.SimplePipeHelper.removePipe (key);
+				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key, url);
 			}
 		} else {
 			window.setTimeout (arguments.callee, p.pipeQueryInterval);
