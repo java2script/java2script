@@ -52,6 +52,30 @@ public class TaskBar extends DesktopItem {
 			this.hShellItemClick = itemClick;
 		}
 
+		public void releaseFromBar(TaskBar bar) {
+			shell = null;
+			//itemHandle.onclick = null;
+			if (hShellItemClick != null) {
+				Clazz.removeEvent(itemHandle, "click", hShellItemClick);
+				hShellItemClick = null;
+			}
+			//itemHandle.onmouseover = null;
+			if (bar.hBarMouesEnter != null) {
+				Clazz.removeEvent(itemHandle, "mouseover", bar.hBarMouesEnter);
+			}
+			if (textHandle != null) {
+				OS.destroyHandle(textHandle);
+				textHandle = null;
+			}
+			if (iconHandle != null) {
+				OS.destroyHandle(iconHandle);
+				iconHandle = null;
+			}
+			if (itemHandle != null) {
+				OS.destroyHandle(itemHandle);
+				itemHandle = null;
+			}
+		}
 	}
 
 	Element barEl = null;
@@ -253,19 +277,7 @@ public class TaskBar extends DesktopItem {
 		for (int i = 0; i < this.items.length; i++) {
 			TaskItem item = this.items[i];
 			if (item != null && item.shell == shell) {
-				item.shell = null;
-				//item.itemHandle.onclick = null;
-				if (item.hShellItemClick != null) {
-					Clazz.removeEvent(item.itemHandle, "click", item.hShellItemClick);
-					item.hShellItemClick = null;
-				}
-				this.handle.removeChild(item.itemHandle);
-				//item.itemHandle.onmouseover = null;
-				Clazz.removeEvent(item.itemHandle, "mouseover", hBarMouesEnter);
-				
-				item.itemHandle = null;
-				item.textHandle = null;
-				item.iconHandle = null;
+				item.releaseFromBar(this);
 				this.items[i] = null;
 				break;
 			}
@@ -573,9 +585,16 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public void releaseWidget() {
-		if (handle != null) {
-			OS.destroyHandle(handle);
-			handle = null;
+		if (items != null) {
+			for (int i = 0; i < this.items.length; i++) {
+				TaskItem item = this.items[i];
+				if (item != null) {
+					item.releaseFromBar(this);
+					this.items[i] = null;
+					break;
+				}
+			}
+			items = null;
 		}
 		if (barEl != null) {
 			if (hBarClick != null) {
@@ -588,32 +607,15 @@ public class TaskBar extends DesktopItem {
 			}
 			if (hBarMouesEnter != null) {
 				Clazz.removeEvent(barEl, "mouseover", hBarMouesEnter);
+				hBarMouesEnter = null;
 			}
 			OS.destroyHandle(barEl);
 			barEl = null;
 		}
-		if (items != null) {
-			for (int i = 0; i < items.length; i++) {
-				TaskItem item = items[i];
-				if (item != null) {
-					if (item.iconHandle != null) {
-						OS.destroyHandle(item.iconHandle);
-						item.iconHandle = null;
-					}
-					if (item.itemHandle != null) {
-						if (item.hShellItemClick != null) {
-							Clazz.removeEvent(item.itemHandle, "click", item.hShellItemClick);
-							item.hShellItemClick = null;
-						}
-						Clazz.removeEvent(item.itemHandle, "mouseover", hBarMouesEnter);
-						OS.destroyHandle(item.itemHandle);
-						item.itemHandle = null;
-					}
-				}
-			}
-			items = null;
+		if (handle != null) {
+			OS.destroyHandle(handle);
+			handle = null;
 		}
-		hBarMouesEnter = null;
 	}
 
 	void toggleAutoHide() {

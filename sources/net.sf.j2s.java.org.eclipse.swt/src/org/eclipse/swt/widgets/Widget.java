@@ -1479,8 +1479,9 @@ protected void releaseHandle () {
 			Clazz.removeEvent(handle, "help", hHelp);
 			hHelp = null;
 		}
-		// FIXME
-		//handle = null;
+		
+		OS.destroyHandle(handle);
+		handle = null;
 	}
 }
 

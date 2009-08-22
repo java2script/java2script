@@ -473,9 +473,10 @@ public void setText (String string) {
 	OS.updateCSSClass(borderFrame, "group-no-title-text", string.length() == 0);
 	if (string.length() != 0) {
 		if (!string.equals(groupText)) {
-			for (int i = titleText.childNodes.length - 1; i >= 0; i--) {
-				titleText.removeChild(titleText.childNodes[i]);
-			}
+//			for (int i = titleText.childNodes.length - 1; i >= 0; i--) {
+//				titleText.removeChild(titleText.childNodes[i]);
+//			}
+			OS.clearChildren(titleText);
 			titleText.appendChild(document.createTextNode(string));
 			textWidth = OS.getContainerWidth(titleText);
 			if (textWidth == 0) {

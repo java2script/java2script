@@ -205,18 +205,6 @@ public Rectangle getClientArea () {
 	return new Rectangle (0, 0, w, h);
 }
 
-protected void releaseHandle() {
-	if (horizontalBar != null) {
-		horizontalBar.releaseHandle();
-		horizontalBar = null;
-	}
-	if (verticalBar != null) {
-		verticalBar.releaseHandle();
-		verticalBar = null;
-	}
-	super.releaseHandle();
-}
-
 /**
  * Returns the receiver's horizontal scroll bar if it has
  * one, and null if it does not.

@@ -755,7 +755,8 @@ void destroyItem (CoolItem item) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
 	*/
-	handle.removeChild(items[index].handle);
+	//handle.removeChild(items[index].handle);
+	OS.destroyHandle(items[index].handle);
 	
 	items [item.id] = null;
 	item.id = -1;

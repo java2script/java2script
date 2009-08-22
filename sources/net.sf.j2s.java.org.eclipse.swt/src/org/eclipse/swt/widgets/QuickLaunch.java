@@ -200,7 +200,8 @@ public class QuickLaunch extends DesktopItem {
 				}
 				Element shortcut = this.addShortcut(child.text != null ? child.text : child.innerText, icon, js);
 				String id = child.id;
-				child.parentNode.removeChild(child);
+				//child.parentNode.removeChild(child);
+				OS.destroyHandle(child);
 				if (id != null && id.length() > 0) {
 					shortcut.id = id;
 				}
@@ -400,21 +401,6 @@ public class QuickLaunch extends DesktopItem {
 		if (defaultQuickLaunch != null) {
 			return;
 		}
-		if (handle != null) {
-			if (hLaunchToggle != null) {
-				Clazz.removeEvent(handle, "dblclick", hLaunchToggle);
-				hLaunchToggle = null;
-			}
-			if (hLaunchClick != null) {
-				Clazz.removeEvent(handle, "click", hLaunchClick);
-				hLaunchClick = null;
-			}
-			if (hLaunchMouseEnter != null) {
-				Clazz.removeEvent(handle, "mouseover", hLaunchMouseEnter);
-			}
-			OS.destroyHandle(handle);
-			handle = null;
-		}
 		if (shortcutItems != null) {
 			for (int i = 0; i < shortcutItems.length; i++) {
 				Element item = shortcutItems[i];
@@ -426,7 +412,22 @@ public class QuickLaunch extends DesktopItem {
 			shortcutItems = null;
 			shortcutCount = 0;
 		}
-		hLaunchMouseEnter = null;
+		if (handle != null) {
+			if (hLaunchToggle != null) {
+				Clazz.removeEvent(handle, "dblclick", hLaunchToggle);
+				hLaunchToggle = null;
+			}
+			if (hLaunchClick != null) {
+				Clazz.removeEvent(handle, "click", hLaunchClick);
+				hLaunchClick = null;
+			}
+			if (hLaunchMouseEnter != null) {
+				Clazz.removeEvent(handle, "mouseover", hLaunchMouseEnter);
+				hLaunchMouseEnter = null;
+			}
+			OS.destroyHandle(handle);
+			handle = null;
+		}
 	}
 	void toggleAutoHide() {
 		isAutoHide = !isAutoHide;

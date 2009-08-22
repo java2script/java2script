@@ -201,10 +201,10 @@ protected void releaseHandle() {
 		OS.destroyHandle(textEl);
 		textEl = null;
 	}
-	if (handle != null) {
-		OS.destroyHandle(handle);
-		handle = null;
-	}
+//	if (handle != null) {
+//		OS.destroyHandle(handle);
+//		handle = null;
+//	}
 	super.releaseHandle();
 }
 
