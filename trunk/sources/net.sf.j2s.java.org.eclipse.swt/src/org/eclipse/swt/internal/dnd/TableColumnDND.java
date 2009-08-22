@@ -12,6 +12,7 @@
 package org.eclipse.swt.internal.dnd;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
@@ -66,7 +67,8 @@ public class TableColumnDND extends DragAdapter {
 		thumb.style.display = "none";
 		Clazz.removeEvent(thumb, "selectstart", DNDUtils.onselectstart);
 		document.body.style.cursor = "auto";
-		thumb.parentNode.removeChild(thumb);
+		//thumb.parentNode.removeChild(thumb);
+		OS.destroyHandle(thumb);
 	}
 
 	protected Point currentLocation(DragEvent e) {

@@ -1019,17 +1019,17 @@ protected void releaseHandle () {
 		anchorElement = null;
 		hAnchorToggle = null;
 	}
-	super.releaseHandle ();
-//	handle = 0;
 	if (checkElement != null) {
 		OS.destroyHandle(checkElement);
 		checkElement = null;
 	}
 	if (handle != null) {
 		OS.deepClearChildren(handle);
-		OS.destroyHandle(handle);
-		handle = null;
+//		OS.destroyHandle(handle);
+//		handle = null;
 	}
+	super.releaseHandle ();
+//	handle = 0;
 }
 
 protected void releaseWidget () {
@@ -1717,7 +1717,8 @@ void showSelection(boolean selected) {
 		Element innerEl = tempElem.childNodes[tempElem.childNodes.length-1].childNodes[0];
 		innerEl.style.hasLayout = true;
 		innerEl.appendChild(tmpDiv);
-		innerEl.removeChild(tmpDiv);
+		//innerEl.removeChild(tmpDiv);
+		OS.destroyHandle(tmpDiv);
 		innerEl.style.display = "inline-block";
 //		handle.style.hasLayout = true;
 		if((style & SWT.RIGHT_TO_LEFT) != 0){

@@ -911,11 +911,6 @@ boolean isAccelerated(HTMLEvent keyEvent){
 }
 
 void destroyItem (MenuItem item) {
-	try {
-		handle.removeChild(item.handle);
-	} catch (Throwable e) {
-		// may already be removed
-	}
 	/*
 	if (OS.IsWinCE) {
 		if ((OS.IsPPC || OS.IsSP) && hwndCB != 0) {

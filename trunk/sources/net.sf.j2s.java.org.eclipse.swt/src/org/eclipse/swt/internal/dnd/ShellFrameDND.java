@@ -342,7 +342,8 @@ public class ShellFrameDND implements DragListener {
 		this.resize = null;
 
 		if (overFrameHandle != null) {
-			document.body.removeChild(overFrameHandle);
+			//document.body.removeChild(overFrameHandle);
+			OS.destroyHandle(overFrameHandle);
 			overFrameHandle = null;
 		}
 	};
@@ -350,7 +351,8 @@ public class ShellFrameDND implements DragListener {
 	public void dispose() {
 		clean();
 		if (this.frame != null) {
-			this.frame.parentNode.removeChild(this.frame);
+			//this.frame.parentNode.removeChild(this.frame);
+			OS.destroyHandle(this.frame);
 			this.frame = null;
 		}
 	}

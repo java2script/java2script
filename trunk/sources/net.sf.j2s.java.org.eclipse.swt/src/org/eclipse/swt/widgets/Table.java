@@ -2185,7 +2185,8 @@ void removeItems (int[] indices){
 			items [count] = null;
 			last = index;
 		}
-		tbody.removeChild(item.handle);
+		//tbody.removeChild(item.handle);
+		OS.destroyHandle(item.handle);
 	}
 }
 
@@ -2354,7 +2355,7 @@ public void remove (int [] indices) {
 		if (index != last) {
 			TableItem item = items [index];
 			if (item != null) {
-				tbody.removeChild(item.handle);					
+//				tbody.removeChild(item.handle);
 				item.releaseHandle();
 				System.arraycopy (items, 0, newItems, 0, index);
 				System.arraycopy (items, index + 1, newItems, index, --count - index);
@@ -2463,7 +2464,7 @@ public void remove (int start, int end) {
 	while (index <= end) {
 		TableItem item = items [index];
 		if (item != null && !item.isDisposed ()){ 
-			tbody.removeChild(item.handle);
+//			tbody.removeChild(item.handle);
 			item.releaseHandle();
 		}
 		index++;

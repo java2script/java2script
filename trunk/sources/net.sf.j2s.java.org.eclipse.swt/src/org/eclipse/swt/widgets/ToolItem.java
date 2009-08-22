@@ -890,7 +890,7 @@ protected void releaseHandle() {
 		}
 		hItemMouseDown = null;
 		hItemMouseUp = null;
-		OS.destroyHandle(handle);
+//		OS.destroyHandle(handle);
 	}
 	super.releaseHandle();
 }

@@ -768,8 +768,8 @@ protected void releaseHandle() {
 			Clazz.removeEvent(handle, "contextmenu", hNoReturn);
 			hNoReturn = null;
 		}
-		OS.destroyHandle(handle);
-		handle = null;
+//		OS.destroyHandle(handle);
+//		handle = null;
 	}
 	super.releaseHandle();
 }

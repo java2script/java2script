@@ -16,6 +16,7 @@ import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.Option;
 import org.eclipse.swt.internal.xhtml.document;
@@ -1307,9 +1308,10 @@ public void setItem (int index, String string) {
 public void setItems (String [] items) {
 	checkWidget ();
 	if (items == null) error (SWT.ERROR_NULL_ARGUMENT);
-	for (int j = handle.childNodes.length - 1; j >= 0; j++) {
-		handle.removeChild(handle.childNodes[j]);
-	}
+//	for (int j = handle.childNodes.length - 1; j >= 0; j++) {
+//		handle.removeChild(handle.childNodes[j]);
+//	}
+	OS.clearChildren(handle);
 	for (int i=0; i<items.length; i++) {
 		if (items [i] == null) error (SWT.ERROR_INVALID_ARGUMENT);
 		Element it = document.createElement("OPTION");

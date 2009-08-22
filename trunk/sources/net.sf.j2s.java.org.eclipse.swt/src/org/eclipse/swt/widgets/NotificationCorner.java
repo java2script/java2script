@@ -44,7 +44,8 @@ public class NotificationCorner extends DesktopItem {
 			Element[] divs = container.childNodes;
 			for (int i = 0; i < divs.length; i++) {
 				if (divs[i].className == "powered") {
-					container.removeChild(divs[i]);
+					//container.removeChild(divs[i]);
+					OS.destroyHandle(divs[i]);
 					existed = true;
 					/**
 					 * @j2sNative
@@ -207,7 +208,7 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	private void unbindAllEvents() {
-		if (tray.allCells != null) {
+		if (tray != null && tray.allCells != null) {
 			for (int i = 0; i < tray.allCells.length; i++) {
 				Element cell = tray.allCells[i];
 				if (cell != null) {
@@ -215,7 +216,9 @@ public class NotificationCorner extends DesktopItem {
 				}
 			}
 		}
-		unbindEvents(minimizedEl);
+		if (minimizedEl != null) {
+			unbindEvents(minimizedEl);
+		}
 	}
 
 	public void bindEvents(Element cell) {
@@ -422,7 +425,10 @@ public class NotificationCorner extends DesktopItem {
 		}
 		
 		unbindAllEvents();
-		
+		if (minimizedEl != null) {
+			OS.destroyHandle(minimizedEl);
+			minimizedEl = null;
+		}
 		if (handle != null) {
 			if (hLogoClick != null) {
 				Clazz.removeEvent(handle, "click", hLogoClick);
@@ -432,10 +438,6 @@ public class NotificationCorner extends DesktopItem {
 			
 			OS.destroyHandle(handle);
 			handle = null;
-		}
-		if (minimizedEl != null) {
-			OS.destroyHandle(minimizedEl);
-			minimizedEl = null;
 		}
 		
 		mouseOver = null;

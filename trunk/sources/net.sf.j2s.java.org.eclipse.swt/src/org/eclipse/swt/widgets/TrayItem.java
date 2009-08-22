@@ -386,7 +386,7 @@ protected void releaseChild () {
 	parent.destroyItem (this);
 }
 
-protected void releaseWidget () {
+protected void releaseHandle() {
 	if (handle != null) {
 		if (hTraySelection != null) {
 			Clazz.removeEvent(handle, "click", hTraySelection);
@@ -401,15 +401,14 @@ protected void releaseWidget () {
 			hOperaMouseUp = null;
 		}
 	}
+	super.releaseHandle();
+}
+
+protected void releaseWidget () {
 	super.releaseWidget ();
 //	if (image2 != null) image2.dispose ();
 //	image2 = null;
 	toolTipText = null;
-	if (handle != null) {
-		parent.removeTrayItem(handle);
-		OS.destroyHandle(handle);
-		handle = null;
-	}
 	/*
 	if (OS.IsWinCE) return;
 	NOTIFYICONDATA iconData = OS.IsUnicode ? (NOTIFYICONDATA) new NOTIFYICONDATAW () : new NOTIFYICONDATAA ();

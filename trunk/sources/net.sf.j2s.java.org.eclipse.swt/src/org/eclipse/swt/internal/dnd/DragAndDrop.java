@@ -51,6 +51,7 @@ public class DragAndDrop {
 			Clazz.removeEvent(element, "mouseover", hDND);
 			hDND = null;
 		}
+		element = null;
 	}
 	public boolean checkDraggable(HTMLEventWrapper e) {
 		for (int i = 0; i < this.listeners.length; i++) {

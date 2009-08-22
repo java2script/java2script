@@ -602,12 +602,13 @@ public void setText (String string) {
 	/*
 	 * Calling setText twice should not make two text node for the handle.
 	 */
-	Element[] children = handle.childNodes;
-	if(children != null){
-		for(int i = 0; i < children.length; i++){
-			handle.removeChild(children[i]);
-		}
-	}
+//	Element[] children = handle.childNodes;
+//	if(children != null){
+//		for(int i = 0; i < children.length; i++){
+//			handle.removeChild(children[i]);
+//		}
+//	}
+	OS.clearChildren(handle);
 	OS.insertText(handle, text);
 	/*
 	int newBits = OS.GetWindowLong (handle, OS.GWL_STYLE), oldBits = newBits;

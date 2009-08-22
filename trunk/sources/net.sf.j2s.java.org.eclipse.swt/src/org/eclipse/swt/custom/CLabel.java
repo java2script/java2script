@@ -394,7 +394,8 @@ public void redraw() {
 		}
 	} else {
 		if (imageHandle != null) {
-			imageHandle.parentNode.removeChild(imageHandle);
+			//imageHandle.parentNode.removeChild(imageHandle);
+			OS.destroyHandle(imageHandle);
 			this.imageHandle = null;
 		}
 	}

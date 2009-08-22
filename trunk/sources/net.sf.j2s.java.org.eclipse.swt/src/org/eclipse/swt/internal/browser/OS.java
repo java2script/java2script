@@ -113,15 +113,30 @@ public class OS {
 			} catch (Error e) {
 			}
 		}
+		if (isIE) {
+			initGC();
+			gcContainer.appendChild(el);
+			el = null;
+			gcContainer.innerHTML = "";
+		}
 	}
 	
 	public static void clearChildren(Object handle) {
 		if (handle == null || ((Element) handle).nodeType != 1) {
 			return ;
 		}
+		initGC();
 		Element el = (Element) handle;
 		for (int i = el.childNodes.length - 1; i >= 0; i--) {
-			el.removeChild(el.childNodes[i]);
+			Element child = el.childNodes[i];
+			el.removeChild(child);
+			if (isIE) {
+				gcContainer.appendChild(child);
+				child = null;
+			}
+		}
+		if (isIE) {
+			gcContainer.innerHTML = "";
 		}
 	}
 
@@ -129,6 +144,7 @@ public class OS {
 		if (handle == null) {
 			return ;
 		}
+		initGC();
 		Element el = (Element) handle;
 		for (int i = el.childNodes.length - 1; i >= 0; i--) {
 			Element child = el.childNodes[i];
@@ -137,7 +153,14 @@ public class OS {
 				destroyHandle(child);
 			} else {
 				el.removeChild(child);
+				if (isIE) {
+					gcContainer.appendChild(child);
+					child = null;
+				}
 			}
+		}
+		if (isIE) {
+			gcContainer.innerHTML = "";
 		}
 	}
 
@@ -148,6 +171,7 @@ public class OS {
 		//Element el = (Element) handle;
 	}
 	
+	private static Element gcContainer;
 	private static Element invisibleContainer;
 	private static Object containers;
 	private static Element lineContainer;
@@ -183,6 +207,16 @@ public class OS {
 			blockContainer = el;
 		}
 	}
+	private static void initGC() {
+		if (isIE) {
+			if (gcContainer == null) {
+				Element gc = document.createElement("DIV");
+				gc.style.display = "none";
+				document.body.appendChild(gc);
+				gcContainer = gc;
+			}
+		}
+	}
 
 	public static void dispose() {
 		if (blockContainer != null) {
@@ -206,7 +240,10 @@ public class OS {
 			 * 	c[p] = null;
 			 * 	} catch (e) {}
 			 * }
-			 */ {}
+			 */ { c.toString(); }
+		}
+		if (gcContainer != null) {
+			gcContainer.parentNode.removeChild(gcContainer);
 		}
 	}
 
@@ -225,7 +262,8 @@ public class OS {
 		document.body.appendChild(el);
 		wScrollBar = el.offsetWidth - el.clientWidth;
 		hScrollBar = el.offsetHeight - el.clientHeight;
-		document.body.removeChild(el);
+		//document.body.removeChild(el);
+		destroyHandle(el);
 	}
 	
 	public static int getScrollBarWidth() {

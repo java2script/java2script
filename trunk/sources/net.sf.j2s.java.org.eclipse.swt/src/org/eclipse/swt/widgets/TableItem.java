@@ -694,8 +694,8 @@ protected void releaseHandle() {
 			hItemDefaultSelection = null;
 		}
 		OS.deepClearChildren(handle);
-		OS.destroyHandle(handle);
-		handle = null;
+//		OS.destroyHandle(handle);
+//		handle = null;
 	}
 	super.releaseHandle();
 }
@@ -1384,7 +1384,8 @@ void showSelection(boolean selected) {
 		Element tmpDiv = document.createElement("DIV");
 		tmpDiv.style.width = "1px"; // hasLayout
 		handle.childNodes[0].appendChild(tmpDiv);
-		handle.childNodes[0].removeChild(tmpDiv);
+		//handle.childNodes[0].removeChild(tmpDiv);
+		OS.destroyHandle(tmpDiv);
 	}
 }
 boolean isSelected(){

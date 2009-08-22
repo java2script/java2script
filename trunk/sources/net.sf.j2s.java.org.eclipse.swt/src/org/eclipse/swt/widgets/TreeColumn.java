@@ -378,8 +378,8 @@ public void pack () {
 protected void releaseHandle() {
 	if (handle != null) {
 		OS.deepClearChildren(handle);
-		OS.destroyHandle(handle);
-		handle = null;
+//		OS.destroyHandle(handle);
+//		handle = null;
 	}
 	super.releaseHandle();
 }

@@ -1699,6 +1699,7 @@ protected void releaseChild () {
 
 protected void releaseHandle () {
 	if (hOperaMouseUp != null || hControlMenuDetect != null) {
+		/* FIXME */
 		Element el = null;
 		if (this instanceof Composite) {
 			el = ((Composite) this).containerHandle();
@@ -1715,10 +1716,6 @@ protected void releaseHandle () {
 		}
 	}
 	super.releaseHandle ();
-	if (handle != null) {
-		OS.destroyHandle(handle);
-		handle = null;
-	}
 }
 
 void releaseWidget () {

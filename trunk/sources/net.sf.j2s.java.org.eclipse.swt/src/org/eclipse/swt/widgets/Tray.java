@@ -181,7 +181,8 @@ private void removeTrayLine () {
 			display.trayCorner.unbindEvents(cell);
 		}
 		allCells[index] = null;
-		document.body.removeChild (cell);
+		//document.body.removeChild (cell);
+		OS.destroyHandle(cell);
 	}
 	cellLines--;
 	for (int i = 0; i < cellLines; i++) {
@@ -206,9 +207,11 @@ private void removeTrayLine () {
 	if (!supportNotificationCornerFloat) {
 		return;
 	}
-	document.body.removeChild (allFloats[cellLines * 2 + 1]);
+	//document.body.removeChild (allFloats[cellLines * 2 + 1]);
+	OS.destroyHandle(allFloats[cellLines * 2 + 1]);
 	allFloats[cellLines * 2 + 1] = null;
-	document.body.removeChild (allFloats[cellLines * 2]);
+	//document.body.removeChild (allFloats[cellLines * 2]);
+	OS.destroyHandle(allFloats[cellLines * 2]);
 	allFloats[cellLines * 2] = null;
 }
 
@@ -300,7 +303,8 @@ void orderTrayItem (Element item, int order) {
 void removeTrayItem (Element item) {
 	for (int i = allItems.length - 1; i >= 0; i--) {
 		if (allItems[i] == item) {
-			document.body.removeChild (item);
+			//document.body.removeChild (item);
+			OS.destroyHandle(item);
 			for (int j = i; j < allItems.length - 1; j++) {
 				allItems[j] = allItems[j + 1];
 				orderTrayItem (allItems[j], j);
