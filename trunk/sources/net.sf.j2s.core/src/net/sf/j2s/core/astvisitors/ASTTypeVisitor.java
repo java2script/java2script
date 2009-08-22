@@ -152,6 +152,12 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 				}
 			}
 		}
+		String xhtml = "org.eclipse.swt.internal.xhtml.";
+		index = name.indexOf(xhtml);
+		if (index != -1) {
+			String after = name.substring(xhtml.length());
+			name = after;
+		}
 		swt = "org.eclipse.swt";
 		index = name.indexOf(swt);
 		if (index != -1) {
