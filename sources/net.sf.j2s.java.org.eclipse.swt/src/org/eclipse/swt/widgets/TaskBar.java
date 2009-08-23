@@ -40,9 +40,11 @@ public class TaskBar extends DesktopItem {
 		public Element textHandle;
 		public Element iconHandle;
 		public Object hShellItemClick;
+		public Object hTextSelection;
 
 		public TaskItem(Shell shell, String text, Element itemHandle,
-				Element textHandle, Element iconHandle, Object itemClick) {
+				Element textHandle, Element iconHandle,
+				Object itemClick, Object textSelection) {
 			super();
 			this.shell = shell;
 			this.text = text;
@@ -50,16 +52,19 @@ public class TaskBar extends DesktopItem {
 			this.textHandle = textHandle;
 			this.iconHandle = iconHandle;
 			this.hShellItemClick = itemClick;
+			this.hTextSelection = textSelection;
 		}
 
 		public void releaseFromBar(TaskBar bar) {
 			shell = null;
-			//itemHandle.onclick = null;
 			if (hShellItemClick != null) {
 				Clazz.removeEvent(itemHandle, "click", hShellItemClick);
 				hShellItemClick = null;
 			}
-			//itemHandle.onmouseover = null;
+			if (hTextSelection != null) {
+				Clazz.removeEvent(textHandle, "selectstart", hTextSelection);
+				hTextSelection = null;
+			}
 			if (bar.hBarMouesEnter != null) {
 				Clazz.removeEvent(itemHandle, "mouseover", bar.hBarMouesEnter);
 			}
@@ -172,7 +177,6 @@ public class TaskBar extends DesktopItem {
 //			}
 //
 //		};
-//		// si.onclick = ...
 //		Clazz.addEvent(si, "click", hNoReturn);
 		
 		if (barEl.style.display == "none") {
@@ -181,7 +185,6 @@ public class TaskBar extends DesktopItem {
 		if (barEl.className.indexOf("minimized") != -1) {
 			si.style.display = "none";
 		}
-		// si.onmouseover = this.barEl.onmouseover;
 		Clazz.addEvent(si, "mouseover", hBarMouesEnter);
 		
 		this.handle.appendChild(si);
@@ -190,18 +193,8 @@ public class TaskBar extends DesktopItem {
 		si.appendChild(icon);
 		Element div = document.createElement("DIV");
 		div.className = "shell-item-text";
-		/**
-		 * @j2sNative
-		 * if (typeof div.style.MozUserSelect != "undefined") {
-		 * 	div.style.MozUserSelect = "none";
-		 * } else if (typeof div.style.KhtmlUserSelect != "undefined") {
-		 * 	div.style.KhtmlUserSelect = "none";
-		 * } else {
-		 * 	div.onselectstart = function () {
-		 * 		return false;
-		 * 	};
-		 * }
-		 */ { }
+		
+		Object hNoTextSelection = OS.setTextSelection(div, false);
 		si.appendChild(div);
 		div.appendChild(document.createTextNode(text));
 		int w = OS.getStringStyledWidth(text, "shell-item-text", "") + 8;
@@ -235,10 +228,9 @@ public class TaskBar extends DesktopItem {
 				}
 
 			};
-			// si.onclick = ...
 			Clazz.addEvent(si, "click", hShellItemClick);
 		}
-		this.items[this.items.length] = new TaskItem(shell, text, si, div, icon, hShellItemClick);
+		this.items[this.items.length] = new TaskItem(shell, text, si, div, icon, hShellItemClick, hNoTextSelection);
 		
 		boolean supportShadow = false;
 		/**
@@ -274,6 +266,9 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public void removeShellItem(Shell shell) {
+		if (this.items == null) {
+			return;
+		}
 		for (int i = 0; i < this.items.length; i++) {
 			TaskItem item = this.items[i];
 			if (item != null && item.shell == shell) {
@@ -381,9 +376,7 @@ public class TaskBar extends DesktopItem {
 			if (item.shell != null) {
 				String text = item.shell.getText();
 				if (text != item.text) {
-					for (int j = item.textHandle.childNodes.length - 1; j >= 0; j--) {
-						item.textHandle.removeChild(item.textHandle.childNodes[j]);
-					}
+					OS.clearChildren(item.textHandle);
 					item.textHandle.appendChild(document.createTextNode(text));
 					item.itemHandle.title = text;
 					item.text = text;
@@ -486,7 +479,6 @@ public class TaskBar extends DesktopItem {
 			}
 
 		};
-		// this.barEl.onmouseover = ...
 		Clazz.addEvent(barEl, "mouseover", hBarMouesEnter);
 		
 		hBarClick = new RunnableCompatibility() {
@@ -506,7 +498,6 @@ public class TaskBar extends DesktopItem {
 			}
 
 		};
-		// this.barEl.onclick = ...
 		Clazz.addEvent(barEl, "click", hBarClick);
 		
 		hBarToggle = new RunnableCompatibility() {
@@ -516,7 +507,6 @@ public class TaskBar extends DesktopItem {
 			}
 
 		};
-		// this.barEl.ondblclick = .. 
 		Clazz.addEvent(barEl, "dblclick", hBarToggle);
 		
 		this.barEl.title = "Doubleclick to set taskbar auto-hide";

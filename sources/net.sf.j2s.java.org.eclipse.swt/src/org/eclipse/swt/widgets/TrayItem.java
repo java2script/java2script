@@ -24,7 +24,6 @@ import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Clazz;
-import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.HTMLEvent;
 
 /**
@@ -50,9 +49,8 @@ public class TrayItem extends Item {
 	String toolTipText;
 	boolean visible = true;
 	
-	Element handle;
+//	Element handle;
 	private Object hOperaMouseUp;
-	private Object hTrayMenu;
 	private Object hTraySelection;
 	
 /**
@@ -217,16 +215,20 @@ void createWidget () {
 	
 	hTraySelection = new RunnableCompatibility() {
 		public void run() {
-			postEvent (SWT.Selection);
+			//postEvent (SWT.Selection);
 			if (display.trayCorner != null) {
 				display.trayCorner.bringToTop(-1);
 			}
 		}
 	};
-	// handle.onclick = ...
 	Clazz.addEvent(handle, "click", hTraySelection);
-	
-	hTrayMenu = new RunnableCompatibility() {
+}
+
+void hookMenuDetect() {
+	if (hMenuDetect != null) {
+		return;
+	}
+	hMenuDetect = new RunnableCompatibility() {
 		public void run() {
 			Event ev = new Event();
 			ev.type = SWT.MenuDetect;
@@ -239,6 +241,7 @@ void createWidget () {
 				ev.x = evtHTML.x;
 				ev.y = evtHTML.y;
 				sendEvent(ev);
+				evtHTML.stopPropagation();
 				evtHTML.preventDefault();
 				toReturn(false);
 				return;
@@ -251,9 +254,7 @@ void createWidget () {
 			}
 		}
 	};
-	// handle.oncontextmenu = ...
-	Clazz.addEvent(handle, "contextmenu", hTrayMenu);
-	
+	Clazz.addEvent(handle, "contextmenu", hMenuDetect);
 	if (OS.isOpera) {
 		hOperaMouseUp = new RunnableCompatibility() {
 			public void run() {
@@ -276,7 +277,6 @@ void createWidget () {
 				}
 			}
 		};
-		// handle.onmouseup = ...
 		Clazz.addEvent(handle, "mouseup", hOperaMouseUp);
 	}
 }
@@ -383,6 +383,7 @@ void recreate () {
 
 protected void releaseChild () {
 	super.releaseChild ();
+	parent.removeTrayItem(handle);
 	parent.destroyItem (this);
 }
 
@@ -391,10 +392,6 @@ protected void releaseHandle() {
 		if (hTraySelection != null) {
 			Clazz.removeEvent(handle, "click", hTraySelection);
 			hTraySelection = null;
-		}
-		if (hTrayMenu != null) {
-			Clazz.removeEvent(handle, "contextmenu", hTrayMenu);
-			hTrayMenu = null;
 		}
 		if (hOperaMouseUp != null) {
 			Clazz.removeEvent(handle, "mouseup", hOperaMouseUp);

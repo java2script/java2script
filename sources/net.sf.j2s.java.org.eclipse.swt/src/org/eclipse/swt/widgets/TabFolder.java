@@ -358,12 +358,12 @@ void createItem (TabItem item, final int index) {
 	tab.style.left = width + "px";
 	items[index] = item;
 	items[index].handle = tab;
-//	tab.onclick = new RunnableCompatibility() {
+//	Clazz.addEvent(tab, "click", new RunnableCompatibility() {
 //		public void run() {
 //			setSelection(index);
 //			//sendEvent(SWT.Selection);
 //		}
-//	};
+//	});
 	/*
 	* Send a selection event when the item that is added becomes
 	* the new selection.  This only happens when the first item
@@ -461,7 +461,6 @@ protected void createHandle () {
 			}
 		}
 	};
-	// el.onclick = btnNextTab.onclick = ...
 	Clazz.addEvent(el, "click", hMoreNextClick);
 	Clazz.addEvent(btnNextTab, "click", hMoreNextClick);
 	
@@ -489,7 +488,6 @@ protected void createHandle () {
 			setSelection(getSelectionIndex(), false);
 		}
 	};
-	// el.onclick = btnPrevTab.onclick = ...
 	Clazz.addEvent(el, "click", hMorePrevClick);
 	Clazz.addEvent(btnPrevTab, "click", hMorePrevClick);
 	

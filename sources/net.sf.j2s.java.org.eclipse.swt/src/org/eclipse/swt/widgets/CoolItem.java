@@ -169,7 +169,6 @@ void configure() {
 			sendEvent(e);
 		}
 	};
-	// this.moreHandle.onclick = ...
 	Clazz.addEvent(moreHandle, "click", hArrowSelection);
 }
 
@@ -429,7 +428,7 @@ public void setControl (Control control) {
 	if (this.control != null && this.control.isDisposed ()) {
 		this.control = null;
 	}
-	Control oldControl = this.control, newControl = control;
+	Control /*oldControl = this.control, */newControl = control;
 	/*
 	int hwnd = parent.handle;
 	int hwndChild = newControl != null ? control.topHandle () : 0;

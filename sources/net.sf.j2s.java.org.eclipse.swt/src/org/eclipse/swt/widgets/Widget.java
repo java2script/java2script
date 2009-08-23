@@ -1023,28 +1023,28 @@ void hookMouseDoubleClick() {
 }
 /*
 void hookPaint() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Paint);
 		}
 	};
 }
 void hookMove() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Move);
 		}
 	};
 }
 void hookResize() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Resize);
 		}
 	};
 }
 void hookDispose() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Dispose);
 		}
@@ -1064,7 +1064,7 @@ void hookSelection() {
 }
 /*
 void hookDefaultSelection() {
-	handle.onclick = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.DefaultSelection);
 		}
@@ -1095,49 +1095,49 @@ void hookFocusOut() {
 }
 /*
 void hookExpand() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Expand);
 		}
 	};
 }
 void hookCollapse() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Collapse);
 		}
 	};
 }
 void hookIconify() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Iconify);
 		}
 	};
 }
 void hookDeiconify() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Deiconify);
 		}
 	};
 }
 void hookClose() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Close);
 		}
 	};
 }
 void hookShow() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Show);
 		}
 	};
 }
 void hookHide() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Hide);
 		}
@@ -1157,21 +1157,21 @@ void hookModify() {
 }
 /*
 void hookVerify() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Verify);
 		}
 	};
 }
 void hookActivate() {
-	handle.onfocus = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Activate);
 		}
 	};
 }
 void hookDeactivate() {
-	handle.onblur = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Deactivate);
 		}
@@ -1192,7 +1192,7 @@ void hookHelp() {
 void hookArm() {
 	// FIXME
 	/*
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.Arm);
 		}
@@ -1202,7 +1202,7 @@ void hookArm() {
 void hookTraverse() {
 	// FIXME
 	/*
-	handle.onkeypress = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			//if (TAB)
 			//sendEvent(SWT.Traverse);
@@ -1212,14 +1212,14 @@ void hookTraverse() {
 }
 /*
 void hookHardKeyDown() {
-	handle.onkeydown = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.HardKeyDown);
 		}
 	};
 }
 void hookHardKeyUp() {
-	handle.onkeyup = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.HardKeyUp);
 		}
@@ -1239,7 +1239,7 @@ void hookMenuDetect() {
 }
 /*
 void hookSetData() {
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.SetData);
 		}
@@ -1249,7 +1249,7 @@ void hookSetData() {
 void hookMouseWheel() {
 	// TODO:
 	/*
-	handle.onchange = new RunnableCompatibility() {
+	new RunnableCompatibility() {
 		public void run() {
 			sendEvent(SWT.MouseWheel);
 		}

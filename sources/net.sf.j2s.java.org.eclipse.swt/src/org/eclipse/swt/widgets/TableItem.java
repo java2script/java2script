@@ -146,11 +146,10 @@ private void configureItem() {
 				setChecked(!checked);
 			}
 		};
-		// check.onclick = ...
 		Clazz.addEvent(check, "click", hCheckSelection);
 	}
 	
-//	this.handle.onkeydown = new RunnableCompatibility() {
+//	Clazz.addEvent(this.handle, "keydown", new RunnableCompatibility() {
 //		public void run() {
 //			HTMLEvent evt = (HTMLEvent) getEvent();
 //			int index = parent.getSelectionIndex();
@@ -164,7 +163,7 @@ private void configureItem() {
 //				}
 //			}
 //		}
-//	};
+//	});
 
 	
 	hItemSelection = new RunnableCompatibility() {
@@ -189,7 +188,6 @@ private void configureItem() {
 			toReturn(false);
 		}
 	};
-	// this.handle.onclick = ...
 	Clazz.addEvent(handle, "click", hItemSelection);
 	
 	hItemDefaultSelection = new RunnableCompatibility(){
@@ -209,7 +207,6 @@ private void configureItem() {
 			toReturn(false);					
 		}
 	};
-	// this.handle.ondblclick = ...
 	Clazz.addEvent(handle, "dblclick", hItemDefaultSelection);
 }
 
@@ -734,7 +731,7 @@ public void setBackground (Color color) {
 	if (color != null && color.isDisposed ()) {
 		SWT.error (SWT.ERROR_INVALID_ARGUMENT);
 	}
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
 //		parent.customDraw = true;
 //		pixel = color.handle;
@@ -973,7 +970,7 @@ public void setForeground (Color color){
 	if (color != null && color.isDisposed ()) {
 		SWT.error (SWT.ERROR_INVALID_ARGUMENT);
 	}
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
 //		parent.customDraw = true;
 //		pixel = color.handle;
@@ -1009,7 +1006,7 @@ public void setForeground (int index, Color color){
 	}
 	int count = Math.max (1, parent.getColumnCount ());
 	if (0 > index || index > count - 1) return;
-	int pixel = -1;
+//	int pixel = -1;
 	if (color != null) {
 //		parent.customDraw = true;
 //		pixel = color.handle;
@@ -1291,7 +1288,7 @@ public void setText (int index, String string) {
 //		Element check = document.createElement("INPUT");
 //		check.type = "checkbox";
 //		el.appendChild(check);
-//		check.onclick = new RunnableCompatibility() {
+//		Clazz.addEvent(check, "click", new RunnableCompatibility() {
 //			public void run() {
 //				Event e = new Event();
 //				e.display = display;
@@ -1301,7 +1298,7 @@ public void setText (int index, String string) {
 //				e.widget = TableItem.this;
 //				parent.sendEvent(e);
 //			}
-//		};
+//		});
 //	}
 //	
 //	Element text = document.createElement("DIV");
@@ -1309,7 +1306,7 @@ public void setText (int index, String string) {
 //	text.className = "table-item-cell-text-default";
 //	text.appendChild(document.createTextNode(string));
 //	if ((parent.style & SWT.FULL_SELECTION) != 0 || index == 0) {
-//		text.onclick = new RunnableCompatibility() {
+//		Clazz.addEvent(text, "click", new RunnableCompatibility() {
 //			public void run() {
 ////				Element element = handle.childNodes[0].childNodes[0].childNodes[1];
 ////				element.className = "tree-item-text-selected";
@@ -1324,8 +1321,8 @@ public void setText (int index, String string) {
 //				parent.sendEvent(e);
 //				toReturn(false);
 //			}
-//		};
-//		text.ondblclick = new RunnableCompatibility(){
+//		});
+//		Clazz.addEvent(text, "dblclick", new RunnableCompatibility(){
 //			public void run(){
 //				HTMLEvent evt = (HTMLEvent) getEvent();
 //				parent.toggleSelection(TableItem.this, evt.ctrlKey, evt.shiftKey);
@@ -1338,7 +1335,7 @@ public void setText (int index, String string) {
 //				parent.sendEvent(e);
 //				toReturn(false);					
 //			}
-//		};
+//		});
 //	}
 
 //		tbodyTD.style.overflow = "hidden";
@@ -1384,7 +1381,6 @@ void showSelection(boolean selected) {
 		Element tmpDiv = document.createElement("DIV");
 		tmpDiv.style.width = "1px"; // hasLayout
 		handle.childNodes[0].appendChild(tmpDiv);
-		//handle.childNodes[0].removeChild(tmpDiv);
 		OS.destroyHandle(tmpDiv);
 	}
 }

@@ -272,7 +272,6 @@ void configureItem() {
 					toggleExpandStatus();
 				}
 			};
-			// hAnchor.onclick = ...
 			Clazz.addEvent(hAnchor, "click", hAnchorToggle);
 			break;
 		}
@@ -289,7 +288,6 @@ void configureItem() {
 				parent.sendEvent(e);
 			}
 		};
-		// checkElement.onclick = ...
 		Clazz.addEvent(checkElement, "click", hCheckSelection);
 	}
 	Element text = innerChildren[innerChildren.length - 1];
@@ -307,7 +305,6 @@ void configureItem() {
 			toReturn(false);
 		}
 	};
-	// text.onclick = ...
 	Clazz.addEvent(text, "click", hTextSelection);
 	
 	hTextDefaultSelection = new RunnableCompatibility() {
@@ -331,25 +328,9 @@ void configureItem() {
 			toReturn(false);
 		}
 	};
-	// text.ondblclick = ...
 	Clazz.addEvent(text, "dblclick", hTextDefaultSelection);
 	
-	hNoTextSelection = new RunnableCompatibility() {
-		public void run() {
-			toReturn(false);
-		}
-	};
-	// text.onselectstart = ...
-	Clazz.addEvent(text, "selectstart", hNoTextSelection);
-	
-	/**
-	 * @j2sNative
-	 * if (typeof text.style.MozUserSelect != "undefined") {
-	 * 	text.style.MozUserSelect = "none";
-	 * } else if (typeof text.style.KhtmlUserSelect != "undefined") {
-	 * 	text.style.KhtmlUserSelect = "none";
-	 * }
-	 */ {}
+	hNoTextSelection = OS.setTextSelection(text, false);
 }
 static TreeItem checkNull (TreeItem item) {
 	if (item == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
@@ -1717,7 +1698,6 @@ void showSelection(boolean selected) {
 		Element innerEl = tempElem.childNodes[tempElem.childNodes.length-1].childNodes[0];
 		innerEl.style.hasLayout = true;
 		innerEl.appendChild(tmpDiv);
-		//innerEl.removeChild(tmpDiv);
 		OS.destroyHandle(tmpDiv);
 		innerEl.style.display = "inline-block";
 //		handle.style.hasLayout = true;

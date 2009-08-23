@@ -13,7 +13,7 @@ package org.eclipse.swt.widgets;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
+//import org.eclipse.swt.graphics.Rectangle;
 
 public class ImageList {
 	int handle, style, refCount;
@@ -76,7 +76,7 @@ public int add (Image image) {
 		index++;
 	}
 	if (count == 0) {
-		Rectangle rect = image.getBounds ();
+		//Rectangle rect = image.getBounds ();
 		// TODO:
 		//OS.ImageList_SetIconSize (handle, rect.width, rect.height);
 	}

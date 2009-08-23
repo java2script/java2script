@@ -824,7 +824,6 @@ protected void createHandle () {
 			}
 		}
 	};
-	// handle.onkeydown = ...
 	Clazz.addEvent(handle, "keydown", hTableKeyDown);
 }
 
@@ -2173,8 +2172,8 @@ void removeItems (int[] indices){
 	}
 	int count = items.length;
 	if ( tbody == null ) return;
-	int last = -1;
-	TableItem[] newItems = new TableItem[items.length - indices.length];
+//	int last = -1;
+//	TableItem[] newItems = new TableItem[items.length - indices.length];
 	for(int i = 0 ; i < indices.length; i++){
 		int index = i;
 		if(index < 0 || index >= items.length) return;
@@ -2183,9 +2182,8 @@ void removeItems (int[] indices){
 		if (item != null) {
 			System.arraycopy (items, index + 1, items, index, --count - index);
 			items [count] = null;
-			last = index;
+//			last = index;
 		}
-		//tbody.removeChild(item.handle);
 		OS.destroyHandle(item.handle);
 	}
 }
@@ -2347,7 +2345,7 @@ public void remove (int [] indices) {
 		return;//error (SWT.ERROR_INVALID_RANGE);
 	}
 	deselect(indices);
-	TableItem[] itemsToBeRemoved = new TableItem[indices.length];
+//	TableItem[] itemsToBeRemoved = new TableItem[indices.length];
 	TableItem[] newItems = new TableItem[count-1];
 	int last = -1;
 	for (int i=0; i<newIndices.length; i++) {
@@ -2355,7 +2353,6 @@ public void remove (int [] indices) {
 		if (index != last) {
 			TableItem item = items [index];
 			if (item != null) {
-//				tbody.removeChild(item.handle);
 				item.releaseHandle();
 				System.arraycopy (items, 0, newItems, 0, index);
 				System.arraycopy (items, index + 1, newItems, index, --count - index);
@@ -2464,7 +2461,6 @@ public void remove (int start, int end) {
 	while (index <= end) {
 		TableItem item = items [index];
 		if (item != null && !item.isDisposed ()){ 
-//			tbody.removeChild(item.handle);
 			item.releaseHandle();
 		}
 		index++;
@@ -2955,8 +2951,8 @@ void setCheckboxImageListColor () {
 
 void setCheckboxImageList (int width, int height) {
 	if ((style & SWT.CHECK) == 0) return;
-	int count = 4;
 	/*
+	int count = 4;
 	int flags = ImageList.COLOR_FLAGS;
 	if ((style & SWT.RIGHT_TO_LEFT) != 0) flags |= OS.ILC_MIRROR;
 	if (OS.COMCTL32_MAJOR < 6 || !OS.IsAppThemed ()) flags |= OS.ILC_MASK;

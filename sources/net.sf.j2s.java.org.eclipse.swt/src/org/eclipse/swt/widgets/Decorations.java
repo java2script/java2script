@@ -145,6 +145,7 @@ public class Decorations extends Canvas {
 	Object hMaxClick;
 	private Object hCloseClick;
 	private Object hTitleBarClick;
+	private Object hNoTextSelection;
 	private DragAndDrop dnd;
 
 /**
@@ -755,11 +756,11 @@ protected void createHandle() {
 		dnd.addDragListener(shellFrameDND);
 		dnd.bind(handle);
 	}
-//	contentHandle.onclick = new RunnableCompatibility(){
+//	Clazz.addEvent(contentHandle, "click", new RunnableCompatibility(){
 //		public void run(){
 //			OS.SetFocus(contentHandle); //contentHandle.focus();
 //		}
-//	};
+//	});
 	hContentKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
@@ -795,7 +796,6 @@ protected void createHandle() {
 			}
 		}
 	}; 
-	// contentHandle.onkeydown = ...
 	Clazz.addEvent(contentHandle, "keydown", hContentKeyDown);
 }
 
@@ -1359,6 +1359,10 @@ protected void releaseHandle() {
 			Clazz.removeEvent(titleBar, "click", hTitleBarClick);
 			hTitleBarClick = null;
 		}
+		if (hNoTextSelection != null) {
+			Clazz.removeEvent(titleBar, "selectstart", hNoTextSelection);
+			hNoTextSelection = null;
+		}
 		OS.destroyHandle(titleBar);
 		titleBar = null;
 	}
@@ -1801,25 +1805,12 @@ public void setMaximized (boolean maximized) {
 			lastClientAreaCSSText = node.style.cssText;
 			lastBodyCSSText = b.style.cssText;
 			
-			//lastClientAreaOnScroll = node.onscroll;
-			
 			node.style.border = "0 none transparent";
 			node.style.overflow = "hidden";
 			b.style.margin = "0";
 			b.style.padding = "0";
 			node.scrollLeft = 0;
 			node.scrollTop = 0;
-			
-//			/**
-//			 * TODO: IE does not trigger onscroll when overflow is hidden! 
-//			 * It seems there is no needs for overriding this onscroll.
-//			 * 
-//			 * @j2sNative
-//			 * node.onscroll = function (e) {
-//			 * 	this.scrollLeft = 0;
-//			 * 	this.scrollTop = 0;
-//			 * };
-//			 */ { }
 		}
 //		boolean toUpdateMax = false;
 		if (contentHandle != null) {
@@ -1901,7 +1892,6 @@ public void setMaximized (boolean maximized) {
 			}
 			node.scrollLeft = lastBodyScrollLeft;
 			node.scrollTop = lastBodyScrollTop;
-//			node.onscroll = lastClientAreaOnScroll;
 		}
 	}
 }
@@ -2208,16 +2198,7 @@ void setSystemMenu () {
 	*/
 	titleBar = document.createElement("DIV");
 	titleBar.className = "shell-title-bar";
-	/**
-	 * @j2sNative
-	if (typeof this.titleBar.style.MozUserSelect != "undefined") {
-		this.titleBar.style.MozUserSelect = "none";
-	} else if (typeof this.titleBar.style.KhtmlUserSelect != "undefined") {
-		this.titleBar.style.KhtmlUserSelect = "none";
-	} else {
-		this.titleBar.onselectstart = function () { return false; };
-	}
-	 */ {}
+	hNoTextSelection = OS.setTextSelection(this.titleBar, false);
 
 	if ((style & SWT.TOOL) == 0 && (style & (SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		shellIcon = document.createElement("DIV");
@@ -2233,7 +2214,6 @@ void setSystemMenu () {
 				}
 			}
 		};
-		// shellIcon.onclick = ...
 		Clazz.addEvent(shellIcon, "click", hIconClick);
 	}
 
@@ -2254,7 +2234,6 @@ void setSystemMenu () {
 				new HTMLEventWrapper(getEvent()).stopPropagation();
 			}
 		};
-		// shellMin.onclick = ...
 		Clazz.addEvent(shellMin, "click", hMinClick);
 	}
 
@@ -2278,7 +2257,6 @@ void setSystemMenu () {
 				});
 			}
 		};
-		// shellMax.onclick = ...
 		Clazz.addEvent(shellMax, "click", hMaxClick);
 	}
 
@@ -2299,7 +2277,6 @@ void setSystemMenu () {
 				toReturn(false);
 			}
 		};
-		// shellClose.onclick = ...
 		Clazz.addEvent(shellClose, "click", hCloseClick);
 	}
 	shellTitle = document.createElement("DIV");
@@ -2317,7 +2294,6 @@ void setSystemMenu () {
 	 
 	titleBar.appendChild(shellTitle);
 	if ((style & SWT.MAX) != 0) {
-		//titleBar.ondblclick = shellMax.onclick;
 		Clazz.addEvent(titleBar, "dblclick", hMaxClick);
 	}
 
@@ -2338,7 +2314,6 @@ void setSystemMenu () {
 			toReturn(true);
 		}
 	};
-	// titleBar.onclick = ...
 	Clazz.addEvent(titleBar, "click", hTitleBarClick);
 	
 	window.currentTopZIndex += 2;

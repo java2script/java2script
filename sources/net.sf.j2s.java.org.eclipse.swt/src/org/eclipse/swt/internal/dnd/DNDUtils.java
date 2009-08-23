@@ -69,7 +69,6 @@ public class DNDUtils {
 	public static boolean onmousemove(Object e, DragAndDrop oThis) {
 		HTMLEventWrapper evt = new HTMLEventWrapper(e);
 		if (!evt.leftButtonHold) {
-			//oThis.element.onmouseup (e); /* reset */
 			if (oThis.status != 0) {
 				DragEvent dndEvt = new DragEvent (evt, oThis.element, 
 						oThis.startX, oThis.startY);
@@ -98,15 +97,26 @@ public class DNDUtils {
 		if (!oThis.checkDraggable (evt)) {
 			return true;
 		}
-		document.onselectstart = DNDUtils.onselectstart;
-		//evt.target.onselectstart = DNDUtils.onselectstart;
-		Clazz.addEvent(evt.target, "selectstart", DNDUtils.onselectstart);
+		if (oThis.hSelectStart == null) {
+			oThis.hSelectStart = DNDUtils.onselectstart;
+			Clazz.addEvent(document.class, "selectstart", oThis.hSelectStart);
+			Clazz.addEvent(evt.target, "selectstart", oThis.hSelectStart);
+		}
 		
 		oThis.startX = evt.x;
 		oThis.startY = evt.y;
-		document.onmousemove = DNDUtils.bindFunctionWith (DNDUtils.onmousemove, oThis);
-		document.onkeyup = DNDUtils.bindFunctionWith (DNDUtils.onkeyup, oThis);
-		document.onmouseup = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, oThis); //oThis.element.onmouseup;
+		if (oThis.hMouseMove == null) {
+			oThis.hMouseMove = DNDUtils.bindFunctionWith (DNDUtils.onmousemove, oThis);
+			Clazz.addEvent(document.class, "mousemove", oThis.hMouseMove);
+		}
+		if (oThis.hKeyUp == null) {
+			oThis.hKeyUp = DNDUtils.bindFunctionWith (DNDUtils.onkeyup, oThis);
+			Clazz.addEvent(document.class, "keyup", oThis.hKeyUp);
+		}
+		if (oThis.hMouseUp == null) {
+			oThis.hMouseUp = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, oThis);
+			Clazz.addEvent(document.class, "mouseup", oThis.hMouseUp);
+		}
 		boolean isOpera = false;
 		/**
 		 * @j2sNative

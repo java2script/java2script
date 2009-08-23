@@ -90,7 +90,6 @@ public class QuickLaunch extends DesktopItem {
 			}
 		
 		};
-		// this.handle.onmouseover = ...
 		Clazz.addEvent(handle, "mouseover", hLaunchMouseEnter);
 		hLaunchClick = new RunnableCompatibility(){
 		
@@ -109,7 +108,6 @@ public class QuickLaunch extends DesktopItem {
 			}
 		
 		};
-		// this.handle.onclick = ...
 		Clazz.addEvent(handle, "click", hLaunchClick);
 		
 		this.handle.title = "Doubleclick to hide shortcuts";
@@ -120,7 +118,6 @@ public class QuickLaunch extends DesktopItem {
 			}
 		
 		};
-		// this.handle.ondblclick = ...
 		Clazz.addEvent(handle, "dblclick", hLaunchToggle);
 		
 		boolean supportShadow = false;
@@ -162,24 +159,6 @@ public class QuickLaunch extends DesktopItem {
 					&& child.className.indexOf("alaa") != -1
 					&& child.className.indexOf("ignored") == -1) {
 				existed = true;
-				Object js = child.href;
-				if (js == "#")
-				/**
-				 * @j2sNative
-				 * js = child.onclick;
-				 */
-				{
-					// js = child.onclick;
-				}
-				/*if (typeof js == "string") {
-					if (js.indexOf ("javascript:") == 0) {
-						js = js.substring (11);
-					}
-					js = decodeURIComponent(js);
-				}
-				var fun = null;
-				eval ("fun = function () {" + js + "};");
-				*/
 				String icon = null;
 				for (int j = 0; j < child.childNodes.length; j++) {
 					Element item = child.childNodes[j];
@@ -198,9 +177,8 @@ public class QuickLaunch extends DesktopItem {
 						break;
 					}
 				}
-				Element shortcut = this.addShortcut(child.text != null ? child.text : child.innerText, icon, js);
+				Element shortcut = this.addShortcut(child.text != null ? child.text : child.innerText, icon, child.href);
 				String id = child.id;
-				//child.parentNode.removeChild(child);
 				OS.destroyHandle(child);
 				if (id != null && id.length() > 0) {
 					shortcut.id = id;
@@ -271,7 +249,7 @@ public class QuickLaunch extends DesktopItem {
 			shortcutItems[i].style.left = (barOffset + 20 + 10 + i * 60) + "px";
 		}
 	}
-	public Element addShortcut(String name, String icon, Object clickFun) {
+	public Element addShortcut(String name, String icon, String href) {
 		/**
 		 * @j2sNative
 		if (window["swt.shortcut.bar"] == false) {
@@ -298,36 +276,15 @@ public class QuickLaunch extends DesktopItem {
 					itemDiv.style.backgroundImage = "url('" + icon + "')";
 //				}
 			}
-			/**
-			 * @j2sNative
-			if (typeof clickFun == "string") {
-				itemDiv.href = clickFun;
-			} else if (clickFun != null) {
-				itemDiv.href = "#";
-				itemDiv.onclick = (function (f) {
-						return function () {
-							f();
-							return false;
-						};
-				})(clickFun);
-			}
-			 */ {}
+			itemDiv.href = href;
 		} else {
 			if (icon != null && icon.length() != 0) {
 				itemDiv.style.backgroundImage = "url('" + icon + "')";
 			}
-			/**
-			 * @j2sNative
-			if (typeof clickFun == "string") {
-				itemDiv.href = clickFun;
-			} else if (clickFun != null) {
-				itemDiv.onclick = clickFun;
-			}
-			 */ {}
+			itemDiv.href = href;
 		}
 		itemDiv.title = name;
 		document.body.appendChild(itemDiv);
-		// itemDiv.onmouseover = this.handle.onmouseover;
 		Clazz.addEvent(itemDiv, "mouseover", hLaunchMouseEnter);
 		
 		boolean supportShadow = false;

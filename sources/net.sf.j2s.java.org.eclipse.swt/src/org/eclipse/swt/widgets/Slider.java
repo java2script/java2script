@@ -248,7 +248,6 @@ protected void createWidget() {
 			sendEvent (SWT.Selection, event);
 		}
 	};
-	// decBtnHandle.onclick = ...
 	Clazz.addEvent(decBtnHandle, "click", hDecreaseClick);
 
 	incBtnHandle = document.createElement("BUTTON");
@@ -274,7 +273,6 @@ protected void createWidget() {
 			sendEvent (SWT.Selection, event);
 		}
 	};
-	// incBtnHandle.onclick = ...
 	Clazz.addEvent(incBtnHandle, "click", hIncreaseClick);
 
 	thumbHandle = document.createElement("BUTTON");

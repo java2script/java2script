@@ -49,7 +49,11 @@ $WTC$$.trackCSS = function (clazzName) {
 				var links = head.getElementsByTagName ("LINK");
 				for (var i = 0; i < links.length; i++) {
 					if (links[i].id == "c$$." + name) {
-						head.removeChild (links[i]);
+						if (window["O$"] != null && O$.destroyHandle != null) {
+							O$.destroyHandle (links[i]);
+						} else {
+							head.removeChild (links[i]);
+						}
 						break;
 					}
 				}
@@ -82,7 +86,11 @@ $WTC$$.removeTesting = function (clazzName) {
 		if (els[i].className == cssClassName) {
 			var el = els[i];
 			if (el.parentNode != null) {
-				el.parentNode.removeChild (el);
+				if (window["O$"] != null && O$.destroyHandle != null) {
+					O$.destroyHandle (el);
+				} else {
+					el.parentNode.removeChild (el);
+				}
 			}
 			for (var j = i; j < els.length - 1; j++) {
 				els[j] = els[j + 1];
@@ -104,7 +112,11 @@ $WTC$$.globalChecking = function () {
 			$WTC$$.cssLoaded (el.className);
 			window.clearTimeout ($WTC$$.timeouts[el.className]);
 			if (el.parentNode != null) {
-				el.parentNode.removeChild (el);
+				if (window["O$"] != null && O$.destroyHandle != null) {
+					O$.destroyHandle (el);
+				} else {
+					el.parentNode.removeChild (el);
+				}
 			}
 			for (var j = i; j < els.length - 1; j++) {
 				els[j] = els[j + 1];

@@ -60,7 +60,7 @@ public class Menu extends Widget {
 	 * platforms and should never be accessed from application code.
 	 * </p>
 	 */
-	public Element handle;
+	//public Element handle;
 	
 	int x, y, hwndCB, id0, id1;
 	boolean hasLocation;
@@ -458,7 +458,7 @@ void createHandle () {
 				if (index != -1) {
 					MenuItem i = menuItems[index];
 					Element target = menuItems[index].handle;
-					if (i.isEnabled()/* && target.onclick != null*/)
+					if (i.isEnabled())
 					/**
 					 * @j2sNative
 					 * try {
@@ -469,9 +469,6 @@ void createHandle () {
 					 * 		clickEvent.initEvent("click", true, true);
 					 * 		target.dispatchEvent(clickEvent);
 					 * 	} catch (e) {
-					 * 		if (target.onclick != null) {
-					 * 			target.onclick (evt);
-					 * 		}
 					 * 	}
 					 * }
 					 */ { target.toString(); }
@@ -567,9 +564,6 @@ void createHandle () {
 						 * 		clickEvent.initEvent("click", true, true);
 						 * 		target.dispatchEvent(clickEvent);
 						 * 	} catch (e) {
-						 * 		if (target.onclick != null) {
-						 * 			target.onclick (evt);
-						 * 		}
 						 * 	}
 						 * }
 						 */ { target.toString(); }
@@ -580,7 +574,6 @@ void createHandle () {
 			currentIndex = index;
 		}
 	};
-	// btnFocus.onkeydown = ...
 	Clazz.addEvent(btnFocus, "keydown", hMenuKeyDown);
 	
 	hMenuBlur = new RunnableCompatibility() {
@@ -596,7 +589,6 @@ void createHandle () {
 			}
 		}
 	};
-	// btnFocus.onblur = ...
 	Clazz.addEvent(btnFocus, "blur", hMenuBlur);
 	
 	hMenuFocus = new RunnableCompatibility() {
@@ -604,7 +596,6 @@ void createHandle () {
 			lastFocusdTime = new Date().getTime();
 		}
 	};
-	// btnFocus.onfocus = ...
 	Clazz.addEvent(btnFocus, "focus", hMenuFocus);
 	
 	hMenuMouseDown = new RunnableCompatibility() {
@@ -612,7 +603,6 @@ void createHandle () {
 			lastFocusdTime = new Date().getTime();
 		}
 	};
-	// handle.onmousedown = ...
 	Clazz.addEvent(handle, "mousedown", hMenuMouseDown);
 	
 	if ((style & SWT.BAR) != 0) {
@@ -901,9 +891,17 @@ boolean isAccelerated(HTMLEvent keyEvent){
 				MenuItem item = (MenuItem) acceleratorTable[i+1];
 				/**
 				 * @j2sNative
-				 * item.handle.onclick();
-				 * 
-				 */{ item.toString(); }
+				 * try {
+				 * 	item.handle.click ();
+				 * } catch (e) {
+				 * 	try {
+				 * 		var clickEvent = document.createEvent("MouseEvents");
+				 * 		clickEvent.initEvent("click", true, true);
+				 * 		item.handle.dispatchEvent(clickEvent);
+				 * 	} catch (e) {
+				 * 	}
+				 * }
+				 */ { item.toString(); }
 			}
 		}
 	}
@@ -1537,6 +1535,8 @@ protected void releaseHandle () {
 			Clazz.removeEvent(btnFocus, "focus", hMenuFocus);
 			hMenuFocus = null;
 		}
+		OS.destroyHandle(btnFocus);
+		btnFocus = null;
 	}
 	if (handle != null) {
 		if (hMenuMouseDown != null) {

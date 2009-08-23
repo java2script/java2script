@@ -131,7 +131,6 @@ private void configure(final int index) {
 			parent.setSelection(index, true);
 		}
 	};
-	// textEl.onclick = ...
 	Clazz.addEvent(textEl, "click", hItemSelection);
 }
 

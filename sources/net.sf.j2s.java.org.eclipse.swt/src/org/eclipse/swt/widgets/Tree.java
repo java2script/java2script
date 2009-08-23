@@ -484,7 +484,6 @@ protected void createHandle () {
 			}
 		}
 	};
-	// handle.onkeydown = ...
 	Clazz.addEvent(handle, "keydown", hTreeKeyDown);
 }
 void setFocusIndex (int index) {
@@ -1005,11 +1004,11 @@ void createItem (TreeItem item, Object hParent, int index) {
 			anchorV.childNodes[1].className = item.parentItem.expandStatus ? "tree-anchor-h tree-anchor-minus" : "tree-anchor-h tree-anchor-plus";
 			// TODO: Verify toggling is correct or not
 //			final TreeItem ii = item.parentItem;
-//			anchorV.onclick = new RunnableCompatibility() {
+//			Clazz.addEvent(anchorV, "click", new RunnableCompatibility() {
 //				public void run() {
 //					ii.toggleExpandStatus();
 //				}
-//			};
+//			});
 		}
 	}
 	boolean visible = true;

@@ -14,6 +14,7 @@ package org.eclipse.swt.internal.browser;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -59,6 +60,8 @@ public class OS {
 	
 	/* Record Caps Lock status */
 	public static boolean isCapsLockOn = false;
+	
+	public static Object noReturnCallback;
 
 	/**
 	 * @j2sNative
@@ -82,6 +85,7 @@ public class OS {
 	os.isIE70 = os.isIE && dav.indexOf("MSIE 7.0")>=0;
 	os.isIE80 = os.isIE && dav.indexOf("MSIE 8.0")>=0;
 	os.isIENeedPNGFix = os.isIE50 || os.isIE55 || os.isIE60;
+	os.noReturnCallback = os.noReturnCallbackFunction;
 	 */
 	static {
 		
@@ -91,22 +95,6 @@ public class OS {
 			return ;
 		}
 		Element el = (Element) handle;
-		el.onblur = null;
-		el.onchange = null;
-		el.onclick = null;
-		el.oncontextmenu = null;
-		el.ondblclick = null;
-		el.onfocus = null;
-		el.onkeydown = null;
-		el.onkeypress = null;
-		el.onkeyup = null;
-		el.onmousedown = null;
-		el.onmousemove = null;
-		el.onmouseout = null;
-		el.onmouseover = null;
-		el.onmouseup = null;
-		el.onselectchange = null;
-		el.onselectstart = null;
 		if (el.parentNode != null) {
 			try {
 				el.parentNode.removeChild (el);
@@ -212,6 +200,7 @@ public class OS {
 			if (gcContainer == null) {
 				Element gc = document.createElement("DIV");
 				gc.style.display = "none";
+				gc.id = "gc";
 				document.body.appendChild(gc);
 				gcContainer = gc;
 			}
@@ -220,14 +209,17 @@ public class OS {
 
 	public static void dispose() {
 		if (blockContainer != null) {
+			deepClearChildren(blockContainer);
 			destroyHandle(blockContainer);
 			blockContainer = null;
 		}
 		if (lineContainer != null) {
+			deepClearChildren(lineContainer);
 			destroyHandle(lineContainer);
 			lineContainer = null;
 		}
 		if (invisibleContainer != null) {
+			deepClearChildren(invisibleContainer);
 			destroyHandle(invisibleContainer);
 			invisibleContainer = null;
 		}
@@ -238,12 +230,14 @@ public class OS {
 			 * for (var p in c) {
 			 * 	try {
 			 * 	c[p] = null;
+			 * 	delete c[p];
 			 * 	} catch (e) {}
 			 * }
 			 */ { c.toString(); }
 		}
 		if (gcContainer != null) {
 			gcContainer.parentNode.removeChild(gcContainer);
+			gcContainer = null;
 		}
 	}
 
@@ -335,7 +329,7 @@ public class OS {
 		} else {
 			c = s.split (/\r\n|\r|\n/g);
 		}
-		 */ {}
+		 */ { lines = new String[0]; }
 		for (int i = 0; i < lines.length; i++) {
 			if (i > 0) {
 				handle.appendChild (document.createElement ("BR"));
@@ -975,7 +969,7 @@ public class OS {
 				/**
 				 * @j2sNative
 				 * img = O$.imageCaches[image.url];
-				 */ {}
+				 */ { imageCaches.toString(); }
 				if (img == null) {
 					img = new org.eclipse.swt.internal.xhtml.Image ();
 					img.src = image.url;
@@ -1086,10 +1080,22 @@ public class OS {
 	 * @j2sNative
 	 * if (O$.isMozilla || O$.isFirefox) {
 	 * 	handle.style.MozUserSelect = enabled ? "all" : "none";
+	 * } else if (typeof handle.style.KhtmlUserSelect != "undefined") {
+	 * 	handle.style.KhtmlUserSelect = "none";
 	 * } else if (typeof handle.onselectstart != "undefined") {
-	 * 	handle.onselectstart = enabled ? null : function () { return false; };
+	 * 	handle.onselectstart = enabled ? null : O$.noReturnCallbackFunction;
+	 * 	return O$.noReturnCallbackFunction;
 	 * }
+	 * return null;
 	 */
-	public static void setTextSelection(Element handle, boolean enabled) {
+	public static Object setTextSelection(Element handle, boolean enabled) {
+		return null;
+	}
+	
+	static boolean noReturnCallbackFunction(Object e) {
+		HTMLEventWrapper evt = new HTMLEventWrapper (e);
+		evt.preventDefault ();
+		evt.stopPropagation ();
+		return false;
 	}
 }

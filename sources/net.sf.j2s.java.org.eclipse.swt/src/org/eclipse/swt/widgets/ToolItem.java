@@ -179,7 +179,6 @@ void configureItem() {
 			*/
 		}
 	};
-	// handle.onclick = handle.ondblclick = hItemSelection;
 	Clazz.addEvent(handle, "click", hItemSelection);
 	Clazz.addEvent(handle, "dblclick", hItemSelection);
 	
@@ -196,7 +195,6 @@ void configureItem() {
 					OS.addCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
 			};
-			// handle.onmousedown = arrow.onmousedown = dropDownEl.onmousedown = ...
 			Clazz.addEvent(handle, "mousedown", hItemMouseDown);
 			Clazz.addEvent(arrow, "mousedown", hItemMouseDown);
 			Clazz.addEvent(dropDownEl, "mousedown", hItemMouseDown);
@@ -211,7 +209,6 @@ void configureItem() {
 					OS.removeCSSClass(dropDownEl, "tool-item-drop-down-button-down");
 				}
 			};
-			// handle.onmouseout = handle.onmouseup = arrow.onmouseout = arrow.onmouseup = dropDownEl.onmouseup = dropDownEl.onmouseout = ...
 			Clazz.addEvent(handle, "mouseup", hItemMouseUp);
 			Clazz.addEvent(arrow, "mouseup", hItemMouseUp);
 			Clazz.addEvent(dropDownEl, "mouseup", hItemMouseUp);
@@ -240,7 +237,6 @@ void configureItem() {
 					postEvent (SWT.Selection, event);
 				}
 			};
-			// arrow.onclick = dropDownEl.onclick = 
 			Clazz.addEvent(arrow, "click", hArrowSelection);
 			Clazz.addEvent(dropDownEl, "click", hArrowSelection);
 		} else {
@@ -253,7 +249,6 @@ void configureItem() {
 					OS.addCSSClass(handle, "tool-item-down");
 				}
 			};
-			// handle.onmousedown = ...
 			Clazz.addEvent(handle, "mousedown", hToolMouseDown);
 			
 			hToolMouseUp = new RunnableCompatibility() {
@@ -265,7 +260,6 @@ void configureItem() {
 					OS.removeCSSClass(handle, "tool-item-down");
 				}
 			};
-			// handle.onmouseout = handle.onmouseup = 
 			Clazz.addEvent(handle, "mouseup", hToolMouseUp);
 			Clazz.addEvent(handle, "mouseout", hToolMouseUp);
 		}

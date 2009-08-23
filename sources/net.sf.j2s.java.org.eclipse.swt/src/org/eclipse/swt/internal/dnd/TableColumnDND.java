@@ -27,6 +27,8 @@ import org.eclipse.swt.internal.xhtml.document;
 public class TableColumnDND extends DragAdapter {
 	protected int sourceX = 0;
 	protected Element thumb;
+	Object hSelectStart;
+	
 	public boolean dragBegan(DragEvent e) {
 		thumb = document.createElement ("DIV");
 		String cssName = e.sourceElement.className;
@@ -38,8 +40,10 @@ public class TableColumnDND extends DragAdapter {
 		thumb.style.top = e.sourceElement.style.top;
 		thumb.style.width = e.sourceElement.style.width;
 		thumb.style.height = e.sourceElement.style.height;
-		//thumb.onselectstart = DNDUtils.onselectstart;
-		Clazz.addEvent(thumb, "selectstart", DNDUtils.onselectstart);
+		if (hSelectStart == null) {
+			hSelectStart = DNDUtils.onselectstart;
+			Clazz.addEvent(thumb, "selectstart", hSelectStart);
+		}
 		if (e.sourceElement.nextSibling != null) {
 			e.sourceElement.parentNode.insertBefore (thumb, 
 					e.sourceElement.nextSibling);
@@ -65,7 +69,10 @@ public class TableColumnDND extends DragAdapter {
 
 	protected void clean() {
 		thumb.style.display = "none";
-		Clazz.removeEvent(thumb, "selectstart", DNDUtils.onselectstart);
+		if (hSelectStart != null) {
+			Clazz.removeEvent(thumb, "selectstart", hSelectStart);
+			hSelectStart = null;
+		}
 		document.body.style.cursor = "auto";
 		//thumb.parentNode.removeChild(thumb);
 		OS.destroyHandle(thumb);

@@ -938,10 +938,10 @@ void setDefaultFont () {
 
 void setDisabledImageList (ImageList imageList) {
 	if (disabledImageList == imageList) return;
-	int hImageList = 0;
-	if ((disabledImageList = imageList) != null) {
-		hImageList = disabledImageList.getHandle ();
-	}
+//	int hImageList = 0;
+//	if ((disabledImageList = imageList) != null) {
+//		hImageList = disabledImageList.getHandle ();
+//	}
 //	OS.SendMessage (handle, OS.TB_SETDISABLEDIMAGELIST, 0, hImageList);
 }
 
@@ -970,19 +970,19 @@ public void setFont (Font font) {
 
 void setHotImageList (ImageList imageList) {
 	if (hotImageList == imageList) return;
-	int hImageList = 0;
-	if ((hotImageList = imageList) != null) {
-		hImageList = hotImageList.getHandle ();
-	}
+//	int hImageList = 0;
+//	if ((hotImageList = imageList) != null) {
+//		hImageList = hotImageList.getHandle ();
+//	}
 //	OS.SendMessage (handle, OS.TB_SETHOTIMAGELIST, 0, hImageList);
 }
 
 void setImageList (ImageList imageList) {
 	if (this.imageList == imageList) return;
-	int hImageList = 0;
-	if ((this.imageList = imageList) != null) {
-		hImageList = imageList.getHandle ();
-	}
+//	int hImageList = 0;
+//	if ((this.imageList = imageList) != null) {
+//		hImageList = imageList.getHandle ();
+//	}
 //	OS.SendMessage (handle, OS.TB_SETIMAGELIST, 0, hImageList);
 }
 

@@ -17,12 +17,8 @@ import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.dnd.DragAndDrop;
-import org.eclipse.swt.internal.dnd.DragEvent;
-import org.eclipse.swt.internal.dnd.TableColumnDND;
 import org.eclipse.swt.internal.xhtml.Clazz;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
@@ -43,7 +39,7 @@ import org.eclipse.swt.internal.xhtml.document;
  */
 public class TableColumn extends Item {
 //	Element handle;
-	private int lastX, lastY, colWidth;
+	private int /*lastX, lastY, */colWidth;
 	Table parent;
 	boolean resizable, moveable;
 	Element resizeHandle;
@@ -95,7 +91,6 @@ private void configureColumn() {
 			sendEvent(SWT.DefaultSelection);
 		}
 	};
-	// handle.ondblclick = ...
 	Clazz.addEvent(handle, "dblclick", hColumnSelection);
 	
 //

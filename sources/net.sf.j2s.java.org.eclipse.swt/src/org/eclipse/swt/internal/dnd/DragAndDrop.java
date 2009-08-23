@@ -26,30 +26,46 @@ public class DragAndDrop {
 	int startX = 0;
 	int startY = 0;
 	private DragListener[] listeners = new DragListener[0];
-	private Object hDND;
+	
+	Object hSelectStart;
+	Object hMouseDown;
+	Object hMouseUp;
+	Object hMouseMove;
+	Object hKeyUp;
 	
 	protected void reset() {
 		status = 0;
-		document.onmousemove = null;
-		document.onmouseup = null;
-		document.onselectstart = null;
-		document.onkeyup = null;
-		if (this.element != null) {
-			//this.element.onselectstart = null;
-			Clazz.removeEvent(element, "selectstart", DNDUtils.onselectstart);
+		if (hMouseMove != null) {
+			Clazz.removeEvent(document.class, "mousemove", hMouseMove);
+			hMouseMove = null;
+		}
+		if (hMouseUp != null) {
+			Clazz.removeEvent(document.class, "mouseup", hMouseUp);
+			hMouseUp = null;
+		}
+		if (hKeyUp != null) {
+			Clazz.removeEvent(document.class, "keyup", hKeyUp);
+			hKeyUp = null;
+		}
+		if (this.element != null && hSelectStart != null) {
+			Clazz.removeEvent(element, "selectstart", hSelectStart);
+		}
+		if (hSelectStart != null) {
+			Clazz.removeEvent(document.class, "selectstart", hSelectStart);
+			hSelectStart = null;
 		}
 	}
 	public void bind(Element el) {
 		this.element = el;
-		hDND = DNDUtils.bindFunctionWith (DNDUtils.onmousedown, this);
-		// el.onmousedown = ;
-		Clazz.addEvent(el, "mousedown", hDND);
-		//el.onmouseup = DNDUtils.bindFunctionWith (DNDUtils.onmouseup, this);
+		if (hMouseDown == null) {
+			hMouseDown = DNDUtils.bindFunctionWith (DNDUtils.onmousedown, this);
+			Clazz.addEvent(el, "mousedown", hMouseDown);
+		}
 	}
 	public void unbind()  {
-		if (hDND != null) {
-			Clazz.removeEvent(element, "mouseover", hDND);
-			hDND = null;
+		if (hMouseDown != null) {
+			Clazz.removeEvent(element, "mouseover", hMouseDown);
+			hMouseDown = null;
 		}
 		element = null;
 	}

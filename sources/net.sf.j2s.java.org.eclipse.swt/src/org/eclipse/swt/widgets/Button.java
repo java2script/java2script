@@ -515,7 +515,7 @@ void createHandle() {
 	}
 	// Why there are CSS class "button-hover"?
 	/*
-	btnHandle.onmouseover = new RunnableCompatibility() {
+	Clazz.addEvent(btnHandle, "mouseover", new RunnableCompatibility() {
 		public void run() {
 			String cssName = " button-hover";
 			int idx = btnHandle.className.indexOf(cssName);
@@ -523,8 +523,8 @@ void createHandle() {
 				btnHandle.className = btnHandle.className + cssName;
 			}
 		}
-	};
-	btnHandle.onmouseout = new RunnableCompatibility() {
+	});
+	Clazz.addEvent(btnHandle, "mouseout", new RunnableCompatibility() {
 		public void run() {
 			String cssName = " button-hover";
 			int idx = btnHandle.className.indexOf(cssName);
@@ -532,7 +532,7 @@ void createHandle() {
 				btnHandle.className = btnHandle.className.substring(0, idx) + btnHandle.className.substring(cssName.length() + idx);
 			}
 		}
-	};
+	});
 	*/
 	
 	//bindHandle();
@@ -1443,10 +1443,7 @@ void hookSelection() {
 			*/
 		}
 	};
-	//handle.onclick = handle.ondblclick = hSelectionHandler;
 	if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		//handle.onclick = handle.ondblclick = null;
-		//btnHandle.onclick = btnText.onclick = btnText.ondblclick = hSelectionHandler;
 		Clazz.addEvent(btnHandle, "click", hSelectionHandler);
 		Clazz.addEvent(btnText, "click", hSelectionHandler);
 		Clazz.addEvent(btnText, "dblclick", hSelectionHandler);
@@ -1463,7 +1460,6 @@ void hookSelection() {
 			toReturn(true);
 		}
 	};
-	//handle.onkeydown = ...
 	Clazz.addEvent(handle, "keydown", hSelectionKeyDown);
 }
 
@@ -1471,21 +1467,18 @@ void hookMouseEnter() {
 	super.hookMouseEnter();
 	Clazz.addEvent(btnHandle, "mouseover", hMouseEnter);
 	Clazz.addEvent(btnText, "mouseover", hMouseEnter);
-	//btnHandle.onmouseover = btnText.onmouseover = handle.onmouseover;
 }
 
 void hookMouseExit() {
 	super.hookMouseExit();
 	Clazz.addEvent(btnHandle, "mouseout", hMouseExit);
 	Clazz.addEvent(btnText, "mouseout", hMouseExit);
-	//btnHandle.onmouseout = btnText.onmouseout = handle.onmouseout;
 }
 
 void hookMouseMove() {
 	super.hookMouseMove();
 	Clazz.addEvent(btnHandle, "mousemove", hMouseMove);
 	Clazz.addEvent(btnText, "mousemove", hMouseMove);
-	//btnHandle.onmousemove = btnText.onmousemove = handle.onmousemove;
 }
 
 /*

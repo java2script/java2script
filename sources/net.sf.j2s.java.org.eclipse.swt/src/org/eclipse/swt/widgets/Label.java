@@ -598,16 +598,6 @@ public void setText (String string) {
 	}
 	textSizeCached = false;
 	text = string;
-	//handle.appendChild(document.createTextNode(text));
-	/*
-	 * Calling setText twice should not make two text node for the handle.
-	 */
-//	Element[] children = handle.childNodes;
-//	if(children != null){
-//		for(int i = 0; i < children.length; i++){
-//			handle.removeChild(children[i]);
-//		}
-//	}
 	OS.clearChildren(handle);
 	OS.insertText(handle, text);
 	/*

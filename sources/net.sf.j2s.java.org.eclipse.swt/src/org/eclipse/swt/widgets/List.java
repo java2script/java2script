@@ -284,7 +284,7 @@ void createHandle () {
 	}
 	
 	/*
-	handle.onclick = new RunnableCompatibility() {
+	Clazz.addEvent(handle, "click", new RunnableCompatibility() {
 		public void run() {
 			Event e = new Event();
 			e.type = SWT.Selection;
@@ -293,7 +293,7 @@ void createHandle () {
 			e.widget = List.this;
 			sendEvent(e);
 		}
-	};
+	});
 	*/
 }
 
@@ -1308,9 +1308,6 @@ public void setItem (int index, String string) {
 public void setItems (String [] items) {
 	checkWidget ();
 	if (items == null) error (SWT.ERROR_NULL_ARGUMENT);
-//	for (int j = handle.childNodes.length - 1; j >= 0; j++) {
-//		handle.removeChild(handle.childNodes[j]);
-//	}
 	OS.clearChildren(handle);
 	for (int i=0; i<items.length; i++) {
 		if (items [i] == null) error (SWT.ERROR_INVALID_ARGUMENT);
