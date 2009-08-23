@@ -59,7 +59,6 @@ public class MaximizedTitle extends DesktopItem {
 			this.topbarEl.style.left = "2px";
 		}
 		this.topbarEl.style.top = "1px";
-		// this.handle.ondblclick = lastShell.titleBar.ondblclick;
 		hMaxClick = lastShell.hMaxClick;
 		if (hMaxClick != null) {
 			Clazz.addEvent(handle, "dblclick", hMaxClick);

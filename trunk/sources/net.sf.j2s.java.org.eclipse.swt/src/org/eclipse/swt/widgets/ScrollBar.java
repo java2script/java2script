@@ -242,7 +242,6 @@ void createWidget () {
 		}
 		
 	};
-	// sbHandle.onscroll = ...
 	Clazz.addEvent(sbHandle, "scroll", hScroll);
 }
 
@@ -699,6 +698,18 @@ protected void releaseHandle() {
 	if (sbHandle != null && hScroll != null) {
 		Clazz.removeEvent(sbHandle, "scroll", hScroll);
 		hScroll = null;
+	}
+	if (innerHandle != null) {
+		OS.destroyHandle(innerHandle);
+		innerHandle = null;
+	}
+	if (sbHandle != null) {
+		OS.destroyHandle(sbHandle);
+		sbHandle = null;
+	}
+	if (outerHandle != null) {
+		OS.destroyHandle(outerHandle);
+		outerHandle = null;
 	}
 	super.releaseHandle();
 }

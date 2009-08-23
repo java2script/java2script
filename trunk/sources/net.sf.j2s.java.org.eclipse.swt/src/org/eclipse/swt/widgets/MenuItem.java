@@ -56,7 +56,8 @@ public class MenuItem extends Item {
 	int mnemonicChar;
 	Object hItemMouseEnter;
 	Object hItemMouseExit;
-	private Object hNoReturn;
+	private Object hNoTextSelection;
+	private Object hNoMenu;
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>Menu</code>) and a style value
@@ -211,11 +212,15 @@ void configMenuItem() {
 			Menu p = parent;
 			int indexOf = p.indexOf(MenuItem.this);
 			if (p.currentIndex != -1 && p.currentIndex != indexOf) {
-				Element el = p.items[p.currentIndex].handle;
+				Object mouseExit = p.items[p.currentIndex].hItemMouseExit;
+				if (mouseExit != null)
 				/**
 				 * @j2sNative
-				 * el.onmouseout();
-				 */ { el.toString(); }
+				 * mouseExit ();
+				 */
+				{
+					mouseExit.toString();
+				}
 			}
 			p.currentIndex = indexOf;
 			if ((parent.style & SWT.BAR) != 0) {
@@ -236,7 +241,6 @@ void configMenuItem() {
 			}
 		}
 	};
-	// handle.onmouseover = ...
 	Clazz.addEvent(handle, "mouseover", hItemMouseEnter);
 	
 	hItemMouseExit = new RunnableCompatibility() {
@@ -284,29 +288,13 @@ void configMenuItem() {
 			parent.currentIndex = -1;
 		}
 	};
-	// handle.onmouseout = ...
 	Clazz.addEvent(handle, "mouseout", hItemMouseExit);
 	
 	checkHookType(SWT.Selection);
 	
-	hNoReturn = new RunnableCompatibility() {
-		
-		@Override
-		public void run() {
-			toReturn(false);
-		}
-	};
-	Clazz.addEvent(handle, "selectstart", hNoReturn);
-	Clazz.addEvent(handle, "contextmenu", hNoReturn);
-	
-	/**
-	 * @j2sNative
-	if (typeof this.handle.style.MozUserSelect != "undefined") {
-		this.handle.style.MozUserSelect = "none";
-	} else if (typeof this.handle.style.KhtmlUserSelect != "undefined") {
-		this.handle.style.KhtmlUserSelect = "none";
-	}
-	 */ {}
+	hNoTextSelection = OS.setTextSelection(handle, false);
+	hNoMenu = OS.noReturnCallback;
+	Clazz.addEvent(handle, "contextmenu", hNoMenu);
 }
 
 /* (non-Javadoc)
@@ -763,13 +751,14 @@ protected void releaseHandle() {
 			Clazz.removeEvent(handle, "mouseout", hItemMouseExit);
 			hItemMouseExit = null;
 		}
-		if (hNoReturn != null) {
-			Clazz.removeEvent(handle, "selectstart", hNoReturn);
-			Clazz.removeEvent(handle, "contextmenu", hNoReturn);
-			hNoReturn = null;
+		if (hNoMenu != null) {
+			Clazz.removeEvent(handle, "contextmenu", hNoMenu);
+			hNoMenu = null;
 		}
-//		OS.destroyHandle(handle);
-//		handle = null;
+		if (hNoTextSelection != null) {
+			Clazz.removeEvent(handle, "selectstart", hNoTextSelection);
+			hNoTextSelection = null;
+		}
 	}
 	super.releaseHandle();
 }

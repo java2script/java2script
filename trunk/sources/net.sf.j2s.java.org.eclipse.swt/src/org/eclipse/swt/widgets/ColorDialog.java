@@ -441,7 +441,7 @@ for (var i = 0; i < 48; i++) {
 	colorMap[colors[i4]] = arr;
 	map[colors[i4]] = arr.join (',');
 }
-     */ { map.toString(); colors.toString(); }
+     */ { map.toString(); if (colors == null); }
      
     final String[] colorMatrix = new String[] { "salmon", "pale yellow",
 				"pale green", "spring green", "pale turquoise",
@@ -463,7 +463,7 @@ for (var i = 0; i < 48; i++) {
 	    	/**
 	    	 * @j2sNative
 	    	 * rgbColor = colorMap[colorMatrix[i]];
-	    	 */ {}
+	    	 */ { rgbColor = new int[0]; }
 	    	if (rgb.red == rgbColor[0] && rgb.green == rgbColor[1] && rgb.blue == rgbColor[2]) {
 	    		buf[buf.length] = " color-selected";
 	    		selected = true;
@@ -567,7 +567,6 @@ for (var i = 0; i < 48; i++) {
 			dialogShell.pack();
 			customButton.disabled = true;
 			customButton.style.color = "gray";
-			//customButton.onclick = null;
 			
 			configureCustomPanel();
 			
@@ -579,7 +578,6 @@ for (var i = 0; i < 48; i++) {
 //			});
 		}
 	};
-	// customButton.onclick = ...
 	Clazz.addEvent(customButton, "click", hCustomClick);
 	
 	hOKClick = new RunnableCompatibility() {
@@ -592,7 +590,6 @@ for (var i = 0; i < 48; i++) {
 			dialogShell.close();
 		}
 	};
-	// okButton.onclick = ...
 	Clazz.addEvent(okButton, "click", hOKClick);
 	
 	hCancelClick = new RunnableCompatibility() {
@@ -600,7 +597,6 @@ for (var i = 0; i < 48; i++) {
 			dialogShell.close();
 		}
 	};
-	// cancelButton.onclick = ...
 	Clazz.addEvent(cancelButton, "click", hCancelClick);
 	
 	Element[] inputs = containerHandle.getElementsByTagName("INPUT");
@@ -638,7 +634,7 @@ for (var i = 0; i < 48; i++) {
 		    	/**
 		    	 * @j2sNative
 		    	 * rgbColor = colorMap[matrix[i]];
-		    	 */ { map.toString(); matrix.toString(); }
+		    	 */ { map.toString(); matrix.toString(); rgbColor = new int[0]; }
 		    	HSL hsl = new HSL(0, 0, 0);
 		    	hsl.fromRGB(new RGB(rgbColor[0], rgbColor[1], rgbColor[2]));
 				updateFromHSL(hsl.h, hsl.s, hsl.l);
@@ -646,7 +642,6 @@ for (var i = 0; i < 48; i++) {
 				switchColorBox(i);
 			}
 		};
-		// basicColorBoxes[i].onclick = ...
 		Clazz.addEvent(basicColorBoxes[i], "click", basicColorBoxClicks[i]);
 	}
 	for (int i = 0; i < customColorBoxes.length; i++) {
@@ -665,7 +660,6 @@ for (var i = 0; i < 48; i++) {
 				switchColorBox(index + 48);
 			}
 		};
-		// customColorBoxes[i].onclick = ...
 		Clazz.addEvent(customColorBoxes[i], "click", customColorBoxClicks[i]);
 		if (customColors[i] != null) {
 			RGB color = customColors[i]; 
@@ -784,7 +778,6 @@ void configureCustomPanel() {
 			selectedCustomIndex = (selectedCustomIndex + 1) % 16;
 		}
 	};
-	// addToCustomButton.onclick = ...
 	Clazz.addEvent(addToCustomButton, "click", hAdd2CustomClick);
 
 	dnd = new DragAndDrop();
@@ -827,7 +820,6 @@ void configureCustomPanel() {
 			updateFromHSL(h, s, l);
 		}
 	};
-	// colorBlock.onclick = ...
 	Clazz.addEvent(colorBlock, "click", hColorBlockClick);
 	
 	hStripBlockClick = new RunnableCompatibility() {
@@ -843,7 +835,6 @@ void configureCustomPanel() {
 			updateFromHSL(h, s, l);
 		}
 	};
-	// stripBlock.onclick = ...
 	Clazz.addEvent(hStripBlockClick, "click", hStripBlockClick);
 	
 	updateRGBRunnable = new RunnableCompatibility() {
@@ -864,10 +855,6 @@ void configureCustomPanel() {
 		}
 	};
 
-//	hText.onchange = sText.onchange = lText.onchange = updateRGBRunnable;
-//	rText.onchange = gText.onchange = bText.onchange = updateHSLRunnable;
-//	hText.onkeyup = sText.onkeyup = lText.onkeyup = updateRGBRunnable;
-//	rText.onkeyup = gText.onkeyup = bText.onkeyup = updateHSLRunnable;
 	Object[] hsl = new Object[] { hText, sText, lText };
 	for (int i = 0; i < hsl.length; i++) {
 		Clazz.addEvent(hsl[i], "change", updateRGBRunnable);

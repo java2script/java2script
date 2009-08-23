@@ -174,14 +174,10 @@ private void removeTrayLine () {
 	for (int i = cellLines - 1; i >= 0 ; i--) {
 		int index = cellLines * (cellLines - 1) / 2 + i;
 		Element cell = allCells[index];
-//		cell.onclick = null;
-//		cell.onmouseover = null;
-//		cell.ondblclick = null;
 		if (display != null && display.trayCorner != null) {
 			display.trayCorner.unbindEvents(cell);
 		}
 		allCells[index] = null;
-		//document.body.removeChild (cell);
 		OS.destroyHandle(cell);
 	}
 	cellLines--;
@@ -207,10 +203,8 @@ private void removeTrayLine () {
 	if (!supportNotificationCornerFloat) {
 		return;
 	}
-	//document.body.removeChild (allFloats[cellLines * 2 + 1]);
 	OS.destroyHandle(allFloats[cellLines * 2 + 1]);
 	allFloats[cellLines * 2 + 1] = null;
-	//document.body.removeChild (allFloats[cellLines * 2]);
 	OS.destroyHandle(allFloats[cellLines * 2]);
 	allFloats[cellLines * 2] = null;
 }
@@ -303,7 +297,6 @@ void orderTrayItem (Element item, int order) {
 void removeTrayItem (Element item) {
 	for (int i = allItems.length - 1; i >= 0; i--) {
 		if (allItems[i] == item) {
-			//document.body.removeChild (item);
 			OS.destroyHandle(item);
 			for (int j = i; j < allItems.length - 1; j++) {
 				allItems[j] = allItems[j + 1];
@@ -437,6 +430,7 @@ void releaseWidget () {
 		if (item != null && !item.isDisposed ()) {
 			item.releaseResources ();
 		}
+		items[i] = null;
 	}
 	items = null;
 	

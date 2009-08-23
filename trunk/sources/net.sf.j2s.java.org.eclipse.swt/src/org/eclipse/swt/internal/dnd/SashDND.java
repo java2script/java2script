@@ -30,6 +30,8 @@ public class SashDND implements DragListener {
 	protected Element thumb;
 	protected boolean isHorizontal;
 	private Element overFrameHandle;
+	Object hSelectStart;
+	
 	public boolean dragBegan(DragEvent e) {
 		thumb = document.createElement ("DIV");
 		String cssName = e.sourceElement.className;
@@ -46,8 +48,10 @@ public class SashDND implements DragListener {
 		thumb.style.top = e.sourceElement.style.top;
 		thumb.style.width = e.sourceElement.style.width;
 		thumb.style.height = e.sourceElement.style.height;
-		//thumb.onselectstart = DNDUtils.onselectstart;
-		Clazz.addEvent(thumb, "selectstart", DNDUtils.onselectstart);
+		if (hSelectStart == null) {
+			hSelectStart = DNDUtils.onselectstart;
+			Clazz.addEvent(thumb, "selectstart", hSelectStart);
+		}
 		if (e.sourceElement.nextSibling != null) {
 			e.sourceElement.parentNode.insertBefore (thumb, 
 					e.sourceElement.nextSibling);
@@ -91,7 +95,10 @@ public class SashDND implements DragListener {
 	protected void clean() {
 		thumb.style.display = "none";
 		document.body.style.cursor = "auto";
-		Clazz.removeEvent(thumb, "selectstart", DNDUtils.onselectstart);
+		if (hSelectStart != null) {
+			Clazz.removeEvent(thumb, "selectstart", hSelectStart);
+			hSelectStart = null;
+		}
 		//thumb.parentNode.removeChild(thumb);
 		OS.destroyHandle(thumb);
 		if (overFrameHandle != null) {

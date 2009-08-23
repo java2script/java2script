@@ -125,8 +125,8 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 	checkWidget ();
 	int width = 0, height = 0;
 	int border = getBorderWidth ();
-	int newWidth = wHint == SWT.DEFAULT ? 0x3FFF : wHint + (border * 2);
-	int newHeight = hHint == SWT.DEFAULT ? 0x3FFF : hHint + (border * 2);
+	//int newWidth = wHint == SWT.DEFAULT ? 0x3FFF : wHint + (border * 2);
+	//int newHeight = hHint == SWT.DEFAULT ? 0x3FFF : hHint + (border * 2);
 	//*
 	//int count = OS.SendMessage (handle, OS.RB_GETBANDCOUNT, 0, 0);
 	int count = items.length;
@@ -755,7 +755,6 @@ void destroyItem (CoolItem item) {
 		error (SWT.ERROR_ITEM_NOT_REMOVED);
 	}
 	*/
-	//handle.removeChild(items[index].handle);
 	OS.destroyHandle(items[index].handle);
 	
 	items [item.id] = null;

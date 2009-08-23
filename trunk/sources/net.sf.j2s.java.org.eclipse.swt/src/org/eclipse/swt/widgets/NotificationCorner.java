@@ -44,7 +44,6 @@ public class NotificationCorner extends DesktopItem {
 			Element[] divs = container.childNodes;
 			for (int i = 0; i < divs.length; i++) {
 				if (divs[i].className == "powered") {
-					//container.removeChild(divs[i]);
 					OS.destroyHandle(divs[i]);
 					existed = true;
 					/**
@@ -129,15 +128,9 @@ public class NotificationCorner extends DesktopItem {
 						}
 					}
 				}
-				/**
-				 * @j2sNative
-				 * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function () { return function () {
-				 * 	$wt.widgets.About.openAbout (null);
-				 * }; }) ());
-				 */ {}
+				openAbout();
 			}
 		};
-		// handle.onclick = ...
 		Clazz.addEvent(handle, "click", hLogoClick);
 
 		if (mouseOver == null) {
@@ -185,14 +178,20 @@ public class NotificationCorner extends DesktopItem {
 			
 			};
 		}
-//		if (handle != null && handle.onmouseover == null) {
-//			handle.onmouseover = mouseOver;
-//		}
 		if (handle != null) {
 			Clazz.addEvent(handle, "mouseover", mouseOver);
 		}
 
 		updateEvents();
+	}
+
+	/**
+	 * @j2sNative
+	 * ClazzLoader.loadClass ("org.eclipse.swt.widgets.About", (function () { return function () {
+	 * 	$wt.widgets.About.openAbout (null);
+	 * }; }) ());
+	 */
+	static void openAbout() {
 	}
 
 	void updateEvents() {
@@ -222,9 +221,6 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	public void bindEvents(Element cell) {
-//		cell.onclick = mouseClick;
-//		cell.onmouseover = mouseOver;
-//		cell.ondblclick = mouseDoubleClick;
 		if (mouseClick != null) {
 			Clazz.addEvent(cell, "click", mouseClick);
 		}

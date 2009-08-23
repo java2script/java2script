@@ -220,7 +220,6 @@ protected void createHandle () {
 		}
 		
 	};
-	// upBtnHandle.onclick = ...
 	Clazz.addEvent(upBtnHandle, "click", hUpClick);
 	
 	downBtnHandle = document.createElement("BUTTON");
@@ -236,7 +235,6 @@ protected void createHandle () {
 		}
 		
 	};
-	// downBtnHandle.onclick = ...
 	Clazz.addEvent(downBtnHandle, "click", hDownClick);
 	
 	textHandle = document.createElement("DIV");
@@ -262,7 +260,6 @@ protected void createHandle () {
 		}
 		
 	};
-	// textInputHandle.onchange = ...
 	Clazz.addEvent(textInputHandle, "change", hTextChange);
 	
 	hTextKeyDown = new RunnableCompatibility(){
@@ -281,7 +278,6 @@ protected void createHandle () {
 			
 		}
 	};
-	// textInputHandle.onkeydown = ...
 	Clazz.addEvent(textInputHandle, "keydown", hTextKeyDown);
 }
 

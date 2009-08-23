@@ -80,6 +80,8 @@ public class Text extends Scrollable {
 	private Object hModifyFocus;
 	private Object hModifyBlur;
 	private Object hModifyKeyUp;
+	private RunnableCompatibility hScrollless;
+	private Element wrapper;
 	/*
 	public static final String DELIMITER;
 	
@@ -252,24 +254,28 @@ void createHandle () {
 			OS.SetFocus(textHandle); //textHandle.focus();
 		}
 	};
-	// handle.onfocus = ...
 	Clazz.addEvent(handle, "focus", hFocus);
 	
-	Element wrapper = document.createElement("DIV");
+	wrapper = document.createElement("DIV");
 	wrapper.style.overflow = ((style & SWT.MULTI) != 0) ? "auto" : "hidden";
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textHandle);
 	//handle.appendChild(textHandle);
-	if (!OS.isChrome)
-	/**
-	 * TODO: IE does not trigger onscroll when dragging inner text input 
-	 * 
-	 * @j2sNative
-	 * wrapper.onscroll = function (e) {
-	 * 	this.scrollLeft = 0;
-	 * 	this.scrollTop = 0;
-	 * };
-	 */ { }
+	if (!OS.isChrome) {
+		// TODO: IE does not trigger onscroll when dragging inner text input 
+		if (hScrollless == null) {
+			hScrollless = new RunnableCompatibility() {
+				
+				@Override
+				public void run() {
+					HTMLEventWrapper evt = new HTMLEventWrapper(getEvent());
+					evt.target.scrollLeft = 0;
+					evt.target.scrollTop = 0;
+				}
+			};
+		}
+		Clazz.addEvent(wrapper, "scroll", hScrollless);
+	}
 
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
@@ -346,7 +352,6 @@ void hookKeyDown() {
 			}
 		}
 	};
-	// textHandle.onkeydown = ...
 	Clazz.addEvent(textHandle, "keydown", hTextKeyDown);
 	
 	hTextKeyPress = new RunnableCompatibility() {
@@ -373,7 +378,6 @@ void hookKeyDown() {
 		}
 	
 	};
-	// textHandle.onkeypress = ...
 	Clazz.addEvent(textHandle, "keypress", hTextKeyPress);
 }
 
@@ -403,7 +407,6 @@ void hookKeyUp() {
 			toReturn(event.doit);
 		}
 	};
-	// textHandle.onkeyup = ...
 	Clazz.addEvent(textHandle, "keyup", hTextKeyUp);
 }
 
@@ -445,7 +448,6 @@ void hookModify() {
 			}
 		}
 	};
-	// textHandle.onkeyup = ...
 	Clazz.addEvent(textHandle, "keyup", hModifyKeyUp);
 	
 	hModifyBlur = new RunnableCompatibility() {
@@ -459,7 +461,6 @@ void hookModify() {
 			toReturn(e.doit);
 		}
 	};
-	// textHandle.onblur = ...
 	Clazz.addEvent(textHandle, "blur", hModifyBlur);
 	
 	hModifyFocus = new RunnableCompatibility() {
@@ -473,25 +474,21 @@ void hookModify() {
 			toReturn(e.doit);
 		}
 	};
-	// textHandle.onfocus = ...
 	Clazz.addEvent(textHandle, "focus", hModifyFocus);
 }
 
 void hookMouseDoubleClick() {
 	super.hookMouseDoubleClick();
-	//textHandle.ondblclick = handle.ondblclick;
 	Clazz.addEvent(textHandle, "dblclick", hMouseDoubleClick);
 }
 
 void hookMouseDown() {
 	super.hookMouseDown();
-	//textHandle.onmousedown = handle.onmousedown;
 	Clazz.addEvent(textHandle, "mousedown", hMouseDown);
 }
 
 void hookMouseUp() {
 	super.hookMouseUp();
-	//textHandle.onmouseup = handle.onmouseup;
 	Clazz.addEvent(textHandle, "mouseup", hMouseUp);
 }
 
@@ -1761,6 +1758,14 @@ protected void releaseHandle() {
 		}
 		OS.destroyHandle(textHandle);
 		textHandle = null;
+	}
+	if (wrapper != null) {
+		if (hScrollless != null) {
+			Clazz.removeEvent(wrapper, "scroll", hScrollless);
+			hScrollless = null;
+		}
+		OS.destroyHandle(wrapper);
+		wrapper = null;
 	}
 	super.releaseHandle();
 }

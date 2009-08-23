@@ -11,9 +11,6 @@
  *******************************************************************************/
 package org.eclipse.swt.widgets;
 
-
-import java.util.Date;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -121,6 +118,9 @@ var f = function () {
 		org.eclipse.swt.widgets.Display.releaseAllDisplays ();
 	} catch (e) {
 	}
+	O$.deepClearChildren (FontSizeSystem.monitorEl);
+	O$.destroyHandle (FontSizeSystem.monitorEl);
+	FontSizeSystem.monitorEl = null;
 	Clazz.removeEvent (window, "unload", cleanUpObject.f);
 	return true;
 };
@@ -374,6 +374,7 @@ public class Display extends Device {
 	/* Multiple Displays */
 	static Display Default;
 	static Display [] Displays = new Display [4];
+	static boolean disposing = false;
 
 	/* Multiple Monitors */
 	static Monitor[] monitors = null;
@@ -429,6 +430,7 @@ public class Display extends Device {
 //		int index = name.lastIndexOf ('.');
 //		PACKAGE_PREFIX = name.substring (0, index + 1);
 //	}
+	private static RunnableCompatibility hShellZOrdering;
 
 	/*
 	* TEMPORARY CODE.  Install the runnable that
@@ -956,6 +958,10 @@ void destroyDisplay () {
 }
 
 public void dispose() {
+	if (disposing) {
+		super.dispose();
+		return;
+	}
 	Shell[] shells = getShells();
 	if (shells == null || shells.length == 0) {
 		if (shortcutBar == null || shortcutBar.shortcutCount == 0) {
@@ -963,7 +969,6 @@ public void dispose() {
 			super.dispose();
 		}
 	}
-	//super.dispose();
 }
 
 /**
@@ -1732,7 +1737,7 @@ public int getLastEventTime () {
 	/*
 	 * TODO: fixed the last event time!
 	 */
-	return (int) new Date().getTime();
+	return (int) System.currentTimeMillis();
 }
 
 MenuItem getMenuItem (int id) {
@@ -1991,6 +1996,9 @@ protected void bindMonitor(Monitor m) {
  */
 public Shell [] getShells () {
 	checkDevice ();
+	if (controlTable == null) {
+		return null;
+	}
 	int count = 0;
 	for (int i=0; i<controlTable.length; i++) {
 		Control control = controlTable [i];
@@ -2471,10 +2479,8 @@ protected void init () {
 	 * @j2sNative
 	 * FontSizeSystem.monitorFontSize ();
 	 */ {}
-	if (document.onclick == null) {
-		bringShellToTop();
-	}
 
+	initializeZOrdering();
 	initializeDekstop();
 }
 
@@ -2573,7 +2579,7 @@ void initializeDekstop() {
 				return;
 			}
 
-			long now = new Date().getTime();
+			long now = System.currentTimeMillis();
 			boolean ctrlKey = e.ctrlKey;
 			taskBar.mouseAlreadyMoved = true;
 			shortcutBar.mouseAlreadyMoved = true;
@@ -2615,14 +2621,7 @@ void initializeDekstop() {
 		}
 	
 	};
-	/**
-	 * @j2sNative
-	if (document.addEventListener) {
-		document.addEventListener ("mousemove", this.mouseMoveListener, false);
-	} else if (document.attachEvent) {
-		document.attachEvent ("onmousemove", this.mouseMoveListener);
-	}
-	 */ { mouseMoveListener.run(); }
+	Clazz.addEvent(document.class, "mousemove", this.mouseMoveListener);
 	
 	Element el = document.getElementById("_console_");
 	if (el != null) {
@@ -2677,7 +2676,6 @@ static void insertOpenConsoleLink() {
 		 * @j2sNative
 		 * ClazzLoader.loadClass('org.eclipse.swt.widgets.Console',function(){$wt.widgets.Console.openConsole();});
 		 */
-		@Override
 		public void widgetSelected(SelectionEvent e) {
 			
 		}
@@ -3451,7 +3449,7 @@ public boolean readAndDispatch () {
 					if (m != null && m.type == MESSAGE.CONTROL_LAYOUT) {
 						m.control.waitingForLayout = false;
 						if (!m.control.isVisible()) { continue; }
-						long d = new Date().getTime();
+						long d = System.currentTimeMillis();
 						Composite c = (Composite) m.control;
 						if(c.waitingForLayoutWithResize){
 							c.setResizeChildren (false);
@@ -3471,7 +3469,7 @@ public boolean readAndDispatch () {
 						} else {
 							c.layout();
 						}
-						time += new Date().getTime() - d;
+						time += System.currentTimeMillis() - d;
 //						System.err.println(c.getName() + " cost " + (time));
 						if (time > 200) {
 //							System.out.println("before deferring:" + msgs.length);
@@ -3599,18 +3597,21 @@ protected void release () {
 		}
 	}
 	timerList = null;
-//	synchronizer.releaseSynchronizer ();
-//	synchronizer = null;
-	releaseDesktop ();
-	releaseDisplay ();
-	super.release ();
 	
 	if (NotificationCorner.defaultNotificationCorner != null) {
-		new Display().getSystemTray();
-		NotificationCorner corner = NotificationCorner.defaultNotificationCorner;
-		document.body.removeChild(corner.handle);
-		document.body.appendChild(corner.handle);
+		//new Display().getSystemTray();
+//		NotificationCorner corner = NotificationCorner.defaultNotificationCorner;
+		NotificationCorner.defaultNotificationCorner = null;
+//		document.body.removeChild(corner.handle);
+//		document.body.appendChild(corner.handle);
 	}
+	//*
+	if (QuickLaunch.defaultQuickLaunch != null) {
+		//QuickLaunch launch = QuickLaunch.defaultQuickLaunch;
+		QuickLaunch.defaultQuickLaunch = null;
+		//document.body.removeChild(launch.handle);
+	}
+	//*/
 	if (NotificationCorner.defaultNotificationCorner == null 
 			&& QuickLaunch.defaultQuickLaunch == null) {
 		if (htmlOverflow != null) {
@@ -3630,6 +3631,11 @@ protected void release () {
 		document.body.scrollLeft = bodyScrollLeft;
 		document.body.scrollTop = bodyScrollTop;
 	}
+//	synchronizer.releaseSynchronizer ();
+//	synchronizer = null;
+	releaseDesktop ();
+	releaseDisplay ();
+	super.release ();
 }
 
 void releaseDesktop () {
@@ -3654,7 +3660,7 @@ void releaseDesktop () {
 		if (!existed && trayCorner.handle != null) {
 			trayCorner.handle.style.display = "none";
 		}
-		return;
+		//return;
 	}
 
 	int trayRefs = 1;
@@ -3667,24 +3673,27 @@ void releaseDesktop () {
 		}
 	}
 
-
-	taskBar.releaseWidget();
-	taskBar = null;
-	topBar.releaseWidget();
-	topBar = null;
-	shortcutBar.releaseWidget();
-	shortcutBar = null;
-	if (trayRefs <= 1) trayCorner.releaseWidget();
-	trayCorner = null;
-	
-	/**
-	 * @j2sNative
-	if (document.removeEventListener) {
-		document.removeEventListener ("mousemove", this.mouseMoveListener, false);
-	} else if (document.detachEvent) {
-		document.detachEvent ("onmousemove", this.mouseMoveListener);
+	if (taskBar != null) {
+		taskBar.releaseWidget();
+		taskBar = null;
 	}
-	 */ { mouseMoveListener.run(); }
+	if (topBar != null) {
+		topBar.releaseWidget();
+		topBar = null;
+	}
+	if (shortcutBar != null) {
+		shortcutBar.releaseWidget();
+		shortcutBar = null;
+	}
+	if (trayCorner != null) {
+		if (trayRefs <= 1) trayCorner.releaseWidget();
+		trayCorner = null;
+	}
+
+	if (mouseMoveListener != null) {
+		Clazz.removeEvent(document.class, "mousemove", this.mouseMoveListener);
+		mouseMoveListener = null;
+	}
 }
 
 void releaseDisplay () {
@@ -4907,6 +4916,7 @@ static String withCrLf (String string) {
 }
 
 static void releaseAllDisplays() {
+	disposing = true;
 	boolean first = true;
 	if (Displays != null) {
 		for (int i = 0; i < Displays.length; i++) {
@@ -4935,15 +4945,18 @@ static void releaseAllDisplays() {
 						d.tray.dispose();
 						d.tray = null;
 					}
-					OS.dispose();
 				}
 				Displays[i] = null;
 			}
 		}
-		Displays = null;
 	}
 	Default = null; // Default will be disposed in the above for loop
 	topMaxShell = null;
+	if (hShellZOrdering != null) {
+		Clazz.removeEvent(document.class, "click", hShellZOrdering);
+		hShellZOrdering = null;
+	}
+	OS.dispose();
 }
 
 
@@ -4984,8 +4997,11 @@ static void updateAllShellLayouts() {
 	}
 }
 
-static void bringShellToTop() {
-	RunnableCompatibility onclick = new RunnableCompatibility() {
+static void initializeZOrdering() {
+	if (hShellZOrdering != null) {
+		return;
+	}
+	hShellZOrdering = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper evt = new HTMLEventWrapper(this.getEvent());
 			Element src = evt.target;
@@ -5024,16 +5040,7 @@ static void bringShellToTop() {
 		}
 	};
 	
-	/**
-	 * @j2sNative
-	 * if (document.addEventListener) {
-	 * 	document.addEventListener ("click", onclick, false);
-	 * } else if (document.attachEvent) {
-	 * 	document.attachEvent ("onclick", onclick);
-	 * }
-	 */ {
-		 document.onclick = onclick;
-	 }
+	Clazz.addEvent(document.class, "click", hShellZOrdering);
 }
 
 }

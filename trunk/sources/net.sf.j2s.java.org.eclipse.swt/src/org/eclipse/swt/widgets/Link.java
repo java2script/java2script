@@ -345,8 +345,6 @@ void hookSelection() {
 	for (int i = 0; i < anchors.length; i++) {
 		anchors[i].href = "javascript:void(0);";
 		anchors[i].target = "_self";
-		//anchors[i].onclick = hLinkSelectionHandler;
-		//anchors[i].ondblclick = hLinkSelectionHandler;
 		Clazz.addEvent(anchors[i], "click", hLinkSelectionHandler);
 		Clazz.addEvent(anchors[i], "dblclick", hLinkSelectionHandler);
 	}
@@ -723,6 +721,23 @@ int parseMnemonics (char[] buffer, int start, int end, char[] result, char[] res
 	return mnemonic;
 }
 
+protected void releaseHandle() {
+	for (int i = 0; i < anchors.length; i++) {
+		Element anchor = anchors[i];
+		if (anchor == null) {
+			continue;
+		}
+		if (hLinkSelectionHandler != null) {
+			Clazz.removeEvent(anchor, "click", hLinkSelectionHandler);
+			Clazz.removeEvent(anchor, "dblclick", hLinkSelectionHandler);
+		}
+		OS.destroyHandle(anchor);
+		anchors[i] = null;
+	}
+	hLinkSelectionHandler = null;
+	super.releaseHandle();
+}
+
 void releaseWidget () {
 	super.releaseWidget ();
 //	if (layout != null) layout.dispose ();
@@ -872,16 +887,16 @@ void unhookSelection() {
 	}
 	for (int i = 0; i < anchors.length; i++) {
 		Element anchor = anchors[i];
-		//anchor.onclick = null;
-		//anchor.ondblclick = null;
 		Clazz.removeEvent(anchor, "click", hLinkSelectionHandler);
 		Clazz.removeEvent(anchor, "dblclick", hLinkSelectionHandler);
-		if ("#".equals(ids[i])) {
-			anchor.href = "javascript:void(0);";
-			anchor.target = "_self";
-		} else {
-			anchor.href = ids[i];
-			anchor.target = "_blank";
+		if (ids != null) {
+			if ("#".equals(ids[i])) {
+				anchor.href = "javascript:void(0);";
+				anchor.target = "_self";
+			} else {
+				anchor.href = ids[i];
+				anchor.target = "_blank";
+			}
 		}
 	}
 	hLinkSelectionHandler = null;

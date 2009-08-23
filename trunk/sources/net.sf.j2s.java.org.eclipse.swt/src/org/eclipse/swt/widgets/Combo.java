@@ -595,7 +595,6 @@ protected void createHandle () {
 			}
 		}
 	};
-	// textInput.ondblclick = ...
 	Clazz.addEvent(textInput, "dblclick", hEditShow);
 
 	hEditKeyUp = new RunnableCompatibility(){
@@ -635,7 +634,6 @@ protected void createHandle () {
 			}
 		}
 	};
-	// textInput.onkeyup = ...
 	Clazz.addEvent(textInput, "keyup", hEditKeyUp);
 	
 	hDropDownClick = new RunnableCompatibility() {
@@ -682,7 +680,6 @@ void configureSelect() {
 //				hide();
 		}
 	};
-	// selectInput.onchange = ...
 	Clazz.addEvent(selectInput, "change", hTextChange);
 
 	hTextBlur = new RunnableCompatibility() {
@@ -692,7 +689,6 @@ void configureSelect() {
 				hide();
 		}
 	};
-	// selectInput.onblur = ...
 	Clazz.addEvent(selectInput, "blue", hTextBlur);
 	
 	hTextMouseUp = new RunnableCompatibility() {
@@ -715,7 +711,6 @@ void configureSelect() {
 			}
 		}
 	};
-	// selectInput.onmouseup = ...
 	Clazz.addEvent(selectInput, "mouseup", hTextMouseUp);
 	
 	hTextKeyUp = new RunnableCompatibility() {
@@ -727,7 +722,6 @@ void configureSelect() {
 			}
 		}
 	};
-	// selectInput.onkeyup = ...
 	Clazz.addEvent(selectInput, "keyup", hTextKeyUp);
 }
 void hide(){
