@@ -51,7 +51,7 @@ public class MaximizedTitle extends DesktopItem {
 		}
 
 		// update topbar
-		this.handle.style.left = Math.round((document.body.clientWidth - 320) / 2) + "px";
+		this.handle.style.left = Math.round((OS.getFixedBodyClientWidth()/*document.body.clientWidth*/ - 320) / 2) + "px";
 		this.topbarEl.style.width = "316px";
 		if (OS.isIE) {
 			this.topbarEl.style.left = "1px";
@@ -112,7 +112,7 @@ public class MaximizedTitle extends DesktopItem {
 			return true;
 		}
 		int barWidth = 320;
-		int width = document.body.clientWidth;
+		int width = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
 		int offset = Math.round((width - barWidth) / 2);
 		int x1 = offset - 72;
 		int x2 = offset + barWidth + 72;

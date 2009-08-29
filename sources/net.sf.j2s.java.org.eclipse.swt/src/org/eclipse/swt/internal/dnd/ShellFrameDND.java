@@ -112,7 +112,7 @@ public class ShellFrameDND implements DragListener {
 	public boolean dragging(DragEvent e) {
 		
 		int gHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
-		int gWidth = document.body.clientWidth;
+		int gWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
 		boolean noScroll = (document.body.style.overflow == "hidden");
 		/**
 		 * @j2sNative

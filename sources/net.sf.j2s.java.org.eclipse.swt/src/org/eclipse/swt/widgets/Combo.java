@@ -568,6 +568,7 @@ protected void createHandle () {
 	//handle.appendChild (document.createTextNode(text));
 	
 	handle.className += " combo-default";
+	OS.removeCSSClass(handle, "composite-border");
 
 	dropDownButton = document.createElement("BUTTON");
 	handle.appendChild(dropDownButton);
@@ -584,7 +585,6 @@ protected void createHandle () {
 	wrapper.style.overflow = "hidden";
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textInput);
-	//handle.appendChild(textInput);
 
 	//int height = OS.getContainerHeight(dropDownButton);
 	
@@ -655,6 +655,26 @@ protected void createHandle () {
 	
 	createSelect();
 	configureSelect();
+}
+
+void hookFocusIn() {
+	super.hookFocusIn();
+	Clazz.addEvent(textInput, "focus", hFocusIn);
+}
+
+void hookFocusOut() {
+	super.hookFocusOut();
+	Clazz.addEvent(textInput, "blur", hFocusOut);
+}
+
+void hookModify() {
+	super.hookModify();
+	Clazz.addEvent(textInput, "change", hModify);
+}
+
+void hookSelection() {
+	super.hookSelection();
+	Clazz.addEvent(selectInput, "selectchange", hSelection);
 }
 
 void createSelect() {
@@ -1702,7 +1722,6 @@ void setBounds (int x, int y, int width, int height, int flags) {
 	* items and ignore the height value that the programmer supplies.
 	*/
 	int buttonHeight =  getTextHeight();
-	int buttonWidth = OS.getContainerHeight(dropDownButton); 
 	
 	if (!isSimple) {
 		//height = getTextHeight () + (getItemHeight () * visibleCount) + 2;
@@ -1736,29 +1755,84 @@ void setBounds (int x, int y, int width, int height, int flags) {
 //		}
 		super.setBounds (x, y, width, height, flags);
 //		SetWindowPos (handle, null, x, y, width, height, flags);
-		textInput.style.height = Math.min(height, buttonHeight) + "px";
+		//int buttonWidth = OS.getContainerHeight(dropDownButton);
+		int buttonWidth = Math.min(OS.getScrollBarWidth(), height - 2);
 		dropDownButton.style.width = buttonWidth + "px";
+		textInput.style.paddingRight = buttonWidth + "px";
 		textInput.style.width = Math.max(0, width - buttonWidth - 5) + "px";
-		
+		textInput.style.height = Math.max(0, height - 6) + "px";
+		textInput.style.lineHeight = Math.max(0, height - 6) + "px";
+		if (OS.isFirefox && !OS.isFirefox10 && !OS.isFirefox20) {
+			textInput.style.width = Math.max(0, width - buttonWidth - 3) + "px";
+			textInput.style.height = Math.max(0, height - 4) + "px";
+			textInput.style.lineHeight = Math.max(0, height - 4) + "px";
+		} else if (OS.isSafari || OS.isChrome) {
+			textInput.style.marginTop = "0";
+		} else if (OS.isIE) {
+			dropDownButton.style.right = "1px";
+			dropDownButton.style.top = "2px";
+			if (!OS.isIE80) {
+				textInput.style.marginTop = "-1px";
+			}
+		} else { // Opera or others
+			dropDownButton.style.right = "0";
+			textInput.style.marginTop = "0";
+		}
+		if (!OS.isIE) {
+			dropDownButton.style.height = Math.max(0, height - 4) + "px";
+			dropDownButton.style.right = "2px";
+			dropDownButton.style.top = "2px";
+		}
 		selectInput.style.width = width + "px";
 	} else {
 //		height = Math.min(height, 
 //				OS.getContainerHeight(dropDownButton) + computeSelectHeight());
 		super.setBounds (x, y, width, height, flags);
-		selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
-		textInput.style.height = (buttonHeight - 2) + "px";
+		selectInput.style.height = (Math.max(0, height - buttonHeight + 2)) + "px";
+		textInput.style.height = (buttonHeight - 6) + "px";
+		textInput.style.lineHeight = (buttonHeight - 6) + "px";
 		//dropDownButton.style.width = 0 + "px";
 		dropDownButton.style.display = "none";
-		textInput.style.width = width + "px";
-		
-		selectInput.style.marginLeft = "-3px";
-		if (OS.isIE) {
-			selectInput.style.marginTop = "-2px";
-			selectInput.style.width = (width + 3) + "px";
+		if (OS.isFirefox && !OS.isFirefox10 && !OS.isFirefox20) {
+			textInput.style.width = (width - 3) + "px";
+		} else {
+			textInput.style.width = (width - 6) + "px";
+		}
+		if (OS.isChrome || OS.isSafari || OS.isOpera) {
+			textInput.style.marginTop = "0";
+			selectInput.style.marginTop = "0";
+			textInput.style.height = (buttonHeight - 8) + "px";
+			if (OS.isChrome) {
+				textInput.style.width = (width - 5) + "px";
+			}
+			//selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
+		} else if (OS.isIE || OS.isOpera) {
+			if (OS.isIE && !OS.isIE80 && !OS.isIE70) {
+				textInput.style.marginTop = "-1px";
+				selectInput.style.marginTop = "-2px";
+				selectInput.style.marginLeft = "-1px";
+				selectInput.style.width = (width + 2) + "px";
+				selectInput.style.height = (Math.max(0, height - buttonHeight + 2)) + "px";
+			} else if (OS.isIE70) {
+				textInput.style.marginTop = "-1px";
+				selectInput.style.marginTop = "-1px";
+				selectInput.style.width = width + "px";
+				selectInput.style.height = (Math.max(0, height - buttonHeight + 2)) + "px";
+			} else {
+				selectInput.style.width = width + "px";
+				selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
+			}
+		} else if (OS.isFirefox10 || OS.isFirefox20) {
+			textInput.style.width = (width - 5) + "px";
+			selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
 		} else {
 			selectInput.style.width = width + "px";
 		}
 	}
+}
+
+Element fontHandle() {
+	return textInput;
 }
 
 /* (non-Javadoc)
@@ -2003,6 +2077,7 @@ public void setSelection (Point selection) {
 	int bits = start | (end << 16);
 	OS.SendMessage (handle, OS.CB_SETEDITSEL, 0, bits);
 	*/
+	Text.setTextSelection(textInput, selection.x, selection.y);
 }
 
 /**
@@ -2654,6 +2729,9 @@ LRESULT wmIMEChar (int hwnd, int wParam, int lParam) {
 */
 protected void releaseHandle() {
 	if (selectInput != null) {
+		if (hSelection != null) {
+			Clazz.removeEvent(selectInput, "selectchange", hSelection);
+		}
 		Clazz.removeEvent(selectInput, "change", hTextChange);
 		hTextChange = null;
 		Clazz.removeEvent(selectInput, "blur", hTextBlur);
@@ -2675,6 +2753,15 @@ protected void releaseHandle() {
 	}
 
 	if (textInput != null) {
+		if (hFocusIn != null) {
+			Clazz.removeEvent(textInput, "focus", hFocusIn);
+		}
+		if (hFocusOut != null) {
+			Clazz.removeEvent(textInput, "blur", hFocusOut);
+		}
+		if (hModify != null) {
+			Clazz.removeEvent(textInput, "change", hModify);
+		}
 		Clazz.removeEvent(textInput, "dblclick", hEditShow);
 		hEditShow = null;
 		Clazz.removeEvent(textInput, "keyup", hEditKeyUp);
@@ -2709,8 +2796,10 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";
 	el.style.top = Y + "px";
-	el.style.width = (cx - 4 > 0 ? cx - 4 : 0) + "px";
-	el.style.height = (cy - 4 > 0 ? cy - 4 : 0) + "px";
+//	el.style.width = (cx - 4 > 0 ? cx - 4 : 0) + "px";
+//	el.style.height = (cy - 4 > 0 ? cy - 4 : 0) + "px";
+	el.style.width = (cx > 0 ? cx : 0) + "px";
+	el.style.height = (cy > 0 ? cy : 0) + "px";
 	return true;
 	//return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
 }
