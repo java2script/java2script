@@ -45,6 +45,12 @@ public class OS {
 	
 	public static boolean isFirefox = false;
 	
+	public static boolean isFirefox10 = false;
+	
+	public static boolean isFirefox20 = false;
+	
+	public static boolean isFirefox30 = false;
+	
 	public static boolean isSafari = false;
 	
 	public static boolean isOpera = false;
@@ -78,6 +84,9 @@ public class OS {
 	var geckoPos = dua.indexOf("Gecko");
 	os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
 	os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
+	os.isFirefox10 = os.isFirefox && (dua.indexOf ("Firefox/1.") != -1 || dua.indexOf ("Firefox/0.") != -1);
+	os.isFirefox20 = os.isFirefox && dua.indexOf ("Firefox/2.") != -1;
+	os.isFirefox30 = os.isFirefox && dua.indexOf ("Firefox/3.") != -1;
 	os.isIE = (document.all!=null)&&(!os.isOpera);
 	os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
 	os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
@@ -680,7 +689,7 @@ public class OS {
 					s.top = "-1px";
 				}
 			}
-		} else if (OS.isSafari) {
+		} else if (OS.isSafari || OS.isIE80) {
 			if ((style & (SWT.RIGHT | SWT.LEFT)) != 0) {
 				s.top = "1px";
 				if ((style & SWT.RIGHT) != 0) {

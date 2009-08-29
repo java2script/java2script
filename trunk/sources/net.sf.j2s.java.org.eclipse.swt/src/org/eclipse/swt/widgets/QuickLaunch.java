@@ -320,8 +320,8 @@ public class QuickLaunch extends DesktopItem {
 	
 	boolean isAround(int x, int y) {
 		int barWidth = 20 + this.shortcutCount * 60;
-		int height = document.body.clientWidth;
-		int offset = Math.round((height - barWidth) / 2);
+		int width = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
+		int offset = Math.round((width - barWidth) / 2);
 		int x1 = offset - 72;
 		int x2 = offset + barWidth + 72;
 		return (x >= x1 && x <= x2);

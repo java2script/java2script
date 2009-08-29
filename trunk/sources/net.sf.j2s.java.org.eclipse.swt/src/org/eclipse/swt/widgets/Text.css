@@ -26,6 +26,13 @@
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 }
+* html .text-default textarea {
+	margin-top:-1px;
+}
+* html .text-default input {
+	margin-top:-1px;
+}
+
 .text-editable input {
 	/*background-color:white;*/
 }
@@ -42,7 +49,7 @@ textarea.text-h-scroll {
 }
 .text-no-border {
 	border-style:none;
-	background-color:transparent;
+	background-color:white;
 }
 textarea.text-no-border, input.text-no-border {
 	border-style:none;

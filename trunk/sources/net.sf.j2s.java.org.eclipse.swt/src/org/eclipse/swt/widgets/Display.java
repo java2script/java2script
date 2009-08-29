@@ -1796,7 +1796,7 @@ public Monitor [] getMonitors () {
 	if (monitors == null) {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
-		monitor.clientWidth = document.body.clientWidth; 
+		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
 		int parentWidth = OS.getContainerWidth(document.body.parentNode);
 		if (parentWidth > monitor.clientWidth) {
 			monitor.clientWidth = parentWidth;
@@ -1827,7 +1827,7 @@ protected static void registerElementAsMonitor(Element el) {
 	} else {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
-		monitor.clientWidth = document.body.clientWidth; 
+		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
 		monitor.width = window.screen.availWidth;
 		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.height = window.screen.availHeight;
@@ -1843,8 +1843,8 @@ protected static void registerElementAsMonitor(Element el) {
 	monitor.clientX = 0;
 	monitor.clientY = 0;
 	if (el == document.body) {
-		monitor.clientWidth = document.body.clientWidth; 
-		monitor.clientHeight = document.body.clientHeight;
+		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
+		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.x = 0;
 		monitor.y = 0;
 		monitor.width = window.screen.availWidth;

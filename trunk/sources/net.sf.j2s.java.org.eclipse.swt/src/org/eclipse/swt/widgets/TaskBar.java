@@ -203,6 +203,10 @@ public class TaskBar extends DesktopItem {
 		}
 		div.style.width = w + "px";
 		si.style.width = (w + 48) + "px";
+		if (OS.isIE80) {
+			div.style.top = "1em";
+			div.style.left = "20px";
+		}
 		Object hShellItemClick = null;
 		if (shell != null) {
 			hShellItemClick = new RunnableCompatibility() {

@@ -474,13 +474,16 @@ void createHandle() {
 			btnEl.className = "button-radio";
 			btnHandle.type = "radio";
 		}
-		if (OS.isIE) {
+		if (OS.isIE && !OS.isIE80) {
 			btnWrapperEl.style.bottom = "-0.5em";
 		}
 		btnWrapperEl.appendChild(btnHandle);
 		btnText = document.createElement("DIV");
 		btnText.className = "button-text";
 		btnEl.appendChild(btnText);
+		if (OS.isIE80) {
+			btnText.style.paddingTop = ((style & SWT.RADIO) != 0) ? "2px" : "1px";
+		}
 	} else {
 		btnHandle = document.createElement ("BUTTON");
 		handle.appendChild(btnHandle);
@@ -1317,7 +1320,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 
 		int h = 0;
 		//if (!hasImage) {
-			if (textSizeCached) {
+			if (textSizeCached && !OS.isIE80) {
 				btnText.style.display = "block";
 				if (textHeightCached < CHECK_HEIGHT) {
 					btnText.style.paddingTop = ((CHECK_HEIGHT - textHeightCached) / 2) + "px";

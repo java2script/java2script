@@ -2338,6 +2338,10 @@ public boolean setFocus () {
 	return forceFocus ();
 }
 
+Element fontHandle() {
+	return handle;
+}
+
 /**
  * Sets the font that the receiver will use to paint textual information
  * to the font specified by the argument, or to the default font for that
@@ -2364,6 +2368,8 @@ public void setFont (Font font) {
 	if (hFont == 0) hFont = defaultFont ();
 	OS.SendMessage (handle, OS.WM_SETFONT, hFont, 1);
 	*/
+	Element handle = fontHandle();
+	
 	if (font == null || font.data == null) {
 		handle.style.fontFamily = "";
 		handle.style.fontSize = "";

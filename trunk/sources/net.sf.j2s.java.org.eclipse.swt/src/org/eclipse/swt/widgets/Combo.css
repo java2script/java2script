@@ -1,19 +1,19 @@
 .combo-default {
 	padding: 0;
-	border-style:none;
 	/*overflow:hidden;*/
 	position:absolute;
-	border-width:2px;
+	/*border-width:2px;
 	border-style:inset;
-	border-color:gray;
+	border-color:gray;*/
 }
 
 .combo-input-box {
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
-	border-style:none;
 	padding-left:1px;
-	background-color:white;
+	overflow:hidden;
+	/*border-style:none;*/
+	/*background-color:white;*/
 }
 
 @media all and (min-width:0px){/* opera and safari */

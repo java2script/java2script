@@ -218,7 +218,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		for (int i = 0; i < items.length; i++) {
 			if (items[i] != null && !items[i].isDisposed()) {
 				int containerWidth = OS.getContainerWidth(items[i].handle);
-				if (containerWidth == document.body.clientWidth) {
+				if (containerWidth == OS.getFixedBodyClientWidth()/*document.body.clientWidth*/) {
 					if (items[i].image != null) {
 						containerWidth = 18;
 					} else {

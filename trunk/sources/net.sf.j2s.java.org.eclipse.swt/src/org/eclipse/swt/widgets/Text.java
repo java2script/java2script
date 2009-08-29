@@ -223,6 +223,13 @@ void createHandle () {
 			textCSSName = "text-readonly";
 		}
 	}
+	if ((style & SWT.MULTI) != 0 && (style & SWT.WRAP) == 0) {
+		textHandle.setAttribute("wrap", "off");
+	}
+	if (OS.isIE70) {
+		textHandle.style.marginTop = "-1px";
+	}
+
 //	if ((style & SWT.WRAP) != 0) {
 //		handle.style.whiteSpace = "normal";
 //	}
@@ -2248,7 +2255,7 @@ if (handle.setSelectionRange) {
 }
 handle.focus ();
  */
-private native void setTextSelection(Object handle, int start, int end);
+static native void setTextSelection(Object handle, int start, int end);
 
 public void setRedraw (boolean redraw) {
 	checkWidget ();
@@ -2450,16 +2457,23 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 	int b = 0;
 	if ((style & SWT.BORDER) != 0) {
 		b = 4;
-		if (OS.isIE) {
-			b++;
+		if (OS.isFirefox30) {
+			b = 2;
+		} else if ((style & SWT.MULTI) != 0) {
+			b = 2;
+			if (OS.isFirefox10 || OS.isFirefox20) {
+				b = 4;
+			} else if (OS.isIE && !OS.isIE70 && !OS.isIE80) {
+				b = 4;
+			}
 		}
 	}
 	textHandle.style.height = (cy - b > 0 ? cy - b : 0) + "px";
-	if (OS.isIE && b != 0) {
-		if ((style & (SWT.MULTI | SWT.WRAP)) != 0) {
-			b += 5; // inner padding for IE!
-		} else {
-			b++;
+	if ((style & (SWT.MULTI | SWT.WRAP)) != 0) {
+		if (OS.isIE && !OS.isIE70 && !OS.isIE80 && b != 0) {
+			b += 2; // inner padding for IE!
+		} else if (OS.isIE70) {
+			b -= 2;
 		}
 	}
 	textHandle.style.width = (cx - b > 0 ? cx - b : 0) + "px";

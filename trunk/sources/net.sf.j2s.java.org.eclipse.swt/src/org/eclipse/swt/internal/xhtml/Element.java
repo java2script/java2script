@@ -122,4 +122,7 @@ public class Element {
 	public native Element cloneNode(boolean flag);
 
 	public native Element getElementById(String id);
+	
+	public native void setAttribute(String prop, String value);
+
 }
