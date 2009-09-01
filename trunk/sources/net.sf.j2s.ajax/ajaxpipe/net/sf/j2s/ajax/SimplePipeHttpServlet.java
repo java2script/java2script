@@ -209,6 +209,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 
 		long lastPipeDataWritten = -1;
 		long beforeLoop = System.currentTimeMillis();
+		int items = 0;
 		if (SimplePipeHelper.notifyPipeStatus(key, true)) { // update it!
 			List<SimpleSerializable> list = null;
 			int priority = 0;
@@ -218,7 +219,6 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	        if (pipe != null) {
 	        	waitClosingInterval = pipe.pipeWaitClosingInterval();
 	        }
-	        int items = 0;
 			while ((list = SimplePipeHelper.getPipeDataList(key)) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
@@ -279,7 +279,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
 						|| (lastPipeDataWritten > 0
 								&& now - lastPipeDataWritten >= pipeQueryTimeout
-								&& SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))) {
+								&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
+										|| SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)))) {
 					output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
 					lastPipeDataWritten = System.currentTimeMillis();
 				}
@@ -316,7 +317,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				// HTTP connection may be closed already!
 			}
 		} else if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
-				&& System.currentTimeMillis() - beforeLoop >= pipeScriptBreakout) {
+				&& (System.currentTimeMillis() - beforeLoop >= pipeScriptBreakout
+						|| (pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery))) {
 			try {
 				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_CONTINUE);
 				lastPipeDataWritten = System.currentTimeMillis();

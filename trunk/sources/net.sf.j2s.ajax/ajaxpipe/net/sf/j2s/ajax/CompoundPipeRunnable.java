@@ -131,6 +131,16 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 		}
 	}
 
+	@Override
+	protected void updateStatus(boolean live) {
+		for (int i = 0; i < pipes.length; i++) {
+			if (pipes[i] != null) {
+				pipes[i].updateStatus(live);
+			}
+		}
+		super.updateStatus(live);
+	}
+
 	public boolean weave(CompoundPipeSession pipe) {
 		pipe.pipeReset();
 		synchronized (pipes) {
