@@ -2077,7 +2077,7 @@ public void setSelection (Point selection) {
 	int bits = start | (end << 16);
 	OS.SendMessage (handle, OS.CB_SETEDITSEL, 0, bits);
 	*/
-	Text.setTextSelection(textInput, selection.x, selection.y);
+	Text.setTextSelection(textInput, selection.x + 1, selection.y + 2);
 }
 
 /**

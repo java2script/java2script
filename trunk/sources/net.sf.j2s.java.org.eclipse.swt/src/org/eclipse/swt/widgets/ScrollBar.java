@@ -277,6 +277,7 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 		sbHandle.style.width = (sbWidth + (needFixing ? 0.1 : 0)) + "px";
 	}
 	sbHandle.style.height = sbOuterHeight + "px";
+	sbHandle.style.fontSize = increment * (maximum - minimum) / thumb + "px";
 	outerHandle.appendChild(sbHandle);
 	
 	innerHandle = document.createElement("DIV");
@@ -343,6 +344,7 @@ void updateScrollBar() {
 	int innerSize = Math.round(size * (maximum - minimum) / thumb);
 	if ((style & SWT.V_SCROLL) != 0) {
 		innerHandle.style.height = innerSize + "px";
+		sbHandle.style.fontSize = increment * (maximum - minimum) / thumb + "px";
 	} else {
 		innerHandle.style.width = innerSize + "px";
 	}
@@ -810,6 +812,7 @@ public void setIncrement (int value) {
 	if (value < 1) return;
 	if (increment == value) return;
 	increment = value;
+	updateScrollBar();
 }
 
 /**
