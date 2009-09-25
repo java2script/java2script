@@ -4,7 +4,9 @@ function generateScriptCallback () {
 	return function () {
 		var s = this.readyState;
 		if (s == null || s == "loaded" || s == "complete") {
-			window["j2s.lib"].onload ();
+			if (window["ClazzLoader"] != null) {
+				window["j2s.lib"].onload (this);
+			}
 			this.onreadystatechange = null;
 			this.onload = null;
 		}
