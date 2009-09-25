@@ -158,7 +158,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		String anonClassName = null;
 		if (binding.isAnonymous() || binding.isLocal()) {
-			anonClassName = assureQualifiedName(shortenQualifiedName(binding.getBinaryName()));
+			String binaryName = binding.getBinaryName();
+			if (binaryName == null) {
+				String bindingKey = binding.getKey();
+				if (bindingKey != null) {
+					binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+				}
+			}
+			anonClassName = assureQualifiedName(shortenQualifiedName(binaryName));
 		} else {
 			anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
 		}
@@ -534,10 +541,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding binding = node.resolveTypeBinding();
 			String anonClassName = null;
 			if (binding.isAnonymous() || binding.isLocal()) {
-				if (binding.getBinaryName() == null) {
-					System.out.println("what?" + binding.getQualifiedName());
+				String binaryName = binding.getBinaryName();
+				if (binaryName == null) {
+					String bindingKey = binding.getKey();
+					if (bindingKey != null) {
+						binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+					}
 				}
-				anonClassName = assureQualifiedName(shortenQualifiedName(binding.getBinaryName()));
+				anonClassName = assureQualifiedName(shortenQualifiedName(binaryName));
 			} else {
 				anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
 			}
