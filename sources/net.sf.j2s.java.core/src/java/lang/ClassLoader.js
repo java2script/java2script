@@ -2352,7 +2352,7 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 				if (!inserted) {
 					qq[0] = n;
 				}
-			} else {
+			} else if (needBeingQueued) {
 				qq[qq.length] = n;
 			}
 			if (!needBeingQueued) { // can be loaded directly
