@@ -709,7 +709,7 @@ void configureSelect() {
 				hide();
 		}
 	};
-	Clazz.addEvent(selectInput, "blue", hTextBlur);
+	Clazz.addEvent(selectInput, "blur", hTextBlur);
 	
 	hTextMouseUp = new RunnableCompatibility() {
 		public void run() {
