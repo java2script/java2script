@@ -187,6 +187,8 @@ public class QuickLaunch extends DesktopItem {
 		}
 		if (existed) {
 			defaultQuickLaunch = this;
+		} else {
+			handle.style.display = "none";
 		}
 	}
 

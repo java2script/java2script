@@ -675,6 +675,7 @@ protected void createHandle() {
 	}
 	handle = document.createElement("DIV");
 	handle.className = "shell-default shell-trim";
+	handle.style.lineHeight = "16px"; // or "1", reset CSS
 	handle.style.visibility = "hidden";
 	
 	//nextWindowLocation();

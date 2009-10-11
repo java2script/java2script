@@ -3797,9 +3797,9 @@ public void setBackgroundPattern (Pattern pattern) {
 }
 
 void setClipping(int clipRgn) {
+	/*
 	int hRgn = clipRgn;
 	int gdipGraphics = data.gdipGraphics;
-	/*
 	if (gdipGraphics != 0) {
 		if (hRgn != 0) {
 			int region = Gdip.Region_new(hRgn);

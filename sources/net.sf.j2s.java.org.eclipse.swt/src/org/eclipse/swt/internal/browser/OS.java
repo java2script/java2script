@@ -185,6 +185,7 @@ public class OS {
 			s.width = "3000px";
 			s.height = "100px";
 			s.overflow = "scroll";
+			s.lineHeight = "16px"; // or "1", reset CSS
 			invisibleContainer = el;
 			setTextSelection(el, false);
 			
