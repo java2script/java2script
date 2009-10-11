@@ -1204,6 +1204,9 @@ public Rectangle getBounds() {
 			return null;
 	}
 	*/
+	if (width == 0 || height == 0) {
+		return new Rectangle(0, 0, 16, 16); 
+	}
 	return new Rectangle(0, 0, width, height);
 }
 

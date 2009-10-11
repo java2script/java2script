@@ -462,6 +462,7 @@ public class TaskBar extends DesktopItem {
 			return;
 		Element sb = document.createElement("DIV");
 		sb.className = "shell-manager-sidebar";
+		sb.style.lineHeight = "16px"; // or "1", reset CSS
 		sb.style.display = "none";
 		document.body.appendChild(sb);
 		this.handle = sb;

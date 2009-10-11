@@ -88,6 +88,7 @@ public class MaximizedTitle extends DesktopItem {
 		Element tbc = document.createElement("DIV");
 		tbc.className = "shell-manager-topbar-container";
 		document.body.appendChild(tbc);
+		tbc.style.lineHeight = "16px"; // or "1", reset CSS
 		tbc.style.display = "none";
 		this.handle = tbc;
 		

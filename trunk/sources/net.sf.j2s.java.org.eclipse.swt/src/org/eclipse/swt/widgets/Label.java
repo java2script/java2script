@@ -675,20 +675,20 @@ void createHandle() {
 		*/
 		if ((style & SWT.SHADOW_IN) != 0) {
 			handle.className += " shadow-in";
-		} else if ((style & SWT.SHADOW_OUT) != 0) {
-			handle.className += " shadow-out";
-		} else {
+		} else if ((style & SWT.SHADOW_NONE) != 0) {
 			handle.className += " shadow-none";
+		} else {
+			handle.className += " shadow-out";
 		}
 		handle.style.fontSize = "0";
 		Element seperator1 = document.createElement("DIV"); 
 		Element seperator2 = document.createElement("DIV"); 
-		if ((style & SWT.VERTICAL) != 0) {
-			seperator1.className = "label-seperator-vertical-left";
-			seperator2.className = "label-seperator-vertical-right";
-		} else {
+		if ((style & SWT.HORIZONTAL) != 0) {
 			seperator1.className = "label-seperator-horizontal-top";
 			seperator2.className = "label-seperator-horizontal-bottom";
+		} else {
+			seperator1.className = "label-seperator-vertical-left";
+			seperator2.className = "label-seperator-vertical-right";
 		}
 		handle.appendChild(seperator1);
 		handle.appendChild(seperator2);
