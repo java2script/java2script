@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,21 +11,13 @@
 package org.eclipse.swt.custom;
 
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.RunnableCompatibility;
+import org.eclipse.swt.*;
+import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.internal.browser.OS;
+import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Widget;
+import org.eclipse.swt.widgets.*;
 
 /**
  * Instances of this class represent a selectable user interface object
@@ -49,10 +41,7 @@ public class CTabItem extends Item {
 	String toolTipText;
 	String shortenedText;
 	int shortenedTextWidth;
-	boolean hasImage;
-	Element textEl;
-	Element rightEl;
-	boolean isSelected;
+	
 	// Appearance
 	Font font;
 	Image disabledImage; 
@@ -71,6 +60,12 @@ public class CTabItem extends Item {
 	static final int FLAGS = SWT.DRAW_TRANSPARENT | SWT.DRAW_MNEMONIC;
 	static final String ELLIPSIS = "..."; //$NON-NLS-1$ // could use the ellipsis glyph on some platforms "\u2026"
 	
+	Element seperatorLine;
+	Element imageHandle;
+	Element textHandle;
+	Element closeBtn;
+	Element[] elements = new Element[0];
+
 /**
  * Constructs a new instance of this class given its parent
  * (which must be a <code>CTabFolder</code>) and a style value
@@ -119,10 +114,11 @@ public CTabItem (CTabFolder parent, int style) {
  *
  * @param parent a CTabFolder which will be the parent of the new instance (cannot be null)
  * @param style the style of control to construct
- * @param index the index to store the receiver in its parent
+ * @param index the zero-relative index to store the receiver in its parent
  *
  * @exception IllegalArgumentException <ul>
  *    <li>ERROR_NULL_ARGUMENT - if the parent is null</li>
+ *    <li>ERROR_INVALID_RANGE - if the index is not between 0 and the number of elements in the parent (inclusive)</li>
  * </ul>
  * @exception SWTException <ul>
  *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the parent</li>
@@ -133,56 +129,71 @@ public CTabItem (CTabFolder parent, int style) {
  */
 public CTabItem (CTabFolder parent, int style, int index) {
 	super (parent, checkStyle(style));
-	this.parent = parent;
-	showClose = parent.showClose;
+	showClose = (style & SWT.CLOSE) != 0;
 	parent.createItem (this, index);
-	configure(index);
 }
-String getNameText () {
-	return getText ();
-}
-
-private void configure(int index) {
-	handle.onclick = new RunnableCompatibility() {
-		public void run() {
-			parent.setSelection(CTabItem.this);
-		}
-	};
-	if(parent.showClose){
-		handle.onmouseover = new RunnableCompatibility() {
-			public void run() {
-				prepareCloseBtn(true);
-			}
-		};
-		handle.onmouseout = new RunnableCompatibility() {
-			public void run() {
-				prepareCloseBtn(false);
-			}
-		};
-	}
-}
-
 static int checkStyle(int style) {
 	return SWT.NONE;
 }
-static String shortenText(GC gc, String text, int width) {
-	if (gc.textExtent(text, FLAGS).x <= width) return text;
-	int ellipseWidth = gc.textExtent(ELLIPSIS, FLAGS).x;
+
+/*
+ * Return whether to use ellipses or just truncate labels
+ */
+boolean useEllipses() {
+	return parent.simple;
+}
+
+String shortenText(/*GC gc, */String text, int width) {
+	return useEllipses()
+		? shortenText(/*gc, */text, width, ELLIPSIS)
+		: shortenText(/*gc, */text, width, ""); //$NON-NLS-1$
+}
+
+private Point textExtent(String text, int flags) {
+	return OS.getStringStyledSize(text, "ctabitem-text", null);
+}
+
+String shortenText(/*GC gc, */String text, int width, String ellipses) {
+	if (/*gc.*/textExtent(text, FLAGS).x <= width) return text;
+	int ellipseWidth = /*gc.*/textExtent(ellipses, FLAGS).x;
 	int length = text.length();
 	int end = length - 1;
 	while (end > 0) {
 		text = text.substring(0, end);
-		int l = gc.textExtent(text, FLAGS).x;
+		int l = /*gc.*/textExtent(text, FLAGS).x;
 		if (l + ellipseWidth <= width) {
-			return text + ELLIPSIS;
+			return text + ellipses;
 		}
 		end--;
 	}
 	return text.substring(0,1);
 }
+
 public void dispose() {
 	if (isDisposed ()) return;
 	//if (!isValidThread ()) error (SWT.ERROR_THREAD_INVALID_ACCESS);
+	if (closeBtn != null) {
+		OS.destroyHandle(closeBtn);
+		closeBtn = null;
+	}
+	if (textHandle != null) {
+		OS.destroyHandle(textHandle);
+		textHandle = null;
+	}
+	if (imageHandle != null) {
+		OS.destroyHandle(imageHandle);
+		imageHandle = null;
+	}
+	if (elements != null) {
+		for (int i = 0; i < elements.length; i++) {
+			Element el = elements[i];
+			if (el != null) {
+				OS.destroyHandle(el);
+				elements[i] = null;
+			}
+		}
+		elements = null;
+	}
 	parent.destroyItem(this);
 	super.dispose();
 	parent = null;
@@ -192,8 +203,11 @@ public void dispose() {
 	font = null;
 }
 void drawClose(GC gc) {
+	if (closeBtn != null) {
+		closeBtn.style.display = parent.showClose ? "" : "none";
+	}
 	if (closeRect.width == 0 || closeRect.height == 0) return;
-	Display display = getDisplay();
+	//Display display = getDisplay();
 
 	// draw X 9x9
 	int indent = Math.max(1, (CTabFolder.BUTTON_SIZE-9)/2);
@@ -201,9 +215,19 @@ void drawClose(GC gc) {
 	int y = closeRect.y + indent;
 	y += parent.onBottom ? -1 : 1;
 	
-	Color closeBorder = display.getSystemColor(CTabFolder.BUTTON_BORDER);
+	//Color closeBorder = display.getSystemColor(CTabFolder.BUTTON_BORDER);
+	
+	if (closeBtn == null) {
+		closeBtn = document.createElement("DIV");
+		parent.handle.appendChild(closeBtn);
+		closeBtn.title = "Close";
+	}
+	closeBtn.style.left = x + "px";
+	closeBtn.style.top = y + "px";
+	
 	switch (closeImageState) {
 		case CTabFolder.NORMAL: {
+			/*
 			int[] shape = new int[] {x,y, x+2,y, x+4,y+2, x+5,y+2, x+7,y, x+9,y, 
 					                 x+9,y+2, x+7,y+4, x+7,y+5, x+9,y+7, x+9,y+9,
 			                         x+7,y+9, x+5,y+7, x+4,y+7, x+2,y+9, x,y+9,
@@ -212,9 +236,12 @@ void drawClose(GC gc) {
 			gc.fillPolygon(shape);
 			gc.setForeground(closeBorder);
 			gc.drawPolygon(shape);
+			*/
+			closeBtn.className = "ctabitem-close";
 			break;
 		}
 		case CTabFolder.HOT: {
+			/*
 			int[] shape = new int[] {x,y, x+2,y, x+4,y+2, x+5,y+2, x+7,y, x+9,y, 
 					                 x+9,y+2, x+7,y+4, x+7,y+5, x+9,y+7, x+9,y+9,
 			                         x+7,y+9, x+5,y+7, x+4,y+7, x+2,y+9, x,y+9,
@@ -225,9 +252,12 @@ void drawClose(GC gc) {
 			fill.dispose();
 			gc.setForeground(closeBorder);
 			gc.drawPolygon(shape);
+			*/
+			closeBtn.className = "ctabitem-close-hover";
 			break;
 		}
 		case CTabFolder.SELECTED: {
+			/*
 			int[] shape = new int[] {x+1,y+1, x+3,y+1, x+5,y+3, x+6,y+3, x+8,y+1, x+10,y+1, 
 					                 x+10,y+3, x+8,y+5, x+8,y+6, x+10,y+8, x+10,y+10,
 			                         x+8,y+10, x+6,y+8, x+5,y+8, x+3,y+10, x+1,y+10,
@@ -238,24 +268,636 @@ void drawClose(GC gc) {
 			fill.dispose();
 			gc.setForeground(closeBorder);
 			gc.drawPolygon(shape);
+			*/
+			closeBtn.className = "ctabitem-close";
 			break;
 		}
 		case CTabFolder.NONE: {
+			/*
 			int[] shape = new int[] {x,y, x+10,y, x+10,y+10, x,y+10};
 			if (parent.gradientColors != null && !parent.gradientVertical) {
-//				parent.drawBackground(gc, shape, false);
+				parent.drawBackground(gc, shape, false);
 			} else {
 				Color defaultBackground = parent.getBackground();
 				Image image = parent.bgImage;
 				Color[] colors = parent.gradientColors;
 				int[] percents = parent.gradientPercents;
 				boolean vertical = parent.gradientVertical; 
-//				parent.drawBackground(gc, shape, x, y, 10, 10, defaultBackground, image, colors, percents, vertical);
+				parent.drawBackground(gc, shape, x, y, 10, 10, defaultBackground, image, colors, percents, vertical);
 			}
+			*/
+			closeBtn.className = "ctabitem-none";
 			break;
 		}
 	}
 }
+void drawSelected(GC gc ) {
+	if (textHandle != null) {
+		textHandle.style.display = "";
+	}
+	if (imageHandle != null) {
+		imageHandle.style.display = "";
+	}
+	if (seperatorLine != null) {
+		seperatorLine.style.display = "";
+	}
+	if (closeBtn != null) {
+		closeBtn.style.display = "";
+	}
+	Point size = parent.getSize();
+	int rightEdge = Math.min (x + width, parent.getRightItemEdge());
+	
+	//	 Draw selection border across all tabs
+	int xx = parent.borderLeft;
+	int yy = parent.onBottom ? size.y - parent.borderBottom - parent.tabHeight - parent.highlight_header : parent.borderTop + parent.tabHeight + 1;
+	int ww = size.x - parent.borderLeft - parent.borderRight;
+	int hh = parent.highlight_header - 1;
+	int[] shape = new int[] {xx,yy, xx+ww,yy, xx+ww,yy+hh, xx,yy+hh};
+	if (parent.selectionGradientColors != null && !parent.selectionGradientVertical) {
+		parent.drawBackground(gc, shape, true);
+	} else {
+		//gc.setBackground(parent.selectionBackground);
+		//gc.fillRectangle(xx, yy, ww, hh);
+	}
+	
+	/*
+	if (parent.single) {
+		if (!showing) return;
+	} else {
+		// if selected tab scrolled out of view or partially out of view
+		// just draw bottom line
+		if (!showing){
+			int x1 = Math.max(0, parent.borderLeft - 1);
+			int y1 = (parent.onBottom) ? y - 1 : y + height;
+			int x2 = size.x - parent.borderRight;
+			gc.setForeground(CTabFolder.borderColor);
+			gc.drawLine(x1, y1, x2, y1);
+			return;
+		}
+			
+		// draw selected tab background and outline
+		shape = null;
+		if (this.parent.onBottom) {
+			int[] left = parent.simple ? CTabFolder.SIMPLE_BOTTOM_LEFT_CORNER : CTabFolder.BOTTOM_LEFT_CORNER;
+			int[] right = parent.simple ? CTabFolder.SIMPLE_BOTTOM_RIGHT_CORNER : parent.curve;
+			if (parent.borderLeft == 0 && parent.indexOf(this) == parent.firstIndex) {
+				left = new int[]{x, y+height};
+			}
+			shape = new int[left.length+right.length+8];
+			int index = 0;
+			shape[index++] = x; // first point repeated here because below we reuse shape to draw outline
+			shape[index++] = y - 1;
+			shape[index++] = x;
+			shape[index++] = y - 1;
+			for (int i = 0; i < left.length/2; i++) {
+				shape[index++] = x + left[2*i];
+				shape[index++] = y + height + left[2*i+1] - 1;
+			}
+			for (int i = 0; i < right.length/2; i++) {
+				shape[index++] = parent.simple ? rightEdge - 1 + right[2*i] : rightEdge - parent.curveIndent + right[2*i];
+				shape[index++] = parent.simple ? y + height + right[2*i+1] - 1 : y + right[2*i+1] - 2;
+			}
+			shape[index++] = parent.simple ? rightEdge - 1 : rightEdge + parent.curveWidth - parent.curveIndent;
+			shape[index++] = y - 1;
+			shape[index++] = parent.simple ? rightEdge - 1 : rightEdge + parent.curveWidth - parent.curveIndent;
+			shape[index++] = y - 1;
+		} else {
+			int[] left = parent.simple ? CTabFolder.SIMPLE_TOP_LEFT_CORNER : CTabFolder.TOP_LEFT_CORNER;
+			int[] right = parent.simple ? CTabFolder.SIMPLE_TOP_RIGHT_CORNER : parent.curve;
+			if (parent.borderLeft == 0 && parent.indexOf(this) == parent.firstIndex) {
+				left = new int[]{x, y};
+			}
+			shape = new int[left.length+right.length+8];
+			int index = 0;
+			shape[index++] = x; // first point repeated here because below we reuse shape to draw outline
+			shape[index++] = y + height + 1;
+			shape[index++] = x;
+			shape[index++] = y + height + 1;
+			for (int i = 0; i < left.length/2; i++) {
+				shape[index++] = x + left[2*i];
+				shape[index++] = y + left[2*i+1];
+			}
+			for (int i = 0; i < right.length/2; i++) {
+				shape[index++] = parent.simple ? rightEdge - 1 + right[2*i] : rightEdge - parent.curveIndent + right[2*i];
+				shape[index++] = y + right[2*i+1];
+			}
+			shape[index++] = parent.simple ? rightEdge - 1 : rightEdge + parent.curveWidth - parent.curveIndent;
+			shape[index++] = y + height + 1;
+			shape[index++] = parent.simple ? rightEdge - 1 : rightEdge + parent.curveWidth - parent.curveIndent;
+			shape[index++] = y + height + 1;
+		}
+		
+		Rectangle clipping = gc.getClipping();
+		Rectangle bounds = getBounds();
+		bounds.height += 1;
+		if (parent.onBottom) bounds.y -= 1;
+		boolean tabInPaint = clipping.intersects(bounds);
+		
+		if (tabInPaint) {
+			// fill in tab background
+			if (parent.selectionGradientColors != null && !parent.selectionGradientVertical) {
+				parent.drawBackground(gc, shape, true);
+			} else {
+				Color defaultBackground = parent.selectionBackground;
+				Image image = parent.selectionBgImage;
+				Color[] colors = parent.selectionGradientColors;
+				int[] percents = parent.selectionGradientPercents;
+				boolean vertical = parent.selectionGradientVertical;
+				xx = x;
+				yy = parent.onBottom ? y -1 : y + 1;
+				ww = width;
+				hh = height;
+				if (!parent.single && !parent.simple) ww += parent.curveWidth - parent.curveIndent;
+				parent.drawBackground(gc, shape, xx, yy, ww, hh, defaultBackground, image, colors, percents, vertical);
+			}
+		}
+		
+		//Highlight MUST be drawn before the outline so that outline can cover it in the right spots (start of swoop)
+		//otherwise the curve looks jagged
+		drawHighlight(gc, rightEdge);
+
+		// draw outline
+		shape[0] = Math.max(0, parent.borderLeft - 1);
+		if (parent.borderLeft == 0 && parent.indexOf(this) == parent.firstIndex) {
+			shape[1] = parent.onBottom ? y + height - 1 : y; 
+			shape[5] = shape[3] = shape[1];
+		}
+		shape[shape.length - 2] = size.x - parent.borderRight + 1;
+		for (int i = 0; i < shape.length/2; i++) {
+			if (shape[2*i + 1] == y + height + 1) shape[2*i + 1] -= 1;
+		}
+		RGB inside = parent.selectionBackground.getRGB();
+		if (parent.selectionBgImage != null || 
+		    (parent.selectionGradientColors != null && parent.selectionGradientColors.length > 1)) {
+		    inside = null;
+		}
+		RGB outside = parent.getBackground().getRGB();		
+		if (parent.bgImage != null || 
+		    (parent.gradientColors != null && parent.gradientColors.length > 1)) {
+		    outside = null;
+		}
+		parent.antialias(shape, CTabFolder.borderColor.getRGB(), inside, outside, gc);
+		gc.setForeground(CTabFolder.borderColor);
+		gc.drawPolyline(shape);
+		
+		if (!tabInPaint) return;
+	}
+	*/
+	if (elements[0] == null) {
+		Element el = document.createElement("DIV");
+		el.className = "ctabfolder-border-line";
+		parent.handle.appendChild(el);
+		elements[0] = el;
+	}
+	CSSStyle s = elements[0].style;
+	s.left = (x + 2) + "px";
+	s.top = (parent.onBottom ? y + height - 1 : y) + "px";
+	s.width = (width + 1 - 2 - (!OS.isIE ? 2: 0)) + "px";
+	s.backgroundColor = CTabFolder.borderColor.getCSSHandle();
+
+	if (elements[1] == null) {
+		Element el = document.createElement("DIV");
+		el.className = "ctabfolder-border-pixel";
+		parent.handle.appendChild(el);
+		elements[1] = el;
+	}
+	s = elements[1].style;
+	s.left = x + 1 + "px";
+	s.top = (parent.onBottom ? y + height - 2 : y + 1) + "px";
+	s.width = (width + 1 - 2 - (!OS.isIE ? 2: 0)) + "px";
+	s.backgroundColor = parent.selectionBackground.getCSSHandle();
+	
+	if (elements[2] == null) {
+		Element el = document.createElement("DIV");
+		el.className = "ctabfolder-border-pixel";
+		parent.handle.appendChild(el);
+		elements[2] = el;
+	}
+	s = elements[2].style;
+	s.left = x + "px";
+	s.top = (parent.onBottom ? y - 1 : y + 2) + "px";
+	s.width = (width + 1 - (!OS.isIE ? 2: 0)) + "px";
+	s.height = (height - 1) + "px";
+	s.backgroundColor = parent.selectionBackground.getCSSHandle();
+	for (int i = 0; i < elements.length; i++) {
+		if (elements[i] != null) {
+			elements[i].style.display = "";
+		}
+	}
+	if (seperatorLine != null) {
+		seperatorLine.style.display = "none";
+	}
+
+	// draw Image
+	int xDraw = x + LEFT_MARGIN;
+	if (parent.single && (parent.showClose || showClose)) xDraw += CTabFolder.BUTTON_SIZE; 
+	Image image = getImage();
+	if (image != null) {
+		Rectangle imageBounds = image.getBounds();
+		// only draw image if it won't overlap with close button
+		int maxImageWidth = rightEdge - xDraw - RIGHT_MARGIN;
+		if (!parent.single && closeRect.width > 0) maxImageWidth -= closeRect.width + INTERNAL_SPACING;
+		if (imageBounds.width < maxImageWidth) {
+			int imageX = xDraw;
+			int imageY = y + (height - imageBounds.height) / 2;
+			imageY += parent.onBottom ? -1 : 1;
+			//gc.drawImage(image, imageX, imageY);
+			drawImage(image, imageX, imageY, imageBounds.width, imageBounds.height);
+			xDraw += imageBounds.width + INTERNAL_SPACING;
+		}
+	}
+	
+	// draw Text
+	int textWidth = rightEdge - xDraw - RIGHT_MARGIN;
+	if (!parent.single && closeRect.width > 0) textWidth -= closeRect.width + INTERNAL_SPACING;
+	if (textWidth > 0) {
+		// Font gcFont = gc.getFont();
+		// gc.setFont(font == null ? parent.getFont() : font);
+		
+		if (shortenedText == null || shortenedTextWidth != textWidth) {
+			shortenedText = shortenText(/*gc, */getText(), textWidth);
+			shortenedTextWidth = textWidth;
+		}
+		Point extent = /*gc.*/textExtent(shortenedText, FLAGS);	
+		int textY = y + (height - extent.y) / 2;
+		textY += parent.onBottom ? -1 : 1;
+		
+		/*
+		gc.setForeground(parent.selectionForeground);
+		gc.drawText(shortenedText, xDraw, textY, FLAGS);
+		gc.setFont(gcFont);
+		*/
+		drawText(shortenedText, xDraw, textY, FLAGS);
+
+		/*
+		// draw a Focus rectangle
+		if (parent.isFocusControl()) {
+			Display display = getDisplay();
+			if (parent.simple || parent.single) {
+				gc.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+				gc.setForeground(display.getSystemColor(SWT.COLOR_WHITE));
+				gc.drawFocus(xDraw-1, textY-1, extent.x+2, extent.y+2);
+			} else {
+				gc.setForeground(display.getSystemColor(CTabFolder.BUTTON_BORDER));
+				gc.drawLine(xDraw, textY+extent.y+1, xDraw+extent.x+1, textY+extent.y+1);
+			}
+		}
+		*/
+	}
+	if (parent.showClose || showClose) drawClose(gc);
+}
+
+/*
+ * Draw a highlight effect along the left, top, and right edges of the tab.
+ * Only for curved tabs, on top.
+ * Do not draw if insufficient colors.
+ */
+void drawHighlight(GC gc, int rightEdge) {
+	//only draw for curvy tabs and only draw for top tabs
+	if(parent.simple || this.parent.onBottom)
+		return;
+	
+	if(parent.selectionHighlightGradientBegin == null)
+		return;
+	
+	Color[] gradients = parent.selectionHighlightGradientColorsCache;
+	if(gradients == null)
+		return;
+	int gradientsSize = gradients.length;
+	if(gradientsSize == 0)
+		return;		//shouldn't happen but just to be tidy
+
+	gc.setForeground(gradients[0]);
+	
+	//draw top horizontal line
+	gc.drawLine(
+			CTabFolder.TOP_LEFT_CORNER_HILITE[0] + x + 1, //rely on fact that first pair is top/right of curve
+			1 + y,
+			rightEdge - parent.curveIndent,
+			1 + y);
+	
+	int[] leftHighlightCurve = CTabFolder.TOP_LEFT_CORNER_HILITE;
+
+	int d = parent.tabHeight - parent.topCurveHighlightEnd.length /2;
+
+	int lastX = 0;
+	int lastY = 0;
+	int lastColorIndex = 0;
+	
+	//draw upper left curve highlight
+	for (int i = 0; i < leftHighlightCurve.length /2; i++) {
+		int rawX = leftHighlightCurve[i * 2];
+		int rawY = leftHighlightCurve[i * 2 + 1];
+		lastX = rawX + x;
+		lastY = rawY + y;
+		lastColorIndex = rawY - 1;
+		gc.setForeground(gradients[lastColorIndex]);
+		gc.drawPoint(lastX, lastY);
+	}
+	//draw left vertical line highlight
+	for(int i = lastColorIndex; i < gradientsSize; i++) {
+		gc.setForeground(gradients[i]);
+		gc.drawPoint(lastX, 1 + lastY++);
+	}
+	
+	int rightEdgeOffset = rightEdge - parent.curveIndent;
+	
+	//draw right swoop highlight up to diagonal portion
+	for (int i = 0; i < parent.topCurveHighlightStart.length /2; i++) {
+		int rawX = parent.topCurveHighlightStart[i * 2];
+		int rawY = parent.topCurveHighlightStart[i * 2 + 1];
+		lastX = rawX + rightEdgeOffset;
+		lastY = rawY + y;
+		lastColorIndex = rawY - 1;
+		if(lastColorIndex >= gradientsSize)
+			break;	//can happen if tabs are unusually short and cut off the curve
+		gc.setForeground(gradients[lastColorIndex]);
+		gc.drawPoint(lastX, lastY);
+	}
+	//draw right diagonal line highlight
+	for(int i = lastColorIndex; i < lastColorIndex + d; i++) {
+		if(i >= gradientsSize)
+			break;	//can happen if tabs are unusually short and cut off the curve
+		gc.setForeground(gradients[i]);
+		gc.drawPoint(1 + lastX++, 1 + lastY++);
+	}
+
+	//draw right swoop highlight from diagonal portion to end
+	for (int i = 0; i < parent.topCurveHighlightEnd.length /2; i++) {
+		int rawX = parent.topCurveHighlightEnd[i * 2]; //d is already encoded in this value
+		int rawY = parent.topCurveHighlightEnd[i * 2 + 1]; //d already encoded
+		lastX = rawX + rightEdgeOffset;
+		lastY = rawY + y;
+		lastColorIndex = rawY - 1;
+		if(lastColorIndex >= gradientsSize)
+			break;	//can happen if tabs are unusually short and cut off the curve
+		gc.setForeground(gradients[lastColorIndex]);
+		gc.drawPoint(lastX, lastY);
+	}	
+}
+
+/*
+ * Draw the unselected border for the receiver on the right.
+ * 
+ * @param gc
+ */
+void drawRightUnselectedBorder(GC gc) {
+	if (this.parent.simple) {
+		if (seperatorLine == null) {
+			Element el = document.createElement("DIV");
+			el.className = "ctabfolder-border-vline";
+			this.parent.handle.appendChild(el);
+			seperatorLine = el;
+		}
+		CSSStyle s = seperatorLine.style;
+		s.left = (x + width - 1) + "px";
+		s.top = y + "px";
+		s.height = height + "px";
+	} else {
+		
+	}
+
+	/*
+	int[] shape = null;
+	int startX = x + width - 1;
+
+	if (this.parent.onBottom) {
+		int[] right = parent.simple
+			? CTabFolder.SIMPLE_UNSELECTED_INNER_CORNER
+			: CTabFolder.BOTTOM_RIGHT_CORNER;
+		
+		shape = new int[right.length + 2];
+		int index = 0;
+		
+		for (int i = 0; i < right.length / 2; i++) {
+			shape[index++] = startX + right[2 * i];
+			shape[index++] = y + height + right[2 * i + 1] - 1;
+		}
+		shape[index++] = startX;
+		shape[index++] = y - 1;
+	} else {
+		int[] right = parent.simple
+			? CTabFolder.SIMPLE_UNSELECTED_INNER_CORNER
+			: CTabFolder.TOP_RIGHT_CORNER;
+		
+		shape = new int[right.length + 2];
+		int index = 0;
+
+		for (int i = 0; i < right.length / 2; i++) {
+			shape[index++] = startX + right[2 * i];
+			shape[index++] = y + right[2 * i + 1];
+		}
+
+		shape[index++] = startX;
+		shape[index++] = y + height;
+
+	}
+
+	drawBorder(gc, shape);
+	*/
+}
+
+/*
+ * Draw the border of the tab
+ * 
+ * @param gc
+ * @param shape
+ */
+void drawBorder(GC gc, int[] shape) {
+
+	gc.setForeground(CTabFolder.borderColor);
+	gc.drawPolyline(shape);
+}
+
+/*
+ * Draw the unselected border for the receiver on the left.
+ * 
+ * @param gc
+ */
+void drawLeftUnselectedBorder(GC gc) {
+	if (this.parent.simple) {
+		if (seperatorLine == null) {
+			Element el = document.createElement("DIV");
+			el.className = "ctabfolder-border-vline";
+			this.parent.handle.appendChild(el);
+			seperatorLine = el;
+		}
+		CSSStyle s = seperatorLine.style;
+		s.left = x + "px";
+		s.top = y + "px";
+		s.height = height + "px";
+	} else {
+		
+	}
+	/*
+	int[] shape = null;
+	if (this.parent.onBottom) {
+		int[] left = parent.simple
+			? CTabFolder.SIMPLE_UNSELECTED_INNER_CORNER
+			: CTabFolder.BOTTOM_LEFT_CORNER;
+		
+		shape = new int[left.length + 2];
+		int index = 0;
+		shape[index++] = x;
+		shape[index++] = y - 1;
+		for (int i = 0; i < left.length / 2; i++) {
+			shape[index++] = x + left[2 * i];
+			shape[index++] = y + height + left[2 * i + 1] - 1;
+		}
+	} else {
+		int[] left = parent.simple
+			? CTabFolder.SIMPLE_UNSELECTED_INNER_CORNER
+			: CTabFolder.TOP_LEFT_CORNER;
+
+		shape = new int[left.length + 2];
+		int index = 0;
+		shape[index++] = x;
+		shape[index++] = y + height;
+		for (int i = 0; i < left.length / 2; i++) {
+			shape[index++] = x + left[2 * i];
+			shape[index++] = y + left[2 * i + 1];
+		}
+
+	}
+
+	drawBorder(gc, shape);
+	*/
+}
+
+void drawUnselected(GC gc) {
+	String displayStr = showing ? "" : "none";
+	if (textHandle != null) {
+		textHandle.style.display = displayStr;
+	}
+	if (imageHandle != null) {
+		imageHandle.style.display = displayStr;
+	}
+	if (seperatorLine != null) {
+		seperatorLine.style.display = displayStr;
+	}
+	if (closeBtn != null) {
+		closeBtn.style.display = displayStr;
+	}
+	// Do not draw partial items
+	if (!showing) return;
+	/*
+	Rectangle clipping = gc.getClipping();
+	Rectangle bounds = getBounds();
+	if (!clipping.intersects(bounds)) return;
+	*/
+	// draw border
+	int index = parent.indexOf(this);
+
+	if (index > 0 && index < parent.selectedIndex)
+		drawLeftUnselectedBorder(gc);
+	// If it is the last one then draw a line
+	if (index > parent.selectedIndex)
+		drawRightUnselectedBorder(gc);
+
+	if (seperatorLine != null) {
+		seperatorLine.style.display = "";
+		if (index == 0 && index < parent.selectedIndex) {
+			seperatorLine.style.display = "none";
+		}
+	}
+	for (int i = 0; i < elements.length; i++) {
+		if (elements[i] != null) {
+			elements[i].style.display = "none";
+		}
+	}
+	// draw Image
+	int xDraw = x + LEFT_MARGIN;
+	Image image = getImage();
+	if (image != null && parent.showUnselectedImage) {
+		Rectangle imageBounds = image.getBounds();
+		// only draw image if it won't overlap with close button
+		int maxImageWidth = x + width - xDraw - RIGHT_MARGIN;
+		if (parent.showUnselectedClose && (parent.showClose || showClose)) {
+			maxImageWidth -= closeRect.width + INTERNAL_SPACING;
+		}
+		if (imageBounds.width < maxImageWidth) {		
+			int imageX = xDraw;
+			int imageHeight = imageBounds.height;
+			int imageY = y + (height - imageHeight) / 2;
+			imageY += parent.onBottom ? -1 : 1;
+			int imageWidth = imageBounds.width * imageHeight / imageBounds.height;
+			/*
+			gc.drawImage(image, 
+				         imageBounds.x, imageBounds.y, imageBounds.width, imageBounds.height,
+				         imageX, imageY, imageWidth, imageHeight);
+			*/
+			drawImage(image, imageX, imageY, imageWidth, imageHeight);
+			xDraw += imageWidth + INTERNAL_SPACING;
+		}
+	} else {
+		if (imageHandle != null) {
+			handle.style.display = "none";
+		}
+	}
+	// draw Text
+	int textWidth = x + width - xDraw - RIGHT_MARGIN;
+	if (parent.showUnselectedClose && (parent.showClose || showClose)) {
+		textWidth -= closeRect.width + INTERNAL_SPACING;
+	}
+	if (textWidth > 0) {
+		//*
+		//Font gcFont = gc.getFont();
+		//gc.setFont(font == null ? parent.getFont() : font);
+		if (shortenedText == null || shortenedTextWidth != textWidth) {
+			shortenedText = shortenText(/*gc, */getText(), textWidth);
+			shortenedTextWidth = textWidth;
+		}	
+		Point extent = /*gc.*/textExtent(shortenedText, FLAGS);
+		int textY = y + (height - extent.y) / 2;
+		textY += parent.onBottom ? -1 : 1;
+		/*
+		gc.setForeground(parent.getForeground());
+		gc.drawText(shortenedText, xDraw, textY, FLAGS);
+		gc.setFont(gcFont);
+		//*/
+		drawText(shortenedText, xDraw, textY, FLAGS);
+	}
+	// draw close
+	if (parent.showUnselectedClose && (parent.showClose || showClose)) drawClose(gc);
+}
+private void drawImage(Image image, int imageX, int imageY, int imageWidth,
+		int imageHeight) {
+	if (imageHandle == null) {
+		imageHandle = document.createElement("DIV");
+		parent.handle.appendChild(imageHandle);
+		imageHandle.className = "ctabitem-image";
+	}
+	CSSStyle handleStyle = imageHandle.style;
+	handleStyle.left = imageX + "px";
+	handleStyle.top = imageY + "px";
+	handleStyle.width = imageWidth + "px";
+	handleStyle.height = imageHeight + "px";
+	if (OS.isIENeedPNGFix && image.url != null && image.url.toLowerCase().endsWith(".png") && handleStyle.filter != null) {
+		handleStyle.backgroundImage = "";
+		handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + image.url + "\", sizingMethod=\"image\")";
+	} else {
+		if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
+		handleStyle.backgroundImage = "url(\"" + image.url + "\")";
+	}
+}
+
+private void drawText(String string, int lineX, int lineY, int flags) {
+	if (textHandle == null) {
+		Element textEl = document.createElement("DIV");
+		textEl.className = "ctabitem-text";
+		textEl.style.position = "absolute";
+		parent.handle.appendChild(textEl);
+		textHandle = textEl;
+		OS.setTextSelection(textEl, false);
+	}
+	if (textHandle.childNodes.length == 0 || textHandle.childNodes[0].nodeValue != string) {
+		OS.clearChildren(textHandle);
+		textHandle.appendChild(document.createTextNode(string));
+	}
+	textHandle.style.left = lineX + "px";
+	textHandle.style.top = lineY + "px";
+}
+
 /**
  * Returns a rectangle describing the receiver's size and location
  * relative to its parent.
@@ -274,7 +916,7 @@ public Rectangle getBounds () {
 	return new Rectangle(x, y, w, height);
 }
 /**
-* Gets the control that is displayed in the content are of the tab item.
+* Gets the control that is displayed in the content area of the tab item.
 *
 * @return the control
 *
@@ -331,7 +973,7 @@ public Font getFont() {
  * </ul>
  */
 public CTabFolder getParent () {
-	checkWidget();
+	//checkWidget();
 	return parent;
 }
 /**
@@ -369,7 +1011,14 @@ public boolean isShowing () {
 	checkWidget();
 	return showing;
 }
-
+void onPaint(GC gc, boolean isSelected) {
+	if (width == 0 || height == 0) return;
+	if (isSelected) {
+		drawSelected(gc);
+	} else {
+		drawUnselected(gc);
+	}
+}
 int preferredHeight(GC gc) {
 	Image image = getImage();
 	int h = (image == null) ? 0 : image.getBounds().height;
@@ -398,9 +1047,14 @@ int preferredWidth(GC gc, boolean isSelected, boolean minimum) {
 		int minChars = parent.minChars;
 		text = minChars == 0 ? null : getText();
 		if (text != null && text.length() > minChars) {
-			int end = minChars < ELLIPSIS.length() + 1 ? minChars : minChars - ELLIPSIS.length();
-			text = text.substring(0, end);
-			if (minChars > ELLIPSIS.length() + 1) text += ELLIPSIS;
+			if (useEllipses()) {
+				int end = minChars < ELLIPSIS.length() + 1 ? minChars : minChars - ELLIPSIS.length();
+				text = text.substring(0, end);
+				if (minChars > ELLIPSIS.length() + 1) text += ELLIPSIS;
+			} else {
+				int end = minChars;
+				text = text.substring(0, end);
+			}
 		}
 	} else {
 		text = getText();
@@ -440,61 +1094,24 @@ int preferredWidth(GC gc, boolean isSelected, boolean minimum) {
  * </ul>
  */
 public void setControl (Control control) {
-
 	checkWidget();
 	if (control != null) {
-		if (control.isDisposed()) error (SWT.ERROR_INVALID_ARGUMENT);
-		if (control.parent != parent) error (SWT.ERROR_INVALID_PARENT);
+		if (control.isDisposed()) SWT.error (SWT.ERROR_INVALID_ARGUMENT);
+		if (control.getParent() != parent) SWT.error (SWT.ERROR_INVALID_PARENT);
 	}
-//	System.out.println("Ctab setControl " + control +  " " + control.parent + " " + parent);
-	if (this.control != null && this.control.isDisposed ()) {
-		this.control = null;
+	if (this.control != null && !this.control.isDisposed()) {
+		this.control.setVisible(false);
 	}
-	Control oldControl = this.control, newControl = control;
 	this.control = control;
-	int index = parent.indexOf (this);
-	if (index != parent.getSelectionIndex ()) {
-		if (newControl != null) newControl.setVisible (false);
-		return;
-	}
-	if (newControl != null) {
-		Rectangle clientArea = parent.getClientArea ();
-		if (clientArea.height <= 0 || clientArea.width <= 0) {
-//			System.out.println("client area has trouble");
+	if (this.control != null) {
+		int index = parent.indexOf (this);
+		if (index == parent.getSelectionIndex ()){
+			this.control.setBounds(parent.getClientArea ());
+			this.control.setVisible(true);
 		} else {
-			if(this.isSelected){
-				newControl.setBounds (clientArea);
-			}
-			newControl.setVisible(true);
+			this.control.setVisible(false);
 		}
-//		if (newControl != null) {
-//			newControl.setBounds (parent.getClientArea ());
-//			newControl.setVisible (true);
-//		}
-//		System.err.println(clientArea);
-//		System.out.println("here!");
-		//newControl.setVisible (true);
 	}
-	if (oldControl != null) oldControl.setVisible (false);
-
-//	checkWidget();
-//	if (control != null) {
-//		if (control.isDisposed()) SWT.error (SWT.ERROR_INVALID_ARGUMENT);
-//		if (control.getParent() != parent) SWT.error (SWT.ERROR_INVALID_PARENT);
-//	}
-//	if (this.control != null && !this.control.isDisposed()) {
-//		this.control.setVisible(false);
-//	}
-//	this.control = control;
-//	if (this.control != null) {
-//		int index = parent.indexOf (this);
-//		if (index == parent.getSelectionIndex ()){
-//			this.control.setBounds(parent.getClientArea ());
-//			this.control.setVisible(true);
-//		} else {
-//			this.control.setVisible(false);
-//		}
-//	}
 }
 /**
  * Sets the image that is displayed if the tab item is disabled.
@@ -543,7 +1160,7 @@ public void setFont (Font font){
 	this.font = font;
 	if (!parent.updateTabHeight(false)) {
 		parent.updateItems();
-		//parent.redrawTabs();
+		parent.redrawTabs();
 	}
 }
 public void setImage (Image image) {
@@ -562,96 +1179,44 @@ public void setImage (Image image) {
 			Rectangle oldBounds = oldImage.getBounds();
 			Rectangle bounds = image.getBounds();
 			if (bounds.width == oldBounds.width && bounds.height == oldBounds.height) {
-				if (showing) parent.redraw(x, y, width, height, false);
+				if (showing) {
+					boolean selected = parent.indexOf(this) == parent.selectedIndex;
+					if (selected || parent.showUnselectedImage) {
+						int imageX = x + LEFT_MARGIN, maxImageWidth;
+						if (selected) {
+							if (parent.single && (parent.showClose || showClose)) imageX += CTabFolder.BUTTON_SIZE; 
+							int rightEdge = Math.min (x + width, parent.getRightItemEdge());
+							maxImageWidth = rightEdge - imageX - RIGHT_MARGIN;
+							if (!parent.single && closeRect.width > 0) maxImageWidth -= closeRect.width + INTERNAL_SPACING;
+						} else {
+							maxImageWidth = x + width - imageX - RIGHT_MARGIN;
+							if (parent.showUnselectedClose && (parent.showClose || showClose)) {
+								maxImageWidth -= closeRect.width + INTERNAL_SPACING;
+							}
+						}
+						if (bounds.width < maxImageWidth) {
+							int imageY = y + (height - bounds.height) / 2 + (parent.onBottom ? -1 : 1);
+							parent.redraw(imageX, imageY, bounds.width, bounds.height, false);
+						}
+					}
+				}
 				return;
 			}
 		} 
 		parent.updateItems();
-		//parent.redrawTabs();
+		parent.redrawTabs();
 	}
 }
 public void setText (String string) {
 	checkWidget();
-	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	if (handle != null) {
-		OS.clearChildren(handle);
-		textEl = document.createElement("DIV");
-		textEl.className = "ctab-item-main-default-left";
-		textEl.appendChild(document.createTextNode(string));
-		handle.appendChild(textEl);
-
-		rightEl = document.createElement("DIV");
-		rightEl.className = cssClassForRight();
-//		rightEl.onmousemove = new 
-//		rightEl.onmouseout
-		handle.appendChild(rightEl);
-		configureRightEl();
-		//handle.appendChild(document.createTextNode(string));
-		parent.updateSelection(parent.getSelectionIndex());
-	}
-//	int index = parent.indexOf (this);
-//	if (index == -1) return;
-//	super.setText (string);
-	this.text = string;
-//	checkWidget();
-//	if (string == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
-//	if (string.equals(getText())) return;
-//	super.setText(string);
-//	shortenedText = null;
-//	shortenedTextWidth = 0;
-//	if (!parent.updateTabHeight(false)) {
-//		parent.updateItems();
-//		parent.redrawTabs();
-//	}
-}
-void configureRightEl() {
-	// TODO Auto-generated method stub
-	if(showClose){
-		rightEl.onclick = new RunnableCompatibility() {
-			public void run() {
-				CTabFolderEvent e = new CTabFolderEvent(parent);
-				
-				e.widget = parent;
-				e.time = display.getLastEventTime ();
-				e.item = CTabItem.this;
-				e.doit = true;
-				CTabFolder parent = CTabItem.this.parent; 
-				for (int j = 0; j < parent.folderListeners.length; j++) {
-					CTabFolder2Listener listener = parent.folderListeners[j];
-					listener.close(e);
-				}
-				for (int j = 0; j < parent.tabListeners.length; j++) {
-					CTabFolderListener listener = parent.tabListeners[j];
-					listener.itemClosed(e);
-				}
-				if (e.doit) {
-					parent.destroyItem(CTabItem.this);
-				}
-				
-				
-			}
-		};
-		/*
-		 * IE does not support HOVER on DIVs so this is a workaround !
-		 */
-		rightEl.onmouseover = new RunnableCompatibility() {
-			public void run() {
-				prepareCloseBtn(true);
-				rightEl.className = rightEl.className.trim() + "-hover";
-			
-			}
-		};
-		rightEl.onmouseout = new RunnableCompatibility() {
-			public void run() {
-				prepareCloseBtn(false);
-				int idx = rightEl.className.indexOf("-hover");
-				if(idx >= 0){
-					rightEl.className = rightEl.className.substring(0, idx); 
-				}
-				//rightEl.className = rightEl.className;
-			}
-		}; 
-
+	if (string == null) SWT.error (SWT.ERROR_NULL_ARGUMENT);
+	if (string.equals(getText())) return;
+	super.setText(string);
+	shortenedText = null;
+	shortenedTextWidth = 0;
+	if (!parent.updateTabHeight(false)) {
+		parent.updateItems();
+		parent.redrawTabs();
 	}
 }
 /**
@@ -669,67 +1234,4 @@ public void setToolTipText (String string) {
 	checkWidget();
 	toolTipText = string;
 }
-
-protected void releaseChild () {
-	super.releaseChild ();
-	int index = parent.indexOf (this);
-	if (index == parent.getSelectionIndex ()) {
-		if (control != null) control.setVisible (false);
-	}
-	parent.destroyItem (this);
-}
-
-protected void releaseWidget () {
-	super.releaseWidget ();
-	control = null;
-	parent = null;
-}
-protected void releaseHandle() {
-	if (textEl != null) {
-		OS.destroyHandle(textEl);
-		textEl = null;
-	}
-	if (rightEl != null){
-		OS.destroyHandle(rightEl);
-		rightEl = null;
-	}
-	if (handle != null) {
-		OS.destroyHandle(handle);
-		handle = null;
-	}
-	super.releaseHandle();
-}
-protected void prepareCloseBtn(boolean in){
-	//rightEl.style.backgroundImage = in ? "url(images/ctab-simple-right-close.png)" : "url(images/ctab-simple-right.gif)";
-	String key = " ctab-item-attach-close-right";
-	if(this.isSelected || !parent.showClose){
-		return;
-	}
-	int idx = rightEl.className.indexOf(key);
-	if(idx != -1){
-		rightEl.className = 
-			rightEl.className.substring(0,idx) + rightEl.className.substring(idx+key.length());
-	}
-	if(in){
-		rightEl.className += " ctab-item-attach-close-right";
-	}
-	/*
-	 * Workaround for firefox;)
-	 */
-	this.handle.style.height = (OS.getContainerHeight(this.textEl) + 1)+ "px";
-	this.rightEl.style.height = (OS.getContainerHeight(this.textEl) + 1)+ "px";
-}
-
-protected void showCloseFocus(){
-
-}
-
-String cssClassForRight(){
-	String cssName = "ctab-item-attach-";
-	cssName += parent.simple ? "" : "rounded-";
-	cssName += parent.showClose ? "default-" : "noextrapos-";
-	cssName += "right";
-	return cssName;
-}
-
 }
