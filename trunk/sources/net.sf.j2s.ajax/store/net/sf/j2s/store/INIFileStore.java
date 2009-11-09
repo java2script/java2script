@@ -55,7 +55,11 @@ class INIFileStore implements IStore {
 		if (lastModified > lastUpdated) {
 			load();
 		}
-		properties.setProperty(name, value);
+		if (value == null) {
+			properties.remove(name);
+		} else {
+			properties.setProperty(name, value);
+		}
 		save();
 	}
 

@@ -95,7 +95,11 @@ if (xssIfr == null) {
 	return;
 }
 try {
-	xssIfr.contentWindow.createCookie (name, value, 365);
+	if (value == null) {
+		xssIfr.contentWindow.createCookie (name, value, -1);
+	} else {
+		xssIfr.contentWindow.createCookie (name, value, 365);
+	}
 } catch (e) { }
 	 */
 	public void setProperty(String name, String value) {

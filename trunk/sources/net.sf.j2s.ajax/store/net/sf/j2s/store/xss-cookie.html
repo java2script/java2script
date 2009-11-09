@@ -11,7 +11,7 @@ function createCookie (name, value, days) {
 	var expires = "";
 	if (days != null) {
 		var toExpireDate = new Date();
-		toExpireDate.setTime (toExpireDate.getTime () + (days * 24 * 3600 * 1000));
+		toExpireDate.setTime (toExpireDate.getTime () + days * 24 * 3600 * 1000);
 		expires = "; expires=" + toExpireDate.toGMTString ();
 	}
 	document.cookie = name + "=" + value + expires + "; path=/";
