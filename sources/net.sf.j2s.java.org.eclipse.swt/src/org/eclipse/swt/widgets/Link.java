@@ -343,7 +343,7 @@ void hookSelection() {
 		}
 	};
 	for (int i = 0; i < anchors.length; i++) {
-		anchors[i].href = "javascript:void(0);";
+		anchors[i].href = OS.isIE ? "#" : "javascript:void(0);";
 		anchors[i].target = "_self";
 		Clazz.addEvent(anchors[i], "click", hLinkSelectionHandler);
 		Clazz.addEvent(anchors[i], "dblclick", hLinkSelectionHandler);
@@ -539,7 +539,7 @@ String parse (String string, Object handle) {
 					}
 					if (anchor != null) {
 						if ("#".equals(ids[linkIndex])) {
-							anchor.href = "javascript:void(0);";
+							anchor.href = OS.isIE ? "#" : "javascript:void(0);";
 							anchor.target = "_self";
 						} else {
 							anchor.href = ids[linkIndex];
@@ -843,8 +843,34 @@ public void setText (String string) {
 	text = string;
 	textSizeCached = false;
 	anchors = new Element[0];
+	
+	if (hLinkSelectionHandler != null) { // already hook
+		// try to unhook it before clear all childNodes
+		for (int i = 0; i < anchors.length; i++) {
+			Element anchor = anchors[i];
+			Clazz.removeEvent(anchor, "click", hLinkSelectionHandler);
+			Clazz.removeEvent(anchor, "dblclick", hLinkSelectionHandler);
+			if (ids != null) {
+				if ("#".equals(ids[i])) {
+					anchor.href = OS.isIE ? "#" : "javascript:void(0);";
+					anchor.target = "_self";
+				} else {
+					anchor.href = ids[i];
+					anchor.target = "_blank";
+				}
+			}
+		}
+	}
 	OS.clearChildren(handle);
 	parse (string, handle);
+	if (hLinkSelectionHandler != null) {
+		for (int i = 0; i < anchors.length; i++) {
+			anchors[i].href = OS.isIE ? "#" : "javascript:void(0);";
+			anchors[i].target = "_self";
+			Clazz.addEvent(anchors[i], "click", hLinkSelectionHandler);
+			Clazz.addEvent(anchors[i], "dblclick", hLinkSelectionHandler);
+		}
+	}
 	/*
 	if (OS.COMCTL32_MAJOR >= 6) {
 		TCHAR buffer = new TCHAR (getCodePage (), string, true);
@@ -891,7 +917,7 @@ void unhookSelection() {
 		Clazz.removeEvent(anchor, "dblclick", hLinkSelectionHandler);
 		if (ids != null) {
 			if ("#".equals(ids[i])) {
-				anchor.href = "javascript:void(0);";
+				anchor.href = OS.isIE ? "#" : "javascript:void(0);";
 				anchor.target = "_self";
 			} else {
 				anchor.href = ids[i];
