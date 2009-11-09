@@ -21,7 +21,12 @@ return null;
 	/**
 	 * @j2sNative
 var toExpire = new Date();
-toExpire.setTime (new Date().getTime () + (365 * 24 * 3600 * 1000));
+if (value == null) {
+	value = "";
+	toExpire.setTime (new Date().getTime () - 24 * 3600 * 1000);
+} else {
+	toExpire.setTime (new Date().getTime () + 365 * 24 * 3600 * 1000);
+}
 document.cookie = name + "=" + value
 		+ "; expires=" + toExpire.toGMTString ()
 		+ "; path=/";
