@@ -95,6 +95,9 @@ public class SimpleRPCRequest {
 
 	private static void ajaxRequest(final SimpleRPCRunnable runnable) {
 		String url = runnable.getHttpURL();
+		if (url == null) {
+			url = "";
+		}
 		String method = runnable.getHttpMethod();
 		String serialize = runnable.serialize();
 		if (method == null) {
@@ -331,28 +334,25 @@ if (isIE) {
 	 * @j2sNative
 return function () {
 	var g = net.sf.j2s.ajax.SimpleRPCRequest;
-	var hKey = "h" + rnd;
-	if (g.idSet[hKey] != null) {
-		window.clearTimeout (g.idSet[hKey]);
-		delete g.idSet[hKey];
-	}
-	if (window["net"] != null && !net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(oScript)) {
+	if (!g.cleanUp(script)) {
 		return; // IE, not completed yet
 	}
-	var src = oScript.src;
-	var idx = src.indexOf ("jzn=");
-	var rid = src.substring (idx + 4, src.indexOf ("&", idx));
-	net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
-	if (oScript.onerror != null) { // W3C
-		oScript.onerror = oScript.onload = null;
-	} else { // IE
-		oScript.onreadystatechange = null;
+	if (error) {
+		var src = script.src;
+		var idx = src.indexOf ("jzn=");
+		var rid = src.substring (idx + 4, src.indexOf ("&", idx));
+		net.sf.j2s.ajax.SimpleRPCRequest.xssNotify (rid, null);
 	}
-	document.getElementsByTagName ("HEAD")[0].removeChild (oScript);
-	oScript = null;
+	if (script.onerror != null) { // W3C
+		script.onerror = script.onload = null;
+	} else { // IE
+		script.onreadystatechange = null;
+	}
+	document.getElementsByTagName ("HEAD")[0].removeChild (script);
+	script = null;
 };
 	 */
-	native static Object generateCallback4Script(Object oScript, String rnd);
+	native static Object generateCallback4Script(Object script, String rnd, boolean error);
 	
 	/**
 	 * @j2sNative
@@ -368,19 +368,28 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url + "?jzn=" + rnd + "&jzp=" + length 
 		+ "&jzc=" + (i + 1) + "&jzz=" + content;
-var fun = g.generateCallback4Script (script, rnd);
+var okFun = g.generateCallback4Script (script, rnd, false);
+var errFun = g.generateCallback4Script (script, rnd, true);
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
 script.defer = true;
 if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
-	script.onerror = script.onload = fun;
-} else { // IE
-	script.onreadystatechange = fun;
+	script.onerror = errFun;
+	script.onload = okFun;
+} else { // IE, IE won't detect script loading error until timeout!
+	script.onreadystatechange = okFun;
 }
 var head = document.getElementsByTagName ("HEAD")[0];
 head.appendChild (script);
-g.idSet["h" + rnd] = window.setTimeout (fun, 30000); // 30s timeout // TODO: Expose to configuration
+var timeout = 30000;
+if (window["j2s.ajax.reqeust.timeout"] != null) {
+	timeout = window["j2s.ajax.reqeust.timeout"];
+}
+if (timeout < 1000) {
+	timeout = 1000; // at least 1s for timeout
+}
+g.idSet["h" + rnd] = window.setTimeout (errFun, timeout);
 	 */
 	native static void callByScript(String rnd, String length, String i, String content);
 
@@ -409,11 +418,17 @@ if (response != null && ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1)
 	var ss = document.getElementsByTagName ("SCRIPT");
 	for (var i = 0; i < ss.length; i++) {
 		var s = ss[i];
-		if (s.src != null && s.src.indexOf ("jzn=" + nameID) != -1
+		if (s.src != null && s.src.indexOf ("jzn=" + nameID) != -1 // FIXME: Not totally safe
 				&& s.readyState == "interactive") {
  			s.onreadystatechange = net.sf.j2s.ajax.SimpleRPCRequest.ieScriptCleanup;
 	 	}
 	}
+}
+var hKey = "h" + nameID;
+var g = net.sf.j2s.ajax.SimpleRPCRequest;
+if (g.idSet[hKey] != null) {
+	window.clearTimeout (g.idSet[hKey]);
+	delete g.idSet[hKey];
 }
 		 */ { }
 		if (response == "continue") {
@@ -425,16 +440,27 @@ if (session != null){
 }
 var k = "x" + nameID;
 var xcontent = g.idSet[k]; 
-// TODO: The following codes should be modified to send out requests one by one.  
 if (xcontent != null) {
+	// Send out requests one by one.  
 	for (var i = 0; i < xcontent.length; i++) {
 		if (xcontent[i] != null) {
 			g.callByScript(nameID, xcontent.length, i, xcontent[i]);
 			xcontent[i] = null;
+			break;
 		}
-	}  
-	g.idSet[k] = null;
-	delete g.idSet[k];
+	}
+	
+	var more = false;
+	for (var i = xcontent.length - 1; i >= 0; i--) {
+		if (xcontent[i] != null) {
+			more = true;
+			break;
+		}
+	}
+	if (!more) { // all contents are sent
+		g.idSet[k] = null;
+		delete g.idSet[k];
+	}
 }
 			 */ {}
 			return;
