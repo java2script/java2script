@@ -52,8 +52,8 @@ public class Text extends Scrollable {
 	boolean doubleClick, ignoreModify, ignoreVerify, ignoreCharacter;
 	
 	boolean keyDownOK;
-	
 	Element textHandle;
+	private String textValue;
 	
 	int lineHeight;
 	
@@ -197,6 +197,7 @@ void createHandle () {
 			textHandle.type = "text";
 		}
 	}
+	textValue = "";
 	String textCSSName = null;
 	if (OS.isIE) {
 		textCSSName = "text-ie-default";
@@ -315,26 +316,33 @@ void hookKeyDown() {
 					String s = verifyText(txt, 0, 0, e);
 					if (s == null) {
 						toReturn(false);
+						return;
 					} else if (hooks(SWT.Modify)) {
-						Event ev = new Event();
-						ev.type = SWT.Modify;
-						ev.widget = Text.this;
-						ev.display = display;
-						ev.time = display.getLastEventTime();
-						sendEvent(ev);
-						toReturn(ev.doit);
+						if (textValue != textHandle.value) {
+							textValue = textHandle.value;
+							Event ev = new Event();
+							ev.type = SWT.Modify;
+							ev.widget = Text.this;
+							ev.display = display;
+							ev.time = display.getLastEventTime();
+							sendEvent(ev);
+							toReturn(ev.doit);
+						}
 					}
 				}
 			}
 			keyDownOK = this.isReturned();
 			if (!verifyHooked || hooks(SWT.KeyDown)) {
 				Event ev = new Event();
-				ev.type = SWT.Modify;
-				ev.widget = Text.this;
-				ev.display = display;
-				ev.time = display.getLastEventTime();
-				sendEvent(ev);
-				toReturn(ev.doit);
+				if (textValue != textHandle.value) {
+					textValue = textHandle.value;
+					ev.type = SWT.Modify;
+					ev.widget = Text.this;
+					ev.display = display;
+					ev.time = display.getLastEventTime();
+					sendEvent(ev);
+					toReturn(ev.doit);
+				}
 
 				HTMLEventWrapper e = new HTMLEventWrapper (getEvent());
 				HTMLEvent evt = (HTMLEvent) e.event;
@@ -438,24 +446,25 @@ void hookModify() {
 			}
 			String newText = textHandle.value;
 			if (newText != null) {
-				//String oldText = newText;
 				newText = verifyText (newText, 0, 0, null);
 				if (newText == null) {
 					toReturn(true);
 					return ;
 				}
-				//if (!newText.equals (oldText)) {
+				if (textValue != textHandle.value) {
+					textValue = textHandle.value;
 					Event e = new Event();
 					e.type = SWT.Modify;
 					e.item = Text.this;
 					e.widget = Text.this;
 					sendEvent(e);
 					toReturn(e.doit);
-				//}
+				}
 			}
 		}
 	};
 	Clazz.addEvent(textHandle, "keyup", hModifyKeyUp);
+	Clazz.addEvent(textHandle, "change", hModifyKeyUp);
 	
 	hModifyBlur = new RunnableCompatibility() {
 		public void run() {
@@ -629,6 +638,10 @@ public void append (String string) {
 	OS.SendMessage (handle, OS.EM_SCROLLCARET, 0, 0);
 	*/
 	textHandle.value += string;
+	if (string.length() > 0) {
+		textValue = textHandle.value;
+		sendEvent(SWT.Modify);
+	}
 }
 
 static int checkStyle (int style) {
@@ -1632,9 +1645,15 @@ public void insert (String string) {
 	ignoreCharacter = false;
 	*/
 	insertTextString(textHandle, string);
+	/*
 	if ((style & SWT.MULTI) != 0) {
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
+	}
+	*/
+	if (textValue != textHandle.value) {
+		textValue = textHandle.value;
+		sendEvent (SWT.Modify);
 	}
 }
 
@@ -1760,6 +1779,7 @@ protected void releaseHandle() {
 			hModifyFocus = null;
 		}
 		if (hModifyKeyUp != null) {
+			Clazz.removeEvent(textHandle, "change", hModifyKeyUp);
 			Clazz.removeEvent(textHandle, "keyup", hModifyKeyUp);
 			hModifyKeyUp = null;
 		}
@@ -2385,10 +2405,16 @@ public void setText (String string) {
 	* notify the application that the text has changed.
 	* The fix is to send the event.
 	*/
-	//if ((style & SWT.MULTI) != 0) {
+	/*
+	if ((style & SWT.MULTI) != 0) {
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
-	//}
+	}
+	*/
+	if (textValue != string) {
+		textValue = string;
+		sendEvent(SWT.Modify);
+	}
 }
 
 /**
