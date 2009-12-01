@@ -475,11 +475,11 @@ public void setText (String string) {
 		if (!string.equals(groupText)) {
 			OS.clearChildren(titleText);
 			titleText.appendChild(document.createTextNode(string));
-			textWidth = OS.getContainerWidth(titleText);
-			if (textWidth == 0) {
+//			textWidth = OS.getContainerWidth(titleText);
+//			if (textWidth == 0) {
 //				textWidth = UIStringUtil.calculatePlainStringLineWidth(string);
 				textWidth = OS.getStringStyledWidth(string, "group-default", handle.style.cssText);
-			}
+//			}
 			if (textWidth != 0) {
 				int w = this.width - textWidth - 24;
 				if (w > 0) {
