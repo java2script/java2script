@@ -20,6 +20,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.ResizeSystem;
@@ -86,7 +87,8 @@ public class Combo extends Composite {
 	private boolean isSimple;
 	private int itemCount;
 	private int maxWidth = 0;
-	
+	private String textValue;
+
 	private Object hDropDownClick;
 	private Object hEditKeyUp;
 	private Object hEditShow;
@@ -94,7 +96,10 @@ public class Combo extends Composite {
 	private Object hTextBlur;
 	private Object hTextMouseUp;
 	private Object hTextKeyUp;
-	
+	private Object hModifyFocus;
+	private Object hModifyBlur;
+	private Object hModifyKeyUp;
+
 	/**
 	 * the operating system limit for the number of characters
 	 * that the text field in an instance of this class can hold
@@ -668,8 +673,71 @@ void hookFocusOut() {
 }
 
 void hookModify() {
-	super.hookModify();
-	Clazz.addEvent(textInput, "change", hModify);
+	if (hModifyKeyUp != null) {
+		return;
+	}
+	hModifyKeyUp = new RunnableCompatibility() {
+		public void run() {
+			if ((style & SWT.READ_ONLY) != 0
+					/*
+					 * I have changed !hooks (SWT.Verify) && !filters (SWT.Verify)) to
+					 * hooks (SWT.Verify) && !filters (SWT.Verify))
+					 * I do not know what is the rational behind the first. 
+					 */
+					|| (hooks (SWT.Verify) && !filters (SWT.Verify))) {
+				toReturn(true);
+				return ;
+			}
+			String newText = textInput.value;
+			if (newText != null) {
+				newText = verifyText (newText, 0, 0, null);
+				if (newText == null) {
+					toReturn(true);
+					return ;
+				}
+				if (textValue != textInput.value) {
+					textValue = textInput.value;
+					Event e = new Event();
+					e.type = SWT.Modify;
+					e.item = Combo.this;
+					e.widget = Combo.this;
+					sendEvent(e);
+					toReturn(e.doit);
+				}
+			}
+		}
+	};
+	Clazz.addEvent(textInput, "keyup", hModifyKeyUp);
+	Clazz.addEvent(textInput, "change", hModifyKeyUp);
+	
+	hModifyBlur = new RunnableCompatibility() {
+		public void run() {
+			OS.removeCSSClass(handle, "text-focus");
+			Event e = new Event();
+			e.type = SWT.FocusOut;
+			e.item = Combo.this;
+			e.widget = Combo.this;
+			sendEvent(e);
+			toReturn(e.doit);
+		}
+	};
+	Clazz.addEvent(textInput, "blur", hModifyBlur);
+	
+	hModifyFocus = new RunnableCompatibility() {
+		public void run() {
+			OS.addCSSClass(handle, "text-focus");
+			Event e = new Event();
+			e.type = SWT.FocusIn;
+			e.item = Combo.this;
+			e.widget = Combo.this;
+			sendEvent(e);
+			toReturn(e.doit);
+		}
+	};
+	Clazz.addEvent(textInput, "focus", hModifyFocus);
+
+//	super.hookModify();
+//	Clazz.addEvent(textInput, "change", hModify);
 }
 
 void hookSelection() {
@@ -1766,6 +1834,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			textInput.style.width = Math.max(0, width - buttonWidth - 3) + "px";
 			textInput.style.height = Math.max(0, height - 4) + "px";
 			textInput.style.lineHeight = Math.max(0, height - 4) + "px";
+			textInput.style.marginTop = "0";
 		} else if (OS.isSafari || OS.isChrome) {
 			textInput.style.marginTop = "0";
 		} else if (OS.isIE) {
@@ -2080,6 +2149,13 @@ public void setSelection (Point selection) {
 	Text.setTextSelection(textInput, selection.x + 1, selection.y + 2);
 }
 
+public void setFont(Font font) {
+	super.setFont(font);
+	Element handle = fontHandle();
+	selectInput.style.fontFamily = handle.style.fontFamily;
+	selectInput.style.fontSize = handle.style.fontSize;
+}
+
 /**
  * Sets the contents of the receiver's text field to the
  * given string.
@@ -2122,10 +2198,14 @@ public void setText (String string, boolean modify) {
 	/*
 	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 	if (OS.SetWindowText (handle, buffer)) {
-	*/
 	if(modify){
 		sendEvent (SWT.Modify);
 		// widget could be disposed at this point
+	}
+	*/
+	if (textValue != string) {
+		textValue = string;
+		sendEvent(SWT.Modify);
 	}
 }
 
@@ -2759,9 +2839,24 @@ protected void releaseHandle() {
 		if (hFocusOut != null) {
 			Clazz.removeEvent(textInput, "blur", hFocusOut);
 		}
-		if (hModify != null) {
-			Clazz.removeEvent(textInput, "change", hModify);
+//		if (hModify != null) {
+//			Clazz.removeEvent(textInput, "change", hModify);
+//		}
+
+		if (hModifyBlur != null) {
+			Clazz.removeEvent(textInput, "blur", hModifyBlur);
+			hModifyBlur = null;
 		}
+		if (hModifyFocus != null) {
+			Clazz.removeEvent(textInput, "focus", hModifyFocus);
+			hModifyFocus = null;
+		}
+		if (hModifyKeyUp != null) {
+			Clazz.removeEvent(textInput, "change", hModifyKeyUp);
+			Clazz.removeEvent(textInput, "keyup", hModifyKeyUp);
+			hModifyKeyUp = null;
+		}
+
 		Clazz.removeEvent(textInput, "dblclick", hEditShow);
 		hEditShow = null;
 		Clazz.removeEvent(textInput, "keyup", hEditKeyUp);
