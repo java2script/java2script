@@ -149,12 +149,26 @@ private void addTrayLine () {
 	floatDiv1.className = "tray-float-block";
 	Element floatDiv2 = document.createElement ("DIV");
 	floatDiv2.className = "tray-float-block";
-	floatDiv1.style.width = cellLines * 36 + "px";
-	floatDiv2.style.width = (cellLines * 36 - 18) + "px";
-	allFloats[cellLines * 2 - 2] = floatDiv2;
-	allFloats[cellLines * 2 - 1] = floatDiv1;
+	floatDiv1.style.width = (cellLines * 36 + 18) + "px";
+	floatDiv2.style.width = cellLines * 36 + "px";
+	Element floatDiv3 = null;
+	if (cellLines == 1) {
+		floatDiv3 = document.createElement ("DIV");
+		floatDiv3.className = "tray-float-block";
+		floatDiv3.style.width = (cellLines * 36 - 18) + "px";
+		allFloats[0] = floatDiv3;
+	}
+	allFloats[cellLines * 2 - 1] = floatDiv2;
+	allFloats[cellLines * 2] = floatDiv1;
 	Element panel = document.getElementById("swt-desktop-panel");
 	if (panel != null) {
+		if (floatDiv3 != null) {
+			if (panel.childNodes.length > 0) {
+				panel.insertBefore (floatDiv3, panel.childNodes[0]);
+			} else {
+				panel.appendChild(floatDiv3);
+			}
+		}
 		if (panel.childNodes.length > 0) {
 			panel.insertBefore (floatDiv2, panel.childNodes[0]);
 		} else {
@@ -162,6 +176,9 @@ private void addTrayLine () {
 		}
 		panel.insertBefore (floatDiv1, panel.childNodes[0]);
 	} else {
+		if (floatDiv3 != null) {
+			document.body.insertBefore (floatDiv3, document.body.childNodes[0]);
+		}
 		document.body.insertBefore (floatDiv2, document.body.childNodes[0]);
 		document.body.insertBefore (floatDiv1, document.body.childNodes[0]);
 	}
@@ -203,10 +220,14 @@ private void removeTrayLine () {
 	if (!supportNotificationCornerFloat) {
 		return;
 	}
+	OS.destroyHandle(allFloats[cellLines * 2 + 2]);
+	allFloats[cellLines * 2 + 2] = null;
 	OS.destroyHandle(allFloats[cellLines * 2 + 1]);
 	allFloats[cellLines * 2 + 1] = null;
-	OS.destroyHandle(allFloats[cellLines * 2]);
-	allFloats[cellLines * 2] = null;
+	if (cellLines == 0) {
+		OS.destroyHandle(allFloats[0]);
+		allFloats[0] = null;
+	}
 }
 
 void initialize () {
