@@ -119,8 +119,8 @@ public class RegExCompress {
 			cssCodes = str.substring(idx1, idx2);
 			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
 		}
-		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
-				"(\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 1:3
+		String regEx = "(''|'[^\\n\\r]*[^\\\\]')|" + // 1:1
+				"(\"\"|\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 1:3
 				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:4
 				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:5,6
 				"(\\s+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:7,8
@@ -164,8 +164,8 @@ public class RegExCompress {
 			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
 		}
 		String whiteSpace = "[ \\f\\t\\v]";
-		String regEx = "('[^\\n\\r]*[^\\\\]')|" + // 1:1
-				"(\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 2:2,3
+		String regEx = "(''|'[^\\n\\r]*[^\\\\]')|" + // 1:1
+				"(\"\"|\"([^\\n\\r\\\"]|\\\\\\\")*[^\\\\]\")|" + // 2:2,3
 				"(\\/\\/[^\\n\\r]*[\\n\\r])|" + // 1:4 // line comments
 				"(\\/\\*[^*]*\\*+([^\\/][^*]*\\*+)*\\/)|" + // 2:5,6 // block comments
 				"(" + whiteSpace + "+(\\/[^\\/\\n\\r\\*][^\\/\\n\\r]*\\/[gim]*))|" + // 2:7,8 // regular expression
