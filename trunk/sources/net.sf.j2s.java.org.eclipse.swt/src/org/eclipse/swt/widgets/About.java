@@ -109,7 +109,7 @@ public class About {
 		Image logoImage = null;
 		/**
 		 * @j2sNative
-		 * logoImage = new $wt.graphics.Image ($wt.widgets.Display.getCurrent (), this.getClass().getResourceAsStream ("images/j2s-logo.gif"));
+		 * logoImage = new $wt.graphics.Image ($wt.widgets.Display.getCurrent (), $wt.widgets.Display.getResourceAsStream ("images/j2s-logo.gif"));
 		 */ {}
 		//logo.setImage(SWTResourceManager.getImage(About.class, "images/j2s-logo.gif"));
 		logo.setImage(logoImage);
@@ -131,7 +131,10 @@ public class About {
 		java2scriptLabel.setFont(j2sFont);
 		
 		java2scriptLabel.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		java2scriptLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		GridData gd_Java2Script = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gd_Java2Script.verticalIndent = 6;
+		gd_Java2Script.heightHint = 24;
+		java2scriptLabel.setLayoutData(gd_Java2Script);
 		java2scriptLabel.setText("Java2Script");
 
 		final Label java2scriptj2sPacemakerLabel = new Label(description, SWT.WRAP);
