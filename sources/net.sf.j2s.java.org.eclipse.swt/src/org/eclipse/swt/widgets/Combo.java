@@ -609,31 +609,44 @@ protected void createHandle () {
 			if (items.length == 0) {
 				return;
 			}
+			if (e.keyCode == 38 || e.keyCode == 40) {
+				String text = getText();
+				currentIndex = -1;
+				for (int i = 0; i < items.length; i++) {
+					if (text.equals(items[i])) {
+						currentIndex = i;
+						break;
+					}
+				}
+				if (currentIndex < 0) {
+					currentIndex = selectInput.selectedIndex;
+				}
+			}
 			switch(e.keyCode){
 			case 38:
-				selectInput.selectedIndex = currentIndex;
-				noSelection = false;
-				updateSelection();
-				noSelection = true;
 				if (currentIndex > 0) {
 					currentIndex--;
 				}
 				if (currentIndex >= items.length) {
 					currentIndex = items.length - 1;
 				}
-				toReturn(false);
-				break;
-			case 40:
 				selectInput.selectedIndex = currentIndex;
 				noSelection = false;
 				updateSelection();
 				noSelection = true;
+				toReturn(false);
+				break;
+			case 40:
 				if (currentIndex < items.length) {
 					currentIndex++;
 				}
 				if (currentIndex >= items.length) {
 					currentIndex = items.length - 1;
 				}
+				selectInput.selectedIndex = currentIndex;
+				noSelection = false;
+				updateSelection();
+				noSelection = true;
 				toReturn(false);
 				break;
 			}
