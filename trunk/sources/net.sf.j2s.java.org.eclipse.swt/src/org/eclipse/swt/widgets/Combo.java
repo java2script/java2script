@@ -1332,13 +1332,13 @@ public int indexOf (String string, int start) {
 	* to insert an empty string into a combo.  The fix is
 	* to search the combo, an item at a time.
 	*/
-	if (string.length () == 0) {
+	//if (string.length () == 0) {
 		int count = getItemCount ();
 		for (int i=start; i<count; i++) {
 			if (string.equals (getItem (i))) return i;
 		}
 		return -1;
-	}
+	//}
 
 	/* Use CB_FINDSTRINGEXACT to search for the item */	
 	/*
@@ -1351,8 +1351,8 @@ public int indexOf (String string, int start) {
 		if (index == OS.CB_ERR || index <= last) return -1;
 	} while (!string.equals (getItem (index)));
 	return index;
-	*/
 	return -1;
+	*/
 }
 
 /*
@@ -2197,17 +2197,17 @@ public void setText (String string) {
 public void setText (String string, boolean modify) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
-	if ((style & SWT.READ_ONLY) != 0) {
+	//if ((style & SWT.READ_ONLY) != 0) {
 		int index = indexOf (string);
-		if(index != -1 && selectInput.selectedIndex != index){			
+		if(index != -1 && selectInput.selectedIndex != index){
 			select (index);
 		}
 		//if (selectInput.selectedIndex != index && index != -1) select (index);
 //		return;
-	}
-	textInput.readOnly = false;
+	//}
+	//textInput.readOnly = false;
 	textInput.value = string;
-	textInput.readOnly = (style & SWT.READ_ONLY) != 0;
+	//textInput.readOnly = (style & SWT.READ_ONLY) != 0;
 	/*
 	TCHAR buffer = new TCHAR (getCodePage (), string, true);
 	if (OS.SetWindowText (handle, buffer)) {
