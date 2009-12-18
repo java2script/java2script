@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -281,7 +282,27 @@ public class HttpRequest {
 	 * @return String the response header value.
 	 */
 	public String getResponseHeader(String key) {
-		return connection.getHeaderField(key);
+		Map<String, List<String>> headerFields = connection.getHeaderFields();
+		List<String> list = headerFields.get(key);
+		if (list == null) {
+			return null;
+		}
+		if (list.size() == 0) {
+			return "";
+		}
+		String headerValue = null;
+		for (Iterator<String> itr = list.iterator(); itr.hasNext();) {
+			String value = (String) itr.next();
+	 		if (value != null) {
+	 			if (headerValue == null) {
+	 				headerValue = value;
+	 			} else {
+	 				headerValue = value + "\r\n" + headerValue;
+	 			}
+	 		}
+		}
+		return headerValue; // may have multiple Set-Cookie headers 
+		// return connection.getHeaderField(key);
 	}
 	/**
 	 * Open connection for HTTP request with given method and URL 
@@ -407,10 +428,12 @@ public class HttpRequest {
 			} else {
 				connection.setReadTimeout(30000); // 30s
 			}
+			connection.setInstanceFollowRedirects(false);
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
-					"Mozilla/5.0 (compatible; Java2Script/2.0.0)");
+					// "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 GTB5 (Java2Script/2.0.0)");
+					"Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 GTB5");
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type",
@@ -471,8 +494,8 @@ public class HttpRequest {
 			
 			receiving = initializeReceivingMonitor();
 			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(10240);
+			byte[] buffer = new byte[10240];
 			int read;
 			while (!toAbort && (read = is.read(buffer)) != -1) {
 				if (checkAbort()) return; // stop receiving anything
