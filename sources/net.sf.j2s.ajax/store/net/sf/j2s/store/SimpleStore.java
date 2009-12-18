@@ -16,11 +16,9 @@ public class SimpleStore implements IStore {
 		 * @j2sNative
 		 * var ua = navigator.userAgent.toLowerCase ();
 		 * var isIE = (ua.indexOf ("msie") != -1);
-		 * var isIE6OrEarlier = isIE && ((ua.indexOf ("msie 6.0") != -1)
-		 * 		|| (ua.indexOf ("msie 5.5") != -1) || (ua.indexOf ("msie 5.0") != -1));
 		 * var cookieURL = window["j2s.xss.cookie.url"];
 		 * var isLocal = window.location.protocol == "file:";
-		 * if (!isLocal && cookieURL != null && !isIE6OrEarlier) {
+		 * if (!isLocal && cookieURL != null && !isIE) {
 		 *  this.store = new net.sf.j2s.store.XSSCookieStore(cookieURL);
 		 * } else {
 		 *  this.store = new net.sf.j2s.store.CookieStore();
