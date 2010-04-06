@@ -50,7 +50,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	long lastLiveDetected;
 	
 	@J2SIgnore
-	void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
+	public void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
+		pipeManaged = true;
 		this.helper = helper;
 	}
 	
@@ -254,7 +255,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * For compound pipe, two pipe session may have some milliseconds interval. 
 	 * @return time interval in millisecond.
 	 */
-	protected long pipeWaitClosingInterval() {
+	public long pipeWaitClosingInterval() {
 		return 5000;
 	}
 	

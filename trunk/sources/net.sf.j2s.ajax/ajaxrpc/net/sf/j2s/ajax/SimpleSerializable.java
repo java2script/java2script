@@ -1029,6 +1029,7 @@ return true;
 						break;
 					}
 				} catch (Exception e) {
+					System.out.println("Parsing: " + s);
 					e.printStackTrace();
 				}
 			}

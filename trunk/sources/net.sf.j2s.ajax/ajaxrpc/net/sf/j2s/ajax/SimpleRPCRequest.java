@@ -63,7 +63,7 @@ public class SimpleRPCRequest {
 	public static void request(final SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
 		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
-			(new Thread() {
+			(new Thread("Simple RPC Request") {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -259,7 +259,6 @@ if (net.sf.j2s.ajax.SimpleRPCRequest.isXSSMode (url)) {
 	}
 	var ua = navigator.userAgent.toLowerCase ();
 	if (ua.indexOf ("msie")!=-1 && ua.indexOf ("opera") == -1){
-		limit = 2048;
 		limit = 2048 - 44; // ;jsessionid=
 	}
 	limit -= url.length + 36; // 5 + 6 + 5 + 2 + 5 + 2 + 5;
@@ -366,8 +365,9 @@ if (session != null && window["script.get.session.url"] != false) {
 }
 var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
-script.src = url + "?jzn=" + rnd + "&jzp=" + length 
-		+ "&jzc=" + (i + 1) + "&jzz=" + content;
+script.src = url + "?jzn=" + rnd
+		+ (length == 1 ? "" : ("&jzp=" + length + (i == 0 ? "" : "&jzc=" + (i + 1))))
+		+ "&jzz=" + content;
 var okFun = g.generateCallback4Script (script, rnd, false);
 var errFun = g.generateCallback4Script (script, rnd, true);
 var userAgent = navigator.userAgent.toLowerCase ();
@@ -484,7 +484,8 @@ if (response == null && runnable != null) { // error!
 	return;
 }
 		 */ {}
-		if (response == "unsupported" || response == "exceedrequestlimit") {
+		if (response == "unsupported" || response == "exceedrequestlimit" || response == "error") {
+			String src = null;
 			/**
 			 * @j2sNative
 var existed = false;
@@ -492,6 +493,7 @@ var ss = document.getElementsByTagName ("SCRIPT");
 for (var i = 0; i < ss.length; i++) {
 	var s = ss[i];
 	if (s.src != null && s.src.indexOf ("jzn=" + nameID) != -1) {
+		src = s.src;
 		existed = true;
 		s.onreadystatechange = null;
 		s.onerror = null;
@@ -506,7 +508,9 @@ if (!existed && runnable == null) {
 			if (runnable != null) {
 				runnable.ajaxFail();
 			} else {
-				if (response == "unsupported") {
+				if (response == "error") {
+					System.err.println("[Java2Script] Sever error: URL \"" + src + "\" is semantically incorrect!");
+				} else if (response == "unsupported") {
 					System.err.println("[Java2Script] Sever error: Cross site script is not supported!");
 				} else {
 					System.err.println("[Java2Script] Sever error: Exceed cross site script request limit!");

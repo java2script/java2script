@@ -50,7 +50,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				}
 			
 			});
-			(new Thread(){
+			(new Thread("Simple Pipe RPC Request") {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -336,6 +336,16 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 					end + destroyedKey.length()))) {
 				return destroyedKey + ":" + string.substring(start, end) 
 						+ ":" + string.substring(end + destroyedKey.length());
+			}
+			String okKey = PIPE_STATUS_OK;
+			end = start + PIPE_KEY_LENGTH;
+			if (okKey.equals(string.substring(end, end + okKey.length()))) {
+				String key = string.substring(start, end);
+				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+				if (runnable != null) { // should always satisfy this condition
+					runnable.lastPipeDataReceived = System.currentTimeMillis();
+				}
+				return string.substring(end + okKey.length());
 			}
 			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
 					|| !ss.deserialize(string, end)) {

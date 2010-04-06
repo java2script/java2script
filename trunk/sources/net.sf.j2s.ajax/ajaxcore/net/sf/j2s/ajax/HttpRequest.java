@@ -374,7 +374,7 @@ public class HttpRequest {
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
-			(new Thread() {
+			(new Thread("Java2Script HTTP Request") {
 				public void run() {
 					if (!toAbort) {
 						request();
