@@ -32,7 +32,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 			}
 		});
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			(new Thread(){
+			(new Thread("Simple RPC Request") {
 				public void run() {
 					try {
 						runnable.ajaxRun();

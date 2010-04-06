@@ -167,14 +167,23 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			buffer.append("<html><head><title></title></head><body>\r\n");
 			buffer.append("<script type=\"text/javascript\">");
 			buffer.append("p = new Object ();\r\n");
-			buffer.append("window.onload = function () {\r\n");
+			buffer.append("p.key = \"" + key + "\";\r\n");
 			buffer.append("p.originalDomain = document.domain;\r\n");
 			buffer.append("document.domain = \"" + domain + "\";\r\n");
-			buffer.append("p.key = \"" + key + "\";\r\n");
+			buffer.append("var securityErrors = 0\r\n");
+			buffer.append("var lazyOnload = function () {\r\n");
+			buffer.append("try {\r\n");
 			buffer.append("var spr = window.parent.net.sf.j2s.ajax.SimplePipeRequest;\r\n");
 			buffer.append("eval (\"(\" + spr.subdomainInit + \") (p);\");\r\n");
 			buffer.append("eval (\"((\" + spr.subdomainLoopQuery + \") (p)) ();\");\r\n");
-			buffer.append("};\r\n");
+			buffer.append("} catch (e) {\r\n");
+			buffer.append("securityErrors++;\r\n");
+			buffer.append("if (securityErrors < 100) {\r\n"); // 10s
+			buffer.append("window.setTimeout (lazyOnload, 100);\r\n");
+			buffer.append("};\r\n"); // end of if
+			buffer.append("};\r\n"); // end of catch
+			buffer.append("};\r\n"); // end of function
+			buffer.append("window.onload = lazyOnload;\r\n");
 			buffer.append("</script>\r\n");
 			buffer.append("</body></html>\r\n");
 			writer.write(buffer.toString());
@@ -191,6 +200,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			buffer.append("<script type=\"text/javascript\">");
 			if (domain != null) {
 				buffer.append("document.domain = \"" + domain + "\";\r\n");
+			} else {
+				buffer.append("document.domain = document.domain;\r\n");
 			}
 			buffer.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
 			buffer.append("if (window.parent) eval (\"(\" + window.parent.net.sf.j2s.ajax.SimplePipeRequest.checkIFrameSrc + \") ();\");\r\n");

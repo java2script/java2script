@@ -32,74 +32,74 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	/**
 	 * Status of pipe: ok.
 	 */
-	protected static final String PIPE_STATUS_OK = "o"; // "ok";
+	public static final String PIPE_STATUS_OK = "o"; // "ok";
 
 	/**
 	 * Status of pipe: destroyed.
 	 */
-	protected static final String PIPE_STATUS_DESTROYED = "d"; // "destroyed";
+	public static final String PIPE_STATUS_DESTROYED = "d"; // "destroyed";
 
 	/**
 	 * Status of pipe: continue.
 	 */
-	protected static final String PIPE_STATUS_CONTINUE = "e"; // "continue";
+	public static final String PIPE_STATUS_CONTINUE = "e"; // "continue";
 	
 	/**
 	 * Status of pipe: lost.
 	 */
-	protected static final String PIPE_STATUS_LOST = "l"; // "lost";
+	public static final String PIPE_STATUS_LOST = "l"; // "lost";
 
 	
 	/**
 	 * Type of pipe request: query
 	 */
-	protected static final String PIPE_TYPE_QUERY = "q"; // "query";
+	public static final String PIPE_TYPE_QUERY = "q"; // "query";
 	
 	/**
 	 * Type of pipe request: subdomain-query
 	 */
-	protected static final String PIPE_TYPE_SUBDOMAIN_QUERY = "u"; // "subdomain-query";
+	public static final String PIPE_TYPE_SUBDOMAIN_QUERY = "u"; // "subdomain-query";
 	
 	/**
 	 * Type of pipe request: notify
 	 */
-	protected static final String PIPE_TYPE_NOTIFY = "n"; // "notify";
+	public static final String PIPE_TYPE_NOTIFY = "n"; // "notify";
 	
 	/**
 	 * Type of pipe request: script
 	 */
-	protected static final String PIPE_TYPE_SCRIPT = "s"; // "script";
+	public static final String PIPE_TYPE_SCRIPT = "s"; // "script";
 	
 	/**
 	 * Type of pipe request: xss
 	 */
-	protected static final String PIPE_TYPE_XSS = "x"; // "xss";
+	public static final String PIPE_TYPE_XSS = "x"; // "xss";
 	
 	/**
 	 * Type of pipe request: continuum
 	 */
-	protected static final String PIPE_TYPE_CONTINUUM = "c"; // "continuum";
+	public static final String PIPE_TYPE_CONTINUUM = "c"; // "continuum";
 	
 	
 	/**
 	 * Query key for pipe: pipekey
 	 */
-	protected static final String FORM_PIPE_KEY = "k"; // "pipekey";
+	public static final String FORM_PIPE_KEY = "k"; // "pipekey";
 	
 	/**
 	 * Query key for pipe: pipetype
 	 */
-	protected static final String FORM_PIPE_TYPE = "t"; // "pipetype";
+	public static final String FORM_PIPE_TYPE = "t"; // "pipetype";
 	
 	/**
 	 * Query key for pipe: pipetype
 	 */
-	protected static final String FORM_PIPE_DOMAIN = "d"; // "pipedomain";
+	public static final String FORM_PIPE_DOMAIN = "d"; // "pipedomain";
 
 	/**
 	 * Query key for pipe: pipernd
 	 */
-	protected static final String FORM_PIPE_RANDOM = "r"; // "pipernd";
+	public static final String FORM_PIPE_RANDOM = "r"; // "pipernd";
 	
 	static final int PIPE_KEY_LENGTH = 6;
 
@@ -116,6 +116,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	private static long reqCount = 0;
 	
 	static Object pipeScriptMap = new Object();
+	
+	static Object pipeQueryMap = new Object();
 	
 	public static int getPipeMode() {
 		return pipeMode;
@@ -328,38 +330,59 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * 
 	 * @param url
 	 * @j2sNative
+if (url == null || url.length == 0) {
+	return;
+}
 var map = net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap;
 var pipe = map[url];
 if (pipe != null) {
-	pipe.queryEnded = true;
+	var stillExistedRequest = false;
+	var idPrefix = iframeID;
+	var idx = iframeID.lastIndexOf ("-");
+	if (idx != -1) {
+		idPrefix = iframeID.substring (0, idx);
+	}
+	var iframes = document.getElementsByTagName ("IFRAME");
+	for (var i = 0; i < iframes.length; i++) {
+		var el = iframes[i];
+		if (el.id != null && el.id.indexOf (idPrefix) == 0) {
+			alert ("exist request!");
+			stillExistedRequest = true;
+			break;
+		}
+	}
+	pipe.queryEnded = !stillExistedRequest;
 	delete map[url];
 }
 	 */
-	native static void updatePipeByURL(String url);
+	native static void updatePipeByURL(String iframeID, String url);
 
 	/**
 	 * @j2sNative
 return function () {
 	if (iframeID != null) {
-		if (window.parent == null || window.parent["net"] == null) return;
-		if (!window.parent.net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
+		var pw = window.parent;
+		if (pw == null || pw["net"] == null) return;
+		if (!pw.net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
 			return; // IE, not completed yet
 		}
-		window.parent.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
+		var url = this.url;
 		this.url = null;
 		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-		var iframe = window.parent.document.getElementById (iframeID);
+		var iframe = pw.document.getElementById (iframeID);
 		if (iframe != null) {
 			iframe.parentNode.removeChild (iframe);
 		}
+		pw.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (iframeID, url);
 	} else {
 		if (window == null || window["net"] == null) return;
 		if (!net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
 			return; // IE, not completed yet
 		}
-		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (this.url);
+		var url = this.url;
 		this.url = null;
 		document.getElementsByTagName ("HEAD")[0].removeChild (this);
+		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (iframeID, url);
 	}
 };
 	 */
@@ -401,7 +424,7 @@ var iframe = document.createElement ("IFRAME");
 iframe.style.display = "none";
 var iframeID = null;
 do {
-	iframeID = "pipe-script-" + Math.round (10000000 * Math.random ());
+	iframeID = "pipe-script-" + pipeKey + "-" + Math.round (10000000 * Math.random ());
 } while (document.getElementById (iframeID) != null);
 iframe.id = iframeID;
 document.body.appendChild (iframe);
@@ -420,7 +443,7 @@ html += "};\r\n";
 html += "</scr" + "ipt></head><body><script type=\"text/javascript\">\r\n";
 if (ClassLoader.isOpera)
 html += "window.setTimeout (function () {\r\n";
-html += "net = { sf : { j2s : { ajax : { SimplePipeRequest : { generatePipeScriptCallback : " + net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback + " } } } } };";
+html += "net = { sf : { j2s : { ajax : { SimplePipeRequest : { generatePipeScriptCallback : " + net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback + " } } } } };\r\n";
 html += "(" + net.sf.j2s.ajax.SimplePipeRequest.loadPipeScript + ") (";
 html += "\"" + url.replace (/"/g, "\\\"") + "\", \"" + iframeID + "\"";
 html += ");\r\n";
@@ -429,18 +452,25 @@ html += "}, " + (net.sf.j2s.ajax.SimplePipeRequest.pipeQueryInterval >> 2) + ");
 html += "</scr" + "ipt></body></html>";
 net.sf.j2s.ajax.SimplePipeRequest.iframeDocumentWrite (iframe, html);
 	 */
-	native static void loadPipeIFrameScript(String url); // for JavaScript only
+	native static void loadPipeIFrameScript(String pipeKey, String url); // for JavaScript only
 	
 	/**
 	 * @j2sNative
 return function () {
-	var doc = handle.contentWindow.document;
-	doc.open ();
-	doc.write (html);
-	doc.close ();
-	// To avoid blank title in title bar
-	document.title = document.title;
-	handle = null;
+	try {
+		var doc = handle.contentWindow.document;
+		doc.open ();
+		if (ClazzLoader.isIE) {
+			doc.domain = domain;
+		}
+		doc.write (html);
+		doc.close ();
+		// To avoid blank title in title bar
+		document.title = document.title;
+		handle = null;
+	} catch (e) {
+		window.setTimeout (arguments.callee, 25);
+	}
 };
 	 */
 	native static Object generateLazyIframeWriting(Object handle, String html);
@@ -451,24 +481,33 @@ return function () {
 	 * @j2sNative
 	var handle = arguments[0];
 	var html = arguments[1];
+	var domain = document.domain;
+	if (ClazzLoader.isIE) {
+		document.domain = domain;
+	}
 	if (handle.contentWindow != null) {
-		handle.contentWindow.location = "about:blank";
+		if (ClazzLoader.isIE) {
+			handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
+		} else {
+			handle.contentWindow.location = "about:blank";
+		}
 	} else { // Opera
 		handle.src = "about:blank";
 	}
 	try {
 		var doc = handle.contentWindow.document;
 		doc.open ();
+		if (ClazzLoader.isIE) {
+			doc.domain = domain;
+		}
 		doc.write (html);
 		doc.close ();
-		// To avoid blank title in title bar
-		document.title = document.title;
 	} catch (e) {
 		window.setTimeout (net.sf.j2s.ajax.SimplePipeRequest.generateLazyIframeWriting (handle, html), 25);
 	}
 	 */
 	native static void iframeDocumentWrite(Object handle, String html);
-	
+
 	static void pipeScript(SimplePipeRunnable runnable) { // xss
 		String url = runnable.getPipeURL();
 		String requestURL = url + (url.indexOf('?') != -1 ? "&" : "?")
@@ -478,8 +517,8 @@ return function () {
 		 * net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap[requestURL] = runnable;
 		 */ {}
 		if (isXSSMode(url)) {
-			// in xss mode, iframe is used to avoid blocking other *.js loading 
-			loadPipeIFrameScript(requestURL);
+			// in xss mode, iframe is used to avoid blocking other *.js loading
+			loadPipeIFrameScript(runnable.pipeKey, requestURL);
 			return;
 		}
 		loadPipeScript(requestURL); // never reach here? March 5, 2009
@@ -492,10 +531,10 @@ return function () {
 	 * @j2sNative
 var pipeKey = runnable.pipeKey;
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
-var url = runnable.getPipeURL();
-spr.pipeIFrameClean (pipeKey, url);
+spr.pipeIFrameClean (pipeKey);
 var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
+var url = runnable.getPipeURL();
 var src = url + (url.indexOf('?') != -1 ? "&" : "?") 
 		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY, true)
 		+ "&" + spr.FORM_PIPE_DOMAIN + "=" + domain;
@@ -546,23 +585,38 @@ document.body.appendChild (ifr);
 				 */ {}
 				if (pipeRequest.getStatus() != 200) {
 					runnable.queryFailedRetries++;
-					runnable.queryEnded = true;
-					return;
+				} else {
+					runnable.queryFailedRetries = 0; // succeeded
+					parseReceived(pipeRequest.getResponseText());
 				}
-				runnable.queryFailedRetries = 0; // succeeded
-				parseReceived(pipeRequest.getResponseText());
 				runnable.queryEnded = true;
+				/**
+				 * @j2sNative
+				 * var pqMap = net.sf.j2s.ajax.SimplePipeRequest.pipeQueryMap;
+				 * for (var key in pqMap) {
+				 * 	if (typeof key == "string" && key.indexOf ("xhr." + this.f$.runnable.pipeKey + ".") == 0) {
+				 * 		if (pqMap[key] == null || pqMap[key] === this.f$.pipeRequest) {
+				 * 			delete pqMap[key];
+				 * 		} else {
+				 * 			delete pqMap[key];
+				 * 			this.f$.runnable.queryEnded = false;
+				 * 		}
+				 * 	}
+				 * }
+				 */ { }
 			}
 		
 		});
 
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, true);
 		boolean async = false;
 		/**
 		 * In JavaScript such queries are not wrapped inside Thread, so asynchronous mode is required!
 		 * @j2sNative
 		 * async = true;
+		 * var key = "xhr." + pipeKey + "." + pipeRequestData;
+		 * net.sf.j2s.ajax.SimplePipeRequest.pipeQueryMap[key] = pipeRequest;
 		 */ {}
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, true);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, async);
 	}
 
@@ -581,20 +635,27 @@ document.body.appendChild (ifr);
 	 * @j2sNative
 var pipeKey = runnable.pipeKey;
 var spr = net.sf.j2s.ajax.SimplePipeRequest;
-var url = runnable.getPipeURL();
-spr.pipeIFrameClean (pipeKey, url);
+spr.pipeIFrameClean (pipeKey);
 var subdomain = arguments[1];
+var pipeContinued = arguments[2];
 (function () { // avoiding element reference in closure
 var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
 ifr.id = "pipe-" + pipeKey;
+var url = runnable.getPipeURL();
+if (subdomain == null) {
+	document.domain = document.domain;
+}
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
 		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true)
 		+ (subdomain == null ? ""
 				: "&" + spr.FORM_PIPE_DOMAIN + "=" + subdomain);
 document.body.appendChild (ifr);
 }) ();
-var fun = (function (key, pipeURL, created) {
+if (pipeContinued == true) { // pipe script continue ...
+	return;
+}
+var fun = (function (key, created) {
 	return function () {
 		var sph = net.sf.j2s.ajax.SimplePipeHelper;
 		var runnable = sph.getPipe(key);
@@ -609,14 +670,14 @@ var fun = (function (key, pipeURL, created) {
 				runnable.pipeAlive = false;
 				runnable.pipeClosed();
 				sph.removePipe(key);
-				spr.pipeIFrameClean (key, pipeURL);
+				spr.pipeIFrameClean (key);
 			} else {
 				spr.pipeNotify (runnable);
 				window.setTimeout (arguments.callee, spr.pipeLiveNotifyInterval);
 			}
 		}
 	};
-}) (runnable.pipeKey, runnable.getPipeURL (), new Date ().getTime ());
+}) (runnable.pipeKey, new Date ().getTime ());
 window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 */
 	static void pipeContinuum(final SimplePipeRunnable runnable) {
@@ -688,23 +749,24 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 * @param pipeKey
 	 * 
 	 * @j2sNative
+var urlSignature = net.sf.j2s.ajax.SimplePipeRequest.FORM_PIPE_KEY + "=" + pipeKey + "&";
 var iframes = document.getElementsByTagName ("IFRAME");
 for (var i = 0; i < iframes.length; i++) {
 	var el = iframes[i];
-	if (urlPrefix != null) {
-		var url = null;
+	var url = null;
+	try {
+		url = el.src;
+	} catch (e) {
+	}
+	if (url == null || url.length == 0) {
 		try {
-			url = el.url;
+			url = el.contentWindow.location.toString ();
 		} catch (e) {
-			try {
-				url = el.contentWindow.location;
-			} catch (e) {
-			}
 		}
-		if (url != null && url.indexOf (urlPrefix) == 0) {
-			el.parentNode.removeChild (el);
-			continue;
-		}
+	}
+	if (url != null && url.indexOf (urlSignature) == 0) {
+		el.parentNode.removeChild (el);
+		continue;
 	}
 	if (el.id == pipeKey || el.id == "pipe-" + pipeKey) {
 		el.parentNode.removeChild (el);
@@ -712,8 +774,8 @@ for (var i = 0; i < iframes.length; i++) {
 	}
 }
 	 */
-	native static void pipeIFrameClean(String pipeKey, String urlPrefix); // for JavaScript only
-	
+	native static void pipeIFrameClean(String pipeKey); // for JavaScript only
+
 	/**
 	 * Parse a SimpleSerializable object's string from given string.
 	 * 
@@ -780,7 +842,7 @@ for (var i = 0; i < iframes.length; i++) {
 					SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 					if (runnable != null) { // should always satisfy this condition
 						runnable.lastPipeDataReceived = System.currentTimeMillis();
-						pipeIFrameClean(runnable.pipeKey, runnable.getPipeURL()); // FIXME: getPipeURL might be incorrect
+						pipeIFrameClean(runnable.pipeKey);
 						String pipeURL = runnable.getPipeURL();
 						boolean isXSS = isXSSMode(pipeURL);
 						boolean isSubdomain = false;
@@ -790,7 +852,7 @@ for (var i = 0; i < iframes.length; i++) {
 						String subdomain = adjustSubdomain(isSubdomain);
 						/**
 						 * @j2sNative
-						 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum(runnable, subdomain);
+						 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum(runnable, subdomain, true);
 						 */ { subdomain.isEmpty(); }
 					}
 					return string.substring(end + continueKey.length());
@@ -890,7 +952,7 @@ for (var i = 0; i < iframes.length; i++) {
 			 * @j2sNative
 			 * var spr = net.sf.j2s.ajax.SimplePipeRequest;
 			 * var subdomain = spr.adjustSubdomain (isSubdomain);
-			 * spr.pipeContinuum (runnable, subdomain);
+			 * spr.pipeContinuum (runnable, subdomain, false);
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
@@ -909,7 +971,7 @@ if (isXSS && isSubdomain && spr.isSubdomainXSSSupported ()) {
 	return;
 }
 runnable.queryEnded = true;
-(function (pipeFun, key, pipeURL, created) { // Use function to simulate Thread
+(function (pipeFun, key, created, lastXHR) { // Use function to simulate Thread
 	return function () {
 		var sph = net.sf.j2s.ajax.SimplePipeHelper;
 		var runnable = sph.getPipe(key);
@@ -920,7 +982,8 @@ runnable.queryEnded = true;
 			if (last == -1) {
 				last = created;
 			}
-			if ((runnable.queryEnded || now - last >= spr.pipeLiveNotifyInterval)
+			if ((runnable.queryEnded || (now - last >= spr.pipeLiveNotifyInterval
+					&& (lastXHR == -1 || now - lastXHR >= spr.pipeLiveNotifyInterval)))
 					&& runnable.queryFailedRetries < 3) {
 				runnable.queryEnded = false;
 				if (runnable.received == runnable.lastPipeDataReceived
@@ -928,6 +991,7 @@ runnable.queryEnded = true;
 					runnable.queryFailedRetries++; // response must not be empty
 				}
 				pipeFun (runnable);
+				lastXHR = new Date ().getTime ();
 			}
 			runnable.retries = runnable.queryFailedRetries;
 			runnable.received = runnable.lastPipeDataReceived;
@@ -936,14 +1000,13 @@ runnable.queryEnded = true;
 				runnable.pipeAlive = false;
 				runnable.pipeClosed();
 				sph.removePipe(key);
-				spr.pipeIFrameClean (key, pipeURL);
+				spr.pipeIFrameClean (key);
 			} else {
 				window.setTimeout (arguments.callee, spr.pipeQueryInterval);
 			}
 		}
 	};
-}) ((!isXSS) ? spr.pipeQuery : spr.pipeScript, runnable.pipeKey,
-		runnable.getPipeURL (), new Date ().getTime ()) ();
+}) ((!isXSS) ? spr.pipeQuery : spr.pipeScript, runnable.pipeKey, new Date ().getTime (), -1) ();
 			 */
 		{
 			final String key = runnable.pipeKey;
@@ -987,16 +1050,21 @@ runnable.queryEnded = true;
 	 * @return whether subdomain XSS is supported or not.
 	 * 
 	 * @j2sNative
-	var dua = navigator.userAgent;
-	var dav = navigator.appVersion;
-	if (dua.indexOf("Opera") != -1 && parseFloat (dav) < 9.6) {
-		return false;
+	var ua = navigator.userAgent;
+	var name = "Opera";
+	var idx = ua.indexOf(name);
+	if (idx != -1) {
+		return parseFloat (ua.substring(idx + name.length + 1)) >= 9.6;
 	}
-	if (dua.indexOf("Firefox") != -1 && parseFloat (dav) < 1.5) {
-		return false;
+	name = "Firefox";
+	idx = ua.indexOf(name);
+	if (idx != -1) {
+		return parseFloat (ua.substring(idx + name.length + 1)) >= 1.5;
 	}
-	if (dua.indexOf("MSIE") != -1 && parseFloat (dav) < 6.0) {
-		return false;
+	name = "MSIE";
+	idx = ua.indexOf(name);
+	if (idx != -1) {
+		return parseFloat (ua.substring(idx + name.length + 1)) >= 6.0;
 	}
 	return true;
 	 */
@@ -1006,6 +1074,9 @@ runnable.queryEnded = true;
 	 * 
 	 * @param p
 	 * @j2sNative
+if (window["NullObject"] == null) {
+	window["NullObject"] = function () { };
+}
 p.initParameters = function () {
 	this.parentDomain = document.domain;
 	this.pipeQueryInterval = 1000;
@@ -1024,9 +1095,6 @@ p.initParameters = function () {
 		eval ("(" + window.parent.net.sf.j2s.ajax.SimplePipeRequest.checkIFrameSrc + ") ();");
 	} else {
 		this.runnable.queryEnded = true;
-	}
-	if (this.runnable != null) {
-		this.pipeURL = this.runnable.getPipeURL ();
 	}
 };
 p.initHttpRequest = function () {
@@ -1049,26 +1117,34 @@ p.initHttpRequest = function () {
 		var state = oThis.xhrHandle.readyState;
 		if (state == 4) {
 			var pipeData = oThis.xhrHandle.responseText;
-			oThis.xhrHandle.onreadystatechange = null;
+			oThis.xhrHandle.onreadystatechange = NullObject;
 			var pipe = oThis.runnable;
-			if (oThis.xhrHandle.status != 200 && pipe != null) {
-				oThis.xhrHandle = null;
-				document.domain = oThis.parentDomain;
-				with (window.parent) {
-					pipe.queryFailedRetries++;
-					pipe.queryEnded = true;
-				}
-				oThis = null;
-				return;
-			}
-			pipe.queryFailedRetries = 0; // succeeded
-			oThis.xhrHandle = null;
 			document.domain = oThis.parentDomain;
-			pipe.queryEnded = true;
-			with (window.parent) {
-				net.sf.j2s.ajax.SimplePipeRequest.parseReceived (pipeData);
-				oThis.runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe (oThis.key);
+			if (oThis.xhrHandle.status != 200) {
+				pipe.queryFailedRetries++;
+			} else {
+				pipe.queryFailedRetries = 0; // succeeded
+				with (window.parent) {
+					net.sf.j2s.ajax.SimplePipeRequest.parseReceived (pipeData);
+					oThis.runnable = net.sf.j2s.ajax.SimplePipeHelper.getPipe (oThis.key);
+				}
 			}
+			pipe.queryEnded = true;
+			var xhrHandle = oThis.xhrHandle;
+			with (window.parent) {
+				var pqMap = net.sf.j2s.ajax.SimplePipeRequest.pipeQueryMap;
+				for (var key in pqMap) {
+					if (typeof key == "string" && key.indexOf ("xhr." + pipe.pipeKey + ".") == 0) {
+						if (pqMap[key] == null || pqMap[key] === xhrHandle) {
+							delete pqMap[key];
+						} else {
+							delete pqMap[key];
+							pipe.queryEnded = false;
+						}
+					}
+				}
+			}
+			oThis.xhrHandle = null;
 			oThis = null;
 		}
 	};
@@ -1080,13 +1156,6 @@ p.pipeXHRQuery = function (request, method, url, data) {
 	} else {
 		request.open (method, url, true, null, null);
 	}
-	try {
-		if (ClassLoader != null && ClassLoader.isGecko) {
-			request.setRequestHeader ("User-Agent", "Java2Script/2.0.0");
-		}
-	} catch (e) {
-		// log ("Setting 'User-Agent' header error : " + e);
-	}
 	if (method != null && method.toLowerCase () == "post") {
 		try {
 			request.setRequestHeader ("Content-type", 
@@ -1094,13 +1163,13 @@ p.pipeXHRQuery = function (request, method, url, data) {
 		} catch (e) {
 			// log ("Setting 'Content-type' header error : " + e);
 		}
-		if (request.overrideMimeType) {
-			try {
-				// request.setRequestHeader ("Connection", "close");
-			} catch (e) {
-				// log ("Setting 'Connection' header error : " + e);
-			}
-		}
+		//if (request.overrideMimeType) {
+		//	try {
+		//		request.setRequestHeader ("Connection", "close");
+		//	} catch (e) {
+		//		log ("Setting 'Connection' header error : " + e);
+		//	}
+		//}
 	}
 	request.send(data);
 };
@@ -1118,11 +1187,10 @@ return function () {
 	if (runnable != null) {
 		if (runnable.pipeKey != p.key) {
 			var key = p.key;
-			var url = p.pipeURL;
 			with (window.parent) {
 				try {
 					net.sf.j2s.ajax.SimplePipeHelper.removePipe (key);
-					net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key, url);
+					net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key);
 					return;
 				} catch (e) {
 				}
@@ -1156,11 +1224,18 @@ return function () {
 			try {
 				p.initHttpRequest ();
 			} catch (e) {};
+			var xhrHandle = p.xhrHandle;
+			try {
+				with (window.parent) {
+					spr.pipeQueryMap["xhr." + key + "." + data] = xhrHandle;
+				}
+			} catch (e) {
+			}
 			try {
 				p.pipeXHRQuery (p.xhrHandle, method, url, data);
 				p.lastXHR = new Date ().getTime ();
 			} catch (e) {
-				p.xhrHandle.onreadystatechange = null;
+				p.xhrHandle.onreadystatechange = NullObject;
 				p.xhrHandle = null;
 				document.domain = p.parentDomain;
 				runnable.queryEnded = true;
@@ -1171,12 +1246,11 @@ return function () {
 				|| now - last > 3 * p.pipeLiveNotifyInterval) {
 			document.domain = p.parentDomain;
 			var key = p.key;
-			var url = p.pipeURL;
 			with (window.parent) {
 				runnable.pipeAlive = false;
 				runnable.pipeClosed ();
 				net.sf.j2s.ajax.SimplePipeHelper.removePipe (key);
-				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key, url);
+				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key);
 			}
 		} else {
 			window.setTimeout (arguments.callee, p.pipeQueryInterval);

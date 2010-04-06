@@ -312,7 +312,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 	}
 
 	@Override
-	protected long pipeWaitClosingInterval() {
+	public long pipeWaitClosingInterval() {
 		long closingInterval = super.pipeWaitClosingInterval();
 		for (int i = 0; i < pipes.length; i++) {
 			if (pipes[i] != null) {
