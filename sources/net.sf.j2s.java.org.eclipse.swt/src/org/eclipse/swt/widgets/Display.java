@@ -1796,9 +1796,9 @@ public Monitor [] getMonitors () {
 	if (monitors == null) {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
-		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
+		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
 		int parentWidth = OS.getContainerWidth(document.body.parentNode);
-		if (parentWidth > monitor.clientWidth) {
+		if (parentWidth > monitor.clientWidth && parentWidth <= window.screen.availWidth) {
 			monitor.clientWidth = parentWidth;
 		}
 		monitor.width = window.screen.availWidth;

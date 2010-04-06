@@ -631,9 +631,12 @@ protected void createHandle () {
 					currentIndex = items.length - 1;
 				}
 				selectInput.selectedIndex = currentIndex;
-				noSelection = false;
-				updateSelection();
-				noSelection = true;
+				{
+					boolean selection = noSelection;
+					noSelection = false;
+					updateSelection();
+					noSelection = selection;
+				}
 				toReturn(false);
 				break;
 			case 40:
@@ -644,15 +647,20 @@ protected void createHandle () {
 					currentIndex = items.length - 1;
 				}
 				selectInput.selectedIndex = currentIndex;
-				noSelection = false;
-				updateSelection();
-				noSelection = true;
+				{
+					boolean selection = noSelection;
+					noSelection = false;
+					updateSelection();
+					noSelection = selection;
+				}
 				toReturn(false);
 				break;
 			}
 		}
 	};
 	Clazz.addEvent(textInput, "keyup", hEditKeyUp);
+	
+	selectShown = false;
 	
 	hDropDownClick = new RunnableCompatibility() {
 		public void run() {
@@ -882,9 +890,9 @@ void show(){
 		//h -= 2;
 	}
 	this.selectShown = true;
-	window.currentTopZIndex = window.currentTopZIndex + 1;
+	//window.currentTopZIndex = window.currentTopZIndex + 1;
 	// related bug: http://groups.google.com/group/java2script/browse_thread/thread/8085561fcf953fc?hl=en
-	selectInput.style.zIndex = window.currentTopZIndex + 4; //sgurin
+	selectInput.style.zIndex = window.currentTopZIndex + 100; //sgurin
 
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
 	int height = OS.getContainerHeight(selectInput);

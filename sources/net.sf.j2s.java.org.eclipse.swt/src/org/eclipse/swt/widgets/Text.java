@@ -80,8 +80,8 @@ public class Text extends Scrollable {
 	private Object hModifyFocus;
 	private Object hModifyBlur;
 	private Object hModifyKeyUp;
-	private RunnableCompatibility hScrollless;
-	private Element wrapper;
+	//private RunnableCompatibility hScrollless;
+	//private Element wrapper;
 	/*
 	public static final String DELIMITER;
 	
@@ -264,11 +264,13 @@ void createHandle () {
 	};
 	Clazz.addEvent(handle, "focus", hFocus);
 	
+	handle.appendChild(textHandle);
+	/*
 	wrapper = document.createElement("DIV");
-	wrapper.style.overflow = ((style & SWT.MULTI) != 0) ? "auto" : "hidden";
+	//wrapper.style.overflow = ((style & SWT.MULTI) != 0) ? "auto" : "hidden";
+	wrapper.style.overflow = "hidden";
 	handle.appendChild(wrapper);
 	wrapper.appendChild(textHandle);
-	//handle.appendChild(textHandle);
 	if (!OS.isChrome) {
 		// TODO: IE does not trigger onscroll when dragging inner text input 
 		if (hScrollless == null) {
@@ -284,6 +286,7 @@ void createHandle () {
 		}
 		Clazz.addEvent(wrapper, "scroll", hScrollless);
 	}
+	//*/
 
 	//setTabStops (tabs = 8);
 	//fixAlignment ();
@@ -1786,6 +1789,7 @@ protected void releaseHandle() {
 		OS.destroyHandle(textHandle);
 		textHandle = null;
 	}
+	/*
 	if (wrapper != null) {
 		if (hScrollless != null) {
 			Clazz.removeEvent(wrapper, "scroll", hScrollless);
@@ -1794,6 +1798,7 @@ protected void releaseHandle() {
 		OS.destroyHandle(wrapper);
 		wrapper = null;
 	}
+	*/
 	super.releaseHandle();
 }
 /**
