@@ -307,6 +307,9 @@
 	top:50%;
 	margin-top:-10px;
 }
+* html .shell-title-icon {
+	margin-top:-8px;
+}
 .shell-title-min, .shell-title-normal-max, .shell-title-close {
 	position:absolute;
 	top:1px;

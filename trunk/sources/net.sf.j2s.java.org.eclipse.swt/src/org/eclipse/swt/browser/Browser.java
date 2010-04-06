@@ -806,6 +806,12 @@ protected void createHandle() {
 	
 	browserHandle = document.createElement ("IFRAME");
 	browserHandle.className = "browser-default";
+	
+	browserHandle.style.border = "0 none transparent";
+	if (OS.isIE) {
+		browserHandle.setAttribute("frameBorder", "0");
+	}
+
 	handle.appendChild(browserHandle);
 }
 
@@ -1388,31 +1394,55 @@ public boolean setText(String html) {
 	return true;
 }
 
+
+/**
+ * @j2sNative
+return function () {
+	try {
+		var doc = handle.contentWindow.document;
+		doc.open ();
+		if (O$.isIE) {
+			doc.domain = domain;
+		}
+		doc.write (html);
+		doc.close ();
+		handle = null;
+	} catch (e) {
+		window.setTimeout (arguments.callee, 25);
+	}
+};
+ */
+native Object generateLazyIframeWriting(Object handle, String domain, String html);
+
 /**
  * @param handle
  * @param html
  * @j2sNative
 var handle = arguments[0];
 var html = arguments[1];
+var domain = document.domain;
+if (O$.isIE) {
+	document.domain = domain;
+}
 if (handle.contentWindow != null) {
-	handle.contentWindow.location = "about:blank";
+	if (O$.isIE) {
+		handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
+	} else {
+		handle.contentWindow.location = "about:blank";
+	}
 } else { // Opera
 	handle.src = "about:blank";
 }
 try {
 	var doc = handle.contentWindow.document;
 	doc.open ();
+	if (O$.isIE) {
+		doc.domain = domain;
+	}
 	doc.write (html);
 	doc.close ();
 } catch (e) {
-	window.setTimeout ((function (handle, html) {
-		return function () {
-			var doc = handle.contentWindow.document;
-			doc.open ();
-			doc.write (html);
-			doc.close ();
-		};
-	}) (handle, html), 25);
+	window.setTimeout (this.generateLazyIframeWriting (handle, domain, html), 25);
 }
  */
 private native void iframeDocumentWrite(Object handle, String html);
@@ -1526,18 +1556,18 @@ public void stop() {
 	}
 }
 
-public void setBounds(int x, int y, int width, int height) {
-	super.setBounds(x, y, width, height);
-	if (handle.style.filter != null) {
-		// one more pixel so onmousemove can be triggered before
-		// entering IFRAME
-		browserHandle.style.width = (width - 2 > 0 ? width - 2 : 0) + "px";
-		browserHandle.style.height = (height - 2 > 0 ? height - 2 : 0) + "px";
-	} else {
-		browserHandle.style.width = (width - 4 > 0 ? width - 4 : 0) + "px";
-		browserHandle.style.height = (height - 4 > 0 ? height - 4 : 0) + "px";
-	}
-}
+//public void setBounds(int x, int y, int width, int height) {
+//	super.setBounds(x, y, width, height);
+//	if (handle.style.filter != null) {
+//		// one more pixel so onmousemove can be triggered before
+//		// entering IFRAME
+//		browserHandle.style.width = (width - 2 > 0 ? width - 2 : 0) + "px";
+//		browserHandle.style.height = (height - 2 > 0 ? height - 2 : 0) + "px";
+//	} else {
+//		browserHandle.style.width = (width - 4 > 0 ? width - 4 : 0) + "px";
+//		browserHandle.style.height = (height - 4 > 0 ? height - 4 : 0) + "px";
+//	}
+//}
 
 protected boolean useNativeScrollBar() {
 	return true;

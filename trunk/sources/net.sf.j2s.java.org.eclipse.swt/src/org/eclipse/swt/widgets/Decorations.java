@@ -1588,6 +1588,9 @@ public void setImage (Image image) {
 //		}
 	if (image == null) {
 		shellIcon.style.backgroundImage = "";
+		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+			shellIcon.style.backgroundPosition = "50% 53%";
+		}
 		if (OS.isIENeedPNGFix && shellIcon.style.filter != null) {
 			shellIcon.style.filter = "";
 		}
@@ -1596,6 +1599,9 @@ public void setImage (Image image) {
 
 	if (shellIcon != null && this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
 		CSSStyle iconStyle = shellIcon.style;
+		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+			shellIcon.style.backgroundPosition = "center center";
+		}
 		if (OS.isIENeedPNGFix && image.url.toLowerCase().endsWith(".png") && contentHandle.style.filter != null) {
 //				Element imgBackground = document.createElement("DIV");
 //				imgBackground.style.position = "absolute";
@@ -2204,6 +2210,9 @@ void setSystemMenu () {
 	if ((style & SWT.TOOL) == 0 && (style & (SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		shellIcon = document.createElement("DIV");
 		shellIcon.className = "shell-title-icon";
+		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+			shellIcon.style.backgroundPosition = "50% 53%";
+		}
 		titleBar.appendChild(shellIcon);
 		hIconClick = new RunnableCompatibility() {
 			public void run() {
@@ -2221,6 +2230,9 @@ void setSystemMenu () {
 	if (minable()) {
 		shellMin = document.createElement("DIV");
 		shellMin.className = "shell-title-min";
+		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+			shellMin.style.backgroundPosition = "0% 53%";
+		}
 		shellMin.title = "Minimze";
 		titleBar.appendChild(shellMin);
 		hMinClick = new RunnableCompatibility() {
