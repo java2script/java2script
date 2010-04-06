@@ -15,10 +15,11 @@ public class SimpleStore implements IStore {
 		/**
 		 * @j2sNative
 		 * var ua = navigator.userAgent.toLowerCase ();
-		 * var isIE = (ua.indexOf ("msie") != -1);
+		 * var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
 		 * var cookieURL = window["j2s.xss.cookie.url"];
-		 * var isLocal = window.location.protocol == "file:";
-		 * if (!isLocal && cookieURL != null && !isIE) {
+		 * var isLocal = window.location.protocol == "file:"
+		 * 		|| window.location.host.toLowerCase ().indexOf ("localhost") != -1;
+		 * if (!isLocal && cookieURL != null && !isOldIE) {
 		 *  this.store = new net.sf.j2s.store.XSSCookieStore(cookieURL);
 		 * } else {
 		 *  this.store = new net.sf.j2s.store.CookieStore();

@@ -8,10 +8,11 @@ package net.sf.j2s.store;
  * 
  * @j2sSuffix
  * var ua = navigator.userAgent.toLowerCase ();
- * var isIE = (ua.indexOf ("msie") != -1);
+ * var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
  * var xssCookieURL = window["j2s.xss.cookie.url"];
- * var isLocal = window.location.protocol == "file:";
- * if (!isLocal && xssCookieURL != null && !isIE) {
+ * var isLocal = window.location.protocol == "file:"
+ * 		|| window.location.host.toLowerCase ().indexOf ("localhost") != -1;
+ * if (!isLocal && xssCookieURL != null && !isOldIE) {
  * 	net.sf.j2s.store.XSSCookieStore.initialize(xssCookieURL);
  * }
  */
@@ -32,10 +33,7 @@ class XSSCookieStore implements IStore {
 	/**
 	 * @j2sNative
 var ua = navigator.userAgent.toLowerCase ();
-var isIE = (ua.indexOf ("msie") != -1);
-if (!isIE) {
-	document.domain = document.domain;
-}
+document.domain = document.domain;
 var xssIfr = document.getElementById ("xss-cookie");
 if (xssIfr != null) {
 	return;
