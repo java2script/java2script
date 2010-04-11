@@ -83,7 +83,7 @@ public class CompoundPipeRunnable extends SimplePipeRunnable {
 		if (pipeAlive && status < 3) { // connected
 			return true; // still in starting status
 		}
-		if (status == 3 && System.currentTimeMillis() - lastSetup < 30000) {
+		if (status == 3 && System.currentTimeMillis() - lastSetup <= 3 * SimplePipeRequest.pipeLiveNotifyInterval) {
 			return true;
 		}
 		if (super.isPipeLive()) {
