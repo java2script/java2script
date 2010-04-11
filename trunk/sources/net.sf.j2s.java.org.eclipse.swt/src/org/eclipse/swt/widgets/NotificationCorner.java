@@ -59,9 +59,6 @@ public class NotificationCorner extends DesktopItem {
 				break;
 			}
 		}
-		if (!existed && tray == null) {
-			return;
-		}
 		if (existed) {
 			defaultNotificationCorner = this;
 		}
