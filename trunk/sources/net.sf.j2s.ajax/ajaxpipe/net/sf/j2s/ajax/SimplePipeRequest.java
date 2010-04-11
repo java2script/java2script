@@ -335,32 +335,41 @@ if (url == null || url.length == 0) {
 }
 var map = net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap;
 var pipe = map[url];
-if (pipe != null) {
+if (pipe != null && pipeID != null && pipeID.length > 0) {
 	var stillExistedRequest = false;
-	var idPrefix = iframeID;
-	var idx = iframeID.lastIndexOf ("-");
+	var idPrefix = pipeID;
+	var idx = pipeID.lastIndexOf ("-");
 	if (idx != -1) {
-		idPrefix = iframeID.substring (0, idx);
+		idPrefix = pipeID.substring (0, idx);
 	}
 	var iframes = document.getElementsByTagName ("IFRAME");
 	for (var i = 0; i < iframes.length; i++) {
 		var el = iframes[i];
 		if (el.id != null && el.id.indexOf (idPrefix) == 0) {
-			alert ("exist request!");
 			stillExistedRequest = true;
 			break;
+		}
+	}
+	if (!stillExistedRequest) {
+		var scripts = document.getElementsByTagName ("SCRIPT");
+		for (var i = 0; i < scripts.length; i++) {
+			var el = scripts[i];
+			if (el.id != null && el.id.indexOf (idPrefix) == 0) {
+				stillExistedRequest = true;
+				break;
+			}
 		}
 	}
 	pipe.queryEnded = !stillExistedRequest;
 	delete map[url];
 }
 	 */
-	native static void updatePipeByURL(String iframeID, String url);
+	native static void updatePipeByURL(String pipeID, String url);
 
 	/**
 	 * @j2sNative
 return function () {
-	if (iframeID != null) {
+	if (pipeID != null) {
 		var pw = window.parent;
 		if (pw == null || pw["net"] == null) return;
 		if (!pw.net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
@@ -369,11 +378,11 @@ return function () {
 		var url = this.url;
 		this.url = null;
 		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-		var iframe = pw.document.getElementById (iframeID);
+		var iframe = pw.document.getElementById (pipeID);
 		if (iframe != null) {
 			iframe.parentNode.removeChild (iframe);
 		}
-		pw.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (iframeID, url);
+		pw.net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (pipeID, url);
 	} else {
 		if (window == null || window["net"] == null) return;
 		if (!net.sf.j2s.ajax.SimpleRPCRequest.cleanUp(this)) {
@@ -382,11 +391,11 @@ return function () {
 		var url = this.url;
 		this.url = null;
 		document.getElementsByTagName ("HEAD")[0].removeChild (this);
-		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (iframeID, url);
+		net.sf.j2s.ajax.SimplePipeRequest.updatePipeByURL (pipeID, url);
 	}
 };
 	 */
-	native static Object generatePipeScriptCallback(String iframeID);
+	native static Object generatePipeScriptCallback(String pipeID);
 	
 	/**
 	 * Load or send data for pipe using SCRIPT tag.
@@ -398,11 +407,14 @@ var script = document.createElement ("SCRIPT");
 script.type = "text/javascript";
 script.src = url;
 script.url = url;
-var iframeID = arguments[1];
+var pipeID = arguments[1];
+if (pipeID != null && pipeID.length > 0) {
+	script.id = pipeID;
+}
 var userAgent = navigator.userAgent.toLowerCase ();
 var isOpera = (userAgent.indexOf ("opera") != -1);
 var isIE = (userAgent.indexOf ("msie") != -1) && !isOpera;
-var fun = net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback (iframeID);
+var fun = net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback (pipeID);
 script.defer = true;
 if (typeof (script.onreadystatechange) == "undefined" || !isIE) { // W3C
 	script.onload = script.onerror = fun;
@@ -422,11 +434,11 @@ head.appendChild (script);
 	 * @j2sNative
 var iframe = document.createElement ("IFRAME");
 iframe.style.display = "none";
-var iframeID = null;
+var pipeID = null;
 do {
-	iframeID = "pipe-script-" + pipeKey + "-" + Math.round (10000000 * Math.random ());
-} while (document.getElementById (iframeID) != null);
-iframe.id = iframeID;
+	pipeID = "pipe-script-" + pipeKey + "-" + Math.round (10000000 * Math.random ());
+} while (document.getElementById (pipeID) != null);
+iframe.id = pipeID;
 document.body.appendChild (iframe);
 var html = "<html><head><title></title>";
 html += "<script type=\"text/javascript\">\r\n";
@@ -445,7 +457,7 @@ if (ClassLoader.isOpera)
 html += "window.setTimeout (function () {\r\n";
 html += "net = { sf : { j2s : { ajax : { SimplePipeRequest : { generatePipeScriptCallback : " + net.sf.j2s.ajax.SimplePipeRequest.generatePipeScriptCallback + " } } } } };\r\n";
 html += "(" + net.sf.j2s.ajax.SimplePipeRequest.loadPipeScript + ") (";
-html += "\"" + url.replace (/"/g, "\\\"") + "\", \"" + iframeID + "\"";
+html += "\"" + url.replace (/"/g, "\\\"") + "\", \"" + pipeID + "\"";
 html += ");\r\n";
 if (ClassLoader.isOpera)
 html += "}, " + (net.sf.j2s.ajax.SimplePipeRequest.pipeQueryInterval >> 2) + ");\r\n";
@@ -460,8 +472,11 @@ return function () {
 	try {
 		var doc = handle.contentWindow.document;
 		doc.open ();
-		if (ClazzLoader.isIE) {
-			doc.domain = domain;
+		if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
+				&& domain != null && domain.length > 0) {
+			try {
+				doc.domain = domain;
+			} catch (e) {}
 		}
 		doc.write (html);
 		doc.close ();
@@ -473,7 +488,7 @@ return function () {
 	}
 };
 	 */
-	native static Object generateLazyIframeWriting(Object handle, String html);
+	native static Object generateLazyIframeWriting(Object handle, String domain, String html);
 	
 	/**
 	 * @param handle
@@ -481,12 +496,17 @@ return function () {
 	 * @j2sNative
 	var handle = arguments[0];
 	var html = arguments[1];
-	var domain = document.domain;
-	if (ClazzLoader.isIE) {
+	var domain = null;
+	try {
+		domain = document.domain;
+	} catch (e) {}
+	if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
+			&& domain != null && domain.length > 0) {
 		document.domain = domain;
 	}
 	if (handle.contentWindow != null) {
-		if (ClazzLoader.isIE) {
+		if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
+				&& domain != null && domain.length > 0) {
 			handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
 		} else {
 			handle.contentWindow.location = "about:blank";
@@ -497,18 +517,20 @@ return function () {
 	try {
 		var doc = handle.contentWindow.document;
 		doc.open ();
-		if (ClazzLoader.isIE) {
+		if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
+				&& domain != null && domain.length > 0) {
 			doc.domain = domain;
 		}
 		doc.write (html);
 		doc.close ();
 	} catch (e) {
-		window.setTimeout (net.sf.j2s.ajax.SimplePipeRequest.generateLazyIframeWriting (handle, html), 25);
+		window.setTimeout (net.sf.j2s.ajax.SimplePipeRequest.generateLazyIframeWriting (handle, domain, html), 25);
 	}
 	 */
 	native static void iframeDocumentWrite(Object handle, String html);
 
 	static void pipeScript(SimplePipeRunnable runnable) { // xss
+		// only for JavaScript
 		String url = runnable.getPipeURL();
 		String requestURL = url + (url.indexOf('?') != -1 ? "&" : "?")
 				+ constructRequest(runnable.pipeKey, PIPE_TYPE_XSS, true);
@@ -517,12 +539,32 @@ return function () {
 		 * net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap[requestURL] = runnable;
 		 */ {}
 		if (isXSSMode(url)) {
-			// in xss mode, iframe is used to avoid blocking other *.js loading
-			loadPipeIFrameScript(runnable.pipeKey, requestURL);
-			return;
+			boolean ok4IFrameScript = true;
+			/**
+			 * @j2sNative
+			 * var domain = null;
+			 * try {
+			 * 	domain = document.domain;
+			 * } catch (e) {
+			 * }
+			 * ok4IFrameScript = domain != null && domain.length > 0;
+			 */ {}
+			if (ok4IFrameScript) {
+				// in xss mode, iframe is used to avoid blocking other *.js loading
+				loadPipeIFrameScript(runnable.pipeKey, requestURL);
+				return;
+			}
 		}
-		loadPipeScript(requestURL); // never reach here? March 5, 2009
-		// only for JavaScript
+		/**
+		 * @j2sNative
+		 * var pipeID = null;
+		 * do {
+		 * 	pipeID = "pipe-script-" + runnable.pipeKey + "-" + Math.round (10000000 * Math.random ());
+		 * } while (document.getElementById (pipeID) != null);
+		 * net.sf.j2s.ajax.SimplePipeRequest.loadPipeScript(requestURL, pipeID);
+		 */ {
+			 loadPipeScript(requestURL); // reach here for about:blank page. April 8, 2010
+		 }
 	}
 	
 	/**
@@ -645,6 +687,7 @@ ifr.id = "pipe-" + pipeKey;
 var url = runnable.getPipeURL();
 if (subdomain == null) {
 	document.domain = document.domain;
+	window["xss.domain.enabled"] = true;
 }
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
 		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true)
@@ -666,7 +709,7 @@ var fun = (function (key, created) {
 			if (last == -1) {
 				last = created;
 			}
-			if (now - last > 4 * spr.pipeLiveNotifyInterval) {
+			if (now - last > 3 * spr.pipeLiveNotifyInterval) {
 				runnable.pipeAlive = false;
 				runnable.pipeClosed();
 				sph.removePipe(key);
@@ -912,13 +955,16 @@ for (var i = 0; i < iframes.length; i++) {
 	 * @j2sNative
 	 * var subdomain = null;
 	 * if (isSubdomain) {
-	 * 	subdomain = window.location.host;
+	 * 	try {
+	 * 		subdomain = window.location.host;
+	 * 	} catch (e) {}
 	 * 	if (subdomain != null) {
 	 * 		var idx = subdomain.indexOf (":");
 	 * 		if (idx != -1) {
 	 * 			subdomain = subdomain.substring (0, idx);
 	 * 		}
 	 * 		document.domain = subdomain; // set owner iframe's domain
+	 * 		window["xss.domain.enabled"] = true;
 	 * 	}
 	 * }
 	 * return subdomain;
