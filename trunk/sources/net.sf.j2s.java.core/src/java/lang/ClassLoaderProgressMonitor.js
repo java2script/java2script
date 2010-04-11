@@ -91,6 +91,7 @@ clpm.DEFAULT_OPACITY = 55;
 };
 /* private */ clpm.createHandle = function () {
 	var div = document.createElement ("DIV");
+	div.id = "clazzloader-status";
 	div.style.cssText = "position:absolute;bottom:4px;left:4px;padding:2px 8px;"
 			+ "z-index:3333;background-color:#8e0000;color:yellow;" 
 			+ "font-family:Arial, sans-serif;font-size:10pt;white-space:nowrap;";

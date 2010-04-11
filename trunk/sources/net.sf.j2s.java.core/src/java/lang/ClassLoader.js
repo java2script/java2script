@@ -939,6 +939,10 @@ ClazzLoader.generatingW3CScriptOnCallback = function (path, forError) {
 		}
 		this.onload = null;
 		this.onerror = null;
+		if (!forError && ClazzLoader.isOpera // Opera only
+				&& !ClazzLoader.innerLoadedScripts[this.src]) {
+			ClazzLoader.checkInteractive();
+		}
 		if (forError || (!ClazzLoader.innerLoadedScripts[this.src]
 					&& ClazzLoader.isOpera)) {
 			// Opera will not take another try.
@@ -975,6 +979,9 @@ ClazzLoader.generatingIEScriptOnCallback = function (path) {
 		var fhs = ClazzLoader.failedHandles;
 		var fss = ClazzLoader.failedScripts;
 		var state = "" + this.readyState;
+		
+		
+		
 		
 		var local = state == "loading" 
 				&& (this.src.indexOf ("file:") == 0 
