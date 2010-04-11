@@ -195,7 +195,15 @@ if (url != null && (url.indexOf ("http://") == 0
 	} else {
 		locPort = parseInt (locPort);
 	}
-	var locHost = loc.host;
+	var locHost = null;
+	try {
+		locHost = loc.host;
+	} catch (e) {
+		if (arguments.length == 2) {
+			return false; // about:blank page has no domain
+		}
+		return true; // about:blank page
+	}
 	var idx4 = locHost.indexOf (":");
 	if (idx4 != -1) {
 		locHost = locHost.substring (0, idx4);
