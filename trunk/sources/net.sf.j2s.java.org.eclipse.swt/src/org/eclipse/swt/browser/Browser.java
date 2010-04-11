@@ -1401,7 +1401,8 @@ return function () {
 	try {
 		var doc = handle.contentWindow.document;
 		doc.open ();
-		if (O$.isIE) {
+		if (O$.isIE && window["xss.domain.enabled"] == true
+				&& domain != null && domain.length > 0) {
 			doc.domain = domain;
 		}
 		doc.write (html);
@@ -1420,12 +1421,17 @@ native Object generateLazyIframeWriting(Object handle, String domain, String htm
  * @j2sNative
 var handle = arguments[0];
 var html = arguments[1];
-var domain = document.domain;
-if (O$.isIE) {
+var domain = null;
+try {
+	domain = document.domain;
+} catch (e) {}
+if (O$.isIE && window["xss.domain.enabled"] == true
+		&& domain != null && domain.length > 0) {
 	document.domain = domain;
 }
 if (handle.contentWindow != null) {
-	if (O$.isIE) {
+	if (O$.isIE && window["xss.domain.enabled"] == true
+			&& domain != null && domain.length > 0) {
 		handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
 	} else {
 		handle.contentWindow.location = "about:blank";
@@ -1436,13 +1442,24 @@ if (handle.contentWindow != null) {
 try {
 	var doc = handle.contentWindow.document;
 	doc.open ();
-	if (O$.isIE) {
+	if (O$.isIE && window["xss.domain.enabled"] == true
+			&& domain != null && domain.length > 0) {
 		doc.domain = domain;
 	}
 	doc.write (html);
 	doc.close ();
 } catch (e) {
-	window.setTimeout (this.generateLazyIframeWriting (handle, domain, html), 25);
+	if (O$.isIE && (domain == null || domain.length == 0)
+			&& e.message != null && e.message.indexOf ("Access is denied") != -1) {
+		var jsHTML = html.replaceAll("\\\\", "\\\\\\\\")
+				.replaceAll("\r", "\\\\r")
+				.replaceAll("\n", "\\\\n")
+				.replaceAll("\"", "\\\\\"");
+		handle.src = "javascript:document.open();document.write (\"" + jsHTML + "\");document.close();void(0);";
+		// In IE 8.0, it is still failing ...
+	} else {
+		window.setTimeout (this.generateLazyIframeWriting (handle, domain, html), 25);
+	}
 }
  */
 private native void iframeDocumentWrite(Object handle, String html);
