@@ -33,6 +33,7 @@ public class OS {
 	
 	public static boolean isIE = false;
 	
+	public static boolean isIE90 = false;
 	public static boolean isIE80 = false;
 	public static boolean isIE70 = false;
 	public static boolean isIE60 = false;
@@ -73,26 +74,26 @@ public class OS {
 	 * @j2sNative
 	var os = $wt.internal.browser.OS;
 	var dua = navigator.userAgent;
-	var dav = navigator.appVersion;
-	os.isOpera = dua.indexOf("Opera") >= 0;
-	var isKHTML = (dav.indexOf("Konqueror") >= 0)||(dav.indexOf("Safari") >= 0);
-	os.isSafari = dav.indexOf("Safari") >= 0;
-	os.isChrome = dav.indexOf("Chrome") >= 0;
-	os.isChrome10 = dav.indexOf("Chrome/1.") >= 0 || dav.indexOf("Chrome/0.") >= 0;
-	os.isChrome20 = dav.indexOf("Chrome/2.") >= 0;
-	os.isChrome30 = dav.indexOf("Chrome/3.") >= 0;
-	var geckoPos = dua.indexOf("Gecko");
-	os.isMozilla = (geckoPos >= 0)&&(!isKHTML);
+	os.isOpera = dua.indexOf ("Opera") >= 0;
+	var isKHTML = dua.indexOf ("Konqueror") >= 0 || dua.indexOf ("Safari") >= 0;
+	os.isSafari = dua.indexOf ("Safari") >= 0;
+	os.isChrome = dua.indexOf ("Chrome") >= 0;
+	os.isChrome10 = dua.indexOf ("Chrome/1.") >= 0 || dua.indexOf ("Chrome/0.") >= 0;
+	os.isChrome20 = dua.indexOf ("Chrome/2.") >= 0;
+	os.isChrome30 = dua.indexOf ("Chrome/3.") >= 0;
+	var geckoPos = dua.indexOf ("Gecko");
+	os.isMozilla = geckoPos >= 0 && !isKHTML;
 	os.isFirefox = os.isMozilla && dua.indexOf ("Firefox") != -1;
 	os.isFirefox10 = os.isFirefox && (dua.indexOf ("Firefox/1.") != -1 || dua.indexOf ("Firefox/0.") != -1);
 	os.isFirefox20 = os.isFirefox && dua.indexOf ("Firefox/2.") != -1;
 	os.isFirefox30 = os.isFirefox && dua.indexOf ("Firefox/3.") != -1;
-	os.isIE = (document.all!=null)&&(!os.isOpera);
-	os.isIE50 = os.isIE && dav.indexOf("MSIE 5.0")>=0;
-	os.isIE55 = os.isIE && dav.indexOf("MSIE 5.5")>=0;
-	os.isIE60 = os.isIE && dav.indexOf("MSIE 6.0")>=0;
-	os.isIE70 = os.isIE && dav.indexOf("MSIE 7.0")>=0;
-	os.isIE80 = os.isIE && dav.indexOf("MSIE 8.0")>=0;
+	os.isIE = document.all != null && !os.isOpera;
+	os.isIE50 = os.isIE && dua.indexOf("MSIE 5.0")>=0;
+	os.isIE55 = os.isIE && dua.indexOf("MSIE 5.5")>=0;
+	os.isIE60 = os.isIE && dua.indexOf("MSIE 6.0")>=0;
+	os.isIE70 = os.isIE && dua.indexOf("MSIE 7.0")>=0;
+	os.isIE80 = os.isIE && dua.indexOf("MSIE 8.0")>=0;
+	os.isIE90 = os.isIE && dua.indexOf("MSIE 9.0")>=0;
 	os.isIENeedPNGFix = os.isIE50 || os.isIE55 || os.isIE60;
 	os.noReturnCallback = os.noReturnCallbackFunction;
 	 */
@@ -177,6 +178,7 @@ public class OS {
 	private static void init() {
 		if (invisibleContainer == null) {
 			Element el = document.createElement ("DIV");
+			el.id = "swt-invisible-container";
 			document.body.appendChild (el);
 			CSSStyle s = el.style;
 			s.position = "absolute";
