@@ -1047,11 +1047,29 @@ Clazz.removeEvent = function (element, type, handler) {
 	}
 };
 
+/* private */
+Clazz.isVeryOldIE = navigator.userAgent.indexOf("MSIE 6.0") != -1 || navigator.userAgent.indexOf("MSIE 5.5") != -1 || navigator.userAgent.indexOf("MSIE 5.0") != -1;
+
 /* protected */
 Clazz.handleEvent = function (event) {
 	var returnValue = true;
 	// grab the event object (IE uses a global event object)
-	event = event || Clazz.fixEvent(((this.ownerDocument || this.document || this).parentWindow || window).event);
+	if (!Clazz.isVeryOldIE) {
+		event = event || Clazz.fixEvent(((this.ownerDocument || this.document || this).parentWindow || window).event);
+	} else { // The above line is buggy in IE 6.0
+		if (event == null) {
+			var evt = null;
+			try {
+				var pWindow = (this.ownerDocument || this.document || this).parentWindow;
+				if (pWindow != null) {
+					evt = pWindow.event;
+				}
+			} catch (e) {
+				evt = window.event;
+			}
+			event = Clazz.fixEvent(evt);
+		}
+	}
 	// get a reference to the hash table of event handlers
 	var handlers = this.events[event.type];
 	// execute each event handler
