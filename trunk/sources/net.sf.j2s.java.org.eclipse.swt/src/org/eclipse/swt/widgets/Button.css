@@ -6,6 +6,7 @@
 	margin:0;
 	padding:0;
 	overflow:hidden;
+	cursor:default;
 }
 
 .button-border {
@@ -35,6 +36,7 @@
 	width:100%;
 	height:100%;
 }
+
 * html .button-push {
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:1em;
