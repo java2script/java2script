@@ -950,7 +950,7 @@ void hookMouseMove() {
 			Widget widgetThis = Widget.this;
 			/**
 			 * @j2sNative
-			 * if (O$.isIE60 || O$.isIE55 || O$.isIE50) {
+			 * if (O$.isIE) {
 			 * 	if (e.x == widgetThis.lastMouseMoveX && e.y == widgetThis.lastMouseMoveY) {
 			 * 		return true;
 			 * 	}

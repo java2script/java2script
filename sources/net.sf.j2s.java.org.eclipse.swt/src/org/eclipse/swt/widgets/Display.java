@@ -134,6 +134,7 @@ fss.cachedFontSize = 10;
 fss.isMonitoring = false;
 fss.initialize = function () {
 	this.monitorEl = document.createElement ("DIV");
+	this.monitorEl.id = "swt-font-monitor";
 	this.monitorEl.style.cssText = "position:absolute;top:-1000px;left:-1000px;font-family:Arial, sans-serif;font-size:10pt;overflow:visible;";
 	document.body.appendChild (this.monitorEl);
 	this.monitorEl.appendChild (document.createTextNode ("Java2Script"));
@@ -1798,7 +1799,7 @@ public Monitor [] getMonitors () {
 		monitor.handle = document.body;
 		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
 		int parentWidth = OS.getContainerWidth(document.body.parentNode);
-		if (parentWidth > monitor.clientWidth && parentWidth <= window.screen.availWidth) {
+		if (parentWidth - 8 > monitor.clientWidth && parentWidth <= window.screen.availWidth) {
 			monitor.clientWidth = parentWidth;
 		}
 		monitor.width = window.screen.availWidth;
@@ -2498,6 +2499,132 @@ void initializeDekstop() {
 	}
 	if (taskBar != null) return;
 	
+	/* initialize desktop panel */
+	Element panel = document.getElementById("swt-desktop-panel");
+	boolean needScrolling = false;
+	boolean injecting = false;
+	if (panel == null) {
+		boolean forceInsertingPanel = true;
+		/**
+		 * @j2sNative
+		 * forceInsertingPanel = (window["swt.desktop.panel"] != false);
+		 */ {}
+		if (forceInsertingPanel) {
+			injecting = true;
+			panel = document.createElement("DIV");
+			panel.id = "swt-desktop-panel";
+			/**
+			 * @j2sNative
+			 * panel.style.overflowX = "hidden";
+			 */ {}
+			Element[] childNodes = document.body.childNodes;
+			if (childNodes.length > 0) {
+				document.body.insertBefore(panel, childNodes[0]);
+			} else {
+				document.body.appendChild(panel);
+			}
+			childNodes = document.body.childNodes;
+			Element[] removedChildren = new Element[0]; 
+			for (int i = childNodes.length - 1; i >= 0; i--) {
+				Element child = childNodes[i];
+				boolean okToMove = false;
+				if (child.nodeName == null) {
+					okToMove = true;
+				} else if (!"SCRIPT".equalsIgnoreCase(child.nodeName)) {
+					okToMove = true;
+					String id = child.id;
+					if (id != null) {
+						if ("swt-desktop-panel".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if ("xss-cookie".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if ("clazzloader-status".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if ("swt-font-monitor".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if ("swt-invisible-container".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if ("_console_".equalsIgnoreCase(id)) {
+							okToMove = false;
+						} else if (id.startsWith("alaa-")) {
+							okToMove = false;
+						}
+					} else {
+						String cssClass = child.className;
+						if (cssClass != null) {
+							String[] allSWTClasses = new String[] {
+									"tray-cell",
+									"tray-item",
+									"tray-logo-item",
+									"shell-manager",
+									"shortcut-bar",
+									"shell-default",
+									"shell-trim"
+							};
+							for (int j = 0; j < allSWTClasses.length; j++) {
+								if (cssClass.indexOf(allSWTClasses[j]) != -1) {
+									okToMove = false;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (okToMove) {
+					removedChildren[removedChildren.length] = child;
+					document.body.removeChild(child);
+				}
+			}
+			for (int i = removedChildren.length - 1; i >= 0; i--) {
+				panel.appendChild(removedChildren[i]);
+			}
+			document.body.style.overflow = "hidden";
+			document.body.style.padding = "0";
+			document.body.style.margin = "0";
+			needScrolling = true;
+		}
+	}
+	if (panel != null) {
+		document.body.style.overflow = "hidden";
+		int height = OS.getFixedBodyClientHeight();
+		int width = OS.getFixedBodyClientWidth();
+		panel.style.position = "absolute";
+		if (!injecting) {
+			panel.style.backgroundColor = "white";
+		}
+		/**
+		 * @j2sNative
+		 * var vsb = window["swt.desktop.vscrollbar"];
+		 * if (vsb != null && (vsb == true || vsb == "true" || vsb == "enable")) {
+		 * 	panel.style.overflowY = "auto";
+		 * }
+		 * var hsb = window["swt.desktop.hscrollbar"];
+		 * if (hsb != null && (hsb == true || hsb == "true" || hsb == "enable")) {
+		 * 	panel.style.overflowX = "auto";
+		 * }
+		 */ {}
+		panel.style.paddingBottom = "80px";
+		if (!OS.isIE || OS.isIE70 || OS.isIE80 || OS.isIE90) { // to ensure that it is at least 80px height?
+			Element div = document.createElement("DIV");
+			div.id = "page-bottom-end";
+			/**
+			 * @j2sNative
+			 * div.style.cssFloat = "left";
+			 */ {}
+			div.style.height = "80px";
+			div.style.width = "1px";
+			div.style.marginLeft = "-1px";
+			panel.appendChild(div);
+		}
+		panel.style.left = "0";
+		panel.style.top = "0";
+		panel.style.width = width + "px";
+		panel.style.height = (height - 80) + "px";
+		if (needScrolling) {
+			panel.scrollTop = panel.scrollHeight;
+		}
+	}
+
 	taskBar = new TaskBar(this);
 	topBar = new MaximizedTitle(this);
 	if (QuickLaunch.defaultQuickLaunch != null) {
@@ -2531,51 +2658,16 @@ void initializeDekstop() {
 	 * 	this.taskBar.toggleAutoHide(); // by default, it is being hide automatically.
 	 * }
 	 */ {}
-	
-	Element panel = document.getElementById("swt-desktop-panel");
-	if (panel != null) {
-		int height = OS.getFixedBodyClientHeight();
-		int width = OS.getFixedBodyClientWidth();
-		panel.style.position = "absolute";
-		panel.style.backgroundColor = "white";
-		/**
-		 * @j2sNative
-		 * var vsb = window["swt.desktop.vscrollbar"];
-		 * if (vsb != null && (vsb == true || vsb == "true" || vsb == "enable")) {
-		 * 	panel.style.overflowY = "auto";
-		 * }
-		 * var hsb = window["swt.desktop.hscrollbar"];
-		 * if (hsb != null && (hsb == true || hsb == "true" || hsb == "enable")) {
-		 * 	panel.style.overflowX = "auto";
-		 * }
-		 */ {}
-		panel.style.paddingBottom = "80px";
-		if (!OS.isIE) {
-			Element div = document.createElement("DIV");
-			/**
-			 * @j2sNative
-			 * div.style.cssFloat = "left";
-			 */ {}
-			div.style.height = "80px";
-			div.style.width = "1px";
-			div.style.marginLeft = "-1px";
-			panel.appendChild(div);
-		}
-		panel.style.left = "0";
-		panel.style.top = "0";
-		panel.style.width = width + "px";
-		panel.style.height = (height - 80) + "px";
-	}
 
 	mouseMoveListener = new RunnableCompatibility(){
 	
 		public void run() {
 			HTMLEvent e = (HTMLEvent) getEvent();
-			int height = OS.getFixedBodyClientHeight();
+			int bottom = getPrimaryMonitor().clientHeight - 128;
 			// Hacks: Return as quickly as possible to avoid CPU 100%
 			int x = e.clientX;
 			int y = e.clientY;
-			if (x > 264 && y >= 100 && y <= height - 128) {
+			if (x > 264 && y >= 100 && y <= bottom) {
 				return;
 			}
 
@@ -2595,7 +2687,7 @@ void initializeDekstop() {
 				}
 			}
 
-			if (y > height - 128) {
+			if (y > bottom) {
 				if (shortcutBar.isApproaching(now, x, y, ctrlKey)) {
 					shortcutBar.handleApproaching();
 				} else if (!inDelay && shortcutBar.isLeaving(now, x, y, ctrlKey)) {
@@ -2665,7 +2757,12 @@ void initializeDekstop() {
 }
 
 static void insertOpenConsoleLink() {
-	TrayItem item = new TrayItem(getTray(), SWT.NONE);
+	Tray t = getTray();
+	if (t == null || t.isDisposed()) {
+		t = Default.getSystemTray();
+	}
+
+	TrayItem item = new TrayItem(t, SWT.NONE);
 	item.setText("Console");
 	item.handle.className = "tray-item tray-item-console";
 	item.setToolTipText("Console");
