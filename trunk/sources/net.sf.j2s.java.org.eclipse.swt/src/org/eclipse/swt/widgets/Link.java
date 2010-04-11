@@ -340,6 +340,13 @@ void hookSelection() {
 			e.display = display;
 			sendEvent(SWT.Selection);
 			toReturn(false);
+			/**
+			 * For IE: No hashes(#) in window.location!
+			 * @j2sNative
+			 * var evt = this.getEvent ();
+			 * evt.cancelBubble = true;
+			 * evt.returnValue = false;
+			 */ {}
 		}
 	};
 	for (int i = 0; i < anchors.length; i++) {
