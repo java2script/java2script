@@ -317,8 +317,9 @@ $wt = org.eclipse.swt;
 
 	var path = ClazzLoader.getClasspathFor ("org.eclipse.swt.*");
 	
-	// The core.z.js should already intialized
-	ClazzLoader.loadZJar (path + "events.z.js", [
+var isDebugging = (window["swt.debugging"] == true);
+if (!isDebugging) {
+	ClazzLoader.jarClasspath (path + "basic.z.js", [
 		"org.eclipse.swt.internal.SWTEventListener",
 		"$.SWTEventObject",
 		"org.eclipse.swt.widgets.Event",
@@ -368,12 +369,8 @@ $wt = org.eclipse.swt;
 		"$.TreeListener",
 		"$.TreeAdapter",
 		"$.VerifyListener",
-		"org.eclipse.swt.widgets.EventTable"
-	]);
-
-var isDebugging = (window["swt.debugging"] == true);
-if (!isDebugging) {
-	ClazzLoader.jarClasspath (path + "basic.z.js", [
+		"org.eclipse.swt.widgets.EventTable",
+		
 		"$wt.internal.SerializableCompatibility",
 		"$.CloneableCompatibility",
 		"$.RunnableCompatibility",
@@ -403,9 +400,8 @@ if (!isDebugging) {
 		"$.FontMetrics",
 		"$.Font",
 
-		"$wt.widgets.Monitor"
-	]);
-	ClazzLoader.jarClasspath (path + "more.z.js", [
+		"$wt.widgets.Monitor",
+		
 		"$wt.internal.ResizeHandler",
 		"$wt.internal.ResizeSystem",
 
@@ -446,15 +442,32 @@ if (!isDebugging) {
 		"$.Shell",
 		"$.Dialog"
 	]);
+	ClazzLoader.jarClasspath (wPath + "more.z.js", [
+   		"$wt.widgets.Label",
+   		"$.Button",
+   		"$.Text",
+   		"$.Group",
+   		"$.TabItem",
+   		"$.TabFolder",
+   		"$.TrayItem",
+   		"$.Tray",
+   		"$.MenuItem",
+   		"$.Menu",
+   		"$.Link",
+   		"$.Combo",
+   		"$wt.browser.Browser",
+   		"$wt.program.Program",
+   		"$wt.layout.GridData",
+   		"$.GridLayout",
+   		"$.FillData",
+   		"$.FillLayout"
+   	]);
+
 	var w = "$wt.widgets.";
 	ClazzLoader.jarClasspath (wPath + "Tree.z.js", [
 		w + "TreeItem",
 		"$.TreeColumn",
 		"$.Tree"
-	]);
-	ClazzLoader.jarClasspath (wPath + "Tray.z.js", [
-		w + "TrayItem",
-		"$.Tray"
 	]);
 	ClazzLoader.jarClasspath (wPath + "ToolBar.z.js", [
 		w + "ToolItem",
@@ -507,33 +520,13 @@ if (!isDebugging) {
 		"$wt.internal.dnd.ScaleDND",
 		w + "Scale"
 	]);
-	ClazzLoader.jarClasspath (wPath + "Menu.z.js", [
-		w + "MenuItem",
-		"$.Menu"
-	]);
 	ClazzLoader.jarClasspath (wPath + "CoolBar.z.js", [
 		w + "CoolItem",
 		"$.CoolBar"
 	]);
-	ClazzLoader.jarClasspath (wPath + "Common.z.js", [
-		w + "Label",
-		"$.Button",
-		"$.Text",
-		"$.Group",
-		"$.TabItem",
-		"$.TabFolder"
-	]);
 	
 	var lPath = ClazzLoader.getClasspathFor ("org.eclipse.swt.layout.*");
 	var l = "$wt.layout.";
-	ClazzLoader.jarClasspath (lPath + "GridLayout.z.js", [
-		l + "GridData",
-		"$.GridLayout"
-	]);
-	ClazzLoader.jarClasspath (lPath + "FillLayout.z.js", [
-		l + "FillData",
-		"$.FillLayout"
-	]);
 	ClazzLoader.jarClasspath (lPath + "RowLayout.z.js", [
 		l + "RowData",
 		"$.RowLayout"
