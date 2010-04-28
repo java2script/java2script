@@ -40,7 +40,7 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 			updateStatus(true);
 		}
 	}
-
+	
 	@Override
 	public boolean pipeDestroy() {
 		if (destroyed) {
@@ -155,6 +155,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 			pipe.pipeDestroy();
 			SimplePipeHelper.removePipe(pipeKey);
 		}
+		
+		this.pipeClosed();
+		
 		return true;
 	}
 	

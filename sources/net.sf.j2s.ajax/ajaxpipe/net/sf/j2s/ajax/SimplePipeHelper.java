@@ -73,7 +73,7 @@ public class SimplePipeHelper {
 	 * Server side
 	 */
 	@J2SIgnore
-	static String registerPipe(SimplePipeRunnable pipe) {
+	synchronized static String registerPipe(SimplePipeRunnable pipe) {
 		if (pipe.pipeKey != null) {
 			System.out.println("ERROR!!! pipeKey should be null here! " + pipe.pipeKey);
 		}
@@ -82,7 +82,6 @@ public class SimplePipeHelper {
 			pipes = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(50));
 		}
 		
-		// TODO: Synchronize pipe key
 		String key = nextPipeKey();
 		while (pipes.get(key) != null) {
 			key = nextPipeKey();;
@@ -152,6 +151,20 @@ public class SimplePipeHelper {
 	public static SimplePipeRunnable getPipe(String key) {
 		if (pipes == null || key == null) return null;
 		return pipes.get(key);
+	}
+
+	// Use this method to avoid HTTP repeat attacks
+	@J2SIgnore
+	public static boolean isPipeHashOK(String key, long hash) {
+		SimplePipeRunnable p = getPipe(key);
+		if (p == null) {
+			return false;
+		}
+		if (p.lastHash >= hash) {
+			return false;
+		}
+		p.lastHash = hash;
+		return true;
 	}
 	
 	@J2SIgnore
