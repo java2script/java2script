@@ -558,6 +558,28 @@ ClazzLoader.registerPackages = function (prefix, pkgs) {
  */
 /* protected */
 ClazzLoader.multipleSites = function (path) {
+	var deltas = window["j2s.update.delta"];
+	if (deltas != null && deltas instanceof Array && deltas.length >= 3) {
+		var lastOldVersion = null;
+		var lastNewVersion = null;
+		for (var i = 0; i < deltas.length / 3; i++) {
+			var oldVersion = deltas[i + i + i];
+			if (oldVersion != "$") {
+				lastOldVersion = oldVersion;
+			}
+			var newVersion = deltas[i + i + i + 1];
+			if (newVersion != "$") {
+				lastNewVersion = newVersion;
+			}
+			var relativePath = deltas[i + i + i + 2];
+			var key = lastOldVersion + "/" + relativePath;
+			var idx = path.indexOf (key);
+			if (idx != -1 && idx == path.length - key.length) {
+				path = path.substring (0, idx) + lastNewVersion + "/" + relativePath;
+				break;
+			}
+		}
+	}
 	var length = path.length;
 	if (ClazzLoader.maxLoadingThreads > 1 
 			&& ((length > 15 && path.substring (0, 15) == "http://archive.")
@@ -1098,6 +1120,7 @@ ClazzLoader.loadScript = function (file) {
 			alert ("[Java2Script] XMLHttpRequest not supported!");
 			return;
 		}
+
 		transport.open ("GET", file, ClazzLoader.isAsynchronousLoading);
 		// transport.setRequestHeader ("User-Agent",
 		// 		"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");

@@ -12,10 +12,21 @@ window["java.registered"] = false;
 
 	var base = ClazzLoader.getClasspathFor ("java.*");
 	
-	ClazzLoader.loadZJar (base + "error.z.js", "java.lang.Throwable");
+	//ClazzLoader.loadZJar (base + "error.z.js", "java.lang.Throwable");
 	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
 
 	ClazzLoader.jarClasspath (base + "core.z.js", [
+        "java.lang.Void",
+		"$.reflect.AccessibleObject",
+		"$.AnnotatedElement",
+		"$.GenericDeclaration",
+		"$.InvocationHandler",
+		"$.Member",
+        "$.Modifier",
+		"$.Constructor",
+        "$.Field",
+        "$.Method",
+        
 		"java.net.URLEncoder",
 		"java.net.URLDecoder",
 
@@ -23,6 +34,37 @@ window["java.registered"] = false;
 		"$.ARunnable",
 		"$.AClass",
 		"$.ASWTClass",
+
+		"net.sf.j2s.ajax.IXHRCallback",
+		"$.XHRCallbackAdapter",
+		"$.XHRCallbackSWTAdapter",
+       	
+		"$.SimpleSerializable",
+		"$.SimpleFilter",
+		"$.SimpleRPCRunnable",
+		"$.ISimpleRequestInfoBinding",
+		"$.ISimpleRequestInfo",
+		"$.ISimpleGeoLocationBinding",
+		"$.ISimpleGeoLocation",
+		"$.SimpleRPCRequest",
+		"$.SimpleRPCSWTRequest",
+       	
+		"$.SimplePipeRunnable",
+		"$.ISimplePipePriority",
+		"$.SimplePipeHelper",
+		"$.SimplePipeRequest",
+		"$.SimplePipeSWTRequest",
+       	
+		"$.CompoundSerializable",
+		"$.CompoundPipeSession",
+		"$.CompoundPipeRunnable",
+		"$.CompoundPipeRequest",
+		"$.CompoundPipeSWTRequest",
+		
+  		"net.sf.j2s.store.IStore",
+  		"$.CookieStore",
+  		"$.XSSCookieStore",
+  		"$.SimpleStore"
 	]);
 
 	ClazzLoader.jarClasspath (base + "util/AbstractList.js", [
@@ -77,54 +119,6 @@ window["java.registered"] = false;
 		"java.util.Collections.UnmodifiableSortedMap",
 		"java.util.Collections.UnmodifiableSortedSet"
 	]);
-
-	ClazzLoader.jarClasspath (base + "lang/reflect.z.js", [
-        "java.lang.Void",
-		"$.reflect.AccessibleObject",
-		"$.AnnotatedElement",
-		"$.GenericDeclaration",
-		"$.InvocationHandler",
-		"$.Member",
-        "$.Modifier",
-		"$.Constructor",
-        "$.Field",
-        "$.Method"
-	]);
-
-var isDebugging = (window["ajax.debugging"] == true);
-if (!isDebugging) {
-	/* ajax library */
-	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("net.sf.j2s.ajax.*") + "simple.z.js", [
-		"net.sf.j2s.ajax.IXHRCallback",
-		"$.XHRCallbackAdapter",
-		"$.XHRCallbackSWTAdapter",
-       	
-		"$.SimpleSerializable",
-		"$.SimpleFilter",
-		"$.SimpleRPCRunnable",
-		"$.SimpleRPCRequest",
-		"$.SimpleRPCSWTRequest",
-       	
-		"$.SimplePipeRunnable",
-		"$.ISimplePipePriority",
-		"$.SimplePipeHelper",
-		"$.SimplePipeRequest",
-		"$.SimplePipeSWTRequest",
-       	
-		"$.CompoundSerializable",
-		"$.CompoundPipeSession",
-		"$.CompoundPipeRunnable",
-		"$.CompoundPipeRequest",
-		"$.CompoundPipeSWTRequest"
-	]);
-}
-
-	ClazzLoader.jarClasspath (ClazzLoader.getClasspathFor ("net.sf.j2s.*") + "store.z.js", [
-  		"net.sf.j2s.store.IStore",
-  		"$.CookieStore",
-  		"$.XSSCookieStore",
-  		"$.SimpleStore"
-  	]);
 
 	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
 		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
