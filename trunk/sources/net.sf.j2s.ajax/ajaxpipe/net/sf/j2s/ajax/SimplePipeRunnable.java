@@ -50,6 +50,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	long lastLiveDetected;
 	
 	@J2SIgnore
+	long lastHash;
+	
+	@J2SIgnore
 	public void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		pipeManaged = true;
 		this.helper = helper;
