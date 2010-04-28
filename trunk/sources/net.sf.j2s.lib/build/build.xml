@@ -79,7 +79,7 @@
        	</java>
     	
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
-    		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
+    		<arg value="${j2s.core.src}/java/lang/Console.js"/>
     		<arg value="${j2s.core.bin}/java/lang/Console.js"/>
         	
     		<arg value="no.window.support=false"/>
@@ -97,6 +97,22 @@
         	<arg value="${j2s.core.bin}"/>
         	
     		<arg value="java/lang/Class.js"/>
+    		<arg value="java/lang/ClassLoader.js"/>
+    		<arg value="java/lang/ClassLoaderProgressMonitor.js"/>
+    		<arg value="java/lang/Console.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="none"/>
+        	<arg value="${j2s.lib.dist}/j2slib.src.z.js"/>
+        	
+        	<arg value="${j2s.core.src}"/>
+        	
+    		<arg value="java/lang/Class.js"/>
+    		<arg value="java/lang/ClassExt.js"/>
     		<arg value="java/lang/ClassLoader.js"/>
     		<arg value="java/lang/ClassLoaderProgressMonitor.js"/>
     		<arg value="java/lang/Console.js"/>
@@ -123,14 +139,55 @@
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
-          target: j2s.pack.error                      
+          target: j2s.pack.common                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.error">
+    <target name="j2s.pack.common" depends="j2s.pack.prepare">
         <java classname="net.sf.j2s.lib.build.J2SConcat">
         	<arg value="false"/>
-        	<arg value="${j2s.core.bin}/java/error.z.js"/>
+        	<arg value="${j2s.core.bin}/java/core.z.js"/>
         	
         	<arg value="${j2s.core.bin}"/>
+
+        	<!-- Already defined in Class.js
+    		<arg value="java/io/Serializable.js"/>
+    		<arg value="java/lang/CharSequence.js"/>
+    		<arg value="java/lang/Cloneable.js"/>
+    		<arg value="java/lang/Comparable.js"/>
+    		<arg value="java/lang/Runnable.js"/>
+    		<arg value="java/util/Comparator.js"/>
+    		-->
+    		
+    		<arg value="java/lang/Number.js"/>
+    		<arg value="java/lang/Integer.js"/>
+    		<arg value="java/lang/Long.js"/>
+    		<arg value="java/lang/Float.js"/>
+    		<arg value="java/lang/Double.js"/>
+    		<arg value="java/lang/Byte.js"/>
+    		<arg value="java/lang/Boolean.js"/>
+    		
+    		<arg value="java/lang/Encoding.js"/>
+    		<arg value="java/lang/String.js"/>
+        	
+    		<arg value="java/lang/Character.js"/>
+        	
+    		<arg value="java/lang/reflect/Array.js"/>
+    			
+    		<arg value="java/util/Date.js"/>
+    		
+    		<arg value="java/util/EventObject.js"/>
+    		<arg value="java/util/EventListener.js"/>
+    		<arg value="java/util/EventListenerProxy.js"/>
+    		
+    		<arg value="java/util/Iterator.js"/>
+    		<arg value="java/util/ListIterator.js"/>
+    		<arg value="java/util/Enumeration.js"/>
+    		<arg value="java/util/Collection.js"/>
+    		<arg value="java/util/Set.js"/>
+    		<arg value="java/util/Map.js"/>
+    		<arg value="java/util/List.js"/>
+    		<arg value="java/util/Queue.js"/>
+    		<arg value="java/util/RandomAccess.js"/>
+        	
 
     		<arg value="java/lang/Throwable.js"/>
     		<arg value="java/lang/StackTraceElement.js"/>
@@ -209,61 +266,25 @@
         	<arg value="java/util/NoSuchElementException.js"/>
         	<arg value="java/util/TooManyListenersException.js"/>
 
-        	<classpath>
-        		<pathelement path="${j2s.lib.project}/bin"/>
-        	</classpath>
-        </java>
-    </target>
-	<!-- - - - - - - - - - - - - - - - - - 
-          target: j2s.pack.common                      
-         - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.common" depends="j2s.pack.prepare">
-        <java classname="net.sf.j2s.lib.build.J2SConcat">
-        	<arg value="false"/>
-        	<arg value="${j2s.core.bin}/java/core.z.js"/>
-        	
-        	<arg value="${j2s.core.bin}"/>
-
-        	<!-- Already defined in Class.js
-    		<arg value="java/io/Serializable.js"/>
-    		<arg value="java/lang/CharSequence.js"/>
-    		<arg value="java/lang/Cloneable.js"/>
-    		<arg value="java/lang/Comparable.js"/>
-    		<arg value="java/lang/Runnable.js"/>
-    		<arg value="java/util/Comparator.js"/>
-    		-->
-    		
-    		<arg value="java/lang/Number.js"/>
-    		<arg value="java/lang/Integer.js"/>
-    		<arg value="java/lang/Long.js"/>
-    		<arg value="java/lang/Float.js"/>
-    		<arg value="java/lang/Double.js"/>
-    		<arg value="java/lang/Byte.js"/>
-    		<arg value="java/lang/Boolean.js"/>
-    		
-    		<arg value="java/lang/Encoding.js"/>
-    		<arg value="java/lang/String.js"/>
-        	
-    		<arg value="java/lang/Character.js"/>
-        	
+    		<arg value="java/lang/Void.js"/>
+    		<!--
     		<arg value="java/lang/reflect/Array.js"/>
-    			
-    		<arg value="java/util/Date.js"/>
-    		
-    		<arg value="java/util/EventObject.js"/>
-    		<arg value="java/util/EventListener.js"/>
-    		<arg value="java/util/EventListenerProxy.js"/>
-    		
-    		<arg value="java/util/Iterator.js"/>
-    		<arg value="java/util/ListIterator.js"/>
-    		<arg value="java/util/Enumeration.js"/>
-    		<arg value="java/util/Collection.js"/>
-    		<arg value="java/util/Set.js"/>
-    		<arg value="java/util/Map.js"/>
-    		<arg value="java/util/List.js"/>
-    		<arg value="java/util/Queue.js"/>
-    		<arg value="java/util/RandomAccess.js"/>
-        	
+    		-->
+			<arg value="java/lang/reflect/GenericDeclaration.js"/>
+			<arg value="java/lang/reflect/AnnotatedElement.js"/>
+			<arg value="java/lang/reflect/AccessibleObject.js"/>
+			<arg value="java/lang/reflect/InvocationHandler.js"/>
+			<arg value="java/lang/reflect/Member.js"/>
+    		<arg value="java/lang/reflect/Modifier.js"/>
+			<arg value="java/lang/reflect/Constructor.js"/>
+    		<arg value="java/lang/reflect/Field.js"/>
+    		<arg value="java/lang/reflect/Method.js"/>
+    		<!--
+    		<arg value="java/lang/reflect/Proxy.js"/>
+    		<arg value="java/lang/reflect/ReflectAccess.js"/>
+    		<arg value="java/lang/reflect/ReflectPermission.js"/>
+    		-->
+
     		<arg value="java/net/URLEncoder.js"/>
     		<arg value="java/net/URLDecoder.js"/>
         	
@@ -271,19 +292,7 @@
     		<arg value="net/sf/j2s/ajax/ARunnable.js"/>
     		<arg value="net/sf/j2s/ajax/AClass.js"/>
     		<arg value="net/sf/j2s/ajax/ASWTClass.js"/>
-
-        	<classpath>
-        		<pathelement path="${j2s.lib.project}/bin"/>
-        	</classpath>
-        </java>
-    	
-        <java classname="net.sf.j2s.lib.build.J2SConcat">
-        	<arg value="false"/>
-        	<arg value="${j2s.ajax.bin}/net/sf/j2s/ajax/simple.z.js"/>
         	
-        	<arg value="${j2s.ajax.bin}"/>
-
-    		<!--arg value="net/sf/j2s/ajax/CookieMonster.js"/-->
     		<arg value="net/sf/j2s/ajax/IXHRCallback.js"/>
     		<arg value="net/sf/j2s/ajax/SWTHelper.js"/>
     		<arg value="net/sf/j2s/ajax/XHRCallbackAdapter.js"/>
@@ -292,6 +301,10 @@
     		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleFilter.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimpleRequestInfoBinding.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimpleRequestInfo.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimpleGeoLocationBinding.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimpleGeoLocation.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRequest.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCSWTRequest.js"/>
         	
@@ -307,23 +320,12 @@
     		<arg value="net/sf/j2s/ajax/CompoundPipeRequest.js"/>
     		<arg value="net/sf/j2s/ajax/CompoundPipeSWTRequest.js"/>
         	
-    		<classpath>
-        		<pathelement path="${j2s.lib.project}/bin"/>
-        	</classpath>
-        </java>
-    	
-        <java classname="net.sf.j2s.lib.build.J2SConcat">
-        	<arg value="false"/>
-        	<arg value="${j2s.ajax.bin}/net/sf/j2s/store.z.js"/>
-        	
-        	<arg value="${j2s.ajax.bin}"/>
-        	
     		<arg value="net/sf/j2s/store/IStore.js"/>
     		<arg value="net/sf/j2s/store/CookieStore.js"/>
     		<arg value="net/sf/j2s/store/XSSCookieStore.js"/>
     		<arg value="net/sf/j2s/store/SimpleStore.js"/>
 
-    		<classpath>
+        	<classpath>
         		<pathelement path="${j2s.lib.project}/bin"/>
         	</classpath>
         </java>
@@ -355,8 +357,9 @@
 
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.lib                      
+          ,j2s.pack.jface
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.error,pack.java.reflect,j2s.pack.swt,j2s.pack.jface">
+    <target name="j2s.pack.lib" depends="j2s.pack.core,j2s.pack.common,j2s.pack.swt">
     	<copy file="${j2s.lib.dist}/../.htaccess" todir="${j2s.lib.dist}"/>
     	<copy todir="${j2s.lib.dist}">
     		<fileset dir="${j2s.ajax.bin}">
@@ -382,6 +385,7 @@
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
+    		<!--
     		<fileset dir="${j2s.junit.bin}">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
@@ -412,6 +416,7 @@
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
+    		-->
     	</copy>
 	</target>
 
@@ -486,7 +491,7 @@
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.swt                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.css,pack.swt.more,pack.swt.event,pack.swt.shell,pack.swt.dnd">
+    <target name="j2s.pack.swt" depends="pack.swt.basic,pack.swt.css,pack.swt.more,pack.swt.shell,pack.swt.dnd">
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -514,40 +519,6 @@
 	</target>
 
     <!-- ================================= 
-          target: pack.java.reflect              
-         ================================= -->
-    <target name="pack.java.reflect" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.core.bin}/java/lang/reflect.z.js"/>
-        	<arg value="${j2s.core.bin}"/>
-        		<arg value="java/lang/Void.js"/>
-        		<!--
-        		<arg value="java/lang/reflect/Array.js"/>
-        		-->
-				<arg value="java/lang/reflect/GenericDeclaration.js"/>
-				<arg value="java/lang/reflect/AnnotatedElement.js"/>
-				<arg value="java/lang/reflect/AccessibleObject.js"/>
-				<arg value="java/lang/reflect/InvocationHandler.js"/>
-				<arg value="java/lang/reflect/Member.js"/>
-        		<arg value="java/lang/reflect/Modifier.js"/>
-				<arg value="java/lang/reflect/Constructor.js"/>
-        		<arg value="java/lang/reflect/Field.js"/>
-        		<arg value="java/lang/reflect/Method.js"/>
-        		<!--
-        		<arg value="java/lang/reflect/Proxy.js"/>
-        		<arg value="java/lang/reflect/ReflectAccess.js"/>
-        		<arg value="java/lang/reflect/ReflectPermission.js"/>
-        		-->
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
-    </target>
-
-    <!-- ================================= 
           target: pack.swt.basic              
          ================================= -->
     <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
@@ -557,6 +528,63 @@
         	
         	<arg value="${j2s.swt.bin}"/>
         	
+
+    		<arg value="org/eclipse/swt/internal/SWTEventListener.js"/>
+    		<arg value="org/eclipse/swt/internal/SWTEventObject.js"/>
+    		
+    		<arg value="org/eclipse/swt/widgets/Event.js"/>
+    		<arg value="org/eclipse/swt/events/TypedEvent.js"/>
+    	
+    		<arg value="org/eclipse/swt/events/ArmEvent.js"/>
+    		<arg value="org/eclipse/swt/events/ControlEvent.js"/>
+    		<arg value="org/eclipse/swt/events/DisposeEvent.js"/>
+    		<arg value="org/eclipse/swt/events/FocusEvent.js"/>
+    		<arg value="org/eclipse/swt/events/HelpEvent.js"/>
+    		<arg value="org/eclipse/swt/events/KeyEvent.js"/>
+    		<arg value="org/eclipse/swt/events/MenuEvent.js"/>
+    		<arg value="org/eclipse/swt/events/MenuDetectEvent.js"/>
+    		<arg value="org/eclipse/swt/events/ModifyEvent.js"/>
+    		<arg value="org/eclipse/swt/events/MouseEvent.js"/>
+    		<arg value="org/eclipse/swt/events/PaintEvent.js"/>
+    		<arg value="org/eclipse/swt/events/SelectionEvent.js"/>
+    		<arg value="org/eclipse/swt/events/ShellEvent.js"/>
+    		<arg value="org/eclipse/swt/events/TraverseEvent.js"/>
+    		<arg value="org/eclipse/swt/events/TreeEvent.js"/>
+    		<arg value="org/eclipse/swt/events/VerifyEvent.js"/>
+    		
+    		<arg value="org/eclipse/swt/widgets/Listener.js"/>
+    		<arg value="org/eclipse/swt/widgets/TypedListener.js"/>
+
+    		<arg value="org/eclipse/swt/events/ArmListener.js"/>
+    		<arg value="org/eclipse/swt/events/ControlListener.js"/>
+    		<arg value="org/eclipse/swt/events/ControlAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/DisposeListener.js"/>
+    		<arg value="org/eclipse/swt/events/FocusListener.js"/>
+    		<arg value="org/eclipse/swt/events/FocusAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/HelpListener.js"/>
+    		<arg value="org/eclipse/swt/events/KeyListener.js"/>
+    		<arg value="org/eclipse/swt/events/KeyAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/MenuListener.js"/>
+    		<arg value="org/eclipse/swt/events/MenuAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/MenuDetectListener.js"/>
+    		<arg value="org/eclipse/swt/events/ModifyListener.js"/>
+    		<arg value="org/eclipse/swt/events/MouseListener.js"/>
+    		<arg value="org/eclipse/swt/events/MouseAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/MouseMoveListener.js"/>
+    		<arg value="org/eclipse/swt/events/MouseTrackListener.js"/>
+    		<arg value="org/eclipse/swt/events/MouseTrackAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/PaintListener.js"/>
+    		<arg value="org/eclipse/swt/events/SelectionListener.js"/>
+    		<arg value="org/eclipse/swt/events/SelectionAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/ShellListener.js"/>
+    		<arg value="org/eclipse/swt/events/ShellAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/TraverseListener.js"/>
+    		<arg value="org/eclipse/swt/events/TreeListener.js"/>
+    		<arg value="org/eclipse/swt/events/TreeAdapter.js"/>
+    		<arg value="org/eclipse/swt/events/VerifyListener.js"/>
+
+    		<arg value="org/eclipse/swt/widgets/EventTable.js"/>
+
     		<!--
     		<arg value="org/eclipse/swt/SWT.js"/>
     		<arg value="org/eclipse/swt/SWTError.js"/>
@@ -607,6 +635,31 @@
     		<arg value="org/eclipse/swt/graphics/FontData.js"/>
     		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
         	
+			<arg value="org/eclipse/swt/internal/ResizeHandler.js"/>
+    		<arg value="org/eclipse/swt/internal/ResizeSystem.js"/>
+
+    		<arg value="org/eclipse/swt/internal/dnd/DragAndDrop.js"/>
+    		<arg value="org/eclipse/swt/internal/dnd/DNDUtils.js"/>
+    		<arg value="org/eclipse/swt/internal/dnd/ShellFrameDND.js"/>
+    		<!--
+    		-->
+    		<arg value="org/eclipse/swt/internal/browser/OS.js"/>
+    		<arg value="org/eclipse/swt/internal/browser/Popup.js"/>
+    		
+    		<arg value="org/eclipse/swt/graphics/Image.js"/>
+    		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
+
+    		<arg value="org/eclipse/swt/widgets/Item.js"/>
+    		<arg value="org/eclipse/swt/widgets/Layout.js"/>
+    		<!--
+    		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
+    		<arg value="org/eclipse/swt/graphics/ImageLoader.js"/>
+
+    		<arg value="org/eclipse/swt/graphics/Font.js"/>
+    		<arg value="org/eclipse/swt/graphics/FontData.js"/>
+    		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
+    		-->
+
 	    	<classpath>
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
@@ -619,34 +672,28 @@
     <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/more.z.js"/>
+        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/more.z.js"/>
         	
         	<arg value="${j2s.swt.bin}"/>
-    			<arg value="org/eclipse/swt/internal/ResizeHandler.js"/>
-        		<arg value="org/eclipse/swt/internal/ResizeSystem.js"/>
-
-        		<arg value="org/eclipse/swt/internal/dnd/DragAndDrop.js"/>
-        		<arg value="org/eclipse/swt/internal/dnd/DNDUtils.js"/>
-        		<arg value="org/eclipse/swt/internal/dnd/ShellFrameDND.js"/>
-        		<!--
-        		-->
-        		<arg value="org/eclipse/swt/internal/browser/OS.js"/>
-        		<arg value="org/eclipse/swt/internal/browser/Popup.js"/>
-        		
-        		<arg value="org/eclipse/swt/graphics/Image.js"/>
-        		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
-
-        		<arg value="org/eclipse/swt/widgets/Item.js"/>
-        		<arg value="org/eclipse/swt/widgets/Layout.js"/>
-        		<!--
-        		<arg value="org/eclipse/swt/graphics/ImageData.js"/>
-        		<arg value="org/eclipse/swt/graphics/ImageLoader.js"/>
-
-        		<arg value="org/eclipse/swt/graphics/Font.js"/>
-        		<arg value="org/eclipse/swt/graphics/FontData.js"/>
-        		<arg value="org/eclipse/swt/graphics/FontMetrics.js"/>
-        		-->
-
+        	
+			<arg value="org/eclipse/swt/widgets/Label.js"/>
+			<arg value="org/eclipse/swt/widgets/Button.js"/>
+    		<arg value="org/eclipse/swt/widgets/Text.js"/>
+    		<arg value="org/eclipse/swt/widgets/Group.js"/>
+    		<arg value="org/eclipse/swt/widgets/TabItem.js"/>
+    		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
+    		<arg value="org/eclipse/swt/widgets/TrayItem.js"/>
+			<arg value="org/eclipse/swt/widgets/Tray.js"/>
+			<arg value="org/eclipse/swt/widgets/MenuItem.js"/>
+    		<arg value="org/eclipse/swt/widgets/Menu.js"/>
+    		<arg value="org/eclipse/swt/widgets/Link.js"/>
+    		<arg value="org/eclipse/swt/widgets/Combo.js"/>
+    		<arg value="org/eclipse/swt/browser/Browser.js"/>
+    		<arg value="org/eclipse/swt/program/Program.js"/>
+    		<arg value="org/eclipse/swt/layout/GridData.js"/>
+			<arg value="org/eclipse/swt/layout/GridLayout.js"/>
+    		<arg value="org/eclipse/swt/layout/FillData.js"/>
+			<arg value="org/eclipse/swt/layout/FillLayout.js"/>
         	
 	    	<classpath>
 	    		<pathelement path="${j2s.lib.project}/bin"/>
@@ -666,33 +713,6 @@
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
 	    </java>
-
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/GridLayout.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-        		<arg value="org/eclipse/swt/layout/GridData.js"/>
-    			<arg value="org/eclipse/swt/layout/GridLayout.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/FillLayout.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-        		<arg value="org/eclipse/swt/layout/FillData.js"/>
-    			<arg value="org/eclipse/swt/layout/FillLayout.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
@@ -719,33 +739,6 @@
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
 	    </java>
-
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Tray.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-        		<arg value="org/eclipse/swt/widgets/TrayItem.js"/>
-    			<arg value="org/eclipse/swt/widgets/Tray.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/TabFolder.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-    			<arg value="org/eclipse/swt/widgets/TabItem.js"/>
-        		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
@@ -787,24 +780,6 @@
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
 	    </java>
-
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Common.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-    			<arg value="org/eclipse/swt/widgets/Label.js"/>
-    			<arg value="org/eclipse/swt/widgets/Button.js"/>
-        		<arg value="org/eclipse/swt/widgets/Text.js"/>
-        		<arg value="org/eclipse/swt/widgets/Group.js"/>
-        		<arg value="org/eclipse/swt/widgets/TabItem.js"/>
-        		<arg value="org/eclipse/swt/widgets/TabFolder.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
@@ -905,20 +880,6 @@
 	    	</classpath>
 	    </java>
 
-    	
-        <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Menu.z.js"/>
-        	<arg value="${j2s.swt.bin}"/>
-    			<arg value="org/eclipse/swt/widgets/MenuItem.js"/>
-        		<arg value="org/eclipse/swt/widgets/Menu.js"/>
-        	
-	    	<classpath>
-	    		<pathelement path="${j2s.lib.project}/bin"/>
-	    	</classpath>
-	    </java>
-
-    	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="false"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js"/>
@@ -981,79 +942,6 @@
 	    </java>
     </target>
 	
-    <!-- ================================= 
-          target: pack.swt.event              
-         ================================= -->
-    <target name="pack.swt.event" description="Building j2s-swt-*.z.js">
-        <java classname="net.sf.j2s.lib.build.J2SConcat">
-        	<arg value="false"/>
-        	<arg value="${j2s.swt.bin}/org/eclipse/swt/events.z.js"/>
-        	
-        	<arg value="${j2s.swt.bin}"/>
-
-    		<arg value="org/eclipse/swt/internal/SWTEventListener.js"/>
-    		<arg value="org/eclipse/swt/internal/SWTEventObject.js"/>
-    		
-    		<arg value="org/eclipse/swt/widgets/Event.js"/>
-    		<arg value="org/eclipse/swt/events/TypedEvent.js"/>
-    	
-    		<arg value="org/eclipse/swt/events/ArmEvent.js"/>
-    		<arg value="org/eclipse/swt/events/ControlEvent.js"/>
-    		<arg value="org/eclipse/swt/events/DisposeEvent.js"/>
-    		<arg value="org/eclipse/swt/events/FocusEvent.js"/>
-    		<arg value="org/eclipse/swt/events/HelpEvent.js"/>
-    		<arg value="org/eclipse/swt/events/KeyEvent.js"/>
-    		<arg value="org/eclipse/swt/events/MenuEvent.js"/>
-    		<arg value="org/eclipse/swt/events/MenuDetectEvent.js"/>
-    		<arg value="org/eclipse/swt/events/ModifyEvent.js"/>
-    		<arg value="org/eclipse/swt/events/MouseEvent.js"/>
-    		<arg value="org/eclipse/swt/events/PaintEvent.js"/>
-    		<arg value="org/eclipse/swt/events/SelectionEvent.js"/>
-    		<arg value="org/eclipse/swt/events/ShellEvent.js"/>
-    		<arg value="org/eclipse/swt/events/TraverseEvent.js"/>
-    		<arg value="org/eclipse/swt/events/TreeEvent.js"/>
-    		<arg value="org/eclipse/swt/events/VerifyEvent.js"/>
-    		
-    		<arg value="org/eclipse/swt/widgets/Listener.js"/>
-    		<arg value="org/eclipse/swt/widgets/TypedListener.js"/>
-
-    		<arg value="org/eclipse/swt/events/ArmListener.js"/>
-    		<arg value="org/eclipse/swt/events/ControlListener.js"/>
-    		<arg value="org/eclipse/swt/events/ControlAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/DisposeListener.js"/>
-    		<arg value="org/eclipse/swt/events/FocusListener.js"/>
-    		<arg value="org/eclipse/swt/events/FocusAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/HelpListener.js"/>
-    		<arg value="org/eclipse/swt/events/KeyListener.js"/>
-    		<arg value="org/eclipse/swt/events/KeyAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/MenuListener.js"/>
-    		<arg value="org/eclipse/swt/events/MenuAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/MenuDetectListener.js"/>
-    		<arg value="org/eclipse/swt/events/ModifyListener.js"/>
-    		<arg value="org/eclipse/swt/events/MouseListener.js"/>
-    		<arg value="org/eclipse/swt/events/MouseAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/MouseMoveListener.js"/>
-    		<arg value="org/eclipse/swt/events/MouseTrackListener.js"/>
-    		<arg value="org/eclipse/swt/events/MouseTrackAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/PaintListener.js"/>
-    		<arg value="org/eclipse/swt/events/SelectionListener.js"/>
-    		<arg value="org/eclipse/swt/events/SelectionAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/ShellListener.js"/>
-    		<arg value="org/eclipse/swt/events/ShellAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/TraverseListener.js"/>
-    		<arg value="org/eclipse/swt/events/TreeListener.js"/>
-    		<arg value="org/eclipse/swt/events/TreeAdapter.js"/>
-    		<arg value="org/eclipse/swt/events/VerifyListener.js"/>
-
-    		<arg value="org/eclipse/swt/widgets/EventTable.js"/>
-
-        	<classpath>
-        		<pathelement path="${j2s.lib.project}/bin"/>
-        	</classpath>
-        </java>
-    </target>
-
-
     <!-- ================================= 
           target: pack.swt.dnd              
          ================================= -->
