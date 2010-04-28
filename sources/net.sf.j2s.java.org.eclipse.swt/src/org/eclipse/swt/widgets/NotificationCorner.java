@@ -180,6 +180,8 @@ public class NotificationCorner extends DesktopItem {
 		}
 
 		updateEvents();
+		
+		bringToTop(window.currentTopZIndex);
 	}
 
 	/**
