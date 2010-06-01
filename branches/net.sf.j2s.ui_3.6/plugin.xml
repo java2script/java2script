@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension-point id="externalResourceProvider" name="External Resource Provider" schema="schema/externalResourceProvider.exsd"/>
+
+   <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            class="net.sf.j2s.ui.variables.SWTVariableInitializer"
+            variable="ECLIPSE_SWT"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Java2Script"
+            id="net.sf.j2s.ui.views">
+      </category>
+      <view
+            allowMultiple="true"
+            category="net.sf.j2s.ui.views"
+            class="net.sf.j2s.ui.generator.J2SView"
+            icon="icons/j2s-logo.gif"
+            id="net.sf.j2s.ui.generator.J2SView"
+            name="J2S View">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.PDEPerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <viewShortcut id="net.sf.j2s.ui.generator.J2SView"/>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="net.sf.j2s.ui.property.J2SPropertyPage"
+            id="net.sf.j2s.ui.property.configpage"
+            name="Java2Script Builder"
+            objectClass="org.eclipse.jdt.core.IJavaProject"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="net.sf.j2s.ui.views"
+            name="Java2Script"/>
+      <view
+            allowMultiple="true"
+            category="net.sf.j2s.ui.views"
+            class="net.sf.j2s.ui.console.J2SConsoleView"
+            icon="icons/j2s-logo.gif"
+            id="net.sf.j2s.ui.console.J2SConsoleView"
+            name="J2S Console"/>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="net.sf.j2s.ui.launching.J2SApplicationLaunchShortcut"
+            helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
+            icon="icons/j2s-app.gif"
+            id="net.sf.j2s.debug.ui.localJava2ScriptShortcut"
+            label="Java2Script Application"
+            modes="run, debug">
+         <contextualLaunch>
+           <enablement>
+             <with variable="selection">
+               <count value="1"/>
+               <iterate>
+                <or>
+               	  <test property="org.eclipse.jdt.launching.hasMain"/>
+               	  <and>
+               	  	 <test property="org.eclipse.jdt.launching.hasProjectNature" args="org.eclipse.jdt.core.javanature"/>
+               	  	 <or>
+               	     	<test property="org.eclipse.jdt.launching.isContainer"/>
+               	     	<test property="org.eclipse.jdt.launching.isPackageFragment"/>
+               	     	<test property="org.eclipse.jdt.launching.isPackageFragmentRoot"/>
+               	     </or>
+               	  </and>
+               	</or>
+               </iterate>
+               </with>
+           </enablement>
+  		 </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.pde.PDEPerspective">
+         </perspective>
+         <perspective id="org.eclipse.ui.resourcePerspective"/>
+      </shortcut>
+      <shortcut
+            label="Java2Script Unit Test"
+            icon="icons/j2s-unit.gif"
+            modes="run, debug"
+            class="net.sf.j2s.ui.launching.J2SUnitLaunchShortcut"
+            id="net.sf.j2s.debug.ui.localJ2SJUnitShortcut">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count value="1"/>
+               	  <iterate>
+                     <adapt type="org.eclipse.jdt.core.IJavaElement">
+		                <test property="org.eclipse.jdt.core.isInJavaProject"/>
+		                <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+		                <test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+		             </adapt>
+		          </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspective>
+         <perspective
+               id="org.eclipse.pde.PDEPerspective">
+         </perspective>
+      </shortcut>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <viewShortcut id="net.sf.j2s.ui.console.J2SConsoleView"/>
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.pde.ui.PDEPerspective">
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <viewShortcut id="net.sf.j2s.ui.console.J2SConsoleView"/>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="net.sf.j2s.ui.launching.J2SLaunchingTabGroup"
+            id="net.sf.j2s.ui.launching.launchConfigurationTabGroup.j2sApplication"
+            type="net.sf.j2s.ui.launching.j2sApplication"/>
+      <launchConfigurationTabGroup
+            type="net.sf.j2s.ui.launching.j2sUnit"
+            class="net.sf.j2s.ui.launching.J2SUnitTabGroup"
+            id="net.sf.j2s.ui.launching.launchConfigurationTabGroup.j2sUnit">
+         <!--
+         <launchMode
+               description="%jUnitTabGroup.description.debug"
+               perspective="org.eclipse.debug.ui.DebugPerspective"
+               mode="debug">
+         </launchMode>
+         <launchMode
+               description="%jUnitTabGroup.description.run"
+               mode="run">
+         </launchMode>
+         -->
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="net.sf.j2s.ui.launching.J2SLaunchConfigurationDelegate"
+            id="net.sf.j2s.ui.launching.j2sApplication"
+            modes="run, debug"
+            name="Java2Script Application"/>
+      <launchConfigurationType
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            name="Java2Script Unit Test"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+            delegate="net.sf.j2s.ui.launching.J2SUnitConfigurationDelegate"
+            modes="run, debug"
+            id="net.sf.j2s.ui.launching.j2sUnit">
+         <fileExtension
+               default="false"
+               extension="java">
+         </fileExtension>
+         <fileExtension
+               default="false"
+               extension="class">
+         </fileExtension>
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="net.sf.j2s.ui.launching.j2sApplication"
+            icon="icons/j2s-app.gif"
+            id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sApplication"/>
+      <launchConfigurationTypeImage
+            icon="icons/j2s-unit.gif"
+            configTypeID="net.sf.j2s.ui.launching.j2sUnit"
+            id="net.sf.j2s.ui.launching.launchConfigurationTypeImage.j2sUnit"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="net.sf.j2s.ui.editors.J2SConfigEditor"
+            contributorClass="net.sf.j2s.ui.editors.J2SConfigEditorContributor"
+            extensions="j2s"
+            icon="icons/j2s-logo.gif"
+            id="net.sf.j2s.ui.editors.J2SConfigEditor"
+            name="Java2Script Config Editor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="net.sf.j2s.ui.actions.openjs"
+            objectClass="org.eclipse.jdt.core.ICompilationUnit">
+         <action
+               class="net.sf.j2s.ui.actions.OpenJSAction"
+               enablesFor="1"
+               id="net.sf.j2s.ui.actions.openJSAction"
+               label="Edit Con&amp;verted *.js"
+               menubarPath="additions"/>
+      </objectContribution>
+      <objectContribution
+            adaptable="false"
+            id="net.sf.j2s.ui.actions.genPropsJS"
+            nameFilter="*.properties"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="net.sf.j2s.ui.actions.GeneratePropertiesJSAction"
+               id="net.sf.j2s.ui.actions.genpropjsaction"
+               label="Generate *.js for *.properties"
+               menubarPath="additions"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="net.sf.j2s.ui.actions.openjseditor"
+            targetID="#CompilationUnitEditorContext">
+         <action
+               class="net.sf.j2s.ui.actions.OpenJSEditorAction"
+               id="net.sf.j2s.ui.actions.openJSEditorAction"
+               label="Edit Con&amp;verted *.js"
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="net.sf.j2s.ui.preferences.Java2ScriptPreferencePage"
+            id="net.sf.j2s.ui.preferences.Java2ScriptPreferencePage"
+            name="Java2Script"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="net.sf.j2s.ui.preferences.PreferenceInitializer"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Java2Script"
+            id="net.sf.j2s.ui.java2script">
+      </category>
+      <wizard
+            name="Java2Script Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptProjectWizard">
+         <description>
+            Create Java Project with Java2Script enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script AJAX Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptAJAXProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptAJAXProjectWizard">
+         <description>
+            Create Java Project with Java2Script AJAX enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script SWT Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptSWTProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptSWTProjectWizard">
+         <description>
+            Create Java Project with Java2Script and SWT enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script SWT AJAX Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptSWTAJAXProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptSWTAJAXProjectWizard">
+         <description>
+            Create Java Project with Java2Script AJAX and SWT enabled.
+         </description>
+      </wizard>
+      <wizard
+            name="Java2Script Servlet Project"
+            icon="icons/e/newjprj_wiz.gif"
+            category="net.sf.j2s.ui.java2script"
+            class="net.sf.j2s.ui.wizards.Java2ScriptServletProjectWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            id="net.sf.j2s.ui.wizards.Java2ScriptServletProjectWizard">
+         <description>
+            Create Java Servlet Project with Java2Script AJAX and SWT enabled.
+         </description>
+      </wizard>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <wizard
+            class="net.sf.j2s.ui.wizards.ExportJ2SAppWizard"
+            icon="icons/z-logo.gif"
+            id="net.sf.j2s.ui.packwizard"
+            name="Java2Script Application">
+         <description>Export Java2Script applications as standalone application</description>
+      </wizard>
+   </extension>
+   -->
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="J2SCompletionProposalComputer">
+		<javaCompletionProposalComputer
+        activate="true"
+        categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
+        class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="J2SCompletionProposalComputer_all">
+		<javaCompletionProposalComputer
+        activate="true"
+        categoryId="org.eclipse.jdt.ui.javaAllProposalCategory"
+        class="net.sf.j2s.ui.text.javadoc.J2SProposalComputer">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+</plugin>
