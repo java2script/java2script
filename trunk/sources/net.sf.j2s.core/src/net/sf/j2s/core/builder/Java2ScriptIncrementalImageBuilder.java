@@ -63,6 +63,9 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 			this,
 			ProblemFactory.getProblemFactory(Locale.getDefault()));
 		CompilerOptions options = newCompiler.options;
+		// temporary code to allow the compiler to revert to a single thread
+		String setting = System.getProperty("jdt.compiler.useSingleThread"); //$NON-NLS-1$
+		newCompiler.useSingleThread = setting != null && setting.equals("true"); //$NON-NLS-1$
 		
 		// enable the compiler reference info support
 		options.produceReferenceInfo = true;
