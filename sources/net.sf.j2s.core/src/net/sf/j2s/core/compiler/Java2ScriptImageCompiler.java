@@ -14,6 +14,7 @@ package net.sf.j2s.core.compiler;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.j2s.core.builder.ClasspathDirectory;
 import net.sf.j2s.core.builder.ClasspathDirectoryProxy;
@@ -22,6 +23,7 @@ import net.sf.j2s.core.builder.NameEnvironment;
 import net.sf.j2s.core.builder.NameEnvironmentProxy;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.jdt.core.compiler.CompilationProgress;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
 import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
@@ -41,14 +43,33 @@ public class Java2ScriptImageCompiler extends Compiler {
 	protected List sourceUnits;
 	protected IContainer binaryFolder;
 	
+	public Java2ScriptImageCompiler(INameEnvironment environment,
+			IErrorHandlingPolicy policy, Map settings,
+			ICompilerRequestor requestor, IProblemFactory problemFactory,
+			boolean parseLiteralExpressionsAsConstants) {
+		super(environment, policy, settings, requestor, problemFactory,
+				parseLiteralExpressionsAsConstants);
+	}
+
+	public Java2ScriptImageCompiler(INameEnvironment environment,
+			IErrorHandlingPolicy policy, Map settings,
+			ICompilerRequestor requestor, IProblemFactory problemFactory) {
+		super(environment, policy, settings, requestor, problemFactory);
+	}
+
+	public Java2ScriptImageCompiler(INameEnvironment environment,
+			IErrorHandlingPolicy policy, CompilerOptions options,
+			ICompilerRequestor requestor, IProblemFactory problemFactory,
+			PrintWriter out, CompilationProgress progress) {
+		super(environment, policy, options, requestor, problemFactory, out, progress);
+	}
+
 	public Java2ScriptImageCompiler(INameEnvironment environment, IErrorHandlingPolicy policy, CompilerOptions options, ICompilerRequestor requestor, IProblemFactory problemFactory, PrintWriter out) {
 		super(environment, policy, options, requestor, problemFactory, out);
-		// TODO Auto-generated constructor stub
 	}
 
 	public Java2ScriptImageCompiler(INameEnvironment environment, IErrorHandlingPolicy policy, CompilerOptions options, ICompilerRequestor requestor, IProblemFactory problemFactory) {
 		super(environment, policy, options, requestor, problemFactory);
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -90,8 +111,12 @@ public class Java2ScriptImageCompiler extends Compiler {
 		}
 
 		this.lookupEnvironment.unitBeingCompleted = unit;
+		long parseStart = System.currentTimeMillis();
 
 		this.parser.getMethodBodies(unit);
+
+		long resolveStart = System.currentTimeMillis();
+		this.stats.parseTime += resolveStart - parseStart;
 
 		// fault in fields & methods
 		if (unit.scope != null)
@@ -99,23 +124,34 @@ public class Java2ScriptImageCompiler extends Compiler {
 
 		// verify inherited methods
 		if (unit.scope != null)
-			unit.scope.verifyMethods(lookupEnvironment.methodVerifier());
+			unit.scope.verifyMethods(this.lookupEnvironment.methodVerifier());
 
 		// type checking
 		unit.resolve();
 
+		long analyzeStart = System.currentTimeMillis();
+		this.stats.resolveTime += analyzeStart - resolveStart;
+
 		// flow analysis
 		unit.analyseCode();
+
+		long generateStart = System.currentTimeMillis();
+		this.stats.analyzeTime += generateStart - analyzeStart;
 
 		// code generation
 		unit.generateCode();
 
 		// reference info
-		if (options.produceReferenceInfo && unit.scope != null)
+		if (this.options.produceReferenceInfo && unit.scope != null)
 			unit.scope.storeDependencyInfo();
 
+		// finalize problems (suppressWarnings)
+		unit.finalizeProblems();
+
+		this.stats.generateTime += System.currentTimeMillis() - generateStart;
+
 		// refresh the total number of units known at this stage
-		unit.compilationResult.totalUnitsKnown = totalUnits;
+		unit.compilationResult.totalUnitsKnown = this.totalUnits;
 
 		this.lookupEnvironment.unitBeingCompleted = null;
 	}
