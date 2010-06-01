@@ -39,6 +39,10 @@ public abstract class BaseTestRunner implements TestListener {
 		return fPreferences;
 	}
 
+	/**
+	 * @throws IOException
+	 * @j2sNative
+	 */
 	public static void savePreferences() throws IOException {
 		FileOutputStream fos= new FileOutputStream(getPreferencesFile());
 		try {
@@ -204,8 +208,12 @@ public abstract class BaseTestRunner implements TestListener {
 	 * Returns the loader to be used.
 	 */
 	public TestSuiteLoader getLoader() {
+		/**
+		 * @j2sNative
+		 */ {
 		if (useReloadingTestSuiteLoader())
 			return new ReloadingTestSuiteLoader();
+		}
 		return new StandardTestSuiteLoader();
 	}
 
@@ -213,11 +221,19 @@ public abstract class BaseTestRunner implements TestListener {
 		return getPreference("loading").equals("true") && !inVAJava() && fLoading;
 	}
 
+	/**
+	 * @return
+	 * @j2sNative
+	 * return null;
+	 */
 	private static File getPreferencesFile() {
 	 	String home= System.getProperty("user.home");
  		return new File(home, "junit.properties");
  	}
 
+	/**
+	 * @j2sNative
+	 */
  	private static void readPreferences() {
  		InputStream is= null;
  		try {
@@ -261,6 +277,8 @@ public abstract class BaseTestRunner implements TestListener {
 
 	/**
 	 * Returns a filtered stack trace
+	 * @j2sNative
+	 * return "";
 	 */
 	public static String getFilteredTrace(Throwable t) {
 		StringWriter stringWriter= new StringWriter();
@@ -273,6 +291,8 @@ public abstract class BaseTestRunner implements TestListener {
 
 	/**
 	 * Filters stack frames from internal JUnit classes
+	 * @j2sNative
+	 * return "";
 	 */
 	public static String getFilteredTrace(String stack) {
 		if (showStackRaw())

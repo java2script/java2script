@@ -148,6 +148,8 @@ public class TestSuite implements Test {
 
 	/**
 	 * Converts the stack trace into a string
+	 * @j2sNative
+	 * return "";
 	 */
 	private static String exceptionToString(Throwable t) {
 		StringWriter stringWriter= new StringWriter();
