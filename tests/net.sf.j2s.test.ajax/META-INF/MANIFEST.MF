@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Ajax
-Bundle-SymbolicName: net.sf.j2s.test.ajax
-Bundle-Version: 1.0.0
-Bundle-Localization: plugin
-Require-Bundle: org.eclipse.swt,
- org.junit
