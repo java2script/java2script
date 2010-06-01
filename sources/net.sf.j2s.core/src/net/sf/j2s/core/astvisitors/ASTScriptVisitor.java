@@ -2492,13 +2492,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 		
-		buffer.append(laterBuffer);
+		StringBuffer laterBufferBackup = laterBuffer;
+		//buffer.append(laterBuffer);
 		laterBuffer = new StringBuffer();
 		// Enum is considered as static member!
 
 		List bodyDeclarations = node.bodyDeclarations();
 		StringBuffer tmpBuffer = buffer;
-		StringBuffer tmpLaterBuffer = laterBuffer;
+		//StringBuffer tmpLaterBuffer = laterBuffer;
 //		StringBuffer tmpMethodBuffer = methodBuffer;
 //		buffer = new StringBuffer();
 //		laterBuffer = new StringBuffer();
@@ -2599,7 +2600,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(laterBuffer);
 
 		tmpBuffer = buffer;
-		tmpLaterBuffer = laterBuffer;
+		StringBuffer tmpLaterBuffer = laterBuffer;
 		buffer = new StringBuffer();
 		laterBuffer = new StringBuffer();
 		/* Testing class declarations in initializers */
@@ -2655,6 +2656,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(methodBuffer);
 			methodBuffer = new StringBuffer();
 		}
+		// method first
+		/*
+		 * Fixing bug for such class
+		 * class A {
+		 * 	class B () {
+		 * 	}
+		 * 	static class C extends A {
+		 * 	}
+		 * }
+		 * A.B should be declared before A.C:
+		 * c$.$A$B$ = function () ... 
+		 * c$.Clazz.decorateAsClass ( ...
+		 */
+		buffer.append(laterBufferBackup);
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof TypeDeclaration) {
