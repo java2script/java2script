@@ -1888,7 +1888,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ITypeBinding typeBinding = (ITypeBinding) binding;
 			if (typeBinding != null) {
 				String name = typeBinding.getQualifiedName();
-				if (name.startsWith("org.eclipse.swt.internal.xhtml")) {
+				if (name.startsWith("org.eclipse.swt.internal.xhtml.")
+						|| name.startsWith("net.sf.j2s.html.")) {
 					buffer.append(node.getIdentifier());
 					return false;
 				}
@@ -2896,9 +2897,31 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 										fieldsSerializables.append(", ");
 									}
 									/*
-									 * TODO: What about when variable name is minimized?
+									 * Fixed bug for the following scenario:
+									 * class NT extends ... {
+									 * 	public boolean typing;
+									 * 	public void typing() {
+									 * 	}
+									 * }
 									 */
-									fieldsSerializables.append("\"" + var.getName() + "\", \"");
+									String fieldName = var.getName().toString();
+									if (checkKeyworkViolation(fieldName)) {
+									    fieldName = "$" + fieldName;
+									}
+									String prefix = null;
+									if (binding != null 
+						                    && checkSameName(binding, fieldName)) {
+										prefix = "$";
+						            }
+									if (binding != null 
+											&& isInheritedFieldName(binding, fieldName)) {
+										fieldName = getFieldName(binding, fieldName);
+									}
+									if (prefix != null) {
+										fieldName = prefix + fieldName;
+									}
+
+									fieldsSerializables.append("\"" + fieldName + "\", \"");
 									if (mark.charAt(0) == 's' && curDim == 1) {
 										fieldsSerializables.append("AX");
 									} else if (curDim == 1) {
