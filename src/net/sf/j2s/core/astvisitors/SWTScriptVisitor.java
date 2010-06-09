@@ -98,7 +98,8 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			ITypeBinding typeBinding = (ITypeBinding) binding;
 			if (typeBinding != null) {
 				String name = typeBinding.getQualifiedName();
-				if (name.startsWith("org.eclipse.swt.internal.xhtml")) {
+				if (name.startsWith("org.eclipse.swt.internal.xhtml.")
+						|| name.startsWith("net.sf.j2s.html.")) {
 					String identifier = node.getIdentifier();
 					if ("window".equals(identifier)) {
 						identifier = "w$";
@@ -157,11 +158,15 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.indexOf("java.lang.") == 0) {
 							name = name.substring(10);
 						}
-						String xhtml = "org.eclipse.swt.internal.xhtml";
+						String xhtml = "org.eclipse.swt.internal.xhtml.";
 						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
 						}
-						xhtml = "$wt.internal.xhtml";
+						xhtml = "net.sf.j2s.html.";
+						if (name.indexOf(xhtml) == 0) {
+							name = name.substring(xhtml.length());
+						}
+						xhtml = "$wt.internal.xhtml.";
 						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
 						}
@@ -177,6 +182,13 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 					}
 				}
 			}
+		}
+		Name qName = node.getQualifier();
+		String nodeStr = qName.toString();
+		if (nodeStr.equals("net.sf.j2s.html")
+				|| nodeStr.equals("org.eclipse.swt.internal.xhtml")) {
+			node.getName().accept(this);
+			return false;
 		}
 		node.getQualifier().accept(this);
 		buffer.append('.');
@@ -205,6 +217,15 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			}
 			fqName = shortenQualifiedName(fqName);
 			String filterKey = "org.eclipse.swt.internal.xhtml.";
+			if (fqName.startsWith(filterKey)) {
+				buffer.append(" new ");
+				buffer.append(fqName.substring(filterKey.length()));
+				buffer.append(" (");
+				visitList(node.arguments(), ", ");
+				buffer.append(")");
+				return false;
+			}
+			filterKey = "net.sf.j2s.html.";
 			if (fqName.startsWith(filterKey)) {
 				buffer.append(" new ");
 				buffer.append(fqName.substring(filterKey.length()));
