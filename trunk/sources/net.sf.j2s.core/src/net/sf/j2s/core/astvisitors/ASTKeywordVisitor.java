@@ -254,10 +254,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding declaring = null;
+		String qName = null;
 		if (varBinding != null 
 				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& varBinding.getDeclaringClass() != null 
-				&& !varBinding.getDeclaringClass().getQualifiedName().startsWith("org.eclipse.swt.internal.xhtml")) {
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.")) {
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
 				buffer.append("(((");
@@ -731,10 +734,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding declaring = null;
+		String qName = null;
 		if (varBinding != null 
 				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& varBinding.getDeclaringClass() != null 
-				&& !varBinding.getDeclaringClass().getQualifiedName().startsWith("org.eclipse.swt.internal.xhtml")) {
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.")) {
 			return ;
 		}
 		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
@@ -760,10 +766,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding declaring = null;
+		String qName = null;
 		if (varBinding != null 
 				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& varBinding.getDeclaringClass() != null 
-				&& !varBinding.getDeclaringClass().getQualifiedName().startsWith("org.eclipse.swt.internal.xhtml")) {
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.")) {
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
 				buffer.append("(((");
@@ -882,10 +891,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding declaring = null;
+		String qName = null;
 		if (varBinding != null 
 				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& varBinding.getDeclaringClass() != null 
-				&& !varBinding.getDeclaringClass().getQualifiedName().startsWith("org.eclipse.swt.internal.xhtml")) {
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.")) {
 			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
 				buffer.append("(((");
@@ -1022,6 +1034,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 								name = "";
 							}
 						}
+						String xhtml = "net.sf.j2s.html.";
+						if (name.indexOf(xhtml) == 0) {
+							name = name.substring(xhtml.length());
+						}
 						if (name.indexOf("java.lang.") == 0) {
 							name = name.substring(10);
 						}
@@ -1033,7 +1049,14 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			}
 		}
-		node.getQualifier().accept(this);
+		Name qName = node.getQualifier();
+		String nodeStr = qName.toString();
+		if (nodeStr.equals("net.sf.j2s.html")
+				|| nodeStr.equals("org.eclipse.swt.internal.xhtml")) {
+			node.getName().accept(this);
+			return false;
+		}
+		qName.accept(this);
 		buffer.append('.');
 		node.getName().accept(this);
 		return false;
@@ -1101,12 +1124,24 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				SimpleName exName = element.getException().getName();
 				catchEName = exName.getIdentifier();
 			}
-			buffer.append(" catch (" + catchEName + ") {\r\n");
-			buffer.append("if (Clazz.instanceOf (" + catchEName + ", ");
+			buffer.append(" catch (" + catchEName + ") ");
+			boolean scopeAdded = false;
+			boolean endedWithThrowable = false;
 			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = (CatchClause) iter.next();
-				element.getException().getType().accept(this);
-				buffer.append(")) ");
+				Type type = element.getException().getType();
+				String typeName = type.toString();
+				if (!"Throwable".equals(typeName) && !"java.lang.Throwable".equals(typeName)) {
+					if (!scopeAdded) {
+						buffer.append("{\r\n");
+						scopeAdded = true;
+					}
+					buffer.append("if (Clazz.instanceOf (" + catchEName + ", ");
+					type.accept(this);
+					buffer.append(")) ");
+				} else {
+					endedWithThrowable = true;
+				}
 				SimpleName exName = element.getException().getName();
 				String eName = exName.getIdentifier();
 				boolean notEName = false;
@@ -1122,10 +1157,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append("\r\n}");
 				}
 				if (iter.hasNext()) {
-					buffer.append(" else if (Clazz.instanceOf (" + catchEName + ", ");
+					buffer.append(" else ");
 				}
 			}
-			buffer.append(" else {\r\nthrow " + catchEName + ";\r\n}\r\n}");
+			if (!endedWithThrowable) {
+				buffer.append(" else {\r\nthrow " + catchEName + ";\r\n}");
+			}
+			if (scopeAdded) {
+				buffer.append("\r\n}");
+			}
 		}
 		Block finallys = node.getFinally();
 		if (finallys != null) {

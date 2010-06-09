@@ -571,7 +571,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				&& !"boolean".equals(qualifiedName)
 				&& !"void".equals(qualifiedName)
 				&& !qualifiedName.startsWith("org.w3c.dom.")
-				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")) {
+				&& !qualifiedName.startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qualifiedName.startsWith("net.sf.j2s.html.")) {
 			ASTNode root = node.getRoot();
 			if (root instanceof CompilationUnit) {
 				CompilationUnit type = (CompilationUnit) root;
