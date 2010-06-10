@@ -30,7 +30,7 @@ return Boolean.toBoolean (s);
 }, "~S");
 Clazz.defineMethod (Boolean, "booleanValue", 
 function () {
-return this.value;
+return this.valueOf ();
 });
 Boolean.$valueOf = Clazz.defineMethod (Boolean, "$valueOf", 
 function (b) {
@@ -55,7 +55,7 @@ return this.valueOf () ? 1231 : 1237;
 Clazz.overrideMethod (Boolean, "equals", 
 function (obj) {
 if (Clazz.instanceOf (obj, Boolean)) {
-return this.value == (obj).booleanValue ();
+return this.valueOf () == (obj).booleanValue ();
 }return false;
 }, "~O");
 Boolean.getBoolean = Clazz.defineMethod (Boolean, "getBoolean", 
@@ -74,7 +74,7 @@ return result;
 }, "~S");
 Clazz.overrideMethod (Boolean, "compareTo", 
 function (b) {
-return (b.value == this.value ? 0 : (this.value ? 1 : -1));
+return (b.value == this.valueOf () ? 0 : (this.valueOf () ? 1 : -1));
 }, "Boolean");
 Boolean.toBoolean = Clazz.defineMethod (Boolean, "toBoolean", 
 ($fz = function (name) {
