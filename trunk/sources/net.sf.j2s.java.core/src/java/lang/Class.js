@@ -1637,8 +1637,28 @@ Clazz.innerFunctions = {
 				if (x != -1) {
 					baseFolder = baseFolder.substring (0, x);
 				} else {
-					baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
 					//baseFolder = null;
+					var y = -1;
+					if (baseFolder.indexOf (".z.js") == baseFolder.length - 5
+							&& (y = baseFolder.lastIndexOf ("/")) != -1) {
+						baseFolder = baseFolder.substring (0, y + 1);
+						var pkgs = clazzName.split (/\./);
+						for (var k = 1; k < pkgs.length; k++) {
+							var pkgURL = "/";
+							for (var j = 0; j < k; j++) {
+								pkgURL += pkgs[j] + "/";
+							}
+							if (pkgURL.length > baseFolder.length) {
+								break;
+							}
+							if (baseFolder.indexOf (pkgURL) == baseFolder.length - pkgURL.length) {
+								baseFolder = baseFolder.substring (0, baseFolder.length - pkgURL.length + 1);
+								break;
+							}
+						}
+					} else {
+						baseFolder = ClazzLoader.getClasspathFor (clazzName, true);
+					}
 				}
 			} else {
 				var bins = Clazz.binaryFolders;

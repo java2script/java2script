@@ -1,7 +1,8 @@
 /* private */
 window["java.registered"] = false;
 
-(function () {
+window["java.package.callback"] = function () {
+	window["java.package.callback"] = null;
 	ClazzLoader.registerPackages ("java", [
 			"io", "lang", "lang.annotation", "lang.reflect",
 			"util", "util.concurrent", "util.concurrent.atomic", "util.concurrent.locks",
@@ -11,9 +12,6 @@ window["java.registered"] = false;
 	window["reflect"] = java.lang.reflect;
 
 	var base = ClazzLoader.getClasspathFor ("java.*");
-	
-	//ClazzLoader.loadZJar (base + "error.z.js", "java.lang.Throwable");
-	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
 
 	ClazzLoader.jarClasspath (base + "core.z.js", [
         "java.lang.Void",
@@ -64,6 +62,7 @@ window["java.registered"] = false;
   		"net.sf.j2s.store.IStore",
   		"$.CookieStore",
   		"$.XSSCookieStore",
+  		"$.HTML5LocalStorage",
   		"$.SimpleStore"
 	]);
 
@@ -122,10 +121,17 @@ window["java.registered"] = false;
 
 	ClazzLoader.jarClasspath (base + "lang/StringBuilder.z.js", 
 		["java.lang.AbstractStringBuilder", "$.StringBuilder"]);
-	base = base.substring (0, base.lastIndexOf ("java/"));
-	ClazzLoader.jarClasspath (base + "org/apache/harmony/luni/util/Msg.z.js", 
+
+	ClazzLoader.jarClasspath (base.substring (0, base.lastIndexOf ("java/"))
+			+ "org/apache/harmony/luni/util/Msg.z.js", 
 		["org.apache.harmony.luni.util.Msg", "$.MsgHelp"]);
-}) ();
+
+	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
+};
+if (ClazzLoader.classpathMap["@java"] != null) {
+	window["java.package.callback"] ();
+}
+
 
 /* private */
 window["java.registered"] = true;
