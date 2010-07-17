@@ -14,4 +14,6 @@ public class O$ {
 	
 	public native static void clearChildren(Element el);
 	
+	public native static int getContainerWidth(Element el);
+	
 }
