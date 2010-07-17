@@ -121,7 +121,48 @@
 	    		<pathelement path="${j2s.lib.project}/bin"/>
 	    	</classpath>
 	    </java>
+
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${j2s.core.src}/java/package.js"/>
+   			<arg value="${j2s.core.bin}/java/package.js"/>
+        	
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="${j2s.lib.project}/bin"/>
+        	</classpath>
+       	</java>
+
+        <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
+    		<arg value="${j2s.swt.bin}/org/eclipse/swt/package.js"/>
+   			<arg value="${j2s.core.bin}/org/eclipse/swt/package.js"/>
+        	
+    		<arg value="link.compress=true"/>
+
+        	<classpath>
+        		<pathelement path="${j2s.lib.project}/bin"/>
+        	</classpath>
+       	</java>
+        <java classname="net.sf.j2s.lib.build.UTF8Concat">
+        	<arg value="none"/>
+        	<arg value="${j2s.lib.dist}/j2slib.swt.z.js"/>
+        	
+        	<arg value="${j2s.core.bin}"/>
+        	
+    		<arg value="java/lang/Class.js"/>
+    		<arg value="java/lang/ClassLoader.js"/>
+    		<arg value="java/lang/ClassLoaderProgressMonitor.js"/>
+    		<arg value="java/lang/Console.js"/>
+    		<arg value="java/package.js"/>
+    		<arg value="org/eclipse/swt/package.js"/>
+        	
+	    	<classpath>
+	    		<pathelement path="${j2s.lib.project}/bin"/>
+	    	</classpath>
+	    </java>
     	
+    	<!--<delete file="${j2s.core.bin}/org/eclipse/swt/package.js" quiet="true"/>-->
+
     	<!-- j2slibcore.z.js does not contains Console -->
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
         	<arg value="none"/>
@@ -143,7 +184,7 @@
          - - - - - - - - - - - - - - - - - -->
     <target name="j2s.pack.common" depends="j2s.pack.prepare">
         <java classname="net.sf.j2s.lib.build.J2SConcat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.core.bin}/java/core.z.js"/>
         	
         	<arg value="${j2s.core.bin}"/>
@@ -323,6 +364,7 @@
     		<arg value="net/sf/j2s/store/IStore.js"/>
     		<arg value="net/sf/j2s/store/CookieStore.js"/>
     		<arg value="net/sf/j2s/store/XSSCookieStore.js"/>
+    		<arg value="net/sf/j2s/store/HTML5LocalStorage.js"/>
     		<arg value="net/sf/j2s/store/SimpleStore.js"/>
 
         	<classpath>
@@ -331,7 +373,7 @@
         </java>
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.core.bin}/org/apache/harmony/luni/util/Msg.z.js"/>
         	<arg value="${j2s.core.bin}"/>
         		<arg value="org/apache/harmony/luni/util/Msg.js"/>
@@ -343,7 +385,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.core.bin}/java/lang/StringBuilder.z.js"/>
         	<arg value="${j2s.core.bin}"/>
         		<arg value="java/lang/AbstractStringBuilder.js"/>
@@ -523,7 +565,7 @@
          ================================= -->
     <target name="pack.swt.basic" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/basic.z.js"/>
         	
         	<arg value="${j2s.swt.bin}"/>
@@ -671,7 +713,7 @@
          ================================= -->
     <target name="pack.swt.more" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/more.z.js"/>
         	
         	<arg value="${j2s.swt.bin}"/>
@@ -702,7 +744,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/SWT.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
         		<arg value="org/eclipse/swt/SWT.js"/>
@@ -715,7 +757,7 @@
 	    </java>
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/RowLayout.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
         		<arg value="org/eclipse/swt/layout/RowData.js"/>
@@ -728,7 +770,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/layout/FormLayout.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
         		<arg value="org/eclipse/swt/layout/FormAttachment.js"/>
@@ -741,7 +783,7 @@
 	    </java>
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Tree.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/widgets/TreeItem.js"/>
@@ -755,7 +797,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/ToolBar.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/widgets/ToolItem.js"/>
@@ -768,7 +810,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Table.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/widgets/TableItem.js"/>
@@ -782,7 +824,7 @@
 	    </java>
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/SashForm.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/internal/dnd/SashDND.js"/>
@@ -798,7 +840,7 @@
 
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CTabFolder.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/custom/CTabFolderEvent.js"/>
@@ -817,7 +859,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CLabel.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/custom/CLayoutData.js"/>
@@ -830,7 +872,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/CBanner.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/custom/CBannerLayout.js"/>
@@ -843,7 +885,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/custom/ViewForm.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/custom/ViewFormLayout.js"/>
@@ -856,7 +898,7 @@
 
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Slider.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/internal/dnd/SliderDND.js"/>
@@ -869,7 +911,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Scale.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/internal/dnd/ScaleDND.js"/>
@@ -881,7 +923,7 @@
 	    </java>
 
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/CoolBar.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/widgets/CoolItem.js"/>
@@ -894,7 +936,7 @@
 
     	
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/graphics/Font.z.js"/>
         	<arg value="${j2s.swt.bin}"/>
     			<arg value="org/eclipse/swt/graphics/FontData.js"/>
@@ -915,7 +957,7 @@
          ================================= -->
     <target name="pack.swt.shell" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/widgets/Shell.z.js"/>
         	
         	<arg value="${j2s.swt.bin}"/>
@@ -947,7 +989,7 @@
          ================================= -->
     <target name="pack.swt.dnd" description="Building j2s-swt-*.z.js">
         <java classname="net.sf.j2s.lib.build.UTF8Concat">
-        	<arg value="false"/>
+        	<arg value="true"/>
         	<arg value="${j2s.swt.bin}/org/eclipse/swt/dnd.z.js"/>
         	
         	<arg value="${j2s.swt.bin}"/>

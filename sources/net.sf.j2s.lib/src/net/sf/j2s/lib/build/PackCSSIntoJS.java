@@ -68,6 +68,22 @@ public class PackCSSIntoJS {
 			File cssFile = cssFiles[i];
 			String path = cssFile.getAbsolutePath();
 			File jsFile = new File(path.substring(0, path.length() - 4) + ".js");
+			if (!jsFile.exists()) {
+				String name = cssFile.getName();
+				name = name.substring(0, name.length() - 4);
+				int lastIdx = 0;
+				int idx = -1;
+				StringBuffer buffer = new StringBuffer();
+				while ((idx = name.indexOf("-", lastIdx)) != -1) {
+					buffer.append(name.substring(lastIdx, lastIdx + 1).toUpperCase());
+					buffer.append(name.substring(lastIdx + 1, idx));
+					lastIdx = idx + 1;
+				}
+				buffer.append(name.substring(lastIdx, lastIdx + 1).toUpperCase());
+				buffer.append(name.substring(lastIdx + 1));
+				buffer.append(".js");
+				jsFile = new File(cssFile.getParent(), buffer.toString());
+			}
 			if (jsFile.exists()) {
 				String jsContent = RegExCompress.readFileAll(new FileInputStream(jsFile));
 				int index = 0;
