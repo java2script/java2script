@@ -56,7 +56,7 @@ while ((idx = clazzName.lastIndexOf('$')) != -1) {
 }
 buffer[1] = clazzName;
 buffer[2] = '#';
-buffer[3] = "00000000$"
+buffer[3] = "00000000$";
 var headSize = buffer.join ('').length;
 
 var fields = oClass.declared$Fields;
@@ -621,6 +621,11 @@ while (index < start + length && index < end) {
 			}
 		}
 	}
+	var count = 0;
+	while (!fieldMap[fieldName] && count++ <= 3) {
+		fieldName = "$" + fieldName;
+	}
+
 	index += l1;
 	var c2 = str.charAt (index++);
 	if (c2 == 'A') {
@@ -812,6 +817,12 @@ return true;
 						break;
 					}
 				}
+			}
+			while (fieldName.startsWith("$")) {
+				if (fieldMap.containsKey(fieldName)) {
+					break;
+				}
+				fieldName = fieldName.substring(1);
 			}
 			index += l1;
 			char c2 = str.charAt(index++);

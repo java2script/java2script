@@ -7,19 +7,48 @@ package net.sf.j2s.store;
  * Mar 28, 2009
  * 
  * @j2sSuffix
- * var ua = navigator.userAgent.toLowerCase ();
- * var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
- * var xssCookieURL = window["j2s.xss.cookie.url"];
- * var isLocal = false;
- * try {
- * 	isLocal = window.location.protocol == "file:"
- * 			|| window.location.host.toLowerCase ().indexOf ("localhost") != -1;
- * } catch (e) {
- * 	isLocal = true;
- * }
- * if (!isLocal && xssCookieURL != null && !isOldIE) {
- * 	net.sf.j2s.store.XSSCookieStore.initialize(xssCookieURL);
- * }
+var ua = navigator.userAgent.toLowerCase ();
+var isLocalFile = false;
+try {
+	isLocalFile = window.location.protocol == "file:";
+} catch (e) {
+	isLocalFile = true;
+}
+if (!window["j2s.html5.store"] || window["localStorage"] == null || (ua.indexOf ("gecko/") != -1 && isLocalFile)) {
+	var isLocal = false;
+	try {
+		isLocal = window.location.protocol == "file:"
+				|| window.location.host.toLowerCase () == "localhost";
+	} catch (e) {
+		isLocal = true;
+	}
+	var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
+	var xssCookieURL = window["j2s.xss.cookie.url"];
+	if (xssCookieURL == null) {
+		var host = null;
+		try {
+			host = window.location.host;
+		} catch (e) {
+		}
+		if (host != null && host.indexOf ("www.") == 0) {
+			host = host.substring (4).toLowerCase ();
+		}
+		
+		var knownXSSCookieSites = window["j2s.known.xss.domains"];
+		if (knownXSSCookieSites != null) {
+			for (var i = 0; i < knownXSSCookieSites.length; i++) {
+				if (host == knownXSSCookieSites[i]) {
+					xssCookieURL = "http://c." + host + "/xss-cookie.html";
+					window["j2s.xss.cookie.url"] = xssCookieURL;
+					break;
+				}
+			}
+		}
+	}
+	if (!isLocal && xssCookieURL != null && !isOldIE) {
+		net.sf.j2s.store.XSSCookieStore.initialize(xssCookieURL);
+	}
+}
  */
 class XSSCookieStore implements IStore {
 
