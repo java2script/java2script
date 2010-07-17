@@ -443,8 +443,7 @@ ClazzLoader.unwrapArray = function (arr) {
 /*-# classQueue -> cq #-*/
 ClazzLoader.classQueue = new Array ();
 
-/* private */
-/*-# classpathMap -> cm #-*/
+/* protected */
 ClazzLoader.classpathMap = new Object ();
 
 /* public */
@@ -495,14 +494,18 @@ ClazzLoader.packageClasspath = function (pkg, base, index) {
 		pkg = pkg.substring (0, pkg.length - 2);
 	}
 	map["@" + pkg] = base;
-	if (index == true && window[pkg + ".registered"] != true && !isPkgDeclared) {
-		ClazzLoader.pkgRefCount++;
-		ClazzLoader.loadClass (pkg + ".package", function () {
+	if (index == true && !isPkgDeclared) {
+		if (window[pkg + ".registered"] != true) {
+			ClazzLoader.pkgRefCount++;
+			ClazzLoader.loadClass (pkg + ".package", function () {
 					ClazzLoader.pkgRefCount--;
 					if (ClazzLoader.pkgRefCount == 0) {
 						ClazzLoader.runtimeLoaded ();
 					}
 				}, true);
+		} else if (window[pkg + ".package.callback"] != null) {
+			window[pkg + ".package.callback"] ();
+		}
 	}
 };
 
@@ -633,7 +636,8 @@ ClazzLoader.getClasspathFor = function (clazz, forRoot, ext) {
 				}
 			}
 		}
-	} else {
+	}
+	if (base == null) {
 		/*
 		path = ClazzLoader.classpathMap["@" + clazz]; // package
 		if (path != null) {
@@ -930,10 +934,10 @@ ClazzLoader.ieToLoadScriptAgain = function (path, local) {
 	};
 	// consider 30 seconds available after failing!
 	/*
-	 * Set 1s waiting in local file system. Is it 1s enough?
-	 * What about big *.z.js need more than 1s to initialize?
+	 * Set 3s waiting in local file system. Is it 3s enough?
+	 * What about big *.z.js need more than 3s to initialize?
 	 */
-	var waitingTime = (local ? 500 : 15000); // 0.5s : 15s
+	var waitingTime = (local ? 3000 : 30000); // 3s : 30s
 	//alert ("waiting:" + waitingTime + " . " + path);
 	return window.setTimeout (fun, waitingTime);
 };
@@ -946,6 +950,14 @@ ClazzLoader.w3cFailedLoadingTest = function (script) {
 				script.timeoutHandle = null;
 				script = null;
 			}, 500); // 0.5s for loading a local file is considered enough long
+};
+
+/* private */
+/*-# lazilyReloadScript -> lRlS #-*/
+ClazzLoader.lazilyReloadScript = function (path) {
+	return window.setTimeout (function () {
+				ClazzLoader.loadScript (path);
+			}, 100); // 0.1s for script reloading interval
 };
 
 /* private */
@@ -977,7 +989,7 @@ ClazzLoader.generatingW3CScriptOnCallback = function (path, forError) {
 					ClazzLoader.innerLoadedScripts[this.src] = false;
 				}
 				ClazzLoader.loadedScripts[path] = false;
-				ClazzLoader.loadScript (path);
+				ClazzLoader.lazilyReloadScript (path);
 				ClazzLoader.removeScriptNode (this);
 				return;
 			} else {
@@ -997,13 +1009,10 @@ ClazzLoader.generatingW3CScriptOnCallback = function (path, forError) {
 /* private */
 /*-# generatingIEScriptOnCallback -> gISC #-*/
 ClazzLoader.generatingIEScriptOnCallback = function (path) {
-	return function () {
+	var f = function () {
 		var fhs = ClazzLoader.failedHandles;
 		var fss = ClazzLoader.failedScripts;
 		var state = "" + this.readyState;
-		
-		
-		
 		
 		var local = state == "loading" 
 				&& (this.src.indexOf ("file:") == 0 
@@ -1030,6 +1039,9 @@ ClazzLoader.generatingIEScriptOnCallback = function (path) {
 			if (fss[path] == 1) { // above function will be executed?!
 				return;
 			}
+			if (state == "loading" && !local) {
+				return; // continue to load script
+			}
 		}
 		if (fhs[path] != null) {
 			window.clearTimeout (fhs[path]);
@@ -1047,7 +1059,7 @@ ClazzLoader.generatingIEScriptOnCallback = function (path) {
 				fss[path] = 1;
 				// log ("reloading ... " + path);
 				ClazzLoader.loadedScripts[path] = false;
-				ClazzLoader.loadScript (path);
+				ClazzLoader.lazilyReloadScript (path);
 				ClazzLoader.removeScriptNode (this);
 				return;
 			} else {
@@ -1062,7 +1074,25 @@ ClazzLoader.generatingIEScriptOnCallback = function (path) {
 		this.onreadystatechange = null; 
 		ClazzLoader.loadingNextByPath (path);
 		ClazzLoader.removeScriptNode (this);
+
+		/*
+		 * In case this script loading takes too long, another script will be
+		 * created to take another try. So remove other script nodes to avoid
+		 * duplicate class loading and initializing.
+		 */
+		var scripts = document.getElementsByTagName ("SCRIPT");
+		if (scripts != null && scripts.length > 0) {
+			for (var i = 0; i < scripts.length; i++) {
+				var s = scripts[i];
+				if (s.readyState == "loading" && s.onreadystatechange != null
+						&& s.onreadystatechange.path == path && s !== this) {
+					s.parentNode.removeChild (s);
+				}
+			}
+		}
 	};
+	f.path = path;
+	return f;
 };
 
 /*
@@ -1348,7 +1378,7 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 	}
 	/*
-	 * Maybe in #optinalLoaded inside above ClazzLoader#updateNode calls, 
+	 * Maybe in #optionalsLoaded inside above ClazzLoader#updateNode calls, 
 	 * ClazzLoader.keepOnLoading is set false (Already loaded the wanted
 	 * classes), so here check to stop.
 	 */
@@ -1376,6 +1406,25 @@ ClazzLoader.tryToLoadNext = function (file) {
 			n = cq[0]; // popup class from the queue
 			//alert ("load from queue");
 			//alert (cq.length + ":" + cq);
+			/*
+			var offset = 1;
+			for (var i = 0; i < cq.length - offset; i++) {
+				var next = cq[i + offset];
+				while (next.status == ClazzNode.STATUS_OPTIONALS_LOADED) {
+					offset++;
+					if (i + offset < cq.length) {
+						next = cq[i + offset];
+					} else {
+						next = null;
+						break;
+					}
+				}
+				if (next != null) {
+					cq[i] = next;
+				}
+			}
+			cq.length -= offset;
+			//*/
 			for (var i = 0; i < cq.length - 1; i++) {
 				cq[i] = cq[i + 1];
 			}
@@ -2336,17 +2385,27 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			&& !ClazzLoader.isClassExcluded (name)) {
 		var path = ClazzLoader.getClasspathFor (name/*, true*/);
 		var existed = ClazzLoader.loadedScripts[path];
+		var existedItem = null;
 		var qq = ClazzLoader.classQueue;
 		if (!existed) {
 			for (var i = qq.length - 1; i >= 0; i--) {
 				if (qq[i].path == path || qq[i].name == name) {
 					existed = true;
+					existedItem = qq[i];
 				}
 			}
 		}
+		var n = null;
+		var checked = false;
+		if (existed && optionalsLoaded != null) {
+			n = ClazzLoader.findClass (name);
+			checked = true;
+			if (n == null) {
+				existed = false; // another class in the same *.z.js path
+			}
+		}
 		if (!existed) {
-			var n = null;
-			if (Clazz.unloadedClasses[name] != null) {
+			if (Clazz.unloadedClasses[name] != null && !checked) {
 				n = ClazzLoader.findClass (name);
 			}
 			if (n == null) {
@@ -2371,8 +2430,8 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 				// push class to queue
 				var inserted = false;
 				for (var i = qq.length - 1; i >= 0; i--) {
-					var name = qq[i].name;
-					if (name.lastIndexOf ("package.js") == name.length - 10) {
+					var itemName = qq[i].name;
+					if (itemName.lastIndexOf ("package.js") == itemName.length - 10) {
 						qq[i + 1] = n;
 						inserted = true;
 						break;
@@ -2393,13 +2452,17 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 					ClazzLoader.isLoadingEntryClass = true;
 				}
 				ClazzLoader.addChildClassNode(ClazzLoader.clazzTreeRoot, n, 1);
-				ClazzLoader.loadScript (n.path);
+				if (!ClazzLoader.loadedScripts[n.path]) {
+					ClazzLoader.loadScript (n.path);
+				}
 				if (optionalsLoaded != null) {
 					ClazzLoader.isLoadingEntryClass = bakEntryClassLoading;
 				}
 			}
 		} else if (optionalsLoaded != null) {
-			var n = ClazzLoader.findClass (name);
+			if (!checked) {
+				n = ClazzLoader.findClass (name);
+			}
 			if (n != null) {
 				if (n.optionalsLoaded == null) {
 					n.optionalsLoaded = optionalsLoaded;
@@ -2411,7 +2474,18 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 						};
 					}) (n.optionalsLoaded, optionalsLoaded);
 				}
-			}
+			} else if (existedItem != null) {
+				if (existedItem[1] == null) {
+					existedItem[1] = optionalsLoaded;
+				} else if (optionalsLoaded != existedItem[1]) {
+					existedItem[1] = (function (oF, nF) {
+						return function () {
+							oF();
+							nF();
+						};
+					}) (existedItem[1], optionalsLoaded);
+				}
+			} // else already be checked, should not reach here
 		}
 	} else if (optionalsLoaded != null && ClazzLoader.isClassDefined (name)) {
 		var nn = ClazzLoader.findClass (name);

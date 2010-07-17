@@ -76,7 +76,7 @@ String.prototype.$generateExpFunction = function (str) {
 	}
 	funStr += "\"" + arr[i] + "\"; }";
 	var f = null;
-	eval (funStr)
+	eval (funStr);
 	return f;
 };
 
