@@ -119,6 +119,11 @@
 * html .shadow-narrow-center-bottom {
 	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='images/narrow-bottom.png', sizingMethod='scale');
 }
+
+* html .shell-title-min, * html .shell-title-normal-max, * html .shell-title-close {
+	margin-bottom:0;
+	filter:Alpha(Opacity=80);
+}
 .swt-widgets-shell-ie {
 	width:324px;
 }

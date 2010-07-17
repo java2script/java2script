@@ -393,7 +393,13 @@ public class TaskBar extends DesktopItem {
 						handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + image.url + "\", sizingMethod=\"image\")";
 					} else {
 						if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
-						handleStyle.backgroundImage = "url(\"" + image.url + "\")";
+						if (image.packedURL != null) {
+							handleStyle.backgroundImage = "url(\"" + image.packedURL + "\")";
+							handleStyle.backgroundPosition = "-" + image.packedOffsetX + "px -" + image.packedOffsetY + "px";
+						} else {
+							handleStyle.backgroundPosition = "";
+							handleStyle.backgroundImage = "url(\"" + image.url + "\")";
+						}
 					}
 				} else {
 					String cssClazzName = null;

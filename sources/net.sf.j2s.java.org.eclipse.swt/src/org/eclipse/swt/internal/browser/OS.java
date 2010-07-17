@@ -975,7 +975,10 @@ public class OS {
 
 	public static Point getImageSize(Image image) {
 		int w = 16, h = 16; // Default to 16x16 for common
-		if (image.width == 0 && image.height == 0) {
+		if (image.packedURL != null) {
+			w = image.packedItemWidth;
+			h = image.packedItemHeight;
+		} else if (image.width == 0 && image.height == 0) {
 			if (image.url != null && image.url.length() != 0) {
 				org.eclipse.swt.internal.xhtml.Image img = null;
 				/**

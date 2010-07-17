@@ -549,7 +549,15 @@ String parse (String string, Object handle) {
 							anchor.href = OS.isIE ? "#" : "javascript:void(0);";
 							anchor.target = "_self";
 						} else {
-							anchor.href = ids[linkIndex];
+							if (OS.isIE && ids[linkIndex] != null && ids[linkIndex].startsWith("http")) {
+								/* IE bug: setting href of "<A>www.example.com</a>" to "http://www.example.com/"
+								 * inner HTML will be modified into <A href="http://www.example.com/">http://www.example.com/</A>
+								 * Add prefix whitespace to avoid such bug. 
+								 */
+								anchor.href = " " + ids[linkIndex];
+							} else {
+								anchor.href = ids[linkIndex];
+							}
 							anchor.target = "_blank";
 						}
 						String title = ids[linkIndex];

@@ -984,7 +984,12 @@ public void setImage (Image image) {
 					handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 				} else {
 					if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
-					handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+					if (this.image.packedURL != null) {
+						handleStyle.backgroundImage = "url(\"" + this.image.packedURL + "\")";
+						handleStyle.backgroundPosition = "-" + this.image.packedOffsetX + "px -" + this.image.packedOffsetY + "px";
+					} else {
+						handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+					}
 				}
 			}
 		} else {

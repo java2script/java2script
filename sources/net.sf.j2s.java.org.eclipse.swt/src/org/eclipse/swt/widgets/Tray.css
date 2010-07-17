@@ -20,8 +20,8 @@
 	background-position: center center;
 }
 .tray-item-console {
-	background-position:bottom left !important;
-	background-image:url('images/shell-packed.gif');
+	background-position:0px -32px !important;
+	background-image:url('images/packed.gif');
 }
 .tray-minimized {
 	left: 0;
@@ -37,8 +37,8 @@
 	height: 36px;
 	cursor: pointer;
 	_cursor: hand;
-	background-image: url('images/z-logo.png');
-	background-position: right bottom;
+	background-image: url('images/packed.gif');
+	background-position: -44px -48px;
 	background-repeat: no-repeat;
 	opacity:0.85;
 	filter:Alpha(Opacity=85);

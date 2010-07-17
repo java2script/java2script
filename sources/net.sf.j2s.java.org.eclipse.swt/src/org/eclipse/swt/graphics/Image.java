@@ -89,6 +89,12 @@ public class Image extends Resource implements Drawable {
 	 */
 	public int hash;
 	
+	public String packedURL;
+	public int packedOffsetX;
+	public int packedOffsetY;
+	public int packedItemWidth;
+	public int packedItemHeight;
+	
 	public int width;
 	public int height;
 	//private Element imgHandle;

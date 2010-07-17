@@ -2607,6 +2607,12 @@ void initializeDekstop() {
 		if (!OS.isIE || OS.isIE70 || OS.isIE80 || OS.isIE90) { // to ensure that it is at least 80px height?
 			Element div = document.createElement("DIV");
 			div.id = "page-bottom-end";
+			if (OS.isIE)
+			/**
+			 * @j2sNative
+			 * div.style.styleFloat = "left";
+			 */ {}
+			else
 			/**
 			 * @j2sNative
 			 * div.style.cssFloat = "left";
@@ -2737,7 +2743,7 @@ void initializeDekstop() {
 	 * 		var console = C_$.createC_$Window_ (parentEl);
 	 * 		if (O$.isIE) {
 	 * 			var consoleStyle = console.style;
-	 * 			consoleStyle.display = "block"
+	 * 			consoleStyle.display = "block";
 	 * 			consoleStyle.position = "absolute";
 	 * 			consoleStyle.width = "200px";
 	 * 			consoleStyle.height = "200px";

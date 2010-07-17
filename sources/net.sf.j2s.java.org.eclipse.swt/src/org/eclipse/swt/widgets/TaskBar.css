@@ -76,8 +76,8 @@ a.shell-item:focus {
 	float:left;
 	/*background-color:buttonface;*/
 	background-repeat:no-repeat;
-	background-position:center center;
-	background-image:url('images/shell-packed.gif');
+	background-position:-16px -17px;
+	background-image:url('images/packed.gif');
 	width:16px;
 	height:16px;
 	position:relative;
@@ -87,7 +87,7 @@ a.shell-item:focus {
 	_margin-top:-8px;
 }
 .shell-item-icon-console {
-	background-position:bottom left !important;
+	background-position:0px -32px !important;
 }
 *:first-child+html .shell-item-icon { /* IE7 */
 	margin-top:-8px;

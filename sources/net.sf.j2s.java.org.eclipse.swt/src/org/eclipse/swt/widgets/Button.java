@@ -67,6 +67,7 @@ public class Button extends Control {
 	boolean ignoreMouse;
 
 	Element btnText;
+	Element btnIcon;
 	Element btnHandle; 
 	
 	private Object hSelectionHandler;
@@ -761,6 +762,19 @@ protected void releaseHandle() {
 		OS.destroyHandle(btnText);
 		btnText = null;
 	}
+	if (btnIcon != null) {
+		if (hMouseEnter != null) {
+			Clazz.removeEvent(btnIcon, "mouseover", hMouseEnter);
+		}
+		if (hMouseExit != null) {
+			Clazz.removeEvent(btnIcon, "mouseout", hMouseExit);
+		}
+		if (hMouseMove != null) {
+			Clazz.removeEvent(btnIcon, "mousemove", hMouseMove);
+		}
+		OS.destroyHandle(btnIcon);
+		btnIcon = null;
+	}
 	if (btnHandle != null) {
 		if (hMouseEnter != null) {
 			Clazz.removeEvent(btnHandle, "mouseover", hMouseEnter);
@@ -872,24 +886,8 @@ public void setAlignment (int alignment) {
 	style &= ~(SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	style |= alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	if ((style & (SWT.PUSH | SWT.TOGGLE)) != 0) {
-		CSSStyle handleStyle = null;
-//		if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
-			handleStyle = btnText.style;
-//		} else {
-//			handleStyle = btnHandle.style;
-//		}
-		if ((style & SWT.LEFT) != 0) {
-			btnText.style.textAlign = "left";
-			handleStyle.backgroundPosition = "left center";
-		} else if ((style & SWT.CENTER) != 0) {
-			btnText.style.textAlign = "center";
-			handleStyle.backgroundPosition = "center center";
-		} else if ((style & SWT.RIGHT) != 0) {
-			btnText.style.textAlign = "right";
-			handleStyle.backgroundPosition = "right center";
-		}
-		if (text != null && text.trim().length() != 0) {
-			handleStyle.backgroundPosition = "left center";
+		if (btnIcon != null) {
+			updateImagePosition();
 		}
 	}
 	/*
@@ -1032,6 +1030,14 @@ public void setImage (Image image) {
 	this.image = image;
 	hasImage = true;
 	if (this.image.handle == null && this.image.url != null && this.image.url.length() != 0) {
+		if (btnIcon == null) {
+			btnIcon = document.createElement("DIV");
+			if (btnText.className != "") {
+				btnIcon.className = btnText.className;
+			}
+			btnIcon.style.position = "absolute";
+			btnText.parentNode.insertBefore(btnIcon, btnText);
+		}
 //		OS.clearChildren(btnText);
 		btnText.style.display = "";
 		btnText.style.paddingTop = "";
@@ -1085,11 +1091,17 @@ public void setImage (Image image) {
 //				imgBackground.style.height = "100%";
 //				imgBackground.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 //				handle.appendChild(imgBackground);
-			handleStyle.backgroundImage = "";
-			handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+			//handleStyle.backgroundImage = "";
+			//handleStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
+			btnIcon.style.cssText = btnText.style.cssText;
+			btnIcon.style.position = "absolute";
+			btnIcon.style.paddingLeft = "0px";
+			btnIcon.style.backgroundImage = "";
+			btnIcon.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + this.image.url + "\", sizingMethod=\"image\")";
 		} else {
 			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 			handleStyle.backgroundRepeat = "no-repeat";
+			/*
 			String bgXPos = "center";
 //			if ((style & (SWT.RADIO | SWT.CHECK)) != 0) {
 				if ((style & SWT.RIGHT) != 0) {
@@ -1105,8 +1117,36 @@ public void setImage (Image image) {
 //			} else if ((style & SWT.PUSH) != 0) {
 //				bgXPos = "left";
 //			}
-			handleStyle.backgroundPosition = bgXPos + " center";
-			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			// */
+			btnIcon.style.cssText = btnText.style.cssText;
+			btnIcon.style.position = "absolute";
+			btnIcon.style.paddingLeft = "0px";
+			//handleStyle.backgroundPosition = bgXPos + " center";
+			//handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			if (this.image.packedURL != null) {
+				btnIcon.style.backgroundImage = "url(\"" + this.image.packedURL + "\")";
+				btnIcon.style.width = this.image.packedItemWidth + "px";
+				btnIcon.style.height = this.image.packedItemHeight + "px";
+				int y = this.image.packedOffsetY;
+//				if (this.image.packedItemHeight <= 20) {
+//					y -= (20 - this.image.packedItemHeight) / 2;
+//				}
+				btnIcon.style.backgroundPosition = "-" + this.image.packedOffsetX + "px -" + y + "px";
+			} else {
+				//btnIcon.style.backgroundPosition = bgXPos + " center";
+				int w = 16;
+				if (this.image.width > 0) {
+					w = this.image.width;
+				}
+				int h = 16;
+				if (this.image.height > 0) {
+					h = this.image.height;
+				}
+				btnIcon.style.width = w + "px";
+				btnIcon.style.height = h + "px";
+				btnIcon.style.backgroundPosition = "center center";
+				btnIcon.style.backgroundImage = "url(\"" + this.image.url + "\")";
+			}
 		}
 		if (text == null || text.length() == 0) {
 			btnText.appendChild(document.createTextNode("" + (char) 160));
@@ -1355,10 +1395,66 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 	// TODO: What about hWndInsertAfter and uFlags
 	el.style.left = X + "px";
 	el.style.top = Y + "px";
-	el.style.width = (cx > 0 ? cx : 0) + "px";
-	el.style.height = (cy > 0 ? cy : 0) + "px";
+	int w = cx > 0 ? cx : 0;
+	el.style.width = w + "px";
+	int h = cy > 0 ? cy : 0;
+	el.style.height = h + "px";
+	if (btnIcon != null) {
+		updateImagePosition();
+	}
 	return true;
 //	return super.SetWindowPos(null, null, X, Y, cx, cy, uFlags);
+}
+
+private void updateImagePosition() {
+	// TODO: This layout is not accurate!
+	int w = OS.getContainerWidth(btnText);
+	int iw = 16;
+	//int ih = 16;
+	if (this.image != null && this.image.packedURL != null) {
+		iw = this.image.packedItemWidth;
+		//ih = this.image.packedItemHeight;
+	}
+	if (w < iw) {
+		w = iw;
+	}
+	if (OS.isIE) { // icon is not vertical center
+		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+			btnIcon.style.marginTop = "2px";
+		}
+	} else if (OS.isFirefox) {
+		btnIcon.style.marginTop = "-1px";
+	}
+	
+	if ((style & (SWT.CHECK | SWT.RADIO)) != 0) {
+		btnIcon.style.marginLeft = "17px";
+	} else {
+		int marginLeft = 4;
+		if (OS.isIE) { // icon is not vertical center
+			if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
+				marginLeft = 2;
+			}
+		} else if (OS.isFirefox) {
+			marginLeft = 2;
+		}
+		if ((style & SWT.LEFT) != 0) {
+			btnIcon.style.marginLeft = marginLeft + "px";
+		} else if ((style & SWT.CENTER) != 0) {
+			if (text == null || text.length() == 0) {
+				int x = (w - iw) / 2;
+				btnIcon.style.marginLeft = (x < marginLeft && marginLeft == 4 ? marginLeft : x) + "px";
+			} else {
+				btnIcon.style.marginLeft = marginLeft + "px";
+			}
+		} else if ((style & SWT.RIGHT) != 0) {
+			if (text == null || text.length() == 0) {
+				btnIcon.style.marginLeft = (w - iw < marginLeft && marginLeft == 4  ? marginLeft : w - iw) + "px";
+			} else {
+				btnIcon.style.marginLeft = marginLeft + "px";
+			}
+		}
+	}
+	//btnIcon.style.marginTop = ((h - ih) / 2) + "px";
 }
 
 public void setCursor(Cursor cursor) {
@@ -1450,6 +1546,10 @@ void hookSelection() {
 		Clazz.addEvent(btnHandle, "click", hSelectionHandler);
 		Clazz.addEvent(btnText, "click", hSelectionHandler);
 		Clazz.addEvent(btnText, "dblclick", hSelectionHandler);
+		if (btnIcon != null) {
+			Clazz.addEvent(btnIcon, "click", hSelectionHandler);
+			Clazz.addEvent(btnIcon, "dblclick", hSelectionHandler);
+		}
 	} else {
 		Clazz.addEvent(handle, "click", hSelectionHandler);
 		Clazz.addEvent(handle, "dblclick", hSelectionHandler);
@@ -1470,18 +1570,27 @@ void hookMouseEnter() {
 	super.hookMouseEnter();
 	Clazz.addEvent(btnHandle, "mouseover", hMouseEnter);
 	Clazz.addEvent(btnText, "mouseover", hMouseEnter);
+	if (btnIcon != null) {
+		Clazz.addEvent(btnIcon, "mouseover", hMouseEnter);
+	}
 }
 
 void hookMouseExit() {
 	super.hookMouseExit();
 	Clazz.addEvent(btnHandle, "mouseout", hMouseExit);
 	Clazz.addEvent(btnText, "mouseout", hMouseExit);
+	if (btnIcon != null) {
+		Clazz.addEvent(btnIcon, "mouseout", hMouseExit);
+	}
 }
 
 void hookMouseMove() {
 	super.hookMouseMove();
 	Clazz.addEvent(btnHandle, "mousemove", hMouseMove);
 	Clazz.addEvent(btnText, "mousemove", hMouseMove);
+	if (btnIcon != null) {
+		Clazz.addEvent(btnIcon, "mousemove", hMouseMove);
+	}
 }
 
 /*

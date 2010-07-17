@@ -57,7 +57,7 @@ $WTC$$.trackCSS = function (clazzName) {
 						break;
 					}
 				}
-				$WTC$$.registerCSS (name);
+				$WTC$$["registerCSS"] (name);
 			}
 		};
 	}) (el, clazzName);
@@ -150,7 +150,7 @@ $WTC$$.getCSSRuleID = function (clazzName) {
  * @param cssText Optional, if given, it will loaded into the page directly.
  */
 /* public */
-$WTC$$.registerCSS = function (clazzName, cssText) {
+$WTC$$["registerCSS"] = function (clazzName, cssText) {
 	var isDebugging = (window["swt.debugging"] == true);
 	if (isDebugging) {
 		cssText = null;
@@ -175,7 +175,7 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 	/*
 	 * Check whether the css resources is loaded or not
 	 */
-	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath)) {
+	if (!ClazzLoader.isResourceExisted (clazzName, cssPath, basePath) || document.getElementById (cssID) != null) {
 		$WTC$$.registeredCSSs[$WTC$$.registeredCSSs.length] = clazzName;
 		if (window["swt.debugging"] == true || cssText == null || $WTC$$.cssForcedUsingFile) {
 			var cssLink = document.createElement ("LINK");
@@ -203,14 +203,38 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 				var location = window.location.href.toString ();
 				//if (protocol == "file:" || host == "") {
 					var idx = location.lastIndexOf ("/");
-					if (idx != -1 && prefix.indexOf ("http://") != 0
-							&& prefix.indexOf ("https://") != 0
-							&& prefix.indexOf ("file://") != 0
-							&& prefix.indexOf ("ftp://") != 0
-							&& prefix.indexOf ("javascript://") != 0) {
+					if (idx != -1 && prefix.indexOf ("http:") != 0
+							&& prefix.indexOf ("https:") != 0
+							&& prefix.indexOf ("file:") != 0
+							&& prefix.indexOf ("ftp:") != 0
+							&& prefix.indexOf ("javascript:") != 0) {
 						prefix = location.substring (0, idx + 1) + prefix;
 					}
 				//}
+			}
+			var usingSingleSite = prefix.indexOf ("/org/eclipse/swt/") != -1;
+			if (!usingSingleSite) {
+				var sites = window["j2s.css.single.site.classes"];
+				if (sites != null && sites.length > 0) {
+					for (var k = 0; k < sites.length; k++) {
+						var clzz = sites[k];
+						if (clzz != null && clzz.length > 0) {
+							var clzzPathKey = "/" + clzz.replace (/\./g, "/") + "/";
+							if (prefix.indexOf (clzzPathKey) != -1) {
+								usingSingleSite = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+			if (usingSingleSite) {
+				var length = prefix.length;
+				if (length > 15 && prefix.match (/^http\:\/\/[aeiouy]rchive\..*/)) {
+					prefix = "http://archive." + prefix.substring(15);
+				} else if (length > 9 && prefix.match (/^http\:\/\/[aeiouy]\..*/)) {
+					prefix = "http://a." + prefix.substring(9);
+				}
 			}
 			/*
 			 * Fix the css images location: url('...') or filter:...(src='...')
@@ -219,10 +243,10 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 					//"
 					function ($0, $1, $2, $3, $4, $5) {
 						if ($4.indexOf ("/") == 0
-								|| $4.indexOf ("http://") == 0 
-								|| $4.indexOf ("https://") == 0
-								|| $4.indexOf ("file:/") == 0
-								|| $4.indexOf ("ftp://") == 0
+								|| $4.indexOf ("http:") == 0 
+								|| $4.indexOf ("https:") == 0
+								|| $4.indexOf ("file:") == 0
+								|| $4.indexOf ("ftp:") == 0
 								|| $4.indexOf ("javascript:") == 0) {
 							return $0;
 						}
@@ -232,9 +256,33 @@ $WTC$$.registerCSS = function (clazzName, cssText) {
 				/*
 				 * Internet Explorer does not support loading dynamic css styles
 				 * by creating <STYLE> element!
+				 *
+				 * Also see discussion at
+				 * http://dean.edwards.name/weblog/2010/02/bug85/
+				 * and
+				 * http://msdn.microsoft.com/en-us/library/ms531194%28VS.85%29.aspx
 				 */
-				var sheet = document.createStyleSheet ();
-				sheet.cssText = cssText;
+				var sheet = null;
+				try {
+					sheet = document.createStyleSheet ();
+					sheet.cssText = cssText;
+				} catch (e) {
+					//sheet = document.styleSheets[document.styleSheets.length - 1];
+					var min = 0;
+					var idx = 0;
+					for (var i = 0; i < document.styleSheets.length; i++) {
+						var style = document.styleSheets[i];
+						if (min == 0) {
+							min = style.cssText.length;
+							idx = i;
+						} else if (min > style.cssText.length) {
+							min = style.cssText.length;
+							idx = i;
+						}
+					}
+					sheet = document.styleSheets[idx];
+					sheet.cssText += "\r\n" + cssText;
+				}
 				//sheet.id = cssID; // No ID support the this element for IE
 				window[cssID] = true;
 			} else {
@@ -298,7 +346,8 @@ $WTC$$.registerTheme = function(themeName, themePath){
 Clazz.declarePackage ("org.eclipse.swt");
 $wt = org.eclipse.swt;
 
-(function () {
+window["org.eclipse.swt.package.callback"] = function () {
+	window["org.eclipse.swt.package.callback"] = null;
 	ClazzLoader.registerPackages ("org.eclipse.swt", [
 			"accessibility", 
 			"browser", 
@@ -562,7 +611,10 @@ if (!isDebugging) {
 	*/
 } // end of !isDebugging
 
-}) ();
+};
+if (ClazzLoader.classpathMap["@org.eclipse.swt"] != null) {
+	window["org.eclipse.swt.package.callback"] ();
+}
 
 /* private */
 window["org.eclipse.swt.registered"] = true;
