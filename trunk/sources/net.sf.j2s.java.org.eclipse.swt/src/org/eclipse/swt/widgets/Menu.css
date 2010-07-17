@@ -132,16 +132,16 @@
 	background-color:gray;
 }
 .menu-item-checked {
-	background-image:url('images/menu-packed.gif');
-	background-position:left top;
+	background-image:url('images/packed.gif');
+	background-position:0px -48px;
 }
 .menu-item-hover .menu-item-checked {
-	background-image:url('images/menu-packed.gif');
-	background-position:center top;
+	background-image:url('images/packed.gif');
+	background-position:-16px -48px;
 }
 .menu-item-disabled .menu-item-checked {
-	background-image:url('images/menu-packed.gif');
-	background-position:right top;
+	background-image:url('images/packed.gif');
+	background-position:-32px -48px;
 }
 
 .menu-enable-image .menu-item-status {

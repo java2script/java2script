@@ -279,8 +279,8 @@ tree-image tree-image-icon {
 	left:0;
 	right:0;
 	background-repeat:repeat-y;
-	background-position:center center;
-	background-image:url('images/tree-packed.gif');
+	background-position:-64px -16px;
+	background-image:url('images/packed.gif');
 }
 
 .tree-anchor-rtl .tree-anchor-v{
@@ -319,16 +319,16 @@ tree-image tree-image-icon {
 	margin-right:0;
 }
 .tree-anchor-minus {
-	background-position:left top;
-	background-image:url('images/tree-packed.gif');
+	background-position:-48px 0px;
+	background-image:url('images/packed.gif');
 }
 .tree-anchor-plus {
-	background-position:left center;
-	background-image:url('images/tree-packed.gif');
+	background-position:-48px -16px;
+	background-image:url('images/packed.gif');
 }
 .tree-anchor-line {
-	background-position:left bottom;
-	background-image:url('images/tree-packed.gif');
+	background-position:-48px -32px;
+	background-image:url('images/packed.gif');
 }
 .tree-grid-line .tree-anchor-v {
 	background-image:none;

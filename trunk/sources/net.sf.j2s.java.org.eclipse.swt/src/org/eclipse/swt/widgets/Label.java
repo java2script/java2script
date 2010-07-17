@@ -456,13 +456,31 @@ public void setAlignment (int alignment) {
 	style |= alignment & (SWT.LEFT | SWT.RIGHT | SWT.CENTER);
 	if ((style & SWT.LEFT) != 0) {
 		handle.style.textAlign = "left";
-		handle.style.backgroundPosition = "left center";
+		if (image != null) {
+			if (image.packedURL == null) {
+				handle.style.backgroundPosition = "left center";
+			} else {
+				updatePackedImagePosition(width, height);
+			}
+		}
 	} else if ((style & SWT.CENTER) != 0) {
 		handle.style.textAlign = "center";
-		handle.style.backgroundPosition = "center center";
+		if (image != null) {
+			if (image.packedURL == null) {
+				handle.style.backgroundPosition = "center center";
+			} else {
+				updatePackedImagePosition(width, height);
+			}
+		}
 	} else if ((style & SWT.RIGHT) != 0) {
 		handle.style.textAlign = "right";
-		handle.style.backgroundPosition = "right center";
+		if (image != null) {
+			if (image.packedURL == null) {
+				handle.style.backgroundPosition = "right center";
+			} else {
+				updatePackedImagePosition(width, height);
+			}
+		}
 	}
 	/*
 	int bits = OS.GetWindowLong (handle, OS.GWL_STYLE);
@@ -512,6 +530,7 @@ public void setImage (Image image) {
 	this.image = image;
 	if (image == null) {
 		handle.style.backgroundImage = "";
+		handle.style.backgroundPosition = "";
 		if (OS.isIENeedPNGFix && handle.style.filter != null) {
 			handle.style.filter = "";
 		}
@@ -531,8 +550,14 @@ public void setImage (Image image) {
 		} else {
 			if (OS.isIENeedPNGFix && handleStyle.filter != null) handleStyle.filter = ""; 
 			handleStyle.backgroundRepeat = "no-repeat";
-			handleStyle.backgroundPosition = "left center";
-			handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			if (this.image.packedURL != null) {
+				handleStyle.backgroundImage = "url(\"" + this.image.packedURL + "\")";
+				//handleStyle.backgroundPosition = "-" + this.image.packedOffsetX + "px -" + this.image.packedOffsetY + "px";
+				updatePackedImagePosition(width, height);
+			} else {
+				handleStyle.backgroundPosition = "left center";
+				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
+			}
 		}
 	} else if (handle.childNodes.length == 0) {
 		if (image.handle == null) return ;
@@ -709,9 +734,18 @@ void createHandle() {
 	OS.setTextSelection(this.handle, false);
 }
 
-public void setBounds(int x, int y, int width, int height) {
-	super.setBounds(x, y, width, height);
-	// TODO Deferr layout
+@Override
+boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y,
+		int cx, int cy, int uFlags) {
+	if (hWnd == null) return true;
+	Element el = (Element) hWnd;
+	el.style.left = X + "px";
+	el.style.top = Y + "px";
+	int width = cx > 0 ? cx : 0;
+	el.style.width = width + "px";
+	int height = cy > 0 ? cy : 0;
+	el.style.height = height + "px";
+	
 	if ((style & SWT.SEPARATOR) != 0) {
 		CSSStyle handleStyle = handle.childNodes[0].style;
 		if ((style & SWT.HORIZONTAL) != 0) {
@@ -728,6 +762,29 @@ public void setBounds(int x, int y, int width, int height) {
 			handle.childNodes[1].style.marginLeft = (width / 2) + "px";
 			handle.childNodes[1].style.height = height + "px";
 		}
+	}
+	
+	if (image != null && image.packedURL != null) {
+		updatePackedImagePosition(cx, cy);
+	}
+	return true;
+}
+
+private void updatePackedImagePosition(int cx, int cy) {
+	// FIXME packed image item should be smaller than cx * cy
+	if (cx <= 0 || cy <= 0) {
+		cx = image.packedItemWidth;
+		cy = image.packedItemHeight;
+	}
+	int y = image.packedOffsetY - (cy - image.packedItemHeight) / 2;
+	if ((style & SWT.LEFT) != 0) {
+		handle.style.backgroundPosition = "-" + image.packedOffsetX + "px -" + y + "px";
+	} else if ((style & SWT.CENTER) != 0) {
+		handle.style.backgroundPosition = "-" + (image.packedOffsetX - (cx - image.packedItemWidth) / 2) + "px -" + y + "px";;
+	} else if ((style & SWT.RIGHT) != 0) {
+		handle.style.backgroundPosition = "-" + (image.packedOffsetX - cx + image.packedItemWidth) + "px -" + y + "px";;
+	} else {
+		handle.style.backgroundPosition = "-" + image.packedOffsetX + "px -" + y + "px";
 	}
 }
 

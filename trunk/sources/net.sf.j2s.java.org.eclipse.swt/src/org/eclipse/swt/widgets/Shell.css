@@ -325,55 +325,45 @@
 	top:50%;
 	margin-top:-8px;
 	opacity:0.65;
+	filter:Alpha(Opacity=65);
 }
 .shell-title-min:hover, .shell-title-normal-max:hover, .shell-title-close:hover {
 	opacity:1;
-}
-* html .shell-title-min {
-	margin-bottom:0;
-	filter:Alpha(Opacity=65);
-}
-* html .shell-title-normal-max {
-	margin-bottom:0;
-	filter:Alpha(Opacity=65);
-}
-* html .shell-title-close {
-	margin-bottom:0;
-	filter:Alpha(Opacity=65);
+	filter:Alpha(Opacity=100);
 }
 
 .alaa-icon {
-	background-image:url('images/shell-packed.gif');
+	background-image:url('images/packed.gif');
 	background-repeat:no-repeat;
-	background-position:center center;
+	background-position:-16px -15px;
 	background-color:transparent !important;
 }
 
 .shell-title-icon {
-	background-image:url('images/shell-packed.gif');
-	background-position:center center;
+	background-image:url('images/packed.gif');
+	background-position:-16px -15px;
 }
 .shell-title-icon-console {
 	width:16px !important;
 	height:16px !important;
 	margin-top:-8px;
-	background-position:bottom left !important;
+	background-position:0px -32px !important;
 }
 .shell-title-min {
-	background-image:url('images/shell-packed.gif');
-	background-position:left center;
+	background-image:url('images/packed.gif');
+	background-position:0px -17px;
 }
 .shell-title-normal-max {
-	background-image:url('images/shell-packed.gif');
-	background-position:center top;
+	background-image:url('images/packed.gif');
+	background-position:-17px 0px;
 }
 .shell-maximized .shell-title-normal-max {
-	background-image:url('images/shell-packed.gif');
-	background-position:right top;
+	background-image:url('images/packed.gif');
+	background-position:-34px 0px;
 }
 .shell-title-close {
-	background-image:url('images/shell-packed.gif');
-	background-position:left top;
+	background-image:url('images/packed.gif');
+	background-position:0px 0px;
 }
 
 .shell-modal-block {

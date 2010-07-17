@@ -16,8 +16,8 @@
 	width:40px;
 	background-color:menu;
 	background-repeat:no-repeat;
-	background-position:center center;
-	background-image: url('images/z-logo.png');
+	background-position:-44px -44px;
+	background-image: url('images/packed.gif');
 	border:1px solid buttonshadow;
 	margin:0;
 	padding:0;
@@ -26,10 +26,7 @@
 	filter:Alpha(Opacity=60);
 	text-align:left;
 }
-* html .shortcut-item {
-	width:42px;
-	height:42px;
-}
+
 .shortcut-bar-minimized {
 	position:absolute;
 	bottom:0;
