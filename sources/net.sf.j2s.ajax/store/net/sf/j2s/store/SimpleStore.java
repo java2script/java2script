@@ -14,21 +14,31 @@ public class SimpleStore implements IStore {
 	private SimpleStore() {
 		/**
 		 * @j2sNative
-		 * var ua = navigator.userAgent.toLowerCase ();
-		 * var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
-		 * var cookieURL = window["j2s.xss.cookie.url"];
-		 * var isLocal = false;
-		 * try {
-		 * 	isLocal = window.location.protocol == "file:"
-		 * 			|| window.location.host.toLowerCase ().indexOf ("localhost") != -1;
-		 * } catch (e) {
-		 * 	isLocal = true;
-		 * }
-		 * if (!isLocal && cookieURL != null && !isOldIE) {
-		 *  this.store = new net.sf.j2s.store.XSSCookieStore(cookieURL);
-		 * } else {
-		 *  this.store = new net.sf.j2s.store.CookieStore();
-		 * }
+var ua = navigator.userAgent.toLowerCase ();
+var isLocalFile = false;
+try {
+	isLocalFile = window.location.protocol == "file:";
+} catch (e) {
+	isLocalFile = true;
+}
+if (window["j2s.html5.store"] && window["localStorage"] != null && (ua.indexOf ("gecko/") == -1 || !isLocalFile)) {
+	this.store = new net.sf.j2s.store.HTML5LocalStorage ();
+	return;
+}
+var isLocal = false;
+try {
+	isLocal = window.location.protocol == "file:"
+			|| window.location.host.toLowerCase () == "localhost";
+} catch (e) {
+	isLocal = true;
+}
+var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
+var cookieURL = window["j2s.xss.cookie.url"];
+if (!isLocal && cookieURL != null && !isOldIE) {
+	this.store = new net.sf.j2s.store.XSSCookieStore(cookieURL);
+} else {
+	this.store = new net.sf.j2s.store.CookieStore();
+}
 		 */ {
 			File storeFile = new File(System.getProperty("user.home"), ".java2script.store");
 			this.store = new INIFileStore(storeFile.getAbsolutePath()); 
@@ -58,12 +68,24 @@ public class SimpleStore implements IStore {
 		if (store instanceof XSSCookieStore && !store.isReady()) {
 			/**
 			 * @j2sNative
-window.xssCookieReadyCallback = (function (r) {
+window.xssCookieReadyCallback = (function (r1, r2) {
 	return function () {
 		net.sf.j2s.store.XSSCookieStore.initialized = true;
-		r.run ();
+		if (r1 != null) {
+			try {
+				r1.run ();
+			} catch (e) {
+			}
+		}
+		r2.run ();
 	};
-}) (runnable);
+}) (window.xssCookieReadyCallback, runnable);
+window.setTimeout (function () {
+	if (!net.sf.j2s.store.XSSCookieStore.initialized
+			&& window.xssCookieReadyCallback != null) {
+		window.xssCookieReadyCallback ();
+	}
+}, 10000);
 			 */ {}
 			return;
 		}

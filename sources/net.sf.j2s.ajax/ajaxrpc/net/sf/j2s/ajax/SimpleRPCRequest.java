@@ -209,8 +209,9 @@ if (url != null && (url.indexOf ("http://") == 0
 		locHost = locHost.substring (0, idx4);
 	}
 	if (arguments.length == 2) { // check subdomain
-		return host.indexOf ("." + locHost) != -1 && locPort == port
-				&& loc.protocol == protocol && loc.protocol != "file:";
+		var idx5 = host.indexOf ("." + locHost);
+		return idx5 != -1 && idx5 == host.length - locHost.length - 1
+				&& locPort == port && loc.protocol == protocol && loc.protocol != "file:";
 	}
 	return (locHost != host || locPort != port
 			|| loc.protocol != protocol || loc.protocol == "file:");

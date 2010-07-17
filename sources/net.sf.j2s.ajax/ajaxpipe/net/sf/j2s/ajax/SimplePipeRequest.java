@@ -523,6 +523,8 @@ return function () {
 		}
 		doc.write (html);
 		doc.close ();
+		// To avoid blank title in title bar
+		document.title = document.title;
 	} catch (e) {
 		window.setTimeout (net.sf.j2s.ajax.SimplePipeRequest.generateLazyIframeWriting (handle, domain, html), 25);
 	}
@@ -547,7 +549,7 @@ return function () {
 			 * 	domain = document.domain;
 			 * } catch (e) {
 			 * }
-			 * ok4IFrameScript = domain != null && domain.length > 0;
+			 * ok4IFrameScript = (domain != null && domain.length > 0) || navigator.userAgent.toLowerCase ().indexOf ("msie") == -1;
 			 */ {}
 			if (ok4IFrameScript) {
 				// in xss mode, iframe is used to avoid blocking other *.js loading
