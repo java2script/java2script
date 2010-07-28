@@ -53,9 +53,7 @@ Double.isInfinite = Double.prototype.isInfinite;
 
 Clazz.defineMethod (Double, "parseDouble", 
 function (s) {
-if (s == null) {
-throw  new NumberFormatException ("null");
-}
+if(s==null) throw new NullPointerException();//sgurin . if s==null a NPE should be thrown and not NumberFormatException because isNaN(null)==true
 var doubleVal = parseFloat (s);
 if(isNaN(doubleVal)){
 throw  new NumberFormatException ("Not a Number : " + s);

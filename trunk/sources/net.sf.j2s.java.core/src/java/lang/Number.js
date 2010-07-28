@@ -44,6 +44,12 @@ function () {
 return this.valueOf();
 });
 
+//sgurin : added this because if not, a native number in native code will print as [Object Number] instead printing the number value... 
+Clazz.defineMethod (Number, "toString", 
+function () {
+return this.valueOf()+"";
+});
+
 Clazz.defineMethod (Number, "hashCode", 
 function () {
 return this.valueOf ();
