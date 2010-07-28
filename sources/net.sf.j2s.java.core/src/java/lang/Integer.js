@@ -124,5 +124,88 @@ throw e;
 }
 return result;
 }, "~S");
+//sgurin compare and compareTo 
+Integer.compare = Clazz.defineMethod (Integer, "compare", 
+function (f1, f2) {
+if (f1 < f2) return -1;
+if (f1 > f2) return 1;
+return 0;
+}, "~N,~N");
+Integer.prototype.compareTo=function(anotherInt) {
+var otherValue = anotherInt;
+if(anotherInt.valueOf) otherValue=anotherInt.valueOf();	
+return java.lang.Integer.compare(this.valueOf(), otherValue);
+}
+//sgurin bit related methods
+Integer.highestOneBit = Clazz.defineMethod (Integer, "highestOneBit", 
+function (i) {
+i |= (i >> 1);
+i |= (i >> 2);
+i |= (i >> 4);
+i |= (i >> 8);
+i |= (i >> 16);
+return i - (i >>> 1);
+}, "~N");
+Integer.lowestOneBit = Clazz.defineMethod (Integer, "lowestOneBit", 
+function (i) {return i & -i;}, "~N");
+Integer.numberOfLeadingZeros = Clazz.defineMethod (Integer, "numberOfLeadingZeros", 
+function (i) {
+if (i == 0) return 32;
+var n = 1;
+if (i >>> 16 == 0) {n += 16;i <<= 16;}
+if (i >>> 24 == 0) {n += 8;i <<= 8;}
+if (i >>> 28 == 0) {n += 4;i <<= 4;}
+if (i >>> 30 == 0) {n += 2;i <<= 2;}
+n -= i >>> 31;
+return n;
+}, "~N");
+Integer.numberOfTrailingZeros = Clazz.defineMethod (Integer, "numberOfTrailingZeros", 
+function (i) {
+var y;
+if (i == 0) return 32;
+var n = 31;
+y = i << 16;
+if (y != 0) {n = n - 16;i = y;}
+y = i << 8;
+if (y != 0) {n = n - 8;i = y;}
+y = i << 4;
+if (y != 0) {n = n - 4;i = y;}
+y = i << 2;
+if (y != 0) {n = n - 2;i = y;}
+return n - ((i << 1) >>> 31);
+}, "~N");
+Integer.reverse = Clazz.defineMethod (Integer, "reverse", 
+function (i) {
+i = (i & 0x55555555) << 1 | (i >>> 1) & 0x55555555;
+i = (i & 0x33333333) << 2 | (i >>> 2) & 0x33333333;
+i = (i & 0x0f0f0f0f) << 4 | (i >>> 4) & 0x0f0f0f0f;
+i = (i << 24) | ((i & 0xff00) << 8) | ((i >>> 8) & 0xff00) | (i >>> 24);
+return i;
+}, "~N");
+Integer.reverseBytes = Clazz.defineMethod (Integer, "reverseBytes", 
+function (i) {
+return ((i >>> 24)) | ((i >> 8) & 0xFF00) | ((i << 8) & 0xFF0000) | ((i << 24));
+}, "~N");
+Integer.rotateLeft = Clazz.defineMethod (Integer, "rotateLeft", 
+function (i, distance) {
+return (i << distance) | (i >>> -distance);
+}, "~N,~N");
+Integer.rotateRight = Clazz.defineMethod (Integer, "rotateRight", 
+function (i, distance) {
+return (i >>> distance) | (i << -distance);
+}, "~N,~N");
+Integer.signum = Clazz.defineMethod (Integer, "signum", 
+function (i) {
+return (i >> 31) | (-i >>> 31);
+}, "~N");
+Integer.bitCount = Clazz.defineMethod (Integer, "bitCount", 
+function (i) {
+i = i - ((i >>> 1) & 0x55555555);
+i = (i & 0x33333333) + ((i >>> 2) & 0x33333333);
+i = (i + (i >>> 4)) & 0x0f0f0f0f;
+i = i + (i >>> 8);
+i = i + (i >>> 16);
+return i & 0x3f;
+}, "~N");
 });
 

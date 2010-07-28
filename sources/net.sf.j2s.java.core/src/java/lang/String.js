@@ -308,7 +308,10 @@ String.valueOf = function (o) {
 			return o.join ('');
 		} else {
 			var off = arguments[1];
-			var len = arguments[2];
+			var len = arguments[2];			
+			//sgurin : check for IndexOutOfBoundsException
+			if(off<0 || len<0 || off+len>arguments[0].length)
+				throw new java.lang.IndexOutOfBoundsException();
 			var oo = new Array (len);
 			for (var i = 0; i < len; i++) {
 				oo[i] = o[off + i];

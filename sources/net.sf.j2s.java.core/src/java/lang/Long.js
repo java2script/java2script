@@ -124,5 +124,76 @@ throw e;
 }
 return result;
 }, "~S");
+//sgurin compare and compareTo. the same implementation as in Integer
+Long.compare = Clazz.defineMethod (Long, "compare", 
+function (f1, f2) {
+if (f1 < f2) return -1;
+if (f1 > f2) return 1;
+return 0;
+}, "~N,~N");
+Long.prototype.compareTo=function(anotherInt) {
+var otherValue = anotherInt;
+if(anotherInt.valueOf) otherValue=anotherInt.valueOf();	
+return java.lang.Long.compare(this.valueOf(), otherValue);
+}
+//sgurin bitwise related static methods 
+Long.bitCount = Clazz.defineMethod (Long, "bitCount", function (i) {
+i = i - ((i >>> 1) & 0x5555555555555555);
+i = (i & 0x3333333333333333) + ((i >>> 2) & 0x3333333333333333);
+i = (i + (i >>> 4)) & 0x0f0f0f0f0f0f0f0f;
+i = i + (i >>> 8);
+i = i + (i >>> 16);
+i = i + (i >>> 32);
+return i & 0x7f;
+}, "~N");
+Long.rotateLeft = Clazz.defineMethod (Long, "rotateLeft", function (i, distance) {
+return (i << distance) | (i >>> -distance);
+}, "~N,~N");
+Long.rotateRight = Clazz.defineMethod (Long, "rotateRight", function (i, distance) {
+return (i >>> distance) | (i << -distance);
+}, "~N,~N");
+Long.highestOneBit = Clazz.defineMethod (Long, "highestOneBit", function (i) {
+i |= (i >> 1);i |= (i >> 2);i |= (i >> 4);
+i |= (i >> 8);i |= (i >> 16);i |= (i >> 32);
+return i - (i >>> 1);
+}, "~N");
+Long.lowestOneBit = Clazz.defineMethod (Long, "lowestOneBit", function (i) {
+return i & -i;}, "~N");
+Long.numberOfLeadingZeros = Clazz.defineMethod (Long, "numberOfLeadingZeros", function (i) {
+if (i == 0) return 64;
+var n = 1;var x = (i >>> 32);
+if (x == 0) {n += 32;x = i;}
+if (x >>> 16 == 0) {n += 16;x <<= 16;}
+if (x >>> 24 == 0) {n += 8;x <<= 8;}
+if (x >>> 28 == 0) {n += 4;x <<= 4;}
+if (x >>> 30 == 0) {n += 2;x <<= 2;}
+n -= x >>> 31;return n;}, "~N");
+Long.numberOfTrailingZeros = Clazz.defineMethod (Long, "numberOfTrailingZeros", function (i) {
+var x;var y;
+if (i == 0) return 64;
+var n = 63;y = i;
+if (y != 0) {n = n - 32;x = y;} 
+else x = (i >>> 32);
+y = x << 16;
+if (y != 0) {n = n - 16;x = y;}
+y = x << 8;
+if (y != 0) {n = n - 8;x = y;
+}y = x << 4;
+if (y != 0) {n = n - 4;x = y;
+}y = x << 2;
+if (y != 0) {n = n - 2;x = y;
+}return n - ((x << 1) >>> 31);}, "~N");
+Long.signum = Clazz.defineMethod (Long, "signum", function (i) {
+return ((i >> 63) | (-i >>> 63));}, "~N");
+Long.reverseBytes = Clazz.defineMethod (Long, "reverseBytes", function (i) {
+i = (i & 0x00ff00ff00ff00ff) << 8 | (i >>> 8) & 0x00ff00ff00ff00ff;
+return (i << 48) | ((i & 0xffff0000) << 16) | ((i >>> 16) & 0xffff0000) | (i >>> 48);}, "~N");
+Long.reverse = Clazz.defineMethod (Long, "reverse", function (i) {
+i = (i & 0x5555555555555555) << 1 | (i >>> 1) & 0x5555555555555555;
+i = (i & 0x3333333333333333) << 2 | (i >>> 2) & 0x3333333333333333;
+i = (i & 0x0f0f0f0f0f0f0f0f) << 4 | (i >>> 4) & 0x0f0f0f0f0f0f0f0f;
+i = (i & 0x00ff00ff00ff00ff) << 8 | (i >>> 8) & 0x00ff00ff00ff00ff;
+i = (i << 48) | ((i & 0xffff0000) << 16) | ((i >>> 16) & 0xffff0000) | (i >>> 48);
+return i;}, "~N");
 });
 
