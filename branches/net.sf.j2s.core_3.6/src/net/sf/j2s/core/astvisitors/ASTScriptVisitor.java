@@ -1855,18 +1855,37 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(", ");
 			}
 			boolean needBrackets = true;
-			//if (args.size() == 1) {
+			
+			//sgurin:  corrected bug when vararg parameter is an empty array.
+			if (args.size() == 0) {
+				if (needBrackets) buffer.append("[]");
+			}
+			else {
 				Expression arg = (Expression) args.get(args.size() - 1);
 				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) {
-					needBrackets = false;
-				}
-			//}
-			if (needBrackets) buffer.append("[");
-			//IMethodBinding methodDeclaration = node.resolveMethodBinding();
-			//visitMethodParameterList(node.arguments(), methodDeclaration, paramTypes.length - 1, size);
-			visitList(args, ", ", paramTypes.length - 1, size);
-			if (needBrackets) buffer.append("]");
+				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) 
+					needBrackets = false;				
+				if (needBrackets) buffer.append("[");
+				visitList(args, ", ", paramTypes.length - 1, size);
+				if (needBrackets) buffer.append("]");
+			}
+			
+			//old Code:
+//			//if (args.size() == 1) {
+//				Expression arg = (Expression) args.get(args.size() - 1);
+//				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
+//				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) {
+//					needBrackets = false;
+//				}
+//			//}
+//			if (needBrackets) buffer.append("[");
+//			//IMethodBinding methodDeclaration = node.resolveMethodBinding();
+//			//visitMethodParameterList(node.arguments(), methodDeclaration, paramTypes.length - 1, size);
+//			visitList(args, ", ", paramTypes.length - 1, size);
+//			if (needBrackets) buffer.append("]");
+			
+			
+			
 		} else {
 			IMethodBinding methodDeclaration = node.resolveMethodBinding();
 			visitMethodParameterList(node.arguments(), methodDeclaration);
