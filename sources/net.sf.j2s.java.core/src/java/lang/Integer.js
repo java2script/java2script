@@ -135,7 +135,7 @@ Integer.prototype.compareTo=function(anotherInt) {
 var otherValue = anotherInt;
 if(anotherInt.valueOf) otherValue=anotherInt.valueOf();	
 return java.lang.Integer.compare(this.valueOf(), otherValue);
-}
+};
 //sgurin bit related methods
 Integer.highestOneBit = Clazz.defineMethod (Integer, "highestOneBit", 
 function (i) {

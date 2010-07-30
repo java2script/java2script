@@ -135,7 +135,7 @@ Long.prototype.compareTo=function(anotherInt) {
 var otherValue = anotherInt;
 if(anotherInt.valueOf) otherValue=anotherInt.valueOf();	
 return java.lang.Long.compare(this.valueOf(), otherValue);
-}
+};
 //sgurin bitwise related static methods 
 Long.bitCount = Clazz.defineMethod (Long, "bitCount", function (i) {
 i = i - ((i >>> 1) & 0x5555555555555555);
