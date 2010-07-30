@@ -1925,7 +1925,7 @@ try {
 		};
 	}		
 };
-/**
+/**sgurin
  * Implements Java's keyword "instanceof" in JavaScript's way **for exception objects**.
  * 
  * calls Clazz.instanceOf if e is a Java exception. If not, try to detect known native 
