@@ -268,8 +268,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
      *            the mappings to add
      */
     public HashMap(Map<? extends K, ? extends V> map) {
-        this(map.size() < 6 ? 11 : map.size() * 2);
-        super.putAll(map);
+    	//sgurin fix: the original code was giving a javascript error putAll() method doens't exists. This at least works, but should be nice to investigate why fails ehwn putAll is called like the original code does.
+    	this();
+    	putAll(map);
+    	//sgurin : original code:
+//        this(map.size() < 6 ? 11 : map.size() * 2);
+//        super.putAll(map);
     }
 
     /**
