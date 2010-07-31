@@ -531,6 +531,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.prepareFields", "Y", //
 				"Clazz.newArray", "A", //
 				"Clazz.instanceOf", "O", //
+				"Clazz.exceptionOf", "e", //sgurin
 				"Clazz.inheritArgs", "G", //
 				"Clazz.checkPrivateMethod", "X", //
 				"Clazz.makeFunction", "Q", //
