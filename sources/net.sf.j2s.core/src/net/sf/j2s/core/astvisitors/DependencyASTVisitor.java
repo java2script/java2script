@@ -956,10 +956,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					optionals.add(qn);
 				}
 			}
-			//sgurin: fix for bug http://sourceforge.net/tracker/?func=det	ail&aid=3037341&group_id=155436&atid=795800
-			String methodOwnerClassName = resolveMethodBinding.getDeclaringClass().getQualifiedName();
-			if(methodOwnerClassName!=null && !methodOwnerClassName.equals("")) 
-				requires.add(methodOwnerClassName);
+			//the ofllowing fix introduces an error... reverting fix until a solution is found
+//			//sgurin: fix for bug http://sourceforge.net/tracker/?func=det	ail&aid=3037341&group_id=155436&atid=795800
+//			String methodOwnerClassName = resolveMethodBinding.getDeclaringClass().getQualifiedName();
+//			if(methodOwnerClassName!=null && !methodOwnerClassName.equals("")) 
+//				requires.add(methodOwnerClassName);
 		}
 		return super.visit(node);
 	}
