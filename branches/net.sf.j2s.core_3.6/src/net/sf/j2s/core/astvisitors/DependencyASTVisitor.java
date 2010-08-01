@@ -956,10 +956,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					optionals.add(qn);
 				}
 			}
+			
+			//the ofllowing fix introduces an error... reverting fix until a solution is found
 			//sgurin: fix for bug http://sourceforge.net/tracker/?func=detail&aid=3037341&group_id=155436&atid=795800
-			String methodOwnerClassName = resolveMethodBinding.getDeclaringClass().getQualifiedName();
-			if(methodOwnerClassName!=null && !methodOwnerClassName.equals("")) 
-				requires.add(methodOwnerClassName);
+			//in a static method call, if the mehthod's type is not this class, we require it.
+//			String methodOwnerClassName = resolveMethodBinding.getDeclaringClass().getQualifiedName();
+//			if(methodOwnerClassName!=null && !methodOwnerClassName.equals(Bindings.getBindingOfParentType(node).getQualifiedName())) {
+//				requires.add(methodOwnerClassName);
+//			}
 		}
 		return super.visit(node);
 	}
