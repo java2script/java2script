@@ -2129,10 +2129,12 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 			if (name == null || name.length == 0) {
 				continue;
 			}
+			/*
 			if (ClazzLoader.isClassDefined (name) 
 					|| ClazzLoader.isClassExcluded (name)) {
 				continue;
 			}
+			//*/
 			isOptionalsOK = false;
 			var n = ClazzLoader.findClass (name);
 			if (n == null) {
@@ -2140,7 +2142,9 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 				n.name = optionals[i];
 				n.status = ClazzNode.STATUS_KNOWN;
 			}
-			ClazzLoader.addChildClassNode (node, n, -1);
+			if (n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+				ClazzLoader.addChildClassNode (node, n, -1);
+			}
 		}
 	}
 };
