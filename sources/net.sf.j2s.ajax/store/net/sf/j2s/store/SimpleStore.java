@@ -4,7 +4,7 @@ import java.io.File;
 
 import net.sf.j2s.annotation.J2SRequireImport;
 
-@J2SRequireImport({CookieStore.class, XSSCookieStore.class})
+@J2SRequireImport({CookieStore.class, XSSCookieStore.class, HTML5LocalStorage.class})
 public class SimpleStore implements IStore {
 
 	private static SimpleStore singleton;
