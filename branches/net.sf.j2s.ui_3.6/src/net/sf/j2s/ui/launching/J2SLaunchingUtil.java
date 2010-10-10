@@ -1,5 +1,6 @@
 package net.sf.j2s.ui.launching;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -9,13 +10,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import net.sf.j2s.core.astvisitors.ASTTigerVisitor;
 import net.sf.j2s.core.astvisitors.ASTTypeVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.hotspot.InnerHotspotServer;
@@ -614,7 +618,7 @@ public class J2SLaunchingUtil {
 	/*
 	 * Append the *.js in classpath
 	 */
-	static String generateClasspathHTML(
+	public static String generateClasspathHTML(
 			ILaunchConfiguration configuration, String mainType, File workingDir)
 			throws CoreException {
 		StringBuffer buf = new StringBuffer();
@@ -695,7 +699,7 @@ public class J2SLaunchingUtil {
 	/*
 	 * Append the *.js in classpath
 	 */
-	static String generateClasspathJ2X(
+	public static String generateClasspathJ2X(
 			ILaunchConfiguration configuration, String varName, File workingDir)
 			throws CoreException {
 		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
@@ -846,7 +850,7 @@ public class J2SLaunchingUtil {
 	/*
 	 * Append the *.js in classpath
 	 */
-	static String generateClasspathExistedClasses (
+	public static String generateClasspathExistedClasses (
 			ILaunchConfiguration configuration, String mainType, File workingDir, String indent)
 			throws CoreException {
 		boolean isUseGlobalURL = configuration.getAttribute(IJ2SLauchingConfiguration.USE_GLOBAL_ALAA_URL, false);
@@ -1020,7 +1024,7 @@ public class J2SLaunchingUtil {
 	/*
 	 * To generate ClazzLoader.ignore (...)
 	 */
-	static String generateClasspathIgnoredClasses (
+	public static String generateClasspathIgnoredClasses (
 			ILaunchConfiguration configuration, String mainType, File workingDir, String indent)
 			throws CoreException {
 		StringBuffer buf = new StringBuffer();
@@ -1183,7 +1187,7 @@ public class J2SLaunchingUtil {
 		return null;
 	}
 
-	static File getWorkingDirectory(ILaunchConfiguration configuration)
+	public static File getWorkingDirectory(ILaunchConfiguration configuration)
 			throws CoreException {
 		File workingDir = null;
 		String path = configuration.getAttribute(
@@ -1234,7 +1238,7 @@ public class J2SLaunchingUtil {
 		return workingDir;
 	}
 
-	static String getMainType(ILaunchConfiguration configuration)
+	public static String getMainType(ILaunchConfiguration configuration)
 			throws CoreException {
 		String mainType;
 		mainType = configuration.getAttribute(
@@ -1246,5 +1250,42 @@ public class J2SLaunchingUtil {
 		mainType = VariablesPlugin.getDefault().getStringVariableManager()
 				.performStringSubstitution(mainType);
 		return mainType;
+	}
+	
+	
+	//added by sgurin for template support:
+	public static void readString(InputStream in, StringWriter w) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String line = null;
+		while ((line = br.readLine()) != null) {
+			w.append(line + "\n");
+		}
+		br.close();
+	}
+	
+	public static Map toMap(Object[]a) {
+		Map m = new HashMap();
+		for (int i = 0; i < a.length-1; i=i+2) 
+			m.put(a[i], a[i+1]);
+		return m;
+	}
+	
+	 public static String inputStreamAsString(InputStream in)
+    throws IOException {
+	    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+	    StringBuilder sb = new StringBuilder();
+	    String line = null;	
+	    while ((line = br.readLine()) != null) {
+	    	sb.append(line + "\n");
+	    }	
+	    br.close();
+	    return sb.toString();
+    }
+
+	public static boolean arrayContains(Object[] a, Object o) {
+		for (int i = 0; i < a.length; i++) 
+			if(a[i].equals(o))
+				return true;		
+		return false;
 	}
 }
