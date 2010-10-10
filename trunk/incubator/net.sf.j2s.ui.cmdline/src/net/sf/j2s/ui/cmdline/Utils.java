@@ -144,7 +144,7 @@ public class Utils {
 	}
 	
 	//debug utilities
-	public static boolean debug=true;
+	public static boolean debug=false;
 
 	public static void debug(String msg) {
 		if(debug)
