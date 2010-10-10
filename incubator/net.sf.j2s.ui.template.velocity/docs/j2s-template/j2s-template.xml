@@ -1,0 +1,291 @@
+<!-- 
+@author: sugurin
+TODO: if this cmdline utility is included as j2s part, this document should be a section of j2s-user-guide
+
+ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+                
+<?xml-stylesheet type="text/xsl" href="../docbook-xsl/xhtml/docbook.xsl"?> 
+
+<article>
+    <title>Java2Script application renderization based on templates</title>
+    
+    <abstract>  <para>This document describes <ulink url="http://j2s.sourceforge.net/">Java2Script</ulink> 
+    templates support for rendering an application</para>    
+    </abstract>
+    
+    
+    <articleinfo>
+    <title>Java2Script Command line API plugin </title>
+	<author><surname>Gurin</surname><firstname>Sebastian</firstname></author>
+  
+  
+  <revhistory>  
+    <revision>
+      <revnumber>0.01</revnumber>
+      <date>20 July 2010</date>
+      <authorinitials>sebastiGurin</authorinitials>
+      <revremark>Initial revision and release</revremark>
+    </revision>
+  
+  </revhistory>
+   
+    </articleinfo>
+
+        <author><surname>Gurin</surname><firstname>Sebastian</firstname></author> 
+
+  <section>
+    <title>About this document</title>
+
+  <para>This document is available in the following formats:</para>
+  
+  <orderedlist>
+    
+	  <listitem><formalpara><title>pdf</title><para>
+	  <ulink url="j2s-template.pdf">Java2Script application renderization based on templates</ulink></para></formalpara></listitem>
+	  
+	  <listitem><formalpara><title>html fragmented</title><para>
+	  <ulink url="j2s-template-htmls">Java2Script application renderization based on templates</ulink></para></formalpara></listitem>
+	  
+	  <listitem><formalpara><title>docbook</title><para>
+	  <ulink url="j2s-template.xml">Java2Script application renderization based on templates</ulink></para></formalpara></listitem>
+	  
+	  <listitem><formalpara><title>download htmls</title><para>
+	  <ulink url="j2s-template-htmls.tgz">Java2Script application renderization based on templates</ulink></para></formalpara></listitem>
+  
+  </orderedlist>
+
+
+  </section>
+
+
+  <section>
+  <title>Background</title>
+  
+  <para>Working with Java2Script eclipse plugin for writing your web applications in java can be divided in two
+  main "tasks": 1) translate all .java code into .javascript code and 2) render the generated javascript 
+  application in some document, for example, in an html document.</para>
+  
+  <para>The first task, code translation, is performed transparently by Java2Script plugin without the user 
+  to even worry about the java to javascript code translation. Nevertheless, current sollution for the second task, rendering the 
+  generated javascript application, is kind of "inflexible" in Java2Script. Today, J2S supports application launching in a fixed
+  html document. The html code is clean enought to reusing its javascript code in other documents, but I think 
+  it can be more practical for the user to be able to define how it whish to "render" its application. For example, 
+  the user may want to :</para>
+  
+  <itemizedlist>
+  <listitem><para>create an html fragment not an entire html document.</para></listitem>
+  <listitem><para>create a jsp/asp/php server web page or fragment that launch the j2s app</para></listitem>
+  <listitem><para>create a javascript script that easily launch the application to be used in 3rd party html.</para></listitem>
+  <listitem><para>create a java tagfile that easily launch the j2s application.</para></listitem>
+  <listitem><para>create a "javascript:" link that load j2slib.js and the j2s application.</para></listitem>
+  <listitem><para>customize output html markup and style.</para></listitem>
+  <listitem><para>customize the output file name and path.</para></listitem>
+  </itemizedlist>
+
+<para>All of these, are examples, of different renderizations of the same Java2Script application.</para>
+<para>We thought that, giving the responsability of how a j2s app is "rendered" to templates will boost J2S plugin 
+supporting these and other user cases with automation and freedom for the user and so we have created support for 
+Java2Script application renderization through templates and that is what this document try to describe.</para>
+ 
+ </section>
+
+
+  <section>
+  <title>Introduction
+  </title>
+  <para>Java2Script now supports application renderization throught templates. The J2S project <code>net.sf.j2s.ui</code>
+  now defines the extension point <code>j2sAppLauncherTemplateSupport</code> for J2S Application launching driven by templates. 
+  This project, <code>net.sf.j2s.ui.templates.velocity</code> is the first contribution to that extension point and provides a 
+  simple template renderization engine and simple template collection for rendering a Java2Script application, based on the 
+  template engine and language <ulink url="http://velocity.apache.org/">apache velocity</ulink>. Users interested in other 
+  template engines and language, can implement their own plugin contributors, basing them on <code>net.sf.j2s.ui.templates.velocity</code></para>
+  
+  <para>In this document we will describe the new template J2s app renderization mechanism based on the velocity contribution.</para>
+ 
+ </section>
+
+
+  <section>
+  <title>Usage
+  </title>
+  <para>
+  Before template support, when launching a J2S application, J2S can only generate an html document and the user can only add some html code 
+  at &lt;body> and &lt;head> elements in the HTML tab of the J2S application launching dialog:
+  </para>
+  
+  <figure>
+    <title>Customizing HTML output code in old HTML application launching tab</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/html-tab.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+   </figure>    
+  
+  <para>
+  If a template contribution is found, like <code>net.sf.j2s.ui.templates.velocity</code>, the HTML tab is replaced by the template tab. The template tab
+  shows all contributor's built-in templates and even let the user create, save and load new templates:</para>
+  
+  
+    <figure>
+    <title>Defining a templtae for Java2Script application renderization</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/template-tab.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+   </figure>    
+   
+ 
+ </section>
+ 
+ <section><title>Template variables</title>
+ <para>In this section we list and describe the variables exposed by Java2Script to 
+ the template engine.  </para>
+ 
+ <programlisting>
+ # J2SClasspathIgnoredClasses ->
+# workingDir -> /home/sebastian/desarrollo/runtime-EclipseApplication/j2sBug
+# j2slibUrl -> j2slib
+# binUrl -> bin/
+# j2sClassPath -> ../../../../net.sf.j2s.lib/j2slib/java.runtime.j2x,../../java2script/svn/trunk/sources/net.sf.j2s.lib/j2slib/java.runtime.j2x,bin/foo/bar/equals.js,bin/foo/bar2/Runme.js,bin/foo/NullBug.js
+# mainType -> foo.NullBug
+# outputFileAbsolutePath -> /home/sebastian/desarrollo/runtime-EclipseApplication/j2sBug/help))=J2STemplateContextDump.html
+# outputFileName -> help))=J2STemplateContextDump.html
+# mozillaAddonCompatible -> false
+# arguments ->
+# htmlHeadOfBody ->
+# J2SClasspathJ2X ->
+# J2SClasspathExistingClasses -> ClazzLoader.packageClasspath (["foo.bar", "foo", "foo.bar2"], "bin/");
+# J2sMainClassLoadCode -> ClazzLoader.loadClass ("foo.NullBug", function () { foo.NullBug.main([]); });
+# projectName -> j2sBug
+# outputFileCode -> help))=J2STemplateContextDump.html
+# J2SSetPrimaryFolder -> ClazzLoader.setPrimaryFolder ("bin/"); 
+ </programlisting>
+ <table>
+ <title>Template variables</title>
+ <tgroup cols="3">
+ <thead><row><entry>Variable name</entry><entry>Description</entry><entry>Example value</entry></row></thead>
+ <tbody>
+ <row><entry>J2SClasspathIgnoredClasses</entry><entry>array of ignored classes setted in "Class Path" tab</entry><entry>TODO</entry></row>
+ <row><entry>workingDir</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>j2slibUrl</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>binUrl</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>j2sClassPath</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>mainType</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>outputFileAbsolutePath</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>outputFileName</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>mozillaAddonCompatible</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>arguments</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>J2SClasspathJ2X</entry><entry>TODO</entry><entry>TODO</entry></row>
+ <row><entry>J2SClasspathExistingClasses</entry><entry></entry><entry>ClazzLoader.packageClasspath (["foo.bar", "foo", "foo.bar2"], "bin/");</entry></row>
+ <row><entry>J2sMainClassLoadCode</entry><entry>Javascript code that calls loadClass()</entry><entry>ClazzLoader.loadClass ("foo.NullBug", function () { foo.NullBug.main([]); });</entry></row>
+ <row><entry>projectName</entry><entry>Name of the Java2Script project in which the main type resides</entry><entry>j2sTestProject1</entry></row>
+ <row><entry>outputFileCode</entry><entry>template code for output file name. This code is evaluated by the template engine to get the actual output file name, that is stored in variables outputFileName and outputFileAbsolutePath </entry><entry>${mainType}.html</entry></row>
+ <row><entry>J2SSetPrimaryFolder</entry><entry>javascript code that call setPrimaryFolder</entry><entry>ClazzLoader.setPrimaryFolder ("bin/"); </entry></row>
+ </tbody>
+ </tgroup>
+ </table>
+ </section>
+ 
+ 
+  <section><title>Velocity based contribution</title>
+  
+ <para>In this section we describe a contribution implementation based on velocity, the <code>net.sf.j2s.ui.templates.velocity</code> eclipse plugin project. </para>
+ 
+ <para>This is not a velocity user manual. Please go to <ulink url="http://velocity.apache.org/engine/devel/user-guide.html">apache velocity user's guide</ulink> for velocity syntax tutorial.</para>
+ 
+ <para>In a velocity template, each template variable mentioned previously is exposed. so for 
+ example you can access the j2slib folder url selected by the user with the velocity statement <code>${j2slibUrl}</code>. 
+ and so, the html script element for including the j2slib.js file is 
+ <code>&lt;script type="text/javascript" src="${j2slibUrl}j2slib.z.js">&lt;/script></code>. </para>
+ 
+ <para>Also, there is a variable named <code>ctx</code> that is a Map with velocity variable names and values. For example, for printing all velocity variables names and values in an html 
+ use the following template:</para>
+ 
+ <programlisting> 
+&lt;ul>
+#foreach( $varName in $ctx.keySet() )
+    &lt;li>&lt;b>$varName&lt;/b> -> $ctx.get($varName)&lt;/li>
+#end
+&lt;/ul>
+ </programlisting>
+ 
+ 
+ 
+ 
+ <section><title>Built-in templates</title>
+ <para></para>
+
+
+	<section>
+		<title>Simple html document</title>
+		<para>generates an html document that renders the java2script
+			application</para>
+
+	</section>
+
+	<section>
+		<title>Javascript Launcher (js)</title>
+		<para>generates a .js file that includes all the code necesary for
+			launching the j2s application with a single function call</para>
+
+	</section>
+
+
+	<section>
+		<title>Javascript Launcher (html)</title>
+		<para>Using the same javascript code generated by Javascript Launcher
+			(js), it creates a simple html document that launch the j2s
+			application using the javascript. (shows and test how to use the
+			javascript launcher in an html doc.)</para>
+
+	</section>
+ </section>
+ </section>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ <section><title>Rendering J2S applications with templates from command line</title>
+ <para><code>net.sf.j2s.ui.cmdline</code>plugin let the user do some high level Java2Script related actions with the command line. For example, 
+ the user can issue a list of commands like import and build existing java2script projects, or render a j2s application with a template, all in a single command line string.</para>
+ 
+ <para>The following are 3 differents command lines. The three shows how to do the same thing: import and build a J2S project and the render a java main 
+ type with a certain template file:</para>
+ 
+ <programlisting>
+# 1) command - 1) render (autoatically do import and build)
+eclipse -clean -nosplash -data "/home/sebastian/desarrollo/workspaceTest2" -application net.sf.j2s.ui.cmdlineApi \
+-cmd build -path "/home/sebastian/desarrollo/sgurin_workspace/j2stest" -projectName j2stest \
+-cmd render -projectName j2stest -mainType org.s.d.M1 -outputName "\${mainType}.html" -j2slibUrl "../yui3/j2slib" \
+-template "/home/sebastian/desarrollo/j2s_3.6_workspace/net.sf.j2s.ui.template.velocity/src/net/sf/j2s/ui/launching/template/velocity/templates/simpleHtmlDocument.vm"
+
+# 2 commands: 1) import and build 2)render
+eclipse -clean -nosplash -data "/home/sebastian/desarrollo/workspaceTest2" -application net.sf.j2s.ui.cmdlineApi \
+-cmd build -path "/home/sebastian/desarrollo/sgurin_workspace/j2stest" -projectName j2stest \
+-cmd render -mainType org.s.d.M1 -projectName j2stest -outputName "\${mainType}.html" -j2slibUrl "../yui3/j2slib" -template "/home/sebastian/desarrollo/j2s_3.6_workspace/net.sf.j2s.ui.template.velocity/src/net/sf/j2s/ui/launching/template/velocity/templates/simpleHtmlDocument.vm"
+
+# 3 commands 1) import, 2) build, 3) render
+eclipse -clean -nosplash -data "/home/sebastian/desarrollo/workspaceTest2" -application net.sf.j2s.ui.cmdlineApi \
+-cmd import -path "/home/sebastian/desarrollo/sgurin_workspace/j2stest" -projectName j2stest \
+-cmd build -projectName j2stest \
+-cmd render -mainType org.s.d.M1 -projectName j2stest -outputName "\${mainType}.html" -j2slibUrl "../yui3/j2slib" -template "/home/sebastian/desarrollo/j2s_3.6_workspace/net.sf.j2s.ui.template.velocity/src/net/sf/j2s/ui/launching/template/velocity/templates/simpleHtmlDocument.vm"
+
+</programlisting>
+ </section>
+ 
+</article>

@@ -1,0 +1,37 @@
+﻿## Description: A template that generates a javascript file with javascript 
+## function responsible of
+## loading the Java2Script Application. Will create a global function named
+## j2sLaunch_${mainType}();
+## so the user can invoke the j2s from javascript with a call like 
+## window["org.foo.var.Class1"](["args", "to", "main"]);
+## 
+## Author: Sebastián Gurin 
+## J2S Template Revision 1 - 25 August 2010 - sgurin
+##
+
+## first of all the LOADJS utility for loading javascript dynamically:
+(function(){if(!window.LOADJS){window.LOADJS=function(src,listener){var el=null;el=document.createElement("script");el.setAttribute("type","text/javascript");if(listener){el.onreadystatechange=function(){if(this.readyState=='complete')listener()};el.onload=listener}el.setAttribute("src",src);document.body.appendChild(el)}}})();
+
+## then check if j2slib is loaded and load the j2s app:
+(function(){
+
+function onJ2SLoaded(mainArgs) {
+${J2SClasspathJ2X}
+${J2SSetPrimaryFolder}
+${J2SClasspathExistingClasses}
+${J2sMainClassLoadCode}
+ClazzLoader.loadClass ("${mainType}", function () {
+	${mainType}.main(mainArgs);
+});
+}
+function main(mainArgs) {
+if(!window.ClazzLoader)
+	LOADJS("${j2slibUrl}j2slib.z.js", onJ2SLoaded(mainArgs));
+else 
+	onJ2SLoaded();
+}
+window["${mainType}"]=main;
+
+})();
+
+

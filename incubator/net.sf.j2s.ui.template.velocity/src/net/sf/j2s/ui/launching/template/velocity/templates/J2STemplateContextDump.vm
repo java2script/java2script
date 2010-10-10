@@ -1,0 +1,29 @@
+﻿## Description: A not useful template, which only purpose is to help J2S template authors to understand the meaning of all J2S template context variables. 
+## It dumps all templates context variables and each respective value for current J2S Application launcher configuration.
+## Author: Sebastián Gurin 
+## J2S Template Revision 1 - 25 August 2010 - sgurin 
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>J2S Templates Context Object Map</title>
+<style text="text/css">
+</style>
+</head>
+<body>
+
+<h1>J2S Templates Context Object Map: </h1>
+<p>The following listing contains all J2S Template variables and values for current launching. 
+The only purpose of this template is to help the J2S template author to understand template 
+variable names and meaning: </p>
+
+<ul>
+#foreach( $varName in $ctx.keySet() )
+    <li><b>$varName</b> -> $ctx.get($varName)</li>
+#end
+</ul>
+</body>
+</html>
+

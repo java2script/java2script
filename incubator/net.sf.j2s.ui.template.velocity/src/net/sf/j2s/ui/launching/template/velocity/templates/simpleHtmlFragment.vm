@@ -1,0 +1,6 @@
+<script type="text/javascript">
+${J2SClasspathJ2X}
+${J2SSetPrimaryFolder}
+${J2SClasspathExistingClasses}
+${J2sMainClassLoadCode}
+</script>
