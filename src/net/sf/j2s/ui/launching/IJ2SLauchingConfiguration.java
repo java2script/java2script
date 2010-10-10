@@ -21,4 +21,9 @@ public interface IJ2SLauchingConfiguration {
 	
 	public static final String J2S_CLASS_PATH = "j2s.class.path";
 	public static final String J2S_ABANDON_CLASS_PATH = "j2s.abandon.class.path";
+	
+	public static final String VELOCITY_CODE = 		"j2s.launch.template.code";
+	public static final String OUTPUT_FILE_NAME = 	"j2s.launch.template.fileName";
+	public static final String APPLY_TEMPLATE = 	"j2s.launch.template.apply";
+	public static final String TEMPLATE_NAME = 		"j2s.launch.template.name";
 }

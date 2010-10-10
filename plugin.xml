@@ -2,6 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
    <extension-point id="externalResourceProvider" name="External Resource Provider" schema="schema/externalResourceProvider.exsd"/>
+   <extension-point id="j2sAppLauncherTemplateSupport" name="j2sAppLauncherTemplateSupport" schema="schema/j2sAppLauncherTemplateSupport.exsd"/>
 
    <extension
          point="org.eclipse.jdt.core.classpathVariableInitializer">
