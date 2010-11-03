@@ -1,0 +1,30 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter&nbsp;3.&nbsp;Getting Started</title><meta content="DocBook XSL Stylesheets V1.75.2" name="generator"><link rel="home" href="index.html" title="Java2Script User's Guide"><link rel="up" href="index.html" title="Java2Script User's Guide"><link rel="prev" href="comparing-j2s-with-similar-techs.html" title="Comparing Java2Script to other similar technologies"><link rel="next" href="configuring-j2s-app-launcher.html" title="Configuring your Java2Script application launcher."></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="chapter" title="Chapter&nbsp;3.&nbsp;Getting Started"><div class="titlepage"><div><div><h2 class="title"><a name="chap-getting-started"></a>Chapter&nbsp;3.&nbsp;Getting Started</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="chap-getting-started.html#sec-simple-j2s-app">A simple Java2Script application</a></span></dt><dt><span class="section"><a href="configuring-j2s-app-launcher.html">Configuring your Java2Script application launcher.</a></span></dt></dl></div><div class="epigraph"><p>
+"Anticipate the difficult by managing the easy"
+</p><div class="attribution"><span>&mdash;<span class="attribution">Lao Tzu </span></span></div></div><p>In this chapter we will build our firsts web aplications using java2script .... TODO</p><div class="section" title="A simple Java2Script application"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec-simple-j2s-app"></a>A simple Java2Script application</h2></div></div></div><p>As with any Java application, the first thing is to create an Eclipse project. But instead of creating a common Java application project, we will create a 
+   <code class="code">Java2script application project</code>. To do so, go to menu <code class="code">File -&gt; New... -&gt; Other...</code> and in the dialog select <code class="code">
+   Java2Script Project</code>:</p><div class="figure"><a name="N10197"></a><p class="title"><b>Figure&nbsp;3.1.&nbsp;Creating a new Java2Script application project</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/using-j2s-02.png" alt="Creating a new Java2Script application project"></div></div></div><br class="figure-break"><p>The following steps for finishing creating the Java2Script project are equal to Java project's. Just enter a valid project name and click next/finnish. 
+   Congratulations you have created your first Java2Script project!</p><div class="note" title="Note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Java2Script projects are just like common Java projects, but with the Java to JavaScript compiler enabled. This means that
+    your .java files will also be compiled to JavaScript. So the application can be executed inside an HTML document as we will see below.
+    By the way, the generated JavaScript codes will be at the same location as generated .class files, by default at
+    <code class="filename">YOU_PROJECT/bin</code> folder. </p></div><p>Now, we will create a simple Java hello world program and see how easily can be executed in an HTML document. First create a Java package like
+    <code class="code">my.first.project</code> and add a Java class named <code class="code">HelloWorld</code> inside it with the following code:</p><pre class="programlisting">
+package my.first.project;
+
+public class HelloWorld {
+
+	public static void main(String[] args) {
+		System.out.println("hello world");
+	}
+
+}
+    </pre><p>Save the file with <code class="code">CTRL + S</code>. Now we will execute the <code class="code">HelloWorld</code> class as a Java2Script application. An HTML 
+    document named <code class="filename">my.first.project.HelloWorld.html</code> will be created that launch our little Java application. 
+    You can launch your Java2Script application in the same way you launch a normal Java application: right click you Java code <code class="code">-&gt; Run As -&gt;
+    Java2Script Application</code>: </p><div class="figure"><a name="N101C2"></a><p class="title"><b>Figure&nbsp;3.2.&nbsp;Launch a Java2Script application</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/using-j2s-03.png" alt="Launch a Java2Script application"></div></div></div><br class="figure-break"><p>When you run a Java class as a Java2Script Application, the J2S console Eclipse view will be opened and it will show an HTML document which will execute your 
+    Java application. This view is a simple browser and in fact you can also open the generated HTML document with your favourite browser: </p><div class="figure"><a name="N101CC"></a><p class="title"><b>Figure&nbsp;3.3.&nbsp;Launch a Java2Script application - the J2S Console view</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/using-j2s-04.png" alt="Launch a Java2Script application - the J2S Console view"></div></div></div><br class="figure-break"><p>Congratulations, you have just executed your first Java2Script application! As you can see, java2script simulate the <code class="code">System.out.println</code> 
+    method call pending a paragraph with text to the html document. Another thing to notice, is that if you refresh your project, you will see a new 
+    html file at the root </p><div class="tip" title="Tip" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Tip</h3><p>Remember, if you just make a change in a .java file and save the file, the J2S compiler will regenerate the 
+    javascript code and you only need to refresh the HTML document in the browser. 
+    If you only change a .java file, you don't need to run as.. the application again, only refresh the document 
+    in the browser. Try it, copy the url of the html document from the J2S console, and paste it in your stem browser. 
+    Then change the System.out string in HelloWorld.java file and save it. Now refresh the browser and you should see the change reflected. </p></div></div></div></body></html>

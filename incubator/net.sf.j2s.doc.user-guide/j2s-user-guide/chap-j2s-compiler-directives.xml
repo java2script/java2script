@@ -1,0 +1,339 @@
+<!-- 
+
+    Copyright (C)  2010  Sebastián Gurin.
+    Permission is granted to copy, distribute and/or modify this document
+    under the terms of the GNU Free Documentation License, Version 1.3
+    or any later version published by the Free Software Foundation;
+    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+    A copy of the license is included in the section entitled "GNU
+    Free Documentation License".
+
+@author: sgurin 
+
+-->
+
+
+<chapter id="using-j2s-compiler-directives">
+
+
+  <title>Customizing output code with @j2s JavaDoc tags and annotations</title>
+  
+  <epigraph>
+<attribution>William James</attribution>
+<para>
+Action may not bring happiness but there is no happiness without action.
+</para>
+</epigraph>
+  
+  
+  <para>The Java2Script compiler supports special syntax in JavaDoc comments for doing some interesting things at compile time. 
+   Java2Script extends the JavaDoc, and you can use the extended JavaDoc tags to do some jobs in JavaScript way. 
+   With the help of extended JavaDoc tag, we can add extra JavaScript codes or replacing the Java codes without modifying the Java codes.</para>
+   
+<!--   <para>This chapter introduce @j2s JavaDoc tags and annotations</para>  -->
+<!--  -->
+<!--  <para>In this chapter we will describe how you can introduce native javascript code in you java source code, and how to use Java2Script compiler -->
+<!--  @j2s JavaDoc annotations to perform interesting things at compile time, like defining a native Java method implemented in JavaScript,-->
+<!--  make the compiler to ignore a code segment, and other related things.</para>-->
+  
+  <para>Main reference page is http://j2s.sourceforge.net/articles/tutorial-advanced-programming-on-j2s.html</para>  
+  
+  
+  
+  
+  
+  <section><title>Using @j2s tags in JavaDoc</title>
+  
+  <para>Java2Script compiler supports some "directives" that the user can include in its java code inside javadoc comments, that affects how a java element, 
+  like a method, a class or simple code block is translated to javascript. So the javadoc always must go before some java block of code. Also, usually this
+  directives accepts some input that must be after the @j2s directive in the same javadoc. In the following java segment, we use the directive @j2sNative 
+  to tell the J2S compiler that a java code block must be replaced by some native javascript code that we give: </para>  
+  
+<programlisting>
+System.out.println("Code before");
+/**
+ * @j2sNative
+ *
+ * alert("a javascript native statement");
+ */
+{
+    System.out.println("these statements will be replaced");
+} 
+System.out.println("Code after");
+</programlisting>
+
+<para>that will be translated to </para>
+
+<programlisting>
+System.out.println("Code before");
+{
+alert("a javascript native statement");
+}
+System.out.println("Code after");
+</programlisting>
+
+<para>The important thing to notice here is how the java statement inside the block ("these statements will be replaced") is 
+not present in the translated code, and it was replaced by the javascript statement <code>alert("a javascript native statement");</code>
+that we wrote inside the javadoc comment, after the @j2sNative directive.</para>
+
+   <para>All these @j2s annotations that we will describe later in more detail, are used the same way. First of all, they must be inside a JavaDoc 
+   comment. JavaDoc comments are special comments that begin with <code>/**</code> instead of <code>/*</code>. This JavaDoc comment have to go before a java 
+   code entity, like a method definition, a class definition or a code block. Second, the javadoc must contain a special J2S annotation like in the previous 
+   example, <code>@j2sNative </code>. We call this @j2s annotations <emphasis>J2S compiler directives</emphasis>, since they let us customize in some ways 
+   the compiler output code.  Also, in most cases, the J2S compiler directive accepts some text input, like in the last example the 
+   javascript native code, and act over some java element, like in the last example, the java code block.</para>
+   
+  <tip>
+    <para>When you are inside a JavaDoc comment, if you type @j2s and then ctrl-space, eclipse will
+      offer an autocompletion menu in which you can choose the desired @j2s annotation easily: </para>
+
+    <figure>
+      <title>@j2s annotations eclipse auto completion menu</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/eclipse-autocomplete-j2s-annotation.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+  </tip>
+
+  </section>  
+  
+  
+  
+  
+  
+  
+  
+
+  <section id="section-writing-native-js-code-with-j2snative"><title id="section-writing-native-js-code-with-j2snative-title">Writing native JavaScript code with @j2sNative</title>
+  
+  <para>the @j2sNative is perhaps the more important @j2s directive of all. It allow the java programmer to replace a java block or method body with native javascript code. </para>
+  
+   <para>Let's take simple example: you want to get current browser name in your java code. 
+   Java doesn't provide with such functionality, 
+   so we must to do it with native JavaScript code. (Remember that in javascript we can get the full browser name with the statement 
+   <code>navigator.userAgent</code>). For doing this we will use the @j2sNative JavaDoc annotation for embbeding native javascript code inside 
+   the java code. In the following example, notice the java comment with the <code>@j2sNative</code> string and the javascript code before the 
+   empty java block <code>{}</code>: </para>
+   
+
+<programlistingco>
+<areaspec>
+<area id="j2snative.ex1.1" coords='2'/>
+<area id="j2snative.ex1.2" coords='4'/>
+<area id="j2snative.ex1.3" coords='5'/>
+<area id="j2snative.ex1.4" coords='6'/>
+<area id="j2snative.ex1.5" coords='7'/>
+<!--<area id="j2snative.ex1.6" coords='9'/>-->
+</areaspec>
+<programlisting>
+String fullBrowserName = null;
+
+/**
+ * @j2sNative
+ * fullBrowserName = navigator.userAgent; 
+ */{}
+ 
+System.out.println("Full browser name is : "+fullBrowserName);
+</programlisting>
+<calloutlist>
+<callout arearefs="j2snative.ex1.1">
+<para>
+Define a java String variable named <code>fullBrowserName</code>for storing the Browser name
+</para>
+</callout>
+<callout arearefs="j2snative.ex1.2">
+<para>
+Here starts JavaDoc that will be use for embbeding native javascript in our java code
+</para>
+</callout>
+<callout arearefs="j2snative.ex1.3">
+<para>
+we use the annotation @j2sNative for indicating to the Java2Script compiler that the next java block must be 
+replaced with þe javascript code that follows this annotation ( <code>fullBrowserName = navigator.userAgent; </code> ).
+</para>
+</callout>
+<callout arearefs="j2snative.ex1.4">
+<para>
+This is the native javascript code that will replace the next java block of code. Notice that the "*" characters in the 
+javadoc are ommited and that the native code goes from after the @j2sNative annotation to the end of the JavaDoc. Also notice that in this 
+case we are assigning the value of the native string <code>navigator.userAgent</code> to the java variable <code>fullBrowserName</code>
+</para>
+</callout>
+<callout arearefs="j2snative.ex1.5"><para>This is the java code block that the @j2sNative directy will apply to. The body of this 
+java block will be replaced by the native javascript code inside the javadoc.</para>
+</callout>
+<!--<callout arearefs="j2snative.ex1.6">-->
+<!--</callout>-->
+</calloutlist>
+</programlistingco>
+
+<para>The above code will be translated to the following javascript code:</para>
+<programlisting>
+var fullBrowserName = null;
+{fullBrowserName = navigator.userAgent;}
+System.out.println ("Full browser name is : " + fullBrowserName);
+</programlisting>
+<para>Notice how the empty java code block has been filled with the native javascript code that we introduced inside the @j2sNative JavaDoc.</para>
+ 
+<para>Since this compiler directive is so important and has several usage scenarios, 
+we will discuss its usage in detail in a separate chapter <xref linkend="working-with-native-code"/>. </para>
+
+<para>A more complex example that shows all use cases. Read the javadocs for info about each of them.</para>
+
+<programlisting>
+package net.sf.j2s.tutorial.debug;
+
+public class HelloJ2SNative {
+  /**
+   * For java native methods, if Java2Script native codes are given, the
+   * native method will be generated when Java2Script compiler is enabled
+   *
+   * @j2sNative
+   * var styleCSS = "position:absolute;left:150px;top:5px;width:100px;height:40px;" 
+   *    + "text-align:center;font-weight:bold;color:yellow;background-color:blue;" 
+   *    + "border:1px solid red;";
+   * var hiEl = document.createElement("&lt;div style=\"" +  styleCSS + "\">&lt;/div>");
+   * document.body.appendChild(hiEl);
+   * hiEl.appendChild (document.createTextNode ("Hi!"));
+   */
+  native static void sayHi();
+  
+  /**
+   * For java native methods, if you did not define Java2Script native codes,
+   * the method will be simply ignored when generating the JavaScript codes.
+   */
+  native static void sayWell();
+  
+  /**
+   * When j2sNative is defined fro a method, the method body will be overrided
+   * with the given native JavaScript codes.
+   *
+   * @j2sNative alert ("Hello, JavaScript");
+   */
+  static void sayHello() {
+    System.out.println("Hello, Java");
+  }
+  
+  static void sayHei(String name) {
+    if(name != null) 
+    /**
+     * For a normal block, inert j2sNative Javadoc before the brace will
+     * replace the inner block body.
+     *
+     * @j2sNative alert ("Hei, " + name); 
+     */
+    {
+      System.out.println("Hei, " + name + ", how are you?");
+    } else
+    /**
+     * @j2sNative alert ("Hei.");
+     */
+    {
+      System.out.println("Hei, how are you?");
+    }
+  }
+  
+  static void saySomething() {
+    /**
+     * Insert JavaScript only codes with an empty brace block.
+     *
+     * @j2sNative alert ("En, things will go fine.");
+     */ 
+    {}
+  }
+  
+  public static void main(String[] args) {
+    /*
+     * When running from Java, the following line must be commented, as
+     * there are not implemented native codes for the native method #sayHi
+     */
+    sayHi();
+    sayHello();
+    sayHei("Josson");
+    saySomething();
+  }
+}
+</programlisting>
+
+<para>And the following is the generated javascript code. We indicate mark with 2 
+new lines where the native  code embbeded with @j2sNative is for each directive call. </para>
+
+<programlisting>
+Clazz.declarePackage ("net.sf.j2s.tutorial.debug");
+c$ = Clazz.decorateAsClass (function () {
+Clazz.instantialize (this, arguments);
+}, net.sf.j2s.tutorial.debug, "HelloJ2SNative");
+c$.sayHi = Clazz.defineMethod (c$, "sayHi", 
+
+function () {
+var styleCSS = "position:absolute;left:150px;top:5px;width:100px;height:40px;"
++ "text-align:center;font-weight:bold;color:yellow;background-color:blue;"
++ "border:1px solid red;";
+var hiEl = document.createElement("&lt;div style=\"" +  styleCSS + "\">&lt;/div>");
+document.body.appendChild(hiEl);
+hiEl.appendChild (document.createTextNode ("Hi!"));
+});
+c$.sayHello = Clazz.defineMethod (c$, "sayHello",
+ 
+function () {
+alert ("Hello, JavaScript");
+});
+c$.sayHei = Clazz.defineMethod (c$, "sayHei", 
+function (name) {
+if (name != null) {
+
+alert ("Hei, " + name);
+} else {
+
+alert ("Hei.");
+}}, "String");
+c$.saySomething = Clazz.defineMethod (c$, "saySomething", 
+function () {
+{
+
+alert ("En, things will go fine.");
+}});
+c$.main = Clazz.defineMethod (c$, "main", 
+function (args) {
+net.sf.j2s.tutorial.debug.HelloJ2SNative.sayHi ();
+net.sf.j2s.tutorial.debug.HelloJ2SNative.sayHello ();
+net.sf.j2s.tutorial.debug.HelloJ2SNative.sayHei ("Josson");
+net.sf.j2s.tutorial.debug.HelloJ2SNative.saySomething ();
+}, "Array");
+</programlisting>
+
+
+  </section>
+  
+  
+  
+  
+   
+   <section><title>Using real Java annotations instead JavaDoc for @j2s</title>
+   <para>for each @j2s javadoc tag there is an equivalent java annotation that we can use. In some cases,
+   the java @J2S annotation can be more convinient than the javadoc comment. </para>
+   <para>you must include net.sf.j2s.ajax project in yout java classpath fgor using them... TODO: better this section</para>
+    <para>J2s also support using real java annotations (not JavaDoc) instead @j2s annotations inside JavaDoc, For each @j2s JavaDoc annotation there exists a @J2S java annotation class that can be used:</para>
+  
+  <programlisting>
+  If you want to refactoring use @J2SRequireImport annotation:
+/**
+ */
+@J2SIgnoreImport(B.class)
+public class A {
+}
+instead of javaDoc
+/**
+ * @j2sIgnoreImport("a.b.c.B")
+ */
+public class A {
+}
+
+All @j2s* javaDoc has its @J2S* annotations.
+</programlisting>
+   </section>
+
+</chapter>

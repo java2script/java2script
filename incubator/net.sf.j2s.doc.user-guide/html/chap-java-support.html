@@ -1,0 +1,34 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter&nbsp;6.&nbsp;Java Support</title><meta content="DocBook XSL Stylesheets V1.75.2" name="generator"><link rel="home" href="index.html" title="Java2Script User's Guide"><link rel="up" href="index.html" title="Java2Script User's Guide"><link rel="prev" href="ch05s05.html" title="Command line API"><link rel="next" href="ch06s02.html" title="JRE Emulation Reference"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="chapter" title="Chapter&nbsp;6.&nbsp;Java Support"><div class="titlepage"><div><div><h2 class="title"><a name="chap-java-support"></a>Chapter&nbsp;6.&nbsp;Java Support</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="chap-java-support.html#N1043C">Using unsupported java classes</a></span></dt><dt><span class="section"><a href="ch06s02.html">JRE Emulation Reference</a></span></dt><dt><span class="section"><a href="java-packages-lang.html">Package java.lang</a></span></dt><dd><dl><dt><span class="section"><a href="java-packages-lang.html#java-packages-lang-annotation">Package java.lang.annotation</a></span></dt><dt><span class="section"><a href="java-packages-lang.html#java-packages-lang-reflect">Package java.lang.reflect</a></span></dt></dl></dd><dt><span class="section"><a href="java-packages-io.html">Package java.io</a></span></dt><dt><span class="section"><a href="java-packages-util.html">Package java.util</a></span></dt><dt><span class="section"><a href="java-packages-util-regex.html">Package java.util</a></span></dt></dl></div><div class="epigraph"><p>
+The best way to predict the future is to implement it.
+</p><div class="attribution"><span>&mdash;<span class="attribution">Alan Kay</span></span></div></div><p>Of course, there are java classes that cannot be emulated in the browser. 
+  For example, the class java.util.File: there is no way in a browser to read and write a file in 
+  the filesystem, so the classes related to filesystem like java.lang.File, java.lang.FileOutputStream are
+  not supported by Java2Script. The same way, it is not possible to use multiple threads or processes in a 
+  javascript program and so classes related to threads like java.lang.Thread are not supported. </p><div class="section" title="Using unsupported java classes"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="N1043C"></a>Using unsupported java classes</h2></div></div></div><p>Let's see what happen when we try to use unsupported java classes in our Java2Script applications. Let's create  java class with the following content:</p><pre class="programlisting">
+package foo.bar;
+
+import java.io.File;
+
+public class WontWork {
+  public static void main(String[] args) {
+    new File("foo.txt");
+  }
+}
+</pre><p>Let's see if Java2Script compiled the class. Save the file, right click and choose "Edit converted *.js" option from the context menu:</p><pre class="programlisting">
+﻿Clazz.declarePackage ("foo.bar");
+Clazz.load (null, "foo.bar.WontWork", ["java.io.File"], function () {
+c$ = Clazz.declareType (foo.bar, "WontWork");
+  c$.main = Clazz.defineMethod (c$, "main", function (args) {
+    new java.io.File ("foo.txt");
+  }, "~A");
+});
+</pre><p>So, as we can see in line 5 of the generated js file, the java class is translated anyway, no matter if it contains or 
+reference a not supported java class. The compiler won't fail, but if we execute the class as a J2S application, the generated html will contain a message error like the following:  </p><pre class="programlisting">
+[Java2Script] Error in loading ../path/to/j2slib/java/io/File.js!
+</pre><p>More, if we open the html document with firefox, the following javascript error will be thrown in the Firefox error console:</p><pre class="programlisting">Error: java.io.File is not a constructor
+Source File: file:///path/to/project/bin/foo/bar/WontWork.js
+Line: 6</pre><p>Remember we have said that one of the main porpuses of J2S is to let the user to reuse Java codes inside web applications. So, this feature of not 
+failing at compile time but at run time can be usefull when trying to compile an existing Java library or framework to javascript because the Java code 
+will be compiled no matter if it contains not supported java classes. Also, generated javascript will run OK as long as the unsupported classes are not needed. 
+But will fail when trying to load an unsupported class with a message like we have showed. </p><div class="important" title="Important" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Important</h3><p>Java classes referencing unsupported java classes will not fail to compile. What will fail is loading unsuported classes when the J2S application is 
+launched in an HTML document.</p></div></div></div></body></html>

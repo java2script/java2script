@@ -1,0 +1,1 @@
+<plugin><extension point="org.eclipse.help.toc"><toc primary="true" file="toc.xml"></toc></extension></plugin>

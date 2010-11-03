@@ -1,0 +1,112 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chapter&nbsp;4.&nbsp;Code Translation</title><meta content="DocBook XSL Stylesheets V1.75.2" name="generator"><meta name="keywords" content="native javascript code, @j2s annotations"><link rel="home" href="index.html" title="Java2Script User's Guide"><link rel="up" href="index.html" title="Java2Script User's Guide"><link rel="prev" href="configuring-j2s-app-launcher.html" title="Configuring your Java2Script application launcher."><link rel="next" href="executing-java-from-html.html" title="Doing java in HTML documents"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="chapter" title="Chapter&nbsp;4.&nbsp;Code Translation"><div class="titlepage"><div><div><h2 class="title"><a name="chap-java-to-js-translation"></a>Chapter&nbsp;4.&nbsp;Code Translation</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="chap-java-to-js-translation.html#examining-generated-js-files">Examining generated javascript files</a></span></dt><dt><span class="section"><a href="executing-java-from-html.html">Doing java in HTML documents</a></span></dt><dt><span class="section"><a href="chap-java-to-js-translation-sec-types.html">Types</a></span></dt><dt><span class="section"><a href="chap-java-to-js-translation-sec-exceptions.html">Exceptions</a></span></dt></dl></div><div class="epigraph"><p>
+"The question of whether computers can think is like the question of whether submarines can swim."
+</p><div class="attribution"><span>&mdash;<span class="attribution">Edsger W. Dijkstra</span></span></div></div><p>Now that the user knows the basics of using the Java2Script plugin, int this chapter we will examine
+  the generated code and how Java2Script translate java sources to javascript and how we can use
+  this code in our html documents</p><p>Note that you won't normally need to understand how the compiler javascript code work, 
+   since one of the main idea of Java2Script plugin is to abstract the java user from javascript 
+   code at all. Nevertheless, it is generally a good idea to be familiar on how J2S generated 
+   code works, but of course you can choose to jump to next section.</p><p>A java to javascript code translator like J2S must translate each possible java statement 
+   to its javascript equivalent. There are some constructions that are very similar in both languages like, 
+   for, if, while, do, and other expressions. But there are java contructions like class, method, interface, 
+   that are not present in javascript. So the compiler has also to add artificial support for these. </p><div class="figure"><a name="N10265"></a><p class="title"><b>Figure&nbsp;4.1.&nbsp;Concepts from both languages and what J2S takes from both worlds</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/java-js-features.png" alt="Concepts from both languages and what J2S takes from both worlds"></div></div></div><br class="figure-break"><div class="section" title="Examining generated javascript files"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examining-generated-js-files"></a>Examining generated javascript files</h2></div></div></div><p>In this section we will examine the generated javascript files and also the generated HTML 
+   document for a basic understanding 
+   of how java code is translated to javascript and how that javascript can be loaded and executed 
+   from an html document. </p><p>Consider the following simple java class that contains one static method and one 
+   instance method:</p><pre class="programlisting">
+package my.first.project;
+public class HelloWorld {
+	public String getName() {
+		return this.getClass().getName() + this.hashCode();
+	}
+	public static void main(String[] args) {
+		HelloWorld obj = new HelloWorld();
+		System.out.println("object name " + obj.getName());
+	}
+}
+</pre><p>And the generated javascript, with comments, is the following: </p><div class="programlistingco"><pre class="programlisting">
+Clazz.declarePackage ("my.first.project");
+c$ = Clazz.declareType (my.first.project, "HelloWorld");
+Clazz.defineMethod (c$, "getName", function () {
+  return this.getClass().getName() + this.hashCode();
+});
+c$.main = Clazz.defineMethod (c$, "main", function (args) {
+  var obj =  new my.first.project.HelloWorld ();
+  System.out.println ("object name " + obj.getName ());
+}, "~A");
+</pre><div class="calloutlist"><table summary="Callout list" border="0"><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="1" src="images/callouts/1.png"></p></td><td align="left" valign="top"><p>
+      this is the translation of the java statement
+      <code class="code">package my.first.project;</code>
+      , declaring the package my.first.project. As with java, it is required before a class definition.
+    </p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="2" src="images/callouts/2.png"></p></td><td align="left" valign="top"><p>
+      This is the translation of the java code
+      <code class="code">public class HelloWorld</code>
+      . With
+      <code class="code">Clazz.declareType (my.first.project, "HelloWorld")</code>
+      we declare the new class
+      <code class="code">HelloWorld</code>
+      of package
+      <code class="code">my.first.project</code>
+      an it returns the new created
+      class object that we later can use for adding methods and such things.
+    </p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="3" src="images/callouts/3.png"></p></td><td align="left" valign="top"><p>
+      This is the translation of the java code
+      <code class="code">public class HelloWorld</code>
+      . With
+      <code class="code">Clazz.declareType (my.first.project, "HelloWorld")</code>
+      we declare the new class
+      <code class="code">HelloWorld</code>
+      of package
+      <code class="code">my.first.project</code>
+      an it returns the new created
+      class object that we later can use for adding methods and such things.
+    </p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="4" src="images/callouts/4.png"></p></td><td align="left" valign="top"><p>
+      this is how the static method main is defined in javascript. Note that we pass the following parameters
+      to <code class="code">Clazz.defineMethod</code> : class object (returned by declareType), method name, method function.
+    </p><p>
+      also notice that the only difference between declaring a static and instance methods is that
+      in the case of static method declaration we assign the returned method to a class object
+      property, i.e.,
+      <code class="code">$c.main = ...</code>
+    </p></td></tr></table></div></div><p>As we can see, the <code class="code">Clazz</code><a name="N102C6" class="indexterm"></a>
+    object contains functions that emulate 
+   the java language. We will document all this functions in <a class="xref" href="app-java-emulation-api.html#java-language-emulation-api" title="Java Language Emulation API">the section called &ldquo;Java Language Emulation API&rdquo;</a>.</p><p>Other thing to notice is that the code translation is linear: for a java statement there is a 
+   single javascript statement. Also, it is noticeable that, for the point of view of the translator, 
+   there are two main types of Java statements: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p title="Supported by javascript"><b>Supported by javascript.&nbsp;</b>Most java statements, like method calling, for, while, 
+   if, etc. expressions, are supported directly by the javascript language and do not need almost any translation. In the previous example, 
+   the java statement <code class="code">System.out.println ("hello world");</code> remains the same both in java and in javascript.</p></li><li class="listitem"><p title="Containing java concepts not supported by javascript."><b>Containing java concepts not supported by javascript. .&nbsp;</b> Doing Object Oriented programming stuf like cľasses, methods definition, etc. Here is when we use the object Clazz: the 
+   J2S java language emulator for javascript. So, for example, if we ewant to define a new class in javascript, we use 
+   Clazz.declareType. </p></li></ul></div><p>Now let's finnish examining a more advance java example and its transjaltion to javascript:</p><pre class="programlisting">
+package my.first.project;
+
+import java.util.HashMap;
+import java.util.Iterator;
+
+public class MyTable extends HashMap&lt;String, Integer&gt;{
+	public String print() {
+		String s = "";
+		Iterator&lt;String&gt; i = keySet().iterator();
+		while (i.hasNext()) {
+			s += i.next()+",";
+		}
+		return s;	
+	}
+}
+</pre><p>that is translated to the following commented javascript code:</p><div class="programlistingco"><pre class="programlisting">
+Clazz.declarePackage ("my.first.project");
+Clazz.load (["java.util.HashMap"], "my.first.project.MyTable", null, function () {
+  c$ = Clazz.declareType (my.first.project, "MyTable", java.util.HashMap);
+  Clazz.defineMethod (c$, "print", function () {
+    var s = "";
+    var i = this.keySet ().iterator ();
+    while (i.hasNext ()) {
+      s += i.next () + ",";
+    }
+    return s;
+  });
+});
+</pre><div class="calloutlist"><table summary="Callout list" border="0"><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="1" src="images/callouts/1.png"></p></td><td align="left" valign="top"><p><a name="N102F9" class="indexterm"></a>This is different that our previous example. Since in this case, our class extends 
+java.util.HashMap, we need first of all, that java.util.HashMap to be loaded and only then declare our new type.
+The function <code class="code">Clazz.load</code> help us on this. Note that the actual call to <code class="code">Clazz.declareType</code> is
+inside the callback function passed to <code class="code">Clazz.load</code>.</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="2" src="images/callouts/2.png"></p></td><td align="left" valign="top"><p>At this point the required class java.util.HashMap is loaded and so we can call Clazz.declareType. Notice the last argument <code class="code">java.util.HashMap</code> 
+referencing the parent class. Note that in javascript we can reference java Class objects just like in java.</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="3" src="images/callouts/3.png"></p></td><td align="left" valign="top"><p><a name="N10311" class="indexterm"></a>Notice that calling <code class="code">this.keySet()</code> is done just like in java, with the exception that 
+in javascript the <code class="code">this</code> keyword is not optional. </p></td></tr></table></div></div></div></div></body></html>
