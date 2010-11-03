@@ -1,0 +1,26 @@
+#summary Description of eclipse project plugin net.sf.j2s.doc.user-guide, a book titled "Java2Script User Guide" written in docbook with support for eclipse help format output.
+#labels userguide,java2scriptuserguide,Java2Scriptdocumentation,documentation,Java2Scripteclipsehelpplugin,eclipsehelp
+
+= Introduction =
+
+"java2Script User Guide" is a book I'm trying to write in my free time for documenting Java2Script. It is written in docbook format for easy collaboration, sharing and exporting to other formats like html, pdf, eclipse-help. 
+
+The project net.sf.j2s.doc.user-guide contains the sources of the guide, and also it is an eclipse plugin project that adds the User Guide in the eclipse help using org.eclipse.help.toc extension point. Eclipse help and toc file can be automatically generated from docbook sources.
+
+Projects sources are available at https://java2script.googlecode.com/svn/trunk/incubator/net.sf.j2s.doc.user-guide
+
+Eclipse help screenshot:
+
+[http://picasaweb.google.com/lh/photo/l_3DJgG8vWKl6ztXyX2sDZoWZDagpoTMZQj7AWmyjOM?feat=directlink]
+
+<table style="width:auto;"><tr><td><a href="http://picasaweb.google.com/lh/photo/l_3DJgG8vWKl6ztXyX2sDZoWZDagpoTMZQj7AWmyjOM?feat=embedwebsite"><img src="http://lh5.ggpht.com/_HR_FUhhrdJg/TNGW09rM1EI/AAAAAAAAAJE/znPBinlTS5k/s144/j2s-user-guide-eclipse-help.png" height="102" width="144" /></a></td></tr><tr><td style="font-family:arial,sans-serif; font-size:11px; text-align:right">De <a href="http://picasaweb.google.com/sebastigurin/Cancerberonia?authkey=Gv1sRgCIvi6prb1fuFbA&feat=embedwebsite">Cancerberonia</a></td></tr></table>
+ 
+= Render the document in html or pdf =
+execute j2s-user-guide/make.sh
+
+= Creating htmls and toc.xml for eclipse help format ==
+1) unzip docbook-xml-4.5.zip and docbook-xsl.zip. (these are common docbook dtd and 
+stylesheets for eclipse, and are not part of this plugin sources. Because of this we distribute only the zips. )
+2) execute ant create-eclipse-help ant task of j2s-user-guide/build.xml using the same JRE as the workspace. 
+
+@author: Sebastián Gurin.
