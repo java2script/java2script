@@ -1,0 +1,86 @@
+<!-- 
+
+    Copyright (C)  2010  Sebastián Gurin.
+    Permission is granted to copy, distribute and/or modify this document
+    under the terms of the GNU Free Documentation License, Version 1.3
+    or any later version published by the Free Software Foundation;
+    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+    A copy of the license is included in the section entitled "GNU
+    Free Documentation License".
+
+@author: sgurin 
+
+-->
+
+
+<chapter id="working-with-native-code">
+
+
+  <title>Working With native code</title>
+  
+<!--  <epigraph>-->
+<!--<attribution>William James</attribution>-->
+<!--<para>-->
+<!--Action may not bring happiness but there is no happiness without action.-->
+<!--</para>-->
+<!--</epigraph>-->
+  
+  
+  <para>in section we have explained how to use J2S compiler directives like @j2sNative inside javadocs
+  for customizing compiler output code, and specially the directive @j2sNative for including 
+  native javascript in our java classes.</para>
+  
+  <para>this chapter will describe how, call java methods from javascript code, problems with java object+method vs - javascript objectsand javascript functions, care native objects like dom, etc, </para>
+  <para>TODO</para>
+  
+  <para>j2s-native-mode support is expl here</para>
+  
+  <section><title>Native Objects</title>
+  <para>a native object is TODO</para>
+  <para>why we have to be careful when dealing with native objects?</para>
+  <para>TODO</para>  
+<!--    <tip><para>When working with native objects, try to encapsulate them in a private variable</para></tip>-->
+  
+  </section>
+  
+   <section>
+    <title>Accessing native JavaScript objects from Java</title>
+
+    <para>In section <link endterm="section-writing-native-js-code-with-j2snative-title"
+    linkend="section-writing-native-js-code-with-j2snative"></link> we learn how to include our
+    JavaScript code in our Java classes and how our native JavaScript code can
+    call our Java objects. But, wait a moment, in JavaScript we have access to
+    a the document object model, and a lot of JavaScript utilities and
+    toolkits .... TODO  </para>
+
+    <para>In Java, all objects are inherited from Java.lang.Object. So they must
+    implement methods like hashCode(), equals(), etc. We say that an object is
+    native when it is created from native JavaScript code and doesn't
+    implements java.lang.Object.   .... TODO</para>
+    
+  </section>
+  
+  
+   
+   
+    <section><title>Native objects mode support</title>
+    
+    <para>By default, J2S will overwrite javascript Object.prototype adding methods of java.lang.Object like equals, hashCode, notifyAll, etc, 
+    so all created objects are valid java objects. Normally this is fine because you don't have to worry
+    about javascript objects that are not valid java objects. </para>
+    
+    <para>Nevertheless, in some situations, this default behaviour is not desiderable. For example, 
+    if you want to integrate your J2S application with a 3rd party javascript toolkit, there can be compatibilities issues because some 
+    javascript toolkits simply don't work with a modified Object.prototype. More, since all javascript objects
+    contains java.lang.Object methods, it is impossible to create a clean javascript object, something really 
+    common and required for working with 3rd party javascript toolkits. </para>
+    
+    <para>Fortunately J2S supports a "native object" mode, in which javascript Object.prototype is not contaminated</para>
+    <para>explain the problems with native objects and explain j2s.native mode</para>
+    
+    </section>
+    
+    
+<!--  <section><title>j2s-base project for doing javascript in java</title></section>-->
+   
+</chapter>

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: net.sf.j2s.doc.user-guide
+Bundle-SymbolicName: net.sf.j2s.doc.user-guide;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: net.sf.j2s.doc.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: Sebastián Gurin @ Java2Script

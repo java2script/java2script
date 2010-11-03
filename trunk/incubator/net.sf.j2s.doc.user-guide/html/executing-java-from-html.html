@@ -1,0 +1,64 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Doing java in HTML documents</title><meta content="DocBook XSL Stylesheets V1.75.2" name="generator"><meta name="keywords" content="native javascript code, @j2s annotations"><link rel="home" href="index.html" title="Java2Script User's Guide"><link rel="up" href="chap-java-to-js-translation.html" title="Chapter&nbsp;4.&nbsp;Code Translation"><link rel="prev" href="chap-java-to-js-translation.html" title="Chapter&nbsp;4.&nbsp;Code Translation"><link rel="next" href="chap-java-to-js-translation-sec-types.html" title="Types"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="section" title="Doing java in HTML documents"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="executing-java-from-html"></a>Doing java in HTML documents</h2></div></div></div><p>When you run a J2s application in eclipse with menu Run-&gt;Run as..-&gt;Java2Script Application
+   the Java2Script plugin generates a simple html document that execute the java application. For doing that 
+   it is required to perform at least the following tasks:</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>load the j2slib.z.js Java2Script runtime script</p></li><li class="listitem"><p>configure J2S runtime</p></li><li class="listitem"><p>Load main class java class dependencies</p></li><li class="listitem"><p>execute some ava code like calling the main() method of main class.</p></li></ul></div><p>
+   You can use the generated html file in yout web applications, nevertheless, it is very common to launch your Java2Script application from an existing 
+   html document, or from a server page (php, jsp asp, whatever). 
+   In those cases, it is 
+   very helpful to understand how J2s applcations are loaded and executed. So lets examine a minimal
+  html document that calls our HelloWorld java example. For generating the following html markup, the HelloWorkd java class
+  is launched with a clean configuration:</p><div class="figure"><a name="N10331"></a><p class="title"><b>Figure&nbsp;4.2.&nbsp;A clean J2S Application launcher configuration</b></p><div class="figure-contents"><div class="mediaobject"><img src="images/j2s-configuration-clean.png" alt="A clean J2S Application launcher configuration"></div></div></div><br class="figure-break"><p>A short version of generated HTML document is the following: </p><div class="programlistingco"><pre class="programlisting">
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"&gt;
+&lt;head&gt;&lt;title&gt;my.first.project.HelloWorld&lt;/title&gt;
+&lt;script type="text/javascript" src="../path/to/j2slib/j2slib.z.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;script type="text/javascript"&gt;
+    ClazzLoader.packageClasspath ("java", "../path/to/j2slib/", true);
+    ClazzLoader.setPrimaryFolder ("bin");
+    ClazzLoader.packageClasspath (["my.first.project", "net.sf.j2s.probes"], "bin/");  
+    ClazzLoader.loadClass ("my.first.project.HelloWorld", function () {
+      my.first.project.HelloWorld.main([]);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre><div class="calloutlist"><table summary="Callout list" border="0"><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="1" src="images/callouts/1.png"></p></td><td align="left" valign="top"><p>
+First of all it is required to include the script j2slib.z.js.
+</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="2" src="images/callouts/2.png"></p></td><td align="left" valign="top"><p>
+With this call to <code class="code">ClazzLoader.packageClasspath</code> we tell the java VM where are main 
+java sources like java.lang, java.util, etc. classes, usually at the same location of file j2slib.z.js. 
+</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="3" src="images/callouts/3.png"></p></td><td align="left" valign="top"><p>
+Calling <code class="code">ClazzLoader.setPrimaryFolder</code> indicates to the java VM what is the primary 
+folder. In the case of a java package collition, the primary folder has precedence. 
+</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="4" src="images/callouts/4.png"></p></td><td align="left" valign="top"><p>
+Exactly the same way we have done for java main sources, this call tells the VM where to find the 
+classes of our project, and that is at the "bin" folder. </p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="5" src="images/callouts/5.png"></p></td><td align="left" valign="top"><p>
+Now the intersting part. At this point we are ready to invoke some java code from our html document. We have already tell the 
+VM where are the sources of each java package we need.
+Remember that in Java2Script will lazily load all java classes (load only when needed). So, for executing some java code that 
+involves some java classes, we first need to load
+some java classes and only when loaded, we can do our java. In this case, we need to invike HelloWorld.main(), and so, we 
+ask to load the class my.first.project.HelloWorld and only when it is loaded (in the function callback, second parameter), 
+we invoke our java code <code class="code">my.first.project.HelloWorld.main([]);</code>.
+</p></td></tr><tr><td align="left" valign="top" width="5%"><p><img border="0" alt="6" src="images/callouts/6.png"></p></td><td align="left" valign="top"><p>
+As we said in the previous item, this is the actual java code that will be invoked. Note that the java sintax is very straightfordward.
+Also notice that in this case we only need to call main method, but nothing prevent us for doing more complex things, like: 
+</p><pre class="programlisting">
+var requiredClasses = ["my.first.project.HelloWorld", 
+  "new java.util.HashMap", "java.util.Arrays"];
+ClazzLoader.loadClass (requiredClasses, function () {
+  var arr = ["hello", "world", "1", "two"];
+  var map1 =  new java.util.HashMap ();
+  for (var i = 0; i &lt; arr.length; i++) {
+    map1.put (new Integer (arr[i].length), arr[i]);
+  }
+  java.util.Arrays.sort(arr);
+});
+
+</pre></td></tr></table></div></div><p>As we can see, the ClazzLoader 
+<a name="N10379" class="indexterm"></a> 
+javascript object contains an API do dialogate with the java runtime from javascript. It lets us configure 
+and manipulate the "java virtual machine", for 
+example, telling where main java library code is located, set the "class path", dynamically loading java 
+classes and give as a context from where to call java classes</p><p>We will examine and document each of this functions in <a class="xref" href="java-runtime-emulation-api.html" title="Java Runtime Emulation API">the section called &ldquo;Java Runtime Emulation API&rdquo;</a>.</p></div></body></html>
