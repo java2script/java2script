@@ -108,11 +108,11 @@
     &chapAboutThisDocument;
     &chapIntro;
     &chapGettingStarted;
-    &chapJavaToJsTranslation;
     &chapj2sPlugin;
     &chapJavaSupport;
     &chapIntegratedLibs;
     &chapj2sCompilerDirectives;    
+    &chapJavaToJsTranslation;
     &chapWorkingWithNativeCode;
     &chapClientServerComunication;
     

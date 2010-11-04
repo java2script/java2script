@@ -46,7 +46,7 @@
   
   <para>Now that the user knows the basics of using the Java2Script plugin, int this chapter we will examine
   the generated code and how Java2Script translate java sources to javascript and how we can use
-  this code in our html documents</para>
+  this code in our html documents for lowding our translated java applications.</para>
   
   
   
@@ -57,7 +57,7 @@
    
    <para>A java to javascript code translator like J2S must translate each possible java statement 
    to its javascript equivalent. There are some constructions that are very similar in both languages like, 
-   for, if, while, do, and other expressions. But there are java contructions like class, method, interface, 
+   <code>for, if, while, do</code>, and other expressions. But there are Java language constructions like class, method, interface, 
    that are not present in javascript. So the compiler has also to add artificial support for these. </para>
    
      <figure>
@@ -74,12 +74,12 @@
   
   
    
-    <section id="examining-generated-js-files"><title>Examining generated javascript files</title>
+    <section id="examining-generated-js-files"><title>Generated JavaScript files</title>
    
-   <para>In this section we will examine the generated javascript files and also the generated HTML 
+   <para>In this section we will examine the generated JavaScript files and also the generated HTML 
    document for a basic understanding 
-   of how java code is translated to javascript and how that javascript can be loaded and executed 
-   from an html document. </para>
+   of how java code is translated to JavaScript and how that JavaScript can be loaded and executed 
+   from an HTML document. </para>
    
    <para>Consider the following simple java class that contains one static method and one 
    instance method:</para>
@@ -405,9 +405,13 @@ classes and give as a context from where to call java classes</para>
    
    
    <section id="chap-java-to-js-translation-sec-types">
-   <title>Types</title><para>Explain how j2s emulates java types. 
+   <title>Types</title>
+   
+   <para>Explain how j2s emulates java types. 
    ej: string and characters are all javascript strings, 
    long, int short, double, float are all javascript numbers. arrays are javascript arrays</para>
+   
+   <para>Java2Script also wrapps some exceptions that can occurr </para>
    </section>
    
    
@@ -417,8 +421,9 @@ classes and give as a context from where to call java classes</para>
    
    
    <section id="chap-java-to-js-translation-sec-exceptions">
-   <title>Exceptions</title><para>Explain exceptions and how to separate native javascript 
-   exceptions from java exceptions</para>
+   <title>Exceptions</title>
+     
+   <para>Explain exceptions and how to separate native javascript exceptions from java exceptions</para>
    </section>
    
    

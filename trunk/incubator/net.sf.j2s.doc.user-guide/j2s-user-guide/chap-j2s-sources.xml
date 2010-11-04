@@ -297,13 +297,30 @@
       
       
   </section>
-  
-  
-  <section><title>Exporting the plugin</title><para>
-      So you make your changes and now you want to redistribute the plugin. As with any other 
-      Eclipse plugin, you have to export it as an eclipse plugin. It is very easy, </para>
-      
-  </section>
-      
 
+
+
+
+  <section>
+    <title>Exporting the plugin</title>
+    <para>
+      So you make your changes and now you want to redistribute the plugin. As with any other
+      Eclipse plugin, you have to export it as an eclipse plugin. It is very easy, </para>
+    <para>TODO</para>
+  </section>
+
+
+
+  <section>
+    <title>How to Extend the Java2Script compiler</title>
+    <para>Now that you know how to install and run Java2Script from the sources, and know how to export your own version of Java2Script,
+      we will describe a mechanism supported by Java2Script eclipse plugin that will let us extend the compiler easily, without modifying
+      the compiler sources and without having to learn all compiler related classes internals for doing it. </para>
+
+    <para>http://j2s.sourceforge.net/articles/tutorial-extended-compiler.html </para>
+    <para>http://blog.java2script.org/2006/10/31/extending-java2script-compiler/</para>
+    <para>TODO</para>
+  </section>
+  
+  
 </chapter>
