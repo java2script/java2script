@@ -4,7 +4,7 @@
 @author: sgurin
 -->
 
-<project default="create-eclipse-help" basedir="..">
+<project name="j2s-ser-guide" default="create-eclipse-help" basedir="..">
 
     <property name="current-loc" location="." />
     <property name="workspace" location=".." />
@@ -27,10 +27,18 @@
 	<!-- XSLT Chunking Properties -->
     <property name="base.dir" value="${htmldir}"/>
     
-    <target name="clean" depends="clean-temporary-artifacts" description="Cleans up generated files.">
+	
+	<target name="clean-generated-formats" description="Cleans up generated files in renderizaton to html and pdf with db2* docbook tools.">       
+    	<delete dir="${docbooksource}/dist" />
+		<delete file="${docbooksource}/j2s-user-guide.pdf" />    	
+    </target>
+	
+	
+    <target name="clean-eclipse-help" depends="clean-temporary-artifacts" description="Cleans up generated files.">
         <delete dir="${htmldir}" />
     	<delete file="${current-loc}/toc.xml" />
     	<delete file="${current-loc}/plugin.xml" />
+    	
     </target>
 
     <target name="clean-temporary-artifacts" description="Cleans up generated files.">
@@ -48,7 +56,7 @@
         <xinclude in="${docbooksource}/j2s-user-guide.xml" out="${docbooksource-tmp}/j2s-user-guide-combined.xml" />
     </target>
 
-    <target name="create-eclipse-help" depends="clean, depends, merge">
+    <target name="create-eclipse-help" depends="clean-eclipse-help, depends, merge">
 
         <xslt force="true" style="${docbookdir}" in="${docbooksource-tmp}/j2s-user-guide-combined.xml" out="xslt-output.xml">
             <factory name="${xalan}" />

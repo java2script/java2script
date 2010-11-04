@@ -1,22 +1,10 @@
-
   <!--
-
     Copyright (C) 2010 Sebastián Gurin. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free
     Documentation License, Version 1.3 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover
     Texts, and no Back-Cover Texts. A copy of the license is included in the section entitled "GNU Free Documentation License". @author: sgurin
   -->
 
 <chapter  id="chap-j2s-plugin">
-
-
-<!--  <chapterinfo>-->
-<!--    <edition>The J2S plugin</edition>-->
-<!--    <keywordset>-->
-<!--      <keyword>plugin</keyword>-->
-<!--      <keyword>plugin usage</keyword>-->
-<!--    </keywordset>-->
-<!--  </chapterinfo>-->
-
 
   <title>The J2S plugin</title>
 
@@ -262,6 +250,26 @@ By using Hotspot, I think it is much more convenient for me to develop JavaScrip
 
 
 
+
+
+  <section><title>Libraries in Java2Script</title>
+  <para>
+  In this section we will detail mechanisms provided by Java2Script plugin for using and distributing java software. 
+  How java software components can be distributed so other Java2Script users can use them in their J2S porojects.
+   </para>
+   
+   <para>Suppose you develop a very useful software component in Java2Script and now you want to distribute so other can use it in their own java2script projects. 
+   In normal java project we normally put our .class files inside a .jar (Java ARchive) file, and distribute the .jar. That is enought, but not in a 
+   java2script project where, besides .class files you must also can distribute generated javascript files.</para>
+   
+   <para>Of course you can always distribute your library sources, and let the users import the osources into their own projects, perhaps in differents sourcefolders, 
+   but that is generally a good idea when you want to encapsulate your library api and implementation.</para>
+   
+   <para>Fortunately, Java2Script provide with flexible mechanism of library definition. Also as we will see, Java2Script support for defining 
+   how the library must loaded</para>
+   <para>TODO: talk about j2slib and how swt, junit etc are inside. TODO: talk about .package file and how a lib can be loaded.</para>
+   
+  </section>
 
 
 
