@@ -9,8 +9,8 @@ toc.xml automatic generation from docbook. See j2s-user-guide/build.xml
 = Render the document in html or pdf =
 execute j2s-user-guide/make-all.sh
 
-= Creating htmls and toc.xml for eclipse help format ==
-r this plugin to work you will have to generate eclipse html help. Html files nd toc.xml
+= Creating htmls, toc.xml and plugin.xml for eclipse help plugin ==
+For this plugin to work you will have to generate eclipse html help. Html files nd toc.xml
 are automatically generated from docbook sources and so are not included in this plugin sources.
 For generating eclipse files :
 
