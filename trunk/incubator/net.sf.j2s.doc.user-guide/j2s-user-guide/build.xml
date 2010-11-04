@@ -28,6 +28,7 @@
     <property name="base.dir" value="${htmldir}"/>
     
 	
+	
 	<target name="clean-generated-formats" description="Cleans up generated files in renderizaton to html and pdf with db2* docbook tools.">       
     	<delete dir="${docbooksource}/dist" />
 		<delete file="${docbooksource}/j2s-user-guide.pdf" />    	
@@ -35,7 +36,9 @@
 	
 	
     <target name="clean-eclipse-help" depends="clean-temporary-artifacts" description="Cleans up generated files.">
-        <delete dir="${htmldir}" />
+        <delete dir="docbook-xml-4.5" />
+    	<delete dir="docbook-xsl" />
+    	<delete dir="${htmldir}" />
     	<delete file="${current-loc}/toc.xml" />
     	<delete file="${current-loc}/plugin.xml" />
     	
@@ -46,9 +49,14 @@
     	<delete file="${current-loc}/xslt-output.xml" />
     </target>
 
+	<target name="clean-all" depends="clean-generated-formats, clean-eclipse-help, clean-temporary-artifacts"/>
+		
+	
 	<target name="depends">
         <mkdir dir="${htmldir}" />		
         <mkdir dir="${docbooksource-tmp}" />
+		<unzip src="docbook-xml-4.5.zip" dest="."></unzip>
+		<unzip src="docbook-xsl.zip" dest="."></unzip>
     </target>
 
     <target name="merge">
