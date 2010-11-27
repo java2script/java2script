@@ -119,6 +119,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	
 	static Object pipeQueryMap = new Object();
 	
+	private static boolean escKeyAbortingDisabled = false;
+	
 	public static int getPipeMode() {
 		return pipeMode;
 	}
@@ -271,7 +273,36 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		thread.start();
 	}
 
+	/**
+	 * Press <ESC> key in browser will abort comet connection. Here try to
+	 * disable such key being detected by browser.
+	 * 
+	 * @j2sNative
+Clazz.addEvent (document, "keydown", function (e) {
+	var ie = false;
+	if (e == null) {
+		e = window.event;
+		ie = true;
+	}
+	var key = e.keyCode || e.charCode;
+	if (key == 27) {
+		if (ie) {
+			e.returnValue = false;
+		} else {
+			e.preventDefault();
+		}
+		return false;
+	}	
+});
+	 */
+	private static void disableESCKeyConnectionAbsorting() {
+	}
+	
 	private static void pipeRequest(final SimplePipeRunnable runnable) {
+		if (!escKeyAbortingDisabled) {
+			escKeyAbortingDisabled = true;
+			disableESCKeyConnectionAbsorting();
+		}
 		String url = runnable.getHttpURL();
 		String method = runnable.getHttpMethod();
 		String serialize = runnable.serialize();
@@ -708,7 +739,7 @@ var fun = (function (key, created) {
 			var spr = net.sf.j2s.ajax.SimplePipeRequest;
 			var now = new Date ().getTime ();
 			var last = runnable.lastPipeDataReceived;
-			if (last == -1) {
+			if (last <= 0) {
 				last = created;
 			}
 			if (now - last > 3 * spr.pipeLiveNotifyInterval) {
@@ -1027,7 +1058,7 @@ runnable.queryEnded = true;
 			var spr = net.sf.j2s.ajax.SimplePipeRequest;
 			var now = new Date ().getTime ();
 			var last = runnable.lastPipeDataReceived;
-			if (last == -1) {
+			if (last <= 0) {
 				last = created;
 			}
 			if ((runnable.queryEnded || (now - last >= spr.pipeLiveNotifyInterval
@@ -1067,7 +1098,7 @@ runnable.queryEnded = true;
 						
 						long now = System.currentTimeMillis();
 						long last = runnable.lastPipeDataReceived;
-						if (last == -1) {
+						if (last <= 0) {
 							last = created;
 						}
 						if (runnable.queryFailedRetries >= 3
@@ -1199,7 +1230,7 @@ p.initHttpRequest = function () {
 };
 p.pipeXHRQuery = function (request, method, url, data) {
 	if ("GET" == method.toUpperCase ()) {
-		request.open (method, url + (url.indexOf ('?') != -1 ? "&" : "?") + data, true, null, null);
+		request.open (method, url + (data != null ? ((url.indexOf ('?') != -1 ? "&" : "?") + data) : ""), true, null, null);
 		data = null;
 	} else {
 		request.open (method, url, true, null, null);
@@ -1246,7 +1277,7 @@ return function () {
 		}
 		var now = new Date ().getTime ();
 		var last = runnable.lastPipeDataReceived;
-		if (last == -1) {
+		if (last <= 0) {
 			last = created;
 		}
 		if ((runnable.queryEnded || (now - last >= p.pipeLiveNotifyInterval
@@ -1269,6 +1300,17 @@ return function () {
 			try {
 				document.domain = p.originalDomain;
 			} catch (e) {};
+			if (data == null) { // make sure that data is not null
+				with (window.parent) {
+					try {
+						method = runnable.getPipeMethod ();
+						url = runnable.getPipeURL ();
+						var spr = net.sf.j2s.ajax.SimplePipeRequest;
+						data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, true);
+					} catch (e) {
+					}
+				}
+			}
 			try {
 				p.initHttpRequest ();
 			} catch (e) {};
