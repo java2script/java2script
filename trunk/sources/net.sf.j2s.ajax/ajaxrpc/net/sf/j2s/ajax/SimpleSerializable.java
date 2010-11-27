@@ -659,6 +659,8 @@ while (index < start + length && index < end) {
 					if (l3 > 0) {
 						s = str.substring (index, index + l3);
 						index += l3;
+					} else if (l3 == 0) {
+						s = "";
 					}
 				} else {
 					var c5 = str.charCodeAt (index++);
@@ -666,6 +668,8 @@ while (index < start + length && index < end) {
 					if (l3 > 0) {
 						s = str.substring (index, index + l3);
 						index += l3;
+					} else if (l3 == 0) {
+						s = "";
 					} else if (l3 == -2) {
 						var c6 = str.charCodeAt (index++);
 						var l4 = c6 - baseChar;
@@ -707,6 +711,8 @@ while (index < start + length && index < end) {
 		if (l2 > 0) {
 			s = str.substring (index, index + l2);
 			index += l2;
+		} else if (l2 == 0) {
+			s = "";
 		} else if (l2 == -2) {
 			var c4 = str.charCodeAt(index++);
 			var l3 = c4 - baseChar;
@@ -860,6 +866,8 @@ return true;
 								if (l3 > 0) {
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
+								} else if (l3 == 0) {
+									ss[i] = "";
 								}
 							} else {
 								char c5 = str.charAt(index++);
@@ -867,6 +875,8 @@ return true;
 								if (l3 > 0) {
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
+								} else if (l3 == 0) {
+									ss[i] = "";
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
@@ -986,6 +996,8 @@ return true;
 				if (l2 > 0) {
 					s = str.substring(index, index + l2);
 					index += l2;
+				} else if (l2 == 0) {
+					s = "";
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
