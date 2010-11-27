@@ -2074,7 +2074,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 		return;
 		//*/
 	}
-	var okToInit = true;
+	//var okToInit = true;
 	if (musts != null && musts.length != 0) {
 		ClazzLoader.unwrapArray (musts);
 		for (var i = 0; i < musts.length; i++) {
@@ -2082,18 +2082,26 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 			if (name == null || name.length == 0) {
 				continue;
 			}
+			var n = ClazzLoader.findClass (name);
 			if (ClazzLoader.isClassDefined (name) 
 					|| ClazzLoader.isClassExcluded (name)) {
+				if (n != null // non-system classes
+						&& n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+					ClazzLoader.addChildClassNode (node, n, 1);
+				}
 				continue;
 			}
-			okToInit = false;
-			var n = ClazzLoader.findClass (name);
+			//okToInit = false;
 			if (n == null) {
 				n = new ClazzNode ();
 				n.name = musts[i];
 				n.status = ClazzNode.STATUS_KNOWN;
+				ClazzLoader.addChildClassNode (node, n, 1);
+			} else {
+				if (n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+					ClazzLoader.addChildClassNode (node, n, 1);
+				}
 			}
-			ClazzLoader.addChildClassNode (node, n, 1);
 		}
 	}
 
@@ -2121,7 +2129,7 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 		node.status = ClazzNode.STATUS_CONTENT_LOADED;
 	}
 
-	var isOptionalsOK = true;
+	//var isOptionalsOK = true;
 	if (optionals != null && optionals.length != 0) {
 		ClazzLoader.unwrapArray (optionals);
 		for (var i = 0; i < optionals.length; i++) {
@@ -2129,21 +2137,25 @@ ClazzLoader.load = function (musts, clazz, optionals, declaration) {
 			if (name == null || name.length == 0) {
 				continue;
 			}
-			/*
+			var n = ClazzLoader.findClass (name);
 			if (ClazzLoader.isClassDefined (name) 
 					|| ClazzLoader.isClassExcluded (name)) {
+				if (n != null // non-system classes
+						&& n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+					ClazzLoader.addChildClassNode (node, n, -1);
+				}
 				continue;
 			}
-			//*/
-			isOptionalsOK = false;
-			var n = ClazzLoader.findClass (name);
+			//isOptionalsOK = false;
 			if (n == null) {
 				n = new ClazzNode ();
 				n.name = optionals[i];
 				n.status = ClazzNode.STATUS_KNOWN;
-			}
-			if (n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
 				ClazzLoader.addChildClassNode (node, n, -1);
+			} else {
+				if (n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+					ClazzLoader.addChildClassNode (node, n, -1);
+				}
 			}
 		}
 	}
