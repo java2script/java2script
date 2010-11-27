@@ -352,7 +352,7 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * 	m = this.clazz[this.getName ()];
      * }
      * if (m != null) {
-     * 	m.apply(receiver,args);
+     * 	return m.apply(receiver,args);
      * } else {
      * 	// should never reach here!
      * }
