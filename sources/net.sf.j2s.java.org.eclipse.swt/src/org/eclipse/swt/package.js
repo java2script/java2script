@@ -136,9 +136,11 @@ $WTC$$.globalChecking = function () {
 /* private */
 $WTC$$.getCSSRuleID = function (clazzName) {
 	var cssRuleID = null;
-	if (clazzName.indexOf ("org.eclipse.swt.") == 0 || clazzName.indexOf ("$wt.")) {
+	if (clazzName.indexOf ("org.eclipse.swt.") == 0 || clazzName.indexOf ("$wt.") == 0) {
 		var idx = clazzName.indexOf ("wt.") + 3;
 		cssRuleID = "swt." + clazzName.substring (idx);
+	} else {
+		cssRuleID = clazzName;
 	}
 	return cssRuleID.toLowerCase ().replace (/\./g, '-');
 };
