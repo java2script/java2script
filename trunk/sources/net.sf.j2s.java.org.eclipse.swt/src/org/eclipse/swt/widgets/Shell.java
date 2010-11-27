@@ -493,14 +493,6 @@ int callWindowProc (int hwnd, int msg, int wParam, int lParam) {
  */
 public void close () {
 	checkWidget ();
-	if (parent == null && (this.getStyle() & SWT.TOOL) == 0 && display.taskBar != null) {
-		TaskBar taskBar = display.taskBar;
-		taskBar.removeShellItem(this);
-		taskBar.handleApproaching();
-		taskBar.updateLayout();
-		taskBar.setMinimized(false);
-		taskBar.updateLastModified();
-	}
 	Shell nextShell = null;
 	if (parent instanceof Shell) {
 		nextShell = (Shell) parent;
@@ -508,21 +500,33 @@ public void close () {
 			nextShell = null;
 		}
 	}
+	Display display = this.display;
 	closeWidget ();
-	if (nextShell == null || nextShell.isDisposed()) {
-		nextShell = Display.getTopShell();
+	if (isDisposed()) {
+		if (parent == null && (this.getStyle() & SWT.TOOL) == 0
+				&& display != null && display.taskBar != null) {
+			TaskBar taskBar = display.taskBar;
+			taskBar.removeShellItem(this);
+			taskBar.handleApproaching();
+			taskBar.updateLayout();
+			taskBar.setMinimized(false);
+			taskBar.updateLastModified();
+		}
+		if (nextShell == null || nextShell.isDisposed()) {
+			nextShell = Display.getTopShell();
+		}
+		if (nextShell != null && !nextShell.isDisposed()) {
+			nextShell.bringToTop();
+			nextShell.forceFocus();
+		} else 
+		/**
+		 * Return to default title
+		 * @j2sNative
+		 * if (window["document.title"] != null) {
+		 * 	document.title = window["document.title"];
+		 * }
+		 */ {}
 	}
-	if (nextShell != null && !nextShell.isDisposed()) {
-		nextShell.bringToTop();
-		nextShell.forceFocus();
-	} else 
-	/**
-	 * Return to default title
-	 * @j2sNative
-	 * if (window["document.title"] != null) {
-	 * 	document.title = window["document.title"];
-	 * }
-	 */ {}
 }
 
 protected void createHandle () {
