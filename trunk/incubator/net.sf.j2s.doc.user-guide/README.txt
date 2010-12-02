@@ -19,4 +19,6 @@ stylesheets for eclipse, and are not part of this plugin sources. Because of thi
 2) execute ant create-eclipse-help ant task of j2s-user-guide/build.xml ***using the same JRE as the workspace***. 
 
 That should generate html/ directory with lots of html documets and images, and the file toc.xml.
+
+
 @author: Sebastián Gurin.
