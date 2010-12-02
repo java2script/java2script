@@ -107,5 +107,16 @@ TODO
    <bridgehead renderas="sect2">ClazzLoader.ignore = function ()</bridgehead>
   <simpara>Makes the J2s compiler to ignore (not load) an array of classes. accepts an array of classnames to ignore. Used when we put set some classes as "Abandoned" in the  project Java2Script properties page.</simpara>  
   
+  <bridgehead renderas="sect2">ClazzLoader.jarClasspath</bridgehead>
+  <simpara>Makes the J2s compiler to ignore (not load) an array of classes. accepts an array of classnames to ignore. Used when we put set some classes as "Abandoned" in the  project Java2Script properties page.</simpara>  
+  
+    ClazzLoader.jarClasspath (base + "util/Collections.js", [
+    "java.util.Collections",
+    "java.util.Collections.CheckedCollection",
+    "java.util.Collections.CheckedList",
+    "java.util.Collections.CheckedListIterator",
+    "java.util.Collections.CheckedMap",
+ ......
+  ]);
   </section>
 </appendix>

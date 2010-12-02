@@ -221,15 +221,20 @@ supported by HotSpot. Changes to static methods, or changes in class signatures
   </bridgehead>
   
   <para>
-  Java2Script also implements JavaScript's Hotspot technology. Such JavaScript Hotspot technology is not complicate, because JavaScript is 
+  Java2Script also implements JavaScript's Hotspot technology. It is not complicate, because JavaScript is 
   already a very robust and convenient language to do so. All Java2Script implementation is to clean those classes' declaration inside JavaScript 
   class inheritance system simulator. And then reload the *.js using Java2Script's classloader. In the implementation, classloader does not change 
   class or object's prototype when a reloaded class is redefined, it's possible to keep all classes relationships without breaking those already 
   instantiated instances.
   </para> 
   
-  <para>
-  To trigger Java2Script class simulator to Hotspot swapping, there is a thread trying to load an 
+  <para><indexterm>
+   <primary>J2SIHS</primary>
+</indexterm>
+<indexterm>
+   <primary>Java2Script Inner Hotspot Server</primary>
+</indexterm>
+  To trigger Java2Script class simulator to Hotspot swapping, there is a thread at the plugin side, trying to load an 
   updating JavaScript classes list from Java2Script compiler in Eclipse. Its work is simple, just 
   trying to load http://127.0.0.1:1725/&lt;session>.js. And the server listening on default port 
   1725 is started by Java2Script compiler, called "Java2Script Inner Hotspot Server (J2SIHS)". 
@@ -241,11 +246,10 @@ supported by HotSpot. Changes to static methods, or changes in class signatures
   </para>
   
   
-  <para>
-By using Hotspot, I think it is much more convenient for me to develop JavaScript RIA in Java codes than before, especially in developing SWT applications.
-  </para>
-  
+  <para>By using Hotspot, I think it is much more convenient for me to develop JavaScript RIA in Java codes than 
+before, especially in developing SWT applications.  </para>  
   </section>
+  
   </section>
 
 
@@ -267,7 +271,10 @@ By using Hotspot, I think it is much more convenient for me to develop JavaScrip
    
    <para>Fortunately, Java2Script provide with flexible mechanism of library definition. Also as we will see, Java2Script support for defining 
    how the library must loaded</para>
-   <para>TODO: talk about j2slib and how swt, junit etc are inside. TODO: talk about .package file and how a lib can be loaded.</para>
+   <para>TODO: talk about j2slib and how swt, junit etc are inside. TODO: talk about .j2x files and package.js files that le definehow alibrary must be loaded.
+   Also, try and if works to dev a library, put it in other folder that j2slib, with a pacakge.js and lib.j2z file, and show how oackage.js is evaluated, and how to use it for loading one, concatenating several files, etcx</para>
+   
+   <para>TODO: p/d: future extension packer can be mention here for intelligent generattion of big .js file .</para>
    
   </section>
 

@@ -167,9 +167,6 @@ c$.main = Clazz.defineMethod (c$, "main", function (args) {
       <code>$c.main = ...</code>
     </para>
   </callout>
-<!--  <callout arearefs="j2snative.jsex1.Clazz.javabody">-->
-<!--    <para>This is the main method source body. It is usually very similar to original java code.</para>-->
-<!--  </callout>-->
 </calloutlist>
 </programlistingco>
    
@@ -407,6 +404,7 @@ classes and give as a context from where to call java classes</para>
    <section id="chap-java-to-js-translation-sec-types">
    <title>Types</title>
    
+   
    <para>Explain how j2s emulates java types. 
    ej: string and characters are all javascript strings, 
    long, int short, double, float are all javascript numbers. arrays are javascript arrays</para>
@@ -422,13 +420,78 @@ classes and give as a context from where to call java classes</para>
    
    <section id="chap-java-to-js-translation-sec-exceptions">
    <title>Exceptions</title>
+   
+   <indexterm> <primary>native exceptions</primary></indexterm>   
+   <indexterm> <primary>Exception</primary></indexterm>
+   <indexterm> <primary>Throwable</primary></indexterm>
+   <para>Exceptions are well supported by Java2Script and so exception related statements have a very simple translation. There is only 
+   one special thing we have take care about when programming Java2Script code and is that in Java2Script, besides Java exceptions, 
+   there are also JavaScript native exceptions. For example, as we have seen, using @j2sNative compiler directive we can introduce 
+   native javascript code. And native javascript code 
+   can throw native javascript exceptions, that may have not be related at all with java exceptions (java.lang.Exception class). For example, 
+   the following example will show native javascript code that throws a native DOM exception. </para>
+   
+   <programlisting>
+/**
+ * native DOM exception siumulation
+ * @j2sNative
+ * document.body.appendChild(null);
+ */{}
+   </programlisting>
+   
+   <para>It is important to understand that these native exceptions, are not java.lang.Exception instances and so, 
+   they cannot be catched with <code>catch(Exception e)</code> expression. So, how we catch native exceptions and how can we diferentiate 
+   them from common java exceptions? The answer is that native exceptions are instance of class java.lang.Throwable (a superclass of 
+   java.lang.Exception) and so, we can catch them using Throwable, as the following example shows:  </para>
+   
+   <programlisting>
+try {
+  /**
+   * native DOM exception siumulation
+   * @j2sNative
+   * document.body.appendChild(null);
+   */{}
+} catch (Exception e) {
+  //catching java exceptions
+  System.out.println("this is NOT printed!!!");
+}
+catch(Throwable e) {
+  //catching native exceptions!
+  System.out.println("this is printed!!!");
+} 
+   </programlisting>
+   
+   <para>The only special case of native exceptions are the null pointer exceptions. 
+   Since both in java and javascript null is the same 
+   object, and in java we spect NullPointerException to be throwed when accessing the null object, 
+   native javascript null pointer exceptions will be objects of the class java.lag.NullPointerException. Let understand this 
+   with a litlle example. In the following listing, we emulate a native null pointer exception and show that is catched with a NullPointerException and not as another native exception with Throwable: </para>
+   
+   <programlisting>
+   try {
+      /**
+       * This simulates a native null pointer exception
+       * @j2sNative
+       * var a = null;
+       * a.sdf();
+       */{}
+    } catch (NullPointerException e) {
+      System.out.println("printed!");
+    }
+    catch (Throwable e) {
+      System.out.println("NOT printed!");
+    }
+   </programlisting>
      
-   <para>Explain exceptions and how to separate native javascript exceptions from java exceptions</para>
    </section>
    
    
    
    
-   
+   <section><title>Concatenating several .js files into one big .js file </title>
+   <para>TODO: explain the problen of j2s clazzloader that loads several small files. it is fast to load one big file.</para>
+   <para>TODO: explain how to concatenate (if a extends b, etc).</para>
+   <para></para>
+   </section>
 
 </chapter>

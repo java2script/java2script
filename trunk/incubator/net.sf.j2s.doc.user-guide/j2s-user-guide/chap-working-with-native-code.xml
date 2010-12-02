@@ -30,6 +30,13 @@
   for customizing compiler output code, and specially the directive @j2sNative for including 
   native javascript in our java classes.</para>
   
+  <para>Nevertheless, there are some areas that need to be understand if you want to write 
+  native javascript code and need to integrate that native code with your java code.
+  
+  
+  </para>  
+  
+<!--   stasks that are not so tribial to do. Take for example a very  common problem: register a mouse click listener -->
   <para>this chapter will describe how, call java methods from javascript code, problems with java object+method vs - javascript objectsand javascript functions, care native objects like dom, etc, </para>
   <para>TODO</para>
   
@@ -77,6 +84,77 @@
     
     <para>Fortunately J2S supports a "native object" mode, in which javascript Object.prototype is not contaminated</para>
     <para>explain the problems with native objects and explain j2s.native mode</para>
+    
+    </section>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <section><title>JavaScript functions</title>
+    <para>TODO: this sections contains the escense but has a bad english. it should be rewritten more elegantly.</para>
+<!-- summary: 
+explain the problems of javascript functions. 
+    1) emulated in java with runnable, but a runnable is not a function!! 
+    2) problem with function context in java   -->
+
+
+<!-- the language problem -->
+    <para>The first problem that we face when working with native javascript is that , in javascript, we work with 
+    functions and the java language doesn't support such a concept or nothing similar. In java, the only beahaviour language concepts we have are 
+    instance methods and static methods. Mixing native javascript functions and java code without realizing what we really are doing,
+    can cause very nasty bugs and problems, and so in this section we will examine possible problems and advices about how to do it right.
+   </para>   
+   
+<!--   the function context problem-->
+
+   <para>function context:</para>
+   <para>what is a function context? In javascript, any function can be evaluated using any object as its context. The context of a 
+   function when evaluated is the object referenced by the "this" keyword.</para>
+   
+   <important><para>Javascript function can be called with an arbitrary context object while Java instance 
+   methods must always have a fixed context. </para></important>
+   
+    <para>since in java we always have to use an object, the function in java have a fixed context (the this object). 
+    But in javascript this is not true and we must ensure the context. for example, the following example for registering a
+    mouse click listener in document.body will work, but it is incorrect! :</para>
+    
+    <programlisting>
+Runnable r = new Runnable(){
+  public void run() {
+    System.out.println("clicked");
+  }
+};
+/**
+ * @j2sNative
+ * document.body.onclick=r.run; //WRONG!
+ */{}
+    </programlisting>
+    
+    <para>Why this is wrong? When an html document is clicked, and a function is registered for listen to clicks with "element.onclick", 
+    the function will be evaluated using the clicked html element as the function context. This means that any reference to "this" in the function body, will
+    point to the target html element and not where it should be, to the Runnable instance. Let examine an example that fails because of this:</para>
+    
+    <programlisting></programlisting>
+    
+    <para>With java static methods there is no problem because they do no context (no this pointer). But it is not useful to work with 
+    static methods for </para>
+    
     
     </section>
     
