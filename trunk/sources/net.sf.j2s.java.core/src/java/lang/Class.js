@@ -1950,6 +1950,9 @@ Clazz.exceptionOf=function(e, clazz) {
 		return false;
 };
 
+/* sgurin: preserve Number.prototype.toString */
+Number.prototype._numberToString=Number.prototype.toString;
+
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");
 Clazz.declarePackage ("java.lang.annotation"); // java.lang
