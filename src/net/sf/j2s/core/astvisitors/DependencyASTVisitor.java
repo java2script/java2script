@@ -924,17 +924,29 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		return super.visit(node);
 //	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
+	
+	
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.
+	 * MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
+		/*
+		 * sgurin: last fix: returning to original version of the method because
+		 * a bug was introduced in my last modifications.
+		 */
 		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
-		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
+		if (resolveMethodBinding != null
+				&& Modifier.isStatic(resolveMethodBinding.getModifiers())) {
 			Expression expression = node.getExpression();
 			if (expression instanceof Name) {
 				Name name = (Name) expression;
 				ITypeBinding resolveTypeBinding = name.resolveTypeBinding();
-				ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+				ITypeBinding declaringClass = resolveTypeBinding
+						.getDeclaringClass();
 				QNTypeBinding qn = new QNTypeBinding();
 				String qualifiedName = null;
 				if (declaringClass != null) {
@@ -950,26 +962,15 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				}
 				qualifiedName = discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
-				if (isQualifiedNameOK(qualifiedName, node) 
-						&& !musts.contains(qn)
-						&& !requires.contains(qn)) {
+				if (isQualifiedNameOK(qualifiedName, node)
+						&& !musts.contains(qn) && !requires.contains(qn)) {
 					optionals.add(qn);
 				}
 			}
-			//sgurin bugfix for http://sourceforge.net/tracker/?func=detail&aid=3037341&group_id=155436&atid=795800
-			else if(expression == null) { //statically imported method invocation
-				QNTypeBinding qn = new QNTypeBinding();
-				String qualifiedName = resolveMethodBinding.getDeclaringClass().getQualifiedName();
-				if(qualifiedName != null && isQualifiedNameOK(qualifiedName, node)) {						
-					qn.qualifiedName = qualifiedName;
-					if(!musts.contains(qn) && !requires.contains(qn)) {
-						optionals.add(qn);
-					}					
-				}
-			}	
 		}
 		return super.visit(node);
 	}
+
 	public boolean isDebugging() {
 		return isDebugging;
 	}
