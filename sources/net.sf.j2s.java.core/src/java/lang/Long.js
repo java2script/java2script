@@ -83,15 +83,31 @@ if(s == null || !Clazz.instanceOf(s, Long) ){
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
-Long.toHexString = Long.prototype.toHexString = function (i) {
-	return i.toString (16);
-};
-Long.toOctalString = Long.prototype.toOctalString = function (i) {
-	return i.toString (8);
-};
-Long.toBinaryString = Long.prototype.toBinaryString = function (i) {
-	return i.toString (2);
-};
+
+Clazz.defineMethod (Long, "toHexString", 
+function (d) {
+if(d.valueOf)d=d.valueOf();
+var r = d._numberToString(16);
+return r;
+}, "Number");
+Long.toHexString = Long.prototype.toHexString;
+
+Clazz.defineMethod (Long, "toOctalString", 
+function (d) {
+if(d.valueOf)d=d.valueOf();
+var r = d._numberToString(8);
+return r;
+}, "Number");
+Long.toOctalString = Long.prototype.toOctalString;
+
+Clazz.defineMethod (Long, "toBinaryString", 
+function (d) {
+if(d.valueOf)d=d.valueOf();
+var r = d._numberToString(2);
+return r;
+}, "Number");
+Long.toBinaryString = Long.prototype.toBinaryString;
+
 Long.decode = Clazz.defineMethod (Long, "decode", 
 function (nm) {
 var radix = 10;

@@ -83,14 +83,17 @@ if(s == null || ! Clazz.instanceOf(s, Integer) ){
 }
 return s.valueOf()  == this.valueOf();
 }, "Object");
-Integer.toHexString = Integer.prototype.toHexString = function (i) {
-	return i.toString (16);
+Integer.toHexString = Integer.prototype.toHexString = function (d) {
+	if(d.valueOf)d=d.valueOf();
+	return d._numberToString(16);
 };
-Integer.toOctalString = Integer.prototype.toOctalString = function (i) {
-	return i.toString (8);
+Integer.toOctalString = Integer.prototype.toOctalString = function (d) {
+	if(d.valueOf)d=d.valueOf();
+	return d._numberToString(8);
 };
-Integer.toBinaryString = Integer.prototype.toBinaryString = function (i) {
-	return i.toString (2);
+Integer.toBinaryString = Integer.prototype.toBinaryString = function (d) {
+	if(d.valueOf)d=d.valueOf();
+	return d._numberToString(2);
 };
 Integer.decode = Clazz.defineMethod (Integer, "decode", 
 function (nm) {
