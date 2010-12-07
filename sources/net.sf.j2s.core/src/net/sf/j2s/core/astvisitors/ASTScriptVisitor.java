@@ -1863,7 +1863,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			else {
 				Expression arg = (Expression) args.get(args.size() - 1);
 				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) 
+				if (resolveTypeBinding != null && resolveTypeBinding.isArray() && args.size()==1) /* sgurin: fix for varargs invocation like vararg("param1", "2", new String[]{"3","4"}). needsBraked should be false only when there is only one array parameter in the method invocation */
 					needBrackets = false;				
 				if (needBrackets) buffer.append("[");
 				visitList(args, ", ", paramTypes.length - 1, size);
