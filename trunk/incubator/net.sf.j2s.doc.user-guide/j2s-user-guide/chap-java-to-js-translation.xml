@@ -69,8 +69,7 @@
       </mediaobject>
     </figure> 
    
-   
-  
+
   
   
    
@@ -488,10 +487,16 @@ catch(Throwable e) {
    
    
    
-   <section><title>Concatenating several .js files into one big .js file </title>
-   <para>TODO: explain the problen of j2s clazzloader that loads several small files. it is fast to load one big file.</para>
-   <para>TODO: explain how to concatenate (if a extends b, etc).</para>
-   <para></para>
-   </section>
+   
+   
+<!--   <section><title>Concatenating several .js files into one big .js file </title>-->
+<!--   <para>TODO: explain the problen of j2s clazzloader that loads several small files. it is fast to load one big file.</para>-->
+<!--   <para>TODO: explain how to concatenate (if a extends b, etc).</para>-->
+<!--   <para></para>-->
+<!--   </section>-->
+
+
+
+
 
 </chapter>

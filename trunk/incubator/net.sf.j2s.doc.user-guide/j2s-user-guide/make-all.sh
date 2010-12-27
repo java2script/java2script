@@ -5,9 +5,9 @@ DOC=j2s-user-guide
 
 #clean
 rm $DOC.pdf
-rm -r $DOC-htmls
+rm -rf $DOC-htmls
 rm $DOC.tgz
-rm -r dist
+rm -rf dist
 
 mkdir dist
 
