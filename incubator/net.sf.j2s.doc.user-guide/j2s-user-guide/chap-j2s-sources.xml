@@ -184,43 +184,45 @@
   
   
    <section id="section-j2s-sources-organization"><title id="section-j2s-sources-organization.title">Source organization</title>
-  <para>As said in previous sections, Java2Script plugin contains both .java files that will be compiled into .class like 
-  any other Java application like projects <code></code>, but also contains a lot of .java files, this will be compiled by 
-  Java2Script compiler itself to JavaScript files. </para>
-  
-  <formalpara><title>plugin related projects</title><para>
-  <code>net.sf.j2s.core</code>, <code>net.sf.j2s.lib</code>, <code>net.sf.j2s.ajax</code>
-  <code>net.sf.j2s.ui</code>. 
-  TODO: explain more</para></formalpara>
-  
-  
-  <formalpara><title>javascript related projects</title><para>
-  <code>net.sf.j2s.java.core</code>, <code>net.sf.j2s.java.junit</code>, <code>net.sf.j2s.org.eclipse.swt</code>. 
-  TODO: explain more</para></formalpara> 
-  
-  
-  <para>Both kind of projects will be built automatically
-  <footnote><para>Only make sure that menu <code>Project->Build Automatically</code> is checked.</para> 
-  </footnote> so we only have to save our files to impact the changes. Nevertheless, if we are modifying files that will be 
-  compiled to JavaScript, like project <code>net.sf.j2s.java.core</code>, we should also rebuild j2slib. It is easy. Just
-  open <filename>net.sf.j2s.lib/build/build.xml</filename> in Ant view and run the <code>j2s.pack.lib</code> ant task:</para>
-  
-    <figure>
-        <title>Packing j2slib</title>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/running-j2s-plugin-02.png"></imagedata>
-          </imageobject>
-        </mediaobject>
-      </figure>
    
-   <important><para>Please remember to always run <code>ant j2s.pack.lib</code> when modifying Java files to be compiled to 
-   JavaScript before launching the Eclipse plugin like showed in next section.</para></important>   
+   <para>the Java2Script eclipse plugin is cosntituted by several projects working together. Some of these projects contains the 
+   eclipse plugin implementation, other contains the java implementation of required java APIs like java.lang, java.util, org.ecipse.swt, 
+   etc and other are only auxiliary. In the following table we list the projects that are part of Java2Script and the responsbility of each of them.</para>
+   
+   <section><title>net.sf.j2s.core</title>
+   <para>It is an eclipse plugin that contains the java to javascript compiler. It is based on eclipse JDT for parsing 
+            the java code and translating it to javascript code. </para>
+   </section>
+   
+     <section><title>net.sf.j2s.java.core</title>
+   <para>This project contains the java language and java API emulation for javascript. First of all it contains
+             the standar java libraries implementation (java.lang, java.utils, etc) that are currently translated to javascript 
+            and used by your Java2Script application. At this time, a version of <ulink url="http://harmony.apache.org">Apache Harmony</ulink> is used. Worth mentioning that
+            some core classes in java.lang like String, Class, Boolean are only implemented in javascript (there is no /java/lang/Boolean.java but a 
+            /java/lang/Boolean.js file). Also notice that files /java/lang/Class.js, /java/lang/CLassExt.js and /java/lang/ClassLoader.js actually contains
+            the java language emulation for javascript, like the Object oriented programming emulation, java class loading emulation, etc.</para>
+   </section>
+   
+     <section><title>net.sf.j2s.java.org.eclipse.swt</title>
+   <para>This project contains an implementation of the popular GUI toolkit <ulink url="http://eclipse.org/swt/">SWT</ulink>, the Eclipse Standar Widget Toolkit.
+   This project will let you write your Rich Internet applications with SWT.</para>
+   </section>
+   
+     <section><title>net.sf.j2s.lib</title>
+   <para>This is an auxiliary project in which is deposited the more like an auxiliary project into wich all the java libraries projects are comiler</para>
+   </section>
+   
+     <section><title></title>
+   <para></para>
+   </section>
+   
    </section>
    
    
    
-  <section><title>Building the sources</title>
+   
+   
+   <section><title>Building the sources</title>
   
   <para>There is a couple of things that should be done before building the sources. You only have this two things only once </para>
   
@@ -256,17 +258,43 @@
   may take a while. Remember that there are two compilers compiling some large projects like java.lang, java.util package, swt, and 
   other java toolkits both to .class and to javascript.</para>
   
-  <para> Remember, like any Java project, if you want to force project rebuild, you can
-  always goto menu "Project -&gt; Clean" and clean all projects: also be sure that "Project  -&gt; Build Automatically" is checked for 
-  automatically building when you change a file.</para>
   
-  <important>
-  <para>Also, as explained in <quote><link endterm="section-j2s-sources-organization.title"
-    linkend="section-j2s-sources-organization"></link> </quote> you must run <code>ant j2s.pack.lib</code> once before running the plugin.</para>
-  </important>
+  
+   <para>As said in the previous section, Java2Script plugin contains two different kind of java sources. In one side we have 
+   the J2S eclipse plugin itself in projects net.sf.j2s.core and net.sf.j2s.ui and in the other side we have projects like net.sf.j2s.java.core 
+   and net.sf.j2s.java.org.eclipse.swt
+   that are actually java libraries to be compiled into javascript and used by our Java2Script applications developed with the Java2Script plugin. </para>
+  
+  <para>Both kind of projects will be built automatically
+  <footnote><para>Only make sure that menu <code>Project->Build Automatically</code> is checked.</para> 
+  </footnote> so we only have to save our files to impact the changes. Nevertheless, if we are modifying files that will be 
+  compiled to JavaScript, like the ones in project <code>net.sf.j2s.java.core</code>, we should also rebuild j2slib. It is easy. Just
+  open <filename>net.sf.j2s.lib/build/build.xml</filename> in Ant view and run the <code>j2s.pack.lib</code> ant task:</para>
+  
+    <figure>
+        <title>Packing j2slib</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/running-j2s-plugin-02.png"></imagedata>
+          </imageobject>
+        </mediaobject>
+      </figure>
+   
+   <important><para>Please remember to always run <code>ant j2s.pack.lib</code> when modifying Java files to be compiled to 
+   JavaScript before launching the Eclipse plugin like showed in next section.</para></important>  
+  
+  <para> Remember, as with any Java project, if you want to force project rebuild, you can
+  always goto menu "Project -&gt; Clean" and clean all projects: also be sure that "Project  -&gt; Build Automatically" is checked for 
+  automatically building when you change a file.</para>  
+ 
   </section>
   
   
+  
+  
+  
+  
+   
   <section><title>Running and debugging</title>
   <para>Now that our sources are ready and builded, we want to run and debug the plugin. This is very easy, all you need is 
   to open <code>net.sf.j2s.core/plugin.xml</code> and click the link  <quote><code>Launch an Eclipse 
@@ -299,28 +327,351 @@
   </section>
 
 
-
-
   <section>
     <title>Exporting the plugin</title>
     <para>
       So you make your changes and now you want to redistribute the plugin. As with any other
-      Eclipse plugin, you have to export it as an eclipse plugin. It is very easy, </para>
-    <para>TODO</para>
+      Eclipse plugin, you have to export it as an eclipse plugin. It is very easy... </para>
+    <para>TODO. this is documented at : http://j2s.sourceforge.net/setup-j2s-from-subversion.html. this is what it sais: </para>
+    
+<para>Export the above 4 projects as "Deployable plug-ins and fragments". For example, 
+you may select C:\eclipse as the directory of export 
+destination. Project "net.sf.j2s.ajax" and "net.sf.j2s.lib" must be exported with 
+"Package plug-ins as individual Jar archives" UNCHECKED. And project "net.sf.j2s.ajax" 
+should be exported with "Include source code" option CHECKED, so later you can bind 
+sources much easily.</para>    
+
+
+
   </section>
 
 
 
-  <section>
+  
+  
+  
+  
+
+<section>
     <title>How to Extend the Java2Script compiler</title>
+    
     <para>Now that you know how to install and run Java2Script from the sources, and know how to export your own version of Java2Script,
       we will describe a mechanism supported by Java2Script eclipse plugin that will let us extend the compiler easily, without modifying
       the compiler sources and without having to learn all compiler related classes internals for doing it. </para>
 
+  <note>
+    <para>Original Java2Script articles about this topic are are the following:</para>
     <para>http://j2s.sourceforge.net/articles/tutorial-extended-compiler.html </para>
     <para>http://blog.java2script.org/2006/10/31/extending-java2script-compiler/</para>
+  </note>
+
+  <para>In this section you will learn how to customize how to customize the output of j2s compiler. You will be able to make an eclipse plugin that 
+  contribute to Java2Script Compiler with custom code for performing the translation of desired java language elements, like methods, classes, fields, 
+  expressions, statements, comments, etc to javascript. The main benefit of using an independent eclipse plugin is that you can isolate your customization code
+  from java2script compiler nd so the same java2script distribution can be used for different java to javascript compiling scenarios.</para>
+  
+  <para>Basically, this eclipse plugin must indicate what it want to customize, and provide the actual code translation for that parts. For example,  </para>
+  
+  <itemizedlist>
+  <listitem><para>analize each method invocation and add some javascript code before or after the invocation.</para></listitem>
+  
+  <listitem><para>analize each javadoc comment and search for a certain string or javadoc annotation inside it 
+  and add some javascript code before or after the java element documented with that javadoc</para></listitem>
+  <listitem><para>add javascript code before or after a class declaration for classes that apply some conditions</para></listitem>
+  <listitem><para>customize how java classes must be loaded in certain circunstances</para></listitem>
+  </itemizedlist>
+
+<para>For developing the eclipse plugin we will use the eclipse plugin environment (PDE) that 
+comes with common eclipse distributions. It is recommended but not mandatory to be familiarized
+with PDE, so you may want to read <ulink url="http://help.eclipse.org/helios/nav/4">Plug-in Development Environment Guide </ulink>. </para>
+
+<para>We will also will need to model java elements like classes, methods, attributes, expressions, statements. 
+For this, we will use eclipse Java Develpment Tools (JDT) and so, for taking full advantadge of this, it is recommended to know the basics about JDT. 
+So, you may want to read <ulink url="http://help.eclipse.org/helios/nav/3">JDT programmers guide</ulink></para>
+
+
+
+<!--extending-j2s-compiler-plugin-java-elements.png-->
+
+<section>
+<title>Creating a Java2Script compiler extension eclipse plugin</title>
+
+<para>In this section we will create an eclipse plugin that contributes to Java2Script compiler with a very simple behavior: it  
+will add a javascript comment before 
+each method invocation, and then the normal method invocation javascript code. </para>
+
+
+<para>so select File->New->Project...->Plugin Project</para>
+        <figure>
+      <title>Creating a new plugin eclipse project</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-new-plugin-project.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    <para>Press "next" button.</para>
+            <figure>
+      <title>Giving a name to the plugin</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-new-plugin-project2.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    
+    <para>Press "next" button and in the following step make sure to choose "No" to "Would you like to create a rich client application?":</para>
+    <figure>
+      <title>new eclipse plugin project last step</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-new-plugin-project3.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    <para>Press finnish for creating your new J2S compiler extension plugin. Now we want to add "org.eclipse.jdt.core" 
+    and "net.sf.j2s.core" dependencies to out new plugin. For this, double click on file META-INF/MANIFEST.MF will open the 
+    eclipse plugin editor. Goto the "Dependencies" tab and add "org.eclipse.jdt.core" and "net.sf.j2s.core" as the dependencies: </para>
+    
+       <figure>
+      <title>eclipse plugin dependencies tab.</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-plugin-dependencies.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    
+    <note><para>At this point you have created an J2S extension plugin general project. All previous steps must be performed 
+    identically for all your J2s extension plugins. </para>
+    </note>
+    
+        
+    <para>Now we want to add an extension point from where our plugin will be plugged to the java2script compiler. Let's detail a little how Java2Script 
+    works and how our extenison is plugged into the java to javascript compiler. </para>
+    
+    <para>First of all, the java2script compiler uses eclipse JDT java compiler for parsing all java code into a tree  of <emphasis>java elements </emphasis>, 
+    called an Abstract syntax tree (AST). For example, a java compilation unit can contain a class declaration, with methods and fields declarations.  A method 
+    contains a body, and the body some statements. Statements are composed by expresions, etc. In the following
+    figure, the eclipse Outline view shows some of this java elements graphically:    
+    </para>
+    <figure>
+      <title>eclipse outline view showing some java elements of a compilation unit</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-plugin-java-elements.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    
+    <para>Then the compiler uses "visitors" for converting java source codes to javascript.
+     A visitor is an object which class contains overloaded "visit" methods for visiting  each of java element types. Defining new visitors, you can 
+     overwrite the "visit" methods corresponding to the desired java element type that you want to customize its translation to javascript. 
+     Java2Script uses TWO kind of visitors for doing the total translation from java to javascript:</para>
+    
+   <formalpara><title>ASTScriptVisitor</title> <para>
+    In one side we have an ASTScriptVisitor that is responsible for converting basic java elements to the corresponding javascript code. J2S provides with the default 
+    implementation net.sf.j2s.core.astvisitors.ASTScriptVisitor that can be extended for building customized AST script visitors. 
+    </para></formalpara>
+    
+       <formalpara><title>DependencyASTVisitor</title> <para>
+   The other type if visitor is DependencyASTVisitor that is responsible for creating a class dependency trees, 
+    in other words an import list for each java file. J2S provides with a default implemenation net.sf.j2s.core.astvisitors.DependencyASTVisitor. It is 
+    recommended that the user extends it for defining its own AST dependency visitors. </para></formalpara>
+    
+   <para>go to the "extensions" tab  and add the extension point <code>net.sf.j2s.core.extendedASTScriptVisitor</code>:</para>
+    <figure>
+      <title>eclipse plugin - adding extension point</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-plugin-extension1.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    <para>This extension point will allow us to provide with a class that will return the kind of visitor your extension want to provide. 
+    So choose the right id and class name. The id is very important because you must refence it in each Java2Script project that must be builded using 
+    this compiler extension, so remember it. In our name is "j2s.extension1.MethodInvocationComment1". Now click on "class" link for creating the new class: </para>
+     <figure>
+      <title>eclipse plugin - setting extension point name</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-plugin-extension2.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+    
+    <figure>
+      <title>eclipse plugin - creating extension point class</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/extending-j2s-compiler-plugin-extension3.png"></imagedata>
+        </imageobject>
+      </mediaobject>
+    </figure> 
+
+    <para>Pressing finnish button for creating the class. This class msut implement interface net.sf.j2s.core.compiler.IExtendedVisitor. 
+    and should return the two visitors, ASTScriptVisitor and DependencyASTVisitor, to use by the Java2Script compiler for converting java 
+    to javascript.</para>
+    
+    <para>In our example, we want only to provide a ScriptVisitor for changing how the java element "method invocation" is translated to javascript. We will use the default DependencyVisitor
+    since we don't want  customize anything of the java dependency tree: </para>
+    
+<programlistingco>
+<areaspec>
+<area id="j2s-compiler-ext-getScriptVisitor2" coords='14'/>
+<area id="j2s-compiler-ext-getDependencyVisitor" coords='18'/>
+</areaspec>
+<programlisting>
+package j2s.extension1;
+
+import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
+import net.sf.j2s.core.compiler.IExtendedVisitor;
+
+public class MethodInvocationComment1 implements IExtendedVisitor {
+
+  public MethodInvocationComment1() {
+  }
+
+  public ASTScriptVisitor getScriptVisitor() {
+    return new MethodInvocationComment1ScriptVisitor();
+  }
+
+  public DependencyASTVisitor getDependencyVisitor() {
+    return new DependencyASTVisitor();
+  }
+}
+</programlisting>
+<calloutlist>
+<callout arearefs="j2s-compiler-ext-getScriptVisitor2">
+<para>we will use our own Script visitor, MethodInvocationComment1ScriptVisitor that we must create extending the default Script visitor net.sf.j2s.core.astvisitors.ASTScriptVisitor</para>
+</callout>
+<callout arearefs="j2s-compiler-ext-getDependencyVisitor">
+<para>use the default J2S dependency visitor, net.sf.j2s.core.astvisitors.DependencyASTVisitor</para>
+</callout>
+</calloutlist>
+</programlistingco>
+    
+    <para>Now, the only thing left is to create our custom Script Visitor that we named MethodInvocationComment1ScriptVisitor, so create the class:</para>
+    
+    <programlistingco>
+<areaspec>
+<area id="j2s-compiler-ext-ScriptVisitor1" coords='10'/>
+<area id="j2s-compiler-ext-ScriptVisitor2" coords='11'/>
+<area id="j2s-compiler-ext-ScriptVisitor3" coords='12'/>
+</areaspec>
+<programlisting>
+package j2s.extension1;
+
+import org.eclipse.jdt.core.dom.MethodInvocation;
+
+import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+
+public class MethodInvocationComment1ScriptVisitor extends ASTScriptVisitor {
+  @Override
+  public boolean visit(MethodInvocation node) {
+    buffer.append("/* A COMMENT ADDED WITH our J2S compiler extension plugin */\n");
+    return super.visit(node);
+  }
+}
+
+</programlisting>
+<calloutlist>
+<callout arearefs="j2s-compiler-ext-ScriptVisitor1">
+<para>Overriding method visit(MethodInvocation node) we can customize how java method invocations are translated to javascript.</para>
+</callout>
+<callout arearefs="j2s-compiler-ext-ScriptVisitor2">
+<para>the StringBuilder buffer field containshe çactual javascript code. So we write our custom javascript comment before the method translation. </para>
+</callout>
+<callout arearefs="j2s-compiler-ext-ScriptVisitor3">
+<para>invoking <code>super.visit(node)</code> will invoke the default implementation for java method invocation translation. We do it after writing our custom javascript code.  </para>
+</callout>
+</calloutlist>
+</programlistingco>
+
+
+<para>And that's it, your compiler extension is ready for use. You can export and install it as any other eclipse plugin. Remember that java2script plugin must be 
+installed. </para>
+
+<important>
+<para>For using this extension in a Jav2Script project you must indicate the id of your J2S extension in your project's .j2s file. In our case 
+you should add the following line to the .j2s file of the projects you want to compile with the extension:</para>
+</important>
+
+<programlisting>
+j2s.compiler.visitor=j2s.extension1.MethodInvocationComment1
+</programlisting>
+
+<para>Now let's see how our J2S extension translate the following java class:</para>
+
+<programlisting>
+package j2s.extension1;
+
+import org.eclipse.jdt.core.dom.MethodInvocation;
+
+import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+
+public class MethodInvocationComment1ScriptVisitor extends ASTScriptVisitor {
+  @Override
+  public boolean visit(MethodInvocation node) {
+    buffer.append("/* A COMMENT ADDED WITH our J2S compiler extension plugin */\n");
+    return super.visit(node);
+  }
+}
+
+</programlisting>
+
+<para>and the resulting javascript is</para>
+
+<programlisting>Clazz.declarePackage ("org.foo");
+c$ = Clazz.declareType (org.foo, "Test1");
+c$.main = Clazz.defineMethod (c$, "main", 
+function (args) {
+/* A COMMENT ADDED WITH our J2S compiler extension plugin */
+java.lang.System.out.println ("hee");
+}, "~A");
+</programlisting>
+
+<para>as you can see, out javascript custom comment was appended just before the method declaration at <code>java.lang.System.out.println ("hee");</code> </para>
+</section>
+
+
+<programlistingco>
+<areaspec>
+<area id="j2s-compiler-ext-getScriptVisitor2" coords='14'/>
+</areaspec>
+<programlisting>
+
+</programlisting>
+<calloutlist>
+<callout arearefs="j2s-compiler-ext-getScriptVisitor1">
+<para> </para>
+</callout>
+</calloutlist>
+</programlistingco>
+
+
+  
     <para>TODO</para>
+    
+    
+</section>
+
+  <section><title>Other example: html attributes with javadoc annotations</title>
+  <para>This second example uses J2S extension mechanism so the user can load html in class fields
+  from javadoc. We usually have to reference html string in our web applications code, and sometimes it is nasty 
+  to do that using java or javascript strings. The idea of this plugin is to load a string to a class attribute from javadoc, like this: </para>
+  
+  <programlisting>
+  
+  </programlisting>
+  
+  <para>TODO: finish this</para>
   </section>
-  
-  
 </chapter>
