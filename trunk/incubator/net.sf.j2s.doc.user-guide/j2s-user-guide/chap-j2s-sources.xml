@@ -476,13 +476,13 @@ each method invocation, and then the normal method invocation javascript code. <
     
    <formalpara><title>ASTScriptVisitor</title> <para>
     In one side we have an ASTScriptVisitor that is responsible for converting basic java elements to the corresponding javascript code. J2S provides with the default 
-    implementation net.sf.j2s.core.astvisitors.ASTScriptVisitor that can be extended for building customized AST script visitors. 
+    implementation net.sf.j2s.core.astvisitors.SWTScriptVisitor that can be extended for building customized AST script visitors. 
     </para></formalpara>
     
        <formalpara><title>DependencyASTVisitor</title> <para>
    The other type if visitor is DependencyASTVisitor that is responsible for creating a class dependency trees, 
-    in other words an import list for each java file. J2S provides with a default implemenation net.sf.j2s.core.astvisitors.DependencyASTVisitor. It is 
-    recommended that the user extends it for defining its own AST dependency visitors. </para></formalpara>
+    in other words an import list for each java file. J2S provides with a default implemenation net.sf.j2s.core.astvisitors.SWTDependencyVisitor. It is 
+    recommended that the user extends this class for defining its own AST dependency visitors. </para></formalpara>
     
    <para>go to the "extensions" tab  and add the extension point <code>net.sf.j2s.core.extendedASTScriptVisitor</code>:</para>
     <figure>
@@ -532,6 +532,7 @@ package j2s.extension1;
 
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
+import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.compiler.IExtendedVisitor;
 
 public class MethodInvocationComment1 implements IExtendedVisitor {
@@ -571,9 +572,9 @@ package j2s.extension1;
 
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
+import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 
-public class MethodInvocationComment1ScriptVisitor extends ASTScriptVisitor {
+public class MethodInvocationComment1ScriptVisitor extends SWTScriptVisitor {
   @Override
   public boolean visit(MethodInvocation node) {
     buffer.append("/* A COMMENT ADDED WITH our J2S compiler extension plugin */\n");
@@ -639,39 +640,130 @@ java.lang.System.out.println ("hee");
 </programlisting>
 
 <para>as you can see, out javascript custom comment was appended just before the method declaration at <code>java.lang.System.out.println ("hee");</code> </para>
+
 </section>
 
 
-<programlistingco>
-<areaspec>
-<area id="j2s-compiler-ext-getScriptVisitor2" coords='14'/>
-</areaspec>
-<programlisting>
-
-</programlisting>
-<calloutlist>
-<callout arearefs="j2s-compiler-ext-getScriptVisitor1">
-<para> </para>
-</callout>
-</calloutlist>
-</programlistingco>
 
 
-  
-    <para>TODO</para>
+
+
+
     
-    
-</section>
 
   <section><title>Other example: html attributes with javadoc annotations</title>
-  <para>This second example uses J2S extension mechanism so the user can load html in class fields
-  from javadoc. We usually have to reference html string in our web applications code, and sometimes it is nasty 
-  to do that using java or javascript strings. The idea of this plugin is to load a string to a class attribute from javadoc, like this: </para>
+  <para>In this second example we show how to load string from javadoc comments into java fields. 
+  In web applications, we usually have to reference html, json, xml or other web format strings 
+  in our code and sometimes it is nasty to do it in common java or javascript strings literals. </para>
+  
+  <para>The following is the java class code that implements ASTScriptVisitor that will detect and load a 
+  string in javadoc after the tag <code>@j2sLoadString</code> .</para>
+  
   
   <programlisting>
+package j2s.extension1;
+
+import java.util.Iterator;
+import java.util.List;
+
+import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
+
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+public class MethodInvocationComment1ScriptVisitor extends SWTScriptVisitor {
+
+  @Override
+  public boolean visit(FieldDeclaration node) {       
+    boolean ret = super.visit(node); /* first visit the default visitor implementation */
+    
+    Javadoc javadoc = node.getJavadoc();
+    List tags = javadoc.tags();   
+    if(tags!=null&amp;&amp;tags.size()&gt;0) {
+      for (Iterator it = tags.iterator(); it.hasNext();) {
+        Object o = (Object) it.next();
+        if(o instanceof TagElement) {
+          TagElement tag = (TagElement) o;
+          String tagName = tag.getTagName();
+          if(tagName!=null&amp;&amp;tagName.equals("@j2sLoadString")) { /* annotation found. all the 
+            following javadoc comment until other tag is found will be loaded */
+            StringBuffer sb = new StringBuffer();
+            List frags = tag.fragments();
+            for (Iterator it2 = frags.iterator(); it2.hasNext();) {
+              sb.append(it2.next()+"\\n");
+            }
+            List fieldDeclFrags = node.fragments();
+            /* now that we have the @j2sLoadString string, we add the javascript statement this.attributeName="str.." for loading the string field.*/
+            if(fieldDeclFrags!=null&amp;&amp;fieldDeclFrags.size()&gt;0) {
+              VariableDeclarationFragment f1 = (VariableDeclarationFragment) fieldDeclFrags.get(0);
+              String str = sb.toString();             
+              buffer.append("this."+f1.getName()+"=\'");
+              buffer.append(str);
+              buffer.append("\';\n");
+            }
+          }
+        }
+      }
+    }
+    return ret;
+  }
+}
+</programlisting>
   
+  <para>Using this compiler extension, you will be able to code complex strings like json, html, xml, etc inside javadoc. 
+  The following java test program define two fields, htmlCode1 and jsonCode1 which content is loaded from javadoc and not from string literals. 
+  As you can see there is much easier to put 
+  other language code inside javadoc instead using java string, in which you have to quote and concatenate:</para>
+  
+  <programlisting>
+  package org.foo;
+
+public class Test1 {    
+       
+  public static void main(String[] args) {
+    Test1 test1 = new Test1();
+    System.out.println("loaded html code: "+test1.getHtmlCode1());
+    System.out.println("loaded json code: "+test1.getJsonCode1());
+    System.out.println("lot easier isn't it?");
+  }  
+  /** this field will be loaded with the fololowing string:
+   * @j2sLoadString 
+   * &lt;h1&gt;this is an &lt;b&gt;html&lt;/b&gt; string loaded from javadoc&lt;/h1&gt;
+   */
+  String htmlCode1;
+  
+  /**
+   * this other too
+   * @j2s LoadString
+   * {p1: [1, 2, 3], p2: {p21: "thi sis a json loaded from javadoc"}}
+   */
+  String jsonCode1;
+
+  public String getHtmlCode1() {
+    return htmlCode1;
+  }
+
+  public String getJsonCode1() {
+    return jsonCode1;
+  }    
+}  
   </programlisting>
   
-  <para>TODO: finish this</para>
+  
+  <para>Compiling this using our new compiler extension, the output will be the following when executing this as a Java2Script application:</para>
+  
+  
+  <programlisting>
+loaded html code:
+&lt;h1&gt;this is an &lt;b&gt;html&lt;/b&gt; string loaded from javadoc&lt;/h1&gt;
+ 
+loaded json code: {p1: [1, 2, 3], p2: {p21: "thi sis a json loaded from javadoc"}}
+ 
+lot easier isn't it?
+  </programlisting>
   </section>
+</section>
+
 </chapter>

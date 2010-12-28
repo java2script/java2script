@@ -24,6 +24,14 @@ mv $DOC dist/$DOC-htmls
 
 tar cvfz dist/$DOC-htmls.tgz dist/$DOC-htmls
 
+
+#single html
+mkdir dist/$DOC-singlehtml
+db2html --nochunks $DOC.xml > dist/$DOC-singlehtml/$DOC.html
+cp -r images dist/$DOC-singlehtml/images
+
+cp index.html dist
+
 rm -r *.pdf *.tex *.dsl CATALOG* *~ db2html* *.dsl
 
 
