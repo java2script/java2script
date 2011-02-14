@@ -782,29 +782,47 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
 			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		}
-
-		String fullClassName = null;//getFullClassName();
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-		String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
-		if (packageName != null && packageName.length() != 0) {
-			fullClassName = packageName + '.' + className;
-		} else {
-			fullClassName = className;
-		}
-//		if (thisPackageName != null && thisPackageName.length() != 0) {
-//			fullClassName = thisPackageName + '.' + thisClassName;
-//		} else {
-//			fullClassName = thisClassName;
-//		}
 		
-		int lastIndexOf = fullClassName.lastIndexOf ('.');
-		if (lastIndexOf != -1) {
-			buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
-			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
+		ASTNode parent = node.getParent();
+		if (parent != null && parent instanceof AbstractTypeDeclaration) {
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			//String className = ((AbstractTypeDeclaration) parent).getName().getFullyQualifiedName();
+			String fullClassName = null;
+			if (packageName != null && packageName.length() != 0) {
+				fullClassName = packageName + '.' + className;
+			} else {
+				fullClassName = className;
+			}
+			String name = node.getName().getIdentifier();
+			buffer.append(assureQualifiedName(fullClassName));
+			buffer.append(", \"" + name + "\"");
+			buffer.append(", Enum");
 		} else {
-			buffer.append("null, \"" + fullClassName + "\"");
+			
+			String fullClassName = null;//getFullClassName();
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			if (packageName != null && packageName.length() != 0) {
+				fullClassName = packageName + '.' + className;
+			} else {
+				fullClassName = className;
+			}
+//			if (thisPackageName != null && thisPackageName.length() != 0) {
+//				fullClassName = thisPackageName + '.' + thisClassName;
+//			} else {
+//				fullClassName = thisClassName;
+//			}
+			
+			int lastIndexOf = fullClassName.lastIndexOf ('.');
+			if (lastIndexOf != -1) {
+				buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
+				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
+			} else {
+				buffer.append("null, \"" + fullClassName + "\"");
+			}
+			buffer.append(", Enum");
 		}
-		buffer.append(", Enum");
 
 		List superInterfaces = node.superInterfaceTypes();
 		int size = superInterfaces.size();
@@ -1022,33 +1040,46 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				 * Never reach here!
 				 * March 17, 2006
 				 */
-				buffer.append("if (!Clazz.isClassDefined (\"");
-				buffer.append(visitor.getFullClassName());
-				buffer.append("\")) {\r\n");
+//				buffer.append("if (!Clazz.isClassDefined (\"");
+//				buffer.append(visitor.getFullClassName());
+//				if (binding != null && !binding.isTopLevel()) {
+//					buffer.append("." + binding.getName());
+//				}
+//				buffer.append("\")) {\r\n");
 				
 				//String className = typeVisitor.getClassName();
-				methodBuffer.append("cla$$.$");
-				String targetClassName = visitor.getClassName();
-				//String prefixKey = className + ".";
-				//if (targetClassName.startsWith(prefixKey)) {
-				//	targetClassName = targetClassName.substring(prefixKey.length());
-				//}
-				targetClassName = targetClassName.replace('.', '$');
-				methodBuffer.append(targetClassName);
-				methodBuffer.append("$ = function () {\r\n");
+//				methodBuffer.append("cla$$.$");
+//				String targetClassName = visitor.getClassName();
+//				//String prefixKey = className + ".";
+//				//if (targetClassName.startsWith(prefixKey)) {
+//				//	targetClassName = targetClassName.substring(prefixKey.length());
+//				//}
+//				targetClassName = targetClassName.replace('.', '$');
+//				methodBuffer.append(targetClassName);
+//				if (binding != null && !binding.isTopLevel()) {
+//					methodBuffer.append("$" + binding.getName());
+//				}
+//				methodBuffer.append("$ = function () {\r\n");
 				methodBuffer.append("Clazz.pu$h ();\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
 				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
-				methodBuffer.append("};\r\n");
-
-				buffer.append(visitor.getPackageName());
-				buffer.append(".");
-				buffer.append(targetClassName);
-				buffer.append(".$");
-				buffer.append(visitor.getClassName());
-				buffer.append("$ ();\r\n");
-				
-				buffer.append("}\r\n");
+//				methodBuffer.append("};\r\n");
+//
+//				String pkgName = visitor.getPackageName();
+//				if (pkgName != null && pkgName.length() > 0) {
+//					buffer.append(pkgName);
+//					buffer.append(".");
+//				}
+//				buffer.append(targetClassName);
+//				buffer.append(".$");
+//				buffer.append(visitor.getClassName());
+//				buffer.append("$");
+//				if (binding != null && !binding.isTopLevel()) {
+//					buffer.append(binding.getName());
+//				}
+//				buffer.append("$ ();\r\n");
+//				
+//				buffer.append("}\r\n");
 			}
 			return false;
 		}
@@ -3063,8 +3094,11 @@ public class CB extends CA {
 				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 				methodBuffer.append("};\r\n");
 
-				buffer.append(visitor.getPackageName());
-				buffer.append(".");
+				String pkgName = visitor.getPackageName();
+				if (pkgName != null && pkgName.length() > 0) {
+					buffer.append(pkgName);
+					buffer.append(".");
+				}
 				buffer.append(className);
 				buffer.append(".$");
 				buffer.append(targetClassName);
