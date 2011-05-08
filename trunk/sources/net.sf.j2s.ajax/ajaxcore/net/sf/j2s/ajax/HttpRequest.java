@@ -122,7 +122,7 @@ public class HttpRequest {
 	 * 
 	 * Attention: Only be visible in Java.
 	 */
-	protected static interface IXHRReceiving {
+	public static interface IXHRReceiving {
 		/**
 		 * Monitoring the received data along with the given output stream.
 		 * 
@@ -135,32 +135,32 @@ public class HttpRequest {
 		public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len);
 	}
 
-	private int status;
-	private String statusText;
-	private int readyState;
+	protected int status;
+	protected String statusText;
+	protected int readyState;
 	
-	private String responseText;
-	private Document responseXML;
-	private IXHRCallback onreadystatechange;
+	protected String responseText;
+	protected Document responseXML;
+	protected IXHRCallback onreadystatechange;
 	//private boolean overrideMimeType;
-	private IXHRReceiving receiving;
+	protected IXHRReceiving receiving;
 	
-	private boolean asynchronous;
+	protected boolean asynchronous;
 	private HttpURLConnection connection;
-	private String url;
-	private String method;
-	private String user;
-	private String password;
+	protected String url;
+	protected String method;
+	protected String user;
+	protected String password;
 	
-	private Map<String, String> headers = new HashMap<String, String>();
-	private String content;
+	protected Map<String, String> headers = new HashMap<String, String>();
+	protected String content;
 	
-	private boolean toAbort = false;
-	private boolean isDisconnected = false;
+	protected boolean toAbort = false;
+	protected boolean isDisconnected = false;
 	private OutputStream activeOS;
 	private InputStream activeIS;
 	
-	private boolean isCometConnection = false;
+	protected boolean isCometConnection = false;
 	
 	/**
 	 * Return read state of XMLHttpRequest.
@@ -393,7 +393,8 @@ public class HttpRequest {
 		isDisconnected = false;
 		checkAbort();
 	}
-	private boolean checkAbort() {
+	
+	protected boolean checkAbort() {
 		if (!toAbort) return false;
 		if (activeOS != null) {
 			try {
@@ -595,7 +596,7 @@ public class HttpRequest {
 	 * Comet connection is used on Java level to provide SimplePipe connection.
 	 * @param isCometConnection
 	 */
-	void setCometConnection(boolean isCometConnection) {
+	protected void setCometConnection(boolean isCometConnection) {
 		this.isCometConnection = isCometConnection;
 	}
 	

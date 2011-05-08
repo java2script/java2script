@@ -30,6 +30,8 @@ import net.sf.j2s.annotation.J2SKeep;
  */
 public class SimpleSerializable implements Cloneable {
 	
+	public static SimpleSerializable UNKNOWN = new SimpleSerializable();
+
 	/**
 	 * @return
 	 * 
@@ -597,11 +599,12 @@ if (nextCharCode >= 48 && nextCharCode <= 57) {
 
 var fieldMap = [];
 var fields = this.getClass ().declared$Fields;
-if (fields == null) return false;
-for (var i = 0; i < fields.length; i++) {
-	var field = fields[i];
-	var name = field.name;
-	fieldMap[name] = true;
+if (fields != null) {
+	for (var i = 0; i < fields.length; i++) {
+		var field = fields[i];
+		var name = field.name;
+		fieldMap[name] = true;
+	}
 }
 var end = index + size;
 var fMap = this.fieldMapping ();
@@ -987,6 +990,7 @@ return true;
 						}
 					}
 				} catch (Exception e) {
+					System.out.println("Parsing: " + str);
 					e.printStackTrace();
 				}
 			} else {
@@ -1052,7 +1056,7 @@ return true;
 						break;
 					}
 				} catch (Exception e) {
-					System.out.println("Parsing: " + s);
+					System.out.println("Parsing: " + s + "\r\n" + str);
 					e.printStackTrace();
 				}
 			}
@@ -1242,7 +1246,7 @@ if (runnableClass != null) {
 		return obj;
 	}
 }
-return null;
+return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 	 */
 	public static SimpleSerializable parseInstance(String str) {
 		return parseInstance(str, 0, null);
@@ -1306,6 +1310,6 @@ return null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return UNKNOWN;
 	}
 }

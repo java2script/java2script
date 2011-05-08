@@ -132,12 +132,12 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
 						if (r != null) {
-							HttpRequest request = new HttpRequest();
+							HttpRequest request = getRequest();
 							String pipeKey = runnable.pipeKey;
 							String pipeMethod = runnable.getPipeMethod();
 							String pipeURL = runnable.getPipeURL();
 
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, false);
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
@@ -175,7 +175,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		if (url2 != url) {
 			serialize = null;
 		}
-		final HttpRequest request = new HttpRequest();
+		final HttpRequest request = getRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
@@ -219,7 +219,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 
     @J2SIgnore
 	static void swtPipeQuery(SimplePipeRunnable runnable) {
-		final HttpRequest pipeRequest = new HttpRequest();
+		final HttpRequest pipeRequest = getRequest();
 		final String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
@@ -248,55 +248,48 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		
 		});
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, false);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, false);
 	}
 	
     @J2SIgnore
 	static void swtPipeContinuum(final SimplePipeRunnable runnable) {
-		HttpRequest pipeRequest = new HttpRequest() {
-			
-			@Override
-			protected IXHRReceiving initializeReceivingMonitor() {
-				return new HttpRequest.IXHRReceiving() {
-					public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
-						baos.write(b, off, len);
-						/*
-						 * It is OK to convert to string as SimpleSerialize's
-						 * serialized string contains only ASCII chars.
-						 */
-						String string = baos.toString();
-						String resetString = swtParseReceived(string);
-						if (resetString != null) {
-							String destroyedKey = PIPE_STATUS_DESTROYED;
-							if (resetString.indexOf(destroyedKey) == 0) {
-								int beginIndex = destroyedKey.length() + 1;
-								final String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
-								final SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
-								if (pipe != null) {
-									SWTHelper.syncExec(Display.getDefault(), new Runnable() {
-										public void run() {
-											pipe.pipeClosed();
-											SimplePipeHelper.removePipe(pipeKeyStr);
-										}
-									});
+		HttpRequest pipeRequest = getRequestWithMonitor(new HttpRequest.IXHRReceiving() {
+			public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
+				baos.write(b, off, len);
+				/*
+				 * It is OK to convert to string as SimpleSerialize's
+				 * serialized string contains only ASCII chars.
+				 */
+				String string = baos.toString();
+				String resetString = swtParseReceived(string);
+				if (resetString != null) {
+					String destroyedKey = PIPE_STATUS_DESTROYED;
+					if (resetString.indexOf(destroyedKey) == 0) {
+						int beginIndex = destroyedKey.length() + 1;
+						final String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
+						final SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
+						if (pipe != null) {
+							SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+								public void run() {
+									pipe.pipeClosed();
+									SimplePipeHelper.removePipe(pipeKeyStr);
 								}
-								resetString = resetString.substring(beginIndex + PIPE_KEY_LENGTH + 1);
-							}
-							baos.reset();
-							try {
-								baos.write(resetString.getBytes());
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+							});
 						}
-						return true;
+						resetString = resetString.substring(beginIndex + PIPE_KEY_LENGTH + 1);
 					}
-				
-				};
+					baos.reset();
+					try {
+						baos.write(resetString.getBytes());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				return true;
 			}
 		
-		};
+		});
 		
 		pipeRequest.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 		
@@ -321,7 +314,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM, false);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	
@@ -345,7 +338,10 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				if (runnable != null) { // should always satisfy this condition
 					runnable.lastPipeDataReceived = System.currentTimeMillis();
 				}
-				return string.substring(end + okKey.length());
+				start = end + okKey.length();
+				if (start == string.length()) {
+					return string.substring(start);
+				}
 			}
 			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
 					|| !ss.deserialize(string, end)) {

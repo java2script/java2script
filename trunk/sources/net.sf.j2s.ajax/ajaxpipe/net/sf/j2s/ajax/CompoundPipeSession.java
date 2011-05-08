@@ -87,7 +87,24 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		return cs;
 	}
 	
-	public abstract CompoundSerializable[] convert(Object... args);
+	/**
+	 * Convert non-SimpleSerializable objects into SimpleSerializable
+	 * objects.
+	 * 
+	 * To be overrided.  
+	 */
+	public CompoundSerializable[] convert(Object... args) {
+		if (args != null && args.length > 0) {
+			CompoundSerializable[] ss = new CompoundSerializable[args.length];
+			if (args[0] instanceof CompoundSerializable) { // check the first
+				for (int i = 0; i < args.length; i++) {
+					ss[i] = (CompoundSerializable) args[i];
+				}
+				return ss;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public void pipeThrough(Object... args) {

@@ -71,7 +71,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 		if (url2 != url) {
 			serialize = null;
 		}
-		final HttpRequest request = new HttpRequest();
+		final HttpRequest request = getRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
