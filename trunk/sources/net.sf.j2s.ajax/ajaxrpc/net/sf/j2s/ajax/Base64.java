@@ -15,6 +15,11 @@ package net.sf.j2s.ajax;
  * @version 1.4, 01/23/03
  * @see     Preferences
  * @since   1.4
+ * 
+ * Remove alternative Base64. Support no line breaks and parse white
+ * space ' ' as '+'.
+ * @author Zhou Renjian
+ * @version Dec 6, 2010
  */
 class Base64 {
     /**
@@ -22,26 +27,12 @@ class Base64 {
      * Preferences.put(byte[]).
      */
     static String byteArrayToBase64(byte[] a) {
-        return byteArrayToBase64(a, false);
-    }
-
-    /**
-     * Translates the specified byte array into an "aternate representation"
-     * Base64 string.  This non-standard variant uses an alphabet that does
-     * not contain the uppercase alphabetic characters, which makes it
-     * suitable for use in situations where case-folding occurs.
-     */
-    static String byteArrayToAltBase64(byte[] a) {
-        return byteArrayToBase64(a, true);
-    }
-
-    private static String byteArrayToBase64(byte[] a, boolean alternate) {
         int aLen = a.length;
         int numFullGroups = aLen/3;
         int numBytesInPartialGroup = aLen - 3*numFullGroups;
         int resultLen = 4*((aLen + 2)/3);
         StringBuffer result = new StringBuffer(resultLen);
-        char[] intToAlpha = (alternate ? intToAltBase64 : intToBase64);
+        char[] intToAlpha = intToBase64;
 
         // Translate all full groups from byte array elements to Base64
         int inCursor = 0;
@@ -89,21 +80,6 @@ class Base64 {
     };
 
     /**
-     * This array is a lookup table that translates 6-bit positive integer
-     * index values into their "Alternate Base64 Alphabet" equivalents.
-     * This is NOT the real Base64 Alphabet as per in Table 1 of RFC 2045.
-     * This alternate alphabet does not use the capital letters.  It is
-     * designed for use in environments where "case folding" occurs.
-     */
-    private static final char intToAltBase64[] = {
-        '!', '"', '#', '$', '%', '&', '\'', '(', ')', ',', '-', '.', ':',
-        ';', '<', '>', '@', '[', ']', '^',  '`', '_', '{', '|', '}', '~',
-        'a', 'b', 'c', 'd', 'e', 'f', 'g',  'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't',  'u', 'v', 'w', 'x', 'y', 'z',
-        '0', '1', '2', '3', '4', '5', '6',  '7', '8', '9', '+', '?'
-    };
-
-    /**
      * Translates the specified Base64 string (as per Preferences.get(byte[]))
      * into a byte array.
      * 
@@ -111,23 +87,7 @@ class Base64 {
      *        string.
      */
     static byte[] base64ToByteArray(String s) {
-        return base64ToByteArray(s, false);
-    }
-
-    /**
-     * Translates the specified "aternate representation" Base64 string
-     * into a byte array.
-     * 
-     * @throw IllegalArgumentException or ArrayOutOfBoundsException
-     *        if <tt>s</tt> is not a valid alternate representation
-     *        Base64 string.
-     */
-    static byte[] altBase64ToByteArray(String s) {
-        return base64ToByteArray(s, true);
-    }
-
-    private static byte[] base64ToByteArray(String s, boolean alternate) {
-        byte[] alphaToInt = (alternate ?  altBase64ToInt : base64ToInt);
+        byte[] alphaToInt = base64ToInt;
         int sLen = s.length();
         int numGroups = sLen/4;
         if (4*numGroups != sLen)
@@ -196,7 +156,7 @@ class Base64 {
      */
     private static final byte base64ToInt[] = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54,
         55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4,
         5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
@@ -204,43 +164,4 @@ class Base64 {
         35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
     };
 
-    /**
-     * This array is the analogue of base64ToInt, but for the nonstandard
-     * variant that avoids the use of uppercase alphabetic characters.
-     */
-    private static final byte altBase64ToInt[] = {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1,
-        2, 3, 4, 5, 6, 7, 8, -1, 62, 9, 10, 11, -1 , 52, 53, 54, 55, 56, 57,
-        58, 59, 60, 61, 12, 13, 14, -1, 15, 63, 16, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, 17, -1, 18, 19, 21, 20, 26, 27, 28, 29, 30, 31, 32, 33,
-        34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-        51, 22, 23, 24, 25
-    };
-
-    /*
-    public static void main(String args[]) {
-        int numRuns  = Integer.parseInt(args[0]);
-        int numBytes = Integer.parseInt(args[1]);
-        java.util.Random rnd = new java.util.Random();
-        for (int i=0; i<numRuns; i++) {
-            for (int j=0; j<numBytes; j++) {
-                byte[] arr = new byte[j];
-                for (int k=0; k<j; k++)
-                    arr[k] = (byte)rnd.nextInt();
-
-                String s = byteArrayToBase64(arr);
-                byte [] b = base64ToByteArray(s);
-                if (!java.util.Arrays.equals(arr, b))
-                    System.out.println("Dismal failure!");
-
-                s = byteArrayToAltBase64(arr);
-                b = altBase64ToByteArray(s);
-                if (!java.util.Arrays.equals(arr, b))
-                    System.out.println("Alternate dismal failure!");
-            }
-        }
-    }
-    */
 }
