@@ -29,6 +29,13 @@ import net.sf.j2s.annotation.J2SIgnore;
  */
 public class SimplePipeRequest extends SimpleRPCRequest {
 	
+	@J2SIgnore
+	public static interface IHttpPipeRequestFactory extends IHttpRequestFactory {
+
+		public HttpRequest createRequestWithMonitor(HttpRequest.IXHRReceiving monitor);
+		
+	}
+
 	/**
 	 * Status of pipe: ok.
 	 */
@@ -150,14 +157,13 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * Construct request string for pipe.
 	 * @param pipeKey
 	 * @param pipeRequestType
-	 * @param rand
 	 * @return request data for both GET and POST request. 
 	 */
-	protected static String constructRequest(String pipeKey, String pipeRequestType, boolean rand) {
+	protected static String constructRequest(String pipeKey, String pipeRequestType) {
 		reqCount++;
 		return FORM_PIPE_KEY + "=" + pipeKey + "&" 
 				+ FORM_PIPE_TYPE + "=" + pipeRequestType 
-				+ (rand ? "&" + FORM_PIPE_RANDOM + "=" + reqCount : "");
+				+ "&" + FORM_PIPE_RANDOM + "=" + reqCount;
 	}
 	
 	protected static void sendRequest(HttpRequest request, String method, String url, 
@@ -205,6 +211,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 */
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
+		runnable.updateStatus(true);
+		//if (true) return;
 		Thread thread = new Thread(new Runnable() {
 			
 			public void run() {
@@ -246,12 +254,12 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
 						if (r != null) {
-							HttpRequest request = new HttpRequest();
+							HttpRequest request = getRequest();
 							String pipeKey = runnable.pipeKey;
 							String pipeMethod = runnable.getPipeMethod();
 							String pipeURL = runnable.getPipeURL();
 
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, false);
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
@@ -260,6 +268,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 								SimplePipeHelper.removePipe(pipeKey);
 								// may need to inform user that connection is already lost!
 								break;
+							} else {
+								runnable.updateStatus(true);
 							}
 						} else {
 							break;
@@ -338,7 +348,7 @@ Clazz.addEvent (document, "keydown", function (e) {
 		if (url2 != url) {
 			serialize = null;
 		}
-		final HttpRequest request = new HttpRequest();
+		final HttpRequest request = getRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
@@ -535,15 +545,18 @@ return function () {
 			&& domain != null && domain.length > 0) {
 		document.domain = domain;
 	}
-	if (handle.contentWindow != null) {
-		if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
-				&& domain != null && domain.length > 0) {
-			handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
-		} else {
-			handle.contentWindow.location = "about:blank";
+	try {
+		if (handle.contentWindow != null) {
+			if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
+					&& domain != null && domain.length > 0) {
+				handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
+			} else {
+				handle.contentWindow.location = "about:blank";
+			}
+		} else { // Opera
+			handle.src = "about:blank";
 		}
-	} else { // Opera
-		handle.src = "about:blank";
+	} catch (e) {
 	}
 	try {
 		var doc = handle.contentWindow.document;
@@ -566,7 +579,7 @@ return function () {
 		// only for JavaScript
 		String url = runnable.getPipeURL();
 		String requestURL = url + (url.indexOf('?') != -1 ? "&" : "?")
-				+ constructRequest(runnable.pipeKey, PIPE_TYPE_XSS, true);
+				+ constructRequest(runnable.pipeKey, PIPE_TYPE_XSS);
 		/**
 		 * @j2sNative
 		 * net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap[requestURL] = runnable;
@@ -611,7 +624,7 @@ var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
 var url = runnable.getPipeURL();
 var src = url + (url.indexOf('?') != -1 ? "&" : "?") 
-		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY, true)
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY)
 		+ "&" + spr.FORM_PIPE_DOMAIN + "=" + domain;
 ifr.id = "pipe-" + pipeKey;
 ifr.src = src;
@@ -622,7 +635,7 @@ document.body.appendChild (ifr);
 	static void pipeNotify(SimplePipeRunnable runnable) { // notifier
 		String url = runnable.getPipeURL();
 		loadPipeScript(url + (url.indexOf('?') != -1 ? "&" : "?")
-				+ constructRequest(runnable.pipeKey, PIPE_TYPE_NOTIFY, true));
+				+ constructRequest(runnable.pipeKey, PIPE_TYPE_NOTIFY));
 		// only for JavaScript
 	}
 	
@@ -644,7 +657,7 @@ document.body.appendChild (ifr);
 	 * @param runnable
 	 */
 	static void pipeQuery(final SimplePipeRunnable runnable) {
-		final HttpRequest pipeRequest = new HttpRequest();
+		final HttpRequest pipeRequest = getRequest();
 		String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
@@ -683,7 +696,7 @@ document.body.appendChild (ifr);
 		
 		});
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, true);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY);
 		boolean async = false;
 		/**
 		 * In JavaScript such queries are not wrapped inside Thread, so asynchronous mode is required!
@@ -693,6 +706,34 @@ document.body.appendChild (ifr);
 		 * net.sf.j2s.ajax.SimplePipeRequest.pipeQueryMap[key] = pipeRequest;
 		 */ {}
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, async);
+	}
+	
+	/*
+	 * A hack to make HttpRequest to support receiving and parsing data
+	 * in a Comet way.
+	 * 
+	 * (non-Javadoc)
+	 * @see net.sf.j2s.ajax.HttpRequest#initializeReceivingMonitor()
+	 */
+	public static HttpRequest getRequestWithMonitor(final HttpRequest.IXHRReceiving montior) {
+		/**
+		 * @j2sNative
+		 */
+		{
+			if (requestFactory != null && requestFactory instanceof IHttpPipeRequestFactory) {
+				try {
+					return ((IHttpPipeRequestFactory) requestFactory).createRequestWithMonitor(montior);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return new HttpRequest() {
+			@Override
+			protected IXHRReceiving initializeReceivingMonitor() {
+				return montior;
+			}
+		};
 	}
 
 	/**
@@ -723,7 +764,7 @@ if (subdomain == null) {
 	window["xss.domain.enabled"] = true;
 }
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
-		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, true)
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT)
 		+ (subdomain == null ? ""
 				: "&" + spr.FORM_PIPE_DOMAIN + "=" + subdomain);
 document.body.appendChild (ifr);
@@ -757,41 +798,27 @@ var fun = (function (key, created) {
 window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 */
 	static void pipeContinuum(final SimplePipeRunnable runnable) {
-		HttpRequest pipeRequest = new HttpRequest() {
-			
-			/*
-			 * A hack to make HttpRequest to support receiving and parsing data
-			 * in a Comet way.
-			 * 
-			 * (non-Javadoc)
-			 * @see net.sf.j2s.ajax.HttpRequest#initializeReceivingMonitor()
-			 */
-			@Override
-			protected IXHRReceiving initializeReceivingMonitor() {
-				return new HttpRequest.IXHRReceiving() {
-					public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
-						baos.write(b, off, len);
-						/*
-						 * It is OK to convert to string, because SimpleSerialize's
-						 * serialized string contains only ASCII chars.
-						 */
-						String string = baos.toString();
-						String resetString = parseReceived(string);
-						if (resetString != null) {
-							baos.reset();
-							try {
-								baos.write(resetString.getBytes());
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-						return true;
+		HttpRequest pipeRequest = getRequestWithMonitor(new HttpRequest.IXHRReceiving() {
+			public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
+				baos.write(b, off, len);
+				/*
+				 * It is OK to convert to string, because SimpleSerialize's
+				 * serialized string contains only ASCII chars.
+				 */
+				String string = baos.toString();
+				String resetString = parseReceived(string);
+				if (resetString != null) {
+					baos.reset();
+					try {
+						baos.write(resetString.getBytes());
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
-				
-				};
+				}
+				return true;
 			}
 		
-		};
+		});
 		
 		pipeRequest.registerOnReadyStateChange(new XHRCallbackAdapter() {
 		
@@ -816,7 +843,7 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_SCRIPT, false);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	
@@ -902,7 +929,10 @@ for (var i = 0; i < iframes.length; i++) {
 				if (runnable != null) { // should always satisfy this condition
 					runnable.lastPipeDataReceived = System.currentTimeMillis();
 				}
-				return string.substring(end + okKey.length());
+				start = end + okKey.length();
+				if (start == string.length()) {
+					return string.substring(start);
+				}
 			}
 			boolean isJavaScript = false;
 			/**
@@ -934,15 +964,17 @@ for (var i = 0; i < iframes.length; i++) {
 					return string.substring(end + continueKey.length());
 				}
 			}
-			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
-					|| !ss.deserialize(string, end)) {
+			ss = SimpleSerializable.parseInstance(string, end);
+			if (ss == null || !ss.deserialize(string, end)) {
 				break;
 			}
-			String key = string.substring(start, end);
-			SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
-			if (runnable != null) { // should always satisfy this condition
-				runnable.lastPipeDataReceived = System.currentTimeMillis();
-				runnable.deal(ss);
+			if (ss != SimpleSerializable.UNKNOWN) {
+				String key = string.substring(start, end);
+				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+				if (runnable != null) { // should always satisfy this condition
+					runnable.lastPipeDataReceived = System.currentTimeMillis();
+					runnable.deal(ss);
+				}
 			}
 			
 			start = restStringIndex(string, start);
@@ -1293,7 +1325,7 @@ return function () {
 					method = runnable.getPipeMethod ();
 					url = runnable.getPipeURL ();
 					var spr = net.sf.j2s.ajax.SimplePipeRequest;
-					data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, true);
+					data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY);
 				} catch (e) {
 				}
 			}
@@ -1306,7 +1338,7 @@ return function () {
 						method = runnable.getPipeMethod ();
 						url = runnable.getPipeURL ();
 						var spr = net.sf.j2s.ajax.SimplePipeRequest;
-						data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, true);
+						data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY);
 					} catch (e) {
 					}
 				}

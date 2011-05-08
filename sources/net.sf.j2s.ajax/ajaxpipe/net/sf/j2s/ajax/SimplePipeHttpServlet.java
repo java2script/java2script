@@ -189,10 +189,12 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write(buffer.toString());
 			return;
 		}
-		if (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
+		boolean isContinuum = SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type);
+		if (isContinuum) {
 			resp.setHeader("Transfer-Encoding", "chunked");
 		}
-		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
+		boolean isScripting = SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type);
+		if (isScripting) { // iframe
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
 			StringBuffer buffer = new StringBuffer();
@@ -210,7 +212,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.flush();
 		} else {
 			if (SimplePipeRequest.PIPE_TYPE_QUERY.equals(type)
-					|| SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
+					|| isContinuum) {
 				resp.setContentType("text/plain; charset=utf-8");
 			} else {
 				resp.setContentType("text/javascript; charset=utf-8");
@@ -226,47 +228,47 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			int priority = 0;
 	        long lastLiveDetected = System.currentTimeMillis();
 	        SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
-	        long waitClosingInterval = 5000;
-	        if (pipe != null) {
-	        	waitClosingInterval = pipe.pipeWaitClosingInterval();
-	        }
+	        long waitClosingInterval = pipe == null ? 5000 : pipe.pipeWaitClosingInterval();
 			while ((list = SimplePipeHelper.getPipeDataList(key)) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
-				int size = list.size();
-				if (size > 0) {
-					boolean live = SimplePipeHelper.isPipeLive(key);
-					for (int i = 0; i < size; i++) {
-						SimpleSerializable ss = null;
-						/*
-						 * Still need to check list size!
-						 * Maybe multiple pipe servlets! 
-						 */
-						if (list.size() <= 0) break;
-						ss = list.remove(0);
-						if (ss == null) break; // terminating signal
-						output(writer, type, key, ss.serialize());
-						items++;
-						if (live && pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
-								&& !SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)) {
-							break;
-						}
-						lastPipeDataWritten = System.currentTimeMillis();
-						writer.flush();
-						if (ss instanceof ISimplePipePriority) {
-							ISimplePipePriority spp = (ISimplePipePriority) ss;
-							int p = spp.getPriority();
-							if (p <= 0) {
-								p = ISimplePipePriority.IMPORTANT;
+				StringBuffer buffer = new StringBuffer();
+				synchronized (list) {
+					int size = list.size();
+					if (size > 0) {
+						boolean live = SimplePipeHelper.isPipeLive(key);
+						for (int i = 0; i < size; i++) {
+							SimpleSerializable ss = null;
+							ss = list.remove(0);
+							if (ss == null) break; // terminating signal
+							if (ss instanceof ISimpleCacheable) {
+								ISimpleCacheable sc = (ISimpleCacheable) ss;
+								sc.setCached(false);
 							}
-							priority += p;
-						} else {
-							priority += ISimplePipePriority.IMPORTANT;
+							buffer.append(output(type, key, ss.serialize()));
+							items++;
+							if (live && pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
+									&& !isContinuum) {
+								break;
+							}
+							lastPipeDataWritten = System.currentTimeMillis();
+							if (ss instanceof ISimplePipePriority) {
+								ISimplePipePriority spp = (ISimplePipePriority) ss;
+								int p = spp.getPriority();
+								if (p <= 0) {
+									p = ISimplePipePriority.IMPORTANT;
+								}
+								priority += p;
+							} else {
+								priority += ISimplePipePriority.IMPORTANT;
+							}
 						}
 					}
-				} else {
-					writer.flush();
 				}
+				if (buffer.length() > 0) {
+					writer.write(buffer.toString());
+				}
+				writer.flush();
 				if (!SimplePipeHelper.isPipeLive(key)) {
 					if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
 						// break out while loop so pipe connection will be closed
@@ -281,30 +283,23 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				} else {
 					lastLiveDetected = System.currentTimeMillis();
 				}
-				/*
-				 * Client should send in "notify" request to simulate the following #notifyPipeStatus
-				 */
+				// Client should send in "notify" request to simulate the following #notifyPipeStatus
 				// SimplePipeHelper.notifyPipeStatus(key, true);
 				
 				long now = System.currentTimeMillis();
 				if ((lastPipeDataWritten == -1 && now - beforeLoop >= pipeQueryTimeout)
 						|| (lastPipeDataWritten > 0
 								&& now - lastPipeDataWritten >= pipeQueryTimeout
-								&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
-										|| SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)))) {
-					output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
+								&& (isContinuum || isScripting))) {
+					writer.write(output(type, key, SimplePipeRequest.PIPE_STATUS_OK));
 					lastPipeDataWritten = System.currentTimeMillis();
 				}
 				
 				now = System.currentTimeMillis();
-				if ((list = SimplePipeHelper.getPipeDataList(key)) != null // may be broken down already!!
-						&& (pipeMaxItemsPerQuery <= 0 || items < pipeMaxItemsPerQuery
-								|| SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type))
-						&& (SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type)
-						|| (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
-								&& now - beforeLoop < pipeScriptBreakout)
-						|| (priority < ISimplePipePriority.IMPORTANT
-								&& now - beforeLoop < pipeQueryTimeout))) {
+				if (SimplePipeHelper.getPipeDataList(key) != null // may be broken down already!!
+						&& (pipeMaxItemsPerQuery <= 0 || items < pipeMaxItemsPerQuery || isContinuum)
+						&& (isContinuum || (isScripting && now - beforeLoop < pipeScriptBreakout)
+						|| (priority < ISimplePipePriority.IMPORTANT && now - beforeLoop < pipeQueryTimeout))) {
 					synchronized (pipe) {
 						try {
 							pipe.wait(1000);
@@ -322,25 +317,25 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			//SimplePipeHelper.notifyPipeStatus(key, false); // Leave for pipe monitor to destroy it
 			SimplePipeHelper.removePipe(key);
 			try {
-				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_DESTROYED);
+				writer.write(output(type, key, SimplePipeRequest.PIPE_STATUS_DESTROYED));
 				lastPipeDataWritten = System.currentTimeMillis();
 			} catch (Exception e) {
 				// HTTP connection may be closed already!
 			}
-		} else if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)
+		} else if (isScripting
 				&& (System.currentTimeMillis() - beforeLoop >= pipeScriptBreakout
 						|| (pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery))) {
 			try {
-				output(writer, type, key, SimplePipeRequest.PIPE_STATUS_CONTINUE);
+				writer.write(output(type, key, SimplePipeRequest.PIPE_STATUS_CONTINUE));
 				lastPipeDataWritten = System.currentTimeMillis();
 			} catch (Exception e) {
 				// HTTP connection may be closed already!
 			}
 		}
 		if (lastPipeDataWritten == -1) {
-			output(writer, type, key, SimplePipeRequest.PIPE_STATUS_OK);
+			writer.write(output(type, key, SimplePipeRequest.PIPE_STATUS_OK));
 		}
-		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
+		if (isScripting) { // iframe
 			try {
 				writer.write("</body></html>\r\n");
 			} catch (Exception e) {
@@ -349,7 +344,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		}
 	}
 
-	protected void output(PrintWriter writer, String type, String key,
+	protected static String output(String type, String key,
 			String str) {
 		StringBuffer buffer = new StringBuffer();
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { 
@@ -373,7 +368,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		} else if (SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
 			buffer.append("\");\r\n");
 		}
-		writer.write(buffer.toString());
+		return buffer.toString();
 	}
 
 	@Override

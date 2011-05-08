@@ -11,6 +11,7 @@
 package net.sf.j2s.ajax;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,9 @@ public class SimplePipeHelper {
 	public static interface IPipeClosing {
 		public void helpClosing(SimplePipeRunnable pipe);
 	}
+	
+	@J2SIgnore
+	public static int MAX_ITEMS_PER_QUERY = 100;
 	
 	@J2SIgnore
 	private static Map<String, List<SimpleSerializable>> pipeMap = null;
@@ -93,7 +97,7 @@ public class SimplePipeHelper {
 		}
 		List<SimpleSerializable> list = pipeMap.get(key);
 		if (list == null) {
-			list = Collections.synchronizedList(new Vector<SimpleSerializable>());
+			list = new Vector<SimpleSerializable>();
 			pipeMap.put(key, list);
 		}
 		
@@ -183,8 +187,59 @@ public class SimplePipeHelper {
 			System.out.println("There are no pipe listening?!!!!");
 			return; // throw exception?
 		}
-		for (int i = 0; i < ss.length; i++) {
-			list.add(ss[i]);
+		synchronized (list) {
+			boolean hasNewPriority = false;
+			for (int i = 0; i < ss.length; i++) {
+				SimpleSerializable s = ss[i];
+				if (s instanceof ISimpleCacheable) {
+					ISimpleCacheable c = (ISimpleCacheable) s;
+					if (c.isCached()) {
+						// already buffered
+						continue;
+					} else {
+						int idx = list.indexOf(s);
+						if (idx != -1) {
+							// same object but may be with updated properties!
+							SimpleSerializable existed = list.get(idx);
+							if (existed instanceof ISimpleCacheable) {
+								ISimpleCacheable ec = (ISimpleCacheable) existed;
+								ec.synchronizeFrom(c);
+							}
+							continue;
+						}
+					}
+					c.setCached(true);
+					list.add(s);
+				} else {
+					list.add(s);
+				}
+				if (!hasNewPriority && s instanceof ISimplePipePriority) {
+					hasNewPriority = true;
+				}
+			}
+			if (hasNewPriority && ss.length > MAX_ITEMS_PER_QUERY) { // 100 by default
+				// sort list!
+				Collections.sort(list, new Comparator<SimpleSerializable>() {
+					
+					public int compare(SimpleSerializable o1, SimpleSerializable o2) {
+						boolean v1 = o1 instanceof ISimplePipePriority;
+						boolean v2 = o2 instanceof ISimplePipePriority;
+						if (v1 && v2) {
+							ISimplePipePriority sp1 = (ISimplePipePriority) o1;
+							ISimplePipePriority sp2 = (ISimplePipePriority) o2;
+							return sp2.getPriority() - sp1.getPriority();
+						} else if (v1) {
+							ISimplePipePriority sp1 = (ISimplePipePriority) o1;
+							return ISimplePipePriority.IMPORTANT - sp1.getPriority();
+						} else if (v2) {
+							ISimplePipePriority sp2 = (ISimplePipePriority) o2;
+							return sp2.getPriority() - ISimplePipePriority.IMPORTANT;
+						}
+						return 0;
+					}
+					
+				});
+			}
 		}
 		synchronized (pipe) {
 			// Notify pipe in!

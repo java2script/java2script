@@ -14,6 +14,9 @@ package net.sf.j2s.ajax;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import net.sf.j2s.annotation.J2SIgnore;
+import net.sf.j2s.annotation.J2SNative;
+
 /**
  * @author zhou renjian
  *
@@ -21,10 +24,19 @@ import java.net.URLEncoder;
  */
 public class SimpleRPCRequest {
 	
+	@J2SIgnore
+	public static interface IHttpRequestFactory {
+
+		public HttpRequest createRequest();
+		
+	}
+
 	public static final int MODE_AJAX = 1;
 	public static final int MODE_LOCAL_JAVA_THREAD = 2;
 	
 	private static int runningMode = MODE_LOCAL_JAVA_THREAD;
+	
+	protected static IHttpRequestFactory requestFactory;
 	
 	static {
 		boolean ajax = false;
@@ -93,6 +105,23 @@ public class SimpleRPCRequest {
 		return name;
 	}
 
+	@J2SIgnore
+	public static void setHttpRequestFactory(IHttpRequestFactory factory) {
+		requestFactory = factory;
+	}
+
+	@J2SNative("return new net.sf.j2s.ajax.HttpRequest ();")
+	public static HttpRequest getRequest() {
+		if (requestFactory != null) {
+			try {
+				return requestFactory.createRequest();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return new HttpRequest();
+	}
+	
 	private static void ajaxRequest(final SimpleRPCRunnable runnable) {
 		String url = runnable.getHttpURL();
 		if (url == null) {
@@ -111,7 +140,7 @@ public class SimpleRPCRequest {
 			serialize = null;
 		}
 		
-		final HttpRequest request = new HttpRequest();
+		final HttpRequest request = getRequest();
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
