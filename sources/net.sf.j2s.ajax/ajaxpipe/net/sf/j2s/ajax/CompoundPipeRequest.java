@@ -18,6 +18,9 @@ public class CompoundPipeRequest extends SimplePipeRequest {
 			if (!pipe.weave(p) && p.isPipeLive()) { // already woven!
 				return;
 			}
+			if (pipe.pipeKey == null) {
+				return;
+			}
 			p.pipeKey = pipe.pipeKey;
 			SimpleRPCRequest.request(p);
 			if (pipe.status < 2) {
