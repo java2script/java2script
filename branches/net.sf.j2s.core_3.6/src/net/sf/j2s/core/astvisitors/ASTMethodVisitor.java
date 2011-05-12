@@ -128,6 +128,7 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 		pmMap = new HashMap();
 		methodSet = new HashSet();
 		register("java.lang.String", "length", "length");
+		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
 		register("java.lang.String", "replace", "~replace");
 		register("java.lang.String", "split", "~plit");
 		ASTMethodVisitor.registerAllMaps();
