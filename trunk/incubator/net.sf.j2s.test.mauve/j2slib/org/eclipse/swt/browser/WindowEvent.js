@@ -1,0 +1,13 @@
+﻿$_L(["$wt.events.TypedEvent"],"$wt.browser.WindowEvent",null,function(){
+c$=$_C(function(){
+this.required=false;
+this.browser=null;
+this.location=null;
+this.size=null;
+this.addressBar=false;
+this.menuBar=false;
+this.statusBar=false;
+this.toolBar=false;
+$_Z(this,arguments);
+},$wt.browser,"WindowEvent",$wt.events.TypedEvent);
+});

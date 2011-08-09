@@ -1,0 +1,32 @@
+﻿$_L(["$wt.events.TypedEvent"],"$wt.events.SelectionEvent",null,function(){
+c$=$_C(function(){
+this.item=null;
+this.detail=0;
+this.x=0;
+this.y=0;
+this.width=0;
+this.height=0;
+this.stateMask=0;
+this.text=null;
+this.doit=false;
+$_Z(this,arguments);
+},$wt.events,"SelectionEvent",$wt.events.TypedEvent);
+$_K(c$,
+function(e){
+$_R(this,$wt.events.SelectionEvent,[e]);
+this.item=e.item;
+this.x=e.x;
+this.y=e.y;
+this.width=e.width;
+this.height=e.height;
+this.detail=e.detail;
+this.stateMask=e.stateMask;
+this.text=e.text;
+this.doit=e.doit;
+},"$wt.widgets.Event");
+$_M(c$,"toString",
+function(){
+var string=$_U(this,$wt.events.SelectionEvent,"toString",[]);
+return string.substring(0,string.length-1)+" item="+this.item+" detail="+this.detail+" x="+this.x+" y="+this.y+" width="+this.width+" height="+this.height+" stateMask="+this.stateMask+" text="+this.text+" doit="+this.doit+"}";
+});
+});

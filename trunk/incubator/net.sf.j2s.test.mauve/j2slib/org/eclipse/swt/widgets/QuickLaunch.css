@@ -1,0 +1,68 @@
+.shortcut-bar {
+	position:absolute;
+	bottom:0;
+	height:32px;
+	background-color:rgb(57,61,254);
+	margin:0;
+	padding:0;
+	font-size:0;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.shortcut-item {
+	position:absolute;
+	bottom:12px;
+	height:40px;
+	width:40px;
+	background-color:menu;
+	background-repeat:no-repeat;
+	background-position:-44px -44px;
+	background-image: url('images/packed.gif');
+	border:1px solid buttonshadow;
+	margin:0;
+	padding:0;
+	font-size:0;
+	opacity:0.6;
+	filter:Alpha(Opacity=60);
+	text-align:left;
+}
+
+.shortcut-bar-minimized {
+	position:absolute;
+	bottom:0;
+	height:8px;
+	background-color:rgb(57,61,254);
+	margin:0;
+	padding:0;
+	font-size:0;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+* html .shortcut-bar {
+	bottom:-1px;
+}
+* html .shortcut-bar-minimized {
+	bottom:-1px;
+}
+.shortcut-item:hover, a.shortcut-item:hover .shortcut-item-highlight {
+	border:1px solid navy;
+	background-color:highlight;
+	color:highlighttext;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.shortcut-active-item {
+	/*border:1px solid darkred;*/
+	opacity:1;
+	filter:Alpha(Opacity=100);
+}
+.shortcut-active-item:hover, a.shortcut-active-item:hover {
+	/*border:1px solid navy;*/
+	background-color:highlight;
+	color:highlighttext;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+.swt-widgets-quicklaunch {
+	width:324px;
+}

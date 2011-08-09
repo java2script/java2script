@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>org.sgx.j2s.mauve.report.SingleTestReport</title>
+</head>
+<body>
+<script type="text/javascript">
+//native exception type detection. This sollution will first find local patters for exceptions and then detect each type of exception 
+//matching exceptions with those patterns-
+
+Clazz={};
+//alert("seba");
+
+//NullPointerException
+var $$o$$ = null;
+try {
+	$$o$$.hello ();
+} catch (e) {
+	var msg = e.message;
+	var idx = msg.indexOf ("$$o$$");
+	Clazz.exceptionNPEString = /msg.substring (0, idx) + "[^\\s]+" + msg.substring(idx + 5)/
+}
+//TODO: other kind of exceptions
+Clazz.isExceptionOf=function(e, className) {
+	if(e==null||className==null||e.message==null)
+		return false;
+	
+	if(className=="java.lang.NullPointerException")
+		return 	e.message.match(Clazz.exceptionNPEString);
+
+	else
+		return false;
+}
+
+try {
+	var a=null;
+	a.toString();
+}catch(e) {
+	alert(Clazz.isExceptionOf(e, "java.lang.NullPointerException"));
+}
+/*
+try {	
+	no.Existent(); //not NPE
+}catch(e) {
+	alert(Clazz.isExceptionOf(e, "java.lang.NullPointerException"));
+}
+try {	
+	document.appendChild(null); //not NPE
+}catch(e) {
+	alert(Clazz.isExceptionOf(e, "java.lang.NullPointerException"));
+}
+try {	
+	var v = {o: ""};
+	v.o();//not npe
+}catch(e) {
+	alert(Clazz.isExceptionOf(e, "java.lang.NullPointerException"));
+}
+*/
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>org.sgx.j2s.mauve.report.SingleTestReport</title>
+</head>
+<body>
+<script type="text/javascript">
+function printError(e) {
+	var s = "ERROR: "+e.toString()+" - ";
+	for(var i in e) {
+		s+=", "+i+" : "+e[i]+"\n";
+	}
+	printStr (s);
+}
+printStr=function(s){
+	document.body.innerHTML+=s+"<br/>";
+}
+function isNPE(e) {
+	if(e.__CLASS_NAME__!=null || e.name!='TypeError') 
+		return false;
+	if(e.number) //IE
+		return e.number==-2146823281;	
+	else 
+		return e.message!=null && (e.message.indexOf("null")!=-1 || e.message.indexOf("undefined")!=-1);
+}
+
+try {
+	var a=null;
+	a.toString();
+}catch(e) {
+	printError(e);
+	alert(isNPE(e));
+}
+/*try {	
+	no.Existent(); //not NPE
+}catch(e) {
+	alert(isNPE(e));
+}
+try {	
+	document.appendChild(null); //not NPE
+}catch(e) {
+	alert(isNPE(e));
+}
+try {	
+	var v = {o: ""};
+	v.o();//not npe
+}catch(e) {
+	alert(isNPE(e));
+}*/
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>org.sgx.j2s.mauve.report.SingleTestReport</title>
+</head>
+<body>
+<script type="text/javascript">
+Clazz={};
+		
+/** utility private method for creating a general regexp that can be used later  
+ * for detecting a certain kind of nativ exception. use with error messages like "blabla IDENTIFIER blabla"
+ * @param msg String - the error message
+ * @param spliterName String, must be contained once in msg
+ * spliterRegex String, a string with the regexp literal for identifying the spitter in exception further error messages.
+ */
+Clazz._ex_reg=function (msg, spliterName, spliterRegex) {
+	if(!spliterRegex) 
+		spliterRegex="[^\\s]+";	
+	var idx = msg.indexOf (spliterName), 
+		str = msg.substring (0, idx) + spliterRegex + msg.substring(idx + spliterName.length), 
+		regexp = new RegExp("^"+str+"$");
+	return regexp;
+}
+
+//NullPointerException
+var $$o$$ = null;
+try {
+	$$o$$.hello ();
+} catch (e) {
+	if(/Opera[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
+		/* opera throws an exception with fixed messages like 
+		"Statement on line 23: Cannot convert undefined or null 
+		to Object Backtrace: Line....long long " */
+		var idx1 = e.message.indexOf(":"), idx2 = e.message.indexOf(":", idx1+2);
+		Clazz._NPEMsgFragment = e.message.substr(idx1+1, idx2-idx1-18);
+		Clazz._isNPEExceptionPredicate = function(e) {
+			return e.message.indexOf(Clazz._NPEMsgFragment)!=-1;
+		}			
+	}	
+	else{ /* other browsers throw an exception that prints the identifier */
+		if(navigator.userAgent.toLowerCase().indexOf("webkit")!=-1) { //webkit, google chrome
+			Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "hello");
+			Clazz._isNPEExceptionPredicate = function(e) {
+				return Clazz._exceptionNPERegExp.test(e.message);
+			}
+		}
+		else {//others 
+			Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "$$o$$");
+			Clazz._isNPEExceptionPredicate = function(e) {
+				return Clazz._exceptionNPERegExp.test(e.message);
+			}
+		}
+	}
+}
+Clazz.isExceptionOf=function(e, className) {
+	if(e==null||className==null||e.message==null)
+		return false;	
+	if(className=="java.lang.NullPointerException") {
+		return Clazz._isNPEExceptionPredicate(e);
+	}
+	else
+		return false;
+}
+
+//simple test tools
+var ok=true, err_msg="";
+function check(b, msg) {
+	if(ok) { //if not error detected
+		if(!b){
+			ok=false;
+			err_msg=msg;
+		}
+	}
+}
+function getResults(){
+	if(ok)return "all test ok";
+	else return "failed test: "+err_msg;
+}
+
+//tests
+try {
+	var a=null;
+	a.toString();
+}catch(e) {
+	check(Clazz.isExceptionOf(e, "java.lang.NullPointerException"), "NPE1");
+}
+try {	
+	no.Existent(); //not NPE
+}catch(e) {
+	check(!Clazz.isExceptionOf(e, "java.lang.NullPointerException"), "NPE2")
+}
+try {	
+	document.appendChild(null); //not NPE
+}catch(e) {
+	check(!Clazz.isExceptionOf(e, "java.lang.NullPointerException"), "NPE3")
+}
+try {	
+	var v = {o: ""};
+	v.o();//not npe
+}catch(e) {
+	check(!Clazz.isExceptionOf(e, "java.lang.NullPointerException"), "NPE4")
+}
+
+alert(getResults());
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+﻿$_L(["$wt.accessibility.AccessibleTextListener"],"$wt.accessibility.AccessibleTextAdapter",null,function(){
+c$=$_T($wt.accessibility,"AccessibleTextAdapter",null,$wt.accessibility.AccessibleTextListener);
+$_V(c$,"getCaretOffset",
+function(e){
+},"$wt.accessibility.AccessibleTextEvent");
+$_V(c$,"getSelectionRange",
+function(e){
+},"$wt.accessibility.AccessibleTextEvent");
+});

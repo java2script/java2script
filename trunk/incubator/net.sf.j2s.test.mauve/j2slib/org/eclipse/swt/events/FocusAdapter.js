@@ -1,0 +1,9 @@
+﻿$_L(["$wt.events.FocusListener"],"$wt.events.FocusAdapter",null,function(){
+c$=$_T($wt.events,"FocusAdapter",null,$wt.events.FocusListener);
+$_V(c$,"focusGained",
+function(e){
+},"$wt.events.FocusEvent");
+$_V(c$,"focusLost",
+function(e){
+},"$wt.events.FocusEvent");
+});

@@ -1,0 +1,9 @@
+﻿$_L(["$wt.widgets.Event"],"$wt.dnd.DNDEvent",null,function(){
+c$=$_C(function(){
+this.dataType=null;
+this.dataTypes=null;
+this.operations=0;
+this.feedback=0;
+$_Z(this,arguments);
+},$wt.dnd,"DNDEvent",$wt.widgets.Event);
+});

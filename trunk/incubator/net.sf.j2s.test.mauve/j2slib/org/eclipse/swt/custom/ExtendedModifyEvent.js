@@ -1,0 +1,15 @@
+﻿$_L(["$wt.events.TypedEvent"],"$wt.custom.ExtendedModifyEvent",null,function(){
+c$=$_C(function(){
+this.start=0;
+this.length=0;
+this.replacedText=null;
+$_Z(this,arguments);
+},$wt.custom,"ExtendedModifyEvent",$wt.events.TypedEvent);
+$_K(c$,
+function(e){
+$_R(this,$wt.custom.ExtendedModifyEvent,[e]);
+this.start=e.start;
+this.length=e.end-e.start;
+this.replacedText=e.text;
+},"$wt.custom.StyledTextEvent");
+});

@@ -1,0 +1,27 @@
+.shell-manager-topbar-container {
+	position:absolute;
+	left:0;
+	top:0;
+	border:1px solid windowframe;
+	border-top:0 none transparent;
+	background-color:buttonface;
+	padding:2px;
+	height:24px;
+	/*font-size:10pt;
+	height:1.6em;
+	min-height:24px;
+	_height:1.7em;*/
+	width:320px;
+	z-index:6174;
+	text-align:left;
+	font-size:0;
+	margin:0;
+	opacity:0.85;
+	filter:Alpha(Opacity=85);
+}
+*:first-child+html .shell-manager-topbar-container { /* IE7 */
+	/*height:1.7em;*/
+}
+.swt-widgets-maximizedtitle {
+	width:324px;
+}

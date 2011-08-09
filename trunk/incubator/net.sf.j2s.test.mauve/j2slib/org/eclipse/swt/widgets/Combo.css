@@ -1,0 +1,88 @@
+.combo-default {
+	padding: 0;
+	/*overflow:hidden;*/
+	position:absolute;
+	/*border-width:2px;
+	border-style:inset;
+	border-color:gray;*/
+}
+
+.combo-input-box {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	padding-left:1px;
+	overflow:hidden;
+	/*border-style:none;*/
+	/*background-color:white;*/
+}
+
+@media all and (min-width:0px){/* opera and safari */
+.combo-input-box {
+	margin-top:-1px;
+}
+html:first-child .combo-input-box {
+	margin-top:-2px !important;
+}
+}
+
+.combo-default button {
+	/*float:right;*/
+	position:absolute;
+	right:0;
+	top:0;
+	height:100%;
+	width:16px;
+	line-height:0;
+	padding:0;
+	font-size:0;
+	margin:0;
+}
+* html .combo-default button {
+	right:-2px;
+}
+.combo-button-arrow-down {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:solid solid none solid;
+	border-color:transparent;
+	border-top-color:black !important;
+	border-bottom-width:0;
+}
+* html .combo-button-arrow-down {
+	border-color:buttonface;
+}
+
+.combo-disabled .combo-button-arrow-down {
+	border-top-color:gray !important;
+}
+.combo-disabled .combo-input-box {
+	background-color:buttonface !important;
+}
+
+.combo-select-box-invisible {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	display:none;
+}
+
+.combo-select-box-visible {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	display:block;
+}
+
+.combo-select-box-notsimple {
+	padding-left:1px;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	position:absolute;
+}
+.swt-widgets-combo {
+	width:324px;
+}

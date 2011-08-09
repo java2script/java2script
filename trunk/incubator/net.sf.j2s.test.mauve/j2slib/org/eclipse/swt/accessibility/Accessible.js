@@ -1,0 +1,80 @@
+﻿c$=$_C(function(){
+this.accessibleListeners=null;
+this.accessibleControlListeners=null;
+this.textListeners=null;
+this.control=null;
+$_Z(this,arguments);
+},$wt.accessibility,"Accessible");
+$_Y(c$,function(){
+this.accessibleListeners=new Array(0);
+this.accessibleControlListeners=new Array(0);
+this.textListeners=new Array(0);
+});
+$_K(c$,
+function(control){
+this.control=control;
+},"$wt.widgets.Control");
+$_M(c$,"addElement",
+($fz=function(arr,element){
+for(var i=0;i<arr.length;i++){
+if(arr[i]===element){
+return;
+}}
+for(var i=0;i<arr.length;i++){
+if(arr[i]==null){
+arr[i]=element;
+return;
+}}
+arr[arr.length]=element;
+},$fz.isPrivate=true,$fz),"~A,~O");
+$_M(c$,"removeElement",
+($fz=function(arr,element){
+for(var i=0;i<arr.length;i++){
+if(arr[i]===element){
+arr[i]=null;
+return;
+}}
+},$fz.isPrivate=true,$fz),"~A,~O");
+$_M(c$,"addAccessibleListener",
+function(listener){
+this.addElement(this.accessibleListeners,listener);
+},"$wt.accessibility.AccessibleListener");
+$_M(c$,"addAccessibleControlListener",
+function(listener){
+this.addElement(this.accessibleControlListeners,listener);
+},"$wt.accessibility.AccessibleControlListener");
+$_M(c$,"addAccessibleTextListener",
+function(listener){
+this.addElement(this.textListeners,listener);
+},"$wt.accessibility.AccessibleTextListener");
+$_M(c$,"getControl",
+function(){
+return this.control;
+});
+$_M(c$,"removeAccessibleListener",
+function(listener){
+this.removeElement(this.accessibleListeners,listener);
+},"$wt.accessibility.AccessibleListener");
+$_M(c$,"removeAccessibleControlListener",
+function(listener){
+this.removeElement(this.accessibleControlListeners,listener);
+},"$wt.accessibility.AccessibleControlListener");
+$_M(c$,"removeAccessibleTextListener",
+function(listener){
+this.removeElement(this.textListeners,listener);
+},"$wt.accessibility.AccessibleTextListener");
+$_M(c$,"selectionChanged",
+function(){
+});
+$_M(c$,"setFocus",
+function(childID){
+},"~N");
+$_M(c$,"textCaretMoved",
+function(index){
+},"~N");
+$_M(c$,"textChanged",
+function(type,startIndex,length){
+},"~N,~N,~N");
+$_M(c$,"textSelectionChanged",
+function(){
+});

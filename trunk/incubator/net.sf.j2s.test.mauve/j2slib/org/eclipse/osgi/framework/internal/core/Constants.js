@@ -1,0 +1,63 @@
+﻿Clazz.declarePackage ("org.eclipse.osgi.framework.internal.core");
+Clazz.load (["org.osgi.framework.Constants"], "org.eclipse.osgi.framework.internal.core.Constants", null, function () {
+c$ = Clazz.declareType (org.eclipse.osgi.framework.internal.core, "Constants", null, org.osgi.framework.Constants);
+c$.getInternalSymbolicName = Clazz.defineMethod (c$, "getInternalSymbolicName", 
+function () {
+return org.eclipse.osgi.framework.internal.core.Constants.INTERNAL_SYSTEM_BUNDLE;
+});
+c$.setInternalSymbolicName = Clazz.defineMethod (c$, "setInternalSymbolicName", 
+function (name) {
+($t$ = org.eclipse.osgi.framework.internal.core.Constants.INTERNAL_SYSTEM_BUNDLE = name, org.eclipse.osgi.framework.internal.core.Constants.prototype.INTERNAL_SYSTEM_BUNDLE = org.eclipse.osgi.framework.internal.core.Constants.INTERNAL_SYSTEM_BUNDLE, $t$);
+}, "~S");
+Clazz.defineStatics (c$,
+"OSGI_FRAMEWORK_VERSION", "1.3",
+"OSGI_FRAMEWORK_VENDOR", "Eclipse",
+"OSGI_BUNDLE_MANIFEST", "META-INF/MANIFEST.MF",
+"OSGI_FRAMEWORK_PACKAGE", "org.osgi.framework",
+"OSGI_RESOURCE_URL_PROTOCOL", "bundleresource",
+"OSGI_ENTRY_URL_PROTOCOL", "bundleentry",
+"OSGI_PROCESSOR_ALIASES", "processor.aliases",
+"OSGI_OSNAME_ALIASES", "osname.aliases",
+"OSGI_DEFAULT_DEFAULT_PERMISSIONS", "default.permissions",
+"OSGI_BASE_IMPLIED_PERMISSIONS", "implied.permissions",
+"OSGI_LOGSERVICE_NAME", "org.osgi.service.log.LogService",
+"OSGI_PACKAGEADMIN_NAME", "org.osgi.service.packageadmin.PackageAdmin",
+"OSGI_PERMISSIONADMIN_NAME", "org.osgi.service.permissionadmin.PermissionAdmin",
+"OSGI_STARTLEVEL_NAME", "org.osgi.service.startlevel.StartLevel",
+"JVM_VM_NAME", "java.vm.name",
+"JVM_OS_ARCH", "os.arch",
+"JVM_OS_NAME", "os.name",
+"JVM_OS_VERSION", "os.version",
+"JVM_USER_LANGUAGE", "user.language",
+"JVM_USER_REGION", "user.region",
+"J2ME_MICROEDITION_CONFIGURATION", "microedition.configuration",
+"J2ME_MICROEDITION_PROFILES", "microedition.profiles",
+"BUNDLE_STARTED", 0x00000001,
+"OSGI_PROPERTIES", "osgi.framework.properties",
+"DEFAULT_OSGI_PROPERTIES", "osgi.properties",
+"OSGI_FRAMEWORK_SYSTEM_PACKAGES", "org.osgi.framework.system.packages",
+"OSGI_BOOTDELEGATION", "org.osgi.framework.bootdelegation",
+"OSGI_SYSTEM_BUNDLE", "system.bundle",
+"INTERNAL_SYSTEM_BUNDLE", "org.eclipse.osgi",
+"OSGI_IMPL_VERSION_KEY", "osgi.framework.version",
+"OSGI_JAVA_PROFILE", "osgi.java.profile",
+"OSGI_JAVA_PROFILE_BOOTDELEGATION", "osgi.java.profile.bootdelegation",
+"OSGI_BOOTDELEGATION_IGNORE", "ignore",
+"OSGI_BOOTDELEGATION_OVERRIDE", "override",
+"OSGI_BOOTDELEGATION_NONE", "none",
+"OSGI_RESOLVER_MODE", "osgi.resolverMode",
+"STRICT_MODE", "strict",
+"OSGI_FRAMEWORKBEGINNINGSTARTLEVEL", "osgi.framework.beginningstartlevel",
+"DEFAULT_STARTLEVEL", "1",
+"ECLIPSE_SYSTEMBUNDLE", "Eclipse-SystemBundle",
+"ECLIPSE_PLATFORMFILTER", "Eclipse-PlatformFilter",
+"INTERNAL_DIRECTIVE", "x-internal",
+"FRIENDS_DIRECTIVE", "x-friends",
+"PROVIDE_PACKAGE", "Provide-Package",
+"REPROVIDE_ATTRIBUTE", "reprovide",
+"OPTIONAL_ATTRIBUTE", "optional",
+"REQUIRE_PACKAGES_ATTRIBUTE", "require-packages",
+"BUDDY_LOADER", "Eclipse-BuddyPolicy",
+"REGISTERED_POLICY", "Eclipse-RegisterBuddy",
+"REEXPORT_PACKAGE", "Reexport-Package");
+});

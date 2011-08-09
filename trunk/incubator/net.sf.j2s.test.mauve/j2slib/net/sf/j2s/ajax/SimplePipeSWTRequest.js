@@ -1,0 +1,9 @@
+﻿$_J("net.sf.j2s.ajax");
+$_L(["net.sf.j2s.ajax.SimplePipeRequest"],"net.sf.j2s.ajax.SimplePipeSWTRequest",null,function(){
+c$=$_T(net.sf.j2s.ajax,"SimplePipeSWTRequest",net.sf.j2s.ajax.SimplePipeRequest);
+c$.swtPipe=$_M(c$,"swtPipe",
+function(runnable){
+runnable.ajaxIn();
+net.sf.j2s.ajax.SimplePipeRequest.pipeRequest(runnable);
+},"net.sf.j2s.ajax.SimplePipeRunnable");
+});

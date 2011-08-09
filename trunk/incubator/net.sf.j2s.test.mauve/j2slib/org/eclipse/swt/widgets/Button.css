@@ -1,0 +1,211 @@
+.button-default {
+	position:absolute;
+	white-space:nowrap;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	cursor:default;
+}
+
+.button-border {
+	border:2px inset white;
+}
+
+.button-flat .button-push {
+	border:2px solid buttonshadow;
+}
+
+.button-flat .button-toggle {
+	border:2px solid buttonshadow;
+}
+
+.button-flat .button-arrow {
+	border:2px solid buttonshadow;
+}
+
+.button-push, .button-toggle, .button-arrow {
+	position:absolute;
+	white-space:nowrap;
+	font-family:inherit;
+	font-size:1em;
+	font-size:inherit;
+	margin:0;
+	padding:0;
+	width:100%;
+	height:100%;
+}
+
+* html .button-push {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:1em;
+}
+* html .button-toggle {
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:1em;
+}
+
+.button-push-safari, .button-toggle-safari {
+	height:auto !important;
+	top:-0.9em;
+	margin-top:50%;
+	padding:0.25em 0 0.35em 0;
+}
+.button-arrow-safari {
+	height:auto !important;
+	top:-0.7em;
+	margin-top:50%;
+	padding:0.25em 0 0.35em 0;
+}
+
+body:nth-of-type(1) .button-push-chrome, 
+body:nth-of-type(1) .button-toggle-chrome, 
+body:nth-of-type(1) .button-arrow-chrome {
+	top:auto;
+	margin:0 !important;
+	padding:0 !important;
+	height:100% !important;
+}
+
+.button-check .button-input-wrapper {
+	float:left;
+	position:relative;
+	/*bottom:-0.5em;*/
+	margin-top:4px;
+	_bottom:-0.5em;
+	_margin-top:auto;
+}
+.button-radio .button-input-wrapper {
+	float:left;
+	position:relative;
+	/*bottom:-0.5em;*/
+	margin-top:4px;
+	_bottom:-0.5em;
+	_margin-top:auto;
+}
+.button-text {
+	position:relative;
+	/*padding-left:2px;*/
+	cursor:default;
+}
+* html .button-text {
+	padding-left:0;
+}
+
+.button-disabled .button-text {
+	color:gray !important;
+}
+
+.button-input-wrapper INPUT {
+	position:relative;
+	top:-6px;
+	margin:3px;
+	margin-left:0;
+	/*margin-right:0;*/
+	padding-left:0;
+	padding-right:0;
+}
+* html .button-input-wrapper INPUT {
+	left:-1px;
+	top:-3px;
+	margin-top:0;
+	_left:0;
+	_top:-5px;
+	_margin-top:auto;
+	width:13px;
+	height:13px;
+	overflow:hidden;
+}
+
+@media all and (min-width:0px){/* opera */
+.button-input-wrapper INPUT {
+	left:0;
+	top:-4px;
+	margin-top:0;
+	width:13px;
+	height:13px;
+	margin-right:2px;
+	overflow:hidden;
+}
+}
+
+.button-selected {
+	border-style:inset;
+	background-color:#eee7e0;
+}
+.button-arrow-left {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:solid solid solid none;
+	border-color:transparent;
+	border-right-color:black !important;
+	border-left-width:0;
+}
+.button-arrow-right {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:solid none solid solid;
+	border-color:transparent;
+	border-left-color:black !important;
+	border-right-width:0;
+}
+.button-arrow-up {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:none solid solid solid;
+	border-color:transparent;
+	border-bottom-color:black !important;
+	border-top-width:0;
+}
+.button-arrow-down {
+	margin:auto;
+	height:0;
+	width:0;
+	font-size:0;
+	line-height:0;
+	
+	border-style:solid solid none solid;
+	border-color:transparent;
+	border-top-color:black !important;
+	border-bottom-width:0;
+}
+* html .button-arrow-left, * html .button-arrow-right, * html .button-arrow-up, * html .button-arrow-down {
+	border-color:buttonface;
+}
+
+.button-disabled .button-arrow-left {
+	border-right-color:gray !important;
+}
+.button-disabled .button-arrow-right {
+	border-left-color:gray !important;
+}
+.button-disabled .button-arrow-up {
+	border-bottom-color:gray !important;
+}
+.button-disabled .button-arrow-down {
+	border-top-color:gray !important;
+}
+
+.button-default span {
+	cursor:default;
+}
+.button-text-mnemonics {
+	text-decoration:underline;
+}
+
+.swt-widgets-button {
+	width:324px;
+}
