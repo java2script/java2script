@@ -1,0 +1,13 @@
+﻿c$=$_C(function(){
+this.header=null;
+this.footer=null;
+this.jobName=null;
+this.printTextForeground=false;
+this.printTextBackground=false;
+this.printTextFontStyle=false;
+this.printLineBackground=false;
+$_Z(this,arguments);
+},$wt.custom,"StyledTextPrintOptions");
+$_S(c$,
+"PAGE_TAG","<page>",
+"SEPARATOR","\t");

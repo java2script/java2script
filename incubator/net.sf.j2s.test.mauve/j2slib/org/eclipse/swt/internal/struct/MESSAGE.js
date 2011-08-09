@@ -1,0 +1,16 @@
+﻿c$=$_C(function(){
+this.defer=false;
+this.control=null;
+this.type=0;
+this.data=null;
+$_Z(this,arguments);
+},$wt.internal.struct,"MESSAGE");
+$_K(c$,
+function(control,type,data){
+this.control=control;
+this.type=type;
+this.data=data;
+},"$wt.widgets.Control,~N,~O");
+$_S(c$,
+"CONTROL_RESIZE",1,
+"CONTROL_LAYOUT",2);

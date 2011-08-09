@@ -1,0 +1,12 @@
+﻿$_L(["$wt.events.MouseTrackListener"],"$wt.events.MouseTrackAdapter",null,function(){
+c$=$_T($wt.events,"MouseTrackAdapter",null,$wt.events.MouseTrackListener);
+$_V(c$,"mouseEnter",
+function(e){
+},"$wt.events.MouseEvent");
+$_V(c$,"mouseExit",
+function(e){
+},"$wt.events.MouseEvent");
+$_V(c$,"mouseHover",
+function(e){
+},"$wt.events.MouseEvent");
+});

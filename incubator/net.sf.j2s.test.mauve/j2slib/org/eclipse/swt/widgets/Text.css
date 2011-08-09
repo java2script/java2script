@@ -1,0 +1,76 @@
+.text-default {
+	position:absolute;
+	border-style:none;
+	/*background-color:white;*/
+	margin:0;
+	padding:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	/*white-space:nowrap;*/
+	overflow:hidden;
+}
+.text-default textarea {
+	/*background-color:transparent;*/
+	margin:0;
+	padding:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+}
+.text-editable textarea {
+	/*background-color:white;*/
+}
+.text-default input {
+	/*background-color:transparent;*/
+	margin:0;
+	padding:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+}
+* html .text-default textarea {
+	margin-top:-1px;
+}
+* html .text-default input {
+	margin-top:-1px;
+}
+
+.text-editable input {
+	/*background-color:white;*/
+}
+textarea.text-ie-default {
+	overflow-y:hidden;
+}
+textarea.text-v-scroll {
+	overflow:scroll;
+	overflow-x:hidden;
+}
+textarea.text-h-scroll {
+	overflow:scroll;
+	overflow-y:hidden;
+}
+.text-no-border {
+	border-style:none;
+	background-color:white;
+}
+textarea.text-no-border, input.text-no-border {
+	border-style:none;
+	_padding:0 3px;
+}
+.text-default textarea {
+	padding:0;
+	_padding:0 1px;
+}
+input.text-wrap {
+	padding:0 3px;
+}
+.text-disabled {
+	background-color:buttonface;
+}
+input.text-readonly {
+	background-color:buttonface;
+}
+textarea.text-disabled, input.text-disabled {
+	background-color:buttonface;
+}
+.swt-widgets-text {
+	width:324px;
+}

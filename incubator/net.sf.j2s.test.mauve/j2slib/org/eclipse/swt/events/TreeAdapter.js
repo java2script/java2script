@@ -1,0 +1,9 @@
+﻿$_L(["$wt.events.TreeListener"],"$wt.events.TreeAdapter",null,function(){
+c$=$_T($wt.events,"TreeAdapter",null,$wt.events.TreeListener);
+$_V(c$,"treeCollapsed",
+function(e){
+},"$wt.events.TreeEvent");
+$_V(c$,"treeExpanded",
+function(e){
+},"$wt.events.TreeEvent");
+});

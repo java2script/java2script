@@ -1,0 +1,12 @@
+﻿c$=$_C(function(){
+this.hwnd=null;
+this.hwndInsertAfter=null;
+this.x=0;
+this.y=0;
+this.cx=0;
+this.cy=0;
+this.flags=0;
+$_Z(this,arguments);
+},$wt.internal.struct,"WINDOWPOS");
+$_S(c$,
+"sizeof",28);

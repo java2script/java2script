@@ -1,0 +1,9 @@
+﻿$_L(["$wt.browser.ProgressListener"],"$wt.browser.ProgressAdapter",null,function(){
+c$=$_T($wt.browser,"ProgressAdapter",null,$wt.browser.ProgressListener);
+$_V(c$,"changed",
+function(event){
+},"$wt.browser.ProgressEvent");
+$_V(c$,"completed",
+function(event){
+},"$wt.browser.ProgressEvent");
+});

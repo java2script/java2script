@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>Java2Script Cross Site Cookie</title>
+</head>
+<body>
+<script type="text/javascript">
+function createCookie (name, value, days) {
+	var expires = "";
+	if (days != null) {
+		var toExpireDate = new Date();
+		toExpireDate.setTime (toExpireDate.getTime () + days * 24 * 3600 * 1000);
+		expires = "; expires=" + toExpireDate.toGMTString ();
+	}
+	document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function readCookie (name) {
+	var prefix = name + "=";
+	var allCookies = document.cookie.split (';');
+	for(var i = 0; i < allCookies.length; i++) {
+		var item = allCookies[i].replace (/^\s*/, "");
+		if (item.indexOf (prefix) == 0) {
+			return item.substring (prefix.length, item.length);
+		}
+	}
+	return null;
+}
+
+var originalDomain = document.domain;
+var idx = originalDomain.indexOf (".");
+if (idx != -1) {
+	var parentDomain = originalDomain.substring (idx + 1);
+	document.domain = parentDomain;
+}
+try {
+	with (window.parent) {
+		if (xssCookieReadyCallback != null) {
+			try {
+				xssCookieReadyCallback ();
+			} catch (e) {};
+		}
+	}
+} catch (e) {};
+</script>
+</body>
+</html>

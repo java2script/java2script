@@ -1,0 +1,13 @@
+.list-default {
+	position:absolute;
+	left:0;
+	top:0;
+	font-family:Tahoma, Arial, sans-serif;
+	font-size:8pt;
+}
+.list-border {
+	border:2px inset gray;
+}
+.swt-widgets-list {
+	width:324px;
+}
