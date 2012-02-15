@@ -12,6 +12,7 @@ package net.sf.j2s.ajax;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
@@ -805,12 +806,17 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 				 * It is OK to convert to string, because SimpleSerialize's
 				 * serialized string contains only ASCII chars.
 				 */
-				String string = baos.toString();
+				String string = null;
+				try {
+					string = baos.toString("iso-8859-1");
+				} catch (UnsupportedEncodingException e1) {
+					string = baos.toString();
+				}
 				String resetString = parseReceived(string);
 				if (resetString != null) {
 					baos.reset();
 					try {
-						baos.write(resetString.getBytes());
+						baos.write(resetString.getBytes("iso-8859-1"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -959,7 +965,7 @@ for (var i = 0; i < iframes.length; i++) {
 						/**
 						 * @j2sNative
 						 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum(runnable, subdomain, true);
-						 */ { subdomain.isEmpty(); }
+						 */ { subdomain.toString(); }
 					}
 					return string.substring(end + continueKey.length());
 				}

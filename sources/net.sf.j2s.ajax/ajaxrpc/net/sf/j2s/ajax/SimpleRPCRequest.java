@@ -448,6 +448,7 @@ if (state == "loaded" || state == "complete") {
 	 * @param response
 	 * @param session
 	 */
+	@SuppressWarnings("unused")
 	static void xssNotify(String nameID, String response, String session) {
 		/**
 		 * @j2sNative
