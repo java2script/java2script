@@ -416,7 +416,7 @@ public class SimplePipeHelper {
             		e.printStackTrace();
             	}
 			}
-			if (pipes == null || pipes.isEmpty()) {
+			if (pipes == null/* || pipes.isEmpty()*/) {
 				monitored = false;
 				break;
 			}

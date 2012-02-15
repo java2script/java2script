@@ -561,7 +561,11 @@ public class HttpRequest {
 				}
 			}
 			if (responseText == null) {
-				responseText = baos.toString();
+				try {
+					responseText = baos.toString("iso-8859-1");
+				} catch (UnsupportedEncodingException e) {
+					responseText = baos.toString();
+				}
 			}
 			readyState = 4;
 			if (onreadystatechange != null) {
@@ -576,7 +580,7 @@ public class HttpRequest {
 			*/
 		} catch (IOException e) {
 			if (checkAbort()) return; // exception caused by abort action
-			//e.printStackTrace();
+			e.printStackTrace();
 			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onLoaded();

@@ -32,6 +32,8 @@ public class SimpleSerializable implements Cloneable {
 	
 	public static SimpleSerializable UNKNOWN = new SimpleSerializable();
 
+	public static boolean BYTES_COMPACT_MODE = false;
+	
 	/**
 	 * @return
 	 * 
@@ -138,7 +140,7 @@ for (var i = 0; i < fields.length; i++) {
 			buffer[buffer.length] = type;
 			var l4 = this[name].length;
 			if (l4 > 52) {
-				if (l4 > 0x4000) { // 16 * 1024
+				if (l4 > 0x1000000) { // 16 * 1024 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 				}
 				buffer[buffer.length] = String.fromCharCode (baseChar - 2);
@@ -408,16 +410,20 @@ return strBuf;
 							byte [] bs = (byte []) field.get(this);
 							if (bs == null && ignoring) continue;
 							buffer.append(nameStr);
-							buffer.append("AB");
+							buffer.append(!bytesCompactMode() ? "AB" : "A8");
 							if (bs == null) {
 								buffer.append((char) (baseChar - 1));
 							} else {
 								serializeLength(buffer, bs.length);
-								for (int j = 0; j < bs.length; j++) {
-									byte b = bs[j];
-									String value = "" + b;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(b);
+								if (!bytesCompactMode()) {
+									for (int j = 0; j < bs.length; j++) {
+										byte b = bs[j];
+										String value = "" + b;
+										buffer.append((char) (baseChar + value.length()));
+										buffer.append(b);
+									}
+								} else {
+									buffer.append(new String(bs, "iso-8859-1"));
 								}
 							}
 						} else if (type == char[].class) {
@@ -490,7 +496,7 @@ return strBuf;
 	private void serializeLength(StringBuffer buffer, int length) {
 		char baseChar = 'B';
 		if (length > 52) {
-			if (length > 0x4000) { // 16 * 1024
+			if (length > 0x1000000) { // 16 * 1024 * 1024
 				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 			}
 			buffer.append((char) (baseChar - 2));
@@ -647,7 +653,7 @@ while (index < start + length && index < end) {
 				var l3 = c4 - baseChar;
 				if (l3 < 0) return true;
 				l2 = parseInt(str.substring(index, index + l3));
-				if (l2 > 0x4000) { // 16 * 1024
+				if (l2 > 0x1000000) { // 16 * 1024 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 				}
 				index += l3;
@@ -852,7 +858,7 @@ return true;
 							int l3 = c4 - baseChar;
 							if (l3 < 0) return true;
 							l2 = Integer.parseInt(str.substring(index, index + l3));
-							if (l2 > 0x4000) { // 16 * 1024
+							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
 								 * Limit the size of array here! 
@@ -860,6 +866,16 @@ return true;
 								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 							}
 							index += l3;
+						}
+						if (c2 == '8') { // byte[]
+							String byteStr = str.substring(index, index + l2);
+							index += l2;
+							if (field == null) {
+								continue;
+							}
+							byte[] bs = byteStr.getBytes("iso-8859-1");
+							field.set(this, bs);
+							continue;
 						}
 						String[] ss = new String[l2];
 						for (int i = 0; i < l2; i++) {
@@ -1064,8 +1080,24 @@ return true;
 		return true;
 	}
 
+    /**
+     * Fields with alias names.
+     * @return
+     */
     protected String[] fieldMapping() {
     	return null;
+    }
+
+    /**
+     * Fields to be ignored while differences are being calculated.
+     * @return
+     */
+    protected String[] fieldDiffIgnored() {
+    	return null;
+    }
+    
+    protected boolean bytesCompactMode() {
+    	return BYTES_COMPACT_MODE;
     }
     
 	/**
