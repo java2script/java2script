@@ -76,12 +76,12 @@ c$.prototype.open = function (method, url, async, user, password) {
 	//	}
 	//} catch (e) {
 	//}
-	try {
-		var l = window.location;
-		this.transport.setRequestHeader ("Referer",
-				l.protocol + "//" + l.host + (l.port != "" ? ":" + l.port : "") + "/");
-	} catch (e) {
-	}
+	//try {
+	//	var l = window.location;
+	//	this.transport.setRequestHeader ("Referer",
+	//			l.protocol + "//" + l.host + (l.port != "" ? ":" + l.port : "") + "/");
+	//} catch (e) {
+	//}
 	if (method != null && method.toLowerCase () == "post") {
 		try {
 			this.transport.setRequestHeader ("Content-type", 
