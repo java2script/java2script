@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.annotation.J2SIgnore;
@@ -50,6 +53,9 @@ public class SimplePipeHelper {
 	
 	static Map<String, SimplePipeRunnable> pipes;
 
+	@J2SIgnore
+	private static BlockingQueue<SimplePipeRunnable> toBeDestroyedPipes = new LinkedBlockingQueue<SimplePipeRunnable>();
+	
 	@J2SIgnore
 	private SimplePipeHelper() {
 		//
@@ -417,9 +423,41 @@ public class SimplePipeHelper {
 		}
 		System.err.println("Pipe sessions are null or empty! Pipe session monitor exited!");
 	}
-
+	
+	@J2SIgnore
+	private static void killingPipes() {
+		while (true) {
+			SimplePipeRunnable pipe = null;
+			try {
+				pipe = toBeDestroyedPipes.poll(30, TimeUnit.SECONDS);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			if (pipe != null) {
+				//System.out.println("Killing pipe " + pipe + " :// " + System.currentTimeMillis());
+    			try {
+    				if (pipe.closer != null) {
+    					pipe.closer.helpClosing(pipe); // will call pipe.pipeDestroy()
+    				} else {
+    					pipe.pipeClosed(); // will call pipe.pipeDestroy()
+    				}
+    			} catch (Throwable e) {
+    				e.printStackTrace();
+    			}
+				//System.out.println("Killed pipe " + pipe + " :// " + System.currentTimeMillis());
+			} else {
+				//System.out.println("?? Empty loop?");
+			}
+		}
+	}
+	
 	@J2SIgnore
 	static void asyncDestroyPipe(final SimplePipeRunnable pipe) {
+		//System.out.println("To destroy pipe " + pipe);
+		if (!toBeDestroyedPipes.contains(pipe)) {
+			toBeDestroyedPipes.offer(pipe);
+		}
+		/*
     	(new Thread("Destroy Pipe Thread") {
     		@Override
     		public void run() {
@@ -434,6 +472,7 @@ public class SimplePipeHelper {
     			}
     		}
     	}).start();
+    	// */
 	}
 	
 	@J2SIgnore
@@ -451,6 +490,13 @@ public class SimplePipeHelper {
 		};
 		thread.setDaemon(true);
 		thread.start();
+		Thread killerThread = new Thread("Managed Pipe Session Killer") {
+			public void run() {
+				killingPipes();
+			}
+		};
+		killerThread.setDaemon(true);
+		killerThread.start();
 	}
 	
 }
