@@ -578,7 +578,7 @@ public class HttpRequest {
 				onreadystatechange.onUninitialized();
 			}
 			*/
-		} catch (IOException e) {
+		} catch (Exception e) {
 			if (checkAbort()) return; // exception caused by abort action
 			e.printStackTrace();
 			readyState = 4;
