@@ -1728,11 +1728,11 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 		if (node.status < ClazzNode.STATUS_DECLARED) {
 			var decl = node.declaration;
 			if (decl != null) {
-				if (decl.executed == false) {
+				if (!decl.executed) {
 					decl ();
 					decl.executed = true;
-				} else {
-					decl ();
+				//} else {
+				//	decl ();
 				}
 			}
 			node.status = ClazzNode.STATUS_DECLARED;
@@ -2514,7 +2514,9 @@ ClazzLoader.loadClass = function (name, optionalsLoaded, forced, async) {
 			} else {
 				optionalsLoaded ();
 			}
-		} // else ... should be called later
+		} else { // should be called later
+			window.setTimeout (optionalsLoaded, 25);
+		}
 	}
 	
 };
