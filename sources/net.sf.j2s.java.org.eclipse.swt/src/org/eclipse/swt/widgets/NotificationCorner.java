@@ -1,5 +1,6 @@
 package org.eclipse.swt.widgets;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Clazz;
@@ -24,14 +25,96 @@ public class NotificationCorner extends DesktopItem {
 
 	private int currentZIndex;
 	
+	int logoOrientation;
+	int orientation;
+	
 	public NotificationCorner(Display display) {
 		super();
 		this.display = display;
 		this.isAutoHide = false;
 		alreadyInitialized = false;
+		
+		String orientationStr = "right";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.logo.orientation"];
+		 */ {}
+		if ("left".equalsIgnoreCase(orientationStr)) {
+			this.logoOrientation = SWT.LEFT;
+		} else {
+			this.logoOrientation = SWT.RIGHT;
+		}
+		orientationStr = "right";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.notification.corner.orientation"];
+		 */ {}
+		if ("left".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.LEFT;
+		} else {
+			this.orientation = SWT.RIGHT;
+		}
 	}
 
 	public void initialize() {
+		if (display != null && display.taskBar != null
+				&& (display.taskBar.orientation == SWT.BOTTOM || display.taskBar.orientation == SWT.TOP)) {
+			if (handle != null) {
+				return;
+			}
+			handle = document.createElement("DIV");
+			handle.className = "tray-logo-item tray-logo-item-round";
+			String title = "Powered by Java2Script";
+			/**
+			 * @j2sNative
+			 * if (window["swt.logo.tooltip"] != null) {
+			 * 	title = window["swt.logo.tooltip"];
+			 * }
+			 */ {}
+			handle.title = title;
+			boolean needFixing = OS.isFirefox;
+			boolean hideLogo = false;
+			/**
+			 * @j2sNative
+			 * needFixing &= (navigator.userAgent.indexOf ("Firefox/2.0") != -1);
+			 * hideLogo = window["swt.logo"] == false;
+			 */ {}
+			if (needFixing) {
+				handle.style.backgroundColor = "white";
+			}
+			if (hideLogo) {
+				handle.style.display = "none";
+			} else {
+				String logoURL = null;
+				/**
+				 * @j2sNative
+				 * if (window["swt.logo.url"] != null) {
+				 * 	logoURL = window["swt.logo.url"];
+				 * }
+				 */ {}
+				if (logoURL != null) {
+					handle.style.backgroundPosition = "center center";
+					handle.style.backgroundImage = "url('" + logoURL + "')";
+				}
+			}
+			if (display.taskBar.handle != null) {
+				display.taskBar.handle.appendChild(handle);
+			} else {
+				document.body.appendChild(handle);
+			}
+			if (logoOrientation == SWT.RIGHT) {
+				handle.style.left = (display.taskBar.clientWidth - 36 - 18 - 6) + "px";
+			} else {
+				handle.style.left = "12px";
+			}
+			if (display.taskBar.orientation == SWT.BOTTOM) {
+				handle.style.top = (display.taskBar.clientHeight - 36) + "px";
+			} else { // TOP
+				handle.style.top = "0"; // TODO
+			}
+			configureEvents();
+			return;
+		}
 		boolean existed = false;
 		Element[] containers = new Element[2];
 		containers[0] = document.body;
@@ -63,6 +146,13 @@ public class NotificationCorner extends DesktopItem {
 			defaultNotificationCorner = this;
 		}
 		
+		/**
+		 * @j2sNative
+		 * if (window["swt.notification.corner"] == false) {
+		 * 	return;
+		 * }
+		 */ { }
+		
 		if (tray == null) {
 			/**
 			 * @j2sNative
@@ -71,7 +161,14 @@ public class NotificationCorner extends DesktopItem {
 			tray = Display.getDefault().getSystemTray();
 		} 
 		if (alreadyInitialized) {
-			handle.style.display = "block";
+			boolean hideLogo = false;
+			/**
+			 * @j2sNative
+			 * hideLogo = window["swt.logo"] == false;
+			 */ {}
+			if (!hideLogo) {
+				handle.style.display = "block";
+			}
 			document.body.removeChild(minimizedEl);
 			document.body.removeChild(handle);
 			document.body.appendChild(minimizedEl);
@@ -97,16 +194,40 @@ public class NotificationCorner extends DesktopItem {
 		handle.className = "tray-logo-item";
 		handle.title = "Powered by Java2Script";
 		boolean needFixing = OS.isFirefox;
+		boolean hideLogo = false;
 		/**
 		 * @j2sNative
 		 * needFixing &= (navigator.userAgent.indexOf ("Firefox/2.0") != -1);
+		 * hideLogo = window["swt.logo"] == false;
 		 */ {}
 		if (needFixing) {
 			handle.style.backgroundColor = "white";
 		}
+		if (hideLogo) {
+			handle.style.display = "none";
+		}
 		document.body.appendChild(handle);
+		configureEvents();
+
+		updateEvents();
+		
+		bringToTop(window.currentTopZIndex);
+	}
+
+	private void configureEvents() {
 		hLogoClick = new RunnableCompatibility() {
 			public void run() {
+				/**
+				 * @j2sNative
+				 * if (window["swt.logo.callback"] != null) {
+				 * 	try {
+				 * 		if (window["swt.logo.callback"] () != false) {
+				 * 			return;
+				 * 		}
+				 * 	} catch (e) {
+				 * 	}
+				 * }
+				 */ {}
 				if (display != null && !display.isDisposed()) {
 					if (display.trayCorner != null) {
 						display.trayCorner.bringToTop(-1);
@@ -178,10 +299,6 @@ public class NotificationCorner extends DesktopItem {
 		if (handle != null) {
 			Clazz.addEvent(handle, "mouseover", mouseOver);
 		}
-
-		updateEvents();
-		
-		bringToTop(window.currentTopZIndex);
 	}
 
 	/**
@@ -339,7 +456,11 @@ public class NotificationCorner extends DesktopItem {
 		}
 	}
 	boolean isMinimized() {
-		return minimizedEl.style.display != "none";
+		if (minimizedEl != null) {
+			return minimizedEl.style.display != "none";
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -349,6 +470,9 @@ public class NotificationCorner extends DesktopItem {
 	public boolean setMinimized(boolean minimized) {
 		if (minimized == isMinimized()) {
 			return false;
+		}
+		if (minimizedEl == null) {
+			return !minimized;
 		}
 		minimizedEl.style.display = !minimized ? "none" : "block";
 		for (int i = 0; i < tray.allCells.length; i++) {
@@ -409,7 +533,22 @@ public class NotificationCorner extends DesktopItem {
 	}
 
 	public void updateLayout() {
-		
+		if (display.tray != null && !display.tray.isDisposed()) {
+			display.tray.updateItems();
+		}
+		if (handle != null && display != null && display.taskBar != null
+				&& (display.taskBar.orientation == SWT.BOTTOM || display.taskBar.orientation == SWT.TOP)) {
+			if (logoOrientation == SWT.RIGHT) {
+				handle.style.left = (display.taskBar.clientWidth - 36 - 18 - 6) + "px";
+			} else {
+				handle.style.left = "12px";
+			}
+			if (display.taskBar.orientation == SWT.BOTTOM) {
+				handle.style.top = (display.taskBar.clientHeight - 36) + "px";
+			} else { // TOP
+				handle.style.top = "0"; // TODO
+			}
+		}
 	}
 
 	public void releaseWidget() {
@@ -429,7 +568,9 @@ public class NotificationCorner extends DesktopItem {
 				Clazz.removeEvent(handle, "click", hLogoClick);
 				hLogoClick = null;
 			}
-			Clazz.removeEvent(handle, "mouseover", mouseOver);
+			if (mouseOver != null) {
+				Clazz.removeEvent(handle, "mouseover", mouseOver);
+			}
 			
 			OS.destroyHandle(handle);
 			handle = null;

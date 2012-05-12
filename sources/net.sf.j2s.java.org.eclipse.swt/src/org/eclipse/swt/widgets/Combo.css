@@ -16,15 +16,6 @@
 	/*background-color:white;*/
 }
 
-@media all and (min-width:0px){/* opera and safari */
-.combo-input-box {
-	margin-top:-1px;
-}
-html:first-child .combo-input-box {
-	margin-top:-2px !important;
-}
-}
-
 .combo-default button {
 	/*float:right;*/
 	position:absolute;

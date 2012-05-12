@@ -218,6 +218,10 @@ void bringToTop () {
 }
 
 void bringToTop (boolean parentShell, boolean childShells) {
+	Shell lastTopShell = null;
+	if (parentShell && childShells) {
+		lastTopShell = Display.getTopShell();
+	}
 	Display.topMaxShell = null;
 	Display.topMaxShellNeedUpdated = true;
 	if (parentShell && childShells) {
@@ -226,10 +230,8 @@ void bringToTop (boolean parentShell, boolean childShells) {
 	if (parentShell && parent != null && parent instanceof Decorations) {
 		((Decorations) parent).bringToTop(true, false);
 	}
-	if (titleBar != null) {
-		titleBar.style.backgroundColor = "activecaption";
-		shellTitle.style.color = "captiontext";
-	}
+	OS.removeCSSClass(handle, "shell-inactive");
+	OS.addCSSClass(handle, "shell-active");
 	/*
 	* This code is intentionally commented.  On some platforms,
 	* the ON_TOP style creates a shell that will stay on top
@@ -302,7 +304,21 @@ void bringToTop (boolean parentShell, boolean childShells) {
 	}
 	
 	if (modalHandle != null) {
+		handle.style.zIndex = 10001 + (handle.style.zIndex - 1);
 		modalHandle.style.zIndex = handle.style.zIndex - 1;
+	}
+	
+	if (display != null && display.taskBar != null) {
+		display.taskBar.updateItems();
+	}
+	
+	if (parentShell && childShells) {
+		if (lastTopShell != this) {
+			if (lastTopShell != null) {
+				lastTopShell.sendEvent(SWT.FocusOut);
+			}
+			sendEvent(SWT.FocusIn);
+		}
 	}
 }
 
@@ -589,12 +605,12 @@ private static Element createCSSDiv(Element handle, String css) {
 
 protected static void createResizeHandles(Element handle) {
 	String[] handles = new String[] {
+			//"shell-center-middle",
 			"shell-left-top",
 			"shell-right-top",
 			"shell-center-top",
 			"shell-left-middle",
 			"shell-right-middle",
-			"shell-center-middle",
 			"shell-left-bottom",
 			"shell-right-bottom",
 			"shell-center-bottom"
@@ -634,19 +650,25 @@ protected static void createShadowHandles(Element handle) {
 }
 
 protected static void createNarrowShadowHandles(Element handle) {
+	appendNarrowShadowHandles(handle, true, true, true, true);
+}
+
+protected static void appendNarrowShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
 	String[] handles = new String[] {
-			"shadow-narrow-left-top",
-			"shadow-narrow-right-top",
-			"shadow-narrow-center-top",
-			"shadow-narrow-left-middle",
-			"shadow-narrow-right-middle",
+			left && top ? "shadow-narrow-left-top" : null,
+			right && top ? "shadow-narrow-right-top" : null,
+			top ? "shadow-narrow-center-top" : null,
+			left ? "shadow-narrow-left-middle" : null,
+			right ? "shadow-narrow-right-middle" : null,
 			"shadow-narrow-center-middle",
-			"shadow-narrow-left-bottom",
-			"shadow-narrow-right-bottom",
-			"shadow-narrow-center-bottom"
+			left && bottom ? "shadow-narrow-left-bottom" : null,
+			right && bottom ? "shadow-narrow-right-bottom" : null,
+			bottom ? "shadow-narrow-center-bottom" : null
 	};
 	for (int i = 0; i < handles.length; i++) {
-		createCSSDiv(handle, handles[i]);
+		if (handles[i] != null) {
+			createCSSDiv(handle, handles[i]);
+		}
 	}
 	if (OS.isChrome10) {
 		handle.style.opacity = "1";
@@ -674,7 +696,8 @@ protected void createHandle() {
 		});
 	}
 	handle = document.createElement("DIV");
-	handle.className = "shell-default shell-trim";
+//	handle.className = "shell-default shell-trim";
+	handle.className = "shell-default";
 	handle.style.lineHeight = "16px"; // or "1", reset CSS
 	handle.style.visibility = "hidden";
 	
@@ -694,7 +717,11 @@ protected void createHandle() {
 //	if ((style & SWT.NO_TRIM) == 0 & (style & SWT.RESIZE) != 0) {
 //		handle.className += " shell-trim";
 //	}
+	if ((style & SWT.NO_TRIM) == 0) {
+		handle.className += " shell-trim";
+	}
 	getMonitor().handle.appendChild(handle);
+	createCSSDiv(handle, "shell-center-middle");
 	if ((style & SWT.NO_TRIM) == 0 && (style & SWT.RESIZE) != 0) {
 		createResizeHandles(handle);
 	}
@@ -703,7 +730,7 @@ protected void createHandle() {
 	 * @j2sNative
 	 * supportShadow = window["swt.disable.shadow"] != true;
 	 */ {}
-	if (supportShadow) {
+	if (supportShadow && (style & SWT.NO_TRIM) == 0) {
 		createShadowHandles(handle);
 	}
 	if ((style & SWT.NO_TRIM) == 0
@@ -809,28 +836,39 @@ void nextWindowLocation(int wHint, int hHint) {
 	}
 	
 	int delta = OS.getStringPlainHeight("A") + 4 + 6 + 1;
+	Monitor monitor = getMonitor();
+	int x = monitor.clientX + 48;
 	if (window.defaultWindowLeft == null) {
-		window.defaultWindowLeft = "160";
+		x = monitor.clientX + 160;
 	} else {
-		int num = Integer.parseInt("" + window.defaultWindowLeft);
-		num += delta;
-		if (num + wHint > getMonitor().clientWidth) {
-			num = delta;
-		}
-		window.defaultWindowLeft = "" + num;
+		x = Integer.parseInt("" + window.defaultWindowLeft);
+		x += delta;
 	}
+	if (x + wHint > monitor.clientX + monitor.clientWidth) {
+		x = monitor.clientX + delta;
+	}
+	if (x < monitor.clientX) {
+		x = monitor.clientX;
+	}
+	window.defaultWindowLeft = "" + x;
+	
+	int y = monitor.clientY;
 	if (window.defaultWindowTop == null) {
-		window.defaultWindowTop = "48";
+		y = monitor.clientY + 48;
 	} else {
-		int num = Integer.parseInt("" + window.defaultWindowTop);
-		num += delta;
-		if (num + hHint > getMonitor().clientHeight) {
-			num = delta;
-		}
-		window.defaultWindowTop = "" + num;
+		y = Integer.parseInt("" + window.defaultWindowTop);
+		y += delta;
 	}
-	left = Integer.parseInt(window.defaultWindowLeft);
-	top = Integer.parseInt(window.defaultWindowTop);
+	if (y + hHint > monitor.clientY + monitor.clientHeight) {
+		y = monitor.clientY + delta;
+	}
+	if (y < monitor.clientY) {
+		y = monitor.clientY;
+	}
+	window.defaultWindowTop = "" + y;
+	
+	left = x;
+	top = y;
 	left += OS.getFixedBodyOffsetLeft ();
 	top += OS.getFixedBodyOffsetTop ();
 }
@@ -838,7 +876,11 @@ void nextWindowLocation(int wHint, int hHint) {
 void addModalLayer() {
 	modalHandle = document.createElement ("DIV");
 	modalHandle.className = "shell-modal-block";
+	handle.style.zIndex = 10001 + (handle.style.zIndex - 1);
 	modalHandle.style.zIndex = handle.style.zIndex - 1;
+	if (OS.isOpera) {
+		modalHandle.style.backgroundColor = "transparent";
+	}
 	getMonitor().handle.insertBefore(modalHandle, handle);
 }
 
@@ -889,7 +931,15 @@ public void dispose () {
 			shell.setFocus ();
 		}
 	}
-	
+	/**
+	 * @j2sNative
+	 * var f = window["swt.animation.disposing"];
+	 * if (f != null) {
+	 * 	try {
+	 * 		f (this);
+	 * 	} catch (e) {}
+	 * }
+	 */ {}
 	if (shellFrameDND != null) {
 		shellFrameDND.dispose();
 		shellFrameDND = null;
@@ -1036,8 +1086,10 @@ public Rectangle getClientArea () {
 			h -= 1 + OS.getContainerHeight(shellMenuBar);
 		}
 	} else if ((style & SWT.TOOL) != 0){
-		h -= 2;
-		w -= 2;
+		if ((style & SWT.NO_TRIM) == 0){
+			h -= 2;
+			w -= 2;
+		}
 	} else {
 		h -= 6;
 		w -= 6;
@@ -1800,6 +1852,15 @@ public void setMaximized (boolean maximized) {
 		OS.UpdateWindow (handle);
 	}
 	*/
+	/**
+	 * @j2sNative
+	 * var f = window["swt.animation.maximizing"];
+	 * if (f != null) {
+	 * 	try {
+	 * 		f (this, maximized);
+	 * 	} catch (e) {}
+	 * }
+	 */ {}
 	Display.topMaxShell = null;
 	Display.topMaxShellNeedUpdated = true;
 	this.maximized = maximized;
@@ -1814,11 +1875,9 @@ public void setMaximized (boolean maximized) {
 	Monitor monitor = getMonitor();
 	boolean updateBody = (monitor.handle == document.body); // update with current body client area
 	if (maximized) {
-		
 		if (updateBody) {
 			lastBodyScrollLeft = node.scrollLeft;
 			lastBodyScrollTop = node.scrollTop;
-			
 			lastClientAreaCSSText = node.style.cssText;
 			lastBodyCSSText = b.style.cssText;
 			
@@ -1838,26 +1897,28 @@ public void setMaximized (boolean maximized) {
 			//Monitor monitor = getMonitor();
 			int height = monitor.clientHeight;
 			int width = monitor.clientWidth;
-			if (monitor.handle == document.body) { // update with current body client area
-				width = document.body.parentNode.clientWidth;
-				height = OS.getFixedBodyClientHeight();
-			}
+			int x = monitor.clientX;
+			int y = monitor.clientY;
+			
+//			if (monitor.handle == document.body) { // update with current body client area
+//				width = document.body.parentNode.clientWidth;
+//				height = OS.getFixedBodyClientHeight();
+//			}
 			//int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
 			int titleHeight = ((style & SWT.TITLE) != 0) ? OS.getContainerHeight(titleBar) : 0;
-//			boolean isOptMaximized = false;
-//			/**
-//			 * @j2sNative
-//			 * isOptMaximized = window["ShellManager"] != null; 
-//			 */ {}
-//			 
-//			
-//			if (!isOptMaximized) {
-//				setBounds(computeTrim(0, 0, width, height - titleHeight));
-//			} else {
-				Rectangle trim = computeTrim(0, -titleHeight, width, height);
+			boolean disablingMaxBar = false;
+			/**
+			 * @j2sNative
+			 * disablingMaxBar = window["swt.maximized.bar"] == false; 
+			 */ {}
+			 
+			if (disablingMaxBar) {
+				setBounds(computeTrim(x, y, width, height - titleHeight));
+			} else {
+				Rectangle trim = computeTrim(x, y - titleHeight, width, height);
 				setBounds(trim.x, trim.y, trim.width, trim.height);
 //				toUpdateMax = true;
-//			}
+			}
 		}
 		ResizeSystem.register(this, SWT.MAX);
 		if (titleBar != null) {
@@ -1876,6 +1937,7 @@ public void setMaximized (boolean maximized) {
 					if (lastShell == null || lastShell.titleBar == null) return;
 					if (display.topBar != null) {
 						MaximizedTitle topBar = display.topBar;
+						topBar.returnTopMaximized(null);
 						topBar.handleApproaching();
 						topBar.updateLayout();
 						topBar.updateLastModified();
@@ -2029,6 +2091,15 @@ public void setMinimized (boolean minimized) {
 	OS.ShowWindow (handle, flags);
 	OS.UpdateWindow (handle);
 	*/
+	/**
+	 * @j2sNative
+	 * var f = window["swt.animation.minimizing"];
+	 * if (f != null) {
+	 * 	try {
+	 * 		f (this, minimized);
+	 * 	} catch (e) {}
+	 * }
+	 */ {}
 	Display.topMaxShell = null;
 	Display.topMaxShellNeedUpdated = true;
 	if (!minimized) {
@@ -2037,6 +2108,12 @@ public void setMinimized (boolean minimized) {
 //			this.setMaximized(true);
 			if (display.taskBar != null) {
 				this.handle.style.display = minimized ? "none" : "";
+			}
+			if (display.topBar != null) {
+				display.topBar.returnTopMaximized(null);
+				display.topBar.handleApproaching();
+				display.topBar.updateLayout();
+				display.topBar.updateLastModified();
 			}
 			return;
 		}
@@ -2224,17 +2301,26 @@ void setSystemMenu () {
 //			shellIcon.style.backgroundPosition = "50% 53%";
 //		}
 		titleBar.appendChild(shellIcon);
-		hIconClick = new RunnableCompatibility() {
-			public void run() {
-				HTMLEvent e = (HTMLEvent)getEvent();
-				if (e == null || (!e.ctrlKey && !e.altKey && !e.shiftKey)) {
-					openAboutJava2Script();
-				} else {
-					exportHTMLSource(e.shiftKey);
+		boolean disablingJ2SEgg = false;
+		/**
+		 * @j2sNative
+		 * if (window["swt.disable.egg"] == true) {
+		 * 	disablingJ2SEgg = true;
+		 * }
+		 */ {}
+		if (!disablingJ2SEgg) {
+			hIconClick = new RunnableCompatibility() {
+				public void run() {
+					HTMLEvent e = (HTMLEvent)getEvent();
+					if (e == null || (!e.ctrlKey && !e.altKey && !e.shiftKey)) {
+						openAboutJava2Script();
+					} else {
+						exportHTMLSource(e.shiftKey);
+					}
 				}
-			}
-		};
-		Clazz.addEvent(shellIcon, "click", hIconClick);
+			};
+			Clazz.addEvent(shellIcon, "click", hIconClick);
+		}
 	}
 
 	if (minable()) {
@@ -2272,6 +2358,9 @@ void setSystemMenu () {
 				Decorations shell = Decorations.this;
 				if (!cur && display.topBar != null) {
 					display.topBar.returnTopMaximized((Shell) shell);
+					if (display.topBar.isVisible()) {
+						display.topBar.updateLayout();
+					}
 				}
 				display.timerExec(25, new Runnable() {
 					public void run() {
@@ -2489,6 +2578,7 @@ public void setVisible (boolean visible) {
  * @see org.eclipse.swt.widgets.Composite#SetWindowPos(java.lang.Object, java.lang.Object, int, int, int, int, int)
  */
 protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, int cy, int uFlags) {
+	//System.out.println("setting cx = " + cx + " , cy = " + cy);
 	// TODO: comment the following codes. 
 	if ((style & SWT.NO_TRIM) == 0) {
 		int w = 0;
@@ -2543,6 +2633,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		contentHandle.style.left = (((style & SWT.BORDER) != 0 ? 1 : 1) + 2) + "px"; 
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
+		contentHandle.scrollTop = 0;
 		titleBar.style.width = ((width - dww) > 0 ? width - dww : 0) + "px";
 		updateShellTitle(width - dww + 8);
 	} else {
@@ -2570,13 +2661,16 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 //		}
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = (width - dw > 0 ? width - dw : 0) + "px";
+		contentHandle.scrollTop = 0;
 	}
+	//System.out.println("before cx " + cx + " cy " + cy);
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 6;
 		cy -= 4;
 	} else if ((style & SWT.NO_TRIM) == 0) {
 		cx -= 2;
 	}
+	//System.out.println("after cx " + cx + " cy " + cy);
 	Element el = (Element) hWnd;
 	el.style.left = X + "px";
 	el.style.top = Y + "px";
@@ -2588,6 +2682,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 }
 
 protected void updateShellTitle(int width) {
+	if (shellTitle.parentNode != titleBar && maximized) {
+		return;
+	}
 	int ww = 18;
 	int w = ww;
 	if (shellClose != null) {
@@ -2700,42 +2797,6 @@ boolean traverseDecorations (boolean next) {
 		}
 	}
 	return false;
-}
-
-/**
- * Updates the monitor size whenever the window is resized
- *
- */
-public void _updateMonitorSize() {
-	Monitor monitor = getMonitor();
-	Element el = monitor.handle;
-	if (el == document.body) {
-		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
-		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
-		monitor.x = 0;
-		monitor.y = 0;
-		monitor.width = window.screen.availWidth;
-		monitor.height = window.screen.availHeight;
-	} else {
-		/*
-		 * Ignore non document.body's bounds change events
-		Point pt = OS.getElementPositionInShell(el, document.body);
-		//el.style.position = "absolute";
-		monitor.x = pt.x;
-		monitor.y = pt.y;
-		monitor.width = monitor.clientWidth = OS.getContainerWidth(el);
-		monitor.height = monitor.clientHeight = OS.getContainerHeight(el);
-		*/
-	}
-
-	/*
-	monitor.clientWidth = document.body.clientWidth; 
-	monitor.width = window.screen.availWidth;
-	monitor.clientHeight = document.body.clientHeight;
-	monitor.height = window.screen.availHeight;
-	monitor.clientX = monitor.x = 0;
-	monitor.clientY = monitor.y = 0;
-	*/
 }
 
 /*

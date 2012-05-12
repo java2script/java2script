@@ -45,13 +45,27 @@ public class ResizeSystem {
 				return ;
 			}
 		}
+		boolean ok = false;
+		ResizeHandler hdl = new ResizeHandler(shell, status);
 		for (int i = 0; i < handlers.length; i++) {
 			if (handlers[i] == null) {
-				handlers[i] = new ResizeHandler(shell, status);
-				return ;
+				handlers[i] = hdl;
+				ok = true;
+				break;
 			}
 		}
-		handlers[handlers.length] = new ResizeHandler(shell, status);
+		if (!ok) {
+			handlers[handlers.length] = hdl;
+		}
+		if ((status & SWT.VIRTUAL) != 0) {
+			hdl.updateCornered();
+		} else if ((status & SWT.CENTER) != 0) {
+			hdl.updateCentered();
+		} else if ((status & SWT.MAX) != 0) {
+			hdl.updateMaximized();
+		} else if ((status & SWT.MIN) != 0) {
+			hdl.updateMinimized();
+		}
 		return ;
 	}
 	public static void unregister(Decorations shell, int status) {
@@ -99,18 +113,23 @@ public class ResizeSystem {
 	public static void updateResize() {
 		for (int i = 0; i < handlers.length; i++) {
 			ResizeHandler hdl = handlers[i];
-			if (hdl != null && hdl.shell != null && hdl.shell.handle != null) {
-				hdl.shell._updateMonitorSize();
-				int status = hdl.getStatus();
-				if (status == SWT.MAX) {
-					hdl.updateMaximized();
-				} else if (status == SWT.MIN) {
-					hdl.updateMinimized();
-				} else if (status == SWT.CENTER) {
-					hdl.updateCentered();
-				}
-			} else if (hdl != null && hdl.monitor != null){
+			if (hdl != null && hdl.monitor != null){
 				hdl.updateMonitor();
+			}
+		}
+		for (int i = 0; i < handlers.length; i++) {
+			ResizeHandler hdl = handlers[i];
+			if (hdl != null && hdl.shell != null && hdl.shell.handle != null) {
+				int status = hdl.getStatus();
+				if ((status & SWT.VIRTUAL) != 0) { // corners!
+					hdl.updateCornered();
+				} else if ((status & SWT.CENTER) != 0) {
+					hdl.updateCentered();
+				} else if ((status & SWT.MAX) != 0) {
+					hdl.updateMaximized();
+				} else if ((status & SWT.MIN) != 0) {
+					hdl.updateMinimized();
+				}
 			}
 		}
 		

@@ -19,20 +19,20 @@ $WTC$$.triedTimes = new Object ();
 $WTC$$.cssTestEls = [];
 /* private */
 $WTC$$.trackCSS = function (clazzName) {
+	var cssID = $WTC$$.getCSSRuleID (clazzName);
+	var els = $WTC$$.cssTestEls;
+	for (var i = 0; i < els.length; i++) {
+		if (els[i] != null && els[i].className == cssID) {
+			return;
+		}
+	}
 	var el = document.createElement ("DIV");
 	el.style.cssText = "position:absolute;left:-1000px;top:-100px;font-size:0;display:block;";
-	var cssID = $WTC$$.getCSSRuleID (clazzName);
 	el.className = cssID;
 	if (document.body != null) {
 		document.body.appendChild (el);
 	}
-
-	var els = $WTC$$.cssTestEls;
-	for (var i = 0; i < els.length; i++) {
-		if (els[i] == el) {
-			return;
-		}
-	}
+	
 	els[els.length] = el;
 	var f = (function (e, name) {
 		return function () {

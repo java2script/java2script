@@ -1213,7 +1213,8 @@ public Rectangle getBounds () {
 	int height = OS.GetSystemMetrics (OS.SM_CYVIRTUALSCREEN);
 	return new Rectangle (x, y, width, height);
 	*/
-	return super.getBounds();
+	//return super.getBounds();
+	return getPrimaryMonitor().getClientArea();
 }
 
 /**
@@ -1257,7 +1258,8 @@ public Rectangle getClientArea () {
 	int height = OS.GetSystemMetrics (OS.SM_CYVIRTUALSCREEN);
 	return new Rectangle (x, y, width, height);
 	*/
-	return super.getClientArea();
+	//return super.getClientArea();
+	return getPrimaryMonitor().getClientArea();
 }
 
 Control getControl (Object handle) {
@@ -1797,16 +1799,33 @@ public Monitor [] getMonitors () {
 	if (monitors == null) {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
+		monitor.clientX = 0;
+		monitor.clientY = 0;
+		monitor.x = 0;
+		monitor.y = 0;
 		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth;
 		int parentWidth = OS.getContainerWidth(document.body.parentNode);
 		if (parentWidth - 8 > monitor.clientWidth && parentWidth <= window.screen.availWidth) {
 			monitor.clientWidth = parentWidth;
 		}
-		monitor.width = window.screen.availWidth;
+		//monitor.width = window.screen.availWidth;
+		monitor.width = monitor.clientWidth;
+		monitor.clientWidth -= monitor.clientX;
 		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
-		monitor.height = window.screen.availHeight;
-		monitor.clientX = monitor.x = 0;
-		monitor.clientY = monitor.y = 0;
+		//monitor.height = window.screen.availHeight;
+		monitor.height = monitor.clientHeight;
+		String orientationStr = "left";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.task.bar.orientation"];
+		 */ { }
+		if ("bottom".equals(orientationStr)) {
+			monitor.clientY = QuickLaunch.BAR_HEIGHT;
+			monitor.clientHeight -= TaskBar.BAR_HEIGHT + QuickLaunch.BAR_HEIGHT;
+		} else if ("top".equals(orientationStr)) {
+			monitor.clientY = TaskBar.BAR_HEIGHT;
+			monitor.clientHeight -= TaskBar.BAR_HEIGHT;
+		}
 		monitors = new Monitor[] {
 			monitor
 		};
@@ -1829,11 +1848,29 @@ protected static void registerElementAsMonitor(Element el) {
 		Monitor monitor = new Monitor();
 		monitor.handle = document.body;
 		monitor.clientWidth = OS.getFixedBodyClientWidth(); //document.body.clientWidth; 
-		monitor.width = window.screen.availWidth;
+		//monitor.width = window.screen.availWidth;
+		monitor.width = monitor.clientWidth;
 		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
-		monitor.height = window.screen.availHeight;
-		monitor.clientX = monitor.x = 0;
-		monitor.clientY = monitor.y = 0;
+		//monitor.height = window.screen.availHeight;
+		monitor.height = monitor.clientHeight;
+		monitor.clientX = 0;
+		monitor.clientY = 0;
+		monitor.x = 0;
+		monitor.y = 0;
+		int delta = 0;
+		String orientationStr = "left";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.task.bar.orientation"];
+		 */ { }
+		if ("bottom".equals(orientationStr)) {
+			delta = TaskBar.BAR_HEIGHT;
+			monitor.clientY = QuickLaunch.BAR_HEIGHT;
+		} else if ("top".equals(orientationStr)) {
+			delta = TaskBar.BAR_HEIGHT;
+		}
+		monitor.clientWidth -= monitor.clientX;
+		monitor.clientHeight -= delta + monitor.clientY;
 		monitors = new Monitor[] {
 			monitor
 		};
@@ -1848,8 +1885,10 @@ protected static void registerElementAsMonitor(Element el) {
 		monitor.clientHeight = OS.getFixedBodyClientHeight(); //document.body.clientHeight;
 		monitor.x = 0;
 		monitor.y = 0;
-		monitor.width = window.screen.availWidth;
-		monitor.height = window.screen.availHeight;
+		//monitor.width = window.screen.availWidth;
+		//monitor.height = window.screen.availHeight;
+		monitor.width = monitor.clientWidth;
+		monitor.height = monitor.clientHeight;
 	} else {
 		Point pt = OS.calcuateRelativePosition(el, document.body);
 		el.style.position = "absolute";
@@ -1858,6 +1897,20 @@ protected static void registerElementAsMonitor(Element el) {
 		monitor.width = monitor.clientWidth = OS.getContainerWidth(el);
 		monitor.height = monitor.clientHeight = OS.getContainerHeight(el);
 	}
+	int delta = 0;
+	String orientationStr = "left";
+	/**
+	 * @j2sNative
+	 * orientationStr = window["swt.task.bar.orientation"];
+	 */ { }
+	if ("bottom".equals(orientationStr)) {
+		delta = TaskBar.BAR_HEIGHT;
+		monitor.clientY = QuickLaunch.BAR_HEIGHT;
+	} else if ("top".equals(orientationStr)) {
+		delta = TaskBar.BAR_HEIGHT;
+	}
+	monitor.clientWidth -= monitor.clientX;
+	monitor.clientHeight -= delta + monitor.clientY;
 	monitors[monitors.length] = monitor;
 	monitorCount = monitors.length;
 }
@@ -2501,7 +2554,7 @@ void initializeDekstop() {
 	
 	/* initialize desktop panel */
 	Element panel = document.getElementById("swt-desktop-panel");
-	boolean needScrolling = false;
+	double scrolling = 0.0;
 	boolean injecting = false;
 	if (panel == null) {
 		boolean forceInsertingPanel = true;
@@ -2510,6 +2563,11 @@ void initializeDekstop() {
 		 * forceInsertingPanel = (window["swt.desktop.panel"] != false);
 		 */ {}
 		if (forceInsertingPanel) {
+			if (document.body.scrollTop != 0) {
+				scrolling = 1.0 * document.body.scrollTop / document.body.scrollHeight;
+			} else {
+				scrolling = 1.0 * document.body.parentNode.scrollTop / document.body.parentNode.scrollHeight;
+			}
 			injecting = true;
 			panel = document.createElement("DIV");
 			panel.id = "swt-desktop-panel";
@@ -2581,17 +2639,16 @@ void initializeDekstop() {
 			document.body.style.overflow = "hidden";
 			document.body.style.padding = "0";
 			document.body.style.margin = "0";
-			needScrolling = true;
 		}
 	}
 	if (panel != null) {
 		document.body.style.overflow = "hidden";
-		int height = OS.getFixedBodyClientHeight();
-		int width = OS.getFixedBodyClientWidth();
+		//int height = OS.getFixedBodyClientHeight();
+		//int width = OS.getFixedBodyClientWidth();
 		panel.style.position = "absolute";
-		if (!injecting) {
-			panel.style.backgroundColor = "white";
-		}
+//		if (!injecting) {
+//			panel.style.backgroundColor = "white";
+//		}
 		/**
 		 * @j2sNative
 		 * var vsb = window["swt.desktop.vscrollbar"];
@@ -2622,13 +2679,15 @@ void initializeDekstop() {
 			div.style.marginLeft = "-1px";
 			panel.appendChild(div);
 		}
+		/*
 		panel.style.left = "0";
 		panel.style.top = "0";
 		panel.style.width = width + "px";
 		panel.style.height = (height - 80) + "px";
-		if (needScrolling) {
-			panel.scrollTop = panel.scrollHeight;
+		if (scrolling != 0) {
+			panel.scrollTop = (int) Math.round(scrolling * panel.scrollHeight);
 		}
+		//*/
 	}
 
 	taskBar = new TaskBar(this);
@@ -2665,61 +2724,99 @@ void initializeDekstop() {
 	 * }
 	 */ {}
 
-	mouseMoveListener = new RunnableCompatibility(){
-	
-		public void run() {
-			HTMLEvent e = (HTMLEvent) getEvent();
-			int bottom = getPrimaryMonitor().clientHeight - 128;
-			// Hacks: Return as quickly as possible to avoid CPU 100%
-			int x = e.clientX;
-			int y = e.clientY;
-			if (x > 264 && y >= 100 && y <= bottom) {
-				return;
-			}
-
-			long now = System.currentTimeMillis();
-			boolean ctrlKey = e.ctrlKey;
-			taskBar.mouseAlreadyMoved = true;
-			shortcutBar.mouseAlreadyMoved = true;
-			trayCorner.mouseAlreadyMoved = true;
-			topBar.mouseAlreadyMoved = true;
-			boolean inDelay = (now - taskBar.lastUpdated <= Display.AUTO_HIDE_DELAY);
-
-			if (taskBar.barEl != null && x < 264) {
-				if (taskBar.isApproaching(now, x, y, ctrlKey)) {
-					taskBar.handleApproaching();
-				} else if (!inDelay && taskBar.isLeaving(now, x, y, ctrlKey)) {
-					taskBar.handleLeaving();
-				}
-			}
-
-			if (y > bottom) {
-				if (shortcutBar.isApproaching(now, x, y, ctrlKey)) {
-					shortcutBar.handleApproaching();
-				} else if (!inDelay && shortcutBar.isLeaving(now, x, y, ctrlKey)) {
-					shortcutBar.handleLeaving();
-				}
-			}
-
-			if (x + y < 200) {
-				if (trayCorner.isApproaching(now, x, y, ctrlKey)) {
-					trayCorner.handleApproaching();
-				} else if (!inDelay && trayCorner.isLeaving(now, x, y, ctrlKey)) {
-					trayCorner.handleLeaving();
-				}
-			}
-
-			if (y < 100) {
-				if (topBar.isApproaching(now, x, y, ctrlKey)) {
-					topBar.handleApproaching();
-				} else if (!inDelay && topBar.isLeaving(now, x, y, ctrlKey)) {
-					topBar.handleLeaving();
-				}
-			}
+	if (panel != null) {
+		Rectangle clientArea = getPrimaryMonitor().getClientArea();
+		panel.style.left = clientArea.x + "px";
+		panel.style.top = clientArea.y + "px";
+		int margin = 0;
+		/**
+		 * @j2sNative
+		 * if (window["swt.desktop.panel.margin"] != null) {
+		 * 	margin = window["swt.desktop.panel.margin"];
+		 * }
+		 */ {}
+		if (margin > 0) {
+			//panel.style.marginLeft = margin + "px";
+			panel.style.paddingLeft = margin + "px";
 		}
+		panel.style.width = (clientArea.width - margin) + "px";
+		panel.style.height = (clientArea.height - 80) + "px";
+		if (scrolling != 0) {
+			panel.scrollTop = (int) Math.round(scrolling * panel.scrollHeight);
+		}
+	}
+	if (taskBar.orientation != SWT.BOTTOM) {
+		mouseMoveListener = new RunnableCompatibility(){
+			
+			public void run() {
+				HTMLEvent e = (HTMLEvent) getEvent();
+				int bottom = getPrimaryMonitor().clientHeight - 128;
+				// Hacks: Return as quickly as possible to avoid CPU 100%
+				int x = e.clientX;
+				int y = e.clientY;
+				if ((taskBar.orientation == SWT.LEFT ? x > 264 : x < taskBar.clientWidth - 264)
+						&& y >= 100 && y <= bottom) {
+					return;
+				}
+				
+				long now = System.currentTimeMillis();
+				boolean ctrlKey = e.ctrlKey;
+				taskBar.mouseAlreadyMoved = true;
+				shortcutBar.mouseAlreadyMoved = true;
+				trayCorner.mouseAlreadyMoved = true;
+				topBar.mouseAlreadyMoved = true;
+				boolean inDelay = (now - taskBar.lastUpdated <= Display.AUTO_HIDE_DELAY);
+				
+				if (taskBar.barEl != null
+						&& (taskBar.orientation == SWT.LEFT ? x < 264 : x > taskBar.clientWidth - 264)) {
+					if (taskBar.isApproaching(now, x, y, ctrlKey)) {
+						taskBar.handleApproaching();
+					} else if (!inDelay && taskBar.isLeaving(now, x, y, ctrlKey)) {
+						taskBar.handleLeaving();
+					}
+				}
+				
+				if (y > bottom) {
+					if (shortcutBar.isApproaching(now, x, y, ctrlKey)) {
+						shortcutBar.handleApproaching();
+					} else if (!inDelay && shortcutBar.isLeaving(now, x, y, ctrlKey)) {
+						shortcutBar.handleLeaving();
+					}
+				}
+				
+				if (y < 100) {
+					if (topBar.isApproaching(now, x, y, ctrlKey)) {
+						topBar.handleApproaching();
+					} else if (!inDelay && topBar.isLeaving(now, x, y, ctrlKey)) {
+						topBar.handleLeaving();
+					}
+				}
+				
+				/**
+				 * @j2sNative
+				 * if (window["swt.notification.corner"] == false) {
+				 * 	return;
+				 * }
+				 */ { }
+				 if (x + y < 200) {
+					 if (trayCorner.isApproaching(now, x, y, ctrlKey)) {
+						 trayCorner.handleApproaching();
+					 } else if (!inDelay && trayCorner.isLeaving(now, x, y, ctrlKey)) {
+						 trayCorner.handleLeaving();
+					 }
+				 }
+			}
+			
+		};
+		Clazz.addEvent(document.class, "mousemove", this.mouseMoveListener);
+	}
 	
-	};
-	Clazz.addEvent(document.class, "mousemove", this.mouseMoveListener);
+	/**
+	 * @j2sNative
+	 * if (window["swt.notification.corner"] == false) {
+	 * 	return;
+	 * }
+	 */ { }
 	
 	Element el = document.getElementById("_console_");
 	if (el != null) {
@@ -4567,8 +4664,14 @@ public void timerExec (int milliseconds, Runnable runnable) {
 	 * 		try {
 	 * 			jsr.run ();
 	 * 		} finally {
-	 * 			disp.timerList[idx] = null;
-	 * 			disp.timerIds[idx] = 0;
+	 * 			if (disp != null) {
+	 * 				if (disp.timerList != null) {
+	 * 					disp.timerList[idx] = null;
+	 * 				}
+	 * 				if (disp.timerIds != null) {
+	 * 					disp.timerIds[idx] = 0;
+	 * 				}
+	 * 			}
 	 * 		}
 	 * 	};
 	 * }) (runnable, index, this);
@@ -4883,7 +4986,7 @@ static Shell getTopShell() {
 				} else {
 					zidx = Integer.parseInt (idx);
 				}
-				if (zidx > lastZIndex) {
+				if (zidx > lastZIndex && (ss[i].style & (SWT.APPLICATION_MODAL | SWT.PRIMARY_MODAL | SWT.SYSTEM_MODAL)) == 0) {
 					lastZIndex = zidx;
 					lastShell = ss[i];
 				}
@@ -4899,10 +5002,10 @@ static void deactivateAllTitleBarShells() {
 		if (disps[k] == null) continue;
 		Shell[] ss = disps[k].getShells ();
 		for (int i = 0; i < ss.length; i++) {
-			if (!ss[i].isDisposed () && ss[i].titleBar != null
+			if (!ss[i].isDisposed ()/* && ss[i].titleBar != null*/ // all shells!
 					&& ss[i].handle.style.display != "none") {
-				ss[i].titleBar.style.backgroundColor = "inactivecaption";
-				ss[i].shellTitle.style.color = "inactivecaptiontext";
+				OS.removeCSSClass(ss[i].handle, "shell-active");
+				OS.addCSSClass(ss[i].handle, "shell-inactive");
 			}
 		}
 	}
@@ -4948,10 +5051,28 @@ public void updateLayout() {
 		trayCorner.updateLayout();
 		Element panel = document.getElementById("swt-desktop-panel");
 		if (panel != null) {
+			Rectangle clientArea = getPrimaryMonitor().getClientArea();
+			panel.style.left = clientArea.x + "px";
+			panel.style.top = clientArea.y + "px";
+			int margin = 0;
+			/**
+			 * @j2sNative
+			 * if (window["swt.desktop.panel.margin"] != null) {
+			 * 	margin = window["swt.desktop.panel.margin"];
+			 * }
+			 */ {}
+			if (margin > 0) {
+				//panel.style.marginLeft = margin + "px";
+				panel.style.paddingLeft = margin + "px";
+			}
+			panel.style.width = (clientArea.width - margin) + "px";
+			panel.style.height = (clientArea.height - 80) + "px";
+			/*
 			int height = OS.getFixedBodyClientHeight();
 			int width = OS.getFixedBodyClientWidth();
 			panel.style.width = width + "px";
 			panel.style.height = (height - 80) + "px";
+			*/
 		}
 	}
 }
@@ -5107,17 +5228,22 @@ static void initializeZOrdering() {
 	hShellZOrdering = new RunnableCompatibility() {
 		public void run() {
 			HTMLEventWrapper evt = new HTMLEventWrapper(this.getEvent());
+			Shell topShell = getTopShell();
 			Element src = evt.target;
 			while (src != null) {
 				String className = src.className;
 				if (className != null && className.indexOf("shadow-") != -1) {
 					Shell[] allVisibleShells = getAllVisibleShells();
 					for (int i = 0; i < allVisibleShells.length; i++) {
-						Rectangle bounds = allVisibleShells[i].getBounds();
+						Shell shell = allVisibleShells[i];
+						Rectangle bounds = shell.getBounds();
 						// border width is taking into consideration
 						if (evt.x >= bounds.x + 2 && evt.x <= bounds.x + bounds.width - 4
 								&& evt.y >= bounds.y + 2 && evt.y <= bounds.y + bounds.height - 4) {
-							allVisibleShells[i].bringToTop();
+							if (topShell != shell) {
+								shell.bringToTop();
+								shell.forceFocus();
+							}
 							return;
 						}
 					}
@@ -5131,7 +5257,12 @@ static void initializeZOrdering() {
 								Control ctrl = disp.getControl(src);
 								if (ctrl != null && ctrl instanceof Shell
 										&& ctrl.isVisible()) {
-									((Shell) ctrl).bringToTop();
+									Shell shell = (Shell) ctrl;
+									if (topShell != shell) {
+										shell.bringToTop();
+										shell.forceFocus();
+									}
+									return;
 								}
 							}
 						}

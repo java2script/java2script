@@ -4,6 +4,10 @@
 	left:0;
 	/*z-index:3690;*/
 }
+.shell-manager-sidebar-right {
+	left:auto !important;
+	right:0;
+}
 .shell-manager-bar {
 	position:absolute;
 	left:0;
@@ -18,6 +22,10 @@
 	opacity:0.85;
 	filter:Alpha(Opacity=85);
 }
+.shell-manager-bar-right {
+	left:auto !important;
+	right:0;
+}
 .shell-manager-bar-minimized {
 	position:absolute;
 	left:0;
@@ -31,6 +39,10 @@
 	border-color:buttonshadow;
 	opacity:0.85;
 	filter:Alpha(Opacity=85);
+}
+.shell-manager-bar-minimized-right {
+	left:auto !important;
+	right:0;
 }
 .shell-item, a.shell-item {
 	display:block;
@@ -47,6 +59,10 @@
 	border:1px solid navy;
 	opacity:0.75;
 	filter:Alpha(Opacity=75);
+}
+.shell-item-right, a.shell-item-right {
+	left:auto !important;
+	right:16px;
 }
 .shell-item:hover, a.shell-item:hover {
 	background-color:highlight;

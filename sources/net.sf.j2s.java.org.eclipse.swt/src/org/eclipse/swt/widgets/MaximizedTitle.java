@@ -11,6 +11,7 @@
 
 package org.eclipse.swt.widgets;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Clazz;
@@ -36,10 +37,17 @@ public class MaximizedTitle extends DesktopItem {
 	}
 	
 	public void updateLayout() {
+		/**
+		 * @j2sNative
+		 * if (window["swt.maximized.bar"] == false) {
+		 * 	return;
+		 * } 
+		 */ {}
 		Shell lastShell = Display.getTopMaximizedShell();
 		if (lastShell == null || lastShell.titleBar == null) return;
 		this.lastMaximizedShell = lastShell;
 		
+		lastShell.updateShellTitle(320 + 4);
 		// move the title bar elements into topbarEl
 		Element[] els = new Element[0];
 		for (int i = 0; i < lastShell.titleBar.childNodes.length; i++) {
@@ -58,14 +66,31 @@ public class MaximizedTitle extends DesktopItem {
 		} else {
 			this.topbarEl.style.left = "2px";
 		}
+		if (display != null && display.taskBar != null) {
+			if (display.taskBar.orientation == SWT.BOTTOM) {
+				int yOffset = QuickLaunch.BAR_HEIGHT;
+				this.handle.style.top = yOffset + "px";
+			} else if (display.taskBar.orientation == SWT.TOP) {
+				int yOffset = TaskBar.BAR_HEIGHT;
+				this.handle.style.top = yOffset + "px";
+			}
+		}
 		this.topbarEl.style.top = "1px";
+		if (hMaxClick != null) {
+			Clazz.removeEvent(handle, "dblclick", hMaxClick);
+		}
 		hMaxClick = lastShell.hMaxClick;
 		if (hMaxClick != null) {
 			Clazz.addEvent(handle, "dblclick", hMaxClick);
 		}
-		lastShell.updateShellTitle(320 + 4);
 	}
 	public void returnTopMaximized(Shell shell) {
+		/**
+		 * @j2sNative
+		 * if (window["swt.maximized.bar"] == false) {
+		 * 	return;
+		 * } 
+		 */ {}
 		Shell lastShell = this.lastMaximizedShell;
 		if (shell != null && lastShell != shell) return;
 		if (lastShell == null || lastShell.titleBar == null) return;
@@ -79,12 +104,31 @@ public class MaximizedTitle extends DesktopItem {
 			lastShell.titleBar.appendChild(els[i]);
 		}
 		if (shell != null) {
-			this.handle.style.display = "none";
+			boolean keepBarTop = false;
+			/**
+			 * @j2sNative
+			 * keepBarTop = (window["swt.maximized.bar.top"] == true);
+			 */ {}
+			if (!keepBarTop) {
+				this.handle.style.display = "none";
+			} else {
+				lastShell = Display.getTopMaximizedShell();
+				if (lastShell != null && lastShell.titleBar != null) {
+					this.lastMaximizedShell = lastShell;
+				} else {
+					this.handle.style.display = "none";
+				}
+			}
 		}
 	}
 	public void initialize() {
 		if (this.handle != null) return;
-
+		/**
+		 * @j2sNative
+		 * if (window["swt.maximized.bar"] == false) {
+		 * 	return;
+		 * } 
+		 */ {}
 		Element tbc = document.createElement("DIV");
 		tbc.className = "shell-manager-topbar-container";
 		document.body.appendChild(tbc);
@@ -106,6 +150,8 @@ public class MaximizedTitle extends DesktopItem {
 		tb.className = "shell-title-bar shell-maximized";
 		this.handle.appendChild(tb);
 		this.topbarEl = tb;
+		
+		/*hNoTextSelection = */OS.setTextSelection(this.topbarEl, false);
 	}
 
 	boolean isAround(long now, int x, int y) {
@@ -121,6 +167,7 @@ public class MaximizedTitle extends DesktopItem {
 	};
 
 	void hide() {
+		if (this.handle == null) return;
 		CSSStyle smStyle = this.handle.style;
 		if (smStyle.display == "block") {
 			smStyle.display = "none";
@@ -142,6 +189,12 @@ public class MaximizedTitle extends DesktopItem {
 	public void handleLeaving() {
 		Element topbar = handle;
 		if (topbar == null) return;
+		/**
+		 * @j2sNative
+		 * if (window["swt.maximized.bar.top"]) {
+		 * 	return;
+		 * }
+		 */ {}
 		if (topbar.style.display != "none") {
 			topbar.style.display = "none";
 			returnTopMaximized(null);
@@ -163,8 +216,11 @@ public class MaximizedTitle extends DesktopItem {
 	public void bringToTop(int index) {
 		
 	}
-
+	
 	public boolean isVisible() {
+		if (handle == null) {
+			return false;
+		}
 		return handle.style.display != "none";
 	}
 

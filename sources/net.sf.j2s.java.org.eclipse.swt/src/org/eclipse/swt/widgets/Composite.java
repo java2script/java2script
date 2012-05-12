@@ -998,10 +998,14 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 //	});
 	Element el = (Element) hWnd;
 	// TODO: What about hWndInsertAfter and uFlags
+//	int cachedScrollLeft = el.scrollLeft;
+//	int cachedScrollTop = el.scrollTop;
 	el.style.left = X + "px";
 	el.style.top = Y + "px";
 	el.style.width = (cx > 0 ? cx : 0) + "px";
 	el.style.height = (cy > 0 ? cy : 0) + "px";
+//	el.scrollLeft = cachedScrollLeft;
+//	el.scrollTop = cachedScrollTop;
 	
 	updateScrollBar(cx, cy);
 	return true;

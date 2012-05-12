@@ -86,13 +86,6 @@ thead .table-head-text {
 	min-height:13px;
 	_height:1em;
 }
-@media all and (min-width:0px){/* opera */
-.table-check-box {
-	top:50%;
-	margin-top:-8px;
-	left:-16px !important;
-}
-}
 
 .table-check-box-rtl {
 	margin:0;

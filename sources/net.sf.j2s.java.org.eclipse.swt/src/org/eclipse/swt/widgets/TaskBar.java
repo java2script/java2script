@@ -13,6 +13,7 @@ package org.eclipse.swt.widgets;
 
 import java.util.Date;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.internal.ResizeSystem;
 import org.eclipse.swt.internal.RunnableCompatibility;
@@ -33,6 +34,8 @@ import org.eclipse.swt.internal.xhtml.window;
  */
 public class TaskBar extends DesktopItem {
 
+	public static final int BAR_HEIGHT = 36;
+	
 	static class TaskItem {
 		public Shell shell;
 		public String text;
@@ -90,9 +93,30 @@ public class TaskBar extends DesktopItem {
 	private Object hBarMouesEnter;
 //	private Object hNoReturn;
 
+	int orientation;
+	int clientWidth;
+	int clientHeight;
+	
 	public TaskBar(Display display) {
 		super();
 		this.display = display;
+		
+		String orientationStr = "left";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.task.bar.orientation"];
+		 */ {}
+		if ("left".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.LEFT;
+		} else if ("right".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.RIGHT;
+		} else if ("top".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.TOP;
+		} else if ("bottom".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.BOTTOM;
+		} else {
+			this.orientation = SWT.LEFT;
+		}
 	}
 
 	public void setTasksVisible(boolean visible) {
@@ -113,6 +137,12 @@ public class TaskBar extends DesktopItem {
 		if (zIdx == -1) {
 			window.currentTopZIndex++;
 			zIndex = window.currentTopZIndex;
+			/**
+			 * @j2sNative
+			 * if (window["swt.task.bar.top"]) {
+			 * 	zIndex += 100;
+			 * }
+			 */ {}
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
 			}
@@ -128,6 +158,8 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public void updateLayout() {
+		clientWidth = OS.getFixedBodyClientWidth();
+		clientHeight = OS.getFixedBodyClientHeight();
 		this.updateItems();
 	}
 
@@ -141,6 +173,17 @@ public class TaskBar extends DesktopItem {
 		if (Dialog.isDialog(shell)) {
 			return;
 		}
+		/**
+		 * @j2sNative
+		 * if (shell != null) {
+		 * 	try {
+		 * 		if (shell["hideFromTaskBar"] != null && shell.hideFromTaskBar ()) {
+		 * 			return;
+		 * 		}
+		 * 	} catch (e) {
+		 * 	}
+		 * }
+		 */ {}
 		if (this.handle == null) {
 			this.initialize();
 		}
@@ -165,7 +208,7 @@ public class TaskBar extends DesktopItem {
 			tag = "DIV";
 		}
 		Element si = document.createElement(tag);
-		si.className = "shell-item";
+		si.className = "shell-item" + ((orientation == SWT.RIGHT) ? " shell-item-right" : "");
 		if (tag == "A") {
 			si.href = "#";
 		}
@@ -201,9 +244,26 @@ public class TaskBar extends DesktopItem {
 		if (w > 120) {
 			w = 120;
 		}
-		div.style.width = w + "px";
-		si.style.width = (w + 48) + "px";
-		if (OS.isIE80) {
+		
+		boolean showShortcut = false;
+		if (orientation == SWT.BOTTOM || orientation == SWT.TOP)
+		/**
+		 * @j2sNative
+		 * if (shell["showShortcutInTaskBar"] != null) {
+		 * 	try {
+		 * 		showShortcut = shell.showShortcutInTaskBar ();
+		 * 	} catch (e) {
+		 * 	}
+		 * }
+		 */ {}
+		if (showShortcut) {
+			div.style.width = "0px";
+			si.style.width = "32px";
+		} else {
+			div.style.width = w + "px";
+			si.style.width = (w + 48) + "px";
+		}
+		if (OS.isIE80 || OS.isIE90) {
 			div.style.top = "1em";
 			div.style.left = "20px";
 		}
@@ -218,16 +278,23 @@ public class TaskBar extends DesktopItem {
 					} else {
 						Shell lastShell = Display.getTopShell();
 						if (shell == lastShell) {
-							ResizeSystem.unregister(shell, 128);
+							ResizeSystem.unregister(shell, SWT.MIN);
 							shell.setMinimized(true);
 							if (display.topBar != null) {
 								display.topBar.returnTopMaximized(shell);
 							}
 						} else {
 							shell.bringToTop();
+							if (shell.getMaximized() && display.topBar != null) {
+								display.topBar.returnTopMaximized(null);
+								display.topBar.handleApproaching();
+								display.topBar.updateLayout();
+								display.topBar.updateLastModified();
+							}
 						}
 					}
 					updateItems();
+					shell.forceFocus();
 					toReturn(false);
 				}
 
@@ -290,7 +357,14 @@ public class TaskBar extends DesktopItem {
 		 */ { }
 		this.syncItems();
 		this.updateItems();
-		if (this.items.length == 0) {
+		boolean existed = this.items.length > 0 || (display != null && display.tray != null && display.tray.itemCount > 0);
+		/**
+		 * @j2sNative
+		 * if (window["swt.task.bar.default"] == true) {
+		 * 	existed = true;
+		 * }
+		 */ {}
+		if (!existed) {
 			handle.style.display = "none";
 			barEl.style.display = "none";
 		}
@@ -324,12 +398,12 @@ public class TaskBar extends DesktopItem {
 		this.syncItems();
 		int length = this.items.length;
 		if (length == 0) {
-			barHeight = 36;
+			barHeight = BAR_HEIGHT;
 		} else {
 			Element si = this.items[0].itemHandle;
 			int hh = Math.max(Math.max(si.scrollHeight, si.offsetHeight),
 					si.clientHeight) + 12;
-			barHeight = (length * hh + 36);
+			barHeight = (length * hh + BAR_HEIGHT);
 		}
 		int height = OS.getFixedBodyClientHeight();
 		int offset = OS.getFixedBodyOffsetTop()
@@ -352,11 +426,35 @@ public class TaskBar extends DesktopItem {
 		 */ { }
 		int length = this.items.length;
 		if (length == 0) {
-			this.barEl.style.height = 36 + "px";
-			int offset = 0;
-			int height = OS.getFixedBodyClientHeight();
-			offset = OS.getFixedBodyOffsetTop() + Math.round((height - 36) / 2);
-			this.barEl.style.top = offset + "px";
+			if (orientation == SWT.BOTTOM) {
+				this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+				this.barEl.style.width = clientWidth + "px";
+				this.barEl.style.top = (clientHeight - BAR_HEIGHT) + "px";
+			} else if (orientation == SWT.TOP) {
+				this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+				this.barEl.style.width = clientWidth + "px";
+				this.barEl.style.top = "0px";
+			} else {
+				this.barEl.style.height = BAR_HEIGHT + "px";
+				int offset = 0;
+				int height = OS.getFixedBodyClientHeight();
+				offset = OS.getFixedBodyOffsetTop() + Math.round((height - BAR_HEIGHT) / 2);
+				this.barEl.style.top = offset + "px";
+			}
+			boolean existed = this.items.length > 0 || (display != null && display.tray != null && display.tray.itemCount > 0);
+			/**
+			 * @j2sNative
+			 * if (window["swt.task.bar.default"] == true) {
+			 * 	existed = true;
+			 * }
+			 */ {}
+			if (!existed) {
+				handle.style.display = "none";
+				barEl.style.display = "none";
+			} else {
+				handle.style.display = "";
+				barEl.style.display = "";
+			}
 			return;
 		}
 		Element si = this.items[0].itemHandle;
@@ -372,19 +470,64 @@ public class TaskBar extends DesktopItem {
 		}
 		int height = OS.getFixedBodyClientHeight();
 		int offset = OS.getFixedBodyOffsetTop()
-				+ Math.round((height - (length * hh + 36)) / 2);
+				+ Math.round((height - (length * hh + BAR_HEIGHT)) / 2);
 		Shell topShell = Display.getTopShell();
+		
+		//int offsetX = 8;
+		boolean hideLogo = false;
+		/**
+		 * @j2sNative
+		 * hideLogo = window["swt.logo"] == false;
+		 */ {}
+		int offsetX = (hideLogo || display.trayCorner == null || display.trayCorner.logoOrientation == SWT.RIGHT) ? 8 : 72;
+		if (display.trayCorner != null && display.trayCorner.orientation == SWT.LEFT
+				&& display.tray != null) {
+			offsetX += display.tray.itemCount * 32 + 24;
+		}
+
+		TaskItem[] items = this.items;
+		if (orientation == SWT.BOTTOM || orientation == SWT.TOP) {
+			items = new TaskItem[this.items.length];
+			int index = 0;
+			for (int i = 0; i < items.length; i++) {
+				if (this.items[i].shell.showShortcutInTaskBar()) {
+					items[index] = this.items[i];
+					index++;
+				}
+			}
+			for (int i = 0; i < items.length; i++) {
+				if (!this.items[i].shell.showShortcutInTaskBar()) {
+					items[index] = this.items[i];
+					index++;
+				}
+			}
+		}
 		for (int i = 0; i < length; i++) {
-			TaskItem item = this.items[i];
-			item.itemHandle.style.top = offset + (i * hh + 24) + "px";
+			TaskItem item = items[i];
+			if (orientation == SWT.BOTTOM || orientation == SWT.TOP) {
+				item.itemHandle.style.left = offsetX + "px";
+				if (orientation == SWT.BOTTOM) {
+					item.itemHandle.style.top = (clientHeight - 32) + "px";
+				} else {
+					item.itemHandle.style.top = "4px"; // TODO
+				}
+				offsetX += OS.getContainerWidth(item.itemHandle) + (OS.isFirefox ? 8 : 4);
+			} else {
+				item.itemHandle.style.top = offset + (i * hh + 24) + "px";
+			}
 			if (item.shell != null) {
 				String text = item.shell.getText();
 				if (text != item.text) {
 					OS.clearChildren(item.textHandle);
 					item.textHandle.appendChild(document.createTextNode(text));
-					item.itemHandle.title = text;
 					item.text = text;
 				}
+				String tooltips = item.shell.getToolTipText();
+				if (tooltips == null || tooltips.length() == 0) {
+					tooltips = text;
+				}
+				item.itemHandle.title = tooltips;
+				
 				Image image = item.shell.getImage();
 				CSSStyle handleStyle = item.iconHandle.style;
 				if (image != null) {
@@ -397,7 +540,7 @@ public class TaskBar extends DesktopItem {
 							handleStyle.backgroundImage = "url(\"" + image.packedURL + "\")";
 							handleStyle.backgroundPosition = "-" + image.packedOffsetX + "px -" + image.packedOffsetY + "px";
 						} else {
-							handleStyle.backgroundPosition = "";
+							handleStyle.backgroundPosition = "0 0";
 							handleStyle.backgroundImage = "url(\"" + image.url + "\")";
 						}
 					}
@@ -428,10 +571,22 @@ public class TaskBar extends DesktopItem {
 				}
 			}
 		}
-		this.barEl.style.height = (length * hh + 36) + "px";
-		this.barEl.style.top = offset + "px";
-		offset = OS.getFixedBodyOffsetLeft();
-		this.handle.style.left = offset + "px";
+		if (orientation == SWT.BOTTOM) {
+			this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+			this.barEl.style.width = clientWidth + "px";
+			this.barEl.style.top = (clientHeight - BAR_HEIGHT) + "px";
+		} else if (orientation == SWT.TOP) {
+			this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+			this.barEl.style.width = clientWidth + "px";
+			this.barEl.style.top = "0px";
+		} else {
+			this.barEl.style.height = (length * hh + BAR_HEIGHT) + "px";
+			this.barEl.style.top = offset + "px";
+			if (orientation == SWT.LEFT) {
+				offset = OS.getFixedBodyOffsetLeft();
+				this.handle.style.left = offset + "px";
+			}
+		}
 	}
 
 	public void initialize() {
@@ -466,16 +621,67 @@ public class TaskBar extends DesktopItem {
 		}
 		if (this.handle != null)
 			return;
+		
 		Element sb = document.createElement("DIV");
-		sb.className = "shell-manager-sidebar";
+		sb.className = "shell-manager-sidebar" + (orientation == SWT.RIGHT ? " shell-manager-sidebar-right" : "");
 		sb.style.lineHeight = "16px"; // or "1", reset CSS
-		sb.style.display = "none";
 		document.body.appendChild(sb);
 		this.handle = sb;
 		Element bb = document.createElement("DIV");
-		bb.className = "shell-manager-bar";
+		bb.className = "shell-manager-bar" + (orientation == SWT.RIGHT ? " shell-manager-bar-right" : "");
 		sb.appendChild(bb);
 		this.barEl = bb;
+		
+		clientWidth = OS.getFixedBodyClientWidth();
+		clientHeight = OS.getFixedBodyClientHeight();
+		
+		boolean supportShadow = false;
+		/**
+		 * @j2sNative
+		 * supportShadow = window["swt.disable.shadow"] != true;
+		 */ {}
+		if (supportShadow) {
+			if (orientation == SWT.RIGHT) {
+				Decorations.appendShadowHandles(barEl, true, false, true, true);
+			} else if (orientation == SWT.BOTTOM) {
+				Decorations.appendNarrowShadowHandles(barEl, true, false, false, false);
+			} else if (orientation == SWT.TOP) {
+				Decorations.appendNarrowShadowHandles(barEl, false, false, true, false);
+			} else {
+				Decorations.appendShadowHandles(barEl, true, true, true, false);
+			}
+		}
+		
+		configureEvents();
+		
+		boolean taskBarOnTop = false;
+		/**
+		 * @j2sNative
+		 * taskBarOnTop = window["swt.task.bar.top"] == true;
+		 */ {}
+		if (taskBarOnTop) {
+			this.handle.style.zIndex = window.currentTopZIndex + 100;
+			isAutoHide = false;
+			setMinimized(false);
+		} else {
+			this.barEl.title = "Doubleclick to set taskbar auto-hide";
+		}
+
+		boolean existed = (display != null && display.tray != null && display.tray.itemCount > 0);
+		/**
+		 * @j2sNative
+		 * if (window["swt.task.bar.default"] == true) {
+		 * 	existed = true;
+		 * }
+		 */ {}
+		if (!existed) {
+			sb.style.display = "none";
+		} else {
+			updateItems();
+		}
+	}
+
+	private void configureEvents() {
 		hBarMouesEnter = new RunnableCompatibility() {
 
 			public void run() {
@@ -483,6 +689,12 @@ public class TaskBar extends DesktopItem {
 					setMinimized(false);
 				}
 				int zIndex = window.currentTopZIndex + 1;
+				/**
+				 * @j2sNative
+				 * if (window["swt.task.bar.top"]) {
+				 * 	zIndex += 100;
+				 * }
+				 */ {}
 				if (handle.style.zIndex != zIndex) {
 					layerZIndex = handle.style.zIndex;
 					bringToTop(zIndex);
@@ -511,26 +723,21 @@ public class TaskBar extends DesktopItem {
 		};
 		Clazz.addEvent(barEl, "click", hBarClick);
 		
-		hBarToggle = new RunnableCompatibility() {
-
-			public void run() {
-				toggleAutoHide();
-			}
-
-		};
-		Clazz.addEvent(barEl, "dblclick", hBarToggle);
-		
-		this.barEl.title = "Doubleclick to set taskbar auto-hide";
-		
-		boolean supportShadow = false;
+		boolean toggling = false;
 		/**
 		 * @j2sNative
-		 * supportShadow = window["swt.disable.shadow"] != true;
+		 * toggling = window["swt.task.bar.top"] != true;
 		 */ {}
-		if (supportShadow) {
-			Decorations.appendShadowHandles(barEl, true, true, true, false);
+		if (toggling) {
+			hBarToggle = new RunnableCompatibility() {
+				
+				public void run() {
+					toggleAutoHide();
+				}
+				
+			};
+			Clazz.addEvent(barEl, "dblclick", hBarToggle);
 		}
-
 	}
 
 	/**
@@ -541,7 +748,8 @@ public class TaskBar extends DesktopItem {
 		boolean alreadyMinimized = barEl.className.indexOf("minimized") != -1;
 		if (alreadyMinimized == minimized)
 			return false;
-		barEl.className = "shell-manager-bar" + (minimized ? "-minimized" : "");
+		String cssName = "shell-manager-bar" + (minimized ? "-minimized" : "");
+		barEl.className = cssName + (orientation == SWT.RIGHT ? " " + cssName + "-right" : "");
 		setTasksVisible(!minimized);
 		return true;
 	}
@@ -553,6 +761,12 @@ public class TaskBar extends DesktopItem {
 		if (items.length != 0) {
 			handle.style.display = "block";
 			int zIndex = window.currentTopZIndex + 1;
+			/**
+			 * @j2sNative
+			 * if (window["swt.task.bar.top"]) {
+			 * 	zIndex += 100;
+			 * }
+			 */ {}
 			if (handle.style.zIndex != zIndex) {
 				layerZIndex = handle.style.zIndex;
 				bringToTop(zIndex);
@@ -565,7 +779,14 @@ public class TaskBar extends DesktopItem {
 		if (barEl == null) {
 			return;
 		}
-		if (items.length == 0) {
+		boolean existed = items.length > 0 || (display != null && display.tray != null && display.tray.itemCount > 0);
+		/**
+		 * @j2sNative
+		 * if (window["swt.task.bar.default"] == true) {
+		 * 	existed = true;
+		 * }
+		 */ {}
+		if (!existed) {
 			handle.style.display = "none";
 		}
 		if (layerZIndex != -1) {
@@ -578,11 +799,11 @@ public class TaskBar extends DesktopItem {
 	}
 
 	public boolean isApproaching(long now, int x, int y, boolean ctrlKey) {
-		return !ctrlKey && x <= 8 && isAround(x, y);
+		return !ctrlKey && ((orientation == SWT.RIGHT ? x >= clientWidth - 8 : x <= 8)) && isAround(x, y);
 	}
 
 	public boolean isLeaving(long now, int x, int y, boolean ctrlKey) {
-		return ctrlKey || x > 200 || !isAround(x, y);
+		return ctrlKey || (orientation == SWT.RIGHT ? x < clientWidth - 200 : x > 200) || !isAround(x, y);
 	}
 
 	public void releaseWidget() {

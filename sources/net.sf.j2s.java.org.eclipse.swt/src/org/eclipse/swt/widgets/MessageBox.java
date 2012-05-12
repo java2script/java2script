@@ -253,7 +253,8 @@ public int open () {
 	if (wHint > 480) {
 		labelGD.widthHint = 480;
 //		int hHint = UIStringUtil.calculatePlainStringBlockHeight(message, labelGD.widthHint);
-		int hHint = OS.getStringPlainWrappedHeight(message, labelGD.widthHint);
+		//int hHint = OS.getStringPlainWrappedHeight(message, labelGD.widthHint);
+		int hHint = OS.getStringStyledWrappedHeight(message, "label-default", null, labelGD.widthHint);
 		if (hHint > 48) {
 			gd.heightHint = hHint;
 		}

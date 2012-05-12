@@ -12,6 +12,7 @@ package org.eclipse.swt.custom;
 
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.widgets.*;
 
 /**
@@ -487,6 +488,21 @@ void vScroll() {
 }
 protected void createHandle () {
 	super.createHandle();
+	
+	Element containerHandle = containerHandle();
+	if ((style & SWT.V_SCROLL) != 0 && (style & SWT.H_SCROLL) != 0) {
+		containerHandle.style.overflow = "scroll";
+	} else if ((style & SWT.V_SCROLL) != 0) {
+		/**
+		 * @j2sNative
+		 * containerHandle.style.overflowY = "scroll";
+		 */ { }
+	} else if ((style & SWT.H_SCROLL) != 0) {
+		/**
+		 * @j2sNative
+		 * containerHandle.style.overflowX = "scroll";
+		 */ { }
+	}
 //	ScrollBar hBar = getHorizontalBar ();
 //	if (hBar != null) {
 //		hBar.addListener (SWT.Selection, new Listener () {
