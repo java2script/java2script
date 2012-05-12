@@ -38,6 +38,7 @@ window["java.package.callback"] = function () {
 		"$.XHRCallbackSWTAdapter",
        	
 		"$.SimpleSerializable",
+		"$.ISimpleCacheable",
 		"$.SimpleFilter",
 		"$.SimpleRPCRunnable",
 		"$.ISimpleRequestInfoBinding",

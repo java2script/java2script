@@ -400,6 +400,10 @@ String.prototype.lastIndexOf = function (s, last) {
 	}
 };
 
+String.prototype.contains = function (s) {
+	return this.indexOf (s) != -1;
+};
+
 String.prototype.intern = function () {
 	return this.valueOf ();
 };
