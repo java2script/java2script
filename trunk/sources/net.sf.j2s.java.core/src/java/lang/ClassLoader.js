@@ -210,6 +210,9 @@ ClazzLoader.isOpera = (ClazzLoader.userAgent.indexOf ("opera") != -1);
 ClazzLoader.isIE = (ClazzLoader.userAgent.indexOf ("msie") != -1) && !ClazzLoader.isOpera;
 ClazzLoader.isGecko = (ClazzLoader.userAgent.indexOf ("gecko") != -1);
 ClazzLoader.isChrome = (ClazzLoader.userAgent.indexOf ("chrome") != -1);
+ClazzLoader.isSafari = (ClazzLoader.userAgent.indexOf ("safari") != -1);
+ClazzLoader.isMobileSafari = (ClazzLoader.isSafari && ClazzLoader.userAgent.indexOf ("mobile") != -1);
+ClazzLoader.randomlyReload = ClazzLoader.isSafari;
 
 /*
  * Opera has different loading order which will result in performance degrade!
@@ -1179,7 +1182,7 @@ ClazzLoader.loadScript = function (file) {
 	// Create script DOM element
 	var script = document.createElement ("SCRIPT");
 	script.type = "text/javascript";
-	if (ClazzLoader.isChrome && ClazzLoader.reloadingClasses[file]) {
+	if (ClazzLoader.randomlyReload && ClazzLoader.reloadingClasses[file]) {
 		script.src = file + "?" + Math.floor (100000 * Math.random ());
 	} else {
 		script.src = file;
@@ -2823,7 +2826,7 @@ ClazzLoader.lastHotspotUpdated = new Date ().getTime ();
 ClazzLoader.lastHotspotSessionID = 0;
 
 /* Google Chrome need to load *.js using url + "?" + random number */
-if (ClazzLoader.isChrome) {
+if (ClazzLoader.randomlyReload) {
 	ClazzLoader.reloadingClasses = new Object ();
 }
 
@@ -2874,7 +2877,7 @@ ClazzLoader.updateHotspot = function () {
 		for (var i = 0; i < toUpdateClasses.length; i++) {
 			if (needUpdateClasses[i]) {
 				var clzz = toUpdateClasses[i];
-				if (ClazzLoader.isChrome) {
+				if (ClazzLoader.randomlyReload) {
 					ClazzLoader.reloadingClasses[ClazzLoader.getClasspathFor (clzz)] = true;
 				}
 				ClazzLoader.loadClass (clzz, (function (clazz) {
@@ -2882,7 +2885,7 @@ ClazzLoader.updateHotspot = function () {
 						// succeeded!
 						Clazz.unloadedClasses[clazz] = null;
 						ClazzLoader.classReloaded (clazz);
-						if (ClazzLoader.isChrome) {
+						if (ClazzLoader.randomlyReload) {
 							ClazzLoader.reloadingClasses[ClazzLoader.getClasspathFor (clazz)] = false;
 						}
 					};
@@ -2978,7 +2981,11 @@ ClazzLoader.hotspotMonitoring = function () {
 		if (port == null) {
 			port = 1725;
 		}
-		var hotspotURL = "http://127.0.0.1:" + port;
+		var host = window["j2s.hotspot.host"];
+		if (host == null) {
+			host = "127.0.0.1";
+		}
+		var hotspotURL = "http://" + host + ":" + port;
 		if (ClazzLoader.lastHotspotSessionID == 0) {
 			hotspotURL += "/hotspot.js?" + Math.random ();
 		} else {
