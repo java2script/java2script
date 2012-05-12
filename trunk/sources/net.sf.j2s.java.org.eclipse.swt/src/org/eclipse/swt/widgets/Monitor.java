@@ -24,11 +24,13 @@ public final class Monitor {
 	Element handle;
 	int x, y, width, height;
 	int clientX, clientY, clientWidth, clientHeight;
+	double r;
 	
 /**
  * Prevents uninitialized instances from being created outside the package.
  */
-Monitor () {	
+Monitor () {
+	r = Math.random();
 }
 	
 /**

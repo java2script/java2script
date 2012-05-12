@@ -231,6 +231,16 @@ private void removeTrayLine () {
 }
 
 void initialize () {
+	if (display != null && display.taskBar != null
+			&& (display.taskBar.orientation == SWT.BOTTOM || display.taskBar.orientation == SWT.TOP)) {
+		return;
+	}
+	/**
+	 * @j2sNative
+	 * if (window["swt.notification.corner"] == false) {
+	 * 	return;
+	 * }
+	 */ { }
 	/**
 	 * @j2sNative
 	 * this.supportShadow = window["swt.disable.shadow"] != true;
@@ -248,7 +258,26 @@ void initialize () {
 	addTrayLine ();
 }
 
+void updateItems() {
+	for (int i = 0; i < allItems.length; i++) {
+		Element item = allItems[i];
+		if (item != null) {
+			orderTrayItem (item, i);
+		}
+	}
+}
+
 Element addTrayItem () {
+	if (display != null && display.taskBar != null
+			&& (display.taskBar.orientation == SWT.BOTTOM || display.taskBar.orientation == SWT.TOP)) {
+		Element item = document.createElement ("DIV");
+		item.className = "tray-item";
+		allItems[allItems.length] = item;
+		orderTrayItem (item, allItems.length - 1);
+		
+		display.taskBar.handle.appendChild(item);
+		return item;
+	}
 	if (allItems.length + 6 - cellLines * (cellLines + 1) / 2 > cellLines) {
 		addTrayLine ();
 	}
@@ -285,10 +314,34 @@ Element addTrayItem () {
 		display.trayCorner.setMinimized(false);
 		display.trayCorner.updateLastModified();
 	}
+	
+	if (itemCount == 1 && display.taskBar != null) {
+		display.taskBar.updateItems();
+	}
 	return item;
 }
 
 void orderTrayItem (Element item, int order) {
+	if (display != null && display.taskBar != null
+			&& (display.taskBar.orientation == SWT.BOTTOM || display.taskBar.orientation == SWT.TOP)) {
+		boolean hideLogo = false;
+		/**
+		 * @j2sNative
+		 * hideLogo = window["swt.logo"] == false;
+		 */ {}
+		int offset = (hideLogo ? 32 : 96);// - 16;
+		if (display.trayCorner == null || display.trayCorner.orientation == SWT.RIGHT) {
+			item.style.left = (display.taskBar.clientWidth - order * 32 - offset) + "px";
+		} else { // left
+			item.style.left = (order * 32 + offset) + "px";
+		}
+		if (display.taskBar.orientation == SWT.BOTTOM) {
+			item.style.top = (display.taskBar.clientHeight - 26) + "px";
+		} else { // TOP
+			item.style.top = "12px"; // TODO
+		}
+		return;
+	}
 	int index = -1;
 	int currentLine = -1;
 	for (int i = cellLines; i >= 2; i--) {
@@ -356,6 +409,9 @@ void removeTrayItem (Element item) {
 	if (display.trayCorner != null) {
 		display.trayCorner.setMinimized(false);
 		display.trayCorner.updateLastModified();
+	}
+	if (itemCount == 0 && display.taskBar != null) {
+		display.taskBar.updateItems();
 	}
 }
 

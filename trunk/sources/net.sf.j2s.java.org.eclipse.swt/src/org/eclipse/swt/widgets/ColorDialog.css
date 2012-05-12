@@ -50,14 +50,6 @@
 	height:22px;
 	padding-bottom:2px;
 }
-@media all and (min-width:0px){/* opera */
-.define-custom-colors-button, .color-dialog-button, .add-to-custom-colors-button {
-	border-width:2px;
-	border-style:solid;
-	background-color:buttonface;
-	border-color:#f0f0f0 #303030 #303030 #f0f0f0;
-}
-}
 
 .define-custom-colors-button {
 	width:196px;

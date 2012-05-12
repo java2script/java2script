@@ -1333,6 +1333,12 @@ public void setRegion (Region region) {
 	*/
 }
 
+/**
+ * @j2sNative
+ * if (hwnd != null && text != null) {
+ * 	hwnd.title = text;
+ * }
+ */
 void setToolTipText (Object hwnd, String text) {
 	/*
 	if (OS.IsWinCE) return;
@@ -1437,7 +1443,7 @@ public void setVisible (boolean visible) {
 	if (drawCount != 0) {
 		if (((state & HIDDEN) == 0) == visible) return;
 	} else {
-		if (visible == (handle.style.visibility != "hidden")) return;
+		if (visible == (handle != null && handle.style.visibility != "hidden")) return;
 		//if (visible == OS.IsWindowVisible (handle)) return;
 	}
 	
@@ -1537,6 +1543,10 @@ void updateModal () {
 		OS.EnableWindow (handle, isActive ());
 	}
 	*/
+}
+
+protected boolean showShortcutInTaskBar() {
+	return false;
 }
 
 /*

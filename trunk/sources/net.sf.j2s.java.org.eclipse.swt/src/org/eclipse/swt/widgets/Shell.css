@@ -278,6 +278,12 @@
 	min-height:20px;
 	_height:1.6em;
 }
+.shell-active .shell-title-bar {
+	background-color:activecaption;
+}
+.shell-inactive .shell-title-bar {
+	background-color:inactivecaption;
+}
 .shell-title-text {
 	position:absolute;
 	cursor:default;
@@ -294,7 +300,12 @@
 	height:1.5em;
 	min-height:18px;
 }
-
+.shell-active .shell-title-text {
+	color:captiontext;
+}
+.shell-inactive .shell-title-text {
+	color:inactivecaptiontext;
+}
 .shell-title-icon {
 	position:absolute;
 	top:0;
@@ -388,14 +399,4 @@
 }
 .swt-widgets-shell {
 	width:324px;
-}
-@media all and (min-width:0px){/* opera */
-.shell-modal-block {
-	background-color:transparent;
-	background-image:url('images/alpha.png');
-}
-.over-iframe-layer {
-	background-color:transparent;
-	background-image:url('images/alpha.png');
-}
 }

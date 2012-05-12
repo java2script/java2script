@@ -118,18 +118,6 @@ body:nth-of-type(1) .button-arrow-chrome {
 	overflow:hidden;
 }
 
-@media all and (min-width:0px){/* opera */
-.button-input-wrapper INPUT {
-	left:0;
-	top:-4px;
-	margin-top:0;
-	width:13px;
-	height:13px;
-	margin-right:2px;
-	overflow:hidden;
-}
-}
-
 .button-selected {
 	border-style:inset;
 	background-color:#eee7e0;

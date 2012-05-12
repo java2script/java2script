@@ -601,6 +601,9 @@ protected void createHandle () {
 		}
 	};
 	Clazz.addEvent(textInput, "dblclick", hEditShow);
+	if ((style & SWT.READ_ONLY) != 0 && !isSimple) {
+		Clazz.addEvent(textInput, "click", hEditShow);
+	}
 
 	hEditKeyUp = new RunnableCompatibility(){
 		public void run(){
@@ -892,7 +895,7 @@ void show(){
 	this.selectShown = true;
 	//window.currentTopZIndex = window.currentTopZIndex + 1;
 	// related bug: http://groups.google.com/group/java2script/browse_thread/thread/8085561fcf953fc?hl=en
-	selectInput.style.zIndex = window.currentTopZIndex + 100; //sgurin
+	selectInput.style.zIndex = window.currentTopZIndex + 10100; //sgurin
 
 	selectInput.className = "combo-select-box-visible" + (isSimple ? "" : " combo-select-box-notsimple");
 	int height = OS.getContainerHeight(selectInput);
@@ -1861,8 +1864,11 @@ void setBounds (int x, int y, int width, int height, int flags) {
 		} else if (OS.isIE) {
 			dropDownButton.style.right = "1px";
 			dropDownButton.style.top = "2px";
-			if (!OS.isIE80) {
+			if (!OS.isIE80 && !OS.isIE90) {
 				textInput.style.marginTop = "-1px";
+			} else if (OS.isIE90) {
+				dropDownButton.childNodes[0].style.marginTop = "-6px";
+				textInput.style.marginTop = "0";
 			}
 		} else { // Opera or others
 			dropDownButton.style.right = "0";
@@ -1897,7 +1903,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			}
 			//selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
 		} else if (OS.isIE || OS.isOpera) {
-			if (OS.isIE && !OS.isIE80 && !OS.isIE70) {
+			if (OS.isIE && !OS.isIE90 && !OS.isIE80 && !OS.isIE70) {
 				textInput.style.marginTop = "-1px";
 				selectInput.style.marginTop = "-2px";
 				selectInput.style.marginLeft = "-1px";
@@ -2167,7 +2173,11 @@ public void setSelection (Point selection) {
 	int bits = start | (end << 16);
 	OS.SendMessage (handle, OS.CB_SETEDITSEL, 0, bits);
 	*/
-	Text.setTextSelection(textInput, selection.x + 1, selection.y + 2);
+	if (OS.isIE90) {
+		Text.setTextSelection(textInput, selection.x, selection.y + 1);
+	} else {
+		Text.setTextSelection(textInput, selection.x + 1, selection.y + 2);
+	}
 }
 
 public void setFont(Font font) {
@@ -2879,6 +2889,9 @@ protected void releaseHandle() {
 		}
 
 		Clazz.removeEvent(textInput, "dblclick", hEditShow);
+		if ((style & SWT.READ_ONLY) != 0 && !isSimple) {
+			Clazz.removeEvent(textInput, "click", hEditShow);
+		}
 		hEditShow = null;
 		Clazz.removeEvent(textInput, "keyup", hEditKeyUp);
 		hEditKeyUp = null;

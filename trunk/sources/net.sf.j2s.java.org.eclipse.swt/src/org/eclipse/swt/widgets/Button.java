@@ -450,6 +450,7 @@ void createHandle() {
 		cssName += " button-flat";
 	}
 	handle.className = cssName;
+	
 	if (parent != null) {
 		Element parentHandle = parent.containerHandle();
 		if (parentHandle!= null) {
@@ -475,14 +476,14 @@ void createHandle() {
 			btnEl.className = "button-radio";
 			btnHandle.type = "radio";
 		}
-		if (OS.isIE && !OS.isIE80) {
+		if (OS.isIE && !OS.isIE80 && !OS.isIE90) {
 			btnWrapperEl.style.bottom = "-0.5em";
 		}
 		btnWrapperEl.appendChild(btnHandle);
 		btnText = document.createElement("DIV");
 		btnText.className = "button-text";
 		btnEl.appendChild(btnText);
-		if (OS.isIE80) {
+		if (OS.isIE80 || OS.isIE90) {
 			btnText.style.paddingTop = ((style & SWT.RADIO) != 0) ? "2px" : "1px";
 		}
 	} else {
@@ -497,6 +498,9 @@ void createHandle() {
 			updateArrowStyle(); 
 		} else {
 			btnHandle.className = "button-push";
+		}
+		if ((style & SWT.RIGHT) != 0) {
+			btnHandle.style.textAlign = "right";
 		}
 		if (OS.isChrome) {
 			btnHandle.className += " " + btnHandle.className + "-chrome"; 
@@ -581,6 +585,13 @@ void enableWidget (boolean enabled) {
 	btnHandle.disabled = !enabled;
 	OS.updateCSSClass(handle, "button-disabled", !enabled);
 	OS.updateCSSClass(btnHandle, "button-disabled", !enabled);
+}
+
+@Override
+public boolean forceFocus() {
+	boolean focused = super.forceFocus();
+	OS.SetFocus(btnHandle);
+	return focused;
 }
 
 /**
@@ -1078,7 +1089,11 @@ public void setImage (Image image) {
 					handleStyle.marginLeft = 4 + "px"; 
 				}
 			}
-			handleStyle.paddingLeft = (this.image.width + 1) + "px";
+			if ((style & SWT.RIGHT) != 0) {
+				//handleStyle.paddingRight = (this.image.width + 1) + "px";
+			} else {
+				handleStyle.paddingLeft = (this.image.width + 1) + "px";
+			}
 		}
 		handleStyle.minHeight = this.image.height + "px";
 		if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK | SWT.TOGGLE | SWT.PUSH)) != 0) {
@@ -1119,8 +1134,17 @@ public void setImage (Image image) {
 //			}
 			// */
 			btnIcon.style.cssText = btnText.style.cssText;
-			btnIcon.style.position = "absolute";
-			btnIcon.style.paddingLeft = "0px";
+			if ((style & SWT.RIGHT) != 0) {
+				/**
+				 * @j2sNative
+				 * this.btnIcon.style.styleFloat = "right";
+				 * this.btnIcon.style.cssFloat = "right";
+				 */ {}
+				btnIcon.style.width = (this.image.width + 1) + "px";
+			} else {
+				btnIcon.style.position = "absolute";
+				btnIcon.style.paddingLeft = "0px";
+			}
 			//handleStyle.backgroundPosition = bgXPos + " center";
 			//handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			if (this.image.packedURL != null) {
@@ -1165,7 +1189,7 @@ public void setImage (Image image) {
 		this.image.draw(btnHandle);
 	}
 	if (OS.isIE && (style & (SWT.RADIO | SWT.CHECK)) != 0) {
-		if (OS.isIE70 || OS.isIE80) {
+		if (OS.isIE70 || OS.isIE80 || OS.isIE90) {
 			btnHandle.parentNode.style.marginTop = "-3px";
 		} else {
 			btnHandle.parentNode.style.marginTop = "1px";
@@ -1304,10 +1328,12 @@ public void setText (String string) {
 	text = string;
 //	hasImage = false;
 	//string = string.replaceAll("&&", "&");
-	string = string.replaceAll("[\r\n]+", "").replaceAll("(&(&))", "$2");
+	string = string.replaceAll("[\r\n]+", "");//.replaceAll("(&(&))", "$2");
 	int idx = string.indexOf('&');
-	if (idx == -1) {
+	if (idx == -1 || idx == string.length()) {
 		btnText.appendChild(document.createTextNode(string));
+	} else if (string.charAt(idx + 1) == '&') {
+		btnText.appendChild(document.createTextNode(string.substring(0, idx) + string.substring(idx + 1)));
 	} else {
 		// Only one &
 		btnText.appendChild(document.createTextNode(string.substring(0, idx)));
@@ -1360,7 +1386,7 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 
 		int h = 0;
 		//if (!hasImage) {
-			if (textSizeCached && !OS.isIE80) {
+			if (textSizeCached && !OS.isIE80 && !OS.isIE90) {
 				btnText.style.display = "block";
 				if (textHeightCached < CHECK_HEIGHT) {
 					btnText.style.paddingTop = ((CHECK_HEIGHT - textHeightCached) / 2) + "px";

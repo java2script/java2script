@@ -337,7 +337,7 @@ void hookKeyDown() {
 			keyDownOK = this.isReturned();
 			if (!verifyHooked || hooks(SWT.KeyDown)) {
 				Event ev = new Event();
-				if (textValue != textHandle.value) {
+				if (hooks(SWT.Modify) && textValue != textHandle.value) {
 					textValue = textHandle.value;
 					ev.type = SWT.Modify;
 					ev.widget = Text.this;
@@ -468,7 +468,12 @@ void hookModify() {
 	};
 	Clazz.addEvent(textHandle, "keyup", hModifyKeyUp);
 	Clazz.addEvent(textHandle, "change", hModifyKeyUp);
-	
+}
+
+void hookFocusIn() {
+	if (hModifyBlur != null) {
+		return;
+	}
 	hModifyBlur = new RunnableCompatibility() {
 		public void run() {
 			OS.removeCSSClass(handle, "text-focus");
@@ -481,7 +486,12 @@ void hookModify() {
 		}
 	};
 	Clazz.addEvent(textHandle, "blur", hModifyBlur);
-	
+}
+
+void hookFocusOut() {
+	if (hModifyFocus != null) {
+		return;
+	}
 	hModifyFocus = new RunnableCompatibility() {
 		public void run() {
 			OS.addCSSClass(handle, "text-focus");
@@ -496,6 +506,12 @@ void hookModify() {
 	Clazz.addEvent(textHandle, "focus", hModifyFocus);
 }
 
+@Override
+protected Element hookHandle() {
+	return textHandle;
+}
+
+/*
 void hookMouseDoubleClick() {
 	super.hookMouseDoubleClick();
 	Clazz.addEvent(textHandle, "dblclick", hMouseDoubleClick);
@@ -510,6 +526,7 @@ void hookMouseUp() {
 	super.hookMouseUp();
 	Clazz.addEvent(textHandle, "mouseup", hMouseUp);
 }
+//*/
 
 /**
  * Adds the listener to the collection of listeners who will
@@ -1135,7 +1152,7 @@ if (typeof handle.selectionEnd != "undefined") {
 	if (workRange.htmlText != null) {
 		var s = workRange.htmlText;
 		var key = handle.nodeName;
-		var txt = parseInnerText (s, key);
+		var txt = this.parseInnerText (s, key);
 		if (txt != null) {
 			return txt.length;
 		}
@@ -1212,6 +1229,14 @@ public char getEchoChar () {
 	return echo;
 	*/
 	return '*';
+}
+
+public boolean getEnabled() {
+	if (this.textHandle != null) {
+		return !this.textHandle.disabled;
+	} else {
+		return super.getEnabled();
+	}
 }
 
 /**
@@ -1618,6 +1643,7 @@ public int getTopPixel () {
 public void insert (String string) {
 	checkWidget ();
 	if (string == null) error (SWT.ERROR_NULL_ARGUMENT);
+	
 	Point sel = getTextSelection(textHandle);
 	if (hooks (SWT.Verify) || filters (SWT.Verify)) {
 		string = verifyText (string, sel.x, sel.y, null);
@@ -2494,14 +2520,14 @@ boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y, int cx, 
 			b = 2;
 			if (OS.isFirefox10 || OS.isFirefox20) {
 				b = 4;
-			} else if (OS.isIE && !OS.isIE70 && !OS.isIE80) {
+			} else if (OS.isIE && !OS.isIE70 && !OS.isIE80 && !OS.isIE90) {
 				b = 4;
 			}
 		}
 	}
 	textHandle.style.height = (cy - b > 0 ? cy - b : 0) + "px";
 	if ((style & (SWT.MULTI | SWT.WRAP)) != 0) {
-		if (OS.isIE && !OS.isIE70 && !OS.isIE80 && b != 0) {
+		if (OS.isIE && !OS.isIE70 && !OS.isIE80 && !OS.isIE90 && b != 0) {
 			b += 2; // inner padding for IE!
 		} else if (OS.isIE70) {
 			b -= 2;

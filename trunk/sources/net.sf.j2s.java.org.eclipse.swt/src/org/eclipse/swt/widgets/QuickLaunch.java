@@ -11,6 +11,7 @@
 
 package org.eclipse.swt.widgets;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.internal.RunnableCompatibility;
 import org.eclipse.swt.internal.browser.OS;
 import org.eclipse.swt.internal.xhtml.Clazz;
@@ -28,6 +29,8 @@ import org.eclipse.swt.internal.xhtml.window;
  */
 public class QuickLaunch extends DesktopItem {
 
+	public static int BAR_HEIGHT = 60;
+	
 	static QuickLaunch defaultQuickLaunch = null;
 	
 	int shortcutCount = 0;
@@ -40,6 +43,8 @@ public class QuickLaunch extends DesktopItem {
 
 	private Object hLaunchToggle;
 
+	int orientation = SWT.CENTER;
+	
 	public QuickLaunch(Display display) {
 		super();
 		this.display = display;
@@ -50,6 +55,18 @@ public class QuickLaunch extends DesktopItem {
 			return;
 		}
 		alreadyInitialized = true;
+		String orientationStr = "center";
+		/**
+		 * @j2sNative
+		 * orientationStr = window["swt.shortcut.bar.orientation"];
+		 */ {}
+		if ("left".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.LEFT;
+		} else if ("right".equalsIgnoreCase(orientationStr)) {
+			this.orientation = SWT.RIGHT;
+		} else {
+			this.orientation = SWT.CENTER;
+		}
 		if (Display.bodyOverflow == null) {
 			Element body = document.body;
 			Display.bodyOverflow = body.style.overflow;
@@ -76,49 +93,8 @@ public class QuickLaunch extends DesktopItem {
 		this.handle = document.createElement("DIV");
 		this.handle.className = "shortcut-bar";
 		document.body.appendChild(this.handle);
-		hLaunchMouseEnter = new RunnableCompatibility() {
 		
-			public void run() {
-				if (isAutoHide) {
-					setMinimized(false);
-				}
-				int zIndex = window.currentTopZIndex + 1;
-				if (handle.style.zIndex != zIndex) {
-					layerZIndex = handle.style.zIndex;
-					bringToTop(zIndex);
-				}
-			}
-		
-		};
-		Clazz.addEvent(handle, "mouseover", hLaunchMouseEnter);
-		hLaunchClick = new RunnableCompatibility(){
-		
-			public void run() {
-				if (setMinimized(false)) {
-					isJustUpdated = true;
-					window.setTimeout(new RunnableCompatibility() {
-					
-						public void run() {
-							isJustUpdated = false;
-						}
-					
-					}, 500);
-				}
-				bringToTop(-1);
-			}
-		
-		};
-		Clazz.addEvent(handle, "click", hLaunchClick);
-		
-		this.handle.title = "Doubleclick to hide shortcuts";
-		hLaunchToggle = new RunnableCompatibility(){
-		
-			public void run() {
-				toggleAutoHide();
-			}
-		
-		};
-		Clazz.addEvent(handle, "dblclick", hLaunchToggle);
+		configureEvents();
 		
 		boolean supportShadow = false;
 		/**
@@ -127,7 +103,15 @@ public class QuickLaunch extends DesktopItem {
 		 */ {}
 		if (supportShadow) {
 			//Decorations.createShadowHandles(handle);
-			Decorations.appendShadowHandles(handle, true, true, false, true);
+			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+				Decorations.appendNarrowShadowHandles(handle, false, false, true, false);
+			} else {
+				Decorations.appendShadowHandles(handle, true, true, false, true);
+			}
+		} else {
+			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+				handle.style.borderBottom = "1px solid black";
+			}
 		}
 
 		Element[] childNodes = document.body.childNodes;
@@ -187,8 +171,101 @@ public class QuickLaunch extends DesktopItem {
 		}
 		if (existed) {
 			defaultQuickLaunch = this;
+		}
+		if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+			int zIndex = getNextLayerLevel(false);
+			handle.style.zIndex = zIndex;
+			this.handle.style.left = "0px";
+			this.handle.style.top = "0px";
+			handle.style.height = (BAR_HEIGHT - 1) + "px";
+			handle.style.width = display.taskBar.clientWidth + "px";
+			/**
+			 * @j2sNative
+			 * if (window["swt.shortcut.bar.top"]) {
+			 * 	this.bringToTop (zIndex);
+			 * } else {
+			 * 	this.handle.title = "Doubleclick to hide shortcuts";
+			 * }
+			 */ {}
 		} else {
+			this.handle.title = "Doubleclick to hide shortcuts";
+		}
+		
+		/**
+		 * @j2sNative
+		 * if (!existed && window["swt.shortcut.bar.default"] != false) {
+		 * 	existed = true;
+		 * }
+		 */ {}
+		if (!existed) {
 			handle.style.display = "none";
+		}
+		Element shortcutBar = null;
+		/**
+		 * @j2sNative
+		 * var containerID = window["swt.shortcut.bar.container"];
+		 * if (containerID != null) {
+		 * 	var container = document.getElementById (containerID + "");
+		 * 	if (container != null) {
+		 * 		shortcutBar = container;
+		 * 	}
+		 * }
+		 */ {}
+		if (shortcutBar != null) {
+			handle.style.display = "none";
+			BAR_HEIGHT = 0;
+		}
+	}
+	
+	private void configureEvents() {
+		hLaunchMouseEnter = new RunnableCompatibility() {
+		
+			public void run() {
+				if (isAutoHide) {
+					setMinimized(false);
+				}
+				int zIndex = getNextLayerLevel(false);
+				if (handle.style.zIndex != zIndex) {
+					layerZIndex = handle.style.zIndex;
+					bringToTop(zIndex);
+				}
+			}
+		
+		};
+		Clazz.addEvent(handle, "mouseover", hLaunchMouseEnter);
+		hLaunchClick = new RunnableCompatibility(){
+		
+			public void run() {
+				if (setMinimized(false)) {
+					isJustUpdated = true;
+					window.setTimeout(new RunnableCompatibility() {
+					
+						public void run() {
+							isJustUpdated = false;
+						}
+					
+					}, 500);
+				}
+				bringToTop(-1);
+			}
+		
+		};
+		Clazz.addEvent(handle, "click", hLaunchClick);
+		
+		boolean toggling = false;
+		/**
+		 * @j2sNative
+		 * toggling = window["swt.shortcut.bar.top"] != true;
+		 */ {}
+		if (toggling) {
+			hLaunchToggle = new RunnableCompatibility(){
+				
+				public void run() {
+					toggleAutoHide();
+				}
+				
+			};
+			Clazz.addEvent(handle, "dblclick", hLaunchToggle);
 		}
 	}
 
@@ -214,13 +291,22 @@ public class QuickLaunch extends DesktopItem {
 		}
 	}
 	public void bringToTop(int zIdx) {
+		boolean supportShortcutOnTop = true;
+		/**
+		 * @j2sNative
+		 * if (window["swt.shortcut.bar.top"] == false) {
+		 * 	supportShortcutOnTop = false;
+		 * }
+		 */ {}
+		if (!supportShortcutOnTop) {
+			return;
+		}
 		if (this.shortcutCount <= 0) {
 			return;
 		}
 		int zIndex = -1;
 		if (zIdx == -1) {
-			window.currentTopZIndex++;
-			zIndex = window.currentTopZIndex;
+			zIndex = getNextLayerLevel(true);
 			if (Display.getTopMaximizedShell() == null) {
 				this.layerZIndex = zIndex;
 			}
@@ -238,14 +324,33 @@ public class QuickLaunch extends DesktopItem {
 		}
 	}
 	public void updateLayout() {
+		if (display != null && display.taskBar != null
+				&& (display.taskBar.orientation == SWT.BOTTOM)) {
+			this.handle.style.width = display.taskBar.clientWidth + "px";
+		}
 		if (this.shortcutCount <= 0) {
 			return;
 		}
 		int barWidth = 20 + this.shortcutCount * 60;
-		int barOffset = (OS.getFixedBodyClientWidth() - barWidth) / 2;
+		int barOffset = 0;
+		if (orientation == SWT.LEFT) {
+			barOffset = 0;
+		} else if (orientation == SWT.RIGHT) {
+			barOffset = OS.getFixedBodyClientWidth() - barWidth;
+		} else {
+			barOffset = (OS.getFixedBodyClientWidth() - barWidth) / 2;
+		}
 		if (this.handle != null) {
-			this.handle.style.left = barOffset + 10 + "px";
-			this.handle.style.width = barWidth + "px";
+			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+				this.handle.style.left = "0px";
+				this.handle.style.top = "0px";
+			} else {
+				if (!(display != null && display.taskBar != null
+						&& (display.taskBar.orientation == SWT.BOTTOM))) {
+					this.handle.style.left = barOffset + 10 + "px";
+					this.handle.style.width = barWidth + "px";
+				}
+			}
 		}
 		for (int i = 0; i < this.shortcutCount; i++) {
 			shortcutItems[i].style.left = (barOffset + 20 + 10 + i * 60) + "px";
@@ -260,6 +365,10 @@ public class QuickLaunch extends DesktopItem {
 		 */ {}
 		if (this.handle == null) {
 			this.initialize();
+		} else if (handle.style.display == "none") {
+			if (BAR_HEIGHT != 0) {
+				handle.style.display = "";
+			}
 		}
 		String tag = "A";
 		/*if (!O$.isIENeedPNGFix) {
@@ -276,17 +385,38 @@ public class QuickLaunch extends DesktopItem {
 //					itemDiv.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + icon + "\", sizingMethod=\"image\")";
 //				} else {
 					itemDiv.style.backgroundImage = "url('" + icon + "')";
+					itemDiv.style.backgroundPosition = "center center";
 //				}
 			}
 			itemDiv.href = href;
 		} else {
 			if (icon != null && icon.length() != 0) {
 				itemDiv.style.backgroundImage = "url('" + icon + "')";
+				itemDiv.style.backgroundPosition = "center center";
 			}
 			itemDiv.href = href;
 		}
 		itemDiv.title = name;
-		document.body.appendChild(itemDiv);
+		if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+			itemDiv.style.top = "8px";
+		}
+		Element shortcutBar = null;
+		/**
+		 * @j2sNative
+		 * var containerID = window["swt.shortcut.bar.container"];
+		 * if (containerID != null) {
+		 * 	var container = document.getElementById (containerID + "");
+		 * 	if (container != null) {
+		 * 		shortcutBar = container;
+		 * 	}
+		 * }
+		 */ {}
+		if (shortcutBar == null) {
+			shortcutBar = document.body;
+		} else {
+			handle.style.display = "none";
+		}
+		shortcutBar.appendChild(itemDiv);
 		Clazz.addEvent(itemDiv, "mouseover", hLaunchMouseEnter);
 		
 		boolean supportShadow = false;
@@ -305,6 +435,21 @@ public class QuickLaunch extends DesktopItem {
 		setMinimized(false);
 		updateLastModified();
 		return itemDiv;
+	}
+	public void removeShortcut(Element item) {
+		for (int i = 0; i < shortcutCount; i++) {
+			if (shortcutItems[i] == item) {
+				Clazz.removeEvent(item, "mouseover", hLaunchMouseEnter);
+				document.body.removeChild(item);
+				shortcutItems[i] = null;
+				for (int j = i; j < shortcutCount - 1; j++) {
+					shortcutItems[j] = shortcutItems[j + 1];
+				}
+				shortcutCount--;
+				updateLayout();
+				return;
+			}
+		}
 	}
 	public void markActiveItem(Element item) {
 		if (this.shortcutCount <= 0 || item == null) {
@@ -339,7 +484,7 @@ public class QuickLaunch extends DesktopItem {
 	}
 
 	public void handleApproaching() {
-		int zIndex = window.currentTopZIndex + 1;
+		int zIndex = getNextLayerLevel(false);
 		if (handle.style.zIndex != zIndex) {
 			layerZIndex = handle.style.zIndex;
 			bringToTop(zIndex);
@@ -397,6 +542,19 @@ public class QuickLaunch extends DesktopItem {
 			return;
 		}
 		bringToTop(-1);
+	}
+	private int getNextLayerLevel(boolean increasing) {
+		int zIndex = window.currentTopZIndex + 1;
+		if (increasing) {
+			window.currentTopZIndex++;
+		}
+		/**
+		 * @j2sNative
+		 * if (window["swt.shortcut.bar.top"]) {
+		 * 	zIndex += 100;
+		 * }
+		 */ {}
+		return zIndex;
 	}
 
 }

@@ -17,10 +17,12 @@
 }
 .tree-v-scroll {
 	overflow:scroll;
+	overflow-y:scroll !important;
 	overflow-x:hidden;
 }
 .tree-h-scroll {
 	overflow:scroll;
+	overflow-x:scroll !important;
 	overflow-y:hidden;
 }
 
@@ -113,13 +115,6 @@ thead .tree-head-text {
 }
 .tree-check .tree-check-box {
 	display:block;
-}
-@media all and (min-width:0px){/* opera */
-.tree-check-box {
-	top:50%;
-	margin-top:-8px;
-	left:-16px !important;
-}
 }
 
 .tree-text {
