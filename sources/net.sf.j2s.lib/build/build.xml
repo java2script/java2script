@@ -133,6 +133,8 @@
         	</classpath>
        	</java>
 
+    	<mkdir dir="${j2s.core.bin}/org/eclipse/swt/"/>
+
         <java classname="net.sf.j2s.lib.build.SmartJSCompressor">
     		<arg value="${j2s.swt.bin}/org/eclipse/swt/package.js"/>
    			<arg value="${j2s.core.bin}/org/eclipse/swt/package.js"/>
@@ -340,6 +342,7 @@
     		<arg value="net/sf/j2s/ajax/XHRCallbackSWTAdapter.js"/>
         	
     		<arg value="net/sf/j2s/ajax/SimpleSerializable.js"/>
+    		<arg value="net/sf/j2s/ajax/ISimpleCacheable.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleFilter.js"/>
     		<arg value="net/sf/j2s/ajax/SimpleRPCRunnable.js"/>
     		<arg value="net/sf/j2s/ajax/ISimpleRequestInfoBinding.js"/>
