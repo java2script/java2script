@@ -95,7 +95,7 @@ JavaObject.prototype.toString = function () {
 	if (this.__CLASS_NAME__ != null) {
 		return "[" + this.__CLASS_NAME__ + " object]";
 	} else {
-		return this.to$tring ();
+		return this.to$tring.apply (this, arguments);
 	}
 };
 
@@ -514,7 +514,7 @@ Clazz.getInheritedLevel = function (clazzTarget, clazzBase) {
 /* public */
 Clazz.instanceOf = function (obj, clazz) {
 	if (obj == null) {
-		return clazz == undefined; // should usually false
+		return false; // return clazz == undefined; // should usually false
 	}
 	if (clazz == null) {
 		return false;
