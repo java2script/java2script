@@ -188,6 +188,10 @@ public class SmartJSCompressor {
 			source = RegExCompress.regexCompress2(source);
 		}
 
+		File folder = new File(dest).getParentFile();
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
 		FileOutputStream fos = new FileOutputStream(dest);
 		fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
 		fos.write(source.getBytes("utf-8"));
