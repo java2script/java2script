@@ -1550,7 +1550,7 @@ Clazz.instantialize = function (objThis, args) {
 /* protected */
 /*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "getName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"equals", "hashCode", "toString", "getName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
 	"makeConstructor" /*# x<< #*/
 ];
 
@@ -1566,6 +1566,14 @@ Clazz.innerFunctions = {
 		return this === aFun;
 	},
 
+	hashCode : function () {
+		return this.getName ().hashCode ();
+	},
+
+	toString : function () {
+		return "class " + this.getName ();
+	},
+	
 	/*
 	 * Similar to Class#getName
 	 */
