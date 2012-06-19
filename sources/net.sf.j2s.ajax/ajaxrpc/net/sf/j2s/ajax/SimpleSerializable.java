@@ -16,9 +16,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import net.sf.j2s.annotation.J2SIgnore;
 import net.sf.j2s.annotation.J2SKeep;
@@ -34,6 +33,33 @@ public class SimpleSerializable implements Cloneable {
 
 	public static boolean BYTES_COMPACT_MODE = false;
 	
+	@J2SIgnore
+	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
+
+    @J2SIgnore
+	private Map<String, Field> getSerializableFields(String clazzName) {
+		Class<?> clazz;
+		Map<String, Field> fields = quickFields.get(clazzName);
+		if (fields == null) {
+			fields = new HashMap<String, Field>();
+			clazz = this.getClass();
+			while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
+				Field[] clazzFields = clazz.getDeclaredFields();
+				for (int i = 0; i < clazzFields.length; i++) {
+					Field f = clazzFields[i];
+					int modifiers = f.getModifiers();
+					if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+							&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
+						fields.put(f.getName(), f);
+					}
+				}
+				clazz = clazz.getSuperclass();
+			}
+			quickFields.put(clazzName, fields);
+		}
+		return fields;
+	}
+
 	/**
 	 * @return
 	 * 
@@ -222,261 +248,247 @@ return strBuf;
 		buffer.append("00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
-		Set<Field> fieldSet = new HashSet<Field>();
-		clazz = this.getClass();
-		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
-			Field[] fields = clazz.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++) {
-				fieldSet.add(fields[i]);
-			}
-			clazz = clazz.getSuperclass();
-		}
+		Map<String, Field> fields = getSerializableFields(clazzName);
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		String[] fMap = fieldMapping();
 		try {
-			Field[] fields = fieldSet.toArray(new Field[0]);
-			for (int i = 0; i < fields.length; i++) {
-				Field field = fields[i];
-				int modifiers = field.getModifiers();
-				if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
-						&& (modifiers & Modifier.TRANSIENT) == 0
-						&& (modifiers & Modifier.STATIC) == 0) {
-					String name = field.getName();
-					if (filter != null && !filter.accept(name)) continue;
-					if (fMap != null && fMap.length > 1) {
-						for (int j = 0; j < fMap.length / 2; j++) {
-							if (name.equals(fMap[j + j])) {
-								String newName = fMap[j + j + 1];
-								if (newName != null && newName.length() > 0) {
-									name = newName;
-								}
-								break;
+			for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+				Field field = (Field) itr.next();
+				String name = field.getName();
+				if (filter != null && !filter.accept(name)) continue;
+				if (fMap != null && fMap.length > 1) {
+					for (int j = 0; j < fMap.length / 2; j++) {
+						if (name.equals(fMap[j + j])) {
+							String newName = fMap[j + j + 1];
+							if (newName != null && newName.length() > 0) {
+								name = newName;
 							}
+							break;
 						}
 					}
-					String nameStr = (char)(baseChar + name.length()) + name;
-					Class<?> type = field.getType();
-					if (type == float.class) {
-						float f = field.getFloat(this);
-						if (f == 0.0 && ignoring) continue;
+				}
+				String nameStr = (char)(baseChar + name.length()) + name;
+				Class<?> type = field.getType();
+				if (type == float.class) {
+					float f = field.getFloat(this);
+					if (f == 0.0 && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('F');
+					String value = "" + f;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(f);
+				} else if (type == double.class) {
+					double d = field.getDouble(this);
+					if (d == 0.0d && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('D');
+					String value = "" + d;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(d);
+				} else if (type == int.class) {
+					int n = field.getInt(this);
+					if (n == 0 && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('I');
+					String value = "" + n;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(n);
+				} else if (type == long.class) {
+					long l = field.getLong(this);
+					if (l == 0L && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('L');
+					String value = "" + l;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(l);
+				} else if (type == short.class) {
+					short s = field.getShort(this);
+					if (s == 0 && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('S');
+					String value = "" + s;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(s);
+				} else if (type == byte.class) {
+					byte b = field.getByte(this);
+					if (b == 0 && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('B');
+					String value = "" + b;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(b);
+				} else if (type == char.class) {
+					int c = 0 + field.getChar(this);
+					if (c == 0 && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('C');
+					String value = "" + c;
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(c);
+				} else if (type == boolean.class) {
+					boolean b = field.getBoolean(this);
+					if (b == false && ignoring) continue;
+					buffer.append(nameStr);
+					buffer.append('b');
+					String value = b ? "1" : "0";
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
+				} else if (type == String.class) {
+					String s = (String) field.get(this);
+					if (s == null && ignoring) continue;
+					buffer.append(nameStr);
+					serializeString(buffer, s);
+				} else { // Array ...
+					if (type == float[].class) {
+						float[] fs = (float[]) field.get(this);
+						if (fs == null && ignoring) continue;
 						buffer.append(nameStr);
-						buffer.append('F');
-						String value = "" + f;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(f);
-					} else if (type == double.class) {
-						double d = field.getDouble(this);
-						if (d == 0.0d && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('D');
-						String value = "" + d;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(d);
-					} else if (type == int.class) {
-						int n = field.getInt(this);
-						if (n == 0 && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('I');
-						String value = "" + n;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(n);
-					} else if (type == long.class) {
-						long l = field.getLong(this);
-						if (l == 0L && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('L');
-						String value = "" + l;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(l);
-					} else if (type == short.class) {
-						short s = field.getShort(this);
-						if (s == 0 && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('S');
-						String value = "" + s;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(s);
-					} else if (type == byte.class) {
-						byte b = field.getByte(this);
-						if (b == 0 && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('B');
-						String value = "" + b;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(b);
-					} else if (type == char.class) {
-						int c = 0 + field.getChar(this);
-						if (c == 0 && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('C');
-						String value = "" + c;
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(c);
-					} else if (type == boolean.class) {
-						boolean b = field.getBoolean(this);
-						if (b == false && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append('b');
-						String value = b ? "1" : "0";
-						buffer.append((char) (baseChar + value.length()));
-						buffer.append(value);
-					} else if (type == String.class) {
-						String s = (String) field.get(this);
-						if (s == null && ignoring) continue;
-						buffer.append(nameStr);
-						serializeString(buffer, s);
-					} else { // Array ...
-						if (type == float[].class) {
-							float[] fs = (float[]) field.get(this);
-							if (fs == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AF");
-							if (fs == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, fs.length);
-								for (int j = 0; j < fs.length; j++) {
-									float f = fs[j]; 
-									String value = "" + f;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(f);
-								}
-							}
-						} else if (type == double[].class) {
-							double [] ds = (double []) field.get(this);
-							if (ds == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AD");
-							if (ds == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, ds.length);
-								for (int j = 0; j < ds.length; j++) {
-									double d = ds[j];
-									String value = "" + d;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(d);
-								}
-							}
-						} else if (type == int[].class) {
-							int [] ns = (int []) field.get(this);
-							if (ns == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AI");
-							if (ns == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, ns.length);
-								for (int j = 0; j < ns.length; j++) {
-									int n = ns[j]; 
-									String value = "" + n;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(n);
-								}
-							}
-						} else if (type == long[].class) {
-							long [] ls = (long []) field.get(this);
-							if (ls == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AL");
-							if (ls == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, ls.length);
-								for (int j = 0; j < ls.length; j++) {
-									long l = ls[j];
-									String value = "" + l;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(l);
-								}
-							}
-						} else if (type == short[].class) {
-							short [] ss = (short []) field.get(this);
-							if (ss == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AS");
-							if (ss == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, ss.length);
-								for (int j = 0; j < ss.length; j++) {
-									short s = ss[j];
-									String value = "" + s;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(s);
-								}
-							}
-						} else if (type == byte[].class) {
-							byte [] bs = (byte []) field.get(this);
-							if (bs == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append(!bytesCompactMode() ? "AB" : "A8");
-							if (bs == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, bs.length);
-								if (!bytesCompactMode()) {
-									for (int j = 0; j < bs.length; j++) {
-										byte b = bs[j];
-										String value = "" + b;
-										buffer.append((char) (baseChar + value.length()));
-										buffer.append(b);
-									}
-								} else {
-									buffer.append(new String(bs, "iso-8859-1"));
-								}
-							}
-						} else if (type == char[].class) {
-							char [] cs = (char []) field.get(this);
-							if (cs == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AC");
-							if (cs == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, cs.length);
-								for (int j = 0; j < cs.length; j++) {
-									int c = cs[j];
-									String value = "" + c;
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(c);
-								}
-							}
-						} else if (type == boolean[].class) {
-							boolean [] bs = (boolean []) field.get(this);
-							if (bs == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("Ab");
-							if (bs == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, bs.length);
-								for (int j = 0; j < bs.length; j++) {
-									boolean b = bs[j];
-									String value = b ? "1" : "0";
-									buffer.append((char) (baseChar + value.length()));
-									buffer.append(value);
-								}
-							}
-						} else if (type == String[].class) {
-							String[] ss = (String []) field.get(this);
-							if (ss == null && ignoring) continue;
-							buffer.append(nameStr);
-							buffer.append("AX"); // special
-							if (ss == null) {
-								buffer.append((char) (baseChar - 1));
-							} else {
-								serializeLength(buffer, ss.length);
-								for (int j = 0; j < ss.length; j++) {
-									String s = ss[j];
-									serializeString(buffer, s);
-								}
-							}
+						buffer.append("AF");
+						if (fs == null) {
+							buffer.append((char) (baseChar - 1));
 						} else {
-							continue; // just ignore it
-							// others unknown or unsupported types!
-							// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
+							serializeLength(buffer, fs.length);
+							for (int j = 0; j < fs.length; j++) {
+								float f = fs[j]; 
+								String value = "" + f;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(f);
+							}
 						}
+					} else if (type == double[].class) {
+						double [] ds = (double []) field.get(this);
+						if (ds == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AD");
+						if (ds == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ds.length);
+							for (int j = 0; j < ds.length; j++) {
+								double d = ds[j];
+								String value = "" + d;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(d);
+							}
+						}
+					} else if (type == int[].class) {
+						int [] ns = (int []) field.get(this);
+						if (ns == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AI");
+						if (ns == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ns.length);
+							for (int j = 0; j < ns.length; j++) {
+								int n = ns[j]; 
+								String value = "" + n;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(n);
+							}
+						}
+					} else if (type == long[].class) {
+						long [] ls = (long []) field.get(this);
+						if (ls == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AL");
+						if (ls == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ls.length);
+							for (int j = 0; j < ls.length; j++) {
+								long l = ls[j];
+								String value = "" + l;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(l);
+							}
+						}
+					} else if (type == short[].class) {
+						short [] ss = (short []) field.get(this);
+						if (ss == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AS");
+						if (ss == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								short s = ss[j];
+								String value = "" + s;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(s);
+							}
+						}
+					} else if (type == byte[].class) {
+						byte [] bs = (byte []) field.get(this);
+						if (bs == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append(!bytesCompactMode() ? "AB" : "A8");
+						if (bs == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, bs.length);
+							if (!bytesCompactMode()) {
+								for (int j = 0; j < bs.length; j++) {
+									byte b = bs[j];
+									String value = "" + b;
+									buffer.append((char) (baseChar + value.length()));
+									buffer.append(b);
+								}
+							} else {
+								buffer.append(new String(bs, "iso-8859-1"));
+							}
+						}
+					} else if (type == char[].class) {
+						char [] cs = (char []) field.get(this);
+						if (cs == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AC");
+						if (cs == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, cs.length);
+							for (int j = 0; j < cs.length; j++) {
+								int c = cs[j];
+								String value = "" + c;
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(c);
+							}
+						}
+					} else if (type == boolean[].class) {
+						boolean [] bs = (boolean []) field.get(this);
+						if (bs == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("Ab");
+						if (bs == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, bs.length);
+							for (int j = 0; j < bs.length; j++) {
+								boolean b = bs[j];
+								String value = b ? "1" : "0";
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == String[].class) {
+						String[] ss = (String []) field.get(this);
+						if (ss == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AX"); // special
+						if (ss == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								String s = ss[j];
+								serializeString(buffer, s);
+							}
+						}
+					} else {
+						continue; // just ignore it
+						// others unknown or unsupported types!
+						// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
 					}
 				}
 			}
@@ -577,12 +589,13 @@ if (arguments.length == 2) {
 }
 var baseChar = 'B'.charCodeAt (0);
 if (str == null || start < 0) return false;
-var length = str.length - start;
+var end = str.length;
+var length = end - start;
 if (length <= 7 || str.substring(start, start + 3) != "WLL") return false;
 var index = str.indexOf('#', start);
 if (index == -1) return false;
 index++;
-if (index >= length + start) return false; // may be empty string!
+if (index >= end) return false; // may be empty string!
 
 var size = 0;
 var nextCharCode = str.charCodeAt(index);
@@ -600,7 +613,7 @@ if (nextCharCode >= 48 && nextCharCode <= 57) {
 	// all fields are in their default values or no fields
 	if (size == 0) return true;
 	index++;
-	if (size > length + start - index) return false; 
+	if (index + size > end) return false; 
 }
 
 var fieldMap = [];
@@ -612,9 +625,9 @@ if (fields != null) {
 		fieldMap[name] = true;
 	}
 }
-var end = index + size;
+var objectEnd = index + size;
 var fMap = this.fieldMapping ();
-while (index < start + length && index < end) {
+while (index < end && index < objectEnd) {
 	var c1 = str.charCodeAt (index++);
 	var l1 = c1 - baseChar;
 	if (l1 < 0) return true;
@@ -651,8 +664,9 @@ while (index < start + length && index < end) {
 			if (l2 == -2) {
 				var c4 = str.charCodeAt(index++);
 				var l3 = c4 - baseChar;
-				if (l3 < 0) return true;
+				if (l3 < 0 || index + l3 > end) return true; // error
 				l2 = parseInt(str.substring(index, index + l3));
+				if (l2 < 0) return true; // error
 				if (l2 > 0x1000000) { // 16 * 1024 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 				}
@@ -666,6 +680,7 @@ while (index < start + length && index < end) {
 				if (c2 != 'X') {
 					var l3 = c4 - baseChar;
 					if (l3 > 0) {
+						if (index + l3 > end) return true; // error
 						s = str.substring (index, index + l3);
 						index += l3;
 					} else if (l3 == 0) {
@@ -675,6 +690,7 @@ while (index < start + length && index < end) {
 					var c5 = str.charCodeAt (index++);
 					var l3 = c5 - baseChar;
 					if (l3 > 0) {
+						if (index + l3 > end) return true; // error
 						s = str.substring (index, index + l3);
 						index += l3;
 					} else if (l3 == 0) {
@@ -682,10 +698,10 @@ while (index < start + length && index < end) {
 					} else if (l3 == -2) {
 						var c6 = str.charCodeAt (index++);
 						var l4 = c6 - baseChar;
-						if (l4 < 0) return true;
+						if (l4 < 0 || index + l4 > end) return true; // error
 						var l5 = parseInt (str.substring( index, index + l4));
-						if (l5 < 0) return true;
 						index += l4;
+						if (l5 < 0 || index + l5 > end) return true; // error
 						s = str.substring (index, index + l5);
 						index += l5;
 					}
@@ -718,6 +734,7 @@ while (index < start + length && index < end) {
 		var l2 = c3 - baseChar;
 		var s = null;
 		if (l2 > 0) {
+			if (index + l2 > end) return true; // error
 			s = str.substring (index, index + l2);
 			index += l2;
 		} else if (l2 == 0) {
@@ -725,10 +742,10 @@ while (index < start + length && index < end) {
 		} else if (l2 == -2) {
 			var c4 = str.charCodeAt(index++);
 			var l3 = c4 - baseChar;
-			if (l3 < 0) return true;
+			if (l3 < 0 || index + l3 > end) return true; // error
 			var l4 = parseInt(str.substring(index, index + l3));
-			if (l4 < 0) return true;
 			index += l3;
+			if (l4 < 0 || index + l4 > end) return true; // error
 			s = str.substring(index, index + l4);
 			index += l4;
 		}
@@ -764,12 +781,13 @@ return true;
 	public boolean deserialize(final String str, int start) {
 		char baseChar = 'B';
 		if (str == null || start < 0) return false;
-		int length = str.length() - start;
+		int end = str.length();
+		int length = end - start;
 		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return false; // Should throw exception!
 		int index = str.indexOf('#', start);
 		if (index == -1) return false; // Should throw exception!
 		index++;
-		if (index >= length + start) return false; // may be empty string!
+		if (index >= end) return false; // may be empty string!
 		
 		int size = 0;
 		char nextChar = str.charAt(index);
@@ -778,50 +796,37 @@ return true;
 			int last = index;
 			index = str.indexOf('$', last);
 			if (index == -1) return false; // Should throw exception!
-			String sizeStr = str.substring(last + 1, index);
-			sizeStr = sizeStr.replaceFirst("^0+", "");
-			if (sizeStr.length() != 0) {
+			String sizeStr = null;
+			for (int i = last + 1; i < index; i++) {
+				char c = str.charAt(i);
+				if (c != '0') {
+					sizeStr = str.substring(i, index);
+					break;
+				}
+			}
+			if (sizeStr != null && sizeStr.length() != 0) {
 				try {
 					size = Integer.parseInt(sizeStr);
 				} catch (NumberFormatException e) {
-					return false;
+					return true; // error!
 				}
 			}
 			// all fields are in their default values or no fields
 			if (size == 0) return true;
 			index++;
 			// may be empty string or not enough string!
-			if (size > length + start - index) return false;
+			if (index + size > end) return false;
 		}
 		
-		Map<String, Field> fieldMap = new HashMap<String, Field>();
-		Set<Field> fieldSet = new HashSet<Field>();
-		Class<?> clazz = this.getClass();
-		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
-			Field[] fields = clazz.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++) {
-				fieldSet.add(fields[i]);
-			}
-			clazz = clazz.getSuperclass();
-		}
-		Field[] fields = fieldSet.toArray(new Field[0]);
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
-			int modifiers = field.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
-					&& (modifiers & Modifier.TRANSIENT) == 0
-					&& (modifiers & Modifier.STATIC) == 0) {
-				String name = field.getName();
-				fieldMap.put(name, field);
-			}
-		}
-		int end = index + size;
+		Map<String, Field> fieldMap = getSerializableFields(this.getClass().getName());
+		int objectEnd = index + size;
 		String[] fMap = fieldMapping();
-		while (index < length + start && index < end) {
+		while (index < end && index < objectEnd) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
-			if (l1 < 0) return true;
+			if (l1 < 0 || index + l1 > end) return true; // error
 			String fieldName = str.substring(index, index + l1);
+			index += l1;
 			if (fMap != null && fMap.length > 1) {
 				for (int i = 0; i < fMap.length / 2; i++) {
 					if (fieldName.equals(fMap[i + i + 1])) {
@@ -839,7 +844,6 @@ return true;
 				}
 				fieldName = fieldName.substring(1);
 			}
-			index += l1;
 			char c2 = str.charAt(index++);
 			if (c2 == 'A') {
 				Field field = (Field) fieldMap.get(fieldName);
@@ -856,8 +860,10 @@ return true;
 						if (l2 == -2) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
-							if (l3 < 0) return true;
+							if (l3 < 0 || index + l3 > end) return true; // error
 							l2 = Integer.parseInt(str.substring(index, index + l3));
+							index += l3;
+							if (l2 < 0) return true; // error
 							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
@@ -865,9 +871,9 @@ return true;
 								 */
 								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 							}
-							index += l3;
 						}
 						if (c2 == '8') { // byte[]
+							if (index + l2 > end) return true; // error
 							String byteStr = str.substring(index, index + l2);
 							index += l2;
 							if (field == null) {
@@ -883,6 +889,7 @@ return true;
 							if (c2 != 'X') {
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
+									if (index + l3 > end) return true; // error
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -892,6 +899,7 @@ return true;
 								char c5 = str.charAt(index++);
 								int l3 = c5 - baseChar;
 								if (l3 > 0) {
+									if (index + l3 > end) return true; // error
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -899,12 +907,14 @@ return true;
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
-									if (l4 < 0) return true;
+									if (l4 < 0 || index + l4 > end) return true; // error
 									int l5 = Integer.parseInt(str.substring(index, index + l4));
-									if (l5 < 0) return true;
 									index += l4;
+									if (l5 < 0 || index + l5 > end) return true; // error
 									ss[i] = str.substring(index, index + l5);
 									index += l5;
+								} else {
+									continue;
 								}
 								if (c4 == 'u') {
 									ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
@@ -993,16 +1003,14 @@ return true;
 								if (ss[i] != null && ss[i].length() > 0) {
 									char c = ss[i].charAt(0);
 									bs[i] = (c == '1' || c == 't');
-									// bs[i] = Boolean.valueOf(ss[i]).booleanValue();
 								}
 							}
 							field.set(this, bs);
 							break;
 						}
-						case 'X': {
+						case 'X':
 							field.set(this, ss);
 							break;
-						}
 						}
 					}
 				} catch (Exception e) {
@@ -1014,6 +1022,7 @@ return true;
 				int l2 = c3 - baseChar;
 				String s = null;
 				if (l2 > 0) {
+					if (index + l2 > end) return true; // error
 					s = str.substring(index, index + l2);
 					index += l2;
 				} else if (l2 == 0) {
@@ -1021,10 +1030,10 @@ return true;
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
-					if (l3 < 0) return true;
+					if (l3 < 0 || index + l3 > end) return true; // error
 					int l4 = Integer.parseInt(str.substring(index, index + l3));
-					if (l4 < 0) return true;
 					index += l3;
+					if (l4 < 0 || index + l4 > end) return true; // error
 					s = str.substring(index, index + l4);
 					index += l4;
 				}
@@ -1055,10 +1064,11 @@ return true;
 					case 'C':
 						field.setChar(this, (char) Integer.parseInt(s));
 						break;
-					case 'b':
-						field.setBoolean(this, s.charAt(0) == '1' || s.charAt(0) == 't');
-						// field.setBoolean(this, Boolean.valueOf(s).booleanValue());
+					case 'b': {
+						char c = s.charAt(0);
+						field.setBoolean(this, c == '1' || c == 't');
 						break;
+					}
 					case 's':
 						field.set(this, s);
 						break;
@@ -1106,142 +1116,94 @@ return true;
     @J2SIgnore
 	public Object clone() throws CloneNotSupportedException {
 		Object clone = super.clone();
-		Set<Field> fieldSet = new HashSet<Field>();
-		Class<?> clazz = this.getClass();
-		while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
-			Field[] fields = clazz.getDeclaredFields();
-			for (int i = 0; i < fields.length; i++) {
-				fieldSet.add(fields[i]);
+		
+		Map<String, Field> fields = this.getSerializableFields(this.getClass().getName());
+		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+			Field field = (Field) itr.next();
+			Class<?> type = field.getType();
+			Object value = null;
+			try {
+				value = field.get(this);
+			} catch (Exception e1) {
+				//e1.printStackTrace();
 			}
-			clazz = clazz.getSuperclass();
-		}
-		Field[] fields = fieldSet.toArray(new Field[0]);
-		for (int i = 0; i < fields.length; i++) {
-			Field field = fields[i];
-			int modifiers = field.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
-					&& (modifiers & Modifier.TRANSIENT) == 0
-					&& (modifiers & Modifier.STATIC) == 0) {
-				//String name = field.getName();
-				Class<?> type = field.getType();
-				Object value = null;
-				try {
-					value = field.get(this);
-				} catch (Exception e1) {
-					//e1.printStackTrace();
-				}
-				if (value != null && type.getName().startsWith("[")) {
-					if (type == float[].class) {
-						float[] as = (float[]) value;
-						float[] clones = new float[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == double[].class) {
-						double[] as = (double[]) value;
-						double[] clones = new double[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == int[].class) {
-						int[] as = (int[]) value;
-						int[] clones = new int[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == long[].class) {
-						long[] as = (long[]) value;
-						long[] clones = new long[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == short[].class) {
-						short[] as = (short[]) value;
-						short[] clones = new short[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == byte[].class) {
-						byte[] as = (byte[]) value;
-						byte[] clones = new byte[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == char[].class) {
-						char[] as = (char[]) value;
-						char[] clones = new char[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == boolean[].class) {
-						boolean[] as = (boolean[]) value;
-						boolean[] clones = new boolean[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == String[].class) {
-						String[] as = (String[]) value;
-						String[] clones = new String[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-					} else if (type == Object[].class) {
-						Object[] as = (Object[]) value;
-						Object[] clones = new Object[as.length];
-						for (int j = 0; j < clones.length; j++) {
-							clones[j] = as[j];
-						}
-						try {
-							field.set(clone, clones);
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
+			if (value != null && type.getName().startsWith("[")) {
+				Object cloneArr = null;
+				if (type == float[].class) {
+					float[] as = (float[]) value;
+					float[] clones = new float[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
 					}
+					cloneArr = clones;
+				} else if (type == double[].class) {
+					double[] as = (double[]) value;
+					double[] clones = new double[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == int[].class) {
+					int[] as = (int[]) value;
+					int[] clones = new int[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == long[].class) {
+					long[] as = (long[]) value;
+					long[] clones = new long[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == short[].class) {
+					short[] as = (short[]) value;
+					short[] clones = new short[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == byte[].class) {
+					byte[] as = (byte[]) value;
+					byte[] clones = new byte[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == char[].class) {
+					char[] as = (char[]) value;
+					char[] clones = new char[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == boolean[].class) {
+					boolean[] as = (boolean[]) value;
+					boolean[] clones = new boolean[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == String[].class) {
+					String[] as = (String[]) value;
+					String[] clones = new String[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				} else if (type == Object[].class) {
+					Object[] as = (Object[]) value;
+					Object[] clones = new Object[as.length];
+					for (int j = 0; j < clones.length; j++) {
+						clones[j] = as[j];
+					}
+					cloneArr = clones;
+				}
+				try {
+					field.set(clone, cloneArr);
+				} catch (Exception e) {
+					//e.printStackTrace();
 				}
 			}
 		}
