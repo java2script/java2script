@@ -209,7 +209,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			SimplePipeHelper.monitoringPipe(this);
 			return;
 		}
-		Thread thread = new Thread("Pipe Monitor") {
+		ThreadUtils.runTask(new Runnable() {
 			
 			public void run() {
 				long interval = pipeMonitoringInterval();
@@ -238,9 +238,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 				}
 			}
 		
-		};
-		thread.setDaemon(true);
-		thread.start();
+		}, "Pipe Monitor", true);
 	}
 
 	/**

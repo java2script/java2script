@@ -140,6 +140,7 @@ public class HttpRequest {
 	protected int readyState;
 	
 	protected String responseText;
+	protected byte[] responseBytes;
 	protected Document responseXML;
 	protected IXHRCallback onreadystatechange;
 	//private boolean overrideMimeType;
@@ -178,6 +179,14 @@ public class HttpRequest {
 		return responseText;
 	}
 	/**
+	 * Return response raw bytes of XMLHttpRequest 
+	 * @return byte[] response bytes. May be null if the request is not sent
+	 * or an error happens. 
+	 */
+	public byte[] getResponseBytes() {
+		return responseBytes;
+	}
+	/**
 	 * Return the parsed XML document of the response of XMLHttpRequest.
 	 * @return Document XML document. May be null if the response text is not
 	 * a valid XML document.
@@ -194,7 +203,7 @@ public class HttpRequest {
 		        dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
 				try {
 		            DocumentBuilder db = dbf.newDocumentBuilder();
-		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseText.getBytes());
+		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseText.getBytes("utf-8"));
 		            responseXML = db.parse(biStream);
 		        } catch (Exception e) {
 		            e.printStackTrace();
@@ -351,6 +360,7 @@ public class HttpRequest {
 		this.user = user;
 		this.password = password;
 		responseText = null;
+		responseBytes = null;
 		responseXML = null;
 		readyState = 1;
 		status = 200; // default OK
@@ -374,13 +384,13 @@ public class HttpRequest {
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
-			(new Thread("Java2Script HTTP Request") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					if (!toAbort) {
 						request();
 					}
 				}
-			}).start();
+			}, "Java2Script HTTP Request", false);
 		} else {
 			request();
 		}
@@ -518,6 +528,7 @@ public class HttpRequest {
 			is.close();
 			activeIS = null;
 			responseText = null;
+			responseBytes = baos.toByteArray();
 			String type = connection.getHeaderField("Content-Type");
 			if (type != null) {
 				String charset = null;
@@ -580,7 +591,7 @@ public class HttpRequest {
 			*/
 		} catch (Exception e) {
 			if (checkAbort()) return; // exception caused by abort action
-			e.printStackTrace();
+			//e.printStackTrace();
 			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onLoaded();

@@ -189,7 +189,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	public static void pipe(final SimplePipeRunnable runnable) {
 		runnable.ajaxIn();
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			(new Thread("Pipe Request Thread") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -201,7 +201,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					keepPipeLive(runnable);
 					runnable.ajaxOut();
 				}
-			}).start();
+			}, "Pipe Request Thread", false);
 		} else {
 			pipeRequest(runnable);
 		}
@@ -213,8 +213,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
 		runnable.updateStatus(true);
-		//if (true) return;
-		Thread thread = new Thread(new Runnable() {
+		/*
+		ThreadUtils.runTask(new Runnable() {
 			
 			public void run() {
 				long lastLiveDetected = System.currentTimeMillis();
@@ -279,9 +279,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 				} while (true);
 			}
 		
-		}, "Pipe Live Notifier Thread");
-		thread.setDaemon(true);
-		thread.start();
+		}, "Pipe Live Notifier Thread", true);
+		// */
 	}
 
 	/**
@@ -974,11 +973,11 @@ for (var i = 0; i < iframes.length; i++) {
 			if (ss == null || !ss.deserialize(string, end)) {
 				break;
 			}
-			if (ss != SimpleSerializable.UNKNOWN) {
-				String key = string.substring(start, end);
-				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
-				if (runnable != null) { // should always satisfy this condition
-					runnable.lastPipeDataReceived = System.currentTimeMillis();
+			String key = string.substring(start, end);
+			SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+			if (runnable != null) { // should always satisfy this condition
+				runnable.lastPipeDataReceived = System.currentTimeMillis();
+				if (ss != SimpleSerializable.UNKNOWN) {
 					runnable.deal(ss);
 				}
 			}
@@ -1073,11 +1072,11 @@ for (var i = 0; i < iframes.length; i++) {
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
-			(new Thread(){
+			ThreadUtils.runTask(new Runnable(){
 				public void run() {
 					pipeContinuum(runnable);
 				}
-			}).start();
+			});
 		} else
 			/**
 			 * @j2sNative
@@ -1128,7 +1127,7 @@ runnable.queryEnded = true;
 		{
 			final String key = runnable.pipeKey;
 			final long created = System.currentTimeMillis();
-			Thread thread = new Thread("Pipe Monitor Thread") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					SimplePipeRunnable runnable = null;
 					while ((runnable = SimplePipeHelper.getPipe(key)) != null) {
@@ -1154,9 +1153,7 @@ runnable.queryEnded = true;
 						}
 					}
 				}
-			};
-			thread.setDaemon(true);
-			thread.start();
+			}, "Pipe Monitor Thread", true);
 		}
 	}
 

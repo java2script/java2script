@@ -62,7 +62,7 @@ public class AClass {
 	 * }, false, true);
 	 */
 	public static void load(final String clazzName, final Runnable afterLoaded) {
-		(new Thread() {
+		ThreadUtils.runTask(new Runnable() {
 			public void run() {
 				try {
 					Class<?> clz = Class.forName(clazzName);
@@ -76,6 +76,6 @@ public class AClass {
 				}
 				if (afterLoaded != null) afterLoaded.run();
 			}
-		}).start();
+		});
 	}
 }
