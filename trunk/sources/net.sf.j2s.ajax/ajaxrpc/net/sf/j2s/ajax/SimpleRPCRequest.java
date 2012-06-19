@@ -75,7 +75,7 @@ public class SimpleRPCRequest {
 	public static void request(final SimpleRPCRunnable runnable) {
 		runnable.ajaxIn();
 		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
-			(new Thread("Simple RPC Request") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -86,7 +86,7 @@ public class SimpleRPCRequest {
 					}
 					runnable.ajaxOut();
 				}
-			}).start();
+			}, "Simple RPC Request", false);
 		} else {
 			ajaxRequest(runnable);
 		}

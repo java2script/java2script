@@ -458,7 +458,7 @@ public class SimplePipeHelper {
 			toBeDestroyedPipes.offer(pipe);
 		}
 		/*
-    	(new Thread("Destroy Pipe Thread") {
+    	ThreadUtils.runTask(new Runnable() {
     		@Override
     		public void run() {
     			try {
@@ -471,7 +471,7 @@ public class SimplePipeHelper {
     				e.printStackTrace();
     			}
     		}
-    	}).start();
+    	}, "Destroy Pipe Thread", false);
     	// */
 	}
 	
@@ -483,20 +483,16 @@ public class SimplePipeHelper {
 			return;
 		}
 		monitored = true;
-		Thread thread = new Thread("Managed Pipe Session Monitor") {
+		ThreadUtils.runTask(new Runnable() {
 			public void run() {
 				monitoringAllPipes();
 			}
-		};
-		thread.setDaemon(true);
-		thread.start();
-		Thread killerThread = new Thread("Managed Pipe Session Killer") {
+		}, "Managed Pipe Session Monitor", true);
+		ThreadUtils.runTask(new Runnable() {
 			public void run() {
 				killingPipes();
 			}
-		};
-		killerThread.setDaemon(true);
-		killerThread.start();
+		}, "Managed Pipe Session Killer", true);
 	}
 	
 }

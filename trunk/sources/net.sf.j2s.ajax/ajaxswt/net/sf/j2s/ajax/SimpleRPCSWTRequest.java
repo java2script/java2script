@@ -32,7 +32,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 			}
 		});
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			(new Thread("Simple RPC Request") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -51,7 +51,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 						}
 					});
 				}
-			}).start();
+			}, "Simple RPC Request", false);
 		} else {
 			swtAJAXRequest(runnable);
 		}

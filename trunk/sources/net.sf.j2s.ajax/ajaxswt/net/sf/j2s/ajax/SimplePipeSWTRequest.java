@@ -50,7 +50,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				}
 			
 			});
-			(new Thread("Simple Pipe RPC Request") {
+			ThreadUtils.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
@@ -73,7 +73,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						});
 					} // else ?
 				}
-			}).start();
+			}, "Simple Pipe RPC Request", false);
 
 			//SimpleRPCSWTRequest.swtRequest(runnable);
 		} else {
@@ -88,7 +88,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 	 */
     @J2SIgnore
 	static void swtKeepPipeLive(final SimplePipeRunnable runnable, final Display disp) {
-		Thread thread = new Thread("Pipe Live Notifier Thread") {
+    	ThreadUtils.runTask(new Runnable() {
 			
 			public void run() {
 				long lastLiveDetected = System.currentTimeMillis();
@@ -158,9 +158,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				} while (true);
 			}
 		
-		};
-		thread.setDaemon(true);
-		thread.start();
+		}, "Pipe Live Notifier Thread", true);
 	}
 
     @J2SIgnore
@@ -190,14 +188,14 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				SimplePipeHelper.registerPipe(runnable.pipeKey, runnable);
 
 				if (getPipeMode() == MODE_PIPE_CONTINUUM) {
-					(new Thread(){
+					ThreadUtils.runTask(new Runnable(){
 						public void run() {
 							swtPipeContinuum(runnable);
 						}
-					}).start();
+					});
 				} else {
 					final String key = runnable.pipeKey;
-					(new Thread("Pipe Monitor Thread") {
+					ThreadUtils.runTask(new Runnable() {
 						public void run() {
 							SimplePipeRunnable runnable = null;
 							while ((runnable = SimplePipeHelper.getPipe(key)) != null) {
@@ -209,7 +207,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 								}
 							}
 						}
-					}).start();
+					}, "Pipe Monitor Thread", false);
 				}
 
 			}
