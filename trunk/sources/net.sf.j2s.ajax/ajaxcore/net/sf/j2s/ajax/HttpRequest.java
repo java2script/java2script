@@ -443,8 +443,7 @@ public class HttpRequest {
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
-					// "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 GTB5 (Java2Script/2.0.0)");
-					"Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 GTB5");
+					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5");
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type",

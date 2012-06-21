@@ -800,6 +800,8 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	static void pipeContinuum(final SimplePipeRunnable runnable) {
 		HttpRequest pipeRequest = getRequestWithMonitor(new HttpRequest.IXHRReceiving() {
 			public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
+				runnable.updateStatus(true);
+				
 				baos.write(b, off, len);
 				/*
 				 * It is OK to convert to string, because SimpleSerialize's
