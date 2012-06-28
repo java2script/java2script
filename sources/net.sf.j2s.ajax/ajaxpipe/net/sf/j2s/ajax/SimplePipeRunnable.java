@@ -11,6 +11,9 @@
 package net.sf.j2s.ajax;
 
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import net.sf.j2s.ajax.SimpleRPCRunnable;
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -51,6 +54,14 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	@J2SIgnore
 	long lastHash;
+	
+	@J2SIgnore
+	List<SimpleSerializable> pipeData;
+	
+	@J2SIgnore
+	public List<SimpleSerializable> getPipeData() {
+		return pipeData;
+	}
 	
 	@J2SIgnore
 	public void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
@@ -110,6 +121,74 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public abstract boolean pipeSetup();
 	
 	/**
+	 * Clear existed pipe data, if any.
+	 * 
+	 * For server side only.
+	 */
+	@J2SIgnore
+	protected void pipeClearData() {
+		if (pipeData != null) {
+			pipeData = null;
+		}
+	}
+	
+	/**
+	 * Check if there is any pipe data left.
+	 * @return
+	 */
+	@J2SIgnore
+	protected boolean hasPipeData() {
+		if (pipeData == null) {
+			return false;
+		}
+		return !pipeData.isEmpty();
+	}
+	
+	@J2SIgnore
+	protected void pipeCloneData(SimplePipeRunnable anotherPipe, SimpleFilter filter) {
+		if (anotherPipe == this) {
+			return;
+		}
+		if (anotherPipe != null && anotherPipe.pipeData != null && anotherPipe.pipeData.size() > 0) {
+			if (pipeData == null) {
+				List<SimpleSerializable> data = new Vector<SimpleSerializable>(anotherPipe.pipeData.size());
+				synchronized (anotherPipe.pipeData) {
+					if (filter == null) {
+						data.addAll(anotherPipe.pipeData);
+					} else {
+						for (Iterator<SimpleSerializable> itr = anotherPipe.pipeData.iterator(); itr.hasNext();) {
+							SimpleSerializable event = (SimpleSerializable) itr.next();
+							if (filter.accept(event.getClass().getName())) {
+								data.add(event);
+							}
+						}
+					}
+				}
+				pipeData = data;
+			} else {
+				synchronized (pipeData) {
+					synchronized (anotherPipe.pipeData) {
+						if (filter == null) {
+							pipeData.addAll(anotherPipe.pipeData);
+						} else {
+							for (Iterator<SimpleSerializable> itr = anotherPipe.pipeData.iterator(); itr.hasNext();) {
+								SimpleSerializable event = (SimpleSerializable) itr.next();
+								if (filter.accept(event.getClass().getName())) {
+									pipeData.add(event);
+								}
+							}
+						}
+						anotherPipe.pipeData.clear();
+					}
+				}
+			}
+			synchronized (this) {
+				this.notifyAll();
+			}
+		}
+	}
+	
+	/**
 	 * Destroy the pipe and remove listeners.
 	 * After pipe is destroyed, {@link #isPipeLive()} must be false
 	 */
@@ -123,6 +202,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			SimplePipeHelper.removePipe(pipeKey);
 			pipeKey = null;
 		}
+		pipeClearData();
 		return true;
 	}
 
