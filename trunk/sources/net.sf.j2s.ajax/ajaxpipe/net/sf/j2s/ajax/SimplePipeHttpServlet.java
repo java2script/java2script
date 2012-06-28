@@ -227,9 +227,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			List<SimpleSerializable> list = null;
 			int priority = 0;
 	        long lastLiveDetected = System.currentTimeMillis();
-	        SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
-	        long waitClosingInterval = pipe == null ? 5000 : pipe.pipeWaitClosingInterval();
-			while ((list = SimplePipeHelper.getPipeDataList(key)) != null
+	        SimplePipeRunnable pipe = null;
+			while ((pipe = SimplePipeHelper.getPipe(key)) != null && (list = pipe.getPipeData()) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
 				StringBuffer buffer = new StringBuffer();
@@ -270,6 +269,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				}
 				writer.flush();
 				if (!SimplePipeHelper.isPipeLive(key)) {
+			        long waitClosingInterval = pipe == null ? 5000 : pipe.pipeWaitClosingInterval();
 					if (System.currentTimeMillis() - lastLiveDetected > waitClosingInterval) {
 						// break out while loop so pipe connection will be closed
 						break;
@@ -296,7 +296,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				}
 				
 				now = System.currentTimeMillis();
-				if (SimplePipeHelper.getPipeDataList(key) != null // may be broken down already!!
+				if (pipe != null && pipe.getPipeData()/*SimplePipeHelper.getPipeDataList(key)*/ != null // may be broken down already!!
 						&& (pipeMaxItemsPerQuery <= 0 || items < pipeMaxItemsPerQuery || isContinuum)
 						&& (isContinuum || (isScripting && now - beforeLoop < pipeScriptBreakout)
 						|| (priority < ISimplePipePriority.IMPORTANT && now - beforeLoop < pipeQueryTimeout))) {
@@ -312,8 +312,9 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				}
 			} // end of while
 		} // else pips is already closed or in other statuses
-		if (SimplePipeHelper.getPipeDataList(key) == null
-				|| !SimplePipeHelper.isPipeLive(key)) { // pipe is tore down!
+		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+		if (pipe == null || pipe.getPipeData() /*SimplePipeHelper.getPipeDataList(key)*/ == null
+				|| !pipe.isPipeLive() /*!SimplePipeHelper.isPipeLive(key)*/) { // pipe is tore down!
 			//SimplePipeHelper.notifyPipeStatus(key, false); // Leave for pipe monitor to destroy it
 			SimplePipeHelper.removePipe(key);
 			try {

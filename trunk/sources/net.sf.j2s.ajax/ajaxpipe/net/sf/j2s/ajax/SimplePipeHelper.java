@@ -42,8 +42,8 @@ public class SimplePipeHelper {
 	@J2SIgnore
 	public static int MAX_ITEMS_PER_QUERY = 100;
 	
-	@J2SIgnore
-	private static Map<String, List<SimpleSerializable>> pipeMap = null;
+//	@J2SIgnore
+//	private static Map<String, List<SimpleSerializable>> pipeMap = null;
 	
 	@J2SIgnore
 	private static boolean monitored = false;
@@ -98,15 +98,18 @@ public class SimplePipeHelper {
 		}
 		pipes.put(key, pipe);
 		
-		if (pipeMap == null) {
-			pipeMap = Collections.synchronizedMap(new HashMap<String, List<SimpleSerializable>>());
-		}
-		List<SimpleSerializable> list = pipeMap.get(key);
-		if (list == null) {
-			list = new Vector<SimpleSerializable>();
-			pipeMap.put(key, list);
-		}
+//		if (pipeMap == null) {
+//			pipeMap = Collections.synchronizedMap(new HashMap<String, List<SimpleSerializable>>());
+//		}
+//		List<SimpleSerializable> list = pipeMap.get(key);
+//		if (list == null) {
+//			list = new Vector<SimpleSerializable>();
+//			pipeMap.put(key, list);
+//		}
 		
+		if (pipe.pipeData == null) {
+			pipe.pipeData = new Vector<SimpleSerializable>();
+		}
 		return key;
 	}
 
@@ -142,15 +145,19 @@ public class SimplePipeHelper {
 			pipe = pipes.remove(key);
 			if (pipe != null) {
 				pipe.pipeAlive = false;
-			}
-		}
-		if (pipeMap != null) {
-			if (pipeMap.remove(key) != null && pipe != null) {
+				pipe.pipeClearData();
 				synchronized (pipe) {
 					pipe.notifyAll();
 				}
 			}
 		}
+//		if (pipeMap != null) {
+//			if (pipeMap.remove(key) != null && pipe != null) {
+//				synchronized (pipe) {
+//					pipe.notifyAll();
+//				}
+//			}
+//		}
 	}
 
 	@J2SNative({
@@ -177,18 +184,18 @@ public class SimplePipeHelper {
 		return true;
 	}
 	
-	@J2SIgnore
-	public static List<SimpleSerializable> getPipeDataList(String key) {
-		if (pipeMap == null) {
-			return null;
-		}
-		return pipeMap.get(key);
-	}
+//	@J2SIgnore
+//	public static List<SimpleSerializable> getPipeDataList(String key) {
+//		if (pipeMap == null) {
+//			return null;
+//		}
+//		return pipeMap.get(key);
+//	}
 
 	@J2SIgnore
 	public static void pipeIn(String key, SimpleSerializable[] ss) {
 		SimplePipeRunnable pipe = getPipe(key);
-		List<SimpleSerializable> list = getPipeDataList(key);
+		List<SimpleSerializable> list = pipe != null ? pipe.pipeData : null; //getPipeDataList(key);
 		if (pipe == null || list == null) {
 			System.out.println("There are no pipe listening?!!!!");
 			return; // throw exception?
@@ -287,12 +294,12 @@ public class SimplePipeHelper {
 		buffer.append("Pipe monitor<br />\r\n");
 		if (pipes != null) {
 			buffer.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
-			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
-			Object[] keys = pipeMap.keySet().toArray();
+//			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
+			Object[] keys = pipes.keySet().toArray();
 			for (int i = 0; i < keys.length; i++) {
 				String key = (String) keys[i];
-				List<SimpleSerializable> list = pipeMap.get(key);
 				SimplePipeRunnable p = pipes.get(key);
+				List<SimpleSerializable> list = p != null ? p.pipeData : null; //pipeMap.get(key);
 				if (p instanceof CompoundPipeRunnable) {
 					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
 					int activeCount = 0;
@@ -326,12 +333,12 @@ public class SimplePipeHelper {
 		buffer.append("Pipe monitor<br />\r\n");
 		if (pipes != null) {
 			buffer.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
-			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
-			Object[] keys = pipeMap.keySet().toArray();
+//			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
+			Object[] keys = pipes.keySet().toArray();
 			for (int i = 0; i < keys.length; i++) {
 				String key = (String) keys[i];
-				List<SimpleSerializable> list = pipeMap.get(key);
 				SimplePipeRunnable p = pipes.get(key);
+				List<SimpleSerializable> list = p != null ? p.pipeData : null; //pipeMap.get(key);
 				if (p instanceof CompoundPipeRunnable) {
 					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
 					buffer.append(i + "Pipe " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");

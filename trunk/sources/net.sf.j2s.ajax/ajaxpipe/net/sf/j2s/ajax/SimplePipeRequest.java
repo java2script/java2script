@@ -213,7 +213,10 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
 		runnable.updateStatus(true);
-		/*
+		if (getRequstMode() != MODE_LOCAL_JAVA_THREAD) {
+			return;
+		}
+		//*
 		ThreadUtils.runTask(new Runnable() {
 			
 			public void run() {
@@ -784,8 +787,10 @@ var fun = (function (key, created) {
 				last = created;
 			}
 			if (now - last > 3 * spr.pipeLiveNotifyInterval) {
-				runnable.pipeAlive = false;
-				runnable.pipeClosed();
+				if (key == runnable.pipeKey) {
+					runnable.pipeAlive = false;
+					runnable.pipeClosed();
+				}
 				sph.removePipe(key);
 				spr.pipeIFrameClean (key);
 			} else {
@@ -798,6 +803,7 @@ var fun = (function (key, created) {
 window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 	 */
 	static void pipeContinuum(final SimplePipeRunnable runnable) {
+		final String pipeKey = runnable.pipeKey;
 		HttpRequest pipeRequest = getRequestWithMonitor(new HttpRequest.IXHRReceiving() {
 			public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
 				runnable.updateStatus(true);
@@ -836,9 +842,12 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 
 			@Override
 			public void onLoaded() { // on case that no destroy event is sent to client
-				String pipeKey = runnable.pipeKey;
-				if (SimplePipeHelper.getPipe(pipeKey) != null) {
+				String key = runnable.pipeKey;
+				if (pipeKey != null && pipeKey.equals(key)) {
 					runnable.pipeClosed(); // may set runnable.pipeKey = null;
+					SimplePipeHelper.removePipe(key);
+				} else { // broken, reconnected and already assigned another pipe key
+					// remove old pipe from pipe pool
 					SimplePipeHelper.removePipe(pipeKey);
 				}
 			}
@@ -846,7 +855,6 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		});
 		pipeRequest.setCometConnection(true);
 
-		String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
@@ -922,8 +930,10 @@ for (var i = 0; i < iframes.length; i++) {
 				String key = string.substring(start, end);
 				SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
 				if (pipe != null) {
-					pipe.pipeAlive = false;
-					pipe.pipeClosed();
+					if (key.equals(pipe.pipeKey)) {
+						pipe.pipeAlive = false;
+						pipe.pipeClosed();
+					}
 					SimplePipeHelper.removePipe(key);
 				}
 				return string.substring(end + destroyedKey.length());
@@ -1115,8 +1125,10 @@ runnable.queryEnded = true;
 			runnable.received = runnable.lastPipeDataReceived;
 			if (runnable.queryFailedRetries >= 3
 					|| now - last > 3 * spr.pipeLiveNotifyInterval) {
-				runnable.pipeAlive = false;
-				runnable.pipeClosed();
+				if (key == runnable.pipeKey) {
+					runnable.pipeAlive = false;
+					runnable.pipeClosed();
+				}
 				sph.removePipe(key);
 				spr.pipeIFrameClean (key);
 			} else {
@@ -1142,8 +1154,10 @@ runnable.queryEnded = true;
 						}
 						if (runnable.queryFailedRetries >= 3
 								|| now - last > 3 * pipeLiveNotifyInterval) {
-							runnable.pipeAlive = false;
-							runnable.pipeClosed();
+							if (key.equals(runnable.pipeKey)) {
+								runnable.pipeAlive = false;
+								runnable.pipeClosed();
+							}
 							SimplePipeHelper.removePipe(key);
 							return;
 						}
@@ -1374,8 +1388,10 @@ return function () {
 			document.domain = p.parentDomain;
 			var key = p.key;
 			with (window.parent) {
-				runnable.pipeAlive = false;
-				runnable.pipeClosed ();
+				if (runnable.pipeKey == key) {
+					runnable.pipeAlive = false;
+					runnable.pipeClosed ();
+				}
 				net.sf.j2s.ajax.SimplePipeHelper.removePipe (key);
 				net.sf.j2s.ajax.SimplePipeRequest.pipeIFrameClean (key);
 			}
