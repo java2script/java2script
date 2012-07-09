@@ -718,14 +718,14 @@ document.body.appendChild (ifr);
 	 * (non-Javadoc)
 	 * @see net.sf.j2s.ajax.HttpRequest#initializeReceivingMonitor()
 	 */
-	public static HttpRequest getRequestWithMonitor(final HttpRequest.IXHRReceiving montior) {
+	public static HttpRequest getRequestWithMonitor(final HttpRequest.IXHRReceiving monitor) {
 		/**
 		 * @j2sNative
 		 */
 		{
 			if (requestFactory != null && requestFactory instanceof IHttpPipeRequestFactory) {
 				try {
-					return ((IHttpPipeRequestFactory) requestFactory).createRequestWithMonitor(montior);
+					return ((IHttpPipeRequestFactory) requestFactory).createRequestWithMonitor(monitor);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -734,7 +734,7 @@ document.body.appendChild (ifr);
 		return new HttpRequest() {
 			@Override
 			protected IXHRReceiving initializeReceivingMonitor() {
-				return montior;
+				return monitor;
 			}
 		};
 	}
