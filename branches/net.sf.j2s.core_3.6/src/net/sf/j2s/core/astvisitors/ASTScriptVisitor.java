@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -505,11 +506,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						}
 						buffer.append(", this, ");
 						buffer.append("null"); // No final variables for non-anonymous class
-						List arguments = node.arguments();
-						if (arguments.size() > 0) {
-							buffer.append(", ");
-							visitList(arguments, ", ");
+						IMethodBinding methodDeclaration = null;
+						IMethodBinding constructorBinding = node.resolveConstructorBinding();
+						if (constructorBinding != null) {
+							methodDeclaration = constructorBinding.getMethodDeclaration();
 						}
+						visitMethodParameterList(node.arguments(), methodDeclaration, true, ", ", null);
 						buffer.append(")");
 						return false;
 					}
@@ -534,8 +536,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (constructorBinding != null) {
 				methodDeclaration = constructorBinding.getMethodDeclaration();
 			}
-			visitMethodParameterList(node.arguments(), methodDeclaration);
-			//visitList(node.arguments(), ", ");
+			visitMethodParameterList(node.arguments(), methodDeclaration, true, null, null);
 			buffer.append(")");
 		} else {
 			ITypeBinding binding = node.resolveTypeBinding();
@@ -576,8 +577,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			buffer.append(shortClassName);
 //			buffer.append("$ = function () {\r\n");
 			
-			List arguments = node.arguments();
-			int argSize = arguments.size();
 			ASTVariableVisitor variableVisitor = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class));
 			variableVisitor.isFinalSensible = true;
 			
@@ -602,17 +601,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			variableVisitor.normalVars = lastNormalVars;
 			buffer.append(listFinalVariables(visitedVars, ", ", scope));
-			if (argSize > 0) {
-				buffer.append(", ");
-			}
+
 			IMethodBinding methodDeclaration = null;
 			IMethodBinding constructorBinding = node.resolveConstructorBinding();
 			if (constructorBinding != null) {
 				methodDeclaration = constructorBinding.getMethodDeclaration();
 			}
-			visitMethodParameterList(node.arguments(), methodDeclaration);
-
-			//visitList(arguments, ", ");
+			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", ", null);
 			
 			if (lastCurrentBlock != -1) {
 				/* add the visited variables into last visited variables */
@@ -641,11 +636,83 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
-	protected void visitMethodParameterList(List arguments,
-			IMethodBinding methodDeclaration, int begin, int end) {
-		ITypeBinding[] parameterTypes = null;
+	protected void visitMethodParameterList(List arguments, IMethodBinding methodDeclaration, boolean isConstructor, String prefix, String suffix) {
+		if (methodDeclaration == null) {
+			return;
+		}
+		if (isConstructor && arguments.size() == 0) {
+			boolean constructorVarargs = isConstructorVarargs(methodDeclaration, false);
+			if (constructorVarargs) {
+				if (prefix != null) {
+					buffer.append(prefix);
+				}
+				buffer.append("[]");
+				if (suffix != null) {
+					buffer.append(suffix);
+				}
+			}
+			return;
+		}
+
+		boolean alreadyPrefixed = false;
 		String clazzName = null;
-		String methodName = null;
+		ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
+		ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+		if (declaringClass != null) {
+			clazzName = declaringClass.getQualifiedName();
+		}
+		String methodName = methodDeclaration.getName();
+		int argSize = arguments.size();
+		for (int i = 0; i < parameterTypes.length; i++) {
+			boolean isVarArgs = false;
+			if (i == parameterTypes.length - 1) {
+				ITypeBinding paramType = parameterTypes[i];
+				if (parameterTypes.length != argSize) {
+					isVarArgs = true;
+				} else if (paramType.isArray() && methodDeclaration.isVarargs()) {
+					Expression element = (Expression) arguments.get(i);
+					ITypeBinding argType = element.resolveTypeBinding();
+					if (!argType.isArray()) {
+						if (!(element instanceof NullLiteral)) {
+							isVarArgs = true;
+						}
+					}
+				}
+			}
+			String parameterTypeName = null;
+			if (parameterTypes != null) {
+				parameterTypeName = parameterTypes[i].getName();
+			}
+			if (!alreadyPrefixed && prefix != null) {
+				buffer.append(prefix);
+				alreadyPrefixed = true;
+			}
+			if (isVarArgs) {
+				buffer.append("[");
+				for (int j = i; j < argSize; j++) {
+					ASTNode element = (ASTNode) arguments.get(j);
+					visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
+					if (j != argSize - 1) {
+						buffer.append(", ");
+					}
+				}
+				buffer.append("]");
+			} else {
+				ASTNode element = (ASTNode) arguments.get(i);
+				visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
+				if (i != parameterTypes.length - 1) {
+					buffer.append(", ");
+				}
+			}
+		}
+		
+		if (alreadyPrefixed && suffix != null) {
+			buffer.append(suffix);
+		}
+	}
+
+	private void visitArgumentItem(ASTNode element,
+			String clazzName, String methodName, String parameterTypeName, int position) {
 		/*
 		Object[] ignores = new Object[] {
 				"java.lang.String", "indexOf", new int[] { 0 },
@@ -654,92 +721,69 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				"java.lang.StringBuilder", "append", new int[] { 0 }
 		};
 		*/
-		if (methodDeclaration != null) {
-			parameterTypes = methodDeclaration.getParameterTypes();
-			ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
-			if (declaringClass != null) {
-				clazzName = declaringClass.getQualifiedName();
-			}
-			methodName = methodDeclaration.getName();
-		}
-		for (int i = begin; i < end; i++) {
-			ASTNode element = (ASTNode) arguments.get(i);
-			String typeStr = null;
-			if (element instanceof CastExpression) {
-				CastExpression castExp = (CastExpression) element;
-				Expression exp = castExp.getExpression();
-				if (exp instanceof NullLiteral) {
-					ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
-					if (nullTypeBinding != null) {
-						if (nullTypeBinding.isArray()) {
-							typeStr = "Array";
-						} else if (nullTypeBinding.isPrimitive()) {
-							Code code = PrimitiveType.toCode(nullTypeBinding.getName());
-							if (code == PrimitiveType.BOOLEAN) {
-								typeStr = "Boolean";
-							} else{
-								typeStr = "Number";
-							}
-						} else if (!nullTypeBinding.isTypeVariable()) {
-							typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
+		String typeStr = null;
+		if (element instanceof CastExpression) {
+			CastExpression castExp = (CastExpression) element;
+			Expression exp = castExp.getExpression();
+			if (exp instanceof NullLiteral) {
+				ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
+				if (nullTypeBinding != null) {
+					if (nullTypeBinding.isArray()) {
+						typeStr = "Array";
+					} else if (nullTypeBinding.isPrimitive()) {
+						Code code = PrimitiveType.toCode(nullTypeBinding.getName());
+						if (code == PrimitiveType.BOOLEAN) {
+							typeStr = "Boolean";
+						} else{
+							typeStr = "Number";
 						}
+					} else if (!nullTypeBinding.isTypeVariable()) {
+						typeStr = assureQualifiedName(shortenQualifiedName(nullTypeBinding.getQualifiedName()));
 					}
 				}
-			}
-			if (typeStr != null) {
-				buffer.append("Clazz.castNullAs (\"");
-				buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
-				buffer.append("\")");
-			} else {
-				boxingNode(element);
-				Expression exp = (Expression) element;
-				ITypeBinding typeBinding = exp.resolveTypeBinding();
-				String typeName = null;
-				if (typeBinding != null) {
-					typeName = typeBinding.getName();
-				}
-				String parameterTypeName = null;
-				if (parameterTypes != null && parameterTypes.length > i) { // parameterTypes.length <= i, incorrect method invocation
-					parameterTypeName = parameterTypes[i].getName();
-				}
-				if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
-					boolean ignored = false;
-					/*
-					for (int j = 0; j < ignores.length / 3; j++) {
-						int[] indexes = (int[]) ignores[i + i + i + 2];
-						boolean existed = false;
-						for (int k = 0; k < indexes.length; k++) {
-							if (indexes[k] == i) {
-								existed = true;
-								break;
-							}
-						}
-						if (existed) {
-							if (ignores[0].equals(Bindings.removeBrackets(clazzName)) && ignores[1].equals(methodName)) {
-								ignored = true;
-								break;
-							}
-						}
-					}
-					*/
-					// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
-					ignored = (i == 0 
-							&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
-							&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
-					if (!ignored) {
-						buffer.append(".charCodeAt (0)");
-					}
-				}
-			}
-			if (i < end - 1) {
-				buffer.append(", ");
 			}
 		}
-	}
-
-	protected void visitMethodParameterList(List arguments,
-			IMethodBinding methodDeclaration) {
-		visitMethodParameterList(arguments, methodDeclaration, 0, arguments.size());
+		if (typeStr != null) {
+			buffer.append("Clazz.castNullAs (\"");
+			buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
+			buffer.append("\")");
+		} else {
+			boxingNode(element);
+			Expression exp = (Expression) element;
+			ITypeBinding typeBinding = exp.resolveTypeBinding();
+			String typeName = null;
+			if (typeBinding != null) {
+				typeName = typeBinding.getName();
+			}
+			if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
+				boolean ignored = false;
+				/*
+				for (int j = 0; j < ignores.length / 3; j++) {
+					int[] indexes = (int[]) ignores[i + i + i + 2];
+					boolean existed = false;
+					for (int k = 0; k < indexes.length; k++) {
+						if (indexes[k] == i) {
+							existed = true;
+							break;
+						}
+					}
+					if (existed) {
+						if (ignores[0].equals(Bindings.removeBrackets(clazzName)) && ignores[1].equals(methodName)) {
+							ignored = true;
+							break;
+						}
+					}
+				}
+				*/
+				// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
+				ignored = (position == 0 
+						&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
+						&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+				if (!ignored) {
+					buffer.append(".charCodeAt (0)");
+				}
+			}
+		}
 	}
 
 	public boolean visit(ConstructorInvocation node) {
@@ -749,8 +793,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
-		visitMethodParameterList(node.arguments(), methodDeclaration);
-		//visitList(node.arguments(), ", ");
+		visitMethodParameterList(node.arguments(), methodDeclaration, true, null, null);
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -782,29 +825,47 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
 			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		}
-
-		String fullClassName = null;//getFullClassName();
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-		String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
-		if (packageName != null && packageName.length() != 0) {
-			fullClassName = packageName + '.' + className;
-		} else {
-			fullClassName = className;
-		}
-//		if (thisPackageName != null && thisPackageName.length() != 0) {
-//			fullClassName = thisPackageName + '.' + thisClassName;
-//		} else {
-//			fullClassName = thisClassName;
-//		}
 		
-		int lastIndexOf = fullClassName.lastIndexOf ('.');
-		if (lastIndexOf != -1) {
-			buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
-			buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
+		ASTNode parent = node.getParent();
+		if (parent != null && parent instanceof AbstractTypeDeclaration) {
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			//String className = ((AbstractTypeDeclaration) parent).getName().getFullyQualifiedName();
+			String fullClassName = null;
+			if (packageName != null && packageName.length() != 0) {
+				fullClassName = packageName + '.' + className;
+			} else {
+				fullClassName = className;
+			}
+			String name = node.getName().getIdentifier();
+			buffer.append(assureQualifiedName(fullClassName));
+			buffer.append(", \"" + name + "\"");
+			buffer.append(", Enum");
 		} else {
-			buffer.append("null, \"" + fullClassName + "\"");
+			
+			String fullClassName = null;//getFullClassName();
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+			String className = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getClassName();
+			if (packageName != null && packageName.length() != 0) {
+				fullClassName = packageName + '.' + className;
+			} else {
+				fullClassName = className;
+			}
+//			if (thisPackageName != null && thisPackageName.length() != 0) {
+//				fullClassName = thisPackageName + '.' + thisClassName;
+//			} else {
+//				fullClassName = thisClassName;
+//			}
+			
+			int lastIndexOf = fullClassName.lastIndexOf ('.');
+			if (lastIndexOf != -1) {
+				buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
+				buffer.append(", \"" + fullClassName.substring(lastIndexOf + 1) + "\"");
+			} else {
+				buffer.append("null, \"" + fullClassName + "\"");
+			}
+			buffer.append(", Enum");
 		}
-		buffer.append(", Enum");
 
 		List superInterfaces = node.superInterfaceTypes();
 		int size = superInterfaces.size();
@@ -1022,33 +1083,46 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				 * Never reach here!
 				 * March 17, 2006
 				 */
-				buffer.append("if (!Clazz.isClassDefined (\"");
-				buffer.append(visitor.getFullClassName());
-				buffer.append("\")) {\r\n");
+//				buffer.append("if (!Clazz.isClassDefined (\"");
+//				buffer.append(visitor.getFullClassName());
+//				if (binding != null && !binding.isTopLevel()) {
+//					buffer.append("." + binding.getName());
+//				}
+//				buffer.append("\")) {\r\n");
 				
 				//String className = typeVisitor.getClassName();
-				methodBuffer.append("cla$$.$");
-				String targetClassName = visitor.getClassName();
-				//String prefixKey = className + ".";
-				//if (targetClassName.startsWith(prefixKey)) {
-				//	targetClassName = targetClassName.substring(prefixKey.length());
-				//}
-				targetClassName = targetClassName.replace('.', '$');
-				methodBuffer.append(targetClassName);
-				methodBuffer.append("$ = function () {\r\n");
+//				methodBuffer.append("cla$$.$");
+//				String targetClassName = visitor.getClassName();
+//				//String prefixKey = className + ".";
+//				//if (targetClassName.startsWith(prefixKey)) {
+//				//	targetClassName = targetClassName.substring(prefixKey.length());
+//				//}
+//				targetClassName = targetClassName.replace('.', '$');
+//				methodBuffer.append(targetClassName);
+//				if (binding != null && !binding.isTopLevel()) {
+//					methodBuffer.append("$" + binding.getName());
+//				}
+//				methodBuffer.append("$ = function () {\r\n");
 				methodBuffer.append("Clazz.pu$h ();\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
 				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
-				methodBuffer.append("};\r\n");
-
-				buffer.append(visitor.getPackageName());
-				buffer.append(".");
-				buffer.append(targetClassName);
-				buffer.append(".$");
-				buffer.append(visitor.getClassName());
-				buffer.append("$ ();\r\n");
-				
-				buffer.append("}\r\n");
+//				methodBuffer.append("};\r\n");
+//
+//				String pkgName = visitor.getPackageName();
+//				if (pkgName != null && pkgName.length() > 0) {
+//					buffer.append(pkgName);
+//					buffer.append(".");
+//				}
+//				buffer.append(targetClassName);
+//				buffer.append(".$");
+//				buffer.append(visitor.getClassName());
+//				buffer.append("$");
+//				if (binding != null && !binding.isTopLevel()) {
+//					buffer.append(binding.getName());
+//				}
+//				buffer.append("$ ();\r\n");
+//				
+//				buffer.append("}\r\n");
 			}
 			return false;
 		}
@@ -1600,7 +1674,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("{\r\n");
 				buffer.append("Clazz.superConstructor (this, ");
 				buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
-				buffer.append(", []);\r\n");
+				boolean constructorVarargs = isConstructorVarargs(binding, true);
+				if (constructorVarargs) {
+					buffer.append(", [[]]);\r\n");
+				} else {
+					buffer.append(", []);\r\n");
+				}
 				boolean read = checkJ2STags(node, false);
 				if (!read) {
 					blockLevel++;
@@ -1696,6 +1775,62 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("\"");
 		}
 		buffer.append(");\r\n");
+		return false;
+	}
+
+	private boolean isConstructorVarargs(IMethodBinding binding, boolean startSuper) {
+		if (binding == null) {
+			return false;
+		}
+		ITypeBinding declaringClass = binding.getDeclaringClass();
+		ITypeBinding superclass = declaringClass;
+		if (startSuper) {
+			superclass = declaringClass.getSuperclass();
+		}
+		if (superclass == null) {
+			return false;
+		}
+		do {
+			IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
+			if (declaredMethods == null) {
+				return false;
+			}
+			boolean constructorVarargs = false;
+			boolean containsNonDefaultConstructor = false;
+			for (int i = 0; i < declaredMethods.length; i++) {
+				IMethodBinding m = declaredMethods[i];
+				if (m.isDefaultConstructor() || !m.isConstructor()) {
+					continue;
+				}
+				containsNonDefaultConstructor = true;
+				int modifiers = m.getModifiers();
+				if ((modifiers & Modifier.PRIVATE) != 0) {
+					continue;
+				}
+				if (modifiers == Modifier.NONE) {
+					IPackageBinding declaringPackage = declaringClass.getPackage();
+					IPackageBinding superPackage = superclass.getPackage();
+					if ((declaringPackage == null && superPackage != null)
+							|| (declaringPackage != null && superPackage == null)) {
+						continue;
+					} else if (declaringPackage != null && !declaringPackage.getName().equals(superPackage.getName())) {
+						continue;
+					}
+				}
+				ITypeBinding[] parameterTypes = m.getParameterTypes();
+				if (parameterTypes == null || parameterTypes.length == 0) {
+					constructorVarargs = false;
+					break;
+				} else if (parameterTypes.length == 1 && m.isVarargs()){
+					constructorVarargs = true;
+				}
+			}
+			if (containsNonDefaultConstructor) {
+				return constructorVarargs;
+			}
+			superclass = superclass.getSuperclass();
+		} while (superclass != null);
+		
 		return false;
 	}
 
@@ -1846,51 +1981,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			node.getName().accept(this);
 		}
 		buffer.append(" (");
-
-		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if (methodBinding != null && methodBinding.isVarargs()) {
-			ITypeBinding[] paramTypes = methodBinding.getParameterTypes();
-			visitList(args, ", ", 0, paramTypes.length - 1);
-			if (paramTypes.length - 1 > 0) {
-				buffer.append(", ");
-			}
-			boolean needBrackets = true;
-			
-			//sgurin:  corrected bug when vararg parameter is an empty array.
-			if (args.size() == 0) {
-				if (needBrackets) buffer.append("[]");
-			}
-			else {
-				Expression arg = (Expression) args.get(args.size() - 1);
-				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-				if (resolveTypeBinding != null && resolveTypeBinding.isArray() && args.size()==1) /* sgurin: fix for varargs invocation like vararg("param1", "2", new String[]{"3","4"}). needsBraked should be false only when there is only one array parameter in the method invocation */ 
-					needBrackets = false;				
-				if (needBrackets) buffer.append("[");
-				visitList(args, ", ", paramTypes.length - 1, size);
-				if (needBrackets) buffer.append("]");
-			}
-			
-			//old Code:
-//			//if (args.size() == 1) {
-//				Expression arg = (Expression) args.get(args.size() - 1);
-//				ITypeBinding resolveTypeBinding = arg.resolveTypeBinding();
-//				if (resolveTypeBinding != null && resolveTypeBinding.isArray()) {
-//					needBrackets = false;
-//				}
-//			//}
-//			if (needBrackets) buffer.append("[");
-//			//IMethodBinding methodDeclaration = node.resolveMethodBinding();
-//			//visitMethodParameterList(node.arguments(), methodDeclaration, paramTypes.length - 1, size);
-//			visitList(args, ", ", paramTypes.length - 1, size);
-//			if (needBrackets) buffer.append("]");
-			
-			
-			
-		} else {
-			IMethodBinding methodDeclaration = node.resolveMethodBinding();
-			visitMethodParameterList(node.arguments(), methodDeclaration);
-			//visitList(args, ", ");
-		}
+		IMethodBinding methodDeclaration = node.resolveMethodBinding();
+		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
 		buffer.append(")");
 		return false;
 	}
@@ -2242,6 +2334,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SuperConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+		if (constructorBinding == null) {
+			return false;
+		}
 		ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
 		if ("java.lang.Object".equals(declaringClass.getQualifiedName())) {
 			return false;
@@ -2262,17 +2357,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 */
 		buffer.append("Clazz.superConstructor (this, ");
 		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
-		List arguments = node.arguments();
-		if (arguments.size() > 0) {
-			buffer.append(", [");
-			IMethodBinding methodDeclaration = null;
-			if (constructorBinding != null) {
-				methodDeclaration = constructorBinding.getMethodDeclaration();
-			}
-			visitMethodParameterList(arguments, methodDeclaration);
-			//visitList(arguments, ", ");
-			buffer.append("]");
+		IMethodBinding methodDeclaration = null;
+		if (constructorBinding != null) {
+			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
+		visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -2329,8 +2418,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(name);
 		buffer.append("\", [");
 		IMethodBinding methodDeclaration = node.resolveMethodBinding();
-		visitMethodParameterList(node.arguments(), methodDeclaration);
-		//visitList(node.arguments(), ", ");
+		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
 		buffer.append("])");
 		return false;
 	}
@@ -3066,8 +3154,11 @@ public class CB extends CA {
 				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 				methodBuffer.append("};\r\n");
 
-				buffer.append(visitor.getPackageName());
-				buffer.append(".");
+				String pkgName = visitor.getPackageName();
+				if (pkgName != null && pkgName.length() > 0) {
+					buffer.append(pkgName);
+					buffer.append(".");
+				}
 				buffer.append(className);
 				buffer.append(".$");
 				buffer.append(targetClassName);
