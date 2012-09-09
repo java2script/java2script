@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -76,6 +77,22 @@ public class MethodReferenceASTVisitor extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ConstructorInvocation)
 	 */
 	public boolean visit(ConstructorInvocation node) {
+		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+		String key = constructorBinding.getKey();
+		if (key != null) {
+			key = key.replaceAll("%?<[^>]+>", "");
+		}
+		if (methodSignature.equals(key)) {
+			isReferenced = true;
+			return false;
+		}
+		return super.visit(node);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EnumConstantDeclaration)
+	 */
+	public boolean visit(EnumConstantDeclaration node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
 		String key = constructorBinding.getKey();
 		if (key != null) {
