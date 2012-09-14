@@ -126,6 +126,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			}
 		}
 		ASTNode parent = node.getParent();
+		boolean qualifierVisited = false;
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
 			while (qualifier instanceof QualifiedName) {
@@ -147,13 +148,16 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				if (!(binding instanceof IVariableBinding)) {
 					ITypeBinding typeBinding = qualifier.resolveTypeBinding();
 					if (typeBinding != null) {
-						String name = null;
-						ITypeBinding declaringClass = typeBinding.getDeclaringClass();
-						if (declaringClass != null) {
-							name = declaringClass.getQualifiedName();
-						} else {
-							name = "";
-						}
+						// Compiling inner Class or enum type, like:
+						// RadiusData.EnumType e = RadiusData.EnumType.THREE;
+						// avoid generate duplicated RadiusData
+						String name = typeBinding.getQualifiedName();
+//						ITypeBinding declaringClass = typeBinding.getDeclaringClass();
+//						if (declaringClass != null) {
+//							name = declaringClass.getQualifiedName();
+//						} else {
+//							name = "";
+//						}
 						name = shortenQualifiedName(name);
 						if (name.indexOf("java.lang.") == 0) {
 							name = name.substring(10);
@@ -178,6 +182,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.length() != 0) {
 							buffer.append(name);
 							buffer.append('.');
+							qualifierVisited = true;
 						}
 					}
 				}
@@ -190,8 +195,10 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			node.getName().accept(this);
 			return false;
 		}
-		node.getQualifier().accept(this);
-		buffer.append('.');
+		if (!qualifierVisited) {
+			node.getQualifier().accept(this);
+			buffer.append('.');
+		}
 		node.getName().accept(this);
 		return false;
 	}

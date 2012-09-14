@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
+//import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -1001,6 +1001,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 		}
 		ASTNode parent = node.getParent();
+		boolean qualifierVisited = false;
 		if (parent != null && !(parent instanceof QualifiedName)) {
 			Name qualifier = node.getQualifier();
 			while (qualifier instanceof QualifiedName) {
@@ -1022,18 +1023,21 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				if (!(binding instanceof IVariableBinding)) {
 					ITypeBinding typeBinding = qualifier.resolveTypeBinding();
 					if (typeBinding != null) {
-						String name = null;
-						ITypeBinding declaringClass = typeBinding.getDeclaringClass();
-						if (declaringClass != null) {
-							name = declaringClass.getQualifiedName();
-						} else {
-							IPackageBinding pkg = typeBinding.getPackage();
-							if (pkg != null) {
-								name = pkg.getName();
-							} else {
-								name = "";
-							}
-						}
+						// Compiling inner Class or enum type, like:
+						// RadiusData.EnumType e = RadiusData.EnumType.THREE;
+						// avoid generate duplicated RadiusData
+						String name = typeBinding.getQualifiedName();
+//						ITypeBinding declaringClass = typeBinding.getDeclaringClass();
+//						if (declaringClass != null) {
+//							name = declaringClass.getQualifiedName();
+//						} else {
+//							IPackageBinding pkg = typeBinding.getPackage();
+//							if (pkg != null) {
+//								name = pkg.getName();
+//							} else {
+//								name = "";
+//							}
+//						}
 						String xhtml = "net.sf.j2s.html.";
 						if (name.indexOf(xhtml) == 0) {
 							name = name.substring(xhtml.length());
@@ -1044,6 +1048,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						if (name.length() != 0) {
 							buffer.append(name);
 							buffer.append('.');
+							qualifierVisited = true;
 						}
 					}
 				}
@@ -1056,8 +1061,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			node.getName().accept(this);
 			return false;
 		}
-		qName.accept(this);
-		buffer.append('.');
+		if (!qualifierVisited) {
+			qName.accept(this);
+			buffer.append('.');
+		}
 		node.getName().accept(this);
 		return false;
 	}
