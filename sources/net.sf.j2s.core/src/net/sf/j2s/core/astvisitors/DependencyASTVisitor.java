@@ -348,6 +348,19 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	//sgurin - fix for bug http://sourceforge.net/tracker/?func=detail&aid=3037341&group_id=155436&atid=795800 with static imports
+	public void endVisit(ImportDeclaration node) {
+		super.endVisit(node);
+		if(node.isStatic()&&node.isOnDemand()) {			
+			String qnameStr = node.getName().getFullyQualifiedName();
+			if(qnameStr!=null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node)) {
+				if(!musts.contains(qnameStr)) {
+					musts.add(qnameStr);
+				}
+			}
+		}
+	}
+
 	protected void readClasses(Annotation annotation, Set set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
