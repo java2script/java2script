@@ -846,13 +846,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			return false;
 		}
-		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
+		ITypeBinding typeBinding = left.resolveTypeBinding();
 		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
 				buffer.append("(");
-				node.getOperand().accept(this);
+				left.accept(this);
 				buffer.append(" = String.fromCharCode (($c$ = ");
-				node.getOperand().accept(this);
+				left.accept(this);
 				String op = node.getOperator().toString();
 				if ("++".equals(op)) {
 					buffer.append(").charCodeAt (0) + 1)");
@@ -863,7 +863,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				return false;
 			}
 		}
-		boxingNode(node.getOperand());
+		boxingNode(left);
 		return false;
 		//return super.visit(node);
 	}
@@ -971,24 +971,30 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			return false;
 		}
-		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
+		ITypeBinding typeBinding = left.resolveTypeBinding();
 		if (typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
 				buffer.append("(");
-				node.getOperand().accept(this);
-				buffer.append(" = String.fromCharCode ((");
-				node.getOperand().accept(this);
-				if ("++".equals(op)) {
-					buffer.append(").charCodeAt (0) + 1)");
+				left.accept(this);
+				buffer.append(" = String.fromCharCode (");
+				if (left instanceof SimpleName || left instanceof QualifiedName) {
+					left.accept(this);
 				} else {
-					buffer.append(").charCodeAt (0) - 1)");
+					buffer.append("(");
+					left.accept(this);
+					buffer.append(")");
+				}
+				if ("++".equals(op)) {
+					buffer.append(".charCodeAt (0) + 1)");
+				} else {
+					buffer.append(".charCodeAt (0) - 1)");
 				}
 				buffer.append(")");
 				return false;
 			}
 		}
 		buffer.append(node.getOperator());
-		boxingNode(node.getOperand());
+		boxingNode(left);
 		return false;
 	}
 
