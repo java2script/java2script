@@ -530,6 +530,15 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.cloneFinals", "F", //
 				"Clazz.prepareFields", "Y", //
 				"Clazz.newArray", "A", //
+				"Clazz.newIntArray", "AI", //
+				"Clazz.newFloatArray", "AF", //
+				"Clazz.newDoubleArray", "AD", //
+				"Clazz.newByteArray", "AB", //
+				"Clazz.newLongArray", "AL", //
+				"Clazz.newShortArray", "AS", //
+				"Clazz.newCharArray", "AC", //
+				"Clazz.newBooleanArray", "Ab", //
+				//"Clazz.newStringArray", "AX", //
 				"Clazz.instanceOf", "O", //
 				"Clazz.exceptionOf", "e", //sgurin
 				"Clazz.inheritArgs", "G", //

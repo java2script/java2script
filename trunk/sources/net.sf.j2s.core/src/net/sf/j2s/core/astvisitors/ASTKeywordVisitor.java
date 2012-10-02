@@ -150,11 +150,31 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	public boolean visit(ArrayAccess node) {
 		node.getArray().accept(this);
 		buffer.append('[');
+		int idx1 = buffer.length();
 		Expression index = node.getIndex();
 		index.accept(this);
 		ITypeBinding rightTypeBinding = index.resolveTypeBinding();
 		if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName())) {
-			buffer.append(".charCodeAt (0)");
+			boolean appendingCode = true;
+			int length = buffer.length();
+			if (index instanceof MethodInvocation) {
+				MethodInvocation m = (MethodInvocation) index;
+				if ("charAt".equals(m.getName().toString())) {
+					int idx2 = buffer.indexOf(".charAt ", idx1);
+					if (idx2 != -1) {
+						StringBuffer newMethodBuffer = new StringBuffer();
+						newMethodBuffer.append(buffer.substring(idx1, idx2));
+						newMethodBuffer.append(".charCodeAt ");
+						newMethodBuffer.append(buffer.substring(idx2 + 8, length));
+						buffer.delete(idx1, length);
+						buffer.append(newMethodBuffer.toString());
+						appendingCode = false;
+					}
+				}
+			}
+			if (appendingCode) {
+				buffer.append(".charCodeAt (0)");
+			}
 		}
 		buffer.append(']');
 		return false;
@@ -179,15 +199,21 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 							|| "byte".equals(typeCode)
 							|| "long".equals(typeCode)
 							|| "short".equals(typeCode)) {
-						buffer.append(" Clazz.newArray (");
+						//buffer.append(" Clazz.newArray (");
+						buffer.append(" Clazz.new");
+						buffer.append(typeCode.substring(0, 1).toUpperCase());
+						buffer.append(typeCode.substring(1));
+						buffer.append("Array (");
 						visitList(dim, ", ");
 						buffer.append(", 0)");
 					} else if ("char".equals(typeCode)) {
-						buffer.append(" Clazz.newArray (");
+						//buffer.append(" Clazz.newArray (");
+						buffer.append(" Clazz.newCharArray (");
 						visitList(dim, ", ");
 						buffer.append(", '\\0')");
 					} else if ("boolean".equals(typeCode)) {
-						buffer.append(" Clazz.newArray (");
+						//buffer.append(" Clazz.newArray (");
+						buffer.append(" Clazz.newBooleanArray (");
 						visitList(dim, ", ");
 						buffer.append(", false)");
 					} else {
@@ -386,31 +412,47 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				 * FIXME: Bug here!: v[count++] = 'a';
 				 */
 				left.accept(this);
-				buffer.append(" = String.fromCharCode (");
-				if (isMixedOp) {
-					buffer.append ("(");
-					left.accept(this);
-					buffer.append(").charCodeAt (0) ");
-					buffer.append(op.charAt(0));
-				}
-				if (right instanceof InfixExpression) {
-					buffer.append(" (");
+				if ("char".equals(rightTypeBinding.getName())) {
+					buffer.append(" = ");
 					right.accept(this);
-					buffer.append(')');
-					if ("char".equals(rightTypeBinding.getName())) {
-						buffer.append(".charCodeAt (0)");
-					}
 				} else {
-					buffer.append(' ');
-					if ("char".equals(rightTypeBinding.getName())) {
-						buffer.append(" (");
-						right.accept(this);
-						buffer.append(").charCodeAt (0)");
-					} else {
-						right.accept(this);
+					buffer.append(" = String.fromCharCode (");
+					if (isMixedOp) {
+						if (left instanceof SimpleName || left instanceof QualifiedName) {
+							left.accept(this);
+						} else {
+							buffer.append("(");
+							left.accept(this);
+							buffer.append(")");
+						}
+						buffer.append(".charCodeAt (0) ");
+						buffer.append(op.charAt(0));
 					}
+					buffer.append(' ');
+					if (right instanceof InfixExpression) {
+						String constValue = checkConstantValue(right);
+						if (constValue != null) {
+							buffer.append(constValue);
+						} else {
+							buffer.append("(");
+							right.accept(this);
+							buffer.append(')');
+						}
+						if ("char".equals(rightTypeBinding.getName())) {
+							buffer.append(".charCodeAt (0)");
+						}
+					} else {
+						if ("char".equals(rightTypeBinding.getName())) {
+							buffer.append("(");
+							right.accept(this);
+							buffer.append(")");
+							buffer.append(".charCodeAt (0)");
+						} else {
+							right.accept(this);
+						}
+					}
+					buffer.append(')');
 				}
-				buffer.append(')');
 				return false;
 			}
 		}
@@ -420,9 +462,46 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		buffer.append(' ');
 		ITypeBinding binding = right.resolveTypeBinding();
 		if (binding != null && "char".equals(binding.getName())) {
-			buffer.append('(');
-			right.accept(this);
-			buffer.append(").charCodeAt (0)");
+			String typeBindingName = (typeBinding != null) ? typeBinding.getName() : null;
+			if (right instanceof CharacterLiteral) {
+				CharacterLiteral cl = (CharacterLiteral) right;
+				if ("char".equals(typeBindingName) || typeBindingName.indexOf("String") != -1) {
+					String constValue = checkConstantValue(right);
+					buffer.append(constValue);
+				} else {
+					buffer.append(0 + cl.charValue());
+				}
+			} else {
+				if (typeBindingName != null && ("char".equals(typeBindingName) || typeBindingName.indexOf("String") != -1)) {
+					right.accept(this);
+				} else {
+					int idx1 = buffer.length();
+					buffer.append('(');
+					right.accept(this);
+					buffer.append(")");
+					
+					boolean appendingCode = true;
+					int length = buffer.length();
+					if (right instanceof MethodInvocation) {
+						MethodInvocation m = (MethodInvocation) right;
+						if ("charAt".equals(m.getName().toString())) {
+							int idx2 = buffer.indexOf(".charAt ", idx1);
+							if (idx2 != -1) {
+								StringBuffer newMethodBuffer = new StringBuffer();
+								newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
+								newMethodBuffer.append(".charCodeAt ");
+								newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
+								buffer.delete(idx1, length);
+								buffer.append(newMethodBuffer.toString());
+								appendingCode = false;
+							}
+						}
+					}
+					if (appendingCode) {
+						buffer.append(".charCodeAt (0)");
+					}
+				}
+			}
 		} else {
 			boxingNode(right);
 		}
@@ -520,15 +599,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ContinueStatement node) {
-		buffer.append("continue ");
+		buffer.append("continue");
 		/*
 		 * TODO: verify that label is not supported!
 		 */
 		SimpleName label = node.getLabel();
 		if (label != null) {
+			buffer.append(' ');
 			label.accept(this);
 		}
-		buffer.append(";");
+		buffer.append(";\r\n");
 		return false;
 	}
 
@@ -1076,9 +1156,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ReturnStatement node) {
-		buffer.append("return ");
+		buffer.append("return");
 		Expression expression = node.getExpression();
 		if (expression != null) {
+			buffer.append(' ');
 			expression.accept(this);
 		}
 		buffer.append(";\r\n");
@@ -1227,11 +1308,43 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (typeBinding != null && "char".equals(typeBinding.getName())) {
 				ITypeBinding nameTypeBinding = name.resolveTypeBinding();
 				String nameType = nameTypeBinding.getName();
-				if (!"char".equals(nameType) && nameType.indexOf("String") == -1) {
-					buffer.append("(");
-					initializer.accept(this);
-					buffer.append(").charCodeAt (0)");
+				if (initializer instanceof CharacterLiteral) {
+					CharacterLiteral cl = (CharacterLiteral) initializer;
+					if ("char".equals(nameType)) {
+						String constValue = checkConstantValue(initializer);
+						buffer.append(constValue);
+					} else {
+						buffer.append(0 + cl.charValue());
+					}
 					return false;
+				} else {
+					if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
+						int idx1 = buffer.length();
+						buffer.append("(");
+						initializer.accept(this);
+						buffer.append(")");
+						boolean appendingCode = true;
+						int length = buffer.length();
+						if (initializer instanceof MethodInvocation) {
+							MethodInvocation m = (MethodInvocation) initializer;
+							if ("charAt".equals(m.getName().toString())) {
+								int idx2 = buffer.indexOf(".charAt ", idx1);
+								if (idx2 != -1) {
+									StringBuffer newMethodBuffer = new StringBuffer();
+									newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
+									newMethodBuffer.append(".charCodeAt ");
+									newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
+									buffer.delete(idx1, length);
+									buffer.append(newMethodBuffer.toString());
+									appendingCode = false;
+								}
+							}
+						}
+						if (appendingCode) {
+							buffer.append(".charCodeAt (0)");
+						}
+						return false;
+					}
 				}
 			}
 			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
