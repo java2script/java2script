@@ -13,7 +13,7 @@
  * @create March 10, 2006
  *******/
 
-if (window["Clazz"] == null || window["Clazz"].unloadClass == null) {
+if (window["Clazz"] != null && window["Clazz"].unloadClass == null) {
 /**
  * Once ClassExt.js is part of Class.js.
  * In order to make the Class.js as small as possible, part of its content
@@ -286,7 +286,7 @@ Clazz.defineEnumConstant = function (clazzEnum, enumName, enumOrdinal, initialPa
  * @return the created Array object
  */
 /* public */
-Clazz.newArray  = function () {
+Clazz.newArray = function () {
 	var args = arguments;
 	if (arguments.length == 1) {
 		if (arguments[0] instanceof Array) {
@@ -324,6 +324,8 @@ Clazz.newArray  = function () {
 		return arr;
 	}
 };
+
+Clazz.newIntArray = Clazz.newFloatArray = Clazz.newDoubleArray = Clazz.newLongArray = Clazz.newShortArray = Clazz.newByteArray = Clazz.newCharArray = Clazz.newBooleanArray = Clazz.newArray; 
 
 /**
  * Make the RunnableCompatiability instance as a JavaScript function.
@@ -512,9 +514,11 @@ Clazz.checkPrivateMethod = function (args) {
 	}
 	return null;
 };
-var $fz = null; // for private method declaration
+
+$fz = null; // for private method declaration
 //var cla$$ = null;
-var c$ = null;
+c$ = null;
+
 /*-# cla$$$tack -> cst  #-*/
 Clazz.cla$$$tack = new Array ();
 Clazz.pu$h = function () {
@@ -825,7 +829,42 @@ Clazz.int0RightShift = function (n, o) { // 64bit
 };
 
 // Compress the common public API method in shorter name
-$_L=Clazz.load;$_W=Clazz.declareAnonymous;$_T=Clazz.declareType;$_J=Clazz.declarePackage;$_C=Clazz.decorateAsClass;$_Z=Clazz.instantialize;$_I=Clazz.declareInterface;$_D=Clazz.isClassDefined;$_H=Clazz.pu$h;$_P=Clazz.p0p;$_B=Clazz.prepareCallback;$_N=Clazz.innerTypeInstance;$_K=Clazz.makeConstructor;$_U=Clazz.superCall;$_R=Clazz.superConstructor;$_M=Clazz.defineMethod;$_V=Clazz.overrideMethod;$_S=Clazz.defineStatics;$_E=Clazz.defineEnumConstant;$_F=Clazz.cloneFinals;$_Y=Clazz.prepareFields;$_A=Clazz.newArray;$_O=Clazz.instanceOf;$_G=Clazz.inheritArgs;$_X=Clazz.checkPrivateMethod;$_Q=Clazz.makeFunction;$_s=Clazz.registerSerializableFields;
+$_L=Clazz.load;
+$_W=Clazz.declareAnonymous;
+$_T=Clazz.declareType;
+$_J=Clazz.declarePackage;
+$_C=Clazz.decorateAsClass;
+$_Z=Clazz.instantialize;
+$_I=Clazz.declareInterface;
+$_D=Clazz.isClassDefined;
+$_H=Clazz.pu$h;
+$_P=Clazz.p0p;
+$_B=Clazz.prepareCallback;
+$_N=Clazz.innerTypeInstance;
+$_K=Clazz.makeConstructor;
+$_U=Clazz.superCall;
+$_R=Clazz.superConstructor;
+$_M=Clazz.defineMethod;
+$_V=Clazz.overrideMethod;
+$_S=Clazz.defineStatics;
+$_E=Clazz.defineEnumConstant;
+$_F=Clazz.cloneFinals;
+$_Y=Clazz.prepareFields;
+$_A=Clazz.newArray;
+$_AI=Clazz.newIntArray;
+$_AF=Clazz.newFloatArray;
+$_AD=Clazz.newDoubleArray;
+$_AL=Clazz.newLongArray;
+$_AS=Clazz.newShortArray;
+$_AB=Clazz.newByteArray;
+$_AC=Clazz.newCharArray;
+$_Ab=Clazz.newBooleanArray;
+//$_AX=Clazz.newStringArray;
+$_O=Clazz.instanceOf;
+$_G=Clazz.inheritArgs;
+$_X=Clazz.checkPrivateMethod;
+$_Q=Clazz.makeFunction;
+$_s=Clazz.registerSerializableFields;
 
 
 var reflect = Clazz.declarePackage ("java.lang.reflect");
@@ -901,7 +940,7 @@ Clazz.innerFunctions.newInstance = function () {
 };
 
 //Object.newInstance = Clazz.innerFunctions.newInstance;
-{
+(function() {  // BH added wrapper here
 	var inF = Clazz.innerFunctionNames;
 	for (var i = 0; i < inF.length; i++) {
 		JavaObject[inF[i]] = Clazz.innerFunctions[inF[i]];
@@ -910,7 +949,7 @@ Clazz.innerFunctions.newInstance = function () {
 	Array["isArray"] = function () {
 		return true;
 	};
-}
+}) ();
 
 /* public */
 Clazz.forName = function (clazzName) {
