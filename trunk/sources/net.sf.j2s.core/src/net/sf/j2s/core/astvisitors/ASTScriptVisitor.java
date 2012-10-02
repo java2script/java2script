@@ -806,7 +806,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
 						&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
 				
-				if (exp instanceof CharacterLiteral) {
+				if (!ignored && exp instanceof CharacterLiteral) {
 					CharacterLiteral cl = (CharacterLiteral) exp;
 					buffer.append(0 + cl.charValue());
 					ignored = true;
