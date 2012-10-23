@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -447,12 +448,29 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
 					if ("char".equals(name)) {
 						buffer.append("(");
-						expression.accept(this);
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (").charCodeAt (0)");
 						return false;
 					} else if ("float".equals(name) || "double".equals(name)) {
-						buffer.append("Math.round (");
-						expression.accept(this);
+						//buffer.append("Math.round (");
+						buffer.append("Clazz.");
+						buffer.append(name);
+						buffer.append("To");
+						String targetType = pType.getPrimitiveTypeCode().toString();
+						buffer.append(targetType.substring(0, 1).toUpperCase());
+						buffer.append(targetType.substring(1));
+						buffer.append (" (");
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (")");
 						return false;
 					}
@@ -465,10 +483,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //						return false;
 					} else if ("float".equals(name) || "double".equals(name)) {
 						// TODO:
-						buffer.append("String.fromCharCode (");
-						buffer.append("Math.round (");
-						expression.accept(this);
-						buffer.append (")");
+						buffer.append("Clazz.");
+						buffer.append(name);
+						buffer.append("ToChar (");
+//						buffer.append("String.fromCharCode (");
+//						buffer.append("Math.round (");
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
+//						buffer.append (")");
 						buffer.append (")");
 						return false;
 					} else if ("int".equals(name) || "byte".equals(name)
@@ -499,7 +525,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							}
 						}
 						buffer.append("String.fromCharCode (");
-						expression.accept(this);
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (")");
 						return false;
 					}
@@ -615,7 +646,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			currentBlockForVisit = blockLevel;
 			visitedVars = variableVisitor.visitedVars = new ArrayList();
 			variableVisitor.normalVars = new ArrayList();
+			methodDeclareStack.push(binding.getKey());
 			anonDeclare.accept(this);
+			methodDeclareStack.pop();
 			buffer.append(", ");
 
 			buffer.append("Clazz.innerTypeInstance (");
@@ -1429,7 +1462,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						StringBuffer tmpBuffer = buffer;
 						buffer = new StringBuffer();
 						
-						buffer.append("Math.floor (");
+						//buffer.append("Math.floor (");
+						// TODO
+						buffer.append("Clazz.doubleToInt (");
 						charVisit(left, beCare);
 						buffer.append(' ');
 						buffer.append(operator);
@@ -1445,7 +1480,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									Expression exp = (Expression) element;
 									ITypeBinding expBinding = exp.resolveTypeBinding();
 									if (isIntegerType(expBinding.getName())) {
-										buffer.insert(0, "Math.floor (");
+										//buffer.insert(0, "Math.floor (");
+										buffer.insert(0, "Clazz.doubleToInt (");
 										is2Floor = true;
 									}
 								}
