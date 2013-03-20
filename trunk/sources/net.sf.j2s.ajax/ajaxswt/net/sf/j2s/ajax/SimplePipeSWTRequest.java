@@ -137,7 +137,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							String pipeMethod = runnable.getPipeMethod();
 							String pipeURL = runnable.getPipeURL();
 
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY);
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, runnable.pipeSequence);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
@@ -246,7 +246,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		
 		});
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, runnable.pipeSequence);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, false);
 	}
 	
@@ -312,7 +312,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM, runnable.pipeSequence);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	

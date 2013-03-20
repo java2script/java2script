@@ -18,6 +18,7 @@ import java.util.Vector;
 import net.sf.j2s.ajax.SimpleRPCRunnable;
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.annotation.J2SIgnore;
+import net.sf.j2s.annotation.J2SNative;
 
 /**
  * 
@@ -55,6 +56,16 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	@J2SIgnore
 	long lastHash;
 	
+	long pipeSequence = 1;
+	
+	long notifySequence = 1;
+	
+	@J2SIgnore
+	int sequenceIndex; // Index of last SimplePipeSequence in pipeData 
+	
+	@J2SIgnore
+	int bufferedIndex; // Index of last buffered object in pipeData 
+	
 	@J2SIgnore
 	List<SimpleSerializable> pipeData;
 	
@@ -62,7 +73,42 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public List<SimpleSerializable> getPipeData() {
 		return pipeData;
 	}
+
+	@J2SIgnore
+	public void setLastPipeSequenceIndex(int index) {
+		sequenceIndex = index;
+	}
 	
+	@J2SIgnore
+	public int getLastPipeSequenceIndex() {
+		return sequenceIndex;
+	}
+	
+	@J2SIgnore
+	public int getLastBufferedIndex() {
+		return bufferedIndex;
+	}
+
+	@J2SIgnore
+	public void setLastBufferedIndex(int index) {
+		bufferedIndex = index;
+	}
+
+	@J2SIgnore
+	public long getSequence() {
+		return pipeSequence;
+	}
+
+	@J2SIgnore
+	public long increaseSequence() {
+		return ++pipeSequence;
+	}
+
+	@J2SIgnore
+	public void setSequence(long sequence) {
+		pipeSequence = sequence;
+	}
+
 	@J2SIgnore
 	public void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		pipeManaged = true;
@@ -125,7 +171,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * 
 	 * For server side only.
 	 */
-	@J2SIgnore
+	@J2SNative("")
 	protected void pipeClearData() {
 		if (pipeData != null) {
 			pipeData = null;
@@ -145,39 +191,27 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	}
 	
 	@J2SIgnore
-	protected void pipeCloneData(SimplePipeRunnable anotherPipe, SimpleFilter filter) {
+	protected void pipeCloneData(SimplePipeRunnable anotherPipe, SimpleFilter filter, boolean clearOriginalData) {
 		if (anotherPipe == this) {
 			return;
 		}
 		if (anotherPipe != null && anotherPipe.pipeData != null && anotherPipe.pipeData.size() > 0) {
 			if (pipeData == null) {
 				List<SimpleSerializable> data = new Vector<SimpleSerializable>(anotherPipe.pipeData.size());
+				pipeData = data;
+			}
+			synchronized (pipeData) {
 				synchronized (anotherPipe.pipeData) {
-					if (filter == null) {
-						data.addAll(anotherPipe.pipeData);
-					} else {
-						for (Iterator<SimpleSerializable> itr = anotherPipe.pipeData.iterator(); itr.hasNext();) {
-							SimpleSerializable event = (SimpleSerializable) itr.next();
-							if (filter.accept(event.getClass().getName())) {
-								data.add(event);
-							}
+					for (Iterator<SimpleSerializable> itr = anotherPipe.pipeData.iterator(); itr.hasNext();) {
+						SimpleSerializable event = (SimpleSerializable) itr.next();
+						if (event instanceof SimplePipeSequence) {
+							continue;
+						}
+						if (filter != null && filter.accept(event.getClass().getName())) {
+							pipeData.add(event);
 						}
 					}
-				}
-				pipeData = data;
-			} else {
-				synchronized (pipeData) {
-					synchronized (anotherPipe.pipeData) {
-						if (filter == null) {
-							pipeData.addAll(anotherPipe.pipeData);
-						} else {
-							for (Iterator<SimpleSerializable> itr = anotherPipe.pipeData.iterator(); itr.hasNext();) {
-								SimpleSerializable event = (SimpleSerializable) itr.next();
-								if (filter.accept(event.getClass().getName())) {
-									pipeData.add(event);
-								}
-							}
-						}
+					if (clearOriginalData) {
 						anotherPipe.pipeData.clear();
 					}
 				}

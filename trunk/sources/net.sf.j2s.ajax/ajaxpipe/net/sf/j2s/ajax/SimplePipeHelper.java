@@ -207,12 +207,12 @@ public class SimplePipeHelper {
 				if (s instanceof ISimpleCacheable) {
 					ISimpleCacheable c = (ISimpleCacheable) s;
 					if (c.isCached()) {
-						// already buffered
+						// in buffer and not sent yet
 						continue;
 					} else {
 						int idx = list.indexOf(s);
-						if (idx != -1) {
-							// same object but may be with updated properties!
+						if (idx != -1 && idx > pipe.getLastBufferedIndex()) {
+							// same object but with updated properties maybe!
 							SimpleSerializable existed = list.get(idx);
 							if (existed instanceof ISimpleCacheable) {
 								ISimpleCacheable ec = (ISimpleCacheable) existed;
