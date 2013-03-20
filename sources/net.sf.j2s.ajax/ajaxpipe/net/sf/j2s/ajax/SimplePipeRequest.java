@@ -108,6 +108,11 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * Query key for pipe: pipernd
 	 */
 	public static final String FORM_PIPE_RANDOM = "r"; // "pipernd";
+
+	/**
+	 * Query key for pipe: pipeseq
+	 */
+	public static final String FORM_PIPE_SEQUENCE = "s"; // "pipeseq";
 	
 	static final int PIPE_KEY_LENGTH = 6;
 
@@ -160,11 +165,12 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * @param pipeRequestType
 	 * @return request data for both GET and POST request. 
 	 */
-	protected static String constructRequest(String pipeKey, String pipeRequestType) {
+	protected static String constructRequest(String pipeKey, String pipeRequestType, long pipeSequence) {
 		reqCount++;
 		return FORM_PIPE_KEY + "=" + pipeKey + "&" 
-				+ FORM_PIPE_TYPE + "=" + pipeRequestType 
-				+ "&" + FORM_PIPE_RANDOM + "=" + reqCount;
+				+ FORM_PIPE_TYPE + "=" + pipeRequestType + "&"
+				+ FORM_PIPE_SEQUENCE + "=" + pipeSequence + "&"
+				+ FORM_PIPE_RANDOM + "=" + reqCount;
 	}
 	
 	protected static void sendRequest(HttpRequest request, String method, String url, 
@@ -213,7 +219,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable runnable) {
 		runnable.updateStatus(true);
-		if (getRequstMode() != MODE_LOCAL_JAVA_THREAD) {
+		if (getRequstMode() != MODE_LOCAL_JAVA_THREAD && getPipeMode() == MODE_PIPE_QUERY) {
 			return;
 		}
 		//*
@@ -227,7 +233,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					while (interval > 0) {
 						try {
 							Thread.sleep(Math.min(interval, 1000));
-							interval -= 1000;
+							interval -= 1000 + (runnable.pipeSequence - runnable.notifySequence) * 1000;
 						} catch (InterruptedException e) {
 							//e.printStackTrace();
 						}
@@ -257,15 +263,18 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 						}
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
-						if (r != null) {
+						if (r != null && r.pipeSequence != r.notifySequence) {
 							HttpRequest request = getRequest();
 							String pipeKey = runnable.pipeKey;
 							String pipeMethod = runnable.getPipeMethod();
 							String pipeURL = runnable.getPipeURL();
-
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY);
+							long sequence = runnable.pipeSequence;
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, sequence);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
+							if (response != null && runnable.notifySequence < sequence) {
+								runnable.notifySequence = sequence;
+							}
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 								runnable.pipeAlive = false;
 								runnable.pipeLost();
@@ -491,9 +500,9 @@ html += "		with (window.parent) {\r\n";
 html += "				net.sf.j2s.ajax.SimplePipeRequest.parseReceived (string);\r\n";
 html += "		};\r\n";
 html += "};\r\n";
-html += "window[\"$p1p3b$\"] = function (key, result) {\r\n";
+html += "window[\"$p1p3b$\"] = function (key, result, sequence) {\r\n";
 html += "		with (window.parent) {\r\n";
-html += "				net.sf.j2s.ajax.SimplePipeRequest.pipeNotifyCallBack (key, result);\r\n";
+html += "				net.sf.j2s.ajax.SimplePipeRequest.pipeNotifyCallBack (key, result, sequence);\r\n";
 html += "		};\r\n";
 html += "};\r\n";
 html += "</scr" + "ipt></head><body><script type=\"text/javascript\">\r\n";
@@ -582,7 +591,7 @@ return function () {
 		// only for JavaScript
 		String url = runnable.getPipeURL();
 		String requestURL = url + (url.indexOf('?') != -1 ? "&" : "?")
-				+ constructRequest(runnable.pipeKey, PIPE_TYPE_XSS);
+				+ constructRequest(runnable.pipeKey, PIPE_TYPE_XSS, runnable.pipeSequence);
 		/**
 		 * @j2sNative
 		 * net.sf.j2s.ajax.SimplePipeRequest.pipeScriptMap[requestURL] = runnable;
@@ -627,7 +636,7 @@ var ifr = document.createElement ("IFRAME");
 ifr.style.display = "none";
 var url = runnable.getPipeURL();
 var src = url + (url.indexOf('?') != -1 ? "&" : "?") 
-		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY)
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SUBDOMAIN_QUERY, runnable.pipeSequence)
 		+ "&" + spr.FORM_PIPE_DOMAIN + "=" + domain;
 ifr.id = "pipe-" + pipeKey;
 ifr.src = src;
@@ -638,14 +647,17 @@ document.body.appendChild (ifr);
 	static void pipeNotify(SimplePipeRunnable runnable) { // notifier
 		String url = runnable.getPipeURL();
 		loadPipeScript(url + (url.indexOf('?') != -1 ? "&" : "?")
-				+ constructRequest(runnable.pipeKey, PIPE_TYPE_NOTIFY));
+				+ constructRequest(runnable.pipeKey, PIPE_TYPE_NOTIFY, runnable.pipeSequence));
 		// only for JavaScript
 	}
 	
-	static void pipeNotifyCallBack(String key, String result) {
-		if (PIPE_STATUS_LOST.equals(result)) {
-			SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
-			if (pipe != null) {
+	static void pipeNotifyCallBack(String key, String result, long sequence) {
+		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+		if (pipe != null) {
+			if (pipe.notifySequence < sequence) {
+				pipe.notifySequence = sequence;
+			}
+			if (PIPE_STATUS_LOST.equals(result)) {
 				pipe.pipeAlive = false;
 				pipe.pipeLost();
 				SimplePipeHelper.removePipe(key);
@@ -699,7 +711,7 @@ document.body.appendChild (ifr);
 		
 		});
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_QUERY, runnable.pipeSequence);
 		boolean async = false;
 		/**
 		 * In JavaScript such queries are not wrapped inside Thread, so asynchronous mode is required!
@@ -767,7 +779,7 @@ if (subdomain == null) {
 	window["xss.domain.enabled"] = true;
 }
 ifr.src = url + (url.indexOf('?') != -1 ? "&" : "?") 
-		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT)
+		+ spr.constructRequest(pipeKey, spr.PIPE_TYPE_SCRIPT, runnable.pipeSequence)
 		+ (subdomain == null ? ""
 				: "&" + spr.FORM_PIPE_DOMAIN + "=" + subdomain);
 document.body.appendChild (ifr);
@@ -781,6 +793,10 @@ var fun = (function (key, created) {
 		var runnable = sph.getPipe(key);
 		if (runnable != null) {
 			var spr = net.sf.j2s.ajax.SimplePipeRequest;
+			if (runnable.pipeSequence == runnable.notifySequence) {
+				window.setTimeout (arguments.callee, spr.pipeLiveNotifyInterval);
+				return;
+			}
 			var now = new Date ().getTime ();
 			var last = runnable.lastPipeDataReceived;
 			if (last <= 0) {
@@ -858,7 +874,7 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
 
-		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM);
+		String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_CONTINUUM, runnable.pipeSequence);
 		sendRequest(pipeRequest, pipeMethod, pipeURL, pipeRequestData, true);
 	}
 	
@@ -990,7 +1006,14 @@ for (var i = 0; i < iframes.length; i++) {
 			if (runnable != null) { // should always satisfy this condition
 				runnable.lastPipeDataReceived = System.currentTimeMillis();
 				if (ss != SimpleSerializable.UNKNOWN) {
-					runnable.deal(ss);
+					if (ss instanceof SimplePipeSequence) {
+						long sequence = ((SimplePipeSequence) ss).sequence;
+						if (sequence > runnable.pipeSequence) {
+							runnable.pipeSequence = sequence;
+						}
+					} else {
+						runnable.deal(ss);
+					}
 				}
 			}
 			
@@ -1344,7 +1367,7 @@ return function () {
 					method = runnable.getPipeMethod ();
 					url = runnable.getPipeURL ();
 					var spr = net.sf.j2s.ajax.SimplePipeRequest;
-					data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY);
+					data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, runnable.pipeSequence);
 				} catch (e) {
 				}
 			}
@@ -1357,7 +1380,7 @@ return function () {
 						method = runnable.getPipeMethod ();
 						url = runnable.getPipeURL ();
 						var spr = net.sf.j2s.ajax.SimplePipeRequest;
-						data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY);
+						data = spr.constructRequest(key, spr.PIPE_TYPE_QUERY, runnable.pipeSequence);
 					} catch (e) {
 					}
 				}

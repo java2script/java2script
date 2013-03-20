@@ -12,11 +12,15 @@
 package net.sf.j2s.ajax;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.j2s.annotation.J2SIgnore;
@@ -32,7 +36,9 @@ public class SimpleSerializable implements Cloneable {
 	public static SimpleSerializable UNKNOWN = new SimpleSerializable();
 
 	public static boolean BYTES_COMPACT_MODE = false;
-	
+
+	public static boolean JSON_EXPAND_MODE = true;
+
 	@J2SIgnore
 	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
 
@@ -48,7 +54,7 @@ public class SimpleSerializable implements Cloneable {
 				for (int i = 0; i < clazzFields.length; i++) {
 					Field f = clazzFields[i];
 					int modifiers = f.getModifiers();
-					if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+					if ((modifiers & Modifier.PUBLIC) != 0
 							&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
 						fields.put(f.getName(), f);
 					}
@@ -64,25 +70,32 @@ public class SimpleSerializable implements Cloneable {
 	 * @return
 	 * 
 	 * @j2sNative
+var ssObjs = null;
+if (arguments.length >= 2) {
+	ssObjs = arguments[1];
+}
+if (ssObjs == null) {
+	ssObjs = [this];
+}
 var baseChar = 'B'.charCodeAt (0);
 var buffer = [];
 buffer[0] = "WLL201";
-var oClass = this.getClass();
+var oClass = this.getClass ();
 var clazz = oClass;
-var clazzName = clazz.getName();
+var clazzName = clazz.getName ();
 var idx = -1;
-while ((idx = clazzName.lastIndexOf('$')) != -1) {
+while ((idx = clazzName.lastIndexOf ('$')) != -1) {
 	if (clazzName.length > idx + 1) {
 		var ch = clazzName.charCodeAt (idx + 1);
 		if (ch < 48 || ch >= 58) { // not a number!
 			break; // inner class
 		} 
 	}
-	clazz = clazz.getSuperclass();
+	clazz = clazz.getSuperclass ();
 	if (clazz == null) {
 		break;
 	}
-	clazzName = clazz.getName();
+	clazzName = clazz.getName ();
 }
 buffer[1] = clazzName;
 buffer[2] = '#';
@@ -154,6 +167,12 @@ for (var i = 0; i < fields.length; i++) {
 		}
 		buffer[buffer.length] = nameStr;
 		this.serializeString(buffer, this[name]);
+	} else if (type == 'O') {
+		if (ignoring && this[name] == null) {
+			continue;
+		}
+		buffer[buffer.length] = nameStr;
+		this.serializeObject(buffer, this[name], ssObjs);
 	} else if (type.charAt (0) == 'A') {
 		if (this[name] == null) {
 			if (ignoring) {
@@ -199,7 +218,9 @@ for (var i = 0; i < fields.length; i++) {
 					buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 					buffer[buffer.length] = value;
 				} else if (t == 'X') {
-					this.serializeString(buffer, arr[j]);
+					this.serializeString (buffer, arr[j]);
+				} else if (t == 'O') {
+					this.serializeObject (buffer, arr[j], ssObjs);
 				}
 			}
 		}
@@ -216,10 +237,80 @@ return strBuf;
 	 */
 	public String serialize() {
 		return serialize(null);
-	}
-	
+    }
+    
     @J2SIgnore
 	public String serialize(SimpleFilter filter) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		return serialize(filter, objects);
+	}
+
+    @J2SIgnore
+    static boolean isSubclassOf(Class<?> type, Class<?> superClass) {
+    	if (type == null || superClass == null) {
+    		return false;
+    	}
+    	if (type.isArray()) {
+    		if (!superClass.isArray()) {
+    			return false;
+    		}
+    		type = type.getComponentType();
+    		superClass = superClass.getComponentType();
+    	}
+    	if (type == superClass) {
+    		return true;
+    	}
+    	do {
+    		type = type.getSuperclass();
+    		if (type == superClass) {
+    			return true;
+    		}
+    		if (type == Object.class) {
+    			return false;
+    		}
+    	} while (type != null);
+    	return false;
+    }
+
+    @J2SIgnore
+    static boolean isSubInterfaceOf(Class<?> type, Class<?> superInterface) {
+    	if (type == null || superInterface == null) {
+    		return false;
+    	}
+    	if (type.isArray()) {
+    		if (!superInterface.isArray()) {
+    			return false;
+    		}
+    		type = type.getComponentType();
+    		superInterface = superInterface.getComponentType();
+    	}
+    	if (type == superInterface) {
+    		return true;
+    	}
+    	List<Type> allInterfaces = new ArrayList<Type>();
+    	allInterfaces.add(type);
+    	Type t = null;
+    	do {
+    		t = allInterfaces.remove(0);
+    		Type[] interfaces = ((Class<?>) t).getGenericInterfaces();
+    		if (interfaces != null && interfaces.length > 0) {
+    			for (int i = 0; i < interfaces.length; i++) {
+					Type f = interfaces[i];
+					if (f == superInterface) {
+						return true;
+					}
+					if (!allInterfaces.contains(f)) {
+						allInterfaces.add(f);
+					}
+				}
+    		}
+    	} while (!allInterfaces.isEmpty());
+    	return false;
+    }
+    
+    @J2SIgnore
+	private String serialize(SimpleFilter filter, List<SimpleSerializable> ssObjs) {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer();
 		/*
@@ -338,6 +429,11 @@ return strBuf;
 					if (s == null && ignoring) continue;
 					buffer.append(nameStr);
 					serializeString(buffer, s);
+				} else if (isSubclassOf(type, SimpleSerializable.class)) {
+					SimpleSerializable ssObj = (SimpleSerializable) field.get(this);
+					if (ssObj == null && ignoring) continue;
+					buffer.append(nameStr);
+					serializeObject(buffer, ssObj, ssObjs);
 				} else { // Array ...
 					if (type == float[].class) {
 						float[] fs = (float[]) field.get(this);
@@ -485,6 +581,20 @@ return strBuf;
 								serializeString(buffer, s);
 							}
 						}
+					} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+						SimpleSerializable[] ss = (SimpleSerializable []) field.get(this);
+						if (ss == null && ignoring) continue;
+						buffer.append(nameStr);
+						buffer.append("AO"); // special
+						if (ss == null) {
+							buffer.append((char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								SimpleSerializable s = ss[j];
+								serializeObject(buffer, s, ssObjs);
+							}
+						}
 					} else {
 						continue; // just ignore it
 						// others unknown or unsupported types!
@@ -577,15 +687,595 @@ if (s == null) {
 			buffer.append((char) (baseChar - 1));
 		}
 	}
-	
+
+	/**
+	 * @param buffer
+	 * @param ss
+	 * @param ssObjs
+	 * 
+	 * @j2sNative
+var baseChar = 'B'.charCodeAt (0);
+if (ss != null) {
+	var idx = -1;
+	var len = ssObjs.length;
+	for (var i = 0; i < len; i++) {
+		if (ssObjs[i] === ss) {
+			idx = i;
+			break;
+		}
+	}
+	if (idx != -1) {
+		buffer[buffer.length] = 'o';
+		var s = "" + idx;
+		var l4 = s.length;
+		buffer[buffer.length] = String.fromCharCode (baseChar + l4);
+		buffer[buffer.length] = s;
+		return;
+	}
+	ssObjs[ssObjs.length] = ss;
+}
+buffer[buffer.length] = 'O';
+if (ss != null) {
+	var s = ss.serialize (null, ssObjs); 
+	var l4 = s.length;
+	if (l4 > 52) {
+		buffer[buffer.length] = String.fromCharCode (baseChar - 2);
+		var value = "" + l4;
+		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
+		buffer[buffer.length] = l4;
+	} else {
+		buffer[buffer.length] = String.fromCharCode (baseChar + l4);
+	}
+	buffer[buffer.length] = s;
+} else {
+	buffer[buffer.length] = String.fromCharCode (baseChar - 1);
+}
+	 */
+    @J2SKeep
+	private void serializeObject(StringBuffer buffer, SimpleSerializable ss, List<SimpleSerializable> ssObjs) {
+		char baseChar = 'B';
+		if (ss != null) {
+			int idx = ssObjs.indexOf(ss);
+			if (idx != -1) {
+				buffer.append('o');
+				String s = "" + idx;
+				int l4 = s.length();
+				buffer.append((char) (baseChar + l4));
+				buffer.append(s);
+				return;
+			}
+			ssObjs.add(ss);
+		}
+		buffer.append('O');
+		if (ss != null) {
+			String s = ss.serialize(null, ssObjs); 
+			int l4 = s.length();
+			if (l4 > 52) {
+				buffer.append((char) (baseChar - 2));
+				String value = "" + l4;
+				buffer.append((char) (baseChar + value.length()));
+				buffer.append(l4);
+			} else {
+				buffer.append((char) (baseChar + l4));
+			}
+			buffer.append(s);
+		} else {
+			buffer.append((char) (baseChar - 1));
+		}
+	}
+    
+    @J2SIgnore
+    protected boolean jsonExpandMode() {
+    	return JSON_EXPAND_MODE;
+    }
+
+    @J2SIgnore
+    public String jsonSerialize() {
+    	return jsonSerialize(null, "");
+    }
+
+    @J2SIgnore
+    public String jsonSerialize(SimpleFilter filter) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+    	return jsonSerialize(filter, objects, true, "");
+    }
+
+    @J2SIgnore
+    public String jsonSerialize(SimpleFilter filter, String linePrefix) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+    	return jsonSerialize(filter, objects, linePrefix != null, linePrefix);
+    }
+    
+    @J2SIgnore
+    private String jsonSerialize(SimpleFilter filter, List<SimpleSerializable> ssObjs, boolean withFormats, String linePrefix) {
+    	String prefix = linePrefix;
+    	StringBuffer buffer = new StringBuffer();
+    	if (prefix != null) {
+    		//buffer.append(prefix);
+    		prefix += "\t";
+    	}
+    	buffer.append("{");
+    	if (withFormats) {
+    		buffer.append("\r\n");
+    	}
+    	boolean commasAppended = false;
+		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
+		Map<String, Field> fieldMap = getSerializableFields(this.getClass().getName());
+		String[] fMap = fieldMapping();
+		for (Iterator<String> itr = fieldMap.keySet().iterator(); itr.hasNext();) {
+			String fieldName = (String) itr.next();
+			if (filter != null && !filter.accept(fieldName)) continue;
+			Field field = fieldMap.get(fieldName);
+			if (field == null) {
+				continue;
+			}
+			if (fMap != null && fMap.length > 1) {
+				for (int j = 0; j < fMap.length / 2; j++) {
+					if (fieldName.equals(fMap[j + j])) {
+						String newName = fMap[j + j + 1];
+						if (newName != null && newName.length() > 0) {
+							fieldName = newName;
+						}
+						break;
+					}
+				}
+			}
+			Class<?> clazz = field.getType();
+			try {
+				if (clazz == float.class) {
+					float f = field.getFloat(this);
+					if (f == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(f);
+				} else if (clazz == double.class) {
+					double d = field.getDouble(this);
+					if (d == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(d);
+				} else if (clazz == int.class) {
+					int i = field.getInt(this);
+					if (i == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(i);
+				} else if (clazz == long.class) {
+					long l = field.getLong(this);
+					if (l == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(l);
+				} else if (clazz == short.class) {
+					short s = field.getShort(this);
+					if (s == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(s);
+				} else if (clazz == byte.class) {
+					byte b = field.getByte(this);
+					if (b == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(b);
+				} else if (clazz == char.class) {
+					char c = field.getChar(this);
+					if (c == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append("\'");
+					if (c == '\r') {
+						buffer.append("\\r");
+					} else if (c == '\n') {
+						buffer.append("\\n");
+					} else if (c == '\t') {
+						buffer.append("\\t");
+					} else if (c == '\'') {
+						buffer.append("\\\'");
+					} else if (c == '\"') {
+						buffer.append("\\\"");
+					} else {
+						buffer.append(c);
+					}
+					buffer.append("\'");
+				} else if (clazz == boolean.class) {
+					boolean b = field.getBoolean(this);
+					if (b == false && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(b);
+				} else if (clazz == String.class) {
+					String str = (String) field.get(this);
+					if (str == null && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					if (str == null) {
+						buffer.append("null");
+					} else {
+						buffer.append("\"");
+						buffer.append(str.replaceAll("\r", "\\r")
+								.replaceAll("\n", "\\n")
+								.replaceAll("\t", "\\t")
+								.replaceAll("\'", "\\'")
+								.replaceAll("\"", "\\\""));
+						buffer.append("\"");
+					}
+				} else if (isSubclassOf(clazz, SimpleSerializable.class)) {
+					SimpleSerializable o = (SimpleSerializable) field.get(this);
+					if (o == null && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					
+					int idx = -1;
+					if (!this.jsonExpandMode()) {
+						idx = ssObjs.indexOf(o);
+					}
+					if (idx != -1) {
+						if (withFormats) {
+							buffer.append("{ \"@\" : ");
+							buffer.append(idx);
+							buffer.append(" }");
+						} else {
+							buffer.append("{\"@\":");
+							buffer.append(idx);
+							buffer.append("}");
+						}
+					} else {
+						ssObjs.add(o);
+						buffer.append(o.jsonSerialize(null, ssObjs, withFormats, prefix));
+					}
+				} else if (clazz.isArray()) {
+					clazz = clazz.getComponentType();
+					if (clazz == float.class) {
+						float[] xs = (float[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == double.class) {
+						double[] xs = (double[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == int.class) {
+						int[] xs = (int[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == long.class) {
+						long[] xs = (long[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == short.class) {
+						short[] xs = (short[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == byte.class) {
+						byte[] xs = (byte[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						if (this.bytesCompactMode()) {
+							buffer.append('\"');
+							buffer.append(Base64.byteArrayToBase64(xs));
+							buffer.append('\"');
+							if (withFormats) {
+								buffer.append(".getBytes ()");
+							} else {
+								buffer.append(".getBytes()");
+							}
+						} else {
+							buffer.append('[');
+							if (withFormats) {
+								buffer.append(" ");
+							}
+							for (int i = 0; i < xs.length; i++) {
+								buffer.append(xs[i]);
+								if (i != xs.length - 1) {
+									buffer.append(",");
+								}
+								if (withFormats) {
+									buffer.append(" ");
+								}
+							}
+							buffer.append(']');
+						}
+					} else if (clazz == char.class) {
+						char[] xs = (char[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							char c = xs[i];
+							buffer.append("\'");
+							if (c == '\r') {
+								buffer.append("\\r");
+							} else if (c == '\n') {
+								buffer.append("\\n");
+							} else if (c == '\t') {
+								buffer.append("\\t");
+							} else if (c == '\'') {
+								buffer.append("\\\'");
+							} else if (c == '\"') {
+								buffer.append("\\\"");
+							} else {
+								buffer.append(c);
+							}
+							buffer.append("\'");
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == boolean.class) {
+						boolean[] xs = (boolean[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(" ");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append(" ");
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == String.class) {
+						String[] xs = (String[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append("\r\n");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							String str = xs[i];
+							if (withFormats) {
+								buffer.append(prefix);
+								buffer.append('\t');
+							}
+							if (str == null) {
+								buffer.append("null");
+							} else {
+								buffer.append("\"");
+								buffer.append(str.replaceAll("\r", "\\r")
+										.replaceAll("\n", "\\n")
+										.replaceAll("\t", "\\t")
+										.replaceAll("\'", "\\'")
+										.replaceAll("\"", "\\\""));
+								buffer.append("\"");
+							}
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append("\r\n");
+							}
+						}
+						if (withFormats) {
+							buffer.append(prefix);
+						}
+						buffer.append(']');
+					} else if (isSubclassOf(clazz, SimpleSerializable.class)) {
+						SimpleSerializable[] xs = (SimpleSerializable[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append("\r\n");
+						}
+						for (int i = 0; i < xs.length; i++) {
+							SimpleSerializable o = xs[i];
+							if (withFormats) {
+								buffer.append(prefix);
+								buffer.append('\t');
+							}
+							if (o == null) {
+								buffer.append("null");
+							} else {
+								int idx = -1;
+								if (!this.jsonExpandMode()) {
+									idx = ssObjs.indexOf(o);
+								}
+								if (idx != -1) {
+									if (withFormats) {
+										buffer.append("{ \"@\" : ");
+										buffer.append(idx);
+										buffer.append(" }");
+									} else {
+										buffer.append("{\"@\":");
+										buffer.append(idx);
+										buffer.append("}");
+									}
+								} else {
+									ssObjs.add(o);
+									buffer.append(o.jsonSerialize(null, ssObjs, withFormats, prefix + "\t"));
+								}
+							}
+							if (i != xs.length - 1) {
+								buffer.append(",");
+							}
+							if (withFormats) {
+								buffer.append("\r\n");
+							}
+						}
+						if (withFormats) {
+							buffer.append(prefix);
+						}
+						buffer.append(']');
+					} else {
+						continue;
+					}
+				} else {
+					continue;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			buffer.append(',');
+			if (withFormats) {
+				buffer.append("\r\n");
+			}
+			commasAppended = true;
+		}
+		int length = buffer.length();
+		if (commasAppended) {
+			if (withFormats) {
+				buffer.delete(length - 3, length);
+				if (withFormats) {
+					buffer.append("\r\n");
+				}
+			} else {
+				buffer.delete(length - 1, length);
+			}
+		}
+		if (withFormats) {
+			buffer.append(linePrefix);
+		}
+    	buffer.append("}");
+
+		return buffer.toString();
+    }
+
+    @J2SIgnore
+	private void appendFieldName(StringBuffer buffer, String fieldName,
+			boolean withFormats, String prefix) {
+		if (withFormats) {
+			buffer.append(prefix);
+		}
+		buffer.append(fieldName);
+		if (withFormats) {
+			buffer.append(" ");
+		}
+		buffer.append(':');
+		if (withFormats) {
+			buffer.append(" ");
+		}
+	}
+    
 	/**
 	 * @param str
 	 * @return whether given string is deserialized as expected or not
 	 * 
 	 * @j2sNative
 var start = 0;
-if (arguments.length == 2) {
+var ssObjs = null;
+if (arguments.length >= 2) {
 	start = arguments[1];
+}
+if (arguments.length >= 3) {
+	ssObjs = arguments[2];
+}
+if (ssObjs == null) {
+	ssObjs = [this];
 }
 var baseChar = 'B'.charCodeAt (0);
 if (str == null || start < 0) return false;
@@ -677,7 +1367,7 @@ while (index < end && index < objectEnd) {
 			for (var i = 0; i < l2; i++) {
 				var s = null;
 				var c4 = str.charCodeAt (index++);
-				if (c2 != 'X') {
+				if (c2 != 'X' && c2 != 'O') {
 					var l3 = c4 - baseChar;
 					if (l3 > 0) {
 						if (index + l3 > end) return true; // error
@@ -722,6 +1412,24 @@ while (index < end && index < objectEnd) {
 					arr[i] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 				} else if (type == 'X') {
 					arr[i] = s;
+				} else if (type == 'O') {
+					if (s != null && s.length > 0) {
+						if (s.length > 3 && s.charAt (0) == 'W' && s.charAt (1) == 'L' && s.charAt (2) == 'L') {
+							var ss = net.sf.j2s.ajax.SimpleSerializable.parseInstance (s);
+							ssObjs[ssObjs.length] = ss;
+							ss.deserialize (s, 0, ssObjs);
+							arr[i] = ss;
+						} else { // 'o'
+							var idx = Integer.parseInt (s);
+							var ss = null;
+							if (idx < ssObjs.length) {
+								ss = ssObjs[idx];
+							}
+							arr[i] = ss;
+						}
+					} else {
+						arr[i] = null;
+					}
 				}
 			}
 			if (!fieldMap[fieldName]) {
@@ -768,17 +1476,36 @@ while (index < end && index < objectEnd) {
 			this[fieldName] = Encoding.readUTF8(Encoding.decodeBase64(s));
 		} else if (type == 'U') {
 			this[fieldName] = Encoding.readUTF8(s);
+		} else if (type == 'O') {
+			var ss = net.sf.j2s.ajax.SimpleSerializable.parseInstance (s);
+			ssObjs[ssObjs.length] = ss;
+			ss.deserialize (s, 0, ssObjs);
+			this[fieldName] = ss;
+		} else if (type == 'o') {
+			var idx = Integer.parseInt (s);
+			var ss = null;
+			if (idx < ssObjs.length) {
+				ss = ssObjs[idx];
+			}
+			this[fieldName] = ss;
 		}
 	}
 }
 return true;
 	 */
 	public boolean deserialize(final String str) {
-		return deserialize(str, 0);
+    	return deserialize(str, 0);
 	}
 	
     @J2SIgnore
 	public boolean deserialize(final String str, int start) {
+    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	ssObjs.add(this);
+    	return deserialize(str, start, ssObjs);
+	}
+	
+    @J2SIgnore
+	private boolean deserialize(final String str, int start, List<SimpleSerializable> ssObjs) {
 		char baseChar = 'B';
 		if (str == null || start < 0) return false;
 		int end = str.length();
@@ -886,7 +1613,7 @@ return true;
 						String[] ss = new String[l2];
 						for (int i = 0; i < l2; i++) {
 							char c4 = str.charAt(index++);
-							if (c2 != 'X') {
+							if (c2 != 'X' && c2 != 'O') {
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
 									if (index + l3 > end) return true; // error
@@ -919,6 +1646,8 @@ return true;
 								if (c4 == 'u') {
 									ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
 								} else if (c4 == 'U') {
+									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
+								} else {
 									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
 								}
 							}
@@ -1008,6 +1737,28 @@ return true;
 							field.set(this, bs);
 							break;
 						}
+						case 'O': {
+							Class<?> fieldClazz = field.getType();
+							SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(fieldClazz.getComponentType(), l2);
+							for (int i = 0; i < l2; i++) {
+								String s = ss[i];
+								if (s != null && s.length() > 0) {
+									if (s.startsWith("WLL")) {
+										SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
+										ssObjs.add(ssObj);
+										ssObj.deserialize(s, 0, ssObjs);
+										sss[i] = ssObj;
+									} else { // 'o'
+										int idx = Integer.parseInt(s);
+										if (idx < ssObjs.size()) {
+											sss[i] = ssObjs.get(idx);
+										}
+									}
+								}
+							}
+							field.set(this, sss);
+							break;
+						}
 						case 'X':
 							field.set(this, ss);
 							break;
@@ -1069,6 +1820,22 @@ return true;
 						field.setBoolean(this, c == '1' || c == 't');
 						break;
 					}
+					case 'O': {
+						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
+						ssObjs.add(ss);
+						ss.deserialize(s, 0, ssObjs);
+						field.set(this, ss);
+						break;
+					}
+					case 'o': {
+						int idx = Integer.parseInt(s);
+						SimpleSerializable ss = null;
+						if (idx < ssObjs.size()) {
+							ss = ssObjs.get(idx);
+						}
+						field.set(this, ss);
+						break;
+					}
 					case 's':
 						field.set(this, s);
 						break;
@@ -1090,6 +1857,198 @@ return true;
 		return true;
 	}
 
+    @J2SIgnore
+    public static SimpleSerializable parseInstance(Map<String, Object> properties) {
+		Class<?> runnableClass = null;
+		String clazzName = (String)properties.get("class");
+		try {
+			runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
+			if (runnableClass != null) {
+				// SimpleRPCRunnale should always has default constructor
+				Constructor<?> constructor = runnableClass.getConstructor(new Class[0]);
+				Object obj = constructor.newInstance(new Object[0]);
+				if (obj != null && obj instanceof SimpleSerializable) {
+					return (SimpleSerializable) obj;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+    }
+    
+    @J2SIgnore
+    public void deserialize(Map<String, Object> properties) {
+		String clazzName = (String) properties.get("class");
+		Map<String, Field> fieldMap = getSerializableFields(clazzName);
+		String[] fMap = fieldMapping();
+		for (Iterator<String> itr = properties.keySet().iterator(); itr.hasNext();) {
+			String fieldName = (String) itr.next();
+			if ("class".equalsIgnoreCase(fieldName)) {
+				continue;
+			}
+			Object o = properties.get(fieldName);
+			if (fMap != null && fMap.length > 1) {
+				for (int i = 0; i < fMap.length / 2; i++) {
+					if (fieldName.equals(fMap[i + i + 1])) {
+						String trueName = fMap[i + i];
+						if (trueName != null && trueName.length() > 0) {
+							fieldName = trueName;
+						}
+						break;
+					}
+				}
+			}
+			while (fieldName.startsWith("$")) {
+				if (fieldMap.containsKey(fieldName)) {
+					break;
+				}
+				fieldName = fieldName.substring(1);
+			}
+			Field field = fieldMap.get(fieldName);
+			if (field == null) {
+				continue;
+			}
+			Class<?> clazz = field.getType();
+			try {
+				if (clazz == float.class) {
+					field.setFloat(this, Float.parseFloat((String) o));
+				} else if (clazz == double.class) {
+					field.setDouble(this, Double.parseDouble((String) o));
+				} else if (clazz == int.class) {
+					field.setInt(this, Integer.parseInt((String) o));
+				} else if (clazz == long.class) {
+					field.setLong(this, Long.parseLong((String) o));
+				} else if (clazz == short.class) {
+					field.setShort(this, Short.parseShort((String) o));
+				} else if (clazz == byte.class) {
+					field.setByte(this, Byte.parseByte((String) o));
+				} else if (clazz == char.class) {
+					field.setChar(this, (char) Integer.parseInt((String) o));
+				} else if (clazz == boolean.class) {
+					String s = (String) o;
+					char c = s.length() > 0 ? s.charAt(0) : '\0';
+					field.setBoolean(this, c == '1' || c == 't');
+				} else if (clazz == String.class) {
+					field.set(this, o);
+				} else if (clazz.isArray()) {
+					clazz = clazz.getComponentType();
+					if (o instanceof String) {
+						if (clazz != byte.class) {
+							continue; // not list 
+						}
+					}
+					if (clazz == float.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						float[] xs = new float[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Float.parseFloat(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == double.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						double[] xs = new double[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Double.parseDouble(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == int.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						int[] xs = new int[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Integer.parseInt(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == long.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						long[] xs = new long[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Long.parseLong(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == short.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						short[] xs = new short[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Short.parseShort(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == byte.class) {
+						if (o instanceof String) {
+							field.set(this, Base64.base64ToByteArray((String) o));
+						} else {
+							List<?> list = (List<?>) o;
+							int size = list.size();
+							byte[] xs = new byte[size];
+							for (int i = 0; i < xs.length; i++) {
+								String s = (String) list.get(i);
+								if (s != null && s.length() > 0) {
+									xs[i] = Byte.parseByte(s);
+								}
+							}
+							field.set(this, xs);
+						}
+					} else if (clazz == char.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						char[] xs = new char[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = s.charAt(0);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == boolean.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						boolean[] xs = new boolean[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null) {
+								char c = s.length() > 0 ? s.charAt(0) : '\0';
+								xs[i] = c == '1' || c == 't';
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == String.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						String[] xs = new String[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							xs[i] = s;
+						}
+						field.set(this, xs);
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Parsing: " + o + " for field " + fieldName +  "\r\n");
+				e.printStackTrace();
+			}
+		}
+    }
+    
     /**
      * Fields with alias names.
      * @return

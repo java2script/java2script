@@ -73,7 +73,7 @@ public class SimpleRPCUtils {
 					}
 				} else if (field2 == null) { // field1 != null
 					diffSet.add(name);
-				} else if (field1.getClass().getName().startsWith("[")) {
+				} else if (field1.getClass().isArray()) {
 					Class<?> type = field.getType();
 					if (type == float[].class) {
 						if (!Arrays.equals((float[]) field1, (float[]) field2)) {
@@ -111,11 +111,15 @@ public class SimpleRPCUtils {
 						if (!Arrays.equals((String[]) field1, (String[]) field2)) {
 							diffSet.add(name);
 						}
+					} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
+						diffSet.add(name);
 					} else if (type == Object[].class) {
 						if (!Arrays.equals((Object[]) field1, (Object[]) field2)) {
 							diffSet.add(name);
 						}
 					}
+				} else if (SimpleSerializable.isSubclassOf(field.getType(), SimpleSerializable.class)) {
+					diffSet.add(name);
 				} else if (!field1.equals(field2)) {
 					diffSet.add(name);
 				}
