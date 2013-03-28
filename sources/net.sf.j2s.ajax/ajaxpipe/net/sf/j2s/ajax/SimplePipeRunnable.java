@@ -54,6 +54,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	long lastLiveDetected;
 	
 	@J2SIgnore
+	long lastPipeNotified;
+	
+	@J2SIgnore
 	long lastHash;
 	
 	long pipeSequence = 1;
@@ -130,6 +133,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 
 	@Override
 	public void ajaxIn() {
+		pipeSequence = 1;
+		notifySequence = 1;
 		pipeInit();
 	}
 	

@@ -20,7 +20,14 @@ public class ThreadUtils {
 			thread.setDaemon(daemon);
 			thread.start();
 		} else {
-			aes.execute(r);
+			try {
+				aes.execute(r);
+			} catch (Exception e) {
+				//e.printStackTrace();
+				Thread thread = new Thread(r, name);
+				thread.setDaemon(daemon);
+				thread.start();
+			}
 		}
 	}
 
@@ -30,7 +37,13 @@ public class ThreadUtils {
 			Thread thread = new Thread(r);
 			thread.start();
 		} else {
-			aes.execute(r);
+			try {
+				aes.execute(r);
+			} catch (Exception e) {
+				//e.printStackTrace();
+				Thread thread = new Thread(r);
+				thread.start();
+			}
 		}
 	}
 

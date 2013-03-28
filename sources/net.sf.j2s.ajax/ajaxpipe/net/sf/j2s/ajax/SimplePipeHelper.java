@@ -211,7 +211,7 @@ public class SimplePipeHelper {
 						continue;
 					} else {
 						int idx = list.indexOf(s);
-						if (idx != -1 && idx > pipe.getLastBufferedIndex()) {
+						if (idx != -1 && idx >= pipe.getLastBufferedIndex()) {
 							// same object but with updated properties maybe!
 							SimpleSerializable existed = list.get(idx);
 							if (existed instanceof ISimpleCacheable) {
