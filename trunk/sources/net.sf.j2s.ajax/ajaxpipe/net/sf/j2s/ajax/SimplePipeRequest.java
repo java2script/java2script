@@ -13,6 +13,8 @@ package net.sf.j2s.ajax;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Vector;
 
 import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
@@ -37,6 +39,15 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		
 	}
 
+	@J2SIgnore
+	private static Object notifyingMutex = new Object();
+
+	@J2SIgnore
+	private static boolean notifyingThreadStarted = false;
+	
+	@J2SIgnore
+	private static List<SimplePipeRunnable> notifyingPipes = new Vector<SimplePipeRunnable>();
+	
 	/**
 	 * Status of pipe: ok.
 	 */
@@ -122,6 +133,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	
 	private static int pipeMode = MODE_PIPE_CONTINUUM;
 	
+	private static boolean queueNotifying = false;
+	
 	private static long pipeQueryInterval = 1000;
 	
 	static long pipeLiveNotifyInterval = 25000;
@@ -157,6 +170,12 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	
 	public static void switchToContinuumMode() {
 		pipeMode = MODE_PIPE_CONTINUUM;
+		queueNotifying = false;
+	}
+	
+	public static void switchToContinuumMode(boolean queue) {
+		pipeMode = MODE_PIPE_CONTINUUM;
+		queueNotifying = queue;
 	}
 	
 	/**
@@ -217,78 +236,108 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * Be used in Java mode to keep the pipe live.
 	 */
 	@J2SIgnore
-	static void keepPipeLive(final SimplePipeRunnable runnable) {
-		runnable.updateStatus(true);
+	static void keepPipeLive(final SimplePipeRunnable pipe) {
+		pipe.updateStatus(true);
 		if (getRequstMode() != MODE_LOCAL_JAVA_THREAD && getPipeMode() == MODE_PIPE_QUERY) {
 			return;
 		}
 		//*
+		boolean startingThread = false;
+		synchronized (notifyingMutex) {
+			if (!notifyingPipes.contains(pipe)) {
+				pipe.lastPipeNotified = System.currentTimeMillis();
+				notifyingPipes.add(pipe);
+			}
+			if (!notifyingThreadStarted) {
+				startingThread = true;
+				notifyingThreadStarted = true;
+			}
+		}
+		if (!startingThread) {
+			return;
+		}
 		ThreadUtils.runTask(new Runnable() {
 			
 			public void run() {
-				long lastLiveDetected = System.currentTimeMillis();
-				do {
-					long interval = pipeLiveNotifyInterval;
+				while (true) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) {
+						//e1.printStackTrace();
+					}
 					
-					while (interval > 0) {
-						try {
-							Thread.sleep(Math.min(interval, 1000));
-							interval -= 1000 + (runnable.pipeSequence - runnable.notifySequence) * 1000;
-						} catch (InterruptedException e) {
-							//e.printStackTrace();
+					SimplePipeRunnable[] pipes = null;
+					synchronized (notifyingMutex) {
+						int size = notifyingPipes.size();
+						if (size == 0) {
+							notifyingThreadStarted = false;
+							return;
 						}
+						pipes = notifyingPipes.toArray(new SimplePipeRunnable[size]);
+					}
+					long now = System.currentTimeMillis();
+					for (int i = 0; i < pipes.length; i++) {
+						final SimplePipeRunnable p = pipes[i];
 						if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-							if (!runnable.isPipeLive()) {
-								break;
-							}
-						} else {
-							SimplePipeRunnable pipeRunnable = SimplePipeHelper.getPipe(runnable.pipeKey);
-							if (pipeRunnable == null || !pipeRunnable.isPipeLive()) {
-								break;
-							}
-						}
-					}
-					
-					if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-						boolean pipeLive = runnable.isPipeLive();
-						if (pipeLive) {
-							runnable.keepPipeLive();
-							lastLiveDetected = System.currentTimeMillis();
-						} else {
-							if (System.currentTimeMillis() - lastLiveDetected > runnable.pipeWaitClosingInterval()) {
-								runnable.pipeDestroy(); // Pipe's server side destroying
-								runnable.pipeClosed(); // Pipe's client side closing
-								break;
-							}
-						}
-					} else {
-						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
-						if (r != null && r.pipeSequence != r.notifySequence) {
-							HttpRequest request = getRequest();
-							String pipeKey = runnable.pipeKey;
-							String pipeMethod = runnable.getPipeMethod();
-							String pipeURL = runnable.getPipeURL();
-							long sequence = runnable.pipeSequence;
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, sequence);
-							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
-							String response = request.getResponseText();
-							if (response != null && runnable.notifySequence < sequence) {
-								runnable.notifySequence = sequence;
-							}
-							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
-								runnable.pipeAlive = false;
-								runnable.pipeLost();
-								SimplePipeHelper.removePipe(pipeKey);
-								// may need to inform user that connection is already lost!
-								break;
+							if (!p.isPipeLive()) {
+								if (now - p.lastLiveDetected > p.pipeWaitClosingInterval()) {
+									p.pipeDestroy(); // Pipe's server side destroying
+									p.pipeClosed(); // Pipe's client side closing
+									synchronized (notifyingMutex) {
+										notifyingPipes.remove(p);
+									}
+								}
+							} else if ((now - p.lastPipeNotified) * (2 + p.pipeSequence - p.notifySequence)
+										< pipeLiveNotifyInterval + pipeLiveNotifyInterval) {
+								// do nothing
 							} else {
-								runnable.updateStatus(true);
+								p.keepPipeLive();
+								p.lastPipeNotified = now;
+								p.lastLiveDetected = System.currentTimeMillis();
 							}
-						} else {
-							break;
+							continue; // end of MODE_LOCAL_JAVA_THREAD
 						}
-					}
-				} while (true);
+						
+						SimplePipeRunnable r = SimplePipeHelper.getPipe(p.pipeKey);
+						if (r == null || !r.isPipeLive()) {
+							if (now - p.lastLiveDetected > p.pipeWaitClosingInterval()) {
+								synchronized (notifyingMutex) {
+									notifyingPipes.remove(p);
+								}
+							}
+						} else if ((now - p.lastPipeNotified) * (2 + p.pipeSequence - p.notifySequence)
+									< pipeLiveNotifyInterval + pipeLiveNotifyInterval) {
+							// do nothing
+						} else if (r.pipeSequence != r.notifySequence) {
+							p.lastPipeNotified = now;
+							final HttpRequest request = getRequest();
+							final String pipeKey = p.pipeKey;
+							final long sequence = p.pipeSequence;
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, sequence);
+							request.registerOnReadyStateChange(new XHRCallbackAdapter() {
+								public void onLoaded() {
+									String response = request.getResponseText();
+									if (response != null && p.notifySequence < sequence) {
+										p.notifySequence = sequence;
+									}
+									if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
+										p.pipeAlive = false;
+										p.pipeLost();
+										SimplePipeHelper.removePipe(pipeKey);
+										// may need to inform user that connection is already lost!
+										synchronized (notifyingMutex) {
+											notifyingPipes.remove(p);
+										}
+									} else {
+										p.lastLiveDetected = System.currentTimeMillis();
+										p.updateStatus(true);
+									}
+								}									
+							});
+							sendRequest(request, p.getPipeMethod(), p.getPipeURL(), pipeRequestData, pipes.length == 1 ? false : queueNotifying);
+						}
+					} // end of pipes for-loop
+				} // end of while true
 			}
 		
 		}, "Pipe Live Notifier Thread", true);
