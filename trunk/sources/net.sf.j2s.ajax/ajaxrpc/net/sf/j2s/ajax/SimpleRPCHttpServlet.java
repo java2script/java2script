@@ -52,6 +52,18 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 	
 	protected boolean managingPipe = false;
 	
+	private static SimpleFilter NO_DELTA_FILTER = new SimpleFilter() {
+		
+		public boolean accept(String field) {
+			return true;
+		}
+
+		public boolean ignoreDefaultFields() {
+			return false;
+		}
+	
+	};
+
 	protected long maxPostLimit() {
 		return postLimit;
 	}
@@ -261,23 +273,24 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			//e.printStackTrace();
 		}
 		runnable.ajaxRun();
-		final String[] diffs = SimpleRPCUtils.compareDiffs(runnable, clonedRunnable);
-		String serialize = runnable.serialize(new SimpleFilter() {
-		
-			public boolean accept(String field) {
-				for (int i = 0; i < diffs.length; i++) {
-					if (diffs[i].equals(field)) {
-						return true;
-					}
+		SimpleFilter filter = null;
+		if (runnable.supportsDeltaResponse()) {
+			final Set<String> diffs = SimpleRPCUtils.compareDiffs(runnable, clonedRunnable);
+			filter = new SimpleFilter() {
+				
+				public boolean accept(String field) {
+					return diffs.contains(field);
 				}
-				return false;
-			}
-
-			public boolean ignoreDefaultFields() {
-				return false;
-			}
-		
-		});
+	
+				public boolean ignoreDefaultFields() {
+					return false;
+				}
+			
+			};
+		} else { // all fields are returned.
+			filter = NO_DELTA_FILTER;
+		}
+		String serialize = runnable.serialize(filter);
 		
 		writer.write(serialize);
 		runnable.ajaxOut();
@@ -324,29 +337,32 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			return;
 		}
 		SimpleRPCRunnable clonedRunnable = null;
-		try {
-			clonedRunnable = (SimpleRPCRunnable) runnable.clone();
-		} catch (CloneNotSupportedException e) {
-			//e.printStackTrace();
+		if (runnable.supportsDeltaResponse()) {
+			try {
+				clonedRunnable = (SimpleRPCRunnable) runnable.clone();
+			} catch (CloneNotSupportedException e) {
+				//e.printStackTrace();
+			}
 		}
 		runnable.ajaxRun();
-		final String[] diffs = SimpleRPCUtils.compareDiffs(runnable, clonedRunnable);
-		String serialize = runnable.serialize(new SimpleFilter() {
-		
-			public boolean accept(String field) {
-				for (int i = 0; i < diffs.length; i++) {
-					if (diffs[i].equals(field)) {
-						return true;
-					}
+		SimpleFilter filter = null;
+		if (runnable.supportsDeltaResponse()) {
+			final Set<String> diffs = SimpleRPCUtils.compareDiffs(runnable, clonedRunnable);
+			filter = new SimpleFilter() {
+				
+				public boolean accept(String field) {
+					return diffs.contains(field);
 				}
-				return false;
-			}
-
-			public boolean ignoreDefaultFields() {
-				return false;
-			}
-		
-		});
+	
+				public boolean ignoreDefaultFields() {
+					return false;
+				}
+			
+			};
+		} else { // all fields are returned.
+			filter = NO_DELTA_FILTER;
+		}
+		String serialize = runnable.serialize(filter);
 		
 		resp.setHeader("Pragma", "no-cache");
 		resp.setHeader("Cache-Control", "no-cache");

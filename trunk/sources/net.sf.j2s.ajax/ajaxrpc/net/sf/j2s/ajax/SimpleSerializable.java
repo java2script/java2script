@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.j2s.annotation.J2SIgnore;
 import net.sf.j2s.annotation.J2SKeep;
@@ -42,13 +43,15 @@ public class SimpleSerializable implements Cloneable {
 	@J2SIgnore
 	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
 
+	@J2SIgnore
+	private static Map<String, Constructor<?>> quickConstructors = new HashMap<String, Constructor<?>>();
+
     @J2SIgnore
-	private Map<String, Field> getSerializableFields(String clazzName) {
-		Class<?> clazz;
+	Map<String, Field> getSerializableFields(String clazzName) {
 		Map<String, Field> fields = quickFields.get(clazzName);
 		if (fields == null) {
 			fields = new HashMap<String, Field>();
-			clazz = this.getClass();
+			Class<?> clazz = this.getClass();
 			while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 				Field[] clazzFields = clazz.getDeclaredFields();
 				for (int i = 0; i < clazzFields.length; i++) {
@@ -61,7 +64,9 @@ public class SimpleSerializable implements Cloneable {
 				}
 				clazz = clazz.getSuperclass();
 			}
-			quickFields.put(clazzName, fields);
+			synchronized (quickFields) {
+				quickFields.put(clazzName, fields);
+			}
 		}
 		return fields;
 	}
@@ -147,20 +152,6 @@ for (var i = 0; i < fields.length; i++) {
 		}
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 		buffer[buffer.length] = value;
-	} else if (type == 'C') {
-		if (ignoring && this[name] == 0 || this[name] == '\0') {
-			continue;
-		}
-		buffer[buffer.length] = nameStr;
-		buffer[buffer.length] = type;
-		var value = "";
-		if (typeof this[name] == 'number') {
-			value += this[name];
-		} else {
-			value += this[name].charCodeAt (0);
-		}
-		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
-		buffer[buffer.length] = value;
 	} else if (type == 's') {
 		if (ignoring && this[name] == null) {
 			continue;
@@ -179,7 +170,7 @@ for (var i = 0; i < fields.length; i++) {
 				continue;
 			}
 			buffer[buffer.length] = nameStr;
-			buffer[buffer.length] = String.fromCharCode (baseChar - 1);
+			buffer[buffer.length] = "A"; //String.fromCharCode (baseChar - 1);
 		} else {
 			buffer[buffer.length] = nameStr;
 			buffer[buffer.length] = type;
@@ -188,10 +179,10 @@ for (var i = 0; i < fields.length; i++) {
 				if (l4 > 0x1000000) { // 16 * 1024 * 1024
 					throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 				}
-				buffer[buffer.length] = String.fromCharCode (baseChar - 2);
+				buffer[buffer.length] = "@"; //String.fromCharCode (baseChar - 2);
 				var value = "" + l4;
 				buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
-				buffer[buffer.length] = l4;
+				buffer[buffer.length] = value;
 			} else {
 				buffer[buffer.length] = String.fromCharCode (baseChar + l4);
 			}
@@ -208,6 +199,10 @@ for (var i = 0; i < fields.length; i++) {
 					}
 					buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 					buffer[buffer.length] = value;
+				} else if (t == 'X') {
+					this.serializeString (buffer, arr[j]);
+				} else if (t == 'O') {
+					this.serializeObject (buffer, arr[j], ssObjs);
 				} else if (t == 'C') {
 					var value = "";
 					if (typeof arr[j] == 'number') {
@@ -217,13 +212,23 @@ for (var i = 0; i < fields.length; i++) {
 					}
 					buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 					buffer[buffer.length] = value;
-				} else if (t == 'X') {
-					this.serializeString (buffer, arr[j]);
-				} else if (t == 'O') {
-					this.serializeObject (buffer, arr[j], ssObjs);
 				}
 			}
 		}
+	} else if (type == 'C') {
+		if (ignoring && this[name] == 0 || this[name] == '\0') {
+			continue;
+		}
+		buffer[buffer.length] = nameStr;
+		buffer[buffer.length] = type;
+		var value = "";
+		if (typeof this[name] == 'number') {
+			value += this[name];
+		} else {
+			value += this[name].charCodeAt (0);
+		}
+		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
+		buffer[buffer.length] = value;
 	}
 }
 var strBuf = buffer.join ('');
@@ -312,7 +317,7 @@ return strBuf;
     @J2SIgnore
 	private String serialize(SimpleFilter filter, List<SimpleSerializable> ssObjs) {
 		char baseChar = 'B';
-		StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer(1024);
 		/*
 		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
 		 * # is used to mark the the beginning of serialized data  
@@ -335,17 +340,17 @@ return strBuf;
 			clazzName = clazz.getName();
 		}
 		buffer.append(clazzName);
-		buffer.append('#');
-		buffer.append("00000000$"); // later the number of size will be updated!
+		buffer.append("#00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
 		Map<String, Field> fields = getSerializableFields(clazzName);
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		String[] fMap = fieldMapping();
 		try {
-			for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
-				Field field = (Field) itr.next();
-				String name = field.getName();
+			for (Iterator<Entry<String, Field>> itr = fields.entrySet().iterator(); itr.hasNext();) {
+				Entry<String, Field> entry = (Entry<String, Field>) itr.next();
+				String name = entry.getKey();
+				Field field = entry.getValue();
 				if (filter != null && !filter.accept(name)) continue;
 				if (fMap != null && fMap.length > 1) {
 					for (int j = 0; j < fMap.length / 2; j++) {
@@ -358,222 +363,75 @@ return strBuf;
 						}
 					}
 				}
-				String nameStr = (char)(baseChar + name.length()) + name;
+				//String nameStr = (char)(baseChar + name.length()) + name;
 				Class<?> type = field.getType();
-				if (type == float.class) {
-					float f = field.getFloat(this);
-					if (f == 0.0 && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('F');
-					String value = "" + f;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(f);
-				} else if (type == double.class) {
-					double d = field.getDouble(this);
-					if (d == 0.0d && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('D');
-					String value = "" + d;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(d);
+				if (type == String.class) {
+					String s = (String) field.get(this);
+					if (s == null && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					serializeString(buffer, s);
 				} else if (type == int.class) {
 					int n = field.getInt(this);
 					if (n == 0 && ignoring) continue;
-					buffer.append(nameStr);
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
 					buffer.append('I');
-					String value = "" + n;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(n);
-				} else if (type == long.class) {
-					long l = field.getLong(this);
-					if (l == 0L && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('L');
-					String value = "" + l;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(l);
-				} else if (type == short.class) {
-					short s = field.getShort(this);
-					if (s == 0 && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('S');
-					String value = "" + s;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(s);
-				} else if (type == byte.class) {
-					byte b = field.getByte(this);
-					if (b == 0 && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('B');
-					String value = "" + b;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(b);
-				} else if (type == char.class) {
-					int c = 0 + field.getChar(this);
-					if (c == 0 && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('C');
-					String value = "" + c;
-					buffer.append((char) (baseChar + value.length()));
-					buffer.append(c);
-				} else if (type == boolean.class) {
-					boolean b = field.getBoolean(this);
-					if (b == false && ignoring) continue;
-					buffer.append(nameStr);
-					buffer.append('b');
-					String value = b ? "1" : "0";
+					String value = String.valueOf(n);
 					buffer.append((char) (baseChar + value.length()));
 					buffer.append(value);
-				} else if (type == String.class) {
-					String s = (String) field.get(this);
-					if (s == null && ignoring) continue;
-					buffer.append(nameStr);
-					serializeString(buffer, s);
 				} else if (isSubclassOf(type, SimpleSerializable.class)) {
 					SimpleSerializable ssObj = (SimpleSerializable) field.get(this);
 					if (ssObj == null && ignoring) continue;
-					buffer.append(nameStr);
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
 					serializeObject(buffer, ssObj, ssObjs);
-				} else { // Array ...
-					if (type == float[].class) {
-						float[] fs = (float[]) field.get(this);
-						if (fs == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AF");
-						if (fs == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, fs.length);
-							for (int j = 0; j < fs.length; j++) {
-								float f = fs[j]; 
-								String value = "" + f;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(f);
-							}
-						}
-					} else if (type == double[].class) {
-						double [] ds = (double []) field.get(this);
-						if (ds == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AD");
-						if (ds == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, ds.length);
-							for (int j = 0; j < ds.length; j++) {
-								double d = ds[j];
-								String value = "" + d;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(d);
-							}
-						}
-					} else if (type == int[].class) {
-						int [] ns = (int []) field.get(this);
-						if (ns == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AI");
-						if (ns == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, ns.length);
-							for (int j = 0; j < ns.length; j++) {
-								int n = ns[j]; 
-								String value = "" + n;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(n);
-							}
-						}
-					} else if (type == long[].class) {
-						long [] ls = (long []) field.get(this);
-						if (ls == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AL");
-						if (ls == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, ls.length);
-							for (int j = 0; j < ls.length; j++) {
-								long l = ls[j];
-								String value = "" + l;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(l);
-							}
-						}
-					} else if (type == short[].class) {
-						short [] ss = (short []) field.get(this);
-						if (ss == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AS");
-						if (ss == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, ss.length);
-							for (int j = 0; j < ss.length; j++) {
-								short s = ss[j];
-								String value = "" + s;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(s);
-							}
-						}
-					} else if (type == byte[].class) {
+				} else if (type == long.class) {
+					long l = field.getLong(this);
+					if (l == 0L && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('L');
+					String value = String.valueOf(l);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
+				} else if (type == boolean.class) {
+					boolean b = field.getBoolean(this);
+					if (b == false && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('b');
+					buffer.append('C'); // ((char) (baseChar + 1));
+					buffer.append(b ? '1' : '0');
+				} else if (type.isArray()) { // Array ...
+					if (type == byte[].class) {
 						byte [] bs = (byte []) field.get(this);
 						if (bs == null && ignoring) continue;
-						buffer.append(nameStr);
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
 						buffer.append(!bytesCompactMode() ? "AB" : "A8");
 						if (bs == null) {
-							buffer.append((char) (baseChar - 1));
+							buffer.append('A'); // (char) (baseChar - 1));
 						} else {
 							serializeLength(buffer, bs.length);
 							if (!bytesCompactMode()) {
 								for (int j = 0; j < bs.length; j++) {
-									byte b = bs[j];
-									String value = "" + b;
+									String value = String.valueOf(bs[j]);
 									buffer.append((char) (baseChar + value.length()));
-									buffer.append(b);
+									buffer.append(value);
 								}
 							} else {
 								buffer.append(new String(bs, "iso-8859-1"));
 							}
 						}
-					} else if (type == char[].class) {
-						char [] cs = (char []) field.get(this);
-						if (cs == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("AC");
-						if (cs == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, cs.length);
-							for (int j = 0; j < cs.length; j++) {
-								int c = cs[j];
-								String value = "" + c;
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(c);
-							}
-						}
-					} else if (type == boolean[].class) {
-						boolean [] bs = (boolean []) field.get(this);
-						if (bs == null && ignoring) continue;
-						buffer.append(nameStr);
-						buffer.append("Ab");
-						if (bs == null) {
-							buffer.append((char) (baseChar - 1));
-						} else {
-							serializeLength(buffer, bs.length);
-							for (int j = 0; j < bs.length; j++) {
-								boolean b = bs[j];
-								String value = b ? "1" : "0";
-								buffer.append((char) (baseChar + value.length()));
-								buffer.append(value);
-							}
-						}
 					} else if (type == String[].class) {
 						String[] ss = (String []) field.get(this);
 						if (ss == null && ignoring) continue;
-						buffer.append(nameStr);
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
 						buffer.append("AX"); // special
 						if (ss == null) {
-							buffer.append((char) (baseChar - 1));
+							buffer.append('A'); // (char) (baseChar - 1));
 						} else {
 							serializeLength(buffer, ss.length);
 							for (int j = 0; j < ss.length; j++) {
@@ -584,10 +442,11 @@ return strBuf;
 					} else if (isSubclassOf(type, SimpleSerializable[].class)) {
 						SimpleSerializable[] ss = (SimpleSerializable []) field.get(this);
 						if (ss == null && ignoring) continue;
-						buffer.append(nameStr);
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
 						buffer.append("AO"); // special
 						if (ss == null) {
-							buffer.append((char) (baseChar - 1));
+							buffer.append('A'); // (char) (baseChar - 1));
 						} else {
 							serializeLength(buffer, ss.length);
 							for (int j = 0; j < ss.length; j++) {
@@ -595,11 +454,168 @@ return strBuf;
 								serializeObject(buffer, s, ssObjs);
 							}
 						}
+					} else if (type == int[].class) {
+						int [] ns = (int []) field.get(this);
+						if (ns == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AI");
+						if (ns == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ns.length);
+							for (int j = 0; j < ns.length; j++) {
+								String value = String.valueOf(ns[j]);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == long[].class) {
+						long [] ls = (long []) field.get(this);
+						if (ls == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AL");
+						if (ls == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ls.length);
+							for (int j = 0; j < ls.length; j++) {
+								String value = String.valueOf(ls[j]);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == boolean[].class) {
+						boolean [] bs = (boolean []) field.get(this);
+						if (bs == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("Ab");
+						if (bs == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, bs.length);
+							for (int j = 0; j < bs.length; j++) {
+								buffer.append('C'); // (char) (baseChar + 1));
+								buffer.append(bs[j] ? '1' : '0');
+							}
+						}
+					} else if (type == float[].class) {
+						float[] fs = (float[]) field.get(this);
+						if (fs == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AF");
+						if (fs == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, fs.length);
+							for (int j = 0; j < fs.length; j++) {
+								String value = String.valueOf(fs[j]);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == double[].class) {
+						double [] ds = (double []) field.get(this);
+						if (ds == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AD");
+						if (ds == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ds.length);
+							for (int j = 0; j < ds.length; j++) {
+								String value = String.valueOf(ds[j]);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == short[].class) {
+						short [] ss = (short []) field.get(this);
+						if (ss == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AS");
+						if (ss == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								String value = String.valueOf(ss[j]);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
+					} else if (type == char[].class) {
+						char [] cs = (char []) field.get(this);
+						if (cs == null && ignoring) continue;
+						buffer.append((char)(baseChar + name.length()));
+						buffer.append(name);
+						buffer.append("AC");
+						if (cs == null) {
+							buffer.append('A'); // (char) (baseChar - 1));
+						} else {
+							serializeLength(buffer, cs.length);
+							for (int j = 0; j < cs.length; j++) {
+								int c = cs[j];
+								String value = Integer.toString(c, 10);
+								buffer.append((char) (baseChar + value.length()));
+								buffer.append(value);
+							}
+						}
 					} else {
 						continue; // just ignore it
 						// others unknown or unsupported types!
 						// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
 					}
+				} else if (type == float.class) {
+					float f = field.getFloat(this);
+					if (f == 0.0 && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('F');
+					String value = String.valueOf(f);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
+				} else if (type == double.class) {
+					double d = field.getDouble(this);
+					if (d == 0.0d && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('D');
+					String value = String.valueOf(d);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
+				} else if (type == short.class) {
+					short s = field.getShort(this);
+					if (s == 0 && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('S');
+					String value = String.valueOf(s);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(s);
+				} else if (type == byte.class) {
+					byte b = field.getByte(this);
+					if (b == 0 && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('B');
+					String value = String.valueOf(b);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
+				} else if (type == char.class) {
+					int c = 0 + field.getChar(this);
+					if (c == 0 && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('C');
+					String value = Integer.toString(c, 10);
+					buffer.append((char) (baseChar + value.length()));
+					buffer.append(value);
 				}
 			}
 		} catch (Exception e) {
@@ -609,7 +625,7 @@ return strBuf;
 		if (size > 0x1000000) { // 16 * 1024 * 1024
 			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
 		}
-		String sizeStr = "" + (size - headSize);
+		String sizeStr = String.valueOf(size - headSize);
 		buffer.replace(headSize - sizeStr.length() - 1, headSize - 1, sizeStr); // update size!
 		return buffer.toString();
 	}
@@ -621,10 +637,10 @@ return strBuf;
 			if (length > 0x1000000) { // 16 * 1024 * 1024
 				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
 			}
-			buffer.append((char) (baseChar - 2));
-			String value = "" + length;
+			buffer.append('@'); // (char) (baseChar - 2));
+			String value = String.valueOf(length);
 			buffer.append((char) (baseChar + value.length()));
-			buffer.append(length);
+			buffer.append(value);
 		} else {
 			buffer.append((char) (baseChar + length));
 		}
@@ -638,10 +654,11 @@ return strBuf;
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
 if (s == null) {
-	buffer[buffer.length] = 's';
-	buffer[buffer.length] = String.fromCharCode (baseChar - 1);
+	buffer[buffer.length] = "sA";
+	// buffer[buffer.length] = 's';
+	// buffer[buffer.length] = String.fromCharCode (baseChar - 1);
 } else {
-	var normal = /^[\r\n\t\u0020-\u007e]*$/.test(s);
+	var normal = /^[\t\u0020-\u007e]*$/.test(s);
 	if (normal) {
 		buffer[buffer.length] = 's';
 	} else {
@@ -650,7 +667,7 @@ if (s == null) {
 	}
 	var l4 = s.length;
 	if (l4 > 52) {
-		buffer[buffer.length] = String.fromCharCode (baseChar - 2);
+		buffer[buffer.length] = "@"; //String.fromCharCode (baseChar - 2);
 		var value = "" + l4;
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
 		buffer[buffer.length] = l4;
@@ -661,30 +678,45 @@ if (s == null) {
 }
 	 */
     @J2SKeep
-	private void serializeString(StringBuffer buffer, String s) throws UnsupportedEncodingException {
+	private void serializeString(StringBuffer buffer, String s) {
 		char baseChar = 'B';
 		if (s != null) {
-			byte[] bytes = s.getBytes("utf-8");
-			if (s.length() != bytes.length) {
-				buffer.append('u');
-				//s = new String(bytes, "iso-8859-1");
-				s = Base64.byteArrayToBase64(bytes);
-			} else {
-				buffer.append('s');
-			}
 			int l4 = s.length();
+			boolean needBase64 = false;
+			if (!stringsASCIIEncoded()) {
+				for (int i = 0; i < l4; i++) {
+					char c = s.charAt(i);
+					if (c > 0x7e || (c < 0x20 && c != '\t')) {
+						needBase64 = true;
+						break;
+					}
+				}
+			}
+			if (!needBase64) {
+				buffer.append('s');
+			} else {
+				try {
+					byte[] bytes = s.getBytes("utf-8");
+					buffer.append('u');
+					//s = new String(bytes, "iso-8859-1");
+					s = Base64.byteArrayToBase64(bytes);
+					l4 = s.length();
+				} catch (UnsupportedEncodingException e) {
+					buffer.append('s');
+				}
+			}
 			if (l4 > 52) {
-				buffer.append((char) (baseChar - 2));
-				String value = "" + l4;
+				buffer.append('@'); // (char) (baseChar - 2));
+				String value = String.valueOf(l4);
 				buffer.append((char) (baseChar + value.length()));
-				buffer.append(l4);
+				buffer.append(value);
 			} else {
 				buffer.append((char) (baseChar + l4));
 			}
 			buffer.append(s);
 		} else {
 			buffer.append('s');
-			buffer.append((char) (baseChar - 1));
+			buffer.append('A'); // (char) (baseChar - 1));
 		}
 	}
 
@@ -706,10 +738,9 @@ if (ss != null) {
 	}
 	if (idx != -1) {
 		buffer[buffer.length] = 'o';
-		var s = "" + idx;
-		var l4 = s.length;
-		buffer[buffer.length] = String.fromCharCode (baseChar + l4);
-		buffer[buffer.length] = s;
+		var value = "" + idx;
+		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
+		buffer[buffer.length] = value;
 		return;
 	}
 	ssObjs[ssObjs.length] = ss;
@@ -719,16 +750,16 @@ if (ss != null) {
 	var s = ss.serialize (null, ssObjs); 
 	var l4 = s.length;
 	if (l4 > 52) {
-		buffer[buffer.length] = String.fromCharCode (baseChar - 2);
+		buffer[buffer.length] = "@"; //String.fromCharCode (baseChar - 2);
 		var value = "" + l4;
 		buffer[buffer.length] = String.fromCharCode (baseChar + value.length);
-		buffer[buffer.length] = l4;
+		buffer[buffer.length] = value;
 	} else {
 		buffer[buffer.length] = String.fromCharCode (baseChar + l4);
 	}
 	buffer[buffer.length] = s;
 } else {
-	buffer[buffer.length] = String.fromCharCode (baseChar - 1);
+	buffer[buffer.length] = "A"; //String.fromCharCode (baseChar - 1);
 }
 	 */
     @J2SKeep
@@ -738,10 +769,9 @@ if (ss != null) {
 			int idx = ssObjs.indexOf(ss);
 			if (idx != -1) {
 				buffer.append('o');
-				String s = "" + idx;
-				int l4 = s.length();
-				buffer.append((char) (baseChar + l4));
-				buffer.append(s);
+				String value = String.valueOf(idx);
+				buffer.append((char) (baseChar + value.length()));
+				buffer.append(value);
 				return;
 			}
 			ssObjs.add(ss);
@@ -751,16 +781,16 @@ if (ss != null) {
 			String s = ss.serialize(null, ssObjs); 
 			int l4 = s.length();
 			if (l4 > 52) {
-				buffer.append((char) (baseChar - 2));
-				String value = "" + l4;
+				buffer.append('@'); // (char) (baseChar - 2));
+				String value = String.valueOf(l4);
 				buffer.append((char) (baseChar + value.length()));
-				buffer.append(l4);
+				buffer.append(value);
 			} else {
 				buffer.append((char) (baseChar + l4));
 			}
 			buffer.append(s);
 		} else {
-			buffer.append((char) (baseChar - 1));
+			buffer.append('A'); // (char) (baseChar - 1));
 		}
 	}
     
@@ -791,12 +821,12 @@ if (ss != null) {
     @J2SIgnore
     private String jsonSerialize(SimpleFilter filter, List<SimpleSerializable> ssObjs, boolean withFormats, String linePrefix) {
     	String prefix = linePrefix;
-    	StringBuffer buffer = new StringBuffer();
+    	StringBuffer buffer = new StringBuffer(1024);
     	if (prefix != null) {
     		//buffer.append(prefix);
     		prefix += "\t";
     	}
-    	buffer.append("{");
+    	buffer.append('{');
     	if (withFormats) {
     		buffer.append("\r\n");
     	}
@@ -824,76 +854,13 @@ if (ss != null) {
 			}
 			Class<?> clazz = field.getType();
 			try {
-				if (clazz == float.class) {
-					float f = field.getFloat(this);
-					if (f == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(f);
-				} else if (clazz == double.class) {
-					double d = field.getDouble(this);
-					if (d == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(d);
-				} else if (clazz == int.class) {
+				if (clazz == int.class) {
 					int i = field.getInt(this);
 					if (i == 0 && ignoring) {
 						continue;
 					}
 					appendFieldName(buffer, fieldName, withFormats, prefix);
 					buffer.append(i);
-				} else if (clazz == long.class) {
-					long l = field.getLong(this);
-					if (l == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(l);
-				} else if (clazz == short.class) {
-					short s = field.getShort(this);
-					if (s == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(s);
-				} else if (clazz == byte.class) {
-					byte b = field.getByte(this);
-					if (b == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(b);
-				} else if (clazz == char.class) {
-					char c = field.getChar(this);
-					if (c == 0 && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append("\'");
-					if (c == '\r') {
-						buffer.append("\\r");
-					} else if (c == '\n') {
-						buffer.append("\\n");
-					} else if (c == '\t') {
-						buffer.append("\\t");
-					} else if (c == '\'') {
-						buffer.append("\\\'");
-					} else if (c == '\"') {
-						buffer.append("\\\"");
-					} else {
-						buffer.append(c);
-					}
-					buffer.append("\'");
-				} else if (clazz == boolean.class) {
-					boolean b = field.getBoolean(this);
-					if (b == false && ignoring) {
-						continue;
-					}
-					appendFieldName(buffer, fieldName, withFormats, prefix);
-					buffer.append(b);
 				} else if (clazz == String.class) {
 					String str = (String) field.get(this);
 					if (str == null && ignoring) {
@@ -903,14 +870,28 @@ if (ss != null) {
 					if (str == null) {
 						buffer.append("null");
 					} else {
-						buffer.append("\"");
+						buffer.append('\"');
 						buffer.append(str.replaceAll("\r", "\\r")
 								.replaceAll("\n", "\\n")
 								.replaceAll("\t", "\\t")
 								.replaceAll("\'", "\\'")
 								.replaceAll("\"", "\\\""));
-						buffer.append("\"");
+						buffer.append('\"');
 					}
+				} else if (clazz == long.class) {
+					long l = field.getLong(this);
+					if (l == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(l);
+				} else if (clazz == boolean.class) {
+					boolean b = field.getBoolean(this);
+					if (b == false && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(b);
 				} else if (isSubclassOf(clazz, SimpleSerializable.class)) {
 					SimpleSerializable o = (SimpleSerializable) field.get(this);
 					if (o == null && ignoring) {
@@ -930,7 +911,7 @@ if (ss != null) {
 						} else {
 							buffer.append("{\"@\":");
 							buffer.append(idx);
-							buffer.append("}");
+							buffer.append('}');
 						}
 					} else {
 						ssObjs.add(o);
@@ -938,47 +919,7 @@ if (ss != null) {
 					}
 				} else if (clazz.isArray()) {
 					clazz = clazz.getComponentType();
-					if (clazz == float.class) {
-						float[] xs = (float[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							buffer.append(xs[i]);
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == double.class) {
-						double[] xs = (double[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							buffer.append(xs[i]);
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == int.class) {
+					if (clazz == int.class) {
 						int[] xs = (int[]) field.get(this);
 						if (xs == null && ignoring) {
 							continue;
@@ -986,141 +927,15 @@ if (ss != null) {
 						appendFieldName(buffer, fieldName, withFormats, prefix);
 						buffer.append('[');
 						if (withFormats) {
-							buffer.append(" ");
+							buffer.append(' ');
 						}
 						for (int i = 0; i < xs.length; i++) {
 							buffer.append(xs[i]);
 							if (i != xs.length - 1) {
-								buffer.append(",");
+								buffer.append(',');
 							}
 							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == long.class) {
-						long[] xs = (long[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							buffer.append(xs[i]);
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == short.class) {
-						short[] xs = (short[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							buffer.append(xs[i]);
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == byte.class) {
-						byte[] xs = (byte[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						if (this.bytesCompactMode()) {
-							buffer.append('\"');
-							buffer.append(Base64.byteArrayToBase64(xs));
-							buffer.append('\"');
-							if (withFormats) {
-								buffer.append(".getBytes ()");
-							} else {
-								buffer.append(".getBytes()");
-							}
-						} else {
-							buffer.append('[');
-							if (withFormats) {
-								buffer.append(" ");
-							}
-							for (int i = 0; i < xs.length; i++) {
-								buffer.append(xs[i]);
-								if (i != xs.length - 1) {
-									buffer.append(",");
-								}
-								if (withFormats) {
-									buffer.append(" ");
-								}
-							}
-							buffer.append(']');
-						}
-					} else if (clazz == char.class) {
-						char[] xs = (char[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							char c = xs[i];
-							buffer.append("\'");
-							if (c == '\r') {
-								buffer.append("\\r");
-							} else if (c == '\n') {
-								buffer.append("\\n");
-							} else if (c == '\t') {
-								buffer.append("\\t");
-							} else if (c == '\'') {
-								buffer.append("\\\'");
-							} else if (c == '\"') {
-								buffer.append("\\\"");
-							} else {
-								buffer.append(c);
-							}
-							buffer.append("\'");
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
-							}
-						}
-						buffer.append(']');
-					} else if (clazz == boolean.class) {
-						boolean[] xs = (boolean[]) field.get(this);
-						if (xs == null && ignoring) {
-							continue;
-						}
-						appendFieldName(buffer, fieldName, withFormats, prefix);
-						buffer.append('[');
-						if (withFormats) {
-							buffer.append(" ");
-						}
-						for (int i = 0; i < xs.length; i++) {
-							buffer.append(xs[i]);
-							if (i != xs.length - 1) {
-								buffer.append(",");
-							}
-							if (withFormats) {
-								buffer.append(" ");
+								buffer.append(' ');
 							}
 						}
 						buffer.append(']');
@@ -1143,16 +958,16 @@ if (ss != null) {
 							if (str == null) {
 								buffer.append("null");
 							} else {
-								buffer.append("\"");
+								buffer.append('\"');
 								buffer.append(str.replaceAll("\r", "\\r")
 										.replaceAll("\n", "\\n")
 										.replaceAll("\t", "\\t")
 										.replaceAll("\'", "\\'")
 										.replaceAll("\"", "\\\""));
-								buffer.append("\"");
+								buffer.append('\"');
 							}
 							if (i != xs.length - 1) {
-								buffer.append(",");
+								buffer.append(',');
 							}
 							if (withFormats) {
 								buffer.append("\r\n");
@@ -1193,7 +1008,7 @@ if (ss != null) {
 									} else {
 										buffer.append("{\"@\":");
 										buffer.append(idx);
-										buffer.append("}");
+										buffer.append('}');
 									}
 								} else {
 									ssObjs.add(o);
@@ -1201,7 +1016,7 @@ if (ss != null) {
 								}
 							}
 							if (i != xs.length - 1) {
-								buffer.append(",");
+								buffer.append(',');
 							}
 							if (withFormats) {
 								buffer.append("\r\n");
@@ -1211,9 +1026,224 @@ if (ss != null) {
 							buffer.append(prefix);
 						}
 						buffer.append(']');
+					} else if (clazz == long.class) {
+						long[] xs = (long[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == boolean.class) {
+						boolean[] xs = (boolean[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == float.class) {
+						float[] xs = (float[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == double.class) {
+						double[] xs = (double[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == short.class) {
+						short[] xs = (short[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							buffer.append(xs[i]);
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
+					} else if (clazz == byte.class) {
+						byte[] xs = (byte[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						if (this.bytesCompactMode()) {
+							buffer.append('\"');
+							buffer.append(Base64.byteArrayToBase64(xs));
+							buffer.append('\"');
+							if (withFormats) {
+								buffer.append(".getBytes ()");
+							} else {
+								buffer.append(".getBytes()");
+							}
+						} else {
+							buffer.append('[');
+							if (withFormats) {
+								buffer.append(' ');
+							}
+							for (int i = 0; i < xs.length; i++) {
+								buffer.append(xs[i]);
+								if (i != xs.length - 1) {
+									buffer.append(',');
+								}
+								if (withFormats) {
+									buffer.append(' ');
+								}
+							}
+							buffer.append(']');
+						}
+					} else if (clazz == char.class) {
+						char[] xs = (char[]) field.get(this);
+						if (xs == null && ignoring) {
+							continue;
+						}
+						appendFieldName(buffer, fieldName, withFormats, prefix);
+						buffer.append('[');
+						if (withFormats) {
+							buffer.append(' ');
+						}
+						for (int i = 0; i < xs.length; i++) {
+							char c = xs[i];
+							buffer.append("\'");
+							if (c == '\r') {
+								buffer.append("\\r");
+							} else if (c == '\n') {
+								buffer.append("\\n");
+							} else if (c == '\t') {
+								buffer.append("\\t");
+							} else if (c == '\'') {
+								buffer.append("\\\'");
+							} else if (c == '\"') {
+								buffer.append("\\\"");
+							} else {
+								buffer.append(c);
+							}
+							buffer.append('\'');
+							if (i != xs.length - 1) {
+								buffer.append(',');
+							}
+							if (withFormats) {
+								buffer.append(' ');
+							}
+						}
+						buffer.append(']');
 					} else {
 						continue;
 					}
+				} else if (clazz == float.class) {
+					float f = field.getFloat(this);
+					if (f == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(f);
+				} else if (clazz == double.class) {
+					double d = field.getDouble(this);
+					if (d == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(d);
+				} else if (clazz == short.class) {
+					short s = field.getShort(this);
+					if (s == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(s);
+				} else if (clazz == byte.class) {
+					byte b = field.getByte(this);
+					if (b == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append(b);
+				} else if (clazz == char.class) {
+					char c = field.getChar(this);
+					if (c == 0 && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					buffer.append('\'');
+					if (c == '\r') {
+						buffer.append("\\r");
+					} else if (c == '\n') {
+						buffer.append("\\n");
+					} else if (c == '\t') {
+						buffer.append("\\t");
+					} else if (c == '\'') {
+						buffer.append("\\\'");
+					} else if (c == '\"') {
+						buffer.append("\\\"");
+					} else {
+						buffer.append(c);
+					}
+					buffer.append('\'');
 				} else {
 					continue;
 				}
@@ -1240,7 +1270,7 @@ if (ss != null) {
 		if (withFormats) {
 			buffer.append(linePrefix);
 		}
-    	buffer.append("}");
+    	buffer.append('}');
 
 		return buffer.toString();
     }
@@ -1253,11 +1283,11 @@ if (ss != null) {
 		}
 		buffer.append(fieldName);
 		if (withFormats) {
-			buffer.append(" ");
+			buffer.append(' ');
 		}
 		buffer.append(':');
 		if (withFormats) {
-			buffer.append(" ");
+			buffer.append(' ');
 		}
 	}
     
@@ -1401,15 +1431,8 @@ while (index < end && index < objectEnd) {
 						s = Encoding.readUTF8(s);
 					}
 				}
-				if (type == 'F' || type == 'D') {
-					arr[i] = parseFloat (s);
-				} else if (type == 'I' || type == 'L'
-						|| type == 'S' || type == 'B') {
+				if (type == 'I' || type == 'L') {
 					arr[i] = parseInt (s);
-				} else if (type == 'C') {
-					arr[i] = String.fromCharCode (parseInt (s));
-				} else if (type == 'b') {
-					arr[i] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 				} else if (type == 'X') {
 					arr[i] = s;
 				} else if (type == 'O') {
@@ -1430,6 +1453,14 @@ while (index < end && index < objectEnd) {
 					} else {
 						arr[i] = null;
 					}
+				} else if (type == 'b') {
+					arr[i] = (s.charAt (0) == '1' || s.charAt (0) == 't');
+				} else if (type == 'F' || type == 'D') {
+					arr[i] = parseFloat (s);
+				} else if (type == 'S' || type == 'B') {
+					arr[i] = parseInt (s);
+				} else if (type == 'C') {
+					arr[i] = String.fromCharCode (parseInt (s));
 				}
 			}
 			if (!fieldMap[fieldName]) {
@@ -1461,17 +1492,12 @@ while (index < end && index < objectEnd) {
 			continue;
 		}
 		var type = c2;
-		if (type == 'F' || type == 'D') {
-			this[fieldName] = parseFloat (s);
-		} else if (type == 'I' || type == 'L'
-				|| type == 'S' || type == 'B') {
+		if (type == 'I' || type == 'L') {
 			this[fieldName] = parseInt (s);
-		} else if (type == 'C') {
-			this[fieldName] = String.fromCharCode (parseInt (s));
-		} else if (type == 'b') {
-			this[fieldName] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 		} else if (type == 's') {
 			this[fieldName] = s;
+		} else if (type == 'b') {
+			this[fieldName] = (s.charAt (0) == '1' || s.charAt (0) == 't');
 		} else if (type == 'u') {
 			this[fieldName] = Encoding.readUTF8(Encoding.decodeBase64(s));
 		} else if (type == 'U') {
@@ -1488,6 +1514,12 @@ while (index < end && index < objectEnd) {
 				ss = ssObjs[idx];
 			}
 			this[fieldName] = ss;
+		} else if (type == 'F' || type == 'D') {
+			this[fieldName] = parseFloat (s);
+		} else if (type == 'S' || type == 'B') {
+			this[fieldName] = parseInt (s);
+		} else if (type == 'C') {
+			this[fieldName] = String.fromCharCode (parseInt (s));
 		}
 	}
 }
@@ -1656,6 +1688,62 @@ return true;
 							continue;
 						}
 						switch (c2) {
+						case 'I': {
+							int[] ns = new int[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									ns[i] = Integer.parseInt(ss[i]);
+								}
+							}
+							field.set(this, ns);
+							break;
+						}
+						case 'X':
+							field.set(this, ss);
+							break;
+						case 'O': {
+							Class<?> fieldClazz = field.getType();
+							SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(fieldClazz.getComponentType(), l2);
+							for (int i = 0; i < l2; i++) {
+								String s = ss[i];
+								if (s != null && s.length() > 0) {
+									if (s.startsWith("WLL")) {
+										SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
+										ssObjs.add(ssObj);
+										ssObj.deserialize(s, 0, ssObjs);
+										sss[i] = ssObj;
+									} else { // 'o'
+										int idx = Integer.parseInt(s);
+										if (idx < ssObjs.size()) {
+											sss[i] = ssObjs.get(idx);
+										}
+									}
+								}
+							}
+							field.set(this, sss);
+							break;
+						}
+						case 'L': {
+							long[] ls = new long[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									ls[i] = Long.parseLong(ss[i]);
+								}
+							}
+							field.set(this, ls);
+							break;
+						}
+						case 'b': {
+							boolean[] bs = new boolean[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null && ss[i].length() > 0) {
+									char c = ss[i].charAt(0);
+									bs[i] = (c == '1' || c == 't');
+								}
+							}
+							field.set(this, bs);
+							break;
+						}
 						case 'F': {
 							float[] fs = new float[l2];
 							for (int i = 0; i < l2; i++) {
@@ -1674,26 +1762,6 @@ return true;
 								}
 							}
 							field.set(this, ds);
-							break;
-						}
-						case 'I': {
-							int[] ns = new int[l2];
-							for (int i = 0; i < l2; i++) {
-								if (ss[i] != null) {
-									ns[i] = Integer.parseInt(ss[i]);
-								}
-							}
-							field.set(this, ns);
-							break;
-						}
-						case 'L': {
-							long[] ls = new long[l2];
-							for (int i = 0; i < l2; i++) {
-								if (ss[i] != null) {
-									ls[i] = Long.parseLong(ss[i]);
-								}
-							}
-							field.set(this, ls);
 							break;
 						}
 						case 'S': {
@@ -1726,42 +1794,6 @@ return true;
 							field.set(this, cs);
 							break;
 						}
-						case 'b': {
-							boolean[] bs = new boolean[l2];
-							for (int i = 0; i < l2; i++) {
-								if (ss[i] != null && ss[i].length() > 0) {
-									char c = ss[i].charAt(0);
-									bs[i] = (c == '1' || c == 't');
-								}
-							}
-							field.set(this, bs);
-							break;
-						}
-						case 'O': {
-							Class<?> fieldClazz = field.getType();
-							SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(fieldClazz.getComponentType(), l2);
-							for (int i = 0; i < l2; i++) {
-								String s = ss[i];
-								if (s != null && s.length() > 0) {
-									if (s.startsWith("WLL")) {
-										SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
-										ssObjs.add(ssObj);
-										ssObj.deserialize(s, 0, ssObjs);
-										sss[i] = ssObj;
-									} else { // 'o'
-										int idx = Integer.parseInt(s);
-										if (idx < ssObjs.size()) {
-											sss[i] = ssObjs.get(idx);
-										}
-									}
-								}
-							}
-							field.set(this, sss);
-							break;
-						}
-						case 'X':
-							field.set(this, ss);
-							break;
 						}
 					}
 				} catch (Exception e) {
@@ -1794,26 +1826,14 @@ return true;
 				}
 				try {
 					switch (c2) {
-					case 'F':
-						field.setFloat(this, Float.parseFloat(s));
-						break;
-					case 'D':
-						field.setDouble(this, Double.parseDouble(s));
-						break;
 					case 'I':
 						field.setInt(this, Integer.parseInt(s));
 						break;
+					case 's':
+						field.set(this, s);
+						break;
 					case 'L':
 						field.setLong(this, Long.parseLong(s));
-						break;
-					case 'S':
-						field.setShort(this, Short.parseShort(s));
-						break;
-					case 'B':
-						field.setByte(this, Byte.parseByte(s));
-						break;
-					case 'C':
-						field.setChar(this, (char) Integer.parseInt(s));
 						break;
 					case 'b': {
 						char c = s.charAt(0);
@@ -1836,9 +1856,6 @@ return true;
 						field.set(this, ss);
 						break;
 					}
-					case 's':
-						field.set(this, s);
-						break;
 					case 'u':
 						s = new String(Base64.base64ToByteArray(s), "utf-8");
 						field.set(this, s);
@@ -1846,6 +1863,21 @@ return true;
 					case 'U':
 						s = new String(s.getBytes("iso-8859-1"), "utf-8");
 						field.set(this, s);
+						break;
+					case 'F':
+						field.setFloat(this, Float.parseFloat(s));
+						break;
+					case 'D':
+						field.setDouble(this, Double.parseDouble(s));
+						break;
+					case 'S':
+						field.setShort(this, Short.parseShort(s));
+						break;
+					case 'B':
+						field.setByte(this, Byte.parseByte(s));
+						break;
+					case 'C':
+						field.setChar(this, (char) Integer.parseInt(s));
 						break;
 					}
 				} catch (Exception e) {
@@ -1911,26 +1943,16 @@ return true;
 			}
 			Class<?> clazz = field.getType();
 			try {
-				if (clazz == float.class) {
-					field.setFloat(this, Float.parseFloat((String) o));
-				} else if (clazz == double.class) {
-					field.setDouble(this, Double.parseDouble((String) o));
-				} else if (clazz == int.class) {
+				if (clazz == int.class) {
 					field.setInt(this, Integer.parseInt((String) o));
+				} else if (clazz == String.class) {
+					field.set(this, o);
 				} else if (clazz == long.class) {
 					field.setLong(this, Long.parseLong((String) o));
-				} else if (clazz == short.class) {
-					field.setShort(this, Short.parseShort((String) o));
-				} else if (clazz == byte.class) {
-					field.setByte(this, Byte.parseByte((String) o));
-				} else if (clazz == char.class) {
-					field.setChar(this, (char) Integer.parseInt((String) o));
 				} else if (clazz == boolean.class) {
 					String s = (String) o;
 					char c = s.length() > 0 ? s.charAt(0) : '\0';
 					field.setBoolean(this, c == '1' || c == 't');
-				} else if (clazz == String.class) {
-					field.set(this, o);
 				} else if (clazz.isArray()) {
 					clazz = clazz.getComponentType();
 					if (o instanceof String) {
@@ -1938,7 +1960,50 @@ return true;
 							continue; // not list 
 						}
 					}
-					if (clazz == float.class) {
+					if (clazz == int.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						int[] xs = new int[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Integer.parseInt(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == String.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						String[] xs = new String[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							xs[i] = s;
+						}
+						field.set(this, xs);
+					} else if (clazz == long.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						long[] xs = new long[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null && s.length() > 0) {
+								xs[i] = Long.parseLong(s);
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == boolean.class) {
+						List<?> list = (List<?>) o;
+						int size = list.size();
+						boolean[] xs = new boolean[size];
+						for (int i = 0; i < xs.length; i++) {
+							String s = (String) list.get(i);
+							if (s != null) {
+								char c = s.length() > 0 ? s.charAt(0) : '\0';
+								xs[i] = c == '1' || c == 't';
+							}
+						}
+						field.set(this, xs);
+					} else if (clazz == float.class) {
 						List<?> list = (List<?>) o;
 						int size = list.size();
 						float[] xs = new float[size];
@@ -1957,28 +2022,6 @@ return true;
 							String s = (String) list.get(i);
 							if (s != null && s.length() > 0) {
 								xs[i] = Double.parseDouble(s);
-							}
-						}
-						field.set(this, xs);
-					} else if (clazz == int.class) {
-						List<?> list = (List<?>) o;
-						int size = list.size();
-						int[] xs = new int[size];
-						for (int i = 0; i < xs.length; i++) {
-							String s = (String) list.get(i);
-							if (s != null && s.length() > 0) {
-								xs[i] = Integer.parseInt(s);
-							}
-						}
-						field.set(this, xs);
-					} else if (clazz == long.class) {
-						List<?> list = (List<?>) o;
-						int size = list.size();
-						long[] xs = new long[size];
-						for (int i = 0; i < xs.length; i++) {
-							String s = (String) list.get(i);
-							if (s != null && s.length() > 0) {
-								xs[i] = Long.parseLong(s);
 							}
 						}
 						field.set(this, xs);
@@ -2019,28 +2062,17 @@ return true;
 							}
 						}
 						field.set(this, xs);
-					} else if (clazz == boolean.class) {
-						List<?> list = (List<?>) o;
-						int size = list.size();
-						boolean[] xs = new boolean[size];
-						for (int i = 0; i < xs.length; i++) {
-							String s = (String) list.get(i);
-							if (s != null) {
-								char c = s.length() > 0 ? s.charAt(0) : '\0';
-								xs[i] = c == '1' || c == 't';
-							}
-						}
-						field.set(this, xs);
-					} else if (clazz == String.class) {
-						List<?> list = (List<?>) o;
-						int size = list.size();
-						String[] xs = new String[size];
-						for (int i = 0; i < xs.length; i++) {
-							String s = (String) list.get(i);
-							xs[i] = s;
-						}
-						field.set(this, xs);
 					}
+				} else if (clazz == float.class) {
+					field.setFloat(this, Float.parseFloat((String) o));
+				} else if (clazz == double.class) {
+					field.setDouble(this, Double.parseDouble((String) o));
+				} else if (clazz == short.class) {
+					field.setShort(this, Short.parseShort((String) o));
+				} else if (clazz == byte.class) {
+					field.setByte(this, Byte.parseByte((String) o));
+				} else if (clazz == char.class) {
+					field.setChar(this, (char) Integer.parseInt((String) o));
 				}
 			} catch (Exception e) {
 				System.out.println("Parsing: " + o + " for field " + fieldName +  "\r\n");
@@ -2064,6 +2096,10 @@ return true;
     protected String[] fieldDiffIgnored() {
     	return null;
     }
+
+    protected boolean stringsASCIIEncoded() {
+    	return false;
+    }
     
     protected boolean bytesCompactMode() {
     	return BYTES_COMPACT_MODE;
@@ -2080,84 +2116,37 @@ return true;
 		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
+			if (!type.isArray()) {
+				continue; // already clone in super.clone
+			}
 			Object value = null;
 			try {
 				value = field.get(this);
 			} catch (Exception e1) {
 				//e1.printStackTrace();
 			}
-			if (value != null && type.getName().startsWith("[")) {
+			if (value != null) {
 				Object cloneArr = null;
-				if (type == float[].class) {
-					float[] as = (float[]) value;
-					float[] clones = new float[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == double[].class) {
-					double[] as = (double[]) value;
-					double[] clones = new double[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == int[].class) {
-					int[] as = (int[]) value;
-					int[] clones = new int[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == long[].class) {
-					long[] as = (long[]) value;
-					long[] clones = new long[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == short[].class) {
-					short[] as = (short[]) value;
-					short[] clones = new short[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
+				if (type == int[].class) {
+					cloneArr = ((int[]) value).clone();
 				} else if (type == byte[].class) {
-					byte[] as = (byte[]) value;
-					byte[] clones = new byte[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == char[].class) {
-					char[] as = (char[]) value;
-					char[] clones = new char[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
-				} else if (type == boolean[].class) {
-					boolean[] as = (boolean[]) value;
-					boolean[] clones = new boolean[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
+					cloneArr = ((byte[]) value).clone();
 				} else if (type == String[].class) {
-					String[] as = (String[]) value;
-					String[] clones = new String[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
+					cloneArr = ((String[]) value).clone();
 				} else if (type == Object[].class) {
-					Object[] as = (Object[]) value;
-					Object[] clones = new Object[as.length];
-					for (int j = 0; j < clones.length; j++) {
-						clones[j] = as[j];
-					}
-					cloneArr = clones;
+					cloneArr = ((Object[]) value).clone();
+				} else if (type == long[].class) {
+					cloneArr = ((long[]) value).clone();
+				} else if (type == boolean[].class) {
+					cloneArr = ((boolean[]) value).clone();
+				} else if (type == float[].class) {
+					cloneArr = ((float[]) value).clone();
+				} else if (type == double[].class) {
+					cloneArr = ((double[]) value).clone();
+				} else if (type == short[].class) {
+					cloneArr = ((short[]) value).clone();
+				} else if (type == char[].class) {
+					cloneArr = ((char[]) value).clone();
 				}
 				try {
 					field.set(clone, cloneArr);
@@ -2251,10 +2240,18 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 			if (!filter.accept(clazzName)) return null;
 		}
 		try {
-			Class<?> runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
-			if (runnableClass != null) {
-				// SimpleRPCRunnale should always has default constructor
-				Constructor<?> constructor = runnableClass.getConstructor(new Class[0]);
+			Constructor<?> constructor = quickConstructors.get(clazzName);
+			if (constructor == null) {
+				Class<?> runnableClass = Class.forName(clazzName);
+				if (runnableClass != null) {
+					// SimpleRPCRunnale should always has a default constructor
+					constructor = runnableClass.getConstructor(new Class[0]);
+					synchronized (quickConstructors) {
+						quickConstructors.put(clazzName, constructor);
+					}
+				}
+			}
+			if (constructor != null) {
 				Object obj = constructor.newInstance(new Object[0]);
 				if (obj != null && obj instanceof SimpleSerializable) {
 					return (SimpleSerializable) obj;

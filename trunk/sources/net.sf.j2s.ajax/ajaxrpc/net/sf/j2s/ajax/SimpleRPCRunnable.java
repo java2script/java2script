@@ -11,7 +11,6 @@
 
 package net.sf.j2s.ajax;
 
-
 /**
  * @author zhou renjian
  *
@@ -48,5 +47,32 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable {
 	 * Called by local Java thread of XMLHttpRequest when #ajaxRun contains errors
 	 */
 	public void ajaxFail() {};
+
+	/**
+	 * Whether serializing delta updates in response only or not. Supporting
+	 * delta updates will save connection bandwidth but increase the CPU usage.
+	 * 
+	 * This method will be called by server side.
+	 * 
+	 * @return supported
+	 */
+	public boolean supportsDeltaResponse() {
+		return true;
+	}
+	
+	/**
+	 * Whether sending out response in GZip encoding or not. Supporting GZip
+	 * encoding will save connection bandwidth but increase the CPU usage.
+	 * 
+	 * For those RPC with already-encoded bytes, for example, PNG/JPEG images,
+	 * AAC/MP3 audio, H.265 movies and others, GZip encoding should be closed.
+	 *  
+	 * This method will be called by server side.
+	 * 
+	 * @return supported
+	 */
+	public boolean supportsGZipEncoding() {
+		return true;
+	}
 	
 }
