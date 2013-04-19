@@ -196,7 +196,21 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 					}
 					buffer.append(hexStr);
 				} else {
-					buffer.append(constValue);
+					char c = charValue;
+					if (c == '\\' || c == '\'' || c == '\"') {
+						buffer.append('\\');
+						buffer.append(c);
+					} else if (c == '\r') {
+						buffer.append("\\r");
+					} else if (c == '\n') {
+						buffer.append("\\n");
+					} else if (c == '\t') {
+						buffer.append("\\t");
+					} else if (c == '\f') {
+						buffer.append("\\f");
+					} else {
+						buffer.append(constValue);
+					}
 				}
 				buffer.append('\'');
 			} else {

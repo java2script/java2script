@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -347,8 +346,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
 		packageVisitor.setPackageName("" + node.getName());
 		return false;
-	}	
-	
+	}
+
 	//sgurin - fix for bug http://sourceforge.net/tracker/?func=detail&aid=3037341&group_id=155436&atid=795800 with static imports
 	public void endVisit(ImportDeclaration node) {
 		super.endVisit(node);
@@ -359,7 +358,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					musts.add(qnameStr);
 				}
 			}
-		}		
+		}
 	}
 
 	protected void readClasses(Annotation annotation, Set set) {
@@ -937,9 +936,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 //		}
 //		return super.visit(node);
 //	}
-	
-	
-	
 	
 	/*
 	 * (non-Javadoc)
