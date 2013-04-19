@@ -310,7 +310,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -330,7 +330,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			boxingNode(right);
 			
 			buffer.append(", ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -343,7 +343,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -876,7 +876,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else {
 				buffer.append("$t$ = ");
 			}
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -893,7 +893,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(op);
 			
 			buffer.append(", ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -906,7 +906,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1004,7 +1004,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			buffer.append(op);
 			buffer.append(' ');
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1018,7 +1018,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			
 			buffer.append(", ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append(".prototype.");
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -1031,7 +1031,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				leftName.accept(this);
 			}
 			buffer.append(" = ");
-			buffer.append(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;

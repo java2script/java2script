@@ -1741,7 +1741,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		
 		if (node.isConstructor()) {
-			buffer.append("Clazz.makeConstructor (");
+			if (getJ2STag(node, "@j2sOverride") != null) {
+				buffer.append("Clazz.overrideConstructor (");
+			} else {
+				buffer.append("Clazz.makeConstructor (");
+			}
 		} else {
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
@@ -3102,7 +3106,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (isSimpleSerializable) {
 					List fragments = fieldDeclaration.fragments();
 					int modifiers = fieldDeclaration.getModifiers();
-					if ((Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) 
+					if ((Modifier.isPublic(modifiers)/* || Modifier.isProtected(modifiers)*/) 
 							&& !Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
 						Type type = fieldDeclaration.getType();
 						int dims = 0;
@@ -3135,6 +3139,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						ITypeBinding resolveBinding = type.resolveBinding();
 						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
 							mark = "s";
+						} else {
+							ITypeBinding t = resolveBinding;
+							do {
+								String typeName = t.getQualifiedName();
+								if ("java.lang.Object".equals(typeName)) {
+									break;
+								}
+								if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
+									mark = "O";
+									break;
+								}
+								t = t.getSuperclass();
+								if (t == null) {
+									break;
+								}
+							} while (true);
 						}
 						if (mark != null) {
 							for (Iterator xiter = fragments.iterator(); xiter.hasNext();) {
