@@ -346,9 +346,9 @@ Clazz.inheritClass = function (clazzThis, clazzSuper, objSuper) {
 	if (Clazz.isClassUnloaded (clazzThis)) {
 		// Don't change clazzThis.protoype! Keep it!
 	} else if (objSuper != null) {
-		// ! Unsafe of refrence prototype to an instance!
+		// ! Unsafe of reference prototype to an instance!
 		// Feb 19, 2006 --josson
-		// OK for this refrence to an instance, as this is anonymous instance,
+		// OK for this reference to an instance, as this is anonymous instance,
 		// which is not referenced elsewhere.
 		// March 13, 2006
 		clazzThis.prototype = objSuper; 
@@ -765,9 +765,15 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	var params = Clazz.getParamsType (funParams);
 	var fx = objThis[fxName];
 	/*
-	 * Cache last matched method
+	 * Cache last or previous matched method
 	 */
+	var cached = 0; // 0: no cache; 1: last matched; 2: previous matched
 	if (fx.lastParams == params.typeString && fx.lastClaxxRef === claxxRef) {
+		cached = 1;
+	} else if (fx.prevParams == params.typeString && fx.prevClaxxRef === claxxRef) {
+		cached = 2;
+	}
+	if (cached != 0) {
 		var methodParams = null;
 		if (params.hasCastedNull) {
 			methodParams = new Array ();
@@ -786,12 +792,23 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 		} else {
 			methodParams = funParams;
 		}
-		if (fx.lastMethod != null) {
+		if (cached == 1 && fx.lastMethod != null) {
 			return fx.lastMethod.apply (objThis, methodParams);
+		} else if (cached == 2 && fx.prevMethod != null) {
+			var f = fx.prevMethod;
+			fx.prevParams = fx.lastParams;
+			fx.prevClaxxRef = fx.lastClaxxRef;
+			fx.prevMethod = fx.lastMethod;
+			fx.lastParams = params.typeString;
+			fx.lastClaxxRef = claxxRef;
+			fx.lastMethod = f;
+			return f.apply (objThis, methodParams);
 		} else { // missed default constructor ?
 			return ;
 		}
 	}
+	fx.prevParams = fx.lastParams;
+	fx.prevClaxxRef = fx.lastClaxxRef;
 	fx.lastParams = params.typeString;
 	fx.lastClaxxRef = claxxRef;
 
@@ -982,6 +999,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 					}
 					Clazz.pu$hCalling (new Clazz.callingStack (caller, owner));
 				}
+				fx.prevMethod = fx.lastMethod;
 				fx.lastMethod = f;
 				var ret = f.apply (objThis, methodParams);
 				if (noInnerWrapper) {
@@ -993,6 +1011,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 				return ret;
 			}
 			/*# x<< #*/
+			fx.prevMethod = fx.lastMethod;
 			fx.lastMethod = f;
 			return f.apply (objThis, methodParams);
 		//}
@@ -1323,8 +1342,24 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
  */
 /* public */
 Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
-	var funName = "construct";
-	Clazz.defineMethod (clazzThis, funName, funBody, funParams);
+	Clazz.defineMethod (clazzThis, "construct", funBody, funParams);
+	if (clazzThis.con$truct != null) {
+		clazzThis.con$truct.index = clazzThis.con$truct.stacks.length;
+	}
+	//clazzThis.con$truct = clazzThis.prototype.con$truct = null;
+};
+
+/**
+ * Override constructor for the class with the given function body and
+ * parameters signature.
+ * 
+ * @param clazzThis host class
+ * @param funBody constructor body
+ * @param funParams constructor parameters signature
+ */
+/* public */
+Clazz.overrideConstructor = function (clazzThis, funBody, funParams) {
+	Clazz.overrideMethod (clazzThis, "construct", funBody, funParams);
 	if (clazzThis.con$truct != null) {
 		clazzThis.con$truct.index = clazzThis.con$truct.stacks.length;
 	}
@@ -1957,9 +1992,6 @@ Clazz.exceptionOf=function(e, clazz) {
 	else
 		return false;
 };
-
-/* sgurin: preserve Number.prototype.toString */
-Number.prototype._numberToString=Number.prototype.toString;
 
 Clazz.declarePackage ("java.io");
 //Clazz.declarePackage ("java.lang");

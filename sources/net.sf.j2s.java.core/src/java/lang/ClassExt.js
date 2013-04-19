@@ -81,7 +81,7 @@ Clazz.prepareCallback = function (objThis, args) {
 			 */
 			obs[className.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
 			var clazz = Clazz.getClass (classThisObj);
-			while (clazz.superClazz != null) {
+			while (clazz != null && clazz.superClazz != null) {
 				clazz = clazz.superClazz;
 				//obs[Clazz.getClassName (clazz)] = classThisObj;
 				/*
@@ -124,65 +124,77 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
 		clazzInner = arguments.callee.caller;
 	}
 	var obj = null;
-	/*if (arguments.length == 2) {
-		obj = new clazzInner (objThis);
-	} else */if (arguments.length == 3) {
-		obj = new clazzInner (objThis);
-	} else if (arguments.length == 4) {
-		if (objThis.__CLASS_NAME__ == clazzInner.__CLASS_NAME__
-				&& arguments[3] === Clazz.inheritArgs) {
-			obj = objThis;
+	if (finalVars == null && objThis.$finals == null) {
+		/*if (arguments.length == 2) {
+			obj = new clazzInner (objThis);
+		} else */if (arguments.length == 3) {
+			obj = new clazzInner (objThis);
+		} else if (arguments.length == 4) {
+			if (objThis.__CLASS_NAME__ == clazzInner.__CLASS_NAME__
+					&& arguments[3] === Clazz.inheritArgs) {
+				obj = objThis;
+			} else {
+				obj = new clazzInner (objThis, arguments[3]);
+			}
+		} else if (arguments.length == 5) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4]);
+		} else if (arguments.length == 6) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4], 
+					arguments[5]);
+		} else if (arguments.length == 7) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4], 
+					arguments[5], arguments[6]);
+		} else if (arguments.length == 8) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4], 
+					arguments[5], arguments[6], arguments[7]);
+		} else if (arguments.length == 9) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4], 
+					arguments[5], arguments[6], arguments[7], arguments[8]);
+		} else if (arguments.length == 10) {
+			obj = new clazzInner (objThis, arguments[3], arguments[4], 
+					arguments[5], arguments[6], arguments[7], arguments[8],
+					arguments[9]);
 		} else {
-			obj = new clazzInner (objThis, arguments[3]);
+			/*
+			 * Should construct instance manually.
+			 */
+			obj = new clazzInner (objThis, Clazz.inheritArgs);
+			//if (obj.construct == null) {
+			//	throw new String ("No support anonymous class constructor with " 
+			//			+ "more than 7 parameters.");
+			//}
+			var args = new Array ();
+			for (var i = 3; i < arguments.length; i++) {
+				args[i - 3] = arguments[i];
+			}
+			//obj.construct.apply (obj, args);
+			Clazz.instantialize (obj, args);
 		}
-	} else if (arguments.length == 5) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4]);
-	} else if (arguments.length == 6) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4], 
-				arguments[5]);
-	} else if (arguments.length == 7) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4], 
-				arguments[5], arguments[6]);
-	} else if (arguments.length == 8) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4], 
-				arguments[5], arguments[6], arguments[7]);
-	} else if (arguments.length == 9) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4], 
-				arguments[5], arguments[6], arguments[7], arguments[8]);
-	} else if (arguments.length == 10) {
-		obj = new clazzInner (objThis, arguments[3], arguments[4], 
-				arguments[5], arguments[6], arguments[7], arguments[8],
-				arguments[9]);
 	} else {
-		/*
-		 * Should construct instance manually.
-		 */
-		obj = new clazzInner ();
-		if (obj.construct == null) {
-			throw new String ("No support anonymous class constructor with " 
-					+ "more than 7 parameters.");
+		obj = new clazzInner (objThis, Clazz.inheritArgs);
+		// f$ is short for the once choosen "$finals"
+		if (finalVars != null && objThis.f$ == null) {
+			obj.f$ = finalVars;
+		} else if (finalVars == null && objThis.f$ != null) {
+			obj.f$ = objThis.f$;
+		} else if (finalVars != null && objThis.f$ != null) {
+			var o = new Object ();
+			for (var attr in objThis.f$) {
+				o[attr] = objThis.f$[attr];
+			}
+			for (var attr in finalVars) {
+				o[attr] = finalVars[attr];
+			}
+			obj.f$ = o;
 		}
+		
 		var args = new Array ();
 		for (var i = 3; i < arguments.length; i++) {
 			args[i - 3] = arguments[i];
 		}
-		obj.construct.apply (obj, args);
+		Clazz.instantialize (obj, args);
 	}
-	// f$ is short for the once choosen "$finals"
-	if (finalVars != null && objThis.f$ == null) {
-		obj.f$ = finalVars;
-	} else if (finalVars == null && objThis.f$ != null) {
-		obj.f$ = objThis.f$;
-	} else if (finalVars != null && objThis.f$ != null) {
-		var o = new Object ();
-		for (var attr in objThis.f$) {
-			o[attr] = objThis.f$[attr];
-		}
-		for (var attr in finalVars) {
-			o[attr] = finalVars[attr];
-		}
-		obj.f$ = o;
-	}
+	
 	/*
 	if (finalVars != null && objThis.$finals == null) {
 		obj.$finals = finalVars;
@@ -685,6 +697,20 @@ System = {
 				dest[destPos + i] = swap[i];
 			}
 		}
+	},
+	identityHashCode: function (obj) {
+		if (obj == null) {
+			return 0;
+		}
+		try {
+			return obj.toString ().hashCode ();
+		} catch (e) {
+			var str = ":";
+			for (var s in obj) {
+				str += s + ":"
+			}
+			return str.hashCode ();
+		}
 	}
 };
 System.out = new JavaObject ();
@@ -828,6 +854,19 @@ Clazz.int0RightShift = function (n, o) { // 64bit
 	return n >>> o; // no needs for this shifting wrapper
 };
 
+Clazz.floatToInt = function (x) {
+	return x < 0 ? Math.ceil(x) : Math.floor(x);
+};
+
+Clazz.floatToByte = Clazz.floatToShort = Clazz.floatToLong = Clazz.floatToInt;
+Clazz.doubleToByte = Clazz.doubleToShort = Clazz.doubleToLong = Clazz.doubleToInt = Clazz.floatToInt;
+
+Clazz.floatToChar = function (x) {
+	return String.fromCharCode (x < 0 ? Math.ceil(x) : Math.floor(x));
+};
+
+Clazz.doubleToChar = Clazz.floatToChar;
+ 
 // Compress the common public API method in shorter name
 $_L=Clazz.load;
 $_W=Clazz.declareAnonymous;
@@ -842,6 +881,7 @@ $_P=Clazz.p0p;
 $_B=Clazz.prepareCallback;
 $_N=Clazz.innerTypeInstance;
 $_K=Clazz.makeConstructor;
+$_k=Clazz.overrideConstructor;
 $_U=Clazz.superCall;
 $_R=Clazz.superConstructor;
 $_M=Clazz.defineMethod;
@@ -860,6 +900,16 @@ $_AB=Clazz.newByteArray;
 $_AC=Clazz.newCharArray;
 $_Ab=Clazz.newBooleanArray;
 //$_AX=Clazz.newStringArray;
+$_fI=Clazz.floatToInt;
+$_fS=Clazz.floatToShort;
+$_fB=Clazz.floatToByte;
+$_fL=Clazz.floatToLong;
+$_fC=Clazz.floatToChar;
+$_dI=Clazz.doubleToInt;
+$_dS=Clazz.doubleToShort;
+$_dB=Clazz.doubleToByte;
+$_dL=Clazz.doubleToLong;
+$_dC=Clazz.doubleToChar;
 $_O=Clazz.instanceOf;
 $_G=Clazz.inheritArgs;
 $_X=Clazz.checkPrivateMethod;
@@ -975,6 +1025,12 @@ Clazz.cleanDelegateMethod = function (m) {
 		m.lastMethod = null;
 		m.lastParams = null;
 		m.lastClaxxRef = null;
+	}
+	if (typeof m == "function" && m.prevMethod != null
+			&& m.prevParams != null && m.prevClaxxRef != null) {
+		m.prevMethod = null;
+		m.prevParams = null;
+		m.prevClaxxRef = null;
 	}
 };
 

@@ -467,6 +467,20 @@ window.assert = function () {
 			}
 		}
 	};
+	System.identityHashCode = function (obj) {
+		if (obj == null) {
+			return 0;
+		}
+		try {
+			return obj.toString ().hashCode ();
+		} catch (e) {
+			var str = ":";
+			for (var s in obj) {
+				str += s + ":"
+			}
+			return str.hashCode ();
+		}
+	};
 	
 	System.props = null; //new java.util.Properties ();
 	System.getProperties = function () {
