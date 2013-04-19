@@ -315,6 +315,11 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		String lineBreak = props.getProperty("j2s.compiler.linebreak");
 		String whiteSpace = props.getProperty("j2s.compiler.whitespace");
+		String utf8Header = props.getProperty("j2s.compiler.utf8bom");
+		boolean addUTF8Header = false;
+		if (utf8Header != null && utf8Header.equals("true")) {
+			addUTF8Header = true;
+		}
 		if (lineBreak != null && whiteSpace != null
 				&& lineBreak.length() == 0 && whiteSpace.equals("false")) {
 			js = RegExCompress.regexCompress(js);
@@ -414,7 +419,9 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		File jsFile = new File(folderPath, elementName + ".js"); //$NON-NLS-1$
 		try {
 			FileOutputStream fos = new FileOutputStream(jsFile);
-			fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
+			if (addUTF8Header) {
+				fos.write(new byte[] {(byte) 0xef, (byte) 0xbb, (byte) 0xbf}); // UTF-8 header!
+			}
 			fos.write(js.getBytes("UTF-8"));
 			fos.close();
 		} catch (IOException e) {
@@ -521,6 +528,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				"Clazz.prepareCallback", "B", //
 				"Clazz.innerTypeInstance", "N", //
 				"Clazz.makeConstructor", "K", //
+				"Clazz.overrideConstructor", "k", //
 				"Clazz.superCall", "U", //
 				"Clazz.superConstructor", "R", //
 				"Clazz.defineMethod", "M", //
