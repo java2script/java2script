@@ -5,11 +5,72 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SourceUtils {
 
+	public static void insertLineComment(StringBuffer source, String indent, int index, boolean blankLine) {
+		source.append(indent);
+		source.append("//+$");
+		source.append(index);
+		source.append("+\r\n");
+		source.append(indent);
+		source.append("//-$");
+		source.append(index);
+		source.append("-\r\n");
+		if (blankLine) {
+			source.append("\r\n");
+		}
+	}
+
+	public static void wrapALineWithLineComment(StringBuffer source, String indent, int index, String line, boolean blankLine) {
+		source.append(indent);
+		source.append("//+$");
+		source.append(index);
+		source.append("+\r\n");
+		source.append(indent);
+		source.append(line);
+		source.append("\r\n");
+		source.append(indent);
+		source.append("//-$");
+		source.append(index);
+		source.append("-\r\n");
+		if (blankLine) {
+			source.append("\r\n");
+		}
+	}
+
+	public static void openLineComment(StringBuffer source, String indent, int index) {
+		source.append(indent);
+		source.append("//+$");
+		source.append(index);
+		source.append("+\r\n");
+	}
+	
+	public static void closeLineComment(StringBuffer source, String indent, int index, boolean blankLine) {
+		source.append(indent);
+		source.append("//-$");
+		source.append(index);
+		source.append("-\r\n");
+		if (blankLine) {
+			source.append("\r\n");
+		}
+	}
+
+	public static void insertBlockComment(StringBuffer source, int index) {
+		source.append(" /*+$");
+		source.append(index);
+		source.append("+*/  /*-$");
+		source.append(index);
+		source.append("-*/ ");
+	}
+	
 	public static void updateSourceContent(File file, String source) {
 		FileInputStream fis = null;
 		byte[] buffer = new byte[8096];
@@ -32,68 +93,90 @@ public class SourceUtils {
 			}
 		}
 		String oldSource = baos.toString();
-		Map<Integer, String> map = new HashMap<Integer, String>();
-		for (int i = 0; i < 100; i++) {
-			boolean got = false;
-			String key1 = "//+$" + i + "+";
-			int idx1 = oldSource.indexOf(key1);
-			if (idx1 != -1) {
-				String key2 = "//-$" + i + "-";
-				int idx2 = oldSource.indexOf(key2);
-				if (idx2 != -1) {
-					String s = oldSource.substring(idx1 + key1.length(), idx2);
-					map.put(i, s);
-					got = true;
-				}
+		if (oldSource.length() > 0) {
+			Pattern regExp = Pattern.compile("\\/[\\/|\\*]\\+\\$(\\d+)\\+");
+			Matcher matcher = regExp.matcher(source);
+			List<String> allIndexes = new ArrayList<String>();
+			while (matcher.find()) {
+				String indexStr = matcher.group(1);
+				allIndexes.add(indexStr);
 			}
-			if (!got) {
-				key1 = "/*+$" + i + "+*/";
-				idx1 = oldSource.indexOf(key1);
+			int position = 0;
+			Map<String, String> map = new HashMap<String, String>();
+			for (Iterator<String> itr = allIndexes.iterator(); itr.hasNext();) {
+				String i = (String) itr.next();
+				boolean got = false;
+				String key1 = "//+$" + i + "+";
+				int idx1 = oldSource.indexOf(key1, position);
 				if (idx1 != -1) {
-					String key2 = "/*-$" + i + "-*/";
-					int idx2 = oldSource.indexOf(key2);
+					String key2 = "//-$" + i + "-";
+					int idx2 = oldSource.indexOf(key2, position + key1.length());
 					if (idx2 != -1) {
 						String s = oldSource.substring(idx1 + key1.length(), idx2);
 						map.put(i, s);
 						got = true;
+						position = idx2 + key2.length();
 					}
 				}
-			}
-		}
-		for (int i = 0; i < 100; i++) {
-			boolean changed = false;
-			String key1 = "//+$" + i + "+";
-			int idx1 = source.indexOf(key1);
-			if (idx1 != -1) {
-				String key2 = "//-$" + i + "-";
-				int idx2 = source.indexOf(key2);
-				if (idx2 != -1) {
-					String ss = source.substring(idx1 + key1.length(), idx2);
-					String s = map.get(i);
-					if (s != null && !s.equals(ss)) {
-						source = source.substring(0, idx1 + key1.length()) + s + source.substring(idx2);
-						changed = true;
-					}
-				}
-			}
-			if (!changed) {
-				key1 = "/*+$" + i + "+*/";
-				idx1 = source.indexOf(key1);
-				if (idx1 != -1) {
-					String key2 = "/*-$" + i + "-*/";
-					int idx2 = source.indexOf(key2);
-					if (idx2 != -1) {
-						String ss = source.substring(idx1 + key1.length(), idx2);
-						String s = map.get(i);
-						if (s != null && !s.equals(ss)) {
-							source = source.substring(0, idx1 + key1.length()) + s + source.substring(idx2);
-							changed = true;
+				if (!got) {
+					key1 = "/*+$" + i + "+*/";
+					idx1 = oldSource.indexOf(key1, position);
+					if (idx1 != -1) {
+						String key2 = "/*-$" + i + "-*/";
+						int idx2 = oldSource.indexOf(key2, position + key1.length());
+						if (idx2 != -1) {
+							String s = oldSource.substring(idx1 + key1.length(), idx2);
+							map.put(i, s);
+							got = true;
+							position = idx2 + key2.length();
 						}
 					}
 				}
 			}
+			position = 0;
+			for (Iterator<String> itr = allIndexes.iterator(); itr.hasNext();) {
+				String i = (String) itr.next();
+				boolean changed = false;
+				String key1 = "//+$" + i + "+";
+				int idx1 = source.indexOf(key1, position);
+				if (idx1 != -1) {
+					String key2 = "//-$" + i + "-";
+					int idx2 = source.indexOf(key2, position + key1.length());
+					if (idx2 != -1) {
+						String ss = source.substring(idx1 + key1.length(), idx2);
+						String s = map.get(i);
+						if (s != null && !s.equals(ss)
+								&& !(s.trim().length() == 0 && ss.trim().length() == 0)) {
+							source = source.substring(0, idx1 + key1.length()) + s + source.substring(idx2);
+							changed = true;
+						}
+						position = idx2 + key2.length();
+					}
+				}
+				if (!changed) {
+					key1 = "/*+$" + i + "+*/";
+					idx1 = source.indexOf(key1, position);
+					if (idx1 != -1) {
+						String key2 = "/*-$" + i + "-*/";
+						int idx2 = source.indexOf(key2, position + key1.length());
+						if (idx2 != -1) {
+							String ss = source.substring(idx1 + key1.length(), idx2);
+							String s = map.get(i);
+							if (s != null && !s.equals(ss)
+									&& !(s.trim().length() == 0 && ss.trim().length() == 0)) {
+								source = source.substring(0, idx1 + key1.length()) + s + source.substring(idx2);
+								changed = true;
+							}
+						}
+						position = idx2 + key2.length();
+					}
+				}
+			}
+			
+			if (source.equals(oldSource)) {
+				return;
+			}
 		}
-		
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(file);

@@ -148,7 +148,7 @@ public class SimpleSource4ObjectiveC {
 					}
 				} else if (type == String.class) {
 					try {
-						source.append("\"" + f.get(interfaceClazz) + "\"");
+						source.append("@\"" + f.get(interfaceClazz) + "\"");
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -340,7 +340,7 @@ public class SimpleSource4ObjectiveC {
 					}
 				} else if (type == String.class) {
 					try {
-						source.append("\"" + f.get(s.getClass()) + "\"");
+						source.append("@\"" + f.get(s.getClass()) + "\"");
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -357,6 +357,14 @@ public class SimpleSource4ObjectiveC {
 		}
 		source.append("//+$1+\r\n//-$1-\r\n\r\n");
 
+		if (s instanceof SimpleSerializable && !(s instanceof SimpleRPCRunnable)) {
+			source.append("@protocol ");
+			source.append(simpleClazzName);
+			source.append("\r\n\r\n");		
+			source.append("//+$8+\r\n//-$8-\r\n\r\n");
+			source.append("@end\r\n\r\n");		
+			source.append("//+$9+\r\n//-$9-\r\n\r\n");
+		}
 		source.append("@interface ");
 		source.append(simpleClazzName);
 		source.append(" : ");
@@ -397,13 +405,22 @@ public class SimpleSource4ObjectiveC {
 				if (s.bytesCompactMode()) {
 					source.append("NSData *");
 				} else {
+					source.append("NSMutableArray<NSNumber> *");
+				}
+			} else if (type == String[].class) {
+				source.append("NSMutableArray<NSString> *");
+			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
+				if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
+					source.append("NSMutableArray<");
+					source.append(type.getComponentType().getSimpleName());
+					source.append("> *");
+				} else {
 					source.append("NSMutableArray *");
 				}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
-					|| type == float[].class || type == boolean[].class || type == String[].class
-					|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				source.append("NSMutableArray *");
+					|| type == float[].class || type == boolean[].class) {
+				source.append("NSMutableArray<NSNumber> *");
 			} else {
 				System.out.println("Unsupported type " + type);
 			}
@@ -449,13 +466,23 @@ public class SimpleSource4ObjectiveC {
 				if (s.bytesCompactMode()) {
 					source.append(", retain) NSData *");
 				} else {
+					source.append(", retain) NSMutableArray<NSNumber> *");
+				}
+			} else if (type == String[].class) {
+				source.append(", retain) NSMutableArray<NSString> *");
+			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
+				if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
+					source.append(", retain) NSMutableArray<");
+					source.append(type.getComponentType().getSimpleName());
+					source.append("> *");
+				} else {
 					source.append(", retain) NSMutableArray *");
 				}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class || type == String[].class
 					|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				source.append(", retain) NSMutableArray *");
+				source.append(", retain) NSMutableArray<NSNumber> *");
 			} else {
 				System.out.println("Unsupported type " + type);
 			}
@@ -722,6 +749,7 @@ public class SimpleSource4ObjectiveC {
 					System.out.println(new File(targetFolder, simpleName + ".m").getAbsolutePath());
 				}
 			} catch (Throwable e) {
+				System.out.println("Failed to generate source for " + j2sSimpleClazz);
 				e.printStackTrace();
 			}
 		}
