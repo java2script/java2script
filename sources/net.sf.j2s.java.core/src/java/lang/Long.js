@@ -12,6 +12,7 @@ Long.toString = Long.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Long, 
 function () {
 this.valueOf = function () {
@@ -32,6 +33,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
+// */
+Clazz.makeConstructor (Long, 
+function (s) {
+var v = 0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Long.parseLong (s, 10);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Long.serialVersionUID = Long.prototype.serialVersionUID = 4290774380558885855;
 Long.MIN_VALUE = Long.prototype.MIN_VALUE = -0x8000000000000000;
 Long.MAX_VALUE = Long.prototype.MAX_VALUE = 0x7fffffffffffffff;
@@ -39,6 +55,9 @@ Long.TYPE = Long.prototype.TYPE = Long;
 
 Clazz.defineMethod (Long, "parseLong", 
 function (s, radix) {
+if (arguments.length < 2 || radix == null) {
+radix = 10;
+}
 if (s == null) {
 throw  new NumberFormatException ("null");
 }if (radix < 2) {
@@ -52,14 +71,15 @@ throw  new NumberFormatException ("Not a Number : " + s);
 }
 return longVal;
 }, "String, Number");
-
+/*
 Clazz.defineMethod (Long, "parseLong", 
 function (s) {
 return Long.parseLong (s, 10);
 }, "String");
-
+// */
 Long.parseLong = Long.prototype.parseLong;
 
+/*
 Clazz.defineMethod (Long, "$valueOf", 
 function (s) {
 return new Long(Long.parseLong (s, 10));
@@ -76,7 +96,19 @@ return new Long(Long.parseLong (s, r));
 }, "String, Number");
 
 Long.$valueOf = Long.prototype.$valueOf;
-Clazz.defineMethod (Long, "equals", 
+// */
+
+Long.$valueOf = Long.prototype.$valueOf = function (s, r) {
+	if (arguments.length == 2) { // String, Number
+		return new Long(Long.parseLong (s, r));
+	} else if (typeof s == "string") { // String
+		return new Long(Long.parseLong (s, 10));
+	} else { // Number
+		return new Long(s);
+	}
+};
+
+Clazz.overrideMethod (Long, "equals", 
 function (s) {
 if(s == null || !Clazz.instanceOf(s, Long) ){
 	return false;
@@ -87,7 +119,7 @@ return s.valueOf()  == this.valueOf();
 Clazz.defineMethod (Long, "toHexString", 
 function (d) {
 if(d.valueOf)d=d.valueOf();
-var r = d._numberToString(16);
+var r = d.to$tring(16);
 return r;
 }, "Number");
 Long.toHexString = Long.prototype.toHexString;
@@ -95,7 +127,7 @@ Long.toHexString = Long.prototype.toHexString;
 Clazz.defineMethod (Long, "toOctalString", 
 function (d) {
 if(d.valueOf)d=d.valueOf();
-var r = d._numberToString(8);
+var r = d.to$tring(8);
 return r;
 }, "Number");
 Long.toOctalString = Long.prototype.toOctalString;
@@ -103,7 +135,7 @@ Long.toOctalString = Long.prototype.toOctalString;
 Clazz.defineMethod (Long, "toBinaryString", 
 function (d) {
 if(d.valueOf)d=d.valueOf();
-var r = d._numberToString(2);
+var r = d.to$tring(2);
 return r;
 }, "Number");
 Long.toBinaryString = Long.prototype.toBinaryString;

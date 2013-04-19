@@ -12,6 +12,7 @@ Double.toString = Double.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Double, 
 function () {
 this.valueOf = function () {
@@ -31,7 +32,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
-
+// */
+Clazz.makeConstructor (Double, 
+function (s) {
+var v = 0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Double.parseDouble (s);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Double.serialVersionUID = Double.prototype.serialVersionUID = -9172774392245257468;
 Double.MIN_VALUE = Double.prototype.MIN_VALUE = 4.9e-324;
 Double.MAX_VALUE = Double.prototype.MAX_VALUE = 1.7976931348623157e+308;
@@ -62,6 +77,7 @@ return doubleVal;
 }, "String");
 Double.parseDouble = Double.prototype.parseDouble;
 
+/*
 Clazz.defineMethod (Double, "$valueOf", 
 function (s) {
 return new Double(this.parseDouble(s));
@@ -73,8 +89,18 @@ return new Double(v);
 }, "Number");
 
 Double.$valueOf = Double.prototype.$valueOf;
+// */
 
-Clazz.defineMethod (Double, "equals", 
+Double.$valueOf = Double.prototype.$valueOf = function (s) {
+	if (typeof s == "string") { // String
+		return new Double(this.parseDouble(s));
+	} else {
+		return new Double(s);
+	}
+};
+
+Double.prototype.hashCode = JavaObject.prototype.hashCode;
+Clazz.overrideMethod (Double, "equals", 
 function (s) {
 if(s == null || ! Clazz.instanceOf(s, Double) ){
 	return false;

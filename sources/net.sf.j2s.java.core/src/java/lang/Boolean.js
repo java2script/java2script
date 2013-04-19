@@ -1,5 +1,8 @@
 Clazz.load (["java.lang.Comparable", "java.io.Serializable"], "java.lang.Boolean", null, function () {
-java.lang.Boolean = Boolean;
+java.lang.B00lean = Boolean;
+java.lang.Boolean = Boolean = function () {
+	Clazz.instantialize (this, arguments);
+};
 if (Clazz.supportsNativeObject) {
 	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
 		var p = Clazz.extendedObjectMethods[i];
@@ -11,7 +14,7 @@ Clazz.implementOf (Boolean, [java.io.Serializable, java.lang.Comparable]);
 Boolean.equals = Clazz.innerFunctions.equals;
 Boolean.getName = Clazz.innerFunctions.getName;
 Boolean.serialVersionUID = Boolean.prototype.serialVersionUID = -3665804199014368530;
-
+/*
 Clazz.makeConstructor (Boolean, 
 function (value) {
 this.valueOf = function () {
@@ -24,6 +27,20 @@ this.valueOf = function () {
 	return Boolean.toBoolean (s);
 };
 }, "~S");
+// */
+Clazz.makeConstructor (Boolean, 
+function (s) {
+var v = false;
+if (arguments.length > 0) {
+	v = s;
+	if (typeof s == "string") {
+		v = Boolean.toBoolean (s);
+	}
+}
+this.valueOf = function () {
+	return !(!v);
+};
+}, "Object");
 Boolean.parseBoolean = Clazz.defineMethod (Boolean, "parseBoolean", 
 function (s) {
 return Boolean.toBoolean (s);
@@ -32,6 +49,7 @@ Clazz.defineMethod (Boolean, "booleanValue",
 function () {
 return this.valueOf ();
 });
+/*
 Boolean.$valueOf = Clazz.defineMethod (Boolean, "$valueOf", 
 function (b) {
 return (b ? Boolean.TRUE : Boolean.FALSE);
@@ -40,7 +58,15 @@ Boolean.$valueOf = Clazz.defineMethod (Boolean, "$valueOf",
 function (s) {
 return Boolean.toBoolean (s) ? Boolean.TRUE : Boolean.FALSE;
 }, "~S");
-Boolean.toString = Clazz.defineMethod (Boolean, "toString", 
+// */
+Boolean.$valueOf = Boolean.prototype.$valueOf = function (s) {
+	if (typeof s == "string") { // String
+		return Boolean.toBoolean (s) ? Boolean.TRUE : Boolean.FALSE;
+	} else {
+		return (s ? Boolean.TRUE : Boolean.FALSE);
+	}
+};
+Boolean.toString = Clazz.overrideMethod (Boolean, "toString", 
 function (b) {
 return b ? "true" : "false";
 }, "~B");
