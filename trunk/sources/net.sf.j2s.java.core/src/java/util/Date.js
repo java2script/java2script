@@ -15,7 +15,7 @@ Clazz.defineMethod (java.util.Date, "after",
 function (when) {
 return this.getTime () > when.getTime ();
 }, "java.util.Date");
-Clazz.defineMethod (java.util.Date, "equals", 
+Clazz.overrideMethod (java.util.Date, "equals", 
 function (obj) {
 return Clazz.instanceOf (obj, java.util.Date) && this.getTime () == (obj).getTime ();
 }, "Object");
@@ -29,7 +29,7 @@ Clazz.defineMethod (java.util.Date, "compareTo",
 function (o) {
 return this.compareTo (o);
 }, "Object");
-Clazz.defineMethod (java.util.Date, "hashCode", 
+Clazz.overrideMethod (java.util.Date, "hashCode", 
 function () {
 var ht = this.getTime ();
 return parseInt (ht) ^ parseInt ((ht >> 32));

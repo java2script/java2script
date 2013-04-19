@@ -12,6 +12,7 @@ Short.toString = Short.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Short, 
 function () {
 this.valueOf = function () {
@@ -32,6 +33,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
+// */
+Clazz.makeConstructor (Short, 
+function (s) {
+var v = 0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Short.parseShort (s, 10);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Short.serialVersionUID = Short.prototype.serialVersionUID = 7515723908773894738;
 Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
 Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
@@ -39,6 +55,9 @@ Short.TYPE = Short.prototype.TYPE = Short;
 
 Clazz.defineMethod (Short, "parseShort", 
 function (s, radix) {
+if (arguments.length < 2 || radix == null) {
+radix = 10;
+}
 if (s == null) {
 throw  new NumberFormatException ("null");
 }if (radix < 2) {
@@ -52,14 +71,16 @@ throw  new NumberFormatException ("Not a Number : " + s);
 }
 return integer;
 }, "String, Number");
+/*
 Short.parseShort = Short.prototype.parseShort;
 Clazz.defineMethod (Short, "parseShort", 
 function (s) {
 return Short.parseShort (s, 10);
 }, "String");
-
+// */
 Short.parseShort = Short.prototype.parseShort;
 
+/*
 Clazz.defineMethod (Short, "$valueOf", 
 function (s) {
 return new Short(Short.parseShort (s, 10));
@@ -76,7 +97,19 @@ return new Short(Short.parseShort (s, r));
 }, "String, Number");
 
 Short.$valueOf = Short.prototype.$valueOf;
-Clazz.defineMethod (Short, "equals", 
+// */
+
+Short.$valueOf = Short.prototype.$valueOf = function (s, r) {
+	if (arguments.length == 2) { // String, Number
+		return new Short(Short.parseShort (s, r));
+	} else if (typeof s == "string") { // String
+		return new Short(Short.parseShort (s, 10));
+	} else { // Number
+		return new Short(s);
+	}
+};
+
+Clazz.overrideMethod (Short, "equals", 
 function (s) {
 if(s == null || !Clazz.instanceOf(s, Short) ){
 	return false;

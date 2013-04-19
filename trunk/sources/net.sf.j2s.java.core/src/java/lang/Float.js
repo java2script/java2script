@@ -12,6 +12,7 @@ Float.toString = Float.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Float, 
 function () {
 this.valueOf = function () {
@@ -36,6 +37,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
+// */
+Clazz.makeConstructor (Float, 
+function (s) {
+var v = 0.0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Float.parseFloat (s);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Float.serialVersionUID = Float.prototype.serialVersionUID = -2671257302660747028;
 Float.MIN_VALUE = Float.prototype.MIN_VALUE = 3.4028235e+38;
 Float.MAX_VALUE = Float.prototype.MAX_VALUE = 1.4e-45;
@@ -57,6 +73,7 @@ return floatVal;
 }, "String");
 Float.parseFloat = Float.prototype.parseFloat;
 
+/*
 Clazz.defineMethod (Float, "$valueOf", 
 function (s) {
 return new Float(Float.parseFloat (s, 10));
@@ -68,6 +85,16 @@ return new Float(s);
 }, "Number");
 
 Float.$valueOf = Float.prototype.$valueOf;
+// */
+
+Float.$valueOf = Float.prototype.$valueOf = function (s) {
+	if (typeof s == "string") { // String
+		return new Float(Float.parseFloat (s, 10));
+	} else {
+		return new Float(s);
+	}
+};
+
 Clazz.defineMethod (Float, "isNaN", 
 function (num) {
 return isNaN (num);
@@ -79,7 +106,8 @@ return !isFinite (num);
 }, "Number");
 Float.isInfinite = Float.prototype.isInfinite;
 
-Clazz.defineMethod (Float, "equals", 
+Float.prototype.hashCode = JavaObject.prototype.hashCode;
+Clazz.overrideMethod (Float, "equals", 
 function (s) {
 if(s == null || ! Clazz.instanceOf(s, Float) ){
 	return false;

@@ -12,6 +12,7 @@ Integer.toString = Integer.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Integer, 
 function () {
 this.valueOf = function () {
@@ -32,6 +33,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
+// */
+Clazz.makeConstructor (Integer, 
+function (s) {
+var v = 0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Integer.parseInt (s, 10);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Integer.serialVersionUID = Integer.prototype.serialVersionUID = 1360826667806852920;
 Integer.MIN_VALUE = Integer.prototype.MIN_VALUE = -0x80000000;
 Integer.MAX_VALUE = Integer.prototype.MAX_VALUE = 0x7fffffff;
@@ -39,6 +55,9 @@ Integer.TYPE = Integer.prototype.TYPE = Integer;
 
 Clazz.defineMethod (Integer, "parseInt", 
 function (s, radix) {
+if (arguments.length < 2 || radix == null) {
+radix = 10;
+}
 if (s == null) {
 throw new NumberFormatException ("null");
 }if (radix < 2) {
@@ -52,16 +71,18 @@ throw new NumberFormatException ("Not a Number : " + s);
 }
 return integer;
 }, "String, Number");
+/*
 Integer.parseInt = Integer.prototype.parseInt;
 Clazz.defineMethod (Integer, "parseInt", 
 function (s) {
 return Integer.parseInt (s, 10);
 }, "String");
-
+// */
 Integer.parseInt = Integer.prototype.parseInt;
 
+/*
 Clazz.defineMethod (Integer, "$valueOf", 
-function (s) {
+function (s, r) {
 return new Integer(Integer.parseInt (s, 10));
 }, "String");
 
@@ -76,7 +97,19 @@ return new Integer(Integer.parseInt (s, r));
 }, "String, Number");
 
 Integer.$valueOf = Integer.prototype.$valueOf;
-Clazz.defineMethod (Integer, "equals", 
+// */
+
+Integer.$valueOf = Integer.prototype.$valueOf = function (s, r) {
+	if (arguments.length == 2) { // String, Number
+		return new Integer(Integer.parseInt (s, r));
+	} else if (typeof s == "string") { // String
+		return new Integer(Integer.parseInt (s, 10));
+	} else { // Number
+		return new Integer(s);
+	}
+};
+
+Clazz.overrideMethod (Integer, "equals", 
 function (s) {
 if(s == null || ! Clazz.instanceOf(s, Integer) ){
 	return false;
@@ -85,15 +118,15 @@ return s.valueOf()  == this.valueOf();
 }, "Object");
 Integer.toHexString = Integer.prototype.toHexString = function (d) {
 	if(d.valueOf)d=d.valueOf();
-	return d._numberToString(16);
+	return d.to$tring(16);
 };
 Integer.toOctalString = Integer.prototype.toOctalString = function (d) {
 	if(d.valueOf)d=d.valueOf();
-	return d._numberToString(8);
+	return d.to$tring(8);
 };
 Integer.toBinaryString = Integer.prototype.toBinaryString = function (d) {
 	if(d.valueOf)d=d.valueOf();
-	return d._numberToString(2);
+	return d.to$tring(2);
 };
 Integer.decode = Clazz.defineMethod (Integer, "decode", 
 function (nm) {

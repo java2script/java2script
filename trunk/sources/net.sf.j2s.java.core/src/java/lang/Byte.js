@@ -12,6 +12,7 @@ Byte.toString = Byte.prototype.toString = function () {
 	}
 	return "" + this.valueOf ();
 };
+/*
 Clazz.makeConstructor (Byte, 
 function () {
 this.valueOf = function () {
@@ -32,6 +33,21 @@ this.valueOf = function () {
 	return value;
 };
 }, "String");
+// */
+Clazz.makeConstructor (Byte, 
+function (s) {
+var v = 0;
+if (arguments.length > 0) {
+	if (typeof s == "string") {
+		v = Byte.parseByte (s, 10);
+	} else {
+		v = s;
+	}
+}
+this.valueOf = function () {
+	return v;
+};
+}, "Object");
 Byte.serialVersionUID = Byte.prototype.serialVersionUID = -7183698231559129828;
 Byte.MIN_VALUE = Byte.prototype.MIN_VALUE = -128;
 Byte.MAX_VALUE = Byte.prototype.MAX_VALUE = 127;
@@ -40,6 +56,9 @@ Byte.TYPE = Byte.prototype.TYPE = Byte;
 
 Clazz.defineMethod (Byte, "parseByte", 
 function (s, radix) {
+if (arguments.length < 2 || radix == null) {
+radix = 10;
+}
 if (s == null) {
 throw  new NumberFormatException ("null");
 }if (radix < 2) {
@@ -53,14 +72,16 @@ throw  new NumberFormatException ("Not a Number : " + s);
 }
 return integer;
 }, "String, Number");
+/*
 Byte.parseByte = Byte.prototype.parseByte;
 Clazz.defineMethod (Byte, "parseByte", 
 function (s) {
 return Byte.parseByte (s, 10);
 }, "String");
-
+// */
 Byte.parseByte = Byte.prototype.parseByte;
 
+/*
 Clazz.defineMethod (Byte, "$valueOf", 
 function (s) {
 return new Byte(Byte.parseByte (s, 10));
@@ -77,7 +98,19 @@ return new Byte(Byte.parseByte (s, r));
 }, "String, Number");
 
 Byte.$valueOf = Byte.prototype.$valueOf;
-Clazz.defineMethod (Byte, "equals", 
+// */
+
+Byte.$valueOf = Byte.prototype.$valueOf = function (s, r) {
+	if (arguments.length == 2) { // String, Number
+		return new Byte(Byte.parseByte (s, r));
+	} else if (typeof s == "string") { // String
+		return new Byte(Byte.parseByte (s, 10));
+	} else { // Number
+		return new Byte(s);
+	}
+};
+
+Clazz.overrideMethod (Byte, "equals", 
 function (s) {
 if(s == null || !Clazz.instanceOf(s, Byte) ){
 	return false;

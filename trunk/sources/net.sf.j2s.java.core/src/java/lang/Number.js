@@ -36,21 +36,26 @@ return Math.round (this);
 
 Clazz.defineMethod (Number, "floatValue", 
 function () {
-return this.valueOf();
+return this.valueOf ();
 });
 
 Clazz.defineMethod (Number, "doubleValue", 
 function () {
-return this.valueOf();
+return this.valueOf ();
 });
 
+Number.prototype.to$tring = Number.prototype.toString;
 //sgurin : added this because if not, a native number in native code will print as [Object Number] instead printing the number value... 
-Clazz.defineMethod (Number, "toString", 
+Clazz.overrideMethod (Number, "toString", 
 function () {
-return this.valueOf()+"";
+	if (arguments.length > 0) {
+		return this.to$tring (arguments[0]);
+	} else {
+		return this.valueOf () + "";
+	}
 });
 
-Clazz.defineMethod (Number, "hashCode", 
+Clazz.overrideMethod (Number, "hashCode", 
 function () {
 return this.valueOf ();
 });
