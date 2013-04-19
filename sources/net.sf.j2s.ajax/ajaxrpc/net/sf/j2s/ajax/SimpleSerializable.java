@@ -16,13 +16,20 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+//import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
 
 import net.sf.j2s.annotation.J2SIgnore;
 import net.sf.j2s.annotation.J2SKeep;
@@ -46,6 +53,21 @@ public class SimpleSerializable implements Cloneable {
 	@J2SIgnore
 	private static Map<String, Constructor<?>> quickConstructors = new HashMap<String, Constructor<?>>();
 
+	@J2SIgnore
+	private static class DeserializeObject {
+		Object object;
+		int index;
+		boolean error;
+		
+		public DeserializeObject(Object object, int index, boolean error) {
+			super();
+			this.object = object;
+			this.index = index;
+			this.error = error;
+		}
+		
+	};
+	
     @J2SIgnore
 	Map<String, Field> getSerializableFields(String clazzName) {
 		Map<String, Field> fields = quickFields.get(clazzName);
@@ -298,10 +320,16 @@ return strBuf;
     	Type t = null;
     	do {
     		t = allInterfaces.remove(0);
+    		if (!(t instanceof Class<?>)) {
+    			continue;
+    		}
     		Type[] interfaces = ((Class<?>) t).getGenericInterfaces();
     		if (interfaces != null && interfaces.length > 0) {
     			for (int i = 0; i < interfaces.length; i++) {
 					Type f = interfaces[i];
+					if (f instanceof ParameterizedType) {
+						f = ((ParameterizedType) f).getRawType();
+					}
 					if (f == superInterface) {
 						return true;
 					}
@@ -571,6 +599,74 @@ return strBuf;
 						// others unknown or unsupported types!
 						// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
 					}
+				} else if (isSubInterfaceOf(type, Collection.class)) {
+					Collection<?> collection = (Collection<?>)field.get(this);
+					if (collection == null && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('Z');
+					if (isSubInterfaceOf(type, List.class)) {
+						buffer.append('Z');
+					} else if (isSubInterfaceOf(type, Set.class)) {
+						buffer.append('Y');
+					} else if (isSubInterfaceOf(type, Queue.class)) {
+						buffer.append('Q');
+					} else {
+						buffer.append('W');
+					}
+					if (collection == null) {
+						buffer.append('A'); // (char) (baseChar - 1));
+					} else {
+						Object[] os = collection.toArray();
+						serializeLength(buffer, os.length);
+						for (int j = 0; j < os.length; j++) {
+							Object o = os[j];
+							if (o == null) {
+								buffer.append("OA");
+							} else {
+								serializeArrayItem(buffer, o.getClass(), o, ssObjs);
+							}
+						}
+					}
+				} else if (isSubInterfaceOf(type, Map.class)) {
+					Map<?, ?> map = (Map<?, ?>)field.get(this);
+					if (map == null && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append("YM");
+					if (map == null) {
+						buffer.append('A'); // (char) (baseChar - 1));
+					} else {
+						serializeLength(buffer, map.size() * 2);
+						for (Iterator<?> iter = map.keySet().iterator(); iter
+								.hasNext();) {
+							Object key = iter.next();
+							if (key == null) {
+								buffer.append("OA");
+							} else {
+								serializeArrayItem(buffer, key.getClass(), key, ssObjs);
+							}
+							Object value = map.get(key);
+							if (value == null) {
+								buffer.append("OA");
+							} else {
+								serializeArrayItem(buffer, value.getClass(), value, ssObjs);
+							}
+						}
+					}
+				} else if (type.isEnum()) {
+					Enum<?> e = (Enum<?>)field.get(this);
+					if (e == null && ignoring) continue;
+					buffer.append((char)(baseChar + name.length()));
+					buffer.append(name);
+					buffer.append('E');
+					if (e == null) {
+						buffer.append('A'); // (char) (baseChar - 1));
+					} else {
+						String value = String.valueOf(e.ordinal());
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
 				} else if (type == float.class) {
 					float f = field.getFloat(this);
 					if (f == 0.0 && ignoring) continue;
@@ -597,7 +693,7 @@ return strBuf;
 					buffer.append('S');
 					String value = String.valueOf(s);
 					buffer.append((char) (baseChar + value.length()));
-					buffer.append(s);
+					buffer.append(value);
 				} else if (type == byte.class) {
 					byte b = field.getByte(this);
 					if (b == 0 && ignoring) continue;
@@ -630,6 +726,265 @@ return strBuf;
 		return buffer.toString();
 	}
 
+    @J2SIgnore
+    private void serializeArrayItem(StringBuffer buffer, Class<?> type, Object target, List<SimpleSerializable> ssObjs) throws Exception {
+    	char baseChar = 'B';
+		if (type == String.class) {
+			String s = (String) target;
+			serializeString(buffer, s);
+		} else if (type == Integer.class) {
+			int n = ((Integer) target).intValue();
+			buffer.append('I');
+			String value = String.valueOf(n);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (isSubclassOf(type, SimpleSerializable.class)) {
+			SimpleSerializable ssObj = (SimpleSerializable) target;
+			serializeObject(buffer, ssObj, ssObjs);
+		} else if (type == Long.class) {
+			long l = ((Long) target).longValue();
+			buffer.append('L');
+			String value = String.valueOf(l);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (type == Boolean.class) {
+			boolean b = ((Boolean) target).booleanValue();
+			buffer.append('b');
+			buffer.append('C'); // ((char) (baseChar + 1));
+			buffer.append(b ? '1' : '0');
+		} else if (type.isArray()) { // Array ...
+			if (type == byte[].class) {
+				byte [] bs = (byte []) target;
+				buffer.append(!bytesCompactMode() ? "AB" : "A8");
+				if (bs == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, bs.length);
+					if (!bytesCompactMode()) {
+						for (int j = 0; j < bs.length; j++) {
+							String value = String.valueOf(bs[j]);
+							buffer.append((char) (baseChar + value.length()));
+							buffer.append(value);
+						}
+					} else {
+						buffer.append(new String(bs, "iso-8859-1"));
+					}
+				}
+			} else if (type == String[].class) {
+				String[] ss = (String []) target;
+				buffer.append("AX"); // special
+				if (ss == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						String s = ss[j];
+						serializeString(buffer, s);
+					}
+				}
+			} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+				SimpleSerializable[] ss = (SimpleSerializable []) target;
+				buffer.append("AO"); // special
+				if (ss == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						SimpleSerializable s = ss[j];
+						serializeObject(buffer, s, ssObjs);
+					}
+				}
+			} else if (type == int[].class) {
+				int [] ns = (int []) target;
+				buffer.append("AI");
+				if (ns == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ns.length);
+					for (int j = 0; j < ns.length; j++) {
+						String value = String.valueOf(ns[j]);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else if (type == long[].class) {
+				long [] ls = (long []) target;
+				buffer.append("AL");
+				if (ls == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ls.length);
+					for (int j = 0; j < ls.length; j++) {
+						String value = String.valueOf(ls[j]);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else if (type == boolean[].class) {
+				boolean [] bs = (boolean []) target;
+				buffer.append("Ab");
+				if (bs == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, bs.length);
+					for (int j = 0; j < bs.length; j++) {
+						buffer.append('C'); // (char) (baseChar + 1));
+						buffer.append(bs[j] ? '1' : '0');
+					}
+				}
+			} else if (type == float[].class) {
+				float[] fs = (float[]) target;
+				buffer.append("AF");
+				if (fs == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, fs.length);
+					for (int j = 0; j < fs.length; j++) {
+						String value = String.valueOf(fs[j]);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else if (type == double[].class) {
+				double [] ds = (double []) target;
+				buffer.append("AD");
+				if (ds == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ds.length);
+					for (int j = 0; j < ds.length; j++) {
+						String value = String.valueOf(ds[j]);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else if (type == short[].class) {
+				short [] ss = (short []) target;
+				buffer.append("AS");
+				if (ss == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						String value = String.valueOf(ss[j]);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else if (type == char[].class) {
+				char [] cs = (char []) target;
+				buffer.append("AC");
+				if (cs == null) {
+					buffer.append('A'); // (char) (baseChar - 1));
+				} else {
+					serializeLength(buffer, cs.length);
+					for (int j = 0; j < cs.length; j++) {
+						int c = cs[j];
+						String value = Integer.toString(c, 10);
+						buffer.append((char) (baseChar + value.length()));
+						buffer.append(value);
+					}
+				}
+			} else {
+				buffer.append("OA");
+				// others unknown or unsupported types!
+				// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
+			}
+		} else if (isSubInterfaceOf(type, Collection.class)) {
+			Collection<?> collection = (Collection<?>) target;
+			buffer.append('Z');
+			if (isSubInterfaceOf(type, List.class)) {
+				buffer.append('Z');
+			} else if (isSubInterfaceOf(type, Set.class)) {
+				buffer.append('Y');
+			} else if (isSubInterfaceOf(type, Queue.class)) {
+				buffer.append('Q');
+			} else {
+				buffer.append('W');
+			}
+			if (collection == null) {
+				buffer.append('A'); // (char) (baseChar - 1));
+			} else {
+				Object[] os = collection.toArray();
+				serializeLength(buffer, os.length);
+				for (int j = 0; j < os.length; j++) {
+					Object o = os[j];
+					if (o == null) {
+						buffer.append("OA");
+					} else {
+						serializeArrayItem(buffer, o.getClass(), o, ssObjs);
+					}
+				}
+			}
+		} else if (isSubInterfaceOf(type, Map.class)) {
+			Map<?, ?> map = (Map<?, ?>) target;
+			buffer.append("YM");
+			if (map == null) {
+				buffer.append('A'); // (char) (baseChar - 1));
+			} else {
+				serializeLength(buffer, map.size() * 2);
+				for (Iterator<?> iter = map.keySet().iterator(); iter
+						.hasNext();) {
+					Object key = iter.next();
+					if (key == null) {
+						buffer.append("OA");
+					} else {
+						serializeArrayItem(buffer, key.getClass(), key, ssObjs);
+					}
+					Object value = map.get(key);
+					if (value == null) {
+						buffer.append("OA");
+					} else {
+						serializeArrayItem(buffer, value.getClass(), value, ssObjs);
+					}
+				}
+			}
+		} else if (type.isEnum()) {
+			Enum<?> e = (Enum<?>) target;
+			buffer.append('E');
+			if (e == null) {
+				buffer.append('A'); // (char) (baseChar - 1));
+			} else {
+				String value = String.valueOf(e.ordinal());
+				buffer.append((char) (baseChar + value.length()));
+				buffer.append(value);
+			}
+		} else if (type == Float.class) {
+			float f = ((Float) target).floatValue();
+			buffer.append('F');
+			String value = String.valueOf(f);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (type == Double.class) {
+			double d = ((Double) target).doubleValue();
+			buffer.append('D');
+			String value = String.valueOf(d);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (type == Short.class) {
+			short s = ((Short) target).shortValue();
+			buffer.append('S');
+			String value = String.valueOf(s);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (type == Byte.class) {
+			byte b = ((Byte) target).byteValue();
+			buffer.append('B');
+			String value = String.valueOf(b);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else if (type == Character.class) {
+			int c = 0 + ((Character) target).charValue();
+			buffer.append('C');
+			String value = Integer.toString(c, 10);
+			buffer.append((char) (baseChar + value.length()));
+			buffer.append(value);
+		} else {
+			buffer.append("OA");
+			// others unknown or unsupported types!
+		}
+    }
+    
     @J2SIgnore
 	private void serializeLength(StringBuffer buffer, int length) {
 		char baseChar = 'B';
@@ -1132,16 +1487,16 @@ if (ss != null) {
 							continue;
 						}
 						appendFieldName(buffer, fieldName, withFormats, prefix);
-						if (this.bytesCompactMode()) {
-							buffer.append('\"');
-							buffer.append(Base64.byteArrayToBase64(xs));
-							buffer.append('\"');
-							if (withFormats) {
-								buffer.append(".getBytes ()");
-							} else {
-								buffer.append(".getBytes()");
-							}
-						} else {
+//						if (this.bytesCompactMode()) {
+//							buffer.append('\"');
+//							buffer.append(Base64.byteArrayToBase64(xs));
+//							buffer.append('\"');
+//							if (withFormats) {
+//								buffer.append(".getBytes ()");
+//							} else {
+//								buffer.append(".getBytes()");
+//							}
+//						} else {
 							buffer.append('[');
 							if (withFormats) {
 								buffer.append(' ');
@@ -1156,7 +1511,7 @@ if (ss != null) {
 								}
 							}
 							buffer.append(']');
-						}
+//						}
 					} else if (clazz == char.class) {
 						char[] xs = (char[]) field.get(this);
 						if (xs == null && ignoring) {
@@ -1194,6 +1549,17 @@ if (ss != null) {
 						buffer.append(']');
 					} else {
 						continue;
+					}
+				} else if (clazz.isEnum()) {
+					Enum<?> e = (Enum<?>) field.get(this);
+					if (e == null && ignoring) {
+						continue;
+					}
+					appendFieldName(buffer, fieldName, withFormats, prefix);
+					if (e != null) {
+						buffer.append(e.ordinal());
+					} else {
+						buffer.append("null");
 					}
 				} else if (clazz == float.class) {
 					float f = field.getFloat(this);
@@ -1281,7 +1647,9 @@ if (ss != null) {
 		if (withFormats) {
 			buffer.append(prefix);
 		}
+		buffer.append('\"');
 		buffer.append(fieldName);
+		buffer.append('\"');
 		if (withFormats) {
 			buffer.append(' ');
 		}
@@ -1604,7 +1972,7 @@ return true;
 				fieldName = fieldName.substring(1);
 			}
 			char c2 = str.charAt(index++);
-			if (c2 == 'A') {
+			if (c2 == 'A' || c2 == 'Z' || c2 == 'Y') {
 				Field field = (Field) fieldMap.get(fieldName);
 				c2 = str.charAt(index++);
 				char c3 = str.charAt(index++);
@@ -1640,6 +2008,41 @@ return true;
 							}
 							byte[] bs = byteStr.getBytes("iso-8859-1");
 							field.set(this, bs);
+							continue;
+						}
+						if (c2 == 'W') {
+							field.set(this, null);
+							continue;
+						}
+						if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
+							Collection<Object> objCollection = null;
+							if (c2 == 'Z') {
+								objCollection = new ArrayList<Object>(l2);
+							} else if (c2 == 'Y') {
+								objCollection = new HashSet<Object>(l2);
+							} else {
+								objCollection = new LinkedList<Object>();
+							}
+							for (int i = 0; i < l2; i++) {
+								DeserializeObject o = deserializeArrayItem(str, index, end, ssObjs);
+								if (o == null || o.error) return true;
+								objCollection.add(o.object);
+								index = o.index;
+							}
+							field.set(this, objCollection);
+							continue;
+						} else if (c2 == 'M') {
+							Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
+							for (int i = 0; i < l2 / 2; i++) {
+								DeserializeObject key = deserializeArrayItem(str, index, end, ssObjs);
+								if (key == null || key.error) return true;
+								index = key.index;
+								DeserializeObject value = deserializeArrayItem(str, index, end, ssObjs);
+								if (value == null || value.error) return true;
+								index = value.index;
+								objMap.put(key.object, value.object);
+							}
+							field.set(this, objMap);
 							continue;
 						}
 						String[] ss = new String[l2];
@@ -1864,6 +2267,25 @@ return true;
 						s = new String(s.getBytes("iso-8859-1"), "utf-8");
 						field.set(this, s);
 						break;
+					case 'E':
+						if (s != null && s.length() > 0) {
+							Object eo = null;
+							try {
+								int v = Integer.parseInt(s);
+								Enum<?>[] enumConstants = (Enum<?> []) field.getType().getEnumConstants();
+								for (int i = 0; i < enumConstants.length; i++) {
+									if (enumConstants[i].ordinal() == v) {
+										eo = enumConstants[i];
+										break;
+									}
+								}
+							} catch (Exception e) {
+							}
+							field.set(this, eo);
+						} else {
+							field.set(this, null);
+						}
+						break;
 					case 'F':
 						field.setFloat(this, Float.parseFloat(s));
 						break;
@@ -1889,6 +2311,309 @@ return true;
 		return true;
 	}
 
+    @J2SIgnore
+    private DeserializeObject deserializeArrayItem(String str, int index, int end, List<SimpleSerializable> ssObjs) {
+    	char baseChar = 'B';
+		char c2 = str.charAt(index++);
+		if (c2 == 'A' || c2 == 'Z' || c2 == 'Y') {
+			c2 = str.charAt(index++);
+			char c3 = str.charAt(index++);
+			int l2 = c3 - baseChar;
+			try {
+				if (l2 < 0 && l2 != -2) {
+					return new DeserializeObject(null, index, false);
+				} else {
+					if (l2 == -2) {
+						char c4 = str.charAt(index++);
+						int l3 = c4 - baseChar;
+						if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+						l2 = Integer.parseInt(str.substring(index, index + l3));
+						index += l3;
+						if (l2 < 0) return new DeserializeObject(null, index, true); // error
+						if (l2 > 0x1000000) { // 16 * 1024 * 1024
+							/*
+							 * Some malicious string may try to allocate huge size of array!
+							 * Limit the size of array here! 
+							 */
+							throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+						}
+					}
+					if (c2 == '8') { // byte[]
+						if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+						String byteStr = str.substring(index, index + l2);
+						index += l2;
+						byte[] bs = byteStr.getBytes("iso-8859-1");
+						return new DeserializeObject(bs, index, false);
+					}
+					if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
+						Collection<Object> objCollection = null;
+						if (c2 == 'Z') {
+							objCollection = new ArrayList<Object>(l2);
+						} else if (c2 == 'Y') {
+							objCollection = new HashSet<Object>(l2);
+						} else {
+							objCollection = new LinkedList<Object>();
+						}
+						for (int i = 0; i < l2; i++) {
+							DeserializeObject o = deserializeArrayItem(str, index, end, ssObjs);
+							if (o == null || o.error) return new DeserializeObject(null, index, true);;
+							objCollection.add(o.object);
+							index = o.index;
+						}
+						return new DeserializeObject(objCollection, index, false);
+					} else if (c2 == 'M') {
+						Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
+						for (int i = 0; i < l2 / 2; i++) {
+							DeserializeObject key = deserializeArrayItem(str, index, end, ssObjs);
+							if (key == null || key.error) return new DeserializeObject(null, index, true);;
+							index = key.index;
+							DeserializeObject value = deserializeArrayItem(str, index, end, ssObjs);
+							if (value == null || value.error) return new DeserializeObject(null, index, true);;
+							index = value.index;
+							objMap.put(key.object, value.object);
+						}
+						return new DeserializeObject(objMap, index, false);
+					}
+					String[] ss = new String[l2];
+					for (int i = 0; i < l2; i++) {
+						char c4 = str.charAt(index++);
+						if (c2 != 'X' && c2 != 'O') {
+							int l3 = c4 - baseChar;
+							if (l3 > 0) {
+								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								ss[i] = str.substring(index, index + l3);
+								index += l3;
+							} else if (l3 == 0) {
+								ss[i] = "";
+							}
+						} else {
+							char c5 = str.charAt(index++);
+							int l3 = c5 - baseChar;
+							if (l3 > 0) {
+								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								ss[i] = str.substring(index, index + l3);
+								index += l3;
+							} else if (l3 == 0) {
+								ss[i] = "";
+							} else if (l3 == -2) {
+								char c6 = str.charAt(index++);
+								int l4 = c6 - baseChar;
+								if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+								int l5 = Integer.parseInt(str.substring(index, index + l4));
+								index += l4;
+								if (l5 < 0 || index + l5 > end) return new DeserializeObject(null, index, true); // error
+								ss[i] = str.substring(index, index + l5);
+								index += l5;
+							} else {
+								continue;
+							}
+							if (c4 == 'u') {
+								ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
+							} else if (c4 == 'U') {
+								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
+							} else {
+								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
+							}
+						}
+					}
+					switch (c2) {
+					case 'I': {
+						int[] ns = new int[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ns[i] = Integer.parseInt(ss[i]);
+							}
+						}
+						return new DeserializeObject(ns, index, false);
+					}
+					case 'X':
+						return new DeserializeObject(ss, index, false);
+					case 'O': {
+						SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(SimpleSerializable.class, l2);
+						for (int i = 0; i < l2; i++) {
+							String s = ss[i];
+							if (s != null && s.length() > 0) {
+								if (s.startsWith("WLL")) {
+									SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
+									ssObjs.add(ssObj);
+									ssObj.deserialize(s, 0, ssObjs);
+									sss[i] = ssObj;
+								} else { // 'o'
+									int idx = Integer.parseInt(s);
+									if (idx < ssObjs.size()) {
+										sss[i] = ssObjs.get(idx);
+									}
+								}
+							}
+						}
+						return new DeserializeObject(sss, index, false);
+					}
+					case 'L': {
+						long[] ls = new long[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ls[i] = Long.parseLong(ss[i]);
+							}
+						}
+						return new DeserializeObject(ls, index, false);
+					}
+					case 'b': {
+						boolean[] bs = new boolean[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null && ss[i].length() > 0) {
+								char c = ss[i].charAt(0);
+								bs[i] = (c == '1' || c == 't');
+							}
+						}
+						return new DeserializeObject(bs, index, false);
+					}
+					case 'F': {
+						float[] fs = new float[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								fs[i] = Float.parseFloat(ss[i]);
+							}
+						}
+						return new DeserializeObject(fs, index, false);
+					}
+					case 'D': {
+						double[] ds = new double[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ds[i] = Double.parseDouble(ss[i]);
+							}
+						}
+						return new DeserializeObject(ds, index, false);
+					}
+					case 'S': {
+						short[] sts = new short[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								sts[i] = Short.parseShort(ss[i]);
+							}
+						}
+						return new DeserializeObject(sts, index, false);
+					}
+					case 'B': {
+						byte[] bs = new byte[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								bs[i] = Byte.parseByte(ss[i]);
+							}
+						}
+						return new DeserializeObject(bs, index, false);
+					}
+					case 'C': {
+						char[] cs = new char[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								cs[i] = (char) Integer.parseInt(ss[i]);
+							}
+						}
+						return new DeserializeObject(cs, index, false);
+					}
+					default :
+						return new DeserializeObject(null, index, false);
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Parsing: " + str);
+				e.printStackTrace();
+			}
+		} else {
+			char c3 = str.charAt(index++);
+			int l2 = c3 - baseChar;
+			String s = null;
+			if (l2 > 0) {
+				if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+				s = str.substring(index, index + l2);
+				index += l2;
+			} else if (l2 == 0) {
+				s = "";
+			} else if (l2 == -2) {
+				char c4 = str.charAt(index++);
+				int l3 = c4 - baseChar;
+				if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+				int l4 = Integer.parseInt(str.substring(index, index + l3));
+				index += l3;
+				if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+				s = str.substring(index, index + l4);
+				index += l4;
+			}
+			try {
+				switch (c2) {
+				case 'I':
+					return new DeserializeObject(Integer.valueOf(s), index, false);
+				case 's':
+					return new DeserializeObject(s, index, false);
+				case 'L':
+					return new DeserializeObject(Long.valueOf(s), index, false);
+				case 'b': {
+					char c = s.charAt(0);
+					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index, false);
+				}
+				case 'O': 
+					if (s != null) {
+						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
+						ssObjs.add(ss);
+						ss.deserialize(s, 0, ssObjs);
+						return new DeserializeObject(ss, index, false);
+					} else {
+						return new DeserializeObject(null, index, false);
+					}
+				case 'o': {
+					int idx = Integer.parseInt(s);
+					SimpleSerializable ss = null;
+					if (idx < ssObjs.size()) {
+						ss = ssObjs.get(idx);
+					}
+					return new DeserializeObject(ss, index, false);
+				}
+				case 'u':
+					s = new String(Base64.base64ToByteArray(s), "utf-8");
+					return new DeserializeObject(s, index, false);
+				case 'U':
+					s = new String(s.getBytes("iso-8859-1"), "utf-8");
+					return new DeserializeObject(s, index, false);
+				case 'E':
+					if (s != null && s.length() > 0) {
+						Object eo = null;
+//						try {
+//							int v = Integer.parseInt(s);
+//							Enum<?>[] enumConstants = (Enum<?> []) field.getType().getEnumConstants();
+//							for (int i = 0; i < enumConstants.length; i++) {
+//								if (enumConstants[i].ordinal() == v) {
+//									eo = enumConstants[i];
+//									break;
+//								}
+//							}
+//						} catch (Exception e) {
+//						}
+						return new DeserializeObject(eo, index, false);
+					} else {
+						return new DeserializeObject(null, index, false);
+					}
+				case 'F':
+					return new DeserializeObject(Float.valueOf(s), index, false);
+				case 'D':
+					return new DeserializeObject(Double.valueOf(s), index, false);
+				case 'S':
+					return new DeserializeObject(Short.valueOf(s), index, false);
+				case 'B':
+					return new DeserializeObject(Byte.valueOf(s), index, false);
+				case 'C':
+					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index, false);
+				default:
+					return new DeserializeObject(null, index, false);
+				}
+			} catch (Exception e) {
+				System.out.println("Parsing: " + s + "\r\n" + str);
+				e.printStackTrace();
+			}
+		}
+		return new DeserializeObject(null, index, false);
+    }
+    
     @J2SIgnore
     public static SimpleSerializable parseInstance(Map<String, Object> properties) {
 		Class<?> runnableClass = null;
@@ -2063,6 +2788,22 @@ return true;
 						}
 						field.set(this, xs);
 					}
+				} else if (clazz.isEnum()) {
+					Object eo = null;
+					if (o != null && o instanceof String && ((String) o).length() > 0) {
+						try {
+							int v = Integer.parseInt((String) o);
+							Enum<?>[] enumConstants = (Enum<?> []) clazz.getEnumConstants();
+							for (int i = 0; i < enumConstants.length; i++) {
+								if (enumConstants[i].ordinal() == v) {
+									eo = enumConstants[i];
+									break;
+								}
+							}
+						} catch (Exception e) {
+						}
+					}
+					field.set(this, eo);
 				} else if (clazz == float.class) {
 					field.setFloat(this, Float.parseFloat((String) o));
 				} else if (clazz == double.class) {

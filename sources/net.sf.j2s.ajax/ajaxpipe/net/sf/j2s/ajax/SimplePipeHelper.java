@@ -172,16 +172,16 @@ public class SimplePipeHelper {
 
 	// Use this method to avoid HTTP repeat attacks
 	@J2SIgnore
-	public static boolean isPipeHashOK(String key, long hash) {
+	public static SimplePipeRunnable checkPipeWithHash(String key, long hash) {
 		SimplePipeRunnable p = getPipe(key);
 		if (p == null) {
-			return false;
+			return null;
 		}
 		if (p.lastHash >= hash) {
-			return false;
+			return null;
 		}
 		p.lastHash = hash;
-		return true;
+		return p;
 	}
 	
 //	@J2SIgnore
