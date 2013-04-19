@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -447,12 +448,29 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
 					if ("char".equals(name)) {
 						buffer.append("(");
-						expression.accept(this);
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (").charCodeAt (0)");
 						return false;
 					} else if ("float".equals(name) || "double".equals(name)) {
-						buffer.append("Math.round (");
-						expression.accept(this);
+						//buffer.append("Math.round (");
+						buffer.append("Clazz.");
+						buffer.append(name);
+						buffer.append("To");
+						String targetType = pType.getPrimitiveTypeCode().toString();
+						buffer.append(targetType.substring(0, 1).toUpperCase());
+						buffer.append(targetType.substring(1));
+						buffer.append (" (");
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (")");
 						return false;
 					}
@@ -465,10 +483,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //						return false;
 					} else if ("float".equals(name) || "double".equals(name)) {
 						// TODO:
-						buffer.append("String.fromCharCode (");
-						buffer.append("Math.round (");
-						expression.accept(this);
-						buffer.append (")");
+						buffer.append("Clazz.");
+						buffer.append(name);
+						buffer.append("ToChar (");
+//						buffer.append("String.fromCharCode (");
+//						buffer.append("Math.round (");
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
+//						buffer.append (")");
 						buffer.append (")");
 						return false;
 					} else if ("int".equals(name) || "byte".equals(name)
@@ -499,7 +525,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							}
 						}
 						buffer.append("String.fromCharCode (");
-						expression.accept(this);
+						if (expression instanceof ParenthesizedExpression) {
+							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+							pe.getExpression().accept(this);
+						} else {
+							expression.accept(this);
+						}
 						buffer.append (")");
 						return false;
 					}
@@ -615,7 +646,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			currentBlockForVisit = blockLevel;
 			visitedVars = variableVisitor.visitedVars = new ArrayList();
 			variableVisitor.normalVars = new ArrayList();
+			methodDeclareStack.push(binding.getKey());
 			anonDeclare.accept(this);
+			methodDeclareStack.pop();
 			buffer.append(", ");
 
 			buffer.append("Clazz.innerTypeInstance (");
@@ -774,14 +807,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
 			buffer.append("\")");
 		} else {
-			boxingNode(element);
 			Expression exp = (Expression) element;
 			ITypeBinding typeBinding = exp.resolveTypeBinding();
 			String typeName = null;
 			if (typeBinding != null) {
 				typeName = typeBinding.getName();
 			}
-			if ("char".equals(typeName) && "int".equals(parameterTypeName)) {
+			int idx1 = buffer.length();
+			if ("char".equals(typeName) && !"char".equals(parameterTypeName)) {
 				boolean ignored = false;
 				/*
 				for (int j = 0; j < ignores.length / 3; j++) {
@@ -805,9 +838,38 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ignored = (position == 0 
 						&& (/*"append".equals(methodName) || */"indexOf".equals(methodName) || "lastIndexOf".equals(methodName))
 						&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
-				if (!ignored) {
-					buffer.append(".charCodeAt (0)");
+				
+				if (!ignored && exp instanceof CharacterLiteral) {
+					CharacterLiteral cl = (CharacterLiteral) exp;
+					buffer.append(0 + cl.charValue());
+					ignored = true;
+				} else {
+					boxingNode(element);
 				}
+				if (!ignored) {
+					boolean appendingCode = true;
+					int length = buffer.length();
+					if (exp instanceof MethodInvocation) {
+						MethodInvocation m = (MethodInvocation) exp;
+						if ("charAt".equals(m.getName().toString())) {
+							int idx2 = buffer.indexOf(".charAt ", idx1);
+							if (idx2 != -1) {
+								StringBuffer newMethodBuffer = new StringBuffer();
+								newMethodBuffer.append(buffer.substring(idx1, idx2));
+								newMethodBuffer.append(".charCodeAt ");
+								newMethodBuffer.append(buffer.substring(idx2 + 8, length));
+								buffer.delete(idx1, length);
+								buffer.append(newMethodBuffer.toString());
+								appendingCode = false;
+							}
+						}
+					}
+					if (appendingCode) {
+						buffer.append(".charCodeAt (0)");
+					}
+				}
+			} else {
+				boxingNode(element);
 			}
 		}
 	}
@@ -1272,6 +1334,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							PrimitiveType pType = (PrimitiveType) node.getType();
 							if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
 								buffer.append("false");
+							} else if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+								buffer.append("'\\0'");
 							} else {
 								buffer.append("0");
 							}
@@ -1319,7 +1383,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			boxingNode(node);
 			return ;
 		}
-		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
+		Expression exp = (Expression) node;
+		ITypeBinding binding = exp.resolveTypeBinding();
 		if (binding.isPrimitive() && "char".equals(binding.getName())) {
 			if (node instanceof CharacterLiteral) {
 				CharacterLiteral cl = (CharacterLiteral) node;
@@ -1328,9 +1393,31 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				boxingNode(node);
 				buffer.append(".charCodeAt (0)");
 			} else {
+				int idx1 = buffer.length();
 				buffer.append("(");
 				boxingNode(node);
-				buffer.append(").charCodeAt (0)");
+				buffer.append(")");
+				
+				boolean appendingCode = true;
+				int length = buffer.length();
+				if (exp instanceof MethodInvocation) {
+					MethodInvocation m = (MethodInvocation) exp;
+					if ("charAt".equals(m.getName().toString())) {
+						int idx2 = buffer.indexOf(".charAt ", idx1);
+						if (idx2 != -1) {
+							StringBuffer newMethodBuffer = new StringBuffer();
+							newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
+							newMethodBuffer.append(".charCodeAt ");
+							newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
+							buffer.delete(idx1, length);
+							buffer.append(newMethodBuffer.toString());
+							appendingCode = false;
+						}
+					}
+				}
+				if (appendingCode) {
+					buffer.append(".charCodeAt (0)");
+				}
 			}
 		} else {
 			boxingNode(node);
@@ -1353,8 +1440,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		Expression right = node.getRightOperand();
 		ITypeBinding typeBinding = left.resolveTypeBinding();
 		
-		if ((left instanceof SimpleName || left instanceof CharacterLiteral) && (right instanceof SimpleName || right instanceof CharacterLiteral)
-				&& (">".equals(operator) || "<".equals(operator) || ">=".equals(operator) || "<=".equals(operator))) {
+		if (/*(left instanceof SimpleName || left instanceof CharacterLiteral) && (right instanceof SimpleName || right instanceof CharacterLiteral)
+				&& */(">".equals(operator) || "<".equals(operator) || ">=".equals(operator) || "<=".equals(operator)
+						|| "==".equals(operator) || "!=".equals(operator))) {
 			ITypeBinding rightBinding = right.resolveTypeBinding();
 			if (typeBinding.isPrimitive() && "char".equals(typeBinding.getName())
 					&& rightBinding.isPrimitive() && "char".equals(rightBinding.getName())) {
@@ -1374,7 +1462,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						StringBuffer tmpBuffer = buffer;
 						buffer = new StringBuffer();
 						
-						buffer.append("Math.floor (");
+						//buffer.append("Math.floor (");
+						// TODO
+						buffer.append("Clazz.doubleToInt (");
 						charVisit(left, beCare);
 						buffer.append(' ');
 						buffer.append(operator);
@@ -1390,7 +1480,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									Expression exp = (Expression) element;
 									ITypeBinding expBinding = exp.resolveTypeBinding();
 									if (isIntegerType(expBinding.getName())) {
-										buffer.insert(0, "Math.floor (");
+										//buffer.insert(0, "Math.floor (");
+										buffer.insert(0, "Clazz.doubleToInt (");
 										is2Floor = true;
 									}
 								}
@@ -1650,7 +1741,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		
 		if (node.isConstructor()) {
-			buffer.append("Clazz.makeConstructor (");
+			if (getJ2STag(node, "@j2sOverride") != null) {
+				buffer.append("Clazz.overrideConstructor (");
+			} else {
+				buffer.append("Clazz.makeConstructor (");
+			}
 		} else {
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
@@ -3011,7 +3106,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (isSimpleSerializable) {
 					List fragments = fieldDeclaration.fragments();
 					int modifiers = fieldDeclaration.getModifiers();
-					if ((Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)) 
+					if ((Modifier.isPublic(modifiers)/* || Modifier.isProtected(modifiers)*/) 
 							&& !Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
 						Type type = fieldDeclaration.getType();
 						int dims = 0;
@@ -3044,6 +3139,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						ITypeBinding resolveBinding = type.resolveBinding();
 						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
 							mark = "s";
+						} else {
+							ITypeBinding t = resolveBinding;
+							do {
+								String typeName = t.getQualifiedName();
+								if ("java.lang.Object".equals(typeName)) {
+									break;
+								}
+								if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
+									mark = "O";
+									break;
+								}
+								t = t.getSuperclass();
+								if (t == null) {
+									break;
+								}
+							} while (true);
 						}
 						if (mark != null) {
 							for (Iterator xiter = fragments.iterator(); xiter.hasNext();) {
