@@ -39,6 +39,7 @@ window["java.package.callback"] = function () {
        	
 		"$.SimpleSerializable",
 		"$.ISimpleCacheable",
+		"$.ISimpleConstant",
 		"$.SimpleFilter",
 		"$.SimpleRPCRunnable",
 		"$.ISimpleRequestInfoBinding",
@@ -48,6 +49,7 @@ window["java.package.callback"] = function () {
 		"$.SimpleRPCRequest",
 		"$.SimpleRPCSWTRequest",
        	
+		"$.SimplePipeSequence",
 		"$.SimplePipeRunnable",
 		"$.ISimplePipePriority",
 		"$.SimplePipeHelper",

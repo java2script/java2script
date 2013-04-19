@@ -879,7 +879,7 @@ ClazzLoader.generatingXHROnload = function (transport, file) {
 
 /* private */
 /*-# generatingXHRCallback -> gXcb #-*/
-ClazzLoader.generatingXHRCallback = function (transport, file) {
+ClazzLoader.generatingXHRCallback = function (transport, file, isActiveX) {
 	return function () {
 		if (transport.readyState == 4) {
 			if (ClazzLoader.inLoadingThreads > 0) {
@@ -1159,7 +1159,7 @@ ClazzLoader.loadScript = function (file) {
 		// 		"Java2Script-Pacemaker/1.0 (+http://j2s.sourceforge.net)");
 		if (ClazzLoader.isAsynchronousLoading) {
 			transport.onreadystatechange = ClazzLoader.generatingXHRCallback (
-					transport, file);
+					transport, file, isActiveX);
 			ClazzLoader.inLoadingThreads++;
 			try {
 				transport.send (null);
@@ -1464,13 +1464,16 @@ ClazzLoader.tryToLoadNext = function (file) {
 			n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
 			if (n != null) {
 				//log ("in optionals unknown..." + n.name);
-				ClazzLoader.loadClassNode (n);
+				var moreLoaded = ClazzLoader.loadClassNode (n);
 				while (ClazzLoader.inLoadingThreads < ClazzLoader.maxLoadingThreads) {
 					var nn = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_KNOWN);
 					//log ("in second loading " + nn);
 					if (nn == null) break;
-					ClazzLoader.loadClassNode (nn); // will increase inLoadingThreads!
+					if (ClazzLoader.loadClassNode (nn)) { // will increase inLoadingThreads!
+						moreLoaded = true;
+					}
 				}
+				loadFurther = !moreLoaded;
 			} else {
 				loadFurther = true;
 			}
@@ -1482,10 +1485,15 @@ ClazzLoader.tryToLoadNext = function (file) {
 	 */
 	if (loadFurther && ClazzLoader.inLoadingThreads == 0) {
 		//error ("no optionals?");
-		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
-			ClazzLoader.updateNode (n);
-		}
 		var lastNode = null;
+		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_CONTENT_LOADED)) != null) {
+			if (lastNode === n) {
+				break;
+			}
+			ClazzLoader.updateNode (n);
+			lastNode = n;
+		}
+		lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_CONTENT_LOADED)) != null) {
 			if (lastNode === n) { // Already existed cycle ?
 				n.status = ClazzNode.STATUS_OPTIONALS_LOADED;
@@ -1501,13 +1509,17 @@ ClazzLoader.tryToLoadNext = function (file) {
 		}
 		lastNode = null;
 		while ((n = ClazzLoader.findNextMustClass (ClazzLoader.clazzTreeRoot, ClazzNode.STATUS_DECLARED)) != null) {
-			if (lastNode === n) break;
+			if (lastNode === n) {
+				break;
+			}
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
 		lastNode = null;
 		while ((n = ClazzLoader.findNextOptionalClass (ClazzNode.STATUS_DECLARED)) != null) {
-			if (lastNode === n) break;
+			if (lastNode === n) {
+				break;
+			}
 			ClazzLoader.updateNode (n);
 			lastNode = n;
 		}
@@ -1533,15 +1545,54 @@ ClazzLoader.tryToLoadNext = function (file) {
 			}
 		}
 
-		/*
-		 * It seems ClazzLoader#globalLoaded is seldom overrided.
-		 */
-		ClazzLoader.globalLoaded ();
-		//error ("end ?");
+		if (ClazzLoader.inLoadingThreads == 0) {
+			/*
+			 * It seems ClazzLoader#globalLoaded is seldom overrided.
+			 */
+			ClazzLoader.globalLoaded ();
+			//error ("end ?");
+		}
 	}
 };
 
 ClazzLoader.tracks = new Array ();
+
+/* private */
+ClazzLoader.checkInnerArray4Cycle = function (index, node, array, traces, paths, list) {
+	var arrayLength = array.length;
+	for (var i = 0; i < arrayLength; i++) {
+		var n = array[i];
+		if (n.status == ClazzNode.STATUS_DECLARED) {
+			var listLength = list.length;
+			for (var j = 0; j < listLength; j++) {
+				if (list[j] === n) {
+					// cycle found!
+					for (var k = j; k >= -1; k--) {
+						var tn = (k >= 0) ? list[k] : node;
+						tn.status = ClazzNode.STATUS_OPTIONALS_LOADED;
+						//ClazzLoader.updateNode (tn);
+						ClazzLoader.destroyClassNode (tn); // Same as above
+						var ps = tn.parents;
+						for (var l = 0; l < ps.length; l++) {
+							ClazzLoader.updateNode (ps[l]);
+						}
+						tn.parents = new Array ();
+						var optLoaded = tn.optionalsLoaded;
+						if (optLoaded != null) {
+							tn.optionalsLoaded = null;
+							//window.setTimeout (optLoaded, 25);
+							optLoaded ();
+						}
+					}
+					return true;
+				}
+			}
+			traces[traces.length] = n;
+			paths[paths.length] = index - 1;
+		}
+ 	}
+ 	return false;
+};
 
 /*
  * There are classes reference cycles. Try to detect and break those cycles.
@@ -1550,6 +1601,41 @@ ClazzLoader.tracks = new Array ();
  */
 /* protected */
 ClazzLoader.checkOptionalCycle = function (node) {
+	var traces = [];
+	var paths = [];
+	var index = 0;
+	var parentIndex = 0;
+	var node = ClazzLoader.clazzTreeRoot;
+	while (true) {
+		var length = traces.length;
+		var list = [];
+		var k = parentIndex;
+		while (k > 0) {
+			var n = traces[k];
+			list[list.length] = n;
+			k = paths[k];
+		}
+
+		if (ClazzLoader.checkInnerArray4Cycle (index, node, node.musts, traces, paths, list)) {
+			return true;
+		}
+		if (ClazzLoader.checkInnerArray4Cycle (index, node, node.optionals, traces, paths, list)) {
+			return true;
+		}
+		
+		if (index >= traces.length) {
+			return false; // not found
+		}
+		parentIndex = paths[index];
+		node = traces[index];
+		index++;
+	}
+	return false;
+
+	// The following implementation is using recursive way to check cycles.
+	// It is considered running poor in old browsers, though not tested.
+	//  
+	/*
 	var ts = ClazzLoader.tracks;
 	var length = ts.length;
 	var cycleFound = -1;
@@ -1562,12 +1648,10 @@ ClazzLoader.checkOptionalCycle = function (node) {
 	}
 	ts[ts.length] = node;
 	if (cycleFound != -1) {
-		/*
-		for (var i = cycleFound; i < ts.length; i++) {
-			alert (ts[i].name + ":::" + ts[i].status);
-		}
-		alert ("===");
-		*/
+		//for (var i = cycleFound; i < ts.length; i++) {
+		//	alert (ts[i].name + ":::" + ts[i].status);
+		//}
+		//alert ("===");
 		for (var i = cycleFound; i < ts.length; i++) {
 			ts[i].status = ClazzNode.STATUS_OPTIONALS_LOADED;
 			//ClazzLoader.updateNode (ts[i]);
@@ -1604,6 +1688,7 @@ ClazzLoader.checkOptionalCycle = function (node) {
 	}
 	ts.length = length;
 	return false;
+	// */
 };
 
 /**
@@ -1830,59 +1915,83 @@ $_L(["$wt.widgets.Widget","$wt.graphics.Drawable"],"$wt.widgets.Control",
 						}
 					}
 		}
-		ClazzLoader.updateParents (node, level);
-	}
-};
-
-/* private */
-/*-# updateParents -> uP #-*/
-ClazzLoader.updateParents = function (node, level) {
-	if (node.parents == null || node.parents.length == 0) {
-		return;
-	}
-	for (var i = 0; i < node.parents.length; i++) {
-		var p = node.parents[i];
-		if (p.status >= level) {
-			continue;
+		
+		// ClazzLoader.updateParents (node, level);
+		if (node.parents == null || node.parents.length == 0) {
+			return;
 		}
-		ClazzLoader.updateNode (p);
-	}
-	if (level == ClazzNode.STATUS_OPTIONALS_LOADED) {
-		node.parents = new Array ();
+		for (var i = 0; i < node.parents.length; i++) {
+			var p = node.parents[i];
+			if (p.status >= level) {
+				continue;
+			}
+			ClazzLoader.updateNode (p);
+		}
+		if (level == ClazzNode.STATUS_OPTIONALS_LOADED) {
+			node.parents = new Array ();
+		}
 	}
 };
 
 /* private */
 /*-# findNextMustClass -> fNM #-*/
 ClazzLoader.findNextMustClass = function (node, status) {
-	if (node != null) {
-		/*
-		if (ClazzLoader.isClassDefined (node.name)) {
-			node.status = ClazzNode.STATUS_OPTIONALS_LOADED;
-		}
-		*/
-		if (node.musts != null && node.musts.length != 0) {
-			for (var i = 0; i < node.musts.length; i++) {
-				var n = node.musts[i];
-				if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
-						|| ClazzLoader.loadedScripts[n.path] != true)
-						&& (status == ClazzNode.STATUS_DECLARED
-						|| !ClazzLoader.isClassDefined (n.name))) {
-					return n;
-				} else {
-					var nn = ClazzLoader.findNextMustClass (n, status);
-					if (nn != null) {
-						return nn;
+	var trace = new Object ();
+	trace.pool = new Array ();
+	var pool = new Array ();
+	pool[0] = ClazzLoader.clazzTreeRoot;
+	while (true) {
+		for (var k = 0; k < pool.length; k++) {
+			var node = pool[k];
+			if (node.name != null) {
+				trace[node.name] = true;
+			}
+			/*
+			if (ClazzLoader.isClassDefined (node.name)) {
+				node.status = ClazzNode.STATUS_OPTIONALS_LOADED;
+			}
+			*/
+			if (node.musts != null && node.musts.length != 0) {
+				for (var i = 0; i < node.musts.length; i++) {
+					var n = node.musts[i];
+					if (trace[n.name]) {
+						continue;
+					}
+					if (n.status == status && (status != ClazzNode.STATUS_KNOWN 
+							|| ClazzLoader.loadedScripts[n.path] != true)
+							&& (status == ClazzNode.STATUS_DECLARED
+							|| !ClazzLoader.isClassDefined (n.name))) {
+						return n;
+					} else {
+						trace.pool[trace.pool.length] = n; // for next level
 					}
 				}
 			}
+			if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
+					|| ClazzLoader.loadedScripts[node.path] != true)
+					&& (status == ClazzNode.STATUS_DECLARED
+					|| !ClazzLoader.isClassDefined (node.name))) {
+				return node;
+			}
+			if (node.optionals != null && node.optionals.length != 0) {
+				for (var i = 0; i < node.optionals.length; i++) {
+					var n = node.optionals[i];
+					if (trace[n.name]) {
+						continue;
+					}
+					if (n.status != ClazzNode.STATUS_DECLARED
+							&& n.status != ClazzNode.STATUS_OPTIONALS_LOADED) {
+						trace.pool[trace.pool.length] = n; // for next level
+					}
+				}
+			}
+		} // end of for pool
+		
+		if (trace.pool.length <= 0) {
+			break;
 		}
-		if (node.status == status && (status != ClazzNode.STATUS_KNOWN 
-				|| ClazzLoader.loadedScripts[node.path] != true)
-				&& (status == ClazzNode.STATUS_DECLARED
-				|| !ClazzLoader.isClassDefined (node.name))) {
-			return node;
-		}
+		pool = trace.pool;
+		trace.pool = new Array ();
 	}
 	return null;
 };
