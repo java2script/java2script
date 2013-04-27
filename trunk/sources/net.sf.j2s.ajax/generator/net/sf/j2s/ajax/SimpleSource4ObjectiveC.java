@@ -15,11 +15,11 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -59,7 +59,8 @@ public class SimpleSource4ObjectiveC {
 		source.append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
-		source.append("//+$0+\r\n//-$0-\r\n\r\n");
+		int index = 0;
+		SourceUtils.insertLineComment(source, "", index++, true);
 		
 		Class<?> superClazz = interfaceClazz.getSuperclass();
 		if (superClazz != null) {
@@ -74,7 +75,7 @@ public class SimpleSource4ObjectiveC {
 			source.append(simpleSuperClazzName);
 			source.append(".h\"\r\n");
 			source.append("\r\n");
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 		}
 		
 		boolean gotStaticFinalFields = false;
@@ -83,7 +84,7 @@ public class SimpleSource4ObjectiveC {
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & Modifier.STATIC) != 0 && (modifiers & Modifier.FINAL) != 0) {
 				source.append("#define ");
 				if (constantPrefix != null && constantPrefix.length() > 0) {
@@ -162,8 +163,8 @@ public class SimpleSource4ObjectiveC {
 		
 		if (gotStaticFinalFields) {
 			source.append("\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 		}
-		source.append("//+$1+\r\n//-$1-\r\n\r\n");
 
 		return source.toString();
 	}
@@ -196,7 +197,8 @@ public class SimpleSource4ObjectiveC {
 		source.append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
-		source.append("//+$0+\r\n//-$0-\r\n\r\n");
+		int index = 0;
+		SourceUtils.insertLineComment(source, "", index++, true);
 		
 		Class<?> superClazz = s.getClass().getSuperclass();
 		String superClazzName = superClazz.getName();
@@ -205,7 +207,6 @@ public class SimpleSource4ObjectiveC {
 		if (idx != -1) {
 			simpleSuperClazzName = superClazzName.substring(idx + 1);
 		}
-		
 		source.append("#import \"");
 		source.append(simpleSuperClazzName);
 		source.append(".h\"\r\n");
@@ -235,19 +236,19 @@ public class SimpleSource4ObjectiveC {
 		boolean gotStaticFinalFields = false;
 		Field[] clazzFields = clazz.getDeclaredFields();
 		
-		Map<String, Field> fields = new HashMap<String, Field>();
+		List<Field> fields = new ArrayList<Field>();
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
-				fields.put(f.getName(), f);
+				fields.add(f);
 			}
 		}
 
 		boolean hasMoreImports = false;
 		Set<String> importedClasses = new HashSet<String>();
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
 			
@@ -271,10 +272,10 @@ public class SimpleSource4ObjectiveC {
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & Modifier.STATIC) != 0 && (modifiers & Modifier.FINAL) != 0) {
 				if (!defineAppended) {
-					source.append("//+$7+\r\n//-$7-\r\n\r\n");
+					SourceUtils.insertLineComment(source, "", index++, true);
 				}
 				defineAppended = true;
 				source.append("#define ");
@@ -355,31 +356,34 @@ public class SimpleSource4ObjectiveC {
 		if (gotStaticFinalFields) {
 			source.append("\r\n");
 		}
-		source.append("//+$1+\r\n//-$1-\r\n\r\n");
+		if (!defineAppended) {
+			index++;
+		}
+		SourceUtils.insertLineComment(source, "", index++, true);
 
-		if (s instanceof SimpleSerializable && !(s instanceof SimpleRPCRunnable)) {
+		//if (s instanceof SimpleSerializable && !(s instanceof SimpleRPCRunnable)) {
 			source.append("@protocol ");
 			source.append(simpleClazzName);
 			source.append("\r\n\r\n");		
-			source.append("//+$8+\r\n//-$8-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@end\r\n\r\n");		
-			source.append("//+$9+\r\n//-$9-\r\n\r\n");
-		}
+			SourceUtils.insertLineComment(source, "", index++, true);
+		//}
 		source.append("@interface ");
 		source.append(simpleClazzName);
 		source.append(" : ");
 		source.append(simpleSuperClazzName);
-		source.append(" /*+$11+*/  /*-$11-*/");
-		source.append(" {\r\n");
+		SourceUtils.insertBlockComment(source, index++);
+		source.append("{\r\n");
 		source.append("\r\n");		
-		source.append("\t//+$2+\r\n\t//-$2-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
 
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
 			
-			source.append("    ");
+			source.append("\t");
 			if (type == int.class) {
 				source.append("int ");
 			} else if (type == long.class) {
@@ -410,13 +414,13 @@ public class SimpleSource4ObjectiveC {
 			} else if (type == String[].class) {
 				source.append("NSMutableArray<NSString> *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
+				//if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
 					source.append("NSMutableArray<");
 					source.append(type.getComponentType().getSimpleName());
 					source.append("> *");
-				} else {
-					source.append("NSMutableArray *");
-				}
+				//} else {
+				//	source.append("NSMutableArray *");
+				//}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class) {
@@ -429,12 +433,12 @@ public class SimpleSource4ObjectiveC {
 		}
 		
 		source.append("\r\n");
-		source.append("\t//+$3+\r\n\t//-$3-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
 		source.append("}\r\n");
 		source.append("\r\n");
-		source.append("//+$4+\r\n//-$4-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
@@ -471,13 +475,13 @@ public class SimpleSource4ObjectiveC {
 			} else if (type == String[].class) {
 				source.append(", retain) NSMutableArray<NSString> *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
+				//if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
 					source.append(", retain) NSMutableArray<");
 					source.append(type.getComponentType().getSimpleName());
 					source.append("> *");
-				} else {
-					source.append(", retain) NSMutableArray *");
-				}
+				//} else {
+				//	source.append(", retain) NSMutableArray *");
+				//}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class || type == String[].class
@@ -491,11 +495,11 @@ public class SimpleSource4ObjectiveC {
 		}
 
 		source.append("\r\n");
-		source.append("//+$5+\r\n//-$5-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 		source.append("- (NSString *) className;\r\n");
 		source.append("- (NSMutableArray *) fields;\r\n");
 		source.append("\r\n");
-		source.append("//+$6+\r\n//-$6-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 		source.append("@end\r\n");
 
 		return source.toString();
@@ -529,30 +533,31 @@ public class SimpleSource4ObjectiveC {
 		source.append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
-		source.append("//+$0+\r\n//-$0-\r\n\r\n");
+		int index = 0;
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		source.append("#import \"");
 		source.append(simpleClazzName);
 		source.append(".h\"\r\n");
 		source.append("\r\n");
-		source.append("//+$1+\r\n//-$1-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 		
 		source.append("@implementation ");
 		source.append(simpleClazzName);
 		source.append("\r\n");
 		source.append("\r\n");		
-		source.append("//+$2+\r\n//-$2-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		Set<String> j2sIgnoredFileds = new HashSet<String>();
 		
-		Map<String, Field> fields = new HashMap<String, Field>();
+		List<Field> fields = new ArrayList<Field>();
 		Field[] clazzFields = clazz.getDeclaredFields();
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
-				fields.put(f.getName(), f);
+				fields.add(f);
 				if ((modifiers & Modifier.PROTECTED) != 0) {
 					j2sIgnoredFileds.add(f.getName());
 				}
@@ -560,7 +565,7 @@ public class SimpleSource4ObjectiveC {
 		}
 
 		boolean needDealloc = false;
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
@@ -580,19 +585,19 @@ public class SimpleSource4ObjectiveC {
 		}
 		
 		source.append("\r\n");
-		source.append("//+$3+\r\n//-$3-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 		source.append("- (NSString *) className {\r\n");
-		source.append("\t//+$4+\r\n\t//-$4-\r\n");
-		source.append("    return @\"");
+		SourceUtils.insertLineComment(source, "\t", index++, false);
+		source.append("\treturn @\"");
 		source.append(clazzName);
 		source.append("\";\r\n");
-		source.append("\t//+$5+\r\n\t//-$5-\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, false);
 		source.append("}\r\n");
 		source.append("\r\n");
 		source.append("- (NSMutableArray *) fields {\r\n");
-		source.append("    NSMutableArray *arr = [super fields];\r\n");
-		source.append("\t//+$6+\r\n\t//-$6-\r\n");
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		source.append("\tNSMutableArray *arr = [super fields];\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, false);
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			if (j2sIgnoredFileds.contains(name)) {
@@ -601,7 +606,7 @@ public class SimpleSource4ObjectiveC {
 			}
 			Class<?> type = field.getType();
 			
-			source.append("    [arr addObject:[SimpleField makeField:@\"");
+			source.append("\t[arr addObject:[SimpleField makeField:@\"");
 			source.append(name);
 			source.append("\" withType:SimpleFieldType");
 			if (type == int.class) {
@@ -653,15 +658,15 @@ public class SimpleSource4ObjectiveC {
 			}
 			source.append("]];\r\n");
 		}
-		source.append("\t//+$7+\r\n\t//-$7-\r\n");
-		source.append("    return arr;\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, false);
+		source.append("\treturn arr;\r\n");
 		source.append("}\r\n");
 		source.append("\r\n");
 
 		if (needDealloc) {
 			source.append("- (void) dealloc {\r\n");
-			source.append("\t//+$8+\r\n\t//-$8-\r\n");
-			for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+			for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 				Field field = (Field) itr.next();
 				String name = field.getName();
 				Class<?> type = field.getType();
@@ -671,17 +676,17 @@ public class SimpleSource4ObjectiveC {
 						|| type == short[].class || type == byte[].class || type == char[].class
 						|| type == float[].class || type == boolean[].class || type == String[].class
 						|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-					source.append("    self.");
+					source.append("\tself.");
 					source.append(name);
 					source.append(" = nil;\r\n");
 				}
 			}
-			source.append("\t//+$9+\r\n\t//-$9-\r\n");
-			source.append("    [super dealloc];\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+			source.append("\t[super dealloc];\r\n");
 			source.append("}\r\n");
 			source.append("\r\n");
 		}
-		source.append("//+$10+\r\n//-$10-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		source.append("@end\r\n");
 
@@ -779,7 +784,8 @@ public class SimpleSource4ObjectiveC {
 			source.append(". All rights reserved.\r\n");
 			source.append("//\r\n");
 			source.append("\r\n");
-			source.append("//+$0+\r\n//-$0-\r\n\r\n");
+			int index = 0;
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("#import \"SimpleFactory.h\"\r\n");
 			source.append("\r\n");
@@ -795,9 +801,9 @@ public class SimpleSource4ObjectiveC {
 					if (inst instanceof SimpleSerializable) {
 						if (!(inst instanceof SimpleRPCRunnable)) {
 							String simpleName = j2sSimpleClazz;
-							int index = j2sSimpleClazz.lastIndexOf('.');
-							if (index != -1) {
-								simpleName = j2sSimpleClazz.substring(index + 1);
+							idx = j2sSimpleClazz.lastIndexOf('.');
+							if (idx != -1) {
+								simpleName = j2sSimpleClazz.substring(idx + 1);
 							}
 							
 							source.append("#import \"");
@@ -810,18 +816,18 @@ public class SimpleSource4ObjectiveC {
 				}
 			}
 			source.append("\r\n");
-			source.append("//+$1+\r\n//-$1-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@interface ");
 			source.append(simpleClazzName);
 			source.append(" : SimpleFactory");
-			source.append(" /*+$11+*/  /*-$11-*/");
-			source.append(" {\r\n\r\n");
-			source.append("\t//+$3+\r\n\t//-$3-\r\n");
-			source.append("\r\n}\r\n\r\n");
-			source.append("//+$4+\r\n//-$4-\r\n\r\n");
+			SourceUtils.insertBlockComment(source, index++);
+			source.append("{\r\n\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, true);
+			source.append("}\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("- (id) createInstanceByClassName:(NSString *) className;\r\n");
 			source.append("\r\n");
-			source.append("//+$5+\r\n//-$5-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@end\r\n");
 			SourceUtils.updateSourceContent(new File(targetFolder, simpleClazzName + ".h"), source.toString());
 		}
@@ -846,21 +852,22 @@ public class SimpleSource4ObjectiveC {
 			source.append(". All rights reserved.\r\n");
 			source.append("//\r\n");
 			source.append("\r\n");
-			source.append("//+$0+\r\n//-$0-\r\n\r\n");
+			int index = 0;
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("#import \"");
 			source.append(simpleClazzName);
 			source.append(".h\"\r\n");
 			source.append("\r\n");
-			source.append("//+$1+\r\n//-$1-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("@implementation ");
 			source.append(simpleClazzName);
 			source.append("\r\n");
 			source.append("\r\n");
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("- (id) createInstanceByClassName:(NSString *) className {\r\n");
-			source.append("\t//+$3+\r\n\t//-$3-\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, false);
 
 			for (int i = 1 + 4; i < args.length; i++) {
 				String j2sSimpleClazz = args[i];
@@ -873,29 +880,29 @@ public class SimpleSource4ObjectiveC {
 					if (inst instanceof SimpleSerializable) {
 						if (!(inst instanceof SimpleRPCRunnable)) {
 							String simpleName = j2sSimpleClazz;
-							int index = j2sSimpleClazz.lastIndexOf('.');
-							if (index != -1) {
-								simpleName = j2sSimpleClazz.substring(index + 1);
+							idx = j2sSimpleClazz.lastIndexOf('.');
+							if (idx != -1) {
+								simpleName = j2sSimpleClazz.substring(idx + 1);
 							}
 							
-							source.append("    if ([className compare:@\"");
+							source.append("\tif ([className compare:@\"");
 							source.append(j2sSimpleClazz);
 							source.append("\"] == 0) {\r\n");
-							source.append("        return [[[");
+							source.append("\t\treturn [[[");
 							source.append(simpleName);
 							source.append(" alloc] init] autorelease];\r\n");
-							source.append("    }\r\n");
+							source.append("\t}\r\n");
 						}
 					}
 				} catch (Throwable e) {
 					e.printStackTrace();
 				}
 			}
-			source.append("\t//+$4+\r\n\t//-$4-\r\n");
-			source.append("    return nil;\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+			source.append("\treturn nil;\r\n");
 			source.append("}\r\n");
 			source.append("\r\n");
-			source.append("//+$5+\r\n//-$5-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@end\r\n");
 			
 			SourceUtils.updateSourceContent(new File(targetFolder, simpleClazzName + ".m"), source.toString());

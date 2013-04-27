@@ -16,11 +16,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -45,7 +45,8 @@ public class SimpleSource4Java {
 		source.append(" */\r\n");
 		source.append("\r\n");
 
-		source.append("//+$0+\r\n//-$0-\r\n\r\n");
+		int index = 0;
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		String clazzName = interfaceClazz.getName();
 		String simpleClazzName = clazzName;
@@ -59,7 +60,7 @@ public class SimpleSource4Java {
 			simpleClazzName = clazzName.substring(idx + 1);
 		}
 
-		source.append("//+$1+\r\n//-$1-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		Class<?> superClazz = interfaceClazz.getSuperclass();
 		if (superClazz != null) {
@@ -74,24 +75,24 @@ public class SimpleSource4Java {
 				superClazzName = superClazzName.substring(idx + 1);
 			}
 
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("public interface ");
 			source.append(simpleClazzName);
 			source.append(" extends ");
 			source.append(superClazzName);
-			source.append(" /*+$11+*/  /*-$11-*/");
-			source.append(" {\r\n");
+			SourceUtils.insertBlockComment(source, index++);
+			source.append("{\r\n");
 		} else {
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("public interface ");
 			source.append(simpleClazzName);
-			source.append(" /*+$11+*/  /*-$11-*/");
-			source.append(" {\r\n");
+			SourceUtils.insertBlockComment(source, index++);
+			source.append("{\r\n");
 		}
 		source.append("\r\n");
-		source.append("\t//+$3+\r\n\t//-$3-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
 
 		boolean gotStaticFinalFields = false;
 		Field[] clazzFields = interfaceClazz.getDeclaredFields();
@@ -99,7 +100,7 @@ public class SimpleSource4Java {
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & Modifier.STATIC) != 0 && (modifiers & Modifier.FINAL) != 0) {
 				Class<?> type = f.getType();
 				if (type == int.class || type == long.class || type == short.class 
@@ -147,8 +148,8 @@ public class SimpleSource4Java {
 		
 		if (gotStaticFinalFields) {
 			source.append("\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, true);
 		}
-		source.append("\t//+$4+\r\n\t//-$4-\r\n\r\n");
 
 		source.append("}\r\n");
 		return source.toString();
@@ -168,7 +169,8 @@ public class SimpleSource4Java {
 		source.append(" */\r\n");
 		source.append("\r\n");
 		
-		source.append("//+$0+\r\n//-$0-\r\n\r\n");
+		int index = 0;
+		SourceUtils.insertLineComment(source, "", index++, true);
 
 		Class<?> clazz = s.getClass();
 		String clazzName = clazz.getName();
@@ -183,7 +185,7 @@ public class SimpleSource4Java {
 			simpleClazzName = clazzName.substring(idx + 1);
 		}
 
-		source.append("//+$1+\r\n//-$1-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "", index++, true);
 		
 		boolean hasMoreImports = false;
 		Set<String> importedClasses = new HashSet<String>();
@@ -211,17 +213,17 @@ public class SimpleSource4Java {
 		boolean gotStaticFinalFields = false;
 		Field[] clazzFields = clazz.getDeclaredFields();
 		
-		Map<String, Field> fields = new HashMap<String, Field>();
+		List<Field> fields = new ArrayList<Field>();
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
-				fields.put(f.getName(), f);
+				fields.add(f);
 			}
 		}
 
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
 			
@@ -269,7 +271,7 @@ public class SimpleSource4Java {
 			}
 			
 			source.append("\r\n");
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("public class ");
 			source.append(simpleClazzName);
@@ -279,7 +281,7 @@ public class SimpleSource4Java {
 			if (hasMoreImports) {
 				source.append("\r\n");
 			}
-			source.append("//+$2+\r\n//-$2-\r\n\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("public class ");
 			source.append(simpleClazzName);
 		}
@@ -309,14 +311,14 @@ public class SimpleSource4Java {
 			}
 		}
 
-		source.append(" /*+$11+*/  /*-$11-*/");
-		source.append(" {\r\n\r\n");
-		source.append("\t//+$3+\r\n\t//-$3-\r\n\r\n");
+		SourceUtils.insertBlockComment(source, index++);
+		source.append("{\r\n\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
 		
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC | Modifier.PROTECTED)) != 0
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & Modifier.STATIC) != 0 && (modifiers & Modifier.FINAL) != 0) {
 				Class<?> type = f.getType();
 				if (type == int.class || type == long.class || type == short.class 
@@ -364,9 +366,12 @@ public class SimpleSource4Java {
 		
 		if (gotStaticFinalFields) {
 			source.append("\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, true);
+		} else {
+			index++;
 		}
 
-		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
@@ -390,12 +395,14 @@ public class SimpleSource4Java {
 		}
 		
 		source.append("\r\n");
-		source.append("\t//+$4+\r\n\t//-$4-\r\n\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
+		boolean moreCodesAdded = false;
 		if (s.bytesCompactMode()) {
 			source.append("\tpublic boolean bytesCompactMode() {\r\n");
 			source.append("\t\treturn true;\r\n");
 			source.append("\t}\r\n");
 			source.append("\r\n");
+			moreCodesAdded = true;
 		}
 		if (s instanceof SimplePipeRunnable) {
 			source.append("\t@Override\r\n");
@@ -435,13 +442,17 @@ public class SimpleSource4Java {
 					}
 				}
 			}
+			moreCodesAdded = true;
 		} else if (s instanceof SimpleRPCRunnable) {
 			source.append("\t@Override\r\n");
 			source.append("\tpublic void ajaxRun() {\r\n");
 			source.append("\t}\r\n");
 			source.append("\r\n");
+			moreCodesAdded = true;
 		}
-		source.append("\t//+$5+\r\n\t//-$5-\r\n\r\n");
+		if (moreCodesAdded) {
+			SourceUtils.insertLineComment(source, "\t", index++, true);
+		}
 		source.append("}\r\n");
 
 		return source.toString();
