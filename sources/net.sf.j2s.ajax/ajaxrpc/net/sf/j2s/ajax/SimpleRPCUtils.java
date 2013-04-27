@@ -23,7 +23,8 @@ public class SimpleRPCUtils {
 	public static Set<String> compareDiffs(SimpleRPCRunnable runnable1, SimpleRPCRunnable runnable2) {
 		Set<String> diffSet = new HashSet<String>();
 		String[] ignoredFields = runnable1.fieldDiffIgnored();
-		Map<String, Field> allFields = runnable1.getSerializableFields(runnable1.getClass().getName());
+		Class<?> clazzType = runnable1.getClass();
+		Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzType.getName(), clazzType, false);
 		for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
 			String name = (String) itr.next();
 			Field field = allFields.get(name);
