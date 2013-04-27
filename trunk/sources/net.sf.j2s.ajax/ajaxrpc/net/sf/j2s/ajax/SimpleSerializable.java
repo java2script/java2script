@@ -13,7 +13,6 @@ package net.sf.j2s.ajax;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -48,11 +47,12 @@ public class SimpleSerializable implements Cloneable {
 	public static boolean JSON_EXPAND_MODE = true;
 
 	@J2SIgnore
-	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
-
+	private static Object mutex = new Object();
 	@J2SIgnore
-	private static Map<String, Constructor<?>> quickConstructors = new HashMap<String, Constructor<?>>();
-
+	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
+	@J2SIgnore
+	private static Set<String> expiredClasses = new HashSet<String>();
+	
 	@J2SIgnore
 	private static class DeserializeObject {
 		Object object;
@@ -69,11 +69,20 @@ public class SimpleSerializable implements Cloneable {
 	};
 	
     @J2SIgnore
-	Map<String, Field> getSerializableFields(String clazzName) {
-		Map<String, Field> fields = quickFields.get(clazzName);
+	static Map<String, Field> getSerializableFields(String clazzName, Class<?> clazz, boolean forceUpdate) {
+		Map<String, Field> fields = forceUpdate ? null : quickFields.get(clazzName);
 		if (fields == null) {
+			if (!forceUpdate) {
+				if (expiredClasses.contains(clazzName)) {
+					// Load class from bytes. Variable clazz may be out of date
+					Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+					if (inst != null) {
+						// Force updating fields in cache
+						return getSerializableFields(clazzName, inst.getClass(), true);
+					}
+				}
+			}
 			fields = new HashMap<String, Field>();
-			Class<?> clazz = this.getClass();
 			while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 				Field[] clazzFields = clazz.getDeclaredFields();
 				for (int i = 0; i < clazzFields.length; i++) {
@@ -86,8 +95,20 @@ public class SimpleSerializable implements Cloneable {
 				}
 				clazz = clazz.getSuperclass();
 			}
-			synchronized (quickFields) {
-				quickFields.put(clazzName, fields);
+			synchronized (mutex) {
+				if (!forceUpdate) {
+					if (expiredClasses.contains(clazzName)) {
+						// Class already be reloaded. Do not put fields into cache.
+						return fields;
+					}
+				}
+				if (forceUpdate || quickFields.get(clazzName) == null) {
+					quickFields.put(clazzName, fields);
+					if (forceUpdate) {
+						// Class and fields are already updated, mark it as updated
+						expiredClasses.remove(clazzName);
+					}
+				}
 			}
 		}
 		return fields;
@@ -371,7 +392,7 @@ return strBuf;
 		buffer.append("#00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
-		Map<String, Field> fields = getSerializableFields(clazzName);
+		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass(), false);
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		String[] fMap = fieldMapping();
 		try {
@@ -1187,7 +1208,8 @@ if (ss != null) {
     	}
     	boolean commasAppended = false;
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
-		Map<String, Field> fieldMap = getSerializableFields(this.getClass().getName());
+		Class<?> clazzType = this.getClass();
+		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType, false);
 		String[] fMap = fieldMapping();
 		for (Iterator<String> itr = fieldMap.keySet().iterator(); itr.hasNext();) {
 			String fieldName = (String) itr.next();
@@ -1945,7 +1967,8 @@ return true;
 			if (index + size > end) return false;
 		}
 		
-		Map<String, Field> fieldMap = getSerializableFields(this.getClass().getName());
+		Class<?> clazzType = this.getClass();
+		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType, false);
 		int objectEnd = index + size;
 		String[] fMap = fieldMapping();
 		while (index < end && index < objectEnd) {
@@ -2616,28 +2639,21 @@ return true;
     
     @J2SIgnore
     public static SimpleSerializable parseInstance(Map<String, Object> properties) {
-		Class<?> runnableClass = null;
 		String clazzName = (String)properties.get("class");
-		try {
-			runnableClass = Class.forName(clazzName); // !!! JavaScript loading!
-			if (runnableClass != null) {
-				// SimpleRPCRunnale should always has default constructor
-				Constructor<?> constructor = runnableClass.getConstructor(new Class[0]);
-				Object obj = constructor.newInstance(new Object[0]);
-				if (obj != null && obj instanceof SimpleSerializable) {
-					return (SimpleSerializable) obj;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (clazzName == null) {
+			return null;
 		}
-		return null;
+		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		if (inst != null && inst instanceof SimpleSerializable) {
+			return (SimpleSerializable) inst;
+		}
+		return UNKNOWN;
     }
     
     @J2SIgnore
     public void deserialize(Map<String, Object> properties) {
 		String clazzName = (String) properties.get("class");
-		Map<String, Field> fieldMap = getSerializableFields(clazzName);
+		Map<String, Field> fieldMap = getSerializableFields(clazzName, this.getClass(), false);
 		String[] fMap = fieldMapping();
 		for (Iterator<String> itr = properties.keySet().iterator(); itr.hasNext();) {
 			String fieldName = (String) itr.next();
@@ -2853,7 +2869,8 @@ return true;
 	public Object clone() throws CloneNotSupportedException {
 		Object clone = super.clone();
 		
-		Map<String, Field> fields = this.getSerializableFields(this.getClass().getName());
+		Class<? extends SimpleSerializable> clazz = this.getClass();
+		Map<String, Field> fields = getSerializableFields(clazz.getName(), clazz, false);
 		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
@@ -2980,27 +2997,20 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		if (filter != null) {
 			if (!filter.accept(clazzName)) return null;
 		}
-		try {
-			Constructor<?> constructor = quickConstructors.get(clazzName);
-			if (constructor == null) {
-				Class<?> runnableClass = Class.forName(clazzName);
-				if (runnableClass != null) {
-					// SimpleRPCRunnale should always has a default constructor
-					constructor = runnableClass.getConstructor(new Class[0]);
-					synchronized (quickConstructors) {
-						quickConstructors.put(clazzName, constructor);
-					}
-				}
-			}
-			if (constructor != null) {
-				Object obj = constructor.newInstance(new Object[0]);
-				if (obj != null && obj instanceof SimpleSerializable) {
-					return (SimpleSerializable) obj;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		if (inst != null && inst instanceof SimpleSerializable) {
+			return (SimpleSerializable) inst;
 		}
 		return UNKNOWN;
 	}
+
+    @J2SIgnore
+    static void removeCachedClassFields(String clazzName) {
+    	synchronized (mutex) {
+			// Will force update cached fields in next time retrieving fields
+			quickFields.remove(clazzName);
+			expiredClasses.add(clazzName);
+		}
+    }
+    
 }
