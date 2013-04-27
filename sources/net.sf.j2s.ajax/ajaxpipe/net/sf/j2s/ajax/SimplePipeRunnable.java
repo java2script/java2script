@@ -402,8 +402,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * @return SimpleSerializable objects to be sent through the pipe.
 	 * If return null, it means that this pipe does not recognize the
 	 * argument objects.
+	 * 
+	 * @j2sIgnore
 	 */
-	public abstract SimpleSerializable[] through(Object ... args);
+	public SimpleSerializable[] through(Object ... args) {
+		return null;
+	}
 
 	/**
 	 * Deal the object from pipe.
@@ -453,8 +457,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	/**
 	 * A method used to pipe a bundle of instances through.
 	 * 
-	 * Attention: Only visible inside {@link #pipeSetup()}.
-	 * @param args
+	 * @param args Normal objects
+	 * 
+	 * @j2sIgnore
 	 */
 	public void pipeThrough(Object ... args) {
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
@@ -472,6 +477,29 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		}
 		for (int i = 0; i < objs.length; i++) {
 			pipe.deal(objs[i]);
+		}
+	}
+
+	/**
+	 * A method used to pipe a bundle of instances through.
+	 * 
+	 * @param args SimpleSerializable objects
+	 * 
+	 * @j2sIgnore
+	 */
+	public void pipeThrough(SimpleSerializable ... args) {
+		if (args == null || args.length == 0) return;
+		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
+		if (pipe == null) return;
+		if (pipe instanceof SimplePipeRunnable) {
+			SimplePipeRunnable pipeRunnable = (SimplePipeRunnable) pipe;
+			if (pipeRunnable.helper != null) {
+				pipeRunnable.helper.helpThrough(pipe, args);
+				return;
+			}
+		}
+		for (int i = 0; i < args.length; i++) {
+			pipe.deal(args[i]);
 		}
 	}
 	
