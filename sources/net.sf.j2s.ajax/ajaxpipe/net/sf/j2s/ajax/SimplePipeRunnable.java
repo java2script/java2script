@@ -416,7 +416,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 */
 	public boolean deal(SimpleSerializable ss) {
 		try {
-			Class<? extends SimpleSerializable> clazz = ss.getClass();
+			Class<?> clazz = ss.getClass();
 			if ("net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 				return true; // seldom or never reach this branch, just ignore
 			}
@@ -439,16 +439,22 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 				clazzName = clzz.getName();
 			}
 			if (clzz != null) {
-				method = clzz.getMethod("deal", clazz);
-				if (method != null) {
-					Class<?> returnType = method.getReturnType();
-					if (returnType == boolean.class) {
-						Object result = method.invoke(this, ss);
-						return ((Boolean) result).booleanValue();
+				do {
+					try {
+						method = clzz.getMethod("deal", clazz);
+					} catch (Exception e) {
 					}
-				}
+					if (method != null) {
+						Class<?> returnType = method.getReturnType();
+						if (returnType == boolean.class) {
+							Object result = method.invoke(this, ss);
+							return ((Boolean) result).booleanValue();
+						}
+					}
+					clazz = clazz.getSuperclass();
+				} while (clazz != null);
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		return false; // unknown object

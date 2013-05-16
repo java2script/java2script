@@ -200,10 +200,14 @@ public class SimplePipeHelper {
 			System.out.println("There are no pipe listening?!!!!");
 			return; // throw exception?
 		}
+		int v = pipe.getSimpleVersion();
 		synchronized (list) {
 			boolean hasNewPriority = false;
 			for (int i = 0; i < ss.length; i++) {
 				SimpleSerializable s = ss[i];
+				if (v >= 202) {
+					s.setSimpleVersion(v);
+				}
 				if (s instanceof ISimpleCacheable) {
 					ISimpleCacheable c = (ISimpleCacheable) s;
 					if (c.isCached()) {
