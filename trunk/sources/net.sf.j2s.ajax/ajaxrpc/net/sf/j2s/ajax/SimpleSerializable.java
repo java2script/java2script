@@ -46,12 +46,39 @@ public class SimpleSerializable implements Cloneable {
 
 	public static boolean JSON_EXPAND_MODE = true;
 
+	public static int LATEST_SIMPLE_VERSION = 202;
+	
 	@J2SIgnore
 	private static Object mutex = new Object();
 	@J2SIgnore
 	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
 	@J2SIgnore
 	private static Set<String> expiredClasses = new HashSet<String>();
+	
+	@J2SIgnore
+	private static Object classMutex = new Object();
+	@J2SIgnore
+	private static Map<String, String> classMappings = new HashMap<String, String>();
+	@J2SIgnore
+	private static Map<String, String> rClassMappings = new HashMap<String, String>();
+	
+	private int simpleVersion;
+	
+	public int getSimpleVersion() {
+		if (simpleVersion <= 0) {
+			return 201;
+		}
+		return simpleVersion;
+	}
+	
+	public void setSimpleVersion(int ver) {
+		simpleVersion = ver;
+		if (ver < 100) {
+			simpleVersion = 201;
+		} else if (simpleVersion >= 1000) {
+			simpleVersion = 201;
+		}
+	}
 	
 	@J2SIgnore
 	private static class DeserializeObject {
@@ -67,6 +94,14 @@ public class SimpleSerializable implements Cloneable {
 		}
 		
 	};
+	
+	@J2SIgnore
+	public static void registerShortClassName(String clazzName, String shortName) {
+		synchronized (classMutex) {
+			classMappings.put(clazzName, shortName);
+			rClassMappings.put(shortName, clazzName);
+		}
+	}
 	
     @J2SIgnore
 	static Map<String, Field> getSerializableFields(String clazzName, Class<?> clazz, boolean forceUpdate) {
@@ -371,7 +406,8 @@ return strBuf;
 		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
 		 * # is used to mark the the beginning of serialized data  
 		 */
-		buffer.append("WLL201");
+		buffer.append("WLL");
+		buffer.append(getSimpleVersion());
 		Class<?> clazz = this.getClass();
 		String clazzName = clazz.getName();
 		int idx = -1;
@@ -388,7 +424,16 @@ return strBuf;
 			}
 			clazzName = clazz.getName();
 		}
-		buffer.append(clazzName);
+		if (getSimpleVersion() >= 202) {
+			String shortClazzName = classMappings.get(clazzName);
+			if (shortClazzName != null) {
+				buffer.append(shortClazzName);
+			} else {
+				buffer.append(clazzName);
+			}
+		} else {
+			buffer.append(clazzName);
+		}
 		buffer.append("#00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
@@ -1933,6 +1978,10 @@ return true;
 		int end = str.length();
 		int length = end - start;
 		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return false; // Should throw exception!
+		try {
+			setSimpleVersion(Integer.parseInt(str.substring(start + 3, start + 6)));
+		} catch (NumberFormatException e1) {
+		}
 		int index = str.indexOf('#', start);
 		if (index == -1) return false; // Should throw exception!
 		index++;
@@ -2105,7 +2154,7 @@ return true;
 									ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
 								} else if (c4 == 'U') {
 									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
-								} else {
+								} else if (c4 != 'O') {
 									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
 								}
 							}
@@ -2434,7 +2483,7 @@ return true;
 								ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
 							} else if (c4 == 'U') {
 								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
-							} else {
+							} else if (c4 != 'O') {
 								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
 							}
 						}
@@ -2867,7 +2916,8 @@ return true;
 	 */
     @J2SIgnore
 	public Object clone() throws CloneNotSupportedException {
-		Object clone = super.clone();
+		SimpleSerializable clone = (SimpleSerializable) super.clone();
+		clone.simpleVersion = simpleVersion;
 		
 		Class<? extends SimpleSerializable> clazz = this.getClass();
 		Map<String, Field> fields = getSerializableFields(clazz.getName(), clazz, false);
@@ -2991,9 +3041,20 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		if (str == null || start < 0) return null;
 		int length = str.length() - start;
 		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return null;
+		int v = 0;
+		try {
+			v = Integer.parseInt(str.substring(start + 3, start + 6));
+		} catch (NumberFormatException e1) {
+		}
 		int index = str.indexOf('#', start);
 		if (index == -1) return null;
 		String clazzName = str.substring(start + 6, index);
+		if (v >= 202) {
+			String longClazzName = rClassMappings.get(clazzName);
+			if (longClazzName != null) {
+				clazzName = longClazzName;
+			}
+		}
 		if (filter != null) {
 			if (!filter.accept(clazzName)) return null;
 		}
