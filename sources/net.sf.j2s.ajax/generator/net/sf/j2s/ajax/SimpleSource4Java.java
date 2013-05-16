@@ -510,8 +510,9 @@ public class SimpleSource4Java {
 							folder.mkdirs();
 						}
 					}
-					SourceUtils.updateSourceContent(new File(targetPath, simpleName + ".java"), javaSource);
-					System.out.println(new File(targetFolder, simpleName + ".java").getAbsolutePath());
+					File javaFile = new File(targetPath, simpleName + ".java");
+					SourceUtils.updateSourceContent(javaFile, javaSource);
+					System.out.println(javaFile.getAbsolutePath());
 					continue;
 				}
 				Object inst = clazz.newInstance();
@@ -544,6 +545,7 @@ public class SimpleSource4Java {
 					System.out.println(javaFile.getAbsolutePath());
 				}
 			} catch (Throwable e) {
+				System.out.println("Error: " + j2sSimpleClazz);
 				e.printStackTrace();
 			}
 		}
