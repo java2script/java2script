@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -597,6 +598,49 @@ public class SimpleSource4ObjectiveC {
 		source.append("- (NSMutableArray *) fields {\r\n");
 		source.append("\tNSMutableArray *arr = [super fields];\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, false);
+		
+		s.setSimpleVersion(SimpleSerializable.LATEST_SIMPLE_VERSION);
+		String[] fieldMapping = s.fieldMapping();
+		if (fieldMapping != null) {
+			Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzName, clazz, false);
+			for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
+				String name = itr.next();
+				boolean existed = false;
+				for (int i = 0; i < fieldMapping.length / 2; i++) {
+					String fName = fieldMapping[i + i];
+					//String sName = fieldMapping[i + i + 1];
+					if (fName.equals(name)) {
+						existed = true;
+						break;
+					}
+				}
+				if (!existed) {
+					System.err.println("[ERROR] Class " + clazzName + " field mappings does not contains field " + name);
+					break;
+				}
+			}
+			Set<String> names = new HashSet<String>();
+			for (int i = 0; i < fieldMapping.length / 2; i++) {
+				String fName = fieldMapping[i + i];
+				String sName = fieldMapping[i + i + 1];
+				if (names.contains(sName)) {
+					System.err.println("[ERROR] Class " + clazzName + " field mappings shorten name " + sName + " duplicatedd.");
+				}
+				names.add(sName);
+				boolean existed = false;
+				for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
+					String name = itr.next();
+					if (fName.equals(name)) {
+						existed = true;
+						break;
+					}
+				}
+				if (!existed) {
+					System.err.println("[ERROR] Class " + clazzName + " field mappings contains non-field " + fName);
+					break;
+				}
+			}
+		}
 		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
@@ -655,6 +699,18 @@ public class SimpleSource4ObjectiveC {
 				source.append("ObjectArray");
 			} else {
 				System.out.println("Unsupported type " + type);
+			}
+			if (fieldMapping != null) {
+				for (int i = 0; i < fieldMapping.length / 2; i++) {
+					String fieldName = fieldMapping[i + i];
+					String fieldAlias = fieldMapping[i + i + 1];
+					if (name.equals(fieldName)) {
+						source.append(" withAlias:@\"");
+						source.append(fieldAlias);
+						source.append("\"");
+						break;
+					}
+				}
 			}
 			source.append("]];\r\n");
 		}
@@ -826,6 +882,8 @@ public class SimpleSource4ObjectiveC {
 			source.append("}\r\n\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("- (id) createInstanceByClassName:(NSString *) className;\r\n");
+			source.append("- (NSString *) getClassShortenName:(NSString *) className;\r\n");
+			source.append("- (NSString *) getClassFullName:(NSString *) className;\r\n");
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@end\r\n");
@@ -903,6 +961,71 @@ public class SimpleSource4ObjectiveC {
 			source.append("}\r\n");
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
+			source.append("- (id) getClassShortenName:(NSString *) className {\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+
+			for (int i = 1 + 4; i < args.length; i++) {
+				String j2sSimpleClazz = args[i];
+				try {
+					Class<?> clazz = Class.forName(j2sSimpleClazz);
+					if (clazz.isInterface()) {
+						continue;
+					}
+					Object inst = clazz.newInstance();
+					if (inst instanceof SimpleSerializable) {
+						String shortenName = SimpleSerializable.getClassShortenName(j2sSimpleClazz);
+						if (shortenName != null) {
+							source.append("\tif ([className compare:@\"");
+							source.append(j2sSimpleClazz);
+							source.append("\"] == 0) {\r\n");
+							source.append("\t\treturn @\"");
+							source.append(shortenName);
+							source.append("\";\r\n");
+							source.append("\t}\r\n");
+						}
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+			source.append("\treturn nil;\r\n");
+			source.append("}\r\n");
+			source.append("\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
+			source.append("- (id) getClassFullName:(NSString *) className {\r\n");
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+
+			for (int i = 1 + 4; i < args.length; i++) {
+				String j2sSimpleClazz = args[i];
+				try {
+					Class<?> clazz = Class.forName(j2sSimpleClazz);
+					if (clazz.isInterface()) {
+						continue;
+					}
+					Object inst = clazz.newInstance();
+					if (inst instanceof SimpleSerializable) {
+						String shortenName = SimpleSerializable.getClassShortenName(j2sSimpleClazz);
+						if (shortenName != null) {
+							source.append("\tif ([className compare:@\"");
+							source.append(shortenName);
+							source.append("\"] == 0) {\r\n");
+							source.append("\t\treturn @\"");
+							source.append(j2sSimpleClazz);
+							source.append("\";\r\n");
+							source.append("\t}\r\n");
+						}
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+			SourceUtils.insertLineComment(source, "\t", index++, false);
+			source.append("\treturn nil;\r\n");
+			source.append("}\r\n");
+			source.append("\r\n");
+			SourceUtils.insertLineComment(source, "", index++, true);
+
 			source.append("@end\r\n");
 			
 			SourceUtils.updateSourceContent(new File(targetFolder, simpleClazzName + ".m"), source.toString());
