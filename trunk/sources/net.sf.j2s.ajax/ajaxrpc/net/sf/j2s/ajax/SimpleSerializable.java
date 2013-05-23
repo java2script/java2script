@@ -96,11 +96,33 @@ public class SimpleSerializable implements Cloneable {
 	};
 	
 	@J2SIgnore
-	public static void registerShortClassName(String clazzName, String shortName) {
-		synchronized (classMutex) {
-			classMappings.put(clazzName, shortName);
-			rClassMappings.put(shortName, clazzName);
+	public static void registerClassShortenName(String clazzName, String shortenName) {
+		if (shortenName == null || shortenName.length() == 0) {
+			System.out.println("Invalid shorten class name for " + clazzName);
+			return;
 		}
+		String sName = classMappings.get(clazzName);
+		if (sName != null && !sName.equals(shortenName)) {
+			System.out.println("Already existed shorten name " + sName + " for " + clazzName);
+		}
+		String fName = rClassMappings.get(shortenName);
+		if (fName != null && !fName.equals(clazzName)) {
+			System.out.println("Conficted: shorten name " + shortenName + " for " + fName + " and " + clazzName);
+		}
+		synchronized (classMutex) {
+			classMappings.put(clazzName, shortenName);
+			rClassMappings.put(shortenName, clazzName);
+		}
+	}
+	
+	@J2SIgnore
+	public static String getClassShortenName(String clazzName) {
+		return classMappings.get(clazzName);
+	}
+	
+	@J2SIgnore
+	public static String getClassFullName(String clazzName) {
+		return rClassMappings.get(clazzName);
 	}
 	
     @J2SIgnore
@@ -1199,6 +1221,7 @@ if (ss != null) {
 		}
 		buffer.append('O');
 		if (ss != null) {
+			ss.simpleVersion = simpleVersion;
 			String s = ss.serialize(null, ssObjs); 
 			int l4 = s.length();
 			if (l4 > 52) {

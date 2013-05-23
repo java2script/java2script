@@ -43,7 +43,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * @j2sNative
 	 */
 	static {
-		SimpleSerializable.registerShortClassName(SimplePipeSequence.class.getName(), "SPS");
+		SimpleSerializable.registerClassShortenName(SimplePipeSequence.class.getName(), "SPS");
 	}
 
 	@J2SIgnore
