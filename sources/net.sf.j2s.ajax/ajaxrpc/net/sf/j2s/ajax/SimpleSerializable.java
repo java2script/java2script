@@ -58,9 +58,9 @@ public class SimpleSerializable implements Cloneable {
 	@J2SIgnore
 	private static Object classMutex = new Object();
 	@J2SIgnore
-	private static Map<String, String> classMappings = new HashMap<String, String>();
+	private static Map<String, String> classNameMappings = new HashMap<String, String>();
 	@J2SIgnore
-	private static Map<String, String> rClassMappings = new HashMap<String, String>();
+	private static Map<String, String> classAliasMappings = new HashMap<String, String>();
 	
 	private int simpleVersion;
 	
@@ -101,28 +101,28 @@ public class SimpleSerializable implements Cloneable {
 			System.out.println("Invalid shorten class name for " + clazzName);
 			return;
 		}
-		String sName = classMappings.get(clazzName);
+		String sName = classNameMappings.get(clazzName);
 		if (sName != null && !sName.equals(shortenName)) {
 			System.out.println("Already existed shorten name " + sName + " for " + clazzName);
 		}
-		String fName = rClassMappings.get(shortenName);
+		String fName = classAliasMappings.get(shortenName);
 		if (fName != null && !fName.equals(clazzName)) {
 			System.out.println("Conficted: shorten name " + shortenName + " for " + fName + " and " + clazzName);
 		}
 		synchronized (classMutex) {
-			classMappings.put(clazzName, shortenName);
-			rClassMappings.put(shortenName, clazzName);
+			classNameMappings.put(clazzName, shortenName);
+			classAliasMappings.put(shortenName, clazzName);
 		}
 	}
 	
 	@J2SIgnore
 	public static String getClassShortenName(String clazzName) {
-		return classMappings.get(clazzName);
+		return classNameMappings.get(clazzName);
 	}
 	
 	@J2SIgnore
 	public static String getClassFullName(String clazzName) {
-		return rClassMappings.get(clazzName);
+		return classAliasMappings.get(clazzName);
 	}
 	
     @J2SIgnore
@@ -447,7 +447,7 @@ return strBuf;
 			clazzName = clazz.getName();
 		}
 		if (getSimpleVersion() >= 202) {
-			String shortClazzName = classMappings.get(clazzName);
+			String shortClazzName = classNameMappings.get(clazzName);
 			if (shortClazzName != null) {
 				buffer.append(shortClazzName);
 			} else {
@@ -461,14 +461,20 @@ return strBuf;
 
 		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass(), false);
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
-		String[] fMap = fieldMapping();
+		Map<String, String> fieldNameMap = getSimpleVersion() >= 202 ? fieldNameMapping() : null;
+		String[] fMap = fieldNameMap == null ? fieldMapping() : null;
 		try {
 			for (Iterator<Entry<String, Field>> itr = fields.entrySet().iterator(); itr.hasNext();) {
 				Entry<String, Field> entry = (Entry<String, Field>) itr.next();
 				String name = entry.getKey();
 				Field field = entry.getValue();
 				if (filter != null && !filter.accept(name)) continue;
-				if (fMap != null && fMap.length > 1) {
+				if (fieldNameMap != null) {
+					String alias = fieldNameMap.get(name);
+					if (alias != null && alias.length() > 0) {
+						name = alias;
+					}
+				} else if (fMap != null && fMap.length > 1) {
 					for (int j = 0; j < fMap.length / 2; j++) {
 						if (name.equals(fMap[j + j])) {
 							String newName = fMap[j + j + 1];
@@ -2042,14 +2048,20 @@ return true;
 		Class<?> clazzType = this.getClass();
 		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType, false);
 		int objectEnd = index + size;
-		String[] fMap = fieldMapping();
+		Map<String, String> fieldAliasMap = getSimpleVersion() >= 202 ? fieldAliasMapping() : null;
+		String[] fMap = fieldAliasMap == null ? fieldMapping() : null;
 		while (index < end && index < objectEnd) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
 			if (l1 < 0 || index + l1 > end) return true; // error
 			String fieldName = str.substring(index, index + l1);
 			index += l1;
-			if (fMap != null && fMap.length > 1) {
+			if (fieldAliasMap != null) {
+				String trueName = fieldAliasMap.get(fieldName);
+				if (trueName != null && trueName.length() > 0) {
+					fieldName = trueName;
+				}
+			} else if (fMap != null && fMap.length > 1) {
 				for (int i = 0; i < fMap.length / 2; i++) {
 					if (fieldName.equals(fMap[i + i + 1])) {
 						String trueName = fMap[i + i];
@@ -2912,12 +2924,60 @@ return true;
     
     /**
      * Fields with alias names.
+     * Field name -> Alias
+     * @return
+     */
+    @J2SIgnore
+    protected Map<String, String> fieldNameMapping() {
+    	return null;
+    }
+    
+    /**
+     * Fields with alias names.
+     * Alias -> Field name
+     * @return
+     */
+    @J2SIgnore
+    protected Map<String, String> fieldAliasMapping() {
+    	return null;
+    }
+    
+    /**
+     * Fields with alias names.
      * @return
      */
     protected String[] fieldMapping() {
     	return null;
     }
 
+    /**
+     * Convert #fieldMapping into #fieldAliasMapping or #fieldNameMapping.
+     * 
+     * @param array, array with string in order of field, alias, field, alias ...
+     * @param reversed, true for #fieldAliasMapping, false for fieldNameMapping
+     * @return
+     */
+    @J2SIgnore
+    public static Map<String, String> mappingFromArray(String[] array, boolean reversed) {
+    	if (array == null || array.length <= 0) {
+    		return null;
+    	}
+    	Map<String, String> mapping = new HashMap<String, String>(array.length);
+    	for (int i = 0; i < array.length / 2; i++) {
+			String name = array[i + i];
+			String alias = array[i + i + 1];
+			if (name == null || alias == null) {
+				continue;
+			}
+			if (reversed) {
+				mapping.put(alias, name);
+			} else {
+				mapping.put(name, alias);
+			}
+		}
+    	return mapping;
+    }
+    
     /**
      * Fields to be ignored while differences are being calculated.
      * @return
@@ -3073,7 +3133,7 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		if (index == -1) return null;
 		String clazzName = str.substring(start + 6, index);
 		if (v >= 202) {
-			String longClazzName = rClassMappings.get(clazzName);
+			String longClazzName = classAliasMappings.get(clazzName);
 			if (longClazzName != null) {
 				clazzName = longClazzName;
 			}
