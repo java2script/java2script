@@ -67,7 +67,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	int sequenceIndex; // Index of last SimplePipeSequence in pipeData 
 	
 	@J2SIgnore
-	int bufferedIndex; // Index of last buffered object in pipeData 
+	int bufferedIndex; // Index of last buffered object in pipeData, data before this object is sent 
 	
 	@J2SIgnore
 	List<SimpleSerializable> pipeData;
@@ -100,11 +100,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	@J2SIgnore
 	public long getSequence() {
 		return pipeSequence;
-	}
-
-	@J2SIgnore
-	public long increaseSequence() {
-		return ++pipeSequence;
 	}
 
 	@J2SIgnore
@@ -423,21 +418,6 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			Method method = null;
 			
 			Class<?> clzz = getClass();
-			String clazzName = clzz.getName();
-			int idx = -1;
-			while ((idx = clazzName.lastIndexOf('$')) != -1) {
-				if (clazzName.length() > idx + 1) {
-					char ch = clazzName.charAt(idx + 1);
-					if (ch < '0' || ch > '9') { // not a number
-						break; // inner class
-					}
-				}
-				clzz = clzz.getSuperclass();
-				if (clzz == null) {
-					break; // should never happen!
-				}
-				clazzName = clzz.getName();
-			}
 			if (clzz != null) {
 				do {
 					try {
@@ -447,12 +427,13 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 					if (method != null) {
 						Class<?> returnType = method.getReturnType();
 						if (returnType == boolean.class) {
+							method.setAccessible(true);
 							Object result = method.invoke(this, ss);
 							return ((Boolean) result).booleanValue();
 						}
 					}
 					clazz = clazz.getSuperclass();
-				} while (clazz != null);
+				} while (clazz != null && clazz != SimpleSerializable.class);
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
