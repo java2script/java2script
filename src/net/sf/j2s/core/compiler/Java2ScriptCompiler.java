@@ -41,6 +41,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
 		final IProject project = binaryFolder.getProject();
+		/*
 		synchronized (project) {
 			if (Java2ScriptProjectNature.hasJavaBuilder(project)) {
 				if (Java2ScriptProjectNature.removeJavaBuilder(project)) {
@@ -62,6 +63,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 			}
 		}
+		// */
 		String prjFolder = project.getLocation().toOSString();
 		File file = new File(prjFolder, ".j2s"); //$NON-NLS-1$
 		if (!file.exists()) {
