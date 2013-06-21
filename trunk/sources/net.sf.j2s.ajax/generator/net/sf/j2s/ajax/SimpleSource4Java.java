@@ -13,10 +13,11 @@ package net.sf.j2s.ajax;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +32,8 @@ public class SimpleSource4Java {
 	static String author = "Author";
 	static String company = "Company";
 
+	static Set<Class<?>> eventClasses = new HashSet<Class<?>>();
+	
 	@SuppressWarnings("deprecation")
 	public static String generateSourceFromInterface(Class<?> interfaceClazz) {
 		StringBuffer source = new StringBuffer();
@@ -247,6 +250,7 @@ public class SimpleSource4Java {
 			source.append(superClazzName);
 			source.append(";\r\n");
 			if (SimpleSerializable.isSubclassOf(superClazz, SimplePipeRunnable.class)) {
+				/*
 				Method[] methods = s.getClass().getMethods();
 				if (methods != null) {
 					for (int i = 0; i < methods.length; i++) {
@@ -262,6 +266,28 @@ public class SimpleSource4Java {
 							}
 						}
 					}
+				}
+				// */
+				Class<?>[] evtClazzes = eventClasses.toArray(new Class<?>[eventClasses.size()]);
+				Arrays.sort(evtClazzes, new Comparator<Class<?>>() {
+
+					public int compare(Class<?> c1, Class<?> c2) {
+						String name1 = c1.getName();
+						String name2 = c2.getName();
+						return name1.compareTo(name2);
+					}
+					
+				});
+				source.append("import net.sf.j2s.ajax.SimpleSerializable;\r\n");
+				for (int i = 0; i < evtClazzes.length; i++) {
+					Class<?> evtClazz = evtClazzes[i];
+					String evtClazzName = evtClazz.getName();
+					if ("net.sf.j2s.ajax.SimpleSerializable".equals(evtClazzName)) {
+						continue;
+					}
+					source.append("import ");
+					source.append(evtClazzName);
+					source.append(";\r\n");
 				}
 			}
 
@@ -416,6 +442,7 @@ public class SimpleSource4Java {
 			source.append("\t}\r\n");
 			source.append("\r\n");
 			
+			/*
 			Method[] methods = s.getClass().getMethods();
 			if (methods != null) {
 				for (int i = 0; i < methods.length; i++) {
@@ -441,6 +468,34 @@ public class SimpleSource4Java {
 						}
 					}
 				}
+			}
+			// */
+			Class<?>[] evtClazzes = eventClasses.toArray(new Class<?>[eventClasses.size()]);
+			Arrays.sort(evtClazzes, new Comparator<Class<?>>() {
+
+				public int compare(Class<?> c1, Class<?> c2) {
+					String name1 = c1.getSimpleName();
+					String name2 = c2.getSimpleName();
+					return name1.compareTo(name2);
+				}
+				
+			});
+			for (int i = 0; i < evtClazzes.length; i++) {
+				Class<?> evtClazz = evtClazzes[i];
+				String evtClazzName = evtClazz.getName();
+				if ("net.sf.j2s.ajax.SimpleSerializable".equals(evtClazzName)) {
+					continue;
+				}
+				int paramIdx = evtClazzName.lastIndexOf('.');
+				if (paramIdx != -1) {
+					evtClazzName = evtClazzName.substring(paramIdx + 1);
+				}
+				source.append("\tpublic boolean deal(");
+				source.append(evtClazzName);
+				source.append(" e) {\r\n");
+				source.append("\t\treturn true;\r\n");
+				source.append("\t}\r\n");
+				source.append("\r\n");
 			}
 			moreCodesAdded = true;
 		} else if (s instanceof SimpleRPCRunnable) {
@@ -483,7 +538,24 @@ public class SimpleSource4Java {
 		folder = f.getName();
 		author = args[1];
 		company = args[2];
-		
+
+		for (int i = 1 + 2; i < args.length; i++) {
+			String j2sSimpleClazz = args[i];
+			try {
+				Class<?> clazz = Class.forName(j2sSimpleClazz);
+				if (clazz.isInterface()) {
+					continue;
+				}
+				Object inst = clazz.newInstance();
+				if (inst instanceof SimpleSerializable && !(inst instanceof SimpleRPCRunnable)) {
+					eventClasses.add(clazz);
+				}
+			} catch (Throwable e) {
+				System.out.println("Error: " + j2sSimpleClazz);
+				e.printStackTrace();
+			}
+		}
+
 		for (int i = 1 + 2; i < args.length; i++) {
 			String j2sSimpleClazz = args[i];
 			try {
