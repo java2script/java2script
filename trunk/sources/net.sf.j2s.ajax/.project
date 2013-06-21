@@ -5,8 +5,24 @@
 	<projects>
 	</projects>
 	<buildSpec>
+		<!--
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		-->
+		<!--
+		DO NOT enable both javabuilder and java2scriptbuilder,
+		or Eclipse will be locked in building this project.
+		
+		If you are building Java2Script from SVN, try to enable
+		javabuilder and disable java2scriptbuilder first and build
+		out Java2Script plug-in. And after installing Java2Script,
+		try to disable javabuilder and re-enable java2scriptbuilder.
+		-->
+		<buildCommand>
+			<name>net.sf.j2s.core.java2scriptbuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -17,11 +33,6 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.pde.SchemaBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>net.sf.j2s.core.java2scriptbuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
