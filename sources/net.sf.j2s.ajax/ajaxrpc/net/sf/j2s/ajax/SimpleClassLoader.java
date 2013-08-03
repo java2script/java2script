@@ -70,7 +70,7 @@ public class SimpleClassLoader extends ClassLoader {
 				}
 	    		return clazz;
 	        } catch (Throwable e) {
-	        	e.printStackTrace();
+	        	//e.printStackTrace();
 	        }
 		}
 		return getParent().loadClass(clazzName);
@@ -122,7 +122,7 @@ public class SimpleClassLoader extends ClassLoader {
 				return runnableClass.newInstance();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 	}
