@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -192,6 +193,16 @@ public class SimpleSource4Java {
 		
 		boolean hasMoreImports = false;
 		Set<String> importedClasses = new HashSet<String>();
+		
+		Map<String, String> fieldMappings = s.fieldNameMapping();
+		if (fieldMappings != null && fieldMappings.size() > 0) {
+			hasMoreImports = true;
+			String mapTypeName = "java.util.Map";
+			source.append("import ");
+			source.append(mapTypeName);
+			source.append(";\r\n");
+			importedClasses.add(mapTypeName);
+		}
 
 		Type[] interfaces = s.getClass().getGenericInterfaces();
 		if (interfaces != null && interfaces.length > 0) {
@@ -341,6 +352,23 @@ public class SimpleSource4Java {
 		source.append("{\r\n\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 		
+		if (fieldMappings != null && fieldMappings.size() > 0) {
+			source.append("\tprivate static String[] mappings = new String[] {\r\n");
+			for (Iterator<String> itr = fieldMappings.keySet().iterator(); itr.hasNext();) {
+				String key = (String) itr.next();
+				String value = fieldMappings.get(key);
+				source.append("\t\t\t\"");
+				source.append(key);
+				source.append("\", \"");
+				source.append(value);
+				source.append("\",\r\n");
+			}
+			source.append("\t};\r\n");
+			
+			source.append("\tprivate static Map<String, String> nameMappings = mappingFromArray(mappings, false);\r\n");
+			source.append("\tprivate static Map<String, String> aliasMappings = mappingFromArray(mappings, true);\r\n");
+		}
+		
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
@@ -350,6 +378,9 @@ public class SimpleSource4Java {
 				if (type == int.class || type == long.class || type == short.class 
 						|| type == byte.class || type == char.class || type == double.class
 						|| type == float.class || type == boolean.class || type == String.class) {
+					if (!gotStaticFinalFields && fieldMappings != null && fieldMappings.size() > 0) {
+						source.append("\r\n");
+					}
 					source.append("\tpublic static final ");
 					source.append(type.getSimpleName());
 					source.append(" ");
@@ -423,6 +454,17 @@ public class SimpleSource4Java {
 		source.append("\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 		boolean moreCodesAdded = false;
+		if (fieldMappings != null && fieldMappings.size() > 0) {
+			source.append("\t@Override\r\n");
+			source.append("\tprotected Map<String, String> fieldNameMapping() {\r\n");
+			source.append("\t\treturn nameMappings;\r\n");
+			source.append("\t}\r\n\r\n");
+			source.append("\t@Override\r\n");
+			source.append("\tprotected Map<String, String> fieldAliasMapping() {\r\n");
+			source.append("\t\treturn aliasMappings;\r\n");
+			source.append("\t}\r\n\r\n");
+			moreCodesAdded = true;
+		}
 		if (s.bytesCompactMode()) {
 			source.append("\tpublic boolean bytesCompactMode() {\r\n");
 			source.append("\t\treturn true;\r\n");
