@@ -73,6 +73,19 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	List<SimpleSerializable> pipeData;
 	
 	@J2SIgnore
+	int pipeMode;
+	
+	@J2SIgnore
+	public int getPipeMode() {
+		return pipeMode;
+	}
+
+	@J2SIgnore
+	public void setPipeMode(int pipeMode) {
+		this.pipeMode = pipeMode;
+	}
+
+	@J2SIgnore
 	public List<SimpleSerializable> getPipeData() {
 		return pipeData;
 	}
