@@ -85,6 +85,17 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		this.pipeMode = pipeMode;
 	}
 
+	/**
+	 * Detect whether it is OK to send a status ok heart beat or not.
+	 * This method is considered as CPU sensitive.
+	 * @param now
+	 * @return whether send heart beat or not
+	 */
+	@J2SIgnore
+	public boolean checkCometStatus(long now) {
+		return false;
+	}
+	
 	@J2SIgnore
 	public List<SimpleSerializable> getPipeData() {
 		return pipeData;
