@@ -11,8 +11,10 @@
 package net.sf.j2s.ajax;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import net.sf.j2s.ajax.SimpleRPCRunnable;
@@ -76,6 +78,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	int pipeMode;
 	
 	@J2SIgnore
+	Object dealMutex;
+	
+	@J2SIgnore
+	Set<String> nonExistedDeals;
+	
+	@J2SIgnore
 	public int getPipeMode() {
 		return pipeMode;
 	}
@@ -131,6 +139,16 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		pipeSequence = sequence;
 	}
 
+	@J2SIgnore
+	public boolean isMonitoringEvents() {
+		return false;
+	}
+	
+	@J2SIgnore
+	public void pipeDataOK(SimpleSerializable ... evts) {
+		
+	}
+	
 	@J2SIgnore
 	public void setPipeHelper(SimplePipeHelper.IPipeThrough helper) {
 		pipeManaged = true;
@@ -444,16 +462,31 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			Class<?> clzz = getClass();
 			if (clzz != null) {
 				do {
-					try {
-						method = clzz.getMethod("deal", clazz);
-					} catch (Exception e) {
-					}
-					if (method != null) {
-						Class<?> returnType = method.getReturnType();
-						if (returnType == boolean.class) {
-							method.setAccessible(true);
-							Object result = method.invoke(this, ss);
-							return ((Boolean) result).booleanValue();
+					if (nonExistedDeals == null || !nonExistedDeals.contains(clazz.getName())) {
+						try {
+							method = clzz.getMethod("deal", clazz);
+						} catch (Exception e) {
+							if (dealMutex == null) {
+								synchronized (this) {
+									if (dealMutex == null) {
+										dealMutex = new Object();
+									}
+								}
+							}
+							synchronized (dealMutex) {
+								if (nonExistedDeals == null) {
+									nonExistedDeals = new HashSet<String>();
+								}
+								nonExistedDeals.add(clazz.getName());
+							}
+						}
+						if (method != null) {
+							Class<?> returnType = method.getReturnType();
+							if (returnType == boolean.class) {
+								method.setAccessible(true);
+								Object result = method.invoke(this, ss);
+								return ((Boolean) result).booleanValue();
+							}
 						}
 					}
 					clazz = clazz.getSuperclass();
