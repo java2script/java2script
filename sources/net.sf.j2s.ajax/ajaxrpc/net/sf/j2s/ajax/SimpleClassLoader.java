@@ -15,9 +15,11 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +35,7 @@ import java.util.Set;
 public class SimpleClassLoader extends ClassLoader {
 
 	private String classpath;
+	private String tag;
 	
 	private Set<String> targetClasses;
 	private Map<String, Class<?>> loadedClasses;
@@ -42,12 +45,17 @@ public class SimpleClassLoader extends ClassLoader {
 	private static ClassLoader defaultLoader = SimpleClassLoader.class.getClassLoader();
 	private static Map<String, SimpleClassLoader> allLoaders = new HashMap<String, SimpleClassLoader>();
 	
-	public SimpleClassLoader(ClassLoader parent, String path) {
+	public SimpleClassLoader(ClassLoader parent, String path, String tag) {
 		super(parent);
 		targetClasses = new HashSet<String>();
 		loadedClasses = new HashMap<String, Class<?>>();
 		loadingMutex = new Object();
 		classpath = path;
+		this.tag = tag;
+	}
+	
+	protected boolean isSystemClass(String clazzName) {
+		return clazzName.startsWith("java.") || clazzName.startsWith("javax.");
 	}
 
 	@Override
@@ -61,11 +69,10 @@ public class SimpleClassLoader extends ClassLoader {
 	        	synchronized (loadingMutex) {
 	        		clazz = loadedClasses.get(clazzName);
 	    			if (clazz == null) {
+	    				// The following two lines are IO sensitive
 			            byte[] bytes = loadClassData(clazzName);
 			            clazz = defineClass(clazzName, bytes, 0, bytes.length);
-			    		synchronized (loadedClasses) {
-			    			loadedClasses.put(clazzName, clazz);
-			    		}
+		    			loadedClasses.put(clazzName, clazz);
 	    			}
 				}
 	    		return clazz;
@@ -73,7 +80,16 @@ public class SimpleClassLoader extends ClassLoader {
 	        	//e.printStackTrace();
 	        }
 		}
-		return getParent().loadClass(clazzName);
+		Class<?> clazz = getParent().loadClass(clazzName);
+		if (isSystemClass(clazzName)) {
+			return clazz;
+		} // else add to loaded classes map
+    	synchronized (loadingMutex) {
+			if (!loadedClasses.containsKey(clazzName)) {
+				loadedClasses.put(clazzName, clazz);
+			}
+    	}
+		return clazz;
 	}
 	
 	/*
@@ -136,30 +152,160 @@ public class SimpleClassLoader extends ClassLoader {
 	 * @param classpath for the given class
 	 */
 	public static void reloadSimpleClass(String clazzName, String path) {
+		reloadSimpleClasses(new String[] { clazzName }, path, null);
+	}
+
+	/**
+	 * Try to reload given classes.
+	 * 
+	 * Class should contains default constructor.
+	 * 
+	 * @param clazzNames
+	 * @param classpath for the given class
+	 * @param tag, with specified tag
+	 */
+	public static void reloadSimpleClasses(String[] clazzNames, String path, String tag) {
 		hasClassReloaded = true;
 		SimpleClassLoader loader = null;
+		Set<SimpleClassLoader> checkedLoaders = new HashSet<SimpleClassLoader>();
 		synchronized (allLoaders) {
 			for (Iterator<SimpleClassLoader> itr = allLoaders.values().iterator();
 					itr.hasNext();) {
 				loader = (SimpleClassLoader) itr.next();
-				if (!loader.loadedClasses.containsKey(clazzName)
-						&& ((loader.classpath == null && path == null) || loader.classpath.equals(path))) {
-					// Class loader does not know class specified by clazzName variable
-					break;
+				if (checkedLoaders.contains(loader)) {
+					loader = null;
+					continue;
+				}
+				checkedLoaders.add(loader);
+				if ((tag == null // for tag is null, use any existed loader
+								|| (loader.tag != null && loader.tag.equals(tag)))
+						&& ((loader.classpath == null && path == null)
+								|| (loader.classpath != null && loader.classpath.equals(path)))) {
+					boolean loaded = false;
+					for (int i = 0; i < clazzNames.length; i++) {
+						String name = clazzNames[i];
+						if (name != null && name.length() > 0
+								&& loader.loadedClasses.containsKey(name)) {
+							loaded = true;
+							break;
+						}
+					}
+					if (!loaded) {
+						// Class loader does not know class specified by clazzName variable
+						break;
+					}
 				}
 				loader = null;
 			}
+			boolean creatingMore = false;
+			if (loader == null) {
+				loader = new SimpleClassLoader(defaultLoader, path, tag);
+				creatingMore = true;
+			}
+			for (int i = 0; i < clazzNames.length; i++) {
+				String name = clazzNames[i];
+				if (name != null && name.length() > 0) {
+					loader.targetClasses.add(name);
+				}
+			}
+			if (creatingMore) { // keep it in all loaders
+				allLoaders.put("." + (checkedLoaders.size() + 1), loader);
+			}
+			for (int i = 0; i < clazzNames.length; i++) {
+				String name = clazzNames[i];
+				if (name != null && name.length() > 0) {
+					allLoaders.put(name, loader);
+				}
+			}
 		}
-		if (loader == null) {
-			loader = new SimpleClassLoader(defaultLoader, path);
+		for (int i = 0; i < clazzNames.length; i++) {
+			String name = clazzNames[i];
+			if (name != null && name.length() > 0) {
+				SimpleSerializable.removeCachedClassFields(name);
+			}
 		}
-		synchronized (loader.targetClasses) {
-			loader.targetClasses.add(clazzName);
-		}
-		synchronized (allLoaders) {
-			allLoaders.put(clazzName, loader);
-		}
-		SimpleSerializable.removeCachedClassFields(clazzName);
 	}
     
+	public static void releaseUnusedClassLoaders() {
+		List<String> removingKeys = new ArrayList<String>();
+		synchronized (allLoaders) {
+			for (Iterator<String> itr = allLoaders.keySet().iterator(); itr.hasNext();) {
+				String key = (String) itr.next();
+				if (key.startsWith(".")) {
+					removingKeys.add(key);
+				}
+			}
+			for (Iterator<String> itr = removingKeys.iterator(); itr.hasNext();) {
+				String key = (String) itr.next();
+				allLoaders.remove(key);
+			}
+		}		
+	}
+	
+	public static String allLoaderStatuses() {
+		StringBuffer buffer = new StringBuffer();
+		Set<SimpleClassLoader> checkedLoaders = new HashSet<SimpleClassLoader>();
+		synchronized (allLoaders) {
+			int count = 0;
+			for (Iterator<SimpleClassLoader> itr = allLoaders.values().iterator();
+					itr.hasNext();) {
+				SimpleClassLoader loader = (SimpleClassLoader) itr.next();
+				if (checkedLoaders.contains(loader)) {
+					continue;
+				}
+				checkedLoaders.add(loader);
+				count++;
+				buffer.append("Classloader ");
+				buffer.append(count);
+				buffer.append(" ");
+				buffer.append(loader.toString());
+				buffer.append("\r\n");
+				buffer.append("classpath : ");
+				buffer.append(loader.classpath);
+				buffer.append("\r\n");
+				if (loader.tag != null) {
+					buffer.append("tag : ");
+					buffer.append(loader.tag);
+					buffer.append("\r\n");
+				}
+				buffer.append("active classes : ");
+				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
+						.hasNext();) {
+					String clazz = (String) iter.next();
+					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
+					if (clazzLoader == loader) {
+						buffer.append(clazz);
+						buffer.append(", ");
+					}
+				}
+				buffer.append("\r\n");
+				buffer.append("inactive classes : ");
+				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
+						.hasNext();) {
+					String clazz = (String) iter.next();
+					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
+					if (clazzLoader != null && clazzLoader != loader) {
+						buffer.append(clazz);
+						buffer.append(", ");
+					}
+				}
+				buffer.append("\r\n");
+				buffer.append("other classes : ");
+				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
+						.hasNext();) {
+					String clazz = (String) iter.next();
+					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
+					if (clazzLoader == null) {
+						buffer.append(clazz);
+						buffer.append(", ");
+					}
+				}
+				buffer.append("\r\n\r\n");
+			} // end of for values
+			buffer.append("Total classloaders : ");
+			buffer.append(count);
+		}
+		return buffer.toString();
+	}
+	
 }
