@@ -60,7 +60,21 @@ public class SimpleClassLoader extends ClassLoader {
 
 	@Override
 	public Class<?> loadClass(String clazzName) throws ClassNotFoundException {
-		if (targetClasses.contains(clazzName)) {
+		boolean contains = targetClasses.contains(clazzName);
+		if (!contains) {
+			// Check inner classes
+			int idx = clazzName.indexOf('$');
+			if (idx != -1) { // RPC$1
+				contains = targetClasses.contains(clazzName.substring(0, idx));
+			}
+			if (!contains) {
+				idx = clazzName.lastIndexOf('.');
+				if (idx != -1) { // RPC.User or net.sf.j2s.XXXRPC
+					contains = targetClasses.contains(clazzName.substring(0, idx));
+				}
+			}
+		}
+		if (contains) {
 			Class<?> clazz = loadedClasses.get(clazzName);
 			if (clazz != null) {
 				return clazz;
