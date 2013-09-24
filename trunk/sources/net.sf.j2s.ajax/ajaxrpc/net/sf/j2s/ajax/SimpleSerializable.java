@@ -64,6 +64,8 @@ public class SimpleSerializable implements Cloneable {
 	
 	private int simpleVersion;
 	
+	private boolean classNameAbbrev = true;
+	
 	public int getSimpleVersion() {
 		if (simpleVersion <= 0) {
 			return 201;
@@ -446,7 +448,7 @@ return strBuf;
 			}
 			clazzName = clazz.getName();
 		}
-		if (getSimpleVersion() >= 202) {
+		if (getSimpleVersion() >= 202 && classNameAbbrev) {
 			String shortClazzName = classNameMappings.get(clazzName);
 			if (shortClazzName != null) {
 				buffer.append(shortClazzName);
@@ -3143,7 +3145,11 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		}
 		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
 		if (inst != null && inst instanceof SimpleSerializable) {
-			return (SimpleSerializable) inst;
+			SimpleSerializable ss = (SimpleSerializable) inst;
+			if (v >= 202) {
+				ss.classNameAbbrev = !clazzName.equals(str.substring(start + 6, index));
+			}
+			return ss;
 		}
 		return UNKNOWN;
 	}
