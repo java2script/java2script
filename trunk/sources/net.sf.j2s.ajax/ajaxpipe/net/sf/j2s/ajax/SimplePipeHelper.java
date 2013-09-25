@@ -118,7 +118,7 @@ public class SimplePipeHelper {
 	 */
 	@J2SIgnore
 	static String nextPipeKey() {
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(SimplePipeRequest.PIPE_KEY_LENGTH);
 		for (int i = 0; i < SimplePipeRequest.PIPE_KEY_LENGTH; i++) {
 			int r = (int) Math.round((float) Math.random() * 61); // 0..61, total 62 numbers
 			if (r < 10) {

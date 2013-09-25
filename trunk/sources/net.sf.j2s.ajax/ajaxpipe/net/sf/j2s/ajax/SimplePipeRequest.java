@@ -79,32 +79,32 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	/**
 	 * Type of pipe request: query
 	 */
-	public static final String PIPE_TYPE_QUERY = "q"; // "query";
+	public static final char PIPE_TYPE_QUERY = 'q';
 	
 	/**
 	 * Type of pipe request: subdomain-query
 	 */
-	public static final String PIPE_TYPE_SUBDOMAIN_QUERY = "u"; // "subdomain-query";
+	public static final char PIPE_TYPE_SUBDOMAIN_QUERY = 'u';
 	
 	/**
 	 * Type of pipe request: notify
 	 */
-	public static final String PIPE_TYPE_NOTIFY = "n"; // "notify";
+	public static final char PIPE_TYPE_NOTIFY = 'n';
 	
 	/**
 	 * Type of pipe request: script
 	 */
-	public static final String PIPE_TYPE_SCRIPT = "s"; // "script";
+	public static final char PIPE_TYPE_SCRIPT = 's';
 	
 	/**
 	 * Type of pipe request: xss
 	 */
-	public static final String PIPE_TYPE_XSS = "x"; // "xss";
+	public static final char PIPE_TYPE_XSS = 'x';
 	
 	/**
 	 * Type of pipe request: continuum
 	 */
-	public static final String PIPE_TYPE_CONTINUUM = "c"; // "continuum";
+	public static final char PIPE_TYPE_CONTINUUM = 'c';
 	
 	
 	/**
@@ -191,12 +191,17 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 * @param pipeRequestType
 	 * @return request data for both GET and POST request. 
 	 */
-	protected static String constructRequest(String pipeKey, String pipeRequestType, long pipeSequence) {
+	protected static String constructRequest(String pipeKey, char pipeRequestType, long pipeSequence) {
 		reqCount++;
-		return FORM_PIPE_KEY + "=" + pipeKey + "&" 
+		/**
+		 * @j2sNative
+		 * return"k="+pipeKey+"&t="+pipeRequestType+"&s="+pipeSequence+"&r="+net.sf.j2s.ajax.SimplePipeRequest.reqCount;
+		 */ {
+			return FORM_PIPE_KEY + "=" + pipeKey + "&" 
 				+ FORM_PIPE_TYPE + "=" + pipeRequestType + "&"
 				+ FORM_PIPE_SEQUENCE + "=" + pipeSequence + "&"
 				+ FORM_PIPE_RANDOM + "=" + reqCount;
+		 }
 	}
 	
 	protected static void sendRequest(HttpRequest request, String method, String url, 
