@@ -112,9 +112,10 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
-		String type = req.getParameter(SimplePipeRequest.FORM_PIPE_TYPE);
-		if (type == null) {
-			type = SimplePipeRequest.PIPE_TYPE_CONTINUUM;
+		char type = SimplePipeRequest.PIPE_TYPE_CONTINUUM;
+		String typeStr = req.getParameter(SimplePipeRequest.FORM_PIPE_TYPE);
+		if (typeStr != null && typeStr.length() > 0) {
+			type = typeStr.charAt(0);
 		}
 		String domain = req.getParameter(SimplePipeRequest.FORM_PIPE_DOMAIN);
 		doPipe(resp, key, type, domain);
@@ -139,14 +140,14 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	 * type = notify
 	 * Notify that client (browser) still keeps the pipe connection.
 	 */ 
-	protected void doPipe(final HttpServletResponse resp, String key, String type, String domain)
+	protected void doPipe(final HttpServletResponse resp, String key, char type, String domain)
 			throws IOException {
 		PrintWriter writer = null;
 		resp.setHeader("Pragma", "no-cache");
 		resp.setHeader("Cache-Control", "no-cache");
 		resp.setDateHeader("Expires", 0);
 		
-		if (SimplePipeRequest.PIPE_TYPE_NOTIFY.equals(type)) {
+		if (SimplePipeRequest.PIPE_TYPE_NOTIFY == type) {
 			/*
 			 * Client send in "notify" request to execute #notifyPipeStatus, see below comments
 			 */
@@ -160,7 +161,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write("\");");
 			return;
 		}
-		if (SimplePipeRequest.PIPE_TYPE_SUBDOMAIN_QUERY.equals(type)) { // subdomain query
+		if (SimplePipeRequest.PIPE_TYPE_SUBDOMAIN_QUERY == type) { // subdomain query
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
 			StringBuffer buffer = new StringBuffer();
@@ -189,11 +190,11 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write(buffer.toString());
 			return;
 		}
-		boolean isContinuum = SimplePipeRequest.PIPE_TYPE_CONTINUUM.equals(type);
+		boolean isContinuum = SimplePipeRequest.PIPE_TYPE_CONTINUUM == type;
 		if (isContinuum) {
 			resp.setHeader("Transfer-Encoding", "chunked");
 		}
-		boolean isScripting = SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type);
+		boolean isScripting = SimplePipeRequest.PIPE_TYPE_SCRIPT == type;
 		if (isScripting) { // iframe
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
@@ -211,8 +212,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.write(buffer.toString());
 			writer.flush();
 		} else {
-			if (SimplePipeRequest.PIPE_TYPE_QUERY.equals(type)
-					|| isContinuum) {
+			if (SimplePipeRequest.PIPE_TYPE_QUERY == type || isContinuum) {
 				resp.setContentType("text/plain; charset=utf-8");
 			} else {
 				resp.setContentType("text/javascript; charset=utf-8");
@@ -345,28 +345,27 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		}
 	}
 
-	protected static String output(String type, String key,
-			String str) {
+	protected static String output(char type, String key, String str) {
 		StringBuffer buffer = new StringBuffer();
-		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { 
+		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { 
 			// iframe, so $ is a safe method identifier
 			buffer.append("<script type=\"text/javascript\">$ (\"");
-		} else if (SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
+		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
 			buffer.append("$p1p3p$ (\""); // $p1p3p$
 		}
 		buffer.append(key);
-		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type) 
-				|| SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
+		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type 
+				|| SimplePipeRequest.PIPE_TYPE_XSS == type) {
 			str = str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\r", "\\\\r")
 					.replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\"");
-			if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) {
+			if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) {
 				str = str.replaceAll("<\\/script>", "<\\/scr\" + \"ipt>");
 			}
 		}
 		buffer.append(str);
-		if (SimplePipeRequest.PIPE_TYPE_SCRIPT.equals(type)) { // iframe
+		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { // iframe
 			buffer.append("\");</script>\r\n");
-		} else if (SimplePipeRequest.PIPE_TYPE_XSS.equals(type)) {
+		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
 			buffer.append("\");\r\n");
 		}
 		return buffer.toString();
