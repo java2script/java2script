@@ -229,12 +229,17 @@ public class SimpleSource4Java {
 		Field[] clazzFields = clazz.getDeclaredFields();
 		
 		List<Field> fields = new ArrayList<Field>();
+		Set<String> j2sIgnoredFileds = new HashSet<String>();
+		
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			int modifiers = f.getModifiers();
 			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
 				fields.add(f);
+				if ((modifiers & Modifier.PROTECTED) != 0) {
+					j2sIgnoredFileds.add(f.getName());
+				}
 			}
 		}
 
@@ -411,19 +416,6 @@ public class SimpleSource4Java {
 			source.append("\tprivate static Map<String, String> aliasMappings = mappingFromArray(mappings, true);\r\n");
 		}
 		
-		Set<String> j2sIgnoredFileds = new HashSet<String>();
-		
-		for (int i = 0; i < clazzFields.length; i++) {
-			Field f = clazzFields[i];
-			int modifiers = f.getModifiers();
-			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
-					&& (modifiers & (Modifier.TRANSIENT | Modifier.STATIC)) == 0) {
-				fields.add(f);
-				if ((modifiers & Modifier.PROTECTED) != 0) {
-					j2sIgnoredFileds.add(f.getName());
-				}
-			}
-		}
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
 			String name = f.getName();
