@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -125,6 +126,24 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				return false;
 			}
 		}
+		boolean staticFields = false;
+		IVariableBinding varBinding = null;
+		IBinding nameBinding = node.resolveBinding();
+		if (nameBinding instanceof IVariableBinding) {
+			varBinding = (IVariableBinding) nameBinding;
+		}
+		ITypeBinding declaring = null;
+		String qdName = null;
+		if (!supportsObjectStaticFields && varBinding != null 
+				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qdName.startsWith("net.sf.j2s.html.")) {
+			IBinding qBinding = node.getQualifier().resolveBinding();
+			if (!(qBinding != null && qBinding instanceof ITypeBinding)) {
+				staticFields = true;
+			}
+		}
 		ASTNode parent = node.getParent();
 		boolean qualifierVisited = false;
 		if (parent != null && !(parent instanceof QualifiedName)) {
@@ -180,7 +199,19 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 							name = "d$";
 						}
 						if (name.length() != 0) {
-							buffer.append(name);
+							if (staticFields) {
+								if (qualifier instanceof SimpleName) {
+									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+								} else {
+									buffer.append('(');
+									buffer.append(name);
+									buffer.append(", ");
+									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(')');
+								}
+							} else {
+								buffer.append(name);
+							}
 							buffer.append('.');
 							qualifierVisited = true;
 						}
@@ -196,7 +227,19 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			return false;
 		}
 		if (!qualifierVisited) {
-			node.getQualifier().accept(this);
+			if (staticFields) {
+				if (qName instanceof SimpleName) {
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				} else {
+					buffer.append('(');
+					node.getQualifier().accept(this);
+					buffer.append(", ");
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(')');
+				}
+			} else {
+				node.getQualifier().accept(this);
+			}
 			buffer.append('.');
 		}
 		node.getName().accept(this);

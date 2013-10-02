@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -92,6 +93,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	
 	protected int currentBlockForVisit = -1;
 	
+	protected boolean supportsObjectStaticFields = false;
+	
+	public boolean isSupportsObjectStaticFields() {
+		return supportsObjectStaticFields;
+	}
+
+	public void setSupportsObjectStaticFields(boolean supportsObjectStaticFields) {
+		this.supportsObjectStaticFields = supportsObjectStaticFields;
+	}
+
 	protected void boxingNode(ASTNode element) {
 		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
 	}
@@ -269,6 +280,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(Assignment node) {
 		Expression left = node.getLeftHandSide();
+		Expression right = node.getRightHandSide();
 		IVariableBinding varBinding = null;
 		if (left instanceof Name) {
 			Name leftName = (Name) left;
@@ -280,6 +292,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		String op = node.getOperator().toString();
 		ITypeBinding declaring = null;
 		String qName = null;
 		if (varBinding != null 
@@ -287,62 +300,43 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& (declaring = varBinding.getDeclaringClass()) != null 
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append("(((");
-			} else {
+			boolean directStaticAccess = left instanceof SimpleName
+					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
+					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
+			ASTNode parent = node.getParent();
+			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess) && !(parent instanceof Statement);
+			if (needParenthesis) {
 				buffer.append("(");
 			}
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
 				if (!(leftName.getQualifier() instanceof SimpleName)) {
 					leftName.getQualifier().accept(this);
+					buffer.append(", ");
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
 				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
+					buffer.append(", ");
 				}
 			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(") || true) ? ($t$ = ");
-			} else {
-				buffer.append("$t$ = ");
+			if (supportsObjectStaticFields) {
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(".prototype.");
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" = ");
 			}
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			buffer.append(' ');
-			String op = node.getOperator().toString();
-			buffer.append(op);
-			Expression right = node.getRightHandSide();
-			buffer.append(' ');
-			boxingNode(right);
 			
-			buffer.append(", ");
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append(".prototype.");
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			buffer.append(" = ");
 			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
@@ -355,17 +349,63 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				Name leftName = (Name) left;
 				leftName.accept(this);
 			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(", $t$) : 0)");
+			buffer.append(' ');
+			boolean isMixedOp = op.trim().length() > 1;
+			ITypeBinding leftTypeBinding = left.resolveTypeBinding();
+			if (leftTypeBinding != null && "char".equals(leftTypeBinding.getName())) {
+				ITypeBinding rightTypeBinding = right.resolveTypeBinding();
+				if (!isMixedOp) { // =
+					buffer.append(op);
+					buffer.append(' ');
+					if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName())) {
+						boxingNode(right);
+					} else {
+						buffer.append("String.fromCharCode (");
+						boxingNode(right);
+						buffer.append(')');
+					}
+				} else {
+					buffer.append("= String.fromCharCode (");
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append('.');
+					if (left instanceof QualifiedName) {
+						QualifiedName leftName = (QualifiedName) left;
+						leftName.getName().accept(this);
+					} else if (left instanceof FieldAccess) {
+						FieldAccess leftAccess = (FieldAccess) left;
+						leftAccess.getName().accept(this);
+					} else {
+						Name leftName = (Name) left;
+						leftName.accept(this);
+					}
+					buffer.append(".charCodeAt (0) ");
+					buffer.append(op.charAt(0));
+					buffer.append(' ');
+					if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName())) {
+						Object constValue = right.resolveConstantExpressionValue();
+						if (constValue != null && constValue instanceof Character) {
+							buffer.append(((Character) constValue).charValue() + 0);
+						} else {
+							boxingNode(right);
+							buffer.append(".charCodeAt (0)");
+						}
+					} else {
+						boxingNode(right);
+					}
+					buffer.append(")");
+				}
 			} else {
-				buffer.append(", $t$)");
+				buffer.append(op);
+				buffer.append(' ');
+				boxingNode(right);
+			}
+
+			if (needParenthesis) {
+				buffer.append(")");
 			}
 			return false;
 		}
 		ITypeBinding typeBinding = left.resolveTypeBinding();
-		String op = node.getOperator().toString();
-		Expression right = node.getRightHandSide();
 		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("boolean".equals(typeBinding.getName())) {
 				if (op.startsWith("^")
@@ -409,11 +449,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 				ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 				/*
-				 * FIXME: Bug here!: v[count++] = 'a';
+				 * FIXME: Bug here!: 
+				 * v[count++] += 'a';
+				 * v[count++] = String.fromCharCode ((v[count++]).charCodeAt (0) + 97);
 				 */
 				left.accept(this);
-				if ("char".equals(rightTypeBinding.getName())) {
-					buffer.append(" = ");
+				if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName()) && !isMixedOp) {
+					buffer.append(' ');
+					buffer.append(op);
+					buffer.append(' ');
 					right.accept(this);
 				} else {
 					buffer.append(" = String.fromCharCode (");
@@ -436,17 +480,27 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						} else {
 							buffer.append("(");
 							right.accept(this);
-							buffer.append(')');
+							buffer.append(")");
 						}
 						if ("char".equals(rightTypeBinding.getName())) {
 							buffer.append(".charCodeAt (0)");
 						}
 					} else {
 						if ("char".equals(rightTypeBinding.getName())) {
-							buffer.append("(");
-							right.accept(this);
-							buffer.append(")");
-							buffer.append(".charCodeAt (0)");
+							Object constValue = right.resolveConstantExpressionValue();
+							if (constValue != null && constValue instanceof Character) {
+								buffer.append(((Character) constValue).charValue() + 0);
+							} else {
+								boolean needParenthesis = !(right instanceof ParenthesizedExpression || right instanceof PrefixExpression || right instanceof PostfixExpression);
+								if (needParenthesis) {
+									buffer.append("(");
+								}
+								right.accept(this);
+								if (needParenthesis) {
+									buffer.append(")");
+								}
+								buffer.append(".charCodeAt (0)");
+							}
 						} else {
 							right.accept(this);
 						}
@@ -846,6 +900,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding typeBinding = left.resolveTypeBinding();
 		ITypeBinding declaring = null;
 		String qName = null;
 		if (varBinding != null 
@@ -853,93 +908,159 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& (declaring = varBinding.getDeclaringClass()) != null 
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append("(((");
-			} else {
+			boolean directStaticAccess = left instanceof SimpleName
+					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
+					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
+			ASTNode parent = node.getParent();
+			boolean staticCharType = typeBinding.isPrimitive() && "char".equals(typeBinding.getName());
+			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess
+					|| (typeBinding != null && staticCharType))
+					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
+			if (needParenthesis) {
 				buffer.append("(");
 			}
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
 				if (!(leftName.getQualifier() instanceof SimpleName)) {
 					leftName.getQualifier().accept(this);
+					buffer.append(", ");
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
 				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
 					leftAccess.getExpression().accept(this);
+					buffer.append(", ");
 				}
 			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(") || true) ? ($t$ = ");
-			} else {
+			if ((supportsObjectStaticFields || staticCharType) && !(parent instanceof Statement)) {
 				buffer.append("$t$ = ");
 			}
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			buffer.append(' ');
 			String op = node.getOperator().toString();
-			buffer.append(op);
+			if (staticCharType) {
+				if (!(parent instanceof Statement)) {
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append('.');
+					if (left instanceof QualifiedName) {
+						QualifiedName leftName = (QualifiedName) left;
+						leftName.getName().accept(this);
+					} else if (left instanceof FieldAccess) {
+						FieldAccess leftAccess = (FieldAccess) left;
+						leftAccess.getName().accept(this);
+					} else {
+						Name leftName = (Name) left;
+						leftName.accept(this);
+					}
+					buffer.append(", ");
+				}
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" = String.fromCharCode (");
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				if ("++".equals(op)) {
+					buffer.append(".charCodeAt (0) + 1)");
+				} else {
+					buffer.append(".charCodeAt (0) - 1)");
+				}
+			} else {
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				//buffer.append(' ');
+				buffer.append(op);
+			}
 			
-			buffer.append(", ");
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append(".prototype.");
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
+			if (supportsObjectStaticFields) {
+				buffer.append(", ");
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(".prototype.");
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" = ");
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
 			}
-			buffer.append(" = ");
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
+			if ((supportsObjectStaticFields || staticCharType) && !(parent instanceof Statement)) {
+				buffer.append(", $t$");
 			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(", $t$) : 0)");
-			} else {
-				buffer.append(", $t$)");
+			if (needParenthesis) {
+				buffer.append(")");
 			}
 			return false;
 		}
-		ITypeBinding typeBinding = left.resolveTypeBinding();
 		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
-				buffer.append("(");
+				ASTNode parent = node.getParent();
+				if (!(parent instanceof Statement)) {
+					if (!(parent instanceof ParenthesizedExpression)) {
+						buffer.append("(");
+					}
+					buffer.append("$c$ = ");
+					left.accept(this);
+					buffer.append(", ");
+				}
 				left.accept(this);
-				buffer.append(" = String.fromCharCode (($c$ = ");
+				buffer.append(" = String.fromCharCode (");
 				left.accept(this);
 				String op = node.getOperator().toString();
 				if ("++".equals(op)) {
-					buffer.append(").charCodeAt (0) + 1)");
+					buffer.append(".charCodeAt (0) + 1)");
 				} else {
-					buffer.append(").charCodeAt (0) - 1)");
+					buffer.append(".charCodeAt (0) - 1)");
 				}
-				buffer.append(", $c$)");
+				if (!(parent instanceof Statement)) {
+					buffer.append(", $c$");
+					if (!(parent instanceof ParenthesizedExpression)) {
+						buffer.append(")");
+					}
+				}
 				return false;
 			}
 		}
@@ -971,6 +1092,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
+		ITypeBinding typeBinding = left.resolveTypeBinding();
 		ITypeBinding declaring = null;
 		String qName = null;
 		if (varBinding != null 
@@ -978,98 +1100,114 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& (declaring = varBinding.getDeclaringClass()) != null 
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append("(((");
-			} else {
+			boolean directStaticAccess = left instanceof SimpleName
+					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
+					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
+			ASTNode parent = node.getParent();
+			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess
+					|| (typeBinding != null && typeBinding.isPrimitive() && "char".equals(typeBinding.getName())))
+					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
+			if (needParenthesis) {
 				buffer.append("(");
 			}
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
 				if (!(leftName.getQualifier() instanceof SimpleName)) {
 					leftName.getQualifier().accept(this);
+					buffer.append(", ");
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
 				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
 						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
 					leftAccess.getExpression().accept(this);
+					buffer.append(", ");
 				}
 			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(") || true) ? ($t$ = ");
-			} else {
-				buffer.append("$t$ = ");
-			}
-			buffer.append(op);
-			buffer.append(' ');
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			
-			buffer.append(", ");
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append(".prototype.");
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			buffer.append(" = ");
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
-			if (!(left instanceof SimpleName || (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression))) {
-				buffer.append(", $t$) : 0)");
-			} else {
-				buffer.append(", $t$)");
-			}
-			return false;
-		}
-		ITypeBinding typeBinding = left.resolveTypeBinding();
-		if (typeBinding.isPrimitive()) {
-			if ("char".equals(typeBinding.getName())) {
-				buffer.append("(");
-				left.accept(this);
-				buffer.append(" = String.fromCharCode (");
-				if (left instanceof SimpleName || left instanceof QualifiedName) {
-					left.accept(this);
+			if (supportsObjectStaticFields) {
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(".prototype.");
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
 				} else {
-					buffer.append("(");
-					left.accept(this);
-					buffer.append(")");
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" = ");
+			}
+			if (typeBinding.isPrimitive() && "char".equals(typeBinding.getName())) {
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" = String.fromCharCode (");
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
 				}
 				if ("++".equals(op)) {
 					buffer.append(".charCodeAt (0) + 1)");
 				} else {
 					buffer.append(".charCodeAt (0) - 1)");
 				}
+			} else {
+				buffer.append(op);
+				//buffer.append(' ');
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+			}
+			if (needParenthesis) {
 				buffer.append(")");
+			}
+			return false;
+		}
+		if (typeBinding.isPrimitive()) {
+			if ("char".equals(typeBinding.getName())) {
+				ASTNode parent = node.getParent();
+				if (!(parent instanceof Statement || parent instanceof ParenthesizedExpression)) {
+					buffer.append("(");
+				}
+				left.accept(this);
+				buffer.append(" = String.fromCharCode (");
+				left.accept(this);
+				if ("++".equals(op)) {
+					buffer.append(".charCodeAt (0) + 1)");
+				} else {
+					buffer.append(".charCodeAt (0) - 1)");
+				}
+				if (!(parent instanceof Statement || parent instanceof ParenthesizedExpression)) {
+					buffer.append(")");
+				}
 				return false;
 			}
 		}
@@ -1084,6 +1222,24 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (constValue != null) {
 				buffer.append(constValue);
 				return false;
+			}
+		}
+		boolean staticFields = false;
+		IVariableBinding varBinding = null;
+		IBinding nameBinding = node.resolveBinding();
+		if (nameBinding instanceof IVariableBinding) {
+			varBinding = (IVariableBinding) nameBinding;
+		}
+		ITypeBinding declaring = null;
+		String qdName = null;
+		if (!supportsObjectStaticFields && varBinding != null 
+				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qdName.startsWith("net.sf.j2s.html.")) {
+			IBinding qBinding = node.getQualifier().resolveBinding();
+			if (!(qBinding != null && qBinding instanceof ITypeBinding)) {
+				staticFields = true;
 			}
 		}
 		ASTNode parent = node.getParent();
@@ -1132,7 +1288,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 							name = name.substring(10);
 						}
 						if (name.length() != 0) {
-							buffer.append(name);
+							if (staticFields) {
+								if (qualifier instanceof SimpleName) {
+									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+								} else {
+									buffer.append('(');
+									buffer.append(name);
+									buffer.append(", ");
+									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(')');
+								}
+							} else {
+								buffer.append(name);
+							}
 							buffer.append('.');
 							qualifierVisited = true;
 						}
@@ -1148,7 +1316,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		}
 		if (!qualifierVisited) {
-			qName.accept(this);
+			if (staticFields) {
+				if (qName instanceof SimpleName) {
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				} else {
+					buffer.append('(');
+					qName.accept(this);
+					buffer.append(", ");
+					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(')');
+				}
+			} else {
+				qName.accept(this);
+			}
 			buffer.append('.');
 		}
 		node.getName().accept(this);
@@ -1160,7 +1340,14 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Expression expression = node.getExpression();
 		if (expression != null) {
 			buffer.append(' ');
-			expression.accept(this);
+			ITypeBinding tBinding = expression.resolveTypeBinding();
+			if (tBinding != null && !("char".equals(tBinding.getName()))) {
+				buffer.append("String.fromCharCode (");
+				expression.accept(this);
+				buffer.append(")");
+			} else {
+				expression.accept(this);
+			}
 		}
 		buffer.append(";\r\n");
 		return false;

@@ -42,6 +42,8 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -1259,7 +1261,28 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 * TODO: more complicated rules should be considered.
 		 * read the JavaDoc
 		 */
-		node.getExpression().accept(this);
+		boolean staticFields = false;
+		IVariableBinding varBinding = node.resolveFieldBinding();
+		ITypeBinding declaring = null;
+		String qdName = null;
+		Expression expression = node.getExpression();
+		if (!supportsObjectStaticFields && varBinding != null 
+				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null 
+				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qdName.startsWith("net.sf.j2s.html.")
+				&& !(expression instanceof SimpleName || expression instanceof QualifiedName)) {
+			staticFields = true;
+		}
+		if (staticFields) {
+			buffer.append('(');
+			expression.accept(this);
+			buffer.append(", ");
+			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+			buffer.append(')');
+		} else {
+			expression.accept(this);
+		}
 		buffer.append(".");
 		node.getName().accept(this);
 		return false;
@@ -1394,9 +1417,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(".charCodeAt (0)");
 			} else {
 				int idx1 = buffer.length();
-				buffer.append("(");
-				boxingNode(node);
-				buffer.append(")");
+				if (node instanceof PrefixExpression || node instanceof PostfixExpression || node instanceof ParenthesizedExpression) {
+					boxingNode(node);
+				} else {
+					buffer.append("(");
+					boxingNode(node);
+					buffer.append(")");
+				}
 				
 				boolean appendingCode = true;
 				int length = buffer.length();
@@ -2991,10 +3018,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					vdf.getName().accept(this);
 					buffer.append("\", ");
 					
+					Type type = field.getType();
 					if (initializer != null) { 
-						initializer.accept(this);
+						if (type.isPrimitiveType() && ((PrimitiveType) type).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+							ITypeBinding tBinding = initializer.resolveTypeBinding();
+							if (tBinding != null && !("char".equals(tBinding.getName()))) {
+								buffer.append("String.fromCharCode (");
+								initializer.accept(this);
+								buffer.append(")");
+							} else {
+								initializer.accept(this);
+							}
+						} else {
+							initializer.accept(this);
+						}
 					} else {
-						Type type = field.getType();
 						if (type.isPrimitiveType()){
 							PrimitiveType pType = (PrimitiveType) type;
 							if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
@@ -3046,10 +3084,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append(",\r\n\"");
 					vdf.getName().accept(this);
 					buffer.append("\", ");
+					Type type = field.getType();
 					if (initializer != null) { 
-						initializer.accept(this);
+						if (type.isPrimitiveType() && ((PrimitiveType) type).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+							ITypeBinding tBinding = initializer.resolveTypeBinding();
+							if (tBinding != null && !("char".equals(tBinding.getName()))) {
+								buffer.append("String.fromCharCode (");
+								initializer.accept(this);
+								buffer.append(")");
+							} else {
+								initializer.accept(this);
+							}
+						} else {
+							initializer.accept(this);
+						}
 					} else {
-						Type type = field.getType();
 						if (type.isPrimitiveType()){
 							PrimitiveType pType = (PrimitiveType) type;
 							if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
