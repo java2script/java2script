@@ -218,6 +218,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 						visitor = new SWTScriptVisitor();
 					}
 				}
+				boolean objectStaticFields = "enable".equals(props.getProperty("j2s.compiler.static.quirks"));
+				visitor.setSupportsObjectStaticFields(objectStaticFields);
 				boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
 				visitor.setDebugging(isDebugging);
 				dvisitor.setDebugging(isDebugging);
