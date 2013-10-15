@@ -58,12 +58,12 @@ public class HttpRequest {
 	 * @see     Preferences
 	 * @since   1.4
 	 */
-	static class Base64 {
+	protected static class Base64 {
 	    /**
 	     * Translates the specified byte array into a Base64 string as per
 	     * Preferences.put(byte[]).
 	     */
-	    static String byteArrayToBase64(byte[] a) {
+	    public static String byteArrayToBase64(byte[] a) {
 	        int aLen = a.length;
 	        int numFullGroups = aLen/3;
 	        int numBytesInPartialGroup = aLen - 3*numFullGroups;
@@ -443,11 +443,10 @@ public class HttpRequest {
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
 			connection.setRequestProperty("User-Agent",
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.56 Safari/536.5");
+					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.69 Safari/537.36");
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
-				connection.setRequestProperty("Content-Type",
-						"application/x-www-form-urlencoded");
+				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			}
 			if (user != null) {
 				String auth = user + ":" + (password != null ? password : "");
