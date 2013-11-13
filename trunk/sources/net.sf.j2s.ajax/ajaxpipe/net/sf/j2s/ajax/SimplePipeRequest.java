@@ -313,6 +313,8 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(p.pipeKey);
 						if (r == null || !r.isPipeLive()) {
 							if (now - p.lastLiveDetected > p.pipeWaitClosingInterval()) {
+								p.pipeDestroy(); // Pipe's server side destroying
+								p.pipeClosed(); // Pipe's client side closing
 								synchronized (notifyingMutex) {
 									notifyingPipes.remove(p);
 								}
