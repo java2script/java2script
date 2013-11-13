@@ -66,7 +66,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	long notifySequence = 1;
 	
 	@J2SIgnore
-	int sequenceIndex; // Index of last SimplePipeSequence in pipeData 
+	int sequenceIndex; // Index of first SimplePipeSequence in pipeData 
 	
 	@J2SIgnore
 	int bufferedIndex; // Index of last buffered object in pipeData, data before this object is sent 
@@ -110,12 +110,12 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	}
 
 	@J2SIgnore
-	public void setLastPipeSequenceIndex(int index) {
+	public void setFirstPipeSequenceIndex(int index) {
 		sequenceIndex = index;
 	}
 	
 	@J2SIgnore
-	public int getLastPipeSequenceIndex() {
+	public int getFirstPipeSequenceIndex() {
 		return sequenceIndex;
 	}
 	
@@ -139,6 +139,11 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		pipeSequence = sequence;
 	}
 
+	/**
+	 * Monitoring to see if all events has been received and call #pipeDataOK.
+	 * 
+	 * @return
+	 */
 	@J2SIgnore
 	public boolean isMonitoringEvents() {
 		return false;
@@ -306,6 +311,15 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		// to be override
 		// notify that pipe is not created correctly.
 		pipeDestroy();
+	}
+	
+	/**
+	 * Pipe is connected.
+	 * For server side, client has already connected to server.
+	 * For client side, server has responded.
+	 */
+	public void pipeConnected() {
+		
 	}
 	
 	/**
