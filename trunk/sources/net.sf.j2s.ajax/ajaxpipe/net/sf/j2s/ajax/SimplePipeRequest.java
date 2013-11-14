@@ -225,6 +225,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 */
 	public static void pipe(final SimplePipeRunnable runnable) {
 		runnable.ajaxIn();
+		runnable.lastLiveDetected = System.currentTimeMillis();
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
 			ThreadUtils.runTask(new Runnable() {
 				public void run() {
@@ -249,6 +250,9 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	 */
 	@J2SIgnore
 	static void keepPipeLive(final SimplePipeRunnable pipe) {
+		if (pipe.pipeKey == null) {
+			return;
+		}
 		pipe.updateStatus(true);
 		if (getRequstMode() != MODE_LOCAL_JAVA_THREAD && getPipeMode() == MODE_PIPE_QUERY) {
 			return;
