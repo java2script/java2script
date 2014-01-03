@@ -72,6 +72,16 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 			serialize = null;
 		}
 		final HttpRequest request = getRequest();
+		if (!runnable.supportsKeepAlive()) {
+			request.setRequestHeader("Connection", "close");
+		}
+		if (runnable instanceof ISimpleRequestInfo) {
+			ISimpleRequestInfo reqInfo = (ISimpleRequestInfo) runnable;
+			String ua = reqInfo.getRemoteUserAgent();
+			if (ua != null) {
+				request.setRequestHeader("User-Agent", ua);
+			}
+		}
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {

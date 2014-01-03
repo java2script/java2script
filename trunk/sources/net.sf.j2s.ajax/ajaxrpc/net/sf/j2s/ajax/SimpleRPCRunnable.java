@@ -75,4 +75,15 @@ public abstract class SimpleRPCRunnable extends SimpleSerializable {
 		return true;
 	}
 	
+	/**
+	 * Whether supporting HTTP Keep-Alive feature or not.
+	 *  
+	 * This method will be called by server side.
+	 * 
+	 * @return supported
+	 */
+	public boolean supportsKeepAlive() {
+		return true;
+	}
+	
 }
