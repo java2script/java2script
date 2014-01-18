@@ -132,6 +132,26 @@ public class SimpleClassLoader extends ClassLoader {
     }
 
     /**
+     * Load given class.
+     * 
+     * @param clazzName
+     * @return 
+     */
+	public static Class<?> loadSimpleClass(String clazzName) {
+		try {
+			ClassLoader classLoader = hasClassReloaded ? allLoaders.get(clazzName) : null;
+			if (classLoader != null) {
+				return classLoader.loadClass(clazzName);
+			} else {
+				return Class.forName(clazzName);
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+		return null;
+	}
+
+    /**
      * Load given class and create instance by default constructor.
      * 
      * This method should not be used for those classes without default constructor.
@@ -224,6 +244,24 @@ public class SimpleClassLoader extends ClassLoader {
 			}
 			if (creatingMore) { // keep it in all loaders
 				allLoaders.put("." + (checkedLoaders.size() + 1), loader);
+			}
+			/*
+			 * It is important to pre-load classes. On server with
+			 * heavy traffic, If classes are not not being pre-
+			 * loaded, later reading class bytes from disk (IO) may
+			 * cause lots of threads from thread pool hanging for
+			 * some milliseconds, and threads are eaten up, and
+			 * server may be down in seconds!  
+			 */
+			for (int i = 0; i < clazzNames.length; i++) {
+				String name = clazzNames[i];
+				if (name != null && name.length() > 0) {
+					try {
+						loader.loadClass(name);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			for (int i = 0; i < clazzNames.length; i++) {
 				String name = clazzNames[i];
