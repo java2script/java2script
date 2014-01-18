@@ -206,12 +206,14 @@ public class SimpleSource4Java {
 		}
 
 		Type[] interfaces = s.getClass().getGenericInterfaces();
+		List<Type> interfaceList = new ArrayList<Type>();
 		if (interfaces != null && interfaces.length > 0) {
 			for (int i = 0; i < interfaces.length; i++) {
 				Class<?> t = (Class<?>) interfaces[i];
 				if (!SimpleSerializable.isSubInterfaceOf(t, ISimpleConstant.class)) {
 					continue;
 				}
+				interfaceList.add(t);
 				String typeName = t.getName();
 				hasMoreImports = true;
 				if (!importedClasses.contains(typeName)) {
@@ -329,10 +331,10 @@ public class SimpleSource4Java {
 			source.append(simpleClazzName);
 		}
 
-		if (interfaces != null && interfaces.length > 0) {
+		if (interfaceList.size() > 0) {
 			boolean keywordAppended = false;
-			for (int i = 0; i < interfaces.length; i++) {
-				Class<?> t = (Class<?>) interfaces[i];
+			for (int i = 0; i < interfaceList.size(); i++) {
+				Class<?> t = (Class<?>) (Type) interfaceList.get(i);
 				if (!SimpleSerializable.isSubInterfaceOf(t, ISimpleConstant.class)) {
 					continue;
 				}
@@ -348,7 +350,7 @@ public class SimpleSource4Java {
 				}
 				
 				source.append(simpleTypeName);
-				if (i != interfaces.length -1) {
+				if (i != interfaceList.size() -1) {
 					source.append(", ");
 				}
 			}
