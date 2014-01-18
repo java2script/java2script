@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -175,6 +176,13 @@ public class SourceUtils {
 			
 			if (source.equals(oldSource)) {
 				return;
+			} else {
+				@SuppressWarnings("deprecation")
+				String copyrightYear = "* Copyright (c) " + (new Date().getYear() + 1900);
+				String updatedSource = oldSource.replaceFirst("\\* Copyright \\(c\\) \\d{4}", copyrightYear);
+				if (source.equals(updatedSource)) {
+					return;
+				}
 			}
 		}
 		FileOutputStream fos = null;
