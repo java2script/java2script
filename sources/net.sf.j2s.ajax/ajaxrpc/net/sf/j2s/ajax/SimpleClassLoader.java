@@ -15,11 +15,9 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,18 +36,19 @@ public class SimpleClassLoader extends ClassLoader {
 	private String tag;
 	
 	private Set<String> targetClasses;
-	private Map<String, Class<?>> loadedClasses;
-	private Object loadingMutex;
+	
+	private Object mutex;
+	private Map<String, Class<?>> loadedClasses; // need synchronization on mutex
 
 	private static boolean hasClassReloaded = false;
 	private static ClassLoader defaultLoader = SimpleClassLoader.class.getClassLoader();
 	private static Map<String, SimpleClassLoader> allLoaders = new HashMap<String, SimpleClassLoader>();
 	
-	public SimpleClassLoader(ClassLoader parent, String path, String tag) {
+	public SimpleClassLoader(ClassLoader parent, String path, String tag, Set<String> targetClazzes) {
 		super(parent);
-		targetClasses = new HashSet<String>();
+		targetClasses = targetClazzes;
 		loadedClasses = new HashMap<String, Class<?>>();
-		loadingMutex = new Object();
+		mutex = new Object();
 		classpath = path;
 		this.tag = tag;
 	}
@@ -57,9 +56,23 @@ public class SimpleClassLoader extends ClassLoader {
 	protected boolean isSystemClass(String clazzName) {
 		return clazzName.startsWith("java.") || clazzName.startsWith("javax.");
 	}
-
+	
+	/*
+	 * Not overriding loadClass(String, boolean) or findClass(String).
+	 * For loadClass(String, boolean), we don't know how to call resolveClass.
+	 * For findClass(String), parent.loadClass(String, boolean) is called first
+	 * and get existed class. It is not expected.
+	 * 
+	 * We need to implement our own lock to avoid running into dead-lock.
+	 * 
+	 * TODO: Fixed class loader dead lock using JDK7+
+	 */
 	@Override
 	public Class<?> loadClass(String clazzName) throws ClassNotFoundException {
+		Class<?> clazz = loadedClasses.get(clazzName);
+		if (clazz != null) {
+			return clazz;
+		}
 		boolean contains = targetClasses.contains(clazzName);
 		if (!contains) {
 			// Check inner classes
@@ -75,37 +88,42 @@ public class SimpleClassLoader extends ClassLoader {
 			}
 		}
 		if (contains) {
-			Class<?> clazz = loadedClasses.get(clazzName);
-			if (clazz != null) {
-				return clazz;
+        	synchronized (mutex) {
+        		clazz = loadedClasses.get(clazzName);
+    			if (clazz == null) {
+    				// The following two lines are IO sensitive
+		            byte[] bytes = null;
+					// The following lines are IO sensitive
+		            try {
+						bytes = loadClassData(clazzName);
+					} catch (IOException e) {
+			        	throw new ClassNotFoundException(e.getMessage(), e);
+					}
+		            clazz = defineClass(clazzName, bytes, 0, bytes.length);
+	    			loadedClasses.put(clazzName, clazz);
+    			}
+        		return clazz;
 			}
-	        try {
-	        	synchronized (loadingMutex) {
-	        		clazz = loadedClasses.get(clazzName);
-	    			if (clazz == null) {
-	    				// The following two lines are IO sensitive
-			            byte[] bytes = loadClassData(clazzName);
-			            clazz = defineClass(clazzName, bytes, 0, bytes.length);
-		    			loadedClasses.put(clazzName, clazz);
-	    			}
-				}
-	    		return clazz;
-	        } catch (Throwable e) {
-	        	//e.printStackTrace();
-	        }
 		}
-		Class<?> clazz = getParent().loadClass(clazzName);
+		/* 
+		 * Potential class loader dead lock! Already met in production environment.
+		 * We need JDK7+ to fix this problem.
+		 * http://openjdk.java.net/groups/core-libs/ClassLoaderProposal.html
+		 */
+		ClassLoader classLoader = allLoaders.get(clazzName);
+		if (classLoader == null) {
+			classLoader = getParent();
+		}
+		clazz = classLoader.loadClass(clazzName);
 		if (isSystemClass(clazzName)) {
 			return clazz;
 		} // else add to loaded classes map
-    	synchronized (loadingMutex) {
-			if (!loadedClasses.containsKey(clazzName)) {
-				loadedClasses.put(clazzName, clazz);
-			}
-    	}
+		synchronized (mutex) {
+			loadedClasses.put(clazzName, clazz);
+		}
 		return clazz;
 	}
-	
+
 	/*
 	 * Read class bytes from file system.
 	 */
@@ -121,13 +139,18 @@ public class SimpleClassLoader extends ClassLoader {
 	    		cp = cp + "/";
 			}
     	}
-        File f = new File(cp + className.replaceAll("\\.", "/") + ".class");
+        File f = new File(cp + className.replace('.', '/') + ".class");
         int size = (int) f.length();
         byte buff[] = new byte[size];
-        FileInputStream fis = new FileInputStream(f);
-        DataInputStream dis = new DataInputStream(fis);
-        dis.readFully(buff);
-        dis.close();
+        DataInputStream dis = null;
+        try {
+			dis = new DataInputStream(new FileInputStream(f));
+			dis.readFully(buff);
+		} finally {
+	        if (dis != null) {
+	        	dis.close();
+	        }
+		}
         return buff;
     }
 
@@ -199,59 +222,55 @@ public class SimpleClassLoader extends ClassLoader {
 	 * @param tag, with specified tag
 	 */
 	public static void reloadSimpleClasses(String[] clazzNames, String path, String tag) {
-		hasClassReloaded = true;
+		Map<String, SimpleClassLoader> oldLoaders = allLoaders;
 		SimpleClassLoader loader = null;
 		Set<SimpleClassLoader> checkedLoaders = new HashSet<SimpleClassLoader>();
-		synchronized (allLoaders) {
-			for (Iterator<SimpleClassLoader> itr = allLoaders.values().iterator();
-					itr.hasNext();) {
-				loader = (SimpleClassLoader) itr.next();
-				if (checkedLoaders.contains(loader)) {
-					loader = null;
-					continue;
-				}
-				checkedLoaders.add(loader);
-				if ((tag == null // for tag is null, use any existed loader
-								|| (loader.tag != null && loader.tag.equals(tag)))
-						&& ((loader.classpath == null && path == null)
-								|| (loader.classpath != null && loader.classpath.equals(path)))) {
-					boolean loaded = false;
-					for (int i = 0; i < clazzNames.length; i++) {
-						String name = clazzNames[i];
-						if (name != null && name.length() > 0
-								&& loader.loadedClasses.containsKey(name)) {
-							loaded = true;
-							break;
-						}
-					}
-					if (!loaded) {
-						// Class loader does not know class specified by clazzName variable
+		for (Iterator<SimpleClassLoader> itr = oldLoaders.values().iterator(); itr.hasNext();) {
+			loader = (SimpleClassLoader) itr.next();
+			if (checkedLoaders.contains(loader)) {
+				loader = null;
+				continue;
+			}
+			checkedLoaders.add(loader);
+			if ((tag == null // for tag is null, use any existed loader
+							|| (loader.tag != null && loader.tag.equals(tag)))
+					&& ((loader.classpath == null && path == null)
+							|| (loader.classpath != null && loader.classpath.equals(path)))) {
+				boolean loaded = false;
+				for (int i = 0; i < clazzNames.length; i++) {
+					String name = clazzNames[i];
+					if (name != null && name.length() > 0
+							&& loader.loadedClasses.containsKey(name)) { // thread-safe
+						loaded = true;
 						break;
 					}
 				}
-				loader = null;
+				if (!loaded) {
+					// Class loader does not know class specified by clazzName variable
+					break;
+				}
 			}
-			boolean creatingMore = false;
-			if (loader == null) {
-				loader = new SimpleClassLoader(defaultLoader, path, tag);
-				creatingMore = true;
-			}
+			loader = null;
+		}
+		Set<String> targetClazzes = null;
+		if (loader == null) {
+			Map<String, SimpleClassLoader> newLoaders = new HashMap<String, SimpleClassLoader>();
+			newLoaders.putAll(oldLoaders);
+			targetClazzes = new HashSet<String>(clazzNames.length + clazzNames.length);
+			loader = new SimpleClassLoader(defaultLoader, path, tag, targetClazzes);
 			for (int i = 0; i < clazzNames.length; i++) {
 				String name = clazzNames[i];
 				if (name != null && name.length() > 0) {
-					loader.targetClasses.add(name);
+					targetClazzes.add(name); // prepare
+					newLoaders.put(name, loader); // prepare, not working
 				}
 			}
-			if (creatingMore) { // keep it in all loaders
-				allLoaders.put("." + (checkedLoaders.size() + 1), loader);
-			}
+			newLoaders.put("." + (checkedLoaders.size() + 1), loader); // keep it in all loaders
 			/*
-			 * It is important to pre-load classes. On server with
-			 * heavy traffic, If classes are not not being pre-
-			 * loaded, later reading class bytes from disk (IO) may
-			 * cause lots of threads from thread pool hanging for
-			 * some milliseconds, and threads are eaten up, and
-			 * server may be down in seconds!  
+			 * Try to pre-load classes. Pre-loading classes may decrease the
+			 * chance of class loader dead lock. But it is not a complete
+			 * solution.
+			 * We need JDK7+ to fix class dead lock.
 			 */
 			for (int i = 0; i < clazzNames.length; i++) {
 				String name = clazzNames[i];
@@ -263,100 +282,108 @@ public class SimpleClassLoader extends ClassLoader {
 					}
 				}
 			}
+			allLoaders = newLoaders; // new class loader works now
+		} else {
+			targetClazzes = new HashSet<String>(loader.targetClasses);
 			for (int i = 0; i < clazzNames.length; i++) {
 				String name = clazzNames[i];
 				if (name != null && name.length() > 0) {
-					allLoaders.put(name, loader);
+					targetClazzes.add(name); // prepare
+				}
+			}
+			loader.targetClasses = targetClazzes; // working after targetClasses is updated
+			for (int i = 0; i < clazzNames.length; i++) {
+				String name = clazzNames[i];
+				if (name != null && name.length() > 0) {
+					/* Try to pre-load classes. */
+					try {
+						loader.loadClass(name);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+					oldLoaders.put(name, loader); // working now
 				}
 			}
 		}
-		for (int i = 0; i < clazzNames.length; i++) {
-			String name = clazzNames[i];
-			if (name != null && name.length() > 0) {
-				SimpleSerializable.removeCachedClassFields(name);
-			}
-		}
+		hasClassReloaded = true;
 	}
     
 	public static void releaseUnusedClassLoaders() {
-		List<String> removingKeys = new ArrayList<String>();
-		synchronized (allLoaders) {
-			for (Iterator<String> itr = allLoaders.keySet().iterator(); itr.hasNext();) {
-				String key = (String) itr.next();
-				if (key.startsWith(".")) {
-					removingKeys.add(key);
-				}
+		Map<String, SimpleClassLoader> oldLoaders = allLoaders;
+		Map<String, SimpleClassLoader> newLoaders = new HashMap<String, SimpleClassLoader>();
+		newLoaders.putAll(oldLoaders);
+		for (Iterator<String> itr = oldLoaders.keySet().iterator(); itr.hasNext();) {
+			String key = (String) itr.next();
+			if (key.startsWith(".")) {
+				newLoaders.remove(key);
 			}
-			for (Iterator<String> itr = removingKeys.iterator(); itr.hasNext();) {
-				String key = (String) itr.next();
-				allLoaders.remove(key);
-			}
-		}		
+		}
+		allLoaders = newLoaders;
 	}
 	
 	public static String allLoaderStatuses() {
 		StringBuffer buffer = new StringBuffer();
 		Set<SimpleClassLoader> checkedLoaders = new HashSet<SimpleClassLoader>();
-		synchronized (allLoaders) {
-			int count = 0;
-			for (Iterator<SimpleClassLoader> itr = allLoaders.values().iterator();
-					itr.hasNext();) {
-				SimpleClassLoader loader = (SimpleClassLoader) itr.next();
-				if (checkedLoaders.contains(loader)) {
-					continue;
-				}
-				checkedLoaders.add(loader);
-				count++;
-				buffer.append("Classloader ");
-				buffer.append(count);
-				buffer.append(" ");
-				buffer.append(loader.toString());
-				buffer.append("\r\n");
-				buffer.append("classpath : ");
-				buffer.append(loader.classpath);
-				buffer.append("\r\n");
-				if (loader.tag != null) {
-					buffer.append("tag : ");
-					buffer.append(loader.tag);
-					buffer.append("\r\n");
-				}
-				buffer.append("active classes : ");
-				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
-						.hasNext();) {
-					String clazz = (String) iter.next();
-					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
-					if (clazzLoader == loader) {
-						buffer.append(clazz);
-						buffer.append(", ");
-					}
-				}
-				buffer.append("\r\n");
-				buffer.append("inactive classes : ");
-				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
-						.hasNext();) {
-					String clazz = (String) iter.next();
-					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
-					if (clazzLoader != null && clazzLoader != loader) {
-						buffer.append(clazz);
-						buffer.append(", ");
-					}
-				}
-				buffer.append("\r\n");
-				buffer.append("other classes : ");
-				for (Iterator<String> iter = loader.loadedClasses.keySet().iterator(); iter
-						.hasNext();) {
-					String clazz = (String) iter.next();
-					SimpleClassLoader clazzLoader = allLoaders.get(clazz);
-					if (clazzLoader == null) {
-						buffer.append(clazz);
-						buffer.append(", ");
-					}
-				}
-				buffer.append("\r\n\r\n");
-			} // end of for values
-			buffer.append("Total classloaders : ");
+		Map<String, SimpleClassLoader> loaders = allLoaders;
+		int count = 0;
+		for (Iterator<SimpleClassLoader> itr = loaders.values().iterator();
+				itr.hasNext();) {
+			SimpleClassLoader loader = (SimpleClassLoader) itr.next();
+			if (checkedLoaders.contains(loader)) {
+				continue;
+			}
+			checkedLoaders.add(loader);
+			count++;
+			buffer.append("Classloader ");
 			buffer.append(count);
-		}
+			buffer.append(" ");
+			buffer.append(loader.toString());
+			buffer.append("\r\n");
+			buffer.append("classpath : ");
+			buffer.append(loader.classpath);
+			buffer.append("\r\n");
+			if (loader.tag != null) {
+				buffer.append("tag : ");
+				buffer.append(loader.tag);
+				buffer.append("\r\n");
+			}
+			buffer.append("active classes : ");
+			Map<String, Class<?>> loadedClazzes = loader.loadedClasses;
+			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
+					.hasNext();) {
+				String clazz = (String) iter.next();
+				SimpleClassLoader clazzLoader = loaders.get(clazz);
+				if (clazzLoader == loader) {
+					buffer.append(clazz);
+					buffer.append(", ");
+				}
+			}
+			buffer.append("\r\n");
+			buffer.append("inactive classes : ");
+			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
+					.hasNext();) {
+				String clazz = (String) iter.next();
+				SimpleClassLoader clazzLoader = loaders.get(clazz);
+				if (clazzLoader != null && clazzLoader != loader) {
+					buffer.append(clazz);
+					buffer.append(", ");
+				}
+			}
+			buffer.append("\r\n");
+			buffer.append("other classes : ");
+			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
+					.hasNext();) {
+				String clazz = (String) iter.next();
+				SimpleClassLoader clazzLoader = loaders.get(clazz);
+				if (clazzLoader == null) {
+					buffer.append(clazz);
+					buffer.append(", ");
+				}
+			}
+			buffer.append("\r\n\r\n");
+		} // end of for values
+		buffer.append("Total classloaders : ");
+		buffer.append(count);
 		return buffer.toString();
 	}
 	

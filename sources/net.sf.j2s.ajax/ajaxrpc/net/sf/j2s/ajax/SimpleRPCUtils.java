@@ -24,7 +24,7 @@ public class SimpleRPCUtils {
 		Set<String> diffSet = new HashSet<String>();
 		String[] ignoredFields = runnable1.fieldDiffIgnored();
 		Class<?> clazzType = runnable1.getClass();
-		Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzType.getName(), clazzType, false);
+		Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzType.getName(), clazzType);
 		for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
 			String name = (String) itr.next();
 			Field field = allFields.get(name);
