@@ -362,7 +362,7 @@ public class SimpleSource4Java {
 		
 		String[] fieldMapping = s.fieldMapping();
 		if (fieldMapping != null) {
-			Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzName, clazz, false);
+			Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzName, clazz);
 			for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
 				String name = itr.next();
 				boolean existed = false;

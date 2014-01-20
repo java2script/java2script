@@ -51,9 +51,7 @@ public class SimpleSerializable implements Cloneable {
 	@J2SIgnore
 	private static Object mutex = new Object();
 	@J2SIgnore
-	private static Map<String, Map<String, Field>> quickFields = new HashMap<String, Map<String, Field>>();
-	@J2SIgnore
-	private static Set<String> expiredClasses = new HashSet<String>();
+	private static Map<Class<?>, Map<String, Field>> quickFields = new HashMap<Class<?>, Map<String, Field>>();
 	
 	@J2SIgnore
 	private static Object classMutex = new Object();
@@ -128,21 +126,11 @@ public class SimpleSerializable implements Cloneable {
 	}
 	
     @J2SIgnore
-	static Map<String, Field> getSerializableFields(String clazzName, Class<?> clazz, boolean forceUpdate) {
-		Map<String, Field> fields = forceUpdate ? null : quickFields.get(clazzName);
+	static Map<String, Field> getSerializableFields(String clazzName, Class<?> clazz) {
+		Map<String, Field> fields = quickFields.get(clazz);
 		if (fields == null) {
-			if (!forceUpdate) {
-				if (expiredClasses.contains(clazzName)) {
-					// Load class from bytes. Variable clazz may be out of date
-					Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
-					if (inst != null) {
-						// Force updating fields in cache
-						return getSerializableFields(clazzName, inst.getClass(), true);
-					}
-				}
-			}
 			fields = new HashMap<String, Field>();
-			while(clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
+			while (clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
 				Field[] clazzFields = clazz.getDeclaredFields();
 				for (int i = 0; i < clazzFields.length; i++) {
 					Field f = clazzFields[i];
@@ -155,19 +143,7 @@ public class SimpleSerializable implements Cloneable {
 				clazz = clazz.getSuperclass();
 			}
 			synchronized (mutex) {
-				if (!forceUpdate) {
-					if (expiredClasses.contains(clazzName)) {
-						// Class already be reloaded. Do not put fields into cache.
-						return fields;
-					}
-				}
-				if (forceUpdate || quickFields.get(clazzName) == null) {
-					quickFields.put(clazzName, fields);
-					if (forceUpdate) {
-						// Class and fields are already updated, mark it as updated
-						expiredClasses.remove(clazzName);
-					}
-				}
+				quickFields.put(clazz, fields);
 			}
 		}
 		return fields;
@@ -461,7 +437,7 @@ return strBuf;
 		buffer.append("#00000000$"); // later the number of size will be updated!
 		int headSize = buffer.length();
 
-		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass(), false);
+		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass());
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		Map<String, String> fieldNameMap = getSimpleVersion() >= 202 ? fieldNameMapping() : null;
 		String[] fMap = fieldNameMap == null ? fieldMapping() : null;
@@ -1285,7 +1261,7 @@ if (ss != null) {
     	boolean commasAppended = false;
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		Class<?> clazzType = this.getClass();
-		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType, false);
+		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType);
 		String[] fMap = fieldMapping();
 		for (Iterator<String> itr = fieldMap.keySet().iterator(); itr.hasNext();) {
 			String fieldName = (String) itr.next();
@@ -2048,7 +2024,7 @@ return true;
 		}
 		
 		Class<?> clazzType = this.getClass();
-		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType, false);
+		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType);
 		int objectEnd = index + size;
 		Map<String, String> fieldAliasMap = getSimpleVersion() >= 202 ? fieldAliasMapping() : null;
 		String[] fMap = fieldAliasMap == null ? fieldMapping() : null;
@@ -2739,7 +2715,7 @@ return true;
     @J2SIgnore
     public void deserialize(Map<String, Object> properties) {
 		String clazzName = (String) properties.get("class");
-		Map<String, Field> fieldMap = getSerializableFields(clazzName, this.getClass(), false);
+		Map<String, Field> fieldMap = getSerializableFields(clazzName, this.getClass());
 		String[] fMap = fieldMapping();
 		for (Iterator<String> itr = properties.keySet().iterator(); itr.hasNext();) {
 			String fieldName = (String) itr.next();
@@ -3005,7 +2981,7 @@ return true;
 		clone.simpleVersion = simpleVersion;
 		
 		Class<? extends SimpleSerializable> clazz = this.getClass();
-		Map<String, Field> fields = getSerializableFields(clazz.getName(), clazz, false);
+		Map<String, Field> fields = getSerializableFields(clazz.getName(), clazz);
 		for (Iterator<Field> itr = fields.values().iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
@@ -3153,14 +3129,5 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		}
 		return UNKNOWN;
 	}
-
-    @J2SIgnore
-    static void removeCachedClassFields(String clazzName) {
-    	synchronized (mutex) {
-			// Will force update cached fields in next time retrieving fields
-			quickFields.remove(clazzName);
-			expiredClasses.add(clazzName);
-		}
-    }
     
 }
