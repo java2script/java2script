@@ -178,8 +178,8 @@ public class SourceUtils {
 				return;
 			} else {
 				@SuppressWarnings("deprecation")
-				String copyrightYear = "* Copyright (c) " + (new Date().getYear() + 1900);
-				String updatedSource = oldSource.replaceFirst("\\* Copyright \\(c\\) \\d{4}", copyrightYear);
+				String copyrightYear = " Copyright (c) " + (new Date().getYear() + 1900);
+				String updatedSource = oldSource.replaceFirst(" Copyright \\(c\\) \\d{4}", copyrightYear);
 				if (source.equals(updatedSource)) {
 					return;
 				}
