@@ -276,7 +276,11 @@ public class SimpleClassLoader extends ClassLoader {
 				String name = clazzNames[i];
 				if (name != null && name.length() > 0) {
 					try {
-						loader.loadClass(name);
+						Class<?> clazz = loader.loadClass(name);
+						if (SimpleSerializable.isSubclassOf(clazz, SimpleSerializable.class)) {
+							// cache fields
+							SimpleSerializable.getSerializableFields(name, clazz);
+						}
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
 					}
@@ -297,7 +301,11 @@ public class SimpleClassLoader extends ClassLoader {
 				if (name != null && name.length() > 0) {
 					/* Try to pre-load classes. */
 					try {
-						loader.loadClass(name);
+						Class<?> clazz = loader.loadClass(name);
+						if (SimpleSerializable.isSubclassOf(clazz, SimpleSerializable.class)) {
+							// cache fields
+							SimpleSerializable.getSerializableFields(name, clazz);
+						}
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
 					}
