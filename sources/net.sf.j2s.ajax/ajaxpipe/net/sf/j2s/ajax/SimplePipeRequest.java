@@ -442,14 +442,12 @@ Clazz.addEvent (document, "keydown", function (e) {
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
 				String responseText = request.getResponseText();
-				if (responseText == null || responseText.length() == 0) {
+				if (responseText == null || responseText.length() == 0
+						|| !runnable.deserialize(responseText)) {
 					runnable.ajaxFail(); // should seldom fail!
 					return;
 				}
-				runnable.deserialize(responseText);
-				
 				runnable.ajaxOut();
-				
 				ajaxPipe(runnable);
 			}
 		});
