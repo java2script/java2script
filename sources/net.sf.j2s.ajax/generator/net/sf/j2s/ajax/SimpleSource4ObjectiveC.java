@@ -215,6 +215,7 @@ public class SimpleSource4ObjectiveC {
 
 		Type[] interfaces = s.getClass().getGenericInterfaces();
 		if (interfaces != null && interfaces.length > 0) {
+			boolean generatedImports = false;
 			for (int i = 0; i < interfaces.length; i++) {
 				Class<?> t = (Class<?>) interfaces[i];
 				if (!SimpleSerializable.isSubInterfaceOf(t, ISimpleConstant.class)) {
@@ -230,8 +231,11 @@ public class SimpleSource4ObjectiveC {
 				source.append("#import \"");
 				source.append(simpleTypeName);
 				source.append(".h\"\r\n");
+				generatedImports = true;
 			}
-			source.append("\r\n");
+			if (generatedImports) {
+				source.append("\r\n");
+			}
 		}
 
 		boolean gotStaticFinalFields = false;
