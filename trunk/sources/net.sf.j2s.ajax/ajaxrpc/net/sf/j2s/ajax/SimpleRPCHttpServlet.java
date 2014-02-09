@@ -122,8 +122,9 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 
 		});
 		if (instance instanceof SimpleRPCRunnable) {
-			instance.deserialize(request);
-			return (SimpleRPCRunnable) instance;
+			if (instance.deserialize(request)) {
+				return (SimpleRPCRunnable) instance;
+			}
 		}
 		return null;
 	}
