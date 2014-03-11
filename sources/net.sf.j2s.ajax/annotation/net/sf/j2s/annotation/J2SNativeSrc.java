@@ -19,5 +19,5 @@ import static java.lang.annotation.ElementType.*;
 @Target({METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.SOURCE)
 public @interface J2SNativeSrc {
-	String[] value();
+	String[] value() default "";
 }

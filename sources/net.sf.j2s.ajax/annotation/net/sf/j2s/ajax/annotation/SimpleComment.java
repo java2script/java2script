@@ -1,13 +1,14 @@
 package net.sf.j2s.ajax.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.TYPE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(FIELD)
+@Target({FIELD, TYPE})
 @Retention(RetentionPolicy.SOURCE)
-public @interface SimpleIn {
-	String[] value() default {};
+public @interface SimpleComment {
+	String[] value();
 }

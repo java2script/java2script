@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
+import net.sf.j2s.ajax.annotation.SimpleComment;
+import net.sf.j2s.ajax.annotation.SimpleIn;
+import net.sf.j2s.ajax.annotation.SimpleInOut;
+import net.sf.j2s.ajax.annotation.SimpleOut;
 
 public class SimpleSource4ObjectiveC {
 	
@@ -32,6 +36,127 @@ public class SimpleSource4ObjectiveC {
 	static String company = "Company";
 	static String constantPrefix = "C_";
 
+
+	private static String wrapString(String s) {
+		if (s == null) {
+			return "";
+		}
+		return s.replaceAll("\r", "\\\\r")
+				.replaceAll("\n", "\\\\n");
+	}
+
+	private static void generateAnnotation(Class<?> clazz, StringBuffer source) {
+		Deprecated annDeprecated = clazz.getAnnotation(Deprecated.class);
+		if (annDeprecated != null) {
+			source.append("@");
+			source.append(annDeprecated.annotationType().getSimpleName());
+			source.append("\r\n");
+		}
+		SimpleComment annComment = clazz.getAnnotation(SimpleComment.class);
+		if (annComment != null) {
+			String[] comments = annComment.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append("// ");
+				source.append(wrapString(comments[0]));
+				source.append("\r\n\r\n");
+			} else if (comments != null && comments.length >= 2) {
+				for (int i = 0; i < comments.length; i++) {
+					source.append("// ");
+					source.append(wrapString(comments[i]));
+					source.append("\r\n");
+				}
+				source.append("\r\n");
+			}
+		}
+	}
+
+	private static boolean generateAnnotation(Field field, boolean firstField, StringBuffer source) {
+		Deprecated annDeprecated = field.getAnnotation(Deprecated.class);
+		if (annDeprecated != null) {
+			source.append(firstField ? "//" : "\r\n// ");
+			source.append("[deprecated]");
+			//source.append(annDeprecated.annotationType().getSimpleName());
+		}
+		SimpleIn annIn = field.getAnnotation(SimpleIn.class);
+		if (annIn != null) {
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
+			source.append("[in]");
+			//source.append(annIn.annotationType().getSimpleName());
+			String[] comments = annIn.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append(": ");
+				source.append(wrapString(comments[0]));
+			} else if (comments != null && comments.length >= 2) {
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\r\n// ");
+					source.append(wrapString(comments[i]));
+				}
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleOut annOut = field.getAnnotation(SimpleOut.class);
+		if (annOut != null) {
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
+			source.append("[out]");
+			//source.append(annOut.annotationType().getSimpleName());
+			String[] comments = annOut.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append(": ");
+				source.append(wrapString(comments[0]));
+			} else if (comments != null && comments.length >= 2) {
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\r\n// ");
+					source.append(wrapString(comments[i]));
+				}
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleInOut annInOut = field.getAnnotation(SimpleInOut.class);
+		if (annInOut != null) {
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
+			source.append("[in/out]");
+			//source.append(annInOut.annotationType().getSimpleName());
+			String[] comments = annInOut.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append(": ");
+				source.append(wrapString(comments[0]));
+			} else if (comments != null && comments.length >= 2) {
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\r\n// ");
+					source.append(wrapString(comments[i]));
+				}
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleComment annComment = field.getAnnotation(SimpleComment.class);
+		if (annComment != null) {
+			String[] comments = annComment.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
+				source.append(wrapString(comments[0]));
+			} else if (comments != null && comments.length >= 2) {
+				for (int i = 0; i < comments.length; i++) {
+					source.append(firstField && i == 0 && annDeprecated == null ? "//" : "\r\n// ");
+					source.append(wrapString(comments[i]));
+				}
+			}
+			source.append("\r\n");
+			return true;
+		}
+		if (annDeprecated != null) {
+			source.append("\r\n");
+			return true;
+		}
+		return false;
+	}
 
 	@SuppressWarnings("deprecation")
 	public static String generateHeaderFromInterface(Class<?> interfaceClazz) {
@@ -60,6 +185,9 @@ public class SimpleSource4ObjectiveC {
 		source.append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
+		
+		generateAnnotation(interfaceClazz, source);
+		
 		int index = 0;
 		SourceUtils.insertLineComment(source, "", index++, true);
 		
@@ -87,6 +215,7 @@ public class SimpleSource4ObjectiveC {
 			int modifiers = f.getModifiers();
 			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
 					&& (modifiers & Modifier.STATIC) != 0 && (modifiers & Modifier.FINAL) != 0) {
+				generateAnnotation(f, !gotStaticFinalFields, source);
 				source.append("#define ");
 				if (constantPrefix != null && constantPrefix.length() > 0) {
 					source.append(constantPrefix);
@@ -198,9 +327,12 @@ public class SimpleSource4ObjectiveC {
 		source.append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
+		
+		generateAnnotation(s.getClass(), source);
+		
 		int index = 0;
 		SourceUtils.insertLineComment(source, "", index++, true);
-		
+
 		Class<?> superClazz = s.getClass().getSuperclass();
 		String superClazzName = superClazz.getName();
 		String simpleSuperClazzName = superClazzName;
@@ -282,6 +414,7 @@ public class SimpleSource4ObjectiveC {
 				if (!defineAppended) {
 					SourceUtils.insertLineComment(source, "", index++, true);
 				}
+				generateAnnotation(f, !defineAppended, source);
 				defineAppended = true;
 				source.append("#define ");
 				if (constantPrefix != null && constantPrefix.length() > 0) {
@@ -387,7 +520,7 @@ public class SimpleSource4ObjectiveC {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
-			
+
 			source.append("\t");
 			if (type == int.class) {
 				source.append("int ");
@@ -443,11 +576,14 @@ public class SimpleSource4ObjectiveC {
 		source.append("\r\n");
 		SourceUtils.insertLineComment(source, "", index++, true);
 
+		boolean firstField = true;
 		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
 			Class<?> type = field.getType();
 			
+			generateAnnotation(field, firstField, source);
+			firstField = false;
 			source.append("@property (nonatomic");
 			if (type == int.class) {
 				source.append(") int ");

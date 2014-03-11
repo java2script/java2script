@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(FIELD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface SimpleOut {
-
+	String[] value() default {};
 }
