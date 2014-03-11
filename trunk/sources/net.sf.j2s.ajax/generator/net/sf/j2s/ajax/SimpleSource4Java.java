@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.j2s.ajax.SimpleSerializable;
+import net.sf.j2s.ajax.annotation.SimpleComment;
+import net.sf.j2s.ajax.annotation.SimpleIn;
+import net.sf.j2s.ajax.annotation.SimpleInOut;
+import net.sf.j2s.ajax.annotation.SimpleOut;
 
 public class SimpleSource4Java {
 	
@@ -66,6 +70,9 @@ public class SimpleSource4Java {
 
 		SourceUtils.insertLineComment(source, "", index++, true);
 
+		Field[] clazzFields = interfaceClazz.getDeclaredFields();
+		boolean hasImports = importAnnotationClasses(Arrays.asList(clazzFields), interfaceClazz, source);
+
 		Class<?> superClazz = interfaceClazz.getSuperclass();
 		if (superClazz != null) {
 			String superClazzName = superClazz.getName();
@@ -88,6 +95,9 @@ public class SimpleSource4Java {
 			SourceUtils.insertBlockComment(source, index++);
 			source.append("{\r\n");
 		} else {
+			if (hasImports) {
+				source.append("\r\n");
+			}
 			SourceUtils.insertLineComment(source, "", index++, true);
 			
 			source.append("public interface ");
@@ -99,7 +109,6 @@ public class SimpleSource4Java {
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 
 		boolean gotStaticFinalFields = false;
-		Field[] clazzFields = interfaceClazz.getDeclaredFields();
 		
 		for (int i = 0; i < clazzFields.length; i++) {
 			Field f = clazzFields[i];
@@ -110,6 +119,7 @@ public class SimpleSource4Java {
 				if (type == int.class || type == long.class || type == short.class 
 						|| type == byte.class || type == char.class || type == double.class
 						|| type == float.class || type == boolean.class || type == String.class) {
+					generateAnnotation(f, !gotStaticFinalFields, source);
 					source.append("\tpublic ");
 					source.append(type.getSimpleName());
 					source.append(" ");
@@ -245,6 +255,10 @@ public class SimpleSource4Java {
 			}
 		}
 
+		if (importAnnotationClasses(fields, clazz, source)) {
+			hasMoreImports = true;
+		}
+		
 		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			Class<?> type = field.getType();
@@ -262,12 +276,16 @@ public class SimpleSource4Java {
 			}
 		}
 
+		String[] fieldMapping = s.fieldMapping();
 		Class<?> superClazz = s.getClass().getSuperclass();
 		if (superClazz != null) {
 			String superClazzName = superClazz.getName();
 			source.append("import ");
 			source.append(superClazzName);
 			source.append(";\r\n");
+			if (fieldMapping != null && fieldMappings.size() > 0 && System.getProperty("j2s.supports.web") != null) {
+				source.append("import net.sf.j2s.annotation.J2SIgnore;\r\n");
+			}
 			if (SimpleSerializable.isSubclassOf(superClazz, SimplePipeRunnable.class)) {
 				/*
 				Method[] methods = s.getClass().getMethods();
@@ -318,15 +336,22 @@ public class SimpleSource4Java {
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 			
+			generateAnnotation(clazz, source);
 			source.append("public class ");
 			source.append(simpleClazzName);
 			source.append(" extends ");
 			source.append(superClazzName);
 		} else {
+			if (fieldMapping != null && fieldMappings.size() > 0 && System.getProperty("j2s.supports.web") != null) {
+				source.append("import net.sf.j2s.annotation.J2SIgnore;\r\n");
+				hasMoreImports = true;
+			}
 			if (hasMoreImports) {
 				source.append("\r\n");
 			}
 			SourceUtils.insertLineComment(source, "", index++, true);
+
+			generateAnnotation(clazz, source);
 			source.append("public class ");
 			source.append(simpleClazzName);
 		}
@@ -360,7 +385,6 @@ public class SimpleSource4Java {
 		source.append("{\r\n\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 		
-		String[] fieldMapping = s.fieldMapping();
 		if (fieldMapping != null) {
 			Map<String, Field> allFields = SimpleSerializable.getSerializableFields(clazzName, clazz);
 			for (Iterator<String> itr = allFields.keySet().iterator(); itr.hasNext();) {
@@ -402,6 +426,9 @@ public class SimpleSource4Java {
 			}
 		}
 		if (fieldMappings != null && fieldMappings.size() > 0) {
+			if (System.getProperty("j2s.supports.web") != null) {
+				source.append("\t@J2SIgnore\r\n");
+			}
 			source.append("\tprivate static String[] mappings = new String[] {\r\n");
 			for (Iterator<String> itr = fieldMappings.keySet().iterator(); itr.hasNext();) {
 				String key = (String) itr.next();
@@ -414,7 +441,13 @@ public class SimpleSource4Java {
 			}
 			source.append("\t};\r\n");
 			
+			if (System.getProperty("j2s.supports.web") != null) {
+				source.append("\t@J2SIgnore\r\n");
+			}
 			source.append("\tprivate static Map<String, String> nameMappings = mappingFromArray(mappings, false);\r\n");
+			if (System.getProperty("j2s.supports.web") != null) {
+				source.append("\t@J2SIgnore\r\n");
+			}
 			source.append("\tprivate static Map<String, String> aliasMappings = mappingFromArray(mappings, true);\r\n");
 		}
 		
@@ -435,6 +468,7 @@ public class SimpleSource4Java {
 					if (!gotStaticFinalFields && fieldMappings != null && fieldMappings.size() > 0) {
 						source.append("\r\n");
 					}
+					generateAnnotation(f, !gotStaticFinalFields, source);
 					source.append("\tpublic static final ");
 					source.append(type.getSimpleName());
 					source.append(" ");
@@ -482,6 +516,7 @@ public class SimpleSource4Java {
 			index++;
 		}
 
+		boolean firstField = true;
 		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
 			Field field = (Field) itr.next();
 			String name = field.getName();
@@ -495,6 +530,8 @@ public class SimpleSource4Java {
 					|| type == byte[].class || type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class || type == String[].class
 					|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
+				generateAnnotation(field, firstField, source);
+				firstField = false;
 				source.append("\tpublic ");
 				source.append(type.getSimpleName());
 				source.append(" ");
@@ -509,10 +546,16 @@ public class SimpleSource4Java {
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 		boolean moreCodesAdded = false;
 		if (fieldMappings != null && fieldMappings.size() > 0) {
+			if (System.getProperty("j2s.supports.web") != null) {
+				source.append("\t@J2SIgnore\r\n");
+			}
 			source.append("\t@Override\r\n");
 			source.append("\tprotected Map<String, String> fieldNameMapping() {\r\n");
 			source.append("\t\treturn nameMappings;\r\n");
 			source.append("\t}\r\n\r\n");
+			if (System.getProperty("j2s.supports.web") != null) {
+				source.append("\t@J2SIgnore\r\n");
+			}
 			source.append("\t@Override\r\n");
 			source.append("\tprotected Map<String, String> fieldAliasMapping() {\r\n");
 			source.append("\t\treturn aliasMappings;\r\n");
@@ -607,6 +650,212 @@ public class SimpleSource4Java {
 		source.append("}\r\n");
 
 		return source.toString();
+	}
+
+	private static void generateAnnotation(Class<?> clazz, StringBuffer source) {
+		Deprecated annDeprecated = clazz.getAnnotation(Deprecated.class);
+		if (annDeprecated != null) {
+			source.append("@");
+			source.append(annDeprecated.annotationType().getSimpleName());
+			source.append("\r\n");
+		}
+		SimpleComment annComment = clazz.getAnnotation(SimpleComment.class);
+		if (annComment != null) {
+			source.append("@");
+			source.append(annComment.annotationType().getSimpleName());
+			String[] comments = annComment.value();
+			if (comments != null && comments.length == 1) {
+				source.append("(\"");
+				source.append(wrapString(comments[0]));
+				source.append("\")");
+			} else if (comments != null && comments.length >= 2) {
+				source.append("({\r\n");
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\t\"");
+					source.append(wrapString(comments[i]));
+					source.append(i == comments.length - 1 ? "\"\r\n" : "\",\r\n");
+				}
+				source.append("})");
+			}
+			source.append("\r\n");
+		}
+	}
+
+	private static boolean importAnnotationClasses(List<Field> fields,
+			Class<?> clazz, StringBuffer source) {
+		boolean inAnnImported = false;
+		boolean outAnnImported = false;
+		boolean inOutAnnImported = false;
+		boolean commentAnnImported = false;
+		if (clazz.getAnnotation(SimpleComment.class) != null) {
+			commentAnnImported = true;
+		}
+		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
+			Field field = (Field) itr.next();
+			if (!inAnnImported) {
+				if (field.getAnnotation(SimpleIn.class) != null) {
+					inAnnImported = true;
+					continue;
+				}
+			}
+			if (!outAnnImported) {
+				if (field.getAnnotation(SimpleOut.class) != null) {
+					outAnnImported = true;
+					continue;
+				}
+			}
+			if (!inOutAnnImported) {
+				if (field.getAnnotation(SimpleInOut.class) != null) {
+					inOutAnnImported = true;
+					continue;
+				}
+			}
+			if (!commentAnnImported) {
+				if (field.getAnnotation(SimpleComment.class) != null) {
+					commentAnnImported = true;
+					continue;
+				}
+			}
+			if (inAnnImported && outAnnImported && inOutAnnImported && commentAnnImported) {
+				break;
+			}
+		}
+		if (commentAnnImported) {
+			String typeName = SimpleComment.class.getName();
+			source.append("import ");
+			source.append(typeName);
+			source.append(";\r\n");
+		}
+		if (inAnnImported) {
+			String typeName = SimpleIn.class.getName();
+			source.append("import ");
+			source.append(typeName);
+			source.append(";\r\n");
+		}
+		if (inOutAnnImported) {
+			String typeName = SimpleInOut.class.getName();
+			source.append("import ");
+			source.append(typeName);
+			source.append(";\r\n");
+		}
+		if (outAnnImported) {
+			String typeName = SimpleOut.class.getName();
+			source.append("import ");
+			source.append(typeName);
+			source.append(";\r\n");
+		}
+		return inAnnImported || outAnnImported || inOutAnnImported || commentAnnImported;
+	}
+
+	private static String wrapString(String s) {
+		if (s == null) {
+			return "";
+		}
+		return s.replaceAll("\\\\", "\\\\\\\\")
+				.replaceAll("\r", "\\\\r")
+				.replaceAll("\n", "\\\\n")
+				.replaceAll("\t", "\\\\t")
+				.replaceAll("\"", "\\\\\"");
+	}
+	
+	private static boolean generateAnnotation(Field field, boolean firstField, StringBuffer source) {
+		Deprecated annDeprecated = field.getAnnotation(Deprecated.class);
+		if (annDeprecated != null) {
+			source.append(firstField ? "\t@" : "\r\n\t@");
+			source.append(annDeprecated.annotationType().getSimpleName());
+		}
+		SimpleIn annIn = field.getAnnotation(SimpleIn.class);
+		if (annIn != null) {
+			source.append(firstField && annDeprecated == null ? "\t@" : "\r\n\t@");
+			source.append(annIn.annotationType().getSimpleName());
+			String[] comments = annIn.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append("(\"");
+				source.append(wrapString(comments[0]));
+				source.append("\")");
+			} else if (comments != null && comments.length >= 2) {
+				source.append("({\r\n");
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\t\t\"");
+					source.append(wrapString(comments[i]));
+					source.append(i == comments.length - 1 ? "\"\r\n" : "\",\r\n");
+				}
+				source.append("\t})");
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleOut annOut = field.getAnnotation(SimpleOut.class);
+		if (annOut != null) {
+			source.append(firstField && annDeprecated == null ? "\t@" : "\r\n\t@");
+			source.append(annOut.annotationType().getSimpleName());
+			String[] comments = annOut.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append("(\"");
+				source.append(wrapString(comments[0]));
+				source.append("\")");
+			} else if (comments != null && comments.length >= 2) {
+				source.append("({\r\n");
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\t\t\"");
+					source.append(wrapString(comments[i]));
+					source.append(i == comments.length - 1 ? "\"\r\n" : "\",\r\n");
+				}
+				source.append("\t})");
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleInOut annInOut = field.getAnnotation(SimpleInOut.class);
+		if (annInOut != null) {
+			source.append(firstField && annDeprecated == null ? "\t@" : "\r\n\t@");
+			source.append(annInOut.annotationType().getSimpleName());
+			String[] comments = annInOut.value();
+			if (comments != null && comments.length == 1
+					&& comments[0] != null && comments[0].length() > 0) {
+				source.append("(\"");
+				source.append(wrapString(comments[0]));
+				source.append("\")");
+			} else if (comments != null && comments.length >= 2) {
+				source.append("({\r\n");
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\t\t\"");
+					source.append(wrapString(comments[i]));
+					source.append(i == comments.length - 1 ? "\"\r\n" : "\",\r\n");
+				}
+				source.append("\t})");
+			}
+			source.append("\r\n");
+			return true;
+		}
+		SimpleComment annComment = field.getAnnotation(SimpleComment.class);
+		if (annComment != null) {
+			source.append(firstField && annDeprecated == null ? "\t@" : "\r\n\t@");
+			source.append(annComment.annotationType().getSimpleName());
+			String[] comments = annComment.value();
+			if (comments != null && comments.length == 1) {
+				source.append("(\"");
+				source.append(wrapString(comments[0]));
+				source.append("\")");
+			} else if (comments != null && comments.length >= 2) {
+				source.append("({\r\n");
+				for (int i = 0; i < comments.length; i++) {
+					source.append("\t\t\"");
+					source.append(wrapString(comments[i]));
+					source.append(i == comments.length - 1 ? "\"\r\n" : "\",\r\n");
+				}
+				source.append("\t})");
+			}
+			source.append("\r\n");
+			return true;
+		}
+		if (annDeprecated != null) {
+			source.append("\r\n");
+			return true;
+		}
+		return false;
 	}
 
 	/**
