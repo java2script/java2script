@@ -88,21 +88,39 @@ public class SimpleClassLoader extends ClassLoader {
 			}
 		}
 		if (contains) {
+			Exception ex = null;
         	synchronized (mutex) {
         		clazz = loadedClasses.get(clazzName);
-    			if (clazz == null) {
-    				// The following two lines are IO sensitive
-		            byte[] bytes = null;
-					// The following lines are IO sensitive
-		            try {
-						bytes = loadClassData(clazzName);
-					} catch (IOException e) {
-			        	throw new ClassNotFoundException(e.getMessage(), e);
-					}
-		            clazz = defineClass(clazzName, bytes, 0, bytes.length);
-	    			loadedClasses.put(clazzName, clazz);
-    			}
-        		return clazz;
+        		if (clazz != null) {
+        			return clazz;
+        		}
+	            byte[] bytes = null;
+				// The following lines are IO sensitive
+	            try {
+					bytes = loadClassData(clazzName);
+				} catch (IOException e) {
+					ex = e;
+				}
+				if (bytes != null) {
+					clazz = defineClass(clazzName, bytes, 0, bytes.length);
+					loadedClasses.put(clazzName, clazz);
+	        		return clazz;
+				}
+			}
+			// continue to load class by super class loader
+			ClassLoader parent = getParent();
+			if (parent != null) {
+				clazz = parent.loadClass(clazzName);
+				synchronized (mutex) {
+					loadedClasses.put(clazzName, clazz);
+				}
+				return clazz;
+			} else {
+				if (ex != null) {
+					throw new ClassNotFoundException(ex.getMessage(), ex);
+				} else {
+					throw new ClassNotFoundException();
+				}
 			}
 		}
 		/* 
