@@ -202,6 +202,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	@Override
 	public void ajaxOut() {
 		if (pipeAlive) {
+			updateStatus(true);
 			pipeCreated();
 		} else {
 			pipeFailed();

@@ -448,7 +448,9 @@ Clazz.addEvent (document, "keydown", function (e) {
 					return;
 				}
 				runnable.ajaxOut();
-				ajaxPipe(runnable);
+				if (runnable.isPipeLive()) { // false if #pipeFailed is called in #ajaxOut  
+					ajaxPipe(runnable);
+				}
 			}
 		});
 		request.send(serialize);
@@ -1007,7 +1009,6 @@ for (var i = 0; i < iframes.length; i++) {
 	 * being parsed.
 	 */
 	public static String parseReceived(final String string) {
-		//System.out.println(string);
 		if (string == null) {
 			return null;
 		}
