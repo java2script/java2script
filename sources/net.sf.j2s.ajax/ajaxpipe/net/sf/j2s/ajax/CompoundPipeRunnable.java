@@ -3,13 +3,12 @@ package net.sf.j2s.ajax;
 public class CompoundPipeRunnable extends SimplePipeRunnable {
 	
 	private static String nextSessionKey() {
-		String hexStr = "0123456789abcdef";
-		String key = "";
+		StringBuffer keyBuffer = new StringBuffer(4);
 		for (int i = 0; i < 4; i++) {
-			int hex = (int) Math.round(15 * Math.random());
-			key += "" + hexStr.charAt(hex);
+			int hex = (int) Math.floor(Math.random() * 16);
+			keyBuffer.append((char) (hex < 10 ? ('0' + hex) : ('a' + hex - 10)));
 		}
-		return key;
+		return keyBuffer.toString();
 	}
 	
 	CompoundPipeSession[] pipes;
