@@ -11,13 +11,15 @@
 
 package net.sf.j2s.ajax;
 
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-//import java.lang.reflect.TypeVariable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,6 +61,12 @@ public class SimpleSerializable implements Cloneable {
 	private static Map<String, String> classNameMappings = new HashMap<String, String>();
 	@J2SIgnore
 	private static Map<String, String> classAliasMappings = new HashMap<String, String>();
+	
+	@J2SIgnore
+	private static Charset UTF_8 = Charset.forName("utf-8");
+	
+	@J2SIgnore
+	private static Charset ISO_8859_1 = Charset.forName("iso-8859-1");
 	
 	private int simpleVersion;
 	
@@ -148,6 +156,16 @@ public class SimpleSerializable implements Cloneable {
 		}
 		return fields;
 	}
+
+    @J2SIgnore
+    public long estimateSize() {
+    	return 8192;
+    }
+
+    @J2SIgnore
+    public long estimateSize(SimpleFilter filter) {
+    	return 8192;
+    }
 
 	/**
 	 * @return
@@ -319,14 +337,59 @@ strBuf = strBuf.substring (0, headSize - sizeStr.length - 1) + sizeStr + strBuf.
 return strBuf;
 	 */
 	public String serialize() {
-		return serialize(null);
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		return serialize(null, objects, true);
+    }
+    
+    @J2SIgnore
+	public byte[] serializeBytes() {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		try {
+			return serializeBytes(null, objects, true);
+		} catch (IOException e) {
+			//e.printStackTrace();
+			return null;
+		}
     }
     
     @J2SIgnore
 	public String serialize(SimpleFilter filter) {
     	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
     	objects.add(this);
-		return serialize(filter, objects);
+		return serialize(filter, objects, true);
+	}
+
+    @J2SIgnore
+	public byte[] serializeBytes(SimpleFilter filter) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		try {
+			return serializeBytes(filter, objects, true);
+		} catch (IOException e) {
+			//e.printStackTrace();
+			return null;
+		}
+	}
+    
+    @J2SIgnore
+	public String serialize(SimpleFilter filter, boolean supportsCompactBytes) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		return serialize(filter, objects, supportsCompactBytes);
+	}
+
+    @J2SIgnore
+	public byte[] serializeBytes(SimpleFilter filter, boolean supportsCompactBytes) {
+    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	objects.add(this);
+		try {
+			return serializeBytes(filter, objects, supportsCompactBytes);
+		} catch (IOException e) {
+			//e.printStackTrace();
+			return null;
+		}
 	}
 
     @J2SIgnore
@@ -399,7 +462,7 @@ return strBuf;
     }
     
     @J2SIgnore
-	private String serialize(SimpleFilter filter, List<SimpleSerializable> ssObjs) {
+	private String serialize(SimpleFilter filter, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) {
 		char baseChar = 'B';
 		StringBuffer buffer = new StringBuffer(1024);
 		/*
@@ -485,7 +548,7 @@ return strBuf;
 					if (ssObj == null && ignoring) continue;
 					buffer.append((char)(baseChar + name.length()));
 					buffer.append(name);
-					serializeObject(buffer, ssObj, ssObjs);
+					serializeObject(buffer, ssObj, ssObjs, supportsCompactBytes);
 				} else if (type == long.class) {
 					long l = field.getLong(this);
 					if (l == 0L && ignoring) continue;
@@ -509,19 +572,19 @@ return strBuf;
 						if (bs == null && ignoring) continue;
 						buffer.append((char)(baseChar + name.length()));
 						buffer.append(name);
-						buffer.append(!bytesCompactMode() ? "AB" : "A8");
+						buffer.append(!bytesCompactMode() || !supportsCompactBytes ? "AB" : "A8");
 						if (bs == null) {
 							buffer.append('A'); // (char) (baseChar - 1));
 						} else {
 							serializeLength(buffer, bs.length);
-							if (!bytesCompactMode()) {
+							if (!bytesCompactMode() || !supportsCompactBytes) {
 								for (int j = 0; j < bs.length; j++) {
 									String value = String.valueOf(bs[j]);
 									buffer.append((char) (baseChar + value.length()));
 									buffer.append(value);
 								}
 							} else {
-								buffer.append(new String(bs, "iso-8859-1"));
+								buffer.append(new String(bs, ISO_8859_1));
 							}
 						}
 					} else if (type == String[].class) {
@@ -551,7 +614,7 @@ return strBuf;
 							serializeLength(buffer, ss.length);
 							for (int j = 0; j < ss.length; j++) {
 								SimpleSerializable s = ss[j];
-								serializeObject(buffer, s, ssObjs);
+								serializeObject(buffer, s, ssObjs, supportsCompactBytes);
 							}
 						}
 					} else if (type == int[].class) {
@@ -696,7 +759,7 @@ return strBuf;
 							if (o == null) {
 								buffer.append("OA");
 							} else {
-								serializeArrayItem(buffer, o.getClass(), o, ssObjs);
+								serializeArrayItem(buffer, o.getClass(), o, ssObjs, supportsCompactBytes);
 							}
 						}
 					}
@@ -716,13 +779,13 @@ return strBuf;
 							if (key == null) {
 								buffer.append("OA");
 							} else {
-								serializeArrayItem(buffer, key.getClass(), key, ssObjs);
+								serializeArrayItem(buffer, key.getClass(), key, ssObjs, supportsCompactBytes);
 							}
 							Object value = map.get(key);
 							if (value == null) {
 								buffer.append("OA");
 							} else {
-								serializeArrayItem(buffer, value.getClass(), value, ssObjs);
+								serializeArrayItem(buffer, value.getClass(), value, ssObjs, supportsCompactBytes);
 							}
 						}
 					}
@@ -799,7 +862,413 @@ return strBuf;
 	}
 
     @J2SIgnore
-    private void serializeArrayItem(StringBuffer buffer, Class<?> type, Object target, List<SimpleSerializable> ssObjs) throws Exception {
+	private byte[] serializeBytes(SimpleFilter filter, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) throws IOException {
+		char baseChar = 'B';
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		DataOutputStream dos = new DataOutputStream(baos);
+		/*
+		 * "WLL" is used to mark Simple RPC, 100 is version 1.0.0, 
+		 * # is used to mark the the beginning of serialized data  
+		 */
+		dos.writeBytes("WLL");
+		dos.writeBytes(String.valueOf(getSimpleVersion()));
+		Class<?> clazz = this.getClass();
+		String clazzName = clazz.getName();
+		int idx = -1;
+		while ((idx = clazzName.lastIndexOf('$')) != -1) {
+			if (clazzName.length() > idx + 1) {
+				char ch = clazzName.charAt(idx + 1);
+				if (ch < '0' || ch > '9') { // not a number
+					break; // inner class
+				}
+			}
+			clazz = clazz.getSuperclass();
+			if (clazz == null) {
+				break; // should never happen!
+			}
+			clazzName = clazz.getName();
+		}
+		if (getSimpleVersion() >= 202 && classNameAbbrev) {
+			String shortClazzName = classNameMappings.get(clazzName);
+			if (shortClazzName != null) {
+				dos.writeBytes(shortClazzName);
+			} else {
+				dos.writeBytes(clazzName);
+			}
+		} else {
+			dos.writeBytes(clazzName);
+		}
+		dos.writeBytes("#00000000$"); // later the number of size will be updated!
+		int headSize = dos.size();
+
+		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass());
+		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
+		Map<String, String> fieldNameMap = getSimpleVersion() >= 202 ? fieldNameMapping() : null;
+		String[] fMap = fieldNameMap == null ? fieldMapping() : null;
+		try {
+			for (Iterator<Entry<String, Field>> itr = fields.entrySet().iterator(); itr.hasNext();) {
+				Entry<String, Field> entry = (Entry<String, Field>) itr.next();
+				String name = entry.getKey();
+				Field field = entry.getValue();
+				if (filter != null && !filter.accept(name)) continue;
+				if (fieldNameMap != null) {
+					String alias = fieldNameMap.get(name);
+					if (alias != null && alias.length() > 0) {
+						name = alias;
+					}
+				} else if (fMap != null && fMap.length > 1) {
+					for (int j = 0; j < fMap.length / 2; j++) {
+						if (name.equals(fMap[j + j])) {
+							String newName = fMap[j + j + 1];
+							if (newName != null && newName.length() > 0) {
+								name = newName;
+							}
+							break;
+						}
+					}
+				}
+				//String nameStr = (char)(baseChar + name.length()) + name;
+				Class<?> type = field.getType();
+				if (type == String.class) {
+					String s = (String) field.get(this);
+					if (s == null && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					serializeBytesString(dos, s);
+				} else if (type == int.class) {
+					int n = field.getInt(this);
+					if (n == 0 && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('I');
+					String value = String.valueOf(n);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (isSubclassOf(type, SimpleSerializable.class)) {
+					SimpleSerializable ssObj = (SimpleSerializable) field.get(this);
+					if (ssObj == null && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					serializeBytesObject(dos, ssObj, ssObjs, supportsCompactBytes);
+				} else if (type == long.class) {
+					long l = field.getLong(this);
+					if (l == 0L && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('L');
+					String value = String.valueOf(l);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (type == boolean.class) {
+					boolean b = field.getBoolean(this);
+					if (b == false && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('b');
+					dos.writeByte('C'); // ((char) (baseChar + 1));
+					dos.writeByte(b ? '1' : '0');
+				} else if (type.isArray()) { // Array ...
+					if (type == byte[].class) {
+						byte [] bs = (byte []) field.get(this);
+						if (bs == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes(!bytesCompactMode() || !supportsCompactBytes ? "AB" : "A8");
+						if (bs == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, bs.length);
+							if (!bytesCompactMode() || !supportsCompactBytes) {
+								for (int j = 0; j < bs.length; j++) {
+									String value = String.valueOf(bs[j]);
+									dos.writeByte(baseChar + value.length());
+									dos.writeBytes(value);
+								}
+							} else {
+								dos.write(bs);
+							}
+						}
+					} else if (type == String[].class) {
+						String[] ss = (String []) field.get(this);
+						if (ss == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AX"); // special
+						if (ss == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								String s = ss[j];
+								serializeBytesString(dos, s);
+							}
+						}
+					} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+						SimpleSerializable[] ss = (SimpleSerializable []) field.get(this);
+						if (ss == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AO"); // special
+						if (ss == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								SimpleSerializable s = ss[j];
+								serializeBytesObject(dos, s, ssObjs, supportsCompactBytes);
+							}
+						}
+					} else if (type == int[].class) {
+						int [] ns = (int []) field.get(this);
+						if (ns == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AI");
+						if (ns == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ns.length);
+							for (int j = 0; j < ns.length; j++) {
+								String value = String.valueOf(ns[j]);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else if (type == long[].class) {
+						long [] ls = (long []) field.get(this);
+						if (ls == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AL");
+						if (ls == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ls.length);
+							for (int j = 0; j < ls.length; j++) {
+								String value = String.valueOf(ls[j]);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else if (type == boolean[].class) {
+						boolean [] bs = (boolean []) field.get(this);
+						if (bs == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("Ab");
+						if (bs == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, bs.length);
+							for (int j = 0; j < bs.length; j++) {
+								dos.writeByte('C'); // (char) (baseChar + 1));
+								dos.writeByte(bs[j] ? '1' : '0');
+							}
+						}
+					} else if (type == float[].class) {
+						float[] fs = (float[]) field.get(this);
+						if (fs == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AF");
+						if (fs == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, fs.length);
+							for (int j = 0; j < fs.length; j++) {
+								String value = String.valueOf(fs[j]);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else if (type == double[].class) {
+						double [] ds = (double []) field.get(this);
+						if (ds == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AD");
+						if (ds == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ds.length);
+							for (int j = 0; j < ds.length; j++) {
+								String value = String.valueOf(ds[j]);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else if (type == short[].class) {
+						short [] ss = (short []) field.get(this);
+						if (ss == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AS");
+						if (ss == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, ss.length);
+							for (int j = 0; j < ss.length; j++) {
+								String value = String.valueOf(ss[j]);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else if (type == char[].class) {
+						char [] cs = (char []) field.get(this);
+						if (cs == null && ignoring) continue;
+						dos.writeByte(baseChar + name.length());
+						dos.writeBytes(name);
+						dos.writeBytes("AC");
+						if (cs == null) {
+							dos.writeByte('A'); // (char) (baseChar - 1));
+						} else {
+							serializeBytesLength(dos, cs.length);
+							for (int j = 0; j < cs.length; j++) {
+								int c = cs[j];
+								String value = Integer.toString(c, 10);
+								dos.writeByte(baseChar + value.length());
+								dos.writeBytes(value);
+							}
+						}
+					} else {
+						continue; // just ignore it
+						// others unknown or unsupported types!
+						// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
+					}
+				} else if (isSubInterfaceOf(type, Collection.class)) {
+					Collection<?> collection = (Collection<?>)field.get(this);
+					if (collection == null && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('Z');
+					if (isSubInterfaceOf(type, List.class)) {
+						dos.writeByte('Z');
+					} else if (isSubInterfaceOf(type, Set.class)) {
+						dos.writeByte('Y');
+					} else if (isSubInterfaceOf(type, Queue.class)) {
+						dos.writeByte('Q');
+					} else {
+						dos.writeByte('W');
+					}
+					if (collection == null) {
+						dos.writeByte('A'); // (char) (baseChar - 1));
+					} else {
+						Object[] os = collection.toArray();
+						serializeBytesLength(dos, os.length);
+						for (int j = 0; j < os.length; j++) {
+							Object o = os[j];
+							if (o == null) {
+								dos.writeBytes("OA");
+							} else {
+								serializeBytesArrayItem(dos, o.getClass(), o, ssObjs, supportsCompactBytes);
+							}
+						}
+					}
+				} else if (isSubInterfaceOf(type, Map.class)) {
+					Map<?, ?> map = (Map<?, ?>)field.get(this);
+					if (map == null && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeBytes("YM");
+					if (map == null) {
+						dos.writeByte('A'); // (char) (baseChar - 1));
+					} else {
+						serializeBytesLength(dos, map.size() * 2);
+						for (Iterator<?> iter = map.keySet().iterator(); iter
+								.hasNext();) {
+							Object key = iter.next();
+							if (key == null) {
+								dos.writeBytes("OA");
+							} else {
+								serializeBytesArrayItem(dos, key.getClass(), key, ssObjs, supportsCompactBytes);
+							}
+							Object value = map.get(key);
+							if (value == null) {
+								dos.writeBytes("OA");
+							} else {
+								serializeBytesArrayItem(dos, value.getClass(), value, ssObjs, supportsCompactBytes);
+							}
+						}
+					}
+				} else if (type.isEnum()) {
+					Enum<?> e = (Enum<?>)field.get(this);
+					if (e == null && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('E');
+					if (e == null) {
+						dos.writeByte('A'); // (char) (baseChar - 1));
+					} else {
+						String value = String.valueOf(e.ordinal());
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				} else if (type == float.class) {
+					float f = field.getFloat(this);
+					if (f == 0.0 && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('F');
+					String value = String.valueOf(f);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (type == double.class) {
+					double d = field.getDouble(this);
+					if (d == 0.0d && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('D');
+					String value = String.valueOf(d);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (type == short.class) {
+					short s = field.getShort(this);
+					if (s == 0 && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('S');
+					String value = String.valueOf(s);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (type == byte.class) {
+					byte b = field.getByte(this);
+					if (b == 0 && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('B');
+					String value = String.valueOf(b);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				} else if (type == char.class) {
+					int c = 0 + field.getChar(this);
+					if (c == 0 && ignoring) continue;
+					dos.writeByte(baseChar + name.length());
+					dos.writeBytes(name);
+					dos.writeByte('C');
+					String value = Integer.toString(c, 10);
+					dos.writeByte(baseChar + value.length());
+					dos.writeBytes(value);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		int size = dos.size();
+		if (size > 0x1000000) { // 16 * 1024 * 1024
+			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+		}
+		// update size!
+		String sizeStr = String.valueOf(size - headSize);
+		int sizeLength = sizeStr.length();
+		byte[] bytes = baos.toByteArray();
+		for (int i = 0; i < sizeLength; i++) {
+			bytes[headSize - sizeLength - 1 + i] = (byte) sizeStr.charAt(i);
+		}
+		return bytes;
+	}
+
+    @J2SIgnore
+    private void serializeArrayItem(StringBuffer buffer, Class<?> type, Object target, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) throws Exception {
     	char baseChar = 'B';
 		if (type == String.class) {
 			String s = (String) target;
@@ -812,7 +1281,7 @@ return strBuf;
 			buffer.append(value);
 		} else if (isSubclassOf(type, SimpleSerializable.class)) {
 			SimpleSerializable ssObj = (SimpleSerializable) target;
-			serializeObject(buffer, ssObj, ssObjs);
+			serializeObject(buffer, ssObj, ssObjs, supportsCompactBytes);
 		} else if (type == Long.class) {
 			long l = ((Long) target).longValue();
 			buffer.append('L');
@@ -827,19 +1296,19 @@ return strBuf;
 		} else if (type.isArray()) { // Array ...
 			if (type == byte[].class) {
 				byte [] bs = (byte []) target;
-				buffer.append(!bytesCompactMode() ? "AB" : "A8");
+				buffer.append(!bytesCompactMode() || !supportsCompactBytes ? "AB" : "A8");
 				if (bs == null) {
 					buffer.append('A'); // (char) (baseChar - 1));
 				} else {
 					serializeLength(buffer, bs.length);
-					if (!bytesCompactMode()) {
+					if (!bytesCompactMode() || !supportsCompactBytes) {
 						for (int j = 0; j < bs.length; j++) {
 							String value = String.valueOf(bs[j]);
 							buffer.append((char) (baseChar + value.length()));
 							buffer.append(value);
 						}
 					} else {
-						buffer.append(new String(bs, "iso-8859-1"));
+						buffer.append(new String(bs, ISO_8859_1));
 					}
 				}
 			} else if (type == String[].class) {
@@ -863,7 +1332,7 @@ return strBuf;
 					serializeLength(buffer, ss.length);
 					for (int j = 0; j < ss.length; j++) {
 						SimpleSerializable s = ss[j];
-						serializeObject(buffer, s, ssObjs);
+						serializeObject(buffer, s, ssObjs, supportsCompactBytes);
 					}
 				}
 			} else if (type == int[].class) {
@@ -984,7 +1453,7 @@ return strBuf;
 					if (o == null) {
 						buffer.append("OA");
 					} else {
-						serializeArrayItem(buffer, o.getClass(), o, ssObjs);
+						serializeArrayItem(buffer, o.getClass(), o, ssObjs, supportsCompactBytes);
 					}
 				}
 			}
@@ -1001,13 +1470,13 @@ return strBuf;
 					if (key == null) {
 						buffer.append("OA");
 					} else {
-						serializeArrayItem(buffer, key.getClass(), key, ssObjs);
+						serializeArrayItem(buffer, key.getClass(), key, ssObjs, supportsCompactBytes);
 					}
 					Object value = map.get(key);
 					if (value == null) {
 						buffer.append("OA");
 					} else {
-						serializeArrayItem(buffer, value.getClass(), value, ssObjs);
+						serializeArrayItem(buffer, value.getClass(), value, ssObjs, supportsCompactBytes);
 					}
 				}
 			}
@@ -1056,7 +1525,266 @@ return strBuf;
 			// others unknown or unsupported types!
 		}
     }
-    
+
+    @J2SIgnore
+    private void serializeBytesArrayItem(DataOutputStream dos, Class<?> type, Object target, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) throws Exception {
+    	char baseChar = 'B';
+		if (type == String.class) {
+			String s = (String) target;
+			serializeBytesString(dos, s);
+		} else if (type == Integer.class) {
+			int n = ((Integer) target).intValue();
+			dos.writeByte('I');
+			String value = String.valueOf(n);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (isSubclassOf(type, SimpleSerializable.class)) {
+			SimpleSerializable ssObj = (SimpleSerializable) target;
+			serializeBytesObject(dos, ssObj, ssObjs, supportsCompactBytes);
+		} else if (type == Long.class) {
+			long l = ((Long) target).longValue();
+			dos.writeByte('L');
+			String value = String.valueOf(l);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (type == Boolean.class) {
+			boolean b = ((Boolean) target).booleanValue();
+			dos.writeByte('b');
+			dos.writeByte('C'); // ((char) (baseChar + 1));
+			dos.writeByte(b ? '1' : '0');
+		} else if (type.isArray()) { // Array ...
+			if (type == byte[].class) {
+				byte [] bs = (byte []) target;
+				dos.writeBytes(!bytesCompactMode() || !supportsCompactBytes ? "AB" : "A8");
+				if (bs == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, bs.length);
+					if (!bytesCompactMode() || !supportsCompactBytes) {
+						for (int j = 0; j < bs.length; j++) {
+							String value = String.valueOf(bs[j]);
+							dos.writeByte(baseChar + value.length());
+							dos.writeBytes(value);
+						}
+					} else {
+						dos.write(bs);
+					}
+				}
+			} else if (type == String[].class) {
+				String[] ss = (String []) target;
+				dos.writeBytes("AX"); // special
+				if (ss == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						String s = ss[j];
+						serializeBytesString(dos, s);
+					}
+				}
+			} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+				SimpleSerializable[] ss = (SimpleSerializable []) target;
+				dos.writeBytes("AO"); // special
+				if (ss == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						SimpleSerializable s = ss[j];
+						serializeBytesObject(dos, s, ssObjs, supportsCompactBytes);
+					}
+				}
+			} else if (type == int[].class) {
+				int [] ns = (int []) target;
+				dos.writeBytes("AI");
+				if (ns == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ns.length);
+					for (int j = 0; j < ns.length; j++) {
+						String value = String.valueOf(ns[j]);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else if (type == long[].class) {
+				long [] ls = (long []) target;
+				dos.writeBytes("AL");
+				if (ls == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ls.length);
+					for (int j = 0; j < ls.length; j++) {
+						String value = String.valueOf(ls[j]);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else if (type == boolean[].class) {
+				boolean [] bs = (boolean []) target;
+				dos.writeBytes("Ab");
+				if (bs == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, bs.length);
+					for (int j = 0; j < bs.length; j++) {
+						dos.writeByte('C'); // (char) (baseChar + 1));
+						dos.writeByte(bs[j] ? '1' : '0');
+					}
+				}
+			} else if (type == float[].class) {
+				float[] fs = (float[]) target;
+				dos.writeBytes("AF");
+				if (fs == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, fs.length);
+					for (int j = 0; j < fs.length; j++) {
+						String value = String.valueOf(fs[j]);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else if (type == double[].class) {
+				double [] ds = (double []) target;
+				dos.writeBytes("AD");
+				if (ds == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ds.length);
+					for (int j = 0; j < ds.length; j++) {
+						String value = String.valueOf(ds[j]);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else if (type == short[].class) {
+				short [] ss = (short []) target;
+				dos.writeBytes("AS");
+				if (ss == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, ss.length);
+					for (int j = 0; j < ss.length; j++) {
+						String value = String.valueOf(ss[j]);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else if (type == char[].class) {
+				char [] cs = (char []) target;
+				dos.writeBytes("AC");
+				if (cs == null) {
+					dos.writeByte('A'); // (char) (baseChar - 1));
+				} else {
+					serializeBytesLength(dos, cs.length);
+					for (int j = 0; j < cs.length; j++) {
+						int c = cs[j];
+						String value = Integer.toString(c, 10);
+						dos.writeByte(baseChar + value.length());
+						dos.writeBytes(value);
+					}
+				}
+			} else {
+				dos.writeBytes("OA");
+				// others unknown or unsupported types!
+				// throw new RuntimeException("Unsupported data type in Java2Script Simple RPC!");
+			}
+		} else if (isSubInterfaceOf(type, Collection.class)) {
+			Collection<?> collection = (Collection<?>) target;
+			dos.writeByte('Z');
+			if (isSubInterfaceOf(type, List.class)) {
+				dos.writeByte('Z');
+			} else if (isSubInterfaceOf(type, Set.class)) {
+				dos.writeByte('Y');
+			} else if (isSubInterfaceOf(type, Queue.class)) {
+				dos.writeByte('Q');
+			} else {
+				dos.writeByte('W');
+			}
+			if (collection == null) {
+				dos.writeByte('A'); // (char) (baseChar - 1));
+			} else {
+				Object[] os = collection.toArray();
+				serializeBytesLength(dos, os.length);
+				for (int j = 0; j < os.length; j++) {
+					Object o = os[j];
+					if (o == null) {
+						dos.writeBytes("OA");
+					} else {
+						serializeBytesArrayItem(dos, o.getClass(), o, ssObjs, supportsCompactBytes);
+					}
+				}
+			}
+		} else if (isSubInterfaceOf(type, Map.class)) {
+			Map<?, ?> map = (Map<?, ?>) target;
+			dos.writeBytes("YM");
+			if (map == null) {
+				dos.writeByte('A'); // (char) (baseChar - 1));
+			} else {
+				serializeBytesLength(dos, map.size() * 2);
+				for (Iterator<?> iter = map.keySet().iterator(); iter
+						.hasNext();) {
+					Object key = iter.next();
+					if (key == null) {
+						dos.writeBytes("OA");
+					} else {
+						serializeBytesArrayItem(dos, key.getClass(), key, ssObjs, supportsCompactBytes);
+					}
+					Object value = map.get(key);
+					if (value == null) {
+						dos.writeBytes("OA");
+					} else {
+						serializeBytesArrayItem(dos, value.getClass(), value, ssObjs, supportsCompactBytes);
+					}
+				}
+			}
+		} else if (type.isEnum()) {
+			Enum<?> e = (Enum<?>) target;
+			dos.writeByte('E');
+			if (e == null) {
+				dos.writeByte('A'); // (char) (baseChar - 1));
+			} else {
+				String value = String.valueOf(e.ordinal());
+				dos.writeByte(baseChar + value.length());
+				dos.writeBytes(value);
+			}
+		} else if (type == Float.class) {
+			float f = ((Float) target).floatValue();
+			dos.writeByte('F');
+			String value = String.valueOf(f);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (type == Double.class) {
+			double d = ((Double) target).doubleValue();
+			dos.writeByte('D');
+			String value = String.valueOf(d);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (type == Short.class) {
+			short s = ((Short) target).shortValue();
+			dos.writeByte('S');
+			String value = String.valueOf(s);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (type == Byte.class) {
+			byte b = ((Byte) target).byteValue();
+			dos.writeByte('B');
+			String value = String.valueOf(b);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else if (type == Character.class) {
+			int c = 0 + ((Character) target).charValue();
+			dos.writeByte('C');
+			String value = Integer.toString(c, 10);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else {
+			dos.writeBytes("OA");
+			// others unknown or unsupported types!
+		}
+    }
+
     @J2SIgnore
 	private void serializeLength(StringBuffer buffer, int length) {
 		char baseChar = 'B';
@@ -1072,11 +1800,26 @@ return strBuf;
 			buffer.append((char) (baseChar + length));
 		}
 	}
+    
+    @J2SIgnore
+	private void serializeBytesLength(DataOutputStream dos, int length) throws IOException {
+		char baseChar = 'B';
+		if (length > 52) {
+			if (length > 0x1000000) { // 16 * 1024 * 1024
+				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+			}
+			dos.writeByte('@'); // (char) (baseChar - 2));
+			String value = String.valueOf(length);
+			dos.writeByte(baseChar + value.length());
+			dos.writeBytes(value);
+		} else {
+			dos.writeByte(baseChar + length);
+		}
+	}
 	
 	/**
 	 * @param buffer
 	 * @param s
-	 * @throws UnsupportedEncodingException
 	 * 
 	 * @j2sNative
 var baseChar = 'B'.charCodeAt (0);
@@ -1122,15 +1865,10 @@ if (s == null) {
 			if (!needBase64) {
 				buffer.append('s');
 			} else {
-				try {
-					byte[] bytes = s.getBytes("utf-8");
-					buffer.append('u');
-					//s = new String(bytes, "iso-8859-1");
-					s = Base64.byteArrayToBase64(bytes);
-					l4 = s.length();
-				} catch (UnsupportedEncodingException e) {
-					buffer.append('s');
-				}
+				byte[] bytes = s.getBytes(UTF_8);
+				buffer.append('u');
+				s = Base64.byteArrayToBase64(bytes);
+				l4 = s.length();
 			}
 			if (l4 > 52) {
 				buffer.append('@'); // (char) (baseChar - 2));
@@ -1144,6 +1882,44 @@ if (s == null) {
 		} else {
 			buffer.append('s');
 			buffer.append('A'); // (char) (baseChar - 1));
+		}
+	}
+
+    @J2SIgnore
+	private void serializeBytesString(DataOutputStream dos, String s) throws IOException {
+		char baseChar = 'B';
+		if (s != null) {
+			int l4 = s.length();
+			boolean needBase64 = false;
+			if (!stringsASCIIEncoded()) {
+				for (int i = 0; i < l4; i++) {
+					char c = s.charAt(i);
+					if (c > 0x7e || (c < 0x20 && c != '\t')) {
+						needBase64 = true;
+						break;
+					}
+				}
+			}
+			if (!needBase64) {
+				dos.writeByte('s');
+			} else {
+				byte[] bytes = s.getBytes(UTF_8);
+				dos.writeByte('u');
+				s = Base64.byteArrayToBase64(bytes);
+				l4 = s.length();
+			}
+			if (l4 > 52) {
+				dos.writeByte('@'); // (char) (baseChar - 2));
+				String value = String.valueOf(l4);
+				dos.writeByte(baseChar + value.length());
+				dos.writeBytes(value);
+			} else {
+				dos.writeByte(baseChar + l4);
+			}
+			dos.writeBytes(s);
+		} else {
+			dos.writeByte('s');
+			dos.writeByte('A'); // (char) (baseChar - 1));
 		}
 	}
 
@@ -1190,7 +1966,7 @@ if (ss != null) {
 }
 	 */
     @J2SKeep
-	private void serializeObject(StringBuffer buffer, SimpleSerializable ss, List<SimpleSerializable> ssObjs) {
+	private void serializeObject(StringBuffer buffer, SimpleSerializable ss, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) {
 		char baseChar = 'B';
 		if (ss != null) {
 			int idx = ssObjs.indexOf(ss);
@@ -1206,7 +1982,7 @@ if (ss != null) {
 		buffer.append('O');
 		if (ss != null) {
 			ss.simpleVersion = simpleVersion;
-			String s = ss.serialize(null, ssObjs); 
+			String s = ss.serialize(null, ssObjs, supportsCompactBytes); 
 			int l4 = s.length();
 			if (l4 > 52) {
 				buffer.append('@'); // (char) (baseChar - 2));
@@ -1219,6 +1995,39 @@ if (ss != null) {
 			buffer.append(s);
 		} else {
 			buffer.append('A'); // (char) (baseChar - 1));
+		}
+	}
+    
+    @J2SIgnore
+	private void serializeBytesObject(DataOutputStream dos, SimpleSerializable ss, List<SimpleSerializable> ssObjs, boolean supportsCompactBytes) throws IOException {
+		char baseChar = 'B';
+		if (ss != null) {
+			int idx = ssObjs.indexOf(ss);
+			if (idx != -1) {
+				dos.writeByte('o');
+				String value = String.valueOf(idx);
+				dos.writeByte(baseChar + value.length());
+				dos.writeBytes(value);
+				return;
+			}
+			ssObjs.add(ss);
+		}
+		dos.writeByte((byte) 'O');
+		if (ss != null) {
+			ss.simpleVersion = simpleVersion;
+			String s = ss.serialize(null, ssObjs, supportsCompactBytes); 
+			int l4 = s.length();
+			if (l4 > 52) {
+				dos.writeByte('@'); // (char) (baseChar - 2));
+				String value = String.valueOf(l4);
+				dos.writeByte(baseChar + value.length());
+				dos.writeBytes(value);
+			} else {
+				dos.writeByte(baseChar + l4);
+			}
+			dos.writeBytes(s);
+		} else {
+			dos.writeByte('A'); // (char) (baseChar - 1));
 		}
 	}
     
@@ -1967,19 +2776,35 @@ while (index < end && index < objectEnd) {
 }
 return true;
 	 */
-	public boolean deserialize(final String str) {
-    	return deserialize(str, 0);
+	public boolean deserialize(String str) {
+    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	ssObjs.add(this);
+    	return deserialize(str, 0, ssObjs);
 	}
 	
     @J2SIgnore
-	public boolean deserialize(final String str, int start) {
+	public boolean deserializeBytes(byte[] bytes) {
+    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	ssObjs.add(this);
+    	return deserializeBytes(bytes, 0, ssObjs);
+	}
+	
+    @J2SIgnore
+	public boolean deserialize(String str, int start) {
     	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
     	ssObjs.add(this);
     	return deserialize(str, start, ssObjs);
 	}
 	
     @J2SIgnore
-	private boolean deserialize(final String str, int start, List<SimpleSerializable> ssObjs) {
+	public boolean deserializeBytes(byte[] bytes, int start) {
+    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	ssObjs.add(this);
+    	return deserializeBytes(bytes, start, ssObjs);
+	}
+	
+    @J2SIgnore
+	private boolean deserialize(String str, int start, List<SimpleSerializable> ssObjs) {
 		char baseChar = 'B';
 		if (str == null || start < 0) return false;
 		int end = str.length();
@@ -2001,19 +2826,15 @@ return true;
 			int last = index;
 			index = str.indexOf('$', last);
 			if (index == -1) return false; // Should throw exception!
-			String sizeStr = null;
 			for (int i = last + 1; i < index; i++) {
 				char c = str.charAt(i);
 				if (c != '0') {
-					sizeStr = str.substring(i, index);
+					try {
+						size = Integer.parseInt(str.substring(i, index));
+					} catch (NumberFormatException e) {
+						return true; // error!
+					}
 					break;
-				}
-			}
-			if (sizeStr != null && sizeStr.length() != 0) {
-				try {
-					size = Integer.parseInt(sizeStr);
-				} catch (NumberFormatException e) {
-					return true; // error!
 				}
 			}
 			// all fields are in their default values or no fields
@@ -2091,7 +2912,7 @@ return true;
 							if (field == null) {
 								continue;
 							}
-							byte[] bs = byteStr.getBytes("iso-8859-1");
+							byte[] bs = byteStr.getBytes(ISO_8859_1);
 							field.set(this, bs);
 							continue;
 						}
@@ -2164,11 +2985,9 @@ return true;
 									continue;
 								}
 								if (c4 == 'u') {
-									ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
-								} else if (c4 == 'U') {
-									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
-								} else if (c4 != 'O') {
-									ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
+									ss[i] = new String(Base64.base64ToByteArray(ss[i]), UTF_8);
+								} else if (c4 == 'U' || c4 == 'X') {
+									ss[i] = new String(ss[i].getBytes(ISO_8859_1), UTF_8);
 								}
 							}
 						}
@@ -2345,11 +3164,11 @@ return true;
 						break;
 					}
 					case 'u':
-						s = new String(Base64.base64ToByteArray(s), "utf-8");
+						s = new String(Base64.base64ToByteArray(s), UTF_8);
 						field.set(this, s);
 						break;
 					case 'U':
-						s = new String(s.getBytes("iso-8859-1"), "utf-8");
+						s = new String(s.getBytes(ISO_8859_1), UTF_8);
 						field.set(this, s);
 						break;
 					case 'E':
@@ -2395,6 +3214,439 @@ return true;
 		}
 		return true;
 	}
+	
+    @J2SIgnore
+	private static int bytesIndexOf(byte[] bytes, byte b, int fromIndex) {
+    	int i = fromIndex;
+    	int max = bytes.length;
+    	for (; i < max ; i++) {
+    		if (bytes[i] == b) {
+    			return i;
+    		}
+    	}
+    	return -1;
+    }
+    
+    @J2SIgnore
+	private boolean deserializeBytes(byte[] bytes, int start, List<SimpleSerializable> ssObjs) {
+		char baseChar = 'B';
+		if (bytes == null || start < 0) return false;
+		int end = bytes.length;
+		int length = end - start;
+		if (length <= 7 || 'W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) return false; // Should throw exception!
+		setSimpleVersion(100 * bytes[start + 3] + 10 * bytes[start + 4] + bytes[start + 5] - '0' * 111);
+		int index = bytesIndexOf(bytes, (byte) '#', start);
+		if (index == -1) return false; // Should throw exception!
+		index++;
+		if (index >= end) return false; // may be empty string!
+		
+		int size = 0;
+		char nextChar = (char) bytes[index];
+		if (nextChar >= '0' && nextChar <= '9') {
+			// have size!
+			int last = index;
+			index = bytesIndexOf(bytes, (byte) '$', last);
+			if (index == -1) return false; // Should throw exception!
+			for (int i = last + 1; i < index; i++) {
+				if (bytes[i] != '0') {
+					for (; i < index; i++) {
+						size = ((size << 3) + (size << 1)) + (bytes[i] - '0'); // size * 10
+					}
+//					try {
+//						size = Integer.parseInt(new String(bytes, i, index - i, ISO_8859_1));
+//					} catch (NumberFormatException e) {
+//						return true; // error!
+//					}
+					break;
+				}
+			}
+			// all fields are in their default values or no fields
+			if (size == 0) return true;
+			index++;
+			// may be empty string or not enough string!
+			if (index + size > end) return false;
+		}
+		
+		Class<?> clazzType = this.getClass();
+		Map<String, Field> fieldMap = getSerializableFields(clazzType.getName(), clazzType);
+		int objectEnd = index + size;
+		Map<String, String> fieldAliasMap = getSimpleVersion() >= 202 ? fieldAliasMapping() : null;
+		String[] fMap = fieldAliasMap == null ? fieldMapping() : null;
+		while (index < end && index < objectEnd) {
+			char c1 = (char) bytes[index++];
+			int l1 = c1 - baseChar;
+			if (l1 < 0 || index + l1 > end) return true; // error
+			String fieldName = new String(bytes, index, l1, ISO_8859_1);
+			index += l1;
+			if (fieldAliasMap != null) {
+				String trueName = fieldAliasMap.get(fieldName);
+				if (trueName != null && trueName.length() > 0) {
+					fieldName = trueName;
+				}
+			} else if (fMap != null && fMap.length > 1) {
+				for (int i = 0; i < fMap.length / 2; i++) {
+					if (fieldName.equals(fMap[i + i + 1])) {
+						String trueName = fMap[i + i];
+						if (trueName != null && trueName.length() > 0) {
+							fieldName = trueName;
+						}
+						break;
+					}
+				}
+			}
+			while (fieldName.startsWith("$")) {
+				if (fieldMap.containsKey(fieldName)) {
+					break;
+				}
+				fieldName = fieldName.substring(1);
+			}
+			char c2 = (char) bytes[index++];
+			if (c2 == 'A' || c2 == 'Z' || c2 == 'Y') {
+				Field field = (Field) fieldMap.get(fieldName);
+				c2 = (char) bytes[index++];
+				char c3 = (char) bytes[index++];
+				int l2 = c3 - baseChar;
+				try {
+					if (l2 < 0 && l2 != -2) {
+						if (field == null) {
+							continue;
+						}
+						field.set(this, null);
+					} else {
+						if (l2 == -2) {
+							char c4 = (char) bytes[index++];
+							int l3 = c4 - baseChar;
+							if (l3 < 0 || index + l3 > end) return true; // error
+							l2 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+							index += l3;
+							if (l2 < 0) return true; // error
+							if (l2 > 0x1000000) { // 16 * 1024 * 1024
+								/*
+								 * Some malicious string may try to allocate huge size of array!
+								 * Limit the size of array here! 
+								 */
+								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+							}
+						}
+						if (c2 == '8') { // byte[]
+							if (index + l2 > end) return true; // error
+							byte[] bs = new byte[l2];
+							System.arraycopy(bytes, index, bs, 0, l2);
+							index += l2;
+							field.set(this, bs);
+							continue;
+						}
+						if (c2 == 'W') {
+							field.set(this, null);
+							continue;
+						}
+						if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
+							Collection<Object> objCollection = null;
+							if (c2 == 'Z') {
+								objCollection = new ArrayList<Object>(l2);
+							} else if (c2 == 'Y') {
+								objCollection = new HashSet<Object>(l2);
+							} else {
+								objCollection = new LinkedList<Object>();
+							}
+							for (int i = 0; i < l2; i++) {
+								DeserializeObject o = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+								if (o == null || o.error) return true;
+								objCollection.add(o.object);
+								index = o.index;
+							}
+							field.set(this, objCollection);
+							continue;
+						} else if (c2 == 'M') {
+							Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
+							for (int i = 0; i < l2 / 2; i++) {
+								DeserializeObject key = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+								if (key == null || key.error) return true;
+								index = key.index;
+								DeserializeObject value = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+								if (value == null || value.error) return true;
+								index = value.index;
+								objMap.put(key.object, value.object);
+							}
+							field.set(this, objMap);
+							continue;
+						}
+						String[] ss = new String[l2];
+						for (int i = 0; i < l2; i++) {
+							char c4 = (char) bytes[index++];
+							if (c2 != 'X' && c2 != 'O') {
+								int l3 = c4 - baseChar;
+								if (l3 > 0) {
+									if (index + l3 > end) return true; // error
+									if (c4 == 'u') {
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+									} else {
+										ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									}
+									index += l3;
+								} else if (l3 == 0) {
+									ss[i] = "";
+								}
+							} else {
+								char c5 = (char) bytes[index++];
+								int l3 = c5 - baseChar;
+								if (l3 > 0) {
+									if (index + l3 > end) return true; // error
+									if (c4 == 'u') {
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+									} else {
+										ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									}
+									index += l3;
+								} else if (l3 == 0) {
+									ss[i] = "";
+								} else if (l3 == -2) {
+									char c6 = (char) bytes[index++];
+									int l4 = c6 - baseChar;
+									if (l4 < 0 || index + l4 > end) return true; // error
+									int l5 = Integer.parseInt(new String(bytes, index, l4, ISO_8859_1));
+									index += l4;
+									if (l5 < 0 || index + l5 > end) return true; // error
+									if (c4 == 'u') {
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5, ISO_8859_1)), UTF_8);
+									} else {
+										ss[i] = new String(bytes, index, l5, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									}
+									index += l5;
+								} else {
+									continue;
+								}
+							}
+						}
+						if (field == null) {
+							continue;
+						}
+						switch (c2) {
+						case 'I': {
+							int[] ns = new int[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									ns[i] = Integer.parseInt(ss[i]);
+								}
+							}
+							field.set(this, ns);
+							break;
+						}
+						case 'X':
+							field.set(this, ss);
+							break;
+						case 'O': {
+							Class<?> fieldClazz = field.getType();
+							SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(fieldClazz.getComponentType(), l2);
+							for (int i = 0; i < l2; i++) {
+								String s = ss[i];
+								if (s != null && s.length() > 0) {
+									if (s.startsWith("WLL")) {
+										SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
+										ssObjs.add(ssObj);
+										ssObj.deserialize(s, 0, ssObjs);
+										sss[i] = ssObj;
+									} else { // 'o'
+										int idx = Integer.parseInt(s);
+										if (idx < ssObjs.size()) {
+											sss[i] = ssObjs.get(idx);
+										}
+									}
+								}
+							}
+							field.set(this, sss);
+							break;
+						}
+						case 'L': {
+							long[] ls = new long[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									ls[i] = Long.parseLong(ss[i]);
+								}
+							}
+							field.set(this, ls);
+							break;
+						}
+						case 'b': {
+							boolean[] bs = new boolean[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null && ss[i].length() > 0) {
+									char c = ss[i].charAt(0);
+									bs[i] = (c == '1' || c == 't');
+								}
+							}
+							field.set(this, bs);
+							break;
+						}
+						case 'F': {
+							float[] fs = new float[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									fs[i] = Float.parseFloat(ss[i]);
+								}
+							}
+							field.set(this, fs);
+							break;
+						}
+						case 'D': {
+							double[] ds = new double[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									ds[i] = Double.parseDouble(ss[i]);
+								}
+							}
+							field.set(this, ds);
+							break;
+						}
+						case 'S': {
+							short[] sts = new short[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									sts[i] = Short.parseShort(ss[i]);
+								}
+							}
+							field.set(this, sts);
+							break;
+						}
+						case 'B': {
+							byte[] bs = new byte[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									bs[i] = Byte.parseByte(ss[i]);
+								}
+							}
+							field.set(this, bs);
+							break;
+						}
+						case 'C': {
+							char[] cs = new char[l2];
+							for (int i = 0; i < l2; i++) {
+								if (ss[i] != null) {
+									cs[i] = (char) Integer.parseInt(ss[i]);
+								}
+							}
+							field.set(this, cs);
+							break;
+						}
+						}
+					}
+				} catch (Exception e) {
+					System.out.println("Parsing: " + bytes);
+					e.printStackTrace();
+				}
+			} else {
+				char c3 = (char) bytes[index++];
+				int l2 = c3 - baseChar;
+				String s = null;
+				if (l2 > 0) {
+					if (index + l2 > end) return true; // error
+					if (c2 == 'u') {
+						s = new String(Base64.base64ToByteArray(new String(bytes, index, l2, ISO_8859_1)), UTF_8);
+					} else {
+						s = new String(bytes, index, l2, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+					}
+					index += l2;
+				} else if (l2 == 0) {
+					s = "";
+				} else if (l2 == -2) {
+					char c4 = (char) bytes[index++];
+					int l3 = c4 - baseChar;
+					if (l3 < 0 || index + l3 > end) return true; // error
+					int l4 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+					index += l3;
+					if (l4 < 0 || index + l4 > end) return true; // error
+					if (c2 == 'u') {
+						s = new String(Base64.base64ToByteArray(new String(bytes, index, l4, ISO_8859_1)), UTF_8);
+					} else {
+						s = new String(bytes, index, l4, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+					}
+					index += l4;
+				}
+				Field field = (Field) fieldMap.get(fieldName);
+				if (field == null) {
+					continue;
+				}
+				try {
+					switch (c2) {
+					case 'I':
+						field.setInt(this, Integer.parseInt(s));
+						break;
+					case 's':
+						field.set(this, s);
+						break;
+					case 'L':
+						field.setLong(this, Long.parseLong(s));
+						break;
+					case 'b': {
+						char c = s.charAt(0);
+						field.setBoolean(this, c == '1' || c == 't');
+						break;
+					}
+					case 'O': {
+						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
+						ssObjs.add(ss);
+						ss.deserialize(s, 0, ssObjs);
+						field.set(this, ss);
+						break;
+					}
+					case 'o': {
+						int idx = Integer.parseInt(s);
+						SimpleSerializable ss = null;
+						if (idx < ssObjs.size()) {
+							ss = ssObjs.get(idx);
+						}
+						field.set(this, ss);
+						break;
+					}
+					case 'u':
+						field.set(this, s);
+						break;
+					case 'U':
+						field.set(this, s);
+						break;
+					case 'E':
+						if (s != null && s.length() > 0) {
+							Object eo = null;
+							try {
+								int v = Integer.parseInt(s);
+								Enum<?>[] enumConstants = (Enum<?> []) field.getType().getEnumConstants();
+								for (int i = 0; i < enumConstants.length; i++) {
+									if (enumConstants[i].ordinal() == v) {
+										eo = enumConstants[i];
+										break;
+									}
+								}
+							} catch (Exception e) {
+							}
+							field.set(this, eo);
+						} else {
+							field.set(this, null);
+						}
+						break;
+					case 'F':
+						field.setFloat(this, Float.parseFloat(s));
+						break;
+					case 'D':
+						field.setDouble(this, Double.parseDouble(s));
+						break;
+					case 'S':
+						field.setShort(this, Short.parseShort(s));
+						break;
+					case 'B':
+						field.setByte(this, Byte.parseByte(s));
+						break;
+					case 'C':
+						field.setChar(this, (char) Integer.parseInt(s));
+						break;
+					}
+				} catch (Exception e) {
+					System.out.println("Parsing: " + s + "\r\n" + bytes);
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
 
     @J2SIgnore
     private DeserializeObject deserializeArrayItem(String str, int index, int end, List<SimpleSerializable> ssObjs) {
@@ -2427,7 +3679,7 @@ return true;
 						if (index + l2 > end) return new DeserializeObject(null, index, true); // error
 						String byteStr = str.substring(index, index + l2);
 						index += l2;
-						byte[] bs = byteStr.getBytes("iso-8859-1");
+						byte[] bs = byteStr.getBytes(ISO_8859_1);
 						return new DeserializeObject(bs, index, false);
 					}
 					if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
@@ -2493,11 +3745,9 @@ return true;
 								continue;
 							}
 							if (c4 == 'u') {
-								ss[i] = new String(Base64.base64ToByteArray(ss[i]), "utf-8");
-							} else if (c4 == 'U') {
-								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
-							} else if (c4 != 'O') {
-								ss[i] = new String(ss[i].getBytes("iso-8859-1"), "utf-8");
+								ss[i] = new String(Base64.base64ToByteArray(ss[i]), UTF_8);
+							} else if (c4 == 'U' || c4 == 'X') {
+								ss[i] = new String(ss[i].getBytes(ISO_8859_1), UTF_8);
 							}
 						}
 					}
@@ -2655,10 +3905,10 @@ return true;
 					return new DeserializeObject(ss, index, false);
 				}
 				case 'u':
-					s = new String(Base64.base64ToByteArray(s), "utf-8");
+					s = new String(Base64.base64ToByteArray(s), UTF_8);
 					return new DeserializeObject(s, index, false);
 				case 'U':
-					s = new String(s.getBytes("iso-8859-1"), "utf-8");
+					s = new String(s.getBytes(ISO_8859_1), UTF_8);
 					return new DeserializeObject(s, index, false);
 				case 'E':
 					if (s != null && s.length() > 0) {
@@ -2693,6 +3943,325 @@ return true;
 				}
 			} catch (Exception e) {
 				System.out.println("Parsing: " + s + "\r\n" + str);
+				e.printStackTrace();
+			}
+		}
+		return new DeserializeObject(null, index, false);
+    }
+
+    @J2SIgnore
+    private DeserializeObject deserializeBytesArrayItem(byte[] bytes, int index, int end, List<SimpleSerializable> ssObjs) {
+    	char baseChar = 'B';
+		char c2 = (char) bytes[index++];
+		if (c2 == 'A' || c2 == 'Z' || c2 == 'Y') {
+			c2 = (char) bytes[index++];
+			char c3 = (char) bytes[index++];
+			int l2 = c3 - baseChar;
+			try {
+				if (l2 < 0 && l2 != -2) {
+					return new DeserializeObject(null, index, false);
+				} else {
+					if (l2 == -2) {
+						char c4 = (char) bytes[index++];
+						int l3 = c4 - baseChar;
+						if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+						l2 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+						index += l3;
+						if (l2 < 0) return new DeserializeObject(null, index, true); // error
+						if (l2 > 0x1000000) { // 16 * 1024 * 1024
+							/*
+							 * Some malicious string may try to allocate huge size of array!
+							 * Limit the size of array here! 
+							 */
+							throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+						}
+					}
+					if (c2 == '8') { // byte[]
+						if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+						/*
+						String byteStr = new String(bytes, index, l2, ISO_8859_1);
+						index += l2;
+						byte[] bs = byteStr.getBytes(ISO_8859_1);
+						*/
+						byte[] bs = new byte[l2];
+						System.arraycopy(bytes, index, bs, 0, l2);
+						index += l2;
+						return new DeserializeObject(bs, index, false);
+					}
+					if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
+						Collection<Object> objCollection = null;
+						if (c2 == 'Z') {
+							objCollection = new ArrayList<Object>(l2);
+						} else if (c2 == 'Y') {
+							objCollection = new HashSet<Object>(l2);
+						} else {
+							objCollection = new LinkedList<Object>();
+						}
+						for (int i = 0; i < l2; i++) {
+							DeserializeObject o = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+							if (o == null || o.error) return new DeserializeObject(null, index, true);;
+							objCollection.add(o.object);
+							index = o.index;
+						}
+						return new DeserializeObject(objCollection, index, false);
+					} else if (c2 == 'M') {
+						Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
+						for (int i = 0; i < l2 / 2; i++) {
+							DeserializeObject key = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+							if (key == null || key.error) return new DeserializeObject(null, index, true);;
+							index = key.index;
+							DeserializeObject value = deserializeBytesArrayItem(bytes, index, end, ssObjs);
+							if (value == null || value.error) return new DeserializeObject(null, index, true);;
+							index = value.index;
+							objMap.put(key.object, value.object);
+						}
+						return new DeserializeObject(objMap, index, false);
+					}
+					String[] ss = new String[l2];
+					for (int i = 0; i < l2; i++) {
+						char c4 = (char) bytes[index++];
+						if (c2 != 'X' && c2 != 'O') {
+							int l3 = c4 - baseChar;
+							if (l3 > 0) {
+								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (c4 == 'u') {
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+								} else {
+									ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+								}
+								index += l3;
+							} else if (l3 == 0) {
+								ss[i] = "";
+							}
+						} else {
+							char c5 = (char) bytes[index++];
+							int l3 = c5 - baseChar;
+							if (l3 > 0) {
+								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (c4 == 'u') {
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+								} else {
+									ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+								}
+								index += l3;
+							} else if (l3 == 0) {
+								ss[i] = "";
+							} else if (l3 == -2) {
+								char c6 = (char) bytes[index++];
+								int l4 = c6 - baseChar;
+								if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+								int l5 = Integer.parseInt(new String(bytes, index, l4, ISO_8859_1));
+								index += l4;
+								if (l5 < 0 || index + l5 > end) return new DeserializeObject(null, index, true); // error
+								if (c4 == 'u') {
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5, ISO_8859_1)), UTF_8);
+								} else {
+									ss[i] = new String(bytes, index, l5, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+								}
+								index += l5;
+							} else {
+								continue;
+							}
+						}
+					}
+					switch (c2) {
+					case 'I': {
+						int[] ns = new int[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ns[i] = Integer.parseInt(ss[i]);
+							}
+						}
+						return new DeserializeObject(ns, index, false);
+					}
+					case 'X':
+						return new DeserializeObject(ss, index, false);
+					case 'O': {
+						SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(SimpleSerializable.class, l2);
+						for (int i = 0; i < l2; i++) {
+							String s = ss[i];
+							if (s != null && s.length() > 0) {
+								if (s.startsWith("WLL")) {
+									SimpleSerializable ssObj = SimpleSerializable.parseInstance(s);
+									ssObjs.add(ssObj);
+									ssObj.deserialize(s, 0, ssObjs);
+									sss[i] = ssObj;
+								} else { // 'o'
+									int idx = Integer.parseInt(s);
+									if (idx < ssObjs.size()) {
+										sss[i] = ssObjs.get(idx);
+									}
+								}
+							}
+						}
+						return new DeserializeObject(sss, index, false);
+					}
+					case 'L': {
+						long[] ls = new long[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ls[i] = Long.parseLong(ss[i]);
+							}
+						}
+						return new DeserializeObject(ls, index, false);
+					}
+					case 'b': {
+						boolean[] bs = new boolean[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null && ss[i].length() > 0) {
+								char c = ss[i].charAt(0);
+								bs[i] = (c == '1' || c == 't');
+							}
+						}
+						return new DeserializeObject(bs, index, false);
+					}
+					case 'F': {
+						float[] fs = new float[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								fs[i] = Float.parseFloat(ss[i]);
+							}
+						}
+						return new DeserializeObject(fs, index, false);
+					}
+					case 'D': {
+						double[] ds = new double[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								ds[i] = Double.parseDouble(ss[i]);
+							}
+						}
+						return new DeserializeObject(ds, index, false);
+					}
+					case 'S': {
+						short[] sts = new short[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								sts[i] = Short.parseShort(ss[i]);
+							}
+						}
+						return new DeserializeObject(sts, index, false);
+					}
+					case 'B': {
+						byte[] bs = new byte[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								bs[i] = Byte.parseByte(ss[i]);
+							}
+						}
+						return new DeserializeObject(bs, index, false);
+					}
+					case 'C': {
+						char[] cs = new char[l2];
+						for (int i = 0; i < l2; i++) {
+							if (ss[i] != null) {
+								cs[i] = (char) Integer.parseInt(ss[i]);
+							}
+						}
+						return new DeserializeObject(cs, index, false);
+					}
+					default :
+						return new DeserializeObject(null, index, false);
+					}
+				}
+			} catch (Exception e) {
+				System.out.println("Parsing: " + bytes);
+				e.printStackTrace();
+			}
+		} else {
+			char c3 = (char) bytes[index++];
+			int l2 = c3 - baseChar;
+			String s = null;
+			if (l2 > 0) {
+				if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+				if (c2 == 'u') {
+					s = new String(Base64.base64ToByteArray(new String(bytes, index, l2, ISO_8859_1)), UTF_8);
+				} else {
+					s = new String(bytes, index, l2, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+				}
+				index += l2;
+			} else if (l2 == 0) {
+				s = "";
+			} else if (l2 == -2) {
+				char c4 = (char) bytes[index++];
+				int l3 = c4 - baseChar;
+				if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+				int l4 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+				index += l3;
+				if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+				if (c2 == 'u') {
+					s = new String(Base64.base64ToByteArray(new String(bytes, index, l4, ISO_8859_1)), UTF_8);
+				} else {
+					s = new String(bytes, index, l4, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+				}
+				index += l4;
+			}
+			try {
+				switch (c2) {
+				case 'I':
+					return new DeserializeObject(Integer.valueOf(s), index, false);
+				case 's':
+					return new DeserializeObject(s, index, false);
+				case 'L':
+					return new DeserializeObject(Long.valueOf(s), index, false);
+				case 'b': {
+					char c = s.charAt(0);
+					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index, false);
+				}
+				case 'O': 
+					if (s != null) {
+						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
+						ssObjs.add(ss);
+						ss.deserialize(s, 0, ssObjs);
+						return new DeserializeObject(ss, index, false);
+					} else {
+						return new DeserializeObject(null, index, false);
+					}
+				case 'o': {
+					int idx = Integer.parseInt(s);
+					SimpleSerializable ss = null;
+					if (idx < ssObjs.size()) {
+						ss = ssObjs.get(idx);
+					}
+					return new DeserializeObject(ss, index, false);
+				}
+				case 'u':
+					return new DeserializeObject(s, index, false);
+				case 'U':
+					return new DeserializeObject(s, index, false);
+				case 'E':
+					if (s != null && s.length() > 0) {
+						Object eo = null;
+//						try {
+//							int v = Integer.parseInt(s);
+//							Enum<?>[] enumConstants = (Enum<?> []) field.getType().getEnumConstants();
+//							for (int i = 0; i < enumConstants.length; i++) {
+//								if (enumConstants[i].ordinal() == v) {
+//									eo = enumConstants[i];
+//									break;
+//								}
+//							}
+//						} catch (Exception e) {
+//						}
+						return new DeserializeObject(eo, index, false);
+					} else {
+						return new DeserializeObject(null, index, false);
+					}
+				case 'F':
+					return new DeserializeObject(Float.valueOf(s), index, false);
+				case 'D':
+					return new DeserializeObject(Double.valueOf(s), index, false);
+				case 'S':
+					return new DeserializeObject(Short.valueOf(s), index, false);
+				case 'B':
+					return new DeserializeObject(Byte.valueOf(s), index, false);
+				case 'C':
+					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index, false);
+				default:
+					return new DeserializeObject(null, index, false);
+				}
+			} catch (Exception e) {
+				System.out.println("Parsing: " + s + "\r\n" + bytes);
 				e.printStackTrace();
 			}
 		}
@@ -3063,6 +4632,11 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		return parseInstance(str, 0, null);
 	}
 	
+	@J2SIgnore
+	public static SimpleSerializable parseInstance(byte[] bytes) {
+		return parseInstance(bytes, 0, null);
+	}
+
 	/**
 	 * Get SimpleSerializable instance according to the given string, 
 	 * starting from the given index. 
@@ -3076,6 +4650,11 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		return parseInstance(str, start, null);
 	}
 	
+    @J2SIgnore // Already implemented in previous method!
+	public static SimpleSerializable parseInstance(byte[] bytes, int start) {
+		return parseInstance(bytes, start, null);
+	}
+	
 	/**
 	 * Get SimpleSerializable instance according to the given string and the filter. 
 	 * 
@@ -3087,6 +4666,11 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
     @J2SIgnore // Only public to Java!
     public static SimpleSerializable parseInstance(String str, SimpleFilter filter) {
 		return parseInstance(str, 0, filter);
+	}
+	
+    @J2SIgnore // Only public to Java!
+    public static SimpleSerializable parseInstance(byte[] bytes, SimpleFilter filter) {
+		return parseInstance(bytes, 0, filter);
 	}
 	
 	/**
@@ -3124,6 +4708,35 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 			SimpleSerializable ss = (SimpleSerializable) inst;
 			if (v >= 202) {
 				ss.classNameAbbrev = !clazzName.equals(str.substring(start + 6, index));
+			}
+			return ss;
+		}
+		return UNKNOWN;
+	}
+    
+    @J2SIgnore // Only public to Java!
+	public static SimpleSerializable parseInstance(byte[] bytes, int start, SimpleFilter filter) {
+		if (bytes == null || start < 0) return null;
+		int length = bytes.length - start;
+		if (length <= 7 || 'W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) return null;
+		int v = 100 * bytes[start + 3] + 10 * bytes[start + 4] + bytes[start + 5] - '0' * 111;
+		int index = bytesIndexOf(bytes, (byte) '#', start);
+		if (index == -1) return null;
+		String clazzName = new String(bytes, start + 6, index - (start + 6), ISO_8859_1);
+		if (v >= 202) {
+			String longClazzName = classAliasMappings.get(clazzName);
+			if (longClazzName != null) {
+				clazzName = longClazzName;
+			}
+		}
+		if (filter != null) {
+			if (!filter.accept(clazzName)) return null;
+		}
+		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		if (inst != null && inst instanceof SimpleSerializable) {
+			SimpleSerializable ss = (SimpleSerializable) inst;
+			if (v >= 202) {
+				ss.classNameAbbrev = !clazzName.equals(new String(bytes, start + 6, index - (start + 6), ISO_8859_1));
 			}
 			return ss;
 		}
