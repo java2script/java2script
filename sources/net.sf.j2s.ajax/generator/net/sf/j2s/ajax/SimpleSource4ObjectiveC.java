@@ -48,8 +48,7 @@ public class SimpleSource4ObjectiveC {
 	private static void generateAnnotation(Class<?> clazz, StringBuffer source) {
 		Deprecated annDeprecated = clazz.getAnnotation(Deprecated.class);
 		if (annDeprecated != null) {
-			source.append("@");
-			source.append(annDeprecated.annotationType().getSimpleName());
+			source.append("// [deprecated]\r\n");
 			source.append("\r\n");
 		}
 		SimpleComment annComment = clazz.getAnnotation(SimpleComment.class);
