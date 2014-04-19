@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 public class SourceUtils {
 
-	public static void insertLineComment(StringBuffer source, String indent, int index, boolean blankLine) {
+	public static void insertLineComment(StringBuilder source, String indent, int index, boolean blankLine) {
 		source.append(indent);
 		source.append("//+$");
 		source.append(index);
@@ -30,7 +30,7 @@ public class SourceUtils {
 		}
 	}
 
-	public static void wrapALineWithLineComment(StringBuffer source, String indent, int index, String line, boolean blankLine) {
+	public static void wrapALineWithLineComment(StringBuilder source, String indent, int index, String line, boolean blankLine) {
 		source.append(indent);
 		source.append("//+$");
 		source.append(index);
@@ -47,14 +47,14 @@ public class SourceUtils {
 		}
 	}
 
-	public static void openLineComment(StringBuffer source, String indent, int index) {
+	public static void openLineComment(StringBuilder source, String indent, int index) {
 		source.append(indent);
 		source.append("//+$");
 		source.append(index);
 		source.append("+\r\n");
 	}
 	
-	public static void closeLineComment(StringBuffer source, String indent, int index, boolean blankLine) {
+	public static void closeLineComment(StringBuilder source, String indent, int index, boolean blankLine) {
 		source.append(indent);
 		source.append("//-$");
 		source.append(index);
@@ -64,7 +64,7 @@ public class SourceUtils {
 		}
 	}
 
-	public static void insertBlockComment(StringBuffer source, int index) {
+	public static void insertBlockComment(StringBuilder source, int index) {
 		source.append(" /*+$");
 		source.append(index);
 		source.append("+*/  /*-$");

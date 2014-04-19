@@ -64,34 +64,67 @@ public class SimpleRPCRequest {
 	public static void switchToLocalJavaThreadMode() {
 		runningMode = MODE_LOCAL_JAVA_THREAD;
 	}
+
+	/**
+	 * Make a Simple RPC request synchronously or asynchronously.
+	 * For Java mode only.
+	 * @param runnable
+	 * @param async
+	 */
+	@J2SIgnore
+	public static void request(final SimpleRPCRunnable runnable, boolean async) {
+		runnable.ajaxIn();
+		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
+			if (async) {
+				SimpleThreadHelper.runTask(new Runnable() {
+					public void run() {
+						try {
+							runnable.ajaxRun();
+						} catch (Throwable e) {
+							e.printStackTrace(); // should never fail in Java thread mode!
+							runnable.ajaxFail();
+							return;
+						}
+						runnable.ajaxOut();
+					}
+				}, "Simple RPC Simulator");
+			} else {
+				try {
+					runnable.ajaxRun();
+				} catch (Throwable e) {
+					e.printStackTrace(); // should never fail in Java thread mode!
+					runnable.ajaxFail();
+					return;
+				}
+				runnable.ajaxOut();
+			}
+		} else {
+			ajaxRequest(runnable, async);
+		}
+	}
 	
 	/**
+	 * Make a Simle RPC request asyncrhonously.
 	 * Java2Script client will always requests in AJAX mode. 
 	 * @param runnable
 	 * @j2sNative
 	 * runnable.ajaxIn ();
-	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable);
+	 * net.sf.j2s.ajax.SimpleRPCRequest.ajaxRequest (runnable, true);
 	 */
 	public static void request(final SimpleRPCRunnable runnable) {
-		runnable.ajaxIn();
-		if (runningMode == MODE_LOCAL_JAVA_THREAD) {
-			ThreadUtils.runTask(new Runnable() {
-				public void run() {
-					try {
-						runnable.ajaxRun();
-					} catch (RuntimeException e) {
-						e.printStackTrace(); // should never fail in Java thread mode!
-						runnable.ajaxFail();
-						return;
-					}
-					runnable.ajaxOut();
-				}
-			}, "Simple RPC Request", false);
-		} else {
-			ajaxRequest(runnable);
-		}
+		request(runnable, true);
 	}
-	
+
+	/**
+	 * Make a Simple RPC invoke synchronously.
+	 * For Java mode only.
+	 * @param runnable
+	 */
+	@J2SIgnore
+	public static void invoke(SimpleRPCRunnable runnable) {
+		request(runnable, false);
+	}
+
 	static String getClassNameURL(SimpleRPCRunnable runnable) {
 		Class<?> oClass = runnable.getClass();
 		String name = oClass.getName();
@@ -122,7 +155,7 @@ public class SimpleRPCRequest {
 		return new HttpRequest();
 	}
 	
-	private static void ajaxRequest(final SimpleRPCRunnable runnable) {
+	private static void ajaxRequest(final SimpleRPCRunnable runnable, boolean async) {
 		String url = runnable.getHttpURL();
 		if (url == null) {
 			url = "";
@@ -151,7 +184,7 @@ public class SimpleRPCRequest {
 				request.setRequestHeader("User-Agent", ua);
 			}
 		}
-		request.open(method, url, true);
+		request.open(method, url, async);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
 				String responseText = request.getResponseText();

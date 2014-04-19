@@ -495,12 +495,12 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 			return null;
 		}
 		
-		StringBuffer buf = new StringBuffer();
+		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < parts.length; i++) {
-			buf.append(parts[i]);
+			builder.append(parts[i]);
 			parts[i] = null;
 		}
-		return buf.toString();
+		return builder.toString();
 	}
 	
 	private void cleanSession(HttpSession ses) {

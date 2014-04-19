@@ -32,11 +32,11 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 			}
 		});
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			ThreadUtils.runTask(new Runnable() {
+			SimpleThreadHelper.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
-					} catch (RuntimeException e) {
+					} catch (Throwable e) {
 						e.printStackTrace(); // should never fail in Java thread mode!
 						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 							public void run() {
@@ -51,7 +51,7 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 						}
 					});
 				}
-			}, "Simple RPC Request", false);
+			}, "Simple RPC Simulator");
 		} else {
 			swtAJAXRequest(runnable);
 		}

@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Target({FIELD, TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface SimpleComment {
 	String[] value();
 }

@@ -68,7 +68,7 @@ public class HttpRequest {
 	        int numFullGroups = aLen/3;
 	        int numBytesInPartialGroup = aLen - 3*numFullGroups;
 	        int resultLen = 4*((aLen + 2)/3);
-	        StringBuffer result = new StringBuffer(resultLen);
+	        StringBuilder result = new StringBuilder(resultLen);
 	        char[] intToAlpha = intToBase64;
 
 	        // Translate all full groups from byte array elements to Base64
@@ -266,23 +266,23 @@ public class HttpRequest {
 	 * @return String the all response header value.
 	 */
 	public String getAllResponseHeaders() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder builder = new StringBuilder();
 		int i = 1;
 		while (true) {
 			String key = connection.getHeaderFieldKey(i);
 			if (key != null) {
 				String value = connection.getHeaderField(i); 
-				buffer.append(key);
-				buffer.append(": ");
-				buffer.append(value);
-				buffer.append("\r\n");
+				builder.append(key);
+				builder.append(": ");
+				builder.append(value);
+				builder.append("\r\n");
 			} else {
 				break;
 			}
 			i++;
 		}
-		buffer.append("\r\n");
-		return buffer.toString();
+		builder.append("\r\n");
+		return builder.toString();
 	}
 	/**
 	 * Get response header with given key.
@@ -384,13 +384,13 @@ public class HttpRequest {
 	public void send(String str) {
 		content = str;
 		if (asynchronous) {
-			ThreadUtils.runTask(new Runnable() {
+			SimpleThreadHelper.runTask(new Runnable() {
 				public void run() {
 					if (!toAbort) {
 						request();
 					}
 				}
-			}, "Java2Script HTTP Request", false);
+			}, "Java2Script HTTP Request Worker");
 		} else {
 			request();
 		}
