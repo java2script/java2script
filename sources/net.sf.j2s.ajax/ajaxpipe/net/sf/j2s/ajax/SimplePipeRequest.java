@@ -227,11 +227,11 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		runnable.ajaxIn();
 		runnable.lastLiveDetected = System.currentTimeMillis();
 		if (getRequstMode() == MODE_LOCAL_JAVA_THREAD) {
-			ThreadUtils.runTask(new Runnable() {
+			SimpleThreadHelper.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
-					} catch (RuntimeException e) {
+					} catch (Throwable e) {
 						e.printStackTrace(); // should never fail in Java thread mode!
 						runnable.ajaxFail();
 						return;
@@ -239,7 +239,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 					keepPipeLive(runnable);
 					runnable.ajaxOut();
 				}
-			}, "Pipe Request Thread", false);
+			}, "Simple Pipe Simulator");
 		} else {
 			pipeRequest(runnable);
 		}
@@ -272,7 +272,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		if (!startingThread) {
 			return;
 		}
-		ThreadUtils.runTask(new Runnable() {
+		Thread notifyThread = new Thread(new Runnable() {
 			
 			public void run() {
 				while (true) {
@@ -358,7 +358,9 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 				} // end of while true
 			}
 		
-		}, "Pipe Live Notifier Thread", true);
+		}, "Simple Pipe Live Notifier");
+		notifyThread.setDaemon(true);
+		notifyThread.start();
 		// */
 	}
 
@@ -1042,6 +1044,7 @@ for (var i = 0; i < iframes.length; i++) {
 				if (start == string.length()) {
 					return string.substring(start);
 				}
+				continue;
 			}
 			boolean isJavaScript = false;
 			/**
@@ -1183,11 +1186,11 @@ for (var i = 0; i < iframes.length; i++) {
 			 */
 		{
 			//pipeQuery(runnable, "continuum");
-			ThreadUtils.runTask(new Runnable(){
+			SimpleThreadHelper.runTask(new Runnable(){
 				public void run() {
 					pipeContinuum(runnable);
 				}
-			});
+			}, "Simple Pipe Continuum Worker");
 		} else
 			/**
 			 * @j2sNative
@@ -1240,7 +1243,7 @@ runnable.queryEnded = true;
 		{
 			final String key = runnable.pipeKey;
 			final long created = System.currentTimeMillis();
-			ThreadUtils.runTask(new Runnable() {
+			Thread queryThread = new Thread(new Runnable() {
 				public void run() {
 					SimplePipeRunnable runnable = null;
 					while ((runnable = SimplePipeHelper.getPipe(key)) != null) {
@@ -1268,7 +1271,9 @@ runnable.queryEnded = true;
 						}
 					}
 				}
-			}, "Pipe Monitor Thread", true);
+			}, "Simple Pipe Query Worker");
+			queryThread.setDaemon(true);
+			queryThread.start();
 		}
 	}
 

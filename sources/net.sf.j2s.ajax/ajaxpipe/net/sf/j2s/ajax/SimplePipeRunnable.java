@@ -347,6 +347,22 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	public void pipeReset() {
 		destroyed = false;
 	}
+
+	/**
+	 * Whether supports pipe quick switching or not. For pipe which is not
+	 * time sensitive, it is OK for client side to switch pipe on local
+	 * network changes. For example, mobile devices entering a WiFi room from
+	 * outside may switch its network, and pipe will get a chance to switch
+	 * its 2G/3G HTTP pipe connection to WiFi HTTP connection.  
+	 * 
+	 * This method will be called by server side to detect whether server
+	 * keeps the pipe for extra time or not.
+	 * 
+	 * @return supported
+	 */
+	public boolean supportsSwitching() {
+		return false;
+	}
 	
 	/**
 	 * Return whether the pipe is still live or not.
@@ -380,7 +396,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 			SimplePipeHelper.monitoringPipe(this);
 			return;
 		}
-		ThreadUtils.runTask(new Runnable() {
+		// Desktop application
+		Thread monitorThread = new Thread(new Runnable() {
 			
 			public void run() {
 				long interval = pipeMonitoringInterval();
@@ -409,7 +426,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 				}
 			}
 		
-		}, "Pipe Monitor", true);
+		}, "Simple Pipe Dedicated Monitor");
+		monitorThread.setDaemon(true);
+		monitorThread.start();
 	}
 
 	/**

@@ -164,30 +164,30 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		if (SimplePipeRequest.PIPE_TYPE_SUBDOMAIN_QUERY == type) { // subdomain query
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
-			StringBuffer buffer = new StringBuffer();
-			buffer.append("<html><head><title></title></head><body>\r\n");
-			buffer.append("<script type=\"text/javascript\">");
-			buffer.append("p = new Object ();\r\n");
-			buffer.append("p.key = \"" + key + "\";\r\n");
-			buffer.append("p.originalDomain = document.domain;\r\n");
-			buffer.append("document.domain = \"" + domain + "\";\r\n");
-			buffer.append("var securityErrors = 0\r\n");
-			buffer.append("var lazyOnload = function () {\r\n");
-			buffer.append("try {\r\n");
-			buffer.append("var spr = window.parent.net.sf.j2s.ajax.SimplePipeRequest;\r\n");
-			buffer.append("eval (\"(\" + spr.subdomainInit + \") (p);\");\r\n");
-			buffer.append("eval (\"((\" + spr.subdomainLoopQuery + \") (p)) ();\");\r\n");
-			buffer.append("} catch (e) {\r\n");
-			buffer.append("securityErrors++;\r\n");
-			buffer.append("if (securityErrors < 100) {\r\n"); // 10s
-			buffer.append("window.setTimeout (lazyOnload, 100);\r\n");
-			buffer.append("};\r\n"); // end of if
-			buffer.append("};\r\n"); // end of catch
-			buffer.append("};\r\n"); // end of function
-			buffer.append("window.onload = lazyOnload;\r\n");
-			buffer.append("</script>\r\n");
-			buffer.append("</body></html>\r\n");
-			writer.write(buffer.toString());
+			StringBuilder builder = new StringBuilder();
+			builder.append("<html><head><title></title></head><body>\r\n");
+			builder.append("<script type=\"text/javascript\">");
+			builder.append("p = new Object ();\r\n");
+			builder.append("p.key = \"" + key + "\";\r\n");
+			builder.append("p.originalDomain = document.domain;\r\n");
+			builder.append("document.domain = \"" + domain + "\";\r\n");
+			builder.append("var securityErrors = 0\r\n");
+			builder.append("var lazyOnload = function () {\r\n");
+			builder.append("try {\r\n");
+			builder.append("var spr = window.parent.net.sf.j2s.ajax.SimplePipeRequest;\r\n");
+			builder.append("eval (\"(\" + spr.subdomainInit + \") (p);\");\r\n");
+			builder.append("eval (\"((\" + spr.subdomainLoopQuery + \") (p)) ();\");\r\n");
+			builder.append("} catch (e) {\r\n");
+			builder.append("securityErrors++;\r\n");
+			builder.append("if (securityErrors < 100) {\r\n"); // 10s
+			builder.append("window.setTimeout (lazyOnload, 100);\r\n");
+			builder.append("};\r\n"); // end of if
+			builder.append("};\r\n"); // end of catch
+			builder.append("};\r\n"); // end of function
+			builder.append("window.onload = lazyOnload;\r\n");
+			builder.append("</script>\r\n");
+			builder.append("</body></html>\r\n");
+			writer.write(builder.toString());
 			return;
 		}
 		boolean isContinuum = SimplePipeRequest.PIPE_TYPE_CONTINUUM == type;
@@ -198,18 +198,18 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		if (isScripting) { // iframe
 			resp.setContentType("text/html; charset=utf-8");
 			writer = resp.getWriter();
-			StringBuffer buffer = new StringBuffer();
-			buffer.append("<html><head><title></title></head><body>\r\n");
-			buffer.append("<script type=\"text/javascript\">");
+			StringBuilder builder = new StringBuilder();
+			builder.append("<html><head><title></title></head><body>\r\n");
+			builder.append("<script type=\"text/javascript\">");
 			if (domain != null) {
-				buffer.append("document.domain = \"" + domain + "\";\r\n");
+				builder.append("document.domain = \"" + domain + "\";\r\n");
 			} else {
-				buffer.append("document.domain = document.domain;\r\n");
+				builder.append("document.domain = document.domain;\r\n");
 			}
-			buffer.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
-			buffer.append("if (window.parent) eval (\"(\" + window.parent.net.sf.j2s.ajax.SimplePipeRequest.checkIFrameSrc + \") ();\");\r\n");
-			buffer.append("</script>\r\n");
-			writer.write(buffer.toString());
+			builder.append("function $ (s) { if (window.parent) window.parent.net.sf.j2s.ajax.SimplePipeRequest.parseReceived (s); }");
+			builder.append("if (window.parent) eval (\"(\" + window.parent.net.sf.j2s.ajax.SimplePipeRequest.checkIFrameSrc + \") ();\");\r\n");
+			builder.append("</script>\r\n");
+			writer.write(builder.toString());
 			writer.flush();
 		} else {
 			if (SimplePipeRequest.PIPE_TYPE_QUERY == type || isContinuum) {
@@ -231,7 +231,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			while ((pipe = SimplePipeHelper.getPipe(key)) != null && (list = pipe.getPipeData()) != null
 					/* && SimplePipeHelper.isPipeLive(key) */ // check it!
 					&& !writer.checkError()) {
-				StringBuffer buffer = new StringBuffer();
+				StringBuilder builder = new StringBuilder();
 				synchronized (list) {
 					int size = list.size();
 					if (size > 0) {
@@ -244,7 +244,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 								ISimpleCacheable sc = (ISimpleCacheable) ss;
 								sc.setCached(false);
 							}
-							buffer.append(output(type, key, ss.serialize()));
+							builder.append(output(type, key, ss.serialize()));
 							items++;
 							if (live && pipeMaxItemsPerQuery > 0 && items >= pipeMaxItemsPerQuery
 									&& !isContinuum) {
@@ -264,8 +264,8 @@ public class SimplePipeHttpServlet extends HttpServlet {
 						}
 					}
 				}
-				if (buffer.length() > 0) {
-					writer.write(buffer.toString());
+				if (builder.length() > 0) {
+					writer.write(builder.toString());
 				}
 				writer.flush();
 				if (!SimplePipeHelper.isPipeLive(key)) {
@@ -346,14 +346,14 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	}
 
 	protected static String output(char type, String key, String str) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder builder = new StringBuilder();
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { 
 			// iframe, so $ is a safe method identifier
-			buffer.append("<script type=\"text/javascript\">$ (\"");
+			builder.append("<script type=\"text/javascript\">$ (\"");
 		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
-			buffer.append("$p1p3p$ (\""); // $p1p3p$
+			builder.append("$p1p3p$ (\""); // $p1p3p$
 		}
-		buffer.append(key);
+		builder.append(key);
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type 
 				|| SimplePipeRequest.PIPE_TYPE_XSS == type) {
 			str = str.replaceAll("\\\\", "\\\\\\\\").replaceAll("\r", "\\\\r")
@@ -362,13 +362,13 @@ public class SimplePipeHttpServlet extends HttpServlet {
 				str = str.replaceAll("<\\/script>", "<\\/scr\" + \"ipt>");
 			}
 		}
-		buffer.append(str);
+		builder.append(str);
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { // iframe
-			buffer.append("\");</script>\r\n");
+			builder.append("\");</script>\r\n");
 		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
-			buffer.append("\");\r\n");
+			builder.append("\");\r\n");
 		}
-		return buffer.toString();
+		return builder.toString();
 	}
 
 	@Override

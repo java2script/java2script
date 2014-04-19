@@ -89,7 +89,7 @@ public class AWindowDelegate {
 			 * @j2sNative
 			 */
 		{
-			ThreadUtils.runTask(new Runnable() {
+			SimpleThreadHelper.runTask(new Runnable() {
 				public void run() {
 					while (win.getShell() == null) {
 						try {
@@ -109,7 +109,7 @@ public class AWindowDelegate {
 						}
 					});
 				}
-			});
+			}, "Simple SWT Shell Loader");
 			win.open();
 		}
 	}

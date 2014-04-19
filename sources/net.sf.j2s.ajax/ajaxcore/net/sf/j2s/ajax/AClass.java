@@ -62,7 +62,7 @@ public class AClass {
 	 * }, false, true);
 	 */
 	public static void load(final String clazzName, final Runnable afterLoaded) {
-		ThreadUtils.runTask(new Runnable() {
+		SimpleThreadHelper.runTask(new Runnable() {
 			public void run() {
 				try {
 					Class<?> clz = Class.forName(clazzName);
@@ -76,6 +76,6 @@ public class AClass {
 				}
 				if (afterLoaded != null) afterLoaded.run();
 			}
-		});
+		}, "Simple Asynchronous Class Loader");
 	}
 }

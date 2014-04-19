@@ -348,7 +348,7 @@ public class SimpleClassLoader extends ClassLoader {
 	}
 	
 	public static String allLoaderStatuses() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder builder = new StringBuilder();
 		Set<SimpleClassLoader> checkedLoaders = new HashSet<SimpleClassLoader>();
 		Map<String, SimpleClassLoader> loaders = allLoaders;
 		int count = 0;
@@ -360,57 +360,57 @@ public class SimpleClassLoader extends ClassLoader {
 			}
 			checkedLoaders.add(loader);
 			count++;
-			buffer.append("Classloader ");
-			buffer.append(count);
-			buffer.append(" ");
-			buffer.append(loader.toString());
-			buffer.append("\r\n");
-			buffer.append("classpath : ");
-			buffer.append(loader.classpath);
-			buffer.append("\r\n");
+			builder.append("Classloader ");
+			builder.append(count);
+			builder.append(" ");
+			builder.append(loader.toString());
+			builder.append("\r\n");
+			builder.append("classpath : ");
+			builder.append(loader.classpath);
+			builder.append("\r\n");
 			if (loader.tag != null) {
-				buffer.append("tag : ");
-				buffer.append(loader.tag);
-				buffer.append("\r\n");
+				builder.append("tag : ");
+				builder.append(loader.tag);
+				builder.append("\r\n");
 			}
-			buffer.append("active classes : ");
+			builder.append("active classes : ");
 			Map<String, Class<?>> loadedClazzes = loader.loadedClasses;
 			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
 					.hasNext();) {
 				String clazz = (String) iter.next();
 				SimpleClassLoader clazzLoader = loaders.get(clazz);
 				if (clazzLoader == loader) {
-					buffer.append(clazz);
-					buffer.append(", ");
+					builder.append(clazz);
+					builder.append(", ");
 				}
 			}
-			buffer.append("\r\n");
-			buffer.append("inactive classes : ");
+			builder.append("\r\n");
+			builder.append("inactive classes : ");
 			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
 					.hasNext();) {
 				String clazz = (String) iter.next();
 				SimpleClassLoader clazzLoader = loaders.get(clazz);
 				if (clazzLoader != null && clazzLoader != loader) {
-					buffer.append(clazz);
-					buffer.append(", ");
+					builder.append(clazz);
+					builder.append(", ");
 				}
 			}
-			buffer.append("\r\n");
-			buffer.append("other classes : ");
+			builder.append("\r\n");
+			builder.append("other classes : ");
 			for (Iterator<String> iter = loadedClazzes.keySet().iterator(); iter
 					.hasNext();) {
 				String clazz = (String) iter.next();
 				SimpleClassLoader clazzLoader = loaders.get(clazz);
 				if (clazzLoader == null) {
-					buffer.append(clazz);
-					buffer.append(", ");
+					builder.append(clazz);
+					builder.append(", ");
 				}
 			}
-			buffer.append("\r\n\r\n");
+			builder.append("\r\n\r\n");
 		} // end of for values
-		buffer.append("Total classloaders : ");
-		buffer.append(count);
-		return buffer.toString();
+		builder.append("Total classloaders : ");
+		builder.append(count);
+		return builder.toString();
 	}
 	
 }

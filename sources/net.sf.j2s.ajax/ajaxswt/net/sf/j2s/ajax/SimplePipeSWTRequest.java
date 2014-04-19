@@ -50,11 +50,11 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				}
 			
 			});
-			ThreadUtils.runTask(new Runnable() {
+			SimpleThreadHelper.runTask(new Runnable() {
 				public void run() {
 					try {
 						runnable.ajaxRun();
-					} catch (RuntimeException e) {
+					} catch (Throwable e) {
 						e.printStackTrace(); // should never fail in Java thread mode!
 						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
 							public void run() {
@@ -73,7 +73,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						});
 					} // else ?
 				}
-			}, "Simple Pipe RPC Request", false);
+			}, "Simple Pipe Simulator");
 
 			//SimpleRPCSWTRequest.swtRequest(runnable);
 		} else {
@@ -88,7 +88,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 	 */
     @J2SIgnore
 	static void swtKeepPipeLive(final SimplePipeRunnable runnable, final Display disp) {
-    	ThreadUtils.runTask(new Runnable() {
+    	Thread notifyThread = new Thread(new Runnable() {
 			
 			public void run() {
 				long lastLiveDetected = System.currentTimeMillis();
@@ -158,7 +158,9 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				} while (true);
 			}
 		
-		}, "Pipe Live Notifier Thread", true);
+		}, "Simple Pipe Live Notifier");
+    	notifyThread.setDaemon(true);
+    	notifyThread.start();
 	}
 
     @J2SIgnore
@@ -198,14 +200,14 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				SimplePipeHelper.registerPipe(runnable.pipeKey, runnable);
 
 				if (getPipeMode() == MODE_PIPE_CONTINUUM) {
-					ThreadUtils.runTask(new Runnable(){
+					SimpleThreadHelper.runTask(new Runnable(){
 						public void run() {
 							swtPipeContinuum(runnable);
 						}
-					});
+					}, "Simple Pipe Continuum Worker");
 				} else {
 					final String key = runnable.pipeKey;
-					ThreadUtils.runTask(new Runnable() {
+					Thread queryThread = new Thread(new Runnable() {
 						public void run() {
 							SimplePipeRunnable runnable = null;
 							while ((runnable = SimplePipeHelper.getPipe(key)) != null) {
@@ -217,7 +219,9 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 								}
 							}
 						}
-					}, "Pipe Monitor Thread", false);
+					}, "Simple Pipe Query Worker");
+					queryThread.setDaemon(true);
+					queryThread.start();
 				}
 
 			}

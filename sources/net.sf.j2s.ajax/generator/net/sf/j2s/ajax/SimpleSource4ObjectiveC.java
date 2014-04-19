@@ -45,7 +45,7 @@ public class SimpleSource4ObjectiveC {
 				.replaceAll("\n", "\\\\n");
 	}
 
-	private static void generateAnnotation(Class<?> clazz, StringBuffer source) {
+	private static void generateAnnotation(Class<?> clazz, StringBuilder source) {
 		Deprecated annDeprecated = clazz.getAnnotation(Deprecated.class);
 		if (annDeprecated != null) {
 			source.append("// [deprecated]\r\n");
@@ -70,7 +70,7 @@ public class SimpleSource4ObjectiveC {
 		}
 	}
 
-	private static boolean generateAnnotation(Field field, boolean firstField, StringBuffer source) {
+	private static boolean generateAnnotation(Field field, boolean firstField, StringBuilder source) {
 		Deprecated annDeprecated = field.getAnnotation(Deprecated.class);
 		if (annDeprecated != null) {
 			source.append(firstField ? "//" : "\r\n// ");
@@ -159,7 +159,7 @@ public class SimpleSource4ObjectiveC {
 
 	@SuppressWarnings("deprecation")
 	public static String generateHeaderFromInterface(Class<?> interfaceClazz) {
-		StringBuffer source = new StringBuffer();
+		StringBuilder source = new StringBuilder();
 		
 		String clazzName = interfaceClazz.getName();
 		String simpleClazzName = clazzName;
@@ -300,7 +300,7 @@ public class SimpleSource4ObjectiveC {
 
 	@SuppressWarnings("deprecation")
 	public static String generateHeaderFromObject(SimpleSerializable s) {
-		StringBuffer source = new StringBuffer();
+		StringBuilder source = new StringBuilder();
 		
 		Class<?> clazz = s.getClass();
 		String clazzName = clazz.getName();
@@ -647,7 +647,7 @@ public class SimpleSource4ObjectiveC {
 	
 	@SuppressWarnings("deprecation")
 	public static String generateImplementation(SimpleSerializable s) {
-		StringBuffer source = new StringBuffer();
+		StringBuilder source = new StringBuilder();
 		
 		Class<?> clazz = s.getClass();
 		String clazzName = clazz.getName();
@@ -961,7 +961,7 @@ public class SimpleSource4ObjectiveC {
 		}
 		
 		{
-			StringBuffer source = new StringBuffer();
+			StringBuilder source = new StringBuilder();
 			Date date = new Date();
 			source.append("//\r\n");
 			source.append("//  ");
@@ -1031,7 +1031,7 @@ public class SimpleSource4ObjectiveC {
 		
 		
 		{
-			StringBuffer source = new StringBuffer();
+			StringBuilder source = new StringBuilder();
 			Date date = new Date();
 			source.append("//\r\n");
 			source.append("//  ");

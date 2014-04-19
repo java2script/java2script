@@ -170,7 +170,9 @@ public abstract class CompoundPipeSession extends SimplePipeRunnable {
 		if (pipe != null && !pipe.isPipeLive()) {
 			String pipeKey = this.pipeKey;
 			pipe.pipeDestroy();
-			SimplePipeHelper.removePipe(pipeKey);
+			if (pipeKey != null && pipeKey.length() > 0) {
+				SimplePipeHelper.removePipe(pipeKey);
+			}
 		}
 		
 		this.pipeClosed();

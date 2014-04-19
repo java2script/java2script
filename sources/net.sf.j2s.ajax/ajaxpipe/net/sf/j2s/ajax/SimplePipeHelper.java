@@ -118,18 +118,18 @@ public class SimplePipeHelper {
 	 */
 	@J2SIgnore
 	static String nextPipeKey() {
-		StringBuffer buf = new StringBuffer(SimplePipeRequest.PIPE_KEY_LENGTH);
+		StringBuilder builder = new StringBuilder(SimplePipeRequest.PIPE_KEY_LENGTH);
 		for (int i = 0; i < SimplePipeRequest.PIPE_KEY_LENGTH; i++) {
 			int r = (int) Math.floor(Math.random() * 62); // 0..61, total 62 numbers
 			if (r < 10) {
-				buf.append((char) (r + '0'));
+				builder.append((char) (r + '0'));
 			} else if (r < 10 + 26) {
-				buf.append((char) ((r - 10) + 'a'));
+				builder.append((char) ((r - 10) + 'a'));
 			} else {
-				buf.append((char) ((r - 10 - 26) + 'A'));
+				builder.append((char) ((r - 10 - 26) + 'A'));
 			}
 		}
-		return buf.toString();
+		return builder.toString();
 	}
 	
 	@J2SNative({
@@ -138,6 +138,7 @@ public class SimplePipeHelper {
 	public static void removePipe(String key) {
 		if (key == null) {
 			System.out.println("Removing pipe for null key???");
+			new RuntimeException("Removing null pipe key").printStackTrace();
 			return;
 		}
 		SimplePipeRunnable pipe = null;
@@ -294,10 +295,10 @@ public class SimplePipeHelper {
 	
 	@J2SIgnore
 	public static String printStatistics2() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Pipe monitor<br />\r\n");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Pipe monitor<br />\r\n");
 		if (pipes != null) {
-			buffer.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
+			builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
 //			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
 			Object[] keys = pipes.keySet().toArray();
 			for (int i = 0; i < keys.length; i++) {
@@ -313,30 +314,30 @@ public class SimplePipeHelper {
 						}
 					}
 					if (activeCount > 2) {
-						buffer.append(i + " Pipe (active=" + activeCount + ") " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
+						builder.append(i + " Pipe (active=" + activeCount + ") " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
 					}
 				}
 				if (list != null) {
 					int size = list.size();
 					if (size > 20) {
 						if (p != null) {
-							buffer.append(i + "::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
+							builder.append(i + "::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
 						} else {
-							buffer.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
+							builder.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
 						}
 					}
 				}
 			}
 		}
-		return buffer.toString();
+		return builder.toString();
 	}
 
 	@J2SIgnore
 	public static String printStatistics() {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append("Pipe monitor<br />\r\n");
+		StringBuilder builder = new StringBuilder();
+		builder.append("Pipe monitor<br />\r\n");
 		if (pipes != null) {
-			buffer.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
+			builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
 //			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
 			Object[] keys = pipes.keySet().toArray();
 			for (int i = 0; i < keys.length; i++) {
@@ -345,11 +346,11 @@ public class SimplePipeHelper {
 				List<SimpleSerializable> list = p != null ? p.pipeData : null; //pipeMap.get(key);
 				if (p instanceof CompoundPipeRunnable) {
 					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
-					buffer.append(i + "Pipe " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
+					builder.append(i + "Pipe " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
 					for (int j = 0; j < cp.pipes.length; j++) {
 						CompoundPipeSession ps = cp.pipes[j];
 						if (ps != null) {
-							buffer.append(j + " : " + ps.session + " / " + ps.isPipeLive() + " pipeAlive=" + ps.pipeAlive + "<br />\r\n");
+							builder.append(j + " : " + ps.session + " / " + ps.isPipeLive() + " pipeAlive=" + ps.pipeAlive + "<br />\r\n");
 						}
 					}
 				}
@@ -357,15 +358,15 @@ public class SimplePipeHelper {
 					int size = list.size();
 					//if (size > 5) {
 						if (p != null) {
-							buffer.append("::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
+							builder.append("::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
 						} else {
-							buffer.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
+							builder.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
 						}
 					//}
 				}
 			}
 		}
-		return buffer.toString();
+		return builder.toString();
 	}
 
 	@J2SIgnore
@@ -404,7 +405,9 @@ public class SimplePipeHelper {
                         if (now - pipe.lastLiveDetected > pipe.pipeWaitClosingInterval()) {
                         	String pipeKey = pipe.pipeKey;
                         	asyncDestroyPipe(pipe);
-                        	removePipe(pipeKey);
+                        	if (pipeKey != null && pipeKey.length() > 0) {
+                        		removePipe(pipeKey);
+                        	}
                         }
 					} else {
 						if (pipe instanceof CompoundPipeRunnable) {
@@ -494,16 +497,22 @@ public class SimplePipeHelper {
 			return;
 		}
 		monitored = true;
-		ThreadUtils.runTask(new Runnable() {
+		
+		Thread monitorThread = new Thread(new Runnable() {
 			public void run() {
 				monitoringAllPipes();
 			}
-		}, "Managed Pipe Session Monitor", true);
-		ThreadUtils.runTask(new Runnable() {
+		}, "Simple Pipe Managed Session Monitor");
+		monitorThread.setDaemon(true);
+		monitorThread.start();
+		
+		Thread killThread = new Thread(new Runnable() {
 			public void run() {
 				killingPipes();
 			}
-		}, "Managed Pipe Session Killer", true);
+		}, "Simple Pipe Managed Session Killer");
+		killThread.setDaemon(true);
+		killThread.start();
 	}
 	
 }
