@@ -13,11 +13,12 @@ package net.sf.j2s.ajax;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -51,7 +52,11 @@ public class SimplePipeHelper {
 	@J2SIgnore
 	private static long monitoringInterval = 10000; // 10s
 	
-	static Map<String, SimplePipeRunnable> pipes;
+	// allPipes is for JavaScript, as pipes is for Java
+	static Object allPipes = null;
+	
+	@J2SIgnore
+	private static Map<String, SimplePipeRunnable> pipes = new ConcurrentHashMap<String, SimplePipeRunnable>(50);
 
 	@J2SIgnore
 	private static BlockingQueue<SimplePipeRunnable> toBeDestroyedPipes = new LinkedBlockingQueue<SimplePipeRunnable>();
@@ -66,16 +71,13 @@ public class SimplePipeHelper {
 	 */
 	@J2SNative({
 		"if (key == null || pipe == null) return;",
-		"if (net.sf.j2s.ajax.SimplePipeHelper.pipes == null) {",
-		"	net.sf.j2s.ajax.SimplePipeHelper.pipes = new Object ();",
+		"if (net.sf.j2s.ajax.SimplePipeHelper.allPipes == null) {",
+		"	net.sf.j2s.ajax.SimplePipeHelper.allPipes = new Object ();",
 		"}",
-		"net.sf.j2s.ajax.SimplePipeHelper.pipes[key] = pipe;"
+		"net.sf.j2s.ajax.SimplePipeHelper.allPipes[key] = pipe;"
 	})
 	public static void registerPipe(String key, SimplePipeRunnable pipe) {
 		if (key == null || pipe == null) return;
-		if (pipes == null) {
-			pipes = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(50));
-		}
 		pipes.put(key, pipe);
 	}
 	
@@ -88,18 +90,14 @@ public class SimplePipeHelper {
 			System.out.println("ERROR!!! pipeKey should be null here! " + pipe.pipeKey);
 		}
 		// if (pipe == null) return null; // should never register null pipe!
-		if (pipes == null) {
-			pipes = Collections.synchronizedMap(new HashMap<String, SimplePipeRunnable>(50));
-		}
-		
 		String key = nextPipeKey();
 		while (pipes.get(key) != null) {
-			key = nextPipeKey();;
+			key = nextPipeKey();
 		}
-		pipes.put(key, pipe);
+		pipes.put(key, pipe); // FIXME: In rare case, it will override another pipe
 		
 //		if (pipeMap == null) {
-//			pipeMap = Collections.synchronizedMap(new HashMap<String, List<SimpleSerializable>>());
+//			pipeMap = new ConcurrentHashMap<String, List<SimpleSerializable>>();
 //		}
 //		List<SimpleSerializable> list = pipeMap.get(key);
 //		if (list == null) {
@@ -133,7 +131,7 @@ public class SimplePipeHelper {
 	}
 	
 	@J2SNative({
-		"delete net.sf.j2s.ajax.SimplePipeHelper.pipes[key];"
+		"delete net.sf.j2s.ajax.SimplePipeHelper.allPipes[key];"
 	})
 	public static void removePipe(String key) {
 		if (key == null) {
@@ -141,15 +139,12 @@ public class SimplePipeHelper {
 			new RuntimeException("Removing null pipe key").printStackTrace();
 			return;
 		}
-		SimplePipeRunnable pipe = null;
-		if (pipes != null) {
-			pipe = pipes.remove(key);
-			if (pipe != null) {
-				pipe.pipeAlive = false;
-				pipe.pipeClearData();
-				synchronized (pipe) {
-					pipe.notifyAll();
-				}
+		SimplePipeRunnable pipe = pipes.remove(key);
+		if (pipe != null) {
+			pipe.pipeAlive = false;
+			pipe.pipeClearData();
+			synchronized (pipe) {
+				pipe.notifyAll();
 			}
 		}
 //		if (pipeMap != null) {
@@ -162,12 +157,12 @@ public class SimplePipeHelper {
 	}
 
 	@J2SNative({
-		"var ps = net.sf.j2s.ajax.SimplePipeHelper.pipes;",
+		"var ps = net.sf.j2s.ajax.SimplePipeHelper.allPipes;",
 		"if (ps == null || key == null) return null;",
 		"return ps[key];"
 	})
 	public static SimplePipeRunnable getPipe(String key) {
-		if (pipes == null || key == null) return null;
+		if (key == null) return null;
 		return pipes.get(key);
 	}
 
@@ -297,35 +292,29 @@ public class SimplePipeHelper {
 	public static String printStatistics2() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Pipe monitor<br />\r\n");
-		if (pipes != null) {
-			builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
-//			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
-			Object[] keys = pipes.keySet().toArray();
-			for (int i = 0; i < keys.length; i++) {
-				String key = (String) keys[i];
-				SimplePipeRunnable p = pipes.get(key);
-				List<SimpleSerializable> list = p != null ? p.pipeData : null; //pipeMap.get(key);
-				if (p instanceof CompoundPipeRunnable) {
-					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
-					int activeCount = 0;
-					for (int j = 0; j < cp.pipes.length; j++) {
-						if (cp.pipes[j] != null) {
-							activeCount++;
-						}
-					}
-					if (activeCount > 2) {
-						builder.append(i + " Pipe (active=" + activeCount + ") " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
+		builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
+//		buffer.append("Total pipe map count: " + pipeMap.size() + "<br />\r\n");
+		int i = 0;
+		for (Iterator<SimplePipeRunnable> itr = pipes.values().iterator(); itr.hasNext();) {
+			SimplePipeRunnable p = (SimplePipeRunnable) itr.next();
+			i++;
+			List<SimpleSerializable> list = p.pipeData; //pipeMap.get(key);
+			if (p instanceof CompoundPipeRunnable) {
+				CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
+				int activeCount = 0;
+				for (int j = 0; j < cp.pipes.length; j++) {
+					if (cp.pipes[j] != null) {
+						activeCount++;
 					}
 				}
-				if (list != null) {
-					int size = list.size();
-					if (size > 20) {
-						if (p != null) {
-							builder.append(i + "::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
-						} else {
-							builder.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
-						}
-					}
+				if (activeCount > 2) {
+					builder.append(i + " Pipe (active=" + activeCount + ") " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
+				}
+			}
+			if (list != null) {
+				int size = list.size();
+				if (size > 20) {
+					builder.append(i + "::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
 				}
 			}
 		}
@@ -336,34 +325,26 @@ public class SimplePipeHelper {
 	public static String printStatistics() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Pipe monitor<br />\r\n");
-		if (pipes != null) {
-			builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
-//			buffer.append("Totoal pipe map count: " + pipeMap.size() + "<br />\r\n");
-			Object[] keys = pipes.keySet().toArray();
-			for (int i = 0; i < keys.length; i++) {
-				String key = (String) keys[i];
-				SimplePipeRunnable p = pipes.get(key);
-				List<SimpleSerializable> list = p != null ? p.pipeData : null; //pipeMap.get(key);
-				if (p instanceof CompoundPipeRunnable) {
-					CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
-					builder.append(i + "Pipe " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
-					for (int j = 0; j < cp.pipes.length; j++) {
-						CompoundPipeSession ps = cp.pipes[j];
-						if (ps != null) {
-							builder.append(j + " : " + ps.session + " / " + ps.isPipeLive() + " pipeAlive=" + ps.pipeAlive + "<br />\r\n");
-						}
+		builder.append("Totoal pipe count: " + pipes.size() + "<br />\r\n");
+//		buffer.append("Total pipe map count: " + pipeMap.size() + "<br />\r\n");
+		int i = 0;
+		for (Iterator<SimplePipeRunnable> itr = pipes.values().iterator(); itr.hasNext();) {
+			SimplePipeRunnable p = (SimplePipeRunnable) itr.next();
+			i++;
+			List<SimpleSerializable> list = p.pipeData; //pipeMap.get(key);
+			if (p instanceof CompoundPipeRunnable) {
+				CompoundPipeRunnable cp = (CompoundPipeRunnable) p;
+				builder.append(i + "Pipe " + cp.pipeKey + " status=" + cp.status + " pipeAlive=" + cp.isPipeLive() + " created=" + new Date(cp.lastSetup) + "<br />\r\n");
+				for (int j = 0; j < cp.pipes.length; j++) {
+					CompoundPipeSession ps = cp.pipes[j];
+					if (ps != null) {
+						builder.append(j + " : " + ps.session + " / " + ps.isPipeLive() + " pipeAlive=" + ps.pipeAlive + "<br />\r\n");
 					}
 				}
-				if (list != null) {
-					int size = list.size();
-					//if (size > 5) {
-						if (p != null) {
-							builder.append("::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
-						} else {
-							builder.append("Error pipe " + key + " with size : " + size + "<br />\r\n");
-						}
-					//}
-				}
+			}
+			if (list != null) {
+				int size = list.size();
+				builder.append("::: pipe " + p.pipeKey + " size : " + size + " / " + p.pipeAlive + "<br />\r\n");
 			}
 		}
 		return builder.toString();
@@ -385,10 +366,6 @@ public class SimplePipeHelper {
 			try {
 				Thread.sleep(monitoringInterval);
 			} catch (InterruptedException e) {
-			}
-			if (pipes == null) {
-				System.err.println("Pipe sessions are null or empty! Managed pipe session monitor exited!");
-				break;
 			}
 			Object[] allPipes = pipes.values().toArray();
 			for (int i = 0; i < allPipes.length; i++) {
@@ -430,12 +407,7 @@ public class SimplePipeHelper {
             		e.printStackTrace();
             	}
 			}
-			if (pipes == null/* || pipes.isEmpty()*/) {
-				monitored = false;
-				break;
-			}
 		}
-		System.err.println("Pipe sessions are null or empty! Pipe session monitor exited!");
 	}
 	
 	@J2SIgnore
