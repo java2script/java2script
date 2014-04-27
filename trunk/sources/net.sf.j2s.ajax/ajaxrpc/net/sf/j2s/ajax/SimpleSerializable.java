@@ -4385,6 +4385,17 @@ return true;
 		if (clazzName == null) {
 			return null;
 		}
+		String longClazzName = classAliasMappings.get(clazzName);
+		if (longClazzName != null) {
+			clazzName = longClazzName;
+		}
+		SimpleFactory fb = fallbackFactory;
+		if (fb != null && classMissed.contains(clazzName)) {
+			SimpleSerializable ssInst = fb.createInstance();
+			if (ssInst != null) {
+				return ssInst;
+			}
+		}
 		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
 		if (inst != null && inst instanceof SimpleSerializable) {
 			return (SimpleSerializable) inst;
@@ -4395,6 +4406,10 @@ return true;
     @J2SIgnore
     public void deserialize(Map<String, Object> properties) {
 		String clazzName = (String) properties.get("class");
+		String longClazzName = classAliasMappings.get(clazzName);
+		if (longClazzName != null) {
+			clazzName = longClazzName;
+		}
 		Map<String, Field> fieldMap = getSerializableFields(clazzName, this.getClass());
 		String[] fMap = fieldMapping();
 		for (Iterator<String> itr = properties.keySet().iterator(); itr.hasNext();) {

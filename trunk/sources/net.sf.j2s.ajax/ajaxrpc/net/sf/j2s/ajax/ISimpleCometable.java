@@ -37,6 +37,6 @@ public interface ISimpleCometable {
 	 * call-back must be called when its job is done. Otherwise, this
 	 * connection will be kept until server restarts.
 	 */
-	public boolean cometRun(Runnable asyncDoneCallback);
+	public boolean cometRun(final Runnable asyncDoneCallback);
 	
 }
