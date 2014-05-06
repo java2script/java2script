@@ -20,10 +20,10 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -134,6 +134,8 @@ public class HttpRequest {
 		 */
 		public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len);
 	}
+	
+	public static String DEFAULT_USER_AGENT = "Java2Script/2.0.2";
 
 	protected int status;
 	protected String statusText;
@@ -153,7 +155,7 @@ public class HttpRequest {
 	protected String user;
 	protected String password;
 	
-	protected Map<String, String> headers = new HashMap<String, String>();
+	protected Map<String, String> headers = new ConcurrentHashMap<String, String>();
 	protected String content;
 	
 	protected boolean toAbort = false;
@@ -442,8 +444,7 @@ public class HttpRequest {
 			connection.setInstanceFollowRedirects(false);
 			connection.setDoInput(true);
 			connection.setRequestMethod(method);
-			connection.setRequestProperty("User-Agent",
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.69 Safari/537.36");
+			connection.setRequestProperty("User-Agent", DEFAULT_USER_AGENT);
 			if ("post".equalsIgnoreCase(method)) {
 				connection.setDoOutput(true);
 				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
