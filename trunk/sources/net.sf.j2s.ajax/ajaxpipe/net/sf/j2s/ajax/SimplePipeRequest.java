@@ -11,8 +11,6 @@
 package net.sf.j2s.ajax;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Vector;
 
@@ -58,22 +56,22 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	/**
 	 * Status of pipe: ok.
 	 */
-	public static final String PIPE_STATUS_OK = "o"; // "ok";
+	public static final char PIPE_STATUS_OK = 'o'; // "ok";
 
 	/**
 	 * Status of pipe: destroyed.
 	 */
-	public static final String PIPE_STATUS_DESTROYED = "d"; // "destroyed";
+	public static final char PIPE_STATUS_DESTROYED = 'd'; // "destroyed";
 
 	/**
 	 * Status of pipe: continue.
 	 */
-	public static final String PIPE_STATUS_CONTINUE = "e"; // "continue";
+	public static final char PIPE_STATUS_CONTINUE = 'e'; // "continue";
 	
 	/**
 	 * Status of pipe: lost.
 	 */
-	public static final String PIPE_STATUS_LOST = "l"; // "lost";
+	public static final char PIPE_STATUS_LOST = 'l'; // "lost";
 
 	
 	/**
@@ -110,27 +108,27 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	/**
 	 * Query key for pipe: pipekey
 	 */
-	public static final String FORM_PIPE_KEY = "k"; // "pipekey";
+	public static final char FORM_PIPE_KEY = 'k'; // "pipekey";
 	
 	/**
 	 * Query key for pipe: pipetype
 	 */
-	public static final String FORM_PIPE_TYPE = "t"; // "pipetype";
+	public static final char FORM_PIPE_TYPE = 't'; // "pipetype";
 	
 	/**
 	 * Query key for pipe: pipetype
 	 */
-	public static final String FORM_PIPE_DOMAIN = "d"; // "pipedomain";
+	public static final char FORM_PIPE_DOMAIN = 'd'; // "pipedomain";
 
 	/**
 	 * Query key for pipe: pipernd
 	 */
-	public static final String FORM_PIPE_RANDOM = "r"; // "pipernd";
+	public static final char FORM_PIPE_RANDOM = 'r'; // "pipernd";
 
 	/**
 	 * Query key for pipe: pipeseq
 	 */
-	public static final String FORM_PIPE_SEQUENCE = "s"; // "pipeseq";
+	public static final char FORM_PIPE_SEQUENCE = 's'; // "pipeseq";
 	
 	static final int PIPE_KEY_LENGTH = 6;
 
@@ -443,11 +441,27 @@ Clazz.addEvent (document, "keydown", function (e) {
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
-				String responseText = request.getResponseText();
-				if (responseText == null || responseText.length() == 0
-						|| !runnable.deserialize(responseText)) {
-					runnable.ajaxFail(); // should seldom fail!
-					return;
+				boolean isJavaScript = false;
+				/**
+				 * @j2sNative
+				 * isJavaScript = true;
+				 */ {}
+				if (isJavaScript) { // for SCRIPT mode only
+					// For JavaScript, there is no #getResponseBytes
+					String responseText = request.getResponseText();
+					if (responseText == null || responseText.length() == 0
+							|| !runnable.deserialize(responseText)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
+				} else {
+					// For Java, use #getResponseBytes for performance optimization
+					byte[] responseBytes = request.getResponseBytes();
+					if (responseBytes == null || responseBytes.length == 0
+							|| !runnable.deserializeBytes(responseBytes)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
 				}
 				runnable.ajaxOut();
 				if (runnable.isPipeLive()) { // false if #pipeFailed is called in #ajaxOut  
@@ -736,7 +750,7 @@ document.body.appendChild (ifr);
 			if (pipe.notifySequence < sequence) {
 				pipe.notifySequence = sequence;
 			}
-			if (PIPE_STATUS_LOST.equals(result)) {
+			if (result != null && result.length() == 1 && result.charAt(0) == PIPE_STATUS_LOST) {
 				pipe.pipeAlive = false;
 				pipe.pipeLost();
 				SimplePipeHelper.removePipe(key);
@@ -755,21 +769,26 @@ document.body.appendChild (ifr);
 		String pipeKey = runnable.pipeKey;
 		String pipeMethod = runnable.getPipeMethod();
 		String pipeURL = runnable.getPipeURL();
-		
 		pipeRequest.registerOnReadyStateChange(new XHRCallbackAdapter() {
 		
 			@Override
 			public void onLoaded() {
+				boolean isJavaScript = false;
 				/**
 				 * Maybe user click on refresh button!
 				 * @j2sNative
+				 * isJavaScript = true;
 				 * if (window == null || window["net"] == null) return;
 				 */ {}
 				if (pipeRequest.getStatus() != 200) {
 					runnable.queryFailedRetries++;
 				} else {
 					runnable.queryFailedRetries = 0; // succeeded
-					parseReceived(pipeRequest.getResponseText());
+					if (isJavaScript) {
+						parseReceived(pipeRequest.getResponseText());
+					} else {
+						parseReceivedBytes(pipeRequest.getResponseBytes());
+					}
 				}
 				runnable.queryEnded = true;
 				/**
@@ -904,23 +923,12 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 				runnable.updateStatus(true);
 				
 				baos.write(b, off, len);
-				/*
-				 * It is OK to convert to string, because SimpleSerialize's
-				 * serialized string contains only ASCII chars.
-				 */
-				String string = null;
-				try {
-					string = baos.toString("iso-8859-1");
-				} catch (UnsupportedEncodingException e1) {
-					string = baos.toString();
-				}
-				String resetString = parseReceived(string);
-				if (resetString != null) {
+				byte[] bytes = baos.toByteArray();
+				int resetIndex = parseReceivedBytes(bytes);
+				if (resetIndex > 0) {
 					baos.reset();
-					try {
-						baos.write(resetString.getBytes("iso-8859-1"));
-					} catch (IOException e) {
-						e.printStackTrace();
+					if (resetIndex < bytes.length) {
+						baos.write(bytes, resetIndex, bytes.length - resetIndex);
 					}
 				}
 				return true;
@@ -1017,10 +1025,8 @@ for (var i = 0; i < iframes.length; i++) {
 		SimpleSerializable ss = null;
 		int start = 0;
 		while (string.length() > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
-			String destroyedKey = PIPE_STATUS_DESTROYED;
 			int end = start + PIPE_KEY_LENGTH;
-			if (destroyedKey.equals(string.substring(end,
-					end + destroyedKey.length()))) {
+			if (PIPE_STATUS_DESTROYED == string.charAt(end)) {
 				String key = string.substring(start, end);
 				SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
 				if (pipe != null) {
@@ -1030,17 +1036,15 @@ for (var i = 0; i < iframes.length; i++) {
 					}
 					SimplePipeHelper.removePipe(key);
 				}
-				return string.substring(end + destroyedKey.length());
+				return string.substring(end + 1);
 			}
-			String okKey = PIPE_STATUS_OK;
-			end = start + PIPE_KEY_LENGTH;
-			if (okKey.equals(string.substring(end, end + okKey.length()))) {
+			if (PIPE_STATUS_OK == string.charAt(end)) {
 				String key = string.substring(start, end);
 				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 				if (runnable != null) { // should always satisfy this condition
 					runnable.lastPipeDataReceived = System.currentTimeMillis();
 				}
-				start = end + okKey.length();
+				start = end + 1;
 				if (start == string.length()) {
 					return string.substring(start);
 				}
@@ -1052,10 +1056,7 @@ for (var i = 0; i < iframes.length; i++) {
 			 * isJavaScript = true;
 			 */ {}
 			if (isJavaScript) { // for SCRIPT mode only
-				String continueKey = PIPE_STATUS_CONTINUE;
-				end = start + PIPE_KEY_LENGTH;
-				if (continueKey.equals(string.substring(end,
-						end + continueKey.length()))) {
+				if (PIPE_STATUS_CONTINUE == string.charAt(end) ) {
 					String key = string.substring(start, end);
 					SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 					if (runnable != null) { // should always satisfy this condition
@@ -1073,7 +1074,7 @@ for (var i = 0; i < iframes.length; i++) {
 						 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum(runnable, subdomain, true);
 						 */ { subdomain.toString(); }
 					}
-					return string.substring(end + continueKey.length());
+					return string.substring(end + 1);
 				}
 			}
 			ss = SimpleSerializable.parseInstance(string, end);
@@ -1104,6 +1105,115 @@ for (var i = 0; i < iframes.length; i++) {
 		return string;
 	}
 
+
+	/**
+	 * Parse a SimpleSerializable object's bytes from given bytes.
+	 * 
+	 * The given bytes should be in format of "X...WLL101...#...$...". The first
+	 * 32-length bytes is pipe key bytes. And the following bytes is the
+	 * serialized bytes of SimpleSerializable object or "pipe-is-destroyed",
+	 * which indicates that pipe is destroyed.
+	 * 
+	 * If given bytes is not in the above format, it is considered that the
+	 * bytes is not completed yet. And in this scenario, return null to
+	 * indicate to keep receiving more data before call this method again.
+	 * 
+	 * If given bytes contains above format bytes fragment, the segment
+	 * will be parsed and relative {@link SimplePipeRunnable#deal(SimpleSerializable)}
+	 * will be called on the bytes fragment. And the rest bytes is returned
+	 * so later data may continue to construct a new bytes. 
+	 * 
+	 * @param bytes
+	 * @return null if given bytes is not completed, or rest of bytes after
+	 * being parsed.
+	 */
+	public static int parseReceivedBytes(final byte[] bytes) {
+		if (bytes == null) {
+			return -1;
+		}
+		SimpleSerializable ss = null;
+		int start = 0;
+		while (bytes.length > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
+			int end = start + PIPE_KEY_LENGTH;
+			if (PIPE_STATUS_DESTROYED == bytes[end]) {
+				String key = new String(bytes, start, PIPE_KEY_LENGTH);
+				SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+				if (pipe != null) {
+					if (key.equals(pipe.pipeKey)) {
+						pipe.pipeAlive = false;
+						pipe.pipeClosed();
+					}
+					SimplePipeHelper.removePipe(key);
+				}
+				return end + 1;
+			}
+			if (PIPE_STATUS_OK == bytes[end]) {
+				String key = new String(bytes, start, PIPE_KEY_LENGTH);
+				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+				if (runnable != null) { // should always satisfy this condition
+					runnable.lastPipeDataReceived = System.currentTimeMillis();
+				}
+				start = end + 1;
+				if (start == bytes.length) {
+					return start;
+				}
+				continue;
+			}
+			boolean isJavaScript = false;
+			/**
+			 * @j2sNative
+			 * isJavaScript = true;
+			 */ {}
+			if (isJavaScript) { // for SCRIPT mode only
+				if (PIPE_STATUS_CONTINUE == bytes[end]) {
+					String key = new String(bytes, start, PIPE_KEY_LENGTH);
+					SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+					if (runnable != null) { // should always satisfy this condition
+						runnable.lastPipeDataReceived = System.currentTimeMillis();
+						pipeIFrameClean(runnable.pipeKey);
+						String pipeURL = runnable.getPipeURL();
+						boolean isXSS = isXSSMode(pipeURL);
+						boolean isSubdomain = false;
+						if (isXSS) {
+							isSubdomain = isSubdomain(pipeURL);
+						}
+						String subdomain = adjustSubdomain(isSubdomain);
+						/**
+						 * @j2sNative
+						 * net.sf.j2s.ajax.SimplePipeRequest.pipeContinuum(runnable, subdomain, true);
+						 */ { subdomain.toString(); }
+					}
+					return end + 1;
+				}
+			}
+			ss = SimpleSerializable.parseInstance(bytes, end);
+			if (ss == null || !ss.deserializeBytes(bytes, end)) {
+				break;
+			}
+			String key = new String(bytes, start, PIPE_KEY_LENGTH);
+			SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+			if (runnable != null) { // should always satisfy this condition
+				runnable.lastPipeDataReceived = System.currentTimeMillis();
+				if (ss != SimpleSerializable.UNKNOWN) {
+					if (ss instanceof SimplePipeSequence) {
+						long sequence = ((SimplePipeSequence) ss).sequence;
+						if (sequence > runnable.pipeSequence) {
+							runnable.pipeSequence = sequence;
+						}
+					} else {
+						runnable.deal(ss);
+					}
+				}
+			}
+			
+			start = restBytesIndex(bytes, start);
+		}
+		if (start != 0) {
+			return start;
+		}
+		return 0;
+	}
+
 	/*
 	 * Return the string index from beginning of next SimpleSerializable
 	 * instance.
@@ -1112,24 +1222,48 @@ for (var i = 0; i < iframes.length; i++) {
 		// Format: WLL101ClassName#NNNNNN$SerializedData...
 		int idx1 = string.indexOf('#', start) + 1;
 		int idx2 = string.indexOf('$', idx1);
-		String sizeStr = string.substring(idx1, idx2);
-		sizeStr = sizeStr.replaceFirst("^0+", "");
 		int size = 0;
-		if (sizeStr.length() != 0) {
-			try {
-				size = Integer.parseInt(sizeStr);
-			} catch (NumberFormatException e) {
-				//
+		for (int i = idx1; i < idx2; i++) {
+			char c = string.charAt(i);
+			if (c != '0') {
+				size = c - '0';
+				i++;
+				for (; i < idx2; i++) {
+					size = ((size << 3) + (size << 1)) + (string.charAt(i) - '0'); // size * 10
+				}
+				break;
 			}
 		}
 		int end = idx2 + size + 1;
 		if (end <= string.length()) {
-			//string = string.substring(end);
 			return end;
 		} else {
 			return start;
 		}
-		//return string;
+	}
+	
+	static int restBytesIndex(final byte[] bytes, int start) {
+		// Format: WLL101ClassName#NNNNNN$SerializedData...
+		int idx1 = SimpleSerializable.bytesIndexOf(bytes, (byte) '#', start) + 1;
+		int idx2 = SimpleSerializable.bytesIndexOf(bytes, (byte) '$', idx1);
+		int size = 0;
+		for (int i = idx1; i < idx2; i++) {
+			byte b = bytes[i];
+			if (b != '0') {
+				size = b - '0';
+				i++;
+				for (; i < idx2; i++) {
+					size = ((size << 3) + (size << 1)) + (bytes[i] - '0'); // size * 10
+				}
+				break;
+			}
+		}
+		int end = idx2 + size + 1;
+		if (end <= bytes.length) {
+			return end;
+		} else {
+			return start;
+		}
 	}
 	
 	/**

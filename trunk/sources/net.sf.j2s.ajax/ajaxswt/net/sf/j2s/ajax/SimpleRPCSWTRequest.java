@@ -85,11 +85,27 @@ public class SimpleRPCSWTRequest extends SimpleRPCRequest {
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
-				String responseText = request.getResponseText();
-				if (responseText == null || responseText.length() == 0
-						|| !runnable.deserialize(responseText)) {
-					runnable.ajaxFail(); // should seldom fail!
-					return;
+				boolean isJavaScript = false;
+				/**
+				 * @j2sNative
+				 * isJavaScript = true;
+				 */ {}
+				if (isJavaScript) { // for SCRIPT mode only
+					// For JavaScript, there is no #getResponseBytes
+					String responseText = request.getResponseText();
+					if (responseText == null || responseText.length() == 0
+							|| !runnable.deserialize(responseText)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
+				} else {
+					// For Java, use #getResponseBytes for performance optimization
+					byte[] responseBytes = request.getResponseBytes();
+					if (responseBytes == null || responseBytes.length == 0
+							|| !runnable.deserializeBytes(responseBytes)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
 				}
 				runnable.ajaxOut();
 			}

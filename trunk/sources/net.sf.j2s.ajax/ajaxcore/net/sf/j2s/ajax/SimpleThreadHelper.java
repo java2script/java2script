@@ -41,13 +41,12 @@ public class SimpleThreadHelper {
 		if (poolInitialized) {
 			return;
 		}
-		poolInitialized = true;
-		
 		poolExecutor = new ThreadPoolExecutor(SimpleThreadConfig.simpleCoreThreads,
 				SimpleThreadConfig.simpleMaxThreads <= 0 ? Integer.MAX_VALUE : SimpleThreadConfig.simpleMaxThreads,
 				SimpleThreadConfig.simpleThreadIdleSeconds, TimeUnit.SECONDS,
 				new SynchronousQueue<Runnable>(),
 				new NamedThreadFactory("Simple Worker"));
+		poolInitialized = true;
 	}
 	
 	public static void runTask(Runnable r, String name) {

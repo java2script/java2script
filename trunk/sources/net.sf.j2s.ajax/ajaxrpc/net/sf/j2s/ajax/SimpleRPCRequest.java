@@ -34,20 +34,20 @@ public class SimpleRPCRequest {
 	public static final int MODE_AJAX = 1;
 	public static final int MODE_LOCAL_JAVA_THREAD = 2;
 	
-	private static int runningMode = MODE_LOCAL_JAVA_THREAD;
+	private static int runningMode = MODE_AJAX; //MODE_LOCAL_JAVA_THREAD;
 	
 	protected static IHttpRequestFactory requestFactory;
 	
-	static {
-		boolean ajax = false;
-		/**
-		 * @j2sNative
-		 * ajax = true;
-		 */ {}
-		if (ajax) {
-			runningMode = MODE_AJAX;
-		}
-	}
+//	static {
+//		boolean ajax = false;
+//		/**
+//		 * @j2sNative
+//		 * ajax = true;
+//		 */ {}
+//		if (ajax) {
+//			runningMode = MODE_AJAX;
+//		}
+//	}
 	
 	public static int getRequstMode() {
 		return runningMode;
@@ -187,11 +187,27 @@ public class SimpleRPCRequest {
 		request.open(method, url, async);
 		request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 			public void onLoaded() {
-				String responseText = request.getResponseText();
-				if (responseText == null || responseText.length() == 0
-						|| !runnable.deserialize(responseText)) {
-					runnable.ajaxFail(); // should seldom fail!
-					return;
+				boolean isJavaScript = false;
+				/**
+				 * @j2sNative
+				 * isJavaScript = true;
+				 */ {}
+				if (isJavaScript) { // for SCRIPT mode only
+					// For JavaScript, there is no #getResponseBytes
+					String responseText = request.getResponseText();
+					if (responseText == null || responseText.length() == 0
+							|| !runnable.deserialize(responseText)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
+				} else {
+					// For Java, use #getResponseBytes for performance optimization
+					byte[] responseBytes = request.getResponseBytes();
+					if (responseBytes == null || responseBytes.length == 0
+							|| !runnable.deserializeBytes(responseBytes)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
 				}
 				runnable.ajaxOut();
 			}
