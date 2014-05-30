@@ -509,12 +509,8 @@ public class SimpleSource4Java {
 			}
 		}
 		
-		if (gotStaticFinalFields) {
-			source.append("\r\n");
-			SourceUtils.insertLineComment(source, "\t", index++, true);
-		} else {
-			index++;
-		}
+		source.append("\r\n");
+		SourceUtils.insertLineComment(source, "\t", index++, true);
 
 		boolean firstField = true;
 		for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
@@ -542,7 +538,9 @@ public class SimpleSource4Java {
 			}
 		}
 		
-		source.append("\r\n");
+		if (!firstField) { // contains fields
+			source.append("\r\n");
+		} // else no blank line as previous comment block contains a blank line
 		SourceUtils.insertLineComment(source, "\t", index++, true);
 		boolean moreCodesAdded = false;
 		if (fieldMappings != null && fieldMappings.size() > 0) {
