@@ -189,13 +189,33 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		request.open(method, url, true);
 		request.registerOnReadyStateChange(new XHRCallbackSWTAdapter() {
 			public void swtOnLoaded() {
-				String responseText = request.getResponseText();
-				if (responseText == null || responseText.length() == 0
-						|| !runnable.deserialize(responseText)) {
-					runnable.ajaxFail(); // should seldom fail!
-					return;
+				boolean isJavaScript = false;
+				/**
+				 * @j2sNative
+				 * isJavaScript = true;
+				 */ {}
+				if (isJavaScript) { // for SCRIPT mode only
+					// For JavaScript, there is no #getResponseBytes
+					String responseText = request.getResponseText();
+					if (responseText == null || responseText.length() == 0
+							|| !runnable.deserialize(responseText)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
+				} else {
+					// For Java, use #getResponseBytes for performance optimization
+					byte[] responseBytes = request.getResponseBytes();
+					if (responseBytes == null || responseBytes.length == 0
+							|| !runnable.deserializeBytes(responseBytes)) {
+						runnable.ajaxFail(); // should seldom fail!
+						return;
+					}
 				}
 				runnable.ajaxOut();
+				
+				if (!runnable.isPipeLive()) {
+					return;
+				}
 				
 				SimplePipeHelper.registerPipe(runnable.pipeKey, runnable);
 
@@ -244,9 +264,8 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				if (responseText != null) {
 					String retStr = swtParseReceived(responseText);
 					if (retStr != null && retStr.length() > 0) {
-						String destroyedKey = PIPE_STATUS_DESTROYED;
-						if (retStr.indexOf(destroyedKey) == 0) {
-							int beginIndex = destroyedKey.length() + 1;
+						if (PIPE_STATUS_DESTROYED == retStr.charAt(0)) {
+							int beginIndex = 1 + 1;
 							String pipeKeyStr = retStr.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 							SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 							if (pipe != null) {
@@ -275,10 +294,9 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				 */
 				String string = baos.toString();
 				String resetString = swtParseReceived(string);
-				if (resetString != null) {
-					String destroyedKey = PIPE_STATUS_DESTROYED;
-					if (resetString.indexOf(destroyedKey) == 0) {
-						int beginIndex = destroyedKey.length() + 1;
+				if (resetString != null && resetString.length() > 0) {
+					if (PIPE_STATUS_DESTROYED == resetString.charAt(0)) {
+						int beginIndex = 1 + 1;
 						final String pipeKeyStr = resetString.substring(beginIndex, beginIndex + PIPE_KEY_LENGTH);
 						final SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKeyStr);
 						if (pipe != null) {
@@ -335,22 +353,18 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		SimpleSerializable ss = null;
 		int start = 0;
 		while (string.length() > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
-			String destroyedKey = PIPE_STATUS_DESTROYED;
 			int end = start + PIPE_KEY_LENGTH;
-			if (PIPE_STATUS_DESTROYED.equals(string.substring(end, 
-					end + destroyedKey.length()))) {
-				return destroyedKey + ":" + string.substring(start, end) 
-						+ ":" + string.substring(end + destroyedKey.length());
+			if (PIPE_STATUS_DESTROYED == string.charAt(end)) {
+				return PIPE_STATUS_DESTROYED + ":" + string.substring(start, end) 
+						+ ":" + string.substring(end + 1);
 			}
-			String okKey = PIPE_STATUS_OK;
-			end = start + PIPE_KEY_LENGTH;
-			if (okKey.equals(string.substring(end, end + okKey.length()))) {
+			if (PIPE_STATUS_OK == string.charAt(end)) {
 				String key = string.substring(start, end);
 				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 				if (runnable != null) { // should always satisfy this condition
 					runnable.lastPipeDataReceived = System.currentTimeMillis();
 				}
-				start = end + okKey.length();
+				start = end + 1;
 				if (start == string.length()) {
 					return string.substring(start);
 				}

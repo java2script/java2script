@@ -136,11 +136,13 @@ public class HttpRequest {
 	}
 	
 	public static String DEFAULT_USER_AGENT = "Java2Script/2.0.2";
-
+	
 	protected int status;
 	protected String statusText;
 	protected int readyState;
 	
+	protected String responseType;
+	protected ByteArrayOutputStream responseBAOS;
 	protected String responseText;
 	protected byte[] responseBytes;
 	protected Document responseXML;
@@ -178,6 +180,59 @@ public class HttpRequest {
 	 * or an error happens. 
 	 */
 	public String getResponseText() {
+		if (responseText != null) {
+			return responseText;
+		}
+		ByteArrayOutputStream baos = responseBAOS;
+		String type = responseType;
+		if (type != null) {
+			String charset = null;
+			String lowerType = type.toLowerCase();
+			int idx = lowerType.indexOf("charset=");
+			if (idx != -1) {
+				charset = type.substring(idx + 8);
+			} else {
+				idx = lowerType.indexOf("/xml"); // more xml Content-Type?
+				if (idx != -1) {
+					String tmp = baos.toString();
+					Matcher matcher = Pattern.compile(
+							"<\\?.*encoding\\s*=\\s*[\'\"]([^'\"]*)[\'\"].*\\?>", 
+							Pattern.MULTILINE).matcher(tmp);
+					if (matcher.find()) {
+						charset = matcher.group(1);
+					} else {
+						// default charset of xml is UTF-8?
+						responseText = tmp;
+					}
+				} else {
+					idx = lowerType.indexOf("html");
+					if (idx != -1) {
+						String tmp = baos.toString();
+						Matcher matcher = Pattern.compile(
+								"<meta.*content\\s*=\\s*[\'\"][^'\"]*charset\\s*=\\s*([^'\"]*)\\s*[\'\"].*>", 
+								Pattern.MULTILINE | Pattern.CASE_INSENSITIVE).matcher(tmp);
+						if (matcher.find()) {
+							charset = matcher.group(1);
+						} else {
+							responseText = tmp;
+						}
+					}
+				}
+			}
+			if (charset != null) {
+				try {
+					responseText = baos.toString(charset);
+				} catch (UnsupportedEncodingException e) {
+				}
+			}
+		}
+		if (responseText == null) {
+			try {
+				responseText = baos.toString("iso-8859-1");
+			} catch (UnsupportedEncodingException e) {
+				responseText = baos.toString();
+			}
+		}
 		return responseText;
 	}
 	/**
@@ -186,6 +241,9 @@ public class HttpRequest {
 	 * or an error happens. 
 	 */
 	public byte[] getResponseBytes() {
+		if (responseBytes == null && responseBAOS != null) {
+			responseBytes = responseBAOS.toByteArray();
+		}
 		return responseBytes;
 	}
 	/**
@@ -197,15 +255,16 @@ public class HttpRequest {
 		if (responseXML != null) {
 			return responseXML;
 		}
-		String type = connection.getHeaderField("Content-Type");
+		String type = responseType;
 		if (type != null && (type.indexOf("/xml") != -1 || type.indexOf("+xml") != -1)) {
-			if (responseText != null && responseText.length() != 0) {
+			String responseContent = getResponseText();
+			if (responseContent != null && responseContent.length() != 0) {
 		        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		        dbf.setNamespaceAware(true);
 		        dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
 				try {
 		            DocumentBuilder db = dbf.newDocumentBuilder();
-		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseText.getBytes("utf-8"));
+		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseContent.getBytes("utf-8"));
 		            responseXML = db.parse(biStream);
 		        } catch (Exception e) {
 		            e.printStackTrace();
@@ -361,11 +420,13 @@ public class HttpRequest {
 		this.url = url;
 		this.user = user;
 		this.password = password;
+		responseType = null;
+		responseBAOS = null;
 		responseText = null;
 		responseBytes = null;
 		responseXML = null;
 		readyState = 1;
-		status = 200; // default OK
+		status = 0; // default OK
 		statusText = null;
 		toAbort = false;
 		if (onreadystatechange != null) {
@@ -504,8 +565,15 @@ public class HttpRequest {
 			
 			receiving = initializeReceivingMonitor();
 			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(10240);
-			byte[] buffer = new byte[10240];
+			int bufferSize = connection.getContentLength();
+			if (bufferSize <= 0) {
+				bufferSize = 10240;
+			} else if (bufferSize > 512 * 1024) {
+				bufferSize = 512 * 1024; // buffer increases by 512k
+			}
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(bufferSize);
+			responseBAOS = baos;
+			byte[] buffer = new byte[Math.min(bufferSize, 10240)];
 			int read;
 			while (!toAbort && (read = is.read(buffer)) != -1) {
 				if (checkAbort()) return; // stop receiving anything
@@ -527,56 +595,7 @@ public class HttpRequest {
 			is.close();
 			activeIS = null;
 			responseText = null;
-			responseBytes = baos.toByteArray();
-			String type = connection.getHeaderField("Content-Type");
-			if (type != null) {
-				String charset = null;
-				String lowerType = type.toLowerCase();
-				int idx = lowerType.indexOf("charset=");
-				if (idx != -1) {
-					charset = type.substring(idx + 8);
-				} else {
-					idx = lowerType.indexOf("/xml"); // more xml Content-Type?
-					if (idx != -1) {
-						String tmp = baos.toString();
-						Matcher matcher = Pattern.compile(
-								"<\\?.*encoding\\s*=\\s*[\'\"]([^'\"]*)[\'\"].*\\?>", 
-								Pattern.MULTILINE).matcher(tmp);
-						if (matcher.find()) {
-							charset = matcher.group(1);
-						} else {
-							// default charset of xml is UTF-8?
-							responseText = tmp;
-						}
-					} else {
-						idx = lowerType.indexOf("html");
-						if (idx != -1) {
-							String tmp = baos.toString();
-							Matcher matcher = Pattern.compile(
-									"<meta.*content\\s*=\\s*[\'\"][^'\"]*charset\\s*=\\s*([^'\"]*)\\s*[\'\"].*>", 
-									Pattern.MULTILINE | Pattern.CASE_INSENSITIVE).matcher(tmp);
-							if (matcher.find()) {
-								charset = matcher.group(1);
-							} else {
-								responseText = tmp;
-							}
-						}
-					}
-				}
-				if (charset != null) {
-					try {
-						responseText = baos.toString(charset);
-					} catch (UnsupportedEncodingException e) {
-					}
-				}
-			}
-			if (responseText == null) {
-				try {
-					responseText = baos.toString("iso-8859-1");
-				} catch (UnsupportedEncodingException e) {
-					responseText = baos.toString();
-				}
-			}
+			responseType = connection.getHeaderField("Content-Type");
 			readyState = 4;
 			if (onreadystatechange != null) {
 				onreadystatechange.onLoaded();

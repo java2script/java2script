@@ -107,17 +107,17 @@ public class SimplePipeHttpServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		String key = req.getParameter(SimplePipeRequest.FORM_PIPE_KEY);
+		String key = req.getParameter(String.valueOf(SimplePipeRequest.FORM_PIPE_KEY));
 		if (key == null) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 		char type = SimplePipeRequest.PIPE_TYPE_CONTINUUM;
-		String typeStr = req.getParameter(SimplePipeRequest.FORM_PIPE_TYPE);
+		String typeStr = req.getParameter(String.valueOf(SimplePipeRequest.FORM_PIPE_TYPE));
 		if (typeStr != null && typeStr.length() > 0) {
 			type = typeStr.charAt(0);
 		}
-		String domain = req.getParameter(SimplePipeRequest.FORM_PIPE_DOMAIN);
+		String domain = req.getParameter(String.valueOf(SimplePipeRequest.FORM_PIPE_DOMAIN));
 		doPipe(resp, key, type, domain);
 	}
 
@@ -345,6 +345,24 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		}
 	}
 
+	protected static String output(char type, String key, char evt) {
+		StringBuilder builder = new StringBuilder();
+		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { 
+			// iframe, so $ is a safe method identifier
+			builder.append("<script type=\"text/javascript\">$ (\"");
+		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
+			builder.append("$p1p3p$ (\""); // $p1p3p$
+		}
+		builder.append(key);
+		builder.append(evt);
+		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { // iframe
+			builder.append("\");</script>\r\n");
+		} else if (SimplePipeRequest.PIPE_TYPE_XSS == type) {
+			builder.append("\");\r\n");
+		}
+		return builder.toString();
+	}
+	
 	protected static String output(char type, String key, String str) {
 		StringBuilder builder = new StringBuilder();
 		if (SimplePipeRequest.PIPE_TYPE_SCRIPT == type) { 
