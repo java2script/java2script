@@ -264,8 +264,8 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		resp.setHeader("Pragma", "no-cache");
 		resp.setHeader("Cache-Control", "no-cache");
 		resp.setDateHeader("Expires", 0);
-		resp.setContentType("text/plain; charset=utf-8");
-		//resp.setCharacterEncoding("utf-8");
+		resp.setContentType("text/plain; charset=UTF-8");
+		//resp.setCharacterEncoding("UTF-8");
 		PrintWriter writer = resp.getWriter();
 		SimpleRPCRunnable clonedRunnable = null;
 		try {
@@ -370,8 +370,8 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		resp.setDateHeader("Expires", 0);
 
 		if (isScriptReuest) { // cross site script response
-			resp.setContentType("text/javascript; charset=utf-8");
-			//resp.setCharacterEncoding("utf-8");
+			resp.setContentType("text/javascript; charset=UTF-8");
+			//resp.setCharacterEncoding("UTF-8");
 			PrintWriter writer = resp.getWriter();
 			writer.write("net.sf.j2s.ajax.SimpleRPCRequest.xssNotify(");
 			writer.write("\"" + requestID + "\", \"");
@@ -385,8 +385,8 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		
 		// normal text response
-		resp.setContentType("text/plain; charset=utf-8");
-		//resp.setCharacterEncoding("utf-8");
+		resp.setContentType("text/plain; charset=UTF-8");
+		//resp.setCharacterEncoding("UTF-8");
 		PrintWriter writer = resp.getWriter();
 		writer.write(serialize);
 		runnable.ajaxOut();
@@ -404,7 +404,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		// make sure that servlet support cross site script request
 		if (!supportXSSRequest()) {
 			resp.setContentType("text/javascript");
-			//resp.setCharacterEncoding("utf-8");
+			//resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
 					".xssNotify(\"" + scriptRequestID + "\", \"unsupported\");");
 			return null;
@@ -436,7 +436,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		// check whether servlet can deal the requests
 		if (partsCount > maxXSSRequestParts()) {
 			resp.setContentType("text/javascript");
-			//resp.setCharacterEncoding("utf-8");
+			//resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
 					".xssNotify(\"" + scriptRequestID + "\", \"exceedrequestlimit\");");
 			return null;
@@ -488,7 +488,7 @@ public class SimpleRPCHttpServlet extends HttpServlet {
 		}
 		if (toContinue) {
 			resp.setContentType("text/javascript");
-			//resp.setCharacterEncoding("utf-8");
+			//resp.setCharacterEncoding("UTF-8");
 			resp.getWriter().write("net.sf.j2s.ajax.SimpleRPCRequest" +
 					".xssNotify(\"" + scriptRequestID + "\", \"continue\"" +
 					((curPart == 1) ? ", \"" + session.getId() + "\");" : ");"));

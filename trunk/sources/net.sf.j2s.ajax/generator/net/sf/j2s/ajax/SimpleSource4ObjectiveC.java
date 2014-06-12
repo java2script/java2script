@@ -35,7 +35,7 @@ public class SimpleSource4ObjectiveC {
 	static String author = "Author";
 	static String company = "Company";
 	static String constantPrefix = "C_";
-
+	static boolean supportsARC = false;
 
 	private static String wrapString(String s) {
 		if (s == null) {
@@ -894,10 +894,15 @@ public class SimpleSource4ObjectiveC {
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		if (args == null || args.length < 2 + 3) {
-			System.out.println("Usage: " + SimpleSource4ObjectiveC.class.getName() + " <sources folder> <author> <orgization or company> <constant prefix> <factory name> <class> [class ...]");
+			System.out.println("Usage: " + SimpleSource4ObjectiveC.class.getName() + "[--arc] <sources folder> <author> <orgization or company> <constant prefix> <factory name> <class> [class ...]");
 			return;
 		}
-		String targetFolder = args[0];
+		int indexStarting = 0;
+		if ("--arc".equals(args[0])) {
+			supportsARC = true;
+			indexStarting = 1;
+		}
+		String targetFolder = args[indexStarting];
 		File f = new File(targetFolder);
 		if (f.exists()) {
 			if (!f.isDirectory()) {
@@ -912,12 +917,13 @@ public class SimpleSource4ObjectiveC {
 			}
 		}
 		folder = f.getName();
-		author = args[1];
-		company = args[2];
-		constantPrefix = args[3];
+		author = args[indexStarting + 1];
+		company = args[indexStarting + 2]; 
+		constantPrefix = args[indexStarting + 3];
 		
-		String factoryClazz = args[4];
-		for (int i = 1 + 4; i < args.length; i++) {
+		String factoryClazz = args[indexStarting + 4];
+		int classStartingIndex = indexStarting + 5;
+		for (int i = classStartingIndex; i < args.length; i++) {
 			String j2sSimpleClazz = args[i];
 			try {
 				Class<?> clazz = Class.forName(j2sSimpleClazz);
@@ -985,7 +991,7 @@ public class SimpleSource4ObjectiveC {
 			source.append("#import \"SimpleFactory.h\"\r\n");
 			source.append("\r\n");
 
-			for (int i = 1 + 4; i < args.length; i++) {
+			for (int i = classStartingIndex; i < args.length; i++) {
 				String j2sSimpleClazz = args[i];
 				try {
 					Class<?> clazz = Class.forName(j2sSimpleClazz);
@@ -1066,7 +1072,7 @@ public class SimpleSource4ObjectiveC {
 			source.append("- (id) createInstanceByClassName:(NSString *) className {\r\n");
 			SourceUtils.insertLineComment(source, "\t", index++, false);
 
-			for (int i = 1 + 4; i < args.length; i++) {
+			for (int i = classStartingIndex; i < args.length; i++) {
 				String j2sSimpleClazz = args[i];
 				try {
 					Class<?> clazz = Class.forName(j2sSimpleClazz);
@@ -1135,7 +1141,7 @@ public class SimpleSource4ObjectiveC {
 			source.append("- (id) getClassFullName:(NSString *) className {\r\n");
 			SourceUtils.insertLineComment(source, "\t", index++, false);
 
-			for (int i = 1 + 4; i < args.length; i++) {
+			for (int i = classStartingIndex; i < args.length; i++) {
 				String j2sSimpleClazz = args[i];
 				try {
 					Class<?> clazz = Class.forName(j2sSimpleClazz);

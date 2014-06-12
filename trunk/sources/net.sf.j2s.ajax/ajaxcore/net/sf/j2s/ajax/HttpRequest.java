@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +138,9 @@ public class HttpRequest {
 	
 	public static String DEFAULT_USER_AGENT = "Java2Script/2.0.2";
 	
+	protected static Charset UTF_8 = Charset.forName("UTF-8");
+	protected static Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+
 	protected int status;
 	protected String statusText;
 	protected int readyState;
@@ -220,18 +224,21 @@ public class HttpRequest {
 				}
 			}
 			if (charset != null) {
-				try {
-					responseText = baos.toString(charset);
-				} catch (UnsupportedEncodingException e) {
+				if ("UTF-8".equalsIgnoreCase(charset)) {
+					responseText = new String (baos.toByteArray(), UTF_8);
+				} else if ("ISO-8859-1".equalsIgnoreCase(charset)) {
+					responseText = new String (baos.toByteArray(), ISO_8859_1);
+				} else {
+					try {
+						responseText = baos.toString(charset);
+					} catch (UnsupportedEncodingException e) {
+						responseText = baos.toString();
+					}
 				}
 			}
 		}
 		if (responseText == null) {
-			try {
-				responseText = baos.toString("iso-8859-1");
-			} catch (UnsupportedEncodingException e) {
-				responseText = baos.toString();
-			}
+			responseText = new String (baos.toByteArray(), ISO_8859_1);
 		}
 		return responseText;
 	}
@@ -264,7 +271,7 @@ public class HttpRequest {
 		        dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
 				try {
 		            DocumentBuilder db = dbf.newDocumentBuilder();
-		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseContent.getBytes("utf-8"));
+		            ByteArrayInputStream biStream = new ByteArrayInputStream(responseContent.getBytes(UTF_8));
 		            responseXML = db.parse(biStream);
 		        } catch (Exception e) {
 		            e.printStackTrace();
