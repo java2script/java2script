@@ -152,7 +152,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			 * Client send in "notify" request to execute #notifyPipeStatus, see below comments
 			 */
 			boolean updated = SimplePipeHelper.notifyPipeStatus(key, true); // update it!
-			resp.setContentType("text/javascript; charset=utf-8");
+			resp.setContentType("text/javascript; charset=UTF-8");
 			writer = resp.getWriter();
 			writer.write("$p1p3b$ (\""); // $p1p3b$ = net.sf.j2s.ajax.SimplePipeRequest.pipeNotifyCallBack
 			writer.write(key);
@@ -162,7 +162,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			return;
 		}
 		if (SimplePipeRequest.PIPE_TYPE_SUBDOMAIN_QUERY == type) { // subdomain query
-			resp.setContentType("text/html; charset=utf-8");
+			resp.setContentType("text/html; charset=UTF-8");
 			writer = resp.getWriter();
 			StringBuilder builder = new StringBuilder();
 			builder.append("<html><head><title></title></head><body>\r\n");
@@ -196,7 +196,7 @@ public class SimplePipeHttpServlet extends HttpServlet {
 		}
 		boolean isScripting = SimplePipeRequest.PIPE_TYPE_SCRIPT == type;
 		if (isScripting) { // iframe
-			resp.setContentType("text/html; charset=utf-8");
+			resp.setContentType("text/html; charset=UTF-8");
 			writer = resp.getWriter();
 			StringBuilder builder = new StringBuilder();
 			builder.append("<html><head><title></title></head><body>\r\n");
@@ -213,9 +213,9 @@ public class SimplePipeHttpServlet extends HttpServlet {
 			writer.flush();
 		} else {
 			if (SimplePipeRequest.PIPE_TYPE_QUERY == type || isContinuum) {
-				resp.setContentType("text/plain; charset=utf-8");
+				resp.setContentType("text/plain; charset=UTF-8");
 			} else {
-				resp.setContentType("text/javascript; charset=utf-8");
+				resp.setContentType("text/javascript; charset=UTF-8");
 			}
 			writer = resp.getWriter();
 		}

@@ -188,7 +188,7 @@ public class SourceUtils {
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(file);
-			fos.write(source.getBytes("utf-8"));
+			fos.write(source.getBytes("UTF-8"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

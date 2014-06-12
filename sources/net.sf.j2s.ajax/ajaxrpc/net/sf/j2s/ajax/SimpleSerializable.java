@@ -68,10 +68,10 @@ public class SimpleSerializable implements Cloneable {
 	private static Set<String> classMissed = new HashSet<String>();
 	
 	@J2SIgnore
-	protected static Charset UTF_8 = Charset.forName("utf-8");
+	public static Charset UTF_8 = Charset.forName("UTF-8");
 	
 	@J2SIgnore
-	protected static Charset ISO_8859_1 = Charset.forName("iso-8859-1");
+	public static Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 	
 	private int simpleVersion;
 	
