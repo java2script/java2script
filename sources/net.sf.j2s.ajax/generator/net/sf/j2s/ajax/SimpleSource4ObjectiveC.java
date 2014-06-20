@@ -601,32 +601,32 @@ public class SimpleSource4ObjectiveC {
 			} else if (type == boolean.class) {
 				source.append(") BOOL ");
 			} else if (type == String.class) {
-				source.append(", retain) NSString *");
+				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSString *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable.class)) {
-				source.append(", retain) ");
+				source.append(", " + (!supportsARC ? "retain" : "strong") + ") ");
 				source.append(type.getSimpleName());
 				source.append(" *");
 			} else if (type == byte[].class) {
 				if (s.bytesCompactMode()) {
-					source.append(", retain) NSData *");
+					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSData *");
 				} else {
-					source.append(", retain) NSMutableArray<NSNumber> *");
+					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSNumber> *");
 				}
 			} else if (type == String[].class) {
-				source.append(", retain) NSMutableArray<NSString> *");
+				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSString> *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
 				//if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
-					source.append(", retain) NSMutableArray<");
+					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<");
 					source.append(type.getComponentType().getSimpleName());
 					source.append("> *");
 				//} else {
-				//	source.append(", retain) NSMutableArray *");
+				//	source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray *");
 				//}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class || type == String[].class
 					|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				source.append(", retain) NSMutableArray<NSNumber> *");
+				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSNumber> *");
 			} else {
 				System.out.println("Unsupported type " + type);
 			}
@@ -858,7 +858,7 @@ public class SimpleSource4ObjectiveC {
 		source.append("}\r\n");
 		source.append("\r\n");
 
-		if (needDealloc) {
+		if (needDealloc && !supportsARC) {
 			source.append("- (void) dealloc {\r\n");
 			SourceUtils.insertLineComment(source, "\t", index++, false);
 			for (Iterator<Field> itr = fields.iterator(); itr.hasNext();) {
@@ -879,6 +879,10 @@ public class SimpleSource4ObjectiveC {
 			SourceUtils.insertLineComment(source, "\t", index++, false);
 			source.append("\t[super dealloc];\r\n");
 			source.append("}\r\n");
+			source.append("\r\n");
+		} else if (needDealloc) {
+			index++;
+			index++;
 			source.append("\r\n");
 		}
 		SourceUtils.insertLineComment(source, "", index++, true);
@@ -1091,9 +1095,15 @@ public class SimpleSource4ObjectiveC {
 							source.append("\tif ([className compare:@\"");
 							source.append(j2sSimpleClazz);
 							source.append("\"] == 0) {\r\n");
-							source.append("\t\treturn [[[");
-							source.append(simpleName);
-							source.append(" alloc] init] autorelease];\r\n");
+							if (!supportsARC) {
+								source.append("\t\treturn [[[");
+								source.append(simpleName);
+								source.append(" alloc] init] autorelease];\r\n");
+							} else {
+								source.append("\t\treturn [[");
+								source.append(simpleName);
+								source.append(" alloc] init];\r\n");
+							}
 							source.append("\t}\r\n");
 						}
 					}
