@@ -241,6 +241,7 @@ public class SimpleSource4Java {
 		Field[] clazzFields = clazz.getDeclaredFields();
 		
 		List<Field> fields = new ArrayList<Field>();
+		List<Field> fields4Annotation = new ArrayList<Field>();
 		Set<String> j2sIgnoredFileds = new HashSet<String>();
 		
 		for (int i = 0; i < clazzFields.length; i++) {
@@ -253,9 +254,13 @@ public class SimpleSource4Java {
 					j2sIgnoredFileds.add(f.getName());
 				}
 			}
+			if ((modifiers & (Modifier.PUBLIC/* | Modifier.PROTECTED*/)) != 0
+					&& (modifiers & (Modifier.TRANSIENT/* | Modifier.STATIC*/)) == 0) {
+				fields4Annotation.add(f);
+			}
 		}
 
-		if (importAnnotationClasses(fields, clazz, source)) {
+		if (importAnnotationClasses(fields4Annotation, clazz, source)) {
 			hasMoreImports = true;
 		}
 		
