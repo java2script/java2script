@@ -1119,7 +1119,7 @@ public class SimpleSource4ObjectiveC {
 			source.append("- (id) getClassShortenName:(NSString *) className {\r\n");
 			SourceUtils.insertLineComment(source, "\t", index++, false);
 
-			for (int i = 1 + 4; i < args.length; i++) {
+			for (int i = classStartingIndex; i < args.length; i++) {
 				String j2sSimpleClazz = args[i];
 				try {
 					Class<?> clazz = Class.forName(j2sSimpleClazz);
