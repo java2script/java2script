@@ -246,7 +246,11 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		if (anotherPipe != null && anotherPipe.pipeData != null && anotherPipe.pipeData.size() > 0) {
 			if (pipeData == null) {
 				List<SimpleSerializable> data = new Vector<SimpleSerializable>(anotherPipe.pipeData.size());
-				pipeData = data;
+				synchronized (this) {
+					if (pipeData == null) {
+						pipeData = data;
+					}
+				}
 			}
 			synchronized (pipeData) {
 				synchronized (anotherPipe.pipeData) {
