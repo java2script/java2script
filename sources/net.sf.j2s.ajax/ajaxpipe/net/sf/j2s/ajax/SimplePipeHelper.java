@@ -222,10 +222,8 @@ public class SimplePipeHelper {
 						}
 					}
 					c.setCached(true);
-					list.add(s);
-				} else {
-					list.add(s);
 				}
+				list.add(s);
 				if (!hasNewPriority && s instanceof ISimplePipePriority) {
 					hasNewPriority = true;
 				}
