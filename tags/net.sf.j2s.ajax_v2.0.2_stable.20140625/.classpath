@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="annotation"/>
+	<classpathentry kind="src" path="store"/>
+	<classpathentry kind="src" path="generator"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="ajaxcore"/>
+	<classpathentry kind="src" path="ajaxswt"/>
+	<classpathentry kind="src" path="ajaxrpc"/>
+	<classpathentry kind="src" path="ajaxpipe"/>
+	<classpathentry kind="var" path="JAVAX_SERVLET"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
