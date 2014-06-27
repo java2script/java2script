@@ -39,4 +39,11 @@ public interface ISimpleCometable {
 	 */
 	public boolean cometRun(final Runnable asyncDoneCallback);
 	
+	/**
+	 * Return whether send chunked encoding header before responding real data.
+	 * @return Returning true, HTTP chunked encoding header will be sent and real data will be
+	 * sent in later packet. Returning false, normal HTTP response will be sent after real data is ready.
+	 */
+	public boolean supportsChunkedEncoding();
+	
 }
