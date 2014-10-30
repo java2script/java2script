@@ -1,52 +1,79 @@
 package net.sf.j2s.ajax;
 
-import java.util.concurrent.AbstractExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleThreadHelper {
 
-	private static class NamedThreadFactory implements ThreadFactory {
-	    final ThreadGroup group;
-	    final AtomicInteger threadNumber = new AtomicInteger(1);
-	    final String namePrefix;
-
-	    public NamedThreadFactory(String prefix) {
-	        SecurityManager s = System.getSecurityManager();
-	        group = (s != null)? s.getThreadGroup() :
-	                             Thread.currentThread().getThreadGroup();
-	        namePrefix = prefix + "-";
-	    }
-
-	    public Thread newThread(Runnable r) {
-	        Thread t = new Thread(group, r,
-	                              namePrefix + threadNumber.getAndIncrement(),
-	                              0);
-	        t.setDaemon(true);
-	        if (t.getPriority() != Thread.NORM_PRIORITY)
-	            t.setPriority(Thread.NORM_PRIORITY);
-	        return t;
-	    }
-
-	}
-	
-	private static AbstractExecutorService poolExecutor;
+	private static SimpleThreadPoolExecutor poolExecutor;
 
 	private static boolean poolInitialized = false;
 	
+	private static int lastCoreThreads = SimpleThreadConfig.simpleCoreThreads;
+	private static int lastMaxThreads = SimpleThreadConfig.simpleMaxThreads;
+	private static int lastIdleThreads = SimpleThreadConfig.simpleIdleThreads;
+	private static int lastQueueTasks = SimpleThreadConfig.simpleQueueTasks;
+	private static long lastIdleSeconds = SimpleThreadConfig.simpleThreadIdleSeconds;
+	private static boolean lastTimeout = SimpleThreadConfig.simpleThreadsTimeout;
+
 	public static void initializePool() {
 		if (poolInitialized) {
 			return;
 		}
-		poolExecutor = new ThreadPoolExecutor(SimpleThreadConfig.simpleCoreThreads,
-				SimpleThreadConfig.simpleMaxThreads <= 0 ? Integer.MAX_VALUE : SimpleThreadConfig.simpleMaxThreads,
-				SimpleThreadConfig.simpleThreadIdleSeconds, TimeUnit.SECONDS,
-				new SynchronousQueue<Runnable>(),
-				new NamedThreadFactory("Simple Worker"));
-		poolInitialized = true;
+		synchronized (SimpleThreadHelper.class) {
+			if (poolInitialized) {
+				return;
+			}
+			lastCoreThreads = SimpleThreadConfig.simpleCoreThreads;
+			lastMaxThreads = SimpleThreadConfig.simpleMaxThreads;
+			lastIdleThreads = SimpleThreadConfig.simpleIdleThreads;
+			lastQueueTasks = SimpleThreadConfig.simpleQueueTasks;
+			lastIdleSeconds = SimpleThreadConfig.simpleThreadIdleSeconds;
+			lastTimeout = SimpleThreadConfig.simpleThreadsTimeout;
+			poolExecutor = new SimpleThreadPoolExecutor(lastCoreThreads,
+					lastMaxThreads <= 0 ? Integer.MAX_VALUE : lastMaxThreads,
+					lastIdleThreads <= 0 ? 0 : lastIdleThreads,
+					lastIdleSeconds, TimeUnit.SECONDS,
+					lastQueueTasks <= 0 ? 1 : lastQueueTasks,
+					"Simple Worker");
+			poolExecutor.allowCoreThreadTimeOut(lastTimeout);
+			poolInitialized = true;
+		}
+	}
+	
+	public static void updatePoolConfigurations() {
+		if (!poolInitialized || poolExecutor == null) {
+			return;
+		}
+		int corePoolSize = SimpleThreadConfig.simpleCoreThreads;
+		int maxPoolSize = SimpleThreadConfig.simpleMaxThreads;
+		int idlePoolSize = SimpleThreadConfig.simpleIdleThreads;
+		int maxQueueSize = SimpleThreadConfig.simpleQueueTasks;
+		long keepAliveTime = SimpleThreadConfig.simpleThreadIdleSeconds;
+		boolean timeout = SimpleThreadConfig.simpleThreadsTimeout;
+		if (lastCoreThreads != corePoolSize) {
+			poolExecutor.setCorePoolSize(corePoolSize);
+		}
+		if (lastMaxThreads != maxPoolSize) {
+			poolExecutor.setMaximumPoolSize(maxPoolSize);
+		}
+		if (lastIdleThreads != idlePoolSize) {
+			poolExecutor.setIdlePoolSize(idlePoolSize);
+		}
+		if (lastQueueTasks != maxQueueSize) {
+			poolExecutor.setQueueSize(maxQueueSize);
+		}
+		if (lastIdleSeconds != keepAliveTime) {
+			poolExecutor.setKeepAliveTime(keepAliveTime, TimeUnit.SECONDS);
+		}
+		if (lastTimeout != timeout) {
+			poolExecutor.allowCoreThreadTimeOut(timeout);
+		}
+		lastCoreThreads = corePoolSize;
+		lastMaxThreads = maxPoolSize;
+		lastIdleThreads = idlePoolSize;
+		lastQueueTasks = maxQueueSize;
+		lastIdleSeconds = keepAliveTime;
+		lastTimeout = timeout;
 	}
 	
 	public static void runTask(Runnable r, String name) {
