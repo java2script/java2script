@@ -44,6 +44,8 @@ public class SimpleSerializable implements Cloneable {
 	
 	public static SimpleSerializable UNKNOWN = new SimpleSerializable();
 	
+	public static SimpleSerializable ERROR = new SimpleSerializable(); // Used to indicate that format error!
+	
 	@J2SIgnore
 	public static SimpleFactory fallbackFactory = null;
 
@@ -97,13 +99,11 @@ public class SimpleSerializable implements Cloneable {
 	protected static class DeserializeObject {
 		public Object object;
 		public int index;
-		public boolean error;
 		
-		public DeserializeObject(Object object, int index, boolean error) {
+		public DeserializeObject(Object object, int index) {
 			super();
 			this.object = object;
 			this.index = index;
-			this.error = error;
 		}
 		
 	};
@@ -157,8 +157,9 @@ public class SimpleSerializable implements Cloneable {
 		Map<String, Field> fields = quickFields.get(clazz);
 		if (fields == null) {
 			fields = new HashMap<String, Field>();
-			while (clazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(clazz.getName())) {
-				Field[] clazzFields = clazz.getDeclaredFields();
+			Class<?> oClazz = clazz;
+			while (oClazz != null && !"net.sf.j2s.ajax.SimpleSerializable".equals(oClazz.getName())) {
+				Field[] clazzFields = oClazz.getDeclaredFields();
 				for (int i = 0; i < clazzFields.length; i++) {
 					Field f = clazzFields[i];
 					int modifiers = f.getModifiers();
@@ -167,7 +168,7 @@ public class SimpleSerializable implements Cloneable {
 						fields.put(f.getName(), f);
 					}
 				}
-				clazz = clazz.getSuperclass();
+				oClazz = oClazz.getSuperclass();
 			}
 			synchronized (mutex) {
 				quickFields.put(clazz, fields);
@@ -356,14 +357,14 @@ strBuf = strBuf.substring (0, headSize - sizeStr.length - 1) + sizeStr + strBuf.
 return strBuf;
 	 */
 	public String serialize() {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		return serialize(null, objects, true);
     }
     
     @J2SIgnore
 	public byte[] serializeBytes() {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		try {
 			return serializeBytes(null, objects, true);
@@ -375,14 +376,14 @@ return strBuf;
     
     @J2SIgnore
 	public String serialize(SimpleFilter filter) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		return serialize(filter, objects, true);
 	}
 
     @J2SIgnore
 	public byte[] serializeBytes(SimpleFilter filter) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		try {
 			return serializeBytes(filter, objects, true);
@@ -394,14 +395,14 @@ return strBuf;
     
     @J2SIgnore
 	public String serialize(SimpleFilter filter, boolean supportsCompactBytes) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		return serialize(filter, objects, supportsCompactBytes);
 	}
 
     @J2SIgnore
 	public byte[] serializeBytes(SimpleFilter filter, boolean supportsCompactBytes) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
 		try {
 			return serializeBytes(filter, objects, supportsCompactBytes);
@@ -453,7 +454,7 @@ return strBuf;
     	if (type == superInterface) {
     		return true;
     	}
-    	List<Type> allInterfaces = new ArrayList<Type>();
+    	List<Type> allInterfaces = new LinkedList<Type>();
     	allInterfaces.add(type);
     	Type t = null;
     	do {
@@ -794,7 +795,7 @@ return strBuf;
 					} else if (isSubInterfaceOf(type, Queue.class)) {
 						builder.append('Q');
 					} else {
-						builder.append('W');
+						builder.append('W'); // Other collections
 					}
 					if (collection == null) {
 						builder.append('A'); // (char) (baseChar - 1));
@@ -2099,14 +2100,14 @@ if (ss != null) {
 
     @J2SIgnore
     public String jsonSerialize(SimpleFilter filter) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
     	return jsonSerialize(filter, objects, true, "");
     }
 
     @J2SIgnore
     public String jsonSerialize(SimpleFilter filter, String linePrefix) {
-    	List<SimpleSerializable> objects = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> objects = new LinkedList<SimpleSerializable>();
     	objects.add(this);
     	return jsonSerialize(filter, objects, linePrefix != null, linePrefix);
     }
@@ -2833,28 +2834,28 @@ while (index < end && index < objectEnd) {
 return true;
 	 */
 	public boolean deserialize(String str) {
-    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> ssObjs = new LinkedList<SimpleSerializable>();
     	ssObjs.add(this);
     	return deserialize(str, 0, ssObjs);
 	}
 	
     @J2SIgnore
 	public boolean deserializeBytes(byte[] bytes) {
-    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> ssObjs = new LinkedList<SimpleSerializable>();
     	ssObjs.add(this);
     	return deserializeBytes(bytes, 0, ssObjs);
 	}
 	
     @J2SIgnore
 	public boolean deserialize(String str, int start) {
-    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> ssObjs = new LinkedList<SimpleSerializable>();
     	ssObjs.add(this);
     	return deserialize(str, start, ssObjs);
 	}
 	
     @J2SIgnore
 	public boolean deserializeBytes(byte[] bytes, int start) {
-    	List<SimpleSerializable> ssObjs = new ArrayList<SimpleSerializable>();
+    	List<SimpleSerializable> ssObjs = new LinkedList<SimpleSerializable>();
     	ssObjs.add(this);
     	return deserializeBytes(bytes, start, ssObjs);
 	}
@@ -2896,7 +2897,7 @@ return true;
 					try {
 						size = Integer.parseInt(str.substring(i, index));
 					} catch (NumberFormatException e) {
-						return true; // error!
+						throw new RuntimeException("Invalid simple format.", e);
 					}
 					break;
 				}
@@ -2916,7 +2917,7 @@ return true;
 		while (index < end && index < objectEnd) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
-			if (l1 < 0 || index + l1 > end) return true; // error
+			if (l1 < 0 || index + l1 > end) throw new RuntimeException("Invalid simple format.");
 			String fieldName = str.substring(index, index + l1);
 			index += l1;
 			if (fieldAliasMap != null) {
@@ -2957,10 +2958,10 @@ return true;
 						if (l2 == -2) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
-							if (l3 < 0 || index + l3 > end) return true; // error
+							if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
 							l2 = Integer.parseInt(str.substring(index, index + l3));
 							index += l3;
-							if (l2 < 0) return true; // error
+							if (l2 < 0) throw new RuntimeException("Invalid simple format.");
 							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
@@ -2970,7 +2971,7 @@ return true;
 							}
 						}
 						if (c2 == '8') { // byte[]
-							if (index + l2 > end) return true; // error
+							if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 							index += l2;
 							if (field == null) {
 								continue;
@@ -2998,7 +2999,6 @@ return true;
 							}
 							for (int i = 0; i < l2; i++) {
 								DeserializeObject o = deserializeArrayItem(str, index, end, ssObjs);
-								if (o == null || o.error) return true;
 								objCollection.add(o.object);
 								index = o.index;
 							}
@@ -3011,10 +3011,8 @@ return true;
 							Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
 							for (int i = 0; i < l2 / 2; i++) {
 								DeserializeObject key = deserializeArrayItem(str, index, end, ssObjs);
-								if (key == null || key.error) return true;
 								index = key.index;
 								DeserializeObject value = deserializeArrayItem(str, index, end, ssObjs);
-								if (value == null || value.error) return true;
 								index = value.index;
 								objMap.put(key.object, value.object);
 							}
@@ -3027,10 +3025,10 @@ return true;
 						String[] ss = new String[l2];
 						for (int i = 0; i < l2; i++) {
 							char c4 = str.charAt(index++);
-							if (c2 != 'X' && c2 != 'O') {
+							if (c2 != 'X' && c2 != 'O') { // short value string
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) return true; // error
+									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -3040,7 +3038,7 @@ return true;
 								char c5 = str.charAt(index++);
 								int l3 = c5 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) return true; // error
+									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -3048,10 +3046,10 @@ return true;
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
-									if (l4 < 0 || index + l4 > end) return true; // error
+									if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 									int l5 = Integer.parseInt(str.substring(index, index + l4));
 									index += l4;
-									if (l5 < 0 || index + l5 > end) return true; // error
+									if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
 									ss[i] = str.substring(index, index + l5);
 									index += l5;
 								} else {
@@ -3177,15 +3175,14 @@ return true;
 						}
 					}
 				} catch (Exception e) {
-					System.out.println("Parsing: " + str);
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 			} else {
 				char c3 = str.charAt(index++);
 				int l2 = c3 - baseChar;
 				String s = null;
 				if (l2 > 0) {
-					if (index + l2 > end) return true; // error
+					if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 					s = str.substring(index, index + l2);
 					index += l2;
 				} else if (l2 == 0) {
@@ -3193,10 +3190,10 @@ return true;
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
-					if (l3 < 0 || index + l3 > end) return true; // error
+					if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
 					int l4 = Integer.parseInt(str.substring(index, index + l3));
 					index += l3;
-					if (l4 < 0 || index + l4 > end) return true; // error
+					if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 					s = str.substring(index, index + l4);
 					index += l4;
 				}
@@ -3280,8 +3277,7 @@ return true;
 						break;
 					}
 				} catch (Exception e) {
-					System.out.println("Parsing: " + s + "\r\n" + str);
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -3314,10 +3310,13 @@ return true;
 		if (bytes == null || start < 0) return false;
 		int end = bytes.length;
 		int length = end - start;
-		if (length <= 7 || 'W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) return false; // Should throw exception!
+		if (length <= 7) return false;
+		if ('W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) {
+			throw new RuntimeException("Invalid simple format.");
+		}
 		setSimpleVersion(100 * bytes[start + 3] + 10 * bytes[start + 4] + bytes[start + 5] - '0' * 111);
 		int index = bytesIndexOf(bytes, (byte) '#', start);
-		if (index == -1) return false; // Should throw exception!
+		if (index == -1) throw new RuntimeException("Invalid simple format.");
 		index++;
 		if (index >= end) return false; // may be empty string!
 		
@@ -3327,16 +3326,16 @@ return true;
 			// have size!
 			int last = index;
 			index = bytesIndexOf(bytes, (byte) '$', last);
-			if (index == -1) return false; // Should throw exception!
+			if (index == -1) throw new RuntimeException("Invalid simple format.");
 			for (int i = last + 1; i < index; i++) {
 				if (bytes[i] != '0') {
 					for (; i < index; i++) {
 						size = ((size << 3) + (size << 1)) + (bytes[i] - '0'); // size * 10
 					}
 //					try {
-//						size = Integer.parseInt(new String(bytes, i, index - i, ISO_8859_1));
+//						size = Integer.parseInt(new String(bytes, i, index - i));
 //					} catch (NumberFormatException e) {
-//						return true; // error!
+//						throw new RuntimeException("Invalid simple format.");
 //					}
 					break;
 				}
@@ -3356,8 +3355,8 @@ return true;
 		while (index < end && index < objectEnd) {
 			char c1 = (char) bytes[index++];
 			int l1 = c1 - baseChar;
-			if (l1 < 0 || index + l1 > end) return true; // error
-			String fieldName = new String(bytes, index, l1, ISO_8859_1);
+			if (l1 < 0 || index + l1 > end) throw new RuntimeException("Invalid simple format.");
+			String fieldName = new String(bytes, index, l1);
 			index += l1;
 			if (fieldAliasMap != null) {
 				String trueName = fieldAliasMap.get(fieldName);
@@ -3384,7 +3383,7 @@ return true;
 			char c2 = (char) bytes[index++];
 			if (c2 == 'A' || c2 == 'Z' || c2 == 'Y') {
 				Field field = (Field) fieldMap.get(fieldName);
-				c2 = (char) bytes[index++];
+				c2 = (char) bytes[index++]; // shift c2 to next char
 				char c3 = (char) bytes[index++];
 				int l2 = c3 - baseChar;
 				try {
@@ -3397,10 +3396,10 @@ return true;
 						if (l2 == -2) {
 							char c4 = (char) bytes[index++];
 							int l3 = c4 - baseChar;
-							if (l3 < 0 || index + l3 > end) return true; // error
-							l2 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+							if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+							l2 = Integer.parseInt(new String(bytes, index, l3));
 							index += l3;
-							if (l2 < 0) return true; // error
+							if (l2 < 0) throw new RuntimeException("Invalid simple format.");
 							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
@@ -3410,7 +3409,7 @@ return true;
 							}
 						}
 						if (c2 == '8') { // byte[]
-							if (index + l2 > end) return true; // error
+							if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 							index += l2;
 							if (field == null) {
 								continue;
@@ -3438,7 +3437,6 @@ return true;
 							}
 							for (int i = 0; i < l2; i++) {
 								DeserializeObject o = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-								if (o == null || o.error) return true;
 								objCollection.add(o.object);
 								index = o.index;
 							}
@@ -3451,10 +3449,8 @@ return true;
 							Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
 							for (int i = 0; i < l2 / 2; i++) {
 								DeserializeObject key = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-								if (key == null || key.error) return true;
 								index = key.index;
 								DeserializeObject value = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-								if (value == null || value.error) return true;
 								index = value.index;
 								objMap.put(key.object, value.object);
 							}
@@ -3470,25 +3466,29 @@ return true;
 							if (c2 != 'X' && c2 != 'O') {
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) return true; // error
+									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 									if (c4 == 'u') {
-										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
+									} else if (c4 == 'U') { // not supported in v202
+									 	ss[i] = new String(bytes, index, l3, UTF_8);
 									} else {
-										ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+										ss[i] = new String(bytes, index, l3); // c4 == 's' or others
 									}
 									index += l3;
 								} else if (l3 == 0) {
 									ss[i] = "";
 								}
-							} else {
+							} else { // X or O
 								char c5 = (char) bytes[index++];
 								int l3 = c5 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) return true; // error
+									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 									if (c4 == 'u') {
-										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
+									} else if (c4 == 'O' || c4 == 'U') {
+										ss[i] = new String(bytes, index, l3, c4 == 'U' ? UTF_8 : ISO_8859_1);
 									} else {
-										ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+										ss[i] = new String(bytes, index, l3); // c4 == 's' or others
 									}
 									index += l3;
 								} else if (l3 == 0) {
@@ -3496,14 +3496,16 @@ return true;
 								} else if (l3 == -2) {
 									char c6 = (char) bytes[index++];
 									int l4 = c6 - baseChar;
-									if (l4 < 0 || index + l4 > end) return true; // error
-									int l5 = Integer.parseInt(new String(bytes, index, l4, ISO_8859_1));
+									if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+									int l5 = Integer.parseInt(new String(bytes, index, l4));
 									index += l4;
-									if (l5 < 0 || index + l5 > end) return true; // error
+									if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
 									if (c4 == 'u') {
-										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5, ISO_8859_1)), UTF_8);
+										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5)), UTF_8);
+									} else if (c4 == 'O' || c4 == 'U') {
+										ss[i] = new String(bytes, index, l5, c4 == 'U' ? UTF_8 : ISO_8859_1);
 									} else {
-										ss[i] = new String(bytes, index, l5, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+										ss[i] = new String(bytes, index, l5); // c4 == 's' or others
 									}
 									index += l5;
 								} else {
@@ -3624,19 +3626,20 @@ return true;
 						}
 					}
 				} catch (Exception e) {
-					System.out.println("Parsing: " + bytes);
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 			} else {
 				char c3 = (char) bytes[index++];
 				int l2 = c3 - baseChar;
 				String s = null;
 				if (l2 > 0) {
-					if (index + l2 > end) return true; // error
+					if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 					if (c2 == 'u') {
-						s = new String(Base64.base64ToByteArray(new String(bytes, index, l2, ISO_8859_1)), UTF_8);
+						s = new String(Base64.base64ToByteArray(new String(bytes, index, l2)), UTF_8);
+					} else if (c2 == 'U' || c2 == 'O') {
+						s = new String(bytes, index, l2, c2 == 'U' ? UTF_8 : ISO_8859_1);
 					} else {
-						s = new String(bytes, index, l2, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+						s = new String(bytes, index, l2); // c2 == 's' and others
 					}
 					index += l2;
 				} else if (l2 == 0) {
@@ -3644,14 +3647,16 @@ return true;
 				} else if (l2 == -2) {
 					char c4 = (char) bytes[index++];
 					int l3 = c4 - baseChar;
-					if (l3 < 0 || index + l3 > end) return true; // error
-					int l4 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+					if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+					int l4 = Integer.parseInt(new String(bytes, index, l3));
 					index += l3;
-					if (l4 < 0 || index + l4 > end) return true; // error
+					if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 					if (c2 == 'u') {
-						s = new String(Base64.base64ToByteArray(new String(bytes, index, l4, ISO_8859_1)), UTF_8);
+						s = new String(Base64.base64ToByteArray(new String(bytes, index, l4)), UTF_8);
+					} else if (c2 == 'U' || c2 == 'O') {
+						s = new String(bytes, index, l4, c2 == 'U' ? UTF_8 : ISO_8859_1);
 					} else {
-						s = new String(bytes, index, l4, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+						s = new String(bytes, index, l4);
 					}
 					index += l4;
 				}
@@ -3733,8 +3738,7 @@ return true;
 						break;
 					}
 				} catch (Exception e) {
-					System.out.println("Parsing: " + s + "\r\n" + bytes);
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -3760,15 +3764,15 @@ return true;
 			int l2 = c3 - baseChar;
 			try {
 				if (l2 < 0 && l2 != -2) {
-					return new DeserializeObject(null, index, false);
+					return new DeserializeObject(null, index);
 				} else {
 					if (l2 == -2) {
 						char c4 = str.charAt(index++);
 						int l3 = c4 - baseChar;
-						if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+						if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
 						l2 = Integer.parseInt(str.substring(index, index + l3));
 						index += l3;
-						if (l2 < 0) return new DeserializeObject(null, index, true); // error
+						if (l2 < 0) throw new RuntimeException("Invalid simple format.");
 						if (l2 > 0x1000000) { // 16 * 1024 * 1024
 							/*
 							 * Some malicious string may try to allocate huge size of array!
@@ -3778,11 +3782,11 @@ return true;
 						}
 					}
 					if (c2 == '8') { // byte[]
-						if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+						if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 						String byteStr = str.substring(index, index + l2);
 						index += l2;
 						byte[] bs = byteStr.getBytes(ISO_8859_1);
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
 						Collection<Object> objCollection = null;
@@ -3795,23 +3799,20 @@ return true;
 						}
 						for (int i = 0; i < l2; i++) {
 							DeserializeObject o = deserializeArrayItem(str, index, end, ssObjs);
-							if (o == null || o.error) return new DeserializeObject(null, index, true);;
 							objCollection.add(o.object);
 							index = o.index;
 						}
-						return new DeserializeObject(objCollection, index, false);
+						return new DeserializeObject(objCollection, index);
 					} else if (c2 == 'M') {
 						Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
 						for (int i = 0; i < l2 / 2; i++) {
 							DeserializeObject key = deserializeArrayItem(str, index, end, ssObjs);
-							if (key == null || key.error) return new DeserializeObject(null, index, true);;
 							index = key.index;
 							DeserializeObject value = deserializeArrayItem(str, index, end, ssObjs);
-							if (value == null || value.error) return new DeserializeObject(null, index, true);;
 							index = value.index;
 							objMap.put(key.object, value.object);
 						}
-						return new DeserializeObject(objMap, index, false);
+						return new DeserializeObject(objMap, index);
 					}
 					String[] ss = new String[l2];
 					for (int i = 0; i < l2; i++) {
@@ -3819,7 +3820,7 @@ return true;
 						if (c2 != 'X' && c2 != 'O') {
 							int l3 = c4 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 								ss[i] = str.substring(index, index + l3);
 								index += l3;
 							} else if (l3 == 0) {
@@ -3829,7 +3830,7 @@ return true;
 							char c5 = str.charAt(index++);
 							int l3 = c5 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 								ss[i] = str.substring(index, index + l3);
 								index += l3;
 							} else if (l3 == 0) {
@@ -3837,10 +3838,10 @@ return true;
 							} else if (l3 == -2) {
 								char c6 = str.charAt(index++);
 								int l4 = c6 - baseChar;
-								if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+								if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 								int l5 = Integer.parseInt(str.substring(index, index + l4));
 								index += l4;
-								if (l5 < 0 || index + l5 > end) return new DeserializeObject(null, index, true); // error
+								if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
 								ss[i] = str.substring(index, index + l5);
 								index += l5;
 							} else {
@@ -3848,7 +3849,7 @@ return true;
 							}
 							if (c4 == 'u') {
 								ss[i] = new String(Base64.base64ToByteArray(ss[i]), UTF_8);
-							} else if (c4 == 'U' || c4 == 'X') {
+							} else if (c4 == 'U') {
 								ss[i] = new String(ss[i].getBytes(ISO_8859_1), UTF_8);
 							}
 						}
@@ -3861,10 +3862,10 @@ return true;
 								ns[i] = Integer.parseInt(ss[i]);
 							}
 						}
-						return new DeserializeObject(ns, index, false);
+						return new DeserializeObject(ns, index);
 					}
 					case 'X':
-						return new DeserializeObject(ss, index, false);
+						return new DeserializeObject(ss, index);
 					case 'O': {
 						SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(SimpleSerializable.class, l2);
 						for (int i = 0; i < l2; i++) {
@@ -3883,7 +3884,7 @@ return true;
 								}
 							}
 						}
-						return new DeserializeObject(sss, index, false);
+						return new DeserializeObject(sss, index);
 					}
 					case 'L': {
 						long[] ls = new long[l2];
@@ -3892,7 +3893,7 @@ return true;
 								ls[i] = Long.parseLong(ss[i]);
 							}
 						}
-						return new DeserializeObject(ls, index, false);
+						return new DeserializeObject(ls, index);
 					}
 					case 'b': {
 						boolean[] bs = new boolean[l2];
@@ -3902,7 +3903,7 @@ return true;
 								bs[i] = (c == '1' || c == 't');
 							}
 						}
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					case 'F': {
 						float[] fs = new float[l2];
@@ -3911,7 +3912,7 @@ return true;
 								fs[i] = Float.parseFloat(ss[i]);
 							}
 						}
-						return new DeserializeObject(fs, index, false);
+						return new DeserializeObject(fs, index);
 					}
 					case 'D': {
 						double[] ds = new double[l2];
@@ -3920,7 +3921,7 @@ return true;
 								ds[i] = Double.parseDouble(ss[i]);
 							}
 						}
-						return new DeserializeObject(ds, index, false);
+						return new DeserializeObject(ds, index);
 					}
 					case 'S': {
 						short[] sts = new short[l2];
@@ -3929,7 +3930,7 @@ return true;
 								sts[i] = Short.parseShort(ss[i]);
 							}
 						}
-						return new DeserializeObject(sts, index, false);
+						return new DeserializeObject(sts, index);
 					}
 					case 'B': {
 						byte[] bs = new byte[l2];
@@ -3938,7 +3939,7 @@ return true;
 								bs[i] = Byte.parseByte(ss[i]);
 							}
 						}
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					case 'C': {
 						char[] cs = new char[l2];
@@ -3947,22 +3948,21 @@ return true;
 								cs[i] = (char) Integer.parseInt(ss[i]);
 							}
 						}
-						return new DeserializeObject(cs, index, false);
+						return new DeserializeObject(cs, index);
 					}
 					default :
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("Parsing: " + str);
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		} else {
 			char c3 = str.charAt(index++);
 			int l2 = c3 - baseChar;
 			String s = null;
 			if (l2 > 0) {
-				if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+				if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 				s = str.substring(index, index + l2);
 				index += l2;
 			} else if (l2 == 0) {
@@ -3970,33 +3970,33 @@ return true;
 			} else if (l2 == -2) {
 				char c4 = str.charAt(index++);
 				int l3 = c4 - baseChar;
-				if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
+				if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
 				int l4 = Integer.parseInt(str.substring(index, index + l3));
 				index += l3;
-				if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+				if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 				s = str.substring(index, index + l4);
 				index += l4;
 			}
 			try {
 				switch (c2) {
 				case 'I':
-					return new DeserializeObject(Integer.valueOf(s), index, false);
+					return new DeserializeObject(Integer.valueOf(s), index);
 				case 's':
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'L':
-					return new DeserializeObject(Long.valueOf(s), index, false);
+					return new DeserializeObject(Long.valueOf(s), index);
 				case 'b': {
 					char c = s.charAt(0);
-					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index, false);
+					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index);
 				}
 				case 'O': 
 					if (s != null) {
 						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
 						ssObjs.add(ss);
 						ss.deserialize(s, 0, ssObjs);
-						return new DeserializeObject(ss, index, false);
+						return new DeserializeObject(ss, index);
 					} else {
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				case 'o': {
 					int idx = Integer.parseInt(s);
@@ -4004,14 +4004,14 @@ return true;
 					if (idx < ssObjs.size()) {
 						ss = ssObjs.get(idx);
 					}
-					return new DeserializeObject(ss, index, false);
+					return new DeserializeObject(ss, index);
 				}
 				case 'u':
 					s = new String(Base64.base64ToByteArray(s), UTF_8);
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'U':
 					s = new String(s.getBytes(ISO_8859_1), UTF_8);
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'E':
 					if (s != null && s.length() > 0) {
 						Object eo = null;
@@ -4026,29 +4026,27 @@ return true;
 //							}
 //						} catch (Exception e) {
 //						}
-						return new DeserializeObject(eo, index, false);
+						return new DeserializeObject(eo, index);
 					} else {
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				case 'F':
-					return new DeserializeObject(Float.valueOf(s), index, false);
+					return new DeserializeObject(Float.valueOf(s), index);
 				case 'D':
-					return new DeserializeObject(Double.valueOf(s), index, false);
+					return new DeserializeObject(Double.valueOf(s), index);
 				case 'S':
-					return new DeserializeObject(Short.valueOf(s), index, false);
+					return new DeserializeObject(Short.valueOf(s), index);
 				case 'B':
-					return new DeserializeObject(Byte.valueOf(s), index, false);
+					return new DeserializeObject(Byte.valueOf(s), index);
 				case 'C':
-					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index, false);
+					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index);
 				default:
-					return new DeserializeObject(null, index, false);
+					return new DeserializeObject(null, index);
 				}
 			} catch (Exception e) {
-				System.out.println("Parsing: " + s + "\r\n" + str);
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
-		return new DeserializeObject(null, index, false);
     }
 
     /**
@@ -4070,15 +4068,15 @@ return true;
 			int l2 = c3 - baseChar;
 			try {
 				if (l2 < 0 && l2 != -2) {
-					return new DeserializeObject(null, index, false);
+					return new DeserializeObject(null, index); // throw error?
 				} else {
 					if (l2 == -2) {
 						char c4 = (char) bytes[index++];
 						int l3 = c4 - baseChar;
-						if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
-						l2 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+						if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+						l2 = Integer.parseInt(new String(bytes, index, l3));
 						index += l3;
-						if (l2 < 0) return new DeserializeObject(null, index, true); // error
+						if (l2 < 0) throw new RuntimeException("Invalid simple format.");
 						if (l2 > 0x1000000) { // 16 * 1024 * 1024
 							/*
 							 * Some malicious string may try to allocate huge size of array!
@@ -4088,7 +4086,7 @@ return true;
 						}
 					}
 					if (c2 == '8') { // byte[]
-						if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+						if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 						/*
 						String byteStr = new String(bytes, index, l2, ISO_8859_1);
 						index += l2;
@@ -4097,7 +4095,7 @@ return true;
 						byte[] bs = new byte[l2];
 						System.arraycopy(bytes, index, bs, 0, l2);
 						index += l2;
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					if (c2 == 'Z' || c2 == 'Y' || c2 == 'Q') {
 						Collection<Object> objCollection = null;
@@ -4110,23 +4108,20 @@ return true;
 						}
 						for (int i = 0; i < l2; i++) {
 							DeserializeObject o = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-							if (o == null || o.error) return new DeserializeObject(null, index, true);;
 							objCollection.add(o.object);
 							index = o.index;
 						}
-						return new DeserializeObject(objCollection, index, false);
+						return new DeserializeObject(objCollection, index);
 					} else if (c2 == 'M') {
 						Map<Object, Object> objMap = new HashMap<Object, Object>(l2);
 						for (int i = 0; i < l2 / 2; i++) {
 							DeserializeObject key = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-							if (key == null || key.error) return new DeserializeObject(null, index, true);;
 							index = key.index;
 							DeserializeObject value = deserializeBytesArrayItem(bytes, index, end, ssObjs);
-							if (value == null || value.error) return new DeserializeObject(null, index, true);;
 							index = value.index;
 							objMap.put(key.object, value.object);
 						}
-						return new DeserializeObject(objMap, index, false);
+						return new DeserializeObject(objMap, index);
 					}
 					String[] ss = new String[l2];
 					for (int i = 0; i < l2; i++) {
@@ -4134,11 +4129,13 @@ return true;
 						if (c2 != 'X' && c2 != 'O') {
 							int l3 = c4 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 								if (c4 == 'u') {
-									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
-								} else {
-									ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
+								} else if (c4 == 'U') {
+									ss[i] = new String(bytes, index, l3, UTF_8);
+								} else { // c4 == 's' or others
+									ss[i] = new String(bytes, index, l3);
 								}
 								index += l3;
 							} else if (l3 == 0) {
@@ -4148,11 +4145,13 @@ return true;
 							char c5 = (char) bytes[index++];
 							int l3 = c5 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) return new DeserializeObject(null, index, true); // error
+								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
 								if (c4 == 'u') {
-									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3, ISO_8859_1)), UTF_8);
-								} else {
-									ss[i] = new String(bytes, index, l3, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
+								} else if (c4 == 'U' || c4 == 'O') {
+									ss[i] = new String(bytes, index, l3, c4 == 'U' ? UTF_8 : ISO_8859_1);
+								} else { // c4 == 's'
+									ss[i] = new String(bytes, index, l3);
 								}
 								index += l3;
 							} else if (l3 == 0) {
@@ -4160,14 +4159,16 @@ return true;
 							} else if (l3 == -2) {
 								char c6 = (char) bytes[index++];
 								int l4 = c6 - baseChar;
-								if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
-								int l5 = Integer.parseInt(new String(bytes, index, l4, ISO_8859_1));
+								if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+								int l5 = Integer.parseInt(new String(bytes, index, l4));
 								index += l4;
-								if (l5 < 0 || index + l5 > end) return new DeserializeObject(null, index, true); // error
+								if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
 								if (c4 == 'u') {
-									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5, ISO_8859_1)), UTF_8);
+									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5)), UTF_8);
+								} else if (c4 == 'U' || c4 == 'O') {
+									ss[i] = new String(bytes, index, l5, c4 == 'U' ? UTF_8 : ISO_8859_1);
 								} else {
-									ss[i] = new String(bytes, index, l5, c4 == 'U' || c4 == 'X' ? UTF_8 : ISO_8859_1);
+									ss[i] = new String(bytes, index, l5);
 								}
 								index += l5;
 							} else {
@@ -4183,10 +4184,10 @@ return true;
 								ns[i] = Integer.parseInt(ss[i]);
 							}
 						}
-						return new DeserializeObject(ns, index, false);
+						return new DeserializeObject(ns, index);
 					}
 					case 'X':
-						return new DeserializeObject(ss, index, false);
+						return new DeserializeObject(ss, index);
 					case 'O': {
 						SimpleSerializable[] sss = (SimpleSerializable[]) Array.newInstance(SimpleSerializable.class, l2);
 						for (int i = 0; i < l2; i++) {
@@ -4205,7 +4206,7 @@ return true;
 								}
 							}
 						}
-						return new DeserializeObject(sss, index, false);
+						return new DeserializeObject(sss, index);
 					}
 					case 'L': {
 						long[] ls = new long[l2];
@@ -4214,7 +4215,7 @@ return true;
 								ls[i] = Long.parseLong(ss[i]);
 							}
 						}
-						return new DeserializeObject(ls, index, false);
+						return new DeserializeObject(ls, index);
 					}
 					case 'b': {
 						boolean[] bs = new boolean[l2];
@@ -4224,7 +4225,7 @@ return true;
 								bs[i] = (c == '1' || c == 't');
 							}
 						}
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					case 'F': {
 						float[] fs = new float[l2];
@@ -4233,7 +4234,7 @@ return true;
 								fs[i] = Float.parseFloat(ss[i]);
 							}
 						}
-						return new DeserializeObject(fs, index, false);
+						return new DeserializeObject(fs, index);
 					}
 					case 'D': {
 						double[] ds = new double[l2];
@@ -4242,7 +4243,7 @@ return true;
 								ds[i] = Double.parseDouble(ss[i]);
 							}
 						}
-						return new DeserializeObject(ds, index, false);
+						return new DeserializeObject(ds, index);
 					}
 					case 'S': {
 						short[] sts = new short[l2];
@@ -4251,7 +4252,7 @@ return true;
 								sts[i] = Short.parseShort(ss[i]);
 							}
 						}
-						return new DeserializeObject(sts, index, false);
+						return new DeserializeObject(sts, index);
 					}
 					case 'B': {
 						byte[] bs = new byte[l2];
@@ -4260,7 +4261,7 @@ return true;
 								bs[i] = Byte.parseByte(ss[i]);
 							}
 						}
-						return new DeserializeObject(bs, index, false);
+						return new DeserializeObject(bs, index);
 					}
 					case 'C': {
 						char[] cs = new char[l2];
@@ -4269,26 +4270,27 @@ return true;
 								cs[i] = (char) Integer.parseInt(ss[i]);
 							}
 						}
-						return new DeserializeObject(cs, index, false);
+						return new DeserializeObject(cs, index);
 					}
 					default :
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("Parsing: " + bytes);
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		} else {
 			char c3 = (char) bytes[index++];
 			int l2 = c3 - baseChar;
 			String s = null;
 			if (l2 > 0) {
-				if (index + l2 > end) return new DeserializeObject(null, index, true); // error
+				if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
 				if (c2 == 'u') {
-					s = new String(Base64.base64ToByteArray(new String(bytes, index, l2, ISO_8859_1)), UTF_8);
+					s = new String(Base64.base64ToByteArray(new String(bytes, index, l2)), UTF_8);
+				} else if (c2 == 'U' || c2 == 'O') {
+					s = new String(bytes, index, l2, c2 == 'U' ? UTF_8 : ISO_8859_1);
 				} else {
-					s = new String(bytes, index, l2, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+					s = new String(bytes, index, l2); // c2 == 's' or others
 				}
 				index += l2;
 			} else if (l2 == 0) {
@@ -4296,37 +4298,39 @@ return true;
 			} else if (l2 == -2) {
 				char c4 = (char) bytes[index++];
 				int l3 = c4 - baseChar;
-				if (l3 < 0 || index + l3 > end) return new DeserializeObject(null, index, true); // error
-				int l4 = Integer.parseInt(new String(bytes, index, l3, ISO_8859_1));
+				if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+				int l4 = Integer.parseInt(new String(bytes, index, l3));
 				index += l3;
-				if (l4 < 0 || index + l4 > end) return new DeserializeObject(null, index, true); // error
+				if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
 				if (c2 == 'u') {
-					s = new String(Base64.base64ToByteArray(new String(bytes, index, l4, ISO_8859_1)), UTF_8);
+					s = new String(Base64.base64ToByteArray(new String(bytes, index, l4)), UTF_8);
+				} else if (c2 == 'U' || c2 == 'O') {
+					s = new String(bytes, index, l4, c2 == 'U' ? UTF_8 : ISO_8859_1);
 				} else {
-					s = new String(bytes, index, l4, c2 == 'U' || c2 == 's' ? UTF_8 : ISO_8859_1);
+					s = new String(bytes, index, l4); // c2 == 's' or others
 				}
 				index += l4;
 			}
 			try {
 				switch (c2) {
 				case 'I':
-					return new DeserializeObject(Integer.valueOf(s), index, false);
+					return new DeserializeObject(Integer.valueOf(s), index);
 				case 's':
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'L':
-					return new DeserializeObject(Long.valueOf(s), index, false);
+					return new DeserializeObject(Long.valueOf(s), index);
 				case 'b': {
 					char c = s.charAt(0);
-					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index, false);
+					return new DeserializeObject(Boolean.valueOf(c == '1' || c == 't'), index);
 				}
 				case 'O': 
 					if (s != null) {
 						SimpleSerializable ss = SimpleSerializable.parseInstance(s);
 						ssObjs.add(ss);
 						ss.deserialize(s, 0, ssObjs);
-						return new DeserializeObject(ss, index, false);
+						return new DeserializeObject(ss, index);
 					} else {
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				case 'o': {
 					int idx = Integer.parseInt(s);
@@ -4334,12 +4338,12 @@ return true;
 					if (idx < ssObjs.size()) {
 						ss = ssObjs.get(idx);
 					}
-					return new DeserializeObject(ss, index, false);
+					return new DeserializeObject(ss, index);
 				}
 				case 'u':
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'U':
-					return new DeserializeObject(s, index, false);
+					return new DeserializeObject(s, index);
 				case 'E':
 					if (s != null && s.length() > 0) {
 						Object eo = null;
@@ -4354,29 +4358,27 @@ return true;
 //							}
 //						} catch (Exception e) {
 //						}
-						return new DeserializeObject(eo, index, false);
+						return new DeserializeObject(eo, index);
 					} else {
-						return new DeserializeObject(null, index, false);
+						return new DeserializeObject(null, index);
 					}
 				case 'F':
-					return new DeserializeObject(Float.valueOf(s), index, false);
+					return new DeserializeObject(Float.valueOf(s), index);
 				case 'D':
-					return new DeserializeObject(Double.valueOf(s), index, false);
+					return new DeserializeObject(Double.valueOf(s), index);
 				case 'S':
-					return new DeserializeObject(Short.valueOf(s), index, false);
+					return new DeserializeObject(Short.valueOf(s), index);
 				case 'B':
-					return new DeserializeObject(Byte.valueOf(s), index, false);
+					return new DeserializeObject(Byte.valueOf(s), index);
 				case 'C':
-					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index, false);
+					return new DeserializeObject(Character.valueOf((char) Integer.parseInt(s)), index);
 				default:
-					return new DeserializeObject(null, index, false);
+					return new DeserializeObject(null, index);
 				}
 			} catch (Exception e) {
-				System.out.println("Parsing: " + s + "\r\n" + bytes);
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
-		return new DeserializeObject(null, index, false);
     }
     
     @J2SIgnore
@@ -4589,8 +4591,7 @@ return true;
 					field.setChar(this, (char) Integer.parseInt((String) o));
 				}
 			} catch (Exception e) {
-				System.out.println("Parsing: " + o + " for field " + fieldName +  "\r\n");
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
     }
@@ -4811,11 +4812,13 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 	public static SimpleSerializable parseInstance(String str, int start, SimpleFilter filter) {
 		if (str == null || start < 0) return null;
 		int length = str.length() - start;
-		if (length <= 7 || !("WLL".equals(str.substring(start, start + 3)))) return null;
+		if (length <= 7) return null;
+		if (!("WLL".equals(str.substring(start, start + 3)))) return ERROR;
 		int v = 0;
 		try {
 			v = Integer.parseInt(str.substring(start + 3, start + 6));
 		} catch (NumberFormatException e1) {
+			return ERROR;
 		}
 		int index = str.indexOf('#', start);
 		if (index == -1) return null;
@@ -4860,11 +4863,13 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 	public static SimpleSerializable parseInstance(byte[] bytes, int start, SimpleFilter filter) {
 		if (bytes == null || start < 0) return null;
 		int length = bytes.length - start;
-		if (length <= 7 || 'W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) return null;
+		if (length <= 7) return null;
+		if ('W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) return ERROR;
 		int v = 100 * bytes[start + 3] + 10 * bytes[start + 4] + bytes[start + 5] - '0' * 111;
+		if (v < 0 || v > 999) return ERROR;
 		int index = bytesIndexOf(bytes, (byte) '#', start);
 		if (index == -1) return null;
-		String clazzName = new String(bytes, start + 6, index - (start + 6), ISO_8859_1);
+		String clazzName = new String(bytes, start + 6, index - (start + 6));
 		if (v >= 202) {
 			String longClazzName = classAliasMappings.get(clazzName);
 			if (longClazzName != null) {
@@ -4894,7 +4899,7 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 		if (inst != null && inst instanceof SimpleSerializable) {
 			SimpleSerializable ss = (SimpleSerializable) inst;
 			if (v >= 202) {
-				ss.classNameAbbrev = !clazzName.equals(new String(bytes, start + 6, index - (start + 6), ISO_8859_1));
+				ss.classNameAbbrev = !clazzName.equals(new String(bytes, start + 6, index - (start + 6)));
 			}
 			return ss;
 		}

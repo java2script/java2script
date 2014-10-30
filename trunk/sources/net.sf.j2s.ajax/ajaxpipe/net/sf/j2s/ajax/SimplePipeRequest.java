@@ -11,8 +11,8 @@
 package net.sf.j2s.ajax;
 
 import java.io.ByteArrayOutputStream;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
@@ -51,7 +51,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 	private static boolean notifyingThreadStarted = false;
 	
 	@J2SIgnore
-	private static List<SimplePipeRunnable> notifyingPipes = new Vector<SimplePipeRunnable>();
+	private static List<SimplePipeRunnable> notifyingPipes = new LinkedList<SimplePipeRunnable>();
 	
 	/**
 	 * Status of pipe: ok.
@@ -787,10 +787,21 @@ document.body.appendChild (ifr);
 					if (isJavaScript) {
 						parseReceived(pipeRequest.getResponseText());
 					} else {
-						parseReceivedBytes(pipeRequest.getResponseBytes());
+						byte[] bytes = pipeRequest.getResponseBytes();
+						try {
+							parseReceivedBytes(bytes);
+						} catch (RuntimeException e) { // invalid simple format
+							int length = bytes.length;
+							if (length < 100) {
+								System.out.println("[ERROR]: " + new String(bytes));
+							} else {
+								System.out.println("[ERROR]: " + new String(bytes, 0, 100) + " ..");
+							}
+							throw e;
+						}
 					}
 				}
-				runnable.queryEnded = true;
+				runnable.queryEnded = true; // for JavaScript only
 				/**
 				 * @j2sNative
 				 * var pqMap = net.sf.j2s.ajax.SimplePipeRequest.pipeQueryMap;
@@ -924,7 +935,18 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 				
 				baos.write(b, off, len);
 				byte[] bytes = baos.toByteArray();
-				int resetIndex = parseReceivedBytes(bytes);
+				int resetIndex = 0;
+				try {
+					resetIndex = parseReceivedBytes(bytes);
+				} catch (RuntimeException e) { // invalid simple format
+					int length = bytes.length;
+					if (length < 100) {
+						System.out.println("[ERROR]: " + new String(bytes));
+					} else {
+						System.out.println("[ERROR]: " + new String(bytes, 0, 100) + " ..");
+					}
+					throw e;
+				}
 				if (resetIndex > 0) {
 					baos.reset();
 					if (resetIndex < bytes.length) {
@@ -1078,7 +1100,13 @@ for (var i = 0; i < iframes.length; i++) {
 				}
 			}
 			ss = SimpleSerializable.parseInstance(string, end);
-			if (ss == null || !ss.deserialize(string, end)) {
+			if (ss == null) {
+				break;
+			}
+			if (ss == SimpleSerializable.ERROR) {
+				break;
+			}
+			if (!ss.deserialize(string, end)) {
 				break;
 			}
 			String key = string.substring(start, end);
@@ -1187,7 +1215,13 @@ for (var i = 0; i < iframes.length; i++) {
 				}
 			}
 			ss = SimpleSerializable.parseInstance(bytes, end);
-			if (ss == null || !ss.deserializeBytes(bytes, end)) {
+			if (ss == null) {
+				break;
+			}
+			if (ss == SimpleSerializable.ERROR) {
+				return -1; // error
+			}
+			if (!ss.deserializeBytes(bytes, end)) {
 				break;
 			}
 			String key = new String(bytes, start, PIPE_KEY_LENGTH);

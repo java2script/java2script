@@ -14,9 +14,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -101,12 +101,12 @@ public class SimplePipeHelper {
 //		}
 //		List<SimpleSerializable> list = pipeMap.get(key);
 //		if (list == null) {
-//			list = new Vector<SimpleSerializable>();
+//			list = new LinkedList<SimpleSerializable>();
 //			pipeMap.put(key, list);
 //		}
 		
 		if (pipe.pipeData == null) {
-			pipe.pipeData = new Vector<SimpleSerializable>();
+			pipe.pipeData = new LinkedList<SimpleSerializable>();
 		}
 		return key;
 	}

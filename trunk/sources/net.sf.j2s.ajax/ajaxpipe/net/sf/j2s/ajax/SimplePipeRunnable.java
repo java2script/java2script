@@ -13,9 +13,9 @@ package net.sf.j2s.ajax;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import net.sf.j2s.ajax.SimpleRPCRunnable;
 import net.sf.j2s.ajax.SimpleSerializable;
@@ -245,7 +245,7 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 		}
 		if (anotherPipe != null && anotherPipe.pipeData != null && anotherPipe.pipeData.size() > 0) {
 			if (pipeData == null) {
-				List<SimpleSerializable> data = new Vector<SimpleSerializable>(anotherPipe.pipeData.size());
+				List<SimpleSerializable> data = new LinkedList<SimpleSerializable>();
 				synchronized (this) {
 					if (pipeData == null) {
 						pipeData = data;

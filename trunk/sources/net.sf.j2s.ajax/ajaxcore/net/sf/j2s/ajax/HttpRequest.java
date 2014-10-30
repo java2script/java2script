@@ -188,6 +188,9 @@ public class HttpRequest {
 			return responseText;
 		}
 		ByteArrayOutputStream baos = responseBAOS;
+		if (baos == null) {
+			return null;
+		}
 		String type = responseType;
 		if (type != null) {
 			String charset = null;
