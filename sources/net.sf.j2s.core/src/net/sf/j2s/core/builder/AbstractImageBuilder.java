@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -56,7 +57,8 @@ private boolean inCompiler;
 protected boolean keepStoringProblemMarkers;
 protected SimpleSet filesWithAnnotations = null;
 
-public static int MAX_AT_ONCE = 2000; // best compromise between space used and speed
+//2000 is best compromise between space used and speed
+public static int MAX_AT_ONCE = Integer.getInteger(JavaModelManager.MAX_COMPILED_UNITS_AT_ONCE, 2000).intValue();
 public final static String[] JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES = {
 	IMarker.MESSAGE,
 	IMarker.SEVERITY,
@@ -292,7 +294,7 @@ protected void compile(SourceFile[] units) {
 	}
 
 	int unitsLength = units.length;
-	this.compiledAllAtOnce = unitsLength <= MAX_AT_ONCE;
+	this.compiledAllAtOnce = MAX_AT_ONCE == 0 || unitsLength <= MAX_AT_ONCE;
 	if (this.compiledAllAtOnce) {
 		// do them all now
 		if (JavaBuilder.DEBUG)
@@ -671,12 +673,14 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 	// but still try to compile as many source files as possible to help the case when the base libraries are in source
 	if (!this.keepStoringProblemMarkers) return; // only want the one error recorded on this source file
 
-	IResource resource = sourceFile.resource;
 	HashSet managedMarkerTypes = JavaModelManager.getJavaModelManager().compilationParticipants.managedMarkerTypes();
-	for (int i = 0, l = problems.length; i < l; i++) {
+	problems: for (int i = 0, l = problems.length; i < l; i++) {
 		CategorizedProblem problem = problems[i];
 		int id = problem.getID();
-
+		// we may use a different resource for certain problems such as IProblem.MissingNonNullByDefaultAnnotationOnPackage
+		// but at the start of the next problem we should reset it to the source file's resource
+		IResource resource = sourceFile.resource;
+		
 		// handle missing classfile situation
 		if (id == IProblem.IsClassPathCorrect) {
 			String missingClassfileName = problem.getArguments()[0];
@@ -706,6 +710,38 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 		boolean managedProblem = false;
 		if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(markerType)
 				|| (managedProblem = managedMarkerTypes.contains(markerType))) {
+			if (id == IProblem.MissingNonNullByDefaultAnnotationOnPackage && !(CharOperation.equals(sourceFile.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME))) {
+				// for this kind of problem, marker needs to be created on the package instead of on the source file
+				// see bug 372012
+				char[] fileName = sourceFile.getFileName();
+				int pkgEnd = CharOperation.lastIndexOf('/', fileName);
+				if (pkgEnd == -1)
+					pkgEnd = CharOperation.lastIndexOf(File.separatorChar, fileName);
+				PackageFragment pkg = null;
+				if (pkgEnd != -1)
+					pkg = (PackageFragment) Util.getPackageFragment(sourceFile.getFileName(), pkgEnd, -1 /*no jar separator for java files*/);
+				
+				if (pkg != null) {
+					try {
+						IMarker[] existingMarkers = pkg.resource().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
+						int len = existingMarkers.length;
+						for (int j=0; j < len; j++) {
+							if (((Integer)existingMarkers[j].getAttribute(IJavaModelMarker.ID)).intValue() == IProblem.MissingNonNullByDefaultAnnotationOnPackage) {
+								continue problems; // marker already present
+							}
+						}
+					} catch (CoreException e) {
+						// marker retrieval failed, cannot do much
+						if (JavaModelManager.VERBOSE) {
+							e.printStackTrace();
+						}
+					}
+					IResource tempRes = pkg.resource();
+					if (tempRes != null) {
+						resource = tempRes;
+					}
+				}
+			}
 			IMarker marker = resource.createMarker(markerType);
 
 			String[] attributeNames = JAVA_PROBLEM_MARKER_ATTRIBUTE_NAMES;
@@ -729,8 +765,7 @@ protected void storeProblemsFor(SourceFile sourceFile, CategorizedProblem[] prob
 			allValues[index++] = problem.isError() ? S_ERROR : S_WARNING; // severity
 			allValues[index++] = new Integer(id); // ID
 			allValues[index++] = new Integer(problem.getSourceStart()); // start
-			int end = problem.getSourceEnd();
-			allValues[index++] = new Integer(end > 0 ? end + 1 : end); // end
+			allValues[index++] = new Integer(problem.getSourceEnd() + 1); // end
 			allValues[index++] = new Integer(problem.getSourceLineNumber()); // line
 			allValues[index++] = Util.getProblemArgumentsForMarker(problem.getArguments()); // arguments
 			allValues[index++] = new Integer(problem.getCategoryID()); // category ID
@@ -835,7 +870,7 @@ protected void writeClassFileContents(ClassFile classFile, IFile file, String qu
 		if (JavaBuilder.DEBUG)
 			System.out.println("Writing changed class file " + file.getName());//$NON-NLS-1$
 		if (!file.isDerived())
-			file.setDerived(true);
+			file.setDerived(true, null);
 		file.setContents(input, true, false, null);
 	} else {
 		// Default implementation just writes out the bytes for the new class file...

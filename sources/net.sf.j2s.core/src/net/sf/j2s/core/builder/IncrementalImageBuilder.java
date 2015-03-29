@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -229,8 +229,16 @@ protected void addDependentsOf(IPath path, boolean isStructuralChange, StringSet
 	if (isStructuralChange) {
 		String last = path.lastSegment();
 		if (last.length() == TypeConstants.PACKAGE_INFO_NAME.length)
-			if (CharOperation.equals(last.toCharArray(), TypeConstants.PACKAGE_INFO_NAME))
+			if (CharOperation.equals(last.toCharArray(), TypeConstants.PACKAGE_INFO_NAME)) {
 				path = path.removeLastSegments(1); // the package-info file has changed so blame the package itself
+				/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=323785, in the case of default package,
+				   there is no need to blame the package itself as there can be no annotations or documentation
+				   comment tags in the package-info file that can influence the rest of the package. Just bail out
+				   so we don't touch null objects below.
+				 */
+				if (path.isEmpty())
+					return;
+			}
 	}
 
 	if (isStructuralChange && !this.hasStructuralChanges) {
@@ -551,7 +559,8 @@ protected boolean findSourceFiles(IResourceDelta sourceDelta, ClasspathMultiDire
 						for (int i = 0, l = this.sourceLocations.length; i < l; i++) {
 							if (this.sourceLocations[i].sourceFolder.getFolder(removedPackagePath).exists()) {
 								// only a package fragment was removed, same as removing multiple source files
-								createFolder(removedPackagePath, md.binaryFolder); // ensure package exists in the output folder
+								if (md.hasIndependentOutputFolder)
+									createFolder(removedPackagePath, md.binaryFolder); // ensure package exists in the output folder
 								IResourceDelta[] removedChildren = sourceDelta.getAffectedChildren();
 								for (int j = 0, m = removedChildren.length; j < m; j++)
 									if (!findSourceFiles(removedChildren[j], md, segmentCount))
@@ -788,6 +797,10 @@ protected void resetCollections() {
 }
 
 protected void updateProblemsFor(SourceFile sourceFile, CompilationResult result) throws CoreException {
+	if (CharOperation.equals(sourceFile.getMainTypeName(), TypeConstants.PACKAGE_INFO_NAME)) {
+		IResource pkgResource = sourceFile.resource.getParent();
+		pkgResource.deleteMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_ZERO);
+	}
 	IMarker[] markers = JavaBuilder.getProblemsFor(sourceFile.resource);
 	CategorizedProblem[] problems = result.getProblems();
 	if (problems == null && markers.length == 0) return;
@@ -818,7 +831,7 @@ protected void writeClassFileContents(ClassFile classfile, IFile file, String qu
 			if (JavaBuilder.DEBUG)
 				System.out.println("Writing changed class file " + file.getName());//$NON-NLS-1$
 			if (!file.isDerived())
-				file.setDerived(true);
+				file.setDerived(true, null);
 			file.setContents(new ByteArrayInputStream(bytes), true, false, null);
 		} else if (JavaBuilder.DEBUG) {
 			System.out.println("Skipped over unchanged class file " + file.getName());//$NON-NLS-1$

@@ -131,16 +131,15 @@ public class Java2ScriptImageCompiler extends Compiler {
 
 		long analyzeStart = System.currentTimeMillis();
 		this.stats.resolveTime += analyzeStart - resolveStart;
-
-		// flow analysis
-		unit.analyseCode();
+		
+		//No need of analysis or generation of code if statements are not required		
+		if (!this.options.ignoreMethodBodies) unit.analyseCode(); // flow analysis
 
 		long generateStart = System.currentTimeMillis();
 		this.stats.analyzeTime += generateStart - analyzeStart;
-
-		// code generation
-		unit.generateCode();
-
+	
+		if (!this.options.ignoreMethodBodies) unit.generateCode(); // code generation
+		
 		// reference info
 		if (this.options.produceReferenceInfo && unit.scope != null)
 			unit.scope.storeDependencyInfo();
