@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -892,6 +894,22 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}else{
 			return super.visit(node);
 		}
+		qualifiedName = discardGenericType(qualifiedName);
+		qn.qualifiedName = qualifiedName;
+		if (isQualifiedNameOK(qualifiedName, node) 
+				&& !musts.contains(qn)
+				&& !requires.contains(qn)) {
+			optionals.add(qn);
+		}
+		return super.visit(node);
+	}
+	
+	public boolean visit(InstanceofExpression node) {
+		Type type = node.getRightOperand();
+		ITypeBinding resolveTypeBinding = type.resolveBinding();
+		QNTypeBinding qn = new QNTypeBinding();
+		String qualifiedName = resolveTypeBinding.getQualifiedName();
+		qn.binding = resolveTypeBinding;
 		qualifiedName = discardGenericType(qualifiedName);
 		qn.qualifiedName = qualifiedName;
 		if (isQualifiedNameOK(qualifiedName, node) 

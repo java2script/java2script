@@ -201,7 +201,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		} else {
 			List dim = node.dimensions();
 			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
-			if(elementType != null){
+			if (elementType != null){
 				if (elementType.isPrimitive()) {
 					String typeCode = elementType.getName();
 					if ("int".equals(typeCode)
@@ -258,10 +258,58 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		/*
 		 * TODO: should be tested
 		 */
-		buffer.append("[");
-		List list = node.expressions();
-		visitList(list, ", ");
-		buffer.append("]");
+		List expressions = node.expressions();
+		ITypeBinding arrType = node.resolveTypeBinding();
+		ITypeBinding elementType = null;
+		if (arrType != null) {
+			elementType = arrType.getComponentType();
+		}
+		if (elementType == null) {
+			buffer.append("[");
+			visitList(expressions, ", ");
+			buffer.append("]");
+			return false;
+		}
+		if (elementType.isPrimitive()) {
+			String typeCode = elementType.getName();
+			if ("int".equals(typeCode)
+					|| "float".equals(typeCode)
+					|| "double".equals(typeCode)
+					|| "byte".equals(typeCode)
+					|| "long".equals(typeCode)
+					|| "short".equals(typeCode)) {
+				//buffer.append(" Clazz.newArray (");
+				buffer.append(" Clazz.new");
+				buffer.append(typeCode.substring(0, 1).toUpperCase());
+				buffer.append(typeCode.substring(1));
+				buffer.append("Array (-1, ");
+				buffer.append("[");
+				visitList(expressions, ", ");
+				buffer.append("])");
+			} else if ("char".equals(typeCode)) {
+				//buffer.append(" Clazz.newArray (");
+				buffer.append(" Clazz.newCharArray (-1, ");
+				buffer.append("[");
+				visitList(expressions, ", ");
+				buffer.append("])");
+			} else if ("boolean".equals(typeCode)) {
+				//buffer.append(" Clazz.newArray (");
+				buffer.append(" Clazz.newBooleanArray (-1, ");
+				buffer.append("[");
+				visitList(expressions, ", ");
+				buffer.append("])");
+			} else {
+				buffer.append(" Clazz.newArray (-1, ");
+				buffer.append("[");
+				visitList(expressions, ", ");
+				buffer.append("])");
+			}
+		} else {
+			buffer.append(" Clazz.newArray (-1, ");
+			buffer.append("[");
+			visitList(expressions, ", ");
+			buffer.append("])");
+		}
 		return false;
 	}
 
@@ -1340,11 +1388,30 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Expression expression = node.getExpression();
 		if (expression != null) {
 			buffer.append(' ');
-			ITypeBinding tBinding = expression.resolveTypeBinding();
-			if (tBinding != null && !("char".equals(tBinding.getName()))) {
-				buffer.append("String.fromCharCode (");
-				expression.accept(this);
-				buffer.append(")");
+			boolean needCharWrapping = false;
+			ASTNode parent = node.getParent();
+			while (parent != null && !(parent instanceof MethodDeclaration)) {
+				parent = parent.getParent();
+			}
+			if (parent != null) {
+				MethodDeclaration m = (MethodDeclaration) parent;
+				IMethodBinding binding = m.resolveBinding();
+				if (binding != null) {
+					ITypeBinding returnType = binding.getReturnType();
+					if (returnType != null && "char".equals(returnType.getName())) {
+						needCharWrapping = true;
+					}
+				}
+			}
+			if (needCharWrapping) {
+				ITypeBinding tBinding = expression.resolveTypeBinding();
+				if (tBinding != null && !("char".equals(tBinding.getName()))) {
+					buffer.append("String.fromCharCode (");
+					expression.accept(this);
+					buffer.append(")");
+				} else {
+					expression.accept(this);
+				}
 			} else {
 				expression.accept(this);
 			}
