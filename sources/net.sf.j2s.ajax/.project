@@ -5,13 +5,11 @@
 	<projects>
 	</projects>
 	<buildSpec>
-		<!--
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
-		-->
 		<!--
 		DO NOT enable both javabuilder and java2scriptbuilder,
 		or Eclipse will be locked in building this project.
@@ -21,11 +19,13 @@
 		out Java2Script plug-in. And after installing Java2Script,
 		try to disable javabuilder and re-enable java2scriptbuilder.
 		-->
+		<!--
 		<buildCommand>
 			<name>net.sf.j2s.core.java2scriptbuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
+		-->
 		<buildCommand>
 			<name>org.eclipse.pde.ManifestBuilder</name>
 			<arguments>
