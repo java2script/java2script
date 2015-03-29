@@ -56,14 +56,10 @@ public class SimpleSource4ObjectiveC {
 			String[] comments = annComment.value();
 			if (comments != null && comments.length == 1
 					&& comments[0] != null && comments[0].length() > 0) {
-				source.append("// ");
-				source.append(wrapString(comments[0]));
-				source.append("\r\n\r\n");
+				source.append("// ").append(wrapString(comments[0])).append("\r\n\r\n");
 			} else if (comments != null && comments.length >= 2) {
 				for (int i = 0; i < comments.length; i++) {
-					source.append("// ");
-					source.append(wrapString(comments[i]));
-					source.append("\r\n");
+					source.append("// ").append(wrapString(comments[i])).append("\r\n");
 				}
 				source.append("\r\n");
 			}
@@ -73,24 +69,20 @@ public class SimpleSource4ObjectiveC {
 	private static boolean generateAnnotation(Field field, boolean firstField, StringBuilder source) {
 		Deprecated annDeprecated = field.getAnnotation(Deprecated.class);
 		if (annDeprecated != null) {
-			source.append(firstField ? "//" : "\r\n// ");
-			source.append("[deprecated]");
+			source.append(firstField ? "//" : "\r\n// ").append("[deprecated]");
 			//source.append(annDeprecated.annotationType().getSimpleName());
 		}
 		SimpleIn annIn = field.getAnnotation(SimpleIn.class);
 		if (annIn != null) {
-			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
-			source.append("[in]");
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ").append("[in]");
 			//source.append(annIn.annotationType().getSimpleName());
 			String[] comments = annIn.value();
 			if (comments != null && comments.length == 1
 					&& comments[0] != null && comments[0].length() > 0) {
-				source.append(": ");
-				source.append(wrapString(comments[0]));
+				source.append(": ").append(wrapString(comments[0]));
 			} else if (comments != null && comments.length >= 2) {
 				for (int i = 0; i < comments.length; i++) {
-					source.append("\r\n// ");
-					source.append(wrapString(comments[i]));
+					source.append("\r\n// ").append(wrapString(comments[i]));
 				}
 			}
 			source.append("\r\n");
@@ -98,18 +90,15 @@ public class SimpleSource4ObjectiveC {
 		}
 		SimpleOut annOut = field.getAnnotation(SimpleOut.class);
 		if (annOut != null) {
-			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
-			source.append("[out]");
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ").append("[out]");
 			//source.append(annOut.annotationType().getSimpleName());
 			String[] comments = annOut.value();
 			if (comments != null && comments.length == 1
 					&& comments[0] != null && comments[0].length() > 0) {
-				source.append(": ");
-				source.append(wrapString(comments[0]));
+				source.append(": ").append(wrapString(comments[0]));
 			} else if (comments != null && comments.length >= 2) {
 				for (int i = 0; i < comments.length; i++) {
-					source.append("\r\n// ");
-					source.append(wrapString(comments[i]));
+					source.append("\r\n// ").append(wrapString(comments[i]));
 				}
 			}
 			source.append("\r\n");
@@ -117,18 +106,15 @@ public class SimpleSource4ObjectiveC {
 		}
 		SimpleInOut annInOut = field.getAnnotation(SimpleInOut.class);
 		if (annInOut != null) {
-			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
-			source.append("[in/out]");
+			source.append(firstField && annDeprecated == null ? "//" : "\r\n// ").append("[in/out]");
 			//source.append(annInOut.annotationType().getSimpleName());
 			String[] comments = annInOut.value();
 			if (comments != null && comments.length == 1
 					&& comments[0] != null && comments[0].length() > 0) {
-				source.append(": ");
-				source.append(wrapString(comments[0]));
+				source.append(": ").append(wrapString(comments[0]));
 			} else if (comments != null && comments.length >= 2) {
 				for (int i = 0; i < comments.length; i++) {
-					source.append("\r\n// ");
-					source.append(wrapString(comments[i]));
+					source.append("\r\n// ").append(wrapString(comments[i]));
 				}
 			}
 			source.append("\r\n");
@@ -139,12 +125,10 @@ public class SimpleSource4ObjectiveC {
 			String[] comments = annComment.value();
 			if (comments != null && comments.length == 1
 					&& comments[0] != null && comments[0].length() > 0) {
-				source.append(firstField && annDeprecated == null ? "//" : "\r\n// ");
-				source.append(wrapString(comments[0]));
+				source.append(firstField && annDeprecated == null ? "//" : "\r\n// ").append(wrapString(comments[0]));
 			} else if (comments != null && comments.length >= 2) {
 				for (int i = 0; i < comments.length; i++) {
-					source.append(firstField && i == 0 && annDeprecated == null ? "//" : "\r\n// ");
-					source.append(wrapString(comments[i]));
+					source.append(firstField && i == 0 && annDeprecated == null ? "//" : "\r\n// ").append(wrapString(comments[i]));
 				}
 			}
 			source.append("\r\n");
@@ -169,19 +153,11 @@ public class SimpleSource4ObjectiveC {
 		}
 		Date date = new Date();
 		source.append("//\r\n");
-		source.append("//  ");
-		source.append(simpleClazzName);
-		source.append(".h\r\n");
-		source.append("//  ");
-		source.append(folder);
-		source.append("\r\n");
+		source.append("//  ").append(simpleClazzName).append(".h\r\n");
+		source.append("//  ").append(folder).append("\r\n");
 		source.append("//\r\n");
 		source.append("//  Generated by Java2Script.\r\n");
-		source.append("//  Copyright (c) ");
-		source.append(date.getYear() + 1900);
-		source.append(" ");
-		source.append(company);
-		source.append(". All rights reserved.\r\n");
+		source.append("//  Copyright (c) ").append(date.getYear() + 1900).append(" ").append(company).append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
 		
@@ -199,9 +175,7 @@ public class SimpleSource4ObjectiveC {
 				simpleSuperClazzName = superClazzName.substring(idx + 1);
 			}
 			
-			source.append("#import \"");
-			source.append(simpleSuperClazzName);
-			source.append(".h\"\r\n");
+			source.append("#import \"").append(simpleSuperClazzName).append(".h\"\r\n");
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 		}
@@ -219,10 +193,7 @@ public class SimpleSource4ObjectiveC {
 				if (constantPrefix != null && constantPrefix.length() > 0) {
 					source.append(constantPrefix);
 				}
-				source.append(simpleClazzName.toUpperCase());
-				source.append("_");
-				source.append(f.getName());
-				source.append(" ");
+				source.append(simpleClazzName.toUpperCase()).append("_").append(f.getName()).append(" ");
 				Class<?> type = f.getType();
 				if (type == int.class) {
 					try {
@@ -278,7 +249,7 @@ public class SimpleSource4ObjectiveC {
 					}
 				} else if (type == String.class) {
 					try {
-						source.append("@\"" + f.get(interfaceClazz) + "\"");
+						source.append("@\"").append(f.get(interfaceClazz)).append("\"");
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -311,19 +282,11 @@ public class SimpleSource4ObjectiveC {
 		}
 		Date date = new Date();
 		source.append("//\r\n");
-		source.append("//  ");
-		source.append(simpleClazzName);
-		source.append(".h\r\n");
-		source.append("//  ");
-		source.append(folder);
-		source.append("\r\n");
+		source.append("//  ").append(simpleClazzName).append(".h\r\n");
+		source.append("//  ").append(folder).append("\r\n");
 		source.append("//\r\n");
 		source.append("//  Generated by Java2Script.\r\n");
-		source.append("//  Copyright (c) ");
-		source.append(date.getYear() + 1900);
-		source.append(" ");
-		source.append(company);
-		source.append(". All rights reserved.\r\n");
+		source.append("//  Copyright (c) ").append(date.getYear() + 1900).append(" ").append(company).append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
 		
@@ -339,9 +302,7 @@ public class SimpleSource4ObjectiveC {
 		if (idx != -1) {
 			simpleSuperClazzName = superClazzName.substring(idx + 1);
 		}
-		source.append("#import \"");
-		source.append(simpleSuperClazzName);
-		source.append(".h\"\r\n");
+		source.append("#import \"").append(simpleSuperClazzName).append(".h\"\r\n");
 		source.append("\r\n");
 
 		Type[] interfaces = s.getClass().getGenericInterfaces();
@@ -359,9 +320,7 @@ public class SimpleSource4ObjectiveC {
 					simpleTypeName = simpleTypeName.substring(idx + 1);
 				}
 				
-				source.append("#import \"");
-				source.append(simpleTypeName);
-				source.append(".h\"\r\n");
+				source.append("#import \"").append(simpleTypeName).append(".h\"\r\n");
 				generatedImports = true;
 			}
 			if (generatedImports) {
@@ -393,9 +352,7 @@ public class SimpleSource4ObjectiveC {
 				hasMoreImports = true;
 				String typeName = type.isArray() ? type.getComponentType().getSimpleName() : type.getSimpleName();
 				if (!importedClasses.contains(typeName)) {
-					source.append("#import \"");
-					source.append(typeName);
-					source.append(".h\"\r\n");
+					source.append("#import \"").append(typeName).append(".h\"\r\n");
 					importedClasses.add(typeName);
 				}
 			}
@@ -419,14 +376,11 @@ public class SimpleSource4ObjectiveC {
 				if (constantPrefix != null && constantPrefix.length() > 0) {
 					source.append(constantPrefix);
 				}
-				source.append(simpleClazzName.toUpperCase());
-				source.append("_");
-				source.append(f.getName());
-				source.append(" ");
+				source.append(simpleClazzName.toUpperCase()).append("_").append(f.getName()).append(" ");
 				Class<?> type = f.getType();
 				if (type == int.class) {
 					try {
-						source.append("" + f.getInt(s.getClass()));
+						source.append(f.getInt(s.getClass()));
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -438,31 +392,31 @@ public class SimpleSource4ObjectiveC {
 					}
 				} else if (type == short.class) {
 					try {
-						source.append("" + f.getShort(s.getClass()));
+						source.append(f.getShort(s.getClass()));
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				} else if (type == byte.class) {
 					try {
-						source.append("" + f.getByte(s.getClass()));
+						source.append(f.getByte(s.getClass()));
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				} else if (type == char.class) {
 					try {
-						source.append("\'" + f.getChar(s.getClass()) + "\'");
+						source.append("\'").append(f.getChar(s.getClass())).append("\'");
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				} else if (type == float.class) {
 					try {
-						source.append("" + f.getFloat(s.getClass()));
+						source.append(f.getFloat(s.getClass()));
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
 				} else if (type == double.class) {
 					try {
-						source.append("" + f.getDouble(s.getClass()));
+						source.append(f.getDouble(s.getClass()));
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -478,7 +432,7 @@ public class SimpleSource4ObjectiveC {
 					}
 				} else if (type == String.class) {
 					try {
-						source.append("@\"" + f.get(s.getClass()) + "\"");
+						source.append("@\"").append(f.get(s.getClass())).append("\"");
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -499,17 +453,12 @@ public class SimpleSource4ObjectiveC {
 		SourceUtils.insertLineComment(source, "", index++, true);
 
 		//if (s instanceof SimpleSerializable && !(s instanceof SimpleRPCRunnable)) {
-			source.append("@protocol ");
-			source.append(simpleClazzName);
-			source.append("\r\n\r\n");		
+			source.append("@protocol ").append(simpleClazzName).append("\r\n\r\n");		
 			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("@end\r\n\r\n");		
 			SourceUtils.insertLineComment(source, "", index++, true);
 		//}
-		source.append("@interface ");
-		source.append(simpleClazzName);
-		source.append(" : ");
-		source.append(simpleSuperClazzName);
+		source.append("@interface ").append(simpleClazzName).append(" : ").append(simpleSuperClazzName);
 		SourceUtils.insertBlockComment(source, index++);
 		source.append("{\r\n");
 		source.append("\r\n");		
@@ -552,9 +501,7 @@ public class SimpleSource4ObjectiveC {
 				source.append("NSMutableArray<NSString> *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
 				//if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
-					source.append("NSMutableArray<");
-					source.append(type.getComponentType().getSimpleName());
-					source.append("> *");
+					source.append("NSMutableArray<").append(type.getComponentType().getSimpleName()).append("> *");
 				//} else {
 				//	source.append("NSMutableArray *");
 				//}
@@ -601,32 +548,28 @@ public class SimpleSource4ObjectiveC {
 			} else if (type == boolean.class) {
 				source.append(") BOOL ");
 			} else if (type == String.class) {
-				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSString *");
+				source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSString *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable.class)) {
-				source.append(", " + (!supportsARC ? "retain" : "strong") + ") ");
-				source.append(type.getSimpleName());
-				source.append(" *");
+				source.append(", ").append(!supportsARC ? "retain" : "strong").append(") ").append(type.getSimpleName()).append(" *");
 			} else if (type == byte[].class) {
 				if (s.bytesCompactMode()) {
-					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSData *");
+					source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSData *");
 				} else {
-					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSNumber> *");
+					source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSMutableArray<NSNumber> *");
 				}
 			} else if (type == String[].class) {
-				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSString> *");
+				source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSMutableArray<NSString> *");
 			} else if (SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
 				//if (!SimpleSerializable.isSubclassOf(type, SimpleRPCRunnable[].class)) {
-					source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<");
-					source.append(type.getComponentType().getSimpleName());
-					source.append("> *");
+					source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSMutableArray<").append(type.getComponentType().getSimpleName()).append("> *");
 				//} else {
-				//	source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray *");
+				//	source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSMutableArray *");
 				//}
 			} else if (type == int[].class || type == long[].class || type == double[].class
 					|| type == short[].class || type == char[].class
 					|| type == float[].class || type == boolean[].class || type == String[].class
 					|| SimpleSerializable.isSubclassOf(type, SimpleSerializable[].class)) {
-				source.append(", " + (!supportsARC ? "retain" : "strong") + ") NSMutableArray<NSNumber> *");
+				source.append(", ").append(!supportsARC ? "retain" : "strong").append(") NSMutableArray<NSNumber> *");
 			} else {
 				System.out.println("Unsupported type " + type);
 			}
@@ -658,33 +601,21 @@ public class SimpleSource4ObjectiveC {
 		}
 		Date date = new Date();
 		source.append("//\r\n");
-		source.append("//  ");
-		source.append(simpleClazzName);
-		source.append(".m\r\n");
-		source.append("//  ");
-		source.append(folder);
-		source.append("\r\n");
+		source.append("//  ").append(simpleClazzName).append(".m\r\n");
+		source.append("//  ").append(folder).append("\r\n");
 		source.append("//\r\n");
 		source.append("//  Generated by Java2Script.\r\n");
-		source.append("//  Copyright (c) ");
-		source.append(date.getYear() + 1900);
-		source.append(" ");
-		source.append(company);
-		source.append(". All rights reserved.\r\n");
+		source.append("//  Copyright (c) ").append(date.getYear() + 1900).append(" ").append(company).append(". All rights reserved.\r\n");
 		source.append("//\r\n");
 		source.append("\r\n");
 		int index = 0;
 		SourceUtils.insertLineComment(source, "", index++, true);
 
-		source.append("#import \"");
-		source.append(simpleClazzName);
-		source.append(".h\"\r\n");
+		source.append("#import \"").append(simpleClazzName).append(".h\"\r\n");
 		source.append("\r\n");
 		SourceUtils.insertLineComment(source, "", index++, true);
 		
-		source.append("@implementation ");
-		source.append(simpleClazzName);
-		source.append("\r\n");
+		source.append("@implementation ").append(simpleClazzName).append("\r\n");
 		source.append("\r\n");		
 		SourceUtils.insertLineComment(source, "", index++, true);
 
@@ -719,18 +650,14 @@ public class SimpleSource4ObjectiveC {
 				needDealloc = true;
 			}
 			
-			source.append("@synthesize ");
-			source.append(name);
-			source.append(";\r\n");
+			source.append("@synthesize ").append(name).append(";\r\n");
 		}
 		
 		source.append("\r\n");
 		SourceUtils.insertLineComment(source, "", index++, true);
 		source.append("- (NSString *) className {\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, false);
-		source.append("\treturn @\"");
-		source.append(clazzName);
-		source.append("\";\r\n");
+		source.append("\treturn @\"").append(clazzName).append("\";\r\n");
 		SourceUtils.insertLineComment(source, "\t", index++, false);
 		source.append("}\r\n");
 		source.append("\r\n");
@@ -789,9 +716,7 @@ public class SimpleSource4ObjectiveC {
 			}
 			Class<?> type = field.getType();
 			
-			source.append("\t[arr addObject:[SimpleField makeField:@\"");
-			source.append(name);
-			source.append("\" withType:SimpleFieldType");
+			source.append("\t[arr addObject:[SimpleField makeField:@\"").append(name).append("\" withType:SimpleFieldType");
 			if (type == int.class) {
 				source.append("Int");
 			} else if (type == long.class) {
@@ -974,19 +899,11 @@ public class SimpleSource4ObjectiveC {
 			StringBuilder source = new StringBuilder();
 			Date date = new Date();
 			source.append("//\r\n");
-			source.append("//  ");
-			source.append(simpleClazzName);
-			source.append(".h\r\n");
-			source.append("//  ");
-			source.append(folder);
-			source.append("\r\n");
+			source.append("//  ").append(simpleClazzName).append(".h\r\n");
+			source.append("//  ").append(folder).append("\r\n");
 			source.append("//\r\n");
 			source.append("//  Generated by Java2Script.\r\n");
-			source.append("//  Copyright (c) ");
-			source.append(date.getYear() + 1900);
-			source.append(" ");
-			source.append(company);
-			source.append(". All rights reserved.\r\n");
+			source.append("//  Copyright (c) ").append(date.getYear() + 1900).append(" ").append(company).append(". All rights reserved.\r\n");
 			source.append("//\r\n");
 			source.append("\r\n");
 			int index = 0;
@@ -1011,9 +928,7 @@ public class SimpleSource4ObjectiveC {
 								simpleName = j2sSimpleClazz.substring(idx + 1);
 							}
 							
-							source.append("#import \"");
-							source.append(simpleName);
-							source.append(".h\"\r\n");
+							source.append("#import \"").append(simpleName).append(".h\"\r\n");
 						}
 					}
 				} catch (Throwable e) {
@@ -1022,9 +937,7 @@ public class SimpleSource4ObjectiveC {
 			}
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
-			source.append("@interface ");
-			source.append(simpleClazzName);
-			source.append(" : SimpleFactory");
+			source.append("@interface ").append(simpleClazzName).append(" : SimpleFactory");
 			SourceUtils.insertBlockComment(source, index++);
 			source.append("{\r\n\r\n");
 			SourceUtils.insertLineComment(source, "\t", index++, true);
@@ -1044,33 +957,21 @@ public class SimpleSource4ObjectiveC {
 			StringBuilder source = new StringBuilder();
 			Date date = new Date();
 			source.append("//\r\n");
-			source.append("//  ");
-			source.append(simpleClazzName);
-			source.append(".m\r\n");
-			source.append("//  ");
-			source.append(folder);
-			source.append("\r\n");
+			source.append("//  ").append(simpleClazzName).append(".m\r\n");
+			source.append("//  ").append(folder).append("\r\n");
 			source.append("//\r\n");
 			source.append("//  Generated by Java2Script.\r\n");
-			source.append("//  Copyright (c) ");
-			source.append(date.getYear() + 1900);
-			source.append(" ");
-			source.append(company);
-			source.append(". All rights reserved.\r\n");
+			source.append("//  Copyright (c) ").append(date.getYear() + 1900).append(" ").append(company).append(". All rights reserved.\r\n");
 			source.append("//\r\n");
 			source.append("\r\n");
 			int index = 0;
 			SourceUtils.insertLineComment(source, "", index++, true);
 			
-			source.append("#import \"");
-			source.append(simpleClazzName);
-			source.append(".h\"\r\n");
+			source.append("#import \"").append(simpleClazzName).append(".h\"\r\n");
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 			
-			source.append("@implementation ");
-			source.append(simpleClazzName);
-			source.append("\r\n");
+			source.append("@implementation ").append(simpleClazzName).append("\r\n");
 			source.append("\r\n");
 			SourceUtils.insertLineComment(source, "", index++, true);
 			source.append("- (id) createInstanceByClassName:(NSString *) className {\r\n");
@@ -1092,17 +993,11 @@ public class SimpleSource4ObjectiveC {
 								simpleName = j2sSimpleClazz.substring(idx + 1);
 							}
 							
-							source.append("\tif ([className compare:@\"");
-							source.append(j2sSimpleClazz);
-							source.append("\"] == 0) {\r\n");
+							source.append("\tif ([className compare:@\"").append(j2sSimpleClazz).append("\"] == 0) {\r\n");
 							if (!supportsARC) {
-								source.append("\t\treturn [[[");
-								source.append(simpleName);
-								source.append(" alloc] init] autorelease];\r\n");
+								source.append("\t\treturn [[[").append(simpleName).append(" alloc] init] autorelease];\r\n");
 							} else {
-								source.append("\t\treturn [[");
-								source.append(simpleName);
-								source.append(" alloc] init];\r\n");
+								source.append("\t\treturn [[").append(simpleName).append(" alloc] init];\r\n");
 							}
 							source.append("\t}\r\n");
 						}
@@ -1130,12 +1025,8 @@ public class SimpleSource4ObjectiveC {
 					if (inst instanceof SimpleSerializable) {
 						String shortenName = SimpleSerializable.getClassShortenName(j2sSimpleClazz);
 						if (shortenName != null) {
-							source.append("\tif ([className compare:@\"");
-							source.append(j2sSimpleClazz);
-							source.append("\"] == 0) {\r\n");
-							source.append("\t\treturn @\"");
-							source.append(shortenName);
-							source.append("\";\r\n");
+							source.append("\tif ([className compare:@\"").append(j2sSimpleClazz).append("\"] == 0) {\r\n");
+							source.append("\t\treturn @\"").append(shortenName).append("\";\r\n");
 							source.append("\t}\r\n");
 						}
 					}
@@ -1162,12 +1053,8 @@ public class SimpleSource4ObjectiveC {
 					if (inst instanceof SimpleSerializable) {
 						String shortenName = SimpleSerializable.getClassShortenName(j2sSimpleClazz);
 						if (shortenName != null) {
-							source.append("\tif ([className compare:@\"");
-							source.append(shortenName);
-							source.append("\"] == 0) {\r\n");
-							source.append("\t\treturn @\"");
-							source.append(j2sSimpleClazz);
-							source.append("\";\r\n");
+							source.append("\tif ([className compare:@\"").append(shortenName).append("\"] == 0) {\r\n");
+							source.append("\t\treturn @\"").append(j2sSimpleClazz).append("\";\r\n");
 							source.append("\t}\r\n");
 						}
 					}

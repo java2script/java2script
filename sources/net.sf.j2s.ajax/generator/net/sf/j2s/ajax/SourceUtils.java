@@ -17,59 +17,35 @@ import java.util.regex.Pattern;
 public class SourceUtils {
 
 	public static void insertLineComment(StringBuilder source, String indent, int index, boolean blankLine) {
-		source.append(indent);
-		source.append("//+$");
-		source.append(index);
-		source.append("+\r\n");
-		source.append(indent);
-		source.append("//-$");
-		source.append(index);
-		source.append("-\r\n");
+		source.append(indent).append("//+$").append(index).append("+\r\n");
+		source.append(indent).append("//-$").append(index).append("-\r\n");
 		if (blankLine) {
 			source.append("\r\n");
 		}
 	}
 
 	public static void wrapALineWithLineComment(StringBuilder source, String indent, int index, String line, boolean blankLine) {
-		source.append(indent);
-		source.append("//+$");
-		source.append(index);
-		source.append("+\r\n");
-		source.append(indent);
-		source.append(line);
-		source.append("\r\n");
-		source.append(indent);
-		source.append("//-$");
-		source.append(index);
-		source.append("-\r\n");
+		source.append(indent).append("//+$").append(index).append("+\r\n");
+		source.append(indent).append(line).append("\r\n");
+		source.append(indent).append("//-$").append(index).append("-\r\n");
 		if (blankLine) {
 			source.append("\r\n");
 		}
 	}
 
 	public static void openLineComment(StringBuilder source, String indent, int index) {
-		source.append(indent);
-		source.append("//+$");
-		source.append(index);
-		source.append("+\r\n");
+		source.append(indent).append("//+$").append(index).append("+\r\n");
 	}
 	
 	public static void closeLineComment(StringBuilder source, String indent, int index, boolean blankLine) {
-		source.append(indent);
-		source.append("//-$");
-		source.append(index);
-		source.append("-\r\n");
+		source.append(indent).append("//-$").append(index).append("-\r\n");
 		if (blankLine) {
 			source.append("\r\n");
 		}
 	}
 
 	public static void insertBlockComment(StringBuilder source, int index) {
-		source.append(" /*+$");
-		source.append(index);
-		source.append("+*/  /*-$");
-		source.append(index);
-		source.append("-*/ ");
+		source.append(" /*+$").append(index).append("+*/  /*-$").append(index).append("-*/ ");
 	}
 	
 	public static void updateSourceContent(File file, String source) {
