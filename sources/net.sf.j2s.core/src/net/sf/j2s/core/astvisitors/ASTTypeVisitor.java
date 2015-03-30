@@ -178,7 +178,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		name = Bindings.removeBrackets(name);
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
-		if (index != -1
+		if (index == 0
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
 						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
 			if (!fullName.startsWith("java.lang.ref")
