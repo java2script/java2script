@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,22 +15,20 @@ import org.eclipse.core.resources.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.util.Util;
 
-public class ClasspathMultiDirectory extends ClasspathDirectory {
+class ClasspathMultiDirectory extends ClasspathDirectory {
 
 IContainer sourceFolder;
 char[][] inclusionPatterns; // used by builders when walking source folders
 char[][] exclusionPatterns; // used by builders when walking source folders
 boolean hasIndependentOutputFolder; // if output folder is not equal to any of the source folders
-public boolean ignoreOptionalProblems;
 
-ClasspathMultiDirectory(IContainer sourceFolder, IContainer binaryFolder, char[][] inclusionPatterns, char[][] exclusionPatterns, boolean ignoreOptionalProblems) {
+ClasspathMultiDirectory(IContainer sourceFolder, IContainer binaryFolder, char[][] inclusionPatterns, char[][] exclusionPatterns) {
 	super(binaryFolder, true, null);
 
 	this.sourceFolder = sourceFolder;
 	this.inclusionPatterns = inclusionPatterns;
 	this.exclusionPatterns = exclusionPatterns;
 	this.hasIndependentOutputFolder = false;
-	this.ignoreOptionalProblems = ignoreOptionalProblems;
 
 	// handle the case when a state rebuilds a source folder
 	if (this.inclusionPatterns != null && this.inclusionPatterns.length == 0)
@@ -44,8 +42,7 @@ public boolean equals(Object o) {
 	if (!(o instanceof ClasspathMultiDirectory)) return false;
 
 	ClasspathMultiDirectory md = (ClasspathMultiDirectory) o;
-	return this.ignoreOptionalProblems == md.ignoreOptionalProblems 
-		&& this.sourceFolder.equals(md.sourceFolder) && this.binaryFolder.equals(md.binaryFolder)
+	return this.sourceFolder.equals(md.sourceFolder) && this.binaryFolder.equals(md.binaryFolder)
 		&& CharOperation.equals(this.inclusionPatterns, md.inclusionPatterns)
 		&& CharOperation.equals(this.exclusionPatterns, md.exclusionPatterns);
 }
