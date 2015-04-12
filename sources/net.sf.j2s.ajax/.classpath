@@ -10,6 +10,6 @@
 	<classpathentry kind="src" path="ajaxswt"/>
 	<classpathentry kind="src" path="ajaxrpc"/>
 	<classpathentry kind="src" path="ajaxpipe"/>
-	<classpathentry kind="var" path="JAVAX_SERVLET"/>
+	<classpathentry kind="lib" path="lib/javax.servlet_2.5.0.v200910301333.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
