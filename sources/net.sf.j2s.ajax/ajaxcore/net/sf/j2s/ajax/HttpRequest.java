@@ -337,6 +337,7 @@ public class HttpRequest {
 	 * @return String the all response header value.
 	 */
 	public String getAllResponseHeaders() {
+		if (connection != null) return null;
 		StringBuilder builder = new StringBuilder();
 		int i = 1;
 		while (true) {
@@ -362,6 +363,7 @@ public class HttpRequest {
 	 * @return String the response header value.
 	 */
 	public String getResponseHeader(String key) {
+		if (connection == null) return null;
 		Map<String, List<String>> headerFields = connection.getHeaderFields();
 		List<String> list = headerFields.get(key);
 		if (list == null) {
@@ -549,6 +551,7 @@ public class HttpRequest {
 			} catch (IOException e) {
 				if (checkAbort()) return; // exception caused by abort action
 				//e.printStackTrace();
+				status = connection.getResponseCode();
 				readyState = 4;
 				if (onreadystatechange != null) {
 					onreadystatechange.onLoaded();

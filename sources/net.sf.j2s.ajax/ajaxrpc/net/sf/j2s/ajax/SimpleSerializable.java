@@ -42,9 +42,9 @@ import net.sf.j2s.annotation.J2SKeep;
  */
 public class SimpleSerializable implements Cloneable {
 	
-	public static SimpleSerializable UNKNOWN = new SimpleSerializable();
+	public static final SimpleSerializable UNKNOWN = new SimpleSerializable();
 	
-	public static SimpleSerializable ERROR = new SimpleSerializable(); // Used to indicate that format error!
+	public static final SimpleSerializable ERROR = new SimpleSerializable(); // Used to indicate that format error!
 	
 	@J2SIgnore
 	public static SimpleFactory fallbackFactory = null;
