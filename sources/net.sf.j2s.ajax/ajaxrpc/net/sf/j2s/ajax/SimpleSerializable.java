@@ -4398,7 +4398,7 @@ return true;
 				return ssInst;
 			}
 		}
-		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		Object inst = loadSimpleInstance(clazzName);
 		if (inst != null && inst instanceof SimpleSerializable) {
 			return (SimpleSerializable) inst;
 		}
@@ -4722,6 +4722,43 @@ return true;
 		}
 		return clone;
 	}
+    
+	private static boolean hasClassReloaded = false;
+	private static Map<String, ClassLoader> allLoaders = null;
+
+    public static void setClassLoaders(Map<String, ClassLoader> loaders) {
+    	if (loaders != null) {
+	    	allLoaders = loaders;
+	    	hasClassReloaded = true;
+    	}
+    }
+    
+    /**
+     * Load given class and create instance by default constructor.
+     * 
+     * This method should not be used for those classes without default constructor.
+     * 
+     * @param clazzName
+     * @return 
+     */
+	static Object loadSimpleInstance(String clazzName) {
+		try {
+			Class<?> runnableClass = null;
+			ClassLoader classLoader = hasClassReloaded ? allLoaders.get(clazzName) : null;
+			if (classLoader != null) {
+				runnableClass = classLoader.loadClass(clazzName);
+			} else {
+				runnableClass = Class.forName(clazzName);
+			}
+			if (runnableClass != null) {
+				return runnableClass.newInstance();
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
+		}
+		return null;
+	}
+
 	
 	/**
 	 * Get SimpleSerializable instance according to the given string. 
@@ -4839,7 +4876,7 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 				return ssInst;
 			}
 		}
-		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		Object inst = loadSimpleInstance(clazzName);
 		if (fb != null && inst == null) {
 			synchronized (classMutex) {
 				classMissed.add(clazzName);
@@ -4886,7 +4923,7 @@ return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
 				return ssInst;
 			}
 		}
-		Object inst = SimpleClassLoader.loadSimpleInstance(clazzName);
+		Object inst = loadSimpleInstance(clazzName);
 		if (fb != null && inst == null) {
 			synchronized (classMutex) {
 				classMissed.add(clazzName);
