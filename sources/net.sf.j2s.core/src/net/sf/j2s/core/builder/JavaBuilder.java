@@ -614,15 +614,6 @@ private int initializeBuilder(int kind, boolean forBuild) throws CoreException {
 		// Flush the existing external files cache if this is the beginning of a build cycle
 		String projectName = this.currentProject.getName();
 		if (builtProjects == null || builtProjects.contains(projectName)) {
-			try {
-				Method method = JavaModel.class.getMethod("flushExternalFileCache", new Class[] { Void.class });
-				if (method != null) {
-					method.invoke(JavaModel.class, new Object[0]);
-				}
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
-			//JavaModel.flushExternalFileCache();
 			builtProjects = new ArrayList();
 		}
 		builtProjects.add(projectName);
