@@ -59,7 +59,8 @@ public class RegExCompress {
 				break;
 			}
 		}
-		String specialFunKey = "@324@();\r\n";
+		//String specialFunKey = "@324@();\r\n";
+		String specialFunKey = "@324@();";
 		if (ignoreCSS) {
 			cssCodes = str.substring(idx1, idx2);
 			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
@@ -103,7 +104,8 @@ public class RegExCompress {
 				break;
 			}
 		}
-		String specialFunKey = "@324@();\r\n";
+		//String specialFunKey = "@324@();\r\n";
+		String specialFunKey = "@324@();";
 		if (ignoreCSS) {
 			cssCodes = str.substring(idx1, idx2);
 			str = str.substring(0, idx1) + specialFunKey + str.substring(idx2);
