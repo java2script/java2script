@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 
 import java.util.*;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class BatchImageBuilder extends AbstractImageBuilder {
 
 	IncrementalImageBuilder incrementalBuilder; // if annotations or secondary types have to be processed after the compile loop

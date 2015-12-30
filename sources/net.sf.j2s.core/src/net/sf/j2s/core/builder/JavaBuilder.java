@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Terry Parker <tparker@google.com> - [performance] Low hit rates in JavaModel caches - https://bugs.eclipse.org/421165
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
+
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -20,10 +22,9 @@ import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JavaBuilder extends IncrementalProjectBuilder {
 
 IProject currentProject;
@@ -792,7 +793,7 @@ private void recordNewState(State state) {
 	if (DEBUG)
 		System.out.println("JavaBuilder: Recording new state : " + state); //$NON-NLS-1$
 	// state.dump();
-	JavaModelManager.getJavaModelManager().setLastBuiltState(currentProject, newState);
+	JavaModelManager.getJavaModelManager().setLastBuiltState(this.currentProject, newState);
 }
 
 /**
