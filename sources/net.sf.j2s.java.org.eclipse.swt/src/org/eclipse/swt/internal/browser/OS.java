@@ -72,6 +72,13 @@ public class OS {
 
 	/**
 	 * @j2sNative
+	window["swt.adjustOSFontSize"] = function (size) {
+		if (window["swt.designer.os"] == "osx") {
+			return size + "px";
+		} else {
+			return size + "pt"; // windows
+		}
+	};
 	var os = $wt.internal.browser.OS;
 	var dua = navigator.userAgent;
 	os.isOpera = dua.indexOf ("Opera") >= 0;

@@ -2437,7 +2437,18 @@ public void setFont (Font font) {
 	if (font.data.name != null) {
 		handle.style.fontFamily = font.data.name;
 	}
-	handle.style.fontSize = font.data.height + "pt";
+	String fontSize = font.data.height + "pt";
+	/**
+	 * @j2sNative
+	 * if (window["swt.adjustOSFontSize"] != null) {
+	 * 	c = window["swt.adjustOSFontSize"](a.data.height);
+	 * }
+	 * @j2sNativeSrc
+	 * if (window["swt.adjustOSFontSize"] != null) {
+	 * 	fontSize = window["swt.adjustOSFontSize"](font.data.height);
+	 * }
+	 */ {}
+	handle.style.fontSize = fontSize;
 	if ((font.data.style & SWT.BOLD) != 0) {
 		handle.style.fontWeight = "bold";
 	} else {
