@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import net.sf.j2s.annotation.J2SIgnore;
+import net.sf.j2s.annotation.J2SKeep;
 import net.sf.j2s.annotation.J2SNative;
 
 /**
@@ -155,6 +156,7 @@ public class SimpleRPCRequest {
 		return new HttpRequest();
 	}
 	
+	@J2SKeep
 	private static void ajaxRequest(final SimpleRPCRunnable runnable, boolean async) {
 		String url = runnable.getHttpURL();
 		if (url == null) {
