@@ -178,6 +178,11 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 		queueNotifying = false;
 	}
 	
+	/**
+	 * Switch to continuum mode, specifying whether sending notify request back to server in queue or not. 
+	 * @param queue If queue is true, all local pipes' notify requests are sent asynchronously. If queue
+	 * is false, notify requests are sent one by one in Pipe Live Notifier thread.
+	 */
 	public static void switchToContinuumMode(boolean queue) {
 		pipeMode = MODE_PIPE_CONTINUUM;
 		queueNotifying = queue;
@@ -333,7 +338,7 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 							request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 								public void onLoaded() {
 									String response = request.getResponseText();
-									if (response != null && p.notifySequence < sequence) {
+									if (response != null && p.notifySequence < sequence && response.indexOf("$p1p3b$") != 0) {
 										p.notifySequence = sequence;
 									}
 									if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
