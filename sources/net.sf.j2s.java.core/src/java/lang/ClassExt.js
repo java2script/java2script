@@ -313,6 +313,12 @@ Clazz.newArray = function () {
 			dim = dim.charCodeAt (0); // char
 		}
 		var val = args[1];
+		if (dim == -1) {
+			if (val instanceof Array) {
+				return val;
+			}
+			dim = 0; // fix it, or exceptions should be thrown
+		}
 		var arr = new Array (dim);
 		for (var i = 0; i < dim; i++) {
 			arr[i] = val;
