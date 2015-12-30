@@ -26,6 +26,7 @@ public class SimpleThreadHelper {
 			}
 		}
 		Thread thread = new Thread(r, name);
+		thread.setDaemon(true);
 		thread.start();
 	}
 
