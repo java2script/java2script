@@ -11,7 +11,6 @@
 package net.sf.j2s.ajax;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 import net.sf.j2s.ajax.HttpRequest;
 import net.sf.j2s.ajax.SimpleRPCRequest;
@@ -136,10 +135,13 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 							String pipeKey = runnable.pipeKey;
 							String pipeMethod = runnable.getPipeMethod();
 							String pipeURL = runnable.getPipeURL();
-
-							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, runnable.pipeSequence);
+							long sequence = runnable.pipeSequence;
+							String pipeRequestData = constructRequest(pipeKey, PIPE_TYPE_NOTIFY, sequence);
 							sendRequest(request, pipeMethod, pipeURL, pipeRequestData, false);
 							String response = request.getResponseText();
+							if (response != null && runnable.notifySequence < sequence && response.indexOf("$p1p3b$") != 0) {
+								runnable.notifySequence = sequence;
+							}
 							if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 								SWTHelper.syncExec(disp, new Runnable() {
 									public void run() {
@@ -150,6 +152,9 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 								SimplePipeHelper.removePipe(pipeKey);
 								// may need to inform user that connection is already lost!
 								break;
+							} else {
+								runnable.lastLiveDetected = System.currentTimeMillis();
+								runnable.updateStatus(true);
 							}
 						} else {
 							break;
@@ -288,10 +293,30 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		HttpRequest pipeRequest = getRequestWithMonitor(new HttpRequest.IXHRReceiving() {
 			public boolean receiving(ByteArrayOutputStream baos, byte b[], int off, int len) {
 				baos.write(b, off, len);
+				byte[] bytes = baos.toByteArray();
+				int resetIndex = 0;
+				try {
+					resetIndex = swtParseReceivedBytes(bytes);
+				} catch (RuntimeException e) { // invalid simple format
+					int length = bytes.length;
+					if (length < 100) {
+						System.out.println("[ERROR]: " + new String(bytes));
+					} else {
+						System.out.println("[ERROR]: " + new String(bytes, 0, 100) + " ..");
+					}
+					throw e;
+				}
+				if (resetIndex > 0) {
+					baos.reset();
+					if (resetIndex < bytes.length) {
+						baos.write(bytes, resetIndex, bytes.length - resetIndex);
+					}
+				}
+
 				/*
-				 * It is OK to convert to string as SimpleSerialize's
-				 * serialized string contains only ASCII chars.
-				 */
+				// It is OK to convert to string as SimpleSerialize's
+				// serialized string contains only ASCII chars.
+				// [20151228] ASCII characters only is broken after 2.0.0
 				String string = baos.toString();
 				String resetString = swtParseReceived(string);
 				if (resetString != null && resetString.length() > 0) {
@@ -315,7 +340,10 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				} else if (resetString != null && resetString.length() == 0) {
+					baos.reset();
 				}
+				// */
 				return true;
 			}
 		
@@ -370,19 +398,30 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				}
 			}
 			if ((ss = SimpleSerializable.parseInstance(string, end)) == null
+					|| ss == SimpleSerializable.ERROR
 					|| !ss.deserialize(string, end)) {
 				break;
 			}
 			String key = string.substring(start, end);
 			final SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
 			if (runnable != null) { // should be always fulfill this condition
-				//runnable.deal(ss);
-				final SimpleSerializable instance = ss;
-				SWTHelper.syncExec(Display.getDefault(), new Runnable() {
-					public void run() {
-						runnable.deal(instance);
+				runnable.lastPipeDataReceived = System.currentTimeMillis();
+				if (ss != SimpleSerializable.UNKNOWN) {
+					if (ss instanceof SimplePipeSequence) {
+						long sequence = ((SimplePipeSequence) ss).sequence;
+						if (sequence > runnable.pipeSequence) {
+							runnable.pipeSequence = sequence;
+						}
+					} else {
+						//runnable.deal(ss);
+						final SimpleSerializable instance = ss;
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+							public void run() {
+								runnable.deal(instance);
+							}
+						});
 					}
-				});
+				}
 			}
 			
 			start = restStringIndex(string, start);
@@ -393,4 +432,83 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 		return string;
 	}
 
+    @J2SIgnore
+	static int swtParseReceivedBytes(final byte[] bytes) {
+		if (bytes == null) {
+			return -1;
+		}
+		SimpleSerializable ss = null;
+		int start = 0;
+		while (bytes.length > start + PIPE_KEY_LENGTH) { // should be bigger than 48 ( 32 + 6 + 1 + 8 + 1)
+			int end = start + PIPE_KEY_LENGTH;
+			if (PIPE_STATUS_DESTROYED == bytes[end]) {
+				final String key = new String(bytes, start, PIPE_KEY_LENGTH);
+				final SimplePipeRunnable pipe = SimplePipeHelper.getPipe(key);
+				if (pipe != null) {
+					if (key.equals(pipe.pipeKey)) {
+						pipe.pipeAlive = false;
+						//pipe.pipeClosed();
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+							public void run() {
+								pipe.pipeClosed();
+								//SimplePipeHelper.removePipe(key);
+							}
+						});
+					}
+					SimplePipeHelper.removePipe(key);
+				}
+				return end + 1;
+			}
+			if (PIPE_STATUS_OK == bytes[end]) {
+				String key = new String(bytes, start, PIPE_KEY_LENGTH);
+				SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+				if (runnable != null) { // should always satisfy this condition
+					runnable.lastPipeDataReceived = System.currentTimeMillis();
+				}
+				start = end + 1;
+				if (start == bytes.length) {
+					return start;
+				}
+				continue;
+			}
+			ss = SimpleSerializable.parseInstance(bytes, end);
+			if (ss == null) {
+				break;
+			}
+			if (ss == SimpleSerializable.ERROR) {
+				return -1; // error
+			}
+			if (!ss.deserializeBytes(bytes, end)) {
+				break;
+			}
+			String key = new String(bytes, start, PIPE_KEY_LENGTH);
+			final SimplePipeRunnable runnable = SimplePipeHelper.getPipe(key);
+			if (runnable != null) { // should always satisfy this condition
+				runnable.lastPipeDataReceived = System.currentTimeMillis();
+				if (ss != SimpleSerializable.UNKNOWN) {
+					if (ss instanceof SimplePipeSequence) {
+						long sequence = ((SimplePipeSequence) ss).sequence;
+						if (sequence > runnable.pipeSequence) {
+							runnable.pipeSequence = sequence;
+						}
+					} else {
+						//runnable.deal(ss);
+						final SimpleSerializable instance = ss;
+						SWTHelper.syncExec(Display.getDefault(), new Runnable() {
+							public void run() {
+								runnable.deal(instance);
+							}
+						});
+					}
+				}
+			}
+			
+			start = restBytesIndex(bytes, start);
+		}
+		if (start != 0) {
+			return start;
+		}
+		return 0;
+    }
+    
 }

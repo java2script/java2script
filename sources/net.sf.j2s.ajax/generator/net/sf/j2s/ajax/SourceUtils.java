@@ -14,6 +14,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 
+ * @author zhourenjian
+ *
+ * @j2sIgnore
+ */
 public class SourceUtils {
 
 	public static void insertLineComment(StringBuilder source, String indent, int index, boolean blankLine) {

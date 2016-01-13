@@ -21,11 +21,13 @@ import net.sf.j2s.ajax.SimpleRPCRunnable;
 import net.sf.j2s.ajax.SimpleSerializable;
 import net.sf.j2s.annotation.J2SIgnore;
 import net.sf.j2s.annotation.J2SNative;
+import net.sf.j2s.annotation.J2SRequireImport;
 
 /**
  * 
  * @author zhou renjian
  */
+@J2SRequireImport(SimplePipeSequence.class) 
 public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	
 	/**
@@ -488,6 +490,11 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * Deal the object from pipe.
 	 * @param ss
 	 * @return boolean Whether the object is dealt
+	 * @j2sNative
+if ("net.sf.j2s.ajax.SimpleSerializable".equals(ss.getClass().getName())) {
+	return true; // seldom or never reach this branch, just ignore
+}
+return false;
 	 */
 	public boolean deal(SimpleSerializable ss) {
 		try {

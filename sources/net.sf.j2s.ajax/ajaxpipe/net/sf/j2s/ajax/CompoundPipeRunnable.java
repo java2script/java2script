@@ -1,7 +1,17 @@
 package net.sf.j2s.ajax;
 
 public class CompoundPipeRunnable extends SimplePipeRunnable {
-	
+
+	/**
+	 * @j2sNative
+var hexStr = "0123456789abcdef";
+var key = "";
+for (var i = 0; i < 4; i++) {
+	var hex = Math.round(15 * Math.random());
+	key += "" + hexStr.charAt(hex);
+}
+return key;
+	 */
 	private static String nextSessionKey() {
 		StringBuilder keyBuilder = new StringBuilder(4);
 		for (int i = 0; i < 4; i++) {

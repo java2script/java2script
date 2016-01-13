@@ -29,6 +29,12 @@ import net.sf.j2s.ajax.annotation.SimpleIn;
 import net.sf.j2s.ajax.annotation.SimpleInOut;
 import net.sf.j2s.ajax.annotation.SimpleOut;
 
+/**
+ * 
+ * @author zhourenjian
+ *
+ * @j2sIgnore
+ */
 public class SimpleSource4ObjectiveC {
 	
 	static String folder = "Project";

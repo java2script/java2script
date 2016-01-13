@@ -17,6 +17,8 @@ import net.sf.j2s.ajax.SimpleSerializable;
 /**
  * 
  * @author zhou renjian
+ * 
+ * @j2sIgnore
  */
 public class SimplePipeRPCHttpServlet extends SimpleRPCHttpServlet {
 

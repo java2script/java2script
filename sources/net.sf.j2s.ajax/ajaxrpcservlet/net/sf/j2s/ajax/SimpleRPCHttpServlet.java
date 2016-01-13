@@ -31,6 +31,8 @@ import javax.servlet.http.HttpSession;
  * @author zhou renjian
  *
  * 2006-10-10
+ * 
+ * @j2sIgnore
  */
 public class SimpleRPCHttpServlet extends HttpServlet {
 

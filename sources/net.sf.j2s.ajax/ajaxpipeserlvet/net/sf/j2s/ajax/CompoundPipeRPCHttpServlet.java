@@ -1,5 +1,11 @@
 package net.sf.j2s.ajax;
 
+/**
+ * 
+ * @author zhourenjian
+ *
+ * @j2sIgnore
+ */
 public class CompoundPipeRPCHttpServlet extends SimplePipeRPCHttpServlet {
 
 	private static final long serialVersionUID = 1605715722698968061L;
