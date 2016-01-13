@@ -58,16 +58,13 @@ JavaObject.prototype.equals = function (obj) {
 	return this == obj;
 };
 
+Clazz.internalHashCode = 1;
+
 JavaObject.prototype.hashCode = function () {
-	try {
-		return this.toString ().hashCode ();
-	} catch (e) {
-		var str = ":";
-		for (var s in this) {
-			str += s + ":"
-		}
-		return str.hashCode ();
+	if (!this.internalHashCode) {
+		this.internalHashCode = Clazz.internalHashCode++;
 	}
+	return this.internalHashCode;
 };
 
 JavaObject.prototype.getClass = function () {
@@ -143,6 +140,10 @@ Clazz.getClassName = function (clazzHost) {
 			return clazz.__CLASS_NAME__;
 		}
 		/*-# clazzStr -> Sc #-*/
+		if (clazz.toString === Clazz.innerFunctions.toString) {
+			// Avoid running into recursion of #toString calling #getClassName
+			return "Object";
+		}
 		var clazzStr = clazz.toString ();
 		var idx0 = clazzStr.indexOf ("function");
 		if (idx0 == -1) {

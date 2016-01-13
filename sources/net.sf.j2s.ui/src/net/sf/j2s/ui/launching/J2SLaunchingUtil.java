@@ -567,7 +567,8 @@ public class J2SLaunchingUtil {
 		buf.append("\tposition:absolute;\r\n" +
 				"\tright:0;\r\n" +
 				"\ttop:0;\r\n" +
-				"\tmargin:1em;\r\n");
+				"\tmargin:1em;\r\n" +
+				"\tfont-family: Arial, sans-serif;\r\n");
 		buf.append("}\r\n");
 		buf.append("a.alaa {\r\n");
 		buf.append("\tdisplay:block;\r\n" +
@@ -579,7 +580,8 @@ public class J2SLaunchingUtil {
 				"\tmargin:2em;\r\n" +
 				"\tcolor:navy;\r\n" +
 				"\tcursor:pointer;\r\n" +
-				"\tcursor:hand;\r\n");
+				"\tcursor:hand;\r\n" +
+				"\tfont-family: Arial, sans-serif;\r\n");
 		buf.append("}\r\n");
 		buf.append("span.alaa-icon {\r\n");
 		buf.append("\tdisplay:block;\r\n" +
@@ -587,6 +589,7 @@ public class J2SLaunchingUtil {
 				"\twidth:16px;\r\n" +
 				"\theight:16px;\r\n" +
 				"\tmargin:2px 8px 0 -24px;\r\n" +
+				"\tborder-radius:3px;\r\n" +
 				"\tbackground-color:rgb(57,61,254);\r\n");
 		buf.append("}\r\n");
 		buf.append("</style>\r\n");

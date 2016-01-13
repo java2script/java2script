@@ -63,39 +63,22 @@ Clazz.prepareCallback = function (objThis, args) {
 	var cbName = "b$"; // "callbacks";
 	if (objThis != null && classThisObj != null && classThisObj !== window) {
 		var obs = new Array ();
-		if (objThis[cbName] == null) {
-			objThis[cbName] = obs;
-		} else { // must make a copy!
-			for (var s in objThis[cbName]) {
-				if (s != "length") {
-					obs[s] = objThis[cbName][s];
+		var callbacks = objThis[cbName];
+		if (callbacks != null) { // must make a copy!
+			for (var s in callbacks) {
+				if (s.charAt(0) == '$') {
+					obs[s] = callbacks[s];
 				}
 			}
-			objThis[cbName] = obs;
 		}
-		var className = Clazz.getClassName (classThisObj, true);
-		//if (obs[className] == null) { /* == null make no sense! */
-			//obs[className] = classThisObj;
-			/*
-			 * TODO: the following line is SWT-specific! Try to move it out!
-			 */
-			obs[className.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
-			var clazz = Clazz.getClass (classThisObj);
-			while (clazz != null && clazz.superClazz != null) {
-				clazz = clazz.superClazz;
-				//obs[Clazz.getClassName (clazz)] = classThisObj;
-				/*
-				 * TODO: the following line is SWT-specific! Try to move it out!
-				 */
-				obs[Clazz.getClassName (clazz, true)
-						.replace (/org\.eclipse\.swt\./, "$wt.")] = classThisObj;
-			}
-		//}
+		objThis[cbName] = obs;
+		// objThis["callbacks"] = obs;
+		obs["$"] = classThisObj;
 		var cbs = classThisObj[cbName];
 		if (cbs != null && cbs instanceof Array) {
 			for (var s in cbs) {
-				if (s != "length") {
-					obs[s] = cbs[s];
+				if (s.charAt(0) == '$') {
+					obs["$" + s] = cbs[s];
 				}
 			}
 		}
@@ -221,6 +204,8 @@ Clazz.innerTypeInstance = function (clazzInner, objThis, finalVars) {
  *
  * @return Object with all final variables
  */
+/* deprecated */
+/* Compiler will use "{ name: name, age : age } instead of Clazz.cloneFinals."
 /* protected */
 Clazz.cloneFinals = function () {
 	var o = new Object ();

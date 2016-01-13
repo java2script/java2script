@@ -143,16 +143,17 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			return "null";
 		}
 		StringBuffer buf = new StringBuffer();
-		buf.append("Clazz.cloneFinals (");
+		buf.append("{");
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
 			ASTFinalVariable fv = (ASTFinalVariable) iter.next();
 			String name = fv.variableName;
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;
 			}
-			buf.append("\"");
+			//buf.append("\"");
 			buf.append(name);
-			buf.append("\", ");
+			//buf.append("\": ");
+			buf.append(": ");
 			String methodScope = fv.methodScope;
 			if (methodScope == null && scope == null) {
 				buf.append(name);
@@ -167,7 +168,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 				buf.append(seperator);
 			}
 		}
-		buf.append(")");
+		buf.append("}");
 		return buf.toString();
 	}
 

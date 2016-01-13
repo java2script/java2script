@@ -698,7 +698,7 @@ protected void createHandle() {
 	handle = document.createElement("DIV");
 //	handle.className = "shell-default shell-trim";
 	handle.className = "shell-default";
-	handle.style.lineHeight = "16px"; // or "1", reset CSS
+//	handle.style.lineHeight = "16px"; // or "1", reset CSS
 	handle.style.visibility = "hidden";
 	
 	//nextWindowLocation();
@@ -2292,6 +2292,7 @@ void setSystemMenu () {
 	*/
 	titleBar = document.createElement("DIV");
 	titleBar.className = "shell-title-bar";
+	titleBar.style.lineHeight = "16px"; // or "1", reset CSS
 	hNoTextSelection = OS.setTextSelection(this.titleBar, false);
 
 	if ((style & SWT.TOOL) == 0 && (style & (SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {

@@ -189,7 +189,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //
 		String fullClassName = anonClassName;
 //		String fullClassName = null;
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
 //		if (packageName != null && packageName.length() != 0) {
 //			fullClassName = packageName + '.' + anonymousName;
 //		} else {
@@ -202,9 +201,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			fullClassName = anonymousName;
 //		}
 		
-		buffer.append("(Clazz.isClassDefined (\"");
-		buffer.append(fullClassName);
-		buffer.append("\") ? 0 : ");
+//		buffer.append("(Clazz.isClassDefined (\"");
+//		buffer.append(fullClassName);
+//		buffer.append("\") ? 0 : ");
 		
 		StringBuffer tmpBuffer = buffer;
 		buffer = methodBuffer;
@@ -213,6 +212,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("cla$$.$");
 		buffer.append(shortClassName);
 		buffer.append("$ = function () {\r\n");
+		buffer.append("if (Clazz.isClassDefined (\"").append(fullClassName).append("\")) ").append("return ").append(fullClassName).append(";\r\n");
 		
 		buffer.append("Clazz.pu$h ();\r\n");
 		buffer.append("cla$$ = ");
@@ -401,6 +401,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		
+		buffer.append("var rc = cla$$;\r\n");
 		buffer.append("cla$$ = Clazz.p0p ();\r\n");
 		
 		typeVisitor.setClassName(oldClassName);
@@ -408,6 +409,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(laterBuffer);
 		laterBuffer = oldLaterBuffer;
 		
+		buffer.append("return rc;\r\n");
 		buffer.append("};\r\n");
 
 		String methods = methodBuffer.toString();
@@ -415,17 +417,30 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		methodBuffer.append(methods);
 		buffer = tmpBuffer;
 		
-		buffer.append(packageName);
-		buffer.append(".");
-		idx = className.indexOf('$');
-		if (idx != -1) {
-			buffer.append(className.substring(0, idx));
-		} else {
-			buffer.append(className);
+		ITypeBinding declareClass = binding;
+		boolean prefixed = false;
+		while (declareClass != null) {
+			if (!declareClass.isAnonymous()) {
+				buffer.append(declareClass.getQualifiedName());
+				prefixed = true;
+				break;
+			}
+			declareClass = declareClass.getDeclaringClass();
+		}
+		if (!prefixed) {
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
+			buffer.append(packageName);
+			buffer.append(".");
+			idx = className.indexOf('$');
+			if (idx != -1) {
+				buffer.append(className.substring(0, idx));
+			} else {
+				buffer.append(className);
+			}
 		}
 		buffer.append(".$");
 		buffer.append(shortClassName);
-		buffer.append("$ ())");
+		buffer.append("$ ()");
 		/*
 		 * Anonymouse class won't have static members and methods and initializers
 		 */
@@ -625,7 +640,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			StringBuffer tmpBuffer = buffer;
 //			buffer = methodBuffer;
 			
-			buffer.append("(");
+//			buffer.append("(");
+			buffer.append("Clazz.innerTypeInstance (");
+//			buffer.append(anonClassName);
 //			buffer.append(baseClassName);
 //			buffer.append(".$");
 //			buffer.append(shortClassName);
@@ -651,10 +668,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			methodDeclareStack.push(binding.getKey());
 			anonDeclare.accept(this);
 			methodDeclareStack.pop();
-			buffer.append(", ");
+//			buffer.append(", ");
 
-			buffer.append("Clazz.innerTypeInstance (");
-			buffer.append(anonClassName);
 			buffer.append(", this, ");
 			String scope = null;
 			if (methodDeclareStack.size() != 0) {
@@ -689,7 +704,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			currentBlockForVisit = lastCurrentBlock;
 			//buffer.append("};\r\n");
 			buffer.append(")"); // Clazz.innerTypeInstance
-			buffer.append(")"); // end of line (..., ...)
+//			buffer.append(")"); // end of line (..., ...)
 
 //			methodBuffer = buffer;
 //			buffer = tmpBuffer;
@@ -2406,10 +2421,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String name = declaringClass.getQualifiedName();
 		boolean isThis = false;
 		int superLevel = 0;
+		ITypeBinding originalType = null;
 		while (parent != null) {
 			if (parent instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
@@ -2423,6 +2442,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			} else if (parent instanceof AnonymousClassDeclaration) {
 				AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
@@ -2465,7 +2487,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (!isThis) {
 			buffer.append("this.callbacks[\"");
-			buffer.append(shortenQualifiedName(name));
+			//buffer.append(shortenQualifiedName(name));
+			StringBuilder dollarBuilder = new StringBuilder();
+			if (originalType != null) {
+				ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+				while (thisDeclaringClass != null) {
+					dollarBuilder.append("$");
+					thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+				}
+			}
+			declaringClass = declaringClass.getDeclaringClass();
+			while (declaringClass != null) {
+				if (dollarBuilder.length() > 0) {
+					dollarBuilder.deleteCharAt(0);
+				}
+				declaringClass = declaringClass.getDeclaringClass();
+			}
+			buffer.append(dollarBuilder);
 			buffer.append("\"].");
 		}
 	}
@@ -2583,8 +2621,57 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(SuperMethodInvocation node) {
-		buffer.append("Clazz.superCall (this, ");
-		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+		boolean extraSuper = false;
+		Name qualifier = node.getQualifier();
+		if (qualifier != null) {
+			String fullyQualifiedName = null;
+			ITypeBinding typeBinding = qualifier.resolveTypeBinding();
+			if (typeBinding != null) {
+				fullyQualifiedName = typeBinding.getQualifiedName();
+			}
+			if (fullyQualifiedName != null && !fullyQualifiedName.equals(getFullClassName())) {
+				ITypeBinding originalType = null;
+				ASTNode parent = node.getParent();
+				while (parent != null) {
+					if (parent instanceof AbstractTypeDeclaration) {
+						AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
+						ITypeBinding parentTypeBinding = type.resolveBinding();
+						if (parentTypeBinding != null && originalType == null) {
+							originalType = parentTypeBinding;
+						}
+					} else if (parent instanceof AnonymousClassDeclaration) {
+						AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
+						ITypeBinding parentTypeBinding = type.resolveBinding();
+						if (parentTypeBinding != null && originalType == null) {
+							originalType = parentTypeBinding;
+						}
+					}
+					parent = parent.getParent();
+				}
+				StringBuilder dollarBuilder = new StringBuilder();
+				if (originalType != null) {
+					ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+					while (thisDeclaringClass != null) {
+						dollarBuilder.append("$");
+						thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+					}
+				}
+				ITypeBinding declaringClass = typeBinding.getDeclaringClass();
+				while (declaringClass != null) {
+					if (dollarBuilder.length() > 0) {
+						dollarBuilder.deleteCharAt(0);
+					}
+					declaringClass = declaringClass.getDeclaringClass();
+				}
+				buffer.append("Clazz.superCall (this.callbacks[\"").append(dollarBuilder).append("\"], ");
+				buffer.append(assureQualifiedName(shortenQualifiedName(fullyQualifiedName)));
+				extraSuper = true;
+			}
+		}
+		if (!extraSuper) {
+			buffer.append("Clazz.superCall (this, ");
+			buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+		}
 		buffer.append(", \"");
 		String name = getJ2SName(node.getName());
 		buffer.append(name);
@@ -2614,7 +2701,44 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				 * or anonymous classes.
 				 */
 				buffer.append("this.callbacks[\"");
-				qualifier.accept(this);
+				//qualifier.accept(this);
+				ITypeBinding originalType = null;
+				ASTNode parent = node.getParent();
+				while (parent != null) {
+					if (parent instanceof AbstractTypeDeclaration) {
+						AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
+						ITypeBinding parentTypeBinding = type.resolveBinding();
+						if (parentTypeBinding != null && originalType == null) {
+							originalType = parentTypeBinding;
+						}
+					} else if (parent instanceof AnonymousClassDeclaration) {
+						AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
+						ITypeBinding parentTypeBinding = type.resolveBinding();
+						if (parentTypeBinding != null && originalType == null) {
+							originalType = parentTypeBinding;
+						}
+					}
+					parent = parent.getParent();
+				}
+				StringBuilder dollarBuilder = new StringBuilder();
+				if (originalType != null) {
+					ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+					while (thisDeclaringClass != null) {
+						dollarBuilder.append("$");
+						thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+					}
+				}
+				ITypeBinding typeBinding = qualifier.resolveTypeBinding();
+				if (typeBinding != null) { // always true
+					ITypeBinding declaringClass = typeBinding.getDeclaringClass();
+					while (declaringClass != null) {
+						if (dollarBuilder.length() > 0) {
+							dollarBuilder.deleteCharAt(0);
+						}
+						declaringClass = declaringClass.getDeclaringClass();
+					}
+				}
+				buffer.append(dollarBuilder);
 				buffer.append("\"]");
 			}
 		} else {

@@ -534,7 +534,7 @@ abstract class AbstractStringBuilder {
                 return "";
 
             shared = true;
-            return new String(start, count - start, value);
+            return new String(value, start, count - start);
         }
         throw new StringIndexOutOfBoundsException(start);
     }
@@ -578,7 +578,7 @@ abstract class AbstractStringBuilder {
         if (count >= 256 && count <= (value.length >> 1))
             return new String(value, 0, count);
         shared = true;
-        return new String(0, count, value);
+        return new String(value, 0, count);
     }
 
     /**

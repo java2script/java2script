@@ -13,61 +13,183 @@ window["java.package.callback"] = function () {
 
 	var base = ClazzLoader.getClasspathFor ("java.*");
 
-	ClazzLoader.jarClasspath (base + "core.z.js", [
-        "java.lang.Void",
-		"$.reflect.AccessibleObject",
-		"$.AnnotatedElement",
-		"$.GenericDeclaration",
-		"$.InvocationHandler",
-		"$.Member",
-        "$.Modifier",
-		"$.Constructor",
-        "$.Field",
-        "$.Method",
-        
-		"java.net.URLEncoder",
-		"java.net.URLDecoder",
-
-		"net.sf.j2s.ajax.HttpRequest",
-		"$.ARunnable",
-		"$.AClass",
-		"$.ASWTClass",
-
-		"net.sf.j2s.ajax.IXHRCallback",
-		"$.XHRCallbackAdapter",
-		"$.XHRCallbackSWTAdapter",
-       	
-		"$.SimpleSerializable",
-		"$.ISimpleCacheable",
-		"$.ISimpleConstant",
-		"$.SimpleFilter",
-		"$.SimpleRPCRunnable",
-		"$.ISimpleRequestInfoBinding",
-		"$.ISimpleRequestInfo",
-		"$.ISimpleGeoLocationBinding",
-		"$.ISimpleGeoLocation",
-		"$.SimpleRPCRequest",
-		"$.SimpleRPCSWTRequest",
-       	
-		"$.SimplePipeSequence",
-		"$.SimplePipeRunnable",
-		"$.ISimplePipePriority",
-		"$.SimplePipeHelper",
-		"$.SimplePipeRequest",
-		"$.SimplePipeSWTRequest",
-       	
-		"$.CompoundSerializable",
-		"$.CompoundPipeSession",
-		"$.CompoundPipeRunnable",
-		"$.CompoundPipeRequest",
-		"$.CompoundPipeSWTRequest",
-		
-  		"net.sf.j2s.store.IStore",
-  		"$.CookieStore",
-  		"$.XSSCookieStore",
-  		"$.HTML5LocalStorage",
-  		"$.SimpleStore"
-	]);
+	var coreZ = null;
+	if (window["j2s.rt.z.enabled"]) {
+		ClazzLoader.jarClasspath (base + "rt.z.js", [
+	        "java.lang.Void",
+			"$.reflect.AccessibleObject",
+			"$.AnnotatedElement",
+			"$.GenericDeclaration",
+			"$.InvocationHandler",
+			"$.Member",
+	        "$.Modifier",
+			"$.Constructor",
+	        "$.Field",
+	        "$.Method",
+	        
+			"java.net.URLEncoder",
+			"java.net.URLDecoder",
+		]);
+		ClazzLoader.jarClasspath (base + "simple.z.js", [
+			"net.sf.j2s.ajax.HttpRequest",
+			"$.ARunnable",
+			"$.AClass",
+			"$.ASWTClass",
+	
+			"net.sf.j2s.ajax.IXHRCallback",
+			"$.XHRCallbackAdapter",
+			"$.XHRCallbackSWTAdapter",
+	       	
+			"$.SimpleSerializable",
+			"$.ISimpleCometable",
+			"$.ISimpleConstant",
+			"$.ISimpleEnum",
+			"$.SimpleFilter",
+			"$.SimpleRPCRunnable",
+			"$.ISimpleRequestInfoBinding",
+			"$.ISimpleRequestInfo",
+			"$.ISimpleGeoLocationBinding",
+			"$.ISimpleGeoLocation",
+			"$.SimpleRPCRequest",
+			"$.SimpleRPCSWTRequest",
+	       	
+			"$.SimplePipeSequence",
+			"$.SimplePipeRunnable",
+			"$.ISimpleCacheable",
+			"$.ISimplePipePriority",
+			"$.SimplePipeHelper",
+			"$.SimplePipeRequest",
+			"$.SimplePipeSWTRequest",
+	       	
+			"$.CompoundSerializable",
+			"$.CompoundPipeSession",
+			"$.CompoundPipeRunnable",
+			"$.CompoundPipeRequest",
+			"$.CompoundPipeSWTRequest",
+			
+	  		"net.sf.j2s.store.IStore",
+	  		"$.CookieStore",
+	  		"$.XSSCookieStore",
+	  		"$.HTML5LocalStorage",
+	  		"$.SimpleStore"
+		]);
+		ClazzLoader.jarClasspath (base + "simple.store.z.js", [
+	  		"net.sf.j2s.store.IStore",
+	  		"$.CookieStore",
+	  		"$.XSSCookieStore",
+	  		"$.HTML5LocalStorage",
+	  		"$.SimpleStore"
+		]);
+		ClazzLoader.jarClasspath (base + "simple.rpc.z.js", [
+			"net.sf.j2s.ajax.HttpRequest",
+			"$.ARunnable",
+			"$.AClass",
+	
+			"net.sf.j2s.ajax.IXHRCallback",
+			"$.XHRCallbackAdapter",
+	       	
+			"$.SimpleSerializable",
+			"$.ISimpleCometable",
+			"$.ISimpleConstant",
+			"$.ISimpleEnum",
+			"$.SimpleFilter",
+			"$.SimpleRPCRunnable",
+			"$.ISimpleRequestInfoBinding",
+			"$.ISimpleRequestInfo",
+			"$.ISimpleGeoLocationBinding",
+			"$.ISimpleGeoLocation",
+			"$.SimpleRPCRequest",
+		]);
+		ClazzLoader.jarClasspath (base + "simple.pipe.z.js", [
+			"net.sf.j2s.ajax.SimplePipeSequence",
+			"$.SimplePipeRunnable",
+			"$.ISimpleCacheable",
+			"$.ISimplePipePriority",
+			"$.SimplePipeHelper",
+			"$.SimplePipeRequest",
+			"$.SimplePipeSWTRequest",
+	       	
+			"$.CompoundSerializable",
+			"$.CompoundPipeSession",
+			"$.CompoundPipeRunnable",
+			"$.CompoundPipeRequest",
+			"$.CompoundPipeSWTRequest",
+		]);
+		ClazzLoader.jarClasspath (base + "simple.swt.z.js", [
+			"net.sf.j2s.ajax.ASWTClass",
+			"$.XHRCallbackSWTAdapter",
+			"$.SimpleRPCSWTRequest",
+			"$.CompoundPipeSWTRequest",
+		]);
+		coreZ = base + "rt.z.js";
+	}
+	if (coreZ != null && window["j2s.core.z.packing"] != null) {
+		try {
+			coreZ = window["j2s.core.z.packing"] (base);
+		} catch (e) {
+		}
+	}
+	
+	if (coreZ == null || coreZ.length == 0) {
+		coreZ = base + "core.z.js";
+		ClazzLoader.jarClasspath (coreZ, [
+	        "java.lang.Void",
+			"$.reflect.AccessibleObject",
+			"$.AnnotatedElement",
+			"$.GenericDeclaration",
+			"$.InvocationHandler",
+			"$.Member",
+	        "$.Modifier",
+			"$.Constructor",
+	        "$.Field",
+	        "$.Method",
+	        
+			"java.net.URLEncoder",
+			"java.net.URLDecoder",
+	
+			"net.sf.j2s.ajax.HttpRequest",
+			"$.ARunnable",
+			"$.AClass",
+			"$.ASWTClass",
+	
+			"net.sf.j2s.ajax.IXHRCallback",
+			"$.XHRCallbackAdapter",
+			"$.XHRCallbackSWTAdapter",
+	       	
+			"$.SimpleSerializable",
+			"$.ISimpleCometable",
+			"$.ISimpleConstant",
+			"$.ISimpleEnum",
+			"$.SimpleFilter",
+			"$.SimpleRPCRunnable",
+			"$.ISimpleRequestInfoBinding",
+			"$.ISimpleRequestInfo",
+			"$.ISimpleGeoLocationBinding",
+			"$.ISimpleGeoLocation",
+			"$.SimpleRPCRequest",
+			"$.SimpleRPCSWTRequest",
+	       	
+			"$.SimplePipeSequence",
+			"$.SimplePipeRunnable",
+			"$.ISimpleCacheable",
+			"$.ISimplePipePriority",
+			"$.SimplePipeHelper",
+			"$.SimplePipeRequest",
+			"$.SimplePipeSWTRequest",
+	       	
+			"$.CompoundSerializable",
+			"$.CompoundPipeSession",
+			"$.CompoundPipeRunnable",
+			"$.CompoundPipeRequest",
+			"$.CompoundPipeSWTRequest",
+			
+	  		"net.sf.j2s.store.IStore",
+	  		"$.CookieStore",
+	  		"$.XSSCookieStore",
+	  		"$.HTML5LocalStorage",
+	  		"$.SimpleStore"
+		]);
+	}
 
 	ClazzLoader.jarClasspath (base + "util/AbstractList.js", [
 		"java.util.AbstractList",
@@ -129,7 +251,7 @@ window["java.package.callback"] = function () {
 			+ "org/apache/harmony/luni/util/Msg.z.js", 
 		["org.apache.harmony.luni.util.Msg", "$.MsgHelp"]);
 
-	ClazzLoader.loadZJar (base + "core.z.js", ClazzLoader.runtimeKeyClass); //"java.lang.String"
+	ClazzLoader.loadZJar (coreZ, ClazzLoader.runtimeKeyClass); //"java.lang.String"
 };
 if (ClazzLoader.classpathMap["@java"] != null) {
 	window["java.package.callback"] ();
