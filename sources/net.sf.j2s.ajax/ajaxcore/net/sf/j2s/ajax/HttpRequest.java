@@ -221,7 +221,14 @@ public class HttpRequest {
 						if (matcher.find()) {
 							charset = matcher.group(1);
 						} else {
-							responseText = tmp;
+							matcher = Pattern.compile(
+									"<meta.*\\s+charset\\s*=\\s*[\'\"]([^'\"]*)\\s*[\'\"].*>", 
+									Pattern.MULTILINE | Pattern.CASE_INSENSITIVE).matcher(tmp);
+							if (matcher.find()) {
+								charset = matcher.group(1);
+							} else {
+								responseText = tmp;
+							}
 						}
 					}
 				}
@@ -552,9 +559,11 @@ public class HttpRequest {
 				if (checkAbort()) return; // exception caused by abort action
 				//e.printStackTrace();
 				status = connection.getResponseCode();
-				readyState = 4;
-				if (onreadystatechange != null) {
-					onreadystatechange.onLoaded();
+				if (readyState != 4) {
+					readyState = 4;
+					if (onreadystatechange != null) {
+						onreadystatechange.onLoaded();
+					}
 				}
 				connection = null;
 				readyState = 0;

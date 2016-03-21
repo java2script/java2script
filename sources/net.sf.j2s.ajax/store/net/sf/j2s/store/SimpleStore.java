@@ -22,8 +22,13 @@ try {
 	isLocalFile = true;
 }
 if (window["j2s.html5.store"] && window["localStorage"] != null && (ua.indexOf ("gecko/") == -1 || !isLocalFile)) {
-	this.store = new net.sf.j2s.store.HTML5LocalStorage ();
-	return;
+	try {
+		localStorage.setItem('net.sf.j2s.test', '1');
+		localStorage.removeItem('net.sf.j2s.test');
+		this.store = new net.sf.j2s.store.HTML5LocalStorage ();
+		return;
+	} catch (error) {
+	}
 }
 var isLocal = false;
 try {
@@ -41,10 +46,10 @@ if (!isLocal && cookieURL != null && !isOldIE) {
 }
 		 */ {
 			File storeFile = new File(System.getProperty("user.home"), ".java2script.store");
-			this.store = new INIFileStore(storeFile.getAbsolutePath()); 
+			this.store = new INIFileStore(storeFile.getAbsolutePath());
 		}
 	}
-	
+
 	public static SimpleStore getDefault() {
 		if (singleton == null) {
 			singleton = new SimpleStore();
