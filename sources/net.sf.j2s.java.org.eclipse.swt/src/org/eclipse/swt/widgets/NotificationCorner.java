@@ -91,8 +91,8 @@ public class NotificationCorner extends DesktopItem {
 				 * if (window["swt.logo.url"] != null) {
 				 * 	logoURL = window["swt.logo.url"];
 				 * }
-				 */ {}
-				if (logoURL != null) {
+				 */ { logoURL = ""; }
+				if (logoURL != null && logoURL.length() > 0) {
 					handle.style.backgroundPosition = "center center";
 					handle.style.backgroundImage = "url('" + logoURL + "')";
 				}

@@ -732,6 +732,9 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		Point size = null;
 		String text = getText();
 		if (text != null && text.length() != 0) {
+			if (text.endsWith("\n")) {
+				text += "W"; // keep last line in size
+			}
 			boolean wrap = (style & SWT.MULTI) != 0 && (style & SWT.WRAP) != 0;
 			if (wrap && wHint != SWT.DEFAULT && wHint > 0) {
 				size = new Point(wHint, 
@@ -739,6 +742,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 			} else {
 				text = text.replaceAll("(^\\s)|(\\s$)", "" + (char) 160).replaceAll("\\s\\s", " " + (char) 160);
 				size = OS.getStringStyledSize(text, "text-default", handle.style.cssText);
+				size.x += (style & SWT.WRAP) != 0 ? 1 : 0; // size.x may be a float number, add 1 pixel to avoid being wrapped
 			}
 //			width = size.x - 2; // there are default padding "0 1px" for class "text-default";
 			width = size.x;

@@ -61,7 +61,7 @@ public class About {
 			gridLayout.horizontalSpacing = 0;
 			aboutShell.setLayout(gridLayout);
 
-			aboutShell.setMinimumSize(442, 301);
+			aboutShell.setMinimumSize(480, 300);
 			aboutShell.open();
 			aboutShell.layout();
 			aboutShell.pack();
@@ -92,6 +92,7 @@ public class About {
 
 	/**
 	 * Create contents of the window
+	 * @wbp.parser.entryPoint
 	 */
 	private static void createContents(Shell aboutShell) {
 		final Composite composite = new Composite(aboutShell, SWT.NONE);
@@ -145,18 +146,23 @@ public class About {
 	     */ {}
 	    java2scriptj2sPacemakerLabel.setFont(j2sFont);
 		java2scriptj2sPacemakerLabel.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-		java2scriptj2sPacemakerLabel.setLayoutData(new GridData(225, SWT.DEFAULT));
-		java2scriptj2sPacemakerLabel.setText("Java2Script (J2S) open source project provides an Eclipse Java to JavaScript compiler plugin, provides java.lang.*, java.util.* and other common utilities, provides an JavaScript implementation of Eclipse Standard Widget Toolkit (SWT), supports SWT-based Rich Client Platform (RCP) to Rich Internet Application (RIA) conversions.");
+		GridData gd_java2scriptj2sPacemakerLabel = new GridData(260, SWT.DEFAULT);
+		gd_java2scriptj2sPacemakerLabel.verticalIndent = 12;
+		java2scriptj2sPacemakerLabel.setLayoutData(gd_java2scriptj2sPacemakerLabel);
+		java2scriptj2sPacemakerLabel.setText("Java2Script (J2S) project provides a Java to JavaScript compiler plugin for Eclipse, provides java.lang.*, java.util.* and other common APIs, provides a JavaScript version of Eclipse Standard Widget Toolkit (SWT), supports converting SWT-based applications to web applications running in moderm browsers.");
 
 		final Link homepageLink = new Link(description, SWT.NONE);
 		homepageLink.setFont(j2sFont);
 		final GridData gd_homepageLink = new GridData();
+		gd_homepageLink.horizontalAlignment = SWT.FILL;
+		gd_homepageLink.grabExcessHorizontalSpace = true;
 		gd_homepageLink.verticalIndent = 8;
 		homepageLink.setLayoutData(gd_homepageLink);
 		homepageLink.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		homepageLink.setText("Home: <a href=\"http://java2script.org/\">java2script.org</a> / <a href=\"http://j2s.sourceforge.net/\">j2s.sourceforge.net</a>");
 
 		final Link founderLink = new Link(description, SWT.NONE);
+		founderLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		founderLink.setFont(j2sFont);
 		founderLink.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 		founderLink.setText("Founder: <a href=\"http://zhourenjian.name/\">Zhou Renjian</a>");

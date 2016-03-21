@@ -300,6 +300,7 @@ public Point computeSize (int wHint, int hHint, boolean changed) {
 		} else {
 			if (!textSizeCached || changed) {
 				Point cssSize = OS.getStringStyledSize(text, "label-default", handle.style.cssText);
+				cssSize.x += (style & SWT.WRAP) != 0 ? 1 : 0; // size.x may be a float number, add 1 pixel to avoid being wrapped
 				textSizeCached = true;
 				textWidthCached = cssSize.x;
 				textHeightCached = cssSize.y;

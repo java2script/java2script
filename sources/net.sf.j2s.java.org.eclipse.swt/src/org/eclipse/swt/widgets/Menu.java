@@ -253,7 +253,7 @@ void _setVisible (boolean visible) {
 			int width = OS.getContainerWidth(handle);
 			handle.style.width = (width + 32) + "px";
 		}
-		handle.style.height = height + "px";
+		//handle.style.height = height + "px"; // Do NOT set height properties
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
 		if (y + height > clientArea.y + clientArea.height) {

@@ -210,7 +210,7 @@ public class QuickLaunch extends DesktopItem {
 		 * 		shortcutBar = container;
 		 * 	}
 		 * }
-		 */ {}
+		 */ { shortcutBar = handle; }
 		if (shortcutBar != null) {
 			handle.style.display = "none";
 			BAR_HEIGHT = 0;
@@ -410,7 +410,7 @@ public class QuickLaunch extends DesktopItem {
 		 * 		shortcutBar = container;
 		 * 	}
 		 * }
-		 */ {}
+		 */ { shortcutBar = handle; }
 		if (shortcutBar == null) {
 			shortcutBar = document.body;
 		} else {

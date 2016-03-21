@@ -2555,7 +2555,7 @@ void initializeDekstop() {
 	/* initialize desktop panel */
 	Element panel = document.getElementById("swt-desktop-panel");
 	double scrolling = 0.0;
-	boolean injecting = false;
+	//boolean injecting = false;
 	if (panel == null) {
 		boolean forceInsertingPanel = true;
 		/**
@@ -2568,7 +2568,7 @@ void initializeDekstop() {
 			} else {
 				scrolling = 1.0 * document.body.parentNode.scrollTop / document.body.parentNode.scrollHeight;
 			}
-			injecting = true;
+			//injecting = true;
 			panel = document.createElement("DIV");
 			panel.id = "swt-desktop-panel";
 			/**
@@ -5195,6 +5195,7 @@ static void updateAllShellLayouts() {
 				for (int j = 0; j < shells.length; j++) {
 					Shell shell = shells[j];
 					if (shell != null && !shell.isDisposed()) {
+						shell.titleBarHeight = 0;
 						if ((shell.style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 							Rectangle bounds = shell.getBounds();
 							if (shell.getMaximized() && shell.titleBar != null) {

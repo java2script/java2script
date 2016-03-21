@@ -16,7 +16,8 @@
 	width:40px;
 	background-color:menu;
 	background-repeat:no-repeat;
-	background-position:-44px -44px;
+	background-position:-48px -48px;
+	_background-position:-44px -44px;
 	background-image: url('images/packed.gif');
 	border:1px solid buttonshadow;
 	margin:0;

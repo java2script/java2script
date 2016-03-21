@@ -1448,7 +1448,7 @@ private void updateImagePosition() {
 		if (OS.isIE50 || OS.isIE55 || OS.isIE60 || OS.isIE70) {
 			btnIcon.style.marginTop = "2px";
 		}
-	} else if (OS.isFirefox) {
+	} else if (OS.isFirefox || OS.isSafari || OS.isChrome) {
 		btnIcon.style.marginTop = "-1px";
 	}
 	

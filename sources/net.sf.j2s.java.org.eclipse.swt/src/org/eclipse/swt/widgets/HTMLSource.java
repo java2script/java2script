@@ -90,7 +90,7 @@ public class HTMLSource {
 //		Composite composite = new Composite(shell, SWT.NONE);
 //		composite.setLayout(new GridLayout());
 		shell.setLayout(new GridLayout());
-		Text text = new Text(shell, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+		final Text text = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
 		Font font = null;
 		/**
 	     * @j2sNative
@@ -141,6 +141,15 @@ public class HTMLSource {
 		});
 		shell.pack();
 		shell.open();
+		shell.getDisplay().timerExec(250, new Runnable() {
+			
+			@Override
+			public void run() {
+				shell.setActive();
+				text.forceFocus();
+			}
+			
+		});
 		while (!shell.isDisposed ()) {
 			if (!objShell.display.readAndDispatch ()) objShell.display.sleep ();
 		}

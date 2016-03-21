@@ -108,6 +108,7 @@ import org.eclipse.swt.internal.xhtml.window;
  * $WTC$$.registerCSS ("$wt.widgets.Shell.IE");
  * @j2sSuffix
 Sync2Async = {};
+Sync2Async.__CLASS_NAME__ = "Sync2Async$1";
 Sync2Async.block = function (shell, oThis, runnable) {
 shell.addDisposeListener ((function (innerThis, finalVars) {
 if (!Clazz.isClassDefined ("Sync2Async$1")) {

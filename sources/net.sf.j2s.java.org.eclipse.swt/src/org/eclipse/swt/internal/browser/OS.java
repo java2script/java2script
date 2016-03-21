@@ -273,8 +273,8 @@ public class OS {
 		s.width = "324px";
 		s.height = "324px";
 		document.body.appendChild(el);
-		wScrollBar = el.offsetWidth - el.clientWidth;
-		hScrollBar = el.offsetHeight - el.clientHeight;
+		wScrollBar = Math.max(14, el.offsetWidth - el.clientWidth);
+		hScrollBar = Math.max(14, el.offsetHeight - el.clientHeight);
 		//document.body.removeChild(el);
 		destroyHandle(el);
 	}
@@ -462,6 +462,7 @@ public class OS {
 		 * f = e[g];
 		 */ {
 			 e = g; // non-sense code
+			 if (g.length() > 0) f = (Element) e; // non-sense code
 		 }
 		if (f != null) {
 			clearChildren (f);
@@ -487,6 +488,8 @@ public class OS {
 		}
 		if (wrappedWidth > 0) {
 			f.style.width = wrappedWidth + "px";
+		} else {
+			f.style.width = "";
 		}
 		/*
 		 * Set other container invisible to make sure the size is accurate

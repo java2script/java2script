@@ -14,8 +14,6 @@ package org.eclipse.swt.internal;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.internal.browser.OS;
-import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.widgets.Decorations;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.QuickLaunch;
@@ -73,25 +71,30 @@ public class ResizeHandler {
 	
 	public void updateMinimized() {
 		Rectangle clientArea = getClientArea();
-		Element tb = null;
+		int titleHeight = 0;
+		if ((shell.getStyle() & SWT.TITLE) != 0)
 		/**
 		 * @j2sNative
-		 * tb = this.shell.titleBar;
+		 * try {
+		 * 	titleHeight = this.shell.getTitleBarHeight();
+		 * } catch (e) {
+		 * }
 		 */ {}
-		int h = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
-		shell.setLocation(clientArea.x - 1, clientArea.y + clientArea.height - h - 6);
+		shell.setLocation(clientArea.x - 1, clientArea.y + clientArea.height - titleHeight - 6);
 	}
 
 	public void updateMaximized() {
 		Rectangle clientArea = getClientArea();
 		
-		//int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? 20 : 0;
-		Element tb = null;
+		int titleHeight = 0;
+		if ((shell.getStyle() & SWT.TITLE) != 0)
 		/**
 		 * @j2sNative
-		 * tb = this.shell.titleBar;
+		 * try {
+		 * 	titleHeight = this.shell.getTitleBarHeight();
+		 * } catch (e) {
+		 * }
 		 */ {}
-		int titleHeight = ((shell.getStyle() & SWT.TITLE) != 0) ? OS.getContainerHeight(tb) : 0;
 		// FIXME: maximized size is not accurate
 		//shell.setBounds(shell.computeTrim(0, 0, width + 4, height - titleHeight + 6));
 		boolean disablingMaxBar = false;
@@ -105,12 +108,13 @@ public class ResizeHandler {
 			} else if ((status & SWT.TOP) != 0 && (status & SWT.BOTTOM) != 0) {
 				Rectangle bounds = shell.getBounds();
 				int shellWidth = shell.getSize().x;
+				int deltaHeight = 0; // 2
 				if ((status & SWT.LEFT) != 0) {
-					shell.setBounds(clientArea.x,  clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(clientArea.x,  clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				} else if ((status & SWT.RIGHT) != 0) {
-					shell.setBounds(clientArea.x + clientArea.width - shellWidth, clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(clientArea.x + clientArea.width - shellWidth, clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				} else {
-					shell.setBounds(bounds.x,  clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(bounds.x,  clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				}
 			} else if ((status & SWT.LEFT) != 0 && (status & SWT.RIGHT) != 0) {
 				Rectangle bounds = shell.getBounds();
@@ -129,12 +133,13 @@ public class ResizeHandler {
 			} else if ((status & SWT.TOP) != 0 && (status & SWT.BOTTOM) != 0) {
 				Rectangle bounds = shell.getBounds();
 				int shellWidth = shell.getSize().x;
+				int deltaHeight = 0; // 2
 				if ((status & SWT.LEFT) != 0) {
-					shell.setBounds(clientArea.x,  clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(clientArea.x,  clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				} else if ((status & SWT.RIGHT) != 0) {
-					shell.setBounds(clientArea.x + clientArea.width - shellWidth + 2, clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(clientArea.x + clientArea.width - shellWidth + 2, clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				} else {
-					shell.setBounds(bounds.x,  clientArea.y, shellWidth, clientArea.height + 2);
+					shell.setBounds(bounds.x,  clientArea.y, shellWidth, clientArea.height + deltaHeight);
 				}
 			} else if ((status & SWT.LEFT) != 0 && (status & SWT.RIGHT) != 0) {
 				Rectangle bounds = shell.getBounds();

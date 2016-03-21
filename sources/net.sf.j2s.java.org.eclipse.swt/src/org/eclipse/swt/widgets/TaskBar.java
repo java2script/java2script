@@ -427,7 +427,7 @@ public class TaskBar extends DesktopItem {
 		int length = this.items.length;
 		if (length == 0) {
 			if (orientation == SWT.BOTTOM) {
-				this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+				this.barEl.style.height = (BAR_HEIGHT - 2 + 1) + "px"; // hide bottom border
 				this.barEl.style.width = clientWidth + "px";
 				this.barEl.style.top = (clientHeight - BAR_HEIGHT) + "px";
 			} else if (orientation == SWT.TOP) {
@@ -572,7 +572,7 @@ public class TaskBar extends DesktopItem {
 			}
 		}
 		if (orientation == SWT.BOTTOM) {
-			this.barEl.style.height = (BAR_HEIGHT - 2) + "px";
+			this.barEl.style.height = (BAR_HEIGHT - 2 + 1) + "px"; // hide bottom border
 			this.barEl.style.width = clientWidth + "px";
 			this.barEl.style.top = (clientHeight - BAR_HEIGHT) + "px";
 		} else if (orientation == SWT.TOP) {

@@ -147,6 +147,8 @@ public class Decorations extends Canvas {
 	private Object hTitleBarClick;
 	private Object hNoTextSelection;
 	private DragAndDrop dnd;
+	
+	int titleBarHeight;
 
 /**
  * Prevents uninitialized instances from being created outside the package.
@@ -439,12 +441,17 @@ protected Element containerHandle() {
 	return contentHandle;
 }
 
+protected int getTitleBarHeight() {
+	return (titleBarHeight = titleBarHeight > 0 ? Math.max(titleBarHeight, OS.getContainerHeight(titleBar)) : OS.getContainerHeight(titleBar));
+}
+
 public Rectangle computeTrim (int x, int y, int width, int height) {
 	checkWidget ();
+	//System.out.println(": " + x + ", " + y + ", " + width + ", " + height);
 	if ((style & SWT.NO_TRIM) == 0) {
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 			//height += 20;
-			height += Math.max(OS.getContainerHeight(titleBar), 19);
+			height += Math.max(getTitleBarHeight(), 19);
 			if (width < 105) {
 				width = 105;
 			}
@@ -468,6 +475,18 @@ public Rectangle computeTrim (int x, int y, int width, int height) {
 			height += 2;
 			x += 1;
 			//y += 1;
+		}
+		if (maximized && (style & SWT.NO_TRIM) == 0) {
+//			boolean maxBarEnabled = false;
+//			/**
+//			 * @j2sNative
+//			 * maxBarEnabled = window["swt.maximized.bar"] != false; 
+//			 */ {}
+//			if (maxBarEnabled) {
+//			} else {
+//				height += 3;
+//			}
+			height += 2;
 		}
 	}
 	return new Rectangle (x, y, width, height);
@@ -1073,7 +1092,7 @@ public Rectangle getClientArea () {
 	int h = height;
 	if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 		//h -= 20;
-		h -= Math.max(OS.getContainerHeight(titleBar), 19) + 2;
+		h -= Math.max(getTitleBarHeight(), 19) + 2;
 		w -= 8;
 		//h -= 8;
 		h -= 5;
@@ -1090,6 +1109,9 @@ public Rectangle getClientArea () {
 			h -= 2;
 			w -= 2;
 		}
+	} else if ((style & SWT.NO_TRIM) != 0){
+		//h -= 2;
+		//w -= 2;
 	} else {
 		h -= 6;
 		w -= 6;
@@ -1296,7 +1318,7 @@ public Point getSize () {
 //	//size.y += 26;
 //	size.y += 6;
 //	if (titleBar != null) {
-//		size.y += OS.getContainerHeight(titleBar);
+//		size.y += getTitleBarHeight();
 //	}
 //	return size;
 }
@@ -1888,6 +1910,7 @@ public void setMaximized (boolean maximized) {
 			node.scrollLeft = 0;
 			node.scrollTop = 0;
 		}
+		OS.addCSSClass(handle, key);
 //		boolean toUpdateMax = false;
 		if (contentHandle != null) {
 			if (oldBounds == null) {
@@ -1905,7 +1928,7 @@ public void setMaximized (boolean maximized) {
 //				height = OS.getFixedBodyClientHeight();
 //			}
 			//int titleHeight = ((style & SWT.TITLE) != 0) ? 20 : 0;
-			int titleHeight = ((style & SWT.TITLE) != 0) ? OS.getContainerHeight(titleBar) : 0;
+			int titleHeight = ((style & SWT.TITLE) != 0) ? getTitleBarHeight() : 0;
 			boolean disablingMaxBar = false;
 			/**
 			 * @j2sNative
@@ -1947,6 +1970,7 @@ public void setMaximized (boolean maximized) {
 			}), 250);
 		}
 	} else {
+		OS.removeCSSClass(handle, key);
 		setBounds(oldBounds);
 		if (titleBar != null) {
 			OS.removeCSSClass(titleBar, key);
@@ -2157,7 +2181,7 @@ public void setMinimized (boolean minimized) {
 			width = 200;
 		}
 		//setBounds(-1, getMonitor().clientHeight - 26, 120, 0);
-		setBounds(-1, getMonitor().clientHeight - 6 - (titleBar != null ? OS.getContainerHeight(titleBar) : 0), 120, 0);
+		setBounds(-1, getMonitor().clientHeight - 6 - (titleBar != null ? getTitleBarHeight() : 0), 120, 0);
 	} else if (!minimized) {
 		bringToTop();
 	}
@@ -2587,7 +2611,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		if ((style & (SWT.TITLE | SWT.CLOSE | SWT.MIN | SWT.MAX)) != 0) {
 			w = 113;
 			//h = 28;
-			h = 8 + OS.getContainerHeight(titleBar);
+			h = 8 + getTitleBarHeight();
 		}
 		if ((style & SWT.BORDER) != 0) {
 			w += 2;
@@ -2605,7 +2629,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	if (titleBar != null) {
 		int dw = 8;
 		//int dh = 28;
-		int tbh = OS.getContainerHeight(titleBar);
+		int tbh = getTitleBarHeight();
 		if (tbh == 0 || tbh == 20 || tbh > 30) { // FIXME
 			tbh = 22;
 		}
@@ -2670,6 +2694,17 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		cy -= 4;
 	} else if ((style & SWT.NO_TRIM) == 0) {
 		cx -= 2;
+	}
+	if (maximized && (style & SWT.NO_TRIM) == 0) {
+//		boolean maxBarEnabled = false;
+//		/**
+//		 * @j2sNative
+//		 * maxBarEnabled = window["swt.maximized.bar"] != false; 
+//		 */ {}
+//		if (maxBarEnabled) {
+//		}
+		X++;
+		//Y++;
 	}
 	//System.out.println("after cx " + cx + " cy " + cy);
 	Element el = (Element) hWnd;

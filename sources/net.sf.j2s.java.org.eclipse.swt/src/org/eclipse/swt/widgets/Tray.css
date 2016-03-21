@@ -38,7 +38,7 @@
 	cursor: pointer;
 	_cursor: hand;
 	background-image: url('images/packed.gif');
-	background-position: -44px -48px;
+	background-position: -48px -48px;
 	background-repeat: no-repeat;
 	opacity:0.85;
 	filter:Alpha(Opacity=85);

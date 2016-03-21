@@ -2,6 +2,9 @@
 	position:absolute;
 	background-color:#e0e0e0;
 }
+.slider-default button {
+	box-sizing: border-box !important;
+}
 .slider-border {
 	border: 1px inset white;
 }

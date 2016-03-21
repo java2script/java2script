@@ -1146,12 +1146,13 @@ void createItem (TableItem item, int index) {
 		Element td = document.createElement("TD");
 		td.className = "table-column-first";
 		String str = "<div class=\"table-text\">";
-		boolean isRTL = (style & SWT.RIGHT_TO_LEFT) != 0;
+		//boolean isRTL = (style & SWT.RIGHT_TO_LEFT) != 0;
 //		if(isRTL){
 //			str += "<div class=\"table-text-inner\"></div>";
 //		}
 		if ((style & SWT.CHECK) != 0) {
-			String checkClass = (isRTL && false) ? "table-check-box-rtl image-p-4" : "table-check-box image-p-4"; 
+			//String checkClass = (isRTL && false) ? "table-check-box-rtl image-p-4" : "table-check-box image-p-4"; 
+			String checkClass = "table-check-box image-p-4"; 
 			str += "<input class=\"" + checkClass + "\" type=\"checkbox\"/>";
 		}
 //		if(!isRTL){
@@ -2161,7 +2162,7 @@ public boolean isSelected (int index) {
 }
 
 void removeItems (int[] indices){
-	if(indices == null && indices.length > items.length) return;
+	if(indices == null || indices.length > items.length) return;
 	Element table = handle.childNodes[0];
 	Element tbody = null;
 	for (int i = 0; i < table.childNodes.length; i++) {

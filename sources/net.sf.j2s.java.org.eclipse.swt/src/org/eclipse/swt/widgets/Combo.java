@@ -1859,6 +1859,8 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			textInput.style.height = Math.max(0, height - 4) + "px";
 			textInput.style.lineHeight = Math.max(0, height - 4) + "px";
 			textInput.style.marginTop = "0";
+			textInput.style.width = Math.max(0, width - buttonWidth - 3 - 4) + "px";
+			textInput.style.marginTop = "-2px";
 		} else if (OS.isSafari || OS.isChrome) {
 			textInput.style.marginTop = "0";
 		} else if (OS.isIE) {
@@ -1899,7 +1901,7 @@ void setBounds (int x, int y, int width, int height, int flags) {
 			selectInput.style.marginTop = "0";
 			textInput.style.height = (buttonHeight - 8) + "px";
 			if (OS.isChrome) {
-				textInput.style.width = (width - 5) + "px";
+				textInput.style.width = (width - 5 - 1) + "px"; // 1: padding-left: 1px in css
 			}
 			//selectInput.style.height = (Math.max(0, height - buttonHeight)) + "px";
 		} else if (OS.isIE || OS.isOpera) {

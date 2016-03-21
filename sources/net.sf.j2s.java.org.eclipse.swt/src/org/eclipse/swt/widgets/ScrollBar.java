@@ -261,7 +261,7 @@ protected void createVerticalScrollBar(Element parent, int sbOuterHeight, int sb
 	style.height = sbOuterHeight + "px";
 	
 	sbHandle = document.createElement("DIV");
-	sbHandle.style.backgroundColor = "blue";
+	//sbHandle.style.backgroundColor = "blue";
 	sbHandle.style.overflow = "auto";
 	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-x:hidden;overflow-y:scroll;";
 	
@@ -303,7 +303,7 @@ protected void createHorizontalScrollBar(Element parent, int sbOuterWidth, int s
 	style.height = sbHeight + "px";
 	
 	sbHandle = document.createElement("DIV");
-	sbHandle.style.backgroundColor = "blue";
+	//sbHandle.style.backgroundColor = "blue";
 	sbHandle.style.overflow = "auto";
 	sbHandle.style.cssText = sbHandle.style.cssText + ";overflow-x:scroll;overflow-y:hidden;";
 	

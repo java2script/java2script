@@ -99,8 +99,7 @@ a.shell-item:focus {
 	position:relative;
 	left:8px;
 	top:50%;
-	margin-top:-7px;
-	_margin-top:-8px;
+	margin-top:-8px;
 }
 .shell-item-icon-console {
 	background-position:0px -32px !important;
@@ -119,8 +118,7 @@ a.shell-item:focus {
 	height:1.5em;
 	white-space:nowrap;
 	top:50%;
-	left:36px;
-	_left:18px;
+	left:18px;
 	margin-top:-0.6em;
 }
 *:first-child+html .shell-item-text { /* IE7 */

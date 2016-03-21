@@ -272,6 +272,7 @@
 	height:20px;
 	overflow:hidden;
 	background-color:activecaption;
+	background-color:black;
 	z-index:2;
 	font-size:10pt;
 	height:1.5em;
@@ -280,9 +281,11 @@
 }
 .shell-active .shell-title-bar {
 	background-color:activecaption;
+	background-color:black;
 }
 .shell-inactive .shell-title-bar {
 	background-color:inactivecaption;
+	background-color:#dddddd;
 }
 .shell-title-text {
 	position:absolute;
@@ -290,6 +293,7 @@
 	white-space:nowrap;
 	/*background-color:#6677ee;*/
 	color:captiontext;
+	color:white;
 	font-family:Arial, sans-serif;
 	font-weight:bold;
 	font-size:10pt;
@@ -302,9 +306,11 @@
 }
 .shell-active .shell-title-text {
 	color:captiontext;
+	color:white;
 }
 .shell-inactive .shell-title-text {
 	color:inactivecaptiontext;
+	color:black;
 }
 .shell-title-icon {
 	position:absolute;
@@ -371,6 +377,10 @@
 .shell-maximized .shell-title-normal-max {
 	background-image:url('images/packed.gif');
 	background-position:-34px 0px;
+}
+
+.shell-maximized {
+	border: 0 none transparent !important;
 }
 .shell-title-close {
 	background-image:url('images/packed.gif');

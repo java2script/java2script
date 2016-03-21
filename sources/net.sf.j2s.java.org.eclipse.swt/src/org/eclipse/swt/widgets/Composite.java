@@ -375,7 +375,7 @@ public Control [] getChildren () {
 }
 
 int getChildrenCount () {
-	if (true) return 0;
+	return 0;
 	/*
 	* NOTE: The current implementation will count
 	* non-registered children.
@@ -390,7 +390,7 @@ int getChildrenCount () {
 	*/
 	// TODO: search the children and filter out the essential children
 //	return count;
-	return _getChildren().length;
+//	return _getChildren().length;
 }
 
 /**
