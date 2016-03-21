@@ -8,4 +8,8 @@ public class Clazz {
 
 	public native static void removeEvent(Object element, String type, Object handler);
 	
+	public native static void addEvent(Class<?> clazz, String type, Object handler);
+
+	public native static void removeEvent(Class<?> clazz, String type, Object handler);
+	
 }

@@ -2044,6 +2044,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (!read) {
 			read = readSources(node, "@j2sNative", prefix, suffix, false);
 		}
+		if (!read) {
+			read = readStringSources(node, "@j2sXHTML", prefix, suffix, false);
+		}
+		if (!read) {
+			read = readStringSources(node, "@j2sXCSS", prefix, suffix, false);
+		}
 		return read;
 	}
 

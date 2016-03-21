@@ -17,4 +17,7 @@ public class window {
 	public native static int setTimeout(Object runnable, int i);
 
 	public native static void clearTimeout(int hoverTimerID);
+	
+	public native static void open(String url);
+	
 }

@@ -1071,6 +1071,12 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		if (getJ2STag(node, "@j2sNativeSrc") != null) {
 			return false;
 		}
+		if (getJ2STag(node, "@j2sXHTML") != null) {
+			return false;
+		}
+		if (getJ2STag(node, "@j2sXCSS") != null) {
+			return false;
+		}
 		
 		if (getJ2STag(node, "@j2sIgnore") != null) {
 			return false;
@@ -1205,7 +1211,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				}
 				for (Iterator iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sNative".equals(tagEl.getTagName())) {
+					if ("@j2sNative".equals(tagEl.getTagName())
+							|| "@j2sXHTML".equals(tagEl.getTagName())
+							|| "@j2sXCSS".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
 						return false;
 					}
@@ -1237,7 +1245,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 								String tagName = tagEl.getTagName();
 								if ("@j2sIgnore".equals(tagName)
 										|| "@j2sDebug".equals(tagName)
-										|| "@j2sNative".equals(tagName)) {
+										|| "@j2sNative".equals(tagName)
+										|| "@j2sNativeSrc".equals(tagName)
+										|| "@j2sXHTML".equals(tagName)
+										|| "@j2sXCSS".equals(tagName)
+										) {
 									list.add(comment);
 								}
 							}

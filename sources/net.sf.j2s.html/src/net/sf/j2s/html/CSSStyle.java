@@ -44,6 +44,7 @@ public class CSSStyle {
 	
 	public String border;
 	public String borderWidth;
+	public String borderRadius;
 	public String borderStyle;
 	public String borderColor;
 	public String borderLeft;
@@ -56,10 +57,14 @@ public class CSSStyle {
 	public String borderRightColor;
 	public String borderTop;
 	public String borderTopWidth;
+	public String borderTopLeftRadius;
+	public String borderTopRightRadius;
 	public String borderTopStyle;
 	public String borderTopColor;
 	public String borderBottom;
 	public String borderBottomWidth;
+	public String borderBottomLeftRadius;
+	public String borderBottomRightRadius;
 	public String borderBottomStyle;
 	public String borderBottomColor;
 	
