@@ -642,6 +642,7 @@ Clazz.load = function (musts, clazz, optionals, declaration) {
 java.lang.Object = JavaObject;
 
 JavaObject.getName = Clazz.innerFunctions.getName;
+JavaObject.getSimpleName = Clazz.innerFunctions.getSimpleName;
 
 w$ = window; // Short for browser's window object
 d$ = document; // Short for browser's document object
@@ -1085,6 +1086,44 @@ Clazz.unloadClass = function (qClazzName) {
 		return true;
 	}
 	return false;
+};
+
+// Add support of parsing HTML and CSS with Java/JavaScript object bindings
+
+/**
+ * Parse HTML and bind HTML elements to Java object's fields.
+ * {$:xxxx}<yyy /> or <!--$:xxxx--><yyy /> or <yyy id="$:xxxx" /> : Bind yyy element to Java objects' field #xxxx
+ * {$.xxxx} or <!--$.xxxx-->: Insert Java objects' field #xxxx as plain string to given position
+ * {$~xxxx} or <!--$~xxxx--> : Insert local variable as plain string to given position
+ * {$/} <!--$/--> : Insert current class path to given position
+ * {$#} <!--$#--> : Return elements in order within an array
+ *
+ * To be override: Java2Script compiler just compile HTML into this method without
+ * implementation. Different HTML/CSS toolkits can implement their own parser. 
+ */
+/* public */
+Clazz.parseHTML = function() {
+	if (arguments.length == 0) {
+		return null;
+	}
+	var html = arguments[arguments.length - 1];
+};
+
+/**
+ * Parse CSS with Java object's field values.
+ * {$.xxxx} or <!--$.xxxx--> : Insert Java objects' field #xxxx as plain string to given position
+ * {$~xxxx} or <!--$~xxxx--> : Insert local variable as plain string to given position
+ * {$/} or <!--$/--> : Insert current class path to given position
+ *
+ * To be override: Java2Script compiler just compile CSS into this method without
+ * implementation. Different HTML/CSS toolkits can implement their own parser. 
+ */
+/* public */
+Clazz.parseCSS = function() {
+	if (arguments.length == 0) {
+		return;
+	}
+	var css = arguments[arguments.length - 1];
 };
 
 //written by Dean Edwards, 2005

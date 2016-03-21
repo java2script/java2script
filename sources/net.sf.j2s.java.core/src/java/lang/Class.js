@@ -199,14 +199,26 @@ Clazz.getClassName = function (clazzHost) {
 							return "Array";
 						}
 					}
-					return Clazz.getClassName (obj.constructor, true);
+					var depth = arguments[2];
+					if (depth == null) {
+						depth = 1;
+					} else if (depth >= 4) {
+						return "Object";
+					}
+					return Clazz.getClassName (obj.constructor, true, depth++);
 				}
 			} else if (objType == "number") {
 				return "Number";
 			} else if (objType == "boolean") {
 				return "Boolean";
 			}
-			return Clazz.getClassName (obj.constructor, true);
+			var depth = arguments[2];
+			if (depth == null) {
+				depth = 1;
+			} else if (depth >= 4) {
+				return "Object";
+			}
+			return Clazz.getClassName (obj.constructor, true, depth++);
 		}
 	}
 };
@@ -1586,7 +1598,7 @@ Clazz.instantialize = function (objThis, args) {
 /* protected */
 /*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "hashCode", "toString", "getName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"equals", "hashCode", "toString", "getName", "getSimpleName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
 	"makeConstructor" /*# x<< #*/
 ];
 
@@ -1615,6 +1627,17 @@ Clazz.innerFunctions = {
 	 */
 	getName : function () {
 		return Clazz.getClassName (this, true);
+	},
+	// Similar to Class#getSimpleName
+	getSimpleName : function () {
+		var name = Clazz.getClassName (this, true);
+		if (name != null) {
+			var idx = name.lastIndexOf(".");
+			if (idx != -1) {
+				name = name.substring(idx + 1);
+			}
+		}
+		return name;
 	},
 
 	getClassLoader : function () {
@@ -1802,6 +1825,7 @@ Clazz.decorateFunction = function (clazzFun, prefix, name) {
 	/*
 	clazzFun.equals = Clazz.innerFunctions.equals;
 	clazzFun.getName = Clazz.innerFunctions.getName;
+	clazzFun.getSimpleName = Clazz.innerFunctions.getSimpleName;
 	clazzFun.getResourceAsStream = Clazz.innerFunctions.getResourceAsStream;
 	*/
 	var inF = Clazz.innerFunctionNames;

@@ -2432,6 +2432,14 @@ ClazzLoader.getJ2SLibBase = function () {
 		if (idx != -1) {
 			return src.substring (0, idx);
 		}
+		idx = src.indexOf ("j2slib.src.z.js"); // consider it as key string!
+		if (idx != -1) {
+			return src.substring (0, idx);
+		}
+		idx = src.indexOf ("j2slib.swt.z.js"); // consider it as key string!
+		if (idx != -1) {
+			return src.substring (0, idx);
+		}
 		var base = ClazzLoader.classpathMap["@java"];
 		if (base != null) {
 			return base;

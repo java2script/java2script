@@ -73,6 +73,7 @@ public final class StackTraceElement implements Serializable {
      * Private, nullary constructor for VM use only.
      * </p>
      */
+	@SuppressWarnings("unused")
 	private StackTraceElement() {
 		super();
 	}

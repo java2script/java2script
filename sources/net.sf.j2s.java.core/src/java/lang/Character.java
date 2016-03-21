@@ -82,7 +82,6 @@ public final class Character implements Serializable, Comparable<Character> {
     /**
      * The <code>char</code> {@link Class} object.
      */
-    @SuppressWarnings("unchecked")
     public static final Class<Character> TYPE = null;
 
     private final char value;
