@@ -22,6 +22,7 @@
 	<property name="j2s.commands.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.core.commands"/>
 	<property name="j2s.runtime.project" value="${workspace.base}/net.sf.j2s.java.org.eclipse.core.runtime"/>
 	<property name="j2s.junit.project" value="${workspace.base}/net.sf.j2s.java.junit"/>
+	<property name="j2s.html.project" value="${workspace.base}/net.sf.j2s.html"/>
 		
 	<property name="j2s.lib.project" value="${workspace.base}/net.sf.j2s.lib"/>
 	
@@ -30,6 +31,7 @@
 	<property name="j2s.swt.bin" value="${j2s.swt.project}/bin"/>
 	<property name="j2s.junit.bin" value="${j2s.junit.project}/bin"/>
 	<property name="j2s.jface.bin" value="${j2s.jface.project}/bin"/>
+	<property name="j2s.html.bin" value="${j2s.html.project}/bin"/>
 	
 	<property name="j2s.lib.dist" value="${j2s.lib.project}/j2slib"/>
 	
@@ -724,6 +726,13 @@
     		</fileset>
     		<fileset dir="${j2s.swt.bin}">
     			<exclude name="org/eclipse/swt/internal/xhtml/**"/>
+    			<exclude name="**/*.clazz"/>
+    			<exclude name="**/*.class"/>
+    			<exclude name="**/*.swp"/>
+    			<exclude name="**/*.swo"/>
+    		</fileset>
+    		<fileset dir="${j2s.html.bin}">
+    			<exclude name="net/sf/j2s/html/**"/>
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>

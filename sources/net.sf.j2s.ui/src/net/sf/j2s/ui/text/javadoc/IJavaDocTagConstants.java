@@ -36,7 +36,10 @@ public interface IJavaDocTagConstants {
 		"@j2sOptionalImport", //$NON-NLS-1$
 		"@j2sIgnoreImport", //$NON-NLS-1$
 		"@j2sPrefix", //$NON-NLS-1$
-		"@j2sSuffix" };//$NON-NLS-1$
+		"@j2sSuffix", //$NON-NLS-1$
+		"@j2sXHTML", //$NON-NLS-1$
+		"@j2sXCSS", //$NON-NLS-1$
+	};
 	//"@author", "@deprecated", "@docRoot", "@exception", "@inheritDoc", "@link", "@linkplain", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@value", "@version" }; 
 
 	/** Javadoc link tags */
