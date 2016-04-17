@@ -208,6 +208,9 @@ Console.loopChecking = function () {
 Console.createConsoleWindow = function (parentEl) {
 	var console = document.createElement ("DIV");
 	console.style.cssText = "font-family:monospace, Arial, sans-serif;";
+	if (document.getElementById ("swt-desktop-panel") != null) {
+		console.style.position = "absolute";
+	}
 	document.body.appendChild (console);
 	return console;
 };

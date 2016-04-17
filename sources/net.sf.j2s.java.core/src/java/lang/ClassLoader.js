@@ -789,7 +789,7 @@ ClazzLoader.xhrOnload = function (transport, file) {
 			ClazzLoader.loadScript (file);
 			return;
 		} else {
-			alert ("[Java2Script] Error in loading " + file + "!");
+			//alert ("[Java2Script] Error in loading " + file + "!");
 		}
 		ClazzLoader.tryToLoadNext (file);
 	} else {
@@ -996,7 +996,7 @@ ClazzLoader.generatingW3CScriptOnCallback = function (path, forError) {
 				ClazzLoader.removeScriptNode (this);
 				return;
 			} else {
-				alert ("[Java2Script] Error in loading " + path + "!");
+				//alert ("[Java2Script] Error in loading " + path + "!");
 			}
 			if (forError) {
 				ClazzLoader.scriptLoaded (path);
@@ -1066,7 +1066,7 @@ ClazzLoader.generatingIEScriptOnCallback = function (path) {
 				ClazzLoader.removeScriptNode (this);
 				return;
 			} else {
-				alert ("[Java2Script] Error in loading " + path + "!");
+				//alert ("[Java2Script] Error in loading " + path + "!");
 			}
 		}
 		if (ClazzLoader.inLoadingThreads > 0) {

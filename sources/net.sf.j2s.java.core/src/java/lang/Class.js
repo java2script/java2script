@@ -1674,7 +1674,9 @@ Clazz.innerFunctions = {
 		if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
 			name = "/" + name;
 		}
-		if (name.indexOf ('/') == 0) {
+		if (name.indexOf ("://") != -1) { // link
+			is.url = name;
+		} else if (name.indexOf ('/') == 0) {
 			//is.url = name.substring (1);
 			if (arguments.length == 2) { // additional argument
 				baseFolder = arguments[1];
