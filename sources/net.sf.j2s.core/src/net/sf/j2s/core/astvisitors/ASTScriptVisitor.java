@@ -2495,19 +2495,38 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("this.callbacks[\"");
 			//buffer.append(shortenQualifiedName(name));
 			StringBuilder dollarBuilder = new StringBuilder();
+			ArrayList<String> levels = new ArrayList<String>();
+			ArrayList<String> classes = new ArrayList<String>();
 			if (originalType != null) {
+				levels.add(originalType.getBinaryName());
+				classes.add(originalType.getSuperclass().getBinaryName());
 				ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
 				while (thisDeclaringClass != null) {
+					levels.add(thisDeclaringClass.getBinaryName());
+					classes.add(thisDeclaringClass.getSuperclass().getBinaryName());
 					dollarBuilder.append("$");
 					thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
 				}
 			}
-			declaringClass = declaringClass.getDeclaringClass();
-			while (declaringClass != null) {
-				if (dollarBuilder.length() > 0) {
-					dollarBuilder.deleteCharAt(0);
+			String binaryName = declaringClass.getBinaryName();
+			int idx = levels.indexOf(binaryName);
+			if (idx == -1) {
+				idx = classes.indexOf(binaryName);
+			}
+			if (idx != -1) {
+				for (int i = idx + 1; i < levels.size(); i++) {
+					if (dollarBuilder.length() > 0) {
+						dollarBuilder.deleteCharAt(0);
+					}
 				}
+			} else {
 				declaringClass = declaringClass.getDeclaringClass();
+				while (declaringClass != null) {
+					if (dollarBuilder.length() > 0) {
+						dollarBuilder.deleteCharAt(0);
+					}
+					declaringClass = declaringClass.getDeclaringClass();
+				}
 			}
 			buffer.append(dollarBuilder);
 			buffer.append("\"].");
