@@ -130,7 +130,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 						}
 					} else {
 						SimplePipeRunnable r = SimplePipeHelper.getPipe(runnable.pipeKey);
-						if (r != null) {
+						if (r != null && r.isPipeLive()) {
 							HttpRequest request = getRequest();
 							String pipeKey = runnable.pipeKey;
 							String pipeMethod = runnable.getPipeMethod();

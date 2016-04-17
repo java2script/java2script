@@ -46,7 +46,6 @@ public class SimpleSerializable implements Cloneable {
 	
 	public static final SimpleSerializable ERROR = new SimpleSerializable(); // Used to indicate that format error!
 	
-	@J2SIgnore
 	public static SimpleFactory fallbackFactory = null;
 
 	public static boolean BYTES_COMPACT_MODE = false;
@@ -62,12 +61,24 @@ public class SimpleSerializable implements Cloneable {
 	
 	@J2SIgnore
 	private static Object classMutex = new Object();
-	@J2SIgnore
-	private static Map<String, String> classNameMappings = new HashMap<String, String>();
-	@J2SIgnore
-	private static Map<String, String> classAliasMappings = new HashMap<String, String>();
-	@J2SIgnore
-	private static Set<String> classMissed = new HashSet<String>();
+	
+	private static Map<String, String> classNameMappings;
+	private static Map<String, String> classAliasMappings;
+	private static Set<String> classMissed;
+	
+	static
+	/**
+	 * @j2sNative
+	 * var ssz = net.sf.j2s.ajax.SimpleSerializable;
+	 * ssz.classNameMappings = {};
+	 * ssz.classAliasMappings = {};
+	 * ssz.classMissed = {};
+	 */
+	{
+		classNameMappings = new HashMap<String, String>();
+		classAliasMappings = new HashMap<String, String>();
+		classMissed = new HashSet<String>();
+	}
 	
 	@J2SIgnore
 	public static Charset UTF_8 = Charset.forName("UTF-8");
@@ -108,7 +119,15 @@ public class SimpleSerializable implements Cloneable {
 		
 	};
 	
-	@J2SIgnore
+	/**
+	 * @j2sNative
+	 * if (shortenName == null || shortenName.length == 0) {
+	 * 	return;
+	 * }
+	 * var ssz = net.sf.j2s.ajax.SimpleSerializable;
+	 * ssz.classNameMappings[clazzName] = shortenName;
+	 * ssz.classAliasMappings[shortenName] = clazzName;
+	 */
 	public static void registerClassShortenName(String clazzName, String shortenName) {
 		if (shortenName == null || shortenName.length() == 0) {
 			System.out.println("Invalid shorten class name for " + clazzName);
@@ -128,24 +147,39 @@ public class SimpleSerializable implements Cloneable {
 		}
 	}
 	
-	@J2SIgnore
+	/**
+	 * @j2sNative
+	 * return net.sf.j2s.ajax.SimplePipeSerialize.classNameMappings[clazzName];
+	 */
 	public static String getClassShortenName(String clazzName) {
 		return classNameMappings.get(clazzName);
 	}
 	
-	@J2SIgnore
+	/**
+	 * @j2sNative
+	 * return net.sf.j2s.ajax.SimplePipeSerialize.classAliasMappings[clazzName];
+	 */
 	public static String getClassFullName(String clazzName) {
 		return classAliasMappings.get(clazzName);
 	}
 	
-	@J2SIgnore
+	/**
+	 * @j2sNative
+	 * var missed = net.sf.j2s.ajax.SimplePipeSerialize.classMissed;
+	 * if (missed[clazzName] == true) {
+	 * 	delete missed[clazzName];
+	 * }
+	 */
 	public static boolean removeMissedClassName(String clazzName) {
 		synchronized (classMutex) {
 			return classMissed.remove(clazzName);
 		}
 	}
 	
-	@J2SIgnore
+	/**
+	 * @j2sNative
+	 * net.sf.j2s.ajax.SimplePipeSerialize.classMissed = {};
+	 */
 	public static void clearAllMissedClasses() {
 		synchronized (classMutex) {
 			classMissed.clear();
@@ -200,7 +234,8 @@ if (ssObjs == null) {
 }
 var baseChar = 'B'.charCodeAt (0);
 var builder = [];
-builder[0] = "WLL201";
+var v = this.getSimpleVersion();
+builder[0] = "WLL" + v;
 var oClass = this.getClass ();
 var clazz = oClass;
 var clazzName = clazz.getName ();
@@ -217,6 +252,12 @@ while ((idx = clazzName.lastIndexOf ('$')) != -1) {
 		break;
 	}
 	clazzName = clazz.getName ();
+}
+if (v >= 202 && this.classNameAbbrev) {
+	var shortClazzName = net.sf.j2s.ajax.SimpleSerializable.classNameMappings[clazzName];
+	if (shortClazzName != null) {
+		clazzName = shortClazzName;
+	}
 }
 builder[1] = clazzName;
 builder[2] = '#';
@@ -531,48 +572,31 @@ return strBuf;
 		Map<String, Field> fields = getSerializableFields(clazzName, this.getClass());
 		boolean ignoring = (filter == null || filter.ignoreDefaultFields());
 		String[] fMap = fieldMapping();
-		boolean arrMapping = fMap != null && fMap.length >> 1 == fields.size();
-		Map<String, String> fieldNameMap = !arrMapping && getSimpleVersion() >= 202 ? fieldNameMapping() : null;
-		Iterator<Entry<String, Field>> itr = null;
-		Entry<String, Field> entry = null;
+		Map<String, String> fieldNameMap = getSimpleVersion() >= 202 ? fieldNameMapping() : null;
 		try {
-			if (!arrMapping) {
-				itr = fields.entrySet().iterator();
-			}
-			int m = 0;
-			while (!arrMapping ? itr.hasNext() : m < fMap.length / 2 ) {
-				String name = null;
-				Field field = null;
-				if (!arrMapping) {
-					entry = (Entry<String, Field>) itr.next();
-					name = entry.getKey();
-					field = entry.getValue();
-					if (filter != null && !filter.accept(name)) continue;
-					if (fieldNameMap != null) {
-						String alias = fieldNameMap.get(name);
-						if (alias != null && alias.length() > 0) {
-							name = alias;
-						}
-					} else if (fMap != null && fMap.length > 1) {
-						for (int j = 0; j < fMap.length / 2; j++) {
-							if (name.equals(fMap[j + j])) {
-								String newName = fMap[j + j + 1];
-								if (newName != null && newName.length() > 0) {
-									name = newName;
-								}
-								break;
+			for (Iterator<Entry<String, Field>> itr = fields.entrySet().iterator(); itr.hasNext();) {
+				Entry<String, Field> entry = (Entry<String, Field>) itr.next();
+				String name = entry.getKey();
+				Field field = entry.getValue();
+				if (filter != null && !filter.accept(name)) continue;
+				if (fieldNameMap != null) {
+					String alias = fieldNameMap.get(name);
+					if (alias != null && alias.length() > 0) {
+						name = alias;
+					}
+				} else if (fMap != null && fMap.length > 1) {
+					for (int j = 0; j < fMap.length / 2; j++) {
+						if (name.equals(fMap[j + j])) {
+							String newName = fMap[j + j + 1];
+							if (newName != null && newName.length() > 0) {
+								name = newName;
 							}
+							break;
 						}
 					}
-				} else {
-					name = fMap[m + m];
-					field = fields.get(name);
-					if (filter != null && !filter.accept(name)) {
-						m++;
-						continue;
-					}
-					name = fMap[m + m + 1];
-					m++;
+				}
+				if (field == null) {
+					continue;
 				}
 				//String nameStr = (char)(baseChar + name.length()) + name;
 				Class<?> type = field.getType();
@@ -591,7 +615,7 @@ return strBuf;
 					String value = String.valueOf(n);
 					builder.append((char) (baseChar + value.length()));
 					builder.append(value);
-				} else if (isSubclassOf(type, SimpleSerializable.class)) {
+				} else if (isSubclassOf(type, SimpleSerializable.class) || type == SimpleSerializable.class) {
 					SimpleSerializable ssObj = (SimpleSerializable) field.get(this);
 					if (ssObj == null && ignoring) continue;
 					builder.append((char)(baseChar + name.length()));
@@ -650,7 +674,7 @@ return strBuf;
 								serializeString(builder, s);
 							}
 						}
-					} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+					} else if (isSubclassOf(type, SimpleSerializable[].class) || type == SimpleSerializable[].class) {
 						SimpleSerializable[] ss = (SimpleSerializable []) field.get(this);
 						if (ss == null && ignoring) continue;
 						builder.append((char)(baseChar + name.length()));
@@ -1001,7 +1025,7 @@ return strBuf;
 					String value = String.valueOf(n);
 					dos.writeByte(baseChar + value.length());
 					dos.writeBytes(value);
-				} else if (isSubclassOf(type, SimpleSerializable.class)) {
+				} else if (isSubclassOf(type, SimpleSerializable.class) || type == SimpleSerializable.class) {
 					SimpleSerializable ssObj = (SimpleSerializable) field.get(this);
 					if (ssObj == null && ignoring) continue;
 					dos.writeByte(baseChar + name.length());
@@ -1060,7 +1084,7 @@ return strBuf;
 								serializeBytesString(dos, s);
 							}
 						}
-					} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+					} else if (isSubclassOf(type, SimpleSerializable[].class) || type == SimpleSerializable[].class) {
 						SimpleSerializable[] ss = (SimpleSerializable []) field.get(this);
 						if (ss == null && ignoring) continue;
 						dos.writeByte(baseChar + name.length());
@@ -1336,7 +1360,7 @@ return strBuf;
 			String value = String.valueOf(n);
 			builder.append((char) (baseChar + value.length()));
 			builder.append(value);
-		} else if (isSubclassOf(type, SimpleSerializable.class)) {
+		} else if (isSubclassOf(type, SimpleSerializable.class) || type == SimpleSerializable.class) {
 			SimpleSerializable ssObj = (SimpleSerializable) target;
 			serializeObject(builder, ssObj, ssObjs, supportsCompactBytes);
 		} else if (type == Long.class) {
@@ -1380,7 +1404,7 @@ return strBuf;
 						serializeString(builder, s);
 					}
 				}
-			} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+			} else if (isSubclassOf(type, SimpleSerializable[].class) || type == SimpleSerializable[].class) {
 				SimpleSerializable[] ss = (SimpleSerializable []) target;
 				builder.append("AO"); // special
 				if (ss == null) {
@@ -1595,7 +1619,7 @@ return strBuf;
 			String value = String.valueOf(n);
 			dos.writeByte(baseChar + value.length());
 			dos.writeBytes(value);
-		} else if (isSubclassOf(type, SimpleSerializable.class)) {
+		} else if (isSubclassOf(type, SimpleSerializable.class) || type == SimpleSerializable.class) {
 			SimpleSerializable ssObj = (SimpleSerializable) target;
 			serializeBytesObject(dos, ssObj, ssObjs, supportsCompactBytes);
 		} else if (type == Long.class) {
@@ -1639,7 +1663,7 @@ return strBuf;
 						serializeBytesString(dos, s);
 					}
 				}
-			} else if (isSubclassOf(type, SimpleSerializable[].class)) {
+			} else if (isSubclassOf(type, SimpleSerializable[].class) || type == SimpleSerializable[].class) {
 				SimpleSerializable[] ss = (SimpleSerializable []) target;
 				dos.writeBytes("AO"); // special
 				if (ss == null) {
@@ -2187,7 +2211,7 @@ if (ss != null) {
 					}
 					appendFieldName(builder, fieldName, withFormats, prefix);
 					builder.append(b);
-				} else if (isSubclassOf(clazz, SimpleSerializable.class)) {
+				} else if (isSubclassOf(clazz, SimpleSerializable.class) || clazz == SimpleSerializable.class) {
 					SimpleSerializable o = (SimpleSerializable) field.get(this);
 					if (o == null && ignoring) {
 						continue;
@@ -2272,7 +2296,7 @@ if (ss != null) {
 							builder.append(prefix);
 						}
 						builder.append(']');
-					} else if (isSubclassOf(clazz, SimpleSerializable.class)) {
+					} else if (isSubclassOf(clazz, SimpleSerializable.class) || clazz == SimpleSerializable.class) {
 						SimpleSerializable[] xs = (SimpleSerializable[]) field.get(this);
 						if (xs == null && ignoring) {
 							continue;
@@ -2620,6 +2644,10 @@ if (str == null || start < 0) return false;
 var end = str.length;
 var length = end - start;
 if (length <= 7 || str.substring(start, start + 3) != "WLL") return false;
+try {
+	this.setSimpleVersion(parseInt(str.substring(start + 3, start + 6)));
+} catch (e) {
+}
 var index = str.indexOf('#', start);
 if (index == -1) return false;
 index++;
@@ -4399,6 +4427,15 @@ return true;
 			}
 		}
 		Object inst = loadSimpleInstance(clazzName);
+		if (fb != null && inst == null) {
+			synchronized (classMutex) {
+				classMissed.add(clazzName);
+			}
+			SimpleSerializable ssInst = fb.createInstance();
+			if (ssInst != null) {
+				return ssInst;
+			}
+		}
 		if (inst != null && inst instanceof SimpleSerializable) {
 			return (SimpleSerializable) inst;
 		}
@@ -4777,20 +4814,49 @@ var length = str.length - start;
 if (length <= 7 || str.substring(start, start + 3) != "WLL") return null;
 var index = str.indexOf('#', start);
 if (index == -1) return null;
+var ssz = net.sf.j2s.ajax.SimpleSerializable;
+var v = 0;
+try {
+	v = Integer.parseInt(str.substring(start + 3, start + 6));
+} catch (e) {
+	return ssz.ERROR;
+}
 var clazzName = str.substring(start + 6, index);
 clazzName = clazzName.replace (/\$/g, '.');
+if (v >= 202) {
+	var longClazzName = ssz.classAliasMappings[clazzName];
+	if (longClazzName != null) {
+		clazzName = longClazzName;
+	}
+}
+var fb = ssz.fallbackFactory;
+if (fb != null && ssz.classMissed[clazzName] == true) {
+	var ssInst = fb.createInstance();
+	if (ssInst != null) {
+		return ssInst;
+	}
+}
 var runnableClass = null;
 if (Clazz.isClassDefined (clazzName)) {
 	runnableClass = Clazz.evalType (clazzName);
 }
+if (fb != null && runnableClass == null) {
+	ssz.classMissed[clazzName] = true;
+	var ssInst = fb.createInstance();
+	if (ssInst != null) {
+		return ssInst;
+	}
+}
 if (runnableClass != null) {
 	var obj = new runnableClass (Clazz.inheritArgs);
-	if (obj != null && Clazz.instanceOf (obj,
-			net.sf.j2s.ajax.SimpleSerializable)) {
+	if (obj != null && Clazz.instanceOf (obj, ssz)) {
+		if (v >= 202) {
+			obj.classNameAbbrev = !clazzName.equals(str.substring(start + 6, index));
+		}
 		return obj;
 	}
 }
-return net.sf.j2s.ajax.SimpleSerializable.UNKNOWN;
+return ssz.UNKNOWN;
 	 */
 	public static SimpleSerializable parseInstance(String str) {
 		return parseInstance(str, 0, null);

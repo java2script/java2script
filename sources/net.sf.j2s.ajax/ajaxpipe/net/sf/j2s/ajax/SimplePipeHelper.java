@@ -71,10 +71,11 @@ public class SimplePipeHelper {
 	 */
 	@J2SNative({
 		"if (key == null || pipe == null) return;",
-		"if (net.sf.j2s.ajax.SimplePipeHelper.allPipes == null) {",
-		"	net.sf.j2s.ajax.SimplePipeHelper.allPipes = new Object ();",
+		"var sph = net.sf.j2s.ajax.SimplePipeHelper;",
+		"if (sph.allPipes == null) {",
+		"	sph.allPipes = new Object ();",
 		"}",
-		"net.sf.j2s.ajax.SimplePipeHelper.allPipes[key] = pipe;"
+		"sph.allPipes[key] = pipe;"
 	})
 	public static void registerPipe(String key, SimplePipeRunnable pipe) {
 		if (key == null || pipe == null) return;
@@ -131,7 +132,10 @@ public class SimplePipeHelper {
 	}
 	
 	@J2SNative({
-		"delete net.sf.j2s.ajax.SimplePipeHelper.allPipes[key];"
+		"var sph = net.sf.j2s.ajax.SimplePipeHelper;",
+		"if (sph.allPipes != null) {",
+		"	delete sph.allPipes[key];",
+		"}"
 	})
 	public static void removePipe(String key) {
 		if (key == null) {

@@ -185,7 +185,8 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	@Override
 	public void ajaxRun() {
 		lastLiveDetected = System.currentTimeMillis();
-		pipeKey = SimplePipeHelper.registerPipe(this);
+		String registeredKey = SimplePipeHelper.registerPipe(this);
+		pipeKey = registeredKey;
 		pipeAlive = pipeSetup();
 		if (!pipeAlive) {
 			SimplePipeHelper.removePipe(pipeKey);
@@ -483,6 +484,9 @@ public abstract class SimplePipeRunnable extends SimpleRPCRunnable {
 	 * @j2sIgnore
 	 */
 	public SimpleSerializable[] through(Object ... args) {
+		if (args instanceof SimpleSerializable[]) {
+			return (SimpleSerializable[]) args;
+		}
 		return null;
 	}
 
@@ -557,13 +561,13 @@ return false;
 		
 		if (objs == null || objs.length == 0) return;
 		
-		if (pipe instanceof SimplePipeRunnable) {
-			SimplePipeRunnable pipeRunnable = (SimplePipeRunnable) pipe;
-			if (pipeRunnable.helper != null) {
-				pipeRunnable.helper.helpThrough(pipe, objs);
+		//if (pipe instanceof SimplePipeRunnable) {
+			//SimplePipeRunnable pipeRunnable = (SimplePipeRunnable) pipe;
+			if (pipe.helper != null) {
+				pipe.helper.helpThrough(pipe, objs);
 				return;
 			}
-		}
+		//}
 		for (int i = 0; i < objs.length; i++) {
 			pipe.deal(objs[i]);
 		}
@@ -580,13 +584,13 @@ return false;
 		if (args == null || args.length == 0) return;
 		SimplePipeRunnable pipe = SimplePipeHelper.getPipe(pipeKey);
 		if (pipe == null) return;
-		if (pipe instanceof SimplePipeRunnable) {
-			SimplePipeRunnable pipeRunnable = (SimplePipeRunnable) pipe;
-			if (pipeRunnable.helper != null) {
-				pipeRunnable.helper.helpThrough(pipe, args);
+		//if (pipe instanceof SimplePipeRunnable) {
+			//SimplePipeRunnable pipeRunnable = (SimplePipeRunnable) pipe;
+			if (pipe.helper != null) {
+				pipe.helper.helpThrough(pipe, args);
 				return;
 			}
-		}
+		//}
 		for (int i = 0; i < args.length; i++) {
 			pipe.deal(args[i]);
 		}
