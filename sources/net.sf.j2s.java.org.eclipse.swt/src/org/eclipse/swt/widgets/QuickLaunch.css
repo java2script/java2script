@@ -6,8 +6,8 @@
 	margin:0;
 	padding:0;
 	font-size:0;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .shortcut-item {
 	position:absolute;
@@ -23,9 +23,16 @@
 	margin:0;
 	padding:0;
 	font-size:0;
-	opacity:0.6;
-	filter:Alpha(Opacity=60);
+	/*opacity:0.6;
+	filter:Alpha(Opacity=60);*/
 	text-align:left;
+}
+.shortcut-item .shadow-narrow-center-middle {
+	background-color:menu;
+	background-repeat:no-repeat;
+	background-position:-48px -48px;
+	_background-position:-44px -44px;
+	background-image: url('images/packed.gif');
 }
 
 .shortcut-bar-minimized {
@@ -36,8 +43,8 @@
 	margin:0;
 	padding:0;
 	font-size:0;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 * html .shortcut-bar {
 	bottom:-1px;
@@ -49,20 +56,20 @@
 	border:1px solid navy;
 	background-color:highlight;
 	color:highlighttext;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .shortcut-active-item {
 	/*border:1px solid darkred;*/
-	opacity:1;
-	filter:Alpha(Opacity=100);
+	/*opacity:1;
+	filter:Alpha(Opacity=100);*/
 }
 .shortcut-active-item:hover, a.shortcut-active-item:hover {
 	/*border:1px solid navy;*/
 	background-color:highlight;
 	color:highlighttext;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .swt-widgets-quicklaunch {
 	width:324px;

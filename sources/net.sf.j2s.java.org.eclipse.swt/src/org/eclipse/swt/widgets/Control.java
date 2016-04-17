@@ -2435,7 +2435,11 @@ public void setFont (Font font) {
 		return;
 	}
 	if (font.data.name != null) {
-		handle.style.fontFamily = font.data.name;
+		if (!"Arial".equals(font.data.name)) {
+			handle.style.fontFamily = font.data.name + ", Arial, sans-serif";
+		} else {
+			handle.style.fontFamily = font.data.name;
+		}
 	}
 	String fontSize = font.data.height + "pt";
 	/**

@@ -52,7 +52,18 @@ public class About {
 			}
 			aboutShell.setText("About Java2Script");
 
+			String designer = null;
+			/**
+			 * @j2sNative
+			 * designer = window["swt.designer.os"];
+			 * window["swt.designer.os"] = "win";
+			 */ { designer = "win"; }
 			createContents(aboutShell);
+			if (designer != null)
+			/**
+			 * @j2sNative
+			 * window["swt.designer.os"] = designer;
+			 */ {}
 			aboutShell.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
 			final GridLayout gridLayout = new GridLayout();
 			gridLayout.verticalSpacing = 0;

@@ -44,6 +44,8 @@ public class QuickLaunch extends DesktopItem {
 	private Object hLaunchToggle;
 
 	int orientation = SWT.CENTER;
+
+	private Element[] shadowEls;
 	
 	public QuickLaunch(Display display) {
 		super();
@@ -76,18 +78,25 @@ public class QuickLaunch extends DesktopItem {
 			Display.bodyScrollTop = body.scrollTop;
 			Display.htmlScrollLeft = body.parentNode.scrollLeft;
 			Display.htmlScrollTop = body.parentNode.scrollTop;
-			body.parentNode.scrollLeft = 0;
-			body.parentNode.scrollTop = 0;
-			body.scrollLeft = 0;
-			body.scrollTop = 0;
-			if (body.style.overflow != "hidden") {
-				body.style.overflow = "hidden";
-			}
-			if (body.style.height != "100%") {
-				body.style.height = "100%";
-			}
-			if (body.parentNode.style.overflow != "hidden") {
-				body.parentNode.style.overflow = "hidden";
+			boolean desktopPanelDisabled = false;
+			/**
+			 * @j2sNative
+			 * desktopPanelDisabled = window["swt.desktop.panel"] == false;
+			 */ {}
+			if (!desktopPanelDisabled) {
+				body.parentNode.scrollLeft = 0;
+				body.parentNode.scrollTop = 0;
+				body.scrollLeft = 0;
+				body.scrollTop = 0;
+				if (body.style.overflow != "hidden") {
+					body.style.overflow = "hidden";
+				}
+				if (body.style.height != "100%") {
+					body.style.height = "100%";
+				}
+				if (body.parentNode.style.overflow != "hidden") {
+					body.parentNode.style.overflow = "hidden";
+				}
 			}
 		}
 		this.handle = document.createElement("DIV");
@@ -96,17 +105,24 @@ public class QuickLaunch extends DesktopItem {
 		
 		configureEvents();
 		
+		String defaultBGColor = null;
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
 		 * supportShadow = window["swt.disable.shadow"] != true;
+		 * defaultBGColor = window["swt.default.launchbar.background"];
 		 */ {}
 		if (supportShadow) {
 			//Decorations.createShadowHandles(handle);
+			if (defaultBGColor == null || defaultBGColor.length() == 0) {
+				defaultBGColor = "blue";
+			}
 			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
-				Decorations.appendNarrowShadowHandles(handle, false, false, true, false);
+				shadowEls = Decorations.appendNarrowShadowHandles(handle, false, false, true, false);
+				Decorations.adjustNarrowShadowOnCreated(shadowEls, defaultBGColor);
 			} else {
-				Decorations.appendShadowHandles(handle, true, true, false, true);
+				shadowEls = Decorations.appendShadowHandles(handle, true, true, false, true);
+				Decorations.adjustShadowOnCreated(shadowEls, defaultBGColor);
 			}
 		} else {
 			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
@@ -179,6 +195,9 @@ public class QuickLaunch extends DesktopItem {
 			this.handle.style.top = "0px";
 			handle.style.height = (BAR_HEIGHT - 1) + "px";
 			handle.style.width = display.taskBar.clientWidth + "px";
+			if (shadowEls != null) {
+				Decorations.adjustNarrowShadowOnResize(shadowEls, display.taskBar.clientWidth, BAR_HEIGHT - 1);
+			}
 			/**
 			 * @j2sNative
 			 * if (window["swt.shortcut.bar.top"]) {
@@ -189,6 +208,9 @@ public class QuickLaunch extends DesktopItem {
 			 */ {}
 		} else {
 			this.handle.title = "Doubleclick to hide shortcuts";
+			if (shadowEls != null) {
+				Decorations.adjustShadowOnResize(shadowEls, 80, 36);
+			}
 		}
 		
 		/**
@@ -279,6 +301,13 @@ public class QuickLaunch extends DesktopItem {
 			return false;
 		handle.className = "shortcut-bar" + (minimized ? "-minimized" : "");
 		setShortcutsVisible(!minimized);
+		if (shadowEls != null) {
+			if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
+				Decorations.adjustNarrowShadowOnResize(shadowEls, -1, minimized ? 8 : 36);
+			} else {
+				Decorations.adjustShadowOnResize(shadowEls, -1, minimized ? 8 : 36);
+			}
+		}
 		return true;
 	}
 
@@ -327,6 +356,9 @@ public class QuickLaunch extends DesktopItem {
 		if (display != null && display.taskBar != null
 				&& (display.taskBar.orientation == SWT.BOTTOM)) {
 			this.handle.style.width = display.taskBar.clientWidth + "px";
+			if (shadowEls != null) {
+				Decorations.adjustNarrowShadowOnResize(shadowEls, display.taskBar.clientWidth, -1);
+			}
 		}
 		if (this.shortcutCount <= 0) {
 			return;
@@ -349,6 +381,9 @@ public class QuickLaunch extends DesktopItem {
 						&& (display.taskBar.orientation == SWT.BOTTOM))) {
 					this.handle.style.left = barOffset + 10 + "px";
 					this.handle.style.width = barWidth + "px";
+					if (shadowEls != null) {
+						Decorations.adjustShadowOnResize(shadowEls, barWidth, -1);
+					}
 				}
 			}
 		}
@@ -376,8 +411,8 @@ public class QuickLaunch extends DesktopItem {
 		}*/
 		Element itemDiv = document.createElement(tag);
 		itemDiv.className = "shortcut-item";
-		if (OS.isIENeedPNGFix) {
-			if (icon != null && icon.length() != 0) {
+		if (icon != null && icon.length() != 0) {
+			if (OS.isIENeedPNGFix) {
 				// The following is commented out intentionally.
 				// Using filter may result in black blocks 
 //				if (icon.toLowerCase().endsWith(".png")) {
@@ -387,15 +422,12 @@ public class QuickLaunch extends DesktopItem {
 					itemDiv.style.backgroundImage = "url('" + icon + "')";
 					itemDiv.style.backgroundPosition = "center center";
 //				}
-			}
-			itemDiv.href = href;
-		} else {
-			if (icon != null && icon.length() != 0) {
+			} else {
 				itemDiv.style.backgroundImage = "url('" + icon + "')";
 				itemDiv.style.backgroundPosition = "center center";
 			}
-			itemDiv.href = href;
 		}
+		itemDiv.href = href;
 		itemDiv.title = name;
 		if (display.taskBar != null && display.taskBar.orientation == SWT.BOTTOM) {
 			itemDiv.style.top = "8px";
@@ -419,13 +451,36 @@ public class QuickLaunch extends DesktopItem {
 		shortcutBar.appendChild(itemDiv);
 		Clazz.addEvent(itemDiv, "mouseover", hLaunchMouseEnter);
 		
+		String defaultBGColor = null;
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
 		 * supportShadow = window["swt.disable.shadow"] != true;
+		 * defaultBGColor = window["swt.default.launchitem.background"];
 		 */ {}
 		if (supportShadow) {
-			Decorations.createNarrowShadowHandles(itemDiv);
+			Element[] shadowEls = Decorations.createNarrowShadowHandles(itemDiv);
+			if (defaultBGColor == null || defaultBGColor.length() == 0) {
+				defaultBGColor = "white";
+			}
+			Decorations.adjustNarrowShadowOnCreated(shadowEls, defaultBGColor);
+			Decorations.adjustNarrowShadowOnResize(shadowEls, 40, 40);
+			if (icon != null && icon.length() != 0 && shadowEls != null && shadowEls[5] != null) {
+				if (OS.isIENeedPNGFix) {
+					// The following is commented out intentionally.
+					// Using filter may result in black blocks 
+//					if (icon.toLowerCase().endsWith(".png")) {
+//						itemDiv.style.backgroundImage = "url(\"about:blank\")";
+//						itemDiv.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\"" + icon + "\", sizingMethod=\"image\")";
+//					} else {
+						shadowEls[5].style.backgroundImage = "url('" + icon + "')";
+						shadowEls[5].style.backgroundPosition = "center center";
+//					}
+				} else {
+					shadowEls[5].style.backgroundImage = "url('" + icon + "')";
+					shadowEls[5].style.backgroundPosition = "center center";
+				}
+			}
 		}
 
 		this.shortcutItems[this.shortcutCount] = itemDiv;

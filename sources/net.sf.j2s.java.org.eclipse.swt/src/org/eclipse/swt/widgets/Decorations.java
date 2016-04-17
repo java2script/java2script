@@ -148,6 +148,8 @@ public class Decorations extends Canvas {
 	private Object hNoTextSelection;
 	private DragAndDrop dnd;
 	
+	private Element[] shadowEls;
+	
 	int titleBarHeight;
 
 /**
@@ -639,7 +641,7 @@ protected static void createResizeHandles(Element handle) {
 	}
 }
 
-protected static void appendShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
+protected static Element[] appendShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
 	String[] handles = new String[] {
 			left && top ? "shadow-left-top" : null,
 			right && top ? "shadow-right-top" : null,
@@ -651,9 +653,10 @@ protected static void appendShadowHandles(Element handle, boolean top, boolean r
 			right && bottom ? "shadow-right-bottom" : null,
 			bottom ? "shadow-center-bottom" : null
 	};
+	Element[] elements = new Element[handles.length];
 	for (int i = 0; i < handles.length; i++) {
 		if (handles[i] != null) {
-			createCSSDiv(handle, handles[i]);
+			elements[i] = createCSSDiv(handle, handles[i]);
 		}
 	}
 	if (OS.isChrome10) {
@@ -662,17 +665,18 @@ protected static void appendShadowHandles(Element handle, boolean top, boolean r
 	if (OS.isIE) {
 		handle.style.filter = "";
 	}
+	return elements;
 }
 
-protected static void createShadowHandles(Element handle) {
-	appendShadowHandles(handle, true, true, true, true);
+protected static Element[] createShadowHandles(Element handle) {
+	return appendShadowHandles(handle, true, true, true, true);
 }
 
-protected static void createNarrowShadowHandles(Element handle) {
-	appendNarrowShadowHandles(handle, true, true, true, true);
+protected static Element[] createNarrowShadowHandles(Element handle) {
+	return appendNarrowShadowHandles(handle, true, true, true, true);
 }
 
-protected static void appendNarrowShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
+protected static Element[] appendNarrowShadowHandles(Element handle, boolean top, boolean right, boolean bottom, boolean left) {
 	String[] handles = new String[] {
 			left && top ? "shadow-narrow-left-top" : null,
 			right && top ? "shadow-narrow-right-top" : null,
@@ -684,9 +688,10 @@ protected static void appendNarrowShadowHandles(Element handle, boolean top, boo
 			right && bottom ? "shadow-narrow-right-bottom" : null,
 			bottom ? "shadow-narrow-center-bottom" : null
 	};
+	Element[] elements = new Element[handles.length];
 	for (int i = 0; i < handles.length; i++) {
 		if (handles[i] != null) {
-			createCSSDiv(handle, handles[i]);
+			elements[i] = createCSSDiv(handle, handles[i]);
 		}
 	}
 	if (OS.isChrome10) {
@@ -694,6 +699,148 @@ protected static void appendNarrowShadowHandles(Element handle, boolean top, boo
 	}
 	if (OS.isIE) {
 		handle.style.filter = "";
+	}
+	return elements;
+}
+
+protected static void adjustShadowOnCreated(Element[] elements, String defaultColor) {
+	int shadowDepth = 16;
+	int verticalOffset = 8;
+	int horizontalDelta = 4;
+	/**
+	 * @j2sNative
+	 * if (window["swt.shadow.vertical.offset"] != null) {
+	 * 	verticalOffset = window["swt.shadow.vertical.offset"];
+	 * }
+	 * if (window["swt.shadow.horizontal.delta"] != null) {
+	 * 	horizontalDelta = window["swt.shadow.horizontal.delta"];
+	 * }
+	 */ { verticalOffset = 0; horizontalDelta = 0; }
+	if (verticalOffset > 0 || horizontalDelta > 0) {
+		adjustShadowDepth(elements, shadowDepth, verticalOffset, horizontalDelta, defaultColor);
+	}
+}
+
+protected static void adjustNarrowShadowOnCreated(Element[] elements, String defaultColor) {
+	int shadowDepth = 8;
+	int verticalOffset = 4;
+	int horizontalDelta = 2;
+	/**
+	 * @j2sNative
+	 * if (window["swt.shadow.vertical.offset"] != null) {
+	 * 	verticalOffset = window["swt.shadow.narrow.vertical.offset"];
+	 * }
+	 * if (window["swt.shadow.horizontal.delta"] != null) {
+	 * 	horizontalDelta = window["swt.shadow.narrow.horizontal.delta"];
+	 * }
+	 */ { verticalOffset = 0; horizontalDelta = 0; }
+	if (verticalOffset > 0 || horizontalDelta > 0) {
+		adjustShadowDepth(elements, shadowDepth, verticalOffset, horizontalDelta, defaultColor);
+	}
+}
+
+protected static void adjustShadowDepth(Element[] shadowEls, int shadowDepth, int verticalOffset, int horizontalDelta,
+		String defaultColor) {
+	Element shadowEl = shadowEls[0]; // left-top
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.left = (horizontalDelta - shadowDepth) + "px";
+		if (verticalOffset > 0) shadowEl.style.top = (verticalOffset - shadowDepth) + "px";
+	}
+	shadowEl = shadowEls[1]; // right-top
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.right = (horizontalDelta - shadowDepth) + "px";
+		if (verticalOffset > 0) shadowEl.style.top = (verticalOffset - shadowDepth) + "px";
+	}
+	shadowEl = shadowEls[2]; // center-top
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.left = (shadowEls[3] == null ? 0 : horizontalDelta) + "px";
+		if (verticalOffset > 0) shadowEl.style.top = (verticalOffset - shadowDepth) + "px";
+	}
+	shadowEl = shadowEls[3]; // left-middle
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.left = (horizontalDelta - shadowDepth) + "px";
+		if (verticalOffset > 0) shadowEl.style.top = verticalOffset + "px";
+	}
+	shadowEl = shadowEls[4]; // right-middle
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.right = (horizontalDelta - shadowDepth) + "px";
+		if (verticalOffset > 0) shadowEl.style.top = verticalOffset + "px";
+	}
+	shadowEl = shadowEls[5]; // center-bottom
+	if (shadowEl != null && defaultColor != null && defaultColor.length() > 0) {
+		shadowEl.style.backgroundColor = defaultColor; // default background-color
+	}
+	shadowEl = shadowEls[6]; // left-bottom
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.left = (horizontalDelta - shadowDepth) + "px";
+	}
+	shadowEl = shadowEls[7]; // right-bottom
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.right = (horizontalDelta - shadowDepth) + "px";
+	}
+	shadowEl = shadowEls[8]; // center-bottom
+	if (shadowEl != null) {
+		if (horizontalDelta > 0) shadowEl.style.left = (shadowEls[3] == null ? 0 : horizontalDelta) + "px";
+	}
+}
+
+protected static void adjustShadowOnResize(Element[] shadowEls, int cx, int cy) {
+	int verticalOffset = 8;
+	int horizontalDelta = 4;
+	/**
+	 * @j2sNative
+	 * if (window["swt.shadow.vertical.offset"] != null) {
+	 * 	verticalOffset = window["swt.shadow.vertical.offset"];
+	 * }
+	 * if (window["swt.shadow.horizontal.delta"] != null) {
+	 * 	horizontalDelta = window["swt.shadow.horizontal.delta"];
+	 * }
+	 */ { verticalOffset = 0; horizontalDelta = 0; }
+	if (verticalOffset > 0 || horizontalDelta > 0) {
+		adjustShadowDimension(shadowEls, cx, cy, verticalOffset, horizontalDelta);
+	}
+}
+
+protected static void adjustNarrowShadowOnResize(Element[] shadowEls, int cx, int cy) {
+	int verticalOffset = 4;
+	int horizontalDelta = 2;
+	/**
+	 * @j2sNative
+	 * if (window["swt.shadow.narrow.vertical.offset"] != null) {
+	 * 	verticalOffset = window["swt.shadow.narrow.vertical.offset"];
+	 * }
+	 * if (window["swt.shadow.narrow.horizontal.delta"] != null) {
+	 * 	horizontalDelta = window["swt.shadow.narrow.horizontal.delta"];
+	 * }
+	 */ { verticalOffset = 0; horizontalDelta = 0; }
+	if (verticalOffset > 0 || horizontalDelta > 0) {
+		adjustShadowDimension(shadowEls, cx, cy, verticalOffset, horizontalDelta);
+	}
+}
+
+protected static void adjustShadowDimension(Element[] shadowEls, int cx, int cy, int verticalOffset, int horizontalDelta) {
+	int sides = 2;
+	if (shadowEls[3] == null) {
+		sides--;
+	}
+	if (shadowEls[4] == null) {
+		sides--;
+	}
+	Element shadowEl = shadowEls[2]; // center-top
+	if (shadowEl != null && cx > 0) {
+		if (horizontalDelta > 0) shadowEl.style.width = (cx - horizontalDelta * sides > 0 ? cx - horizontalDelta * sides : 0) + "px";
+	}
+	shadowEl = shadowEls[3]; // left-middle
+	if (shadowEl != null && cy > 0) {
+		if (horizontalDelta > 0) shadowEl.style.height = (cy - verticalOffset > 0 ? cy - verticalOffset : 0) + "px";
+	}
+	shadowEl = shadowEls[4]; // right-middle
+	if (shadowEl != null && cy > 0) {
+		if (horizontalDelta > 0) shadowEl.style.height = (cy - verticalOffset > 0 ? cy - verticalOffset : 0) + "px";
+	}
+	shadowEl = shadowEls[8]; // center-bottom
+	if (shadowEl != null && cx > 0) {
+		if (horizontalDelta > 0) shadowEl.style.width = (cx - horizontalDelta * sides > 0 ? cx - horizontalDelta * sides : 0) + "px";
 	}
 }
 
@@ -745,12 +892,18 @@ protected void createHandle() {
 		createResizeHandles(handle);
 	}
 	boolean supportShadow = false;
+	String defaultBGColor = null;
 	/**
 	 * @j2sNative
 	 * supportShadow = window["swt.disable.shadow"] != true;
+	 * defaultBGColor = window["swt.default.window.background"];
 	 */ {}
 	if (supportShadow && (style & SWT.NO_TRIM) == 0) {
-		createShadowHandles(handle);
+		shadowEls = createShadowHandles(handle);
+		if (defaultBGColor == null || defaultBGColor.length() == 0) {
+			defaultBGColor = "buttonface";
+		}
+		adjustShadowOnCreated(shadowEls, defaultBGColor);
 	}
 	if ((style & SWT.NO_TRIM) == 0
 			&& (style & (SWT.TITLE | SWT.MIN | SWT.MAX | SWT.CLOSE)) != 0) {
@@ -1535,8 +1688,38 @@ void saveFocus () {
  */
 public void setBackground(Color color) {
 	checkWidget ();
-	if (color != null)
-	contentHandle.style.backgroundColor = color.getCSSHandle();
+	if (color != null) {
+		String cssHandle = color.getCSSHandle();
+		contentHandle.style.backgroundColor = cssHandle;
+		if (shadowEls != null && shadowEls[5] != null) {
+			int verticalOffset = 8;
+			int horizontalDelta = 4;
+			/**
+			 * @j2sNative
+			 * if (window["swt.shadow.vertical.offset"] != null) {
+			 * 	verticalOffset = window["swt.shadow.vertical.offset"];
+			 * }
+			 * if (window["swt.shadow.horizontal.delta"] != null) {
+			 * 	horizontalDelta = window["swt.shadow.horizontal.delta"];
+			 * }
+			 */ { verticalOffset = 0; horizontalDelta = 0; }
+			if (verticalOffset > 0 || horizontalDelta > 0) {
+				if ("transparent".equals(cssHandle)) {
+					String defaultBGColor = null;
+					/**
+					 * @j2sNative
+					 * defaultBGColor = window["swt.default.window.background"];
+					 */ { }
+					if (defaultBGColor == null || defaultBGColor.length() == 0) {
+						defaultBGColor = "buttonface";
+					}
+					shadowEls[5].style.backgroundColor = defaultBGColor;
+				} else {
+					shadowEls[5].style.backgroundColor = cssHandle;
+				}
+			}
+		}
+	}
 }
 void setBounds (int x, int y, int width, int height, int flags, boolean defer) {
 	/*
@@ -2654,7 +2837,7 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 			dh += mbh + 1;
 			tbh += mbh + 1;
 		}
-		contentHandle.style.top = (((style & SWT.BORDER) != 0 ? 1 : 1) + tbh + 2) + "px"; 
+		contentHandle.style.top = (((style & SWT.BORDER) != 0 ? 2 : 2) + tbh + 2) + "px"; 
 		contentHandle.style.left = (((style & SWT.BORDER) != 0 ? 1 : 1) + 2) + "px"; 
 		contentHandle.style.height = ((height - dh >= 0) ? height - dh : 0) + "px";
 		contentHandle.style.width = ((width - dw) > 0 ? width - dw : 0) + "px";
@@ -2669,6 +2852,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 		if ((style & SWT.NO_TRIM) != 0) {
 			dw = 0;
 			dh = 0;
+		} else if ((style & 0x0fffff) == SWT.TOOL) {
+			dw = 2;
+			dh = 2;
 		} else if ((style & SWT.TOOL) != 0) {
 			dw = 4;
 			dh = 2;
@@ -2692,6 +2878,10 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	if ((style & SWT.BORDER) != 0) {
 		cx -= 6;
 		cy -= 4;
+	} else if ((style & 0x0fffff) == SWT.TOOL) {
+		// do nothing
+		cx -= 2;
+		cy -= 2;
 	} else if ((style & SWT.NO_TRIM) == 0) {
 		cx -= 2;
 	}
@@ -2712,6 +2902,9 @@ protected boolean SetWindowPos(Object hWnd, Object hWndInsertAfter, int X, int Y
 	el.style.top = Y + "px";
 	el.style.width = (cx > 0 ? cx : 0) + "px";
 	el.style.height = (cy > 0 ? cy : 0) + "px";
+	if (shadowEls != null) {
+		adjustShadowOnResize(shadowEls, cx, cy);
+	}
 	
 	return true;
 //	return super.SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);

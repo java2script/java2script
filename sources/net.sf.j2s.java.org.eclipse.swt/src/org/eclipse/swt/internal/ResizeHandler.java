@@ -186,18 +186,17 @@ public class ResizeHandler {
 	public void updateCornered() {
 		Rectangle clientArea = getClientArea();
 		Point size = shell.getSize();
-		int trimWidth = (shell.getStyle() & SWT.NO_TRIM) != 0 ? 0 : 4; // 4: shadow
 		if ((status & SWT.TOP) != 0){
 			if ((status & SWT.LEFT) != 0) {
 				shell.setLocation(clientArea.x, clientArea.y);
 			} else if ((status & SWT.RIGHT) != 0) {
-				shell.setLocation(clientArea.width - size.x + trimWidth, clientArea.y);
+				shell.setLocation(clientArea.width - size.x, clientArea.y);
 			}
 		} else if ((status & SWT.BOTTOM) != 0){
 			if ((status & SWT.LEFT) != 0) {
-				shell.setLocation(clientArea.x, clientArea.height - 2 - size.y + clientArea.y + trimWidth);
+				shell.setLocation(clientArea.x, clientArea.height - size.y + clientArea.y);
 			} else if ((status & SWT.RIGHT) != 0) {
-				shell.setLocation(clientArea.width - size.x + trimWidth, clientArea.height - 2 - size.y + clientArea.y + trimWidth);
+				shell.setLocation(clientArea.width - size.x, clientArea.height - size.y + clientArea.y);
 			}
 		}
 	}

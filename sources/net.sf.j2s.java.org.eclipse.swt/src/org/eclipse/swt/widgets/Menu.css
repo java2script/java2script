@@ -1,12 +1,13 @@
 .menu-default {
 	position:absolute;
-	border-width:2px;
+	border:1px solid windowframe;
+	/*border-width:2px;
 	border-style:groove solid solid groove;
-	border-color:white gray gray white;
+	border-color:white gray gray white;*/
 	background-color:menu;
 	background-color:#ebeced;
 	cursor:default;
-	padding:1px 0 1px 1px;
+	/*padding:1px 0 1px 1px;*/
 	display:none;
 	text-align:left;
 	font-size:0;
@@ -15,18 +16,27 @@
 * html .menu-default {
 	padding-left:0;
 }
+.menu-space {
+	font-size:0;
+	margin:0;
+	padding:0;
+	height:4px;
+}
 .menu-item {
 	position:relative;
 	overflow:hidden;
 	font-family:Tahoma, Arial, sans-serif;
-	font-size:8pt;
-	margin:0 2px 0 1px;
+	font-size:13px;
+	margin:0;
 	padding:2px;
+	height:20px;
+	/*
 	height:13px;
 	height:1.5em;
+	// */
 }
 .menu-item-enable-image {
-	height:18px;
+	height:20px;
 }
 .menu-item-hover {
 	background-color:highlight;
@@ -51,7 +61,7 @@
 	overflow:hidden;
 	white-space:nowrap;
 	font-family:Tahoma, Arial, sans-serif;
-	font-size:8pt;
+	font-size:13px;
 	color:menutext;
 	color:#3d3d3e;
 }
@@ -274,7 +284,7 @@
 	background-color:#ebeced;
 	overflow:visible;
 	font-family:Tahoma, Arial, sans-serif;
-	font-size:8pt;
+	font-size:13px;
 	cursor:default;
 	padding:4px 0;
 	z-index:9;

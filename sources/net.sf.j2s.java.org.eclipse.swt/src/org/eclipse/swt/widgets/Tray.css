@@ -7,8 +7,8 @@
 	border-width: 0;
 	border-top-width: 36px;
 	border-right-width: 36px;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .tray-item {
 	position: absolute;
@@ -40,8 +40,8 @@
 	background-image: url('images/packed.gif');
 	background-position: -48px -48px;
 	background-repeat: no-repeat;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .tray-logo-item-round {
 	background-color:white;

@@ -71,6 +71,8 @@ public class Menu extends Widget {
 	MenuItem[] items;
 	MenuItem defaultItem;
 	Element btnFocus;
+	Element beginSpace;
+	Element endSpace;
 	int currentIndex;
 	
 	long lastFocusdTime;
@@ -93,6 +95,7 @@ public class Menu extends Widget {
 	Object hMenuBlur;
 	private Object hMenuFocus;
 	private Object hMenuMouseDown;
+	private Element[] shadowEls;
 /**
  * Constructs a new instance of this class given its parent,
  * and sets the style for the instance so that the instance
@@ -231,28 +234,38 @@ void _setVisible (boolean visible) {
 		style.display = "block";
 		handle.style.height = "";
 		int height = OS.getContainerHeight(handle);
-		if (OS.isIE || OS.isOpera) {
-			int maxWidth = 0;
-			boolean hasImage = false;
-			boolean hasSelection = false;
-			MenuItem[] children = getItems();
-			for (int i = 0; i < children.length; i++) {
-				MenuItem item = children[i];
-				int width = OS.getStringStyledWidth(item.getText(), "menu-item-text", null);
-				if (item.getImage() != null) {
-					hasImage = true;
-				}
-				if ((item.getStyle() & (SWT.CHECK | SWT.RADIO)) != 0) {
-					hasImage = true;
-				}
-				maxWidth = Math.max(maxWidth, width);
+		int maxWidth = 0;
+		boolean hasImage = false;
+		boolean hasSelection = false;
+		MenuItem[] children = getItems();
+		for (int i = 0; i < children.length; i++) {
+			MenuItem item = children[i];
+			int width = OS.getStringStyledWidth(item.getText(), "menu-item-text", null);
+			if (item.getImage() != null) {
+				hasImage = true;
 			}
-			handle.style.width = (maxWidth + (hasImage ? 18 : 0) + (hasSelection ? 18 : 0) + 32) + "px";
-		} else {
-			handle.style.width = "";
-			int width = OS.getContainerWidth(handle);
-			handle.style.width = (width + 32) + "px";
+			if ((item.getStyle() & (SWT.CHECK | SWT.RADIO)) != 0) {
+				hasImage = true;
+			}
+			maxWidth = Math.max(maxWidth, width);
 		}
+		int meunWidth = maxWidth + (hasImage ? 18 : 0) + (hasSelection ? 18 : 0) + 32;
+		//if (OS.isIE || OS.isOpera) {
+			handle.style.width = meunWidth + "px";
+			if (shadowEls != null) {
+				Decorations.adjustNarrowShadowOnResize(shadowEls, meunWidth, Math.max(handle.offsetHeight, handle.clientHeight) - 1);
+			}
+//		} else {
+//			//handle.style.width = "";
+//			//int width = OS.getContainerWidth(handle);
+//			//handle.style.width = (width + 32) + "px";
+//			handle.style.width = meunWidth + "px";
+//			if (shadowEls != null) {
+//				Decorations.adjustNarrowShadowOnResize(shadowEls,
+//						Math.max(handle.offsetWidth, handle.clientWidth),
+//						Math.max(handle.offsetHeight, handle.clientHeight));
+//			}
+//		}
 		//handle.style.height = height + "px"; // Do NOT set height properties
 		int width = OS.getContainerWidth(handle);
 		int left = x, top = y;
@@ -435,20 +448,36 @@ void createHandle () {
 	} else {
 		document.body.appendChild(handle);
 		handle.className = "menu-default";
+		String defaultBGColor = null;
 		boolean supportShadow = false;
 		/**
 		 * @j2sNative
 		 * supportShadow = window["swt.disable.shadow"] != true;
+		 * defaultBGColor = window["swt.default.menu.background"];
 		 */ {}
 		if (supportShadow) {
-			Decorations.createNarrowShadowHandles(handle);
+			shadowEls = Decorations.createNarrowShadowHandles(handle);
+			if (defaultBGColor == null || defaultBGColor.length() == 0) {
+				defaultBGColor = "#ebeced";
+			}
+			Decorations.adjustNarrowShadowOnCreated(shadowEls, defaultBGColor);
 		}
+		beginSpace = document.createElement("DIV");
+		beginSpace.className = "menu-space menu-begin";
+		handle.appendChild(beginSpace);
+		endSpace = document.createElement("DIV");
+		endSpace.className = "menu-space menu-end";
+		handle.appendChild(endSpace);
 	}
 	
 	btnFocus = document.createElement("BUTTON");
 	//btnFocus.type = "BUTTON";
 	btnFocus.className = "menu-focus";
-	handle.appendChild(btnFocus);
+	if (beginSpace != null) {
+		handle.insertBefore(btnFocus, beginSpace);
+	} else {
+		handle.appendChild(btnFocus);
+	}
 	hMenuKeyDown = new RunnableCompatibility() {
 		public void run() {
 			HTMLEvent evt = (HTMLEvent) getEvent();
@@ -733,7 +762,11 @@ void createItem (MenuItem item, int index) {
 	display.addMenuItem (item);
 	item.handle = document.createElement("DIV");
 	item.handle.className = ((style & SWT.BAR) != 0) ? "menu-bar-item" : "menu-item";
-	handle.appendChild(item.handle);
+	if (beginSpace != null) {
+		handle.insertBefore(item.handle, endSpace);
+	} else {
+		handle.appendChild(item.handle);
+	}
 	
 	if ((item.style & SWT.SEPARATOR) == 0) {
 		if ((item.style & (SWT.CHECK | SWT.RADIO)) != 0) {

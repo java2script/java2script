@@ -19,8 +19,8 @@
 	font-size:0;
 	margin:0;
 	padding:0;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .shell-manager-bar-right {
 	left:auto !important;
@@ -37,8 +37,8 @@
 	border-style:solid solid solid none;
 	border-width:1px;
 	border-color:buttonshadow;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .shell-manager-bar-minimized-right {
 	left:auto !important;
@@ -57,8 +57,8 @@
 	padding:0;
 	background-color:buttonface;
 	border:1px solid navy;
-	opacity:0.75;
-	filter:Alpha(Opacity=75);
+	/*opacity:0.75;
+	filter:Alpha(Opacity=75);*/
 }
 .shell-item-right, a.shell-item-right {
 	left:auto !important;
@@ -68,20 +68,20 @@
 	background-color:highlight;
 	color:highlighttext;
 	border:1px solid navy;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 }
 .shell-top-item {
 	/*border:1px solid darkred;*/
-	opacity:1;
-	filter:Alpha(Opacity=100);
+	/*opacity:1;
+	filter:Alpha(Opacity=100);*/
 }
 .shell-top-item:hover, a.shell-top-item:hover {
 	/*border:1px solid navy;*/
 	background-color:highlight;
 	color:highlighttext;
-	opacity:0.85;
-	filter:Alpha(Opacity=85);
+	/*opacity:0.85;
+	filter:Alpha(Opacity=85);*/
 	/*opacity:0.75;
 	filter:Alpha(Opacity=75);*/
 }

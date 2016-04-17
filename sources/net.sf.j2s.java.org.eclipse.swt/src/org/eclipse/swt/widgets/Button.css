@@ -37,7 +37,12 @@
 	height:100%;
 	box-sizing: border-box !important;
 }
-
+button.button-push div {
+	background-color:transparent;
+}
+button.button-push {
+	text-align:center;
+}
 * html .button-push {
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:1em;

@@ -2581,6 +2581,10 @@ void initializeDekstop() {
 			} else {
 				document.body.appendChild(panel);
 			}
+			Element consoleEl = document.getElementById("_console_");
+			if (consoleEl != null) {
+				consoleEl.style.position = "absolute";
+			}
 			childNodes = document.body.childNodes;
 			Element[] removedChildren = new Element[0]; 
 			for (int i = childNodes.length - 1; i >= 0; i--) {
@@ -2690,36 +2694,64 @@ void initializeDekstop() {
 		//*/
 	}
 
-	taskBar = new TaskBar(this);
-	topBar = new MaximizedTitle(this);
-	if (QuickLaunch.defaultQuickLaunch != null) {
-		shortcutBar = QuickLaunch.defaultQuickLaunch;
-	} else {
-		shortcutBar = new QuickLaunch(this);
+	boolean taskBarSupported = true;
+	/**
+	 * @j2sNative
+	 * taskBarSupported = window["swt.task.bar"] != false;
+	 */ {}
+	if (taskBarSupported) {
+		taskBar = new TaskBar(this);
 	}
-	if (NotificationCorner.defaultNotificationCorner != null) {
-		trayCorner = NotificationCorner.defaultNotificationCorner;
-	} else {
-		trayCorner = new NotificationCorner(this);
+	boolean topBarSupported = true;
+	/**
+	 * @j2sNative
+	 * topBarSupported = window["swt.maximized.bar"] != false;
+	 */ {}
+	if (topBarSupported) {
+		topBar = new MaximizedTitle(this);
+	}
+	boolean shortcutBarSupported = true;
+	/**
+	 * @j2sNative
+	 * shortcutBarSupported = window["swt.shortcut.bar"] != false;
+	 */ {}
+	if (shortcutBarSupported) {
+		if (QuickLaunch.defaultQuickLaunch != null) {
+			shortcutBar = QuickLaunch.defaultQuickLaunch;
+		} else {
+			shortcutBar = new QuickLaunch(this);
+		}
+	}
+	boolean trayCornerSupported = true;
+	/**
+	 * @j2sNative
+	 * trayCornerSupported = window["swt.notification.corner"] != false;
+	 */ {}
+	if (trayCornerSupported) {
+		if (NotificationCorner.defaultNotificationCorner != null) {
+			trayCorner = NotificationCorner.defaultNotificationCorner;
+		} else {
+			trayCorner = new NotificationCorner(this);
+		}
 	}
 
-	taskBar.initialize();
-	topBar.initialize();
-	shortcutBar.initialize();
-	trayCorner.initialize();
+	if (taskBar != null) taskBar.initialize();
+	if (topBar != null) topBar.initialize();
+	if (shortcutBar != null) shortcutBar.initialize();
+	if (trayCorner != null) trayCorner.initialize();
 	
 	/**
 	 * @j2sNative
 	 * var autoHide = window["swt.notification.corner.autohide"];
-	 * if (autoHide != null && (autoHide == true || autoHide == "true")) {
+	 * if (this.trayCorner != null && autoHide != null && (autoHide == true || autoHide == "true")) {
 	 * 	this.trayCorner.toggleAutoHide(); // by default, it is being shown normally.
 	 * }
 	 * autoHide = window["swt.quick.launch.autohide"];
-	 * if (autoHide != null && (autoHide == true || autoHide == "true")) {
+	 * if (this.shortcutBar != null && autoHide != null && (autoHide == true || autoHide == "true")) {
 	 * 	this.shortcutBar.toggleAutoHide(); // by default, it is being shown normally.
 	 * }
 	 * autoHide = window["swt.task.bar.autohide"];
-	 * if (autoHide != null && (autoHide == false || autoHide == "false")) {
+	 * if (this.taskBar != null && autoHide != null && (autoHide == false || autoHide == "false")) {
 	 * 	this.taskBar.toggleAutoHide(); // by default, it is being hide automatically.
 	 * }
 	 */ {}
@@ -2745,7 +2777,7 @@ void initializeDekstop() {
 			panel.scrollTop = (int) Math.round(scrolling * panel.scrollHeight);
 		}
 	}
-	if (taskBar.orientation != SWT.BOTTOM) {
+	if (taskBar != null && taskBar.orientation != SWT.BOTTOM) {
 		mouseMoveListener = new RunnableCompatibility(){
 			
 			public void run() {
@@ -2762,9 +2794,9 @@ void initializeDekstop() {
 				long now = System.currentTimeMillis();
 				boolean ctrlKey = e.ctrlKey;
 				taskBar.mouseAlreadyMoved = true;
-				shortcutBar.mouseAlreadyMoved = true;
-				trayCorner.mouseAlreadyMoved = true;
-				topBar.mouseAlreadyMoved = true;
+				if (shortcutBar != null) shortcutBar.mouseAlreadyMoved = true;
+				if (trayCorner != null) trayCorner.mouseAlreadyMoved = true;
+				if (topBar != null) topBar.mouseAlreadyMoved = true;
 				boolean inDelay = (now - taskBar.lastUpdated <= Display.AUTO_HIDE_DELAY);
 				
 				if (taskBar.barEl != null
@@ -2776,7 +2808,7 @@ void initializeDekstop() {
 					}
 				}
 				
-				if (y > bottom) {
+				if (y > bottom && shortcutBar != null) {
 					if (shortcutBar.isApproaching(now, x, y, ctrlKey)) {
 						shortcutBar.handleApproaching();
 					} else if (!inDelay && shortcutBar.isLeaving(now, x, y, ctrlKey)) {
@@ -2784,7 +2816,7 @@ void initializeDekstop() {
 					}
 				}
 				
-				if (y < 100) {
+				if (y < 100 && topBar != null) {
 					if (topBar.isApproaching(now, x, y, ctrlKey)) {
 						topBar.handleApproaching();
 					} else if (!inDelay && topBar.isLeaving(now, x, y, ctrlKey)) {
@@ -2798,7 +2830,7 @@ void initializeDekstop() {
 				 * 	return;
 				 * }
 				 */ { }
-				 if (x + y < 200) {
+				 if (x + y < 200 && trayCorner != null) {
 					 if (trayCorner.isApproaching(now, x, y, ctrlKey)) {
 						 trayCorner.handleApproaching();
 					 } else if (!inDelay && trayCorner.isLeaving(now, x, y, ctrlKey)) {
@@ -2829,12 +2861,12 @@ void initializeDekstop() {
 	} else 
 	/**
 	 * @j2sNative
-	 * if (window["C_$"] == null && Console != null) {
+	 * if (window["C_$"] == null && window["Console"] != null) {
 	 * 	C_$ = Console;
 	 * 	C_$.createC_$Window = Console.createConsoleWindow;
 	 * }
-	 * if (Console == null) Console = C_$;
-	 * if (C_$.createC_$Window.wrapped == null) {
+	 * if (window["Console"] == null && window["C_$"] != null) window["Console"] = C_$;
+	 * if (window["C_$"] != null && C_$.createC_$Window.wrapped == null) {
 	 * 	C_$.createC_$Window_ = Console.createC_$Window;
 	 * 	C_$.createConsoleWindow = C_$.createC_$Window = function (parentEl) {
 	 * 		var console = C_$.createC_$Window_ (parentEl);
@@ -3797,8 +3829,12 @@ protected void release () {
 		}
 	}
 	timerList = null;
-	
-	if (NotificationCorner.defaultNotificationCorner != null) {
+	boolean trayCornerSupported = true;
+	/**
+	 * @j2sNative
+	 * trayCornerSupported = window["swt.notification.corner"] != false;
+	 */ {}
+	if (trayCornerSupported && NotificationCorner.defaultNotificationCorner != null) {
 		//new Display().getSystemTray();
 //		NotificationCorner corner = NotificationCorner.defaultNotificationCorner;
 		NotificationCorner.defaultNotificationCorner = null;
@@ -3806,13 +3842,18 @@ protected void release () {
 //		document.body.appendChild(corner.handle);
 	}
 	//*
-	if (QuickLaunch.defaultQuickLaunch != null) {
+	boolean shortcutBarSupported = true;
+	/**
+	 * @j2sNative
+	 * shortcutBarSupported = window["swt.shortcut.bar"] != false;
+	 */ {}
+	if (trayCornerSupported && shortcutBarSupported && QuickLaunch.defaultQuickLaunch != null) {
 		//QuickLaunch launch = QuickLaunch.defaultQuickLaunch;
 		QuickLaunch.defaultQuickLaunch = null;
 		//document.body.removeChild(launch.handle);
 	}
 	//*/
-	if (NotificationCorner.defaultNotificationCorner == null 
+	if (shortcutBarSupported && NotificationCorner.defaultNotificationCorner == null 
 			&& QuickLaunch.defaultQuickLaunch == null) {
 		if (htmlOverflow != null) {
 			document.body.parentNode.style.overflow = htmlOverflow;
@@ -5046,34 +5087,34 @@ static Shell getTopMaximizedShell() {
 public void updateLayout() {
 	if (taskBar != null) {
 		taskBar.updateLayout();
-		topBar.updateLayout();
-		shortcutBar.updateLayout();
-		trayCorner.updateLayout();
-		Element panel = document.getElementById("swt-desktop-panel");
-		if (panel != null) {
-			Rectangle clientArea = getPrimaryMonitor().getClientArea();
-			panel.style.left = clientArea.x + "px";
-			panel.style.top = clientArea.y + "px";
-			int margin = 0;
-			/**
-			 * @j2sNative
-			 * if (window["swt.desktop.panel.margin"] != null) {
-			 * 	margin = window["swt.desktop.panel.margin"];
-			 * }
-			 */ {}
-			if (margin > 0) {
-				//panel.style.marginLeft = margin + "px";
-				panel.style.paddingLeft = margin + "px";
-			}
-			panel.style.width = (clientArea.width - margin) + "px";
-			panel.style.height = (clientArea.height - 80) + "px";
-			/*
-			int height = OS.getFixedBodyClientHeight();
-			int width = OS.getFixedBodyClientWidth();
-			panel.style.width = width + "px";
-			panel.style.height = (height - 80) + "px";
-			*/
+		if (topBar != null) topBar.updateLayout();
+		if (shortcutBar != null) shortcutBar.updateLayout();
+		if (trayCorner != null) trayCorner.updateLayout();
+	}
+	Element panel = document.getElementById("swt-desktop-panel");
+	if (panel != null) {
+		Rectangle clientArea = getPrimaryMonitor().getClientArea();
+		panel.style.left = clientArea.x + "px";
+		panel.style.top = clientArea.y + "px";
+		int margin = 0;
+		/**
+		 * @j2sNative
+		 * if (window["swt.desktop.panel.margin"] != null) {
+		 * 	margin = window["swt.desktop.panel.margin"];
+		 * }
+		 */ {}
+		if (margin > 0) {
+			//panel.style.marginLeft = margin + "px";
+			panel.style.paddingLeft = margin + "px";
 		}
+		panel.style.width = (clientArea.width - margin) + "px";
+		panel.style.height = (clientArea.height - 80) + "px";
+		/*
+		int height = OS.getFixedBodyClientHeight();
+		int width = OS.getFixedBodyClientWidth();
+		panel.style.width = width + "px";
+		panel.style.height = (height - 80) + "px";
+		*/
 	}
 }
 

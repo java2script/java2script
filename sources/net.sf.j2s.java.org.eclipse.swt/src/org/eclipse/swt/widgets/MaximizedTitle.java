@@ -144,6 +144,9 @@ public class MaximizedTitle extends DesktopItem {
 		if (supportShadow) {
 			//Decorations.createShadowHandles(handle);
 			Decorations.appendShadowHandles(handle, false, true, true, true);
+			//Element[] shadowEls = Decorations.appendShadowHandles(handle, false, true, true, true);
+			//Decorations.adjustShadowOnCreated(shadowEls, "buttonface");
+			//Decorations.adjustShadowOnResize(shadowEls, 320, 24);
 		}
 
 		Element tb = document.createElement("DIV");

@@ -91,6 +91,12 @@ public class HTMLSource {
 //		composite.setLayout(new GridLayout());
 		shell.setLayout(new GridLayout());
 		final Text text = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL);
+		String designer = null;
+		/**
+		 * @j2sNative
+		 * designer = window["swt.designer.os"];
+		 * window["swt.designer.os"] = "win";
+		 */ { designer = "win"; }
 		Font font = null;
 		/**
 	     * @j2sNative
@@ -139,6 +145,11 @@ public class HTMLSource {
 				shell.close();
 			}
 		});
+		if (designer != null)
+		/**
+		 * @j2sNative
+		 * window["swt.designer.os"] = designer;
+		 */ {}
 		shell.pack();
 		shell.open();
 		shell.getDisplay().timerExec(250, new Runnable() {

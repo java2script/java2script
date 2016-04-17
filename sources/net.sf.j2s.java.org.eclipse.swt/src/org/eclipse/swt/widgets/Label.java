@@ -555,7 +555,13 @@ public void setImage (Image image) {
 				//handleStyle.backgroundPosition = "-" + this.image.packedOffsetX + "px -" + this.image.packedOffsetY + "px";
 				updatePackedImagePosition(width, height);
 			} else {
-				handleStyle.backgroundPosition = "left center";
+				if ((style & SWT.LEFT) != 0) {
+					handleStyle.backgroundPosition = "left center";
+				} else if ((style & SWT.CENTER) != 0) {
+					handleStyle.backgroundPosition = "center center";
+				} else if ((style & SWT.RIGHT) != 0) {
+					handleStyle.backgroundPosition = "right center";
+				}
 				handleStyle.backgroundImage = "url(\"" + this.image.url + "\")";
 			}
 		}
