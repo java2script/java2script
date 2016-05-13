@@ -69,10 +69,12 @@ public class SimpleSerializable implements Cloneable {
 	static
 	/**
 	 * @j2sNative
+	 * (function() {
 	 * var ssz = net.sf.j2s.ajax.SimpleSerializable;
 	 * ssz.classNameMappings = {};
 	 * ssz.classAliasMappings = {};
 	 * ssz.classMissed = {};
+	 * }) ();
 	 */
 	{
 		classNameMappings = new HashMap<String, String>();
