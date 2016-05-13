@@ -594,6 +594,9 @@ do {
 	pipeID = "pipe-script-" + pipeKey + "-" + Math.round (10000000 * Math.random ());
 } while (document.getElementById (pipeID) != null);
 iframe.id = pipeID;
+if (ClazzLoader.isIE) { // Avoid being warned with "This page contains both secure and nonsecure items."
+	iframe.src = "javascript:false;"; // http://gemal.dk/blog/2005/01/27/iframe_without_src_attribute_on_https_in_internet_explorer/
+}
 document.body.appendChild (iframe);
 var html = "<html><head><title></title>";
 html += "<script type=\"text/javascript\">\r\n";
@@ -663,7 +666,9 @@ return function () {
 		if (handle.contentWindow != null) {
 			if (ClazzLoader.isIE && window["xss.domain.enabled"] == true
 					&& domain != null && domain.length > 0) {
-				handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();void(0);";
+				handle.contentWindow.location = "javascript:document.open();document.domain='" + domain + "';document.close();false;"; // void(0);";
+			} else if (ClazzLoader.isIE) {
+				handle.contentWindow.location = "javascript:false;"; //"about:blank";
 			} else {
 				handle.contentWindow.location = "about:blank";
 			}
