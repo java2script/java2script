@@ -621,8 +621,7 @@ if (ClazzLoader.classpathMap["@org.eclipse.swt"] != null) {
 /* private */
 window["org.eclipse.swt.registered"] = true;
 
-var lazyCBKey = "swt.lazy.loading.callback";
-if (window[lazyCBKey] != null) {
-	window[lazyCBKey]();
-	window[lazyCBKey] = null;
+if (window["swt.lazy.loading.callback"] != null) {
+	window["swt.lazy.loading.callback"]();
+	window["swt.lazy.loading.callback"] = null;
 }

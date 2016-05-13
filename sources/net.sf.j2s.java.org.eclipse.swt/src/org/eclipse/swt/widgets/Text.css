@@ -16,6 +16,7 @@
 	font-family:Tahoma, Arial, sans-serif;
 	font-size:8pt;
 	box-sizing: content-box !important;
+	resize:none;
 }
 .text-editable textarea {
 	/*background-color:white;*/

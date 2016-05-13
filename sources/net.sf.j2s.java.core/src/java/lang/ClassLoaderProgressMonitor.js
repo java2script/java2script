@@ -171,26 +171,29 @@ clpm.showStatus = function (msg, fading) {
 		this.fadeOut();
 	}
 };
-if (window["ClazzLoader"] != null) {
-	ClazzLoader.scriptLoading = function (file) {
-		ClassLoaderProgressMonitor.showStatus ("Loading " + file + "...");
-	};
-	ClazzLoader.scriptLoaded = function (file) {
-		ClassLoaderProgressMonitor.showStatus (file + " loaded.", true);
-	};
-	ClazzLoader.globalLoaded = function (file) {
-		ClassLoaderProgressMonitor.showStatus ("Application loaded.", true);
-	};
-	ClazzLoader.classUnloaded = function (clazz) {
-		ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is unloaded.", true);
-	};
-	ClazzLoader.classReloaded = function (clazz) {
-		ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is reloaded.", true);
-	};
-
-	var ua = navigator.userAgent.toLowerCase ();
-	if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
-		ClazzLoader.setLoadingMode ("script", 5);
+(function() {
+	if (window["ClazzLoader"] != null) {
+		ClazzLoader.scriptLoading = function (file) {
+			ClassLoaderProgressMonitor.showStatus ("Loading " + file + "...");
+		};
+		ClazzLoader.scriptLoaded = function (file) {
+			ClassLoaderProgressMonitor.showStatus (file + " loaded.", true);
+		};
+		ClazzLoader.globalLoaded = function (file) {
+			ClassLoaderProgressMonitor.showStatus ("Application loaded.", true);
+		};
+		ClazzLoader.classUnloaded = function (clazz) {
+			ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is unloaded.", true);
+		};
+		ClazzLoader.classReloaded = function (clazz) {
+			ClassLoaderProgressMonitor.showStatus ("Class " + clazz + " is reloaded.", true);
+		};
+	
+		var ua = navigator.userAgent.toLowerCase ();
+		if (ua.indexOf ("msie") != -1 && ua.indexOf ("opera") == -1) {
+			ClazzLoader.setLoadingMode ("script", 5);
+		}
 	}
-}
+}) ();
+
 }

@@ -983,14 +983,20 @@ Clazz.innerFunctions.newInstance = function () {
 
 //Object.newInstance = Clazz.innerFunctions.newInstance;
 (function() {  // BH added wrapper here
+	Array["isArray"] = (function (nativeFun) {
+		return function() {
+			if (arguments.length == 0) {
+				return true;
+			}
+			return nativeFun(arguments[0]); 
+		};
+	}) (Array.isArray);
 	var inF = Clazz.innerFunctionNames;
 	for (var i = 0; i < inF.length; i++) {
 		JavaObject[inF[i]] = Clazz.innerFunctions[inF[i]];
+		if ("isArray" == inF[i]) continue;
 		Array[inF[i]] = Clazz.innerFunctions[inF[i]];
 	}
-	Array["isArray"] = function () {
-		return true;
-	};
 }) ();
 
 /* public */

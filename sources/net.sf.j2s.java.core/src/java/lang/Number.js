@@ -1,11 +1,15 @@
 Clazz.load (["java.io.Serializable"], "java.lang.Number", null, function () {
 java.lang.Number = Number;
-if (Clazz.supportsNativeObject) {
-	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
-		var p = Clazz.extendedObjectMethods[i];
-		Number.prototype[p] = JavaObject.prototype[p];
+Number.prototype.to$tring = Number.prototype.toString;
+(function() {
+	if (Clazz.supportsNativeObject) {
+		for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+			var p = Clazz.extendedObjectMethods[i];
+			if (p == "toString" || p == "to$tring") continue;
+			Number.prototype[p] = JavaObject.prototype[p];
+		}
 	}
-}
+}) ();
 //Clazz.decorateAsType (Number, "Number", null, java.io.Serializable, null, true);
 Number.__CLASS_NAME__ = "Number";
 Clazz.implementOf (Number, java.io.Serializable);
@@ -44,12 +48,11 @@ function () {
 return this.valueOf ();
 });
 
-Number.prototype.to$tring = Number.prototype.toString;
 //sgurin : added this because if not, a native number in native code will print as [Object Number] instead printing the number value... 
 Clazz.overrideMethod (Number, "toString", 
 function () {
 	if (arguments.length > 0) {
-		return this.to$tring (arguments[0]);
+		return Number.prototype.to$tring.apply (this, arguments);
 	} else {
 		return this.valueOf () + "";
 	}

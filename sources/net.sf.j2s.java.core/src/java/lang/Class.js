@@ -49,6 +49,7 @@ JavaObject = Object;
 
 /* protected */
 Clazz.supportsNativeObject = window["j2s.object.native"];
+Clazz.supportsNativeArray = window["j2s.array.native"];
 
 if (Clazz.supportsNativeObject) {
 	JavaObject = function () {};
@@ -92,23 +93,28 @@ JavaObject.prototype.toString = function () {
 	if (this.__CLASS_NAME__ != null) {
 		return "[" + this.__CLASS_NAME__ + " object]";
 	} else {
-		return this.to$tring.apply (this, arguments);
+		return JavaObject.prototype.to$tring.apply (this, arguments);
 	}
 };
 
-if (Clazz.supportsNativeObject) {
-	/* protected */
-	Clazz.extendedObjectMethods = [
-			"equals", "hashCode", "getClass", "clone", "finalize", "notify", "notifyAll", "wait", "to$tring", "toString"
-	];
-
-	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
-		var p = Clazz.extendedObjectMethods[i];
-		Array.prototype[p] = JavaObject.prototype[p];
+(function() {
+	if (Clazz.supportsNativeObject) {
+		/* protected */
+		Clazz.extendedObjectMethods = [
+				"equals", "hashCode", "getClass", "clone", "finalize", "notify", "notifyAll", "wait", "to$tring", "toString"
+		];
+		if (!Clazz.supportsNativeArray) {
+			Array.prototype.to$tring = Array.prototype.toString;
+			for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+				var p = Clazz.extendedObjectMethods[i];
+				if (p == "toString" || p == "to$tring") continue;
+				Array.prototype[p] = JavaObject.prototype[p];
+			}
+		}
+		JavaObject.__CLASS_NAME__ = "Object";
+		JavaObject["getClass"] = function () { return JavaObject; }; 
 	}
-	JavaObject.__CLASS_NAME__ = "Object";
-	JavaObject["getClass"] = function () { return JavaObject; }; 
-}
+}) ();
 
 /**
  * Try to fix bug on Safari
@@ -1518,15 +1524,17 @@ Clazz.defineType = function (qClazzName, clazzFun, clazzParent, interfacez) {
 
 Clazz.isSafari = (navigator.userAgent.indexOf ("Safari") != -1);
 Clazz.isSafari4Plus = false;
-if (Clazz.isSafari) {
-	var ua = navigator.userAgent;
-	var verIdx = ua.indexOf ("Version/");
-	if (verIdx  != -1) {
-		var verStr = ua.substring (verIdx + 8);
-		var verNumber = parseFloat (verStr);
-		Clazz.isSafari4Plus = verNumber >= 4.0;
+(function() {
+	if (Clazz.isSafari) {
+		var ua = navigator.userAgent;
+		var verIdx = ua.indexOf ("Version/");
+		if (verIdx  != -1) {
+			var verStr = ua.substring (verIdx + 8);
+			var verNumber = parseFloat (verStr);
+			Clazz.isSafari4Plus = verNumber >= 4.0;
+		}
 	}
-}
+}) ();
 
 /* protected */
 Clazz.instantialize = function (objThis, args) {
@@ -1970,31 +1978,34 @@ Clazz._ex_reg=function (msg, spliterName, spliterRegex) {
 		regexp = new RegExp("^"+str+"$");
 	return regexp;
 };
-// reproduce NullPointerException for knowing how to detect them, and create detector function Clazz._isNPEExceptionPredicate
-var $$o$$ = null;
-try {
-	$$o$$.hello ();
-} catch (e) {
-	if(/Opera[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {// opera throws an exception with fixed messages like "Statement on line 23: Cannot convert undefined or null to Object Backtrace: Line....long text... " 
-		var idx1 = e.message.indexOf(":"), idx2 = e.message.indexOf(":", idx1+2);
-		Clazz._NPEMsgFragment = e.message.substr(idx1+1, idx2-idx1-20);
-		Clazz._isNPEExceptionPredicate = function(e) {
-			return e.message.indexOf(Clazz._NPEMsgFragment)!=-1;
-		};
-	}	
-	else if(navigator.userAgent.toLowerCase().indexOf("webkit")!=-1) { //webkit, google chrome prints the property name accessed. 
-		Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "hello");
-		Clazz._isNPEExceptionPredicate = function(e) {
-			return Clazz._exceptionNPERegExp.test(e.message);
-		};
+(function() {
+	// reproduce NullPointerException for knowing how to detect them, and create detector function Clazz._isNPEExceptionPredicate
+	var $$o$$ = null;
+	try {
+		$$o$$.hello ();
+	} catch (e) {
+		if(/Opera[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {// opera throws an exception with fixed messages like "Statement on line 23: Cannot convert undefined or null to Object Backtrace: Line....long text... " 
+			var idx1 = e.message.indexOf(":"), idx2 = e.message.indexOf(":", idx1+2);
+			Clazz._NPEMsgFragment = e.message.substr(idx1+1, idx2-idx1-20);
+			Clazz._isNPEExceptionPredicate = function(e) {
+				return e.message.indexOf(Clazz._NPEMsgFragment)!=-1;
+			};
+		}	
+		else if(navigator.userAgent.toLowerCase().indexOf("webkit")!=-1) { //webkit, google chrome prints the property name accessed. 
+			Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "hello");
+			Clazz._isNPEExceptionPredicate = function(e) {
+				return Clazz._exceptionNPERegExp.test(e.message);
+			};
+		}
+		else {// ie, firefox and others print the name of the object accessed: 
+			Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "$$o$$");
+			Clazz._isNPEExceptionPredicate = function(e) {
+				return Clazz._exceptionNPERegExp.test(e.message);
+			};
+		}		
 	}
-	else {// ie, firefox and others print the name of the object accessed: 
-		Clazz._exceptionNPERegExp = Clazz._ex_reg(e.message, "$$o$$");
-		Clazz._isNPEExceptionPredicate = function(e) {
-			return Clazz._exceptionNPERegExp.test(e.message);
-		};
-	}		
-};
+}) ();
+ 
 /**sgurin
  * Implements Java's keyword "instanceof" in JavaScript's way **for exception objects**.
  * 

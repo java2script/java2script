@@ -3,12 +3,14 @@ java.lang.B00lean = Boolean;
 java.lang.Boolean = Boolean = function () {
 	Clazz.instantialize (this, arguments);
 };
-if (Clazz.supportsNativeObject) {
-	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
-		var p = Clazz.extendedObjectMethods[i];
-		Boolean.prototype[p] = JavaObject.prototype[p];
+(function() {
+	if (Clazz.supportsNativeObject) {
+		for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+			var p = Clazz.extendedObjectMethods[i];
+			Boolean.prototype[p] = JavaObject.prototype[p];
+		}
 	}
-}
+}) ();
 Boolean.__CLASS_NAME__ = "Boolean";
 Clazz.implementOf (Boolean, [java.io.Serializable, java.lang.Comparable]);
 Boolean.equals = Clazz.innerFunctions.equals;

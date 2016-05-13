@@ -220,19 +220,21 @@ ClazzLoader.randomlyReload = ClazzLoader.isSafari;
  *
  * FIXME: This different loading order also causes bugs in single thread!
  */
-if (ClazzLoader.isOpera) {
-	ClazzLoader.maxLoadingThreads = 1;
-	var index = ClazzLoader.userAgent.indexOf ("opera/");
-	if (index != -1) {
-		var verNumber = 9.0;
-		try {
-			verNumber = parseFloat(ClazzLoader.userAgent.subString (index + 6));
-		} catch (e) {}
-		if (verNumber >= 9.6) {
-			ClazzLoader.maxLoadingThreads = 6;
-		}
-	} 
-}
+(function() {
+	if (ClazzLoader.isOpera) {
+		ClazzLoader.maxLoadingThreads = 1;
+		var index = ClazzLoader.userAgent.indexOf ("opera/");
+		if (index != -1) {
+			var verNumber = 9.0;
+			try {
+				verNumber = parseFloat(ClazzLoader.userAgent.subString (index + 6));
+			} catch (e) {}
+			if (verNumber >= 9.6) {
+				ClazzLoader.maxLoadingThreads = 6;
+			}
+		} 
+	}
+}) ();
 
 /**
  * Try to be compatiable with Clazz system.

@@ -1,15 +1,17 @@
 Clazz.load (["java.lang.CharSequence", "$.Comparable", "java.io.Serializable", "java.util.Comparator"], "java.lang.String", null, function () {
 if (String.prototype.$replace == null) { // not defined yet! ClazzLoader may try to load this twice!
 java.lang.String = String;
-if (Clazz.supportsNativeObject) {
-	for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
-		var p = Clazz.extendedObjectMethods[i];
-		if ("to$tring" == p || "toString" == p || "equals" == p || "hashCode" == p) {
-			continue;
+(function() {
+	if (Clazz.supportsNativeObject) {
+		for (var i = 0; i < Clazz.extendedObjectMethods.length; i++) {
+			var p = Clazz.extendedObjectMethods[i];
+			if ("to$tring" == p || "toString" == p || "equals" == p || "hashCode" == p) {
+				continue;
+			}
+			String.prototype[p] = JavaObject.prototype[p];
 		}
-		String.prototype[p] = JavaObject.prototype[p];
 	}
-}
+}) ();
 //Clazz.decorateAsType (String, "String", null, [java.io.Serializable, CharSequence, Comparable]);
 Clazz.implementOf (String, [java.io.Serializable, CharSequence, Comparable]);
 //Number.equals = Clazz.innerFunctions.equals;
