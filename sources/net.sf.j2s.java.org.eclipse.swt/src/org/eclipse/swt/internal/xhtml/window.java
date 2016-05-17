@@ -10,6 +10,9 @@ public class window {
 	public static int clientWidth;
 	public static int clientHeight;
 	
+	public static int innerWidth; // IE9+
+	public static int innerHeight; // IE9+
+	
 	public static Screen screen;
 	public static History history;
 	

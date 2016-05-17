@@ -18,6 +18,7 @@ import org.eclipse.swt.internal.dnd.HTMLEventWrapper;
 import org.eclipse.swt.internal.xhtml.CSSStyle;
 import org.eclipse.swt.internal.xhtml.Element;
 import org.eclipse.swt.internal.xhtml.document;
+import org.eclipse.swt.internal.xhtml.window;
 
 /**
  * @author zhou renjian
@@ -64,6 +65,11 @@ public class OS {
 	
 	public static boolean isChrome30 = false;
 	
+	public static boolean isMobile = false;
+	
+	public static boolean isAndroid = false;
+	
+	public static boolean isiOS = false;
 	
 	/* Record Caps Lock status */
 	public static boolean isCapsLockOn = false;
@@ -103,6 +109,31 @@ public class OS {
 	os.isIE90 = os.isIE && dua.indexOf("MSIE 9.0")>=0;
 	os.isIENeedPNGFix = os.isIE50 || os.isIE55 || os.isIE60;
 	os.noReturnCallback = os.noReturnCallbackFunction;
+	if (dua.match(/Android/i)
+			|| dua.match(/webOS/i)
+			|| dua.match(/iPhone/i)
+			|| dua.match(/iPad/i)
+			|| dua.match(/iPod/i)
+			|| dua.match(/BlackBerry/i)
+			|| dua.match(/Windows Phone/i)
+		) {
+		os.isMobile = true;
+	} else {
+		os.isMobile = false;
+	}
+	if (dua.match(/Android/i)) {
+		os.isAndroid = true;
+	} else {
+		os.isAndroid = false;
+	}
+	if (dua.match(/iPhone/i)
+			|| dua.match(/iPad/i)
+			|| dua.match(/iPod/i)
+		) {
+		os.isiOS = true;
+	} else {
+		os.isiOS = false;
+	}
 	 */
 	static {
 		
@@ -938,7 +969,11 @@ public class OS {
 	    Element p = b.parentNode;
 	    int bcHeight = b.clientHeight;
 	    int pcHeight = p.clientHeight;
-	    if (OS.isIE) { // && !OS.isOpera
+	    if (OS.isMobile) {
+	    	int height = (pcHeight == p.offsetHeight 
+	                && pcHeight == p.scrollHeight) ? bcHeight : pcHeight;
+	    	return Math.max(window.innerHeight, height);
+	    } else if (OS.isIE) { // && !OS.isOpera
 	        return (pcHeight == 0) ? bcHeight : pcHeight;
 	    } else if (OS.isFirefox || OS.isSafari) {
 	        return (pcHeight == p.offsetHeight 

@@ -38,7 +38,7 @@ public class ResizeHandler {
 		this.status = status;
 	}
 	
-	private Rectangle getClientArea() {
+	public Rectangle getClientArea() {
 		int orientation = SWT.LEFT;
 		int clientWidth = 0;
 		int clientHeight = 0;

@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Monitor;
  * @author zhou renjian
  *
  * 2006-4-24
+ * @j2sRequireImport org.eclipse.swt.internal.browser.OS
  * @j2sSuffix
 var $browserResizingHandle = null;
 $browserLayoutResize = function () {
@@ -33,6 +34,9 @@ $browserLayoutResize = function () {
 
 if (document.addEventListener) {
 	window.addEventListener('resize', $browserLayoutResize, true);
+	if (O$.isMobile) {
+		window.addEventListener('orientationchange', $browserLayoutResize, true);
+	}
 } else if (document.attachEvent) {
 	window.attachEvent('onresize', $browserLayoutResize);
 }
