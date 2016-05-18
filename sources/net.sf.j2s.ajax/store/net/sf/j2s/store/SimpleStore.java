@@ -96,4 +96,9 @@ window.setTimeout (function () {
 		}
 		runnable.run();
 	}
+	
+	public Object getStore() {
+		return store;
+	}
+	
 }
