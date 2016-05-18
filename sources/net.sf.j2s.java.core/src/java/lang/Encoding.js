@@ -33,7 +33,7 @@ Encoding.readUTF8 = function (str) {
 			var c2 = str.charCodeAt(i) & 0x3f;
 			var c = (c1 << 6) + c2;
 			arrs[arrs.length] = String.fromCharCode(c);
-		} else if (charCode >= 0xe0) {
+		} else if (charCode >= 0xe0 && charCode < 0xf0) {
 			var c1 = charCode & 0x0f;
 			i++;
 			var c2 = str.charCodeAt(i) & 0x3f;
@@ -41,6 +41,19 @@ Encoding.readUTF8 = function (str) {
 			var c3 = str.charCodeAt(i) & 0x3f;
 			var c = (c1 << 12) + (c2 << 6) + c3;
 			arrs[arrs.length] = String.fromCharCode(c);
+		} else if (charCode >= 0xf0) {
+			var c1 = charCode & 0x07;
+			i++;
+			var c2 = str.charCodeAt(i);
+			i++;
+			var c3 = str.charCodeAt(i);
+			i++;
+			var c4 = str.charCodeAt(i);
+			//var c = ((c1 & 0x06) << 18) + ((c2 & 0x3f)<< 12) + ((c3 & 0x3f) << 6) + (c4 & 0x3f) - 0x10000;
+			var highCode = (c1 & 0x07 << 8) + ((c2 & 0x3f) << 2) + ((c3 & 0x30) >> 4) + 0xd800 - 0x0040;
+			var lowCode = ((c3 & 0x0f) << 6) + (c4 & 0x3f) + 0xdc00;
+			arrs[arrs.length] = String.fromCharCode(highCode);
+			arrs[arrs.length] = String.fromCharCode(lowCode);
 		}
 	}
 	return arrs.join ('');
@@ -66,16 +79,33 @@ Encoding.convert2UTF8 = function (str) {
 		var charCode = str.charCodeAt(i);
 		if (charCode < 0x80) {
 			arrs[offset + i - startIdx] = str.charAt(i);
+			continue;
 		} else if (charCode <= 0x07ff) { //(charCode > 0xc0 && charCode < 0xe0) {
 			var c1 = 0xc0 + ((charCode & 0x07c0) >> 6);
 			var c2 = 0x80 + (charCode & 0x003f);
 			arrs[offset + i - startIdx] = String.fromCharCode(c1) + String.fromCharCode(c2);
-		} else {
-			var c1 = 0xe0 + ((charCode & 0xf000) >> 12);
-			var c2 = 0x80 + ((charCode & 0x0fc0) >> 6);
-			var c3 = 0x80 + (charCode & 0x003f);
-			arrs[offset + i - startIdx] = String.fromCharCode(c1) + String.fromCharCode(c2) + String.fromCharCode(c3);
+			continue;
+		} else if (charCode >= 0xd800 && charCode <= 0xdbff) { // high-surrogate code point
+			if (i < str.length - 1) {
+				var lowCode = str.charCodeAt(i+1);
+				if (lowCode >= 0xdc00 && lowCode <= 0xdfff) { // low-surrogate code point
+					i++;
+					// charCode = ((charCode & 0x03ff) << 10) + (lowCode & 0x03ff) + 0x10000;
+					// utf8mb4: 0x10000 <= charCode <= 0x1fffff
+					var highCode = charCode + 0x0040; // + 0x10000 
+					var c1 = 0xf0 + ((highCode & 0x0700) >> 16);
+					var c2 = 0x80 + ((highCode & 0x00fc) >> 2);
+					var c3 = 0x80 + ((highCode & 0x0003) << 4) + ((lowCode & 0x03c0) >> 6);
+					var c4 = 0x80 + (lowCode & 0x003f);
+					arrs[offset + i - startIdx] = String.fromCharCode(c1) + String.fromCharCode(c2) + String.fromCharCode(c3) + String.fromCharCode(c4);
+					continue;
+				}
+			} 
 		}
+		var c1 = 0xe0 + ((charCode & 0xf000) >> 12);
+		var c2 = 0x80 + ((charCode & 0x0fc0) >> 6);
+		var c3 = 0x80 + (charCode & 0x003f);
+		arrs[offset + i - startIdx] = String.fromCharCode(c1) + String.fromCharCode(c2) + String.fromCharCode(c3);
 	}
 	return arrs.join ('');
 };
