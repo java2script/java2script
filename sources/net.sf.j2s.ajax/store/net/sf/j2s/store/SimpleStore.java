@@ -9,9 +9,17 @@ public class SimpleStore implements IStore {
 
 	private static SimpleStore singleton;
 	
-	private IStore store;
+	private static SimpleStore[] extras = new SimpleStore[3];
 	
-	private SimpleStore() {
+	public static final String TYPE_LOCALSTORAGE = "local";
+	public static final String TYPE_COOKIE = "cookie";
+	public static final String TYPE_XSS_COOKIE = "xss";
+	public static final String TYPE_FILE = "file";
+	
+	private IStore store;
+	private String type;
+	
+	private SimpleStore(String type) {
 		/**
 		 * @j2sNative
 var ua = navigator.userAgent.toLowerCase ();
@@ -21,11 +29,13 @@ try {
 } catch (e) {
 	isLocalFile = true;
 }
-if (window["j2s.html5.store"] && window["localStorage"] != null && (ua.indexOf ("gecko/") == -1 || !isLocalFile)) {
+if ((type == null || "local" == type) && window["j2s.html5.store"] && window["localStorage"] != null
+ 		&& (ua.indexOf ("gecko/") == -1 || !isLocalFile)) {
 	try {
 		localStorage.setItem('net.sf.j2s.test', '1');
 		localStorage.removeItem('net.sf.j2s.test');
 		this.store = new net.sf.j2s.store.HTML5LocalStorage ();
+		this.type = "local";
 		return;
 	} catch (error) {
 	}
@@ -39,22 +49,63 @@ try {
 }
 var isOldIE = ua.indexOf ("msie 5.5") != -1 || ua.indexOf ("msie 5.0") != -1;
 var cookieURL = window["j2s.xss.cookie.url"];
-if (!isLocal && cookieURL != null && !isOldIE) {
+if (!isLocal && cookieURL != null && !isOldIE && (type == null || "xss" == type)) {
 	this.store = new net.sf.j2s.store.XSSCookieStore(cookieURL);
+	this.type = "xss";
 } else {
-	this.store = new net.sf.j2s.store.CookieStore();
+	if (type == null || "cookie" == type) {
+		this.store = new net.sf.j2s.store.CookieStore();
+		this.type = "cookie";
+	} else {
+		throw new RuntimeException("Not supporting SimpleStore for given type \"" + type + "\"!");
+	}
 }
 		 */ {
-			File storeFile = new File(System.getProperty("user.home"), ".java2script.store");
-			this.store = new INIFileStore(storeFile.getAbsolutePath());
+			if (type == null || "file".equals(type)) {
+				File storeFile = new File(System.getProperty("user.home"), ".java2script.store");
+				this.store = new INIFileStore(storeFile.getAbsolutePath());
+				this.type = "file";
+			} else {
+				throw new RuntimeException("Not supporting SimpleStore for given type \"" + type + "\"!");
+			}
 		}
 	}
 
 	public static SimpleStore getDefault() {
 		if (singleton == null) {
-			singleton = new SimpleStore();
+			singleton = new SimpleStore(null);
 		}
 		return singleton;
+	}
+	
+	public static SimpleStore getTypedStore(String type) {
+		if (singleton == null) {
+			singleton = new SimpleStore(null);
+		}
+		if (type == null || type.length() == 0 || type.equals(singleton.type)) {
+			return singleton;
+		}
+		SimpleStore[] es = extras;
+		for (int i = 0; i < es.length; i++) {
+			SimpleStore ss = es[i];
+			if (ss == null) continue;
+			if (type.equals(ss.type)) return ss;
+		}
+		SimpleStore typedStore = null;
+		try {
+			typedStore = new SimpleStore(type);
+		} catch (Throwable e) {
+			//e.printStackTrace();
+			return null;
+		}
+		for (int i = 0; i < es.length; i++) {
+			SimpleStore ss = es[i];
+			if (ss == null) {
+				es[i] = typedStore;
+				break;
+			}
+		}
+		return typedStore;
 	}
 
 	public String getProperty(String name) {
