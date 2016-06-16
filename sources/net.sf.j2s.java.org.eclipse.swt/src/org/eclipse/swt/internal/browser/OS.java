@@ -32,8 +32,12 @@ public class OS {
 		
 	}
 	
+	public static boolean isEdge = false;
+	public static boolean isTrident = false; // IE11 or IE10
+	
 	public static boolean isIE = false;
 	
+	public static boolean isIE100 = false;
 	public static boolean isIE90 = false;
 	public static boolean isIE80 = false;
 	public static boolean isIE70 = false;
@@ -87,6 +91,7 @@ public class OS {
 	};
 	var os = $wt.internal.browser.OS;
 	var dua = navigator.userAgent;
+	os.isEdge = dua.indexOf ("Edge") >= 0 && dua.indexOf ("Windows") >= 0;
 	os.isOpera = dua.indexOf ("Opera") >= 0;
 	var isKHTML = dua.indexOf ("Konqueror") >= 0 || dua.indexOf ("Safari") >= 0;
 	os.isSafari = dua.indexOf ("Safari") >= 0;
@@ -107,6 +112,8 @@ public class OS {
 	os.isIE70 = os.isIE && dua.indexOf("MSIE 7.0")>=0;
 	os.isIE80 = os.isIE && dua.indexOf("MSIE 8.0")>=0;
 	os.isIE90 = os.isIE && dua.indexOf("MSIE 9.0")>=0;
+	os.isIE100 = os.isIE && dua.indexOf("MSIE 10.0")>=0;
+	os.isTrident = (!os.isIE || os.isIE100 || os.isIE90) && dua.indexOf("Trident")>=0;
 	os.isIENeedPNGFix = os.isIE50 || os.isIE55 || os.isIE60;
 	os.noReturnCallback = os.noReturnCallbackFunction;
 	if (dua.match(/Android/i)
