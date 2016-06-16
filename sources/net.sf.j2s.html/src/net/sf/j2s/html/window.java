@@ -10,6 +10,9 @@ public class window {
 	
 	public static location location;
 	
+	public static int innerWidth;
+	public static int innerHeight;
+	
 	public native static int setInterval(Object runnable, int milliseconds);
 
 	public native static void clearInterval(int timerId);

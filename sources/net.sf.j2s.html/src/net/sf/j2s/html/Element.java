@@ -1,15 +1,13 @@
 package net.sf.j2s.html;
 
 
-
-
-	
 public class Element {
 	public ContentWindow contentWindow;
 	
 	public Element parentNode;
 	public Element[] childNodes;
 	public Element nextSibling;
+	public Element previousSibling;
 	public int offsetLeft;
 	public int offsetTop;
 	public Element offsetParent;
@@ -62,17 +60,22 @@ public class Element {
 
 	public boolean multiple;
 	
+	public String action;
+	public String method;
+	public String enctype;
+	public String accept;
+	
 	public Object onchange;
 
 	public Object onselectchange;
 
-	public String rows;
+	public int rows;
 	
-	public String cols;
+	public int cols;
 	
-	public String width;
+	public int width;
 
-	public String height;
+	public int height;
 
 	public int offsetWidth, clientWidth, scrollWidth, scrollLeft;
 	
@@ -135,5 +138,9 @@ public class Element {
 	public native Element getElementById(String id);
 	
 	public native void setAttribute(String prop, String value);
+	
+	public native void submit();
+	
+	public native void reset();
 
 }
