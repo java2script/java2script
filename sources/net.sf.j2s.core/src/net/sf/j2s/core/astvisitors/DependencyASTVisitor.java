@@ -876,8 +876,21 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		QNTypeBinding qn = new QNTypeBinding();
 		String qualifiedName = null;
 		if (resolveTypeBinding != null && resolveTypeBinding.isAnonymous()) {
-			qualifiedName = node.getType().resolveBinding().getQualifiedName();
-			qn.binding = node.getType().resolveBinding();
+			resolveTypeBinding = node.getType().resolveBinding();
+			//qualifiedName = node.getType().resolveBinding().getQualifiedName();
+			//qn.binding = node.getType().resolveBinding();
+			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
+			if (declaringClass != null) {
+				ITypeBinding dclClass = null;
+				while ((dclClass = declaringClass.getDeclaringClass()) != null) {
+					declaringClass = dclClass;
+				}
+				qualifiedName = declaringClass.getQualifiedName();
+				qn.binding = declaringClass;
+			} else {
+				qualifiedName = resolveTypeBinding.getQualifiedName();
+				qn.binding = resolveTypeBinding;
+			}
 		} else if(resolveTypeBinding != null){
 			ITypeBinding declaringClass = resolveTypeBinding.getDeclaringClass();
 			if (declaringClass != null) {
