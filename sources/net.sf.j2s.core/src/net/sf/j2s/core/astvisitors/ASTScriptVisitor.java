@@ -2509,9 +2509,42 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			String binaryName = declaringClass.getBinaryName();
-			int idx = levels.indexOf(binaryName);
+			int idx = levels.lastIndexOf(binaryName);
 			if (idx == -1) {
-				idx = classes.indexOf(binaryName);
+				idx = classes.lastIndexOf(binaryName);
+				if (idx == -1) {
+					// Check each super class
+					int index = 0;
+					ITypeBinding superClass = originalType.getSuperclass();
+					while (superClass != null) {
+						String superName = superClass.getBinaryName();
+						if ("java.lang.Object".equals(superName)) {
+							break;
+						}
+						if (binaryName.equals(superName)) {
+							idx = index; 
+							//break;
+						}
+						superClass = superClass.getSuperclass();
+					}
+					ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+					while (thisDeclaringClass != null) {
+						index++;
+						superClass = thisDeclaringClass.getSuperclass();
+						while (superClass != null) {
+							String superName = superClass.getBinaryName();
+							if ("java.lang.Object".equals(superName)) {
+								break;
+							}
+							if (binaryName.equals(superName)) {
+								idx = index; 
+								//break;
+							}
+							superClass = superClass.getSuperclass();
+						}
+						thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+					}
+				}
 			}
 			if (idx != -1) {
 				for (int i = idx + 1; i < levels.size(); i++) {
