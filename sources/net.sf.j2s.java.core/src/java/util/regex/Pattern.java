@@ -115,7 +115,7 @@ public final class Pattern implements Serializable {
 //
 //    transient private int consCount = -1;
 
-	private Object regexp;
+	Object regexp;
 
     /**
 	 * Create a matcher for this pattern and a given input character sequence
@@ -296,7 +296,7 @@ public final class Pattern implements Serializable {
 		/**
 		 * @j2sNative
 		pattern.regexp = new RegExp(regex, flagStr);
-		 */ {}
+		 */ { flagStr.toString(); }
 		return pattern;
     }
 

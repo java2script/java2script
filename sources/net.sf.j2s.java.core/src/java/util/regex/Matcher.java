@@ -416,8 +416,22 @@ public final class Matcher implements MatchResult {
 	 *         character sequence.
 	 */
     public boolean matches() {
-//        return lookingAt(leftBound, Matcher.MODE_MATCH);
-		return find(); 
+        // return lookingAt(leftBound, Matcher.MODE_MATCH);
+    	// Udo: the find must match the complete input and not modify the RE object
+    	/**
+    	 * @j2sNative
+    	Object regexp = this.pat.regexp;
+		int oldLastIndex = regexp.lastIndex;
+    	try {
+	    	this.find();
+	    	String[] r = this.results;
+			return r != null && r.length > 0 && r[0].length() == r.input.length();
+    	} finally {
+    		// Restore the old state of the RE object
+    		regexp.lastIndex = oldLastIndex;
+    	}
+    	 */ {}
+ 		return find(); 
     }
 
     /**

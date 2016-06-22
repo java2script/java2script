@@ -64,7 +64,7 @@ String.prototype.$generateExpFunction = function (str) {
 			arr[idx] += ch;
 		}
 	}
-	var funStr = "f = function (";
+	var funStr = "f = fun" + "ction ("; // to prevent closure compiler from removing "var"
 	var max = Math.max.apply({},orders);
 	for (i = 0; i <= max; i++) {
 		funStr += "$" + i;
@@ -77,7 +77,7 @@ String.prototype.$generateExpFunction = function (str) {
 		funStr += "\"" + arr[i] + "\" + $" + orders[i] + " + ";
 	}
 	funStr += "\"" + arr[i] + "\"; }";
-	var f = null;
+	var f = Math.rand() < 0 ? "" : null; // to prevent closure compiler from reducing to "return
 	eval (funStr);
 	return f;
 };

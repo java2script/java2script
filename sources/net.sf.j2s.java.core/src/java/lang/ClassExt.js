@@ -376,24 +376,43 @@ Clazz.defineStatics = function (clazz) {
 /* protected */
 Clazz.prepareFields = function (clazz, fieldsFun) {
 	var stacks = new Array ();
+	var idx = 0;
 	if (clazz.con$truct != null) {
 		var ss = clazz.con$truct.stacks;
-		var idx = clazz.con$truct.index;
+		idx = clazz.con$truct.index;
 		for (var i = idx; i < ss.length; i++) {
 			stacks[i] = ss[i];
 		}
+		stacks[ss.length] = fieldsFun; //append 
+	} else {
+		stacks[idx] = fieldsFun; // first
 	}
-	clazz.con$truct = clazz.prototype.con$truct = function () {
-		var stacks = arguments.callee.stacks;
+	// To create and set a new con$truct method, so different classes have
+	// different con$truct methods
+	clazz.con$truct = clazz.prototype.con$truct = function (startIdx, endIdx) {
+		var fun = arguments.callee;
+		var stacks = fun.stacks;
 		if (stacks != null) {
-			for (var i = 0; i < stacks.length; i++) {
+			if (startIdx == null || startIdx < 0) {
+				startIdx = fun.index;
+			}
+			if (endIdx == null || endIdx < 0) {
+				endIdx = stacks.length;
+			}
+			// With given start index and end index, we can call methods for different
+			// purposes. For example, for the lowest class with constructor, we need to
+			// call preparing method prior to class with constructor first, then call
+			// constructor body
+			for (var i = startIdx; i < endIdx; i++) {
+				if (stacks[i] == null) {
+					continue;
+				}
 				stacks[i].apply (this, []);
 			}
 		}
 	};
-	stacks[stacks.length] = fieldsFun;
 	clazz.con$truct.stacks = stacks;
-	clazz.con$truct.index = 0;
+	clazz.con$truct.index = idx;
 };
 
 /*
@@ -913,11 +932,14 @@ var reflect = Clazz.declarePackage ("java.lang.reflect");
 Clazz.declarePackage ("java.security");
 
 Clazz.innerFunctionNames = Clazz.innerFunctionNames.concat (["getSuperclass",
-		"isAssignableFrom", "getMethods", "getMethod", "getDeclaredMethods", 
+		"isAssignableFrom", "isInstance", "getMethods", "getMethod", "getDeclaredMethods", 
 		"getDeclaredMethod", "getConstructor", "getModifiers", "isArray", "newInstance"]);
 
 Clazz.innerFunctions.getSuperclass = function () {
 	return this.superClazz;	
+};
+Clazz.innerFunctions.isInstance = function (obj) {
+	return Clazz.instanceOf (obj, this);	
 };
 Clazz.innerFunctions.isAssignableFrom = function (clazz) {
 	return Clazz.getInheritedLevel (clazz, this) >= 0;	

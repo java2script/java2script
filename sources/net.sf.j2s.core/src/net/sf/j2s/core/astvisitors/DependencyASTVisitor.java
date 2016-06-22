@@ -340,6 +340,27 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 
 
+	public boolean isNodeInMustPath(ASTNode node) {
+		if (node == null) return false;
+		do {
+			if (node instanceof TypeDeclaration) {
+				return false;
+			}
+			if (node instanceof MethodDeclaration) {
+				MethodDeclaration m = (MethodDeclaration) node;
+				return m.isConstructor();
+			}
+			if (node instanceof VariableDeclarationFragment) {
+				return true;
+			}
+			if (node instanceof Initializer) {
+				return true;
+			}
+			node = node.getParent();
+		} while (node != null);
+		return false;
+	}
+	
 	public boolean visit(ImportDeclaration node) {
 		return false;
 	}
@@ -449,7 +470,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
 				&& !requires.contains(qn)) {
-			optionals.add(qn);
+			if (isNodeInMustPath(node)) {
+				requires.add(qn);
+			} else {
+				optionals.add(qn);
+			}
 		}
 		return false;
 	}
@@ -839,7 +864,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					&& !musts.contains(qualifiedName)
 					&& !requires.contains(qualifiedName)) {
 				qn.qualifiedName = qualifiedName;
-				optionals.add(qn);
+				if (isNodeInMustPath(node)) {
+					requires.add(qn);
+				} else {
+					optionals.add(qn);
+				}
 			}
 		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding = (IVariableBinding) binding;
@@ -859,11 +888,13 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 						&& !musts.contains(qualifiedName)
 						&& !requires.contains(qualifiedName)) {
 					qn.qualifiedName = qualifiedName;
-					optionals.add(qn);
+					if (isNodeInMustPath(node)) {
+						requires.add(qn);
+					} else {
+						optionals.add(qn);
+					}
 				}
-
 			}
-			
 		}
 		return super.visit(node);
 	}
@@ -912,7 +943,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
 				&& !requires.contains(qn)) {
-			optionals.add(qn);
+			if (isNodeInMustPath(node)) {
+				requires.add(qn);
+			} else {
+				optionals.add(qn);
+			}
 		}
 		return super.visit(node);
 	}
@@ -928,7 +963,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		if (isQualifiedNameOK(qualifiedName, node) 
 				&& !musts.contains(qn)
 				&& !requires.contains(qn)) {
-			optionals.add(qn);
+			if (isNodeInMustPath(node)) {
+				requires.add(qn);
+			} else {
+				optionals.add(qn);
+			}
 		}
 		return super.visit(node);
 	}
@@ -1005,7 +1044,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node)
 						&& !musts.contains(qn) && !requires.contains(qn)) {
-					optionals.add(qn);
+					if (isNodeInMustPath(node)) {
+						requires.add(qn);
+					} else {
+						optionals.add(qn);
+					}
 				}
 			}
 		}
@@ -1045,7 +1088,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					qualifiedName = paramType.getQualifiedName();
 				}
 				qn.qualifiedName = discardGenericType(qualifiedName);
-				optionals.add(qn);
+				if (isNodeInMustPath(node)) {
+					requires.add(qn);
+				} else {
+					optionals.add(qn);
+				}
 			}
 		}
 		boolean toBeIgnored = false;
@@ -1134,7 +1181,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				if (isQualifiedNameOK(qualifiedName, node) 
 						&& !musts.contains(qn)
 						&& !requires.contains(qn)) {
-					optionals.add(qn);
+					if (isNodeInMustPath(node)) {
+						requires.add(qn);
+					} else {
+						optionals.add(qn);
+					}
 				}
 			}
 		} else if (constValue != null && (constValue instanceof Number

@@ -179,7 +179,7 @@ Clazz.getClassName = function (clazzHost) {
 		}
 	} else {
 		var obj = clazzHost;
-		if (obj instanceof Clazz.CastedNull) {
+		if (obj instanceof Clazz.CastedNull || obj instanceof Clazz.CastedObject) {
 			return obj.clazzName;
 		} else {
 			var objType = typeof obj;
@@ -248,7 +248,7 @@ Clazz.getClass = function (clazzHost) {
 	} else {
 		var clazzName = null;
 		var obj = clazzHost;
-		if (obj instanceof Clazz.CastedNull) {
+		if (obj instanceof Clazz.CastedNull || obj instanceof Clazz.CastedObject) {
 			clazzName = obj.clazzName;
 		} else {
 			var objType = typeof obj;
@@ -552,7 +552,7 @@ Clazz.instanceOf = function (obj, clazz) {
 /**
  * Call super method of the class. 
  * The same effect as Java's expression:
- * <code> super.* () </code>
+ * <code> super.*() </code>
  * 
  * @param objThis host object
  * @param clazzThis class of declaring method scope. It's hard to determine 
@@ -574,7 +574,6 @@ Clazz.instanceOf = function (obj, clazz) {
 /* public */
 Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 	var fx = null;
-	var i = -1;
 	var clazzFun = objThis[funName];
 	if (clazzFun != null) {
 		if (clazzFun.claxxOwner != null) { 
@@ -593,29 +592,20 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 				stacks = clazzFun.lastClaxxRef.prototype[funName].stacks;
 			}
 			var length = stacks.length;
-			for (i = length - 1; i >= 0; i--) {
-				/*
-				 * Once super call is computed precisely, there are no need 
-				 * to calculate the inherited level but just an equals
-				 * comparision
-				 */
-				//var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
+			for (var i = length - 1; i >= 0; i--) {
+				// Once super call is computed precisely, there are no need 
+				// to calculate the inherited level but just an equals comparison
+				// var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
 				if (clazzThis === stacks[i]) { // level == 0
 					if (i > 0) {
-						i--;
-						fx = stacks[i].prototype[funName];
+						fx = stacks[--i].prototype[funName];
 					} else {
-						/*
-						 * Will this case be reachable?
-						 * March 4, 2006
-						 * Should never reach here if all things are converted
-						 * by Java2Script
-						 */
+						/* Will this case be reachable? - March 4, 2006
+						 Should never reach here if all are compiled by Java2Script */
 						fx = stacks[0].prototype[funName]["\\unknown"];
 					}
 					break;
-				} else if (Clazz.getInheritedLevel (clazzThis, 
-						stacks[i]) > 0) {
+				} else if (Clazz.getInheritedLevel (clazzThis, stacks[i]) > 0) {
 					fx = stacks[i].prototype[funName];
 					break;
 				}
@@ -623,20 +613,6 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		} // end of normal wrapped method
 	} // end of clazzFun != null
 	if (fx != null) {
-		/* there are members which are initialized out of the constructor */
-		/*if (i == -1) {
-			// unreachable
-			//var oo = clazzFun.claxxOwner;
-			//if (oo.superClazz == null && oo.con$truct != null) {
-			//	clazzFun.claxxOwner.con$truct.apply (objThis, []);
-			//}
-		} else */if (i == 0 && funName == "construct") {
-			var ss = clazzFun.stacks;
-			if (ss != null && ss[0].superClazz == null
-					&& ss[0].con$truct != null) {
-				ss[0].con$truct.apply (objThis, []);
-			}
-		}
 		/*# {$no.debug.support} >>x #*/
 		if (Clazz.tracingCalling) {
 			var caller = arguments.callee.caller;
@@ -650,23 +626,6 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 		}
 		/*# x<< #*/
 		return fx.apply (objThis, (funParams == null) ? [] : funParams);
-	} else if (funName == "construct") {
-		/* there are members which are initialized out of the constructor */
-		/*
-		if (i == -1) {
-			// should be ignore as there are codes calling con$truct in 
-			// #superConstructor
-		} else {
-			// unreachable
-			//var ss = clazzFun.stacks;
-			//if (ss != null && ss[0].superClazz == null 
-			//		&& ss[0].con$truct != null) {
-			//	ss[0].con$truct.apply (objThis, []);
-			//}
-		}
-		*/
-		/* No super constructor! */
-		return ;
 	}
 	throw new Clazz.MethodNotFoundException (objThis, clazzThis, funName, 
 			Clazz.getParamsType (funParams).typeString);
@@ -675,14 +634,96 @@ Clazz.superCall = function (objThis, clazzThis, funName, funParams) {
 /**
  * Call super constructor of the class. 
  * The same effect as Java's expression: 
- * <code> super () </code>
+ * <code> super() </code>
  */
 /* public */
 Clazz.superConstructor = function (objThis, clazzThis, funParams) {
-	Clazz.superCall (objThis, clazzThis, "construct", funParams);
+	var funName = "construct"; 
+	var fx = null;
+	var clazzSuper = clazzThis.superClazz;
+	var superTopBased = clazzSuper == null || clazzSuper.superClazz == null;
+	var clazzFun = objThis[funName];
+	if (clazzFun != null) {
+		if (clazzFun.claxxOwner != null) { 
+			// claxxOwner is a mark for methods that is single.
+			if (clazzFun.claxxOwner !== clazzThis) {
+				// This is a single method, call directly!
+				fx = clazzFun;
+				clazzSuper = clazzFun.claxxOwner;
+				superTopBased = clazzSuper == null || superClazzSuper == null;
+			}
+		/*
+		// As suer constructor needs to check preparing fields, do NOT use cached
+		// methods by previous invocation.
+		} else if (clazzFun.stacks == null && !(clazzFun.lastClaxxRef != null
+				&& clazzFun.lastClaxxRef.prototype[funName] != null
+				&& clazzFun.lastClaxxRef.prototype[funName].stacks != null)) { // super.toString
+			fx = clazzFun;
+			clazzSuper = clazzFun.lastClaxxRef;
+		// */
+		} else { // normal wrapped method
+			var stacks = clazzFun.stacks;
+			/*
+			// As suer constructor needs to check preparing fields, do NOT use cached
+			// methods by previous invocation.
+			if (stacks == null) {
+				stacks = clazzFun.lastClaxxRef.prototype[funName].stacks;
+			}
+			// */
+			var length = stacks.length;
+			for (var i = length - 1; i >= 0; i--) {
+				// Once super call is computed precisely, there are no need 
+				// to calculate the inherited level but just an equals comparison
+				// var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
+				if (clazzThis === stacks[i]) { // level == 0
+					if (i > 0) {
+						fx = (clazzSuper = stacks[--i]).prototype[funName];
+						superTopBased = i == 0;
+					} else {
+						/* Will this case be reachable? - March 4, 2006
+						 Should never reach here if all are compiled by Java2Script */
+						fx = (clazzSuper = stacks[0]).prototype[funName]["\\unknown"];
+						superTopBased = true;
+					}
+					break;
+				} else if (Clazz.getInheritedLevel (clazzThis, stacks[i]) > 0) {
+					fx = (clazzSuper = stacks[i]).prototype[funName];
+					superTopBased = i == 0;
+					break;
+				}
+			} // end of for loop
+		} // end of normal wrapped method
+	} // end of clazzFun != null
+	if (fx != null) {
+		if (superTopBased && clazzSuper != null && clazzSuper.con$truct != null) {
+			clazzSuper.con$truct.apply (objThis, [0, clazzSuper.con$truct.index]);
+		}
+		/*# {$no.debug.support} >>x #*/
+		if (Clazz.tracingCalling) {
+			var caller = arguments.callee.caller;
+			if (caller === Clazz.superConstructor) {
+				caller = caller.arguments.callee.caller;
+			}
+			Clazz.pu$hCalling (new Clazz.callingStack (caller, clazzThis));
+			fx.apply (objThis, (funParams == null) ? [] : funParams);
+			Clazz.p0pCalling ();
+		} else {
+		/*# x<< #*/
+			fx.apply (objThis, (funParams == null) ? [] : funParams);
+		/*# {$no.debug.support} >>x #*/
+		}
+		/*# x<< #*/
+	}
 	/* If there are members which are initialized out of the constructor */
 	if (clazzThis.con$truct != null) {
-		clazzThis.con$truct.apply (objThis, []);
+		// try to call back all field preparing function starting from
+		// clazzThis' super class which has constructor
+		// con$truct.index records the level of last class which has constructor
+		if (clazzSuper != null && clazzSuper.con$truct != null) {
+			clazzThis.con$truct.apply (objThis, [clazzSuper.con$truct.index, clazzThis.con$truct.index]);
+		} else {
+			clazzThis.con$truct.apply (objThis, [0, clazzThis.con$truct.index]);
+		}
 	}
 };
 
@@ -725,6 +766,33 @@ Clazz.castNullAs = function (asClazz) {
 	return new Clazz.CastedNull (asClazz);
 };
 
+/* protcted */
+Clazz.CastedObject = function (obj, asClazz) {
+	if (asClazz != null) {
+		if (asClazz instanceof String) {
+			this.clazzName = asClazz;
+		} else if (asClazz instanceof Function) {
+			this.clazzName = Clazz.getClassName (asClazz, true);
+		} else {
+			this.clazzName = "" + asClazz;
+		}
+	} else {
+		this.clazzName = "Object";
+	}
+	this.target = obj;
+	this.toString = function () {
+		return this.target;
+	};
+	this.getObject = this.valueOf = function () {
+		return this.target;
+	};
+};
+
+/* public */
+Clazz.castObjectAs = function (obj, asClazz) {
+	return new Clazz.CastedObject (obj, asClazz);
+};
+
 /** 
  * MethodException will be used as a signal to notify that the method is
  * not found in the current clazz hierarchy.
@@ -749,12 +817,12 @@ Clazz.MethodNotFoundException = function () {
 /*x-# getParamsType -> gPT #-x*/
 Clazz.getParamsType = function (funParams) {
 	var params = new Array ();
-	params.hasCastedNull = false;
+	params.hasCastedVariable = false;
 	if (funParams != null) {
 		for (var i = 0; i < funParams.length; i++) {
 			params[i] = Clazz.getClassName (funParams[i]);
-			if (funParams[i] instanceof Clazz.CastedNull) {
-				params.hasCastedNull = true;
+			if (funParams[i] instanceof Clazz.CastedNull || funParams[i] instanceof Clazz.CastedObject) {
+				params.hasCastedVariable = true;
 			}
 		}
 	}
@@ -762,7 +830,7 @@ Clazz.getParamsType = function (funParams) {
 		params[0] = "void";
 	}
 	params.typeString = "\\" + params.join ('\\');
-	//params.hasCastedNull = hasCastedNull;
+	//params.hasCastedVariable = hasCastedVariable;
 	return params;
 };
 /**
@@ -794,7 +862,7 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 	}
 	if (cached != 0) {
 		var methodParams = null;
-		if (params.hasCastedNull) {
+		if (params.hasCastedVariable) {
 			methodParams = new Array ();
 			for (var k = 0; k < funParams.length; k++) {
 				if (funParams[k] instanceof Clazz.CastedNull) {
@@ -804,6 +872,13 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 					 * searchMethod.
 					 */
 					methodParams[k] = null;
+				} else if (funParams[k] instanceof Clazz.CastedObject) {
+					/*
+					 * For Clazz.CastedObject instances, the type name is
+					 * already used to indentified the method in Clazz#
+					 * searchMethod.
+					 */
+					methodParams[k] = funParams[k].getObject();
 				} else {
 					methodParams[k] = funParams[k];
 				}
@@ -874,7 +949,9 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 		 * exceptions. In Java codes, extending Object can call super
 		 * default Object#constructor, which is not defined in JS.
 		 */
-		return ;
+		// return; // ub: ignoring the above comment and throw an execption
+		// when not found.
+		throw new java.lang.NoSuchMethodException ();
 	}
 	// TODO: should be java.lang.NoSuchMethodException
 	throw new Clazz.MethodNotFoundException (objThis, claxxRef, 
@@ -961,7 +1038,7 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 		}
 		//if (f != null) { // always not null
 			var methodParams = null;
-			if (params.hasCastedNull) {
+			if (params.hasCastedVariable) {
 				methodParams = new Array ();
 				for (var k = 0; k < funParams.length; k++) {
 					if (funParams[k] instanceof Clazz.CastedNull) {
@@ -971,6 +1048,13 @@ Clazz.tryToSearchAndExecute = function (objThis, clazzFun, params, funParams/*,
 						 * searchMethod.
 						 */
 						methodParams[k] = null;
+					} else if (funParams[k] instanceof Clazz.CastedObject) {
+						/*
+						 * For Clazz.CastedObject instances, the type name is
+						 * already used to indentified the method in Clazz#
+						 * searchMethod.
+						 */
+						methodParams[k] = funParams[k].getObject();
 					} else {
 						methodParams[k] = funParams[k];
 					}
@@ -1049,7 +1133,7 @@ Clazz.initializingException = false;
  *
  * @param existedMethods Array of string which contains method parameters
  * @param paramTypes Array of string that is parameter type.
- * @return string of method parameters seperated by "\\"
+ * @return string of method parameters separated by "\\"
  */
 /* private */
 /*-# 
@@ -1191,7 +1275,7 @@ Clazz.formatParameters = function (funParams) {
 /*
  * Override the existed methods which are in the same name.
  * Overriding methods is provided for the purpose that the JavaScript
- * does not need to search the whole hierarchied methods to find the
+ * does not need to search the whole method tree to find the
  * correct method to execute.
  * Be cautious about this method. Incorrectly using this method may
  * break the inheritance system.
@@ -1199,7 +1283,7 @@ Clazz.formatParameters = function (funParams) {
  * @param clazzThis host class in which the method to be defined
  * @param funName method name
  * @param funBody function object, e.g function () { ... }
- * @param funParams paramether signature, e.g ["string", "number"]
+ * @param funParams parameter signature, e.g ["string", "number"]
  */
 /* public */
 Clazz.overrideMethod = function (clazzThis, funName, funBody, funParams) {
@@ -1266,7 +1350,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 		 * oldStacks should be "new Array ()";
 		 */
 		/*
-		 * Here try to fix up the method into Clazz compatiable.
+		 * Here try to fix up the method into Clazz compatible.
 		 */
 		//oldStacks[0] = oldFun.claxxOwner;
 		/*
@@ -1285,7 +1369,7 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 		//*/
 	//}
 	/*
-	 * Method that is already defined in super class will be overriden
+	 * Method that is already defined in super class will be overridden
 	 * with a new proxy method with class hierarchy stored in a stack.
 	 * That is to say, the super methods are lost in this class' proxy
 	 * method. 
@@ -1339,8 +1423,8 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 		} else if (oldFun.claxxOwner == null) {
 			/*
 			 * The function is not defined Clazz.defineMethod ().
-			 * Try to fixup the method ...
-			 * As a matter of lost method information, I just suppose
+			 * Try to fix up the method ...
+			 * As a matter of lost method information, just suppose
 			 * the method to be fixed is with void parameter!
 			 */
 			f$["\\unknown"] = oldFun;
@@ -1362,10 +1446,11 @@ Clazz.defineMethod = function (clazzThis, funName, funBody, funParams) {
 /* public */
 Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
 	Clazz.defineMethod (clazzThis, "construct", funBody, funParams);
-	if (clazzThis.con$truct != null) {
-		clazzThis.con$truct.index = clazzThis.con$truct.stacks.length;
+	var con$truct = clazzThis.con$truct;
+	if (con$truct != null) {
+		// mark field preparing level, not including current level
+		con$truct.index = con$truct.stacks.length;
 	}
-	//clazzThis.con$truct = clazzThis.prototype.con$truct = null;
 };
 
 /**
@@ -1379,10 +1464,11 @@ Clazz.makeConstructor = function (clazzThis, funBody, funParams) {
 /* public */
 Clazz.overrideConstructor = function (clazzThis, funBody, funParams) {
 	Clazz.overrideMethod (clazzThis, "construct", funBody, funParams);
-	if (clazzThis.con$truct != null) {
-		clazzThis.con$truct.index = clazzThis.con$truct.stacks.length;
+	var con$truct = clazzThis.con$truct;
+	if (con$truct != null) {
+		// mark field preparing level, not including current level
+		con$truct.index = con$truct.stacks.length;
 	}
-	//clazzThis.con$truct = clazzThis.prototype.con$truct = null;
 };
 
 /*
@@ -1540,16 +1626,9 @@ Clazz.isSafari4Plus = false;
 Clazz.instantialize = function (objThis, args) {
 	if (args != null && args.length == 1 && args[0] != null 
 			&& args[0] instanceof Clazz.args4InheritClass) {
-		return ;
+		return; // Just for preparing class inheritance hierarchies.
 	}
-	/*
-	if (objThis.con$truct != null) {
-		objThis.con$truct.apply (objThis, args);
-	}
-	if (objThis.construct != null) {
-		objThis.construct.apply (objThis, args);
-	}
-	*/
+	
 	if (objThis instanceof Number) {
 		objThis.valueOf = function () {
 			return this;
@@ -1562,37 +1641,40 @@ Clazz.instantialize = function (objThis, args) {
 		}
 		args = argsClone;
 	}
+	
 	var c = objThis.construct;
-	if (c != null) {
-		if (objThis.con$truct == null) { // no need to init fields
-			c.apply (objThis, args);
-		} else if (objThis.getClass ().superClazz == null) { // the base class
-			objThis.con$truct.apply (objThis, []);
-			c.apply (objThis, args);
-		} else if ((c.claxxOwner != null 
-				&& c.claxxOwner === objThis.getClass ())
-				|| (c.stacks != null 
-				&& c.stacks[c.stacks.length - 1] == objThis.getClass ())) {
-			/*
-			 * This #construct is defined by this class itself.
-			 * #construct will call Clazz.superConstructor, which will
-			 * call #con$truct back
-			 */
-			c.apply (objThis, args);
-		} else { // constructor is a super constructor
-			if (c.claxxOwner != null && c.claxxOwner.superClazz == null 
-						&& c.claxxOwner.con$truct != null) {
-				c.claxxOwner.con$truct.apply (objThis, []);
-			} else if (c.stacks != null && c.stacks.length == 1
-					&& c.stacks[0].superClazz == null) {
-				c.stacks[0].con$truct.apply (objThis, []);
-			}
-			c.apply (objThis, args);
-			objThis.con$truct.apply (objThis, []);
-		}
-	} else if (objThis.con$truct != null) {
-		objThis.con$truct.apply (objThis, []);
+	if (c == null) { // no default constructors
+		// try to prepare fields, if there are such fields
+		if (objThis.con$truct != null) {
+			// index will be 0
+			objThis.con$truct.apply (objThis, []); // with default arguments (0, length) 
+		} // else do nothing
+		return;
 	}
+	
+	// has constructors
+	if (objThis.con$truct == null) { // no need to prepare fields
+		c.apply (objThis, args);
+		return;
+	}
+	
+	// has constructors and has fields needing to be prepared
+	var clazzThis = objThis.getClass ();
+	// check to see if there are super constructor or not
+	var targetClazz = clazzThis;
+	if (((targetClazz = clazzThis) != null && clazzThis.superClazz == null) // the base class, has no super classes, no super constructor
+			|| (targetClazz = c.claxxOwner) != null // single constructor method, no super constructor
+			|| (c.stacks != null && c.stacks.length == 1 && (targetClazz = c.stacks[0]) != null)) {
+		// no super constructors, try to prepare fields
+		targetClazz.con$truct.apply (objThis, [0, targetClazz.con$truct.index]);
+	}
+	
+	// invoke constructor to prepare fields to given value by the constructor body
+	// if there are super constructor calls, super constructors will try to prepare
+	// fields 
+	c.apply (objThis, args);
+	//  prepare fields after constructor class level
+	objThis.con$truct.apply (objThis, [objThis.con$truct.index]);
 };
 
 /**
@@ -1606,7 +1688,7 @@ Clazz.instantialize = function (objThis, args) {
 /* protected */
 /*-# innerFunctionNames -> iFN #-*/
 Clazz.innerFunctionNames = [
-	"equals", "hashCode", "toString", "getName", "getSimpleName", "getClassLoader", "getResourceAsStream" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
+	"equals", "hashCode", "toString", "getName", "getSimpleName", "getClassLoader", "getResourceAsStream", "getResource" /*# {$no.javascript.support} >>x #*/, "defineMethod", "defineStaticMethod",
 	"makeConstructor" /*# x<< #*/
 ];
 
@@ -1771,6 +1853,12 @@ Clazz.innerFunctions = {
 			}
 		}
 		return is;
+	},
+	
+	getResource : function (name) {
+		var is = this.getResourceAsStream (name);
+		if (is == null) return null;
+		return new java.net.URL (is.url);
 	}/*# {$no.javascript.support} >>x #*/,
 	
 	/*

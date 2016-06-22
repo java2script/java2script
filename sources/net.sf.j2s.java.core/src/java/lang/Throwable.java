@@ -636,7 +636,9 @@ while (index > -1 || caller != null) {
 	if (superCaller != null) {
 		callerList[callerList.length] = superCaller;
 	}
-	caller = superCaller.arguments.callee.caller;
+	//caller = superCaller.arguments.callee.caller;
+	// Udo
+	caller = (superCaller && superCaller.arguments && superCaller.arguments.callee) ? superCaller.arguments.callee.caller : null;
 }
 Clazz.initializingException = false;
 return this;
