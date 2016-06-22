@@ -77,7 +77,7 @@ String.prototype.$generateExpFunction = function (str) {
 		funStr += "\"" + arr[i] + "\" + $" + orders[i] + " + ";
 	}
 	funStr += "\"" + arr[i] + "\"; }";
-	var f = Math.rand() < 0 ? "" : null; // to prevent closure compiler from reducing to "return
+	var f = Math.random () < 0 ? "" : null; // to prevent closure compiler from reducing to "return
 	eval (funStr);
 	return f;
 };
