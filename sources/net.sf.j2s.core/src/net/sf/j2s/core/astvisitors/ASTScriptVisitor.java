@@ -1036,6 +1036,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(ConstructorInvocation node) {
+		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+		if (constructorBinding == null) {
+			return false;
+		}
+		buffer.append("Clazz.thisConstructor (this, ");
+		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+		IMethodBinding methodDeclaration = null;
+		if (constructorBinding != null) {
+			methodDeclaration = constructorBinding.getMethodDeclaration();
+		}
+		visitMethodParameterList(methodDeclaration.getDeclaringClass(), node.arguments(), methodDeclaration, true, ", [", "]");
+		buffer.append(");\r\n");
+		/*
 		buffer.append("this.construct (");
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
@@ -1044,6 +1057,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		visitMethodParameterList(methodDeclaration.getDeclaringClass(), node.arguments(), methodDeclaration, true, null, null);
 		buffer.append(");\r\n");
+		// */
 		return false;
 	}
 	public boolean visit(EnumConstantDeclaration node) {
