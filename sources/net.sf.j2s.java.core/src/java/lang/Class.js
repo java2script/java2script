@@ -650,7 +650,7 @@ Clazz.superConstructor = function (objThis, clazzThis, funParams) {
 				// This is a single method, call directly!
 				fx = clazzFun;
 				clazzSuper = clazzFun.claxxOwner;
-				superTopBased = clazzSuper == null || superClazzSuper == null;
+				superTopBased = clazzSuper == null || clazzSuper.superClazz == null;
 			}
 		/*
 		// As suer constructor needs to check preparing fields, do NOT use cached
