@@ -778,8 +778,8 @@ Clazz.byteCast = function (b) { // 8bit
 };
 
 /* public */
-Clazz.charCast = function (c) { // 8bit
-	return String.fromCharCode (c & 0xff).charAt (0);
+Clazz.charCast = function (c) { // 16bit
+	return String.fromCharCode (c & 0xffff).charAt (0);
 };
 
 /**

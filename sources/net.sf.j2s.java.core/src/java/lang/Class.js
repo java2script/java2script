@@ -728,6 +728,67 @@ Clazz.superConstructor = function (objThis, clazzThis, funParams) {
 };
 
 /**
+ * Call this constructor of the class. 
+ * The same effect as Java's expression:
+ * <code> this(*) </code>
+ * 
+ * @param objThis host object
+ * @param clazzThis class of declaring method scope.
+ * @param funParams Array of method parameters
+ */
+/* public */
+Clazz.thisConstructor = function (objThis, clazzThis, funParams) {
+	var funName = "construct"; 
+	var fx = null;
+	var clazzFun = objThis[funName];
+	if (clazzFun != null) {
+		if (clazzFun.claxxOwner != null) { 
+			// claxxOwner is a mark for methods that is single.
+			if (clazzFun.claxxOwner !== clazzThis) {
+				// This is a single method, call directly!
+				fx = clazzFun;
+			}
+		} else if (clazzFun.stacks == null && !(clazzFun.lastClaxxRef != null
+				&& clazzFun.lastClaxxRef.prototype[funName] != null
+				&& clazzFun.lastClaxxRef.prototype[funName].stacks != null)) { // super.toString
+			fx = clazzFun;
+		} else { // normal wrapped method
+			var stacks = clazzFun.stacks;
+			if (stacks == null) {
+				stacks = clazzFun.lastClaxxRef.prototype[funName].stacks;
+			}
+			var length = stacks.length;
+			for (var i = length - 1; i >= 0; i--) {
+				// Once super call is computed precisely, there are no need 
+				// to calculate the inherited level but just an equals comparison
+				// var level = Clazz.getInheritedLevel (clazzThis, stacks[i]);
+				if (clazzThis === stacks[i]) { // level == 0
+					fx = stacks[i].prototype[funName];
+					break;
+				}
+			} // end of for loop
+		} // end of normal wrapped method
+	} // end of clazzFun != null
+	if (fx != null) {
+		/*# {$no.debug.support} >>x #*/
+		if (Clazz.tracingCalling) {
+			var caller = arguments.callee.caller;
+			if (caller === Clazz.thisConstructor) {
+				caller = caller.arguments.callee.caller;
+			}
+			Clazz.pu$hCalling (new Clazz.callingStack (caller, clazzThis));
+			fx.apply (objThis, (funParams == null) ? [] : funParams);
+			Clazz.p0pCalling ();
+		} else {
+		/*# x<< #*/
+			fx.apply (objThis, (funParams == null) ? [] : funParams);
+		/*# {$no.debug.support} >>x #*/
+		}
+		/*# x<< #*/
+	}
+};
+
+/**
  * Class for null with a given class as to be casted.
  * This class will be used as an implementation of Java's casting way.
  * For example,
@@ -1193,7 +1254,7 @@ Clazz.searchMethod = function (roundOne, paramTypes) {
 		var isVectorLesser = true;
 		for (var j = 0; j < paramTypes.length; j++) {
 			if (min[j] < resultTwo[i][j]) {
-				isVectorLesser = false;;
+				isVectorLesser = false;
 				break;
 			}
 		}
