@@ -37,7 +37,7 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 	
 	protected Compiler newCompiler() {
 		// disable entire javadoc support if not interested in diagnostics
-		Map projectOptions = javaBuilder.javaProject.getOptions(true);
+		Map projectOptions = this.javaBuilder.javaProject.getOptions(true);
 		String option = (String) projectOptions.get(JavaCore.COMPILER_PB_INVALID_JAVADOC);
 		if (option == null || option.equals(JavaCore.IGNORE)) { // TODO (frederic) see why option is null sometimes while running model tests!?
 			option = (String) projectOptions.get(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
@@ -51,13 +51,13 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 				}
 			}
 		}
-		
+
 		// called once when the builder is initialized... can override if needed
 		CompilerOptions compilerOptions = new CompilerOptions(projectOptions);
 		compilerOptions.performMethodsFullRecovery = true;
 		compilerOptions.performStatementsRecovery = true;
 		Compiler newCompiler = new Java2ScriptImageCompiler(
-			nameEnvironment,
+			this.nameEnvironment,
 			DefaultErrorHandlingPolicies.proceedWithAllProblems(),
 			compilerOptions,
 			this,
@@ -66,7 +66,7 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 		// temporary code to allow the compiler to revert to a single thread
 		String setting = System.getProperty("jdt.compiler.useSingleThread"); //$NON-NLS-1$
 		newCompiler.useSingleThread = setting != null && setting.equals("true"); //$NON-NLS-1$
-		
+
 		// enable the compiler reference info support
 		options.produceReferenceInfo = true;
 
@@ -75,7 +75,7 @@ public class Java2ScriptIncrementalImageBuilder extends IncrementalImageBuilder 
 			// support for Java 6 annotation processors
 			initializeAnnotationProcessorManager(newCompiler);
 		}
-		
+
 		return newCompiler;
 	}
 }
