@@ -200,6 +200,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			initializer.accept(this);
 		} else {
 			List dim = node.dimensions();
+			int dimensions = node.getType().getDimensions();
 			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
 			if (elementType != null){
 				if (elementType.isPrimitive()) {
@@ -216,17 +217,29 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						buffer.append(typeCode.substring(1));
 						buffer.append("Array (");
 						visitList(dim, ", ");
-						buffer.append(", 0)");
+						if (dim.size() == dimensions) {
+							buffer.append(", 0)");
+						} else {
+							buffer.append(", null)");
+						}
 					} else if ("char".equals(typeCode)) {
 						//buffer.append(" Clazz.newArray (");
 						buffer.append(" Clazz.newCharArray (");
 						visitList(dim, ", ");
-						buffer.append(", '\\0')");
+						if (dim.size() == dimensions) {
+							buffer.append(", '\\0')");
+						} else {
+							buffer.append(", null)");
+						}
 					} else if ("boolean".equals(typeCode)) {
 						//buffer.append(" Clazz.newArray (");
 						buffer.append(" Clazz.newBooleanArray (");
 						visitList(dim, ", ");
-						buffer.append(", false)");
+						if (dim.size() == dimensions) {
+							buffer.append(", false)");
+						} else {
+							buffer.append(", null)");
+						}
 					} else {
 						if (dim != null && dim.size() > 1) {
 							buffer.append(" Clazz.newArray (");
@@ -442,6 +455,23 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 					buffer.append(")");
 				}
+			} else if (leftTypeBinding != null && "/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(leftTypeBinding.getName())) {
+				buffer.append(" = Clazz.doubleToInt (");
+				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append('.');
+				if (left instanceof QualifiedName) {
+					QualifiedName leftName = (QualifiedName) left;
+					leftName.getName().accept(this);
+				} else if (left instanceof FieldAccess) {
+					FieldAccess leftAccess = (FieldAccess) left;
+					leftAccess.getName().accept(this);
+				} else {
+					Name leftName = (Name) left;
+					leftName.accept(this);
+				}
+				buffer.append(" / ");
+				boxingNode(right);
+				buffer.append(')');
 			} else {
 				buffer.append(op);
 				buffer.append(' ');
@@ -555,6 +585,14 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 					buffer.append(')');
 				}
+				return false;
+			} else if ("/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(typeBinding.getName())) {
+				left.accept(this);
+				buffer.append(" = Clazz.doubleToInt (");
+				left.accept(this);
+				buffer.append(" / ");
+				right.accept(this);
+				buffer.append(')');
 				return false;
 			}
 		}
@@ -828,15 +866,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(InstanceofExpression node) {
 		Type right = node.getRightOperand();
-			buffer.append("Clazz.instanceOf (");
-			node.getLeftOperand().accept(this);
-			buffer.append(", ");
-			if (right instanceof ArrayType) {
-				buffer.append("Array");
-			} else {
-				right.accept(this);
-			}
-			buffer.append(")");
+		buffer.append("Clazz.instanceOf (");
+		node.getLeftOperand().accept(this);
+		buffer.append(", ");
+		if (right instanceof ArrayType) {
+			buffer.append("Array");
+		} else {
+			right.accept(this);
+		}
+		buffer.append(")");
 		return false;
 	}
 

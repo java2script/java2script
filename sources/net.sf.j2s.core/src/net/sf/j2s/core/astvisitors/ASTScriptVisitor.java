@@ -451,6 +451,20 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(CastExpression node) {
+		Object nodeConstantValue = node.resolveConstantExpressionValue();
+		if (nodeConstantValue != null) {
+			Type type = node.getType();
+			if (type.isPrimitiveType()) {
+				PrimitiveType pType = (PrimitiveType) type;
+				if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
+						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
+					buffer.append(nodeConstantValue);
+					return false;
+				}
+			}
+		}
 		Type type = node.getType();
 		/*
 		 * TODO: some casting should have its meaning!
@@ -1197,41 +1211,40 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof Initializer) {
 				element.accept(this);
-				
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-			if ((field.getModifiers() & Modifier.STATIC) != 0) {
-				List fragments = field.fragments();
-				for (int j = 0; j < fragments.size(); j++) {
-				//if (fragments.size () == 1) {
-					/* replace full class name with short variable name */
-					buffer.append("cla$$");
-					//buffer.append(fullClassName);
-					buffer.append(".");
-					VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
-					//buffer.append(vdf.getName());
-					vdf.getName().accept(this);
-					buffer.append(" = ");
-					Expression initializer = vdf.getInitializer();
-					if (initializer != null) { 
-						initializer.accept(this);
-					} else {
-						Type type = field.getType();
-						if (type.isPrimitiveType()){
-							PrimitiveType pType = (PrimitiveType) type;
-							if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-								buffer.append("false");
-							} else {
-								buffer.append("0");
-							}
+				if ((field.getModifiers() & Modifier.STATIC) != 0) {
+					List fragments = field.fragments();
+					for (int j = 0; j < fragments.size(); j++) {
+					//if (fragments.size () == 1) {
+						/* replace full class name with short variable name */
+						buffer.append("cla$$");
+						//buffer.append(fullClassName);
+						buffer.append(".");
+						VariableDeclarationFragment vdf = (VariableDeclarationFragment) fragments.get(j);
+						//buffer.append(vdf.getName());
+						vdf.getName().accept(this);
+						buffer.append(" = ");
+						Expression initializer = vdf.getInitializer();
+						if (initializer != null) { 
+							initializer.accept(this);
 						} else {
-							buffer.append("null");
+							Type type = field.getType();
+							if (type.isPrimitiveType()){
+								PrimitiveType pType = (PrimitiveType) type;
+								if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+									buffer.append("false");
+								} else {
+									buffer.append("0");
+								}
+							} else {
+								buffer.append("null");
+							}
 						}
+						buffer.append(";\r\n");
 					}
-					buffer.append(";\r\n");
 				}
 			}
-		}
 		}
 
 		List constants = node.enumConstants();
@@ -1248,9 +1261,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("\", " + i + ", [");
 				visitList(enumConst.arguments(), ", ");
 				buffer.append("]);\r\n");
-				
 			} else {
-				ITypeBinding binding = node.resolveBinding();
+				ITypeBinding binding = anonDeclare.resolveBinding();
 				String anonClassName = null;
 				if (binding.isAnonymous() || binding.isLocal()) {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getBinaryName()));
@@ -1258,8 +1270,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
 				}
 				//int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
+				
+				StringBuffer tmpBuffer = buffer;
+				StringBuffer tmpMethodBuffer = methodBuffer;
+				buffer = new StringBuffer();
+				methodBuffer = new StringBuffer();
 				anonDeclare.accept(this);
-
+				
+				tmpBuffer.append(methodBuffer);
+				
+				tmpBuffer.append(buffer);
+				tmpBuffer.append(";\r\n");
+				
+				buffer = tmpBuffer;
+				methodBuffer = tmpMethodBuffer;
+				
+				
 				buffer.append("Clazz.defineEnumConstant (");
 				/* replace full class name with short variable name */
 				buffer.append("cla$$");
@@ -1273,7 +1299,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //				buffer.append("$" + anonCount + ");\r\n");
 				buffer.append(anonClassName);
 				buffer.append(");\r\n");
-
 			}
 		}
 
