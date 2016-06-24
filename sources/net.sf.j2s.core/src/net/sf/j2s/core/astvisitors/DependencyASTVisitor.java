@@ -341,6 +341,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 
 	public boolean isNodeInMustPath(ASTNode node) {
+		// Add more class dependencies in musts will make classloader running
+		// into stack call limit reached.
+		// Temporary disable this bug fix.
+		/*
 		if (node == null) return false;
 		do {
 			if (node instanceof TypeDeclaration) {
@@ -350,7 +354,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				MethodDeclaration m = (MethodDeclaration) node;
 				return m.isConstructor();
 			}
-			if (node instanceof VariableDeclarationFragment) {
+			if (node instanceof FieldDeclaration) {
 				return true;
 			}
 			if (node instanceof Initializer) {
@@ -358,6 +362,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			}
 			node = node.getParent();
 		} while (node != null);
+		// */
 		return false;
 	}
 	

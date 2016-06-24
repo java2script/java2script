@@ -886,16 +886,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
+			if (!alreadyPrefixed && prefix != null) {
+				buffer.append(prefix);
+				alreadyPrefixed = true;
+			}
 			if (!isVarArgs && ambitiousResult != null && ambitiousResult[i] != null) {
 				buffer.append("Clazz.castObjectAs(");
 			}
 			String parameterTypeName = null;
 			if (parameterTypes != null) {
 				parameterTypeName = parameterTypes[i].getName();
-			}
-			if (!alreadyPrefixed && prefix != null) {
-				buffer.append(prefix);
-				alreadyPrefixed = true;
 			}
 			if (isVarArgs) {
 				buffer.append("[");
