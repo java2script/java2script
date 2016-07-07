@@ -830,8 +830,12 @@ Clazz.castNullAs = function (asClazz) {
 /* protcted */
 Clazz.CastedObject = function (obj, asClazz) {
 	if (asClazz != null) {
-		if (asClazz instanceof String) {
-			this.clazzName = asClazz;
+		if (asClazz instanceof String || typeof asClazz == "string") {
+			if (asClazz.indexOf ("$wt.") == 0) {
+				this.clazzName = "org.eclipse.swt." + asClazz.substring(4);
+			} else {
+				this.clazzName = asClazz;
+			}
 		} else if (asClazz instanceof Function) {
 			this.clazzName = Clazz.getClassName (asClazz, true);
 		} else {
@@ -1010,9 +1014,9 @@ Clazz.searchAndExecuteMethod = function (objThis, claxxRef, fxName, funParams) {
 		 * exceptions. In Java codes, extending Object can call super
 		 * default Object#constructor, which is not defined in JS.
 		 */
-		// return; // ub: ignoring the above comment and throw an execption
+		return; // ub: ignoring the above comment and throw an execption
 		// when not found.
-		throw new java.lang.NoSuchMethodException ();
+		// throw new java.lang.NoSuchMethodException ();
 	}
 	// TODO: should be java.lang.NoSuchMethodException
 	throw new Clazz.MethodNotFoundException (objThis, claxxRef, 
