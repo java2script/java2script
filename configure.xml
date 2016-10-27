@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="java2script" default="configure" basedir=".">
+<!-- IMPORTANT!
+
+This is not a normal ant build file. You need to run it via the Eclipse
+AntRunner, like this Unix shell example:
+
+$ eclipse -nosplash -clean \
+  -configuration $PWD/autobuild/configuration \
+  -user $PWD/autobuild \
+  -data $PWD/autobuild \
+  -application org.eclipse.ant.core.antRunner \
+  -buildfile build.xml \
+  -Dplugin.path=/usr/lib/eclipse:/usr/share/eclipse/dropins/jdt
+
+Setting the -configuration, -user, and -data options are important in an
+automated build process where you don't want to clobber the default locations.
+
+For more details see http://help.eclipse.org/kepler/index.jsp?topic=%2Forg.eclipse.pde.doc.user%2Ftasks%2Fpde_feature_generating_antcommandline.htm
+-->
+<target name="configure">
+<eclipse.buildScript elements="plugin@net.sf.j2s.core"
+		buildDirectory="sources"
+		pluginPath="${plugin.path}"
+		forceContextQualifier="${forceContextQualifier}" />
+<eclipse.buildScript elements="plugin@net.sf.j2s.ajax"
+		buildDirectory="sources"
+		pluginPath="${plugin.path}"
+		forceContextQualifier="${forceContextQualifier}" />
+<eclipse.buildScript elements="plugin@net.sf.j2s.lib"
+		buildDirectory="sources"
+		pluginPath="${plugin.path}"
+		forceContextQualifier="${forceContextQualifier}" />
+<eclipse.buildScript elements="plugin@net.sf.j2s.ui"
+		buildDirectory="sources"
+		pluginPath="${plugin.path}"
+		forceContextQualifier="${forceContextQualifier}" />
+<eclipse.buildScript elements="plugin@net.sf.j2s.ui.template.velocity"
+		buildDirectory="incubator"
+		pluginPath="${plugin.path}${path.separator}sources"
+		forceContextQualifier="${forceContextQualifier}" />
+<eclipse.buildScript elements="plugin@net.sf.j2s.ui.cmdline"
+		buildDirectory="incubator"
+		pluginPath="${plugin.path}${path.separator}sources"
+		forceContextQualifier="${forceContextQualifier}" />
+</target>
+</project>
