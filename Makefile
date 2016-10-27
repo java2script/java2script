@@ -44,6 +44,8 @@ configure:
 	$(ECLIPSE_ANT) -f configure.xml $(CONFIGURE_FLAGS)
 
 build-plugins: configure
+	sh switch-build-command.sh sources/net.sf.j2s.ajax/.project \
+	  -net.sf.j2s.core.java2scriptbuilder +org.eclipse.jdt.core.javabuilder
 	set -e; for i in $(CORE_PLUGINS:%=sources/%); do \
 		( cd $$i && $(ECLIPSE_ANT_BUILD) $(CORE_FLAGS); ) \
 	done
@@ -64,6 +66,8 @@ local-install-plugins: build-plugins
 BADMETHOD1 = org/eclipse/jdt/internal/compiler/parser/TypeConverter.decodeType
 WORKAROUND1 = -vmargs -XX:CompileCommand=exclude,$(BADMETHOD1)
 build-libs: local-install-plugins
+	sh switch-build-command.sh sources/net.sf.j2s.ajax/.project \
+	  +net.sf.j2s.core.java2scriptbuilder -org.eclipse.jdt.core.javabuilder
 	test ! -f *err*.log
 	set -e; for i in $(CORE_J2SLIB); do \
 		$(ECLIPSE_J2S) -cmd build -path $$PWD/sources/$$i $(WORKAROUND1); \
