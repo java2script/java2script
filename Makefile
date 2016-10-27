@@ -57,9 +57,17 @@ local-install-plugins: build-plugins
 	touch $(BUILD_WORKSPACE)/artifacts.xml
 	$(ECLIPSE_AUTO) -initialize
 
+# Work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=465693 (actually a JDK bug)
+# Otherwise the net.sf.j2s.java.core build wil segfault about half of the time.
+# Annoyingly, the segfault causes java to exit 0; I was unable to figure out why.
+# So we add some extra checks, testing for the absence of crash logs.
+BADMETHOD1 = org/eclipse/jdt/internal/compiler/parser/TypeConverter.decodeType
+WORKAROUND1 = -vmargs -XX:CompileCommand=exclude,$(BADMETHOD1)
 build-libs: local-install-plugins
+	test ! -f *err*.log
 	set -e; for i in $(CORE_J2SLIB); do \
-		$(ECLIPSE_J2S) -cmd build -path $$PWD/sources/$$i; \
+		$(ECLIPSE_J2S) -cmd build -path $$PWD/sources/$$i $(WORKAROUND1); \
+		test ! -f *err*.log; \
 	done
 	mkdir -p sources/net.sf.j2s.lib/bin sources/net.sf.j2s.lib/j2slib
 	cd sources/net.sf.j2s.lib/bin && jar xf ../library.jar
