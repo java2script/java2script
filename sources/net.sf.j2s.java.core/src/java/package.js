@@ -16,19 +16,58 @@ window["java.package.callback"] = function () {
 	var coreZ = null;
 	if (window["j2s.rt.z.enabled"]) {
 		ClazzLoader.jarClasspath (base + "rt.z.js", [
-	        "java.lang.Void",
+			"java.lang.Void",
 			"$.reflect.AccessibleObject",
 			"$.AnnotatedElement",
 			"$.GenericDeclaration",
 			"$.InvocationHandler",
 			"$.Member",
-	        "$.Modifier",
+			"$.Modifier",
 			"$.Constructor",
-	        "$.Field",
-	        "$.Method",
-	        
+			"$.Field",
+			"$.Method",
+			"$.Array",
+			"$.InvocationTargetException",
+			"$.UndeclaredThrowableException",
+				
+			"java.util.Date",
+			"$.EventObject",
+			"$.EventListener",
+			"$.EventListenerProxy",
+			"$.Iterator",
+			"$.ListIterator",
+			"$.Enumeration",
+			"$.Collection",
+			"$.Set",
+			"$.Map",
+			"$.List",
+			"$.Queue",
+			"$.RandomAccess",
+			"$.ConcurrentModificationException",
+			"$.EmptyStackException",
+			"$.MissingResourceException",
+			"$.NoSuchElementException",
+			"$.TooManyListenersException",
+
+			"java.io.IOException",
+			"$.CharConversionException",
+			"$.EOFException",
+			"$.FileNotFoundException",
+			"$.InterruptedIOException",
+			"$.ObjectStreamException",
+			"$.InvalidClassException",
+			"$.InvalidObjectException",
+			"$.NotActiveException",
+			"$.NotSerializableException",
+			"$.OptionalDataException",
+			"$.StreamCorruptedException",
+			"$.SyncFailedException",
+			"$.UnsupportedEncodingException",
+			"$.UTFDataFormatException",
+			"$.WriteAbortedException",
+			
 			"java.net.URLEncoder",
-			"java.net.URLDecoder",
+			"$.URLDecoder",
 		]);
 		ClazzLoader.jarClasspath (base + "simple.z.js", [
 			"net.sf.j2s.ajax.HttpRequest",
@@ -39,7 +78,7 @@ window["java.package.callback"] = function () {
 			"net.sf.j2s.ajax.IXHRCallback",
 			"$.XHRCallbackAdapter",
 			"$.XHRCallbackSWTAdapter",
-	       	
+		   	
 			"$.SimpleSerializable",
 			"$.ISimpleCometable",
 			"$.ISimpleConstant",
@@ -52,7 +91,7 @@ window["java.package.callback"] = function () {
 			"$.ISimpleGeoLocation",
 			"$.SimpleRPCRequest",
 			"$.SimpleRPCSWTRequest",
-	       	
+		   	
 			"$.SimplePipeSequence",
 			"$.SimplePipeRunnable",
 			"$.ISimpleCacheable",
@@ -60,7 +99,7 @@ window["java.package.callback"] = function () {
 			"$.SimplePipeHelper",
 			"$.SimplePipeRequest",
 			"$.SimplePipeSWTRequest",
-	       	
+		   	
 			"$.CompoundSerializable",
 			"$.CompoundPipeSession",
 			"$.CompoundPipeRunnable",
@@ -87,7 +126,7 @@ window["java.package.callback"] = function () {
 	
 			"net.sf.j2s.ajax.IXHRCallback",
 			"$.XHRCallbackAdapter",
-	       	
+		   	
 			"$.SimpleSerializable",
 			"$.ISimpleCometable",
 			"$.ISimpleConstant",
@@ -108,7 +147,7 @@ window["java.package.callback"] = function () {
 			"$.SimplePipeHelper",
 			"$.SimplePipeRequest",
 			"$.SimplePipeSWTRequest",
-	       	
+		   	
 			"$.CompoundSerializable",
 			"$.CompoundPipeSession",
 			"$.CompoundPipeRunnable",
@@ -133,19 +172,58 @@ window["java.package.callback"] = function () {
 	if (coreZ == null || coreZ.length == 0) {
 		coreZ = base + "core.z.js";
 		ClazzLoader.jarClasspath (coreZ, [
-	        "java.lang.Void",
+			"java.lang.Void",
 			"$.reflect.AccessibleObject",
 			"$.AnnotatedElement",
 			"$.GenericDeclaration",
 			"$.InvocationHandler",
 			"$.Member",
-	        "$.Modifier",
+			"$.Modifier",
 			"$.Constructor",
-	        "$.Field",
-	        "$.Method",
-	        
+			"$.Field",
+			"$.Method",
+			"$.Array",
+			"$.InvocationTargetException",
+			"$.UndeclaredThrowableException",
+				
+			"java.util.Date",
+			"$.EventObject",
+			"$.EventListener",
+			"$.EventListenerProxy",
+			"$.Iterator",
+			"$.ListIterator",
+			"$.Enumeration",
+			"$.Collection",
+			"$.Set",
+			"$.Map",
+			"$.List",
+			"$.Queue",
+			"$.RandomAccess",
+			"$.ConcurrentModificationException",
+			"$.EmptyStackException",
+			"$.MissingResourceException",
+			"$.NoSuchElementException",
+			"$.TooManyListenersException",
+
+			"java.io.IOException",
+			"$.CharConversionException",
+			"$.EOFException",
+			"$.FileNotFoundException",
+			"$.InterruptedIOException",
+			"$.ObjectStreamException",
+			"$.InvalidClassException",
+			"$.InvalidObjectException",
+			"$.NotActiveException",
+			"$.NotSerializableException",
+			"$.OptionalDataException",
+			"$.StreamCorruptedException",
+			"$.SyncFailedException",
+			"$.UnsupportedEncodingException",
+			"$.UTFDataFormatException",
+			"$.WriteAbortedException",
+			
 			"java.net.URLEncoder",
-			"java.net.URLDecoder",
+			"$.URLDecoder",
 	
 			"net.sf.j2s.ajax.HttpRequest",
 			"$.ARunnable",
@@ -155,7 +233,7 @@ window["java.package.callback"] = function () {
 			"net.sf.j2s.ajax.IXHRCallback",
 			"$.XHRCallbackAdapter",
 			"$.XHRCallbackSWTAdapter",
-	       	
+		   	
 			"$.SimpleSerializable",
 			"$.ISimpleCometable",
 			"$.ISimpleConstant",
@@ -168,7 +246,7 @@ window["java.package.callback"] = function () {
 			"$.ISimpleGeoLocation",
 			"$.SimpleRPCRequest",
 			"$.SimpleRPCSWTRequest",
-	       	
+		   	
 			"$.SimplePipeSequence",
 			"$.SimplePipeRunnable",
 			"$.ISimpleCacheable",
@@ -176,7 +254,7 @@ window["java.package.callback"] = function () {
 			"$.SimplePipeHelper",
 			"$.SimplePipeRequest",
 			"$.SimplePipeSWTRequest",
-	       	
+		   	
 			"$.CompoundSerializable",
 			"$.CompoundPipeSession",
 			"$.CompoundPipeRunnable",

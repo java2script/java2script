@@ -455,8 +455,8 @@ public final class Character implements Serializable, Comparable<Character> {
     public static String toString(char c) {
     	/**
     	 * @j2sNative
-    	 * if (this === Charater) {
-    	 * 	return "class java.lang.Charater"; // Charater.class.toString
+    	 * if (this === Character) {
+    	 * 	return "class java.lang.Character"; // Character.class.toString
     	 * }
     	 */ {}
         return String.valueOf(c);

@@ -29,6 +29,8 @@ import java.io.Serializable;
  * Like HashSet, LinkedHashSet is not thread safe, so access by multiple threads must be synchronized
  * by an external mechanism such as Collections.synchronizedSet.
  * @since 1.4
+ * 
+ * @j2sRequireImport java.util.LinkedHashMap
  */
 public class LinkedHashSet<E> extends HashSet<E> implements Set<E>, Cloneable,
 		Serializable {
