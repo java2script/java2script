@@ -806,10 +806,10 @@ document.body.appendChild (ifr);
 							parseReceivedBytes(bytes);
 						} catch (RuntimeException e) { // invalid simple format
 							int length = bytes.length;
-							if (length < 100) {
+							if (length < 1024) {
 								System.out.println("[ERROR]: " + new String(bytes));
 							} else {
-								System.out.println("[ERROR]: " + new String(bytes, 0, 100) + " ..");
+								System.out.println("[ERROR]: " + new String(bytes, 0, 1024) + " ...");
 							}
 							throw e;
 						}
@@ -952,12 +952,15 @@ window.setTimeout (fun, spr.pipeLiveNotifyInterval);
 				int resetIndex = 0;
 				try {
 					resetIndex = parseReceivedBytes(bytes);
-				} catch (RuntimeException e) { // invalid simple format
+				} catch (RuntimeException e) { // not enough data, invalid simple format, array size too large
+					if (SimpleSerializable.EXCEPTION_NOT_ENOUGH_DATA.equals(e.getMessage())) {
+						return true;
+					}
 					int length = bytes.length;
-					if (length < 100) {
+					if (length < 1024) {
 						System.out.println("[ERROR]: " + new String(bytes));
 					} else {
-						System.out.println("[ERROR]: " + new String(bytes, 0, 100) + " ..");
+						System.out.println("[ERROR]: " + new String(bytes, 0, 1024) + " ...");
 					}
 					throw e;
 				}

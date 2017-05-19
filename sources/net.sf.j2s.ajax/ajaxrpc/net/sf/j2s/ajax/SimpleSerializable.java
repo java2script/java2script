@@ -41,7 +41,15 @@ import net.sf.j2s.annotation.J2SKeep;
  * 2006-10-11
  */
 public class SimpleSerializable implements Cloneable {
+
+	protected static final String EXCEPTION_INVALID_SIMPLE_FORMAT = "Invalid simple format.";
+
+	protected static final String EXCEPTION_NOT_ENOUGH_DATA = "Not enough data.";
+
+	protected static final String EXCEPTION_ARRAY_SIZE_TOO_LARGE = "Array size reaches the limit of Java2Script Simple RPC.";
 	
+	protected static final String EXCEPTION_DATA_SIZE_TOO_LARGE = "Data size reaches the limit of Java2Script Simple RPC.";
+
 	public static final SimpleSerializable UNKNOWN = new SimpleSerializable();
 	
 	public static final SimpleSerializable ERROR = new SimpleSerializable(); // Used to indicate that format error!
@@ -928,7 +936,7 @@ return strBuf;
 		}
 		int size = builder.length();
 		if (size > 0x1000000) { // 16 * 1024 * 1024
-			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+			throw new RuntimeException(EXCEPTION_DATA_SIZE_TOO_LARGE);
 		}
 		String sizeStr = String.valueOf(size - headSize);
 		builder.replace(headSize - sizeStr.length() - 1, headSize - 1, sizeStr); // update size!
@@ -1338,7 +1346,7 @@ return strBuf;
 		}
 		int size = dos.size();
 		if (size > 0x1000000) { // 16 * 1024 * 1024
-			throw new RuntimeException("Data size reaches the limit of Java2Script Simple RPC!");
+			throw new RuntimeException(EXCEPTION_DATA_SIZE_TOO_LARGE);
 		}
 		// update size!
 		String sizeStr = String.valueOf(size - headSize);
@@ -1873,7 +1881,7 @@ return strBuf;
 		char baseChar = 'B';
 		if (length > 52) {
 			if (length > 0x1000000) { // 16 * 1024 * 1024
-				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+				throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 			}
 			builder.append('@'); // (char) (baseChar - 2));
 			String value = String.valueOf(length);
@@ -1889,7 +1897,7 @@ return strBuf;
 		char baseChar = 'B';
 		if (length > 52) {
 			if (length > 0x1000000) { // 16 * 1024 * 1024
-				throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+				throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 			}
 			dos.writeByte('@'); // (char) (baseChar - 2));
 			String value = String.valueOf(length);
@@ -2920,14 +2928,19 @@ return true;
 			// have size!
 			int last = index;
 			index = str.indexOf('$', last);
-			if (index == -1) return false; // Should throw exception!
+			if (index == -1) {
+				if (end > last + 8) {
+					throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				}
+				return false; // Should throw exception!
+			}
 			for (int i = last + 1; i < index; i++) {
 				char c = str.charAt(i);
 				if (c != '0') {
 					try {
 						size = Integer.parseInt(str.substring(i, index));
 					} catch (NumberFormatException e) {
-						throw new RuntimeException("Invalid simple format.", e);
+						throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT, e);
 					}
 					break;
 				}
@@ -2947,7 +2960,8 @@ return true;
 		while (index < end && index < objectEnd) {
 			char c1 = str.charAt(index++);
 			int l1 = c1 - baseChar;
-			if (l1 < 0 || index + l1 > end) throw new RuntimeException("Invalid simple format.");
+			if (l1 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+			if (index + l1 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 			String fieldName = str.substring(index, index + l1);
 			index += l1;
 			if (fieldAliasMap != null) {
@@ -2988,20 +3002,21 @@ return true;
 						if (l2 == -2) {
 							char c4 = str.charAt(index++);
 							int l3 = c4 - baseChar;
-							if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+							if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+							if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 							l2 = Integer.parseInt(str.substring(index, index + l3));
 							index += l3;
-							if (l2 < 0) throw new RuntimeException("Invalid simple format.");
+							if (l2 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
 								 * Limit the size of array here! 
 								 */
-								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+								throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 							}
 						}
 						if (c2 == '8') { // byte[]
-							if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+							if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 							index += l2;
 							if (field == null) {
 								continue;
@@ -3058,7 +3073,7 @@ return true;
 							if (c2 != 'X' && c2 != 'O') { // short value string
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+									if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -3068,7 +3083,7 @@ return true;
 								char c5 = str.charAt(index++);
 								int l3 = c5 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+									if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									ss[i] = str.substring(index, index + l3);
 									index += l3;
 								} else if (l3 == 0) {
@@ -3076,10 +3091,12 @@ return true;
 								} else if (l3 == -2) {
 									char c6 = str.charAt(index++);
 									int l4 = c6 - baseChar;
-									if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+									if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+									if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									int l5 = Integer.parseInt(str.substring(index, index + l4));
 									index += l4;
-									if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
+									if (l5 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+									if (index + l5 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									ss[i] = str.substring(index, index + l5);
 									index += l5;
 								} else {
@@ -3212,7 +3229,7 @@ return true;
 				int l2 = c3 - baseChar;
 				String s = null;
 				if (l2 > 0) {
-					if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+					if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					s = str.substring(index, index + l2);
 					index += l2;
 				} else if (l2 == 0) {
@@ -3220,10 +3237,12 @@ return true;
 				} else if (l2 == -2) {
 					char c4 = str.charAt(index++);
 					int l3 = c4 - baseChar;
-					if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+					if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+					if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					int l4 = Integer.parseInt(str.substring(index, index + l3));
 					index += l3;
-					if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+					if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+					if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					s = str.substring(index, index + l4);
 					index += l4;
 				}
@@ -3342,11 +3361,11 @@ return true;
 		int length = end - start;
 		if (length <= 7) return false;
 		if ('W' != bytes[start] || 'L' != bytes[start + 1] || 'L' != bytes[start + 2]) {
-			throw new RuntimeException("Invalid simple format.");
+			throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 		}
 		setSimpleVersion(100 * bytes[start + 3] + 10 * bytes[start + 4] + bytes[start + 5] - '0' * 111);
 		int index = bytesIndexOf(bytes, (byte) '#', start);
-		if (index == -1) throw new RuntimeException("Invalid simple format.");
+		if (index == -1) return false; // throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 		index++;
 		if (index >= end) return false; // may be empty string!
 		
@@ -3356,7 +3375,12 @@ return true;
 			// have size!
 			int last = index;
 			index = bytesIndexOf(bytes, (byte) '$', last);
-			if (index == -1) throw new RuntimeException("Invalid simple format.");
+			if (index == -1) {
+				if (end > last + 8) {
+					throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				}
+				return false;
+			}
 			for (int i = last + 1; i < index; i++) {
 				if (bytes[i] != '0') {
 					for (; i < index; i++) {
@@ -3385,7 +3409,8 @@ return true;
 		while (index < end && index < objectEnd) {
 			char c1 = (char) bytes[index++];
 			int l1 = c1 - baseChar;
-			if (l1 < 0 || index + l1 > end) throw new RuntimeException("Invalid simple format.");
+			if (l1 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+			if (index + l1 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 			String fieldName = new String(bytes, index, l1);
 			index += l1;
 			if (fieldAliasMap != null) {
@@ -3426,20 +3451,21 @@ return true;
 						if (l2 == -2) {
 							char c4 = (char) bytes[index++];
 							int l3 = c4 - baseChar;
-							if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+							if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+							if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 							l2 = Integer.parseInt(new String(bytes, index, l3));
 							index += l3;
-							if (l2 < 0) throw new RuntimeException("Invalid simple format.");
+							if (l2 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 							if (l2 > 0x1000000) { // 16 * 1024 * 1024
 								/*
 								 * Some malicious string may try to allocate huge size of array!
 								 * Limit the size of array here! 
 								 */
-								throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+								throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 							}
 						}
 						if (c2 == '8') { // byte[]
-							if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+							if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 							index += l2;
 							if (field == null) {
 								continue;
@@ -3496,7 +3522,7 @@ return true;
 							if (c2 != 'X' && c2 != 'O') {
 								int l3 = c4 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+									if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									if (c4 == 'u') {
 										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
 									} else if (c4 == 'U') { // not supported in v202
@@ -3512,7 +3538,7 @@ return true;
 								char c5 = (char) bytes[index++];
 								int l3 = c5 - baseChar;
 								if (l3 > 0) {
-									if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+									if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									if (c4 == 'u') {
 										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
 									} else if (c4 == 'O' || c4 == 'U') {
@@ -3526,10 +3552,12 @@ return true;
 								} else if (l3 == -2) {
 									char c6 = (char) bytes[index++];
 									int l4 = c6 - baseChar;
-									if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+									if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+									if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									int l5 = Integer.parseInt(new String(bytes, index, l4));
 									index += l4;
-									if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
+									if (l5 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+									if (index + l5 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 									if (c4 == 'u') {
 										ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5)), UTF_8);
 									} else if (c4 == 'O' || c4 == 'U') {
@@ -3663,7 +3691,7 @@ return true;
 				int l2 = c3 - baseChar;
 				String s = null;
 				if (l2 > 0) {
-					if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+					if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					if (c2 == 'u') {
 						s = new String(Base64.base64ToByteArray(new String(bytes, index, l2)), UTF_8);
 					} else if (c2 == 'U' || c2 == 'O') {
@@ -3677,10 +3705,12 @@ return true;
 				} else if (l2 == -2) {
 					char c4 = (char) bytes[index++];
 					int l3 = c4 - baseChar;
-					if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+					if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+					if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					int l4 = Integer.parseInt(new String(bytes, index, l3));
 					index += l3;
-					if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+					if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+					if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 					if (c2 == 'u') {
 						s = new String(Base64.base64ToByteArray(new String(bytes, index, l4)), UTF_8);
 					} else if (c2 == 'U' || c2 == 'O') {
@@ -3799,20 +3829,21 @@ return true;
 					if (l2 == -2) {
 						char c4 = str.charAt(index++);
 						int l3 = c4 - baseChar;
-						if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+						if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+						if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 						l2 = Integer.parseInt(str.substring(index, index + l3));
 						index += l3;
-						if (l2 < 0) throw new RuntimeException("Invalid simple format.");
+						if (l2 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 						if (l2 > 0x1000000) { // 16 * 1024 * 1024
 							/*
 							 * Some malicious string may try to allocate huge size of array!
 							 * Limit the size of array here! 
 							 */
-							throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+							throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 						}
 					}
 					if (c2 == '8') { // byte[]
-						if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+						if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 						String byteStr = str.substring(index, index + l2);
 						index += l2;
 						byte[] bs = byteStr.getBytes(ISO_8859_1);
@@ -3850,7 +3881,7 @@ return true;
 						if (c2 != 'X' && c2 != 'O') {
 							int l3 = c4 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+								if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								ss[i] = str.substring(index, index + l3);
 								index += l3;
 							} else if (l3 == 0) {
@@ -3860,7 +3891,7 @@ return true;
 							char c5 = str.charAt(index++);
 							int l3 = c5 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+								if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								ss[i] = str.substring(index, index + l3);
 								index += l3;
 							} else if (l3 == 0) {
@@ -3868,10 +3899,12 @@ return true;
 							} else if (l3 == -2) {
 								char c6 = str.charAt(index++);
 								int l4 = c6 - baseChar;
-								if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+								if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+								if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								int l5 = Integer.parseInt(str.substring(index, index + l4));
 								index += l4;
-								if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
+								if (l5 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+								if (index + l5 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								ss[i] = str.substring(index, index + l5);
 								index += l5;
 							} else {
@@ -3992,7 +4025,7 @@ return true;
 			int l2 = c3 - baseChar;
 			String s = null;
 			if (l2 > 0) {
-				if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+				if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				s = str.substring(index, index + l2);
 				index += l2;
 			} else if (l2 == 0) {
@@ -4000,10 +4033,12 @@ return true;
 			} else if (l2 == -2) {
 				char c4 = str.charAt(index++);
 				int l3 = c4 - baseChar;
-				if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+				if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				int l4 = Integer.parseInt(str.substring(index, index + l3));
 				index += l3;
-				if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+				if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				s = str.substring(index, index + l4);
 				index += l4;
 			}
@@ -4103,20 +4138,21 @@ return true;
 					if (l2 == -2) {
 						char c4 = (char) bytes[index++];
 						int l3 = c4 - baseChar;
-						if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+						if (l3 < 0 ) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+						if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 						l2 = Integer.parseInt(new String(bytes, index, l3));
 						index += l3;
-						if (l2 < 0) throw new RuntimeException("Invalid simple format.");
+						if (l2 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
 						if (l2 > 0x1000000) { // 16 * 1024 * 1024
 							/*
 							 * Some malicious string may try to allocate huge size of array!
 							 * Limit the size of array here! 
 							 */
-							throw new RuntimeException("Array size reaches the limit of Java2Script Simple RPC!");
+							throw new RuntimeException(EXCEPTION_ARRAY_SIZE_TOO_LARGE);
 						}
 					}
 					if (c2 == '8') { // byte[]
-						if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+						if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 						/*
 						String byteStr = new String(bytes, index, l2, ISO_8859_1);
 						index += l2;
@@ -4159,7 +4195,7 @@ return true;
 						if (c2 != 'X' && c2 != 'O') {
 							int l3 = c4 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+								if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								if (c4 == 'u') {
 									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
 								} else if (c4 == 'U') {
@@ -4175,7 +4211,7 @@ return true;
 							char c5 = (char) bytes[index++];
 							int l3 = c5 - baseChar;
 							if (l3 > 0) {
-								if (index + l3 > end) throw new RuntimeException("Invalid simple format.");
+								if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								if (c4 == 'u') {
 									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l3)), UTF_8);
 								} else if (c4 == 'U' || c4 == 'O') {
@@ -4189,10 +4225,12 @@ return true;
 							} else if (l3 == -2) {
 								char c6 = (char) bytes[index++];
 								int l4 = c6 - baseChar;
-								if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+								if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+								if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								int l5 = Integer.parseInt(new String(bytes, index, l4));
 								index += l4;
-								if (l5 < 0 || index + l5 > end) throw new RuntimeException("Invalid simple format.");
+								if (l5 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+								if (index + l5 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 								if (c4 == 'u') {
 									ss[i] = new String(Base64.base64ToByteArray(new String(bytes, index, l5)), UTF_8);
 								} else if (c4 == 'U' || c4 == 'O') {
@@ -4314,7 +4352,7 @@ return true;
 			int l2 = c3 - baseChar;
 			String s = null;
 			if (l2 > 0) {
-				if (index + l2 > end) throw new RuntimeException("Invalid simple format.");
+				if (index + l2 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				if (c2 == 'u') {
 					s = new String(Base64.base64ToByteArray(new String(bytes, index, l2)), UTF_8);
 				} else if (c2 == 'U' || c2 == 'O') {
@@ -4328,10 +4366,12 @@ return true;
 			} else if (l2 == -2) {
 				char c4 = (char) bytes[index++];
 				int l3 = c4 - baseChar;
-				if (l3 < 0 || index + l3 > end) throw new RuntimeException("Invalid simple format.");
+				if (l3 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				if (index + l3 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				int l4 = Integer.parseInt(new String(bytes, index, l3));
 				index += l3;
-				if (l4 < 0 || index + l4 > end) throw new RuntimeException("Invalid simple format.");
+				if (l4 < 0) throw new RuntimeException(EXCEPTION_INVALID_SIMPLE_FORMAT);
+				if (index + l4 > end) throw new RuntimeException(EXCEPTION_NOT_ENOUGH_DATA);
 				if (c2 == 'u') {
 					s = new String(Base64.base64ToByteArray(new String(bytes, index, l4)), UTF_8);
 				} else if (c2 == 'U' || c2 == 'O') {
