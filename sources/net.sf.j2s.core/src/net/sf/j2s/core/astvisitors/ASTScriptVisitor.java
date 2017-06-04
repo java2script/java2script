@@ -92,6 +92,26 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	protected AbstractTypeDeclaration rootTypeNode;
 
+	protected boolean methodOverloadingSupported = true;
+	
+	protected boolean interfaceCastingSupported = false;
+	
+	public boolean isMethodOverloadingSupported() {
+		return methodOverloadingSupported;
+	}
+
+	public void setSupportsMethodOverloading(boolean recognizeMethodOverloading) {
+		methodOverloadingSupported = recognizeMethodOverloading;
+	}
+
+	public boolean isInterfaceCastingSupported() {
+		return interfaceCastingSupported;
+	}
+
+	public void setSupportsInterfaceCasting(boolean recognizeInterfaceCasting) {
+		interfaceCastingSupported = recognizeInterfaceCasting;
+	}
+		
 	public boolean isMethodRegistered(String methodName) {
 		return ((ASTMethodVisitor) getAdaptable(ASTMethodVisitor.class)).isMethodRegistered(methodName);
 	}
@@ -748,6 +768,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			} else if (t1.isArray()) {
 				if (!t2.isArray()) return null;
 				/*
+				 * TODO:
 				 * Current Java2Script does not distinguish different array types.
 				 * 
 				ITypeBinding cType1 = t1.getComponentType();
@@ -758,9 +779,27 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 				// */
 			} else {
-				if (t1 != t2 && !t2.isCastCompatible(t1)) return null;
 				if (t1 != t2) {
-					result[i] = t1.getQualifiedName();
+					// In most cases, different interfaces means different method signatures, no needs of casting  
+					if (!interfaceCastingSupported && t1.isInterface() && t2.isInterface() && !t1.isSubTypeCompatible(t2)) {
+						return null;
+					}
+					if (!t2.isCastCompatible(t1)) {
+						return null;
+					} else {
+						/*
+						 * B(Object) and B(Event)
+						 * C extends B with
+						 * C(Event) {
+						 * 	super(event)
+						 * }
+						 * There should be no needs of casting for super constructor invocation
+						 */
+						if (!t1.isInterface() && !t2.isInterface() && "java.lang.Object".equals(t2.getQualifiedName())) {
+							return null;
+						}
+						result[i] = t1.getQualifiedName();
+					}
 				}
 			}
 		}
@@ -869,6 +908,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
 		String methodName = methodDeclaration.getName();
+		boolean ignoringCasting = !methodOverloadingSupported;
+		if (declaringClass.getBinaryName().equals("java.io.PrintStream") && methodName.startsWith("print")) {
+			ignoringCasting = true;
+		}
 		int argSize = arguments.size();
 		for (int i = 0; i < parameterTypes.length; i++) {
 			boolean isVarArgs = false;
@@ -890,12 +933,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(prefix);
 				alreadyPrefixed = true;
 			}
-			if (!isVarArgs && ambitiousResult != null && ambitiousResult[i] != null) {
-				buffer.append("Clazz.castObjectAs(");
-			}
 			String parameterTypeName = null;
 			if (parameterTypes != null) {
-				parameterTypeName = parameterTypes[i].getName();
+				parameterTypeName = parameterTypes[i].getQualifiedName();
+			}
+			if (!isVarArgs && !ignoringCasting && ambitiousResult != null && ambitiousResult[i] != null) {
+				buffer.append("Clazz.castObjectAs(");
 			}
 			if (isVarArgs) {
 				buffer.append("[");
@@ -910,7 +953,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			} else {
 				ASTNode element = (ASTNode) arguments.get(i);
 				visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
-				if (ambitiousResult != null && ambitiousResult[i] != null) {
+				if (!ignoringCasting && ambitiousResult != null && ambitiousResult[i] != null) {
 					String typeName = ambitiousResult[i];
 					if (typeName.length() == 0) {
 						ITypeBinding paramType = parameterTypes[i];
@@ -3632,6 +3675,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				visitor = new ASTScriptVisitor(); // Default visitor
 			}
 			visitor.rootTypeNode = node;
+			visitor.methodOverloadingSupported = this.methodOverloadingSupported;
+			visitor.interfaceCastingSupported = this.interfaceCastingSupported;
+			visitor.supportsObjectStaticFields = this.supportsObjectStaticFields;
+			visitor.setDebugging(this.isDebugging());
+			((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(((ASTVariableVisitor) this.getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName());
 			String className = typeVisitor.getClassName();
 			String visitorClassName = null;
 			if (node.getParent() instanceof TypeDeclarationStatement) {

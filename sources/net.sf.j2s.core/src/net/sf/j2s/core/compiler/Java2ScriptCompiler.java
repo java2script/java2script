@@ -218,6 +218,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 						visitor = new SWTScriptVisitor();
 					}
 				}
+				boolean ignoreMethodOverloading = !("enable".equals(props.getProperty("j2s.compiler.method.overloading")));
+				visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
+				boolean supportsInterfaceCasting = "enable".equals(props.getProperty("j2s.compiler.interface.casting")); // if not set explicitly, it is not supported
+				visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
 				boolean objectStaticFields = "enable".equals(props.getProperty("j2s.compiler.static.quirks"));
 				visitor.setSupportsObjectStaticFields(objectStaticFields);
 				boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
