@@ -258,12 +258,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 				needPreparation = isFieldNeedPreparation(field);
 				if (needPreparation) {
 					break;
 				}
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
 				if ((init.getModifiers() & Modifier.STATIC) == 0) {
 					needPreparation = true;
 					break;
@@ -280,12 +286,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				//}
 				// there are no static members/methods in the inner type 
 				// but there are static final members
-//			} else if (element instanceof Initializer) {
-//				continue;
+			} else if (element instanceof Initializer) {
+				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
+				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+					continue;
+				}
 			} else if (element instanceof FieldDeclaration
 					/*&& isFieldNeedPreparation((FieldDeclaration) element)*/) {
 //				continue;
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (getJ2STag(fieldDeclaration, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (isFieldNeedPreparation(fieldDeclaration)) {
 					visitWith(fieldDeclaration, true);
 					continue;
@@ -365,12 +380,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if (!isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
+					if (getJ2STag(init, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((init.getModifiers() & Modifier.STATIC) == 0) {
 						element.accept(this);
 					}
@@ -1804,6 +1825,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		//visitList(node.getBody().statements(), "\r\n");
 		node.getBody().accept(this);
+		buffer.append("\r\n");
 		return false;
 	}
 
@@ -2723,9 +2745,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			String binaryName = declaringClass.getBinaryName();
-			int idx = levels.lastIndexOf(binaryName);
+			int idx = levels.indexOf(binaryName);
 			if (idx == -1) {
-				idx = classes.lastIndexOf(binaryName);
+				idx = classes.indexOf(binaryName);
 				if (idx == -1) {
 					// Check each super class
 					int index = 0;
