@@ -341,10 +341,14 @@ public class SimplePipeRequest extends SimpleRPCRequest {
 								request.registerOnReadyStateChange(new XHRCallbackAdapter() {
 									public void onLoaded() {
 										String response = request.getResponseText();
-										if (response != null && p.notifySequence < sequence && response.indexOf("$p1p3b$") != 0) {
+										if (response == null || response.length() == 0 || response.indexOf("$p1p3b$") != 0) {
+											// Incorrect response
+											return;
+										}
+										if (p.notifySequence < sequence) {
 											p.notifySequence = sequence;
 										}
-										if (response != null && response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
+										if (response.indexOf("\"" + PIPE_STATUS_LOST + "\"") != -1) {
 											p.pipeAlive = false;
 											p.pipeLost();
 											SimplePipeHelper.removePipe(pipeKey);
