@@ -221,7 +221,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		} else {
 //			fullClassName = anonymousName;
 //		}
-		
+		//For inner functions (No issues)
 		buffer.append("(Clazz.isClassDefined (\"");
 		buffer.append(fullClassName);
 		buffer.append("\") ? 0 : ");
@@ -234,8 +234,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(shortClassName);
 		buffer.append("$ = function () {\r\n");
 		
-		buffer.append("Clazz.pu$h ();\r\n");
+//		Start SwingJS modded 6/9/17
+		//buffer.append("Clazz.pu$h ();\r\n");
+		buffer.append("Clazz.pu$h (cla$$);\r\n");
 		buffer.append("cla$$ = ");
+//		End SwingJS modded 6/9/17		
+		
 		//buffer.append("Clazz.decorateAsType (");
 		buffer.append("Clazz.decorateAsClass (");
 //		buffer.append(JavaLangUtil.ripJavaLang(fullClassName));
@@ -255,12 +259,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
+				if (getJ2STag(field, "@j2sIgnore") != null) {
+					continue;
+				}
 				needPreparation = isFieldNeedPreparation(field);
 				if (needPreparation) {
 					break;
 				}
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
 				if ((init.getModifiers() & Modifier.STATIC) == 0) {
 					needPreparation = true;
 					break;
@@ -277,12 +287,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				//}
 				// there are no static members/methods in the inner type 
 				// but there are static final members
-//			} else if (element instanceof Initializer) {
-//				continue;
+			} else if (element instanceof Initializer) {
+				Initializer init = (Initializer) element;
+				if (getJ2STag(init, "@j2sIgnore") != null) {
+					continue;
+				}
+				if ((init.getModifiers() & Modifier.STATIC) == 0) {
+					continue;
+				}
 			} else if (element instanceof FieldDeclaration
 					/*&& isFieldNeedPreparation((FieldDeclaration) element)*/) {
 //				continue;
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+				if (getJ2STag(fieldDeclaration, "@j2sIgnore") != null) {
+					continue;
+				}
 				if (isFieldNeedPreparation(fieldDeclaration)) {
 					visitWith(fieldDeclaration, true);
 					continue;
@@ -362,12 +381,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
+					if (getJ2STag(field, "@j2sIgnore") != null) {
+						continue;
+					}
 					if (!isFieldNeedPreparation(field)) {
 						continue;
 					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
+					if (getJ2STag(init, "@j2sIgnore") != null) {
+						continue;
+					}
 					if ((init.getModifiers() & Modifier.STATIC) == 0) {
 						element.accept(this);
 					}
@@ -421,6 +446,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		
+//		Start SwingJS modded 6/9/17- rc remove
+		//buffer.append("var rc = cla$$;\r\n");
+//		End SwingJS modded 6/9/17
 		buffer.append("cla$$ = Clazz.p0p ();\r\n");
 		
 		typeVisitor.setClassName(oldClassName);
@@ -428,13 +456,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(laterBuffer);
 		laterBuffer = oldLaterBuffer;
 		
+//		Start SwingJS modded 6/9/17
+//		buffer.append("return rc;\r\n");
+//		End SwingJS modded 6/9/17
+		
 		buffer.append("};\r\n");
-
 		String methods = methodBuffer.toString();
 		methodBuffer = buffer;
 		methodBuffer.append(methods);
 		buffer = tmpBuffer;
-		
+//		Start SwingJS 6/9/17- Binding prefix ignored
 		buffer.append(packageName);
 		buffer.append(".");
 		idx = className.indexOf('$');
@@ -453,6 +484,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(CastExpression node) {
+//		Start SwingJS modded 6/9/17
+//		Object nodeConstantValue = node.resolveConstantExpressionValue();
+//		if (nodeConstantValue != null) {
+//			Type type = node.getType();
+//			if (type.isPrimitiveType()) {
+//				PrimitiveType pType = (PrimitiveType) type;
+//				if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
+//						|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
+//						|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
+//						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
+//					buffer.append(nodeConstantValue);
+//					return false;
+//				}
+//			}
+//		}
+//		End SwingJS modded 6/9/17
 		Type type = node.getType();
 		/*
 		 * TODO: some casting should have its meaning!
@@ -645,6 +692,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			StringBuffer tmpBuffer = buffer;
 //			buffer = methodBuffer;
 			
+//			SwingJS 6/9/17- Reverted inner class call
 			buffer.append("(");
 //			buffer.append(baseClassName);
 //			buffer.append(".$");
@@ -718,6 +766,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected void visitMethodParameterList(List arguments, IMethodBinding methodDeclaration, boolean isConstructor, String prefix, String suffix) {
+//		SwingJS 6/9/17- Reverted no binding
 		if (methodDeclaration == null) {
 			return;
 		}
@@ -763,6 +812,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			String parameterTypeName = null;
 			if (parameterTypes != null) {
 				parameterTypeName = parameterTypes[i].getName();
+//				Start SwingJS TODO 6/9/17 
+//				parameterTypeName = parameterTypes[i].getQualifiedName();
+//				End SwingJS modded 6/9/17
 			}
 			if (!alreadyPrefixed && prefix != null) {
 				buffer.append(prefix);
@@ -897,6 +949,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(ConstructorInvocation node) {
+//		SwingJS modded 6/9/17- Reverted clazz.thisConstructor
 		buffer.append("this.construct (");
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
@@ -1126,6 +1179,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				
 			} else {
 				ITypeBinding binding = node.resolveBinding();
+				
+//				Start SwingJS TODO 6/9/17- Potential fix by Renjian
+//				ITypeBinding binding = anonDeclare.resolveBinding();
+//				End SwingJS modded 6/9/17
+				
 				String anonClassName = null;
 				if (binding.isAnonymous() || binding.isLocal()) {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getBinaryName()));
@@ -1133,8 +1191,26 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
 				}
 				//int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
-				anonDeclare.accept(this);
 
+				//				Start SwingJS TODO 6/9/17
+//				StringBuffer tmpBuffer = buffer;
+//				StringBuffer tmpMethodBuffer = methodBuffer;
+//				buffer = new StringBuffer();
+//				methodBuffer = new StringBuffer();
+//				End SwingJS modded 6/9/17
+				anonDeclare.accept(this);
+				
+//				Start SwingJS TODO 6/9/17
+//				tmpBuffer.append(methodBuffer);
+//				
+//				tmpBuffer.append(buffer);
+//				tmpBuffer.append(";\r\n");
+//				
+//				buffer = tmpBuffer;
+//				methodBuffer = tmpMethodBuffer;
+//				End SwingJS modded 6/9/17
+				
+				
 				buffer.append("Clazz.defineEnumConstant (");
 				/* replace full class name with short variable name */
 				buffer.append("cla$$");
@@ -1597,6 +1673,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		//visitList(node.getBody().statements(), "\r\n");
 		node.getBody().accept(this);
+		buffer.append("\r\n");
 		return false;
 	}
 
@@ -2049,6 +2126,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (!read) {
 			read = readSources(node, "@j2sNative", prefix, suffix, false);
 		}
+		if (!read) {
+			read = readStringSources(node, "@j2sXHTML", prefix, suffix, false);
+		}
+		if (!read) {
+			read = readStringSources(node, "@j2sXCSS", prefix, suffix, false);
+		}
 		return read;
 	}
 
@@ -2137,6 +2220,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(MethodInvocation node) {
+//		SwingJS ??? 6/9/17
 		Expression expression = node.getExpression();
 		if (expression != null) {
 			/*
@@ -2485,6 +2569,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (!isThis) {
 			buffer.append("this.callbacks[\"");
+//			Start SwingJS modded 6/9/17- Reverted b$
 			buffer.append(shortenQualifiedName(name));
 			buffer.append("\"].");
 		}
@@ -2603,6 +2688,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(SuperMethodInvocation node) {
+//		Start SwingJS modded 6/9/17- Reverted extraSuper, dollarBuilder etc.
 		buffer.append("Clazz.superCall (this, ");
 		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 		buffer.append(", \"");
@@ -2634,6 +2720,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				 * or anonymous classes.
 				 */
 				buffer.append("this.callbacks[\"");
+//				Start SwingJS modded 6/9/17- Reverted dollarBuilder etc.
 				qualifier.accept(this);
 				buffer.append("\"]");
 			}
