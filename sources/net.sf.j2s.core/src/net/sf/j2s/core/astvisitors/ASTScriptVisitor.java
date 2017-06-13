@@ -277,18 +277,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				//}
 				// there are no static members/methods in the inner type 
 				// but there are static final members
-//			} else if (element instanceof Initializer) {
-//				continue;
+			} else if (element instanceof Initializer) {
+				System.out.println(element);
+				continue;
 			} else if (element instanceof FieldDeclaration
 					/*&& isFieldNeedPreparation((FieldDeclaration) element)*/) {
 //				continue;
 				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
 				if (isFieldNeedPreparation(fieldDeclaration)) {
-					visitWith(fieldDeclaration, true);
+					visitWith(fieldDeclaration, true);	
 					continue;
 				}
 			}
+			
+			//buffer.append("//Testing " + element + "\n");
 			element.accept(this);
+			//buffer.append("//Testing after " + element.getClass().getName() + "\n");
+			
 //			element.accept(this);
 		}
 		
