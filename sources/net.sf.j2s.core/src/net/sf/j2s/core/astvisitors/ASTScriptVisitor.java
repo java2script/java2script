@@ -209,7 +209,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //
 		String fullClassName = anonClassName;
 //		String fullClassName = null;
-		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
 //		if (packageName != null && packageName.length() != 0) {
 //			fullClassName = packageName + '.' + anonymousName;
 //		} else {
@@ -234,7 +233,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(shortClassName);
 		buffer.append("$ = function () {\r\n");
 		
-//		Start SwingJS modded 6/9/17
+//		Start SwingJS modded 6/9/17- Issue #1
+//		SwingJS 6/14/17-Part of the fix to make cla$$ local- no effect on J2Slib
 		//buffer.append("Clazz.pu$h ();\r\n");
 		buffer.append("Clazz.pu$h (cla$$);\r\n");
 		buffer.append("cla$$ = ");
@@ -282,7 +282,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof MethodDeclaration) {
 				//MethodDeclaration method = (MethodDeclaration) element;
-				//if ((method.getModifiers() & Modifier.STATIC) != 0) {
+//				if ((method.getModifiers() & Modifier.STATIC) != 0) {
 					continue;
 				//}
 				// there are no static members/methods in the inner type 
@@ -447,7 +447,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		
 //		Start SwingJS modded 6/9/17- rc remove
-		//buffer.append("var rc = cla$$;\r\n");
+//		SwingJS 6/14/17-Removing attempt to make cla$$ local- Issue fixed in SwingJS- Needs fix in J2Slib
+//		SwingJS 6/14/17- Back to java2script/java2script master below
+		buffer.append("var rc = cla$$;\r\n");
 //		End SwingJS modded 6/9/17
 		buffer.append("cla$$ = Clazz.p0p ();\r\n");
 		
@@ -457,7 +459,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		laterBuffer = oldLaterBuffer;
 		
 //		Start SwingJS modded 6/9/17
-//		buffer.append("return rc;\r\n");
+//		SwingJS 6/14/17- Back to java2script/java2script master below
+		buffer.append("return rc;\r\n");
 //		End SwingJS modded 6/9/17
 		
 		buffer.append("};\r\n");
@@ -465,7 +468,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		methodBuffer = buffer;
 		methodBuffer.append(methods);
 		buffer = tmpBuffer;
-//		Start SwingJS 6/9/17- Binding prefix ignored
+//SwingJS 6/14/17- Imported from master branch		
+//		ITypeBinding declareClass = binding;
+//		boolean prefixed = false;
+//		while (declareClass != null) {
+//			if (!declareClass.isAnonymous()) {
+//				buffer.append(declareClass.getQualifiedName());
+//				prefixed = true;
+//			}
+//				break;
+//			declareClass = declareClass.getDeclaringClass();
+//		}
+//		if (!prefixed) {
+			String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
 		buffer.append(packageName);
 		buffer.append(".");
 		idx = className.indexOf('$');
@@ -474,9 +489,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			buffer.append(className);
 		}
+//		}
 		buffer.append(".$");
 		buffer.append(shortClassName);
-		buffer.append("$ ())");
+		buffer.append("$ ()");
+//		SwingJS 6/14/17- End of annonymous fx creation
+		buffer.append(")");
 		/*
 		 * Anonymouse class won't have static members and methods and initializers
 		 */
@@ -485,6 +503,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(CastExpression node) {
 //		Start SwingJS modded 6/9/17
+//		SwingJS 6/14/17- No longer casting expressions
 //		Object nodeConstantValue = node.resolveConstantExpressionValue();
 //		if (nodeConstantValue != null) {
 //			Type type = node.getType();
@@ -692,8 +711,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			StringBuffer tmpBuffer = buffer;
 //			buffer = methodBuffer;
 			
-//			SwingJS 6/9/17- Reverted inner class call
+//			Start- SwingJS 6/9/17- Reverted inner class call
 			buffer.append("(");
+//			buffer.append("Clazz.innerTypeInstance (");
+//			End- SwingJS 6/9/17
+			
 //			buffer.append(baseClassName);
 //			buffer.append(".$");
 //			buffer.append(shortClassName);
@@ -721,8 +743,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			methodDeclareStack.pop();
 			buffer.append(", ");
 
+//			Start- SwingJS 6/14/17-Part of reverted inner class call
 			buffer.append("Clazz.innerTypeInstance (");
 			buffer.append(anonClassName);
+//			End- SwingJS 6/14/17
 			buffer.append(", this, ");
 			String scope = null;
 			if (methodDeclareStack.size() != 0) {
@@ -757,16 +781,75 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			currentBlockForVisit = lastCurrentBlock;
 			//buffer.append("};\r\n");
 			buffer.append(")"); // Clazz.innerTypeInstance
+//			Start- SwingJS 6/14/17-Part of reverted inner class call
 			buffer.append(")"); // end of line (..., ...)
+//			End- SwingJS 6/14/17
 
 //			methodBuffer = buffer;
 //			buffer = tmpBuffer;
 		}
 		return false;
 	}
-
+//	SwingJS 6/14/17- Reverted no binding
+//	String[] getParameterSimilarities(ITypeBinding[] params1, ITypeBinding[] params2) {
+//		if (params1 == null || params2 == null || params1.length != params2.length) return null;
+//		String[] result = new String[params1.length];
+//		for (int i = 0; i < params1.length; i++) {
+//			ITypeBinding t1 = params1[i];
+//			ITypeBinding t2 = params2[i];
+//			if (t1.isPrimitive()) {
+//				String typeName1 = t1.getName();
+//				String typeName2 = t2.getName();
+//				if (!"boolean".equals(typeName1)) {
+//					typeName1 = "Number";
+//				}
+//				if (!"boolean".equals(typeName2)) {
+//					typeName2 = "Number";
+//				}
+//				if (!t2.isPrimitive() || !typeName1.equals(typeName2)) return null;
+//			} else if (t1.isArray()) {
+//				if (!t2.isArray()) return null;
+//				/*
+//				 * TODO:
+//				 * Current Java2Script does not distinguish different array types.
+//				 * 
+//				ITypeBinding cType1 = t1.getComponentType();
+//				ITypeBinding cType2 = t2.getComponentType();
+//				if (cType1 != cType2 && !cType2.isCastCompatible(cType1)) return null;
+//				if (cType1 != cType2) {
+//					result[i] = cType2.getQualifiedName();
+//				}
+//				// */
+//			} else {
+//				if (t1 != t2) {
+//					// In most cases, different interfaces means different method signatures, no needs of casting  
+//					if (!interfaceCastingSupported && t1.isInterface() && t2.isInterface() && !t1.isSubTypeCompatible(t2)) {
+//						return null;
+//					}
+//					if (!t2.isCastCompatible(t1)) {
+//						return null;
+//					} else {
+//						/*
+//						 * B(Object) and B(Event)
+//						 * C extends B with
+//						 * C(Event) {
+//						 * 	super(event)
+//						 * }
+//						 * There should be no needs of casting for super constructor invocation
+//						 */
+//						if (!t1.isInterface() && !t2.isInterface() && "java.lang.Object".equals(t2.getQualifiedName())) {
+//							return null;
+//						}
+//						result[i] = t1.getQualifiedName();
+//					}
+//				}
+//			}
+//		}
+//		return result;
+//	}
 	protected void visitMethodParameterList(List arguments, IMethodBinding methodDeclaration, boolean isConstructor, String prefix, String suffix) {
 //		SwingJS 6/9/17- Reverted no binding
+		
 		if (methodDeclaration == null) {
 			return;
 		}
@@ -784,6 +867,162 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return;
 		}
 
+		
+//		SwingJS 6/14/17-Clipped from master		
+//		String[] ambitiousResult = null;
+//		boolean alreadyPrefixed = false;
+//		String clazzName = null;
+//		ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+//		if (declaringClass != null) {
+//			clazzName = declaringClass.getQualifiedName();
+//			
+//			String methodName = methodDeclaration.getName();
+//			IMethodBinding mBinding = methodDeclaration;
+//			ITypeBinding[] paramTypes = mBinding.getParameterTypes();
+//			List allSimilarMethods = new ArrayList();
+//			ITypeBinding dClass = nodeTypeBinding;
+//			if (dClass == null) {
+//				dClass = mBinding.getDeclaringClass();
+//			}
+//			do {
+//				IMethodBinding[] methods = dClass.getDeclaredMethods();
+//				for (int i = 0; i < methods.length; i++) {
+//					IMethodBinding m = methods[i];
+//					ITypeBinding[] mParamTypes = m.getParameterTypes();
+//					if (methodName.equals(m.getName()) && mParamTypes != null
+//							&& paramTypes.length == mParamTypes.length) {
+//						allSimilarMethods.add(m);
+//					}
+//				}
+//				dClass = dClass.getSuperclass();
+//			} while (dClass != null);
+//			IMethodBinding[] methods = (IMethodBinding[])allSimilarMethods.toArray(new IMethodBinding[allSimilarMethods.size()]);
+//			Set knownMethods = new HashSet();
+//			knownMethods.add(methodDeclaration);
+//			List ambitiousMethods = new ArrayList();
+//			int lastCastings = 0;
+//			do {
+//				ITypeBinding[] parameterTypes = mBinding.getParameterTypes();
+//				for (int i = 0; i < methods.length; i++) {
+//					IMethodBinding m = methods[i];
+//					if (knownMethods.contains(m)) continue;
+//					ITypeBinding[] mParamTypes = m.getParameterTypes();
+//					if (methodName.equals(m.getName()) && mParamTypes != null
+//							&& parameterTypes.length == mParamTypes.length) {
+//						String[] result = getParameterSimilarities(parameterTypes, mParamTypes);
+//						if (result != null) {
+//							int currentCastings = 0;
+//							for (int j = 0; j < result.length; j++) {
+//								if (result[j] != null) {
+//									currentCastings++;
+//								}
+//							}
+//							if (!knownMethods.contains(m)) {
+//								ambitiousMethods.add(m);
+//								knownMethods.add(m);
+//							}
+//							if (ambitiousResult == null) {
+//								ambitiousResult = result;
+//								lastCastings = currentCastings;
+//							} else { // other methods
+//								if (currentCastings < lastCastings) {
+//									for (int j = 0; j < result.length; j++) {
+//										if (result[j] != null) {
+//											ambitiousResult[j] = result[j];
+//										} else if (ambitiousResult[j] != null){
+//											ambitiousResult[j] = ""; // need to be casted, other similar methods exist
+//										}
+//									}
+//									lastCastings = currentCastings;
+//								} else {
+//									for (int j = 0; j < result.length; j++) {
+//										if (result[j] != null && ambitiousResult[j] == null) {
+//											ambitiousResult[j] = ""; // need to be casted, other similar methods exist
+//										}
+//									}
+//								}
+//							}
+//						}
+//					}
+//				}
+//				if (ambitiousMethods.size() <= 0) {
+//					break;
+//				}
+//				mBinding = (IMethodBinding) ambitiousMethods.remove(0);
+//			} while (true);
+//		}
+//		ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
+//		String methodName = methodDeclaration.getName();
+//		boolean ignoringCasting = !methodOverloadingSupported;
+//		if (declaringClass.getBinaryName().equals("java.io.PrintStream") && methodName.startsWith("print")) {
+//			ignoringCasting = true;
+//		}
+//		int argSize = arguments.size();
+//		for (int i = 0; i < parameterTypes.length; i++) {
+//			boolean isVarArgs = false;
+//			if (i == parameterTypes.length - 1) {
+//				ITypeBinding paramType = parameterTypes[i];
+//				if (parameterTypes.length != argSize) {
+//					isVarArgs = true;
+//				} else if (paramType.isArray() && methodDeclaration.isVarargs()) {
+//					Expression element = (Expression) arguments.get(i);
+//					ITypeBinding argType = element.resolveTypeBinding();
+//					if (!argType.isArray()) {
+//						if (!(element instanceof NullLiteral)) {
+//							isVarArgs = true;
+//						}
+//					}
+//				}
+//			}
+//			if (!alreadyPrefixed && prefix != null) {
+//				buffer.append(prefix);
+//				alreadyPrefixed = true;
+//			}
+//			String parameterTypeName = null;
+//			if (parameterTypes != null) {
+//				parameterTypeName = parameterTypes[i].getQualifiedName();
+//			}
+//			if (!isVarArgs && !ignoringCasting && ambitiousResult != null && ambitiousResult[i] != null) {
+//				buffer.append("Clazz.castObjectAs(");
+//			}
+//			if (isVarArgs) {
+//				buffer.append("[");
+//				for (int j = i; j < argSize; j++) {
+//					ASTNode element = (ASTNode) arguments.get(j);
+//					visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
+//					if (j != argSize - 1) {
+//						buffer.append(", ");
+//					}
+//				}
+//				buffer.append("]");
+//			} else {
+//				ASTNode element = (ASTNode) arguments.get(i);
+//				visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
+//				if (!ignoringCasting && ambitiousResult != null && ambitiousResult[i] != null) {
+//					String typeName = ambitiousResult[i];
+//					if (typeName.length() == 0) {
+//						ITypeBinding paramType = parameterTypes[i];
+//						typeName = paramType.getQualifiedName();
+//					}
+//					String typeStr = assureQualifiedName(shortenQualifiedName(typeName));
+//					buffer.append(", \"").append(typeStr).append("\")");
+//				}
+//				if (i != parameterTypes.length - 1) {
+//					buffer.append(", ");
+//				}
+//			}
+//		}
+//		
+//		if (alreadyPrefixed && suffix != null) {
+//			buffer.append(suffix);
+//		}
+//	}
+		
+		
+		
+		
+		
+		
 		boolean alreadyPrefixed = false;
 		String clazzName = null;
 		ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
@@ -877,9 +1116,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		if (typeStr != null) {
+//			SwingJS 6/14/17- More casting- Back to cast null
 			buffer.append("Clazz.castNullAs (\"");
 			buffer.append(typeStr.replaceFirst("^\\$wt.", "org.eclipse.swt."));
 			buffer.append("\")");
+//			buffer.append("null");
+//			End- SwingJS 6/14/17
 		} else {
 			Expression exp = (Expression) element;
 			ITypeBinding typeBinding = exp.resolveTypeBinding();
@@ -947,9 +1189,37 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 	}
-
+	
+//	Start- SwingJS modded 6/9/17- Reverted clazz.thisConstructor
+//	public boolean visit(ConstructorInvocation node) {
+//		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+//		if (constructorBinding == null) {
+//			return false;
+//		}
+//		buffer.append("Clazz.thisConstructor (this, ");
+//		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+//		IMethodBinding methodDeclaration = null;
+//		if (constructorBinding != null) {
+//			methodDeclaration = constructorBinding.getMethodDeclaration();
+//		}
+//		visitMethodParameterList(methodDeclaration.getDeclaringClass(), node.arguments(), methodDeclaration, true, ", [", "]");
+//		buffer.append(");\r\n");
+//		/*
+//		buffer.append("this.construct (");
+//		IMethodBinding methodDeclaration = null;
+//		IMethodBinding constructorBinding = node.resolveConstructorBinding();
+//		if (constructorBinding != null) {
+//			methodDeclaration = constructorBinding.getMethodDeclaration();
+//		}
+//		visitMethodParameterList(methodDeclaration.getDeclaringClass(), node.arguments(), methodDeclaration, true, null, null);
+//		buffer.append(");\r\n");
+//		 */
+//		return false;
+//	}
+	
+	
+	
 	public boolean visit(ConstructorInvocation node) {
-//		SwingJS modded 6/9/17- Reverted clazz.thisConstructor
 		buffer.append("this.construct (");
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
@@ -960,6 +1230,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(");\r\n");
 		return false;
 	}
+//	End- SwingJS modded 6/9/17
 	public boolean visit(EnumConstantDeclaration node) {
 		buffer.append("this.");
 		node.getName().accept(this);
@@ -1178,12 +1449,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("]);\r\n");
 				
 			} else {
-				ITypeBinding binding = node.resolveBinding();
-				
-//				Start SwingJS TODO 6/9/17- Potential fix by Renjian
-//				ITypeBinding binding = anonDeclare.resolveBinding();
-//				End SwingJS modded 6/9/17
-				
+				ITypeBinding binding = anonDeclare.resolveBinding();
 				String anonClassName = null;
 				if (binding.isAnonymous() || binding.isLocal()) {
 					anonClassName = assureQualifiedName(shortenQualifiedName(binding.getBinaryName()));
@@ -1192,23 +1458,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 				//int anonCount = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getAnonymousCount() + 1;
 
-				//				Start SwingJS TODO 6/9/17
-//				StringBuffer tmpBuffer = buffer;
-//				StringBuffer tmpMethodBuffer = methodBuffer;
-//				buffer = new StringBuffer();
-//				methodBuffer = new StringBuffer();
-//				End SwingJS modded 6/9/17
+				StringBuffer tmpBuffer = buffer;
+				StringBuffer tmpMethodBuffer = methodBuffer;
+				buffer = new StringBuffer();
+				methodBuffer = new StringBuffer();
 				anonDeclare.accept(this);
 				
-//				Start SwingJS TODO 6/9/17
-//				tmpBuffer.append(methodBuffer);
-//				
-//				tmpBuffer.append(buffer);
-//				tmpBuffer.append(";\r\n");
-//				
-//				buffer = tmpBuffer;
-//				methodBuffer = tmpMethodBuffer;
-//				End SwingJS modded 6/9/17
+				tmpBuffer.append(methodBuffer);
+				
+				tmpBuffer.append(buffer);
+				tmpBuffer.append(";\r\n");
+				
+				buffer = tmpBuffer;
+				methodBuffer = tmpMethodBuffer;
 				
 				
 				buffer.append("Clazz.defineEnumConstant (");
@@ -2220,7 +2482,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(MethodInvocation node) {
-//		SwingJS ??? 6/9/17
+		ITypeBinding nodeTypeBinding = null;
 		Expression expression = node.getExpression();
 		if (expression != null) {
 			/*
@@ -2228,6 +2490,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			 */
 			expression.accept(this);
 			buffer.append(".");
+			nodeTypeBinding = node.getExpression().resolveTypeBinding();
 		}
 		
 		String methodName = node.getName().getIdentifier();
@@ -2510,10 +2773,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String name = declaringClass.getQualifiedName();
 		boolean isThis = false;
 		int superLevel = 0;
+		ITypeBinding originalType = null;
 		while (parent != null) {
 			if (parent instanceof AbstractTypeDeclaration) {
 				AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
@@ -2527,6 +2794,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			} else if (parent instanceof AnonymousClassDeclaration) {
 				AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
 				ITypeBinding typeBinding = type.resolveBinding();
+				if (typeBinding != null && originalType == null) {
+					originalType = typeBinding;
+				}
 				superLevel++;
 				if (Bindings.isSuperType(declaringClass, typeBinding)) {
 					if (superLevel == 1) {
@@ -2567,12 +2837,94 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			parent = parent.getParent();
 		}
+		
+//		Start SwingJS modded 6/9/17- Reverted b$
 		if (!isThis) {
 			buffer.append("this.callbacks[\"");
-//			Start SwingJS modded 6/9/17- Reverted b$
 			buffer.append(shortenQualifiedName(name));
 			buffer.append("\"].");
 		}
+			
+			
+			
+			
+//			if (!isThis) {
+//				buffer.append("this.callbacks[\"");
+//				//buffer.append(shortenQualifiedName(name));
+//				StringBuilder dollarBuilder = new StringBuilder();
+//				ArrayList<String> levels = new ArrayList<String>();
+//				ArrayList<String> classes = new ArrayList<String>();
+//				if (originalType != null) {
+//					levels.add(originalType.getBinaryName());
+//					classes.add(originalType.getSuperclass().getBinaryName());
+//					ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+//					while (thisDeclaringClass != null) {
+//						levels.add(thisDeclaringClass.getBinaryName());
+//						classes.add(thisDeclaringClass.getSuperclass().getBinaryName());
+//						dollarBuilder.append("$");
+//						thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+//					}
+//				}
+//				String binaryName = declaringClass.getBinaryName();
+//				int idx = levels.indexOf(binaryName);
+//				if (idx == -1) {
+//					idx = classes.indexOf(binaryName);
+//					if (idx == -1) {
+//						// Check each super class
+//						int index = 0;
+//						ITypeBinding superClass = originalType.getSuperclass();
+//						while (superClass != null) {
+//							String superName = superClass.getBinaryName();
+//							if ("java.lang.Object".equals(superName)) {
+//								break;
+//							}
+//							if (binaryName.equals(superName)) {
+//								idx = index; 
+//								//break;
+//							}
+//							superClass = superClass.getSuperclass();
+//						}
+//						ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+//						while (thisDeclaringClass != null) {
+//							index++;
+//							superClass = thisDeclaringClass.getSuperclass();
+//							while (superClass != null) {
+//								String superName = superClass.getBinaryName();
+//								if ("java.lang.Object".equals(superName)) {
+//									break;
+//								}
+//								if (binaryName.equals(superName)) {
+//									idx = index; 
+//									//break;
+//								}
+//								superClass = superClass.getSuperclass();
+//							}
+//							thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+//						}
+//					}
+//				}
+//				if (idx != -1) {
+//					for (int i = idx + 1; i < levels.size(); i++) {
+//						if (dollarBuilder.length() > 0) {
+//							dollarBuilder.deleteCharAt(0);
+//						}
+//					}
+//				} else {
+//					declaringClass = declaringClass.getDeclaringClass();
+//					while (declaringClass != null) {
+//						if (dollarBuilder.length() > 0) {
+//							dollarBuilder.deleteCharAt(0);
+//						}
+//						declaringClass = declaringClass.getDeclaringClass();
+//					}
+//				}
+//				buffer.append(dollarBuilder);
+//				buffer.append("\"].");
+//			}
+			
+			
+			
+		
 	}
 
 	public boolean visit(SimpleType node) {
@@ -2687,6 +3039,73 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
+	
+	
+//	SwingJS 6/14/17- Clipped from master branch. Dollar builder stuff	
+//	public boolean visit(SuperMethodInvocation node) {
+//		boolean extraSuper = false;
+//		Name qualifier = node.getQualifier();
+//		if (qualifier != null) {
+//			String fullyQualifiedName = null;
+//			ITypeBinding typeBinding = qualifier.resolveTypeBinding();
+//			if (typeBinding != null) {
+//				fullyQualifiedName = typeBinding.getQualifiedName();
+//			}
+//			if (fullyQualifiedName != null && !fullyQualifiedName.equals(getFullClassName())) {
+//				ITypeBinding originalType = null;
+//				ASTNode parent = node.getParent();
+//				while (parent != null) {
+//					if (parent instanceof AbstractTypeDeclaration) {
+//						AbstractTypeDeclaration type = (AbstractTypeDeclaration) parent;
+//						ITypeBinding parentTypeBinding = type.resolveBinding();
+//						if (parentTypeBinding != null && originalType == null) {
+//							originalType = parentTypeBinding;
+//						}
+//					} else if (parent instanceof AnonymousClassDeclaration) {
+//						AnonymousClassDeclaration type = (AnonymousClassDeclaration) parent;
+//						ITypeBinding parentTypeBinding = type.resolveBinding();
+//						if (parentTypeBinding != null && originalType == null) {
+//							originalType = parentTypeBinding;
+//						}
+//					}
+//					parent = parent.getParent();
+//				}
+//				StringBuilder dollarBuilder = new StringBuilder();
+//				if (originalType != null) {
+//					ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
+//					while (thisDeclaringClass != null) {
+//						dollarBuilder.append("$");
+//						thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
+//					}
+//				}
+//				ITypeBinding declaringClass = typeBinding.getDeclaringClass();
+//				while (declaringClass != null) {
+//					if (dollarBuilder.length() > 0) {
+//						dollarBuilder.deleteCharAt(0);
+//					}
+//					declaringClass = declaringClass.getDeclaringClass();
+//				}
+//				buffer.append("Clazz.superCall (this.callbacks[\"").append(dollarBuilder).append("\"], ");
+//				buffer.append(assureQualifiedName(shortenQualifiedName(fullyQualifiedName)));
+//				extraSuper = true;
+//			}
+//		}
+//		if (!extraSuper) {
+//			buffer.append("Clazz.superCall (this, ");
+//			buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+//		}
+//		buffer.append(", \"");
+//		String name = getJ2SName(node.getName());
+//		buffer.append(name);
+//		buffer.append("\", [");
+//		IMethodBinding methodDeclaration = node.resolveMethodBinding();
+//		visitMethodParameterList(methodDeclaration.getDeclaringClass(), node.arguments(), methodDeclaration, false, null, null);
+//		buffer.append("])");
+//		return false;
+//	}
+	
+	
+	
 	public boolean visit(SuperMethodInvocation node) {
 //		Start SwingJS modded 6/9/17- Reverted extraSuper, dollarBuilder etc.
 		buffer.append("Clazz.superCall (this, ");
