@@ -2421,7 +2421,7 @@ ClazzLoader.getJ2SLibBase = function () {
 		if (o.base == null) {
 			o.base = "http://archive.java2script.org/";
 		}
-		return o.base + (o.alias ? o.alias : (o.version ? o.version : "1.0.0")) + "/";
+		return o.base + (o.alias ? o.alias : (o.version ? o.version : "3.1.1")) + "/";
 	}
 	var ss = document.getElementsByTagName ("SCRIPT");
 	for (var i = 0; i < ss.length; i++) {
@@ -2477,7 +2477,7 @@ ClazzLoader.assurePackageClasspath = function (pkg) {
 		window[pkg + ".registered"] = false;
 		var base = ClazzLoader.fastGetJ2SLibBase ();
 		if (base == null) {
-			base = "http://archive.java2script.org/1.0.0/"; // only after 1.0.0
+			base = "http://archive.java2script.org/3.1.1/"; // only after 3.1.1
 		}
 		ClazzLoader.packageClasspath (pkg, base, true);
 	}

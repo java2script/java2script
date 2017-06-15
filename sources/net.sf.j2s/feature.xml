@@ -2,7 +2,7 @@
 <feature
       id="net.sf.j2s"
       label="net.sf.j2s"
-      version="2.0.0"
+      version="3.1.1"
       provider-name="j2s.sourceforge.net">
 
    <description url="http://j2s.sourceforge.net/features.html">
@@ -170,26 +170,26 @@ This Agreement is governed by the laws of the State of New York and the intellec
          id="net.sf.j2s.ajax"
          download-size="271"
          install-size="271"
-         version="2.0.0"/>
+         version="3.1.1"/>
 
    <plugin
          id="net.sf.j2s.core"
          download-size="233"
          install-size="233"
-         version="2.0.0"
+         version="3.1.1"
          unpack="false"/>
 
    <plugin
          id="net.sf.j2s.lib"
          download-size="873"
          install-size="3170"
-         version="2.0.0"/>
+         version="3.1.1"/>
 
    <plugin
          id="net.sf.j2s.ui"
          download-size="239"
          install-size="239"
-         version="2.0.0"
+         version="3.1.1"
          unpack="false"/>
 
 </feature>

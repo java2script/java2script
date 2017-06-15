@@ -22,8 +22,8 @@ import java.net.*;
  * by the reference URL.  The Framework only supports reference URLs that refer
  * to a local file URL.  For example: <p>
  * <pre>
- *     reference:file:/eclipse/plugins/org.eclipse.myplugin_1.0.0/
- *     reference:file:/eclispe/plugins/org.eclipse.mybundle_1.0.0.jar
+ *     reference:file:/eclipse/plugins/org.eclipse.myplugin_3.1.1/
+ *     reference:file:/eclispe/plugins/org.eclipse.mybundle_3.1.1.jar
  * </pre>
  */
 public class Handler extends URLStreamHandler {

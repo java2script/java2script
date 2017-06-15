@@ -330,7 +330,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 			File j2slibFolder = new File(workingDir.getAbsolutePath(), j2sLibPath);
 			File j2sRelease = new File(j2slibFolder, ".release");
 			Properties release = new Properties();
-			String alias = "2.0.0";
+			String alias = "3.1.1";
 			String version = "20081203";
 			release.put("alias", alias);
 			release.put("version", version);
@@ -348,7 +348,7 @@ public class J2SConsoleOptionsTab extends AbstractLaunchConfigurationTab {
 			return alias;
 		} catch (CoreException e) {
 			e.printStackTrace();
-			return "2.0.0";
+			return "3.1.1";
 		}
 	}
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {

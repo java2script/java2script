@@ -15,7 +15,7 @@
 <script type="text/javascript">
 window["j2s.lib"] = {
 	/*base : "http://archive.java2script.org/",*/
-   	/*alias : "1.0.0-m5",*/
+   	/*alias : "3.1.1-m5",*/
 	base : "../net.sf.j2s.lib/",
 	alias : "j2slib",
 	version : "20070206",
