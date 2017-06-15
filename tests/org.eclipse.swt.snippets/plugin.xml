@@ -2,7 +2,7 @@
 <plugin
    id="org.eclipse.swt.snippets"
    name="%pluginName"
-   version="3.1.0"
+   version="3.1.1"
    provider-name="%providerName">
 
    <requires>

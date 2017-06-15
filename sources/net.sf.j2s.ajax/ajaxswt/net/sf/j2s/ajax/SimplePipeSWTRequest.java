@@ -316,7 +316,7 @@ public class SimplePipeSWTRequest extends SimplePipeRequest {
 				/*
 				// It is OK to convert to string as SimpleSerialize's
 				// serialized string contains only ASCII chars.
-				// [20151228] ASCII characters only is broken after 2.0.0
+				// [20151228] ASCII characters only is broken after 3.1.1
 				String string = baos.toString();
 				String resetString = swtParseReceived(string);
 				if (resetString != null && resetString.length() > 0) {
