@@ -321,6 +321,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot, String folderPath, Properties props) {
 		String js = dvisitor.getDependencyScript(visitor.getBuffer());
+		//js = js + "\n//SwingJS test " + System.currentTimeMillis() + "\n";
 		String lineBreak = props.getProperty("j2s.compiler.linebreak");
 		String whiteSpace = props.getProperty("j2s.compiler.whitespace");
 		String utf8Header = props.getProperty("j2s.compiler.utf8bom");
@@ -357,6 +358,18 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				.replaceAll("finalVars", "v\\$")
 				.replaceAll("\\.callbacks", "\\.b\\$")
 				.replaceAll("\\.\\$finals", "\\.f\\$");
+		
+		//SwingJS 6/15/2017- Trying to replace new Boolean with Boolean.from because 
+		//new Boolean("false") returns true.
+		//Require implementation of Boolean.from in runtime
+		//javascript considers any string to be true while java only considers the string "true"
+		//to be true
+		//js = js.replaceAll("new\\ Boolean\\ ", "Boolean\\.from");
+		js = js.replaceAll("new Boolean ", "Boolean.from");
+		js = js + "\n\\\\Created Boolean.from js" + System.currentTimeMillis() + "\n"; 
+			
+		
+		
 		String abbr = props.getProperty("j2s.compiler.abbreviation");
 		if (abbr != null) {
 			if (abbr.equals("true")) {
