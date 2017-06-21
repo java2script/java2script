@@ -392,6 +392,7 @@ public class DoubleTest extends junit.framework.TestCase {
 	/**
 	 * @tests java.lang.Double#equals(java.lang.Object)
 	 */
+	@SuppressWarnings("all") // "Comparing identical expressions" 0d == -0d
 	public void test_equalsLjava_lang_Object() {
 		// Test for method boolean java.lang.Double.equals(java.lang.Object)
 
