@@ -378,9 +378,6 @@ public class J2SView extends ViewPart {
 
 	
 	private void doLinkWithEditor(ISelection selection) {
-		ITextSelection textSelection= (ITextSelection) selection;
-		int offset= textSelection.getOffset();
-		int length= textSelection.getLength();
 	}
 	
 	/*(non-Javadoc)
