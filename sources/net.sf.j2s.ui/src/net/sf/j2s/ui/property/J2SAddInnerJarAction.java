@@ -73,7 +73,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 	}
 
 	public void widgetSelected(SelectionEvent e) {
-		ViewerFilter filter= new ArchiveFilter(new ArrayList());
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		String rootPath = root.getLocation().toOSString();
 		String rootTruePath = new File(rootPath).getAbsolutePath();
@@ -178,7 +177,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 		dialog.setValidator(validator);
 		dialog.setTitle("Libraries Selection"); //$NON-NLS-1$
 		dialog.setMessage("Choose libraries (*.j2x)"); //$NON-NLS-1$
-//		dialog.addFilter(filter);
 		List rr = page.classpathModel.resources;
 		List al = new ArrayList(rr.size());
 		for (Iterator iter = rr.iterator(); iter.hasNext();) {
