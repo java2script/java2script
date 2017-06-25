@@ -73,23 +73,10 @@ public class J2SAddInnerJarAction implements SelectionListener {
 	}
 
 	public void widgetSelected(SelectionEvent e) {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		String rootPath = root.getLocation().toOSString();
-		String rootTruePath = new File(rootPath).getAbsolutePath();
-		String j2sPath = page.j2sFile.getAbsolutePath();
-		String prjName = null;
-		if (j2sPath.startsWith(rootTruePath)) {
-			j2sPath = j2sPath.substring(rootTruePath.length());
-			if (j2sPath.startsWith(File.separator)) {
-				j2sPath = j2sPath.substring(1);
-			}
-			prjName = j2sPath.substring(0, j2sPath.indexOf(File.separatorChar));
-		}
 		ILabelProvider lp= new LabelProvider() {
 		
 			public String getText(Object element) {
 				if (element instanceof J2SLibrary[]) {
-					//J2SLibrary[] libs = (J2SLibrary[]) element;
 					return "Inner JS Library";
 				} else if (element instanceof J2SLibrary) {
 					J2SLibrary lib = (J2SLibrary) element;
