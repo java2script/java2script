@@ -85,7 +85,6 @@ public class J2SAddInnerJarAction implements SelectionListener {
 			}
 			prjName = j2sPath.substring(0, j2sPath.indexOf(File.separatorChar));
 		}
-		final IProject project = (prjName != null) ? root.getProject(prjName) : null;
 		ILabelProvider lp= new LabelProvider() {
 		
 			public String getText(Object element) {
