@@ -120,7 +120,6 @@ public class J2SAddProjectAction implements SelectionListener {
 		List projects = getPossibleAdditions();
 		ProjectSelectionDialog dialog= new ProjectSelectionDialog(page.getShell(),projects);
 		dialog.setTitle(ActionMessages.AddProjectAction_Project_Selection_2); 
-		MultiStatus status = new MultiStatus(JDIDebugUIPlugin.getUniqueIdentifier(), IJavaDebugUIConstants.INTERNAL_ERROR, "One or more exceptions occurred while adding projects.", null);  //$NON-NLS-1$
 				
 		if (dialog.open() == Window.OK) {			
 			Object[] expandedElements = page.viewer.getExpandedElements();
