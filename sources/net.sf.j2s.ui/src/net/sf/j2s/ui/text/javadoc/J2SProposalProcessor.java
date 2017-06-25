@@ -159,8 +159,6 @@ public final class J2SProposalProcessor implements IContentAssistProcessor {
 
 	}
 
-	private final HippieCompletionEngine fEngine= new HippieCompletionEngine();
-
 	/**
 	 * Creates a new hippie completion proposal computer.
 	 */
