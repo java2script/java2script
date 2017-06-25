@@ -77,12 +77,6 @@ public class J2SApplicationRunnable implements Runnable {
 			J2SConsoleView j2sConsole = (J2SConsoleView) console;
 			IWorkbenchPage page = j2sConsole.getViewSite().getWorkbenchWindow()
 					.getActivePage();
-			WorkbenchPage wp = (WorkbenchPage) page;
-			IViewReference ref = wp
-					.findViewReference("net.sf.j2s.ui.console.J2SConsoleView");
-//			if (isViewFast && !wp.isFastView(ref)) {
-//				wp.addFastView(ref);
-//			}
 			page.activate(j2sConsole);
 			j2sConsole.setFocus();
 			if (isViewMaximize) {
