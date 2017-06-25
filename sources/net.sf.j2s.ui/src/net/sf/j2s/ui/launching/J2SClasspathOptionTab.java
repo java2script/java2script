@@ -63,7 +63,6 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		Font font = parent.getFont();
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		setControl(comp);
