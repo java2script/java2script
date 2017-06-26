@@ -2484,6 +2484,42 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(MethodInvocation node) {
 		ITypeBinding nodeTypeBinding = null;
 		Expression expression = node.getExpression();
+		
+		buffer.append("\n\n//SwingJS BH methodInvocation:" + node.resolveMethodBinding().getKey() + "\n\n");
+		
+		ITypeBinding[] paramTypes = node.resolveMethodBinding().getParameterTypes();
+		StringBuffer sbParams = new StringBuffer();
+		// TODO don't want to do this with java, javax, or sun
+		for (int i = 0; i < paramTypes.length; i++) {
+			String name = paramTypes[i].getQualifiedName();
+			String arrays = null;
+			int pt = name.indexOf("["); 
+			if (pt >= 0) {
+				arrays = name.substring(pt);
+				name = name.substring(0,  pt);
+			}
+			switch (name) {
+			case "boolean":
+				name = "B";
+				break;
+			case "int":
+				name = "I";
+				break;
+			case "float":
+				name = "F";
+				break;
+			case "LJava/lang/String":
+				name = "S";
+				break;
+			default:
+				name = name.replace('/','_');
+				break;
+			}
+			sbParams.append("$").append(name);
+			if (arrays != null)
+				sbParams.append(arrays.replaceAll("\\[\\]", "A"));
+		}
+
 		if (expression != null) {
 			/*
 			 * Here?
@@ -2519,6 +2555,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (!isSpecialMethod) {
 			node.getName().accept(this);
 		}
+		buffer.append(sbParams);
 		buffer.append(" (");
 		IMethodBinding methodDeclaration = node.resolveMethodBinding();
 		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
