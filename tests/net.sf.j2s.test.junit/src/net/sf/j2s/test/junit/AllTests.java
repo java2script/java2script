@@ -37,7 +37,6 @@ public class AllTests extends TestCase {
 		suite.addTestSuite(ArraysTest.class);
 		suite.addTestSuite(DoubleTest.class);
 		suite.addTestSuite(FloatTest.class);
-		suite.addTestSuite(HelloTest.class);
 		suite.addTestSuite(LongTest.class);
 		suite.addTestSuite(MathTest.class);
 		suite.addTestSuite(NumberTest.class);
