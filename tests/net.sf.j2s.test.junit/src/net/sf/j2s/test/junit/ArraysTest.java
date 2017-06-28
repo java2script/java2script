@@ -84,14 +84,17 @@ public class ArraysTest extends TestCase {
 	}
 	public void testArraysBinarySearchString2() {
 		String[] bs = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};
-		Arrays.sort(bs, new Comparator<String>() {
+		Comparator<String> comp = new Comparator<String>() {
 			public int compare(String o1, String o2) {
 				return o1.charAt(1) - o2.charAt(1);
 			}
-		});
-//		int idx = Arrays.binarySearch(bs, "SWT");
-//		assertEquals(1, idx);
+		};
+		Arrays.sort(bs, comp);
+		
+		int idx = Arrays.binarySearch(bs, "SWT", comp);
+		assertEquals(1, idx);
 	}
+
 	public void testArraysEqualsString2() {
 		String[] bs1 = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};
 		String[] bs2 = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};
