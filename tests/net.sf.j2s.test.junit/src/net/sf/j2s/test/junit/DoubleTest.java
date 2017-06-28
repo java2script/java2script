@@ -583,7 +583,7 @@ public class DoubleTest extends junit.framework.TestCase {
 		doTestCompareRawBits("-1.2341234124312332E107", 0xd62ae7a25fe706ecL,
 				"-1.2341234124312331E107");
 
-		doTestCompareRawBits("1e23", 0x44b52d02c7e14af6L, "1.0e23");
+		doTestCompareRawBits("1e23", 0x44b52d02c7e14af6L, "9.999999999999999E22");
 
 		/*
 		 * These particular tests verify that the extreme boundary conditions
