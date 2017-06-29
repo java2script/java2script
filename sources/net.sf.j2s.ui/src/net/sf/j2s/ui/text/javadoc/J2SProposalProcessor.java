@@ -159,8 +159,6 @@ public final class J2SProposalProcessor implements IContentAssistProcessor {
 
 	}
 
-	private final HippieCompletionEngine fEngine= new HippieCompletionEngine();
-
 	/**
 	 * Creates a new hippie completion proposal computer.
 	 */
@@ -239,25 +237,6 @@ public final class J2SProposalProcessor implements IContentAssistProcessor {
 	}
 
 	/**
-	 * Return the list of suggestions from the current document. First the
-	 * document is searched backwards from the caret position and then forwards.
-	 * 
-	 * @param offset 
-	 * @param viewer 
-	 * @param prefix the completion prefix
-	 * @return all possible completions that were found in the current document
-	 * @throws BadLocationException if accessing the document fails
-	 */
-	private ArrayList createSuggestionsFromOpenDocument(ITextViewer viewer, int offset, String prefix) throws BadLocationException {
-		IDocument document= viewer.getDocument();
-		ArrayList completions= new ArrayList();
-		completions.addAll(fEngine.getCompletionsBackwards(document, prefix, offset));
-		completions.addAll(fEngine.getCompletionsForward(document, prefix, offset - prefix.length(), true));
-
-		return completions;
-	}
-
-	/**
 	 * Create the array of suggestions. It scans all open text editors and
 	 * prefers suggestions from the currently open editor. It also adds the
 	 * empty suggestion at the end.
@@ -289,6 +268,7 @@ public final class J2SProposalProcessor implements IContentAssistProcessor {
 		}
 		return list;
 		
+		// FIXME: commented-out code. To be removed after St. Olaf merge.
 		/*
 		ArrayList suggestions= createSuggestionsFromOpenDocument(viewer, offset, prefix);
 		IDocument currentDocument= viewer.getDocument();

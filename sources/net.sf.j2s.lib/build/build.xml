@@ -6,13 +6,14 @@
                    
      josson smith
      ====================================================================== -->
-<project name="j2s.core.build" default="j2s.pack.lib">
+<project name="j2s.core.build" default="j2s.pack.lib" 
+	 xmlns:if="ant:if"
+	 xmlns:unless="ant:unless">
     <description>
             Building j2s-core-*.z.js
     </description>
 	
-	<!--property name="workspace.base" value="${basedir}/../.."/-->
-	<property name="workspace.base" value="/workspace/java2script/sources/net.sf.j2s.lib/build/../.."/>
+	<property name="workspace.base" value="${basedir}/../.."/>
 	
 	<property name="j2s.core.project" value="${workspace.base}/net.sf.j2s.java.core"/>
 	<property name="j2s.ajax.project" value="${workspace.base}/net.sf.j2s.ajax"/>
@@ -37,6 +38,8 @@
 	
 	<property name="j2s.core.src" value="${j2s.core.project}/src"/>
 
+	<property name="j2s.lib.include.junit" value="false"/>
+	
 	<!-- - - - - - - - - - - - - - - - - - 
           target: j2s.pack.core                      
          - - - - - - - - - - - - - - - - - -->
@@ -738,13 +741,13 @@
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
-    		<!--
-    		<fileset dir="${j2s.junit.bin}">
+    		<fileset dir="${j2s.junit.bin}" if:true="${j2s.lib.include.junit}" >
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>
     			<exclude name="**/*.swp"/>
     			<exclude name="**/*.swo"/>
     		</fileset>
+    		<!--
     		<fileset dir="${j2s.jface.project}/bin">
     			<exclude name="**/*.clazz"/>
     			<exclude name="**/*.class"/>

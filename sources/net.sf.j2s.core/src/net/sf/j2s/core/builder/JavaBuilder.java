@@ -252,6 +252,7 @@ private void buildAll() {
 	if (DEBUG && this.lastState != null)
 		System.out.println("JavaBuilder: Clearing last state : " + this.lastState); //$NON-NLS-1$
 	clearLastState();
+	// j2sChange: Instead of BatchImageBuilder use Java2ScriptBatchImageBuilder
 	BatchImageBuilder imageBuilder = new Java2ScriptBatchImageBuilder(this, true);
 	imageBuilder.build();
 	recordNewState(imageBuilder.newState);
@@ -263,6 +264,7 @@ private void buildDeltas(SimpleLookupTable deltas) {
 	if (DEBUG && this.lastState != null)
 		System.out.println("JavaBuilder: Clearing last state : " + this.lastState); //$NON-NLS-1$
 	clearLastState(); // clear the previously built state so if the build fails, a full build will occur next time
+	// j2sChange: Instead of IncrementalImageBuilder use Java2ScriptIncrementalImageBuilder.
 	IncrementalImageBuilder imageBuilder = new Java2ScriptIncrementalImageBuilder(this);
 	if (imageBuilder.build(deltas)) {
 		recordNewState(imageBuilder.newState);
@@ -419,7 +421,18 @@ private SimpleLookupTable findDeltas() {
 }
 
 public State getLastState(IProject project) {
+	// j2sChange: We need to convert the "Eclipse" State to the "Java2Script" State. 
 	org.eclipse.jdt.internal.core.builder.State lastBuiltState = (org.eclipse.jdt.internal.core.builder.State) JavaModelManager.getJavaModelManager().getLastBuiltState(project, this.notifier.monitor);
+	return toJava2ScriptState(project, lastBuiltState);
+}
+
+// j2sChange: convert an "Eclipse" State to a "Java2Script" State. 
+private State toJava2ScriptState(IProject project, org.eclipse.jdt.internal.core.builder.State lastBuiltState) {
+	// We use 'instance to bytes' serialization and 'bytes to instance' deserialization 
+	// to do the conversions.
+	//
+	// (Note: casting is not an option here, as both State classes are independent.). 
+	
 	if (lastBuiltState == null) {
 		return null;
 	}
@@ -785,6 +798,20 @@ private void recordNewState(State state) {
 		if (prereqProject != null && prereqProject != this.currentProject)
 			state.recordStructuralDependency(prereqProject, getLastState(prereqProject));
 	}
+	if (DEBUG)
+		System.out.println("JavaBuilder: Recording new state : " + state); //$NON-NLS-1$
+	// state.dump();
+
+	// j2sChange: We need to convert the "Java2Script" State to the "Eclipse" State. 
+	JavaModelManager.getJavaModelManager().setLastBuiltState(this.currentProject, toEclipseState(state));
+}
+
+// j2sChange: convert a "Java2Script" State to an "Eclipse" State. 
+private org.eclipse.jdt.internal.core.builder.State toEclipseState(State state) {
+	// We use 'instance to bytes' serialization and 'bytes to instance' deserialization 
+	// to do the conversions.
+	//
+	// (Note: casting is not an option here, as both State classes are independent.). 
 	
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	DataOutputStream out = new DataOutputStream(baos);
@@ -802,11 +829,7 @@ private void recordNewState(State state) {
 	} catch (IOException e) {
 		e.printStackTrace();
 	}
-
-	if (DEBUG)
-		System.out.println("JavaBuilder: Recording new state : " + state); //$NON-NLS-1$
-	// state.dump();
-	JavaModelManager.getJavaModelManager().setLastBuiltState(this.currentProject, newState);
+	return newState;
 }
 
 /**

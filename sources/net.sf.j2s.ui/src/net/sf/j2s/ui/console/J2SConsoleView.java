@@ -181,19 +181,6 @@ public class J2SConsoleView extends ViewPart {
 		});
 	}
 
-	private void hookContextMenu() {
-		MenuManager menuMgr = new MenuManager("#PopupMenu");
-		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				J2SConsoleView.this.fillContextMenu(manager);
-			}
-		});
-		Menu menu = menuMgr.createContextMenu(browser);
-		browser.setMenu(menu);
-		//getSite().registerContextMenu(menuMgr, viewer);
-	}
-
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
@@ -204,16 +191,10 @@ public class J2SConsoleView extends ViewPart {
 		manager.add(actionReload);
 		manager.add(new Separator());
 		manager.add(showAddressBarAction);
+// FIXME: commented-out code. To be removed after St. Olaf merge.
 //		manager.add(actionStop);
 	}
 
-	private void fillContextMenu(IMenuManager manager) {
-		manager.add(actionReload);
-//		manager.add(actionStop);
-		// Other plug-ins can contribute there actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-	}
-	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(actionBack);
 		manager.add(actionForward);

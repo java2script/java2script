@@ -9,8 +9,9 @@ public class FileUtil {
 
 	public static String readSource(File f) {
 		StringBuffer sb = new StringBuffer();
+		FileReader reader = null;
 		try {
-			FileReader reader = new FileReader(f);
+			reader = new FileReader(f);
 			char[] buf = new char[1024];
 			int read = reader.read(buf);
 			while (read != -1) {
@@ -21,8 +22,27 @@ public class FileUtil {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			close(reader);
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Close the given FileReader.
+	 * 
+	 * <p>In case of an error the exception and its backtrace is written to the standard error stream. 
+	 * 
+	 * @param fileReader null or the FileReader to close 
+	 */
+	public static void close(FileReader fileReader) {
+		if (fileReader != null) {
+			try {
+				fileReader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }
 

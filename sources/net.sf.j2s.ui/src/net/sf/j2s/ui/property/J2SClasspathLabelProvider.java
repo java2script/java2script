@@ -43,8 +43,6 @@ public class J2SClasspathLabelProvider extends LabelProvider {
 		} else if (element instanceof CompositeResources) {
             return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
 		} else if (element instanceof J2SCategory) {
-			J2SCategory ctg = (J2SCategory) element;
-			//if (ctg)
             return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_EMPTY_LOGICAL_PACKAGE);
 		}
 		return null;

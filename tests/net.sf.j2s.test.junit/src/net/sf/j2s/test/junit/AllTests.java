@@ -34,6 +34,14 @@ public class AllTests extends TestCase {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(StringTest.class);
 		suite.addTestSuite(IntegerTest.class);
+		suite.addTestSuite(ArraysTest.class);
+		suite.addTestSuite(DoubleTest.class);
+		suite.addTestSuite(FloatTest.class);
+		suite.addTestSuite(LongTest.class);
+		suite.addTestSuite(MathTest.class);
+		suite.addTestSuite(NumberTest.class);
+		suite.addTestSuite(ObjectTest.class);
+		suite.addTestSuite(StringBufferTest.class);
 		//$JUnit-END$
 		return suite;
 	}

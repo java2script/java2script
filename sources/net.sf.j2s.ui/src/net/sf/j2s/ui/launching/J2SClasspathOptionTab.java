@@ -63,7 +63,6 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		Font font = parent.getFont();
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		setControl(comp);
@@ -195,12 +194,6 @@ public class J2SClasspathOptionTab extends AbstractLaunchConfigurationTab {
 			IProject project = javaProject.getProject();
 			String prjFolder = project.getLocation().toOSString();
 			File workingDir = new File(prjFolder);
-			boolean useDefault = true;
-			try {
-				useDefault = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, true);
-			} catch (CoreException e) {
-				//JDIDebugUIPlugin.log(e);
-			}
 			String path = javaProject.getOutputLocation().toString();
 			int idx = path.indexOf('/', 2);
 			String relativePath = null;
