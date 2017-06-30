@@ -27,6 +27,19 @@ public class SubclassTest extends TestCase {
 		new C1();
 		assertEquals("C()\nC1.foo()\nC.bar()\nC1()\n", Output.text());
 	}
+	
+	/**
+	 * A call in a superclass constructor to a private method ("baz") does 
+	 * not run a (public) subclass method with the same signature but the
+	 * method in the superclass.
+	 *  
+	 */
+	public void testSuperClassConstructorCallsPrivatePseudoOverriddenMethod() {
+		Output.clear();
+
+		new C1(true);
+		assertEquals("C(true)\nC.baz()\nC1(true)\nC1.baz()\n", Output.text());
+	}
 }
 
 

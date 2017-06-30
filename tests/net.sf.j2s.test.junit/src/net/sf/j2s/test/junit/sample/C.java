@@ -43,6 +43,7 @@ public class C {
 
 	public C(boolean b) {
 		Output.add("C("+b+")\n");
+		baz();
 	}
 
 	public void foo() {
@@ -51,5 +52,9 @@ public class C {
 
 	public void bar() {
 		Output.add("C.bar()\n");
+	}
+	
+	private void baz() {
+		Output.add("C.baz()\n");
 	}
 }

@@ -19,8 +19,18 @@ public class C1 extends C {
 		Output.add("C1()\n");
 	}
 
+	public C1(boolean b) {
+		super(b);
+		Output.add("C1("+b+")\n");
+		baz();
+	}
+
 	public void foo() {
 		Output.add("C1.foo()\n");
+	}
+
+	public void baz() {
+		Output.add("C1.baz()\n");
 	}
 
 }

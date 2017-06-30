@@ -82,7 +82,7 @@ public class OverloadTest extends TestCase {
 
 		new C(true);
 
-		assertEquals("C(true)\n", Output.text());
+		assertEquals("C(true)\nC.baz()\n", Output.text());
 	}
 	
 	

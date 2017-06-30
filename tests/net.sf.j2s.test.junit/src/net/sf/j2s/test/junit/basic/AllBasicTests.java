@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
 public class AllBasicTests extends TestCase {
 	
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Kernel");
+		TestSuite suite = new TestSuite("All Basic Tests");
 
 		suite.addTestSuite(FieldInitTest.class);
 		suite.addTestSuite(OverloadTest.class);
