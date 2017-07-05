@@ -2487,60 +2487,70 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		return isOnlyOneCall;
 	}
+	
+	private String getJ2SParamQualifier(IMethodBinding binding) {
+		StringBuffer sbParams = new StringBuffer();
+
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!className.startsWith("java.") && !className.startsWith("javax.") && !className.startsWith("sun.")) {
+			ITypeBinding[] paramTypes = binding.getParameterTypes();
+			for (int i = 0; i < paramTypes.length; i++) {
+				String name = paramTypes[i].getQualifiedName();
+				String arrays = null;
+				int pt = name.indexOf("[");
+				if (pt >= 0) {
+					arrays = name.substring(pt);
+					name = name.substring(0, pt);
+				}
+				switch (name) {
+				case "boolean":
+					name = "B";
+					break;
+				case "int":
+					name = "I";
+					break;
+				case "float":
+					name = "F";
+					break;
+				case "LJava/lang/String":
+					name = "S";
+					break;
+				default:
+					name = name.replace('/', '_');
+					break;
+				}
+				sbParams.append("$").append(name);
+				if (arrays != null)
+					sbParams.append(arrays.replaceAll("\\[\\]", "A"));
+			}
+		}
+		return sbParams.toString();
+
+	}
 
 	public boolean visit(MethodInvocation node) {
-		ITypeBinding nodeTypeBinding = null;
+		//ITypeBinding nodeTypeBinding = null;
 		Expression expression = node.getExpression();
-		
-		buffer.append("\n\n//SwingJS BH methodInvocation:" + node.resolveMethodBinding().getKey() + "\n\n");
-		
-		ITypeBinding[] paramTypes = node.resolveMethodBinding().getParameterTypes();
-		StringBuffer sbParams = new StringBuffer();
-		// TODO don't want to do this with java, javax, or sun
-		for (int i = 0; i < paramTypes.length; i++) {
-			String name = paramTypes[i].getQualifiedName();
-			String arrays = null;
-			int pt = name.indexOf("["); 
-			if (pt >= 0) {
-				arrays = name.substring(pt);
-				name = name.substring(0,  pt);
-			}
-			switch (name) {
-			case "boolean":
-				name = "B";
-				break;
-			case "int":
-				name = "I";
-				break;
-			case "float":
-				name = "F";
-				break;
-			case "LJava/lang/String":
-				name = "S";
-				break;
-			default:
-				name = name.replace('/','_');
-				break;
-			}
-			sbParams.append("$").append(name);
-			if (arrays != null)
-				sbParams.append(arrays.replaceAll("\\[\\]", "A"));
-		}
 
+		buffer.append("\n\n//SwingJS BH methodInvocation:"
+				+ node.resolveMethodBinding().getDeclaringClass().getQualifiedName() + "\n\n");
+
+		String sbParams = getJ2SParamQualifier(node.resolveMethodBinding());
+		
 		if (expression != null) {
 			/*
 			 * Here?
 			 */
 			expression.accept(this);
 			buffer.append(".");
-			nodeTypeBinding = node.getExpression().resolveTypeBinding();
+			//nodeTypeBinding = node.getExpression().resolveTypeBinding();
 		}
-		
+
 		String methodName = node.getName().getIdentifier();
 		List args = node.arguments();
 		int size = args.size();
 		boolean isSpecialMethod = false;
-		if (isMethodRegistered(methodName) 
+		if (isMethodRegistered(methodName)
 				&& (size == 0 || methodName.equals("split") || methodName.equals("replace"))) {
 			IBinding binding = node.getName().resolveBinding();
 			if (binding != null && binding instanceof IMethodBinding) {
@@ -2561,8 +2571,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (!isSpecialMethod) {
 			node.getName().accept(this);
+			buffer.append(sbParams);
 		}
-		buffer.append(sbParams);
 		buffer.append(" (");
 		IMethodBinding methodDeclaration = node.resolveMethodBinding();
 		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
@@ -3033,7 +3043,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		IMethodBinding methodDeclaration = null;
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
+			//String sbParams = getJ2SParamQualifier(methodDeclaration);
+			//buffer.append("\\Testing sbparams in methoddeclaration:  " + sbParams + "\n\n");
 		}
+///		6/26/17
 		visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		buffer.append(");\r\n");
 		return false;
