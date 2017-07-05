@@ -202,6 +202,7 @@ public class FloatTest extends junit.framework.TestCase {
 	/**
 	 * @tests java.lang.Float#equals(java.lang.Object)
 	 */
+	@SuppressWarnings("all") // "Comparing identical expressions" 0f == -0f
 	public void test_equalsLjava_lang_Object() {
 		// Test for method boolean java.lang.Float.equals(java.lang.Object)
 
@@ -552,6 +553,7 @@ public class FloatTest extends junit.framework.TestCase {
 	/**
 	 * @tests java.lang.Float#valueOf(java.lang.String)
 	 */
+	@SuppressWarnings("all") // "Comparing identical expressions" 0.0f == -0.0f
 	public void test_valueOfLjava_lang_String() {
 		// Test for method java.lang.Float
 		// java.lang.Float.valueOf(java.lang.String)

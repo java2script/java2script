@@ -25,9 +25,7 @@ public class ArraysTest extends TestCase {
 	public void testArraysSort() {
 		byte[] bs = new byte[] {13, 4, 56};
 		Arrays.sort(bs);
-		for (int i = 0; i < bs.length; i++) {
-			System.out.println(bs[i]);
-		}
+
 		assertEquals(4, bs[0]);
 		assertEquals(13, bs[1]);
 		assertEquals(56, bs[2]);
@@ -47,15 +45,14 @@ public class ArraysTest extends TestCase {
 	}
 	public void testArraysAsList() {
 		List asList = Arrays.asList(11, 50, 45, 4, 13, 4, 56);
+		
 		assertEquals(7, asList.size());
 		assertEquals(4, asList.get(3));
 	}
 	public void testArraysSortString() {
 		String[] bs = new String[] {"Hello", "World", "JavaScript"};
 		Arrays.sort(bs);
-		for (int i = 0; i < bs.length; i++) {
-			System.out.println(bs[i]);
-		}
+
 		assertEquals("Hello", bs[0]);
 		assertEquals("JavaScript", bs[1]);
 		assertEquals("World", bs[2]);
@@ -80,27 +77,24 @@ public class ArraysTest extends TestCase {
 				return o1.charAt(1) - o2.charAt(1);
 			}
 		});
-		for (int i = 0; i < bs.length; i++) {
-			System.out.println(bs[i]);
-		}
+
 		assertEquals("JavaScript", bs[0]);
 		assertEquals("Hello", bs[1]);
 		assertEquals("World", bs[2]);
 	}
 	public void testArraysBinarySearchString2() {
 		String[] bs = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};
-		Arrays.sort(bs, new Comparator<String>() {
+		Comparator<String> comp = new Comparator<String>() {
 			public int compare(String o1, String o2) {
 				return o1.charAt(1) - o2.charAt(1);
 			}
-		});
-		System.out.println();
-		for (int i = 0; i < bs.length; i++) {
-			System.out.println(bs[i]);
-		}
-//		int idx = Arrays.binarySearch(bs, "SWT");
-//		assertEquals(1, idx);
+		};
+		Arrays.sort(bs, comp);
+		
+		int idx = Arrays.binarySearch(bs, "SWT", comp);
+		assertEquals(1, idx);
 	}
+
 	public void testArraysEqualsString2() {
 		String[] bs1 = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};
 		String[] bs2 = new String[] {"Hello", "World", "JavaScript", "AJAX", "SWT", "JavaScript"};

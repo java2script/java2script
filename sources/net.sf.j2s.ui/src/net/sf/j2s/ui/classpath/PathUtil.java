@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import net.sf.j2s.core.compiler.FileUtil;
+
 public class PathUtil {
 	public static final String J2S_RESOURCES_LIST = "j2s.resources.list";
 	public static final String J2S_ABANDOMED_RESOURCES_LIST = "j2s.abandoned.resources.list";
@@ -147,8 +149,9 @@ public class PathUtil {
 	public static Properties loadJZ(File file) {
 		Properties props = new Properties();
 		if (file.exists()) {
+			FileReader reader = null;
 			try {
-				FileReader reader = new FileReader(file);
+				reader = new FileReader(file);
 				char[] buf = new char[1024];
 				StringBuffer buffer = new StringBuffer();
 				int read = 0;
@@ -184,6 +187,8 @@ public class PathUtil {
 				e1.printStackTrace();
 			} catch (IOException e1) {
 				e1.printStackTrace();
+			} finally {
+				FileUtil.close(reader);
 			}
 		}
 		return props;

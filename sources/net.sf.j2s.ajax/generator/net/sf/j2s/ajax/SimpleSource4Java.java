@@ -685,7 +685,7 @@ public class SimpleSource4Java {
 			source.append("import ").append(SimpleIn.class.getName()).append(";\r\n");
 		}
 		if (inOutAnnImported) {
-			source.append("import ").append(SimpleOut.class.getName()).append(";\r\n");
+			source.append("import ").append(SimpleInOut.class.getName()).append(";\r\n");
 		}
 		if (outAnnImported) {
 			source.append("import ").append(SimpleOut.class.getName()).append(";\r\n");

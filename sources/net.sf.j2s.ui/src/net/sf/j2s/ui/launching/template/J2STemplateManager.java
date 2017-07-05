@@ -135,11 +135,5 @@ public class J2STemplateManager /*implements TemplateManager*/ {
 		}
 		return tnames;
 	}
-	
-	/** only for debug porpuses
-	 * @throws IOException */ 
-	private void resetStore() throws IOException {
-		getStore().setValue(PREFS_KEYFILE, "");		
-	}
-	
+		
 }
