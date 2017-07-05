@@ -77,7 +77,7 @@ public class JDTUtils {
 		
 		if(!isAnEclipseProject)  {
 			addJavaClassPathContainer(project);
-			IJavaProject javaProject = JavaCore.create(project);
+			JavaCore.create(project);
 		}
 		return project;			
 	}

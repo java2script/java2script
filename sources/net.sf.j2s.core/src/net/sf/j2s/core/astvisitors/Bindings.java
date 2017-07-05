@@ -50,11 +50,12 @@ public class Bindings {
 		// No instance
 	}
 	
-	private static final boolean CHECK_CORE_BINDING_IS_EQUAL_TO;
-	static {
-		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo"); //$NON-NLS-1$
-		CHECK_CORE_BINDING_IS_EQUAL_TO= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-	}
+// FIXME: commented-out code. To be removed after St. Olaf merge.
+//	private static final boolean CHECK_CORE_BINDING_IS_EQUAL_TO;
+//	static {
+//		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo"); //$NON-NLS-1$
+//		CHECK_CORE_BINDING_IS_EQUAL_TO= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+//	}
 //	private static final boolean CHECK_CORE_BINDING_GET_JAVA_ELEMENT;
 //	static {
 //		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
@@ -86,33 +87,7 @@ public class Bindings {
 				isEqualTo = bb1Name.equals(bb2.getBinaryName());
 			}
 		}
-		if (CHECK_CORE_BINDING_IS_EQUAL_TO) {
-			boolean originalEquals= originalEquals(b1, b2);
-			if (originalEquals != isEqualTo) {
-				//String message= "Unexpected difference between Bindings.equals(..) and IBinding#isEqualTo(..)"; //$NON-NLS-1$
-				String detail= "\nb1 == " + b1.getKey() + ",\nb2 == " + (b2 == null ? "null binding" : b2.getKey()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				try {
-					detail+= "\nb1.getJavaElement() == " + b1.getJavaElement() + ",\nb2.getJavaElement() == " + (b2 == null ? "null binding" : b2.getJavaElement().toString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} catch (Exception e) {
-					detail += "\nException in getJavaElement():\n" + e; //$NON-NLS-1$
-				}
-				//JavaPlugin.logRepeatedMessage(message, detail);
-			}
-		}
 		return isEqualTo;
-	}
-	
-	private static boolean originalEquals(IBinding b1, IBinding b2) {
-		Assert.isNotNull(b1);
-		if (b1 == b2)
-			return true;
-		if (b2 == null)
-			return false;		
-		String k1= b1.getKey();
-		String k2= b2.getKey();
-		if (k1 == null || k2 == null)
-			return false;
-		return k1.equals(k2);
 	}
 	
 	/**

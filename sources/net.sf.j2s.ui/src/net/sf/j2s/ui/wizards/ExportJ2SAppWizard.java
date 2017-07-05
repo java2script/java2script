@@ -23,7 +23,6 @@ import org.eclipse.ui.IWorkbench;
  */
 public class ExportJ2SAppWizard extends Wizard implements IExportWizard {
 
-    private IStructuredSelection selection;
 	/**
 	 * 
 	 */
@@ -44,7 +43,6 @@ public class ExportJ2SAppWizard extends Wizard implements IExportWizard {
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-        this.selection = selection;
 		setWindowTitle("Java2Script Export");
 	}
 

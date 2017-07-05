@@ -685,19 +685,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(")");
 		} else {
 			ITypeBinding binding = node.resolveTypeBinding();
-			String anonClassName = null;
-			if (binding.isAnonymous() || binding.isLocal()) {
-				String binaryName = binding.getBinaryName();
-				if (binaryName == null) {
-					String bindingKey = binding.getKey();
-					if (bindingKey != null) {
-						binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
-					}
-				}
-				anonClassName = assureQualifiedName(shortenQualifiedName(binaryName));
-			} else {
-				anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
-			}
+            // BEGIN MERGE 7/5/17 (Pulled from java2script/java2script Commit bc6425216b915bd9b4ad6111c8bb9f24fa666277)
+			// String anonClassName = null;
+			// if (binding.isAnonymous() || binding.isLocal()) {
+				// String binaryName = binding.getBinaryName();
+				// if (binaryName == null) {
+					// String bindingKey = binding.getKey();
+					// if (bindingKey != null) {
+						// binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+					// }
+				// }
+				// anonClassName = assureQualifiedName(shortenQualifiedName(binaryName));
+			// } else {
+				// anonClassName = assureQualifiedName(shortenQualifiedName(binding.getQualifiedName()));
+			// }
+            // END MERGE 7/5/17
 
 //			String baseClassName = assureQualifiedName(shortenQualifiedName(getFullClassName()));
 //			String shortClassName = null;

@@ -39,6 +39,9 @@ public class J2SViewImages {
 
 	public static void setImageDescriptors(IAction action, String type) {
 		if (action == null) {
+			return;
+		}
+		
 		try {
 			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("d", type)); //$NON-NLS-1$
 			if (id != null)
@@ -52,7 +55,7 @@ public class J2SViewImages {
 				action.setHoverImageDescriptor(id);
 		} catch (MalformedURLException e) {
 		}
-		}
+		
 		action.setImageDescriptor(create("e", type)); //$NON-NLS-1$
 	}
 	

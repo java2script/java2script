@@ -30,7 +30,6 @@ public class J2SApplicationRunnable implements Runnable {
 
 	public void run() {
 		boolean isToViewInConsole = true;
-		boolean isViewFast = false;
 		boolean isViewMaximize = false;
 		try {
 			IPreferenceStore store = Java2ScriptUIPlugin.getDefault().getPreferenceStore();
@@ -41,8 +40,6 @@ public class J2SApplicationRunnable implements Runnable {
 					IJ2SLauchingConfiguration.VIEW_IN_INNER_J2S_CONSOLE, preferred);
 			isViewMaximize = configuration.getAttribute(
 					IJ2SLauchingConfiguration.MAXIMIZE_J2S_CONSOLE, false);
-			isViewFast = configuration.getAttribute(
-					IJ2SLauchingConfiguration.FAST_VIEW_J2S_CONSOLE, false);
 		} catch (CoreException e1) {
 			e1.printStackTrace();
 		}
@@ -80,12 +77,6 @@ public class J2SApplicationRunnable implements Runnable {
 			J2SConsoleView j2sConsole = (J2SConsoleView) console;
 			IWorkbenchPage page = j2sConsole.getViewSite().getWorkbenchWindow()
 					.getActivePage();
-			WorkbenchPage wp = (WorkbenchPage) page;
-			IViewReference ref = wp
-					.findViewReference("net.sf.j2s.ui.console.J2SConsoleView");
-//			if (isViewFast && !wp.isFastView(ref)) {
-//				wp.addFastView(ref);
-//			}
 			page.activate(j2sConsole);
 			j2sConsole.setFocus();
 			if (isViewMaximize) {
