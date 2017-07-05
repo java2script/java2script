@@ -1,6 +1,5 @@
-#<<<<<<< HEAD
 #Java2Script Configuration
-#Fri Jul 17 23:11:27 CST 2009
+#Wed Jul 05 11:01:01 CDT 2017
 j2s.abandoned.resources.list=bin/net/sf/j2s/ajax/AjaxPlugin.js,bin/net/sf/j2s/ajax/AJAXVariableInitializer.js
 j2s.compiler.abbreviation=true
 j2s.compiler.status=enable
@@ -10,11 +9,3 @@ j2s.resources.list=../../plugins/net.sf.j2s.lib_3.1.1/j2slib/java.runtime.j2x,bi
 j2s.compiler.whitespace=false
 j2s.output.path=bin
 j2s.compiler.linebreak=\r\n
-#=======
-#Java2Script Configuration
-#Tue Jun 27 12:46:23 CEST 2017
-#j2s.resources.list=
-#j2s.abandoned.resources.list=
-#j2s.output.path=bin
-#j2s.compiler.status=enable
-#>>>>>>> master
