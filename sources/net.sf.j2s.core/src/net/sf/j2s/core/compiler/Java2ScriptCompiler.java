@@ -366,7 +366,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		//to be true
 		//js = js.replaceAll("new\\ Boolean\\ ", "Boolean\\.from");
 		js = js.replaceAll("new Boolean ", "Boolean.from");
-		js = js + "\n\\\\Created Boolean.from js" + System.currentTimeMillis() + "\n"; 
+		js = js + "\n//Created " + System.currentTimeMillis() + "\n"; 
 			
 		
 		

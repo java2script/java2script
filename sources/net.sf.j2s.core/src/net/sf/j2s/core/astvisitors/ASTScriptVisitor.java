@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -247,6 +248,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		typeVisitor.setClassName(shortClassName);
 //		buffer.append(" = function () {\r\n");
 		buffer.append("function () {\r\n");
+			
+		
 		if (!(node.getParent() instanceof EnumConstantDeclaration)) {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
@@ -398,6 +401,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
+			
+			
 			buffer.append("});\r\n");
 		}
 		
@@ -500,6 +505,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 */
 		return false;
 	}
+
+
 
 	public boolean visit(CastExpression node) {
 //		Start SwingJS modded 6/9/17
@@ -2142,12 +2149,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
+				
+				
+				
 				buffer.append("cla$$");
 				//buffer.append(fullClassName);
 				buffer.append(".");
 				//buffer.append(methods[i].getName());
 				node.getName().accept(this);
 				buffer.append(" = ");
+				
 			}
 			if (getJ2STag(node, "@j2sOverride") != null) {
 				buffer.append("Clazz.overrideMethod (");
@@ -2178,7 +2189,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		boolean isPrivate = (node.getModifiers() & Modifier.PRIVATE) != 0;
 		if (isPrivate) {
 			buffer.append("($fz = ");
-		}		
+		}	
+		
+		//Define parameter qualified function -- NY
+		buffer.append("cla$$");
+		//buffer.append(fullClassName);
+		buffer.append(".");
+		//buffer.append(methods[i].getName());
+		//node.getName().accept(this);
+		
+		
+		appendDeclMethod(node.getName() + getJ2SParamQualifier(mBinding));
+		buffer.append(" = ");
+		/////////
+		
+		
 		buffer.append("function (");
 		List parameters = node.parameters();
 		visitList(parameters, ", ");
@@ -2488,52 +2513,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return isOnlyOneCall;
 	}
 	
-	private String getJ2SParamQualifier(IMethodBinding binding) {
-		StringBuffer sbParams = new StringBuffer();
 
-		String className = binding.getDeclaringClass().getQualifiedName();
-		if (!className.startsWith("java.") && !className.startsWith("javax.") && !className.startsWith("sun.")) {
-			ITypeBinding[] paramTypes = binding.getParameterTypes();
-			for (int i = 0; i < paramTypes.length; i++) {
-				String name = paramTypes[i].getQualifiedName();
-				String arrays = null;
-				int pt = name.indexOf("[");
-				if (pt >= 0) {
-					arrays = name.substring(pt);
-					name = name.substring(0, pt);
-				}
-				switch (name) {
-				case "boolean":
-					name = "B";
-					break;
-				case "int":
-					name = "I";
-					break;
-				case "float":
-					name = "F";
-					break;
-				case "LJava/lang/String":
-					name = "S";
-					break;
-				default:
-					name = name.replace('/', '_');
-					break;
-				}
-				sbParams.append("$").append(name);
-				if (arrays != null)
-					sbParams.append(arrays.replaceAll("\\[\\]", "A"));
-			}
-		}
-		return sbParams.toString();
-
-	}
 
 	public boolean visit(MethodInvocation node) {
 		//ITypeBinding nodeTypeBinding = null;
 		Expression expression = node.getExpression();
 
-		buffer.append("\n\n//SwingJS BH methodInvocation:"
-				+ node.resolveMethodBinding().getDeclaringClass().getQualifiedName() + "\n\n");
+		//buffer.append("\n\n//SwingJS BH methodInvocation:"
+				//+ node.resolveMethodBinding().getDeclaringClass().getQualifiedName() + "\n\n");
 
 		String sbParams = getJ2SParamQualifier(node.resolveMethodBinding());
 		
@@ -3914,7 +3901,10 @@ public class CB extends CA {
 						&& !((TypeDeclaration) node.getParent()).isInterface()) 
 						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
+		} else {
+			addDecl();
 		}
+		
 		List bodyDeclarations = node.bodyDeclarations();
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -3984,5 +3974,76 @@ public class CB extends CA {
 		type.accept(this);
 		return false;
 	}
+	
+	//St.Olaf Additions -- NY
+	private String getJ2SParamQualifier(IMethodBinding binding) {
+		StringBuffer sbParams = new StringBuffer();
 
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!className.startsWith("java.") && !className.startsWith("javax.") && !className.startsWith("sun.")) {
+			ITypeBinding[] paramTypes = binding.getParameterTypes();
+			if (paramTypes.length == 0) {
+				sbParams.append("$_");
+			}
+			for (int i = 0; i < paramTypes.length; i++) {
+				String name = paramTypes[i].getQualifiedName();
+				String arrays = null;
+				int pt = name.indexOf("[");
+				if (pt >= 0) {
+					//buffer.append("================" + name + "============");
+					arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1:0));
+					name = name.substring(0, pt);
+				}
+				switch (name) {
+				case "boolean":
+					name = "B";
+					break;
+				case "int":
+					name = "I";
+					break;
+				case "float":
+					name = "F";
+					break;
+				case "java.lang.String":
+					name = "S";
+					break;
+				default:
+					name = name.replace("java.lang.", "").replace('.', '_');
+					
+					break;
+				}
+				sbParams.append("$").append(name);
+				if (arrays != null)
+					sbParams.append(arrays.replaceAll("\\[\\]", "A"));
+			}
+		}
+		return sbParams.toString();
+
+	}
+	
+	private void addDecl() {
+		buffer.append("decl.apply(this);\r\n");	
+	}
+	
+	private List<String> j2sDeclList = new ArrayList<String>();
+	
+	private void appendDeclMethod(String name) {
+		j2sDeclList.add(name);
+		buffer.append(name);
+	}
+	
+	private void declareJ2SQualifiedMethods() {
+		buffer.append("var decl = function() { \r\n");
+		for (int i=j2sDeclList.size(); --i>=0;) {
+			String name = j2sDeclList.get(i);
+			buffer.append("this.").append(name).append(" = c$.").append(name).append(";\r\n");	
+			
+		}	
+		buffer.append("}\r\n");
+	}
+	
+	public void endVisit(CompilationUnit node) {
+		declareJ2SQualifiedMethods();
+		super.endVisit(node);
+	}	
 }
