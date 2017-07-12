@@ -237,7 +237,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		Start SwingJS modded 6/9/17- Issue #1
 //		SwingJS 6/14/17-Part of the fix to make cla$$ local- no effect on J2Slib
 		//buffer.append("Clazz.pu$h ();\r\n");
-		buffer.append("Clazz.pu$h (cla$$);\r\n");
+		//buffer.append("Clazz.pu$h (cla$$);\r\n");
+		addClassVar(buffer);
 		buffer.append("cla$$ = ");
 //		End SwingJS modded 6/9/17		
 		
@@ -251,6 +252,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			
 		
 		if (!(node.getParent() instanceof EnumConstantDeclaration)) {
+			addDecl();
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
 		}
 		StringBuffer oldLaterBuffer = laterBuffer;
@@ -319,6 +321,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		scriptVisitor.thisClassName = anonymousName;
 //		node.accept(scriptVisitor);
 //		buffer.append(scriptVisitor.getBuffer());
+		
 		
 		buffer.append("Clazz.instantialize (this, arguments);\r\n");
 		
@@ -413,6 +416,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		
+		declareJ2SQualifiedMethods();
+
+		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
@@ -454,9 +460,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		Start SwingJS modded 6/9/17- rc remove
 //		SwingJS 6/14/17-Removing attempt to make cla$$ local- Issue fixed in SwingJS- Needs fix in J2Slib
 //		SwingJS 6/14/17- Back to java2script/java2script master below
-		buffer.append("var rc = cla$$;\r\n");
+		//nikesh
+		//buffer.append("var rc = cla$$;\r\n");
 //		End SwingJS modded 6/9/17
-		buffer.append("cla$$ = Clazz.p0p ();\r\n");
+		//buffer.append("cla$$ = Clazz.p0p ();\r\n");
 		
 		typeVisitor.setClassName(oldClassName);
 		
@@ -465,8 +472,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 //		Start SwingJS modded 6/9/17
 //		SwingJS 6/14/17- Back to java2script/java2script master below
-		buffer.append("return rc;\r\n");
+		//buffer.append("return rc;\r\n");
 //		End SwingJS modded 6/9/17
+		
 		
 		buffer.append("};\r\n");
 		String methods = methodBuffer.toString();
@@ -505,7 +513,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		 */
 		return false;
 	}
-
 
 
 	public boolean visit(CastExpression node) {
@@ -640,12 +647,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		Expression expression = node.getExpression();
 		if (anonDeclare == null) {
-			if (expression != null) {
-				/*
-				 * TODO: make sure the expression is not effected
-				 */
-				expression.accept(this);
-			}
+//			if (expression != null) {
+//				/*
+//				 * TODO: make sure the expression is not effected
+//				 */
+//				//buffer.append("//\n=========Before expression.accept this=========\n");
+//				expression.accept(this);
+//				//buffer.append("I am the expression: " + expression + "\n");
+//				//buffer.append("//=========After expression.accept this=========\n");
+//			}
 			ITypeBinding binding = node.resolveTypeBinding();
 			if (binding != null) {
 				if (!binding.isTopLevel()) {
@@ -656,7 +666,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						} else {
 							buffer.append(assureQualifiedName(shortenQualifiedName(binding.getQualifiedName())));
 						}
-						buffer.append(", this, ");
+						buffer.append(", " );
+						
+						//Fixing J2S bug for class instance creation expressions with primary -- NY
+						//se7/html/jls-15.html#15.9
+						if (expression == null) {
+							buffer.append(this);
+						} else {
+							expression.accept(this);
+						}
+						
+						buffer.append(", ");
 						buffer.append("null"); // No final variables for non-anonymous class
 						IMethodBinding methodDeclaration = null;
 						IMethodBinding constructorBinding = node.resolveConstructorBinding();
@@ -1270,7 +1290,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				"}, ";
 		int idx = buffer.lastIndexOf(emptyFun);
 		
-		if (idx != -1 && idx == buffer.length() - emptyFun.length()) {
+		boolean useDeclare = (idx != -1 && idx == buffer.length() - emptyFun.length());
+		
+		if (useDeclare) {
 			buffer.replace(idx, buffer.length(), "Clazz.declareType (");
 		}
 		
@@ -1366,6 +1388,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		for (int i = 0; i < methods.length; i++) {
 			methods[i].accept(this);
 		}
+		
+		declareJ2SQualifiedMethods();
 
 		List bodyDeclarations = node.bodyDeclarations();
 		
@@ -1404,6 +1428,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			buffer.append("};\r\n");
+
 		}
 		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -1504,6 +1529,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 
+		addAnonymousFunctionWrapper(false);
 		super.endVisit(node);
 	}
 
@@ -1536,9 +1562,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (!str.startsWith("cla$$")) {
 					laterBuffer.append(str);
 				} else {
-					laterBuffer.append("Clazz.pu$h ();\r\n");
+					//laterBuffer.append("Clazz.pu$h ();\r\n");
 					laterBuffer.append(str);
-					laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+					//laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 				}
 			} else {
 				/*
@@ -1565,9 +1591,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //					methodBuffer.append("$" + binding.getName());
 //				}
 //				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append("Clazz.pu$h ();\r\n");
+				//methodBuffer.append("Clazz.pu$h ();\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+				//methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 //				methodBuffer.append("};\r\n");
 //
 //				String pkgName = visitor.getPackageName();
@@ -1588,6 +1614,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			return false;
 		}
+		
+		addAnonymousFunctionWrapper(true);
+		addClassVar(buffer);
 		buffer.append("cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
@@ -3036,6 +3065,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 ///		6/26/17
 		visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		buffer.append(");\r\n");
+		addDecl();
 		return false;
 	}
 
@@ -3085,15 +3115,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SuperMethodInvocation node) {
 //		Start SwingJS modded 6/9/17- Reverted extraSuper, dollarBuilder etc.
-		buffer.append("Clazz.superCall (this, ");
-		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
-		buffer.append(", \"");
-		String name = getJ2SName(node.getName());
-		buffer.append(name);
-		buffer.append("\", [");
-		IMethodBinding methodDeclaration = node.resolveMethodBinding();
-		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
-		buffer.append("])");
+//		buffer.append("Clazz.superCall (this, ");
+//		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+//		buffer.append(", \"");
+//		String name = getJ2SName(node.getName());
+//		buffer.append(name);
+//		buffer.append("\", [");
+//		IMethodBinding methodDeclaration = node.resolveMethodBinding();
+//		visitMethodParameterList(node.arguments(), methodDeclaration, false, null, null);
+//		buffer.append("])");
+		superFix(node);
 		return false;
 	}
 
@@ -3357,6 +3388,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// All the methods are defined outside the main function body! -- March 17, 2006
 			methods[i].accept(this);
 		}
+		
+		declareJ2SQualifiedMethods();
 		
 		
 		int staticCount = -1;
@@ -3821,9 +3854,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (!str.startsWith("cla$$")) {
 					laterBuffer.append(str);
 				} else {
-					laterBuffer.append("Clazz.pu$h ();\r\n");
+					//laterBuffer.append("Clazz.pu$h ();\r\n");
 					laterBuffer.append(str);
-					laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+					//laterBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 				}
 			} else {
 				/*
@@ -3867,9 +3900,9 @@ public class CB extends CA {
 				targetClassName = targetClassName.replace('.', '$');
 				methodBuffer.append(targetClassName);
 				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append("Clazz.pu$h ();\r\n");
+				//methodBuffer.append("Clazz.pu$h ();\r\n");
 				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
+				//methodBuffer.append("cla$$ = Clazz.p0p ();\r\n");
 				methodBuffer.append("};\r\n");
 
 				String pkgName = visitor.getPackageName();
@@ -3891,18 +3924,18 @@ public class CB extends CA {
 			return false;
 		}
 		readSources(node, "@j2sPrefix", "", " ", true);
+		addClassVar(buffer);
 		buffer.append("cla$$ = ");
 		
 		buffer.append("Clazz.decorateAsClass (");
 		
 		buffer.append("function () {\r\n");
+		//addDecl();
 		if (node == rootTypeNode && (node.getModifiers() & Modifier.STATIC) == 0 
 				&& ((node.getParent() instanceof TypeDeclaration 
 						&& !((TypeDeclaration) node.getParent()).isInterface()) 
 						|| node.getParent() instanceof TypeDeclarationStatement)) {
 			buffer.append("Clazz.prepareCallback (this, arguments);\r\n");
-		} else {
-			addDecl();
 		}
 		
 		List bodyDeclarations = node.bodyDeclarations();
@@ -4022,7 +4055,7 @@ public class CB extends CA {
 	}
 	
 	private void addDecl() {
-		buffer.append("decl.apply(this);\r\n");	
+		buffer.append("decl && decl.apply(this);\r\n");	
 	}
 	
 	private List<String> j2sDeclList = new ArrayList<String>();
@@ -4033,17 +4066,36 @@ public class CB extends CA {
 	}
 	
 	private void declareJ2SQualifiedMethods() {
-		buffer.append("var decl = function() { \r\n");
+		if (j2sDeclList.size() == 0) {
+			return;
+		}
+		
+		buffer.append("decl = function() { \r\n");
 		for (int i=j2sDeclList.size(); --i>=0;) {
 			String name = j2sDeclList.get(i);
-			buffer.append("this.").append(name).append(" = c$.").append(name).append(";\r\n");	
+			buffer.append("cla$$.$super$").append(name).append(" = this.").append(name).append(";\r\n"); 
+			buffer.append("this.").append(name).append(" = cla$$.").append(name).append(";\r\n");	
 			
 		}	
 		buffer.append("}\r\n");
 	}
 	
 	public void endVisit(CompilationUnit node) {
-		declareJ2SQualifiedMethods();
-		super.endVisit(node);
+		//declareJ2SQualifiedMethods();
+		//super.endVisit(node);
 	}	
+	
+	private void addClassVar(StringBuffer buffer) {
+		buffer.append("var decl, ");	
+	}
+	
+	private void addAnonymousFunctionWrapper(boolean isOpen) {
+		buffer.append(isOpen? "(function(){" : "})();\r\n");
+	}
+	
+	private void superFix(SuperMethodInvocation node) {
+		IMethodBinding mBinding = node.resolveMethodBinding();
+		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(mBinding);
+		buffer.append("C$.$super$").append(name).append(".apply(this, arguments)");
+	}
 }

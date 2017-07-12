@@ -353,7 +353,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		/**
 		 * FIXME: The following variable name replacement should be done in *Visitor
 		 */
-		js = js.replaceAll("cla\\$\\$", "c\\$")
+		//Changed c$ to C$ -- NY
+		js = js.replaceAll("cla\\$\\$", "C\\$")
 				.replaceAll("innerThis", "i\\$")
 				.replaceAll("finalVars", "v\\$")
 				.replaceAll("\\.callbacks", "\\.b\\$")
