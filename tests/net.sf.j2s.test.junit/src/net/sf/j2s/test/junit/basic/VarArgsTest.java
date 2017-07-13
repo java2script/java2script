@@ -30,6 +30,14 @@ public class VarArgsTest extends TestCase {
 	}
 
 	/**
+	 * Call a varArgs method with exactly one argument.
+	 */
+	public void testVarArgsExactlyOneArg() {
+		String s = new CVarArgs().fVarArgsInt(4);
+		assertEquals("ints: 4 ", s);
+	}
+	
+	/**
 	 * Call a varArgs method with some arguments.
 	 */
 	public void testVarArgsNotEmpty() {
@@ -55,7 +63,15 @@ public class VarArgsTest extends TestCase {
 	}
 
 	/**
-	 * Call a varArgs method with a mandatory arguments and no optional arguments.
+	 * Call a varArgs method with a mandatory arguments and exactly one optional arguments.
+	 */
+	public void testStringPlusVarArgsExactlyOneArg() {
+		String s = new CVarArgs().fStringVarArgsInt("demo ", 4);
+		assertEquals("demo 4 ", s);
+	}
+	
+	/**
+	 * Call a varArgs method with a mandatory arguments and some optional arguments.
 	 */
 	public void testStringPlusVarArgsNotEmpty() {
 		String s = new CVarArgs().fStringVarArgsInt("demo ", 4, 7);
@@ -76,6 +92,14 @@ public class VarArgsTest extends TestCase {
 	public void testIntArrVarArgsNotEmpty() {
 		String s = new CVarArgs().fIntArr(new int[]{3,5,7}, new int[]{2,4});
 		assertEquals("intss [3 5 7 ] [2 4 ] ", s);
+	}
+
+	/**
+	 * Call a varArgs method of array type (here int[]) with exactly one argument.
+	 */
+	public void testIntArrVarArgsExactlyOneArg() {
+		String s = new CVarArgs().fIntArr(new int[]{2,4});
+		assertEquals("intss [2 4 ] ", s);
 	}
 
 	/**
