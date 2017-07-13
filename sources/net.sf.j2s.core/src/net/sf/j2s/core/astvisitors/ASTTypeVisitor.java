@@ -129,7 +129,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
 						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
 			if (!name.startsWith("java.lang.ref")
-							&& !name.startsWith("java.lang.annotaion")
+							&& !name.startsWith("java.lang.annotation")
 							&& !name.startsWith("java.lang.instrument")
 							&& !name.startsWith("java.lang.management")) {
 				name = name.substring(10);
@@ -244,7 +244,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		if (name == null || name.length() == 0) {
 			return name;
 		}
-		String[] keywords = ASTFieldVisitor.keywods;
+		String[] keywords = ASTFieldVisitor.keywords;
 		String[] packages = null;
 		boolean existedKeyword = false;
 		for (int i = 0; i < keywords.length; i++) {

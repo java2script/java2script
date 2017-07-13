@@ -31,11 +31,11 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 
 	/*
 	 * IE passes the following: 
-	 * pubic,protected,private,static,package,
-	 * implements,prototype,fasle,throws,label
+	 * public,protected,private,static,package,
+	 * implements,prototype,false,throws,label
 	 * 
 	 * Firefox passes the following:
-	 * pubic,prototype,fasle,label
+	 * public,prototype,false,label
 	 * 
 	 * The following does not contains all the reserved keywords:
 	 * http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Reserved_Words
@@ -57,7 +57,7 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	 * volatile,		while,			with,
 	 *  
 	 */
-	public static String[] keywods = new String[] {
+	public static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",
@@ -71,8 +71,8 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 
 	
 	boolean checkKeyworkViolation(String name) {
-		for (int i = 0; i < keywods.length; i++) {
-			if (keywods[i].equals(name)) {
+		for (int i = 0; i < keywords.length; i++) {
+			if (keywords[i].equals(name)) {
 				return true;
 			}
 		}

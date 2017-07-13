@@ -2170,11 +2170,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		
 		if (node.isConstructor()) {
-			if (getJ2STag(node, "@j2sOverride") != null) {
-				buffer.append("Clazz.overrideConstructor (");
-			} else {
+//			if (getJ2STag(node, "@j2sOverride") != null) {
+//				buffer.append("Clazz.overrideConstructor (");
+//			} else {
 				buffer.append("Clazz.makeConstructor (");
-			}
+//			}
 		} else {
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				/* replace full class name with short variable name */
@@ -2189,16 +2189,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(" = ");
 				
 			}
-			if (getJ2STag(node, "@j2sOverride") != null) {
-				buffer.append("Clazz.overrideMethod (");
-			} else {
-				boolean isOK2AutoOverriding = canAutoOverride(node);
-				if (isOK2AutoOverriding) {
-					buffer.append("Clazz.overrideMethod (");
-				} else {
+//			if (getJ2STag(node, "@j2sOverride") != null) {
+//				buffer.append("Clazz.overrideMethod (");
+//			} else {
+//				boolean isOK2AutoOverriding = canAutoOverride(node);
+//				if (isOK2AutoOverriding) {
+//					buffer.append("Clazz.overrideMethod (");
+//				} else {
 					buffer.append("Clazz.defineMethod (");
-				}
-			}
+//				}
+//			}
 		}
 		/* replace full class name with short variable name */
 		buffer.append("cla$$");
@@ -2228,7 +2228,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		//node.getName().accept(this);
 		
 		
-		appendDeclMethod(node.getName() + getJ2SParamQualifier(mBinding));
+		appendDeclMethod("construct_" + getJ2SParamQualifier(mBinding));
 		buffer.append(" = ");
 		/////////
 		
@@ -2262,14 +2262,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			if (!isSuperCalled && existedSuperClass) {
 				buffer.append("{\r\n");
-				buffer.append("Clazz.superConstructor (this, ");
-				buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
-				boolean constructorVarargs = isConstructorVarargs(binding, true);
-				if (constructorVarargs) {
-					buffer.append(", [[]]);\r\n");
-				} else {
-					buffer.append(", []);\r\n");
-				}
+				addSuperConstructor(null, null);
 				boolean read = checkJ2STags(node, false);
 				if (!read) {
 					blockLevel++;
@@ -3054,18 +3047,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		/*
 		 * TODO: expression before the "super" should be considered.
 		 */
-		buffer.append("Clazz.superConstructor (this, ");
-		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 		IMethodBinding methodDeclaration = null;
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
-			//String sbParams = getJ2SParamQualifier(methodDeclaration);
-			//buffer.append("\\Testing sbparams in methoddeclaration:  " + sbParams + "\n\n");
 		}
-///		6/26/17
-		visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
-		buffer.append(");\r\n");
-		addDecl();
+		addSuperConstructor(node, methodDeclaration);
 		return false;
 	}
 
@@ -4056,6 +4042,7 @@ public class CB extends CA {
 	
 	private void addDecl() {
 		buffer.append("decl && decl.apply(this);\r\n");	
+		haveDecl = true;
 	}
 	
 	private List<String> j2sDeclList = new ArrayList<String>();
@@ -4066,6 +4053,13 @@ public class CB extends CA {
 	}
 	
 	private void declareJ2SQualifiedMethods() {
+		
+		if (!haveDecl) {
+			buffer.append("Clazz.makeConstructor (c$, function () {");
+			addSuperConstructor(null, null);
+			buffer.append("});\r\n");
+		}
+		
 		if (j2sDeclList.size() == 0) {
 			return;
 		}
@@ -4098,4 +4092,22 @@ public class CB extends CA {
 		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(mBinding);
 		buffer.append("C$.$super$").append(name).append(".apply(this, arguments)");
 	}
+	
+	private boolean haveDecl;
+	
+	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
+		buffer.append("Clazz.superConstructor (this, ");
+		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+		if (node != null)	
+			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
+		else
+			buffer.append(", []");
+
+		buffer.append(");\r\n");
+		addDecl();
+
+	}
+	
 }
+
+
