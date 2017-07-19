@@ -12,11 +12,6 @@
 package net.sf.j2s.test.junit.issue;
 
 import junit.framework.TestCase;
-import net.sf.j2s.test.junit.sample.C;
-import net.sf.j2s.test.junit.sample.C2;
-import net.sf.j2s.test.junit.sample.CF;
-import net.sf.j2s.test.junit.sample.CF1;
-import net.sf.j2s.test.junit.util.Output;
 
 public class Issue18Test extends TestCase {
 
