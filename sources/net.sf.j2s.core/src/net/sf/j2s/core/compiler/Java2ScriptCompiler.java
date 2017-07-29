@@ -141,8 +141,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				buf.append(",");
 			}
 		}
-		props.setProperty("j2s.resources.list", buf.toString());
-		props.setProperty("j2s.output.path", binaryFolder.getProjectRelativePath().toPortableString());
+//		props.setProperty("j2s.resources.list", buf.toString());
+//		props.setProperty("j2s.output.path", binaryFolder.getProjectRelativePath().toPortableString());
 		try {
 			props.store(new FileOutputStream(file), "Java2Script Configuration");
 		} catch (IOException e) {

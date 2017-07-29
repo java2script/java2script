@@ -312,7 +312,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					continue;
 				}
 			}
-			element.accept(this);
+//			element.accept(this);
 //			element.accept(this);
 		}
 		
@@ -323,13 +323,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		buffer.append(scriptVisitor.getBuffer());
 		
 		
-		buffer.append("Clazz.instantialize (this, arguments);\r\n");
+		buffer.append("Clazz.newInstance$ (this, arguments);\r\n");
 		
 		buffer.append("}, ");
 
 		
 		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
-				"Clazz.instantialize (this, arguments);\r\n" +
+				"Clazz.newInstance$ (this, arguments);\r\n" +
 				"}, ";
 		idx = buffer.lastIndexOf(emptyFun);
 		
@@ -338,7 +338,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
 					"Clazz.prepareCallback (this, arguments);\r\n" +
-					"Clazz.instantialize (this, arguments);\r\n" +
+					"Clazz.newInstance$ (this, arguments);\r\n" +
 					"}, ";
 			idx = buffer.lastIndexOf(emptyFun);
 			
@@ -381,8 +381,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 		bodyDeclarations = node.bodyDeclarations();
 		
-		if (needPreparation) {
-			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+		if (true || needPreparation) {
+			buffer.append("cla$$.$init$ = function () {\r\n");
 			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
@@ -390,9 +390,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					if (getJ2STag(field, "@j2sIgnore") != null) {
 						continue;
 					}
-					if (!isFieldNeedPreparation(field)) {
-						continue;
-					}
+//					if (!isFieldNeedPreparation(field)) {
+//						continue;
+//					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
@@ -406,7 +406,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			
 			
-			buffer.append("});\r\n");
+			buffer.append("};\r\n");
 		}
 		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -1279,14 +1279,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return ;
 		}
 //		if (!node.isInterface()) {
-			buffer.append("Clazz.instantialize (this, arguments);\r\n");
+			buffer.append("Clazz.newInstance$ (this, arguments);\r\n");
 //		}
 
 		buffer.append("}, ");
 		
 		
 		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
-				"Clazz.instantialize (this, arguments);\r\n" +
+				"Clazz.newInstance$ (this, arguments);\r\n" +
 				"}, ";
 		int idx = buffer.lastIndexOf(emptyFun);
 		
@@ -1410,15 +1410,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
-		if (needPreparation) {
-			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+		if (true || needPreparation) {
+			buffer.append("cla$$.$init$ = function () {\r\n");
 			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
-					if (!isFieldNeedPreparation(field)) {
-						continue;
-					}
+//					if (!isFieldNeedPreparation(field)) {
+//						continue;
+//					}
 					element.accept(this);
 				} else if (element instanceof Initializer) {
 					Initializer init = (Initializer) element;
@@ -2168,27 +2168,48 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
+
+		boolean isConstructor = node.isConstructor();
+		boolean isStatic = ((node.getModifiers() & Modifier.STATIC) != 0);
 		
-		if (node.isConstructor()) {
+		String name =  (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(mBinding);
+		/////////
+		
+		
+
+//		if (node.isConstructor()) {
 //			if (getJ2STag(node, "@j2sOverride") != null) {
 //				buffer.append("Clazz.overrideConstructor (");
 //			} else {
-				buffer.append("Clazz.makeConstructor (");
+	//			buffer.append("Clazz.makeConstructor (");
 //			}
-		} else {
-			if ((node.getModifiers() & Modifier.STATIC) != 0) {
+		//} else {
+		//	if  {
 				/* replace full class name with short variable name */
 				
+		//Define parameter qualified function -- NY
+		buffer.append("cla$$");
+		//buffer.append(fullClassName);
+		buffer.append(".");
+		//buffer.append(methods[i].getName());
+		//node.getName().accept(this);
+		
+        if (!isConstructor && !isStatic)
+          buffer.append("prototype.");
+		appendDeclMethod(name);
+		buffer.append(" = ");
+
+		
 				
 				
-				buffer.append("cla$$");
+			//	buffer.append("cla$$");
 				//buffer.append(fullClassName);
-				buffer.append(".");
+			//	buffer.append(".");
 				//buffer.append(methods[i].getName());
-				node.getName().accept(this);
-				buffer.append(" = ");
+			//	node.getName().accept(this);
+			//	buffer.append(" = ");
 				
-			}
+			//}
 //			if (getJ2STag(node, "@j2sOverride") != null) {
 //				buffer.append("Clazz.overrideMethod (");
 //			} else {
@@ -2196,10 +2217,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //				if (isOK2AutoOverriding) {
 //					buffer.append("Clazz.overrideMethod (");
 //				} else {
-					buffer.append("Clazz.defineMethod (");
+					buffer.append("Clazz.newMethod$ (");
 //				}
 //			}
-		}
+		//}
 		/* replace full class name with short variable name */
 		buffer.append("cla$$");
 		
@@ -2215,23 +2236,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("\", ");
 		}
 		buffer.append("\r\n");
-		boolean isPrivate = (node.getModifiers() & Modifier.PRIVATE) != 0;
-		if (isPrivate) {
-			buffer.append("($fz = ");
-		}	
+//		boolean isPrivate = (node.getModifiers() & Modifier.PRIVATE) != 0;
+	//	if (isPrivate) {
+		//	buffer.append("($fz = ");
+	//	}	
 		
-		//Define parameter qualified function -- NY
-		buffer.append("cla$$");
-		//buffer.append(fullClassName);
-		buffer.append(".");
-		//buffer.append(methods[i].getName());
-		//node.getName().accept(this);
-		
-		
-		appendDeclMethod("construct_" + getJ2SParamQualifier(mBinding));
-		buffer.append(" = ");
 		/////////
-		
 		
 		buffer.append("function (");
 		List parameters = node.parameters();
@@ -2300,9 +2310,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				node.getBody().accept(this);
 			}
 		}
-		if (isPrivate) {
-			buffer.append(", $fz.isPrivate = true, $fz)");
-		}		
+		//if (isPrivate) {
+			//buffer.append(", $fz.isPrivate = true, $fz)");
+		//}		
 		if (parameters.size() != 0) {
 			buffer.append(", \"");
 			for (Iterator iter = parameters.iterator(); iter.hasNext();) {
@@ -2338,7 +2348,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							if (binding.isTypeVariable()) {
 								buffer.append("~O");
 							} else {
-								String name = binding.getQualifiedName();
+								name = binding.getQualifiedName();
 								name = shortenQualifiedName(name);
 								if ("String".equals(name)) {
 									buffer.append("~S");
@@ -3150,13 +3160,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return ;
 		}
 		if (!node.isInterface()) {
-			buffer.append("Clazz.instantialize (this, arguments);\r\n");
+			buffer.append("Clazz.newInstance$ (this, arguments);\r\n");
 			//buffer.append("};\r\n");
 			buffer.append("}, ");
 		}
 		
 		String emptyFun = "Clazz.decorateAsClass (function () {\r\n" +
-				"Clazz.instantialize (this, arguments);\r\n" +
+				"Clazz.newInstance$ (this, arguments);\r\n" +
 				"}, ";
 		int idx = buffer.lastIndexOf(emptyFun);
 		
@@ -3336,8 +3346,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //		laterBuffer = tmpLaterBuffer;
 //		methodBuffer = tmpMethodBuffer;
 
-		if (needPreparation) {
-			buffer.append("Clazz.prepareFields (cla$$, function () {\r\n");
+		if (true || needPreparation) {
+			buffer.append("cla$$.$init$ = function () {\r\n");
 			for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof FieldDeclaration) {
@@ -3345,7 +3355,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					if (getJ2STag(field, "@j2sIgnore") != null) {
 						continue;
 					}
-					if (node.isInterface() || !isFieldNeedPreparation(field)) {
+					if (node.isInterface() /* || !isFieldNeedPreparation(field) */) {
 						continue;
 					}
 					element.accept(this);
@@ -3359,7 +3369,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
-			buffer.append("});\r\n");
+			buffer.append("};\r\n");
 		}
 		
 		for (Iterator iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -3962,7 +3972,7 @@ public class CB extends CA {
 					continue;
 				}
 			}
-			element.accept(this);
+//			element.accept(this);
 		}
 		return false;
 	}
@@ -3999,7 +4009,7 @@ public class CB extends CA {
 		StringBuffer sbParams = new StringBuffer();
 
 		String className = binding.getDeclaringClass().getQualifiedName();
-		if (!className.startsWith("java.") && !className.startsWith("javax.") && !className.startsWith("sun.")) {
+		if (!className.startsWith("java.") && !className.startsWith("javax.")) {
 			ITypeBinding[] paramTypes = binding.getParameterTypes();
 			if (paramTypes.length == 0) {
 				sbParams.append("$_");
@@ -4055,7 +4065,7 @@ public class CB extends CA {
 	private void declareJ2SQualifiedMethods() {
 		
 		if (!haveDecl) {
-			buffer.append("Clazz.makeConstructor (c$, function () {");
+			buffer.append("C$.construct$ = function () {\r\n");
 			addSuperConstructor(null, null);
 			buffer.append("});\r\n");
 		}
@@ -4095,16 +4105,24 @@ public class CB extends CA {
 	
 	private boolean haveDecl;
 	
-	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
-		buffer.append("Clazz.superConstructor (this, ");
-		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
+	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {		
+		if (node == null) {
+			buffer.append("if (cla$$.superClazz && cla$$.superClazz.construct$) {");
+		}
+		buffer.append("cla$$.superClazz.construct").append(node == null ? "$" : getJ2SParamQualifier(node.resolveConstructorBinding()));
+		buffer.append(".apply(this");
+//		buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
 		if (node != null)	
 			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		else
 			buffer.append(", []");
 
 		buffer.append(");\r\n");
+		if (node == null) {
+			buffer.append("}\r\n");
+		}
 		addDecl();
+		buffer.append("C$.$init$.apply(this);\r\n");
 
 	}
 	
