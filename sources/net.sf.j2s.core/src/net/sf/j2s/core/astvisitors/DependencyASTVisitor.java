@@ -210,17 +210,17 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			}
 		}
 
+		// save the Clazz.declarePackage for later
 		String js = buf.toString();
-		
-
-		String prefix = null;
+		String prefix = "";
 		if (js.indexOf("Clazz.declarePackage") == 0) {
 			int index = js.indexOf("\r\n");
 			prefix = js.substring(0, index + 2);
 			js = js.substring(index + 2);
 		}
-		
-		if (musts.size() != 0 || requires.size() != 0 || optionals.size() != 0) {
+		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
+			js = "(function() {\r\n" + js + "}) ();\r\n";
+		} else {
 			buf = new StringBuffer();
 			buf.append("Clazz.load (");
 			if (musts.size() != 0 || requires.size() != 0) {
@@ -260,10 +260,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			buf.append("});\r\n");
 			js = buf.toString();
 		}
-		if (prefix != null) {
-			js = prefix + "(function() {\r\n" + js + "}) ();\r\n";
-		}
-		return js;
+		return prefix + js;
 	}
 
 	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
