@@ -27,8 +27,6 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -97,9 +95,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	
 	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sIgnore".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
@@ -107,7 +105,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 					}
 				}
 				if (isDebugging()) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sDebug".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
@@ -119,7 +117,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
 				
 				if (!toCompileVariableName) {
-					for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 						TagElement tagEl = (TagElement) iter.next();
 						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
 							if (superVisit) super.visit(node);
@@ -128,7 +126,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						}
 					}
 				}
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sNative".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
@@ -136,7 +134,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 						return false;
 					}
 				}
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if ("@j2sXHTML".equals(tagEl.getTagName()) || "@j2sXCSS".equals(tagEl.getTagName())) {
 						if (superVisit) super.visit(node);
@@ -150,10 +148,10 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	}
 
 	private void visitJavadocJ2SSource(TagElement tagEl) {
-		List fragments = tagEl.fragments();
+		List<?> fragments = tagEl.fragments();
 		boolean isFirstLine = true;
 		StringBuffer buf = new StringBuffer();
-		for (Iterator iterator = fragments.iterator(); iterator
+		for (Iterator<?> iterator = fragments.iterator(); iterator
 				.hasNext();) {
 			TextElement commentEl = (TextElement) iterator.next();
 			String text = commentEl.getText().trim();
@@ -169,11 +167,11 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	}
 	
 	private void visitJavadocXStringSource(TagElement tagEl, String tagName) {
-		List fragments = tagEl.fragments();
+		List<?> fragments = tagEl.fragments();
 		boolean isFirstLine = true;
 		StringBuffer buf = new StringBuffer();
 		String firstLine = null;
-		for (Iterator iterator = fragments.iterator(); iterator
+		for (Iterator<?> iterator = fragments.iterator(); iterator
 				.hasNext();) {
 			TextElement commentEl = (TextElement) iterator.next();
 			String text = commentEl.getText().trim();
@@ -391,17 +389,17 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		boolean existed = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						if (tagEl != null) {
-							List fragments = tagEl.fragments();
+							List<?> fragments = tagEl.fragments();
 							StringBuffer buf = new StringBuffer();
 							boolean isFirstLine = true;
 							String firstLine = null;
-							for (Iterator iterator = fragments.iterator(); iterator
+							for (Iterator<?> iterator = fragments.iterator(); iterator
 									.hasNext();) {
 								TextElement commentEl = (TextElement) iterator.next();
 								String text = commentEl.getText().trim();
@@ -435,16 +433,16 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		boolean existed = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						if (tagEl != null) {
-							List fragments = tagEl.fragments();
+							List<?> fragments = tagEl.fragments();
 							StringBuffer buf = new StringBuffer();
 							boolean isFirstLine = true;
-							for (Iterator iterator = fragments.iterator(); iterator
+							for (Iterator<?> iterator = fragments.iterator(); iterator
 									.hasNext();) {
 								TextElement commentEl = (TextElement) iterator.next();
 								String text = commentEl.getText().trim();
@@ -470,8 +468,8 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		if (existed && !both) {
 			return existed;
 		}
-		List modifiers = node.modifiers();
-		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+		List<?> modifiers = node.modifiers();
+		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 			Object obj = (Object) iter.next();
 			if (obj instanceof Annotation) {
 				Annotation annotation = (Annotation) obj;
@@ -523,14 +521,14 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	
 	private Javadoc[] checkJavadocs(ASTNode root) {
 		if (root instanceof CompilationUnit) {
-			List commentList = ((CompilationUnit) root).getCommentList();
-			ArrayList list = new ArrayList();
-			for (Iterator iter = commentList.iterator(); iter.hasNext();) {
+			List<?> commentList = ((CompilationUnit) root).getCommentList();
+			ArrayList<Comment> list = new ArrayList<Comment>();
+			for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
 				Comment comment = (Comment) iter.next();
 				if (comment instanceof Javadoc) {
-					List tags = ((Javadoc) comment).tags();
+					List<?> tags = ((Javadoc) comment).tags();
 					if (tags.size() != 0) {
-						for (Iterator itr = tags.iterator(); itr.hasNext();) {
+						for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
 							TagElement tagEl = (TagElement) itr.next();
 							String tagName = tagEl.getTagName();
 							if ("@j2sIgnore".equals(tagName) || "@j2sDebug".equals(tagName)
@@ -556,7 +554,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				previousStart = sttmt.getStartPosition();
 				if (sttmt instanceof Block) {
 					Block parentBlock = (Block) sttmt;
-					for (Iterator iter = parentBlock.statements().iterator(); iter.hasNext();) {
+					for (Iterator<?> iter = parentBlock.statements().iterator(); iter.hasNext();) {
 						Statement element = (Statement) iter.next();
 						if (element == node) {
 							break;
@@ -593,9 +591,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	protected Object getJ2STag(BodyDeclaration node, String tagName) {
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
-			List tags = javadoc.tags();
+			List<?> tags = javadoc.tags();
 			if (tags.size() != 0) {
-				for (Iterator iter = tags.iterator(); iter.hasNext();) {
+				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
 						return tagEl;
@@ -603,9 +601,9 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				}
 			}
 		}
-		List modifiers = node.modifiers();
+		List<?> modifiers = node.modifiers();
 		if (modifiers != null && modifiers.size() > 0) {
-			for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 				Object obj = (Object) iter.next();
 				if (obj instanceof Annotation) {
 					Annotation annotation = (Annotation) obj;
