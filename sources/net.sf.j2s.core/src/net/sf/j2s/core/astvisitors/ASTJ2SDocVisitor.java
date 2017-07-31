@@ -48,10 +48,6 @@ import org.eclipse.jdt.core.dom.TextElement;
  */
 public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	
-	private Javadoc[] nativeJavadoc = null;
-	
-	private ASTNode javadocRoot = null;
-	
 	private boolean isDebugging = false;
 
 	
@@ -67,59 +63,24 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		blockLevel++;
 		buffer.append("{\r\n");
 		ASTNode parent = node.getParent();
-		if (parent instanceof MethodDeclaration) {
-			MethodDeclaration method = (MethodDeclaration) parent;
-			Javadoc javadoc = method.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-			IMethodBinding methodBinding = method.resolveBinding();
-			if(methodBinding != null){
-				ITypeBinding superclass = methodBinding.getDeclaringClass().getSuperclass();
-				boolean containsSuperPrivateMethod = false; 
-				while (superclass != null) {
-					IMethodBinding[] methods = superclass.getDeclaredMethods();
-					for (int i = 0; i < methods.length; i++) {
-						if (methods[i].getName().equals(methodBinding.getName())
-								&& (methods[i].getModifiers() & Modifier.PRIVATE) != 0) {
-							containsSuperPrivateMethod = true;
-							break;
-						}
-					}
-					if (containsSuperPrivateMethod) {
-						break;
-					}
-					superclass = superclass.getSuperclass();
-				}
-				if (containsSuperPrivateMethod) {
-					buffer.append("var $private = Clazz.checkPrivateMethod (arguments);\r\n");
-					buffer.append("if ($private != null) {\r\n");
-					buffer.append("return $private.apply (this, arguments);\r\n");
-					buffer.append("}\r\n");
-				}
-			}
-		} else if (parent instanceof Initializer) {
-			Initializer initializer = (Initializer) parent;
-			Javadoc javadoc = initializer.getJavadoc();
-			/*
-			 * if comment contains "@j2sNative", then output the given native 
-			 * JavaScript codes directly. 
-			 */
-			if (visitNativeJavadoc(javadoc, node, true) == false) {
-				return false;
-			}
-		}
+		BodyDeclaration dec = (parent instanceof MethodDeclaration ? dec = (BodyDeclaration) parent 
+				: parent instanceof Initializer ? (BodyDeclaration) parent : null);
+		Javadoc javadoc;
+		/*
+		 * if comment contains "@j2sNative", then output the given native 
+		 * JavaScript codes directly. 
+		 */
+		if (dec != null 
+				&& (javadoc = dec.getJavadoc()) != null 
+				&& !visitNativeJavadoc(javadoc, node, true))
+			return false;
 		int blockStart = node.getStartPosition();
 		int previousStart = getPreviousStartPosition(node);
 		ASTNode root = node.getRoot();
-		checkJavadocs(root);
-		//for (int i = 0; i < nativeJavadoc.length; i++) {
-		for (int i = nativeJavadoc.length - 1; i >= 0; i--) {
-			Javadoc javadoc = nativeJavadoc[i];
+		Javadoc[] nativeJavadoc = checkJavadocs(root);
+		if (nativeJavadoc != null)
+		for (int i = nativeJavadoc.length; --i >= 0;) {
+			javadoc = nativeJavadoc[i];
 			int commentStart = javadoc.getStartPosition();
 			if (commentStart > previousStart && commentStart < blockStart) {
 				/*
@@ -560,42 +521,30 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				.matcher(text).replaceAll("/*$1*/");
 	}
 	
-	private void checkJavadocs(ASTNode root) {
-		if (root != javadocRoot) {
-			nativeJavadoc = null;
-			javadocRoot = root;
-		}
-		if (nativeJavadoc == null) {
-			nativeJavadoc = new Javadoc[0];
-			if (root instanceof CompilationUnit) {
-				CompilationUnit unit = (CompilationUnit) root;
-				List commentList = unit.getCommentList();
-				ArrayList list = new ArrayList();
-				for (Iterator iter = commentList.iterator(); iter.hasNext();) {
-					Comment comment = (Comment) iter.next();
-					if (comment instanceof Javadoc) {
-						Javadoc javadoc = (Javadoc) comment;
-						List tags = javadoc.tags();
-						if (tags.size() != 0) {
-							for (Iterator itr = tags.iterator(); itr.hasNext();) {
-								TagElement tagEl = (TagElement) itr.next();
-								String tagName = tagEl.getTagName();
-								if ("@j2sIgnore".equals(tagName)
-										|| "@j2sDebug".equals(tagName)
-										|| "@j2sNative".equals(tagName)
-										|| "@j2sNativeSrc".equals(tagName)
-										|| "@j2sXHTML".equals(tagName)
-										|| "@j2sXCSS".equals(tagName)
-										) {
-									list.add(comment);
-								}
+	private Javadoc[] checkJavadocs(ASTNode root) {
+		if (root instanceof CompilationUnit) {
+			List commentList = ((CompilationUnit) root).getCommentList();
+			ArrayList list = new ArrayList();
+			for (Iterator iter = commentList.iterator(); iter.hasNext();) {
+				Comment comment = (Comment) iter.next();
+				if (comment instanceof Javadoc) {
+					List tags = ((Javadoc) comment).tags();
+					if (tags.size() != 0) {
+						for (Iterator itr = tags.iterator(); itr.hasNext();) {
+							TagElement tagEl = (TagElement) itr.next();
+							String tagName = tagEl.getTagName();
+							if ("@j2sIgnore".equals(tagName) || "@j2sDebug".equals(tagName)
+									|| "@j2sNative".equals(tagName) || "@j2sNativeSrc".equals(tagName)
+									|| "@j2sXHTML".equals(tagName) || "@j2sXCSS".equals(tagName)) {
+								list.add(comment);
 							}
 						}
 					}
 				}
-				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
 			}
+			return (Javadoc[]) list.toArray(new Javadoc[0]);
 		}
+		return null;
 	}
 
 	private int getPreviousStartPosition(Block node) {
