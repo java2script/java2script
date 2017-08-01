@@ -252,7 +252,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 
-		addDefaultConstructor();
+		//addDefaultConstructor();
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -2687,7 +2687,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding binding = node.resolveBinding();
 		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
 		if (binding != null && binding.isTopLevel()) {
-			haveDefaultConstructor = false;
 			typeVisitor.setClassName(binding.getName());
 		}
 		if ((node != rootTypeNode) && node.getParent() != null && (node.getParent() instanceof AbstractTypeDeclaration
@@ -2892,8 +2891,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private void addDefaultConstructor() {
 
 		if (!haveDefaultConstructor) {
-			buffer.append("\r\nClazz.newMethod$(cla$$, 'construct', function () {\r\n"); // was
-																							// $_
+			buffer.append("\r\nClazz.newMethod$(cla$$, 'construct', function () {"); // was																							// $_
 			addSuperConstructor(null, null);
 			buffer.append("},true);\r\n");
 		}
@@ -2912,23 +2910,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
 		if (node == null) {
-			buffer.append("if (cla$$.superClazz && cla$$.superClazz.construct) {"); // was
-																					// $_
-		}
-		buffer.append("cla$$.superClazz.construct")
-				.append(node == null ? "" : getJ2SParamQualifier(node.resolveConstructorBinding())); // was
-																										// $_
-		buffer.append(".apply(this");
-		// buffer.append(assureQualifiedName(shortenQualifiedName(getFullClassName())));
-		if (node != null)
+			buffer.append("Clazz.super$(cla$$, this");
+		} else {
+			buffer.append("cla$$.superClazz.construct").append(getJ2SParamQualifier(node.resolveConstructorBinding())); 
+			buffer.append(".apply(this");
 			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
-		else
-			buffer.append(", []");
-
-		buffer.append(");\r\n");
-		if (node == null) {
-			buffer.append("}\r\n");
 		}
+		buffer.append(");\r\n");
 		addCallInit();
 	}
 
