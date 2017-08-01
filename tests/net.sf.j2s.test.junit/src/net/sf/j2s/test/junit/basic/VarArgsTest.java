@@ -46,6 +46,15 @@ public class VarArgsTest extends TestCase {
 	}
 	
 	/**
+	 * Call a varArgs method with some "float" arguments, to check if
+	 * the correct overload ("float ..." vs. "int ...") is selected.
+	 */
+	public void testVarArgsNotEmpty_WithFloat() {
+		String s = new CVarArgs().fVarArgsInt(4.0f,7,9);
+		assertEquals("floats: 4.0 7.0 9.0 ", s);
+	}
+	
+	/**
 	 * Call a varArgs method with some arguments (via array).
 	 */
 	public void testVarArgsNotEmptyViaArray() {

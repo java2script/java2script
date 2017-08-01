@@ -24,6 +24,7 @@ public class AllBasicTests extends TestCase {
 		suite.addTestSuite(OverloadTest.class);
 		suite.addTestSuite(SubclassTest.class);
 		suite.addTestSuite(ThisTest.class);
+		suite.addTestSuite(VarArgsTest.class);
 
 		return suite;
 	}
