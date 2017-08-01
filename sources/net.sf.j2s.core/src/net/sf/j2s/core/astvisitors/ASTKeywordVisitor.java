@@ -111,7 +111,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).assureQualifiedName(name);
 	}
 	
-	protected String shortenQualifiedName(String name) {
+	protected String removeJavaLang(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
 	}
 	
@@ -383,7 +383,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			}
 			if (supportsObjectStaticFields) {
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append(".prototype.");
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -398,7 +398,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				buffer.append(" = ");
 			}
 			
-			buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+			buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
 				QualifiedName leftName = (QualifiedName) left;
@@ -427,7 +427,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 				} else {
 					buffer.append("= String.fromCharCode (");
-					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append('.');
 					if (left instanceof QualifiedName) {
 						QualifiedName leftName = (QualifiedName) left;
@@ -457,7 +457,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else if (leftTypeBinding != null && "/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(leftTypeBinding.getName())) {
 				buffer.append(" = Clazz.doubleToInt (");
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -907,9 +907,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(NullLiteral node) {
-		/*
-		 * TODO: Clazz.castNullAs should be used instead
-		 */
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (binding != null)
 		buffer.append("null");
@@ -1024,7 +1021,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String op = node.getOperator().toString();
 			if (staticCharType) {
 				if (!(parent instanceof Statement)) {
-					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append('.');
 					if (left instanceof QualifiedName) {
 						QualifiedName leftName = (QualifiedName) left;
@@ -1038,7 +1035,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 					buffer.append(", ");
 				}
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1051,7 +1048,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					leftName.accept(this);
 				}
 				buffer.append(" = String.fromCharCode (");
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1069,7 +1066,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append(".charCodeAt (0) - 1)");
 				}
 			} else {
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1087,7 +1084,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			
 			if (supportsObjectStaticFields) {
 				buffer.append(", ");
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append(".prototype.");
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1100,7 +1097,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					leftName.accept(this);
 				}
 				buffer.append(" = ");
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1211,7 +1208,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			}
 			if (supportsObjectStaticFields) {
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append(".prototype.");
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1226,7 +1223,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				buffer.append(" = ");
 			}
 			if (typeBinding.isPrimitive() && "char".equals(typeBinding.getName())) {
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1239,7 +1236,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					leftName.accept(this);
 				}
 				buffer.append(" = String.fromCharCode (");
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1259,7 +1256,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else {
 				buffer.append(op);
 				//buffer.append(' ');
-				buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
 					QualifiedName leftName = (QualifiedName) left;
@@ -1376,12 +1373,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						if (name.length() != 0) {
 							if (staticFields) {
 								if (qualifier instanceof SimpleName) {
-									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 								} else {
 									buffer.append('(');
 									buffer.append(name);
 									buffer.append(", ");
-									buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 									buffer.append(')');
 								}
 							} else {
@@ -1404,12 +1401,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (!qualifierVisited) {
 			if (staticFields) {
 				if (qName instanceof SimpleName) {
-					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				} else {
 					buffer.append('(');
 					qName.accept(this);
 					buffer.append(", ");
-					buffer.append(assureQualifiedName(shortenQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append(')');
 				}
 			} else {

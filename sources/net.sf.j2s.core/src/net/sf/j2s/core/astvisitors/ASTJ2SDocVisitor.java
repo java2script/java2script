@@ -427,87 +427,95 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	}
 	
 	/*
-	 * Read JavaScript sources from @j2sNative, @J2SPrefix or others
+	 * Read JavaScript sources from @j2sNative, @j2sPrefix, etc, as well as
+	 * annotations
 	 */
-	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
-		boolean existed = false;
+	/**
+	 * for example, for classes only:
+	 * 
+	 * @j2sPrefix /-* this is from <@>j2sPrefix added outside of just before
+	 *            Clazz.decorateAsClass() *-/
+	 * 
+	 * 
+	 * @j2sSuffix /-* this is from <@>j2sSuffix added just after
+	 *            Clazz.decorateAsClass() *-/
+	 */
+	boolean readSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean allowBoth) {
+		boolean haveJ2SJavaDoc = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
 			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
+			if (tags.size() > 0) {
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
-					if (tagName.equals(tagEl.getTagName())) {
-						if (tagEl != null) {
-							List<?> fragments = tagEl.fragments();
-							StringBuffer buf = new StringBuffer();
-							boolean isFirstLine = true;
-							for (Iterator<?> iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									isFirstLine = false;
-									if (text.length() == 0) {
-										continue;
-									}
-								}
-								buf.append(text);
-								buf.append("\r\n");
+					if (!tagName.equals(tagEl.getTagName()))
+						continue;
+					List<?> fragments = tagEl.fragments();
+					StringBuffer buf = new StringBuffer();
+					boolean isFirstLine = true;
+					for (Iterator<?> iterator = fragments.iterator(); iterator.hasNext();) {
+						TextElement commentEl = (TextElement) iterator.next();
+						String text = commentEl.getText().trim();
+						if (isFirstLine) {
+							isFirstLine = false;
+							if (text.length() == 0) {
+								continue;
 							}
-							String sources = buf.toString().trim();
-							// embed block comments and Javadoc @
-							sources = sources.replaceAll("(\\/)-\\*|\\*-(\\/)", "$1*$2").replaceAll("<@>", "@");
-							buffer.append(prefix + sources + suffix);
-							existed = true;
 						}
+						buf.append(text);
+						buf.append("\r\n");
 					}
+					// embed block comments and Javadoc @
+					// /-* comment *-/ becomes /* comment */ and <@> becomes @
+					String sources = buf.toString().trim().replaceAll("(\\/)-\\*|\\*-(\\/)", "$1*$2").replaceAll("<@>",
+							"@");
+					buffer.append(prefix).append(sources).append(suffix);
+					haveJ2SJavaDoc = true;
 				}
 			}
 		}
-		if (existed && !both) {
-			return existed;
-		}
+		// only classes allow both
+		if (haveJ2SJavaDoc && !allowBoth)   
+			return haveJ2SJavaDoc;
+		
+		// now check annotations (class definitions only)
+		
 		List<?> modifiers = node.modifiers();
 		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
 			Object obj = (Object) iter.next();
-			if (obj instanceof Annotation) {
-				Annotation annotation = (Annotation) obj;
-				String qName = annotation.getTypeName().getFullyQualifiedName();
-				int index = qName.indexOf("J2S");
-				if (index != -1) {
-					String annName = qName.substring(index);
-					annName = annName.replaceFirst("J2S", "@j2s");
-					if (annName.startsWith(tagName)) {
-						StringBuffer buf = new StringBuffer();
-						IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
-						if (annotationBinding != null) {
-							IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
-							if (valuePairs != null && valuePairs.length > 0) {
-								for (int i = 0; i < valuePairs.length; i++) {
-									Object value = valuePairs[i].getValue();
-									if (value != null) {
-										if (value instanceof Object[]) {
-											Object[] lines = (Object[]) value;
-											for (int j = 0; j < lines.length; j++) {
-												buf.append(lines[j]);
-												buf.append("\r\n");
-											}
-										} else if (value instanceof String) {
-											buf.append(value);
-											buf.append("\r\n");
-										}
-									}
+			if (!(obj instanceof Annotation))
+				continue;
+			Annotation annotation = (Annotation) obj;
+			String qName = annotation.getTypeName().getFullyQualifiedName();
+			int index = qName.indexOf("J2S");
+			if (index < 0 || !qName.substring(index).replaceFirst("J2S", "@j2s").startsWith(tagName))
+				continue;
+			haveJ2SJavaDoc = true;
+			StringBuffer buf = new StringBuffer();
+			IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
+			if (annotationBinding != null) {
+				IMemberValuePairBinding[] valuePairs = annotationBinding.getAllMemberValuePairs();
+				if (valuePairs != null && valuePairs.length > 0) {
+					for (int i = 0; i < valuePairs.length; i++) {
+						Object value = valuePairs[i].getValue();
+						if (value != null) {
+							if (value instanceof Object[]) {
+								Object[] lines = (Object[]) value;
+								for (int j = 0; j < lines.length; j++) {
+									buf.append(lines[j]);
+									buf.append("\r\n");
 								}
+							} else if (value instanceof String) {
+								buf.append(value);
+								buf.append("\r\n");
 							}
 						}
-						buffer.append(prefix + buf.toString().trim() + suffix);
-						existed = true;
 					}
 				}
 			}
+			buffer.append(prefix).append(buf.toString().trim()).append(suffix);
 		}
-		return existed;
+		return haveJ2SJavaDoc;
 	}
 
 	private String fixCommentBlock(String text) {

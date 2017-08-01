@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,25 +49,8 @@ public class Bindings {
 		// No instance
 	}
 	
-// FIXME: commented-out code. To be removed after St. Olaf merge.
-//	private static final boolean CHECK_CORE_BINDING_IS_EQUAL_TO;
-//	static {
-//		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo"); //$NON-NLS-1$
-//		CHECK_CORE_BINDING_IS_EQUAL_TO= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-//	}
-//	private static final boolean CHECK_CORE_BINDING_GET_JAVA_ELEMENT;
-//	static {
-//		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
-//		CHECK_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-//	}
-//	private static final boolean USE_UI_BINDING_GET_JAVA_ELEMENT;
-//	static {
-//		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/useUIBindingGetJavaElement"); //$NON-NLS-1$
-//		USE_UI_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-//	}
-	
 	/**
-	 * Checks if the two bindings are equals. First an identity check is
+	 * Checks if the two bindings are equal. First an identity check is
 	 * made an then the key of the bindings are compared. 
 	 * @param b1 first binding treated as <code>this</code>. So it must
 	 *  not be <code>null</code>
@@ -173,7 +155,7 @@ public class Bindings {
 	}
 	
 	public static String getTypeQualifiedName(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
 		
 		StringBuffer buffer= new StringBuffer();
@@ -203,32 +185,8 @@ public class Bindings {
 			name= name.substring(0, index);
 		return name;
 	}	
-
-//	public static String getImportName(IBinding binding) {
-//		ITypeBinding declaring= null;
-//		switch (binding.getKind()) {
-//			case IBinding.TYPE:
-//				return getRawQualifiedName((ITypeBinding) binding);
-//			case IBinding.PACKAGE:
-//				return binding.getName() + ".*"; //$NON-NLS-1$
-//			case IBinding.METHOD:
-//				declaring= ((IMethodBinding) binding).getDeclaringClass();
-//				break;
-//			case IBinding.VARIABLE:
-//				declaring= ((IVariableBinding) binding).getDeclaringClass();
-//				if (declaring == null) {
-//					return binding.getName(); // array.length
-//				}
-//				
-//				break;
-//			default:
-//				return binding.getName();
-//		}
-//		return JavaModelUtil.concatenateName(getRawQualifiedName(declaring), binding.getName());
-//	}	
 	
-	
-	private static void createName(ITypeBinding type, boolean includePackage, List list) {
+	private static void createName(ITypeBinding type, boolean includePackage, List<String> list) {
 		ITypeBinding baseType= type;
 		if (type.isArray()) {
 			baseType= type.getElementType();
@@ -253,13 +211,13 @@ public class Bindings {
 	
 	
 	public static String[] getNameComponents(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
 	
 	public static String[] getAllNameComponents(ITypeBinding type) {
-		List result= new ArrayList(5);
+		List<String> result= new ArrayList<String>(5);
 		createName(type, true, result);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
@@ -675,13 +633,13 @@ public class Bindings {
 	 * @return all super types (excluding <code>type</code>)
 	 */
 	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
-		Set result= new HashSet();
+		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
 		collectSuperTypes(type, result);
 		result.remove(type);
 		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
 	
-	private static void collectSuperTypes(ITypeBinding curr, Set collection) {
+	private static void collectSuperTypes(ITypeBinding curr, Set<ITypeBinding> collection) {
 		if (collection.add(curr)) {
 			ITypeBinding[] interfaces= curr.getInterfaces();
 			for (int i= 0; i < interfaces.length; i++) {
@@ -808,8 +766,8 @@ public class Bindings {
 			//Compare type parameter bounds:
 			for (int i= 0; i < m1TypeParams.length; i++) {
 				// loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
-				Set m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
-				Set m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
+				Set<ITypeBinding> m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
+				Set<ITypeBinding> m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
 				if (! m1Bounds.equals(m2Bounds))
 					return false;
 			}
@@ -865,13 +823,14 @@ public class Bindings {
 		return false;
 	}
 
-	private static Set getTypeBoundsForSubsignature(ITypeBinding typeParameter) {
+	@SuppressWarnings("unchecked")
+	private static Set<ITypeBinding> getTypeBoundsForSubsignature(ITypeBinding typeParameter) {
 		ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
 		int count= typeBounds.length;
 		if (count == 0)
 			return Collections.EMPTY_SET;
 		
-		Set result= new HashSet(typeBounds.length);
+		Set<ITypeBinding> result= new HashSet<ITypeBinding>(typeBounds.length);
 		for (int i= 0; i < typeBounds.length; i++) {
 			ITypeBinding bound= typeBounds[i];
 			if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$

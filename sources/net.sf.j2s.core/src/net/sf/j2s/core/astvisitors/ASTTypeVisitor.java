@@ -110,7 +110,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	}
 
 	/**
-	 * Shorten full qualified class names. 
+	 * Shorten fully qualified class names starting with java.lang. 
 	 * 
 	 * Here are the situations: 
 	 * 1. No needs for "java.lang." 
