@@ -475,9 +475,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(" new Clazz._O("); // BH removing
 													// window.JavaObject
 			} else if (noConstructorNames.indexOf(fqName) >= 0) {
+				// look out for java.lang.Integer and the like -- just pass it directly
 				buffer.append(" new ").append(fqName).append("(");
 			} else {
-				// look out for java.lang.Integer -- just pass it directly
 				buffer.append("Clazz.$new(")
 				.append(assureQualifiedName(fqName))
 				.append(".construct")
@@ -899,12 +899,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
 			AnonymousClassDeclaration anonDeclare = enumConst.getAnonymousClassDeclaration();
+			buffer.append("Clazz.$newEnumConst(cla$$.construct");
 			if (anonDeclare == null) {
-				buffer.append("Clazz.defineEnumConstant (").append("cla$$").append(", \"");
-				enumConst.getName().accept(this);
-				buffer.append("\", " + i + ", [");
-				visitList(enumConst.arguments(), ", ");
-				buffer.append("]);\r\n");
+				IMethodBinding binding = enumConst.resolveConstructorBinding();
+				buffer.append(getJ2SParamQualifier(binding));
 			} else {
 				ITypeBinding binding = anonDeclare.resolveBinding();
 				String anonClassName = null;
@@ -914,32 +912,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					anonClassName = assureQualifiedName(removeJavaLang(binding.getQualifiedName()));
 				}
 				StringBuffer tmpBuffer = buffer;
-				StringBuffer tmpMethodBuffer = methodBuffer;
 				buffer = new StringBuffer();
+				StringBuffer tmpMethodBuffer = methodBuffer;
 				methodBuffer = new StringBuffer();
 				anonDeclare.accept(this);
-
 				tmpBuffer.append(methodBuffer);
-
 				tmpBuffer.append(buffer);
 				tmpBuffer.append(";\r\n");
-
-				buffer = tmpBuffer;
 				methodBuffer = tmpMethodBuffer;
-
-				buffer.append("Clazz.defineEnumConstant (");
-				/* replace full class name with short variable name */
-				buffer.append("cla$$");
-				// buffer.append(fullClassName);
-				buffer.append(", \"");
-				enumConst.getName().accept(this);
-				buffer.append("\", " + i + ", [");
-				visitList(enumConst.arguments(), ", ");
-				buffer.append("], ");
-				buffer.append(anonClassName);
-				buffer.append(");\r\n");
-
+				buffer = tmpBuffer;
 			}
+			buffer.append(", \"");
+			enumConst.getName().accept(this);
+			buffer.append("\", " + i + ", [");
+			visitList(enumConst.arguments(), ", ");
+			buffer.append("]);\r\n");
 		}
 
 		addAnonymousFunctionWrapper(false);
@@ -2708,32 +2695,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			String className = typeVisitor.getClassName();
 			String visitorClassName = null;
 			if (node.getParent() instanceof TypeDeclarationStatement) {
-				// typeVisitor.increaseAnonymousClassCount();
-				// if
-				// (node.resolveBinding().getBinaryName().matches(".*\\$[0-9]+\\$.*"))
-				// {
-				// visitorClassName = className + "$" +
-				// typeVisitor.getAnonymousCount() + "$" + node.getName();
-				// } else {
-				// visitorClassName = className + "$" +
-				// typeVisitor.getAnonymousCount() + node.getName();
-				// }
-				String anonClassName = null;
-				if (binding.isAnonymous() || binding.isLocal()) {
-					anonClassName = assureQualifiedName(removeJavaLang(binding.getBinaryName()));
-				} else {
-					anonClassName = assureQualifiedName(removeJavaLang(binding.getQualifiedName()));
-				}
-				int idx = anonClassName.lastIndexOf('.');
-				if (idx == -1) {
-					visitorClassName = anonClassName;
-				} else {
-					visitorClassName = anonClassName.substring(idx + 1);
-				}
+				String anonClassName = assureQualifiedName(removeJavaLang(binding.isAnonymous() || binding.isLocal()
+						? binding.getBinaryName() : binding.getQualifiedName()));
+				visitorClassName = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
 			} else {
 				visitorClassName = className + "." + node.getName();
 			}
-
 			((ASTTypeVisitor) visitor.getAdaptable(ASTTypeVisitor.class)).setClassName(visitorClassName);
 			((ASTPackageVisitor) visitor.getAdaptable(ASTPackageVisitor.class))
 					.setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
@@ -2784,13 +2751,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (node.isInterface()) {
 			return false;
 		}
-		
-		// BH: JavaScipt @j2sPrefix/@j2sSuffix adds code before/after a class definition that does not remove anything and needs no {...}
+
+		// BH: JavaScipt @j2sPrefix/@j2sSuffix adds code before/after a class
+		// definition that does not remove anything and needs no {...}
 		readSources(node, "@j2sPrefix", "", " ", true);
 		buffer.append("var cla$$ = Clazz.decorateAsClass (function () {\r\n");
 
 		// add all inner classes iteratively
-		
+
 		List<?> bodyDeclarations = node.bodyDeclarations();
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -2856,13 +2824,25 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			switch (name) {
 			case "boolean":
+				name = "b";
+				break;
+			case "byte":
 				name = "B";
+				break;
+			case "short":
+				name = "s";
 				break;
 			case "int":
 				name = "I";
 				break;
+			case "long":
+				name = "L";
+				break;
 			case "float":
 				name = "F";
+				break;
+			case "double":
+				name = "D";
 				break;
 			case "java.lang.String":
 				name = "S";
