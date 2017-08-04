@@ -75,12 +75,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private static final String noConstructorNames = "Byte,Short,Integer,Long,Float,Double,Boolean";
 
-	private StringBuffer laterBuffer = new StringBuffer();
+	/**
+	 * holds the initial static calls to initialize one or more inner classes 
+	 */
+	private StringBuffer innerClassInitializerBuffer = new StringBuffer();
 
-	/* for anonymous classes */
-	private StringBuffer methodBuffer = new StringBuffer();
-
-	// private boolean isInnerClass = false;
+	/**
+	 * holds all static field definitions for insertion at the end of the class def
+	 */
+	private StringBuffer staticFieldDefBuffer = new StringBuffer();
 
 	protected AbstractTypeDeclaration rootTypeNode;
 
@@ -195,9 +198,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String className = typeVisitor.getClassName();
 		buffer.append(fullClassName);
 		buffer.append(" || (");
-		StringBuffer tmpBuffer = buffer;
-		buffer = methodBuffer;
-		methodBuffer = new StringBuffer();
+		StringBuffer oldBuffer = buffer;
+		buffer = innerClassInitializerBuffer;
+		innerClassInitializerBuffer = new StringBuffer();
 
 		buffer.append("cla$$.");
 		buffer.append(bootstrapName);
@@ -239,8 +242,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		String oldClassName = className;
 		typeVisitor.setClassName(shortClassName);
-		StringBuffer oldLaterBuffer = laterBuffer;
-		laterBuffer = new StringBuffer();
+		StringBuffer oldLaterBuffer = staticFieldDefBuffer;
+		staticFieldDefBuffer = new StringBuffer();
 		List<?> bodyDeclarations = node.bodyDeclarations();
 
 		addInitMethod(bodyDeclarations, false);
@@ -290,14 +293,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 
 		typeVisitor.setClassName(oldClassName);
-		buffer.append(laterBuffer);
-		laterBuffer = oldLaterBuffer;
+		buffer.append(staticFieldDefBuffer);
+		staticFieldDefBuffer = oldLaterBuffer;
 
 		buffer.append("};\r\n");
-		String methods = methodBuffer.toString();
-		methodBuffer = buffer;
-		methodBuffer.append(methods);
-		buffer = tmpBuffer;
+		String methods = innerClassInitializerBuffer.toString();
+		innerClassInitializerBuffer = buffer;
+		innerClassInitializerBuffer.append(methods);
+		buffer = oldBuffer;
 		String packageName = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
 		buffer.append(packageName);
 		buffer.append(".");
@@ -548,11 +551,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 			variableVisitor.visitedVars = lastVisitedVars;
 			currentBlockForVisit = lastCurrentBlock;
-
 			buffer.append(")"); // end of line (..., ...)
-
-			// methodBuffer = buffer;
-			// buffer = tmpBuffer;
 		}
 		return false;
 	}
@@ -827,7 +826,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 
-		buffer.append(laterBuffer);
+		buffer.append(staticFieldDefBuffer);
 
 		// EnumTypeWrapper enumWrapper = new EnumTypeWrapper(node);
 		//
@@ -899,34 +898,34 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
 			AnonymousClassDeclaration anonDeclare = enumConst.getAnonymousClassDeclaration();
-			buffer.append("Clazz.$newEnumConst(cla$$.construct");
-			if (anonDeclare == null) {
-				IMethodBinding binding = enumConst.resolveConstructorBinding();
-				buffer.append(getJ2SParamQualifier(binding));
-			} else {
-				ITypeBinding binding = anonDeclare.resolveBinding();
-				String anonClassName = null;
-				if (binding.isAnonymous() || binding.isLocal()) {
-					anonClassName = assureQualifiedName(removeJavaLang(binding.getBinaryName()));
-				} else {
-					anonClassName = assureQualifiedName(removeJavaLang(binding.getQualifiedName()));
-				}
-				StringBuffer tmpBuffer = buffer;
+			IMethodBinding binding = enumConst.resolveConstructorBinding();
+			String anonClass = null;
+			if (anonDeclare != null) {
+				// add the anonymous class definition
+				StringBuffer oldBuffer = buffer;
+				StringBuffer oldMethodBuffer = innerClassInitializerBuffer;
 				buffer = new StringBuffer();
-				StringBuffer tmpMethodBuffer = methodBuffer;
-				methodBuffer = new StringBuffer();
+				innerClassInitializerBuffer = new StringBuffer();
 				anonDeclare.accept(this);
-				tmpBuffer.append(methodBuffer);
-				tmpBuffer.append(buffer);
-				tmpBuffer.append(";\r\n");
-				methodBuffer = tmpMethodBuffer;
-				buffer = tmpBuffer;
+				String classDef = innerClassInitializerBuffer.toString();
+				classDef = classDef.substring(classDef.indexOf("function"), classDef.lastIndexOf(";"));
+				anonClass = buffer.substring(0, buffer.indexOf("||")).trim();
+				innerClassInitializerBuffer = oldMethodBuffer;
+				buffer = oldBuffer;
+				buffer.append(anonClass)
+				 .append(" || (")
+				 .append(classDef)
+				 .append(")();\r\n");
 			}
-			buffer.append(", \"");
+			buffer.append("Clazz.$newEnumConst(cla$$.construct")
+			 .append(getJ2SParamQualifier(binding))
+			 .append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i + ", [");
 			visitList(enumConst.arguments(), ", ");
-			buffer.append("]);\r\n");
+			buffer.append("], ")
+			 .append(anonClass)
+			 .append(");\r\n");
 		}
 
 		addAnonymousFunctionWrapper(false);
@@ -959,12 +958,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			node.accept(visitor);
 			if ((node.getModifiers() & Modifier.STATIC) != 0) {
 				String str = visitor.getBuffer().toString();
-				laterBuffer.append(str);
+				staticFieldDefBuffer.append(str);
 			} else {
 				/*
 				 * Never reach here! March 17, 2006
 				 */
-				methodBuffer.append(visitor.getBuffer().toString());
+				innerClassInitializerBuffer.append(visitor.getBuffer().toString());
 			}
 			return false;
 		}
@@ -1202,7 +1201,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (isIntegerType(typeBinding.getName())) {
 					ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 					if (isIntegerType(rightTypeBinding.getName())) {
-						StringBuffer tmpBuffer = buffer;
+						StringBuffer oldBuffer = buffer;
 						buffer = new StringBuffer();
 						buffer.append("Clazz.doubleToInt (");
 						charVisit(left, beCare);
@@ -1235,9 +1234,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							}
 						}
 
-						tmpBuffer.append(buffer);
-						buffer = tmpBuffer;
-						tmpBuffer = null;
+						oldBuffer.append(buffer);
+						buffer = oldBuffer;
+						oldBuffer = null;
 
 						return false;
 					}
@@ -2258,12 +2257,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(");\r\n");
 
-		StringBuffer laterBufferBackup = laterBuffer;
-		laterBuffer = new StringBuffer();
+		StringBuffer laterBufferBackup = staticFieldDefBuffer;
+		staticFieldDefBuffer = new StringBuffer();
 		// Enum is considered as static member!
 
 		List<?> bodyDeclarations = node.bodyDeclarations();
-		StringBuffer tmpBuffer = buffer;
+		StringBuffer oldBuffer = buffer;
 		addInitMethod(bodyDeclarations, node.isInterface());
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
@@ -2303,12 +2302,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		// Interface's inner interfaces or classes
-		buffer.append(laterBuffer);
+		buffer.append(staticFieldDefBuffer);
 
-		tmpBuffer = buffer;
-		StringBuffer tmpLaterBuffer = laterBuffer;
+		oldBuffer = buffer;
+		StringBuffer oldLaterBuffer = staticFieldDefBuffer;
 		buffer = new StringBuffer();
-		laterBuffer = new StringBuffer();
+		staticFieldDefBuffer = new StringBuffer();
 		/* Testing class declarations in initializers */
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
@@ -2356,12 +2355,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
-		buffer = tmpBuffer;
-		laterBuffer = tmpLaterBuffer;
+		buffer = oldBuffer;
+		staticFieldDefBuffer = oldLaterBuffer;
 
-		if (methodBuffer.length() > 0) {
-			buffer.append(methodBuffer);
-			methodBuffer = new StringBuffer();
+		if (innerClassInitializerBuffer.length() > 0) {
+			buffer.append(innerClassInitializerBuffer);
+			innerClassInitializerBuffer = new StringBuffer();
 		}
 		// method first
 		/*
@@ -2544,7 +2543,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 
 		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
-		laterBuffer = new StringBuffer();
+		staticFieldDefBuffer = new StringBuffer();
 		super.endVisit(node);
 	}
 
@@ -2710,7 +2709,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					|| (node.getParent() instanceof TypeDeclaration
 							&& ((TypeDeclaration) node.getParent()).isInterface())) {
 				String str = visitor.getBuffer().toString();
-				laterBuffer.append(str);
+				staticFieldDefBuffer.append(str);
 			} else {
 				/*
 				 * Code examples:
@@ -2729,11 +2728,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(visitor.getFullClassName());
 				buffer.append(") {\r\n");
 
-				methodBuffer.append("cla$$.$");
-				methodBuffer.append(targetClassName);
-				methodBuffer.append("$ = function () {\r\n");
-				methodBuffer.append(visitor.getBuffer().toString());
-				methodBuffer.append("};\r\n");
+				innerClassInitializerBuffer.append("cla$$.$");
+				innerClassInitializerBuffer.append(targetClassName);
+				innerClassInitializerBuffer.append("$ = function () {\r\n");
+				innerClassInitializerBuffer.append(visitor.getBuffer().toString());
+				innerClassInitializerBuffer.append("};\r\n");
 				String pkgName = visitor.getPackageName();
 				if (pkgName != null && pkgName.length() > 0) {
 					buffer.append(pkgName);
