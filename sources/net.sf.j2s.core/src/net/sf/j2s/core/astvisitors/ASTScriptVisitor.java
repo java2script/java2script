@@ -61,7 +61,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
 
-// TODO private methods - rename as private names
+// DONE: type def, including inner classes and anonymous classes
+// DONE: fully encapsulated cla$$ variable
+// DONE: proper <init> processing
+
+// TODO: check proper treatment of abstract classes and interfaces
+// TODO: check more complex mixes to ensure all nesting is correct
+
 // 
 /**
  * 
