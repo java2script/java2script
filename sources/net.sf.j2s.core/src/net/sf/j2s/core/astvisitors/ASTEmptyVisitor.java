@@ -102,8 +102,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
 public class ASTEmptyVisitor extends ASTVisitor {
 
 	/**
-	 * Buffer that keep all compiled *.js.
-	 * @see ASTScriptVisitor#laterBuffer
+	 * Buffer that keeps all compiled *.js.
 	 */
 	protected StringBuffer buffer = new StringBuffer();
 
