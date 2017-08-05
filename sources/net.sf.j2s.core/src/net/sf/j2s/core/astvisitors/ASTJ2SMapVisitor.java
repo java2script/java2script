@@ -21,25 +21,26 @@ import org.eclipse.jdt.core.dom.SimpleName;
 /**
  * @author zhou renjian
  *
- * 2006-12-3
+ *         2006-12-3
  */
 public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 
-	private static Map maps;
+	private static Map<String, NameConvertItem> maps;
 
 	/**
-	 * Set .j2smap
-	 * Please also read net.sf.j2s.java.org.eclipse.swt/.j2smap file.
+	 * Set .j2smap Please also read net.sf.j2s.java.org.eclipse.swt/.j2smap
+	 * file.
 	 * 
 	 * @param m
 	 */
-	public static void setJ2SMap(Map m) {
+	public static void setJ2SMap(Map<String, NameConvertItem> m) {
 		maps = m;
 	}
 
 	String getJ2SName(SimpleName node) {
 		IBinding binding = node.resolveBinding();
-		if (binding == null) return node.getIdentifier();
+		if (binding == null)
+			return node.getIdentifier();
 		if (binding instanceof IVariableBinding) {
 			return getJ2SName((IVariableBinding) binding);
 		}
@@ -53,15 +54,14 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 	String getJ2SName(IVariableBinding binding) {
 		String nameID = binding.getName();
 		if (maps == null || maps.size() == 0) {
-			return nameID; 
+			return nameID;
 		}
 		String className = null;
-		IVariableBinding varBinding = (IVariableBinding) binding;
-		ITypeBinding declaringClass = varBinding.getDeclaringClass();
+		ITypeBinding declaringClass = binding.getDeclaringClass();
 		if (declaringClass != null) {
 			className = declaringClass.getQualifiedName();
 		}
-		
+
 		String key = className + "." + nameID;
 		Object value = maps.get(key);
 		if (value != null && value instanceof NameConvertItem) {
@@ -74,12 +74,11 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 	private String getJ2SName(IMethodBinding binding) {
 		String nameID = binding.getName();
 		if (maps == null || maps.size() == 0) {
-			return nameID; 
+			return nameID;
 		}
 		String className = null;
-		IMethodBinding methodBinding = (IMethodBinding) binding;
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		ITypeBinding superclass = declaringClass.getSuperclass();
+		ITypeBinding declaringClass = binding.getDeclaringClass();
+		ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
 		while (superclass != null) {
 			IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
@@ -127,7 +126,6 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		return false;
 	}
 
-
 	String getFieldName(ITypeBinding binding, String name) {
 		if (binding != null) {
 			ITypeBinding superclass = binding.getSuperclass();
@@ -148,14 +146,12 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 	}
 
 	/**
-	 * Check whether the given field name is already defined in super types 
-	 * or not.
+	 * Check whether the given field name is already defined in super types or
+	 * not.
 	 * 
-	 * The algorithm:
-	 * 1. Check binding self class/interface fields
-	 * 2. Check binding super class
-	 * 3. Check binding interfaces
-	 *  
+	 * The algorithm: 1. Check binding self class/interface fields 2. Check
+	 * binding super class 3. Check binding interfaces
+	 * 
 	 * @param binding
 	 * @param name
 	 * @return
@@ -163,10 +159,10 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
 		if ("serialVersionUID".equals(name)) {
 			/*
-			 * Just ignore this field: serialVersionUID.
-			 * Currently Java2Script does not support Java serialization but 
-			 * support Java2Script's own Simple RPC serialization, which does
-			 * not care about serialVersionID.
+			 * Just ignore this field: serialVersionUID. Currently Java2Script
+			 * does not support Java serialization but support Java2Script's own
+			 * Simple RPC serialization, which does not care about
+			 * serialVersionID.
 			 */
 			return false;
 		}

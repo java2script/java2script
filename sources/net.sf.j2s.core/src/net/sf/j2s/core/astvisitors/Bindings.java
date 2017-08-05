@@ -163,7 +163,7 @@ public class Bindings {
 			if (i > 0) {
 				buffer.append('.');
 			}
-			buffer.append(((String) result.get(i)));
+			buffer.append(result.get(i));
 		}
 		return buffer.toString();
 	}
@@ -213,13 +213,13 @@ public class Bindings {
 	public static String[] getNameComponents(ITypeBinding type) {
 		List<String> result= new ArrayList<String>(5);
 		createName(type, false, result);
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 	
 	public static String[] getAllNameComponents(ITypeBinding type) {
 		List<String> result= new ArrayList<String>(5);
 		createName(type, true, result);
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 	
 	public static ITypeBinding getTopLevelType(ITypeBinding type) {
@@ -509,7 +509,7 @@ public class Bindings {
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
+	public static IMethodBinding findMethodDefinition(IMethodBinding method, boolean testVisibility) {
 		int modifiers= method.getModifiers();
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || method.isConstructor()) {
 			return null;
@@ -563,9 +563,11 @@ public class Bindings {
 	public static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
 		int otherflags= member.getModifiers();
 		ITypeBinding declaringType= member.getDeclaringClass();
-		if (Modifier.isPublic(otherflags) || Modifier.isProtected(otherflags) || (declaringType != null && declaringType.isInterface())) {
+		if (Modifier.isPublic(otherflags) || Modifier.isProtected(otherflags) 
+				|| (declaringType != null && declaringType.isInterface())) {
 			return true;
-		} else if (Modifier.isPrivate(otherflags)) {
+		} 
+		if (declaringType == null || Modifier.isPrivate(otherflags)) {
 			return false;
 		}		
 		return pack == declaringType.getPackage();
@@ -636,7 +638,7 @@ public class Bindings {
 		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
 		collectSuperTypes(type, result);
 		result.remove(type);
-		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
+		return result.toArray(new ITypeBinding[result.size()]);
 	}
 	
 	private static void collectSuperTypes(ITypeBinding curr, Set<ITypeBinding> collection) {
@@ -735,69 +737,82 @@ public class Bindings {
 	}
 
 	/**
-	 * @param overriding overriding method (m1)
-	 * @param overridden overridden method (m2)
-	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
-	 * 		This is one of the requirements for m1 to override m2.
-	 * 		Accessibility and return types are not taken into account.
-	 * 		Note that subsignature is <em>not</em> symmetric!
+	 * @param overriding
+	 *            overriding method (m1)
+	 * @param overridden
+	 *            overridden method (m2)
+	 * @return <code>true</code> iff the method <code>m1</code> is a
+	 *         subsignature of the method <code>m2</code>. This is one of the
+	 *         requirements for m1 to override m2. Accessibility and return
+	 *         types are not taken into account. Note that subsignature is
+	 *         <em>not</em> symmetric!
 	 */
 	public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
-		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
+		// TODO: use IMethodBinding#isSubsignature(..) once it is tested and
+		// fixed (only erasure of m1's parameter types, considering type
+		// variable counts, doing type variable substitution
 		if (!overriding.getName().equals(overridden.getName()))
 			return false;
-			
-		ITypeBinding[] m1Params= overriding.getParameterTypes();
-		ITypeBinding[] m2Params= overridden.getParameterTypes();
+
+		ITypeBinding[] m1Params = overriding.getParameterTypes();
+		ITypeBinding[] m2Params = overridden.getParameterTypes();
 		if (m1Params.length != m2Params.length)
 			return false;
-		
-		ITypeBinding[] m1TypeParams= overriding.getTypeParameters();
-		ITypeBinding[] m2TypeParams= overridden.getTypeParameters();
-		if (m1TypeParams.length != m2TypeParams.length
-				&& m1TypeParams.length != 0) //non-generic m1 can override a generic m2
+
+		ITypeBinding[] m1TypeParams = overriding.getTypeParameters();
+		ITypeBinding[] m2TypeParams = overridden.getTypeParameters();
+		if (m1TypeParams.length != m2TypeParams.length && m1TypeParams.length != 0) // non-generic
+																					// m1
+																					// can
+																					// override
+																					// a
+																					// generic
+																					// m2
 			return false;
-		
-		//m1TypeParameters.length == (m2TypeParameters.length || 0)
+
+		// m1TypeParameters.length == (m2TypeParameters.length || 0)
 		if (m2TypeParams.length != 0) {
-			//Note: this branch does not 100% adhere to the spec and may report some false positives.
+			// Note: this branch does not 100% adhere to the spec and may report
+			// some false positives.
 			// Full compliance would require major duplication of compiler code.
-			
-			//Compare type parameter bounds:
-			for (int i= 0; i < m1TypeParams.length; i++) {
-				// loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
-				Set<ITypeBinding> m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
-				Set<ITypeBinding> m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
-				if (! m1Bounds.equals(m2Bounds))
+
+			// Compare type parameter bounds:
+			for (int i = 0; i < m1TypeParams.length; i++) {
+				// loop over m1TypeParams, which is either empty, or equally
+				// long as m2TypeParams
+				Set<ITypeBinding> m1Bounds = getTypeBoundsForSubsignature(m1TypeParams[i]);
+				Set<ITypeBinding> m2Bounds = getTypeBoundsForSubsignature(m2TypeParams[i]);
+				if (!m1Bounds.equals(m2Bounds))
 					return false;
 			}
-			//Compare parameter types:
+			// Compare parameter types:
 			if (equals(m2Params, m1Params))
 				return true;
-			for (int i= 0; i < m1Params.length; i++) {
-				ITypeBinding m1Param= m1Params[i];
+			for (int i = 0; i < m1Params.length; i++) {
+				ITypeBinding m1Param = m1Params[i];
 				if (containsTypeVariables(m1Param))
-					m1Param= m1Param.getErasure(); // try to achieve effect of "rename type variables"
+					m1Param = m1Param.getErasure(); // try to achieve effect of
+													// "rename type variables"
 				else if (m1Param.isRawType())
-					m1Param= m1Param.getTypeDeclaration();
-				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
+					m1Param = m1Param.getTypeDeclaration();
+				if (!(equals(m1Param, m2Params[i].getErasure()))) // can erase
+																	// m2
 					return false;
 			}
 			return true;
-			
-		} else {
-			// m1TypeParams.length == m2TypeParams.length == 0  
-			if (equals(m1Params, m2Params))
-				return true;
-			for (int i= 0; i < m1Params.length; i++) {
-				ITypeBinding m1Param= m1Params[i];
-				if (m1Param.isRawType())
-					m1Param= m1Param.getTypeDeclaration();
-				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
-					return false;
-			}
-			return true;
+
 		}
+		// m1TypeParams.length == m2TypeParams.length == 0
+		if (equals(m1Params, m2Params))
+			return true;
+		for (int i = 0; i < m1Params.length; i++) {
+			ITypeBinding m1Param = m1Params[i];
+			if (m1Param.isRawType())
+				m1Param = m1Param.getTypeDeclaration();
+			if (!(equals(m1Param, m2Params[i].getErasure()))) // can erase m2
+				return false;
+		}
+		return true;
 	}
 
 	private static boolean containsTypeVariables(ITypeBinding type) {
@@ -1027,38 +1042,35 @@ public class Bindings {
 	private static boolean sameParameter(ITypeBinding type, String candidate, IType scope) throws JavaModelException {
 		if (type.getDimensions() != Signature.getArrayCount(candidate))
 			return false;
-			
+
 		// Normalizes types
 		if (type.isArray())
-			type= type.getElementType();
-		candidate= Signature.getElementType(candidate);
-		
+			type = type.getElementType();
+		candidate = Signature.getElementType(candidate);
+
 		if ((Signature.getTypeSignatureKind(candidate) == Signature.BASE_TYPE_SIGNATURE) != type.isPrimitive()) {
 			return false;
 		}
-			
+
 		if (type.isPrimitive() || type.isTypeVariable()) {
 			return type.getName().equals(Signature.toString(candidate));
-		} else {
-			// normalize (quick hack until binding.getJavaElement works)
-			candidate= Signature.getTypeErasure(candidate);
-			type= type.getErasure();
-			
-			if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
-				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
-			} else {
-				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
-				if (qualifiedCandidates == null || qualifiedCandidates.length == 0)
-					return false;
-				String packageName= type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
-				String typeName= getTypeQualifiedName(type);
-				for (int i= 0; i < qualifiedCandidates.length; i++) {
-					String[] qualifiedCandidate= qualifiedCandidates[i];
-					if (	qualifiedCandidate[0].equals(packageName) &&
-							qualifiedCandidate[1].equals(typeName))
-						return true;
-				}
-			}
+		}
+		// normalize (quick hack until binding.getJavaElement works)
+		candidate = Signature.getTypeErasure(candidate);
+		type = type.getErasure();
+
+		if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
+			return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
+		}
+		String[][] qualifiedCandidates = scope.resolveType(Signature.toString(candidate));
+		if (qualifiedCandidates == null || qualifiedCandidates.length == 0)
+			return false;
+		String packageName = type.getPackage().isUnnamed() ? "" : type.getPackage().getName(); //$NON-NLS-1$
+		String typeName = getTypeQualifiedName(type);
+		for (int i = 0; i < qualifiedCandidates.length; i++) {
+			String[] qualifiedCandidate = qualifiedCandidates[i];
+			if (qualifiedCandidate[0].equals(packageName) && qualifiedCandidate[1].equals(typeName))
+				return true;
 		}
 		return false;
 	}
@@ -1122,9 +1134,8 @@ public class Bindings {
 			return binding;
 		if (binding.isUpperbound()) {
 			return binding.getBound();
-		} else {
-			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		}
+		} 
+		return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
 	/**
@@ -1160,41 +1171,39 @@ public class Bindings {
 	
 
 	public static String getRawQualifiedName(ITypeBinding binding) {
-		final String EMPTY= ""; //$NON-NLS-1$
-		
+		final String EMPTY = ""; //$NON-NLS-1$
+
 		if (binding.isAnonymous() || binding.isLocal()) {
-			return EMPTY; 
+			return EMPTY;
 		}
-		
+
 		if (binding.isPrimitive() || binding.isNullType() || binding.isTypeVariable()) {
 			return binding.getName();
 		}
-		
+
 		if (binding.isArray()) {
 			String elementTypeQualifiedName = getRawQualifiedName(binding.getElementType());
 			if (elementTypeQualifiedName.length() != 0) {
-				StringBuffer stringBuffer= new StringBuffer(elementTypeQualifiedName);
+				StringBuffer stringBuffer = new StringBuffer(elementTypeQualifiedName);
 				stringBuffer.append('[').append(']');
 				return stringBuffer.toString();
-			} else {
-				return EMPTY;
 			}
+			return EMPTY;
 		}
 		if (binding.isMember()) {
-			String outerName= getRawQualifiedName(binding.getDeclaringClass());
+			String outerName = getRawQualifiedName(binding.getDeclaringClass());
 			if (outerName.length() > 0) {
-				StringBuffer buffer= new StringBuffer();
+				StringBuffer buffer = new StringBuffer();
 				buffer.append(outerName);
 				buffer.append('.');
 				buffer.append(getRawName(binding));
 				return buffer.toString();
-			} else {
-				return EMPTY;
 			}
+			return EMPTY;
 
 		} else if (binding.isTopLevel()) {
-			IPackageBinding packageBinding= binding.getPackage();
-			StringBuffer buffer= new StringBuffer();
+			IPackageBinding packageBinding = binding.getPackage();
+			StringBuffer buffer = new StringBuffer();
 			if (packageBinding != null && packageBinding.getName().length() > 0) {
 				buffer.append(packageBinding.getName()).append('.');
 			}
@@ -1228,20 +1237,22 @@ public class Bindings {
 	}
 
 	/**
-	 * Tests if the given node is a declaration, not a instance of a generic type, method or field.
-	 * Declarations can be found in AST with CompilationUnit.findDeclaringNode
+	 * Tests if the given node is a declaration, not a instance of a generic
+	 * type, method or field. Declarations can be found in AST with
+	 * CompilationUnit.findDeclaringNode
 	 */
 	public static boolean isDeclarationBinding(IBinding binding) {
 		switch (binding.getKind()) {
-			case IBinding.TYPE:
-				return ((ITypeBinding) binding).getTypeDeclaration() == binding;
-			case IBinding.VARIABLE:
-				IVariableBinding var= (IVariableBinding) binding;
-				return !var.isField() || isDeclarationBinding(var.getDeclaringClass());
-			case IBinding.METHOD:
-				return ((IMethodBinding) binding).getMethodDeclaration() == binding;
+		case IBinding.TYPE:
+			return ((ITypeBinding) binding).getTypeDeclaration() == binding;
+		case IBinding.VARIABLE:
+			IVariableBinding var = (IVariableBinding) binding;
+			return !var.isField() || isDeclarationBinding(var.getDeclaringClass());
+		case IBinding.METHOD:
+			return ((IMethodBinding) binding).getMethodDeclaration() == binding;
+		default:
+			return true;
 		}
-		return true;
 	}
 
 	public static boolean containsOverridingMethod(IMethodBinding[] candidates, IMethodBinding overridable) {

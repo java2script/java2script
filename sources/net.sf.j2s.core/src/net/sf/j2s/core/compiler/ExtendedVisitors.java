@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.Platform;
  */
 public class ExtendedVisitors {
 
-	public static Map visitors = new HashMap();
+	public static Map<String, IExtendedVisitor> visitors = new HashMap<String, IExtendedVisitor>();
 
 	private static boolean isExtensionPointsChecked = false;
 
@@ -59,7 +59,7 @@ public class ExtendedVisitors {
 							Object callback = element
 									.createExecutableExtension("class");
 							if (callback instanceof IExtendedVisitor) {
-								visitors.put(id.trim(), callback);
+								visitors.put(id.trim(), (IExtendedVisitor) callback);
 							}
 						} catch (CoreException e) {
 							e.printStackTrace();
@@ -79,19 +79,19 @@ public class ExtendedVisitors {
 
 	public static IExtendedVisitor deregister(String visitorID) {
 		if (visitorID != null && visitorID.trim().length() != 0) {
-			return (IExtendedVisitor) visitors.remove(visitorID);
+			return visitors.remove(visitorID);
 		}
 		return null;
 	}
 
 	public static IExtendedVisitor[] getExistedVisitors() {
 		checkExtensionPoints();
-		return (IExtendedVisitor[]) visitors.values().toArray(new IExtendedVisitor[0]);
+		return visitors.values().toArray(new IExtendedVisitor[0]);
 	}
 	
 	public static IExtendedVisitor getExistedVisitor(String id) {
 		checkExtensionPoints();
-		return (IExtendedVisitor) visitors.get(id);
+		return visitors.get(id);
 	}
 	
 }

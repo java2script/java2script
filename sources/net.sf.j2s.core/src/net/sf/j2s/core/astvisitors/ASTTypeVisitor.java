@@ -23,35 +23,35 @@ import org.eclipse.jdt.core.dom.WildcardType;
 /**
  * @author zhou renjian
  *
- * 2006-12-3
+ *         2006-12-3
  */
 public class ASTTypeVisitor extends AbstractPluginVisitor {
 
 	protected String thisClassName = "";
-	
-//	protected int anonymousCount = 0;
-//
-//	public int getAnonymousCount() {
-//		return anonymousCount;
-//	}
+
+	// protected int anonymousCount = 0;
+	//
+	// public int getAnonymousCount() {
+	// return anonymousCount;
+	// }
 
 	public String getClassName() {
 		return thisClassName;
 	}
-	
-//	public void increaseAnonymousClassCount() {
-//		anonymousCount++;
-//	}
-	
+
+	// public void increaseAnonymousClassCount() {
+	// anonymousCount++;
+	// }
+
 	public void setClassName(String className) {
 		thisClassName = className;
 	}
-	
+
 	public String getFullClassName() {
 		String fullClassName = null;
-		String thisPackageName = ((ASTPackageVisitor) getVisitor().getAdaptable(ASTPackageVisitor.class)).getPackageName();
-		if (thisPackageName != null && thisPackageName.length() != 0
-				&& !"java.lang".equals(thisPackageName)) {
+		String thisPackageName = ((ASTPackageVisitor) getVisitor().getAdaptable(ASTPackageVisitor.class))
+				.getPackageName();
+		if (thisPackageName != null && thisPackageName.length() != 0 && !"java.lang".equals(thisPackageName)) {
 			fullClassName = thisPackageName + '.' + thisClassName;
 		} else {
 			fullClassName = thisClassName;
@@ -81,7 +81,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * 1. Check binding self class name
 	 * 2. Check binding super class
 	 * 3. Check binding interfaces
-	 *  
+	 * 
 	 * @param binding
 	 * @param name
 	 * @return
@@ -110,7 +110,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	}
 
 	/**
-	 * Shorten fully qualified class names starting with java.lang. 
+	 * Shorten fully qualified class names starting with java.lang.
 	 * 
 	 * Here are the situations: 
 	 * 1. No needs for "java.lang." 
@@ -126,12 +126,9 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index == 0
-				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
-						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
-			if (!name.startsWith("java.lang.ref")
-							&& !name.startsWith("java.lang.annotation")
-							&& !name.startsWith("java.lang.instrument")
-							&& !name.startsWith("java.lang.management")) {
+				&& (name.indexOf('.', index + 10) == -1 || ((ch = name.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
+			if (!name.startsWith("java.lang.ref") && !name.startsWith("java.lang.annotation")
+					&& !name.startsWith("java.lang.instrument") && !name.startsWith("java.lang.management")) {
 				name = name.substring(10);
 			}
 		}
@@ -179,12 +176,9 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		int index = name.indexOf("java.lang.");
 		char ch = 0;
 		if (index == 0
-				&& (name.indexOf('.', index + 10) == -1 || ((ch = name
-						.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
-			if (!fullName.startsWith("java.lang.ref")
-							&& !fullName.startsWith("java.lang.annotation")
-							&& !fullName.startsWith("java.lang.instrument")
-							&& !fullName.startsWith("java.lang.management")) {
+				&& (name.indexOf('.', index + 10) == -1 || ((ch = name.charAt(index + 10)) >= 'A' && ch <= 'Z'))) {
+			if (!fullName.startsWith("java.lang.ref") && !fullName.startsWith("java.lang.annotation")
+					&& !fullName.startsWith("java.lang.instrument") && !fullName.startsWith("java.lang.management")) {
 				name = name.substring(10);
 			}
 		}
@@ -218,8 +212,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		if (type == null) {
 			return null;
 		}
-		if (type instanceof PrimitiveType
-				|| type instanceof WildcardType) {
+		if (type instanceof PrimitiveType || type instanceof WildcardType) {
 			return null;
 		} else if (type instanceof ArrayType) {
 			ArrayType arrType = (ArrayType) type;
@@ -229,17 +222,18 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 			return getTypeStringName(paramType.getType());
 		} else if (type instanceof QualifiedType) {
 			QualifiedType qualType = (QualifiedType) type;
-			return getTypeStringName(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();//.getFullyQualifiedName();
+			return getTypeStringName(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();// .getFullyQualifiedName();
 		} else if (type instanceof SimpleType) {
 			SimpleType simpType = (SimpleType) type;
 			ITypeBinding binding = simpType.resolveBinding();
-			if(binding != null){
+			if (binding != null) {
 				return binding.getQualifiedName();
 			}
 		}
 		return null;
 	}
 
+	@SuppressWarnings("null")
 	public String assureQualifiedName(String name) {
 		if (name == null || name.length() == 0) {
 			return name;
@@ -276,9 +270,8 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 				}
 			}
 			return sb.toString();
-		} else {
-			return name;
 		}
+		return name;
 	}
 
 	public boolean isIntegerType(String type) {

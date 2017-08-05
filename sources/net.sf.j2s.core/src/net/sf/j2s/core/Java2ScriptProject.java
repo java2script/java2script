@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.core.ExternalJavaProject;
  *
  * 2006-6-15
  */
+@SuppressWarnings("restriction")
 public class Java2ScriptProject {
 
 	/**
@@ -31,7 +32,7 @@ public class Java2ScriptProject {
 	public static boolean hasJava2ScriptNature(IProject project) { 
 		try {
 			return project.hasNature("net.sf.j2s.java2scriptnature");
-		} catch (CoreException e) {
+		} catch (@SuppressWarnings("unused") CoreException e) {
 			if (ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(project.getName()))
 				return true;
 			// project does not exist or is not open

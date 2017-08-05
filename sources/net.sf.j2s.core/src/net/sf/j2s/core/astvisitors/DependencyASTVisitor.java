@@ -65,19 +65,20 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 
  *         2006-5-2
  */
+@SuppressWarnings("rawtypes")
 public class DependencyASTVisitor extends ASTEmptyVisitor {
 
-	protected Set classNameSet = new HashSet();
+	protected Set<String> classNameSet = new HashSet<String>();
 
-	protected Set classBindingSet = new HashSet();
+	protected Set<ITypeBinding> classBindingSet = new HashSet<ITypeBinding>();
 
-	protected Set musts = new HashSet();
+	protected Set<Object> musts = new HashSet<Object>();
 
-	protected Set requires = new HashSet();
+	protected Set<Object> requires = new HashSet<Object>();
 
-	protected Set optionals = new HashSet();
+	protected Set<Object> optionals = new HashSet<Object>();
 
-	protected Set ignores = new HashSet();
+	protected Set<Object> ignores = new HashSet<Object>();
 
 	private boolean isDebugging = false;
 
@@ -99,12 +100,12 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * @return Returns the thisClassName.
 	 */
 	public String[] getClassNames() {
-		return (String[]) classNameSet.toArray(new String[0]);
+		return classNameSet.toArray(new String[0]);
 	}
 
-	protected void checkSuperType(Set set) {
-		Set removed = new HashSet();
-		Set reseted = new HashSet();
+	protected void checkSuperType(Set<Object> set) {
+		Set<QNTypeBinding> removed = new HashSet<QNTypeBinding>();
+		Set<QNTypeBinding> reseted = new HashSet<QNTypeBinding>();
 		for (Iterator iter = set.iterator(); iter.hasNext();) {
 			Object n = iter.next();
 			if (n instanceof QNTypeBinding) {
@@ -125,22 +126,21 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}
 		set.removeAll(removed);
 		set.removeAll(reseted);
-		for (Iterator i = reseted.iterator(); i.hasNext();) {
-			QNTypeBinding qn = (QNTypeBinding) i.next();
+		for (Iterator<QNTypeBinding> i = reseted.iterator(); i.hasNext();) {
+			QNTypeBinding qn = i.next();
 			set.add(qn.qualifiedName);
 		}
 	}
 
-	protected void remedyDependency(Set set) {
+	protected void remedyDependency(Set<Object> set) {
 		String[] classNames = getClassNames();
 		for (int i = 0; i < classNames.length; i++) {
 			if ("net.sf.j2s.ajax.ASWTClass".equals(classNames[i])) {
 				return;
 			}
 		}
-		List toRemoveList = new ArrayList();
+		List<Object> toRemoveList = new ArrayList<Object>();
 		boolean needRemedy = false;
-		;
 		for (Iterator iterator = set.iterator(); iterator.hasNext();) {
 			Object next = iterator.next();
 			String name = null;
@@ -225,13 +225,13 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			buf.append("Clazz.load (");
 			if (musts.size() != 0 || requires.size() != 0) {
 				buf.append("[");
-				String[] ss = (String[]) musts.toArray(new String[0]);
+				String[] ss = musts.toArray(new String[0]);
 				Arrays.sort(ss);
 				String lastClassName = joinArrayClasses(buf, ss, null);
 				if (musts.size() != 0 && requires.size() != 0) {
 					buf.append(", ");
 				}
-				ss = (String[]) requires.toArray(new String[0]);
+				ss = requires.toArray(new String[0]);
 				Arrays.sort(ss);
 				joinArrayClasses(buf, ss, lastClassName);
 				buf.append("], ");
@@ -248,7 +248,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			buf.append(", ");
 			if (optionals.size() != 0) {
 				buf.append("[");
-				String[] ss = (String[]) optionals.toArray(new String[0]);
+				String[] ss = optionals.toArray(new String[0]);
 				Arrays.sort(ss);
 				joinArrayClasses(buf, ss, null);
 				buf.append("], ");
@@ -293,7 +293,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				if (ss[i].startsWith(key)) {
 					buf.append("$wt.");
 					buf.append(ss[i].substring(key.length()));
-					;
 				} else {
 					buf.append(ss[i]);
 				}
@@ -308,7 +307,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 
 	public static void main(String[] args) {
-		Set set = new HashSet();
+		Set<String> set = new HashSet<String>();
 		set.add("java.lang.UnsupportedOperationException");
 		set.add("java.lang.CloneNotSupportedException");
 		set.add("java.io.ObjectOutputStream");
@@ -338,13 +337,16 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		for (int i = 0; i < s.length; i++) {
 			set.add(s[i]);
 		}
-		String[] ss = (String[]) set.toArray(new String[0]);
+		String[] ss = set.toArray(new String[0]);
 		StringBuffer buf = new StringBuffer();
 		Arrays.sort(ss);
 		joinArrayClasses(buf, ss, null);
 		System.out.println(buf.toString().replaceAll(", ", ",\r\n\t"));
 	}
 
+	/**
+	 * @param node  
+	 */
 	public boolean isNodeInMustPath(ASTNode node) {
 		// Add more class dependencies in musts will make classloader running
 		// into stack call limit reached.
@@ -385,7 +387,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}
 	}
 
-	protected void readClasses(Annotation annotation, Set set) {
+	protected void readClasses(Annotation annotation, Set<Object> set) {
 		StringBuffer buf = new StringBuffer();
 		IAnnotationBinding annotationBinding = annotation.resolveAnnotationBinding();
 		if (annotationBinding != null) {
@@ -423,8 +425,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}
 	}
 
-	protected void readClasses(TagElement tagEl, Set set) {
-		List fragments = tagEl.fragments();
+	protected void readClasses(TagElement tagEl, Set<Object> set) {
+		List<?> fragments = tagEl.fragments();
 		StringBuffer buf = new StringBuffer();
 		boolean isFirstLine = true;
 		for (Iterator iterator = fragments.iterator(); iterator.hasNext();) {
@@ -536,7 +538,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}
 		List modifiers = node.modifiers();
 		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = (Object) iter.next();
+			Object obj = iter.next();
 			if (obj instanceof Annotation) {
 				Annotation annotation = (Annotation) obj;
 				String qName = annotation.getTypeName().getFullyQualifiedName();
@@ -757,8 +759,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
+	/**
+	 * @param node  
+	 */
 	protected void visitForOptionals(AbstractTypeDeclaration node) {
-
+		// ignore
 	}
 
 	protected boolean isSimpleQualified(QualifiedName node) {
@@ -1280,12 +1285,12 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			if (root instanceof CompilationUnit) {
 				CompilationUnit unit = (CompilationUnit) root;
 				List commentList = unit.getCommentList();
-				ArrayList list = new ArrayList();
+				ArrayList<Javadoc> list = new ArrayList<Javadoc>();
 				for (Iterator iter = commentList.iterator(); iter.hasNext();) {
 					Comment comment = (Comment) iter.next();
 					if (comment instanceof Javadoc) {
 						Javadoc javadoc = (Javadoc) comment;
-						List tags = javadoc.tags();
+						List<?> tags = javadoc.tags();
 						if (tags.size() != 0) {
 							for (Iterator itr = tags.iterator(); itr.hasNext();) {
 								TagElement tagEl = (TagElement) itr.next();
@@ -1293,13 +1298,13 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 								if ("@j2sIgnore".equals(tagName) || "@j2sDebug".equals(tagName)
 										|| "@j2sNative".equals(tagName) || "@j2sNativeSrc".equals(tagName)
 										|| "@j2sXHTML".equals(tagName) || "@j2sXCSS".equals(tagName)) {
-									list.add(comment);
+									list.add((Javadoc)comment);
 								}
 							}
 						}
 					}
 				}
-				nativeJavadoc = (Javadoc[]) list.toArray(nativeJavadoc);
+				nativeJavadoc = list.toArray(nativeJavadoc);
 			}
 		}
 	}
@@ -1350,7 +1355,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	protected Object getJ2STag(BodyDeclaration node, String tagName) {
 		List modifiers = node.modifiers();
 		for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = (Object) iter.next();
+			Object obj = iter.next();
 			if (obj instanceof Annotation) {
 				Annotation annotation = (Annotation) obj;
 				String qName = annotation.getTypeName().getFullyQualifiedName();

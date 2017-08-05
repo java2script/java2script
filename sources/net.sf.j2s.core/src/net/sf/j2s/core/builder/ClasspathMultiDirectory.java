@@ -10,11 +10,12 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.resources.*;
-
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.util.Util;
 
+@SuppressWarnings("restriction")
 public class ClasspathMultiDirectory extends ClasspathDirectory {
 
 IContainer sourceFolder;

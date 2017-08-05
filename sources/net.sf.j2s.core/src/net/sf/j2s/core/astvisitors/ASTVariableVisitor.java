@@ -30,7 +30,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	/**
 	 * List of variables that are declared as final.
 	 */
-	protected List finalVars = new ArrayList();
+	protected List<ASTFinalVariable> finalVars = new ArrayList<ASTFinalVariable>();
 	
 	/**
 	 * Final variables only make senses (need "this.f$[...]") inside anonymous
@@ -41,32 +41,34 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
 	 */
-	protected List normalVars = new ArrayList();
+	protected List<ASTFinalVariable> normalVars = new ArrayList<ASTFinalVariable>();
 
 	/**
 	 * Only those final variables that are referenced inside anonymous class
 	 * need to be passed into anonymous class.
 	 */
-	protected List visitedVars = new ArrayList();
+	protected List<ASTFinalVariable> visitedVars = new ArrayList<ASTFinalVariable>();
 	
 	/**
 	 * Whether to compile variable names into minimized names or not
 	 */
-	protected boolean toCompileVariableName = true;
+	protected boolean toCompileVariableName = false; // BH - ensure default is FALSE not TRUE
 
 	public boolean isToCompileVariableName() {
 		return toCompileVariableName;
 	}
 
+	/**
+	 * @param toCompileVariableName  
+	 */
 	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
+		//BH abandoned this.toCompileVariableName = toCompileVariableName;
 	}
 
 	protected String getVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+			ASTFinalVariable var =  normalVars.get(i);
 			if (name.equals(var.variableName)) {
-				//return getIndexedVarName(name, i);
 				return var.toVariableName;
 			}
 		}
@@ -99,18 +101,16 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 				int l = i % 26;
 				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
 			}
-			for (Iterator iter = finalVars.iterator(); iter.hasNext();) {
-				ASTFinalVariable f = (ASTFinalVariable) iter.next();
-				if (newName.equals(f.toVariableName)) {
+			for (Iterator<ASTFinalVariable> iter = finalVars.iterator(); iter.hasNext();) {
+				if (newName.equals(iter.next().toVariableName)) {
 					newName = null;
 					i++;
 					break;
 				}
 			}
 			if (newName != null) {
-				for (Iterator iter = normalVars.iterator(); iter.hasNext();) {
-					ASTFinalVariable f = (ASTFinalVariable) iter.next();
-					if (newName.equals(f.toVariableName)) {
+				for (Iterator<ASTFinalVariable> iter = normalVars.iterator(); iter.hasNext();) {
+					if (newName.equals(iter.next().toVariableName)) {
 						newName = null;
 						i++;
 						break;
@@ -138,14 +138,14 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	 * @param scope
 	 * @return
 	 */
-	protected String listFinalVariables(List list, String seperator, String scope) {
+	protected String listFinalVariables(List<ASTFinalVariable> list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
 		}
 		StringBuffer buf = new StringBuffer();
 		buf.append("{");
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			ASTFinalVariable fv = (ASTFinalVariable) iter.next();
+		for (Iterator<ASTFinalVariable> iter = list.iterator(); iter.hasNext();) {
+			ASTFinalVariable fv = iter.next();
 			String name = fv.variableName;
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;

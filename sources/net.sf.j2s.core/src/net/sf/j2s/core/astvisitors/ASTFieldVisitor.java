@@ -11,16 +11,9 @@
 
 package net.sf.j2s.core.astvisitors;
 
-import java.util.Iterator;
-import java.util.List;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * @author zhou renjian
@@ -96,32 +89,29 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 		return false;
 	}
 
-	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		if ((node.getModifiers() & Modifier.STATIC) != 0) {
-			return false;
-		}
-
-		List fragments = node.fragments();
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
-			Expression initializer = element.getInitializer();
-			if (initializer != null) {
-				Object constValue = initializer.resolveConstantExpressionValue();
-				if (constValue != null && (constValue instanceof Number
-						|| constValue instanceof Character
-						|| constValue instanceof Boolean
-						|| constValue instanceof String)) {
-					return false;
-				}
-				if (initializer instanceof NullLiteral) {
-					return false;
-				}
-				return true;
-			} else {
-				return false;
-			}
-		}
-		return false;
-	}
+//	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+//		if ((node.getModifiers() & Modifier.STATIC) != 0) {
+//			return false;
+//		}
+//
+//		List<?> fragments = node.fragments();
+//		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
+//			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
+//			Expression initializer = element.getInitializer();
+//			if (initializer != null) {
+//				Object constValue = initializer.resolveConstantExpressionValue();
+//				if (constValue != null && (constValue instanceof Number || constValue instanceof Character
+//						|| constValue instanceof Boolean || constValue instanceof String)) {
+//					return false;
+//				}
+//				if (initializer instanceof NullLiteral) {
+//					return false;
+//				}
+//				return true;
+//			}
+//			return false;
+//		}
+//		return false;
+//	}
 
 }

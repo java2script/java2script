@@ -123,9 +123,9 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		this.buffer = buffer;
 	}
 
-	protected Map visitorMap = new HashMap();
+	protected Map<Class<?>, IPluginVisitor> visitorMap = new HashMap<Class<?>, IPluginVisitor>();
 	
-	public Object getAdaptable(Class clazz) {
+	public Object getAdaptable(Class<?> clazz) {
 		if (clazz == ASTEmptyVisitor.class) {
 			return this;
 		}
@@ -148,7 +148,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public void registerPluginVisitor(IPluginVisitor visitor) {
-		//visitor.setBuffer(buffer);
 		visitor.setVisitor(this);
 		visitorMap.put(visitor.getClass(), visitor);
 	}

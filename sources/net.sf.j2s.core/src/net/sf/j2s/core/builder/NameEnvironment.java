@@ -16,22 +16,34 @@
  *******************************************************************************/
 package net.sf.j2s.core.builder;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import java.io.File;
+import java.util.ArrayList;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.env.*;
+import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
+import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
+import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
-import org.eclipse.jdt.internal.core.*;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
+import org.eclipse.jdt.internal.core.JavaModel;
+import org.eclipse.jdt.internal.core.JavaProject;
 
-import java.io.*;
-import java.util.*;
-
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class NameEnvironment implements INameEnvironment, SuffixConstants {
 
 boolean isIncrementalBuild;
@@ -53,7 +65,7 @@ public NameEnvironment(IJavaProject javaProject) {
 	this.isIncrementalBuild = false;
 	try {
 		computeClasspathLocations(javaProject.getProject().getWorkspace().getRoot(), (JavaProject) javaProject, null);
-	} catch(CoreException e) {
+	} catch(@SuppressWarnings("unused") CoreException e) {
 		this.sourceLocations = new ClasspathMultiDirectory[0];
 		this.binaryLocations = new ClasspathLocation[0];
 	}
@@ -205,6 +217,8 @@ private void computeClasspathLocations(
 					bLocations.add(ClasspathLocation.forLibrary(path.toString(), accessRuleSet, externalAnnotationPath));
 				}
 				continue nextEntry;
+		default:
+			break;
 		}
 	}
 

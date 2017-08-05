@@ -94,30 +94,26 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			return false;
 		}
 		IBinding binding = node.resolveBinding();
-		if (binding != null
-				&& binding instanceof ITypeBinding) {
-			ITypeBinding typeBinding = (ITypeBinding) binding;
-			if (typeBinding != null) {
-				String name = typeBinding.getQualifiedName();
-				if (name.startsWith("org.eclipse.swt.internal.xhtml.")
-						|| name.startsWith("net.sf.j2s.html.")) {
-					String identifier = node.getIdentifier();
-					if ("window".equals(identifier)) {
-						identifier = "w$";
-					} else if ("document".equals(identifier)) {
-						identifier = "d$";
-					}
-					buffer.append(identifier);
-					return false;
+		if (binding != null && binding instanceof ITypeBinding) {
+			String name = ((ITypeBinding) binding).getQualifiedName();
+			if (name.startsWith("org.eclipse.swt.internal.xhtml.") || name.startsWith("net.sf.j2s.html.")) {
+				String identifier = node.getIdentifier();
+				if ("window".equals(identifier)) {
+					identifier = "w$";
+				} else if ("document".equals(identifier)) {
+					identifier = "d$";
 				}
-				if ("org.eclipse.swt.internal.browser.OS".equals(name)) {
-					buffer.append("O$");
-					return false;
-				}
+				buffer.append(identifier);
+				return false;
+			}
+			if ("org.eclipse.swt.internal.browser.OS".equals(name)) {
+				buffer.append("O$");
+				return false;
 			}
 		}
 		return super.visit(node);
 	}
+	@SuppressWarnings("null")
 	public boolean visit(QualifiedName node) {
 		if (isSimpleQualified(node)) {
 			String constValue = checkConstantValue(node);
@@ -245,6 +241,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		node.getName().accept(this);
 		return false;
 	}
+	@SuppressWarnings("unchecked")
 	public boolean visit(ClassInstanceCreation node) {
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (binding != null) {
@@ -256,8 +253,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			}
 		}
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
-		if (anonDeclare != null) {
-		} else {
+		if (anonDeclare == null) {
 			String fqName = null;
 			String name = getTypeStringName(node.getType());
 			if (name != null) {
@@ -303,10 +299,10 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		}
 		if (clazzName.equals(binding.getBinaryName())) {
 			return true;
-		} else {
-			return isTypeOf(binding.getSuperclass(), clazzName);
 		}
+		return isTypeOf(binding.getSuperclass(), clazzName);
 	}
+	
 	public boolean visit(WhileStatement node) {
 		Expression exp = node.getExpression();
 		if (exp instanceof PrefixExpression) {
@@ -496,8 +492,8 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			metDialogOpen = lastDialogOpen;
 			return false;
 		}
-		List statements = node.statements();
-		for (Iterator iter = statements.iterator(); iter.hasNext();) {
+		List<?> statements = node.statements();
+		for (Iterator<?> iter = statements.iterator(); iter.hasNext();) {
 			Statement stmt = (Statement) iter.next();
 			if (stmt instanceof ExpressionStatement) {
 				ExpressionStatement expStmt = (ExpressionStatement) stmt;
@@ -540,7 +536,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			Statement thenStatement = node.getThenStatement();
 			if (thenStatement instanceof Block) {
 				Block block = (Block) thenStatement;
-				List statements = block.statements();
+				List<?> statements = block.statements();
 				if (statements.size() == 1) {
 					thenStatement = (Statement) statements.get(0);
 				}

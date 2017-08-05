@@ -47,6 +47,6 @@ public class ReferenceASTVisitor extends ASTVisitor {
 
 	public void setReferenced(boolean isReferenced) {
 		this.isReferenced = isReferenced;
-	};
+	}
 	
 }

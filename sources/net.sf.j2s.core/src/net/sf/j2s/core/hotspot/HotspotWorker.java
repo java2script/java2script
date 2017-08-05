@@ -28,13 +28,14 @@ public class HotspotWorker implements Runnable {
         notify();
     }
 
-    public synchronized void run() {
+    @SuppressWarnings("unchecked")
+	public synchronized void run() {
         while(true) {
             if (s == null) {
                 /* nothing to do */
                 try {
                     wait();
-                } catch (InterruptedException e) {
+                } catch (@SuppressWarnings("unused") InterruptedException e) {
                     /* should not happen */
                     continue;
                 }
@@ -48,14 +49,14 @@ public class HotspotWorker implements Runnable {
              * than numHandler connections.
              */
             s = null;
-            Vector pool = InnerHotspotServer.threads;
+            @SuppressWarnings("rawtypes")
+			Vector pool = InnerHotspotServer.threads;
             synchronized (pool) {
                 if (pool.size() >= 5) {
                     /* too many threads, exit this one */
                     return;
-                } else {
-                    pool.addElement(this);
-                }
+                } 
+                pool.addElement(this);
             }
         }
     }
@@ -131,7 +132,8 @@ public class HotspotWorker implements Runnable {
                     break;
                 }
             }
-            String fname = new String(buf, 0, index, i-index);
+            @SuppressWarnings("deprecation")
+			String fname = new String(buf, 0, index, i-index);
             if (fname.startsWith("/") || fname.startsWith("\\")) {
                 fname = fname.substring(1);
             }
@@ -146,7 +148,8 @@ public class HotspotWorker implements Runnable {
             long sessionID = -1;
             try {
 				sessionID = Long.parseLong(fname);
-			} catch (NumberFormatException e) {
+			} catch (@SuppressWarnings("unused") NumberFormatException e) {
+				// ignore
 			}
             ps.print("HTTP/1.0 200 OK");
             ps.write(EOL);

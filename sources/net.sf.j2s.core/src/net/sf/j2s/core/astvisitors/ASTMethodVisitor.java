@@ -15,12 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 
 /**
  * @author zhou renjian
@@ -29,8 +23,8 @@ import org.eclipse.jdt.core.dom.Modifier;
  */
 public class ASTMethodVisitor extends AbstractPluginVisitor {
 
-	private static Set methodSet;
-	private static Map pmMap;
+	private static Set<String> methodSet;
+	private static Map<String, String> pmMap;
 	public static final String PACKAGE_PREFIX;
 	public static String[] mapDocument;
 	public static String[] mapNode;
@@ -125,8 +119,8 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	}
 
 	public static void init() {
-		pmMap = new HashMap();
-		methodSet = new HashSet();
+		pmMap = new HashMap<String, String>();
+		methodSet = new HashSet<String>();
 		register("java.lang.String", "length", "length");
 		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
 		register("java.lang.String", "replace", "~replace");
@@ -144,7 +138,7 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	}
 
 	public String translate(String className, String methodName) {
-		return (String) pmMap.get(className + "." + methodName);
+		return pmMap.get(className + "." + methodName);
 	}
 
 	protected static void registerMap(String[] map) {
@@ -171,57 +165,57 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 	
 
 
-	private boolean testForceOverriding(IMethodBinding method) {
-		if(method == null){
-			return true;
-		}
-		String methodName = method.getName();
-		ITypeBinding classInHierarchy = method.getDeclaringClass();
-		do {
-			IMethodBinding[] methods = classInHierarchy.getDeclaredMethods();
-			int count = 0;
-			IMethodBinding superMethod = null;
-			for (int i= 0; i < methods.length; i++) {
-				if (methodName.equals(methods[i].getName())) {
-					count++;
-					superMethod = methods[i];
-				}
-			}
-			if (count > 1) {
-				return false;
-			} else if (count == 1) {
-				if (!Bindings.isSubsignature(method, superMethod)) {
-					return false;
-				} else if ((superMethod.getModifiers() & Modifier.PRIVATE) != 0) {
-					return false;
-				}
-			}
-			classInHierarchy = classInHierarchy.getSuperclass();
-		} while (classInHierarchy != null);
-		return true;
-	}
-
-	/**
-	 * Check whether the given method can be defined by "Clazz.overrideMethod" or not.
-	 * @param node
-	 * @return
-	 */
-	protected boolean canAutoOverride(MethodDeclaration node) {
-		boolean isOK2AutoOverriding = false;
-		IMethodBinding methodBinding = node.resolveBinding();
-		if (methodBinding != null && testForceOverriding(methodBinding)) {
-			IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
-			if (superMethod != null) {
-				ASTNode parentRoot = node.getParent();
-				while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {
-					parentRoot = parentRoot.getParent();
-				}
-				if (parentRoot != null) {
-					isOK2AutoOverriding = !MethodReferenceASTVisitor.checkReference(parentRoot, superMethod.getKey());
-				}
-			}
-		}
-		return isOK2AutoOverriding;
-	}
+//	@SuppressWarnings("null")
+//	private boolean testForceOverriding(IMethodBinding method) {
+//		if(method == null){
+//			return true;
+//		}
+//		String methodName = method.getName();
+//		ITypeBinding classInHierarchy = method.getDeclaringClass();
+//		do {
+//			IMethodBinding[] methods = classInHierarchy.getDeclaredMethods();
+//			int count = 0;
+//			IMethodBinding superMethod = null;
+//			for (int i= 0; i < methods.length; i++) {
+//				if (methodName.equals(methods[i].getName())) {
+//					count++;
+//					superMethod = methods[i];
+//				}
+//			}
+//			if (count > 1) {
+//				return false;
+//			} else if (count == 1) {
+//				if (!Bindings.isSubsignature(method, superMethod)
+//						|| (superMethod.getModifiers() & Modifier.PRIVATE) != 0) {
+//					return false;
+//				}
+//			}
+//			classInHierarchy = classInHierarchy.getSuperclass();
+//		} while (classInHierarchy != null);
+//		return true;
+//	}
+//
+//	/**
+//	 * Check whether the given method can be defined by "Clazz.overrideMethod" or not.
+//	 * @param node
+//	 * @return
+//	 */
+//	protected boolean canAutoOverride(MethodDeclaration node) {
+//		boolean isOK2AutoOverriding = false;
+//		IMethodBinding methodBinding = node.resolveBinding();
+//		if (methodBinding != null && testForceOverriding(methodBinding)) {
+//			IMethodBinding superMethod = Bindings.findMethodDeclarationInHierarchy(methodBinding.getDeclaringClass(), methodBinding);
+//			if (superMethod != null) {
+//				ASTNode parentRoot = node.getParent();
+//				while (parentRoot != null && !(parentRoot instanceof AbstractTypeDeclaration)) {
+//					parentRoot = parentRoot.getParent();
+//				}
+//				if (parentRoot != null) {
+//					isOK2AutoOverriding = !MethodReferenceASTVisitor.checkReference(parentRoot, superMethod.getKey());
+//				}
+//			}
+//		}
+//		return isOK2AutoOverriding;
+//	}
 
 }

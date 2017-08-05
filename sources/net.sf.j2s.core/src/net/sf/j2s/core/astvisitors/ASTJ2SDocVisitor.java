@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -385,7 +386,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	/*
 	 * Read HTML/CSS sources from @j2sXHTML, @J2SXCSS or others
 	 */
-	boolean readStringSources(BodyDeclaration node, String tagName, String prefix, String suffix, boolean both) {
+	boolean readStringSources(BodyDeclaration node, String tagName, String prefix, String suffix) {
 		boolean existed = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null) {
@@ -394,31 +395,28 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
 					TagElement tagEl = (TagElement) iter.next();
 					if (tagName.equals(tagEl.getTagName())) {
-						if (tagEl != null) {
-							List<?> fragments = tagEl.fragments();
-							StringBuffer buf = new StringBuffer();
-							boolean isFirstLine = true;
-							String firstLine = null;
-							for (Iterator<?> iterator = fragments.iterator(); iterator
-									.hasNext();) {
-								TextElement commentEl = (TextElement) iterator.next();
-								String text = commentEl.getText().trim();
-								if (isFirstLine) {
-									if (text.length() == 0) {
-										continue;
-									}
-									firstLine = text.trim();
-									isFirstLine = false;
+						List<?> fragments = tagEl.fragments();
+						StringBuffer buf = new StringBuffer();
+						boolean isFirstLine = true;
+						String firstLine = null;
+						for (Iterator<?> iterator = fragments.iterator(); iterator.hasNext();) {
+							TextElement commentEl = (TextElement) iterator.next();
+							String text = commentEl.getText().trim();
+							if (isFirstLine) {
+								if (text.length() == 0) {
 									continue;
 								}
-								buf.append(text);
-								buf.append("\r\n");
+								firstLine = text.trim();
+								isFirstLine = false;
+								continue;
 							}
-							String sources = buf.toString().trim();
-							sources = buildXSource(tagName, firstLine, sources);
-							buffer.append(prefix + sources + suffix);
-							existed = true;
+							buf.append(text);
+							buf.append("\r\n");
 						}
+						String sources = buf.toString().trim();
+						sources = buildXSource(tagName, firstLine, sources);
+						buffer.append(prefix + sources + suffix);
+						existed = true;
 					}
 				}
 			}
@@ -482,7 +480,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		
 		List<?> modifiers = node.modifiers();
 		for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-			Object obj = (Object) iter.next();
+			Object obj = iter.next();
 			if (!(obj instanceof Annotation))
 				continue;
 			Annotation annotation = (Annotation) obj;
@@ -548,7 +546,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 					}
 				}
 			}
-			return (Javadoc[]) list.toArray(new Javadoc[0]);
+			return list.toArray(new Javadoc[0]);
 		}
 		return null;
 	}
@@ -591,6 +589,49 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	}
 
 	/**
+	 * 
+	 * @param node
+	 * @param mBinding
+	 * @param isEnd
+	 * @return true to keep this method
+	 */
+	protected boolean checkKeepSpecialClassMethod(BodyDeclaration node, IMethodBinding mBinding, boolean isEnd) {
+		boolean doKeep = true;
+		if (isEnd) {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+				doKeep = false;
+			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+			for (int i = 0; i < pipeMethods.length; i++) {
+				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+					doKeep = false;
+					break;
+				}
+			}
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+				doKeep = false;
+		} else {
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimpleRPCRunnable", "ajaxRun"))
+				doKeep = false;
+			String[] pipeMethods = new String[] { "pipeSetup", "pipeThrough", "through", "pipeMonitoring",
+					"pipeMonitoringInterval", "pipeWaitClosingInterval", "setPipeHelper" };
+			for (int i = 0; i < pipeMethods.length; i++) {
+				if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.SimplePipeRunnable", pipeMethods[i])) {
+					doKeep = false;
+					break;
+				}
+			}
+			if (Bindings.isMethodInvoking(mBinding, "net.sf.j2s.ajax.CompoundPipeSession", "convert"))
+				doKeep = false;
+		}
+		return (doKeep || getJ2STag(node, "@j2sKeep") != null);
+	}
+
+	protected boolean checkIgnore(BodyDeclaration node) {
+	  return getJ2STag(node, "@j2sIgnore") != null;
+	}
+
+	/**
 	 * Method with "j2s*" tag.
 	 * 
 	 * @param node
@@ -612,7 +653,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		List<?> modifiers = node.modifiers();
 		if (modifiers != null && modifiers.size() > 0) {
 			for (Iterator<?> iter = modifiers.iterator(); iter.hasNext();) {
-				Object obj = (Object) iter.next();
+				Object obj = iter.next();
 				if (obj instanceof Annotation) {
 					Annotation annotation = (Annotation) obj;
 					String qName = annotation.getTypeName().getFullyQualifiedName();

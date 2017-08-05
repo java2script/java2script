@@ -13,6 +13,7 @@ package net.sf.j2s.core.astvisitors;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -89,7 +89,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	
 	protected int blockLevel = 0;
 	
-	protected Stack methodDeclareStack = new Stack();
+	protected Stack<String> methodDeclareNameStack = new Stack<String>();
 	
 	protected int currentBlockForVisit = -1;
 	
@@ -130,28 +130,26 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
 	}
 
-	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
-	}
+//	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+//		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
+//	}
 	
 	protected String getIndexedVarName(String name, int i) {
 		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getIndexedVarName(name, i);
 	}
 
-	protected void visitList(List list, String seperator) {
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			boxingNode(element);
+	protected void visitList(List<ASTNode> list, String seperator) {
+		for (Iterator<ASTNode> iter = list.iterator(); iter.hasNext();) {
+			boxingNode(iter.next());
 			if (iter.hasNext()) {
 				buffer.append(seperator);
 			}
 		}
 	}
 
-	protected void visitList(List list, String seperator, int begin, int end) {
+	protected void visitList(List<ASTNode> list, String seperator, int begin, int end) {
 		for (int i = begin; i < end; i++) {
-			ASTNode element = (ASTNode) list.get(i);
-			boxingNode(element);
+			boxingNode(list.get(i));
 			if (i < end - 1) {
 				buffer.append(seperator);
 			}
@@ -199,7 +197,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (initializer != null) {
 			initializer.accept(this);
 		} else {
-			List dim = node.dimensions();
+			@SuppressWarnings("unchecked")
+			List<ASTNode> dim = node.dimensions();
 			int dimensions = node.getType().getDimensions();
 			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
 			if (elementType != null){
@@ -269,9 +268,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(ArrayInitializer node) {
 		/*
-		 * TODO: should be tested
+		 * TODO: need to add type to array initialization
 		 */
-		List expressions = node.expressions();
+		@SuppressWarnings("unchecked")
+		List<ASTNode>  expressions = node.expressions();
 		ITypeBinding arrType = node.resolveTypeBinding();
 		ITypeBinding elementType = null;
 		if (arrType != null) {
@@ -339,6 +339,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("null")
 	public boolean visit(Assignment node) {
 		Expression left = node.getLeftHandSide();
 		Expression right = node.getRightHandSide();
@@ -507,7 +508,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append(".valueOf ()");
 					return false;
 				}
-			} else if (typeBinding != null &&  "char".equals(typeBinding.getName())) {
+			} else if ("char".equals(typeBinding.getName())) {
 				boolean isMixedOp = op.trim().length() > 1;
 				if (!isMixedOp) {
 					if (right instanceof Name || right instanceof CharacterLiteral
@@ -650,16 +651,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public void endVisit(Block node) {
 		buffer.append("}");
-		List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-		List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+		List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
 		for (int i = finalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = (ASTFinalVariable) finalVars.get(i);
+			ASTFinalVariable var = finalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				finalVars.remove(i);
 			}
 		}
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var = (ASTFinalVariable) normalVars.get(i);
+			ASTFinalVariable var = normalVars.get(i);
 			if (var.blockLevel >= blockLevel) {
 				normalVars.remove(i);
 			}
@@ -669,17 +670,18 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-		List visitedVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).visitedVars;
-		List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
-		List parameters = node.parameters();
+		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+		List<ASTFinalVariable> visitedVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).visitedVars;
+		List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+		@SuppressWarnings("unchecked")
+		List<SingleVariableDeclaration> parameters = node.parameters();
 		String methodSig = null;
 		IMethodBinding resolveBinding = node.resolveBinding();
 		if (resolveBinding != null) {
 			methodSig = resolveBinding.getKey();
 		}
 		for (int i = parameters.size() - 1; i >= 0; i--) {
-			SingleVariableDeclaration varDecl = (SingleVariableDeclaration) parameters.get(i);
+			SingleVariableDeclaration varDecl = parameters.get(i);
 			
 			SimpleName name = varDecl.getName();
 			IBinding binding = name.resolveBinding();
@@ -704,9 +706,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(BreakStatement node) {
 		buffer.append("break");
-		/*
-		 * TODO: verify that the label is not supported!
-		 */
 		SimpleName label = node.getLabel();
 		if (label != null) {
 			buffer.append(' ');
@@ -740,9 +739,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(ContinueStatement node) {
 		buffer.append("continue");
-		/*
-		 * TODO: verify that label is not supported!
-		 */
 		SimpleName label = node.getLabel();
 		if (label != null) {
 			buffer.append(' ');
@@ -821,6 +817,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		super.endVisit(node);
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(ForStatement node) {
 		buffer.append("for (");
 		visitList(node.initializers(), ", ");
@@ -996,6 +993,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
 			ASTNode parent = node.getParent();
 			boolean staticCharType = typeBinding.isPrimitive() && "char".equals(typeBinding.getName());
+			@SuppressWarnings("null")
 			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess
 					|| (typeBinding != null && staticCharType))
 					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
@@ -1152,6 +1150,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		//return super.visit(node);
 	}
 
+	@SuppressWarnings("null")
 	public boolean visit(PrefixExpression node) {
 		String constValue = checkConstantValue(node);
 		if (constValue != null) {
@@ -1299,6 +1298,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("null")
 	public boolean visit(QualifiedName node) {
 		if (isSimpleQualified(node)) {
 			String constValue = checkConstantValue(node);
@@ -1315,9 +1315,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		ITypeBinding declaring = null;
 		String qdName = null;
-		if (!supportsObjectStaticFields && varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
+		if (!supportsObjectStaticFields && varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qdName.startsWith("net.sf.j2s.html.")) {
 			IBinding qBinding = node.getQualifier().resolveBinding();
@@ -1344,69 +1343,71 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				break;
 			}
 			IBinding binding = qualifier.resolveBinding();
-			if (binding != null) {
-				if (!(binding instanceof IVariableBinding)) {
-					ITypeBinding typeBinding = qualifier.resolveTypeBinding();
-					if (typeBinding != null) {
-						// Compiling inner Class or enum type, like:
-						// RadiusData.EnumType e = RadiusData.EnumType.THREE;
-						// avoid generate duplicated RadiusData
-						String name = typeBinding.getQualifiedName();
-//						ITypeBinding declaringClass = typeBinding.getDeclaringClass();
-//						if (declaringClass != null) {
-//							name = declaringClass.getQualifiedName();
-//						} else {
-//							IPackageBinding pkg = typeBinding.getPackage();
-//							if (pkg != null) {
-//								name = pkg.getName();
-//							} else {
-//								name = "";
-//							}
-//						}
-						String xhtml = "net.sf.j2s.html.";
-						if (name.indexOf(xhtml) == 0) {
-							name = name.substring(xhtml.length());
-						}
-						if (name.indexOf("java.lang.") == 0) {
-							name = name.substring(10);
-						}
-						if (name.length() != 0) {
-							if (staticFields) {
-								if (qualifier instanceof SimpleName) {
-									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-								} else {
-									buffer.append('(');
-									buffer.append(name);
-									buffer.append(", ");
-									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-									buffer.append(')');
-								}
+			if (binding != null && !(binding instanceof IVariableBinding)) {
+				ITypeBinding typeBinding = qualifier.resolveTypeBinding();
+				if (typeBinding != null) {
+					// Compiling inner Class or enum type, like:
+					// RadiusData.EnumType e = RadiusData.EnumType.THREE;
+					// avoid generate duplicated RadiusData
+					String name = typeBinding.getQualifiedName();
+					// ITypeBinding declaringClass =
+					// typeBinding.getDeclaringClass();
+					// if (declaringClass != null) {
+					// name = declaringClass.getQualifiedName();
+					// } else {
+					// IPackageBinding pkg = typeBinding.getPackage();
+					// if (pkg != null) {
+					// name = pkg.getName();
+					// } else {
+					// name = "";
+					// }
+					// }
+					String xhtml = "net.sf.j2s.html.";
+					if (name.indexOf(xhtml) == 0) {
+						name = name.substring(xhtml.length());
+					}
+					if (name.indexOf("java.lang.") == 0) {
+						name = name.substring(10);
+					}
+					if (name.length() != 0) {
+						if (staticFields) {
+							if (qualifier instanceof SimpleName) {
+								buffer.append(assureQualifiedName(
+										removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 							} else {
+								buffer.append('(');
 								buffer.append(name);
+								buffer.append(", ");
+								buffer.append(assureQualifiedName(
+										removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+								buffer.append(')');
 							}
-							buffer.append('.');
-							qualifierVisited = true;
+						} else {
+							buffer.append(name);
 						}
+						buffer.append('.');
+						qualifierVisited = true;
 					}
 				}
 			}
 		}
 		Name qName = node.getQualifier();
 		String nodeStr = qName.toString();
-		if (nodeStr.equals("net.sf.j2s.html")
-				|| nodeStr.equals("org.eclipse.swt.internal.xhtml")) {
+		if (nodeStr.equals("net.sf.j2s.html") || nodeStr.equals("org.eclipse.swt.internal.xhtml")) {
 			node.getName().accept(this);
 			return false;
 		}
 		if (!qualifierVisited) {
 			if (staticFields) {
 				if (qName instanceof SimpleName) {
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(
+							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				} else {
 					buffer.append('(');
 					qName.accept(this);
 					buffer.append(", ");
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(
+							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append(')');
 				}
 			} else {
@@ -1471,6 +1472,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(SwitchStatement node) {
 		buffer.append("switch (");
 		node.getExpression().accept(this);
@@ -1481,9 +1483,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(SynchronizedStatement node) {
-		/*
-		 * TODO: synchronized keyword should be implemented in JS
-		 */
+		// not implemented in JS, as there is only one thread
 		node.getBody().accept(this);
 		return false;
 	}
@@ -1498,20 +1498,21 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	public boolean visit(TryStatement node) {
 		buffer.append("try ");
 		node.getBody().accept(this);
-		List catchClauses = node.catchClauses();
+		@SuppressWarnings("unchecked")
+		List<CatchClause> catchClauses = node.catchClauses();
 		int size = catchClauses.size();
 		if (size > 0) {
 			String catchEName = "e$$";
 			if (size == 1) {
-				CatchClause element = (CatchClause) catchClauses.get(0);
+				CatchClause element = catchClauses.get(0);
 				SimpleName exName = element.getException().getName();
 				catchEName = exName.getIdentifier();
 			}
 			buffer.append(" catch (" + catchEName + ") ");
 			boolean scopeAdded = false;
 			boolean endedWithThrowable = false;
-			for (Iterator iter = catchClauses.iterator(); iter.hasNext();) {
-				CatchClause element = (CatchClause) iter.next();
+			for (Iterator<CatchClause> iter = catchClauses.iterator(); iter.hasNext();) {
+				CatchClause element = iter.next();
 				Type type = element.getException().getType();
 				String typeName = type.toString();
 				if (!"Throwable".equals(typeName) && !"java.lang.Throwable".equals(typeName)) {
@@ -1560,10 +1561,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(VariableDeclarationExpression node) {
-		/*
-		 * TODO: Confirm that whether "var" is necessary or not
-		 */
 		buffer.append("var ");
 		visitList(node.fragments(), ", ");
 		return false;
@@ -1574,15 +1573,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		IBinding binding = name.resolveBinding();
 		if (binding != null) {
 			String identifier = name.getIdentifier();
-			ASTFinalVariable f = null;
-			if (methodDeclareStack.size() == 0) {
-				f = new ASTFinalVariable(blockLevel, identifier, null);
-			} else {
-				String methodSig = (String) methodDeclareStack.peek();
-				f = new ASTFinalVariable(blockLevel, identifier, methodSig);
-			}
-			List finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
-			List normalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).normalVars;
+			ASTFinalVariable f = new ASTFinalVariable(blockLevel, identifier,
+					methodDeclareNameStack.size() == 0 ? null : (String) methodDeclareNameStack.peek());
+			List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
+			List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(
+					ASTVariableVisitor.class)).normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
 			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
@@ -1606,34 +1601,33 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						buffer.append(0 + cl.charValue());
 					}
 					return false;
-				} else {
-					if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
-						int idx1 = buffer.length();
-						buffer.append("(");
-						initializer.accept(this);
-						buffer.append(")");
-						boolean appendingCode = true;
-						int length = buffer.length();
-						if (initializer instanceof MethodInvocation) {
-							MethodInvocation m = (MethodInvocation) initializer;
-							if ("charAt".equals(m.getName().toString())) {
-								int idx2 = buffer.indexOf(".charAt ", idx1);
-								if (idx2 != -1) {
-									StringBuffer newMethodBuffer = new StringBuffer();
-									newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
-									newMethodBuffer.append(".charCodeAt ");
-									newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
-									buffer.delete(idx1, length);
-									buffer.append(newMethodBuffer.toString());
-									appendingCode = false;
-								}
+				}
+				if (nameType != null && !"char".equals(nameType) && nameType.indexOf("String") == -1) {
+					int idx1 = buffer.length();
+					buffer.append("(");
+					initializer.accept(this);
+					buffer.append(")");
+					boolean appendingCode = true;
+					int length = buffer.length();
+					if (initializer instanceof MethodInvocation) {
+						MethodInvocation m = (MethodInvocation) initializer;
+						if ("charAt".equals(m.getName().toString())) {
+							int idx2 = buffer.indexOf(".charAt ", idx1);
+							if (idx2 != -1) {
+								StringBuffer newMethodBuffer = new StringBuffer();
+								newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
+								newMethodBuffer.append(".charCodeAt ");
+								newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
+								buffer.delete(idx1, length);
+								buffer.append(newMethodBuffer.toString());
+								appendingCode = false;
 							}
 						}
-						if (appendingCode) {
-							buffer.append(".charCodeAt (0)");
-						}
-						return false;
 					}
+					if (appendingCode) {
+						buffer.append(".charCodeAt (0)");
+					}
+					return false;
 				}
 			}
 			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
@@ -1654,11 +1648,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(VariableDeclarationStatement node) {
-		List fragments = node.fragments();
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
+		@SuppressWarnings("unchecked")
+		List<ASTNode> fragments = node.fragments();
+		for (Iterator<ASTNode> iter = fragments.iterator(); iter.hasNext();) {
 			buffer.append("var ");
-			element.accept(this);
+			iter.next().accept(this);
 			buffer.append(";\r\n");
 		}
 		return false;

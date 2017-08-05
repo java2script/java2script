@@ -148,7 +148,7 @@ public class SWTDependencyASTVisitor extends DependencyASTVisitor {
 			Statement thenStatement = node.getThenStatement();
 			if (thenStatement instanceof Block) {
 				Block block = (Block) thenStatement;
-				List statements = block.statements();
+				List<?> statements = block.statements();
 				if (statements.size() == 1) {
 					thenStatement = (Statement) statements.get(0);
 				}
