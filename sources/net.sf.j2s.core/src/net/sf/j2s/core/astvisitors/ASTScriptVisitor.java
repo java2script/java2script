@@ -2120,7 +2120,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(className);
 				buffer.append(".$");
 				buffer.append(targetClassName);
-				buffer.append("$ ();\r\n");  
+				buffer.append("$ ();\r\n\r\n");  
 
 // oops -- not anonymous
 //				buffer.append(visitor.getFullClassName());
