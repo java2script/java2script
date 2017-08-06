@@ -238,8 +238,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(fullClassName);
 		buffer.append(" || ((function () {");
 		buffer.append("var C$ = Clazz.decorateAsClass (function () {\r\n");
-		buffer.append("Clazz.newInstance$ (this, arguments[0], true);\r\n");
-		buffer.append("}, ");
+		buffer.append("Clazz.newInstance$ (this, arguments");
+		if (!(node.getParent() instanceof EnumConstantDeclaration))
+			buffer.append("[0], true");
+		buffer.append(");\r\n}, ");
 
 		int idx = fullClassName.lastIndexOf('.');
 		if (idx >= 0) {
@@ -2127,13 +2129,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(TypeDeclaration node) {
-		if (node != rootTypeNode && node.getParent() != null && (node.getParent() instanceof AbstractTypeDeclaration
-				|| node.getParent() instanceof TypeDeclarationStatement)) {
+		ASTNode parent = node.getParent();
+		boolean haveParentClass = (parent != null && (parent instanceof AbstractTypeDeclaration
+				|| parent instanceof TypeDeclarationStatement));
+		boolean isInnerStaticClass = (node != rootTypeNode && haveParentClass);
+
+		if (isInnerStaticClass) {
 			return;
 		}
+		ITypeBinding binding = node.resolveBinding();
 		if (!node.isInterface()) {
 			buffer.append("Clazz.newInstance$ (this, arguments");
-			if (!node.resolveBinding().isTopLevel())
+			if (!binding.isTopLevel())
 				buffer.append("[0], true");
 			buffer.append(");\r\n}, ");
 		}
@@ -2222,7 +2229,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		for (Iterator<?> iter = superInterfaces.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
-			ITypeBinding binding = ((Type) element).resolveBinding();
+			binding = ((Type) element).resolveBinding();
 			if (binding != null) {
 				String clazzName = binding.getQualifiedName();
 				clazzName = assureQualifiedName(removeJavaLang(clazzName));
