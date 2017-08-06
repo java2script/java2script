@@ -2100,13 +2100,34 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				String str = visitor.getBuffer().toString();
 				staticFieldDefBuffer.append(str);
 			} else {
-				// BH: add the anonymous class definition inline, not as a static, 
-				//     and not requiring finalization of variables
-				//buffer.append(visitor.getFullClassName());
-				//buffer.append(" || ");
-				buffer.append("(function(){");
-				buffer.append(visitor.getBuffer().toString());
-				buffer.append("}) ();\r\n");  
+				
+				String targetClassName = visitor.getClassName();
+				targetClassName = targetClassName.replace('.', '$');
+
+				staticFieldDefBuffer.append("C.$");
+				staticFieldDefBuffer.append(targetClassName);
+				staticFieldDefBuffer.append("$ = function () {\r\n");
+				staticFieldDefBuffer.append(visitor.getBuffer().toString());
+				staticFieldDefBuffer.append("};\r\n");
+
+				buffer.append(visitor.getFullClassName());
+				buffer.append(" || ");
+				String pkgName = visitor.getPackageName();
+				if (pkgName != null && pkgName.length() > 0) {
+					buffer.append(pkgName);
+					buffer.append(".");
+				}
+				buffer.append(className);
+				buffer.append(".$");
+				buffer.append(targetClassName);
+				buffer.append("$ ();\r\n");  
+
+// oops -- not anonymous
+//				buffer.append(visitor.getFullClassName());
+//				buffer.append(" || ");
+//				buffer.append("(function(){");
+//				buffer.append(visitor.getBuffer().toString());
+//				buffer.append("}) ();\r\n");  
 			}
 			return false;
 		}
