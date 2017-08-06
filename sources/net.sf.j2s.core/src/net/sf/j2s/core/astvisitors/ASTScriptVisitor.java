@@ -2104,7 +2104,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				String targetClassName = visitor.getClassName();
 				targetClassName = targetClassName.replace('.', '$');
 
-				staticFieldDefBuffer.append("C.$");
+				staticFieldDefBuffer.append("C$.$");
 				staticFieldDefBuffer.append(targetClassName);
 				staticFieldDefBuffer.append("$ = function () {\r\n");
 				staticFieldDefBuffer.append(visitor.getBuffer().toString());
