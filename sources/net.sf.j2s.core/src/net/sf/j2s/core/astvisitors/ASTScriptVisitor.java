@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: type def, including inner classes and anonymous classes
 // DONE: fully encapsulated C$ variable
 // DONE: proper <init> processing
+// DONE: non-final variables for anonymous class definition
 
 // TODO: check proper treatment of abstract classes and interfaces
 // TODO: check more complex mixes to ensure all nesting is correct
@@ -235,8 +236,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String fullClassName = anonClassName;
 		String shortClassName = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
 		String className = typeVisitor.getClassName();
-		buffer.append(fullClassName);
-		buffer.append(" || ((function () {");
+		// BH: add the anonymous class definition inline, not as a static, 
+		//     and not requiring finalization of variables
+		//buffer.append(fullClassName);
+		//buffer.append(" || ");
+		buffer.append("((function(){");
 		buffer.append("var C$ = Clazz.decorateAsClass (function () {\r\n");
 		buffer.append("Clazz.newInstance$ (this, arguments");
 		if (!(node.getParent() instanceof EnumConstantDeclaration))
@@ -2096,9 +2100,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				String str = visitor.getBuffer().toString();
 				staticFieldDefBuffer.append(str);
 			} else {
-				// BH: add the anonymous class definition inline!
-				buffer.append(visitor.getFullClassName());
-				buffer.append(" || (function(){");
+				// BH: add the anonymous class definition inline, not as a static, 
+				//     and not requiring finalization of variables
+				//buffer.append(visitor.getFullClassName());
+				//buffer.append(" || ");
+				buffer.append("(function(){");
 				buffer.append(visitor.getBuffer().toString());
 				buffer.append("}) ();\r\n");  
 			}
