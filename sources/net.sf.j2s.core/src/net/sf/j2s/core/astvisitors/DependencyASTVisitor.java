@@ -218,8 +218,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			prefix = js.substring(0, index + 2);
 			js = js.substring(index + 2);
 		}
+		boolean haveLoad = false;
 		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
-			js = "(function() {\r\n" + js + "}) ();\r\n";
+			int pt = js.indexOf("var C$"); 
+			if (pt == 0 || pt > 0 && js.indexOf("{var C$") != pt - 1)
+				js = "(function() {\r\n" + js + "}) ();\r\n";
 		} else {
 			buf = new StringBuffer();
 			buf.append("Clazz.load (");
