@@ -1,0 +1,26 @@
+var checkDeclared = function(name, type) {
+    checkDeclared((prefix.__PKG_NAME__ || prefix.__CLASS_NAME__) + "." + name, 1);
+    "getDeclaredMethod", "getDeclaredMethods",
+inF.getDeclaredMethods = inF.getMethods;
+inF.getDeclaredMethod = inF.getMethod;
+Clazz._setDeclared = function(name, func) {
+Clazz._setDeclared("java.lang.System",
+Clazz._setDeclared("java.lang.Thread",java.lang.Thread = Thread = function () {});
+  var isPkgDeclared = (isIndex && map["@" + pkg]);
+  if (isIndex && !isPkgDeclared && !window[pkg + ".registered"]) {
+    checkDeclared(name, 2);
+Clazz._setDeclared("java.lang.Math", java.lang.Math = Math);
+Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
+Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
+Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
+Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function () {
+Clazz._setDeclared("java.lang.Byte", java.lang.Byte=Byte=function(){
+Clazz._setDeclared("java.lang.Float", java.lang.Float=Float=function(){
+Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
+Clazz._setDeclared("java.lang.Boolean", 
+Clazz._setDeclared("java.lang.String", java.lang.String=String);
+Clazz._setDeclared("java.lang.Character", java.lang.Character); 
+Clazz._setDeclared("java.lang.reflect.Array", java.lang.reflect.Array) 
+Clazz._setDeclared("java.util.Data", javautil.Date=Date);
+Clazz._setDeclared("java.util.EventObject", java.util.EventObject); 
+Clazz.overrideMethod(c$,"getDeclaredAnnotations",

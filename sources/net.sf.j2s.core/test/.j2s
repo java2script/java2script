@@ -1,0 +1,7 @@
+#Java2Script Configuration
+#Sat Aug 05 16:17:42 EDT 2017
+j2s.compiler.abbreviation=false
+j2s.output.path=bin
+2s.compiler.abbreviation.prefix=$_
+j2s.compiler.status=enable
+j2s.compiler.mode=debug
