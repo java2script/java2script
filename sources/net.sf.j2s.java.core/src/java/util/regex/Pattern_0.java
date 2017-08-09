@@ -29,14 +29,14 @@ import java.io.Serializable;
 
 
 /**
- * Pattern implements a compiler for regular expressions as defined by the J2SE
+ * Pattern_0 implements a compiler for regular expressions as defined by the J2SE
  * specification. The regular expression syntax is largely similar to the syntax
  * defined by Perl 5 but has both omissions and extensions. A formal and
  * complete definition of the regular expression syntax is not provided by the
  * J2SE speTBD (TODO)
  * 
  */
-public final class Pattern implements Serializable {
+public final class Pattern_0 implements Serializable {
     
     private static final long serialVersionUID = 5073258162644648461L;
     
@@ -87,16 +87,16 @@ public final class Pattern implements Serializable {
     /**
      * Bit mask that includes all defined match flags
      */
-    static final int flagsBitMask = Pattern.UNIX_LINES | 
-                                    Pattern.CASE_INSENSITIVE | 
-                                    Pattern.COMMENTS | 
-                                    Pattern.MULTILINE |  
-                                    Pattern.DOTALL | 
-                                    Pattern.UNICODE_CASE | 
-                                    Pattern.CANON_EQ;
+    static final int flagsBitMask = Pattern_0.UNIX_LINES | 
+                                    Pattern_0.CASE_INSENSITIVE | 
+                                    Pattern_0.COMMENTS | 
+                                    Pattern_0.MULTILINE |  
+                                    Pattern_0.DOTALL | 
+                                    Pattern_0.UNICODE_CASE | 
+                                    Pattern_0.CANON_EQ;
 
     /**
-     * Pattern compile flags;
+     * Pattern_0 compile flags;
      */
     private int flags = 0;
 
@@ -124,8 +124,8 @@ public final class Pattern implements Serializable {
 	 *            The input character sequence
 	 * @return A new matcher
 	 */
-    public Matcher matcher(CharSequence cs) {
-        return new Matcher(this, cs);
+    public Matcher_0 matcher(CharSequence cs) {
+        return new Matcher_0(this, cs);
     }
 
 	/**
@@ -143,7 +143,7 @@ public final class Pattern implements Serializable {
     public String[] split(CharSequence input, int limit) {
 //        ArrayList res = new ArrayList();
         Object[] res = new Object[0];
-        Matcher mat = matcher(input);
+        Matcher_0 mat = matcher(input);
         int index = 0;
         int curPos = 0;       
         
@@ -272,7 +272,7 @@ public final class Pattern implements Serializable {
 	 *             If the input regular expression does not match the required
 	 *             grammar.
 	 */
-    public static Pattern compile(String regex, int flags)
+    public static Pattern_0 compile(String regex, int flags)
             throws PatternSyntaxException {
     	
     	if ((flags != 0) &&
@@ -284,15 +284,15 @@ public final class Pattern implements Serializable {
     	
 //        AbstractSet.counter = 1;
 
-//        return new Pattern().compileImpl(regex, flags);
+//        return new Pattern_0().compileImpl(regex, flags);
     	String flagStr = "g";
-    	if ((flags & Pattern.MULTILINE) != 0) {
+    	if ((flags & Pattern_0.MULTILINE) != 0) {
     		flagStr += "m";
     	}
-    	if ((flags & Pattern.CASE_INSENSITIVE) != 0) {
+    	if ((flags & Pattern_0.CASE_INSENSITIVE) != 0) {
     		flagStr += "i";
     	}
-    	Pattern pattern = new Pattern();
+    	Pattern_0 pattern = new Pattern_0();
 		/**
 		 * @j2sNative
 		pattern.regexp = new RegExp(regex, flagStr);
@@ -303,7 +303,7 @@ public final class Pattern implements Serializable {
     /**
      * @com.intel.drl.spec_ref
      */
-    public static Pattern compile(String pattern) {
+    public static Pattern_0 compile(String pattern) {
         return compile(pattern, 0);
     }
 
@@ -311,7 +311,7 @@ public final class Pattern implements Serializable {
      * @com.intel.drl.spec_ref
      */
     public static boolean matches(String regex, CharSequence input) {
-        return Pattern.compile(regex).matcher(input).matches();
+        return Pattern_0.compile(regex).matcher(input).matches();
     }
 
     public static String quote(String s) {
@@ -362,7 +362,7 @@ public final class Pattern implements Serializable {
      * Dismiss public constructor.
      * 
      */
-    private Pattern() {
+    private Pattern_0() {
     }
 
 //    /**

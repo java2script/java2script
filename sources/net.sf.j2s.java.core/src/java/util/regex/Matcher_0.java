@@ -24,13 +24,13 @@ package java.util.regex;
 /**
  * Note: main functionality of this class is hidden into nodes match methods. 
  */
-public final class Matcher implements MatchResult {
+public final class Matcher_0 implements MatchResult {
 
     static int MODE_FIND = 1 << 0;
 
     static int MODE_MATCH = 1 << 1;
 
-    private Pattern pat = null;
+    private Pattern_0 pat = null;
 
     private CharSequence string = null;
 
@@ -56,7 +56,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher appendReplacement(StringBuffer sb, String replacement) {
+    public Matcher_0 appendReplacement(StringBuffer sb, String replacement) {
         processedRepl = processReplacement(replacement);
         sb.append(string.subSequence(appendPos, start()));
         sb.append(processedRepl);
@@ -188,7 +188,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher reset(CharSequence newSequence) {
+    public Matcher_0 reset(CharSequence newSequence) {
         if (newSequence == null) {
 //            throw new NullPointerException(Messages.getString("regex.01")); //$NON-NLS-1$
             throw new NullPointerException("Empty new sequence!");
@@ -200,7 +200,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher reset() {
+    public Matcher_0 reset() {
         this.leftBound = 0;
         this.rightBound = string.length();
 //        matchResult.reset(string, leftBound, rightBound);
@@ -220,7 +220,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher region(int leftBound, int rightBound) {
+    public Matcher_0 region(int leftBound, int rightBound) {
 
         if (leftBound > rightBound || leftBound < 0 || rightBound < 0
                 || leftBound > string.length() || rightBound > string.length()) {
@@ -293,11 +293,11 @@ public final class Matcher implements MatchResult {
     }
 
 	/**
-	 * Return a reference to the pattern used by this Matcher.
+	 * Return a reference to the pattern used by this Matcher_0.
 	 * 
-	 * @return A reference to the pattern used by this Matcher.
+	 * @return A reference to the pattern used by this Matcher_0.
 	 */
-    public Pattern pattern() {
+    public Pattern_0 pattern() {
         return pat;
     }
 
@@ -340,7 +340,7 @@ public final class Matcher implements MatchResult {
 
     private int findAt(int startIndex) {
 //        matchResult.reset();
-//        matchResult.setMode(Matcher.MODE_FIND);
+//        matchResult.setMode(Matcher_0.MODE_FIND);
 //        matchResult.setStartIndex(startIndex);
 //        int foundIndex = start.find(startIndex, string, matchResult);
 //        if (foundIndex == -1) {
@@ -363,7 +363,7 @@ public final class Matcher implements MatchResult {
         if (!hasTransparentBounds())
             length = rightBound;
         if (matchResult.startIndex >= 0
-                && matchResult.mode() == Matcher.MODE_FIND) {
+                && matchResult.mode() == Matcher_0.MODE_FIND) {
             matchResult.startIndex = matchResult.end();
             if (matchResult.end() == matchResult.start()) {
                 matchResult.startIndex++;
@@ -408,7 +408,7 @@ public final class Matcher implements MatchResult {
     }
 
 	/**
-	 * This method is identical in function to the Pattern.matches() method. It
+	 * This method is identical in function to the Pattern_0.matches() method. It
 	 * returns true if and only if the regular expression pattern matches the
 	 * entire input character sequence.
 	 * 
@@ -416,7 +416,7 @@ public final class Matcher implements MatchResult {
 	 *         character sequence.
 	 */
     public boolean matches() {
-        // return lookingAt(leftBound, Matcher.MODE_MATCH);
+        // return lookingAt(leftBound, Matcher_0.MODE_MATCH);
     	// Udo: the find must match the complete input and not modify the RE object
     	/**
     	 * @j2sNative
@@ -490,7 +490,7 @@ public final class Matcher implements MatchResult {
 	 *         character sequence.
 	 */
     public boolean lookingAt() {
-//        return lookingAt(leftBound, Matcher.MODE_FIND);
+//        return lookingAt(leftBound, Matcher_0.MODE_FIND);
     	return false;
     }
 
@@ -536,7 +536,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher useAnchoringBounds(boolean value) {
+    public Matcher_0 useAnchoringBounds(boolean value) {
 //        matchResult.useAnchoringBounds(value);
         return this;
     }
@@ -552,7 +552,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher useTransparentBounds(boolean value) {
+    public Matcher_0 useTransparentBounds(boolean value) {
 //        matchResult.useTransparentBounds(value);
         return this;
     }
@@ -600,7 +600,7 @@ public final class Matcher implements MatchResult {
     /**
      * @com.intel.drl.spec_ref
      */
-    public Matcher usePattern(Pattern pat) {
+    public Matcher_0 usePattern(Pattern_0 pat) {
     	if (pat == null) {
 //    		throw new IllegalArgumentException(Messages.getString("regex.1B"));
     		throw new IllegalArgumentException("Empty pattern!");
@@ -617,7 +617,7 @@ public final class Matcher implements MatchResult {
         return this;
     }
 
-    Matcher(Pattern pat, CharSequence cs) {
+    Matcher_0(Pattern_0 pat, CharSequence cs) {
         this.pat = pat;
 //        this.start = pat.start;
         this.string = cs;

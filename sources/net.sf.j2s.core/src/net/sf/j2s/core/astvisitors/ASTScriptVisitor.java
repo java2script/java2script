@@ -10,8 +10,6 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -23,7 +21,6 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -153,8 +150,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	protected boolean interfaceCastingSupported = false;
 
 	protected AbstractTypeDeclaration rootTypeNode;
-
-	private CompilationUnit complationUnit;
 
 	public boolean isMethodOverloadingSupported() {
 		return methodOverloadingSupported;
@@ -791,19 +786,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(");\r\n");
 	}
 
-	public boolean visit(EnumConstantDeclaration node) {
-		buffer.append("this.");
-		node.getName().accept(this);
-		buffer.append(" = ");
-		node.getName().accept(this);
-		buffer.append(";\r\n");
-		return super.visit(node);
-	}
-
-	public void endVisit(EnumConstantDeclaration node) {
-		super.endVisit(node);
-	}
-	
 	public boolean visit(EnumDeclaration node) {
 		ITypeBinding binding = node.resolveBinding();
 		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
@@ -960,6 +942,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 
+		buffer.append("var vals = [];\r\n");
 		List<?> constants = node.enumConstants();
 		for (int i = 0; i < constants.size(); i++) {
 			EnumConstantDeclaration enumConst = (EnumConstantDeclaration) constants.get(i);
@@ -972,19 +955,34 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				anonName = getNameForBinding(anonDeclare.resolveBinding());
 				buffer.append("\r\n");
 			}
-			buffer.append("Clazz.$newEnumConst(C$.construct")
+			buffer.append("vals.push(Clazz.$newEnumConst(C$.construct")
 			 .append(getJ2SParamQualifier(binding))
 			 .append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
 			visitMethodParameterList(enumConst.arguments(), binding, true, ", [", "]");
-			buffer.append(", ").append(anonName).append(");\r\n");
+			buffer.append(", ").append(anonName).append("));\r\n");
 		}
-
+		buffer.append("Clazz.newMethod$(C$, 'values', function() { return vals }, 1);\r\n");
+		// this next just ensures we have the valueOf() method in Enum if it is not already there.
+        buffer.append("Clazz.newMethod$(Enum, 'valueOf$Class$S', function(cl, name) { return cl[name] }, 1);\r\n");
 		addAnonymousFunctionWrapper(false);
 		super.endVisit(node);
 	}
 
+	public boolean visit(EnumConstantDeclaration node) {
+		buffer.append("this.");
+		node.getName().accept(this);
+		buffer.append(" = ");
+		node.getName().accept(this);
+		buffer.append(";\r\n");
+		return super.visit(node);
+	}
+
+	public void endVisit(EnumConstantDeclaration node) {
+		super.endVisit(node);
+	}
+	
 	public boolean visit(FieldAccess node) {
 		// Expression . Identifier
 		// TODO: more complicated rules should be considered. read the JavaDoc
@@ -2724,15 +2722,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 
-	public boolean visit(CompilationUnit node) {
-		complationUnit = node;
-		return super.visit(node);
-	}
-
-	public void endVisit(CompilationUnit node) {
-		super.endVisit(node);
-	}
-
 	/////////////////// St.Olaf Additions -- NY ////////////////
 
 	private void addAnonymousFunctionWrapper(boolean isOpen) {
@@ -2762,8 +2751,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		
 	};
 
-
-	private Hashtable<String, Object> htGenerics = new Hashtable<String, Object>();
 
 	/**
 	 * Determine the qualified parameter suffix for method names, including
