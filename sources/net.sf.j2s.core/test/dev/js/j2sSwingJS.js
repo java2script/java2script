@@ -2412,12 +2412,15 @@ var arraySlice = function(istart, iend) {
   // could be Safari or could be fake
   istart || (istart = 0);
   iend || (iend = this.length);
+  var b;
   if (this._fake) {    
-    var b = new this.constructor(iend - istart); 
+    b = new this.constructor(iend - istart); 
     System.arraycopy(this, istart, b, 0, iend - istart); 
-    return b; 
+  } else {
+    b = new this.constructor(this.buffer.slice(istart * this.BYTES_PER_ELEMENT, iend * this.BYTES_PER_ELEMENT));
   }
-  return new this.constructor(this.buffer.slice(istart * this.BYTES_PER_ELEMENT, iend * this.BYTES_PER_ELEMENT));
+  b.BYTES_PER_ELEMENT = a.BYTES_PER_ELEMENT;
+  b.__paramType = a.__paramType;
 };
       
 if ((Clazz.haveInt32 = !!(self.Int32Array && self.Int32Array != Array)) == true) {
@@ -2430,7 +2433,12 @@ if ((Clazz.haveInt32 = !!(self.Int32Array && self.Int32Array != Array)) == true)
 }
 if (!Int32Array.prototype.slice)
   Int32Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-Int32Array.prototype.clone = function() { var a = this.slice(); a.BYTES_PER_ELEMENT = 4; return a; };
+Int32Array.prototype.clone = function() { 
+  var a = this.slice(); 
+  a.BYTES_PER_ELEMENT = 4;
+  a.__paramType = this.__paramType; 
+  return a; 
+};
 Int32Array.prototype.getClass = function () { return this.constructor; };
 
 
@@ -2448,7 +2456,12 @@ if ((Clazz.haveFloat64 = !!(self.Float64Array && self.Float64Array != Array)) ==
 }
 if (!Float64Array.prototype.slice)
   Float64Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-Float64Array.prototype.clone =  function() { return this.slice(); };
+Float64Array.prototype.clone =  function() { 
+  var a = this.slice(); 
+  a.BYTES_PER_ELEMENT = 8;
+  a.__paramType = this.__paramType; 
+  return a; 
+};
 Float64Array.prototype.getClass = function () { return this.constructor; };
 
 /**
@@ -2575,7 +2588,12 @@ if (!haveInt8) {
   Clazz.newByteArray = Clazz.newIntArray;
 }
 
-Int8Array.prototype.clone = function() { var a = this.slice(); a.BYTES_PER_ELEMENT = 1;return a; };
+Int8Array.prototype.clone = function() {
+  var a = this.slice(); 
+  a.BYTES_PER_ELEMENT = 1;
+  a.__paramType = this.__paramType; 
+  return a; 
+};
 Int8Array.prototype.getClass = function () { return this.constructor; };
 
 // deprecated
