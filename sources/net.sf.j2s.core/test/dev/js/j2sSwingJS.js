@@ -6,6 +6,10 @@
 
 // NOTES by Bob Hanson
 
+// BH 8/11/2017 7:53:55 AM reflection for all 8 primitive types fixed;
+// BH 8/11/2017 7:52:02 AM adding primitive Integer.TYPE, Float.TYPE classes
+// BH 8/10/2017 6:51:22 AM added newA$, newByteA$, newIntA$, newDoubleA$, newArray$, var newTypedA$
+// BH 8/10/2017 6:30:31 AM $newEnumConst cleaned up; implicit valueOf() and values() moved to transpiler   
 // BH 8/7/2017 11:18:50 PM further testing on java.* 
 // BH 8/5/2017 7:20:40 PM adds $newEnumConst, System.out.format/printf, System.err.format/printf
 // BH 8/1/2017 10:52:23 AM added Clazz.super$(cl,obj)
@@ -159,20 +163,15 @@ Clazz.$newEnumConst = function (c, enumName, enumOrdinal, args, cl) {
   o.$name = enumName;
   o.$ordinal = enumOrdinal;
   var clazzEnum = c.exClazz;
-  if (!clazzEnum["$ values"]) {
-    clazzEnum["$ values"] = []; 
-    clazzEnum.values = function() { return this["$ values"]; };
-  }
-  clazzEnum["$ values"].push(clazzEnum[enumName] = clazzEnum.prototype[enumName] = o);
+  return clazzEnum[enumName] = clazzEnum.prototype[enumName] = o;
 }
     
 Clazz.super$ = function(cl, obj) {
   if (cl.superClazz && cl.superClazz.construct) {
     // added [] here to account for the possibility of vararg default constructor
     cl.superClazz.construct.apply(obj, [[]]);
+  }
 }
-}
-
 
 Clazz.newInstance$ = function (objThis, args, isInner) {
 
@@ -225,6 +224,127 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   if (isStatic || funName == "construct")
     clazzThis[funName] = funBody;
 };                     
+
+/**
+ * Create an array class placeholder for reflection 
+ * type is "String[][]" for instance  
+ */
+Clazz.arrayClass$ = function(type) {
+  var o = {};
+  o.arrayType = 1;
+  o.__CLASS_NAME__ = o.__paramType = type;
+  return o;  
+}
+ 
+Clazz.newArray$ = function(arrayClass, arrayFunc, params) {
+  // arrayFunc is one of newA$, newBA$, newIA$, newDA$ 
+  params.push(arrayClass.__paramType);
+  return arrayFunc.apply(null, params);
+}
+
+/**
+ * Make arrays.
+ *
+ * @return the created Array object
+ */
+/* public */
+Clazz.newA$ = function (a, b, c, d) {
+  if (a != -1 || arguments.length == 3) { 
+    // Clazz.newA$(36,null, type)
+    // Clazz.newA$(3, 0, type)
+    // Clazz.newA$(3, 5, null, type)
+    // Clazz.newA$(-1, ["A","B"], type)
+    return newTypedA$(arguments, 0);
+  }
+  // truncate array using slice
+  // Clazz.newA$(-1, array, ifirst, ilast+1)
+  // from JU.AU;
+  a = b.slice(c, d);
+  a.BYTES_PER_ELEMENT = b.BYTES_PER_ELEMENT;
+  a.__paramType = b.__paramType;
+  return a;
+};
+
+/**
+ * Make a new byte array.
+ *
+ * @return the created Array object
+ */
+Clazz.newByteA$ = function () {
+  return newTypedA$(arguments, 8);
+}
+
+/**
+ * Make an int, short, or long array
+ *
+ * @return the created Array object
+ */
+Clazz.newIntA$ = function () {
+  return newTypedA$(arguments, 32);
+}
+
+/**
+ * Make a float or double array
+ *
+ * @return the created Array object
+ */
+Clazz.newDoubleA$  = function () {
+  return newTypedA$(arguments, 64);
+}
+
+var newTypedA$ = function(args, nBits) {
+  var dim = args[0];
+  if (typeof dim == "string")
+    dim = dim.charCodeAt(0); // char
+  var last = args.length - 1;
+  var paramType = args[last];
+  var val = args[last - 1];
+  if (last > 2) {
+     // array of arrays
+     // Clazz.newA$(3, 5, null, "SAA") // last = 3
+    var xargs = new Array(last); 
+    for (var i = 0; i < last; i++)
+      xargs[i] = args[i + 1];
+    // SAA -> SA
+    xargs[xargs.length] = paramType.substring(0, paramType.length - 1);    
+    var arr = new Array(dim);
+    arr.__paramType = paramType;
+    for (var i = 0; i < dim; i++)
+      arr[i] = newTypedA$(xargs, nBits); // Call recursively
+    return arr;
+  }
+  // Clazz.newIntA$(5, null, "IAA")    new int[5][]   val = null 
+  // Clazz.newA$(5 ,null, "SA")        new String[5] val = null
+  // Clazz.newA$(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
+  // Clazz.newA$(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
+  if (val == null)
+    nBits = 0;
+  else if (nBits > 0 && dim < 0)
+    dim = val; // because we can initialize an array using new Int32Array([...])
+  switch (nBits) {
+  case 8:
+    var arr = new Int8Array(dim);
+    break;
+  case 32:
+    var arr = new Int32Array(dim);
+    break;
+  case 64:
+    var arr = new Float64Array(dim);
+    break;
+  default:
+    var arr = (dim < 0 ? val : new Array(dim));
+    nBits = 0;
+    if (dim > 0 && val != null)
+      for (var i = dim; --i >= 0;)
+         arr[i] = val;
+    break;
+  }
+  arr.BYTES_PER_ELEMENT = (nBits >> 3);
+  arr.__paramType = paramType;
+  return arr;
+}
+
+
 
 
 try {
@@ -1004,6 +1124,7 @@ var NullObject = function () {};
 if (supportsNativeObject) {
   Clazz._O = function () {};
   Clazz._O.__CLASS_NAME__ = "Object";
+  Clazz._O.__PARAMCODE = "O";
   Clazz._O["getClass"] = function () { return Clazz._O; }; 
 } else {
   Clazz._O = Object;
@@ -1371,7 +1492,7 @@ var innerNames = [
     "getSuperclass", "isAssignableFrom", 
     "getConstructor", 
     "getDeclaredMethod", "getDeclaredMethods",
-    "getMethod", "getMethods",   
+    "getMethod$S$ClassA", "getMethods",   
     "getModifiers", /*"isArray",*/ "newInstance"
 ];
 
@@ -1515,26 +1636,9 @@ var inF = Clazz._inF = {
     return ms;
   },
 
-  getMethod : function(name, paramTypes) {
-    var p = this.prototype;
-    for (var attr in p) {
-      if (name == attr && typeof p[attr] == "function" 
-          && !p[attr].__CLASS_NAME__) {
-        /* there are polynormical methods. */
-        return new java.lang.reflect.Method (this, attr,
-            paramTypes, java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC);
-      }
-    }
-    p = this;
-    for (var attr in p) {
-      if (name == attr && typeof p[attr] == "function" 
-          && !p[attr].__CLASS_NAME__) {
-        return new java.lang.reflect.Method (this, attr,
-            paramTypes, java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
-            | java.lang.reflect.Modifier.STATIC);
-      }
-    }
-    return null;
+  getMethod$S$ClassA : function(name, paramTypes) {
+    return Clazz.$new(java.lang.reflect.Method.construct$Class$S$ClassA$Class$ClassA$I, [this, name,
+            paramTypes, java.lang.Void, [], 0]);
   },
 
   getModifiers : function() { return java.lang.reflect.Modifier.PUBLIC; },
@@ -2296,14 +2400,9 @@ Clazz.doubleToChar = Clazz.floatToChar;
 //
 //
 
-var getArrayType = function(n, nbits) {
-    if (!n) n = 0;
-    if (typeof n == "object") {
-      var b = n;
-    } else {
-      var b = new Array(n);
-       for (var i = 0; i < n; i++)b[i] = 0
-    }
+var getFakeArrayType = function(n, nbits) {
+    var b = new Array(n);
+      for (var i = 0; i < n; i++)b[i] = 0
     b.BYTES_PER_ELEMENT = nbits >> 3;
     b._fake = true;    
     return b;
@@ -2325,7 +2424,7 @@ if ((Clazz.haveInt32 = !!(self.Int32Array && self.Int32Array != Array)) == true)
   if (!Int32Array.prototype.sort)
     Int32Array.prototype.sort = Array.prototype.sort
 } else {
-  Int32Array = function(n) { return getArrayType(n, 32); };
+  Int32Array = function(n) { return getFakeArrayType(n, 32); };
   Int32Array.prototype.sort = Array.prototype.sort
   Int32Array.prototype.toString = function(){return "[object Int32Array]"};
 }
@@ -2341,7 +2440,7 @@ if ((Clazz.haveFloat64 = !!(self.Float64Array && self.Float64Array != Array)) ==
   if (!Float64Array.prototype.sort)
     Float64Array.prototype.sort = Array.prototype.sort
 } else {
-  Float64Array = function(n) { return getArrayType(n, 64); };
+  Float64Array = function(n) { return getFakeArrayType(n, 64); };
   Float64Array.prototype.sort = Array.prototype.sort
   Float64Array.prototype.toString = function() {return "[object Float64Array]"};
 // Darn! Mozilla makes this a double, not a float. It's 64-bit.
@@ -2429,7 +2528,8 @@ var newTypedArray = function(args, nBits) {
  * @return the created Array object
  */
 /* public */
-Clazz.newByteArray  = function () {
+// deprecated
+Clazz.newByteArray = function () {
   return newTypedArray(arguments, 8);
 }
 
@@ -2439,7 +2539,8 @@ Clazz.newByteArray  = function () {
  * @return the created Array object
  */
 /* public */
-Clazz.newIntArray  = function () {
+// deprecated
+Clazz.newIntArray = function () {
   return newTypedArray(arguments, 32);
 }
 
@@ -2449,60 +2550,79 @@ Clazz.newIntArray  = function () {
  * @return the created Array object
  */
 /* public */
+// deprecated
 Clazz.newFloatArray  = function () {
   return newTypedArray(arguments, 64);
 }
 
+// deprecated
 Clazz.newDoubleArray = Clazz.newFloatArray;
+// deprecated
 Clazz.newLongArray = Clazz.newShortArray = Clazz.newIntArray;
+// deprecated
 Clazz.newCharArray = Clazz.newBooleanArray = Clazz.newArray;
-if ((Clazz.haveInt8 = !!self.Int8Array) == true) {
+
+var haveInt8 = !!self.Int8Array;
+
+if (haveInt8) {
   if (!Int8Array.prototype.sort)
     Int8Array.prototype.sort = Array.prototype.sort
   if (!Int8Array.prototype.slice)
     Int8Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
- 
-} else {
+}
+
+if (!haveInt8) {
   Clazz.newByteArray = Clazz.newIntArray;
 }
+
 Int8Array.prototype.clone = function() { var a = this.slice(); a.BYTES_PER_ELEMENT = 1;return a; };
 Int8Array.prototype.getClass = function () { return this.constructor; };
 
+// deprecated
 Clazz.isAB = function(a) {
   return (a && typeof a == "object" && a.BYTES_PER_ELEMENT == 1);
 }
+// deprecated
 Clazz.isAI = function(a) {
   return (a && typeof a == "object" && a.BYTES_PER_ELEMENT == 4);
 }
 
+// deprecated
 Clazz.isAF = function(a) {
   return (a && typeof a == "object" && a.BYTES_PER_ELEMENT == 8);
 }
 
+// deprecated
 Clazz.isAS = function(a) { // just checking first parameter
   return (a && typeof a == "object" && a.constructor == Array && (typeof a[0] == "string" || typeof a[0] == "undefined"));
 }
 
+// deprecated
 Clazz.isAII = function(a) { // assumes non-null a[0]
   return (a && typeof a == "object" && Clazz.isAI(a[0]));
 }
 
+// deprecated
 Clazz.isAFF = function(a) { // assumes non-null a[0]
   return (a && typeof a == "object" && Clazz.isAF(a[0]));
 }
 
+// deprecated
 Clazz.isAFFF = function(a) { // assumes non-null a[0]
   return (a && typeof a == "object" && Clazz.isAFF(a[0]));
 }
 
+// deprecated
 Clazz.isASS = function(a) {
   return (a && typeof a == "object" && Clazz.isAS(a[0]));
 }
 
+// deprecated
 Clazz.isAFloat = function(a) { // just checking first parameter
   return (a && typeof a == "object" && a.constructor == Array && Clazz.instanceOf(a[0], Float));
 }
 
+// deprecated
 Clazz.isAP = function(a) {
   return (a && Clazz.getClassName(a[0]) == "JU.P3");
 }
@@ -3887,7 +4007,7 @@ var findNode = function(clazzName) {
   return findNodeUnderNode(clazzName, clazzTreeRoot);
 };
 
-Clazz._findNode = findNode;
+//Clazz._findNode = findNode;  BH - maybe this was for debugging
 
 /* private */
 var findNextRequiredClass = function(status) {
@@ -5116,16 +5236,27 @@ Clazz._setDeclared("java.lang.Integer", java.lang.Integer=Integer=function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
 
-var decorateAsNumber = function (clazzFun, qClazzName) {
+var setJ2STypeclass = function(cl, type, paramCode) {
+  cl.TYPE = {
+    type:type, 
+    __PARAMCODE:paramCode, 
+    __PRIMITIVE:1,
+    toString = getName = getTypeName = getCanonicalName = getSimpleName = function() {return type}
+  };
+}
+
+var decorateAsNumber = function (clazzFun, qClazzName, type, PARAMCODE) {
   clazzFun.prototype.valueOf=function(){return 0;};
   clazzFun.prototype.__VAL0__ = 1;
   Clazz._extendJO(clazzFun, qClazzName, true);
   Clazz._inheritClass(clazzFun, Number);
   Clazz._implementOf(clazzFun, Comparable);
+  setJ2STypeclass(clazzFun, type, PARAMCODE);
   return clazzFun;
 };
 
-decorateAsNumber(Integer,"Integer");
+decorateAsNumber(Integer, "Integer", "int", "I");
+
 Integer.toString=Integer.prototype.toString=function(){
   if(arguments.length!=0){
     return "" + arguments[0];
@@ -5145,7 +5276,7 @@ Clazz.newMethod$(Integer, "construct", function(v){
 
 Integer.MIN_VALUE=Integer.prototype.MIN_VALUE=-0x80000000;
 Integer.MAX_VALUE=Integer.prototype.MAX_VALUE=0x7fffffff;
-Integer.TYPE=Integer.prototype.TYPE=Integer;
+//Integer.TYPE=Integer.prototype.TYPE=Integer;
 
 
 Clazz.newMethod$(Integer,"bitCount",
@@ -5279,7 +5410,7 @@ Clazz._setDeclared("java.lang.Long", java.lang.Long=Long=function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
 
-decorateAsNumber(Long,"Long");
+decorateAsNumber(Long, "Long", "long", "L");
 Long.toString=Long.prototype.toString=function(){
 if(arguments.length!=0){
 return""+arguments[0];
@@ -5297,7 +5428,7 @@ Clazz.newMethod$(Long, "construct", function(v){
 
 //Long.MIN_VALUE=Long.prototype.MIN_VALUE=-0x8000000000000000;
 //Long.MAX_VALUE=Long.prototype.MAX_VALUE=0x7fffffffffffffff;
-Long.TYPE=Long.prototype.TYPE=Long;
+//Long.TYPE=Long.prototype.TYPE=Long;
 
 Clazz.newMethod$(Long,"parseLong",
 function(s,radix){
@@ -5345,11 +5476,10 @@ function(n){
   return Clazz.$new(Long.construct, [n]);
 });
 
-decorateAsNumber = function(){}
 Clazz._setDeclared("java.lang.Short", java.lang.Short = Short = function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
-decorateAsNumber(Short, "Short");
+decorateAsNumber(Short, "Short", "short", "H");
 
 Clazz.newMethod$(Short, "construct",
 function (v) {
@@ -5374,7 +5504,7 @@ Short.toString = Short.prototype.toString = function () {
 
 Short.MIN_VALUE = Short.prototype.MIN_VALUE = -32768;
 Short.MAX_VALUE = Short.prototype.MAX_VALUE = 32767;
-Short.TYPE = Short.prototype.TYPE = Short;
+//Short.TYPE = Short.prototype.TYPE = Short;
 
 Clazz.newMethod$(Short, "parseShortRadix",
 function (s, radix) {
@@ -5430,7 +5560,7 @@ function(n){
 Clazz._setDeclared("java.lang.Byte", java.lang.Byte=Byte=function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
-decorateAsNumber(Byte,"Byte");
+decorateAsNumber(Byte,"Byte", "byte", "B");
 
 Clazz.newMethod$(Byte, "construct", function(v){
  if (typeof v != "number")
@@ -5454,7 +5584,7 @@ Byte.serialVersionUID=Byte.prototype.serialVersionUID=-7183698231559129828;
 Byte.MIN_VALUE=Byte.prototype.MIN_VALUE=-128;
 Byte.MAX_VALUE=Byte.prototype.MAX_VALUE=127;
 Byte.SIZE=Byte.prototype.SIZE=8;
-Byte.TYPE=Byte.prototype.TYPE=Byte;
+//Byte.TYPE=Byte.prototype.TYPE=Byte;
 
 Clazz.newMethod$(Byte,"parseByteRadix",
 function(s,radix){
@@ -5517,7 +5647,7 @@ Clazz._floatToString = function(f) {
 Clazz._setDeclared("java.lang.Float", java.lang.Float=Float=function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
-decorateAsNumber(Float,"Float");
+decorateAsNumber(Float,"Float", "float", "F");
 
 Clazz.newMethod$(Float, "construct", function(v){
  v == null && (v = 0);
@@ -5549,7 +5679,7 @@ Float.MAX_VALUE=Float.prototype.MAX_VALUE=1.4e-45;
 Float.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Float.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Float.NaN=Number.NaN;
-Float.TYPE=Float.prototype.TYPE=Float;
+//Float.TYPE=Float.prototype.TYPE=Float;
 
 Clazz.newMethod$(Float,"parseFloat",
 function(s){
@@ -5601,7 +5731,7 @@ return s.valueOf()==this.valueOf();
 Clazz._setDeclared("java.lang.Double", java.lang.Double=Double=function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
-decorateAsNumber(Double,"Double");
+decorateAsNumber(Double,"Double", "double", "D");
 Double.toString=Double.prototype.toString=function(){
 if(arguments.length!=0){
 return Clazz._floatToString(arguments[0]);
@@ -5624,7 +5754,7 @@ Double.MAX_VALUE=Double.prototype.MAX_VALUE=1.7976931348623157e+308;
 Double.NEGATIVE_INFINITY=Number.NEGATIVE_INFINITY;
 Double.POSITIVE_INFINITY=Number.POSITIVE_INFINITY;
 Double.NaN=Number.NaN;
-Double.TYPE=Double.prototype.TYPE=Double;
+//Double.TYPE=Double.prototype.TYPE=Double;
 
 Clazz.newMethod$(Double,"isNaN",
 function(num){
@@ -5673,9 +5803,6 @@ return false;
 return s.valueOf()==this.valueOf();
 });
 
-
-//java.lang.B00lean = Boolean; ?? BH why this?
-
 Clazz._setDeclared("java.lang.Boolean", 
 Boolean = java.lang.Boolean = Boolean || function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
@@ -5689,6 +5816,7 @@ if (supportsNativeObject) {
 }
 Boolean.__CLASS_NAME__="Boolean";
 Clazz._implementOf(Boolean,[java.io.Serializable,java.lang.Comparable]);
+setJ2STypeclass(Boolean, "boolean", "Z");
 Boolean.equals=Clazz._inF.equals;
 Boolean.getName=Clazz._inF.getName;
 Boolean.serialVersionUID=Boolean.prototype.serialVersionUID=-3665804199014368530;
@@ -5764,7 +5892,7 @@ return Clazz.$new(Boolean.construct, [typeof name == "string" ? name.equalsIgnor
 
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.$new(Boolean.construct, [true]);
 Boolean.FALSE=Boolean.prototype.FALSE=Clazz.$new(Boolean.construct, [false]);
-Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
+//Boolean.TYPE=Boolean.prototype.TYPE=Boolean;
 
 
 Clazz._Encoding={
@@ -5953,6 +6081,7 @@ String.prototype[p]=Clazz._O.prototype[p];
  
 Clazz._implementOf(String,[java.io.Serializable,CharSequence,Comparable]);
 
+String.__PARAMCODE = "S";
 String.getName=Clazz._inF.getName;
 
 String.serialVersionUID=String.prototype.serialVersionUID=-6849794470754667710;
@@ -6457,6 +6586,7 @@ c$=Clazz.decorateAsClass(function(){
 if (typeof arguments[0] != "object")this.construct(arguments[0]);
 },java.lang,"Character",null,[java.io.Serializable,Comparable]);
 Clazz._setDeclared("java.lang.Character", java.lang.Character); 
+setJ2STypeclass(Character, "char", "C");
 
 Clazz.newMethod$(c$,"construct",
 function(value){
@@ -6482,6 +6612,14 @@ function(obj){
 if(Clazz.instanceOf(obj,Character)){
 return(this.value).charCodeAt(0)==((obj).charValue()).charCodeAt(0);
 }return false;
+});
+Clazz.newMethod$(c$,"charCodeAt",
+function(i){
+return(this.value).charCodeAt(i);
+});
+Clazz.newMethod$(c$,"charCodeAt$I",
+function(i){
+return(this.value).charCodeAt(i);
 });
 Clazz.newMethod$(c$,"compareTo",
 function(c){
@@ -6568,9 +6706,8 @@ Clazz.defineStatics(c$,
 "MIN_VALUE",'\u0000',
 "MAX_VALUE",'\uffff',
 "MIN_RADIX",2,
-"MAX_RADIX",36,
-"TYPE",null);
-java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
+"MAX_RADIX",36);
+//java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
 java.lang.Character.charCount = java.lang.Character.prototype.charCount = function(codePoint){return codePoint >= 0x010000 ? 2 : 1;};
 
 Clazz._ArrayWrapper = function(a, type) {
@@ -6597,7 +6734,7 @@ return a;
 // TODO: Only asking for problems declaring Date. This is not necessary
 
 Clazz._setDeclared("java.util.Date", javautil.Date=Date);
-Date.TYPE="javautil.Date";
+//Date.TYPE="javautil.Date";
 Date.__CLASS_NAME__="Date";
 Clazz._implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
 
@@ -7353,11 +7490,12 @@ c$=declareType(javautil,"NoSuchElementException",RuntimeException);
 c$=declareType(javautil,"TooManyListenersException",Exception);
 
 c$=declareType(java.lang,"Void");
-Clazz.defineStatics(c$,
-"TYPE",null);
-{
-java.lang.Void.TYPE=java.lang.Void;
-}Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
+//Clazz.defineStatics(c$,
+//"TYPE",null);
+//{
+//java.lang.Void.TYPE=java.lang.Void;
+//}
+Clazz.declareInterface(java.lang.reflect,"GenericDeclaration");
 Clazz.declareInterface(java.lang.reflect,"AnnotatedElement");
 
 c$=declareType(java.lang.reflect,"AccessibleObject",null,java.lang.reflect.AnnotatedElement);
@@ -7767,17 +7905,22 @@ return this.getDeclaringClass().getName().hashCode()^this.getName().hashCode();
 });
 Clazz.newMethod$(c$,"invoke$O$OA",
 function(receiver,args){
-var name = this.getName();
+var name0 = this.getName();
+var name = name0;
+var types = this.parameterTypes;
+var a = (args ? new Array(args.length) : null);
+for (var i = 0; i < types.length; i++) {
+  var t = types[i];
+  var paramCode = t.__PARAMCODE;
+  a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
+  if (!paramCode)
+    paramCode = t.__PARAMCODE = t.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_');
+  name += "$" + paramCode;
+}
+
 var m=this.clazz.prototype[name] || this.clazz[name];
 if (m == null)
-  newMethodNotFoundException(this.clazz, name);
-  // must fix [Number,Number...]
-var a = (args ? new Array(args.length) : null);
-if (a) {
-  for (var i = a.length; --i >= 0;) {
-    a[i] = (this.parameterTypes[i] == Number ? args[i].valueOf() : args[i]);
-  }
-}  
+  newMethodNotFoundException(this.clazz, name);  
 return m.apply(receiver,a);
 });
 Clazz.newMethod$(c$,"toString",

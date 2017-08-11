@@ -517,7 +517,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("Clazz.$new(")
 				.append(assureQualifiedName(fqName))
 				.append(".construct")
-				.append(getJ2SParamQualifier(constructorBinding));
+				.append(getJ2SParamQualifier(null, constructorBinding));
 				prefix = ",[";
 				postfix = "]";
 			}
@@ -591,7 +591,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			IMethodBinding methodDeclaration, boolean inheritArgs, String anonName) {
 		
 		String constructor = (anonName == null ? className : anonName) + (inheritArgs || methodDeclaration == null ? ".$init$" 
-				: ".construct" + getJ2SParamQualifier(methodDeclaration));
+				: ".construct" + getJ2SParamQualifier(null, methodDeclaration));
 		buffer.append("Clazz.$new(").append(constructor).append(", [");
 		if (outerClassExpr == null)
 			buffer.append("this");
@@ -778,7 +778,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	private void addThisConstructorCall(IMethodBinding constructorBinding, List<?> arguments) {
-		String qualifiedParams = getJ2SParamQualifier(constructorBinding);
+		String qualifiedParams = getJ2SParamQualifier(null, constructorBinding);
 		buffer.append("C$.construct").append(qualifiedParams).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
@@ -956,7 +956,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append("\r\n");
 			}
 			buffer.append("vals.push(Clazz.$newEnumConst(C$.construct")
-			 .append(getJ2SParamQualifier(binding))
+			 .append(getJ2SParamQualifier(null, binding))
 			 .append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
@@ -1336,7 +1336,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (isMethodNativeIgnored(node))
 				return false;
 		}
-		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(mBinding);
+		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
 		buffer.append("\r\nClazz.newMethod$ (C$, '").append(name).append("', ").append("function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
@@ -1514,9 +1514,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		boolean isPrivateAndNotStatic = ((mBinding.getModifiers() & Modifier.PRIVATE) != 0)
 				&& ((mBinding.getModifiers() & Modifier.STATIC) == 0);
 
-		String sbParams = getJ2SParamQualifier(mBinding);
-
 		Expression expression = node.getExpression();
+		int pt = buffer.length();
 		if (expression == null) {
 			// "this"
 		} else {
@@ -1524,6 +1523,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			expression.accept(this);
 			buffer.append(".");
 		}
+
+		String sbParams = getJ2SParamQualifier(buffer.substring(pt, buffer.length()), mBinding);
 
 		String methodName = node.getName().getIdentifier();
 		List<?> args = node.arguments();
@@ -2042,7 +2043,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
-		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(mBinding);
+		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding);
 		buffer.append("C$.superClazz.prototype.").append(name).append(".apply(this, arguments)");
 		return false;
 	}
@@ -2700,17 +2701,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(TypeLiteral node) {
 		// Class x = Foo.class
 		Type type = node.getType();
-		ITypeBinding resolveBinding = type.resolveBinding();
+		ITypeBinding binding = type.resolveBinding();
 		if (type.isPrimitiveType()) {
-			String name = resolveBinding.getName();
+			String name = binding.getName();
 			// adds Integer.TYPE, Float.TYPE, etc.
 			buffer.append(getPrimitiveTYPE(name));
 			return false;
 		} else if (type.isArrayType()) {
-			buffer.append("Clazz.arrayType('"+resolveBinding.getQualifiedName()+"')");
+			buffer.append(j2sGetArrayClass(binding));
 			return false;
 		} else {
-			String name = resolveBinding.getName();
+			String name = binding.getName();
 			if ("Object".equals(name) || "java.lang.Object".equals(name)) {
 				buffer.append("Clazz._O"); // BH was JavaObject, but that
 											// introduces a new top-level
@@ -2729,7 +2730,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				+ "\r\n(function(){" : "})()\r\n");
 	}
 
-	private String[] excludedClasses = new String[] {
+	private final static String[] excludedClasses = new String[] {
 			// these are pre-defined in j2sSwingJSext.js 
 			"java.lang.Boolean", 
 			"java.lang.Byte", 
@@ -2742,7 +2743,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			"java.lang.Number",
 			"java.lang.reflect.Array", 
 			"java.lang.Short",
-			"java.lang.System",
 			"java.lang.Thread",
 			"java.util.Date",
 			"java.util.EventListenerProxy",
@@ -2756,11 +2756,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * Determine the qualified parameter suffix for method names, including
 	 * constructors. TODO: Something like this must be duplicated in Clazz as
 	 * well in JavaScript
-	 * 
+	 * @param nodeName TODO
 	 * @param binding
+	 * 
 	 * @return
 	 */
-	private String getJ2SParamQualifier(IMethodBinding binding) {
+	private String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
 //		if (binding.getTypeParameters().length > 0) {
 //			String key = binding.getKey();
 //			int pt = key.indexOf("T:");
@@ -2781,69 +2782,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			}
 //		}
 
-		String className = binding.getDeclaringClass().getQualifiedName();
+		// The problem is that System.out and System.err are PrintStreams, and we 
+		// do not intend to change those. So in the case that we just wrote
+		// "System....", we use that instead and do not qualify the name
+		if (nodeName != null && nodeName.startsWith("System."))
+			return "";
+		String className = binding.getDeclaringClass().getQualifiedName();		
 		for (int i = excludedClasses.length; --i >= 0;) {
-			if (className.startsWith(excludedClasses[i]))
+			if (className.startsWith(excludedClasses[i])) {
 				return "";
+			}
 		}
 
 		StringBuffer sbParams = new StringBuffer();
 		ITypeBinding[] paramTypes = binding.getParameterTypes();
 		int nParams = paramTypes.length;
-		int pt;
-		for (int i = 0; i < nParams; i++) {
-			String prefix = (paramTypes[i].getKey().indexOf(":T") >= 0 ? "T" : null);
-			String name = paramTypes[i].getQualifiedName();
-			String arrays = null;
-			pt = name.indexOf("[");
-			if (pt >= 0) {
-				arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
-				name = name.substring(0, pt);
-			}
-			// catching putAll$java_util_Map<? extends K,? extends V>
-			// (java.util.AbstractMap.js)
-			switch (name = discardGenericType(name)) {
-			case "boolean":
-				name = "b";
-				break;
-			case "char":
-				name = "C";
-				break;
-			case "byte":
-				name = "B";
-				break;
-			case "short":
-				name = "s";
-				break;
-			case "int":
-				name = "I";
-				break;
-			case "long":
-				name = "L";
-				break;
-			case "float":
-				name = "F";
-				break;
-			case "double":
-				name = "D";
-				break;
-			case "java.lang.Object":
-			case "Object":
-				name = "O";
-				break;
-			case "java.lang.String":
-				name = "S";
-				break;
-			default:
-				if (name.length() == 1 && prefix != null)
-					name = prefix + name; // (T,V) --> $TK$TV
-				name = name.replace("java.lang.", "").replace('.', '_');
-				break;
-			}
-			sbParams.append("$").append(name);
-			if (arrays != null)
-				sbParams.append(arrays.replaceAll("\\[\\]", "A"));
-		}
+		for (int i = 0; i < nParams; i++)
+			sbParams.append("$").append(j2sGetParamCode(paramTypes[i]));
 		String s = sbParams.toString();
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
@@ -2855,6 +2810,65 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		return s;
+	}
+
+	private static String j2sGetParamCode(ITypeBinding binding) {
+		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
+		String name = binding.getQualifiedName();
+		String arrays = null;
+			
+		int pt = name.indexOf("[");
+		if (pt >= 0) {
+			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
+			name = name.substring(0, pt);
+		}
+		// catching putAll$java_util_Map<? extends K,? extends V>
+		// (java.util.AbstractMap.js)
+		
+		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
+		// NOTE: These are the same as standard Java Spec, with the exception of Short, which is "H" instead of "S"
+		
+		switch (name = Bindings.removeBrackets(name)) {
+		case "boolean":
+			name = "Z";
+			break;
+		case "byte":
+			name = "B";
+			break;
+		case "char":
+			name = "C";
+			break;
+		case "double":
+			name = "D";
+			break;
+		case "float":
+			name = "F";
+			break;
+		case "int":
+			name = "I";
+			break;
+		case "long":
+			name = "J";
+			break;
+		case "short":
+			name = "H"; // differs from Java Spec so we can use S for String
+			break;
+		case "java.lang.Object":
+		case "Object":
+			name = "O";
+			break;
+		case "java.lang.String":
+			name = "S";
+			break;
+		default:
+			if (name.length() == 1 && prefix != null)
+				name = prefix + name; // (T,V) --> $TK$TV
+			name = name.replace("java.lang.", "").replace('.', '_');
+			break;
+		}
+		if (arrays != null)
+			name += arrays.replaceAll("\\[\\]", "A");
+		return name;
 	}
 
 	private void addDefaultConstructor() {
@@ -2877,7 +2891,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (node == null) {
 			buffer.append("Clazz.super$(C$, this");
 		} else {
-			buffer.append("C$.superClazz.construct").append(getJ2SParamQualifier(node.resolveConstructorBinding())); 
+			buffer.append("C$.superClazz.construct").append(getJ2SParamQualifier(null, node.resolveConstructorBinding())); 
 			buffer.append(".apply(this");
 			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		}
@@ -2888,4 +2902,39 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private void addCallInit() {
 		buffer.append("C$.$init$.apply(this);\r\n");
 	}
+
+	public static void j2sAddArrayPrefix(StringBuffer buffer, ITypeBinding arrType, ITypeBinding elementType) {
+		buffer.append(" Clazz.newArray$(")
+		.append(j2sGetArrayClass(arrType))
+		.append(", Clazz.new");
+		String type = "";
+		if (elementType.isPrimitive()) {
+			String typeCode = elementType.getName();
+			switch (typeCode) {
+			case "byte":
+				type = "Byte";
+				break;
+			case "int":
+			case "long":
+			case "short":
+				type = "Int";
+				break;
+			case "float":
+			case "double":
+				type = "Double";
+				break;
+			default:
+			case "char":
+			case "boolean":
+				break;
+			}
+		}
+		buffer.append(type);
+		buffer.append("A$, [");
+	}
+	
+	private static String j2sGetArrayClass(ITypeBinding binding) {
+		return "Clazz.arrayClass$('"+j2sGetParamCode(binding)+"')";
+	}
+
 }

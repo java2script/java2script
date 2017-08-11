@@ -196,73 +196,44 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ArrayInitializer initializer = node.getInitializer();
 		if (initializer != null) {
 			initializer.accept(this);
-		} else {
-			@SuppressWarnings("unchecked")
-			List<ASTNode> dim = node.dimensions();
-			int dimensions = node.getType().getDimensions();
-			ITypeBinding elementType = node.getType().getElementType().resolveBinding();
-			if (elementType != null){
-				if (elementType.isPrimitive()) {
-					String typeCode = elementType.getName();
-					if ("int".equals(typeCode)
-							|| "float".equals(typeCode)
-							|| "double".equals(typeCode)
-							|| "byte".equals(typeCode)
-							|| "long".equals(typeCode)
-							|| "short".equals(typeCode)) {
-						//buffer.append(" Clazz.newArray (");
-						buffer.append(" Clazz.new");
-						buffer.append(typeCode.substring(0, 1).toUpperCase());
-						buffer.append(typeCode.substring(1));
-						buffer.append("Array (");
-						visitList(dim, ", ");
-						if (dim.size() == dimensions) {
-							buffer.append(", 0)");
-						} else {
-							buffer.append(", null)");
-						}
-					} else if ("char".equals(typeCode)) {
-						//buffer.append(" Clazz.newArray (");
-						buffer.append(" Clazz.newCharArray (");
-						visitList(dim, ", ");
-						if (dim.size() == dimensions) {
-							buffer.append(", '\\0')");
-						} else {
-							buffer.append(", null)");
-						}
-					} else if ("boolean".equals(typeCode)) {
-						//buffer.append(" Clazz.newArray (");
-						buffer.append(" Clazz.newBooleanArray (");
-						visitList(dim, ", ");
-						if (dim.size() == dimensions) {
-							buffer.append(", false)");
-						} else {
-							buffer.append(", null)");
-						}
-					} else {
-						if (dim != null && dim.size() > 1) {
-							buffer.append(" Clazz.newArray (");
-							visitList(dim, ", ");
-							buffer.append(", null)");
-						} else {
-							buffer.append(" new Array (");
-							visitList(dim, "");
-							buffer.append(")");
-						}
-					}
-				} else {
-					if (dim != null && dim.size() > 1) {
-						buffer.append(" Clazz.newArray (");
-						visitList(dim, ", ");
-						buffer.append(", null)");
-					} else {
-						buffer.append(" new Array (");
-						visitList(dim, "");
-						buffer.append(")");
-					}
+			return false;
+		}
+		@SuppressWarnings("unchecked")
+		List<ASTNode> dim = node.dimensions();
+		int dimensions = node.getType().getDimensions();
+		ITypeBinding arrType = node.resolveTypeBinding();
+		ITypeBinding elementType = node.getType().getElementType().resolveBinding();
+		if (elementType == null)
+			return false;
+		ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
+		visitList(dim, ", ");
+		if (elementType.isPrimitive()) {
+			String typeCode = elementType.getName();
+			String val = "null";
+			if (dim.size() == dimensions) {
+				switch (typeCode) {
+				default:
+				case "byte":
+				case "int":
+				case "long":
+				case "short":
+				case "float":
+				case "double":
+					val = "0";
+					break;
+				case "char":
+					val = "'\\0'";
+					break;
+				case "boolean":
+					val = "false";
+					break;
 				}
 			}
+			buffer.append(", ").append(val);
+		} else if (dim != null && dim.size() > 1) {
+			buffer.append(", null");
 		}
+		buffer.append("])");
 		return false;
 	}
 
@@ -273,56 +244,18 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		@SuppressWarnings("unchecked")
 		List<ASTNode>  expressions = node.expressions();
 		ITypeBinding arrType = node.resolveTypeBinding();
-		ITypeBinding elementType = null;
-		if (arrType != null) {
-			elementType = arrType.getComponentType();
-		}
+		ITypeBinding elementType = (arrType == null ? null : arrType.getComponentType());
 		if (elementType == null) {
-			buffer.append("[");
-			visitList(expressions, ", ");
-			buffer.append("]");
+//			// BH: what is this??  
+//			buffer.append("[");
+//			visitList(expressions, ", ");
+//			buffer.append("]");
 			return false;
 		}
-		if (elementType.isPrimitive()) {
-			String typeCode = elementType.getName();
-			if ("int".equals(typeCode)
-					|| "float".equals(typeCode)
-					|| "double".equals(typeCode)
-					|| "byte".equals(typeCode)
-					|| "long".equals(typeCode)
-					|| "short".equals(typeCode)) {
-				//buffer.append(" Clazz.newArray (");
-				buffer.append(" Clazz.new");
-				buffer.append(typeCode.substring(0, 1).toUpperCase());
-				buffer.append(typeCode.substring(1));
-				buffer.append("Array (-1, ");
-				buffer.append("[");
-				visitList(expressions, ", ");
-				buffer.append("])");
-			} else if ("char".equals(typeCode)) {
-				//buffer.append(" Clazz.newArray (");
-				buffer.append(" Clazz.newCharArray (-1, ");
-				buffer.append("[");
-				visitList(expressions, ", ");
-				buffer.append("])");
-			} else if ("boolean".equals(typeCode)) {
-				//buffer.append(" Clazz.newArray (");
-				buffer.append(" Clazz.newBooleanArray (-1, ");
-				buffer.append("[");
-				visitList(expressions, ", ");
-				buffer.append("])");
-			} else {
-				buffer.append(" Clazz.newArray (-1, ");
-				buffer.append("[");
-				visitList(expressions, ", ");
-				buffer.append("])");
-			}
-		} else {
-			buffer.append(" Clazz.newArray (-1, ");
-			buffer.append("[");
-			visitList(expressions, ", ");
-			buffer.append("])");
-		}
+		ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
+		buffer.append("-1, [");
+		visitList(expressions, ", ");
+		buffer.append("]])");
 		return false;
 	}
 
