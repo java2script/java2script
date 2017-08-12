@@ -103,10 +103,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		this.supportsObjectStaticFields = supportsObjectStaticFields;
 	}
 
-	protected void boxingNode(ASTNode element) {
-		((ASTTigerVisitor) getAdaptable(ASTTigerVisitor.class)).boxingNode(element);
-	}
-	
 	protected String assureQualifiedName(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).assureQualifiedName(name);
 	}
@@ -190,9 +186,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ArrayCreation node) {
-		/*
-		 * TODO: multi-dimension Array creation
-		 */
 		ArrayInitializer initializer = node.getInitializer();
 		if (initializer != null) {
 			initializer.accept(this);
@@ -238,24 +231,21 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ArrayInitializer node) {
-		/*
-		 * TODO: need to add type to array initialization
-		 */
 		@SuppressWarnings("unchecked")
-		List<ASTNode>  expressions = node.expressions();
+		List<ASTNode> expressions = node.expressions();
 		ITypeBinding arrType = node.resolveTypeBinding();
 		ITypeBinding elementType = (arrType == null ? null : arrType.getComponentType());
 		if (elementType == null) {
-//			// BH: what is this??  
-//			buffer.append("[");
-//			visitList(expressions, ", ");
-//			buffer.append("]");
-			return false;
+			// // BH: what is this??
+			buffer.append("[");
+			visitList(expressions, ", ");
+			buffer.append("]");
+		} else {
+			ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
+			buffer.append("-1, [");
+			visitList(expressions, ", ");
+			buffer.append("]])");
 		}
-		ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
-		buffer.append("-1, [");
-		visitList(expressions, ", ");
-		buffer.append("]])");
 		return false;
 	}
 
@@ -460,11 +450,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 				}
 				ITypeBinding rightTypeBinding = right.resolveTypeBinding();
-				/*
-				 * FIXME: Bug here!: 
-				 * v[count++] += 'a';
-				 * v[count++] = String.fromCharCode ((v[count++]).charCodeAt (0) + 97);
-				 */
 				left.accept(this);
 				if (rightTypeBinding != null && "char".equals(rightTypeBinding.getName()) && !isMixedOp) {
 					buffer.append(' ');
@@ -1598,6 +1583,38 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
+	}
+
+	protected void boxingNode(ASTNode element) {
+		if (element instanceof Expression) {
+			Expression exp = (Expression) element;
+			if (exp.resolveBoxing()) {
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (typeBinding.isPrimitive()) {
+					String name = typeBinding.getName();
+					name = (name.equals("char") ? "Character"
+							: name.equals("int") ? "Integer"
+							: Character.toUpperCase(name.charAt(0)) + name.substring(1));
+					getBuffer().append("new " + name + " (");
+					element.accept(this);
+					getBuffer().append(")");
+					return;
+				}
+			} else if (exp.resolveUnboxing()) {
+				ITypeBinding typeBinding = exp.resolveTypeBinding();
+				if (!typeBinding.isPrimitive()) {
+					String name = typeBinding.getQualifiedName();
+					name = (name.indexOf("Integer") >= 0 ? "int"
+							: name.indexOf("Character") >= 0 ? "char"
+									: name.replace("java.lang.", "").toLowerCase());
+					getBuffer().append("(");
+					element.accept(this);
+					getBuffer().append(")." + name + "Value ()");
+					return;
+				}
+			}
+		}
+		element.accept(this);
 	}
 
 }

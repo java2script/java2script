@@ -64,11 +64,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: proper <init> processing
 // DONE: non-final variables for anonymous class definition
 
-// TODO: check proper treatment of abstract classes and interfaces
 // TODO: check more complex mixes to ensure all nesting is correct
-// TODO: multi-dimension Array creation and array type def
-// TODO: qualified exclusion of Java classes is only temporary
-// TODO: visit TypeLiteral: Number is only IntegerMore types? Integer, Long, Double, ... ?
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 // 
 /**
@@ -370,99 +366,101 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(CastExpression node) {
-		Type type = node.getType();
-		/*
-		 * TODO: some casting should have its meaning! int to byte, int to
-		 * short, long to int will lost values
-		 */
+		//TODO: some casting should have its meaning! int to byte, int to short, long to int will lose values
 		Expression expression = node.getExpression();
-		if (type.isPrimitiveType()) {
-			ITypeBinding resolveTypeBinding = expression.resolveTypeBinding();
-			if (resolveTypeBinding != null) {
-				String name = resolveTypeBinding.getName();
-				PrimitiveType pType = (PrimitiveType) type;
-				if (pType.getPrimitiveTypeCode() == PrimitiveType.INT
-						|| pType.getPrimitiveTypeCode() == PrimitiveType.BYTE
-						|| pType.getPrimitiveTypeCode() == PrimitiveType.SHORT
-						|| pType.getPrimitiveTypeCode() == PrimitiveType.LONG) {
-					if ("char".equals(name)) {
-						buffer.append("(");
-						if (expression instanceof ParenthesizedExpression) {
-							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-							pe.getExpression().accept(this);
-						} else {
-							expression.accept(this);
-						}
-						buffer.append(").charCodeAt (0)");
-						return false;
-					} else if ("float".equals(name) || "double".equals(name)) {
-						// buffer.append("Math.round (");
-						buffer.append("Clazz.");
-						buffer.append(name);
-						buffer.append("To");
-						String targetType = pType.getPrimitiveTypeCode().toString();
-						buffer.append(targetType.substring(0, 1).toUpperCase());
-						buffer.append(targetType.substring(1));
-						buffer.append(" (");
-						if (expression instanceof ParenthesizedExpression) {
-							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-							pe.getExpression().accept(this);
-						} else {
-							expression.accept(this);
-						}
-						buffer.append(")");
-						return false;
+		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		Type typeTO = node.getType();
+		if (typeTO.isPrimitiveType() && typeBinding != null) {
+			String nameFROM = typeBinding.getName();
+			Code codeTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode();
+			if (codeTO == PrimitiveType.INT 
+					|| codeTO == PrimitiveType.BYTE 
+					|| codeTO == PrimitiveType.SHORT
+					|| codeTO == PrimitiveType.LONG) {
+				switch (nameFROM) {
+				default:
+					break;
+				case "char":
+					buffer.append("(");
+					if (expression instanceof ParenthesizedExpression) {
+						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+						pe.getExpression().accept(this);
+					} else {
+						expression.accept(this);
 					}
+					buffer.append(").charCodeAt (0)");
+					return false;
+				case "float":
+				case "double":
+					buffer.append("Clazz.");
+					buffer.append(nameFROM);
+					buffer.append("To");
+					String targetType = codeTO.toString();
+					buffer.append(targetType.substring(0, 1).toUpperCase());
+					buffer.append(targetType.substring(1));
+					buffer.append(" (");
+					if (expression instanceof ParenthesizedExpression) {
+						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+						pe.getExpression().accept(this);
+					} else {
+						expression.accept(this);
+					}
+					buffer.append(")");
+					return false;
 				}
-				if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-					if ("char".equals(name)) {
-						// ignore
-					} else if ("float".equals(name) || "double".equals(name)) {
-						buffer.append("Clazz.");
-						buffer.append(name);
-						buffer.append("ToChar (");
-						if (expression instanceof ParenthesizedExpression) {
-							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-							pe.getExpression().accept(this);
-						} else {
-							expression.accept(this);
-						}
-						buffer.append(")");
-						return false;
-					} else if ("int".equals(name) || "byte".equals(name) || "short".equals(name)
-							|| "long".equals(name)) {
-						Object constantValue = expression.resolveConstantExpressionValue();
-						if (constantValue != null) {
-							if (constantValue instanceof Integer) {
-								int value = ((Integer) constantValue).intValue();
-								if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
-										|| (value >= 'a' && value <= 'z')) {
-									buffer.append('\'');
-									buffer.append((char) value);
-									buffer.append('\'');
-									return false;
-								}
-							} else if (constantValue instanceof Long) {
-								long value = ((Long) constantValue).longValue();
-								if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
-										|| (value >= 'a' && value <= 'z')) {
-									buffer.append('\'');
-									buffer.append((char) value);
-									buffer.append('\'');
-									return false;
-								}
+			} else if (codeTO == PrimitiveType.CHAR) {
+				switch (nameFROM) {
+				case "char":
+				default:
+					break;
+				case "float":
+				case "double":
+					buffer.append("Clazz.");
+					buffer.append(nameFROM);
+					buffer.append("ToChar (");
+					if (expression instanceof ParenthesizedExpression) {
+						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+						pe.getExpression().accept(this);
+					} else {
+						expression.accept(this);
+					}
+					buffer.append(")");
+					return false;
+				case "int":
+				case "byte":
+				case "short":
+				case "long":
+					Object constantValue = expression.resolveConstantExpressionValue();
+					if (constantValue != null) {
+						if (constantValue instanceof Integer) {
+							int value = ((Integer) constantValue).intValue();
+							if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
+									|| (value >= 'a' && value <= 'z')) {
+								buffer.append('\'');
+								buffer.append((char) value);
+								buffer.append('\'');
+								return false;
+							}
+						} else if (constantValue instanceof Long) {
+							long value = ((Long) constantValue).longValue();
+							if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
+									|| (value >= 'a' && value <= 'z')) {
+								buffer.append('\'');
+								buffer.append((char) value);
+								buffer.append('\'');
+								return false;
 							}
 						}
-						buffer.append("String.fromCharCode (");
-						if (expression instanceof ParenthesizedExpression) {
-							ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-							pe.getExpression().accept(this);
-						} else {
-							expression.accept(this);
-						}
-						buffer.append(")");
-						return false;
 					}
+					buffer.append("String.fromCharCode (");
+					if (expression instanceof ParenthesizedExpression) {
+						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
+						pe.getExpression().accept(this);
+					} else {
+						expression.accept(this);
+					}
+					buffer.append(")");
+					return false;
 				}
 			}
 		}
@@ -664,7 +662,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (isVarArgs) {
 				buffer.append("[");
 				for (int j = i; j < argSize; j++) {
-					ASTNode element = (ASTNode) arguments.get(j);
+					Expression element = (Expression) arguments.get(j);
 					visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
 					if (j != argSize - 1) {
 						buffer.append(", ");
@@ -672,7 +670,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 				buffer.append("]");
 			} else {
-				ASTNode element = (ASTNode) arguments.get(i);
+				Expression element = (Expression) arguments.get(i);
 				visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
 				if (i != parameterTypes.length - 1) {
 					buffer.append(", ");
@@ -688,88 +686,59 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	/**
 	 * 
-	 * @param element
+	 * @param exp
 	 * @param clazzName
-	 * @param methodName can be null
+	 * @param methodName
+	 *            can be null
 	 * @param parameterTypeName
 	 * @param position
 	 */
-	private void visitArgumentItem(ASTNode element, String clazzName, String methodName, String parameterTypeName,
+	private void visitArgumentItem(Expression exp, String clazzName, String methodName, String parameterTypeName,
 			int position) {
-		String typeStr = null;
-		if (element instanceof CastExpression) {
-			CastExpression castExp = (CastExpression) element;
-			Expression exp = castExp.getExpression();
-			if (exp instanceof NullLiteral) {
-				ITypeBinding nullTypeBinding = castExp.resolveTypeBinding();
-				if (nullTypeBinding != null) {
-					if (nullTypeBinding.isArray()) {
-						typeStr = "Array";
-					} else if (nullTypeBinding.isPrimitive()) {
-						Code code = PrimitiveType.toCode(nullTypeBinding.getName());
-						if (code == PrimitiveType.BOOLEAN) {
-							typeStr = "Boolean";
-						} else {
-							typeStr = "Number";
-						}
-					} else if (!nullTypeBinding.isTypeVariable()) {
-						typeStr = assureQualifiedName(removeJavaLang(nullTypeBinding.getQualifiedName()));
-					}
-				}
-			}
-		}
-		if (typeStr != null) {
+		if (exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
 			buffer.append("null");
-		} else {
-			Expression exp = (Expression) element;
-			ITypeBinding typeBinding = exp.resolveTypeBinding();
-			String typeName = null;
-			if (typeBinding != null) {
-				typeName = typeBinding.getName();
-			}
-			int idx1 = buffer.length();
-			if ("char".equals(typeName) && !"char".equals(parameterTypeName)) {
-				boolean ignored = false;
-				// Keep String#indexOf(int) and String#lastIndexOf(int)'s first
-				// char argument
-				ignored = (position == 0
-						&& ("indexOf".equals(methodName)
-								|| "lastIndexOf".equals(methodName))
-						&& ("java.lang.String".equals(Bindings.removeBrackets(clazzName))));
-
-				if (!ignored && exp instanceof CharacterLiteral) {
-					CharacterLiteral cl = (CharacterLiteral) exp;
-					buffer.append(0 + cl.charValue());
-					ignored = true;
-				} else {
-					boxingNode(element);
+			return;
+		}
+		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
+		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
+		if (expTypeBinding == null)
+			System.err.println("typeBinding was null in " + clazzName + "." + methodName + " " + parameterTypeName);
+		// BH: Question: When does typeBinding == null?
+		// only continue if we are converting a character to a non-character type
+		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
+		boolean useCharCodeAt = (
+				"char".equals(expTypeName)
+				&& !"char".equals(parameterTypeName)
+				&& !parameterTypeName.startsWith("Object") // BH could be Object or Object[]
+				&& (position != 0 || !"indexOf".equals(methodName) && !"lastIndexOf".equals(methodName)
+						|| !"java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+		if (useCharCodeAt && exp instanceof CharacterLiteral) {
+			// BH: converting character literal such as 'A' to number 65
+			CharacterLiteral cl = (CharacterLiteral) exp;
+			buffer.append(0 + cl.charValue());
+			return;
+		}
+		int idx1 = buffer.length();
+		boxingNode(exp);
+		if (!useCharCodeAt)
+			return;
+		int length = buffer.length();
+		if (exp instanceof MethodInvocation) {
+			MethodInvocation m = (MethodInvocation) exp;
+			if ("charAt".equals(m.getName().toString())) {
+				int idx2 = buffer.indexOf(".charAt ", idx1);
+				if (idx2 >= 0) {
+					StringBuffer buf = new StringBuffer();
+					buf.append(buffer.substring(idx1, idx2));
+					buf.append(".charCodeAt ");
+					buf.append(buffer.substring(idx2 + 8, length));
+					buffer.delete(idx1, length);
+					buffer.append(buf.toString());
+					return;
 				}
-				if (!ignored) {
-					boolean appendingCode = true;
-					int length = buffer.length();
-					if (exp instanceof MethodInvocation) {
-						MethodInvocation m = (MethodInvocation) exp;
-						if ("charAt".equals(m.getName().toString())) {
-							int idx2 = buffer.indexOf(".charAt ", idx1);
-							if (idx2 != -1) {
-								StringBuffer buf = new StringBuffer();
-								buf.append(buffer.substring(idx1, idx2));
-								buf.append(".charCodeAt ");
-								buf.append(buffer.substring(idx2 + 8, length));
-								buffer.delete(idx1, length);
-								buffer.append(buf.toString());
-								appendingCode = false;
-							}
-						}
-					}
-					if (appendingCode) {
-						buffer.append(".charCodeAt (0)");
-					}
-				}
-			} else {
-				boxingNode(element);
 			}
 		}
+		buffer.append(".charCodeAt (0)");
 	}
 
 	public boolean visit(ConstructorInvocation node) {
