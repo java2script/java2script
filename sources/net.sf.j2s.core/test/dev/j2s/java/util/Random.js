@@ -12,12 +12,12 @@ this.nextNextGaussian = 0;
 
 Clazz.newMethod$ (C$, 'construct', function () {
 C$.$init$.apply(this);
-this.setSeed$L (System.currentTimeMillis ());
+this.setSeed$J (System.currentTimeMillis ());
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$L', function (seed) {
+Clazz.newMethod$ (C$, 'construct$J', function (seed) {
 C$.$init$.apply(this);
-this.setSeed$L (seed);
+this.setSeed$J (seed);
 }, 1);
 
 Clazz.newMethod$ (C$, 'next$I', function (bits) {
@@ -83,7 +83,7 @@ Clazz.newMethod$ (C$, 'nextLong', function () {
 return Math.ceil (0xffffffff * Math.random ()) - 0x80000000;
 });
 
-Clazz.newMethod$ (C$, 'setSeed$L', function (seed) {
+Clazz.newMethod$ (C$, 'setSeed$J', function (seed) {
 this.seed = (seed ^ 25214903917) & (281474976710655);
 this.haveNextNextGaussian = false;
 });
@@ -92,4 +92,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:20

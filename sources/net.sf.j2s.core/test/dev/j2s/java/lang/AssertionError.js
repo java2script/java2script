@@ -13,23 +13,23 @@ C$.$init$.apply(this);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct$O', function (detailMessage) {
-C$.superClazz.construct$S$Throwable.apply(this, [String.valueOf (detailMessage), (Clazz.instanceOf (detailMessage, Throwable) ? detailMessage : null)]);
+C$.superClazz.construct$S$Throwable.apply(this, [String.valueOf$O (detailMessage), (Clazz.instanceOf(detailMessage, Throwable) ? detailMessage : null)]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$b', function (detailMessage) {
-C$.construct$O.apply(this, [String.valueOf (detailMessage)]);
+Clazz.newMethod$ (C$, 'construct$Z', function (detailMessage) {
+C$.construct$O.apply(this, [String.valueOf$Z (detailMessage)]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$char', function (detailMessage) {
-C$.construct$O.apply(this, [String.valueOf (detailMessage)]);
+Clazz.newMethod$ (C$, 'construct$C', function (detailMessage) {
+C$.construct$O.apply(this, [String.valueOf$C (detailMessage)]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct$I', function (detailMessage) {
 C$.construct$O.apply(this, [Integer.toString (detailMessage)]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$L', function (detailMessage) {
+Clazz.newMethod$ (C$, 'construct$J', function (detailMessage) {
 C$.construct$O.apply(this, [Long.toString (detailMessage)]);
 }, 1);
 
@@ -43,4 +43,4 @@ C$.construct$O.apply(this, [Double.toString (detailMessage)]);
 })()
 });
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:15

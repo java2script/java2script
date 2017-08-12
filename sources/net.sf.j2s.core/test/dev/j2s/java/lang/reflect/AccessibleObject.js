@@ -14,11 +14,11 @@ Clazz.newMethod$ (C$, 'isAccessible', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'setAccessible$reflect_AccessibleObjectA$b', function (objects, flag) {
+Clazz.newMethod$ (C$, 'setAccessible$reflect_AccessibleObjectA$Z', function (objects, flag) {
 return;
 }, 1);
 
-Clazz.newMethod$ (C$, 'setAccessible$b', function (flag) {
+Clazz.newMethod$ (C$, 'setAccessible$Z', function (flag) {
 return;
 });
 
@@ -27,11 +27,11 @@ return false;
 });
 
 Clazz.newMethod$ (C$, 'getDeclaredAnnotations', function () {
-return  new Array (0);
+return  Clazz.newArray$('annotation_AnnotationA', Clazz.newA$, [0]);
 });
 
 Clazz.newMethod$ (C$, 'getAnnotations', function () {
-return  new Array (0);
+return  Clazz.newArray$('annotation_AnnotationA', Clazz.newA$, [0]);
 });
 
 Clazz.newMethod$ (C$, 'getAnnotation$Class', function (annotationType) {
@@ -65,8 +65,8 @@ return 0.0;
 Clazz.newMethod$ (C$, 'invokeD$O$OA', function (receiver, args) {
 return 0.0;
 });
-C$.emptyArgs = C$.prototype.emptyArgs =  new Array (0);
+C$.emptyArgs = C$.prototype.emptyArgs =  Clazz.newArray$('OA', Clazz.newA$, [0]);
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:17

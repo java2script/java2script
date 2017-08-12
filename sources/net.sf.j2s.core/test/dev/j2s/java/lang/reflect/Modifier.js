@@ -60,7 +60,7 @@ return ((modifiers & 64) != 0);
 }, 1);
 
 Clazz.newMethod$ (C$, 'toString$I', function (modifiers) {
-var sb =  new Array (0);
+var sb =  Clazz.newArray$('SA', Clazz.newA$, [0]);
 if (java.lang.reflect.Modifier.isPublic$I (modifiers)) sb[sb.length] = "public";
 if (java.lang.reflect.Modifier.isProtected$I (modifiers)) sb[sb.length] = "protected";
 if (java.lang.reflect.Modifier.isPrivate$I (modifiers)) sb[sb.length] = "private";
@@ -98,4 +98,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:18

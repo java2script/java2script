@@ -12,7 +12,7 @@ this.count = 0;
 Clazz.newMethod$ (C$, 'construct$java_io_OutputStream', function (out) {
 C$.superClazz.construct$java_io_OutputStream.apply(this, [out]);
 C$.$init$.apply(this);
-this.buf =  Clazz.newByteArray (8192, 0);
+this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [8192, 0]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct$java_io_OutputStream$I', function (out, size) {
@@ -20,7 +20,7 @@ C$.superClazz.construct$java_io_OutputStream.apply(this, [out]);
 C$.$init$.apply(this);
 if (size <= 0) {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
-}this.buf =  Clazz.newByteArray (size, 0);
+}this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [size, 0]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'flush', function () {
@@ -70,4 +70,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:40
+//Created 2017-08-12 07:32:13

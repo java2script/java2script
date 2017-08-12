@@ -46,8 +46,8 @@ Clazz.newMethod$ (C$, 'reset', function () {
 this.$in.reset ();
 });
 
-Clazz.newMethod$ (C$, 'skip$L', function (count) {
-return this.$in.skip$L (count);
+Clazz.newMethod$ (C$, 'skip$J', function (count) {
+return this.$in.skip$J (count);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
@@ -56,4 +56,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:41
+//Created 2017-08-12 07:32:14

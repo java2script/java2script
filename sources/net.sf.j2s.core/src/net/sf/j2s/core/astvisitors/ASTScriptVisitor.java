@@ -2873,9 +2873,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public static void j2sAddArrayPrefix(StringBuffer buffer, ITypeBinding arrType, ITypeBinding elementType) {
-		buffer.append(" Clazz.newArray$(")
-		.append(j2sGetArrayClass(arrType))
-		.append(", Clazz.new");
+		buffer.append(" Clazz.newArray$('")
+		.append(j2sGetParamCode(arrType))
+		.append("', Clazz.new");
 		String type = "";
 		if (elementType.isPrimitive()) {
 			String typeCode = elementType.getName();

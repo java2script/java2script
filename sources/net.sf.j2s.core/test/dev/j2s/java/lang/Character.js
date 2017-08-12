@@ -21,7 +21,7 @@ return (this.value).charCodeAt (0);
 });
 
 Clazz.newMethod$ (C$, 'equals', function (obj) {
-if (Clazz.instanceOf (obj, Character)) {
+if (Clazz.instanceOf(obj, Character)) {
 return this.value == (obj).charValue ();
 }return false;
 });
@@ -31,11 +31,11 @@ return this.value.charCodeAt (0) - c.value.charCodeAt (0);
 });
 
 Clazz.newMethod$ (C$, 'toLowerCase', function (c) {
-return ("" + c).toLowerCase ().charAt (0);
+return ("" + c).toLowerCase ().charAt$I (0);
 }, 1);
 
 Clazz.newMethod$ (C$, 'toUpperCase', function (c) {
-return ("" + c).toUpperCase ().charAt (0);
+return ("" + c).toUpperCase ().charAt$I (0);
 }, 1);
 
 Clazz.newMethod$ (C$, 'isDigit', function (c) {
@@ -104,8 +104,8 @@ result = c.charCodeAt (0) - (55);
 }, 1);
 
 Clazz.newMethod$ (C$, 'toString', function () {
-var buf =  Clazz.newCharArray (-1, [this.value]);
-return String.valueOf (buf);
+var buf =  Clazz.newArray$('CA', Clazz.newA$, [-1, [this.value]]);
+return String.valueOf$CA (buf);
 });
 
 Clazz.newMethod$ (C$, 'toString', function (c) {
@@ -113,7 +113,7 @@ Clazz.newMethod$ (C$, 'toString', function (c) {
 if (this === Character) {
 return "class java.lang.Character"; // Character.class.toString
 }
-}return String.valueOf (c);
+}return String.valueOf$C (c);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
@@ -129,4 +129,4 @@ Clazz.defineStatics (C$,
 java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
 })()
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:15

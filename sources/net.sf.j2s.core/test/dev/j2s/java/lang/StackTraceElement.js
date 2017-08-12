@@ -24,21 +24,21 @@ Clazz.newMethod$ (C$, 'construct', function () {
 }, 1);
 
 Clazz.newMethod$ (C$, 'equals$O', function (obj) {
-if (!(Clazz.instanceOf (obj, StackTraceElement))) {
+if (!(Clazz.instanceOf(obj, StackTraceElement))) {
 return false;
 }var castObj = obj;
 if ((this.methodName == null) || (castObj.methodName == null)) {
 return false;
-}if (!this.getMethodName ().equals (castObj.getMethodName ())) {
+}if (!this.getMethodName ().equals$O (castObj.getMethodName ())) {
 return false;
-}if (!this.getClassName ().equals (castObj.getClassName ())) {
+}if (!this.getClassName ().equals$O (castObj.getClassName ())) {
 return false;
 }var localFileName = this.getFileName ();
 if (localFileName == null) {
 if (castObj.getFileName () != null) {
 return false;
 }} else {
-if (!localFileName.equals (castObj.getFileName ())) {
+if (!localFileName.equals$O (castObj.getFileName ())) {
 return false;
 }}if (this.getLineNumber () != castObj.getLineNumber ()) {
 return false;
@@ -72,27 +72,27 @@ return this.lineNumber == -2;
 });
 
 Clazz.newMethod$ (C$, 'toString', function () {
-var buf = Clazz.$new(StringBuilder.construct,[80]);
-buf.append (this.getClassName ());
-buf.append ('.');
-buf.append (this.getMethodName ());
+var buf = Clazz.$new(StringBuilder.construct$I,[80]);
+buf.append$S (this.getClassName ());
+buf.append$C ('.');
+buf.append$S (this.getMethodName ());
 if (this.isNativeMethod ()) {
-buf.append ("(Native Method)");
+buf.append$S ("(Native Method)");
 } else {
 var fName = this.getFileName ();
 if (fName == null) {
-buf.append ("(Unknown Source)");
+buf.append$S ("(Unknown Source)");
 } else {
 var lineNum = this.getLineNumber ();
-buf.append ('(');
-buf.append (fName);
+buf.append$C ('(');
+buf.append$S (fName);
 if (lineNum >= 0) {
-buf.append (':');
-buf.append (lineNum);
-}buf.append (')');
+buf.append$C (':');
+buf.append$I (lineNum);
+}buf.append$C (')');
 }}return buf.toString ();
 });
 })()
 });
 
-//Created 2017-08-08 06:13:43
+//Created 2017-08-12 07:32:16

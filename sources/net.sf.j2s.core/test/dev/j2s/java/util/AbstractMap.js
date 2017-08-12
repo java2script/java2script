@@ -49,7 +49,7 @@ return true;
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Map)) {
+}if (Clazz.instanceOf(object, java.util.Map)) {
 var map = object;
 if (this.size () != map.size ()) {
 return false;
@@ -176,26 +176,26 @@ return this.entrySet ().size ();
 Clazz.newMethod$ (C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "{}";
-}var buffer = Clazz.$new(StringBuilder.construct,[this.size () * 28]);
-buffer.append ('{');
+}var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 28]);
+buffer.append$C ('{');
 var it = this.entrySet ().iterator ();
 while (it.hasNext ()) {
 var entry = it.next ();
 var key = entry.getKey ();
 if (key !== this) {
-buffer.append (key);
+buffer.append$O (key);
 } else {
-buffer.append ("(this Map)");
-}buffer.append ('=');
+buffer.append$S ("(this Map)");
+}buffer.append$C ('=');
 var value = entry.getValue ();
 if (value !== this) {
-buffer.append (value);
+buffer.append$O (value);
 } else {
-buffer.append ("(this Map)");
+buffer.append$S ("(this Map)");
 }if (it.hasNext ()) {
-buffer.append (", ");
+buffer.append$S (", ");
 }}
-buffer.append ('}');
+buffer.append$C ('}');
 return buffer.toString ();
 });
 
@@ -255,4 +255,4 @@ return result;
 })()
 });
 
-//Created 2017-08-08 06:13:46
+//Created 2017-08-12 07:32:18

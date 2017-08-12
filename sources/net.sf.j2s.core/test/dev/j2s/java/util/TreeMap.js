@@ -154,7 +154,7 @@ this.b$["java.util.TreeMap"].clear ();
 });
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 var v1 = this.b$["java.util.TreeMap"].get$O (entry.getKey ());
 var v2 = entry.getValue ();
@@ -1164,7 +1164,7 @@ return size;
 });
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 var key = entry.getKey ();
 if (this.subMap.isInRange$TK (key)) {
@@ -1270,4 +1270,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:21

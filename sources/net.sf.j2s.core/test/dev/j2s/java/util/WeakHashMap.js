@@ -16,7 +16,7 @@ this.modCount = 0;
 }, 1);
 
 Clazz.newMethod$ (C$, 'newEntryArray$I', function (size) {
-return  new Array (size);
+return  Clazz.newArray$('java_util_WeakHashMap_EntryA', Clazz.newA$, [size]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct', function () {
@@ -97,7 +97,7 @@ return true;
 });
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = this.b$["java.util.WeakHashMap"].getEntry$O ((object).getKey ());
 if (entry != null) {
 var key = entry.get ();
@@ -438,7 +438,7 @@ return result;
 });
 
 Clazz.newMethod$ (C$, 'equals$O', function (other) {
-if (!(Clazz.instanceOf (other, java.util.Map.Entry))) {
+if (!(Clazz.instanceOf(other, java.util.Map.Entry))) {
 return false;
 }var entry = other;
 var key = C$.superClazz.prototype.get.apply(this, arguments);
@@ -531,4 +531,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:21

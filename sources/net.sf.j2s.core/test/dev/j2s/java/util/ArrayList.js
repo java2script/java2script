@@ -39,7 +39,7 @@ this.addAll$java_util_Collection (collection);
 }, 1);
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (size) {
-return  new Array (size);
+return  Clazz.newArray$('OA', Clazz.newA$, [size]);
 });
 
 Clazz.newMethod$ (C$, 'add$I$TE', function (location, object) {
@@ -339,7 +339,7 @@ return this.lastIndex - this.firstIndex;
 
 Clazz.newMethod$ (C$, 'toArray', function () {
 var size = this.size ();
-var result =  new Array (size);
+var result =  Clazz.newArray$('OA', Clazz.newA$, [size]);
 System.arraycopy (this.array, this.firstIndex, result, 0, size);
 return result;
 });
@@ -386,4 +386,4 @@ this.array[i] = stream.readObject ();
 })()
 });
 
-//Created 2017-08-08 06:13:46
+//Created 2017-08-12 07:32:18

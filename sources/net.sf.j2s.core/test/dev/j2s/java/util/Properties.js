@@ -20,45 +20,45 @@ C$.$init$.apply(this);
 this.defaults = properties;
 }, 1);
 
-Clazz.newMethod$ (C$, 'dumpString$StringBuilder$S$b', function (buffer, string, key) {
+Clazz.newMethod$ (C$, 'dumpString$StringBuilder$S$Z', function (buffer, string, key) {
 var i = 0;
-if (!key && i < string.length && string.charAt (i) == ' ') {
-buffer.append ("\\ ");
+if (!key && i < string.length && string.charAt$I (i) == ' ') {
+buffer.append$S ("\\ ");
 i++;
 }for (; i < string.length; i++) {
-var ch = string.charAt (i);
+var ch = string.charAt$I (i);
 switch (ch) {
 case '\t':
-buffer.append ("\\t");
+buffer.append$S ("\\t");
 break;
 case '\n':
-buffer.append ("\\n");
+buffer.append$S ("\\n");
 break;
 case '\f':
-buffer.append ("\\f");
+buffer.append$S ("\\f");
 break;
 case '\r':
-buffer.append ("\\r");
+buffer.append$S ("\\r");
 break;
 default:
-if ("\\#!=:".indexOf (ch) >= 0 || (key && ch == ' ')) {
-buffer.append ('\\');
+if ("\\#!=:".indexOf$I (ch) >= 0 || (key && ch == ' ')) {
+buffer.append$C ('\\');
 }if (ch >= ' ' && ch <= '~') {
-buffer.append (ch);
+buffer.append$C (ch);
 } else {
 var hex = Integer.toHexString (ch.charCodeAt (0));
-buffer.append ("\\u");
+buffer.append$S ("\\u");
 for (var j = 0; j < 4 - hex.length; j++) {
-buffer.append ("0");
+buffer.append$S ("0");
 }
-buffer.append (hex);
+buffer.append$S (hex);
 }}
 }
 });
 
 Clazz.newMethod$ (C$, 'getProperty$S', function (name) {
 var result = this.get$O (name);
-var property = Clazz.instanceOf (result, String) ? result : null;
+var property = Clazz.instanceOf(result, String) ? result : null;
 if (property == null && this.defaults != null) {
 property = this.defaults.getProperty$S (name);
 }return property;
@@ -66,7 +66,7 @@ property = this.defaults.getProperty$S (name);
 
 Clazz.newMethod$ (C$, 'getProperty$S$S', function (name, defaultValue) {
 var result = this.get$O (name);
-var property = Clazz.instanceOf (result, String) ? result : null;
+var property = Clazz.instanceOf(result, String) ? result : null;
 if (property == null && this.defaults != null) {
 property = this.defaults.getProperty$S (name);
 }if (property == null) {
@@ -77,12 +77,12 @@ return defaultValue;
 Clazz.newMethod$ (C$, 'list$java_io_PrintStream', function (out) {
 if (out == null) {
 throw Clazz.$new(NullPointerException.construct);
-}var buffer = Clazz.$new(StringBuffer.construct,[80]);
+}var buffer = Clazz.$new(StringBuffer.construct$I,[80]);
 var keys = this.propertyNames ();
 while (keys.hasMoreElements ()) {
 var key = keys.nextElement ();
-buffer.append (key);
-buffer.append ('=');
+buffer.append$S (key);
+buffer.append$C ('=');
 var property = this.get$O (key);
 var def = this.defaults;
 while (property == null) {
@@ -90,24 +90,24 @@ property = def.get$O (key);
 def = def.defaults;
 }
 if (property.length > 40) {
-buffer.append (property.substring (0, 37));
-buffer.append ("...");
+buffer.append$S (property.substring$I$I (0, 37));
+buffer.append$S ("...");
 } else {
-buffer.append (property);
+buffer.append$S (property);
 }out.println$S (buffer.toString ());
-buffer.setLength (0);
+buffer.setLength$I (0);
 }
 });
 
 Clazz.newMethod$ (C$, 'list$java_io_PrintWriter', function (writer) {
 if (writer == null) {
 throw Clazz.$new(NullPointerException.construct);
-}var buffer = Clazz.$new(StringBuffer.construct,[80]);
+}var buffer = Clazz.$new(StringBuffer.construct$I,[80]);
 var keys = this.propertyNames ();
 while (keys.hasMoreElements ()) {
 var key = keys.nextElement ();
-buffer.append (key);
-buffer.append ('=');
+buffer.append$S (key);
+buffer.append$C ('=');
 var property = this.get$O (key);
 var def = this.defaults;
 while (property == null) {
@@ -115,12 +115,12 @@ property = def.get$O (key);
 def = def.defaults;
 }
 if (property.length > 40) {
-buffer.append (property.substring (0, 37));
-buffer.append ("...");
+buffer.append$S (property.substring$I$I (0, 37));
+buffer.append$S ("...");
 } else {
-buffer.append (property);
+buffer.append$S (property);
 }writer.println$S (buffer.toString ());
-buffer.setLength (0);
+buffer.setLength$I (0);
 }
 });
 
@@ -175,7 +175,7 @@ Clazz.newMethod$ (C$, 'storeToXML$java_io_OutputStream$S$S', function (os, comme
 });
 
 Clazz.newMethod$ (C$, 'substitutePredefinedEntries$S', function (s) {
-return s.replaceAll ("&", "&amp;").replaceAll ("<", "&lt;").replaceAll (">", "&gt;").replaceAll ("\u0027", "&apos;").replaceAll ("\"", "&quot;");
+return s.replaceAll$S$S ("&", "&amp;").replaceAll$S$S ("<", "&lt;").replaceAll$S$S (">", "&gt;").replaceAll$S$S ("\u0027", "&apos;").replaceAll$S$S ("\"", "&quot;");
 });
 Clazz.defineStatics (C$,
 "PROP_DTD_NAME", "http://java.sun.com/dtd/properties.dtd",
@@ -190,4 +190,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:48
+//Created 2017-08-12 07:32:20

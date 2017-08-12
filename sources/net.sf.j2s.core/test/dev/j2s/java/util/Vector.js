@@ -43,7 +43,7 @@ this.elementData[this.elementCount++] = it.next ();
 }, 1);
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (size) {
-return  new Array (size);
+return  Clazz.newArray$('OA', Clazz.newA$, [size]);
 });
 
 Clazz.newMethod$ (C$, 'add$I$TE', function (location, object) {
@@ -160,7 +160,7 @@ C$.prototype.grow$I.apply(this, [minimumCapacity > next ? minimumCapacity : next
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.List)) {
+}if (Clazz.instanceOf(object, java.util.List)) {
 var list = object;
 if (list.size () != this.size ()) {
 return false;
@@ -399,7 +399,7 @@ return Clazz.$new(java.util.Collections.SynchronizedRandomAccessList.construct$j
 });
 
 Clazz.newMethod$ (C$, 'toArray', function () {
-var result =  new Array (this.elementCount);
+var result =  Clazz.newArray$('OA', Clazz.newA$, [this.elementCount]);
 System.arraycopy (this.elementData, 0, result, 0, this.elementCount);
 return result;
 });
@@ -418,20 +418,20 @@ Clazz.newMethod$ (C$, 'toString', function () {
 if (this.elementCount == 0) {
 return "[]";
 }var length = this.elementCount - 1;
-var buffer = Clazz.$new(StringBuffer.construct,[this.size () * 16]);
-buffer.append ('[');
+var buffer = Clazz.$new(StringBuffer.construct$I,[this.size () * 16]);
+buffer.append$C ('[');
 for (var i = 0; i < length; i++) {
 if (this.elementData[i] === this) {
-buffer.append ("(this Collection)");
+buffer.append$S ("(this Collection)");
 } else {
-buffer.append (this.elementData[i]);
-}buffer.append (", ");
+buffer.append$O (this.elementData[i]);
+}buffer.append$S (", ");
 }
 if (this.elementData[length] === this) {
-buffer.append ("(this Collection)");
+buffer.append$S ("(this Collection)");
 } else {
-buffer.append (this.elementData[length]);
-}buffer.append (']');
+buffer.append$O (this.elementData[length]);
+}buffer.append$C (']');
 return buffer.toString ();
 });
 
@@ -448,4 +448,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:21

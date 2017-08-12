@@ -1,83 +1,68 @@
-Clazz.load (["java.io.Serializable", "java.lang.Comparable"], "java.lang.Enum", ["java.lang.ClassCastException", "$.CloneNotSupportedException", "$.IllegalArgumentException", "$.NullPointerException"], function () {
-c$ = java.lang.Enum = Enum = function () {
+Clazz.load (null, "java.lang.Enum", ["java.lang.ClassCastException", "$.CloneNotSupportedException", "$.IllegalArgumentException", "$.NullPointerException"], function () {
+;
+(function(){var C$ = Clazz.decorateAsClass (function () {
+Clazz.newInstance$ (this, arguments);
+}, java.lang, "Enum", null, [Comparable, java.io.Serializable]);
+
+Clazz.newMethod$(C$, '$init$', function () {
 this.$name = null;
 this.$ordinal = 0;
-Clazz.instantialize (this, arguments);
-};
-Clazz.decorateAsType (c$, "Enum", null, [Comparable, java.io.Serializable]);
-Clazz.defineMethod (c$, "name", 
-function () {
+}, 1);
+
+Clazz.newMethod$ (C$, 'name', function () {
 return this.$name;
 });
-Clazz.defineMethod (c$, "ordinal", 
-function () {
+
+Clazz.newMethod$ (C$, 'ordinal', function () {
 return this.$ordinal;
 });
-Clazz.makeConstructor (c$, 
-function (name, ordinal) {
+
+Clazz.newMethod$ (C$, 'construct$S$I', function (name, ordinal) {
+C$.$init$.apply(this);
 this.$name = name;
 this.$ordinal = ordinal;
-}, "String, Number");
-Clazz.defineMethod (c$, "toString", 
-function () {
+}, 1);
+
+Clazz.newMethod$ (C$, 'toString', function () {
 return this.$name;
 });
-Clazz.defineMethod (c$, "equals", 
-function (other) {
-return this == other;
-}, "Object");
-Clazz.defineMethod (c$, "hashCode", 
-function () {
-return System.identityHashCode (this);
+
+Clazz.newMethod$ (C$, 'equals$O', function (other) {
+return this === other;
 });
-Clazz.defineMethod (c$, "clone", 
-function () {
-throw  new CloneNotSupportedException ();
+
+Clazz.newMethod$ (C$, 'hashCode', function () {
+return C$.superClazz.prototype.hashCode.apply(this, arguments);
 });
-Clazz.defineMethod (c$, "compareTo", 
-function (o) {
+
+Clazz.newMethod$ (C$, 'clone', function () {
+throw Clazz.$new(CloneNotSupportedException.construct);
+});
+
+Clazz.newMethod$ (C$, 'compareTo$TE', function (o) {
 var other = o;
 var self = this;
-if (self.getClass () != other.getClass () && self.getDeclaringClass () != other.getDeclaringClass ()) throw  new ClassCastException ();
-return self.ordinal - other.ordinal;
-}, "E");
-Clazz.defineMethod (c$, "getDeclaringClass", 
-function () {
+if (self.getClass () !== other.getClass () && self.getDeclaringClass () !== other.getDeclaringClass ()) throw Clazz.$new(ClassCastException.construct);
+return self.$ordinal - other.$ordinal;
+});
+
+Clazz.newMethod$ (C$, 'getDeclaringClass', function () {
 var clazz = this.getClass ();
 var zuper = clazz.getSuperclass ();
-return (zuper == Enum) ? clazz : zuper;
+return (zuper === Enum) ? clazz : zuper;
 });
-Clazz.defineMethod (Enum, "$valueOf", 
-function (enumType, name) {
-	return enumType.$valueOf (name);
-}, "Object, String"); /* "Class, String" */
-Clazz.defineMethod (Enum, "$valueOf", 
-function (name) {
-if (name == null) throw  new NullPointerException ("Name is null");
-var vals = this.values ();
-for (var i = 0; i < vals.length; i++) {
-	if (name == vals[i].name ()) {
-		return vals[i];
-	}
-}
-throw  new IllegalArgumentException ("No enum const " + enumType + "." + name);
-}, "String");
-Enum.$valueOf = Enum.prototype.$valueOf;
-Clazz.defineMethod (Enum, "values", 
-function () {
-	if (this.$ALL$ENUMS != null) {
-		return this.$ALL$ENUMS;
-	}
-	this.$ALL$ENUMS = new Array ();
-	var clazzThis = this.getClass ();
-	for (var e in clazzThis) {
-		if (clazzThis[e] != null && clazzThis[e].__CLASS_NAME__ != null 
-				&& e != "prototype"
-				&& Clazz.instanceOf (clazzThis[e], clazzThis)) {
-			this.$ALL$ENUMS[this.$ALL$ENUMS.length] = clazzThis[e];
-		}
-	}
-	return this.$ALL$ENUMS;
+
+Clazz.newMethod$ (C$, 'valueOf$Class$S', function (enumType, name) {
+var result = enumType.enumConstantDirectory ().get$O (name);
+if (result != null) return result;
+if (name == null) throw Clazz.$new(NullPointerException.construct$S,["Name is null"]);
+throw Clazz.$new(IllegalArgumentException.construct$S,["No enum const " + enumType + "." + name]);
+}, 1);
+
+Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
+C$.$init$.apply(this);
+},true);
+})()
 });
-Enum.values = Enum.prototype.values;
-});
+
+//Created 2017-08-12 07:32:15

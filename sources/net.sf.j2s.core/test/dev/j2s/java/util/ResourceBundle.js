@@ -78,8 +78,8 @@ Clazz.newInstance$ (this, arguments[0], true);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.map =  new Array (0);
-this.keys =  new Array (0);
+this.map =  Clazz.newArray$('SA', Clazz.newA$, [0]);
+this.keys =  Clazz.newArray$('SA', Clazz.newA$, [0]);
 this.content = null;
 this.initialized = false;
 }, 1);
@@ -165,12 +165,12 @@ return;
 }var bundleLines = this.content.$plit ("\n");
 for (var i = 0; i < bundleLines.length; i++) {
 var trimedLine = bundleLines[i].trim ();
-if (!trimedLine.startsWith ("#")) {
-var index = trimedLine.indexOf ('=');
+if (!trimedLine.startsWith$S ("#")) {
+var index = trimedLine.indexOf$I ('=');
 if (index != -1) {
-var key = trimedLine.substring (0, index).trim ();
-var value = trimedLine.substring (index + 1).trim ();
-if (value.indexOf ('\\') != -1) {
+var key = trimedLine.substring$I$I (0, index).trim ();
+var value = trimedLine.substring$I (index + 1).trim ();
+if (value.indexOf$I ('\\') != -1) {
 value = this.evalString$S (value);
 }var m = this.map;
 var k = this.keys;
@@ -217,8 +217,8 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 },true);
 })()
-C$.caches = C$.prototype.caches =  new Array (0);
+C$.caches = C$.prototype.caches =  Clazz.newArray$('java_util_ResourceBundleA', Clazz.newA$, [0]);
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:20

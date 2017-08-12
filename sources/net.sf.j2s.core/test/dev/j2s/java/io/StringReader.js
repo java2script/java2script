@@ -47,19 +47,19 @@ Clazz.newMethod$ (C$, 'read', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.pos != this.count) {
-return this.str.charAt (this.pos++);
+return this.str.charAt$I (this.pos++);
 }return -1;
 }throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0083")]);
 }});
 
-Clazz.newMethod$ (C$, 'read$charA$I$I', function (buf, offset, len) {
+Clazz.newMethod$ (C$, 'read$CA$I$I', function (buf, offset, len) {
 if (0 <= offset && offset <= buf.length && 0 <= len && len <= buf.length - offset) {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.pos == this.count) {
 return -1;
 }var end = this.pos + len > this.count ? this.count : this.pos + len;
-this.str.getChars (this.pos, end, buf, offset);
+this.str.getChars$I$I$CA$I (this.pos, end, buf, offset);
 var read = end - this.pos;
 this.pos = end;
 return read;
@@ -82,7 +82,7 @@ this.pos = this.markpos != -1 ? this.markpos : 0;
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0083")]);
 }}});
 
-Clazz.newMethod$ (C$, 'skip$L', function (ns) {
+Clazz.newMethod$ (C$, 'skip$J', function (ns) {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (ns <= 0) {
@@ -104,4 +104,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:14

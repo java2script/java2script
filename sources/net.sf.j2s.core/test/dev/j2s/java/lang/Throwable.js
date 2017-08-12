@@ -64,7 +64,7 @@ return (message != null) ? (s + ": " + message) : s;
 });
 
 Clazz.newMethod$ (C$, 'printStackTrace', function () {
-System.err.println$O (this);
+System.err.println (this);
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
 var x = t.methodName.indexOf ("(");
@@ -147,4 +147,4 @@ this.stackTrace = defensiveCopy;
 });
 })()
 
-//Created 2017-08-08 06:13:44
+//Created 2017-08-12 07:32:17

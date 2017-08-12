@@ -53,11 +53,11 @@ Clazz.newMethod$ (C$, 'reset', function () {
 throw Clazz.$new(java.io.IOException.construct);
 });
 
-Clazz.newMethod$ (C$, 'skip$L', function (n) {
+Clazz.newMethod$ (C$, 'skip$J', function (n) {
 if (n <= 0) return 0;
 var skipped = 0;
 var toRead = n < 4096 ? n : 4096;
-if (java.io.InputStream.skipBuf == null || java.io.InputStream.skipBuf.length < toRead) java.io.InputStream.skipBuf =  Clazz.newByteArray (toRead, 0);
+if (java.io.InputStream.skipBuf == null || java.io.InputStream.skipBuf.length < toRead) java.io.InputStream.skipBuf =  Clazz.newArray$('BA', Clazz.newByteA$, [toRead, 0]);
 while (skipped < n) {
 var read = this.read$BA$I$I (java.io.InputStream.skipBuf, 0, toRead);
 if (read == -1) return skipped;
@@ -72,4 +72,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:41
+//Created 2017-08-12 07:32:14

@@ -13,7 +13,7 @@ this.modCount = 0;
 }, 1);
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (s) {
-return  new Array (s);
+return  Clazz.newArray$('java_util_HashMap_EntryA', Clazz.newA$, [s]);
 });
 
 Clazz.newMethod$ (C$, 'construct', function () {
@@ -499,7 +499,7 @@ return true;
 });
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = this.associatedMap.getEntry$O ((object).getKey ());
 return object.equals$O (entry);
 }return false;
@@ -530,4 +530,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:47
+//Created 2017-08-12 07:32:19

@@ -10,10 +10,13 @@ C$.$init$.apply(this);
 
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
-Clazz.$newEnumConst(C$.construct, "SOURCE", 0, null);
-Clazz.$newEnumConst(C$.construct, "CLASS", 1, null);
-Clazz.$newEnumConst(C$.construct, "RUNTIME", 2, null);
+var vals = [];
+vals.push(Clazz.$newEnumConst(C$.construct, "SOURCE", 0, null));
+vals.push(Clazz.$newEnumConst(C$.construct, "CLASS", 1, null));
+vals.push(Clazz.$newEnumConst(C$.construct, "RUNTIME", 2, null));
+Clazz.newMethod$(C$, 'values', function() { return vals }, 1);
+Clazz.newMethod$(Enum, 'valueOf$Class$S', function(cl, name) { return cl[name] }, 1);
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:17

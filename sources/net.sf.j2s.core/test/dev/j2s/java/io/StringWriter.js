@@ -11,7 +11,7 @@ this.buf = null;
 Clazz.newMethod$ (C$, 'construct', function () {
 C$.superClazz.construct.apply(this);
 C$.$init$.apply(this);
-this.buf = Clazz.$new(StringBuffer.construct,[16]);
+this.buf = Clazz.$new(StringBuffer.construct$I,[16]);
 this.lock = this.buf;
 }, 1);
 
@@ -19,7 +19,7 @@ Clazz.newMethod$ (C$, 'construct$I', function (initialSize) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (initialSize >= 0) {
-this.buf = Clazz.$new(StringBuffer.construct,[initialSize]);
+this.buf = Clazz.$new(StringBuffer.construct$I,[initialSize]);
 this.lock = this.buf;
 } else {
 throw Clazz.$new(IllegalArgumentException.construct);
@@ -41,31 +41,31 @@ Clazz.newMethod$ (C$, 'toString', function () {
 return this.buf.toString ();
 }});
 
-Clazz.newMethod$ (C$, 'write$charA$I$I', function (cbuf, offset, count) {
+Clazz.newMethod$ (C$, 'write$CA$I$I', function (cbuf, offset, count) {
 if (0 <= offset && offset <= cbuf.length && 0 <= count && count <= cbuf.length - offset) {
 {
-this.buf.append (cbuf, offset, count);
+this.buf.append$CA$I$I (cbuf, offset, count);
 }} else {
 throw Clazz.$new(IndexOutOfBoundsException.construct);
 }});
 
 Clazz.newMethod$ (C$, 'write$I', function (oneChar) {
 {
-this.buf.append (String.fromCharCode (oneChar));
+this.buf.append$C (String.fromCharCode (oneChar));
 }});
 
 Clazz.newMethod$ (C$, 'write$S', function (str) {
 {
-this.buf.append (str);
+this.buf.append$S (str);
 }});
 
 Clazz.newMethod$ (C$, 'write$S$I$I', function (str, offset, count) {
-var sub = str.substring (offset, offset + count);
+var sub = str.substring$I$I (offset, offset + count);
 {
-this.buf.append (sub);
+this.buf.append$S (sub);
 }});
 
-Clazz.newMethod$ (C$, 'append$char', function (c) {
+Clazz.newMethod$ (C$, 'append$C', function (c) {
 this.write$I (c.charCodeAt (0));
 return this;
 });
@@ -88,4 +88,4 @@ return this;
 })()
 });
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:14

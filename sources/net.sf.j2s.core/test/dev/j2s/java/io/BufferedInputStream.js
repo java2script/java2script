@@ -16,7 +16,7 @@ this.closed = false;
 Clazz.newMethod$ (C$, 'construct$java_io_InputStream', function ($in) {
 C$.superClazz.construct$java_io_InputStream.apply(this, [$in]);
 C$.$init$.apply(this);
-this.buf = ($in == null) ? null :  Clazz.newByteArray (8192, 0);
+this.buf = ($in == null) ? null :  Clazz.newArray$('BA', Clazz.newByteA$, [8192, 0]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct$java_io_InputStream$I', function ($in, size) {
@@ -24,7 +24,7 @@ C$.superClazz.construct$java_io_InputStream.apply(this, [$in]);
 C$.$init$.apply(this);
 if (size <= 0) {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
-}this.buf = ($in == null) ? null :  Clazz.newByteArray (size, 0);
+}this.buf = ($in == null) ? null :  Clazz.newArray$('BA', Clazz.newByteA$, [size, 0]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'available', function () {
@@ -53,7 +53,7 @@ this.count = result == -1 ? 0 : result;
 var newLength = this.buf.length * 2;
 if (newLength > this.marklimit) {
 newLength = this.marklimit;
-}var newbuf =  Clazz.newByteArray (newLength, 0);
+}var newbuf =  Clazz.newArray$('BA', Clazz.newByteA$, [newLength, 0]);
 System.arraycopy (this.buf, 0, newbuf, 0, this.buf.length);
 this.buf = newbuf;
 } else if (this.markpos > 0) {
@@ -133,7 +133,7 @@ throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.M
 }this.pos = this.markpos;
 });
 
-Clazz.newMethod$ (C$, 'skip$L', function (amount) {
+Clazz.newMethod$ (C$, 'skip$J', function (amount) {
 if (null == this.$in) {
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0059")]);
 }if (amount < 1) {
@@ -154,7 +154,7 @@ return amount;
 this.pos = this.count;
 return read;
 }this.markpos = -1;
-}return read + this.$in.skip$L (amount - read);
+}return read + this.$in.skip$J (amount - read);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
@@ -163,4 +163,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:40
+//Created 2017-08-12 07:32:13

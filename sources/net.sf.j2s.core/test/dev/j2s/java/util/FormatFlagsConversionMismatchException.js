@@ -9,7 +9,7 @@ this.f = null;
 this.c = '\0';
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$char', function (f, c) {
+Clazz.newMethod$ (C$, 'construct$S$C', function (f, c) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (null == f) {
@@ -36,4 +36,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:47
+//Created 2017-08-12 07:32:19

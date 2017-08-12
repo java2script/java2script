@@ -12,16 +12,16 @@ C$.superClazz.construct.apply(this);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function (index) {
+Clazz.newMethod$ (C$, 'construct$I', function (index) {
 C$.superClazz.construct$S.apply(this, ["String index out of range: " + index]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function (detailMessage) {
+Clazz.newMethod$ (C$, 'construct$S', function (detailMessage) {
 C$.superClazz.construct$S.apply(this, [detailMessage]);
 C$.$init$.apply(this);
 }, 1);
 })()
 });
 
-//Created 2017-08-08 06:13:44
+//Created 2017-08-12 07:32:16

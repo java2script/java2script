@@ -25,7 +25,7 @@ return this.count - this.pos;
 });
 
 Clazz.newMethod$ (C$, 'read', function () {
-return this.pos < this.count ? this.buffer.charCodeAt (this.pos++) & 0xFF : -1;
+return this.pos < this.count ? (this.buffer.charAt$I (this.pos++)).charCodeAt (0) & 0xFF : -1;
 });
 
 Clazz.newMethod$ (C$, 'read$BA$I$I', function (b, offset, length) {
@@ -37,7 +37,7 @@ if (length == 0) {
 return 0;
 }var copylen = this.count - this.pos < length ? this.count - this.pos : length;
 for (var i = 0; i < copylen; i++) {
-b[offset + i] = (this.buffer.charAt (this.pos + i)).charCodeAt (0);
+b[offset + i] = (this.buffer.charAt$I (this.pos + i)).charCodeAt (0);
 }
 this.pos += copylen;
 return copylen;
@@ -49,7 +49,7 @@ Clazz.newMethod$ (C$, 'reset', function () {
 this.pos = 0;
 });
 
-Clazz.newMethod$ (C$, 'skip$L', function (n) {
+Clazz.newMethod$ (C$, 'skip$J', function (n) {
 if (n <= 0) {
 return 0;
 }var numskipped;
@@ -68,4 +68,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:14

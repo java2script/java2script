@@ -15,7 +15,7 @@ C$.$init$.apply(this);
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Set)) {
+}if (Clazz.instanceOf(object, java.util.Set)) {
 var s = object;
 return this.size () == s.size () && this.containsAll$java_util_Collection (s);
 }return false;
@@ -50,4 +50,4 @@ result = this.remove$O (it.next ()) || result;
 })()
 });
 
-//Created 2017-08-08 06:13:46
+//Created 2017-08-12 07:32:18

@@ -54,7 +54,7 @@ this.backingMap.clear ();
 Clazz.newMethod$ (C$, 'clone', function () {
 try {
 var clone = C$.superClazz.prototype.clone.apply(this, arguments);
-if (Clazz.instanceOf (this.backingMap, java.util.TreeMap)) {
+if (Clazz.instanceOf(this.backingMap, java.util.TreeMap)) {
 clone.backingMap = (this.backingMap).clone ();
 } else {
 clone.backingMap = Clazz.$new(java.util.TreeMap.construct$java_util_SortedMap,[this.backingMap]);
@@ -164,4 +164,4 @@ last = x;
 })()
 });
 
-//Created 2017-08-08 06:13:49
+//Created 2017-08-12 07:32:21

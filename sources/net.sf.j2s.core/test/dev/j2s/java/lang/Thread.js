@@ -97,7 +97,7 @@ this.name = name;
 });
 
 Clazz.newMethod$ (C$, 'getName', function () {
-return String.valueOf (this.name);
+return String.valueOf$O (this.name);
 });
 
 Clazz.newMethod$ (C$, 'getThreadGroup', function () {
@@ -119,4 +119,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-08 06:13:44
+//Created 2017-08-12 07:32:16

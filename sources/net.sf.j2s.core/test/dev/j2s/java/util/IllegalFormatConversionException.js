@@ -9,7 +9,7 @@ this.c = '\0';
 this.arg = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$char$Class', function (c, arg) {
+Clazz.newMethod$ (C$, 'construct$C$Class', function (c, arg) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.c = c;
@@ -36,4 +36,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:48
+//Created 2017-08-12 07:32:19

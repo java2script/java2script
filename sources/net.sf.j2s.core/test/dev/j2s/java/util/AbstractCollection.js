@@ -103,7 +103,7 @@ Clazz.newMethod$ (C$, 'toArray', function () {
 var size = this.size ();
 var index = 0;
 var it = this.iterator ();
-var array =  new Array (size);
+var array =  Clazz.newArray$('OA', Clazz.newA$, [size]);
 while (index < size) {
 array[index++] = it.next ();
 }
@@ -127,22 +127,22 @@ contents[index] = null;
 Clazz.newMethod$ (C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "[]";
-}var buffer = Clazz.$new(StringBuilder.construct,[this.size () * 16]);
-buffer.append ('[');
+}var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 16]);
+buffer.append$C ('[');
 var it = this.iterator ();
 while (it.hasNext ()) {
 var next = it.next ();
 if (next !== this) {
-buffer.append (next);
+buffer.append$O (next);
 } else {
-buffer.append ("(this Collection)");
+buffer.append$S ("(this Collection)");
 }if (it.hasNext ()) {
-buffer.append (", ");
+buffer.append$S (", ");
 }}
-buffer.append (']');
+buffer.append$C (']');
 return buffer.toString ();
 });
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:18

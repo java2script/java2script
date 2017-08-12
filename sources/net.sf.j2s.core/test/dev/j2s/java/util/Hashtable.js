@@ -58,7 +58,7 @@ this.putAll$java_util_Map (map);
 }, 1);
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (size) {
-return  new Array (size);
+return  Clazz.newArray$('java_util_Hashtable_EntryA', Clazz.newA$, [size]);
 });
 
 Clazz.newMethod$ (C$, 'clear', function () {
@@ -115,7 +115,7 @@ return this.contains$O (value);
 Clazz.newMethod$ (C$, 'elements', function () {
 if (this.elementCount == 0) {
 return java.util.Hashtable.EMPTY_ENUMERATION;
-}return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$b, [this, null, false]);
+}return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$Z, [this, null, false]);
 });
 
 Clazz.newMethod$ (C$, 'entrySet', function () {
@@ -169,7 +169,7 @@ return entry;
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Map)) {
+}if (Clazz.instanceOf(object, java.util.Map)) {
 var map = object;
 if (this.size () != map.size ()) {
 return false;
@@ -226,7 +226,7 @@ return this.elementCount == 0;
 Clazz.newMethod$ (C$, 'keys', function () {
 if (this.elementCount == 0) {
 return java.util.Hashtable.EMPTY_ENUMERATION;
-}return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$b, [this, null, true]);
+}return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$Z, [this, null, true]);
 });
 
 Clazz.newMethod$ (C$, 'keySet', function () {
@@ -365,27 +365,27 @@ return this.elementCount;
 Clazz.newMethod$ (C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "{}";
-}var buffer = Clazz.$new(StringBuilder.construct,[this.size () * 28]);
-buffer.append ('{');
+}var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 28]);
+buffer.append$C ('{');
 for (var i = this.lastSlot; i >= this.firstSlot; i--) {
 var entry = this.elementData[i];
 while (entry != null) {
 if (entry.key !== this) {
-buffer.append (entry.key);
+buffer.append$O (entry.key);
 } else {
-buffer.append ("(this Map)");
-}buffer.append ('=');
+buffer.append$S ("(this Map)");
+}buffer.append$C ('=');
 if (entry.value !== this) {
-buffer.append (entry.value);
+buffer.append$O (entry.value);
 } else {
-buffer.append ("(this Map)");
-}buffer.append (", ");
+buffer.append$S ("(this Map)");
+}buffer.append$S (", ");
 entry = entry.next;
 }
 }
 if (this.elementCount > 0) {
 buffer.setLength$I (buffer.length () - 2);
-}buffer.append ('}');
+}buffer.append$C ('}');
 return buffer.toString ();
 });
 
@@ -604,7 +604,7 @@ this.start = 0;
 this.entry = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$b', function (isKey) {
+Clazz.newMethod$ (C$, 'construct$Z', function (isKey) {
 C$.$init$.apply(this);
 this.key = isKey;
 this.start = this.b$["java.util.Hashtable"].lastSlot + 1;
@@ -654,4 +654,4 @@ throw Clazz.$new(java.util.NoSuchElementException.construct);
 })()
 });
 
-//Created 2017-08-08 06:13:47
+//Created 2017-08-12 07:32:19

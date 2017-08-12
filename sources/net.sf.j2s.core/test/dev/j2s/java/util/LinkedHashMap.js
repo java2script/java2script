@@ -32,7 +32,7 @@ this.head = null;
 this.tail = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I$F$b', function (s, lf, order) {
+Clazz.newMethod$ (C$, 'construct$I$F$Z', function (s, lf, order) {
 C$.superClazz.construct$I$F.apply(this, [s, lf]);
 C$.$init$.apply(this);
 this.accessOrder = order;
@@ -50,7 +50,7 @@ this.putAll$java_util_Map (m);
 }, 1);
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (s) {
-return  new Array (s);
+return  Clazz.newArray$('java_util_LinkedHashMap_LinkedHashMapEntryA', Clazz.newA$, [s]);
 });
 
 Clazz.newMethod$ (C$, 'get$O', function (key) {
@@ -398,4 +398,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:48
+//Created 2017-08-12 07:32:20

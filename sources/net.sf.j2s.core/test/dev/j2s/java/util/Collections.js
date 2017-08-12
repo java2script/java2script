@@ -17,7 +17,7 @@ throw Clazz.$new(NullPointerException.construct);
 }if (list.isEmpty ()) {
 return -1;
 }var key = object;
-if (!(Clazz.instanceOf (list, java.util.RandomAccess))) {
+if (!(Clazz.instanceOf(list, java.util.RandomAccess))) {
 var it = list.listIterator ();
 while (it.hasNext ()) {
 var result;
@@ -46,7 +46,7 @@ return -mid - (result < 0 ? 1 : 2);
 Clazz.newMethod$ (C$, 'binarySearch$java_util_List$TT$java_util_Comparator', function (list, object, comparator) {
 if (comparator == null) {
 return java.util.Collections.binarySearch$java_util_List$TT (list, object);
-}if (!(Clazz.instanceOf (list, java.util.RandomAccess))) {
+}if (!(Clazz.instanceOf(list, java.util.RandomAccess))) {
 var it = list.listIterator ();
 while (it.hasNext ()) {
 var result;
@@ -196,7 +196,7 @@ java.util.Collections.shuffle$java_util_List$java_util_Random (list, Clazz.$new(
 }, 1);
 
 Clazz.newMethod$ (C$, 'shuffle$java_util_List$java_util_Random', function (list, random) {
-if (!(Clazz.instanceOf (list, java.util.RandomAccess))) {
+if (!(Clazz.instanceOf(list, java.util.RandomAccess))) {
 var array = list.toArray ();
 for (var i = array.length - 1; i > 0; i--) {
 var index = random.nextInt () % (i + 1);
@@ -246,7 +246,7 @@ it.set$TT (array[i++]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'sort$java_util_List$java_util_Comparator', function (list, comparator) {
-var array = list.toArray$TTA ( new Array (list.size ()));
+var array = list.toArray$TTA ( Clazz.newArray$('OA', Clazz.newA$, [list.size ()]));
 java.util.Arrays.sort$OA$java_util_Comparator (array, comparator);
 var i = 0;
 var it = list.listIterator ();
@@ -287,7 +287,7 @@ normdist = dist % size;
 normdist = size - ((dist % size) * (-1));
 }if (normdist == 0 || normdist == size) {
 return;
-}if (Clazz.instanceOf (list, java.util.RandomAccess)) {
+}if (Clazz.instanceOf(list, java.util.RandomAccess)) {
 var temp = list.get$I (0);
 var index = 0;
 var beginIndex = 0;
@@ -384,7 +384,7 @@ throw Clazz.$new(NullPointerException.construct);
 Clazz.newMethod$ (C$, 'synchronizedList$java_util_List', function (list) {
 if (list == null) {
 throw Clazz.$new(NullPointerException.construct);
-}if (Clazz.instanceOf (list, java.util.RandomAccess)) {
+}if (Clazz.instanceOf(list, java.util.RandomAccess)) {
 return Clazz.$new(java.util.Collections.SynchronizedRandomAccessList.construct$java_util_List,[list]);
 }return Clazz.$new(java.util.Collections.SynchronizedList.construct$java_util_List,[list]);
 }, 1);
@@ -422,7 +422,7 @@ throw Clazz.$new(NullPointerException.construct);
 Clazz.newMethod$ (C$, 'unmodifiableList$java_util_List', function (list) {
 if (list == null) {
 throw Clazz.$new(NullPointerException.construct);
-}if (Clazz.instanceOf (list, java.util.RandomAccess)) {
+}if (Clazz.instanceOf(list, java.util.RandomAccess)) {
 return Clazz.$new(java.util.Collections.UnmodifiableRandomAccessList.construct$java_util_List,[list]);
 }return Clazz.$new(java.util.Collections.UnmodifiableList.construct$java_util_List,[list]);
 }, 1);
@@ -487,7 +487,7 @@ return Clazz.$new(java.util.Collections.CheckedMap.construct$java_util_Map$Class
 }, 1);
 
 Clazz.newMethod$ (C$, 'checkedList$java_util_List$Class', function (list, type) {
-if (Clazz.instanceOf (list, java.util.RandomAccess)) {
+if (Clazz.instanceOf(list, java.util.RandomAccess)) {
 return Clazz.$new(java.util.Collections.CheckedRandomAccessList.construct$java_util_List$Class,[list, type]);
 }return Clazz.$new(java.util.Collections.CheckedList.construct$java_util_List$Class,[list, type]);
 }, 1);
@@ -513,7 +513,7 @@ return modified;
 }, 1);
 
 Clazz.newMethod$ (C$, 'disjoint$java_util_Collection$java_util_Collection', function (c1, c2) {
-if ((Clazz.instanceOf (c1, java.util.Set)) && !(Clazz.instanceOf (c2, java.util.Set)) || (c2.size ()) > c1.size ()) {
+if ((Clazz.instanceOf(c1, java.util.Set)) && !(Clazz.instanceOf(c2, java.util.Set)) || (c2.size ()) > c1.size ()) {
 var tmp = c1;
 c1 = c2;
 c2 = tmp;
@@ -854,7 +854,7 @@ Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 return this.b$["java.util.Collections.SingletonMap"].containsKey$O (entry.getKey ()) && this.b$["java.util.Collections.SingletonMap"].containsValue$O (entry.getValue ());
 }return false;
@@ -1146,7 +1146,7 @@ stream.defaultWriteObject ();
 }});
 
 Clazz.newMethod$ (C$, 'readResolve', function () {
-if (Clazz.instanceOf (this.list, java.util.RandomAccess)) {
+if (Clazz.instanceOf(this.list, java.util.RandomAccess)) {
 return Clazz.$new(java.util.Collections.SynchronizedRandomAccessList.construct$java_util_List$O,[this.list, this.mutex]);
 }return this;
 });
@@ -1647,7 +1647,7 @@ return Clazz.$new(java.util.Collections.UnmodifiableList.construct$java_util_Lis
 });
 
 Clazz.newMethod$ (C$, 'readResolve', function () {
-if (Clazz.instanceOf (this.list, java.util.RandomAccess)) {
+if (Clazz.instanceOf(this.list, java.util.RandomAccess)) {
 return Clazz.$new(java.util.Collections.UnmodifiableRandomAccessList.construct$java_util_List,[this.list]);
 }return this;
 });
@@ -1773,7 +1773,7 @@ throw Clazz.$new(UnsupportedOperationException.construct);
 
 Clazz.newMethod$ (C$, 'toArray', function () {
 var length = this.c.size ();
-var result =  new Array (length);
+var result =  Clazz.newArray$('OA', Clazz.newA$, [length]);
 var it = this.iterator ();
 for (var i = length; --i >= 0; ) {
 result[i] = it.next ();
@@ -1986,7 +1986,7 @@ return this.c.contains$O (obj);
 
 Clazz.newMethod$ (C$, 'iterator', function () {
 var i = this.c.iterator ();
-if (Clazz.instanceOf (i, java.util.ListIterator)) {
+if (Clazz.instanceOf(i, java.util.ListIterator)) {
 i = Clazz.$new(java.util.Collections.CheckedListIterator.construct$java_util_ListIterator$Class,[i, this.type]);
 }return i;
 });
@@ -2015,7 +2015,7 @@ Clazz.newMethod$ (C$, 'addAll$java_util_Collection', function (c1) {
 var size = c1.size ();
 if (size == 0) {
 return false;
-}var arr =  new Array (size);
+}var arr =  Clazz.newArray$('OA', Clazz.newA$, [size]);
 var it = c1.iterator ();
 for (var i = 0; i < size; i++) {
 arr[i] = java.util.Collections.checkType$TE$Class (it.next (), this.type);
@@ -2122,7 +2122,7 @@ Clazz.newMethod$ (C$, 'addAll$I$java_util_Collection', function (index, c1) {
 var size = c1.size ();
 if (size == 0) {
 return false;
-}var arr =  new Array (size);
+}var arr =  Clazz.newArray$('OA', Clazz.newA$, [size]);
 var it = c1.iterator ();
 for (var i = 0; i < size; i++) {
 arr[i] = java.util.Collections.checkType$TE$Class (it.next (), this.type);
@@ -2272,7 +2272,7 @@ Clazz.newMethod$ (C$, 'putAll$java_util_Map', function (map) {
 var size = map.size ();
 if (size == 0) {
 return;
-}var entries =  new Array (size);
+}var entries =  Clazz.newArray$('java_util_Map_EntryA', Clazz.newA$, [size]);
 var it = map.entrySet ().iterator ();
 for (var i = 0; i < size; i++) {
 var e = it.next ();
@@ -2380,7 +2380,7 @@ return Clazz.$new(java.util.Collections.CheckedMap.CheckedEntrySet.CheckedEntryI
 
 Clazz.newMethod$ (C$, 'toArray', function () {
 var thisSize = this.size ();
-var array =  new Array (thisSize);
+var array =  Clazz.newArray$('OA', Clazz.newA$, [thisSize]);
 var it = this.iterator ();
 for (var i = 0; i < thisSize; i++) {
 array[i] = it.next ();
@@ -2579,4 +2579,4 @@ C$.EMPTY_MAP = C$.prototype.EMPTY_MAP = Clazz.$new(java.util.Collections.EmptyMa
 })()
 });
 
-//Created 2017-08-08 06:13:46
+//Created 2017-08-12 07:32:18

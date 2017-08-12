@@ -329,7 +329,7 @@ return this.getFirst ();
 
 Clazz.newMethod$ (C$, 'toArray', function () {
 var index = 0;
-var contents =  new Array (this.$size);
+var contents =  Clazz.newArray$('OA', Clazz.newA$, [this.$size]);
 var link = this.voidLink.next;
 while (link !== this.voidLink) {
 contents[index++] = link.data;
@@ -519,4 +519,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:48
+//Created 2017-08-12 07:32:20

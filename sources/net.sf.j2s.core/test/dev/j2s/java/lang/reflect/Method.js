@@ -65,7 +65,7 @@ return null;
 });
 
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
-if (object != null && Clazz.instanceOf (object, java.lang.reflect.Method)) {
+if (object != null && Clazz.instanceOf(object, java.lang.reflect.Method)) {
 var other = object;
 if ((this.getDeclaringClass () === other.getDeclaringClass ()) && (this.getName () === other.getName ())) {
 var params1 = this.parameterTypes;
@@ -128,4 +128,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:17

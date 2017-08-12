@@ -12,14 +12,14 @@ this.count = 0;
 Clazz.newMethod$ (C$, 'construct', function () {
 C$.superClazz.construct.apply(this);
 C$.$init$.apply(this);
-this.buf =  Clazz.newByteArray (32, 0);
+this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [32, 0]);
 }, 1);
 
 Clazz.newMethod$ (C$, 'construct$I', function (size) {
 C$.superClazz.construct.apply(this);
 C$.$init$.apply(this);
 if (size >= 0) {
-this.buf =  Clazz.newByteArray (size, 0);
+this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [size, 0]);
 } else {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005e")]);
 }}, 1);
@@ -31,7 +31,7 @@ C$.superClazz.prototype.close.apply(this, arguments);
 Clazz.newMethod$ (C$, 'expand$I', function (i) {
 if (this.count + i <= this.buf.length) {
 return;
-}var newbuf =  Clazz.newByteArray ((this.count + i) * 2, 0);
+}var newbuf =  Clazz.newArray$('BA', Clazz.newByteA$, [(this.count + i) * 2, 0]);
 System.arraycopy (this.buf, 0, newbuf, 0, this.count);
 this.buf = newbuf;
 });
@@ -45,7 +45,7 @@ return this.count;
 });
 
 Clazz.newMethod$ (C$, 'toByteArray', function () {
-var newArray =  Clazz.newByteArray (this.count, 0);
+var newArray =  Clazz.newArray$('BA', Clazz.newByteA$, [this.count, 0]);
 System.arraycopy (this.buf, 0, newArray, 0, this.count);
 return newArray;
 });
@@ -55,7 +55,7 @@ return  String.instantialize(this.buf, 0, this.count);
 });
 
 Clazz.newMethod$ (C$, 'toString$I', function (hibyte) {
-var newBuf =  Clazz.newCharArray (this.size (), '\0');
+var newBuf =  Clazz.newArray$('CA', Clazz.newA$, [this.size (), '\0']);
 for (var i = 0; i < newBuf.length; i++) {
 newBuf[i] = String.fromCharCode (((hibyte & 0xff) << 8) | (this.buf[i] & 0xff));
 }
@@ -107,4 +107,4 @@ out.write$BA$I$I (this.buf, 0, this.count);
 })()
 });
 
-//Created 2017-08-08 06:13:41
+//Created 2017-08-12 07:32:13

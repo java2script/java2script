@@ -35,6 +35,11 @@ public class Test_Enum {
 	}
 
 	public static void main(String[] args) {
+		
+		Day[] d = Day.values();
+		for (int i = 0; i < d.length; i++)
+			System.out.println(i + " day " + d[i]);
+		
 		Test_Enum firstDay = new Test_Enum(Day.MONDAY);
 		firstDay.tellItLikeItIs();
 		Test_Enum thirdDay = new Test_Enum(Day.WEDNESDAY);
@@ -98,8 +103,10 @@ public class Test_Enum {
 			}
 			double earthWeight = Double.parseDouble(args[0]);
 			double mass = earthWeight / EARTH.surfaceGravity();
+			
 			for (Planet p : Planet.values())
-				System.out.printf("Your weight on %s is %8.2f%n", p.toString(), p.surfaceWeight(mass));
+//				System.out.printf("Your weight on %s is %8.2f%n", p.toString(), p.surfaceWeight(mass));
+				System.out.println("Your weight on " + p.toString() + " is " +  p.surfaceWeight(mass));
 		}
 	}
 }

@@ -35,7 +35,7 @@ return (Clazz.doubleToInt ((this.threshold * 10000) / 7500)) * 2;
 });
 
 Clazz.newMethod$ (C$, 'newElementArray$I', function (s) {
-return  new Array (s);
+return  Clazz.newArray$('OA', Clazz.newA$, [s]);
 });
 
 Clazz.newMethod$ (C$, 'construct$java_util_Map', function (map) {
@@ -306,7 +306,7 @@ return false;
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Map)) {
+}if (Clazz.instanceOf(object, java.util.Map)) {
 var map = object;
 if (this.size () != map.size ()) {
 return false;
@@ -382,7 +382,7 @@ return C$.superClazz.prototype.clone.apply(this, arguments);
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+}if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 return (this.key === entry.getKey ()) && (this.value === entry.getValue ());
 }return false;
@@ -496,7 +496,7 @@ return true;
 });
 
 Clazz.newMethod$ (C$, 'contains$O', function (object) {
-if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = this.associatedMap.getEntry$O ((object).getKey ());
 return entry != null && entry.equals$O (object);
 }return false;
@@ -529,4 +529,4 @@ C$.NULL_OBJECT = C$.prototype.NULL_OBJECT =  new Clazz._O();
 })()
 });
 
-//Created 2017-08-08 06:13:47
+//Created 2017-08-12 07:32:19

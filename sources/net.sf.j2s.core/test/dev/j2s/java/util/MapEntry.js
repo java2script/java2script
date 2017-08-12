@@ -35,7 +35,7 @@ throw e;
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.Map.Entry)) {
+}if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 return (this.key == null ? entry.getKey () == null : this.key.equals$O (entry.getKey ())) && (this.value == null ? entry.getValue () == null : this.value.equals$O (entry.getValue ()));
 }return false;
@@ -70,4 +70,4 @@ Clazz.declareInterface (java.util.MapEntry, "Type");
 })()
 });
 
-//Created 2017-08-08 06:13:48
+//Created 2017-08-12 07:32:20

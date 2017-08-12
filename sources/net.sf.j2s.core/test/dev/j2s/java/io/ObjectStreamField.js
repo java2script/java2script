@@ -21,7 +21,7 @@ throw Clazz.$new(NullPointerException.construct);
 this.type = cl;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$Class$b', function (name, cl, unshared) {
+Clazz.newMethod$ (C$, 'construct$S$Class$Z', function (name, cl, unshared) {
 C$.$init$.apply(this);
 if (name == null || cl == null) {
 throw Clazz.$new(NullPointerException.construct);
@@ -45,7 +45,7 @@ var thisPrimitive = this.isPrimitive ();
 var fPrimitive = f.isPrimitive ();
 if (thisPrimitive != fPrimitive) {
 return thisPrimitive ? -1 : 1;
-}return this.getName ().compareTo (f.getName ());
+}return this.getName ().compareTo$S (f.getName ());
 });
 
 Clazz.newMethod$ (C$, 'equals$O', function (arg0) {
@@ -142,7 +142,7 @@ java.util.Arrays.sort$OA$java_util_Comparator (fields, fieldDescComparator);
 
 Clazz.newMethod$ (C$, 'resolve$ClassLoader', function (loader) {
 if (this.typeString.length == 1) {
-switch (this.typeString.charAt (0)) {
+switch (this.typeString.charAt$I (0)) {
 case 'I':
 this.type = Integer.TYPE;
 return;
@@ -169,10 +169,10 @@ this.type = Double.TYPE;
 return;
 }
 }var className = this.typeString.$replace ('/', '.');
-if (className.charAt (0) == 'L') {
-className = className.substring (1, className.length - 1);
+if (className.charAt$I (0) == 'L') {
+className = className.substring$I$I (1, className.length - 1);
 }try {
-var cl = Class.forName$S$b$ClassLoader (className, false, loader);
+var cl = Class.forName$S$Z$ClassLoader (className, false, loader);
 this.type = cl;
 } catch (e) {
 if (Clazz.exceptionOf (e, ClassNotFoundException)) {
@@ -192,4 +192,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:42
+//Created 2017-08-12 07:32:14

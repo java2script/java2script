@@ -19,7 +19,7 @@ return this.source;
 });
 
 Clazz.newMethod$ (C$, 'toString', function () {
-return this.getClass ().getName () + "[source=" + String.valueOf (this.source) + ']';
+return this.getClass ().getName () + "[source=" + String.valueOf$O (this.source) + ']';
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
@@ -28,4 +28,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:47
+//Created 2017-08-12 07:32:19

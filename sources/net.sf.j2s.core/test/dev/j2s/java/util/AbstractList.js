@@ -41,7 +41,7 @@ this.removeRange$I$I (0, this.size ());
 Clazz.newMethod$ (C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
-}if (Clazz.instanceOf (object, java.util.List)) {
+}if (Clazz.instanceOf(object, java.util.List)) {
 var list = object;
 if (list.size () != this.size ()) {
 return false;
@@ -128,7 +128,7 @@ throw Clazz.$new(UnsupportedOperationException.construct);
 Clazz.newMethod$ (C$, 'subList$I$I', function (start, end) {
 if (0 <= start && end <= this.size ()) {
 if (start <= end) {
-if (Clazz.instanceOf (this, java.util.RandomAccess)) {
+if (Clazz.instanceOf(this, java.util.RandomAccess)) {
 return Clazz.$new(java.util.AbstractList.SubAbstractListRandomAccess.construct$java_util_AbstractList$I$I,[this, start, end]);
 }return Clazz.$new(java.util.AbstractList.SubAbstractList.construct$java_util_AbstractList$I$I,[this, start, end]);
 }throw Clazz.$new(IllegalArgumentException.construct);
@@ -401,7 +401,7 @@ Clazz.newMethod$ (C$, 'size', function () {
 return this.$size;
 });
 
-Clazz.newMethod$ (C$, 'sizeChanged$b', function (increment) {
+Clazz.newMethod$ (C$, 'sizeChanged$Z', function (increment) {
 if (increment) {
 this.$size++;
 } else {
@@ -433,7 +433,7 @@ this.end = this.start + length;
 
 Clazz.newMethod$ (C$, 'add$TE', function (object) {
 this.iterator.add$TE (object);
-this.subList.sizeChanged$b (true);
+this.subList.sizeChanged$Z (true);
 this.end++;
 });
 
@@ -470,7 +470,7 @@ return previous - this.start;
 
 Clazz.newMethod$ (C$, 'remove', function () {
 this.iterator.remove ();
-this.subList.sizeChanged$b (false);
+this.subList.sizeChanged$Z (false);
 this.end--;
 });
 
@@ -486,4 +486,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:45
+//Created 2017-08-12 07:32:18

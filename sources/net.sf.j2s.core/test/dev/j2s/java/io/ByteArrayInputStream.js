@@ -66,7 +66,7 @@ Clazz.newMethod$ (C$, 'reset', function () {
 this.pos = this.$mark;
 });
 
-Clazz.newMethod$ (C$, 'skip$L', function (n) {
+Clazz.newMethod$ (C$, 'skip$J', function (n) {
 if (n <= 0) {
 return 0;
 }var temp = this.pos;
@@ -80,4 +80,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-08 06:13:41
+//Created 2017-08-12 07:32:13
