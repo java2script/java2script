@@ -2902,7 +2902,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("A$, [");
 	}
 	
-	private static String j2sGetArrayClass(ITypeBinding binding) {
+    static String j2sGetArrayClass(ITypeBinding binding) {
 		return "Clazz.arrayClass$('"+j2sGetParamCode(binding)+"')";
 	}
 

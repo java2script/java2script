@@ -194,11 +194,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		@SuppressWarnings("unchecked")
 		List<ASTNode> dim = node.dimensions();
 		int dimensions = node.getType().getDimensions();
-		ITypeBinding arrType = node.resolveTypeBinding();
 		ITypeBinding elementType = node.getType().getElementType().resolveBinding();
 		if (elementType == null)
 			return false;
-		ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
+		ASTScriptVisitor.j2sAddArrayPrefix(buffer, node.resolveTypeBinding(), elementType);
 		visitList(dim, ", ");
 		if (elementType.isPrimitive()) {
 			String typeCode = elementType.getName();
@@ -781,11 +780,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(InstanceofExpression node) {
 		Type right = node.getRightOperand();
-		buffer.append("Clazz.instanceOf (");
+		buffer.append("Clazz.instanceOf(");
 		node.getLeftOperand().accept(this);
 		buffer.append(", ");
 		if (right instanceof ArrayType) {
-			buffer.append("Array");
+			buffer.append(ASTScriptVisitor.j2sGetArrayClass(right.resolveBinding()));
 		} else {
 			right.accept(this);
 		}
@@ -1438,8 +1437,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						buffer.append("{\r\n");
 						scopeAdded = true;
 					}
-					buffer.append("if (Clazz.exceptionOf (" + catchEName + ", ");//sgurin : isExceptionOf compiler support.
-					//old code was: buffer.append("if (Clazz.instanceOf (" + catchEName + ", ");
+					buffer.append("if (Clazz.exceptionOf (" + catchEName + ", ");
 					type.accept(this);
 					buffer.append(")) ");
 				} else {
