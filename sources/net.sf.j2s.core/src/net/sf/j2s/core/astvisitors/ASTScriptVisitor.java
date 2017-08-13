@@ -207,8 +207,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).isInheritedFieldName(binding, name);
 	}
 
-	protected boolean checkKeyworkViolation(String name) {
-		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).checkKeyworkViolation(name);
+	protected boolean checkKeywordViolation(String name) {
+		return ASTFieldVisitor.checkKeywordViolation(name);
 	}
 
 	protected boolean checkSameName(ITypeBinding binding, String name) {
@@ -616,13 +616,16 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (methodDeclaration == null) {
 			return false;
 		}
-		if (isConstructor && arguments.size() == 0 && methodDeclaration.isVarargs()) {
+		if (isConstructor && arguments.size() == 0) {
+			// always add a [] constuctor, as null will indicate
+			// that we did not use Clazz.$new and instead called new foo() directly
 			// we have an apparent default empty constructor such as
 			// public MyClass() {....}
 			if (prefix != null) {
 				buffer.append(prefix);
+				if (methodDeclaration.isVarargs())
+					buffer.append("[]");
 			}
-			buffer.append("[]");
 			if (suffix != null) {
 				buffer.append(suffix);
 			}
@@ -992,7 +995,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			String fieldName = getJ2SName(element.getName());
 			// String fieldName = element.getName().getIdentifier();
 			String ext = "";
-			if (checkKeyworkViolation(fieldName)) {
+			if (checkKeywordViolation(fieldName)) {
 				ext += "$";
 			}
 			if (typeBinding != null && checkSameName(typeBinding, fieldName)) {
@@ -1306,7 +1309,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				return false;
 		}
 		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
-		buffer.append("\r\nClazz.newMethod$ (C$, '").append(name).append("', ").append("function (");
+		buffer.append("\r\nClazz.newMethod$(C$, '").append(name).append("', ").append("function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
 		visitList(parameters, ", ");
@@ -1563,7 +1566,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				if (checkSameName(declaringClass, fieldName)) {
 					buffer.append('$');
 				}
-				if (checkKeyworkViolation(fieldName)) {
+				if (checkKeywordViolation(fieldName)) {
 					buffer.append('$');
 				}
 				if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
@@ -1590,7 +1593,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (binding == null) {
 			String name = getJ2SName(node);
 			name = removeJavaLang(name);
-			if (checkKeyworkViolation(name)) {
+			if (checkKeywordViolation(name)) {
 				buffer.append('$');
 			}
 			buffer.append(name);
@@ -1608,13 +1611,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (typeBinding != null) {
 				String name = typeBinding.getQualifiedName();
 				name = assureQualifiedName(removeJavaLang(name));
-				if (checkKeyworkViolation(name)) {
+				if (checkKeywordViolation(name)) {
 					buffer.append('$');
 				}
 				buffer.append(name);
 			} else {
 				String name = node.getFullyQualifiedName();
-				if (checkKeyworkViolation(name)) {
+				if (checkKeywordViolation(name)) {
 					buffer.append('$');
 				}
 				buffer.append(name);
@@ -1646,7 +1649,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (checkSameName(declaringClass, fieldName)) {
 				buffer.append('$');
 			}
-			if (checkKeyworkViolation(fieldName)) {
+			if (checkKeywordViolation(fieldName)) {
 				buffer.append('$');
 			}
 			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
@@ -1700,7 +1703,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				fieldName = fieldVar;
 			}
 			// System.err.println(fieldName);
-			if (checkKeyworkViolation(fieldName)) {
+			if (checkKeywordViolation(fieldName)) {
 				buffer.append('$');
 			}
 			if (declaringClass != null && checkSameName(declaringClass, fieldName)) {
@@ -1737,9 +1740,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// String name = variableDeclaration.getName();
 			String name = getJ2SName(node);
 			name = removeJavaLang(name);
-			if (!(isClassString && "valueOf".equals(name)) && checkKeyworkViolation(name)) {
-				buffer.append('$');
-			}
+			if (isClassString && "$valueOf".equals(name))
+				name = "valueOf";
 			buffer.append(name);
 		} else {
 			ASTNode parent = node.getParent();
@@ -1755,7 +1757,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// String name = node.getFullyQualifiedName();
 			String name = getJ2SName(node);
 			name = removeJavaLang(name);
-			if (!(isClassString && "valueOf".equals(name)) && checkKeyworkViolation(name)) {
+			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name)) {
 				buffer.append('$');
 			}
 			buffer.append(name);
@@ -1961,7 +1963,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if ("java.lang.Object".equals(declaringClass.getQualifiedName())) {
 			return false;
 		}
-//		// BH NEVER ignore superconstructor
+//		// BH NEVER NEVER NEVER ignore superconstructor, as it includes an <init> call.
 //		ASTNode parent = node.getParent();
 //		if (parent instanceof Block) {
 //			Block methoBlock = (Block) parent;
@@ -1991,7 +1993,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					String superFieldName = getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
 						buffer.append("this.");
-						if (checkKeyworkViolation(fieldName)) {
+						if (checkKeywordViolation(fieldName)) {
 							buffer.append('$');
 						}
 						fieldName = getFieldName(typeBinding.getSuperclass(), fieldName);
@@ -2002,7 +2004,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		buffer.append("this.");
-		if (checkKeyworkViolation(fieldName)) {
+		if (checkKeywordViolation(fieldName)) {
 			buffer.append('$');
 		}
 		buffer.append(fieldName);
@@ -2633,7 +2635,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									 * typing; public void typing() { } }
 									 */
 									String fieldName = var.getName().toString();
-									if (checkKeyworkViolation(fieldName)) {
+									if (checkKeywordViolation(fieldName)) {
 										fieldName = "$" + fieldName;
 									}
 									String prefix = null;
@@ -2725,7 +2727,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * Determine the qualified parameter suffix for method names, including
 	 * constructors. TODO: Something like this must be duplicated in Clazz as
 	 * well in JavaScript
-	 * @param nodeName TODO
+	 * @param nodeName
 	 * @param binding
 	 * 
 	 * @return
@@ -2841,18 +2843,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	private void addDefaultConstructor() {
-//		System.err.println("adddefaultconstr " + defaultConstructor);
+		if (defaultConstructor != null && !defaultConstructor.isVarargs())
+			return;
+		buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
 		if (defaultConstructor == null) {
-			buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
 			addSuperConstructor(null, null);
-			buffer.append("},true);\r\n");
-		} else if (defaultConstructor.isVarargs()) {
-			// BH: This is still not right.  It's specifically for anonymous constructors
-			// But can't seem to see how to get the  right vararg constructor (float...) vs (int...)
-			buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
+		} else {
+			// TODO BH: This is still not right. It's specifically for anonymous
+			// constructors
+			// But I can't seem to see how to get the right vararg constructor
+			// (float...) vs (int...)
 			addThisConstructorCall(defaultConstructor, new ArrayList<Object>());
-			buffer.append("},true);\r\n");
 		}
+		buffer.append("}, 1);\r\n");
 
 	}
 

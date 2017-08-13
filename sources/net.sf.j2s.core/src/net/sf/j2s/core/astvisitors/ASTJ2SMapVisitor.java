@@ -73,32 +73,31 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 
 	private String getJ2SName(IMethodBinding binding) {
 		String nameID = binding.getName();
-		if (maps == null || maps.size() == 0) {
-			return nameID;
-		}
-		String className = null;
-		ITypeBinding declaringClass = binding.getDeclaringClass();
-		ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
-		while (superclass != null) {
-			IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
-			for (int i = 0; i < declaredMethods.length; i++) {
-				String methodName = declaredMethods[i].getName();
-				if (nameID.equals(methodName)) {
-					return getJ2SName(declaredMethods[i]);
+		if (maps != null && maps.size() > 0) {
+			String className = null;
+			ITypeBinding declaringClass = binding.getDeclaringClass();
+			ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
+			while (superclass != null) {
+				IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
+				for (int i = 0; i < declaredMethods.length; i++) {
+					String methodName = declaredMethods[i].getName();
+					if (nameID.equals(methodName)) {
+						return getJ2SName(declaredMethods[i]);
+					}
 				}
+				superclass = superclass.getSuperclass();
 			}
-			superclass = superclass.getSuperclass();
+			if (declaringClass != null) {
+				className = declaringClass.getQualifiedName();
+			}
+			String key = className + "#" + nameID;
+			Object value = maps.get(key);
+			if (value != null && value instanceof NameConvertItem) {
+				NameConvertItem item = (NameConvertItem) value;
+				return item.toVarName;
+			}
 		}
-		if (declaringClass != null) {
-			className = declaringClass.getQualifiedName();
-		}
-		String key = className + "#" + nameID;
-		Object value = maps.get(key);
-		if (value != null && value instanceof NameConvertItem) {
-			NameConvertItem item = (NameConvertItem) value;
-			return item.toVarName;
-		}
-		return nameID;
+		return (ASTFieldVisitor.checkKeywordViolation(nameID) ? "$" + nameID : nameID);
 	}
 
 	public boolean checkSameName(ITypeBinding binding, String name) {

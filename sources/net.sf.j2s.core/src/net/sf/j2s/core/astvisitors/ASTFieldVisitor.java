@@ -49,29 +49,33 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	 * try,				typeof,			var,			void, 
 	 * volatile,		while,			with,
 	 *  
+	 *  
+	 *  
 	 */
 	public static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",
 		"instanceof", "typeof", "void", "if", "this", "super",
-		"prototype", "else", "break", "true", "fasle", "try",
+		"prototype", "else", "break", "true", "false", "try",
 		"catch", "throw", "throws", "continue", "switch", "default",
-		"case", "export", "import", "const", /*"label", */"with",
-		"arguments",
-		"valueOf"
+		"case", "export", "import", "const",/*"label", */"with",
+		// BH and a few of our own, based on checking developer console:
+		 "construct", "apply", "arguments", "bind", "call", "caller",
+		 "watch", "unwatch", "valueOf", "isPrototypeOf", "isGenerator", 
+		 "prototype"
 	};
 
 	
-	boolean checkKeyworkViolation(String name) {
+	static boolean checkKeywordViolation(String name) {
 		for (int i = 0; i < keywords.length; i++) {
 			if (keywords[i].equals(name)) {
 				return true;
 			}
 		}
 		return false;
+		
 	}
-
 	/**
 	 * Check whether the given QualifiedName is just simple or not.
 	 * The "just simple" means only "*.*" format.
