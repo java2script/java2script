@@ -627,6 +627,10 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return (doKeep || getJ2STag(node, "@j2sKeep") != null);
 	}
 
+	/**
+	 * @param node
+	 * @return true if we have @j2sIngore for this BodyDeclaration
+	 */
 	protected boolean checkj2sIgnore(BodyDeclaration node) {
 	  return getJ2STag(node, "@j2sIgnore") != null;
 	}

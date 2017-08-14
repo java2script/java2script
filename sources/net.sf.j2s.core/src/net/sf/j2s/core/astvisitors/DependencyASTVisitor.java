@@ -218,7 +218,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			prefix = js.substring(0, index + 2);
 			js = js.substring(index + 2);
 		}
-		boolean haveLoad = false;
 		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
 			int pt = js.indexOf("var C$"); 
 			if (pt == 0 || pt > 0 && js.indexOf("{var C$") != pt - 1)
