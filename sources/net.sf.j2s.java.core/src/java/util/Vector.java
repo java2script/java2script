@@ -321,6 +321,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 	 * 
 	 * @see #size
 	 */
+	@SuppressWarnings("unchecked")
 	public synchronized E elementAt(int location) {
 		if (location < elementCount) {
 			return (E)elementData[location];
@@ -345,6 +346,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 				return pos < elementCount;
 			}
 
+			@SuppressWarnings("unchecked")
 			public E nextElement() {
 				synchronized (Vector.this) {
 					if (pos < elementCount) {
@@ -393,7 +395,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
             return true;
         }
 		if (object instanceof List) {
-			List<?> list = (List) object;
+			List<?> list = (List<?>) object;
 			if (list.size() != size()) {
                 return false;
             }
@@ -423,6 +425,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 	 * @see #lastElement
 	 * @see #size
 	 */
+	@SuppressWarnings("unchecked")
 	public synchronized E firstElement() {
 		if (elementCount > 0) {
 			return (E)elementData[0];
@@ -625,6 +628,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 	 * @see #firstElement
 	 * @see #size
 	 */
+	@SuppressWarnings("unchecked")
 	public synchronized E lastElement() {
 		try {
 			return (E)elementData[elementCount - 1];
@@ -699,6 +703,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 	@Override
     public synchronized E remove(int location) {
 		if (location < elementCount) {
+			@SuppressWarnings("unchecked")
 			E result = (E)elementData[location];
 			elementCount--;
 			int size = elementCount - location;
@@ -872,6 +877,7 @@ public class Vector<E> extends AbstractList<E> implements List<E>, RandomAccess,
 	@Override
     public synchronized E set(int location, E object) {
 		if (location < elementCount) {
+			@SuppressWarnings("unchecked")
 			E result = (E)elementData[location];
 			elementData[location] = object;
 			return result;

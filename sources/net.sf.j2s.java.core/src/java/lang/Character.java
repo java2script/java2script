@@ -24,9 +24,9 @@
  */
 
 package java.lang;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * The <code>Character</code> class wraps a value of the primitive
@@ -170,7 +170,8 @@ class Character extends Object implements java.io.Serializable, Comparable<Chara
      *
      * @since   1.1
      */
-    public static final Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass("char");
+    @SuppressWarnings("unchecked")
+	public static final Class<Character> TYPE = (Class<Character>) Class.getPrimitiveClass("char");
 
    /*
     * Normative general types
@@ -655,7 +656,7 @@ class Character extends Object implements java.io.Serializable, Comparable<Chara
      */
     public static final class UnicodeBlock extends Subset {
 
-        private static Map map = new HashMap();
+        private static Map<String, UnicodeBlock> map = new HashMap<String, UnicodeBlock>();
 
         /**
          * Create a UnicodeBlock with the given identifier name.

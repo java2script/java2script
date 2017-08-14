@@ -63,7 +63,7 @@ public class Collections {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     private static final class EmptyList extends AbstractList implements
 			Serializable {
 		private static final long serialVersionUID = 8842843931221139166L;
@@ -88,7 +88,7 @@ public class Collections {
         }
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     private static final class EmptySet extends AbstractSet implements
 			Serializable {
 		private static final long serialVersionUID = 1582296315990362920L;
@@ -125,7 +125,7 @@ public class Collections {
         }
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     private static final class EmptyMap extends AbstractMap implements
 			Serializable {
 		private static final long serialVersionUID = 6428348081105594320L;
@@ -156,7 +156,7 @@ public class Collections {
 		}
 
 		@Override
-        public Collection values() {
+        public Collection<?> values() {
 			return EMPTY_LIST;
 		}
         
@@ -165,13 +165,13 @@ public class Collections {
         }
 	}
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     public static final List EMPTY_LIST = new EmptyList();
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     public static final Set EMPTY_SET = new EmptySet();
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
     public static final Map EMPTY_MAP = new EmptyMap();
 
 	private static final class ReverseComparator<T> implements Comparator<T>, Serializable {
@@ -313,7 +313,7 @@ public class Collections {
 				@Override
                 public boolean contains(Object object) {
 					if (object instanceof Map.Entry) {
-						Map.Entry<?, ?> entry = (Map.Entry) object;
+						Map.Entry<?, ?> entry = (Entry<?, ?>) object;
 						return containsKey(entry.getKey())
 								&& containsValue(entry.getValue());
 					}

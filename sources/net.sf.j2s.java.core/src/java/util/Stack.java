@@ -51,6 +51,7 @@ public class Stack<E> extends Vector<E> {
 	 *                when empty() is true
 	 * @see #pop
 	 */
+	@SuppressWarnings("unchecked")
 	public synchronized E peek() {
 		try {
 			return (E)elementData[elementCount - 1];
@@ -71,6 +72,7 @@ public class Stack<E> extends Vector<E> {
 	public synchronized E pop() {
 		try {
 			int index = elementCount - 1;
+			@SuppressWarnings("unchecked")
 			E obj = (E)elementData[index];
 			removeElementAt(index);
 			return obj;

@@ -131,7 +131,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
             return true;
         }
         if (object instanceof Map) {
-            Map<?, ?> map = (Map) object;
+            Map<?, ?> map = (Map<?,?>) object;
             if (size() != map.size()) {
                 return false;
             }

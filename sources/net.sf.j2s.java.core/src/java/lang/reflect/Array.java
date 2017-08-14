@@ -474,7 +474,7 @@ class Array {
      * Private
      */
 
-    private static Object newArray(Class componentType, int length)
+    private static Object newArray(Class<?> componentType, int length)
         throws NegativeArraySizeException {
     	/**
     	 *  // BH
@@ -487,7 +487,7 @@ class Array {
     	}
     }
 
-    private static Object multiNewArray(Class componentType,
+    private static Object multiNewArray(Class<?> componentType,
         int[] dimensions)
         throws IllegalArgumentException, NegativeArraySizeException {
     	/**

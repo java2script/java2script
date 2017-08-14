@@ -37,8 +37,7 @@ public interface Member {
 	 * 
 	 * @return the declaring class
 	 */
-	@SuppressWarnings("unchecked")
-    Class getDeclaringClass();
+    Class<?> getDeclaringClass();
 
 	/**
 	 * Return the modifiers for the member. The Modifier class should be used to

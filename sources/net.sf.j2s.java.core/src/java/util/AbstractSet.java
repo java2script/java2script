@@ -50,7 +50,7 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
             return true;
         }
 		if (object instanceof Set) {
-			Set<?> s = (Set) object;
+			Set<?> s = (Set<?>) object;
 			return size() == s.size() && containsAll(s);
 		}
 		return false;

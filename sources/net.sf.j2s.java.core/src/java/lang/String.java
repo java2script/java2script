@@ -25,14 +25,13 @@
 
 package java.lang;
 
-import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
+import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2777,7 +2776,8 @@ public final class String
      * @see  java.util.Formatter
      * @since  1.5
      */
-    public static String format(String format, Object ... args) {
+    @SuppressWarnings("resource")
+	public static String format(String format, Object ... args) {
         return new Formatter().format(format, args).toString();
     }
 
@@ -2821,7 +2821,8 @@ public final class String
      * @see  java.util.Formatter
      * @since  1.5
      */
-    public static String format(Locale l, String format, Object ... args) {
+    @SuppressWarnings("resource")
+	public static String format(Locale l, String format, Object ... args) {
         return new Formatter(l).format(format, args).toString();
     }
 

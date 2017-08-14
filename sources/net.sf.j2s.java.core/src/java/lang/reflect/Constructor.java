@@ -27,8 +27,8 @@ import java.lang.annotation.Annotation;
 public final class Constructor<T> extends AccessibleObject implements GenericDeclaration, Member {
 
     private Class<T>	clazz;
-    private Class[]		parameterTypes;
-    private Class[]		exceptionTypes;
+    private Class<?>[]		parameterTypes;
+    private Class<?>[]		exceptionTypes;
     private int			modifiers;
 
     /**
@@ -37,8 +37,8 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
      * package via sun.reflect.LangReflectAccess.
      */
     Constructor(Class<T> declaringClass,
-                Class[] parameterTypes,
-                Class[] checkedExceptions,
+                Class<?>[] parameterTypes,
+                Class<?>[] checkedExceptions,
                 int modifiers)
     {
         this.clazz = declaringClass;
@@ -148,11 +148,11 @@ public final class Constructor<T> extends AccessibleObject implements GenericDec
      */
 	public boolean equals(Object object) {
 		if (object != null && object instanceof Constructor) {
-		    Constructor other = (Constructor)object;
+		    Constructor<?> other = (Constructor<?>)object;
 		    if (getDeclaringClass() == other.getDeclaringClass()) {
 			/* Avoid unnecessary cloning */
-			Class[] params1 = parameterTypes;
-			Class[] params2 = other.parameterTypes;
+			Class<?>[] params1 = parameterTypes;
+			Class<?>[] params2 = other.parameterTypes;
 			if (params1.length == params2.length) {
 			    for (int i = 0; i < params1.length; i++) {
 				if (params1[i] != params2[i])

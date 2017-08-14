@@ -170,7 +170,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
         @Override
         public boolean remove(Object object) {
             if (contains(object)) {
-                associatedMap.remove(((Map.Entry) object).getKey());
+                associatedMap.remove(((Map.Entry<?,?>) object).getKey());
                 return true;
             }
             return false;
@@ -178,8 +178,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
 
         @Override
         public boolean contains(Object object) {
-            if (object instanceof Map.Entry) {
-                Entry<KT, VT> entry = associatedMap.getEntry(((Map.Entry) object)
+            if (object instanceof Map.Entry<?,?>) {
+                Entry<KT, VT> entry = associatedMap.getEntry(((Map.Entry<?,?>) object)
                         .getKey());
                 return object.equals(entry);
             }
@@ -690,7 +690,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>,
         stream.writeInt(elementCount);
         Iterator<?> iterator = entrySet().iterator();
         while (iterator.hasNext()) {
-            Entry<?, ?> entry = (Entry) iterator.next();
+            Entry<?, ?> entry = (Entry<?, ?>) iterator.next();
             stream.writeObject(entry.key);
             stream.writeObject(entry.value);
             entry = entry.next;

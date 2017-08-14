@@ -1143,7 +1143,8 @@ public class Arrays {
      * high is the end index in dest to end sorting
      * off is the offset to generate corresponding low, high in src
      */
-    private static void mergeSort(Object[] src,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void mergeSort(Object[] src,
                                   Object[] dest,
                                   int low,
                                   int high,
@@ -1271,10 +1272,11 @@ public class Arrays {
      * high is the end index in dest to end sorting
      * off is the offset into src corresponding to low in dest
      */
-    private static void mergeSort(Object[] src,
+    @SuppressWarnings("unchecked")
+	private static void mergeSort(Object[] src,
                                   Object[] dest,
                                   int low, int high, int off,
-                                  Comparator c) {
+                                  @SuppressWarnings("rawtypes") Comparator c) {
         int length = high - low;
 
         // Insertion sort on smallest arrays
@@ -1993,7 +1995,8 @@ public class Arrays {
     }
 
     // Like public version, but without range checks.
-    private static int binarySearch0(Object[] a, int fromIndex, int toIndex,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private static int binarySearch0(Object[] a, int fromIndex, int toIndex,
                                      Object key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -2742,7 +2745,8 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static <T> T[] copyOf(T[] original, int newLength) {
+    @SuppressWarnings("unchecked")
+	public static <T> T[] copyOf(T[] original, int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
 
@@ -2769,7 +2773,8 @@ public class Arrays {
      * @since 1.6
      */
     public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        T[] copy = ((Object)newType == (Object)Object[].class)
+        @SuppressWarnings("unchecked")
+		T[] copy = ((Object)newType == (Object)Object[].class)
             ? (T[]) new Object[newLength]
             : (T[]) Array.newInstance(newType.getComponentType(), newLength);
         System.arraycopy(original, 0, copy, 0,
@@ -2997,7 +3002,8 @@ public class Arrays {
      * @throws NullPointerException if <tt>original</tt> is null
      * @since 1.6
      */
-    public static <T> T[] copyOfRange(T[] original, int from, int to) {
+    @SuppressWarnings("unchecked")
+	public static <T> T[] copyOfRange(T[] original, int from, int to) {
         return copyOfRange(original, from, to, (Class<T[]>) original.getClass());
     }
 
@@ -3032,7 +3038,8 @@ public class Arrays {
      *     an array of class <tt>newType</tt>.
      * @since 1.6
      */
-    public static <T,U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
+    @SuppressWarnings("unchecked")
+	public static <T,U> T[] copyOfRange(U[] original, int from, int to, Class<? extends T[]> newType) {
         int newLength = to - from;
         if (newLength < 0)
             throw new IllegalArgumentException(from + " > " + to);
@@ -3378,7 +3385,8 @@ public class Arrays {
             return a.clone();
         }
 
-        public <T> T[] toArray(T[] a) {
+        @SuppressWarnings("unchecked")
+		public <T> T[] toArray(T[] a) {
             int size = size();
             if (a.length < size)
                 return Arrays.copyOf(this.a, size,
@@ -4120,7 +4128,8 @@ public class Arrays {
      * @see #toString(Object[])
      * @since 1.5
      */
-    public static String deepToString(Object[] a) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static String deepToString(Object[] a) {
         if (a == null)
             return "null";
 
@@ -4152,7 +4161,7 @@ public class Arrays {
             if (element == null) {
                 buf.append("null");
             } else {
-                Class eClass = element.getClass();
+                Class<?> eClass = element.getClass();
 
                 if (eClass.isArray()) {
                     if (eClass == byte[].class)

@@ -304,7 +304,7 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             @Override
             public boolean remove(Object object) {
                 if (contains(object)) {
-                    WeakHashMap.this.remove(((Map.Entry) object).getKey());
+                    WeakHashMap.this.remove(((Map.Entry<?,?>) object).getKey());
                     return true;
                 }
                 return false;
@@ -313,7 +313,7 @@ public class WeakHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
             @Override
             public boolean contains(Object object) {
                 if (object instanceof Map.Entry) {
-                    Entry<?, ?> entry = getEntry(((Map.Entry) object).getKey());
+                    Entry<?, ?> entry = getEntry(((Map.Entry<?,?>) object).getKey());
                     if (entry != null) {
                         Object key = entry.get();
                         if (key != null || entry.isNull) {

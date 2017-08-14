@@ -503,7 +503,7 @@ abstract public class ResourceBundle {
      * Returns an enumeration of the keys.
      *
      */
-    public abstract Enumeration getKeys();
+    public abstract Enumeration<?> getKeys();
 
     private static class TextResourceBundle extends ResourceBundle {
     	
@@ -641,8 +641,8 @@ return r.join ('');
 			}
 		}
 
-		public Enumeration getKeys() {
-			return new Enumeration() {
+		public Enumeration<?> getKeys() {
+			return new Enumeration<Object>() {
 				int index = -1;
 				public Object nextElement() {
 					index++;

@@ -324,23 +324,25 @@ public final class Locale implements Cloneable, Serializable {
          * java.util.Locale.defaultLocale = new java.util.Locale (language, country, variant);
          */
         {
-            String language, region, country, variant;
+            @SuppressWarnings("unused")
+			String language, region, country, variant;
             language = null; /* (String) AccessController.doPrivileged(
                             new GetPropertyAction("user.language", "en")); */
             // for compatibility, check for old user.region property
-            region = null; /* (String) AccessController.doPrivileged(
-                            new GetPropertyAction("user.region")); */
-            if (region != null) {
-                // region can be of form country, country_variant, or _variant
-                int i = region.indexOf('_');
-                if (i >= 0) {
-                    country = region.substring(0, i);
-                    variant = region.substring(i + 1);
-                } else {
-                    country = region;
-                    variant = "";
-                }
-            } else {
+            region = null; 
+            // (String) AccessController.doPrivileged(new GetPropertyAction("user.region")); 
+//            if (region != null) {
+//                // region can be of form country, country_variant, or _variant
+//                int i = region.indexOf('_');
+//                if (i >= 0) {
+//                    country = region.substring(0, i);
+//                    variant = region.substring(i + 1);
+//                } else {
+//                    country = region;
+//                    variant = "";
+//                }
+//            } else 
+            {
                 country = null; /* (String) AccessController.doPrivileged(
                                 new GetPropertyAction("user.country", "")); */
                 variant = null; /* (String) AccessController.doPrivileged(
@@ -606,7 +608,8 @@ return [
      * @j2sNative
      * return inLocale.language;
      */
-    public String getDisplayLanguage(Locale inLocale) {
+    @SuppressWarnings("null")
+	public String getDisplayLanguage(Locale inLocale) {
         String  langCode = language;
         if (langCode.length() == 0)
             return "";
@@ -692,7 +695,8 @@ return [
      * @j2sNative
      * return inLocale.country;
      */
-    public String getDisplayCountry(Locale inLocale) {
+    @SuppressWarnings("null")
+	public String getDisplayCountry(Locale inLocale) {
         String  ctryCode = country;
         if (ctryCode.length() == 0)
             return "";
@@ -763,7 +767,8 @@ return [
      * @j2sNative
      * return inLocale.variant;
      */
-    public String getDisplayVariant(Locale inLocale) {
+    @SuppressWarnings("null")
+	public String getDisplayVariant(Locale inLocale) {
         if (variant.length() == 0)
             return "";
 
@@ -826,7 +831,8 @@ return [
      * 	return s;
      * }
      */
-    public String getDisplayName(Locale inLocale) {
+    @SuppressWarnings("null")
+	public String getDisplayName(Locale inLocale) {
         ResourceBundle bundle = null; // LocaleData.getLocaleElements(inLocale);
 
         String languageName = getDisplayLanguage(inLocale);

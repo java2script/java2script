@@ -96,7 +96,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
                 return true;
             }
             if (object instanceof Map.Entry) {
-                Map.Entry<?, ?> entry = (Map.Entry) object;
+                Map.Entry<?, ?> entry = (Map.Entry<?,?>) object;
                 return (key == entry.getKey()) && (value == entry.getValue());
             }
             return false;
@@ -206,7 +206,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
         @Override
         public boolean remove(Object object) {
             if (contains(object)) {
-                associatedMap.remove(((Map.Entry) object).getKey());
+                associatedMap.remove(((Map.Entry<?,?>) object).getKey());
                 return true;
             }
             return false;
@@ -216,7 +216,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
         public boolean contains(Object object) {
             if (object instanceof Map.Entry) {
                 IdentityHashMapEntry<?, ?> entry = associatedMap
-                        .getEntry(((Map.Entry) object).getKey());
+                        .getEntry(((Map.Entry<?,?>) object).getKey());
                 // we must call equals on the entry obtained from "this"
                 return entry != null && entry.equals(object);
             }
@@ -715,7 +715,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
             return true;
         }
         if (object instanceof Map) {
-            Map<?, ?> map = (Map) object;
+            Map<?, ?> map = (Map<?, ?>) object;
             if (size() != map.size()) {
                 return false;
             }
@@ -771,7 +771,7 @@ public class IdentityHashMap<K, V> extends AbstractMap<K, V> implements
         stream.writeInt(size);
         Iterator<?> iterator = entrySet().iterator();
         while (iterator.hasNext()) {
-            MapEntry<?, ?> entry = (MapEntry) iterator.next();
+            MapEntry<?, ?> entry = (MapEntry<?, ?>) iterator.next();
             stream.writeObject(entry.key);
             stream.writeObject(entry.value);
         }

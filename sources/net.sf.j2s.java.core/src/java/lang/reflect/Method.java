@@ -26,13 +26,13 @@ import java.lang.annotation.Annotation;
  */
 public final class Method extends AccessibleObject implements GenericDeclaration, Member {
 
-	private Class		clazz;
+	private Class<?>		clazz;
     // This is guaranteed to be interned by the VM in the 1.4
     // reflection implementation
     private String		name;
-    private Class		returnType;
-    private Class[]		parameterTypes;
-    private Class[]		exceptionTypes;
+    private Class<?>		returnType;
+    private Class<?>[]		parameterTypes;
+    private Class<?>[]		exceptionTypes;
     private int			modifiers;
     
     /**
@@ -40,11 +40,11 @@ public final class Method extends AccessibleObject implements GenericDeclaration
      * instantiation of these objects in Java code from the java.lang
      * package via sun.reflect.LangReflectAccess.
      */
-    Method(Class declaringClass,
+    Method(Class<?> declaringClass,
            String name,
-           Class[] parameterTypes,
-           Class returnType,
-           Class[] checkedExceptions,
+           Class<?>[] parameterTypes,
+           Class<?> returnType,
+           Class<?>[] checkedExceptions,
            int modifiers)
     {
         this.clazz = declaringClass;
@@ -203,8 +203,8 @@ public final class Method extends AccessibleObject implements GenericDeclaration
 		    if ((getDeclaringClass() == other.getDeclaringClass())
 			&& (getName() == other.getName())) {
 			/* Avoid unnecessary cloning */
-			Class[] params1 = parameterTypes;
-			Class[] params2 = other.parameterTypes;
+			Class<?>[] params1 = parameterTypes;
+			Class<?>[] params2 = other.parameterTypes;
 			if (params1.length == params2.length) {
 			    for (int i = 0; i < params1.length; i++) {
 				if (params1[i] != params2[i])

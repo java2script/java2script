@@ -25,11 +25,11 @@
 
 package java.lang;
 
-import java.io.Serializable;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 /**
  * This is the common base class of all Java language enumeration types.
@@ -39,6 +39,7 @@ import java.io.ObjectStreamException;
  * @see     Class#getEnumConstants()
  * @since   1.5
  */
+@SuppressWarnings("serial")
 public abstract class Enum<E extends Enum<E>>
         implements Comparable<E>, Serializable {
     /**
@@ -160,8 +161,8 @@ public abstract class Enum<E extends Enum<E>>
      * method is the order in which the constants are declared.
      */
     public final int compareTo(E o) {
-        Enum other = (Enum)o;
-        Enum self = this;
+        Enum<?> other = (Enum<?>)o;
+        Enum<E> self = this;
         if (self.getClass() != other.getClass() && // optimization
             self.getDeclaringClass() != other.getDeclaringClass())
             throw new ClassCastException();
@@ -180,10 +181,11 @@ public abstract class Enum<E extends Enum<E>>
      * @return the Class object corresponding to this enum constant's
      *     enum type
      */
-    public final Class<E> getDeclaringClass() {
-        Class clazz = getClass();
-        Class zuper = clazz.getSuperclass();
-        return (zuper == Enum.class) ? clazz : zuper;
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public final Class<E> getDeclaringClass() {
+        Class<? extends Enum> clazz = getClass();
+        Class<?> zuper = clazz.getSuperclass();
+        return (Class<E>) ((zuper == Enum.class) ? clazz : zuper);
     }
 
     /**
@@ -237,7 +239,8 @@ public abstract class Enum<E extends Enum<E>>
      * 
      * @throws ObjectStreamException
      */
-    private void readObjectNoData() throws ObjectStreamException {
+    @SuppressWarnings("unused")
+	private void readObjectNoData() throws ObjectStreamException {
             throw new InvalidObjectException("can't deserialize enum");
     }
 }
