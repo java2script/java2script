@@ -7,7 +7,7 @@ abstract public class Test_8 extends Test_8b {
 	}
 
 	{
-		int[] test8 = new int[8];
+		//int[] test8 = new int[8];
 		System.out.println("8.2 init - prepare fields");
 	}
 

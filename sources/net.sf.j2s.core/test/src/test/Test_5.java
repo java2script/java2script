@@ -140,7 +140,7 @@ public class Test_5 extends Test_6 {
 		t5.x_2();
 		final String finalString = "final" + new Integer(3);
 		System.out.println("???");
-		Test_6 t6b = new Test_6(36) {
+		new Test_6(36) {
 		    public void x_2() {
 				System.out.println("t6b.x_2 in Test_5 anonymous finalString=" + finalString);
 				System.out.println("calling Test6.x_2 from anonymous Test_6 using super.x_2()");

@@ -7,7 +7,7 @@ abstract public class Test_8b {
 	}
 
 	{
-		int[] test8b = new int[8];
+//		int[] test8b = new int[8];
 		System.out.println("8.2 init - prepare fields");
 	}
 

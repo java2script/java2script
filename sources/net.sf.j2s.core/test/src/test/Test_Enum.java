@@ -64,6 +64,16 @@ public class Test_Enum {
 			}
 		}, PLUTO();
 
+		static int y = 0;
+		{
+			int x = 4;
+		}
+		
+		static {
+			int x = 5;
+			y = x;
+		}
+
 		private final double mass; // in kilograms
 		private final double radius; // in meters
 

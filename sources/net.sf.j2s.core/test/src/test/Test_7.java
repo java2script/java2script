@@ -17,7 +17,7 @@ public class Test_7 extends Test_8 {
 	}
 	
 	{
-		int[] test7 = new int[7];
+		//int[] test7 = new int[7];
 		System.out.println("7.2 init - prepare fields");
 	}
 

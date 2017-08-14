@@ -47,7 +47,7 @@ public class Test_call1 extends Test_call {
 	}
 
 	public static void main(String[] args) {
-		Test_call t1 = new Test_call1();
+		new Test_call1();
 	}
 
 
