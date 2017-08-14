@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+// BH 8/13/2017 -- includes native code calls
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
 
 // DONE: type def, including inner classes and anonymous classes
@@ -64,9 +65,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: proper <init> processing
 // DONE: non-final variables for anonymous class definition
 
-// TODO: check more complex mixes to ensure all nesting is correct
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
-// 
+
 /**
  * 
  * @author zhou renjian
@@ -348,13 +348,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			ASTNode element = (ASTNode) iter.next();
 			if (element instanceof FieldDeclaration) {
-				if (checkIgnore((FieldDeclaration) element)) {
+				if (checkj2sIgnore((FieldDeclaration) element)) {
 					continue;
 				}
 				element.accept(this);
 			} else if (element instanceof Initializer) {
 				Initializer init = (Initializer) element;
-				if (checkIgnore(init)) {
+				if (checkj2sIgnore(init)) {
 					continue;
 				}
 				if ((init.getModifiers() & Modifier.STATIC) == 0) {
@@ -1261,7 +1261,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(Initializer node) {
-		if (checkIgnore(node)) {
+		if (checkj2sIgnore(node)) {
 			return false;
 		}
 		// visitList(node.getBody().statements(), "\r\n");
@@ -1277,7 +1277,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(MethodDeclaration node) {
 
 		// methodBuffer = new StringBuffer();
-		if (checkIgnore(node)) {
+		if (checkj2sIgnore(node)) {
 			return false;
 		}
 
@@ -1301,11 +1301,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (mBinding != null)
 			methodDeclareNameStack.push(mBinding.getKey());
 
+		boolean isNative = ((node.getModifiers() & Modifier.NATIVE) != 0);
 		if (node.getBody() == null) {
-			/*
-			 * Abstract or native method
-			 */
-			if (isMethodNativeIgnored(node))
+			//Abstract or native method
+			if (!isNative) // BH
 				return false;
 		}
 		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
@@ -1351,6 +1350,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			blockLevel++;
 			if (!checkJ2STags(node, true)) {
 				buffer.append("{\r\n");
+				if (isNative)
+					buffer.append("//native_code\r\n");
 				visitNativeJavadoc(node.getJavadoc(), null, false);
 				buffer.append("}");
 			}
@@ -1367,7 +1368,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			node.getBody().accept(this);
 		}
 		if (isStatic || isConstructor)
-			buffer.append(", 1");
+			buffer.append(", ").append(isNative ? 2 : 1);
 		buffer.append(");\r\n");
 		return false;
 	}
@@ -1380,7 +1381,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public void endVisit(MethodDeclaration node) {
-		if (checkIgnore(node)) {
+		if (checkj2sIgnore(node)) {
 			return;
 		}
 
@@ -2168,13 +2169,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			for (Iterator<?> iter = node.bodyDeclarations().iterator(); iter.hasNext();) {
 				ASTNode element = (ASTNode) iter.next();
 				if (element instanceof Initializer) {
-					if (checkIgnore((Initializer) element)) {
+					if (checkj2sIgnore((Initializer) element)) {
 						continue;
 					}
 					interfaceHasMethods = true;
 				} else if (element instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) element;
-					if (checkIgnore(field)) {
+					if (checkj2sIgnore(field)) {
 						continue;
 					}
 					if ((field.getModifiers() & Modifier.STATIC) != 0) {
@@ -2328,7 +2329,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					continue;
 				}
 			} else if (element instanceof Initializer) {
-				if (checkIgnore((Initializer) element)) {
+				if (checkj2sIgnore((Initializer) element)) {
 					continue;
 				}
 				if ((((Initializer) element).getModifiers() & Modifier.STATIC) != 0) {
@@ -2338,7 +2339,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-				if (checkIgnore(field)) {
+				if (checkj2sIgnore(field)) {
 					continue;
 				}
 				if ((field.getModifiers() & Modifier.STATIC) != 0) {
@@ -2378,7 +2379,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					continue;
 				}
 			} else if (element instanceof Initializer) {
-				if (checkIgnore((Initializer) element)) {
+				if (checkj2sIgnore((Initializer) element)) {
 					continue;
 				}
 				if (staticCount != -1) {
@@ -2392,7 +2393,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-				if (checkIgnore(field)) {
+				if (checkj2sIgnore(field)) {
 					continue;
 				}
 				if ((field.getModifiers() & Modifier.STATIC) != 0) {
@@ -2783,7 +2784,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return s;
 	}
 
-	private static String j2sGetParamCode(ITypeBinding binding) {
+	static String j2sGetParamCode(ITypeBinding binding) {
 		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
 		String name = binding.getQualifiedName();
 		String arrays = null;
@@ -2875,36 +2876,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("C$.$init$.apply(this);\r\n");
 	}
 
-	public static void j2sAddArrayPrefix(StringBuffer buffer, ITypeBinding arrType, ITypeBinding elementType) {
-		buffer.append(" Clazz.newArray$('")
-		.append(j2sGetParamCode(arrType))
-		.append("', Clazz.new");
-		String type = "";
-		if (elementType.isPrimitive()) {
-			String typeCode = elementType.getName();
-			switch (typeCode) {
-			case "byte":
-				type = "Byte";
-				break;
-			case "int":
-			case "long":
-			case "short":
-				type = "Int";
-				break;
-			case "float":
-			case "double":
-				type = "Double";
-				break;
-			default:
-			case "char":
-			case "boolean":
-				break;
-			}
-		}
-		buffer.append(type);
-		buffer.append("A$, [");
-	}
-	
     static String j2sGetArrayClass(ITypeBinding binding) {
 		return "Clazz.arrayClass$('"+j2sGetParamCode(binding)+"')";
 	}

@@ -194,37 +194,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		@SuppressWarnings("unchecked")
 		List<ASTNode> dim = node.dimensions();
 		int dimensions = node.getType().getDimensions();
-		ITypeBinding elementType = node.getType().getElementType().resolveBinding();
-		if (elementType == null)
-			return false;
-		ASTScriptVisitor.j2sAddArrayPrefix(buffer, node.resolveTypeBinding(), elementType);
+		buffer.append(" Clazz.newArray$('")
+			.append(ASTScriptVisitor.j2sGetParamCode(node.resolveTypeBinding()))
+			.append("', ").append(dimensions).append(", [");
 		visitList(dim, ", ");
-		if (elementType.isPrimitive()) {
-			String typeCode = elementType.getName();
-			String val = "null";
-			if (dim.size() == dimensions) {
-				switch (typeCode) {
-				default:
-				case "byte":
-				case "int":
-				case "long":
-				case "short":
-				case "float":
-				case "double":
-					val = "0";
-					break;
-				case "char":
-					val = "'\\0'";
-					break;
-				case "boolean":
-					val = "false";
-					break;
-				}
-			}
-			buffer.append(", ").append(val);
-		} else if (dim != null && dim.size() > 1) {
-			buffer.append(", null");
-		}
 		buffer.append("])");
 		return false;
 	}
@@ -240,8 +213,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			visitList(expressions, ", ");
 			buffer.append("]");
 		} else {
-			ASTScriptVisitor.j2sAddArrayPrefix(buffer, arrType, elementType);
-			buffer.append("-1, [");
+			buffer.append(" Clazz.newArray$('")
+			.append(ASTScriptVisitor.j2sGetParamCode(arrType))
+			.append("', -1, [-1, [");
 			visitList(expressions, ", ");
 			buffer.append("]])");
 		}
