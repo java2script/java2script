@@ -4,9 +4,15 @@
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
 // TODO: fix Array.newInstance
+// TODO: check array.clone
+// TODO: check issue for static calls not showing up in requirements. 
+//           How to handle static calls other class static methods?
+// TODO: check issue that some static calls do not need to be put in must/optional 
 // TODO: getResourceAsStream is using new java.io.BufferedInputStream and Clazz.isAB()
+
 // NOTES by Bob Hanson
 
+// BH 8/13/2017 8:06:48 PM rewrites Array class; adds Array.newArray(class, dimension)
 // BH 8/12/2017 7:08:39 AM instanceOf fix for arrays
 // BH 8/12/2017 6:23:13 AM comments out deprecated methods
 // BH 8/11/2017 7:53:55 AM reflection for all 8 primitive types fixed;
@@ -181,7 +187,6 @@ Clazz.super$ = function(cl, obj) {
 }
 
 Clazz.newInstance$ = function (objThis, args, isInner) {
-
   if (args && (args[0] == _prepOnly 
   || args[0] == Clazz.inheritArgs 
   || args[1] == Clazz.inheritArgs 
@@ -200,27 +205,103 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
     };
   }
   
-  if (isInner) {
-  // args[0] = outerObject
-  // args[1] = b$ array
-  // args[2-n] = actual arguments
-  var outerObj = (args == null ? null : args[0]); // null for direct new xxx()  
-  var finalVars = shiftArray(args, 1, 1);
-  var haveFinals = (finalVars || outerObj && outerObj.$finals);
-
-  if (haveFinals) {
-    // f$ is short for the once-chosen "$finals"
-    var of$ = outerObj.f$;
-    objThis.f$ = (finalVars ? 
-      (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
-      : of$ ? of$ : null);
-  }
-  // hack for outer obj being WINDOW
-  if (outerObj != null && outerObj != _prepOnly && outerObj.__CLASS_NAME__)    
-    Clazz.prepareCallback(objThis, args);
- }
   objThis.__JSID__ = ++_jsid;
 
+  if (isInner) {
+    // args[0] = outerObject
+    // args[1] = b$ array
+    // args[2-n] = actual arguments
+    var outerObj = (args == null ? null : args[0]); // null for direct new xxx()  
+    var finalVars = shiftArray(args, 1, 1);
+    var haveFinals = (finalVars || outerObj && outerObj.$finals);
+  
+    if (haveFinals) {
+      // f$ is short for the once-chosen "$finals"
+      var of$ = outerObj.f$;
+      objThis.f$ = (finalVars ? 
+        (of$ ? appendMap(appendMap({}, of$), finalVars) : finalVars)
+        : of$ ? of$ : null);
+    }
+    // hack for outer obj being WINDOW
+    if (outerObj != null && outerObj != _prepOnly && outerObj.__CLASS_NAME__)    
+      prepareCallback(objThis, args);      
+  } else if (args && args.length == 0 && objThis.construct) {
+    // allow for direct default call "new foo()" to run with its default constructor
+    objThis.construct.apply(objThis);
+  }
+
+};
+
+/**
+ * in-place shift of an array by k elements, starting with element i0,
+ * resetting its length in case it is arguments (which does not have the
+ * .shift() method. Returns a[i0] 
+ */
+var shiftArray = function(a, k, i0) {
+  if (a == null)
+    return null;
+  k || (k == 1);
+  i0 || (i0 == 0);
+  var arg = a[i0];
+  for (var i = i0, n = a.length - k; i < n; i++)
+    a[i] = a[i + k];
+  a.length -= k;
+  return arg;
+};
+
+/**
+ * Prepare synthetic callback references b$[] for an anonymous inner class.
+ * 
+ * This implementation takes advantage of the fact that the inheritance of the 
+ * outer object is a property of itself.    
+ *
+ * @param innerObj this object
+ * @param args args[0] will be the outer object; args [1...] 
+ *  must be shifted back to be actual calling arguments
+ *  @author Bob Hanson
+ */
+var prepareCallback = function (innerObj, args) {
+  var outerObj = args[0];
+  if (outerObj == _prepOnly)return;    
+  if (innerObj && outerObj && outerObj !== window) {
+    // BH: For efficiency: Save the b$ array with the OUTER class as $b$, 
+    // as its keys are properties of it and can be used again.
+    var b = outerObj.$b$;
+    var isNew = false;
+    var innerName = Clazz.getClassName(innerObj, true);
+    if (!b) {
+      b = outerObj.b$;
+      // Inner class of an inner class must inherit all outer object references. Note that this 
+      // can cause conflicts. For example, b%["java.awt.Component"] could refer to the wrong
+      // object if I did this wrong.
+      // 
+      if (!b) {
+        // the outer class is not itself an inner class - start a new map
+        b = {};
+        isNew = true;
+      } else if (b["$ " + innerName]) {
+        // this inner class is already in the map pointing to a different object. Clone the map.
+        b = appendMap({},b);
+        isNew = true;
+      }
+      // add all superclass references for outer object
+      var clazz = Clazz.getClass(outerObj);
+      do {
+        var key = Clazz.getClassName(clazz, true);
+        if (!isNew && b[key])
+          break;
+        b[key] = outerObj; 
+      } while ((clazz = clazz.superClazz));
+    }
+    // add a flag to disallow any other same-class use of this map.
+    b["$ " + innerName] = 1;
+    // it is new, save this map with the OUTER object as $b$
+    if (isNew)
+      outerObj.$b$ = b;
+    // final objective: save this map for the inner object
+    innerObj.b$ = b;
+  }
+  shiftArray(args, 1, 0);
 };
 
 Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
@@ -243,10 +324,65 @@ Clazz.arrayClass$ = function(type) {
   return o;  
 }
  
-Clazz.newArray$ = function(paramType, arrayFunc, params) {
-  // arrayFunc is one of newA$, newBA$, newIA$, newDA$ 
+Clazz.newArray$ = function(paramType, ndims, params) {
+//var o =  Clazz.newArray$('IA', -1, [-1, [3, 4, 5]); --> [-1, [3, 4, 5]
+//var a =  Clazz.newArray$('IA', 1, [3]); --> [3, 0]
+//var p =  Clazz.newArray$('IAA', 2, [3]); --> [3, null]
+//var b =  Clazz.newArray$('IAA', 2, [3, 3]); --> [3, 3, 0]
+//var cp =  Clazz.newArray$('CA', 1, [3]); --> [3, '\0']
+//var cq =  Clazz.newArray$('CAA', 2, [3]); --> [3, null]
+//var cr =  Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, '\0']
+//var sp =  Clazz.newArray$('CA', 1, [3]); --> [3, null]
+//var sq =  Clazz.newArray$('CAA', 2, [3]); --> [3, null]
+//var sr =  Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, null]
+
+  if (paramType.__CLASS_NAME__) {
+   // from Array.newArray(classType, 1, [3])
+   // from Array.newArray(classType, 2, [3, 3])
+    var cl = paramType;
+    paramType = getParamCode(cl);
+  }
+  if (ndims >= 0) {
+    var initValue = null;
+    switch (ndims == params.length && paramType[1] == "A" ? paramType[0] : null) {
+    case "B":
+    case "I":
+    case "L":
+    case "H": // short
+    case "F":
+    case "D":
+      initValue = 0;
+      break;
+    case "Z":
+      initValue = false;
+      break;
+    case "C": 
+      initValue = '\0';
+      break;
+    }
+    params.push(initValue);
+  }
   params.push(paramType);
+  var arrayFunc = Clazz.newA$;
+  switch (paramType[1] == "A" ? paramType[0] : null) {
+  case "B":
+    arrayFunc = Clazz.newByteA$;
+    break;
+  case "I":
+  case "L":
+  case "H": // short
+    arrayFunc = Clazz.newIntA$;
+    break;
+  case "F":
+  case "D":
+    arrayFunc = Clazz.newDoubleA$;
+    break;
+  }  
   return arrayFunc.apply(null, params);
+}
+
+var getParamCode = function(cl) {
+  return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
 }
 
 /**
@@ -256,7 +392,7 @@ Clazz.newArray$ = function(paramType, arrayFunc, params) {
  */
 /* public */
 Clazz.newA$ = function (a, b, c, d) {
-  if (a != -1 || arguments.length == 3) { 
+  if (a >= 0 || arguments.length == 3) { 
     // Clazz.newA$(36,null, type)
     // Clazz.newA$(3, 0, type)
     // Clazz.newA$(3, 5, null, type)
@@ -279,6 +415,15 @@ Clazz.newA$ = function (a, b, c, d) {
  */
 Clazz.newByteA$ = function () {
   return newTypedA$(arguments, 8);
+}
+
+/**
+ * Make an int, short, or long array
+ *
+ * @return the created Array object
+ */
+Clazz.newShortA$ = function () {
+  return newTypedA$(arguments, 16);
 }
 
 /**
@@ -309,50 +454,49 @@ var newTypedA$ = function(args, nBits) {
   if (last > 2) {
      // array of arrays
      // Clazz.newA$(3, 5, null, "SAA") // last = 3
-    var xargs = new Array(last); 
-    for (var i = 0; i < last; i++)
+    var xargs = new Array(last--); 
+    for (var i = 0; i <= last; i++)
       xargs[i] = args[i + 1];
     // SAA -> SA
-    xargs[xargs.length] = paramType.substring(0, paramType.length - 1);    
+    xargs[last] = paramType.substring(0, paramType.length - 1);    
     var arr = new Array(dim);
-    arr.__paramType = paramType;
     for (var i = 0; i < dim; i++)
       arr[i] = newTypedA$(xargs, nBits); // Call recursively
-    return arr;
+  } else {
+    // Clazz.newIntA$(5, null, "IAA")    new int[5][]   val = null 
+    // Clazz.newA$(5 ,null, "SA")        new String[5] val = null
+    // Clazz.newA$(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
+    // Clazz.newA$(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
+    if (val == null)
+      nBits = 0;
+    else if (nBits > 0 && dim < 0)
+      dim = val; // because we can initialize an array using new Int32Array([...])
+    switch (nBits) {
+    case 8:
+      var arr = new Int8Array(dim);
+      break;
+    case 16:
+      var arr = new Int16Array(dim);
+      break;
+    case 32:
+      var arr = new Int32Array(dim);
+      break;
+    case 64:
+      var arr = new Float64Array(dim);
+      break;
+    default:
+      var arr = (dim < 0 ? val : new Array(dim));
+      nBits = 0;
+      if (dim > 0 && val != null)
+        for (var i = dim; --i >= 0;)
+           arr[i] = val;
+      break;
+    }
+    arr.BYTES_PER_ELEMENT = (nBits >> 3);
   }
-  // Clazz.newIntA$(5, null, "IAA")    new int[5][]   val = null 
-  // Clazz.newA$(5 ,null, "SA")        new String[5] val = null
-  // Clazz.newA$(-1, ["A","B"], "SA")  new String[]   val = {"A", "B"}
-  // Clazz.newA$(3, 5, 0, "IAA")       new int[3][5] (second pass, so now args = [5, 0, "IA"])
-  if (val == null)
-    nBits = 0;
-  else if (nBits > 0 && dim < 0)
-    dim = val; // because we can initialize an array using new Int32Array([...])
-  switch (nBits) {
-  case 8:
-    var arr = new Int8Array(dim);
-    break;
-  case 32:
-    var arr = new Int32Array(dim);
-    break;
-  case 64:
-    var arr = new Float64Array(dim);
-    break;
-  default:
-    var arr = (dim < 0 ? val : new Array(dim));
-    nBits = 0;
-    if (dim > 0 && val != null)
-      for (var i = dim; --i >= 0;)
-         arr[i] = val;
-    break;
-  }
-  arr.BYTES_PER_ELEMENT = (nBits >> 3);
   arr.__paramType = paramType;
   return arr;
 }
-
-
-
 
 try {
 Clazz._debugging = (document.location.href.indexOf("j2sdebug") >= 0);
@@ -597,74 +741,6 @@ Clazz.defineStatics = function(clazz) {
 };
 
 
-/**
- * Prepare synthetic callback references b$[] for an anonymous inner class.
- * 
- * This implementation takes advantage of the fact that the inheritance of the 
- * outer object is a property of itself.    
- *
- * @param innerObj this object
- * @param args args[0] will be the outer object; args [1...] 
- *  must be shifted back to be actual calling arguments
- *  @author Bob Hanson
- */
-Clazz.prepareCallback = function (innerObj, args) {
-  var outerObj = args[0];
-  if (outerObj == _prepOnly)return;    
-  if (innerObj && outerObj && outerObj !== window) {
-    // BH: For efficiency: Save the b$ array with the OUTER class as $b$, 
-    // as its keys are properties of it and can be used again.
-    var b = outerObj.$b$;
-    var isNew = false;
-    var innerName = Clazz.getClassName(innerObj, true);
-    if (!b) {
-      b = outerObj.b$;
-      // Inner class of an inner class must inherit all outer object references. Note that this 
-      // can cause conflicts. For example, b%["java.awt.Component"] could refer to the wrong
-      // object if I did this wrong.
-      // 
-      if (!b) {
-        // the outer class is not itself an inner class - start a new map
-        b = {};
-        isNew = true;
-      } else if (b["$ " + innerName]) {
-        // this inner class is already in the map pointing to a different object. Clone the map.
-        b = appendMap({},b);
-        isNew = true;
-      }
-      // add all superclass references for outer object
-      var clazz = Clazz.getClass(outerObj);
-      do {
-        var key = Clazz.getClassName(clazz, true);
-        if (!isNew && b[key])
-          break;
-        b[key] = outerObj; 
-      } while ((clazz = clazz.superClazz));
-    }
-    // add a flag to disallow any other same-class use of this map.
-    b["$ " + innerName] = 1;
-    // it is new, save this map with the OUTER object as $b$
-    if (isNew)
-      outerObj.$b$ = b;
-    // final objective: save this map for the inner object
-    innerObj.b$ = b;
-  }
-  shiftArray(args, 1, 0);
-};
-
-var shiftArray = function(args, k, i0) {
-  if (args == null)
-    return null;
-  k || (k == 1);
-  i0 || (i0 == 0);
-  arg = args[i0];
-  // note that args is an instance of arguments -- NOT an array; does not have the .shift() method!
-  for (var i = i0, n = args.length - k; i < n; i++)
-    args[i] = args[i + k];
-  args.length -= k;
-  return arg;
-};
-
 Clazz.cloneFinals = function () {
   var o = {};
   var len = arguments.length / 2;
@@ -747,6 +823,15 @@ Clazz.getClassName = function(obj, fAsClassName) {
   return "Object";
 };
 
+var extractClassName = function(clazzStr) {
+  // [object Int32Array]
+  var clazzName = clazzStr.substring (1, clazzStr.length - 1);
+  return (clazzName.indexOf("Array") >= 0 ? "Array" // BH -- for Float64Array and Int32Array
+    : clazzName.indexOf ("object ") >= 0 ? clazzName.substring (7) // IE
+    : clazzName);
+}
+
+
 /*
 // deprecated
 Clazz.declareType = function (prefix, name, clazzSuper, interfacez, 
@@ -821,13 +906,6 @@ Clazz.overrideMethod = function(clazzThis, funName, funBody, rawSig) {
   funBody.overrider = clazzThis;
   return addProto(clazzThis.prototype, funName, funBody);
 };
-
-// deprecated
-Clazz.saemCount0 = 0 // methods defined        5400 (Ripple.js)
-// deprecated
-Clazz.saemCount1 = 0 // delegates created       937
-// deprecated
-Clazz.saemCount2 = 0 // delegates bound         397
 
 // deprecated
 Clazz.defineMethod = function (clazzThis, funName, funBody, rawSig, isConstruct) {
@@ -1206,7 +1284,10 @@ var extendedObjectMethods = Clazz._extendedObjectMethods = [ "isInstance", "equa
   addProto(proto, "clone", function () { return Clazz.clone(this); });
 
   // BH allows @j2sNative access without super constructor
-  Clazz.clone = function(me) { return appendMap(me instanceof Array ? new Array(me.length) : new me.constructor(), me); }
+  Clazz.clone = function(me) { 
+    return appendMap(me.__paramType ? Clazz.newArray$(me.__paramType, -1, [-2, me])
+     : new me.constructor(), me); 
+  }
 /*
  * Methods for thread in Object
  */
@@ -1288,8 +1369,11 @@ var implementOf = Clazz._implementOf = function (clazzThis, interfacez) {
   }
 };
 
+/*
+// deprecated
 Clazz.extendInterface = implementOf;
 
+// deprecated
 var getParamTypes = function (args) {
   // bh: optimization here for very common cases
   var n = args.length;
@@ -1318,15 +1402,13 @@ var getParamTypes = function (args) {
   return pTypes;
 };
 
-/**
- * replace arguments casted as null with actual null
- *  
- */
+// deprecated
 var fixNullParams = function(args) {
   for (var i = args.length; --i >= 0;)
     args[i] && args[i]._NULL_ && (args[i] = null);
 }
 
+// deprecated
 var setSignature = function(f$, funBody, sig) {
   var params = sig.substring(1).split("\\");
   var nparams = params.length;
@@ -1339,15 +1421,11 @@ var setSignature = function(f$, funBody, sig) {
   delete f$.sigs.sig;
   f$.sigs.fparams[nparams].push([funBody, params]);
 }
+*/
 
-var extractClassName = function(clazzStr) {
-  // [object Int32Array]
-  var clazzName = clazzStr.substring (1, clazzStr.length - 1);
-  return (clazzName.indexOf("Array") >= 0 ? "Array" // BH -- for Float64Array and Int32Array
-    : clazzName.indexOf ("object ") >= 0 ? clazzName.substring (7) // IE
-    : clazzName);
-}
-
+Clazz.saemCount0 = 0 // methods defined        5400 (Ripple.js)
+Clazz.saemCount1 = 0 // delegates created       937
+Clazz.saemCount2 = 0 // delegates bound         397
 Clazz.saemCount3 = 0 // getInheritedLevels started      
 Clazz.saemCount4 = 0 // getInheritedLevels checked
 
@@ -2448,7 +2526,7 @@ var arraySlice = function(istart, iend) {
   b.__paramType = a.__paramType;
 };
 
-var haveInt8 = !!self.Int8Array;
+var haveInt8 = !!(self.Int8Array && self.Int8Array != Array);
 
 if (haveInt8) {
   if (!Int8Array.prototype.sort)
@@ -2456,7 +2534,7 @@ if (haveInt8) {
   if (!Int8Array.prototype.slice)
     Int8Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
 } else {
-  Clazz.newByteArray = Clazz.newIntArray;
+  Clazz.newByteA$ = Clazz.newIntA$;
 }
 
 Int8Array.prototype.clone = function() {
@@ -2466,6 +2544,26 @@ Int8Array.prototype.clone = function() {
   return a; 
 };
 Int8Array.prototype.getClass = function () { return this.constructor; };
+
+var haveInt16 = !!(self.Int16Array && self.Int16Array != Array);
+
+if (haveInt16) {
+  if (!Int16Array.prototype.sort)
+    Int16Array.prototype.sort = Array.prototype.sort
+  if (!Int16Array.prototype.slice)
+    Int16Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
+} else {
+  Clazz.newShortA$ = Clazz.newIntA$;
+}
+
+Int16Array.prototype.clone = function() {
+  var a = this.slice(); 
+  a.BYTES_PER_ELEMENT = 2;
+  a.__paramType = this.__paramType; 
+  return a; 
+};
+Int16Array.prototype.getClass = function () { return this.constructor; };
+
 
 Clazz.haveInt32 = !!(self.Int32Array && self.Int32Array != Array);      
 if (Clazz.haveInt32) {
@@ -3483,6 +3581,7 @@ var loadScript = function (node, file, why, ignoreOnload, fSuccess, _loadScript)
   
   
 System.out.println("for file " + file +" fSuccess = " + (fSuccess ? fSuccess.toString() : ""))
+
   var info = {
     dataType:"script",
     async:true, 
@@ -6702,6 +6801,8 @@ Clazz.defineStatics(c$,
 "MAX_RADIX",36);
 //java.lang.Character.TYPE=java.lang.Character.prototype.TYPE=java.lang.Character;
 
+/*
+// deprecated
 Clazz._ArrayWrapper = function(a, type) {
  return {
    a: a,
@@ -6712,18 +6813,30 @@ Clazz._ArrayWrapper = function(a, type) {
    getName: function() { return this.__CLASS_NAME__ }
  };
 }
+*/
+
 c$=declareType(java.lang.reflect,"Array");
 Clazz._setDeclared("java.lang.reflect.Array", java.lang.reflect.Array) 
 
 
 // TODO: fix Array.newInstance
-Clazz.newMethod$(c$,"newInstance",
-function(componentType,size){
-  var a = Clazz.newArray(size);
-  a.getClass = function() { return new Clazz._ArrayWrapper(this, componentType);};
-  a.__paramType = componentType.__paramType;
-  return a;
+Clazz.newMethod$(c$,"newInstance$Class$I",
+function(componentType,length){
+  return Clazz.newArray$(componentType, 1, [length]);
+//  var a = Clazz.newArray(ldnbgh);
+//  a.getClass = function() { return new Clazz._ArrayWrapper(this, componentType);};
+//  a.__paramType = componentType.__paramType;
+//  return a;
 }, 1);
+
+c$.newArray$Class$I = c$.newInstance$Class$I;
+
+Clazz.newMethod$(c$,"newInstance$Class$IA",
+function(componentType,dims){
+  return Clazz.newArray$(componentType, dims.length, dims);
+}, 1);
+
+c$.newMultiArray$Class$IA = c$.newInstance$Class$IA;
 
 
 // TODO: Only asking for problems declaring Date. This is not necessary
@@ -6931,8 +7044,7 @@ nativeClazz = superCaller.exClazz;
 var st =Clazz.$new(StackTraceElement.construct, [
 ((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
 nativeClazz.__CLASS_NAME__ : "anonymous"),
-((superCaller.exName == null) ? "anonymous" : superCaller.exName)
-+ " (" + Clazz.getParamsType (superCaller.arguments) + ")",
+((superCaller.exName == null) ? "anonymous" : superCaller.exName),
 null, -1]);
 st.nativeClazz = nativeClazz;
 this.stackTrace[this.stackTrace.length] = st;
@@ -7725,6 +7837,13 @@ function(){
 return this.getDeclaringClass().getName().hashCode();
 });
 Clazz.newMethod$(c$,"newInstance$OA", function(args){
+
+
+
+
+
+
+
 var a = (args ? new Array(args.length) : null);
 if (args) {
   for (var i = args.length; --i >= 0;) {
@@ -7891,10 +8010,8 @@ var types = this.parameterTypes;
 var a = (args ? new Array(args.length) : null);
 for (var i = 0; i < types.length; i++) {
   var t = types[i];
-  var paramCode = t.__PARAMCODE;
+  var paramCode = getParamCode(t);
   a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
-  if (!paramCode)
-    paramCode = t.__PARAMCODE = t.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_');
   name += "$" + paramCode;
 }
 
