@@ -92,14 +92,9 @@ public final class StringBuffer extends AbstractStringBuilder implements
      *         <code>null</code>.
      * @since 1.5
      * 
-     * @j2sNative
-     * if (cs == null) {
-     * 	throw new NullPointerException();
-     * }
-     * Clazz.superConstructor(this, StringBuffer, [cs.toString()]);
      */
     public StringBuffer(CharSequence cs) {
-        super(cs.toString());
+        super(cs == null ? null : cs.toString());
     }
 
     /**

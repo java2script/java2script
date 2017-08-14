@@ -84,6 +84,8 @@ abstract class AbstractStringBuilder {
     }
 
     AbstractStringBuilder(String string) {
+    	if (string == null) // BH added
+    		throw new NullPointerException(); // BH added
         count = string.length();
         shared = false;
         value = new char[count + INITIAL_CAPACITY];
