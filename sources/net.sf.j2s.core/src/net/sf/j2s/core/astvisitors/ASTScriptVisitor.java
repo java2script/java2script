@@ -57,7 +57,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// BH 8/13/2017 -- includes native code calls
+// BH 8/16/2017 -- JSE8-UnionType catch (Exception... | Exception...) {...}
+// BH 8/13/2017 -- includes native code calls in System.err
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
 
 // DONE: type def, including inner classes and anonymous classes
@@ -802,7 +803,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		List<?> bodyDeclarations = node.bodyDeclarations();
 
 		for (Iterator<?> it = bodyDeclarations.listIterator(); it.hasNext();) {
-			BodyDeclaration decl = (MethodDeclaration) it.next();
+			BodyDeclaration decl = (BodyDeclaration) it.next();
 			if (decl instanceof MethodDeclaration)
 				decl.accept(this);
 		}
