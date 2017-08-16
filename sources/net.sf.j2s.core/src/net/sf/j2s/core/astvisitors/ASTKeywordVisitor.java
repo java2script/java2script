@@ -10,6 +10,7 @@
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -71,11 +72,14 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+
+// BH 8/15/2017 12:18:46 PM adds support for Java 8 catch (Exception...|Excepion... e)
 /**
  * This class will traverse most of the common keyword and
  * common expression.
@@ -195,7 +199,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		List<ASTNode> dim = node.dimensions();
 		int dimensions = node.getType().getDimensions();
 		buffer.append(" Clazz.newArray$('")
-			.append(ASTScriptVisitor.j2sGetParamCode(node.resolveTypeBinding()))
+			.append(ASTScriptVisitor.j2sGetParamCode(node.resolveTypeBinding(), true))
 			.append("', ").append(dimensions).append(", [");
 		visitList(dim, ", ");
 		buffer.append("])");
@@ -214,7 +218,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append("]");
 		} else {
 			buffer.append(" Clazz.newArray$('")
-			.append(ASTScriptVisitor.j2sGetParamCode(arrType))
+			.append(ASTScriptVisitor.j2sGetParamCode(arrType, true))
 			.append("', -1, [-1, [");
 			visitList(expressions, ", ");
 			buffer.append("]])");
@@ -1386,10 +1390,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(TryStatement node) {
 		buffer.append("try ");
 		node.getBody().accept(this);
-		@SuppressWarnings("unchecked")
 		List<CatchClause> catchClauses = node.catchClauses();
 		int size = catchClauses.size();
 		if (size > 0) {
@@ -1404,19 +1408,33 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			boolean endedWithThrowable = false;
 			for (Iterator<CatchClause> iter = catchClauses.iterator(); iter.hasNext();) {
 				CatchClause element = iter.next();
+				List<Type> types;
 				Type type = element.getException().getType();
-				String typeName = type.toString();
-				if (!"Throwable".equals(typeName) && !"java.lang.Throwable".equals(typeName)) {
-					if (!scopeAdded) {
-						buffer.append("{\r\n");
-						scopeAdded = true;
-					}
-					buffer.append("if (Clazz.exceptionOf (" + catchEName + ", ");
-					type.accept(this);
-					buffer.append(")) ");
+				if (type instanceof UnionType) {
+					types = ((UnionType) type).types();
 				} else {
-					endedWithThrowable = true;
+					(types = new ArrayList<Type>()).add(type);
 				}
+				boolean haveType = false;
+				for (int j = 0; j < types.size(); j++) {
+					type = types.get(j);
+					String typeName = type.toString();
+					if ("Throwable".equals(typeName) || "java.lang.Throwable".equals(typeName)) {
+						endedWithThrowable = true;
+					} else {
+						if (!scopeAdded) {
+							buffer.append("{\r\n");
+							scopeAdded = true;
+						}
+						buffer.append(haveType ? " || " : "if (");
+						buffer.append("Clazz.exceptionOf(" + catchEName + ", ");
+						type.accept(this);
+						buffer.append(")");
+						haveType = true;
+					}
+				}
+				if (haveType)
+					buffer.append(")");
 				SimpleName exName = element.getException().getName();
 				String eName = exName.getIdentifier();
 				boolean notEName = false;

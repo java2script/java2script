@@ -3,7 +3,6 @@
 
 // latest author: Bob Hanson, St. Olaf College, hansonr@stolaf.edu
 
-// TODO: fix Array.newInstance
 // TODO: check array.clone
 // TODO: check issue for static calls not showing up in requirements. 
 //           How to handle static calls other class static methods?
@@ -12,6 +11,9 @@
 
 // NOTES by Bob Hanson
 
+// BH 8/15/2017 2:32:47 PM fix Array.newInstance()
+// BH 8/15/2017 1:21:47 PM add innerFunctions getConstructor$ClassA
+// BH 8/15/2017 5:23:06 AM simpler newArray$; net.sf.j2s.core code clean up
 // BH 8/13/2017 8:06:48 PM rewrites Array class; adds Array.newArray(class, dimension)
 // BH 8/12/2017 7:08:39 AM instanceOf fix for arrays
 // BH 8/12/2017 6:23:13 AM comments out deprecated methods
@@ -238,7 +240,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
  * .shift() method. Returns a[i0] 
  */
 var shiftArray = function(a, k, i0) {
-  if (a == null)
+  if (a == null || k > a.length)
     return null;
   k || (k == 1);
   i0 || (i0 == 0);
@@ -317,9 +319,10 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
  * Create an array class placeholder for reflection 
  * type is "String[][]" for instance  
  */
-Clazz.arrayClass$ = function(type) {
+Clazz.arrayClass$ = function(type, ndim) {
   var o = {};
   o.arrayType = 1;
+  o.__NDIM = ndim;
   o.__CLASS_NAME__ = o.__paramType = type;
   return o;  
 }
@@ -336,7 +339,7 @@ Clazz.newArray$ = function(paramType, ndims, params) {
 //var sq =  Clazz.newArray$('CAA', 2, [3]); --> [3, null]
 //var sr =  Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, null]
 
-  if (paramType.__CLASS_NAME__) {
+  if (paramType.__CLASS_NAME__ || paramType.__PARAMCODE) {
    // from Array.newArray(classType, 1, [3])
    // from Array.newArray(classType, 2, [3, 3])
     var cl = paramType;
@@ -381,7 +384,7 @@ Clazz.newArray$ = function(paramType, ndims, params) {
   return arrayFunc.apply(null, params);
 }
 
-var getParamCode = function(cl) {
+var getParamCode = Clazz._getParamCode = function(cl) {
   return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
 }
 
@@ -1594,10 +1597,10 @@ var innerNames = [
   "getResourceAsStream", "defineMethod", "defineStaticMethod",
   "makeConstructor",  
     "getSuperclass", "isAssignableFrom", 
-    "getConstructor", 
+    "getConstructor", "getConstructor$ClassA",
     "getDeclaredMethod", "getDeclaredMethods",
-    "getMethod$S$ClassA", "getMethods",   
-    "getModifiers", /*"isArray",*/ "newInstance"
+    "getMethod", "getMethod$S$ClassA", 
+    "getMethods", "getModifiers", /*"isArray",*/ "newInstance"
 ];
 
 /*
@@ -1609,10 +1612,6 @@ var inF = Clazz._inF = {
    */
    
   equals : function (aFun) {
-    return this === aFun;
-  },
-
-  equals$O : function (aFun) {
     return this === aFun;
   },
 
@@ -1715,7 +1714,9 @@ var inF = Clazz._inF = {
 
   isAssignableFrom : function(clazz) {  return getInheritedLevel (clazz, this) >= 0;  },
 
-  getConstructor : function(paramTypes) { return new java.lang.reflect.Constructor (this, paramTypes || [], [], java.lang.reflect.Modifier.PUBLIC);},
+  getConstructor : function(paramTypes) { 
+  return new java.lang.reflect.Constructor (this, paramTypes || [], [], java.lang.reflect.Modifier.PUBLIC);
+  },
 /**
  * TODO: fix bug for polymorphic methods!
  */
@@ -1740,7 +1741,7 @@ var inF = Clazz._inF = {
     return ms;
   },
 
-  getMethod$S$ClassA : function(name, paramTypes) {
+  getMethod : function(name, paramTypes) {
     return Clazz.$new(java.lang.reflect.Method.construct$Class$S$ClassA$Class$ClassA$I, [this, name,
             paramTypes, java.lang.Void, [], 0]);
   },
@@ -1785,7 +1786,10 @@ var inF = Clazz._inF = {
 };
 
 inF.getDeclaredMethods = inF.getMethods;
-inF.getDeclaredMethod = inF.getMethod;
+inF.getDeclaredMethod = inF.getMethod$S$ClassA = inF.getMethod;
+inF.equals$O = inF.equals;
+inF.getConstructor$ClassA = inF.getConstructor;
+
  
 for (var i = innerNames.length, name; --i >= 0;)
   Clazz._O[name = innerNames[i]] = Array[name] = inF[name];
@@ -6822,14 +6826,14 @@ Clazz._setDeclared("java.lang.reflect.Array", java.lang.reflect.Array)
 // TODO: fix Array.newInstance
 Clazz.newMethod$(c$,"newInstance$Class$I",
 function(componentType,length){
-  return Clazz.newArray$(componentType, 1, [length]);
+  return Clazz.newArray$(Clazz._getParamCode(componentType) + "A", (componentType.__NDIM || 0) + 1, [length]);
 //  var a = Clazz.newArray(ldnbgh);
 //  a.getClass = function() { return new Clazz._ArrayWrapper(this, componentType);};
 //  a.__paramType = componentType.__paramType;
 //  return a;
 }, 1);
 
-c$.newArray$Class$I = c$.newInstance$Class$I;
+c$.newInstance = c$.newArray$Class$I = c$.newInstance$Class$I;
 
 Clazz.newMethod$(c$,"newInstance$Class$IA",
 function(componentType,dims){
@@ -6907,7 +6911,6 @@ Clazz.declareInterface(javautil,"EventListener");
 
 c$=Clazz.decorateAsClass(function(){
 this.listener=null;
-Clazz.instantialize(this,arguments);
 },javautil,"EventListenerProxy",null,javautil.EventListener);
 Clazz.newMethod$(c$, "construct", function(listener){
 this.listener=listener;
@@ -7322,7 +7325,6 @@ Clazz.Error = Error;
 declareTypeError = function (prefix, name, clazzParent, interfacez, 
     parentClazzInstance, _declareType) {
   var f = function () {
-    Clazz.instantialize (this, arguments);
     return Clazz.Error();
   };
   return Clazz.decorateAsClass (f, prefix, name, clazzParent, interfacez, 
@@ -7500,7 +7502,6 @@ this.bytesTransferred=0;
 
 c$=Clazz.decorateAsClass(function(){
 this.classname=null;
-Clazz.instantialize(this,arguments);
 },java.io,"InvalidClassException",java.io.ObjectStreamException);
 
 Clazz.newMethod$(c$, "construct$S$S", function(className,detailMessage){
@@ -7760,7 +7761,6 @@ this.clazz=null;
 this.parameterTypes=null;
 this.exceptionTypes=null;
 this.modifiers=0;
-Clazz.instantialize(this,arguments);
 },java.lang.reflect,"Constructor",java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 
 Clazz.newMethod$(c$, "construct$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
@@ -7837,13 +7837,6 @@ function(){
 return this.getDeclaringClass().getName().hashCode();
 });
 Clazz.newMethod$(c$,"newInstance$OA", function(args){
-
-
-
-
-
-
-
 var a = (args ? new Array(args.length) : null);
 if (args) {
   for (var i = args.length; --i >= 0;) {
@@ -7853,7 +7846,6 @@ if (args) {
 var instance=new this.clazz(null, Clazz.inheritArgs);
 if (instance == null)
   newMethodNotFoundException(this.clazz, "construct", getParamTypes(a).typeString);  
-Clazz.instantialize(instance,a);
 return instance;
 });
 Clazz.newMethod$(c$,"toString",
@@ -8010,7 +8002,7 @@ var types = this.parameterTypes;
 var a = (args ? new Array(args.length) : null);
 for (var i = 0; i < types.length; i++) {
   var t = types[i];
-  var paramCode = getParamCode(t);
+  var paramCode = Clazz._getParamCode(t);
   a[i] = (t.__PRIMITIVE && args[i].valueOf ? args[i].valueOf() : args[i]);
   name += "$" + paramCode;
 }

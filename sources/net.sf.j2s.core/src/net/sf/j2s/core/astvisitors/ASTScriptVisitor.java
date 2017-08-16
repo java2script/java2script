@@ -2548,7 +2548,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding[] paramTypes = binding.getParameterTypes();
 		int nParams = paramTypes.length;
 		for (int i = 0; i < nParams; i++)
-			sbParams.append("$").append(j2sGetParamCode(paramTypes[i]));
+			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
 		String s = sbParams.toString();
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
@@ -2562,7 +2562,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return s;
 	}
 
-	static String j2sGetParamCode(ITypeBinding binding) {
+	static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
 		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
 		String name = binding.getQualifiedName();
 		String arrays = null;
@@ -2616,8 +2616,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			name = name.replace("java.lang.", "").replace('.', '_');
 			break;
 		}
-		if (arrays != null)
-			name += arrays.replaceAll("\\[\\]", "A");
+		if (arrays != null) {
+			if (addAAA) 
+				arrays = arrays.replaceAll("\\[\\]", "A");
+			name += arrays;
+		}
 		return name;
 	}
 
@@ -2654,8 +2657,24 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("C$.$init$.apply(this);\r\n");
 	}
 
+	/**
+	 * Add the Clazz.arrayClass$(class, ndim) call to create a
+	 * faux class with the correct _paramType and __NDIM
+	 *
+	 * @param binding
+	 * @return
+	 */
     static String j2sGetArrayClass(ITypeBinding binding) {
-		return "Clazz.arrayClass$('"+j2sGetParamCode(binding)+"')";
+    	String strClass = j2sGetParamCode(binding, false);
+    	int n = 0;
+    	int pt = 0;
+    	String strAAA = "";
+    	while ((pt = strClass.lastIndexOf("[]")) >= 0) {
+    		n++;
+    		strClass = strClass.substring(0, pt);
+    		strAAA += "A";
+    	}
+		return "Clazz.arrayClass$('" + strClass + strAAA + "'," + n + ")";
 	}
 
 	private static boolean isStatic(int modifiers) {
