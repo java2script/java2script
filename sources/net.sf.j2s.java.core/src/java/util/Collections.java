@@ -3217,7 +3217,14 @@ public class Collections {
                 int thisSize = size();
                 if (array.length < thisSize) {
                     Class<?> ct = array.getClass().getComponentType();
-                    array = (T[]) Array.newInstance(ct, thisSize);
+                    /**
+                     * @j2sNative
+                     * 
+                     * array = Clazz._newArrayType$(ct, thisSize);
+                     */
+                    {
+                    	array = (T[]) Array.newInstance(ct, thisSize);
+                    }
                 }
                 Iterator<?> it = iterator();
                 for (int i = 0; i < thisSize; i++) {
