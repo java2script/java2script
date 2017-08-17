@@ -11,6 +11,7 @@
 
 // NOTES by Bob Hanson
 
+// BH 8/17/2017 10:45:26 AM java.lang.reflect.Array moved to java; Array.newInstance --> Clazz.newArray$
 // BH 8/15/2017 2:32:47 PM fix Array.newInstance()
 // BH 8/15/2017 1:21:47 PM add innerFunctions getConstructor$ClassA
 // BH 8/15/2017 5:23:06 AM simpler newArray$; net.sf.j2s.core code clean up
@@ -317,27 +318,34 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
 
 /**
  * Create an array class placeholder for reflection 
- * type is "String[][]" for instance  
+ * type is "SAA" for instance  
  */
 Clazz.arrayClass$ = function(type, ndim) {
   var o = {};
   o.arrayType = 1;
-  o.__NDIM = ndim;
+  o.__NDIM = ndim || 0;
   o.__CLASS_NAME__ = o.__paramType = type;
+  o.getComponentType = function() { return Clazz.arrayClass$(type.substring(0, type.length - 1), ndim - 1); };
   return o;  
 }
- 
+
 Clazz.newArray$ = function(paramType, ndims, params) {
-//var o =  Clazz.newArray$('IA', -1, [-1, [3, 4, 5]); --> [-1, [3, 4, 5]
-//var a =  Clazz.newArray$('IA', 1, [3]); --> [3, 0]
-//var p =  Clazz.newArray$('IAA', 2, [3]); --> [3, null]
-//var b =  Clazz.newArray$('IAA', 2, [3, 3]); --> [3, 3, 0]
-//var cp =  Clazz.newArray$('CA', 1, [3]); --> [3, '\0']
-//var cq =  Clazz.newArray$('CAA', 2, [3]); --> [3, null]
-//var cr =  Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, '\0']
-//var sp =  Clazz.newArray$('CA', 1, [3]); --> [3, null]
-//var sq =  Clazz.newArray$('CAA', 2, [3]); --> [3, null]
-//var sr =  Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, null]
+  // new Int[] {3, 4, 5} Clazz.newArray$('IA', -1, [-1, [3, 4, 5]); --> [-1, [3, 4, 5], 'IA']    
+  // new int[3]          Clazz.newArray$('IA', 1, [3]); --> [3, 0, 'IA']
+  // new int[3][3]       Clazz.newArray$('IAA', 2, [3, 3]); --> [3, 3, 0, 'IAA']
+  // new int[3][]        Clazz.newArray$('IAA', 2, [3]); --> [3, null, 'IAA']
+  // new char[3]         Clazz.newArray$('CA', 1, [3]); --> [3, '\0', 'CA']
+  // new char[3][3]      Clazz.newArray$('CAA', 2, [3, 3]); --> [3, 3, '\0', 'CAA']
+  // new char[3][]       Clazz.newArray$('CAA', 2, [3]); --> [3, null, 'CAA']
+  // new String[3]       Clazz.newArray$('SA', 1, [3]); --> [3, null, 'SA']
+  // new String[3][3]    Clazz.newArray$('SAA', 2, [3, 3]); --> [3, 3, null, 'SAA']
+  // new String[3][]     Clazz.newArray$('SAA', 2, [3]); --> [3, null, 'SAA']
+
+  if (arguments.length == 2) {
+    // two-parameter options for Array.newInstance(class, length) and Array.newInstance(class, [dim1, dim2, dim3....])
+    return (typeof lengthOrDims == "object" ? Clazz.newArray$(paramType, ndims.length, ndims)
+    : Clazz.newArray$(Clazz._getParamCode(paramType) + "A", (paramType.__NDIM || 0) + 1, [ndims]));
+  }
 
   if (paramType.__CLASS_NAME__ || paramType.__PARAMCODE) {
    // from Array.newArray(classType, 1, [3])
@@ -2530,84 +2538,27 @@ var arraySlice = function(istart, iend) {
   b.__paramType = a.__paramType;
 };
 
-var haveInt8 = !!(self.Int8Array && self.Int8Array != Array);
-
-if (haveInt8) {
-  if (!Int8Array.prototype.sort)
-    Int8Array.prototype.sort = Array.prototype.sort
-  if (!Int8Array.prototype.slice)
-    Int8Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-} else {
-  Clazz.newByteA$ = Clazz.newIntA$;
+// Note that we now require 
+var setAType = function (IntXArray, nBytes, atype) {
+  if (!IntXArray)
+    alert("SwingJS will not work in this Browser")
+  if (!IntXArray.prototype.sort)
+    IntXArray.prototype.sort = Array.prototype.sort
+  if (!IntXArray.prototype.slice)
+    IntXArray.prototype.slice = function() {return arraySlice.apply(this, arguments)};
+  IntXArray.prototype.clone = function() {
+    var a = this.slice(); 
+    a.BYTES_PER_ELEMENT = 1;
+    a.__paramType = this.__paramType; 
+    return a; 
+  };
+  IntXArray.prototype.getClass = function () { return Clazz.arrayClass$(atype) };
 }
 
-Int8Array.prototype.clone = function() {
-  var a = this.slice(); 
-  a.BYTES_PER_ELEMENT = 1;
-  a.__paramType = this.__paramType; 
-  return a; 
-};
-Int8Array.prototype.getClass = function () { return this.constructor; };
-
-var haveInt16 = !!(self.Int16Array && self.Int16Array != Array);
-
-if (haveInt16) {
-  if (!Int16Array.prototype.sort)
-    Int16Array.prototype.sort = Array.prototype.sort
-  if (!Int16Array.prototype.slice)
-    Int16Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-} else {
-  Clazz.newShortA$ = Clazz.newIntA$;
-}
-
-Int16Array.prototype.clone = function() {
-  var a = this.slice(); 
-  a.BYTES_PER_ELEMENT = 2;
-  a.__paramType = this.__paramType; 
-  return a; 
-};
-Int16Array.prototype.getClass = function () { return this.constructor; };
-
-
-Clazz.haveInt32 = !!(self.Int32Array && self.Int32Array != Array);      
-if (Clazz.haveInt32) {
-  if (!Int32Array.prototype.sort)
-    Int32Array.prototype.sort = Array.prototype.sort
-} else {
-  Int32Array = function(n) { return getFakeArrayType(n, 32); };
-  Int32Array.prototype.sort = Array.prototype.sort
-  Int32Array.prototype.toString = function(){return "[object Int32Array]"};
-}
-if (!Int32Array.prototype.slice)
-  Int32Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-Int32Array.prototype.clone = function() { 
-  var a = this.slice(); 
-  a.BYTES_PER_ELEMENT = 4;
-  a.__paramType = this.__paramType;
-  return a; 
-};
-Int32Array.prototype.getClass = function () { return this.constructor; };
-
-Clazz.haveFloat64 = !!(self.Float64Array && self.Float64Array != Array);
-if (Clazz.haveFloat64) {
-  if (!Float64Array.prototype.sort)
-    Float64Array.prototype.sort = Array.prototype.sort
-} else {
-  Float64Array = function(n) { return getFakeArrayType(n, 64); };
-  Float64Array.prototype.sort = Array.prototype.sort
-  Float64Array.prototype.toString = function() {return "[object Float64Array]"};
-// Darn! Mozilla makes this a double, not a float. It's 64-bit.
-// and Safari 5.1 doesn't have Float64Array 
-}
-if (!Float64Array.prototype.slice)
-  Float64Array.prototype.slice = function() {return arraySlice.apply(this, arguments)};
-Float64Array.prototype.clone =  function() { 
-  var a = this.slice(); 
-  a.BYTES_PER_ELEMENT = 8;
-  a.__paramType = this.__paramType; 
-  return a; 
-};
-Float64Array.prototype.getClass = function () { return this.constructor; };
+setAType(self.Int8Array, 1, "BA");
+setAType(self.Int16Array, 2, "HA");
+setAType(self.Int32Array, 4, "IA");
+setAType(self.Float64Array, 8, "DA");
 
 /*
 // deprecated
@@ -6820,280 +6771,7 @@ Clazz._ArrayWrapper = function(a, type) {
 }
 */
 
-c$=declareType(java.lang.reflect,"Array");
-Clazz._setDeclared("java.lang.reflect.Array", java.lang.reflect.Array) 
-
-c$.newArray = m$(c$,"newInstance",
-function(componentType,length){
-  if (typeof length == "object") {
-    var dims = length;
-    return Clazz.newArray$(componentType, dims.length, dims);
-  }
-  return Clazz.newArray$(Clazz._getParamCode(componentType) + "A", (componentType.__NDIM || 0) + 1, [length]);
-}, 1);
-
-var getAval = function(array, index) {
-  if (!array)
-    throw new NullPointerException();
-  var x = array[index];
-  if (x === undefined)
-    throw new IndexOutOfBoundsException();
-  return x;
-}
-
-m$(c$, "get", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {  
-  case "BA":
-    return new Byte(x);
-  case "CA":
-    return new Character(x);
-  case "HA":
-    return new Short(x);
-  case "IA":
-    return new Integer(x);
-  case "JA":
-    return new Long(x);
-  case "ZA":
-    return (x ? Boolean.TRUE : Boolean.FALSE);
-  case "FA":
-    return  new Float(x);
-  case "DA":
-    return new Double(x);
-  }
-  return x;  
-}, 1);
-
-m$(c$, "getBoolean", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "ZA":
-    return (x ? Boolean.TRUE : Boolean.FALSE);
-  case "BooleanA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getByte", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-    return new Byte(x);
-  case "ByteA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getChar", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "CA":
-    return new Character(x);
-  case "CharacterA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getDouble", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-  case "HA":
-  case "IA":
-  case "JA":
-  case "FA":
-  case "DA":
-    return new Double(x);
-  case "DoubleA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getFloat", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-  case "HA":
-  case "IA":
-  case "JA":
-  case "FA":
-    return new Float(x);
-  case "FloatA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-
-m$(c$, "getInt", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-  case "HA":
-  case "IA":
-    return new Integer(x);
-  case "IntegerA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getLong", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-  case "HA":
-  case "IA":
-  case "JA":
-    return new Long(x);
-  case "LongA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getShort", function(array, index) {
-  var x = getAval(array, index);
-  switch (array.__paramType) {
-  case "BA":
-  case "HA":
-    return new Short(x);
-  case "ShortA":
-    return x;
-  }
-  throw new IllegalArgumentType();
-}, 1);
-
-m$(c$, "getLength", function(array) {
-  if (!array)
-    throw new NullPointerException();
-  if (!array.__paramType || array.length === undefined)
-    throw new IllegalArgumentType();
-  return array.length;
-}, 1);
-
-m$(c$, "set", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "BA":
-    return array[index] = new Byte(x).byteValue();
-  case "CA":
-    return array[index] = new Character(x).charValue();
-  case "HA":
-    return array[index] = new Short(x).shortValue();
-  case "IA":
-    return array[index] = new Integer(x).intValue();
-  case "JA":
-    return array[index] = new Long(x).longValue();
-  case "ZA":
-    return array[index] = !!x;
-  case "FA":
-    return  array[index] = new Float(x).floatValue();
-  case "DA":
-    return array[index] = new Double(x).doubleValue();
-  }
-  array[index] = x;
-}, 1);
-
-m$(c$, "setBoolean", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "zA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setByte", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "BA":
-  case "HA":
-  case "IA":
-  case "JA":
-  case "FA":
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setChar", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "CA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setShort", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {
-  case "HA":
-  case "IA":
-  case "JA":
-  case "FA":
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setInt", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "IA":
-  case "JA":
-  case "FA":
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setLong", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "JA":
-  case "FA":
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setFloat", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "FA":
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
-m$(c$, "setDouble", function(array, index, x) {
-  getAval(array, index);
-  switch (array.__paramType) {  
-  case "DA":
-    return array[index] = x;
-  default:
-    throw new IllegalArgumentType();
-  }
-}, 1);
-
+// deprecated: Array class moved back to java.lang; Array.newInstance() --> Clazz.newArray$()
 
 // TODO: Only asking for problems declaring Date. This is not necessary
 
