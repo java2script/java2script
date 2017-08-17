@@ -12,27 +12,27 @@ this.modCount = 0;
 this.$entrySet = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'toComparable$TT', function (obj) {
+Clazz.newMethod$(C$, 'toComparable$TT', function (obj) {
 return obj;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
-C$.superClazz.construct.apply(this);
+Clazz.newMethod$(C$, 'construct', function () {
+C$.superClazz.construct.apply(this, []);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Comparator', function (comparator) {
+Clazz.newMethod$(C$, 'construct$java_util_Comparator', function (comparator) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.$comparator = comparator;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Map', function (map) {
-C$.construct.apply(this);
+Clazz.newMethod$(C$, 'construct$java_util_Map', function (map) {
+C$.construct.apply(this, []);
 this.putAll$java_util_Map (map);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_SortedMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_SortedMap', function (map) {
 C$.construct$java_util_Comparator.apply(this, [map.comparator ()]);
 var it = map.entrySet ().iterator ();
 if (it.hasNext ()) {
@@ -51,7 +51,7 @@ last = x;
 }
 }}, 1);
 
-Clazz.newMethod$ (C$, 'balance$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'balance$java_util_TreeMap_Entry', function (x) {
 var y;
 x.color = true;
 while (x !== this.root && x.parent.color) {
@@ -87,13 +87,13 @@ C$.prototype.leftRotate$java_util_TreeMap_Entry.apply(this, [x.parent.parent]);
 this.root.color = false;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.root = null;
 this.$size = 0;
 this.modCount++;
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 var clone = C$.superClazz.prototype.clone.apply(this, arguments);
 clone.$entrySet = null;
@@ -101,7 +101,7 @@ if (this.root != null) {
 clone.root = this.root.clone$java_util_TreeMap_Entry (null);
 }return clone;
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -109,21 +109,21 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'comparator', function () {
+Clazz.newMethod$(C$, 'comparator', function () {
 return this.$comparator;
 });
 
-Clazz.newMethod$ (C$, 'containsKey$O', function (key) {
+Clazz.newMethod$(C$, 'containsKey$O', function (key) {
 return C$.prototype.find$O.apply(this, [key]) != null;
 });
 
-Clazz.newMethod$ (C$, 'containsValue$O', function (value) {
+Clazz.newMethod$(C$, 'containsValue$O', function (value) {
 if (this.root != null) {
 return C$.prototype.containsValue$java_util_TreeMap_Entry$O.apply(this, [this.root, value]);
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'containsValue$java_util_TreeMap_Entry$O', function (node, value) {
+Clazz.newMethod$(C$, 'containsValue$java_util_TreeMap_Entry$O', function (node, value) {
 if (value == null ? node.value == null : value.equals$O (node.value)) {
 return true;
 }if (node.left != null) {
@@ -135,7 +135,7 @@ return true;
 }}return false;
 });
 
-Clazz.newMethod$ (C$, 'entrySet', function () {
+Clazz.newMethod$(C$, 'entrySet', function () {
 if (this.$entrySet == null) {
 this.$entrySet = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -145,15 +145,15 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.TreeMap"].$size;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.TreeMap"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 var v1 = this.b$["java.util.TreeMap"].get$O (entry.getKey ());
@@ -162,7 +162,7 @@ return v1 == null ? v2 == null : v1.equals$O (v2);
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.TreeMap.UnboundedEntryIterator.construct$java_util_TreeMap,[this.b$["java.util.TreeMap"]]);
 });
 })()
@@ -170,7 +170,7 @@ return Clazz.$new(java.util.TreeMap.UnboundedEntryIterator.construct$java_util_T
 }return this.$entrySet;
 });
 
-Clazz.newMethod$ (C$, 'find$O', function (keyObj) {
+Clazz.newMethod$(C$, 'find$O', function (keyObj) {
 var result;
 var key = keyObj;
 var object = null;
@@ -186,7 +186,7 @@ return x;
 return null;
 });
 
-Clazz.newMethod$ (C$, 'findAfter$O', function (keyObj) {
+Clazz.newMethod$(C$, 'findAfter$O', function (keyObj) {
 var key = keyObj;
 var result;
 var object = null;
@@ -207,7 +207,7 @@ x = x.right;
 return last;
 });
 
-Clazz.newMethod$ (C$, 'findBefore$TK', function (key) {
+Clazz.newMethod$(C$, 'findBefore$TK', function (key) {
 var result;
 var object = null;
 if (this.$comparator == null) {
@@ -225,13 +225,13 @@ x = x.right;
 return last;
 });
 
-Clazz.newMethod$ (C$, 'firstKey', function () {
+Clazz.newMethod$(C$, 'firstKey', function () {
 if (this.root != null) {
 return java.util.TreeMap.minimum$java_util_TreeMap_Entry (this.root).key;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'fixup$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'fixup$java_util_TreeMap_Entry', function (x) {
 var w;
 while (x !== this.root && !x.color) {
 if (x === x.parent.left) {
@@ -292,14 +292,14 @@ x = this.root;
 x.color = false;
 });
 
-Clazz.newMethod$ (C$, 'get$O', function (key) {
+Clazz.newMethod$(C$, 'get$O', function (key) {
 var node = C$.prototype.find$O.apply(this, [key]);
 if (node != null) {
 return node.value;
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'headMap$TK', function (endKey) {
+Clazz.newMethod$(C$, 'headMap$TK', function (endKey) {
 if (this.$comparator == null) {
 java.util.TreeMap.toComparable$TK (endKey).compareTo$TK (endKey);
 } else {
@@ -307,7 +307,7 @@ this.$comparator.compare$$ (endKey, endKey);
 }return Clazz.$new(java.util.TreeMap.SubMap.construct$java_util_TreeMap$TK,[this, endKey]);
 });
 
-Clazz.newMethod$ (C$, 'keySet', function () {
+Clazz.newMethod$(C$, 'keySet', function () {
 if (this.$keySet == null) {
 this.$keySet = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -317,19 +317,19 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.TreeMap"].containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.TreeMap"].$size;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.TreeMap"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.TreeMap.UnboundedKeyIterator.construct$java_util_TreeMap,[this.b$["java.util.TreeMap"]]);
 });
 })()
@@ -337,13 +337,13 @@ return Clazz.$new(java.util.TreeMap.UnboundedKeyIterator.construct$java_util_Tre
 }return this.$keySet;
 });
 
-Clazz.newMethod$ (C$, 'lastKey', function () {
+Clazz.newMethod$(C$, 'lastKey', function () {
 if (this.root != null) {
 return java.util.TreeMap.maximum$java_util_TreeMap_Entry (this.root).key;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'leftRotate$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'leftRotate$java_util_TreeMap_Entry', function (x) {
 var y = x.right;
 x.right = y.left;
 if (y.left != null) {
@@ -360,21 +360,21 @@ x.parent.right = y;
 x.parent = y;
 });
 
-Clazz.newMethod$ (C$, 'maximum$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'maximum$java_util_TreeMap_Entry', function (x) {
 while (x.right != null) {
 x = x.right;
 }
 return x;
 }, 1);
 
-Clazz.newMethod$ (C$, 'minimum$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'minimum$java_util_TreeMap_Entry', function (x) {
 while (x.left != null) {
 x = x.left;
 }
 return x;
 }, 1);
 
-Clazz.newMethod$ (C$, 'predecessor$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'predecessor$java_util_TreeMap_Entry', function (x) {
 if (x.left != null) {
 return java.util.TreeMap.maximum$java_util_TreeMap_Entry (x.left);
 }var y = x.parent;
@@ -385,18 +385,18 @@ y = y.parent;
 return y;
 }, 1);
 
-Clazz.newMethod$ (C$, 'put$TK$TV', function (key, value) {
+Clazz.newMethod$(C$, 'put$TK$TV', function (key, value) {
 var entry = C$.prototype.rbInsert$TK.apply(this, [key]);
 var result = entry.value;
 entry.value = value;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'putAll$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'putAll$java_util_Map', function (map) {
 C$.superClazz.prototype.putAll$java_util_Map.apply(this, arguments);
 });
 
-Clazz.newMethod$ (C$, 'rbDelete$java_util_TreeMap_Entry', function (z) {
+Clazz.newMethod$(C$, 'rbDelete$java_util_TreeMap_Entry', function (z) {
 var y = z.left == null || z.right == null ? z : java.util.TreeMap.successor$java_util_TreeMap_Entry (z);
 var x = y.left != null ? y.left : y.right;
 if (x != null) {
@@ -419,7 +419,7 @@ C$.prototype.fixup$java_util_TreeMap_Entry.apply(this, [x]);
 }}this.$size--;
 });
 
-Clazz.newMethod$ (C$, 'rbInsert$TK', function (object) {
+Clazz.newMethod$(C$, 'rbInsert$TK', function (object) {
 var result = 0;
 var y = null;
 if (this.$size != 0) {
@@ -448,7 +448,7 @@ y.right = z;
 return z;
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 var node = C$.prototype.find$O.apply(this, [key]);
 if (node == null) {
 return null;
@@ -457,7 +457,7 @@ this.rbDelete$java_util_TreeMap_Entry (node);
 return result;
 });
 
-Clazz.newMethod$ (C$, 'rightRotate$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'rightRotate$java_util_TreeMap_Entry', function (x) {
 var y = x.left;
 x.left = y.right;
 if (y.right != null) {
@@ -474,21 +474,21 @@ x.parent.left = y;
 x.parent = y;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.$size;
 });
 
-Clazz.newMethod$ (C$, 'subMap$TK$TK', function (startKey, endKey) {
+Clazz.newMethod$(C$, 'subMap$TK$TK', function (startKey, endKey) {
 if (this.$comparator == null) {
 if (java.util.TreeMap.toComparable$TK (startKey).compareTo$TK (endKey) <= 0) {
 return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[startKey, this, endKey]);
 }} else {
 if (this.$comparator.compare$$ (startKey, endKey) <= 0) {
 return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[startKey, this, endKey]);
-}}throw Clazz.$new(IllegalArgumentException.construct);
+}}throw Clazz.$new(IllegalArgumentException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'successor$java_util_TreeMap_Entry', function (x) {
+Clazz.newMethod$(C$, 'successor$java_util_TreeMap_Entry', function (x) {
 if (x.right != null) {
 return java.util.TreeMap.minimum$java_util_TreeMap_Entry (x.right);
 }var y = x.parent;
@@ -499,7 +499,7 @@ y = y.parent;
 return y;
 }, 1);
 
-Clazz.newMethod$ (C$, 'tailMap$TK', function (startKey) {
+Clazz.newMethod$(C$, 'tailMap$TK', function (startKey) {
 if (this.$comparator == null) {
 java.util.TreeMap.toComparable$TK (startKey).compareTo$TK (startKey);
 } else {
@@ -507,7 +507,7 @@ this.$comparator.compare$$ (startKey, startKey);
 }return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap,[startKey, this]);
 });
 
-Clazz.newMethod$ (C$, 'values', function () {
+Clazz.newMethod$(C$, 'values', function () {
 if (this.valuesCollection == null) {
 this.valuesCollection = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -517,19 +517,19 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.TreeMap"].containsValue$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.TreeMap"].$size;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.TreeMap"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.TreeMap.UnboundedValueIterator.construct$java_util_TreeMap,[this.b$["java.util.TreeMap"]]);
 });
 })()
@@ -537,7 +537,7 @@ return Clazz.$new(java.util.TreeMap.UnboundedValueIterator.construct$java_util_T
 }return this.valuesCollection;
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeInt$I (this.$size);
 if (this.$size > 0) {
@@ -549,7 +549,7 @@ node = java.util.TreeMap.successor$java_util_TreeMap_Entry (node);
 }
 }});
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 this.$size = stream.readInt ();
 var last = null;
@@ -577,17 +577,17 @@ this.right = null;
 this.color = false;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK', function (key) {
+Clazz.newMethod$(C$, 'construct$TK', function (key) {
 C$.superClazz.construct$TK.apply(this, [key]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$TV', function (key, value) {
+Clazz.newMethod$(C$, 'construct$TK$TV', function (key, value) {
 C$.superClazz.construct$TK$TV.apply(this, [key, value]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'clone$java_util_TreeMap_Entry', function (parent) {
+Clazz.newMethod$(C$, 'clone$java_util_TreeMap_Entry', function (parent) {
 var clone = C$.superClazz.prototype.clone.apply(this, arguments);
 clone.parent = parent;
 if (this.left != null) {
@@ -599,7 +599,7 @@ clone.right = this.right.clone$java_util_TreeMap_Entry (clone);
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -613,41 +613,41 @@ this.node = null;
 this.lastNode = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (map, startNode) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (map, startNode) {
 C$.$init$.apply(this);
 this.backingMap = map;
 this.expectedModCount = map.modCount;
 this.node = startNode;
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return this.node != null;
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 if (this.expectedModCount == this.backingMap.modCount) {
 if (this.lastNode != null) {
 this.backingMap.rbDelete$java_util_TreeMap_Entry (this.lastNode);
 this.lastNode = null;
 this.expectedModCount++;
 } else {
-throw Clazz.$new(IllegalStateException.construct);
+throw Clazz.$new(IllegalStateException.construct,[]);
 }} else {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'makeNext', function () {
+Clazz.newMethod$(C$, 'makeNext', function () {
 if (this.expectedModCount != this.backingMap.modCount) {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 } else if (this.node == null) {
-throw Clazz.$new(java.util.NoSuchElementException.construct);
+throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 }this.lastNode = this.node;
 this.node = java.util.TreeMap.successor$java_util_TreeMap_Entry (this.node);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -657,24 +657,24 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (map, startNode) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (map, startNode) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [map, startNode]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap', function (map) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [map, map.root == null ? null : java.util.TreeMap.minimum$java_util_TreeMap_Entry (map.root)]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 return this.lastNode;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -684,24 +684,24 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (treeMap, entry) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (treeMap, entry) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [treeMap, entry]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap', function (map) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [map, map.root == null ? null : java.util.TreeMap.minimum$java_util_TreeMap_Entry (map.root)]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 return this.lastNode.key;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -711,24 +711,24 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (treeMap, startNode) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry', function (treeMap, startNode) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [treeMap, startNode]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap', function (map) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [map, map.root == null ? null : java.util.TreeMap.minimum$java_util_TreeMap_Entry (map.root)]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 return this.lastNode.value;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -740,25 +740,25 @@ this.endKey = null;
 this.cmp = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [map, startNode]);
 C$.$init$.apply(this);
 this.endKey = end;
 this.cmp = map.comparator ();
 }, 1);
 
-Clazz.newMethod$ (C$, 'cleanNext', function () {
+Clazz.newMethod$(C$, 'cleanNext', function () {
 if (this.node != null && this.cmp.compare$$ (this.endKey, this.node.key) <= 0) {
 this.node = null;
 }});
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return (this.node != null && this.endKey != null) && (this.cmp.compare$$ (this.node.key, this.endKey) < 0);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -768,12 +768,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$TK.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode;
@@ -781,7 +781,7 @@ return this.lastNode;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -791,12 +791,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$TK.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode.key;
@@ -804,7 +804,7 @@ return this.lastNode.key;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -814,12 +814,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$TK', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$TK.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode.value;
@@ -827,7 +827,7 @@ return this.lastNode.value;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -838,24 +838,24 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.endKey = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (treeMap, entry, endKey) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (treeMap, entry, endKey) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry.apply(this, [treeMap, entry]);
 C$.$init$.apply(this);
 this.endKey = endKey;
 }, 1);
 
-Clazz.newMethod$ (C$, 'cleanNext', function () {
+Clazz.newMethod$(C$, 'cleanNext', function () {
 if ((this.node != null) && (this.endKey.compareTo$TK (this.node.key) <= 0)) {
 this.node = null;
 }});
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return (this.node != null) && (this.endKey.compareTo$TK (this.node.key) > 0);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -865,12 +865,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode;
@@ -878,7 +878,7 @@ return this.lastNode;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -888,12 +888,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode.key;
@@ -901,7 +901,7 @@ return this.lastNode.key;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -911,12 +911,12 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable', function (map, startNode, end) {
 C$.superClazz.construct$java_util_TreeMap$java_util_TreeMap_Entry$Comparable.apply(this, [map, startNode, end]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.makeNext ();
 this.cleanNext ();
 return this.lastNode.value;
@@ -924,7 +924,7 @@ return this.lastNode.value;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -940,7 +940,7 @@ this.endKey = null;
 this.$entrySet = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$java_util_TreeMap', function (start, map) {
+Clazz.newMethod$(C$, 'construct$TK$java_util_TreeMap', function (start, map) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = map;
@@ -948,7 +948,7 @@ this.hasStart = true;
 this.startKey = start;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$java_util_TreeMap$TK', function (start, map, end) {
+Clazz.newMethod$(C$, 'construct$TK$java_util_TreeMap$TK', function (start, map, end) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = map;
@@ -957,7 +957,7 @@ this.startKey = start;
 this.endKey = end;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap$TK', function (map, end) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap$TK', function (map, end) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = map;
@@ -965,22 +965,22 @@ this.hasEnd = true;
 this.endKey = end;
 }, 1);
 
-Clazz.newMethod$ (C$, 'checkRange$TK', function (key) {
+Clazz.newMethod$(C$, 'checkRange$TK', function (key) {
 var cmp = this.backingMap.$comparator;
 if (cmp == null) {
 var object = java.util.TreeMap.toComparable$TK (key);
 if (this.hasStart && object.compareTo$TK (this.startKey) < 0) {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }if (this.hasEnd && object.compareTo$TK (this.endKey) >= 0) {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }} else {
 if (this.hasStart && this.backingMap.comparator ().compare$$ (key, this.startKey) < 0) {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }if (this.hasEnd && this.backingMap.comparator ().compare$$ (key, this.endKey) >= 0) {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }}});
 
-Clazz.newMethod$ (C$, 'isInRange$TK', function (key) {
+Clazz.newMethod$(C$, 'isInRange$TK', function (key) {
 var cmp = this.backingMap.$comparator;
 if (cmp == null) {
 var object = java.util.TreeMap.toComparable$TK (key);
@@ -996,7 +996,7 @@ return false;
 }}return true;
 });
 
-Clazz.newMethod$ (C$, 'checkUpperBound$TK', function (key) {
+Clazz.newMethod$(C$, 'checkUpperBound$TK', function (key) {
 if (this.hasEnd) {
 var cmp = this.backingMap.$comparator;
 if (cmp == null) {
@@ -1005,7 +1005,7 @@ return (java.util.TreeMap.toComparable$TK (key).compareTo$TK (this.endKey) < 0);
 }return true;
 });
 
-Clazz.newMethod$ (C$, 'checkLowerBound$TK', function (key) {
+Clazz.newMethod$(C$, 'checkLowerBound$TK', function (key) {
 if (this.hasStart) {
 var cmp = this.backingMap.$comparator;
 if (cmp == null) {
@@ -1014,30 +1014,30 @@ return (java.util.TreeMap.toComparable$TK (key).compareTo$TK (this.startKey) >= 
 }return true;
 });
 
-Clazz.newMethod$ (C$, 'comparator', function () {
+Clazz.newMethod$(C$, 'comparator', function () {
 return this.backingMap.comparator ();
 });
 
-Clazz.newMethod$ (C$, 'containsKey$O', function (key) {
+Clazz.newMethod$(C$, 'containsKey$O', function (key) {
 if (C$.prototype.isInRange$TK.apply(this, [key])) {
 return this.backingMap.containsKey$O (key);
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'entrySet', function () {
+Clazz.newMethod$(C$, 'entrySet', function () {
 if (this.$entrySet == null) {
 this.$entrySet = Clazz.$new(java.util.TreeMap.SubMapEntrySet.construct$java_util_TreeMap_SubMap,[this]);
 }return this.$entrySet;
 });
 
-Clazz.newMethod$ (C$, 'firstKey', function () {
+Clazz.newMethod$(C$, 'firstKey', function () {
 var node = this.firstEntry ();
 if (node != null) {
 return node.key;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'firstEntry', function () {
+Clazz.newMethod$(C$, 'firstEntry', function () {
 if (!this.hasStart) {
 var root = this.backingMap.root;
 return (root == null) ? null : java.util.TreeMap.minimum$java_util_TreeMap_Entry (this.backingMap.root);
@@ -1047,54 +1047,54 @@ return node;
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'get$O', function (key) {
+Clazz.newMethod$(C$, 'get$O', function (key) {
 if (C$.prototype.isInRange$TK.apply(this, [key])) {
 return this.backingMap.get$O (key);
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'headMap$TK', function (endKey) {
+Clazz.newMethod$(C$, 'headMap$TK', function (endKey) {
 C$.prototype.checkRange$TK.apply(this, [endKey]);
 if (this.hasStart) {
 return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[this.startKey, this.backingMap, endKey]);
 }return Clazz.$new(java.util.TreeMap.SubMap.construct$java_util_TreeMap$TK,[this.backingMap, endKey]);
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 if (this.hasStart) {
 var node = this.backingMap.findAfter$O (this.startKey);
 return node == null || !C$.prototype.checkUpperBound$TK.apply(this, [node.key]);
 }return this.backingMap.findBefore$TK (this.endKey) == null;
 });
 
-Clazz.newMethod$ (C$, 'keySet', function () {
+Clazz.newMethod$(C$, 'keySet', function () {
 if (this.$keySet == null) {
 this.$keySet = Clazz.$new(java.util.TreeMap.SubMapKeySet.construct$java_util_TreeMap_SubMap,[this]);
 }return this.$keySet;
 });
 
-Clazz.newMethod$ (C$, 'lastKey', function () {
+Clazz.newMethod$(C$, 'lastKey', function () {
 if (!this.hasEnd) {
 return this.backingMap.lastKey ();
 }var node = this.backingMap.findBefore$TK (this.endKey);
 if (node != null && C$.prototype.checkLowerBound$TK.apply(this, [node.key])) {
 return node.key;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'put$TK$TV', function (key, value) {
+Clazz.newMethod$(C$, 'put$TK$TV', function (key, value) {
 if (C$.prototype.isInRange$TK.apply(this, [key])) {
 return this.backingMap.put$TK$TV (key, value);
-}throw Clazz.$new(IllegalArgumentException.construct);
+}throw Clazz.$new(IllegalArgumentException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 if (C$.prototype.isInRange$TK.apply(this, [key])) {
 return this.backingMap.remove$O (key);
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'subMap$TK$TK', function (startKey, endKey) {
+Clazz.newMethod$(C$, 'subMap$TK$TK', function (startKey, endKey) {
 C$.prototype.checkRange$TK.apply(this, [startKey]);
 C$.prototype.checkRange$TK.apply(this, [endKey]);
 var c = this.backingMap.comparator ();
@@ -1104,17 +1104,17 @@ return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[st
 }} else {
 if (c.compare$$ (startKey, endKey) <= 0) {
 return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[startKey, this.backingMap, endKey]);
-}}throw Clazz.$new(IllegalArgumentException.construct);
+}}throw Clazz.$new(IllegalArgumentException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'tailMap$TK', function (startKey) {
+Clazz.newMethod$(C$, 'tailMap$TK', function (startKey) {
 C$.prototype.checkRange$TK.apply(this, [startKey]);
 if (this.hasEnd) {
 return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap$TK,[startKey, this.backingMap, this.endKey]);
 }return Clazz.$new(java.util.TreeMap.SubMap.construct$TK$java_util_TreeMap,[startKey, this.backingMap]);
 });
 
-Clazz.newMethod$ (C$, 'values', function () {
+Clazz.newMethod$(C$, 'values', function () {
 if (this.valuesCollection == null) {
 this.valuesCollection = Clazz.$new(java.util.TreeMap.SubMapValuesCollection.construct$java_util_TreeMap_SubMap,[this]);
 }return this.valuesCollection;
@@ -1122,7 +1122,7 @@ this.valuesCollection = Clazz.$new(java.util.TreeMap.SubMapValuesCollection.cons
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -1133,17 +1133,17 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.subMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap_SubMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap_SubMap', function (map) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.subMap = map;
 }, 1);
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.subMap.isEmpty ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 var startNode = this.subMap.firstEntry ();
 if (this.subMap.hasEnd) {
 var cmp = this.subMap.comparator ();
@@ -1153,7 +1153,7 @@ return Clazz.$new(java.util.TreeMap.ComparableBoundedEntryIterator.construct$jav
 }return Clazz.$new(java.util.TreeMap.UnboundedEntryIterator.construct$java_util_TreeMap$java_util_TreeMap_Entry,[this.subMap.backingMap, startNode]);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 var size = 0;
 var it = this.iterator ();
 while (it.hasNext ()) {
@@ -1163,7 +1163,7 @@ it.next ();
 return size;
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = object;
 var key = entry.getKey ();
@@ -1176,7 +1176,7 @@ return v1 == null ? v2 == null : v1.equals$O (v2);
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -1187,21 +1187,21 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.subMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap_SubMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap_SubMap', function (map) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.subMap = map;
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.subMap.containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.subMap.isEmpty ();
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 var size = 0;
 var it = this.iterator ();
 while (it.hasNext ()) {
@@ -1211,7 +1211,7 @@ it.next ();
 return size;
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 var startNode = this.subMap.firstEntry ();
 if (this.subMap.hasEnd) {
 var cmp = this.subMap.comparator ();
@@ -1223,7 +1223,7 @@ return Clazz.$new(java.util.TreeMap.ComparableBoundedKeyIterator.construct$java_
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -1234,17 +1234,17 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.subMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_TreeMap_SubMap', function (subMap) {
+Clazz.newMethod$(C$, 'construct$java_util_TreeMap_SubMap', function (subMap) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.subMap = subMap;
 }, 1);
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.subMap.isEmpty ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 var startNode = this.subMap.firstEntry ();
 if (this.subMap.hasEnd) {
 var cmp = this.subMap.comparator ();
@@ -1254,7 +1254,7 @@ return Clazz.$new(java.util.TreeMap.ComparableBoundedValueIterator.construct$jav
 }return Clazz.$new(java.util.TreeMap.UnboundedValueIterator.construct$java_util_TreeMap$java_util_TreeMap_Entry,[this.subMap.backingMap, startNode]);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 var cnt = 0;
 for (var it = this.iterator (); it.hasNext (); ) {
 it.next ();
@@ -1265,9 +1265,9 @@ return cnt;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 })()
 });
 
-//Created 2017-08-12 07:32:21
+//Created 2017-08-17 10:33:18

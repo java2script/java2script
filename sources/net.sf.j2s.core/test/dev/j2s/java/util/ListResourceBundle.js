@@ -8,12 +8,12 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.table = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
-C$.superClazz.construct.apply(this);
+Clazz.newMethod$(C$, 'construct', function () {
+C$.superClazz.construct.apply(this, []);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getKeys', function () {
+Clazz.newMethod$(C$, 'getKeys', function () {
 if (this.table == null) {
 C$.prototype.initializeTable.apply(this, []);
 }if (this.parent == null) {
@@ -29,7 +29,7 @@ this.pEnum = this.b$["java.util.ListResourceBundle"].parent.getKeys ();
 this.$nextElement = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'findNext', function () {
+Clazz.newMethod$(C$, 'findNext', function () {
 if (this.$nextElement != null) {
 return true;
 }while (this.pEnum.hasMoreElements ()) {
@@ -41,13 +41,13 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'hasMoreElements', function () {
+Clazz.newMethod$(C$, 'hasMoreElements', function () {
 if (this.local.hasMoreElements ()) {
 return true;
 }return C$.prototype.findNext.apply(this, []);
 });
 
-Clazz.newMethod$ (C$, 'nextElement', function () {
+Clazz.newMethod$(C$, 'nextElement', function () {
 if (this.local.hasMoreElements ()) {
 return this.local.nextElement ();
 }if (C$.prototype.findNext.apply(this, [])) {
@@ -60,13 +60,13 @@ return result;
 ), Clazz.$new(java.util.ListResourceBundle$1.$init$, [this, null]));
 });
 
-Clazz.newMethod$ (C$, 'handleGetObject$S', function (key) {
+Clazz.newMethod$(C$, 'handleGetObject$S', function (key) {
 if (this.table == null) {
 C$.prototype.initializeTable.apply(this, []);
 }return this.table.get$O (key);
 });
 
-Clazz.newMethod$ (C$, 'initializeTable', function () {
+Clazz.newMethod$(C$, 'initializeTable', function () {
 if (this.table == null) {
 var contents = this.getContents ();
 this.table = Clazz.$new(java.util.Hashtable.construct$I,[Clazz.doubleToInt (contents.length / 3) * 4 + 3]);
@@ -77,4 +77,4 @@ this.table.put$S$O (contents[i][0], contents[i][1]);
 })()
 });
 
-//Created 2017-08-12 07:32:20
+//Created 2017-08-17 10:33:17

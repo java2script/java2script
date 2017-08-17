@@ -8,12 +8,12 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S', function (msg) {
+Clazz.newMethod$(C$, 'getString$S', function (msg) {
 if (org.apache.harmony.luni.util.Msg.bundle == null) return msg;
 try {
 return org.apache.harmony.luni.util.Msg.bundle.getString$S (msg);
 } catch (e) {
-if (Clazz.exceptionOf (e, java.util.MissingResourceException)) {
+if (Clazz.exceptionOf(e, java.util.MissingResourceException)){
 return msg;
 } else {
 throw e;
@@ -21,29 +21,29 @@ throw e;
 }
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S$O', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', Clazz.newA$, [-1, [arg]]));
+Clazz.newMethod$(C$, 'getString$S$O', function (msg, arg) {
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [arg]]));
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S$I', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', Clazz.newA$, [-1, [Integer.toString (arg)]]));
+Clazz.newMethod$(C$, 'getString$S$I', function (msg, arg) {
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [Integer.toString (arg)]]));
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S$C', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', Clazz.newA$, [-1, [String.valueOf$C (arg)]]));
+Clazz.newMethod$(C$, 'getString$S$C', function (msg, arg) {
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [String.valueOf$C (arg)]]));
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S$O$O', function (msg, arg1, arg2) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', Clazz.newA$, [-1, [arg1, arg2]]));
+Clazz.newMethod$(C$, 'getString$S$O$O', function (msg, arg1, arg2) {
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [arg1, arg2]]));
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S$OA', function (msg, args) {
+Clazz.newMethod$(C$, 'getString$S$OA', function (msg, args) {
 var format = msg;
 if (org.apache.harmony.luni.util.Msg.bundle != null) {
 try {
 format = org.apache.harmony.luni.util.Msg.bundle.getString$S (msg);
 } catch (e) {
-if (Clazz.exceptionOf (e, java.util.MissingResourceException)) {
+if (Clazz.exceptionOf(e, java.util.MissingResourceException)){
 } else {
 throw e;
 }
@@ -53,10 +53,10 @@ throw e;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 Clazz.defineStatics (C$,
 "bundle", null);
 })()
 });
 
-//Created 2017-08-12 07:32:21
+//Created 2017-08-17 10:33:18

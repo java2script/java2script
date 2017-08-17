@@ -8,13 +8,13 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'decode$S', function (s) {
+Clazz.newMethod$(C$, 'decode$S', function (s) {
 return decodeURIComponent(arguments[0]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'decode$S$S', function (s, enc) {
+Clazz.newMethod$(C$, 'decode$S$S', function (s, enc) {
 if (enc == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }{
 return decodeURIComponent(arguments[0]);
 }return null;
@@ -22,8 +22,8 @@ return decodeURIComponent(arguments[0]);
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

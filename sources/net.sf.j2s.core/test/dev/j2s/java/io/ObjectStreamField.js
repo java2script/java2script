@@ -1,4 +1,4 @@
-Clazz.load (null, "java.io.ObjectStreamField", ["java.lang.Boolean", "$.Byte", "$.Character", "$.Double", "$.Float", "$.Long", "$.NullPointerException", "$.Short", "java.util.Arrays"], function () {
+Clazz.load (null, "java.io.ObjectStreamField", ["java.lang.Boolean", "$.NullPointerException", "java.util.Arrays"], function () {
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments);
@@ -13,33 +13,33 @@ this.unshared = false;
 this.isDeserialized = false;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$Class', function (name, cl) {
+Clazz.newMethod$(C$, 'construct$S$Class', function (name, cl) {
 C$.$init$.apply(this);
 if (name == null || cl == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.name = name;
 this.type = cl;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$Class$Z', function (name, cl, unshared) {
+Clazz.newMethod$(C$, 'construct$S$Class$Z', function (name, cl, unshared) {
 C$.$init$.apply(this);
 if (name == null || cl == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.name = name;
 this.type = cl;
 this.unshared = unshared;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S', function (signature, name) {
+Clazz.newMethod$(C$, 'construct$S$S', function (signature, name) {
 C$.$init$.apply(this);
 if (name == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.name = name;
 this.typeString = signature.$replace ('.', '/');
 this.isDeserialized = true;
 }, 1);
 
-Clazz.newMethod$ (C$, 'compareTo$O', function (o) {
+Clazz.newMethod$(C$, 'compareTo$O', function (o) {
 var f = o;
 var thisPrimitive = this.isPrimitive ();
 var fPrimitive = f.isPrimitive ();
@@ -48,34 +48,34 @@ return thisPrimitive ? -1 : 1;
 }return this.getName ().compareTo$S (f.getName ());
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (arg0) {
+Clazz.newMethod$(C$, 'equals$O', function (arg0) {
 return this.compareTo$O (arg0) == 0;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 return this.getName ().hashCode ();
 });
 
-Clazz.newMethod$ (C$, 'getName', function () {
+Clazz.newMethod$(C$, 'getName', function () {
 return this.name;
 });
 
-Clazz.newMethod$ (C$, 'getOffset', function () {
+Clazz.newMethod$(C$, 'getOffset', function () {
 return this.offset;
 });
 
-Clazz.newMethod$ (C$, 'getTypeInternal', function () {
+Clazz.newMethod$(C$, 'getTypeInternal', function () {
 return this.type;
 });
 
-Clazz.newMethod$ (C$, 'getType', function () {
+Clazz.newMethod$(C$, 'getType', function () {
 var cl = C$.prototype.getTypeInternal.apply(this, []);
 if (this.isDeserialized && !cl.isPrimitive ()) {
 return Clazz._O;
 }return cl;
 });
 
-Clazz.newMethod$ (C$, 'getTypeCode', function () {
+Clazz.newMethod$(C$, 'getTypeCode', function () {
 var t = C$.prototype.getTypeInternal.apply(this, []);
 if (t === Integer.TYPE) {
 return 'I';
@@ -98,7 +98,7 @@ return '[';
 }return 'L';
 });
 
-Clazz.newMethod$ (C$, 'getTypeString', function () {
+Clazz.newMethod$(C$, 'getTypeString', function () {
 if (this.isPrimitive ()) {
 return null;
 }if (this.typeString == null) {
@@ -109,20 +109,20 @@ this.typeString = str.intern ();
 }return this.typeString;
 });
 
-Clazz.newMethod$ (C$, 'isPrimitive', function () {
+Clazz.newMethod$(C$, 'isPrimitive', function () {
 var t = C$.prototype.getTypeInternal.apply(this, []);
 return t != null && t.isPrimitive ();
 });
 
-Clazz.newMethod$ (C$, 'setOffset$I', function (newValue) {
+Clazz.newMethod$(C$, 'setOffset$I', function (newValue) {
 this.offset = newValue;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return this.getClass ().getName () + '(' + this.getName () + ':' + C$.prototype.getTypeInternal.apply(this, []) + ')';
 });
 
-Clazz.newMethod$ (C$, 'sortFields$java_io_ObjectStreamFieldA', function (fields) {
+Clazz.newMethod$(C$, 'sortFields$java_io_ObjectStreamFieldA', function (fields) {
 if (fields.length > 1) {
 var fieldDescComparator = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -132,15 +132,15 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'compare$java_io_ObjectStreamField$java_io_ObjectStreamField', function (f1, f2) {
+Clazz.newMethod$(C$, 'compare$java_io_ObjectStreamField$java_io_ObjectStreamField', function (f1, f2) {
 return f1.compareTo$O (f2);
 });
 })()
 ), Clazz.$new(java.io.ObjectStreamField$1.$init$, [this, null]));
-java.util.Arrays.sort$OA$java_util_Comparator (fields, fieldDescComparator);
+java.util.Arrays.sort$java_io_ObjectStreamFieldA$java_util_Comparator (fields, fieldDescComparator);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'resolve$ClassLoader', function (loader) {
+Clazz.newMethod$(C$, 'resolve$ClassLoader', function (loader) {
 if (this.typeString.length == 1) {
 switch (this.typeString.charAt$I (0)) {
 case 'I':
@@ -175,21 +175,21 @@ className = className.substring$I$I (1, className.length - 1);
 var cl = Class.forName$S$Z$ClassLoader (className, false, loader);
 this.type = cl;
 } catch (e) {
-if (Clazz.exceptionOf (e, ClassNotFoundException)) {
+if (Clazz.exceptionOf(e, ClassNotFoundException)){
 } else {
 throw e;
 }
 }
 });
 
-Clazz.newMethod$ (C$, 'isUnshared', function () {
+Clazz.newMethod$(C$, 'isUnshared', function () {
 return this.unshared;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:14
+//Created 2017-08-17 10:33:12

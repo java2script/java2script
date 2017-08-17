@@ -8,46 +8,46 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.backingMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
-C$.construct$java_util_HashMap.apply(this, [Clazz.$new(java.util.HashMap.construct)]);
+Clazz.newMethod$(C$, 'construct', function () {
+C$.construct$java_util_HashMap.apply(this, [Clazz.$new(java.util.HashMap.construct,[])]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I', function (capacity) {
+Clazz.newMethod$(C$, 'construct$I', function (capacity) {
 C$.construct$java_util_HashMap.apply(this, [Clazz.$new(java.util.HashMap.construct$I,[capacity])]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I$F', function (capacity, loadFactor) {
+Clazz.newMethod$(C$, 'construct$I$F', function (capacity, loadFactor) {
 C$.construct$java_util_HashMap.apply(this, [Clazz.$new(java.util.HashMap.construct$I$F,[capacity, loadFactor])]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'construct$java_util_Collection', function (collection) {
 C$.construct$java_util_HashMap.apply(this, [Clazz.$new(java.util.HashMap.construct$I,[collection.size () < 6 ? 11 : collection.size () * 2])]);
 for (var e, $e = collection.iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 this.add$TE (e);
 }
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_HashMap', function (backingMap) {
+Clazz.newMethod$(C$, 'construct$java_util_HashMap', function (backingMap) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = backingMap;
 }, 1);
 
-Clazz.newMethod$ (C$, 'add$TE', function (object) {
+Clazz.newMethod$(C$, 'add$TE', function (object) {
 return this.backingMap.put$TE$java_util_HashSet (object, this) == null;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.backingMap.clear ();
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 var clone = C$.superClazz.prototype.clone.apply(this, arguments);
 clone.backingMap = this.backingMap.clone ();
 return clone;
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -55,27 +55,27 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.backingMap.containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.backingMap.isEmpty ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return this.backingMap.keySet ().iterator ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 return this.backingMap.remove$O (object) != null;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.backingMap.size ();
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeInt$I (this.backingMap.elementData.length);
 stream.writeFloat$F (this.backingMap.loadFactor);
@@ -89,7 +89,7 @@ entry = entry.next;
 }
 });
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 var length = stream.readInt ();
 var loadFactor = stream.readFloat ();
@@ -101,10 +101,10 @@ this.backingMap.put$TE$java_util_HashSet (key, this);
 }
 });
 
-Clazz.newMethod$ (C$, 'createBackingMap$I$F', function (capacity, loadFactor) {
+Clazz.newMethod$(C$, 'createBackingMap$I$F', function (capacity, loadFactor) {
 return Clazz.$new(java.util.HashMap.construct$I$F,[capacity, loadFactor]);
 });
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

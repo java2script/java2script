@@ -8,52 +8,52 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.lock = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 this.lock = this;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$O', function (lock) {
+Clazz.newMethod$(C$, 'construct$O', function (lock) {
 C$.$init$.apply(this);
 if (lock != null) {
 this.lock = lock;
 } else {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'write$CA', function (buf) {
+Clazz.newMethod$(C$, 'write$CA', function (buf) {
 this.write$CA$I$I (buf, 0, buf.length);
 });
 
-Clazz.newMethod$ (C$, 'write$I', function (oneChar) {
+Clazz.newMethod$(C$, 'write$I', function (oneChar) {
 {
-var oneCharArray =  Clazz.newArray$('CA', Clazz.newA$, [1, '\0']);
+var oneCharArray =  Clazz.newArray$('CA', 1, [1]);
 oneCharArray[0] = String.fromCharCode (oneChar);
 this.write$CA (oneCharArray);
 }});
 
-Clazz.newMethod$ (C$, 'write$S', function (str) {
-var buf =  Clazz.newArray$('CA', Clazz.newA$, [str.length, '\0']);
+Clazz.newMethod$(C$, 'write$S', function (str) {
+var buf =  Clazz.newArray$('CA', 1, [str.length]);
 str.getChars$I$I$CA$I (0, buf.length, buf, 0);
 {
 this.write$CA (buf);
 }});
 
-Clazz.newMethod$ (C$, 'write$S$I$I', function (str, offset, count) {
+Clazz.newMethod$(C$, 'write$S$I$I', function (str, offset, count) {
 if (count >= 0) {
-var buf =  Clazz.newArray$('CA', Clazz.newA$, [count, '\0']);
+var buf =  Clazz.newArray$('CA', 1, [count]);
 str.getChars$I$I$CA$I (offset, offset + count, buf, 0);
 {
 this.write$CA (buf);
 }} else {
-throw Clazz.$new(StringIndexOutOfBoundsException.construct);
+throw Clazz.$new(StringIndexOutOfBoundsException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'append$C', function (c) {
+Clazz.newMethod$(C$, 'append$C', function (c) {
 this.write$I (c.charCodeAt (0));
 return this;
 });
 
-Clazz.newMethod$ (C$, 'append$CharSequence', function (csq) {
+Clazz.newMethod$(C$, 'append$CharSequence', function (csq) {
 if (null == csq) {
 this.write$S ("null");
 } else {
@@ -61,7 +61,7 @@ this.write$S (csq.toString ());
 }return this;
 });
 
-Clazz.newMethod$ (C$, 'append$CharSequence$I$I', function (csq, start, end) {
+Clazz.newMethod$(C$, 'append$CharSequence$I$I', function (csq, start, end) {
 if (null == csq) {
 this.write$S ("null".substring$I$I (start, end));
 } else {
@@ -73,4 +73,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-12 07:32:15
+//Created 2017-08-17 10:33:12

@@ -11,25 +11,25 @@ this.returnDelimiters = false;
 this.position = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S', function (string) {
+Clazz.newMethod$(C$, 'construct$S', function (string) {
 C$.construct$S$S$Z.apply(this, [string, " \t\n\r\f", false]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S', function (string, delimiters) {
+Clazz.newMethod$(C$, 'construct$S$S', function (string, delimiters) {
 C$.construct$S$S$Z.apply(this, [string, delimiters, false]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S$Z', function (string, delimiters, returnDelimiters) {
+Clazz.newMethod$(C$, 'construct$S$S$Z', function (string, delimiters, returnDelimiters) {
 C$.$init$.apply(this);
 if (string != null) {
 this.string = string;
 this.delimiters = delimiters;
 this.returnDelimiters = returnDelimiters;
 this.position = 0;
-} else throw Clazz.$new(NullPointerException.construct);
+} else throw Clazz.$new(NullPointerException.construct,[]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'countTokens', function () {
+Clazz.newMethod$(C$, 'countTokens', function () {
 var count = 0;
 var inToken = false;
 for (var i = this.position, length = this.string.length; i < length; i++) {
@@ -45,11 +45,11 @@ if (inToken) count++;
 return count;
 });
 
-Clazz.newMethod$ (C$, 'hasMoreElements', function () {
+Clazz.newMethod$(C$, 'hasMoreElements', function () {
 return this.hasMoreTokens ();
 });
 
-Clazz.newMethod$ (C$, 'hasMoreTokens', function () {
+Clazz.newMethod$(C$, 'hasMoreTokens', function () {
 var length = this.string.length;
 if (this.position < length) {
 if (this.returnDelimiters) return true;
@@ -58,11 +58,11 @@ for (var i = this.position; i < length; i++) if (this.delimiters.indexOf$I$I (th
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'nextElement', function () {
+Clazz.newMethod$(C$, 'nextElement', function () {
 return this.nextToken ();
 });
 
-Clazz.newMethod$ (C$, 'nextToken', function () {
+Clazz.newMethod$(C$, 'nextToken', function () {
 var i = this.position;
 var length = this.string.length;
 if (i < length) {
@@ -78,18 +78,18 @@ if (i < length) {
 for (this.position++; this.position < length; this.position++) if (this.delimiters.indexOf$I$I (this.string.charAt$I (this.position), 0) >= 0) return this.string.substring$I$I (i, this.position);
 
 return this.string.substring$I (i);
-}}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'nextToken$S', function (delims) {
+Clazz.newMethod$(C$, 'nextToken$S', function (delims) {
 this.delimiters = delims;
 return this.nextToken ();
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:21
+//Created 2017-08-17 10:33:18

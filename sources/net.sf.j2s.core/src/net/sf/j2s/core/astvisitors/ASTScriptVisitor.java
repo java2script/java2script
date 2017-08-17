@@ -657,7 +657,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
 		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
 		if (expTypeBinding == null)
-			System.err.println("typeBinding was null in " + clazzName + "." + methodName + " " + parameterTypeName);
+			System.err.println("typeBinding was null in " + clazzName + "." + methodName + " " + parameterTypeName  + " " + exp);
 		// BH: Question: When does typeBinding == null?
 		// only continue if we are converting a character to a non-character type
 		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
@@ -1371,10 +1371,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
+
 		boolean isPrivateAndNotStatic = ((mBinding.getModifiers() & Modifier.PRIVATE) != 0)
 				&& !isStatic(mBinding.getModifiers());
 
 		Expression expression = node.getExpression();
+		String methodName = node.getName().getIdentifier();
+
 		int pt = buffer.length();
 		if (expression == null) {
 			// "this"
@@ -1384,26 +1387,25 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(".");
 		}
 
-		String sbParams = getJ2SParamQualifier(buffer.substring(pt, buffer.length()), mBinding);
+		String className = mBinding.getDeclaringClass().getQualifiedName();
+		String sbParams = getJ2SParamQualifier(className, mBinding);
 
-		String methodName = node.getName().getIdentifier();
-		List<?> args = node.arguments();
-		int size = args.size();
 		boolean isSpecialMethod = false;
-		if (isMethodRegistered(methodName)
-				&& (size == 0 || methodName.equals("split") || methodName.equals("replace"))) {
-			IBinding binding = node.getName().resolveBinding();
-			if (binding != null && binding instanceof IMethodBinding) {
-				IMethodBinding mthBinding = (IMethodBinding) binding;
-				String className = mthBinding.getDeclaringClass().getQualifiedName();
-				String propertyName = translate(className, methodName);
-				if (propertyName != null) {
-					if (propertyName.startsWith("~")) {
+		if (isMethodRegistered(methodName)) {
+			String j2sName = translate(className, methodName);
+			if (j2sName != null) {
+				// Array.newInstance --> Clazz.newArray$
+				if (j2sName.startsWith("Clazz.")) {
+					buffer.setLength(pt);
+					buffer.append(j2sName);
+					isSpecialMethod = true;
+				} else if (node.arguments().size() == 0 || methodName.equals("split") || methodName.equals("replace")) {
+					if (j2sName.startsWith("~")) {
 						buffer.append('$');
-						buffer.append(propertyName.substring(1));
+						buffer.append(j2sName.substring(1));
 						isSpecialMethod = true;
 					} else {
-						buffer.append(propertyName);
+						buffer.append(j2sName);
 						return false;
 					}
 				}

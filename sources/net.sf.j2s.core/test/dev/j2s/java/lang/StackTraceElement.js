@@ -11,19 +11,19 @@ this.fileName = null;
 this.lineNumber = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S$S$I', function (cls, method, file, line) {
+Clazz.newMethod$(C$, 'construct$S$S$S$I', function (cls, method, file, line) {
 if (cls == null || method == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.declaringClass = cls;
 this.methodName = method;
 this.fileName = file;
 this.lineNumber = line;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'equals$O', function (obj) {
+Clazz.newMethod$(C$, 'equals$O', function (obj) {
 if (!(Clazz.instanceOf(obj, StackTraceElement))) {
 return false;
 }var castObj = obj;
@@ -45,33 +45,33 @@ return false;
 }return true;
 });
 
-Clazz.newMethod$ (C$, 'getClassName', function () {
+Clazz.newMethod$(C$, 'getClassName', function () {
 return (this.declaringClass == null) ? "<unknown class>" : this.declaringClass;
 });
 
-Clazz.newMethod$ (C$, 'getFileName', function () {
+Clazz.newMethod$(C$, 'getFileName', function () {
 return this.fileName;
 });
 
-Clazz.newMethod$ (C$, 'getLineNumber', function () {
+Clazz.newMethod$(C$, 'getLineNumber', function () {
 return this.lineNumber;
 });
 
-Clazz.newMethod$ (C$, 'getMethodName', function () {
+Clazz.newMethod$(C$, 'getMethodName', function () {
 return (this.methodName == null) ? "<unknown method>" : this.methodName;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 if (this.methodName == null) {
 return 0;
 }return this.methodName.hashCode () ^ this.declaringClass.hashCode ();
 });
 
-Clazz.newMethod$ (C$, 'isNativeMethod', function () {
+Clazz.newMethod$(C$, 'isNativeMethod', function () {
 return this.lineNumber == -2;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 var buf = Clazz.$new(StringBuilder.construct$I,[80]);
 buf.append$S (this.getClassName ());
 buf.append$C ('.');
@@ -95,4 +95,4 @@ buf.append$I (lineNum);
 })()
 });
 
-//Created 2017-08-12 07:32:16
+//Created 2017-08-17 10:33:14

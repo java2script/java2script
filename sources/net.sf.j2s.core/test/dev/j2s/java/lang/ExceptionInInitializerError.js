@@ -8,33 +8,33 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.exception = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
-C$.superClazz.construct.apply(this);
+Clazz.newMethod$(C$, 'construct', function () {
+C$.superClazz.construct.apply(this, []);
 C$.$init$.apply(this);
 this.initCause$Throwable (null);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S', function (detailMessage) {
+Clazz.newMethod$(C$, 'construct$S', function (detailMessage) {
 C$.superClazz.construct$S.apply(this, [detailMessage]);
 C$.$init$.apply(this);
 this.initCause$Throwable (null);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Throwable', function (exception) {
-C$.superClazz.construct.apply(this);
+Clazz.newMethod$(C$, 'construct$Throwable', function (exception) {
+C$.superClazz.construct.apply(this, []);
 C$.$init$.apply(this);
 this.exception = exception;
 this.initCause$Throwable (exception);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getException', function () {
+Clazz.newMethod$(C$, 'getException', function () {
 return this.exception;
 });
 
-Clazz.newMethod$ (C$, 'getCause', function () {
+Clazz.newMethod$(C$, 'getCause', function () {
 return this.exception;
 });
 })()
 });
 
-//Created 2017-08-12 07:32:15
+//Created 2017-08-17 10:33:13

@@ -7,19 +7,19 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'encode$S', function (s) {
+Clazz.newMethod$(C$, 'encode$S', function (s) {
 return encodeURIComponent(arguments[0]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'encode$S$S', function (s, enc) {
+Clazz.newMethod$(C$, 'encode$S$S', function (s, enc) {
 return encodeURIComponent(arguments[0]);
 }, 1);
 Clazz.defineStatics (C$,
 "digits", "0123456789ABCDEF");
 })()
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

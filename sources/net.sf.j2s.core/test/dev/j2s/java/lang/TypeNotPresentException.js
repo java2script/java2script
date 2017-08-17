@@ -8,20 +8,20 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.$typeName = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$Throwable', function (typeName, cause) {
+Clazz.newMethod$(C$, 'construct$S$Throwable', function (typeName, cause) {
 C$.superClazz.construct$S$Throwable.apply(this, ["Type " + typeName + " not present", cause]);
 C$.$init$.apply(this);
 this.$typeName = typeName;
 }, 1);
 
-Clazz.newMethod$ (C$, 'typeName', function () {
+Clazz.newMethod$(C$, 'typeName', function () {
 return this.$typeName;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:14

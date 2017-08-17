@@ -10,37 +10,37 @@ this.name = null;
 this.maxPriority = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 this.name = "system";
 this.maxPriority = 10;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function (name) {
+Clazz.newMethod$(C$, 'construct', function (name) {
 C$.construct.apply(this, [Thread.currentThread ().getThreadGroup (), name]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function (parent, name) {
+Clazz.newMethod$(C$, 'construct', function (parent, name) {
 C$.$init$.apply(this);
 if (parent == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.name = name;
 this.parent = parent;
 this.maxPriority = 10;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getName', function () {
+Clazz.newMethod$(C$, 'getName', function () {
 return this.name;
 });
 
-Clazz.newMethod$ (C$, 'getParent', function () {
+Clazz.newMethod$(C$, 'getParent', function () {
 return this.parent;
 });
 
-Clazz.newMethod$ (C$, 'getMaxPriority', function () {
+Clazz.newMethod$(C$, 'getMaxPriority', function () {
 return this.maxPriority;
 });
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:14

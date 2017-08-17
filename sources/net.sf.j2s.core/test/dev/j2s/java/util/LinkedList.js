@@ -1,4 +1,4 @@
-Clazz.load (["java.util.AbstractSequentialList", "$.List", "$.ListIterator", "$.Queue"], "java.util.LinkedList", ["java.lang.IllegalStateException", "$.IndexOutOfBoundsException", "java.lang.reflect.Array", "java.util.ConcurrentModificationException", "$.NoSuchElementException"], function () {
+Clazz.load (["java.util.AbstractSequentialList", "$.List", "$.ListIterator", "$.Queue"], "java.util.LinkedList", ["java.lang.IllegalStateException", "$.IndexOutOfBoundsException", "java.util.ConcurrentModificationException", "$.NoSuchElementException"], function () {
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments);
@@ -9,7 +9,7 @@ this.$size = 0;
 this.voidLink = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.voidLink = Clazz.$new(java.util.LinkedList.Link.construct$TE$java_util_LinkedList_Link$java_util_LinkedList_Link,[null, null, null]);
@@ -17,12 +17,12 @@ this.voidLink.previous = this.voidLink;
 this.voidLink.next = this.voidLink;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Collection', function (collection) {
-C$.construct.apply(this);
+Clazz.newMethod$(C$, 'construct$java_util_Collection', function (collection) {
+C$.construct.apply(this, []);
 this.addAll$java_util_Collection (collection);
 }, 1);
 
-Clazz.newMethod$ (C$, 'add$I$TE', function (location, object) {
+Clazz.newMethod$(C$, 'add$I$TE', function (location, object) {
 if (0 <= location && location <= this.$size) {
 var link = this.voidLink;
 if (location < (Clazz.doubleToInt (this.$size / 2))) {
@@ -40,10 +40,10 @@ link.previous = newLink;
 this.$size++;
 this.modCount++;
 } else {
-throw Clazz.$new(IndexOutOfBoundsException.construct);
+throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'add$TE', function (object) {
+Clazz.newMethod$(C$, 'add$TE', function (object) {
 var oldLast = this.voidLink.previous;
 var newLink = Clazz.$new(java.util.LinkedList.Link.construct$TE$java_util_LinkedList_Link$java_util_LinkedList_Link,[object, oldLast, this.voidLink]);
 this.voidLink.previous = newLink;
@@ -53,9 +53,9 @@ this.modCount++;
 return true;
 });
 
-Clazz.newMethod$ (C$, 'addAll$I$java_util_Collection', function (location, collection) {
+Clazz.newMethod$(C$, 'addAll$I$java_util_Collection', function (location, collection) {
 if (location < 0 || location > this.$size) {
-throw Clazz.$new(IndexOutOfBoundsException.construct);
+throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 }var adding = collection.size ();
 if (adding == 0) {
 return false;
@@ -81,7 +81,7 @@ this.modCount++;
 return true;
 });
 
-Clazz.newMethod$ (C$, 'addAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'addAll$java_util_Collection', function (collection) {
 var adding = collection.size ();
 if (adding == 0) {
 return false;
@@ -98,7 +98,7 @@ this.modCount++;
 return true;
 });
 
-Clazz.newMethod$ (C$, 'addFirst$TE', function (object) {
+Clazz.newMethod$(C$, 'addFirst$TE', function (object) {
 var oldFirst = this.voidLink.next;
 var newLink = Clazz.$new(java.util.LinkedList.Link.construct$TE$java_util_LinkedList_Link$java_util_LinkedList_Link,[object, this.voidLink, oldFirst]);
 this.voidLink.next = newLink;
@@ -107,7 +107,7 @@ this.$size++;
 this.modCount++;
 });
 
-Clazz.newMethod$ (C$, 'addLast$TE', function (object) {
+Clazz.newMethod$(C$, 'addLast$TE', function (object) {
 var oldLast = this.voidLink.previous;
 var newLink = Clazz.$new(java.util.LinkedList.Link.construct$TE$java_util_LinkedList_Link$java_util_LinkedList_Link,[object, oldLast, this.voidLink]);
 this.voidLink.previous = newLink;
@@ -116,7 +116,7 @@ this.$size++;
 this.modCount++;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 if (this.$size > 0) {
 this.$size = 0;
 this.voidLink.next = this.voidLink;
@@ -124,11 +124,11 @@ this.voidLink.previous = this.voidLink;
 this.modCount++;
 }});
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 return Clazz.$new(java.util.LinkedList.construct$java_util_Collection,[this]);
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 var link = this.voidLink.next;
 if (object != null) {
 while (link !== this.voidLink) {
@@ -145,7 +145,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'get$I', function (location) {
+Clazz.newMethod$(C$, 'get$I', function (location) {
 if (0 <= location && location < this.$size) {
 var link = this.voidLink;
 if (location < (Clazz.doubleToInt (this.$size / 2))) {
@@ -157,24 +157,24 @@ for (var i = this.$size; i > location; i--) {
 link = link.previous;
 }
 }return link.data;
-}throw Clazz.$new(IndexOutOfBoundsException.construct);
+}throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'getFirst', function () {
+Clazz.newMethod$(C$, 'getFirst', function () {
 var first = this.voidLink.next;
 if (first !== this.voidLink) {
 return first.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'getLast', function () {
+Clazz.newMethod$(C$, 'getLast', function () {
 var last = this.voidLink.previous;
 if (last !== this.voidLink) {
 return last.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'indexOf$O', function (object) {
+Clazz.newMethod$(C$, 'indexOf$O', function (object) {
 var pos = 0;
 var link = this.voidLink.next;
 if (object != null) {
@@ -194,7 +194,7 @@ pos++;
 }return -1;
 });
 
-Clazz.newMethod$ (C$, 'lastIndexOf$O', function (object) {
+Clazz.newMethod$(C$, 'lastIndexOf$O', function (object) {
 var pos = this.$size;
 var link = this.voidLink.previous;
 if (object != null) {
@@ -214,11 +214,11 @@ return pos;
 }return -1;
 });
 
-Clazz.newMethod$ (C$, 'listIterator$I', function (location) {
+Clazz.newMethod$(C$, 'listIterator$I', function (location) {
 return Clazz.$new(java.util.LinkedList.LinkIterator.construct$java_util_LinkedList$I,[this, location]);
 });
 
-Clazz.newMethod$ (C$, 'remove$I', function (location) {
+Clazz.newMethod$(C$, 'remove$I', function (location) {
 if (0 <= location && location < this.$size) {
 var link = this.voidLink;
 if (location < (Clazz.doubleToInt (this.$size / 2))) {
@@ -236,10 +236,10 @@ next.previous = previous;
 this.$size--;
 this.modCount++;
 return link.data;
-}throw Clazz.$new(IndexOutOfBoundsException.construct);
+}throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 var link = this.voidLink.next;
 if (object != null) {
 while (link !== this.voidLink && !object.equals$O (link.data)) {
@@ -260,7 +260,7 @@ this.modCount++;
 return true;
 });
 
-Clazz.newMethod$ (C$, 'removeFirst', function () {
+Clazz.newMethod$(C$, 'removeFirst', function () {
 var first = this.voidLink.next;
 if (first !== this.voidLink) {
 var next = first.next;
@@ -269,10 +269,10 @@ next.previous = this.voidLink;
 this.$size--;
 this.modCount++;
 return first.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'removeLast', function () {
+Clazz.newMethod$(C$, 'removeLast', function () {
 var last = this.voidLink.previous;
 if (last !== this.voidLink) {
 var previous = last.previous;
@@ -281,10 +281,10 @@ previous.next = this.voidLink;
 this.$size--;
 this.modCount++;
 return last.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'set$I$TE', function (location, object) {
+Clazz.newMethod$(C$, 'set$I$TE', function (location, object) {
 if (0 <= location && location < this.$size) {
 var link = this.voidLink;
 if (location < (Clazz.doubleToInt (this.$size / 2))) {
@@ -298,38 +298,38 @@ link = link.previous;
 }var result = link.data;
 link.data = object;
 return result;
-}throw Clazz.$new(IndexOutOfBoundsException.construct);
+}throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.$size;
 });
 
-Clazz.newMethod$ (C$, 'offer$TE', function (o) {
+Clazz.newMethod$(C$, 'offer$TE', function (o) {
 this.add$TE (o);
 return true;
 });
 
-Clazz.newMethod$ (C$, 'poll', function () {
+Clazz.newMethod$(C$, 'poll', function () {
 return this.$size == 0 ? null : this.removeFirst ();
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 return this.removeFirst ();
 });
 
-Clazz.newMethod$ (C$, 'peek', function () {
+Clazz.newMethod$(C$, 'peek', function () {
 var first = this.voidLink.next;
 return first === this.voidLink ? null : first.data;
 });
 
-Clazz.newMethod$ (C$, 'element', function () {
+Clazz.newMethod$(C$, 'element', function () {
 return this.getFirst ();
 });
 
-Clazz.newMethod$ (C$, 'toArray', function () {
+Clazz.newMethod$(C$, 'toArray', function () {
 var index = 0;
-var contents =  Clazz.newArray$('OA', Clazz.newA$, [this.$size]);
+var contents =  Clazz.newArray$('OA', 1, [this.$size]);
 var link = this.voidLink.next;
 while (link !== this.voidLink) {
 contents[index++] = link.data;
@@ -338,11 +338,11 @@ link = link.next;
 return contents;
 });
 
-Clazz.newMethod$ (C$, 'toArray$TTA', function (contents) {
+Clazz.newMethod$(C$, 'toArray$TTA', function (contents) {
 var index = 0;
 if (this.$size > contents.length) {
 var ct = contents.getClass ().getComponentType ();
-contents = java.lang.reflect.Array.newInstance (ct, this.$size);
+contents = Clazz.newArray$ (ct, this.$size);
 }var link = this.voidLink.next;
 while (link !== this.voidLink) {
 contents[index++] = link.data;
@@ -353,7 +353,7 @@ contents[index] = null;
 }return contents;
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeInt$I (this.$size);
 var it = this.iterator ();
@@ -362,7 +362,7 @@ stream.writeObject$O (it.next ());
 }
 });
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 this.$size = stream.readInt ();
 this.voidLink = Clazz.$new(java.util.LinkedList.Link.construct$TE$java_util_LinkedList_Link$java_util_LinkedList_Link,[null, null, null]);
@@ -386,7 +386,7 @@ this.previous = null;
 this.next = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$ET$java_util_LinkedList_Link$java_util_LinkedList_Link', function (o, p, n) {
+Clazz.newMethod$(C$, 'construct$ET$java_util_LinkedList_Link$java_util_LinkedList_Link', function (o, p, n) {
 C$.$init$.apply(this);
 this.data = o;
 this.previous = p;
@@ -395,7 +395,7 @@ this.next = n;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -410,7 +410,7 @@ this.link = null;
 this.lastLink = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_LinkedList$I', function (object, location) {
+Clazz.newMethod$(C$, 'construct$java_util_LinkedList$I', function (object, location) {
 C$.$init$.apply(this);
 this.list = object;
 this.expectedModCount = this.list.modCount;
@@ -425,10 +425,10 @@ for (this.pos = this.list.$size; this.pos >= location; this.pos--) {
 this.link = this.link.previous;
 }
 }} else {
-throw Clazz.$new(IndexOutOfBoundsException.construct);
+throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'add$ET', function (object) {
+Clazz.newMethod$(C$, 'add$ET', function (object) {
 if (this.expectedModCount == this.list.modCount) {
 var next = this.link.next;
 var newLink = Clazz.$new(java.util.LinkedList.Link.construct$ET$java_util_LinkedList_Link$java_util_LinkedList_Link,[object, this.link, next]);
@@ -441,48 +441,48 @@ this.expectedModCount++;
 this.list.$size++;
 this.list.modCount++;
 } else {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return this.link.next !== this.list.voidLink;
 });
 
-Clazz.newMethod$ (C$, 'hasPrevious', function () {
+Clazz.newMethod$(C$, 'hasPrevious', function () {
 return this.link !== this.list.voidLink;
 });
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 if (this.expectedModCount == this.list.modCount) {
 var next = this.link.next;
 if (next !== this.list.voidLink) {
 this.lastLink = this.link = next;
 this.pos++;
 return this.link.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
-}throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
+}throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'nextIndex', function () {
+Clazz.newMethod$(C$, 'nextIndex', function () {
 return this.pos + 1;
 });
 
-Clazz.newMethod$ (C$, 'previous', function () {
+Clazz.newMethod$(C$, 'previous', function () {
 if (this.expectedModCount == this.list.modCount) {
 if (this.link !== this.list.voidLink) {
 this.lastLink = this.link;
 this.link = this.link.previous;
 this.pos--;
 return this.lastLink.data;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
-}throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
+}throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'previousIndex', function () {
+Clazz.newMethod$(C$, 'previousIndex', function () {
 return this.pos;
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 if (this.expectedModCount == this.list.modCount) {
 if (this.lastLink != null) {
 var next = this.lastLink.next;
@@ -497,26 +497,26 @@ this.expectedModCount++;
 this.list.$size--;
 this.list.modCount++;
 } else {
-throw Clazz.$new(IllegalStateException.construct);
+throw Clazz.$new(IllegalStateException.construct,[]);
 }} else {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'set$ET', function (object) {
+Clazz.newMethod$(C$, 'set$ET', function (object) {
 if (this.expectedModCount == this.list.modCount) {
 if (this.lastLink != null) {
 this.lastLink.data = object;
 } else {
-throw Clazz.$new(IllegalStateException.construct);
+throw Clazz.$new(IllegalStateException.construct,[]);
 }} else {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 }});
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 })()
 });
 
-//Created 2017-08-12 07:32:20
+//Created 2017-08-17 10:33:17

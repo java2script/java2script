@@ -9,25 +9,25 @@ this.className = null;
 this.key = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S$S', function (detailMessage, className, resourceName) {
+Clazz.newMethod$(C$, 'construct$S$S$S', function (detailMessage, className, resourceName) {
 C$.superClazz.construct$S.apply(this, [detailMessage]);
 C$.$init$.apply(this);
 this.className = className;
 this.key = resourceName;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getClassName', function () {
+Clazz.newMethod$(C$, 'getClassName', function () {
 return this.className;
 });
 
-Clazz.newMethod$ (C$, 'getKey', function () {
+Clazz.newMethod$(C$, 'getKey', function () {
 return this.key;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:20
+//Created 2017-08-17 10:33:17

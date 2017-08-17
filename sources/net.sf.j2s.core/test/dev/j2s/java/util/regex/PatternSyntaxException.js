@@ -11,7 +11,7 @@ this.pattern = null;
 this.index = -1;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S$I', function (desc, pattern, index) {
+Clazz.newMethod$(C$, 'construct$S$S$I', function (desc, pattern, index) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.desc = desc;
@@ -19,11 +19,11 @@ this.pattern = pattern;
 this.index = index;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getPattern', function () {
+Clazz.newMethod$(C$, 'getPattern', function () {
 return this.pattern;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 var s = this.desc;
 if (this.index >= 0) {
 s += " near index " + this.index;
@@ -36,18 +36,18 @@ s += '^';
 }return s;
 });
 
-Clazz.newMethod$ (C$, 'getDescription', function () {
+Clazz.newMethod$(C$, 'getDescription', function () {
 return this.desc;
 });
 
-Clazz.newMethod$ (C$, 'getIndex', function () {
+Clazz.newMethod$(C$, 'getIndex', function () {
 return this.index;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-08 06:13:50
+//Created 2017-08-17 10:33:18

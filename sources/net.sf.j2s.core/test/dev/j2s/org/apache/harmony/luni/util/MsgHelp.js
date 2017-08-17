@@ -8,9 +8,9 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'format$S$OA', function (format, args) {
+Clazz.newMethod$(C$, 'format$S$OA', function (format, args) {
 var answer = Clazz.$new(StringBuilder.construct$I,[format.length + (args.length * 20)]);
-var argStrings =  Clazz.newArray$('SA', Clazz.newA$, [args.length]);
+var argStrings =  Clazz.newArray$('SA', 1, [args.length]);
 for (var i = 0; i < args.length; ++i) {
 if (args[i] == null) argStrings[i] = "<null>";
  else argStrings[i] = args[i].toString ();
@@ -40,14 +40,14 @@ if (lastI < format.length) answer.append$S (format.substring$I$I (lastI, format.
 return answer.toString ();
 }, 1);
 
-Clazz.newMethod$ (C$, 'setLocale$java_util_Locale$S', function (locale, resource) {
+Clazz.newMethod$(C$, 'setLocale$java_util_Locale$S', function (locale, resource) {
 return java.util.ResourceBundle.getBundle$S (resource);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:21
+//Created 2017-08-17 10:33:18

@@ -13,7 +13,7 @@ this.exceptionTypes = null;
 this.modifiers = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Class$S$ClassA$Class$ClassA$I', function (declaringClass, name, parameterTypes, returnType, checkedExceptions, modifiers) {
+Clazz.newMethod$(C$, 'construct$Class$S$ClassA$Class$ClassA$I', function (declaringClass, name, parameterTypes, returnType, checkedExceptions, modifiers) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.clazz = declaringClass;
@@ -24,47 +24,47 @@ this.exceptionTypes = checkedExceptions;
 this.modifiers = modifiers;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getTypeParameters', function () {
+Clazz.newMethod$(C$, 'getTypeParameters', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'toGenericString', function () {
+Clazz.newMethod$(C$, 'toGenericString', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getGenericParameterTypes', function () {
+Clazz.newMethod$(C$, 'getGenericParameterTypes', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getGenericExceptionTypes', function () {
+Clazz.newMethod$(C$, 'getGenericExceptionTypes', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getGenericReturnType', function () {
+Clazz.newMethod$(C$, 'getGenericReturnType', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getParameterAnnotations', function () {
+Clazz.newMethod$(C$, 'getParameterAnnotations', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'isVarArgs', function () {
+Clazz.newMethod$(C$, 'isVarArgs', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'isBridge', function () {
+Clazz.newMethod$(C$, 'isBridge', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'isSynthetic', function () {
+Clazz.newMethod$(C$, 'isSynthetic', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'getDefaultValue', function () {
+Clazz.newMethod$(C$, 'getDefaultValue', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (object != null && Clazz.instanceOf(object, java.lang.reflect.Method)) {
 var other = object;
 if ((this.getDeclaringClass () === other.getDeclaringClass ()) && (this.getName () === other.getName ())) {
@@ -78,35 +78,35 @@ return true;
 }}}return false;
 });
 
-Clazz.newMethod$ (C$, 'getDeclaringClass', function () {
+Clazz.newMethod$(C$, 'getDeclaringClass', function () {
 return this.clazz;
 });
 
-Clazz.newMethod$ (C$, 'getExceptionTypes', function () {
+Clazz.newMethod$(C$, 'getExceptionTypes', function () {
 return this.exceptionTypes;
 });
 
-Clazz.newMethod$ (C$, 'getModifiers', function () {
+Clazz.newMethod$(C$, 'getModifiers', function () {
 return this.modifiers;
 });
 
-Clazz.newMethod$ (C$, 'getName', function () {
+Clazz.newMethod$(C$, 'getName', function () {
 return this.name;
 });
 
-Clazz.newMethod$ (C$, 'getParameterTypes', function () {
+Clazz.newMethod$(C$, 'getParameterTypes', function () {
 return this.parameterTypes;
 });
 
-Clazz.newMethod$ (C$, 'getReturnType', function () {
+Clazz.newMethod$(C$, 'getReturnType', function () {
 return this.returnType;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 return this.getDeclaringClass ().getName ().hashCode () ^ this.getName ().hashCode ();
 });
 
-Clazz.newMethod$ (C$, 'invoke$O$OA', function (receiver, args) {
+Clazz.newMethod$(C$, 'invoke$O$OA', function (receiver, args) {
 var m = this.clazz.prototype[this.getName ()];
 if (m == null) {
 m = this.clazz[this.getName ()];
@@ -118,14 +118,14 @@ return m.apply(receiver,args);
 }
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return null;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:15

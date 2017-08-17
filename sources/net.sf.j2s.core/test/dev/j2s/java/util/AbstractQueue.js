@@ -7,42 +7,42 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
-C$.superClazz.construct.apply(this);
+Clazz.newMethod$(C$, 'construct', function () {
+C$.superClazz.construct.apply(this, []);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'add$TE', function (o) {
+Clazz.newMethod$(C$, 'add$TE', function (o) {
 if (null == o) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }if (this.offer$TE (o)) {
 return true;
-}throw Clazz.$new(IllegalStateException.construct);
+}throw Clazz.$new(IllegalStateException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'addAll$java_util_Collection', function (c) {
+Clazz.newMethod$(C$, 'addAll$java_util_Collection', function (c) {
 if (null == c) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }if (this === c) {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }return C$.superClazz.prototype.addAll$java_util_Collection.apply(this, arguments);
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 var o = this.poll ();
 if (null == o) {
-throw Clazz.$new(java.util.NoSuchElementException.construct);
+throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 }return o;
 });
 
-Clazz.newMethod$ (C$, 'element', function () {
+Clazz.newMethod$(C$, 'element', function () {
 var o = this.peek ();
 if (null == o) {
-throw Clazz.$new(java.util.NoSuchElementException.construct);
+throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 }return o;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 var o;
 do {
 o = this.poll ();
@@ -51,4 +51,4 @@ o = this.poll ();
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:16

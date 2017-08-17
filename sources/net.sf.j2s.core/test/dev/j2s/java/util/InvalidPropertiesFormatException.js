@@ -7,29 +7,29 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S', function (m) {
+Clazz.newMethod$(C$, 'construct$S', function (m) {
 C$.superClazz.construct$S.apply(this, [m]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Throwable', function (c) {
+Clazz.newMethod$(C$, 'construct$Throwable', function (c) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.initCause$Throwable (c);
 }, 1);
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (out) {
-throw Clazz.$new(java.io.NotSerializableException.construct);
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (out) {
+throw Clazz.$new(java.io.NotSerializableException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function ($in) {
-throw Clazz.$new(java.io.NotSerializableException.construct);
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function ($in) {
+throw Clazz.$new(java.io.NotSerializableException.construct,[]);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

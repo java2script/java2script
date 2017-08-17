@@ -11,7 +11,7 @@ this.exceptionTypes = null;
 this.modifiers = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Class$ClassA$ClassA$I', function (declaringClass, parameterTypes, checkedExceptions, modifiers) {
+Clazz.newMethod$(C$, 'construct$Class$ClassA$ClassA$I', function (declaringClass, parameterTypes, checkedExceptions, modifiers) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.clazz = declaringClass;
@@ -20,35 +20,35 @@ this.exceptionTypes = checkedExceptions;
 this.modifiers = modifiers;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getTypeParameters', function () {
+Clazz.newMethod$(C$, 'getTypeParameters', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'toGenericString', function () {
+Clazz.newMethod$(C$, 'toGenericString', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getGenericParameterTypes', function () {
+Clazz.newMethod$(C$, 'getGenericParameterTypes', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getGenericExceptionTypes', function () {
+Clazz.newMethod$(C$, 'getGenericExceptionTypes', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getParameterAnnotations', function () {
+Clazz.newMethod$(C$, 'getParameterAnnotations', function () {
 return null;
 });
 
-Clazz.newMethod$ (C$, 'isVarArgs', function () {
+Clazz.newMethod$(C$, 'isVarArgs', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'isSynthetic', function () {
+Clazz.newMethod$(C$, 'isSynthetic', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (object != null && Clazz.instanceOf(object, java.lang.reflect.Constructor)) {
 var other = object;
 if (this.getDeclaringClass () === other.getDeclaringClass ()) {
@@ -62,44 +62,44 @@ return true;
 }}}return false;
 });
 
-Clazz.newMethod$ (C$, 'getDeclaringClass', function () {
+Clazz.newMethod$(C$, 'getDeclaringClass', function () {
 return this.clazz;
 });
 
-Clazz.newMethod$ (C$, 'getExceptionTypes', function () {
+Clazz.newMethod$(C$, 'getExceptionTypes', function () {
 return this.exceptionTypes;
 });
 
-Clazz.newMethod$ (C$, 'getModifiers', function () {
+Clazz.newMethod$(C$, 'getModifiers', function () {
 return this.modifiers;
 });
 
-Clazz.newMethod$ (C$, 'getName', function () {
+Clazz.newMethod$(C$, 'getName', function () {
 return this.getDeclaringClass ().getName ();
 });
 
-Clazz.newMethod$ (C$, 'getParameterTypes', function () {
+Clazz.newMethod$(C$, 'getParameterTypes', function () {
 return this.parameterTypes;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 return this.getDeclaringClass ().getName ().hashCode ();
 });
 
-Clazz.newMethod$ (C$, 'newInstance$OA', function (args) {
+Clazz.newMethod$(C$, 'newInstance$OA', function (args) {
 var instance = new this.clazz (Clazz.inheritArgs);
 Clazz.instantialize (instance, args);
 return instance;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return null;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:15

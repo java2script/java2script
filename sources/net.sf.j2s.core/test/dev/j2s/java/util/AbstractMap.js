@@ -9,14 +9,14 @@ this.$keySet = null;
 this.valuesCollection = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.entrySet ().clear ();
 });
 
-Clazz.newMethod$ (C$, 'containsKey$O', function (key) {
+Clazz.newMethod$(C$, 'containsKey$O', function (key) {
 var it = this.entrySet ().iterator ();
 if (key != null) {
 while (it.hasNext ()) {
@@ -31,7 +31,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'containsValue$O', function (value) {
+Clazz.newMethod$(C$, 'containsValue$O', function (value) {
 var it = this.entrySet ().iterator ();
 if (value != null) {
 while (it.hasNext ()) {
@@ -46,7 +46,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
 }if (Clazz.instanceOf(object, java.util.Map)) {
@@ -63,7 +63,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'get$O', function (key) {
+Clazz.newMethod$(C$, 'get$O', function (key) {
 var it = this.entrySet ().iterator ();
 if (key != null) {
 while (it.hasNext ()) {
@@ -80,7 +80,7 @@ return entry.getValue ();
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 var result = 0;
 var it = this.entrySet ().iterator ();
 while (it.hasNext ()) {
@@ -89,11 +89,11 @@ result += it.next ().hashCode ();
 return result;
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.size () == 0;
 });
 
-Clazz.newMethod$ (C$, 'keySet', function () {
+Clazz.newMethod$(C$, 'keySet', function () {
 if (this.$keySet == null) {
 this.$keySet = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -103,15 +103,15 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.AbstractMap"].containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.AbstractMap"].size ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -121,15 +121,15 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.setIterator = this.b$["java.util.AbstractMap"].entrySet ().iterator ();
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return this.setIterator.hasNext ();
 });
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 return this.setIterator.next ().getKey ();
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 this.setIterator.remove ();
 });
 })()
@@ -140,17 +140,17 @@ this.setIterator.remove ();
 }return this.$keySet;
 });
 
-Clazz.newMethod$ (C$, 'put$TK$TV', function (key, value) {
-throw Clazz.$new(UnsupportedOperationException.construct);
+Clazz.newMethod$(C$, 'put$TK$TV', function (key, value) {
+throw Clazz.$new(UnsupportedOperationException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'putAll$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'putAll$java_util_Map', function (map) {
 for (var entry, $entry = map.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 this.put$TK$TV (entry.getKey (), entry.getValue ());
 }
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 var it = this.entrySet ().iterator ();
 if (key != null) {
 while (it.hasNext ()) {
@@ -169,11 +169,11 @@ return entry.getValue ();
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.entrySet ().size ();
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "{}";
 }var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 28]);
@@ -199,7 +199,7 @@ buffer.append$C ('}');
 return buffer.toString ();
 });
 
-Clazz.newMethod$ (C$, 'values', function () {
+Clazz.newMethod$(C$, 'values', function () {
 if (this.valuesCollection == null) {
 this.valuesCollection = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -209,15 +209,15 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.AbstractMap"].size ();
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.AbstractMap"].containsValue$O (object);
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -227,15 +227,15 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.setIterator = this.b$["java.util.AbstractMap"].entrySet ().iterator ();
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 return this.setIterator.hasNext ();
 });
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 return this.setIterator.next ().getValue ();
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 this.setIterator.remove ();
 });
 })()
@@ -246,7 +246,7 @@ this.setIterator.remove ();
 }return this.valuesCollection;
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 var result = C$.superClazz.prototype.clone.apply(this, arguments);
 result.$keySet = null;
 result.valuesCollection = null;
@@ -255,4 +255,4 @@ return result;
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

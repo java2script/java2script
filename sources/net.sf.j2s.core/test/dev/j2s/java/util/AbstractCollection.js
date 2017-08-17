@@ -1,4 +1,4 @@
-Clazz.load (["java.util.Collection"], "java.util.AbstractCollection", ["java.lang.StringBuilder", "$.UnsupportedOperationException", "java.lang.reflect.Array"], function () {
+Clazz.load (["java.util.Collection"], "java.util.AbstractCollection", ["java.lang.StringBuilder", "$.UnsupportedOperationException"], function () {
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments);
@@ -7,14 +7,14 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'add$TE', function (object) {
-throw Clazz.$new(UnsupportedOperationException.construct);
+Clazz.newMethod$(C$, 'add$TE', function (object) {
+throw Clazz.$new(UnsupportedOperationException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'addAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'addAll$java_util_Collection', function (collection) {
 var result = false;
 var it = collection.iterator ();
 while (it.hasNext ()) {
@@ -24,7 +24,7 @@ result = true;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 var it = this.iterator ();
 while (it.hasNext ()) {
 it.next ();
@@ -32,7 +32,7 @@ it.remove ();
 }
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 var it = this.iterator ();
 if (object != null) {
 while (it.hasNext ()) {
@@ -47,7 +47,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'containsAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'containsAll$java_util_Collection', function (collection) {
 var it = collection.iterator ();
 while (it.hasNext ()) {
 if (!this.contains$O (it.next ())) {
@@ -56,11 +56,11 @@ return false;
 return true;
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.size () == 0;
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 var it = this.iterator ();
 if (object != null) {
 while (it.hasNext ()) {
@@ -77,7 +77,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'removeAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'removeAll$java_util_Collection', function (collection) {
 var result = false;
 var it = this.iterator ();
 while (it.hasNext ()) {
@@ -88,7 +88,7 @@ result = true;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'retainAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'retainAll$java_util_Collection', function (collection) {
 var result = false;
 var it = this.iterator ();
 while (it.hasNext ()) {
@@ -99,23 +99,23 @@ result = true;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'toArray', function () {
+Clazz.newMethod$(C$, 'toArray', function () {
 var size = this.size ();
 var index = 0;
 var it = this.iterator ();
-var array =  Clazz.newArray$('OA', Clazz.newA$, [size]);
+var array =  Clazz.newArray$('OA', 1, [size]);
 while (index < size) {
 array[index++] = it.next ();
 }
 return array;
 });
 
-Clazz.newMethod$ (C$, 'toArray$TTA', function (contents) {
+Clazz.newMethod$(C$, 'toArray$TTA', function (contents) {
 var size = this.size ();
 var index = 0;
 if (size > contents.length) {
 var ct = contents.getClass ().getComponentType ();
-contents = java.lang.reflect.Array.newInstance (ct, size);
+contents = Clazz.newArray$ (ct, size);
 }for (var entry, $entry = this.iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 contents[index++] = entry;
 }
@@ -124,7 +124,7 @@ contents[index] = null;
 }return contents;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "[]";
 }var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 16]);
@@ -145,4 +145,4 @@ return buffer.toString ();
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

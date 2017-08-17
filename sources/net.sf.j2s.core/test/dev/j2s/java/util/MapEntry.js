@@ -9,22 +9,22 @@ this.key = null;
 this.value = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK', function (theKey) {
+Clazz.newMethod$(C$, 'construct$TK', function (theKey) {
 C$.$init$.apply(this);
 this.key = theKey;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$TV', function (theKey, theValue) {
+Clazz.newMethod$(C$, 'construct$TK$TV', function (theKey, theValue) {
 C$.$init$.apply(this);
 this.key = theKey;
 this.value = theValue;
 }, 1);
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 return C$.superClazz.prototype.clone.apply(this, arguments);
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -32,7 +32,7 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
 }if (Clazz.instanceOf(object, java.util.Map.Entry)) {
@@ -41,33 +41,33 @@ return (this.key == null ? entry.getKey () == null : this.key.equals$O (entry.ge
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'getKey', function () {
+Clazz.newMethod$(C$, 'getKey', function () {
 return this.key;
 });
 
-Clazz.newMethod$ (C$, 'getValue', function () {
+Clazz.newMethod$(C$, 'getValue', function () {
 return this.value;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 return (this.key == null ? 0 : this.key.hashCode ()) ^ (this.value == null ? 0 : this.value.hashCode ());
 });
 
-Clazz.newMethod$ (C$, 'setValue$TV', function (object) {
+Clazz.newMethod$(C$, 'setValue$TV', function (object) {
 var result = this.value;
 this.value = object;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return this.key + "=" + this.value;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 Clazz.declareInterface (java.util.MapEntry, "Type");
 })()
 });
 
-//Created 2017-08-12 07:32:20
+//Created 2017-08-17 10:33:17

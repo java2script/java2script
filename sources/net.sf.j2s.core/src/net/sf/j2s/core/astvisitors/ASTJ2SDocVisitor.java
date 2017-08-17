@@ -161,7 +161,14 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 					continue;
 				}
 			}
-			buf.append(text);
+			buf.append(text.replace('\n', ' ').replace('\r', ' ')); 
+			// BH note that all line terminators are removed, 
+			// as this causes problems after source cleaning, which may result
+			// in code such as:
+			//
+			// return
+			//   x
+			//
 			buf.append("\r\n");
 		}
 		buffer.append(fixCommentBlock(buf.toString()));

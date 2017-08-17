@@ -6,8 +6,8 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 }, 1);
 })()
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:16

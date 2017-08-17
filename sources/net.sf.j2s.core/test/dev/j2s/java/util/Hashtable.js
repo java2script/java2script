@@ -18,15 +18,15 @@ this.lastSlot = -1;
 this.modCount = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'newEntry$TK$TV$I', function (key, value, hash) {
+Clazz.newMethod$(C$, 'newEntry$TK$TV$I', function (key, value, hash) {
 return Clazz.$new(java.util.Hashtable.Entry.construct$TK$TV,[key, value]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.construct$I.apply(this, [11]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I', function (capacity) {
+Clazz.newMethod$(C$, 'construct$I', function (capacity) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (capacity >= 0) {
@@ -36,10 +36,10 @@ this.firstSlot = this.elementData.length;
 this.loadFactor = 0.75;
 C$.prototype.computeMaxSize.apply(this, []);
 } else {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'construct$I$F', function (capacity, loadFactor) {
+Clazz.newMethod$(C$, 'construct$I$F', function (capacity, loadFactor) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (capacity >= 0 && loadFactor > 0) {
@@ -49,25 +49,25 @@ this.elementData = C$.prototype.newElementArray$I.apply(this, [capacity == 0 ? 1
 this.loadFactor = loadFactor;
 C$.prototype.computeMaxSize.apply(this, []);
 } else {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_Map', function (map) {
 C$.construct$I.apply(this, [map.size () < 6 ? 11 : (Clazz.doubleToInt (map.size () * 4 / 3)) + 11]);
 this.putAll$java_util_Map (map);
 }, 1);
 
-Clazz.newMethod$ (C$, 'newElementArray$I', function (size) {
-return  Clazz.newArray$('java_util_Hashtable_EntryA', Clazz.newA$, [size]);
+Clazz.newMethod$(C$, 'newElementArray$I', function (size) {
+return  Clazz.newArray$('java_util_Hashtable_EntryA', 1, [size]);
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.elementCount = 0;
 java.util.Arrays.fill$OA$O (this.elementData, null);
 this.modCount++;
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 var hashtable = C$.superClazz.prototype.clone.apply(this, arguments);
 hashtable.elementData = this.elementData.clone ();
@@ -78,7 +78,7 @@ hashtable.elementData[i] = entry.clone ();
 }}
 return hashtable;
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -86,13 +86,13 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'computeMaxSize', function () {
+Clazz.newMethod$(C$, 'computeMaxSize', function () {
 this.threshold = Clazz.floatToInt (this.elementData.length * this.loadFactor);
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (value) {
+Clazz.newMethod$(C$, 'contains$O', function (value) {
 if (value == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }for (var i = this.elementData.length; --i >= 0; ) {
 var entry = this.elementData[i];
 while (entry != null) {
@@ -104,21 +104,21 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'containsKey$O', function (key) {
+Clazz.newMethod$(C$, 'containsKey$O', function (key) {
 return this.getEntry$O (key) != null;
 });
 
-Clazz.newMethod$ (C$, 'containsValue$O', function (value) {
+Clazz.newMethod$(C$, 'containsValue$O', function (value) {
 return this.contains$O (value);
 });
 
-Clazz.newMethod$ (C$, 'elements', function () {
+Clazz.newMethod$(C$, 'elements', function () {
 if (this.elementCount == 0) {
 return java.util.Hashtable.EMPTY_ENUMERATION;
 }return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$Z, [this, null, false]);
 });
 
-Clazz.newMethod$ (C$, 'entrySet', function () {
+Clazz.newMethod$(C$, 'entrySet', function () {
 return Clazz.$new(java.util.Collections.SynchronizedSet.construct$java_util_Set$O,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -127,27 +127,27 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.Hashtable"].elementCount;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.Hashtable"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 if (this.contains$O (object)) {
 this.b$["java.util.Hashtable"].remove$O ((object).getKey ());
 return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 var entry = this.b$["java.util.Hashtable"].getEntry$O ((object).getKey ());
 return object.equals$O (entry);
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.Hashtable.HashIterator.construct$java_util_MapEntry_Type, [this, null, ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -156,7 +156,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry;
 });
 })()
@@ -166,7 +166,7 @@ return entry;
 ), Clazz.$new(java.util.Hashtable$2.superClazz.construct, [this, null],java.util.Hashtable$2)), this]);
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
 }if (Clazz.instanceOf(object, java.util.Map)) {
@@ -182,7 +182,7 @@ return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'get$O', function (key) {
+Clazz.newMethod$(C$, 'get$O', function (key) {
 var hash = key.hashCode ();
 var index = (hash & 0x7FFFFFFF) % this.elementData.length;
 var entry = this.elementData[index];
@@ -194,7 +194,7 @@ return entry.value;
 return null;
 });
 
-Clazz.newMethod$ (C$, 'getEntry$O', function (key) {
+Clazz.newMethod$(C$, 'getEntry$O', function (key) {
 var hash = key.hashCode ();
 var index = (hash & 0x7FFFFFFF) % this.elementData.length;
 var entry = this.elementData[index];
@@ -206,7 +206,7 @@ return entry;
 return null;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
+Clazz.newMethod$(C$, 'hashCode', function () {
 var result = 0;
 var it = this.entrySet ().iterator ();
 while (it.hasNext ()) {
@@ -219,17 +219,17 @@ result += hash;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.elementCount == 0;
 });
 
-Clazz.newMethod$ (C$, 'keys', function () {
+Clazz.newMethod$(C$, 'keys', function () {
 if (this.elementCount == 0) {
 return java.util.Hashtable.EMPTY_ENUMERATION;
 }return Clazz.$new(java.util.Hashtable.HashEnumerator.construct$Z, [this, null, true]);
 });
 
-Clazz.newMethod$ (C$, 'keySet', function () {
+Clazz.newMethod$(C$, 'keySet', function () {
 return Clazz.$new(java.util.Collections.SynchronizedSet.construct$java_util_Set$O,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -238,26 +238,26 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.Hashtable"].containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.Hashtable"].elementCount;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.Hashtable"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 if (this.b$["java.util.Hashtable"].containsKey$O (key)) {
 this.b$["java.util.Hashtable"].remove$O (key);
 return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.Hashtable.HashIterator.construct$java_util_MapEntry_Type, [this, null, ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -266,7 +266,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry.key;
 });
 })()
@@ -276,7 +276,7 @@ return entry.key;
 ), Clazz.$new(java.util.Hashtable$3.superClazz.construct, [this, null],java.util.Hashtable$3)), this]);
 });
 
-Clazz.newMethod$ (C$, 'put$TK$TV', function (key, value) {
+Clazz.newMethod$(C$, 'put$TK$TV', function (key, value) {
 if (key != null && value != null) {
 var hash = key.hashCode ();
 var index = (hash & 0x7FFFFFFF) % this.elementData.length;
@@ -300,16 +300,16 @@ return null;
 }var result = entry.value;
 entry.value = value;
 return result;
-}throw Clazz.$new(NullPointerException.construct);
+}throw Clazz.$new(NullPointerException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'putAll$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'putAll$java_util_Map', function (map) {
 for (var entry, $entry = map.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 this.put$TK$TV (entry.getKey (), entry.getValue ());
 }
 });
 
-Clazz.newMethod$ (C$, 'rehash', function () {
+Clazz.newMethod$(C$, 'rehash', function () {
 var length = (this.elementData.length << 1) + 1;
 if (length == 0) {
 length = 1;
@@ -336,7 +336,7 @@ this.elementData = newData;
 C$.prototype.computeMaxSize.apply(this, []);
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 var hash = key.hashCode ();
 var index = (hash & 0x7FFFFFFF) % this.elementData.length;
 var last = null;
@@ -358,11 +358,11 @@ return result;
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.elementCount;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 if (this.isEmpty ()) {
 return "{}";
 }var buffer = Clazz.$new(StringBuilder.construct$I,[this.size () * 28]);
@@ -389,7 +389,7 @@ buffer.setLength$I (buffer.length () - 2);
 return buffer.toString ();
 });
 
-Clazz.newMethod$ (C$, 'values', function () {
+Clazz.newMethod$(C$, 'values', function () {
 return Clazz.$new(java.util.Collections.SynchronizedCollection.construct$java_util_Collection$O,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -398,19 +398,19 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.Hashtable"].contains$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.Hashtable"].elementCount;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.Hashtable"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.Hashtable.HashIterator.construct$java_util_MapEntry_Type, [this, null, ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -419,7 +419,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry.value;
 });
 })()
@@ -429,7 +429,7 @@ return entry.value;
 ), Clazz.$new(java.util.Hashtable$4.superClazz.construct, [this, null],java.util.Hashtable$4)), this]);
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeInt$I (this.elementData.length);
 stream.writeInt$I (this.elementCount);
@@ -443,7 +443,7 @@ entry = entry.next;
 }
 });
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 var length = stream.readInt ();
 this.elementData = C$.prototype.newElementArray$I.apply(this, [length]);
@@ -471,42 +471,42 @@ this.next = null;
 this.hashcode = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$TV', function (theKey, theValue) {
+Clazz.newMethod$(C$, 'construct$TK$TV', function (theKey, theValue) {
 C$.superClazz.construct$TK$TV.apply(this, [theKey, theValue]);
 C$.$init$.apply(this);
 this.hashcode = theKey.hashCode ();
 }, 1);
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 var entry = C$.superClazz.prototype.clone.apply(this, arguments);
 if (this.next != null) {
 entry.next = this.next.clone ();
 }return entry;
 });
 
-Clazz.newMethod$ (C$, 'setValue$TV', function (object) {
+Clazz.newMethod$(C$, 'setValue$TV', function (object) {
 if (object == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }var result = this.value;
 this.value = object;
 return result;
 });
 
-Clazz.newMethod$ (C$, 'getKeyHash', function () {
+Clazz.newMethod$(C$, 'getKeyHash', function () {
 return this.key.hashCode ();
 });
 
-Clazz.newMethod$ (C$, 'equalsKey$O$I', function (aKey, hash) {
+Clazz.newMethod$(C$, 'equalsKey$O$I', function (aKey, hash) {
 return this.hashcode == aKey.hashCode () && this.key.equals$O (aKey);
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return this.key + "=" + this.value;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 C$.$Hashtable$HashIterator$ = function () {
 ;
@@ -523,14 +523,14 @@ this.lastPosition = 0;
 this.canRemove = false;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_MapEntry_Type', function (value) {
+Clazz.newMethod$(C$, 'construct$java_util_MapEntry_Type', function (value) {
 C$.$init$.apply(this);
 this.type = value;
 this.position = this.b$["java.util.Hashtable"].lastSlot;
 this.expectedModCount = this.b$["java.util.Hashtable"].modCount;
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 if (this.lastEntry != null && this.lastEntry.next != null) {
 return true;
 }while (this.position >= this.b$["java.util.Hashtable"].firstSlot) {
@@ -542,7 +542,7 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 if (this.expectedModCount == this.b$["java.util.Hashtable"].modCount) {
 if (this.lastEntry != null) {
 this.lastEntry = this.lastEntry.next;
@@ -556,11 +556,11 @@ this.position--;
 }}if (this.lastEntry != null) {
 this.canRemove = true;
 return this.type.get$java_util_MapEntry (this.lastEntry);
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
-}throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
+}throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 if (this.expectedModCount == this.b$["java.util.Hashtable"].modCount) {
 if (this.canRemove) {
 this.canRemove = false;
@@ -583,13 +583,13 @@ this.b$["java.util.Hashtable"].elementCount--;
 this.expectedModCount++;
 return;
 }}} else {
-throw Clazz.$new(IllegalStateException.construct);
-}}throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(IllegalStateException.construct,[]);
+}}throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 };
 C$.$Hashtable$HashEnumerator$ = function () {
@@ -604,13 +604,13 @@ this.start = 0;
 this.entry = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Z', function (isKey) {
+Clazz.newMethod$(C$, 'construct$Z', function (isKey) {
 C$.$init$.apply(this);
 this.key = isKey;
 this.start = this.b$["java.util.Hashtable"].lastSlot + 1;
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasMoreElements', function () {
+Clazz.newMethod$(C$, 'hasMoreElements', function () {
 if (this.entry != null) {
 return true;
 }while (--this.start >= this.b$["java.util.Hashtable"].firstSlot) {
@@ -621,20 +621,21 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'nextElement', function () {
+Clazz.newMethod$(C$, 'nextElement', function () {
 if (this.hasMoreElements ()) {
 var result = this.key ? this.entry.key : this.entry.value;
 this.entry = this.entry.next;
 return result;
-}throw Clazz.$new(java.util.NoSuchElementException.construct);
+}throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 };
-C$.EMPTY_ENUMERATION = C$.prototype.EMPTY_ENUMERATION = ((
+Clazz.defineStatics (C$,
+"EMPTY_ENUMERATION", ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
 }, java.util, "Hashtable$1", null, java.util.Enumeration);
@@ -642,16 +643,16 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasMoreElements', function () {
+Clazz.newMethod$(C$, 'hasMoreElements', function () {
 return false;
 });
 
-Clazz.newMethod$ (C$, 'nextElement', function () {
-throw Clazz.$new(java.util.NoSuchElementException.construct);
+Clazz.newMethod$(C$, 'nextElement', function () {
+throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 })()
-), Clazz.$new(java.util.Hashtable$1.$init$, [this, null]));
+), Clazz.$new(java.util.Hashtable$1.$init$, [this, null])));
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

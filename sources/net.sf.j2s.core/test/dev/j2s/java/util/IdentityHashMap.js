@@ -11,11 +11,11 @@ this.threshold = 0;
 this.modCount = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.construct$I.apply(this, [21]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I', function (maxSize) {
+Clazz.newMethod$(C$, 'construct$I', function (maxSize) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (maxSize >= 0) {
@@ -23,31 +23,31 @@ this.$size = 0;
 this.threshold = C$.prototype.getThreshold$I.apply(this, [maxSize]);
 this.elementData = C$.prototype.newElementArray$I.apply(this, [C$.prototype.computeElementArraySize.apply(this, [])]);
 } else {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'getThreshold$I', function (maxSize) {
+Clazz.newMethod$(C$, 'getThreshold$I', function (maxSize) {
 return maxSize > 3 ? maxSize : 3;
 });
 
-Clazz.newMethod$ (C$, 'computeElementArraySize', function () {
+Clazz.newMethod$(C$, 'computeElementArraySize', function () {
 return (Clazz.doubleToInt ((this.threshold * 10000) / 7500)) * 2;
 });
 
-Clazz.newMethod$ (C$, 'newElementArray$I', function (s) {
-return  Clazz.newArray$('OA', Clazz.newA$, [s]);
+Clazz.newMethod$(C$, 'newElementArray$I', function (s) {
+return  Clazz.newArray$('OA', 1, [s]);
 });
 
-Clazz.newMethod$ (C$, 'construct$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_Map', function (map) {
 C$.construct$I.apply(this, [map.size () < 6 ? 11 : map.size () * 2]);
 C$.prototype.putAllImpl$java_util_Map.apply(this, [map]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'massageValue$O', function (value) {
+Clazz.newMethod$(C$, 'massageValue$O', function (value) {
 return ((value === java.util.IdentityHashMap.NULL_OBJECT) ? null : value);
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.$size = 0;
 for (var i = 0; i < this.elementData.length; i++) {
 this.elementData[i] = null;
@@ -55,14 +55,14 @@ this.elementData[i] = null;
 this.modCount++;
 });
 
-Clazz.newMethod$ (C$, 'containsKey$O', function (key) {
+Clazz.newMethod$(C$, 'containsKey$O', function (key) {
 if (key == null) {
 key = java.util.IdentityHashMap.NULL_OBJECT;
 }var index = C$.prototype.findIndex$O$OA.apply(this, [key, this.elementData]);
 return this.elementData[index] === key;
 });
 
-Clazz.newMethod$ (C$, 'containsValue$O', function (value) {
+Clazz.newMethod$(C$, 'containsValue$O', function (value) {
 if (value == null) {
 value = java.util.IdentityHashMap.NULL_OBJECT;
 }for (var i = 1; i < this.elementData.length; i = i + 2) {
@@ -72,7 +72,7 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'get$O', function (key) {
+Clazz.newMethod$(C$, 'get$O', function (key) {
 if (key == null) {
 key = java.util.IdentityHashMap.NULL_OBJECT;
 }var index = C$.prototype.findIndex$O$OA.apply(this, [key, this.elementData]);
@@ -82,7 +82,7 @@ return C$.prototype.massageValue$O.apply(this, [result]);
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'getEntry$O', function (key) {
+Clazz.newMethod$(C$, 'getEntry$O', function (key) {
 if (key == null) {
 key = java.util.IdentityHashMap.NULL_OBJECT;
 }var index = C$.prototype.findIndex$O$OA.apply(this, [key, this.elementData]);
@@ -91,7 +91,7 @@ return C$.prototype.getEntry$I.apply(this, [index]);
 }return null;
 });
 
-Clazz.newMethod$ (C$, 'getEntry$I', function (index) {
+Clazz.newMethod$(C$, 'getEntry$I', function (index) {
 var key = this.elementData[index];
 var value = this.elementData[index + 1];
 if (key === java.util.IdentityHashMap.NULL_OBJECT) {
@@ -101,7 +101,7 @@ value = null;
 }return Clazz.$new(java.util.IdentityHashMap.IdentityHashMapEntry.construct$TK$TV,[key, value]);
 });
 
-Clazz.newMethod$ (C$, 'findIndex$O$OA', function (key, array) {
+Clazz.newMethod$(C$, 'findIndex$O$OA', function (key, array) {
 var length = array.length;
 var index = C$.prototype.getModuloHash$O$I.apply(this, [key, length]);
 var last = (index + length - 2) % length;
@@ -113,11 +113,11 @@ break;
 return index;
 });
 
-Clazz.newMethod$ (C$, 'getModuloHash$O$I', function (key, length) {
-return ((System.identityHashCode (key) & 0x7FFFFFFF) % (Clazz.doubleToInt (length / 2))) * 2;
+Clazz.newMethod$(C$, 'getModuloHash$O$I', function (key, length) {
+return ((System.identityHashCode$O (key) & 0x7FFFFFFF) % (Clazz.doubleToInt (length / 2))) * 2;
 });
 
-Clazz.newMethod$ (C$, 'put$TK$TV', function (key, value) {
+Clazz.newMethod$(C$, 'put$TK$TV', function (key, value) {
 var _key = key;
 var _value = value;
 if (_key == null) {
@@ -137,11 +137,11 @@ this.elementData[index + 1] = _value;
 return C$.prototype.massageValue$O.apply(this, [result]);
 });
 
-Clazz.newMethod$ (C$, 'putAll$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'putAll$java_util_Map', function (map) {
 C$.prototype.putAllImpl$java_util_Map.apply(this, [map]);
 });
 
-Clazz.newMethod$ (C$, 'rehash', function () {
+Clazz.newMethod$(C$, 'rehash', function () {
 var newlength = this.elementData.length << 1;
 if (newlength == 0) {
 newlength = 1;
@@ -157,11 +157,11 @@ this.elementData = newData;
 C$.prototype.computeMaxSize.apply(this, []);
 });
 
-Clazz.newMethod$ (C$, 'computeMaxSize', function () {
+Clazz.newMethod$(C$, 'computeMaxSize', function () {
 this.threshold = (Clazz.doubleToInt ((Clazz.doubleToInt (this.elementData.length / 2)) * 7500 / 10000));
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 if (key == null) {
 key = java.util.IdentityHashMap.NULL_OBJECT;
 }var hashedOk;
@@ -198,11 +198,11 @@ this.elementData[index + 1] = null;
 return C$.prototype.massageValue$O.apply(this, [result]);
 });
 
-Clazz.newMethod$ (C$, 'entrySet', function () {
+Clazz.newMethod$(C$, 'entrySet', function () {
 return Clazz.$new(java.util.IdentityHashMap.IdentityHashMapEntrySet.construct$java_util_IdentityHashMap,[this]);
 });
 
-Clazz.newMethod$ (C$, 'keySet', function () {
+Clazz.newMethod$(C$, 'keySet', function () {
 if (this.$keySet == null) {
 this.$keySet = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -212,26 +212,26 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.IdentityHashMap"].containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.IdentityHashMap"].size ();
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.IdentityHashMap"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (key) {
+Clazz.newMethod$(C$, 'remove$O', function (key) {
 if (this.b$["java.util.IdentityHashMap"].containsKey$O (key)) {
 this.b$["java.util.IdentityHashMap"].remove$O (key);
 return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.IdentityHashMap.IdentityHashMapIterator.construct$java_util_MapEntry_Type$java_util_IdentityHashMap,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -240,7 +240,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry.key;
 });
 })()
@@ -251,7 +251,7 @@ return entry.key;
 }return this.$keySet;
 });
 
-Clazz.newMethod$ (C$, 'values', function () {
+Clazz.newMethod$(C$, 'values', function () {
 if (this.valuesCollection == null) {
 this.valuesCollection = ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -261,19 +261,19 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.b$["java.util.IdentityHashMap"].containsValue$O (object);
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.b$["java.util.IdentityHashMap"].size ();
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.b$["java.util.IdentityHashMap"].clear ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.IdentityHashMap.IdentityHashMapIterator.construct$java_util_MapEntry_Type$java_util_IdentityHashMap,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -282,14 +282,14 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry.value;
 });
 })()
 ), Clazz.$new(java.util.IdentityHashMap$2$1.$init$, [this, null])), this.b$["java.util.IdentityHashMap"]]);
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 var it = this.iterator ();
 while (it.hasNext ()) {
 if (object === it.next ()) {
@@ -303,7 +303,7 @@ return false;
 }return this.valuesCollection;
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
 }if (Clazz.instanceOf(object, java.util.Map)) {
@@ -315,11 +315,11 @@ return set.equals$O (map.entrySet ());
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 return C$.superClazz.prototype.clone.apply(this, arguments);
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -327,15 +327,15 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.$size == 0;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.$size;
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeInt$I (this.$size);
 var iterator = this.entrySet ().iterator ();
@@ -346,7 +346,7 @@ stream.writeObject$O (entry.value);
 }
 });
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 var savedSize = stream.readInt ();
 this.threshold = C$.prototype.getThreshold$I.apply(this, [21]);
@@ -358,7 +358,7 @@ this.put$TK$TV (key, stream.readObject ());
 this.$size = savedSize;
 });
 
-Clazz.newMethod$ (C$, 'putAllImpl$java_util_Map', function (map) {
+Clazz.newMethod$(C$, 'putAllImpl$java_util_Map', function (map) {
 if (map.entrySet () != null) {
 C$.superClazz.prototype.putAll$java_util_Map.apply(this, arguments);
 }});
@@ -370,16 +370,16 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$TK$TV', function (theKey, theValue) {
+Clazz.newMethod$(C$, 'construct$TK$TV', function (theKey, theValue) {
 C$.superClazz.construct$TK$TV.apply(this, [theKey, theValue]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 return C$.superClazz.prototype.clone.apply(this, arguments);
 });
 
-Clazz.newMethod$ (C$, 'equals$O', function (object) {
+Clazz.newMethod$(C$, 'equals$O', function (object) {
 if (this === object) {
 return true;
 }if (Clazz.instanceOf(object, java.util.Map.Entry)) {
@@ -388,17 +388,17 @@ return (this.key === entry.getKey ()) && (this.value === entry.getValue ());
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'hashCode', function () {
-return System.identityHashCode (this.key) ^ System.identityHashCode (this.value);
+Clazz.newMethod$(C$, 'hashCode', function () {
+return System.identityHashCode$O (this.key) ^ System.identityHashCode$O (this.value);
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return this.key + "=" + this.value;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -414,14 +414,14 @@ this.type = null;
 this.canRemove = false;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_MapEntry_Type$java_util_IdentityHashMap', function (value, hm) {
+Clazz.newMethod$(C$, 'construct$java_util_MapEntry_Type$java_util_IdentityHashMap', function (value, hm) {
 C$.$init$.apply(this);
 this.associatedMap = hm;
 this.type = value;
 this.expectedModCount = hm.modCount;
 }, 1);
 
-Clazz.newMethod$ (C$, 'hasNext', function () {
+Clazz.newMethod$(C$, 'hasNext', function () {
 while (this.position < this.associatedMap.elementData.length) {
 if (this.associatedMap.elementData[this.position] == null) {
 this.position += 2;
@@ -431,15 +431,15 @@ return true;
 return false;
 });
 
-Clazz.newMethod$ (C$, 'checkConcurrentMod', function () {
+Clazz.newMethod$(C$, 'checkConcurrentMod', function () {
 if (this.expectedModCount != this.associatedMap.modCount) {
-throw Clazz.$new(java.util.ConcurrentModificationException.construct);
+throw Clazz.$new(java.util.ConcurrentModificationException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'next', function () {
+Clazz.newMethod$(C$, 'next', function () {
 this.checkConcurrentMod ();
 if (!this.hasNext ()) {
-throw Clazz.$new(java.util.NoSuchElementException.construct);
+throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 }var result = this.associatedMap.getEntry$I (this.position);
 this.lastPosition = this.position;
 this.position += 2;
@@ -447,10 +447,10 @@ this.canRemove = true;
 return this.type.get$java_util_MapEntry (result);
 });
 
-Clazz.newMethod$ (C$, 'remove', function () {
+Clazz.newMethod$(C$, 'remove', function () {
 this.checkConcurrentMod ();
 if (!this.canRemove) {
-throw Clazz.$new(IllegalStateException.construct);
+throw Clazz.$new(IllegalStateException.construct,[]);
 }this.canRemove = false;
 this.associatedMap.remove$O (this.associatedMap.elementData[this.lastPosition]);
 this.position = this.lastPosition;
@@ -459,7 +459,7 @@ this.expectedModCount++;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
@@ -470,39 +470,39 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.associatedMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_IdentityHashMap', function (hm) {
+Clazz.newMethod$(C$, 'construct$java_util_IdentityHashMap', function (hm) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.associatedMap = hm;
 }, 1);
 
-Clazz.newMethod$ (C$, 'hashMap', function () {
+Clazz.newMethod$(C$, 'hashMap', function () {
 return this.associatedMap;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.associatedMap.$size;
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.associatedMap.clear ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 if (this.contains$O (object)) {
 this.associatedMap.remove$O ((object).getKey ());
 return true;
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 if (Clazz.instanceOf(object, java.util.Map.Entry)) {
 var entry = this.associatedMap.getEntry$O ((object).getKey ());
 return entry != null && entry.equals$O (object);
 }return false;
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return Clazz.$new(java.util.IdentityHashMap.IdentityHashMapIterator.construct$java_util_MapEntry_Type$java_util_IdentityHashMap,[((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -511,7 +511,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'get$java_util_MapEntry', function (entry) {
+Clazz.newMethod$(C$, 'get$java_util_MapEntry', function (entry) {
 return entry;
 });
 })()
@@ -520,13 +520,13 @@ return entry;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 Clazz.defineStatics (C$,
 "DEFAULT_MAX_SIZE", 21,
-"loadFactor", 7500);
-C$.NULL_OBJECT = C$.prototype.NULL_OBJECT =  new Clazz._O();
+"loadFactor", 7500,
+"NULL_OBJECT",  new Clazz._O());
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

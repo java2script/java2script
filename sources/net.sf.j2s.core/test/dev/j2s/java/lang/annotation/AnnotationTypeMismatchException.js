@@ -9,25 +9,25 @@ this.$element = null;
 this.$foundType = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$reflect_Method$S', function (element, foundType) {
+Clazz.newMethod$(C$, 'construct$reflect_Method$S', function (element, foundType) {
 C$.superClazz.construct$S.apply(this, [org.apache.harmony.luni.util.Msg.getString$S$O$O ("annotation.1", element, foundType)]);
 C$.$init$.apply(this);
 this.$element = element;
 this.$foundType = foundType;
 }, 1);
 
-Clazz.newMethod$ (C$, 'element', function () {
+Clazz.newMethod$(C$, 'element', function () {
 return this.$element;
 });
 
-Clazz.newMethod$ (C$, 'foundType', function () {
+Clazz.newMethod$(C$, 'foundType', function () {
 return this.$foundType;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:14

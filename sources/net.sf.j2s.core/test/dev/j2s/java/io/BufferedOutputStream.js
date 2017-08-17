@@ -9,28 +9,28 @@ this.buf = null;
 this.count = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_OutputStream', function (out) {
+Clazz.newMethod$(C$, 'construct$java_io_OutputStream', function (out) {
 C$.superClazz.construct$java_io_OutputStream.apply(this, [out]);
 C$.$init$.apply(this);
-this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [8192, 0]);
+this.buf =  Clazz.newArray$('BA', 1, [8192]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_OutputStream$I', function (out, size) {
+Clazz.newMethod$(C$, 'construct$java_io_OutputStream$I', function (out, size) {
 C$.superClazz.construct$java_io_OutputStream.apply(this, [out]);
 C$.$init$.apply(this);
 if (size <= 0) {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
-}this.buf =  Clazz.newArray$('BA', Clazz.newByteA$, [size, 0]);
+}this.buf =  Clazz.newArray$('BA', 1, [size]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'flush', function () {
+Clazz.newMethod$(C$, 'flush', function () {
 if (this.count > 0) {
 this.out.write$BA$I$I (this.buf, 0, this.count);
 }this.count = 0;
 this.out.flush ();
 });
 
-Clazz.newMethod$ (C$, 'write$BA$I$I', function (buffer, offset, length) {
+Clazz.newMethod$(C$, 'write$BA$I$I', function (buffer, offset, length) {
 if (buffer == null) {
 throw Clazz.$new(NullPointerException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0047")]);
 }if (offset < 0 || offset > buffer.length - length || length < 0) {
@@ -42,7 +42,7 @@ return;
 if (length < available) {
 available = length;
 }if (available > 0) {
-System.arraycopy (buffer, offset, this.buf, this.count, available);
+System.arraycopy$O$I$O$I$I (buffer, offset, this.buf, this.count, available);
 this.count += available;
 }if (this.count == this.buf.length) {
 this.out.write$BA$I$I (this.buf, 0, this.buf.length);
@@ -53,11 +53,11 @@ available = length - available;
 if (available >= this.buf.length) {
 this.out.write$BA$I$I (buffer, offset, available);
 } else {
-System.arraycopy (buffer, offset, this.buf, this.count, available);
+System.arraycopy$O$I$O$I$I (buffer, offset, this.buf, this.count, available);
 this.count += available;
 }}}});
 
-Clazz.newMethod$ (C$, 'write$I', function (oneByte) {
+Clazz.newMethod$(C$, 'write$I', function (oneByte) {
 if (this.count == this.buf.length) {
 this.out.write$BA$I$I (this.buf, 0, this.count);
 this.count = 0;
@@ -66,8 +66,8 @@ this.count = 0;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:13
+//Created 2017-08-17 10:33:11

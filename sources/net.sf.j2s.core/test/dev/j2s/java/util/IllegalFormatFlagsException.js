@@ -8,26 +8,26 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.flags = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S', function (f) {
+Clazz.newMethod$(C$, 'construct$S', function (f) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (null == f) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.flags = f;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getFlags', function () {
+Clazz.newMethod$(C$, 'getFlags', function () {
 return this.flags;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 return "Flags = '" + this.flags + "'";
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

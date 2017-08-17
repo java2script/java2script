@@ -9,31 +9,31 @@ this.c = '\0';
 this.arg = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$C$Class', function (c, arg) {
+Clazz.newMethod$(C$, 'construct$C$Class', function (c, arg) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.c = c;
 if (arg == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.arg = arg;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getArgumentClass', function () {
+Clazz.newMethod$(C$, 'getArgumentClass', function () {
 return this.arg;
 });
 
-Clazz.newMethod$ (C$, 'getConversion', function () {
+Clazz.newMethod$(C$, 'getConversion', function () {
 return this.c;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 return "" + this.c + " is incompatible with " + this.arg.getName ();
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

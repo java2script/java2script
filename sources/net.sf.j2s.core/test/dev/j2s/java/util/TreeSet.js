@@ -8,30 +8,30 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.backingMap = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_SortedMap', function (map) {
+Clazz.newMethod$(C$, 'construct$java_util_SortedMap', function (map) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = map;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
-this.backingMap = Clazz.$new(java.util.TreeMap.construct);
+this.backingMap = Clazz.$new(java.util.TreeMap.construct,[]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Collection', function (collection) {
-C$.construct.apply(this);
+Clazz.newMethod$(C$, 'construct$java_util_Collection', function (collection) {
+C$.construct.apply(this, []);
 this.addAll$java_util_Collection (collection);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_Comparator', function (comparator) {
+Clazz.newMethod$(C$, 'construct$java_util_Comparator', function (comparator) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.backingMap = Clazz.$new(java.util.TreeMap.construct$java_util_Comparator,[comparator]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_util_SortedSet', function (set) {
+Clazz.newMethod$(C$, 'construct$java_util_SortedSet', function (set) {
 C$.construct$java_util_Comparator.apply(this, [set.comparator ()]);
 var it = set.iterator ();
 while (it.hasNext ()) {
@@ -39,19 +39,19 @@ this.add$TE (it.next ());
 }
 }, 1);
 
-Clazz.newMethod$ (C$, 'add$TE', function (object) {
+Clazz.newMethod$(C$, 'add$TE', function (object) {
 return this.backingMap.put$TE$TE (object, object) == null;
 });
 
-Clazz.newMethod$ (C$, 'addAll$java_util_Collection', function (collection) {
+Clazz.newMethod$(C$, 'addAll$java_util_Collection', function (collection) {
 return C$.superClazz.prototype.addAll$java_util_Collection.apply(this, arguments);
 });
 
-Clazz.newMethod$ (C$, 'clear', function () {
+Clazz.newMethod$(C$, 'clear', function () {
 this.backingMap.clear ();
 });
 
-Clazz.newMethod$ (C$, 'clone', function () {
+Clazz.newMethod$(C$, 'clone', function () {
 try {
 var clone = C$.superClazz.prototype.clone.apply(this, arguments);
 if (Clazz.instanceOf(this.backingMap, java.util.TreeMap)) {
@@ -60,7 +60,7 @@ clone.backingMap = (this.backingMap).clone ();
 clone.backingMap = Clazz.$new(java.util.TreeMap.construct$java_util_SortedMap,[this.backingMap]);
 }return clone;
 } catch (e) {
-if (Clazz.exceptionOf (e, CloneNotSupportedException)) {
+if (Clazz.exceptionOf(e, CloneNotSupportedException)){
 return null;
 } else {
 throw e;
@@ -68,19 +68,19 @@ throw e;
 }
 });
 
-Clazz.newMethod$ (C$, 'comparator', function () {
+Clazz.newMethod$(C$, 'comparator', function () {
 return this.backingMap.comparator ();
 });
 
-Clazz.newMethod$ (C$, 'contains$O', function (object) {
+Clazz.newMethod$(C$, 'contains$O', function (object) {
 return this.backingMap.containsKey$O (object);
 });
 
-Clazz.newMethod$ (C$, 'first', function () {
+Clazz.newMethod$(C$, 'first', function () {
 return this.backingMap.firstKey ();
 });
 
-Clazz.newMethod$ (C$, 'headSet$TE', function (end) {
+Clazz.newMethod$(C$, 'headSet$TE', function (end) {
 var c = this.backingMap.comparator ();
 if (c == null) {
 (end).compareTo$TE (end);
@@ -89,27 +89,27 @@ c.compare$$ (end, end);
 }return Clazz.$new(java.util.TreeSet.construct$java_util_SortedMap,[this.backingMap.headMap$TE (end)]);
 });
 
-Clazz.newMethod$ (C$, 'isEmpty', function () {
+Clazz.newMethod$(C$, 'isEmpty', function () {
 return this.backingMap.isEmpty ();
 });
 
-Clazz.newMethod$ (C$, 'iterator', function () {
+Clazz.newMethod$(C$, 'iterator', function () {
 return this.backingMap.keySet ().iterator ();
 });
 
-Clazz.newMethod$ (C$, 'last', function () {
+Clazz.newMethod$(C$, 'last', function () {
 return this.backingMap.lastKey ();
 });
 
-Clazz.newMethod$ (C$, 'remove$O', function (object) {
+Clazz.newMethod$(C$, 'remove$O', function (object) {
 return this.backingMap.remove$O (object) != null;
 });
 
-Clazz.newMethod$ (C$, 'size', function () {
+Clazz.newMethod$(C$, 'size', function () {
 return this.backingMap.size ();
 });
 
-Clazz.newMethod$ (C$, 'subSet$TE$TE', function (start, end) {
+Clazz.newMethod$(C$, 'subSet$TE$TE', function (start, end) {
 var c = this.backingMap.comparator ();
 if (c == null) {
 if ((start).compareTo$TE (end) <= 0) {
@@ -117,10 +117,10 @@ return Clazz.$new(java.util.TreeSet.construct$java_util_SortedMap,[this.backingM
 }} else {
 if (c.compare$$ (start, end) <= 0) {
 return Clazz.$new(java.util.TreeSet.construct$java_util_SortedMap,[this.backingMap.subMap$TE$TE (start, end)]);
-}}throw Clazz.$new(IllegalArgumentException.construct);
+}}throw Clazz.$new(IllegalArgumentException.construct,[]);
 });
 
-Clazz.newMethod$ (C$, 'tailSet$TE', function (start) {
+Clazz.newMethod$(C$, 'tailSet$TE', function (start) {
 var c = this.backingMap.comparator ();
 if (c == null) {
 (start).compareTo$TE (start);
@@ -129,7 +129,7 @@ c.compare$$ (start, start);
 }return Clazz.$new(java.util.TreeSet.construct$java_util_SortedMap,[this.backingMap.tailMap$TE (start)]);
 });
 
-Clazz.newMethod$ (C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
+Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 stream.writeObject$O (this.backingMap.comparator ());
 var size = this.backingMap.size ();
@@ -141,7 +141,7 @@ stream.writeObject$O (it.next ());
 }
 }});
 
-Clazz.newMethod$ (C$, 'readObject$java_io_ObjectInputStream', function (stream) {
+Clazz.newMethod$(C$, 'readObject$java_io_ObjectInputStream', function (stream) {
 stream.defaultReadObject ();
 var map = Clazz.$new(java.util.TreeMap.construct$java_util_Comparator,[stream.readObject ()]);
 var size = stream.readInt ();
@@ -164,4 +164,4 @@ last = x;
 })()
 });
 
-//Created 2017-08-12 07:32:21
+//Created 2017-08-17 10:33:18

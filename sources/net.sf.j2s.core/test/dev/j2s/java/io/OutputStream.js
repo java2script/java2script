@@ -7,21 +7,21 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'close', function () {
+Clazz.newMethod$(C$, 'close', function () {
 });
 
-Clazz.newMethod$ (C$, 'flush', function () {
+Clazz.newMethod$(C$, 'flush', function () {
 });
 
-Clazz.newMethod$ (C$, 'write$BA', function (buffer) {
+Clazz.newMethod$(C$, 'write$BA', function (buffer) {
 this.write$BA$I$I (buffer, 0, buffer.length);
 });
 
-Clazz.newMethod$ (C$, 'write$BA$I$I', function (buffer, offset, count) {
+Clazz.newMethod$(C$, 'write$BA$I$I', function (buffer, offset, count) {
 if (offset <= buffer.length && 0 <= offset && 0 <= count && count <= buffer.length - offset) {
 for (var i = offset; i < offset + count; i++) this.write$I (buffer[i]);
 
@@ -30,4 +30,4 @@ for (var i = offset; i < offset + count; i++) this.write$I (buffer[i]);
 })()
 });
 
-//Created 2017-08-12 07:32:14
+//Created 2017-08-17 10:33:12

@@ -9,31 +9,31 @@ this.f = null;
 this.c = '\0';
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$C', function (f, c) {
+Clazz.newMethod$(C$, 'construct$S$C', function (f, c) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 if (null == f) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }this.f = f;
 this.c = c;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getFlags', function () {
+Clazz.newMethod$(C$, 'getFlags', function () {
 return this.f;
 });
 
-Clazz.newMethod$ (C$, 'getConversion', function () {
+Clazz.newMethod$(C$, 'getConversion', function () {
 return this.c;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 return "Mismatched Convertor =" + this.c + ", Flags= " + this.f;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:16

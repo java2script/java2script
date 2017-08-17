@@ -8,24 +8,24 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.source = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function (source) {
+Clazz.newMethod$(C$, 'construct', function (source) {
 C$.$init$.apply(this);
 if (source != null) this.source = source;
- else throw Clazz.$new(IllegalArgumentException.construct);
+ else throw Clazz.$new(IllegalArgumentException.construct,[]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getSource', function () {
+Clazz.newMethod$(C$, 'getSource', function () {
 return this.source;
 });
 
-Clazz.newMethod$ (C$, 'toString', function () {
+Clazz.newMethod$(C$, 'toString', function () {
 return this.getClass ().getName () + "[source=" + String.valueOf$O (this.source) + ']';
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:16

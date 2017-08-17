@@ -10,19 +10,19 @@ this.locale = null;
 this.bundleName = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getString$S', function (key) {
+Clazz.newMethod$(C$, 'getString$S', function (key) {
 return this.getObject$S (key);
 });
 
-Clazz.newMethod$ (C$, 'getStringArray$S', function (key) {
+Clazz.newMethod$(C$, 'getStringArray$S', function (key) {
 return this.getObject$S (key);
 });
 
-Clazz.newMethod$ (C$, 'getObject$S', function (key) {
+Clazz.newMethod$(C$, 'getObject$S', function (key) {
 var obj = this.handleGetObject$S (key);
 if (obj == null) {
 if (this.parent != null) {
@@ -31,31 +31,31 @@ obj = this.parent.getObject$S (key);
 }return obj;
 });
 
-Clazz.newMethod$ (C$, 'getLocale', function () {
+Clazz.newMethod$(C$, 'getLocale', function () {
 return this.locale;
 });
 
-Clazz.newMethod$ (C$, 'setParent$java_util_ResourceBundle', function (parent) {
+Clazz.newMethod$(C$, 'setParent$java_util_ResourceBundle', function (parent) {
 this.parent = parent;
 });
 
-Clazz.newMethod$ (C$, 'getBundle$S', function (baseName) {
+Clazz.newMethod$(C$, 'getBundle$S', function (baseName) {
 return java.util.ResourceBundle.getBundleImpl$S$java_util_Locale$ClassLoader (baseName, null, null);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getBundle$S$java_util_Locale', function (baseName, locale) {
+Clazz.newMethod$(C$, 'getBundle$S$java_util_Locale', function (baseName, locale) {
 return java.util.ResourceBundle.getBundleImpl$S$java_util_Locale$ClassLoader (baseName, locale, null);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getBundle$S$java_util_Locale$ClassLoader', function (baseName, locale, loader) {
+Clazz.newMethod$(C$, 'getBundle$S$java_util_Locale$ClassLoader', function (baseName, locale, loader) {
 if (loader == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }return java.util.ResourceBundle.getBundleImpl$S$java_util_Locale$ClassLoader (baseName, locale, loader);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getBundleImpl$S$java_util_Locale$ClassLoader', function (baseName, locale, loader) {
+Clazz.newMethod$(C$, 'getBundleImpl$S$java_util_Locale$ClassLoader', function (baseName, locale, loader) {
 if (baseName == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }for (var i = 0; i < java.util.ResourceBundle.caches.length; i++) {
 if (java.util.ResourceBundle.caches[i].bundleName === baseName) {
 return java.util.ResourceBundle.caches[i];
@@ -65,7 +65,7 @@ java.util.ResourceBundle.caches[java.util.ResourceBundle.caches.length] = bundle
 return bundle;
 }, 1);
 
-Clazz.newMethod$ (C$, 'registerBundle$S$S', function (baseName, content) {
+Clazz.newMethod$(C$, 'registerBundle$S$S', function (baseName, content) {
 for (var i = 0; i < java.util.ResourceBundle.caches.length; i++) {
 if (java.util.ResourceBundle.caches[i].bundleName === baseName) {
 return;
@@ -78,26 +78,26 @@ Clazz.newInstance$ (this, arguments[0], true);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.map =  Clazz.newArray$('SA', Clazz.newA$, [0]);
-this.keys =  Clazz.newArray$('SA', Clazz.newA$, [0]);
+this.map =  Clazz.newArray$('SA', 1, [0]);
+this.keys =  Clazz.newArray$('SA', 1, [0]);
 this.content = null;
 this.initialized = false;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S', function (bundleName) {
+Clazz.newMethod$(C$, 'construct$S', function (bundleName) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.bundleName = bundleName;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$S$S', function (bundleName, content) {
+Clazz.newMethod$(C$, 'construct$S$S', function (bundleName, content) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.bundleName = bundleName;
 this.content = content;
 }, 1);
 
-Clazz.newMethod$ (C$, 'evalString$S', function (a) {
+Clazz.newMethod$(C$, 'evalString$S', function (a) {
 var r = new Array ();
 var b = false;
 var x = 0;
@@ -130,7 +130,7 @@ r[r.length] = a.substring (x, a.length);
 return r.join ('');
 });
 
-Clazz.newMethod$ (C$, 'initBundle', function () {
+Clazz.newMethod$(C$, 'initBundle', function () {
 if (this.initialized) {
 return;
 }this.initialized = true;
@@ -182,7 +182,7 @@ m[key] = value;
 }}}}
 });
 
-Clazz.newMethod$ (C$, 'getKeys', function () {
+Clazz.newMethod$(C$, 'getKeys', function () {
 return ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
@@ -192,19 +192,19 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.index = -1;
 }, 1);
 
-Clazz.newMethod$ (C$, 'nextElement', function () {
+Clazz.newMethod$(C$, 'nextElement', function () {
 this.index++;
 return this.b$["java.util.ResourceBundle.TextResourceBundle"].keys[this.index];
 });
 
-Clazz.newMethod$ (C$, 'hasMoreElements', function () {
+Clazz.newMethod$(C$, 'hasMoreElements', function () {
 return this.index < this.b$["java.util.ResourceBundle.TextResourceBundle"].keys.length - 1;
 });
 })()
 ), Clazz.$new(java.util.ResourceBundle$TextResourceBundle$1.$init$, [this, null]));
 });
 
-Clazz.newMethod$ (C$, 'handleGetObject$S', function (key) {
+Clazz.newMethod$(C$, 'handleGetObject$S', function (key) {
 if (!this.initialized) {
 this.initBundle ();
 }var m = this.map;
@@ -215,10 +215,11 @@ return m[key];
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
-C$.caches = C$.prototype.caches =  Clazz.newArray$('java_util_ResourceBundleA', Clazz.newA$, [0]);
+Clazz.defineStatics (C$,
+"caches",  Clazz.newArray$('java_util_ResourceBundleA', 1, [0]));
 })()
 });
 
-//Created 2017-08-12 07:32:20
+//Created 2017-08-17 10:33:18

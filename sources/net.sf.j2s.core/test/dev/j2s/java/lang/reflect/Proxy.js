@@ -8,32 +8,32 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.h = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$reflect_InvocationHandler', function (h) {
+Clazz.newMethod$(C$, 'construct$reflect_InvocationHandler', function (h) {
 C$.$init$.apply(this);
 this.h = h;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getProxyClass$ClassLoader$ClassA', function (loader, interfaces) {
+Clazz.newMethod$(C$, 'getProxyClass$ClassLoader$ClassA', function (loader, interfaces) {
 if (interfaces == null) {
-throw Clazz.$new(NullPointerException.construct);
+throw Clazz.$new(NullPointerException.construct,[]);
 }return null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'newProxyInstance$ClassLoader$ClassA$reflect_InvocationHandler', function (loader, interfaces, h) {
+Clazz.newMethod$(C$, 'newProxyInstance$ClassLoader$ClassA$reflect_InvocationHandler', function (loader, interfaces, h) {
 if (h != null) {
-}throw Clazz.$new(NullPointerException.construct);
+}throw Clazz.$new(NullPointerException.construct,[]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isProxyClass$Class', function (cl) {
+Clazz.newMethod$(C$, 'isProxyClass$Class', function (cl) {
 if (cl != null) {
-}throw Clazz.$new(NullPointerException.construct);
+}throw Clazz.$new(NullPointerException.construct,[]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'getInvocationHandler$O', function (proxy) {
+Clazz.newMethod$(C$, 'getInvocationHandler$O', function (proxy) {
 if (java.lang.reflect.Proxy.isProxyClass$Class (proxy.getClass ())) {
 return (proxy).h;
 }throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K00f1")]);
@@ -41,4 +41,4 @@ return (proxy).h;
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

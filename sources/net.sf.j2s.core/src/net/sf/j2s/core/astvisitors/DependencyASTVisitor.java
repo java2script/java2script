@@ -171,6 +171,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 
 	public String getDependencyScript(StringBuffer buf) {
+		checkJ2SClazzMethods(buf);
 		checkSuperType(musts);
 		checkSuperType(requires);
 		checkSuperType(optionals);
@@ -265,6 +266,15 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return prefix + js;
 	}
 
+	private void checkJ2SClazzMethods(StringBuffer buf) {
+		// If only java.lang.reflect.Array.newInstance was referenced,
+		// it will have been changed to Clazz.newArray$, and
+		// we can remove the dependency on java.lang.reflect.Array
+		if (buf.indexOf("java.lang.reflect.Array.") < 0) { 
+		  ignores.add("java.lang.reflect.Array");
+		}
+	}
+
 	public static String joinArrayClasses(StringBuffer buf, String[] ss, String last) {
 		return joinArrayClasses(buf, ss, last, ", ");
 	}
@@ -350,17 +360,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * @param node  
 	 */
 	public boolean isNodeInMustPath(ASTNode node) {
-		// Add more class dependencies in musts will make classloader running
-		// into stack call limit reached.
-		// Temporary disable this bug fix.
-		/*
-		 * if (node == null) return false; do { if (node instanceof
-		 * TypeDeclaration) { return false; } if (node instanceof
-		 * MethodDeclaration) { MethodDeclaration m = (MethodDeclaration) node;
-		 * return m.isConstructor(); } if (node instanceof FieldDeclaration) {
-		 * return true; } if (node instanceof Initializer) { return true; } node
-		 * = node.getParent(); } while (node != null); //
-		 */
 		return false;
 	}
 
@@ -583,10 +582,19 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean isClassKnown(String qualifiedName) {
-		String[] knownClasses = new String[] { "java.lang.Object", "java.lang.Class", "java.lang.String",
-				"java.io.Serializable", "java.lang.Iterable", "java.lang.CharSequence", "java.lang.Cloneable",
-				"java.lang.Comparable", "java.lang.Runnable", "java.util.Comparator", "java.lang.System",
-				"java.io.PrintStream", "java.lang.Math", "java.lang.Integer" };
+		String[] knownClasses = new String[] { 
+				"java.lang.Object", "java.lang.Class", 
+				"java.lang.String",
+				"java.lang.Byte", "java.lang.Character",
+				"java.lang.Short", "java.lang.Long", 
+				"java.lang.Integer", "java.lang.Float", 
+				"java.lang.Double", 
+				"java.io.Serializable", "java.lang.Iterable", 
+				"java.lang.CharSequence", "java.lang.Cloneable",
+				"java.lang.Comparable", "java.lang.Runnable", 
+				"java.util.Comparator", "java.lang.System",
+				"java.io.PrintStream", "java.lang.Math", 
+				};
 
 		for (int i = 0; i < knownClasses.length; i++) {
 			if (knownClasses[i].equals(qualifiedName)) {
@@ -595,8 +603,9 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		}
 		return false;
 	}
-
+	
 	public boolean isQualifiedNameOK(String qualifiedName, ASTNode node) {
+		
 		if (qualifiedName != null && !isClassKnown(qualifiedName) && qualifiedName.indexOf('[') == -1
 				&& !"int".equals(qualifiedName) && !"float".equals(qualifiedName) && !"double".equals(qualifiedName)
 				&& !"long".equals(qualifiedName) && !"short".equals(qualifiedName) && !"byte".equals(qualifiedName)
@@ -1009,12 +1018,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
-		/*
-		 * sgurin: last fix: returning to original version of the method because
-		 * a bug was introduced in my last modifications.
-		 */
 		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
 		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
+			
+			
+			
 			Expression expression = node.getExpression();
 			if (expression instanceof Name) {
 				Name name = (Name) expression;

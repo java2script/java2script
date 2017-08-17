@@ -7,60 +7,60 @@ Clazz.newInstance$ (this, arguments);
 Clazz.newMethod$(C$, '$init$', function () {
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isAbstract$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isAbstract$I', function (modifiers) {
 return ((modifiers & 1024) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isFinal$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isFinal$I', function (modifiers) {
 return ((modifiers & 16) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isInterface$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isInterface$I', function (modifiers) {
 return ((modifiers & 512) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isNative$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isNative$I', function (modifiers) {
 return ((modifiers & 256) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isPrivate$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isPrivate$I', function (modifiers) {
 return ((modifiers & 2) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isProtected$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isProtected$I', function (modifiers) {
 return ((modifiers & 4) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isPublic$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isPublic$I', function (modifiers) {
 return ((modifiers & 1) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isStatic$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isStatic$I', function (modifiers) {
 return ((modifiers & 8) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isStrict$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isStrict$I', function (modifiers) {
 return ((modifiers & 2048) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isSynchronized$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isSynchronized$I', function (modifiers) {
 return ((modifiers & 32) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isTransient$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isTransient$I', function (modifiers) {
 return ((modifiers & 128) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'isVolatile$I', function (modifiers) {
+Clazz.newMethod$(C$, 'isVolatile$I', function (modifiers) {
 return ((modifiers & 64) != 0);
 }, 1);
 
-Clazz.newMethod$ (C$, 'toString$I', function (modifiers) {
-var sb =  Clazz.newArray$('SA', Clazz.newA$, [0]);
+Clazz.newMethod$(C$, 'toString$I', function (modifiers) {
+var sb =  Clazz.newArray$('SA', 1, [0]);
 if (java.lang.reflect.Modifier.isPublic$I (modifiers)) sb[sb.length] = "public";
 if (java.lang.reflect.Modifier.isProtected$I (modifiers)) sb[sb.length] = "protected";
 if (java.lang.reflect.Modifier.isPrivate$I (modifiers)) sb[sb.length] = "private";
@@ -98,4 +98,4 @@ Clazz.defineStatics (C$,
 })()
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

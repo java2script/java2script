@@ -8,24 +8,24 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.w = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I', function (w) {
+Clazz.newMethod$(C$, 'construct$I', function (w) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.w = w;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getWidth', function () {
+Clazz.newMethod$(C$, 'getWidth', function () {
 return this.w;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 return String.valueOf$I (this.w);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

@@ -9,25 +9,25 @@ this.$annotationType = null;
 this.$elementName = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Class$S', function (annotationType, elementName) {
+Clazz.newMethod$(C$, 'construct$Class$S', function (annotationType, elementName) {
 C$.superClazz.construct$S.apply(this, [org.apache.harmony.luni.util.Msg.getString$S$O$O ("annotation.0", elementName, annotationType)]);
 C$.$init$.apply(this);
 this.$annotationType = annotationType;
 this.$elementName = elementName;
 }, 1);
 
-Clazz.newMethod$ (C$, 'annotationType', function () {
+Clazz.newMethod$(C$, 'annotationType', function () {
 return this.$annotationType;
 });
 
-Clazz.newMethod$ (C$, 'elementName', function () {
+Clazz.newMethod$(C$, 'elementName', function () {
 return this.$elementName;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:15

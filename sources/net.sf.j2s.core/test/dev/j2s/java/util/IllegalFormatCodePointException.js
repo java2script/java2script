@@ -8,24 +8,24 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.c = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$I', function (c) {
+Clazz.newMethod$(C$, 'construct$I', function (c) {
 Clazz.super$(C$, this);
 C$.$init$.apply(this);
 this.c = c;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getCodePoint', function () {
+Clazz.newMethod$(C$, 'getCodePoint', function () {
 return this.c;
 });
 
-Clazz.newMethod$ (C$, 'getMessage', function () {
+Clazz.newMethod$(C$, 'getMessage', function () {
 return "Code point is " + this.c;
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:19
+//Created 2017-08-17 10:33:17

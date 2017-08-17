@@ -8,31 +8,31 @@ Clazz.newMethod$(C$, '$init$', function () {
 this.target = null;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct', function () {
+Clazz.newMethod$(C$, 'construct', function () {
 C$.superClazz.construct$Throwable.apply(this, [null]);
 C$.$init$.apply(this);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Throwable', function (exception) {
+Clazz.newMethod$(C$, 'construct$Throwable', function (exception) {
 C$.superClazz.construct$S$Throwable.apply(this, [null, exception]);
 C$.$init$.apply(this);
 this.target = exception;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$Throwable$S', function (exception, detailMessage) {
+Clazz.newMethod$(C$, 'construct$Throwable$S', function (exception, detailMessage) {
 C$.superClazz.construct$S$Throwable.apply(this, [detailMessage, exception]);
 C$.$init$.apply(this);
 this.target = exception;
 }, 1);
 
-Clazz.newMethod$ (C$, 'getTargetException', function () {
+Clazz.newMethod$(C$, 'getTargetException', function () {
 return this.target;
 });
 
-Clazz.newMethod$ (C$, 'getCause', function () {
+Clazz.newMethod$(C$, 'getCause', function () {
 return this.target;
 });
 })()
 });
 
-//Created 2017-08-12 07:32:17
+//Created 2017-08-17 10:33:15

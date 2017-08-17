@@ -2,4 +2,4 @@ Clazz.load (["java.lang.reflect.Type"], "java.lang.reflect.TypeVariable", null, 
 Clazz.declareInterface (java.lang.reflect, "TypeVariable", java.lang.reflect.Type);
 });
 
-//Created 2017-08-12 07:32:18
+//Created 2017-08-17 10:33:15

@@ -11,24 +11,24 @@ this.pos = 0;
 this.lineSeparator = "\r\n";
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_Writer', function (out) {
+Clazz.newMethod$(C$, 'construct$java_io_Writer', function (out) {
 C$.superClazz.construct$O.apply(this, [out]);
 C$.$init$.apply(this);
 this.out = out;
-this.buf =  Clazz.newArray$('CA', Clazz.newA$, [8192, '\0']);
+this.buf =  Clazz.newArray$('CA', 1, [8192]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_Writer$I', function (out, size) {
+Clazz.newMethod$(C$, 'construct$java_io_Writer$I', function (out, size) {
 C$.superClazz.construct$O.apply(this, [out]);
 C$.$init$.apply(this);
 if (size > 0) {
 this.out = out;
-this.buf =  Clazz.newArray$('CA', Clazz.newA$, [size, '\0']);
+this.buf =  Clazz.newArray$('CA', 1, [size]);
 } else {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'close', function () {
+Clazz.newMethod$(C$, 'close', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 this.flush ();
@@ -37,7 +37,7 @@ this.buf = null;
 this.out = null;
 }}});
 
-Clazz.newMethod$ (C$, 'flush', function () {
+Clazz.newMethod$(C$, 'flush', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.pos > 0) {
@@ -48,20 +48,20 @@ this.out.flush ();
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005d")]);
 }}});
 
-Clazz.newMethod$ (C$, 'isOpen', function () {
+Clazz.newMethod$(C$, 'isOpen', function () {
 return this.out != null;
 });
 
-Clazz.newMethod$ (C$, 'newLine', function () {
+Clazz.newMethod$(C$, 'newLine', function () {
 this.write$S$I$I ("\r\n", 0, "\r\n".length);
 });
 
-Clazz.newMethod$ (C$, 'write$CA$I$I', function (cbuf, offset, count) {
+Clazz.newMethod$(C$, 'write$CA$I$I', function (cbuf, offset, count) {
 {
 if (!C$.prototype.isOpen.apply(this, [])) {
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005d")]);
 }if (offset < 0 || offset > cbuf.length - count || count < 0) {
-throw Clazz.$new(IndexOutOfBoundsException.construct);
+throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 }if (this.pos == 0 && count >= this.buf.length) {
 this.out.write$CA$I$I (cbuf, offset, count);
 return;
@@ -69,7 +69,7 @@ return;
 if (count < available) {
 available = count;
 }if (available > 0) {
-System.arraycopy (cbuf, offset, this.buf, this.pos, available);
+System.arraycopy$O$I$O$I$I (cbuf, offset, this.buf, this.pos, available);
 this.pos += available;
 }if (this.pos == this.buf.length) {
 this.out.write$CA$I$I (this.buf, 0, this.buf.length);
@@ -80,11 +80,11 @@ available = count - available;
 if (available >= this.buf.length) {
 this.out.write$CA$I$I (cbuf, offset, available);
 return;
-}System.arraycopy (cbuf, offset, this.buf, this.pos, available);
+}System.arraycopy$O$I$O$I$I (cbuf, offset, this.buf, this.pos, available);
 this.pos += available;
 }}}});
 
-Clazz.newMethod$ (C$, 'write$I', function (oneChar) {
+Clazz.newMethod$(C$, 'write$I', function (oneChar) {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.pos >= this.buf.length) {
@@ -95,16 +95,16 @@ this.pos = 0;
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005d")]);
 }}});
 
-Clazz.newMethod$ (C$, 'write$S$I$I', function (str, offset, count) {
+Clazz.newMethod$(C$, 'write$S$I$I', function (str, offset, count) {
 {
 if (!C$.prototype.isOpen.apply(this, [])) {
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005d")]);
 }if (count <= 0) {
 return;
 }if (offset > str.length - count || offset < 0) {
-throw Clazz.$new(StringIndexOutOfBoundsException.construct);
+throw Clazz.$new(StringIndexOutOfBoundsException.construct,[]);
 }if (this.pos == 0 && count >= this.buf.length) {
-var chars =  Clazz.newArray$('CA', Clazz.newA$, [count, '\0']);
+var chars =  Clazz.newArray$('CA', 1, [count]);
 str.getChars$I$I$CA$I (offset, offset + count, chars, 0);
 this.out.write$CA$I$I (chars, 0, count);
 return;
@@ -121,7 +121,7 @@ if (count > available) {
 offset += available;
 available = count - available;
 if (available >= this.buf.length) {
-var chars =  Clazz.newArray$('CA', Clazz.newA$, [count, '\0']);
+var chars =  Clazz.newArray$('CA', 1, [count]);
 str.getChars$I$I$CA$I (offset, offset + available, chars, 0);
 this.out.write$CA$I$I (chars, 0, available);
 return;
@@ -131,8 +131,8 @@ this.pos += available;
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:13
+//Created 2017-08-17 10:33:11

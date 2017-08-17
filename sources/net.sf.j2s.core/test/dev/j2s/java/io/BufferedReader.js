@@ -13,31 +13,31 @@ this.markpos = -1;
 this.pos = 0;
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_Reader', function ($in) {
+Clazz.newMethod$(C$, 'construct$java_io_Reader', function ($in) {
 C$.superClazz.construct$O.apply(this, [$in]);
 C$.$init$.apply(this);
 this.$in = $in;
-this.buf =  Clazz.newArray$('CA', Clazz.newA$, [8192, '\0']);
+this.buf =  Clazz.newArray$('CA', 1, [8192]);
 }, 1);
 
-Clazz.newMethod$ (C$, 'construct$java_io_Reader$I', function ($in, size) {
+Clazz.newMethod$(C$, 'construct$java_io_Reader$I', function ($in, size) {
 C$.superClazz.construct$O.apply(this, [$in]);
 C$.$init$.apply(this);
 if (size > 0) {
 this.$in = $in;
-this.buf =  Clazz.newArray$('CA', Clazz.newA$, [size, '\0']);
+this.buf =  Clazz.newArray$('CA', 1, [size]);
 } else {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
 }}, 1);
 
-Clazz.newMethod$ (C$, 'close', function () {
+Clazz.newMethod$(C$, 'close', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 this.$in.close ();
 this.buf = null;
 }}});
 
-Clazz.newMethod$ (C$, 'fillbuf', function () {
+Clazz.newMethod$(C$, 'fillbuf', function () {
 if (this.markpos == -1 || (this.pos - this.markpos >= this.marklimit)) {
 var result = this.$in.read$CA$I$I (this.buf, 0, this.buf.length);
 if (result > 0) {
@@ -49,11 +49,11 @@ this.count = result == -1 ? 0 : result;
 var newLength = this.buf.length * 2;
 if (newLength > this.marklimit) {
 newLength = this.marklimit;
-}var newbuf =  Clazz.newArray$('CA', Clazz.newA$, [newLength, '\0']);
-System.arraycopy (this.buf, 0, newbuf, 0, this.buf.length);
+}var newbuf =  Clazz.newArray$('CA', 1, [newLength]);
+System.arraycopy$O$I$O$I$I (this.buf, 0, newbuf, 0, this.buf.length);
 this.buf = newbuf;
 } else if (this.markpos > 0) {
-System.arraycopy (this.buf, this.markpos, this.buf, 0, this.buf.length - this.markpos);
+System.arraycopy$O$I$O$I$I (this.buf, this.markpos, this.buf, 0, this.buf.length - this.markpos);
 }this.pos -= this.markpos;
 this.count = this.markpos = 0;
 var charsread = this.$in.read$CA$I$I (this.buf, this.pos, this.buf.length - this.pos);
@@ -61,11 +61,11 @@ this.count = charsread == -1 ? this.pos : this.pos + charsread;
 return charsread;
 });
 
-Clazz.newMethod$ (C$, 'isOpen', function () {
+Clazz.newMethod$(C$, 'isOpen', function () {
 return this.buf != null;
 });
 
-Clazz.newMethod$ (C$, 'mark$I', function (readlimit) {
+Clazz.newMethod$(C$, 'mark$I', function (readlimit) {
 if (readlimit >= 0) {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
@@ -74,14 +74,14 @@ this.markpos = this.pos;
 } else {
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }}} else {
-throw Clazz.$new(IllegalArgumentException.construct);
+throw Clazz.$new(IllegalArgumentException.construct,[]);
 }});
 
-Clazz.newMethod$ (C$, 'markSupported', function () {
+Clazz.newMethod$(C$, 'markSupported', function () {
 return true;
 });
 
-Clazz.newMethod$ (C$, 'read', function () {
+Clazz.newMethod$(C$, 'read', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.pos < this.count || C$.prototype.fillbuf.apply(this, []) != -1) {
@@ -90,18 +90,18 @@ return this.buf[this.pos++];
 }throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }});
 
-Clazz.newMethod$ (C$, 'read$CA$I$I', function (buffer, offset, length) {
+Clazz.newMethod$(C$, 'read$CA$I$I', function (buffer, offset, length) {
 {
 if (!C$.prototype.isOpen.apply(this, [])) {
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }if (offset < 0 || offset > buffer.length - length || length < 0) {
-throw Clazz.$new(IndexOutOfBoundsException.construct);
+throw Clazz.$new(IndexOutOfBoundsException.construct,[]);
 }if (length == 0) {
 return 0;
 }var required;
 if (this.pos < this.count) {
 var copylength = this.count - this.pos >= length ? length : this.count - this.pos;
-System.arraycopy (this.buf, this.pos, buffer, offset, copylength);
+System.arraycopy$O$I$O$I$I (this.buf, this.pos, buffer, offset, copylength);
 this.pos += copylength;
 if (copylength == length || !this.$in.ready ()) {
 return copylength;
@@ -119,7 +119,7 @@ return required == length ? -1 : length - required;
 if (C$.prototype.fillbuf.apply(this, []) == -1) {
 return required == length ? -1 : length - required;
 }read = this.count - this.pos >= required ? required : this.count - this.pos;
-System.arraycopy (this.buf, this.pos, buffer, offset, read);
+System.arraycopy$O$I$O$I$I (this.buf, this.pos, buffer, offset, read);
 this.pos += read;
 }required -= read;
 if (required == 0) {
@@ -130,7 +130,7 @@ return length - required;
 }
 }});
 
-Clazz.newMethod$ (C$, 'readLine', function () {
+Clazz.newMethod$(C$, 'readLine', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if ((this.pos >= this.count) && (C$.prototype.fillbuf.apply(this, []) == -1)) {
@@ -183,14 +183,14 @@ result.append$CA$I$I (this.buf, this.pos, this.count - this.pos - 1);
 }throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }});
 
-Clazz.newMethod$ (C$, 'ready', function () {
+Clazz.newMethod$(C$, 'ready', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 return ((this.count - this.pos) > 0) || this.$in.ready ();
 }throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }});
 
-Clazz.newMethod$ (C$, 'reset', function () {
+Clazz.newMethod$(C$, 'reset', function () {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
 if (this.markpos != -1) {
@@ -201,7 +201,7 @@ throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.M
 throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
 }}});
 
-Clazz.newMethod$ (C$, 'skip$J', function (amount) {
+Clazz.newMethod$(C$, 'skip$J', function (amount) {
 if (amount >= 0) {
 {
 if (C$.prototype.isOpen.apply(this, [])) {
@@ -223,13 +223,13 @@ this.pos = this.count;
 }
 return amount;
 }throw Clazz.$new(java.io.IOException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K005b")]);
-}}throw Clazz.$new(IllegalArgumentException.construct);
+}}throw Clazz.$new(IllegalArgumentException.construct,[]);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
-},true);
+}, 1);
 })()
 });
 
-//Created 2017-08-12 07:32:13
+//Created 2017-08-17 10:33:11
