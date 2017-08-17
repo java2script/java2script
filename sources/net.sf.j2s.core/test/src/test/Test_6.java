@@ -1,7 +1,5 @@
 package test;
 
-import test.Test_5.Test_5_inner;
-
 public class Test_6 extends Test_7 {
 
   public int[] test6 = new int[6];
