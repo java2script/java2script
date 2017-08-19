@@ -16,8 +16,6 @@
 */
 package javajs.util;
 
-import java.io.Serializable;
-
 import javajs.api.JSONEncodable;
 
 /**
@@ -33,7 +31,7 @@ import javajs.api.JSONEncodable;
  * for the optimization of compiled JavaScript using Java2Script.
  *
  */
-public abstract class T3 implements JSONEncodable, Serializable {
+public abstract class T3 implements JSONEncodable {
 
   public float x, y, z;
 

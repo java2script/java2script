@@ -16,7 +16,7 @@ this.closed = false;
 Clazz.newMethod$(C$, 'construct$java_io_InputStream', function ($in) {
 C$.superClazz.construct$java_io_InputStream.apply(this, [$in]);
 C$.$init$.apply(this);
-this.buf = ($in == null) ? null :  Clazz.newArray$('BA', 1, [8192]);
+this.buf = ($in == null) ? null :  Clazz.newArray$(Byte.TYPE, [8192]);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct$java_io_InputStream$I', function ($in, size) {
@@ -24,7 +24,7 @@ C$.superClazz.construct$java_io_InputStream.apply(this, [$in]);
 C$.$init$.apply(this);
 if (size <= 0) {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
-}this.buf = ($in == null) ? null :  Clazz.newArray$('BA', 1, [size]);
+}this.buf = ($in == null) ? null :  Clazz.newArray$(Byte.TYPE, [size]);
 }, 1);
 
 Clazz.newMethod$(C$, 'available', function () {
@@ -53,7 +53,7 @@ this.count = result == -1 ? 0 : result;
 var newLength = this.buf.length * 2;
 if (newLength > this.marklimit) {
 newLength = this.marklimit;
-}var newbuf =  Clazz.newArray$('BA', 1, [newLength]);
+}var newbuf =  Clazz.newArray$(Byte.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (this.buf, 0, newbuf, 0, this.buf.length);
 this.buf = newbuf;
 } else if (this.markpos > 0) {
@@ -163,4 +163,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:11
+//Created 2017-08-18 22:17:56

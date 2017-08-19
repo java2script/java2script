@@ -87,9 +87,9 @@ Clazz.newMethod$(C$, 'setSeed$J', function (seed) {
 this.seed = (seed ^ 25214903917) & (281474976710655);
 this.haveNextNextGaussian = false;
 });
-Clazz.defineStatics (C$,
-"multiplier", 0x5deece66d);
+Clazz.defineStatics$ (C$, ["multiplier", 0x5deece66d
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04

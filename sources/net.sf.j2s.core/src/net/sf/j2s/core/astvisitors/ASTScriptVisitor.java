@@ -1561,7 +1561,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					&& (varBinding.getModifiers() & Modifier.FINAL) != 0 && varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
-					buffer.append("this.f$.");
+					buffer.append("this.$finals.");
 					if (currentBlockForVisit != -1) {
 						List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(
 								ASTVariableVisitor.class)).finalVars;
@@ -2058,7 +2058,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// user using new Foo()
 			buffer.append("Clazz.newInstance$ (this, arguments");
 			if (!binding.isTopLevel())
-				buffer.append("[0], true");
+				buffer.append("[0], " + !isStatic(binding.getModifiers()));
 			buffer.append(");\r\n");
 			buffer.append("}"); // end of Clazz.decorateAsClass(){};
 			buffer.append(", ");
@@ -2240,7 +2240,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					continue;
 				}
 				if (staticCount != -1) {
-					buffer.append(");\r\n");
+					buffer.append("]);\r\n");
 					staticCount = -1;
 				}
 				if (isStatic(element.getModifiers())) {
@@ -2258,9 +2258,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						continue;
 					}
 					if (++staticCount == 0) {
-						buffer.append("Clazz.defineStatics (C$");
+						buffer.append("Clazz.defineStatics$ (C$, [");
+					} else {
+						buffer.append(",\r\n");
 					}
-					buffer.append(",\r\n\"");
+					buffer.append("\"");
 					vdf.getName().accept(this);
 					buffer.append("\", ");
 					Type fieldType = field.getType();
@@ -2285,7 +2287,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		if (staticCount != -1) {
-			buffer.append(");\r\n");
+			buffer.append("\r\n]);\r\n");
 		}
 
 		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
@@ -2460,8 +2462,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// adds Integer.TYPE, Float.TYPE, etc.
 			buffer.append(getPrimitiveTYPE(name));
 			return false;
-		} else if (type.isArrayType()) {
-			buffer.append(j2sGetArrayClass(binding));
+		} else if (type instanceof ArrayType) {
+			buffer.append(j2sGetArrayClass(binding, 1));
 			return false;
 		} else {
 			String name = binding.getName();
@@ -2664,20 +2666,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * Add the Clazz.arrayClass$(class, ndim) call to create a
 	 * faux class with the correct _paramType and __NDIM
 	 *
-	 * @param binding
-	 * @return
+	 * @param type
+	 * @param dimFlag  -1 : initialized depth; n > 0 uninitialized depth; 0: not necessary 
+	 * 
+	 * @return JavaScript for array creation
 	 */
-    static String j2sGetArrayClass(ITypeBinding binding) {
-    	String strClass = j2sGetParamCode(binding, false);
-    	int n = 0;
-    	int pt = 0;
-    	String strAAA = "";
-    	while ((pt = strClass.lastIndexOf("[]")) >= 0) {
-    		n++;
-    		strClass = strClass.substring(0, pt);
-    		strAAA += "A";
-    	}
-		return "Clazz.arrayClass$('" + strClass + strAAA + "'," + n + ")";
+    static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
+    	ITypeBinding ebinding = type.getElementType();
+    	String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) : Bindings.removeBrackets(ebinding.getQualifiedName())) 
+    			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
+		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
+				: " Clazz.newArray$(" + params + ", [");
 	}
 
 	private static boolean isStatic(int modifiers) {

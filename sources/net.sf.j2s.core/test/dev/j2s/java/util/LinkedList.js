@@ -329,7 +329,7 @@ return this.getFirst ();
 
 Clazz.newMethod$(C$, 'toArray', function () {
 var index = 0;
-var contents =  Clazz.newArray$('OA', 1, [this.$size]);
+var contents =  Clazz.newArray$(java.lang.Object, [this.$size]);
 var link = this.voidLink.next;
 while (link !== this.voidLink) {
 contents[index++] = link.data;
@@ -377,7 +377,7 @@ this.voidLink.previous = link;
 });
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.LinkedList, "Link");
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -399,7 +399,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.LinkedList, "LinkIterator", null, java.util.ListIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -519,4 +519,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:17
+//Created 2017-08-18 22:18:03

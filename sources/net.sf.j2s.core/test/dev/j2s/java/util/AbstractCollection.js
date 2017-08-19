@@ -103,7 +103,7 @@ Clazz.newMethod$(C$, 'toArray', function () {
 var size = this.size ();
 var index = 0;
 var it = this.iterator ();
-var array =  Clazz.newArray$('OA', 1, [size]);
+var array =  Clazz.newArray$(java.lang.Object, [size]);
 while (index < size) {
 array[index++] = it.next ();
 }
@@ -145,4 +145,4 @@ return buffer.toString ();
 })()
 });
 
-//Created 2017-08-17 10:33:15
+//Created 2017-08-18 22:18:01

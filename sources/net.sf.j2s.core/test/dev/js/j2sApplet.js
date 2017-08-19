@@ -779,9 +779,9 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return data.getBytes();
 	// ArrayBuffer assumed here
 	data = new Uint8Array(data);
-	var b = Clazz.newByteArray(data.length, 0);
-		for (var i = data.length; --i >= 0;)
-			b[i] = data[i];
+  var b = (Clazz.newArray$ ? Clazz.newArray$('BA', 1, [data.length]) : Clazz.newByteArray(data.length, 0));
+	for (var i = data.length; --i >= 0;)
+		b[i] = data[i];
 	return b;
 	}
 
@@ -894,9 +894,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
     if (s.indexOf(";base64,") == 0)
       return JU.Base64.decodeBase64(s.substring(8));
     // not UTF-8
-    
-    
-		var b = Clazz.newByteArray(s.length, 0);
+		var b = (Clazz.newArray$ ? Clazz.newArray$('BA', 1, [s.length]) : Clazz.newByteArray(s.length, 0));
 		for (var i = s.length; --i >= 0;)
 			b[i] = s.charCodeAt(i) & 0xFF;
 		return b;

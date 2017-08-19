@@ -15,7 +15,7 @@ Clazz.newMethod$(C$, 'construct$java_io_Writer', function (out) {
 C$.superClazz.construct$O.apply(this, [out]);
 C$.$init$.apply(this);
 this.out = out;
-this.buf =  Clazz.newArray$('CA', 1, [8192]);
+this.buf =  Clazz.newArray$(Character.TYPE, [8192]);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct$java_io_Writer$I', function (out, size) {
@@ -23,7 +23,7 @@ C$.superClazz.construct$O.apply(this, [out]);
 C$.$init$.apply(this);
 if (size > 0) {
 this.out = out;
-this.buf =  Clazz.newArray$('CA', 1, [size]);
+this.buf =  Clazz.newArray$(Character.TYPE, [size]);
 } else {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
 }}, 1);
@@ -104,7 +104,7 @@ return;
 }if (offset > str.length - count || offset < 0) {
 throw Clazz.$new(StringIndexOutOfBoundsException.construct,[]);
 }if (this.pos == 0 && count >= this.buf.length) {
-var chars =  Clazz.newArray$('CA', 1, [count]);
+var chars =  Clazz.newArray$(Character.TYPE, [count]);
 str.getChars$I$I$CA$I (offset, offset + count, chars, 0);
 this.out.write$CA$I$I (chars, 0, count);
 return;
@@ -121,7 +121,7 @@ if (count > available) {
 offset += available;
 available = count - available;
 if (available >= this.buf.length) {
-var chars =  Clazz.newArray$('CA', 1, [count]);
+var chars =  Clazz.newArray$(Character.TYPE, [count]);
 str.getChars$I$I$CA$I (offset, offset + available, chars, 0);
 this.out.write$CA$I$I (chars, 0, available);
 return;
@@ -135,4 +135,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:11
+//Created 2017-08-18 22:17:57

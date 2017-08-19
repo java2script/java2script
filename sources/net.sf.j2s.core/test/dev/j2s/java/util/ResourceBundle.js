@@ -74,12 +74,12 @@ java.util.ResourceBundle.caches[java.util.ResourceBundle.caches.length] = Clazz.
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.ResourceBundle, "TextResourceBundle", java.util.ResourceBundle);
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.map =  Clazz.newArray$('SA', 1, [0]);
-this.keys =  Clazz.newArray$('SA', 1, [0]);
+this.map =  Clazz.newArray$(java.lang.String, [0]);
+this.keys =  Clazz.newArray$(java.lang.String, [0]);
 this.content = null;
 this.initialized = false;
 }, 1);
@@ -217,9 +217,9 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
 })()
-Clazz.defineStatics (C$,
-"caches",  Clazz.newArray$('java_util_ResourceBundleA', 1, [0]));
+Clazz.defineStatics$ (C$, ["caches",  Clazz.newArray$(java.util.ResourceBundle, [0])
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04

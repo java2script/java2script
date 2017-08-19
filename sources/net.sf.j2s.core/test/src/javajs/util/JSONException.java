@@ -1,7 +1,12 @@
 package javajs.util;
 
 public class JSONException extends RuntimeException {
-    public JSONException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public JSONException(String message) {
         super(message);
     }
 

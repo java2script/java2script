@@ -50,7 +50,7 @@ this.putAll$java_util_Map (m);
 }, 1);
 
 Clazz.newMethod$(C$, 'newElementArray$I', function (s) {
-return  Clazz.newArray$('java_util_LinkedHashMap_LinkedHashMapEntryA', 1, [s]);
+return  Clazz.newArray$(java.util.LinkedHashMap.LinkedHashMapEntry, [s]);
 });
 
 Clazz.newMethod$(C$, 'get$O', function (key) {
@@ -263,7 +263,7 @@ return map;
 });
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.LinkedHashMap, "LinkedHashIterator", java.util.HashMap.HashMapIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -333,7 +333,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.LinkedHashMap, "LinkedHashMapEntrySet", java.util.HashMap.HashMapEntrySet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -366,7 +366,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.LinkedHashMap, "LinkedHashMapEntry", java.util.HashMap.Entry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -398,4 +398,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:17
+//Created 2017-08-18 22:18:03

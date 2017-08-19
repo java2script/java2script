@@ -3,8 +3,6 @@ package javajs.api;
 import java.io.BufferedReader;
 import java.util.Map;
 
-import javajs.util.CifDataParser;
-
 
 public interface GenericCifDataParser {
 

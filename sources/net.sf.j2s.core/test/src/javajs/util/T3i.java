@@ -16,8 +16,6 @@
 */
 package javajs.util;
 
-import java.io.Serializable;
-
 /**
  * A 3-element tuple represented by signed integer x,y,z coordinates.
  * 
@@ -31,7 +29,7 @@ import java.io.Serializable;
  *         JavaScript using Java2Script.
  *
  */
-public abstract class T3i implements Serializable {
+public abstract class T3i {
 
   /**
    * The x coordinate.

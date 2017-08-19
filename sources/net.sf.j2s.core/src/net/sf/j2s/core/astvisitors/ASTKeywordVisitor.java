@@ -81,8 +81,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 // BH 8/15/2017 12:18:46 PM adds support for Java 8 catch (Exception...|Excepion... e)
 /**
- * This class will traverse most of the common keyword and
- * common expression.
+ * This class will traverse most of the common keyword and common expression.
  * 
  * This class will not deal with binding.
  * 
@@ -90,15 +89,15 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  *
  */
 public class ASTKeywordVisitor extends ASTEmptyVisitor {
-	
+
 	protected int blockLevel = 0;
-	
+
 	protected Stack<String> methodDeclareNameStack = new Stack<String>();
-	
+
 	protected int currentBlockForVisit = -1;
-	
+
 	protected boolean supportsObjectStaticFields = false;
-	
+
 	public boolean isSupportsObjectStaticFields() {
 		return supportsObjectStaticFields;
 	}
@@ -110,11 +109,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	protected String assureQualifiedName(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).assureQualifiedName(name);
 	}
-	
+
 	protected String removeJavaLang(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenQualifiedName(name);
 	}
-	
+
 	protected String shortenPackageName(String name) {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).shortenPackageName(name);
 	}
@@ -122,18 +121,20 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	protected String checkConstantValue(Expression node) {
 		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).checkConstantValue(node);
 	}
-	
+
 	protected String[] skipDeclarePackages() {
 		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).skipDeclarePackages();
 	}
+
 	protected boolean isSimpleQualified(QualifiedName node) {
 		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
 	}
 
-//	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-//		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
-//	}
-	
+	// protected boolean isFieldNeedPreparation(FieldDeclaration node) {
+	// return ((ASTFieldVisitor)
+	// getAdaptable(ASTFieldVisitor.class)).isFieldNeedPreparation(node);
+	// }
+
 	protected String getIndexedVarName(String name, int i) {
 		return ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).getIndexedVarName(name, i);
 	}
@@ -189,40 +190,32 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean visit(ArrayCreation node) {
-		ArrayInitializer initializer = node.getInitializer();
-		if (initializer != null) {
-			initializer.accept(this);
-			return false;
+		ArrayInitializer inode = node.getInitializer();
+		ITypeBinding binding = node.resolveTypeBinding();
+		if (inode == null) {
+			buffer.append(ASTScriptVisitor.j2sGetArrayClass(binding, 0));
+			List<ASTNode> dim = node.dimensions();
+			visitList(dim, ", ");
+			for (int i = binding.getDimensions() - dim.size(); --i >= 0;)
+				buffer.append(", null");
+			buffer.append("])");
+		} else {
+			visit(inode);
 		}
-		@SuppressWarnings("unchecked")
-		List<ASTNode> dim = node.dimensions();
-		int dimensions = node.getType().getDimensions();
-		buffer.append(" Clazz.newArray$('")
-			.append(ASTScriptVisitor.j2sGetParamCode(node.resolveTypeBinding(), true))
-			.append("', ").append(dimensions).append(", [");
-		visitList(dim, ", ");
-		buffer.append("])");
 		return false;
 	}
 
 	public boolean visit(ArrayInitializer node) {
+		// 	public String[] d = {"1", "2"};
+		ITypeBinding binding = node.resolveTypeBinding();
+		int n = binding.getDimensions();
+		buffer.append(ASTScriptVisitor.j2sGetArrayClass(node.resolveTypeBinding(), -1));
 		@SuppressWarnings("unchecked")
 		List<ASTNode> expressions = node.expressions();
-		ITypeBinding arrType = node.resolveTypeBinding();
-		ITypeBinding elementType = (arrType == null ? null : arrType.getComponentType());
-		if (elementType == null) {
-			// // BH: what is this??
-			buffer.append("[");
-			visitList(expressions, ", ");
-			buffer.append("]");
-		} else {
-			buffer.append(" Clazz.newArray$('")
-			.append(ASTScriptVisitor.j2sGetParamCode(arrType, true))
-			.append("', -1, [-1, [");
-			visitList(expressions, ", ");
-			buffer.append("]])");
-		}
+		visitList(expressions, ", ");
+		buffer.append("])");
 		return false;
 	}
 
@@ -230,11 +223,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		/*
 		 * TODO: should be implemented
 		 */
-		//return super.visit(node);
+		// return super.visit(node);
 		/*
-		 * The assert statement should be passed when debugging in
-		 * native Java application mode. No need for JavaScript to
-		 * throws errors.
+		 * The assert statement should be passed when debugging in native Java
+		 * application mode. No need for JavaScript to throws errors.
 		 */
 		return false;
 	}
@@ -257,16 +249,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		String op = node.getOperator().toString();
 		ITypeBinding declaring = null;
 		String qName = null;
-		if (varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
+		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
 			boolean directStaticAccess = left instanceof SimpleName
 					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
 					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
 			ASTNode parent = node.getParent();
-			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess) && !(parent instanceof Statement);
+			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess)
+					&& !(parent instanceof Statement);
 			if (needParenthesis) {
 				buffer.append("(");
 			}
@@ -278,7 +270,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) {
 					leftAccess.getExpression().accept(this);
 					buffer.append(", ");
 				}
@@ -298,7 +290,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 				buffer.append(" = ");
 			}
-			
+
 			buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 			buffer.append('.');
 			if (left instanceof QualifiedName) {
@@ -328,7 +320,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 				} else {
 					buffer.append("= String.fromCharCode (");
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(
+							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append('.');
 					if (left instanceof QualifiedName) {
 						QualifiedName leftName = (QualifiedName) left;
@@ -356,7 +349,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 					buffer.append(")");
 				}
-			} else if (leftTypeBinding != null && "/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(leftTypeBinding.getName())) {
+			} else if (leftTypeBinding != null && "/=".equals(op)
+					&& ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(leftTypeBinding.getName())) {
 				buffer.append(" = Clazz.doubleToInt (");
 				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
@@ -387,10 +381,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding typeBinding = left.resolveTypeBinding();
 		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("boolean".equals(typeBinding.getName())) {
-				if (op.startsWith("^")
-						|| op.startsWith("|")
-						|| op.startsWith("&")
-						/*|| op.startsWith("!")*/) {
+				if (op.startsWith("^") || op.startsWith("|") || op.startsWith("&")
+				/* || op.startsWith("!") */) {
 					left.accept(this);
 					buffer.append(" = new Boolean (");
 					left.accept(this);
@@ -411,14 +403,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else if ("char".equals(typeBinding.getName())) {
 				boolean isMixedOp = op.trim().length() > 1;
 				if (!isMixedOp) {
-					if (right instanceof Name || right instanceof CharacterLiteral
-							|| right instanceof ArrayAccess
-							|| right instanceof FieldAccess
-							|| right instanceof MethodInvocation
-							|| right instanceof ParenthesizedExpression
-							|| right instanceof SuperFieldAccess
-							|| right instanceof SuperMethodInvocation
-							|| right instanceof ThisExpression
+					if (right instanceof Name || right instanceof CharacterLiteral || right instanceof ArrayAccess
+							|| right instanceof FieldAccess || right instanceof MethodInvocation
+							|| right instanceof ParenthesizedExpression || right instanceof SuperFieldAccess
+							|| right instanceof SuperMethodInvocation || right instanceof ThisExpression
 							|| right instanceof CastExpression) {
 						left.accept(this);
 						buffer.append(" = ");
@@ -465,7 +453,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 							if (constValue != null && constValue instanceof Character) {
 								buffer.append(((Character) constValue).charValue() + 0);
 							} else {
-								boolean needParenthesis = !(right instanceof ParenthesizedExpression || right instanceof PrefixExpression || right instanceof PostfixExpression);
+								boolean needParenthesis = !(right instanceof ParenthesizedExpression
+										|| right instanceof PrefixExpression || right instanceof PostfixExpression);
 								if (needParenthesis) {
 									buffer.append("(");
 								}
@@ -482,7 +471,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append(')');
 				}
 				return false;
-			} else if ("/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(typeBinding.getName())) {
+			} else if ("/=".equals(op)
+					&& ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(typeBinding.getName())) {
 				left.accept(this);
 				buffer.append(" = Clazz.doubleToInt (");
 				left.accept(this);
@@ -508,14 +498,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					buffer.append(0 + cl.charValue());
 				}
 			} else {
-				if (typeBindingName != null && ("char".equals(typeBindingName) || typeBindingName.indexOf("String") != -1)) {
+				if (typeBindingName != null
+						&& ("char".equals(typeBindingName) || typeBindingName.indexOf("String") != -1)) {
 					right.accept(this);
 				} else {
 					int idx1 = buffer.length();
 					buffer.append('(');
 					right.accept(this);
 					buffer.append(")");
-					
+
 					boolean appendingCode = true;
 					int length = buffer.length();
 					if (right instanceof MethodInvocation) {
@@ -577,7 +568,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		for (int i = parameters.size() - 1; i >= 0; i--) {
 			SingleVariableDeclaration varDecl = parameters.get(i);
-			
+
 			SimpleName name = varDecl.getName();
 			IBinding binding = name.resolveBinding();
 			if (binding != null) {
@@ -658,15 +649,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(EnhancedForStatement node) {
-		
+
 		SimpleName name = node.getParameter().getName();
 		String varName = name.getIdentifier();
 		buffer.append("for (var ");
 		buffer.append(varName);
-		//name.accept(this);
+		// name.accept(this);
 		buffer.append(", $");
 		buffer.append(varName);
-		//name.accept(this);
+		// name.accept(this);
 		buffer.append(" = ");
 		Expression exp = node.getExpression();
 		ITypeBinding typeBinding = exp.resolveTypeBinding();
@@ -692,13 +683,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			exp.accept(this);
 			buffer.append(".iterator (); $");
 			buffer.append(varName);
-			//name.accept(this);
+			// name.accept(this);
 			buffer.append(".hasNext () && ((");
 			buffer.append(varName);
-			//name.accept(this);
+			// name.accept(this);
 			buffer.append(" = $");
 			buffer.append(varName);
-			//name.accept(this);
+			// name.accept(this);
 			buffer.append(".next ()) || true);");
 		}
 		buffer.append(") ");
@@ -736,9 +727,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		 * 
 		 * if( x ){
 		 * 
-		 * }
-		 * should converted to 
-		 * if(x.booleanValue()){
+		 * } should converted to if(x.booleanValue()){
 		 * 
 		 * }
 		 */
@@ -762,7 +751,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		node.getLeftOperand().accept(this);
 		buffer.append(", ");
 		if (right instanceof ArrayType) {
-			buffer.append(ASTScriptVisitor.j2sGetArrayClass(right.resolveBinding()));
+			buffer.append(ASTScriptVisitor.j2sGetArrayClass(right.resolveBinding(), 1));
 		} else {
 			right.accept(this);
 		}
@@ -786,8 +775,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (token.endsWith("L") || token.endsWith("l")) {
 			buffer.append(token.substring(0, token.length() - 1));
 		} else if (!token.startsWith("0x") && !token.startsWith("0X")) {
-			if (token.endsWith("F") || token.endsWith("f")
-					|| token.endsWith("D") || token.endsWith("d")) {
+			if (token.endsWith("F") || token.endsWith("f") || token.endsWith("D") || token.endsWith("d")) {
 				buffer.append(token.substring(0, token.length() - 1));
 			} else {
 				buffer.append(token);
@@ -801,7 +789,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	public boolean visit(NullLiteral node) {
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (binding != null)
-		buffer.append("null");
+			buffer.append("null");
 		return super.visit(node);
 	}
 
@@ -817,9 +805,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				return false;
 			}
 		}
-		buffer.append ("Clazz.declarePackage (\"");
+		buffer.append("Clazz.declarePackage (\"");
 		node.getName().accept(this);
-		buffer.append ("\");\r\n");
+		buffer.append("\");\r\n");
 		return false;
 	}
 
@@ -845,17 +833,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		ITypeBinding declaring = null;
 		String qName = null;
-		if (varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
+		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
-			return ;
+			return;
 		}
 		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
 		if (typeBinding != null && typeBinding.isPrimitive()) {
 			if ("char".equals(typeBinding.getName())) {
-				return ;
+				return;
 			}
 		}
 		buffer.append(node.getOperator());
@@ -878,9 +865,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding typeBinding = left.resolveTypeBinding();
 		ITypeBinding declaring = null;
 		String qName = null;
-		if (varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
+		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
 			boolean directStaticAccess = left instanceof SimpleName
@@ -903,7 +889,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression)) { 
+				if (!(leftAccess.getExpression() instanceof ThisExpression)) {
 					leftAccess.getExpression().accept(this);
 					buffer.append(", ");
 				}
@@ -914,7 +900,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String op = node.getOperator().toString();
 			if (staticCharType) {
 				if (!(parent instanceof Statement)) {
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(
+							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append('.');
 					if (left instanceof QualifiedName) {
 						QualifiedName leftName = (QualifiedName) left;
@@ -971,10 +958,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					Name leftName = (Name) left;
 					leftName.accept(this);
 				}
-				//buffer.append(' ');
+				// buffer.append(' ');
 				buffer.append(op);
 			}
-			
+
 			if (supportsObjectStaticFields) {
 				buffer.append(", ");
 				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
@@ -1042,7 +1029,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		boxingNode(left);
 		return false;
-		//return super.visit(node);
+		// return super.visit(node);
 	}
 
 	@SuppressWarnings("null")
@@ -1072,9 +1059,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding typeBinding = left.resolveTypeBinding();
 		ITypeBinding declaring = null;
 		String qName = null;
-		if (varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
+		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
+				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
 				&& !qName.startsWith("net.sf.j2s.html.")) {
 			boolean directStaticAccess = left instanceof SimpleName
@@ -1095,8 +1081,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/* 
-						|| leftAccess.getExpression() instanceof SimpleName*/)) { 
+				if (!(leftAccess
+						.getExpression() instanceof ThisExpression/*
+																	 * ||
+																	 * leftAccess
+																	 * .
+																	 * getExpression
+																	 * ()
+																	 * instanceof
+																	 * SimpleName
+																	 */)) {
 					leftAccess.getExpression().accept(this);
 					buffer.append(", ");
 				}
@@ -1149,7 +1143,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else {
 				buffer.append(op);
-				//buffer.append(' ');
+				// buffer.append(' ');
 				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 				buffer.append('.');
 				if (left instanceof QualifiedName) {
@@ -1475,7 +1469,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		visitList(node.fragments(), ", ");
 		return false;
 	}
-	
+
 	public boolean visit(VariableDeclarationFragment node) {
 		SimpleName name = node.getName();
 		IBinding binding = name.resolveBinding();
@@ -1584,7 +1578,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					String name = typeBinding.getName();
 					name = (name.equals("char") ? "Character"
 							: name.equals("int") ? "Integer"
-							: Character.toUpperCase(name.charAt(0)) + name.substring(1));
+									: Character.toUpperCase(name.charAt(0)) + name.substring(1));
 					getBuffer().append("new " + name + " (");
 					element.accept(this);
 					getBuffer().append(")");
@@ -1595,8 +1589,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				if (!typeBinding.isPrimitive()) {
 					String name = typeBinding.getQualifiedName();
 					name = (name.indexOf("Integer") >= 0 ? "int"
-							: name.indexOf("Character") >= 0 ? "char"
-									: name.replace("java.lang.", "").toLowerCase());
+							: name.indexOf("Character") >= 0 ? "char" : name.replace("java.lang.", "").toLowerCase());
 					getBuffer().append("(");
 					element.accept(this);
 					getBuffer().append(")." + name + "Value ()");

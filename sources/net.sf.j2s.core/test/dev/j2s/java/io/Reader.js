@@ -28,7 +28,7 @@ return false;
 
 Clazz.newMethod$(C$, 'read', function () {
 {
-var charArray =  Clazz.newArray$('CA', 1, [1]);
+var charArray =  Clazz.newArray$(Character.TYPE, [1]);
 if (this.read$CA$I$I (charArray, 0, 1) != -1) return charArray[0];
 return -1;
 }});
@@ -50,7 +50,7 @@ if (count >= 0) {
 {
 var skipped = 0;
 var toRead = count < 512 ? count : 512;
-var charsSkipped =  Clazz.newArray$('CA', 1, [toRead]);
+var charsSkipped =  Clazz.newArray$(Character.TYPE, [toRead]);
 while (skipped < count) {
 var read = this.read$CA$I$I (charsSkipped, 0, toRead);
 if (read == -1) {
@@ -69,7 +69,7 @@ Clazz.newMethod$(C$, 'read$java_nio_CharBuffer', function (target) {
 if (null == target) {
 throw Clazz.$new(NullPointerException.construct,[]);
 }var length = target.length ();
-var buf =  Clazz.newArray$('CA', 1, [length]);
+var buf =  Clazz.newArray$(Character.TYPE, [length]);
 length = Math.min (length, this.read$CA (buf));
 if (length > 0) {
 target.put$CA$I$I (buf, 0, length);
@@ -78,4 +78,4 @@ target.put$CA$I$I (buf, 0, length);
 })()
 });
 
-//Created 2017-08-17 10:33:12
+//Created 2017-08-18 22:17:57

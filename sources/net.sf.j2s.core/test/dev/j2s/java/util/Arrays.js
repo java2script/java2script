@@ -1019,55 +1019,55 @@ return java.util.Arrays.copyOf$TTA$I$ClassA> (original, newLength, original.getC
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$TUA$I$ClassA>', function (original, newLength, newType) {
-var copy = (newType === Clazz.arrayClass$('OA',1)) ?  Clazz.newArray$('OA', 1, [newLength]) : Clazz.newArray$ (newType.getComponentType (), newLength);
+var copy = (newType === Clazz.arrayClass$(java.lang.Object, 1)) ?  Clazz.newArray$(java.lang.Object, [newLength]) : Clazz.newArray$ (newType.getComponentType (), newLength);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$BA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('BA', 1, [newLength]);
+var copy =  Clazz.newArray$(Byte.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$HA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('HA', 1, [newLength]);
+var copy =  Clazz.newArray$(Short.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$IA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('IA', 1, [newLength]);
+var copy =  Clazz.newArray$(Integer.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$JA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('JA', 1, [newLength]);
+var copy =  Clazz.newArray$(Long.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$CA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('CA', 1, [newLength]);
+var copy =  Clazz.newArray$(Character.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$FA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('FA', 1, [newLength]);
+var copy =  Clazz.newArray$(Float.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$DA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('DA', 1, [newLength]);
+var copy =  Clazz.newArray$(Double.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
 
 Clazz.newMethod$(C$, 'copyOf$ZA$I', function (original, newLength) {
-var copy =  Clazz.newArray$('ZA', 1, [newLength]);
+var copy =  Clazz.newArray$(Boolean.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, 0, copy, 0, Math.min (original.length, newLength));
 return copy;
 }, 1);
@@ -1079,7 +1079,7 @@ return java.util.Arrays.copyOfRange$TTA$I$I$ClassA> (original, from, to, origina
 Clazz.newMethod$(C$, 'copyOfRange$TUA$I$I$ClassA>', function (original, from, to, newType) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy = (newType === Clazz.arrayClass$('OA',1)) ?  Clazz.newArray$('OA', 1, [newLength]) : Clazz.newArray$ (newType.getComponentType (), newLength);
+var copy = (newType === Clazz.arrayClass$(java.lang.Object, 1)) ?  Clazz.newArray$(java.lang.Object, [newLength]) : Clazz.newArray$ (newType.getComponentType (), newLength);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1087,7 +1087,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$BA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('BA', 1, [newLength]);
+var copy =  Clazz.newArray$(Byte.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1095,7 +1095,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$HA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('HA', 1, [newLength]);
+var copy =  Clazz.newArray$(Short.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1103,7 +1103,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$IA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('IA', 1, [newLength]);
+var copy =  Clazz.newArray$(Integer.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1111,7 +1111,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$JA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('JA', 1, [newLength]);
+var copy =  Clazz.newArray$(Long.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1119,7 +1119,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$CA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('CA', 1, [newLength]);
+var copy =  Clazz.newArray$(Character.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1127,7 +1127,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$FA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('FA', 1, [newLength]);
+var copy =  Clazz.newArray$(Float.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1135,7 +1135,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$DA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('DA', 1, [newLength]);
+var copy =  Clazz.newArray$(Double.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1143,7 +1143,7 @@ return copy;
 Clazz.newMethod$(C$, 'copyOfRange$ZA$I$I', function (original, from, to) {
 var newLength = to - from;
 if (newLength < 0) throw Clazz.$new(IllegalArgumentException.construct$S,[from + " > " + to]);
-var copy =  Clazz.newArray$('ZA', 1, [newLength]);
+var copy =  Clazz.newArray$(Boolean.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (original, from, copy, 0, Math.min (original.length - from, newLength));
 return copy;
 }, 1);
@@ -1233,15 +1233,15 @@ if (a == null) return 0;
 var result = 1;
 for (var element, $element = 0, $$element = a; $element < $$element.length && ((element = $$element[$element]) || true); $element++) {
 var elementHash = 0;
-if (Clazz.instanceOf(element, Clazz.arrayClass$('OA',1))) elementHash = java.util.Arrays.deepHashCode$OA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('BA',1))) elementHash = java.util.Arrays.hashCode$BA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('HA',1))) elementHash = java.util.Arrays.hashCode$HA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('IA',1))) elementHash = java.util.Arrays.hashCode$IA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('JA',1))) elementHash = java.util.Arrays.hashCode$JA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('CA',1))) elementHash = java.util.Arrays.hashCode$CA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('FA',1))) elementHash = java.util.Arrays.hashCode$FA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('DA',1))) elementHash = java.util.Arrays.hashCode$DA (element);
- else if (Clazz.instanceOf(element, Clazz.arrayClass$('ZA',1))) elementHash = java.util.Arrays.hashCode$ZA (element);
+if (Clazz.instanceOf(element, Clazz.arrayClass$(java.lang.Object, 1))) elementHash = java.util.Arrays.deepHashCode$OA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Byte.TYPE, 1))) elementHash = java.util.Arrays.hashCode$BA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Short.TYPE, 1))) elementHash = java.util.Arrays.hashCode$HA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Integer.TYPE, 1))) elementHash = java.util.Arrays.hashCode$IA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Long.TYPE, 1))) elementHash = java.util.Arrays.hashCode$JA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Character.TYPE, 1))) elementHash = java.util.Arrays.hashCode$CA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Float.TYPE, 1))) elementHash = java.util.Arrays.hashCode$FA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Double.TYPE, 1))) elementHash = java.util.Arrays.hashCode$DA (element);
+ else if (Clazz.instanceOf(element, Clazz.arrayClass$(Boolean.TYPE, 1))) elementHash = java.util.Arrays.hashCode$ZA (element);
  else if (element != null) elementHash = element.hashCode ();
 result = 31 * result + elementHash;
 }
@@ -1259,15 +1259,15 @@ var e2 = a2[i];
 if (e1 === e2) continue;
 if (e1 == null) return false;
 var eq;
-if (Clazz.instanceOf(e1, Clazz.arrayClass$('OA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('OA',1))) eq = java.util.Arrays.deepEquals$OA$OA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('BA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('BA',1))) eq = java.util.Arrays.equals$BA$BA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('HA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('HA',1))) eq = java.util.Arrays.equals$HA$HA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('IA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('IA',1))) eq = java.util.Arrays.equals$IA$IA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('JA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('JA',1))) eq = java.util.Arrays.equals$JA$JA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('CA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('CA',1))) eq = java.util.Arrays.equals$CA$CA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('FA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('FA',1))) eq = java.util.Arrays.equals$FA$FA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('DA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('DA',1))) eq = java.util.Arrays.equals$DA$DA (e1, e2);
- else if (Clazz.instanceOf(e1, Clazz.arrayClass$('ZA',1)) && Clazz.instanceOf(e2, Clazz.arrayClass$('ZA',1))) eq = java.util.Arrays.equals$ZA$ZA (e1, e2);
+if (Clazz.instanceOf(e1, Clazz.arrayClass$(java.lang.Object, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(java.lang.Object, 1))) eq = java.util.Arrays.deepEquals$OA$OA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Byte.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Byte.TYPE, 1))) eq = java.util.Arrays.equals$BA$BA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Short.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Short.TYPE, 1))) eq = java.util.Arrays.equals$HA$HA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Integer.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Integer.TYPE, 1))) eq = java.util.Arrays.equals$IA$IA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Long.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Long.TYPE, 1))) eq = java.util.Arrays.equals$JA$JA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Character.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Character.TYPE, 1))) eq = java.util.Arrays.equals$CA$CA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Float.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Float.TYPE, 1))) eq = java.util.Arrays.equals$FA$FA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Double.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Double.TYPE, 1))) eq = java.util.Arrays.equals$DA$DA (e1, e2);
+ else if (Clazz.instanceOf(e1, Clazz.arrayClass$(Boolean.TYPE, 1)) && Clazz.instanceOf(e2, Clazz.arrayClass$(Boolean.TYPE, 1))) eq = java.util.Arrays.equals$ZA$ZA (e1, e2);
  else eq = e1.equals$O (e2);
 if (!eq) return false;
 }
@@ -1417,14 +1417,14 @@ buf.append$S ("null");
 } else {
 var eClass = element.getClass ();
 if (eClass.isArray ()) {
-if (eClass === Clazz.arrayClass$('BA',1)) buf.append$S (java.util.Arrays.toString$BA (element));
- else if (eClass === Clazz.arrayClass$('HA',1)) buf.append$S (java.util.Arrays.toString$HA (element));
- else if (eClass === Clazz.arrayClass$('IA',1)) buf.append$S (java.util.Arrays.toString$IA (element));
- else if (eClass === Clazz.arrayClass$('JA',1)) buf.append$S (java.util.Arrays.toString$JA (element));
- else if (eClass === Clazz.arrayClass$('CA',1)) buf.append$S (java.util.Arrays.toString$CA (element));
- else if (eClass === Clazz.arrayClass$('FA',1)) buf.append$S (java.util.Arrays.toString$FA (element));
- else if (eClass === Clazz.arrayClass$('DA',1)) buf.append$S (java.util.Arrays.toString$DA (element));
- else if (eClass === Clazz.arrayClass$('ZA',1)) buf.append$S (java.util.Arrays.toString$ZA (element));
+if (eClass === Clazz.arrayClass$(Byte.TYPE, 1)) buf.append$S (java.util.Arrays.toString$BA (element));
+ else if (eClass === Clazz.arrayClass$(Short.TYPE, 1)) buf.append$S (java.util.Arrays.toString$HA (element));
+ else if (eClass === Clazz.arrayClass$(Integer.TYPE, 1)) buf.append$S (java.util.Arrays.toString$IA (element));
+ else if (eClass === Clazz.arrayClass$(Long.TYPE, 1)) buf.append$S (java.util.Arrays.toString$JA (element));
+ else if (eClass === Clazz.arrayClass$(Character.TYPE, 1)) buf.append$S (java.util.Arrays.toString$CA (element));
+ else if (eClass === Clazz.arrayClass$(Float.TYPE, 1)) buf.append$S (java.util.Arrays.toString$FA (element));
+ else if (eClass === Clazz.arrayClass$(Double.TYPE, 1)) buf.append$S (java.util.Arrays.toString$DA (element));
+ else if (eClass === Clazz.arrayClass$(Boolean.TYPE, 1)) buf.append$S (java.util.Arrays.toString$ZA (element));
  else {
 if (dejaVu.contains$O (element)) buf.append$S ("[...]");
  else java.util.Arrays.deepToString$OA$StringBuilder$java_util_SetA> (element, buf, dejaVu);
@@ -1438,7 +1438,7 @@ dejaVu.remove$O (a);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Arrays, "ArrayList", java.util.AbstractList, [java.util.RandomAccess, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1496,9 +1496,9 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
 })()
-Clazz.defineStatics (C$,
-"INSERTIONSORT_THRESHOLD", 7);
+Clazz.defineStatics$ (C$, ["INSERTIONSORT_THRESHOLD", 7
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:16
+//Created 2017-08-18 22:18:02

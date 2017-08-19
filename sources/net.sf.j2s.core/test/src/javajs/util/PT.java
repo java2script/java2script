@@ -876,7 +876,7 @@ public class PT {
     /**
      * @j2sNative
      * 
-     * return (x.constructor == Array || x.BYTES_PER_ELEMENT ? null : x.toString());
+     * return (x.constructor == Array || x.__BYTESIZE ? null : x.toString());
      * 
      */
     {

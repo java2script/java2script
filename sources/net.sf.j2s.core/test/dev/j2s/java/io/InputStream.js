@@ -57,7 +57,7 @@ Clazz.newMethod$(C$, 'skip$J', function (n) {
 if (n <= 0) return 0;
 var skipped = 0;
 var toRead = n < 4096 ? n : 4096;
-if (java.io.InputStream.skipBuf == null || java.io.InputStream.skipBuf.length < toRead) java.io.InputStream.skipBuf =  Clazz.newArray$('BA', 1, [toRead]);
+if (java.io.InputStream.skipBuf == null || java.io.InputStream.skipBuf.length < toRead) java.io.InputStream.skipBuf =  Clazz.newArray$(Byte.TYPE, [toRead]);
 while (skipped < n) {
 var read = this.read$BA$I$I (java.io.InputStream.skipBuf, 0, toRead);
 if (read == -1) return skipped;
@@ -67,9 +67,9 @@ if (n - skipped < toRead) toRead = (n - skipped);
 }
 return skipped;
 });
-Clazz.defineStatics (C$,
-"skipBuf", null);
+Clazz.defineStatics$ (C$, ["skipBuf", null
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:12
+//Created 2017-08-18 22:17:57

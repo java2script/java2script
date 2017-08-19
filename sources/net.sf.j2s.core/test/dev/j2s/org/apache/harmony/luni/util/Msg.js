@@ -22,19 +22,19 @@ throw e;
 }, 1);
 
 Clazz.newMethod$(C$, 'getString$S$O', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [arg]]));
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$(java.lang.Object, -1, [arg]));
 }, 1);
 
 Clazz.newMethod$(C$, 'getString$S$I', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [Integer.toString (arg)]]));
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$(java.lang.Object, -1, [Integer.toString (arg)]));
 }, 1);
 
 Clazz.newMethod$(C$, 'getString$S$C', function (msg, arg) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [String.valueOf$C (arg)]]));
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$(java.lang.Object, -1, [String.valueOf$C (arg)]));
 }, 1);
 
 Clazz.newMethod$(C$, 'getString$S$O$O', function (msg, arg1, arg2) {
-return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$('OA', -1, [-1, [arg1, arg2]]));
+return org.apache.harmony.luni.util.Msg.getString$S$OA (msg,  Clazz.newArray$(java.lang.Object, -1, [arg1, arg2]));
 }, 1);
 
 Clazz.newMethod$(C$, 'getString$S$OA', function (msg, args) {
@@ -54,9 +54,9 @@ throw e;
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
-Clazz.defineStatics (C$,
-"bundle", null);
+Clazz.defineStatics$ (C$, ["bundle", null
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:05

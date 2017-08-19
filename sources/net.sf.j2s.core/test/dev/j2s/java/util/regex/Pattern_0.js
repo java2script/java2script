@@ -15,12 +15,12 @@ return Clazz.$new(java.util.regex.Matcher_0.construct$java_util_regex_Pattern_0$
 });
 
 Clazz.newMethod$(C$, 'split$CharSequence$I', function (input, limit) {
-var res =  Clazz.newArray$('OA', 1, [0]);
+var res =  Clazz.newArray$(java.lang.Object, [0]);
 var mat = this.matcher$CharSequence (input);
 var index = 0;
 var curPos = 0;
 if (input.length == 0) {
-return  Clazz.newArray$('SA', -1, [-1, [""]]);
+return  Clazz.newArray$(java.lang.String, -1, [""]);
 } else {
 while (mat.find () && (index + 1 < limit || limit <= 0)) {
 res[res.length] = input.subSequence$I$I (curPos, mat.start ()).toString ();
@@ -90,8 +90,7 @@ return sb.append$S (s.substring$I (apos)).append$S ("\\E").toString ();
 Clazz.newMethod$(C$, 'construct', function () {
 C$.$init$.apply(this);
 }, 1);
-Clazz.defineStatics (C$,
-"UNIX_LINES", 1,
+Clazz.defineStatics$ (C$, ["UNIX_LINES", 1,
 "CASE_INSENSITIVE", 2,
 "COMMENTS", 4,
 "MULTILINE", 8,
@@ -99,8 +98,9 @@ Clazz.defineStatics (C$,
 "DOTALL", 32,
 "UNICODE_CASE", 64,
 "CANON_EQ", 128,
-"flagsBitMask", 239);
+"flagsBitMask", 239
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:05

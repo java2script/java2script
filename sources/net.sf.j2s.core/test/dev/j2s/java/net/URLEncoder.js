@@ -18,8 +18,8 @@ return encodeURIComponent(arguments[0]);
 Clazz.newMethod$(C$, 'encode$S$S', function (s, enc) {
 return encodeURIComponent(arguments[0]);
 }, 1);
-Clazz.defineStatics (C$,
-"digits", "0123456789ABCDEF");
+Clazz.defineStatics$ (C$, ["digits", "0123456789ABCDEF"
+]);
 })()
 
-//Created 2017-08-17 10:33:15
+//Created 2017-08-18 22:18:01

@@ -99,7 +99,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 }, java.util, "Collections$1", null, java.util.Enumeration);
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.it = this.f$.c.iterator ();
+this.it = this.$finals.c.iterator ();
 }, 1);
 
 Clazz.newMethod$(C$, 'hasMoreElements', function () {
@@ -246,7 +246,7 @@ it.set$TT (array[i++]);
 }, 1);
 
 Clazz.newMethod$(C$, 'sort$java_util_List$java_util_Comparator', function (list, comparator) {
-var array = list.toArray$TTA ( Clazz.newArray$('OA', 1, [list.size ()]));
+var array = list.toArray$TTA ( Clazz.newArray$(java.lang.Object, [list.size ()]));
 java.util.Arrays.sort$TTA$java_util_Comparator (array, comparator);
 var i = 0;
 var it = list.listIterator ();
@@ -532,7 +532,7 @@ throw Clazz.$new(ClassCastException.construct$S,["Attempt to insert " + obj.getC
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CopiesList", java.util.AbstractList, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -569,7 +569,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "EmptyList", java.util.AbstractList, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -597,7 +597,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "EmptySet", java.util.AbstractSet, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -645,7 +645,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "EmptyMap", java.util.AbstractMap, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -685,7 +685,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "ReverseComparator", null, [java.util.Comparator, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -702,7 +702,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "ReverseComparatorWithComparator", null, [java.util.Comparator, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -723,7 +723,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SingletonSet", java.util.AbstractSet, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -778,7 +778,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SingletonList", java.util.AbstractList, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -811,7 +811,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SingletonMap", java.util.AbstractMap, java.io.Serializable);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -929,7 +929,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedCollection", null, [java.util.Collection, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1030,7 +1030,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedRandomAccessList", java.util.Collections.SynchronizedList, java.util.RandomAccess);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1061,7 +1061,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedList", java.util.Collections.SynchronizedCollection, java.util.List);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1157,7 +1157,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedMap", null, [java.util.Map, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1263,7 +1263,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedSet", java.util.Collections.SynchronizedCollection, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1300,7 +1300,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedSortedMap", java.util.Collections.SynchronizedMap, java.util.SortedMap);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1360,7 +1360,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "SynchronizedSortedSet", java.util.Collections.SynchronizedSet, java.util.SortedSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1420,7 +1420,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableCollection", null, [java.util.Collection, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1515,7 +1515,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableRandomAccessList", java.util.Collections.UnmodifiableList, java.util.RandomAccess);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1540,7 +1540,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableList", java.util.Collections.UnmodifiableCollection, java.util.List);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1592,7 +1592,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 }, java.util, "Collections$UnmodifiableList$1", null, java.util.ListIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.iterator = this.b$["java.util.Collections.UnmodifiableList"].list.listIterator$I (this.f$.location);
+this.iterator = this.b$["java.util.Collections.UnmodifiableList"].list.listIterator$I (this.$finals.location);
 }, 1);
 
 Clazz.newMethod$(C$, 'add$TE', function (object) {
@@ -1658,7 +1658,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableMap", null, [java.util.Map, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1735,7 +1735,7 @@ C$.$init$.apply(this);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections.UnmodifiableMap, "UnmodifiableEntrySet", java.util.Collections.UnmodifiableSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1773,7 +1773,7 @@ throw Clazz.$new(UnsupportedOperationException.construct,[]);
 
 Clazz.newMethod$(C$, 'toArray', function () {
 var length = this.c.size ();
-var result =  Clazz.newArray$('OA', 1, [length]);
+var result =  Clazz.newArray$(java.lang.Object, [length]);
 var it = this.iterator ();
 for (var i = length; --i >= 0; ) {
 result[i] = it.next ();
@@ -1801,7 +1801,7 @@ C$.$init$.apply(this);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections.UnmodifiableMap.UnmodifiableEntrySet, "UnmodifiableMapEntry", null, java.util.Map.Entry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1845,7 +1845,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableSet", java.util.Collections.UnmodifiableCollection, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1870,7 +1870,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableSortedMap", java.util.Collections.UnmodifiableMap, java.util.SortedMap);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1913,7 +1913,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "UnmodifiableSortedSet", java.util.Collections.UnmodifiableSet, java.util.SortedSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1956,7 +1956,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedCollection", null, [java.util.Collection, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2015,7 +2015,7 @@ Clazz.newMethod$(C$, 'addAll$java_util_Collection', function (c1) {
 var size = c1.size ();
 if (size == 0) {
 return false;
-}var arr =  Clazz.newArray$('OA', 1, [size]);
+}var arr =  Clazz.newArray$(java.lang.Object, [size]);
 var it = c1.iterator ();
 for (var i = 0; i < size; i++) {
 arr[i] = java.util.Collections.checkType$TE$Class (it.next (), this.type);
@@ -2049,7 +2049,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedListIterator", null, java.util.ListIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2105,7 +2105,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedList", java.util.Collections.CheckedCollection, java.util.List);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2122,7 +2122,7 @@ Clazz.newMethod$(C$, 'addAll$I$java_util_Collection', function (index, c1) {
 var size = c1.size ();
 if (size == 0) {
 return false;
-}var arr =  Clazz.newArray$('OA', 1, [size]);
+}var arr =  Clazz.newArray$(java.lang.Object, [size]);
 var it = c1.iterator ();
 for (var i = 0; i < size; i++) {
 arr[i] = java.util.Collections.checkType$TE$Class (it.next (), this.type);
@@ -2180,7 +2180,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedRandomAccessList", java.util.Collections.CheckedList, java.util.RandomAccess);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2197,7 +2197,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedSet", java.util.Collections.CheckedCollection, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2222,7 +2222,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedMap", null, [java.util.Map, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2272,7 +2272,7 @@ Clazz.newMethod$(C$, 'putAll$java_util_Map', function (map) {
 var size = map.size ();
 if (size == 0) {
 return;
-}var entries =  Clazz.newArray$('java_util_Map_EntryA', 1, [size]);
+}var entries =  Clazz.newArray$(java.util.Map.Entry, [size]);
 var it = map.entrySet ().iterator ();
 for (var i = 0; i < size; i++) {
 var e = it.next ();
@@ -2318,7 +2318,7 @@ C$.$init$.apply(this);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections.CheckedMap, "CheckedEntry", null, java.util.Map.Entry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2360,7 +2360,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections.CheckedMap, "CheckedEntrySet", null, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2380,7 +2380,7 @@ return Clazz.$new(java.util.Collections.CheckedMap.CheckedEntrySet.CheckedEntryI
 
 Clazz.newMethod$(C$, 'toArray', function () {
 var thisSize = this.size ();
-var array =  Clazz.newArray$('OA', 1, [thisSize]);
+var array =  Clazz.newArray$(java.lang.Object, [thisSize]);
 var it = this.iterator ();
 for (var i = 0; i < thisSize; i++) {
 array[i] = it.next ();
@@ -2456,7 +2456,7 @@ C$.$init$.apply(this);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections.CheckedMap.CheckedEntrySet, "CheckedEntryIterator", null, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2490,7 +2490,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedSortedSet", java.util.Collections.CheckedSet, java.util.SortedSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2533,7 +2533,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Collections, "CheckedSortedMap", java.util.Collections.CheckedMap, java.util.SortedMap);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -2574,11 +2574,11 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
 })()
-Clazz.defineStatics (C$,
-"EMPTY_LIST", Clazz.$new(java.util.Collections.EmptyList.construct,[]),
+Clazz.defineStatics$ (C$, ["EMPTY_LIST", Clazz.$new(java.util.Collections.EmptyList.construct,[]),
 "EMPTY_SET", Clazz.$new(java.util.Collections.EmptySet.construct,[]),
-"EMPTY_MAP", Clazz.$new(java.util.Collections.EmptyMap.construct,[]));
+"EMPTY_MAP", Clazz.$new(java.util.Collections.EmptyMap.construct,[])
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:16
+//Created 2017-08-18 22:18:02

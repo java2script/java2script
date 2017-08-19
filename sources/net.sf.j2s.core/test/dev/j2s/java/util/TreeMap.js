@@ -567,7 +567,7 @@ this.balance$java_util_TreeMap_Entry (node);
 });
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "Entry", java.util.MapEntry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -603,7 +603,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "AbstractMapIterator");
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -651,7 +651,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "UnboundedEntryIterator", java.util.TreeMap.AbstractMapIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -678,7 +678,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "UnboundedKeyIterator", java.util.TreeMap.AbstractMapIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -705,7 +705,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "UnboundedValueIterator", java.util.TreeMap.AbstractMapIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -732,7 +732,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparatorBoundedIterator", java.util.TreeMap.AbstractMapIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -762,7 +762,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparatorBoundedEntryIterator", java.util.TreeMap.ComparatorBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -785,7 +785,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparatorBoundedKeyIterator", java.util.TreeMap.ComparatorBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -808,7 +808,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparatorBoundedValueIterator", java.util.TreeMap.ComparatorBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -831,7 +831,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparableBoundedIterator", java.util.TreeMap.AbstractMapIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -859,7 +859,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparableBoundedEntryIterator", java.util.TreeMap.ComparableBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -882,7 +882,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparableBoundedKeyIterator", java.util.TreeMap.ComparableBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -905,7 +905,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "ComparableBoundedValueIterator", java.util.TreeMap.ComparableBoundedIterator, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -928,7 +928,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "SubMap", java.util.AbstractMap, [java.util.SortedMap, java.io.Serializable]);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1126,7 +1126,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "SubMapEntrySet", java.util.AbstractSet, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1180,7 +1180,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "SubMapKeySet", java.util.AbstractSet, java.util.Set);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1227,7 +1227,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.TreeMap, "SubMapValuesCollection", java.util.AbstractCollection);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -1270,4 +1270,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04

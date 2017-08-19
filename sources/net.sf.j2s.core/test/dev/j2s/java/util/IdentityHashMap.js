@@ -35,7 +35,7 @@ return (Clazz.doubleToInt ((this.threshold * 10000) / 7500)) * 2;
 });
 
 Clazz.newMethod$(C$, 'newElementArray$I', function (s) {
-return  Clazz.newArray$('OA', 1, [s]);
+return  Clazz.newArray$(java.lang.Object, [s]);
 });
 
 Clazz.newMethod$(C$, 'construct$java_util_Map', function (map) {
@@ -364,7 +364,7 @@ C$.superClazz.prototype.putAll$java_util_Map.apply(this, arguments);
 }});
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.IdentityHashMap, "IdentityHashMapEntry", java.util.MapEntry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -402,7 +402,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.IdentityHashMap, "IdentityHashMapIterator", null, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -463,7 +463,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.IdentityHashMap, "IdentityHashMapEntrySet", java.util.AbstractSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -522,11 +522,11 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
 })()
-Clazz.defineStatics (C$,
-"DEFAULT_MAX_SIZE", 21,
+Clazz.defineStatics$ (C$, ["DEFAULT_MAX_SIZE", 21,
 "loadFactor", 7500,
-"NULL_OBJECT",  new Clazz._O());
+"NULL_OBJECT",  new Clazz._O()
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:17
+//Created 2017-08-18 22:18:03

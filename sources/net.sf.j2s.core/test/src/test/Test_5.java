@@ -17,6 +17,8 @@ public class Test_5 extends Test_6 {
 
 	public String[] d = {"1", "2"};
 
+	public String[][] d2 = {{"1", "2"}, {"3", "4"}};
+
 	//private StringBuffer buffer = new StringBuffer();
 
 	public Test_5() {

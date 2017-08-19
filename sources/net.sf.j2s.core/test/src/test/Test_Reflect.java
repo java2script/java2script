@@ -1,9 +1,12 @@
 package test;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 class Test_Reflect {
 
+	String s;
+	
 	public void test(char i, String s) {
 		System.out.println("testchar " + i + " " + s.equals("char"));
 	}
@@ -68,6 +71,11 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 	public static void main(String[] args) {
 		Test_Reflect tr = new Test_Reflect();
 		try {
+			// Field is not implemented
+			
+//			Field f = Test_Reflect.class.getDeclaredField("s");
+//			System.out.println(f.getDeclaringClass());
+			
 			Test_Reflect.class.getMethod("test", char.class, String.class).invoke(tr, (char)75, "char");
 			Test_Reflect.class.getMethod("test", Character.TYPE, String.class).invoke(tr, (char)75, "char");
 
@@ -111,6 +119,9 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+//		} catch (NoSuchFieldException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		}
 	}
 

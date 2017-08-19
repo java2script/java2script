@@ -177,8 +177,7 @@ Clazz.newMethod$(C$, 'storeToXML$java_io_OutputStream$S$S', function (os, commen
 Clazz.newMethod$(C$, 'substitutePredefinedEntries$S', function (s) {
 return s.replaceAll$S$S ("&", "&amp;").replaceAll$S$S ("<", "&lt;").replaceAll$S$S (">", "&gt;").replaceAll$S$S ("\u0027", "&apos;").replaceAll$S$S ("\"", "&quot;");
 });
-Clazz.defineStatics (C$,
-"PROP_DTD_NAME", "http://java.sun.com/dtd/properties.dtd",
+Clazz.defineStatics$ (C$, ["PROP_DTD_NAME", "http://java.sun.com/dtd/properties.dtd",
 "PROP_DTD", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>    <!ELEMENT properties (comment?, entry*) >    <!ATTLIST properties version CDATA #FIXED \"1.0\" >    <!ELEMENT comment (#PCDATA) >    <!ELEMENT entry (#PCDATA) >    <!ATTLIST entry key CDATA #REQUIRED >",
 "NONE", 0,
 "SLASH", 1,
@@ -186,8 +185,9 @@ Clazz.defineStatics (C$,
 "CONTINUE", 3,
 "KEY_DONE", 4,
 "IGNORE", 5,
-"lineSeparator", null);
+"lineSeparator", null
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04

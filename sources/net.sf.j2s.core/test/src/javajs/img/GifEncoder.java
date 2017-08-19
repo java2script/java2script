@@ -215,7 +215,11 @@ public class GifEncoder extends ImageEncoder {
    * is the background color
    */
   private class ColorItem extends P3 {
-    protected boolean isBackground;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected boolean isBackground;
 
     ColorItem(int rgb, boolean isBackground) {
       this.isBackground = isBackground;
@@ -229,7 +233,11 @@ public class GifEncoder extends ImageEncoder {
    */
   private class ColorCell extends Lst<P3> {
 
-    protected int index;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected int index;
     protected P3 center;
 
     private float volume;

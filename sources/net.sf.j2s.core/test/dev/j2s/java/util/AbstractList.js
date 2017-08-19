@@ -279,7 +279,7 @@ C$.$init$.apply(this);
 };
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.AbstractList, "SubAbstractListRandomAccess", java.util.AbstractList.SubAbstractList, java.util.RandomAccess);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -296,7 +296,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.AbstractList, "SubAbstractList", java.util.AbstractList);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -414,7 +414,7 @@ C$.$init$.apply(this);
 }, 1);
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.AbstractList.SubAbstractList, "SubAbstractListIterator", null, java.util.ListIterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -486,4 +486,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:15
+//Created 2017-08-18 22:18:01

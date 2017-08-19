@@ -17,7 +17,7 @@ Clazz.newMethod$(C$, 'construct$java_io_Reader', function ($in) {
 C$.superClazz.construct$O.apply(this, [$in]);
 C$.$init$.apply(this);
 this.$in = $in;
-this.buf =  Clazz.newArray$('CA', 1, [8192]);
+this.buf =  Clazz.newArray$(Character.TYPE, [8192]);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct$java_io_Reader$I', function ($in, size) {
@@ -25,7 +25,7 @@ C$.superClazz.construct$O.apply(this, [$in]);
 C$.$init$.apply(this);
 if (size > 0) {
 this.$in = $in;
-this.buf =  Clazz.newArray$('CA', 1, [size]);
+this.buf =  Clazz.newArray$(Character.TYPE, [size]);
 } else {
 throw Clazz.$new(IllegalArgumentException.construct$S,[org.apache.harmony.luni.util.Msg.getString$S ("K0058")]);
 }}, 1);
@@ -49,7 +49,7 @@ this.count = result == -1 ? 0 : result;
 var newLength = this.buf.length * 2;
 if (newLength > this.marklimit) {
 newLength = this.marklimit;
-}var newbuf =  Clazz.newArray$('CA', 1, [newLength]);
+}var newbuf =  Clazz.newArray$(Character.TYPE, [newLength]);
 System.arraycopy$O$I$O$I$I (this.buf, 0, newbuf, 0, this.buf.length);
 this.buf = newbuf;
 } else if (this.markpos > 0) {
@@ -232,4 +232,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:11
+//Created 2017-08-18 22:17:57

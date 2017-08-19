@@ -58,7 +58,7 @@ this.putAll$java_util_Map (map);
 }, 1);
 
 Clazz.newMethod$(C$, 'newElementArray$I', function (size) {
-return  Clazz.newArray$('java_util_Hashtable_EntryA', 1, [size]);
+return  Clazz.newArray$(java.util.Hashtable.Entry, [size]);
 });
 
 Clazz.newMethod$(C$, 'clear', function () {
@@ -463,7 +463,7 @@ this.elementData[index] = entry;
 });
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.Hashtable, "Entry", java.util.MapEntry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -634,8 +634,7 @@ C$.$init$.apply(this);
 }, 1);
 })()
 };
-Clazz.defineStatics (C$,
-"EMPTY_ENUMERATION", ((
+Clazz.defineStatics$ (C$, ["EMPTY_ENUMERATION", ((
 (function(){var C$ = Clazz.decorateAsClass (function () {
 Clazz.newInstance$ (this, arguments[0], true);
 }, java.util, "Hashtable$1", null, java.util.Enumeration);
@@ -651,8 +650,9 @@ Clazz.newMethod$(C$, 'nextElement', function () {
 throw Clazz.$new(java.util.NoSuchElementException.construct,[]);
 });
 })()
-), Clazz.$new(java.util.Hashtable$1.$init$, [this, null])));
+), Clazz.$new(java.util.Hashtable$1.$init$, [this, null]))
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:17
+//Created 2017-08-18 22:18:03

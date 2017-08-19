@@ -10,7 +10,7 @@ Clazz.newMethod$(C$, '$init$', function () {
 
 Clazz.newMethod$(C$, 'format$S$OA', function (format, args) {
 var answer = Clazz.$new(StringBuilder.construct$I,[format.length + (args.length * 20)]);
-var argStrings =  Clazz.newArray$('SA', 1, [args.length]);
+var argStrings =  Clazz.newArray$(java.lang.String, [args.length]);
 for (var i = 0; i < args.length; ++i) {
 if (args[i] == null) argStrings[i] = "<null>";
  else argStrings[i] = args[i].toString ();
@@ -50,4 +50,4 @@ C$.$init$.apply(this);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:05

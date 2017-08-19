@@ -13,7 +13,7 @@ this.modCount = 0;
 }, 1);
 
 Clazz.newMethod$(C$, 'newElementArray$I', function (s) {
-return  Clazz.newArray$('java_util_HashMap_EntryA', 1, [s]);
+return  Clazz.newArray$(java.util.HashMap.Entry, [s]);
 });
 
 Clazz.newMethod$(C$, 'construct', function () {
@@ -362,7 +362,7 @@ this.createEntry$TK$I$TV (key, index, stream.readObject ());
 });
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.HashMap, "Entry", java.util.MapEntry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -389,7 +389,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.HashMap, "HashMapIterator", null, java.util.Iterator);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -466,7 +466,7 @@ C$.$init$.apply(this);
 })()
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.HashMap, "HashMapEntrySet", java.util.AbstractSet);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -525,9 +525,9 @@ Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
 })()
-Clazz.defineStatics (C$,
-"DEFAULT_SIZE", 16);
+Clazz.defineStatics$ (C$, ["DEFAULT_SIZE", 16
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:16
+//Created 2017-08-18 22:18:03

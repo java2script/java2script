@@ -43,7 +43,7 @@ this.elementData[this.elementCount++] = it.next ();
 }, 1);
 
 Clazz.newMethod$(C$, 'newElementArray$I', function (size) {
-return  Clazz.newArray$('OA', 1, [size]);
+return  Clazz.newArray$(java.lang.Object, [size]);
 });
 
 Clazz.newMethod$(C$, 'add$I$TE', function (location, object) {
@@ -399,7 +399,7 @@ return Clazz.$new(java.util.Collections.SynchronizedRandomAccessList.construct$j
 });
 
 Clazz.newMethod$(C$, 'toArray', function () {
-var result =  Clazz.newArray$('OA', 1, [this.elementCount]);
+var result =  Clazz.newArray$(java.lang.Object, [this.elementCount]);
 System.arraycopy$O$I$O$I$I (this.elementData, 0, result, 0, this.elementCount);
 return result;
 });
@@ -443,9 +443,9 @@ C$.prototype.grow$I.apply(this, [this.elementCount]);
 Clazz.newMethod$(C$, 'writeObject$java_io_ObjectOutputStream', function (stream) {
 stream.defaultWriteObject ();
 });
-Clazz.defineStatics (C$,
-"DEFAULT_SIZE", 10);
+Clazz.defineStatics$ (C$, ["DEFAULT_SIZE", 10
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04

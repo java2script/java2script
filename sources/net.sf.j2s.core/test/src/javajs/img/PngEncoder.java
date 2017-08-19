@@ -26,11 +26,11 @@
  */
 package javajs.img;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 
 
@@ -106,7 +106,6 @@ public class PngEncoder extends CRCEncoder {
   private String appPrefix;
   private String comment;
   private byte[] bytes;
-	private String fourByteSoftwareCode;
 
   
   public PngEncoder() {

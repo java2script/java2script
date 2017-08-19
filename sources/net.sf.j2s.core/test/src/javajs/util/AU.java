@@ -39,7 +39,7 @@ final public class AU {
 
   /**
    * Very important that this not be used with Int32Array or Float32Array,
-   * because it is not initialized to all zeros in MSIE 9. 
+   * because it is not initialize to all zeros in MSIE 9. 
    * 
    * @param array
    * @param minimumLength
@@ -139,7 +139,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     Object t = newInstanceO(array, newLength);
@@ -160,17 +160,6 @@ final public class AU {
    * @return array
    */
   private static Object newInstanceO(Object array, int n) {
-    if (isAI(array)) 
-      return new int[n];
-    /**
-     * @j2sNative
-     * 
-     * if (!array.getClass || !array.getClass().getComponentType)
-     * 	 return new Array(n);
-     * 
-     */
-    {
-    }
     return Array.newInstance(array.getClass().getComponentType(), n);
   }
 
@@ -192,7 +181,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     String[] t = new String[newLength];
@@ -231,7 +220,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     float[] t = new float[newLength];
@@ -248,7 +237,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     int[] t = new int[newLength];
@@ -276,15 +265,15 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     * return Clazz.newArray(-1, array, i0, n);
+     * if (Clazz.newArray$) return Clazz.newArray$(-1, array, i0, n);
      * 
      */
     {
-      n -= i0;
-      int[] t = new int[n];
-      System.arraycopy(array, i0, t, 0, n);
-      return t;
     }
+    n -= i0;
+    int[] t = new int[n];
+    System.arraycopy(array, i0, t, 0, n);
+    return t;
   }
 
   public static int[] arrayCopyRangeRevI(int[] array, int i0, int n) {
@@ -293,16 +282,16 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     * return Clazz.newArray(-1, array, i0, n).reverse();
+     * if (Clazz.newArray$) return Clazz.newArray$(-1, array, i0, n).reverse();
      */
     {
-      int[] t = arrayCopyRangeI(array, i0, n);
-      if (n < 0)
-        n = array.length;
-      for (int i = n / 2; --i >= 0;)
-        swapInt(t, i, n - 1 - i);
-      return t;
     }
+    int[] t = arrayCopyRangeI(array, i0, n);
+    if (n < 0)
+      n = array.length;
+    for (int i = n / 2; --i >= 0;)
+      swapInt(t, i, n - 1 - i);
+    return t;
   }
 
   public static short[] arrayCopyShort(short[] array, int newLength) {
@@ -311,7 +300,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     short[] t = new short[newLength];
@@ -328,7 +317,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     byte[] t = new byte[newLength];
@@ -345,7 +334,7 @@ final public class AU {
     /**
      * @j2sNative
      * 
-     *     if (newLength < oldLength) return Clazz.newArray(-1, array, 0, newLength);
+     *     if (Clazz.newArray$ && newLength < oldLength) return Clazz.newArray$(-1, array, 0, newLength);
      */
     {}
     boolean[] t = new boolean[newLength];
@@ -437,111 +426,39 @@ final public class AU {
   }
 
   public static float[][] newFloat2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new float[n][];
-    }
   }
 
 	public static boolean[][] newBool2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
-		return new boolean[n][];
-    }
+	return new boolean[n][];
 	}
 
   public static int[][] newInt2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new int[n][];
-    }
   }
 
   public static int[][][] newInt3(int nx, int ny) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(nx, null);
-     * 
-     */
-    {
-      return (ny < 0 ? new int[nx][][] : new int[nx][ny][]);
-    }
+    return (ny < 0 ? new int[nx][][] : new int[nx][ny][]);
   }
 
   public static float[][][] newFloat3(int nx, int ny) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(nx, null);
-     * 
-     */
-    {
-      return (ny < 0 ? new float[nx][][] : new float[nx][ny][]);
-    }
+    return (ny < 0 ? new float[nx][][] : new float[nx][ny][]);
   }
 
   public static int[][][][] newInt4(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new int[n][][][];
-    }
   }
 
   public static short[][] newShort2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new short[n][];
-    }
   }
 
   public static byte[][] newByte2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new byte[n][];
-    }
   }
 
   public static double[][] newDouble2(int n) {
-    /**
-     * @j2sNative
-     * 
-     * return Clazz.newArray(n, null);
-     * 
-     */
-    {
     return new double[n][];
-    }
   }
 
   /**
@@ -561,128 +478,51 @@ final public class AU {
   }
 
 	public static boolean isAS(Object x) {
-	  /**
-	   * 
-	   * look also for array with first null element
-	   * so untypable -- just call it a String[]
-	   * (group3Lists, created in ModelLoader)
-	   * 
-	   * @j2sNative
-	   *  return Clazz.isAS(x);
-	   */
-	  {
-	  return x instanceof String[];
-	  }
+		return x instanceof String[];
 	}
 
 	public static boolean isASS(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isASS(x);
-	   */
-	  {
-	  return x instanceof String[][];
-	  }
+		return x instanceof String[][];
 	}
 
 	public static boolean isAP(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAP(x);
-	   */
-	  {
-	  return x instanceof T3[];
-	  }
+		return x instanceof T3[];
 	}
 
 	public static boolean isAF(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAF(x);
-	   */
-	  {
 	  return x instanceof float[];
-	  }
 	}
 
 	public static boolean isAFloat(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAFloat(x);
-	   */
-	  {
 	  return x instanceof Float[];
-	  }
 	}
 
 	public static boolean isAD(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAF(x);
-	   */
-	  {
 	  return x instanceof double[];
-	  }
 	}
 
 	public static boolean isADD(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAFF(x);
-	   */
-	  {
 	  return x instanceof double[][];
-	  }
 	}
 
 	public static boolean isAB(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAB(x);
-	   */
-	  {
 	  return x instanceof byte[];
-	  }
 	}
 
 	public static boolean isAI(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAI(x);
-	   */
-	  {
 	  return x instanceof int[];
-	  }
 	}
 
 	public static boolean isAII(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAII(x);
-	   */
-	  {
 	  return (x instanceof int[][]);
-	  }
 	}
 
 	public static boolean isAFF(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAFF(x);
-	   */
-	  {
 	  return x instanceof float[][];
-	  }
 	}
 
 	public static boolean isAFFF(Object x) {
-	  /**
-	   * @j2sNative
-	   *  return Clazz.isAFFF(x);
-	   */
-	  {
 	  return x instanceof float[][][];
-	  }
 	}
 	
 	/**
@@ -694,16 +534,16 @@ final public class AU {
 	 */
 	public static byte[] ensureSignedBytes(byte[] b) {
 		if (b != null) {
-	  /**
-	   * @j2sNative
-	   * 
-			 *            for (var i = b.length; --i >= 0;) { var j = b[i] & 0xFF; if
-			 *            (j >= 0x80) j -= 0x100; b[i] = j; }
-	   * 
-	   */
-	  {
-	  }
-	}
+			/**
+			 * @j2sNative
+			 * 
+			 * 			for (var i = b.length; --i >= 0;) { var j = b[i] &
+			 *            0xFF; if (j >= 0x80) j -= 0x100; b[i] = j; }
+			 * 
+			 */
+			{
+			}
+		}
 		return b;
 	}
 

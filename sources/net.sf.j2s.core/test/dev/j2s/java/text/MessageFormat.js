@@ -27,7 +27,7 @@ return args[i];
 }, 1);
 
 Clazz.newMethod$(C$, 'format$O', function (obj) {
-return java.text.MessageFormat.format$S$OA (this.pattern,  Clazz.newArray$('OA', -1, [-1, [obj]]));
+return java.text.MessageFormat.format$S$OA (this.pattern,  Clazz.newArray$(java.lang.Object, -1, [obj]));
 });
 
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
@@ -35,4 +35,4 @@ C$.$init$.apply(this);
 }, 1);
 })()
 
-//Created 2017-08-17 10:33:15
+//Created 2017-08-18 22:18:01

@@ -32,6 +32,7 @@ import java.io.Serializable;
  *         
  *         
  */
+@SuppressWarnings("serial")
 public class M3 extends M34 implements Serializable {
 
   /**

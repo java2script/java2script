@@ -44,6 +44,11 @@ public class A4 implements JSONEncodable, Serializable {
    */
 
   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+/**
    * The x coordinate.
    */
   public float x;

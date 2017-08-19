@@ -53,7 +53,7 @@ nextBackSlashed = false;
 } else {
 if (repl[index] == '$') {
 if (this.replacementParts == null) {
-this.replacementParts =  Clazz.newArray$('OA', 1, [0]);
+this.replacementParts =  Clazz.newArray$(java.lang.Object, [0]);
 }try {
 var gr = Integer.parseInt ( String.instantialize(repl, ++index, 1));
 if (replacementPos != res.length ()) {
@@ -65,7 +65,7 @@ Clazz.newInstance$ (this, arguments[0], true);
 }, java.util.regex, "Matcher_0$1");
 
 Clazz.newMethod$(C$, '$init$', function () {
-this.grN = this.f$.gr;
+this.grN = this.$finals.gr;
 }, 1);
 
 Clazz.newMethod$(C$, 'toString', function () {
@@ -306,10 +306,10 @@ this.rightBound = this.string.toString ().length;
 Clazz.newMethod$(C$, 'construct', function () {Clazz.super$(C$, this);
 C$.$init$.apply(this);
 }, 1);
-Clazz.defineStatics (C$,
-"MODE_FIND", 1,
-"MODE_MATCH", 2);
+Clazz.defineStatics$ (C$, ["MODE_FIND", 1,
+"MODE_MATCH", 2
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:05

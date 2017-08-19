@@ -31,7 +31,7 @@ import java.io.Serializable;
  * for the optimization of compiled JavaScript using Java2Script.
  *
  */
-public abstract class T3d implements Serializable {
+public abstract class T3d {
   /**
    * The x coordinate.
    */

@@ -62,7 +62,6 @@ public class ZipTools implements GenericZipTools {
     return newZIS(is);
   }
 
-  @SuppressWarnings("resource")
   private static ZInputStream newZIS(InputStream is) {
     return (is instanceof ZInputStream ? (ZInputStream) is
         : is instanceof BufferedInputStream ? new GenericZipInputStream(is)

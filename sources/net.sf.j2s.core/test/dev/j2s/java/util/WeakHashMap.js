@@ -16,7 +16,7 @@ this.modCount = 0;
 }, 1);
 
 Clazz.newMethod$(C$, 'newEntryArray$I', function (size) {
-return  Clazz.newArray$('java_util_WeakHashMap_EntryA', 1, [size]);
+return  Clazz.newArray$(java.util.WeakHashMap.Entry, [size]);
 }, 1);
 
 Clazz.newMethod$(C$, 'construct', function () {
@@ -405,7 +405,7 @@ C$.superClazz.prototype.putAll$java_util_Map.apply(this, arguments);
 }});
 ;
 (function(){var C$ = Clazz.decorateAsClass (function () {
-Clazz.newInstance$ (this, arguments[0], true);
+Clazz.newInstance$ (this, arguments[0], false);
 }, java.util.WeakHashMap, "Entry", java.lang.ref.WeakReference, java.util.Map.Entry);
 
 Clazz.newMethod$(C$, '$init$', function () {
@@ -526,9 +526,9 @@ C$.$init$.apply(this);
 }, 1);
 })()
 };
-Clazz.defineStatics (C$,
-"DEFAULT_SIZE", 16);
+Clazz.defineStatics$ (C$, ["DEFAULT_SIZE", 16
+]);
 })()
 });
 
-//Created 2017-08-17 10:33:18
+//Created 2017-08-18 22:18:04
