@@ -2127,15 +2127,15 @@ public final class String
      * {@link java.util.regex.Pattern}.{@link java.util.regex.Pattern#compile
      * compile}(</tt><i>regex</i><tt>).{@link
      * java.util.regex.Pattern#matcher(java.lang.CharSequence)
-     * matcher}(</tt><i>str</i><tt>).{@link java.util.regex.Matcher#replaceFirst
+     * matcher}(</tt><i>str</i><tt>).{@link java.util.regex.Matcher_1#replaceFirst
      * replaceFirst}(</tt><i>repl</i><tt>)</tt></blockquote>
      *
      *<p>
      * Note that backslashes (<tt>\</tt>) and dollar signs (<tt>$</tt>) in the
      * replacement string may cause the results to be different than if it were
      * being treated as a literal replacement string; see
-     * {@link java.util.regex.Matcher#replaceFirst}.
-     * Use {@link java.util.regex.Matcher#quoteReplacement} to suppress the special
+     * {@link java.util.regex.Matcher_1#replaceFirst}.
+     * Use {@link java.util.regex.Matcher_1#quoteReplacement} to suppress the special
      * meaning of these characters, if desired.
      *
      * @param   regex
@@ -2170,15 +2170,15 @@ public final class String
      * {@link java.util.regex.Pattern}.{@link java.util.regex.Pattern#compile
      * compile}(</tt><i>regex</i><tt>).{@link
      * java.util.regex.Pattern#matcher(java.lang.CharSequence)
-     * matcher}(</tt><i>str</i><tt>).{@link java.util.regex.Matcher#replaceAll
+     * matcher}(</tt><i>str</i><tt>).{@link java.util.regex.Matcher_1#replaceAll
      * replaceAll}(</tt><i>repl</i><tt>)</tt></blockquote>
      *
      *<p>
      * Note that backslashes (<tt>\</tt>) and dollar signs (<tt>$</tt>) in the
      * replacement string may cause the results to be different than if it were
      * being treated as a literal replacement string; see
-     * {@link java.util.regex.Matcher#replaceAll Matcher.replaceAll}.
-     * Use {@link java.util.regex.Matcher#quoteReplacement} to suppress the special
+     * {@link java.util.regex.Matcher_1#replaceAll Matcher.replaceAll}.
+     * Use {@link java.util.regex.Matcher_1#quoteReplacement} to suppress the special
      * meaning of these characters, if desired.
      *
      * @param   regex

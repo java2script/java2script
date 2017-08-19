@@ -155,6 +155,10 @@ window["j2s.object.native"] = true;
 
 ;(function(Clazz, J2S) {
 
+Clazz.makeConstructor = function(){debugger}
+
+Clazz.defineMethod = function(){debugger}
+
 Clazz.popup = Clazz.assert = Clazz.log = Clazz.error = window.alert;
 
 //J2S._debugCode = false;
@@ -1238,7 +1242,7 @@ var inF = Clazz._inF = {
   isAssignableFrom : function(clazz) {  return getInheritedLevel (clazz, this) >= 0;  },
 
   getConstructor : function(paramTypes) { 
-  return new java.lang.reflect.Constructor (this, paramTypes || [], [], java.lang.reflect.Modifier.PUBLIC);
+  return Clazz.$new(java.lang.reflect.Constructor.construct$Class$ClassA$ClassA$I, [this, paramTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
   },
 /**
  * TODO: fix bug for polymorphic methods!
@@ -1459,7 +1463,7 @@ Clazz.exceptionOf = function(e, clazz) {
   }
   if (!e.printStackTrace) {
     e.printStackTrace = function(){};
-    alert(e + " try/catch path:" + Clazz.getStackTrace(-10));
+    //alert(e + " try/catch path:" + Clazz.getStackTrace(-10));
   }
   if(clazz == Error) {
     if (("" + e).indexOf("Error") < 0)
@@ -3039,17 +3043,13 @@ updateNode = function(node, ulev, chain, _updateNode) {
   if (node.status < Node.STATUS_DECLARED) {
     var decl = node.declaration;
     if (decl) {
-//      var vallow = allowImplicit;
-//      allowImplicit = true;
-      decl(), decl.executed = true;
-//      allowImplicit = vallow;
+        decl(), decl.executed = true;
     }
     if(_Loader._checkLoad) {
             if (_Loader._classPending[node.name]) {
               delete _Loader._classPending[node.name];
               _Loader._classCountOK;
               _Loader._classCountPending--;
-//              System.out.println("OK " + (_Loader._classCountOK) + " FOR " + node.name)
             }
     }
     node.status = Node.STATUS_DECLARED;
@@ -3944,6 +3944,7 @@ Clazz.alert = function (s) {
 })(Clazz.Console);
 
 
+
 Clazz._setDeclared("java.lang.System",
 java.lang.System = System = {
   props : null, //new java.util.Properties (),
@@ -4018,6 +4019,8 @@ java.lang.System = System = {
 });
 
 ;(function(Con, Sys) {
+
+Sys.arraycopy$O$I$O$I$I = Sys.arraycopy;
 
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
@@ -5115,9 +5118,9 @@ var formatterClass;
 if (!String.format)
  String.format = function() {
   if (!formatterClass)
-    formatterClass = Class.forName("java.util.Formatter");
-  var f = formatterClass.newInstance();
-  return f.format.apply(f,arguments).toString();
+    formatterClass = Clazz._4Name("java.util.Formatter");
+  var f = new formatterClass();
+  return f.format$S$OA.apply(f,arguments).toString();
  }
 
 ;(function(sp) {
@@ -5444,7 +5447,7 @@ return false;
 return true;
 };
 
-sp.getChars=function(srcBegin,srcEnd,dst,dstBegin){
+sp.getChars$I$I$CA$I = sp.getChars=function(srcBegin,srcEnd,dst,dstBegin){
 if(srcBegin<0){
 throw new StringIndexOutOfBoundsException(srcBegin);
 }
@@ -5494,6 +5497,10 @@ String.copyValueOf=sp.copyValueOf=function(){
 };
 
 sp.codePointAt || (sp.codePointAt = sp.charCodeAt); // Firefox only
+sp.codePointAt$I = sp.codePointAt;
+
+sp.charAt$I = sp.charAt;
+sp.subSequence$I$I = sp.substring;
 
 
 })(String.prototype);
@@ -6500,12 +6507,18 @@ this.clazz=null;
 this.parameterTypes=null;
 this.exceptionTypes=null;
 this.modifiers=0;
+this.signature="construct";
+this.constr = null;
 },java.lang.reflect,"Constructor",java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 
 m$(c$, "construct$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
 Clazz.super$(c$, this);
 this.clazz=declaringClass;
 this.parameterTypes=parameterTypes;
+for (var i = 0; i < parameterTypes.length; i++) {
+  this.signature += "$" + Clazz._getParamCode(parameterTypes[i]);
+}
+this.constr = this.clazz[this.signature];
 this.exceptionTypes=checkedExceptions;
 this.modifiers=modifiers;
 }, 1);
@@ -6576,16 +6589,23 @@ function(){
 return this.getDeclaringClass().getName().hashCode();
 });
 m$(c$,"newInstance$OA", function(args){
-var a = (args ? new Array(args.length) : null);
-if (args) {
-  for (var i = args.length; --i >= 0;) {
-    a[i] = (this.parameterTypes[i] == Number ? args[i].valueOf() : args[i]);
+  var instance = null;
+  if (this.constr) {
+    var a = (args ? new Array(args.length) : null);
+    if (args) {
+      for (var i = args.length; --i >= 0;) {
+        a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
+      }
+    }
+    var instance = new (Function.prototype.bind.apply(this.clazz, [null, []]));
+    if (instance) {
+      this.constr.apply(instance, a);
+    }
   }
-}
-var instance=new this.clazz(null, Clazz.inheritArgs);
-if (instance == null)
-  newMethodNotFoundException(this.clazz, "construct", getParamTypes(a).typeString);  
-return instance;
+//  var instance=new this.clazz(null, Clazz.inheritArgs);
+  if (instance == null)
+    newMethodNotFoundException(this.clazz, "construct", getParamTypes(a).typeString);  
+  return instance;
 });
 m$(c$,"toString",
 function(){

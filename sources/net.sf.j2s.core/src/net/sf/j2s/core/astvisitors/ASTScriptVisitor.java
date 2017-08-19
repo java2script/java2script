@@ -57,6 +57,10 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+// TODO Clazz._4Name  replaces Class.forName$S
+
+// BH 8/19/2017 -- varargs logic fixed for missing argument
+// BH 8/18/2017 -- array instanceof, reflection, componentType fixes
 // BH 8/16/2017 -- JSE8-UnionType catch (Exception... | Exception...) {...}
 // BH 8/13/2017 -- includes native code calls in System.err
 // BH 7/31/2017 -- extensively reworked for fully qualified method names and no SAEM
@@ -68,6 +72,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: array handling in instanceof and reflection
 
 // TODO: String + double should be new Double(x).toString() 
+// TODO: Formatter
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 
 /**
@@ -2242,14 +2247,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					if ("serialVersionUID".equals(vdf.getName().getIdentifier())) {
 						continue;
 					}
-					if (++staticCount == 0) {
+//					if (++staticCount == 0) {
 						buffer.append("Clazz.defineStatics$ (C$, [");
-					} else {
-						buffer.append(",\r\n");
-					}
+//					} else {
+//						buffer.append(",\r\n");
+//					}
 					buffer.append("\"");
 					vdf.getName().accept(this);
-					buffer.append("\", ");
+					buffer.append("\",");
 					Type fieldType = field.getType();
 					Expression initializer = vdf.getInitializer();
 					if (initializer == null) {
@@ -2268,6 +2273,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						if (term != null)
 							buffer.append(term);
 					}
+					buffer.append("]);\r\n");
 				}
 			}
 		}
@@ -2483,6 +2489,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			"java.lang.Number",
 			"java.lang.reflect.Array", 
 			"java.lang.Short",
+			"java.lang.String",
 			"java.lang.Thread",
 			"java.util.Date",
 			"java.util.EventListenerProxy",
@@ -2522,6 +2529,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 //			}
 //		}
 
+		String name = binding.getName();
+		
 		// The problem is that System.out and System.err are PrintStreams, and we 
 		// do not intend to change those. So in the case that we just wrote
 		// "System....", we use that instead and do not qualify the name
@@ -2529,20 +2538,31 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return "";
 		String className = binding.getDeclaringClass().getQualifiedName();		
 		for (int i = excludedClasses.length; --i >= 0;) {
-			if (className.startsWith(excludedClasses[i])) {
+			if (className.equals(excludedClasses[i])) {
+				// leave equivalent String methods the same
+				if (className.equals("java.lang.String")) {
+				  if ("charAt,codePointAt,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(name) < 0)
+					  break;
+				}
 				return "";
 			}
 		}
+		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
+
+		// BH: Note that Map.put$K$V is translated to actual values
+		// if .getMethodDeclaration() is not used.
+		// Without that, it uses the bound parameters such as
+		// String, Object  instead of the declared ones, such as $TK$TV
+		
 
 		StringBuffer sbParams = new StringBuffer();
-		ITypeBinding[] paramTypes = binding.getParameterTypes();
 		int nParams = paramTypes.length;
 		for (int i = 0; i < nParams; i++)
 			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
 		String s = sbParams.toString();
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
-		if ("main".equals(binding.getName()) && isStatic(binding.getModifiers())) {
+		if ("main".equals(name) && isStatic(binding.getModifiers())) {
 			if (s.length() == 0) {
 				s = "$";
 			} else if (s.equals("$SA")) {
