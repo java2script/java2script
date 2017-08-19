@@ -181,9 +181,8 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			switch (array.__paramType){ case "BA": return new Byte(x);
-		 *            case "CA": return new Character(x); case "HA": return new
-		 *            Short(x); case "IA": return new Integer(x); case "JA":
+		 * 			switch (array.__ARRAYTYPE){ case "BA": return new Byte(x);
+		 *            case "CA": return new Character(x); case "HA": return new Short(x); case "IA": return new Integer(x); case "JA":
 		 *            return new Long(x); case "ZA": return (x ? Boolean.TRUE :
 		 *            Boolean.FALSE); case "FA": return new Float(x); case "DA":
 		 *            return new Double(x); } return x;
@@ -230,7 +229,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -276,7 +275,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -322,7 +321,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -365,7 +364,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -411,7 +410,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -459,7 +458,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -508,7 +507,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -558,7 +557,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType; val = x;
+		 * 			type = array.__ARRAYTYPE; val = x;
 		 */
 		{
 		}
@@ -608,7 +607,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -682,7 +681,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -728,7 +727,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -779,7 +778,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -825,7 +824,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -875,7 +874,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -924,7 +923,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -972,7 +971,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
@@ -1019,7 +1018,7 @@ public final class Array {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			type = array.__paramType;
+		 * 			type = array.__ARRAYTYPE;
 		 */
 		{
 		}
