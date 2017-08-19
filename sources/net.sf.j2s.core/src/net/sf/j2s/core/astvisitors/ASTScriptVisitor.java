@@ -65,7 +65,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: fully encapsulated C$ variable
 // DONE: proper <init> processing
 // DONE: non-final variables for anonymous class definition
+// DONE: array handling in instanceof and reflection
 
+// TODO: String + double should be new Double(x).toString() 
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 
 /**
@@ -471,7 +473,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				prefix = ",[";
 				postfix = "]";
 			}
-			visitMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix);
+			addMethodParameterList(node.arguments(), methodDeclaration, true, prefix, postfix);
 			buffer.append(")");
 		} else {
 			// anonymous
@@ -552,7 +554,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(", Clazz.inheritArgs");
 		} else if (methodDeclaration != null) {
 			List<?> args = node.arguments();
-			visitMethodParameterList(args, methodDeclaration, true, args.size() > 0 || methodDeclaration.isVarargs() ? ", " : null, null);
+			addMethodParameterList(args, methodDeclaration, true, args.size() > 0 || methodDeclaration.isVarargs() ? ", " : null, null);
 		}
 		buffer.append("]");
 		// an anonymous class will be calling a constructor in another class, so we need to indicate
@@ -562,81 +564,64 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(")");
 	}
 
-	protected boolean visitMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration,
-			boolean isConstructor, String prefix, String suffix) {
-
-		if (methodDeclaration == null) {
-			return false;
-		}
-		if (isConstructor && arguments.size() == 0) {
-			// always add a [] constuctor, as null will indicate
-			// that we did not use Clazz.$new and instead called new foo() directly
-			// we have an apparent default empty constructor such as
-			// public MyClass() {....}
+	@SuppressWarnings("null")
+	protected void addMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor,
+			String prefix, String suffix) {
+		if (methodDeclaration == null)
+			return;
+		boolean methodIsVarArgs = methodDeclaration.isVarargs();
+		int argCount = arguments.size();
+		if (isConstructor && argCount == 0) {
+			// We allow use of a default constructor using new foo().
+			// Here we always add a [] argument to a default constuctor, as null
+			// will indicate
+			// that we did not use Clazz.$new and instead called new foo()
+			// directly.
 			if (prefix != null) {
 				buffer.append(prefix);
-				if (methodDeclaration.isVarargs())
+				prefix = null;
+				if (methodIsVarArgs)
 					buffer.append("[]");
 			}
-			if (suffix != null) {
-				buffer.append(suffix);
-			}
-			return true;
-		}
-		boolean alreadyPrefixed = false;
-		String clazzName = null;
-		ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
-		ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
-		if (declaringClass != null) {
-			clazzName = declaringClass.getQualifiedName();
-		}
-		String methodName = methodDeclaration.getName();
-		int argSize = arguments.size();
-		for (int i = 0; i < parameterTypes.length; i++) {
-			boolean isVarArgs = false;
-			if (i == parameterTypes.length - 1) {
-				ITypeBinding paramType = parameterTypes[i];
-				if (parameterTypes.length != argSize) {
-					isVarArgs = true;
-				} else if (paramType.isArray() && methodDeclaration.isVarargs()) {
-					Expression element = (Expression) arguments.get(i);
-					ITypeBinding argType = element.resolveTypeBinding();
-					if (!argType.isArray()) {
-						if (!(element instanceof NullLiteral)) {
-							isVarArgs = true;
-						}
-					}
-				}
-			}
-			String parameterTypeName = null;
-			parameterTypeName = parameterTypes[i].getName();
-			if (!alreadyPrefixed && prefix != null) {
+		} else {
+			ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
+			ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
+			String clazzName = (declaringClass == null ? null : declaringClass.getQualifiedName());
+			String methodName = methodDeclaration.getName();
+			String post = ", ";
+			int nparam = parameterTypes.length;
+			if (prefix != null && (nparam > 0 || methodIsVarArgs)) {
 				buffer.append(prefix);
-				alreadyPrefixed = true;
+				prefix = null;
 			}
-			if (isVarArgs) {
-				buffer.append("[");
-				for (int j = i; j < argSize; j++) {
-					Expression element = (Expression) arguments.get(j);
-					visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
-					if (j != argSize - 1) {
-						buffer.append(", ");
+			for (int i = 0; i < nparam; i++) {
+				ITypeBinding paramType = parameterTypes[i];
+				String parameterTypeName = paramType.getName();
+				Expression arg = (i < argCount ? (Expression) arguments.get(i) : null);
+				if (i == nparam - 1) {
+					// BH: can't just check for an array; it has to be an array with the right number of dimensions
+					if (nparam != argCount || methodIsVarArgs && paramType.isArray()
+							&& arg.resolveTypeBinding().getDimensions() != paramType.getDimensions() 
+							&& !(arg instanceof NullLiteral)) {
+						buffer.append("[");
+						for (int j = i; j < argCount; j++) {
+							addMethodArgument((Expression) arguments.get(j), clazzName, methodName, parameterTypeName,
+									i);
+							if (j != argCount - 1) {
+								buffer.append(", ");
+							}
+						}
+						buffer.append("]");
+						break;
 					}
+					post = "";
 				}
-				buffer.append("]");
-			} else {
-				Expression element = (Expression) arguments.get(i);
-				visitArgumentItem(element, clazzName, methodName, parameterTypeName, i);
-				if (i != parameterTypes.length - 1) {
-					buffer.append(", ");
-				}
+				addMethodArgument(arg, clazzName, methodName, parameterTypeName, i);
+				buffer.append(post);
 			}
 		}
-
-		if (alreadyPrefixed && suffix != null) {
+		if (prefix == null && suffix != null)
 			buffer.append(suffix);
-		}
-		return true;
 	}
 
 	/**
@@ -648,7 +633,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * @param parameterTypeName
 	 * @param position
 	 */
-	private void visitArgumentItem(Expression exp, String clazzName, String methodName, String parameterTypeName,
+	private void addMethodArgument(Expression exp, String clazzName, String methodName, String parameterTypeName,
 			int position) {
 		if (exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
 			buffer.append("null");
@@ -706,7 +691,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("C$.construct").append(qualifiedParams).append(".apply(this");
 		IMethodBinding methodDeclaration = (constructorBinding == null ? null
 				: constructorBinding.getMethodDeclaration());
-		visitMethodParameterList(arguments, methodDeclaration, true, ", [", "]");
+		addMethodParameterList(arguments, methodDeclaration, true, ", [", "]");
 		buffer.append(");\r\n");
 	}
 
@@ -841,7 +826,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					.append(", \"");
 			enumConst.getName().accept(this);
 			buffer.append("\", " + i);
-			visitMethodParameterList(enumConst.arguments(), binding, true, ", [", "]");
+			addMethodParameterList(enumConst.arguments(), binding, true, ", [", "]");
 			buffer.append(", ").append(anonName).append("));\r\n");
 		}
 		buffer.append("Clazz.newMethod$(C$, 'values', function() { return vals }, 1);\r\n");
@@ -1416,7 +1401,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append(sbParams);
 		}
 		buffer.append(isPrivateAndNotStatic ? ".apply(this, [" : " (");
-		visitMethodParameterList(node.arguments(), mBinding, false, null, null);
+		addMethodParameterList(node.arguments(), mBinding, false, null, null);
 		if (isPrivateAndNotStatic)
 			buffer.append("]");
 		buffer.append(")");
@@ -2652,7 +2637,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		} else {
 			buffer.append("C$.superClazz.construct").append(getJ2SParamQualifier(null, node.resolveConstructorBinding())); 
 			buffer.append(".apply(this");
-			visitMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
+			addMethodParameterList(node.arguments(), methodDeclaration, true, ", [", "]");
 		}
 		buffer.append(");\r\n");
 		addCallInit();
