@@ -1047,7 +1047,8 @@ public class File
      *          SecurityManager#checkRead(String)} method denies read access to
      *          the directory
      */
-    public String[] list(FilenameFilter filter) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public String[] list(FilenameFilter filter) {
         String names[] = list();
         if ((names == null) || (filter == null)) {
             return names;

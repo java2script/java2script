@@ -3358,7 +3358,8 @@ public class Arrays {
      * @param a the array by which the list will be backed
      * @return a list view of the specified array
      */
-    public static <T> List<T> asList(T... a) {
+    @SuppressWarnings("unchecked")
+	public static <T> List<T> asList(T... a) {
         return new ArrayList<T>(a);
     }
 

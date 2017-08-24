@@ -527,7 +527,8 @@ public class DecimalFormatSymbols implements Cloneable {
     /**
      * Initializes the symbols from the FormatData resource bundle.
      */
-    private void initialize( Locale locale ) {
+    @SuppressWarnings("unchecked")
+	private void initialize( Locale locale ) {
         this.locale = locale;
 
         // get resource bundle data - try the cache first
@@ -805,13 +806,15 @@ public class DecimalFormatSymbols implements Cloneable {
      * @serial
      * @since JDK 1.1.6
      */
-    private int serialVersionOnStream = currentSerialVersion;
+    @SuppressWarnings("unused")
+	private int serialVersionOnStream = currentSerialVersion;
 
     /**
      * cache to hold the NumberElements and the Currency
      * of a Locale.
      */
-    private static final Hashtable cachedLocaleData = new Hashtable(3);
+    @SuppressWarnings("rawtypes")
+	private static final Hashtable cachedLocaleData = new Hashtable(3);
 
 //    /**
 //     * Obtains a DecimalFormatSymbols instance from a DecimalFormatSymbolsProvider

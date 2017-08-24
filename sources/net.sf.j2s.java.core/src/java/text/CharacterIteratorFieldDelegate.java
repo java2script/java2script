@@ -44,7 +44,8 @@ class CharacterIteratorFieldDelegate implements Format.FieldDelegate {
      * for existing regions result in invoking addAttribute on the existing
      * AttributedStrings.
      */
-    private ArrayList attributedStrings;
+    @SuppressWarnings("rawtypes")
+	private ArrayList attributedStrings;
     /**
      * Running count of the number of characters that have
      * been encountered.
@@ -52,11 +53,13 @@ class CharacterIteratorFieldDelegate implements Format.FieldDelegate {
     private int size;
 
 
-    CharacterIteratorFieldDelegate() {
+    @SuppressWarnings("rawtypes")
+	CharacterIteratorFieldDelegate() {
         attributedStrings = new ArrayList();
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
 		public void formatted(Format.Field attr, Object value, int start, int end,
                           StringBuffer buffer) {
         if (start != end) {
@@ -108,7 +111,8 @@ class CharacterIteratorFieldDelegate implements Format.FieldDelegate {
      *
      * @pararm string Result of formatting.
      */
-    public AttributedCharacterIterator getIterator(String string) {
+    @SuppressWarnings("unchecked")
+	public AttributedCharacterIterator getIterator(String string) {
         // Add the last AttributedCharacterIterator if necessary
         // assert(size <= string.length());
         if (string.length() > size) {

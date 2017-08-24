@@ -2776,7 +2776,6 @@ public final class String
      * @see  java.util.Formatter
      * @since  1.5
      */
-    @SuppressWarnings("resource")
 	public static String format(String format, Object ... args) {
         return new Formatter().format(format, args).toString();
     }
@@ -2821,7 +2820,6 @@ public final class String
      * @see  java.util.Formatter
      * @since  1.5
      */
-    @SuppressWarnings("resource")
 	public static String format(Locale l, String format, Object ... args) {
         return new Formatter(l).format(format, args).toString();
     }

@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,11 +22,10 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
-import net.sf.j2s.core.astvisitors.ASTJ2SMapVisitor;
+import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
-import net.sf.j2s.core.astvisitors.NameConvertItem;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
 import net.sf.j2s.core.builder.SourceFile;
@@ -161,7 +158,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					}
 				}
 				if (dvisitor == null) {
-					dvisitor = new SWTDependencyASTVisitor();
+// BH - we are done with SWT					dvisitor = new SWTDependencyASTVisitor();
+					dvisitor = new DependencyASTVisitor();
 				}
 			}
 			try {
@@ -206,6 +204,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					visitor = new SWTScriptVisitor();
 				}
 			}
+			ASTEmptyVisitor.setNoQualifiedNamePackages(props.getProperty("j2s.compiler.method.overloading"));
 			boolean ignoreMethodOverloading = !("enable".equals(props.getProperty("j2s.compiler.method.overloading")));
 			visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
 			boolean supportsInterfaceCasting = "enable".equals(props.getProperty("j2s.compiler.interface.casting"));
@@ -215,13 +214,12 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
 			dvisitor.setDebugging(isDebugging);
-			boolean toCompress = "enable".equals(props.getProperty("j2s.compiler.allow.compression"))
-					&& "release".equals(props.getProperty("j2s.compiler.mode")); // BH added
+			boolean toCompress = false; //"enable".equals(props.getProperty("j2s.compiler.allow.compression"))); // BH
 			((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
 			dvisitor.setToCompileVariableName(toCompress);
-			if (toCompress) {
-				updateJ2SMap(prjFolder);
-			}
+//			if (toCompress) {
+//				updateJ2SMap(prjFolder);
+//			}
 			errorOccurred = false;
 			try {
 				root.accept(visitor);
@@ -248,61 +246,61 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		}
 	}
 
-	public static void updateJ2SMap(String prjFolder) {
-		File j2sMap = new File(prjFolder, ".j2smap");
-		if (j2sMap.exists()) {
-			String mapStr = FileUtil.readSource(j2sMap);
-			if (mapStr != null) {
-				String lastClassName = null;
-				Map<String, NameConvertItem> varList = new HashMap<String, NameConvertItem>();
-				String[] lines = mapStr.split("\r\n|\r|\n");
-				for (int j = 0; j < lines.length; j++) {
-					String line = lines[j].trim();
-					if (line.length() > 0) {
-						if (!line.startsWith("#")) {
-							int index = line.indexOf("=");
-							if (index != -1) {
-								String key = line.substring(0, index).trim();
-								String toVarName = line.substring(index + 1).trim();
-								boolean isMethod = true;
-								int idx = key.lastIndexOf('#');
-								if (idx == -1) {
-									isMethod = false;
-									idx = key.lastIndexOf('.');
-									if (idx == -1) {
-										continue;
-									}
-								}
-								String className = key.substring(0, idx);
-								if (className.startsWith("$")) {
-									if (lastClassName != null) {
-										className = className.replaceAll("\\$", lastClassName);
-//													System.out.println(className + "..." + lastClassName);
-									} else {
-										className = className.replaceAll("\\$", "");
-										lastClassName = className;
-									}
-								} else {
-									lastClassName = className;
-								}
-								String varName = key.substring(idx + 1);
-//								System.out.println(className + "." + varName + "->" + toVarName);
-								if (isMethod) {
-									key = className + "#" + varName;
-								} else {
-									key = className + "." + varName;
-								}
-								varList.put(key, new NameConvertItem(className, varName, toVarName, isMethod));
-							}
-						}
-					}
-				}
-				ASTJ2SMapVisitor.setJ2SMap(varList);
-				return ;
-			}
-		}
-		ASTJ2SMapVisitor.setJ2SMap(null);
-	}
+//	public static void updateJ2SMap(String prjFolder) {
+//		File j2sMap = new File(prjFolder, ".j2smap");
+//		if (j2sMap.exists()) {
+//			String mapStr = FileUtil.readSource(j2sMap);
+//			if (mapStr != null) {
+//				String lastClassName = null;
+//				Map<String, NameConvertItem> varList = new HashMap<String, NameConvertItem>();
+//				String[] lines = mapStr.split("\r\n|\r|\n");
+//				for (int j = 0; j < lines.length; j++) {
+//					String line = lines[j].trim();
+//					if (line.length() > 0) {
+//						if (!line.startsWith("#")) {
+//							int index = line.indexOf("=");
+//							if (index != -1) {
+//								String key = line.substring(0, index).trim();
+//								String toVarName = line.substring(index + 1).trim();
+//								boolean isMethod = true;
+//								int idx = key.lastIndexOf('#');
+//								if (idx == -1) {
+//									isMethod = false;
+//									idx = key.lastIndexOf('.');
+//									if (idx == -1) {
+//										continue;
+//									}
+//								}
+//								String className = key.substring(0, idx);
+//								if (className.startsWith("$")) {
+//									if (lastClassName != null) {
+//										className = className.replaceAll("\\$", lastClassName);
+////													System.out.println(className + "..." + lastClassName);
+//									} else {
+//										className = className.replaceAll("\\$", "");
+//										lastClassName = className;
+//									}
+//								} else {
+//									lastClassName = className;
+//								}
+//								String varName = key.substring(idx + 1);
+////								System.out.println(className + "." + varName + "->" + toVarName);
+//								if (isMethod) {
+//									key = className + "#" + varName;
+//								} else {
+//									key = className + "." + varName;
+//								}
+//								varList.put(key, new NameConvertItem(className, varName, toVarName, isMethod));
+//							}
+//						}
+//					}
+//				}
+//				ASTJ2SMapVisitor.setJ2SMap(varList);
+//				return ;
+//			}
+//		}
+//		ASTJ2SMapVisitor.setJ2SMap(null);
+//	}
 
 	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String folderPath, Properties props) {

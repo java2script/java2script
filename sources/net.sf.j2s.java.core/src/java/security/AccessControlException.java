@@ -40,6 +40,7 @@ package java.security;
  * @author Roland Schemers
  */
 
+@SuppressWarnings("serial")
 public class AccessControlException extends SecurityException {
 
 //    private static final long serialVersionUID = 5138225684096988535L;

@@ -395,7 +395,8 @@ public class DecimalFormat extends NumberFormat {
      * @see java.text.NumberFormat#getCurrencyInstance
      * @see java.text.NumberFormat#getPercentInstance
      */
-    public DecimalFormat() {
+    @SuppressWarnings("unchecked")
+	public DecimalFormat() {
         Locale def = Locale.getDefault();
         // try to get the pattern from the cache
         String pattern = (String) cachedLocaleData.get(def);
@@ -2079,7 +2080,8 @@ public class DecimalFormat extends NumberFormat {
      * @param pattern the non-null, possibly empty pattern
      * @return FieldPosition array of the resulting fields.
      */
-    private FieldPosition[] expandAffix(String pattern) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private FieldPosition[] expandAffix(String pattern) {
         ArrayList positions = null;
         int stringIndex = 0;
         for (int i=0; i<pattern.length(); ) {
@@ -3311,5 +3313,6 @@ public class DecimalFormat extends NumberFormat {
     /**
      * Cache to hold the NumberPattern of a Locale.
      */
-    private static Hashtable cachedLocaleData = new Hashtable(3);
+    @SuppressWarnings("rawtypes")
+	private static Hashtable cachedLocaleData = new Hashtable(3);
 }

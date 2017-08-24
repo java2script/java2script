@@ -94,7 +94,7 @@ public interface AttributedCharacterIterator extends CharacterIterator {
         private String name;
 
         // table of all instances in this class, used by readResolve
-        private static final Map instanceMap = new HashMap(7);
+        private static final Map<String, Object> instanceMap = new HashMap<String, Object>(7);
 
         /**
          * Constructs an Attribute with the given name.

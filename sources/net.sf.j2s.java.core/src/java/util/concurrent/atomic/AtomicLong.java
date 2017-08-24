@@ -49,6 +49,7 @@ package java.util.concurrent.atomic;
  * @since 1.5
  * @author Doug Lea
  */
+@SuppressWarnings("serial")
 public class AtomicLong extends Number {//implements java.io.Serializable {
 //    private static final long serialVersionUID = 1927816293512124184L;
 

@@ -43,15 +43,10 @@ package java.text;
 
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
-
-import javajs.J2SRequireImport;
-import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.TimeZone;
-import jssun.util.TimeZoneNameUtility;
-import jssun.util.calendar.ZoneInfo;
+
+import javajs.J2SRequireImport;
 import jssun.util.resources.LocaleData;
 
 /**
@@ -578,13 +573,15 @@ public class DateFormatSymbols implements Cloneable {
      * Cache to hold the FormatData and TimeZoneNames ResourceBundles
      * of a Locale.
      */
-    private static Hashtable cachedLocaleData = new Hashtable(3);
+    @SuppressWarnings("rawtypes")
+	private static Hashtable cachedLocaleData = new Hashtable(3);
 
     /**
      * Look up resource data for the desiredLocale in the cache; update the
      * cache if necessary.
      */
-    private static ResourceBundle cacheLookup(Locale desiredLocale) {
+    @SuppressWarnings("unchecked")
+	private static ResourceBundle cacheLookup(Locale desiredLocale) {
     ResourceBundle rb = (ResourceBundle) cachedLocaleData.get(desiredLocale);
     if (rb == null) {
         rb = LocaleData.getDateFormatData(desiredLocale);
@@ -669,7 +666,8 @@ public class DateFormatSymbols implements Cloneable {
 //        }
 //    }
 //
-    private final boolean isSubclassObject() {
+    @SuppressWarnings("unused")
+	private final boolean isSubclassObject() {
         return !getClass().getName().equals("java.text.DateFormatSymbols");
     }
 
@@ -718,7 +716,8 @@ public class DateFormatSymbols implements Cloneable {
      * @param current this String array.
      * @param other that String array.
      */
-    private final boolean equals(String[] current, String[] other)
+    @SuppressWarnings("unused")
+	private final boolean equals(String[] current, String[] other)
     {
         int count = current.length;
 

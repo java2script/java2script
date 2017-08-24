@@ -347,6 +347,7 @@ import javajs.J2SRequireImport;
 	java.util.GregorianCalendar.class, 
 	java.util.Calendar.class, java.util.TimeZone.class, 
 	jssun.util.calendar.ZoneInfo.class, java.text.DecimalFormat.class })
+@SuppressWarnings("unused")
 public class SimpleDateFormat extends DateFormat {
 
     // the official serial version ID which says cryptically
@@ -423,7 +424,7 @@ public class SimpleDateFormat extends DateFormat {
 
     // For time zones that have no names, use strings GMT+minutes and
     // GMT-minutes. For instance, in France the time zone is GMT+60.
-    private static final String GMT = "GMT";
+	private static final String GMT = "GMT";
 
     /**
      * Cache to hold the DateTimePatterns of a Locale.

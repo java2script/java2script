@@ -50,6 +50,7 @@ import java.text.AttributedCharacterIterator.Attribute;
  * @since 1.2
  */
 
+@SuppressWarnings("rawtypes")
 public class AttributedString {
 
     // since there are no vectors of int, we have to use arrays.
@@ -142,7 +143,8 @@ public class AttributedString {
      * and the attributes parameter is not an empty Map (attributes
      * cannot be applied to a 0-length range).
      */
-    public AttributedString(String text,
+    @SuppressWarnings("unchecked")
+	public AttributedString(String text,
                             Map<? extends Attribute, ?> attributes)
     {
         if (text == null || attributes == null) {
@@ -231,7 +233,8 @@ public class AttributedString {
      * beginIndex and endIndex is out of the text range.
      * @see java.text.Annotation
      */
-    public AttributedString(AttributedCharacterIterator text,
+    @SuppressWarnings("unchecked")
+	public AttributedString(AttributedCharacterIterator text,
                             int beginIndex,
                             int endIndex,
                             Attribute[] attributes) {
@@ -509,7 +512,8 @@ public class AttributedString {
     }
 
     // add the attribute attribute/value to all runs where beginRunIndex <= runIndex < endRunIndex
-    private void addAttributeRunData(Attribute attribute, Object value,
+    @SuppressWarnings("unchecked")
+	private void addAttributeRunData(Attribute attribute, Object value,
             int beginRunIndex, int endRunIndex) {
 
         for (int i = beginRunIndex; i < endRunIndex; i++) {
@@ -694,7 +698,8 @@ public class AttributedString {
      * (typically the end of the text) to the ones specified in attrs.
      * This is only meant to be called from the constructor!
      */
-    private void setAttributes(Map attrs, int offset) {
+    @SuppressWarnings("unchecked")
+	private void setAttributes(Map attrs, int offset) {
         if (runCount == 0) {
             createRunAttributeDataVectors();
         }
@@ -962,7 +967,8 @@ public class AttributedString {
             }
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
 				public Map<Attribute,Object> getAttributes() {
             if (runAttributes == null || currentRunIndex == -1 || runAttributes[currentRunIndex] == null) {
                 // ??? would be nice to return null, but current spec doesn't allow it
@@ -972,7 +978,8 @@ public class AttributedString {
             return new AttributeMap(currentRunIndex, beginIndex, endIndex);
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
 				public Set<Attribute> getAllAttributeKeys() {
             // ??? This should screen out attribute keys that aren't relevant to the client
             if (runAttributes == null) {
@@ -1077,7 +1084,8 @@ public class AttributedString {
             this.endIndex = endIndex;
         }
 
-        @Override
+		@SuppressWarnings("unchecked")
+		@Override
 				public Set entrySet() {
             HashSet set = new HashSet();
             synchronized (AttributedString.this) {
@@ -1106,6 +1114,7 @@ public class AttributedString {
     }
 }
 
+@SuppressWarnings("rawtypes")
 class AttributeEntry implements Map.Entry {
 
     private Attribute key;

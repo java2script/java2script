@@ -755,7 +755,8 @@ public abstract class DateFormat extends Format {
         private static final long serialVersionUID = 7441350119349544720L;
 
         // table of all instances in this class, used by readResolve
-        private static final Map instanceMap = new HashMap(18);
+        @SuppressWarnings("rawtypes")
+		private static final Map instanceMap = new HashMap(18);
         // Maps from Calendar constant (such as Calendar.ERA) to Field
         // constant (such as Field.ERA).
         private static final Field[] calendarToFieldMapping =
@@ -795,7 +796,8 @@ public abstract class DateFormat extends Format {
          *        be used, but <code>-1</code> should be used for values
          *        that don't correspond to legal <code>Calendar</code> values
          */
-        protected Field(String name, int calendarField) {
+        @SuppressWarnings("unchecked")
+		protected Field(String name, int calendarField) {
             super(name);
             this.calendarField = calendarField;
             if (this.getClass() == DateFormat.Field.class) {

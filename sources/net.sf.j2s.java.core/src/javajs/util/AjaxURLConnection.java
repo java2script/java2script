@@ -69,7 +69,6 @@ public class AjaxURLConnection extends URLConnection {
     //     type = "application/x-www-form-urlencoded";
   }
 
-	@SuppressWarnings("unused")
 	@Override
 	public InputStream getInputStream() {
 		BufferedInputStream bis = getAttachedStreamData(url);

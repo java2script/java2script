@@ -752,7 +752,8 @@ public abstract class NumberFormat extends Format  {
 
     // =======================privates===============================
 
-    private static NumberFormat getInstance(Locale desiredLocale,
+    @SuppressWarnings("unchecked")
+	private static NumberFormat getInstance(Locale desiredLocale,
                                            int choice) {
         // Check whether a provider can provide an implementation that's closer
         // to the requested locale than what the Java runtime itself can provide.
@@ -857,7 +858,8 @@ public abstract class NumberFormat extends Format  {
     /**
      * Cache to hold the NumberPatterns of a Locale.
      */
-    private static final Hashtable cachedLocaleData = new Hashtable(3);
+    @SuppressWarnings("rawtypes")
+	private static final Hashtable cachedLocaleData = new Hashtable(3);
 
     // Constants used by factory methods to specify a style of format.
     private static final int NUMBERSTYLE = 0;
@@ -1048,7 +1050,8 @@ public abstract class NumberFormat extends Format  {
         private static final long serialVersionUID = 7494728892700160890L;
 
         // table of all instances in this class, used by readResolve
-        private static final Map instanceMap = new HashMap(11);
+        @SuppressWarnings("rawtypes")
+		private static final Map instanceMap = new HashMap(11);
 
         /**
          * Creates a Field instance with the specified
@@ -1056,7 +1059,8 @@ public abstract class NumberFormat extends Format  {
          *
          * @param name Name of the attribute
          */
-        protected Field(String name) {
+        @SuppressWarnings("unchecked")
+		protected Field(String name) {
             super(name);
             if (this.getClass() == NumberFormat.Field.class) {
                 instanceMap.put(name, this);
