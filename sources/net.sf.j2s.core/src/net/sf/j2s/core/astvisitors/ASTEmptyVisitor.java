@@ -98,8 +98,72 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * nodes, you can always modify these methods without restarting Eclipse.
  * 
  * @author zhou renjian
+ * @author Bob Hanson
  */
 public class ASTEmptyVisitor extends ASTVisitor {
+
+	private final static String defaultNonQualified = 
+			  "javajs.api.js;"
+			+ "swingjs.api.js;"
+			+ "swingjs.JSToolkit;";
+	
+	private static String[] nonQualifiedPackages;
+	
+	public static void setNoQualifiedNamePackages(String names) {
+		names = defaultNonQualified + (names == null ? "" : names);
+		nonQualifiedPackages = names.split(";");
+		for (int i = nonQualifiedPackages.length; --i >= 0;) {
+			String s = nonQualifiedPackages[i];
+			if (s.startsWith("*."))
+				nonQualifiedPackages[i] = s.substring(1);
+			nonQualifiedPackages[i] = (s.endsWith("*") ? s.substring(0, s.length() - 1) : s + ".");
+		}
+	}
+	
+	private final static String[] nonQualifiedClasses = new String[] {
+			// these are pre-defined in j2sSwingJSext.js 
+			"java.lang.Boolean", 
+			"java.lang.Byte", 
+			"java.lang.Character", 
+			"java.lang.Double",
+			"java.lang.Float",
+			"java.lang.Integer",
+			"java.lang.Long", 
+			"java.lang.Math", 
+			"java.lang.Number",
+			"java.lang.reflect.Array", 
+			"java.lang.Short",
+			"java.lang.String",
+			"java.lang.Thread",
+			"java.util.Date", // TODO _- really???
+			"java.util.EventListenerProxy",
+			"java.util.EventObject",
+	};
+	
+	protected final static boolean isMethodQualified(String className, String methodName) {
+		for (int i = nonQualifiedClasses.length; --i >= 0;) {
+			String s = nonQualifiedClasses[i];
+			if (className.equals(s)) {
+				// leave selected String methods the same
+				return (className.equals("java.lang.String") && "charAt,codePointAt,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(methodName) < 0);
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Check to see if this class is in a package for which we exclude parameter qualification
+	 * @param className 
+	 * @return
+	 */
+	public static boolean isPackageQualified(String className) {
+		for (int i = nonQualifiedPackages.length; --i >= 0;) {
+			String s = nonQualifiedPackages[i];
+			if (s.length() > 0 && (s.startsWith(".") ? className.contains(s) : className.startsWith(s)))
+				return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Buffer that keeps all compiled *.js.

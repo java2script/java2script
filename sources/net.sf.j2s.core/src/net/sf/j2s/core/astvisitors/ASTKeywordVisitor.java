@@ -78,7 +78,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-
 // BH 8/15/2017 12:18:46 PM adds support for Java 8 catch (Exception...|Excepion... e)
 /**
  * This class will traverse most of the common keyword and common expression.
@@ -208,9 +207,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ArrayInitializer node) {
-		// 	public String[] d = {"1", "2"};
-		ITypeBinding binding = node.resolveTypeBinding();
-		int n = binding.getDimensions();
+		// as in: public String[] d = {"1", "2"};
+		//ITypeBinding binding = node.resolveTypeBinding();
+		//int n = binding.getDimensions();
 		buffer.append(ASTScriptVisitor.j2sGetArrayClass(node.resolveTypeBinding(), -1));
 		@SuppressWarnings("unchecked")
 		List<ASTNode> expressions = node.expressions();
@@ -1081,16 +1080,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			} else if (left instanceof FieldAccess) {
 				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess
-						.getExpression() instanceof ThisExpression/*
-																	 * ||
-																	 * leftAccess
-																	 * .
-																	 * getExpression
-																	 * ()
-																	 * instanceof
-																	 * SimpleName
-																	 */)) {
+				if (!(leftAccess.getExpression() instanceof ThisExpression/*
+																			 * ||
+																			 * leftAccess
+																			 * .
+																			 * getExpression
+																			 * ()
+																			 * instanceof
+																			 * SimpleName
+																			 */)) {
 					leftAccess.getExpression().accept(this);
 					buffer.append(", ");
 				}

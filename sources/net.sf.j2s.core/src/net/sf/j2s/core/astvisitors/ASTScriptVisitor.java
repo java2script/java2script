@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // TODO Clazz._4Name  replaces Class.forName$S
 
+// BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
 // BH 8/19/2017 -- varargs logic fixed for missing argument
 // BH 8/18/2017 -- array instanceof, reflection, componentType fixes
 // BH 8/16/2017 -- JSE8-UnionType catch (Exception... | Exception...) {...}
@@ -889,20 +890,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
 			String fieldName = getJ2SName(element.getName());
 			// String fieldName = element.getName().getIdentifier();
-			String ext = "";
+			String prefix = "";
 			if (checkKeywordViolation(fieldName)) {
-				ext += "$";
+				prefix += "$";
 			}
 			if (typeBinding != null && checkSameName(typeBinding, fieldName)) {
-				ext += "$";
+				prefix += "$";
 			}
 			buffer.append("this.");
 			if (isInheritedFieldName(typeBinding, fieldName)) {
 				fieldName = getFieldName(typeBinding, fieldName);
-				buffer.append(ext + fieldName);
-			} else {
-				buffer.append(ext + fieldName);
 			}
+			buffer.append(prefix + fieldName);
 			buffer.append(" = ");
 			if (element.getInitializer() == null) {
 				boolean isArray = false;
@@ -1229,7 +1228,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append("// native_code\r\n");
 					System.err.println("native: " + key);
 				}
-				visitNativeJavadoc(node.getJavadoc(), null, false);
+				visitNativeJavadoc(node.getJavadoc(), null);
 				buffer.append("}");
 			}
 			List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(
@@ -1366,8 +1365,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				&& !isStatic(mBinding.getModifiers());
 
 		Expression expression = node.getExpression();
-		String methodName = node.getName().getIdentifier();
-
 		int pt = buffer.length();
 		if (expression == null) {
 			// "this"
@@ -1378,7 +1375,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 
 		String className = mBinding.getDeclaringClass().getQualifiedName();
-		String sbParams = getJ2SParamQualifier(className, mBinding);
+		String methodName = node.getName().getIdentifier();
+		String j2sParams = getJ2SParamQualifier(className, mBinding);
 
 		boolean isSpecialMethod = false;
 		if (isMethodRegistered(methodName)) {
@@ -1403,7 +1401,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (!isSpecialMethod) {
 			node.getName().accept(this);
-			buffer.append(sbParams);
+			buffer.append(j2sParams);
 		}
 		buffer.append(isPrivateAndNotStatic ? ".apply(this, [" : " (");
 		addMethodParameterList(node.arguments(), mBinding, false, null, null);
@@ -2476,93 +2474,66 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				+ "\r\n(function(){" : "})()\r\n");
 	}
 
-	private final static String[] excludedClasses = new String[] {
-			// these are pre-defined in j2sSwingJSext.js 
-			"java.lang.Boolean", 
-			"java.lang.Byte", 
-			"java.lang.Character", 
-			"java.lang.Double",
-			"java.lang.Float",
-			"java.lang.Integer",
-			"java.lang.Long", 
-			"java.lang.Math", 
-			"java.lang.Number",
-			"java.lang.reflect.Array", 
-			"java.lang.Short",
-			"java.lang.String",
-			"java.lang.Thread",
-			"java.util.Date",
-			"java.util.EventListenerProxy",
-			"java.util.EventObject",
-		
-		
-	};
-
-
 	/**
 	 * Determine the qualified parameter suffix for method names, including
 	 * constructors. TODO: Something like this must be duplicated in Clazz as
 	 * well in JavaScript
+	 * 
 	 * @param nodeName
 	 * @param binding
 	 * 
 	 * @return
 	 */
 	private String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
-//		if (binding.getTypeParameters().length > 0) {
-//			String key = binding.getKey();
-//			int pt = key.indexOf("T:");
-//			if (pt > key.indexOf("(")) {
-//				String fullName = binding.getName();
-//				// for put<K,V> we just allow this to be a single method.
-//				// TODO: Q: Good assumption? Could register these to check for
-//				// problems?
-//				String name = discardGenericType(fullName);
-//				Object other = htGenerics.get(name);
-//				System.err.println(binding.getKey());
-//				if (other == null) {
-//					htGenerics.put(name, key);
-//				} else if (other instanceof String) {
-//					System.err.println("parameterization problem with " + key + "; dual generic " + other);
-//					htGenerics.put(name, Boolean.TRUE);
-//				}
-//			}
-//		}
+		// if (binding.getTypeParameters().length > 0) {
+		// String key = binding.getKey();
+		// int pt = key.indexOf("T:");
+		// if (pt > key.indexOf("(")) {
+		// String fullName = binding.getName();
+		// // for put<K,V> we just allow this to be a single method.
+		// // TODO: Q: Good assumption? Could register these to check for
+		// // problems?
+		// String name = discardGenericType(fullName);
+		// Object other = htGenerics.get(name);
+		// System.err.println(binding.getKey());
+		// if (other == null) {
+		// htGenerics.put(name, key);
+		// } else if (other instanceof String) {
+		// System.err.println("parameterization problem with " + key + "; dual
+		// generic " + other);
+		// htGenerics.put(name, Boolean.TRUE);
+		// }
+		// }
+		// }
 
-		String name = binding.getName();
-		
-		// The problem is that System.out and System.err are PrintStreams, and we 
+		// The problem is that System.out and System.err are PrintStreams, and
+		// we
 		// do not intend to change those. So in the case that we just wrote
 		// "System....", we use that instead and do not qualify the name
-		if (nodeName != null && nodeName.startsWith("System."))
+		// Note: binding can be null if we have errors in the Java and we are compiling
+		if (binding == null || nodeName != null && nodeName.startsWith("System."))
 			return "";
-		String className = binding.getDeclaringClass().getQualifiedName();		
-		for (int i = excludedClasses.length; --i >= 0;) {
-			if (className.equals(excludedClasses[i])) {
-				// leave equivalent String methods the same
-				if (className.equals("java.lang.String")) {
-				  if ("charAt,codePointAt,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(name) < 0)
-					  break;
-				}
-				return "";
-			}
-		}
+		String methodName = binding.getName();
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
+			return "";
 		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
 
 		// BH: Note that Map.put$K$V is translated to actual values
 		// if .getMethodDeclaration() is not used.
 		// Without that, it uses the bound parameters such as
-		// String, Object  instead of the declared ones, such as $TK$TV
-		
+		// String, Object instead of the declared ones, such as $TK$TV
 
 		StringBuffer sbParams = new StringBuffer();
 		int nParams = paramTypes.length;
+		if (nParams == 0 && methodName.equals("length"))
+			return "$"; // so that String implements CharSequence
 		for (int i = 0; i < nParams; i++)
 			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
 		String s = sbParams.toString();
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
-		if ("main".equals(name) && isStatic(binding.getModifiers())) {
+		if ("main".equals(methodName) && isStatic(binding.getModifiers())) {
 			if (s.length() == 0) {
 				s = "$";
 			} else if (s.equals("$SA")) {

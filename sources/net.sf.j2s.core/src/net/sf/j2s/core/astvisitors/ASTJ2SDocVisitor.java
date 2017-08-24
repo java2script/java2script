@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
@@ -71,7 +70,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		 */
 		if (dec != null 
 				&& (javadoc = dec.getJavadoc()) != null 
-				&& !visitNativeJavadoc(javadoc, node, true))
+				&& !visitNativeJavadoc(javadoc, node))
 			return false;
 		int blockStart = node.getStartPosition();
 		int previousStart = getPreviousStartPosition(node);
@@ -86,7 +85,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 				 * if the block's leading comment contains "@j2sNative", 
 				 * then output the given native JavaScript codes directly. 
 				 */
-				if (visitNativeJavadoc(javadoc, node, true) == false) {
+				if (!visitNativeJavadoc(javadoc, node)) {
 					return false;
 				}
 			}
@@ -94,87 +93,70 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return super.visit(node);
 	}
 	
-	boolean visitNativeJavadoc(Javadoc javadoc, Block node, boolean superVisit) {
-		if (javadoc != null) {
-			List<?> tags = javadoc.tags();
-			if (tags.size() != 0) {
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sIgnore".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						return false;
-					}
-				}
-				if (isDebugging()) {
-					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sDebug".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							visitJavadocJ2SSource(tagEl);
-							return false;
-						}
-					}
-				}
-				boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isToCompileVariableName();
-				
-				if (!toCompileVariableName) {
-					for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-						TagElement tagEl = (TagElement) iter.next();
-						if ("@j2sNativeSrc".equals(tagEl.getTagName())) {
-							if (superVisit) super.visit(node);
-							visitJavadocJ2SSource(tagEl);
-							return false;
-						}
-					}
-				}
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sNative".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						visitJavadocJ2SSource(tagEl);
-						return false;
-					}
-				}
-				for (Iterator<?> iter = tags.iterator(); iter.hasNext();) {
-					TagElement tagEl = (TagElement) iter.next();
-					if ("@j2sXHTML".equals(tagEl.getTagName()) || "@j2sXCSS".equals(tagEl.getTagName())) {
-						if (superVisit) super.visit(node);
-						visitJavadocXStringSource(tagEl, tagEl.getTagName());
-						return false;
-					}
-				}
-			}
+	@SuppressWarnings("null")
+	boolean visitNativeJavadoc(Javadoc javadoc, Block node) {
+		if (javadoc == null)
+			return true;
+		List<?> tags = javadoc.tags();
+		if (tags.size() == 0)
+			return true;
+		TagElement tagEl;
+		if (getTag(tags, "@j2sIgnore", node) != null) {
+			return false;
+		}
+		if (isDebugging() && (tagEl = getTag(tags, "@j2sDebug", node)) != null) {
+			addJavadocJ2SSource(tagEl);
+			return false;
+		}
+		boolean toCompileVariableName = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class))
+				.isToCompileVariableName();
+		if (!toCompileVariableName && (tagEl = getTag(tags, "@j2sNativeSrc", node)) != null
+				|| (tagEl = getTag(tags, "@j2sNative", node)) != null) {
+			addJavadocJ2SSource(tagEl);
+			return false;
+		}
+		if ((tagEl = getTag(tags, "@j2sXHTML", node)) != null || (tagEl = getTag(tags, "@j2sXCSS", node)) != null) {
+			addJavadocXStringSource(tagEl, tagEl.getTagName());
+			return false;
 		}
 		return true;
 	}
 
-	private void visitJavadocJ2SSource(TagElement tagEl) {
+	private TagElement getTag(List<?> tags, String j2sKey, Block superNode) {
+		Iterator<?> iter = tags.iterator();
+		while (iter.hasNext()) {
+			TagElement tagEl = (TagElement) iter.next();
+			if (j2sKey.equals(tagEl.getTagName())) {
+				if (superNode != null)
+					super.visit(superNode);
+				return tagEl;
+			}
+		}
+		return null;
+	}
+
+	private void addJavadocJ2SSource(TagElement tagEl) {
 		List<?> fragments = tagEl.fragments();
-		boolean isFirstLine = true;
 		StringBuffer buf = new StringBuffer();
-		for (Iterator<?> iterator = fragments.iterator(); iterator
-				.hasNext();) {
+		for (Iterator<?> iterator = fragments.iterator(); iterator.hasNext();) {
 			TextElement commentEl = (TextElement) iterator.next();
 			String text = commentEl.getText().trim();
-			if (isFirstLine) {
-				if (text.length() == 0) {
-					continue;
-				}
-			}
-			buf.append(text.replace('\n', ' ').replace('\r', ' ')); 
-			// BH note that all line terminators are removed, 
+			if (text.length() == 0)
+				continue;
+			buf.append(text.replace('\n', ' ').replace('\r', ' '));
+			// BH note that all line terminators are removed,
 			// as this causes problems after source cleaning, which may result
 			// in code such as:
 			//
 			// return
-			//   x
+			// x
 			//
 			buf.append("\r\n");
 		}
 		buffer.append(fixCommentBlock(buf.toString()));
 	}
 	
-	private void visitJavadocXStringSource(TagElement tagEl, String tagName) {
+	private void addJavadocXStringSource(TagElement tagEl, String tagName) {
 		List<?> fragments = tagEl.fragments();
 		boolean isFirstLine = true;
 		StringBuffer buf = new StringBuffer();
@@ -194,9 +176,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 			buf.append(text);
 			buf.append("\r\n");
 		}
-		String sources = buf.toString().trim();
-		sources = buildXSource(tagName, firstLine, sources);
-		buffer.append(sources);
+		buffer.append(buildXSource(tagName, firstLine, buf.toString().trim()));
 	}
 
 	private Set<String> parseXTag(String sources) {
@@ -681,34 +661,35 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		}
 		return null;
 	}
-	
-	/**
-	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
-	 * directly.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
-		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-			if (isDebugging() && getJ2STag(node, "@j2sDebug") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sNative") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sNativeSrc") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sXHTML") != null) {
-				return false;
-			}
-			if (getJ2STag(node, "@j2sXCSS") != null) {
-				return false;
-			}
-			return true;
-		}
-		return true; // interface!
-	}
+
+// BH no! At least record native methods
+//	/**
+//	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
+//	 * directly.
+//	 * 
+//	 * @param node
+//	 * @return
+//	 */
+//	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
+//		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
+//			if (isDebugging() && getJ2STag(node, "@j2sDebug") != null) {
+//				return false;
+//			}
+//			if (getJ2STag(node, "@j2sNative") != null) {
+//				return false;
+//			}
+//			if (getJ2STag(node, "@j2sNativeSrc") != null) {
+//				return false;
+//			}
+//			if (getJ2STag(node, "@j2sXHTML") != null) {
+//				return false;
+//			}
+//			if (getJ2STag(node, "@j2sXCSS") != null) {
+//				return false;
+//			}
+//			return true;
+//		}
+//		return true; // interface!
+//	}
 
 }

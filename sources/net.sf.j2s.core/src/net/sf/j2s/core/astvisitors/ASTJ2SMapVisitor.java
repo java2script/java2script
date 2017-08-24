@@ -11,7 +11,6 @@
 
 package net.sf.j2s.core.astvisitors;
 
-import java.util.Map;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -25,17 +24,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 
-	private static Map<String, NameConvertItem> maps;
+	// BH deprecated
+//	private static Map<String, NameConvertItem> maps;
 
-	/**
-	 * Set .j2smap Please also read net.sf.j2s.java.org.eclipse.swt/.j2smap
-	 * file.
-	 * 
-	 * @param m
-	 */
-	public static void setJ2SMap(Map<String, NameConvertItem> m) {
-		maps = m;
-	}
+	// BH deprecated
+//	/**
+//	 * Set .j2smap Please also read net.sf.j2s.java.org.eclipse.swt/.j2smap
+//	 * file.
+//	 * 
+//	 * @param m
+//	 */
+//	public static void setJ2SMap(Map<String, NameConvertItem> m) {
+//		maps = m;
+//	}
 
 	String getJ2SName(SimpleName node) {
 		IBinding binding = node.resolveBinding();
@@ -53,50 +54,52 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 
 	String getJ2SName(IVariableBinding binding) {
 		String nameID = binding.getName();
-		if (maps == null || maps.size() == 0) {
-			return nameID;
-		}
-		String className = null;
-		ITypeBinding declaringClass = binding.getDeclaringClass();
-		if (declaringClass != null) {
-			className = declaringClass.getQualifiedName();
-		}
-
-		String key = className + "." + nameID;
-		Object value = maps.get(key);
-		if (value != null && value instanceof NameConvertItem) {
-			NameConvertItem item = (NameConvertItem) value;
-			return item.toVarName;
-		}
+		// BH deprecated
+//		if (maps == null || maps.size() == 0) {
+//			return nameID;
+//		}
+//		String className = null;
+//		ITypeBinding declaringClass = binding.getDeclaringClass();
+//		if (declaringClass != null) {
+//			className = declaringClass.getQualifiedName();
+//		}
+//
+//		String key = className + "." + nameID;
+//		Object value = maps.get(key);
+//		if (value != null && value instanceof NameConvertItem) {
+//			NameConvertItem item = (NameConvertItem) value;
+//			return item.toVarName;
+//		}
 		return nameID;
 	}
 
 	private String getJ2SName(IMethodBinding binding) {
 		String nameID = binding.getName();
-		if (maps != null && maps.size() > 0) {
-			String className = null;
-			ITypeBinding declaringClass = binding.getDeclaringClass();
-			ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
-			while (superclass != null) {
-				IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
-				for (int i = 0; i < declaredMethods.length; i++) {
-					String methodName = declaredMethods[i].getName();
-					if (nameID.equals(methodName)) {
-						return getJ2SName(declaredMethods[i]);
-					}
-				}
-				superclass = superclass.getSuperclass();
-			}
-			if (declaringClass != null) {
-				className = declaringClass.getQualifiedName();
-			}
-			String key = className + "#" + nameID;
-			Object value = maps.get(key);
-			if (value != null && value instanceof NameConvertItem) {
-				NameConvertItem item = (NameConvertItem) value;
-				return item.toVarName;
-			}
-		}
+// BH deprecated
+//		if (maps != null && maps.size() > 0) {
+//			String className = null;
+//			ITypeBinding declaringClass = binding.getDeclaringClass();
+//			ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
+//			while (superclass != null) {
+//				IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
+//				for (int i = 0; i < declaredMethods.length; i++) {
+//					String methodName = declaredMethods[i].getName();
+//					if (nameID.equals(methodName)) {
+//						return getJ2SName(declaredMethods[i]);
+//					}
+//				}
+//				superclass = superclass.getSuperclass();
+//			}
+//			if (declaringClass != null) {
+//				className = declaringClass.getQualifiedName();
+//			}
+//			String key = className + "#" + nameID;
+//			Object value = maps.get(key);
+//			if (value != null && value instanceof NameConvertItem) {
+//				NameConvertItem item = (NameConvertItem) value;
+//				return item.toVarName;
+//			}
+//		}
 		return (ASTFieldVisitor.checkKeywordViolation(nameID) ? "$" + nameID : nameID);
 	}
 

@@ -123,8 +123,8 @@ public class ASTMethodVisitor extends AbstractPluginVisitor {
 		methodSet = new HashSet<String>();
 		register("java.lang.Class", "forName", "Clazz._4Name");
 		register("java.lang.reflect.Array", "newInstance", "Clazz.newArray$");
-		register("java.lang.String", "length", "length");
-		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
+//		register("java.lang.String", "length", "length"); // BH no -- we need String to implement CharSequence. Both will be length$()
+//		register("java.lang.CharSequence", "length", "length");//sgurin: fix for bug: CharSequence cs = "123"; cs.length();
 		register("java.lang.String", "replace", "~replace");
 		register("java.lang.String", "split", "~plit");
 		ASTMethodVisitor.registerAllMaps();

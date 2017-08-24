@@ -593,7 +593,8 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 				"java.lang.CharSequence", "java.lang.Cloneable",
 				"java.lang.Comparable", "java.lang.Runnable", 
 				"java.util.Comparator", "java.lang.System",
-				"java.io.PrintStream", "java.lang.Math", 
+				// BH ????? "java.io.PrintStream", 
+				"java.lang.Math", 
 				};
 
 		for (int i = 0; i < knownClasses.length; i++) {
