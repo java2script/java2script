@@ -32,7 +32,7 @@ public class Interface {
 	
 	private static String instances=""; 
 
-	public static Object getInstanceWithParams(String name, Class[] classes, Object... params) {
+	public static Object getInstanceWithParams(String name, Class<?>[] classes, Object... params) {
 		try {
 			Class<?> cl = Class.forName(name);
 			return  cl.getConstructor(classes).newInstance(params);

@@ -2248,8 +2248,7 @@ public final class Formatter implements Flushable {
         Matcher m = fsPattern.matcher(s);
         int i = 0;
         while (i < s.length()) {
-        	boolean have = false;
-        	m.find(i);
+        	boolean have = m.find(i);
             if (have) {
                 // Anything between the start of the string and the beginning
                 // of the format specifier is either fixed text or contains
