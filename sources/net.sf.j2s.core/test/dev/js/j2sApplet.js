@@ -847,7 +847,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			: filename.indexOf(".gif") >= 0 ? "image/gif" 
 			: filename.indexOf(".jpg") >= 0 | filename.indexOf(".jpeg") >= 0? "image/jpg" : ""));
 		var isString = (typeof data == "string");    
-   	data = (JU ? JU : J.util).Base64.getBase64(isString ? data.getBytes("UTF-8") : data).toString();
+   	data = (self.JU ? JU : javajs.util).Base64.getBase64$BA(isString ? data.getBytes("UTF-8") : data).toString();
 		encoding || (encoding = "base64");
 		var url = J2S._serverUrl;
 		url && url.indexOf("your.server") >= 0 && (url = "");
@@ -892,7 +892,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		if (Clazz.instanceOf(s, self.ArrayBuffer))
 			return J2S._toBytes(s);
     if (s.indexOf(";base64,") == 0)
-      return JU.Base64.decodeBase64(s.substring(8));
+      return (self.JU || javajs.util).Base64.decodeBase64$S(s.substring(8));
     // not UTF-8
 		var b = (Clazz.newArray$ ? Clazz.newArray$('BA', 1, [s.length]) : Clazz.newByteArray(s.length, 0));
 		for (var i = s.length; --i >= 0;)
@@ -2030,7 +2030,7 @@ J2S.Cache.put = function(filename, data) {
               System.out.println("Jsmol.js J2S._loadImage using data URI for " + id) 
         }
         image.src = (typeof bytes == "string" ? bytes : 
-          "data:" + JU.Rdr.guessMimeTypeForBytes(bytes) + ";base64," + JU.Base64.getBase64(bytes));
+          "data:" + (self.JU || javajs.util).Rdr.guessMimeTypeForBytes$BA(bytes) + ";base64," + (self.JU|| javajs.util).Base64.getBase64$BA(bytes));
       }
   		var width = image.width;
   		var height = image.height;
@@ -2081,7 +2081,7 @@ J2S.Cache.put = function(filename, data) {
 	};
   
   J2S._apply = function(f,a) {
-    // JmolObjectInterface
+    // J2SObjectInterface
     return f(a);
   }
 

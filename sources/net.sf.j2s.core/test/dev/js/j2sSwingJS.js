@@ -11,6 +11,10 @@
 
 // NOTES by Bob Hanson
 
+// TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
+
+// BH 8/24/2017 1:54:01 AM fix for static Character.toUpperCase, .toLowerCase 
+// BH 8/20/2017 5:04:32 AM lets String implement CharSequence using .length$() for all .length() for ALL classes
 // BH 8/18/2017 10:14:09 PM Test_7.class.getConstructor(new Class[]{int[].class}) requires a minimal java.lang.Class
 // BH 8/18/2017 6:58:39 PM .arrayClass$, .newArray$ simplifications; .defineStatics$() uses array rather than many arguments
 // BH 8/18/2017 7:55:15 AM array fixes; removing all deprecated methods, including all previous array methods 
@@ -228,7 +232,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   // args[1] = b$ array
   // args[2-n] = actual arguments
   var outerObj = shiftArray(args, 0, 1);  
-  var finalVars = shiftArray(args, 1, 1);
+  var finalVars = shiftArray(args, 0, 1);
   var haveFinals = (finalVars || outerObj && outerObj.$finals);
   if (haveFinals) {
     // f$ is short for the once-chosen "$finals"
@@ -239,7 +243,6 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   }
   if (outerObj == null || outerObj == _prepOnly || !outerObj.__CLASS_NAME__)
     return;
-  shiftArray(args, 0, 1);
   // hack for outer obj being WINDOW
   if (!objThis || outerObj == window)
     return;
@@ -386,11 +389,14 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
   }
   var prim = Clazz._getParamCode(baseClass);
   if (arguments.length < 4) {
-    // two-parameter options for Array.newInstance(class, length) and Array.newInstance(class, [dim1, dim2, dim3....])
+    // one-parameter option just for convenience, same as newArray$(String, 0)
+    // two-parameter options for standard new foo[n], 
+    //   Array.newInstance(class, length), and 
+    //   Array.newInstance(class, [dim1, dim2, dim3....])
     // three-parameter option for (Integer.TYPE, -1, [3, 4, 5])
     var cl = baseClass;
     var values = ndims;
-    var ndims = paramType;
+    var ndims = paramType || 0;
     var baseClass = cl.__BASECLASS || cl;
     var isNum = (typeof ndims == "number");  
     if (isNum && ndims >= -1) {
@@ -432,7 +438,7 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
   }
   params.push(paramType);
   var nbits = 0;
-  switch (ndims == -1 ? prim : null) {
+  switch (ndims == -1 || ndims == 1 ? prim : null) {
   case "B":
     nbits = 8;
     break; 
@@ -1783,10 +1789,10 @@ var setAType = function (IntXArray, nBytes, atype) {
   };
 }
 
-setAType(self.Int8Array, 1, "BA");
-setAType(self.Int16Array, 2, "HA");
-setAType(self.Int32Array, 4, "IA");
-setAType(self.Float64Array, 8, "DA");
+setAType(Int8Array, 1, "BA");
+setAType(Int16Array, 2, "HA");
+setAType(Int32Array, 4, "IA");
+setAType(Float64Array, 8, "DA");
 
 java.lang.Object = Clazz._O;
 
@@ -5121,11 +5127,11 @@ if (!String.format)
     formatterClass = Clazz._4Name("java.util.Formatter");
   var f = new formatterClass();
   return f.format$S$OA.apply(f,arguments).toString();
- }
+ };
 
 ;(function(sp) {
 
-sp.$replace$C$C=function(c1,c2){
+$replace$C$C=function(c1,c2){
   if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
@@ -5355,10 +5361,9 @@ if(cs=="utf-8"||cs=="utf8"){
 s=Encoding.convert2UTF8(this);
 }
 }
-var arrs=Clazz.newArray$(Int8Array, 'BA', 1, [s.length]);
-var c=0,ii=0;
-for(var i=0;i<s.length;i++){
-c=s.charCodeAt(i);
+var arrs=Clazz.newArray$(Byte.TYPE, [s.length]);
+for(var i=0, ii=0;i<s.length;i++){
+var c=s.charCodeAt(i);
 if(c>255){
 arrs[ii]=0x1a;
 arrs[ii+1]=c&0xff;
@@ -5431,8 +5436,8 @@ return-1;
 }
 };
 
-sp.contentEquals$S=function(sb){
-if(this.length!=sb.length()){
+sp.contentEquals$CharSequence=function(sb){
+if(this.length!=sb.length$()){
 return false;
 }
 var v=sb.getValue();
@@ -5464,6 +5469,7 @@ for(var i=0;i<srcEnd-srcBegin;i++){
 dst[dstBegin+i]=this.charAt(srcBegin+i);
 }
 };
+
 sp.$concat=sp.concat;
 sp.concat=function(s){
 if(s==null){
@@ -5498,11 +5504,14 @@ String.copyValueOf=sp.copyValueOf=function(){
 
 sp.codePointAt || (sp.codePointAt = sp.charCodeAt); // Firefox only
 sp.codePointAt$I = sp.codePointAt;
+// in order to implement CharSequence, we need .length(), but String only has .length
+// so in ALL classes the transpiler changes x.length() to x.length$()
+sp.length$ = function() {return this.length}; // to implement CharSequence
 
 sp.charAt$I = sp.charAt;
 sp.subSequence$I$I = sp.substring;
 
-
+sp.toString || (sp.toString=function(){return this.valueOf();});
 })(String.prototype);
 
 String.instantialize=function(){
@@ -5519,7 +5528,7 @@ case 1:
   }
   if(x.__CLASS_NAME__=="StringBuffer"||x.__CLASS_NAME__=="java.lang.StringBuffer"){
     var value=x.shareValue();
-    var length=x.length();
+    var length=x.length$();
     var valueCopy=new Array(length);
     for(var i=0;i<length;i++){
       valueCopy[i]=value[i];
@@ -5603,10 +5612,6 @@ default:
 }
 };
 
-if(navigator.userAgent.toLowerCase().indexOf("chrome")!=-1){
-  String.prototype.toString=function(){return this.valueOf();};
-}
-
 }
 
 })(Clazz._Encoding);
@@ -5658,11 +5663,11 @@ return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
 m$(c$,"toLowerCase",
 function(c){
 return(""+c).toLowerCase().charAt(0);
-});
+}, 1);
 m$(c$,"toUpperCase",
 function(c){
 return(""+c).toUpperCase().charAt(0);
-});
+}, 1);
 m$(c$,"isDigit",
 function(c){
 c = c.charCodeAt(0);
