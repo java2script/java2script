@@ -11,6 +11,8 @@
 
 package net.sf.j2s.core.astvisitors;
 
+import java.util.HashSet;
+
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -67,15 +69,15 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	};
 
 	
-	static boolean checkKeywordViolation(String name) {
+	static boolean checkKeywordViolation(String name, HashSet<String> definedPackageNames) {
 		for (int i = 0; i < keywords.length; i++) {
 			if (keywords[i].equals(name)) {
 				return true;
 			}
 		}
-		return false;
-		
+		return (definedPackageNames != null && definedPackageNames.contains(name));		
 	}
+	
 	/**
 	 * Check whether the given QualifiedName is just simple or not.
 	 * The "just simple" means only "*.*" format.

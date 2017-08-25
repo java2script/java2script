@@ -100,7 +100,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 //				return item.toVarName;
 //			}
 //		}
-		return (ASTFieldVisitor.checkKeywordViolation(nameID) ? "$" + nameID : nameID);
+		return (ASTFieldVisitor.checkKeywordViolation(nameID, null) ? "$" + nameID : nameID);
 	}
 
 	public boolean checkSameName(ITypeBinding binding, String name) {

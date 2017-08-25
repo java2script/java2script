@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
-import net.sf.j2s.core.astvisitors.ASTEmptyVisitor;
+import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
 import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
@@ -35,7 +35,7 @@ import net.sf.j2s.core.hotspot.InnerHotspotServer;
 @SuppressWarnings("restriction")
 public class Java2ScriptCompiler implements IExtendedCompiler {
 
-	// BH: added "true".equals(props.getProperty("j2s.compiler.allow.compression")) to ensure compression only occurs when desired
+	// BH: added "true".equals(getProperty(props, "j2s.compiler.allow.compression")) to ensure compression only occurs when desired
     static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8? 
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
@@ -61,7 +61,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(file));
-			String status = props.getProperty("j2s.compiler.status");
+			String status = getProperty(props, "j2s.compiler.status");
 			if (!"enable".equals(status)) {
 				/*
 				 * Not enabled!
@@ -79,10 +79,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		String binFolder = binaryFolder.getLocation().toOSString();
 		boolean errorOccurred = false;
-		if ("true".equals(props.getProperty("j2s.save.resource.lists"))) {
+		if ("true".equals(getProperty(props, "j2s.save.resource.lists"))) {
 
-			String resPaths = props.getProperty("j2s.resources.list");
-			String abandonedPaths = props.getProperty("j2s.abandoned.resources.list");
+			String resPaths = getProperty(props, "j2s.resources.list");
+			String abandonedPaths = getProperty(props, "j2s.abandoned.resources.list");
 
 			List<String> abandonedList = new ArrayList<String>();
 			List<String> list = new ArrayList<String>();
@@ -144,7 +144,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			root = (CompilationUnit) astParser.createAST(null);
 
 			DependencyASTVisitor dvisitor = null;
-			String visitorID = props.getProperty("j2s.compiler.visitor");
+			String visitorID = getProperty(props, "j2s.compiler.visitor");
+			System.err.println("j2s.compiler.visitor = " + visitorID);
 			IExtendedVisitor extVisitor = null;
 			if ("ASTScriptVisitor".equals(visitorID)) {
 				dvisitor = new DependencyASTVisitor();
@@ -168,10 +169,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				e.printStackTrace();
 				errorOccurred = true;
 			}
-			if (!errorOccurred) {
-				// J2SDependencyCompiler.outputJavaScript(dvisitor, root,
-				// binFolder);
-			} else {
+			if (errorOccurred) {
 				String folderPath = binFolder;
 				String elementName = root.getJavaElement().getElementName();
 				// if (elementName.endsWith(".class") ||
@@ -190,8 +188,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 				}
 				return;
 			}
+			// J2SDependencyCompiler.outputJavaScript(dvisitor, root, binFolder);
 
 			ASTScriptVisitor visitor = null;
+			System.err.println("using visitor " + visitorID);
 			if ("ASTScriptVisitor".equals(visitorID)) {
 				visitor = new ASTScriptVisitor();
 			} else if ("SWTScriptVisitor".equals(visitorID)) {
@@ -204,17 +204,19 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					visitor = new SWTScriptVisitor();
 				}
 			}
-			ASTEmptyVisitor.setNoQualifiedNamePackages(props.getProperty("j2s.compiler.method.overloading"));
-			boolean ignoreMethodOverloading = !("enable".equals(props.getProperty("j2s.compiler.method.overloading")));
+			visitor.setPackageNames(dvisitor.getDefinedBasePackages());
+			// *.js*;swingjs; etc.
+			ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty(props, "j2s.compiler.nonqualified.classes"));
+			boolean ignoreMethodOverloading = !("enable".equals(getProperty(props, "j2s.compiler.method.overloading")));
 			visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
-			boolean supportsInterfaceCasting = "enable".equals(props.getProperty("j2s.compiler.interface.casting"));
+			boolean supportsInterfaceCasting = "enable".equals(getProperty(props, "j2s.compiler.interface.casting"));
 			visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
-			boolean objectStaticFields = "enable".equals(props.getProperty("j2s.compiler.static.quirks"));
+			boolean objectStaticFields = "enable".equals(getProperty(props, "j2s.compiler.static.quirks"));
 			visitor.setSupportsObjectStaticFields(objectStaticFields);
-			boolean isDebugging = "debug".equals(props.getProperty("j2s.compiler.mode"));
+			boolean isDebugging = "debug".equals(getProperty(props, "j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
 			dvisitor.setDebugging(isDebugging);
-			boolean toCompress = false; //"enable".equals(props.getProperty("j2s.compiler.allow.compression"))); // BH
+			boolean toCompress = false; //"enable".equals(getProperty(props, "j2s.compiler.allow.compression"))); // BH
 			((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
 			dvisitor.setToCompileVariableName(toCompress);
 //			if (toCompress) {
@@ -302,13 +304,19 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 //		ASTJ2SMapVisitor.setJ2SMap(null);
 //	}
 
+	private static String getProperty(Properties props, String key) {
+		String val = props.getProperty(key);
+		System.err.println(key + " = " + val);
+		return val;
+	}
+
 	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
 			String folderPath, Properties props) {
 		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		// js = js + "\n//SwingJS test " + System.currentTimeMillis() + "\n";
-		String lineBreak = props.getProperty("j2s.compiler.linebreak");
-		String whiteSpace = props.getProperty("j2s.compiler.whitespace");
-		String utf8Header = props.getProperty("j2s.compiler.utf8bom");
+		String lineBreak = getProperty(props, "j2s.compiler.linebreak");
+		String whiteSpace = getProperty(props, "j2s.compiler.whitespace");
+		String utf8Header = getProperty(props, "j2s.compiler.utf8bom");
 		boolean addUTF8Header = false;
 		if (utf8Header != null && utf8Header.equals("true")) {
 			addUTF8Header = true;
@@ -335,10 +343,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		}
 		js = js + "\n//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
 
-		String abbr = props.getProperty("j2s.compiler.abbreviation");
+		String abbr = getProperty(props, "j2s.compiler.abbreviation");
 		if (abbr != null) {
 			if (abbr.equals("true")) {
-				String abbrPrefix = props.getProperty("j2s.compiler.abbreviation.prefix");
+				String abbrPrefix = getProperty(props, "j2s.compiler.abbreviation.prefix");
 				if (abbrPrefix == null) {
 					abbrPrefix = "$_";
 				}
@@ -428,7 +436,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			DependencyASTVisitor.joinArrayClasses(buffer, classNameSet, null, ",\r\n");
 
 			buffer.append("]);\r\n");
-			String s = props.getProperty("package.js");
+			String s = getProperty(props, "package.js");
 			if (s == null || s.length() == 0) {
 				s = "package.js";
 			}

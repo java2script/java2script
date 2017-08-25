@@ -10,6 +10,7 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -92,6 +93,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		methodOverloadingSupported = parent.methodOverloadingSupported;
 		interfaceCastingSupported = parent.interfaceCastingSupported;
 		supportsObjectStaticFields = parent.supportsObjectStaticFields;
+		definedPackageNames = parent.definedPackageNames;
 		setDebugging(parent.isDebugging());
 		// BH abandoning all compiler variable name compressing -- Google Closure Compiler is way better
 		//((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(
@@ -184,7 +186,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	protected boolean checkKeywordViolation(String name) {
-		return ASTFieldVisitor.checkKeywordViolation(name);
+		return ASTFieldVisitor.checkKeywordViolation(name, definedPackageNames);
 	}
 
 	protected boolean checkSameName(ITypeBinding binding, String name) {
@@ -2657,6 +2659,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private static boolean isStatic(int modifiers) {
 		return ((modifiers & Modifier.STATIC) != 0);
+	}
+
+	public void setPackageNames(HashSet<String> definedPackageNames) {
+		this.definedPackageNames = definedPackageNames;
 	}
 
 

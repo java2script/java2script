@@ -367,10 +367,30 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	private HashSet<String> definedBasePackages = new HashSet<String>();
+	
+	public HashSet<String> getDefinedBasePackages() {
+		return definedBasePackages;
+	}
+	
 	public boolean visit(PackageDeclaration node) {
 		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
-		packageVisitor.setPackageName("" + node.getName());
+		String name = "" + node.getName();
+		System.err.println("declaring package " + name);
+		packageVisitor.setPackageName(name);
+		addPackage(name);
 		return false;
+	}
+
+	
+
+	private void addPackage(String name) {
+		int pt = name. indexOf(".");
+		if (pt >= 0)
+			name = name.substring(0, pt);
+		if (definedBasePackages.add(name)) {
+			System.err.println("adding package " + name);
+		}
 	}
 
 	// sgurin - fix for bug
@@ -378,14 +398,16 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	// with static imports
 	public void endVisit(ImportDeclaration node) {
 		super.endVisit(node);
+		String qnameStr = node.getName().getFullyQualifiedName();
+		if (qnameStr != null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node)) {
 		if (node.isStatic() && node.isOnDemand()) {
-			String qnameStr = node.getName().getFullyQualifiedName();
-			if (qnameStr != null && !qnameStr.equals("") && isQualifiedNameOK(qnameStr, node)) {
 				if (!musts.contains(qnameStr)) {
 					musts.add(qnameStr);
 				}
 			}
+		addPackage(qnameStr);
 		}
+		
 	}
 
 	protected void readClasses(Annotation annotation, Set<Object> set) {

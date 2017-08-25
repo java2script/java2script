@@ -22,17 +22,19 @@ public class ASTPackageVisitor extends AbstractPluginVisitor {
 	protected String thisPackageName = "";
 	
 
+	public static String[] basePackages =  {
+			"java.lang", 
+			"java.lang.ref", 
+			"java.lang.ref.reflect", 
+			"java.lang.reflect", 
+			"java.lang.annotation",
+			"java.lang.instrument",
+			"java.lang.management",
+			"java.io", 
+			"java.util"};
+ 
 	protected String[] skipDeclarePackages() {
-		return new String[] {
-				"java.lang", 
-				"java.lang.ref", 
-				"java.lang.ref.reflect", 
-				"java.lang.reflect", 
-				"java.lang.annotation",
-				"java.lang.instrument",
-				"java.lang.management",
-				"java.io", 
-				"java.util"};
+		return basePackages;
 	}
 
 	public String getPackageName() {

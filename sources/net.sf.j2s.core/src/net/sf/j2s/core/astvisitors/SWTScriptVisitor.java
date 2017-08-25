@@ -35,6 +35,31 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
+	private static String[] swtPackages = null;
+	static {
+		String swt = "org.eclipse.swt";
+		String[] swtInnerPackages = new String[]{
+				swt, 
+				swt + ".accessibility", 
+				swt + ".browser", 
+				swt + ".custom", 
+				swt + ".dnd",
+				swt + ".events", 
+				swt + ".graphics", 
+				swt + ".internal", 
+				swt + ".internal.dnd", 
+				swt + ".internal.browser", 
+				swt + ".internal.struct", 
+				swt + ".layout", 
+				swt + ".widgets"
+		};
+		String[] pkgs = ASTPackageVisitor.basePackages;
+		String[] packages = new String[swtInnerPackages.length + pkgs.length];
+		System.arraycopy(pkgs, 0, packages, 0, pkgs.length);
+		System.arraycopy(swtInnerPackages, 0, packages, pkgs.length, swtInnerPackages.length);
+		swtPackages = packages;
+	}
+
 	/**
 	 * Mark whether current statement are before or after SWT's while block.
 	 * <code>
@@ -64,27 +89,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	 * @see net.sf.j2s.core.astvisitors.ASTKeywordParser#skipDeclarePackages()
 	 */
 	protected String[] skipDeclarePackages() {
-		String swt = "org.eclipse.swt";
-		String[] swtInnerPackages = new String[]{
-				swt, 
-				swt + ".accessibility", 
-				swt + ".browser", 
-				swt + ".custom", 
-				swt + ".dnd",
-				swt + ".events", 
-				swt + ".graphics", 
-				swt + ".internal", 
-				swt + ".internal.dnd", 
-				swt + ".internal.browser", 
-				swt + ".internal.struct", 
-				swt + ".layout", 
-				swt + ".widgets"
-		};
-		String[] pkgs = super.skipDeclarePackages();
-		String[] packages = new String[swtInnerPackages.length + pkgs.length];
-		System.arraycopy(pkgs, 0, packages, 0, pkgs.length);
-		System.arraycopy(swtInnerPackages, 0, packages, pkgs.length, swtInnerPackages.length);
-		return packages;
+		return swtPackages;
 	}
 	
 	public boolean visit(SimpleName node) {
