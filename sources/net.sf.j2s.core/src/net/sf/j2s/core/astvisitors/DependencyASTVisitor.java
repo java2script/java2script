@@ -384,13 +384,15 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 	
 
+	private String[] defaultPackageNamesDefined = {"java", "javax", "sun", "jsjava", "jsjavax", "jssun"};	
 	private void addPackage(String name) {
 		int pt = name. indexOf(".");
 		if (pt >= 0)
 			name = name.substring(0, pt);
 		if (definedBasePackageNames == null) {
 			definedBasePackageNames = new HashSet<String>();
-			definedBasePackageNames.add("java");
+			for (int i = defaultPackageNamesDefined.length; --i >= 0;)
+				definedBasePackageNames.add(defaultPackageNamesDefined[i]);
 		}
 		if (definedBasePackageNames.add(name)) {
 			System.err.println("adding package " + name);

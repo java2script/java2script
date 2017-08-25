@@ -642,8 +642,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
 		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
-		if (expTypeBinding == null)
+		if (expTypeBinding == null) {
 			System.err.println("typeBinding was null in " + clazzName + "." + methodName + " " + parameterTypeName  + " " + exp);
+			return;
+		}
 		// BH: Question: When does typeBinding == null?
 		// only continue if we are converting a character to a non-character type
 		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
