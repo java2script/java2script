@@ -20,25 +20,24 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
 import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-
+@SuppressWarnings("serial")
 public class Test_2 extends JApplet {
 
 	Test_2Canvas canvas;
@@ -357,6 +356,7 @@ public class Test_2 extends JApplet {
 } 
 
 // ------------------------------------------------------
+@SuppressWarnings("serial")
 class Test_2Canvas extends JPanel implements MouseListener, MouseMotionListener {
 
 	double y; // Coordinates used for drawing graphs
@@ -733,6 +733,7 @@ class Test_2Canvas extends JPanel implements MouseListener, MouseMotionListener 
 } // End Class Test_2Canvas
 
 // ------------------------------------------------------
+@SuppressWarnings("serial")
 class Test_2Controls extends JPanel implements ItemListener {
 
 	JTextField s;
@@ -821,13 +822,5 @@ class Test_2Controls extends JPanel implements ItemListener {
 			}
 			canvas.redraw(range);
 		}
-	}
-	static {
-		int i = 33;
-		double d = 33.;
-		i /= 3;
-		i /= d; // REALLY??? GO FIGURE!!!
-				
-
 	}
 } // End Class Test_2Controls

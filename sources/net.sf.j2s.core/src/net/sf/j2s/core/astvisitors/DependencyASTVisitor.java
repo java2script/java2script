@@ -367,10 +367,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	private HashSet<String> definedBasePackages = new HashSet<String>();
+	private HashSet<String> definedBasePackageNames;
 	
 	public HashSet<String> getDefinedBasePackages() {
-		return definedBasePackages;
+		return definedBasePackageNames;
 	}
 	
 	public boolean visit(PackageDeclaration node) {
@@ -388,7 +388,11 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		int pt = name. indexOf(".");
 		if (pt >= 0)
 			name = name.substring(0, pt);
-		if (definedBasePackages.add(name)) {
+		if (definedBasePackageNames == null) {
+			definedBasePackageNames = new HashSet<String>();
+			definedBasePackageNames.add("java");
+		}
+		if (definedBasePackageNames.add(name)) {
 			System.err.println("adding package " + name);
 		}
 	}

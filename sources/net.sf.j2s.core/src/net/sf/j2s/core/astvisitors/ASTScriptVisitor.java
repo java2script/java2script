@@ -185,8 +185,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).isInheritedFieldName(binding, name);
 	}
 
-	protected boolean checkKeywordViolation(String name) {
-		return ASTFieldVisitor.checkKeywordViolation(name, definedPackageNames);
+	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
+		return ASTFieldVisitor.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
 	}
 
 	protected boolean checkSameName(ITypeBinding binding, String name) {
@@ -534,22 +534,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	private String getNameForBinding(ITypeBinding binding) {
-		if (binding.isAnonymous() || binding.isLocal()) {
-			String binaryName = binding.getBinaryName();
-			if (binaryName == null) {
-				String bindingKey = binding.getKey();
-				if (bindingKey != null) {
-					binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
-				}
-			}
-			return assureQualifiedName(removeJavaLang(binaryName));
-		}
-		return assureQualifiedName(removeJavaLang(binding.getQualifiedName()));
+		String binaryName = null, bindingKey;
+		if ((binding.isAnonymous() || binding.isLocal()) && (binaryName = binding.getBinaryName()) == null
+				&& (bindingKey = binding.getKey()) != null)
+			binaryName = bindingKey = bindingKey.substring(1, bindingKey.length() - 1).replace('/', '.');
+		return assureQualifiedName(removeJavaLang(binaryName == null ? binding.getQualifiedName() : binaryName));
 	}
 
 	private void addInnerTypeInstance(ClassInstanceCreation node, String className, Expression outerClassExpr, String finals,
-			IMethodBinding methodDeclaration, boolean inheritArgs, String anonName) {
-		
+			IMethodBinding methodDeclaration, boolean inheritArgs, String anonName) {		
 		String constructor = (anonName == null ? className : anonName) + (inheritArgs || methodDeclaration == null ? ".$init$" 
 				: ".construct" + getJ2SParamQualifier(null, methodDeclaration));
 		buffer.append("Clazz.$new(").append(constructor).append(", [");
@@ -893,7 +886,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			String fieldName = getJ2SName(element.getName());
 			// String fieldName = element.getName().getIdentifier();
 			String prefix = "";
-			if (checkKeywordViolation(fieldName)) {
+			if (checkKeywordViolation(fieldName, false)) {
 				prefix += "$";
 			}
 			if (typeBinding != null && checkSameName(typeBinding, fieldName)) {
@@ -1440,13 +1433,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (ch == '.' && xparent instanceof QualifiedName) {
 			if (binding != null && binding instanceof IVariableBinding) {
 				IVariableBinding varBinding = (IVariableBinding) binding;
-				IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
-				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
+				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
 				String fieldName = getJ2SName(node);
 				if (checkSameName(declaringClass, fieldName)) {
 					buffer.append('$');
 				}
-				if (checkKeywordViolation(fieldName)) {
+				if (checkKeywordViolation(fieldName, false)) {
 					buffer.append('$');
 				}
 				if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
@@ -1471,11 +1463,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return false;
 		}
 		if (binding == null) {
-			String name = getJ2SName(node);
-			name = removeJavaLang(name);
-			if (checkKeywordViolation(name)) {
+			String name = removeJavaLang(getJ2SName(node));
+			if (checkKeywordViolation(name, true))
 				buffer.append('$');
-			}
 			buffer.append(name);
 			return false;
 		}
@@ -1487,21 +1477,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			simpleNameInMethodBinding(node, ch, mthBinding);
 		} else {
 			ITypeBinding typeBinding = node.resolveTypeBinding();
-			// String name = NameConverterUtil.getJ2SName(node);
-			if (typeBinding != null) {
-				String name = typeBinding.getQualifiedName();
-				name = assureQualifiedName(removeJavaLang(name));
-				if (checkKeywordViolation(name)) {
-					buffer.append('$');
-				}
-				buffer.append(name);
-			} else {
-				String name = node.getFullyQualifiedName();
-				if (checkKeywordViolation(name)) {
-					buffer.append('$');
-				}
-				buffer.append(name);
-			}
+			String name = (typeBinding == null ? node.getFullyQualifiedName() : 
+				assureQualifiedName(removeJavaLang(typeBinding.getQualifiedName())));
+			if (checkKeywordViolation(name, false))
+				buffer.append('$');
+			buffer.append(name);
 		}
 		return false;
 	}
@@ -1529,7 +1509,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (checkSameName(declaringClass, fieldName)) {
 				buffer.append('$');
 			}
-			if (checkKeywordViolation(fieldName)) {
+			if (checkKeywordViolation(fieldName, false)) {
 				buffer.append('$');
 			}
 			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
@@ -1574,24 +1554,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 			// String fieldName = node.getFullyQualifiedName();
-			String fieldName = null;
-			if (declaringClass != null) {
-				fieldName = getJ2SName(node);
-			} else if (fieldVar == null) {
-				fieldName = getVariableName(node.getIdentifier());
-			} else {
-				fieldName = fieldVar;
-			}
-			// System.err.println(fieldName);
-			if (checkKeywordViolation(fieldName)) {
+			String fieldName = (declaringClass != null ? getJ2SName(node)
+					: fieldVar == null ? getVariableName(node.getIdentifier())
+							: fieldVar);
+			if (checkKeywordViolation(fieldName, true))
 				buffer.append('$');
-			}
-			if (declaringClass != null && checkSameName(declaringClass, fieldName)) {
+			if (declaringClass != null && checkSameName(declaringClass, fieldName))
 				buffer.append('$');
-			}
-			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName)) {
+			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName))
 				fieldName = getFieldName(declaringClass, fieldName);
-			}
 			buffer.append(fieldName);
 		}
 	}
@@ -1637,7 +1608,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// String name = node.getFullyQualifiedName();
 			String name = getJ2SName(node);
 			name = removeJavaLang(name);
-			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name)) {
+			if (!(isClassString && "valueOf".equals(name)) && checkKeywordViolation(name, false)) {
 				buffer.append('$');
 			}
 			buffer.append(name);
@@ -1801,11 +1772,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SimpleType node) {
 		ITypeBinding binding = node.resolveBinding();
-		if (binding != null) {
-			buffer.append(assureQualifiedName(removeJavaLang(binding.getQualifiedName())));
-		} else {
-			buffer.append(node);
-		}
+		buffer.append(binding == null ? node : assureQualifiedName(removeJavaLang(binding.getQualifiedName())));
 		return false;
 	}
 
@@ -1873,7 +1840,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					String superFieldName = getJ2SName(declaredFields[i]);
 					if (fieldName.equals(superFieldName)) {
 						buffer.append("this.");
-						if (checkKeywordViolation(fieldName)) {
+						if (checkKeywordViolation(fieldName, false)) {
 							buffer.append('$');
 						}
 						fieldName = getFieldName(typeBinding.getSuperclass(), fieldName);
@@ -1884,7 +1851,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		buffer.append("this.");
-		if (checkKeywordViolation(fieldName)) {
+		if (checkKeywordViolation(fieldName, false)) {
 			buffer.append('$');
 		}
 		buffer.append(fieldName);
@@ -2410,7 +2377,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 									 * typing; public void typing() { } }
 									 */
 									String fieldName = var.getName().toString();
-									if (checkKeywordViolation(fieldName)) {
+									if (checkKeywordViolation(fieldName, false)) {
 										fieldName = "$" + fieldName;
 									}
 									String prefix = null;

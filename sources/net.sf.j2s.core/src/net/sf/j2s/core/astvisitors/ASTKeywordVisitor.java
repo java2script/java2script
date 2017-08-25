@@ -278,33 +278,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				}
 			}
 			if (supportsObjectStaticFields) {
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append(".prototype.");
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, true);
 				buffer.append(" = ");
 			}
 
-			buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append('.');
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				leftName.getName().accept(this);
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				leftAccess.getName().accept(this);
-			} else {
-				Name leftName = (Name) left;
-				leftName.accept(this);
-			}
+			addFieldName(varBinding, left, false);
 			buffer.append(' ');
 			boolean isMixedOp = op.trim().length() > 1;
 			ITypeBinding leftTypeBinding = left.resolveTypeBinding();
@@ -322,19 +300,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					}
 				} else {
 					buffer.append("= String.fromCharCode (");
-					buffer.append(
-							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-					buffer.append('.');
-					if (left instanceof QualifiedName) {
-						QualifiedName leftName = (QualifiedName) left;
-						leftName.getName().accept(this);
-					} else if (left instanceof FieldAccess) {
-						FieldAccess leftAccess = (FieldAccess) left;
-						leftAccess.getName().accept(this);
-					} else {
-						Name leftName = (Name) left;
-						leftName.accept(this);
-					}
+					addFieldName(varBinding, left, false);
 					buffer.append(".charCodeAt (0) ");
 					buffer.append(op.charAt(0));
 					buffer.append(' ');
@@ -354,18 +320,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else if (leftTypeBinding != null && "/=".equals(op)
 					&& ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(leftTypeBinding.getName())) {
 				buffer.append(" = Clazz.doubleToInt (");
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, false);
 				buffer.append(" / ");
 				boxingNode(right);
 				buffer.append(')');
@@ -807,7 +762,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				return false;
 			}
 		}
-		buffer.append("Clazz.declarePackage (\"");
+		buffer.append("Clazz.declarePackage(\"");
 		node.getName().accept(this);
 		buffer.append("\");\r\n");
 		return false;
@@ -902,95 +857,26 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String op = node.getOperator().toString();
 			if (staticCharType) {
 				if (!(parent instanceof Statement)) {
-					buffer.append(
-							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-					buffer.append('.');
-					if (left instanceof QualifiedName) {
-						QualifiedName leftName = (QualifiedName) left;
-						leftName.getName().accept(this);
-					} else if (left instanceof FieldAccess) {
-						FieldAccess leftAccess = (FieldAccess) left;
-						leftAccess.getName().accept(this);
-					} else {
-						Name leftName = (Name) left;
-						leftName.accept(this);
-					}
+					addFieldName(varBinding, left, false);
 					buffer.append(", ");
 				}
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, false);
 				buffer.append(" = String.fromCharCode (");
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, false);
 				if ("++".equals(op)) {
 					buffer.append(".charCodeAt (0) + 1)");
 				} else {
 					buffer.append(".charCodeAt (0) - 1)");
 				}
 			} else {
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
-				// buffer.append(' ');
+				addFieldName(varBinding, left, false);
 				buffer.append(op);
 			}
-
 			if (supportsObjectStaticFields) {
 				buffer.append(", ");
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append(".prototype.");
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, true);
 				buffer.append(" = ");
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(varBinding, left, false);
 			}
 			if ((supportsObjectStaticFields || staticCharType) && !(parent instanceof Statement)) {
 				buffer.append(", $t$");
@@ -1032,6 +918,24 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		boxingNode(left);
 		return false;
 		// return super.visit(node);
+	}
+
+	private void addFieldName(IVariableBinding varBinding, Expression left, boolean isPrototype) {
+		buffer.append(
+				assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+		buffer.append('.');
+		if (isPrototype)
+			buffer.append("prototype.");
+		if (left instanceof QualifiedName) {
+			QualifiedName leftName = (QualifiedName) left;
+			leftName.getName().accept(this);
+		} else if (left instanceof FieldAccess) {
+			FieldAccess leftAccess = (FieldAccess) left;
+			leftAccess.getName().accept(this);
+		} else {
+			Name leftName = (Name) left;
+			leftName.accept(this);
+		}
 	}
 
 	@SuppressWarnings("null")

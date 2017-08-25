@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollBar;
 
+@SuppressWarnings("serial")
 public class Test_1 extends JApplet {
 	
   int ipt;

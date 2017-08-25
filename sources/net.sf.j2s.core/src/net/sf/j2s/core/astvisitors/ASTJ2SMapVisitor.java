@@ -46,7 +46,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 			return getJ2SName((IVariableBinding) binding);
 		}
 		if (binding instanceof IMethodBinding) {
-			return getJ2SName((IMethodBinding) binding);
+			return getJ2SMethodName((IMethodBinding) binding);
 		}
 		String nameID = node.getIdentifier();
 		return nameID;
@@ -73,7 +73,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		return nameID;
 	}
 
-	private String getJ2SName(IMethodBinding binding) {
+	private String getJ2SMethodName(IMethodBinding binding) {
 		String nameID = binding.getName();
 // BH deprecated
 //		if (maps != null && maps.size() > 0) {
@@ -107,7 +107,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		if (binding != null) {
 			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
-				String methodName = getJ2SName(declaredMethods[i]);
+				String methodName = getJ2SMethodName(declaredMethods[i]);
 				if (name.equals(methodName)) {
 					return true;
 				}
