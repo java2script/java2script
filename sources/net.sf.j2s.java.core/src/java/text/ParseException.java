@@ -49,6 +49,7 @@ package java.text;
  * @see java.text.FieldPosition
  * @author      Mark Davis
  */
+@SuppressWarnings("serial")
 public
 class ParseException extends Exception {
 

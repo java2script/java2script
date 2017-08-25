@@ -703,7 +703,8 @@ final class Inflate {
     return r;
   }
 
-  class Return extends Exception {
+  @SuppressWarnings("serial")
+class Return extends Exception {
     int r;
 
     Return(int r) {

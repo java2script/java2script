@@ -28,7 +28,6 @@
 
 package jssun.util.calendar;
 
-import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -207,7 +206,7 @@ public abstract class BaseCalendar extends AbstractCalendar {
             return false;
         }
         int dow = bdate.getDayOfWeek();
-        if (dow != bdate.FIELD_UNDEFINED && dow != getDayOfWeek(bdate)) {
+        if (dow != CalendarDate.FIELD_UNDEFINED && dow != getDayOfWeek(bdate)) {
             return false;
         }
 
@@ -503,7 +502,8 @@ public abstract class BaseCalendar extends AbstractCalendar {
      */
     final int getGregorianYearFromFixedDate(long fixedDate) {
         long d0;
-        int  d1, d2, d3, d4;
+        @SuppressWarnings("unused")
+		int  d1, d2, d3, d4;
         int  n400, n100, n4, n1;
         int  year;
 

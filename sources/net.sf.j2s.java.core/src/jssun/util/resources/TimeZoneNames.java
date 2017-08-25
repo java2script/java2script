@@ -45,7 +45,8 @@ package jssun.util.resources;
 
 public final class TimeZoneNames extends TimeZoneNamesBundle {
 
-    @Override
+    @SuppressWarnings("unused")
+	@Override
 		protected final Object[][] getContents() {
         String ACT[] = new String[] {"Acre Time", "ACT",
                                      "Acre Summer Time", "ACST"};

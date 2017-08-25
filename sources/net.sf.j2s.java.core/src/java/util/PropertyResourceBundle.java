@@ -122,6 +122,7 @@ import jssun.util.ResourceBundleEnumeration;
  * @see Properties
  * @since JDK1.1
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PropertyResourceBundle extends ResourceBundle {
 	
 	

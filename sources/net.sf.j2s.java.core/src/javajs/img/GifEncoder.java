@@ -218,7 +218,6 @@ public class GifEncoder extends ImageEncoder {
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 	protected boolean isBackground;
 
     ColorItem(int rgb, boolean isBackground) {

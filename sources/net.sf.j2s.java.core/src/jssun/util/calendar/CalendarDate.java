@@ -87,7 +87,8 @@ public abstract class CalendarDate implements Cloneable {
     private int daylightSaving;
     private boolean forceStandardTime;
 
-    private Locale locale;
+    @SuppressWarnings("unused")
+	private Locale locale;
 
     protected CalendarDate() {
         this(TimeZone.getDefault());

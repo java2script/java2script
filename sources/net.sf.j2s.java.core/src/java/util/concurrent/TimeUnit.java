@@ -331,7 +331,8 @@ public enum TimeUnit {
      * @throws InterruptedException if interrupted while waiting.
      * @see Thread#join(long, int)
      */
-    public void timedJoin(Thread thread, long timeout)
+    @SuppressWarnings("unused")
+	public void timedJoin(Thread thread, long timeout)
     throws InterruptedException {
         if (timeout > 0) {
             long ms = toMillis(timeout);
@@ -349,7 +350,8 @@ public enum TimeUnit {
      * @throws InterruptedException if interrupted while sleeping.
      * @see Thread#sleep
      */
-    public void sleep(long timeout) throws InterruptedException {
+    @SuppressWarnings("unused")
+	public void sleep(long timeout) throws InterruptedException {
         if (timeout > 0) {
             long ms = toMillis(timeout);
             int ns = excessNanos(timeout, ms);

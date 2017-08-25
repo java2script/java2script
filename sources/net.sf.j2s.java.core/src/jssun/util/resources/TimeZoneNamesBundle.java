@@ -93,7 +93,8 @@ public abstract class TimeZoneNamesBundle extends OpenListResourceBundle {
     /**
      * Use LinkedHashMap to preserve order of bundle entries.
      */
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
 		protected Map createMap(int size) {
         return new LinkedHashMap(size);
     }

@@ -2503,6 +2503,7 @@ public class Collections {
 	 *             when c or elements is null, or elements contains one or more
 	 *             null elements and c doesn't support null elements
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> boolean addAll(Collection<? super T> c, T... a) {
 		boolean modified = false;
 		for (int i = 0; i < a.length; i++) {

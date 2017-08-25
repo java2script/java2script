@@ -71,7 +71,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Set;
 
-import javajs.J2SRequireImport;
 //import swingjs.JSToolkit;
 import swingjs.api.Interface;
 
@@ -2513,8 +2512,6 @@ public abstract class ResourceBundle {
 				
 				
 				InputStream stream = null;
-				// SwingJS  - we just get the resource as a string here
-				// J2S compiler bug converts these variables to a b c d e
 				stream = (data == null ? null : new BufferedInputStream(
 						new ByteArrayInputStream(data.getBytes())));
 				// // try {
@@ -2542,13 +2539,13 @@ public abstract class ResourceBundle {
 				// // } catch (IOException e) {
 				// // throw (IOException) e.getException();
 				// // }
-				if (stream != null) {
+//				if (stream != null) {
 					try {
 						bundle = newPropertyBundle(stream);
 					} finally {
 						stream.close();
 					}
-				}
+//				}
 			} else {
 				throw new IllegalArgumentException("unknown format: " + format);
 			}

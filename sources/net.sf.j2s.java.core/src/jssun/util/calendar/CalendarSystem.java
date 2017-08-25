@@ -32,8 +32,6 @@ package jssun.util.calendar;
 import java.util.HashMap;
 //import java.util.Locale;
 import java.util.Map;
-
-import javajs.J2SRequireImport;
 //import java.util.MissingResourceException;
 //import java.util.ResourceBundle;
 //import java.util.Set;
@@ -172,7 +170,7 @@ public abstract class CalendarSystem {
 //            cal = LocalGregorianCalendar.getLocalGregorianCalendar(calendarName);
 //        } else {
             try {
-                Class cl = Class.forName(className);
+                Class<?> cl = Class.forName(className);
                 cal = (CalendarSystem) cl.newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("internal error", e);

@@ -34,6 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package swingjs.jzlib;
 
+@SuppressWarnings("serial")
 public class ZStreamException extends java.io.IOException {
   public ZStreamException() {
     super();

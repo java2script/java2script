@@ -186,7 +186,8 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> {
      * @return the head of this queue
      * @throws InterruptedException {@inheritDoc}
      */
-    public E take() throws InterruptedException {
+    @SuppressWarnings("unused")
+	public E take() throws InterruptedException {
         final ReentrantLock lock = this.lock;
         lock.lockInterruptibly();
         try {
@@ -492,14 +493,16 @@ public class DelayQueue<E extends Delayed> extends AbstractQueue<E> {
             return cursor < array.length;
         }
 
-        public E next() {
+        @SuppressWarnings("unchecked")
+		public E next() {
             if (cursor >= array.length)
                 throw new NoSuchElementException();
             lastRet = cursor;
             return (E)array[cursor++];
         }
 
-        public void remove() {
+        @SuppressWarnings("rawtypes")
+		public void remove() {
             if (lastRet < 0)
                 throw new IllegalStateException();
             Object x = array[lastRet];

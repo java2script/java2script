@@ -112,6 +112,7 @@ import java.util.Set;
  * @author  Xueming Shen
  * @since   JDK1.0
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public
 class Properties extends Hashtable<Object,Object> {
     /**

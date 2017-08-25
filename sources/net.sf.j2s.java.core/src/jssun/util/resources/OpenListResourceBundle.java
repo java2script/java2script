@@ -60,6 +60,7 @@ import jssun.util.ResourceBundleEnumeration;
  * adds a method createMap which allows subclasses to
  * use specialized Map implementations.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class OpenListResourceBundle extends ResourceBundle {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
@@ -92,7 +93,7 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
     /**
      * Returns a set of keys provided in this resource bundle
      */
-    public Set<String> handleGetKeys() {
+	public Set<String> handleGetKeys() {
         loadLookupTablesIfNecessary();
 
         return lookup.keySet();
@@ -123,7 +124,7 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
      * We lazily load the lookup hashtable.  This function does the
      * loading.
      */
-    private synchronized void loadLookup() {
+	private synchronized void loadLookup() {
         if (lookup != null)
             return;
 
@@ -145,7 +146,7 @@ public abstract class OpenListResourceBundle extends ResourceBundle {
      * Lets subclasses provide specialized Map implementations.
      * Default uses HashMap.
      */
-    protected Map createMap(int size) {
+	protected Map createMap(int size) {
         return new HashMap(size);
     }
 

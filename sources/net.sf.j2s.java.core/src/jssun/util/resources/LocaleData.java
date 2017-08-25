@@ -47,11 +47,9 @@ package jssun.util.resources;
 //import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.List;
-
 import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.StringTokenizer;
 
 import javajs.J2SRequireImport;
 

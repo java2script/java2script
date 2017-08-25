@@ -63,6 +63,7 @@ import java.util.TimeZone;
  * @since 1.4
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ZoneInfo extends java.util.TimeZone {
 
     private static final int UTC_TIME = 0;
@@ -790,7 +791,7 @@ public class ZoneInfo extends java.util.TimeZone {
         return (checksum == ((ZoneInfo)other).checksum);
     }
 
-    private static Map aliasTable;
+	private static Map aliasTable;
 
     /**
      * Returns a Map from alias time zone IDs to their standard

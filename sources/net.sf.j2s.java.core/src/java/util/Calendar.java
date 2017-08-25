@@ -881,28 +881,6 @@ public abstract class Calendar implements Cloneable, Comparable<Calendar> {
     //     removed. In JDK 1.1.6 we write a format compatible with version 2.
     static final int        currentSerialVersion = 1;
 
-    /**
-     * The version of the serialized data on the stream.  Possible values:
-     * <dl>
-     * <dt><b>0</b> or not present on stream</dt>
-     * <dd>
-     * JDK 1.1.5 or earlier.
-     * </dd>
-     * <dt><b>1</b></dt>
-     * <dd>
-     * JDK 1.1.6 or later.  Writes a correct 'time' value
-     * as well as compatible values for other fields.  This is a
-     * transitional format.
-     * </dd>
-     * </dl>
-     * When streaming out this class, the most recent format
-     * and the highest allowable <code>serialVersionOnStream</code>
-     * is written.
-     * @serial
-     * @since JDK1.1.6
-     */
-    private int             serialVersionOnStream = currentSerialVersion;
-
     // Proclaim serialization compatibility with JDK 1.1
     static final long       serialVersionUID = -1807547505821590642L;
 

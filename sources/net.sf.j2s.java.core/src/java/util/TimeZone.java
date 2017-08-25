@@ -240,7 +240,7 @@ abstract public class TimeZone implements Cloneable {
      * @see Calendar#ZONE_OFFSET
      * @see Calendar#DST_OFFSET
      */
-    int getOffsets(long date, int[] offsets) {
+    public int getOffsets(long date, int[] offsets) {
         int rawoffset = getRawOffset();
         int dstoffset = 0;
         if (inDaylightTime(new Date(date))) {

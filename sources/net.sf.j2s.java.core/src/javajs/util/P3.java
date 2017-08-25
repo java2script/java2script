@@ -32,7 +32,6 @@ package javajs.util;
  *
  * 
  */
-@SuppressWarnings("serial")
 public class P3 extends T3 {
 
   /**

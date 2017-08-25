@@ -16,8 +16,6 @@
 */
 package javajs.util;
 
-import java.io.Serializable;
-
 /**
  * A generic 3 element tuple that is represented by double precision floating
  * point x,y and z coordinates.

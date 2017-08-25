@@ -61,7 +61,6 @@ public abstract class ListResourceBundle extends ResourceBundle {
 		return new Enumeration<String>() {
 			Enumeration<String> local = table.keys();
 
-			@SuppressWarnings("unchecked")
 			Enumeration<String> pEnum = (Enumeration<String>) parent.getKeys();
 
 			String nextElement;

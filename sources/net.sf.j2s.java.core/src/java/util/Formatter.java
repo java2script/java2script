@@ -1823,6 +1823,7 @@ import java.text.NumberFormat;
  * @author  Iris Clark
  * @since 1.5
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public final class Formatter implements Flushable {
     Appendable a;
     private Locale l;
@@ -4210,23 +4211,6 @@ public final class Formatter implements Flushable {
 
 			String sNoRound = ""; // d
 			String sRound = ""; // e
-			boolean j2sCompilerOK = true;
-			// a prec of 3 in scientific is "1.234e3" in Java and JavaScript
-			/**
-			 * @j2sNative
-			 * 
-			 * if (typeof j2sCompilerOK != "undefined") {
-			 *            sNoRound= value.toExponential(); sRound =
-			 *            value.toExponential(prec);
-			 *            
-			 * } else {
-			 *            d = b.toExponential(); 
-			 *            e = b.toExponential(c);
-			 * }
-			 * 
-			 */
-			{
-			}
 			exp = getExp(sNoRound);
 			expr = getExp(sRound);
 			if (type == GENERAL) {
@@ -4234,11 +4218,7 @@ public final class Formatter implements Flushable {
 				/**
 				 * @j2sNative 
 				 * 
-				 * if (typeof j2sCompilerOK != "undefined") {
 				 *  sRound = value.toExponential(prec-1);
-				 * } else {
-				 *  e = b.toExponential(c-1); 
-				 * }
 				 * 
 				 */
 				{
@@ -4250,12 +4230,7 @@ public final class Formatter implements Flushable {
 				/**
 				 * @j2sNative 
 				 * 
-				 * if (typeof j2sCompilerOK != "undefined") {
 				 *            sRound = value.toFixed(); sNoRound = value.toFixed(prec);
-				 * } else {
-				 *            e = b.toFixed(); 
-				 *            d = b.toFixed(c);
-				 * }
 				 * 
 				 */
 				{
@@ -4269,7 +4244,7 @@ public final class Formatter implements Flushable {
 			switch (type) {
 			case SCIENTIFIC:
 				// check for 1.2e3 -> 1.2e+3
-				if (sRound.indexOf("e-") < 0)
+				if (sRound.indexOf("e-") < 0 && sRound.indexOf("e") >= 0)
 					sRound = sRound.substring(0, pt + 1) + "+" + sRound.substring(pt + 1);
 				// check for 1.2e+3 or 1.2e-3 --> 1.2e+03 1.2e-03
 				if (pt == sRound.length() - 2)
@@ -4289,11 +4264,7 @@ public final class Formatter implements Flushable {
 				/**
 				 * @j2sNative 
 				 * 
-				 * if (typeof j2sCompilerOK != "undefined") {
-				 *            sRound = ParseFloat(sRound).toFixed(ndig);
-				 * } else {
-				 *            e = ParseFloat(e).toFixed(g);
-				 * }
+				 *            sRound = parseFloat(sRound).toFixed(ndig);
 				 * 
 				 */
 				{

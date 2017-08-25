@@ -28,16 +28,9 @@
 
 package jssun.util;
 
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Set;
-import jssun.util.calendar.ZoneInfo;
-import jssun.util.resources.LocaleData;
+
 import jssun.util.resources.OpenListResourceBundle;
 
 /**
@@ -48,13 +41,15 @@ public final class TimeZoneNameUtility {
     /**
      * cache to hold time zone resource bundles. Keyed by Locale
      */
-    private static HashMap<Locale, OpenListResourceBundle> cachedBundles =
+    @SuppressWarnings("unused")
+	private static HashMap<Locale, OpenListResourceBundle> cachedBundles =
         new HashMap<Locale, OpenListResourceBundle>();
 
     /**
      * cache to hold time zone localized strings. Keyed by Locale
      */
-    private static HashMap<Locale, String[][]> cachedZoneData =
+    @SuppressWarnings("unused")
+	private static HashMap<Locale, String[][]> cachedZoneData =
         new HashMap<Locale, String[][]>();
 
 //    /**
