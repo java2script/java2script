@@ -102,8 +102,6 @@ public class ZipOutputStream extends DeflaterOutputStream implements
    * The UTF-8 {@link java.nio.charset.Charset charset} is used to encode the
    * entry names and comments.
    * 
-   * @j2sIgnore
-   * 
    * @param out
    *        the actual output stream
    */
