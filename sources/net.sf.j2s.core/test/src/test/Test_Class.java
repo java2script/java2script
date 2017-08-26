@@ -1,5 +1,6 @@
 package test;
 
+@SuppressWarnings("rawtypes")
 class Test_Class {
 	
 	Class B() {

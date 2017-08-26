@@ -23,7 +23,6 @@ import java.text.DecimalFormat;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JApplet;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,13 +34,8 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-//import java.text.NumberFormat;
-//import a2s.Canvas;
-//import a2s.Panel;
-//import javax.swing.JButton;
-//import javax.swing.JScrollBar;
-import javax.swing.plaf.basic.BasicToggleButtonUI;
 
+@SuppressWarnings("serial")
 public class Test_Scroll extends JApplet {
 
 	static DecimalFormat df = new DecimalFormat("0.00");

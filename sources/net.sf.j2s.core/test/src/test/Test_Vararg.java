@@ -1,5 +1,6 @@
 package test;
 
+@SuppressWarnings("unused")
 class Test_Vararg {
 
 	Test_Vararg() {

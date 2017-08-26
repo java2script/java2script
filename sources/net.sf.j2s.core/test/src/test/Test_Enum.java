@@ -1,5 +1,6 @@
 package test;
 
+@SuppressWarnings("unused")
 public class Test_Enum {
 
 	public enum Day {
