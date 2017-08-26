@@ -114,16 +114,8 @@ final class InfBlocks{
     end=w;
     this.check = (z.istate.wrap==0) ? false : true;
     mode = TYPE;
-    /**
-     * @j2sNative
-     * 
-     *            this.tl = Clazz.newArray(1, null);
-     *            this.td = Clazz.newArray(1, null);
-     */
-    {
-      tl = new int[1][];
-      td = new int[1][];
-    }
+	tl = new int[1][];
+	td = new int[1][];
     reset();
   }
 

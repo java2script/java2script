@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import javajs.api.JmolObjectInterface;
 import javajs.api.ResettableStream;
+import javajs.api.js.J2SObjectInterface;
 
 /**
  * 
@@ -42,7 +42,7 @@ public class AjaxURLConnection extends URLConnection {
    */
   @SuppressWarnings("null")
   private Object doAjax(boolean isBinary) {
-    JmolObjectInterface jmol = null;
+    J2SObjectInterface jmol = null;
     /**
      * @j2sNative
      * 

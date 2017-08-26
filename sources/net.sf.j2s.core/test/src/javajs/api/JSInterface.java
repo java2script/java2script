@@ -1,4 +1,4 @@
-package javajs.api.js;
+package javajs.api;
 
 /** 
  * called by JSmol JavaScript methods using

@@ -349,37 +349,12 @@ abstract public class ZStream{
    * @return UTF-8 byte array (or, for code points < 256, ISO-8859-1)
    */
   public static byte[] getBytes(String s) {
-    /**
-     * 
-     * JavaScript only encodes to 16 bits.
-     * 
-     * @j2sNative
-     * 
-     *      var x = [];
-     *      for (var i = 0; i < s.length;i++) {
-     *        var pt = s.charCodeAt(i);
-     *        if (pt <= 0x7F) {
-     *          x.push(pt);
-     *        } else if (pt <= 0x7FF) {
-     *          x.push(0xC0|((pt>>6)&0x1F));
-     *          x.push(0x80|(pt&0x3F));
-     *        } else if (pt <= 0xFFFF) { 
-     *          x.push(0xE0|((pt>>12)&0xF));
-     *          x.push(0x80|((pt>>6)&0x3F));
-     *          x.push(0x80|(pt&0x3F));
-     *        } else {
-     *          x.push(0x3F); // '?'
-     *        }
-     *      }
-     *      return (Int32Array != Array ? new Int32Array(x) : x);
-     */
-    {
-      try {
-        return s.getBytes("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-        return null;
-      }
-    }
+	  try {
+	    return s.getBytes("UTF-8");
+	  } catch (UnsupportedEncodingException e) {
+		  // impossible
+	    return null;
+	  }
   }
   
 }

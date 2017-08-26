@@ -212,4 +212,14 @@ public class ByteArrayInputStream extends InputStream {
 		pos = this.count - pos < n ? this.count : (int) (pos + n);
 		return pos - temp;
 	}
+	
+    /**
+     * BH: Allows resetting of the stream when a new InputStreamReader is invoked
+     */
+    @Override
+    public void resetStream() {
+      mark = pos = 0;
+    }
+
+
 }

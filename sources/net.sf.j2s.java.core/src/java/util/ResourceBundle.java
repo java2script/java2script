@@ -71,6 +71,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Set;
 
+import swingjs.JSToolkit;
 //import swingjs.JSToolkit;
 import swingjs.api.Interface;
 
@@ -2502,17 +2503,9 @@ public abstract class ResourceBundle {
 				}
 				// final ClassLoader ClassLoader = loader;
 				// final boolean reloadFlag = reload;
-				String data = null;
+				String data = JSToolkit.getJavaResource(resourceName, false, true, false);
 				
-				
-				
-// TODO				JSToolkit.getJavaResource(resourceName, false, true, false);
-				
-				
-				
-				
-				InputStream stream = null;
-				stream = (data == null ? null : new BufferedInputStream(
+				InputStream stream = (data == null ? null : new BufferedInputStream(
 						new ByteArrayInputStream(data.getBytes())));
 				// // try {
 				// stream = AccessController.doPrivileged(

@@ -1,9 +1,9 @@
-package javajs.api.js;
+package javajs.api;
 
 /**
  * methods in JSmol JavaScript accessed in Jmol (aka J2S) 
  */
-public interface J2SObjectInterface {
+public interface JmolObjectInterface {
 
   Object _doAjax(Object url, String postOut, Object bytesOrStringOut, boolean isBinary);
 
