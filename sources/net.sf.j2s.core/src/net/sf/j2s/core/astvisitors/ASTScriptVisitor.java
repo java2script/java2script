@@ -74,7 +74,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: array handling in instanceof and reflection
 
 // TODO: String + double should be new Double(x).toString() 
-// TODO: Formatter
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 
 /**

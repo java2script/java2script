@@ -13,6 +13,7 @@
 
 // TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
 
+// BH 8/26/2017 9:45:55 AM fix for URL.getContent()
 // BH 8/24/2017 1:54:01 AM fix for static Character.toUpperCase, .toLowerCase 
 // BH 8/20/2017 5:04:32 AM lets String implement CharSequence using .length$() for all .length() for ALL classes
 // BH 8/18/2017 10:14:09 PM Test_7.class.getConstructor(new Class[]{int[].class}) requires a minimal java.lang.Class
@@ -111,9 +112,6 @@
 // see earlier notes at swingjs/doc/j2snotes.txt
  
 LoadClazz = function() {
-
-var debugNoSwingJS = true;
-if (debugNoSwingJS)alert("Note! debugNoSwingJS in j2sSwingJS.js")
 
 
 // BH c$ is the ONLY global used in SwingJS now. I do not think it is necessary,
@@ -4041,6 +4039,10 @@ Sys.out.printf = Sys.out.format = function (f, args) {
 }
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println = function(s) {
+
+if (s.indexOf("TypeError") >= 0) {
+   debugger;
+}
   if (Clazz._nooutput) return;
   if (Clazz._traceOutput && s && ("" + s).indexOf(Clazz._traceOutput) >= 0)
     alert(s + "\n\n" + Clazz.getStackTrace());
@@ -5209,7 +5211,7 @@ var regExp=new RegExp(exp,"gm");
 var m=this.match(regExp);
 return m!=null&&m.length!=0;
 };
-sp.regionMatches$b$I$S$I$I=function(ignoreCase,toffset,
+sp.regionMatches$Z$I$S$I$I=function(ignoreCase,toffset,
 other,ooffset,len){
 
 if(typeof ignoreCase=="number"
@@ -6782,8 +6784,7 @@ return null;
 });
 
 
-if (!debugNoSwingJS)
-  Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSToolkit");
+Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSToolkit");
 
 
 })(Clazz, J2S); // requires JSmolCore.js

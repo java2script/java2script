@@ -680,7 +680,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			isBinary = false;
 		}
 		isBinary && (isBinary = J2S._canSyncBinary(true));
-		return (isBinary ? J2S._strToBytes(data) : JU.SB.newS(data));
+		return (isBinary ? J2S._strToBytes(data) : (self.JU || javajs.util).SB.newS(data));
 	}
 	
 	J2S._xhrReturn = function(xhr){
@@ -779,7 +779,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 		return data.getBytes();
 	// ArrayBuffer assumed here
 	data = new Uint8Array(data);
-  var b = (Clazz.newArray$ ? Clazz.newArray$('BA', 1, [data.length]) : Clazz.newByteArray(data.length, 0));
+  var b = (Clazz.newArray$ ? Clazz.newArray$(Byte.TYPE, data.length) : Clazz.newByteArray(data.length, 0));
 	for (var i = data.length; --i >= 0;)
 		b[i] = data[i];
 	return b;
@@ -894,7 +894,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
     if (s.indexOf(";base64,") == 0)
       return (self.JU || javajs.util).Base64.decodeBase64$S(s.substring(8));
     // not UTF-8
-		var b = (Clazz.newArray$ ? Clazz.newArray$('BA', 1, [s.length]) : Clazz.newByteArray(s.length, 0));
+		var b = (Clazz.newArray$ ? Clazz.newArray$(Byte.TYPE, s.length) : Clazz.newByteArray(s.length, 0));
 		for (var i = s.length; --i >= 0;)
 			b[i] = s.charCodeAt(i) & 0xFF;
 		return b;
