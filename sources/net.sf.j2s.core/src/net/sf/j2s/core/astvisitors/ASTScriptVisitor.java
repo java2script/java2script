@@ -58,6 +58,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+// TODO: resource loading
+
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
 // BH 8/19/2017 -- varargs logic fixed for missing argument
 // BH 8/18/2017 -- array instanceof, reflection, componentType fixes
