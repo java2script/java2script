@@ -137,7 +137,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param f the float
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(float f) {
         return append(Float.toString(f));
@@ -150,7 +149,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param value the integer
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(int i) {
         return append(Integer.toString(i));
@@ -163,7 +161,6 @@ public final class StringBuffer extends AbstractStringBuilder implements
      * @param l the long
      * @return this StringBuffer
      * 
-     * @j2sIgnore
      */
     public StringBuffer append(long l) {
         return append(Long.toString(l));

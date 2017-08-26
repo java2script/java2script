@@ -761,7 +761,6 @@ public abstract class ResourceBundle {
      *     if no resource bundle for the specified base name can be found
      * @return a resource bundle for the given base name and the default locale
      * 
-     * @j2sIgnore
      */
     
     public static final ResourceBundle getBundle(String baseName)
@@ -806,8 +805,6 @@ public abstract class ResourceBundle {
      *        needed.
      * @since 1.6
      * 
-     * @j2sIgnore
-		 *
      */
     
     public static final ResourceBundle getBundle(String baseName,
@@ -839,7 +836,6 @@ public abstract class ResourceBundle {
      *        if no resource bundle for the specified base name can be found
      * @return a resource bundle for the given base name and locale
      * 
-     * @j2sIgnore
      */
     
     public static final ResourceBundle getBundle(String baseName,
@@ -887,8 +883,6 @@ public abstract class ResourceBundle {
      *        Note that validation of <code>control</code> is performed as
      *        needed.
      * @since 1.6
-     * 
-     * @j2sIgnore
      * 
      * 
      */
@@ -1021,7 +1015,6 @@ public abstract class ResourceBundle {
      *        if no resource bundle for the specified base name can be found
      * @since 1.2
      * 
-     * @j2sIgnore
      */
     public static ResourceBundle getBundle(String baseName, Locale locale,
                                            Object loader)

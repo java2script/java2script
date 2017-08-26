@@ -1097,7 +1097,6 @@ public class PrintWriter extends Writer {
 	}
 
 	/**
-	 * @j2sIgnore
 	 * 
 	 *            Appends the specified character to this writer.
 	 * 

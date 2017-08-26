@@ -41,76 +41,16 @@ public class Lst<V> extends ArrayList<V> {
     super();  
   }
   
-  /**
-   * @j2sIgnore
-   * 
-   */
-  @Override
-  @Deprecated
-  public boolean add(V v) {
-    throw new NullPointerException("use addLast(value), not add(value) in List for JavaScript compatibility");
-  }
-  
   public boolean addLast(V v) {
-    /**
-     * no overloading of add(Object) in JavaScript
-     * 
-     * @j2sNative
-     * 
-     * return this.add1(v);
-     *  
-     */
-    {
       return super.add(v);
-    }
-  }
-  
-  /**
-   * @j2sIgnore
-   * 
-   */
-  @Override
-  @Deprecated
-  public V remove(int location) {
-    throw new NullPointerException("use Lst.removeItemAt(location), not Lst.remove(location)");
   }
   
   public V removeItemAt(int location) {
-    /**
-     * no overloading of remove(location) in JavaScript
-     * 
-     * @j2sNative
-     * 
-     * return this._removeItemAt(location);
-     *  
-     */
-    {
       return super.remove(location);
-    }
   }
 
-  /**
-   * @j2sIgnore
-   * 
-   */
-  @Override
-  @Deprecated
-  public boolean remove(Object v) {
-    throw new NullPointerException("use Lst.removeObj(obj), not Lst.remove(obj)");
-  }
-  
   public boolean removeObj(Object v) {
-    /**
-     * no overloading of remove(Object) in JavaScript
-     * 
-     * @j2sNative
-     * 
-     * return this._removeObject(v);
-     *  
-     */
-    {
       return super.remove(v);
-    }
   }
   
 }

@@ -595,17 +595,8 @@ public class ZipOutputStream extends DeflaterOutputStream implements
   private void writeShort(int v) throws IOException {
     OutputStream out = this.out;
     
-    /**
-     * @j2sNative
-     * 
-     *            out.writeByteAsInt((v >>> 0) & 0xff);
-     *            out.writeByteAsInt((v >>> 8) & 0xff);
-     * 
-     */
-    { 
-      out.write((v >>> 0) & 0xff);
-      out.write((v >>> 8) & 0xff);
-    }
+    out.write((v >>> 0) & 0xff);
+    out.write((v >>> 8) & 0xff);
     written += 2;
   }
 
@@ -614,21 +605,10 @@ public class ZipOutputStream extends DeflaterOutputStream implements
    */
   private void writeInt(long v) throws IOException {
     OutputStream out = this.out;
-    /**
-     * @j2sNative
-     * 
-     *            out.writeByteAsInt((v >>> 0) & 0xff);
-     *            out.writeByteAsInt((v >>> 8) & 0xff);
-     *            out.writeByteAsInt((v >>> 16) & 0xff);
-     *            out.writeByteAsInt((v >>> 24) & 0xff);
-     * 
-     */
-    {
-      out.write((int) ((v >>> 0) & 0xff));
-      out.write((int) ((v >>> 8) & 0xff));
-      out.write((int) ((v >>> 16) & 0xff));
-      out.write((int) ((v >>> 24) & 0xff));
-    }
+  out.write((int) ((v >>> 0) & 0xff));
+  out.write((int) ((v >>> 8) & 0xff));
+  out.write((int) ((v >>> 16) & 0xff));
+  out.write((int) ((v >>> 24) & 0xff));
     written += 4;
   }
 
@@ -638,21 +618,9 @@ public class ZipOutputStream extends DeflaterOutputStream implements
   private void writeLong(long v) throws IOException {
     OutputStream out = this.out;
     /**
-     * JavaScript does not support long
-     * 
-     * @j2sNative
-     * 
-     *            out.writeByteAsInt((v >>> 0) & 0xff);
-     *            out.writeByteAsInt((v >>> 8) & 0xff);
-     *            out.writeByteAsInt((v >>> 16) & 0xff);
-     *            out.writeByteAsInt((v >>> 24) & 0xff);
-     *            out.writeByteAsInt(0);
-     *            out.writeByteAsInt(0);
-     *            out.writeByteAsInt(0);
-     *            out.writeByteAsInt(0);
+     * JavaScript does not support long -- only to 54  bits
      * 
      */
-    {
     out.write((int) ((v >>> 0) & 0xff));
     out.write((int) ((v >>> 8) & 0xff));
     out.write((int) ((v >>> 16) & 0xff));
@@ -661,7 +629,6 @@ public class ZipOutputStream extends DeflaterOutputStream implements
     out.write((int) ((v >>> 40) & 0xff));
     out.write((int) ((v >>> 48) & 0xff));
     out.write((int) ((v >>> 56) & 0xff));
-    }
     written += 8;
   }
 

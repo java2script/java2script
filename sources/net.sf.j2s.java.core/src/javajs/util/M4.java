@@ -63,10 +63,6 @@ public class M4 extends M34 {
    */
   public float m33 = 0;
 
-  /**
-   * all zeros
-   * @j2sIgnore
-   */
   public M4() {
   }
   /**

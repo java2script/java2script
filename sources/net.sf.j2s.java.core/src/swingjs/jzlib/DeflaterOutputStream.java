@@ -102,7 +102,7 @@ public class DeflaterOutputStream extends FilterOutputStream {
 		if (deflater.finished())
 			throw new IOException("finished");
 
-		if (off < 0 | len < 0 | off + len > b.length)
+		if (off < 0 || len < 0 || off + len > b.length)
 			throw new IndexOutOfBoundsException();
 		if (len == 0)
 			return;

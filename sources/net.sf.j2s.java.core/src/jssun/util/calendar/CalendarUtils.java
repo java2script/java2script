@@ -112,22 +112,6 @@ public class CalendarUtils {
         return q;
     }
 
-    /**
-     * Divides two integers and returns the floor of the quotient and
-     * the modulus remainder.  For example,
-     * <code>floorDivide(-1,4)</code> returns <code>-1</code> with
-     * <code>3</code> as its remainder, while <code>-1/4</code> is
-     * <code>0</code> and <code>-1%4</code> is <code>-1</code>.
-     *
-     * @param n the numerator
-     * @param d a divisor which must be > 0
-     * @param r an array of at least one element in which the value
-     * <code>mod(n, d)</code> is returned.
-     * @return the floor of the quotient.
-     * 
-     * @j2sIgnore
-     * 
-     */
     public static final int floorDivide(long n, int d, int[] r) {
         if (n >= 0) {
             r[0] = (int)(n % d);

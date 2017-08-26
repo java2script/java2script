@@ -632,7 +632,6 @@ public class DecimalFormat extends NumberFormat {
      * 
      * SwingJS ignores this one
      * 
-     * @j2sIgnore 
      */
     @Override
 		public StringBuffer format(long number, StringBuffer result,

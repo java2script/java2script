@@ -36,13 +36,6 @@ public abstract class T3 implements JSONEncodable {
   public float x, y, z;
 
   /**
-   * @j2sIgnore
-   * 
-   */
-  public T3() {
-  }
-
-  /**
    * Sets the value of this tuple to the specified xyz coordinates.
    * 
    * @param x

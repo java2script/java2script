@@ -194,12 +194,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
   public void writeByteAsInt(int b) {
     if (os == null)
       initOS();
-    /**
-     * @j2sNative
-     * 
-     *  this.os.writeByteAsInt(b);
-     * 
-     */
     {
       try {
         os.write(b);
@@ -209,9 +203,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
     byteCount++;
   }
   
-  /**
-   * @j2sOverride
-   */
   @Override
   public void write(byte[] buf, int i, int len) {
     if (os == null)
@@ -251,15 +242,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
     }
   }
 
-  /**
-   * Will break JavaScript if used.
-   * 
-   * @j2sIgnore
-   * 
-   * @param b
-   */
-  @Override
-  @Deprecated
   public void write(int b) {
     // required by standard ZipOutputStream -- do not use, as it will break JavaScript methods
     if (os == null)
@@ -271,16 +253,6 @@ public class OC extends OutputStream implements GenericOutputChannel {
     byteCount++;
   }
 
-  // in JSmol,  this is commented out because the underlying OutputStream does not have it.
-  /**
-   * Will break if used; no equivalent in JavaScript.
-   * 
-   * @j2sIgnore
-   * 
-   * @param b
-   */
-  @Override
-  @Deprecated
   public void write(byte[] b) {
     // not used in JavaScript due to overloading problem there
     write(b, 0, b.length);

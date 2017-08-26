@@ -58,8 +58,6 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// TODO Clazz._4Name  replaces Class.forName$S
-
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
 // BH 8/19/2017 -- varargs logic fixed for missing argument
 // BH 8/18/2017 -- array instanceof, reflection, componentType fixes
@@ -1183,24 +1181,24 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		visitList(parameters, ", ");
 		buffer.append(") ");
 		if (node.isConstructor()) {
-			boolean isSuperOrThis = false;
+			boolean hasSuperOrThis = false;
 			@SuppressWarnings("unchecked")
 			List<ASTNode> statements = node.getBody().statements();
 			if (statements.size() > 0) {
 				ASTNode firstStatement = statements.get(0);
 				if (firstStatement instanceof SuperConstructorInvocation
 						|| firstStatement instanceof ConstructorInvocation) {
-					isSuperOrThis = true;
+					hasSuperOrThis = true;
 				}
 			}
 			// BH @j2sIgnoreSuperConstructor removed from options
 			// as it is too risky to do this -- lose all initialization.
-			IMethodBinding binding = node.resolveBinding();
-		    boolean existedSuperClass = binding != null && hasSuperClass(binding.getDeclaringClass());
-			if (isSuperOrThis) {
+			if (hasSuperOrThis) {
 				if (!checkJ2STags(node, true))
 					node.getBody().accept(this);
 			} else {
+				IMethodBinding binding = node.resolveBinding();
+			    boolean existedSuperClass = binding != null && hasSuperClass(binding.getDeclaringClass());
 				buffer.append("{\r\n");
 				if (existedSuperClass) {
 					addSuperConstructor(null, null);
@@ -1804,30 +1802,26 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(SuperConstructorInvocation node) {
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		if (constructorBinding == null) {
-			return false;
+		ITypeBinding declaringClass = (constructorBinding == null ? null : constructorBinding.getDeclaringClass());
+		if (constructorBinding != null && declaringClass != null && !"java.lang.Object".equals(declaringClass.getQualifiedName())) {
+			// // BH NEVER NEVER NEVER ignore superconstructor, as it
+			// includes an <init> call.
+			// ASTNode parent = node.getParent();
+			// if (parent instanceof Block) {
+			// Block methoBlock = (Block) parent;
+			// ASTNode methodParent = methoBlock.getParent();
+			// if (methodParent instanceof MethodDeclaration) {
+			// MethodDeclaration method = (MethodDeclaration) methodParent;
+			// if (getJ2STag(method, "@j2sIgnoreSuperConstructor") != null)
+			// {
+			// return false;
+			// }
+			// }
+			// }
+			addSuperConstructor(node, constructorBinding.getMethodDeclaration());
+		} else {
+			addCallInit();
 		}
-		ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
-		if ("java.lang.Object".equals(declaringClass.getQualifiedName())) {
-			return false;
-		}
-//		// BH NEVER NEVER NEVER ignore superconstructor, as it includes an <init> call.
-//		ASTNode parent = node.getParent();
-//		if (parent instanceof Block) {
-//			Block methoBlock = (Block) parent;
-//			ASTNode methodParent = methoBlock.getParent();
-//			if (methodParent instanceof MethodDeclaration) {
-//				MethodDeclaration method = (MethodDeclaration) methodParent;
-//				if (getJ2STag(method, "@j2sIgnoreSuperConstructor") != null) {
-//					return false;
-//				}
-//			}
-//		}
-		/*
-		 * TODO: expression before the "super" should be considered.
-		 */
-		IMethodBinding methodDeclaration = constructorBinding.getMethodDeclaration();
-		addSuperConstructor(node, methodDeclaration);
 		return false;
 	}
 

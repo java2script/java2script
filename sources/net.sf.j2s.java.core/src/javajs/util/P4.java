@@ -33,14 +33,6 @@ package javajs.util;
  */
 public class P4 extends T4 {
 
-  /**
-   * 
-   * @j2sIgnore   * 
-   */
-  public P4() {
-    // skip T4() constructor
-  }
-  
   public static P4 new4(float x, float y, float z, float w) {
     P4 pt = new P4();
     pt.set4(x, y, z, w);

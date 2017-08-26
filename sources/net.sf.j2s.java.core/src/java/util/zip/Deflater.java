@@ -32,11 +32,6 @@ public class Deflater extends swingjs.jzlib.Deflater {
   
   public static final int DEFAULT_COMPRESSION = -1;
   
-  /**
-   * @j2sIgnoreSuperConstructor
-   * 
-   * @param compressionLevel
-   */
   public Deflater(int compressionLevel) {
     super();
     if (compressionLevel != Integer.MAX_VALUE)

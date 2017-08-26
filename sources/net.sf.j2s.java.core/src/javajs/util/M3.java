@@ -36,13 +36,6 @@ import java.io.Serializable;
 public class M3 extends M34 implements Serializable {
 
   /**
-   * Constructs and initializes a Matrix3f to all zeros.
-   * @j2sIgnore
-   */
-  public M3() {
-  }
-
-  /**
    * Constructs and initializes a Matrix3f from the specified 9 element array.
    * this.m00 =v[0], this.m01=v[1], etc.
    * 

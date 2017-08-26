@@ -1548,7 +1548,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String s = nonQualifiedClasses[i];
 			if (className.equals(s)) {
 				// leave selected String methods the same
-				return (className.equals("java.lang.String") && "charAt,codePointAt,format,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(methodName) < 0);
+				return (className.equals("java.lang.String") && "charAt,codePointAt,format,getBytes,substring,indexOf,lastIndexOf,toUpperCase,toLowerCase,trim,valueOf".indexOf(methodName) < 0);
 			}
 		}
 		return true;
