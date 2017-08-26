@@ -1153,11 +1153,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		boolean isConstructor = node.isConstructor();
 		if (isConstructor) {
-			// TODO: This is not sufficient for variable args. We are not finding the correct constructor, only the first-stated
-			//       For example, this(int...) and this(float...) will be wrong here. 
-			//       fortunately this only affects anonymous class definitions - BH
-			if (mBinding.getParameterTypes().length == 0 || mBinding.isVarargs()
-					&& (defaultConstructor == null))  {
+			// TODO: This is not sufficient for variable args. We are not
+			// finding the correct constructor, only the first-stated
+			// For example, this(int...) and this(float...) will be wrong here.
+			// fortunately this only affects anonymous class definitions - BH
+			if (mBinding.getParameterTypes().length == 0 || mBinding.isVarargs() && (defaultConstructor == null)) {
 				defaultConstructor = mBinding;
 			}
 		}
@@ -1171,8 +1171,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		boolean isNative = ((node.getModifiers() & Modifier.NATIVE) != 0);
 		if (node.getBody() == null && !isNative) {
-		  //Abstract method
-		  return false;
+			// Abstract method
+			return false;
 		}
 		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
 		buffer.append("\r\nClazz.newMethod$(C$, '").append(name).append("', ").append("function (");
@@ -1181,40 +1181,29 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		visitList(parameters, ", ");
 		buffer.append(") ");
 		if (node.isConstructor()) {
-			boolean hasSuperOrThis = false;
-			@SuppressWarnings("unchecked")
-			List<ASTNode> statements = node.getBody().statements();
-			if (statements.size() > 0) {
-				ASTNode firstStatement = statements.get(0);
-				if (firstStatement instanceof SuperConstructorInvocation
-						|| firstStatement instanceof ConstructorInvocation) {
-					hasSuperOrThis = true;
-				}
-			}
 			// BH @j2sIgnoreSuperConstructor removed from options
 			// as it is too risky to do this -- lose all initialization.
-			if (hasSuperOrThis) {
-				if (!checkJ2STags(node, true))
-					node.getBody().accept(this);
-			} else {
-				IMethodBinding binding = node.resolveBinding();
-			    boolean existedSuperClass = binding != null && hasSuperClass(binding.getDeclaringClass());
+			@SuppressWarnings("unchecked")
+			List<ASTNode> statements = node.getBody().statements();
+			ASTNode firstStatement = statements.get(0);
+			if (statements.size() == 0 || !(firstStatement instanceof SuperConstructorInvocation)
+					&& !(firstStatement instanceof ConstructorInvocation)) {
 				buffer.append("{\r\n");
-				if (existedSuperClass) {
+				IMethodBinding binding = node.resolveBinding();
+				boolean needSuperClassCall = binding != null && hasSuperClass(binding.getDeclaringClass());
+				if (needSuperClassCall) {
 					addSuperConstructor(null, null);
 				} else {
 					addCallInit();
 				}
-				if (checkJ2STags(node, false)) {
-					buffer.append("}");
-				} else {
-					blockLevel++;
-					visitList(statements, "");
-					endVisit(node.getBody());
-				}
+				blockLevel++;
+				visitList(statements, "");
+				endVisit(node.getBody());
+			} else {
+				node.getBody().accept(this);
 			}
 		} else if (node.getBody() == null) {
-			// not a constructor
+			// not a constructor and no body -- possibly native or an interface
 			blockLevel++;
 			if (!checkJ2STags(node, true)) {
 				buffer.append("{\r\n");
@@ -1323,12 +1312,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * Check to see whether there are @j2s* and append sources to buffer
 	 */
 	private boolean checkJ2STags(MethodDeclaration node, boolean needScope) {
-		String prefix = "{\r\n";
-		String suffix = "\r\n}";
-		if (!needScope) {
-			prefix = "";
-			suffix = "";
-		}
+		String prefix = (needScope ? "{\r\n" : "");
+		String suffix = (needScope ? "\r\n}" : "");
 		boolean read = false;
 		if (isDebugging()) {
 			read = readSources(node, "@j2sDebug", prefix, suffix, false);
