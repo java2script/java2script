@@ -220,7 +220,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
   objThis.__JSID__ = ++_jsid;
 
   if (!isInner) {
-    if (args && args.length == 0 && objThis.construct) {
+    if ((!args || args && args.length == 0) && objThis.construct) {
     // allow for direct default call "new foo()" to run with its default constructor
       objThis.construct.apply(objThis);  
     }
@@ -921,7 +921,7 @@ var extendedObjectMethods = Clazz._extendedObjectMethods = [ "isInstance", "equa
   // BH allows @j2sNative access without super constructor
   Clazz.clone = function(me) { 
     return appendMap(me.__ARRAYTYPE ? Clazz.newArray$(me.__BASECLASS, me.__ARRAYTYPE, -1, [-2, me])
-     : new me.constructor(), me); 
+     : new me.constructor([Clazz.inheritArgs]), me); 
   }
 /*
  * Methods for thread in Object
@@ -943,7 +943,6 @@ var extendJO = Clazz._extendJO = function(c, name, isNumber) {
 
     c.isInstance = function(o) { return Clazz.instanceOf(o, this) };
 
-    
     for (var i = 0; i < extendedObjectMethods.length; i++) {
       var p = extendedObjectMethods[i];
       addProto(c.prototype, p, Clazz._O.prototype[p]);
@@ -1124,12 +1123,15 @@ var getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
 
 var innerNames = [
   "equals", "equals$O", "hashCode", /*"toString",*/ 
-  "getName", "getCanonicalName", "getClassLoader", "getResource", 
-  "getResourceAsStream", "defineMethod", "defineStaticMethod",
+  "getName", "getCanonicalName", "getClassLoader", 
+  "getResource", "getResource$S",
+  "getResourceAsStream","getResourceAsStream$S", 
+  "defineMethod", "defineStaticMethod",
   "makeConstructor",  
     "getSuperclass", "isAssignableFrom", 
     "getConstructor", "getConstructor$ClassA",
-    "getDeclaredMethod", "getDeclaredMethods",
+    "getDeclaredMethod", "getDeclaredmethod$S$ClassA", 
+    "getDeclaredMethods",
     "getMethod", "getMethod$S$ClassA", 
     "getMethods", "getModifiers", /*"isArray",*/ "newInstance"
 ];
@@ -1222,7 +1224,8 @@ var inF = Clazz._inF = {
         d[d.length - 1] = fname;
         fname = d.join("/");
       }
-      url = new java.net.URL(fname);
+      Clazz.loadClass("java.net.URL");
+      url = Clazz.$new(java.net.URL.construct$S,[fname]);
     } catch (e) {
       return null;
     }
@@ -1235,7 +1238,9 @@ var inF = Clazz._inF = {
       return null;
             
     var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
-    var is = new java.io.BufferedInputStream ( new java.io.ByteArrayInputStream (bytes)); 
+    Clazz.loadClass("java.io.BufferedInputStream");
+    Clazz.loadClass("java.io.ByteArrayInputStream");
+    var is = Clazz.$new(java.io.BufferedInputStream.construct$java_io_InputStream, [Clazz.$new(java.io.ByteArrayInputStream.construct$BA, [bytes])]); 
     is.url = url;
     url._streamData = is;
     return is;
@@ -1279,42 +1284,13 @@ var inF = Clazz._inF = {
 
   getModifiers : function() { return java.lang.reflect.Modifier.PUBLIC; },
 
-  newInstance : function(a) {
-    // but there is only one empty-parameter version of class.newInstance()???
-    var clz = this;
-    allowImplicit = false;
-    var c = null;
-    var n = (a == null ? 0 : a.length);
-    if (n > 1) {
-      alert("?? n > 1 in Clazz.newInstance")
-    }
-    switch(n) {
-    case 0:
-      c = Clazz.$new(clz);//new clz();
-      break;
-    case 1:
-      c = new clz(a[0]);
-      break;
-    case 2:
-      c = new clz(a[0], a[1]);
-      break;
-    case 3:
-      c = new clz(a[0], a[1], a[2]);
-      break;
-    case 4:
-      c = new clz(a[0], a[1], a[2], a[3]);
-      break;
-    default:
-      var x = "new " + clz.__CLASS_NAME__ + "(";
-      for (var i = 0; i < a.length; i++)
-       x += (i == 0 ? "" : ",") + "a[" + i + "]";
-      x += ")";
-      c = eval(x);
-    }
-    allowImplicit = true;
-    return c;
+  newInstance : function() {
+    return new this;
   }
 };
+
+inF.getResource$S = inF.getResource;
+inF.getResourceAsStream$S = inF.getResourceAsStream;
 
 inF.getDeclaredMethods = inF.getMethods;
 inF.getDeclaredMethod = inF.getMethod$S$ClassA = inF.getMethod;
@@ -4040,7 +4016,7 @@ Sys.out.printf = Sys.out.format = function (f, args) {
 
 Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println = function(s) {
 
-if (s.indexOf("TypeError") >= 0) {
+if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
 }
   if (Clazz._nooutput) return;
@@ -5753,6 +5729,10 @@ Clazz._setDeclared("java.util.Date", javautil.Date=Date);
 //Date.TYPE="javautil.Date";
 Date.__CLASS_NAME__="Date";
 Clazz._implementOf(Date,[java.io.Serializable,java.lang.Comparable]);
+
+m$(javautil.Date, "construct", function(t) {
+  this.setTime(t || System.currentTimeMillis())
+}, 1);
 
 m$(javautil.Date,"clone",
 function(){
