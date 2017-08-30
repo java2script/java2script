@@ -376,7 +376,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	public boolean visit(PackageDeclaration node) {
 		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
 		String name = "" + node.getName();
-		System.err.println("declaring package " + name);
 		packageVisitor.setPackageName(name);
 		addPackage(name);
 		return false;
@@ -394,9 +393,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			for (int i = defaultPackageNamesDefined.length; --i >= 0;)
 				definedBasePackageNames.add(defaultPackageNamesDefined[i]);
 		}
-		if (definedBasePackageNames.add(name)) {
-			System.err.println("adding package " + name);
-		}
+		definedBasePackageNames.add(name);
 	}
 
 	// sgurin - fix for bug

@@ -87,21 +87,6 @@ public class Test_Bugs extends HashMap {
 		// class A init2
 		// class A init
 
-		try {
-			Class<?> cl;
-			cl = Class.forName("test.Test_Bugs");
-			cl.getConstructor(String.class, String.class).newInstance(
-					new Object[] { "test1", "test2" });
-			cl.getConstructor(Object[].class).newInstance(
-					new Object[] { new Object[] { "test1", "test2" } });
-			cl.getConstructor(String.class, String.class).newInstance("test1",
-					"test2");
-			cl.getConstructor().newInstance();
-			cl.newInstance();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		System.out.println(getFont("f"));
 		System.out.println(getFont("f", "y"));

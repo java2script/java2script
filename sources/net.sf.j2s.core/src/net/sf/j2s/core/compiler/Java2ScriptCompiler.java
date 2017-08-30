@@ -37,6 +37,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	// BH: added "true".equals(getProperty(props, "j2s.compiler.allow.compression")) to ensure compression only occurs when desired
     static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8? 
+	private static boolean showJ2SSettings = true; // BH adding this
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
 		final IProject project = binaryFolder.getProject();
@@ -145,7 +146,6 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 			DependencyASTVisitor dvisitor = null;
 			String visitorID = getProperty(props, "j2s.compiler.visitor");
-			System.err.println("j2s.compiler.visitor = " + visitorID);
 			IExtendedVisitor extVisitor = null;
 			if ("ASTScriptVisitor".equals(visitorID)) {
 				dvisitor = new DependencyASTVisitor();
@@ -191,7 +191,6 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			// J2SDependencyCompiler.outputJavaScript(dvisitor, root, binFolder);
 
 			ASTScriptVisitor visitor = null;
-			System.err.println("using visitor " + visitorID);
 			if ("ASTScriptVisitor".equals(visitorID)) {
 				visitor = new ASTScriptVisitor();
 			} else if ("SWTScriptVisitor".equals(visitorID)) {
@@ -201,7 +200,9 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					visitor = extVisitor.getScriptVisitor();
 				}
 				if (visitor == null) {
-					visitor = new SWTScriptVisitor();
+					visitor = new ASTScriptVisitor();
+					// BH default to ASTScriptVisitor, not SWTScriptVisitor 
+					// visitor = new SWTScriptVisitor();
 				}
 			}
 			visitor.setPackageNames(dvisitor.getDefinedBasePackages());
@@ -306,7 +307,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 	private static String getProperty(Properties props, String key) {
 		String val = props.getProperty(key);
-		System.err.println(key + " = " + val);
+		if (showJ2SSettings)
+			System.err.println(key + " = " + val);
 		return val;
 	}
 
@@ -477,6 +479,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			}
 		}
 
+		showJ2SSettings = false;
 		// if (visitor instanceof SWTScriptVisitor) {
 		// SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
 		// String removedJS = swtVisitor.getBufferRemoved().toString();

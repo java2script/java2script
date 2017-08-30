@@ -58,8 +58,10 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// TODO: resource loading
+// TODO: resource loading using ResourceBundle.getBundle throws error when looking for format java.class
+// TODO: need real Class object Foo.class, not just Foo itself -- see Test_Class.java 
 
+// BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
 // BH 8/19/2017 -- varargs logic fixed for missing argument
 // BH 8/18/2017 -- array instanceof, reflection, componentType fixes
@@ -213,47 +215,59 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		ITypeBinding binding = node.resolveBinding();
 		ASTTypeVisitor typeVisitor = ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class));
-		String anonClassName = getNameForBinding(binding);
-		String fullClassName = anonClassName;
-		String shortClassName = anonClassName.substring(anonClassName.lastIndexOf('.') + 1);
+		String fullClassName = getNameForBinding(binding);
+		int idx = fullClassName.lastIndexOf('.');
+		String shortClassName = fullClassName.substring(idx + 1);
 		String className = typeVisitor.getClassName();
+		buffer.append("(");
+
 		// BH: add the anonymous class definition inline, not as a static,
 		// and not requiring finalization of variables
-		buffer.append("(");
 		addAnonymousFunctionWrapper(true);
-		buffer.append("var C$ = Clazz.decorateAsClass (function () {\r\n");
-		buffer.append("Clazz.newInstance$ (this, arguments");
-		if (!(node.getParent() instanceof EnumConstantDeclaration))
-			buffer.append("[0], true");
-		buffer.append(");\r\n}, ");
 
-		int idx = fullClassName.lastIndexOf('.');
-		if (idx >= 0) {
-			buffer.append(assureQualifiedName(shortenPackageName(fullClassName)));
+		// add decorateAsClass
+		buffer.append("var C$ = Clazz.decorateAsClass (");
+		{
+			// arg1 is the class definition function, C$, which is called in Clazz.$new(). 
+			buffer.append("function () {\r\n");
+			{
+				// add the appropriate newInstance$ call
+				buffer.append("Clazz.newInstance$ (this, arguments");
+				if (!(node.getParent() instanceof EnumConstantDeclaration))
+					buffer.append("[0], true");
+				buffer.append(");\r\n}, ");
+			}
+
+			// arg2 is the package name or null
+			buffer.append(idx >= 0 ? assureQualifiedName(shortenPackageName(fullClassName)) : "null");
+
+			// arg3 is the full class name in quotes
 			buffer.append(", \"" + fullClassName.substring(idx + 1) + "\"");
-		} else {
-			buffer.append("null, \"" + fullClassName + "\"");
-		}
 
-		ITypeBinding superclass = binding.getSuperclass();
-		if (superclass != null) {
-			String superclassName = superclass.getQualifiedName();
-			superclassName = assureQualifiedName(removeJavaLang(superclassName));
-			if (superclassName != null && superclassName.length() != 0 && !"Object".equals(superclassName)) {
-				buffer.append(", ");
-				buffer.append(superclassName);
-			} else {
-				ITypeBinding[] declaredTypes = binding.getInterfaces();
-				if (declaredTypes != null && declaredTypes.length > 0) {
-					superclassName = declaredTypes[0].getQualifiedName();
-					if (superclassName != null && superclassName.length() > 0) {
-						superclassName = assureQualifiedName(removeJavaLang(superclassName));
-						buffer.append(", null, ");
-						buffer.append(superclassName);
+			// arg4 is the superclass
+			// arg5 is the superinterface
+			// (only one or the other is ever non-null)
+			if (binding.getSuperclass() != null) {
+				String superclassName = getSuperclassName(binding);
+				if (superclassName != null) {
+					// superclass, not superinterface
+					buffer.append(", ");
+					buffer.append(superclassName);
+				} else {
+					// no superclass other than Object -- look for
+					// superInterface
+					ITypeBinding[] declaredTypes = binding.getInterfaces();
+					if (declaredTypes != null && declaredTypes.length > 0) {
+						String superinterfaceName = declaredTypes[0].getQualifiedName();
+						if (superinterfaceName != null && superinterfaceName.length() > 0) {
+							buffer.append(", null, ");
+							buffer.append(assureQualifiedName(removeJavaLang(superinterfaceName)));
+						}
 					}
 				}
 			}
 		}
+		// close decorateAsClass
 		buffer.append(");\r\n");
 
 		String oldClassName = className;
@@ -271,8 +285,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 
-		// addDefaultConstructor();
-
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
 			if (element instanceof FieldDeclaration && isStatic(element.getModifiers()))
@@ -281,9 +293,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		typeVisitor.setClassName(oldClassName);
 		buffer.append(staticFieldDefBuffer);
-
 		staticFieldDefBuffer = oldStaticDefBuffer;
 
+		// close the anonymous function wrapper
 		addAnonymousFunctionWrapper(false);
 		buffer.append(")");
 
@@ -1187,8 +1199,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// as it is too risky to do this -- lose all initialization.
 			@SuppressWarnings("unchecked")
 			List<ASTNode> statements = node.getBody().statements();
-			ASTNode firstStatement = statements.get(0);
-			if (statements.size() == 0 || !(firstStatement instanceof SuperConstructorInvocation)
+			ASTNode firstStatement;
+			if (statements.size() == 0 || !((firstStatement = statements.get(0)) instanceof SuperConstructorInvocation)
 					&& !(firstStatement instanceof ConstructorInvocation)) {
 				buffer.append("{\r\n");
 				IMethodBinding binding = node.resolveBinding();
@@ -1844,7 +1856,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
 		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding);
-		buffer.append("C$.superClazz.prototype.").append(name).append(".apply(this, arguments)");
+		// BH if this is a call to super.clone() and there is no superclass, or the superclass is Object,
+		// then we need to invoke Clazz.clone(this) directly instead of calling C$.superClazz.clone()
+		buffer.append("clone".equals(name) && getSuperclassName(mBinding.getDeclaringClass()) == null
+				? "Clazz.clone(this)" : "C$.superClazz.prototype." + name + ".apply(this, arguments)");
 		return false;
 	}
 
@@ -2009,21 +2024,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		Type superClassType = null;
 		if (!isInterface) {
-			// add superclass name
+			buffer.append(", ").append("" + getSuperclassName(node.resolveBinding()));
 			superClassType = node.getSuperclassType();
-			String superClassName = "null";
-			ITypeBinding typeBinding = node.resolveBinding();
-			if (typeBinding != null) {
-				ITypeBinding superclass = typeBinding.getSuperclass();
-				if (superclass != null) {
-					String clazzName = superclass.getQualifiedName();
-					clazzName = assureQualifiedName(removeJavaLang(clazzName));
-					if (clazzName != null && clazzName.length() != 0 && !"Object".equals(clazzName)) {
-						superClassName = clazzName;
-					}
-				}
-			}
-			buffer.append(", ").append(superClassName);
 		}
 		// Add superinterfaces
 		buffer.append(", ");
@@ -2242,6 +2244,25 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			addAnonymousFunctionWrapper(false);
 		staticFieldDefBuffer = new StringBuffer();
 		super.endVisit(node);
+	}
+
+	/**
+	 * return the superclass name, provided it is not Object or ""
+	 * 
+	 * @param typeBinding
+	 * @return superclass name or null 
+	 */
+	private String getSuperclassName(ITypeBinding typeBinding) {
+		if (typeBinding != null) {
+			ITypeBinding superclass = typeBinding.getSuperclass();
+			if (superclass != null) {
+				String clazzName = superclass.getQualifiedName();
+				clazzName = assureQualifiedName(removeJavaLang(clazzName));
+				if (clazzName != null && clazzName.length() != 0 && !"Object".equals(clazzName)) 
+					return clazzName;
+			}
+		}
+		return null;
 	}
 
 	private void appendDefaultValue(Type type) {
