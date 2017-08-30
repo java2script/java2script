@@ -2538,7 +2538,33 @@ public abstract class ResourceBundle {
 			return bundle;
 		}
 
-        private ResourceBundle newPropertyBundle(InputStream stream) throws IOException {
+	    /**
+	     * Gets a resource bundle using the specified base name, the default locale,
+	     * and the caller's class loader. Calling this method is equivalent to calling
+	     * <blockquote>
+	     * <code>getBundle(baseName, Locale.getDefault(), this.getClass().getClassLoader())</code>,
+	     * </blockquote>
+	     * except that <code>getClassLoader()</code> is run with the security
+	     * privileges of <code>ResourceBundle</code>.
+	     * See {@link #getBundle(String, Locale, ClassLoader) getBundle}
+	     * for a complete description of the search and instantiation strategy.
+	     *
+	     * @param baseName the base name of the resource bundle, a fully qualified class name
+	     * @exception java.lang.NullPointerException
+	     *     if <code>baseName</code> is <code>null</code>
+	     * @exception MissingResourceException
+	     *     if no resource bundle for the specified base name can be found
+	     * @return a resource bundle for the given base name and the default locale
+	     */
+	    public static final ResourceBundle getBundle(String baseName)
+	    {
+	        return getBundleImpl(baseName, Locale.getDefault(), null,
+	                             /* must determine loader here, else we break stack invariant */
+//	                             getLoader(),
+	                             Control.INSTANCE);
+	    }
+
+	    private ResourceBundle newPropertyBundle(InputStream stream) throws IOException {
         	  return ((PropertyResourceBundle)Interface.getInstance("java.util.PropertyResourceBundle", false))
         		.setStream(stream);
         	}
