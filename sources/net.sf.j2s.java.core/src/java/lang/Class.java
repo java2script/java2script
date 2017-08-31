@@ -887,7 +887,18 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @see java.lang.reflect.Array
 	 * @since JDK1.1
 	 */
-	public native Class<?> getComponentType();
+	public Class<?> getComponentType() {
+		// Arrays have this method via Clazz.newArray$
+		/**
+		 * @j2sNative
+		 * 
+		 * return(this.$clazz$.__ARRAYTYPE && this.$class$.getComponentType() || null);
+		 * 
+		 */
+		{
+			return null;
+		}
+	}
 
 	/**
 	 * Returns the Java language modifiers for this class or interface, encoded
