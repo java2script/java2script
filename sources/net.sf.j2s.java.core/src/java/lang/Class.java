@@ -2135,6 +2135,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public InputStream getResourceAsStream(String name) {
+	    @SuppressWarnings("unused")
+		String clazzName = this.$clazz$.__CLASS_NAME__;
 		/**
 		 * @j2sNative
 	    if (!name)
@@ -2142,7 +2144,6 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	    name = name.replace (/\\/g, '/');
 	    var baseFolder = null;
 	    var fname = name;
-	    var clazzName = this.__CLASS_NAME__;
 	    if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
 	      name = "/" + name;
 	    }
