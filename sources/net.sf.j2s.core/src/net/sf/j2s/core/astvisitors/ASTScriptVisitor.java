@@ -2419,23 +2419,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		Type type = node.getType();
 		ITypeBinding binding = type.resolveBinding();
 		if (type.isPrimitiveType()) {
-			String name = binding.getName();
 			// adds Integer.TYPE, Float.TYPE, etc.
-			buffer.append(getPrimitiveTYPE(name));
-			return false;
+			buffer.append(getPrimitiveTYPE(binding.getName()));
 		} else if (type instanceof ArrayType) {
 			buffer.append(j2sGetArrayClass(binding, 1));
-			return false;
 		} else {
-			String name = binding.getName();
-			if ("Object".equals(name) || "java.lang.Object".equals(name)) {
-				buffer.append("Clazz._O"); // BH was JavaObject, but that
-											// introduces a new top-level
-											// JavaScript object
-				return false;
-			}
+			// BH we are creating a new Class object around this class
+			buffer.append("Clazz.$newClass(" + Bindings.removeBrackets(binding.getQualifiedName()) + ")");
 		}
-		type.accept(this);
 		return false;
 	}
 
@@ -2615,8 +2606,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 * faux class with the correct _paramType and __NDIM
 	 *
 	 * @param type
-	 * @param dimFlag  -1 : initialized depth; n > 0 uninitialized depth; 0: not necessary 
-	 * 
+	 * @param dimFlag  -1 : initialized depth; n > 0 uninitialized depth as Clazz.arrayClass$; 0: not necessary 
 	 * @return JavaScript for array creation
 	 */
     static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
@@ -2624,7 +2614,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
     	String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) : Bindings.removeBrackets(ebinding.getQualifiedName())) 
     			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
-				: " Clazz.newArray$(" + params + ", [");
+				: " Clazz.newArray$(" + params);
 	}
 
 	private static boolean isStatic(int modifiers) {

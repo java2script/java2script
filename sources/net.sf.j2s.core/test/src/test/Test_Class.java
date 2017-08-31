@@ -4,7 +4,7 @@ package test;
 class Test_Class {
 
 	public Test_Class() {
-	  System.out.println("defaultConstructor");
+	  System.out.println(true);
 	}
 	
 	public Test_Class(Object... ab) {
@@ -18,12 +18,12 @@ class Test_Class {
 	}
 	
 	public static Test_Class newInstance() {
-		   System.out.println("this is static Test_Class.newInstance()");
+		   System.out.println("failed! this is static Test_Class.newInstance()");
 		   return null;		
 		}
 		
 	public static Test_Class newInstance(Object... objects) {
-	   System.out.println("this is static Test_Class.newInstance(Object... objects");
+	   System.out.println("failed! this is static Test_Class.newInstance(Object... objects");
 	   return null;		
 	}
 	

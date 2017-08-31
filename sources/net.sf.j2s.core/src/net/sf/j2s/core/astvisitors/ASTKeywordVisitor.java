@@ -198,6 +198,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding binding = node.resolveTypeBinding();
 		if (inode == null) {
 			buffer.append(ASTScriptVisitor.j2sGetArrayClass(binding, 0));
+			buffer.append(", [");
 			List<ASTNode> dim = node.dimensions();
 			visitList(dim, ", ");
 			for (int i = binding.getDimensions() - dim.size(); --i >= 0;)
@@ -214,6 +215,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		//ITypeBinding binding = node.resolveTypeBinding();
 		//int n = binding.getDimensions();
 		buffer.append(ASTScriptVisitor.j2sGetArrayClass(node.resolveTypeBinding(), -1));
+		buffer.append(", [");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> expressions = node.expressions();
 		visitList(expressions, ", ");

@@ -1916,7 +1916,13 @@ J2S.Cache.put = function(filename, data) {
 			J2S._registerApplet(applet._id, applet);
 			try {
         if (applet.__Info.main) {
-          Clazz._4Name(applet.__Info.main).main([]);
+          try{
+            var cl = Clazz._4Name(applet.__Info.main);
+          }catch(e) {
+            alert ("Java class " +  applet.__Info.main + " was not found.");
+            return;
+          }
+          cl.$clazz$.main([]);
         } else {
   				applet._newApplet(viewerOptions);
         }

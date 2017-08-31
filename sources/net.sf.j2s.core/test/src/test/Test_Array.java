@@ -41,7 +41,6 @@ class Test_Array {
       System.out.println(i33.getClass().getComponentType().getName() == "[I");
       System.out.println(i33.getClass().getComponentType().getComponentType().getName() == "int");
       System.out.println(tType3__.getClass().getComponentType().getName().equals("[[L" + Test_Array.class.getName() + ";"));
-
 	  System.out.println("int[] " + (i3 instanceof int[]));
 	  System.out.println("int[] " + (i3b instanceof int[]));
 	  System.out.println("int[] " + (iType3 instanceof int[]));

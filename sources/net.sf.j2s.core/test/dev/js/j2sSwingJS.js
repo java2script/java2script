@@ -13,6 +13,7 @@
 
 // TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
 
+// BH 8/30/2017 6:40:11 PM adds $newClass()
 // BH 8/26/2017 9:45:55 AM fix for URL.getContent()
 // BH 8/24/2017 1:54:01 AM fix for static Character.toUpperCase, .toLowerCase 
 // BH 8/20/2017 5:04:32 AM lets String implement CharSequence using .length$() for all .length() for ALL classes
@@ -183,6 +184,17 @@ Clazz.$new = function(c, args, cl) {
   return f;
 }
 
+Clazz.$newClass = function(cl) {
+  // $Class$ is the java.lang.Class object wrapper
+  // $clazz$ is the unwrapped JavaScript object
+  if (cl.$Class$)
+    return cl.$Class$;
+  java.lang.Class || Clazz.loadClass("java.lang.Class");
+  var Class_ = cl.$Class$ = new java.lang.Class();
+  Class_.$clazz$ = cl;
+  return Class_;
+}
+
 Clazz.$newEnumConst = function (c, enumName, enumOrdinal, args, cl) {
   var o = Clazz.$new(c, args, cl);
   o.$name = enumName;
@@ -335,11 +347,12 @@ Clazz.arrayClass$ = function(baseClass, ndim) {
   o.__NDIM = ndim;
   o.__CLASS_NAME__ = o.__ARRAYTYPE = stub + aaa;
   o.__COMPONENTTYPE = (o.__NDIM == 1 ? baseClass : null);
-  o.getComponentType = function() { 
+  var oclass = Clazz.$newClass(o);
+  oclass.getComponentType = function() { 
     return o.__COMPONENTTYPE 
       || (o.__COMPONENTTYPE = Clazz.arrayClass$(baseClass, ndim - 1)); 
   };
-  o.getName = function() {return o.__NAME || (o__NAME = (function() {
+  oclass.getName = function() {return o.__NAME || (o__NAME = (function() {
     switch (stub) {
     case "O":
       stub = "Object";
@@ -361,7 +374,7 @@ Clazz.arrayClass$ = function(baseClass, ndim) {
       stub = "Ljava.lang." + stub + ";";
     return aaa.replace(/A/g,"[") + stub;
   })())};
-  return o;  
+  return oclass;  
 }
 
 Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
@@ -456,6 +469,7 @@ Clazz.newArray$ = function(baseClass, paramType, ndims, params) {
 }
 
 var getParamCode = Clazz._getParamCode = function(cl) {
+  cl.$clazz$ && (cl = cl.$clazz$);
   return cl.__PARAMCODE || (cl.__PARAMCODE = cl.__CLASS_NAME__.replace(/java\.lang\./, "").replace(/\./g, '_'));
 }
 
@@ -1067,7 +1081,7 @@ var equalsOrExtendsLevel = function (clazzThis, clazzAncestor) {
  * be function.
  */
 
-var getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
+Clazz.getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
   if (clazzTarget === clazzBase)
     return 0;
   if (isTgtStr && ("void" == clazzTarget || "unknown" == clazzTarget))
@@ -1122,180 +1136,19 @@ var getInheritedLevel = function (clazzTarget, clazzBase, isTgtStr, isBaseStr) {
 };
 
 var innerNames = [
-  "equals", "equals$O", "hashCode", /*"toString",*/ 
-  "getName", "getCanonicalName", "getClassLoader", 
-  "getResource", "getResource$S",
-  "getResourceAsStream","getResourceAsStream$S", 
-  "defineMethod", "defineStaticMethod",
-  "makeConstructor",  
-    "getSuperclass", "isAssignableFrom", 
-    "getConstructor", "getConstructor$ClassA",
-    "getDeclaredMethod", "getDeclaredmethod$S$ClassA", 
-    "getDeclaredMethods",
-    "getMethod", "getMethod$S$ClassA", 
-    "getMethods", "getModifiers", /*"isArray",*/ "newInstance"
+  "equals", "equals$O", "hashCode" /*"toString",*/ 
 ];
 
 /*
  * Static methods
  */
 var inF = Clazz._inF = {
-  /*
-   * Similar to Object#equals
-   */
-   
-  equals : function (aFun) {
-    return this === aFun;
-  },
-
-  hashCode : function () {
-    return this.getName ().hashCode ();
-  },
-
-  toString : function () {
-    return "class " + this.getName ();
-  },
-
-  /*
-   * Similar to Class#getName
-   */
-  getName : function () {
-    return Clazz.getClassName (this, true);
-  },
-  getCanonicalName : function () {
-    return this.__CLASS_NAME__;
-  },
-  getClassLoader : function () {
-    var clazzName = this.__CLASS_NAME__;
-    var baseFolder = Clazz._Loader.getJ2SLibBase(); // getClass().getClassLoader() uses full path
-    var loader = Clazz._Loader.requireLoaderByBase(baseFolder);
-    loader.getResourceAsStream = inF.getResourceAsStream;
-    loader.getResource = inF.getResource; // BH
-    return loader;
-  },
-
-  getResource : function(name) {
-    var stream = this.getResourceAsStream(name);
-    return (stream ? stream.url : null);
-  },
-
-  getResourceAsStream : function(name) {
-    if (!name)
-      return null;
-    name = name.replace (/\\/g, '/');
-    var baseFolder = null;
-    var fname = name;
-    var clazzName = this.__CLASS_NAME__;
-    if (arguments.length == 2 && name.indexOf ('/') != 0) { // additional argument
-      name = "/" + name;
-    }
-    if (name.indexOf ('/') == 0) {
-      //is.url = name.substring (1);
-      if (arguments.length == 2)  // additional argument
-        baseFolder = arguments[1];
-      if (!baseFolder)
-        baseFolder = Clazz._Loader.getJ2SLibBase();
-      if (baseFolder.charAt(baseFolder.length - 1) != '/')
-        baseFolder += "/";
-      fname = baseFolder + name.substring (1);
-    } else {
-      baseFolder = Clazz._Loader.getJ2SLibBase(); // getClass().getClassLoader() uses full path
-      fname = baseFolder;      
-      if (this.$_$base == null) {      
-        // getClass().getResource() will be here
-        var pkgs = clazzName.split(".");
-        var fname = baseFolder;
-        if (fname.charAt(fname.length - 1) != '/')
-          fname += "/";
-        var map = Clazz.allPackage;
-        for (var i = 0; i < pkgs.length - 1; i++) {
-          if (!(map = map[pkgs[i]]))
-            break;
-          fname += pkgs[i] + "/";
-        }
-      }
-      fname += name;
-    }
-    var url = null;
-    var javapath = fname;
-    try {
-      if (fname.indexOf(":/") < 0) {
-        var d = document.location.href.split("?")[0].split("/");
-        d[d.length - 1] = fname;
-        fname = d.join("/");
-      }
-      Clazz.loadClass("java.net.URL");
-      url = Clazz.$new(java.net.URL.construct$S,[fname]);
-    } catch (e) {
-      return null;
-    }
-    var fileCache = J2S._getSetJavaFileCache(null);
-    var data = fileCache && fileCache.get(javapath);   
-    if (!data)
-      data = J2S._getFileData(fname.toString(),null,1,1);
-    
-    if (data == null || data == "error" || data.indexOf && data.indexOf("[Exception") == 0)
-      return null;
-            
-    var bytes = (data.__BYTESIZE == 1 ? data : J2S._strToBytes(data));
-    Clazz.loadClass("java.io.BufferedInputStream");
-    Clazz.loadClass("java.io.ByteArrayInputStream");
-    var is = Clazz.$new(java.io.BufferedInputStream.construct$java_io_InputStream, [Clazz.$new(java.io.ByteArrayInputStream.construct$BA, [bytes])]); 
-    is.url = url;
-    url._streamData = is;
-    return is;
-  },
-  
-  getSuperclass : function() { return this.superClazz; },
-
-  isAssignableFrom : function(clazz) {  return getInheritedLevel (clazz, this) >= 0;  },
-
-  getConstructor : function(paramTypes) { 
-  return Clazz.$new(java.lang.reflect.Constructor.construct$Class$ClassA$ClassA$I, [this, paramTypes || [], [], java.lang.reflect.Modifier.PUBLIC]);
-  },
-/**
- * TODO: fix bug for polymorphic methods!
- */
-  getMethods : function() {
-    var ms = [];
-    var p = this.prototype;
-    for (var attr in p) {
-      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__) {
-        /* there are polynormical methods. */
-        ms.push(new java.lang.reflect.Method (this, attr,
-            [], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC));
-      }
-    }
-    p = this;
-    for (var attr in p) {
-      if (typeof p[attr] == "function" && !p[attr].__CLASS_NAME__) {
-        ms.push(new java.lang.reflect.Method (this, attr,
-            [], java.lang.Void, [], java.lang.reflect.Modifier.PUBLIC
-            | java.lang.reflect.Modifier.STATIC));
-      }
-    }
-    return ms;
-  },
-
-  getMethod : function(name, paramTypes) {
-    return Clazz.$new(java.lang.reflect.Method.construct$Class$S$ClassA$Class$ClassA$I, [this, name,
-            paramTypes, java.lang.Void, [], 0]);
-  },
-
-  getModifiers : function() { return java.lang.reflect.Modifier.PUBLIC; },
-
-  newInstance : function() {
-    return new this;
-  }
+  equals : function (aFun) { return this === aFun; },
+  hashCode : function () { return this.__CLASS_NAME__.hashCode (); },
+  toString : function () { return "class " + this.__CLASS_NAME__; } 
 };
 
-inF.getResource$S = inF.getResource;
-inF.getResourceAsStream$S = inF.getResourceAsStream;
-
-inF.getDeclaredMethods = inF.getMethods;
-inF.getDeclaredMethod = inF.getMethod$S$ClassA = inF.getMethod;
 inF.equals$O = inF.equals;
-inF.getConstructor$ClassA = inF.getConstructor;
 
  
 for (var i = innerNames.length, name; --i >= 0;)
@@ -1337,13 +1190,14 @@ var checkInnerFunction = function (hostSuper, funName) {
 /* public */
 Clazz.instanceOf = function (obj, clazz) {
   // allows obj to be a class already, from arrayX.getClass().isInstance(y)
+  // unwrap java.lang.Class to JavaScript clazz
   return (obj != null && clazz && 
-  (obj == clazz
+  (obj == (clazz.$clazz$ ? (clazz = clazz.$clazz$) : clazz)
     || (obj.__ARRAYTYPE || clazz.__ARRAYTYPE ? 
             obj.__ARRAYTYPE == clazz.__ARRAYTYPE 
             || obj.__ARRAYTYPE && clazz.__ARRAYTYPE && obj.__NDIM == clazz.__NDIM 
-               && getInheritedLevel(Clazz.getClassName(obj.__BASECLASS, true), clazz.__BASECLASS, true) >= 0
-    : obj instanceof clazz || getInheritedLevel(Clazz.getClassName(obj), clazz, true) >= 0)));
+               && Clazz.getInheritedLevel(Clazz.getClassName(obj.__BASECLASS, true), clazz.__BASECLASS, true) >= 0
+    : obj instanceof clazz || Clazz.getInheritedLevel(Clazz.getClassName(obj), clazz, true) >= 0)));
 };
 
 /////////////////////////// Exception handling ////////////////////////////
@@ -2500,25 +2354,31 @@ var removeScriptNode = function (n) {
 
 /* public */
 Clazz._4Name = function(clazzName, applet, state) {
-  if (Clazz.isClassDefined(clazzName))
-    return evalType(clazzName);
-  if (clazzName.indexOf("$") >= 0) {
-    // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
-    // when the static nested class is created using declareType  
-   var name2 = clazzName.replace(/\$/g,".");
-   if (Clazz.isClassDefined(name2))
-    return evalType(name2);   
+  if (!Clazz.isClassDefined(clazzName)) {
+    var name2 = null;
+    if (clazzName.indexOf("$") >= 0) {
+      // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
+      // when the static nested class is created using declareType  
+      name2 = clazzName.replace(/\$/g,".");
+      if (Clazz.isClassDefined(name2)) {
+        clazzName = name2;
+      } else {
+        name2 = null;
+      }
+    }
+    if (name2 == null) {
+      var f = (J2S._isAsync && applet ? applet._restoreState(clazzName, state) : null);
+      if (f == 1)
+        return null; // must be already being created
+      if (_Loader.setLoadingMode(f ? _Loader.MODE_SCRIPT : "xhr.sync")) {
+        _Loader.loadClass(clazzName, f, false, true, 1);
+        return null; // this will surely throw an error, but that is OK
+      }
+      //alert ("Using Java reflection: " + clazzName + " for " + applet._id + " \n"+ Clazz.getStackTrace());
+      _Loader.loadClass(clazzName);
+    }    
   }
-  var f = (J2S._isAsync && applet ? applet._restoreState(clazzName, state) : null);
-  if (f == 1)
-    return null; // must be already being created
-  if (_Loader.setLoadingMode(f ? _Loader.MODE_SCRIPT : "xhr.sync")) {
-    _Loader.loadClass(clazzName, f, false, true, 1);
-    return null; // this will surely throw an error, but that is OK
-  }
-  //alert ("Using Java reflection: " + clazzName + " for " + applet._id + " \n"+ Clazz.getStackTrace());
-  _Loader.loadClass(clazzName);
-  return evalType(clazzName);
+  return Clazz.$newClass(evalType(clazzName));
 };
 
 /**
@@ -5595,8 +5455,8 @@ default:
 })(Clazz._Encoding);
 
 
-c$=Clazz.decorateAsClass(function() {}, java.lang, "Class");
-Clazz._setDeclared("java.lang.Class", java.lang.Class); 
+//c$=Clazz.decorateAsClass(function() {}, java.lang, "Class");
+//Clazz._setDeclared("java.lang.Class", java.lang.Class); 
 
 
 c$=Clazz.decorateAsClass(function(){
@@ -6490,7 +6350,7 @@ var newMethodNotFoundException = function (clazz, method) {
 };
 
 c$=Clazz.decorateAsClass(function(){
-this.clazz=null;
+this.Class_=null;
 this.parameterTypes=null;
 this.exceptionTypes=null;
 this.modifiers=0;
@@ -6500,12 +6360,12 @@ this.constr = null;
 
 m$(c$, "construct$Class$ClassA$ClassA$I", function(declaringClass,parameterTypes,checkedExceptions,modifiers){
 Clazz.super$(c$, this);
-this.clazz=declaringClass;
+this.Class_=declaringClass;
 this.parameterTypes=parameterTypes;
 for (var i = 0; i < parameterTypes.length; i++) {
   this.signature += "$" + Clazz._getParamCode(parameterTypes[i]);
 }
-this.constr = this.clazz[this.signature];
+this.constr = this.Class_.$clazz$[this.signature];
 this.exceptionTypes=checkedExceptions;
 this.modifiers=modifiers;
 }, 1);
@@ -6553,7 +6413,7 @@ return true;
 });
 m$(c$,"getDeclaringClass",
 function(){
-return this.clazz;
+return this.Class_;
 });
 m$(c$,"getExceptionTypes",
 function(){
@@ -6584,14 +6444,14 @@ m$(c$,"newInstance$OA", function(args){
         a[i] = (this.parameterTypes[i].__PRIMITIVE ? args[i].valueOf() : args[i]);
       }
     }
-    var instance = new (Function.prototype.bind.apply(this.clazz, [null, []]));
+    var instance = new (Function.prototype.bind.apply(this.Class_.$clazz$, [null, []]));
     if (instance) {
       this.constr.apply(instance, a);
     }
   }
 //  var instance=new this.clazz(null, Clazz.inheritArgs);
   if (instance == null)
-    newMethodNotFoundException(this.clazz, "construct", getParamTypes(a).typeString);  
+    newMethodNotFoundException(this.Class_.$clazz$, "construct", getParamTypes(a).typeString);  
   return instance;
 });
 m$(c$,"toString",
@@ -6642,7 +6502,7 @@ return null;
 });
 
 c$=Clazz.decorateAsClass(function(){
-this.clazz=null;
+this.Class_=null;
 this.name=null;
 this.returnType=null;
 this.parameterTypes=null;
@@ -6651,7 +6511,7 @@ this.modifiers=0;
 },java.lang.reflect,"Method",java.lang.reflect.AccessibleObject,[java.lang.reflect.GenericDeclaration,java.lang.reflect.Member]);
 m$(c$, "construct$Class$S$ClassA$Class$ClassA$I", function(declaringClass,name,parameterTypes,returnType,checkedExceptions,modifiers){
 Clazz.super$(c$, this);
-this.clazz=declaringClass;
+this.Class_=declaringClass;
 this.name=name;
 this.parameterTypes=parameterTypes;
 this.returnType=returnType;
@@ -6714,7 +6574,7 @@ return true;
 });
 m$(c$,"getDeclaringClass",
 function(){
-return this.clazz;
+return this.Class_;
 });
 m$(c$,"getExceptionTypes",
 function(){
@@ -6753,9 +6613,9 @@ for (var i = 0; i < types.length; i++) {
   name += "$" + paramCode;
 }
 
-var m=this.clazz.prototype[name] || this.clazz[name];
+var m=this.Class_.$clazz$.prototype[name] || this.Class_.$clazz$[name];
 if (m == null)
-  newMethodNotFoundException(this.clazz, name);  
+  newMethodNotFoundException(this.Class_.$clazz$, name);  
 return m.apply(receiver,a);
 });
 m$(c$,"toString",
