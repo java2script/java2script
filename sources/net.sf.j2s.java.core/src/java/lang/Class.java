@@ -888,16 +888,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public Class<?> getComponentType() {
-		// Arrays have this method via Clazz.newArray$
-		/**
-		 * @j2sNative
-		 * 
-		 * return(this.$clazz$.__ARRAYTYPE && this.$class$.getComponentType() || null);
-		 * 
-		 */
-		{
-			return null;
-		}
+		// Array classes have this method added via Clazz.arrayClass$()
+		return null;
 	}
 
 	/**
