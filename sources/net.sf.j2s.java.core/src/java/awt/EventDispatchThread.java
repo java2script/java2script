@@ -329,7 +329,7 @@ class EventDispatchThread extends JSThread {
 			 * Fix for 4648733. Check both the associated java event queue and the
 			 * PostEventQueue.
 			 */
-			if (theQueue.peekEventSAEM() != null || !SunToolkit.isPostEventQueueEmpty()) {
+			if (theQueue.peekEvent() != null || !SunToolkit.isPostEventQueueEmpty()) {
 				theQueue.initDispatchThread();
 			}
 			AWTAutoShutdown.getInstance().notifyThreadFree(this);

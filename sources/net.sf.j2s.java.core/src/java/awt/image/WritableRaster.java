@@ -294,14 +294,9 @@ public class WritableRaster extends Raster {
      * in bounds, or if inData is too small to hold the input.
      */
     public void setDataElements(int x, int y, Object inData) {
-    	if (inData instanceof Raster) {
-    		// SwingJS SAEM java.awt.image had setDataElements(int, int, [Raster | Object])
-    		setDataElementsRaster(x, y, (Raster) inData);
-    	} else {
         sampleModel.setDataElements(x-sampleModelTranslateX,
                                     y-sampleModelTranslateY,
                                     inData, dataBuffer);
-    	}
     }
 
     /**
@@ -322,7 +317,7 @@ public class WritableRaster extends Raster {
      * @throws ArrayIndexOutOfBoundsException if the coordinates are not
      * in bounds.
      */
-    public void setDataElementsRaster(int x, int y, Raster inRaster) {
+    public void setDataElements(int x, int y, Raster inRaster) {
         int dstOffX = x+inRaster.getMinX();
         int dstOffY = y+inRaster.getMinY();
         int width  = inRaster.getWidth();

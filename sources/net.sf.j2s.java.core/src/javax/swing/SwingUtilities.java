@@ -544,7 +544,6 @@ public class SwingUtilities implements SwingConstants
         int rectCount = 0;
 
         
-        // SwingJS SAEM setBounds --> reshape
         /* rectA contains rectB */
         if (isRectangleContainingRectangle(rectA,rectB)) {
             t.x = rectA.x; t.y = rectA.y; t.width = rectB.x - rectA.x; t.height = rectA.height;
@@ -584,14 +583,14 @@ public class SwingUtilities implements SwingConstants
                         rectCount++;
                     }
                 } else if ((rectB.y + rectB.height) > (rectA.y + rectA.height)) {
-                    t.reshape((rectB.x + rectB.width), rectA.y,
+                    t.setBounds((rectB.x + rectB.width), rectA.y,
                                 (rectA.x + rectA.width) - (rectB.x + rectB.width), rectA.height);
                     if(t.width > 0 && t.height > 0) {
                         a = t;
                         rectCount++;
                     }
                 } else {
-                    t.reshape((rectB.x + rectB.width), rectA.y,
+                    t.setBounds((rectB.x + rectB.width), rectA.y,
                                 (rectA.x + rectA.width) - (rectB.x + rectB.width),
                                 (rectB.y + rectB.height) - rectA.y);
                     if(t.width > 0 && t.height > 0) {
@@ -599,7 +598,7 @@ public class SwingUtilities implements SwingConstants
                         rectCount++;
                     }
 
-                    t.reshape(rectA.x, (rectB.y + rectB.height), rectA.width,
+                    t.setBounds(rectA.x, (rectB.y + rectB.height), rectA.width,
                                 (rectA.y + rectA.height) - (rectB.y + rectB.height));
                     if(t.width > 0 && t.height > 0) {
                         b = new Rectangle(t);
@@ -608,13 +607,13 @@ public class SwingUtilities implements SwingConstants
                 }
             } else if (rectB.x <= rectA.x && (rectB.y + rectB.height) >= (rectA.y + rectA.height)) {
                 if ((rectB.x + rectB.width) > (rectA.x + rectA.width)) {
-                    t.reshape(rectA.x, rectA.y, rectA.width, rectB.y - rectA.y);
+                    t.setBounds(rectA.x, rectA.y, rectA.width, rectB.y - rectA.y);
                     if(t.width > 0 && t.height > 0) {
                         a = t;
                         rectCount++;
                     }
                 } else {
-                    t.reshape(rectA.x, rectA.y, rectA.width, rectB.y - rectA.y);
+                    t.setBounds(rectA.x, rectA.y, rectA.width, rectB.y - rectA.y);
                     if(t.width > 0 && t.height > 0) {
                         a = new Rectangle(t);
                         rectCount++;
@@ -1178,7 +1177,7 @@ public class SwingUtilities implements SwingConstants
      * @see java.awt.Component#isLightweight
      */
     public static void paintComponent(Graphics g, Component c, Container p, int x, int y, int w, int h) {
-        getCellRendererPane(c, p).paintComponentSAEM(g, c, p, x, y, w, h,false);
+        getCellRendererPane(c, p).paintComponent(g, c, p, x, y, w, h,false);
     }
 
     /**

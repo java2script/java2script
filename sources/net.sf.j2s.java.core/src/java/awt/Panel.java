@@ -57,7 +57,7 @@ public class Panel extends Container {
      * 
      */
     public Panel() {
-    	setLayout(new FlowLayout());
+    	this(new FlowLayout());
     }
 
     @Override
@@ -73,11 +73,8 @@ public class Panel extends Container {
      * @since JDK1.1
      */
     public Panel(LayoutManager layout) {
-    	// SwingJS SAEM
-    	if (layout == null)
-    		layout = new FlowLayout();
     	setAppContext();
-      setLayout(layout);
+    	setLayout(layout);
     }
 
     /**

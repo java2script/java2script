@@ -917,7 +917,8 @@ public class Dialog extends Window {
 		} else {
 			//visible = 
 		  retval = true;
-			showSAEM();
+		  // TODO this was Component.showSAEM, in Component, but not is setVisible in Window
+			super.setVisible(true);
 
 			// check if this dialog should be modal blocked BEFORE calling
 			// peer.show(),

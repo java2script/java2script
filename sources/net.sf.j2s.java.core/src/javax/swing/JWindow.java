@@ -417,7 +417,7 @@ public class JWindow extends Window implements RootPaneContainer {
 		if (isRootPaneCheckingEnabled()) {
 			return getContentPane().add(comp, constraints, index);
 		}
-		return addImplSAEM(comp, constraints, index);
+		return addImplCont(comp, constraints, index);
 	}
 
 	/**

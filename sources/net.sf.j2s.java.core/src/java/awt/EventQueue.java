@@ -556,10 +556,6 @@ public class EventQueue {
 	 * @return the first event
 	 */
 	public synchronized AWTEvent peekEvent() {
-		return peekEventSAEM();
-	}
-
-	public AWTEvent peekEventSAEM() {
 		for (int i = NUM_PRIORITIES - 1; i >= 0; i--) {
 			if (queues[i].head != null) {
 				return queues[i].head.event;
@@ -796,7 +792,7 @@ public class EventQueue {
 
 		synchronized (newEventQueue) {
 			// Transfer all events forward to new EventQueue.
-			while (peekEventSAEM() != null) {
+			while (peekEvent() != null) {
 				try {
 					newEventQueue.postEventPrivate(getNextEvent());
 				} catch (InterruptedException ie) {
@@ -863,7 +859,7 @@ public class EventQueue {
 
 				// Transfer all events back to previous EventQueue.
 				previousQueue.nextQueue = null;
-				while (peekEventSAEM() != null) {
+				while (peekEvent() != null) {
 					try {
 						previousQueue.postEventPrivate(getNextEvent());
 					} catch (InterruptedException ie) {

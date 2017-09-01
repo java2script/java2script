@@ -1857,7 +1857,7 @@ public abstract class AbstractButton extends JComponent implements ItemSelectabl
         if (!setLayout) {
             setLayout(new OverlayLayout(this));
         }
-        return addImplSAEM(comp, constraints, index);
+        return addImplCont(comp, constraints, index);
     }
 
     /**

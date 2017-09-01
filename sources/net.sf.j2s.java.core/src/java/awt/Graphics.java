@@ -164,10 +164,6 @@ public abstract class Graphics {
      * @see        java.awt.Graphics#clipRect
      */
     public Graphics create(int x, int y, int width, int height) {
-    	return create4(x, y, width, height);
-    }
-
-    public Graphics create4(int x, int y, int width, int height) {
     	// cell renderer pane and JComponent
       Graphics g = create();
       if (g == null) return null;

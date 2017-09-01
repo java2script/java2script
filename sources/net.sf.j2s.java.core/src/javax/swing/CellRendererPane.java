@@ -109,7 +109,7 @@ public class CellRendererPane extends JPanel
             return null;
         }
         else {
-            return addImplSAEM(x, constraints, index);
+            return addImplCont(x, constraints, index);
         }
     }
 
@@ -126,25 +126,6 @@ public class CellRendererPane extends JPanel
      * validated before painted.
      */
     public void paintComponent(Graphics g, Component c, Container p, int x, int y, int w, int h, boolean shouldValidate) {
-    	paintComponentSAEM(g, c, p, x, y, w, h, shouldValidate);
-    }
-
-
-    /**
-     * SwingJS renaming to avoid SearchAndReplaceMethod
-     * 
-     * @param g
-     * @param c
-     * @param p
-     * @param x
-     * @param y
-     * @param w
-     * @param h
-     * @param shouldValidate
-     */
-    public void paintComponentSAEM(Graphics g, Component c, Container p,
-				int x, int y, int w, int h, boolean shouldValidate) {
-    	
       if (c == null) {
           if (p != null) {
               Color oldColor = g.getColor();
@@ -190,7 +171,7 @@ public class CellRendererPane extends JPanel
      * Calls this.paintComponent(g, c, p, x, y, w, h, false).
      */
     public void paintComponent(Graphics g, Component c, Container p, int x, int y, int w, int h) {
-        paintComponentSAEM(g, c, p, x, y, w, h, false);
+        paintComponent(g, c, p, x, y, w, h, false);
     }
 
 
@@ -198,7 +179,7 @@ public class CellRendererPane extends JPanel
      * Calls this.paintComponent() with the rectangles x,y,width,height fields.
      */
     public void paintComponent(Graphics g, Component c, Container p, Rectangle r) {
-        paintComponentSAEM(g, c, p, r.x, r.y, r.width, r.height, false);
+        paintComponent(g, c, p, r.x, r.y, r.width, r.height, false);
     }
 
 

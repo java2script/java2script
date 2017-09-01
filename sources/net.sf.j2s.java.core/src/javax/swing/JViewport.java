@@ -962,7 +962,7 @@ public class JViewport extends JComponent
         isViewSizeSet = false;
 
         if (view != null) {
-            addImplSAEM(view, null, -1);
+            addImplCont(view, null, -1);
             viewListener = createViewListener();
             view.addComponentListener(viewListener);
         }
@@ -1090,7 +1090,7 @@ public class JViewport extends JComponent
                 if (dirty == null || !dirty.contains(jview.getVisibleRect())) {
                     rm.beginPaint();
                     try {
-                        Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this)); // SwingJS SAEM
+                        Graphics g = JComponent.safelyGetGraphics(this, SwingUtilities.getRoot(this));
                         flushViewDirtyRegion(g, dirty);
                         view.setLocation(newX, newY);
                         g.setClip(0,0,getWidth(), Math.min(getHeight(),

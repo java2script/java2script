@@ -908,7 +908,7 @@ public class JDialog extends Dialog implements WindowConstants,
 		if (isRootPaneCheckingEnabled()) {
 			return getContentPane().add(comp, constraints, index);
 		}
-		return addImplSAEM(comp, constraints, index);
+		return addImplCont(comp, constraints, index);
 	}
 
     /**

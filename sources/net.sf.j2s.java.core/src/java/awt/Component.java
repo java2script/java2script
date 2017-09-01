@@ -1462,10 +1462,6 @@ protected  transient ComponentPeer peer;
     }
 
 	public void show() {
-		showSAEM();
-	}
-	
-	protected void showSAEM() {
 		// System.out.println("Component " + name + " setVisible TRUE");
 		if (!visible) {
 			// synchronized (getTreeLock()) {
@@ -1532,10 +1528,6 @@ protected  transient ComponentPeer peer;
      * replaced by <code>setVisible(boolean)</code>.
      */
     public void hide() {
-    	hideSAEM();
-    }
-    
-    protected void hideSAEM() {
         isPacked = false;
         if (visible) {
             clearCurrentFocusCycleRootOnHide();
@@ -1719,12 +1711,6 @@ protected  transient ComponentPeer peer;
      *       bound: true
      */
     public void setFont(Font f) {
-    	// SwingJS SAEM
-    	setFontComp(f);
-    }
-
-	protected void setFontComp(Font f) {
-		// SwingJS SAEM
 		Font oldFont, newFont;
 		oldFont = font;
 		newFont = font = f;
@@ -2561,12 +2547,10 @@ protected  transient ComponentPeer peer;
      * @see LayoutManager
      */
     public Dimension getMaximumSize() {
-    	// SwingJS SAEM
     	return getMaxSizeComp();
     }
 
 	protected Dimension getMaxSizeComp() {
-		// SwingJS SAEM
 		if (isMaximumSizeSet()) {
 			return new Dimension(maxSize);
 		}
@@ -2581,11 +2565,9 @@ protected  transient ComponentPeer peer;
      * the furthest away from the origin, 0.5 is centered, etc.
      */
     public float getAlignmentX() {
-    	// SwingJS SAEM
     	return getAlignmentXComp();
     }
     protected float getAlignmentXComp() {
-    	// SwingJS SAEM
         return CENTER_ALIGNMENT;
     }
 
@@ -2597,11 +2579,9 @@ protected  transient ComponentPeer peer;
      * the furthest away from the origin, 0.5 is centered, etc.
      */
     public float getAlignmentY() {
-    	// SwingJS SAEM
     	return getAlignmentYComp();
     }
     protected float getAlignmentYComp() {
-    	// SwingJS SAEM
         return CENTER_ALIGNMENT;
     }
 
@@ -2691,12 +2671,10 @@ protected  transient ComponentPeer peer;
      * @since     JDK1.0
      */
     public void validate() {
-    	// SwingJS SAEM
     	validateComponent();
     }
 
 	public void validateComponent() {
-  	// SwingJS SAEM
 		synchronized (getTreeLock()) {
 			ComponentPeer peer = this.peer;
 			boolean wasValid = isValid();
@@ -2726,12 +2704,10 @@ protected  transient ComponentPeer peer;
      * @since     JDK1.0
      */
     public void invalidate() {
-    	// SwingJS SAEM
     	invalidateComp();
     }
     
     protected void invalidateComp() {
-    	// SwingJS SAEM
 //        synchronized (getTreeLock()) {
             /* Nullify cached layout and size information.
              * For efficiency, propagate invalidate() upwards only if
@@ -3019,12 +2995,10 @@ protected  transient ComponentPeer peer;
      * @see       #paintAll
      */
     void lightweightPaint(Graphics g) {
-    	// SwingJS SAEM
     	lwPaintComp(g);
     }
 
     protected void lwPaintComp(Graphics g) {
-    	// SwingJS SAEM
       paint(g);
 		}
 
@@ -4524,13 +4498,11 @@ protected  transient ComponentPeer peer;
 
     // Should only be called while holding the tree lock
     int numListening(long mask) {
-    	// SwingJS SAEM
     	return numListeningMask(mask);
     }
     
     // Should only be called while holding the tree lock
     int numListeningMask(long mask) {
-    	// SwingJS SAEM
         // One mask or the other, but not neither or both.
 //        if (eventLog.isLoggable(Level.FINE)) {
 //            if ((mask != AWTEvent.HIERARCHY_EVENT_MASK) &&
@@ -5020,11 +4992,9 @@ protected  transient ComponentPeer peer;
      * @since 1.3
      */
     public <T extends EventListener> T[] getListeners(Class<T> listenerType) {
-    	// SwingJS SAEM
     	return getListenersComp(listenerType);
     }
     protected <T extends EventListener> T[] getListenersComp(Class<T> listenerType) {
-    	// SwingJS SAEM
     EventListener l = null;
     if  (listenerType == ComponentListener.class) {
         l = componentListener;
@@ -5319,14 +5289,10 @@ protected  transient ComponentPeer peer;
      * @since     JDK1.1
      */
     protected void processEvent(AWTEvent e) {
-  		// SwingJS SAEM
     	processEventComp(e);
     }
     
 	protected void processEventComp(AWTEvent e) {
-
-		// SwingJS SAEM
-		
 		if (e instanceof FocusEvent) {
 			processFocusEvent((FocusEvent) e);
 
@@ -6052,11 +6018,9 @@ protected  transient ComponentPeer peer;
      * @since JDK1.0
      */
     public void removeNotify() {
-    	// SwingJS SAEM
     	removeNotifyComp();
     }
     protected void removeNotifyComp() {
-    	// SwingJS SAEM
 //        KeyboardFocusManager.clearMostRecentFocusOwner(this);
 //        if (KeyboardFocusManager.getCurrentKeyboardFocusManager().
 //            getPermanentFocusOwner() == this)
@@ -6845,11 +6809,9 @@ protected  transient ComponentPeer peer;
      * @since 1.4
      */
     public boolean isFocusCycleRoot(Container container) {
-   	 // SwingJS SAEM
     	return isFocusCycleRootComp(container);
     }
     protected boolean isFocusCycleRootComp(Container container) {
-    	 // SwingJS SAEM
         Container rootAncestor = getFocusCycleRootAncestor();
         return (rootAncestor == container);
     }
@@ -7876,11 +7838,9 @@ protected  transient ComponentPeer peer;
      * @since 1.4
      */
     public void applyComponentOrientation(ComponentOrientation orientation) {
-    	// SwingJS SAEM
     	applyCompOrientComp(orientation);
     }
     protected void applyCompOrientComp(ComponentOrientation orientation) {
-    	// SwingJS SAEM
         if (orientation == null) {
             throw new NullPointerException();
         }

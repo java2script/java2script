@@ -328,7 +328,7 @@ public class JSListUI extends JSLightweightUI {
 			cw = w;
 		}
 
-		rendererPane.paintComponentSAEM(g, rendererComponent, list, cx, cy, cw, ch,
+		rendererPane.paintComponent(g, rendererComponent, list, cx, cy, cw, ch,
 				true);
 		updateItemHTML(rendererComponent, index, cx, cy, cw,
 				ch);

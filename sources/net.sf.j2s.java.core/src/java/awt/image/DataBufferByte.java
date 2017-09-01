@@ -116,16 +116,9 @@ public final class DataBufferByte extends DataBuffer
      */
     public DataBufferByte(byte dataArray[], int size) {
         super(UNTRACKABLE, TYPE_BYTE, size);
-    		if (AU.isAI(dataArray)) {
           data = dataArray;
           bankdata = new byte[1][];
           bankdata[0] = data;
-    		} else {
-    			// SwingJS SAEM
-    			banks = dataArray.length;
-    			bankdata = (byte[][]) (Object) dataArray.clone();
-    			data = bankdata[0];
-    		}
     }
 
     /**

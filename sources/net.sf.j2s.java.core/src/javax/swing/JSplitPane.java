@@ -905,7 +905,7 @@ public class JSplitPane extends JComponent {
 		}
 		/* LayoutManager should raise for else condition here. */
 
-		addImplSAEM(comp, constraints, index);
+		addImplCont(comp, constraints, index);
 
 		// Update the JSplitPane on the screen
 		revalidate();

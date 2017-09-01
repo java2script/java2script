@@ -112,19 +112,11 @@ public final class DataBufferInt extends DataBuffer {
 	 * @param size
 	 *          The size of the <CODE>DataBuffer</CODE> bank.
 	 */
-	public DataBufferInt(int dataArray[], int size) {
+	public DataBufferInt(int[] dataArray, int size) {
 		super(UNTRACKABLE, TYPE_INT, size);
-		if (AU.isAI(dataArray)) {
 			data = dataArray;
 			bankdata = new int[1][];
 			bankdata[0] = data;
-		} else {
-			// SwingJS SAEM
-			banks = dataArray.length;
-			bankdata = (int[][]) (Object) dataArray.clone();
-			data = bankdata[0];
-		}
-
 	}
 
 	
@@ -148,7 +140,7 @@ public final class DataBufferInt extends DataBuffer {
 	 * @param offset
 	 *          The offset into the <CODE>dataArray</CODE>.
 	 */
-	public DataBufferInt(int dataArray[], int size, int offset) {
+	public DataBufferInt(int[] dataArray, int size, int offset) {
 		super(UNTRACKABLE, TYPE_INT, size, 1, offset);
 		data = dataArray;
 		bankdata = new int[1][];
@@ -173,7 +165,7 @@ public final class DataBufferInt extends DataBuffer {
 	 *          
 	 * 
 	 */
-	public DataBufferInt(int dataArray[][], int size) {
+	public DataBufferInt(int[][] dataArray, int size) {
 		super(UNTRACKABLE, TYPE_INT, size, dataArray.length);
 		bankdata = (int[][]) dataArray.clone();
 		data = bankdata[0];
@@ -201,7 +193,7 @@ public final class DataBufferInt extends DataBuffer {
 	 * @param offsets
 	 *          The offsets into each array.
 	 */
-	public DataBufferInt(int dataArray[][], int size, int offsets[]) {
+	public DataBufferInt(int[][] dataArray, int size, int[] offsets) {
 		super(UNTRACKABLE, TYPE_INT, size, dataArray.length, offsets);
 		bankdata = (int[][]) dataArray.clone();
 		data = bankdata[0];

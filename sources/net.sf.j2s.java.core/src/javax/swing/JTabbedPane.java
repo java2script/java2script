@@ -690,7 +690,7 @@ public class JTabbedPane extends JComponent
 
 
         if (component != null) {
-            addImplSAEM(component, null, -1);
+            addImplCont(component, null, -1);
             component.setVisible(false);
         } else {
             firePropertyChange("indexForNullComponent", -1, index);
@@ -1548,7 +1548,7 @@ public class JTabbedPane extends JComponent
 
             if (component != null) {
                 component.setVisible(selectedPage);
-                addImplSAEM(component, null, -1);
+                addImplCont(component, null, -1);
 
 // SwingJS X: Key Focus
 //                if (shouldChangeFocus) {

@@ -99,7 +99,7 @@ public class SunCompositeContext implements CompositeContext {
         int h;
 
         if (dstIn != dstOut) {
-            dstOut.setDataElementsRaster(0, 0, dstIn);
+            dstOut.setDataElements(0, 0, dstIn);
         }
 
         // REMIND: We should be able to create a SurfaceData from just

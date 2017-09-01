@@ -236,7 +236,7 @@ public class JLayeredPane extends JComponent /* implements Accessible */ {
             layer = getLayer(comp);
 
         pos = insertIndexForLayer(layer, index);
-        addImplSAEM(comp, constraints, pos);
+        addImplCont(comp, constraints, pos);
         comp.validate();
         comp.repaint();
         validateOptimizedDrawing();

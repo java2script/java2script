@@ -503,7 +503,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 				((Separator) comp).setOrientation(JSeparator.VERTICAL);
 			}
 		}
-		addImplSAEM(comp, constraints, index);
+		addImplCont(comp, constraints, index);
 		if (comp instanceof JButton) {
 			((JButton) comp).setDefaultCapable(false);
 		}

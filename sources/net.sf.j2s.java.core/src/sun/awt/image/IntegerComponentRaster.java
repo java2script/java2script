@@ -403,7 +403,7 @@ public class IntegerComponentRaster extends SunWritableRaster {
      * @param inRaster   Raster of data to place at x,y location.
      */
     @Override
-    public void setDataElementsRaster(int x, int y, Raster inRaster) {
+    public void setDataElements(int x, int y, Raster inRaster) {
         int dstOffX = x + inRaster.getMinX();
         int dstOffY = y + inRaster.getMinY();
         int width  = inRaster.getWidth();

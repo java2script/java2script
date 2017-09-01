@@ -1024,10 +1024,10 @@ public class Container extends JSComponent {
      * @since     JDK1.1
      */
     protected Component addImpl(Component comp, Object constraints, int index) {
-    	return addImplSAEM(comp, constraints, index);
+    	return addImplCont(comp, constraints, index);
     }
 
-    protected Component addImplSAEM(Component comp, Object constraints, int index) {
+    protected Component addImplCont(Component comp, Object constraints, int index) {
       synchronized (getTreeLock()) {
       	
       	//SwingJS used for all add methods
@@ -1607,7 +1607,7 @@ public class Container extends JSComponent {
 	@Override
 	public void setFont(Font f) {
 		Font oldfont = getFont();
-		setFontComp(f);
+		super.setFont(f);
 		Font newfont = getFont();
 		if (newfont != oldfont && (oldfont == null || !oldfont.equals(newfont))) {
 			invalidateTree();
@@ -2093,12 +2093,10 @@ public class Container extends JSComponent {
      */
     @Override
 		protected void processEvent(AWTEvent e) {
-      // SwingJS SAEM
     	processEventCont(e);
     }
 
 	protected void processEventCont(AWTEvent e) {
-		// SwingJS SAEM
 		if (e instanceof ContainerEvent) {
 			processContainerEvent((ContainerEvent) e);
 			return;

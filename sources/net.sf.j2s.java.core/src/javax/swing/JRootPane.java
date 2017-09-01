@@ -850,7 +850,7 @@ public class JRootPane extends JComponent {
 	 */
 	@Override
 	protected Component addImpl(Component comp, Object constraints, int index) {
-		addImplSAEM(comp, constraints, index);
+		addImplCont(comp, constraints, index);
 
 		// / We are making sure the glassPane is on top.
 		if (glassPane != null && glassPane.getParent() == this

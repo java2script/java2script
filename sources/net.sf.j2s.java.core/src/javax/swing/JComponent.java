@@ -711,9 +711,8 @@ public abstract class JComponent extends Container {
 					// cr.width = width;
 					// cr.height = height;
 					// }
-					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create4(cr.x, 
-							(jc.isContentPane ? 0 : cr.y), cr.width, cr.height); // SwingJS
-																																			// SAEM
+					JSGraphics2D jsg = (JSGraphics2D) (Object) sg.create(cr.x, 
+							(jc.isContentPane ? 0 : cr.y), cr.width, cr.height); 
 					jsg.setColor(jc.getForeground());
 					jsg.setFont(jc.getFont());
 					boolean shouldSetFlagBack = false;
@@ -2549,11 +2548,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void setVisible(boolean aFlag) {
 		if (aFlag != isVisible()) {
-			if (aFlag)
-				showSAEM();
-			else
-				hideSAEM();
-//			super.setVisible(aFlag);
+			super.setVisible(aFlag);
 			Container parent = getParent();
 			if (parent != null) {
 				Rectangle r = getBounds();
@@ -4315,8 +4310,7 @@ public abstract class JComponent extends Container {
 		Rectangle bounds = c.getBounds();
 
 		if (p == null || p instanceof Window || p instanceof Applet) {
-			// SwingJS SAEM setBounds --> reshape
-			visibleRect.reshape(0, 0, bounds.width, bounds.height);
+			visibleRect.setBounds(0, 0, bounds.width, bounds.height);
 		} else {
 			computeVisibleRect(p, visibleRect);
 			visibleRect.x -= bounds.x;

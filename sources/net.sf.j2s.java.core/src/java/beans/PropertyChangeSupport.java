@@ -220,7 +220,7 @@ public class PropertyChangeSupport {
         if (oldValue != null && newValue != null && oldValue.equals(newValue)) {
             return;
         }
-        firePropertyChangeEvt(new PropertyChangeEvent(source, propertyName,
+        firePropertyChange(new PropertyChangeEvent(source, propertyName,
                                                    oldValue, newValue));
     }
 
@@ -236,12 +236,9 @@ public class PropertyChangeSupport {
      * @param oldValue  The old value of the property.
      * @param newValue  The new value of the property.
      * 
-     * @deprecated
-     * 
      */
     public void firePropertyChange(String propertyName,
                                         int oldValue, int newValue) {
-    	// SwingJS some sort of J2S compiler problem here directs this to itself
         if (oldValue == newValue) {
             return;
         }
@@ -260,13 +257,10 @@ public class PropertyChangeSupport {
      * @param oldValue  The old value of the property.
      * @param newValue  The new value of the property.
      * 
-     * @deprecated  
-     * 
      *
      */
     public void firePropertyChange(String propertyName,
                                         boolean oldValue, boolean newValue) {
-    	// SwingJS some sort of J2S compiler problem here directs this to itself
         if (oldValue == newValue) {
             return;
         }
@@ -279,8 +273,7 @@ public class PropertyChangeSupport {
      * equal and non-null.
      * @param evt  The PropertyChangeEvent object.
      */
-    public void firePropertyChangeEvt(PropertyChangeEvent evt) {
-    	// SAEM was firePropertyChange
+    public void firePropertyChange(PropertyChangeEvent evt) {
         Object oldValue = evt.getOldValue();
         Object newValue = evt.getNewValue();
         String propertyName = evt.getPropertyName();
@@ -324,7 +317,7 @@ public class PropertyChangeSupport {
      */
     public void fireIndexedPropertyChange(String propertyName, int index,
                                           Object oldValue, Object newValue) {
-        firePropertyChangeEvt(new IndexedPropertyChangeEvent
+        firePropertyChange(new IndexedPropertyChangeEvent
             (source, propertyName, oldValue, newValue, index));
     }
 
