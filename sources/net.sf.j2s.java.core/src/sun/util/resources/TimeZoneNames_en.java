@@ -42,7 +42,7 @@
  *
  */
 
-package jssun.util.resources;
+package sun.util.resources;
 
 public final class TimeZoneNames_en extends TimeZoneNamesBundle {
 

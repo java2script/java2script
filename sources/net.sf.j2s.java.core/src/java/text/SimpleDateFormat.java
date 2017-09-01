@@ -54,10 +54,10 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
-import jssun.util.calendar.CalendarUtils;
-import jssun.util.resources.LocaleData;
+import sun.util.calendar.CalendarUtils;
+import sun.util.resources.LocaleData;
 import javajs.J2SRequireImport;
-//import jssun.util.calendar.ZoneInfoFile;
+//import sun.util.calendar.ZoneInfoFile;
 
 /**
  * <code>SimpleDateFormat</code> is a concrete class for formatting and
@@ -346,7 +346,7 @@ import javajs.J2SRequireImport;
 @J2SRequireImport( { 
 	java.util.GregorianCalendar.class, 
 	java.util.Calendar.class, java.util.TimeZone.class, 
-	jssun.util.calendar.ZoneInfo.class, java.text.DecimalFormat.class })
+	sun.util.calendar.ZoneInfo.class, java.text.DecimalFormat.class })
 @SuppressWarnings("unused")
 public class SimpleDateFormat extends DateFormat {
 

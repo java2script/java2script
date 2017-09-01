@@ -55,11 +55,11 @@ import java.util.HashMap;
 //import swingjs.JSToolkit;
 
 //import java.security.AccessController;
-//import jssun.security.action.GetPropertyAction;
+//import sun.security.action.GetPropertyAction;
 //import java.util.spi.LocaleNameProvider;
 //import java.util.spi.LocaleServiceProvider;
-//import jssun.util.resources.LocaleData;
-//import jssun.util.resources.OpenListResourceBundle;
+//import sun.util.resources.LocaleData;
+//import sun.util.resources.OpenListResourceBundle;
 
 /**
  *

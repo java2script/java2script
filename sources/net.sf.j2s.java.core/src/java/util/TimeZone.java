@@ -45,9 +45,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import jssun.util.calendar.ZoneInfo;
-//import jssun.util.TimeZoneNameUtility;
-//import jssun.util.calendar.ZoneInfoFile;
+import sun.util.calendar.ZoneInfo;
+//import sun.util.TimeZoneNameUtility;
+//import sun.util.calendar.ZoneInfoFile;
 
 /**
  * <code>TimeZone</code> represents a time zone offset, and also figures out daylight

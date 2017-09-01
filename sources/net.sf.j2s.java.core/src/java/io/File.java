@@ -29,6 +29,8 @@
 package java.io;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 
@@ -622,16 +624,16 @@ public class File
 //        return new File(canonPath, null);
     }
 
-//    private static String slashify(String path, boolean isDirectory) {
-//        String p = path;
-//        if (File.separatorChar != '/')
-//            p = p.replace(File.separatorChar, '/');
-//        if (!p.startsWith("/"))
-//            p = "/" + p;
-//        if (!p.endsWith("/") && isDirectory)
-//            p = p + "/";
-//        return p;
-//    }
+    private static String slashify(String path, boolean isDirectory) {
+        String p = path;
+        if (File.separatorChar != '/')
+            p = p.replace(File.separatorChar, '/');
+        if (!p.startsWith("/"))
+            p = "/" + p;
+        if (!p.endsWith("/") && isDirectory)
+            p = p + "/";
+        return p;
+    }
 
 //    /**
 //     * Converts this abstract pathname into a <code>file:</code> URL.  The
@@ -693,6 +695,7 @@ public class File
 //     * @see java.net.URI#toURL()
 //     * @since 1.4
 //     */
+// SwingJS TODO
 //    public URI toURI() {
 //        try {
 //            File f = getAbsoluteFile();

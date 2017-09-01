@@ -26,12 +26,12 @@
  * questions.
  */
 
-package jssun.util;
+package sun.util;
 
 import java.util.HashMap;
 import java.util.Locale;
 
-import jssun.util.resources.OpenListResourceBundle;
+import sun.util.resources.OpenListResourceBundle;
 
 /**
  * Utility class that deals with the localized time zone names

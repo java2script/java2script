@@ -41,7 +41,7 @@
  *
  */
 
-package jssun.util.resources;
+package sun.util.resources;
 
 import java.util.Map;
 import java.util.LinkedHashMap;

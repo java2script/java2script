@@ -1243,29 +1243,6 @@ public abstract class ResourceBundle {
      */
     public static ResourceBundle getBundle(String baseName, Object targetLocale,
                                            Object loader, Control control) {
-    	int n = 4;
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * n = arguments.length;
-    	 * 
-    	 * 
-    	 */
-    	{}    	
-    	switch (n) {
-    	case 2:
-    		if ((targetLocale instanceof Control)) {
-    			control = (Control) targetLocale;
-    			targetLocale = null;
-    		}
-    		break;
-    	case 3:
-    		if ((loader instanceof Control)) {
-    			control = (Control) loader;
-    			loader = null;
-    		}
-    		break;
-    	}
     	if (targetLocale == null)
     		targetLocale = Locale.getDefault();
     	if (control == null)

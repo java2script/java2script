@@ -26,7 +26,7 @@
  * questions.
  */
 
-package jssun.util;
+package sun.util;
 
 import java.util.Enumeration;
 import java.util.Iterator;

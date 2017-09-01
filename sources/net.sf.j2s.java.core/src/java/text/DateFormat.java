@@ -50,7 +50,7 @@ import java.util.MissingResourceException;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
-//import jssun.util.LocaleServiceProviderPool;
+//import sun.util.LocaleServiceProviderPool;
 
 /**
  * DateFormat is an abstract class for date/time formatting subclasses which

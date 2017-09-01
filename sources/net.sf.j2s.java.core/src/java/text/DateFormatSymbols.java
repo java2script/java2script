@@ -47,7 +47,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javajs.J2SRequireImport;
-import jssun.util.resources.LocaleData;
+import sun.util.resources.LocaleData;
 
 /**
  * <code>DateFormatSymbols</code> is a public class for encapsulating

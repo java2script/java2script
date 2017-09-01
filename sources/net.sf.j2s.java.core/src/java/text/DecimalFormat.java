@@ -54,7 +54,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 //import java.util.concurrent.atomic.AtomicInteger;
 //import java.util.concurrent.atomic.AtomicLong;
-import jssun.util.resources.LocaleData;
+import sun.util.resources.LocaleData;
 
 /**
  * <code>DecimalFormat</code> is a concrete subclass of

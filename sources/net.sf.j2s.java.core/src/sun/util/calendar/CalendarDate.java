@@ -26,7 +26,7 @@
  * questions.
  */
 
-package jssun.util.calendar;
+package sun.util.calendar;
 
 import java.lang.Cloneable;
 import java.util.Locale;

@@ -92,7 +92,7 @@ public class AjaxURLConnection extends URLConnection {
 	 * This stream can be re-used, but it has to be reset. Java for some 
 	 * reason does not allow  a BufferedInputStream to fully reset its 
 	 * inner streams. We enable that by force-casting the stream as a 
-	 * jsjavax.io stream and then applying resetStream() to that. 
+	 * javax.io stream and then applying resetStream() to that. 
 	 * 
 	 * 
 	 * @param url

@@ -42,10 +42,10 @@
 package java.util;
 
 import javajs.J2SRequireImport;
-import jssun.util.calendar.BaseCalendar;
-import jssun.util.calendar.CalendarSystem;
-import jssun.util.calendar.CalendarUtils;
-import jssun.util.calendar.Gregorian;
+import sun.util.calendar.BaseCalendar;
+import sun.util.calendar.CalendarSystem;
+import sun.util.calendar.CalendarUtils;
+import sun.util.calendar.Gregorian;
 
 /**
  * <code>SimpleTimeZone</code> is a concrete subclass of <code>TimeZone</code>
@@ -153,7 +153,7 @@ import jssun.util.calendar.Gregorian;
  * @author David Goldsmith, Mark Davis, Chen-Lieh Huang, Alan Liu
  */
 
-@J2SRequireImport({ jssun.util.calendar.Gregorian.class })
+@J2SRequireImport({ sun.util.calendar.Gregorian.class })
 @SuppressWarnings({"unused"})
 public class SimpleTimeZone extends TimeZone {
 	/**

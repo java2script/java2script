@@ -26,7 +26,7 @@
  * questions.
  */
 
-package jssun.util.calendar;
+package sun.util.calendar;
 
 //import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -132,7 +132,7 @@ public abstract class CalendarSystem {
 	public static Gregorian getGregorianCalendar() {
 		if (GREGORIAN_INSTANCE == null)
 			GREGORIAN_INSTANCE = (Gregorian) swingjs.api.Interface
-					.getInstance("jssun.util.calendar.Gregorian", false);
+					.getInstance("sun.util.calendar.Gregorian", false);
 		return GREGORIAN_INSTANCE;
 	}
 

@@ -1,9 +1,8 @@
 package swingjs.api.js;
 
-//import jsjava.awt.Image;
-//import jsjava.awt.Rectangle;
+import java.awt.Image;
+import java.awt.Rectangle;
 import swingjs.JSToolkit;
-//import swingjs.plaf.JSComponentUI;
 
 public abstract class DOMNode {
 
@@ -19,7 +18,7 @@ public abstract class DOMNode {
 	
 	public abstract void setSelectionRange(int pt0, int pt1);
 
-//	public abstract Rectangle getBoundingClientRect();
+	public abstract Rectangle getBoundingClientRect();
 
 
 	public static DOMNode createElement(String key, String id, Object... attrs) {
@@ -117,19 +116,19 @@ public abstract class DOMNode {
 		}
 	}
 
-//	public static void getRectangle(DOMNode node, Rectangle r) {
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 *       r.x = parseInt(node.style.left.split("p")[0]);
-//		 *       r.y = parseInt(node.style.top.split("p")[0]);
-//		 *       r.width = parseInt(node.style.width.split("p")[0]);
-//		 *       r.height = parseInt(node.style.height.split("p")[0]);
-//		 * 
-//		 */
-//		{
-//		}
-//	}
+	public static void getRectangle(DOMNode node, Rectangle r) {
+		/**
+		 * @j2sNative
+		 * 
+		 *       r.x = parseInt(node.style.left.split("p")[0]);
+		 *       r.y = parseInt(node.style.top.split("p")[0]);
+		 *       r.width = parseInt(node.style.width.split("p")[0]);
+		 *       r.height = parseInt(node.style.height.split("p")[0]);
+		 * 
+		 */
+		{
+		}
+	}
 
 	
 	public static DOMNode setAttr(DOMNode node, String attr, Object val) {
@@ -211,16 +210,16 @@ public abstract class DOMNode {
 		}
 	}
 
-//	public static void addJqueryHandledEvent(JSComponentUI me, DOMNode node, String event) {
-//		Object f = null;
-//	  /**
-//		 * @j2sNative
-//		 * 
-//		 *            f = function(ev) {me.handleJSEvent(node, -1, ev)};
-//		 */
-//		{}
-//		JSToolkit.getJQuery().$(node).on(event, f);
-//	}
+	public static void addJqueryHandledEvent(Object me, DOMNode node, String event) {
+		Object f = null;
+	  /**
+		 * @j2sNative
+		 * 
+		 *            f = function(ev) {me.handleJSEvent(node, -1, ev)};
+		 */
+		{}
+		JSToolkit.getJQuery().$(node).on(event, f);
+	}
 
 	public static DOMNode setZ(DOMNode node, int z) {
 		return setStyles(node, "z-index", "" + z);
@@ -241,21 +240,21 @@ public abstract class DOMNode {
 		{}
 	}
 
-//	public static DOMNode getImageNode(Image img) {
-//		
-//		/**
-//		 * note that canvas takes precedence over imgNode, because
-//		 * imgNode is a placeholder for the original image, but canvas
-//		 * will be an op-filtered image
-//		 * 
-//		 * @j2sNative
-//		 * 
-//		 *            return (img._canvas || img._imgNode);
-//		 */
-//		{
-//			return null;
-//		}
-//	}
+	public static DOMNode getImageNode(Image img) {
+		
+		/**
+		 * note that canvas takes precedence over imgNode, because
+		 * imgNode is a placeholder for the original image, but canvas
+		 * will be an op-filtered image
+		 * 
+		 * @j2sNative
+		 * 
+		 *            return (img._canvas || img._imgNode);
+		 */
+		{
+			return null;
+		}
+	}
 
 	public static void addHorizontalGap(DOMNode domNode, int gap) {
 		DOMNode label = DOMNode.setStyles(DOMNode.createElement("label", null), 

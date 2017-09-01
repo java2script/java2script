@@ -26,7 +26,7 @@
  * questions.
  */
 
-package jssun.util.calendar;
+package sun.util.calendar;
 
 import java.util.Date;
 import java.util.Map;

@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import jssun.util.ResourceBundleEnumeration;
+import sun.util.ResourceBundleEnumeration;
 
 /**
  * <code>PropertyResourceBundle</code> is a concrete subclass of

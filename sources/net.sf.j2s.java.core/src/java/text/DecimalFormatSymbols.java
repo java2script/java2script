@@ -48,7 +48,7 @@ import javajs.J2SRequireImport;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-import jssun.util.resources.LocaleData;
+import sun.util.resources.LocaleData;
 //import java.util.spi.LocaleServiceProvider;
 //import sun.util.LocaleServiceProviderPool;
 

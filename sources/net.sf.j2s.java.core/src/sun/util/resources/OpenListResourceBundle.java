@@ -41,14 +41,14 @@
  *
  */
 
-package jssun.util.resources;
+package sun.util.resources;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import jssun.util.ResourceBundleEnumeration;
+import sun.util.ResourceBundleEnumeration;
 
 /**
  * Subclass of <code>ResourceBundle</code> which mimics

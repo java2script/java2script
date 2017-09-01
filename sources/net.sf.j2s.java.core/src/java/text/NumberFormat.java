@@ -55,7 +55,7 @@ import java.util.ResourceBundle;
 //import java.util.concurrent.atomic.AtomicLong;
 //import java.util.spi.LocaleServiceProvider;
 //import sun.util.LocaleServiceProviderPool;
-import jssun.util.resources.LocaleData;
+import sun.util.resources.LocaleData;
 
 /**
  * <code>NumberFormat</code> is the abstract base class for all number

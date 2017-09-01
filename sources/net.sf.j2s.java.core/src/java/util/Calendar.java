@@ -51,8 +51,8 @@ import javajs.J2SRequireImport;
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 //import sun.util.BuddhistCalendar;
-import jssun.util.calendar.ZoneInfo;
-import jssun.util.resources.LocaleData;
+import sun.util.calendar.ZoneInfo;
+import sun.util.resources.LocaleData;
 
 /**
  * The <code>Calendar</code> class is an abstract class that provides methods

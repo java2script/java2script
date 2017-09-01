@@ -26,7 +26,7 @@
  * questions.
  */
 
-package jssun.util.calendar;
+package sun.util.calendar;
 
 import java.util.Locale;
 import java.util.TimeZone;
