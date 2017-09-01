@@ -4106,7 +4106,9 @@ if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
 
 var setJ2STypeclass = function(cl, type, paramCode) {
+// TODO -- should be a proper Java.lang.Class
   cl.TYPE = {
+    isPrimitive: function() { return true },
     type:type, 
     __PARAMCODE:paramCode, 
     __PRIMITIVE:1

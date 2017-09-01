@@ -843,6 +843,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 			return "OK";
 		var filename = filename.substring(filename.lastIndexOf("/") + 1);
 		mimetype || (mimetype = (filename.indexOf(".pdf") >= 0 ? "application/pdf" 
+			: filename.indexOf(".zip") >= 0 ? "application/zip" 
 			: filename.indexOf(".png") >= 0 ? "image/png" 
 			: filename.indexOf(".gif") >= 0 ? "image/gif" 
 			: filename.indexOf(".jpg") >= 0 | filename.indexOf(".jpeg") >= 0? "image/jpg" : ""));
