@@ -4003,7 +4003,7 @@ public abstract class JComponent extends Container {
 			// }
 		} else {
 			// SwingJS throw new IllegalArgumentException
-			System.out.println(JSToolkit.getClassName(this) + " property \""
+			System.out.println(JSToolkit.getClassNameForObject(this) + " property \""
 					+ propertyName + "\" cannot be set using this method"
 					+ JSToolkit.getStackTrace(5));
 		}

@@ -154,7 +154,6 @@ public class Point extends Point2D {
      * @see         java.awt.Point#move(int, int)
      * @since       1.1
      * 
-     * @j2sIgnore
      */
     public void setLocation(int x, int y) {
         move(x, y);

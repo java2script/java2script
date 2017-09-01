@@ -402,7 +402,6 @@ public abstract class Point2D implements Cloneable {
     }
 
     /**
-     * @j2sIgnore
      * 
      * Creates a new object of the same class as this object.
      *

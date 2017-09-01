@@ -303,7 +303,7 @@ public class JSMouse {
 		 * 
 		 * bdata.jqevent = jqevent;
 		 * c = jqevent.target["data-component"];
-		 * e.setBData(e, bdata); 
+		 * e.setBData$java_awt_AWTEvent$BA(e, bdata); 
 		 */
 		{
 			System.out.println(jqevent);

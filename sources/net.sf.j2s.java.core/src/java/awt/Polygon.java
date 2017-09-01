@@ -647,8 +647,6 @@ public class Polygon implements Shape {
          * @see PathIterator#SEG_LINETO
          * @see PathIterator#SEG_CLOSE
          * 
-         * SwingJS: duplicates double[] coords
-         * @j2sIgnore
          * 
          */
         @Override

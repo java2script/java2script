@@ -27,14 +27,6 @@
  */
 package java.awt;
 
-import java.awt.Canvas;
-import java.awt.HeadlessException;
-import java.awt.KeyboardFocusManager;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-
 import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.AdjustmentEvent;
@@ -67,7 +59,12 @@ import java.awt.peer.ContainerPeer;
 import java.awt.peer.LightweightPeer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
+
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 import swingjs.JSToolkit;

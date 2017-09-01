@@ -1144,7 +1144,6 @@ public abstract class Line2D implements Shape, Cloneable {
         return new LineIterator(this, at);
     }
     /**
-     * @j2sIgnore
      * 
      * Creates a new object of the same class as this object.
      *

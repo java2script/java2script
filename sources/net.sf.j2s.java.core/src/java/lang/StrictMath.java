@@ -672,7 +672,7 @@ public final class StrictMath {
      *            the floating-point value to compute ulp of
      * @return the size of a ulp of the argument.
      * 
-     * @j2sIgnore
+     * @j2sIgnore  ulp
      */
     public static double ulp(double d) {
         // special cases
@@ -694,7 +694,7 @@ public final class StrictMath {
      *            the floating-point value to compute ulp of
      * @return the size of a ulp of the argument.
      * 
-     * @j2sIgnore
+     * @j2sIgnore ulp
      */
     public static float ulp(float f) {
         // special cases

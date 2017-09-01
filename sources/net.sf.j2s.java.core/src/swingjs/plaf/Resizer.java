@@ -84,7 +84,7 @@ public class Resizer {
 		/**
 		 * @j2sNative
 		 * 
-		 *            fHandleResizer = function(xyev,type){me.fHandleResizer(
+		 *            fHandleResizer = function(xyev,type){me.fHandleResizer$I$I$I(
 		 *            xyev.dx, xyev.dy,type)}; 
 		 * 
 		 */

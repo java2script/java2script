@@ -1721,7 +1721,6 @@ public abstract class CubicCurve2D implements Shape, Cloneable {
     }
 
     /**
-     * @j2sIgnore
      * 
      * Creates a new object of the same class as this object.
      *

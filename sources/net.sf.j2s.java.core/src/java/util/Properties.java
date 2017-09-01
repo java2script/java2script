@@ -478,16 +478,11 @@ class Properties extends Hashtable<Object,Object> {
 					lineBuf[len++] = c;
 					if (len == lineBuf.length) {
 						int newLength = lineBuf.length * 2;
-						/**
-						 * @j2sIgnore
-						 */
-						{
-							if (newLength < 0) {
-								// in other words, we ran over and went negative
-								// this will never happen in JavaScript
-								newLength = 80;// HOLY COW! was Integer.MAX_VALUE;
-							}
-						}
+//							if (newLength < 0) {
+//								// in other words, we ran over and went negative
+//								// this will never happen in JavaScript
+//								newLength = 80;// HOLY COW! was Integer.MAX_VALUE;
+//							}
 						char[] buf = new char[newLength];
 						System.arraycopy(lineBuf, 0, buf, 0, lineBuf.length);
 						lineBuf = buf;

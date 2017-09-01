@@ -131,7 +131,7 @@ public class URLEncoder {
 	}
 
 	/**
-	 * @j2sIgnore
+	 * @j2sIgnore unused
 	 */
 	private static void convert(String s, StringBuffer buf, String enc)
 			throws UnsupportedEncodingException {

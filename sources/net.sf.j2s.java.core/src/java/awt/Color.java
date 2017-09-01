@@ -328,8 +328,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //     * @param g the Green component
 //     * @param b the Blue component
 //     * 
-//     * @j2sIgnore
-//     * 
 //     **/
 //    private static void testColorValueRange(float r, float g, float b, float a) {
 //        boolean rangeError = false;
@@ -380,7 +378,7 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * 
      */
     public Color(int r, int g, int b) {
-        setColor4(r, g, b, 255);
+      this(r, g, b, 255);
     }
 
     /**
@@ -402,10 +400,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * 
      */
     public Color(int r, int g, int b, int a) {
-    	setColor4(r, g, b, a);
-    }
-
-    private void setColor4(int r, int g, int b, int a) {
       value = ((a & 0xFF) << 24) |
           ((r & 0xFF) << 16) |
           ((g & 0xFF) << 8)  |
@@ -477,54 +471,44 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getBlue
      * @see #getRGB
      * 
-     * @deprecated
-     *   use Color.getColorF4 instead
      */
     
     public Color(float r, float g, float b) {
-  	  setFloat(r, g, b, 1f);    	
+  	  this(r, g, b, 1f);    	
     }
 
-    private void setFloat(float r, float g, float b, float f) {
-    	setColor4((int) (r*255+0.5), (int) (g*255+0.5), (int) (b*255+0.5), (int) (f*255+0.5));
-      frgbvalue = new float[3];
-      frgbvalue[0] = r;
-      frgbvalue[1] = g;
-      frgbvalue[2] = b;
-      falpha = f;
-      //fvalue = frgbvalue;
-		}
-
-		/**
-     * Creates an sRGB color with the specified red, green, blue, and
-     * alpha values in the range (0.0 - 1.0).  The actual color
-     * used in rendering depends on finding the best match given the
-     * color space available for a particular output device.
-     * @throws IllegalArgumentException if <code>r</code>, <code>g</code>
-     *        <code>b</code> or <code>a</code> are outside of the range
-     *        0.0 to 1.0, inclusive
-     * @param r the red component
-     * @param g the green component
-     * @param b the blue component
-     * @param a the alpha component
-     * @see #getRed
-     * @see #getGreen
-     * @see #getBlue
-     * @see #getAlpha
-     * @see #getRGB
-     * 
-     * @deprecated
-     *   use getColorF4 instead
-     */
-    public Color(float r, float g, float b, float a) {
-    	setFloat(r, g, b, a);
-    }
-
-    public static Color getColorF4(float r, float g, float b, float a) {
-  	  Color c = new Color();
-  	  c.setFloat(r, g, b, a);
-      return c;
-  }
+	/**
+	 * Creates an sRGB color with the specified red, green, blue, and alpha
+	 * values in the range (0.0 - 1.0). The actual color used in rendering
+	 * depends on finding the best match given the color space available for a
+	 * particular output device.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if <code>r</code>, <code>g</code> <code>b</code> or
+	 *             <code>a</code> are outside of the range 0.0 to 1.0, inclusive
+	 * @param r
+	 *            the red component
+	 * @param g
+	 *            the green component
+	 * @param b
+	 *            the blue component
+	 * @param a
+	 *            the alpha component
+	 * @see #getRed
+	 * @see #getGreen
+	 * @see #getBlue
+	 * @see #getAlpha
+	 * @see #getRGB
+	 * 
+	 */
+	public Color(float r, float g, float b, float a) {
+		this((int) (r * 255 + 0.5), (int) (g * 255 + 0.5), (int) (b * 255 + 0.5), (int) (a * 255 + 0.5));
+		frgbvalue = new float[3];
+		frgbvalue[0] = r;
+		frgbvalue[1] = g;
+		frgbvalue[2] = b;
+		falpha = a;
+	}
 
 
 //    /**
@@ -546,7 +530,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //     * @see #getColorComponents
 //     * 
 //     * 
-//     *     @j2sIgnore
 //     */
 //    public Color(ColorSpace cspace, float components[], float alpha) {
 //        boolean rangeError = false;
@@ -1054,41 +1037,39 @@ public class Color implements Paint /*, java.io.Serializable*/ {
         return f;
     }
 
-//    /**
-//     * Returns a <code>float</code> array containing the color and alpha
-//     * components of the <code>Color</code>, in the
-//     * <code>ColorSpace</code> of the <code>Color</code>.
-//     * If <code>compArray</code> is <code>null</code>, an array with
-//     * length equal to the number of components in the associated
-//     * <code>ColorSpace</code> plus one is created for
-//     * the return value.  Otherwise, <code>compArray</code> must have at
-//     * least this length and it is filled in with the components and
-//     * returned.
-//     * @param compArray an array that this method fills with the color and
-//     *          alpha components of this <code>Color</code> in its
-//     *          <code>ColorSpace</code> and returns
-//     * @return the color and alpha components in a <code>float</code>
-//     *          array.
-//     *          
-//     *     @j2sIgnore
-//     *          
-//     */
-//    public float[] getComponents(float[] compArray) {
-//        if (fvalue == null)
-//            return getRGBComponents(compArray);
-//        float[] f;
-//        int n = fvalue.length;
-//        if (compArray == null) {
-//            f = new float[n + 1];
-//        } else {
-//            f = compArray;
-//        }
-//        for (int i = 0; i < n; i++) {
-//            f[i] = fvalue[i];
-//        }
-//        f[n] = falpha;
-//        return f;
-//    }
+    /**
+     * Returns a <code>float</code> array containing the color and alpha
+     * components of the <code>Color</code>, in the
+     * <code>ColorSpace</code> of the <code>Color</code>.
+     * If <code>compArray</code> is <code>null</code>, an array with
+     * length equal to the number of components in the associated
+     * <code>ColorSpace</code> plus one is created for
+     * the return value.  Otherwise, <code>compArray</code> must have at
+     * least this length and it is filled in with the components and
+     * returned.
+     * @param compArray an array that this method fills with the color and
+     *          alpha components of this <code>Color</code> in its
+     *          <code>ColorSpace</code> and returns
+     * @return the color and alpha components in a <code>float</code>
+     *          array.
+     *          
+     */
+    public float[] getComponents(float[] compArray) {
+        if (frgbvalue == null)
+            return getRGBComponents(compArray);
+        float[] f;
+        int n = frgbvalue.length;
+        if (compArray == null) {
+            f = new float[n + 1];
+        } else {
+            f = compArray;
+        }
+        for (int i = 0; i < n; i++) {
+            f[i] = frgbvalue[i];
+        }
+        f[n] = falpha;
+        return f;
+    }
 //
 //    /**
 //     * Returns a <code>float</code> array containing only the color
@@ -1137,7 +1118,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //     * @return the color and alpha components in a <code>float</code>
 //     *          array.
 //     *          
-//     *     @j2sIgnore
 //     */
 //    public float[] getComponents(ColorSpace cspace, float[] compArray) {
 //        if (cs == null) {
@@ -1184,7 +1164,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //     * @return the color components in a <code>float</code> array.
 //     * 
 //     * 
-//     *     @j2sIgnore
 //     */
 //    public float[] getColorComponents(ColorSpace cspace, float[] compArray) {
 //        if (cs == null) {
@@ -1213,7 +1192,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //    /**
 //     * Returns the <code>ColorSpace</code> of this <code>Color</code>.
 //     * @return this <code>Color</code> object's <code>ColorSpace</code>.
-//     *     @j2sIgnore
 //     */
 //    public ColorSpace getColorSpace() {
 //        if (cs == null) {

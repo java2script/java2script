@@ -65,6 +65,7 @@ import swingjs.plaf.Resizer;
  * @author Bob Hanson
  * 
  */
+@SuppressWarnings("rawtypes")
 public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletContext,
 		JSInterface {
 
@@ -188,7 +189,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	 * 
 	 * @param params
 	 */
-	public JSAppletViewer(Hashtable params) {
+	public JSAppletViewer(Hashtable<String, Object> params) {
 		isApplet = true;
 		appletViewer = this;
 		set(params);
@@ -197,7 +198,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	/**
 	 * @param params
 	 */
-	@SuppressWarnings("static-access")
 	private void set(Hashtable<String, Object> params) {
 		isApplet = true;
 		System.out.println("JSAppletViewer initializing");
@@ -392,22 +392,12 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@Override
 	public void showDocument(URL url) {
-		/**
-		 * @j2sNative window.open(url.toString());
-		 */
-		{
-			System.out.println(url);
-		}
+		JSToolkit.showWebPage(url, null);
 	}
 
 	@Override
 	public void showDocument(URL url, String target) {
-		/**
-		 * @j2sNative window.open(url.toString(), target);
-		 */
-		{
-			System.out.println(url);
-		}
+		JSToolkit.showWebPage(url, target);
 	}
 
 	@Override
@@ -431,7 +421,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.showAppletStatus("error " + (t.getMessage ?
+		 *            this.showAppletStatus$S("error " + (t.getMessage ?
 		 *            t.getMessage() : t)); t.printStackTrace &&
 		 *            t.printStackTrace();
 		 */

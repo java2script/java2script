@@ -64,10 +64,6 @@ public class JSFontMetrics extends FontMetrics {
       return font.getSize() / 4 + 1;
   }
   
-  /**
-   * @j2sIgnore
-   * 
-   */
   @Override
 	public int charWidth(char pt) {
   	return (pt < 256 ? (int) getWidthsFloat()[pt] : stringWidth("" + pt));
@@ -83,7 +79,7 @@ public class JSFontMetrics extends FontMetrics {
   	 * var spt;
   	 * return ((pt + 0 == pt ? pt : (pt = (spt = pt).charCodeAt(0))) < 256 ? 
   	 *       Clazz.floatToInt(this.getWidthsFloat()[pt])
-  	 *     : this.stringWidth(isChar ? spt : String.fromCharCode (pt)));
+  	 *     : this.stringWidth$S(isChar ? spt : String.fromCharCode (pt)));
   	 */
   	{
   		return (pt < 256 ? (int) getWidthsFloat()[pt] : stringWidth("" + (char) pt));

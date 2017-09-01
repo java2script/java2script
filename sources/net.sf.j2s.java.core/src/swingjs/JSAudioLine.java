@@ -231,7 +231,7 @@ class JSAudioLine implements SourceDataLine {
 	 * We must convert data in one multi-channel-interwoven byte array
 	 * to channelCount arrays of single-channel data.
 	 * 
-	 * We create a new audioBuffer if necesssary.
+	 * We create a new audioBuffer if necessary.
 	 *  
 	 * @param ich
 	 * @param b

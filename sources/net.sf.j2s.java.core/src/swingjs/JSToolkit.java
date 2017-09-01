@@ -188,7 +188,6 @@ public class JSToolkit extends SunToolkit {
 	 * @param isPost
 	 * @return
 	 */
-	@SuppressWarnings("restriction")
 	public static Object getPostEventQueue(boolean isPost) {
 		return (isPost ? (EventQueue) AppContext.getAppContext().get("PostEventQueue") : (EventQueue) AppContext.getAppContext().get(
 				AppContext.EVENT_QUEUE_KEY));
@@ -659,7 +658,7 @@ public class JSToolkit extends SunToolkit {
 		 *            f = function()
 		 *            {
 		 *            if
-		 *            (src == null) event.dispatch(); else src.dispatchEvent(event);
+		 *            (src == null) event.dispatch(); else src.dispatchEvent$java_awt_AWTEvent(event);
 		 *            };
 		 * 
 		 */
@@ -680,7 +679,7 @@ public class JSToolkit extends SunToolkit {
 	 * @param id an event id or 0 if not via EventQueue 
 	 */
 	public static int dispatch(Object f, int msDelay, int id) {
-			
+
 		/**
 		 * @j2sNative
 		 * 
@@ -891,7 +890,7 @@ public class JSToolkit extends SunToolkit {
 		return (Document) getInstance("swingjs.JSPlainDocument");
 	}
 
-	public static String getClassName(Object c) {
+	public static String getClassNameForObject(Object c) {
 		/**
 		 * @j2sNative
 		 * 
@@ -1134,12 +1133,18 @@ public class JSToolkit extends SunToolkit {
 		return getAppletViewer().getTimerQueue();
 	}
 
+	/**
+	 * not implemented?
+	 * 
+	 * @param jsFileHandler
+	 * @param type
+	 */
 	public static void getFileFromDialog(JSFileHandler jsFileHandler, String type) {
 		JSFunction f = null;
 		/**
 		 * @j2sNative
 	   *   
-	   *   f = function(data, fileName) { jsFileHandler.handleFileLoaded(data, fileName) };
+	   *   f = function(data, fileName) { jsFileHandler.handleFileLoaded$BA$S(data, fileName) };
 	   * 
 	   */
 		{}
@@ -1433,13 +1438,14 @@ public class JSToolkit extends SunToolkit {
     }
   }
 
-  public static void showWebPage(URL url) {
-    /**
-     * @j2sNative window.open(url.toString());
-     */
-    {
-      System.out.println(url);
-    }
+  public static void showWebPage(URL url, Object target) {
+		/**
+		 * @j2sNative
+		 * 
+		 * 			if (target) window.open(url.toString(), target); else
+		 *            window.open(url.toString());
+		 */
+	  {}
 
   }
   

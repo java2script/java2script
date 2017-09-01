@@ -401,8 +401,6 @@ public class SwingUtilities2 {
      * This does not necessarily return the FontMetrics from the
      * Graphics.
      *
-     * @j2sIgnore
-     * 
      * @param c JComponent requesting FontMetrics, may be null
      * @param c Graphics Graphics
      * @param font Font to get FontMetrics for

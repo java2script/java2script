@@ -70,7 +70,7 @@ public class JSSplitPaneUI extends JSPanelUI {
 			/**
 			 * @j2sNative
 			 * 
-			 *            fHandleDrag = function(xyev,type){ui.fHandleDrag(xyev.dx,
+			 *            fHandleDrag = function(xyev,type){ui.fHandleDrag$I$I$I(xyev.dx,
 			 *            xyev.dy,type)};
 			 * 
 			 */

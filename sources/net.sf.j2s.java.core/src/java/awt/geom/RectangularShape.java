@@ -385,7 +385,6 @@ public abstract class RectangularShape implements Shape, Cloneable {
     }
 
     /**
-     * @j2sIgnore
      * 
      * Creates a new object of the same class as this object.
      *

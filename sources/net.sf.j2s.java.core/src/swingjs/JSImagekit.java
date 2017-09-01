@@ -101,6 +101,23 @@ public class JSImagekit implements ImageConsumer {
 		hints = hintflags;
 	}
 
+	/**
+	 * @j2sIgnore
+	 * 
+	 */
+	@Override
+	public void setPixels(int x, int y, int w, int h, ColorModel model,
+			int[] pixels, int off, int scansize) {
+		colorModel = model;
+		width = w;
+		height = h;
+		this.x = x;
+		this.y = y;
+		this.off = off;
+		this.scansize = scansize;
+		this.pixels = pixels;
+	}
+
 	@Override
 	public void setPixels(int x, int y, int w, int h, ColorModel model,
 			byte[] pixels, int off, int scansize) {
@@ -111,29 +128,8 @@ public class JSImagekit implements ImageConsumer {
 		this.y = y;
 		this.off = off;
 		this.scansize = scansize;
-		boolean isBytes = AU.isAB(pixels);
-		/**
-		 * @j2sNative
-		 * 
-		 * if (isBytes) {this.pixelBytes = pixels} else {this.pixels = pixels};
-		 * 
-		 */
-		{
-			this.pixelBytes = pixels;
-		}
-		if (isBytes)	
-			JSToolkit.notImplemented("byte-based image pixels");
-	}
-
-	/**
-	 * @j2sIgnore
-	 * 
-	 */
-	@Override
-	public void setPixels(int x, int y, int w, int h, ColorModel model,
-			int[] pixels, int off, int scansize) {
-		
-		// see above
+		this.pixelBytes = pixels;
+		JSToolkit.notImplemented("byte-based image pixels");
 	}
 
 	private static JSImage createImageFromBytesStatic(byte[] data, int imageoffset,

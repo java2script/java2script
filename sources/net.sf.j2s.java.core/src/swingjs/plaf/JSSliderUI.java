@@ -119,11 +119,13 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	
 	private void setJQuerySliderAndEvents() {
 
+		@SuppressWarnings("unused")
+		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
 		 * 
 		 *            var me = this; 
-		 *            me.$(me.jqSlider).j2sslider(
+		 *            slider.j2sslider(
 		 *             { orientation: me.orientation, 
 		 *               jslider: me.c,
 		 *               range: false, 
@@ -133,23 +135,17 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		 *               disabled: me.disabled,
 		 *               inverted: me.isInverted, 
 		 *               change: function(jqevent, handle) {
-		 *                     me.jqueryCallback(jqevent, handle); }, 
+		 *                     me.jqueryCallback$O$O(jqevent, handle); }, 
 		 *               slide: function(jqevent, handle) { 
-		 *                     me.jqueryCallback(jqevent, handle); },
+		 *                     me.jqueryCallback$O$O(jqevent, handle); },
 		 *               start: function(jqevent, handle) {
-		 *                     me.jqueryStart(jqevent, handle); },
+		 *                     me.jqueryStart$O$O(jqevent, handle); },
 		 *               stop: function(jqevent, handle) {
-		 *                     me.jqueryStop(jqevent, handle); }
+		 *                     me.jqueryStop$O$O(jqevent, handle); }
 		 *            });
 		 */
 		{
 		}
-	}
-
-	@Override
-	public void setEnabled(boolean b) {
-		super.setEnabled(b);
-		setSliderAttr("disabled", (disabled = (b ? 0 : 1)));
 	}
 
 	/**
@@ -158,7 +154,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param event
 	 * @param ui
 	 */
-	public void jqueryStart(Object event, DOMNode ui) {
+	public void jqueryStart(Object event, Object ui) {
 	    jSlider.setValueIsAdjusting(true);
 	}
 
@@ -168,7 +164,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param event
 	 * @param ui
 	 */
-	public void jqueryStop(Object event, DOMNode ui) {
+	public void jqueryStop(Object event, Object ui) {
 	    jSlider.setValueIsAdjusting(false);
 	}
 	
@@ -178,7 +174,7 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	 * @param event
 	 * @param ui
 	 */
-	public void jqueryCallback(Object event, DOMNode ui) {
+	public void jqueryCallback(Object event, Object ui) {
 		int value = 0;
 		
 		/**
@@ -190,6 +186,12 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 		{}
 		
 		jSlider.setValue(val = (value));
+	}
+
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		setSliderAttr("disabled", (disabled = (b ? 0 : 1)));
 	}
 
 	/**
@@ -216,12 +218,14 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	private void setSliderAttr(String key, float val) {
+		@SuppressWarnings("unused")
+		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
 		 * 
 		 *  var a = {};
 		 *  a[key]= val;
-		 *  this.$(this.jqSlider).j2sslider(a);
+		 *  slider.j2sslider(a);
 		 */
 		{}
 	}

@@ -818,8 +818,6 @@ public class RenderingHints
      * @param init a map of key/value pairs to initialize the hints
      *          or null if the object should be empty
      *          
-     *  @j2sIgnore
-     *  
      */
     public RenderingHints(Map<Key,?> init) {
         if (init != null) {

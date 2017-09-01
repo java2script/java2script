@@ -502,7 +502,6 @@ if (n != "construct" || t.z == null
 
     /**
      * Print our stack trace as a cause for the specified stack trace.
-     * @j2sIgnore
      */
     private void printStackTraceAsCause(PrintStream s,
                                         StackTraceElement[] causedTrace)
@@ -553,7 +552,6 @@ if (n != "construct" || t.z == null
 
     /**
      * Print our stack trace as a cause for the specified stack trace.
-     * @j2sIgnore
      */
     private void printStackTraceAsCause(PrintWriter s,
                                         StackTraceElement[] causedTrace)
@@ -721,7 +719,7 @@ return this;
      * @return an array of stack trace elements representing the stack trace
      *         pertaining to this throwable.
      * @since  1.4
-     * @j2sIgnore
+     * @j2sIgnore unused
      */
     public StackTraceElement[] getStackTrace() {
         return (StackTraceElement[]) getOurStackTrace().clone();
@@ -729,7 +727,7 @@ return this;
 
     /**
      * @return
-     * @j2sIgnore
+     * @j2sIgnore unused
      */
     private synchronized StackTraceElement[] getOurStackTrace() {
         // Initialize stack trace if this is the first call to this method
@@ -793,7 +791,7 @@ return this;
     /**
      * @param s
      * @throws IOException
-     * @j2sIgnore
+     * @j2sIgnore unused
      */
     private synchronized void writeObject(java.io.ObjectOutputStream s)
         throws IOException

@@ -961,7 +961,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	@Override
 	public Object clone() {
 		int n = mark();
-		JSGraphics2D g = null;
+		JSGraphics2D g = this;
 		/**
 		 * avoid super call to Object.clone();
 		 * 
@@ -971,7 +971,6 @@ public class JSGraphics2D //extends SunGraphics2D
 		 * 
 		 */
 		{
-			g = this; // not passed on to JavaScript
 		}
 		g.transform = new AffineTransform(transform);
 		if (hints != null) {

@@ -366,7 +366,7 @@ public class Desktop {
      */
     public void browse(URI uri) throws IOException {
     	
-    	JSToolkit.showWebPage(uri.toURL());
+    	JSToolkit.showWebPage(uri.toURL(), null);
 //        SecurityException securityException = null;
 //        try {
 //            checkAWTPermission();

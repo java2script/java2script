@@ -154,12 +154,12 @@ class LazyActionMap extends ActionMapUIResource {
     private void loadIfNecessary() {
         if (_loader != null) {
           @SuppressWarnings("unused")
-					Object loader = _loader;
+			Object loader = _loader;
         	_loader = null;
         	/**
         	 * @j2sNative
         	 * 
-        	 * loader.loadActionMap(this);
+        	 * loader.$clazz$.loadActionMap$swingjs_plaf_LazyActionMap(this);
         	 */
         	{}
 //

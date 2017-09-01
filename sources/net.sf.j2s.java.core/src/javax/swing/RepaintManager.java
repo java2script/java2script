@@ -27,7 +27,19 @@
  */
 package javax.swing;
 
-import java.util.ArrayList;
+import java.applet.Applet;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.GraphicsConfiguration;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.InvocationEvent;
+import java.awt.image.VolatileImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -36,21 +48,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javajs.util.Lst;
-
-import java.applet.Applet;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.InvocationEvent;
-import java.awt.image.VolatileImage;
 import sun.awt.AWTAccessor;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
@@ -241,17 +238,16 @@ public class RepaintManager {
 		// component is ever used to determine the current
 		// RepaintManager, DisplayChangedRunnable will need to be modified
 		// accordingly.
-		// SwingJS return currentManager(AppContext.getAppContext());
-		// }
-		//
-		// /**
-		// * Returns the RepaintManager for the specified AppContext. If a
-		// * RepaintManager has not been created for the specified AppContext this
-		// will
-		// * return null.
-		// */
-		// static RepaintManager currentManager(AppContext appContext) {
-		AppContext appContext = AppContext.getAppContext();
+		return currentManager(c, AppContext.getAppContext());
+	}
+
+ /**
+ * Returns the RepaintManager for the specified AppContext. If a
+ * RepaintManager has not been created for the specified AppContext this
+ will
+ * return null.
+ */
+ static RepaintManager currentManager(Component c, AppContext appContext) {
 		RepaintManager rm = (RepaintManager) appContext.get(repaintManagerKey);
 		if (rm == null) {
 			rm = new RepaintManager();
@@ -262,24 +258,22 @@ public class RepaintManager {
 		return rm;
 	}
 
-// SwingJS - VERY important that this be commented out!
-//	/**
-//	 * Return the RepaintManager for the calling thread given a JComponent.
-//	 * <p>
-//	 * Note: This method exists for backward binary compatibility with earlier
-//	 * versions of the Swing library. It simply returns the result returned by
-//	 * {@link #currentManager(Component)}.
-//	 * 
-//	 * @param c
-//	 *          a JComponent -- unused
-//	 * @return the RepaintManager object
-//	 * 
-//	 * @j2sIgnore
-//	 * 
-//	 */
-//	public static RepaintManager currentManager(JComponent c) {
-//		return currentManager((Component) c);
-//	}
+	/**
+	 * Return the RepaintManager for the calling thread given a JComponent.
+	 * <p>
+	 * Note: This method exists for backward binary compatibility with earlier
+	 * versions of the Swing library. It simply returns the result returned by
+	 * {@link #currentManager(Component)}.
+	 * 
+	 * @param c
+	 *          a JComponent -- unused
+	 * @return the RepaintManager object
+	 * 
+	 * 
+	 */
+	public static RepaintManager currentManager(JComponent c) {
+		return currentManager((Component) c);
+	}
 
 	/**
 	 * Set the RepaintManager that should be used for the calling thread.

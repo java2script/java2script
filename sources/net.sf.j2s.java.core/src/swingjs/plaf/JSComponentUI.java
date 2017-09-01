@@ -379,7 +379,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            c.addChangeListener && c.addChangeListener(this);
+		 *            c.addChangeListener$javax_swing_event_ChangeListener && c.addChangeListener$javax_swing_event_ChangeListener(this);
 		 */
 		{
 		}
@@ -404,8 +404,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            c && c.removeChangeListener && c.removeChangeListener(this); c
-		 *            && c.removePropertyChangeListener(this);
+		 *            c && c.removeChangeListener$javax_swing_event_ChangeListener && c.removeChangeListener$javax_swing_event_ChangeListener(this); 
+		 *            c && c.removePropertyChangeListener$java_beans_PropertyChangeListener(this);
 		 */
 		{
 		}
@@ -554,8 +554,8 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            node.focus(function() {me.notifyFocus(true)});
-		 *            node.blur(function() {me.notifyFocus(false)});
+		 *            node.focus(function() {me.notifyFocus$Z(true)});
+		 *            node.blur(function() {me.notifyFocus$Z(false)});
 		 */
 		{
 		}
@@ -594,7 +594,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		/**
 		 * @j2sNative
 		 * 
-		 *            f = function(event) { me.handleJSEvent(node, eventID, event) }
+		 *            f = function(event) { me.handleJSEvent$O$I$O(node, eventID, event) }
 		 */
 		{
 			handleJSEvent(null, 0, null); // Eclipse reference only; not in JavaScript

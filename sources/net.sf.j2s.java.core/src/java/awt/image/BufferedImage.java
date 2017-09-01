@@ -28,9 +28,6 @@
 
 package java.awt.image;
 
-import java.util.Hashtable;
-import java.util.Vector;
-
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
@@ -39,6 +36,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import sun.awt.image.OffScreenImageSource;
 import swingjs.JSGraphics2D;
 import swingjs.JSImage;
@@ -67,13 +67,13 @@ import swingjs.api.js.HTML5Canvas;
  * @see WritableRaster
  */
 
-public class BufferedImage extends Image implements RenderedImage, Transparency // ,
-																																	// WritableRenderedImage
+public class BufferedImage extends Image implements RenderedImage, Transparency // , WritableRenderedImage
 {
 	int imageType = TYPE_CUSTOM;
 	ColorModel colorModel; 
 	protected WritableRaster raster;
 	OffScreenImageSource osis;
+	@SuppressWarnings("rawtypes")
 	Hashtable properties;
 
 	boolean isAlphaPremultiplied;// If true, alpha has been premultiplied in
@@ -82,7 +82,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	protected Object _imgNode; // used by JSGraphics2D directly
 	protected int width, height;
 	protected boolean _havePix;
-	protected Object _canvas; // created in setRangeRGB
+	protected Object _canvas; // created in setRGB
 	private int[] _pixSaved;
 	private JSGraphics2D _g; // a JSGraphics2D instance
 	//private static int rangeIndex;
@@ -866,6 +866,30 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	// }
 
 
+	
+	/**
+	 * Returns an integer pixel in the default RGB color model (TYPE_INT_ARGB) and
+	 * default sRGB colorspace. Color conversion takes place if this default model
+	 * does not match the image <code>ColorModel</code>. There are only 8-bits of
+	 * precision for each color component in the returned data when using this
+	 * method.
+	 * 
+	 * <p>
+	 * 
+	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the coordinates
+	 * are not in bounds. However, explicit bounds checking is not guaranteed.
+	 * 
+	 * @param x
+	 *          the X coordinate of the pixel from which to get the pixel in the
+	 *          default RGB color model and sRGB color space
+	 * @param y
+	 *          the Y coordinate of the pixel from which to get the pixel in the
+	 *          default RGB color model and sRGB color space
+	 * @return an integer pixel in the default RGB color model and default sRGB
+	 *         colorspace.
+	 * @see #setRGB(int, int, int)
+	 * @see #setRGB(int, int, int, int, int[], int, int)
+	 */
 	public int getRGB(int x, int y) {
 		if ((_imgNode != null || _g != null) && !_havePix) 
 		  ((JSImage) this).setPixels();
@@ -874,6 +898,42 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		return _pix[y * this.width + x];
 	}
 
+	/**
+	 * Returns an array of integer pixels in the default RGB color model
+	 * (TYPE_INT_ARGB) and default sRGB color space, from a portion of the image
+	 * data. Color conversion takes place if the default model does not match the
+	 * image <code>ColorModel</code>. There are only 8-bits of precision for each
+	 * color component in the returned data when using this method. With a
+	 * specified coordinate (x,&nbsp;y) in the image, the ARGB pixel can be
+	 * accessed in this way: </p>
+	 * 
+	 * <pre>
+	 * pixel = rgbArray[offset + (y - startY) * scansize + (x - startX)];
+	 * </pre>
+	 * 
+	 * <p>
+	 * 
+	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the region is
+	 * not in bounds. However, explicit bounds checking is not guaranteed.
+	 * 
+	 * @param startX
+	 *          the starting X coordinate
+	 * @param startY
+	 *          the starting Y coordinate
+	 * @param w
+	 *          width of region
+	 * @param h
+	 *          height of region
+	 * @param rgbArray
+	 *          if not <code>null</code>, the rgb pixels are written here
+	 * @param offset
+	 *          offset into the <code>rgbArray</code>
+	 * @param scansize
+	 *          scanline stride for the <code>rgbArray</code>
+	 * @return array of RGB pixels.
+	 * @see #setRGB(int, int, int)
+	 * @see #setRGB(int, int, int, int, int[], int, int)
+	 */
 	public int[] getRGB(int startX, int startY, int w, int h,
 			int[] rgbArray, int offset, int scansize) {
 		if ((_imgNode != null || _g != null) && !_havePix) 
@@ -892,6 +952,26 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		return rgbArray;
 	}
 	
+	/**
+	 * Sets a pixel in this <code>BufferedImage</code> to the specified RGB value.
+	 * The pixel is assumed to be in the default RGB color model, TYPE_INT_ARGB,
+	 * and default sRGB color space. For images with an
+	 * <code>IndexColorModel</code>, the index with the nearest color is chosen.
+	 * 
+	 * <p>
+	 * 
+	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the coordinates
+	 * are not in bounds. However, explicit bounds checking is not guaranteed.
+	 * 
+	 * @param x
+	 *          the X coordinate of the pixel to set
+	 * @param y
+	 *          the Y coordinate of the pixel to set
+	 * @param rgb
+	 *          the RGB value
+	 * @see #getRGB(int, int)
+	 * @see #getRGB(int, int, int, int, int[], int, int)
+	 */
 	public synchronized void setRGB(int x, int y, int rgb) {
 		if ((_imgNode != null || _g != null) && !_havePix) {
 		  ((JSImage) this).setPixels();
@@ -901,17 +981,50 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		pixels[y * this.width + x] = rgb;
 	}
 
+	/**
+	 * 
+	 * Sets an array of integer pixels in the default RGB color model
+	 * (TYPE_INT_ARGB) and default sRGB color space, into a portion of the image
+	 * data. Color conversion takes place if the default model does not match the
+	 * image <code>ColorModel</code>. There are only 8-bits of precision for each
+	 * color component in the returned data when using this method. With a
+	 * specified coordinate (x,&nbsp;y) in the this image, the ARGB pixel can be
+	 * accessed in this way:
+	 * 
+	 * <pre>
+	 * pixel = rgbArray[offset + (y - startY) * scansize + (x - startX)];
+	 * </pre>
+	 * 
+	 * WARNING: No dithering takes place.
+	 * 
+	 * <p>
+	 * 
+	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the region is
+	 * not in bounds. However, explicit bounds checking is not guaranteed.
+	 * 
+	 * @param startX
+	 *          the starting X coordinate
+	 * @param startY
+	 *          the starting Y coordinate
+	 * @param w
+	 *          width of the region
+	 * @param h
+	 *          height of the region
+	 * @param rgbArray
+	 *          the rgb pixels
+	 * @param offset
+	 *          offset into the <code>rgbArray</code>
+	 * @param scansize
+	 *          scanline stride for the <code>rgbArray</code>
+	 * @see #getRGB(int, int)
+	 * @see #getRGB(int, int, int, int, int[], int, int)
+	 */
 	public void setRGB(int startX, int startY, int w, int h, int[] rgbArray,
 			int offset, int scansize) {
 		if ((_imgNode != null || _g != null) && !_havePix) {
 			  ((JSImage) this).setPixels();
 			  _imgNode = null;
 			}
-		setRangeRGB(startX, startY, w, h, rgbArray, offset, scansize);
-	}
-	
-	public void setRangeRGB(int startX, int startY, int w, int h, int[] rgbArray,
-			int offset, int scansize) {
 		int[] pixels = (_pix == null ? _pixSaved : _pix);
 		int width = this.width;
 		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize) 
@@ -924,235 +1037,6 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 		getImageGraphic(); // sets _pix = null and creates _canvas 
 		
 	}
-
-
-	
-//	/**
-//	 * Returns an integer pixel in the default RGB color model (TYPE_INT_ARGB) and
-//	 * default sRGB colorspace. Color conversion takes place if this default model
-//	 * does not match the image <code>ColorModel</code>. There are only 8-bits of
-//	 * precision for each color component in the returned data when using this
-//	 * method.
-//	 * 
-//	 * <p>
-//	 * 
-//	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the coordinates
-//	 * are not in bounds. However, explicit bounds checking is not guaranteed.
-//	 * 
-//	 * @param x
-//	 *          the X coordinate of the pixel from which to get the pixel in the
-//	 *          default RGB color model and sRGB color space
-//	 * @param y
-//	 *          the Y coordinate of the pixel from which to get the pixel in the
-//	 *          default RGB color model and sRGB color space
-//	 * @return an integer pixel in the default RGB color model and default sRGB
-//	 *         colorspace.
-//	 * @see #setRGB(int, int, int)
-//	 * @see #setRGB(int, int, int, int, int[], int, int)
-//	 */
-//	public int getRGB(int x, int y) {
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * if (arguments.length == 7) {
-//		 *   this.getRangeRGB.apply(this, arguments);
-//		 * } 
-//		 */
-//		{}
-//	   return colorModel.getRGB(raster.getDataElements(x, y, null));
-//	}
-//
-//	/**
-//	 * Returns an array of integer pixels in the default RGB color model
-//	 * (TYPE_INT_ARGB) and default sRGB color space, from a portion of the image
-//	 * data. Color conversion takes place if the default model does not match the
-//	 * image <code>ColorModel</code>. There are only 8-bits of precision for each
-//	 * color component in the returned data when using this method. With a
-//	 * specified coordinate (x,&nbsp;y) in the image, the ARGB pixel can be
-//	 * accessed in this way: </p>
-//	 * 
-//	 * <pre>
-//	 * pixel = rgbArray[offset + (y - startY) * scansize + (x - startX)];
-//	 * </pre>
-//	 * 
-//	 * <p>
-//	 * 
-//	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the region is
-//	 * not in bounds. However, explicit bounds checking is not guaranteed.
-//	 * 
-//	 * @param startX
-//	 *          the starting X coordinate
-//	 * @param startY
-//	 *          the starting Y coordinate
-//	 * @param w
-//	 *          width of region
-//	 * @param h
-//	 *          height of region
-//	 * @param rgbArray
-//	 *          if not <code>null</code>, the rgb pixels are written here
-//	 * @param offset
-//	 *          offset into the <code>rgbArray</code>
-//	 * @param scansize
-//	 *          scanline stride for the <code>rgbArray</code>
-//	 * @return array of RGB pixels.
-//	 * @see #setRGB(int, int, int)
-//	 * @see #setRGB(int, int, int, int, int[], int, int)
-//	 */
-//	public int[] getRangeRGB(int startX, int startY, int w, int h,
-//			int[] rgbArray, int offset, int scansize) {
-//		int yoff = offset;
-//		int off;
-//		Object data;
-//		int nbands = raster.getNumBands();
-//		int dataType = raster.getDataBuffer().getDataType();
-//		switch (dataType) {
-//		case DataBuffer.TYPE_BYTE:
-//			data = new byte[nbands];
-//			break;
-//		case DataBuffer.TYPE_USHORT:
-//			data = new short[nbands];
-//			break;
-//		case DataBuffer.TYPE_INT:
-//			data = new int[nbands];
-//			break;
-//// Swingjs does not implement float or double for bufferes
-////		case DataBuffer.TYPE_FLOAT:
-////			data = new float[nbands];
-////			break;
-////		case DataBuffer.TYPE_DOUBLE:
-////			data = new double[nbands];
-////			break;
-//		default:
-//			throw new IllegalArgumentException("Unknown data buffer type: "
-//					+ dataType);
-//		}
-//
-//		if (rgbArray == null) {
-//			rgbArray = new int[offset + h * scansize];
-//		}
-//
-//		for (int y = startY; y < startY + h; y++, yoff += scansize) {
-//			off = yoff;
-//			for (int x = startX; x < startX + w; x++) {
-//				rgbArray[off++] = colorModel.getRGB(raster.getDataElements(x, y, data));
-//			}
-//		}
-//
-//		return rgbArray;
-//	}
-//
-//	/**
-//	 * Sets a pixel in this <code>BufferedImage</code> to the specified RGB value.
-//	 * The pixel is assumed to be in the default RGB color model, TYPE_INT_ARGB,
-//	 * and default sRGB color space. For images with an
-//	 * <code>IndexColorModel</code>, the index with the nearest color is chosen.
-//	 * 
-//	 * <p>
-//	 * 
-//	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the coordinates
-//	 * are not in bounds. However, explicit bounds checking is not guaranteed.
-//	 * 
-//	 * @param x
-//	 *          the X coordinate of the pixel to set
-//	 * @param y
-//	 *          the Y coordinate of the pixel to set
-//	 * @param rgb
-//	 *          the RGB value
-//	 * @see #getRGB(int, int)
-//	 * @see #getRGB(int, int, int, int, int[], int, int)
-//	 */
-//	public synchronized void setRGB(int x, int y, int rgb) {
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * 
-//		 * if (arguments.length == 7) {
-//		 *   return this.setRangeRGB.apply(this, arguments);
-//		 * }
-//		 *  
-//		 */
-//		{
-//		}		
-//		int[] _pix = null;
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * _pix = this._pix || (this._pix = Clazz.newIntArray (this.height * this.width)); 
-//		 *  
-//		 */
-//		{
-//		}
-//		_pix[y * raster.width + x] = rgb;
-//		// raster.setDataElements(x, y, colorModel.getDataElements(rgb, null));
-//	}
-//
-//	/**
-//	 * 
-//	 * Sets an array of integer pixels in the default RGB color model
-//	 * (TYPE_INT_ARGB) and default sRGB color space, into a portion of the image
-//	 * data. Color conversion takes place if the default model does not match the
-//	 * image <code>ColorModel</code>. There are only 8-bits of precision for each
-//	 * color component in the returned data when using this method. With a
-//	 * specified coordinate (x,&nbsp;y) in the this image, the ARGB pixel can be
-//	 * accessed in this way:
-//	 * 
-//	 * <pre>
-//	 * pixel = rgbArray[offset + (y - startY) * scansize + (x - startX)];
-//	 * </pre>
-//	 * 
-//	 * WARNING: No dithering takes place.
-//	 * 
-//	 * <p>
-//	 * 
-//	 * An <code>ArrayOutOfBoundsException</code> may be thrown if the region is
-//	 * not in bounds. However, explicit bounds checking is not guaranteed.
-//	 * 
-//	 * @param startX
-//	 *          the starting X coordinate
-//	 * @param startY
-//	 *          the starting Y coordinate
-//	 * @param w
-//	 *          width of the region
-//	 * @param h
-//	 *          height of the region
-//	 * @param rgbArray
-//	 *          the rgb pixels
-//	 * @param offset
-//	 *          offset into the <code>rgbArray</code>
-//	 * @param scansize
-//	 *          scanline stride for the <code>rgbArray</code>
-//	 * @see #getRGB(int, int)
-//	 * @see #getRGB(int, int, int, int, int[], int, int)
-//	 */
-//	public void setRangeRGB(int startX, int startY, int w, 
-//			int h, int[] rgbArray, int offset, int scansize) {
-//		
-//		int[] _pix = null;
-//		int width = getWidth();
-//		/**
-//		 * @j2sNative
-//		 * 
-//		 * _pix = this._pix || (this._pix = Clazz.newIntArray (this.height * width)); 
-//		 *  
-//		 */
-//		{
-//		}
-//		for (int y = startY, yoff = offset; y < startY + h; y++, yoff += scansize) 
-//			for (int x = startX, off = yoff; x < startX + w; x++) 
-//				_pix[y * width + x] = rgbArray[off++];
-//
-//		// int yoff = offset;
-//		// int off;
-//		// Object pixel = null;
-//		//
-//		// for (int y = startY; y < startY+h; y++, yoff+=scansize) {
-//		// off = yoff;
-//		// for (int x = startX; x < startX+w; x++) {
-//		// pixel = colorModel.getDataElements(rgbArray[off++], pixel);
-//		// raster.setDataElements(x, y, pixel);
-//		// }
-//		// }
-//	}
 
 	/**
 	 * Returns the width of the <code>BufferedImage</code>.
@@ -1206,6 +1090,7 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	 *         this image.
 	 * @see ImageProducer
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public ImageProducer getSource() {
 		if (osis == null) {
