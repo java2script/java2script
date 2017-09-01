@@ -228,7 +228,7 @@ public class JScrollBar extends JComponent implements Adjustable
         checkOrientation(orientation);
         int oldValue = this.orientation;
         this.orientation = orientation;
-        firePropertyChangeInt("orientation", oldValue, orientation);
+        firePropertyChange("orientation", oldValue, orientation);
 
 //        if ((oldValue != orientation) && (accessibleContext != null)) {
 //            accessibleContext.firePropertyChange(
@@ -277,7 +277,7 @@ public class JScrollBar extends JComponent implements Adjustable
             model.addChangeListener(fwdAdjustmentEvents);
         }
 
-        firePropertyChangeObject("model", oldModel, model);
+        firePropertyChange("model", oldModel, model);
 
 //        if (accessibleContext != null) {
 //            accessibleContext.firePropertyChange(
@@ -327,7 +327,7 @@ public class JScrollBar extends JComponent implements Adjustable
 		public void setUnitIncrement(int unitIncrement) {
         int oldValue = this.unitIncrement;
         this.unitIncrement = unitIncrement;
-        firePropertyChangeInt("unitIncrement", oldValue, unitIncrement);
+        firePropertyChange("unitIncrement", oldValue, unitIncrement);
     }
 
 
@@ -371,7 +371,7 @@ public class JScrollBar extends JComponent implements Adjustable
 		public void setBlockIncrement(int blockIncrement) {
         int oldValue = this.blockIncrement;
         this.blockIncrement = blockIncrement;
-        firePropertyChangeInt("blockIncrement", oldValue, blockIncrement);
+        firePropertyChange("blockIncrement", oldValue, blockIncrement);
     }
 
 

@@ -286,7 +286,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
         // set the current selected item.
         selectedItemReminder = dataModel.getSelectedItem();
 
-        firePropertyChangeObject( "model", oldModel, dataModel);
+        firePropertyChange( "model", oldModel, dataModel);
     }
 
     /**
@@ -336,7 +336,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     public void setLightWeightPopupEnabled(boolean aFlag) {
         boolean oldFlag = lightWeightPopupEnabled;
         lightWeightPopupEnabled = aFlag;
-        firePropertyChangeBool("lightWeightPopupEnabled", oldFlag, lightWeightPopupEnabled);
+        firePropertyChange("lightWeightPopupEnabled", oldFlag, lightWeightPopupEnabled);
     }
 
     /**
@@ -371,7 +371,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     public void setEditable(boolean aFlag) {
         boolean oldFlag = isEditable;
         isEditable = aFlag;
-        firePropertyChangeBool( "editable", oldFlag, isEditable );
+        firePropertyChange( "editable", oldFlag, isEditable );
     }
 
     /**
@@ -399,7 +399,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     public void setMaximumRowCount(int count) {
         int oldCount = maximumRowCount;
         maximumRowCount = count;
-        firePropertyChangeInt( "maximumRowCount", oldCount, maximumRowCount );
+        firePropertyChange( "maximumRowCount", oldCount, maximumRowCount );
     }
 
     /**
@@ -437,7 +437,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     public void setRenderer(ListCellRenderer aRenderer) {
         ListCellRenderer oldRenderer = renderer;
         renderer = aRenderer;
-        firePropertyChangeObject( "renderer", oldRenderer, renderer );
+        firePropertyChange( "renderer", oldRenderer, renderer );
         invalidate();
     }
 
@@ -476,7 +476,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
         if ( editor != null ) {
             editor.addActionListener(this);
         }
-        firePropertyChangeObject( "editor", oldEditor, editor );
+        firePropertyChange( "editor", oldEditor, editor );
     }
 
     /**
@@ -658,7 +658,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     public void setPrototypeDisplayValue(Object prototypeDisplayValue) {
         Object oldValue = this.prototypeDisplayValue;
         this.prototypeDisplayValue = prototypeDisplayValue;
-        firePropertyChangeObject("prototypeDisplayValue", oldValue, prototypeDisplayValue);
+        firePropertyChange("prototypeDisplayValue", oldValue, prototypeDisplayValue);
     }
 
     /**
@@ -1061,7 +1061,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
                 actionPropertyChangeListener = createActionPropertyChangeListener(action);
                 action.addPropertyChangeListener(actionPropertyChangeListener);
             }
-            firePropertyChangeObject("action", oldValue, action);
+            firePropertyChange("action", oldValue, action);
         }
     }
 
@@ -1369,7 +1369,7 @@ implements ItemSelectable,ListDataListener,ActionListener {
     @Override
 		public void setEnabled(boolean b) {
         super.setEnabled(b);
-        firePropertyChangeBool( "enabled", !isEnabled(), isEnabled() );
+        firePropertyChange( "enabled", !isEnabled(), isEnabled() );
     }
 
     /**

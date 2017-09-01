@@ -215,7 +215,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 	public void setMargin(Insets m) {
 		Insets old = margin;
 		margin = m;
-		firePropertyChangeObject("margin", old, m);
+		firePropertyChange("margin", old, m);
 		revalidate();
 		repaint();
 	}
@@ -260,7 +260,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 		if (paintBorder != b) {
 			boolean old = paintBorder;
 			paintBorder = b;
-			firePropertyChangeBool("borderPainted", old, b);
+			firePropertyChange("borderPainted", old, b);
 			revalidate();
 			repaint();
 		}
@@ -313,7 +313,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 			boolean old = floatable;
 			floatable = b;
 
-			firePropertyChangeBool("floatable", old, b);
+			firePropertyChange("floatable", old, b);
 			revalidate();
 			repaint();
 		}
@@ -354,7 +354,7 @@ public class JToolBar extends JComponent implements SwingConstants {
 			int old = orientation;
 			orientation = o;
 
-			firePropertyChangeInt("orientation", old, o);
+			firePropertyChange("orientation", old, o);
 			revalidate();
 			repaint();
 		}

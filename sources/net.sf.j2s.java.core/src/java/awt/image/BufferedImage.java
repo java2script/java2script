@@ -1176,8 +1176,6 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 
 	/**
 	 * 
-	 * @j2sIgnore
-	 * 
 	 * Returns the width of the <code>BufferedImage</code>.
 	 * 
 	 * @param observer
@@ -1190,8 +1188,6 @@ public class BufferedImage extends Image implements RenderedImage, Transparency 
 	}
 
 	/**
-	 * @j2sIgnore
-	 * 
 	 * Returns the height of the <code>BufferedImage</code>.
 	 * 
 	 * @param observer

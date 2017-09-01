@@ -166,7 +166,6 @@ public final class DataBufferByte extends DataBuffer
      * @param dataArray The byte arrays for the <CODE>DataBuffer</CODE>.
      * @param size The size of the banks in the <CODE>DataBuffer</CODE>.
      * 
-     * @j2sIgnore
      */
     public DataBufferByte(byte dataArray[][], int size) {
         super(UNTRACKABLE, TYPE_BYTE, size, dataArray.length);

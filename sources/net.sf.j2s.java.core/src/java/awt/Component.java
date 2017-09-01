@@ -867,7 +867,7 @@ protected  transient ComponentPeer peer;
             nameExplicitlySet = true;
         }
 //      	System.out.println("Component setName " + this);
-        firePropertyChangeObject("name", oldName, name);
+        firePropertyChange("name", oldName, name);
     }
 
     /**
@@ -1459,8 +1459,6 @@ protected  transient ComponentPeer peer;
      * @deprecated As of JDK version 1.1,
      * replaced by <code>setVisible(boolean)</code>.
      * 
-     * @j2sIgnore
-     * 
      */
     public void show(boolean b) {
     	setVisible(b);
@@ -1609,7 +1607,7 @@ protected  transient ComponentPeer peer;
         }
         // This is a bound property, so report the change to
         // any registered listeners.  (Cheap if there are none.)
-        firePropertyChangeObject("foreground", oldColor, c);
+        firePropertyChange("foreground", oldColor, c);
     }
 
     /**
@@ -1669,7 +1667,7 @@ protected  transient ComponentPeer peer;
         }
         // This is a bound property, so report the change to
         // any registered listeners.  (Cheap if there are none.)
-        firePropertyChangeObject("background", oldColor, c);
+        firePropertyChange("background", oldColor, c);
     }
 
     /**
@@ -1747,7 +1745,7 @@ protected  transient ComponentPeer peer;
 		}
 		// This is a bound property, so report the change to
 		// any registered listeners. (Cheap if there are none.)
-		firePropertyChangeObject("font", oldFont, newFont);
+		firePropertyChange("font", oldFont, newFont);
 
 		// This could change the preferred size of the Component.
 		// Fix for 6213660. Should compare old and new fonts and do not
@@ -1807,7 +1805,7 @@ protected  transient ComponentPeer peer;
 
         // This is a bound property, so report the change to
         // any registered listeners.  (Cheap if there are none.)
-        firePropertyChangeObject("locale", oldValue, l);
+        firePropertyChange("locale", oldValue, l);
 
         // This could change the preferred size of the Component.
         invalidateIfValid();
@@ -2018,7 +2016,6 @@ protected  transient ComponentPeer peer;
      * @see #setBounds
      * @since JDK1.1
      * 
-     * @j2sIgnore
      * 
      */
     public void setSize(Dimension d) {
@@ -2259,7 +2256,6 @@ protected  transient ComponentPeer peer;
      * @see #getLocation
      * @see #getSize
      * 
-     * @j2sIgnore
      * 
      */
     public Rectangle getBounds() {
@@ -2280,8 +2276,7 @@ protected  transient ComponentPeer peer;
 	public Rectangle getBounds(Rectangle rv) {
 		if (rv == null)
 			return new Rectangle(getX(), getY(), getWidth(), getHeight());
-    // SwingJS SAEM setBounds --> reshape
-		rv.reshape(getX(), getY(), getWidth(), getHeight());
+		rv.setBounds(getX(), getY(), getWidth(), getHeight());
 		return rv;
 	}
 
@@ -2406,7 +2401,7 @@ protected  transient ComponentPeer peer;
 		Dimension old = (prefSizeSet ? prefSize : null);
 		prefSize = preferredSize;
 		prefSizeSet = (preferredSize != null);
-		firePropertyChangeObject("preferredSize", old, preferredSize);
+		firePropertyChange("preferredSize", old, preferredSize);
 	}
 
 
@@ -2478,7 +2473,7 @@ protected  transient ComponentPeer peer;
         }
         this.minSize = minimumSize;
         minSizeSet = (minimumSize != null);
-        firePropertyChangeObject("minimumSize", old, minimumSize);
+        firePropertyChange("minimumSize", old, minimumSize);
     }
 
     /**
@@ -2546,7 +2541,7 @@ protected  transient ComponentPeer peer;
         }
         this.maxSize = maximumSize;
         maxSizeSet = (maximumSize != null);
-        firePropertyChangeObject("maximumSize", old, maximumSize);
+        firePropertyChange("maximumSize", old, maximumSize);
     }
 
     /**
@@ -3683,7 +3678,6 @@ protected  transient ComponentPeer peer;
      * @see       #getComponentAt(Point)
      * @since     JDK1.1
      * 
-     * @j2sIgnore
      */
     public boolean contains(Point p) {
         return contains(p.x, p.y);
@@ -6211,7 +6205,7 @@ protected  transient ComponentPeer peer;
         }
         isFocusTraversableOverridden = FOCUS_TRAVERSABLE_SET;
 
-        firePropertyChangeObject("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
+        firePropertyChange("focusable", Boolean.valueOf(oldFocusable), Boolean.valueOf(focusable));
 //        if (oldFocusable && !focusable) {
 //            if (isFocusOwner() && KeyboardFocusManager.isAutoFocusTransferEnabled()) {
 //                transferFocus(true);
@@ -7377,16 +7371,9 @@ protected  transient ComponentPeer peer;
      * @param propertyName the property whose value has changed
      * @param oldValue the property's previous value
      * @param newValue the property's new value
-     * @deprecated
      */
-    protected void firePropertyChange(String propertyName,
+    public void firePropertyChange(String propertyName,
                                       Object oldValue, Object newValue) {
-    	// SwingJS SAEM
-    	firePropertyChangeObject(propertyName, oldValue, newValue);
-    }
-    public void firePropertyChangeObject(String propertyName, Object oldValue, Object newValue) {
-    	// SwingJS SAEM
-    	// SwingJS called by swingjs.plaf.JSTextListener "text"
         PropertyChangeSupport changeSupport;
         synchronized (getChangeSupportLock()) {
             changeSupport = this.changeSupport;
@@ -7413,11 +7400,6 @@ protected  transient ComponentPeer peer;
      */
     protected void firePropertyChange(String propertyName,
                                       boolean oldValue, boolean newValue) {
-    	// SwingJS SAEM
-    	firePropertyChangeBool(propertyName, oldValue, newValue);
-    }
-    protected void firePropertyChangeBool(String propertyName, boolean oldValue, boolean newValue) {
-    	// SwingJS SAEM
         PropertyChangeSupport changeSupport = this.changeSupport;
         if (changeSupport == null || oldValue == newValue) {
             return;
@@ -7437,15 +7419,9 @@ protected  transient ComponentPeer peer;
      * @param newValue the property's new value
      * @since 1.4
      * 
-     * @deprecated
      */
     protected void firePropertyChange(String propertyName,
                                       int oldValue, int newValue) {
-    	// SwingJS SAEM
-    	firePropertyChangeInt(propertyName, oldValue, newValue);
-    }
-    protected void firePropertyChangeInt(String propertyName, int oldValue, int newValue) {
-    	// SwingJS SAEM
         PropertyChangeSupport changeSupport = this.changeSupport;
         if (changeSupport == null || oldValue == newValue) {
             return;
@@ -7461,18 +7437,16 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a byte)
      * @param newValue the new value of the property (as a byte)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
      * 
-     * @j2sIgnore
      */
-    public void firePropertyChangeByte(String propertyName, byte oldValue, byte newValue) {
-    	// SwingJS was "firePropertyChange"
+    public void firePropertyChange(String propertyName, byte oldValue, byte newValue) {
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, Byte.valueOf(oldValue), Byte.valueOf(newValue));
+        firePropertyChange(propertyName, Byte.valueOf(oldValue), Byte.valueOf(newValue));
     }
 
     /**
@@ -7482,20 +7456,15 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a char)
      * @param newValue the new value of the property (as a char)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
      */
     public void firePropertyChange(String propertyName, char oldValue, char newValue) {
-    	// SwingJS SAEM
-    	firePropertyChangeChar(propertyName, oldValue, newValue);
-    }
-    public void firePropertyChangeChar(String propertyName, char oldValue, char newValue) {
-    	// SwingJS SAEM
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, new Character(oldValue), new Character(newValue));
+        firePropertyChange(propertyName, new Character(oldValue), new Character(newValue));
     }
 
     /**
@@ -7505,18 +7474,15 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a short)
      * @param newValue the old value of the property (as a short)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
-     *      * @j2sIgnore
-
      */
-    public void firePropertyChangeShort(String propertyName, short oldValue, short newValue) {
-    	// SwingJS was "firePropertyChange"
+    public void firePropertyChange(String propertyName, short oldValue, short newValue) {
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, Short.valueOf(oldValue), Short.valueOf(newValue));
+        firePropertyChange(propertyName, Short.valueOf(oldValue), Short.valueOf(newValue));
     }
 
 
@@ -7527,16 +7493,15 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a long)
      * @param newValue the new value of the property (as a long)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
      */
-    public void firePropertyChangeLong(String propertyName, long oldValue, long newValue) {
-    	// SwingJS was "firePropertyChange"
+    public void firePropertyChange(String propertyName, long oldValue, long newValue) {
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, Long.valueOf(oldValue), Long.valueOf(newValue));
+        firePropertyChange(propertyName, Long.valueOf(oldValue), Long.valueOf(newValue));
     }
 
     /**
@@ -7546,16 +7511,15 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a float)
      * @param newValue the new value of the property (as a float)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
      */
-    public void firePropertyChangeFloat(String propertyName, float oldValue, float newValue) {
-    	// SwingJS was "firePropertyChange"
+    public void firePropertyChange(String propertyName, float oldValue, float newValue) {
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, Float.valueOf(oldValue), Float.valueOf(newValue));
+        firePropertyChange(propertyName, Float.valueOf(oldValue), Float.valueOf(newValue));
     }
 
     /**
@@ -7565,16 +7529,15 @@ protected  transient ComponentPeer peer;
      *          that was changed
      * @param oldValue the old value of the property (as a double)
      * @param newValue the new value of the property (as a double)
-     * @see #firePropertyChangeObject(java.lang.String, java.lang.Object,
+     * @see #firePropertyChange(java.lang.String, java.lang.Object,
      *          java.lang.Object)
      * @since 1.5
      */
-    public void firePropertyChangeDouble(String propertyName, double oldValue, double newValue) {
-    	// SwingJS was "firePropertyChange"
+    public void firePropertyChange(String propertyName, double oldValue, double newValue) {
         if (changeSupport == null || oldValue == newValue) {
             return;
         }
-        firePropertyChangeObject(propertyName, Double.valueOf(oldValue), Double.valueOf(newValue));
+        firePropertyChange(propertyName, Double.valueOf(oldValue), Double.valueOf(newValue));
     }
 
 
@@ -7883,7 +7846,7 @@ protected  transient ComponentPeer peer;
 
         // This is a bound property, so report the change to
         // any registered listeners.  (Cheap if there are none.)
-        firePropertyChangeObject("componentOrientation", oldValue, o);
+        firePropertyChange("componentOrientation", oldValue, o);
 
         // This could change the preferred size of the Component.
         invalidateIfValid();

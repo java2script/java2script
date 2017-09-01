@@ -218,7 +218,7 @@ public class JApplet extends Applet implements /* Accessible ,*/
         TransferHandler oldHandler = transferHandler;
         transferHandler = newHandler;
         SwingUtilities.installSwingDropTargetAsNecessary(this, transferHandler);
-        firePropertyChangeObject("transferHandler", oldHandler, newHandler);
+        firePropertyChange("transferHandler", oldHandler, newHandler);
     }
 
     /**

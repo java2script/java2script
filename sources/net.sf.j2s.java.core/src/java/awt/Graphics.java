@@ -1248,8 +1248,6 @@ public abstract class Graphics {
      *              copied to.  Any current values in this rectangle are
      *              overwritten.
      * @return      the bounding rectangle of the current clipping area.
-     * 
-     * @j2sIgnore
      */
     public Rectangle getClipBounds(Rectangle r) {
         // Note, this implementation is not very efficient.

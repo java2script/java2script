@@ -299,22 +299,14 @@ public abstract class Path2D implements Shape, Cloneable {
             return ret;
         }
 
-        /**
-         * @j2sIgnore
-         * 
-         */
         @Override
-				void append(float x, float y) {
+		void append(float x, float y) {
             floatCoords[numCoords++] = x;
             floatCoords[numCoords++] = y;
         }
 
-        /**
-         * @j2sIgnore
-         * 
-         */
         @Override
-				void append(double x, double y) {
+		void append(double x, double y) {
             floatCoords[numCoords++] = (float) x;
             floatCoords[numCoords++] = (float) y;
         }
@@ -324,20 +316,7 @@ public abstract class Path2D implements Shape, Cloneable {
          * @since 1.6
          */
         @Override
-				public final void append(PathIterator pi, boolean connect) {
-        	/**
-        	 * @j2sNative
-        	 * 
-        	 * if (typeof pi == "number") {
-        	 * 
-            this.floatCoords[this.numCoords++] = pi;
-            this.floatCoords[this.numCoords++] = connect;
-            return;
-            }
-        	 * 
-        	 * 
-        	 */
-        	{}
+        public final void append(PathIterator pi, boolean connect) {
             float coords[] = new float[6];
             while (!pi.isDone()) {
                 switch (pi.currentSegment(coords)) {
@@ -995,9 +974,6 @@ public abstract class Path2D implements Shape, Cloneable {
                 this.floatCoords = p2df.floatCoords;
             }
 
-            /**
-             * @j2sIgnore
-             */
             @Override
 						public int currentSegment(float[] coords) {
                 int type = path.pointTypes[typeIdx];
@@ -1032,9 +1008,6 @@ public abstract class Path2D implements Shape, Cloneable {
                 this.affine = at;
             }
 
-            /**
-             * @j2sIgnore
-             */
             @Override
 						public int currentSegment(float[] coords) {
                 int type = path.pointTypes[typeIdx];
@@ -1182,20 +1155,12 @@ public abstract class Path2D implements Shape, Cloneable {
             return ret;
         }
 
-        /**
-         * @j2sIgnore
-         * 
-         */
         @Override
 				void append(float x, float y) {
             doubleCoords[numCoords++] = x;
             doubleCoords[numCoords++] = y;
         }
 
-        /**
-         * @j2sIgnore
-         * 
-         */
         @Override
 				void append(double x, double y) {
             doubleCoords[numCoords++] = x;
@@ -1208,20 +1173,6 @@ public abstract class Path2D implements Shape, Cloneable {
          */
         @Override
 				public final void append(PathIterator pi, boolean connect) {
-        	/**
-        	 * @j2sNative
-        	 * 
-        	 * if (typeof pi == "number") {
-        	 * 
-            this.floatCoords[this.numCoords++] = pi;
-            this.floatCoords[this.numCoords++] = connect;
-            return;
-            
-            }
-        	 * 
-        	 * 
-        	 */
-        	{}
             double coords[] = new double[6];
             while (!pi.isDone()) {
                 switch (pi.currentSegment(coords)) {

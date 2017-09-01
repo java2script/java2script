@@ -529,7 +529,7 @@ public class Frame extends Window {
                 peer.setTitle(title);
             }
         }
-        firePropertyChangeObject("title", oldTitle, title);
+        firePropertyChange("title", oldTitle, title);
     }
 
     /**
@@ -645,7 +645,7 @@ public class Frame extends Window {
 //        if (testvalid) {
 //            invalidateIfValid();
 //        }
-        firePropertyChangeBool("resizable", oldResizable, resizable);
+        firePropertyChange("resizable", oldResizable, resizable);
     }
 
 

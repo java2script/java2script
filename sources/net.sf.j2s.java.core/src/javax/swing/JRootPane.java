@@ -433,7 +433,7 @@ public class JRootPane extends JComponent {
 		}
 		int oldWindowDecorationStyle = getWindowDecorationStyle();
 		this.windowDecorationStyle = windowDecorationStyle;
-		firePropertyChangeInt("windowDecorationStyle", oldWindowDecorationStyle,
+		firePropertyChange("windowDecorationStyle", oldWindowDecorationStyle,
 				windowDecorationStyle);
 	}
 
@@ -768,7 +768,7 @@ public class JRootPane extends JComponent {
 			}
 		}
 
-		firePropertyChangeObject("defaultButton", oldDefault, defaultButton);
+		firePropertyChange("defaultButton", oldDefault, defaultButton);
 	}
 
 	/**

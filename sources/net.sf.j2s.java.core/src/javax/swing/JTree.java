@@ -750,7 +750,7 @@ public class JTree extends JComponent implements Scrollable
         TreeCellRenderer oldValue = cellRenderer;
 
         cellRenderer = x;
-        firePropertyChangeObject(CELL_RENDERER_PROPERTY, oldValue, cellRenderer);
+        firePropertyChange(CELL_RENDERER_PROPERTY, oldValue, cellRenderer);
         invalidate();
     }
 
@@ -768,7 +768,7 @@ public class JTree extends JComponent implements Scrollable
         boolean                 oldValue = this.editable;
 
         this.editable = flag;
-        firePropertyChangeBool(EDITABLE_PROPERTY, oldValue, flag);
+        firePropertyChange(EDITABLE_PROPERTY, oldValue, flag);
 //        if (accessibleContext != null) {
 //            accessibleContext.firePropertyChange(
 //                AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
@@ -802,7 +802,7 @@ public class JTree extends JComponent implements Scrollable
         TreeCellEditor        oldEditor = this.cellEditor;
 
         this.cellEditor = cellEditor;
-        firePropertyChangeObject(CELL_EDITOR_PROPERTY, oldEditor, cellEditor);
+        firePropertyChange(CELL_EDITOR_PROPERTY, oldEditor, cellEditor);
         invalidate();
     }
 
@@ -864,7 +864,7 @@ public class JTree extends JComponent implements Scrollable
                                   Boolean.TRUE);
             }
         }
-        firePropertyChangeObject(TREE_MODEL_PROPERTY, oldModel, treeModel);
+        firePropertyChange(TREE_MODEL_PROPERTY, oldModel, treeModel);
         invalidate();
     }
 
@@ -893,7 +893,7 @@ public class JTree extends JComponent implements Scrollable
         boolean                oldValue = this.rootVisible;
 
         this.rootVisible = rootVisible;
-        firePropertyChangeBool(ROOT_VISIBLE_PROPERTY, oldValue, this.rootVisible);
+        firePropertyChange(ROOT_VISIBLE_PROPERTY, oldValue, this.rootVisible);
 //        if (accessibleContext != null) {
 //            ((AccessibleJTree)accessibleContext).fireVisibleDataPropertyChange();
 //        }
@@ -922,7 +922,7 @@ public class JTree extends JComponent implements Scrollable
 
         showsRootHandles = newValue;
         showsRootHandlesSet = true;
-        firePropertyChangeBool(SHOWS_ROOT_HANDLES_PROPERTY, oldValue,
+        firePropertyChange(SHOWS_ROOT_HANDLES_PROPERTY, oldValue,
                            showsRootHandles);
 //        if (accessibleContext != null) {
 //            ((AccessibleJTree)accessibleContext).fireVisibleDataPropertyChange();
@@ -957,7 +957,7 @@ public class JTree extends JComponent implements Scrollable
 
         this.rowHeight = rowHeight;
         rowHeightSet = true;
-        firePropertyChangeInt(ROW_HEIGHT_PROPERTY, oldValue, this.rowHeight);
+        firePropertyChange(ROW_HEIGHT_PROPERTY, oldValue, this.rowHeight);
         invalidate();
     }
 
@@ -998,7 +998,7 @@ public class JTree extends JComponent implements Scrollable
         boolean                oldValue = largeModel;
 
         largeModel = newValue;
-        firePropertyChangeBool(LARGE_MODEL_PROPERTY, oldValue, newValue);
+        firePropertyChange(LARGE_MODEL_PROPERTY, oldValue, newValue);
     }
 
     /**
@@ -1032,7 +1032,7 @@ public class JTree extends JComponent implements Scrollable
         boolean                  oldValue = invokesStopCellEditing;
 
         invokesStopCellEditing = newValue;
-        firePropertyChangeBool(INVOKES_STOP_CELL_EDITING_PROPERTY, oldValue,
+        firePropertyChange(INVOKES_STOP_CELL_EDITING_PROPERTY, oldValue,
                            newValue);
     }
 
@@ -1072,7 +1072,7 @@ public class JTree extends JComponent implements Scrollable
 
         scrollsOnExpand = newValue;
         scrollsOnExpandSet = true;
-        firePropertyChangeBool(SCROLLS_ON_EXPAND_PROPERTY, oldValue,
+        firePropertyChange(SCROLLS_ON_EXPAND_PROPERTY, oldValue,
                            newValue);
     }
 
@@ -1098,7 +1098,7 @@ public class JTree extends JComponent implements Scrollable
         int         oldCount = toggleClickCount;
 
         toggleClickCount = clickCount;
-        firePropertyChangeInt(TOGGLE_CLICK_COUNT_PROPERTY, oldCount,
+        firePropertyChange(TOGGLE_CLICK_COUNT_PROPERTY, oldCount,
                            clickCount);
     }
 
@@ -1136,7 +1136,7 @@ public class JTree extends JComponent implements Scrollable
         boolean         oldValue = expandsSelectedPaths;
 
         expandsSelectedPaths = newValue;
-        firePropertyChangeBool(EXPANDS_SELECTED_PATHS_PROPERTY, oldValue,
+        firePropertyChange(EXPANDS_SELECTED_PATHS_PROPERTY, oldValue,
                            newValue);
     }
 
@@ -1628,7 +1628,7 @@ public class JTree extends JComponent implements Scrollable
         TreePath          oldValue = leadPath;
 
         leadPath = newPath;
-        firePropertyChangeObject(LEAD_SELECTION_PATH_PROPERTY, oldValue, newPath);
+        firePropertyChange(LEAD_SELECTION_PATH_PROPERTY, oldValue, newPath);
     }
 
     /**
@@ -1646,7 +1646,7 @@ public class JTree extends JComponent implements Scrollable
         TreePath          oldValue = anchorPath;
 
         anchorPath = newPath;
-        firePropertyChangeObject(ANCHOR_SELECTION_PATH_PROPERTY, oldValue, newPath);
+        firePropertyChange(ANCHOR_SELECTION_PATH_PROPERTY, oldValue, newPath);
     }
 
     /**
@@ -2407,7 +2407,7 @@ public class JTree extends JComponent implements Scrollable
         if (selectionRedirector != null) {
             this.selectionModel.addTreeSelectionListener(selectionRedirector);
         }
-        firePropertyChangeObject(SELECTION_MODEL_PROPERTY, oldValue,
+        firePropertyChange(SELECTION_MODEL_PROPERTY, oldValue,
                            this.selectionModel);
 
 //        if (accessibleContext != null) {
@@ -2852,7 +2852,7 @@ public class JTree extends JComponent implements Scrollable
         int                 oldCount = visibleRowCount;
 
         visibleRowCount = newCount;
-        firePropertyChangeInt(VISIBLE_ROW_COUNT_PROPERTY, oldCount,
+        firePropertyChange(VISIBLE_ROW_COUNT_PROPERTY, oldCount,
                            visibleRowCount);
         invalidate();
 //        if (accessibleContext != null) {

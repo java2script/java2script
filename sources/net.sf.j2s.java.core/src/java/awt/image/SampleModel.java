@@ -687,7 +687,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if fArray is too small to hold the output.
      * 
-     * @j2sIgnore
      */
     public float[] getPixel(int x, int y, float fArray[],
                             DataBuffer data) {
@@ -719,8 +718,6 @@ public abstract class SampleModel
      * @throws NullPointerException if data is null.
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if dArray is too small to hold the output.
-     * 
-     * @j2sIgnore
      * 
      */
     public double[] getPixel(int x, int y, double dArray[],
@@ -797,7 +794,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if fArray is too small to hold the output.
      * 
-     * @j2sIgnore
      */
     public float[] getPixels(int x, int y, int w, int h,
                              float fArray[], DataBuffer data) {
@@ -839,7 +835,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if dArray is too small to hold the output.
      * 
-     * @j2sIgnore
      * 
      */
     public double[] getPixels(int x, int y, int w, int h,
@@ -990,8 +985,6 @@ public abstract class SampleModel
      * the band index are not in bounds, or if fArray is too small to
      * hold the output.
      * 
-     * @j2sIgnore
-     * 
      */
     public float[] getSamples(int x, int y, int w, int h,
                               int b, float fArray[],
@@ -1034,7 +1027,6 @@ public abstract class SampleModel
      * the band index are not in bounds, or if dArray is too small to
      * hold the output.
      * 
-     * @j2sIgnore
      */
     public double[] getSamples(int x, int y, int w, int h,
                                int b, double dArray[],
@@ -1109,7 +1101,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if fArray is too small to hold the input.
      * 
-     * @j2sIgnore
      */
     public void setPixel(int x, int y, double dArray[], DataBuffer data) {
 
@@ -1164,7 +1155,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if fArray is too small to hold the input.
      * 
-     * @j2sIgnore
      */
     public void setPixels(int x, int y, int w, int h,
                           float fArray[], DataBuffer data) {
@@ -1196,7 +1186,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates are
      * not in bounds, or if dArray is too small to hold the input.
      * 
-     * @j2sIgnore
      */
     public void setPixels(int x, int y, int w, int h,
                           double dArray[], DataBuffer data) {
@@ -1251,7 +1240,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates or
      * the band index are not in bounds.
      * 
-     * @j2sIgnore
      * 
      */
     public void setSample(int x, int y, int b,
@@ -1282,7 +1270,6 @@ public abstract class SampleModel
      * @throws ArrayIndexOutOfBoundsException if the coordinates or
      * the band index are not in bounds.
      * 
-     * @j2sIgnore
      */
     public void setSample(int x, int y, int b,
                           double s,
@@ -1342,7 +1329,6 @@ public abstract class SampleModel
      * the band index are not in bounds, or if fArray is too small to
      * hold the input.
      * 
-     * @j2sIgnore
      */
     public void setSamples(int x, int y, int w, int h, int b,
                            float fArray[], DataBuffer data) {
@@ -1374,7 +1360,6 @@ public abstract class SampleModel
      * the band index are not in bounds, or if dArray is too small to
      * hold the input.
      * 
-     * @j2sIgnore
      */
     public void setSamples(int x, int y, int w, int h, int b,
                            double dArray[], DataBuffer data) {

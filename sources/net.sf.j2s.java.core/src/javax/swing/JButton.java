@@ -176,7 +176,7 @@ public class JButton extends AbstractButton {
     public void setDefaultCapable(boolean defaultCapable) {
         boolean oldDefaultCapable = this.defaultCapable;
         this.defaultCapable = defaultCapable;
-        firePropertyChangeBool("defaultCapable", oldDefaultCapable, defaultCapable);
+        firePropertyChange("defaultCapable", oldDefaultCapable, defaultCapable);
     }
 
     /**

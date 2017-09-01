@@ -1429,9 +1429,9 @@ public class JViewport extends JComponent
      * @param newValue  the new value of the property
      */
     @Override
-		public void firePropertyChangeObject(String propertyName, Object oldValue,
+		public void firePropertyChange(String propertyName, Object oldValue,
                                       Object newValue) {
-        super.firePropertyChangeObject(propertyName, oldValue, newValue);
+        super.firePropertyChange(propertyName, oldValue, newValue);
         if (propertyName.equals(EnableWindowBlit)) {
             if (newValue != null) {
                 setScrollMode(BLIT_SCROLL_MODE);

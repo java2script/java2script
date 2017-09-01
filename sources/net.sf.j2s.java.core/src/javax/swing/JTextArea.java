@@ -260,7 +260,7 @@ public class JTextArea extends JTextComponent {
             int old = getTabSize();
           	// SwingJS -- temporarily using JSPlainDocument here
             doc.putProperty(JSPlainDocument.tabSizeAttribute, new Integer(size));
-            firePropertyChangeInt("tabSize", old, size);
+            firePropertyChange("tabSize", old, size);
         }
     }
 
@@ -301,7 +301,7 @@ public class JTextArea extends JTextComponent {
     public void setLineWrap(boolean wrap) {
         boolean old = this.wrap;
         this.wrap = wrap;
-        firePropertyChangeBool("lineWrap", old, wrap);
+        firePropertyChange("lineWrap", old, wrap);
     }
 
     /**
@@ -335,7 +335,7 @@ public class JTextArea extends JTextComponent {
     public void setWrapStyleWord(boolean word) {
         boolean old = this.word;
         this.word = word;
-        firePropertyChangeBool("wrapStyleWord", old, word);
+        firePropertyChange("wrapStyleWord", old, word);
     }
 
     /**

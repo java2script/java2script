@@ -161,8 +161,6 @@ public class Dimension extends Dimension2D {
     }
 
     /**
-     * @j2sIgnore
-     * 
      * Sets the size of this <code>Dimension</code> object
      * to the specified width and height.
      * This method is included for completeness, to parallel the

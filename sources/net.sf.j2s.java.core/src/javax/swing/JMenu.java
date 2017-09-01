@@ -790,8 +790,6 @@ public class JMenu extends JMenuItem implements MenuElement
      *
      * @param    item the <code>JMenuItem</code> to be removed from the menu
      * 
-     * @j2sIgnore
-     * 
      */
     public void remove(JMenuItem item) {
     	remove((Component) item);

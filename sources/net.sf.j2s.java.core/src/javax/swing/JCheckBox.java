@@ -186,7 +186,7 @@ public class JCheckBox extends JToggleButton {
     public void setBorderPaintedFlat(boolean b) {
         boolean oldValue = flat;
         flat = b;
-        firePropertyChangeBool(BORDER_PAINTED_FLAT_CHANGED_PROPERTY, oldValue, flat);
+        firePropertyChange(BORDER_PAINTED_FLAT_CHANGED_PROPERTY, oldValue, flat);
         if (b != oldValue) {
             revalidate();
             repaint();

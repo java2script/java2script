@@ -98,10 +98,6 @@ public class DefaultFormatterFactory extends JFormattedTextField.AbstractFormatt
     private JFormattedTextField.AbstractFormatter nullFormat;
 
 
-    /**
-     * @j2sIgnore
-     * 
-     */
     public DefaultFormatterFactory() {
     }
 
@@ -114,7 +110,6 @@ public class DefaultFormatterFactory extends JFormattedTextField.AbstractFormatt
      *                      JFormattedTextField.AbstractFormatter can not be
      *                      found.
      *                      
-     * @j2sIgnore
      */
     public DefaultFormatterFactory(JFormattedTextField.
                                        AbstractFormatter defaultFormat) {
@@ -132,7 +127,6 @@ public class DefaultFormatterFactory extends JFormattedTextField.AbstractFormatt
      * @param displayFormat JFormattedTextField.AbstractFormatter to be used
      *                      when the JFormattedTextField does not have focus.
      *                      
-     * @j2sIgnore
      */
     public DefaultFormatterFactory(
                      JFormattedTextField.AbstractFormatter defaultFormat,
@@ -153,7 +147,6 @@ public class DefaultFormatterFactory extends JFormattedTextField.AbstractFormatt
      * @param editFormat    JFormattedTextField.AbstractFormatter to be used
      *                      when the JFormattedTextField has focus.
      *                      
-     * @j2sIgnore
      */
     public DefaultFormatterFactory(
                    JFormattedTextField.AbstractFormatter defaultFormat,

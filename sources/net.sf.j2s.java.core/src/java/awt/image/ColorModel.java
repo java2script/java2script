@@ -1253,8 +1253,6 @@ public abstract class ColorModel implements Transparency{
      * @see WritableRaster#setDataElements
      * @see SampleModel#setDataElements
      * 
-     * @j2sIgnore
-     * 
      */
     public Object getDataElements(int[] components, int offset, Object obj) {
         throw new UnsupportedOperationException("This method has not been implemented "+
@@ -1294,10 +1292,6 @@ public abstract class ColorModel implements Transparency{
 	 * @since 1.4
 	 */
 	public int getDataElement(float[] normComponents, int normOffset) {
-		if (AU.isAI(normComponents)) {
-			Object ints = normComponents;
-			return getDataElementInt((int[]) ints, normOffset);
-		}
 		int components[] = getUnnormalizedComponents(normComponents, normOffset,
 				null, 0);
 		return getDataElement(components, 0);

@@ -530,7 +530,7 @@ public class JEditorPane extends JTextComponent {
             }
             getDocument().putProperty(Document.StreamDescriptionProperty, page);
         }
-        firePropertyChangeObject("page", loaded, page);
+        firePropertyChange("page", loaded, page);
     }
 
     /**
@@ -735,7 +735,7 @@ public class JEditorPane extends JTextComponent {
                     @Override
 										public void run() {
                         if (pageLoaded) {
-                            firePropertyChangeObject("page", old, page);
+                            firePropertyChange("page", old, page);
                         }
                     }
                 });
@@ -1158,7 +1158,7 @@ public class JEditorPane extends JTextComponent {
             this.kit.install(this);
             setDocument(this.kit.createDefaultDocument());
         }
-        firePropertyChangeObject("editorKit", old, kit);
+        firePropertyChange("editorKit", old, kit);
     }
 
     /**

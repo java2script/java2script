@@ -190,7 +190,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
 				ui.editor.setText(val);
 				// the text may have been filtered, but we should not change it yet
 				//val = ui.getComponentText();
-				ui.editor.firePropertyChangeObject("text", oldval, val);
+				ui.editor.firePropertyChange("text", oldval, val);
 				ui.domNode.setSelectionRange(dot, dot);
 			}
 			break;

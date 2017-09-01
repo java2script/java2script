@@ -122,7 +122,7 @@ public class JMenuBar extends JComponent implements MenuElement
     public void setSelectionModel(SingleSelectionModel model) {
         SingleSelectionModel oldValue = selectionModel;
         this.selectionModel = model;
-        firePropertyChangeObject("selectionModel", oldValue, selectionModel);
+        firePropertyChange("selectionModel", oldValue, selectionModel);
     }
 
 
@@ -266,7 +266,7 @@ public class JMenuBar extends JComponent implements MenuElement
       {
         boolean oldValue = paintBorder;
         paintBorder = b;
-        firePropertyChangeBool("borderPainted", oldValue, paintBorder);
+        firePropertyChange("borderPainted", oldValue, paintBorder);
         if (b != oldValue) {
             revalidate();
             repaint();
@@ -304,7 +304,7 @@ public class JMenuBar extends JComponent implements MenuElement
     public void setMargin(Insets m) {
         Insets old = margin;
         this.margin = m;
-        firePropertyChangeObject("margin", old, m);
+        firePropertyChange("margin", old, m);
         if (old == null || !old.equals(m)) {
             revalidate();
             repaint();

@@ -171,7 +171,6 @@ public final class DataBufferInt extends DataBuffer {
 	 * @param size
 	 *          The size of the banks in the <CODE>DataBuffer</CODE>.
 	 *          
-	 * @j2sIgnore
 	 * 
 	 */
 	public DataBufferInt(int dataArray[][], int size) {

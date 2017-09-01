@@ -611,7 +611,7 @@ public class Window extends Container {
 //            peer.updateIconImages();
 //        }
         // Always send a property change event
-        firePropertyChangeObject("iconImage", null, null);
+        firePropertyChange("iconImage", null, null);
     }
 
     /**
@@ -2061,7 +2061,7 @@ public class Window extends Container {
 //                    }
 //                }
             }
-            firePropertyChangeBool("alwaysOnTop", oldAlwaysOnTop, alwaysOnTop);
+            firePropertyChange("alwaysOnTop", oldAlwaysOnTop, alwaysOnTop);
         }
     }
 
@@ -2383,7 +2383,7 @@ public class Window extends Container {
 //        if (peer != null) {
 //            peer.updateFocusableWindowState();
 //        }
-        firePropertyChangeBool("focusableWindowState", oldFocusableWindowState,
+        firePropertyChange("focusableWindowState", oldFocusableWindowState,
                            focusableWindowState);
         if (oldFocusableWindowState && !focusableWindowState && isFocused()) {
             for (Window owner = getOwner();

@@ -3384,7 +3384,7 @@ public class Container extends JSComponent {
             oldProvider = focusTraversalPolicyProvider;
             focusTraversalPolicyProvider = provider;
         }
-        firePropertyChangeBool("focusTraversalPolicyProvider", oldProvider, provider);
+        firePropertyChange("focusTraversalPolicyProvider", oldProvider, provider);
     }
 
     /**

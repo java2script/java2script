@@ -356,8 +356,6 @@ public abstract class JComponent extends Container {
 	 * @param c
 	 * @return
 	 * 
-	 * @deprecated
-	 * @j2sIgnore
 	 */
 	static Graphics safelyGetGraphics(Component c) {
 		return safelyGetGraphics(c, SwingUtilities.getRoot(c));
@@ -466,7 +464,7 @@ public abstract class JComponent extends Container {
 	public void setInheritsPopupMenu(boolean value) {
 		boolean oldValue = getFlag(INHERITS_POPUP_MENU);
 		setFlag(INHERITS_POPUP_MENU, value);
-		firePropertyChangeBool("inheritsPopupMenu", oldValue, value);
+		firePropertyChange("inheritsPopupMenu", oldValue, value);
 	}
 
 	/**
@@ -505,7 +503,7 @@ public abstract class JComponent extends Container {
 		}
 		JPopupMenu oldPopup = this.popupMenu;
 		this.popupMenu = popup;
-		firePropertyChangeObject("componentPopupMenu", oldPopup, popup);
+		firePropertyChange("componentPopupMenu", oldPopup, popup);
 	}
 
 	/**
@@ -1043,12 +1041,12 @@ public abstract class JComponent extends Container {
 	@Override
 	public void print(Graphics g) {
 		setFlag(IS_PRINTING, true);
-		firePropertyChangeBool("paintingForPrint", false, true);
+		firePropertyChange("paintingForPrint", false, true);
 		try {
 			paint(g);
 		} finally {
 			setFlag(IS_PRINTING, false);
-			firePropertyChangeBool("paintingForPrint", true, false);
+			firePropertyChange("paintingForPrint", true, false);
 		}
 	}
 
@@ -1504,7 +1502,7 @@ public abstract class JComponent extends Container {
 	public void setVerifyInputWhenFocusTarget(boolean verifyInputWhenFocusTarget) {
 		boolean oldVerifyInputWhenFocusTarget = this.verifyInputWhenFocusTarget;
 		this.verifyInputWhenFocusTarget = verifyInputWhenFocusTarget;
-		firePropertyChangeBool("verifyInputWhenFocusTarget",
+		firePropertyChange("verifyInputWhenFocusTarget",
 				oldVerifyInputWhenFocusTarget, verifyInputWhenFocusTarget);
 	}
 
@@ -1698,7 +1696,7 @@ public abstract class JComponent extends Container {
 		Border oldBorder = this.border;
 
 		this.border = border;
-		firePropertyChangeObject("border", oldBorder, border);
+		firePropertyChange("border", oldBorder, border);
 		if (border != oldBorder) {
 			if (border == null
 					|| oldBorder == null
@@ -1841,7 +1839,7 @@ public abstract class JComponent extends Container {
 	public void setInputVerifier(InputVerifier inputVerifier) {
 		InputVerifier oldInputVerifier = (InputVerifier) getClientProperty(JComponent_INPUT_VERIFIER);
 		putClientProperty(JComponent_INPUT_VERIFIER, inputVerifier);
-		firePropertyChangeObject("inputVerifier", oldInputVerifier, inputVerifier);
+		firePropertyChange("inputVerifier", oldInputVerifier, inputVerifier);
 	}
 
 	/**
@@ -2593,7 +2591,7 @@ public abstract class JComponent extends Container {
 	public void setEnabled(boolean enabled) {
 		boolean oldEnabled = isEnabled();
 		super.setEnabled(enabled);
-		firePropertyChangeBool("enabled", oldEnabled, enabled);
+		firePropertyChange("enabled", oldEnabled, enabled);
 		if (enabled != oldEnabled) {
 			repaint();
 		}
@@ -3880,7 +3878,7 @@ public abstract class JComponent extends Container {
 			}
 		}
 		clientPropertyChanged(key, oldValue, value);
-		firePropertyChangeObject(key.toString(), oldValue, value);
+		firePropertyChange(key.toString(), oldValue, value);
 	}
 
 	// Invoked from putClientProperty. This is provided for subclasses
@@ -4243,7 +4241,7 @@ public abstract class JComponent extends Container {
 		boolean oldValue = getFlag(IS_OPAQUE);
 		setFlag(IS_OPAQUE, isOpaque);
 		setFlag(OPAQUE_SET, true);
-		firePropertyChangeBool("opaque", oldValue, isOpaque);
+		firePropertyChange("opaque", oldValue, isOpaque);
 	}
 
 	/**
@@ -4368,9 +4366,9 @@ public abstract class JComponent extends Container {
 	// * @param oldValue the property's previous value
 	// * @param newValue the property's new value
 	// */
-	// public void firePropertyChangeBool(String propertyName,
+	// public void firePropertyChange(String propertyName,
 	// boolean oldValue, boolean newValue) {
-	// firePropertyChangeBool0(propertyName, oldValue, newValue);
+	// firePropertyChange0(propertyName, oldValue, newValue);
 	// }
 	//
 	//
@@ -4386,7 +4384,7 @@ public abstract class JComponent extends Container {
 	// */
 	// public void firePropertyChange(String propertyName,
 	// int oldValue, int newValue) {
-	// firePropertyChangeInt(propertyName, oldValue, newValue);
+	// firePropertyChange(propertyName, oldValue, newValue);
 	// }
 	//
 	// // XXX This method is implemented as a workaround to a JLS issue with
@@ -4619,7 +4617,7 @@ public abstract class JComponent extends Container {
 	@Override
 	public void addNotify() {
 		super.addNotify();
-		firePropertyChangeObject("ancestor", null, getParent());
+		firePropertyChange("ancestor", null, getParent());
 
 		registerWithKeyboardManager(false);
 		registerNextFocusableComponent();
@@ -4638,7 +4636,7 @@ public abstract class JComponent extends Container {
 		// This isn't strictly correct. The event shouldn't be
 		// fired until *after* the parent is set to null. But
 		// we only get notified before that happens
-		firePropertyChangeObject("ancestor", getParent(), null);
+		firePropertyChange("ancestor", getParent(), null);
 
 		unregisterWithKeyboardManager();
 		deregisterNextFocusableComponent();

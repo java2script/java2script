@@ -441,7 +441,7 @@ public class JFormattedTextField extends JTextField {
      */
     public void setFormatterFactory(AbstractFormatterFactory tf) {
         AbstractFormatterFactory oldFactory = factory = tf;
-        firePropertyChangeObject("formatterFactory", oldFactory, tf);
+        firePropertyChange("formatterFactory", oldFactory, tf);
         setValue(getValue(), true, false);
     }
 
@@ -489,7 +489,7 @@ public class JFormattedTextField extends JTextField {
             format.install(this);
         }
         setEdited(false);
-        firePropertyChangeObject("textFormatter", oldFormat, format);
+        firePropertyChange("textFormatter", oldFormat, format);
     }
 
     /**
@@ -576,7 +576,7 @@ public class JFormattedTextField extends JTextField {
     private void setEditValid(boolean isValid) {
         if (isValid != editValid) {
             editValid = isValid;
-            firePropertyChangeObject("editValid", Boolean.valueOf(!isValid),
+            firePropertyChange("editValid", Boolean.valueOf(!isValid),
                                Boolean.valueOf(isValid));
         }
     }
@@ -814,7 +814,7 @@ public class JFormattedTextField extends JTextField {
         setEdited(false);
 
         if (firePC) {
-            firePropertyChangeObject("value", oldValue, value);
+            firePropertyChange("value", oldValue, value);
         }
     }
 

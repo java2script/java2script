@@ -419,7 +419,7 @@ public class JTabbedPane extends JComponent
             model.addChangeListener(changeListener);
         }
 
-        firePropertyChangeObject("model", oldModel, model);
+        firePropertyChange("model", oldModel, model);
         repaint();
     }
 
@@ -464,7 +464,7 @@ public class JTabbedPane extends JComponent
         if (this.tabPlacement != tabPlacement) {
             int oldValue = this.tabPlacement;
             this.tabPlacement = tabPlacement;
-            firePropertyChangeInt("tabPlacement", oldValue, tabPlacement);
+            firePropertyChange("tabPlacement", oldValue, tabPlacement);
             revalidate();
             repaint();
         }
@@ -517,7 +517,7 @@ public class JTabbedPane extends JComponent
         if (this.tabLayoutPolicy != tabLayoutPolicy) {
             int oldValue = this.tabLayoutPolicy;
             this.tabLayoutPolicy = tabLayoutPolicy;
-            firePropertyChangeInt("tabLayoutPolicy", oldValue, tabLayoutPolicy);
+            firePropertyChange("tabLayoutPolicy", oldValue, tabLayoutPolicy);
             revalidate();
             repaint();
         }
@@ -693,7 +693,7 @@ public class JTabbedPane extends JComponent
             addImplSAEM(component, null, -1);
             component.setVisible(false);
         } else {
-            firePropertyChangeInt("indexForNullComponent", -1, index);
+            firePropertyChange("indexForNullComponent", -1, index);
         }
 
         if (pages.size() == 1) {
@@ -1303,7 +1303,7 @@ public class JTabbedPane extends JComponent
         page.title = title;
 
         if (oldTitle != title) {
-            firePropertyChangeInt("indexForTitle", -1, index);
+            firePropertyChange("indexForTitle", -1, index);
         }
         page.updateDisplayedMnemonicIndex();
 //        if ((oldTitle != title) && (accessibleContext != null)) {
@@ -1644,7 +1644,7 @@ public class JTabbedPane extends JComponent
         Page page = pages.get(tabIndex);
         page.setMnemonic(mnemonic);
 
-        firePropertyChangeObject("mnemonicAt", null, null);
+        firePropertyChange("mnemonicAt", null, null);
     }
 
 // end of Page setters
@@ -2080,7 +2080,7 @@ public class JTabbedPane extends JComponent
                                 "Invalid mnemonic index: " + mnemonicIndex);
                 }
                 this.mnemonicIndex = mnemonicIndex;
-                JTabbedPane.this.firePropertyChangeObject("displayedMnemonicIndexAt",
+                JTabbedPane.this.firePropertyChange("displayedMnemonicIndexAt",
                                                     null, null);
             }
         }
@@ -2358,7 +2358,7 @@ public class JTabbedPane extends JComponent
                 setTabComponentAt(tabComponentIndex, null);
             }
             pages.get(index).tabComponent = component;
-            firePropertyChangeInt("indexForTabComponent", -1, index);
+            firePropertyChange("indexForTabComponent", -1, index);
         }
     }
 

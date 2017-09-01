@@ -1952,7 +1952,7 @@ public class JOptionPane extends JComponent {
 		Object oldMessage = message;
 
 		message = newMessage;
-		firePropertyChangeObject(MESSAGE_PROPERTY, oldMessage, message);
+		firePropertyChange(MESSAGE_PROPERTY, oldMessage, message);
 	}
 
 	/**
@@ -1981,7 +1981,7 @@ public class JOptionPane extends JComponent {
 		Object oldIcon = icon;
 
 		icon = newIcon;
-		firePropertyChangeObject(ICON_PROPERTY, oldIcon, icon);
+		firePropertyChange(ICON_PROPERTY, oldIcon, icon);
 	}
 
 	/**
@@ -2009,7 +2009,7 @@ public class JOptionPane extends JComponent {
 		Object oldValue = value;
 
 		value = newValue;
-		firePropertyChangeObject(VALUE_PROPERTY, oldValue, value);
+		firePropertyChange(VALUE_PROPERTY, oldValue, value);
 	}
 
 	/**
@@ -2046,7 +2046,7 @@ public class JOptionPane extends JComponent {
 		Object[] oldOptions = options;
 
 		options = newOptions;
-		firePropertyChangeObject(OPTIONS_PROPERTY, oldOptions, options);
+		firePropertyChange(OPTIONS_PROPERTY, oldOptions, options);
 	}
 
 	/**
@@ -2082,7 +2082,7 @@ public class JOptionPane extends JComponent {
 		Object oldIV = initialValue;
 
 		initialValue = newInitialValue;
-		firePropertyChangeObject(INITIAL_VALUE_PROPERTY, oldIV, initialValue);
+		firePropertyChange(INITIAL_VALUE_PROPERTY, oldIV, initialValue);
 	}
 
 	/**
@@ -2124,7 +2124,7 @@ public class JOptionPane extends JComponent {
 		int oldType = messageType;
 
 		messageType = newType;
-		firePropertyChangeInt(MESSAGE_TYPE_PROPERTY, oldType, messageType);
+		firePropertyChange(MESSAGE_TYPE_PROPERTY, oldType, messageType);
 	}
 
 	/**
@@ -2165,7 +2165,7 @@ public class JOptionPane extends JComponent {
 		int oldType = optionType;
 
 		optionType = newType;
-		firePropertyChangeInt(OPTION_TYPE_PROPERTY, oldType, optionType);
+		firePropertyChange(OPTION_TYPE_PROPERTY, oldType, optionType);
 	}
 
 	/**
@@ -2202,7 +2202,7 @@ public class JOptionPane extends JComponent {
 		Object[] oldValues = selectionValues;
 
 		selectionValues = newValues;
-		firePropertyChangeObject(SELECTION_VALUES_PROPERTY, oldValues, newValues);
+		firePropertyChange(SELECTION_VALUES_PROPERTY, oldValues, newValues);
 		if (selectionValues != null)
 			setWantsInput(true);
 	}
@@ -2232,7 +2232,7 @@ public class JOptionPane extends JComponent {
 		Object oldValue = initialSelectionValue;
 
 		initialSelectionValue = newValue;
-		firePropertyChangeObject(INITIAL_SELECTION_VALUE_PROPERTY, oldValue,
+		firePropertyChange(INITIAL_SELECTION_VALUE_PROPERTY, oldValue,
 				newValue);
 	}
 
@@ -2270,7 +2270,7 @@ public class JOptionPane extends JComponent {
 		Object oldValue = inputValue;
 
 		inputValue = newValue;
-		firePropertyChangeObject(INPUT_VALUE_PROPERTY, oldValue, newValue);
+		firePropertyChange(INPUT_VALUE_PROPERTY, oldValue, newValue);
 	}
 
 	/**
@@ -2317,7 +2317,7 @@ public class JOptionPane extends JComponent {
 		boolean oldValue = wantsInput;
 
 		wantsInput = newValue;
-		firePropertyChangeBool(WANTS_INPUT_PROPERTY, oldValue, newValue);
+		firePropertyChange(WANTS_INPUT_PROPERTY, oldValue, newValue);
 	}
 
 	/**

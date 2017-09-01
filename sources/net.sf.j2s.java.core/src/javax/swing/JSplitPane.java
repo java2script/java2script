@@ -335,7 +335,7 @@ public class JSplitPane extends JComponent {
 		dividerSizeSet = true;
 		if (oldSize != newSize) {
 			dividerSize = newSize;
-			firePropertyChangeInt(DIVIDER_SIZE_PROPERTY, oldSize, newSize);
+			firePropertyChange(DIVIDER_SIZE_PROPERTY, oldSize, newSize);
 		}
 	}
 
@@ -464,7 +464,7 @@ public class JSplitPane extends JComponent {
 
 		oneTouchExpandable = newValue;
 		oneTouchExpandableSet = true;
-		firePropertyChangeBool(ONE_TOUCH_EXPANDABLE_PROPERTY, oldValue, newValue);
+		firePropertyChange(ONE_TOUCH_EXPANDABLE_PROPERTY, oldValue, newValue);
 		repaint();
 	}
 
@@ -491,7 +491,7 @@ public class JSplitPane extends JComponent {
 		int oldLocation = lastDividerLocation;
 
 		lastDividerLocation = newLastLocation;
-		firePropertyChangeInt(LAST_DIVIDER_LOCATION_PROPERTY, oldLocation,
+		firePropertyChange(LAST_DIVIDER_LOCATION_PROPERTY, oldLocation,
 				newLastLocation);
 	}
 
@@ -532,7 +532,7 @@ public class JSplitPane extends JComponent {
 		int oldOrientation = this.orientation;
 
 		this.orientation = orientation;
-		firePropertyChangeInt(ORIENTATION_PROPERTY, oldOrientation, orientation);
+		firePropertyChange(ORIENTATION_PROPERTY, oldOrientation, orientation);
 	}
 
 	/**
@@ -563,7 +563,7 @@ public class JSplitPane extends JComponent {
 		boolean oldCD = continuousLayout;
 
 		continuousLayout = newContinuousLayout;
-		firePropertyChangeBool(CONTINUOUS_LAYOUT_PROPERTY, oldCD,
+		firePropertyChange(CONTINUOUS_LAYOUT_PROPERTY, oldCD,
 				newContinuousLayout);
 	}
 
@@ -602,7 +602,7 @@ public class JSplitPane extends JComponent {
 		double oldWeight = resizeWeight;
 
 		resizeWeight = value;
-		firePropertyChangeObject(RESIZE_WEIGHT_PROPERTY, oldWeight, value);
+		firePropertyChange(RESIZE_WEIGHT_PROPERTY, oldWeight, value);
 	}
 
 	/**
@@ -701,7 +701,7 @@ public class JSplitPane extends JComponent {
 		}
 
 		// Then listeners
-		firePropertyChangeInt(DIVIDER_LOCATION_PROPERTY, oldValue, location);
+		firePropertyChange(DIVIDER_LOCATION_PROPERTY, oldValue, location);
 
 		// And update the last divider location.
 		setLastDividerLocation(oldValue);

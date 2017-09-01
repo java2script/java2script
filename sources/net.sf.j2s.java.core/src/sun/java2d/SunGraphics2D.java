@@ -3321,7 +3321,7 @@ public abstract class SunGraphics2D
 //    }
 //
 //		@Override
-//		public void drawStringTrans(String str, float x, float y) {
+//		public void drawString(String str, float x, float y) {
 //			// TODO Auto-generated method stub
 //			
 //		}

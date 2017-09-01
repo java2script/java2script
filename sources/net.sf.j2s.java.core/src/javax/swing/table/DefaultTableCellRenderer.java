@@ -349,7 +349,7 @@ public class DefaultTableCellRenderer extends JLabel
      * for more information.
      */
     @Override
-		public void firePropertyChangeObject(String propertyName, Object oldValue, Object newValue) {
+		public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
 //        // Strings get interned...
 //        if (propertyName=="text"
 //                || propertyName == "labelFor"
@@ -360,7 +360,7 @@ public class DefaultTableCellRenderer extends JLabel
 //                    )
 //                    ) {
 //
-//            super.firePropertyChangeObject(propertyName, oldValue, newValue);
+//            super.firePropertyChange(propertyName, oldValue, newValue);
 //        }
     }
 
@@ -370,7 +370,7 @@ public class DefaultTableCellRenderer extends JLabel
      * for more information.
      */
     @Override
-		public void firePropertyChangeBool(String propertyName, boolean oldValue, boolean newValue) { }
+		public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }
 
 
     /**

@@ -570,7 +570,7 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * for more information.
     */
     @Override
-		public void firePropertyChangeObject(String propertyName, Object oldValue, Object newValue) {
+		public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
 //        // Strings get interned...
 //        if (propertyName == "text"
 //                || ((propertyName == "font" || propertyName == "foreground")
@@ -578,7 +578,7 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
 //                    && getClientProperty(javax.swing.plaf.basic.BasicHTML.propertyKey) != null
 //                    )) {
 //
-//            super.firePropertyChangeObject(propertyName, oldValue, newValue);
+//            super.firePropertyChange(propertyName, oldValue, newValue);
 //        }
     }
 
@@ -610,7 +610,7 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * for more information.
     */
     @Override
-		public void firePropertyChangeInt(String propertyName, int oldValue, int newValue) {}
+		public void firePropertyChange(String propertyName, int oldValue, int newValue) {}
 
    /**
     * Overridden for performance reasons.
@@ -639,6 +639,6 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     * for more information.
     */
     @Override
-		public void firePropertyChangeBool(String propertyName, boolean oldValue, boolean newValue) {}
+		public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) {}
 
 }

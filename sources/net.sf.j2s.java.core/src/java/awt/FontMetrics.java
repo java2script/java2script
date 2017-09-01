@@ -246,8 +246,6 @@ public abstract class FontMetrics {
      * @return    the maximum descent of any character in the
      * <code>Font</code>.
      * 
-     * @j2sIgnore
-     * 
      * @see #getMaxDescent()
      * @deprecated As of JDK version 1.1.1,
      * replaced by <code>getMaxDescent()</code>.

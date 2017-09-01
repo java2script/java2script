@@ -356,46 +356,9 @@ public class Color implements Paint /*, java.io.Serializable*/ {
 //        }
 //    }
 
-    /*
-     * only J2S constructor
-     * 
-     */
     public Color() {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * var a = arguments;
-    	 * switch(a.length) {
-    	 * case 0:
-    	 *   break;
-    	 * case 1:
-    	 *   this.value = (a[0].value ? a[0].value : 0xff000000 | a[0]);
-    	 *   break;
-    	 * case 2:
-    	 *   this.value = (a[1] ? a[0] : 0xff000000 | a[0]);
-       *   break;
-    	 * case 3:
-    	 *   var n = a[0] + a[1] + a[2];
-    	 *   if (n > 0 && n < 3.001) 
-    	 *     this.setFloat(a[0], a[1], a[2], 1);
-    	 *   else
-    	 *     this.setColor4(a[0], a[1], a[2], 255);
-    	 *   break;
-    	 * case 4:
-    	 *   var n = a[0] + a[1] + a[2] + a[3];
-    	 *   if (n > 0 && n < 4.001) 
-    	 *     this.setFloat(a[0], a[1], a[2], a[3]);
-    	 *   else
-    	 *     this.setColor4(a[0], a[1], a[2], a[3]);
-    	 *   break;
-    	 * }
-    	 * 
-    	 * return this;
-    	 */
-    	{
-    		
-    	}
     }
+    
     /**
      * Creates an opaque sRGB color with the specified red, green,
      * and blue values in the range (0 - 255).
@@ -415,7 +378,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getBlue
      * @see #getRGB
      * 
-     * @j2sIgnore
      */
     public Color(int r, int g, int b) {
         setColor4(r, g, b, 255);
@@ -438,7 +400,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getAlpha
      * @see #getRGB
      * 
-     * @j2sIgnore
      */
     public Color(int r, int g, int b, int a) {
     	setColor4(r, g, b, a);
@@ -467,7 +428,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getBlue
      * @see #getRGB
      * 
-     * @j2sIgnore
      */
     public Color(int rgb) {
         value = 0xff000000 | rgb;
@@ -490,7 +450,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getAlpha
      * @see #getRGB
      * 
-     * @j2sIgnore
      */
     public Color(int rgba, boolean hasalpha) {
         if (hasalpha) {
@@ -518,7 +477,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getBlue
      * @see #getRGB
      * 
-     * @j2sIgnore
      * @deprecated
      *   use Color.getColorF4 instead
      */
@@ -555,7 +513,6 @@ public class Color implements Paint /*, java.io.Serializable*/ {
      * @see #getAlpha
      * @see #getRGB
      * 
-     * @j2sIgnore
      * @deprecated
      *   use getColorF4 instead
      */

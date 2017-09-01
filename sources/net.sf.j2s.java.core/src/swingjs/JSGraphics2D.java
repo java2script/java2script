@@ -687,12 +687,7 @@ public class JSGraphics2D //extends SunGraphics2D
 		ctx.fillText(s, x, y);
 	}
 
-	public void drawStringUnique(String s, int x, int y) {
-		ctx.fillText(s, x, y);
-	}
-
-	
-	public void drawStringTrans(String str, float x, float y) {
+	public void drawString(String str, float x, float y) {
 		// apply affine transformation first
 		JSToolkit.notImplemented(null);
 	}
@@ -703,13 +698,13 @@ public class JSGraphics2D //extends SunGraphics2D
 	}
 
 	
-	public void drawStringAttrTrans(AttributedCharacterIterator iterator,
+	public void drawString(AttributedCharacterIterator iterator,
 			float x, float y) {
 		JSToolkit.notImplemented(null);
 	}
 
 	
-	public void translateTrans(double tx, double ty) {
+	public void translate(double tx, double ty) {
 		JSToolkit.notImplemented(null);
 	}
 

@@ -741,7 +741,7 @@ public class JDialog extends Dialog implements WindowConstants,
 
         int oldValue = this.defaultCloseOperation;
         this.defaultCloseOperation = operation;
-        firePropertyChangeInt("defaultCloseOperation", oldValue, operation);
+        firePropertyChange("defaultCloseOperation", oldValue, operation);
     }
 
    /**
@@ -792,7 +792,7 @@ public class JDialog extends Dialog implements WindowConstants,
         TransferHandler oldHandler = transferHandler;
         transferHandler = newHandler;
         SwingUtilities.installSwingDropTargetAsNecessary(this, transferHandler);
-        firePropertyChangeObject("transferHandler", oldHandler, newHandler);
+        firePropertyChange("transferHandler", oldHandler, newHandler);
     }
 
     /**

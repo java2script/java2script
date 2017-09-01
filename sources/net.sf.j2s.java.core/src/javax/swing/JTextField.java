@@ -354,7 +354,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
         } else {
             throw new IllegalArgumentException("horizontalAlignment");
         }
-        firePropertyChangeInt("horizontalAlignment", oldValue, horizontalAlignment);
+        firePropertyChange("horizontalAlignment", oldValue, horizontalAlignment);
         invalidate();
         repaint();
     }
@@ -596,7 +596,7 @@ public class JTextField extends JTextComponent implements SwingConstants {
                 actionPropertyChangeListener = createActionPropertyChangeListener(action);
                 action.addPropertyChangeListener(actionPropertyChangeListener);
             }
-            firePropertyChangeObject("action", oldValue, action);
+            firePropertyChange("action", oldValue, action);
         }
     }
 

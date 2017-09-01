@@ -343,7 +343,7 @@ public class JWindow extends Window implements RootPaneContainer {
 		TransferHandler oldHandler = transferHandler;
 		transferHandler = newHandler;
 		SwingUtilities.installSwingDropTargetAsNecessary(this, transferHandler);
-		firePropertyChangeObject("transferHandler", oldHandler, newHandler);
+		firePropertyChange("transferHandler", oldHandler, newHandler);
 	}
 
 	/**
