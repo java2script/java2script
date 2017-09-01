@@ -985,10 +985,11 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
                     result = 1;
                 } else {
                 		Comparator c = sortComparators[counter];
+                		// BH ??????? BH
                 		/**
                 		 *  @j2sNative
                 		 *  
-                		 *  result = (c != null ? c.compare(v1, v2) : typeof c == "object" ? 
+                		 *  result = (c != null ? c.compare$O$O(v1, v2) : typeof c == "object" ? 
                 		 *    ((v1 = v1.toString()) < (v2 = v2.toString) ? -1 : v1 == v2 ? 0 : 1)
                 		 *    : (v1 < v2 ? -1 : v1 == v2 ? 0 : 1));   
                 		 */

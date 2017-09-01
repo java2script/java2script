@@ -591,9 +591,9 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	@Override
 	public void remove(Component comp) {
 		if (comp == rootPane) {
-			removeChild(comp);
+			super.remove(comp);
 		} else {
-			getContentPane().removeChild(comp);
+			getContentPane().remove(comp);
 		}
 	}
 

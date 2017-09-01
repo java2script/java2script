@@ -308,7 +308,7 @@ public class JViewport extends JComponent
     @Override
 		public void remove(Component child) {
         child.removeComponentListener(viewListener);
-        removeChild(child);
+        super.remove(child);
     }
 
 

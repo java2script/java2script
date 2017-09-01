@@ -1143,11 +1143,6 @@ public class Container extends JSComponent {
      * 
      */
     public void remove(int index) {
-    	removeInt(index);
-    }
-
-	public void removeInt(int index) {
-  	// SwingJS SAEM
 		synchronized (getTreeLock()) {
 			if (index < 0 || index >= children.size()) {
 				throw new ArrayIndexOutOfBoundsException(index);
@@ -1207,18 +1202,6 @@ public class Container extends JSComponent {
      * @see #remove(int)
      */
     public void remove(Component comp) {
-    	//SwingJS SAEM
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * if (typeof comp == "number")
-    	 *   return removeInt(comp);
-    	 */
-    	removeChild(comp);
-    }
-
-	public void removeChild(Component comp) {
-  	//SwingJS SAEM
 		synchronized (getTreeLock()) {
 			if (comp.parent == this) {
 				int index = children.indexOf(comp);

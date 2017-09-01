@@ -104,7 +104,7 @@ class EventDispatchThread extends JSThread {
 		/**
 		 * @j2sNative
 		 * 
-		 *            f = function() {r.run();me.run1(mode)};
+		 *            f = function() {r.run();me.run1$I(mode)};
 		 * 
 		 */
 		{
@@ -295,7 +295,7 @@ class EventDispatchThread extends JSThread {
 		/**
 		 * @j2sNative
 		 * 
-		 *            f = function() {r.run();me.run1(mode)
+		 *            f = function() {r.run();me.run1$I(mode)
 		 *            };
 		 * 
 		 */
