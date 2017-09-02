@@ -643,9 +643,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @see java.lang.RuntimePermission
 	 */
 	public ClassLoader getClassLoader() {
-		ClassLoader cl = getClassLoader0();
-		if (cl == null)
-			return null;
+		return getClassLoader0();
 //		SecurityManager sm = System.getSecurityManager();
 //		if (sm != null) {
 //			ClassLoader ccl = ClassLoader.getCallerClassLoader();
@@ -653,27 +651,26 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 //				sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
 //			}
 //		}
-		return cl;
+//		return cl;
 	}
 
 	// Package-private to allow ClassLoader access
 	ClassLoader getClassLoader0() {
-	    @SuppressWarnings("unused")
-		String clazzName = $clazz$.__CLASS_NAME__;
+	    ClassLoader loader = null;
 		/**
 		 * getClass().getClassLoader() uses full path
 		 *  
 		 * @j2sNative
 		 * 
 		 * var baseFolder = Clazz._Loader.getJ2SLibBase(); 
-		 * var loader = Clazz._Loader.requireLoaderByBase(baseFolder);
-		 * loader.getResourceAsStream = this.getResourceAsStream;
-		 * loader.getResource = this.getResource; // BH return loader;
+		 * loader = Clazz._Loader.requireLoaderByBase(baseFolder);
+		 * var me = this;
+		 * loader.getResourceAsStream$S = function(s) { return me.getResourceAsStream$S(s.indexOf("/") == 0 ? s : "/" + s) };
+		 * loader.getResource$S = function(s) { return me.getResource$S(s.indexOf("/") == 0 ? s : "/" + s) }; 
 		 * 
 		 */
-	    
-	    {   return null;
-	}
+	    { }
+	    return loader;
 
 	}
 
@@ -2138,6 +2135,7 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	 * @since JDK1.1
 	 */
 	public InputStream getResourceAsStream(String name) {
+		// allows an optional second argument to be a base directory in JavaScript
 	    @SuppressWarnings("unused")
 		String clazzName = this.$clazz$.__CLASS_NAME__;
 		/**
@@ -2151,7 +2149,6 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 	      name = "/" + name;
 	    }
 	    if (name.indexOf ('/') == 0) {
-	      //is.url = name.substring (1);
 	      if (arguments.length == 2)  // additional argument
 	        baseFolder = arguments[1];
 	      if (!baseFolder)
@@ -2258,8 +2255,8 @@ public final class Class<T> implements java.io.Serializable, java.lang.reflect.G
 		/**
 		 * @j2sNative
 		 * 
-		 * 			var stream = this.getResourceAsStream(name); return(stream
-		 *            ? stream.url : null);
+		 * 			var stream = this.getResourceAsStream$S(name); 
+		 *          return(stream ? stream.url : null);
 		 * 
 		 */
 		{
