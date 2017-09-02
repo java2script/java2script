@@ -1526,11 +1526,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 	
 	private final static String[] nonQualifiedClasses = new String[] {
-			// these are pre-defined in j2sSwingJSext.js
+			// these classes are called from JavaScript or represent JavaScript functions
 			"swingjs.JSAppletViewer",
 			"swingjs.JSFrameViewer",
 			"java.applet.AppletContext",
 			"java.applet.AppletStub",
+			
+			// these classes need no qualification
 			"java.lang.Boolean", 
 			"java.lang.Byte", 
 			"java.lang.Character", 
@@ -1544,7 +1546,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			"java.lang.Short",
 			"java.lang.System",
 			"java.lang.String",
-			"java.lang.Thread",
+			
+			// I have no idea why these are here
 			"java.util.Date", // TODO _- really???
 			"java.util.EventListenerProxy",
 			"java.util.EventObject",
