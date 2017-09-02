@@ -177,7 +177,8 @@ Clazz.$new = function(c, args, cl) {
   // an inner class will attach arguments to the arguments returned
   // Integer will be passed as is here, without c.exClazz, or cl
   var f = new (Function.prototype.bind.apply(cl || c.exClazz || c, arguments));
-  c.apply(f, args);
+  if (args[2] != Clazz.inheritArgs)
+    c.apply(f, args);
     
   _profileNew && addProfileNew(myclass, window.performance.now() - t0);
 
@@ -277,7 +278,7 @@ Clazz.newInstance$ = function (objThis, args, isInner) {
       isNew = true;
     }
     // add all superclass references for outer object
-    var clazz = Clazz.getClass(outerObj);
+    var clazz = Clazz.getClazz(outerObj);
     do {
       var key = Clazz.getClassName(clazz, true);
       if (!isNew && b[key])
@@ -672,13 +673,13 @@ Clazz.showDuplicates = function(quiet) {
 }
 
 /**
- * Return the class of the given class or object.
+ * Return the JavaScript clazz of the given class or object.
  *
  * @param clazzHost given class or object
  * @return class name
  */
 /* public */
-Clazz.getClass = function (clazzHost) {
+Clazz.getClazz = function (clazzHost) {
   if (!clazzHost)
     return Clazz._O;  // null/undefined is always treated as Object
   if (typeof clazzHost == "function")
@@ -892,9 +893,23 @@ var addProto = function(proto, name, func) {
   return proto[name] = func;
 };
 
-var extendedObjectMethods = Clazz._extendedObjectMethods = [ "isInstance", "equals", "equals$O", "hashCode", "getClass", 
-  "clone", "finalize", "notify", "notifyAll", "wait", "to$tring", "toString" ];
+// very important that toString be LAST here
+var extendedObjectMethods = Clazz._extendedObjectMethods = [ "isInstance", "getClass", 
+  "clone", "finalize", "notify", "notifyAll", "wait", 
+  "equals", "equals$O", "hashCode", // not String
+  "to$tring", "toString" // not String, Array, Boolean
+  ];
 
+var extendObject = function(clazz) {
+  var limit = (clazz === Array || clazz === Number ? 2 : clazz === String ? 5 : 0);
+  var n = Clazz._extendedObjectMethods.length - limit;
+  var obj = Clazz._O.prototype;
+  var proto = clazz.prototype;
+  for (var i = 0; i < n; i++) {
+    var p = Clazz._extendedObjectMethods[i];
+    proto[p] = obj[p];
+  }
+}
 
 {
   var proto = Clazz._O.prototype;
@@ -928,7 +943,7 @@ var extendedObjectMethods = Clazz._extendedObjectMethods = [ "isInstance", "equa
 */
   });
 
-  addProto(proto, "getClass", function () { return Clazz.getClass (this); });
+  addProto(proto, "getClass", function () { return Clazz.$newClass(this); });
 
   addProto(proto, "clone", function () { return Clazz.clone(this); });
 
@@ -1450,6 +1465,7 @@ var inheritClass = Clazz._inheritClass = function (clazzThis, clazzSuper, objSup
   if (n) {
     for (var o in clazzSuper) {
       if (o != "b$" 
+      && o != "$Class$"
       && o != "prototype" 
       && o != "superClazz"
       && o.indexOf("__STACK") != 0
@@ -2378,7 +2394,9 @@ Clazz._4Name = function(clazzName, applet, state) {
       _Loader.loadClass(clazzName);
     }    
   }
-  return Clazz.$newClass(evalType(clazzName));
+  x = evalType(clazzName);
+  if (!x)alert(clazzName)
+  return Clazz.$newClass(x);
 };
 
 /**
@@ -2650,6 +2668,8 @@ var tryToLoadNext = function (file, fSuccess) {
         n.status = Node.STATUS_LOAD_COMPLETE;
       updateNode(n);
       lastNode = n;
+      if (pt > 800)
+        System.out.println("loading " + n);
       if (pt++ == 1000) {
         alert("There seems to be a problem loading " + n.name+ ". Check all imports and make sure that those files really exist. This could be a java.xxx vs java.xxx issue.\n"+Clazz._lastEvalError)
         break;
@@ -2838,6 +2858,7 @@ updateNode = function(node, ulev, chain, _updateNode) {
     for (var mustLength = node.musts.length, i = mustLength; --i >= 0;) {
       var n = node.musts[i];
       n.requiredBy = node;
+      System.out.println(n.name + " required by " + node.name)
       if (n.status < Node.STATUS_DECLARED && isClassDefined (n.name)) {
         var nns = []; // a stack for onLoaded events
         n.status = Node.STATUS_LOAD_COMPLETE;
@@ -3811,7 +3832,7 @@ java.lang.System = System = {
   },
   getProperty : function (key, def) {
     if (System.props)
-      return System.props.getProperty (key, def);
+      return System.props.getProperty$S$S (key, def);
     var v = System.$props[key];
     if (typeof v != "undefined")
       return v;
@@ -3859,8 +3880,6 @@ java.lang.System = System = {
 });
 
 ;(function(Con, Sys) {
-
-Sys.arraycopy$O$I$O$I$I = Sys.arraycopy;
 
 Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
@@ -4011,13 +4030,14 @@ window["java.registered"] = true;
 
 var c$, m$ = Clazz.newMethod$;
 
+/*
 Clazz._setDeclared("java.lang.Thread",java.lang.Thread = Thread = function () {});
 m$(Thread, "construct", function(){}, 1); 
 m$(Thread, "currentThread", function () {
   return this.J2S_THREAD;
 }, 1);
 Thread.J2S_THREAD = Thread.prototype.J2S_THREAD = Clazz.$new(Thread);
-
+*/
 Clazz._setDeclared("java.lang.Math", java.lang.Math = Math);
 
 Math.rint || (Math.rint = function(a) {
@@ -4052,11 +4072,8 @@ Clazz._setDeclared("java.lang.Number", java.lang.Number=Number);
 Number.prototype._numberToString=Number.prototype.toString;
 if(supportsNativeObject){
   // Number and Array are special -- do not override prototype.toString -- "length - 2" here
-  for (var i = 0; i < Clazz._extendedObjectMethods.length - 2; i++) {
-    var p = Clazz._extendedObjectMethods[i];
-    Array.prototype[p] = Clazz._O.prototype[p];
-    Number.prototype[p] = Clazz._O.prototype[p];
-  }
+  extendObject(Array);
+  extendObject(Number);
 }
 Number.__CLASS_NAME__="Number";
 Clazz._implementOf(Number,java.io.Serializable);
@@ -4268,7 +4285,7 @@ m$(Integer,"decode", function(n){
   n = Integer.decodeRaw(n);
   if (isNaN(n) || n < Integer.MIN_VALUE|| n > Integer.MAX_VALUE)
   throw Clazz.$new(NumberFormatException.construct$S,["Invalid Integer"]);
-  returnClazz.$new(Integer.construct, [n]);
+  return Clazz.$new(Integer.construct, [n]);
 }, 1);
 
 m$(Integer,"hashCode",
@@ -4681,10 +4698,7 @@ if (typeof arguments[0] != "object")this.construct(arguments[0]);
 });
 
 if (supportsNativeObject) {
-  for (var i = 0; i < Clazz._extendedObjectMethods.length; i++) {
-    var p = Clazz._extendedObjectMethods[i];
-    Boolean.prototype[p] = Clazz._O.prototype[p];
-  }
+  extendObject(Boolean);
 }
 Boolean.__CLASS_NAME__="Boolean";
 Clazz._implementOf(Boolean,[java.io.Serializable,java.lang.Comparable]);
@@ -4933,13 +4947,7 @@ if(String.prototype.$replace==null){
 Clazz._setDeclared("java.lang.String", java.lang.String=String);
 
 if(supportsNativeObject){
-for(var i = 0; i < Clazz._extendedObjectMethods.length; i++) {
-var p = Clazz._extendedObjectMethods[i];
-if("to$tring"==p||"toString"==p||"equals"==p||"equals$O"==p||"hashCode"==p){
-continue;
-}
-String.prototype[p]=Clazz._O.prototype[p];
-}
+  extendObject(String);
 }
 
 // Actually, String does not implement CharSequence because it does not
@@ -4971,7 +4979,7 @@ if (!String.format)
 
 ;(function(sp) {
 
-$replace$C$C=function(c1,c2){
+sp.$replace=function(c1,c2){
   if (c1 == c2 || this.indexOf (c1) < 0) return "" + this;
   if (c1.length == 1) {
     if ("\\$.*+|?^{}()[]".indexOf(c1) >= 0)   
@@ -6626,7 +6634,7 @@ return null;
 });
 
 
-Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSToolkit");
+//Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSToolkit");
 
 
 })(Clazz, J2S); // requires JSmolCore.js
