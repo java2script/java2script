@@ -1858,10 +1858,19 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(SuperMethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
 		String name = getJ2SName(node.getName()) + getJ2SParamQualifier(null, mBinding);
-		// BH if this is a call to super.clone() and there is no superclass, or the superclass is Object,
-		// then we need to invoke Clazz.clone(this) directly instead of calling C$.superClazz.clone()
-		buffer.append("clone".equals(name) && getSuperclassName(mBinding.getDeclaringClass()) == null
-				? "Clazz.clone(this)" : "C$.superClazz.prototype." + name + ".apply(this, arguments)");
+		// BH if this is a call to super.clone() and there is no superclass, or
+		// the superclass is Object,
+		// then we need to invoke Clazz.clone(this) directly instead of calling
+		// C$.superClazz.clone()
+		if ("clone".equals(name) && getSuperclassName(mBinding.getDeclaringClass()) == null) {
+			buffer.append("Clazz.clone(this)");
+		} else {
+			buffer.append("C$.superClazz.prototype." + name + ".apply(this, ");
+			buffer.append(" [");
+			addMethodParameterList(node.arguments(), mBinding, false, null, null);
+			buffer.append("])");
+		}
+
 		return false;
 	}
 
