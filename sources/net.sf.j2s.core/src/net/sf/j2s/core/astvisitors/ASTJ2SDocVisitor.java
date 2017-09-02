@@ -143,7 +143,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 			String text = commentEl.getText().trim();
 			if (text.length() == 0)
 				continue;
-			buf.append(text.replace('\n', ' ').replace('\r', ' '));
+			buf.append(text).append(text.endsWith(";") || text.indexOf("//") >= 0 ? "\r\n" : " ");
 			// BH note that all line terminators are removed,
 			// as this causes problems after source cleaning, which may result
 			// in code such as:
@@ -151,9 +151,21 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 			// return
 			// x
 			//
-			buf.append("\r\n");
+			// but this still does not fix the problem that we can have
+			// x = " 
+			//       "
+			// after source cleaning
 		}
 		buffer.append(fixCommentBlock(buf.toString()));
+	}
+	
+	private String fixCommentBlock(String text) {
+		if (text == null || text.length() == 0) {
+			return text;
+		}
+		return Pattern.compile("\\/-\\*(.*)\\*-\\/",
+				Pattern.MULTILINE | Pattern.DOTALL)
+				.matcher(text).replaceAll("/*$1*/");
 	}
 	
 	private void addJavadocXStringSource(TagElement tagEl, String tagName) {
@@ -503,15 +515,6 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return haveJ2SJavaDoc;
 	}
 
-	private String fixCommentBlock(String text) {
-		if (text == null || text.length() == 0) {
-			return text;
-		}
-		return Pattern.compile("\\/-\\*(.*)\\*-\\/",
-				Pattern.MULTILINE | Pattern.DOTALL)
-				.matcher(text).replaceAll("/*$1*/");
-	}
-	
 	private Javadoc[] checkJavadocs(ASTNode root) {
 		if (root instanceof CompilationUnit) {
 			List<?> commentList = ((CompilationUnit) root).getCommentList();
