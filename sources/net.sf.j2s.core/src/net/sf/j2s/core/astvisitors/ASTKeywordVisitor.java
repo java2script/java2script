@@ -1526,7 +1526,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 	
 	private final static String[] nonQualifiedClasses = new String[] {
-			// these are pre-defined in j2sSwingJSext.js 
+			// these are pre-defined in j2sSwingJSext.js
+			"swingjs.JSAppletViewer",
+			"swingjs.JSFrameViewer",
 			"java.lang.Boolean", 
 			"java.lang.Byte", 
 			"java.lang.Character", 
