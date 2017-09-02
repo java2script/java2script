@@ -126,6 +126,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	protected AbstractTypeDeclaration rootTypeNode;
 
+	private String b$name;
+
 	public boolean isMethodOverloadingSupported() {
 		return methodOverloadingSupported;
 	}
@@ -1228,7 +1230,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					System.err.println("native: " + key);
 				}
 				visitNativeJavadoc(node.getJavadoc(), null);
-				buffer.append("}");
+				buffer.append("}\r\n");
 			}
 			List<ASTFinalVariable> normalVars = ((ASTVariableVisitor) getAdaptable(
 					ASTVariableVisitor.class)).normalVars;
@@ -1368,8 +1370,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			expression.accept(this);
 			buffer.append(".");
 		}
-
-		String className = mBinding.getDeclaringClass().getQualifiedName();
+		ITypeBinding cl = mBinding.getDeclaringClass();
+		String className = cl.getQualifiedName();
 		String methodName = node.getName().getIdentifier();
 		String j2sParams = getJ2SParamQualifier(className, mBinding);
 
@@ -1394,15 +1396,48 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
+		
+		// record whether this.b$[.....] was used, and if so and it is private, we need to use it again
+		b$name = null;
 		if (!isSpecialMethod) {
 			node.getName().accept(this);
 			buffer.append(j2sParams);
 		}
-		buffer.append(isPrivateAndNotStatic ? ".apply(this, [" : " (");
+		if (isPrivateAndNotStatic) {
+			// A call to a private outer-class method from an inner class requires 
+			// this.b$["....."], not just "this"
+			// There is probably a nicer way to do this...
+			buffer.append(".apply(this");
+			if (b$name != null)
+				buffer.append(b$name);
+			buffer.append(", [");
+		} else {
+			buffer.append("(");			
+		}
 		addMethodParameterList(node.arguments(), mBinding, false, null, null);
 		if (isPrivateAndNotStatic)
 			buffer.append("]");
 		buffer.append(")");
+		return false;
+	}
+
+	private boolean addThisOrSyntheticReference(Expression node) {
+		/*
+		 * only need callbacks wrapper in inner classes or anonymous
+		 * classes.
+		 */
+		buffer.append("this");
+		Name qualifier = (node instanceof ThisExpression ? ((ThisExpression) node).getQualifier() : null);
+		if (qualifier != null) {
+			ASTNode xparent = getXparent(node);
+			if (xparent != null && xparent.getParent() != null // CompilationUnit
+					&& xparent.getParent().getParent() != null) {
+				buffer.append(".b$[\"");
+				qualifier.accept(this);
+				buffer.append("\"]");
+				return false;
+			}
+		}
 		return false;
 	}
 
@@ -1687,87 +1722,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			parent = parent.getParent();
 		}
 
-		// Start SwingJS modded 6/9/17- Reverted b$
 		if (!isThis) {
-			buffer.append("this.b$[\"");
-			buffer.append(removeJavaLang(name));
-			buffer.append("\"].");
+			buffer.append("this");
+			buffer.append(b$name = ".b$[\"" + removeJavaLang(name) + "\"]");
+			buffer.append(".");
 		}
-
-		// if (!isThis) {
-		// buffer.append("this.callbacks[\"");
-		// //buffer.append(shortenQualifiedName(name));
-		// StringBuilder dollarBuilder = new StringBuilder();
-		// ArrayList<String> levels = new ArrayList<String>();
-		// ArrayList<String> classes = new ArrayList<String>();
-		// if (originalType != null) {
-		// levels.add(originalType.getBinaryName());
-		// classes.add(originalType.getSuperclass().getBinaryName());
-		// ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
-		// while (thisDeclaringClass != null) {
-		// levels.add(thisDeclaringClass.getBinaryName());
-		// classes.add(thisDeclaringClass.getSuperclass().getBinaryName());
-		// dollarBuilder.append("$");
-		// thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
-		// }
-		// }
-		// String binaryName = declaringClass.getBinaryName();
-		// int idx = levels.indexOf(binaryName);
-		// if (idx == -1) {
-		// idx = classes.indexOf(binaryName);
-		// if (idx == -1) {
-		// // Check each super class
-		// int index = 0;
-		// ITypeBinding superClass = originalType.getSuperclass();
-		// while (superClass != null) {
-		// String superName = superClass.getBinaryName();
-		// if ("java.lang.Object".equals(superName)) {
-		// break;
-		// }
-		// if (binaryName.equals(superName)) {
-		// idx = index;
-		// //break;
-		// }
-		// superClass = superClass.getSuperclass();
-		// }
-		// ITypeBinding thisDeclaringClass = originalType.getDeclaringClass();
-		// while (thisDeclaringClass != null) {
-		// index++;
-		// superClass = thisDeclaringClass.getSuperclass();
-		// while (superClass != null) {
-		// String superName = superClass.getBinaryName();
-		// if ("java.lang.Object".equals(superName)) {
-		// break;
-		// }
-		// if (binaryName.equals(superName)) {
-		// idx = index;
-		// //break;
-		// }
-		// superClass = superClass.getSuperclass();
-		// }
-		// thisDeclaringClass = thisDeclaringClass.getDeclaringClass();
-		// }
-		// }
-		// }
-		// if (idx != -1) {
-		// for (int i = idx + 1; i < levels.size(); i++) {
-		// if (dollarBuilder.length() > 0) {
-		// dollarBuilder.deleteCharAt(0);
-		// }
-		// }
-		// } else {
-		// declaringClass = declaringClass.getDeclaringClass();
-		// while (declaringClass != null) {
-		// if (dollarBuilder.length() > 0) {
-		// dollarBuilder.deleteCharAt(0);
-		// }
-		// declaringClass = declaringClass.getDeclaringClass();
-		// }
-		// }
-		// buffer.append(dollarBuilder);
-		// buffer.append("\"].");
-		// }
-
 	}
 
 	public boolean visit(SimpleType node) {
@@ -1875,25 +1834,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(ThisExpression node) {
-		Name qualifier = node.getQualifier();
-		if (qualifier != null) {
-			ASTNode xparent = getXparent(node);
-			if (xparent == null || xparent.getParent() == null // CompilationUnit
-					|| xparent.getParent().getParent() == null) {
-				buffer.append("this");
-			} else {
-				/*
-				 * only need callbacks wrapper in inner classes or anonymous
-				 * classes.
-				 */
-				buffer.append("this.b$[\"");
-				// Start SwingJS modded 6/9/17- Reverted dollarBuilder etc.
-				qualifier.accept(this);
-				buffer.append("\"]");
-			}
-		} else {
-			buffer.append("this");
-		}
+		addThisOrSyntheticReference(node);
 		return false;
 	}
 
