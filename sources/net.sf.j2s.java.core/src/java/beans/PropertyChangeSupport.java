@@ -27,6 +27,8 @@
  */
 package java.beans;
 
+import javajs.J2SRequireImport;
+
 /**
  * This is a utility class that can be used by beans that support bound
  * properties.  You can use an instance of this class as a member field
@@ -36,6 +38,7 @@ package java.beans;
  * (and restore) any listeners that are themselves serializable.  Any
  * non-serializable listeners will be skipped during serialization.
  */
+@J2SRequireImport(PropertyChangeListener.class)
 public class PropertyChangeSupport {
     private PropertyChangeListenerMap map = new PropertyChangeListenerMap();
 
@@ -472,7 +475,8 @@ public class PropertyChangeSupport {
      * that works with {@link PropertyChangeListener PropertyChangeListener} objects.
      */
     private static final class PropertyChangeListenerMap extends ChangeListenerMap<PropertyChangeListener> {
-        private static final PropertyChangeListener[] EMPTY = {};
+
+    	private static final PropertyChangeListener[] EMPTY = {};
 
         /**
          * Creates an array of {@link PropertyChangeListener PropertyChangeListener} objects.

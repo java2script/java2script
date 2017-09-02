@@ -28,11 +28,13 @@
 package java.awt;
 
 import java.awt.peer.ComponentPeer;
+
 import javax.swing.JComponent;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
-import sun.awt.ConstrainableGraphics;
+
+import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
@@ -59,8 +61,7 @@ public abstract class JSComponent extends Component {
 
 	public boolean isRootPane, isContentPane;
 	public HTML5Canvas canvas;
-	public JSAppletViewer appletViewer = JSToolkit.getAppletViewer();    
-
+	public JSAppletViewer appletViewer = ((JSAppletThread) Thread.currentThread()).appletViewer;
 	private  JSFrameViewer frameViewer;
 
   public JSComponent() {

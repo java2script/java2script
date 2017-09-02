@@ -1,17 +1,5 @@
 package swingjs;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLStreamHandlerFactory;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
-import javax.swing.WindowConstants;
-
-import javajs.util.JSThread;
-import javajs.util.Lst;
-import javajs.util.PT;
 import java.applet.Applet;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
@@ -24,17 +12,28 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Locale;
+
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+
+import javajs.util.JSThread;
+import javajs.util.Lst;
+import javajs.util.PT;
 import sun.applet.AppletEvent;
 import sun.applet.AppletEventMulticaster;
 import sun.applet.AppletListener;
 import sun.awt.AppContext;
 import swingjs.api.Interface;
 import swingjs.api.js.HTML5Applet;
-import swingjs.api.js.JSInterface;
 import swingjs.plaf.Resizer;
 
 /**
@@ -66,8 +65,7 @@ import swingjs.plaf.Resizer;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletContext,
-		JSInterface {
+public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletContext {
 
 	/*
 	 * the JavaScript testApplet._applet object
@@ -262,7 +260,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			myThread.start();
 		else
 			showStatus("already started");
-		japplet.repaint();
+		//japplet.repaint();
 	}
 
 	synchronized public void addAppletListener(AppletListener l) {
@@ -392,6 +390,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@Override
 	public void showDocument(URL url) {
+		// note that JavaScript will overwrite this one because names will not be qualified here
 		JSToolkit.showWebPage(url, null);
 	}
 
@@ -421,7 +420,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.showAppletStatus$S("error " + (t.getMessage ?
+		 *            this.showAppletStatus("error " + (t.getMessage ?
 		 *            t.getMessage() : t)); t.printStackTrace &&
 		 *            t.printStackTrace();
 		 */
