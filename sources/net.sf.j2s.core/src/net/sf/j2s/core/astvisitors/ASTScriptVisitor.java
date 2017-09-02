@@ -1965,6 +1965,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// definition that does not remove anything and needs no {...}
 		addAnonymousFunctionWrapper(true);
 		readSources(node, "@j2sPrefix", "", " ", true);
+		
+		// add decorateAsClass
 		buffer.append("var C$ = Clazz.decorateAsClass (function () {\r\n");
 
 		// add all inner classes iteratively
@@ -2569,20 +2571,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	private void addDefaultConstructor() {
-		if (defaultConstructor != null && !defaultConstructor.isVarargs())
-			return;
-		buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
-		if (defaultConstructor == null) {
-			addSuperConstructor(null, null);
-		} else {
-			// TODO BH: This is still not right. It's specifically for anonymous
-			// constructors
-			// But I can't seem to see how to get the right vararg constructor
-			// (float...) vs (int...)
-			addThisConstructorCall(defaultConstructor, new ArrayList<Object>());
+		if (defaultConstructor == null || defaultConstructor.isVarargs()) {
+			buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
+			if (defaultConstructor == null) {
+				addSuperConstructor(null, null);
+			} else {
+				// TODO BH: This is still not right. It's specifically for
+				// anonymous
+				// constructors
+				// But I can't seem to see how to get the right vararg
+				// constructor
+				// (float...) vs (int...)
+				addThisConstructorCall(defaultConstructor, new ArrayList<Object>());
+			}
+			buffer.append("}, 1);\r\n");
 		}
-		buffer.append("}, 1);\r\n");
-
+		defaultConstructor = null;
 	}
 
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
