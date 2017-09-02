@@ -1529,6 +1529,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			// these are pre-defined in j2sSwingJSext.js
 			"swingjs.JSAppletViewer",
 			"swingjs.JSFrameViewer",
+			"java.applet.AppletContext",
+			"java.applet.AppletStub",
 			"java.lang.Boolean", 
 			"java.lang.Byte", 
 			"java.lang.Character", 

@@ -1189,6 +1189,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return false;
 		}
 		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
+		if (name.equals("construct"))
+			defaultConstructor = mBinding; // in case we are not qualifying names here
 		buffer.append("\r\nClazz.newMethod$(C$, '").append(name).append("', ").append("function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
