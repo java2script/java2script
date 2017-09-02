@@ -1538,6 +1538,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			"java.lang.Number",
 			"java.lang.reflect.Array", 
 			"java.lang.Short",
+			"java.lang.System",
 			"java.lang.String",
 			"java.lang.Thread",
 			"java.util.Date", // TODO _- really???
