@@ -1866,7 +1866,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("Clazz.clone(this)");
 		} else {
 			buffer.append("C$.superClazz.prototype." + name + ".apply(this, ");
-			buffer.append(" [");
+			buffer.append("[");
 			addMethodParameterList(node.arguments(), mBinding, false, null, null);
 			buffer.append("])");
 		}
