@@ -28,11 +28,11 @@
 
 package java.awt;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The {@code RenderingHints} class defines and manages collections of
@@ -79,6 +79,7 @@ import java.util.HashMap;
  * Other hints may be created by other packages by defining new objects
  * which subclass the {@code Key} class and defining the associated values.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class RenderingHints
     implements Map<Object,Object>, Cloneable
 {
@@ -1144,24 +1145,14 @@ public class RenderingHints
 	 * 
 	 * @return a clone of this instance.
 	 * 
-	 * @j2sOverride
 	 */
 	@Override
 	public Object clone() {
 		RenderingHints rh;
 		try {
-			/**
-			 * @j2sNative
-			 * 
-			 *            rh = Clazz.clone(this);
-			 *            if (this.hintmap != null) { rh.hintmap =
-			 *            this.hintmap.cloneHM(); }
-			 */
-			{
-				rh = (RenderingHints) super.clone();
-				if (hintmap != null) {
-					rh.hintmap = (HashMap) hintmap.clone();
-				}
+			rh = (RenderingHints) super.clone();
+			if (hintmap != null) {
+				rh.hintmap = (HashMap) hintmap.clone();
 			}
 		} catch (CloneNotSupportedException e) {
 			// this shouldn't happen, since we are Cloneable

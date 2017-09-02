@@ -1658,7 +1658,6 @@ public abstract class JComponent extends Container {
 	 * @see java.awt.Component#contains(int, int)
 	 * @see ComponentUI
 	 * 
-	 * @j2sOverride
 	 */
 	@Override
 	public boolean contains(int x, int y) {

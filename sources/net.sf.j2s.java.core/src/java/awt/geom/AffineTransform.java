@@ -2201,15 +2201,6 @@ public class AffineTransform implements Cloneable, java.io.Serializable {
      * @since 1.2
      */
     public void setTransform(AffineTransform t) {
-    	setTransformImpl(t);
-    }
-
-    /**
-     * allows for no overhead
-     * 
-     * @param t
-     */
-    public void setTransformImpl(AffineTransform t) {
       this.m00 = t.m00;
       this.m10 = t.m10;
       this.m01 = t.m01;

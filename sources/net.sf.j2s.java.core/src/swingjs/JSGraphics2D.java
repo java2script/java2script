@@ -1,10 +1,5 @@
 package swingjs;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javajs.J2SIgnoreImport;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -31,6 +26,11 @@ import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javajs.J2SIgnoreImport;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.HTML5CanvasContext2D;
@@ -761,20 +761,19 @@ public class JSGraphics2D //extends SunGraphics2D
 	/**
 	 * sets the transform matrix to the given one
 	 */
-	
+
 	public void setTransform(AffineTransform t) {
-			/**
-			 * @j2sNative
-			 * 
-			 *            this.ctx.setTransform (t.m00, t.m10, t.m01, t.m11, t.m02,
-			 *            t.m12);
-			 *            
-			 *            this.$transform.setTransformImpl(t);
-			 *            
-			 */
-			{
-				transform.setTransform(t);
-			}
+		/**
+		 * @j2sNative
+		 * 
+		 * 			this.ctx.setTransform (t.m00, t.m10, t.m01, t.m11, t.m02,
+		 *            t.m12);
+		 * 
+		 * 
+		 */
+		{
+		}
+		transform.setTransform(t);
 	}
 
   /**
@@ -782,7 +781,7 @@ public class JSGraphics2D //extends SunGraphics2D
    */
 	
 	public AffineTransform getTransform() {
-  	return (AffineTransform) transform.clone();
+		return (AffineTransform) transform.clone();
 	}
 
 //  /**
@@ -952,7 +951,16 @@ public class JSGraphics2D //extends SunGraphics2D
 		}
 	}
 
-	
+	public Graphics create(int x, int y, int width, int height) {
+		// cell renderer pane and JComponent
+		Graphics g = create();
+		if (g == null)
+			return null;
+		g.translate(x, y);
+		g.clipRect(0, 0, width, height);
+		return g;
+	}
+
 	public Graphics create() {
 		return (Graphics) clone();
 	}

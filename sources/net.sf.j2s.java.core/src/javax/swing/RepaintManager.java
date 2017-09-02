@@ -736,11 +736,11 @@ public class RepaintManager {
 
 	/**
 	 * This is invoked to process paint requests. It's needed for backward
-	 * compatability in so far as RepaintManager would previously not see paint
+	 * compatibility in so far as RepaintManager would previously not see paint
 	 * requests for top levels, so, we have to make sure a subclass correctly
 	 * paints any dirty top levels.
 	 */
-	private void prePaintDirtyRegions() {
+	 void prePaintDirtyRegions() {
 		Map<Component, Rectangle> dirtyComponents;
 		java.util.List<Runnable> runnableList;
 		synchronized (this) {

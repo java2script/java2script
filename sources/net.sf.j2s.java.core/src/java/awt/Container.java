@@ -1492,7 +1492,6 @@ public class Container extends JSComponent {
 	 * @see javax.swing.JComponent#revalidate()
 	 * @see #validateTree
 	 * 
-	 * @j2sOverride
 	 * 
 	 */
 	@Override
@@ -1806,7 +1805,6 @@ public class Container extends JSComponent {
      * @param g the specified Graphics window
      * @see   Component#update(Graphics)
      * 
-     * @j2sOverride
      * 
      */
     @Override

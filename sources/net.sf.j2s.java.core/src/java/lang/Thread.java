@@ -284,26 +284,30 @@ class Thread implements Runnable {
     	 */
     	{}
     	if (thisThread == null) {
-    		/**
-    		 * 
-    		 * technically, JSThread is an abstract class, but we go ahead and
-    		 * instantialize it anyway in JavaScript. The reason it is abstract is
-    		 * to force generation of necessary methods when using it.
-    		 * 
-    		 * @j2sNative
-    		 *
-    		 * java.lang.Thread.thisThread = "working";
-    		 * java.lang.Thread.thisThread =  new java.lang.Thread ("master");
-    		 * var name = J2S._applets["master"]._id;
-    		 * var g = new swingjs.JSThreadGroup(null, name);
-    		 * java.lang.Thread.thisThread = new javajs.util.JSThread(g, name);
-    		 *  
-    		 */
+			/**
+			 * 
+			 * technically, JSThread is an abstract class, but we go ahead and
+			 * instantialize it anyway in JavaScript. The reason it is abstract
+			 * is to force generation of necessary methods when using it.
+			 * 
+			 * @j2sNative
+			 *
+			 *
+			 * 			java.lang.Thread.thisThread = "working";
+			 *            java.lang.Thread.thisThread =
+			 *            Clazz.$new(java.lang.Thread.construct$S, ["master"]);
+			 *            var name = J2S._applets["master"]._id; var g =
+			 *            Clazz.$new(swingjs.JSThreadGroup.construct$ThreadGroup$S,
+			 *            [null, name]); java.lang.Thread.thisThread =
+			 *            Clazz.$new(javajs.util.JSThread.construct$ThreadGroup$S,
+			 *            [g, name]);
+			 * 
+			 */
     		{
     			// these are for reference only -- not used in JavaScript
     			JSThread.interrupted();
     			new swingjs.JSThreadGroup(null, null);
-      		thisThread = new Thread("master");
+    			thisThread = new Thread("master");
     		}
     		thisThread.setPriority(NORM_PRIORITY);
     	}

@@ -73,7 +73,7 @@ class ThreadGroup implements Thread.UncaughtExceptionHandler {
 
     int ngroups;
     ThreadGroup groups[];
-		private HTML5Applet html5Applet;
+    protected HTML5Applet html5Applet;
 
 //    /**
 //     * Creates an empty Thread group that is not in any Thread group.

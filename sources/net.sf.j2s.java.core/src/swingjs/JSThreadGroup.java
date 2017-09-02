@@ -79,9 +79,6 @@ class JSThreadGroup extends ThreadGroup {
 		{}
 	}
 
-	private HTML5Applet html5Applet;
-
-
 	public HTML5Applet getHtmlApplet() {
 		return html5Applet;
 	}

@@ -272,9 +272,6 @@ public class JSFrameViewer implements JSInterface {
 		}
 	}
 
-	/**
-	 * @j2sOverride
-	 */
 	public void paint(Graphics g) {
 		// Note that the applet "Panel" is never painted.
 		// This class simply maintains valuable information for applet loading.
