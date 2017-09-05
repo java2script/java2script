@@ -58,8 +58,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// TODO: resource loading using ResourceBundle.getBundle throws error when looking for format java.class
-// TODO: need real Class object Foo.class, not just Foo itself -- see Test_Class.java 
+// TODO: all calls to inner classes should be referenced to the outer class for Clazz.load
 
 // BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
