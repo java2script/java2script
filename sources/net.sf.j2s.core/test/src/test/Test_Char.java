@@ -1,5 +1,7 @@
 package test;
 
+import java.util.Properties;
+
 class Test_Char {
 	
   public static void main(String[] args) {

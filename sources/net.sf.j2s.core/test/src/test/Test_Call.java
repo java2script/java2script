@@ -13,7 +13,7 @@ public class Test_Call extends Test_call0 {
 		this.y = y;
 	}
 	
-	void setTY(int y) {
+	private void setTY(int y) {
 		this.y = y;
 	}
 	

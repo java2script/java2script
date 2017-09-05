@@ -67,10 +67,7 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 	 * @return
 	 */
 	public String discardGenericType(String name) {
-		if (name == null) {
-			return null;
-		}
-		return Bindings.removeBrackets(name);
+		return (name == null ? null : Bindings.removeBrackets(name));
 	}
 
 	/**

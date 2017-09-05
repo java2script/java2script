@@ -61,3 +61,7 @@ class Test_Class {
   }
 	
 }
+
+class Test_class1 {
+	int test;
+}
