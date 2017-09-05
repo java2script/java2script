@@ -4718,7 +4718,7 @@ return this.valueOf();
 });
 m$(Boolean,"$valueOf",
 function(b){
-return((typeof b == "string"? "true".equalsIgnoreCase(b) : b)?Boolean.TRUE:Boolean.FALSE);
+return((typeof b == "string"? "true".equalsIgnoreCase$S(b) : b)?Boolean.TRUE:Boolean.FALSE);
 }, 1);
 
 m$(Boolean,"toString",
@@ -4761,14 +4761,14 @@ return(b.value==this.value?0:(this.value?1:-1));
 });
 m$(Boolean,"toBoolean",
 function(name){
-return(typeof name == "string" ? name.equalsIgnoreCase("true") : !!name);
+return(typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name);
 }, 1);
 
 // the need is to have new Boolean(string), but that won't work with native Boolean
 // so instead we have to do a lexical switch from "new Boolean" to "Boolean.from"
 m$(Boolean,"from",
 function(name){
-return Clazz.$new(Boolean.construct, [typeof name == "string" ? name.equalsIgnoreCase("true") : !!name]);
+return Clazz.$new(Boolean.construct, [typeof name == "string" ? name.equalsIgnoreCase$S("true") : !!name]);
 }, 1);
 
 Boolean.TRUE=Boolean.prototype.TRUE=Clazz.$new(Boolean.construct, [true]);
@@ -5149,12 +5149,7 @@ sp.endsWith$S=function(suffix){
 return sn(this, suffix,this.length-suffix.length);
 };
 
-
-sp.equals=function(anObject){
-return this.valueOf()==anObject;
-};
-
-sp.equals$O=function(anObject){
+sp.equals=sp.equals$O = function(anObject){
 return this.valueOf()==anObject;
 };
 
