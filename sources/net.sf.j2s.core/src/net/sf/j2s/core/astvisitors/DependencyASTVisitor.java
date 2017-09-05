@@ -983,23 +983,25 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		return super.visit(node);
 	}
 
-	public boolean visit(InstanceofExpression node) {
-		Type type = node.getRightOperand();
-		ITypeBinding resolveTypeBinding = type.resolveBinding();
-		QNTypeBinding qn = new QNTypeBinding();
-		String qualifiedName = resolveTypeBinding.getQualifiedName();
-		qn.binding = resolveTypeBinding;
-		qualifiedName = discardGenericType(qualifiedName);
-		qn.qualifiedName = qualifiedName;
-		if (isQualifiedNameOK(qualifiedName, node) && !musts.contains(qn) && !requires.contains(qn)) {
-			if (isNodeInMustPath(node)) {
-				requires.add(qn);
-			} else {
-				optionals.add(qn);
-			}
-		}
-		return super.visit(node);
-	}
+//	public boolean visit(InstanceofExpression node) {
+//		// this is wrong. instanceof is not a dependency. 
+//		
+//		Type type = node.getRightOperand();
+//		ITypeBinding resolveTypeBinding = type.resolveBinding();
+//		QNTypeBinding qn = new QNTypeBinding();
+//		String qualifiedName = resolveTypeBinding.getQualifiedName();
+//		qn.binding = resolveTypeBinding;
+//		qualifiedName = discardGenericType(qualifiedName);
+//		qn.qualifiedName = qualifiedName;
+//		if (isQualifiedNameOK(qualifiedName, node) && !musts.contains(qn) && !requires.contains(qn)) {
+//			if (isNodeInMustPath(node)) {
+//				requires.add(qn);
+//			} else {
+//				optionals.add(qn);
+//			}
+//		}
+//		return super.visit(node);
+//	}
 
 	// /* (non-Javadoc)
 	// * @see

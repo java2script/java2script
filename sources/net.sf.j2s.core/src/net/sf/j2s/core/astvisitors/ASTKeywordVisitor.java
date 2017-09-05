@@ -706,13 +706,17 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public boolean visit(InstanceofExpression node) {
 		Type right = node.getRightOperand();
+		ITypeBinding binding = right.resolveBinding();
+		if (binding  == null)
+			return false;
 		buffer.append("Clazz.instanceOf(");
 		node.getLeftOperand().accept(this);
 		buffer.append(", ");
 		if (right instanceof ArrayType) {
-			buffer.append(ASTScriptVisitor.j2sGetArrayClass(right.resolveBinding(), 1));
+			buffer.append(ASTScriptVisitor.j2sGetArrayClass(binding, 1));
 		} else {
-			right.accept(this);
+			buffer.append("\"" + Bindings.removeBrackets(binding.getQualifiedName()) + "\"");
+			//right.accept(this);
 		}
 		buffer.append(")");
 		return false;
