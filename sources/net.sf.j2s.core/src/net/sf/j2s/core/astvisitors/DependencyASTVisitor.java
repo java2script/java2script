@@ -226,7 +226,10 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 		} else {
 			buf = new StringBuffer();
 			buf.append("Clazz.load (");
-			if (musts.size() != 0 || requires.size() != 0) {
+			
+			// add must/requires
+			
+			if (musts.size() > 0 || requires.size() > 0) {
 				buf.append("[");
 				String[] ss = musts.toArray(new String[0]);
 				Arrays.sort(ss);
@@ -241,15 +244,22 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			} else {
 				buf.append("null, ");
 			}
-			if (classNameSet.size() > 1) {
+			
+			// add class names
+			
+			boolean isArray = (classNameSet.size() > 1); 
+			if (isArray) {
 				buf.append("[");
 			}
 			joinArrayClasses(buf, getClassNames(), null);
-			if (classNameSet.size() > 1) {
+			if (isArray) {
 				buf.append("]");
 			}
 			buf.append(", ");
-			if (optionals.size() != 0) {
+			
+			// add optionals
+			
+			if (optionals.size() > 0) {
 				buf.append("[");
 				String[] ss = optionals.toArray(new String[0]);
 				Arrays.sort(ss);
@@ -258,9 +268,18 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			} else {
 				buf.append("null, ");
 			}
-			buf.append("function () {\r\n");
-			buf.append(js);
-			buf.append("});\r\n");
+			
+			// check for anonymous wrapper if not multiple classes
+			
+			if (isArray || !js.endsWith("})()\r\n") || !js.startsWith("\r\n(function")) {
+				buf.append("function(){\r\n");
+				buf.append(js);
+				buf.append("}");
+			} else {
+				// just make outer function not anonymous
+				buf.append("\r\n").append(js.substring(3, js.length() - 5));
+			}
+			buf.append(");\r\n");
 			js = buf.toString();
 		}
 		return prefix + js;
