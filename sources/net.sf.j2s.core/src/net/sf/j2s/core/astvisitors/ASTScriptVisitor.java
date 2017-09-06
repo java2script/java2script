@@ -74,7 +74,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: proper <init> processing
 // DONE: non-final variables for anonymous class definition
 // DONE: array handling in instanceof and reflection
-// DONE: String + double should be new Double(x).toString() 
+// DONE: String + double/float/Double/Float --> new Double/Float().toString() 
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 
 /**
