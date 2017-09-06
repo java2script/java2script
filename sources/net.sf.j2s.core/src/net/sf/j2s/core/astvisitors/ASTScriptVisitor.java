@@ -104,7 +104,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	/**
 	 * default constructor found by visit(MethodDeclaration)
 	 */
-	IMethodBinding defaultConstructor;
+	boolean haveDefaultConstructor;
 
 	/**
 	 * holds all static field definitions for insertion at the end of the class def
@@ -1137,27 +1137,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(MethodDeclaration node) {
 
-		if (checkj2sIgnore(node)) {
+		IMethodBinding mBinding = node.resolveBinding();
+
+		if (mBinding == null || checkj2sIgnore(node)) {
 			return false;
 		}
 
-		IMethodBinding mBinding = node.resolveBinding();
-
-		boolean isConstructor = node.isConstructor();
-		if (isConstructor) {
-			// TODO: This is not sufficient for variable args. We are not
-			// finding the correct constructor, only the first-stated
-			// For example, this(int...) and this(float...) will be wrong here.
-			// fortunately this only affects anonymous class definitions - BH
-			if (mBinding.getParameterTypes().length == 0 || mBinding.isVarargs() && (defaultConstructor == null)) {
-				defaultConstructor = mBinding;
-			}
-		}
 		boolean isStatic = isStatic(node.getModifiers());
 
 		if (!checkKeepSpecialClassMethod(node, mBinding, false))
 			return false;
-		String key = (mBinding == null ? null : mBinding.getKey());
+		String key = mBinding.getKey();
 		if (key != null)
 			methodDeclareNameStack.push(key);
 
@@ -1166,15 +1156,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			// Abstract method
 			return false;
 		}
+
+		boolean isConstructor = node.isConstructor();
 		String name = (isConstructor ? "construct" : getJ2SName(node.getName())) + getJ2SParamQualifier(null, mBinding);
-		if (isConstructor && name.equals("construct"))
-			defaultConstructor = mBinding; // in case we are not qualifying names here
+		if (isConstructor && name.equals("construct") || mBinding.isVarargs() && mBinding.getParameterTypes().length == 1)
+			haveDefaultConstructor = true; // in case we are not qualifying names here
 		buffer.append("\r\nClazz.newMethod$(C$, '").append(name).append("', function (");
 		@SuppressWarnings("unchecked")
 		List<ASTNode> parameters = node.parameters();
 		visitList(parameters, ", ");
 		buffer.append(") ");
-		if (node.isConstructor()) {
+		if (isConstructor) {
 			// BH @j2sIgnoreSuperConstructor removed from options
 			// as it is too risky to do this -- lose all initialization.
 			@SuppressWarnings("unchecked")
@@ -2475,22 +2467,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	private void addDefaultConstructor() {
-		if (defaultConstructor == null || defaultConstructor.isVarargs()) {
-			buffer.append("\r\nClazz.newMethod$(C$, 'construct', function () {");
-			if (defaultConstructor == null) {
+		// if there is no Foo() or Foo(xxx... array) 
+		// then we need to provide our own constructor
+		if (haveDefaultConstructor) {
+			haveDefaultConstructor = false;
+		} else {
+			buffer.append("\r\nClazz.newMethod$(C$, 'construct', function(){");
 				addSuperConstructor(null, null);
-			} else {
-				// TODO BH: This is still not right. It's specifically for
-				// anonymous
-				// constructors
-				// But I can't seem to see how to get the right vararg
-				// constructor
-				// (float...) vs (int...)
-				addThisConstructorCall(defaultConstructor, new ArrayList<Object>());
-			}
 			buffer.append("}, 1);\r\n");
 		}
-		defaultConstructor = null;
 	}
 
 	private void addSuperConstructor(SuperConstructorInvocation node, IMethodBinding methodDeclaration) {
