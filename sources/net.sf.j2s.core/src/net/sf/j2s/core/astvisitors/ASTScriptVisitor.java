@@ -58,9 +58,9 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// TODO: all calls to inner classes should be referenced to the outer class for Clazz.load
-// TODO: static calls to static methods do not trigger dependency
+// TODO: static calls to static methods do not trigger "musts" dependency
 
+// BH 9/4/2017 -- java.awt, javax.swing, swingjs code added; additional fixes required
 // BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
 // BH 8/19/2017 -- varargs logic fixed for missing argument
@@ -74,16 +74,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: proper <init> processing
 // DONE: non-final variables for anonymous class definition
 // DONE: array handling in instanceof and reflection
-
-// TODO: String + double should be new Double(x).toString() 
+// DONE: String + double should be new Double(x).toString() 
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 
 /**
  * 
- * @author zhou renjian
- * @author Bob Hanson
+ * @author zhou renjian    2006-12-3
+ * @author Bob Hanson    2017-08/2017-09
  *
- *         2006-12-3
+ *     
  * 
  */
 public class ASTScriptVisitor extends ASTJ2SDocVisitor {
