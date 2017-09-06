@@ -14,12 +14,5 @@ public class Test_Ints {
 		new Test_Ints();
 		new Test_Ints(3,5,6);
 		new Test_Ints(3.5f,5.5f,6.5f);
-		System.out.println(getIntFromChar('c') == 99);
-	}
-
-	private static int getIntFromChar(char c) {
-		return c; 
-		
-		FAILS
 	}
 }

@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -76,6 +77,101 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // DONE: array handling in instanceof and reflection
 // DONE: String + double/float/Double/Float --> new Double/Float().toString() 
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
+/*
+ * 
+
+parameter and return values are not indicated as boxed or unboxed but actually are.
+
+Test_Char
+		System.out.println(getCharacterFromChar1('c') == 'c');
+		System.out.println(getCharacterFromChar2('c') == 'c');
+		System.out.println(getCharFromCharacter1('c') == 'c');
+		System.out.println(getCharFromCharacter2('c') == 'c');
+
+System.out.println$Z((test.Test_Char.getCharacterFromChar1$C('c')).charValue () === 99);
+System.out.println$Z((test.Test_Char.getCharacterFromChar2$C('c')).charValue () === 99);
+System.out.println$Z(test.Test_Char.getCharFromCharacter1$Character(99) == 'c');
+System.out.println$Z(test.Test_Char.getCharFromCharacter2$Character(99) == 'c');
+
+should be
+
+System.out.println$Z((test.Test_Char.getCharacterFromChar1$C('c')).charValue () === 'c');
+System.out.println$Z((test.Test_Char.getCharacterFromChar2$C('c')).charValue () === 'c');
+System.out.println$Z(test.Test_Char.getCharFromCharacter1$Character(new Character('c')) == 'c');
+System.out.println$Z(test.Test_Char.getCharFromCharacter2$Character(new Character('c')) == 'c');
+
+
+
+ TODO #25 for int f() { return 'o' }  -- will return a string, not int 
+
+TODO #24 in a file starting with an interface and also including a class, only the class is found.
+
+interface Editable {
+    EditInfo getEditInfo(int n);
+    void setEditValue(int n, EditInfo ei);
+}
+
+class EditDialog extends Dialog implements AdjustmentListener, ActionListener, ItemListener {
+...
+
+TODO #21 (byte) ignored so that 0xFF remains 0xFF.
+
+With the implementation of Int8Array in j2sJmol, it becomes more important to consider
+the issue of no byte type in JavaScript. In particular, the construction
+
+   bytes[3] == (byte) 0xFF
+
+is being translated as
+
+   bytes[3] == 0xFF
+
+and will evaluate FALSE since JavaScript Int8Array elements cannot have value 255.
+
+The solution is to recast the byte as an integer, not the other way around:
+
+   (bytes[3] & 0xFF) == 0xFF
+
+which now works for both Java and JavaScript.
+ 
+ 
+TODO #16 when an inner public class is called by another class using instanceOf, that inner class becomes an optional load. 
+but optional loads must still be loaded, and unless declared in package.js, J2S will look for xxx.xxx.Outer/Inner.js
+because the inner classes are not fully declared. 
+
+Solution is to switch to requiring the outer class, not the inner class:
+
+@J2SRequireImport(NumberFormat.class)
+@J2SIgnoreImport(NumberFormat.Field.class)
+public class NumberFormatter extends InternationalFormatter...
+
+
+
+TODO #14 in java.awt.image.Raster, we have a static block that 
+creates new Objects. In that case, we need to add the annotation:
+      
+      @J2SRequireImport({ jsjava.awt.image.SinglePixelPackedSampleModel.class, jssun.awt.image.IntegerInterleavedRaster.class, jssun.awt.image.ByteInterleavedRaster.class })
+      
+      
+TODO #12 Inner classes must not call other inner classes defined after them in a file.
+    This showed up in java.awt.geom.Path2D.Float.CopyIterator, which extends
+    java.awt.geom.Path2D.Iterator. Since the Iterator is in the code after CopyIterator,
+    the reference to java.awt.geom.Path2D.Iterator in
+    
+    c$ = Clazz.decorateAsClass (function () {
+		this.floatCoords = null;
+		Clazz.instantialize (this, arguments);
+	}, java.awt.geom.Path2D.Float, "CopyIterator", java.awt.geom.Path2D.Iterator);
+     
+    is null, and then CopyIterator does not extend Iterator.
+   
+TODO #4 @J2SRequireImport({jsjava.util.PropertyResourceBundle.class})
+
+is required for  public abstract class ResourceBundle because the inner class
+ResourceBundle.Control requires it, but for some reason it is not included in the
+MUST list in the Clazz.load() call.
+
+
+ */
 
 /**
  * 

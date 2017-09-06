@@ -1219,41 +1219,66 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	@SuppressWarnings("null")
 	public boolean visit(ReturnStatement node) {
 		buffer.append("return");
 		Expression expression = node.getExpression();
-		if (expression != null) {
-			buffer.append(' ');
-			boolean needCharWrapping = false;
-			ASTNode parent = node.getParent();
-			while (parent != null && !(parent instanceof MethodDeclaration)) {
-				parent = parent.getParent();
-			}
-			if (parent != null) {
-				MethodDeclaration m = (MethodDeclaration) parent;
-				IMethodBinding binding = m.resolveBinding();
-				if (binding != null) {
-					ITypeBinding returnType = binding.getReturnType();
-					if (returnType != null && "char".equals(returnType.getName())) {
-						needCharWrapping = true;
-					}
-				}
-			}
-			if (needCharWrapping) {
-				ITypeBinding tBinding = expression.resolveTypeBinding();
-				if (tBinding != null && !("char".equals(tBinding.getName()))) {
-					buffer.append("String.fromCharCode (");
+		if (expression == null)
+			return false;
+		buffer.append(' ');
+		ASTNode parent = node.getParent();
+		while (parent != null && !(parent instanceof MethodDeclaration)) {
+			parent = parent.getParent();
+		}
+		ITypeBinding expType = expression.resolveTypeBinding();
+		IMethodBinding mBinding = (parent == null ? null : ((MethodDeclaration) parent).resolveBinding());
+		ITypeBinding retType = (mBinding == null || expType == null ? null : mBinding.getReturnType());
+		boolean done = false;
+		if (expression.resolveUnboxing() || expression.resolveUnboxing()) {
+			boxingNode(expression);
+			done = true;
+		}
+		if (!done && retType != null && retType != expType) {
+			String retName = retType.getName();
+			String expName = expType.getName();
+			//buffer.append("<<" + retName + " f(){return " + expName + " " + expression + "}");
+			switch (retName) {
+			case "char":
+				// char f() { return ... }
+				if (!("char".equals(expName))) {
+					buffer.append("String.fromCharCode(");
 					expression.accept(this);
 					buffer.append(")");
-				} else {
-					expression.accept(this);
+					done = true;
 				}
-			} else {
-				expression.accept(this);
+				break;
+			case "String":
+				break;
+			default:
+				if (("char".equals(expName))) {
+					if ("Character".equals(retName)) {
+						buffer.append("new Character(");
+						expression.accept(this);
+						buffer.append(")");
+					} else {
+						buffer.append("(");
+						expression.accept(this);
+						buffer.append(").charCodeAt(0)");
+					}
+					done = true;
+				}
+				break;
 			}
+
 		}
-		buffer.append(";\r\n");
+		if (!done) {
+			expression.accept(this);
+		}
 		return false;
+	}
+
+	public void endVisit(ReturnStatement node) {
+		buffer.append(";\r\n");
 	}
 
 	public boolean visit(StringLiteral node) {
