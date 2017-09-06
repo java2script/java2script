@@ -79,27 +79,28 @@ import javajs.api.JSONEncodable;
  */
 public class BS implements Cloneable, JSONEncodable {
   /*
-   * BitSets are packed into arrays of "words."
+   * BitSets are packed into arrays of "wrangeords."
    * 
    * An int, which consists of 32 bits, requiring 5 address bits, is used for
    * the JavaScript port.
    */
   private final static int ADDRESS_BITS_PER_WORD = 5;
   private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+  protected final static int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
   /* Used to shift left or right for a partial word mask */
-  private static final int WORD_MASK = 0xffffffff;
+  protected static final int WORD_MASK = 0xffffffff;
 
 
   /**
    * The internal field corresponding to the serialField "bits".
    */
-  private int[] words;
+  protected int[] words;
 
   /**
    * The number of words in the logical size of this BitSet.
    */
-  private transient int wordsInUse = 0;
+  protected transient int wordsInUse = 0;
 
   /**
    * Whether the size of "words" is user-specified. If so, we assume the user
@@ -115,7 +116,7 @@ public class BS implements Cloneable, JSONEncodable {
    * @param bitIndex 
    * @return b
    */
-  private static int wordIndex(int bitIndex) {
+  protected static int wordIndex(int bitIndex) {
     return bitIndex >> ADDRESS_BITS_PER_WORD;
   }
 
@@ -124,7 +125,7 @@ public class BS implements Cloneable, JSONEncodable {
    * WARNING:This method assumes that the number of words actually in use is
    * less than or equal to the current value of wordsInUse!
    */
-  private void recalculateWordsInUse() {
+  protected void recalculateWordsInUse() {
     // Traverse the bitset until a used word is found
     int i;
     for (i = wordsInUse - 1; i >= 0; i--)
@@ -159,7 +160,7 @@ public class BS implements Cloneable, JSONEncodable {
     return bs;
   }
 
-  private void init(int nbits) {
+  protected void init(int nbits) {
     // nbits can't be negative; size 0 is OK
     if (nbits < 0)
       throw new NegativeArraySizeException("nbits < 0: " + nbits);
@@ -194,7 +195,7 @@ public class BS implements Cloneable, JSONEncodable {
    * @param wordIndex
    *          the index to be accommodated.
    */
-  private void expandTo(int wordIndex) {
+  protected void expandTo(int wordIndex) {
     int wordsRequired = wordIndex + 1;
     if (wordsInUse < wordsRequired) {
       ensureCapacity(wordsRequired);
