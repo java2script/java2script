@@ -1474,16 +1474,22 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	public boolean visit(WhileStatement node) {
 		buffer.append("while (");
 		node.getExpression().accept(this);
-		buffer.append(") ");
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
 	}
 
-	protected void boxingNode(ASTNode element) {
+	/**
+	 * box or unbox as necessary
+	 * 
+	 * @param element
+	 * @return true if boxing or unboxing
+	 */
+	protected boolean boxingNode(ASTNode element) {
 		if (element instanceof Expression) {
 			Expression exp = (Expression) element;
 			if (exp.resolveBoxing()) {
+				// expression is the site of a boxing conversion
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
 				if (typeBinding.isPrimitive()) {
 					String name = typeBinding.getName();
@@ -1493,9 +1499,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					getBuffer().append("new " + name + " (");
 					element.accept(this);
 					getBuffer().append(")");
-					return;
+					return true;
 				}
 			} else if (exp.resolveUnboxing()) {
+				// expression is the site of an unboxing conversion
 				ITypeBinding typeBinding = exp.resolveTypeBinding();
 				if (!typeBinding.isPrimitive()) {
 					String name = typeBinding.getQualifiedName();
@@ -1504,11 +1511,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					getBuffer().append("(");
 					element.accept(this);
 					getBuffer().append(")." + name + "Value ()");
-					return;
+					return true;
 				}
 			}
 		}
 		element.accept(this);
+		return false;
 	}
 
 	private final static String defaultNonQualified = 

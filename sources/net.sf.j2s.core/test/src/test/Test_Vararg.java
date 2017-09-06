@@ -3,12 +3,12 @@ package test;
 @SuppressWarnings("unused")
 class Test_Vararg {
 
-	Test_Vararg() {
-		System.out.println("Test_Vararg null");
+	Test_Vararg(float... a) {
+		System.out.println("Test_Vararg float... " + (a.length > 0 ? a[0] : null));
 	}
 
 	Test_Vararg(int... a) {
-		System.out.println("Test_Vararg a" + a[0]);
+		System.out.println("Test_Vararg int... " + (a.length > 0 ? a[0] : null));
 	}
 
 	private void testVar(String s, int i) {
@@ -17,6 +17,10 @@ class Test_Vararg {
 
 	private void testVar(String s, int... a) {
 		System.out.println("testVar len=" + a.length + " " + s);
+	}
+
+	private void testVar(String s, float... a) {
+		System.out.println("testVar float... len=" + a.length + " " + s);
 	}
 
 	private void testVar2(String s, int[]... aa) {
@@ -40,11 +44,11 @@ class Test_Vararg {
 		t21.testVar2("int[][]");
 		t21.testVar3("Object[]", new Object[] {"1", "2", "3"});
 		t21.testVar3("Object[]", new Object[] {} , new Object[] {});
-		try {
-		t21.testVar("int[]", null);
-		} catch (NullPointerException e) {
-			System.out.println("ok - npe");
-		}
+//		try {
+//		t21.testVar("int[]", null);
+//		} catch (NullPointerException e) {
+//			System.out.println("ok - npe");
+//		}
 
 	}
 
