@@ -212,8 +212,8 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
 			boolean supportsInterfaceCasting = "enable".equals(getProperty(props, "j2s.compiler.interface.casting"));
 			visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
-			boolean objectStaticFields = "enable".equals(getProperty(props, "j2s.compiler.static.quirks"));
-			visitor.setSupportsObjectStaticFields(objectStaticFields);
+			//boolean objectStaticFields = "enable".equals(getProperty(props, "j2s.compiler.static.quirks"));
+			//visitor.setSupportsObjectStaticFields(objectStaticFields);
 			boolean isDebugging = "debug".equals(getProperty(props, "j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
 			dvisitor.setDebugging(isDebugging);

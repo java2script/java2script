@@ -146,7 +146,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		rootTypeNode = node;
 		methodOverloadingSupported = parent.methodOverloadingSupported;
 		interfaceCastingSupported = parent.interfaceCastingSupported;
-		supportsObjectStaticFields = parent.supportsObjectStaticFields;
+//		supportsObjectStaticFields = parent.supportsObjectStaticFields;
 		definedPackageNames = parent.definedPackageNames;
 		setDebugging(parent.isDebugging());
 		// BH abandoning all compiler variable name compressing -- Google Closure Compiler is way better
@@ -842,14 +842,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// Expression . Identifier
 		// TODO: more complicated rules should be considered. read the JavaDoc
 		IVariableBinding varBinding = node.resolveFieldBinding();
-		ITypeBinding declaring;
-		String qdName;
 		Expression expression = node.getExpression();
-		if (!supportsObjectStaticFields && varBinding != null && isStatic(varBinding)
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(expression instanceof SimpleName || expression instanceof QualifiedName)
-				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qdName.startsWith("net.sf.j2s.html.")) {
+		if (checkStaticBinding(varBinding)) {
 			buffer.append('(');
 			expression.accept(this);
 			buffer.append(", ");

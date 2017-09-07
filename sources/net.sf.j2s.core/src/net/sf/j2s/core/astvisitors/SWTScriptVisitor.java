@@ -12,6 +12,7 @@ package net.sf.j2s.core.astvisitors;
 
 import java.util.Iterator;
 import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -25,7 +26,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -133,13 +133,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		if (nameBinding instanceof IVariableBinding) {
 			varBinding = (IVariableBinding) nameBinding;
 		}
-		ITypeBinding declaring = null;
-		String qdName = null;
-		if (!supportsObjectStaticFields && varBinding != null 
-				&& (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null 
-				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qdName.startsWith("net.sf.j2s.html.")) {
+		if (/*!supportsObjectStaticFields && */ checkStaticBinding(varBinding)) {
 			IBinding qBinding = node.getQualifier().resolveBinding();
 			if (!(qBinding != null && qBinding instanceof ITypeBinding)) {
 				staticFields = true;
