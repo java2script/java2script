@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
 
+// BH 9/8/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
 // BH 9/7/2017 -- fixed multiple issues with char and Character
 // BH 9/4/2017 -- java.awt, javax.swing, swingjs code added; additional fixes required
 // BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
@@ -90,26 +91,6 @@ interface Editable {
 class EditDialog extends Dialog implements AdjustmentListener, ActionListener, ItemListener {
 ...
 
-TODO #21 (byte) ignored so that 0xFF remains 0xFF.
-
-With the implementation of Int8Array in j2sJmol, it becomes more important to consider
-the issue of no byte type in JavaScript. In particular, the construction
-
-   bytes[3] == (byte) 0xFF
-
-is being translated as
-
-   bytes[3] == 0xFF
-
-and will evaluate FALSE since JavaScript Int8Array elements cannot have value 255.
-
-The solution is to recast the byte as an integer, not the other way around:
-
-   (bytes[3] & 0xFF) == 0xFF
-
-which now works for both Java and JavaScript.
- 
- 
 TODO #16 when an inner public class is called by another class using instanceOf, that inner class becomes an optional load. 
 but optional loads must still be loaded, and unless declared in package.js, J2S will look for xxx.xxx.Outer/Inner.js
 because the inner classes are not fully declared. 

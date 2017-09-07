@@ -797,7 +797,7 @@ solution: recast as:
 
 
 
-TODO #21 (byte) ignored so that 0xFF remains 0xFF.
+FIXED #21 (byte) ignored so that 0xFF remains 0xFF.
 
 With the implementation of Int8Array in j2sJmol, it becomes more important to consider
 the issue of no byte type in JavaScript. In particular, the construction
