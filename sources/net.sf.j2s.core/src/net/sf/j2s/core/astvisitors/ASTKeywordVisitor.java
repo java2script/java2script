@@ -226,18 +226,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	public boolean visit(AssertStatement node) {
-		/*
-		 * TODO: should be implemented
-		 */
-		// return super.visit(node);
-		/*
-		 * The assert statement should be passed when debugging in native Java
-		 * application mode. No need for JavaScript to throws errors.
-		 */
-		return false;
-	}
-
 	@SuppressWarnings("null")
 	public boolean visit(Assignment node) {
 		Expression left = node.getLeftHandSide();

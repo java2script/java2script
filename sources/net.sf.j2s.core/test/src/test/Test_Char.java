@@ -9,53 +9,38 @@ class Test_Char {
 		char c = (char) 0xdf84;
 		int i = (int) c;
 		c = (char) 0xd800df84;
-		System.out.println(i == 57220);
+		assert(i == 57220);
 		System.out.println(s.length() + " " + Character.charCount(s.codePointAt(0)) + " " + Character.getName(c));
 		
-		System.out.println(getIntFromChar1('c') == 99);
-		System.out.println(getIntFromChar2('c') == 99);
-//		System.out.println$Z(test.Test_Char.getIntFromChar1$C('c') == 99);
-//		System.out.println$Z(test.Test_Char.getIntFromChar2$C('c') == 99);
+		assert(getIntFromChar1('c') == 99);
+		assert(getIntFromChar2('c') == 99);
 		
-		System.out.println(getCharacterFromChar1('c') == 'c');
-		System.out.println(getCharacterFromChar2('c') == 'c');
-//		System.out.println$Z(((test.Test_Char.getCharacterFromChar1$C('c'))).charValue () === 99);
-//		System.out.println$Z(((test.Test_Char.getCharacterFromChar2$C('c'))).charValue () === 99);
+		assert(getCharacterFromChar1('c') == 'c');
+		assert(getCharacterFromChar2('c') == 'c');
 
-		System.out.println(getCharFromCharacter1('c') == new Character('c'));
-		System.out.println(getCharFromCharacter2('c') == 'c');
-//		System.out.println$Z((test.Test_Char.getCharFromCharacter1$Character(99)).charCodeAt (0) == ((Clazz.$new(Character.construct,['c']))).charValue ());
-//		System.out.println$Z(test.Test_Char.getCharFromCharacter2$Character(99) == 'c');
-				
-		System.out.println(getIntFromInteger(99) == 'c');
-//		System.out.println$Z(test.Test_Char.getIntFromInteger$Integer(new Integer ((99))) == 99);
-		System.out.println(getIntegerFromInt(Integer.valueOf(99)) == 'c');
-//		System.out.println$Z(test.Test_Char.getIntegerFromInt$I(((Integer.$valueOf(99))).intValue ()) == 99);
+		assert(getCharFromCharacter1('c') == new Character('c'));
+		assert(getCharFromCharacter2('c') == 'c');
+		assert(getIntFromInteger(99) == 'c');
+		assert(getIntegerFromInt(Integer.valueOf(99)) == 'c');
 		
-		System.out.println(new Double(3) > new Double(1));
-		System.out.println(new Double(3) <= new Float(5));
-//		System.out.println$Z((( new Double(3))).doubleValue () > (( new Double(1))).doubleValue ());
-//		System.out.println$Z((( new Double(3))).doubleValue () <= (( new Float(5))).floatValue ());
+		assert(new Double(3) > new Double(1));
+		assert(new Double(3) <= new Float(5));
 
 		char cc = 'c';
 		cc = new Character('d');
 		cc += new Character('\1');
 		cc += 3 + 6 + new Character('\1');
-        System.out.println(cc == 'o');
+        assert(cc == 'o');
         int ii = 3 + 6 + new Character('\1');
-        System.out.println(ii == 10);
+        assert(ii == 10);
 		double d = 3;
 		int di = 'c';
 		d /= 'c';
 		di /= 'c';
-		System.out.println(d == 3.0/99);
-		System.out.println(di == 1);
+		assert(d == 3.0/99);
+		assert(di == 1);
 		di = 100;
-		System.out.println(di / 7 / 3 == 4);
-		
-		// TODO check for String + Double/Float --> String + ... .toString()
-		// and change to String + double/float --> String + new
-		// Double/Float(...).toString()
+		assert(di / 7 / 3 == 4);
 
 		s = "testing" + 3;
 		s = "testing" + 3 + cc + 5;
@@ -78,15 +63,15 @@ class Test_Char {
 		s += new Double(3);
 		s += new Double(3) + cc + 5;
 		System.out.println(s);
-		System.out.println(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0"));
+		assert(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0"));
 		d = 333.5;
-        System.out.println((int)d == 333);
-        System.out.println((int)-d == -333);
-        System.out.println((byte)d == 77);
+        assert((int)d == 333);
+        assert((int)-d == -333);
+        assert((byte)d == 77);
         int b = 255;
-        System.out.println((byte) b == -1);
+        assert((byte) b == -1);
         b = 99;
-        System.out.println((char) b == 'c');
+        assert((char) b == 'c');
 	}
 
 	private static int getIntFromInteger(Integer i) {

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -388,6 +389,18 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				element.accept(this);
 		}
 		buffer.append("}, 1);\r\n");
+	}
+
+	public boolean visit(AssertStatement node) {
+		Expression msg = node.getMessage();
+		buffer.append("Clazz.assert(C$, function(){return ");
+		node.getExpression().accept(this);
+		if (msg != null) {
+			buffer.append("}, function(){return ");
+			msg.accept(this);
+		}
+		buffer.append("});\r\n");
+		return false;
 	}
 
 	public boolean visit(CastExpression node) {
