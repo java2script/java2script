@@ -13,6 +13,7 @@
 
 // TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
 
+// BH 9/7/2017 10:53:30 AM adds Clazz.assert; deprecates all Clazz.floatToInt, floatToByte, etc. 
 // BH 8/30/2017 6:40:11 PM adds $newClass()
 // BH 8/26/2017 9:45:55 AM fix for URL.getContent()
 // BH 8/24/2017 1:54:01 AM fix for static Character.toUpperCase, .toLowerCase 
@@ -162,8 +163,31 @@ Clazz.makeConstructor = function(){debugger}
 
 Clazz.defineMethod = function(){debugger}
 
-Clazz.popup = Clazz.assert = Clazz.log = Clazz.error = window.alert;
+Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
+Clazz._assertEnabled = true;
+Clazz._assertFunction = null;
+Clazz.assert = function(clazz, tf, msg) {
+  if (!Clazz._assertEnabled)return;
+  var ok = true;
+  try {
+    ok = tf.apply(clazz)
+    if (!ok)
+      msg = msg.apply(clazz);  
+  } catch (e) {
+    ok = false;
+  }
+  if (!ok) {
+    if (Clazz._assertFunction) {
+      return Clazz._assertFunction(msg || Clazz.getStackTrace());
+    }
+    Clazz.loadClass("java.lang.AssertionError");
+    if (msg == null)
+      throw new AssertionError();
+    else
+      throw Clazz.$new(AssertionError.construct$S, [msg]);
+  }
+}
 //J2S._debugCode = false;
 
 Clazz.$new = function(c, args, cl) {
@@ -184,6 +208,7 @@ Clazz.$new = function(c, args, cl) {
 
   return f;
 }
+
 
 Clazz.$newClass = function(cl) {
   // $Class$ is the java.lang.Class object wrapper
@@ -1552,50 +1577,13 @@ java.lang.ClassLoader = {
   __CLASS_NAME__ : "ClassLoader"
 };
 
-/******************************************************************************
- * Copyright (c) 2007 java2script.org and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     Zhou Renjian - initial API and implementation
- *****************************************************************************/
-/*******
- * @author zhou renjian
- * @create March 10, 2006
- *******/
-
-/**
- * Once ClassExt.js is part of Class.js.
- * In order to make the Class.js as small as possible, part of its content
- * is moved into this ClassExt.js.
- *
- * See also http://j2s.sourceforge.net/j2sclazz/
- */
- 
-/**
- * Clazz.MethodNotFoundException is used to notify the developer about calling
- * methods with incorrect parameters.
- */
-
 //////// (int) conversions //////////
 
-Clazz.floatToInt = function (x) {
+// deprecated
+Clazz.doubleToInt = Clazz.floatToInt = function (x) {
   // asm.js-style conversion
   return x|0;
 };
-
-Clazz.floatToByte = Clazz.floatToShort = Clazz.floatToLong = Clazz.floatToInt;
-Clazz.doubleToByte = Clazz.doubleToShort = Clazz.doubleToLong = Clazz.doubleToInt = Clazz.floatToInt;
-
-Clazz.floatToChar = function (x) {
-  return String.fromCharCode (isNaN(x) ? 0 : x < 0 ? Math.ceil(x) : Math.floor(x));
-};
-
-Clazz.doubleToChar = Clazz.floatToChar;
-
 
 
 ///////////////////////////////// Array additions //////////////////////////////
@@ -4080,18 +4068,19 @@ Number.compare = function(a,b) { return (a < b ? -1 : a == b ? 0 : 1) };
 m$(Number,"shortValue",
 function(){
 var x = Math.round(this)&0xffff;
-return (this < 0 && x > 0 ? x - 0x10000 : x);
+return (this < 0 && x > 0 || x == 0xffff ? x - 0x10000 : x);
 });
 
 m$(Number,"byteValue",
 function(){
 var x = Math.round(this)&0xff;
-return (this < 0 && x > 0 ? x - 0x100 : x);
+return (this < 0 && x > 0  || x == 0xff ? x - 0x100 : x);
 });
 
 m$(Number,"intValue",
 function(){
-return Math.round(this)&0xffffffff;
+var x = Math.round(this)&0xffffffff;
+return (this < 0 && x > 0  || x == 0xffffffff ? x - 0x100000000 : x);
 });
 
 m$(Number,"longValue",
@@ -4155,6 +4144,7 @@ m$(Integer, "construct", function(v){
  v == null && (v = 0);
  if (typeof v != "number")
   v = Integer.parseIntRadix(v, 10);
+ v = v.intValue();  
  this.valueOf=function(){return v;};
 }, 1);
 
@@ -4450,9 +4440,8 @@ m$(Byte, "construct", function(v){
  if (typeof v != "number")
    v = Integer.parseIntRadix(v, 10);
  v = v.byteValue();
-this.valueOf=function(){
-return v;
-};
+this.valueOf=function(){return v;};
+this.byteValue = function(){return v};
 }, 1);
 
 Byte.toString=Byte.prototype.toString=function(){
@@ -5465,6 +5454,11 @@ if (typeof arguments[0] != "object")this.construct(arguments[0]);
 Clazz._setDeclared("java.lang.Character", java.lang.Character); 
 setJ2STypeclass(Character, "char", "C");
 
+m$(c$,"getName",
+function(){
+return "?";
+}, 1);
+
 m$(c$,"construct",
 function(value){
 this.value=value;
@@ -5474,6 +5468,7 @@ m$(c$,"charValue",
 function(){
 return this.value;
 });
+
 m$(c$,"hashCode",
 function(){
 return(this.value).charCodeAt(0);
@@ -5929,7 +5924,6 @@ declareType(java.lang,"LinkageError",Error);
 declareType(java.lang,"VirtualMachineError",Error);
 declareType(java.lang,"IncompatibleClassChangeError",LinkageError);
 
-
 declareType(java.lang,"AbstractMethodError",IncompatibleClassChangeError);
 declareType(java.lang,"ArithmeticException",RuntimeException);
 declareType(java.lang,"ArrayStoreException",RuntimeException);
@@ -5963,12 +5957,6 @@ declareType(java.lang,"UnsatisfiedLinkError",LinkageError);
 declareType(java.lang,"UnsupportedClassVersionError",ClassFormatError);
 declareType(java.lang,"UnsupportedOperationException",RuntimeException);
 declareType(java.lang,"VerifyError",LinkageError);
-
-
-var c$=declareType(java.lang,"ArrayIndexOutOfBoundsException",IndexOutOfBoundsException);
-m$(c$, "construct$I", function() {
-c$.superClazz.construct$S.apply(this, ["Array index out of range: "+index]);
-}, 1);
 
 declareType(java.lang,"ClassCastException",RuntimeException);
 c$=Clazz.decorateAsClass(java.lang,"ClassNotFoundException",function(){this.ex=null;},Exception);
