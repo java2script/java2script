@@ -79,7 +79,14 @@ class Test_Char {
 		s += new Double(3) + cc + 5;
 		System.out.println(s);
 		System.out.println(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0"));
-
+		d = 333.5;
+        System.out.println((int)d == 333);
+        System.out.println((int)-d == -333);
+        System.out.println((byte)d == 77);
+        int b = 255;
+        System.out.println((byte) b == -1);
+        b = 99;
+        System.out.println((char) b == 'c');
 	}
 
 	private static int getIntFromInteger(Integer i) {

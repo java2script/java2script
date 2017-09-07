@@ -56,6 +56,8 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+// TODO: assert 
+
 // TODO: static calls to static methods do not trigger "musts" dependency
 
 // BH 9/7/2017 -- fixed multiple issues with char and Character
@@ -408,105 +410,38 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(CastExpression node) {
-		//TODO: some casting should have its meaning! int to byte, int to short, long to int will lose values
 		Expression expression = node.getExpression();
-		ITypeBinding typeBinding = expression.resolveTypeBinding();
+		ITypeBinding expBinding = expression.resolveTypeBinding();
 		Type typeTO = node.getType();
-		if (typeTO.isPrimitiveType() && typeBinding != null) {
-			String nameFROM = typeBinding.getName();
+		String fromValue = "";
+		String toValue = "";
+		if (expBinding != null && typeTO.isPrimitiveType()) {
+			String nameFROM = expBinding.getName();
 			Code codeTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode();
-			if (codeTO == PrimitiveType.INT 
-					|| codeTO == PrimitiveType.BYTE 
-					|| codeTO == PrimitiveType.SHORT
-					|| codeTO == PrimitiveType.LONG) {
-				switch (nameFROM) {
-				default:
-					break;
+			String nameTO = codeTO.toString();
+			if (!nameTO.equals(nameFROM)) {
+				fromValue = "((";
+				toValue = ")|0)";
+				switch (nameTO) {
 				case "char":
-					buffer.append("(");
-					if (expression instanceof ParenthesizedExpression) {
-						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-						pe.getExpression().accept(this);
-					} else {
-						expression.accept(this);
-					}
-					buffer.append(").charCodeAt (0)");
-					return false;
-				case "float":
-				case "double":
-					buffer.append("Clazz.");
-					buffer.append(nameFROM);
-					buffer.append("To");
-					String targetType = codeTO.toString();
-					buffer.append(targetType.substring(0, 1).toUpperCase());
-					buffer.append(targetType.substring(1));
-					buffer.append(" (");
-					if (expression instanceof ParenthesizedExpression) {
-						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-						pe.getExpression().accept(this);
-					} else {
-						expression.accept(this);
-					}
-					buffer.append(")");
-					return false;
-				}
-			} else if (codeTO == PrimitiveType.CHAR) {
-				switch (nameFROM) {
-				case "char":
-				default:
+					fromValue = "String.fromCharCode((";
 					break;
-				case "float":
-				case "double":
-					buffer.append("Clazz.");
-					buffer.append(nameFROM);
-					buffer.append("ToChar (");
-					if (expression instanceof ParenthesizedExpression) {
-						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-						pe.getExpression().accept(this);
-					} else {
-						expression.accept(this);
-					}
-					buffer.append(")");
-					return false;
-				case "int":
 				case "byte":
 				case "short":
+				case "int":
 				case "long":
-					Object constantValue = expression.resolveConstantExpressionValue();
-					if (constantValue != null) {
-						if (constantValue instanceof Integer) {
-							int value = ((Integer) constantValue).intValue();
-							if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
-									|| (value >= 'a' && value <= 'z')) {
-								buffer.append('\'');
-								buffer.append((char) value);
-								buffer.append('\'');
-								return false;
-							}
-						} else if (constantValue instanceof Long) {
-							long value = ((Long) constantValue).longValue();
-							if ((value >= '0' && value <= '9') || (value >= 'A' && value <= 'Z')
-									|| (value >= 'a' && value <= 'z')) {
-								buffer.append('\'');
-								buffer.append((char) value);
-								buffer.append('\'');
-								return false;
-							}
-						}
-					}
-					buffer.append("String.fromCharCode (");
-					if (expression instanceof ParenthesizedExpression) {
-						ParenthesizedExpression pe = (ParenthesizedExpression) expression;
-						pe.getExpression().accept(this);
-					} else {
-						expression.accept(this);
-					}
-					buffer.append(")");
-					return false;
+					toValue = (nameFROM.equals("char") ? ")).charCodeAt(0)" : toValue) + "." + nameTO + "Value()";
+					break;
+				default:
+					break;
 				}
+				if (expression instanceof ParenthesizedExpression)
+					expression = ((ParenthesizedExpression) expression).getExpression();
 			}
 		}
+		buffer.append(fromValue);
 		expression.accept(this);
+		buffer.append(toValue);
 		return false;
 	}
 
