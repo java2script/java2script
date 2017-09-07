@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -240,29 +239,20 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				varBinding = (IVariableBinding) leftTypeBinding;
 			}
 		} else if (left instanceof FieldAccess) {
-			FieldAccess leftAccess = (FieldAccess) left;
-			varBinding = leftAccess.resolveFieldBinding();
+			varBinding = ((FieldAccess) left).resolveFieldBinding();
 		}
 		String op = node.getOperator().toString();
 		boolean isMixedOp = (op.trim().length() > 1); // +=, -=, *=, /=, etc.
-		ITypeBinding declaring = null;
-		String qName = null;
 
 		// TODO BH Q: what does static have to do with anything?
-		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.")) {
+		if (checkStaticBinding(varBinding)) {
 
 			System.err.println("????static varbinding " + varBinding);
 
 			// static variable = ...
 
-			boolean directStaticAccess = left instanceof SimpleName
-					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
 			ASTNode parent = node.getParent();
-			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess)
+			boolean needParenthesis = (supportsObjectStaticFields || !haveDirectStaticAccess(left))
 					&& !(parent instanceof Statement);
 			if (needParenthesis) {
 				buffer.append("(");
@@ -503,6 +493,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	private boolean haveDirectStaticAccess(Expression exp) {
+		return exp instanceof SimpleName
+				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
+				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
+
+	}
+
 	public void endVisit(Block node) {
 		buffer.append("}");
 		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
@@ -544,7 +541,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				ASTFinalVariable f = new ASTFinalVariable(blockLevel + 1, identifier, methodSig);
 				f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 				normalVars.remove(f);
-				if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+				if (Modifier.isFinal(binding.getModifiers())) {
 					finalVars.remove(f);
 				}
 				visitedVars.remove(f);
@@ -803,12 +800,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			FieldAccess leftAccess = (FieldAccess) left;
 			varBinding = leftAccess.resolveFieldBinding();
 		}
-		ITypeBinding declaring = null;
-		String qName = null;
-		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.")) {
+		if (checkStaticBinding(varBinding)) {
 			return;
 		}
 		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
@@ -835,19 +827,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			varBinding = leftAccess.resolveFieldBinding();
 		}
 		ITypeBinding typeBinding = left.resolveTypeBinding();
-		ITypeBinding declaring = null;
-		String qName = null;
-		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.")) {
-			boolean directStaticAccess = left instanceof SimpleName
-					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
+		if (checkStaticBinding(varBinding)) {
 			ASTNode parent = node.getParent();
 			boolean staticCharType = typeBinding.isPrimitive() && "char".equals(typeBinding.getName());
 			@SuppressWarnings("null")
-			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess
+			boolean needParenthesis = (supportsObjectStaticFields || !haveDirectStaticAccess(left)
 					|| (typeBinding != null && staticCharType))
 					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
 			if (needParenthesis) {
@@ -975,17 +959,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			varBinding = leftAccess.resolveFieldBinding();
 		}
 		ITypeBinding typeBinding = left.resolveTypeBinding();
-		ITypeBinding declaring = null;
-		String qName = null;
-		if (varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qName.startsWith("net.sf.j2s.html.")) {
-			boolean directStaticAccess = left instanceof SimpleName
-					|| (left instanceof QualifiedName && ((QualifiedName) left).getQualifier() instanceof SimpleName)
-					|| (left instanceof FieldAccess && ((FieldAccess) left).getExpression() instanceof ThisExpression);
+		if (checkStaticBinding(varBinding)) {
 			ASTNode parent = node.getParent();
-			boolean needParenthesis = (supportsObjectStaticFields || !directStaticAccess
+			boolean needParenthesis = (supportsObjectStaticFields || !haveDirectStaticAccess(left)
 					|| (typeBinding != null && typeBinding.isPrimitive() && "char".equals(typeBinding.getName())))
 					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
 			if (needParenthesis) {
@@ -1111,12 +1087,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (nameBinding instanceof IVariableBinding) {
 			varBinding = (IVariableBinding) nameBinding;
 		}
-		ITypeBinding declaring = null;
-		String qdName = null;
-		if (!supportsObjectStaticFields && varBinding != null && (varBinding.getModifiers() & Modifier.STATIC) != 0
-				&& (declaring = varBinding.getDeclaringClass()) != null
-				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
-				&& !qdName.startsWith("net.sf.j2s.html.")) {
+		if (!supportsObjectStaticFields && checkStaticBinding(varBinding)) {
 			IBinding qBinding = node.getQualifier().resolveBinding();
 			if (!(qBinding != null && qBinding instanceof ITypeBinding)) {
 				staticFields = true;
@@ -1277,6 +1248,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	public void endVisit(ReturnStatement node) {
 		buffer.append(";\r\n");
+		super.endVisit(node);
 	}
 
 	public boolean visit(StringLiteral node) {
@@ -1416,7 +1388,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					ASTVariableVisitor.class)).normalVars;
 			f.toVariableName = getIndexedVarName(identifier, normalVars.size());
 			normalVars.add(f);
-			if ((binding.getModifiers() & Modifier.FINAL) != 0) {
+			if (Modifier.isFinal(binding.getModifiers())) {
 				finalVars.add(f);
 			}
 		}
@@ -1706,9 +1678,17 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return true;
 	}
 
-	protected static boolean isStatic(int modifiers) {
-		return ((modifiers & Modifier.STATIC) != 0);
+	protected static boolean isStatic(IBinding b) {
+		return b != null && Modifier.isStatic(b.getModifiers());
 	}
 
+	private boolean checkStaticBinding(IVariableBinding varBinding) {
+		ITypeBinding declaring;
+		String qName;
+		return isStatic(varBinding)
+				&& (declaring = varBinding.getDeclaringClass()) != null
+				&& !(qName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
+				&& !qName.startsWith("net.sf.j2s.html.");
+	}
 
 }

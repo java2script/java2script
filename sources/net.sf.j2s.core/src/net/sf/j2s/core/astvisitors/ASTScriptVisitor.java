@@ -340,7 +340,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
-			if (element instanceof FieldDeclaration && isStatic(element.getModifiers()))
+			if (element instanceof FieldDeclaration && isStatic(element))
 				addStaticFieldFragments((FieldDeclaration) element);
 		}
 
@@ -384,7 +384,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// Q: Why don't we have to check for static fields?
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
-			if ((element instanceof FieldDeclaration || (element instanceof Initializer) && !isStatic(element.getModifiers()))
+			if ((element instanceof FieldDeclaration || (element instanceof Initializer) && !isStatic(element))
 					&& !checkj2sIgnore(element))
 				element.accept(this);
 		}
@@ -492,7 +492,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return false;
 		}
 		// not anonymous
-		if (!binding.isTopLevel() && !isStatic(binding.getModifiers())) {
+		if (!binding.isTopLevel() && !isStatic(binding)) {
 			// inner nonstatic class
 			IMethodBinding constructorBinding = node.resolveConstructorBinding();
 			addInnerTypeInstance(node,
@@ -793,7 +793,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
-			if (!isStatic(element.getModifiers()))
+			if (!isStatic(element))
 				continue;
 			if (element instanceof Initializer)
 				element.accept(this);
@@ -838,10 +838,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return super.visit(node);
 	}
 
-	public void endVisit(EnumConstantDeclaration node) {
-		super.endVisit(node);
-	}
-	
 	public boolean visit(FieldAccess node) {
 		// Expression . Identifier
 		// TODO: more complicated rules should be considered. read the JavaDoc
@@ -849,7 +845,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding declaring;
 		String qdName;
 		Expression expression = node.getExpression();
-		if (!supportsObjectStaticFields && varBinding != null && isStatic(varBinding.getModifiers())
+		if (!supportsObjectStaticFields && varBinding != null && isStatic(varBinding)
 				&& (declaring = varBinding.getDeclaringClass()) != null
 				&& !(expression instanceof SimpleName || expression instanceof QualifiedName)
 				&& !(qdName = declaring.getQualifiedName()).startsWith("org.eclipse.swt.internal.xhtml.")
@@ -868,7 +864,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(FieldDeclaration node) {
-		if (isStatic(node.getModifiers()))
+		if (isStatic(node))
 			return false;
 		ITypeBinding typeBinding = resolveParentBinding(getXparent(node));
 		List<?> fragments = node.fragments();
@@ -1110,7 +1106,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			return false;
 		}
 
-		boolean isStatic = isStatic(node.getModifiers());
+		boolean isStatic = isStatic(node);
 
 		if (!checkKeepSpecialClassMethod(node, mBinding, false))
 			return false;
@@ -1118,7 +1114,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		if (key != null)
 			methodDeclareNameStack.push(key);
 
-		boolean isNative = ((node.getModifiers() & Modifier.NATIVE) != 0);
+		boolean isNative = Modifier.isNative(node.getModifiers());
 		if (node.getBody() == null && !isNative) {
 			// Abstract method
 			return false;
@@ -1293,8 +1289,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding mBinding = node.resolveMethodBinding();
 
-		boolean isPrivateAndNotStatic = ((mBinding.getModifiers() & Modifier.PRIVATE) != 0)
-				&& !isStatic(mBinding.getModifiers());
+		boolean isPrivateAndNotStatic = Modifier.isPrivate(mBinding.getModifiers())
+				&& !isStatic(mBinding);
 
 		Expression expression = node.getExpression();
 		int pt = buffer.length();
@@ -1458,7 +1454,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private void simpleNameInVarBinding(SimpleName node, char ch, IVariableBinding varBinding) {
 		String thisClassName = getClassName();
-		if (isStatic(varBinding.getModifiers())) {
+		if (isStatic(varBinding)) {
 			IVariableBinding variableDeclaration = varBinding.getVariableDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 			if (ch != '.' && ch != '\"' && declaringClass != null) {
@@ -1498,7 +1494,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 			String fieldVar = null;
 			if (((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).isFinalSensible
-					&& (varBinding.getModifiers() & Modifier.FINAL) != 0 && varBinding.getDeclaringMethod() != null) {
+					&& Modifier.isFinal(varBinding.getModifiers()) && varBinding.getDeclaringMethod() != null) {
 				String key = varBinding.getDeclaringMethod().getKey();
 				if (methodDeclareNameStack.size() == 0 || !key.equals(methodDeclareNameStack.peek())) {
 					buffer.append("this.$finals.");
@@ -1539,7 +1535,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private void simpleNameInMethodBinding(SimpleName node, char ch, IMethodBinding mthBinding) {
 		String thisClassName = getClassName();
-		if (isStatic(mthBinding.getModifiers())) {
+		if (isStatic(mthBinding)) {
 			IMethodBinding variableDeclaration = mthBinding.getMethodDeclaration();
 			ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 			boolean isClassString = false;
@@ -1572,7 +1568,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				ITypeBinding declaringClass = variableDeclaration.getDeclaringClass();
 				if (declaringClass != null && thisClassName != null && ch != '.') {
 					isClassString = "java.lang.String".equals(declaringClass.getQualifiedName());
-					appendFieldName(parent, declaringClass, ((mthBinding.getModifiers() & Modifier.PRIVATE) != 0));
+					appendFieldName(parent, declaringClass, Modifier.isPrivate(mthBinding.getModifiers()));
 				}
 			}
 			// String name = node.getFullyQualifiedName();
@@ -1814,7 +1810,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					.setPackageName(((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName());
 			node.accept(visitor);
 
-			if (node.isInterface() || isStatic(node.getModifiers()) || (node.getParent() instanceof TypeDeclaration
+			if (node.isInterface() || isStatic(node) || (node.getParent() instanceof TypeDeclaration
 					&& ((TypeDeclaration) node.getParent()).isInterface())) {
 				String str = visitor.getBuffer().toString();
 				staticFieldDefBuffer.append(str);
@@ -1903,7 +1899,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		// user using new Foo()
 		buffer.append("Clazz.newInstance$(this, arguments");
 		if (!isTopLevel)
-			buffer.append("[0], " + !isStatic(binding.getModifiers()));
+			buffer.append("[0], " + !isStatic(binding));
 		buffer.append(");\r\n");
 		buffer.append("}"); // end of Clazz.decorateAsClass(){};
 		return false;
@@ -1943,7 +1939,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (!haveSuperInterface)
 				buffer.append(", null");
 			ITypeBinding superclass = superClassType.resolveBinding();
-			if (superclass != null && !superclass.isTopLevel() && !isStatic(superclass.getModifiers())) {
+			if (superclass != null && !superclass.isTopLevel() && !isStatic(superclass)) {
 				String name = assureQualifiedName(removeJavaLang(superclass.getQualifiedName()));
 				buffer.append(",");
 				addInnerTypeInstance(null, name, null, null, null, true, null);
@@ -2021,12 +2017,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append("]);\r\n");
 					staticCount = -1;
 				}
-				if (isStatic(element.getModifiers())) {
+				if (isStatic(element)) {
 					element.accept(this);
 				}
 			} else if (element instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) element;
-				if (!isStatic(element.getModifiers()) || checkj2sIgnore(field))
+				if (!isStatic(element) || checkj2sIgnore(field))
 					continue;
 //				ReferenceASTVisitor refVisitor = new ReferenceASTVisitor();
 				List<?> fragments = field.fragments();
@@ -2150,8 +2146,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
 			if ((element instanceof Initializer
 					|| element instanceof FieldDeclaration
-							&& (isStatic(element.getModifiers()) || ((FieldDeclaration) element).fragments().size() > 0)
-					|| element instanceof MethodDeclaration && isStatic(element.getModifiers())
+							&& (isStatic(element) || ((FieldDeclaration) element).fragments().size() > 0)
+					|| element instanceof MethodDeclaration && isStatic(element)
 				) && !checkj2sIgnore(element))
 				return true;
 		}
@@ -2162,26 +2158,23 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
 		StringBuffer fieldsSerializables = new StringBuffer();
 		ITypeBinding binding = node.resolveBinding();
-		boolean isSimpleSerializable = binding != null
-				&& (Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null);
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				if (node.isInterface()) {
-					/*
-					 * As members of interface should be treated as final and
-					 * for javascript interface won't get instantiated, so the
-					 * member will be treated specially.
-					 */
-					continue;
-				}
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+		if (binding != null && Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null)
+			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+				ASTNode element = (ASTNode) iter.next();
+				if (element instanceof FieldDeclaration) {
+					if (node.isInterface()) {
+						/*
+						 * As members of interface should be treated as final
+						 * and for javascript interface won't get instantiated,
+						 * so the member will be treated specially.
+						 */
+						continue;
+					}
+					FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
 
-				if (isSimpleSerializable) {
 					List<?> fragments = fieldDeclaration.fragments();
 					int modifiers = fieldDeclaration.getModifiers();
-					if ((Modifier.isPublic(
-							modifiers)/* || Modifier.isProtected(modifiers) */) && !Modifier.isStatic(modifiers)
+					if ((Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)
 							&& !Modifier.isTransient(modifiers)) {
 						Type type = fieldDeclaration.getType();
 						int dims = 0;
@@ -2275,7 +2268,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					}
 				}
 			}
-		}
 		return fieldsSerializables.toString();
 	}
 
@@ -2361,7 +2353,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String s = sbParams.toString();
 		// exception for special case: setting static main(String[] args) to
 		// "main", and "main()" to "main$"
-		if ("main".equals(methodName) && isStatic(binding.getModifiers())) {
+		if ("main".equals(methodName) && isStatic(binding)) {
 			if (s.length() == 0) {
 				s = "$";
 			} else if (s.equals("$SA")) {
@@ -2480,6 +2472,11 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public void setPackageNames(HashSet<String> definedPackageNames) {
 		this.definedPackageNames = definedPackageNames;
 	}
+
+	protected static boolean isStatic(BodyDeclaration b) {
+		return Modifier.isStatic(b.getModifiers());
+	}
+
 
 
 }
