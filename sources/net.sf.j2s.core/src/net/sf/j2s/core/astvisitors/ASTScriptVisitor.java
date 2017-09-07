@@ -40,12 +40,9 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -61,6 +58,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
 
+// BH 9/7/2017 -- fixed multiple issues with char and Character
 // BH 9/4/2017 -- java.awt, javax.swing, swingjs code added; additional fixes required
 // BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
 // BH 8/19/2017 -- String must implement CharSequence, so all .length() -> .length$()
@@ -79,30 +77,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 // TODO: Q: Good assumption that generic parameterization can be ignored? put<K,V> vs put<K>? 
 /*
  * 
-
-parameter and return values are not indicated as boxed or unboxed but actually are.
-
-Test_Char
-		System.out.println(getCharacterFromChar1('c') == 'c');
-		System.out.println(getCharacterFromChar2('c') == 'c');
-		System.out.println(getCharFromCharacter1('c') == 'c');
-		System.out.println(getCharFromCharacter2('c') == 'c');
-
-System.out.println$Z((test.Test_Char.getCharacterFromChar1$C('c')).charValue () === 99);
-System.out.println$Z((test.Test_Char.getCharacterFromChar2$C('c')).charValue () === 99);
-System.out.println$Z(test.Test_Char.getCharFromCharacter1$Character(99) == 'c');
-System.out.println$Z(test.Test_Char.getCharFromCharacter2$Character(99) == 'c');
-
-should be
-
-System.out.println$Z((test.Test_Char.getCharacterFromChar1$C('c')).charValue () === 'c');
-System.out.println$Z((test.Test_Char.getCharacterFromChar2$C('c')).charValue () === 'c');
-System.out.println$Z(test.Test_Char.getCharFromCharacter1$Character(new Character('c')) == 'c');
-System.out.println$Z(test.Test_Char.getCharFromCharacter2$Character(new Character('c')) == 'c');
-
-
-
- TODO #25 for int f() { return 'o' }  -- will return a string, not int 
 
 TODO #24 in a file starting with an interface and also including a class, only the class is found.
 
@@ -291,8 +265,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).checkSameName(binding, name);
 	}
 
-	public boolean isIntegerType(String type) {
-		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isIntegerType(type);
+	public boolean isPrimNumberType(String type) {
+		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isNumericType(type);
 	}
 
 	public String getClassName() {
@@ -755,20 +729,22 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
 		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
 		if (expTypeBinding == null) {
-			System.err.println("typeBinding was null in " + clazzName + "." + methodName + " " + parameterTypeName  + " " + exp);
+			// BH: Question: When does typeBinding == null?
+			// A: when there is a compilation error, I think.
 			return;
 		}
-		// BH: Question: When does typeBinding == null?
 		// only continue if we are converting a character to a non-character type
 		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
 		boolean useCharCodeAt = (
-				"char".equals(expTypeName)
+				!exp.resolveBoxing()
+				&& "char".equals(expTypeName)
 				&& !"char".equals(parameterTypeName)
 				&& !parameterTypeName.startsWith("Object") // BH could be Object or Object[]
 				&& (position != 0 || !"indexOf".equals(methodName) && !"lastIndexOf".equals(methodName)
 						|| !"java.lang.String".equals(Bindings.removeBrackets(clazzName))));
 		if (useCharCodeAt && exp instanceof CharacterLiteral) {
 			// BH: converting character literal such as 'A' to number 65
+			
 			CharacterLiteral cl = (CharacterLiteral) exp;
 			buffer.append(0 + cl.charValue());
 			return;
@@ -1021,27 +997,36 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						: null);
 	}
 
-	private boolean checkSimpleBooleanOperator(String op) {
-		return (op.equals("^") || op.equals("|") || op.equals("&"));
-	}
-
-	private boolean checkInfixOperator(InfixExpression node) {
+	/**
+	 * The left operand is primitive boolean. Check to see if the operator is ^,
+	 * |, or &, or if the left or right operand is such an expression. 
+	 * 
+	 * If so, we are going to box this all as a Boolean(....).valueOf()
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private boolean isBitwiseBinaryOperator(InfixExpression node) {
 		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
 			return true;
 		}
 		Expression left = node.getLeftOperand();
 		if (left instanceof InfixExpression) {
-			if (checkInfixOperator((InfixExpression) left)) {
+			if (isBitwiseBinaryOperator((InfixExpression) left)) {
 				return true;
 			}
 		}
 		Expression right = node.getRightOperand();
 		if (right instanceof InfixExpression) {
-			if (checkInfixOperator((InfixExpression) right)) {
+			if (isBitwiseBinaryOperator((InfixExpression) right)) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	private boolean checkSimpleBooleanOperator(String op) {
+		return (op.equals("^") || op.equals("|") || op.equals("&"));
 	}
 
 	public boolean visit(InfixExpression node) {
@@ -1064,29 +1049,43 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 		if (leftTypeBinding == null || rightTypeBinding == null)
 			return false;
-
+		String leftName = leftTypeBinding.getName();
+		String rightName = rightTypeBinding.getName();
 		if ("!==<=>=".indexOf(operator) >= 0) {
 			// < > <= >= == !=
-			if (leftTypeBinding.isPrimitive() && "char".equals(leftTypeBinding.getName())
-					&& rightTypeBinding.isPrimitive() && "char".equals(rightTypeBinding.getName())) {
-				boxingNode(left);
-				buffer.append(' ');
-				buffer.append(operator);
-				buffer.append(' ');
-				boxingNode(right);
-				return false;
+			switch (leftName) {
+			case "char":
+			case "Character":
+				switch (rightName) {
+				case "char":
+				case "Character":
+					boxingNode(left);
+					buffer.append(' ');
+					buffer.append(operator);
+					buffer.append(' ');
+					boxingNode(right);
+					return false;
+				default:
+				}
+				break;
+			default:
+				break;
 			}
 		} else if ("/".equals(operator)) {
-			if (leftTypeBinding.isPrimitive() && isIntegerType(leftTypeBinding.getName())
-					&& isIntegerType(rightTypeBinding.getName())) {
+			// what about CHAR here?
+			if (leftTypeBinding.isPrimitive() && isPrimNumberType(leftName) && isPrimNumberType(rightName)) {
+				// left and right are some sort of primitive byte, short, int,
+				// or, long
+				// division must take care of this.
+				// TODO more issues here...
 				StringBuffer oldBuffer = buffer;
 				buffer = new StringBuffer();
 				buffer.append("Clazz.doubleToInt (");
-				addOperand(left, toString, leftTypeBinding);
-				buffer.append(' ');
-				buffer.append(operator);
-				buffer.append(' ');
-				addOperand(right, toString, rightTypeBinding);
+				{
+					addOperand(left, toString);
+					buffer.append(" / ");
+					addOperand(right, toString);
+				}
 				buffer.append(')');
 				List<?> extendedOperands = node.extendedOperands();
 				if (extendedOperands.size() > 0) {
@@ -1096,15 +1095,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						if (element instanceof Expression) {
 							Expression exp = (Expression) element;
 							ITypeBinding expBinding = exp.resolveTypeBinding();
-							if (isIntegerType(expBinding.getName())) {
+							if (isPrimNumberType(expBinding.getName())) {
 								buffer.insert(0, "Clazz.doubleToInt (");
 								is2Floor = true;
 							}
 						}
-						buffer.append(' ');
-						buffer.append(operator);
-						buffer.append(' ');
-						addOperand(element, toString, ((Expression) element).resolveTypeBinding());
+						buffer.append(" / ");
+						addOperand((Expression) element, toString);
 						if (is2Floor) {
 							buffer.append(')');
 						}
@@ -1117,16 +1114,13 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		}
 		boolean toBoolean = false;
-		if (leftTypeBinding.isPrimitive()) {
-			if ("boolean".equals(leftTypeBinding.getName())) {
-				if (checkInfixOperator(node)) {
-					buffer.append(" new Boolean (");
-					toBoolean = true;
-				}
-			}
+		if (leftTypeBinding.isPrimitive() && "boolean".equals(leftName) && isBitwiseBinaryOperator(node)) {
+			// box this as Boolean(...).valueOf();
+			buffer.append(" new Boolean (");
+			toBoolean = true;
 		}
 		// left
-		addOperand(left, toString, leftTypeBinding);
+		addOperand(left, toString);
 		buffer.append(' ');
 		// op
 		buffer.append(operator);
@@ -1136,7 +1130,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		buffer.append(' ');
 		// right
-		addOperand(right, toString, rightTypeBinding);
+		addOperand(right, toString);
 
 		// ok, this is trouble
 		// The extended operands is the preferred way of representing deeply
@@ -1155,105 +1149,14 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(operator);
 				buffer.append(' ');
 				ASTNode element = (ASTNode) iter.next();
-				addOperand(element, toString, ((Expression) element).resolveTypeBinding());
+				addOperand((Expression) element, toString);
 			}
 		}
 		if (toBoolean) {
-			buffer.append(").valueOf ()");
+			// unbox Boolean(...)
+			buffer.append(").valueOf()");
 		}
 		return false;
-	}
-
-	/**
-	 * add the operand, checking to see if it needs some adjustment:
-	 * 
-	 * (a) String + x where x is {double/float} requires boxing Double/Float(x).toString() 
-	 * 
-	 * (b) String + x where x is {Double/Float} requires added .toString()
-	 * 
-	 * (c) 
-	 * 
-	 * @param node
-	 * @param toString
-	 * @param typeBinding
-	 */
-	private void addOperand(ASTNode node, boolean toString, ITypeBinding typeBinding) {
-		if (!(node instanceof Expression)) {
-			// BH I don't see how node cannot be an expression
-			node.accept(this);
-			return;
-		}
-		if (toString) {
-			// BH
-			String prefix = null, suffix = null;
-			switch (typeBinding.getName()) {
-			case "double":
-				prefix = "new Double(";
-				suffix = ")";
-				break;
-			case "float":
-				prefix = "new Float(";
-				suffix = ")";
-				break;
-			case "Double":
-			case "Float":
-				prefix = suffix = "";
-				break;
-			default:
-				node.accept(this);
-				break;
-			}
-			if (prefix != null) {
-				buffer.append(prefix);
-				node.accept(this);
-				buffer.append(suffix);
-				buffer.append(".toString()");
-			}
-			return;
-		}
-		ITypeBinding binding = ((Expression) node).resolveTypeBinding();
-		if (!binding.isPrimitive() || !"char".equals(binding.getName())) {
-			boxingNode(node);
-			return;
-		}
-		// to char
-		if (node instanceof CharacterLiteral) {
-			CharacterLiteral cl = (CharacterLiteral) node;
-			buffer.append(0 + cl.charValue());
-		} else if (node instanceof SimpleName || node instanceof QualifiedName) {
-			boxingNode(node);
-			buffer.append(".charCodeAt (0)");
-		} else {
-			int idx1 = buffer.length();
-			if (node instanceof PrefixExpression || node instanceof PostfixExpression
-					|| node instanceof ParenthesizedExpression) {
-				boxingNode(node);
-			} else {
-				buffer.append("(");
-				boxingNode(node);
-				buffer.append(")");
-			}
-			boolean addCharCodeAt0 = true;
-			int length = buffer.length();
-			if (node instanceof MethodInvocation) {
-				MethodInvocation m = (MethodInvocation) node;
-				if ("charAt".equals(m.getName().toString())) {
-					int idx2 = buffer.indexOf(".charAt ", idx1);
-					if (idx2 != -1) {
-						StringBuffer newMethodBuffer = new StringBuffer();
-						newMethodBuffer.append(buffer.substring(idx1 + 1, idx2));
-						newMethodBuffer.append(".charCodeAt ");
-						newMethodBuffer.append(buffer.substring(idx2 + 8, length - 1));
-						buffer.delete(idx1, length);
-						buffer.append(newMethodBuffer.toString());
-						addCharCodeAt0 = false;
-					}
-				}
-			}
-			if (addCharCodeAt0) {
-				buffer.append(".charCodeAt (0)");
-			}
-		}
 	}
 
 	public boolean visit(Initializer node) {
@@ -2643,10 +2546,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
     			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
 				: " Clazz.newArray$(" + params);
-	}
-
-	private static boolean isStatic(int modifiers) {
-		return ((modifiers & Modifier.STATIC) != 0);
 	}
 
 	public void setPackageNames(HashSet<String> definedPackageNames) {

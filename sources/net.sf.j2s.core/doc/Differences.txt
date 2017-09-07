@@ -749,7 +749,7 @@ N/A #26 occasionally, the compiler will insert Clazz.overwriteMethod when it sho
   This showed up in a case where we had   void setVisible(b) { super.setVisible(b) ... and then super.setVisible(b)
   was not found.     
     
-TODO #25 for int f() { return 'o' }  -- will return a string, not int 
+FIXED #25 for int f() { return 'o' }  -- will return a string, not int 
 
 TODO #24 in a file starting with an interface and also including a class, only the class is found.
 

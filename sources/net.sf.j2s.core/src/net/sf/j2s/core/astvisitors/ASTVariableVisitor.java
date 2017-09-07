@@ -174,7 +174,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 
 	/**
 	 * If given expression is constant value expression, return its value 
-	 * string; or return null.
+	 * string; or character or return null.
 	 * 
 	 * @param node
 	 * @return
@@ -187,75 +187,55 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			StringBuffer buffer = new StringBuffer();
 			if (constValue instanceof Character) {
 				buffer.append('\'');
-				char charValue = ((Character)constValue).charValue();
-				if (charValue < 32 || charValue > 127) {
-					buffer.append("\\u");
-					String hexStr = Integer.toHexString(charValue);
-					int zeroLen = 4 - hexStr.length();
-					for (int i = 0; i < zeroLen; i++) {
-						buffer.append('0');
-					}
-					buffer.append(hexStr);
-				} else {
-					char c = charValue;
-					if (c == '\\' || c == '\'' || c == '\"') {
-						buffer.append('\\');
-						buffer.append(c);
-					} else if (c == '\r') {
-						buffer.append("\\r");
-					} else if (c == '\n') {
-						buffer.append("\\n");
-					} else if (c == '\t') {
-						buffer.append("\\t");
-					} else if (c == '\f') {
-						buffer.append("\\f");
-					} else {
-						buffer.append(constValue);
-					}
-				}
+				addChar(((Character)constValue).charValue(), buffer);
 				buffer.append('\'');
 			} else {
+				// Number or Boolean
 				buffer.append(constValue);
 			}
 			return buffer.toString();
 		}
-		if (constValue != null && (constValue instanceof String)) {
+		if (constValue instanceof String) {
 			StringBuffer buffer = new StringBuffer();
 			String str = (String) constValue;
 			int length = str.length();
-			/*
-			if (length > 20) {
-				return null;
-			}*/
 			buffer.append("\"");
-			for (int i = 0; i < length; i++) {
-				char c = str.charAt(i);
-				if (c == '\\' || c == '\'' || c == '\"') {
-					buffer.append('\\');
-					buffer.append(c);
-				} else if (c == '\r') {
-					buffer.append("\\r");
-				} else if (c == '\n') {
-					buffer.append("\\n");
-				} else if (c == '\t') {
-					buffer.append("\\t");
-				} else if (c == '\f') {
-					buffer.append("\\f");
-				} else if (c < 32 || c > 127) {
-					buffer.append("\\u");
-					String hexStr = Integer.toHexString(c);
-					int zeroLen = 4 - hexStr.length();
-					for (int k = 0; k < zeroLen; k++) {
-						buffer.append('0');
-					}
-					buffer.append(hexStr);
-				} else {
-					buffer.append(c);
-				}
-			}
+			for (int i = 0; i < length; i++)
+				addChar(str.charAt(i), buffer);
 			buffer.append("\"");
 			return buffer.toString();
 		}
 		return null;
+	}
+
+	private void addChar(char c, StringBuffer buffer) {
+		if (c < 32 || c > 127) {
+			String hexStr = "0000" + Integer.toHexString(c);
+			buffer.append("\\u").append(hexStr.substring(hexStr.length() - 4));
+		} else {
+			switch (c) {
+			case '\\':
+			case '\'':
+			case '\"':
+				buffer.append('\\');
+				buffer.append(c);
+				break;
+			case '\r':
+				buffer.append("\\r");
+				break;
+			case '\n':
+				buffer.append("\\n");
+				break;
+			case '\t':
+				buffer.append("\\t");
+				break;
+			case '\f':
+				buffer.append("\\f");
+				break;
+			default:
+				buffer.append(c);
+				break;
+			}
+		}
 	}
 }
