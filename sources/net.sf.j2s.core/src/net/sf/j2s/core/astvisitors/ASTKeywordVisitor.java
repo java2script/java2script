@@ -233,71 +233,48 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 		String rightName = (rightTypeBinding == null ? null : rightTypeBinding.getName());
 		String leftName = (leftTypeBinding == null ? null : leftTypeBinding.getName());
-		IVariableBinding varBinding = null;
-		if (left instanceof Name) {
-			if (leftTypeBinding instanceof IVariableBinding) {
-				varBinding = (IVariableBinding) leftTypeBinding;
-			}
-		} else if (left instanceof FieldAccess) {
-			varBinding = ((FieldAccess) left).resolveFieldBinding();
-		}
+		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
 		String op = node.getOperator().toString();
 		boolean isMixedOp = (op.trim().length() > 1); // +=, -=, *=, /=, etc.
 
 		// TODO BH Q: what does static have to do with anything?
 		if (checkStaticBinding(varBinding)) {
-
-			System.err.println("????static varbinding " + varBinding);
-
-			// static variable = ...
-
 			ASTNode parent = node.getParent();
-			boolean needParenthesis = (/*supportsObjectStaticFields ||*/ !haveDirectStaticAccess(left))
-					&& !(parent instanceof Statement);
+			boolean needParenthesis = (!haveDirectStaticAccess(left)) && !(parent instanceof Statement);
 			if (needParenthesis) {
 				buffer.append("(");
 			}
-			if (left instanceof QualifiedName) {
-				Name qn = ((QualifiedName) left).getQualifier();
-				if (!(qn instanceof SimpleName)) {
-					qn.accept(this);
-					buffer.append(", ");
-				}
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression)) {
-					leftAccess.getExpression().accept(this);
-					buffer.append(", ");
-				}
-			}
-//			if (supportsObjectStaticFields) {
-//				addFieldName(varBinding, left, true);
-//				buffer.append(" = ");
-//			}
-
-			addFieldName(varBinding, left, false);
+			addLeftSidePrefixName(left);
+			addFieldName(left, varBinding);
 			buffer.append(' ');
 			if ("char".equals(leftName)) {
 				if (isMixedOp) {
 					// +=, -=
 					buffer.append("= String.fromCharCode(");
 					{
-						addFieldName(varBinding, left, false);
+						boolean needCharCodeAt0 = "char".equals(rightName);
+						addFieldName(left, varBinding);
 						buffer.append(".charCodeAt(0) ");
 						buffer.append(op.charAt(0));
 						buffer.append(' ');
-						if ("char".equals(rightName)) {
+						if (needCharCodeAt0) {
 							Object constValue = right.resolveConstantExpressionValue();
 							if (constValue != null && constValue instanceof Character) {
 								buffer.append(0 + ((Character) constValue).charValue());
+								needCharCodeAt0 = false;
 							} else {
+								buffer.append('(');
 								boxingNode(right);
-								buffer.append(".charCodeAt(0)");
+								buffer.append(')');
 							}
 						} else {
-							if (boxingNode(right)) // unboxed a Character
-								buffer.append(".charCodeAt(0)");
+							buffer.append('(');
+							needCharCodeAt0 = boxingNode(right); // unboxed a
+																	// Character
+							buffer.append(')');
 						}
+						if (needCharCodeAt0)
+							buffer.append(".charCodeAt(0)");
 					}
 					buffer.append(")");
 				} else {
@@ -315,16 +292,23 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						buffer.append(')');
 					}
 				}
-			} else if ("/=".equals(op)
-					&& ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isNumericType(leftName)) {
-				buffer.append(" = Clazz.doubleToInt (");
-				addFieldName(varBinding, left, false);
-				buffer.append(" / ");
+			} else if (isMixedOp && "/=*=+=-=&=|=^=".indexOf(op) >= 0 && isNumericType(leftName)) {
+				// byte|short|int|long /= ...
+				// convert to proper
+				// number of bits
+				// TODO -- what about when division leads to a LARGER number?
+				buffer.append(" = (");
+				addFieldName(left, varBinding);
+				buffer.append(op.charAt(0));
+				buffer.append('(');
 				boxingNode(right);
 				if ("char".equals(rightName))
 					buffer.append(".charCodeAt(0)");
-				buffer.append(')');
+				buffer.append("))");
+				if (!leftName.equals("int"))
+					buffer.append(".").append(leftName).append("Value()");
 			} else {
+				// double|float /= ...
 				buffer.append(op);
 				buffer.append(' ');
 				boxingNode(right);
@@ -381,7 +365,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			} else {
 				buffer.append(" = String.fromCharCode(");
 				{
-					//????
 					if (isMixedOp) {
 						if (left instanceof SimpleName || left instanceof QualifiedName) {
 							left.accept(this);
@@ -400,7 +383,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 						if (constValue == null) {
 							buffer.append("(");
 							boxingNode(right);
-							// TODO here 
+							// TODO here
 							buffer.append(")");
 						} else {
 							buffer.append(constValue);
@@ -433,15 +416,20 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			return false;
 		}
-		if ("/=".equals(op) && ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isNumericType(leftName)) {
+		if (isMixedOp && "/=*=+=-=&=|=^=".indexOf(op) >= 0 && isNumericType(leftName)) {
+			// byte|short|int|long /= ...
+			// convert to proper number
+			// of bits using .xxxxValue()
 			left.accept(this);
-			buffer.append(" = Clazz.doubleToInt(");
+			buffer.append(" = (");
 			left.accept(this);
-			buffer.append(" / ");
+			buffer.append(op.charAt(0));
 			right.accept(this);
 			if ("char".equals(rightName))
 				buffer.append(".charCodeAt(0)");
-			buffer.append(')');
+			buffer.append(")");
+			if (!leftName.equals("int") || !rightName.equals("int") || op.equals("/="))
+				buffer.append(".").append(leftName).append("Value()");
 			return false;
 		}
 		left.accept(this);
@@ -493,22 +481,46 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	private void addFieldName(IVariableBinding varBinding, Expression left, boolean isPrototype) {
-		buffer.append(
-				assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-		buffer.append('.');
-		if (isPrototype)
-			buffer.append("prototype.");
+	private boolean haveDirectStaticAccess(Expression exp) {
+		return exp instanceof SimpleName
+				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
+				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
+
+	}
+
+	private void addLeftSidePrefixName(Expression left) {
 		if (left instanceof QualifiedName) {
-			QualifiedName leftName = (QualifiedName) left;
-			leftName.getName().accept(this);
+			if ((left = ((QualifiedName) left).getQualifier()) instanceof SimpleName)
+				return;
 		} else if (left instanceof FieldAccess) {
-			FieldAccess leftAccess = (FieldAccess) left;
-			leftAccess.getName().accept(this);
+			if ((left = ((FieldAccess) left).getExpression()) instanceof ThisExpression) 
+				return;
 		} else {
-			Name leftName = (Name) left;
-			leftName.accept(this);
+			return;
 		}
+		left.accept(this);
+		buffer.append(", ");
+	}
+
+	private IVariableBinding getLeftVariableBinding(Expression left, IBinding leftTypeBinding) {
+		if (left instanceof Name) {
+			if (leftTypeBinding instanceof IVariableBinding) {
+				return (IVariableBinding) leftTypeBinding;
+			}
+		} else if (left instanceof FieldAccess) {
+			return ((FieldAccess) left).resolveFieldBinding();
+		}
+		return null;
+	}
+
+	private void addFieldName(Expression left, IVariableBinding varBinding) {
+		if (varBinding != null) {
+			addQualifiedName(varBinding);
+			buffer.append('.');
+			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
+					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+		}
+		left.accept(this);
 	}
 
 	public void endVisit(Block node) {
@@ -798,136 +810,169 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
-	public boolean visit(PostfixExpression node) {
-		Expression left = node.getOperand();
-		IVariableBinding varBinding = null;
-		if (left instanceof Name) {
-			Name leftName = (Name) left;
-			IBinding nameBinding = leftName.resolveBinding();
-			if (nameBinding instanceof IVariableBinding) {
-				varBinding = (IVariableBinding) nameBinding;
-			}
-		} else if (left instanceof FieldAccess) {
-			FieldAccess leftAccess = (FieldAccess) left;
-			varBinding = leftAccess.resolveFieldBinding();
-		}
-		ITypeBinding typeBinding = left.resolveTypeBinding();
-		if (checkStaticBinding(varBinding)) {
-			ASTNode parent = node.getParent();
-			boolean staticCharType = typeBinding.isPrimitive() && "char".equals(typeBinding.getName());
-			@SuppressWarnings("null")
-			boolean needParenthesis = (/*supportsObjectStaticFields ||*/ !haveDirectStaticAccess(left)
-					|| (typeBinding != null && staticCharType))
-					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
-			if (needParenthesis) {
-				buffer.append("(");
-			}
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				if (!(leftName.getQualifier() instanceof SimpleName)) {
-					leftName.getQualifier().accept(this);
-					buffer.append(", ");
-				}
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression)) {
-					leftAccess.getExpression().accept(this);
-					buffer.append(", ");
-				}
-			}
-			if ((/*supportsObjectStaticFields ||*/ staticCharType) && !(parent instanceof Statement)) {
-				buffer.append("$t$ = ");
-			}
-			String op = node.getOperator().toString();
-			if (staticCharType) {
-				if (!(parent instanceof Statement)) {
-					addFieldName(varBinding, left, false);
-					buffer.append(", ");
-				}
-				addFieldName(varBinding, left, false);
-				buffer.append(" = String.fromCharCode(");
-				addFieldName(varBinding, left, false);
-				addCharPlusPlus(op);
-				buffer.append(")");
-			} else {
-				addFieldName(varBinding, left, false);
-				buffer.append(op);
-			}
-//			if (supportsObjectStaticFields) {
-//				buffer.append(", ");
-//				addFieldName(varBinding, left, true);
-//				buffer.append(" = ");
-//				addFieldName(varBinding, left, false);
-//			}
-			if ((/*supportsObjectStaticFields ||*/ staticCharType) && !(parent instanceof Statement)) {
-				buffer.append(", $t$");
-			}
-			if (needParenthesis) {
-				buffer.append(")");
-			}
+
+	public boolean visit(InfixExpression node) {
+		// TODO check for String + Double/Float --> String + ... .toString()
+		// and change to String + double/float --> String + new
+		// Double/Float(...).toString()
+		String constValue = checkConstantValue(node);
+		if (constValue != null) {
+			buffer.append(constValue);
 			return false;
 		}
-		if (typeBinding != null && typeBinding.isPrimitive()) {
-			if ("char".equals(typeBinding.getName())) {
-				ASTNode parent = node.getParent();
-				if (!(parent instanceof Statement)) {
-					if (!(parent instanceof ParenthesizedExpression)) {
-						buffer.append("(");
-					}
-					buffer.append("$c$ = ");
-					left.accept(this);
-					buffer.append(", ");
+		ITypeBinding expTypeBinding = node.resolveTypeBinding();
+		if (expTypeBinding == null)
+			return false;
+		String expTypeName = expTypeBinding.getName();
+		boolean toString = (expTypeName.indexOf("String") >= 0);
+		String operator = node.getOperator().toString();
+		Expression left = node.getLeftOperand();
+		Expression right = node.getRightOperand();
+		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
+		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
+		if (leftTypeBinding == null || rightTypeBinding == null)
+			return false;
+		String leftName = leftTypeBinding.getName();
+		String rightName = rightTypeBinding.getName();
+		if ("!==<=>=".indexOf(operator) >= 0) {
+			// < > <= >= == !=
+			switch (leftName) {
+			case "char":
+			case "Character":
+				switch (rightName) {
+				case "char":
+				case "Character":
+					boxingNode(left);
+					buffer.append(' ');
+					buffer.append(operator);
+					buffer.append(' ');
+					boxingNode(right);
+					return false;
+				default:
 				}
-				left.accept(this);
-				buffer.append(" = String.fromCharCode(");
-				left.accept(this);
-				addCharPlusPlus(node.getOperator().toString());
-				buffer.append(")");
-				if (!(parent instanceof Statement)) {
-					buffer.append(", $c$");
-					if (!(parent instanceof ParenthesizedExpression)) {
-						buffer.append(")");
+				break;
+			default:
+				break;
+			}
+		} else if ("/".equals(operator)) {
+			if (leftTypeBinding.isPrimitive() && isNumericType(leftName) && isNumericType(rightName)) {
+				// left and right are some sort of primitive byte, short, int,
+				// or, long
+				// division must take care of this.
+				// TODO more issues here...
+				StringBuffer oldBuffer = buffer;
+				buffer = new StringBuffer();
+				buffer.append("(");
+				{
+					addOperand(left, toString);
+					buffer.append(" / ");
+					addOperand(right, toString);
+				}
+				buffer.append(").").append(expTypeName).append("Value()");
+				List<?> extendedOperands = node.extendedOperands();
+				if (extendedOperands.size() > 0) {
+					for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
+						ASTNode element = (ASTNode) iter.next();
+						boolean is2Floor = false;
+						if (element instanceof Expression) {
+							Expression exp = (Expression) element;
+							ITypeBinding expBinding = exp.resolveTypeBinding();
+							if (isNumericType(expBinding.getName())) {
+								buffer.insert(0, "("); 
+								is2Floor = true;
+							}
+						}
+						buffer.append(" / ");
+						addOperand((Expression) element, toString);
+						if (is2Floor) {
+							buffer.append(").").append(expTypeName).append("Value()");
+						}
 					}
 				}
+				oldBuffer.append(buffer);
+				buffer = oldBuffer;
+				oldBuffer = null;
 				return false;
 			}
 		}
-		boxingNode(left);
+		boolean toBoolean = false;
+		if (leftTypeBinding.isPrimitive() && "boolean".equals(leftName) && isBitwiseBinaryOperator(node)) {
+			// box this as Boolean(...).valueOf();
+			buffer.append(" new Boolean (");
+			toBoolean = true;
+		}
+		// left
+		addOperand(left, toString);
+		buffer.append(' ');
+		// op
+		buffer.append(operator);
+		if (("==".equals(operator) || "!=".equals(operator)) && !leftTypeBinding.isPrimitive()
+				&& !(left instanceof NullLiteral) && !(right instanceof NullLiteral)) {
+			buffer.append('=');
+		}
+		buffer.append(' ');
+		// right
+		addOperand(right, toString);
+
+		// ok, this is trouble
+		// The extended operands is the preferred way of representing deeply
+		// nested expressions of the form L op R op R2 op R3... where the same
+		// operator appears between all the operands (the most common case being
+		// lengthy string concatenation expressions). Using the extended
+		// operands keeps the trees from getting too deep; this decreases the
+		// risk is running out of thread stack space at runtime when traversing
+		// such trees. ((a + b) + c) + d would be translated to: leftOperand: a
+		// rightOperand: b extendedOperands: {c, d} operator: +
+
+		List<?> extendedOperands = node.extendedOperands();
+		if (extendedOperands.size() > 0) {
+			for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
+				buffer.append(' ');
+				buffer.append(operator);
+				buffer.append(' ');
+				ASTNode element = (ASTNode) iter.next();
+				addOperand((Expression) element, toString);
+			}
+		}
+		if (toBoolean) {
+			// unbox Boolean(...)
+			buffer.append(").valueOf()");
+		}
 		return false;
-		// return super.visit(node);
 	}
 
-	private void addCharPlusPlus(String op) {
-		buffer.append(".charCodeAt(0)").append("++".equals(op) ? "+1" : "-1");
-	}
-
-	public void endVisit(PostfixExpression node) {
-		Expression left = node.getOperand();
-		IVariableBinding varBinding = null;
-		if (left instanceof Name) {
-			Name leftName = (Name) left;
-			IBinding nameBinding = leftName.resolveBinding();
-			if (nameBinding instanceof IVariableBinding) {
-				varBinding = (IVariableBinding) nameBinding;
-			}
-		} else if (left instanceof FieldAccess) {
-			FieldAccess leftAccess = (FieldAccess) left;
-			varBinding = leftAccess.resolveFieldBinding();
+	/**
+	 * The left operand is primitive boolean. Check to see if the operator is ^,
+	 * |, or &, or if the left or right operand is such an expression. 
+	 * 
+	 * If so, we are going to box this all as a Boolean(....).valueOf()
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private boolean isBitwiseBinaryOperator(InfixExpression node) {
+		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
+			return true;
 		}
-		if (checkStaticBinding(varBinding)) {
-			return;
-		}
-		ITypeBinding typeBinding = node.getOperand().resolveTypeBinding();
-		if (typeBinding != null && typeBinding.isPrimitive()) {
-			if ("char".equals(typeBinding.getName())) {
-				return;
+		Expression left = node.getLeftOperand();
+		if (left instanceof InfixExpression) {
+			if (isBitwiseBinaryOperator((InfixExpression) left)) {
+				return true;
 			}
 		}
-		buffer.append(node.getOperator());
-		super.endVisit(node);
+		Expression right = node.getRightOperand();
+		if (right instanceof InfixExpression) {
+			if (isBitwiseBinaryOperator((InfixExpression) right)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	@SuppressWarnings("null")
+	private boolean checkSimpleBooleanOperator(String op) {
+		return (op.equals("^") || op.equals("|") || op.equals("&"));
+	}
+
 	public boolean visit(PrefixExpression node) {
 		String constValue = checkConstantValue(node);
 		if (constValue != null) {
@@ -940,132 +985,99 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return super.visit(node);
 		}
 		Expression left = node.getOperand();
-		IVariableBinding varBinding = null;
-		if (left instanceof Name) {
-			Name leftName = (Name) left;
-			IBinding nameBinding = leftName.resolveBinding();
-			if (nameBinding instanceof IVariableBinding) {
-				varBinding = (IVariableBinding) nameBinding;
-			}
-		} else if (left instanceof FieldAccess) {
-			FieldAccess leftAccess = (FieldAccess) left;
-			varBinding = leftAccess.resolveFieldBinding();
-		}
 		ITypeBinding typeBinding = left.resolveTypeBinding();
+		IVariableBinding varBinding = getLeftVariableBinding(left, typeBinding);
+		boolean isChar = (typeBinding != null && typeBinding.isPrimitive() && "char".equals(typeBinding.getName()));
 		if (checkStaticBinding(varBinding)) {
 			ASTNode parent = node.getParent();
-			boolean needParenthesis = (/*supportsObjectStaticFields ||*/ !haveDirectStaticAccess(left)
-					|| (typeBinding != null && typeBinding.isPrimitive() && "char".equals(typeBinding.getName())))
+			boolean needParenthesis = (isChar || !haveDirectStaticAccess(left))
 					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
 			if (needParenthesis) {
 				buffer.append("(");
 			}
-			if (left instanceof QualifiedName) {
-				QualifiedName leftName = (QualifiedName) left;
-				if (!(leftName.getQualifier() instanceof SimpleName)) {
-					leftName.getQualifier().accept(this);
-					buffer.append(", ");
-				}
-			} else if (left instanceof FieldAccess) {
-				FieldAccess leftAccess = (FieldAccess) left;
-				if (!(leftAccess.getExpression() instanceof ThisExpression/*
-																			 * ||
-																			 * leftAccess
-																			 * .
-																			 * getExpression
-																			 * ()
-																			 * instanceof
-																			 * SimpleName
-																			 */)) {
-					leftAccess.getExpression().accept(this);
-					buffer.append(", ");
-				}
-			}
-//			if (supportsObjectStaticFields) {
-//				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-//				buffer.append(".prototype.");
-//				if (left instanceof QualifiedName) {
-//					QualifiedName leftName = (QualifiedName) left;
-//					leftName.getName().accept(this);
-//				} else if (left instanceof FieldAccess) {
-//					FieldAccess leftAccess = (FieldAccess) left;
-//					leftAccess.getName().accept(this);
-//				} else {
-//					Name leftName = (Name) left;
-//					leftName.accept(this);
-//				}
-//				buffer.append(" = ");
-//			}
-			if (typeBinding.isPrimitive() && "char".equals(typeBinding.getName())) {
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
-				buffer.append(" = String.fromCharCode(");
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
-				addCharPlusPlus(op);
-				buffer.append(")");
+			addLeftSidePrefixName(left);
+			if (isChar) {
+				addCharacterPrePostFix(left, null, varBinding, op, true);
 			} else {
 				buffer.append(op);
-				// buffer.append(' ');
-				buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-				buffer.append('.');
-				if (left instanceof QualifiedName) {
-					QualifiedName leftName = (QualifiedName) left;
-					leftName.getName().accept(this);
-				} else if (left instanceof FieldAccess) {
-					FieldAccess leftAccess = (FieldAccess) left;
-					leftAccess.getName().accept(this);
-				} else {
-					Name leftName = (Name) left;
-					leftName.accept(this);
-				}
+				addFieldName(left, varBinding);
 			}
 			if (needParenthesis) {
 				buffer.append(")");
 			}
 			return false;
 		}
-		if ("char".equals(typeBinding.getName())) {
-			ASTNode parent = node.getParent();
-			String term = "";
-			if (!(parent instanceof Statement || parent instanceof ParenthesizedExpression)) {
-				buffer.append("(");
-				term = ")";
-			}
-			left.accept(this);
-			buffer.append(" = String.fromCharCode(");
-			left.accept(this);
-			addCharPlusPlus(op);
+		if (isChar) {
+			buffer.append("(");
+			addCharacterPrePostFix(left, node.getParent(), null, op, true);
 			buffer.append(")");
-			buffer.append(term);
 			return false;
 		}
-		buffer.append(node.getOperator());
+		buffer.append(op);
 		boxingNode(left);
 		return false;
 	}
 
-	@SuppressWarnings("null")
+	/**
+	 * 
+	 * @param left
+	 * @param parent  null for prefix
+	 * @param varBinding
+	 * @param op
+	 * @param b 
+	 */
+	private void addCharacterPrePostFix(Expression left, ASTNode parent,
+			IVariableBinding varBinding, String op, boolean isPrefix) {		
+		boolean addAnonymousWrapper = !isPrefix &&  !(parent instanceof Statement); 
+		if (addAnonymousWrapper) {
+			buffer.append("(function() {var $t$ = ");
+			addFieldName(left, varBinding);
+			buffer.append("; ");
+		}
+		addFieldName(left, varBinding);
+		buffer.append(" = String.fromCharCode(");
+		addFieldName(left, varBinding);
+		buffer.append(".charCodeAt(0)").append("++".equals(op) ? "+1" : "-1");
+		buffer.append(")");
+		if (addAnonymousWrapper) {
+			buffer.append("; return $t$})()");
+		}
+	}
+
+	public boolean visit(PostfixExpression node) {
+		Expression left = node.getOperand();
+		ITypeBinding typeBinding = left.resolveTypeBinding();
+		IVariableBinding varBinding = getLeftVariableBinding(left, typeBinding);
+		boolean isChar = (typeBinding != null && typeBinding.isPrimitive() && "char".equals(typeBinding.getName()));
+		if (checkStaticBinding(varBinding)) {
+			ASTNode parent = node.getParent();
+			boolean needParenthesis = (isChar || !haveDirectStaticAccess(left))
+					&& !(parent instanceof Statement || parent instanceof ParenthesizedExpression);
+			if (needParenthesis) {
+				buffer.append("(");
+			}
+			addLeftSidePrefixName(left);
+			String op = node.getOperator().toString();
+			if (isChar) {
+				addCharacterPrePostFix(left, parent, varBinding, op, false);
+			} else {
+				addFieldName(left, varBinding);
+				buffer.append(op);
+			}
+			if (needParenthesis) {
+				buffer.append(")");
+			}
+			return false;
+		}
+		if (isChar) {
+			addCharacterPrePostFix(left, node.getParent(), null, node.getOperator().toString(), false);
+			return false;
+		}
+		boxingNode(left);
+		buffer.append(node.getOperator());
+		return false;
+	}
+	
 	public boolean visit(QualifiedName node) {
 		if (isSimpleQualified(node)) {
 			String constValue = checkConstantValue(node);
@@ -1074,17 +1086,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				return false;
 			}
 		}
-		boolean staticFields = false;
-		IVariableBinding varBinding = null;
 		IBinding nameBinding = node.resolveBinding();
-		if (nameBinding instanceof IVariableBinding) {
-			varBinding = (IVariableBinding) nameBinding;
-		}
-		if (/*!supportsObjectStaticFields && */ checkStaticBinding(varBinding)) {
+		IVariableBinding varBinding = (nameBinding instanceof IVariableBinding ? (IVariableBinding) nameBinding : null);
+		boolean staticFields = false;
+		if (checkStaticBinding(varBinding)) {
 			IBinding qBinding = node.getQualifier().resolveBinding();
-			if (!(qBinding != null && qBinding instanceof ITypeBinding)) {
-				staticFields = true;
-			}
+			staticFields = (qBinding == null || !(qBinding instanceof ITypeBinding));
 		}
 		ASTNode parent = node.getParent();
 		boolean qualifierVisited = false;
@@ -1112,21 +1119,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					// RadiusData.EnumType e = RadiusData.EnumType.THREE;
 					// avoid generate duplicated RadiusData
 					String name = typeBinding.getQualifiedName();
-					// ITypeBinding declaringClass =
-					// typeBinding.getDeclaringClass();
-					// if (declaringClass != null) {
-					// name = declaringClass.getQualifiedName();
-					// } else {
-					// IPackageBinding pkg = typeBinding.getPackage();
-					// if (pkg != null) {
-					// name = pkg.getName();
-					// } else {
-					// name = "";
-					// }
-					// }
-					String xhtml = "net.sf.j2s.html.";
-					if (name.indexOf(xhtml) == 0) {
-						name = name.substring(xhtml.length());
+					if (name.indexOf("net.sf.j2s.html.") == 0) {
+						name = name.substring(16);
 					}
 					if (name.indexOf("java.lang.") == 0) {
 						name = name.substring(10);
@@ -1134,14 +1128,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					if (name.length() != 0) {
 						if (staticFields) {
 							if (qualifier instanceof SimpleName) {
-								buffer.append(assureQualifiedName(
-										removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+								addQualifiedName(varBinding);
 							} else {
 								buffer.append('(');
 								buffer.append(name);
 								buffer.append(", ");
-								buffer.append(assureQualifiedName(
-										removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+								addQualifiedName(varBinding);
 								buffer.append(')');
 							}
 						} else {
@@ -1162,14 +1154,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (!qualifierVisited) {
 			if (staticFields) {
 				if (qName instanceof SimpleName) {
-					buffer.append(
-							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					addQualifiedName(varBinding);
 				} else {
 					buffer.append('(');
 					qName.accept(this);
 					buffer.append(", ");
-					buffer.append(
-							assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					addQualifiedName(varBinding);
 					buffer.append(')');
 				}
 			} else {
@@ -1179,6 +1169,29 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		node.getName().accept(this);
 		return false;
+	}
+
+	public boolean visit(FieldAccess node) {
+		// Expression . Identifier
+		// TODO: more complicated rules should be considered. read the JavaDoc
+		IVariableBinding varBinding = node.resolveFieldBinding();
+		Expression expression = node.getExpression();
+		if (checkStaticBinding(varBinding)) {
+			buffer.append('(');
+			expression.accept(this);
+			buffer.append(", ");
+			addQualifiedName(varBinding);
+			buffer.append(')');
+		} else {
+			expression.accept(this);
+		}
+		buffer.append(".");
+		node.getName().accept(this);
+		return false;
+	}
+
+	private void addQualifiedName(IVariableBinding varBinding) {
+		buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
 	}
 
 	@SuppressWarnings("null")
@@ -1675,6 +1688,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return b != null && Modifier.isStatic(b.getModifiers());
 	}
 
+	/**
+	 * Check to see if we have a static variable. 
+	 * 
+	 * @param varBinding
+	 * @return
+	 */
 	protected boolean checkStaticBinding(IVariableBinding varBinding) {
 		ITypeBinding declaring;
 		String qName;
@@ -1684,11 +1703,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& !qName.startsWith("net.sf.j2s.html.");
 	}
 	
-	private boolean haveDirectStaticAccess(Expression exp) {
-		return exp instanceof SimpleName
-				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
-				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
 
+	protected static boolean isNumericType(String type) {
+		return (type != null  && "int long byte short".indexOf(type) >= 0);
 	}
 
 

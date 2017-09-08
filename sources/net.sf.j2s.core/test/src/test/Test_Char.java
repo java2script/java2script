@@ -61,9 +61,10 @@ class Test_Char {
 		s += 3 + cc + 5f;
 		
 		s += new Double(3);
-		s += new Double(3) + cc + 5;
-		System.out.println(s);
-		assert(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0"));
+		s += new Double(3) + cc++ + 5;
+		s += new Double(3) + ++cc + 5;
+		System.out.println(s + cc);
+		assert(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0121.0q"));
 		d = 333.5;
         assert((int)d == 333);
         assert((int)-d == -333);

@@ -4067,25 +4067,26 @@ Number.compare = function(a,b) { return (a < b ? -1 : a == b ? 0 : 1) };
 
 m$(Number,"shortValue",
 function(){
-var x = Math.round(this)&0xffff;
-return (this < 0 && x > 0 || x == 0xffff ? x - 0x10000 : x);
+var x = (this|0)&0xffff;
+return (x >= 0x8000 ? x - 0x10000 : x);
 });
 
 m$(Number,"byteValue",
 function(){
-var x = Math.round(this)&0xff;
-return (this < 0 && x > 0  || x == 0xff ? x - 0x100 : x);
+var x = (this|0)&0xff;
+return (x >= 0x80 ? x - 0x100 : x);
 });
+
 
 m$(Number,"intValue",
 function(){
-var x = Math.round(this)&0xffffffff;
-return (this < 0 && x > 0  || x == 0xffffffff ? x - 0x100000000 : x);
+var x = (this|0)&0xffffffff;
+return (x >= 0x80000000 ? x - 0x100000000 : x);
 });
 
 m$(Number,"longValue",
 function(){
-return Math.round(this);
+return (this|0);
 });
 
 m$(Number,"floatValue",

@@ -271,15 +271,4 @@ public class ASTTypeVisitor extends AbstractPluginVisitor {
 		return name;
 	}
 
-	public boolean isNumericType(String type) {
-		// BH -- removed char
-		if ("int".equals(type)
-				|| "long".equals(type)
-				|| "byte".equals(type)
-				|| "short".equals(type)) {
-			return true;
-		}
-		return false;
-	}
-
 }

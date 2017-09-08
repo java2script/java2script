@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -57,11 +56,13 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-// TODO: assert 
-
 // TODO: static calls to static methods do not trigger "musts" dependency
 
-// BH 9/8/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
+
+//TODO: doubleToInt; not just /=
+
+// BH 9/7/2017 -- primitive casting for *=,/=,+=,-=,&=,|=,^=
+// BH 9/7/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
 // BH 9/7/2017 -- fixed multiple issues with char and Character
 // BH 9/4/2017 -- java.awt, javax.swing, swingjs code added; additional fixes required
 // BH 8/30/2017 -- all i/o working, including printf and FileOutputStream
@@ -247,10 +248,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	protected boolean checkSameName(ITypeBinding binding, String name) {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).checkSameName(binding, name);
-	}
-
-	public boolean isPrimNumberType(String type) {
-		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).isNumericType(type);
 	}
 
 	public String getClassName() {
@@ -838,25 +835,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return super.visit(node);
 	}
 
-	public boolean visit(FieldAccess node) {
-		// Expression . Identifier
-		// TODO: more complicated rules should be considered. read the JavaDoc
-		IVariableBinding varBinding = node.resolveFieldBinding();
-		Expression expression = node.getExpression();
-		if (checkStaticBinding(varBinding)) {
-			buffer.append('(');
-			expression.accept(this);
-			buffer.append(", ");
-			buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
-			buffer.append(')');
-		} else {
-			expression.accept(this);
-		}
-		buffer.append(".");
-		node.getName().accept(this);
-		return false;
-	}
-
 	public boolean visit(FieldDeclaration node) {
 		if (isStatic(node))
 			return false;
@@ -916,173 +894,10 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 						: null);
 	}
 
-	/**
-	 * The left operand is primitive boolean. Check to see if the operator is ^,
-	 * |, or &, or if the left or right operand is such an expression. 
-	 * 
-	 * If so, we are going to box this all as a Boolean(....).valueOf()
-	 * 
-	 * @param node
-	 * @return
-	 */
-	private boolean isBitwiseBinaryOperator(InfixExpression node) {
-		if (checkSimpleBooleanOperator(node.getOperator().toString())) {
-			return true;
-		}
-		Expression left = node.getLeftOperand();
-		if (left instanceof InfixExpression) {
-			if (isBitwiseBinaryOperator((InfixExpression) left)) {
-				return true;
-			}
-		}
-		Expression right = node.getRightOperand();
-		if (right instanceof InfixExpression) {
-			if (isBitwiseBinaryOperator((InfixExpression) right)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean checkSimpleBooleanOperator(String op) {
-		return (op.equals("^") || op.equals("|") || op.equals("&"));
-	}
-
-	public boolean visit(InfixExpression node) {
-		// TODO check for String + Double/Float --> String + ... .toString()
-		// and change to String + double/float --> String + new
-		// Double/Float(...).toString()
-		String constValue = checkConstantValue(node);
-		if (constValue != null) {
-			buffer.append(constValue);
-			return false;
-		}
-		ITypeBinding expTypeBinding = node.resolveTypeBinding();
-		if (expTypeBinding == null)
-			return false;
-		boolean toString = (expTypeBinding.getName().indexOf("String") >= 0);
-		String operator = node.getOperator().toString();
-		Expression left = node.getLeftOperand();
-		Expression right = node.getRightOperand();
-		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
-		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
-		if (leftTypeBinding == null || rightTypeBinding == null)
-			return false;
-		String leftName = leftTypeBinding.getName();
-		String rightName = rightTypeBinding.getName();
-		if ("!==<=>=".indexOf(operator) >= 0) {
-			// < > <= >= == !=
-			switch (leftName) {
-			case "char":
-			case "Character":
-				switch (rightName) {
-				case "char":
-				case "Character":
-					boxingNode(left);
-					buffer.append(' ');
-					buffer.append(operator);
-					buffer.append(' ');
-					boxingNode(right);
-					return false;
-				default:
-				}
-				break;
-			default:
-				break;
-			}
-		} else if ("/".equals(operator)) {
-			// what about CHAR here?
-			if (leftTypeBinding.isPrimitive() && isPrimNumberType(leftName) && isPrimNumberType(rightName)) {
-				// left and right are some sort of primitive byte, short, int,
-				// or, long
-				// division must take care of this.
-				// TODO more issues here...
-				StringBuffer oldBuffer = buffer;
-				buffer = new StringBuffer();
-				buffer.append("Clazz.doubleToInt (");
-				{
-					addOperand(left, toString);
-					buffer.append(" / ");
-					addOperand(right, toString);
-				}
-				buffer.append(')');
-				List<?> extendedOperands = node.extendedOperands();
-				if (extendedOperands.size() > 0) {
-					for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
-						ASTNode element = (ASTNode) iter.next();
-						boolean is2Floor = false;
-						if (element instanceof Expression) {
-							Expression exp = (Expression) element;
-							ITypeBinding expBinding = exp.resolveTypeBinding();
-							if (isPrimNumberType(expBinding.getName())) {
-								buffer.insert(0, "Clazz.doubleToInt (");
-								is2Floor = true;
-							}
-						}
-						buffer.append(" / ");
-						addOperand((Expression) element, toString);
-						if (is2Floor) {
-							buffer.append(')');
-						}
-					}
-				}
-				oldBuffer.append(buffer);
-				buffer = oldBuffer;
-				oldBuffer = null;
-				return false;
-			}
-		}
-		boolean toBoolean = false;
-		if (leftTypeBinding.isPrimitive() && "boolean".equals(leftName) && isBitwiseBinaryOperator(node)) {
-			// box this as Boolean(...).valueOf();
-			buffer.append(" new Boolean (");
-			toBoolean = true;
-		}
-		// left
-		addOperand(left, toString);
-		buffer.append(' ');
-		// op
-		buffer.append(operator);
-		if (("==".equals(operator) || "!=".equals(operator)) && !leftTypeBinding.isPrimitive()
-				&& !(left instanceof NullLiteral) && !(right instanceof NullLiteral)) {
-			buffer.append('=');
-		}
-		buffer.append(' ');
-		// right
-		addOperand(right, toString);
-
-		// ok, this is trouble
-		// The extended operands is the preferred way of representing deeply
-		// nested expressions of the form L op R op R2 op R3... where the same
-		// operator appears between all the operands (the most common case being
-		// lengthy string concatenation expressions). Using the extended
-		// operands keeps the trees from getting too deep; this decreases the
-		// risk is running out of thread stack space at runtime when traversing
-		// such trees. ((a + b) + c) + d would be translated to: leftOperand: a
-		// rightOperand: b extendedOperands: {c, d} operator: +
-
-		List<?> extendedOperands = node.extendedOperands();
-		if (extendedOperands.size() > 0) {
-			for (Iterator<?> iter = extendedOperands.iterator(); iter.hasNext();) {
-				buffer.append(' ');
-				buffer.append(operator);
-				buffer.append(' ');
-				ASTNode element = (ASTNode) iter.next();
-				addOperand((Expression) element, toString);
-			}
-		}
-		if (toBoolean) {
-			// unbox Boolean(...)
-			buffer.append(").valueOf()");
-		}
-		return false;
-	}
-
 	public boolean visit(Initializer node) {
 		if (checkj2sIgnore(node)) {
 			return false;
 		}
-		// visitList(node.getBody().statements(), "\r\n");
 		node.getBody().accept(this);
 		buffer.append("\r\n");
 		return false;
