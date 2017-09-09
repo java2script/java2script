@@ -28,22 +28,6 @@
 
 package sun.awt.image;
 
-import java.awt.AWTException;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.ImageCapabilities;
-import java.awt.Rectangle;
-import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DirectColorModel;
-import java.awt.image.Raster;
-import java.awt.image.VolatileImage;
-import java.awt.image.WritableRaster;
-
 public class BufferedImageGraphicsConfig {
 //    extends GraphicsConfiguration
 //{

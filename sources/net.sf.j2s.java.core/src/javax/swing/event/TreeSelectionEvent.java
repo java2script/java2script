@@ -52,6 +52,7 @@ import javax.swing.tree.TreePath;
  *
  * @author Scott Violet
  */
+@SuppressWarnings("serial")
 public class TreeSelectionEvent extends EventObject
 {
     /** Paths this event represents. */

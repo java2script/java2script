@@ -42,6 +42,7 @@ import java.util.Hashtable;
  * @author Georges Saab
  * @author Scott Violet
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 class ArrayTable implements Cloneable {
     // Our field for storage
     private Object table = null;

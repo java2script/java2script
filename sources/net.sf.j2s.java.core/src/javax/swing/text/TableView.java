@@ -72,6 +72,7 @@ import javax.swing.event.DocumentEvent;
  * @author  Timothy Prinzing
  * @see     View
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class TableView extends BoxView {
 
     /**

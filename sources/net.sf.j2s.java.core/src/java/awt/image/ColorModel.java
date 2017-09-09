@@ -28,13 +28,9 @@
 
 package java.awt.image;
 
-import java.awt.image.ComponentColorModel;
-import java.awt.image.IndexColorModel;
-import java.util.Map;
-
-import javajs.util.AU;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.util.Map;
 
 /**
  * The <code>ColorModel</code> abstract class encapsulates the
@@ -154,6 +150,7 @@ import java.awt.color.ColorSpace;
  * @see DataBuffer
  */
 //no! don't do this! @J2SRequireImport(DirectColorModel.class)
+@SuppressWarnings({"rawtypes"})
 public abstract class ColorModel implements Transparency{
 //    private long pData;         // Placeholder for data for native functions
 

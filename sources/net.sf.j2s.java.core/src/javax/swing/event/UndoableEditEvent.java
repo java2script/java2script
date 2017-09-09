@@ -44,6 +44,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author Ray Ryan
  */
+@SuppressWarnings("serial")
 public class UndoableEditEvent extends java.util.EventObject {
     private UndoableEdit myEdit;
 

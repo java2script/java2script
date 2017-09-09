@@ -200,7 +200,8 @@ public class Applet extends Panel {
      * @param   width    the new requested width for the applet.
      * @param   height   the new requested height for the applet.
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
 		public void resize(int width, int height) {
         Dimension d = size();
         if ((d.width != width) || (d.height != height)) {

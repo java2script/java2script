@@ -48,6 +48,7 @@ package javax.sound.sampled;
  *
  * @serial exclude
  */
+@SuppressWarnings("serial")
 public class LineEvent extends java.util.EventObject {
 
     // INSTANCE VARIABLES

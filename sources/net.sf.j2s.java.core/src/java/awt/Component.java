@@ -153,7 +153,7 @@ import swingjs.JSToolkit;
  * @author Arthur van Hoff
  * @author Sami Shaio
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Component
 		implements ImageObserver/*
 								 * , MenuContainer, Serializable
@@ -2156,6 +2156,7 @@ public abstract class Component
 		peer.setBounds(nativeX, nativeY, width, height, op);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void notifyNewBounds(boolean resized, boolean moved) {
 		if (componentListener != null || (eventMask & AWTEvent.COMPONENT_EVENT_MASK) != 0
 				|| Toolkit.enabledOnToolkit(AWTEvent.COMPONENT_EVENT_MASK)) {

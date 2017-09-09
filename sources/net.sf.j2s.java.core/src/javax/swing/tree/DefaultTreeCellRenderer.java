@@ -100,12 +100,14 @@ public class DefaultTreeCellRenderer extends JLabel implements TreeCellRenderer
     /**
      * Background color of the tree.
      */
-    private Color treeBGColor;
+    @SuppressWarnings("unused")
+	private Color treeBGColor;
     /**
      * Color to draw the focus indicator in, determined from the background.
      * color.
      */
-    private Color focusBGColor;
+    @SuppressWarnings("unused")
+	private Color focusBGColor;
 
     // Icons
     /** Icon used to show non-leaf nodes that aren't expanded. */

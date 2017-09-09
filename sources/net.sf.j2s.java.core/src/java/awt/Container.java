@@ -723,7 +723,8 @@ public class Container extends JSComponent {
      * to new heavyweight parent.
      * @since 1.5
      */
-    private void reparentTraverse(ContainerPeer parentPeer, Container child) {
+    @SuppressWarnings("deprecation")
+	private void reparentTraverse(ContainerPeer parentPeer, Container child) {
         checkTreeLock();
 
         for (int i = 0; i < child.getComponentCount(); i++) {
@@ -746,7 +747,8 @@ public class Container extends JSComponent {
      * Container must be heavyweight.
      * @since 1.5
      */
-    private void reparentChild(Component comp) {
+    @SuppressWarnings("deprecation")
+	private void reparentChild(Component comp) {
 //        checkTreeLock();
         if (comp == null) {
             return;

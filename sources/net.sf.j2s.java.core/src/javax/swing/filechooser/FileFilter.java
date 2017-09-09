@@ -52,10 +52,10 @@ import java.io.File;
  * @author Jeff Dinkins
  */
 public /* SwingJS abstract*/ class FileFilter {
-    private String[] options;
+    //private String[] options;
 
 		public FileFilter(String[] options) {
-    	this.options = options;
+    	//this.options = options;
 	}
 
 		/**

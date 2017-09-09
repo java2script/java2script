@@ -71,6 +71,7 @@ import java.util.Stack;
  *
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ElementIterator implements Cloneable {
 
 

@@ -73,6 +73,7 @@ import javax.swing.plaf.UIResource;
  * 
  * @author David Kloba
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JSlider extends JComponent implements SwingConstants {
 
 	private boolean paintTicks = false;
@@ -1295,6 +1296,7 @@ public class JSlider extends JComponent implements SwingConstants {
 	// }
 	// } // AccessibleJSlider
 
+	@SuppressWarnings("serial")
 	class JSliderSmartHashtable extends Hashtable implements
 			PropertyChangeListener {
 		int increment = 0;

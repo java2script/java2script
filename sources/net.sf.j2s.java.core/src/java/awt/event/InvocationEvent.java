@@ -53,6 +53,7 @@ import java.awt.AWTEvent;
  *
  * @since       1.2
  */
+@SuppressWarnings("serial")
 public class InvocationEvent extends AWTEvent implements ActiveEvent {
 
   /**

@@ -152,6 +152,7 @@ import javax.swing.JFormattedTextField;
  *
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MaskFormatter extends DefaultFormatter {
     // Potential values in mask.
     private static final char DIGIT_KEY = '#';

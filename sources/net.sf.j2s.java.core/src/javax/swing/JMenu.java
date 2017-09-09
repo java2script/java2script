@@ -103,6 +103,7 @@ import javax.swing.plaf.PopupMenuUI;
  * @see JMenuBar
  * @see JPopupMenu
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JMenu extends JMenuItem implements MenuElement
 {
     /*

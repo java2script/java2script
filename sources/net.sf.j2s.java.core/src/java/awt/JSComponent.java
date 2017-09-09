@@ -38,7 +38,6 @@ import swingjs.JSAppletThread;
 import swingjs.JSAppletViewer;
 import swingjs.JSFrameViewer;
 import swingjs.JSGraphics2D;
-import swingjs.JSToolkit;
 import swingjs.api.js.HTML5Canvas;
 
 /*

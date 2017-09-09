@@ -28,19 +28,15 @@
 
 package sun.font;
 
-//import java.lang.ref.ReferenceQueue;
-//import java.lang.ref.SoftReference;
-import java.awt.Toolkit;
-import java.util.Hashtable;
-
-import swingjs.JSToolkit;
-
 import java.awt.Font;
 import java.awt.FontMetrics;
 //import java.awt.font.FontRenderContext;
 //import java.awt.geom.AffineTransform;
 //import sun.java2d.Disposer;
 //import sun.java2d.DisposerRecord;
+import java.util.Hashtable;
+
+import swingjs.JSToolkit;
 
 /*
  * This class provides a summary of the glyph measurements  for a Font

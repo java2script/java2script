@@ -53,6 +53,7 @@ import java.awt.ItemSelectable;
  *
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class ItemEvent extends AWTEvent {
 
     /**

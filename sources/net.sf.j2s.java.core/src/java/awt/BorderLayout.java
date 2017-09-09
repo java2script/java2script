@@ -123,6 +123,7 @@ package java.awt;
  * @see         java.awt.ComponentOrientation
  * @since       JDK1.0
  */
+@SuppressWarnings("serial")
 public class BorderLayout implements LayoutManager2,
                                      java.io.Serializable {
     /**

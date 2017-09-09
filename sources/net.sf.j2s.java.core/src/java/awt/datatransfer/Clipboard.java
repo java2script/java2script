@@ -54,6 +54,7 @@ import sun.awt.EventListenerAggregate;
  * @author      Amy Fowler
  * @author      Alexander Gerasimov
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class Clipboard {
 
     String name;

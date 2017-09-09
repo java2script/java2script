@@ -165,6 +165,7 @@ import swingjs.plaf.JSComponentUI;
  * @author Hans Muller
  * @author Arnaud Weber
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public abstract class JComponent extends Container {
 
 	// /**
@@ -3041,6 +3042,7 @@ public abstract class JComponent extends Container {
 	 * @beaninfo expert: true description: Determines if this component
 	 *           automatically scrolls its contents when dragged.
 	 */
+	@SuppressWarnings("static-access")
 	public void setAutoscrolls(boolean autoscrolls) {
 		setFlag(AUTOSCROLLS_SET, true);
 		if (this.autoscrolls != autoscrolls) {
@@ -3087,6 +3089,7 @@ public abstract class JComponent extends Container {
 	 * @see java.awt.Component#processMouseEvent
 	 * @since 1.5
 	 */
+	@SuppressWarnings("static-access")
 	@Override
 	protected void processMouseEvent(MouseEvent e) {
 	  if (autoscrolls && e.getID() == MouseEvent.MOUSE_RELEASED) {
@@ -3102,6 +3105,7 @@ public abstract class JComponent extends Container {
 	 *          the <code>MouseEvent</code>
 	 * @see MouseEvent
 	 */
+	@SuppressWarnings("static-access")
 	@Override
 	protected void processMouseMotionEvent(MouseEvent e) {
 		boolean dispatch = true;
@@ -4623,6 +4627,7 @@ public abstract class JComponent extends Container {
 	 * 
 	 * @see #registerKeyboardAction
 	 */
+	@SuppressWarnings("static-access")
 	@Override
 	public void removeNotify() {
 		super.removeNotify();

@@ -61,7 +61,8 @@ import java.util.List;
  */
 public class SpinnerListModel extends AbstractSpinnerModel 
 {
-    private List list;
+    @SuppressWarnings("rawtypes")
+	private List list;
     private int index;
 
 

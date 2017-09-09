@@ -53,6 +53,7 @@ import javax.swing.tree.TreePath;
  * @author Ray Ryan
  * @author Scott Violet
  */
+@SuppressWarnings("serial")
 public class TreeModelEvent extends EventObject {
     /** Path to the parent of the nodes that have changed. */
     protected TreePath  path;

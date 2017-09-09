@@ -36,6 +36,7 @@ import java.util.Vector;
  * @author Tom Santos
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultComboBoxModel extends AbstractListModel implements MutableComboBoxModel {
     Vector objects;
     Object selectedObject;

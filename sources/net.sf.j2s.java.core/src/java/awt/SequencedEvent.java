@@ -45,12 +45,8 @@ import sun.awt.SunToolkit;
  *
  * @author David Mendenhall
  */
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
 class SequencedEvent extends AWTEvent implements ActiveEvent {
-    /*
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = 547742659238625067L;
-
     private static final int ID =
         java.awt.event.FocusEvent.FOCUS_LAST + 1;
     private static final LinkedList list = new LinkedList();

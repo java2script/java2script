@@ -672,7 +672,8 @@ public abstract class AbstractWriter {
      * @param     attr an AttributeSet.
      * @exception IOException on any I/O error
      */
-    protected void writeAttributes(AttributeSet attr) throws IOException {
+    @SuppressWarnings("rawtypes")
+	protected void writeAttributes(AttributeSet attr) throws IOException {
 
         Enumeration names = attr.getAttributeNames();
         while (names.hasMoreElements()) {

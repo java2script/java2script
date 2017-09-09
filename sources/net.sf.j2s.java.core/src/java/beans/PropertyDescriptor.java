@@ -39,6 +39,7 @@ import java.lang.reflect.Constructor;
  * A PropertyDescriptor describes one property that a Java Bean
  * exports via a pair of accessor methods.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PropertyDescriptor extends FeatureDescriptor {
 
     private Class/*Reference<Class>*/ propertyTypeRef;
@@ -120,8 +121,8 @@ public class PropertyDescriptor extends FeatureDescriptor {
         // If this class or one of its base classes allow PropertyChangeListener,
         // then we assume that any properties we discover are "bound".
         // See Introspector.getTargetPropertyInfo() method.
-        String name = "addPropertyChangeListener";
-        Class[] args = {PropertyChangeListener.class};
+//        String name = "addPropertyChangeListener";
+  //      Class[] args = {PropertyChangeListener.class};
 //        this.bound = (null != Introspector.findMethod(beanClass, name, args.length, args));
     }
 
@@ -218,7 +219,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
                 return null;
             }
             if (readMethodName == null) {
-                Class type = getPropertyType0();
+//                Class type = getPropertyType0();
 //                if (type == boolean.class || type == null) {
 //                    readMethodName = Introspector.IS_PREFIX + getBaseName();
 //                } else {

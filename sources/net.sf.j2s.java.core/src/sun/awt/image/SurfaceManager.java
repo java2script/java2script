@@ -28,18 +28,6 @@
 
 package sun.awt.image;
 
-import java.awt.Color;
-import java.awt.GraphicsEnvironment;
-import java.awt.GraphicsConfiguration;
-import java.awt.Image;
-import java.awt.ImageCapabilities;
-import java.awt.image.BufferedImage;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Iterator;
-import sun.java2d.SurfaceData;
-import sun.java2d.SurfaceDataProxy;
-//import sun.java2d.loops.CompositeType;
-
 /**
  * The abstract base class that manages the various SurfaceData objects that
  * represent an Image's contents.  Subclasses can customize how the surfaces

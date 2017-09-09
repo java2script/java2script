@@ -50,6 +50,7 @@ import javax.swing.plaf.UIResource;
  * @author Amy Fowler
  *
  */
+@SuppressWarnings("serial")
 public class InsetsUIResource extends Insets implements UIResource
 {
     public InsetsUIResource(int top, int left, int bottom, int right) {

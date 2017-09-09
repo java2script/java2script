@@ -46,6 +46,7 @@ import java.util.ArrayList;
  *
  * @author Scott Violet
  */
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
 public class BakedArrayList extends ArrayList {
     /**
      * The cached hashCode.

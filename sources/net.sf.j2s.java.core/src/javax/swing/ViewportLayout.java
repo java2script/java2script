@@ -28,12 +28,12 @@
 
 package javax.swing;
 
-import java.awt.LayoutManager;
+import java.awt.AWTError;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Point;
 import java.awt.Dimension;
-import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Point;
 
 /**
  * The default layout manager for <code>JViewport</code>.
@@ -142,7 +142,7 @@ public class ViewportLayout implements LayoutManager
          * vpSize which we're converting.
          */
 
-        Insets insets = vp.getInsets();
+        //Insets insets = vp.getInsets();
         Dimension viewPrefSize = view.getPreferredSize();
         Dimension vpSize = vp.getSize();
         Dimension extentSize = vp.toViewCoordinates(vpSize);

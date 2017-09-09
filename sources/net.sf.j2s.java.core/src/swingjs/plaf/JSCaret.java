@@ -10,6 +10,7 @@ import javax.swing.text.JTextComponent;
 
 class JSCaret implements Caret, UIResource {
 
+	@SuppressWarnings("unused")
 	private JTextComponent c;
 	private int dot;
 	private int mark;

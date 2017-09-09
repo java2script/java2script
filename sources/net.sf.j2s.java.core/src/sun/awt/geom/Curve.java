@@ -37,6 +37,7 @@ import java.awt.geom.Rectangle2D;
 // BH: at issue here is the fact that the J2S compiler 
 //     does not add the necessary Order1,2,3 references
 //     to the "needs" but not "requires" side of things
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Curve {
     public static final int INCREASING = 1;
     public static final int DECREASING = -1;

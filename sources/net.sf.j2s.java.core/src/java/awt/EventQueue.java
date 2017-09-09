@@ -28,15 +28,6 @@
 
 package java.awt;
 
-//import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
-import java.util.EmptyStackException;
-
-import swingjs.JSEvent;
-import swingjs.JSToolkit;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
@@ -47,12 +38,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.PaintEvent;
 import java.awt.event.WindowEvent;
 import java.awt.peer.ComponentPeer;
+//import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.util.EmptyStackException;
 
 import sun.awt.AWTAutoShutdown;
 //import java.security.PrivilegedAction;
 import sun.awt.AppContext;
-import sun.awt.SunToolkit;
 import sun.awt.PeerEvent;
+import sun.awt.SunToolkit;
+import swingjs.JSToolkit;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
 /**
  * <code>EventQueue</code> is a platform-independent class that queues events,
@@ -153,6 +150,7 @@ public class EventQueue {
 	 * Non-zero if a thread is waiting in getNextEvent(int) for an event of a
 	 * particular ID to be posted to the queue.
 	 */
+	@SuppressWarnings("unused")
 	private int waitForID;
 
 	private final String name = "AWT-EventQueue-" + nextThreadNum();
@@ -447,6 +445,7 @@ public class EventQueue {
 	private static final int UPDATE = 1;
 	private static final int MOVE = 2;
 	private static final int DRAG = 3;
+	@SuppressWarnings("unused")
 	private static final int PEER = 4;
 	private static final int CACHE_LENGTH = 5;
 

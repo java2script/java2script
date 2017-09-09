@@ -125,7 +125,8 @@ abstract class ModalEventFilter implements EventFilter {
         return modalDialog.getModalityType().compareTo(anotherDialog.getModalityType());
     }
 
-    static ModalEventFilter createFilterForDialog(Dialog modalDialog) {
+    @SuppressWarnings("incomplete-switch")
+	static ModalEventFilter createFilterForDialog(Dialog modalDialog) {
         switch (modalDialog.getModalityType()) {
             case DOCUMENT_MODAL: return new DocumentModalEventFilter(modalDialog);
             case APPLICATION_MODAL: return new ApplicationModalEventFilter(modalDialog);

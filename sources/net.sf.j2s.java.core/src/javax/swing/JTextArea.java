@@ -27,20 +27,21 @@
  */
 package javax.swing;
 
-import swingjs.JSPlainDocument;
-import swingjs.JSToolkit;
-import swingjs.api.JSMinimalAbstractDocument;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.Rectangle;
-import javax.swing.text.AbstractDocument;
+import java.awt.TextComponent;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.PlainDocument;
+
+import swingjs.JSPlainDocument;
+import swingjs.JSToolkit;
+import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * A <code>JTextArea</code> is a multi-line area that displays plain text.

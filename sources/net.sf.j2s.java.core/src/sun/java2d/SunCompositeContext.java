@@ -40,6 +40,7 @@ import sun.awt.image.BufImgSurfaceData;
 import sun.java2d.loops.CompositeType;
 //import sun.java2d.loops.Blit;
 
+@SuppressWarnings({"unused"})
 public class SunCompositeContext implements CompositeContext {
     ColorModel srcCM;
     ColorModel dstCM;

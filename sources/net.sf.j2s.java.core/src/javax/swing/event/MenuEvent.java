@@ -47,6 +47,7 @@ import java.util.EventObject;
  * @author Georges Saab
  * @author David Karlton
  */
+@SuppressWarnings("serial")
 public class MenuEvent extends EventObject {
     /**
      * Constructs a MenuEvent object.

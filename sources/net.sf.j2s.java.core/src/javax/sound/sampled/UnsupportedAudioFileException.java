@@ -44,6 +44,7 @@ package javax.sound.sampled;
  * @author Kara Kytle
  */
 
+@SuppressWarnings("serial")
 public class UnsupportedAudioFileException extends Exception {
 
     /**

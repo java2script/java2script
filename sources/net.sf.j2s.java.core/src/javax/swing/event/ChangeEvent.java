@@ -45,6 +45,7 @@ import java.util.EventObject;
  *
  * @author Jeff Dinkins
  */
+@SuppressWarnings("serial")
 public class ChangeEvent extends EventObject {
     /**
      * Constructs a ChangeEvent object.

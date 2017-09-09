@@ -87,6 +87,7 @@ import java.awt.Component;
  * @since 1.4
  */
 
+@SuppressWarnings("serial")
 public class MouseWheelEvent extends MouseEvent {
 
     /**

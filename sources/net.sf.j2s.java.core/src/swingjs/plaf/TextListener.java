@@ -36,14 +36,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.AbstractButton;
+
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
-import swingjs.api.js.DOMNode;
 
 public class TextListener implements MouseListener, MouseMotionListener,
                                    FocusListener, ChangeListener, PropertyChangeListener, DocumentListener
@@ -201,7 +200,7 @@ public class TextListener implements MouseListener, MouseMotionListener,
 				ui.editor.getCaret().moveDot(mark);
 			ui.editor.caretEvent.fire();
 		}
-		if (ui.debugging)
+		if (JSComponentUI.debugging)
 			System.out.println(ui.id + " TextListener handling event " + evType + " " + eventType
 				+ " " + ui.editor.getCaret() + " " + ui.getComponentText().length());
 		return true;

@@ -47,6 +47,7 @@ import javax.swing.table.TableColumnModel;
  * @author Alan Chung
  * @see TableColumnModelListener
  */
+@SuppressWarnings("serial")
 public class TableColumnModelEvent extends java.util.EventObject
 {
 //

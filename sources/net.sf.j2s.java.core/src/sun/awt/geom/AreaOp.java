@@ -33,6 +33,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AreaOp {
     public static abstract class CAGOp extends AreaOp {
         boolean inLeft;

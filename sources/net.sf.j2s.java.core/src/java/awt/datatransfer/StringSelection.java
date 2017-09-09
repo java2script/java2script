@@ -50,7 +50,8 @@ public class StringSelection implements Transferable, ClipboardOwner {
     private static final int STRING = 0;
     private static final int PLAIN_TEXT = 1;
 
-    private static final DataFlavor[] flavors = {
+    @SuppressWarnings("deprecation")
+	private static final DataFlavor[] flavors = {
         DataFlavor.stringFlavor,
         DataFlavor.plainTextFlavor // deprecated
     };

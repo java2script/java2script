@@ -37,6 +37,7 @@ import java.util.EventObject;
  * @author  Sunita Mani
  */
 
+@SuppressWarnings("serial")
 public class AppletEvent extends EventObject {
 
     private Object arg;

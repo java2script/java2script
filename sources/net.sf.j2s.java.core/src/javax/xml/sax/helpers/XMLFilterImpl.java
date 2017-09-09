@@ -50,6 +50,7 @@ import javax.xml.sax.SAXNotRecognizedException;
  * @see javax.xml.sax.ContentHandler
  * @see javax.xml.sax.ErrorHandler
  */
+@SuppressWarnings({"unused"})
 public class XMLFilterImpl
     implements XMLFilter, EntityResolver, DTDHandler, ContentHandler, ErrorHandler
 {

@@ -3,13 +3,11 @@ package javax.xml.sax.demo;
 // No warranty; no copyright -- use this as you will.
 // $Id: CharacterStreamDemo.java,v 1.3 1998/05/01 20:44:33 david Exp $
 
-import javax.xml.sax.Parser;
-import javax.xml.sax.InputSource;
-import javax.xml.sax.SAXException;
-
-import javax.xml.sax.helpers.ParserFactory;
-
 import java.io.StringReader;
+
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Parser;
+import javax.xml.sax.helpers.ParserFactory;
 
 
 /**
@@ -30,6 +28,7 @@ import java.io.StringReader;
   * @see javax.xml.sax.helpers.ParserFactory
   * @see java.io.StringReader
   */
+@SuppressWarnings({"deprecation"})
 public class CharacterStreamDemo {
 
 				// This is the document, in all its glory.
@@ -45,7 +44,8 @@ public class CharacterStreamDemo {
   /**
     * Main entry point for an application.
     */
-  public static void main (String args[])
+  @SuppressWarnings("unused")
+public static void main (String args[])
     throws Exception
   {
     DemoHandler handler;

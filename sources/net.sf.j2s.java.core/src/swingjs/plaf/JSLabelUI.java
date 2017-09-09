@@ -1,9 +1,9 @@
 package swingjs.plaf;
 
-import java.awt.Dimension;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.LookAndFeel;
+
 import swingjs.api.js.DOMNode;
 
 /**

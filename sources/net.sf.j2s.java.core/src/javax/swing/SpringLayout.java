@@ -27,7 +27,11 @@
  */
 package javax.swing;
 
-import java.util.ArrayList;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager2;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,12 +40,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javajs.util.Lst;
-
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.LayoutManager2;
 
 /**
  * A <code>SpringLayout</code> lays out the children of its associated container
@@ -194,6 +192,7 @@ import java.awt.LayoutManager2;
  * @author      Joe Winchester
  * @since       1.4
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SpringLayout implements LayoutManager2 {
     private Map componentConstraints = new HashMap();
 

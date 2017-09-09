@@ -69,10 +69,10 @@ import java.util.Vector;
  * @author David Megginson
  * @version 2.0.1 (sax2r2)
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class NamespaceSupport
 {
 
-
     ////////////////////////////////////////////////////////////////////
     // Constants.
     ////////////////////////////////////////////////////////////////////

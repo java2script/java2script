@@ -17,6 +17,7 @@ import swingjs.api.Interface;
  * @author Bob Hanson hansonr@stolaf.edu
  *
  */
+@SuppressWarnings({"unused"})
 public class JSImagekit implements ImageConsumer {
 
 	private static final int UNK = -1;

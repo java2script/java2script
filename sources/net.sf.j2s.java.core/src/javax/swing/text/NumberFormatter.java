@@ -106,6 +106,7 @@ import javajs.J2SRequireImport;
 // SwingJS J2S bug #16 NumberFormat.js includes the inner public class NumberFormat.Field, which is called here by instanceOf 
 @J2SRequireImport(NumberFormat.class)
 @J2SIgnoreImport(NumberFormat.Field.class)
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class NumberFormatter extends InternationalFormatter {
     /** The special characters from the Format instance. */
     private String specialChars;

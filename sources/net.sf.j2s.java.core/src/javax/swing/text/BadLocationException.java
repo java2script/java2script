@@ -42,6 +42,7 @@ package javax.swing.text;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings("serial")
 public class BadLocationException extends Exception
 {
     /**

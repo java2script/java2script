@@ -3,14 +3,12 @@ package javax.xml.sax.demo;
 // No warranty; no copyright -- use this as you will.
 // $Id: EntityDemo.java,v 1.2 1998/05/01 20:52:16 david Exp $
 
-import javax.xml.sax.InputSource;
-import javax.xml.sax.Parser;
-import javax.xml.sax.SAXException;
-
-import javax.xml.sax.helpers.ParserFactory;
-
 import java.io.StringReader;
 import java.net.URL;
+
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Parser;
+import javax.xml.sax.helpers.ParserFactory;
 
 
 /**
@@ -39,6 +37,7 @@ import java.net.URL;
   *
   * @see DemoHandler
   */
+@SuppressWarnings({"deprecation"})
 public class EntityDemo extends DemoHandler {
 
 				// This is the Reader that will be

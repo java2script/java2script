@@ -1141,7 +1141,7 @@ public abstract class View implements SwingConstants {
      */
     protected void forwardUpdate(DocumentEvent.ElementChange ec,
                                       DocumentEvent e, Shape a, ViewFactory f) {
-        Element elem = getElement();
+        //Element elem = getElement();
         int pos = e.getOffset();
         int index0 = getViewIndex(pos, Position.Bias.Forward);
         if (index0 == -1 && e.getType() == DocumentEvent.EventType.REMOVE &&

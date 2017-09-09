@@ -1,13 +1,12 @@
 package swingjs.plaf;
 
-//import java.awt.FontMetrics;
-import java.awt.Event;
-import java.awt.event.KeyEvent;
-
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
 import javax.swing.Action;
 import javax.swing.JTextField;
+
 import swingjs.api.js.DOMNode;
 
 /**
@@ -16,6 +15,7 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  * 
  */
+@SuppressWarnings({"unused"})
 public class JSTextFieldUI extends JSTextUI {
 
 	protected String inputType = "text";

@@ -67,6 +67,7 @@ import javax.swing.event.TreeSelectionListener;
  *
  * @author Scott Violet
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultTreeSelectionModel extends Object implements Cloneable, TreeSelectionModel
 {
     /** Property name for selectionMode. */
@@ -797,7 +798,8 @@ public class DefaultTreeSelectionModel extends Object implements Cloneable, Tree
      * the currently selected TreePaths are still valid based on the
      * selection mode.
      */
-    @Override
+    @SuppressWarnings("unused")
+	@Override
 		public void resetRowSelection() {
         listSelectionModel.clearSelection();
         if(selection != null && rowMapper != null) {
@@ -1058,7 +1060,8 @@ public class DefaultTreeSelectionModel extends Object implements Cloneable, Tree
      * continuity of the model.
      * This is rather expensive.
      */
-    protected boolean canPathsBeRemoved(TreePath[] paths) {
+    @SuppressWarnings("unused")
+	protected boolean canPathsBeRemoved(TreePath[] paths) {
         if(rowMapper == null || selection == null ||
            selectionMode == TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION)
             return true;

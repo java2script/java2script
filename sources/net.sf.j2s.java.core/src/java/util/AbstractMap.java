@@ -63,7 +63,7 @@ package java.util;
  * @see Collection
  * @since 1.2
  */
-
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractMap<K,V> implements Map<K,V> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically

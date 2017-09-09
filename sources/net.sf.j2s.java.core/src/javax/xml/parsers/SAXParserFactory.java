@@ -33,6 +33,7 @@ import javax.xml.sax.Parser;
   * @see org.xml.sax.Parser
   * @see java.lang.Class
   */
+@SuppressWarnings("deprecation")
 public class SAXParserFactory {
 
 	/**

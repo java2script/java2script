@@ -42,6 +42,7 @@ import java.io.IOException;
  * reading from a <code>File</code> would be stored there.
  *
  */
+@SuppressWarnings("serial")
 public class IIOException extends IOException {
 
     /**

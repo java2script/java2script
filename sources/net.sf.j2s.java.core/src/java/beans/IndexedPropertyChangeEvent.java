@@ -43,6 +43,7 @@ package java.beans;
  * @since 1.5
  * @author Mark Davidson
  */
+@SuppressWarnings("serial")
 public class IndexedPropertyChangeEvent extends PropertyChangeEvent {
 
     private int index;

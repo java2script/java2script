@@ -27,9 +27,6 @@
  */
 package javax.swing.text;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javajs.util.Lst;
 
 /**
@@ -44,6 +41,7 @@ import javajs.util.Lst;
  * </pre>
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 class SegmentCache {
     /**
      * A global cache.

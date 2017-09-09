@@ -34,6 +34,7 @@ package java.awt;
  *
  * @author      Jonni Kanerva
  */
+@SuppressWarnings("serial")
 public class IllegalComponentStateException extends IllegalStateException {
     /*
      * JDK 1.1 serialVersionUID

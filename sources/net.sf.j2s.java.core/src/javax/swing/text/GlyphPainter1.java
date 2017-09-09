@@ -235,7 +235,8 @@ class GlyphPainter1 extends GlyphView.GlyphPainter {
         return p1;
     }
 
-    void sync(GlyphView v) {
+    @SuppressWarnings("deprecation")
+	void sync(GlyphView v) {
         Font f = v.getFont();
         if ((metrics == null) || (! f.equals(metrics.getFont()))) {
             // fetch a new FontMetrics

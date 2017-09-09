@@ -27,6 +27,20 @@
  */
 package javax.swing.text;
 
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.ComponentOrientation;
+import java.awt.Dimension;
+import java.awt.HeadlessException;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputMethodListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 //import java.awt.HeadlessException;
 import java.io.IOException;
 import java.io.Reader;
@@ -37,25 +51,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.ComponentOrientation;
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.InputMethodListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.DropMode;
@@ -76,6 +71,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.TextUI;
 import javax.swing.plaf.UIResource;
+
 import sun.awt.AppContext;
 import swingjs.JSPlainDocument;
 import swingjs.JSToolkit;
@@ -312,6 +308,7 @@ import swingjs.api.JSMinimalAbstractDocument;
  * @see View
  * @see ViewFactory
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public abstract class JTextComponent extends JComponent implements Scrollable
 {
 	/**
@@ -740,7 +737,8 @@ public abstract class JTextComponent extends JComponent implements Scrollable
      * @see javax.swing.TransferHandler
      * @since 1.6
      */
-    public final void setDropMode(DropMode dropMode) {
+    @SuppressWarnings("incomplete-switch")
+	public final void setDropMode(DropMode dropMode) {
         if (dropMode != null) {
             switch (dropMode) {
                 case USE_SELECTION:

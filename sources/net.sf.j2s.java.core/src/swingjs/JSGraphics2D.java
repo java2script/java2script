@@ -47,6 +47,7 @@ import swingjs.api.js.HTML5CanvasContext2D;
  */
 
 @J2SIgnoreImport(java.awt.AlphaComposite.class)
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class JSGraphics2D //extends SunGraphics2D 
 	implements Cloneable {
 

@@ -35,6 +35,7 @@ import java.io.IOException;
  *
  * @author Sunita Mani
  */
+@SuppressWarnings("serial")
 public class ChangedCharSetException extends IOException {
 
     String charSetSpec;

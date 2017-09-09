@@ -37,6 +37,7 @@ package java.awt.dnd;
  * @since 1.2
  */
 
+@SuppressWarnings("serial")
 public class InvalidDnDOperationException extends IllegalStateException {
 
     static private String dft_msg = "The operation requested cannot be performed by the DnD system since it is not in the appropriate state";

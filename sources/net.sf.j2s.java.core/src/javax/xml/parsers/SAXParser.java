@@ -12,6 +12,7 @@ import javax.xml.sax.Parser;
  * @author Bob Hanson
  *
  */
+@SuppressWarnings("deprecation")
 public abstract class SAXParser implements Parser {
 }
 

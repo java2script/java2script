@@ -40,7 +40,6 @@ package java.awt.image;
 
 import static sun.java2d.StateTrackable.State.STABLE;
 import static sun.java2d.StateTrackable.State.UNTRACKABLE;
-import javajs.util.AU;
 
 /**
  * This class extends <CODE>DataBuffer</CODE> and stores data internally as

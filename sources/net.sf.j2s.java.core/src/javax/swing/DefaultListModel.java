@@ -51,6 +51,7 @@ import java.util.Enumeration;
  *
  * @author Hans Muller
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultListModel extends AbstractListModel
 {
     private Vector delegate = new Vector();

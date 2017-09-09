@@ -53,6 +53,7 @@ import java.util.HashMap;
  * @author Scott Violet
  * @since 1.3
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ActionMap  {
     /** Handles the mapping between Action name and Action. */
     private transient ArrayTable     arrayTable;

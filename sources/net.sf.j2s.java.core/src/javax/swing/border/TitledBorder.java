@@ -249,7 +249,7 @@ public class TitledBorder extends AbstractBorder
 
         g.setFont(getFont(c));
 
-        JComponent jc = (JComponent)c;
+        //JComponent jc = (JComponent)c;
         FontMetrics fm = getFont(c).getFontMetrics();
         int         fontHeight = fm.getHeight();
         int         descent = fm.getDescent();
@@ -659,7 +659,7 @@ public class TitledBorder extends AbstractBorder
                                           insets.top+insets.bottom);
         Font font = getFont(c);
         FontMetrics fm = c.getFontMetrics(font);
-        JComponent jc = (c instanceof JComponent) ? (JComponent)c : null;
+        //JComponent jc = (c instanceof JComponent) ? (JComponent)c : null;
         switch (getTitlePosition()) {
           case ABOVE_TOP:
           case BELOW_BOTTOM:

@@ -171,6 +171,7 @@ import java.awt.Toolkit;
  *
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class MouseEvent extends InputEvent {
 
     /**

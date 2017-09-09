@@ -43,6 +43,7 @@ import javax.swing.RowSorter;
  * @see javax.swing.RowSorter
  * @since 1.6
  */
+@SuppressWarnings({"rawtypes", "serial"})
 public class RowSorterEvent extends java.util.EventObject {
     private Type type;
     private int[] oldViewToModel;

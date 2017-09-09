@@ -458,6 +458,7 @@ public class JRootPane extends JComponent {
 	 * 
 	 * @return the default <code>contentPane</code>
 	 */
+	@SuppressWarnings("serial")
 	protected Container createContentPane() {
 		JComponent c = new JPanel();
 		c.setName(this.getName() + ".contentPane");

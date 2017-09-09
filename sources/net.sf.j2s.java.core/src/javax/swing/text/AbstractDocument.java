@@ -111,6 +111,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractDocument implements JSMinimalAbstractDocument {
 
     /**

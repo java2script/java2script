@@ -29,10 +29,11 @@
 package javax.swing;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Rectangle;
+
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+
 import sun.swing.DefaultLookup;
 
 

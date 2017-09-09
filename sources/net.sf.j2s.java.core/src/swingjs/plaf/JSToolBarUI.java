@@ -30,14 +30,8 @@
 package swingjs.plaf;
 
 
-import java.util.HashMap;
-import java.util.Hashtable;
-
-import java.awt.Color;
-
-import javax.swing.JToolBar;
-
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -60,8 +54,10 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Hashtable;
+
 import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -69,6 +65,7 @@ import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.JSeparator;
 import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import javax.swing.LookAndFeel;
 import javax.swing.RootPaneContainer;
 import javax.swing.SwingConstants;
@@ -81,11 +78,13 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicBorders;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
+
 import sun.swing.DefaultLookup;
 import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
 
 
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class JSToolBarUI extends JSPanelUI {
 
 //	static {

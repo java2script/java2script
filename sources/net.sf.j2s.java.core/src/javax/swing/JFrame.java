@@ -495,6 +495,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * @beaninfo hidden: true description: The menubar for accessing pulldown
 	 *           menus from this frame.
 	 */
+	@SuppressWarnings("deprecation")
 	public void setJMenuBar(JMenuBar menubar) {
 		getRootPane().setMenuBar(menubar);
 	}
@@ -506,6 +507,7 @@ RootPaneContainer// TransferHandler.HasGetTransferHandler
 	 * 
 	 * @see #setJMenuBar
 	 */
+	@SuppressWarnings("deprecation")
 	public JMenuBar getJMenuBar() {
 		return getRootPane().getMenuBar();
 	}

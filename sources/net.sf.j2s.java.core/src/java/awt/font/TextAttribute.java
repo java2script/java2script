@@ -257,6 +257,7 @@ import java.util.HashMap;
  * @see java.awt.font.TextLayout
  * @see java.text.AttributedCharacterIterator
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class TextAttribute extends Attribute {
 
     // table of all instances in this class, used by readResolve

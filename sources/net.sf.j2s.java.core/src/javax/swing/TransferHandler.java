@@ -27,11 +27,6 @@
  */
 package javax.swing;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.TooManyListenersException;
-
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
@@ -39,6 +34,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -62,11 +58,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.TooManyListenersException;
+
 import javax.swing.event.EventListenerList;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.JTextComponent;
+
 import sun.awt.AppContext;
-import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
 
 /**

@@ -27,8 +27,6 @@
  */
 package javax.swing;
 
-import java.awt.HeadlessException;
-
 import java.applet.Applet;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -37,10 +35,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.HeadlessException;
 import java.awt.LayoutManager;
-import java.awt.Window;
-import swingjs.JSAppletViewer;
-import swingjs.JSToolkit;
 
 /**
  * An extended version of <code>java.applet.Applet</code> that adds support for
@@ -279,7 +275,8 @@ public class JApplet extends Applet implements /* Accessible ,*/
     *      hidden: true
     * description: The menubar for accessing pulldown menus from this applet.
     */
-    public void setJMenuBar(JMenuBar menuBar) {
+    @SuppressWarnings("deprecation")
+	public void setJMenuBar(JMenuBar menuBar) {
         getRootPane().setMenuBar(menuBar);
     }
 
@@ -288,7 +285,8 @@ public class JApplet extends Applet implements /* Accessible ,*/
     *
     * @see #setJMenuBar
     */
-    public JMenuBar getJMenuBar() {
+    @SuppressWarnings("deprecation")
+	public JMenuBar getJMenuBar() {
         return getRootPane().getMenuBar();
     }
 

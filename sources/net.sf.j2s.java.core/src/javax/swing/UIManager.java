@@ -161,6 +161,7 @@ import java.util.Locale;
  * @author Thomas Ball
  * @author Hans Muller
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class UIManager
 {
 //    /**

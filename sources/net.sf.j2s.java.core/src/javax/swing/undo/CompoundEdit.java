@@ -36,6 +36,7 @@ import java.util.Vector;
  *
  * @author Ray Ryan
  */
+@SuppressWarnings({"rawtypes"})
 public class CompoundEdit extends AbstractUndoableEdit {
     /**
      * True if this edit has never received <code>end</code>.

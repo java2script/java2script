@@ -50,6 +50,7 @@ import java.util.HashMap;
  * @author Scott Violet
  * @since 1.3
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class InputMap  {
     /** Handles the mapping between KeyStroke and Action name. */
     private transient ArrayTable     arrayTable;

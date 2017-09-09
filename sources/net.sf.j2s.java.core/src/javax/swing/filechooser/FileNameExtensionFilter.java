@@ -29,7 +29,6 @@
 package javax.swing.filechooser;
 
 import java.io.File;
-import java.util.Locale;
 
 /**
  * An implementation of {@code FileFilter} that filters using a

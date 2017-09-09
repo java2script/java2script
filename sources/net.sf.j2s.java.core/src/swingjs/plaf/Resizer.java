@@ -23,6 +23,7 @@ public class Resizer {
 	private JFrame jframe;
 	private int offsetx = -4, offsety = -4, minSize = 10;
 	private RootPaneContainer rpc;
+	@SuppressWarnings("unused")
 	private int titleHeight;
 	private boolean enabled = true;
 

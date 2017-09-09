@@ -27,16 +27,13 @@
  */
 package javax.swing;
 
-import java.awt.HeadlessException;
-
-import swingjs.JSFrameViewer;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.LayoutManager;
 import java.awt.Window;

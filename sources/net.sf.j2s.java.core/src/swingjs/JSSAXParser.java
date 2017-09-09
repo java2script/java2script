@@ -27,6 +27,7 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
+@SuppressWarnings({"deprecation"})
 public class JSSAXParser implements Parser, XMLReader {
 
 	private EntityResolver resolver;

@@ -80,6 +80,7 @@ package javax.swing;
  * @author Hans Muller
  * @since 1.4
 */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SpinnerNumberModel extends AbstractSpinnerModel 
 {
     private Number stepSize, value;

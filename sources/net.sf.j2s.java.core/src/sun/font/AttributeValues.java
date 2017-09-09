@@ -74,6 +74,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
+@SuppressWarnings({"unchecked"})
 public final class AttributeValues implements Cloneable {
     private int defined;
     private int nondefault;

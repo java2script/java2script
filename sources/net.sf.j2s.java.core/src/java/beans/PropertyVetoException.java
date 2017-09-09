@@ -34,6 +34,7 @@ package java.beans;
  * property represents an unacceptable value.
  */
 
+@SuppressWarnings("serial")
 public
 class PropertyVetoException extends Exception {
 

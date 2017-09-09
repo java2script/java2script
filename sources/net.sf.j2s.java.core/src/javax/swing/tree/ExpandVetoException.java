@@ -39,6 +39,7 @@ import javax.swing.event.TreeExpansionEvent;
  *
  * @author Scott Violet
  */
+@SuppressWarnings("serial")
 public class ExpandVetoException extends Exception {
     /** The event that the exception was created for. */
     protected TreeExpansionEvent      event;

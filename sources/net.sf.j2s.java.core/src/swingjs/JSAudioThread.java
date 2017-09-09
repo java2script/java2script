@@ -56,7 +56,6 @@ import sun.audio.AudioPlayer;
  * @author Bob Hanson
  * 
  */
-@SuppressWarnings("restriction")
 public class JSAudioThread extends JSThread {
 	
 	protected JSAudioThreadOwner owner;

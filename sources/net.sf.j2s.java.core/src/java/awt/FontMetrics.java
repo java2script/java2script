@@ -410,7 +410,8 @@ public abstract class FontMetrics {
      * @see       #charsWidth(char[], int, int)
      * @see       #stringWidth(String)
      */
-    public int bytesWidth(byte data[], int off, int len) {
+    @SuppressWarnings("deprecation")
+	public int bytesWidth(byte data[], int off, int len) {
         return stringWidth(new String(data, 0, off, len));
     }
 

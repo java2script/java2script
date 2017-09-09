@@ -27,9 +27,8 @@
  */
 package javax.swing;
 
-import swingjs.api.JSMinimalAbstractDocument;
 import java.awt.Component;
-import javax.swing.text.AbstractDocument;
+
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -41,6 +40,8 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
+
+import swingjs.api.JSMinimalAbstractDocument;
 
 /**
  * A text component that can be marked up with attributes that are

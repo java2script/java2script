@@ -1,14 +1,11 @@
 package swingjs.plaf;
 
-import java.awt.Event;
-
-import javajs.api.JSFunction;
-import javajs.util.PT;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -29,6 +26,7 @@ import java.awt.peer.ContainerPeer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.EventObject;
+
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -38,12 +36,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
+
+import javajs.api.JSFunction;
+import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
-import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.JQueryObject;
 
 /**
@@ -584,6 +584,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected void bindJSEvents(DOMNode node, String eventList, int eventID,
 			boolean andSetCSS) {
 		JSFunction f = null;
+		@SuppressWarnings("unused")
 		JSEventHandler me = this;
 
 		if (andSetCSS) {
@@ -808,6 +809,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * and FALSE when that is complete.
 	 * 
 	 */
+	@SuppressWarnings("unused")
 	private boolean layingOut;
 
 	/**
@@ -1289,6 +1291,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	 * @see javax.swing.JComponent#contains
 	 * @see java.awt.Component#contains
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean contains(JComponent c, int x, int y) {
 		return c.inside(x, y);

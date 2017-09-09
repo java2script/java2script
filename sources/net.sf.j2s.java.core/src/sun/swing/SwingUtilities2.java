@@ -110,11 +110,11 @@ public class SwingUtilities2 {
      */
     public static final Object AA_TEXT_PROPERTY_KEY = new Object(); // AATextInfoPropertyKey
 
-    /**
-     * Used to tell a text component, being used as an editor for table
-     * or tree, how many clicks it took to start editing.
-     */
-    private static final Object SKIP_CLICK_COUNT = new Object(); // skipClickCount
+//    /**
+//     * Used to tell a text component, being used as an editor for table
+//     * or tree, how many clicks it took to start editing.
+//     */
+//    private static final Object SKIP_CLICK_COUNT = new Object(); // skipClickCount
 
     /* Presently this class assumes default fractional metrics.
      * This may need to change to emulate future platform L&Fs.

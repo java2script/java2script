@@ -78,6 +78,7 @@ import java.awt.image.ColorModel;
  * @see GraphicsEnvironment
  * @see GraphicsConfiguration
  */
+@SuppressWarnings({"unused"})
 public abstract class GraphicsDevice {
 
     private Window fullScreenWindow;

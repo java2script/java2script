@@ -170,6 +170,7 @@ import javax.swing.text.TextAction;
  * @see JPasswordField
  * @see #addActionListener
  */
+@SuppressWarnings({"rawtypes"})
 public class JTextField extends JTextComponent implements SwingConstants {
 
     /**

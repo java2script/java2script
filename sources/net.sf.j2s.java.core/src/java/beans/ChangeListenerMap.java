@@ -240,7 +240,8 @@ abstract class ChangeListenerMap<L extends EventListener> {
      *
      * @return a real listener
      */
-    public final L extract(L listener) {
+    @SuppressWarnings("unchecked")
+	public final L extract(L listener) {
         while (listener instanceof EventListenerProxy) {
             EventListenerProxy proxy = (EventListenerProxy) listener;
             listener = (L) proxy.getListener();

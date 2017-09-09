@@ -303,6 +303,7 @@ import javax.swing.plaf.OptionPaneUI;
  * @author James Gosling
  * @author Scott Violet
  */
+@SuppressWarnings({"deprecation"})
 public class JOptionPane extends JComponent {
 	/**
 	 * Indicates that the user has not yet selected a value.
@@ -549,6 +550,7 @@ public class JOptionPane extends JComponent {
 	 *              <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
+	@SuppressWarnings("unused")
 	public static Object showInputDialog(Component parentComponent,
 			Object message, String title, int messageType, Icon icon,
 			Object[] selectionValues, Object initialSelectionValue) {
@@ -820,6 +822,7 @@ public class JOptionPane extends JComponent {
 	 *              <code>true</code>
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
+	@SuppressWarnings("unused")
 	public static int showConfirmDialog(Component parentComponent,
 			Object message, String title, int optionType, int messageType, Icon icon) {
 		int ok = OK_OPTION;

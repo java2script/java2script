@@ -62,6 +62,7 @@ import java.util.Vector;
  * @see     Document
  * @see     AbstractDocument
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PlainDocument extends AbstractDocument {
 
     /**
@@ -214,11 +215,11 @@ public class PlainDocument extends AbstractDocument {
                 }
             }
             if (hasBreaks) {
-                int rmCount = 1;
+                //int rmCount = 1;
                 removed.addElement(rmCandidate);
                 if ((offset + length == rmOffs1) && (lastOffset != rmOffs1) &&
                     ((index+1) < lineMap.getElementCount())) {
-                    rmCount += 1;
+                    //rmCount += 1;
                     Element e = lineMap.getElement(index+1);
                     removed.addElement(e);
                     rmOffs1 = e.getEndOffset();

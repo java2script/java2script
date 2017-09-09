@@ -28,8 +28,6 @@
 
 
 package javax.swing;
-import javax.swing.plaf.ToolTipUI;
-
 
 /**
  * Used to display a "Tip" for a Component. Typically components provide api

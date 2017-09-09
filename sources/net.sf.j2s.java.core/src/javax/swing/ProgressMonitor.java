@@ -257,7 +257,8 @@ public class ProgressMonitor
      * @see #setMaximum
      * @see #close
      */
-    public void setProgress(int nv) {
+    @SuppressWarnings("deprecation")
+	public void setProgress(int nv) {
         if (nv >= max) {
             close();
         }

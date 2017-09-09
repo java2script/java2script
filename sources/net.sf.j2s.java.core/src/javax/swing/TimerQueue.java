@@ -54,7 +54,8 @@ class TimerQueue implements Runnable
 {
     private static final Object sharedInstanceKey =
         new StringBuffer("TimerQueue.sharedInstanceKey");
-    private static final Object expiredTimersKey =
+    @SuppressWarnings("unused")
+	private static final Object expiredTimersKey =
         new StringBuffer("TimerQueue.expiredTimersKey");
 
     private final DelayQueue<DelayedTimer> queue;

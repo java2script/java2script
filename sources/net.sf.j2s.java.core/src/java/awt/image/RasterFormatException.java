@@ -33,6 +33,7 @@ package java.awt.image;
  * The <code>RasterFormatException</code> is thrown if there is
  * invalid layout information in the {@link Raster}.
  */
+@SuppressWarnings("serial")
 public class RasterFormatException extends java.lang.RuntimeException {
 
     /**

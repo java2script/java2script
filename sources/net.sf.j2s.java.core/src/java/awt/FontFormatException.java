@@ -36,6 +36,7 @@ package java.awt;
  * @see     java.awt.Font
  * @since   1.3
  */
+@SuppressWarnings("serial")
 public
 class FontFormatException extends Exception {
     /*

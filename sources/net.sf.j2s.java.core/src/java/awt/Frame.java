@@ -127,6 +127,7 @@ import java.awt.peer.FramePeer;
  * @see Window#addWindowListener
  * @since       JDK1.0
  */
+@SuppressWarnings({"rawtypes"})
 public class Frame extends Window {
 
     /* Note: These are being obsoleted;  programs should use the Cursor class

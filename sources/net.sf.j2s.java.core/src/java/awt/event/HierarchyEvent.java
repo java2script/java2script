@@ -78,6 +78,7 @@ import java.awt.Container;
  * @see         HierarchyBoundsListener
  * @since       1.3
  */
+@SuppressWarnings("serial")
 public class HierarchyEvent extends AWTEvent {
     /*
      * serialVersionUID

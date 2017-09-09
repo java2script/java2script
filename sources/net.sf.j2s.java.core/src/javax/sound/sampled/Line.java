@@ -240,6 +240,7 @@ public interface Line {
      * @see AudioSystem#isLineSupported <code>AudioSystem.isLineSupported(Line.Info)</code>
      * @since 1.3
      */
+    @SuppressWarnings({"rawtypes"})
     public static class Info {
 
         /**

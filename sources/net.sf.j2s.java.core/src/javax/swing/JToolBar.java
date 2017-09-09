@@ -37,7 +37,7 @@ import java.awt.LayoutManager;
 import java.awt.LayoutManager2;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.plaf.ToolBarUI;
+
 import javax.swing.plaf.UIResource;
 
 

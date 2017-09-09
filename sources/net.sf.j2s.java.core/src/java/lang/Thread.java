@@ -166,7 +166,7 @@ class Thread implements Runnable {
     private ThreadGroup group;
 
     /* The context ClassLoader for this thread */
-    private ClassLoader contextClassLoader;
+    //private ClassLoader contextClassLoader;
 
 //    /* The inherited AccessControlContext of this thread */
 //    private AccessControlContext inheritedAccessControlContext;
@@ -273,7 +273,6 @@ class Thread implements Runnable {
      *
      * @return  the currently executing thread.
      */
-    @SuppressWarnings({ "unused", "static-access" })
 		public static Thread currentThread() {
     	/**
     	 * @j2sNative

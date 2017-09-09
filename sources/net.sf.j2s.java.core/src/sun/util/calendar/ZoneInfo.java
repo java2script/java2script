@@ -63,7 +63,7 @@ import java.util.TimeZone;
  * @since 1.4
  */
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class ZoneInfo extends java.util.TimeZone {
 
     private static final int UTC_TIME = 0;

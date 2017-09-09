@@ -901,6 +901,7 @@ public class Dialog extends Window {
 	/**
 	 * @return true if we actually showed, false if we just called toFront()
 	 */
+	@SuppressWarnings("deprecation")
 	private boolean conditionalShow(Component toFocus, Long time) {
 		boolean retval;
 

@@ -99,6 +99,7 @@ import sun.awt.geom.AreaOp;
  *
  * @since 1.2
  */
+@SuppressWarnings({"rawtypes"})
 public class Area implements Shape, Cloneable {
     private static Vector EmptyCurves = new Vector();
 
@@ -670,6 +671,7 @@ public class Area implements Shape, Cloneable {
     }
 }
 
+@SuppressWarnings({"rawtypes"})
 class AreaIterator implements PathIterator {
     private AffineTransform transform;
     private Vector curves;

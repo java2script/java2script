@@ -56,6 +56,7 @@ import javajs.util.Lst;
  * @since       JDK1.0
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class CardLayout implements LayoutManager2,
                                    Serializable {
 
@@ -71,7 +72,8 @@ public class CardLayout implements LayoutManager2,
     /*
      * A pair of Component and String that represents its name.
      */
-    class Card implements Serializable {
+    @SuppressWarnings("serial")
+	class Card implements Serializable {
 //        static final long serialVersionUID = 6640330810709497518L;
         public String name;
         public Component comp;

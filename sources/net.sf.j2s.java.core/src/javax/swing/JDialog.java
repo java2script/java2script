@@ -27,8 +27,6 @@
  */
 package javax.swing;
 
-import java.awt.HeadlessException;
-
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -37,12 +35,11 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
+import java.awt.HeadlessException;
 import java.awt.LayoutManager;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import swingjs.JSFrameViewer;
-// 
 
 // BH: Added rootPane.addNotify(); // builds a peer for the root pane
 
@@ -830,7 +827,8 @@ public class JDialog extends Dialog implements WindowConstants,
     *      hidden: true
     * description: The menubar for accessing pulldown menus from this dialog.
     */
-    public void setJMenuBar(JMenuBar menu) {
+    @SuppressWarnings("deprecation")
+	public void setJMenuBar(JMenuBar menu) {
         getRootPane().setMenuBar(menu);
     }
 
@@ -839,7 +837,8 @@ public class JDialog extends Dialog implements WindowConstants,
     *
     * @see #setJMenuBar
     */
-    public JMenuBar getJMenuBar() {
+    @SuppressWarnings("deprecation")
+	public JMenuBar getJMenuBar() {
         return getRootPane().getMenuBar();
     }
 

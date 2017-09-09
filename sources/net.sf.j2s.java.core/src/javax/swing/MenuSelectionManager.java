@@ -45,6 +45,7 @@ import sun.awt.AppContext;
  *
  * @author Arnaud Weber
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MenuSelectionManager {
     private Vector selection = new Vector();
 

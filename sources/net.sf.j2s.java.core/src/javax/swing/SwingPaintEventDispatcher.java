@@ -28,12 +28,7 @@
 package javax.swing;
 
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.Rectangle;
 import java.awt.event.PaintEvent;
-import sun.awt.AppContext;
-import sun.awt.SunToolkit;
-import sun.awt.event.IgnorePaintEvent;
 
 /**
  * Swing's PaintEventDispatcher.  If the component specified by the PaintEvent
@@ -42,11 +37,11 @@ import sun.awt.event.IgnorePaintEvent;
  *
  */
 class SwingPaintEventDispatcher extends sun.awt.PaintEventDispatcher {
-    private static final boolean SHOW_FROM_DOUBLE_BUFFER;
+    //private static final boolean SHOW_FROM_DOUBLE_BUFFER;
     private static final boolean ERASE_BACKGROUND;
 
     static {
-        SHOW_FROM_DOUBLE_BUFFER = false;
+        //SHOW_FROM_DOUBLE_BUFFER = false;
         //"true".equals(AccessController.doPrivileged(
           //    new GetPropertyAction("swing.showFromDoubleBuffer", "true")));
         ERASE_BACKGROUND = true;
@@ -90,7 +85,7 @@ class SwingPaintEventDispatcher extends sun.awt.PaintEventDispatcher {
     @Override
 		public boolean queueSurfaceDataReplacing(Component c, Runnable r) {
         if (c instanceof RootPaneContainer) {
-            AppContext appContext = SunToolkit.targetToAppContext(c);
+//            AppContext appContext = SunToolkit.targetToAppContext(c);
 //            RepaintManager.currentManager(appContext).
 //                    nativeQueueSurfaceDataRunnable(appContext, c, r);
             return true;

@@ -35,6 +35,7 @@ import java.util.Hashtable;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageConsumer;
 
+@SuppressWarnings({"rawtypes"})
 public abstract class ImageDecoder {
     InputStreamImageSource source;
     InputStream input;

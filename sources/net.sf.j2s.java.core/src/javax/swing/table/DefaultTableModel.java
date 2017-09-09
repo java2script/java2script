@@ -61,6 +61,7 @@ import javax.swing.event.TableModelEvent;
  * @see TableModel
  * @see #getDataVector
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultTableModel extends AbstractTableModel  {
 
 //

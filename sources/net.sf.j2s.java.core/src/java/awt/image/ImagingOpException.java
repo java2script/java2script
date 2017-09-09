@@ -34,6 +34,7 @@ package java.awt.image;
  * {@link BufferedImageOp} or {@link RasterOp} filter methods cannot
  * process the image.
  */
+@SuppressWarnings("serial")
 public class ImagingOpException extends java.lang.RuntimeException {
 
     /**

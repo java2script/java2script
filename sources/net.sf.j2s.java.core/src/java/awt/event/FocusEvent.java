@@ -62,6 +62,7 @@ import sun.awt.SunToolkit;
  * @author Amy Fowler
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class FocusEvent extends ComponentEvent {
 
     /**

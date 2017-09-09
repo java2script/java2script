@@ -35,6 +35,7 @@ package java.awt.geom;
  * <code>AffineTransform</code> is in a non-invertible state.
  */
 
+@SuppressWarnings("serial")
 public class NoninvertibleTransformException extends java.lang.Exception {
     /**
      * Constructs an instance of

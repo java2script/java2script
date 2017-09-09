@@ -1065,7 +1065,8 @@ implements ItemSelectable,ListDataListener,ActionListener {
         }
     }
 
-    private boolean isListener(Class c, ActionListener a) {
+    @SuppressWarnings("rawtypes")
+	private boolean isListener(Class c, ActionListener a) {
         boolean isListener = false;
         Object[] listeners = listenerList.getListenerList();
         for (int i = listeners.length-2; i>=0; i-=2) {

@@ -62,13 +62,13 @@ public abstract class PrinterJob {
      *          method disallows this thread from creating a print job request
      */
     public static PrinterJob getPrinterJob() {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkPrintJobAccess();
-        }
-        return (PrinterJob) java.security.AccessController.doPrivileged(
-            new java.security.PrivilegedAction() {
-            public Object run() {
+//        SecurityManager security = System.getSecurityManager();
+//        if (security != null) {
+//            security.checkPrintJobAccess();
+//        }
+//        return (PrinterJob) java.security.AccessController.doPrivileged(
+//            new java.security.PrivilegedAction() {
+//            public Object run() {
                 String nm = System.getProperty("java.awt.printerjob", null);
                 try {
                     return (PrinterJob)Class.forName(nm).newInstance();
@@ -79,8 +79,8 @@ public abstract class PrinterJob {
                 } catch (IllegalAccessException e) {
                     throw new AWTError("Could not access PrinterJob: " + nm);
                 }
-            }
-        });
+//            }
+//        });
     }
 
 //    /**

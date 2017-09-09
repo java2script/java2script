@@ -138,6 +138,7 @@ import java.awt.Toolkit;
  *
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class KeyEvent extends InputEvent {
 
     /**
@@ -148,7 +149,8 @@ public class KeyEvent extends InputEvent {
      * Used in Component.dispatchEventImpl to correctly dispatch
      * events when proxy is active
      */
-    private boolean isProxyActive = false;
+    @SuppressWarnings("unused")
+	private boolean isProxyActive = false;
 
     /**
      * The first number in the range of ids used for key events.

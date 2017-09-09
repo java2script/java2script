@@ -28,21 +28,13 @@
 
 package sun.awt.image;
 
-import swingjs.JSToolkit;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
-import java.awt.image.ByteLookupTable;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
-import java.awt.image.LookupOp;
-import java.awt.image.LookupTable;
-import java.awt.image.RasterOp;
 import java.awt.image.Raster;
+import java.awt.image.RasterOp;
 import java.awt.image.WritableRaster;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+
+import swingjs.JSToolkit;
 
 /**
  * This class provides a hook to access platform-specific
@@ -55,6 +47,7 @@ import java.security.PrivilegedAction;
  * (in which case our java code will be executed) or may throw
  * an exception.
  */
+@SuppressWarnings({"unused"})
 public class ImagingLib {
 
 //    static boolean useLib = true;

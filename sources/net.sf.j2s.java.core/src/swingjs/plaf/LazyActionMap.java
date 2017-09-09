@@ -41,6 +41,7 @@ import javax.swing.plaf.ActionMapUIResource;
  *
  * @author Scott Violet
  */
+@SuppressWarnings("rawtypes")
 class LazyActionMap extends ActionMapUIResource {
     /**
      * Object to invoke <code>loadActionMap</code> on. This may be
@@ -61,7 +62,7 @@ class LazyActionMap extends ActionMapUIResource {
      * @param defaultsKey Key to use to defaults table to check for
      *        existing map and what resulting Map will be registered on.
      */
-    static void installLazyActionMap(JComponent c, Class loaderClass,
+	static void installLazyActionMap(JComponent c, Class loaderClass,
                                      String defaultsKey) {
         ActionMap map = (ActionMap)UIManager.get(defaultsKey);
         if (map == null) {

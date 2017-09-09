@@ -101,6 +101,7 @@ import javax.swing.JFormattedTextField;
  *
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class InternationalFormatter extends DefaultFormatter {
     /**
      * Used by <code>getFields</code>.
@@ -937,8 +938,6 @@ public class InternationalFormatter extends DefaultFormatter {
                     (f instanceof AttributedCharacterIterator.Attribute)) {
             AttributedCharacterIterator.Attribute field =
                                    (AttributedCharacterIterator.Attribute)f;
-            int index = 0;
-
             iterator.first();
             while (iterator.getIndex() < start) {
                 while (iterator.getAttribute(field) == null &&

@@ -353,6 +353,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		return this.html5Applet._getWidth();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void setBounds(int x, int y, int width, int height) {
 		japplet.reshape(x, y, width, height); // straight to component
 		currentAppletSize.width = width;

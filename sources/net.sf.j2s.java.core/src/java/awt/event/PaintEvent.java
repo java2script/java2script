@@ -43,6 +43,7 @@ import java.awt.Rectangle;
  * @author Amy Fowler
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class PaintEvent extends ComponentEvent {
 
     /**

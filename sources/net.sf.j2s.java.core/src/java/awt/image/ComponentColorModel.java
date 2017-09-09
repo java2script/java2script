@@ -194,7 +194,7 @@ public class ComponentColorModel extends ColorModel {
     private byte[] tosRGB8LUT;
     private byte[] fromsRGB8LUT8;
     private short[] fromsRGB8LUT16;
-    private byte[] fromLinearGray16ToOtherGray8LUT;
+//    private byte[] fromLinearGray16ToOtherGray8LUT;
     private short[] fromLinearGray16ToOtherGray16LUT;
     private boolean needScaleInit;
     private boolean noUnnorm;
@@ -2819,7 +2819,7 @@ public class ComponentColorModel extends ColorModel {
      * @see SampleModel
      */
     public WritableRaster createCompatibleWritableRaster (int w, int h) {
-        int dataSize = w*h*numComponents;
+       // int dataSize = w*h*numComponents;
         WritableRaster raster = null;
 
         switch (transferType) {

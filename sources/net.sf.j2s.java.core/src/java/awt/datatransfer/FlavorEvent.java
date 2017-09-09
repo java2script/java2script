@@ -40,6 +40,7 @@ import java.util.EventObject;
  * @author Alexander Gerasimov
  * @since 1.5
  */
+@SuppressWarnings("serial")
 public class FlavorEvent extends EventObject {
     /**
      * Constructs a <code>FlavorEvent</code> object.

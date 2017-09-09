@@ -40,6 +40,7 @@ package java.awt;
  * @see         java.awt.Container
  * @since       JDK1.0
  */
+@SuppressWarnings("serial")
 public class Insets implements Cloneable, java.io.Serializable {
 
     /**

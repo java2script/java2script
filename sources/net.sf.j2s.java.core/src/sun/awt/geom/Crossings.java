@@ -32,6 +32,7 @@ package sun.awt.geom;
 import java.util.Vector;
 import java.util.Enumeration;
 
+@SuppressWarnings({"rawtypes"})
 public abstract class Crossings {
 //    public static final boolean debug = false;
 

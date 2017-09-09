@@ -125,6 +125,7 @@ import swingjs.JSToolkit;
  * @author      Fred Ecks
  * @since       JDK1.0
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class Toolkit {
 
 	// SwingJS note: Most of these are AWT classes that we do not need to worry about 

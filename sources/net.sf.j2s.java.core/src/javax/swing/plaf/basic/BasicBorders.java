@@ -28,15 +28,12 @@
 
 package javax.swing.plaf.basic;
 
-import javax.swing.plaf.basic.BasicSplitPaneDivider;
-import javax.swing.plaf.basic.BasicSplitPaneUI;
-
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
@@ -139,7 +136,7 @@ public class BasicBorders {
     }
 
     public static Border getProgressBarBorder() {
-        UIDefaults table = UIManager.getLookAndFeelDefaults();
+        //UIDefaults table = UIManager.getLookAndFeelDefaults();
         Border progressBarBorder = new BorderUIResource.LineBorderUIResource(Color.green, 2);
         return progressBarBorder;
     }

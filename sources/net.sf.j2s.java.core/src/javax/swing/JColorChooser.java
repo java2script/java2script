@@ -100,6 +100,7 @@ import sun.swing.SwingUtilities2;
  * @author Amy Fowler
  * @author Steve Wilson
  */
+@SuppressWarnings({"deprecation"})
 public class JColorChooser extends JComponent {
 
     private ColorSelectionModel selectionModel;
@@ -611,7 +612,8 @@ class ColorChooserDialog extends JDialog {
         getRootPane().setDefaultButton(okButton);
         okButton.setActionCommand("OK");
         okButton.addActionListener(new ActionListener() {
-            @Override
+            @SuppressWarnings("deprecation")
+			@Override
 						public void actionPerformed(ActionEvent e) {
                 hide();
             }
@@ -642,7 +644,8 @@ class ColorChooserDialog extends JDialog {
 
         cancelButton.setActionCommand("cancel");
         cancelButton.addActionListener(new ActionListener() {
-            @Override
+            @SuppressWarnings("deprecation")
+			@Override
 						public void actionPerformed(ActionEvent e) {
                 hide();
             }
@@ -681,7 +684,8 @@ class ColorChooserDialog extends JDialog {
         this.addWindowListener(new Closer());
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
 		public void show() {
         initialColor = chooserPane.getColor();
         super.show();
@@ -692,7 +696,8 @@ class ColorChooserDialog extends JDialog {
     }
 
     class Closer extends WindowAdapter {
-        @Override
+        @SuppressWarnings("deprecation")
+		@Override
 				public void windowClosing(WindowEvent e) {
             cancelButton.doClick(0);
             Window w = e.getWindow();

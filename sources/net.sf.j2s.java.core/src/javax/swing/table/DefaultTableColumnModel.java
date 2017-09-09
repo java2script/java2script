@@ -59,6 +59,7 @@ import javax.swing.event.TableColumnModelListener;
  * @author Philip Milne
  * @see JTable
  */
+@SuppressWarnings({"rawtypes"})
 public class DefaultTableColumnModel implements TableColumnModel,
                         PropertyChangeListener, ListSelectionListener
 {

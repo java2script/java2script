@@ -63,6 +63,7 @@ import java.awt.Rectangle;
  * @author Carl Quinn
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class ComponentEvent extends AWTEvent {
 
     /**

@@ -223,6 +223,7 @@ import swingjs.api.JSMinimalAbstractDocument;
  * @author  Timothy Prinzing
  */
 @J2SIgnoreImport({StyledEditorKit.class})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JEditorPane extends JTextComponent {
 
     /**

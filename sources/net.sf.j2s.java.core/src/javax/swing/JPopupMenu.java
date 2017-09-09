@@ -85,6 +85,7 @@ import javax.swing.plaf.PopupMenuUI;
  * @author David Karlton
  * @author Arnaud Weber
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JPopupMenu extends JComponent implements MenuElement {
 
     /**
@@ -1088,14 +1089,14 @@ public class JPopupMenu extends JComponent implements MenuElement {
     }
 
 
-    private static Frame getFrame(Component c) {
-        Component w = c;
-
-        while(!(w instanceof Frame) && (w!=null)) {
-            w = w.getParent();
-        }
-        return (Frame)w;
-    }
+//    private static Frame getFrame(Component c) {
+//        Component w = c;
+//
+//        while(!(w instanceof Frame) && (w!=null)) {
+//            w = w.getParent();
+//        }
+//        return (Frame)w;
+//    }
 
 
     /**

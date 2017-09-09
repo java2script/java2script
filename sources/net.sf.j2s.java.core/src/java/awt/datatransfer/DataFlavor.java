@@ -115,6 +115,7 @@ import sun.awt.datatransfer.DataTransferer;
  * @author      Laurence P. G. Cable
  * @author      Jeff Dunn
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DataFlavor implements Externalizable, Cloneable {
 
     private static final long serialVersionUID = 8367026044764648243L;

@@ -45,6 +45,7 @@ import java.util.EventObject;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings("serial")
 public abstract class CaretEvent extends EventObject {
 
     /**

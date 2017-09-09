@@ -49,6 +49,7 @@ import javax.swing.MenuSelectionManager;
  *
  * @author Georges Saab
  */
+@SuppressWarnings("serial")
 public class MenuDragMouseEvent extends MouseEvent {
     private MenuElement path[];
     private MenuSelectionManager manager;

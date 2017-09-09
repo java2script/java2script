@@ -34,6 +34,7 @@ package javax.swing.text;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings("serial")
 class StateInvariantError extends Error
 {
     /**

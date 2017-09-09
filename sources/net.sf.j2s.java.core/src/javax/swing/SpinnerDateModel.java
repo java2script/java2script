@@ -89,6 +89,7 @@ import java.util.Date;
  * @author Hans Muller
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SpinnerDateModel extends AbstractSpinnerModel 
 {
     private Comparable start, end;

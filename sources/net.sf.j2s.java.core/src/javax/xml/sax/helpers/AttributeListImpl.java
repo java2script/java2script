@@ -63,6 +63,7 @@ import java.util.Vector;
  * @see javax.xml.sax.AttributeList
  * @see javax.xml.sax.DocumentHandler#startElement 
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AttributeListImpl implements AttributeList
 {
     
@@ -136,7 +137,7 @@ public class AttributeListImpl implements AttributeList
      * @see #removeAttribute
      * @see javax.xml.sax.DocumentHandler#startElement
      */
-    public void addAttribute (String name, String type, String value)
+	public void addAttribute (String name, String type, String value)
     {
 	names.addElement(name);
 	types.addElement(type);
@@ -309,7 +310,7 @@ public class AttributeListImpl implements AttributeList
     // Internal state.
     ////////////////////////////////////////////////////////////////////
 
-    Vector names = new Vector();
+	Vector names = new Vector();
     Vector types = new Vector();
     Vector values = new Vector();
 

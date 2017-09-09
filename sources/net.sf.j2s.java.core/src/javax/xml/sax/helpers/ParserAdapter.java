@@ -10,22 +10,21 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.xml.sax.Parser;	// deprecated
-import javax.xml.sax.InputSource;
-import javax.xml.sax.Locator;
 import javax.xml.sax.AttributeList; // deprecated
-import javax.xml.sax.EntityResolver;
-import javax.xml.sax.DTDHandler;
-import javax.xml.sax.DocumentHandler; // deprecated
-import javax.xml.sax.ErrorHandler;
-import javax.xml.sax.SAXException;
-import javax.xml.sax.SAXParseException;
-
-import javax.xml.sax.XMLReader;
 import javax.xml.sax.Attributes;
 import javax.xml.sax.ContentHandler;
+import javax.xml.sax.DTDHandler;
+import javax.xml.sax.DocumentHandler; // deprecated
+import javax.xml.sax.EntityResolver;
+import javax.xml.sax.ErrorHandler;
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Locator;
+import javax.xml.sax.Parser;	// deprecated
+import javax.xml.sax.SAXException;
 import javax.xml.sax.SAXNotRecognizedException;
 import javax.xml.sax.SAXNotSupportedException;
+import javax.xml.sax.SAXParseException;
+import javax.xml.sax.XMLReader;
 
 
 /**
@@ -54,6 +53,7 @@ import javax.xml.sax.SAXNotSupportedException;
  * @see javax.xml.sax.XMLReader
  * @see javax.xml.sax.Parser
  */
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class ParserAdapter implements XMLReader, DocumentHandler
 {
 
@@ -579,7 +579,7 @@ public class ParserAdapter implements XMLReader, DocumentHandler
 			    // note funky case:  localname can be null
 			    // when declaring the default prefix, and
 			    // yet the uri isn't null.
-			    atts.addAttribute (nsSupport.XMLNS, prefix,
+			    atts.addAttribute (NamespaceSupport.XMLNS, prefix,
 				    attQName.intern(), type, value);
 			else
 			    atts.addAttribute ("", "",

@@ -57,6 +57,7 @@ import java.awt.Component;
  * @author Amy Fowler
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class ContainerEvent extends ComponentEvent {
 
     /**

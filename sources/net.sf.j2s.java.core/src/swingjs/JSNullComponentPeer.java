@@ -20,7 +20,7 @@ import java.awt.image.ImageProducer;
 import java.awt.image.VolatileImage;
 import java.awt.peer.ContainerPeer;
 import java.awt.peer.LightweightPeer;
-import javax.swing.plaf.ComponentUI;
+
 import sun.awt.CausedFocusEvent.Cause;
 
 /**
@@ -32,7 +32,9 @@ import sun.awt.CausedFocusEvent.Cause;
  */
 public class JSNullComponentPeer implements LightweightPeer {
 
+	@SuppressWarnings("unused")
 	private Component target;
+	@SuppressWarnings("unused")
 	private boolean isNull = true;
 	
 	public JSNullComponentPeer(Component target) {

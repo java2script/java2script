@@ -28,18 +28,17 @@
 
 package java.awt.image;
 
-import swingjs.JSGraphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+
 import sun.awt.image.ImagingLib;
+import swingjs.JSGraphics2D;
 
 /**
  * This class uses an affine transform to perform a linear mapping from
@@ -115,23 +114,23 @@ public class AffineTransformOp implements BufferedImageOp, RasterOp {
         this.hints = hints;
 
         if (hints != null) {
-            Object value = hints.get(hints.KEY_INTERPOLATION);
+            Object value = hints.get(RenderingHints.KEY_INTERPOLATION);
             if (value == null) {
-                value = hints.get(hints.KEY_RENDERING);
-                if (value == hints.VALUE_RENDER_SPEED) {
+                value = hints.get(RenderingHints.KEY_RENDERING);
+                if (value == RenderingHints.VALUE_RENDER_SPEED) {
                     interpolationType = TYPE_NEAREST_NEIGHBOR;
                 }
-                else if (value == hints.VALUE_RENDER_QUALITY) {
+                else if (value == RenderingHints.VALUE_RENDER_QUALITY) {
                     interpolationType = TYPE_BILINEAR;
                 }
             }
-            else if (value == hints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR) {
+            else if (value == RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR) {
                 interpolationType = TYPE_NEAREST_NEIGHBOR;
             }
-            else if (value == hints.VALUE_INTERPOLATION_BILINEAR) {
+            else if (value == RenderingHints.VALUE_INTERPOLATION_BILINEAR) {
                 interpolationType = TYPE_BILINEAR;
             }
-            else if (value == hints.VALUE_INTERPOLATION_BICUBIC) {
+            else if (value == RenderingHints.VALUE_INTERPOLATION_BICUBIC) {
                 interpolationType = TYPE_BICUBIC;
             }
         }

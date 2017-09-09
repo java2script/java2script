@@ -192,7 +192,8 @@ public abstract class InputEvent extends ComponentEvent {
      * A flag that indicates that this instance can be used to access
      * the system clipboard.
      */
-    private transient boolean canAccessSystemClipboard;
+    @SuppressWarnings("unused")
+	private transient boolean canAccessSystemClipboard;
 
 //    static {
 //        /* ensure that the necessary native libraries are loaded */

@@ -28,7 +28,14 @@
 
 package sun.awt.datatransfer;
 
-import java.io.BufferedReader;
+import java.awt.AWTError;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.FlavorMap;
+import java.awt.datatransfer.FlavorTable;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,7 +49,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.ByteBuffer;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 //import java.nio.CharBuffer;
 //import java.nio.charset.Charset;
 //import java.nio.charset.CharsetEncoder;
@@ -66,16 +74,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.awt.AWTError;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.FlavorMap;
-import java.awt.datatransfer.FlavorTable;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 //import swingjs.JSImageReader;
@@ -112,6 +110,7 @@ import sun.awt.SunToolkit;
  *
  * @since 1.3.1
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public abstract class DataTransferer {
 
     /**
@@ -1120,7 +1119,8 @@ search:
      * Primary translation function for translating a Transferable into
      * a byte array, given a source DataFlavor and target format.
      */
-    public byte[] translateTransferable(Transferable contents,
+    @SuppressWarnings("deprecation")
+	public byte[] translateTransferable(Transferable contents,
                                         DataFlavor flavor,
                                         long format) throws IOException
     {
@@ -1386,7 +1386,8 @@ search:
      * immediately if necessary. The opposite conversion is expensive,
      * so avoid it if possible.
      */
-    protected Object translateBytesOrStream(InputStream str, byte[] bytes,
+    @SuppressWarnings("deprecation")
+	protected Object translateBytesOrStream(InputStream str, byte[] bytes,
                                             DataFlavor flavor, long format,
                                             Transferable localeTransferable)
         throws IOException

@@ -52,11 +52,13 @@ public class JSGraphicsEnvironment extends GraphicsEnvironment {
 		return availableFonts;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String[] getAvailableFontFamilyNames() {
 		return Toolkit.getDefaultToolkit().getFontList();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String[] getAvailableFontFamilyNames(Locale l) {
 		return Toolkit.getDefaultToolkit().getFontList();

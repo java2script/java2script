@@ -44,6 +44,7 @@ import javax.swing.plaf.TextUI;
  * @author  Timothy Prinzing
  * @see     Highlighter
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultHighlighter extends LayeredHighlighter {
 
     /**

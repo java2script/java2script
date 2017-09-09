@@ -42,6 +42,7 @@ import javax.swing.UIDefaults;
  * arguments.
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SwingLazyValue implements UIDefaults.LazyValue {
     private String className;
     private String methodName;

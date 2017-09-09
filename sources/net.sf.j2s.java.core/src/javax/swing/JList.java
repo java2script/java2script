@@ -310,12 +310,12 @@ public class JList extends JComponent implements Scrollable//, Accessible
     /**
      * The drop mode for this component.
      */
-    private DropMode dropMode = DropMode.USE_SELECTION;
+    DropMode dropMode = DropMode.USE_SELECTION;
 
     /**
      * The drop location.
      */
-    private transient DropLocation dropLocation;
+    transient DropLocation dropLocation;
 
     /**
      * A subclass of <code>TransferHandler.DropLocation</code> representing
@@ -1176,7 +1176,8 @@ public class JList extends JComponent implements Scrollable//, Accessible
      * @see TransferHandler
      * @since 1.6
      */
-    public final void setDropMode(DropMode dropMode) {
+    @SuppressWarnings("incomplete-switch")
+	public final void setDropMode(DropMode dropMode) {
         if (dropMode != null) {
             switch (dropMode) {
                 case USE_SELECTION:

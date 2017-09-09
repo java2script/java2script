@@ -54,6 +54,7 @@ import sun.awt.SunToolkit;
  *
  * @since JDK1.1
  */
+@SuppressWarnings("serial")
 public class WindowEvent extends ComponentEvent {
 
     /**

@@ -401,7 +401,8 @@ public class AudioFormat {
      * @see #getProperty(String)
      * @since 1.5
      */
-    public Map<String,Object> properties() {
+    @SuppressWarnings("unchecked")
+	public Map<String,Object> properties() {
         Map<String,Object> ret;
         if (properties == null) {
             ret = new HashMap<String,Object>(0);

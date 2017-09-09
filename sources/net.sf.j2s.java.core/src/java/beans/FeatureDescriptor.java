@@ -45,6 +45,7 @@ import java.lang.reflect.Method;
  * attribute/value pairs can be associated with a design feature.
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class FeatureDescriptor {
 
     private Class /*Reference<Class>*/ classRef;

@@ -47,6 +47,7 @@ import javax.swing.text.Element;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings("serial")
 public class HyperlinkEvent extends EventObject {
 
     /**

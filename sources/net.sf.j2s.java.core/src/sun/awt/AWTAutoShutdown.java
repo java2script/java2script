@@ -65,6 +65,7 @@ import java.util.logging.Logger;
  * this blocker thread terminates all the event dispatch threads and
  * exits.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public final class AWTAutoShutdown implements Runnable {
 
     private static AWTAutoShutdown theInstance;
@@ -329,7 +330,8 @@ public final class AWTAutoShutdown implements Runnable {
 //        }
     }
 
-    static AWTEvent getShutdownEvent() {
+    @SuppressWarnings("serial")
+	static AWTEvent getShutdownEvent() {
         return new AWTEvent(getInstance(), 0) {};
     }
 

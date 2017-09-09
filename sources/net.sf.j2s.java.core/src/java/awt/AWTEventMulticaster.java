@@ -132,6 +132,7 @@ import java.awt.event.WindowStateListener;
  * @since       1.1
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AWTEventMulticaster implements
     ComponentListener, ContainerListener, FocusListener, KeyListener,
     MouseListener, MouseMotionListener, WindowListener, WindowFocusListener,

@@ -27,6 +27,8 @@
  */
 package java.awt;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -34,10 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import swingjs.api.Interface;
-
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import sun.awt.AppContext;
 
 /**
@@ -63,6 +61,7 @@ import sun.awt.AppContext;
  * @author David Mendenhall
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AWTKeyStroke {
 
 	private static Map modifierKeywords;
@@ -597,6 +596,7 @@ public class AWTKeyStroke {
 		throw new IllegalArgumentException(errmsg);
 	}
 
+	@SuppressWarnings("unused")
 	private static VKCollection getVKCollection() {
 		if (vks == null) {
 			vks = new VKCollection();
@@ -863,6 +863,7 @@ public class AWTKeyStroke {
 
 }
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 class VKCollection {
 	Map code2name;
 	Map name2code;

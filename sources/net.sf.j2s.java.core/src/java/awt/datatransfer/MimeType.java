@@ -28,13 +28,6 @@
 
 package java.awt.datatransfer;
 
-import java.io.Externalizable;
-//import java.io.ObjectOutput;
-//import java.io.ObjectInput;
-import java.io.IOException;
-//import java.util.Enumeration;
-
-
 /**
  * A Multipurpose Internet Mail Extension (MIME) type, as defined
  * in RFC 2045 and 2046.

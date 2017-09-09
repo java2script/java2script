@@ -50,6 +50,7 @@ import java.text.AttributedCharacterIterator;
  * @since 1.2
  */
 
+@SuppressWarnings("serial")
 public class InputMethodEvent extends AWTEvent {
 
 	public InputMethodEvent(Event event) {

@@ -34,6 +34,7 @@ package javax.xml.sax;
  * @version 2.0.1 (sax2r2)
  * @see javax.xml.sax.SAXParseException
  */
+@SuppressWarnings("serial")
 public class SAXException extends Exception {
 
 

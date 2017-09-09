@@ -55,6 +55,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class StringContent implements AbstractDocument.Content {
 
     /**

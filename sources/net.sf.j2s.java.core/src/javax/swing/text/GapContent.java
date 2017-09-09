@@ -57,6 +57,7 @@ import javax.swing.undo.UndoableEdit;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class GapContent extends GapVector implements AbstractDocument.Content {
 
     /**

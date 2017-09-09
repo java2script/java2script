@@ -41,6 +41,7 @@ import java.util.Set;
  *
  * @author jeff.dunn@eng.sun.com
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 class MimeTypeParameterList implements Cloneable {
 
     /**

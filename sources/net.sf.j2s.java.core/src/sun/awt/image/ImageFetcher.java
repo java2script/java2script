@@ -44,6 +44,7 @@ import sun.awt.AppContext;
   * @author Jim Graham
   * @author Fred Ecks
   */
+@SuppressWarnings({"unchecked"})
 class ImageFetcher extends Thread {
     static final int HIGH_PRIORITY = 8;
     static final int LOW_PRIORITY = 3;
@@ -315,6 +316,7 @@ class ImageFetcher extends Thread {
   * information.  This includes the array of ImageFetchers, as well as
   * the queue of ImageFetchable objects.
   */
+@SuppressWarnings({"rawtypes"})
 class FetcherInfo {
     static final int MAX_NUM_FETCHERS_PER_APPCONTEXT = 4;
 

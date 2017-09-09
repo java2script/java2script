@@ -28,23 +28,6 @@
 
 package sun.java2d;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.AlphaComposite;
-import java.awt.GraphicsEnvironment;
-
-//import sun.awt.DisplayChangedListener;
-import sun.java2d.StateTrackable.State;
-//import sun.java2d.loops.CompositeType;
-//import sun.java2d.loops.SurfaceType;
-//import sun.java2d.loops.Blit;
-//import sun.java2d.loops.BlitBg;
-import sun.awt.image.SurfaceManager;
-//import sun.awt.image.SurfaceManager.FlushableCacheData;
-
-import java.security.AccessController;
-import sun.security.action.GetPropertyAction;
-
 /**
  * The proxy class encapsulates the logic for managing alternate
  * SurfaceData representations of a primary SurfaceData.

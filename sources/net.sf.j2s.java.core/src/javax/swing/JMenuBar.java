@@ -73,6 +73,7 @@ import java.awt.event.MouseEvent;
  * @see JPopupMenu
  * @see JMenuItem
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JMenuBar extends JComponent implements MenuElement
 {
     /*

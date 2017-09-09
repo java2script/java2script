@@ -39,6 +39,7 @@ import java.awt.AWTEvent;
  * @author Amy Fowler
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class AdjustmentEvent extends AWTEvent {
 
     /**

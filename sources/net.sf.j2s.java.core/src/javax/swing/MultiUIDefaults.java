@@ -41,6 +41,7 @@ import java.util.Set;
  *
  * @author Hans Muller
  */
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
 class MultiUIDefaults extends UIDefaults
 {
     private UIDefaults[] tables;

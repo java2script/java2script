@@ -19,7 +19,6 @@ import java.awt.image.WritableRaster;
 import sun.awt.image.SunWritableRaster;
 import swingjs.api.js.DOMNode;
 
-@SuppressWarnings("restriction")
 public class JSGraphicsCompositor {
 
 

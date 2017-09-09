@@ -51,6 +51,7 @@ import javax.swing.tree.TreePath;
  *
  * @author Scott Violet
  */
+@SuppressWarnings("serial")
 public class TreeExpansionEvent extends EventObject
 {
     /**

@@ -65,6 +65,7 @@ import sun.awt.SunToolkit;
  * 
  * @author Arnaud Weber
  */
+@SuppressWarnings({"unused", "deprecation"})
 public class RepaintManager {
 	/**
 	 * Whether or not the RepaintManager should handle paint requests for top

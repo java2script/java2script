@@ -67,6 +67,7 @@ import javax.swing.table.TableModel;
  * @author Philip Milne
  * @see TableModel
  */
+@SuppressWarnings("serial")
 public class TableModelEvent extends java.util.EventObject
 {
     /** Identifies the addtion of new rows or columns. */

@@ -15,6 +15,7 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  *
  */
+@SuppressWarnings("deprecation")
 class JSSAXAttributes implements Attributes2, AttributeList {
 
 	private DOMNode[] nodes;

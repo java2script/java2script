@@ -169,9 +169,9 @@ public final class DataBufferUShort extends DataBuffer
      */
     public DataBufferUShort(short dataArray[][], int size) {
         super(UNTRACKABLE, TYPE_USHORT, size, dataArray.length);
-        if (dataArray == null) {
-            throw new NullPointerException("dataArray is null");
-        }
+//        if (dataArray == null) {
+//            throw new NullPointerException("dataArray is null");
+//        }
         for (int i=0; i < dataArray.length; i++) {
             if (dataArray[i] == null) {
                 throw new NullPointerException("dataArray["+i+"] is null");
@@ -203,9 +203,9 @@ public final class DataBufferUShort extends DataBuffer
      */
     public DataBufferUShort(short dataArray[][], int size, int offsets[]) {
         super(UNTRACKABLE, TYPE_USHORT, size, dataArray.length, offsets);
-        if (dataArray == null) {
-            throw new NullPointerException("dataArray is null");
-        }
+//        if (dataArray == null) {
+//            throw new NullPointerException("dataArray is null");
+//        }
         for (int i=0; i < dataArray.length; i++) {
             if (dataArray[i] == null) {
                 throw new NullPointerException("dataArray["+i+"] is null");

@@ -42,6 +42,7 @@ import java.util.EventListener;
  *
  * @since 1.5
  */
+@SuppressWarnings({"rawtypes"})
 public class EventListenerAggregate {
 
     private EventListener[] listenerList;

@@ -165,6 +165,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Ray Ryan
  * @author Scott Violet
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JTree extends JComponent implements Scrollable
 {
    
@@ -438,7 +439,7 @@ public class JTree extends JComponent implements Scrollable
     /**
      * The row to expand during DnD.
      */
-    private int expandRow = -1;
+//    private int expandRow = -1;
 
 //    private class TreeTimer extends Timer {
 //        public TreeTimer() {
@@ -918,7 +919,7 @@ public class JTree extends JComponent implements Scrollable
      */
     public void setShowsRootHandles(boolean newValue) {
         boolean                oldValue = showsRootHandles;
-        TreeModel              model = getModel();
+//        TreeModel              model = getModel();
 
         showsRootHandles = newValue;
         showsRootHandlesSet = true;

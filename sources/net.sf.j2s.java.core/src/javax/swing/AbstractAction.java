@@ -57,7 +57,8 @@ public abstract class AbstractAction implements Action, Cloneable
     /**
      * Whether or not actions should reconfigure all properties on null.
      */
-    private static Boolean RECONFIGURE_ON_NULL;
+    @SuppressWarnings("unused")
+	private static Boolean RECONFIGURE_ON_NULL;
 
     /**
      * Specifies whether action is enabled; the default is true.

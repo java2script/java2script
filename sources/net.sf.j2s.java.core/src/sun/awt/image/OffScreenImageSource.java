@@ -38,6 +38,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.BufferedImage;
 //import java.awt.image.DataBuffer;
 
+@SuppressWarnings({"rawtypes"})
 public class OffScreenImageSource implements ImageProducer {
     BufferedImage image;
     int width;

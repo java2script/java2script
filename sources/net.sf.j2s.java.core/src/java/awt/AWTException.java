@@ -33,6 +33,7 @@ package java.awt;
  *
  * @author      Arthur van Hoff
  */
+@SuppressWarnings("serial")
 public class AWTException extends Exception {
 
     /*

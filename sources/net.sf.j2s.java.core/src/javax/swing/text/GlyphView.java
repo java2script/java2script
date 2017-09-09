@@ -68,6 +68,7 @@ import javax.swing.event.DocumentEvent;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes"})
 public class GlyphView extends View implements TabableView, Cloneable {
 
     /**

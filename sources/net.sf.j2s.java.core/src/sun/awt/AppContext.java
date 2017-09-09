@@ -125,6 +125,7 @@ import java.beans.PropertyChangeListener;
  * @author  Thomas Ball
  * @author  Fred Ecks
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class AppContext {
 
     /* Since the contents of an AppContext are unique to each Java
@@ -263,7 +264,6 @@ public final class AppContext {
      * @see     java.lang.ThreadGroup
      * @since   1.2
      */
-    @SuppressWarnings("unchecked")
 		public final static AppContext getAppContext() {
     	/*
     	 * May not be possible without an ID

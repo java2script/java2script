@@ -32,18 +32,9 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Point;
-
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-
 import java.awt.dnd.peer.DragSourceContextPeer;
-
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
-
 import java.util.TooManyListenersException;
 
 /**
@@ -567,7 +558,7 @@ public class DragSourceContext
 //        }
 //    }
 //
-    private static Transferable emptyTransferable;
+    //private static Transferable emptyTransferable;
 
     /*
      * fields

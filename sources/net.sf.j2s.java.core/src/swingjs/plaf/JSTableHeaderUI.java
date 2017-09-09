@@ -28,8 +28,6 @@
 
 package swingjs.plaf;
 
-import java.util.Enumeration;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -38,6 +36,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+
 import javax.swing.CellRendererPane;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -51,6 +51,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 import sun.swing.UIAction;
 import swingjs.api.js.DOMNode;
 
@@ -60,6 +61,7 @@ import swingjs.api.js.DOMNode;
  * @author Bob Hanson
  * 
  */
+@SuppressWarnings({"rawtypes"})
 public class JSTableHeaderUI extends JSLightweightUI {
 
 	private JTable table;

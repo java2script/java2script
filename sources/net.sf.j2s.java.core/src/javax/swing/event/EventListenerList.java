@@ -98,6 +98,7 @@ import java.util.EventListener;
  * @author Hans Muller
  * @author James Gosling
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class EventListenerList  {
     /* A null array to be shared by all empty listener lists*/
     private final static Object[] NULL_ARRAY = new Object[0];

@@ -28,28 +28,26 @@
 
 package javax.swing;
 
-import java.awt.HeadlessException;
-import java.lang.reflect.Constructor;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.print.attribute.PrintRequestAttributeSet;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.EventObject;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -76,6 +74,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
 import sun.swing.SwingLazyValue;
 import sun.swing.SwingUtilities2;
 // SwingJS  TODO import java.text.DateFormat;
@@ -239,6 +238,7 @@ import sun.swing.SwingUtilities2;
 /* The first versions of the JTable, contained in Swing-0.1 through
  * Swing-0.4, were written by Alan Chung.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class JTable extends JComponent implements TableModelListener, Scrollable,
     TableColumnModelListener, ListSelectionListener, CellEditorListener,
     /*Accessible,*/ RowSorterListener

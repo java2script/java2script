@@ -37,6 +37,7 @@ package java.beans;
  * its intended use.
  */
 
+@SuppressWarnings("serial")
 public
 class IntrospectionException extends Exception {
 

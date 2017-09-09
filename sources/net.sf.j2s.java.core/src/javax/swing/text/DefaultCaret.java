@@ -27,8 +27,6 @@
  */
 package javax.swing.text;
 
-import java.util.EventListener;
-
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -41,8 +39,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.EventListener;
+
 import javax.swing.Action;
-import javax.swing.ActionMap;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -120,6 +119,7 @@ import javax.swing.plaf.TextUI;
  * @author  Timothy Prinzing
  * @see     Caret
  */
+@SuppressWarnings({"unused"})
 public class DefaultCaret extends Rectangle implements Caret, FocusListener, MouseListener, MouseMotionListener {
 
     /**
@@ -383,31 +383,31 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
     }
 
 
-    /**
-     * Selects word based on the MouseEvent
-     */
-    private void selectWord(MouseEvent e) {
-        if (selectedWordEvent != null
-            && selectedWordEvent.getX() == e.getX()
-            && selectedWordEvent.getY() == e.getY()) {
-            //we already done selection for this
-            return;
-        }
-                    Action a = null;
-                    ActionMap map = getComponent().getActionMap();
-                    if (map != null) {
-                        a = map.get(DefaultEditorKit.selectWordAction);
-                    }
-                    if (a == null) {
-                        if (selectWord == null) {
-                            selectWord = new DefaultEditorKit.SelectWordAction();
-                        }
-                        a = selectWord;
-                    }
-                    a.actionPerformed(new ActionEvent(getComponent(),
-                                                      ActionEvent.ACTION_PERFORMED, null, e.getWhen(), e.getModifiers()));
-        selectedWordEvent = e;
-    }
+//    /**
+//     * Selects word based on the MouseEvent
+//     */
+//    private void selectWord(MouseEvent e) {
+//        if (selectedWordEvent != null
+//            && selectedWordEvent.getX() == e.getX()
+//            && selectedWordEvent.getY() == e.getY()) {
+//            //we already done selection for this
+//            return;
+//        }
+//                    Action a = null;
+//                    ActionMap map = getComponent().getActionMap();
+//                    if (map != null) {
+//                        a = map.get(DefaultEditorKit.selectWordAction);
+//                    }
+//                    if (a == null) {
+//                        if (selectWord == null) {
+//                            selectWord = new DefaultEditorKit.SelectWordAction();
+//                        }
+//                        a = selectWord;
+//                    }
+//                    a.actionPerformed(new ActionEvent(getComponent(),
+//                                                      ActionEvent.ACTION_PERFORMED, null, e.getWhen(), e.getModifiers()));
+//        selectedWordEvent = e;
+//    }
 
     // --- MouseListener methods -----------------------------------
 

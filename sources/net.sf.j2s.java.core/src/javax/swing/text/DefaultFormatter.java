@@ -61,6 +61,7 @@ import javax.swing.plaf.TextUI;
  *
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes"})
 public class DefaultFormatter extends JFormattedTextField.AbstractFormatter
                     implements Cloneable {
     /** Indicates if the value being edited must match the mask. */
@@ -432,7 +433,7 @@ public class DefaultFormatter extends JFormattedTextField.AbstractFormatter
      * Invokes <code>commitEdit</code> on the JFormattedTextField.
      */
     void commitEdit() throws ParseException {
-        JFormattedTextField ftf = getFormattedTextField();
+        //JFormattedTextField ftf = getFormattedTextField();
 
 //        if (ftf != null) {
 //            ftf.commitEdit();

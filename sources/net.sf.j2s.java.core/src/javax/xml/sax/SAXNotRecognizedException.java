@@ -26,6 +26,7 @@ package javax.xml.sax;
  * @version 2.0.1 (sax2r2)
  * @see javax.xml.sax.SAXNotSupportedException
  */
+@SuppressWarnings("serial")
 public class SAXNotRecognizedException extends SAXException
 {
 

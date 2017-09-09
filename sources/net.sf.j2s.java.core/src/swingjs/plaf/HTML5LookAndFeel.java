@@ -499,6 +499,7 @@ public class HTML5LookAndFeel extends LookAndFeel {
 	 * @throws NullPointerException
 	 *           if {@code table} is {@code null}
 	 */
+	@SuppressWarnings("unused")
 	protected void initComponentDefaults(UIDefaults table) {
 
 		initResourceBundle(table);

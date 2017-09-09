@@ -52,6 +52,7 @@ import java.util.EventObject;
  * @author Ray Ryan
  * @see ListSelectionModel
  */
+@SuppressWarnings("serial")
 public class ListSelectionEvent extends EventObject
 {
     private int firstIndex;

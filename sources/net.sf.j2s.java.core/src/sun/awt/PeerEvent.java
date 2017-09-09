@@ -30,6 +30,7 @@ package sun.awt;
 
 import java.awt.event.InvocationEvent;
 
+@SuppressWarnings("serial")
 public class PeerEvent extends InvocationEvent {
     public static final long PRIORITY_EVENT = 0x01;
     public static final long ULTIMATE_PRIORITY_EVENT = 0x02;

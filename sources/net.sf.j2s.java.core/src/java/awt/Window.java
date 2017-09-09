@@ -145,6 +145,7 @@ import swingjs.JSToolkit;
  * @see java.awt.BorderLayout
  * @since       JDK1.0
  */
+@SuppressWarnings({"unchecked", "deprecation"})
 public class Window extends Container {
 
     /**
@@ -2576,18 +2577,18 @@ public class Window extends Container {
 //        }
     }
 
-	private static void removeFromWindowList(AppContext context, Window w) {
-		synchronized (Window.class) {
-			Vector<Window> windowList = (Vector<Window>) context.get(Window.class);
-			if (windowList != null) {
-				windowList.remove(w);
-			}
-		}
-	}
+//	private static void removeFromWindowList(AppContext context, Window w) {
+//		synchronized (Window.class) {
+//			Vector<Window> windowList = (Vector<Window>) context.get(Window.class);
+//			if (windowList != null) {
+//				windowList.remove(w);
+//			}
+//		}
+//	}
 
-	private void removeFromWindowList0() {
-		removeFromWindowList(appContext, this);
-	}
+//	private void removeFromWindowList0() {
+//		removeFromWindowList(appContext, this);
+//	}
 
 	// /**
 	// * The window serialized data version.

@@ -42,6 +42,7 @@ package javax.swing;
  *
  * @author unattributed
  */
+@SuppressWarnings("serial")
 public class UnsupportedLookAndFeelException extends Exception
 {
     /**

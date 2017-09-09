@@ -45,6 +45,7 @@ import java.util.Hashtable;
  *
  * @author Tim Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SimpleAttributeSet implements MutableAttributeSet, Cloneable
 {
     //private static final long serialVersionUID = -6631553454711782652L;

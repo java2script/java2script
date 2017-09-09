@@ -1,17 +1,12 @@
 package javax.xml.sax.demo;
 
-// SAX event handler for demos.
-// No warranty; no copyright -- use this as you will.
-// $Id: DemoHandler.java,v 1.3 1998/05/01 20:45:16 david Exp $
-
-import javax.xml.sax.HandlerBase;
-import javax.xml.sax.InputSource;
-import javax.xml.sax.Locator;
 import javax.xml.sax.AttributeList;
-import javax.xml.sax.EntityResolver;
 import javax.xml.sax.DTDHandler;
 import javax.xml.sax.DocumentHandler;
+import javax.xml.sax.EntityResolver;
 import javax.xml.sax.ErrorHandler;
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Locator;
 import javax.xml.sax.SAXParseException;
 
 
@@ -28,6 +23,7 @@ import javax.xml.sax.SAXParseException;
   * @see javax.xml.sax.DocumentHandler
   * @see javax.xml.sax.ErrorHandler
   */
+@SuppressWarnings({"deprecation"})
 public class DemoHandler
   implements EntityResolver, DTDHandler, DocumentHandler, ErrorHandler
 {

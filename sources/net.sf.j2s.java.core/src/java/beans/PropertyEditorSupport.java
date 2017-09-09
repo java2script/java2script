@@ -35,6 +35,7 @@ package java.beans;
  * It can be used either as a base class or as a delagatee.
  */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class PropertyEditorSupport implements PropertyEditor {
 
     /**

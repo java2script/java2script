@@ -55,6 +55,7 @@ import java.util.Map;
  *
  * @since 1.4 (appeared in modified form as FullyRenderedTransferable in 1.3.1)
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ClipboardTransferable implements Transferable {
     private final HashMap flavorsToData = new HashMap();
     private DataFlavor[] flavors = new DataFlavor[0];
@@ -74,7 +75,8 @@ public class ClipboardTransferable implements Transferable {
         }
     }
 
-    public ClipboardTransferable(SunClipboard clipboard) {
+    @SuppressWarnings("static-access")
+	public ClipboardTransferable(SunClipboard clipboard) {
 
         clipboard.openClipboard(null);
 

@@ -28,13 +28,13 @@
 
 package javax.swing;
 
+import java.awt.Graphics;
 import java.text.Format;
 import java.text.NumberFormat;
 
-import java.awt.Graphics;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ProgressBarUI;
+import javax.swing.event.EventListenerList;
 
 
 /**

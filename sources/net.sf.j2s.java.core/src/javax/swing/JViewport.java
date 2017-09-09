@@ -695,7 +695,7 @@ public class JViewport extends JComponent
 
         if (repaintAll) {
             repaintAll = false;
-            Rectangle clipB = g.getClipBounds();
+//           Rectangle clipB = g.getClipBounds();
 //            if (clipB.width < getWidth() ||
 //                clipB.height < getHeight()) {
 //                waitingForRepaint = true;
@@ -827,7 +827,8 @@ public class JViewport extends JComponent
      *
      * @see JComponent#reshape(int, int, int, int)
      */
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
 		public void reshape(int x, int y, int w, int h) {
         boolean sizeChanged = (getWidth() != w) || (getHeight() != h);
         if (sizeChanged) {
@@ -1527,7 +1528,7 @@ public class JViewport extends JComponent
         }
 
         boolean retValue;
-        RepaintManager rm = RepaintManager.currentManager(this);
+//        RepaintManager rm = RepaintManager.currentManager(this);
         JComponent view = (JComponent) getView();
 
         if (lastPaintPosition == null ||
@@ -1583,9 +1584,9 @@ public class JViewport extends JComponent
         //   blitFrom/blitTo are in JViewport coordinates system
         //     not the views coordinate space.
         //   clip* are in the views coordinate space.
-        RepaintManager rm = RepaintManager.currentManager(this);
-        int bdx = blitToX - blitFromX;
-        int bdy = blitToY - blitFromY;
+//        RepaintManager rm = RepaintManager.currentManager(this);
+//        int bdx = blitToX - blitFromX;
+//        int bdy = blitToY - blitFromY;
 
 // SwingJS        // Shift the scrolled region
 //        rm.copyArea(this, g, blitFromX, blitFromY, blitW, blitH, bdx, bdy,

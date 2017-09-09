@@ -28,14 +28,14 @@
 
 package java.awt.image;
 
-//import java.awt.color.ICC_Profile;
-import swingjs.JSGraphics2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+
 import sun.awt.image.ImagingLib;
+//import java.awt.color.ICC_Profile;
+import swingjs.JSGraphics2D;
 
 /**
  * This class implements a convolution from the source
@@ -169,7 +169,7 @@ public class ConvolveOp implements BufferedImageOp, RasterOp {
                                                "same as the dst image");
         }
 
-        boolean needToConvert = false;
+        //boolean needToConvert = false;
         ColorModel srcCM = src.getColorModel();
         ColorModel dstCM;
         BufferedImage origDst = dst;

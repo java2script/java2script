@@ -39,6 +39,7 @@ import java.io.IOException;
  * @author  unascribed
  * @since   JDK1.0
  */
+@SuppressWarnings("serial")
 public class UnknownServiceException extends IOException {
     /**
      * Constructs a new <code>UnknownServiceException</code> with no

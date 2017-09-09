@@ -55,6 +55,7 @@ import javax.swing.plaf.TextUI;
  * @author  Igor Kushnirskiy
  * @see     View
  */
+@SuppressWarnings({"rawtypes"})
 public class ParagraphView extends FlowView implements TabExpander {
 
     /**

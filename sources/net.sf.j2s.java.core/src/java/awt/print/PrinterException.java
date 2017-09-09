@@ -34,6 +34,7 @@ package java.awt.print;
  * system.
  */
 
+@SuppressWarnings("serial")
 public class PrinterException extends Exception {
 
     /**

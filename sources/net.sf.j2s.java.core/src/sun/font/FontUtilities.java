@@ -28,14 +28,10 @@
 
 package sun.font;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-
 import java.awt.Font;
 //import java.security.AccessController;
 //import java.security.PrivilegedAction;
+import java.io.File;
 
 /**
  * A collection of utility methods.

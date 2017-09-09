@@ -60,13 +60,14 @@ import swingjs.JSGraphics2D;
  * @author Jeff Dinkins
  * @author Lynn Monsanto
  */
+@SuppressWarnings({"unused"})
 public class ImageIcon implements Icon {
     /* Keep references to the filename and location so that
      * alternate persistence schemes have the option to archive
      * images symbolically rather than including the image data
      * in the archive.
      */
-    transient private String filename;
+	transient private String filename;
     transient private URL location;
 
     transient Image image;

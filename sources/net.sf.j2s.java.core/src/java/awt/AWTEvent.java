@@ -85,6 +85,7 @@ import java.awt.peer.LightweightPeer;
  * @author Amy Fowler
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public abstract class AWTEvent extends EventObject {
 
 	private static int idnum; // SwingJS for testing

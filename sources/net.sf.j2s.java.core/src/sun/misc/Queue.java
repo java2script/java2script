@@ -40,6 +40,7 @@ import swingjs.JSToolkit;
  * @author Herb Jellinek
  */
 
+@SuppressWarnings({"rawtypes"})
 public class Queue {
 
     int length = 0;
@@ -154,6 +155,7 @@ public class Queue {
     }
 }
 
+@SuppressWarnings("rawtypes")
 final class FIFOQueueEnumerator implements Enumeration {
     Queue queue;
     QueueElement cursor;
@@ -181,6 +183,7 @@ final class FIFOQueueEnumerator implements Enumeration {
     }
 }
 
+@SuppressWarnings("rawtypes")
 final class LIFOQueueEnumerator implements Enumeration {
     Queue queue;
     QueueElement cursor;

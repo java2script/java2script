@@ -94,6 +94,7 @@ import java.util.regex.Pattern;
  * @see javax.swing.table.TableRowSorter
  * @since 1.6
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class RowFilter<M,I> {
     /**
      * Enumeration of the possible comparison values supported by
@@ -506,13 +507,12 @@ public abstract class RowFilter<M,I> {
             isComparable = (number instanceof Comparable);
         }
 
-        @SuppressWarnings("unchecked")
         protected boolean include(
                 Entry<? extends Object,? extends Object> value, int index) {
             Object v = value.getValue(index);
 
             if (v instanceof Number) {
-                boolean compared = true;
+//                boolean compared = true;
                 int compareResult;
                 Class vClass = v.getClass();
                 if (number.getClass() == vClass && isComparable) {

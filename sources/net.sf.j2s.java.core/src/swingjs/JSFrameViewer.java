@@ -2,18 +2,16 @@ package swingjs;
 
 import java.awt.Container;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.event.PaintEvent;
+
 import javax.swing.JApplet;
-import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
-import swingjs.api.js.JSInterface;
+
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.HTML5Canvas;
+import swingjs.api.js.JSInterface;
 import swingjs.plaf.JSComponentUI;
 import swingjs.plaf.Resizer;
 
@@ -133,6 +131,7 @@ public class JSFrameViewer implements JSInterface {
 		jsgraphics = null;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setScreenDimension(int width, int height) {
 		setGraphics((Graphics) (Object)(jsgraphics = null), width, height);

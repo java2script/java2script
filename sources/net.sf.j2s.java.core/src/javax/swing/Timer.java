@@ -123,6 +123,7 @@ import swingjs.JSToolkit;
  * 
  * @author Dave Moore
  */
+@SuppressWarnings("serial")
 public class Timer implements Serializable {
 	/*
 	 * NOTE: all fields need to be handled in readResolve

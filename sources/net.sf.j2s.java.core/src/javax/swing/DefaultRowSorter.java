@@ -111,6 +111,7 @@ import javax.swing.SortOrder;
  * @see java.text.Collator
  * @since 1.6
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
     /**
      * Whether or not we resort on TableModelEvent.UPDATEs.
@@ -953,7 +954,6 @@ public abstract class DefaultRowSorter<M, I> extends RowSorter<M> {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private int compare(int model1, int model2) {
         int column;
         SortOrder sortOrder;

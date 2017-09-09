@@ -39,6 +39,11 @@ package java.awt.geom;
 
 public class IllegalPathStateException extends RuntimeException {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructs an <code>IllegalPathStateException</code> with no
      * detail message.
      *

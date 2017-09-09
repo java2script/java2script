@@ -63,7 +63,7 @@ import java.awt.event.KeyEvent;
  * @since      JDK1.0
  */
 public class Event {
-    private transient long data;
+    transient long data;
 
     /* Modifier constants */
 

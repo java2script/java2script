@@ -32,8 +32,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sound.sampled.AudioFileFormat.Type;
-
 
 /**
  * An instance of the <code>AudioFileFormat</code> class describes
@@ -245,7 +243,8 @@ public class AudioFileFormat {
      * @see #getProperty(String)
      * @since 1.5
      */
-    public Map<String,Object> properties() {
+    @SuppressWarnings("unchecked")
+	public Map<String,Object> properties() {
         Map<String,Object> ret;
         if (properties == null) {
             ret = new HashMap<String,Object>(0);

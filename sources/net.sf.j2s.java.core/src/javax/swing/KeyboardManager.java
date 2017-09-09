@@ -65,6 +65,7 @@ import java.awt.event.KeyEvent;
   *
   * @see InputMap
   */
+@SuppressWarnings({"rawtypes", "unchecked"})
 class KeyboardManager {
 
     static KeyboardManager currentManager = new KeyboardManager();

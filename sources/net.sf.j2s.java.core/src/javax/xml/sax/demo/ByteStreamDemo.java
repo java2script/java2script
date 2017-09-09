@@ -3,13 +3,11 @@ package javax.xml.sax.demo;
 // No warranty; no copyright -- use this as you will.
 // $Id: ByteStreamDemo.java,v 1.4 1998/05/01 20:38:19 david Exp $
 
-import javax.xml.sax.Parser;
-import javax.xml.sax.InputSource;
-import javax.xml.sax.SAXException;
-
-import javax.xml.sax.helpers.ParserFactory;
-
 import java.io.FileInputStream;
+
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Parser;
+import javax.xml.sax.helpers.ParserFactory;
 
 
 
@@ -25,6 +23,7 @@ import java.io.FileInputStream;
   *
   * @see DemoHandler
   */
+@SuppressWarnings({"deprecation"})
 public class ByteStreamDemo {
 
 

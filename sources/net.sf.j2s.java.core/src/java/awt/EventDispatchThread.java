@@ -28,24 +28,21 @@
 
 package java.awt;
 
+import java.awt.event.ActionEvent;
 //import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
+
+import javajs.api.JSFunction;
+import javajs.util.JSThread;
+import javajs.util.Lst;
+//import java.util.logging.*;
 //import java.lang.reflect.Method;
 //import java.security.AccessController;
 //import sun.security.action.GetPropertyAction;
 import sun.awt.AWTAutoShutdown;
 import sun.awt.ModalExclude;
 import sun.awt.SunToolkit;
-
-import java.util.Vector;
-
-import javajs.api.JSFunction;
-import javajs.util.JSThread;
-import javajs.util.Lst;
-//import java.util.logging.*;
-
 import swingjs.JSToolkit;
 
 //import sun.awt.dnd.SunDragSourceContextPeer;

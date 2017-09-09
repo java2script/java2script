@@ -476,6 +476,7 @@ public final class ImageIO {
 
 	private static String[] readerTypes = { "image/png", "image/jpeg",
 			"image/x-png", "image/vnd.wap.wbmp", "image/gif", "image/bmp" };
+	@SuppressWarnings("unused")
 	private static int[] readerMap = { PNG, JPG, PNG, BMP, GIF, BMP };
 	private static String[] readerFormatNames = { "jpg", "BMP", "bmp", "JPG",
 			"wbmp", "jpeg", "png", "PNG", "JPEG", "WBMP", "GIF", "gif" };

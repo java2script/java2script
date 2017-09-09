@@ -28,18 +28,9 @@
 
 package java.awt.datatransfer;
 
-import java.awt.Toolkit;
-
-import java.lang.ref.SoftReference;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
 import java.io.IOException;
-
-import java.net.URL;
-import java.net.MalformedURLException;
-
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,6 +59,7 @@ import sun.awt.datatransfer.DataTransferer;
  *
  * @since 1.2
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class SystemFlavorMap implements FlavorMap, FlavorTable {
 
     /**
@@ -246,7 +238,8 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
      * Copied code from java.util.Properties. Parsing the data ourselves is the
      * only way to handle duplicate keys and values.
      */
-    private void parseAndStoreReader(BufferedReader in) throws IOException {
+    @SuppressWarnings("unused")
+	private void parseAndStoreReader(BufferedReader in) throws IOException {
         while (true) {
             // Get next line
             String line = in.readLine();
@@ -766,7 +759,8 @@ public final class SystemFlavorMap implements FlavorMap, FlavorTable {
      * @see #encodeJavaMIMEType
      * @since 1.4
      */
-    public synchronized List<DataFlavor> getFlavorsForNative(String nat) {
+    @SuppressWarnings("deprecation")
+	public synchronized List<DataFlavor> getFlavorsForNative(String nat) {
 
         // Check cache, even for null nat
         SoftReference ref = (SoftReference)getFlavorsForNativeCache.get(nat);

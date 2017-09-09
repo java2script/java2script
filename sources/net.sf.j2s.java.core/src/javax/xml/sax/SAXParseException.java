@@ -34,6 +34,7 @@ package javax.xml.sax;
  * @see javax.xml.sax.Locator
  * @see javax.xml.sax.ErrorHandler
  */
+@SuppressWarnings("serial")
 public class SAXParseException extends SAXException {
     
     

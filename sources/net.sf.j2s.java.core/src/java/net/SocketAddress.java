@@ -43,5 +43,6 @@ import java.io.Serializable;
  * @see java.net.ServerSocket
  * @since 1.4
  */
+@SuppressWarnings("serial")
 public abstract class SocketAddress implements Serializable {
 }

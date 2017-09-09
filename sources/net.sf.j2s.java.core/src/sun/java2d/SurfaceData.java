@@ -28,51 +28,6 @@
 
 package sun.java2d;
 
-import java.awt.Color;
-import java.awt.Rectangle;
-import java.awt.Transparency;
-import java.awt.GraphicsConfiguration;
-import java.awt.Image;
-import java.awt.image.ColorModel;
-//import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-
-//import sun.java2d.loops.RenderCache;
-//import sun.java2d.loops.RenderLoops;
-//import sun.java2d.loops.CompositeType;
-//import sun.java2d.loops.SurfaceType;
-//import sun.java2d.loops.MaskFill;
-//import sun.java2d.loops.DrawLine;
-//import sun.java2d.loops.FillRect;
-//import sun.java2d.loops.DrawRect;
-//import sun.java2d.loops.DrawPolygons;
-//import sun.java2d.loops.DrawPath;
-//import sun.java2d.loops.FillPath;
-//import sun.java2d.loops.FillSpans;
-//import sun.java2d.loops.FontInfo;
-//import sun.java2d.loops.DrawGlyphList;
-//import sun.java2d.loops.DrawGlyphListAA;
-//import sun.java2d.loops.DrawGlyphListLCD;
-//import sun.java2d.pipe.LoopPipe;
-//import sun.java2d.pipe.CompositePipe;
-//import sun.java2d.pipe.GeneralCompositePipe;
-//import sun.java2d.pipe.SpanClipRenderer;
-//import sun.java2d.pipe.SpanShapeRenderer;
-//import sun.java2d.pipe.AAShapePipe;
-//import sun.java2d.pipe.AlphaPaintPipe;
-//import sun.java2d.pipe.AlphaColorPipe;
-//import sun.java2d.pipe.PixelToShapeConverter;
-//import sun.java2d.pipe.TextPipe;
-//import sun.java2d.pipe.TextRenderer;
-//import sun.java2d.pipe.AATextRenderer;
-//import sun.java2d.pipe.LCDTextRenderer;
-//import sun.java2d.pipe.SolidTextRenderer;
-//import sun.java2d.pipe.OutlineTextRenderer;
-//import sun.java2d.pipe.DrawImagePipe;
-//import sun.java2d.pipe.DrawImage;
-import sun.awt.SunHints;
-//import sun.awt.image.SurfaceManager;
-
 /**
  * This class provides various pieces of information relevant to a
  * particular drawing surface.  The information obtained from this

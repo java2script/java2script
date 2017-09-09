@@ -261,7 +261,8 @@ public abstract class ComponentUI implements ComponentPeer {
      * @see javax.swing.JComponent#contains
      * @see java.awt.Component#contains
      */
-    public boolean contains(JComponent c, int x, int y) {
+    @SuppressWarnings("deprecation")
+	public boolean contains(JComponent c, int x, int y) {
         return c.inside(x, y);
     }
 

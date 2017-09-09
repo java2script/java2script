@@ -9,20 +9,19 @@ package javax.xml.sax.helpers;
 import java.io.IOException;
 import java.util.Locale;
 
-import javax.xml.sax.Parser;	// deprecated
-import javax.xml.sax.Locator;
-import javax.xml.sax.InputSource;
 import javax.xml.sax.AttributeList; // deprecated
-import javax.xml.sax.EntityResolver;
-import javax.xml.sax.DTDHandler;
-import javax.xml.sax.DocumentHandler; // deprecated
-import javax.xml.sax.ErrorHandler;
-import javax.xml.sax.SAXException;
-
-import javax.xml.sax.XMLReader;
 import javax.xml.sax.Attributes;
 import javax.xml.sax.ContentHandler;
+import javax.xml.sax.DTDHandler;
+import javax.xml.sax.DocumentHandler; // deprecated
+import javax.xml.sax.EntityResolver;
+import javax.xml.sax.ErrorHandler;
+import javax.xml.sax.InputSource;
+import javax.xml.sax.Locator;
+import javax.xml.sax.Parser;	// deprecated
+import javax.xml.sax.SAXException;
 import javax.xml.sax.SAXNotSupportedException;
+import javax.xml.sax.XMLReader;
 
 
 /**
@@ -49,10 +48,10 @@ import javax.xml.sax.SAXNotSupportedException;
  * @see javax.xml.sax.Parser
  * @see javax.xml.sax.XMLReader
  */
+@SuppressWarnings({"deprecation"})
 public class XMLReaderAdapter implements Parser, ContentHandler
 {
 
-
     ////////////////////////////////////////////////////////////////////
     // Constructor.
     ////////////////////////////////////////////////////////////////////

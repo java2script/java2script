@@ -30,28 +30,24 @@ package sun.awt.datatransfer;
 
 import java.awt.EventQueue;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.FlavorEvent;
+import java.awt.datatransfer.FlavorListener;
 import java.awt.datatransfer.FlavorTable;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.ClipboardOwner;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.FlavorListener;
-import java.awt.datatransfer.FlavorEvent;
 import java.awt.datatransfer.UnsupportedFlavorException;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.HashSet;
-
-import java.io.IOException;
 
 import sun.awt.AppContext;
+import sun.awt.EventListenerAggregate;
 import sun.awt.PeerEvent;
 import sun.awt.SunToolkit;
-import sun.awt.EventListenerAggregate;
 
 
 /**
@@ -63,6 +59,7 @@ import sun.awt.EventListenerAggregate;
  *
  * @since 1.3
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class SunClipboard extends Clipboard
     implements PropertyChangeListener {
 

@@ -75,6 +75,7 @@ import sun.font.FontDesignMetrics;
 //import java.awt.GraphicsEnvironment;
 //import java.awt.image.BufferedImage;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class SunToolkit extends Toolkit implements
 		WindowClosingSupport, WindowClosingListener, ComponentFactory {// ,
 																																		// InputMethodSupport
@@ -644,6 +645,7 @@ public abstract class SunToolkit extends Toolkit implements
 	 * Fixed 5064013: the InvocationEvent time should be equals the time of the
 	 * ActionEvent
 	 */
+	@SuppressWarnings("serial")
 	public static void executeOnEventHandlerThread(Object target,
 			Runnable runnable, final long when) {
 		executeOnEventHandlerThread(new PeerEvent(target, runnable,

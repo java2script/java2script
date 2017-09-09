@@ -48,6 +48,7 @@ import java.util.EventObject;
  * old and new values should also be null.
  */
 
+@SuppressWarnings("serial")
 public class PropertyChangeEvent extends EventObject {
 
     /**

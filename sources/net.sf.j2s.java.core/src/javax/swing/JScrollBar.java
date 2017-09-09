@@ -33,9 +33,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.ScrollBarUI;
+import javax.swing.event.EventListenerList;
 
 
 

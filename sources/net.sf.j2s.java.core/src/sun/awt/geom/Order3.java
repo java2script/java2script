@@ -34,6 +34,7 @@ import java.awt.geom.QuadCurve2D;
 
 import java.util.Vector;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class Order3 extends Curve {
     private double x0;
     private double y0;

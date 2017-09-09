@@ -101,7 +101,8 @@ final public class XMLReaderFactory
      *            can be identified and instantiated.
      * @see #createXMLReader(java.lang.String)
      */
-    public static XMLReader createXMLReader ()
+    @SuppressWarnings("deprecation")
+	public static XMLReader createXMLReader ()
 	throws SAXException
     {
 	String		className = null;

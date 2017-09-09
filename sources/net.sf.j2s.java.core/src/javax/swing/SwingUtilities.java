@@ -27,15 +27,13 @@
  */
 package javax.swing;
 
-import java.awt.HeadlessException;
-import java.lang.reflect.InvocationTargetException;
-
 import java.applet.Applet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.HeadlessException;
 import java.awt.IllegalComponentStateException;
 import java.awt.Image;
 import java.awt.Insets;
@@ -49,12 +47,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.lang.reflect.InvocationTargetException;
+
 import javax.swing.event.MenuDragMouseEvent;
 import javax.swing.plaf.UIResource;
+
+import javajs.J2SIgnoreImport;
 import sun.awt.AppContext;
 import sun.swing.UIAction;
-import javajs.J2SIgnoreImport;
-import javajs.J2SRequireImport;
 import swingjs.JSAppletViewer;
 import swingjs.JSToolkit;
 import swingjs.api.Interface;
@@ -65,6 +65,7 @@ import swingjs.api.Interface;
  * @author unknown
  */
 @J2SIgnoreImport({CellRendererPane.class, DefaultCellEditor.class, ImageIcon.class, JMenu.class, })
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class SwingUtilities implements SwingConstants
 {
     // These states are system-wide, rather than AppContext wide.

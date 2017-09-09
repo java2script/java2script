@@ -22,6 +22,7 @@ import swingjs.JSToolkit;
 import swingjs.api.js.DOMNode;
 
 @J2SRequireImport(swingjs.jquery.JQueryUI.class)
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class JSSliderUI extends JSLightweightUI implements PropertyChangeListener, ChangeListener {
 
 	JSlider jSlider;
@@ -119,7 +120,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	
 	private void setJQuerySliderAndEvents() {
 
-		@SuppressWarnings("unused")
 		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative
@@ -218,7 +218,6 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	}
 
 	private void setSliderAttr(String key, float val) {
-		@SuppressWarnings("unused")
 		Object slider = $(jqSlider);
 		/**
 		 * @j2sNative

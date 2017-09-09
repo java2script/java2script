@@ -58,6 +58,7 @@ import javax.swing.AbstractAction;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class TextAction extends AbstractAction {
 
     /**

@@ -31,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
  * @author Edwin Goei, David Brownell
  * @version 2.0.1 (sax2r2)
  */
+@SuppressWarnings({"rawtypes"})
 class NewInstance {
 
     /**
@@ -60,7 +61,7 @@ class NewInstance {
         Method m = null;
 
         try {
-            m = Thread.class.getMethod("getContextClassLoader", null);
+            m = Thread.class.getMethod("getContextClassLoader");
         } catch (NoSuchMethodException e) {
             // Assume that we are running JDK 1.1, use the current ClassLoader
             return NewInstance.class.getClassLoader();

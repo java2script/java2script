@@ -39,12 +39,11 @@ import java.awt.datatransfer.FlavorMap;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.peer.DragSourceContextPeer;
-import java.io.IOException;
 //import java.io.ObjectInputStream;
 //import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.security.AccessController;
 import java.util.EventListener;
+
 import sun.awt.dnd.SunDragSourceContextPeer;
 //import sun.security.action.GetIntegerAction;
 
@@ -117,6 +116,7 @@ import sun.awt.dnd.SunDragSourceContextPeer;
  * @since 1.2
  */
 
+@SuppressWarnings({ "restriction"})
 public class DragSource implements Serializable {
 
     private static final long serialVersionUID = 6236096958971414066L;
@@ -236,7 +236,7 @@ public class DragSource implements Serializable {
      */
 
     public static boolean isDragImageSupported() {
-        Toolkit t = Toolkit.getDefaultToolkit();
+        //Toolkit t = Toolkit.getDefaultToolkit();
 
         Boolean supported;
 
@@ -290,7 +290,7 @@ public class DragSource implements Serializable {
      *    is still executing
      */
 
-    public void startDrag(DragGestureEvent   trigger,
+	public void startDrag(DragGestureEvent   trigger,
                           Cursor             dragCursor,
                           Image              dragImage,
                           Point              imageOffset,

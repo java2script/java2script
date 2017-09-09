@@ -51,6 +51,7 @@ import java.awt.AWTEvent;
  * @since 1.1
  */
 
+@SuppressWarnings("serial")
 public class TextEvent extends AWTEvent {
 
     /**

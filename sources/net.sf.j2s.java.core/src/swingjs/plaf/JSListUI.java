@@ -2659,6 +2659,7 @@ public class JSListUI extends JSLightweightUI {
 		// Whether or not the mouse press (which is being considered as part
 		// of a drag sequence) also caused the selection change to be fully
 		// processed.
+		@SuppressWarnings("unused")
 		private boolean dragPressDidSelection;
 
 		@Override

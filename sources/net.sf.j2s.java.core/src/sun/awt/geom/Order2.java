@@ -33,6 +33,7 @@ import java.awt.geom.PathIterator;
 
 import java.util.Vector;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class Order2 extends Curve {
     private double x0;
     private double y0;

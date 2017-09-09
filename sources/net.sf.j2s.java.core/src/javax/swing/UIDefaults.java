@@ -63,9 +63,10 @@ import swingjs.JSToolkit;
  * @see UIManager
  * @author Hans Muller
  */
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
 public class UIDefaults extends Hashtable<Object,Object>
 {
-    private static final Object PENDING = new String("Pending");
+    //private static final Object PENDING = new String("Pending");
 
     private SwingPropertyChangeSupport changeSupport;
 

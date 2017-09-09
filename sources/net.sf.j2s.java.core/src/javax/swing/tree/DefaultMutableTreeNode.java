@@ -90,6 +90,7 @@ import java.util.Vector;
  *
  * @author Rob Davis
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultMutableTreeNode extends Object implements Cloneable,
        MutableTreeNode
 {

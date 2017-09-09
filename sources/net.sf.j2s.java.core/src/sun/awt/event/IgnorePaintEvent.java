@@ -38,6 +38,7 @@ import java.awt.event.PaintEvent;
  * Look at <code>javax.swing.SwingPaintEventDispatcher</code> for more.
  *
  */
+@SuppressWarnings("serial")
 public class IgnorePaintEvent extends PaintEvent {
     public IgnorePaintEvent(Component source, int id, Rectangle updateRect) {
         super(source, id, updateRect);

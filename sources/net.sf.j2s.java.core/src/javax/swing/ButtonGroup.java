@@ -66,6 +66,7 @@ import java.util.Enumeration;
  *
  * @author Jeff Dinkins
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ButtonGroup  {
 
     // the list of buttons participating in this group

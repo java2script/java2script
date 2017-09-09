@@ -83,6 +83,7 @@ package java.awt;
  * @since       JDK1.0
  * @see ComponentOrientation
  */
+@SuppressWarnings("serial")
 public class FlowLayout implements LayoutManager, java.io.Serializable {
 
     /**

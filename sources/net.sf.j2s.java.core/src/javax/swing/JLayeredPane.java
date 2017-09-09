@@ -27,14 +27,12 @@
  */
 package javax.swing;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import javax.swing.plaf.LayeredPaneUI;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 // 
 
@@ -158,6 +156,7 @@ import javax.swing.plaf.LayeredPaneUI;
  *
  * @author David Kloba
  */
+@SuppressWarnings({"rawtypes"})
 public class JLayeredPane extends JComponent /* implements Accessible */ {
     /// Watch the values in getObjectForLayer()
     /** Convenience object defining the Default layer. Equivalent to new Integer(0).*/

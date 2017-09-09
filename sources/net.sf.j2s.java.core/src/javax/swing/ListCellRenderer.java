@@ -28,9 +28,6 @@
 
 package javax.swing;
 
-import java.awt.Component;
-
-
 /**
  * Identifies components that can be used as "rubber stamps" to paint
  * the cells in a JList.  For example, to use a JLabel as a

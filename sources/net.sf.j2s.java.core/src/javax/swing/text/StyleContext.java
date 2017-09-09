@@ -27,6 +27,9 @@
  */
 package javax.swing.text;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 //import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -39,10 +42,6 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 //import java.util.WeakHashMap;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Toolkit;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -73,6 +72,7 @@ import javax.swing.event.EventListenerList;
  *
  * @author  Timothy Prinzing
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class StyleContext implements  AbstractDocument.AttributeContext {
 
     /**

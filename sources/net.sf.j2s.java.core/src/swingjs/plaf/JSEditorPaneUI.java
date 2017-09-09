@@ -1,10 +1,10 @@
 package swingjs.plaf;
 
-import java.awt.Event;
-
 import java.awt.Dimension;
 import java.awt.Insets;
+
 import javax.swing.text.JTextComponent;
+
 import swingjs.api.js.DOMNode;
 
 public class JSEditorPaneUI  extends JSTextUI {

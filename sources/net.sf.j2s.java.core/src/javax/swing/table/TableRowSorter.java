@@ -129,6 +129,7 @@ import javax.swing.DefaultRowSorter;
  * @see java.util.Comparator
  * @since 1.6
  */
+@SuppressWarnings({"rawtypes"})
 public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, Integer> {
 //    /**
 //     * Comparator that uses compareTo on the contents.
@@ -310,12 +311,10 @@ public class TableRowSorter<M extends TableModel> extends DefaultRowSorter<M, In
         }
     }
 
-
-    private static class ComparableComparator implements Comparator {
-        @Override
-				@SuppressWarnings("unchecked")
-        public int compare(Object o1, Object o2) {
-            return ((Comparable)o1).compareTo(o2);
-        }
-    }
+//	private static class ComparableComparator implements Comparator {
+//        @Override
+//        public int compare(Object o1, Object o2) {
+//            return ((Comparable)o1).compareTo(o2);
+//        }
+//    }
 }

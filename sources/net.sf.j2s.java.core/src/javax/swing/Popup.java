@@ -28,8 +28,6 @@
 
 package javax.swing;
 
-import swingjs.JSFrameViewer;
-import swingjs.JSToolkit;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -38,6 +36,7 @@ import java.awt.Graphics;
 //import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.Window;
+
 import sun.awt.SunToolkit;
 
 /**
@@ -125,7 +124,8 @@ public class Popup {
      * on a <code>disposed</code> <code>Popup</code>, indeterminate
      * behavior will result.
      */
-    public void hide() {
+    @SuppressWarnings("deprecation")
+	public void hide() {
         Component component = getComponent();
 
         if (component instanceof JWindow) {
@@ -263,7 +263,8 @@ public class Popup {
             paint(g);
         }
 
-        @Override
+        @SuppressWarnings("deprecation")
+		@Override
 				public void show() {
             this.pack();
             if (getWidth() > 0 && getHeight() > 0) {

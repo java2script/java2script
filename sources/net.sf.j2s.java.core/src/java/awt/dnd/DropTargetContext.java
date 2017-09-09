@@ -29,16 +29,10 @@
 package java.awt.dnd;
 
 import java.awt.Component;
-
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-
 import java.awt.dnd.peer.DropTargetContextPeer;
-
-import java.io.IOException;
 import java.io.Serializable;
-
 import java.util.Arrays;
 import java.util.List;
 

@@ -33,6 +33,7 @@ import java.util.ListIterator;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Window;
+import java.io.Serializable;
 
 
 /**
@@ -42,7 +43,8 @@ import java.awt.Window;
  *
  * @author David Mendenhall
  */
-final class LayoutComparator implements Comparator, java.io.Serializable {
+@SuppressWarnings({"rawtypes", "unchecked", "serial"})
+final class LayoutComparator implements Comparator, Serializable {
 
     private static final int ROW_TOLERANCE = 10;
 

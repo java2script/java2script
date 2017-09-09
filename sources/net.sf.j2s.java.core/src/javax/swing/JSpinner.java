@@ -138,6 +138,7 @@ import javax.swing.text.NumberFormatter;
  * @author Lynn Monsanto (accessibility)
  * @since 1.4
  */
+@SuppressWarnings({"rawtypes"})
 public class JSpinner extends JComponent
 {
     private static final Action DISABLED_ACTION = new DisabledAction();

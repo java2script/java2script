@@ -42,5 +42,6 @@ package javax.swing.undo;
  *
  * @author Ray Ryan
  */
+@SuppressWarnings("serial")
 public class CannotUndoException extends RuntimeException {
 }
