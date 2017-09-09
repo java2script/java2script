@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -38,6 +36,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 	// BH: added "true".equals(getProperty(props, "j2s.compiler.allow.compression")) to ensure compression only occurs when desired
     static final int JSL_LEVEL = AST.JLS8; // BH can we go to JSL 8? 
 	private static boolean showJ2SSettings = true; // BH adding this
+	private static Properties props;
 
 	public void process(ICompilationUnit sourceUnit, IContainer binaryFolder) {
 		final IProject project = binaryFolder.getProject();
@@ -59,10 +58,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			 */
 			return;
 		}
-		Properties props = new Properties();
+		props = new Properties();
 		try {
 			props.load(new FileInputStream(file));
-			String status = getProperty(props, "j2s.compiler.status");
+			String status = getProperty("j2s.compiler.status");
 			if (!"enable".equals(status)) {
 				/*
 				 * Not enabled!
@@ -80,10 +79,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 
 		String binFolder = binaryFolder.getLocation().toOSString();
 		boolean errorOccurred = false;
-		if ("true".equals(getProperty(props, "j2s.save.resource.lists"))) {
+		if ("true".equals(getProperty("j2s.save.resource.lists"))) {
 
-			String resPaths = getProperty(props, "j2s.resources.list");
-			String abandonedPaths = getProperty(props, "j2s.abandoned.resources.list");
+			String resPaths = getProperty("j2s.resources.list");
+			String abandonedPaths = getProperty("j2s.abandoned.resources.list");
 
 			List<String> abandonedList = new ArrayList<String>();
 			List<String> list = new ArrayList<String>();
@@ -145,7 +144,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			root = (CompilationUnit) astParser.createAST(null);
 
 			DependencyASTVisitor dvisitor = null;
-			String visitorID = getProperty(props, "j2s.compiler.visitor");
+			String visitorID = getProperty("j2s.compiler.visitor");
 			IExtendedVisitor extVisitor = null;
 			if ("ASTScriptVisitor".equals(visitorID)) {
 				dvisitor = new DependencyASTVisitor();
@@ -207,14 +206,14 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			}
 			visitor.setPackageNames(dvisitor.getDefinedBasePackages());
 			// *.js*;swingjs; etc.
-			ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty(props, "j2s.compiler.nonqualified.classes"));
-			boolean ignoreMethodOverloading = !("enable".equals(getProperty(props, "j2s.compiler.method.overloading")));
+			ASTKeywordVisitor.setNoQualifiedNamePackages(getProperty("j2s.compiler.nonqualified.classes"));
+			boolean ignoreMethodOverloading = !("enable".equals(getProperty("j2s.compiler.method.overloading")));
 			visitor.setSupportsMethodOverloading(!ignoreMethodOverloading);
-			boolean supportsInterfaceCasting = "enable".equals(getProperty(props, "j2s.compiler.interface.casting"));
+			boolean supportsInterfaceCasting = "enable".equals(getProperty("j2s.compiler.interface.casting"));
 			visitor.setSupportsInterfaceCasting(supportsInterfaceCasting);
 			//boolean objectStaticFields = "enable".equals(getProperty(props, "j2s.compiler.static.quirks"));
 			//visitor.setSupportsObjectStaticFields(objectStaticFields);
-			boolean isDebugging = "debug".equals(getProperty(props, "j2s.compiler.mode"));
+			boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
 			dvisitor.setDebugging(isDebugging);
 			boolean toCompress = false; //"enable".equals(getProperty(props, "j2s.compiler.allow.compression"))); // BH
@@ -244,7 +243,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 					}
 				}
 			} else {
-				Java2ScriptCompiler.outputJavaScript(visitor, dvisitor, root, binFolder, props);
+				outputJavaScript(visitor, dvisitor, root, binFolder);
 			}
 		}
 	}
@@ -305,7 +304,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 //		ASTJ2SMapVisitor.setJ2SMap(null);
 //	}
 
-	private static String getProperty(Properties props, String key) {
+	private static String getProperty(String key) {
 		String val = props.getProperty(key);
 		if (showJ2SSettings)
 			System.err.println(key + " = " + val);
@@ -313,12 +312,12 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 	}
 
 	public static void outputJavaScript(ASTScriptVisitor visitor, DependencyASTVisitor dvisitor, CompilationUnit fRoot,
-			String folderPath, Properties props) {
+			String folderPath) {
 		String js = dvisitor.getDependencyScript(visitor.getBuffer());
 		// js = js + "\n//SwingJS test " + System.currentTimeMillis() + "\n";
-		String lineBreak = getProperty(props, "j2s.compiler.linebreak");
-		String whiteSpace = getProperty(props, "j2s.compiler.whitespace");
-		String utf8Header = getProperty(props, "j2s.compiler.utf8bom");
+		String lineBreak = getProperty("j2s.compiler.linebreak");
+		String whiteSpace = getProperty("j2s.compiler.whitespace");
+		String utf8Header = getProperty("j2s.compiler.utf8bom");
 		boolean addUTF8Header = false;
 		if (utf8Header != null && utf8Header.equals("true")) {
 			addUTF8Header = true;
@@ -345,51 +344,50 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		}
 		js = js + "\n//Created " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "\n";
 
-		String abbr = getProperty(props, "j2s.compiler.abbreviation");
-		if (abbr != null) {
-			if (abbr.equals("true")) {
-				String abbrPrefix = getProperty(props, "j2s.compiler.abbreviation.prefix");
-				if (abbrPrefix == null) {
-					abbrPrefix = "$_";
-				}
-				abbrPrefix = abbrPrefix.replaceAll("\\$", "\\\\\\$");
-				String[] clazzAll = getClazzAbbrMap();
-				StringBuffer buf = new StringBuffer();
-				for (int i = 0; i < clazzAll.length / 2; i++) {
-					String method = clazzAll[i + i].substring(6);
-					if ("pu$h".equals(method)) {
-						method = "pu\\$h";
-					}
-					buf.append("(Clazz\\." + method + ")");
-					if (i < clazzAll.length / 2 - 1) {
-						buf.append("|");
-					}
-				}
-				Matcher matcher = Pattern.compile(buf.toString()).matcher(js);
-				matcher.reset();
-				boolean result = matcher.find();
-				if (result) {
-					StringBuffer sb = new StringBuffer();
-					do {
-						int groupCount = matcher.groupCount();
-						for (int i = 0; i < groupCount; i++) {
-							String group = matcher.group(i);
-							if (group != null && group.length() != 0) {
-								for (int j = 0; j < clazzAll.length / 2; j++) {
-									if (group.equals(clazzAll[j + j])) {
-										matcher.appendReplacement(sb, abbrPrefix + clazzAll[j + j + 1]);
-										break;
-									}
-								}
-								break;
-							}
-						}
-						result = matcher.find();
-					} while (result);
-					matcher.appendTail(sb);
-					js = sb.toString();
-				}
-			}
+		String abbr = getProperty("j2s.compiler.abbreviation");
+		if ("true".equals(abbr)) {
+			System.out.println("j2s.compiler.appreviation ignored -- use Google closure compiler");
+//			String abbrPrefix = getProperty(props, "j2s.compiler.abbreviation.prefix");
+//			if (abbrPrefix == null) {
+//				abbrPrefix = "$_";
+//			}
+//			abbrPrefix = abbrPrefix.replaceAll("\\$", "\\\\\\$");
+//			String[] clazzAll = getClazzAbbrMap();
+//			StringBuffer buf = new StringBuffer();
+//			for (int i = 0; i < clazzAll.length / 2; i++) {
+//				String method = clazzAll[i + i].substring(6);
+//				if ("pu$h".equals(method)) {
+//					method = "pu\\$h";
+//				}
+//				buf.append("(Clazz\\." + method + ")");
+//				if (i < clazzAll.length / 2 - 1) {
+//					buf.append("|");
+//				}
+//			}
+//			Matcher matcher = Pattern.compile(buf.toString()).matcher(js);
+//			matcher.reset();
+//			boolean result = matcher.find();
+//			if (result) {
+//				StringBuffer sb = new StringBuffer();
+//				do {
+//					int groupCount = matcher.groupCount();
+//					for (int i = 0; i < groupCount; i++) {
+//						String group = matcher.group(i);
+//						if (group != null && group.length() != 0) {
+//							for (int j = 0; j < clazzAll.length / 2; j++) {
+//								if (group.equals(clazzAll[j + j])) {
+//									matcher.appendReplacement(sb, abbrPrefix + clazzAll[j + j + 1]);
+//									break;
+//								}
+//							}
+//							break;
+//						}
+//					}
+//					result = matcher.find();
+//				} while (result);
+//				matcher.appendTail(sb);
+//				js = sb.toString();
+//			}
 		}
 
 		String elementName = fRoot.getJavaElement().getElementName();
@@ -422,7 +420,34 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		writePackageJS(dvisitor, folderPath, packageName, elementName);
+		showJ2SSettings = false; // just once per compilation run
+		// if (visitor instanceof SWTScriptVisitor) {
+		// SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
+		// String removedJS = swtVisitor.getBufferRemoved().toString();
+		// if (removedJS.trim().length() > 0) {
+		// jsFile = new File(folderPath, elementName + ".remmoved.js");
+		// //$NON-NLS-1$
+		// fileWriter = null;
+		// try {
+		// fileWriter = new FileWriter(jsFile);
+		// fileWriter.write(removedJS);
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// } finally {
+		// if (fileWriter != null) {
+		// try {
+		// fileWriter.close();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
+		// }
+		// }
+	}
 
+	private static void writePackageJS(DependencyASTVisitor dvisitor, String folderPath, String packageName, String elementName) {
 		String[] classNameSet = dvisitor.getClassNames();
 		if (classNameSet.length > 1) {
 			StringBuffer buffer = new StringBuffer();
@@ -438,7 +463,7 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			DependencyASTVisitor.joinArrayClasses(buffer, classNameSet, null, ",\r\n");
 
 			buffer.append("]);\r\n");
-			String s = getProperty(props, "package.js");
+			String s = getProperty("package.js");
 			if (s == null || s.length() == 0) {
 				s = "package.js";
 			}
@@ -472,92 +497,60 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			}
 			try {
 				FileOutputStream fos = new FileOutputStream(f);
+				System.err.println(f.getAbsolutePath());
+				System.err.println(source);
 				fos.write(source.getBytes());
 				fos.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
-		showJ2SSettings = false;
-		// if (visitor instanceof SWTScriptVisitor) {
-		// SWTScriptVisitor swtVisitor = (SWTScriptVisitor) visitor;
-		// String removedJS = swtVisitor.getBufferRemoved().toString();
-		// if (removedJS.trim().length() > 0) {
-		// jsFile = new File(folderPath, elementName + ".remmoved.js");
-		// //$NON-NLS-1$
-		// fileWriter = null;
-		// try {
-		// fileWriter = new FileWriter(jsFile);
-		// fileWriter.write(removedJS);
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// } finally {
-		// if (fileWriter != null) {
-		// try {
-		// fileWriter.close();
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
-		// }
-		// }
-		// }
-		// }
 	}
 
-	public static String[] getClazzAbbrMap() {
-		String[] clazzAll = new String[] {
-				"Clazz.load", "L", //
-				"Clazz.declareAnonymous", "W", //
-				"Clazz.declareType", "T", //
-				"Clazz.declarePackage", "J", //
-				"Clazz.decorateAsClass", "C", //
-				"Clazz.instantialize", "Z", //
-				"Clazz.declareInterface", "I", //
-				"Clazz.isClassDefined", "D", //
-				"Clazz.pu$h", "H", //
-				"Clazz.p0p", "P", //
-				"Clazz.prepareCallback", "B", //
-				"Clazz.innerTypeInstance", "N", //
-				"Clazz.makeConstructor", "K", //
-				"Clazz.overrideConstructor", "k", //
-				"Clazz.superCall", "U", //
-				"Clazz.superConstructor", "R", //
-				"Clazz.defineMethod", "M", //
-				"Clazz.overrideMethod", "V", //
-				"Clazz.defineStatics", "S", //
-				"Clazz.defineEnumConstant", "E", //
-				"Clazz.cloneFinals", "F", //
-				"Clazz.prepareFields", "Y", //
-				"Clazz.newArray", "A", //
-				"Clazz.newIntArray", "AI", //
-				"Clazz.newFloatArray", "AF", //
-				"Clazz.newDoubleArray", "AD", //
-				"Clazz.newByteArray", "AB", //
-				"Clazz.newLongArray", "AL", //
-				"Clazz.newShortArray", "AS", //
-				"Clazz.newCharArray", "AC", //
-				"Clazz.newBooleanArray", "Ab", //
-				//"Clazz.newStringArray", "AX", //
-				"Clazz.floatToInt", "fI", //
-				"Clazz.floatToByte", "fB", //
-				"Clazz.floatToShort", "fS", //
-				"Clazz.floatToLong", "fL", //
-				"Clazz.floatToChar", "fC", //
-				"Clazz.doubleToInt", "dI", //
-				"Clazz.doubleToByte", "dB", //
-				"Clazz.doubleToShort", "dS", //
-				"Clazz.doubleToLong", "dL", //
-				"Clazz.doubleToChar", "dC", //
-				"Clazz.instanceOf", "O", //
-				"Clazz.exceptionOf", "e", //sgurin
-				"Clazz.inheritArgs", "G", //
-				"Clazz.checkPrivateMethod", "X", //
-				"Clazz.makeFunction", "Q", //
-				
-				"Clazz.registerSerializableFields", "s", //
-		};
-		return clazzAll;
-	}
+//	@Deprecated
+//	public static String[] getClazzAbbrMap() {
+//		String[] clazzAll = new String[] {
+//				"Clazz.load", "L", //
+//				"Clazz.declareAnonymous", "W", //
+//				"Clazz.declareType", "T", //
+//				"Clazz.declarePackage", "J", //
+//				"Clazz.decorateAsClass", "C", //
+//				"Clazz.instantialize", "Z", //
+//				"Clazz.declareInterface", "I", //
+//				"Clazz.isClassDefined", "D", //
+//				"Clazz.pu$h", "H", //
+//				"Clazz.p0p", "P", //
+//				"Clazz.prepareCallback", "B", //
+//				"Clazz.innerTypeInstance", "N", //
+//				"Clazz.makeConstructor", "K", //
+//				"Clazz.overrideConstructor", "k", //
+//				"Clazz.superCall", "U", //
+//				"Clazz.superConstructor", "R", //
+//				"Clazz.defineMethod", "M", //
+//				"Clazz.overrideMethod", "V", //
+//				"Clazz.defineStatics", "S", //
+//				"Clazz.defineEnumConstant", "E", //
+//				"Clazz.cloneFinals", "F", //
+//				"Clazz.prepareFields", "Y", //
+//				"Clazz.newArray", "A", //
+//				"Clazz.newIntArray", "AI", //
+//				"Clazz.newFloatArray", "AF", //
+//				"Clazz.newDoubleArray", "AD", //
+//				"Clazz.newByteArray", "AB", //
+//				"Clazz.newLongArray", "AL", //
+//				"Clazz.newShortArray", "AS", //
+//				"Clazz.newCharArray", "AC", //
+//				"Clazz.newBooleanArray", "Ab", //
+//				//"Clazz.newStringArray", "AX", //
+//				"Clazz.instanceOf", "O", //
+//				"Clazz.exceptionOf", "e", //sgurin
+//				"Clazz.inheritArgs", "G", //
+//				"Clazz.checkPrivateMethod", "X", //
+//				"Clazz.makeFunction", "Q", //
+//				
+//				"Clazz.registerSerializableFields", "s", //
+//		};
+//		return clazzAll;
+//	}
 
 }

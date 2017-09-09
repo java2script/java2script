@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
@@ -39,9 +37,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -57,9 +52,6 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
-
-
-//TODO: doubleToInt; not just /=
 
 // BH 9/7/2017 -- primitive casting for *=,/=,+=,-=,&=,|=,^=
 // BH 9/7/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
@@ -160,11 +152,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	 */
 	boolean haveDefaultConstructor;
 
-	/**
-	 * holds all static field definitions for insertion at the end of the class def
-	 */
-	StringBuffer staticFieldDefBuffer = new StringBuffer();
-	
 	private static final String noConstructorNames = "Byte,Short,Integer,Long,Float,Double,Boolean";
 	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,";
 	
@@ -226,28 +213,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).getTypeStringName(type);
 	}
 
-	protected String getFieldName(ITypeBinding binding, String name) {
-		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getFieldName(binding, name);
-	}
-
 	protected String getJ2SName(SimpleName node) {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getJ2SName(node);
 	}
 
 	protected String getJ2SName(IVariableBinding binding) {
 		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getJ2SName(binding);
-	}
-
-	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
-		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).isInheritedFieldName(binding, name);
-	}
-
-	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
-		return ASTFieldVisitor.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
-	}
-
-	protected boolean checkSameName(ITypeBinding binding, String name) {
-		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).checkSameName(binding, name);
 	}
 
 	public String getClassName() {
@@ -322,8 +293,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		String oldClassName = className;
 		typeVisitor.setClassName(shortClassName);
-		StringBuffer oldStaticDefBuffer = staticFieldDefBuffer;
-		staticFieldDefBuffer = new StringBuffer();
+		StaticBuffer oldStaticDefBuffer = staticFieldDefBuffer;
+		staticFieldDefBuffer = new StaticBuffer();
 		List<?> bodyDeclarations = node.bodyDeclarations();
 
 		addInitMethod(bodyDeclarations);
@@ -397,42 +368,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			msg.accept(this);
 		}
 		buffer.append("});\r\n");
-		return false;
-	}
-
-	public boolean visit(CastExpression node) {
-		Expression expression = node.getExpression();
-		ITypeBinding expBinding = expression.resolveTypeBinding();
-		Type typeTO = node.getType();
-		String fromValue = "";
-		String toValue = "";
-		if (expBinding != null && typeTO.isPrimitiveType()) {
-			String nameFROM = expBinding.getName();
-			Code codeTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode();
-			String nameTO = codeTO.toString();
-			if (!nameTO.equals(nameFROM)) {
-				fromValue = "((";
-				toValue = ")|0)";
-				switch (nameTO) {
-				case "char":
-					fromValue = "String.fromCharCode((";
-					break;
-				case "byte":
-				case "short":
-				case "int":
-				case "long":
-					toValue = (nameFROM.equals("char") ? ")).charCodeAt(0)" : toValue) + "." + nameTO + "Value()";
-					break;
-				default:
-					break;
-				}
-				if (expression instanceof ParenthesizedExpression)
-					expression = ((ParenthesizedExpression) expression).getExpression();
-			}
-		}
-		buffer.append(fromValue);
-		expression.accept(this);
-		buffer.append(toValue);
 		return false;
 	}
 
@@ -635,67 +570,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		}
 		if (prefix == null && suffix != null)
 			buffer.append(suffix);
-	}
-
-	/**
-	 * 
-	 * @param exp
-	 * @param clazzName
-	 * @param methodName
-	 *            can be null
-	 * @param parameterTypeName
-	 * @param position
-	 */
-	private void addMethodArgument(Expression exp, String clazzName, String methodName, String parameterTypeName,
-			int position) {
-		if (exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
-			buffer.append("null");
-			return;
-		}
-		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
-		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
-		if (expTypeBinding == null) {
-			// BH: Question: When does typeBinding == null?
-			// A: when there is a compilation error, I think.
-			return;
-		}
-		// only continue if we are converting a character to a non-character type
-		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
-		boolean useCharCodeAt = (
-				!exp.resolveBoxing()
-				&& "char".equals(expTypeName)
-				&& !"char".equals(parameterTypeName)
-				&& !parameterTypeName.startsWith("Object") // BH could be Object or Object[]
-				&& (position != 0 || !"indexOf".equals(methodName) && !"lastIndexOf".equals(methodName)
-						|| !"java.lang.String".equals(Bindings.removeBrackets(clazzName))));
-		if (useCharCodeAt && exp instanceof CharacterLiteral) {
-			// BH: converting character literal such as 'A' to number 65
-			
-			CharacterLiteral cl = (CharacterLiteral) exp;
-			buffer.append(0 + cl.charValue());
-			return;
-		}
-		int idx1 = buffer.length();
-		boxingNode(exp);
-		if (!useCharCodeAt)
-			return;
-		int length = buffer.length();
-		if (exp instanceof MethodInvocation) {
-			MethodInvocation m = (MethodInvocation) exp;
-			if ("charAt".equals(m.getName().toString())) {
-				int idx2 = buffer.indexOf(".charAt ", idx1);
-				if (idx2 >= 0) {
-					StringBuffer buf = new StringBuffer();
-					buf.append(buffer.substring(idx1, idx2));
-					buf.append(".charCodeAt ");
-					buf.append(buffer.substring(idx2 + 8, length));
-					buffer.delete(idx1, length);
-					buffer.append(buf.toString());
-					return;
-				}
-			}
-		}
-		buffer.append(".charCodeAt (0)");
 	}
 
 	public boolean visit(ConstructorInvocation node) {
@@ -1766,8 +1640,8 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		// hold onto static defs
 
-		StringBuffer staticDefBackup = staticFieldDefBuffer;
-		staticFieldDefBuffer = new StringBuffer();
+		StaticBuffer staticDefBackup = staticFieldDefBuffer;
+		staticFieldDefBuffer = new StaticBuffer();
 
 		if (!isInterface) {
 			// add the $init$ method, which includes all fields and initializer
@@ -1802,9 +1676,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					element.accept(this);
 			}
 		} else {
-			// add a default constructor if needed
-			// TODO: problem here with distinguishing construct(int...) from
-			// construct(float...)
 			addDefaultConstructor();
 		}
 
@@ -1850,22 +1721,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 					buffer.append("\",");
 					Type fieldType = field.getType();
 					Expression initializer = vdf.getInitializer();
-					if (initializer == null) {
-						appendDefaultValue(fieldType);
-					} else {
-						String term = null;
-						if (fieldType.isPrimitiveType()
-								&& ((PrimitiveType) fieldType).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-							ITypeBinding tBinding = initializer.resolveTypeBinding();
-							if (tBinding != null && !("char".equals(tBinding.getName()))) {
-								buffer.append("String.fromCharCode (");
-								term = ")";
-							}
-						}
-						initializer.accept(this);
-						if (term != null)
-							buffer.append(term);
-					}
+					appendInitializer(initializer, fieldType);
 					buffer.append("]);\r\n");
 				}
 			}
@@ -1884,7 +1740,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true);
 		if (hasWrapper)
 			addAnonymousFunctionWrapper(false);
-		staticFieldDefBuffer = new StringBuffer();
+		staticFieldDefBuffer = new StaticBuffer();
 		super.endVisit(node);
 	}
 
@@ -1935,21 +1791,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return null;
 	}
 
-	private void appendDefaultValue(Type type) {
-		if (type.isPrimitiveType()) {
-			PrimitiveType pType = (PrimitiveType) type;
-			if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-				buffer.append("false");
-			} else if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-				buffer.append("'\\0'");
-			} else {
-				buffer.append("0");
-			}
-		} else {
-			buffer.append("null");
-		}
-	}
-
 	private boolean checkInterfaceHasMethods(TypeDeclaration node) {
 		for (Iterator<?> iter = node.bodyDeclarations().iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
@@ -1963,123 +1804,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		return false;
 	}
 		
-	@SuppressWarnings("deprecation")
-	private String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
-		StringBuffer fieldsSerializables = new StringBuffer();
-		ITypeBinding binding = node.resolveBinding();
-		if (binding != null && Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") != null)
-			for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-				ASTNode element = (ASTNode) iter.next();
-				if (element instanceof FieldDeclaration) {
-					if (node.isInterface()) {
-						/*
-						 * As members of interface should be treated as final
-						 * and for javascript interface won't get instantiated,
-						 * so the member will be treated specially.
-						 */
-						continue;
-					}
-					FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-
-					List<?> fragments = fieldDeclaration.fragments();
-					int modifiers = fieldDeclaration.getModifiers();
-					if ((Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)
-							&& !Modifier.isTransient(modifiers)) {
-						Type type = fieldDeclaration.getType();
-						int dims = 0;
-						if (type.isArrayType()) {
-							dims = 1;
-							type = ((ArrayType) type).getComponentType();
-						}
-						String mark = null;
-						if (type.isPrimitiveType()) {
-							PrimitiveType pType = (PrimitiveType) type;
-							Code code = pType.getPrimitiveTypeCode();
-							if (code == PrimitiveType.FLOAT) {
-								mark = "F";
-							} else if (code == PrimitiveType.DOUBLE) {
-								mark = "D";
-							} else if (code == PrimitiveType.INT) {
-								mark = "I";
-							} else if (code == PrimitiveType.LONG) {
-								mark = "L";
-							} else if (code == PrimitiveType.SHORT) {
-								mark = "S";
-							} else if (code == PrimitiveType.BYTE) {
-								mark = "B";
-							} else if (code == PrimitiveType.CHAR) {
-								mark = "C";
-							} else if (code == PrimitiveType.BOOLEAN) {
-								mark = "b";
-							}
-						}
-						ITypeBinding resolveBinding = type.resolveBinding();
-						if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
-							mark = "s";
-						} else {
-							ITypeBinding t = resolveBinding;
-							do {
-								String typeName = t.getQualifiedName();
-								if ("java.lang.Object".equals(typeName)) {
-									break;
-								}
-								if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
-									mark = "O";
-									break;
-								}
-								t = t.getSuperclass();
-								if (t == null) {
-									break;
-								}
-							} while (true);
-						}
-						if (mark != null) {
-							for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
-								VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
-								int curDim = dims + var.getExtraDimensions();
-								if (curDim <= 1) {
-									if (fieldsSerializables.length() > 0) {
-										fieldsSerializables.append(", ");
-									}
-									/*
-									 * Fixed bug for the following scenario:
-									 * class NT extends ... { public boolean
-									 * typing; public void typing() { } }
-									 */
-									String fieldName = var.getName().toString();
-									if (checkKeywordViolation(fieldName, false)) {
-										fieldName = "$" + fieldName;
-									}
-									String prefix = null;
-									if (binding != null && checkSameName(binding, fieldName)) {
-										prefix = "$";
-									}
-									if (binding != null && isInheritedFieldName(binding, fieldName)) {
-										fieldName = getFieldName(binding, fieldName);
-									}
-									if (prefix != null) {
-										fieldName = prefix + fieldName;
-									}
-
-									fieldsSerializables.append("\"" + fieldName + "\", \"");
-									if (mark.charAt(0) == 's' && curDim == 1) {
-										fieldsSerializables.append("AX");
-									} else if (curDim == 1) {
-										fieldsSerializables.append("A");
-										fieldsSerializables.append(mark);
-									} else {
-										fieldsSerializables.append(mark);
-									}
-									fieldsSerializables.append("\"");
-								}
-							}
-						}
-					}
-				}
-			}
-		return fieldsSerializables.toString();
-	}
-
 	public boolean visit(TypeLiteral node) {
 		// Class x = Foo.class
 		Type type = node.getType();
@@ -2101,137 +1825,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private void addAnonymousFunctionWrapper(boolean isOpen) {
 		buffer.append(isOpen ? (buffer.lastIndexOf(")") >= buffer.length() - 3 ? ";" : "")
 				+ "\r\n(function(){" : "})()\r\n");
-	}
-
-	/**
-	 * Determine the qualified parameter suffix for method names, including
-	 * constructors. TODO: Something like this must be duplicated in Clazz as
-	 * well in JavaScript
-	 * 
-	 * @param nodeName
-	 * @param binding
-	 * 
-	 * @return
-	 */
-	private String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
-		// if (binding.getTypeParameters().length > 0) {
-		// String key = binding.getKey();
-		// int pt = key.indexOf("T:");
-		// if (pt > key.indexOf("(")) {
-		// String fullName = binding.getName();
-		// // for put<K,V> we just allow this to be a single method.
-		// // TODO: Q: Good assumption? Could register these to check for
-		// // problems?
-		// String name = discardGenericType(fullName);
-		// Object other = htGenerics.get(name);
-		// System.err.println(binding.getKey());
-		// if (other == null) {
-		// htGenerics.put(name, key);
-		// } else if (other instanceof String) {
-		// System.err.println("parameterization problem with " + key + "; dual
-		// generic " + other);
-		// htGenerics.put(name, Boolean.TRUE);
-		// }
-		// }
-		// }
-
-		// The problem is that System.out and System.err are PrintStreams, and
-		// we
-		// do not intend to change those. So in the case that we just wrote
-		// "System....", we use that instead and do not qualify the name
-		// Note: binding can be null if we have errors in the Java and we are compiling
-		if (binding == null || nodeName != null && nodeName.startsWith("System."))
-			return "";
-		String methodName = binding.getName();
-		String className = binding.getDeclaringClass().getQualifiedName();
-		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
-			return "";
-		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
-
-		// BH: Note that Map.put$K$V is translated to actual values
-		// if .getMethodDeclaration() is not used.
-		// Without that, it uses the bound parameters such as
-		// String, Object instead of the declared ones, such as $TK$TV
-
-		StringBuffer sbParams = new StringBuffer();
-		int nParams = paramTypes.length;
-		if (nParams == 0 && methodName.equals("length"))
-			return "$"; // so that String implements CharSequence
-		for (int i = 0; i < nParams; i++)
-			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
-		String s = sbParams.toString();
-		// exception for special case: setting static main(String[] args) to
-		// "main", and "main()" to "main$"
-		if ("main".equals(methodName) && isStatic(binding)) {
-			if (s.length() == 0) {
-				s = "$";
-			} else if (s.equals("$SA")) {
-				s = "";
-			}
-		}
-		return s;
-	}
-
-	static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
-		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
-		String name = binding.getQualifiedName();
-		String arrays = null;
-			
-		int pt = name.indexOf("[");
-		if (pt >= 0) {
-			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
-			name = name.substring(0, pt);
-		}
-		// catching putAll$java_util_Map<? extends K,? extends V>
-		// (java.util.AbstractMap.js)
-		
-		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
-		// NOTE: These are the same as standard Java Spec, with the exception of Short, which is "H" instead of "S"
-		
-		switch (name = Bindings.removeBrackets(name)) {
-		case "boolean":
-			name = "Z";
-			break;
-		case "byte":
-			name = "B";
-			break;
-		case "char":
-			name = "C";
-			break;
-		case "double":
-			name = "D";
-			break;
-		case "float":
-			name = "F";
-			break;
-		case "int":
-			name = "I";
-			break;
-		case "long":
-			name = "J";
-			break;
-		case "short":
-			name = "H"; // differs from Java Spec so we can use S for String
-			break;
-		case "java.lang.Object":
-		case "Object":
-			name = "O";
-			break;
-		case "java.lang.String":
-			name = "S";
-			break;
-		default:
-			if (name.length() == 1 && prefix != null)
-				name = prefix + name; // (T,V) --> $TK$TV
-			name = name.replace("java.lang.", "").replace('.', '_');
-			break;
-		}
-		if (arrays != null) {
-			if (addAAA) 
-				arrays = arrays.replaceAll("\\[\\]", "A");
-			name += arrays;
-		}
-		return name;
 	}
 
 	private void addDefaultConstructor() {

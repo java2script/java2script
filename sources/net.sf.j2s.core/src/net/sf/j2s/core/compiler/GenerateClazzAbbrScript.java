@@ -19,12 +19,13 @@ package net.sf.j2s.core.compiler;
 public class GenerateClazzAbbrScript {
 
 	public static void main(String[] args) {
-		String[] clazzAbbrMap = Java2ScriptCompiler.getClazzAbbrMap();
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < clazzAbbrMap.length / 2; i++) {
-			buf.append("$_" + clazzAbbrMap[i + i + 1] + "=" + clazzAbbrMap[i + i] + ";");
-		}
-		System.out.println(buf.toString());
+		System.out.println("// GenerateClazzAbbrScript: class name appbreviation no longer supported");
+//		String[] clazzAbbrMap = Java2ScriptCompiler.getClazzAbbrMap();
+//		StringBuffer buf = new StringBuffer();
+//		for (int i = 0; i < clazzAbbrMap.length / 2; i++) {
+//			buf.append("$_" + clazzAbbrMap[i + i + 1] + "=" + clazzAbbrMap[i + i] + ";");
+//		}
+//		System.out.println(buf.toString());
 	}
 
 }

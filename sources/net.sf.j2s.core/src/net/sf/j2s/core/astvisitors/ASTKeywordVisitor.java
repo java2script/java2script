@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 // BH 8/15/2017 12:18:46 PM adds support for Java 8 catch (Exception...|Excepion... e)
 /**
@@ -88,6 +90,35 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  *
  */
 public class ASTKeywordVisitor extends ASTEmptyVisitor {
+
+	/**
+	 * holds all static field definitions for insertion at the end of the class def
+	 */
+	StaticBuffer staticFieldDefBuffer = new StaticBuffer();
+	
+	class StaticBuffer {
+		StringBuffer buf;
+		boolean addByte = false;
+		boolean addShort = false;
+		boolean addInt = false;
+		public StaticBuffer() {
+			buf = new StringBuffer();
+		}
+		public StaticBuffer append(String s) {
+			buf.append(s);
+			return this;
+		}
+		public String toString() {
+			String s = "";
+			if (addByte)
+				s += "C$.$B$ = new Int8Array(1);]\r\n";
+			if (addShort)
+				s += "C$.$H$ = new Int16Array(1);]\r\n";
+			if (addInt)
+				s += "C$.$I$ = new Int32Array(1);]\r\n";
+			return s + super.toString();
+		}
+	}
 
 	protected int blockLevel = 0;
 
@@ -132,6 +163,22 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	protected boolean isSimpleQualified(QualifiedName node) {
 		return ((ASTFieldVisitor) getAdaptable(ASTFieldVisitor.class)).isSimpleQualified(node);
+	}
+
+	protected String getFieldName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).getFieldName(binding, name);
+	}
+
+	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).isInheritedFieldName(binding, name);
+	}
+
+	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
+		return ASTFieldVisitor.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
+	}
+
+	protected boolean checkSameName(ITypeBinding binding, String name) {
+		return ((ASTJ2SMapVisitor) getAdaptable(ASTJ2SMapVisitor.class)).checkSameName(binding, name);
 	}
 
 	// protected boolean isFieldNeedPreparation(FieldDeclaration node) {
@@ -481,6 +528,16 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return false;
 	}
 
+	private void addFieldName(Expression left, IVariableBinding varBinding) {
+		if (varBinding != null) {
+			addQualifiedName(varBinding);
+			buffer.append('.');
+			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
+					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+		}
+		left.accept(this);
+	}
+
 	private boolean haveDirectStaticAccess(Expression exp) {
 		return exp instanceof SimpleName
 				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
@@ -511,16 +568,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return ((FieldAccess) left).resolveFieldBinding();
 		}
 		return null;
-	}
-
-	private void addFieldName(Expression left, IVariableBinding varBinding) {
-		if (varBinding != null) {
-			addQualifiedName(varBinding);
-			buffer.append('.');
-			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
-					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
-		}
-		left.accept(this);
 	}
 
 	public void endVisit(Block node) {
@@ -586,6 +633,42 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			label.accept(this);
 		}
 		buffer.append(";\r\n");
+		return false;
+	}
+
+	public boolean visit(CastExpression node) {
+		Expression expression = node.getExpression();
+		ITypeBinding expBinding = expression.resolveTypeBinding();
+		Type typeTO = node.getType();
+		String fromValue = "";
+		String toValue = "";
+		if (expBinding != null && typeTO.isPrimitiveType()) {
+			String nameFROM = expBinding.getName();
+			Code codeTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode();
+			String nameTO = codeTO.toString();
+			if (!nameTO.equals(nameFROM)) {
+				fromValue = "((";
+				toValue = ")|0)";
+				switch (nameTO) {
+				case "char":
+					fromValue = "String.fromCharCode((";
+					break;
+				case "byte":
+				case "short":
+				case "int":
+				case "long":
+					toValue = (nameFROM.equals("char") ? ")).charCodeAt(0)" : toValue) + "." + nameTO + "Value()";
+					break;
+				default:
+					break;
+				}
+				if (expression instanceof ParenthesizedExpression)
+					expression = ((ParenthesizedExpression) expression).getExpression();
+			}
+		}
+		buffer.append(fromValue);
+		expression.accept(this);
+		buffer.append(toValue);
 		return false;
 	}
 
@@ -1708,5 +1791,232 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return (type != null  && "int long byte short".indexOf(type) >= 0);
 	}
 
+	/**
+	 * 
+	 * @param exp
+	 * @param clazzName
+	 * @param methodName
+	 *            can be null
+	 * @param parameterTypeName
+	 * @param position
+	 */
+	protected void addMethodArgument(Expression exp, String clazzName, String methodName, String parameterTypeName,
+			int position) {
+		if (exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
+			buffer.append("null");
+			return;
+		}
+		ITypeBinding expTypeBinding = exp.resolveTypeBinding();
+		String expTypeName = (expTypeBinding == null ? null : expTypeBinding.getName());
+		if (expTypeBinding == null) {
+			// BH: Question: When does typeBinding == null?
+			// A: when there is a compilation error, I think.
+			return;
+		}
+		// only continue if we are converting a character to a non-character type
+		// Keep String#indexOf(int) and String#lastIndexOf(int)'s first char argument
+		boolean useCharCodeAt = (
+				!exp.resolveBoxing()
+				&& "char".equals(expTypeName)
+				&& !"char".equals(parameterTypeName)
+				&& !parameterTypeName.startsWith("Object") // BH could be Object or Object[]
+				&& (position != 0 || !"indexOf".equals(methodName) && !"lastIndexOf".equals(methodName)
+						|| !"java.lang.String".equals(Bindings.removeBrackets(clazzName))));
+		if (useCharCodeAt && exp instanceof CharacterLiteral) {
+			// BH: converting character literal such as 'A' to number 65
+			
+			CharacterLiteral cl = (CharacterLiteral) exp;
+			buffer.append(0 + cl.charValue());
+			return;
+		}
+		int idx1 = buffer.length();
+		boxingNode(exp);
+		if (!useCharCodeAt)
+			return;
+		int length = buffer.length();
+		if (exp instanceof MethodInvocation) {
+			MethodInvocation m = (MethodInvocation) exp;
+			if ("charAt".equals(m.getName().toString())) {
+				int idx2 = buffer.indexOf(".charAt ", idx1);
+				if (idx2 >= 0) {
+					StringBuffer buf = new StringBuffer();
+					buf.append(buffer.substring(idx1, idx2));
+					buf.append(".charCodeAt ");
+					buf.append(buffer.substring(idx2 + 8, length));
+					buffer.delete(idx1, length);
+					buffer.append(buf.toString());
+					return;
+				}
+			}
+		}
+		buffer.append(".charCodeAt (0)");
+	}
 
+	protected void appendDefaultValue(Type type) {
+		if (type.isPrimitiveType()) {
+			PrimitiveType pType = (PrimitiveType) type;
+			if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
+				buffer.append("false");
+			} else if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+				buffer.append("'\\0'");
+			} else {
+				buffer.append("0");
+			}
+		} else {
+			buffer.append("null");
+		}
+	}
+
+	protected void appendInitializer(Expression initializer, Type fieldType) {
+		if (initializer == null) {
+			appendDefaultValue(fieldType);
+		} else {
+			String term = null;
+			if (fieldType.isPrimitiveType()
+					&& ((PrimitiveType) fieldType).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
+				ITypeBinding tBinding = initializer.resolveTypeBinding();
+				if (tBinding != null && !("char".equals(tBinding.getName()))) {
+					buffer.append("String.fromCharCode (");
+					term = ")";
+				}
+			}
+			initializer.accept(this);
+			if (term != null)
+				buffer.append(term);
+		}
+	}
+
+	/**
+	 * Determine the qualified parameter suffix for method names, including
+	 * constructors. TODO: Something like this must be duplicated in Clazz as
+	 * well in JavaScript
+	 * 
+	 * @param nodeName
+	 * @param binding
+	 * 
+	 * @return
+	 */
+	protected String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
+		// if (binding.getTypeParameters().length > 0) {
+		// String key = binding.getKey();
+		// int pt = key.indexOf("T:");
+		// if (pt > key.indexOf("(")) {
+		// String fullName = binding.getName();
+		// // for put<K,V> we just allow this to be a single method.
+		// // TODO: Q: Good assumption? Could register these to check for
+		// // problems?
+		// String name = discardGenericType(fullName);
+		// Object other = htGenerics.get(name);
+		// System.err.println(binding.getKey());
+		// if (other == null) {
+		// htGenerics.put(name, key);
+		// } else if (other instanceof String) {
+		// System.err.println("parameterization problem with " + key + "; dual
+		// generic " + other);
+		// htGenerics.put(name, Boolean.TRUE);
+		// }
+		// }
+		// }
+
+		// The problem is that System.out and System.err are PrintStreams, and
+		// we
+		// do not intend to change those. So in the case that we just wrote
+		// "System....", we use that instead and do not qualify the name
+		// Note: binding can be null if we have errors in the Java and we are compiling
+		if (binding == null || nodeName != null && nodeName.startsWith("System."))
+			return "";
+		String methodName = binding.getName();
+		String className = binding.getDeclaringClass().getQualifiedName();
+		if (!isPackageQualified(className) || !isMethodQualified(className, methodName))
+			return "";
+		ITypeBinding[] paramTypes = binding.getMethodDeclaration().getParameterTypes();
+
+		// BH: Note that Map.put$K$V is translated to actual values
+		// if .getMethodDeclaration() is not used.
+		// Without that, it uses the bound parameters such as
+		// String, Object instead of the declared ones, such as $TK$TV
+
+		StringBuffer sbParams = new StringBuffer();
+		int nParams = paramTypes.length;
+		if (nParams == 0 && methodName.equals("length"))
+			return "$"; // so that String implements CharSequence
+		for (int i = 0; i < nParams; i++)
+			sbParams.append("$").append(j2sGetParamCode(paramTypes[i], true));
+		String s = sbParams.toString();
+		// exception for special case: setting static main(String[] args) to
+		// "main", and "main()" to "main$"
+		if ("main".equals(methodName) && isStatic(binding)) {
+			if (s.length() == 0) {
+				s = "$";
+			} else if (s.equals("$SA")) {
+				s = "";
+			}
+		}
+		return s;
+	}
+
+	protected static String j2sGetParamCode(ITypeBinding binding, boolean addAAA) {
+		String prefix = (binding.getKey().indexOf(":T") >= 0 ? "T" : null);
+		String name = binding.getQualifiedName();
+		String arrays = null;
+			
+		int pt = name.indexOf("[");
+		if (pt >= 0) {
+			arrays = name.substring(pt + (name.indexOf("[L") >= 0 ? 1 : 0));
+			name = name.substring(0, pt);
+		}
+		// catching putAll$java_util_Map<? extends K,? extends V>
+		// (java.util.AbstractMap.js)
+		
+		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
+		// NOTE: These are the same as standard Java Spec, with the exception of Short, which is "H" instead of "S"
+		
+		switch (name = Bindings.removeBrackets(name)) {
+		case "boolean":
+			name = "Z";
+			break;
+		case "byte":
+			name = "B";
+			break;
+		case "char":
+			name = "C";
+			break;
+		case "double":
+			name = "D";
+			break;
+		case "float":
+			name = "F";
+			break;
+		case "int":
+			name = "I";
+			break;
+		case "long":
+			name = "J";
+			break;
+		case "short":
+			name = "H"; // differs from Java Spec so we can use S for String
+			break;
+		case "java.lang.Object":
+		case "Object":
+			name = "O";
+			break;
+		case "java.lang.String":
+			name = "S";
+			break;
+		default:
+			if (name.length() == 1 && prefix != null)
+				name = prefix + name; // (T,V) --> $TK$TV
+			name = name.replace("java.lang.", "").replace('.', '_');
+			break;
+		}
+		if (arrays != null) {
+			if (addAAA) 
+				arrays = arrays.replaceAll("\\[\\]", "A");
+			name += arrays;
+		}
+		return name;
+	}
+
+
+	
 }
