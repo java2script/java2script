@@ -1,7 +1,6 @@
 package test;
 
 import java.lang.reflect.Array;
-import java.net.URL;
 
 class Test_Array {
 		

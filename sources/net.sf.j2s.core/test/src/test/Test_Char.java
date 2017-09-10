@@ -3,6 +3,7 @@ package test;
 class Test_Char {
 
 	public static void main(String[] args) {
+		Character k = new Character('K');
 		System.out.println("'K'=" + (char) 75 + " Character('K')=" + new Character('K'));
 		test((char) 75);
 		String s = new String("\ud800\udf84");
@@ -15,6 +16,9 @@ class Test_Char {
 		assert(getIntFromChar1('c') == 99);
 		assert(getIntFromChar2('c') == 99);
 		
+		assert(new Double(3) > new Double(1));
+		assert(new Double(3) <= new Float(5));
+
 		assert(getCharacterFromChar1('c') == 'c');
 		assert(getCharacterFromChar2('c') == 'c');
 
@@ -23,11 +27,20 @@ class Test_Char {
 		assert(getIntFromInteger(99) == 'c');
 		assert(getIntegerFromInt(Integer.valueOf(99)) == 'c');
 		
-		assert(new Double(3) > new Double(1));
-		assert(new Double(3) <= new Float(5));
 
 		char cc = 'c';
+		
+		assert(getCharacterFromChar1('c') == cc);
+		assert(getCharacterFromChar2('c') == cc);
+
+		assert(getCharFromCharacter1('c') == new Character(cc));
+		assert(getCharFromCharacter2('c') == cc);
+		assert(getIntFromInteger(99) == cc);
+		assert(getIntegerFromInt(Integer.valueOf(99)) == cc);
+		
+
 		cc = new Character('d');
+		
 		cc += new Character('\1');
 		cc += 3 + 6 + new Character('\1');
         assert(cc == 'o');
@@ -41,7 +54,13 @@ class Test_Char {
 		assert(di == 1);
 		di = 100;
 		assert(di / 7 / 3 == 4);
-
+		int[] ia = new int[300];
+		ia[new Character('c')] = 3;
+		switch (cc) {
+		case 'c':
+		case 'd':
+		case 33:
+		}
 		s = "testing" + 3;
 		s = "testing" + 3 + cc + 5;
 		s = "testing" + 3 + cc + 5f;
@@ -63,7 +82,8 @@ class Test_Char {
 		s += new Double(3);
 		s += new Double(3) + cc++ + 5;
 		s += new Double(3) + ++cc + 5;
-		System.out.println(s + cc);
+		System.out.println(s = s + cc);
+		di = cc++ + 1;
 		assert(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0121.0q"));
 		d = 333.5;
         assert((int)d == 333);
@@ -73,6 +93,8 @@ class Test_Char {
         assert((byte) b == -1);
         b = 99;
         assert((char) b == 'c');
+        
+        System.out.println("Test_Char OK");
 	}
 
 	private static int getIntFromInteger(Integer i) {

@@ -179,7 +179,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	 * @param node
 	 * @return
 	 */
-	protected String checkConstantValue(Expression node) {
+	protected String getConstantValue(Expression node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character

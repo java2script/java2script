@@ -93,7 +93,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	}
 	
 	public boolean visit(SimpleName node) {
-		String constValue = checkConstantValue(node);
+		String constValue = getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
 			return false;
@@ -121,7 +121,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	@SuppressWarnings("null")
 	public boolean visit(QualifiedName node) {
 		if (isSimpleQualified(node)) {
-			String constValue = checkConstantValue(node);
+			String constValue = getConstantValue(node);
 			if (constValue != null) {
 				buffer.append(constValue);
 				return false;

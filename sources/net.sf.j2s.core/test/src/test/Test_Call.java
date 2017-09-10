@@ -29,6 +29,7 @@ public class Test_Call extends Test_call0 {
 		Inner2 t2;
 
 
+		@SuppressWarnings("synthetic-access")
 		Inner1() {
 			t2 = new Inner2();
 			setY(1);

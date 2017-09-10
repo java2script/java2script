@@ -778,6 +778,7 @@ class Test_2Controls extends JPanel implements ItemListener {
 			}
 
 			private void enableButtons(boolean isEnable) {
+				@SuppressWarnings("synthetic-access")
 				Enumeration<AbstractButton> x = bg.getElements();
 				while (x.hasMoreElements())
 					x.nextElement().setEnabled(isEnable);

@@ -1261,13 +1261,6 @@ Clazz.instanceOf = function (obj, clazz) {
 /* public */
 Clazz._initializingException = false;
 
-/**
- * BH: used in Throwable
- *  
- */  
-/* public */
-Clazz._callingStackTraces = [];
-
 /** 
  * MethodException will be used as a signal to notify that the method is
  * not found in the current clazz hierarchy.
@@ -2842,7 +2835,7 @@ updateNode = function(node, ulev, chain, _updateNode) {
     for (var mustLength = node.musts.length, i = mustLength; --i >= 0;) {
       var n = node.musts[i];
       n.requiredBy = node;
-      System.out.println(n.name + " required by " + node.name)
+      //System.out.println(n.name + " required by " + node.name)
       if (n.status < Node.STATUS_DECLARED && isClassDefined (n.name)) {
         var nns = []; // a stack for onLoaded events
         n.status = Node.STATUS_LOAD_COMPLETE;
@@ -4065,23 +4058,24 @@ Number.getName=Clazz._inF.getName;
 Number.prototype.compareTo = function(x) { var a = this.valueOf(), b = x.valueOf(); return (a < b ? -1 : a == b ? 0 : 1) };
 Number.compare = function(a,b) { return (a < b ? -1 : a == b ? 0 : 1) };
 
+var $b$ = new Int8Array(1);
+var $s$ = new Int16Array(1);
+var $i$ = new Int32Array(1);
+
 m$(Number,"shortValue",
 function(){
-var x = (this|0)&0xffff;
-return (x >= 0x8000 ? x - 0x10000 : x);
+return ($s$[0] = this, $s$[0]);
 });
 
 m$(Number,"byteValue",
 function(){
-var x = (this|0)&0xff;
-return (x >= 0x80 ? x - 0x100 : x);
+return ($b$[0] = this, $b$[0]);
 });
 
 
 m$(Number,"intValue",
 function(){
-var x = (this|0)&0xffffffff;
-return (x >= 0x80000000 ? x - 0x100000000 : x);
+return ($i$[0] = this, $i$[0]);
 });
 
 m$(Number,"longValue",
@@ -4095,7 +4089,7 @@ return this.valueOf();
 });
 m$(Number,"doubleValue",
 function(){
-return parseFloat(this.valueOf());
+return this.valueOf();
 });
 
 m$(Number,"hashCode",
@@ -5331,6 +5325,7 @@ String.copyValueOf=sp.copyValueOf=function(){
 };
 
 sp.codePointAt || (sp.codePointAt = sp.charCodeAt); // Firefox only
+sp.$c = function(){return this.charCodeAt(0)};
 sp.codePointAt$I = sp.codePointAt;
 // in order to implement CharSequence, we need .length(), but String only has .length
 // so in ALL classes the transpiler changes x.length() to x.length$()
@@ -5490,6 +5485,9 @@ m$(c$,"charCodeAt",
 function(i){
 return(this.value).charCodeAt(i);
 });
+
+c$.prototype.$c = function(){return this.value.charCodeAt(0)};
+
 m$(c$,"compareTo",
 function(c){
 return(this.value).charCodeAt(0)-(c.value).charCodeAt(0);
@@ -5679,39 +5677,29 @@ Clazz.newInstance$ (this, arguments);
 
 m$(C$, 'construct', function () {
 this.fillInStackTrace ();
-this.detailMessage = null;
+this.detailMessage = this.stack;
 this.cause = this;
-this.stackTrace = null;
 }, 1);
 
 m$(C$, 'construct$S', function (message) {
 this.fillInStackTrace ();
 this.cause = this;
-this.stackTrace = null;
 this.detailMessage = message;
 }, 1);
 
 m$(C$, 'construct$S$Throwable', function (message, cause) {
 this.fillInStackTrace ();
-this.stackTrace = null;
 this.detailMessage = message;
 this.cause = cause;
 }, 1);
 
 m$(C$, 'construct$Throwable', function (cause) {
 this.fillInStackTrace ();
-this.stackTrace = null;
-this.detailMessage = (cause == null ? null : cause.toString ());
+this.detailMessage = (cause == null ? this.stack : cause.toString ());
 this.cause = cause;
 }, 1);
 
-m$(C$, 'getMessage', function () {
-{
-if (typeof this.message != "undefined") {
-return this.message;
-}
-}return this.detailMessage;
-});
+m$(C$, 'getMessage', function () {return this.message || this.detailMessage});
 
 m$(C$, 'getLocalizedMessage', function () {
 return this.getMessage ();
@@ -5734,17 +5722,22 @@ var message = this.getLocalizedMessage ();
 return (message != null) ? (s + ": " + message) : s;
 });
 
+m$(C$, 'getStackTrace', function () {
+return this.stackTrace;
+});
+
 m$(C$, 'printStackTrace', function () {
 System.err.println$O (this);
 for (var i = 0; i < this.stackTrace.length; i++) {
 var t = this.stackTrace[i];
 var x = t.methodName.indexOf ("(");
-var n = t.methodName.substring (0, x).replace (/\s+/g, "");
-if (n != "construct" || t.nativeClazz == null
-|| Clazz.getInheritedLevel (t.nativeClazz, Throwable) < 0) {
+//var n = (x < 0 ? t.methodName : t.methodName.substring (0, x)).replace (/\s+/g, "");
+if (t.nativeClazz == null || Clazz.getInheritedLevel (t.nativeClazz, Throwable) < 0) {
 System.err.println (t);
 }
 }
+// from a JavaScript error 
+this.stack && System.err.println(this.stack);
 });
 
 Clazz.newMethod$(C$, 'printStackTrace$java_io_PrintStream', function (s) {
@@ -5756,54 +5749,40 @@ this.printStackTrace ();
 });
 
 Clazz.newMethod$(C$, 'fillInStackTrace', function () {
-this.stackTrace = new Array();
+this.stackTrace = Clazz.newArray$(StackTraceElement);
 var caller = arguments.callee.caller;
 var superCaller = null;
-var callerList = new Array();
-var index = Clazz._callingStackTraces.length - 1;
-var noLooping = true;
-while (index > -1 || caller != null) {
-var clazzName = null;
-var nativeClazz = null;
-if (!noLooping || caller == Clazz.tryToSearchAndExecute || caller == Clazz.superCall || caller == null) {
-if (index < 0) {
-break;
-}
-noLooping = true;
-superCaller = Clazz.callingStackTraces[index].caller;
-nativeClazz = Clazz.callingStackTraces[index].owner;
-index--;
-} else {
-superCaller = caller;
-if (superCaller.claxxOwner != null) {
-nativeClazz = superCaller.claxxOwner;
-} else if (superCaller.exClazz != null) {
-nativeClazz = superCaller.exClazz;
-}
-}
-var st =Clazz.$new(StackTraceElement.construct, [
-((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
-nativeClazz.__CLASS_NAME__ : "anonymous"),
-((superCaller.exName == null) ? "anonymous" : superCaller.exName),
-null, -1]);
-st.nativeClazz = nativeClazz;
-this.stackTrace[this.stackTrace.length] = st;
-for (var i = 0; i < callerList.length; i++) {
-if (callerList[i] == superCaller) {
-// ... stack information lost as recursive invocation existed ...
-var st =Clazz.$new(StackTraceElement.construct, ["lost", "missing", null, -3]);
-st.nativeClazz = null;
-this.stackTrace[this.stackTrace.length] = st;
-noLooping = false;
-//break;
-}
-}
-if (superCaller != null) {
-callerList[callerList.length] = superCaller;
-}
-//caller = superCaller.arguments.callee.caller;
-// Udo
-caller = (superCaller && superCaller.arguments && superCaller.arguments.callee) ? superCaller.arguments.callee.caller : null;
+var callerList = [];
+var index = 0;
+while (index < 20 && caller != null) {
+  index++;
+  var clazzName = null;
+  var nativeClazz = null;
+  superCaller = caller;
+  if (superCaller.exClazz != null) {
+    nativeClazz = superCaller.exClazz;
+  }
+  var st =Clazz.$new(StackTraceElement.construct, [
+    ((nativeClazz != null && nativeClazz.__CLASS_NAME__.length != 0) ?
+    nativeClazz.__CLASS_NAME__ : "anonymous"),
+    ((superCaller.exName == null) ? "anonymous" : superCaller.exName),
+    null, -1]);    
+  st.nativeClazz = nativeClazz;
+  this.stackTrace.push(st);
+  for (var i = 0; i < callerList.length; i++) {
+    if (callerList[i] == superCaller) {
+      // ... stack information lost as recursive invocation existed ...
+      var st =Clazz.$new(StackTraceElement.construct, ["lost", "missing", null, -3]);
+      st.nativeClazz = null;
+      this.stackTrace.push(st);
+      index = 100;
+      break;
+    }
+  }
+  if (superCaller != null) {
+    callerList.push(superCaller);
+  }
+  caller = (superCaller && superCaller.arguments && superCaller.arguments.callee) ? superCaller.arguments.callee.caller : null;
 }
 Clazz.initializingException = false;
 return this;
@@ -5882,24 +5861,24 @@ return this.lineNumber==-2;
 });
 m$(c$,"toString",
 function(){
-var buf=new StringBuilder(80);
-buf.append(this.getClassName());
-buf.append('.');
-buf.append(this.getMethodName());
+var buf=Clazz.$new(StringBuilder.construct$I, [80]);
+buf.append$S(this.getClassName());
+buf.append$S('.');
+buf.append$S(this.getMethodName());
 if(this.isNativeMethod()){
-buf.append("(Native Method)");
+buf.append$S("(Native Method)");
 }else{
 var fName=this.getFileName();
 if(fName==null){
-buf.append("(Unknown Source)");
+buf.append$S("(Unknown Source)");
 }else{
 var lineNum=this.getLineNumber();
-buf.append('(');
-buf.append(fName);
+buf.append$S('(');
+buf.append$S(fName);
 if(lineNum>=0){
-buf.append(':');
-buf.append(lineNum);
-}buf.append(')');
+buf.append$S(':');
+buf.append$I(lineNum);
+}buf.append$(')');
 }}return buf.toString();
 });
 
@@ -5910,12 +5889,17 @@ TypeError.prototype.getMessage || (TypeError.prototype.getMessage = function(){ 
 Clazz.Error = Error;
 
 var declareType = function(prefix, name, clazzSuper, interfacez) {
-  return Clazz.decorateAsClass(prefix, name, function(){}, clazzSuper, interfacez);
+  return Clazz.decorateAsClass(prefix, name, null, clazzSuper, interfacez);
 };
 
 // at least allow Error() by itself to work as before
 Clazz._Error || (Clazz._Error = Error);
+(function(){
+ for (var i in Throwable.prototype)
+   Clazz._Error.prototype[i] = Throwable.prototype[i];
+})();
 
+inheritClass(Clazz._Error, Throwable);
 Clazz.decorateAsClass (java.lang, "Error", function (){return Clazz._Error();}, Throwable);
 
 declareType(java.lang,"Exception",Throwable);

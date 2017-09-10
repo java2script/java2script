@@ -512,7 +512,6 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append(")");
 	}
 
-	@SuppressWarnings("null")
 	protected void addMethodParameterList(List<?> arguments, IMethodBinding methodDeclaration, boolean isConstructor,
 			String prefix, String suffix) {
 		if (methodDeclaration == null)
@@ -533,40 +532,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			}
 		} else {
 			ITypeBinding[] parameterTypes = methodDeclaration.getParameterTypes();
-			ITypeBinding declaringClass = methodDeclaration.getDeclaringClass();
-			String clazzName = (declaringClass == null ? null : declaringClass.getQualifiedName());
-			String methodName = methodDeclaration.getName();
-			String post = ", ";
 			int nparam = parameterTypes.length;
 			if (prefix != null && (nparam > 0 || methodIsVarArgs)) {
 				buffer.append(prefix);
 				prefix = null;
 			}
-			for (int i = 0; i < nparam; i++) {
-				ITypeBinding paramType = parameterTypes[i];
-				String parameterTypeName = paramType.getName();
-				Expression arg = (i < argCount ? (Expression) arguments.get(i) : null);
-				if (i == nparam - 1) {
-					// BH: can't just check for an array; it has to be an array with the right number of dimensions
-					if (nparam != argCount || methodIsVarArgs && paramType.isArray()
-							&& arg.resolveTypeBinding().getDimensions() != paramType.getDimensions() 
-							&& !(arg instanceof NullLiteral)) {
-						buffer.append("[");
-						for (int j = i; j < argCount; j++) {
-							addMethodArgument((Expression) arguments.get(j), clazzName, methodName, parameterTypeName,
-									i);
-							if (j != argCount - 1) {
-								buffer.append(", ");
-							}
-						}
-						buffer.append("]");
-						break;
-					}
-					post = "";
-				}
-				addMethodArgument(arg, clazzName, methodName, parameterTypeName, i);
-				buffer.append(post);
-			}
+			addMethodArguments(parameterTypes, methodIsVarArgs, arguments);
 		}
 		if (prefix == null && suffix != null)
 			buffer.append(suffix);
@@ -1056,7 +1027,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(SimpleName node) {
-		String constValue = checkConstantValue(node);
+		String constValue = getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
 			return false;

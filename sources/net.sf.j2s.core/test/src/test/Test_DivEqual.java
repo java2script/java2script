@@ -14,7 +14,7 @@ class Test_DivEqual {
 	  assert(x == 10);
 	  x = 3;
 	  x += 3.5 - x;
-	  assert(x == 6);
+	  assert(x == 3);
 	  x = 3;
 	  x -= 3.5 + x - 3.5;
 	  assert(x == 0);
