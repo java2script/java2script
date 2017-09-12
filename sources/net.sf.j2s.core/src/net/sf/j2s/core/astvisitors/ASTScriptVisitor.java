@@ -2,7 +2,8 @@
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * 
+://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
  *     Zhou Renjian - initial API and implementation
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 // TODO: static calls to static methods do not trigger "musts" dependency
 
+// BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1]. (See ASTKeywordVisitor)
 // BH 9/7/2017 -- primitive casting for *=,/=,+=,-=,&=,|=,^=
 // BH 9/7/2017 -- primitive numeric casting -- (byte) was ignored so that (byte)  0xFF remained 0xFF.
 // BH 9/7/2017 -- fixed multiple issues with char and Character

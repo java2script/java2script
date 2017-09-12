@@ -76,27 +76,90 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.internal.compiler.ast.CaseStatement;
 
-// BH 8/15/2017 12:18:46 PM adds support for Java 8 catch (Exception...|Excepion... e)
+//BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
+// 
+
+// TODO
+
+// fix String.fromCharCode('c'.$c())
+
 /**
- * This class will traverse most of the common keyword and common expression.
- * 
- * This class will not deal with binding.
+ * This class will traverse most of the common keyword and common expression,
+ * processing all interconversion among primitive types byte char short int, and long
+ * as well as all boxing and unboxing of Character/char, Integer/int, etc.
  * 
  * @author zhou renjian
+ * @author Bob Hanson
  *
  */
 public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	
+	private boolean isArray = false;
+	
 	private final static String CHARCODEAT0 = ".$c()";
 	/**
 	 * holds all static field definitions for insertion at the end of the class def
 	 * and allows setting of local typed integer arrays for fast processing of bytes  
+	 * 
 	 */
 	protected StaticBuffer staticFieldDefBuffer = new StaticBuffer();
 	
+	/**
+	 * StaticBuffer holds definitions that need to come after all methods are defined, with blocks defined just
+	 * once for any given class. 
+	 * 
+	 * The buffer also provides a very efficient way to do byte, short, and int operation processing by using
+	 * the trick that if we have defined  
+	 * 
+	 * var $b$ = new Int8Array(1)
+	 * 
+	 * then we can use that to "filter" a (necessarily) 32-bit integer JavaScript variable to reproduce the effect of 
+	 * being a byte or short or int. This is done as follows:
+	 * 
+	 * Java: 
+	 * 
+	 *   byte b = (byte) 300;
+	 *   
+	 * JavaScript:
+	 * 
+	 *   var b = ($b$[0] = 300, $b$[0]);
+	 *   
+	 * This works because Int8Arrays really are bytes, and they can only hold bytes. So 
+	 * 
+	 *   $b$[0] = 300
+	 * 
+	 * sets $b$[0] to be 44, and ($b$[0] = 300, $b$[0]) then passes that value on to the 
+	 * receiving variable b (which itself is a 32-bit integer, actually).
+	 * 
+	 * It was a surprise to me that the "(..., $b$[0])" business was necessary. 
+	 * However, it turns out that
+	 * 
+	 *   b = $b$[0] = 300;
+	 *   
+	 * is really short for the two (undesired) independent processes: 
+	 * 
+	 *   b = 300;
+	 *   $b$[0] = 300;
+	 *
+	 * not the (desired) sequential pair
+	 * 
+	 *   $b$[0] = 300;
+	 *   b = $b$[0];
+	 *   
+	 * But
+	 *  
+	 *   var b = ($b$[0] = 300, $b$[0]);
+	 * 	
+	 * is precisely this second meaning.
+	 * 
+	 * 
+	 * We turn this action off using the field isArray so that these don't get nested.
+	 * 
+	 * @author Bob Hanson
+	 *
+	 */
 	class StaticBuffer {
 		private StringBuffer buf;
 		private String added = "";
@@ -281,6 +344,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		String leftName = (leftTypeBinding == null ? null : leftTypeBinding.getName());
 		if (leftName == null || rightName == null)
 			return false;
+		boolean wasArray = isArray;
+		isArray = (left instanceof ArrayAccess);
 		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
 		String op = node.getOperator().toString();
 		String opType = (op.length() == 1 ? null : op.substring(0, op.length() - 1));
@@ -301,11 +366,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 		if (opType == null) {
 			left.accept(this);
-			buffer.append(" = ");
+			buffer.append(" = ");		
+//			buffer.append(">>=>>" + leftName + "-" + rightName);
 			addExpressionAsTargetType(right, leftTypeBinding, "=", null);
 			if (needParenthesis) {
 				buffer.append(")");
 			}
+			isArray = wasArray;
 			return false;
 		}
 
@@ -334,6 +401,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				right.accept(this);
 			}
 			buffer.append(")");
+			isArray = wasArray;
 			return false;
 
 		}
@@ -345,9 +413,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				// byte|short|int|long += ...
 				buffer.append(" = ");
 				addNumericTypedExpression(left, varBinding, leftName, opType, right, rightName, null);
-				// if (!leftName.equals("int") || !rightName.equals("int") ||
-				// op.equals("/="))
-				// buffer.append(".").append(leftName).append("Value()");
+				isArray = wasArray;
 				return false;
 			}
 			// not char x ....
@@ -386,6 +452,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (needParenthesis) {
 				buffer.append(")");
 			}
+			isArray = wasArray;
 			return false;
 		}
 
@@ -437,9 +504,19 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (needCharCode)
 			buffer.append(CHARCODEAT0);
 		buffer.append(')');
+		isArray = wasArray;
 		return false;
 	}
 
+	/**
+	 * Add the ".c$()" alias for ".charCodeAt(0)" to 
+	 * char, Character, and String that need to be expressed as integer values. 
+	 * 
+	 * As a shortcut, we convert .charAt() to .c$() directly if that is what we have.
+	 *  
+	 * @param right
+	 * @param pt
+	 */
 	private void addCharCodeAt(Expression right, int pt) {
 		String charCodeAt0 = CHARCODEAT0;
 		if (right instanceof MethodInvocation) {
@@ -454,54 +531,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		buffer.append(charCodeAt0);
 	}
-
-	private void addFieldName(Expression left, IVariableBinding varBinding) {
-		if (varBinding != null) {
-			addQualifiedName(varBinding);
-			buffer.append('.');
-			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
-					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
-		}
-		boxingNode(left, false);
-	}
-
-	private boolean haveDirectStaticAccess(Expression exp) {
-		return exp instanceof SimpleName
-				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
-				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
-
-	}
-
-	/**
-	 * add a reference to the static field prior to defining it.
-	 * 
-	 * @param left
-	 */
-	private void addLeftSidePrefixName(Expression left) {
-		if (left instanceof QualifiedName) {
-			if ((left = ((QualifiedName) left).getQualifier()) instanceof SimpleName)
-				return;
-		} else if (left instanceof FieldAccess) {
-			if ((left = ((FieldAccess) left).getExpression()) instanceof ThisExpression) 
-				return;
-		} else {
-			return;
-		}
-		left.accept(this);
-		buffer.append(", ");
-	}
-
-	private IVariableBinding getLeftVariableBinding(Expression left, IBinding leftTypeBinding) {
-		if (left instanceof Name) {
-			if (leftTypeBinding instanceof IVariableBinding) {
-				return (IVariableBinding) leftTypeBinding;
-			}
-		} else if (left instanceof FieldAccess) {
-			return ((FieldAccess) left).resolveFieldBinding();
-		}
-		return null;
-	}
-
 	public void endVisit(Block node) {
 		buffer.append("}");
 		List<ASTFinalVariable> finalVars = ((ASTVariableVisitor) getAdaptable(ASTVariableVisitor.class)).finalVars;
@@ -574,29 +603,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Type typeTO = node.getType();
 		String fromValue = "";
 		String toValue = "";
+		// assume that casting is intentional to adjust the integer type
 		if (expBinding != null && typeTO.isPrimitiveType()) {
 			String nameFROM = expBinding.getName();
 			String nameTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode().toString();
 			if (!nameTO.equals(nameFROM)) {
 				addNumericTypedExpression(null, null, nameTO, null, expression, nameFROM, null);
 				return false;
-//				fromValue = "((";
-//				toValue = ")|0)";
-//				switch (nameTO) {
-//				case "char":
-//					fromValue = "String.fromCharCode((";
-//					break;
-//				case "byte":
-//				case "short":
-//				case "int":
-//				case "long":
-//					toValue = ("char".equals(nameFROM) ? ")).charCodeAt(0)" : toValue) + "." + nameTO + "Value()";
-//					break;
-//				default:
-//					break;
-//				}
-//				if (expression instanceof ParenthesizedExpression)
-//					expression = ((ParenthesizedExpression) expression).getExpression();
 			}
 		}
 		buffer.append(fromValue);
@@ -619,11 +632,14 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ConditionalExpression node) {
+		ITypeBinding binding = node.resolveTypeBinding();
+		Expression expThen = node.getThenExpression();
+		Expression expElse = node.getElseExpression();
 		node.getExpression().accept(this);
 		buffer.append(" ? ");
-		node.getThenExpression().accept(this);
+		addExpressionAsTargetType(expThen, binding, "e", null);
 		buffer.append(" : ");
-		node.getElseExpression().accept(this);
+		addExpressionAsTargetType(expElse, binding, "e", null);
 		return false;
 	}
 
@@ -883,14 +899,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		String operator = node.getOperator().toString();
 		boolean isBitwise = isBitwiseBinaryOperator(node);
 		boolean isComparison = (!isBitwise && "!==<=>=".indexOf(operator) >= 0);
-
 		ITypeBinding leftTypeBinding = left.resolveTypeBinding();
 		ITypeBinding rightTypeBinding = right.resolveTypeBinding();
 		if (leftTypeBinding == null || rightTypeBinding == null)
 			return false;
 		String leftName = leftTypeBinding.getName();
 		String rightName = rightTypeBinding.getName();
-
 		if ("/".equals(operator) && leftTypeBinding.isPrimitive() && isNumericType(leftName)
 				&& isNumericType(rightName)) {
 			// left and right are one of byte, short, int, or long
@@ -1084,6 +1098,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(", ");
 			staticFieldDefBuffer.addType("p");
 		}
+		
 		addFieldName(left, varBinding);
 		buffer.append(" = String.fromCharCode(");
 		addFieldName(left, varBinding);
@@ -1633,7 +1648,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					&& ((PrimitiveType) fieldType).getPrimitiveTypeCode() == PrimitiveType.CHAR) {
 				ITypeBinding tBinding = initializer.resolveTypeBinding();
 				if (tBinding != null && !("char".equals(tBinding.getName()))) {
-					buffer.append("String.fromCharCode (");
+					buffer.append("String.fromCharCode(");
 					term = ")";
 				}
 			}
@@ -1803,11 +1818,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		boolean fromChar = ("char".equals(rightName));
 		boolean addParens = (op != "r" || fromChar);
 		boolean isDiv = "/".equals(op);
+		boolean toChar = false;
 		switch (leftName) {
 		case "char":
-			buffer.append("String.fromCharCode(");
-			more = ")";
-			addParens = false;
+			if (!fromChar) {
+				buffer.append("String.fromCharCode(");
+				more = ")";
+				addParens = false;
+			}
+			toChar = true;
 			break;
 		default:
 		case "long":
@@ -1824,29 +1843,34 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				break;
 			//$FALL-THROUGH$
 		case "byte":
-			classIntArray = "$" + leftName.charAt(0) + "$[0]";
-			staticFieldDefBuffer.addType(leftName);
+			if (!isArray) {
+				classIntArray = "$" + leftName.charAt(0) + "$[0]";
+				staticFieldDefBuffer.addType(leftName);
+			}
+			break;
 		}
+		boolean wasArray = isArray;
 		if (classIntArray != null) {
 			if (addParens)
 				buffer.append("(");
 			buffer.append(classIntArray).append(" = ");
+			isArray = true;
 		}
 		if (left != null) {
 			addFieldName(left, varBinding);
 			buffer.append(op);
 		}
-		if (!boxingNode(right, fromChar) && fromChar) 
+		if (!boxingNode(right, fromChar) && fromChar && !toChar)
 			buffer.append(CHARCODEAT0);
 		if (extendedOperands != null) {
 			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
 		}
-			
-		
+
 		if (classIntArray != null) {
 			buffer.append(", ").append(classIntArray);
 			if (addParens)
 				buffer.append(")");
+			isArray = wasArray;
 		}
 		if (more != null)
 			buffer.append(more);
@@ -1876,7 +1900,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
 			String paramName = targetType.getName();
-			if (isNumericType(paramName) && !isBoxTyped(exp)) {
+			if ((isNumericType(paramName) || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
 				addNumericTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);
 			} else {
@@ -1930,7 +1954,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * 
 	 * (b) String + x where x is {Double/Float} requires added .toString()
 	 * 
-	 * (c)
+	 * (c) Character and char to numeric requires addition of .$c()
+	 * 
+	 * 
 	 * 
 	 * @param exp
 	 * @param isToString
@@ -1971,24 +1997,69 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		}
 		// to numeric only
 		if (exp instanceof CharacterLiteral) {
-			CharacterLiteral cl = (CharacterLiteral) exp;
-			buffer.append(0 + cl.charValue());
+			buffer.append(0 + ((CharacterLiteral) exp).charValue());
 		} else if (exp instanceof SimpleName || exp instanceof QualifiedName) {
 			boxingNode(exp, false);
 			buffer.append(CHARCODEAT0);
+		} else if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
+				|| exp instanceof ParenthesizedExpression) {
+			boxingNode(exp, false);
+			buffer.append(CHARCODEAT0);
 		} else {
-			if (exp instanceof PrefixExpression || exp instanceof PostfixExpression
-					|| exp instanceof ParenthesizedExpression) {
-				boxingNode(exp, false);
-				buffer.append(CHARCODEAT0);
-			} else {
-				int pt = buffer.length();
-				buffer.append("(");
-				boxingNode(exp, false);
-				buffer.append(")");
-				addCharCodeAt(exp, pt);
-			}
+			int pt = buffer.length();
+			buffer.append("(");
+			boxingNode(exp, false);
+			buffer.append(")");
+			addCharCodeAt(exp, pt);
 		}
+	}
+
+
+	private void addFieldName(Expression left, IVariableBinding varBinding) {
+		if (varBinding != null) {
+			addQualifiedName(varBinding);
+			buffer.append('.');
+			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
+					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
+		}
+		boxingNode(left, false);
+	}
+
+	private boolean haveDirectStaticAccess(Expression exp) {
+		return exp instanceof SimpleName
+				|| (exp instanceof QualifiedName && ((QualifiedName) exp).getQualifier() instanceof SimpleName)
+				|| (exp instanceof FieldAccess && ((FieldAccess) exp).getExpression() instanceof ThisExpression);
+
+	}
+
+	/**
+	 * add a reference to the static field prior to defining it.
+	 * 
+	 * @param left
+	 */
+	private void addLeftSidePrefixName(Expression left) {
+		if (left instanceof QualifiedName) {
+			if ((left = ((QualifiedName) left).getQualifier()) instanceof SimpleName)
+				return;
+		} else if (left instanceof FieldAccess) {
+			if ((left = ((FieldAccess) left).getExpression()) instanceof ThisExpression) 
+				return;
+		} else {
+			return;
+		}
+		left.accept(this);
+		buffer.append(", ");
+	}
+
+	private IVariableBinding getLeftVariableBinding(Expression left, IBinding leftTypeBinding) {
+		if (left instanceof Name) {
+			if (leftTypeBinding instanceof IVariableBinding) {
+				return (IVariableBinding) leftTypeBinding;
+			}
+		} else if (left instanceof FieldAccess) {
+			return ((FieldAccess) left).resolveFieldBinding();
+		}
+		return null;
 	}
 
 	
