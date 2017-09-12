@@ -1861,7 +1861,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(op);
 		}
 		if (!boxingNode(right, fromChar) && fromChar && !toChar)
-			buffer.append(CHARCODEAT0);
+			buffer.append(CHARCODEAT0); 
 		if (extendedOperands != null) {
 			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
 		}
