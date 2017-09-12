@@ -412,7 +412,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (isNumericType(leftName)) {
 				// byte|short|int|long += ...
 				buffer.append(" = ");
-				addNumericTypedExpression(left, varBinding, leftName, opType, right, rightName, null);
+				addPrimitiveTypedExpression(left, varBinding, leftName, opType, right, rightName, null);
 				isArray = wasArray;
 				return false;
 			}
@@ -608,7 +608,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String nameFROM = expBinding.getName();
 			String nameTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode().toString();
 			if (!nameTO.equals(nameFROM)) {
-				addNumericTypedExpression(null, null, nameTO, null, expression, nameFROM, null);
+				addPrimitiveTypedExpression(null, null, nameTO, null, expression, nameFROM, null);
 				return false;
 			}
 		}
@@ -909,7 +909,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& isNumericType(rightName)) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
-			addNumericTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands);
+			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands);
 			return false;
 		}
 
@@ -1801,7 +1801,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param right
 	 * @param rightName
 	 */
-	private void addNumericTypedExpression(Expression left, IVariableBinding varBinding, String leftName, String op,
+	private void addPrimitiveTypedExpression(Expression left, IVariableBinding varBinding, String leftName, String op,
 			Expression right, String rightName, List<?> extendedOperands) {
 		// byte|short|int|long /= ...
 		// convert to proper number of bits
@@ -1902,7 +1902,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String paramName = targetType.getName();
 			if ((isNumericType(paramName) || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
-				addNumericTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);
+				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);
 			} else {
 				// char f() { return Character }
 				// Character f() { return char }
