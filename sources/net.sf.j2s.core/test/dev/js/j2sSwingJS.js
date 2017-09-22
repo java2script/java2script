@@ -977,7 +977,7 @@ var extendObject = function(clazz) {
   // BH allows @j2sNative access without super constructor
   Clazz.clone = function(me) { 
     return appendMap(me.__ARRAYTYPE ? Clazz.newArray$(me.__BASECLASS, me.__ARRAYTYPE, -1, [-2, me])
-     : new me.constructor([Clazz.inheritArgs]), me); 
+     : new me.constructor(Clazz.inheritArgs), me); 
   }
 /*
  * Methods for thread in Object

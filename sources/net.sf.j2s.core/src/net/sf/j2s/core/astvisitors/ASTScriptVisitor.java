@@ -369,6 +369,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			msg.accept(this);
 		}
 		buffer.append("});\r\n");
+		staticFieldDefBuffer.hasAssert = true;
 		return false;
 	}
 

@@ -163,17 +163,23 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	class StaticBuffer {
 		private StringBuffer buf;
 		private String added = "";
-		public StaticBuffer() {
+		
+		boolean hasAssert;
+		
+		StaticBuffer() {
 			buf = new StringBuffer();
 		}
-		public StaticBuffer append(String s) {
+		
+		StaticBuffer append(String s) {
 			buf.append(s);
 			return this;
 		}
+		
 		public String toString() {
-			return added + buf;
+			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);\r\n" : "") + added + buf;
 		}
-		public void addType(String name) {
+		
+		void addType(String name) {
 			char a = name.charAt(0);
 			// note that this character may not be in the phrase "new Int Array"
 			if (added.indexOf(a) >= 0)
