@@ -1927,12 +1927,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			buffer.append("\r\n]);\r\n");
 		}
 
-		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
-		if (fieldsSerializables.length() > 0) {
-			buffer.append("Clazz.registerSerializableFields(C$, ");
-			buffer.append(fieldsSerializables.toString());
-			buffer.append(");\r\n");
-		}
+//		String fieldsSerializables = prepareSimpleSerializable(node, bodyDeclarations);
+//		if (fieldsSerializables.length() > 0) {
+//			buffer.append("Clazz.registerSerializableFields(C$, ");
+//			buffer.append(fieldsSerializables.toString());
+//			buffer.append(");\r\n");
+//		}
 
 		readSources(node, "@j2sSuffix", "\r\n", "\r\n", true, false);
 		if (hasWrapper)

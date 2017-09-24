@@ -18,27 +18,18 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.ExtendedAdapter;
@@ -117,14 +108,14 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	 */
 	protected boolean addJavadocForBlock(Javadoc javadoc, Block node) {
 		List<?> tags = (javadoc == null ? null : javadoc.tags());
-		return (tags != null && tags.size() > 0 && (getTag(tags, "@j2sIgnore", node) != null
-				|| isDebugging() && addSourceForTag(getTag(tags, "@j2sDebug", node), "", "")
+		return (tags != null && tags.size() > 0 && (getTag(tags, "@j2sIgnore") != null
+				|| isDebugging() && addSourceForTag(getTag(tags, "@j2sDebug"), "", "")
 				// note that isToCompileVariableName() always returns false
 				//|| !isToCompileVariableName() && (tagEl = getTag(tags, "@j2sNativeSrc", node)) != null  
-				|| addSourceForTag(getTag(tags, "@j2sNative", node), "", "")
+				|| addSourceForTag(getTag(tags, "@j2sNative"), "", "")
 				|| allowExtensions && (
-						addSourceForTagExtended(getTag(tags, "@j2sXHTML", node), "", "")
-						|| addSourceForTagExtended(getTag(tags, "@j2sXCSS", node), "", "")
+						addSourceForTagExtended(getTag(tags, "@j2sXHTML"), "", "")
+						|| addSourceForTagExtended(getTag(tags, "@j2sXCSS"), "", "")
 				)
 			));
 	}
@@ -152,7 +143,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 //		return ret;
 //	}
 
-	private TagElement getTag(List<?> tags, String j2sKey, Block superNode) {
+	private TagElement getTag(List<?> tags, String j2sKey) {
 		Iterator<?> iter = tags.iterator();
 		while (iter.hasNext()) {
 			TagElement tagEl = (TagElement) iter.next();
@@ -188,8 +179,8 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		boolean haveJ2SJavaDoc = false;
 		Javadoc javadoc = node.getJavadoc();
 		if (javadoc != null && javadoc.tags().size() > 1)
-			haveJ2SJavaDoc = (isExtended ? addSourceForTagExtended(getTag(javadoc.tags(), tagName, null), prefix, suffix)
-					: addSourceForTag(getTag(javadoc.tags(), tagName, null), prefix, suffix));
+			haveJ2SJavaDoc = (isExtended ? addSourceForTagExtended(getTag(javadoc.tags(), tagName), prefix, suffix)
+					: addSourceForTag(getTag(javadoc.tags(), tagName), prefix, suffix));
 		// only classes allow both
 		if (haveJ2SJavaDoc && !allowBoth)
 			return haveJ2SJavaDoc;
@@ -483,123 +474,123 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 //		return true; // interface!
 //	}
 
-	@SuppressWarnings("deprecation")
-	protected String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
-		StringBuffer fieldsSerializables = new StringBuffer();
-		ITypeBinding binding = node.resolveBinding();
-		if (binding == null || Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") == null)
-			return "";
-		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-			ASTNode element = (ASTNode) iter.next();
-			if (element instanceof FieldDeclaration) {
-				if (node.isInterface()) {
-					/*
-					 * As members of interface should be treated as final and
-					 * for javascript interface won't get instantiated, so the
-					 * member will be treated specially.
-					 */
-					continue;
-				}
-				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-
-				List<?> fragments = fieldDeclaration.fragments();
-				int modifiers = fieldDeclaration.getModifiers();
-				if ((Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)
-						&& !Modifier.isTransient(modifiers)) {
-					Type type = fieldDeclaration.getType();
-					int dims = 0;
-					if (type.isArrayType()) {
-						dims = 1;
-						type = ((ArrayType) type).getComponentType();
-					}
-					String mark = null;
-					if (type.isPrimitiveType()) {
-						PrimitiveType pType = (PrimitiveType) type;
-						Code code = pType.getPrimitiveTypeCode();
-						if (code == PrimitiveType.FLOAT) {
-							mark = "F";
-						} else if (code == PrimitiveType.DOUBLE) {
-							mark = "D";
-						} else if (code == PrimitiveType.INT) {
-							mark = "I";
-						} else if (code == PrimitiveType.LONG) {
-							mark = "L";
-						} else if (code == PrimitiveType.SHORT) {
-							mark = "S";
-						} else if (code == PrimitiveType.BYTE) {
-							mark = "B";
-						} else if (code == PrimitiveType.CHAR) {
-							mark = "C";
-						} else if (code == PrimitiveType.BOOLEAN) {
-							mark = "b";
-						}
-					}
-					ITypeBinding resolveBinding = type.resolveBinding();
-					if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
-						mark = "s";
-					} else {
-						ITypeBinding t = resolveBinding;
-						do {
-							String typeName = t.getQualifiedName();
-							if ("java.lang.Object".equals(typeName)) {
-								break;
-							}
-							if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
-								mark = "O";
-								break;
-							}
-							t = t.getSuperclass();
-							if (t == null) {
-								break;
-							}
-						} while (true);
-					}
-					if (mark != null) {
-						for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
-							VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
-							int curDim = dims + var.getExtraDimensions();
-							if (curDim <= 1) {
-								if (fieldsSerializables.length() > 0) {
-									fieldsSerializables.append(", ");
-								}
-								/*
-								 * Fixed bug for the following scenario: class
-								 * NT extends ... { public boolean typing;
-								 * public void typing() { } }
-								 */
-								String fieldName = var.getName().toString();
-								if (checkKeywordViolation(fieldName, false)) {
-									fieldName = "$" + fieldName;
-								}
-								String prefix = null;
-								if (binding != null && checkSameName(binding, fieldName)) {
-									prefix = "$";
-								}
-								if (binding != null && isInheritedFieldName(binding, fieldName)) {
-									fieldName = getFieldName(binding, fieldName);
-								}
-								if (prefix != null) {
-									fieldName = prefix + fieldName;
-								}
-
-								fieldsSerializables.append("\"" + fieldName + "\", \"");
-								if (mark.charAt(0) == 's' && curDim == 1) {
-									fieldsSerializables.append("AX");
-								} else if (curDim == 1) {
-									fieldsSerializables.append("A");
-									fieldsSerializables.append(mark);
-								} else {
-									fieldsSerializables.append(mark);
-								}
-								fieldsSerializables.append("\"");
-							}
-						}
-					}
-				}
-			}
-		}
-		return fieldsSerializables.toString();
-	}
+//	@SuppressWarnings("deprecation")
+//	protected String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
+//		StringBuffer fieldsSerializables = new StringBuffer();
+//		ITypeBinding binding = node.resolveBinding();
+//		if (binding == null || Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") == null)
+//			return "";
+//		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
+//			ASTNode element = (ASTNode) iter.next();
+//			if (element instanceof FieldDeclaration) {
+//				if (node.isInterface()) {
+//					/*
+//					 * As members of interface should be treated as final and
+//					 * for javascript interface won't get instantiated, so the
+//					 * member will be treated specially.
+//					 */
+//					continue;
+//				}
+//				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
+//
+//				List<?> fragments = fieldDeclaration.fragments();
+//				int modifiers = fieldDeclaration.getModifiers();
+//				if ((Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)
+//						&& !Modifier.isTransient(modifiers)) {
+//					Type type = fieldDeclaration.getType();
+//					int dims = 0;
+//					if (type.isArrayType()) {
+//						dims = 1;
+//						type = ((ArrayType) type).getComponentType();
+//					}
+//					String mark = null;
+//					if (type.isPrimitiveType()) {
+//						PrimitiveType pType = (PrimitiveType) type;
+//						Code code = pType.getPrimitiveTypeCode();
+//						if (code == PrimitiveType.FLOAT) {
+//							mark = "F";
+//						} else if (code == PrimitiveType.DOUBLE) {
+//							mark = "D";
+//						} else if (code == PrimitiveType.INT) {
+//							mark = "I";
+//						} else if (code == PrimitiveType.LONG) {
+//							mark = "L";
+//						} else if (code == PrimitiveType.SHORT) {
+//							mark = "S";
+//						} else if (code == PrimitiveType.BYTE) {
+//							mark = "B";
+//						} else if (code == PrimitiveType.CHAR) {
+//							mark = "C";
+//						} else if (code == PrimitiveType.BOOLEAN) {
+//							mark = "b";
+//						}
+//					}
+//					ITypeBinding resolveBinding = type.resolveBinding();
+//					if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
+//						mark = "s";
+//					} else {
+//						ITypeBinding t = resolveBinding;
+//						do {
+//							String typeName = t.getQualifiedName();
+//							if ("java.lang.Object".equals(typeName)) {
+//								break;
+//							}
+//							if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
+//								mark = "O";
+//								break;
+//							}
+//							t = t.getSuperclass();
+//							if (t == null) {
+//								break;
+//							}
+//						} while (true);
+//					}
+//					if (mark != null) {
+//						for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
+//							VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
+//							int curDim = dims + var.getExtraDimensions();
+//							if (curDim <= 1) {
+//								if (fieldsSerializables.length() > 0) {
+//									fieldsSerializables.append(", ");
+//								}
+//								/*
+//								 * Fixed bug for the following scenario: class
+//								 * NT extends ... { public boolean typing;
+//								 * public void typing() { } }
+//								 */
+//								String fieldName = var.getName().toString();
+//								if (checkKeywordViolation(fieldName, false)) {
+//									fieldName = "$" + fieldName;
+//								}
+//								String prefix = null;
+//								if (binding != null && checkSameName(binding, fieldName)) {
+//									prefix = "$";
+//								}
+//								if (binding != null && isInheritedFieldName(binding, fieldName)) {
+//									fieldName = getFieldName(binding, fieldName);
+//								}
+//								if (prefix != null) {
+//									fieldName = prefix + fieldName;
+//								}
+//
+//								fieldsSerializables.append("\"" + fieldName + "\", \"");
+//								if (mark.charAt(0) == 's' && curDim == 1) {
+//									fieldsSerializables.append("AX");
+//								} else if (curDim == 1) {
+//									fieldsSerializables.append("A");
+//									fieldsSerializables.append(mark);
+//								} else {
+//									fieldsSerializables.append(mark);
+//								}
+//								fieldsSerializables.append("\"");
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//		return fieldsSerializables.toString();
+//	}
 
 
 }

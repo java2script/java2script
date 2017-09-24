@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.FinalVariable;
 
@@ -554,7 +553,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (right instanceof ArrayType) {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
-			buffer.append("\"" + Bindings.removeBrackets(binding.getQualifiedName()) + "\"");
+			buffer.append("\"" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + "\"");
 			//right.accept(this);
 		}
 		buffer.append(")");
@@ -1067,7 +1066,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			buffer.append(j2sGetArrayClass(binding, 1));
 		} else {
 			// BH we are creating a new Class object around this class
-			buffer.append("Clazz.$newClass(" + Bindings.removeBrackets(binding.getQualifiedName()) + ")");
+			buffer.append("Clazz.$newClass(" + ASTKeywordVisitor.removeBrackets(binding.getQualifiedName()) + ")");
 		}
 		return false;
 	}
@@ -1371,7 +1370,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		// NOTE: If any of these are changed, they must be changed in j2sSwingJS as well.
 		// NOTE: These are the same as standard Java Spec, with the exception of Short, which is "H" instead of "S"
 		
-		switch (name = Bindings.removeBrackets(name)) {
+		switch (name = ASTKeywordVisitor.removeBrackets(name)) {
 		case "boolean":
 			name = "Z";
 			break;
@@ -1690,6 +1689,28 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		return null;
 	}
 
+	public static String removeBrackets(String qName) {
+		if (qName == null) {
+			return qName;
+		}
+		int length = qName.length();
+		StringBuffer buf = new StringBuffer();
+		int ltCount = 0;
+		for (int i = 0; i < length; i++) {
+			char c = qName.charAt(i);
+			if (c == '<') {
+				ltCount++;
+			} else if (c == '>') {
+				ltCount--;
+			}
+			if (ltCount == 0 && c != '>') {
+				buf.append(c);
+			}
+		}
+		qName = buf.toString().trim();
+		return qName;
+	}
+
 	private static final String primitiveTypeEquivalents = "Boolean,Byte,Character,Short,Integer,Long,Float,Double,";
 	
 	private static final String getPrimitiveTYPE(String name) {
@@ -1708,7 +1729,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 */
     static String j2sGetArrayClass(ITypeBinding type, int dimFlag) {
     	ITypeBinding ebinding = type.getElementType();
-    	String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) : Bindings.removeBrackets(ebinding.getQualifiedName())) 
+    	String params = (ebinding.isPrimitive() ? getPrimitiveTYPE(ebinding.getName()) : ASTKeywordVisitor.removeBrackets(ebinding.getQualifiedName())) 
     			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
 				: " Clazz.newArray$(" + params);

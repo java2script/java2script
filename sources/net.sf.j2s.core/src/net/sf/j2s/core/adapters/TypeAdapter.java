@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
+
 /**
  * 
  * also used for package declaration names
@@ -55,7 +57,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @return
 	 */
 	public String discardGenericType(String name) {
-		return (name == null ? null : Bindings.removeBrackets(name));
+		return (name == null ? null : ASTKeywordVisitor.removeBrackets(name));
 	}
 
 	/**
@@ -115,7 +117,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	}
 
 	private String getShortenedName(String name, boolean isPackage) {
-		name = Bindings.removeBrackets(name);
+		name = ASTKeywordVisitor.removeBrackets(name);
 		String name1 = shortenJavaLang(name);
 		return (name1 == null ? shortenSWTName(name, isPackage) : name1);
 	}
