@@ -62,10 +62,6 @@ import net.sf.j2s.core.adapters.FinalVariable;
 //BH 9/10/2017 -- adds full byte, short, and int distinction using class-level local fields $b$, $s$, and $i$, which are IntXArray[1].
 // 
 
-// TODO
-
-// fix String.fromCharCode('c'.$c())
-
 /**
  * This class will traverse most of the common keyword and common expression,
  * processing all interconversion among primitive types byte char short int, and long
@@ -433,10 +429,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	/**
-	 * Add the ".c$()" alias for ".charCodeAt(0)" to 
-	 * char, Character, and String that need to be expressed as integer values. 
-	 * 
-	 * As a shortcut, we convert .charAt() to .c$() directly if that is what we have.
+	 * check to change charAt to charCodeAt   
 	 *  
 	 * @param right
 	 * @param pt
@@ -635,7 +628,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		Expression right = node.getRightOperand();
 		List<?> extendedOperands = node.extendedOperands();
 
-		// TODO: not convinced....
 		String constValue = getConstantValue(node);
 		if (constValue != null) {
 			buffer.append(constValue);
@@ -1110,7 +1102,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * box or unbox as necessary
 	 * 
 	 * @param element
-	 * @param toCharCode TODO
+	 * @param toCharCode true to append .c$(), not .valueOf();
 	 * @return true if boxing or unboxing
 	 */
 	protected boolean boxingNode(ASTNode element, boolean toCharCode) {
@@ -1287,8 +1279,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 
 	/**
 	 * Determine the qualified parameter suffix for method names, including
-	 * constructors. TODO: Something like this must be duplicated in Clazz as
-	 * well in JavaScript
+	 * constructors. 
 	 * 
 	 * @param nodeName
 	 * @param binding
@@ -1296,29 +1287,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @return
 	 */
 	protected String getJ2SParamQualifier(String nodeName, IMethodBinding binding) {
-		// if (binding.getTypeParameters().length > 0) {
-		// String key = binding.getKey();
-		// int pt = key.indexOf("T:");
-		// if (pt > key.indexOf("(")) {
-		// String fullName = binding.getName();
-		// // for put<K,V> we just allow this to be a single method.
-		// // TODO: Q: Good assumption? Could register these to check for
-		// // problems?
-		// String name = discardGenericType(fullName);
-		// Object other = htGenerics.get(name);
-		// System.err.println(binding.getKey());
-		// if (other == null) {
-		// htGenerics.put(name, key);
-		// } else if (other instanceof String) {
-		// System.err.println("parameterization problem with " + key + "; dual
-		// generic " + other);
-		// htGenerics.put(name, Boolean.TRUE);
-		// }
-		// }
-		// }
-
-		// The problem is that System.out and System.err are PrintStreams, and
-		// we
+		// The problem is that System.out and System.err are PrintStreams, and we
 		// do not intend to change those. So in the case that we just wrote
 		// "System....", we use that instead and do not qualify the name
 		// Note: binding can be null if we have errors in the Java and we are compiling

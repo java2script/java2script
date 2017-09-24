@@ -52,7 +52,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	 * 
 	 */
 	private boolean allowExtensions = false;
-	private Javadoc[] rootJavaDocs; 
+	private ArrayList<Javadoc> rootJavaDocs; 
 
 	public void setAllowExtensions(boolean tf) {
 		allowExtensions = tf;
@@ -69,36 +69,18 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 
 	public boolean visit(Block node) {
 		ASTNode parent = node.getParent();
-		BodyDeclaration dec = (parent instanceof MethodDeclaration ||
-				 parent instanceof Initializer ? (BodyDeclaration) parent : null);
-		Javadoc javadoc;
+		BodyDeclaration dec = (parent instanceof MethodDeclaration && !((MethodDeclaration)parent).isConstructor() 
+				|| parent instanceof Initializer ? (BodyDeclaration) parent : null);
 		/*
 		 * if comment contains "@j2sNative", then output the given native
 		 * JavaScript codes directly.
 		 */
-		if (dec != null && addJavadocForBlock(dec.getJavadoc(), node))
-			return false;
-		Javadoc[] nativeJavadoc = checkJavadocs(node.getRoot());
-		if (nativeJavadoc.length > 0) {
-			int blockStart = node.getStartPosition();
-			//int previousStart = getPreviousStartPosition(node);
-			for (int i = nativeJavadoc.length; --i >= 0;) {
-				javadoc = nativeJavadoc[i];
-				int commentStart = javadoc.getStartPosition();
-				int commentEnd = commentStart + javadoc.getLength();
-				if (commentStart < blockStart &&  commentEnd > blockStart - 10) {
-					/*
-					 * if the block's leading comment contains "@j2sNative",
-					 * then output the given native JavaScript codes directly.
-					 */
-					if (addJavadocForBlock(javadoc, node)) {
-						return false;
-					}
-				}
-			}
-		}
-		return super.visit(node);
+		Javadoc javadoc = (dec == null ? getBlockJavadoc(node) : dec.getJavadoc());
+		lastPos = node.getStartPosition();
+		return (javadoc != null && addJavadocForBlock(javadoc, node) ? false : super.visit(node));
 	}
+
+
 	/**
 	 * 
 	 * Check for j2sIgnore, j2sDebug, j2sNative, j2sXHTML, j2sXCSS
@@ -169,8 +151,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 	 * 
 	 * @j2sSuffix /-* this is from <@>j2sSuffix added just after
 	 *            Clazz.decorateAsClass() *-/
-	 * @param isExtended
-	 *            TODO
+	 * @param isExtended if this is j2sXHTML or j2sXCSS
 	 * 
 	 * @return true if javadoc of this sort was found and added to the buffer
 	 */
@@ -297,30 +278,46 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		return true;
 	}
 	
-	private Javadoc[] checkJavadocs(ASTNode root) {
+	/**
+	 * Get the nearest Javadoc that is after any other element but before this block.
+	 * 
+	 * @param block
+	 * @return nearest Javadoc or null
+	 */
+	private Javadoc getBlockJavadoc(Block block) {
+		ASTNode root = block.getRoot();
+		Javadoc jd = null;
 		if (root instanceof CompilationUnit) {
-			if (rootJavaDocs != null)
-				return rootJavaDocs;
-			List<?> commentList = ((CompilationUnit) root).getCommentList();
-			ArrayList<Comment> list = new ArrayList<Comment>();
-			for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
-				Comment comment = (Comment) iter.next();
-				if (comment instanceof Javadoc) {
-					List<?> tags = ((Javadoc) comment).tags();
-					if (tags.size() != 0) {
-						for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
-							TagElement tagEl = (TagElement) itr.next();
-							String tagName = tagEl.getTagName();
-							if (tagName.startsWith("@j2s")) {
-								list.add(comment);
+			if (rootJavaDocs == null) {
+				rootJavaDocs = new ArrayList<Javadoc>();
+				List<?> commentList = ((CompilationUnit) root).getCommentList();
+				for (Iterator<?> iter = commentList.iterator(); iter.hasNext();) {
+					Comment comment = (Comment) iter.next();
+					if (comment instanceof Javadoc) {
+						List<?> tags = ((Javadoc) comment).tags();
+						if (tags.size() != 0) {
+							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
+								TagElement tagEl = (TagElement) itr.next();
+								String tagName = tagEl.getTagName();
+								if (tagName.startsWith("@j2s")) {
+									rootJavaDocs.add((Javadoc) comment);
+								}
 							}
 						}
 					}
 				}
 			}
-			return rootJavaDocs = list.toArray(new Javadoc[0]);
+			// looking for last comment prior to this block starting after all other nodes
+			// we can remove any previous Javadocs in case they are still there 
+			int blockPos = block.getStartPosition();
+			int docPos = 0;
+			while (rootJavaDocs.size() > 0 && (docPos = rootJavaDocs.get(0).getStartPosition()) < blockPos) {
+				jd = rootJavaDocs.remove(0);
+				if (docPos < lastPos)
+					jd = null;  
+			}
 		}
-		return new Javadoc[0];
+		return jd;
 	}
 
 //	private int getPreviousStartPosition(Block node) {
@@ -443,154 +440,6 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 		}
 		return null;
 	}
-
-// BH no! At least record native methods
-//	/**
-//	 * Native method without "j2sDebug" or "j2sNative" tag should be ignored
-//	 * directly.
-//	 * 
-//	 * @param node
-//	 * @return
-//	 */
-//	protected boolean isMethodNativeIgnored(MethodDeclaration node) {
-//		if ((node.getModifiers() & Modifier.NATIVE) != 0) {
-//			if (isDebugging() && getJ2STag(node, "@j2sDebug") != null) {
-//				return false;
-//			}
-//			if (getJ2STag(node, "@j2sNative") != null) {
-//				return false;
-//			}
-//			if (getJ2STag(node, "@j2sNativeSrc") != null) {
-//				return false;
-//			}
-//			if (getJ2STag(node, "@j2sXHTML") != null) {
-//				return false;
-//			}
-//			if (getJ2STag(node, "@j2sXCSS") != null) {
-//				return false;
-//			}
-//			return true;
-//		}
-//		return true; // interface!
-//	}
-
-//	@SuppressWarnings("deprecation")
-//	protected String prepareSimpleSerializable(TypeDeclaration node, List<?> bodyDeclarations) {
-//		StringBuffer fieldsSerializables = new StringBuffer();
-//		ITypeBinding binding = node.resolveBinding();
-//		if (binding == null || Bindings.findTypeInHierarchy(binding, "net.sf.j2s.ajax.SimpleSerializable") == null)
-//			return "";
-//		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
-//			ASTNode element = (ASTNode) iter.next();
-//			if (element instanceof FieldDeclaration) {
-//				if (node.isInterface()) {
-//					/*
-//					 * As members of interface should be treated as final and
-//					 * for javascript interface won't get instantiated, so the
-//					 * member will be treated specially.
-//					 */
-//					continue;
-//				}
-//				FieldDeclaration fieldDeclaration = (FieldDeclaration) element;
-//
-//				List<?> fragments = fieldDeclaration.fragments();
-//				int modifiers = fieldDeclaration.getModifiers();
-//				if ((Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)
-//						&& !Modifier.isTransient(modifiers)) {
-//					Type type = fieldDeclaration.getType();
-//					int dims = 0;
-//					if (type.isArrayType()) {
-//						dims = 1;
-//						type = ((ArrayType) type).getComponentType();
-//					}
-//					String mark = null;
-//					if (type.isPrimitiveType()) {
-//						PrimitiveType pType = (PrimitiveType) type;
-//						Code code = pType.getPrimitiveTypeCode();
-//						if (code == PrimitiveType.FLOAT) {
-//							mark = "F";
-//						} else if (code == PrimitiveType.DOUBLE) {
-//							mark = "D";
-//						} else if (code == PrimitiveType.INT) {
-//							mark = "I";
-//						} else if (code == PrimitiveType.LONG) {
-//							mark = "L";
-//						} else if (code == PrimitiveType.SHORT) {
-//							mark = "S";
-//						} else if (code == PrimitiveType.BYTE) {
-//							mark = "B";
-//						} else if (code == PrimitiveType.CHAR) {
-//							mark = "C";
-//						} else if (code == PrimitiveType.BOOLEAN) {
-//							mark = "b";
-//						}
-//					}
-//					ITypeBinding resolveBinding = type.resolveBinding();
-//					if ("java.lang.String".equals(resolveBinding.getQualifiedName())) {
-//						mark = "s";
-//					} else {
-//						ITypeBinding t = resolveBinding;
-//						do {
-//							String typeName = t.getQualifiedName();
-//							if ("java.lang.Object".equals(typeName)) {
-//								break;
-//							}
-//							if ("net.sf.j2s.ajax.SimpleSerializable".equals(typeName)) {
-//								mark = "O";
-//								break;
-//							}
-//							t = t.getSuperclass();
-//							if (t == null) {
-//								break;
-//							}
-//						} while (true);
-//					}
-//					if (mark != null) {
-//						for (Iterator<?> xiter = fragments.iterator(); xiter.hasNext();) {
-//							VariableDeclarationFragment var = (VariableDeclarationFragment) xiter.next();
-//							int curDim = dims + var.getExtraDimensions();
-//							if (curDim <= 1) {
-//								if (fieldsSerializables.length() > 0) {
-//									fieldsSerializables.append(", ");
-//								}
-//								/*
-//								 * Fixed bug for the following scenario: class
-//								 * NT extends ... { public boolean typing;
-//								 * public void typing() { } }
-//								 */
-//								String fieldName = var.getName().toString();
-//								if (checkKeywordViolation(fieldName, false)) {
-//									fieldName = "$" + fieldName;
-//								}
-//								String prefix = null;
-//								if (binding != null && checkSameName(binding, fieldName)) {
-//									prefix = "$";
-//								}
-//								if (binding != null && isInheritedFieldName(binding, fieldName)) {
-//									fieldName = getFieldName(binding, fieldName);
-//								}
-//								if (prefix != null) {
-//									fieldName = prefix + fieldName;
-//								}
-//
-//								fieldsSerializables.append("\"" + fieldName + "\", \"");
-//								if (mark.charAt(0) == 's' && curDim == 1) {
-//									fieldsSerializables.append("AX");
-//								} else if (curDim == 1) {
-//									fieldsSerializables.append("A");
-//									fieldsSerializables.append(mark);
-//								} else {
-//									fieldsSerializables.append(mark);
-//								}
-//								fieldsSerializables.append("\"");
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		return fieldsSerializables.toString();
-//	}
 
 
 }

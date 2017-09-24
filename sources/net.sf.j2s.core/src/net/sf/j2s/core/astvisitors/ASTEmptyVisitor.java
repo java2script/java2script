@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BlockComment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -275,6 +277,8 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		visitorMap.put(visitor.getClass(), visitor);
 	}
 	
+	protected int lastPos = Integer.MAX_VALUE;
+
 	/*
 	 * The following are empty super.* methods which will be use to help
 	 * developing Java2Script compiler.
@@ -408,6 +412,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public boolean visit(TagElement node) {
+		buffer.append(">>vis tagE " + node);
 		return false;
 	}
 
@@ -596,6 +601,8 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public void preVisit(ASTNode node) {
+		if (!(node instanceof Block))
+			lastPos = node.getStartPosition();
 		super.preVisit(node);
 	}
 

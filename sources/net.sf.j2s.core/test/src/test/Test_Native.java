@@ -24,29 +24,57 @@ class Test_Native {
 	 * 			return /-* testing *-/ and <@>here
 	 * 
 	 */
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	public void test() {
-	}
-
-	public void test2() {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return /-* testing *-/ and <@>here
+		 * 			return /-* test2 *-/ and <@>here
 		 * 
 		 */
 		{
+			int i =0;
 		}
+	}
+
+	/**
+	 * @j2sNative
+	 * 
+	 * 			ignored
+	 * 
+	 */
+	int ii = 0;
+	{
+		ii = 1;
+	}
+
+	
+	/**
+	 * @j2sNative
+	 * 
+	 * 		 //	ok
+	 * 
+	 */
+	{}
+
+	public void test2() {
+		int  j = 0;
+		/**
+		 * @j2sNative
+		 * 
+		 * 	j = 1	//	ignored
+		 * 
+		 */
+		/**
+		 * @j2sNative
+		 * 
+		 *  this.ii = -1
+		 * 	j = 4		// ok
+		 * 
+		 */
+		{
+		  j = 3 + ii;
+		}
+		assert(j == 3 + ii);
 	}
 
 	public static void main(String[] args) {
