@@ -299,7 +299,7 @@ public class ASTJ2SDocVisitor extends ASTKeywordVisitor {
 							for (Iterator<?> itr = tags.iterator(); itr.hasNext();) {
 								TagElement tagEl = (TagElement) itr.next();
 								String tagName = tagEl.getTagName();
-								if (tagName.startsWith("@j2s")) {
+								if (tagName != null && tagName.startsWith("@j2s")) {
 									rootJavaDocs.add((Javadoc) comment);
 								}
 							}

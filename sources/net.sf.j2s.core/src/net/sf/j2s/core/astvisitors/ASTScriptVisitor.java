@@ -328,7 +328,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 	
 	public void endVisit(Block node) {
-		buffer.append("\r\n}\r\n");
+		buffer.append("}");
 		clearVariables(getVariableList('f'));
 		clearVariables(getVariableList('n'));
 		blockLevel--;
