@@ -22,7 +22,6 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 
 import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
 import net.sf.j2s.core.astvisitors.ASTScriptVisitor;
-import net.sf.j2s.core.astvisitors.ASTVariableVisitor;
 import net.sf.j2s.core.astvisitors.DependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTDependencyASTVisitor;
 import net.sf.j2s.core.astvisitors.SWTScriptVisitor;
@@ -216,9 +215,10 @@ public class Java2ScriptCompiler implements IExtendedCompiler {
 			boolean isDebugging = "debug".equals(getProperty("j2s.compiler.mode"));
 			visitor.setDebugging(isDebugging);
 			dvisitor.setDebugging(isDebugging);
-			boolean toCompress = false; //"enable".equals(getProperty(props, "j2s.compiler.allow.compression"))); // BH
-			((ASTVariableVisitor) visitor.getAdaptable(ASTVariableVisitor.class)).setToCompileVariableName(toCompress);
-			dvisitor.setToCompileVariableName(toCompress);
+			// BH: compression has been deprecated. Use Google Closure Compiler
+			//boolean toCompress = false; //"enable".equals(getProperty(props, "j2s.compiler.allow.compression"))); // BH
+			//visitor.setToCompileVariableName(false);
+			//dvisitor.toCompileVariableName = false;
 //			if (toCompress) {
 //				updateJ2SMap(prjFolder);
 //			}

@@ -9,14 +9,25 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors;
-
+package net.sf.j2s.core.adapters;
 
 /**
  * @author zhou renjian
  *
- * 2006-12-27
+ * 2006-6-3
  */
-public interface IPluginVisitor {
-	public void setVisitor(ASTEmptyVisitor visitor);
+public class NameConvertItem {
+	public String className;
+	public String varName;
+	public String toVarName;
+	public boolean isMethod;
+	
+	public NameConvertItem(String className, String varName, String toVarName, boolean isMethod) {
+		super();
+		this.className = className;
+		this.varName = varName;
+		this.toVarName = toVarName;
+		this.isMethod = isMethod;
+	}
+	
 }

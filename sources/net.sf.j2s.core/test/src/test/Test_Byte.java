@@ -3,6 +3,24 @@ package test;
 class Test_Byte {
 	
 	public static void main(String[] args) {
+		
+		double d = 3;
+		int di = 'c';
+		d /= 'c';
+		di /= 'c';
+		assert(d == 3.0/99);
+		assert(di == 1);
+		di = 100;
+		assert(di / 7 / 3 == 4);
+
+		byte[] ab = new byte[10];
+		ab[1] += 120;
+		ab[2] = 120;
+		ab[3] = 120;
+		ab[0] = (byte) ((ab[1] + ab[2] + ab[3])/3); // plus and div are not byte operators.
+		assert(ab[0] == 120);
+		
+		
 		int i255 = 0xFF;
 		byte b = (byte) i255;
 		b = 127;
@@ -18,8 +36,10 @@ class Test_Byte {
 		assert (h == -1);
 		assert (i == -1);
 		b = (byte) c;
-		b/=((byte)1000 / b / b) * 30;
-		b /= 100;
+		b = (byte) 2;
+		int i2 = ((byte)4000 / b / b) * 30;
+		b/=2;
+		b /= 0.01;
 		System.out.println("Test_Byte OK");
 
 	}

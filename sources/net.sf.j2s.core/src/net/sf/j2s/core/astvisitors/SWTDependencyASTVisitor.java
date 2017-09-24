@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
+import net.sf.j2s.core.adapters.Bindings;
+
 /**
  * @author zhou renjian
  *

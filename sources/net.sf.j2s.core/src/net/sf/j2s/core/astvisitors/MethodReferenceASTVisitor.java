@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 
+import net.sf.j2s.core.adapters.Bindings;
+
 /**
  * This visitor is used to find out those private methods that are never 
  * referenced.

@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors;
+package net.sf.j2s.core.adapters;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,52 +25,54 @@ import org.eclipse.jdt.core.dom.Expression;
  *
  * 2006-12-3
  */
-public class ASTVariableVisitor extends AbstractPluginVisitor {
-	
-	/**
-	 * List of variables that are declared as final.
-	 */
-	protected List<ASTFinalVariable> finalVars = new ArrayList<ASTFinalVariable>();
+public class VariableAdapter extends AbstractPluginAdapter {
 	
 	/**
 	 * Final variables only make senses (need "this.f$[...]") inside anonymous
 	 * class.
 	 */
-	protected boolean isFinalSensible = true;
+	public boolean isFinalSensible = true;
 
+	/**
+	 * List of variables that are declared as final.
+	 */
+	public List<FinalVariable> finalVars = new ArrayList<FinalVariable>();
+	
 	/**
 	 * Normal (non-final) variables may be affected by final variable names.
 	 */
-	protected List<ASTFinalVariable> normalVars = new ArrayList<ASTFinalVariable>();
+	public List<FinalVariable> normalVars = new ArrayList<FinalVariable>();
 
 	/**
 	 * Only those final variables that are referenced inside anonymous class
 	 * need to be passed into anonymous class.
 	 */
-	protected List<ASTFinalVariable> visitedVars = new ArrayList<ASTFinalVariable>();
+	public List<FinalVariable> visitedVars = new ArrayList<FinalVariable>();
 	
 	/**
 	 * Whether to compile variable names into minimized names or not
 	 */
-	protected boolean toCompileVariableName = false; // BH - ensure default is FALSE not TRUE
+	private boolean toCompileVariableName = false; // BH - ensure default is FALSE not TRUE
 
 	public boolean isToCompileVariableName() {
 		return toCompileVariableName;
 	}
 
 	/**
+	 * never called - abandoned
+	 * 
 	 * @param toCompileVariableName  
 	 */
-	public void setToCompileVariableName(boolean toCompileVariableName) {
+	@Deprecated
+	void setToCompileVariableName(boolean toCompileVariableName) {
 		//BH abandoned this.toCompileVariableName = toCompileVariableName;
 	}
 
-	protected String getVariableName(String name) {
+	public String getNormalVariableName(String name) {
 		for (int i = normalVars.size() - 1; i >= 0; i--) {
-			ASTFinalVariable var =  normalVars.get(i);
-			if (name.equals(var.variableName)) {
-				return var.toVariableName;
-			}
+			String var =  normalVars.get(i).variableName;
+			if (name.equals(var))
+				return var;
 		}
 		return name;
 	}
@@ -101,7 +103,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 				int l = i % 26;
 				newName = String.valueOf((char) ('a' + h)) + String.valueOf((char) ('a' + l));
 			}
-			for (Iterator<ASTFinalVariable> iter = finalVars.iterator(); iter.hasNext();) {
+			for (Iterator<FinalVariable> iter = finalVars.iterator(); iter.hasNext();) {
 				if (newName.equals(iter.next().toVariableName)) {
 					newName = null;
 					i++;
@@ -109,7 +111,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 				}
 			}
 			if (newName != null) {
-				for (Iterator<ASTFinalVariable> iter = normalVars.iterator(); iter.hasNext();) {
+				for (Iterator<FinalVariable> iter = normalVars.iterator(); iter.hasNext();) {
 					if (newName.equals(iter.next().toVariableName)) {
 						newName = null;
 						i++;
@@ -138,14 +140,14 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	 * @param scope
 	 * @return
 	 */
-	protected String listFinalVariables(List<ASTFinalVariable> list, String seperator, String scope) {
+	public String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
 		if (list.size() == 0) {
 			return "null";
 		}
 		StringBuffer buf = new StringBuffer();
 		buf.append("{");
-		for (Iterator<ASTFinalVariable> iter = list.iterator(); iter.hasNext();) {
-			ASTFinalVariable fv = iter.next();
+		for (Iterator<FinalVariable> iter = list.iterator(); iter.hasNext();) {
+			FinalVariable fv = iter.next();
 			String name = fv.variableName;
 			if (fv.toVariableName != null) {
 				name = fv.toVariableName;
@@ -179,7 +181,7 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 	 * @param node
 	 * @return
 	 */
-	protected String getConstantValue(Expression node) {
+	public String getConstantValue(Expression node) {
 		Object constValue = node.resolveConstantExpressionValue();
 		if (constValue != null && (constValue instanceof Number
 				|| constValue instanceof Character
@@ -208,6 +210,17 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 		return null;
 	}
 
+	public List<FinalVariable> getVariableList(char fvn) {
+		switch (fvn) {
+		case 'f':
+			return finalVars;
+		case 'v':
+			return visitedVars;
+		default:
+			return normalVars;
+		}
+	}
+	
 	private void addChar(char c, StringBuffer buffer) {
 		if (c < 32 || c > 127) {
 			String hexStr = "0000" + Integer.toHexString(c);
@@ -238,4 +251,5 @@ public class ASTVariableVisitor extends AbstractPluginVisitor {
 			}
 		}
 	}
+
 }

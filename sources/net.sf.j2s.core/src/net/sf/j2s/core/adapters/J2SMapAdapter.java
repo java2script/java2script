@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors;
+package net.sf.j2s.core.adapters;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -22,23 +22,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  *         2006-12-3
  */
-public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
+public class J2SMapAdapter extends AbstractPluginAdapter {
 
-	// BH deprecated
-//	private static Map<String, NameConvertItem> maps;
-
-	// BH deprecated
-//	/**
-//	 * Set .j2smap Please also read net.sf.j2s.java.org.eclipse.swt/.j2smap
-//	 * file.
-//	 * 
-//	 * @param m
-//	 */
-//	public static void setJ2SMap(Map<String, NameConvertItem> m) {
-//		maps = m;
-//	}
-
-	String getJ2SName(SimpleName node) {
+	public static String getJ2SName(SimpleName node) {
 		IBinding binding = node.resolveBinding();
 		if (binding == null)
 			return node.getIdentifier();
@@ -52,58 +38,11 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		return nameID;
 	}
 
-	String getJ2SName(IVariableBinding binding) {
-		String nameID = binding.getName();
-		// BH deprecated
-//		if (maps == null || maps.size() == 0) {
-//			return nameID;
-//		}
-//		String className = null;
-//		ITypeBinding declaringClass = binding.getDeclaringClass();
-//		if (declaringClass != null) {
-//			className = declaringClass.getQualifiedName();
-//		}
-//
-//		String key = className + "." + nameID;
-//		Object value = maps.get(key);
-//		if (value != null && value instanceof NameConvertItem) {
-//			NameConvertItem item = (NameConvertItem) value;
-//			return item.toVarName;
-//		}
-		return nameID;
+	public static String getJ2SName(IVariableBinding binding) {
+		return binding.getName();
 	}
 
-	private String getJ2SMethodName(IMethodBinding binding) {
-		String nameID = binding.getName();
-// BH deprecated
-//		if (maps != null && maps.size() > 0) {
-//			String className = null;
-//			ITypeBinding declaringClass = binding.getDeclaringClass();
-//			ITypeBinding superclass = (declaringClass == null ? null : declaringClass.getSuperclass());
-//			while (superclass != null) {
-//				IMethodBinding[] declaredMethods = superclass.getDeclaredMethods();
-//				for (int i = 0; i < declaredMethods.length; i++) {
-//					String methodName = declaredMethods[i].getName();
-//					if (nameID.equals(methodName)) {
-//						return getJ2SName(declaredMethods[i]);
-//					}
-//				}
-//				superclass = superclass.getSuperclass();
-//			}
-//			if (declaringClass != null) {
-//				className = declaringClass.getQualifiedName();
-//			}
-//			String key = className + "#" + nameID;
-//			Object value = maps.get(key);
-//			if (value != null && value instanceof NameConvertItem) {
-//				NameConvertItem item = (NameConvertItem) value;
-//				return item.toVarName;
-//			}
-//		}
-		return (ASTFieldVisitor.checkKeywordViolation(nameID, null) ? "$" + nameID : nameID);
-	}
-
-	public boolean checkSameName(ITypeBinding binding, String name) {
+	public static boolean checkSameName(ITypeBinding binding, String name) {
 		if (binding != null) {
 			IMethodBinding[] declaredMethods = binding.getDeclaredMethods();
 			for (int i = 0; i < declaredMethods.length; i++) {
@@ -128,7 +67,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		return false;
 	}
 
-	String getFieldName(ITypeBinding binding, String name) {
+	public static String getFieldName(ITypeBinding binding, String name) {
 		if (binding != null) {
 			ITypeBinding superclass = binding.getSuperclass();
 			if (superclass != null) {
@@ -158,7 +97,7 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 	 * @param name
 	 * @return
 	 */
-	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+	public static boolean isInheritedFieldName(ITypeBinding binding, String name) {
 		if ("serialVersionUID".equals(name)) {
 			/*
 			 * Just ignore this field: serialVersionUID. Currently Java2Script
@@ -197,5 +136,11 @@ public class ASTJ2SMapVisitor extends AbstractPluginVisitor {
 		}
 		return false;
 	}
+
+	private static String getJ2SMethodName(IMethodBinding binding) {
+		String nameID = binding.getName();
+		return (FieldAdapter.checkKeywordViolation(nameID, null) ? "$" + nameID : nameID);
+	}
+
 
 }

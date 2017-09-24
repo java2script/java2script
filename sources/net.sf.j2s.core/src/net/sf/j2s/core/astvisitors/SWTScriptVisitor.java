@@ -33,6 +33,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import net.sf.j2s.core.adapters.Bindings;
+import net.sf.j2s.core.adapters.FieldAdapter;
+import net.sf.j2s.core.adapters.PackageAdapter;
+
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
 	private static String[] swtPackages = null;
@@ -53,7 +57,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 				swt + ".layout", 
 				swt + ".widgets"
 		};
-		String[] pkgs = ASTPackageVisitor.basePackages;
+		String[] pkgs = PackageAdapter.basePackages;
 		String[] packages = new String[swtInnerPackages.length + pkgs.length];
 		System.arraycopy(pkgs, 0, packages, 0, pkgs.length);
 		System.arraycopy(swtInnerPackages, 0, packages, pkgs.length, swtInnerPackages.length);
@@ -120,7 +124,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 	}
 	@SuppressWarnings("null")
 	public boolean visit(QualifiedName node) {
-		if (isSimpleQualified(node)) {
+		if (FieldAdapter.isSimpleQualified(node)) {
 			String constValue = getConstantValue(node);
 			if (constValue != null) {
 				buffer.append(constValue);

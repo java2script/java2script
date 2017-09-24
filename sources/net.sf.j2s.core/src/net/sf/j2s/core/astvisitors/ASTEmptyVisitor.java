@@ -11,6 +11,8 @@
 package net.sf.j2s.core.astvisitors;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -38,10 +40,13 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -83,6 +88,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -91,6 +97,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+
+import net.sf.j2s.core.adapters.FieldAdapter;
+import net.sf.j2s.core.adapters.FinalVariable;
+import net.sf.j2s.core.adapters.J2SMapAdapter;
+import net.sf.j2s.core.adapters.PackageAdapter;
+import net.sf.j2s.core.adapters.TypeAdapter;
+import net.sf.j2s.core.adapters.VariableAdapter;
 
 /**
  * This empty visitor just gives a way for debugging. That is to say, in 
@@ -101,6 +114,117 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * @author Bob Hanson
  */
 public class ASTEmptyVisitor extends ASTVisitor {
+
+	protected HashSet<String> definedPackageNames;
+
+	public void setPackageNames(HashSet<String> definedPackageNames) {
+		this.definedPackageNames = definedPackageNames;
+	}
+
+
+	protected String assureQualifiedName(String name) {
+		return TypeAdapter.assureQualifiedName(name);
+	}
+
+	protected boolean checkKeywordViolation(String name, boolean checkPackages) {
+		return FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
+	}
+
+	protected boolean checkSameName(ITypeBinding binding, String name) {
+		return J2SMapAdapter.checkSameName(binding, name);
+	}
+
+	protected String discardGenericType(String name) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).discardGenericType(name);
+	}
+
+	protected String getClassName() {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getClassName();
+	}
+	protected String getConstantValue(Expression exp) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getConstantValue(exp);
+	}
+
+	protected String getFieldName(ITypeBinding binding, String name) {
+		return J2SMapAdapter.getFieldName(binding, name);
+	}
+
+	protected List<FinalVariable> getVariableList(char fvn) { 
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getVariableList(fvn); 
+	}
+
+	protected String getFullClassName() {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getFullClassName();
+	}
+
+	protected String getIndexedVarName(String name, int i) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getIndexedVarName(name, i);
+	}
+
+	protected String getJ2SName(SimpleName node) {
+		return J2SMapAdapter.getJ2SName(node);
+	}
+
+	protected String getJ2SName(IVariableBinding binding) {
+		return J2SMapAdapter.getJ2SName(binding);
+	}
+
+	protected String getNormalVariableName(String name) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).getNormalVariableName(name);
+	}
+
+	public String getPackageName() {
+		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).getPackageName();
+	}
+
+	protected String getShortenedPackageNameFromClassName(String name) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedPackageNameFromClassName(name);
+	}
+
+	protected String getTypeStringName(Type type) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getTypeStringName(type);
+	}
+
+	protected boolean isBasePackage() {
+		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).isBasePackage();
+	}
+
+	protected boolean isFinalSensible() {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isFinalSensible;
+	}
+
+	protected boolean isInheritedFieldName(ITypeBinding binding, String name) {
+		return J2SMapAdapter.isInheritedFieldName(binding, name);
+	}
+
+	/**
+	 * compiling of variable names is no longer supported -- use Google Closure Compiler
+	 * @return
+	 */
+	@Deprecated
+	protected boolean isToCompileVariableName() {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).isToCompileVariableName();
+	}
+
+	protected String listFinalVariables(List<FinalVariable> list, String seperator, String scope) {
+		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).listFinalVariables(list, seperator, scope);
+	}
+	
+	protected String removeJavaLang(String name) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
+	}
+
+	protected void setClassName(String className) {
+		((TypeAdapter) getAdaptable(TypeAdapter.class)).setClassName(className);
+	}
+
+	protected void setPackageName(String packageName) {
+		((PackageAdapter) getAdaptable(PackageAdapter.class)).setPackageName(packageName);
+	}
+	
+//	public void setToCompileVariableName(boolean toCompress) {
+//		((ASTVariableAdapter) getAdaptable(ASTVariableAdapter.class)).setToCompileVariableName(toCompress);	
+//	}
 
 	/**
 	 * Buffer that keeps all compiled *.js.
@@ -140,9 +264,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 				registerPluginVisitor((IPluginVisitor) newInstance);
 				return newInstance;
 			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		return null;

@@ -548,7 +548,7 @@ J2S._getDefaultLanguage = function(isAll) { return (isAll ? J2S.featureDetection
 	}
   
   J2S._getSetJavaFileCache = function(cache) {
-    // called by swingjs.JSToolkit 
+    // called by swingjs.JSUtil 
     return (cache == null ? J2S._javaFileCache : (J2S._javaFileCache = cache)); 
   }
 	
@@ -1881,6 +1881,7 @@ J2S.Cache.put = function(filename, data) {
 		proto.__startAppletJS = function(applet) {
 			if (J2S._version.indexOf("$Date: ") == 0)
 				J2S._version = (J2S._version.substring(7) + " -").split(" -")[0] + " (J2S)"
+			Clazz.loadClass("java.lang.Class");
 			var viewerOptions = Clazz._4Name("java.util.Hashtable").newInstance();
       viewerOptions.put = viewerOptions.put$TK$TV;
 			J2S._setAppletParams(applet._availableParams, viewerOptions, applet.__Info, true);

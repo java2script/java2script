@@ -13,6 +13,7 @@
 
 // TODO: Check String.contentEquals -- CharSequence?  StringBuffer.shareValue??
 
+// BH 9/21/2017 10:39:26 PM adds ClassLoader.getSystemClassLoader().setDefaultAssertionStatus$Z(tf)
 // BH 9/7/2017 10:53:30 AM adds Clazz.assert; deprecates all Clazz.floatToInt, floatToByte, etc. 
 // BH 8/30/2017 6:40:11 PM adds $newClass()
 // BH 8/26/2017 9:45:55 AM fix for URL.getContent()
@@ -165,10 +166,10 @@ Clazz.defineMethod = function(){debugger}
 
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
-Clazz._assertEnabled = true;
+Clazz.defaultAssertionStatus = true;
 Clazz._assertFunction = null;
 Clazz.assert = function(clazz, tf, msg) {
-  if (!Clazz._assertEnabled)return;
+  if (!clazz.$_ASSERT_ENABLED_)return;
   var ok = true;
   try {
     ok = tf.apply(clazz)
@@ -179,7 +180,7 @@ Clazz.assert = function(clazz, tf, msg) {
   }
   if (!ok) {
     if (Clazz._assertFunction) {
-      return Clazz._assertFunction(msg || Clazz.getStackTrace());
+      return Clazz._assertFunction(clazz, msg || Clazz.getStackTrace());
     }
     Clazz.loadClass("java.lang.AssertionError");
     if (msg == null)
@@ -1066,6 +1067,8 @@ Clazz.saemCount3 = 0 // getInheritedLevels started
 Clazz.saemCount4 = 0 // getInheritedLevels checked
 
 var evalType = function (typeStr, isQualified) {
+  if (typeStr == null)
+    return null;
   var idx = typeStr.lastIndexOf(".");
   if (idx >= 0) {
     var pkgName = typeStr.substring (0, idx);
@@ -1566,10 +1569,6 @@ Clazz.declareInterface (java.lang,"Comparable");
 Clazz.declareInterface (java.lang,"Runnable");
 Clazz.declareInterface (java.util,"Comparator");
 
-java.lang.ClassLoader = {
-  __CLASS_NAME__ : "ClassLoader"
-};
-
 //////// (int) conversions //////////
 
 // deprecated
@@ -1655,11 +1654,6 @@ Clazz._setDeclared = function(name, func) {
 
 
 /**
- * Static class loader class
- */
-Clazz._Loader = Clazz.ClazzLoader = function () {};
-
-/**
  * Class dependency tree node
  */
 /* private */
@@ -1678,8 +1672,52 @@ var Node = function () {
 };
 
 
+/**
+ * Static class loader class
+ */
+Clazz._Loader = Clazz.ClazzLoader = function () {};
+
 ;(function(Clazz, _Loader) {
 
+ClassLoader = java.lang.ClassLoader = _Loader;
+_Loader.__CLASS_NAME__ = "ClassLoader";
+
+_Loader.sysLoader = null;
+
+_Loader.getSystemClassLoader = function() {
+  return (_Loader.sysLoader ? _Loader.sysLoader : (_Loader.sysLoader = new Class().getClassLoader()));
+};
+
+_Loader.prototype.setDefaultAssertionStatus$Z = function(tf) {
+  Clazz.defaultAssertionStatus = tf;
+};
+
+var assertionStatus = {};
+
+_Loader.prototype.clearAssertionStatus = function() {
+  assertionStatus = {};
+  Clazz.defaultAssertionStatus = false;
+}
+
+_Loader.$getClassAssertionStatus = function(clazz) {
+  var ret;
+  var clazzName = clazz.__CLASS_NAME__ + ".";
+  for (var c in assertionStatus) {
+    if (clazzName.indexOf(c) == 0) {
+      ret = assertionStatus[c];
+      break;
+    }
+  }
+  return (ret === false ? false : ret || Clazz.defaultAssertionStatus);
+}
+
+_Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAssertionStatus$S$Z = function(clazzName, tf) {
+  assertionStatus[clazzName + "."] = tf;
+};
+
+_Loader.prototype.loadClass$S = function(clazzName) {
+  return Clazz._4Name(clazzName);
+}
 _Loader._checkLoad = J2S._checkLoad;
  
 _Loader._TODO = [];
@@ -1943,14 +1981,14 @@ Clazz.loadClass = function (name, onLoaded, async) {
     JavaObject = Clazz._O;
     // maybe more here
   }
-  return (name && _Loader.loadClass(name, onLoaded, true, async, 1));
+  name && _Loader.loadClass(name, onLoaded, true, async, 1);
 }
 
 /**
  * Load the given class ant its related classes.
  */
 /* public */
-_Loader.loadClass = function (name, onLoaded, forced, async, mode) {
+_Loader.loadClass = _Loader.prototype.loadClass = function (name, onLoaded, forced, async, mode) {
 
   mode || (mode = 0); // BH: not implemented
   (async == null) && (async = false);
@@ -2002,7 +2040,7 @@ _Loader.loadClass = function (name, onLoaded, forced, async, mode) {
         }
       }
     }
-    return;
+    return b;
   }
   var path = _Loader.getClasspathFor(name);
   var existed = loadedScripts[path];
@@ -3802,7 +3840,7 @@ java.lang.System = System = {
   currentTimeMillis : function () {
     return new Date ().getTime ();
   },
-  exit : function() { swingjs.JSToolkit.exit() },
+  exit : function() { swingjs.JSToolkit && swingjs.JSToolkit.exit() },
   gc : function() {}, // bh
   getProperties : function () {
     return System.props;
@@ -6534,7 +6572,7 @@ return null;
 });
 
 
-//Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSToolkit");
+//Clazz._Loader.loadZJar(Clazz._Loader.getJ2SLibBase() + "core/coreswingjs.z.js", "swingjs.JSUtil");
 
 
 })(Clazz, J2S); // requires JSmolCore.js

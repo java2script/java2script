@@ -4,7 +4,7 @@ class Test_Char {
 
 	public static void main(String[] args) {
 		Character k = new Character('K');
-		System.out.println("'K'=" + (char) 75 + " Character('K')=" + new Character('K'));
+		System.out.println("'K'=" + (char) 75 + " Character('K')=" + k);
 		test((char) 75);
 		String s = new String("\ud800\udf84");
 		char c = (char) 0xdf84;
@@ -37,7 +37,32 @@ class Test_Char {
 		assert(getCharFromCharacter2('c') == cc);
 		assert(getIntFromInteger(99) == cc);
 		assert(getIntegerFromInt(Integer.valueOf(99)) == cc);
+
+
+		// testing for proper conversion to int from char in array and switch
 		
+		int[] ia = new int[300];
+		ia[new Character('c')] = 3;
+		switch (cc) {
+		case 'c':
+		case 'd':
+		case 33:
+		}
+
+		// what about conditional expressions?
+		
+		int ic = (cc < 10 ? 'c' : 33);
+		char ccc = (cc < 10 ? 'c' : 33);
+
+		ic = (cc < 10 ? (int) 330 : (byte) 330);
+		ic = (cc < 10 ? (byte) 330 : (int) 330);
+		ic = (cc < 10 ? 33 : 'c');
+		ccc = (cc < 10 ? 33 : new Character('c'));
+		
+//		var ic = (cc.$c() < 10  ? 'c' : String.fromCharCode(33)).$c();
+//		var ccc = String.fromCharCode((cc.$c() < 10  ? 'c' : String.fromCharCode(33)).$c());
+//		ic = >>=>>int-char(cc.$c() < 10  ? 33 : 'c'.$c()).$c();
+//		ccc = >>=>>char-charString.fromCharCode((cc.$c() < 10  ? 33 : (Clazz.$new(Character.construct,[String.fromCharCode('c'.$c())])).charValue()).$c());
 
 		cc = new Character('d');
 		
@@ -46,21 +71,6 @@ class Test_Char {
         assert(cc == 'o');
         int ii = 3 + 6 + new Character('\1');
         assert(ii == 10);
-		double d = 3;
-		int di = 'c';
-		d /= 'c';
-		di /= 'c';
-		assert(d == 3.0/99);
-		assert(di == 1);
-		di = 100;
-		assert(di / 7 / 3 == 4);
-		int[] ia = new int[300];
-		ia[new Character('c')] = 3;
-		switch (cc) {
-		case 'c':
-		case 'd':
-		case 33:
-		}
 		s = "testing" + 3;
 		s = "testing" + 3 + cc + 5;
 		s = "testing" + 3 + cc + 5f;
@@ -83,9 +93,9 @@ class Test_Char {
 		s += new Double(3) + cc++ + 5;
 		s += new Double(3) + ++cc + 5;
 		System.out.println(s = s + cc);
-		di = cc++ + 1;
+		int di = cc++ + 1;
 		assert(s.equals("33.53o53o5.03.03.0o5null33.0119119.03.0119.0121.0q"));
-		d = 333.5;
+		double d = 333.5;
         assert((int)d == 333);
         assert((int)-d == -333);
         assert((byte)d == 77);

@@ -9,19 +9,21 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors;
-
+package net.sf.j2s.core.adapters;
 
 /**
+ * 
+ * Class to allow checking for need to use Clazz.declarePackage
+ * 
+ * 
  * @author zhou renjian
  *
  * 2006-12-3
  */
-public class ASTPackageVisitor extends AbstractPluginVisitor {
+public class PackageAdapter extends AbstractPluginAdapter {
 
-	protected String thisPackageName = "";
+	private String thisPackageName = "";
 	
-
 	public static String[] basePackages =  {
 			"java.lang", 
 			"java.lang.ref", 
@@ -33,16 +35,19 @@ public class ASTPackageVisitor extends AbstractPluginVisitor {
 			"java.io", 
 			"java.util"};
  
-	protected String[] skipDeclarePackages() {
-		return basePackages;
-	}
-
 	public String getPackageName() {
 		return thisPackageName;
 	}
 
 	public void setPackageName(String thisPackageName) {
 		this.thisPackageName = thisPackageName;
+	}
+
+	public boolean isBasePackage() {
+		for (int i = 0; i < basePackages.length; i++)
+			if (basePackages[i].equals(thisPackageName))
+				return true;
+		return false;
 	}
 
 }

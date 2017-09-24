@@ -9,7 +9,7 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 
-package net.sf.j2s.core.astvisitors;
+package net.sf.j2s.core.adapters;
 
 import java.util.HashSet;
 
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  * 2006-12-3
  */
-public class ASTFieldVisitor extends AbstractPluginVisitor {
+public class FieldAdapter extends AbstractPluginAdapter {
 
 	/*
 	 * IE passes the following: 
@@ -54,7 +54,7 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	 *  
 	 *  
 	 */
-	public static String[] keywords = new String[] {
+	static String[] keywords = new String[] {
 		"class", /*"java", "javax", "sun", */"for", "while", "do", "in", "return", "function", "var", 
 		"class", "pubic", "protected", "private", "new", "delete",
 		"static", "package", "import", "extends", "implements",
@@ -69,7 +69,7 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	};
 
 	
-	static boolean checkKeywordViolation(String name, HashSet<String> definedPackageNames) {
+	public static boolean checkKeywordViolation(String name, HashSet<String> definedPackageNames) {
 		for (int i = 0; i < keywords.length; i++) {
 			if (keywords[i].equals(name)) {
 				return true;
@@ -85,7 +85,7 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 	 * @param node
 	 * @return
 	 */
-	protected boolean isSimpleQualified(QualifiedName node) {
+	public static boolean isSimpleQualified(QualifiedName node) {
 		Name qualifier = node.getQualifier();
 		if (qualifier instanceof SimpleName) {
 			return true;
@@ -94,30 +94,5 @@ public class ASTFieldVisitor extends AbstractPluginVisitor {
 		}
 		return false;
 	}
-
-//	protected boolean isFieldNeedPreparation(FieldDeclaration node) {
-//		if ((node.getModifiers() & Modifier.STATIC) != 0) {
-//			return false;
-//		}
-//
-//		List<?> fragments = node.fragments();
-//		for (Iterator<?> iter = fragments.iterator(); iter.hasNext();) {
-//			VariableDeclarationFragment element = (VariableDeclarationFragment) iter.next();
-//			Expression initializer = element.getInitializer();
-//			if (initializer != null) {
-//				Object constValue = initializer.resolveConstantExpressionValue();
-//				if (constValue != null && (constValue instanceof Number || constValue instanceof Character
-//						|| constValue instanceof Boolean || constValue instanceof String)) {
-//					return false;
-//				}
-//				if (initializer instanceof NullLiteral) {
-//					return false;
-//				}
-//				return true;
-//			}
-//			return false;
-//		}
-//		return false;
-//	}
 
 }

@@ -58,6 +58,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import net.sf.j2s.core.adapters.Bindings;
+
 /**
  * 
  * @author zhou renjian
@@ -85,15 +87,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 	private ASTNode javadocRoot = null;
 
-	protected boolean toCompileVariableName = true;
-
-	public String discardGenericType(String name) {
-		return ((ASTTypeVisitor) getAdaptable(ASTTypeVisitor.class)).discardGenericType(name);
-	}
-
-	public String getPackageName() {
-		return ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class)).getPackageName();
-	}
+	public boolean toCompileVariableName = false;
 
 	private String[] classNames;
 	/**
@@ -375,15 +369,13 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 	
 	public boolean visit(PackageDeclaration node) {
-		ASTPackageVisitor packageVisitor = ((ASTPackageVisitor) getAdaptable(ASTPackageVisitor.class));
 		String name = "" + node.getName();
-		packageVisitor.setPackageName(name);
+		setPackageName(name);
 		addPackage(name);
 		return false;
 	}
 
 	
-
 	private String[] defaultPackageNamesDefined = {"java", "javax", "sun", "jsjava", "jsjavax", "jssun"};	
 	private void addPackage(String name) {
 		int pt = name. indexOf(".");
@@ -1006,10 +998,6 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 
 	public boolean isToCompileVariableName() {
 		return toCompileVariableName;
-	}
-
-	public void setToCompileVariableName(boolean toCompileVariableName) {
-		this.toCompileVariableName = toCompileVariableName;
 	}
 
 	public boolean visit(MethodDeclaration node) {

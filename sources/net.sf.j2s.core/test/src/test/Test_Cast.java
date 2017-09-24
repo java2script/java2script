@@ -2,13 +2,13 @@ package test;
 
 class Test_Cast {
 
-	private static void say(char c, String type, char val) {
+	private static void say(char c, String type, int val) {
 		System.out.println("testing char " + type + " " +  c + " " + val);
 		assert(type == "char" && c == val);
 	}
 
 
-	private static void say(Character c, String type, char val) {
+	private static void say(Character c, String type, int val) {
 		System.out.println("testing char " + type + " " +  c + " " + val);
 		assert(type == "Character" && c== val);
 	}
@@ -35,6 +35,10 @@ class Test_Cast {
 	}
 
 	public static void main(String[] args) {
+		
+		
+		
+		
 		System.out.println("'K'=" + (char) 75 + " Character('K')=" + new Character('K'));
 		say((char) 75, "char", 'K');
 		say(new Character('K'), "Character", 'K');
@@ -46,7 +50,16 @@ class Test_Cast {
 		short s300 = (short) 300;
 		short s100 = (short) 100;
 		int i300 = 300;
+
+		// int char --> char
+		// char int --> char
+		// byte int --> byte
+		// int byte --> byte
+		// byte long --> long
+	    // byte Character --> int ??? 
 		
+		say(i300 > 1000 ? (byte) 33: new Character('C') , "???", 33);  // int
+
 		// TODO && not working
 		assert(i300 == 300 && true);
 		
