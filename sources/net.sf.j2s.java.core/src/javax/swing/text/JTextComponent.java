@@ -74,7 +74,7 @@ import javax.swing.plaf.UIResource;
 
 import sun.awt.AppContext;
 import swingjs.JSPlainDocument;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 //import java.text.AttributedCharacterIterator;
 //import java.text.AttributedString;
 //import java.text.CharacterIterator;
@@ -1382,7 +1382,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
                     restoreComposedText();
                 }
             } catch (BadLocationException e) {
-            	JSToolkit.alert("SWINGJS BAD LOCATION EXCEPTION (replace):" + e.getMessage() + JSToolkit.getStackTrace(-10));
+            	JSUtil.alert("SWINGJS BAD LOCATION EXCEPTION (replace):" + e.getMessage() + JSUtil.getStackTrace(-10));
                 //UIManager.getLookAndFeel().provideErrorFeedback(JTextComponent.this);
             }
         }
@@ -1720,7 +1720,7 @@ public abstract class JTextComponent extends JComponent implements Scrollable
             }
             
         } catch (BadLocationException e) {
-        	JSToolkit.alert("SWINGJS BAD LOCATION EXCEPTION (setText):" + e.getMessage() + JSToolkit.getStackTrace(-10));
+        	JSUtil.alert("SWINGJS BAD LOCATION EXCEPTION (setText):" + e.getMessage() + JSUtil.getStackTrace(-10));
         }
     }
 

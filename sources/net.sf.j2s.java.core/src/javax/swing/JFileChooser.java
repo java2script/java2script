@@ -48,7 +48,7 @@ import javax.swing.filechooser.FileFilter;
 //import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
 
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 
 /**
@@ -740,13 +740,13 @@ public class JFileChooser extends JComponent {
     		// SwingJS TODO
     		return CANCEL_OPTION;
     	case SAVE_DIALOG:
-    		String name = JSToolkit.prompt(dialogTitle, lastFileName);
+    		String name = JSUtil.prompt(dialogTitle, lastFileName);
     		if (name == null)
     			return CANCEL_OPTION;
     		selectedFile = new File(name);
     		return APPROVE_OPTION;
     	case CUSTOM_DIALOG:
-    		JSToolkit.notImplemented("JFileChooser.CUSTOM_DIALOG");
+    		JSUtil.notImplemented("JFileChooser.CUSTOM_DIALOG");
     		return CANCEL_OPTION;
     	}
     	return CANCEL_OPTION;

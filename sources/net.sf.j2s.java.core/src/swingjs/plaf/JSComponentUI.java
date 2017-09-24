@@ -42,6 +42,7 @@ import javajs.util.PT;
 import sun.awt.CausedFocusEvent.Cause;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.JQueryObject;
@@ -182,7 +183,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	public void setDraggable(JSFunction f) {
 		// SplitPaneDivider
 		draggable = true;
-		JSToolkit.J2S._setDraggable(updateDOMNode(), f);
+		JSUtil.J2S._setDraggable(updateDOMNode(), f);
 	}
 	
 
@@ -362,7 +363,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 		 */
 		{
 		}
-		debugging = swingjs.JSToolkit.debugging;
+		debugging = swingjs.JSUtil.debugging;
 	}
 
 	/**
@@ -422,7 +423,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	}
 
 	protected JQueryObject $(DOMNode node) {
-		return JSToolkit.getJQuery().$(node);
+		return JSUtil.getJQuery().$(node);
 	}
 
 	public JSComponentUI set(JComponent target) {
@@ -535,7 +536,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 	protected void setJ2sMouseHandler(DOMNode frameNode) {
 		DOMNode.setAttrs(frameNode, "applet", applet, "_frameViewer",
 				jc.getFrameViewer());
-		JSToolkit.J2S._jsSetMouse(frameNode, true);
+		JSUtil.J2S._jsSetMouse(frameNode, true);
 	}
 
 	public static JSComponentUI focusedUI;
@@ -853,7 +854,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 				+ getClass().getName();
 		if (debugging && createMsgs.indexOf(msg) < 0) {
 			createMsgs += msg;
-			JSToolkit.alert(msg);
+			JSUtil.alert(msg);
 		}
 		System.out.println(msg);
 		return (domNode == null ? domNode = DOMNode.createElement("div", id)
@@ -1251,7 +1252,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public void print(Graphics g) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 	}
 
 	@Override
@@ -1403,13 +1404,13 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public boolean isObscured() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return false;
 	}
 
 	@Override
 	public boolean canDetermineObscurity() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return false;
 	}
 
@@ -1651,7 +1652,7 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public void coalescePaintEvent(PaintEvent e) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 
 	}
 
@@ -1837,79 +1838,79 @@ public class JSComponentUI extends ComponentUI implements ContainerPeer,
 
 	@Override
 	public Image createImage(ImageProducer producer) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 
 	@Override
 	public Image createImage(int width, int height) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 
 	@Override
 	public VolatileImage createVolatileImage(int width, int height) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 
 	@Override
 	public boolean prepareImage(Image img, int w, int h, ImageObserver o) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return false;
 	}
 
 	@Override
 	public int checkImage(Image img, int w, int h, ImageObserver o) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return 0;
 	}
 
 	@Override
 	public GraphicsConfiguration getGraphicsConfiguration() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 
 	@Override
 	public boolean handlesWheelScrolling() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return false;
 	}
 
 	@Override
 	public Image getBackBuffer() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 
 	@Override
 	public void destroyBuffers() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 
 	}
 
 	@Override
 	public void reparent(ContainerPeer newContainer) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 
 	}
 
 	@Override
 	public boolean isReparentSupported() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return false;
 	}
 
 	@Override
 	public void layout() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 
 	}
 
 	@Override
 	public Rectangle getBounds() {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 

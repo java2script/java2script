@@ -38,7 +38,7 @@ public class JSSAXContentHandler extends DefaultHandler {
 
 	@Override
 	public void startDocument() {
-		debugging = JSToolkit.debugging;
+		debugging = JSUtil.debugging;
 		if (debugging)
 			System.out.println("JSSAX Start document");
 	}

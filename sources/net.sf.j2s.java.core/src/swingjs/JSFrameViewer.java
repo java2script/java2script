@@ -3,13 +3,13 @@ package swingjs;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Insets;
+import java.util.Hashtable;
 
 import javax.swing.JApplet;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 
 import swingjs.api.js.DOMNode;
-import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.HTML5Canvas;
 import swingjs.api.js.JSInterface;
 import swingjs.plaf.JSComponentUI;
@@ -26,17 +26,13 @@ import swingjs.plaf.Resizer;
  * @author Bob Hanson
  * 
  */
-public class JSFrameViewer implements JSInterface {
+public class JSFrameViewer extends JSApp implements JSInterface {
 
 	protected JSGraphics2D jsgraphics;
-
-	public String fullName = "Main";
 
 	public Container top; // JApplet or JFrame
 
 	public JSAppletViewer appletViewer;
-	public boolean isApplet, isFrame;	
-	public HTML5Applet html5Applet;
 	public Resizer resizer;
   
 
@@ -45,7 +41,15 @@ public class JSFrameViewer implements JSInterface {
 	public Insets getInsets() {
 		return insets;
 	}
+
+	public JSFrameViewer(Hashtable<String, Object> params) {
+		super(params);
+	}
 	
+	public JSFrameViewer() {
+		super();
+	}
+
 	public JSFrameViewer setForWindow(Container window) {
 		isFrame = true;
 		appletViewer = window.appletViewer;

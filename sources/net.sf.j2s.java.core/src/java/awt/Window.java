@@ -59,6 +59,7 @@ import sun.awt.AppContext;
 import swingjs.JSToolkit;
 //import java.util.concurrent.atomic.AtomicBoolean;
 //import java.util.logging.Logger;
+import swingjs.JSUtil;
 
 /**
  * A <code>Window</code> object is a top-level window with no borders and no
@@ -665,7 +666,7 @@ public class Window extends Container {
 		if (parent != null && parent.getPeer() == null)
 			parent.addNotify();
 		getOrCreatePeer();
-		JSToolkit.getAppletViewer().addWindow(this);
+		JSUtil.getAppletViewer().addWindow(this);
 		super.addNotify();
 	}
 
@@ -679,7 +680,7 @@ public class Window extends Container {
 	 */
 	@Override
 	public void removeNotify() {
-		JSToolkit.getAppletViewer().allWindows.removeObj(this);
+		JSUtil.getAppletViewer().allWindows.removeObj(this);
 		super.removeNotify();
 	}
 
@@ -1345,14 +1346,14 @@ public class Window extends Container {
     static ArrayList<Window> getAllWindows() {
 //        synchronized (allWindows) {
             ArrayList<Window> v = new ArrayList<Window>();
-            v.addAll(JSToolkit.getAppletViewer().allWindows);
+            v.addAll(JSUtil.getAppletViewer().allWindows);
             return v;
  //       }
     }
 
 	static ArrayList<Window> getAllUnblockedWindows() {
 		// synchronized (allWindows) {
-		ArrayList<Window> allWindows = JSToolkit.getAppletViewer().allWindows;
+		ArrayList<Window> allWindows = JSUtil.getAppletViewer().allWindows;
 		ArrayList<Window> unblocked = new ArrayList<Window>();
 		for (int i = 0; i < allWindows.size(); i++) {
 			Window w = allWindows.get(i);

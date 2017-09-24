@@ -16,7 +16,7 @@ public class JSApplet extends JApplet {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Running main but cannot find class " + className);
-			JSToolkit.alert("Cannot find class " + className + " for running main(args)");
+			JSUtil.alert("Cannot find class " + className + " for running main(args)");
 			e.printStackTrace();
 			return null;
 		}

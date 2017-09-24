@@ -53,7 +53,8 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.NavigationFilter;
 import javax.swing.text.NumberFormatter;
 import javax.swing.text.TextAction;
-import swingjs.JSToolkit;
+
+import swingjs.JSUtil;
 //import javax.swing.text.InternationalFormatter;
 import swingjs.api.JSMinimalAbstractDocument;
 
@@ -838,7 +839,7 @@ public class JFormattedTextField extends JTextField {
      */
     private AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
     	if (type instanceof DateFormat) {
-    		JSToolkit.notImplemented(null);
+    		JSUtil.notImplemented(null);
     		return null;
 //            return new DefaultFormatterFactory(new DateFormatter
 //                                               ((DateFormat)type));

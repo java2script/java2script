@@ -18,7 +18,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import sun.swing.DefaultLookup;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 @J2SRequireImport(swingjs.jquery.JQueryUI.class)
@@ -56,8 +56,8 @@ public class JSSliderUI extends JSLightweightUI implements PropertyChangeListene
 	public JSSliderUI() {
 		if (!cssLoaded) {
 			// this static call allows for the CSS to be loaded only once and only when needed
-			JSToolkit.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
-			JSToolkit.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
+			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.css");
+			JSUtil.loadStaticResource("swingjs/jquery/jquery-ui-j2sslider.js");
 			cssLoaded = true;
 		}
 		needPreferred = true;

@@ -31,7 +31,7 @@ package sun.misc;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 /**
  * Queue: implements a simple queue mechanism.  Allows for enumeration of the
@@ -95,7 +95,7 @@ public class Queue {
         throws InterruptedException {
 
         while (tail == null) {
-          JSToolkit.warn("Cannot wait in Queue.java");
+          JSUtil.warn("Cannot wait in Queue.java");
 
             wait(timeOut);
         }

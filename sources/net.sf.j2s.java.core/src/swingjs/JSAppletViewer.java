@@ -18,7 +18,6 @@ import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Locale;
 
 import javax.swing.JApplet;
 import javax.swing.JComponent;
@@ -33,30 +32,28 @@ import sun.applet.AppletEventMulticaster;
 import sun.applet.AppletListener;
 import sun.awt.AppContext;
 import swingjs.api.Interface;
-import swingjs.api.js.HTML5Applet;
 import swingjs.plaf.Resizer;
 
 /**
- * JSAppletViewer 
+ * JSAppletViewer
  * 
- * SwingJS class to start an applet. Note that this must be a JApplet,
- * not just java.awt.Applet. The SwingJS implementation does not allow
- * "mixed" contents -- That is, no non-Swing Applet components are allowed.
+ * SwingJS class to start an applet. Note that this must be a JApplet, not just
+ * java.awt.Applet. The SwingJS implementation does not allow "mixed" contents
+ * -- That is, no non-Swing Applet components are allowed.
  * 
- * However, the package a2s has adapter classes that have names of
- * the AWT components Label, Button, Applet, Frame, etc., which allow
- * one to simply change the imports from java.awt or java.awt.applet to a2s
- * and be done with it. This may take some development along the way, as we have
- * not fully implemented all of the methods of AWT classes, and the JComponent
- * does not subclass its AWT counterpart.
+ * However, the package a2s has adapter classes that have names of the AWT
+ * components Label, Button, Applet, Frame, etc., which allow one to simply
+ * change the imports from java.awt or java.awt.applet to a2s and be done with
+ * it. This may take some development along the way, as we have not fully
+ * implemented all of the methods of AWT classes, and the JComponent does not
+ * subclass its AWT counterpart.
  * 
  * 
  * 
  * The basic start up in JavaScript involves:
  * 
- * Clazz.loadClass("swingjs.JSAppletViewer"); 
- * var _appletViewer = new JSAppletViewer(viewerOptions);
- * _appletViewer.start();
+ * Clazz.loadClass("swingjs.JSAppletViewer"); var _appletViewer = new
+ * JSAppletViewer(viewerOptions); _appletViewer.start();
  * 
  * where viewerOptions holds critical information needed to create this applet
  * 
@@ -64,38 +61,20 @@ import swingjs.plaf.Resizer;
  * @author Bob Hanson
  * 
  */
-@SuppressWarnings("rawtypes")
 public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletContext {
 
 	/*
 	 * the JavaScript testApplet._applet object
 	 */
-	
-
-	private Hashtable params;
 
 	public int maximumSize = Integer.MAX_VALUE;
 
 	// /// AppletViewer fields //////
-	
-	public String appletCodeBase;
-	public String appletIdiomaBase;
-	public String appletDocumentBase;
-
-	public String appletName;
-	public String syncId;
-	public boolean testAsync;
-	public boolean async;
-	public String strJavaVersion;
-	public Object strJavaVendor;
 
 	public GraphicsConfiguration graphicsConfig;
 	public JSThreadGroup threadGroup;
 	public JSThread myThread;
-  public boolean haveFrames = false;
-
-  
-
+	public boolean haveFrames = false;
 
 	/**
 	 * The initial applet size.
@@ -140,7 +119,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	private AppletListener listeners;
 
-	public Lst<Window>allWindows = new Lst<Window>();
+	public Lst<Window> allWindows = new Lst<Window>();
 
 	public void addWindow(Window window) {
 		// not entirely clear why we are getting multiples here
@@ -150,8 +129,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	public Frame sharedOwnerFrame;
 
-	public String htmlName;
-
 	public AppContext appContext;
 
 	private ArrayList<Object> timerQueue;
@@ -160,84 +137,48 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	private boolean addFrame;
 
-	private String main;
-
 	private JFrame jAppletFrame;
-	
+
 	static {
-		
+
 		try {
-			URL.setURLStreamHandlerFactory((URLStreamHandlerFactory) Interface
-					.getInstance("javajs.util.AjaxURLStreamHandlerFactory", false));
+			URL.setURLStreamHandlerFactory(
+					(URLStreamHandlerFactory) Interface.getInstance("javajs.util.AjaxURLStreamHandlerFactory", false));
 		} catch (Throwable e) {
 			// that's fine -- already created
 		}
 
-		
 	}
 
 	/**
 	 * SwingJS initialization is through a Hashtable provided by the page
 	 * JavaScript
 	 * 
-	 * After the applet is instantiated is the opportunity to add a listener using
-	 * setAppletListener(x), where x.appletStateChanged(AppletEvent evt) exists
-	 * 
+	 * After the applet is instantiated is the opportunity to add a listener
+	 * using setAppletListener(x), where x.appletStateChanged(AppletEvent evt)
+	 * exists
+	 * e
 	 * next command on page should be appletViewer.start();
 	 * 
 	 * @param params
 	 */
 	public JSAppletViewer(Hashtable<String, Object> params) {
+		super(params);
+		System.out.println("JSAppletViewer initializing");
 		isApplet = true;
 		appletViewer = this;
-		set(params);
+		setDisplayParams(params);
 	}
 
-	/**
-	 * @param params
-	 */
-	private void set(Hashtable<String, Object> params) {
-		isApplet = true;
-		System.out.println("JSAppletViewer initializing");
-		this.params = params;
-		String language = getParameter("language");
-		if (language == null)
-			language = JSToolkit.J2S._getDefaultLanguage(false);
-		Locale.setDefault(JSToolkit.getDefaultLocale(language));
-		htmlName = JSUtil.split("" + getParameter("name"), "_object")[0];
-		appletName = JSUtil.split(htmlName + "_", "_")[0];
-		// should be the same as htmlName; probably should point out that applet
-		// names cannot have _ in them.
-
-		syncId = getParameter("syncId");
-		fullName = htmlName + "__" + syncId + "__";
-		params.put("fullName", fullName);
-		Object o = params.get("codePath");
-		if (o == null)
-			o = "../java/";
-		appletCodeBase = o.toString();
-		appletIdiomaBase = appletCodeBase.substring(0,
-				appletCodeBase.lastIndexOf("/", appletCodeBase.length() - 2) + 1)
-				+ "idioma";
-		o = params.get("documentBase");
-		appletDocumentBase = (o == null ? "" : o.toString());
-		if (params.containsKey("maximumSize"))
-			Math.max(((Integer) params.get("maximumSize")).intValue(), 100);
-		async = (testAsync || params.containsKey("async"));
-		HTML5Applet applet = JSToolkit.J2S._findApplet(htmlName); 
-		String javaver = JSToolkit.J2S._getJavaVersion();
-		html5Applet = applet;
-		strJavaVersion = javaver;
-		strJavaVendor = "Java2Script/Java 1.6 (HTML5)";
-		// String platform = (String) params.get("platform");
-		// if (platform != null && platform.length() > 0)
-		// apiPlatform = (GenericPlatform) Interface.getInterface(platform);
+	private void setDisplayParams(Hashtable<String, Object> params) {
 		display = params.get("display");
 		String s = "" + params.get("isResizable");
 		isResizable = "true".equalsIgnoreCase(s);
 		haveResizable = (isResizable || "false".equalsIgnoreCase(s));
 		
 		addFrame = "true".equalsIgnoreCase("" + params.get("addFrame"));
+
+		insets = new Insets(0, 0, 0, 0);
 
 		threadGroup = new JSThreadGroup(appletName);
 		myThread = new JSAppletThread(this, threadGroup, appletName);
@@ -248,11 +189,6 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		// initialize toolkit and graphics configuration
 		Toolkit.getDefaultToolkit();
 		new JSGraphicsConfiguration().getDevice();
-		o = params.get("assets");
-		if (o != null)
-			JSToolkit.loadJavaResourcesFromZip(getClass().getClassLoader(), (String) o, null);
-		System.out.println("JSAppletViewer initialized");
-		insets = new Insets(0, 0, 0, 0);
 	}
 
 	public void start() {
@@ -260,7 +196,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			myThread.start();
 		else
 			showStatus("already started");
-		//japplet.repaint();
+		// japplet.repaint();
 	}
 
 	synchronized public void addAppletListener(AppletListener l) {
@@ -293,8 +229,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	 * Is called when the applet wants to be resized.
 	 */
 	public void appletResize(int width, int height) {
-		final Dimension currentSize = new Dimension(currentAppletSize.width,
-				currentAppletSize.height);
+		final Dimension currentSize = new Dimension(currentAppletSize.width, currentAppletSize.height);
 		currentAppletSize.width = width;
 		currentAppletSize.height = height;
 		japplet.setBounds(0, 0, getWidth(), getHeight());
@@ -305,12 +240,12 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			jAppletFrame = new JFrame("SwingJS Applet Viewer");
 			Container pane = japplet.getContentPane();
 			jAppletFrame.setContentPane(pane);
-		  japplet.setVisible(false);
-		  jAppletFrame.pack();
-		  jAppletFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			japplet.setVisible(false);
+			jAppletFrame.pack();
+			jAppletFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		}
-	//if (wNew > 0 && hNew > 0)
-	  japplet.repaint(0, 0, getWidth(), getHeight());
+		// if (wNew > 0 && hNew > 0)
+		japplet.repaint(0, 0, getWidth(), getHeight());
 
 		dispatchAppletEvent(APPLET_RESIZE, currentSize);
 	}
@@ -337,7 +272,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 	public String getParameter(String name) {
 		String s = (String) params.get(name);
 		System.out.println("get parameter: " + name + " = " + s);
-		return (s == null ? null : "" + s); // because it may not be a string in JavaScript if inherited from Info
+		return (s == null ? null : "" + s); // because it may not be a string in
+											// JavaScript if inherited from Info
 	}
 
 	@Override
@@ -374,7 +310,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 *            applet = SwingJS._applets[name]; applet && (applet =
+		 * 			applet = SwingJS._applets[name]; applet && (applet =
 		 *            applet._applet);
 		 */
 		{
@@ -391,22 +327,23 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 
 	@Override
 	public void showDocument(URL url) {
-		// note that JavaScript will overwrite this one because names will not be qualified here
-		JSToolkit.showWebPage(url, null);
+		// note that JavaScript will overwrite this one because names will not
+		// be qualified here
+		JSUtil.showWebPage(url, null);
 	}
 
 	@Override
 	public void showDocument(URL url, String target) {
-		JSToolkit.showWebPage(url, target);
+		JSUtil.showWebPage(url, target);
 	}
 
 	@Override
 	public void showStatus(String status) {
-		JSToolkit.log(status);
+		JSUtil.log(status);
 		/**
 		 * @j2sNative
 		 * 
-		 *            Clazz._LoaderProgressMonitor.showStatus(status, true);
+		 * 			Clazz._LoaderProgressMonitor.showStatus(status, true);
 		 */
 		{
 			System.out.println(status);
@@ -421,13 +358,13 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 		/**
 		 * @j2sNative
 		 * 
-		 *            this.showAppletStatus("error " + (t.getMessage ?
+		 * 			this.showAppletStatus("error " + (t.getMessage ?
 		 *            t.getMessage() : t)); t.printStackTrace &&
 		 *            t.printStackTrace();
 		 */
 		{
 		}
-		//repaint();
+		// repaint();
 	}
 
 	/**
@@ -469,7 +406,8 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				japplet.setFont(new Font(Font.DIALOG, Font.PLAIN, 12));
 				japplet.resize(defaultAppletSize);
 				japplet.init();
-				// Need the default(fallback) font to be created in this AppContext
+				// Need the default(fallback) font to be created in this
+				// AppContext
 				japplet.validate(); // SwingJS
 				status = APPLET_INIT;
 				showAppletStatus("initialized");
@@ -487,20 +425,29 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				System.out.println("JSAppletViewer start" + currentAppletSize);
 				japplet.resize(currentAppletSize);
 				japplet.start();
-				//japplet.repaint();
+				// japplet.repaint();
 				status = APPLET_START;
 				showAppletStatus("started");
 				nextStatus = APPLET_READY;
 				ok = true;
 				break;
 			case APPLET_READY:
-				japplet.getContentPane().setBounds(japplet.getBounds()); // added 7/13/17; applet background was not painting if setContentPane() was used
+				japplet.getContentPane().setBounds(japplet.getBounds()); // added
+																			// 7/13/17;
+																			// applet
+																			// background
+																			// was
+																			// not
+																			// painting
+																			// if
+																			// setContentPane()
+																			// was
+																			// used
 				japplet.setVisible(true);
 				showAppletStatus("ready");
-				JSToolkit.readyCallback(appletName, fullName, applet, this);
+				JSUtil.readyCallback(appletName, fullName, applet, this);
 				if (isResizable && !addFrame) {
-					resizer = ((Resizer) JSToolkit.getInstance("swingjs.plaf.Resizer"))
-							.set(this);
+					resizer = ((Resizer) JSUtil.getInstance("swingjs.plaf.Resizer")).set(this);
 					if (resizer != null)
 						resizer.show();
 				}
@@ -546,7 +493,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 				if (args instanceof String)
 					args = PT.split((String) args, " ");
 				((JSApplet) applet).runMain(main, (String[]) args);
-				JSToolkit.readyCallback(appletName, fullName, applet, this);				
+				JSUtil.readyCallback(appletName, fullName, applet, this);
 				break;
 			case APPLET_QUIT:
 				break;
@@ -575,7 +522,7 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			}
 			if (code == null)
 				code = "swingjs.JSApplet";
-			top = applet = japplet = (JApplet) JSToolkit.getInstance(code);
+			top = applet = japplet = (JApplet) JSUtil.getInstance(code);
 			if (applet == null) {
 				System.out.println(code + " could not be launched");
 				status = APPLET_ERROR;
@@ -607,11 +554,18 @@ public class JSAppletViewer extends JSFrameViewer implements AppletStub, AppletC
 			japplet.setStub(this);
 			japplet.setVisible(false);
 			japplet.setDispatcher();
-			//japplet.addNotify(); // we need this here because there is no frame
+			// japplet.addNotify(); // we need this here because there is no
+			// frame
 			showAppletStatus("loaded");
 		}
 	}
-	
+
+	/**
+	 * Not used?
+	 * 
+	 * @param forceNew
+	 * @return
+	 */
 	public JSFrameViewer newFrameViewer(boolean forceNew) {
 		return (haveFrames || forceNew ? new JSFrameViewer() : null);
 	}

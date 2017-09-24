@@ -141,13 +141,13 @@ class JSAudioLine implements SourceDataLine {
 
 	@Override
 	public int getFramePosition() {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return 0;
 	}
 
 	@Override
 	public long getLongFramePosition() {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return 0;
 	}
 
@@ -164,31 +164,31 @@ class JSAudioLine implements SourceDataLine {
 
 	@Override
 	public float getLevel() {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return 0;
 	}
 
 	@Override
 	public Control[] getControls() {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return null;
 	}
 
 	@Override
 	public boolean isControlSupported(Type control) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return false;
 	}
 
 	@Override
 	public Control getControl(Type control) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return null;
 	}
 
 	@Override
 	public void addLineListener(LineListener listener) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	@Override

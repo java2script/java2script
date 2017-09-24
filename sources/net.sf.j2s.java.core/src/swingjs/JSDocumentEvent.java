@@ -40,7 +40,7 @@ public class JSDocumentEvent implements DocumentEvent {
 
 	@Override
 	public ElementChange getChange(Element elem) {
-		JSToolkit.notImplemented("");
+		JSUtil.notImplemented("");
 		return null;
 	}
 

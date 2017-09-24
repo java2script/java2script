@@ -70,7 +70,7 @@ import javax.swing.text.Position;
 import sun.swing.DefaultLookup;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIAction;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 //import java.awt.datatransfer.Transferable;
 //import javax.swing.BorderFactory;
 //import javax.swing.ImageIcon;
@@ -2545,7 +2545,7 @@ public class JSListUI extends JSLightweightUI {
 				updateIsFileList();
 				redrawList();
 			} else if ("dropLocation" == propertyName) {
-				JSToolkit.notImplemented("dropLocation");
+				JSUtil.notImplemented("dropLocation");
 				// JList.DropLocation oldValue = (JList.DropLocation) e.getOldValue();
 				// repaintDropLocation(oldValue);
 				// repaintDropLocation(list.getDropLocation());

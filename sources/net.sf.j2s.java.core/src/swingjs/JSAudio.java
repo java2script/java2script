@@ -47,7 +47,7 @@ public class JSAudio {
 	}
 	
 	public void playAudioFileURL(URL url) throws IOException, UnsupportedAudioFileException {
-		if (JSToolkit.debugging)
+		if (JSUtil.debugging)
 			System.out.println(url + " AudioFormat:" + getAudioFileFormat(url));
 		playAudioFile(Rdr.getLimitedStreamBytes(url.openStream(), -1), null);
 	}

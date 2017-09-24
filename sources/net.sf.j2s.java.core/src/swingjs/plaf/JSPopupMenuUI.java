@@ -5,7 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JPopupMenu;
 import javax.swing.LookAndFeel;
 import javajs.J2SRequireImport;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.JSSwingMenu;
 import swingjs.api.js.DOMNode;
 
@@ -21,8 +21,8 @@ public class JSPopupMenuUI extends JSPanelUI {
 	public JSPopupMenuUI() {
 		
 		if (j2sSwingMenu == null) {
-			JSToolkit.loadStaticResource("swingjs/jquery/j2sMenu.js");
-			j2sSwingMenu = JSToolkit.J2S._getSwing();
+			JSUtil.loadStaticResource("swingjs/jquery/j2sMenu.js");
+			j2sSwingMenu = JSUtil.J2S._getSwing();
 		}
 		isContainer = true;	
 		isMenuItem = true;

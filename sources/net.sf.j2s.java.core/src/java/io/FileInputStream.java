@@ -25,7 +25,7 @@
 
 package java.io;
 
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 //import java.nio.channels.FileChannel;
 //import sun.nio.ch.FileChannelImpl;
@@ -183,7 +183,7 @@ class FileInputStream extends InputStream
      * @param name the name of the file
      */
     private void open(String name) throws FileNotFoundException {
-    	is = new ByteArrayInputStream(JSToolkit.getFileAsBytes(name));    	
+    	is = new ByteArrayInputStream(JSUtil.getFileAsBytes(name));    	
     }
 
     /**

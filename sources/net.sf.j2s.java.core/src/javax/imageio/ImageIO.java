@@ -43,7 +43,7 @@ import javajs.api.Interface;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import swingjs.JSToolkit;
+
 //import javax.imageio.spi.IIORegistry;
 //import javax.imageio.spi.ImageReaderSpi;
 //import javax.imageio.spi.ImageReaderWriterSpi;
@@ -53,6 +53,7 @@ import swingjs.JSToolkit;
 //import javax.imageio.spi.ImageTranscoderSpi;
 //import javax.imageio.spi.ServiceRegistry;
 //import sun.security.action.GetPropertyAction;
+import swingjs.JSUtil;
 
 /**
  * A class containing static convenience methods for locating
@@ -138,7 +139,7 @@ public final class ImageIO {
 		}
 
 		public void setCacheDirectory(File cacheDirectory) {
-			JSToolkit.notImplemented(null);
+			JSUtil.notImplemented(null);
 			// this.cacheDirectory = cacheDirectory;
 		}
 
@@ -1361,7 +1362,7 @@ public final class ImageIO {
 		return (BufferedImage) Toolkit
 				.getDefaultToolkit()
 				.createImage(
-						JSToolkit
+						JSUtil
 								.getSignedStreamBytes(input instanceof BufferedInputStream ? (BufferedInputStream) input
 										: new BufferedInputStream(input)));
 	}
@@ -1430,7 +1431,7 @@ public final class ImageIO {
 	 *              if an error occurs during reading.
 	 */
 	public static BufferedImage read(ImageInputStream stream) throws IOException {
-		JSToolkit.notImplemented("ImageIO.read(ImageInputStream");
+		JSUtil.notImplemented("ImageIO.read(ImageInputStream");
 		return null;
 	}
 
@@ -1463,7 +1464,7 @@ public final class ImageIO {
 	 public static boolean write(RenderedImage im,
 	 String formatName,
 	 ImageOutputStream output) throws IOException {
-			JSToolkit.notImplemented("ImageIO.write(RenderedImage, String, ImageOutputStream");
+			JSUtil.notImplemented("ImageIO.write(RenderedImage, String, ImageOutputStream");
 			return false;
 	 }
 	

@@ -37,7 +37,7 @@ import javax.swing.plaf.InputMapUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.JTextComponent;
 import sun.swing.DefaultLayoutStyle;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 
 /**
@@ -323,7 +323,7 @@ public abstract class LookAndFeel
      */
     public static JTextComponent.KeyBinding[] makeKeyBindings(Object[] keyBindingList)
     {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        JTextComponent.KeyBinding[] rv = new JTextComponent.KeyBinding[keyBindingList.length / 2];
 //
 //        for(int i = 0; i < keyBindingList.length; i += 2) {
@@ -458,7 +458,7 @@ public abstract class LookAndFeel
      * @see Class#getResourceAsStream(String)
      */
     public static Object makeIcon(final Class<?> baseClass, final String gifFile) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
     	return null;
 //        return SwingUtilities2.makeIcon(baseClass, baseClass, gifFile);
     }
@@ -493,7 +493,7 @@ public abstract class LookAndFeel
      * @since 1.4
      */
     public void provideErrorFeedback(Component component) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        Toolkit toolkit = null;
 //        if (component != null) {
 //            toolkit = component.getToolkit();
@@ -518,7 +518,7 @@ public abstract class LookAndFeel
      * @since 1.4
      */
     public static Object getDesktopPropertyValue(String systemPropertyName, Object fallbackValue) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        Object value = Toolkit.getDefaultToolkit().getDesktopProperty(systemPropertyName);
 //        if (value == null) {
             return fallbackValue;
@@ -550,7 +550,7 @@ public abstract class LookAndFeel
      * @since 1.5
      */
     public Icon getDisabledIcon(JComponent component, Icon icon) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        if (icon instanceof ImageIcon) {
 //            return new ImageIconUIResource(GrayFilter.
 //                   createDisabledImage(((ImageIcon)icon).getImage()));

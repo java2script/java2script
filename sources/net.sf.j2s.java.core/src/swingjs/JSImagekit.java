@@ -130,7 +130,7 @@ public class JSImagekit implements ImageConsumer {
 		this.off = off;
 		this.scansize = scansize;
 		this.pixelBytes = pixels;
-		JSToolkit.notImplemented("byte-based image pixels");
+		JSUtil.notImplemented("byte-based image pixels");
 	}
 
 	private static JSImage createImageFromBytesStatic(byte[] data, int imageoffset,

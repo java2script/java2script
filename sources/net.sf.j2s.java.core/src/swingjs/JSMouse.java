@@ -108,7 +108,7 @@ public class JSMouse {
 
 	private JSMouse2 mouse2;
 	private JSMouse2 getMouse2() {
-		return (mouse2 == null ? (mouse2 = (JSMouse2) JSToolkit.getInstance("swingjs.JSMouse2")).set(this) : mouse2);
+		return (mouse2 == null ? (mouse2 = (JSMouse2) JSUtil.getInstance("swingjs.JSMouse2")).set(this) : mouse2);
 	}
 
 	public static final int MOUSE_LEFT = 16; // MouseEvent.BUTTON1_MASK

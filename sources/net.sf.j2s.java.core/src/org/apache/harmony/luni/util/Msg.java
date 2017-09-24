@@ -40,6 +40,7 @@ import org.apache.harmony.luni.util.MsgHelp;
  * @j2sRequireImport org.apache.harmony.luni.util.MsgHelp,java.util.Locale
  */
 public class Msg {
+	
 
 	// ResourceBundle holding the system messages.
 	static private ResourceBundle bundle = null;

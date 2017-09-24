@@ -1,33 +1,8 @@
 package swingjs;
 
-import java.awt.Toolkit;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Map;
-
-import javajs.J2SIgnoreImport;
-import javajs.api.JSFunction;
-import javajs.util.AU;
-import javajs.util.PT;
-import javajs.util.Rdr;
-import javajs.util.SB;
-import javajs.util.ZipTools;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dialog.ModalExclusionType;
@@ -55,56 +30,57 @@ import java.awt.peer.DialogPeer;
 import java.awt.peer.FramePeer;
 import java.awt.peer.LightweightPeer;
 import java.awt.peer.WindowPeer;
-import java.util.Locale;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.text.Document;
+
+import javajs.J2SIgnoreImport;
+import javajs.api.JSFunction;
+import javajs.util.PT;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 import swingjs.api.Interface;
-import swingjs.api.js.JQuery;
 import swingjs.api.JSFileHandler;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.HTML5Applet;
 import swingjs.api.js.HTML5CanvasContext2D;
-import swingjs.api.js.J2SInterface;
+import swingjs.api.js.JQuery;
 import swingjs.plaf.JSComponentUI;
+
 
 @J2SIgnoreImport(URL.class)
 public class JSToolkit extends SunToolkit {
 
-	public static J2SInterface J2S;
+	/**
+	 * for JSMouse only
+	 */
 	public static boolean isMac;
 		
-	private static Hashtable<String, Object> fileCache;
-	private static boolean useCache = true;
-	
-	/**
-	 * Derived from J2S._checkLoad, which can be set in html page
-	 */
-	public static boolean debugging;
-	
 	static {
-		boolean j2sdebug = false;
-		boolean j2sismac = false;
-		J2SInterface j2sself = null;
 		/**
 		 * @j2sNative
 		 * 
-		 * j2sself = self.J2S;
-		 * j2sismac = (J2S.featureDetection.os == "mac");
-		 * j2sdebug = J2S._checkLoad || J2S._debugCode
+		 * swingjs.JSToolkit.isMac = (J2S.featureDetection.os == "mac");
 		 * 
 		 */
 		{
 		}
-		debugging = j2sdebug;
-		isMac = j2sismac;
-		J2S = j2sself;
 	}
 	
+
 	/*
 	 * NOTE: This class is constructed from java.awt.Toolkit.getDefaultToolkit()
 	 * 
@@ -113,73 +89,6 @@ public class JSToolkit extends SunToolkit {
 	public JSToolkit() {
 		super();		
 		System.out.println("JSToolkit initialized");
-	}
-
-	/**
-	 * important warnings for TODO list
-	 *  
-	 * @param msg
-	 */
-	public static void warn(String msg) {
-		alert(msg);
-	}
-
-  /**
-	 * JavaScript alert
-	 */
-	public static void alert(Object object) {
-		/**
-		 * @j2sNative
-		 * 
-		 * console.log("[JSToolkit] " + object);
-		 * alert("[JSToolkit] " + object);
-		 */
-		{
-			System.out.println(object);
-		}
-	}
-
-	/**
-	 * JavaScript console.log
-	 */
-	public static void log(String msg) {
-		/**
-		 * @j2sNative
-		 * 
-		 * System.out.println(msg);
-		 * console.log(msg);
-		 */
-		{}
-	}
-
-	/**
-	 * JavaScript confirm
-	 * 
-	 */
-	public static boolean confirm(String msg) {
-		/**
-		 * @j2sNative
-		 * 
-		 * return confirm(msg);
-		 */
-		{
-			return false;
-		}
-	}
-
-	/**
-	 * JavaScript confirm
-	 * 
-	 */
-	public static String prompt(String msg, String defaultRet) {
-		/**
-		 * @j2sNative
-		 * 
-		 * return prompt(msg, defaultRet);
-		 */
-		{
-			return null;
-		}
 	}
 
 	/**
@@ -194,7 +103,7 @@ public class JSToolkit extends SunToolkit {
 	}
 
 	public static void exit() {
-		getAppletViewer().exit();
+		JSUtil.getAppletViewer().exit();
 	}
 
 	// ////// java.awt.Toolkit /////////
@@ -202,7 +111,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenWidth() {
 		@SuppressWarnings("unused")
-		JQuery jq = getJQuery();
+		JQuery jq = JSUtil.getJQuery();
 		int w = 0;
 		/**
 		 * @j2sNative
@@ -218,7 +127,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	protected int getScreenHeight() {
 		@SuppressWarnings("unused")
-		JQuery jq = getJQuery();
+		JQuery jq = JSUtil.getJQuery();
 		int h = 0;
 		/**
 		 * @j2sNative
@@ -301,28 +210,14 @@ public class JSToolkit extends SunToolkit {
 	}
 
 	/**
-	 * Load a class that has a () constructor.
-	 * 
-	 * @param className
-	 * @return may be null
-	 */
-	public static Object getInstance(String className) {
-		return swingjs.api.Interface.getInstance(className, false);
-	}
-
-	/**
 	 * There is one and only one graphics configuration for a given Applet. 
 	 * It is available through Thread.currentThread
 	 * @return
 	 */
 	public static GraphicsConfiguration getGraphicsConfiguration() {
-		JSAppletViewer ap = getAppletViewer();
+		JSAppletViewer ap = JSUtil.getAppletViewer();
 		GraphicsConfiguration gc = ap.graphicsConfig;
-		return (gc == null ? (gc = ap.graphicsConfig = (GraphicsConfiguration) getInstance("swingjs.JSGraphicsConfiguration")) : gc);
-	}
-
-	public static JSAppletViewer getAppletViewer() {
-		return ((JSAppletThread) Thread.currentThread()).appletViewer;
+		return (gc == null ? (gc = ap.graphicsConfig = (GraphicsConfiguration) JSUtil.getInstance("swingjs.JSGraphicsConfiguration")) : gc);
 	}
 
 	public static boolean isFocused(Window window) {
@@ -391,59 +286,6 @@ public class JSToolkit extends SunToolkit {
 		return "#" + s.substring(s.length() - 6);
 	}
 
-	private static Map<String, Boolean> mapNotImpl;
-
-	/**
-	 * report ONCE to System.out; can check in JavaScript
-	 * 
-	 * @param msg
-	 *          TODO
-	 * 
-	 */
-	public static void notImplemented(String msg) {
-		String s = null;
-		if (mapNotImpl == null)
-			mapNotImpl = new Hashtable<String, Boolean>();
-		/**
-		 * @j2sNative
-		 * 
-		 *            s = arguments.callee.caller;
-		 *            var cl = s.claxxOwner || s.exClazz;
-		 *            s = (cl ? cl.__CLASS_NAME__ + "." : "") +
-		 *            arguments.callee.caller.exName;
-		 */
-		{
-		}
-		if (mapNotImpl.containsKey(s))
-			return;
-		mapNotImpl.put(s, Boolean.TRUE);
-		System.out.println(s + " has not been implemented in SwingJS. "
-				+ (msg == "" ? "" : (msg == null ? "" : msg) + getStackTrace(-5)));
-
-	}
-
-	public static String getStackTrace() {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return Clazz.getStackTrace();
-		 */
-		{
-			return null;
-		}
-	}
-
-	public static String getStackTrace(int n) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return Clazz.getStackTrace(n);
-		 */
-		{
-			return null;
-		}
-	}
-
 	private static UIDefaults uid;
 
 	public static UIDefaults getLookAndFeelDefaults() {
@@ -462,161 +304,6 @@ public class JSToolkit extends SunToolkit {
 
 	public static String getSwingDivId() {
 		return Thread.currentThread().getName() + "_swingdiv";
-	}
-
-	/**
-	 * Sets window.jQuery.$ = window.jQuery, so that we can call jQuery.$
-	 * 
-	 * @return an object with $ as a method
-	 */
-	public static JQuery getJQuery() {
-		/**
-		 * @j2sNative
-		 * 
-		 *            if (!window.jQuery) alert(
-		 *            "jQuery is required for SwingJS, but window.jQuery is not defined."
-		 *            ); jQuery.$ || (jQuery.$ = jQuery); return(jQuery);
-		 */
-		{
-			return null;
-		}
-	}
-
-	private static void cacheFileData(String path, Object data) {		
-		getFileCache().put(path,  data);
-	}
-
-	private static Map<String, Object> getFileCache() {
-		if (fileCache == null && (fileCache = J2S._getSetJavaFileCache(null)) == null) {
-			fileCache = new Hashtable<String, Object>();
-			J2S._getSetJavaFileCache(fileCache);
-		}
-		return fileCache;
-	}
-
-	/**
-	 * Load a Hashtable with resource files, which may be binary;
-	 * called by JSAppletViewer upon loading and finding Info.resourceZip not null.
-	 * 
-	 * @param zipFileName originating file
-	 * @param mapByteData map to fill or null for the default file cache
-	 */
-	@SuppressWarnings("static-access")
-	public static void loadJavaResourcesFromZip(ClassLoader cl, String zipFileName, Map<String, Object>  mapByteData) {
-		if (mapByteData == null)
-			mapByteData = getFileCache();
-		String fileList = "";
-		try {
-			BufferedInputStream bis = new BufferedInputStream(cl.getResourceAsStream(zipFileName));
-			String prefix = J2S._getResourcePath(null, true); // will end with /
-			fileList = getZipTools().cacheZipContentsStatic(bis, prefix, mapByteData, false);
-		} catch (Exception e) {
-			System.out.println("JSToolkit could not cache files from " + zipFileName);
-			return;
-		}
-		if (debugging)
-			System.out.println("JSToolkit loaded resources from " + zipFileName + ":\n" + fileList);
-	}
-	
-	
-	private static ZipTools zipTools;
-
-	private static ZipTools getZipTools() {
-		return (zipTools == null ? (zipTools = (ZipTools) Interface.getInstance("javajs.util.ZipTools", true)) : zipTools);		// TODO Auto-generated method stub
-	}
-
-	/**
-	 * Load a static JavaScript or CSS resource only once; no need to cache it if
-	 * it is not there.
-	 * 
-	 * @param file
-	 */
-	public static String loadStaticResource(String file) {
-		String s = "alert('" + file + "' was not found)";
-		if (!J2S._isResourceLoaded(file, false)) {
-			s = getJavaResource(file, true, false, true);
-			J2S._isResourceLoaded(file, true);
-		}
-		return s;
-	}
-
-	/**
-	 * a String-based file such as .js, .css, or .property
-	 * 
-	 * .js and .css files will be processed appropriately
-	 * 
-	 * @param resourceName
-	 * @param isJavaPath
-	 * @param doProcess
-	 *          evaluate JS or load CSS
-	 * @return the resource as a string
-	 */
-	public static String getJavaResource(String resourceName, boolean isJavaPath,
-			boolean doCache, boolean doProcess) {
-		System.out.println("JSToolkit getting Java resource " + resourceName);
-		String path = J2S._getResourcePath(resourceName, isJavaPath);
-		if (path == null)
-			return null;
-		Object data = getCachedFileData(path);
-		if (data == null
-				&& (data = J2S._getFileData(path, null, false, false)) != null
-				&& useCache && doCache)
-			cacheFileData(path, data);
-		String sdata = ensureString(data);
-		boolean ok = (sdata != null && sdata.indexOf("[Exception") != 0);
-		System.out.println("Processing " + path + " ["
-				+ (ok ? "" + sdata.length() : sdata) + "]");
-		return (!ok ? null : !doProcess ? sdata
-				: path.endsWith(".css") ? processCSS(sdata, path) : path
-						.endsWith(".js") ? processJS(sdata) : sdata);
-	}
-	
-	public static boolean haveCachedResource(String resourceName, boolean isJavaPath) {
-		String path = J2S._getResourcePath(resourceName, isJavaPath);
-		return (path != null && getCachedFileData(path) != null);
-	}
-	
-	private static String processCSS(String css, String path) {
-		if (path != null && css.indexOf("images/") >= 0) {
-			path = path.substring(0, path.lastIndexOf("/") + 1) + "images/";
-			css = PT.rep(css, "images/", path);
-		}
-		JQuery jq = getJQuery();
-    jq.$("head").append(jq.$("<style type='text/css'>" + css + "</style>"));
-    return css;
-	}
-
-	private static String processJS(String js) {
-    try {
-    	/**
-    	 * @j2sNative
-    	 * 
-    	 * eval(js);
-    	 * 
-    	 */
-    	{}
-    } catch (Throwable e) {
-    	alert("error processing " + js);
-      return null;
-    }
-    return js;
-	}
-
-	private static String ensureString(Object data) {
-		if (data == null)
-			return null;
-		if (AU.isAB(data))
-			return Rdr.bytesToUTF8String((byte[]) data);
-		if (data instanceof String || data instanceof SB)
-			return data.toString();
-		if (data instanceof InputStream)
-			return Rdr.streamToUTF8String(new BufferedInputStream((InputStream) data));
-		return null;
-	}
-
-	private static Object getCachedFileData(String path) {
-		return (useCache && fileCache != null ?
-					fileCache.get(path) : null);
 	}
 
 	private static int dispatchID = 0;
@@ -759,43 +446,9 @@ public class JSToolkit extends SunToolkit {
 		}
 	}
 
-	/**
-	 * 
-	 * check if a J2S class implements a specific method with a specific signature
-	 * 
-	 * @param component
-	 * @param fname
-	 *          "coalesceEvents
-	 * @param signature
-	 *          "\\java.awt.AWTEvent\\java.awt.AWTEvent"
-	 * @return
-	 */
-	public static boolean checkClassMethod(Component component, String fname,
-			String signature) {
-		/**
-		 * @j2sNative
-		 * 
-		 *            return component[fname] && component[fname][signature];
-		 * 
-		 */
-		{
-			return false;
-		}
-	}
-
-	public static void readyCallback(String aname, String fname, Container applet,
-			JSAppletViewer appletPanel) {
-		try {
-			J2S._readyCallback(aname, fname, true, applet, appletPanel);
-		} catch (Throwable e) {
-			System.out.println("JSToolkit Error running readyCallback method for " + fname + " -- check your page JavaScript");
-		}
-	}
-
-
-	public static void forceRepaint(Component c) {
-		// NO LONGER NECESSARY :)
-	}
+//	public static void forceRepaint(Component c) {
+//		// NO LONGER NECESSARY :)
+//	}
 	
 	public static HTML5Applet getHTML5Applet(Component c) {
 		return ((JSThreadGroup) c.getAppContext().getThreadGroup()).getHtmlApplet();
@@ -827,7 +480,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
   protected LightweightPeer createComponent(Component target) {
   	LightweightPeer peer = (LightweightPeer) getUI(target, true);
-  	if (debugging)
+  	if (JSUtil.debugging)
   		System.out.println("JSToolkit creating UI-Peer for " +  target.getClass().getName() + ": " + peer.getClass().getName());
   	return peer;
   }
@@ -837,7 +490,7 @@ public class JSToolkit extends SunToolkit {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (debugging)
+  	if (JSUtil.debugging)
   		System.out.println("JSToolkit creating Dialog Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return (DialogPeer) ((WindowPeer) ui).setFrame(target, true);
 	}
@@ -847,7 +500,7 @@ public class JSToolkit extends SunToolkit {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (debugging)
+  	if (JSUtil.debugging)
   		System.out.println("JSToolkit creating Frame Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return (FramePeer) ((WindowPeer) ui).setFrame(target, true);
 	}
@@ -857,7 +510,7 @@ public class JSToolkit extends SunToolkit {
 		ComponentUI ui = target.getUI();
 		if (ui == null)
 			return null;
-  	if (debugging)
+  	if (JSUtil.debugging)
   		System.out.println("JSToolkit creating Window Peer for " +  target.getClass().getName() + ": " + target.getClass().getName());
 		return ((WindowPeer) ui).setFrame(target, false);
 	}
@@ -887,7 +540,7 @@ public class JSToolkit extends SunToolkit {
 	}
 
 	public static Document getPlainDocument(JComponent c) {
-		return (Document) getInstance("swingjs.JSPlainDocument");
+		return (Document) JSUtil.getInstance("swingjs.JSPlainDocument");
 	}
 
 	public static String getClassNameForObject(Object c) {
@@ -902,84 +555,11 @@ public class JSToolkit extends SunToolkit {
 		}
 	}
 
-	/**
-	 * A protected version of Rdr.getStreamAsBytes
-	 * @param bis
-	 * @return
-	 */
-	public static byte[] getSignedStreamBytes(BufferedInputStream bis) {
-		try {
-			return AU.ensureSignedBytes((byte[]) Rdr.getStreamAsBytes(bis, null));
-		} catch (IOException e) {
-			return null;
-		}
-	}
+	
 
-	/**
-	 * This could be a simple String, a javajs.util.SB, or unsigned or signed bytes
-	 * depending upon the browser and the file type. 
-	 * 
-	 * It will not be cached, but it might come from a cache;
-	 * 
-	 * @param uri
-	 * @return
-	 */
-	private static Object getFileContents(String uri) {
-		Object data = getCachedFileData(uri);
-		if (data == null)  
-		/**
-		 * @j2sNative
-		 * 
-		 */
-		{
-			// for reference -- not used in JavaScript
-			try {
-				data = Rdr.streamToUTF8String(new BufferedInputStream((InputStream) new URL(uri).getContent()));
-			} catch (Exception e) {
-			}
-		}
-		else {
-			data = J2S._getFileData(uri, null, false, false);
-		}
-		return data;
-	}
+	
 
-
-	/**
-	 * Regardless of how returned by Jmol._getFileContents(), 
-	 * this method ensures that we get signed bytes.
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	public static byte[] getFileAsBytes(String filename) {
-		Object data = getFileContents(filename);
-		byte[] b = null;
-		if (AU.isAB(data))
-			b = (byte[]) data;
-		else if (data instanceof String) 
-			b = ((String) data).getBytes();
-		else if (data instanceof SB)
-			b = Rdr.getBytesFromSB((SB) data);
-		else if (data instanceof InputStream)
-			try {
-				b = Rdr.getLimitedStreamBytes((InputStream) data, -1);
-			} catch (IOException e) {
-			}
-		return AU.ensureSignedBytes(b);
-	}
-
-	/**
-	 * Regardless of how returned by Jmol._getFileContents(), 
-	 * this method ensures that we get a String.
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	public static String getFileAsString(String filename) {
-		Object data = getFileContents(filename);
-		return  ensureString(data);
-	}
+	
 
 
 
@@ -1015,7 +595,7 @@ public class JSToolkit extends SunToolkit {
 
 	@Override
 	public Image createImage(String filename) {
-		return getImagekit().createImageFromBytes(getSignedStreamBytes(new BufferedInputStream ( new ByteArrayInputStream(getFileAsBytes(filename)))), 0, -1, filename);
+		return getImagekit().createImageFromBytes(JSUtil.getSignedStreamBytes(new BufferedInputStream ( new ByteArrayInputStream(JSUtil.getFileAsBytes(filename)))), 0, -1, filename);
 	}
 
 	/**
@@ -1023,8 +603,8 @@ public class JSToolkit extends SunToolkit {
 	 */
 	@Override
 	public Image createImage(URL url) {
-		BufferedInputStream b = getURLInputStream(url, true);
-		return (b == null ? null : getImagekit().createImageFromBytes(getSignedStreamBytes(b), 0, -1, url.toString()));
+		BufferedInputStream b = JSUtil.getURLInputStream(url, true);
+		return (b == null ? null : getImagekit().createImageFromBytes(JSUtil.getSignedStreamBytes(b), 0, -1, url.toString()));
 	}
 	
 	@Override
@@ -1095,7 +675,7 @@ public class JSToolkit extends SunToolkit {
 	private static JSAudio audioPlayer;
 
 	private static JSAudio getAudioPlayer() {
-		return (audioPlayer == null ? audioPlayer = (JSAudio) getInstance("swingjs.JSAudio")
+		return (audioPlayer == null ? audioPlayer = (JSAudio) JSUtil.getInstance("swingjs.JSAudio")
 				: audioPlayer);
 	}
 	/**
@@ -1130,7 +710,7 @@ public class JSToolkit extends SunToolkit {
 	}
 
 	public static ArrayList<Object> getTimerQueue() {
-		return getAppletViewer().getTimerQueue();
+		return JSUtil.getAppletViewer().getTimerQueue();
 	}
 
 	/**
@@ -1148,11 +728,7 @@ public class JSToolkit extends SunToolkit {
 	   * 
 	   */
 		{}
-		J2S._getFileFromDialog(f, type);
-	}
-
-	public static void saveFile(String fileName, Object data, String mimeType, String encoding) {
-		J2S._saveFile(fileName, data, mimeType, encoding);
+		JSUtil.J2S._getFileFromDialog(f, type);
 	}
 
 	public static void killDispatched(int html5Id) {
@@ -1169,7 +745,7 @@ public class JSToolkit extends SunToolkit {
 	@Override
 	public Clipboard getSystemClipboard() {
 		if (systemClipboard == null)
-			systemClipboard = (Clipboard) getInstance("java.awt.datatransfer.Clipboard");
+			systemClipboard = (Clipboard) JSUtil.getInstance("java.awt.datatransfer.Clipboard");
 		return systemClipboard;
 	}
 
@@ -1222,89 +798,11 @@ public class JSToolkit extends SunToolkit {
 		DOMNode.setCursor(curs);
 	}
 
-	/**
-	 * All classes created by Clazz have static class loaders
-	 * which are just minimal objects in Clazz var inF.
-	 * 
-	 * @param name
-	 * @return the object as a stream
-	 */
-	@SuppressWarnings("null")
-	public static InputStream getResourceAsStream(String name) {
-		ClassLoader cl = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * cl = swingjs.JSToolkit.getClassLoader();
-		 * 
-		 */
-		{} 		
-		return cl.getResourceAsStream(name);
-	}
 	
-	/**
-	 * All classes created by Clazz have static class loaders
-	 * which are just minimal objects in Clazz var inF.
-	 * 
-	 * @param name
-	 * @return a URL for this object
-	 */
-	public static URL getResource(String name) {
-		ClassLoader cl = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * cl = swingjs.JSToolkit.getClassLoader();
-		 * 
-		 */
-		{
-			cl = Toolkit.getDefaultToolkit().getClass().getClassLoader();
-		} 
-		return cl.getResource(name);    
-  }
 
 //////// FONTS ///////
 	
 	
-	/**
-	 * Get a default Locale. Called by Locale.getDefault(), but also
-	 * called by JSAppletViewer, which will pass Info.language to this method.
-	 * 
-	 * @param language
-	 *          null to use J2S default language based on (1) setting of J2S._lang
-	 *          (2) setting of j2sLang=xx_XX in URI (3) navigator.language (4)
-	 *          navigator.userLanguage (5) "en-US"
-	 * 
-	 * 
-	 * 
-	 * @return
-	 */
-	public static Locale getDefaultLocale(String language) {
-		String region, country, variant;
-		if (language == null)
-			language = J2S._getDefaultLanguage(true);
-		language = language.replace('-','_');
-		if (language == null || language.length() == 0 || language.equalsIgnoreCase("en"))
-			language = "en_US";
-		int i = language.indexOf('_');
-		if (i > 0) {
-			region = language.substring(i + 1);
-			language = language.substring(0, i);
-		} else {
-			region = "";
-		}
-		region = region.toUpperCase();
-		i = region.indexOf('_');
-		if (i > 0) {
-			country = region.substring(0, i);
-			variant = region.substring(i + 1);
-		} else {
-			country = region;
-			variant = "";
-		}
-		return new Locale(language, country, variant);
-	}
-
 	private static String[] hardwiredFontList; 
 
 	// -- Obsolete font names from 1.0.2. It was decided that
@@ -1358,30 +856,6 @@ public class JSToolkit extends SunToolkit {
 		// for whatever reason, Java font points are much larger than HTML5 canvas
 		// points
 		return strStyle + font.getSize() + "px " + family;
-	}
-
-	@SuppressWarnings("unused")
-	public static BufferedInputStream getURLInputStream(URL url, boolean andDelete) {
-		
-		BufferedInputStream bis = null;
-		/**
-		 * @j2sNative
-		 * 
-		 * bis = url._streamData;
-		 * if (andDelete)
-		 *   url._streamData = null;
-		 * 
-		 */
-		{}
-		
-		if (bis == null)
-			try {
-				return (BufferedInputStream) (Object) url.openStream();
-			} catch (IOException e) {
-				return null;
-			}
-		((java.io.BufferedInputStream) (Object) bis).resetStream();
-		return bis;
 	}
 
 	/**
@@ -1438,17 +912,6 @@ public class JSToolkit extends SunToolkit {
     }
   }
 
-  public static void showWebPage(URL url, Object target) {
-		/**
-		 * @j2sNative
-		 * 
-		 * 			if (target) window.open(url.toString(), target); else
-		 *            window.open(url.toString());
-		 */
-	  {}
-
-  }
-  
   public void beep() {
   	System.out.println("JSToolkit.beep");
   }

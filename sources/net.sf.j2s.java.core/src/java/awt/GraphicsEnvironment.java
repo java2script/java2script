@@ -29,9 +29,10 @@
 
 package java.awt;
 
-import swingjs.JSToolkit;
 import java.awt.image.BufferedImage;
 import java.util.Locale;
+
+import swingjs.JSUtil;
 
 /**
  *
@@ -75,7 +76,7 @@ public abstract class GraphicsEnvironment {
      */
     public static synchronized GraphicsEnvironment getLocalGraphicsEnvironment() {
         if (localEnv == null) {
-          localEnv = (GraphicsEnvironment) JSToolkit.getInstance("swingjs.JSGraphicsEnvironment");	
+          localEnv = (GraphicsEnvironment) JSUtil.getInstance("swingjs.JSGraphicsEnvironment");	
         
 //        	String nm = null;
 ////        	  final String def = null;

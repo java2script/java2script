@@ -2,7 +2,8 @@ package swingjs.api.js;
 
 import java.awt.Image;
 import java.awt.Rectangle;
-import swingjs.JSToolkit;
+
+import swingjs.JSUtil;
 
 public abstract class DOMNode {
 
@@ -218,7 +219,7 @@ public abstract class DOMNode {
 		 *            f = function(ev) {me.handleJSEvent(node, -1, ev)};
 		 */
 		{}
-		JSToolkit.getJQuery().$(node).on(event, f);
+		JSUtil.getJQuery().$(node).on(event, f);
 	}
 
 	public static DOMNode setZ(DOMNode node, int z) {

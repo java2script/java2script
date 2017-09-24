@@ -48,18 +48,6 @@ import java.io.Serializable;
 //import java.text.MessageFormat;
 //import java.util.List;
 import java.util.HashMap;
-//import java.util.StringTokenizer;
-
-//import java.util.Locale;
-
-//import swingjs.JSToolkit;
-
-//import java.security.AccessController;
-//import sun.security.action.GetPropertyAction;
-//import java.util.spi.LocaleNameProvider;
-//import java.util.spi.LocaleServiceProvider;
-//import sun.util.resources.LocaleData;
-//import sun.util.resources.OpenListResourceBundle;
 
 /**
  *

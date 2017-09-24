@@ -1667,7 +1667,7 @@ public class RepaintManager {
 			validateInvalidComponents();
 			prePaintDirtyRegions();
 			// SwingJS -- this is what does the mouse-action painting; not necessary
-			swingjs.JSToolkit.forceRepaint(myComponent);
+			//swingjs.JSToolkit.forceRepaint(myComponent);
 
 //			System.out.println("RepaintManager run() done");
 		}

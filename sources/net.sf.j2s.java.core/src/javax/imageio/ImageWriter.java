@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.Interface;
 import javajs.api.GenericImageEncoder;
 import javajs.util.OC;
@@ -57,7 +58,7 @@ public class ImageWriter {
 				return false;
 			}
 			if (out == null && o != null)
-				JSToolkit.saveFile(fileName, o, (String) params.get("mimeType"), null);
+				JSUtil.saveFile(fileName, o, (String) params.get("mimeType"), null);
 		} catch (Exception e) {
 			return false;
 		}

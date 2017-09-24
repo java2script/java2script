@@ -1,8 +1,9 @@
 package sun.awt;
 
-import swingjs.JSToolkit;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
+
+import swingjs.JSUtil;
 
 /*
  * PostEventQueue is a Thread that runs in the same AppContext as the
@@ -45,7 +46,7 @@ public class PostEventQueue {
                  * different threads tempQueue will be null for one of them.
                  */
                 while (tempQueue != null) {
-                	 JSToolkit.alert("postevent IS NOT IMPLEMENTED " + tempQueue.event);
+                	 JSUtil.alert("postevent IS NOT IMPLEMENTED " + tempQueue.event);
                     eventQueue.postEvent(tempQueue.event);
                     tempQueue = tempQueue.next;
                 }

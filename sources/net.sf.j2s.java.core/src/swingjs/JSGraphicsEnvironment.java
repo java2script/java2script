@@ -67,7 +67,7 @@ public class JSGraphicsEnvironment extends GraphicsEnvironment {
 	@Override
 	public GraphicsDevice getDefaultScreenDevice() {
 		if (device == null)
-			device = (GraphicsDevice) JSToolkit.getInstance("swingjs.JSScreenDevice"); 
+			device = (GraphicsDevice) JSUtil.getInstance("swingjs.JSScreenDevice"); 
 		return device;
 	}
 

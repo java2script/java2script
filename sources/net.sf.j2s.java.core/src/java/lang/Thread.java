@@ -44,6 +44,7 @@ import javajs.util.JSThread;
 //import sun.security.util.SecurityConstants;
 
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 
 /**
@@ -1299,7 +1300,7 @@ class Thread implements Runnable {
             throw new IllegalArgumentException("timeout value is negative");
         }
 
-        JSToolkit.warn("Cannot wait in Thread");
+        JSUtil.warn("Cannot wait in Thread");
         if (millis == 0) {
             while (isAlive()) {
                 wait(0);
@@ -1475,7 +1476,7 @@ class Thread implements Runnable {
      */
     public ClassLoader getContextClassLoader() {
     	// here if a static call during load
-     	 return JSToolkit.class.getClassLoader();
+     	 return JSUtil.class.getClassLoader();
   	}
 
     /**

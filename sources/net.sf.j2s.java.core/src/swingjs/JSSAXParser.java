@@ -95,7 +95,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	@Override
 	public void parse(String fileName) throws SAXException, IOException {
 		try {
-			parseDocument(parseXML(JSToolkit.getFileAsString(fileName)));
+			parseDocument(parseXML(JSUtil.getFileAsString(fileName)));
 		} catch (Exception e) {
 			error(e);
 		}
@@ -110,7 +110,7 @@ public class JSSAXParser implements Parser, XMLReader {
 	}
 
 	private DOMNode parseXML(String data) {
-		return JSToolkit.getJQuery().parseXML(removeProcessing(data));
+		return JSUtil.getJQuery().parseXML(removeProcessing(data));
 	}
 
 	/**

@@ -42,6 +42,7 @@ import javax.sound.sampled.TargetDataLine;
 
 import swingjs.JSAudio;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 /**
  * 
@@ -286,7 +287,7 @@ public class AudioSystem {
 	 */
 	public static javax.sound.sampled.AudioInputStream getAudioInputStream(URL url)
 			throws javax.sound.sampled.UnsupportedAudioFileException, IOException {
-		return getAudioInputStream(JSToolkit.getURLInputStream(url, false));
+		return getAudioInputStream(JSUtil.getURLInputStream(url, false));
 	}
 
 }

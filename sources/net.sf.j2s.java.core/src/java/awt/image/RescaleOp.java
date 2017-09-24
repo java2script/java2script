@@ -31,7 +31,8 @@ package java.awt.image;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import swingjs.JSToolkit;
+
+import swingjs.JSUtil;
 
 /**
  * This class performs a pixel-by-pixel rescaling of the data in the
@@ -378,7 +379,7 @@ public class RescaleOp implements BufferedImageOp, RasterOp {
             dstCM = dst.getColorModel();
             if(srcCM.getColorSpace().getType() !=
                dstCM.getColorSpace().getType()) {
-            	JSToolkit.notImplemented(null);
+            	JSUtil.notImplemented(null);
             	throw new ImagingOpException("SwingJS only supports RGB color space");
 //                needToConvert = true;
 //                dst = createCompatibleDestImage(src, null);

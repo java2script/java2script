@@ -72,6 +72,7 @@ import javax.swing.plaf.ComponentUI;
 import sun.font.FontDesignMetrics;
 import swingjs.JSGraphics2D;
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.plaf.JSComponentUI;
 
 /**
@@ -3063,7 +3064,7 @@ public abstract class JComponent extends Container {
 
 	private static Autoscroller getAutoscroller() {
 		 return (autoscroller == null?
-			 autoscroller = (Autoscroller) JSToolkit.getInstance("javax.swing.Autoscroller") : autoscroller);
+			 autoscroller = (Autoscroller) JSUtil.getInstance("javax.swing.Autoscroller") : autoscroller);
 		 
 	}
 
@@ -4003,7 +4004,7 @@ public abstract class JComponent extends Container {
 			// SwingJS throw new IllegalArgumentException
 			System.out.println(JSToolkit.getClassNameForObject(this) + " property \""
 					+ propertyName + "\" cannot be set using this method"
-					+ JSToolkit.getStackTrace(5));
+					+ JSUtil.getStackTrace(5));
 		}
 	}
 

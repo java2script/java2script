@@ -10,7 +10,8 @@ import java.awt.peer.FramePeer;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JFrame;
 import javax.swing.LookAndFeel;
-import swingjs.JSToolkit;
+
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSFrameUI extends JSWindowUI implements FramePeer {
@@ -107,7 +108,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 			 */
 			{
 			}
-			JSToolkit.J2S._setDraggable(titleBarNode, fGetFrameParent);
+			JSUtil.J2S._setDraggable(titleBarNode, fGetFrameParent);
 			titleBarNode.appendChild(titleNode);
 			titleBarNode.appendChild(closerWrap);
 			closerWrap.appendChild(closerNode);
@@ -177,7 +178,7 @@ public class JSFrameUI extends JSWindowUI implements FramePeer {
 	}
 
 	protected void closeFrame() {
-		JSToolkit.J2S._jsUnsetMouse(frameNode);
+		JSUtil.J2S._jsUnsetMouse(frameNode);
 		$(frameNode).remove();
 		$(outerNode).remove();
 	}

@@ -30,9 +30,9 @@ package java.awt;
 
 import java.util.LinkedList;
 
-import swingjs.JSToolkit;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
+import swingjs.JSUtil;
 
 /**
  * A mechanism for ensuring that a series of AWTEvents are executed in a
@@ -101,7 +101,7 @@ class SequencedEvent extends AWTEvent implements ActiveEvent {
                     while(!isFirstOrDisposed()) {
                         synchronized (SequencedEvent.class) {
                             try {
-                          	  JSToolkit.warn("Cannot wait in SequenceEvent");
+                          	  JSUtil.warn("Cannot wait in SequenceEvent");
                                 SequencedEvent.class.wait(1000);
                             } catch (InterruptedException e) {
                                 break;

@@ -5212,8 +5212,7 @@ public abstract class Component
 				return value.booleanValue();
 			}
 
-			Boolean enabled = Boolean.valueOf(
-					JSToolkit.checkClassMethod(this, "coalesceEvents", "\\java.awt.AWTEvent\\java.awt.AWTEvent"));
+			Boolean enabled = Boolean.valueOf(checkCoelescence());
 			// SwingJS untested
 			// // Need to check non-bootstraps.
 			// Boolean enabled = java.security.AccessController.doPrivileged(
@@ -5227,6 +5226,23 @@ public abstract class Component
 			return enabled.booleanValue();
 		}
 	}
+
+	/**
+	 * untested
+	 * @return
+	 */
+	private boolean checkCoelescence() {
+		/**
+		 * @j2sNative
+		 * 
+		 *            return !!this.prototype["coalesceEvents$java.awt.AWTEvent$java.awt.AWTEvent"];
+		 * 
+		 */
+		{
+			return false;
+		}
+	}
+
 
 	// /**
 	// * Parameter types of coalesceEvents(AWTEvent,AWTEVent).

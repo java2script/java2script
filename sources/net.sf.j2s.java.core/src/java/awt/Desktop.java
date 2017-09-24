@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 
 /**
  * 
@@ -366,7 +366,7 @@ public class Desktop {
      */
     public void browse(URI uri) throws IOException {
     	
-    	JSToolkit.showWebPage(uri.toURL(), null);
+    	JSUtil.showWebPage(uri.toURL(), null);
 //        SecurityException securityException = null;
 //        try {
 //            checkAWTPermission();

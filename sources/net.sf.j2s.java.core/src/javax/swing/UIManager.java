@@ -44,6 +44,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.plaf.HTML5LookAndFeel;
 import java.util.Locale;
 
@@ -415,7 +416,7 @@ public class UIManager
     public static void setInstalledLookAndFeels(LookAndFeelInfo[] infos)
         throws SecurityException
     {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        maybeInitialize();
 //        LookAndFeelInfo[] newInfos = new LookAndFeelInfo[infos.length];
 //        System.arraycopy(infos, 0, newInfos, 0, infos.length);
@@ -433,7 +434,7 @@ public class UIManager
      * @see #setInstalledLookAndFeels
      */
     public static void installLookAndFeel(LookAndFeelInfo info) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        LookAndFeelInfo[] infos = getInstalledLookAndFeels();
 //        LookAndFeelInfo[] newInfos = new LookAndFeelInfo[infos.length + 1];
 //        System.arraycopy(infos, 0, newInfos, 0, infos.length);
@@ -453,7 +454,7 @@ public class UIManager
      * @see #setInstalledLookAndFeels
      */
     public static void installLookAndFeel(String name, String className) {
-    	JSToolkit.notImplemented(null);
+    	JSUtil.notImplemented(null);
 //        installLookAndFeel(new LookAndFeelInfo(name, className));
     }
 
@@ -467,7 +468,7 @@ public class UIManager
      * @see #setLookAndFeel
      */
     public static LookAndFeel getLookAndFeel() {
-    	return (laf == null ? (laf = (HTML5LookAndFeel) JSToolkit.getInstance("swingjs.plaf.HTML5LookAndFeel")) : laf);
+    	return (laf == null ? (laf = (HTML5LookAndFeel) JSUtil.getInstance("swingjs.plaf.HTML5LookAndFeel")) : laf);
     }
 
 

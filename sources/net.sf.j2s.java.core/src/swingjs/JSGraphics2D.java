@@ -373,7 +373,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	public boolean drawImage(Image img, int x, int y, Color bgcolor,
 			ImageObserver observer) {
 		backgroundPainted = true;
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, observer);
 	}
 
@@ -381,7 +381,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	public boolean drawImage(Image img, int x, int y, int width, int height,
 			Color bgcolor, ImageObserver observer) {
 		backgroundPainted = true;
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return drawImage(img, x, y, width, height, observer);
 	}
 
@@ -405,7 +405,7 @@ public class JSGraphics2D //extends SunGraphics2D
 	
 	public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2,
 			int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
 	}
 
@@ -475,7 +475,7 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		return false;
 	}
 
@@ -661,20 +661,20 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void drawRoundRect(int x, int y, int width, int height, int arcWidth,
 			int arcHeight) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		drawRect(x, y, width, height);
 	}
 
 	
 	public void fillRoundRect(int x, int y, int width, int height, int arcWidth,
 			int arcHeight) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 		fillRect(x, y, width, height);
 	}
 
@@ -690,28 +690,28 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	public void drawString(String str, float x, float y) {
 		// apply affine transformation first
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void drawString(AttributedCharacterIterator iterator,
 			float x, float y) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void translate(double tx, double ty) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void shear(double shx, double shy) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
@@ -805,12 +805,12 @@ public class JSGraphics2D //extends SunGraphics2D
 
 	
 	public void setPaintMode() {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	
 	public void setXORMode(Color c1) {
-		JSToolkit.notImplemented(null);
+		JSUtil.notImplemented(null);
 	}
 
 	public Rectangle getClipBounds() {

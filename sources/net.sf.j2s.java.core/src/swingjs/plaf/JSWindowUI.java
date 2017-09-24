@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 import java.awt.peer.WindowPeer;
 import javax.swing.JWindow;
 import swingjs.JSAppletViewer;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 
 public class JSWindowUI extends JSComponentUI implements WindowPeer {
@@ -56,7 +56,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 		this.isFrame = isFrame;
 		isContainer = isWindow = true;
 		JSComponent jc = (JSComponent) (Object) this;
-		JSAppletViewer viewer = JSToolkit.getAppletViewer();
+		JSAppletViewer viewer = JSUtil.getAppletViewer();
 		applet = viewer.html5Applet;
 		graphics = (Graphics2D) jc.getGraphics();
 		return this;
@@ -93,13 +93,13 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 	public void toFront() {
 		if (debugging)
 			System.out.println("window to front for " + id);
-		z = JSToolkit.J2S._setWindowZIndex(domNode, Integer.MAX_VALUE);
+		z = JSUtil.J2S._setWindowZIndex(domNode, Integer.MAX_VALUE);
 	}
 
 	@Override
 	public void toBack() {
 		System.out.println("window to back for " + id);
-		z = JSToolkit.J2S._setWindowZIndex(domNode, Integer.MIN_VALUE);
+		z = JSUtil.J2S._setWindowZIndex(domNode, Integer.MIN_VALUE);
 		
 	}
 
@@ -175,7 +175,7 @@ public class JSWindowUI extends JSComponentUI implements WindowPeer {
 
 	@Override
 	public void dispose() {
-		JSToolkit.J2S._jsUnsetMouse(domNode);
+		JSUtil.J2S._jsUnsetMouse(domNode);
 		DOMNode.remove(outerNode);
 	}
 

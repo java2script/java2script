@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JRootPane;
 import javax.swing.RootPaneContainer;
 import swingjs.JSFrameViewer;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.js.DOMNode;
 import swingjs.api.js.JQueryObject;
 
@@ -92,7 +92,7 @@ public class Resizer {
 		{
 		}
 		// set to track size changes
-		JSToolkit.J2S._setDraggable(resizer, new JSFunction[] { fHandleResizer });
+		JSUtil.J2S._setDraggable(resizer, new JSFunction[] { fHandleResizer });
 		$(rootNode).resize(fHandleDOMResize);
 	}
 
@@ -160,7 +160,7 @@ public class Resizer {
 	}
 
 	private JQueryObject $(DOMNode node) {
-		return JSToolkit.getJQuery().$(node);
+		return JSUtil.getJQuery().$(node);
 	}
 
   private Rectangle getFrameOffset(int dw, int dh) {

@@ -56,7 +56,7 @@ import javajs.J2SIgnoreImport;
 import sun.awt.AppContext;
 import sun.swing.UIAction;
 import swingjs.JSAppletViewer;
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
 import swingjs.api.Interface;
 
 /**
@@ -1854,7 +1854,7 @@ public class SwingUtilities implements SwingConstants
 	 * @see java.awt.GraphicsEnvironment#isHeadless
 	 */
 	public static Frame getSharedOwnerFrame() {
-		JSAppletViewer p = JSToolkit.getAppletViewer();
+		JSAppletViewer p = JSUtil.getAppletViewer();
 		Frame f = p.sharedOwnerFrame;
 		return (f == null ? (p.sharedOwnerFrame = new SharedOwnerFrame()) : f);
 	}

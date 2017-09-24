@@ -30,7 +30,8 @@ package java.awt.image;
 
 import java.util.Hashtable;
 
-import swingjs.JSToolkit;
+import swingjs.JSUtil;
+
 import java.awt.image.ImageProducer;
 import java.awt.image.ImageConsumer;
 import java.awt.image.ColorModel;
@@ -273,7 +274,7 @@ public class PixelGrabber implements ImageConsumer {
                     break;
                 }
             }
-            JSToolkit.warn("wait in PixelGrabber.grabPixels");
+            JSUtil.warn("wait in PixelGrabber.grabPixels");
             wait(timeout);
         }
         return (flags & GRABBEDBITS) != 0;
