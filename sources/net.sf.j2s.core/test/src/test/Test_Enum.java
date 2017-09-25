@@ -1,7 +1,7 @@
 package test;
 
 @SuppressWarnings("unused")
-public class Test_Enum {
+public class Test_Enum extends Test_{
 
 	public enum Day {
 		SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
@@ -14,25 +14,25 @@ public class Test_Enum {
 		this.day = day;
 	}
 
-	public void tellItLikeItIs() {
+	public String tellItLikeItIs() {
+		String s;
 		switch (day) {
 		case MONDAY:
-			System.out.println("Mondays are bad.");
+			s = "Mondays are bad.";
 			break;
-
 		case FRIDAY:
-			System.out.println("Fridays are better.");
+			s = "Fridays are better.";
 			break;
-
 		case SATURDAY:
 		case SUNDAY:
-			System.out.println("Weekends are best.");
+			s = "Weekends are best.";
 			break;
-
 		default:
-			System.out.println("Midweek days are so-so.");
+			s = "Midweek days are so-so.";
 			break;
 		}
+		System.out.println(s);
+		return s;
 	}
 
 	public static void main(String[] args) {
@@ -42,15 +42,15 @@ public class Test_Enum {
 			System.out.println(i + " day " + d[i]);
 		
 		Test_Enum firstDay = new Test_Enum(Day.MONDAY);
-		firstDay.tellItLikeItIs();
+		assert(firstDay.tellItLikeItIs() == "Mondays are bad.");
 		Test_Enum thirdDay = new Test_Enum(Day.WEDNESDAY);
-		thirdDay.tellItLikeItIs();
+		assert(thirdDay.tellItLikeItIs() == "Midweek days are so-so.");
 		Test_Enum fifthDay = new Test_Enum(Day.FRIDAY);
-		fifthDay.tellItLikeItIs();
+		assert(fifthDay.tellItLikeItIs() == "Fridays are better.");
 		Test_Enum sixthDay = new Test_Enum(Day.SATURDAY);
-		sixthDay.tellItLikeItIs();
+		assert(sixthDay.tellItLikeItIs() == "Weekends are best.");
 		Test_Enum seventhDay = new Test_Enum(Day.SUNDAY);
-		seventhDay.tellItLikeItIs();
+		assert(seventhDay.tellItLikeItIs() == "Weekends are best.");
 		Planet.main(new String[] { "155" });
 		
 	}
@@ -115,9 +115,14 @@ public class Test_Enum {
 			double earthWeight = Double.parseDouble(args[0]);
 			double mass = earthWeight / EARTH.surfaceGravity();
 			
-			for (Planet p : Planet.values())
+			String[] answers = "58.55243035614497,140.27486047536206,155.0,58.704263525754975,392.23641645183983,165.23240851579283,140.2947159053609,0.0,Infinity".split(",");
+			int i = 0;
+			for (Planet p : Planet.values()) {
 //				System.out.printf("Your weight on %s is %8.2f%n", p.toString(), p.surfaceWeight(mass));
-				System.out.println("Your weight on " + p.toString() + " is " +  p.surfaceWeight(mass));
+				System.out.println("Your weight on " + p.toString() + " is " +  p.surfaceWeight(mass) + "==" + answers[i]);
+				assert(answers[i].equals("" + p.surfaceWeight(mass)));
+				i++;
+			}
 		}
 	}
 }

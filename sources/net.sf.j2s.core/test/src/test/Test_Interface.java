@@ -7,7 +7,10 @@ public interface Test_Interface {
 	
 	
   public static void main(String[] args) {
+	 ClassLoader.getSystemClassLoader().setClassAssertionStatus("test.Test_Interface", true);
 	 System.out.println("in the interface " + x + " " + y);
+	 assert("3 y".equals(x + " " + y));
+	 System.out.println("Test_Interface OK");
 	 
   }
 	

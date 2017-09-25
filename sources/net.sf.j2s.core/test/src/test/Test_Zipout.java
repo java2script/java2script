@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class Test_Zipout {
+public class Test_Zipout extends Test_ {
 
 	public static void main(String[] args) {
 
@@ -19,6 +19,7 @@ public class Test_Zipout {
 			zos.close();
 			String msg = bytes.length + " bytes written to testzip.zip";
 			System.out.println(msg);
+			System.out.println("Test_Zipout OK");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

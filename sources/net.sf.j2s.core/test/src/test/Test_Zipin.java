@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Test_Zipin {
+public class Test_Zipin extends Test_ {
 
 	public static void main(String[] args) {
 
@@ -17,7 +17,9 @@ public class Test_Zipin {
 			ZipInputStream zis = new ZipInputStream(bis);
 			ZipEntry ze = zis.getNextEntry();
 			System.out.println(ze.getName() + " " + ze.getSize());
+			assert((ze.getName() + " " + ze.getSize()).equals("obj_490758.pmesh 95301"));
 			bis.close();
+			System.out.println("Test_Zipin OK");			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

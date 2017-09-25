@@ -34,9 +34,13 @@ class Test_Cast extends Test_ {
 
 	}
 
+	public int f() { return new Character('c'); };
+	
 	public static void main(String[] args) {
 		
+		int i300 = 300;
 		
+		say(i300 > 1000 ? (byte) 333: new Character('C') , "int", 67);  // int
 		
 		
 		System.out.println("'K'=" + (char) 75 + " Character('K')=" + new Character('K'));
@@ -49,7 +53,6 @@ class Test_Cast extends Test_ {
 		byte b100 = (byte) 100;
 		short s300 = (short) 300;
 		short s100 = (short) 100;
-		int i300 = 300;
 
 		// int char --> char
 		// char int --> char
@@ -58,7 +61,6 @@ class Test_Cast extends Test_ {
 		// byte long --> long
 	    // byte Character --> int ??? 
 		
-		say(i300 > 1000 ? (byte) 333: new Character('C') , "int", 67);  // int
 
 		assert(i300 == 300 && true);
 		

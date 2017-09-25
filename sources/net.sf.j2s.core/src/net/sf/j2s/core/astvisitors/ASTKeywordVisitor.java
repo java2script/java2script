@@ -336,7 +336,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (isNumericType(leftName)) {
 				// byte|short|int|long += ...
 				buffer.append(" = ");
-				addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null);
+				addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null, true);
 				isArray = wasArray;
 				return false;
 			}
@@ -504,7 +504,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			String nameFROM = expBinding.getName();
 			String nameTO = ((PrimitiveType) typeTO).getPrimitiveTypeCode().toString();
 			if (!nameTO.equals(nameFROM)) {
-				addPrimitiveTypedExpression(null, null, nameTO, null, expression, nameFROM, null);
+				addPrimitiveTypedExpression(null, null, nameTO, null, expression, nameFROM, null, false);
 				return false;
 			}
 		}
@@ -659,7 +659,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 				&& isNumericType(rightName)) {
 			// left and right are one of byte, short, int, or long
 			// division must take care of this.
-			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands);
+			addPrimitiveTypedExpression(left, null, leftName, operator, right, rightName, extendedOperands, false);
 			return false;
 		}
 
@@ -1404,7 +1404,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param rightName
 	 */
 	private void addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName, String op,
-			Expression right, String rightName, List<?> extendedOperands) {
+			Expression right, String rightName, List<?> extendedOperands, boolean isAssignment) {
 		// byte|short|int|long /= ...
 		// convert to proper number of bits
 
@@ -1462,14 +1462,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (left != null) {
 			addFieldName(left, assignmentBinding);
 			buffer.append(op);
-			buffer.append("(");
+			if (isAssignment)
+				buffer.append("(");
 		}
 		if (!boxingNode(right, fromChar) && fromChar && !toChar)
 			buffer.append(CHARCODEAT0); 
 		if (extendedOperands != null) {
 			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
 		}
-		if (left != null) {
+		if (left != null && isAssignment) {
 			buffer.append(")");
 		}
 		if (classIntArray != null) {
@@ -1509,7 +1510,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			boolean isNumeric = isNumericType(paramName);
 			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
-				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);
+				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands, false);
 			} else {
 				// char f() { return Character }
 				// Character f() { return char }

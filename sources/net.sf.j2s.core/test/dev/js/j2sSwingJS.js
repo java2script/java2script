@@ -1722,6 +1722,7 @@ _Loader.$getClassAssertionStatus = function(clazz) {
 }
 
 _Loader.prototype.setClassAssertionStatus$S$Z = _Loader.prototype.setPackageAssertionStatus$S$Z = function(clazzName, tf) {
+  if (Clazz.allClasses[clazzName])Clazz.allClasses[clazzName].$_ASSERT_ENABLED_ = tf;
   assertionStatus[clazzName + "."] = tf;
 };
 
@@ -3930,7 +3931,7 @@ Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = fu
   Sys.out.print(String.format.apply(null, arguments));
 }
 
-Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println = function(s) {
+Sys.out.println = Sys.out.println$O = Sys.out.println$Z = Sys.out.println$I = Sys.out.println$S = Sys.out.println$C = Sys.out.println = function(s) {
 
 if (("" + s).indexOf("TypeError") >= 0) {
    debugger;
@@ -3941,7 +3942,7 @@ if (("" + s).indexOf("TypeError") >= 0) {
   Con.consoleOutput(typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n");
 };
 
-Sys.out.println$F = Sys.out.println$D = function(f) {var s = "" + f; Sys.out.println(s.indexOf(".") < 0 ? s + ".0" : s)};
+Sys.out.println$F = Sys.out.println$D = function(f) {var s = "" + f; Sys.out.println(s.indexOf(".") < 0 && s.indexOf("Inf") < 0 ? s + ".0" : s)};
 
 Sys.out.write = function (buf, offset, len) {
   Sys.out.print(String.instantialize(buf).substring(offset, offset+len));
@@ -3954,15 +3955,15 @@ Sys.err.print = function (s) {
   Con.consoleOutput (s, "red");
 };
 
-Sys.err.printf = Sys.err.format = function (f, args) {
+Sys.err.printf = Sys.err.printf$S$OA = Sys.err.format = Sys.err.format$S$OA = Sys.err.format = function (f, args) {
   Sys.out.print(String.format.apply(null, arguments));
 }
 
-Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println = function (s) {
+Sys.err.println = Sys.err.println$O = Sys.err.println$Z = Sys.err.println$I = Sys.err.println$S = Sys.err.println$C = Sys.err.println = function (s) {
   Con.consoleOutput (typeof s == "undefined" ? "\r\n" : s == null ?  s = "null\r\n" : s + "\r\n", "red");
 };
 
-Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.println(s.indexOf(".") < 0 ? s + ".0" : s)};
+Sys.err.println$F = Sys.err.println$D = function(f) {var s = "" + f; Sys.err.println(s.indexOf(".") < 0  && s.indexOf("Inf") < 0 ? s + ".0" : s)};
 
 Sys.err.write = function (buf, offset, len) {
   Sys.err.print(String.instantialize(buf).substring(offset, offset+len));
@@ -4567,7 +4568,7 @@ function(n){
 
 Clazz._floatToString = function(f) {
  var s = ""+f
- if (s.indexOf(".") < 0 && s.indexOf("e") < 0)
+ if (s.indexOf(".") < 0 && s.indexOf("e") < 0 && s.indexOf("Inf") < 0)
     s += ".0";
  return s;
 }

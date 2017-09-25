@@ -74,7 +74,7 @@ class Test_Native extends Test_ {
 		 * @j2sNative
 		 * 
 		 *  this.ii = -1;
-		 * 	j = 4		// ok
+		 * 	j = 2		// ok
 		 * 
 		 */
 		{
@@ -84,7 +84,7 @@ class Test_Native extends Test_ {
 
 	public static void main(String[] args) {
 		new Test_Native().test2();
-		System.out.println("OK");
+		System.out.println("Test_Native OK");
 	}
 
 }

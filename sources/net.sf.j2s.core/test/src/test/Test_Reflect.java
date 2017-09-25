@@ -2,52 +2,52 @@ package test;
 
 import java.lang.reflect.InvocationTargetException;
 
-class Test_Reflect {
+class Test_Reflect extends Test_ {
 
 	String s;
 	
 	public void test(char i, String s) {
-		System.out.println("testchar " + i + " " + s.equals("char"));
+		System.out.println("testchar " + i);assert(s.equals("char"));
 	}
 
 	public void test(int i, String s) {
-		System.out.println("testint " + i + " " + s.equals("int"));
+		System.out.println("testint " + i);assert(s.equals("int"));
 	}
 
 	public void test(float f, String s) {
-		System.out.println("testfloat " + f + " " + s.equals("float"));
+		System.out.println("testfloat " + f);assert(s.equals("float"));
 	}
 
 	public void test(Integer i, String s) {
-		System.out.println("testInteger " + i + " " + s.equals("Integer"));
+		System.out.println("testInteger " + i);assert(s.equals("Integer"));
 	}
 
 	public void test(Float f, String s) {
-		System.out.println("testFloat " + f + " " + s.equals("Float"));
+		System.out.println("testFloat " + f);assert(s.equals("Float"));
 	}
 
 	public void test(String s, int... ia) {
-		System.out.println("testint[] " + ia[0] + " " + s.equals("int[]"));
+		System.out.println("testint[] " + ia[0]);assert(s.equals("int[]"));
 	}
 
 	public void test(String s, float... fa) {
-		System.out.println("testfloat[] " + fa[0] + " " + s.equals("float[]"));
+		System.out.println("testfloat[] " + fa[0]);assert(s.equals("float[]"));
 	}
 
 	public void test(String s, test.Test_Reflect[] rf) {
-		System.out.println("testObject[] " + rf[0] + " " + s.equals("test.Test_Reflect[]"));
+		System.out.println("testObject[] " + rf[0]);assert(s.equals("test.Test_Reflect[]"));
 	}
 	
 	public void test(String s, String[] aStr) {
-		System.out.println("testString[] " + aStr[0] + " " + s.equals("String[]"));
+		System.out.println("testString[] " + aStr[0]);assert(s.equals("String[]"));
 	}
 
 	public void test(String s, String[][] aaStr) {
-		System.out.println("testString[][] " + aaStr[0][0] + " " + s.equals("String[][]"));
+		System.out.println("testString[][] " + aaStr[0][0]);assert(s.equals("String[][]"));
 	}
 
 	public void test(String s, float[][] aaf) {
-		System.out.println("testfloat[][] " + aaf[0][0] + " " + s.equals("float[][]"));
+		System.out.println("testfloat[][] " + aaf[0][0]);assert(s.equals("float[][]"));
 	}
 
 	/*
@@ -101,7 +101,8 @@ test.Test_Reflect.getMethod$S$ClassA ("test", [String, Clazz.arrayType('float[][
 			Test_Reflect.class.getMethod("test", String.class, String[][].class).invoke(tr, "String[][]", ss);
 			Test_Reflect.class.getMethod("test", String.class, float[][].class).invoke(tr, "float[][]", ff);
 
-			
+
+			System.out.println("Test_Reflect OK");
 			
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block

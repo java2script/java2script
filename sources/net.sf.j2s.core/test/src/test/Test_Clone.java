@@ -12,6 +12,7 @@ class Test_Clone extends Test_ implements Cloneable {
 			tc.ia[1] = 33;
 			System.out.println(tc.i + " " + tc1.i + " " + tc.ia[1] + " " + tc1.ia[1]);
 			assert (tc.i == tc1.i && tc.ia == tc1.ia);
+			System.out.println("Test_Clone OK");
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

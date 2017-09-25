@@ -1,76 +1,28 @@
 package test;
 
-public class Test_Format {
+public class Test_Format extends Test_ {
 	public static void main(String[] args) {
 
-		double d = 1234.56789356789;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 1.5;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 2.5;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 1;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 100;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 100.34567891234;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 4.95;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 4.5;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 3.95;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 3.5;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		d = 12345;
-		for (int i = -10; i < 10; i++) {
-			System.out.println("----");
-			test2(d * Math.pow(10, i));
-		}
-		System.out.println("{" + String.format("%.3f", 36f) + "}");
-		System.out.println("----");
+		String s;
+		
+		s = test(100 * Math.pow(10, -6), 2);
+		System.out.println(s);
+		assert s.equals("prec=2 0.00 0.00010 1.00e-04");
 
+		s = test(100 * Math.pow(10, 4), 2);
+		System.out.println(s);
+		assert s.equals("prec=2 1000000.00 1.0e+06 1.00e+06");
+		
+		System.out.println("Test_Format OK");		
 	}
 
-	private static void test(double value, int prec) {
+	private static String test(double value, int prec) {
+		System.out.println(value);
+    String s = "prec=" + prec + " " + String.format("%1." + prec + "f", value) + " " +
+				String.format("%1." + prec + "g", value) + " " 
+    		+ String.format("%1." + prec + "e", value);
 
-		System.out.println(value + " prec=" + prec + " " + String.format("%1." + prec + "f", value) + " "
-				+ String.format("%1." + prec + "g", value) + " " + String.format("%1." + prec + "e", value) + " ");
+    return s;
 	}
 
-	private static void test2(double d) {
-		for (int i = 0; i < 10; i++)
-			test(d, i);
-	}
 }
