@@ -266,11 +266,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		boolean wasArray = isArray;
 		isArray = (left instanceof ArrayAccess);
-		IVariableBinding varBinding = getLeftVariableBinding(left, leftTypeBinding);
+		IVariableBinding toBinding = getLeftVariableBinding(left, leftTypeBinding);
 		String op = node.getOperator().toString();
 		String opType = (op.length() == 1 ? null : op.substring(0, op.length() - 1));
 		boolean needParenthesis = false;
-		if (checkStaticBinding(varBinding)) {
+		if (checkStaticBinding(toBinding)) {
 			// Static def new Test_Static().y++;
 			ASTNode parent = node.getParent();
 			needParenthesis = (!haveDirectStaticAccess(left)) && !(parent instanceof Statement);
@@ -279,7 +279,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			}
 			addLeftSidePrefixName(left);
 		} else {
-			varBinding = null;
+			toBinding = null;
 		}
 
 		// take care of "=" first
@@ -332,7 +332,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			if (isNumericType(leftName)) {
 				// byte|short|int|long += ...
 				buffer.append(" = ");
-				addPrimitiveTypedExpression(left, varBinding, leftName, opType, right, rightName, null);
+				addPrimitiveTypedExpression(left, toBinding, leftName, opType, right, rightName, null);
 				isArray = wasArray;
 				return false;
 			}
@@ -524,6 +524,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	public boolean visit(ConditionalExpression node) {
+		// tricky part here is that the overall expression should have a target,
+		// not the individual ones. 
 		ITypeBinding binding = node.resolveTypeBinding();
 		Expression expThen = node.getThenExpression();
 		Expression expElse = node.getElseExpression();
@@ -1391,13 +1393,13 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * A general method to handle implicit casting.
 	 * 
 	 * @param left
-	 * @param varBinding
+	 * @param assignmentBinding
 	 * @param leftName
 	 * @param op
 	 * @param right
 	 * @param rightName
 	 */
-	private void addPrimitiveTypedExpression(Expression left, IVariableBinding varBinding, String leftName, String op,
+	private void addPrimitiveTypedExpression(Expression left, IVariableBinding assignmentBinding, String leftName, String op,
 			Expression right, String rightName, List<?> extendedOperands) {
 		// byte|short|int|long /= ...
 		// convert to proper number of bits
@@ -1412,6 +1414,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		String classIntArray = null;
 		String more = null;
 		boolean fromChar = ("char".equals(rightName));
+		boolean fromIntType = ("long int short byte".indexOf(rightName) >= 0);
 		boolean addParens = (op != "r" || fromChar);
 		boolean isDiv = "/".equals(op);
 		boolean toChar = false;
@@ -1426,11 +1429,11 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			break;
 		default:
 		case "long":
-			if ("long int short byte".indexOf(rightName) < 0 || isDiv)
+			if (!fromIntType || isDiv)
 				more = "|0";
 			break;
 		case "int":
-			if (op != null && !isDiv || fromChar || rightName.equals("short")) {
+			if (op != null && (!isDiv && fromIntType) || fromChar || rightName.equals("short")) {
 				break;
 			}
 			//$FALL-THROUGH$
@@ -1453,15 +1456,18 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			isArray = true;
 		}
 		if (left != null) {
-			addFieldName(left, varBinding);
+			addFieldName(left, assignmentBinding);
 			buffer.append(op);
+			buffer.append("(");
 		}
 		if (!boxingNode(right, fromChar) && fromChar && !toChar)
 			buffer.append(CHARCODEAT0); 
 		if (extendedOperands != null) {
 			addExtendedOperands(extendedOperands, op, ' ', ' ', false);
 		}
-
+		if (left != null) {
+			buffer.append(")");
+		}
 		if (classIntArray != null) {
 			buffer.append(", ").append(classIntArray);
 			if (addParens)
@@ -1496,13 +1502,15 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
 			String paramName = (targetType instanceof ITypeBinding ? ((ITypeBinding)targetType).getName() : targetType.toString());
-			if ((isNumericType(paramName) || paramName.equals("char")) && !isBoxTyped(exp)) {
+			boolean isNumeric = isNumericType(paramName);
+			if ((isNumeric || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
 				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);
 			} else {
 				// char f() { return Character }
 				// Character f() { return char }
-				boxingNode(exp, false);
+				// int f() { return Character }
+				boxingNode(exp, isNumeric);
 			}
 		}
 	}
