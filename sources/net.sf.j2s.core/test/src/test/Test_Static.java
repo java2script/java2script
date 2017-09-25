@@ -1,6 +1,6 @@
 package test;
 
-class Test_Static {
+class Test_Static extends Test_ {
 	
  private static boolean b;
  private static int y;

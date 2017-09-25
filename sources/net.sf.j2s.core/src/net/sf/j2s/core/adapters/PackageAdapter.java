@@ -14,6 +14,8 @@ package net.sf.j2s.core.adapters;
 /**
  * 
  * Class to allow checking for need to use Clazz.declarePackage
+ * (because they are predefined in j2sSwingjs.js)
+ * and to track the current package name.
  * 
  * 
  * @author zhou renjian
@@ -39,8 +41,8 @@ public class PackageAdapter extends AbstractPluginAdapter {
 		return thisPackageName;
 	}
 
-	public void setPackageName(String thisPackageName) {
-		this.thisPackageName = thisPackageName;
+	public void setPackageName(String packageName) {
+		thisPackageName = packageName;
 	}
 
 	public boolean isBasePackage() {

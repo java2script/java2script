@@ -1,6 +1,6 @@
 package test;
 
-class Test_Char {
+class Test_Char extends Test_ {
 
 	public static void main(String[] args) {
 		Character k = new Character('K');
@@ -110,7 +110,7 @@ class Test_Char {
 	private static int getIntFromInteger(Integer i) {
 		return i;
 	}
-	
+		
 	private static int getIntegerFromInt(int i) {
 		return i;
 	}

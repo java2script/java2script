@@ -6,7 +6,7 @@ package test;
  * 			<a href=testing>testing</a>
  * 
  */
-class Test_Native {
+class Test_Native extends Test_ {
 
 	private abstract class IF {
 		abstract void testing(int a);
@@ -21,14 +21,14 @@ class Test_Native {
 	/**
 	 * @j2sNative
 	 * 
-	 * 			return /-* testing *-/ and <@>here
+	 * 		//	return /-* testing *-/ and <@>here
 	 * 
 	 */
 	public void test() {
 		/**
 		 * @j2sNative
 		 * 
-		 * 			return /-* test2 *-/ and <@>here
+		 * 		//	return /-* test2 *-/ and <@>here
 		 * 
 		 */
 		{
@@ -59,6 +59,12 @@ class Test_Native {
 	public void test2() {
 		int  j = 0;
 		/**
+		 * @j2sIgnore
+		 */
+		{
+			j = 3 + ii;			
+		}
+		/**
 		 * @j2sNative
 		 * 
 		 * 	j = 1	//	ignored
@@ -67,17 +73,18 @@ class Test_Native {
 		/**
 		 * @j2sNative
 		 * 
-		 *  this.ii = -1
+		 *  this.ii = -1;
 		 * 	j = 4		// ok
 		 * 
 		 */
 		{
-		  j = 3 + ii;
 		}
 		assert(j == 3 + ii);
 	}
 
 	public static void main(String[] args) {
+		new Test_Native().test2();
+		System.out.println("OK");
 	}
 
 }

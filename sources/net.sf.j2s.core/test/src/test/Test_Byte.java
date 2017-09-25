@@ -1,6 +1,6 @@
 package test;
 
-class Test_Byte {
+class Test_Byte extends Test_ {
 	
 	public static void main(String[] args) {
 		

@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BlockComment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -122,6 +123,11 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	public void setPackageNames(HashSet<String> definedPackageNames) {
 		this.definedPackageNames = definedPackageNames;
 	}
+
+	protected static boolean isStatic(BodyDeclaration b) {
+		return Modifier.isStatic(b.getModifiers());
+	}
+
 
 
 	protected String assureQualifiedName(String name) {
@@ -601,6 +607,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 
 	public void preVisit(ASTNode node) {
+//		buffer.append(node.getClass().getName());
 		if (!(node instanceof Block))
 			lastPos = node.getStartPosition();
 		super.preVisit(node);

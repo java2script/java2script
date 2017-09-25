@@ -2,7 +2,7 @@ package test;
 
 import java.io.IOException;
 
-class Test_Appendable {
+class Test_Appendable extends Test_  {
   public static void main(String[] args) {
 	  Appendable s = new StringBuffer();
 	  try {
@@ -11,7 +11,8 @@ class Test_Appendable {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-	System.out.println(s);
+	assert(s.toString().equals("true"));
+	System.out.println("Test_Appendable OK");
   }
 	
 }

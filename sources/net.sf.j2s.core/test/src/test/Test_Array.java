@@ -2,7 +2,7 @@ package test;
 
 import java.lang.reflect.Array;
 
-class Test_Array {
+class Test_Array extends Test_ {
 		
  static int y;	
   static {
@@ -37,16 +37,17 @@ class Test_Array {
       Class<?> c = i3.getClass().getComponentType();
       int[] i3b = (int[]) Array.newInstance(c, 5);
       
-      System.out.println(i3.getClass().getComponentType().getName() == "int");
-      System.out.println(i33.getClass().getComponentType().getName() == "[I");
-      System.out.println(i33.getClass().getComponentType().getComponentType().getName() == "int");
-      System.out.println(tType3__.getClass().getComponentType().getName().equals("[[L" + Test_Array.class.getName() + ";"));
-	  System.out.println("int[] " + (i3 instanceof int[]));
-	  System.out.println("int[] " + (i3b instanceof int[]));
-	  System.out.println("int[] " + (iType3 instanceof int[]));
-	  System.out.println("int[][] " + (i33 instanceof int[][]));
-	  System.out.println("int[][] " + (iType3_ instanceof int[][]));
-	  System.out.println("int[][] != int[] " + !(i33 instanceof int[]));
+      assert(i3.getClass().getComponentType().getName() == "int");
+      assert(i33.getClass().getComponentType().getName() == "[I");
+      assert(i33.getClass().getComponentType().getComponentType().getName() == "int");
+      assert(tType3__.getClass().getComponentType().getName().equals("[[L" + Test_Array.class.getName() + ";"));
+	  assert((i3 instanceof int[]));
+	  assert((i3b instanceof int[]));
+	  assert((iType3 instanceof int[]));
+	  assert((i33 instanceof int[][]));
+	  assert((iType3_ instanceof int[][]));
+	  assert(!(i33 instanceof int[]));
+	  System.out.println("Test_Array OK");
   }
 
 }

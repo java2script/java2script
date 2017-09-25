@@ -1,6 +1,6 @@
 package test;
 
-public class Test_call0 {
+public class Test_call0 extends Test_ {
 
 	int x, y;
 

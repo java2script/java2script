@@ -978,13 +978,14 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	 * MethodInvocation)
 	 */
 	public boolean visit(MethodInvocation node) {
-		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
-		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
-			Expression expression = node.getExpression();
-			if (expression instanceof Name) {
-				addDeclClassReference(node, expression.resolveTypeBinding());
-			}
-		}
+// no longer necessary BH
+//		IMethodBinding resolveMethodBinding = node.resolveMethodBinding();
+//		if (resolveMethodBinding != null && Modifier.isStatic(resolveMethodBinding.getModifiers())) {
+//			Expression expression = node.getExpression();
+//			if (expression instanceof Name) {
+//				addDeclClassReference(node, expression.resolveTypeBinding());
+//			}
+//		}
 		return super.visit(node);
 	}
 

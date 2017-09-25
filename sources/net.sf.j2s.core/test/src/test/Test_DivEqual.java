@@ -1,6 +1,6 @@
 package test;
 
-class Test_DivEqual {
+class Test_DivEqual extends Test_ {
 	
   public static void main(String[] args) {
 	  

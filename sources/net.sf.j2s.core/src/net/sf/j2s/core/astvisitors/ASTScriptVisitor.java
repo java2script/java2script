@@ -9,7 +9,6 @@
  *     Zhou Renjian - initial API and implementation
  *******************************************************************************/
 package net.sf.j2s.core.astvisitors;
-// LAST PROBLEM
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -309,9 +308,9 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	public boolean visit(AssertStatement node) {
 
-		Expression msg = node.getMessage();
 		buffer.append("Clazz.assert(C$, this, function(){return ");
-		node.getExpression().accept(this);
+		addExpressionAsTargetType(node.getExpression(), Boolean.TYPE, "r", null);
+		Expression msg = node.getMessage();
 		if (msg != null) {
 			buffer.append("}, function(){return ");
 			msg.accept(this);
@@ -660,7 +659,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	}
 
 	public boolean visit(ExpressionStatement node) {
-
+		// e.g. test.Test_Anon.main(args);
 		return super.visit(node);
 	}
 
@@ -862,16 +861,28 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 		IMethodBinding mBinding = node.resolveMethodBinding();
 
-		boolean isPrivateAndNotStatic = Modifier.isPrivate(mBinding.getModifiers())
-				&& !isStatic(mBinding);
-
+		boolean isStatic = isStatic(mBinding);
+		boolean isPrivate = Modifier.isPrivate(mBinding.getModifiers());
+		boolean isPrivateAndNotStatic = isPrivate && !isStatic;
 		Expression expression = node.getExpression();
 		int pt = buffer.length();
 		if (expression == null) {
 			// "this"
 		} else {
 			isPrivateAndNotStatic = false;
-			expression.accept(this);
+			if (expression instanceof SimpleName) {
+				// BH: The idea here is to load these on demand.
+				// It will require synchronous loading,
+				// but it will ensure that a class is only
+				// loaded when it is really needed.
+				if (isStatic && !isPrivate)
+					buffer.append("Clazz.static$('");
+				expression.accept(this);
+				if (isStatic && !isPrivate)
+					buffer.append("')");
+			} else {
+				expression.accept(this);
+			}
 			buffer.append(".");
 		}
 		ITypeBinding cl = mBinding.getDeclaringClass();
@@ -900,15 +911,17 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 		}
-		
-		// record whether this.b$[.....] was used, and if so and it is private, we need to use it again
+
+		// record whether this.b$[.....] was used, and if so and it is private,
+		// we need to use it again
 		b$name = null;
 		if (!isSpecialMethod) {
 			node.getName().accept(this);
 			buffer.append(j2sParams);
 		}
 		if (isPrivateAndNotStatic) {
-			// A call to a private outer-class method from an inner class requires 
+			// A call to a private outer-class method from an inner class
+			// requires
 			// this.b$["....."], not just "this"
 			// There is probably a nicer way to do this...
 			buffer.append(".apply(this");
@@ -916,7 +929,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				buffer.append(b$name);
 			buffer.append(", [");
 		} else {
-			buffer.append("(");			
+			buffer.append("(");
 		}
 		addMethodParameterList(node.arguments(), mBinding, false, null, null);
 		if (isPrivateAndNotStatic)
@@ -1872,7 +1885,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private String getPackageAndName() {
 		String fullClassName = getFullClassName();
 		int pt = fullClassName.lastIndexOf('.');
-		return (pt < 0 ? "null" : assureQualifiedName(getShortenedPackageNameFromClassName(fullClassName)))
+		return (pt < 0 ? getPackageName() : assureQualifiedName(getShortenedPackageNameFromClassName(fullClassName)))
 			+ ", \"" + fullClassName.substring(pt + 1) + "\"";
 	}
 
@@ -2007,17 +2020,12 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("C$.$init$.apply(this);\r\n");
 	}
 
-	protected static boolean isStatic(BodyDeclaration b) {
-		return Modifier.isStatic(b.getModifiers());
-	}
-
-
 	/**
-	 * log to syserr
+	 * log to syserr -- may be subclassed
 	 * 
 	 * @param msg
 	 */
-	private void log(String msg) {
+	protected void log(String msg) {
 		System.err.println(msg);
 	}
 

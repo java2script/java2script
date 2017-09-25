@@ -3,7 +3,7 @@ package test;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
-class Test_Anon {
+class Test_Anon extends Test_ {
 
 	private static final Enumeration<?> EMPTY_ENUMERATION = new Enumeration<Object>() {
         public boolean hasMoreElements() {
@@ -17,7 +17,8 @@ class Test_Anon {
 
 
   public static void main(String[] args) {
-	  System.out.println(!EMPTY_ENUMERATION.hasMoreElements());
+	  assert(!EMPTY_ENUMERATION.hasMoreElements());
+	  System.out.println("Test_Anon OK");
 	  
   }
 	

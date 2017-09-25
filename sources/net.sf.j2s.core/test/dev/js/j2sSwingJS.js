@@ -7,7 +7,7 @@
 // TODO: check issue for static calls not showing up in requirements. 
 //           How to handle static calls other class static methods?
 // TODO: check issue that some static calls do not need to be put in must/optional 
-// TODO: getResourceAsStream is using new java.io.BufferedInputStream and Clazz.isAB()
+// TODO: getResourceAsStream is using new .BufferedInputStream and Clazz.isAB()
 
 // NOTES by Bob Hanson
 
@@ -168,19 +168,19 @@ Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
 Clazz.defaultAssertionStatus = true;
 Clazz._assertFunction = null;
-Clazz.assert = function(clazz, tf, msg) {
+Clazz.assert = function(clazz, obj, tf, msg) {
   if (!clazz.$_ASSERT_ENABLED_)return;
   var ok = true;
   try {
-    ok = tf.apply(clazz)
+    ok = tf.apply(obj)
     if (!ok)
-      msg = msg.apply(clazz);  
+      msg = msg.apply(obj);  
   } catch (e) {
     ok = false;
   }
   if (!ok) {
     if (Clazz._assertFunction) {
-      return Clazz._assertFunction(clazz, msg || Clazz.getStackTrace());
+      return Clazz._assertFunction(clazz, obj, msg || Clazz.getStackTrace());
     }
     Clazz.loadClass("java.lang.AssertionError");
     if (msg == null)
@@ -190,6 +190,12 @@ Clazz.assert = function(clazz, tf, msg) {
   }
 }
 //J2S._debugCode = false;
+
+Clazz.static$ = function(cName) {
+  if (cName.indexOf(".") < 0)
+    cName = "java.lang." + cName;  
+  return Clazz._4Name(cName).$clazz$
+}
 
 Clazz.$new = function(c, args, cl) {
   args || (args = [[]]);
@@ -2409,9 +2415,7 @@ Clazz._4Name = function(clazzName, applet, state) {
       _Loader.loadClass(clazzName);
     }    
   }
-  x = evalType(clazzName);
-  if (!x)alert(clazzName)
-  return Clazz.$newClass(x);
+  return Clazz.$newClass(evalType(clazzName));
 };
 
 /**
@@ -5296,18 +5300,21 @@ return-1;
 }
 };
 
-sp.contentEquals$CharSequence=function(sb){
-if(this.length!=sb.length$()){
-return false;
-}
-var v=sb.getValue();
-var i=0;
-var j=0;
+sp.contentEquals$StringBuffer=function(sb){
+return (this == sb.s);
+};
+
+sp.contentEquals$CharSequence=function(cs){
+if(this == cs)
+ return true;
+if(this.length!=cs.length$())
+ return false;
+var v=cs.getValue();
 var n=this.length;
-while(n--!=0){
-if(this.charCodeAt(i++)!=v[j++]){
-return false;
-}
+while(n-- >= 0){
+  if(this.charCodeAt(n)!=v[n]){
+    return false;
+  }
 }
 return true;
 };

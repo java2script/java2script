@@ -1,10 +1,10 @@
 package test;
 
-class Test_Assert {
+class Test_Assert extends Test_ {
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
-		ClassLoader.getSystemClassLoader().setClassAssertionStatus("test.Test_assert2", true);
+		//ClassLoader.getSystemClassLoader().setClassAssertionStatus("test.Test_assert2", true);
 		try {
 			Class<Test_assert2> cl = (Class<Test_assert2>) ClassLoader.getSystemClassLoader().loadClass("test.Test_assert2");
 			Test_assert2 ta2 = cl.newInstance();

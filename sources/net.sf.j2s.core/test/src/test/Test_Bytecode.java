@@ -1,16 +1,18 @@
 package test;
 
-public class Test_Bytecode {
+public class Test_Bytecode extends Test_ {
 
 	int x;
 	double y = 4.4;
 
 	void setX(int x) {
+		assert(x == 3);
 		System.out.println("BC_setX(int) " + x);
 		this.x = x;
 	}
 	
 	void setX(double x) {
+		assert(x == 1.1);
 		System.out.println("BC_setX(double) " + x);
 		// in SwingJS this next call causes an infinite loop
 		//setX((int) x);
@@ -18,6 +20,7 @@ public class Test_Bytecode {
 	
 
 	void setX(Double x) {
+		assert(false);
 		System.out.println("BC_setX(Number) " + x);
 		// note that in JavaScript, the above construction uses "valueOf" not "toString" for x.
 		// this results in reporting "3" for new Double(3.0) instead of "3.0"
@@ -42,6 +45,9 @@ public class Test_Bytecode {
 //	BC_setX(int) 3
 
 		t.setX(1.1);
+		
+		System.out.println("Test_Bytecode OK");
+		
 //	BC_setX(double) 1.1
 //	BC_setX(int) 1
 

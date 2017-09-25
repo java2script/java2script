@@ -788,7 +788,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return false;
 		}
 		String op = node.getOperator().toString();
-		if ("~".equals(op) || "!".equals(op)) {
+		if ("~".equals(op)) {
 			buffer.append(op);
 			return super.visit(node);
 		}
@@ -1481,10 +1481,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * 
 	 * 
 	 * @param exp
-	 * @param targetType
+	 * @param targetType ITypeBinding or TYPE or string
 	 * @param op just an identifier of the context: = for assignment, r for return statement, v for variable declaration fragment, p for method parameter
 	 */
-	protected void addExpressionAsTargetType(Expression exp, ITypeBinding targetType, String op, List<?> extendedOperands) {
+	protected void addExpressionAsTargetType(Expression exp, Object targetType, String op, List<?> extendedOperands) {
 		if (targetType == null
 				|| exp instanceof CastExpression && ((CastExpression) exp).getExpression() instanceof NullLiteral) {
 			buffer.append("null");
@@ -1495,7 +1495,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			// BH: Question: When does typeBinding == null?
 			// A: when there is a compilation error, I think.
 			// OK, now we have the same situation as any operand.
-			String paramName = targetType.getName();
+			String paramName = (targetType instanceof ITypeBinding ? ((ITypeBinding)targetType).getName() : targetType.toString());
 			if ((isNumericType(paramName) || paramName.equals("char")) && !isBoxTyped(exp)) {
 				// using operator "m" to limit int application of $i$
 				addPrimitiveTypedExpression(null, null, paramName, op, exp, expTypeBinding.getName(), extendedOperands);

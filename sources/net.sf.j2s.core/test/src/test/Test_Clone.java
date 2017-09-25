@@ -1,6 +1,6 @@
 package test;
 
-class Test_Clone implements Cloneable {
+class Test_Clone extends Test_ implements Cloneable {
 	int i = 30;
 	int[] ia = new int[3];
 

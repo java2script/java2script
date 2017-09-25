@@ -1,6 +1,6 @@
 package test;
 
-class Test_Boolean {
+class Test_Boolean extends Test_ {
 	
   public static void main(String[] args) {
 	  assert(new Boolean("true"));
