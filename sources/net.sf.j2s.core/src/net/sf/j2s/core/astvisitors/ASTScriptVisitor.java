@@ -605,12 +605,15 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				decl.accept(this);
 		}
 
+		buffer.append(staticFieldDefBuffer.getAssertString());
+
 		addDefaultConstructor();
 
 		addInitMethod(bodyDeclarations);
 
+		
 		// add statics
-
+		
 		for (Iterator<?> iter = bodyDeclarations.iterator(); iter.hasNext();) {
 			BodyDeclaration element = (BodyDeclaration) iter.next();
 			if (!isStatic(element))

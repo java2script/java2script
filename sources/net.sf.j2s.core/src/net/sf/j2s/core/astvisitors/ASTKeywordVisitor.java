@@ -153,8 +153,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 			return this;
 		}
 		
+		String getAssertString() {
+			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);\r\n" : "");
+		}
+		
 		public String toString() {
-			return (hasAssert ? "C$.$_ASSERT_ENABLED_ = ClassLoader.$getClassAssertionStatus(C$);\r\n" : "") + added + buf;
+			return getAssertString() + added + buf;
 		}
 		
 		void addType(String name) {
