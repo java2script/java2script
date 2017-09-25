@@ -4211,6 +4211,18 @@ public final class Formatter implements Flushable {
 
 			String sNoRound = ""; // d
 			String sRound = ""; // e
+
+			/**
+			 * @j2sNative
+			 * 
+			 * 			sNoRound = value.toExponential(13); 
+			 * 			sRound = value.toExponential(prec);
+			 * 
+			 * 
+			 */
+			{
+			}
+
 			exp = getExp(sNoRound);
 			expr = getExp(sRound);
 			if (type == GENERAL) {

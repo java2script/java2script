@@ -56,7 +56,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @param name
 	 * @return
 	 */
-	public String discardGenericType(String name) {
+	static public String discardGenericType(String name) {
 		return (name == null ? null : ASTKeywordVisitor.removeBrackets(name));
 	}
 
@@ -73,7 +73,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @param name
 	 * @return
 	 */
-	public boolean isInheritedClassName(ITypeBinding binding, String name) {
+	static public boolean isInheritedClassName(ITypeBinding binding, String name) {
 		if (binding == null) {
 			return false;
 		}
@@ -96,7 +96,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 		return false;
 	}
 
-	public String getShortenedPackageNameFromClassName(String fullName) {
+	static public String getShortenedPackageNameFromClassName(String fullName) {
 		return getShortenedName(fullName.substring(0, fullName.lastIndexOf('.')), true);
 	}
 
@@ -112,17 +112,17 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @param name
 	 * @return
 	 */
-	public String getShortenedQualifiedName(String name) {
+	static public String getShortenedQualifiedName(String name) {
 		return getShortenedName(name, false);
 	}
 
-	private String getShortenedName(String name, boolean isPackage) {
+	static private String getShortenedName(String name, boolean isPackage) {
 		name = ASTKeywordVisitor.removeBrackets(name);
 		String name1 = shortenJavaLang(name);
 		return (name1 == null ? shortenSWTName(name, isPackage) : name1);
 	}
 
-	private String shortenJavaLang(String name) {
+	static private String shortenJavaLang(String name) {
 		// shorten java.lang.XXX.YYY but not java.lang.xxx.ZZZ
 		// don't shorten java.lang.ref or java.lang.annotation or java.lang.instrument or java.lang.management
 		// because why? they are discarded ultimately?
@@ -146,7 +146,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 
 	}
 
-	private String shortenSWTName(String name, boolean isPackage) {		
+	static private String shortenSWTName(String name, boolean isPackage) {		
 		if (name.indexOf(".swt.") < 0 && (isPackage || name.indexOf(".j2s.") < 0)) 
 			return name;
 		String name1;
@@ -160,7 +160,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 			 ? name1 : name);
 	}
 
-	private String checkAbbrClassName(String name, String prefix, String abbr) {
+	static private String checkAbbrClassName(String name, String prefix, String abbr) {
 		int pt;
 		return (name.startsWith(prefix) && (
 					(pt = prefix.length()) == 0 
@@ -171,7 +171,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 			: null);
 	}
 
-	public String getTypeStringName(Type type) {
+	static public String getTypeStringName(Type type) {
 		if (type instanceof QualifiedType) {
 			QualifiedType qualType = (QualifiedType) type;
 			return getTypeStringName(qualType.getQualifier()) + "." + qualType.getName().getIdentifier();

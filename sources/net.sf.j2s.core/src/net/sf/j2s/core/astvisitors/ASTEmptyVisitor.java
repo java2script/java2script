@@ -91,7 +91,6 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
@@ -138,14 +137,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return FieldAdapter.checkKeywordViolation(name, checkPackages ? definedPackageNames : null);
 	}
 
-	protected boolean checkSameName(ITypeBinding binding, String name) {
-		return J2SMapAdapter.checkSameName(binding, name);
-	}
-
-	protected String discardGenericType(String name) {
-		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).discardGenericType(name);
-	}
-
 	protected String getClassName() {
 		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getClassName();
 	}
@@ -185,14 +176,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).getPackageName();
 	}
 
-	protected String getShortenedPackageNameFromClassName(String name) {
-		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedPackageNameFromClassName(name);
-	}
-
-	protected String getTypeStringName(Type type) {
-		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getTypeStringName(type);
-	}
-
 	protected boolean isBasePackage() {
 		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).isBasePackage();
 	}
@@ -219,7 +202,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	}
 	
 	protected String removeJavaLang(String name) {
-		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
+		return TypeAdapter.getShortenedQualifiedName(name);
 	}
 
 	protected void setClassName(String className) {

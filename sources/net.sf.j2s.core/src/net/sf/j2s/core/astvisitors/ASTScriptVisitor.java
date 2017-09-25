@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.FinalVariable;
+import net.sf.j2s.core.adapters.J2SMapAdapter;
 import net.sf.j2s.core.adapters.MethodAdapter;
 import net.sf.j2s.core.adapters.TypeAdapter;
 import net.sf.j2s.core.adapters.VariableAdapter;
@@ -235,7 +236,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		buffer.append("var C$ = Clazz.decorateAsClass(");
 		{
 			// arg1 is the package name or null
-			buffer.append(idx >= 0 ? assureQualifiedName(getShortenedPackageNameFromClassName(fullClassName)) : "null");
+			buffer.append(idx >= 0 ? assureQualifiedName(TypeAdapter.getShortenedPackageNameFromClassName(fullClassName)) : "null");
 
 			// arg2 is the full class name in quotes
 			buffer.append(", \"" + fullClassName.substring(idx + 1) + "\"");
@@ -412,7 +413,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 		String prefix = null, postfix = null;
 		IMethodBinding methodDeclaration = null;
 		IMethodBinding constructorBinding = node.resolveConstructorBinding();
-		String fqName = removeJavaLang(getTypeStringName(node.getType()));
+		String fqName = removeJavaLang(TypeAdapter.getTypeStringName(node.getType()));
 		if (constructorBinding != null) {
 			methodDeclaration = constructorBinding.getMethodDeclaration();
 		}
@@ -578,7 +579,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			name = node.getName().getIdentifier();
 		} else {
 			int pt = fullClassName.lastIndexOf('.');
-			buffer.append(pt < 0 ? "null" : assureQualifiedName(getShortenedPackageNameFromClassName(fullClassName)));
+			buffer.append(pt < 0 ? "null" : assureQualifiedName(TypeAdapter.getShortenedPackageNameFromClassName(fullClassName)));
 			name = fullClassName.substring(pt + 1);
 		}
 		buffer.append(", \"" + name + "\"");
@@ -682,7 +683,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 			if (checkKeywordViolation(fieldName, false)) {
 				prefix += "$";
 			}
-			if (classBinding != null && checkSameName(classBinding, fieldName)) {
+			if (classBinding != null && J2SMapAdapter.checkSameName(classBinding, fieldName)) {
 				prefix += "$";
 			}
 			buffer.append("this.");
@@ -860,6 +861,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	public boolean visit(MethodInvocation node) {
 
 		IMethodBinding mBinding = node.resolveMethodBinding();
+		String className = mBinding.getDeclaringClass().getQualifiedName();
 
 		boolean isStatic = isStatic(mBinding);
 		boolean isPrivate = Modifier.isPrivate(mBinding.getModifiers());
@@ -875,22 +877,21 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				// It will require synchronous loading,
 				// but it will ensure that a class is only
 				// loaded when it is really needed.
-				if (isStatic && !isPrivate)
+				boolean mustEscape = (isStatic && !isPrivate && className.indexOf(".") >= 0);
+				if (mustEscape)
 					buffer.append("Clazz.static$('");
 				expression.accept(this);
-				if (isStatic && !isPrivate)
+				if (mustEscape)
 					buffer.append("')");
 			} else {
 				expression.accept(this);
 			}
 			buffer.append(".");
 		}
-		ITypeBinding cl = mBinding.getDeclaringClass();
-		String className = cl.getQualifiedName();
-		String methodName = node.getName().getIdentifier();
 		String j2sParams = getJ2SParamQualifier(className, mBinding);
 
 		boolean isSpecialMethod = false;
+		String methodName = node.getName().getIdentifier();
 		if (MethodAdapter.isMethodRegistered(methodName)) {
 			String j2sName = MethodAdapter.translate(className, methodName);
 			if (j2sName != null) {
@@ -990,7 +991,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				IVariableBinding varBinding = (IVariableBinding) binding;
 				ITypeBinding declaringClass = varBinding.getVariableDeclaration().getDeclaringClass();
 				String fieldName = getJ2SName(node);
-				if (checkSameName(declaringClass, fieldName)) {
+				if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
 					buffer.append('$');
 				}
 				if (checkKeywordViolation(fieldName, false)) {
@@ -1646,7 +1647,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 
 	private boolean hasSuperClass(ITypeBinding declaringClass) {
 		ITypeBinding superclass = declaringClass.getSuperclass();
-		String qualifiedName = (superclass == null ? null : discardGenericType(superclass.getQualifiedName()));
+		String qualifiedName = (superclass == null ? null : TypeAdapter.discardGenericType(superclass.getQualifiedName()));
 		return superclass != null && !"java.lang.Object".equals(qualifiedName)
 				&& !"java.lang.Enum".equals(qualifiedName);
 	}
@@ -1691,7 +1692,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 				}
 			}
 			String fieldName = getJ2SName(node);
-			if (checkSameName(declaringClass, fieldName)) {
+			if (J2SMapAdapter.checkSameName(declaringClass, fieldName)) {
 				buffer.append('$');
 			}
 			if (checkKeywordViolation(fieldName, false)) {
@@ -1741,7 +1742,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 							: fieldVar);
 			if (checkKeywordViolation(fieldName, true))
 				buffer.append('$');
-			if (declaringClass != null && checkSameName(declaringClass, fieldName))
+			if (declaringClass != null && J2SMapAdapter.checkSameName(declaringClass, fieldName))
 				buffer.append('$');
 			if (declaringClass != null && isInheritedFieldName(declaringClass, fieldName))
 				fieldName = getFieldName(declaringClass, fieldName);
@@ -1885,7 +1886,7 @@ public class ASTScriptVisitor extends ASTJ2SDocVisitor {
 	private String getPackageAndName() {
 		String fullClassName = getFullClassName();
 		int pt = fullClassName.lastIndexOf('.');
-		return (pt < 0 ? getPackageName() : assureQualifiedName(getShortenedPackageNameFromClassName(fullClassName)))
+		return (pt < 0 ? getPackageName() : assureQualifiedName(TypeAdapter.getShortenedPackageNameFromClassName(fullClassName)))
 			+ ", \"" + fullClassName.substring(pt + 1) + "\"";
 	}
 

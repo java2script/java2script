@@ -167,7 +167,10 @@ Clazz.defineMethod = function(){debugger}
 Clazz.popup = Clazz.log = Clazz.error = window.alert;
 
 Clazz.defaultAssertionStatus = true;
+
+
 Clazz._assertFunction = null;
+
 Clazz.assert = function(clazz, obj, tf, msg) {
   if (!clazz.$_ASSERT_ENABLED_)return;
   var ok = true;
@@ -179,6 +182,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
     ok = false;
   }
   if (!ok) {
+    debugger;
     if (Clazz._assertFunction) {
       return Clazz._assertFunction(clazz, obj, msg || Clazz.getStackTrace());
     }
@@ -2302,7 +2306,11 @@ _Loader.ignore = function () {
  * TODO: There should be a Java interface with name like INativeLoaderStatus
  */
 /* public */
-_Loader.onScriptLoading = function (file){};
+_Loader.onScriptLoading = function (file){
+
+window.console.log("onscriptload " + file);
+
+};
 
 /* public */
 _Loader.onScriptLoaded = function (file, isError){};
@@ -2415,7 +2423,12 @@ Clazz._4Name = function(clazzName, applet, state) {
       _Loader.loadClass(clazzName);
     }    
   }
-  return Clazz.$newClass(evalType(clazzName));
+  var cl = evalType(clazzName);
+  if (!cl){
+    alert(clazzName + " could not be loaded");
+    debugger;
+  }
+  return Clazz.$newClass(cl);
 };
 
 /**
@@ -2922,8 +2935,13 @@ updateNode = function(node, ulev, chain, _updateNode) {
     return;
   if (node.status < Node.STATUS_DECLARED) {
     var decl = node.declaration;
-    if (decl) {
-        decl(), decl.executed = true;
+    if (decl && !decl.executing) {
+        console.log("decl() for " + node.name)
+        decl.executing = true;
+        decl();
+        console.log("decl() for " + node.name + "DONE")
+        decl.executing = false;
+        decl.executed = true;
     }
     if(_Loader._checkLoad) {
             if (_Loader._classPending[node.name]) {
@@ -3904,11 +3922,11 @@ Sys.out = new Clazz._O ();
 Sys.out.__CLASS_NAME__ = "java.io.PrintStream";
 
 
-Sys.out.print = function (s) { 
+Sys.out.print = Sys.out.print$S = function (s) { 
   Con.consoleOutput (s);
 };
 
-Sys.out.printf = Sys.out.format = function (f, args) {
+Sys.out.printf = Sys.out.printf$S$OA = Sys.out.format = Sys.out.format$S$OA = function (f, args) {
   Sys.out.print(String.format.apply(null, arguments));
 }
 
@@ -4993,7 +5011,7 @@ var formatterClass;
 if (!String.format)
  String.format = function() {
   if (!formatterClass)
-    formatterClass = Clazz._4Name("java.util.Formatter");
+    formatterClass = Clazz._4Name("java.util.Formatter").$clazz$;
   var f = new formatterClass();
   return f.format$S$OA.apply(f,arguments).toString();
  };

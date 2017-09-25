@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import net.sf.j2s.core.adapters.Bindings;
+import net.sf.j2s.core.adapters.TypeAdapter;
 
 /**
  * 
@@ -651,7 +652,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 					qualifiedName = superBinding.getQualifiedName();
 					qn.binding = superBinding;
 				}
-				qualifiedName = discardGenericType(qualifiedName);
+				qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
 				qn.qualifiedName = qualifiedName;
 				if (isQualifiedNameOK(qualifiedName, node)) {
 					musts.add(qn);
@@ -685,7 +686,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 						qualifiedName = binding.getQualifiedName();
 						qn.binding = binding;
 					}
-					qualifiedName = discardGenericType(qualifiedName);
+					qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
 					qn.qualifiedName = qualifiedName;
 					if (isQualifiedNameOK(qualifiedName, node)) {
 						musts.add(qn);
@@ -868,7 +869,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 	}
 
 	private void addReference(ASTNode node, String qualifiedName, QNTypeBinding qn) {
-		qualifiedName = discardGenericType(qualifiedName);
+		qualifiedName = TypeAdapter.discardGenericType(qualifiedName);
 		if (isQualifiedNameOK(qualifiedName, node) && !musts.contains(qualifiedName)
 				&& !requires.contains(qualifiedName)) {
 			qn.qualifiedName = qualifiedName;

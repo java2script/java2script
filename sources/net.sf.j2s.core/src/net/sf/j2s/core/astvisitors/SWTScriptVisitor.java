@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import net.sf.j2s.core.adapters.Bindings;
 import net.sf.j2s.core.adapters.FieldAdapter;
 import net.sf.j2s.core.adapters.PackageAdapter;
+import net.sf.j2s.core.adapters.TypeAdapter;
 
 public class SWTScriptVisitor extends ASTScriptVisitor {
 
@@ -258,7 +259,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		AnonymousClassDeclaration anonDeclare = node.getAnonymousClassDeclaration();
 		if (anonDeclare == null) {
 			String fqName = null;
-			String name = getTypeStringName(node.getType());
+			String name = TypeAdapter.getTypeStringName(node.getType());
 			if (name != null) {
 				fqName = name;//.getFullyQualifiedName();
 			} else {
