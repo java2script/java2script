@@ -1,3 +1,5 @@
+// DEPRECATED -- SEE J2SSwingJS.js
+
 Clazz.load (["java.io.Serializable", "java.lang.Comparable"], "java.lang.Enum", ["java.lang.ClassCastException", "$.CloneNotSupportedException", "$.IllegalArgumentException", "$.NullPointerException"], function () {
 c$ = java.lang.Enum = Enum = function () {
 this.$name = null;

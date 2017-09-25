@@ -1,3 +1,5 @@
+// DEPRECATED -- SEE J2SSwingJS.js
+
 Clazz.load (["java.lang.Comparable", "$.Number"], "java.lang.Integer", null, function () {
 java.lang.Integer = Integer = function () {
 Clazz.instantialize (this, arguments);

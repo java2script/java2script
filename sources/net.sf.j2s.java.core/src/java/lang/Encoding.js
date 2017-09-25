@@ -1,3 +1,5 @@
+// DEPRECATED -- SEE J2SSwingJS.js
+
 Encoding = new Object();
 Encoding.UTF8 = "utf-8";
 Encoding.UTF16 = "utf-16";

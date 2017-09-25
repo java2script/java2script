@@ -1,4 +1,4 @@
-// BH 8/24/2017 12:11:13 AM newMethod$
+// BH 9/24/2017 4:21:05 PM new syntax for decorateAsClass
 //Udo Borkowski 6/13/2016 12:39:12 AM "matches"
 //BH 12/25/2016 7:28:07 AM fix for find() not updating this.leftBound
 //BH fix for String not having .length() or .subSequence()
@@ -9,17 +9,16 @@ Clazz.declarePackage("java.util.regex");
 Clazz.load(["java.util.regex.MatchResult"],"java.util.regex.Matcher",["java.lang.IllegalArgumentException","$.IndexOutOfBoundsException","$.NullPointerException","$.StringBuffer"],function(){
 
 
-var C$=Clazz.decorateAsClass(function(){
+var C$=Clazz.decorateAsClass(java.util.regex,"Matcher",function(){
   java.util.regex.Matcher$1 || java.util.regex.Matcher.$Matcher$1$();
-  
   Clazz.newInstance$(this,arguments);
-},java.util.regex,"Matcher",null,java.util.regex.MatchResult);
+},null,java.util.regex.MatchResult);
 
 
 C$.$Matcher$1$=function(){
-  var C$=Clazz.decorateAsClass(function(){
-    Clazz.newInstance$ (this, arguments[0], true);
-  },java.util.regex,"Matcher$1");
+  var C$=Clazz.decorateAsClass(java.util.regex,"Matcher$1",function(){
+    Clazz.newInstance$(this, arguments[0], true);
+  });
   Clazz.newMethod$(C$, "$init$", function() {
       this.grN=0;
   }, 1);

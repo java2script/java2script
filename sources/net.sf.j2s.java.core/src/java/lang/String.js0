@@ -1,3 +1,5 @@
+// DEPRECATED -- SEE J2SSwingJS.js
+
 Clazz.load (["java.lang.CharSequence", "$.Comparable", "java.io.Serializable", "java.util.Comparator"], "java.lang.String", null, function () {
 if (String.prototype.$replace == null) { // not defined yet! ClazzLoader may try to load this twice!
 java.lang.String = String;

@@ -1,3 +1,5 @@
+// DEPRECATED -- SEE J2SSwingJS.js
+
 Clazz.load (["java.io.Serializable"], "java.lang.Number", null, function () {
 java.lang.Number = Number;
 Number.prototype.to$tring = Number.prototype.toString;

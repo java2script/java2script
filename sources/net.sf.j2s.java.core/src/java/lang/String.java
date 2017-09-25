@@ -24,7 +24,7 @@
  */
 
 package java.lang;
-
+//DEPRECATED -- SEE J2SSwingJS.js
 import java.io.ObjectStreamField;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

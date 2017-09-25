@@ -24,7 +24,7 @@
  */
 
 package java.lang;
-
+//DEPRECATED -- SEE J2SSwingJS.js
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

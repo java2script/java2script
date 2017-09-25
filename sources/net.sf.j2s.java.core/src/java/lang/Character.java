@@ -23,11 +23,13 @@
  * have any questions.
  */
 
+// DEPRECATED -- SEE J2SSwingJS.js
+
 package java.lang;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
+//DEPRECATED -- SEE J2SSwingJS.js
 /**
  * The <code>Character</code> class wraps a value of the primitive
  * type <code>char</code> in an object. An object of type

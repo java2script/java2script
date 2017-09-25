@@ -1,3 +1,4 @@
+// DEPRECATED -- SEE J2SSwingJS.js
 Clazz.load (["java.lang.Comparable", "java.io.Serializable"], "java.lang.Boolean", null, function () {
 java.lang.B00lean = Boolean;
 java.lang.Boolean = Boolean = function () {

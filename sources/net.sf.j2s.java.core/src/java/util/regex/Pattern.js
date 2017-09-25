@@ -1,8 +1,9 @@
+// BH 9/24/2017 4:21:05 PM new syntax for decorateAsClass
 Clazz.declarePackage("java.util.regex");
 Clazz.load(null,"java.util.regex.Pattern",["java.lang.IllegalArgumentException","$.StringBuffer","java.util.regex.Matcher"],function(){
-var C$=Clazz.decorateAsClass(function(){
+var C$=Clazz.decorateAsClass(java.util.regex,"Pattern",function(){
   Clazz.newInstance$(this,arguments);
-},java.util.regex,"Pattern",null,java.io.Serializable);
+},null,java.io.Serializable);
 
 Clazz.newMethod$(C$,"$init$", function(){
   this.$flags=0;
