@@ -4256,10 +4256,10 @@ public final class Formatter implements Flushable {
 			switch (type) {
 			case SCIENTIFIC:
 				// check for 1.2e3 -> 1.2e+3
-				if (sRound.indexOf("e-") < 0 && sRound.indexOf("e") >= 0)
+				if (pt >= 0 && sRound.indexOf("e-") < 0 && sRound.indexOf("e+") < 0)
 					sRound = sRound.substring(0, pt + 1) + "+" + sRound.substring(pt + 1);
 				// check for 1.2e+3 or 1.2e-3 --> 1.2e+03 1.2e-03
-				if (pt == sRound.length() - 2)
+				if (pt == sRound.length() - 3)
 					sRound = sRound.substring(0, pt + 2) + "0" + sRound.substring(pt + 2);
 				break;
 			case DECIMAL_FLOAT:
