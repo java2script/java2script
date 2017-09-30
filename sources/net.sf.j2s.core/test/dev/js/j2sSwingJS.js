@@ -198,7 +198,7 @@ Clazz.assert = function(clazz, obj, tf, msg) {
 Clazz.static$ = function(cName) {
   if (cName.indexOf(".") < 0)
     cName = "java.lang." + cName;  
-  return Clazz._4Name(cName).$clazz$
+  return Clazz._4Name(cName, null, null, true);
 }
 
 Clazz.$new = function(c, args, cl) {
@@ -363,9 +363,11 @@ Clazz.newMethod$ = function (clazzThis, funName, funBody, isStatic) {
   Clazz.saemCount0++;
   funBody.exName = funName;
   funBody.exClazz = clazzThis; // make it traceable
-  clazzThis.prototype[funName] = funBody;
+    
   if (isStatic || funName == "construct")
-    clazzThis[funName] = funBody;
+    clazzThis[funName] = function(){clazzThis.$clinit$ && clazzThis.$clinit$();return funBody};
+  else
+  clazzThis.prototype[funName] = funBody;
 };                     
 
 var aas = "AAA";
@@ -805,14 +807,6 @@ Clazz.decorateAsClass = function (prefix, name, clazzFun, clazzParent,
     implementOf(clazzFun, interfacez);
   return clazzFun;
 };
-
-Clazz.defineStatics$ = function(clazz, statics) {
-  for (var i = 0; i < statics.length;) {
-    var name = statics[i++];
-    clazz[name] = clazz.prototype[name] = statics[i++];
-  }
-};
-
 
 Clazz.cloneFinals = function () {
   var o = {};
@@ -1417,7 +1411,7 @@ Clazz.declarePackage = function (pkgName) {
 
   Clazz._Loader && Clazz._Loader.doTODO();
 
-  if (Clazz.lastPackageName == pkgName || !pkgName || pkgName.length == 0)
+  if (Clazz.lastPackageName == pkgName || !pkgName)
     return Clazz.lastPackage;
   var pkgFrags = pkgName.split (/\./);
   var pkg = Clazz.allPackage;
@@ -1691,7 +1685,7 @@ Clazz._Loader = Clazz.ClazzLoader = function () {};
 
 ClassLoader = java.lang.ClassLoader = _Loader;
 _Loader.__CLASS_NAME__ = "ClassLoader";
-
+Clazz.allClasses["java.lang.ClassLoader"] = _Loader;
 _Loader.sysLoader = null;
 
 _Loader.getSystemClassLoader = function() {
@@ -2399,8 +2393,16 @@ var removeScriptNode = function (n) {
 };
 
 /* public */
-Clazz._4Name = function(clazzName, applet, state) {
-  if (!Clazz.isClassDefined(clazzName)) {
+Clazz._4Name = function(clazzName, applet, state, asClazz) {
+  var isok = Clazz.isClassDefined(clazzName);
+  if (isok && asClazz) {
+    var cl = Clazz.allClasses[clazzName];
+    cl.$clinit$ && cl.$clinit$();
+    return cl;
+  } 
+  if (!isok) {
+    
+//  if (!Clazz.isClassDefined(clazzName)) {
     var name2 = null;
     if (clazzName.indexOf("$") >= 0) {
       // BH we allow Java's java.swing.JTable.$BooleanRenderer as a stand-in for java.swing.JTable.BooleanRenderer
@@ -2429,7 +2431,9 @@ Clazz._4Name = function(clazzName, applet, state) {
     alert(clazzName + " could not be loaded");
     debugger;
   }
-  return Clazz.$newClass(cl);
+  Clazz.allClasses[clazzName] = cl;
+  cl.$clinit$ && cl.$clinit$();
+  return (asClazz ? cl : Clazz.$newClass(cl));
 };
 
 /**
@@ -5012,7 +5016,7 @@ var formatterClass;
 if (!String.format)
  String.format = function() {
   if (!formatterClass)
-    formatterClass = Clazz._4Name("java.util.Formatter").$clazz$;
+    formatterClass = Clazz._4Name("java.util.Formatter", null, null, true);
   var f = new formatterClass();
   return f.format$S$OA.apply(f,arguments).toString();
  };

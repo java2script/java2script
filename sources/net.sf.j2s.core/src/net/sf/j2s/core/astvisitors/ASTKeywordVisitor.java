@@ -11,8 +11,10 @@
 package net.sf.j2s.core.astvisitors;
 //LAST PROBLEM
 
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -291,7 +294,6 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 		if (opType == null) {
 			left.accept(this);
 			buffer.append(" = ");		
-//			buffer.append(">>=>>" + leftName + "-" + rightName);
 			addExpressionAsTargetType(right, leftTypeBinding, "=", null);
 			if (needParenthesis) {
 				buffer.append(")");
@@ -840,7 +842,7 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	 * @param b 
 	 */
 	private void addCharacterPrePostFix(Expression left, ASTNode parent,
-			IVariableBinding varBinding, String op, boolean isPrefix) {		
+			IVariableBinding varBinding, String op, boolean isPrefix) {
 		boolean addAnonymousWrapper = !isPrefix &&  !(parent instanceof Statement); 
 		if (addAnonymousWrapper) {
 			buffer.append("($p$ = ");
@@ -936,10 +938,8 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 					if (name.indexOf("java.lang.") == 0) {
 						name = name.substring(10);
 					}
-					if (name.length() == 0) {
-						buffer.append("!!!!" + typeBinding.getQualifiedName());
-						skipQualifier = true;
-					}
+					if (isStatic(nameBinding))
+						name = getSimpleName(name);
 				}
 			}
 		}
@@ -1026,7 +1026,12 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	private void addQualifiedName(IVariableBinding varBinding) {
-		buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+		String name = assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName()));
+		if (isStatic(varBinding) && !name.startsWith("C$.")) {
+		  appendSimpleName(null, name, true); 
+		} else {
+			buffer.append(name);
+		}
 	}
 
 	public boolean visit(StringLiteral node) {
@@ -1250,18 +1255,10 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 	protected void appendDefaultValue(Type type) {
-		if (type.isPrimitiveType()) {
-			PrimitiveType pType = (PrimitiveType) type;
-			if (pType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
-				buffer.append("false");
-			} else if (pType.getPrimitiveTypeCode() == PrimitiveType.CHAR) {
-				buffer.append("'\\0'");
-			} else {
-				buffer.append("0");
-			}
-		} else {
-			buffer.append("null");
-		}
+		Code code = (type == null || !type.isPrimitiveType() ? null : ((PrimitiveType) type).getPrimitiveTypeCode());
+		buffer.append(code == null ? "null"
+				: code == PrimitiveType.BOOLEAN ? "false" 
+				: code == PrimitiveType.CHAR ? "'\\0'" : "0");
 	}
 
 	protected void appendInitializer(Expression initializer, Type fieldType) {
@@ -1624,9 +1621,9 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
 	}
 
 
-	private void addFieldName(Expression left, IVariableBinding varBinding) {
-		if (varBinding != null) {
-			addQualifiedName(varBinding);
+	private void addFieldName(Expression left, IVariableBinding qualifier) {
+		if (qualifier != null) {
+			addQualifiedName(qualifier);
 			buffer.append('.');
 			left = (left instanceof QualifiedName ? ((QualifiedName) left).getName()
 					: left instanceof FieldAccess ? ((FieldAccess) left).getName() : left);
@@ -1715,6 +1712,41 @@ public class ASTKeywordVisitor extends ASTEmptyVisitor {
     			+ (dimFlag == 0 ? "" : ", " + dimFlag * type.getDimensions());
 		return (dimFlag > 0 ? "Clazz.arrayClass$(" + params + ")" 
 				: " Clazz.newArray$(" + params);
+	}
+
+	protected void appendSimpleName(ASTNode name, String className, boolean mustEscape) {
+		// BH: The idea here is to load these on demand.
+		// It will require synchronous loading,
+		// but it will ensure that a class is only
+		// loaded when it is really needed.
+		mustEscape &= (className.indexOf(".") >= 0 && !className.startsWith("java.lang."));
+		if (mustEscape) {
+			Integer n = getStaticNameIndex(className);
+			buffer.append("(I$[" + n  + "] || (I$[" + n  + "]=Clazz.static$('");
+		}
+		if (name == null)
+			buffer.append(className);
+		else
+			name.accept(this);
+		if (mustEscape)
+			buffer.append("')))");			
+	}
+
+	protected String getSimpleName(String className) {
+		if (className.indexOf(".") < 0)
+			return className;
+		Integer n = getStaticNameIndex(className);
+		return "(I$[" + n + "] || (I$[" + n + "]=Clazz.static$('" + className + "')))";
+	}
+
+	private Map<String, Integer>htStaticNames = new Hashtable<>();
+	private int staticCount;
+	
+	private Integer getStaticNameIndex(String name) {
+		Integer n = htStaticNames.get(name);
+		if (n == null)
+			htStaticNames.put(name,  n = new Integer(staticCount++));
+		return n;
 	}
 
 	

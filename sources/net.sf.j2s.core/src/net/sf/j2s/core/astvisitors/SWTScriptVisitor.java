@@ -177,7 +177,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 //						} else {
 //							name = "";
 //						}
-						name = removeJavaLang(name);
+						name = getShortenedQualifiedName(name);
 						if (name.indexOf("java.lang.") == 0) {
 							name = name.substring(10);
 						}
@@ -201,12 +201,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 						if (name.length() != 0) {
 							if (staticFields) {
 								if (qualifier instanceof SimpleName) {
-									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 								} else {
 									buffer.append('(');
 									buffer.append(name);
 									buffer.append(", ");
-									buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+									buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 									buffer.append(')');
 								}
 							} else {
@@ -229,12 +229,12 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 		if (!qualifierVisited) {
 			if (staticFields) {
 				if (qName instanceof SimpleName) {
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 				} else {
 					buffer.append('(');
 					node.getQualifier().accept(this);
 					buffer.append(", ");
-					buffer.append(assureQualifiedName(removeJavaLang(varBinding.getDeclaringClass().getQualifiedName())));
+					buffer.append(assureQualifiedName(getShortenedQualifiedName(varBinding.getDeclaringClass().getQualifiedName())));
 					buffer.append(')');
 				}
 			} else {
@@ -265,7 +265,7 @@ public class SWTScriptVisitor extends ASTScriptVisitor {
 			} else {
 				fqName = "noname";
 			}
-			fqName = removeJavaLang(fqName);
+			fqName = getShortenedQualifiedName(fqName);
 			String filterKey = "org.eclipse.swt.internal.xhtml.";
 			if (fqName.startsWith(filterKey)) {
 				buffer.append(" new ");

@@ -176,6 +176,10 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).getPackageName();
 	}
 
+	protected String getShortenedQualifiedName(String name) {
+		return ((TypeAdapter) getAdaptable(TypeAdapter.class)).getShortenedQualifiedName(name);
+	}
+
 	protected boolean isBasePackage() {
 		return ((PackageAdapter) getAdaptable(PackageAdapter.class)).isBasePackage();
 	}
@@ -201,10 +205,6 @@ public class ASTEmptyVisitor extends ASTVisitor {
 		return ((VariableAdapter) getAdaptable(VariableAdapter.class)).listFinalVariables(list, seperator, scope);
 	}
 	
-	protected String removeJavaLang(String name) {
-		return TypeAdapter.getShortenedQualifiedName(name);
-	}
-
 	protected void setClassName(String className) {
 		((TypeAdapter) getAdaptable(TypeAdapter.class)).setClassName(className);
 	}
@@ -220,7 +220,7 @@ public class ASTEmptyVisitor extends ASTVisitor {
 	/**
 	 * Buffer that keeps all compiled *.js.
 	 */
-	protected StringBuffer buffer = new StringBuffer();
+	public StringBuffer buffer = new StringBuffer();
 
 	/**
 	 * Return the buffer. Actually it is returning compiled *.js String

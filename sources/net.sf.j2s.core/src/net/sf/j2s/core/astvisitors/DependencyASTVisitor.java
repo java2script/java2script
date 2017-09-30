@@ -149,8 +149,7 @@ public class DependencyASTVisitor extends ASTEmptyVisitor {
 			js = js.substring(index + 2);
 		}
 		if (musts.size() == 0 && requires.size() == 0 && optionals.size() == 0) {
-			int pt = js.indexOf("var C$");
-			if (pt == 0 || pt > 0 && js.indexOf("{var C$") != pt - 1)
+			if (ASTScriptVisitor.needsWrapper(js))
 				js = "(function() {\r\n" + js + "}) ();\r\n";
 		} else {
 			buf = new StringBuffer();

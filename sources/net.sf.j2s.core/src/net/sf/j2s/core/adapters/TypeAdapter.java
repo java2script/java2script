@@ -32,7 +32,8 @@ import net.sf.j2s.core.astvisitors.ASTKeywordVisitor;
  */
 public class TypeAdapter extends AbstractPluginAdapter {
 
-	protected String thisClassName = "";
+	private String thisClassName = "";
+	private String fullClassName = "";
 
 	public String getClassName() {
 		return thisClassName;
@@ -40,13 +41,14 @@ public class TypeAdapter extends AbstractPluginAdapter {
 
 	public void setClassName(String className) {
 		thisClassName = className;
+		String thisPackageName = visitor.getPackageName();
+		fullClassName = (thisPackageName == null || thisPackageName.length() == 0 
+				|| "java.lang".equals(thisPackageName)
+				? thisClassName : thisPackageName + '.' + thisClassName);
 	}
 
 	public String getFullClassName() {
-		String thisPackageName = visitor.getPackageName();
-		return (thisPackageName == null || thisPackageName.length() == 0 
-				|| "java.lang".equals(thisPackageName)
-				? thisClassName : thisPackageName + '.' + thisClassName);
+		return fullClassName;
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	}
 
 	static public String getShortenedPackageNameFromClassName(String fullName) {
-		return getShortenedName(fullName.substring(0, fullName.lastIndexOf('.')), true);
+		return getShortenedName(null, fullName.substring(0, fullName.lastIndexOf('.')), true);
 	}
 
 	/**
@@ -112,12 +114,18 @@ public class TypeAdapter extends AbstractPluginAdapter {
 	 * @param name
 	 * @return
 	 */
-	static public String getShortenedQualifiedName(String name) {
-		return getShortenedName(name, false);
+	public String getShortenedQualifiedName(String name) {
+		return getShortenedName(fullClassName, name, false);
 	}
 
-	static private String getShortenedName(String name, boolean isPackage) {
+	static private String getShortenedName(String className, String name, boolean isPackage) {
 		name = ASTKeywordVisitor.removeBrackets(name);
+		if (className != null) {
+			if (name.equals(className))
+				return "C$";
+			if (name.startsWith(className + "."))
+				return "C$." + name.substring(className.length() + 1);
+		}
 		String name1 = shortenJavaLang(name);
 		return (name1 == null ? shortenSWTName(name, isPackage) : name1);
 	}
